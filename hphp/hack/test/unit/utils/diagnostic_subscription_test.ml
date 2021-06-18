@@ -1,6 +1,5 @@
 open Hh_prelude
 open Reordered_argument_collections
-module DS = Diagnostic_subscription
 
 let errors_to_string buf x =
   List.iter x ~f:(fun error ->
@@ -65,20 +64,15 @@ let test_update () =
       ~rechecked:(Relative_path.Set.singleton a_path)
       Errors.Parsing
   in
-  let ds = DS.of_id ~id:1 ~init:Errors.empty in
+  let ds = Diagnostic_subscription.of_id ~id:1 ~init:Errors.empty in
   let priority_files = Relative_path.Set.empty in
-  let reparsed = Relative_path.Set.empty in
-  let rechecked_a = Relative_path.Set.singleton a_path in
-  let rechecked_b = Relative_path.Set.singleton b_path in
   let (ds, diagnostics) =
-    DS.update
+    Diagnostic_subscription.update
       ds
       ~priority_files
-      ~reparsed
-      ~rechecked:rechecked_a
       ~global_errors:foo_error_a
       ~full_check_done:true
-    |> DS.pop_errors ~global_errors:foo_error_a
+    |> Diagnostic_subscription.pop_errors ~global_errors:foo_error_a
   in
   let expected =
     "/A:\nFile \"/A\", line 0, characters 0-0:\nfoo (Parsing[1002])\n\n"
@@ -89,14 +83,12 @@ let test_update () =
     "foo error in A should be pushed";
 
   let (ds, diagnostics) =
-    DS.update
+    Diagnostic_subscription.update
       ds
       ~priority_files
-      ~reparsed
-      ~rechecked:rechecked_a
       ~global_errors:foo_error_a
       ~full_check_done:false
-    |> DS.pop_errors ~global_errors:foo_error_a
+    |> Diagnostic_subscription.pop_errors ~global_errors:foo_error_a
   in
   Asserter.Bool_asserter.assert_equals
     true
@@ -107,14 +99,12 @@ let test_update () =
     "/A:\nFile \"/A\", line 0, characters 0-0:\nbar (Parsing[1002])\n\n"
   in
   let (ds, diagnostics) =
-    DS.update
+    Diagnostic_subscription.update
       ds
       ~priority_files
-      ~reparsed
-      ~rechecked:rechecked_a
       ~global_errors:bar_error_a
       ~full_check_done:false
-    |> DS.pop_errors ~global_errors:bar_error_a
+    |> Diagnostic_subscription.pop_errors ~global_errors:bar_error_a
   in
   Asserter.String_asserter.assert_equals
     expected
@@ -126,14 +116,12 @@ let test_update () =
     "/B:\nFile \"/B\", line 0, characters 0-0:\nbaz (Parsing[1002])\n\n"
   in
   let (ds, diagnostics) =
-    DS.update
+    Diagnostic_subscription.update
       ds
       ~priority_files
-      ~reparsed
-      ~rechecked:rechecked_b
       ~global_errors:baz_error_b
       ~full_check_done:false
-    |> DS.pop_errors ~global_errors:baz_error_b
+    |> Diagnostic_subscription.pop_errors ~global_errors:baz_error_b
   in
   Asserter.String_asserter.assert_equals
     expected
@@ -141,14 +129,12 @@ let test_update () =
     "baz error in B should be added";
 
   let (ds, diagnostics) =
-    DS.update
+    Diagnostic_subscription.update
       ds
       ~priority_files
-      ~reparsed
-      ~rechecked:rechecked_a
       ~global_errors:bar_error_cleared_a
       ~full_check_done:false
-    |> DS.pop_errors ~global_errors:bar_error_cleared_a
+    |> Diagnostic_subscription.pop_errors ~global_errors:bar_error_cleared_a
   in
   let expected = "/A:\n" in
   Asserter.String_asserter.assert_equals
@@ -169,30 +155,24 @@ let test_error_sources () =
         Errors.run_in_context b_path Errors.Typing (fun () ->
             error_in a_path "error from b"))
   in
-  let ds = DS.of_id ~id:1 ~init:Errors.empty in
+  let ds = Diagnostic_subscription.of_id ~id:1 ~init:Errors.empty in
   let priority_files = Relative_path.Set.empty in
-  let rechecked =
-    Relative_path.Set.(
-      Relative_path.Set.singleton a_path |> union (singleton b_path))
-  in
   let ds =
-    DS.update
+    Diagnostic_subscription.update
       ds
       ~priority_files
-      ~reparsed:Relative_path.Set.empty
-      ~rechecked
       ~global_errors:errors
       ~full_check_done:true
   in
   Asserter.Bool_asserter.assert_equals
     true
-    (Relative_path.Set.mem (DS.error_sources ds) a_path)
-    "error_sources should contain A";
+    (Relative_path.Set.mem (Diagnostic_subscription.diagnosed_files ds) a_path)
+    "diagnosed_files should contain A";
 
   Asserter.Bool_asserter.assert_equals
     true
-    (Relative_path.Set.mem (DS.error_sources ds) b_path)
-    "error_sources should contain B";
+    (Relative_path.Set.mem (Diagnostic_subscription.diagnosed_files ds) b_path)
+    "diagnosed_files should contain B";
   true
 
 let tests =

@@ -22,13 +22,13 @@ val get_id : t -> int
 val update :
   t ->
   priority_files:Relative_path.Set.t ->
-  reparsed:Relative_path.Set.t ->
-  rechecked:Relative_path.Set.t ->
   global_errors:Errors.t ->
   full_check_done:bool ->
   t
 
-val error_sources : t -> Relative_path.Set.t
+(** Files to send diagnostic for. We don't send diagnostic for all the files with errors
+    for performance reason *)
+val diagnosed_files : t -> Relative_path.Set.t
 
 (** Pop errors ready for sending to client *)
 val pop_errors :

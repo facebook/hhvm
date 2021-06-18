@@ -225,6 +225,10 @@ val get_sorted_error_list : t -> error list
 
 val from_error_list : error list -> t
 
+val file_has_errors : t -> Relative_path.t -> bool
+
+val errors_in_file : t -> Relative_path.t -> error list
+
 val iter_error_list : (error -> unit) -> t -> unit
 
 val fold_errors :
@@ -233,7 +237,7 @@ val fold_errors :
 val fold_errors_in :
   ?phase:phase ->
   t ->
-  source:Relative_path.t ->
+  file:Relative_path.t ->
   init:'a ->
   f:(error -> 'a -> 'a) ->
   'a

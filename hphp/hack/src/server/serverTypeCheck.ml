@@ -229,16 +229,16 @@ let get_files_with_stale_errors
         (* Looking at global files *)
         Errors.fold_errors errors ~phase ~init ~f:(fun source error acc ->
             f source error acc)
-    | Some sources ->
+    | Some files ->
       fun phase init f ->
-        (* Looking only at subset of error sources *)
-        Relative_path.Set.fold sources ~init ~f:(fun source acc ->
+        (* Looking only at subset of files *)
+        Relative_path.Set.fold files ~init ~f:(fun file acc ->
             Errors.fold_errors_in
               errors
-              ~source
+              ~file
               ~phase
               ~init:acc
-              ~f:(fun error acc -> f source error acc))
+              ~f:(fun error acc -> f file error acc))
   in
   List.fold phases ~init:Relative_path.Set.empty ~f:(fun acc phase ->
       fold phase acc (fun source error acc ->
@@ -615,13 +615,13 @@ end
 module LazyCheckKind : CheckKindType = struct
   let get_files_to_parse env = (env.ide_needs_parsing, true)
 
-  let ide_error_sources env =
+  let ide_diagnosed_files env =
     match env.diag_subscribe with
-    | Some ds -> Diagnostic_subscription.error_sources ds
+    | Some ds -> Diagnostic_subscription.diagnosed_files ds
     | None -> Relative_path.Set.empty
 
   let is_ide_file env x =
-    Relative_path.Set.mem (ide_error_sources env) x
+    Relative_path.Set.mem (ide_diagnosed_files env) x
     || Relative_path.Set.mem env.editor_open_files x
 
   let get_defs_to_redecl ~reparsed ~env ~ctx =
@@ -629,7 +629,7 @@ module LazyCheckKind : CheckKindType = struct
      * to files that are relevant to IDE *)
     get_files_with_stale_errors
       ~reparsed
-      ~filter:(Some (ide_error_sources env))
+      ~filter:(Some (ide_diagnosed_files env))
       ~phases:[Errors.Decl]
       ~errors:env.errorl
       ~ctx
@@ -659,7 +659,7 @@ module LazyCheckKind : CheckKindType = struct
     if Typing_deps.DepSet.cardinal to_redecl_phase2_deps > 1000 then
       (* inspecting tons of dependencies would take more time that just
       * rechecking all relevant files. *)
-      Relative_path.Set.union env.editor_open_files (ide_error_sources env)
+      Relative_path.Set.union env.editor_open_files (ide_diagnosed_files env)
     else
       Typing_deps.DepSet.fold
         to_redecl_phase2_deps
@@ -692,7 +692,7 @@ module LazyCheckKind : CheckKindType = struct
       get_files_with_stale_errors
         ~ctx
         ~reparsed
-        ~filter:(Some (ide_error_sources env))
+        ~filter:(Some (ide_diagnosed_files env))
         ~phases:[Errors.Decl; Errors.Typing]
         ~errors:env.errorl
     in
@@ -1162,8 +1162,6 @@ functor
             Diagnostic_subscription.update
               x
               ~priority_files:env.editor_open_files
-              ~reparsed:files_to_parse
-              ~rechecked:files_to_check
               ~global_errors:errors
               ~full_check_done)
       in

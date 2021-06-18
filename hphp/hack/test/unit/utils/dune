@@ -62,6 +62,23 @@
         unit_test))
 
 (executable
+    (name diagnostic_subscription_test)
+    (modules diagnostic_subscription_test)
+    (link_flags (:standard (:include ../../../src/dune_config/ld-opts.sexp)))
+    (modes exe byte_complete)
+    (libraries
+        asserter
+        diagnostic_subscription
+        errors
+        logging
+        naming
+        sys_utils
+        test_injector_config
+        typing_deps
+        unit_test
+        utils_core))
+
+(executable
     (name errors_test)
     (modules errors_test)
     (libraries
@@ -74,3 +91,12 @@
         test_injector_config
         unit_test
         utils_core))
+
+(alias
+    (name diagnostic_subscription_test_run)
+    (deps %{exe:diagnostic_subscription_test.exe})
+    (action (run %{exe:diagnostic_subscription_test.exe})))
+
+(alias
+    (name runtest)
+    (deps (alias diagnostic_subscription_test_run)))

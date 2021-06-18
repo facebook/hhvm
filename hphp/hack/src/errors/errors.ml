@@ -942,6 +942,15 @@ let apply_callback_to_errors : t -> error_from_reasons_callback -> unit =
 (* Accessors. (All methods delegated to the parameterized module.) *)
 (*****************************************************************************)
 
+let file_has_errors : t -> Relative_path.t -> bool =
+ (fun (errors, _) -> Relative_path.Map.mem errors)
+
+let errors_in_file : t -> Relative_path.t -> _ =
+ fun (errors, _) file ->
+  Relative_path.Map.find_opt errors file
+  |> Option.value ~default:PhaseMap.empty
+  |> PhaseMap.fold ~init:[] ~f:(fun _phase errors acc -> errors @ acc)
+
 let iter_error_list f err = List.iter ~f (get_sorted_error_list err)
 
 let fold_errors ?phase err ~init ~f =
@@ -955,8 +964,8 @@ let fold_errors ?phase err ~init ~f =
         | None -> acc
         | Some errors -> List.fold_right errors ~init:acc ~f:(f source))
 
-let fold_errors_in ?phase err ~source ~init ~f =
-  Relative_path.Map.find_opt (fst err) source
+let fold_errors_in ?phase err ~file ~init ~f =
+  Relative_path.Map.find_opt (fst err) file
   |> Option.value ~default:PhaseMap.empty
   |> PhaseMap.fold ~init ~f:(fun p errors acc ->
          match phase with

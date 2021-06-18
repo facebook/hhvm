@@ -1,4 +1,0 @@
-File "trait_use_protected.php", line 34, characters 11-18:
-Cannot access this protected member, you don't extend BarExample (Typing[4112])
-  File "trait_use_protected.php", line 20, characters 22-29:
-  This member is protected

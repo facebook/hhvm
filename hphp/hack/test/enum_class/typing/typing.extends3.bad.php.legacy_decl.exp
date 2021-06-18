@@ -1,4 +1,0 @@
-File "typing.extends3.bad.php", line 22, characters 7-7:
-Classes can only extend other classes. (Typing[4115])
-  File "typing.extends3.bad.php", line 22, characters 17-17:
-  This is an enum class.

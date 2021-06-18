@@ -1,2 +1,0 @@
-File "override_attr_14.php", line 5, characters 19-21:
-`IFoo` has no parent class with a method `bar` to override (Typing[4087])

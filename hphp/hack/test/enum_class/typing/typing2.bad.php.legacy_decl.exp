@@ -1,6 +1,0 @@
-File "typing2.bad.php", line 39, characters 25-28:
-Invalid argument (Typing[4110])
-  File "typing2.bad.php", line 6, characters 24-29:
-  Expected `string`
-  File "typing2.bad.php", line 15, characters 24-26:
-  But got `int`

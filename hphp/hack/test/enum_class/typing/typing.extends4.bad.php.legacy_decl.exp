@@ -1,2 +1,0 @@
-File "typing.extends4.bad.php", line 23, characters 30-30:
-Enum F includes enum E but their base types are incompatible (Typing[4388])

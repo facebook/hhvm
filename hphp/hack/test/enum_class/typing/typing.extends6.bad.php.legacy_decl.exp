@@ -1,6 +1,0 @@
-File "typing.extends6.bad.php", line 22, characters 7-7:
-Enum NormalEnum includes enum E but their base types are incompatible (Typing[4388])
-File "typing.extends6.bad.php", line 22, characters 7-7:
-Enums can only extend int, string, or arraykey. (Typing[4115])
-  File "typing.extends6.bad.php", line 16, characters 12-12:
-  This is an enum class.

@@ -1,6 +1,6 @@
 File "codegen_unsafe.php", line 4, characters 3-6:
 `echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
   File "codegen_unsafe.php", line 3, characters 33-48:
-  The local (enclosing) context provides the capability (WriteProperty)
+  The local (enclosing) context provides the capability WriteProperty
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

@@ -102,12 +102,9 @@ inline int64_t tvToInt(
     case KindOfKeyset:
       handleConvNoticeLevel(level, "keyset", "int", notice_reason);
       return cell.m_data.parr->empty() ? 0 : 1;
-    case KindOfObject: {
-      // do the conversion first in case it throws
-      const auto ret = cell.m_data.pobj->toInt64();
+    case KindOfObject:
       handleConvNoticeLevel(level, "object", "int", notice_reason);
-      return ret;
-    }
+      return cell.m_data.pobj->toInt64();
     case KindOfResource:
       handleConvNoticeLevel(level, "resource", "int", notice_reason);
       return cell.m_data.pres->data()->o_toInt64();

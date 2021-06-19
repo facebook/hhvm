@@ -141,15 +141,6 @@ type process_file_results = {
   deferred_decls: Deferred_decl.deferment list;
 }
 
-let process_file_remote_execution
-    (ctx : Provider_context.t)
-    (errors : Errors.t)
-    (file : check_file_computation) : process_file_results =
-  let fn = file.path in
-  let deps_mode = Provider_context.get_deps_mode ctx in
-  let errors' = Re.process_file fn deps_mode in
-  { errors = Errors.merge errors' errors; deferred_decls = [] }
-
 let process_files_remote_execution
     (ctx : Provider_context.t)
     (errors : Errors.t)
@@ -444,10 +435,7 @@ let process_files
         match fn with
         | Check file ->
           let process_file () =
-            if remote_execution then
-              process_file_remote_execution ctx errors file
-            else
-              process_file dynamic_view_files ctx errors file
+            process_file dynamic_view_files ctx errors file
           in
           let result =
             if check_info.profile_log then (

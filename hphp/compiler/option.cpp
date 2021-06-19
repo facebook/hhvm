@@ -66,7 +66,6 @@ std::string Option::AutoloadRoot;
 bool Option::GenerateTextHHBC = false;
 bool Option::GenerateHhasHHBC = false;
 bool Option::GenerateBinaryHHBC = false;
-std::string Option::RepoCentralPath;
 
 std::string Option::IdPrefix = "$$";
 
@@ -159,10 +158,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   {
     // Repo
-    {
-      // Repo Central
-      Config::Bind(RepoCentralPath, ini, config, "Repo.Central.Path");
-    }
     Config::Bind(RuntimeOption::RepoDebugInfo,
                  ini, config, "Repo.DebugInfo",
                  RuntimeOption::RepoDebugInfo);

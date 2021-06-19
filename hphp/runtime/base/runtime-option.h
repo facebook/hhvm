@@ -1437,6 +1437,14 @@ public:
   static std::string CodeCoverageOutputFile;
 
   // Repo (hhvm bytecode repository) options
+  static std::string RepoPath;
+  static int64_t RepoLocalReadaheadRate;
+  static bool RepoLocalReadaheadConcurrent;
+  static bool RepoLitstrLazyLoad;
+  static bool RepoDebugInfo;
+  static bool RepoAuthoritative;
+
+  // These are (functionally) unused
   static RepoMode RepoLocalMode;
   static std::string RepoLocalPath;
   static RepoMode RepoCentralMode;
@@ -1447,11 +1455,6 @@ public:
   static bool RepoAllowFallbackPath;
   static std::string RepoJournal;
   static bool RepoCommit;
-  static bool RepoDebugInfo;
-  static bool RepoAuthoritative;
-  static int64_t RepoLocalReadaheadRate;
-  static bool RepoLitstrLazyLoad;
-  static bool RepoLocalReadaheadConcurrent;
   static uint32_t RepoBusyTimeoutMS;
 
   // pprof/hhprof options

@@ -179,7 +179,7 @@ void TestServer::RunServer() {
     : "-vServer.TakeoverFilename=" + std::string(s_filename);
   auto serverType = std::string("-vServer.Type=") + m_serverType;
   auto pidFile = std::string("-vPidFile=") + s_pidfile;
-  auto repoFile = std::string("-vRepo.Central.Path=") + s_repoFile;
+  auto repoFile = std::string("-vRepo.Path=") + s_repoFile;
   auto logFile = std::string("-vLog.File=") + s_logFile;
 
   const char *argv[] = {

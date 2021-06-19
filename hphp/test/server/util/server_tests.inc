@@ -104,7 +104,6 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
   $includePathConfig = ' -vServer.IncludeSearchPaths.0='.$root;
   $adminPortConfig = $adminPort ? ' -vAdminServer.Port='.$adminPort : '';
   $debugPortConfig = $debugPort ? ' -vEval.Debugger.Port='.$debugPort : '';
-  $repoConfig = " -vRepo.Central.Path={$LOG_ROOT}_server{$test_run_id}_{$instance_id}.hhbc";
   $useJit = array_key_exists('HHVM_JIT', $_ENV) && $_ENV['HHVM_JIT'] == 1;
   $jitConfig = ' -vEval.Jit='.($useJit ? "true" : "false");
   // To emulate sandbox setup, let Sandbox.Home be '$home'
@@ -139,8 +138,10 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
       tlog(exec($cmd, inout $output, inout $return_var));
     }
     $repoConfig .=
-      " -vRepo.Local.Path=".ServerUtilServerTests::$repo_builds[$repoKey]."/hhvm.hhbc".
+      " -vRepo.Path=".ServerUtilServerTests::$repo_builds[$repoKey]."/hhvm.hhbc".
       " -vRepo.Authoritative=true";
+  } else {
+    $repoConfig = '';
   }
 
   $cmd = "exec env MALLOC_CONF=junk:true TESTID={$serverId} " .
@@ -153,7 +154,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
     ' -vPidFile=' . escapeshellarg(__SystemLib\hphp_test_tmppath('www.pid')) .
     $portConfig . $srcRootConfig .
     $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
-    $debugPortConfig . $repoConfig . $jitConfig . ' ' . $customArgs .
+    $debugPortConfig . $jitConfig . ' ' . $customArgs .
     " > {$LOG_ROOT}_test_server_stdout$test_run_id.log" .
     " 2> {$LOG_ROOT}_test_server_stderr$test_run_id.log";
 

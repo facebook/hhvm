@@ -50,7 +50,6 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   RuntimeOption::Load(ini, config);
-  RuntimeOption::RepoCommit = false;
 
   hasRepo = !repoFileName.empty();
   if (hasRepo) RepoFile::init(repoFileName);

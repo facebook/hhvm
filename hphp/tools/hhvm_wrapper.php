@@ -306,8 +306,7 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
 function repo_auth_flags(string $flags, string $repo): string {
   return $flags .
     '-v Repo.Authoritative=true '.
-    '-v Repo.Local.Mode=r- '.
-    "-v Repo.Local.Path=$repo ";
+    "-v Repo.Path=$repo ";
 }
 
 function compile_with_hphp(string $flags, OptionMap $opts): string {

@@ -5,7 +5,7 @@ CHECKER="$2"
 EMITTER="$3"
 HHVM="$4"
 
-HHVM_CMD="$HHVM -vRepo.Local.Mode=-- -vRepo.Central.Path=verify.hhbc"
+HHVM_CMD="$HHVM -vRepo.Path=verify.hhbc"
 
 HHAS="$TEST.hhas"
 EXPECTED="$TEST.exp"

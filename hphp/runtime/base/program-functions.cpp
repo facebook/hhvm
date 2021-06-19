@@ -1006,21 +1006,8 @@ static bool set_execution_mode(folly::StringPiece mode) {
 
 static void init_repo_file() {
   if (!RO::RepoAuthoritative) return;
-  auto const path = [] {
-    if (!RO::RepoLocalPath.empty())   return RO::RepoLocalPath;
-    if (!RO::RepoCentralPath.empty()) return RO::RepoCentralPath;
-    if (auto const env = getenv("HHVM_REPO_CENTRAL_PATH")) {
-      std::string p{env};
-      replacePlaceholders(p);
-      return p;
-    }
-    always_assert(
-      false &&
-      "Either Repo.LocalPath or Repo.CentralPath must be set in "
-      "RepoAuthoritative mode"
-    );
-  }();
-  RepoFile::init(path);
+  assertx(!RO::RepoPath.empty());
+  RepoFile::init(RO::RepoPath);
 }
 
 /* Reads a file into the OS page cache, with rate limiting. */
@@ -1140,13 +1127,14 @@ static int start_server(const std::string &username, int xhprof) {
 
   std::unique_ptr<std::thread> readaheadThread;
 
-  if (RuntimeOption::RepoLocalReadaheadRate > 0 &&
-      !RuntimeOption::RepoLocalPath.empty()) {
+  if (RO::RepoAuthoritative &&
+      RO::RepoLocalReadaheadRate > 0 &&
+      !RO::RepoPath.empty()) {
     HttpServer::CheckMemAndWait();
     readaheadThread = std::make_unique<std::thread>([&] {
         assertx(RuntimeOption::ServerExecutionMode());
         BootStats::Block timer("Readahead Repo", true);
-        auto path = RuntimeOption::RepoLocalPath.c_str();
+        auto path = RuntimeOption::RepoPath.c_str();
         Logger::Info("readahead %s", path);
 #ifdef __linux__
         // glibc doesn't have a wrapper for ioprio_set(), so we need to use
@@ -1813,8 +1801,6 @@ static int execute_program_impl(int argc, char** argv) {
       }
       return file;
     }(po.file.empty() ? po.args[0] : po.file);
-
-    RuntimeOption::RepoCommit = false; // avoid initializing a repo
 
     std::fstream fs(file, std::ios::in);
     if (!fs) {

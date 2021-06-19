@@ -1230,6 +1230,7 @@ hphp_string_imap<TypedValue> RuntimeOption::ConstantFunctions;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
 
+std::string RuntimeOption::RepoPath;
 RepoMode RuntimeOption::RepoLocalMode = RepoMode::ReadOnly;
 std::string RuntimeOption::RepoLocalPath;
 RepoMode RuntimeOption::RepoCentralMode = RepoMode::ReadWrite;
@@ -1886,6 +1887,9 @@ void RuntimeOption::Load(
     Config::Bind(repoLocalMode, ini, config, "Repo.Local.Mode", repoModeToStr(RepoLocalMode));
     RepoLocalMode = parseRepoMode(repoLocalMode, "Local", RepoMode::ReadOnly);
 
+    // Repo.Path
+    Config::Bind(RepoPath, ini, config, "Repo.Path", RepoPath);
+
     // Repo.Local.Path
     Config::Bind(RepoLocalPath, ini, config, "Repo.Local.Path");
     if (RepoLocalPath.empty()) {
@@ -1911,6 +1915,7 @@ void RuntimeOption::Load(
 
     replacePlaceholders(RepoLocalPath);
     replacePlaceholders(RepoCentralPath);
+    replacePlaceholders(RepoPath);
 
     Config::Bind(RepoJournal, ini, config, "Repo.Journal", RepoJournal);
     Config::Bind(RepoCommit, ini, config, "Repo.Commit",
@@ -1926,6 +1931,23 @@ void RuntimeOption::Load(
                  "Repo.LocalReadaheadConcurrent", false);
     Config::Bind(RepoBusyTimeoutMS, ini, config,
                  "Repo.BusyTimeoutMS", RepoBusyTimeoutMS);
+
+    if (RepoPath.empty()) {
+      if (!RepoLocalPath.empty()) {
+        RepoPath = RepoLocalPath;
+      } else if (!RepoCentralPath.empty()) {
+        RepoPath = RepoCentralPath;
+      } else if (auto const env = getenv("HHVM_REPO_CENTRAL_PATH")) {
+        RepoPath = env;
+        replacePlaceholders(RepoPath);
+      } else {
+        always_assert_flog(
+          !RepoAuthoritative,
+          "Either Repo.Path, Repo.LocalPath, or Repo.CentralPath "
+          "must be set in RepoAuthoritative mode"
+        );
+      }
+    }
   }
 
   if (use_jemalloc) {

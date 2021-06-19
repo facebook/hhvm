@@ -25,6 +25,6 @@ sqlite3 "$repo" "select path from $table $where" | \
    grep -v "^/:" | \
    xargs -I% sh -c \
         "echo ==== Dumping % ======; \
-         ${HHVM:-hhvm} -vRepo.Authoritative=true -vRepo.Commit=false -vRepo.{Central,Local}.Path=$repo $dump_what --lint=% 2>&1 | \
+         ${HHVM:-hhvm} -vRepo.Authoritative=true -vRepo.Path=$repo $dump_what --lint=% 2>&1 | \
          grep -v '^No syntax errors detected in'; \
          echo"

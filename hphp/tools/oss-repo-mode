@@ -36,12 +36,12 @@ usage() {
 }
 
 set_hhbc() {
-  HHBC=`grep hhvm.repo.central.path "$INI" | sed 's/[^=]*=\s*\(.*\)/\1/'`
+  HHBC=`grep hhvm.repo.path "$INI" | sed 's/[^=]*=\s*\(.*\)/\1/'`
   if [ "x$HHBC" = "x" ]; then
     mkdir -p /var/cache/hhvm
     USER=`stat -c "%U" "/var/run/hhvm"`
     chown -R "$USER" "/var/cache/hhvm"
-    echo "hhvm.repo.central.path = /var/cache/hhvm/hhvm.hhbc" >> "$INI"
+    echo "hhvm.repo.path = /var/cache/hhvm/hhvm.hhbc" >> "$INI"
     HHBC="/var/cache/hhvm/hhvm.hhbc"
   fi
 }

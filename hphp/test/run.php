@@ -461,7 +461,6 @@ function get_options($argv): (darray<string, mixed>, varray<string>) {
     'write-to-checkout' => '',
     'bespoke' => '',
     'lazyclass' => '',
-    '*force-repo' => '',
     'hn' => '',
   ];
   $options = darray[];
@@ -821,13 +820,7 @@ function find_debug_config($test, $name) {
 function mode_cmd($options): varray<string> {
   $repo_args = '';
   if (!isset($options['repo'])) {
-    // Set the non-repo-mode shared repo.
-    // When in repo mode, we set our own central path.
-    if (isset($options['force-repo'])) {
-      $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
-    } else {
-      $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=:memory: -vRepo.Commit=0 -vUnitFileCache.Path=".unit_cache_file();
-    }
+    $repo_args = "-vUnitFileCache.Path=".unit_cache_file();
   }
   $interp_args = "$repo_args -vEval.Jit=0";
   $jit_args = "$repo_args -vEval.Jit=true";
@@ -1036,10 +1029,7 @@ function hhvm_cmd(
     $program = isset($options['hackc']) ? "hackc" : "hhvm";
     $hhbbc_repo = '"' . test_repo($options, $test) . "/$program.$repo_suffix\"";
     $cmd .= ' -vRepo.Authoritative=true';
-    $cmd .= ' -vRepo.Commit=0';
-    $cmd .= ' -vRepo.Local.Mode=--';
-    $cmd .= ' -vRepo.Central.Mode=r-';
-    $cmd .= " -vRepo.Central.Path=$hhbbc_repo";
+    $cmd .= " -vRepo.Path=$hhbbc_repo";
   }
 
   if (isset($options['jitsample'])) {
@@ -1130,7 +1120,6 @@ function hphp_cmd($options, $test, $program): string {
     '--nofork=1 -thhbc -l1 -k1',
     '-o "' . test_repo($options, $test) . '"',
     "--program $program.hhbc \"$test\"",
-    "-vRuntime.Repo.Local.Mode=-- -vRuntime.Repo.Central.Path=".verify_hhbc(),
     "-vRuntime.UnitFileCache.Path=".unit_cache_file(),
     $extra_args,
     $compiler_args,

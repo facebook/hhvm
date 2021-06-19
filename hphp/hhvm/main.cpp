@@ -109,8 +109,7 @@ int main(int argc, char** argv) {
   std::vector<char*> args;
   args.push_back(argv[0]);
   args.push_back("-vRepo.Authoritative=true");
-  args.push_back("-vRepo.Local.Mode=r-");
-  repo = "-vRepo.Local.Path=" + repo;
+  repo = "-vRepo.Path=" + repo;
   args.push_back(const_cast<char*>(repo.c_str()));
   if (argc > 1) {
     args.insert(args.end(), argv + 1, argv + argc);

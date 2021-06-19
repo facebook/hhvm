@@ -94,7 +94,6 @@ struct Option {
   static bool GenerateTextHHBC;
   static bool GenerateHhasHHBC;
   static bool GenerateBinaryHHBC;
-  static std::string RepoCentralPath;
 
   /**
    * A somewhat unique prefix for system identifiers.

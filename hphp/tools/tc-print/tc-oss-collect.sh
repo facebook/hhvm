@@ -47,7 +47,7 @@ fi
 
 HHVM_BIN=$(readlink /proc/$HHVM_PID/exe)
 CHROOT=$(readlink /proc/$HHVM_PID/root)
-LOCAL_REPO_FILE=$CHROOT$(strings /proc/$HHVM_PID/cmdline | grep "^Repo.Local.Path" | cut -d\= -f2)
+LOCAL_REPO_FILE=$CHROOT$(strings /proc/$HHVM_PID/cmdline | grep "^Repo.Path" | cut -d\= -f2)
 
 echo "Reading symbols from $HHVM_BIN..."
 nm $HHVM_BIN > $TMPDIR/hhvm.nm

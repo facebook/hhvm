@@ -594,7 +594,7 @@ void HttpServer::EvictFileCache() {
   // explicitly advise files out.  But we can do it anyway when we
   // need more free memory, e.g., when a new instance of the server is
   // about to start.
-  advise_out(RuntimeOption::RepoLocalPath);
+  advise_out(RuntimeOption::RepoPath);
   advise_out(RuntimeOption::FileCache);
 }
 

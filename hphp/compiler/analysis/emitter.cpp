@@ -345,7 +345,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
       folly::Optional<SymbolSets> symbolSets;
       if (Option::GenerateBinaryHHBC) {
         autoloadMapBuilder.emplace();
-        repoBuilder.emplace(RuntimeOption::RepoCentralPath);
+        repoBuilder.emplace(RuntimeOption::RepoPath);
         symbolSets.emplace();
       }
 

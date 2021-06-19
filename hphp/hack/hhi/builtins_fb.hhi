@@ -109,8 +109,8 @@ function int_mul_overflow(int $a, int $b): int;
  * manipulate rounding of the result.
  */
 function int_mul_add_overflow(int $a, int $b, int $bias): int;
-<<__PHPStdLib>>
+
 function enable_function_coverage();
-<<__PHPStdLib>>
+
 function collect_function_coverage();
 } // HH namespace

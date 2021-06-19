@@ -5,9 +5,5 @@ class A {
   $obj = new A();
   var_dump($obj);
   var_dump((bool)$obj);
-  try {
-    var_dump((int)$obj);
-  } catch (TypecastException $e) {
-    var_dump($e->getMessage());
-  }
+  var_dump((int)$obj);
 }

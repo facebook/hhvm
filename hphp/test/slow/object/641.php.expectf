@@ -1,4 +1,6 @@
 object(A) (0) {
 }
 bool(true)
-string(47) "Object of class A could not be converted to int"
+
+Notice: Object of class A could not be converted to int in %s/test/slow/object/641.php on line 8
+int(1)

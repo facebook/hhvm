@@ -9,11 +9,7 @@ var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', varray[0], 3));
 var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', varray[0], 1.0));
 var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', varray[0], null));
 $obj = new stdClass();
-try {
-  var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', 0, $obj));
-} catch (TypecastException $e) {
-  var_dump($e->getMessage());
-}
+var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', 0, $obj));
 var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', '0', '1.0'));
 var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', '0.0', 1.0));
 var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', '0.0', 1));

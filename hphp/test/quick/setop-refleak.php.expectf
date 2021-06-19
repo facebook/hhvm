@@ -1,7 +1,7 @@
-string(50) "Object of class Dtor could not be converted to int"
+
+Notice: Object of class Dtor could not be converted to int in %s/test/quick/setop-refleak.php on line 11
 object(Foo) (1) {
   ["bug"]=>
-  object(Dtor) (0) {
-  }
+  int(13)
 }
 done

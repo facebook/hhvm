@@ -165,11 +165,7 @@ f(1.0);
 f('1abc');
 f('3');
 f('foo');
-try {
-  f(new M());
-} catch (TypecastException $e) {
-  var_dump($e->getMessage());
-}
+f(new M());
 f_str('0');
 f_str('');
 f_str('jazz');

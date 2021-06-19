@@ -8,6 +8,13 @@
  * Pass different data types as $number argument to abs() to test behaviour
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "abs";
+  }
+}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing abs() : usage variations ***\n";
 
@@ -42,6 +49,11 @@ $inputs = varray[
 /*19*/ "abs",
        'abs',
        $heredoc,
+
+       // object data
+/*22*/ new classA(),
+
+
 
        // resource variable
 /*23*/ $fp

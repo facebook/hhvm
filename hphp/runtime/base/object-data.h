@@ -548,8 +548,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   tv_lval makeDynProp(const StringData* key);
 
-  static void throwObjToIntException(const char*);
-  static void throwObjToDoubleException(const char*);
+  static void raiseObjToIntNotice(const char*);
+  static void raiseObjToDoubleNotice(const char*);
   static void raiseAbstractClassError(Class*);
   void raiseUndefProp(const StringData*) const;
   void raiseCreateDynamicProp(const StringData*) const;

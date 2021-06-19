@@ -61,11 +61,7 @@ function main_bitop_types() {
     for ($i = 0; $i < count($values); ++$i) {
       for ($j = 0; $j < count($values); ++$j) {
         list($op_str, $op_lambda) = $ops[$o];
-        try {
-          $func($values[$i], $values[$j], $op_str, $op_lambda);
-        } catch (TypecastException $e) {
-          var_dump($e->getMessage());
-        }
+        $func($values[$i], $values[$j], $op_str, $op_lambda);
       }
     }
   }

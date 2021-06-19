@@ -125,7 +125,9 @@ bool(false)
 object(stdClass) (0) {
 }
 InvalidArgumentException: Invalid string key: expected a key of type int or string, stdClass given
-string(54) "Object of class stdClass could not be converted to int"
+
+Notice: Object of class stdClass could not be converted to int in %s/test/slow/string/str_offset_isset_empty.php on line 21
+bool(false)
 
 int(4294967300)
 

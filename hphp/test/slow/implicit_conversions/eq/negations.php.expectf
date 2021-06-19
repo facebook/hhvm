@@ -12,19 +12,22 @@
 !('0bcd' == 42)
 !('0bcd' == 1.234)
 !(new A() == 42)
-Threw: Object of class A could not be converted to int
+
+Notice: Object of class A could not be converted to int in %s/negations.php on line 100
 !(new A() == new A(new A()))
 !(new B() == new C())
 !(DateTime1(1000) == new DateTime2())
 !(DateTime1(1000) == 42)
-Threw: Object of class DateTime1 could not be converted to int
+
+Notice: Object of class DateTime1 could not be converted to int in %s/negations.php on line 109
 !(xml == 42)
 !(Vector == Vector)
 !(Vector == 42)
 !(Pair<string, string> == pair<string, int>)
 !(Pair == 42)
 !(closure == 42)
-Threw: Object of class Closure$eq#10;%s could not be converted to int
+
+Notice: Object of class Closure$eq#5;%s could not be converted to int in %s/negations.php on line 128
 !(fun == 42)
 !(fun == 'baz')
 !(rfun == 42)
@@ -55,19 +58,22 @@ Threw: Object of class Closure$eq#10;%s could not be converted to int
 !('0bcd' != 42)
 !('0bcd' != 1.234)
 !(new A() != 42)
-Threw: Object of class A could not be converted to int
+
+Notice: Object of class A could not be converted to int in %s/negations.php on line 191
 !(new A() != new A(new A()))
 !(new B() != new C())
 !(DateTime1(1000) != new DateTime2())
 !(DateTime1(1000) != 42)
-Threw: Object of class DateTime1 could not be converted to int
+
+Notice: Object of class DateTime1 could not be converted to int in %s/negations.php on line 200
 !(xml != 42)
 !(Vector != Vector)
 !(Vector != 42)
 !(Pair<string, string> != pair<string, int>)
 !(Pair != 42)
 !(closure != 42)
-Threw: Object of class Closure$neq#10;%s could not be converted to int
+
+Notice: Object of class Closure$neq#5;%s could not be converted to int in %s/negations.php on line 219
 !(fun != 42)
 !(fun != 'baz')
 !(rfun != 42)

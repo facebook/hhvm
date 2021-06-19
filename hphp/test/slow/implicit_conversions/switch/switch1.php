@@ -24,11 +24,7 @@ function main() {
   f('jazz');
   f('5');
   f('1');
-  try {
-    f(new M());
-  } catch (Exception $e) {
-    echo $e->getMessage()."\n";
-  }
+  f(new M());
 
   f(5.3920);
   f(5.5);

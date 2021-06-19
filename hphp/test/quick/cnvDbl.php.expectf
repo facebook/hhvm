@@ -5,7 +5,9 @@ float(9.007199254741E+15)
 float(1.1)
 float(0)
 float(1)
-string(49) "Object of class C could not be converted to float"
+
+Notice: Object of class C could not be converted to float in %s on line 4
+float(1)
 float(0)
 float(0)
 float(1)
@@ -14,7 +16,9 @@ float(1)
 float(0)
 float(1.1)
 float(0)
-string(49) "Object of class C could not be converted to float"
+
+Notice: Object of class C could not be converted to float in %s on line 50
+float(1)
 float(0)
 float(1)
 float(5.3)

@@ -27,6 +27,7 @@ function and(): void {
   echo STDIN & "string";
   echo "string" & "string";
   echo varray[42] & dict['foobar' => false];
+  echo new Foo() & -INF;
   echo ">\n";
 
   $i = 1;
@@ -42,6 +43,7 @@ function and(): void {
   $i &= "string";
   $i &= varray[42];
   $i &= dict['foobar' => false];
+  $i &= new Foo();
   echo $i;
 
   $i = "string";
@@ -58,6 +60,7 @@ function or(): void {
   echo STDIN | "string";
   echo "string" | "string";
   echo varray[42] | dict['foobar' => false];
+  echo new Foo() | -INF;
   echo ">\n";
 
   $i = 1;
@@ -73,6 +76,7 @@ function or(): void {
   $i |= "string";
   $i |= varray[42];
   $i |= dict['foobar' => false];
+  $i |= new Foo();
   echo $i;
 
   $i = "string";
@@ -89,6 +93,7 @@ function xor(): void {
   echo STDIN ^ "string";
   echo "string" ^ "string";
   echo varray[42] ^ dict['foobar' => false];
+  echo new Foo() ^ -INF;
   echo ">\n";
 
   $i = 1;
@@ -104,6 +109,7 @@ function xor(): void {
   $i ^= "string";
   $i ^= varray[42];
   $i ^= dict['foobar' => false];
+  $i ^= new Foo();
   echo $i;
 
   $i = "string";
@@ -120,6 +126,7 @@ function shl(): void {
   echo STDIN << "string";
   echo "string" << "string";
   echo varray[42] << dict['foobar' => false];
+  echo new Foo() << -INF;
   echo ">\n";
 
   $i = 1;
@@ -135,6 +142,7 @@ function shl(): void {
   $i <<= "string";
   $i <<= varray[42];
   $i <<= dict['foobar' => false];
+  $i <<= new Foo();
   echo $i;
 
   $i = "string";
@@ -151,6 +159,7 @@ function shr(): void {
   echo STDIN >> "string";
   echo "string" >> "string";
   echo varray[42] >> dict['foobar' => false];
+  echo new Foo() >> -INF;
   echo ">\n";
 
   $i = 1;
@@ -166,6 +175,7 @@ function shr(): void {
   $i >>= "string";
   $i >>= varray[42];
   $i >>= dict['foobar' => false];
+  $i >>= new Foo();
   echo $i;
 
   $i = "string";

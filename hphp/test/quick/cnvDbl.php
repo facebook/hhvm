@@ -11,11 +11,7 @@ function foo2(): void {
   var_dump(foo(1.1));
   var_dump(foo("abc"));
   var_dump(foo(varray[123]));
-  try {
-    var_dump(foo(new C));
-  } catch (TypecastException $e) {
-    var_dump($e->getMessage());
-  }
+  var_dump(foo(new C));
 }
 class C { public $foo = "bar"; }
 function real($i) {
@@ -51,11 +47,7 @@ function real($i) {
   var_dump((float)$v6);
   var_dump((float)$v7);
   var_dump((float)$v8);
-  try {
-    var_dump((float)$v9);
-  } catch (TypecastException $e) {
-    var_dump($e->getMessage());
-  }
+  var_dump((float)$v9);
   var_dump((float)$v10);
   var_dump((float)$v11);
 }

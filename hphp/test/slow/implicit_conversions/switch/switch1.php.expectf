@@ -59,7 +59,8 @@ goes to:
 object(M) (0) {
 }
 goes to:
-Object of class M could not be converted to int
+%r(\nNotice: Object of class M could not be converted to int in %s\/switch1\.php on line %s\n?)+%r
+1
 float(5.392)
 goes to:
 default

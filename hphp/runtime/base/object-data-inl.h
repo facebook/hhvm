@@ -400,16 +400,18 @@ inline int64_t ObjectData::toInt64(
   if (!isCollection() && UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
     return toInt64Impl();
   }
-  throwObjToIntException(classname_cstr());
-  not_reached();
+  // this was a notice from PHP times. We should consider just deletin this and
+  // let handleConvNoticeLevel do the job.
+  raiseObjToIntNotice(classname_cstr());
+  return 1;
 }
 
 inline double ObjectData::toDouble() const {
   if (!isCollection() && UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
     return toDoubleImpl();
   }
-  throwObjToDoubleException(classname_cstr());
-  not_reached();
+  raiseObjToDoubleNotice(classname_cstr());
+  return 1;
 }
 
 inline const Func* ObjectData::methodNamed(const StringData* sd) const {

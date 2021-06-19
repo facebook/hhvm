@@ -35,11 +35,7 @@ $var_cnt = count($a);
 foreach($a as $var) {
     for ($i = 0; $i < $var_cnt; $i++) {
         my_dump($var);
-        try {
-          echo ($var == $a[$i]) ? " == " : " != ";
-        } catch(Exception $e) {
-          echo " cannot be compared to ";
-        }
+        echo ($var == $a[$i]) ? " == " : " != ";
         my_dump($a[$i]);
         echo "\n";
     }

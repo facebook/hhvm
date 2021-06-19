@@ -1,10 +1,5 @@
 <?hh
 
-class aClass {
-   function __toString() {
-       return "Some Ascii Data";
-   }
-}
 <<__EntryPoint>>
 function main_entry(): void {
   /* Prototype  : proto int xml_parser_set_option(resource parser, int option, mixed value)
@@ -64,9 +59,6 @@ function main_entry(): void {
         "string",
         'string',
 
-        // object data
-        new aClass(),
-
         // resource data
         $fp,
 
@@ -76,7 +68,7 @@ function main_entry(): void {
   // loop through each element of the array for value
 
   foreach($values as $value) {
-        echo @"\nArg value $value \n";
+        echo @"\nArg value<$value>\n";
         var_dump( xml_parser_set_option($parser, $option, $value) );
   };
 

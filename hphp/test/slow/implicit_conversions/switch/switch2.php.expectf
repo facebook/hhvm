@@ -47,13 +47,11 @@ default
 --------------------------------
 object(stdClass) (0) {
 }
-%r(\nNotice: Object of class stdClass could not be converted to int in %s\/switch2\.php on line %s\n?)+%r
-1
+Object of class stdClass could not be converted to int
 --------------------------------
 object(C) (0) {
 }
-%r(\nNotice: Object of class C could not be converted to int in %s\/switch2\.php on line %s\n?)+%r
-1
+Object of class C could not be converted to int
 --------------------------------
 resource(4) of type (stream)
 2 or 4: Resource id #4

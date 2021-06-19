@@ -1550,12 +1550,14 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
   }
 }
 
-void ObjectData::raiseObjToIntNotice(const char* clsName) {
-  raise_notice("Object of class %s could not be converted to int", clsName);
+void ObjectData::throwObjToIntException(const char* clsName) {
+  SystemLib::throwTypecastExceptionObject(folly::sformat(
+    "Object of class {} could not be converted to int", clsName));
 }
 
-void ObjectData::raiseObjToDoubleNotice(const char* clsName) {
-  raise_notice("Object of class %s could not be converted to float", clsName);
+void ObjectData::throwObjToDoubleException(const char* clsName) {
+  SystemLib::throwTypecastExceptionObject(folly::sformat(
+    "Object of class {} could not be converted to float", clsName));
 }
 
 void ObjectData::raiseAbstractClassError(Class* cls) {

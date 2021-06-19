@@ -11,6 +11,7 @@ float(1)
 float(0)
 float(%d)
 
-Notice: %s
-float(1)
-Done
+Fatal error: Uncaught exception 'TypecastException' with message 'Object of class test could not be converted to float' in %s/cast_to_double.php:30
+Stack trace:
+#0 (): main()
+#1 {main}

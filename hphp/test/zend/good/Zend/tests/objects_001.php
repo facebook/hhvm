@@ -13,13 +13,6 @@ var_dump($b == false);
 var_dump($b != false);
 var_dump($b == "");
 var_dump($b != "");
-var_dump($b == 0);
-var_dump($b != 0);
-var_dump($b == 1);
-var_dump($b != 1);
-var_dump($b == 1.0);
-var_dump($b != 1.0);
-var_dump($b == 1);
 
 
 echo "Done\n";

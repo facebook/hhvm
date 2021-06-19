@@ -1,27 +1,27 @@
-
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 17
-
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 18
-
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 19
-
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 20
-
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 21
-
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 22
-
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 23
-
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 24
-
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 25
-int(2)
-int(0)
-int(1)
-int(1)
-int(0)
-int(1)
-int(1)
-int(1)
-int(0)
+string(47) "Object of class D could not be converted to int"
+string(47) "Object of class D could not be converted to int"
+string(47) "Object of class D could not be converted to int"
+string(47) "Object of class D could not be converted to int"
+string(47) "Object of class D could not be converted to int"
+string(47) "Object of class D could not be converted to int"
+string(47) "Object of class D could not be converted to int"
+string(47) "Object of class D could not be converted to int"
+string(47) "Object of class D could not be converted to int"
+object(D) (0) {
+}
+object(D) (0) {
+}
+object(D) (0) {
+}
+object(D) (0) {
+}
+object(D) (0) {
+}
+object(D) (0) {
+}
+object(D) (0) {
+}
+object(D) (0) {
+}
+object(D) (0) {
+}

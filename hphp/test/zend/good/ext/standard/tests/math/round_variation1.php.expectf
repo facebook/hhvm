@@ -67,10 +67,5 @@ float(0)
 float(0)
 
 -- Iteration 23 --
-
-Notice: %s
-float(1)
-
--- Iteration 24 --
 float(%f)
 ===Done===

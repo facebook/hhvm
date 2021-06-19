@@ -37,10 +37,5 @@ int(0)
 int(0)
 
 -- Iteration 13 --
-
-Notice: %s
-int(1)
-
--- Iteration 14 --
 int(%d)
 ===Done===

@@ -36,9 +36,6 @@ var_dump(count(new returnNull));
 echo "Count returns a string:\n";
 var_dump(count(new returnString));
 
-echo "Count returns an object:\n";
-var_dump(count(new returnObject));
-
 echo "Count returns an array:\n";
 var_dump(count(new returnArray));
 

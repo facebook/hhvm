@@ -10,9 +10,7 @@ int(0)
 float(0)
 float(0)
 int(0)
-
-Notice: Object of class stdClass could not be converted to int in %s on line 6
 bool(false)
 bool(false)
 int(1)
-int(1)
+int(0)

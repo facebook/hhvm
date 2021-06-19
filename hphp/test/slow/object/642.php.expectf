@@ -3,6 +3,4 @@ object(A) (1) {
   string(2) "ok"
 }
 bool(true)
-
-Notice: Object of class A could not be converted to int in %s/test/slow/object/642.php on line 9
-int(1)
+string(47) "Object of class A could not be converted to int"

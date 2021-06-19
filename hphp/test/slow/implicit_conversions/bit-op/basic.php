@@ -15,11 +15,8 @@ const vec<mixed> VALS = vec[
   dict['foobar' => false],
 ];
 
-class Foo {}
-
 <<__EntryPoint>>
 function main(): void {
-  $o = new Foo();
   foreach(VALS as $i) {
     if ($i is float || $i is int) {
       echo '$i '; var_dump($i);
@@ -32,14 +29,7 @@ function main(): void {
       echo '$i '; var_dump($i); echo '$j '; var_dump($j);
       do_the_thing($i, $j);
     }
-    // hand-do the object ones since they can't be in the constant
-    echo "Foo on right\n";
-    do_the_thing($i, $o);
-    echo "Foo on left\n";
-    do_the_thing($o, $i);
   }
-  echo "Foo on both\n";
-  do_the_thing($o, $o);
 }
 
 function do_the_thing(mixed $i, mixed $j): void {

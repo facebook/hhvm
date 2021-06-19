@@ -232,6 +232,10 @@ Object AllocUndefinedVariableExceptionObject(const Variant& message) {
   return createAndConstructThrowable(s_UndefinedVariableExceptionClass, message);
 }
 
+Object AllocTypecastExceptionObject(const Variant& message) {
+  return createAndConstructThrowable(s_TypecastExceptionClass, message);
+}
+
 void throwExceptionObject(const Variant& message) {
   throw_object(AllocExceptionObject(message));
 }
@@ -313,6 +317,10 @@ void throwUndefinedPropertyExceptionObject(const Variant& message) {
 
 void throwUndefinedVariableExceptionObject(const Variant& message) {
   throw_object(AllocUndefinedVariableExceptionObject(message));
+}
+
+void throwTypecastExceptionObject(const Variant& message) {
+  throw_object(AllocTypecastExceptionObject(message));
 }
 
 #define ALLOC_OBJECT_STUB(name)                                         \

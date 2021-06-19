@@ -8,7 +8,6 @@ var_dump(gmp_intval("-1"));
 var_dump(gmp_intval(-1));
 var_dump(gmp_intval(-2349828));
 var_dump(gmp_intval(2342344));
-var_dump(gmp_intval(new stdClass));
 var_dump(gmp_intval(varray[]));
 
 $fp = fopen(__FILE__, 'r');

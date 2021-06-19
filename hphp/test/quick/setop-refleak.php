@@ -8,7 +8,11 @@ class Foo { public $bug; }
 function main() {
   $x = new Foo;
   $x->bug = new Dtor;
-  $x->bug += 12;
+  try {
+    $x->bug += 12;
+  } catch (TypecastException $e) {
+    var_dump($e->getMessage());
+  }
   var_dump($x);
 }
 <<__EntryPoint>> function main_entry() {

@@ -48,11 +48,11 @@ default
 --------------------------------
 object(stdClass) (0) {
 }
-1
+string(54) "Object of class stdClass could not be converted to int"
 --------------------------------
 object(c) (0) {
 }
-1
+string(47) "Object of class c could not be converted to int"
 --------------------------------
 resource(4) of type (stream)
 2 or 4: Resource id #4

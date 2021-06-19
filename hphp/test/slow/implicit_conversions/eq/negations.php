@@ -97,16 +97,16 @@ function eq(): void {
   !("0bcd" == 1.234);
 
   echo "!(new A() == 42)\n";
-  !(new A() == 42);
+  wrapped(() ==> !(new A() == 42));
   echo "!(new A() == new A(new A()))\n";
-  !(new A() == new A(new A()));
+  wrapped(() ==> !(new A() == new A(new A())));
   echo "!(new B() == new C())\n";
-  !(new B() == new C());
+  wrapped(() ==> !(new B() == new C()));
 
   echo "!(DateTime1(1000) == new DateTime2())\n";
-  !(new DateTime1(1000) == new DateTime2());
+  wrapped(() ==> !(new DateTime1(1000) == new DateTime2()));
   echo "!(DateTime1(1000) == 42)\n";
-  !(new DateTime1(1000) == 42);
+  wrapped(() ==> !(new DateTime1(1000) == 42));
 
   echo "!(xml == 42)\n";
   !(simplexml_load_string("<root />")->unknown == 42);
@@ -122,10 +122,14 @@ function eq(): void {
   wrapped(() ==> !(Pair {'elem1', 'elem2'} == 42));
 
   echo "!(closure == 42)\n";
-  !(function() {
-    return 0;
-  } ==
-    42);
+  wrapped(
+    () ==> (
+      function() {
+        return 0;
+      } ==
+        42
+    ),
+  );
 
   echo "!(fun == 42)\n";
   wrapped(() ==> !(foo<> == 42));
@@ -188,16 +192,16 @@ function neq(): void {
   !("0bcd" != 1.234);
 
   echo "!(new A() != 42)\n";
-  !(new A() != 42);
+  wrapped(() ==> !(new A() != 42));
   echo "!(new A() != new A(new A()))\n";
-  !(new A() != new A(new A()));
+  wrapped(() ==> !(new A() != new A(new A())));
   echo "!(new B() != new C())\n";
-  !(new B() != new C());
+  wrapped(() ==> !(new B() != new C()));
 
   echo "!(DateTime1(1000) != new DateTime2())\n";
-  !(new DateTime1(1000) != new DateTime2());
+  wrapped(() ==> !(new DateTime1(1000) != new DateTime2()));
   echo "!(DateTime1(1000) != 42)\n";
-  !(new DateTime1(1000) != 42);
+  wrapped(() ==> !(new DateTime1(1000) != 42));
 
   echo "!(xml != 42)\n";
   !(simplexml_load_string("<root />")->unknown != 42);
@@ -213,10 +217,14 @@ function neq(): void {
   wrapped(() ==> Pair {'elem1', 'elem2'} != 42);
 
   echo "!(closure != 42)\n";
-  !(function() {
-    return 0;
-  } !=
-    42);
+  wrapped(
+    () ==> !(
+      function() {
+        return 0;
+      } !=
+        42
+    ),
+  );
 
   echo "!(fun != 42)\n";
   wrapped(() ==> !(foo<> != 42));

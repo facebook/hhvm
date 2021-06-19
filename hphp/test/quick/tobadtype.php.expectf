@@ -1,9 +1,7 @@
 test int
-
-Notice: Object of class X could not be converted to int in %s on line 21
+string(47) "Object of class X could not be converted to int"
 test dbl
-
-Notice: Object of class X could not be converted to float in %s on line 25
+string(49) "Object of class X could not be converted to float"
 test str
 
-Catchable fatal error: Object of class X could not be converted to string in %s on line 17
+Catchable fatal error: Object of class X could not be converted to string in %s/tobadtype.php on line 17

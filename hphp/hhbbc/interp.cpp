@@ -3362,24 +3362,6 @@ void in(ISS& env, const bc::SetOpL& op) {
 
   auto resultTy = typeSetOp(op.subop2, loc, t1);
   setLoc(env, op.loc1, resultTy);
-
-  bool isSimpleMathOp = [&]{
-    switch (op.subop2) {
-      case SetOpOp::PlusEqual:
-      case SetOpOp::MinusEqual:
-      case SetOpOp::MulEqual:
-        return true;
-      default:
-        return false;
-    }
-  }();
-  if (env.blk.throwExit != NoBlockId && isSimpleMathOp && !resultTy.is(BBottom)) {
-    // we need to prepare for the possibility that we convert/set LHS to num and
-    // then throw.
-    auto const state = with_throwable_only(env.index, env.state);
-    env.propagate(env.blk.throwExit, &state);
-  }
-
   push(env, std::move(resultTy));
 }
 

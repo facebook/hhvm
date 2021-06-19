@@ -97,9 +97,11 @@ Type typeAdd(Type t1, Type t2) {
   if (okTypesForConstMath(t1, t2)) {
     if (auto t = eval_const(t1, t2, tvAdd)) return *t;
   }
-  if (auto t = usual_arith_conversions(t1, t2))         return *t;
-  if (t1.subtypeOf(BArrLike) && t2.subtypeOf(BArrLike)) return TBottom;
-  return TNum;
+  if (auto t = usual_arith_conversions(t1, t2))       return *t;
+  if (t1.subtypeOf(BVec) && t2.subtypeOf(BVec))       return TVec;
+  if (t1.subtypeOf(BDict) && t2.subtypeOf(BDict))     return TDict;
+  if (t1.subtypeOf(BKeyset) && t2.subtypeOf(BKeyset)) return TKeyset;
+  return TInitCell;
 }
 
 Type typeAddO(Type t1, Type t2) {
@@ -108,7 +110,9 @@ Type typeAddO(Type t1, Type t2) {
   }
   if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt))       return TNum;
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
-  if (t1.subtypeOf(BArrLike) && t2.subtypeOf(BArrLike)) return TBottom;
+  if (t1.subtypeOf(BVec) && t2.subtypeOf(BVec))       return TVec;
+  if (t1.subtypeOf(BDict) && t2.subtypeOf(BDict))     return TDict;
+  if (t1.subtypeOf(BKeyset) && t2.subtypeOf(BKeyset)) return TKeyset;
   return TInitCell;
 }
 
@@ -118,8 +122,7 @@ Type typeSubMulImpl(Type t1, Type t2, CellOp op) {
     if (auto t = eval_const(t1, t2, op))        return *t;
   }
   if (auto t = usual_arith_conversions(t1, t2)) return *t;
-  if (t1.subtypeOf(BArrLike) && t2.subtypeOf(BArrLike)) return TBottom;
-  return TNum;
+  return TInitPrim;
 }
 
 template <class CellOp>
@@ -129,7 +132,6 @@ Type typeSubMulImplO(Type t1, Type t2, CellOp op) {
   }
   if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt)) return TNum;
   if (auto t = usual_arith_conversions(t1, t2)) return *t;
-  if (t1.subtypeOf(BArrLike) && t2.subtypeOf(BArrLike)) return TBottom;
   return TInitPrim;
 }
 

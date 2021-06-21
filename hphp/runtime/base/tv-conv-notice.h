@@ -38,8 +38,10 @@ void handleConvNoticeLevel(
    const char* const to,
    const StringData* reason);
 
-void handleConvNoticeForCmp(const char* const lhs, const char* const rhs);
 void handleConvNoticeForCmp(TypedValue lhs, TypedValue rhs);
+void handleConvNoticeForCmp(const char* const lhs, const char* const rhs);
+void handleConvNoticeForEq(TypedValue lhs, TypedValue rhs);
+void handleConvNoticeForEq(const char* const lhs, const char* const rhs);
 
 extern const StaticString s_ConvNoticeReasonConcat;
 extern const StaticString s_ConvNoticeReasonBitOp;

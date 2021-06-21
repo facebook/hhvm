@@ -1356,6 +1356,37 @@ SSATmp* implRClsMethCmp(IRGS& env, Op, SSATmp*, SSATmp*) {
   PUNT(RClsMeth-cmp);
 }
 
+namespace {
+
+bool isEqualityOp(Op op) { return op == Op::Eq || op == Op::Neq; }
+
+void maybeRaiseBadComparisonViolation(
+  IRGS& env, Op op, SSATmp* comp_result, SSATmp* lhs, SSATmp* rhs) {
+  const bool eqOp = isEqualityOp(op);
+  const auto level = flagToConvNoticeLevel(
+    eqOp
+      ? RuntimeOption::EvalNoticeOnCoerceForEq
+      : RuntimeOption::EvalNoticeOnCoerceForCmp);
+  if (level == ConvNoticeLevel::None) return;
+  if (!eqOp) {
+    gen(env, RaiseBadComparisonViolation, BadComparisonData{false}, lhs, rhs);
+  } else {
+    // only trigger the notice if we're eq and the result is true or
+    // neq and the result is false since otherwise a coercion is
+    // impossible
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        gen(env, op == Op::Eq ? JmpNZero : JmpZero, taken, comp_result);
+      },
+      [&] {
+        gen(env, RaiseBadComparisonViolation, BadComparisonData{true}, lhs, rhs);
+      }
+    );
+  }
+}
+}
+
 /*
  * Responsible for converting the bytecode comparisons (which are type-agnostic)
  * to IR comparisons (which are typed). This generally involves inserting the
@@ -1426,13 +1457,13 @@ void implCmp(IRGS& env, Op op) {
       not_reached();
     }();
 
-    if (op != Op::Same && op != Op::NSame && op != Op::Eq && op != Op::Neq && !equiv() &&
-        !((leftTy <= TInt && rightTy <= TDbl) || (leftTy <= TDbl && rightTy <= TInt))) {
-      const auto level = flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForCmp);
-      if (level != ConvNoticeLevel::None) {
-        gen(env, RaiseBadComparisonViolation, left, right);
-      }
+    if (op != Op::Same && op != Op::NSame && !equiv()
+      && (isEqualityOp(op) ||
+          (!(leftTy <= TInt && rightTy <= TDbl) &&
+          !(leftTy <= TDbl && rightTy <= TInt)))) {
+       maybeRaiseBadComparisonViolation(env, op, res, left, right);
     }
+
     push(env, res);
   }
 

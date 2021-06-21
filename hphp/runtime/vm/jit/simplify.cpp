@@ -278,6 +278,9 @@ DEBUG_ONLY bool validate(const State& env,
 
 //////////////////////////////////////////////////////////////////////
 
+bool handleConvNoticeImpl(
+    State& env, Block* trace, ConvNoticeLevel level, const std::string& str);
+
 // return true if throws
 bool handleConvNoticeLevel(
   State& env,
@@ -285,19 +288,41 @@ bool handleConvNoticeLevel(
   const ConvNoticeData* notice_data,
   const char* const from,
   const char* const to) {
-  if (LIKELY(notice_data->level == ConvNoticeLevel::None)) return false;
-
+  // do this check here because if notice level is none, reason may be nullptr
+  if (notice_data->level == ConvNoticeLevel::None) return false;
   assertx(notice_data->reason != nullptr);
-  const auto str = makeStaticString(folly::sformat(
-    "Implicit {} to {} conversion for {}", from, to, notice_data->reason));
-  if (notice_data->level == ConvNoticeLevel::Throw) {
-    gen(env, ThrowInvalidOperation, trace, cns(env, str));
-    return true;
+  const auto str = folly::sformat(
+    "Implicit {} to {} conversion for {}", from, to, notice_data->reason);
+  return handleConvNoticeImpl(env, trace, notice_data->level, str);
+}
+
+// return true if throws
+bool handleConvNoticeEq(
+    State& env,
+    Block* trace,
+    const char* lhs,
+    const char* rhs) {
+  if (strcmp(lhs, rhs) > 0) std::swap(lhs, rhs);
+  const auto str = folly::sformat(
+    "Comparing {} and {} using equality", lhs, rhs);
+  const auto level =
+    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForEq);
+  return handleConvNoticeImpl(env, trace, level, str);
+}
+
+bool handleConvNoticeImpl(
+    State& env, Block* trace, ConvNoticeLevel level, const std::string& str) {
+  switch(level) {
+    case ConvNoticeLevel::Throw:
+      gen(env, ThrowInvalidOperation, trace, cns(env, makeStaticString(str)));
+      return true;
+    case ConvNoticeLevel::Log:
+      gen(env, RaiseNotice, trace, cns(env, makeStaticString(str)));
+    // FALLTHROUGH
+    case ConvNoticeLevel::None:
+      return false;
   }
-  if (notice_data->level == ConvNoticeLevel::Log) {
-    gen(env, RaiseNotice, trace, cns(env, str));
-  }
-  return false;
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1243,7 +1268,19 @@ SSATmp* cmpStrImpl(State& env,
           env,
           cmpOp(opc, left->strVal()->same(right->strVal()), true)
         );
-      } else {
+      } else if (opc == EqStr || opc == NeqStr) {
+        // if we're going to be converting these to num and then comparing an
+        // int and a float, block this fold because it needs to trigger a notice
+        int64_t lval; double dval;
+        auto ret1 = left->strVal()->isNumericWithVal(lval, dval, 0);
+        auto ret2 = right->strVal()->isNumericWithVal(lval, dval, 0);
+        if (ret1 == ret2 || ret1 == KindOfNull || ret2 == KindOfNull) {
+          return cns(
+            env,
+            cmpOp(opc, left->strVal()->equal(right->strVal()), true)
+          );
+        }
+      } else{
         return cns(
           env,
           cmpOp(opc, left->strVal()->compare(right->strVal()), 0)
@@ -1270,13 +1307,15 @@ SSATmp* cmpStrImpl(State& env,
   // Comparisons against the empty string can be optimized to checks on the
   // string length.
   if (right->hasConstVal() && right->strVal()->empty()) {
+    const auto op =
+     opc == EqStr || opc == SameStr || opc == LteStr ? EqInt : NeqInt;
     switch (opc) {
       case EqStr:
+      case NeqStr: return gen(env, op, gen(env, LdStrLen, left), cns(env, 0));
       case SameStr:
-      case LteStr: return newInst(EqInt, gen(env, LdStrLen, left), cns(env, 0));
-      case NeqStr:
+      case LteStr:
       case NSameStr:
-      case GtStr: return newInst(NeqInt, gen(env, LdStrLen, left), cns(env, 0));
+      case GtStr: return newInst(op, gen(env, LdStrLen, left), cns(env, 0));
       case LtStr: return cns(env, false);
       case GteStr: return cns(env, true);
       default: always_assert(false);

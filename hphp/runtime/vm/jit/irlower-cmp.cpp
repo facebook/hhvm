@@ -242,6 +242,16 @@ void cgCmpDbl(IRLS& env, const IRInstruction* inst) {
   v << cmovq{CC_P, sf, tmp2, v.cns(-1), d};
 }
 
+void cgRaiseBadComparisonViolation(IRLS& env, const IRInstruction* inst) {
+  using target_type = void (*)(TypedValue, TypedValue);
+  auto const target = inst->extra<BadComparisonData>()->eq
+    ? static_cast<target_type>(handleConvNoticeForEq)
+    : static_cast<target_type>(handleConvNoticeForCmp);
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(target), kVoidDest, SyncOptions::Sync,
+               argGroup(env, inst).typedValue(0).typedValue(1));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(GtStr);
@@ -285,8 +295,6 @@ IMPL_OPCODE_CALL(GteRes);
 IMPL_OPCODE_CALL(LtRes);
 IMPL_OPCODE_CALL(LteRes);
 IMPL_OPCODE_CALL(CmpRes);
-
-IMPL_OPCODE_CALL(RaiseBadComparisonViolation);
 
 #define CMP_DATA_OPS        \
   CDO(Obj,  Same,   CC_E)   \

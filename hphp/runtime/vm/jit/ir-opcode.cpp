@@ -275,6 +275,10 @@ bool opcodeMayRaise(Opcode opc) {
            RuntimeOption::EvalIsExprEnableUnresolvedWarning ||
            RuntimeOption::EvalIsVecNotices;
 
+  case EqStr:
+  case NeqStr:
+    return (bool)RuntimeOption::EvalNoticeOnCoerceForEq;
+
   case AddNewElemKeyset:
   case AFWHPrepareChild:
   case AKExistsObj:
@@ -342,6 +346,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ElemX:
   case EqArrLike:
   case EqObj:
+  case EqStrInt:
   case GetMemoKey:
   case GtArrLike:
   case GteArrLike:
@@ -398,6 +403,7 @@ bool opcodeMayRaise(Opcode opc) {
   case NativeImpl:
   case NeqArrLike:
   case NeqObj:
+  case NeqStrInt:
   case NewKeysetArray:
   case NewRecord:
   case OODeclExists:
@@ -641,8 +647,6 @@ bool opcodeMayRaise(Opcode opc) {
   case EqPtrIter:
   case EqRecDesc:
   case EqRes:
-  case EqStr:
-  case EqStrInt:
   case EqStrPtr:
   case ExtendsClass:
   case FinishMemberOp:
@@ -848,8 +852,6 @@ bool opcodeMayRaise(Opcode opc) {
   case NeqDbl:
   case NeqInt:
   case NeqRes:
-  case NeqStr:
-  case NeqStrInt:
   case NewClsMeth:
   case NewRClsMeth:
   case NewCol:

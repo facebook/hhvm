@@ -1,9 +1,15 @@
 ==
 
 !(null == false)
+
+Notice: Comparing bool and null using equality in %s/negations.php on line 77
 !(true == 0)
 !(99 == 99.0)
+
+Notice: Comparing float and int using equality in %s/negations.php on line 81
 !('99' == '99.0')
+
+Notice: Comparing float and int using equality in %s/negations.php on line 83
 !(empty string == NAN)
 !('0' == 'baz')
 !('0' == 42)
@@ -47,9 +53,15 @@ Notice: Object of class Closure$eq#5;%s could not be converted to int in %s/nega
 !=
 
 !(null != false)
+
+Notice: Comparing bool and null using equality in %s/negations.php on line 168
 !(true != 0)
 !(99 != 99.0)
+
+Notice: Comparing float and int using equality in %s/negations.php on line 172
 !('99' != '99.0')
+
+Notice: Comparing float and int using equality in %s/negations.php on line 174
 !(empty string != NAN)
 !('0' != 'baz')
 !('0' != 42)

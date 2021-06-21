@@ -2641,6 +2641,14 @@ struct ConvNoticeData : IRExtraData {
   bool noticeWithinNum = true;
 };
 
+struct BadComparisonData : IRExtraData {
+  explicit BadComparisonData(bool eqOp) : eq(eqOp)  {}
+  std::string show() const { return eq ? "For Eq" : "For Cmp"; }
+  size_t stableHash() const { return std::hash<bool>()(eq); }
+  bool equals(const BadComparisonData& o) const { return eq == o.eq; }
+  bool eq;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -2867,6 +2875,7 @@ X(ConvTVToInt,                  ConvNoticeData);
 X(ConvObjToInt,                 ConvNoticeData);
 X(CheckFuncNeedsCoverage,       FuncData);
 X(RecordFuncCall,               FuncData);
+X(RaiseBadComparisonViolation,  BadComparisonData);
 
 #undef X
 

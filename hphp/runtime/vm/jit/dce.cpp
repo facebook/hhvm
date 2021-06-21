@@ -100,8 +100,6 @@ bool canDCE(IRInstruction* inst) {
   case GteStr:
   case LtStr:
   case LteStr:
-  case EqStr:
-  case NeqStr:
   case SameStr:
   case NSameStr:
   case CmpStr:
@@ -712,6 +710,8 @@ bool canDCE(IRInstruction* inst) {
     return false;
 
   case IsTypeStruct:
+  case EqStr:
+  case NeqStr:
     return !opcodeMayRaise(inst->op());
 
   case EqArrLike:

@@ -55,18 +55,23 @@ template<class Op> constexpr bool isEqualityOp();
 
 template<class Op>
 void handleConvNotice(const std::string& lhs, const std::string& rhs) {
-  if constexpr (!isEqualityOp<Op>()) handleConvNoticeForCmp(lhs.c_str(), rhs.c_str());
+  if constexpr (isEqualityOp<Op>()) {
+    handleConvNoticeForEq(lhs.c_str(), rhs.c_str());
+  } else {
+    handleConvNoticeForCmp(lhs.c_str(), rhs.c_str());
+  }
 }
 
-template<class Op>
-bool shouldMaybeTriggerConvNotice(DataType d1, DataType d2) {
+template<class Op> bool shouldMaybeTriggerConvNotice(
+    DataType d1, DataType d2, typename Op::RetType res) {
   if (equivDataTypes(d1, d2)) return false;
   if (RO::EvalIsCompatibleClsMethType &&
      ((d1 == KindOfClsMeth && equivDataTypes(d2, KindOfVec)) ||
       (equivDataTypes(d1, KindOfVec) && d2 == KindOfClsMeth))) {
    return false;
   }
-  if constexpr (isEqualityOp<Op>()) return true;
+  // if eq op, only notice if the comparison was true
+  if constexpr (isEqualityOp<Op>()) return res;
   // only applies to comparison ops
   if ((d1 == KindOfInt64  && d2 == KindOfDouble) ||
       (d1 == KindOfDouble && d2 == KindOfInt64)) return false;
@@ -879,7 +884,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
     not_reached();
   }();
   // put it after in case the original comparison throws
-  if (shouldMaybeTriggerConvNotice<Op>(c1.m_type, c2.m_type)) {
+  if (shouldMaybeTriggerConvNotice<Op>(c1.m_type, c2.m_type, res)) {
     handleConvNotice<Op>(
       describe_actual_type(&c1), describe_actual_type(&c2));
   }
@@ -914,13 +919,9 @@ struct Eq {
     return sd1->equal(sd2);
   }
   bool operator()(const ArrayData* ad, bool val) const {
-    // @dizzy note to self, when dealign with eq notices, trigger a notice here
-    // and ensure we handle the null case with correct message
     return !ad->empty() == val;
   }
   bool operator()(bool val, const ArrayData* ad) const {
-    // @dizzy note to self, when dealign with eq notices, trigger a notice here
-    // and ensure we handle the null case with correct message
     return val == !ad->empty();
   }
 
@@ -1386,7 +1387,7 @@ typename Op::RetType tvRelOp(TypedValue cell, T val) {
   else res = tvRelOp(Op(), cell, val);
 
   // put it after in case the original comparison throws
-  if (shouldMaybeTriggerConvNotice<Op>(cell.m_type, DT)) {
+  if (shouldMaybeTriggerConvNotice<Op>(cell.m_type, DT, res)) {
     const char* rhs = [&]() {
       switch(DT) {
         case DataType::Boolean:  return "bool";

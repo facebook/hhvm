@@ -573,7 +573,7 @@ private:
 #endif
 
   void releaseProxy();
-  int numericCompare(const StringData *v2) const;
+  int numericCompare(const StringData *v2, bool eq) const;
   StringData* escalate(size_t cap);
   void enlist();
   void delist();

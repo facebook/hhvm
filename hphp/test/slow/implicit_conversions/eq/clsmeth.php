@@ -25,7 +25,7 @@ function main(): void {
   $arr2 = varray[99, 'foo'];
   $arr3 = varray['Bar'];
   $arr4 = varray['Bar', 'foo'];
-  $arr5 = varray['Bar', 42];
+  $arr5 = varray['Bar', 0];
 
   $try = ($a, $b, $num) ==> {
     try {

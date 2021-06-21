@@ -1184,23 +1184,46 @@ void handleConvNoticeLevel(
     folly::sformat("Implicit {} to {} conversion for {}", from, to, reason));
 }
 
-void handleConvNoticeForCmp(const char* lhs, const char* rhs) {
-  const auto level =
-    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForCmp);
-  if (LIKELY(level == ConvNoticeLevel::None)) return;
-  if (strcmp(lhs, rhs) > 0) std::swap(lhs, rhs);
-  handleConvNoticeLevelImpl(
-    level,
-    folly::sformat("Comparing {} and {} using a relational operator", lhs, rhs));
+namespace {
+void handleConvNoticeForCmpOrEq(
+  int runtime_option,
+  const char* const format,
+  const char* lhs,
+  const char* rhs);
 }
 
 void handleConvNoticeForCmp(TypedValue lhs, TypedValue rhs) {
   handleConvNoticeForCmp(
-    describe_actual_type(&lhs).c_str(),
-    describe_actual_type(&rhs).c_str());
+    describe_actual_type(&lhs).c_str(), describe_actual_type(&rhs).c_str());
+}
+void handleConvNoticeForCmp(const char* lhs, const char* rhs) {
+  handleConvNoticeForCmpOrEq(
+    RuntimeOption::EvalNoticeOnCoerceForCmp, lhs, rhs, "a relational operator");
+}
+
+void handleConvNoticeForEq(TypedValue lhs, TypedValue rhs) {
+  handleConvNoticeForEq(
+    describe_actual_type(&lhs).c_str(), describe_actual_type(&rhs).c_str());
+}
+void handleConvNoticeForEq(const char* lhs, const char* rhs) {
+  handleConvNoticeForCmpOrEq(
+    RuntimeOption::EvalNoticeOnCoerceForEq, lhs, rhs, "equality");
 }
 
 namespace {
+
+void handleConvNoticeForCmpOrEq(
+  int runtime_option,
+  const char* lhs,
+  const char* rhs,
+  const char* const with) {
+  const auto level = flagToConvNoticeLevel(runtime_option);
+  if (LIKELY(level == ConvNoticeLevel::None)) return;
+  if (strcmp(lhs, rhs) > 0) std::swap(lhs, rhs);
+  handleConvNoticeLevelImpl(
+    level, folly::sformat("Comparing {} and {} using {}", lhs, rhs, with));
+}
+
 void handleConvNoticeLevelImpl(ConvNoticeLevel level, const std::string& str) {
   if (level == ConvNoticeLevel::Throw) {
     SystemLib::throwInvalidOperationExceptionObject(str);

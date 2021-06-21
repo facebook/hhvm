@@ -934,7 +934,7 @@ bool StringData::equal(const StringData *s) const {
   int ret;
 
   if (!(m_hash < 0 || s->m_hash < 0)) {
-    ret = numericCompare(s);
+    ret = numericCompare(s, true);
     if (ret >= -1) {
       return ret == 0;
     }
@@ -942,7 +942,7 @@ bool StringData::equal(const StringData *s) const {
   return same(s);
 }
 
-int StringData::numericCompare(const StringData *v2) const {
+int StringData::numericCompare(const StringData *v2, bool eq) const {
   assertx(v2);
 
   int oflow1, oflow2;
@@ -968,6 +968,7 @@ int StringData::numericCompare(const StringData *v2) const {
     if (dval1 == dval2) return 0;
     return -1;
   }
+
   if (ret1 == KindOfDouble) {
     assertx(ret2 == KindOfInt64);
     if (oflow1) {
@@ -984,7 +985,10 @@ int StringData::numericCompare(const StringData *v2) const {
   }
 
   if (dval1 > dval2) return 1;
-  if (dval1 == dval2) return 0;
+  if (dval1 == dval2) {
+    if (eq) handleConvNoticeForEq("int", "float");
+    return 0;
+  }
   return -1;
 }
 
@@ -993,7 +997,7 @@ int StringData::compare(const StringData *v2) const {
 
   if (v2 == this) return 0;
 
-  int ret = numericCompare(v2);
+  int ret = numericCompare(v2, false);
   if (ret < -1) {
     int len1 = size();
     int len2 = v2->size();

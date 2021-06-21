@@ -50,10 +50,10 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
     | (Some _, None) -> "?? diagnostics subscription but no client ??"
     | (None, Some _) -> "?? client but no diagnostics subscription ??"
     | (Some sub, Some client) ->
-      let (is_truncated, count) =
+      let (_is_truncated, count) =
         Diagnostic_subscription.get_pushed_error_length sub
       in
-      let (_sub, errors) =
+      let (_sub, errors, is_truncated) =
         Diagnostic_subscription.pop_errors sub ~global_errors:env.errorl
       in
       Printf.sprintf

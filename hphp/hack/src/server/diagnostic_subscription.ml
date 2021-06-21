@@ -132,7 +132,7 @@ let of_id ?error_limit ~initial_errors id =
     subscription used to choose which errors from global error list to push. *)
 let pop_errors ds ~global_errors =
   if not ds.has_new_errors then
-    (ds, SMap.empty)
+    (ds, SMap.empty, false)
   else
     let new_pushed_errors =
       RP.Set.fold
@@ -167,7 +167,8 @@ let pop_errors ds ~global_errors =
             ~data:(List.map el ~f:Errors.to_absolute))
     in
     ( { ds with pushed_errors = new_pushed_errors; has_new_errors = false },
-      errors_to_send )
+      errors_to_send,
+      ds.is_truncated )
 
 let get_pushed_error_length ds =
   let length =

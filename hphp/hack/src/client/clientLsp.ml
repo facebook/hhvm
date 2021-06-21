@@ -3391,7 +3391,8 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
     our client currently has non-empty diagnostic reports. *)
 let do_diagnostics
     (uris_with_diagnostics : UriSet.t)
-    (file_reports : Errors.finalized_error list SMap.t) : UriSet.t =
+    (file_reports : Errors.finalized_error list SMap.t)
+    ~(is_truncated : bool) : UriSet.t =
   (* Hack sometimes reports a diagnostic on an empty file when it can't
      figure out which file to report. In this case we'll report on the root.
      Nuclide and VSCode both display this fine, though they obviously don't
@@ -3409,6 +3410,10 @@ let do_diagnostics
     notify_jsonrpc ~powered_by:Hh_server notification
   in
   SMap.iter per_file file_reports;
+  if is_truncated then
+    Lsp_helpers.showMessage_warning
+      to_stdout
+      "Found a very large number of problems. Showing only a limited number.";
 
   let is_error_free _uri errors = List.is_empty errors in
   (* reports_without/reports_with are maps of filename->ErrorList. *)
@@ -4554,9 +4559,11 @@ let handle_server_message
       state := do_server_busy !state status;
       Lwt.return_unit
     (* textDocument/publishDiagnostics notification *)
-    | (Main_loop menv, { push = ServerCommandTypes.DIAGNOSTIC errors; _ }) ->
+    | ( Main_loop menv,
+        { push = ServerCommandTypes.DIAGNOSTIC { errors; is_truncated }; _ } )
+      ->
       let uris_with_diagnostics =
-        do_diagnostics menv.uris_with_diagnostics errors
+        do_diagnostics menv.uris_with_diagnostics errors ~is_truncated
       in
       state := Main_loop { menv with uris_with_diagnostics };
       Lwt.return_unit

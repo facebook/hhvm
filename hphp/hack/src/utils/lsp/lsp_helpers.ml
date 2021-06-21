@@ -333,5 +333,11 @@ let showMessage
   let notification = ShowMessageNotification params in
   notification |> print_lsp_notification |> writer
 
+let showMessage_info (writer : Jsonrpc.writer) =
+  showMessage writer MessageType.InfoMessage
+
+let showMessage_warning (writer : Jsonrpc.writer) =
+  showMessage writer MessageType.WarningMessage
+
 let showMessage_error (writer : Jsonrpc.writer) =
   showMessage writer MessageType.ErrorMessage

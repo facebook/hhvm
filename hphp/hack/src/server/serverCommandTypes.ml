@@ -467,7 +467,12 @@ and streamed =
   | LIST_MODES
 
 type push =
-  | DIAGNOSTIC of (Errors.finalized_error list SMap.t[@opaque])
+  | DIAGNOSTIC of {
+      errors: Errors.finalized_error list SMap.t; [@opaque]
+      is_truncated: bool;
+          (** Whether the list of errors has been truncated
+              to preserve IDE perf. *)
+    }
   | BUSY_STATUS of busy_status
   | NEW_CLIENT_CONNECTED
   | FATAL_EXCEPTION of (Marshal_tools.remote_exception_data[@opaque])

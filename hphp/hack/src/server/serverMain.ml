@@ -789,11 +789,11 @@ let serve_one_iteration genv env client_provider =
       else if has_pending_disk_changes genv then
         (env, "has_pending_disk_changes")
       else
-        let (sub, errors) =
+        let (sub, errors, is_truncated) =
           Diagnostic_subscription.pop_errors sub ~global_errors:env.errorl
         in
         let env = { env with diag_subscribe = Some sub } in
-        let res = ServerCommandTypes.DIAGNOSTIC errors in
+        let res = ServerCommandTypes.DIAGNOSTIC { errors; is_truncated } in
         if SMap.is_empty errors then
           (env, "is_empty errors")
         else begin

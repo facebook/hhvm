@@ -66,7 +66,7 @@ let test_update () =
   in
   let ds = Diagnostic_subscription.of_id 1 ~initial_errors:Errors.empty in
   let priority_files = Relative_path.Set.empty in
-  let (ds, diagnostics) =
+  let (ds, diagnostics, _is_truncated) =
     Diagnostic_subscription.update
       ds
       ~priority_files
@@ -82,7 +82,7 @@ let test_update () =
     (diagnostics_to_string diagnostics)
     "foo error in A should be pushed";
 
-  let (ds, diagnostics) =
+  let (ds, diagnostics, _is_truncated) =
     Diagnostic_subscription.update
       ds
       ~priority_files
@@ -98,7 +98,7 @@ let test_update () =
   let expected =
     "/A:\nFile \"/A\", line 0, characters 0-0:\nbar (Parsing[1002])\n\n"
   in
-  let (ds, diagnostics) =
+  let (ds, diagnostics, _is_truncated) =
     Diagnostic_subscription.update
       ds
       ~priority_files
@@ -115,7 +115,7 @@ let test_update () =
   let expected =
     "/B:\nFile \"/B\", line 0, characters 0-0:\nbaz (Parsing[1002])\n\n"
   in
-  let (ds, diagnostics) =
+  let (ds, diagnostics, _is_truncated) =
     Diagnostic_subscription.update
       ds
       ~priority_files
@@ -128,7 +128,7 @@ let test_update () =
     (diagnostics_to_string diagnostics)
     "baz error in B should be added";
 
-  let (ds, diagnostics) =
+  let (ds, diagnostics, _is_truncated) =
     Diagnostic_subscription.update
       ds
       ~priority_files

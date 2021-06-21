@@ -35,8 +35,9 @@ val update :
     for performance reason *)
 val diagnosed_files : t -> Relative_path.Set.t
 
-(** Pop errors ready for sending to client *)
+(** Pop errors ready for sending to client.
+    The boolean returned indicates whether the list of errors has been truncated. *)
 val pop_errors :
-  t -> global_errors:Errors.t -> t * Errors.finalized_error list SMap.t
+  t -> global_errors:Errors.t -> t * Errors.finalized_error list SMap.t * bool
 
 val get_pushed_error_length : t -> bool * int

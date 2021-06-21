@@ -6,7 +6,7 @@ Class `F` does not correctly implement all required members  (Typing[4340])
   The method `getValues` is not compatible with the overridden method
   File "BuiltinEnum.hhi", line 33, characters 43-44:
   Expected a function that requires the capability set {}
-  File "BuiltinEnum.hhi", line 107, characters 43-55:
+  File "BuiltinEnum.hhi", line 107, characters 44-54:
   But got a function that requires the capability WriteProperty
 File "typing.extends5.bad.php", line 25, characters 12-12:
 Class `F` does not correctly implement all required members  (Typing[4340])

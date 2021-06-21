@@ -1,6 +1,6 @@
 File "intershape.php", line 29, characters 18-44:
-Invalid argument (Typing[4057])
-File "intershape.php", line 6, characters 13-14:
-The field `b` is missing
-File "intershape.php", line 29, characters 18-44:
-The field `b` is defined
+Invalid argument (Typing[4110])
+  File "intershape.php", line 8, characters 20-22:
+  Expected `nothing`
+  File "intershape.php", line 29, characters 18-44:
+  But got `shape('a' => int, 'b' => string)`

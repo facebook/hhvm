@@ -2,7 +2,7 @@ File "closures_restore_env.php", line 21, characters 3-10:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_restore_env.php", line 17, characters 22-23:
   From this declaration, the context of this function body provides the capability set {}
-  File "closures_restore_env.php", line 3, characters 18-30:
+  File "closures_restore_env.php", line 3, characters 19-29:
   But the function being called requires the capability WriteProperty
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

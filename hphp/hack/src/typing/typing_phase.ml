@@ -234,10 +234,12 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     (env, mk (r, Ttuple tyl))
   | Tunion tyl ->
     let (env, tyl) = List.map_env env tyl ~f:(localize ~ety_env) in
-    (env, mk (r, Tunion tyl))
+    let (env, ty) = Typing_union.union_list env r tyl in
+    (env, ty)
   | Tintersection tyl ->
     let (env, tyl) = List.map_env env tyl ~f:(localize ~ety_env) in
-    (env, mk (r, Tintersection tyl))
+    let (env, ty) = Typing_intersection.intersect_list env r tyl in
+    (env, ty)
   | Taccess (root_ty, id) ->
     (* Sometimes, Tthis and Tgeneric are not expanded to Tabstract, so we need
     to allow accessing abstract type constants here. *)

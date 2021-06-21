@@ -2,5 +2,5 @@ File "pretty_subtyping.php", line 6, characters 10-11:
 Invalid return type (Typing[4403])
   File "pretty_subtyping.php", line 5, characters 16-17:
   Expected a function that requires the capability set {}
-  File "pretty_subtyping.php", line 4, characters 15-27:
+  File "pretty_subtyping.php", line 4, characters 16-26:
   But got a function that requires the capability WriteProperty

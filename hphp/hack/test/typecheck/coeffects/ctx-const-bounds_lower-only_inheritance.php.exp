@@ -4,17 +4,17 @@ File "ctx-const-bounds_lower-only_inheritance.php", line 14, characters 13-13:
 Unable to satisfy constraint on this type constant (Typing[4110])
   File "ctx-const-bounds_lower-only_inheritance.php", line 14, characters 32-39:
   Expected `the default capability set {AccessGlobals, Output, WriteProperty}`
-  File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 30-36:
+  File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 31-35:
   But got `the capability set {Rx, WriteProperty}`
 File "ctx-const-bounds_lower-only_inheritance.php", line 18, characters 13-13:
 Unable to satisfy constraint on this type constant (Typing[4110])
   File "ctx-const-bounds_lower-only_inheritance.php", line 18, characters 18-25:
   Expected `the default capability set {AccessGlobals, Output, WriteProperty}`
-  File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 30-36:
+  File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 31-35:
   But got `the capability set {Rx, WriteProperty}`
 File "ctx-const-bounds_lower-only_inheritance.php", line 27, characters 22-22:
 The constraint on this type constant is inconsistent with its parent (Typing[4110])
   File "ctx-const-bounds_lower-only_inheritance.php", line 27, characters 31-38:
   Expected `the default capability set {AccessGlobals, Output, WriteProperty}`
-  File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 30-36:
+  File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 31-35:
   But got `the capability set {Rx, WriteProperty}`

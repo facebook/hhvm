@@ -10,13 +10,12 @@
         f_name = ([3:10-42], "\\assign_array_append_intersection"); f_tparams = []; 
         f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([3:58-60], (int & string)); param_type_hint = (((int & string)), (Some ([3:43-57], (Hintersection [([3:44-47], (Hprim Tint)); ([3:50-56], (Hprim Tstring))]))));
+        [{ param_annotation = ([3:58-60], nothing); param_type_hint = ((nothing), (Some ([3:43-57], (Hintersection [([3:44-47], (Hprim Tint)); ([3:50-56], (Hprim Tstring))]))));
            param_is_variadic = false; param_pos = [3:58-60]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None };
-          { param_annotation = ([3:84-87], Vector<(int & float)>);
-            param_type_hint =
-            ((Vector<(int & float)>), (Some ([3:62-83], (Happly (([3:62-68], "\\HH\\Vector"), [([3:69-82], (Hintersection [([3:70-73], (Hprim Tint)); ([3:76-81], (Hprim Tfloat))]))])))));
+          { param_annotation = ([3:84-87], Vector<nothing>);
+            param_type_hint = ((Vector<nothing>), (Some ([3:62-83], (Happly (([3:62-68], "\\HH\\Vector"), [([3:69-82], (Hintersection [([3:70-73], (Hprim Tint)); ([3:76-81], (Hprim Tfloat))]))])))));
             param_is_variadic = false; param_pos = [3:84-87]; param_name = "$xs"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -26,9 +25,7 @@
         { fb_ast =
           [([5:3-14],
             (Expr
-               (([5:3-13], (int & string)),
-                (Binop ((Eq None), (([5:3-8], (int & string)), (Array_get ((([5:3-6], Vector<(int & float)>), (Lvar ([5:3-6], $xs))), None))),
-                   (([5:11-13], (int & string)), (Hole ((([5:11-13], (int & string)), (Lvar ([5:11-13], $x))), ((int & string)), ((int & float)), Typing))))))))
+               (([5:3-13], nothing), (Binop ((Eq None), (([5:3-8], nothing), (Array_get ((([5:3-6], Vector<nothing>), (Lvar ([5:3-6], $xs))), None))), (([5:11-13], nothing), (Lvar ([5:11-13], $x))))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

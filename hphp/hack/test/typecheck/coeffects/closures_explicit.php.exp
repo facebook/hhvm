@@ -10,13 +10,13 @@ File "closures_explicit.php", line 11, characters 5-16:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 9, characters 24-25:
   From this declaration, the context of this function body provides the capability set {}
-  File "closures_explicit.php", line 4, characters 22-28:
+  File "closures_explicit.php", line 4, characters 23-27:
   But the function being called requires the capability set {Rx, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "closures_explicit.php", line 17, characters 5-22:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "closures_explicit.php", line 14, characters 27-33:
+  File "closures_explicit.php", line 14, characters 28-32:
   From this declaration, the context of this function body provides the capability set {Rx, WriteProperty}
   File "closures_explicit.php", line 5, characters 24-41:
   But the function being called requires the capability set {Rx, Unrelated, WriteProperty}
@@ -24,17 +24,17 @@ This call is not allowed because its coeffects are incompatible with the context
   Hack provides a list of supported contexts here
 File "closures_explicit.php", line 23, characters 17-35:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "closures_explicit.php", line 23, characters 5-11:
+  File "closures_explicit.php", line 23, characters 6-10:
   From this declaration, the context of this function body provides the capability set {Rx, WriteProperty}
-  File "closures_explicit.php", line 21, characters 29-39:
+  File "closures_explicit.php", line 21, characters 30-38:
   But the function being called requires the capability Unrelated
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "closures_explicit.php", line 36, characters 7-18:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "closures_explicit.php", line 33, characters 21-27:
+  File "closures_explicit.php", line 33, characters 22-26:
   From this declaration, the context of this function body provides the capability set {Rx, WriteProperty}
-  File "closures_explicit.php", line 29, characters 18-28:
+  File "closures_explicit.php", line 29, characters 19-27:
   But the function being called requires the capability Unrelated
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
@@ -42,7 +42,7 @@ File "closures_explicit.php", line 39, characters 7-18:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 38, characters 7-8:
   From this declaration, the context of this function body provides the capability set {}
-  File "closures_explicit.php", line 27, characters 18-24:
+  File "closures_explicit.php", line 27, characters 19-23:
   But the function being called requires the capability set {Rx, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
@@ -50,7 +50,7 @@ File "closures_explicit.php", line 40, characters 7-19:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 38, characters 7-8:
   From this declaration, the context of this function body provides the capability set {}
-  File "closures_explicit.php", line 33, characters 21-27:
+  File "closures_explicit.php", line 33, characters 22-26:
   But the function being called requires the capability set {Rx, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
@@ -58,7 +58,7 @@ File "closures_explicit.php", line 45, characters 7-18:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "closures_explicit.php", line 38, characters 7-8:
   From this declaration, the context of this function body provides the capability set {}
-  File "closures_explicit.php", line 29, characters 18-28:
+  File "closures_explicit.php", line 29, characters 19-27:
   But the function being called requires the capability Unrelated
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

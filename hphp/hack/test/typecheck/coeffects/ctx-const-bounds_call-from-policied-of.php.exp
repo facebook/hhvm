@@ -1,16 +1,16 @@
 File "ctx-const-bounds_call-from-policied-of.php", line 18, characters 3-9:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "ctx-const-bounds_call-from-policied-of.php", line 17, characters 30-39:
+  File "ctx-const-bounds_call-from-policied-of.php", line 17, characters 31-38:
   From this declaration, the context of this function body provides the capability set {IO, ImplicitPolicy, ReadGlobals, WriteProperty}
-  File "ctx-const-bounds_call-from-policied-of.php", line 10, characters 22-30:
+  File "ctx-const-bounds_call-from-policied-of.php", line 10, characters 29-29:
   But the function being called requires the capability <expr#1>::C
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "ctx-const-bounds_call-from-policied-of.php", line 22, characters 3-9:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "ctx-const-bounds_call-from-policied-of.php", line 21, characters 30-56:
+  File "ctx-const-bounds_call-from-policied-of.php", line 21, characters 31-55:
   From this declaration, the context of this function body provides the capability set {IO, ImplicitPolicyOf<MySubPolicy>, ReadGlobals, WriteProperty}
-  File "ctx-const-bounds_call-from-policied-of.php", line 10, characters 22-30:
+  File "ctx-const-bounds_call-from-policied-of.php", line 10, characters 29-29:
   But the function being called requires the capability <expr#1>::C
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

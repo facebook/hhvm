@@ -1,32 +1,32 @@
 File "cipp_ns.php", line 16, characters 5-21:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp_ns.php", line 15, characters 17-26:
+  File "cipp_ns.php", line 15, characters 18-25:
   From this declaration, the context of this function body provides the capability set {IO, ImplicitPolicy, ReadGlobals, WriteProperty}
-  File "cipp_ns.php", line 9, characters 29-44:
+  File "cipp_ns.php", line 9, characters 30-43:
   But the function being called requires the capability set {IO, ImplicitPolicyOf<A>, ReadGlobals, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp_ns.php", line 17, characters 5-21:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp_ns.php", line 15, characters 17-26:
+  File "cipp_ns.php", line 15, characters 18-25:
   From this declaration, the context of this function body provides the capability set {IO, ImplicitPolicy, ReadGlobals, WriteProperty}
-  File "cipp_ns.php", line 10, characters 29-45:
+  File "cipp_ns.php", line 10, characters 30-44:
   But the function being called requires the capability set {IO, ImplicitPolicyOf<A>, ReadGlobals, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp_ns.php", line 18, characters 5-20:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp_ns.php", line 15, characters 17-26:
+  File "cipp_ns.php", line 15, characters 18-25:
   From this declaration, the context of this function body provides the capability set {IO, ImplicitPolicy, ReadGlobals, WriteProperty}
-  File "cipp_ns.php", line 12, characters 28-47:
+  File "cipp_ns.php", line 12, characters 29-46:
   But the function being called requires the capability set {IO, ImplicitPolicyOf<mixed>, ReadGlobals, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp_ns.php", line 19, characters 5-22:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
-  File "cipp_ns.php", line 15, characters 17-26:
+  File "cipp_ns.php", line 15, characters 18-25:
   From this declaration, the context of this function body provides the capability set {IO, ImplicitPolicy, ReadGlobals, WriteProperty}
-  File "cipp_ns.php", line 13, characters 30-51:
+  File "cipp_ns.php", line 13, characters 31-50:
   But the function being called requires the capability set {IO, ImplicitPolicyOf<nothing>, ReadGlobals, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

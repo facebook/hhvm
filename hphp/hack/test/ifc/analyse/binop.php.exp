@@ -2,18 +2,16 @@
 Analyzing \add:
 * pc: pc
 * This: None
-* Return: (<ret> | <ret'1>)
+* Return: <ret>
 * Exception: \Exception<exn, exn_lump>
 * Params:
-  { $x -> (<$x> | <$x'1>); $y -> <$y> }
+  { $x -> <$x>; $y -> <$y> }
 * Final environment:
   Deps: {}
   Constraints:
-    [8:3-18]
-      $x < $x'2, $x'1 < $x'2, $x'2 < arith, $x'3 < arith, $y < arith,
-      arith < ret
+    [8:3-18] $x < arith, $y < arith, arith < ret
   Locals:
-    { $x -> (<$x'2> | <$x'3>); $y -> <$y> }
+    { $x -> <$x>; $y -> <$y> }
 
 Analyzing \qq:
 * pc: pc

@@ -59,8 +59,6 @@ let log_inference_constraints = GlobalOptions.tco_log_inference_constraints
 
 let default = GlobalOptions.default
 
-let experimental_isarray = GlobalOptions.tco_experimental_isarray
-
 let experimental_generics_arity = GlobalOptions.tco_experimental_generics_arity
 
 let experimental_forbid_nullable_cast =

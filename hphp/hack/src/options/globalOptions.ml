@@ -135,8 +135,6 @@ type t = {
 }
 [@@deriving eq, show]
 
-let tco_experimental_isarray = "is_array"
-
 (**
  * Insist on instantiations for all generic types, even in non-strict files
  *)
@@ -185,7 +183,6 @@ let tco_experimental_all =
   |> List.fold_right
        SSet.add
        [
-         tco_experimental_isarray;
          tco_experimental_generics_arity;
          tco_experimental_forbid_nullable_cast;
          tco_experimental_disallow_static_memoized;

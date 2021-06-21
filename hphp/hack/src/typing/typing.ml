@@ -1460,18 +1460,8 @@ and safely_refine_is_array env ty p pred_name arg_expr =
         TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
       in
       let array_ty =
-        let safe_isarray_enabled =
-          TypecheckerOptions.experimental_feature_enabled
-            (Env.get_tcopt env)
-            TypecheckerOptions.experimental_isarray
-        in
         let tk = MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r)) in
-        let tv =
-          if safe_isarray_enabled then
-            tfresh
-          else
-            mk (r, TUtils.tany env)
-        in
+        let tv = tfresh in
         MakeType.varray_or_darray ~unification r tk tv
       in
       (* This is the refined type of e inside the branch *)

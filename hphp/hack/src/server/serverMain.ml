@@ -793,8 +793,7 @@ let serve_one_iteration genv env client_provider =
           Diagnostic_subscription.pop_errors sub ~global_errors:env.errorl
         in
         let env = { env with diag_subscribe = Some sub } in
-        let id = Diagnostic_subscription.get_id sub in
-        let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
+        let res = ServerCommandTypes.DIAGNOSTIC errors in
         if SMap.is_empty errors then
           (env, "is_empty errors")
         else begin

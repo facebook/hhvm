@@ -4554,8 +4554,7 @@ let handle_server_message
       state := do_server_busy !state status;
       Lwt.return_unit
     (* textDocument/publishDiagnostics notification *)
-    | (Main_loop menv, { push = ServerCommandTypes.DIAGNOSTIC (_, errors); _ })
-      ->
+    | (Main_loop menv, { push = ServerCommandTypes.DIAGNOSTIC errors; _ }) ->
       let uris_with_diagnostics =
         do_diagnostics menv.uris_with_diagnostics errors
       in

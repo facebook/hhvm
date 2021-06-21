@@ -707,7 +707,7 @@ let errors_to_string x =
 let get_diagnostics loop_output =
   let diags =
     List.filter_map loop_output.push_messages ~f:(function
-        | DIAGNOSTIC (_, m) -> Some m
+        | DIAGNOSTIC m -> Some m
         | _ -> None)
   in
   match diags with

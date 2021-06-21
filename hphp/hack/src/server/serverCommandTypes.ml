@@ -467,7 +467,7 @@ and streamed =
   | LIST_MODES
 
 type push =
-  | DIAGNOSTIC of int * (Errors.finalized_error list SMap.t[@opaque])
+  | DIAGNOSTIC of (Errors.finalized_error list SMap.t[@opaque])
   | BUSY_STATUS of busy_status
   | NEW_CLIENT_CONNECTED
   | FATAL_EXCEPTION of (Marshal_tools.remote_exception_data[@opaque])

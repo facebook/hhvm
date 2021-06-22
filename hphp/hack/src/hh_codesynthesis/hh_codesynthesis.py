@@ -192,7 +192,23 @@ def main() -> int:
     parser.add_argument("--input_file", type=os.path.abspath)
     parser.add_argument("--target_lang", type=str)
     parser.add_argument("--output_file", type=os.path.abspath)
+    parser.add_argument("--n", type=int)
+    parser.add_argument("--avg_width", type=int)
+    parser.add_argument("--min_depth", type=int)
+    parser.add_argument("--min_classes", type=int)
+    parser.add_argument("--min_interfaces", type=int)
+    parser.add_argument("--lower_bound", type=int)
+    parser.add_argument("--higher_bound", type=int)
     args: argparse.Namespace = parser.parse_args()
+
+    # Set graph generating parameters. (If any)
+    ClingoContext.number_of_nodes = args.n or 0
+    ClingoContext.avg_width = args.avg_width or 0
+    ClingoContext.min_depth = args.min_depth or 1
+    ClingoContext.min_classes = args.min_classes or 1
+    ClingoContext.min_interfaces = args.min_interfaces or 1
+    ClingoContext.lower_bound = args.lower_bound or 1
+    ClingoContext.higher_bound = args.higher_bound or 1
 
     # Load dependency graph.
     lines = read_from_file_or_stdin(filename=args.input_file)
@@ -206,7 +222,9 @@ def main() -> int:
     # Output target language.
     generator = generators.get(args.target_lang, CodeGenerator)()
 
-    do_reasoning(extract_logic_rules(graph), generator)
+    combined_rules = generate_logic_rules() + extract_logic_rules(graph)
+
+    do_reasoning(combined_rules, generator)
     return output_to_file_or_stdout(generator=generator, filename=args.output_file)
 
 

@@ -95,14 +95,14 @@ def cross_verify(args: argparse.Namespace, file_name: str) -> bool:
         cmd = [
             args.synthesis,
             "--target_lang=hack",
-            f"--output_file={tmp_file_name}.out",
+            f"--output_file={tmp_file_name}",
         ]
         invoke_sub_process(cmd, dep_graph)
 
         # 3. Invoke hh_simple_type_checker on
         cmd = [
             args.typechecker,
-            f"{tmp_file_name}.out",
+            f"{tmp_file_name}",
             "--dump-deps",
             "--no-builtins",
         ]
@@ -117,6 +117,30 @@ def cross_verify(args: argparse.Namespace, file_name: str) -> bool:
     return original_extends_edges == generate_extends_edges
 
 
+# Cross verify the hh_codesynthesis binary produce the Hack code has identical
+# dependency graph as the sample parameters.
+def cross_verify_with_parameters(args: argparse.Namespace) -> bool:
+    with tempfile.NamedTemporaryFile(mode="w") as fp:
+        tmp_file_name = fp.name
+        # 0. Invoke hh_codesynthesis binary to produce a Hack code from parameters.
+        cmd = [
+            args.synthesis,
+            "--target_lang=hack",
+            "--n=12",
+            "--avg_width=3",
+            "--min_classes=3",
+            "--min_interfaces=4",
+            "--lower_bound=1",
+            "--higher_bound=5",
+            "--min_depth=0",
+            f"--output_file={tmp_file_name}",
+        ]
+        invoke_sub_process(cmd, "")
+
+        # 1. Reuse cross_verify using tmp_file_name as input.
+        return cross_verify(args, tmp_file_name)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("test_path", help="A file or a directory. ")
@@ -125,5 +149,9 @@ if __name__ == "__main__":
 
     args: argparse.Namespace = parser.parse_args()
 
+    # Cross verify synthesized from given raph.
     for file_name in glob.glob(args.test_path + "/*.php"):
         cross_verify(args, file_name)
+
+    # Cross verify synthesized from parameters.
+    cross_verify_with_parameters(args)

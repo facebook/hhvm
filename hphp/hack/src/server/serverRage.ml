@@ -64,7 +64,7 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
         (not (Relative_path.Set.is_empty env.ide_needs_parsing))
         (Errors.count env.errorl)
         count
-        is_truncated
+        (Option.is_some is_truncated)
         (errors |> SMap.keys |> String.concat ~sep:",")
   in
 

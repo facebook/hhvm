@@ -3392,7 +3392,7 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
 let do_diagnostics
     (uris_with_diagnostics : UriSet.t)
     (file_reports : Errors.finalized_error list SMap.t)
-    ~(is_truncated : bool) : UriSet.t =
+    ~(is_truncated : int option) : UriSet.t =
   (* Hack sometimes reports a diagnostic on an empty file when it can't
      figure out which file to report. In this case we'll report on the root.
      Nuclide and VSCode both display this fine, though they obviously don't
@@ -3410,10 +3410,13 @@ let do_diagnostics
     notify_jsonrpc ~powered_by:Hh_server notification
   in
   SMap.iter per_file file_reports;
-  if is_truncated then
-    Lsp_helpers.showMessage_warning
-      to_stdout
-      "Found a very large number of problems. Showing only a limited number.";
+  Option.iter is_truncated ~f:(fun total_error_count ->
+      let msg =
+        Printf.sprintf
+          "Hack produced %d errors in total. Showing only a limited number to preserve performance."
+          total_error_count
+      in
+      Lsp_helpers.showMessage_warning to_stdout msg);
 
   let is_error_free _uri errors = List.is_empty errors in
   (* reports_without/reports_with are maps of filename->ErrorList. *)

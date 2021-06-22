@@ -36,8 +36,12 @@ val update :
 val diagnosed_files : t -> Relative_path.Set.t
 
 (** Pop errors ready for sending to client.
-    The boolean returned indicates whether the list of errors has been truncated. *)
+    The option returned indicates whether the list of errors has been truncated:
+    we return [None] if the list has not been truncated, otherwise we return
+    [Some n] where n is the total number of errors. *)
 val pop_errors :
-  t -> global_errors:Errors.t -> t * Errors.finalized_error list SMap.t * bool
+  t ->
+  global_errors:Errors.t ->
+  t * Errors.finalized_error list SMap.t * int option
 
-val get_pushed_error_length : t -> bool * int
+val get_pushed_error_length : t -> int option * int

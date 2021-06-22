@@ -1905,15 +1905,13 @@ let type_check_unsafe genv env kind start_time profiling =
       |> Telemetry.object_ ~key:"core" ~value:core_telemetry
     in
     ( if is_full_check_done env.full_check_status then
-      let total = Errors.count env.ServerEnv.errorl in
       let (is_truncated, shown) =
         match env.ServerEnv.diag_subscribe with
-        | None -> (false, 0)
+        | None -> (None, 0)
         | Some ds -> Diagnostic_subscription.get_pushed_error_length ds
       in
-      let msg =
-        ServerCommandTypes.Done_global_typecheck { is_truncated; shown; total }
-      in
+      let total = Option.value is_truncated ~default:shown in
+      let msg = ServerCommandTypes.Done_global_typecheck { shown; total } in
       ServerBusyStatus.send env msg );
     let telemetry =
       telemetry

@@ -10,8 +10,6 @@ open Hh_prelude
 open Reordered_argument_collections
 module RP = Relative_path
 
-exception Reached_error_limit of RP.Set.t
-
 type errors = Errors.error list
 
 type id = int [@@deriving show]
@@ -34,8 +32,9 @@ type t = {
       (** Copy of errors most recently pushed to subscribers, used to avoid pushing
           no-op duplicates *)
   has_new_errors: bool;
-  is_truncated: bool;
-      (** Whether [diagnosed_files] contains all the files with errors. *)
+  is_truncated: int option;
+      (** [None] if [diagnosed_files] contains all the files with errors,
+          [Some n] with n the total number of errors otherwise *)
 }
 [@@deriving show]
 
@@ -87,27 +86,32 @@ let update
    * errors in global_errors, not only those that were just rechecked *)
   let (is_truncated, diagnosed_files) =
     if not full_check_done then
-      (false, diagnosed_files)
+      (None, diagnosed_files)
     else
-      try
-        let (diagnosed_files, _error_count) =
-          (* Add files to diagnosed_files until we've reached the error limit. *)
-          Errors.fold_per_file
-            global_errors
-            ~init:(diagnosed_files, error_count)
-            ~f:(fun file errors (diagnosed_files, error_count) ->
-              if error_count >= error_limit then
-                raise (Reached_error_limit diagnosed_files)
-              else if RP.Set.mem diagnosed_files file then
-                (diagnosed_files, error_count)
+      let (diagnosed_files, error_count, is_truncated) =
+        (* Add files to diagnosed_files until we've reached the error limit. *)
+        Errors.fold_per_file
+          global_errors
+          ~init:(diagnosed_files, error_count, false)
+          ~f:(fun file errors (diagnosed_files, error_count, is_truncated) ->
+            if RP.Set.mem diagnosed_files file then
+              (diagnosed_files, error_count, is_truncated)
+            else
+              let n = Errors.per_file_error_count errors in
+              let error_count = error_count + n in
+              if is_truncated || error_count > error_limit then
+                (diagnosed_files, error_count, true)
               else
                 let diagnosed_files = RP.Set.add diagnosed_files file in
-                let n = Errors.per_file_error_count errors in
-                let error_count = error_count + n in
-                (diagnosed_files, error_count))
-        in
-        (false, diagnosed_files)
-      with Reached_error_limit diagnosed_files -> (true, diagnosed_files)
+                (diagnosed_files, error_count, false))
+      in
+      let is_truncated =
+        if is_truncated then
+          Some error_count
+        else
+          None
+      in
+      (is_truncated, diagnosed_files)
   in
   { ds with diagnosed_files; has_new_errors = true; is_truncated }
 
@@ -119,7 +123,7 @@ let of_id ?error_limit ~initial_errors id =
       diagnosed_files = RP.Set.empty;
       pushed_errors = RP.Map.empty;
       has_new_errors = false;
-      is_truncated = false;
+      is_truncated = None;
     }
   in
   update
@@ -132,7 +136,7 @@ let of_id ?error_limit ~initial_errors id =
     subscription used to choose which errors from global error list to push. *)
 let pop_errors ds ~global_errors =
   if not ds.has_new_errors then
-    (ds, SMap.empty, false)
+    (ds, SMap.empty, None)
   else
     let new_pushed_errors =
       RP.Set.fold

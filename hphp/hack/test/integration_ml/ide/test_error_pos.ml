@@ -47,7 +47,9 @@ let assert_10_diagnostics loop_output =
       (Test.get_diagnostics loop_output)
       0
   in
-  if error_count <> 10 then Test.fail "Expected 10 push diagnostics"
+  if error_count <> 10 then
+    Test.fail
+    @@ Printf.sprintf "Expected 10 push diagnostics but got %d." error_count
 
 let bar_107_foo_line_3_diagnostics =
   {|

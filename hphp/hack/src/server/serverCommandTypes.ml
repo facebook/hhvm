@@ -469,7 +469,7 @@ and streamed =
 type push =
   | DIAGNOSTIC of {
       errors: Errors.finalized_error list SMap.t; [@opaque]
-      is_truncated: bool;
+      is_truncated: int option;
           (** Whether the list of errors has been truncated
               to preserve IDE perf. *)
     }
@@ -486,7 +486,6 @@ and busy_status =
   | Done_global_typecheck of {
       shown: int;  (** How many errors did we push in DIAGNOSTICS? *)
       total: int;  (** How many errors total were there? *)
-      is_truncated: bool;  (** Whether shown DIAGNOSTICS weren't all of them *)
     }
 
 and global_typecheck_kind =

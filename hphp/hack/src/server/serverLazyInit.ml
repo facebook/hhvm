@@ -769,6 +769,12 @@ let type_check_dirty
                   dirty_files_changed_hash)
              ~is_ide_file:(fun _ -> false)
     in
+    let files_to_check =
+      if genv.ServerEnv.local_config.ServerLocalConfig.re_worker then
+        []
+      else
+        files_to_check
+    in
     let init_telemetry =
       telemetry
       |> Telemetry.int_

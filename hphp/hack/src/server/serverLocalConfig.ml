@@ -444,6 +444,7 @@ type t = {
   trace_parsing: bool;
   prechecked_files: bool;
   enable_type_check_filter_files: bool;
+  re_worker: bool;
   (* whether clientLsp should use serverless-ide *)
   ide_serverless: bool;
   (* whether clientLsp should use ranked autocomplete *)
@@ -591,6 +592,7 @@ let default =
     trace_parsing = false;
     prechecked_files = false;
     enable_type_check_filter_files = false;
+    re_worker = false;
     ide_serverless = false;
     ide_ranked_autocomplete = false;
     ide_ffp_autocomplete = false;
@@ -919,6 +921,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let re_worker =
+    bool_if_min_version
+      "re_worker"
+      ~default:default.re_worker
+      ~current_version
+      config
+  in
   (* ide_serverless CANNOT use bool_if_min_version, since it's needed before we yet know root/version *)
   let ide_serverless =
     bool_ "ide_serverless" ~default:default.ide_serverless config
@@ -1214,6 +1223,7 @@ let load_ fn ~silent ~current_version overrides =
     trace_parsing;
     prechecked_files;
     enable_type_check_filter_files;
+    re_worker;
     ide_serverless;
     ide_ranked_autocomplete;
     ide_ffp_autocomplete;

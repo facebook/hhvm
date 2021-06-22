@@ -8,8 +8,6 @@
  *)
 
 type load_state_error =
-  (* an error reported by mk_state_future for downloading saved-state *)
-  | Load_state_loader_failure of State_loader.error
   (* an error reported when downloading saved-state through [Saved_state_loader] *)
   | Load_state_saved_state_loader_failure of Saved_state_loader.load_error
   (* an error fetching list of dirty files from hg *)
@@ -21,6 +19,14 @@ type load_state_error =
       exn: exn;
       stack: Utils.callstack;
     }
+
+type load_state_verbose_error = {
+  message: string;
+  stack: Utils.callstack;
+  auto_retry: bool;
+  environment: string option;
+}
+[@@deriving show]
 
 type load_state_approach =
   | Precomputed of ServerArgs.saved_state_target_info
@@ -50,10 +56,8 @@ type init_result =
 
 (** returns human-readable string, an indication of whether auto-retry is sensible, and stack *)
 let load_state_error_to_verbose_string (err : load_state_error) :
-    State_loader.verbose_error =
-  let open State_loader in
+    load_state_verbose_error =
   match err with
-  | Load_state_loader_failure err -> State_loader.error_string_verbose err
   | Load_state_saved_state_loader_failure err ->
     (* TODO(hverr): Construct verbose errors with all fields properly set *)
     {

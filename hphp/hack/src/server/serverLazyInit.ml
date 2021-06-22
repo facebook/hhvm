@@ -215,12 +215,8 @@ let merge_saved_state_futures
           ~naming_table_fallback_path
           ~load_decls
           ~shallow_decls
-          ~hot_decls_paths:
-            State_loader.
-              {
-                legacy_hot_decls_path = Path.to_string legacy_hot_decls_path;
-                shallow_hot_decls_path = Path.to_string shallow_hot_decls_path;
-              }
+          ~legacy_hot_decls_path:(Path.to_string legacy_hot_decls_path)
+          ~shallow_hot_decls_path:(Path.to_string shallow_hot_decls_path)
           ~errors_path:(Path.to_string errors_path)
       in
       let t = Unix.time () in
@@ -370,14 +366,11 @@ let use_precomputed_state_exn
   let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
   let shallow_decls = genv.local_config.SLC.shallow_class_decl in
   let naming_table_fallback_path = get_naming_table_fallback_path genv None in
-  let hot_decls_paths =
-    State_loader.
-      {
-        legacy_hot_decls_path =
-          ServerArgs.legacy_hot_decls_path_for_target_info info;
-        shallow_hot_decls_path =
-          ServerArgs.shallow_hot_decls_path_for_target_info info;
-      }
+  let legacy_hot_decls_path =
+    ServerArgs.legacy_hot_decls_path_for_target_info info
+  in
+  let shallow_hot_decls_path =
+    ServerArgs.shallow_hot_decls_path_for_target_info info
   in
   let errors_path = ServerArgs.errors_path_for_target_info info in
   let (old_naming_table, old_errors) =
@@ -389,7 +382,8 @@ let use_precomputed_state_exn
       ~naming_table_fallback_path
       ~load_decls
       ~shallow_decls
-      ~hot_decls_paths
+      ~legacy_hot_decls_path
+      ~shallow_hot_decls_path
       ~errors_path
   in
   {

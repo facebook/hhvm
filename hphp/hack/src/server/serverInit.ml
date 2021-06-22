@@ -159,7 +159,7 @@ let lazy_saved_state_init genv env root load_state_approach profiling =
   | Ok (res, ({ state_distance; _ }, _)) ->
     (post_init genv res, Load_state_succeeded state_distance)
   | Error err ->
-    let ( State_loader.
+    let ( ServerInitTypes.
             { message; auto_retry; stack = Utils.Callstack stack; environment }
         as verbose_error ) =
       load_state_error_to_verbose_string err
@@ -182,7 +182,7 @@ let lazy_saved_state_init genv env root load_state_approach profiling =
     HackEventLogger.load_state_exn exception_telemetry;
     Hh_logger.log
       "Could not load saved state: %s\n%s\n"
-      (State_loader.show_verbose_error verbose_error)
+      (ServerInitTypes.show_load_state_verbose_error verbose_error)
       stack;
     (match next_step with
     | Exit_status.No_error ->

@@ -31,19 +31,14 @@ let get_naming_table_and_errors provider_context path is_sqlite =
     else
       (None, path)
   in
-  let hot_decls_path_default =
-    {
-      State_loader.legacy_hot_decls_path = "";
-      State_loader.shallow_hot_decls_path = "";
-    }
-  in
   let errors_path = path ^ ".err" in
   SaveStateService.load_saved_state
     ~load_decls:false
     ~shallow_decls:false
     ~naming_table_fallback_path:sqlite_path
     ~naming_table_path:marshaled_blob_path
-    ~hot_decls_paths:hot_decls_path_default
+    ~legacy_hot_decls_path:""
+    ~shallow_hot_decls_path:""
     ~errors_path
     provider_context
 

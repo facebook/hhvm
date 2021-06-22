@@ -58,13 +58,12 @@ let partition_error_files_tf
   (fold_error_files errors_in_phases_t, fold_error_files errors_in_phases_f)
 
 let load_class_decls
-    ~(shallow_decls : bool) ~(hot_decls_paths : State_loader.hot_decls_paths) :
-    unit =
+    ~(shallow_decls : bool)
+    ~(legacy_hot_decls_path : string)
+    ~(shallow_hot_decls_path : string) : unit =
   let start_t = Unix.gettimeofday () in
   Hh_logger.log "Begin loading class declarations";
-  let State_loader.{ legacy_hot_decls_path; shallow_hot_decls_path } =
-    hot_decls_paths
-  in
+
   try
     let (filename, num_classes) =
       if shallow_decls then
@@ -92,7 +91,8 @@ let load_saved_state
     ~(shallow_decls : bool)
     ~(naming_table_fallback_path : string option)
     ~(naming_table_path : string)
-    ~(hot_decls_paths : State_loader.hot_decls_paths)
+    ~(legacy_hot_decls_path : string)
+    ~(shallow_hot_decls_path : string)
     ~(errors_path : string)
     (ctx : Provider_context.t) : Naming_table.t * saved_state_errors =
   let old_naming_table =
@@ -122,7 +122,11 @@ let load_saved_state
     else
       Marshal.from_channel (In_channel.create ~binary:true errors_path)
   in
-  if load_decls then load_class_decls ~shallow_decls ~hot_decls_paths;
+  if load_decls then
+    load_class_decls
+      ~shallow_decls
+      ~legacy_hot_decls_path
+      ~shallow_hot_decls_path;
 
   (old_naming_table, old_errors)
 

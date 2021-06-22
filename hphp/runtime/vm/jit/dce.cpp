@@ -838,7 +838,23 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
   auto constexpr numTrackedSlots = 64;
   auto constexpr wholeRange = std::make_pair(0, numTrackedSlots);
   auto const stackTop = block->back().extra<EndCatch>()->offset;
-  auto const stackRange = AStack::range(stackTop, stackTop + numTrackedSlots);
+  auto const stackRange = [&] {
+    // If the catch block occurs within an inlined frame the outer stack
+    // locations (those above the inlined frame) are not dead and cannot be
+    // elided as we may not throw through the outer callers.
+    if (block->back().src(0)->inst()->is(BeginInlining)) {
+      auto const extra = block->back().src(0)->inst()->extra<BeginInlining>();
+      auto const spOff = extra->spOffset;
+      assertx(stackTop <= spOff);
+      if (spOff < stackTop + numTrackedSlots) {
+        return AStack::range(stackTop, spOff);
+      }
+    }
+    return AStack::range(stackTop, stackTop + numTrackedSlots);
+  }();
+
+  // Nothing to optimize if the stack is empty
+  if (stackRange.size() == 0) return;
 
   std::bitset<numTrackedSlots> usedLocations = {};
   // stores that are only read by the EndCatch

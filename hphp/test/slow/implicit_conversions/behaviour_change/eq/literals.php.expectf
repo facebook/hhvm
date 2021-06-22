@@ -1,0 +1,91 @@
+==
+
+null == false
+true == 0
+99 == 99.0
+'99' == '99.0'
+empty string == NAN
+'0' == 'baz'
+'0' == 42
+'0bcd' == 1.234
+'0bcd' == 'baz'
+'0bcd' == 42
+'0bcd' == 1.234
+new A() == 42
+
+Notice: Object of class A could not be converted to int in %s/literals.php on line 100
+new A() == new A(new A())
+new B() == new C()
+DateTime1(1000) == new DateTime2()
+DateTime1(1000) == 42
+
+Notice: Object of class DateTime1 could not be converted to int in %s/literals.php on line 109
+xml == 42
+Vector == Vector
+Vector == 42
+Pair<string, string> == pair<string, int>
+Pair == 42
+closure == 42
+
+Notice: Object of class Closure$eq#5;%s could not be converted to int in %s/literals.php on line 128
+fun == 42
+fun == 'baz'
+rfun == 42
+class_meth == 42
+class_meth == vec['foo', 'bar']
+class_meth == vec['Bar', 42]
+rclass_meth == 42
+vec[99] == vec['foo']
+vec[vec[99]] == vec[vec['foo']]
+vec[42] == dict[0 => 42]
+vec[42] == dict[0 => '42']
+vec[42] == 42
+dict[0 => 42] == 42
+keyset[42] == 42
+imagecreate(10, 10) == 42
+
+!=
+
+null != false
+true != 0
+99 != 99.0
+'99' != '99.0'
+empty string != NAN
+'0' != 'baz'
+'0' != 42
+'0bcd' != 1.234
+'0bcd' != 'baz'
+'0bcd' != 42
+'0bcd' != 1.234
+new A() != 42
+
+Notice: Object of class A could not be converted to int in %s/literals.php on line 191
+new A() != new A(new A())
+new B() != new C()
+DateTime1(1000) != new DateTime2()
+DateTime1(1000) != 42
+
+Notice: Object of class DateTime1 could not be converted to int in %s/literals.php on line 200
+xml != 42
+Vector != Vector
+Vector != 42
+Pair<string, string> != pair<string, int>
+Pair != 42
+closure != 42
+
+Notice: Object of class Closure$neq#5;%s could not be converted to int in %s/literals.php on line 219
+fun != 42
+fun != 'baz'
+rfun != 42
+class_meth != 42
+class_meth != vec['foo', 'bar']
+class_meth != vec['Bar', 42]
+rclass_meth != 42
+vec[99] != vec['foo']
+vec[vec[99]] != vec[vec['foo']]
+vec[42] != dict[0 => 42]
+vec[42] != dict[0 => '42']
+vec[42] != 42
+dict[0 => 42] != 42
+keyset[42] != 42
+imagecreate(10, 10) != 42

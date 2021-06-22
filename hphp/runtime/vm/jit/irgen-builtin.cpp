@@ -125,13 +125,22 @@ SSATmp* is_a_impl(IRGS& env, const ParamPrep& params, bool subclassOnly) {
   auto const allowClass = nparams == 3 ? params[2].value : cns(env, false);
 
   if (!obj->type().subtypeOfAny(TCls, TObj) ||
-      !cls->type().subtypeOfAny(TCls, TStr) ||
+      !cls->type().subtypeOfAny(TCls, TLazyCls, TStr) ||
       !allowClass->isA(TBool)) {
     return nullptr;
   }
 
   auto const lhs = obj->isA(TObj) ? gen(env, LdObjClass, obj) : obj;
-  auto const rhs = cls->isA(TStr) ? gen(env, LookupClsRDS, cls) : cls;
+  auto const rhs = [&] {
+    if (cls->isA(TStr)) {
+      return gen(env, LookupClsRDS, cls);
+    }
+    if (cls->isA(TLazyCls)) {
+      auto const cname = gen(env, LdLazyClsName, cls);
+      return gen(env, LookupClsRDS, cname);
+    }
+    return cls;
+  }();
 
   return cond(
     env,
@@ -526,12 +535,14 @@ SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
   auto const clsNameTmp = params[0].value;
   auto const cnsNameTmp = params[1].value;
 
-  if (!clsNameTmp->isA(TStr)) return nullptr;
+  if (!clsNameTmp->isA(TStr|TCls|TLazyCls)) return nullptr;
   if (!cnsNameTmp->hasConstVal(TStaticStr)) return nullptr;
   auto const cnsName = cnsNameTmp->strVal();
 
   auto const clsTmp = [&] () -> SSATmp* {
-    if (clsNameTmp->inst()->is(LdClsName)) {
+    if (clsNameTmp->isA(TCls)) return clsNameTmp;
+    if (clsNameTmp->inst()->is(LdClsName) ||
+        clsNameTmp->inst()->is(LdLazyCls)) {
       return clsNameTmp->inst()->src(0);
     }
     return ldCls(env, clsNameTmp, make_opt_catch(env, params));

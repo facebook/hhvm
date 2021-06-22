@@ -412,8 +412,14 @@ SSATmp* simplifyLookupClsCtxCns(State& env, const IRInstruction* inst) {
 SSATmp* simplifyLdCls(State& env, const IRInstruction* inst) {
   auto const str = inst->src(0);
   auto const cls = inst->src(1);
-  if (str->inst()->is(LdClsName, LdLazyCls)) {
+  if (str->inst()->is(LdClsName)) {
     return str->inst()->src(0);
+  }
+  if (str->inst()->is(LdLazyClsName)) {
+    auto const lcls = str->inst()->src(0);
+    if (lcls->inst()->is(LdLazyCls)) {
+      return lcls->inst()->src(0);
+    }
   }
   if (str->hasConstVal() && (cls->hasConstVal(TCls) || cls->isA(TNullptr))) {
     auto const sval = str->strVal();

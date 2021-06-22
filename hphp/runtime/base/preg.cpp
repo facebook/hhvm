@@ -60,6 +60,8 @@
 
 namespace HPHP {
 
+TRACE_SET_MOD(preg);
+
 using jit::TCA;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1168,10 +1170,8 @@ static Variant preg_match_impl(StringData* pattern,
      * the full regular expression evaluation.
      * Take the slow path if there are any special compile options.
      */
-    if (pce->literal_data && !global && literalOptions(options)) {
-      assertx(pce->literal_data->isLiteral());
-      /* TODO(t13140878): compare literal against multiple substrings
-       * in the preg_match_all (global == true) case. */
+    if (pce->literal_data && literalOptions(options)) {
+      assertx(pce->literal_data->isLiteral() && pce->num_subpats == 1);
       count = pce->literal_data->matches(subject, start_offset, offsets, options)
         ? 1 : PCRE_ERROR_NOMATCH;
     } else {

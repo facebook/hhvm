@@ -299,52 +299,30 @@ struct Div {
 
 template<class Op>
 void tvOpEq(Op op, tv_lval c1, TypedValue c2) {
-again:
-  if (type(c1) == KindOfInt64) {
-    for (;;) {
-      if (c2.m_type == KindOfInt64) {
-        val(c1).num = op(val(c1).num, c2.m_data.num);
-        return;
-      }
-      if (c2.m_type == KindOfDouble) {
-        type(c1) = KindOfDouble;
-        val(c1).dbl = op(val(c1).num, c2.m_data.dbl);
-        return;
-      }
-      tvCopy(numericConvHelper(c2), c2);
-      assertx(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
-    }
-  }
-
-  if (type(c1) == KindOfDouble) {
-    for (;;) {
-      if (c2.m_type == KindOfInt64) {
-        val(c1).dbl = op(val(c1).dbl, c2.m_data.num);
-        return;
-      }
-      if (c2.m_type == KindOfDouble) {
-        val(c1).dbl = op(val(c1).dbl, c2.m_data.dbl);
-        return;
-      }
-      tvCopy(numericConvHelper(c2), c2);
-      assertx(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
-    }
-  }
-
-  if (isArrayLikeType(type(c1)) && isArrayLikeType(c2.m_type)) {
-    auto const ad1    = val(c1).parr;
-    auto const newArr = op(ad1, c2.m_data.parr);
-    type(c1) = newArr->toDataType();
-    if (newArr != ad1) {
-      val(c1).parr = newArr;
-      decRefArr(ad1);
-    }
+  if (UNLIKELY(isArrayLikeType(type(c1)) && isArrayLikeType(c2.m_type))) {
+    throw_bad_array_operand(val(c1).parr);
     return;
   }
 
-  tvSet(numericConvHelper(*c1), c1);
-  assertx(type(c1) == KindOfInt64 || type(c1) == KindOfDouble);
-  goto again;
+  auto lhs = *c1;
+  if (UNLIKELY(!tvIsInt(lhs) && !tvIsDouble(lhs))) tvCopy(numericConvHelper(lhs), lhs);
+  if (UNLIKELY(!tvIsInt(c2)  && !tvIsDouble(c2)))  tvCopy(numericConvHelper(c2), c2);
+  assertx(tvIsInt(c2) || tvIsDouble(c2));
+  tvSet(lhs, c1); // do the write-back after both conversions in case one throws
+
+  if (tvIsDouble(c1)) {
+    val(c1).dbl = op(val(c1).dbl, tvIsInt(c2) ? c2.m_data.num : c2.m_data.dbl);
+    return;
+  }
+
+  assertx(tvIsInt(c1));
+  if (tvIsInt(c2)) {
+    val(c1).num = op(val(c1).num, c2.m_data.num);
+  } else {
+    type(c1) = KindOfDouble;
+    val(c1).dbl = op(val(c1).num, c2.m_data.dbl);
+  }
+
 }
 
 struct AddEq {
@@ -354,10 +332,6 @@ struct AddEq {
   double  operator()(double  a, int64_t b) const { return a + b; }
   double  operator()(int64_t a, double  b) const { return a + b; }
   double  operator()(double  a, double  b) const { return a + b; }
-
-  ArrayData* operator()(ArrayData* ad1, ArrayData* /*ad2*/) const {
-    throw_bad_array_operand(ad1);
-  }
 };
 
 struct SubEq {
@@ -367,10 +341,6 @@ struct SubEq {
   double  operator()(double  a, int64_t b) const { return a - b; }
   double  operator()(int64_t a, double  b) const { return a - b; }
   double  operator()(double  a, double  b) const { return a - b; }
-
-  ArrayData* operator()(ArrayData* ad1, ArrayData* /*ad2*/) const {
-    throw_bad_array_operand(ad1);
-  }
 };
 
 struct MulEq {
@@ -378,10 +348,6 @@ struct MulEq {
   double  operator()(double  a, int64_t b) const { return a * b; }
   double  operator()(int64_t a, double  b) const { return a * b; }
   double  operator()(double  a, double  b) const { return a * b; }
-
-  ArrayData* operator()(ArrayData* ad1, ArrayData* /*ad2*/) const {
-    throw_bad_array_operand(ad1);
-  }
 };
 
 template<class SzOp, class BitOp>

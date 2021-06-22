@@ -17,7 +17,6 @@ type rollout_flags = {
   max_times_to_defer_type_checking: int option;
   monitor_fd_close_delay: int;
   monitor_backpressure: bool;
-  enable_devx_dependency_graph: bool;
   small_buckets_for_dirty_names: bool;
   symbolindex_search_provider: string;
   require_saved_state: bool;

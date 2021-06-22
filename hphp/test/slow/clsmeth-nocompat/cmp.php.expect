@@ -149,43 +149,19 @@ Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compar
 Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 
 Test 10
-
-Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/cmp.php on line %d
-bool(true)
-
-Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/cmp.php on line %d
-bool(true)
-
-Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/cmp.php on line %d
 bool(false)
-
-Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/cmp.php on line %d
-bool(true)
-
-Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/cmp.php on line %d
 bool(false)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 
-Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/cmp.php on line %d
-bool(true)
-
-
-Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/cmp.php on line %d
-bool(true)
-
-Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/cmp.php on line %d
-bool(true)
-
-Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/cmp.php on line %d
 bool(false)
-
-Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/cmp.php on line %d
-bool(true)
-
-Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/cmp.php on line %d
 bool(false)
-
-Notice: Implicit clsmeth to vec conversion in %s/test/slow/global_func/class_meth/cmp.php on line %d
-bool(true)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 
 Test 11
 bool(false)

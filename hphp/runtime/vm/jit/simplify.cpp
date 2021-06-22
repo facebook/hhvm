@@ -2064,6 +2064,7 @@ SSATmp* simplifyConvArrLikeToKeyset(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyConvClsMethToVec(State& env, const IRInstruction* inst) {
+  assertx(RO::EvalIsCompatibleClsMethType);
   if (RO::EvalRaiseClsMethConversionWarning) return nullptr;
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
@@ -2075,6 +2076,7 @@ SSATmp* simplifyConvClsMethToVec(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyConvClsMethToDict(State& env, const IRInstruction* inst) {
+  assertx(RO::EvalIsCompatibleClsMethType);
   if (RO::EvalRaiseClsMethConversionWarning) return nullptr;
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
@@ -2087,6 +2089,7 @@ SSATmp* simplifyConvClsMethToDict(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyConvClsMethToKeyset(State& env, const IRInstruction* inst) {
+  assertx(RO::EvalIsCompatibleClsMethType);
   if (RO::EvalRaiseClsMethConversionWarning) return nullptr;
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
@@ -2197,12 +2200,11 @@ const StaticString
     s_msgVecToStr("Vec to string conversion"),
     s_msgDictToStr("Dict to string conversion"),
     s_msgKeysetToStr("Keyset to string conversion"),
-    s_msgFuncToStr("Func to string conversion"),
-    s_msgFuncToInt("Func to int conversion"),
-    s_msgFuncToDbl("Func to double conversion"),
-    s_msgClsMethToStr("clsmeth to string conversion"),
-    s_msgClsMethToInt("Implicit clsmeth to int conversion"),
-    s_msgClsMethToDbl("Implicit clsmeth to double conversion");
+    s_msgClsMethToStr("Cannot convert clsmeth to string"),
+    s_msgClsMethToInt("Cannot convert clsmeth to int"),
+    s_msgClsMethToIntImpl("Implicit clsmeth to int conversion"),
+    s_msgClsMethToDbl("Cannot convert clsmeth to double"),
+    s_msgClsMethToDblImpl("Implicit clsmeth to double conversion");
 }
 
 SSATmp* simplifyConvTVToBool(State& env, const IRInstruction* inst) {
@@ -2342,9 +2344,14 @@ SSATmp* simplifyConvTVToInt(State& env, const IRInstruction* inst) {
   if (srcType <= TStr)  return genWithConvNoticePrim(ConvStrToInt, "string");
   if (srcType <= TObj)  return gen(env, ConvObjToInt, *notice_data, catchTrace, src);
   if (srcType <= TRes)  return genWithConvNoticePrim(ConvResToInt, "resource");
-  if (srcType <= TClsMeth)  {
+  if (srcType <= TClsMeth) {
+    if (!RO::EvalIsCompatibleClsMethType) {
+      gen(env, ThrowInvalidOperation, catchTrace,
+          cns(env, s_msgClsMethToInt.get()));
+      return cns(env, TBottom);
+    }
     if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
-      gen(env, RaiseNotice, catchTrace, cns(env, s_msgClsMethToInt.get()));
+      gen(env, RaiseNotice, catchTrace, cns(env, s_msgClsMethToIntImpl.get()));
     }
     return cns(env, 1);
   }
@@ -2375,9 +2382,14 @@ SSATmp* simplifyConvTVToDbl(State& env, const IRInstruction* inst) {
   if (srcType <= TStr)  return gen(env, ConvStrToDbl, src);
   if (srcType <= TObj)  return gen(env, ConvObjToDbl, inst->taken(), src);
   if (srcType <= TRes)  return gen(env, ConvResToDbl, src);
-  if (srcType <= TClsMeth)  {
+  if (srcType <= TClsMeth) {
+    if (!RO::EvalIsCompatibleClsMethType) {
+      gen(env, ThrowInvalidOperation, catchTrace,
+          cns(env, s_msgClsMethToDbl.get()));
+      return cns(env, TBottom);
+    }
     if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
-      gen(env, RaiseNotice, catchTrace, cns(env, s_msgClsMethToDbl.get()));
+      gen(env, RaiseNotice, catchTrace, cns(env, s_msgClsMethToDblImpl.get()));
     }
     return cns(env, 1.0);
   }

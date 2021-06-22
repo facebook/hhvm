@@ -483,9 +483,7 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
     }
 
     case KindOfClsMeth:
-      SystemLib::throwInvalidOperationExceptionObject(
-        "clsmeth to string conversion"
-      );
+      throwInvalidClsMethToType("string");
 
     case KindOfRClsMeth:
       raise_convert_rcls_meth_to_type("string");
@@ -586,9 +584,7 @@ StringData* tvCastToStringData(
     }
 
     case KindOfClsMeth:
-      SystemLib::throwInvalidOperationExceptionObject(
-        "clsmeth to string conversion"
-      );
+      throwInvalidClsMethToType("string");
 
     case KindOfRClsMeth:
       raise_convert_rcls_meth_to_type("string");
@@ -843,7 +839,9 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
 
       case KindOfClsMeth: {
         if (!RO::EvalIsCompatibleClsMethType) {
-          throwInvalidClsMethToType("vec");
+          SystemLib::throwInvalidOperationExceptionObject(
+            "ClsMeth to vec conversion"
+          );
         }
         raiseClsMethConvertWarningHelper("vec");
         a = make_vec_array(
@@ -946,7 +944,9 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
 
       case KindOfClsMeth: {
         if (!RO::EvalIsCompatibleClsMethType) {
-          throwInvalidClsMethToType("dict");
+          SystemLib::throwInvalidOperationExceptionObject(
+            "ClsMeth to dict conversion"
+          );
         }
         raiseClsMethConvertWarningHelper("dict");
         a = make_dict_array(
@@ -1049,7 +1049,9 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
 
       case KindOfClsMeth: {
         if (!RO::EvalIsCompatibleClsMethType) {
-          throwInvalidClsMethToType("keyset");
+          SystemLib::throwInvalidOperationExceptionObject(
+            "ClsMeth to keyset conversion"
+          );
         }
         raiseClsMethConvertWarningHelper("keyset");
         a = make_keyset_array(

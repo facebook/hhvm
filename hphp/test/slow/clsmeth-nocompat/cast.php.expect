@@ -1,0 +1,7 @@
+Caught: Cannot convert clsmeth to string
+bool(true)
+Caught: Cannot convert clsmeth to double
+Caught: Cannot convert clsmeth to int
+Caught: ClsMeth to vec conversion
+Caught: ClsMeth to dict conversion
+Caught: ClsMeth to keyset conversion

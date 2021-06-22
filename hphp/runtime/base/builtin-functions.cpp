@@ -91,7 +91,7 @@ const StaticString s_cmpWithRecord(
 );
 const StaticString s_cmpWithClsMeth(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
-  "a clsmeth with a non-clsmeth"
+  "a clsmeth"
 );
 const StaticString s_cmpWithRClsMeth(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "

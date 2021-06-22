@@ -1,1 +1,5 @@
 -vEval.IsCompatibleClsMethType=1
+-vEval.RaiseClsMethComparisonWarning=1
+-vEval.RaiseClsMethConversionWarning=1
+-vEval.IsVecNotices=1
+-vEval.VecHintNotices=1

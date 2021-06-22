@@ -61,24 +61,14 @@ void checkClsMethFuncHelper(const Func* func) {
   }
 }
 
-void raiseClsMethVecCompareWarningHelper() {
-  if (!RuntimeOption::EvalRaiseClsMethComparisonWarning) return;
-  raise_notice("Comparing clsmeth with vec");
-}
-
-void raiseClsMethNonClsMethRelCompareWarning() {
-  raise_notice("Comparing clsmeth with non-clsmeth relationally");
-}
-
 void raiseClsMethClsMethRelCompareWarning() {
   raise_notice("Comparing clsmeth with clsmeth relationally");
 }
 
 void raiseClsMethToVecWarningHelper(const char* fn /* =nullptr */) {
   if (!RuntimeOption::EvalRaiseClsMethConversionWarning) return;
-  const char* t = RuntimeOption::EvalHackArrDVArrs ? "vec" : "varray";
-  if (!fn) raise_notice("Implicit clsmeth to %s conversion", t);
-  else raise_notice("Implicit clsmeth to %s conversion for %s()", t, fn);
+  if (!fn) raise_notice("Implicit clsmeth to vec conversion");
+  else raise_notice("Implicit clsmeth to vec conversion for %s()", fn);
 }
 
 void raiseClsMethConvertWarningHelper(const char* toType) {
@@ -93,8 +83,8 @@ Array clsMethToVecHelper(ClsMethDataRef clsMeth) {
 }
 
 void throwInvalidClsMethToType(const char* ty) {
-  SystemLib::throwRuntimeExceptionObject(folly::sformat(
-    "invalid conversion from clsmeth to {}", ty
+  SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+    "Cannot convert clsmeth to {}", ty
   ));
 }
 

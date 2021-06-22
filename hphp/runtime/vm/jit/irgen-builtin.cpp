@@ -177,9 +177,7 @@ SSATmp* opt_method_exists(IRGS& env, const ParamPrep& params) {
   return gen(env, MethodExists, cls, meth);
 }
 
-const StaticString
-  s_conv_clsmeth_to_varray("Implicit clsmeth to varray conversion"),
-  s_conv_clsmeth_to_vec("Implicit clsmeth to vec conversion");
+const StaticString s_conv_clsmeth_to_vec("Implicit clsmeth to vec conversion");
 
 void raiseClsMethToVecWarningHelper(IRGS& env, const ParamPrep& params) {
   assertx(RO::EvalIsCompatibleClsMethType);

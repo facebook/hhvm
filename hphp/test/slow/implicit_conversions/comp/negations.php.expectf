@@ -64,7 +64,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(rfun < 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
 !(class_meth < 42)
-Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 !(class_meth < vec['foo', 'bar'])
 !(class_meth < vec['Bar', 42])
 
@@ -157,7 +157,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(rfun <= 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
 !(class_meth <= 42)
-Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 !(class_meth <= vec['foo', 'bar'])
 !(class_meth <= vec['Bar', 42])
 
@@ -250,7 +250,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(rfun > 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
 !(class_meth > 42)
-Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 !(class_meth > vec['foo', 'bar'])
 !(class_meth > vec['Bar', 42])
 
@@ -343,7 +343,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(rfun >= 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
 !(class_meth >= 42)
-Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 !(class_meth >= vec['foo', 'bar'])
 !(class_meth >= vec['Bar', 42])
 
@@ -436,7 +436,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(rfun <=> 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
 !(class_meth <=> 42)
-Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 !(class_meth <=> vec['foo', 'bar'])
 !(class_meth <=> vec['Bar', 42])
 

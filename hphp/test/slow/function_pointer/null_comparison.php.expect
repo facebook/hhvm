@@ -22,17 +22,17 @@ null x rfunc_ptr: >   :Cannot use relational comparison operators (<, <=, >, >=,
 null x rfunc_ptr: >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
 null x rfunc_ptr: <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
 
-clsmeth x null <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
-clsmeth x null <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
-clsmeth x null >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
-clsmeth x null >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
-clsmeth x null <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+clsmeth x null <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+clsmeth x null <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+clsmeth x null >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+clsmeth x null >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+clsmeth x null <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 
-null x clsmeth: <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
-null x clsmeth: <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
-null x clsmeth: >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
-null x clsmeth: >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
-null x clsmeth: <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth with a non-clsmeth
+null x clsmeth: <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+null x clsmeth: <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+null x clsmeth: >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+null x clsmeth: >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+null x clsmeth: <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 
 rclsmeth x null <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
 rclsmeth x null <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth

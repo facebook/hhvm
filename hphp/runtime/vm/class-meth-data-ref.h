@@ -54,8 +54,6 @@ private:
 
 void checkClsMethFuncHelper(const Func* f);
 
-void raiseClsMethVecCompareWarningHelper();
-void raiseClsMethNonClsMethRelCompareWarning();
 void raiseClsMethToVecWarningHelper(const char* fn = nullptr);
 void raiseClsMethConvertWarningHelper(const char* toType);
 void raiseClsMethClsMethRelCompareWarning();

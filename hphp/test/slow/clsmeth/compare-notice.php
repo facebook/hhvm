@@ -2,8 +2,7 @@
 
 class Info { static bool $SawError = false; }
 function handle_error($_errno, $msg, ...) {
-  if (!Info::$SawError && ($msg === "Implicit clsmeth to varray conversion" ||
-                           $msg === "Implicit clsmeth to vec conversion")) {
+  if (!Info::$SawError && $msg === "Implicit clsmeth to vec conversion") {
     Info::$SawError = true;
     return true;
   }

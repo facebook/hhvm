@@ -1,1 +1,1 @@
--vRuntime.Eval.IsCompatibleClsMethType=1
+-vRuntime.Eval.IsCompatibleClsMethType=1 -vRuntime.Eval.RaiseClsMethConversionWarning=1 -vRuntime.Eval.IsVecNotices=1

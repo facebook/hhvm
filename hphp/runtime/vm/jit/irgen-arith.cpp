@@ -601,12 +601,7 @@ SSATmp* implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         }
       );
   } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
-      return emitMixedClsMethCmp(env, op);
-    } else {
-      raiseClsMethCompareWarningHelper(env, op);
-      return emitConstCmp(env, op, false, true);
-    }
+    return emitMixedClsMethCmp(env, op);
   } else if (rightTy <= TFunc) {
     return emitMixedFuncCmp(env, op);
   } else if (rightTy <= TRFunc) {
@@ -635,12 +630,7 @@ SSATmp* implBoolCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         [&](Op op){ return emitHackArrBoolCmp(env, op, right, left); }
       );
   } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
-      return emitMixedClsMethCmp(env, op);
-    } else {
-      raiseClsMethCompareWarningHelper(env, op);
-      return gen(env, toBoolCmpOpcode(op), left, cns(env, true));
-    }
+    return emitMixedClsMethCmp(env, op);
   } else if (rightTy <= TFunc) {
     return emitMixedFuncCmp(env, op);
   } else if (rightTy <= TRFunc) {
@@ -703,12 +693,7 @@ SSATmp* implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       }
     );
   } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
-      return emitMixedClsMethCmp(env, op);
-    } else {
-      raiseClsMethCompareWarningHelper(env, op);
-      return emitConstCmp(env, op, false, true);
-    }
+    return emitMixedClsMethCmp(env, op);
   } else if (rightTy <= TFunc) {
     return emitMixedFuncCmp(env, op);
   } else if (rightTy <= TRFunc) {
@@ -762,12 +747,7 @@ SSATmp* implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       }
     );
   } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
-      return emitMixedClsMethCmp(env, op);
-    } else {
-      raiseClsMethCompareWarningHelper(env, op);
-      return emitConstCmp(env, op, false, true);
-    }
+    return emitMixedClsMethCmp(env, op);
   } else if (rightTy <= TFunc) {
     return emitMixedFuncCmp(env, op);
   } else if (rightTy <= TRFunc) {
@@ -815,9 +795,10 @@ SSATmp* equalClsMeth(IRGS& env, SSATmp* left, SSATmp* right) {
 void raiseClsMethToVecWarningHelper(IRGS& env) {
   assertx(RO::EvalIsCompatibleClsMethType);
   if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
-    gen(env, RaiseNotice, cns(env, makeStaticString(
-      folly::sformat("Implicit clsmeth to {} conversion",
-        RuntimeOption::EvalHackArrDVArrs ? "vec" : "varray"))));
+    gen(
+      env,
+      RaiseNotice,
+      cns(env, makeStaticString("Implicit clsmeth to vec conversion")));
   }
 }
 
@@ -843,23 +824,13 @@ SSATmp* implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TVec) {
     return gen(env, toArrLikeCmpOpcode(op), left, right);
   } else if (rightTy <= TClsMeth && RO::EvalIsCompatibleClsMethType) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      raiseClsMethToVecWarningHelper(env);
-      auto const arr = convertClsMethToVec(env, right);
-      const auto ret = gen(env, toArrLikeCmpOpcode(op), left, arr);
-      decRef(env, arr);
-      return ret;
-    } else {
-      raiseHACCompareWarningHelper(env);
-      if (RuntimeOption::EvalRaiseClsMethComparisonWarning) {
-        gen(
-          env,
-          RaiseNotice,
-          cns(env, makeStaticString(Strings::CLSMETH_COMPAT_VEC_CMP))
-        );
-      }
-      return emitMixedVecCmp(env, op);
-    }
+    raiseClsMethToVecWarningHelper(env);
+    auto const arr = convertClsMethToVec(env, right);
+    const auto ret = gen(env, toArrLikeCmpOpcode(op), left, arr);
+    decRef(env, arr);
+    return ret;
+  } else if (rightTy <= TClsMeth) {
+    return emitMixedClsMethCmp(env, op);
   } else if (rightTy <= TFunc) {
     return emitMixedFuncCmp(env, op);
   } else if (rightTy <= TRFunc) {
@@ -891,6 +862,8 @@ SSATmp* implDictCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       );
       return cns(env, false);
     }
+  } else if (rightTy <= TClsMeth) {
+    return emitMixedClsMethCmp(env, op);
   } else if (rightTy <= TFunc) {
     return emitMixedFuncCmp(env, op);
   } else if (rightTy <= TRFunc) {
@@ -922,6 +895,8 @@ SSATmp* implKeysetCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       );
       return cns(env, false);
     }
+  } else if (rightTy <= TClsMeth) {
+    return emitMixedClsMethCmp(env, op);
   } else if (rightTy <= TFunc) {
     return emitMixedFuncCmp(env, op);
   } else if (rightTy <= TRFunc) {
@@ -1001,19 +976,14 @@ SSATmp* implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     return emitMixedDictCmp(env, op);
   } else if (rightTy <= TKeyset) {
     return emitMixedKeysetCmp(env, op);
+  } else if (rightTy <= TClsMeth) {
+    return emitMixedClsMethCmp(env, op);
   } else if (rightTy <= TFunc) {
     return emitMixedFuncCmp(env, op);
   } else if (rightTy <= TRFunc) {
     PUNT(RFunc-cmp);
   } else if (rightTy <= TRClsMeth) {
     PUNT(RClsMeth-cmp);
-  } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
-      return emitMixedClsMethCmp(env, op);
-    } else {
-      raiseClsMethCompareWarningHelper(env, op);
-      return emitConstCmp(env, op, false, true);
-    }
   } else {
     // Strings are less than anything else (usually arrays).
     return emitConstCmp(env, op, false, true);
@@ -1074,12 +1044,6 @@ SSATmp* implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         left,
         [&]{ return emitObjStrCmp(env, op, left, right); }
       );
-  } else if (rightTy <= TFunc) {
-    return emitMixedFuncCmp(env, op);
-  } else if (rightTy <= TRFunc) {
-    PUNT(RFunc-cmp);
-  } else if (rightTy <= TRClsMeth) {
-    PUNT(RClsMeth-cmp);
   } else if (rightTy <= TCls) {
     if (RuntimeOption::EvalRaiseClassConversionWarning) {
       gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
@@ -1111,18 +1075,13 @@ SSATmp* implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TKeyset) {
     return emitMixedKeysetCmp(env, op);
   } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
-      return emitMixedClsMethCmp(env, op);
-    } else {
-      raiseClsMethCompareWarningHelper(env, op);
-      return
-        emitCollectionCheck(
-          env,
-          op,
-          left,
-          [&]{ return emitConstCmp(env, op, true, false); }
-        );
-    }
+    return emitMixedClsMethCmp(env, op);
+  } else if (rightTy <= TFunc) {
+    return emitMixedFuncCmp(env, op);
+  } else if (rightTy <= TRFunc) {
+    PUNT(RFunc-cmp);
+  } else if (rightTy <= TRClsMeth) {
+    PUNT(RClsMeth-cmp);
   } else {
     // For anything else, the object is always greater.
     return emitConstCmp(env, op, true, false);
@@ -1164,19 +1123,14 @@ SSATmp* implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     return emitMixedDictCmp(env, op);
   } else if (rightTy <= TKeyset) {
     return emitMixedKeysetCmp(env, op);
+  } else if (rightTy <= TClsMeth) {
+    return emitMixedClsMethCmp(env, op);
   } else if (rightTy <= TFunc) {
     return emitMixedFuncCmp(env, op);
   } else if (rightTy <= TRFunc) {
     PUNT(RFunc-cmp);
   } else if (rightTy <= TRClsMeth) {
     PUNT(RClsMeth-cmp);
-  } else if (rightTy <= TClsMeth) {
-    if (RuntimeOption::EvalHackArrDVArrs || !RO::EvalIsCompatibleClsMethType) {
-      return emitMixedClsMethCmp(env, op);
-    } else {
-      raiseClsMethCompareWarningHelper(env, op);
-      return emitConstCmp(env, op, false, true);
-    }
   } else {
     // Resources are always less than anything else.
     return emitConstCmp(env, op, false, true);
@@ -1202,8 +1156,7 @@ SSATmp* implFunCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     return emitMixedDictCmp(env, op);
   } else if (rightTy <= TKeyset) {
     return emitMixedKeysetCmp(env, op);
-  } else if (rightTy <= TClsMeth && RuntimeOption::EvalHackArrDVArrs &&
-             RO::EvalIsCompatibleClsMethType) {
+  } else if (rightTy <= TClsMeth) {
     return emitMixedClsMethCmp(env, op);
   } else if (rightTy <= TRFunc) {
     PUNT(RFunc-cmp);
@@ -1287,61 +1240,22 @@ SSATmp* implClsMethCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     PUNT(ClsMeth-ClsMeth-cmp);
   }
 
-  if (!RO::EvalIsCompatibleClsMethType) {
-    return emitMixedClsMethCmp(env, op);
+  // Left (TClsMeth) is compatible with vec
+  if (rightTy <= TVec && RO::EvalIsCompatibleClsMethType) {
+    raiseClsMethToVecWarningHelper(env);
+    auto const arr = convertClsMethToVec(env, left);
+    const auto ret = implVecCmp(env, op, arr, right);
+    decRef(env, arr);
+    return ret;
+  } else if (rightTy <= TRFunc) {
+    PUNT(RFunc-cmp);
+  } else if (rightTy <= TRClsMeth) {
+    PUNT(RClsMeth-cmp);
+  } else if (rightTy <= TRecord) {
+    PUNT(Record-cmp);
   }
 
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    // Left (TClsMeth) is compatible with vec
-    if (rightTy <= TVec) {
-      raiseClsMethToVecWarningHelper(env);
-      auto const arr = convertClsMethToVec(env, left);
-      const auto ret = implVecCmp(env, op, arr, right);
-      decRef(env, arr);
-      return ret;
-    } else {
-      return emitMixedClsMethCmp(env, op);
-    }
-  } else {
-    // Left (TClsMeth) is compatible with varray
-    if (rightTy.subtypeOfAny(TNull, TInt, TDbl, TStr)) {
-      // Null is always less than TClsMeth
-      // ints,dbls,strs are implicitly less than TClsMeth
-      raiseClsMethCompareWarningHelper(env, op);
-      return emitConstCmp(env, op, true, false);
-    } else if (rightTy <= TBool) {
-      raiseClsMethCompareWarningHelper(env, op);
-      return gen(env, toBoolCmpOpcode(op), cns(env, true), right);
-    } else if (rightTy <= TObj) {
-      raiseClsMethCompareWarningHelper(env, op);
-      // collections are greater than TClsMeth
-      return
-        emitCollectionCheck(
-          env,
-          op,
-          right,
-          [&]{ return emitConstCmp(env, op, false, true); }
-        );
-    } else if (rightTy <= TVec) {
-      raiseHACCompareWarningHelper(env);
-      if (RuntimeOption::EvalRaiseClsMethComparisonWarning) {
-        gen(
-          env,
-          RaiseNotice,
-          cns(env, makeStaticString(Strings::CLSMETH_COMPAT_VEC_CMP))
-        );
-      }
-      return emitMixedVecCmp(env, op);
-    } else if (rightTy <= TDict) {
-      raiseClsMethCompareWarningHelper(env, op);
-      return emitMixedDictCmp(env, op);
-    } else if (rightTy <= TKeyset) {
-      raiseClsMethCompareWarningHelper(env, op);
-      return emitMixedKeysetCmp(env, op);
-    } else {
-      PUNT(ClsMeth-cmp);
-    }
-  }
+  return emitMixedClsMethCmp(env, op);
 }
 
 SSATmp* implRecordCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {

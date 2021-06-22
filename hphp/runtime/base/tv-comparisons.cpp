@@ -17,6 +17,7 @@
 
 #include <type_traits>
 
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -473,9 +474,8 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceData* rd) {
     case KindOfResource:
       return op(cell.m_data.pres->data(), rd);
 
-    case KindOfFunc: {
+    case KindOfFunc:
       return op.funcVsNonFunc();
-    }
 
     case KindOfClass: {
       auto const str = classToStringHelper(cell.m_data.pclass);
@@ -521,6 +521,7 @@ typename Op::RetType tvRelOpVec(Op op, TypedValue cell, const ArrayData* a) {
     if (cell.m_type == KindOfNull) return op(false, a);
     if (isDictType(cell.m_type)) return op.dictVsNonDict();
     if (isKeysetType(cell.m_type)) return op.keysetVsNonKeyset();
+    if (isClsMethType(cell.m_type)) return op.clsmethVsNonClsMeth();
     return op.vecVsNonVec();
   }
 
@@ -537,6 +538,7 @@ typename Op::RetType tvRelOpDict(Op op, TypedValue cell, const ArrayData* a) {
     if (cell.m_type == KindOfNull) return op(false, a);
     if (isVecType(cell.m_type)) return op.vecVsNonVec();
     if (isKeysetType(cell.m_type)) return op.keysetVsNonKeyset();
+    if (isClsMethType(cell.m_type)) return op.clsmethVsNonClsMeth();
     return op.dictVsNonDict();
   }
 
@@ -553,6 +555,7 @@ typename Op::RetType tvRelOpKeyset(Op op, TypedValue cell, const ArrayData* a) {
     if (cell.m_type == KindOfNull) return op(false, a);
     if (isVecType(cell.m_type)) return op.vecVsNonVec();
     if (isDictType(cell.m_type)) return op.dictVsNonDict();
+    if (isClsMethType(cell.m_type)) return op.clsmethVsNonClsMeth();
     return op.keysetVsNonKeyset();
   }
 
@@ -570,6 +573,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, ClsMethDataRef clsMeth) {
     case KindOfDouble:
     case KindOfPersistentString:
     case KindOfString:
+    case KindOfFunc:
     case KindOfClass:
     case KindOfLazyClass:
     case KindOfResource:
@@ -601,9 +605,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, ClsMethDataRef clsMeth) {
 
     case KindOfRecord:
       return op.recordVsNonRecord();
-
-    case KindOfFunc:
-      return op.funcVsNonFunc();
   }
   not_reached();
 }
@@ -681,7 +682,8 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Func* val) {
   assertx(tvIsPlausible(cell));
   assertx(val != nullptr);
 
-  if (!isFuncType(type(cell))) {
+  if (UNLIKELY(!isFuncType(type(cell)))) {
+    if (isClsMethType(cell.m_type)) return op.clsmethVsNonClsMeth();
     return op.funcVsNonFunc();
   }
 
@@ -982,8 +984,6 @@ struct Eq {
   }
   bool clsmethVsNonClsMeth() const { return false; }
 
-  bool warnOnClsMethNonClsMeth() const { return false; }
-
   bool operator()(ClsMethDataRef c1, ClsMethDataRef c2) const {
     return c1 == c2;
   }
@@ -1088,10 +1088,6 @@ struct CompareBase {
   }
   RetType clsmethVsNonClsMeth() const {
     throw_clsmeth_compare_exception();
-  }
-
-  bool warnOnClsMethNonClsMeth() const {
-    return RuntimeOption::EvalRaiseClsMethComparisonWarning;
   }
 
   bool operator()(const Func* f1, const Func* f2) const {

@@ -1,0 +1,6 @@
+Notice: Comparing float and int using equality in %s/intish_string_cases_literals.php on line 17
+44
+Notice: Comparing int and string using equality in %s/intish_string_cases_literals.php on line 82
+4
+Notice: Comparing bool and string using equality in %s/intish_string_cases_literals.php on line 117
+0baz

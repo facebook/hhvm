@@ -1,0 +1,139 @@
+bool(true)
+goes to:
+true
+bool(false)
+goes to:
+false
+NULL
+goes to:
+
+Notice: Comparing bool and null using equality in %s/misc_typed_cases.php on line 45
+false
+string(3) "str"
+goes to:
+
+Notice: Comparing bool and string using equality in %s/misc_typed_cases.php on line 42
+true
+int(1234)
+goes to:
+
+Notice: Comparing bool and int using equality in %s/misc_typed_cases.php on line 42
+true
+float(1234.5)
+goes to:
+
+Notice: Comparing bool and float using equality in %s/misc_typed_cases.php on line 42
+true
+string(4) "1234"
+goes to:
+
+Notice: Comparing bool and string using equality in %s/misc_typed_cases.php on line 42
+true
+string(6) "1234.5"
+goes to:
+
+Notice: Comparing bool and string using equality in %s/misc_typed_cases.php on line 42
+true
+int(42)
+goes to:
+
+Notice: Comparing bool and int using equality in %s/misc_typed_cases.php on line 42
+true
+float(42.5)
+goes to:
+
+Notice: Comparing bool and float using equality in %s/misc_typed_cases.php on line 42
+true
+string(2) "42"
+goes to:
+
+Notice: Comparing bool and string using equality in %s/misc_typed_cases.php on line 42
+true
+string(4) "42.5"
+goes to:
+
+Notice: Comparing bool and string using equality in %s/misc_typed_cases.php on line 42
+true
+string(0) ""
+goes to:
+
+Notice: Comparing bool and string using equality in %s/misc_typed_cases.php on line 45
+false
+object(Derp) (0) {
+}
+goes to:
+
+Notice: Comparing Derp and bool using equality in %s/misc_typed_cases.php on line 42
+true
+object(Herp) (1) {
+  ["x"]=>
+  string(1) "1"
+}
+goes to:
+
+Notice: Comparing Herp and bool using equality in %s/misc_typed_cases.php on line 42
+true
+object(Herp) (1) {
+  ["x"]=>
+  int(1)
+}
+goes to:
+
+Notice: Comparing Herp and bool using equality in %s/misc_typed_cases.php on line 42
+true
+object(stdClass) (0) {
+}
+goes to:
+
+Notice: Comparing bool and stdClass using equality in %s/misc_typed_cases.php on line 42
+true
+int(1)
+goes to:
+
+Notice: Comparing bool and int using equality in %s/misc_typed_cases.php on line 42
+true
+int(0)
+goes to:
+
+Notice: Comparing bool and int using equality in %s/misc_typed_cases.php on line 45
+false
+string(1) "0"
+goes to:
+
+Notice: Comparing bool and string using equality in %s/misc_typed_cases.php on line 45
+false
+resource(1) of type (stream)
+goes to:
+
+Notice: Comparing File and bool using equality in %s/misc_typed_cases.php on line 42
+true
+vec(1) {
+  int(1)
+}
+goes to:
+
+Notice: Comparing HH\vec and bool using equality in %s/misc_typed_cases.php on line 42
+true
+vec(1) {
+  string(1) "1"
+}
+goes to:
+
+Notice: Comparing HH\vec and bool using equality in %s/misc_typed_cases.php on line 42
+true
+object(HH\Vector) (1) {
+  [0]=>
+  int(1)
+}
+goes to:
+
+Notice: Comparing HH\Vector and bool using equality in %s/misc_typed_cases.php on line 42
+true
+object(HH\Vector) (1) {
+  [0]=>
+  string(1) "1"
+}
+goes to:
+
+Notice: Comparing HH\Vector and bool using equality in %s/misc_typed_cases.php on line 42
+true

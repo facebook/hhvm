@@ -1,0 +1,2 @@
+Notice: Comparing float and int using equality in %s/int_literal.php on line 6
+case 30.0

@@ -1,0 +1,155 @@
+string(0) ""
+goes to:
+""
+NULL
+goes to:
+
+Notice: Comparing null and string using equality in %s/string_cases_intish_floatish_falsy.php on line 64
+""
+bool(false)
+goes to:
+
+Notice: Comparing bool and string using equality in %s/string_cases_intish_floatish_falsy.php on line 61
+"0"
+string(1) "0"
+goes to:
+"0"
+string(4) "0eab"
+goes to:
+default
+string(3) "0.0"
+goes to:
+
+Notice: Comparing float and int using equality in %s/string_cases_intish_floatish_falsy.php on line 61
+"0"
+float(0)
+goes to:
+
+Notice: Comparing float and string using equality in %s/string_cases_intish_floatish_falsy.php on line 61
+"0"
+int(0)
+goes to:
+
+Notice: Comparing int and string using equality in %s/string_cases_intish_floatish_falsy.php on line 61
+"0"
+bool(true)
+goes to:
+
+Notice: Comparing bool and string using equality in %s/string_cases_intish_floatish_falsy.php on line 52
+"123"
+bool(false)
+goes to:
+
+Notice: Comparing bool and string using equality in %s/string_cases_intish_floatish_falsy.php on line 61
+"0"
+string(4) "4abc"
+goes to:
+"4abc"
+int(4)
+goes to:
+
+Notice: Comparing int and string using equality in %s/string_cases_intish_floatish_falsy.php on line 55
+"4abc"
+string(3) "4.0"
+goes to:
+default
+object(Derp) (0) {
+}
+goes to:
+default
+int(1)
+goes to:
+
+Notice: Comparing int and string using equality in %s/string_cases_intish_floatish_falsy.php on line 81
+1
+int(2)
+goes to:
+
+Notice: Comparing int and string using equality in %s/string_cases_intish_floatish_falsy.php on line 84
+2.0
+float(2)
+goes to:
+
+Notice: Comparing float and string using equality in %s/string_cases_intish_floatish_falsy.php on line 84
+2.0
+bool(true)
+goes to:
+
+Notice: Comparing bool and string using equality in %s/string_cases_intish_floatish_falsy.php on line 78
+foo
+bool(false)
+goes to:
+
+Notice: Comparing bool and string using equality in %s/string_cases_intish_floatish_falsy.php on line 93
+0
+NULL
+goes to:
+
+Notice: Comparing null and string using equality in %s/string_cases_intish_floatish_falsy.php on line 96
+{empty str}
+vec(0) {
+}
+goes to:
+default
+float(3.212)
+goes to:
+
+Notice: Comparing float and string using equality in %s/string_cases_intish_floatish_falsy.php on line 90
+3.212
+string(0) ""
+goes to:
+{empty str}
+string(1) "0"
+goes to:
+0
+string(4) "0eab"
+goes to:
+default
+string(3) "0.0"
+goes to:
+
+Notice: Comparing float and int using equality in %s/string_cases_intish_floatish_falsy.php on line 93
+0
+object(Derp) (0) {
+}
+goes to:
+default
+int(0)
+goes to:
+
+Notice: Comparing int and string using equality in %s/string_cases_intish_floatish_falsy.php on line 110
+{empty str}
+NULL
+goes to:
+
+Notice: Comparing null and string using equality in %s/string_cases_intish_floatish_falsy.php on line 110
+{empty str}
+bool(false)
+goes to:
+
+Notice: Comparing bool and string using equality in %s/string_cases_intish_floatish_falsy.php on line 110
+{empty str}
+bool(true)
+goes to:
+default
+string(1) "3"
+goes to:
+
+Notice: Comparing float and int using equality in %s/string_cases_intish_floatish_falsy.php on line 127
+3.0
+string(4) "3abc"
+goes to:
+
+string(2) "3a"
+goes to:
+
+int(3)
+goes to:
+
+Notice: Comparing int and string using equality in %s/string_cases_intish_floatish_falsy.php on line 127
+3.0
+float(3)
+goes to:
+
+Notice: Comparing float and string using equality in %s/string_cases_intish_floatish_falsy.php on line 127
+3.0

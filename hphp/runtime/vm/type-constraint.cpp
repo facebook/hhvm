@@ -1254,6 +1254,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
           return tc.isNullable() ? MK::IntOrNull : MK::Int;
         case KindOfPersistentString:
         case KindOfString:
+        case KindOfLazyClass:
           return tc.isNullable() ? MK::StrOrNull : MK::Str;
         case KindOfObject:
           return tc.isNullable() ? MK::ObjectOrNull : MK::Object;
@@ -1274,13 +1275,14 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfFunc:
         case KindOfRClsMeth:
         case KindOfClass:
-        case KindOfLazyClass:
           always_assert_flog(false, "Unexpected DataType");
       }
       not_reached();
     }
     case AnnotMetaType::ArrayKey:
       return tc.isNullable() ? MK::None : MK::IntOrStr;
+    case AnnotMetaType::Classname:
+      return tc.isNullable() ? MK::StrOrNull : MK::Str;
     case AnnotMetaType::Mixed:
     case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
@@ -1292,7 +1294,6 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
     case AnnotMetaType::Number:
     case AnnotMetaType::VecOrDict:
     case AnnotMetaType::ArrayLike:
-    case AnnotMetaType::Classname:
       return MK::None;
   }
   not_reached();

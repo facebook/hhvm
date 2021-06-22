@@ -1,1 +1,1 @@
--vRuntime.Eval.IsCompatibleClsMethType=1 -vRuntime.Eval.RaiseClassConversionWarning=1
+-vRuntime.Eval.IsCompatibleClsMethType=1 -vRuntime.Eval.EmitClassPointers=2 -vRuntime.Eval.RaiseClassConversionWarning=1

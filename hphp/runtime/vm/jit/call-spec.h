@@ -52,6 +52,7 @@ namespace detail {
   T(ActRec*, TFramePtr)          \
   T(AsioBlockableChain, TABC)    \
   T(Class*, TCls)                \
+  T(LazyClassData, TLazyCls)     \
   T(Func*, TFunc)                \
   T(RFuncData*, TRFunc)          \
   T(ClsMethDataRef, TClsMeth)    \

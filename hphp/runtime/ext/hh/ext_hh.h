@@ -30,6 +30,7 @@ TypedValue serialize_memoize_param_arr(ArrayData*);
 TypedValue serialize_memoize_param_obj(ObjectData*);
 TypedValue serialize_memoize_param_col(ObjectData*);
 TypedValue serialize_memoize_param_str(StringData*);
+TypedValue serialize_memoize_param_lazycls(LazyClassData);
 TypedValue serialize_memoize_param_dbl(double);
 
 extern const StaticString

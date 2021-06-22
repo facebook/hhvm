@@ -1,0 +1,36 @@
+function(foo)
+foo(1)
+function(foo)
+foo(2)
+string(3) "foo"
+foo(1)
+string(3) "foo"
+foo(2)
+classMeth{
+  class(A)
+  function(b)
+}
+A::b(3)
+classMeth{
+  class(A)
+  function(b)
+}
+A::b(4)
+
+Warning: Class to string conversion in %s/test/slow/memoize-ptr.php on line 16
+vec(2) {
+  string(1) "a"
+  string(1) "b"
+}
+A::b(3)
+
+Warning: Class to string conversion in %s/test/slow/memoize-ptr.php on line 16
+vec(2) {
+  string(1) "a"
+  string(1) "b"
+}
+A::b(4)
+
+Warning: Class to string conversion in %s/test/slow/memoize-ptr.php on line 16
+
+Warning: Class to string conversion in %s/test/slow/memoize-ptr.php on line 16

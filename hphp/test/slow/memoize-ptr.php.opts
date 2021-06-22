@@ -1,4 +1,5 @@
 -vEval.IsCompatibleClsMethType=1
 -vEval.IsVecNotices=1
 -vEval.VecHintNotices=1
--vEval.RaiseClassConversionWarning=1
+-vEval.EmitClassPointers=2
+-vEval.RaiseClassConversionWarning=true

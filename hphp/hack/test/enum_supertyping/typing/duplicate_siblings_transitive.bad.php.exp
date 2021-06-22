@@ -1,4 +1,4 @@
 File "duplicate_siblings_transitive.bad.php", line 18, characters 7-7:
-H cannot re-inherit constant A from \G (Typing[4389])
+H cannot re-inherit constant A from G (Typing[4389])
   File "duplicate_siblings_transitive.bad.php", line 16, characters 6-6:
   because it already inherited it via E

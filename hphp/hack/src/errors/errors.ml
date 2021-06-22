@@ -5074,7 +5074,7 @@ let reinheriting_classish_const
       ^ " cannot re-inherit constant "
       ^ const_name
       ^ " from "
-      ^ src_classish_name )
+      ^ strip_ns src_classish_name )
     [
       ( Pos_or_decl.of_raw_pos dest_classish_pos,
         "because it already inherited it via " ^ strip_ns existing_const_origin

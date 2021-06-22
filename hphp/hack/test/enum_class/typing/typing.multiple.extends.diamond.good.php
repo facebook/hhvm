@@ -15,10 +15,6 @@ enum class D2 : mixed extends D0 {
    string D = '';
 }
 
-// D3 --> D1 ---> D0
-// |----> D2------^
-// diamons are never ok, and detected at redeclaring constants from the
-// root (D0)
 enum class D3: mixed extends D1, D2 {
    int E = 0;
 }

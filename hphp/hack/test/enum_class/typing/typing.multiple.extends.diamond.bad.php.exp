@@ -1,8 +1,0 @@
-File "typing.multiple.extends.diamond.bad.php", line 22, characters 34-35:
-D3 cannot re-inherit constant A from \D2 (Typing[4389])
-  File "typing.multiple.extends.diamond.bad.php", line 22, characters 12-13:
-  because it already inherited it via D0
-File "typing.multiple.extends.diamond.bad.php", line 22, characters 34-35:
-D3 cannot re-inherit constant B from \D2 (Typing[4389])
-  File "typing.multiple.extends.diamond.bad.php", line 22, characters 12-13:
-  because it already inherited it via D0

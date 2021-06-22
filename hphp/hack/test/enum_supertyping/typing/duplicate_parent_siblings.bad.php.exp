@@ -1,5 +1,5 @@
 File "duplicate_parent_siblings.bad.php", line 14, characters 7-8:
-F1 cannot re-inherit constant A from \E2 (Typing[4389])
+F1 cannot re-inherit constant A from E2 (Typing[4389])
   File "duplicate_parent_siblings.bad.php", line 12, characters 6-7:
   because it already inherited it via E1
 File "duplicate_parent_siblings.bad.php", line 15, characters 3-3:
@@ -7,7 +7,7 @@ F1 cannot re-declare constant A (Typing[4389])
   File "duplicate_parent_siblings.bad.php", line 12, characters 6-7:
   because it already inherited it via E1
 File "duplicate_parent_siblings.bad.php", line 19, characters 11-12:
-F2 cannot re-inherit constant A from \E2 (Typing[4389])
+F2 cannot re-inherit constant A from E2 (Typing[4389])
   File "duplicate_parent_siblings.bad.php", line 18, characters 6-7:
   because it already inherited it via E1
 File "duplicate_parent_siblings.bad.php", line 20, characters 3-3:

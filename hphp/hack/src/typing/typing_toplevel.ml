@@ -1129,8 +1129,8 @@ let check_enum_includes env cls =
                   origin_const_pos
                   src_class_name
                   const_name
-              else
-                (* multiple inherit *)
+              else if String.( <> ) origin_class_name class_const.cc_origin then
+                (* check for diamond inclusion, if not raise an error about multiple inherit *)
                 Errors.reinheriting_classish_const
                   dest_class_pos
                   dest_class_name

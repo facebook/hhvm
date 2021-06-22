@@ -105,6 +105,13 @@ let with_deferred_decls
     ~enable ~declaration_threshold_opt ~memory_mb_threshold_opt f =
   reset ~enable ~declaration_threshold_opt ~memory_mb_threshold_opt;
   let result = f () in
-  match get_deferments () with
-  | [] -> Ok result
-  | deferred_files -> Error deferred_files
+  let result =
+    match get_deferments () with
+    | [] -> Ok result
+    | deferred_files -> Error deferred_files
+  in
+  reset
+    ~enable:false
+    ~declaration_threshold_opt:None
+    ~memory_mb_threshold_opt:None;
+  result

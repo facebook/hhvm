@@ -428,7 +428,6 @@ type t = {
   search_chunk_size: int;
   io_priority: int;
   cpu_priority: int;
-  saved_state_cache_limit: int;
   can_skip_deptable: bool;
   shm_dirs: string list;
   state_loader_timeouts: State_loader_config.timeouts;
@@ -440,7 +439,6 @@ type t = {
   (* See HhMonitorInformant. *)
   use_dummy_informant: bool;
   informant_min_distance_restart: int;
-  informant_use_xdb: bool;
   use_full_fidelity_parser: bool;
   interrupt_on_watchman: bool;
   interrupt_on_client: bool;
@@ -583,7 +581,6 @@ let default =
     search_chunk_size = 0;
     io_priority = 7;
     cpu_priority = 10;
-    saved_state_cache_limit = 20;
     can_skip_deptable = true;
     shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir];
     max_workers = None;
@@ -592,7 +589,6 @@ let default =
     state_loader_timeouts = State_loader_config.default_timeouts;
     use_dummy_informant = true;
     informant_min_distance_restart = 100;
-    informant_use_xdb = false;
     use_full_fidelity_parser = true;
     interrupt_on_watchman = false;
     interrupt_on_client = false;
@@ -892,13 +888,6 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.informant_min_distance_restart
       config
   in
-  let informant_use_xdb =
-    bool_if_min_version
-      "informant_use_xdb_v5"
-      ~default:default.informant_use_xdb
-      ~current_version
-      config
-  in
   let type_decl_bucket_size =
     int_ "type_decl_bucket_size" ~default:default.type_decl_bucket_size config
   in
@@ -910,12 +899,6 @@ let load_ fn ~silent ~current_version overrides =
   in
   let io_priority = int_ "io_priority" ~default:default.io_priority config in
   let cpu_priority = int_ "cpu_priority" ~default:default.cpu_priority config in
-  let saved_state_cache_limit =
-    int_
-      "saved_state_cache_limit"
-      ~default:default.saved_state_cache_limit
-      config
-  in
   let can_skip_deptable =
     bool_if_min_version
       "can_skip_deptable"
@@ -1273,7 +1256,6 @@ let load_ fn ~silent ~current_version overrides =
     search_chunk_size;
     io_priority;
     cpu_priority;
-    saved_state_cache_limit;
     can_skip_deptable;
     shm_dirs;
     max_workers;
@@ -1282,7 +1264,6 @@ let load_ fn ~silent ~current_version overrides =
     state_loader_timeouts;
     use_dummy_informant;
     informant_min_distance_restart;
-    informant_use_xdb;
     use_full_fidelity_parser;
     interrupt_on_watchman;
     interrupt_on_client;

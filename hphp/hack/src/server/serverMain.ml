@@ -1246,9 +1246,6 @@ let program_init genv env =
   ServerProgress.send_progress "wrapping up init...";
   genv.wait_until_ready ();
   ServerStamp.touch_stamp ();
-  let informant_use_xdb =
-    genv.local_config.ServerLocalConfig.informant_use_xdb
-  in
   let load_script_timeout =
     genv.local_config.ServerLocalConfig.load_state_script_timeout
   in
@@ -1256,7 +1253,6 @@ let program_init genv env =
   let telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
   HackEventLogger.init_lazy_end
     telemetry
-    ~informant_use_xdb
     ~load_script_timeout
     ~state_distance
     ~approach_name

@@ -12,56 +12,6 @@ include HhMonitorInformant_sig.Types
 module WEWClient = WatchmanEventWatcherClient
 module WEWConfig = WatchmanEventWatcherConfig
 
-module type State_loader_prefetcher_sig = sig
-  val fetch :
-    hhconfig_hash:string ->
-    cache_limit:int ->
-    State_loader.saved_state_handle ->
-    unit Future.t
-end
-
-module State_loader_prefetcher_real = struct
-  let fetch ~hhconfig_hash ~cache_limit handle =
-    let error_to_string (error : State_loader.error) : string =
-      let State_loader.
-            {
-              message;
-              auto_retry = _;
-              stack = Utils.Callstack stack;
-              environment;
-            } =
-        State_loader.error_string_verbose error
-      in
-      message
-      ^ "\n"
-      ^ stack
-      ^ "\nEnvironment:\b"
-      ^ Option.value environment ~default:"N/A"
-    in
-    let future =
-      (* TODO(hverr): Support 64-bit *)
-      State_loader.fetch_saved_state
-        ~load_64bit:false
-        ~cache_limit
-        ~config:State_loader_config.default_timeouts
-        ~config_hash:hhconfig_hash
-        handle
-    in
-    Future.continue_with future @@ function
-    | Ok result -> ignore result
-    | Error error -> failwith (error_to_string error)
-end
-
-module State_loader_prefetcher_fake = struct
-  let fetch ~hhconfig_hash:_ ~cache_limit:_ _handle = Future.of_value ()
-end
-
-module State_loader_prefetcher =
-( val if Injector_config.use_test_stubbing then
-        (module State_loader_prefetcher_fake : State_loader_prefetcher_sig)
-      else
-        (module State_loader_prefetcher_real : State_loader_prefetcher_sig) )
-
 (** We need to query mercurial to convert an hg revision into a numerical
  * global revision. These queries need to be non-blocking, so we keep a cache
  * of the mapping in here, as well as the Futures corresponding to
@@ -73,28 +23,9 @@ module Revision_map = struct
    *)
   type t = {
     global_rev_queries: (Hg.hg_rev, Hg.global_rev Future.t) Caml.Hashtbl.t;
-    xdb_queries: (Hg.global_rev, query) Caml.Hashtbl.t;
-    use_xdb: bool;
-    ignore_hh_version: bool;
-    ignore_hhconfig: bool;
-    saved_state_cache_limit: int;
   }
 
-  and query = {
-    query: Xdb.sql_result list Future.t;
-    prefetcher: unit Future.t option ref;
-  }
-
-  let create
-      ~saved_state_cache_limit ~use_xdb ~ignore_hh_version ~ignore_hhconfig =
-    {
-      global_rev_queries = Caml.Hashtbl.create 200;
-      xdb_queries = Caml.Hashtbl.create 200;
-      use_xdb;
-      ignore_hh_version;
-      ignore_hhconfig;
-      saved_state_cache_limit;
-    }
+  let create () = { global_rev_queries = Caml.Hashtbl.create 200 }
 
   let add_query ~hg_rev root t =
     (* Don't add if we already have an entry for this. *)
@@ -122,235 +53,6 @@ module Revision_map = struct
              ~f:(HackEventLogger.find_svn_rev_failed (Future.start_t future))
       in
       Some (result |> Result.ok |> Option.value ~default:0)
-
-  (* XDB table changes over time. Prior queries should be cleared out after
-   * we'v finished using the result completely (i.e. also allowed the
-   * Prefetcher to finish) so that we don't reuse old results. *)
-  let clear_xdb_query ~global_rev t =
-    Caml.Hashtbl.remove t.xdb_queries global_rev
-
-  (**
-     * Does an async query to XDB to find nearest saved state match.
-     * If no match is found, returns an empty list.
-     * If query is not ready returns None.
-     *
-     * Non-blocking.
-     *)
-  let find_xdb_match global_rev t =
-    let query =
-      let query = Caml.Hashtbl.find_opt t.xdb_queries global_rev in
-      if Option.is_some query then
-        query
-      else
-        let (hhconfig_hash, _config) =
-          Config_file.parse_hhconfig
-            ~silent:false
-            (Relative_path.to_absolute ServerConfig.filename)
-        in
-        let hhconfig_hash =
-          if t.ignore_hhconfig then
-            None
-          else
-            Some hhconfig_hash
-        in
-        (* Query doesn't exist yet, so we create one and consume it when
-         * it's ready. *)
-        let future =
-          let hh_version =
-            if t.ignore_hh_version then
-              None
-            else
-              Some Build_id.build_revision
-          in
-          (* TODO(hverr): Support 64-bit state *)
-          Xdb.find_nearest
-            ~db:Xdb.hack_db_name
-            ~db_table:Xdb.saved_states_table
-            ~load_64bit:false
-            ~global_rev
-            ~hh_version
-            ~hhconfig_hash
-          |> fst
-        in
-        let () =
-          Caml.Hashtbl.add
-            t.xdb_queries
-            global_rev
-            { query = future; prefetcher = ref None }
-        in
-        None
-    in
-    let query_to_result_list future =
-      Future.get future
-      |> Result.map_error ~f:Future.error_to_string
-      |> Result.map_error
-           ~f:(HackEventLogger.find_xdb_match_failed (Future.start_t future))
-      |> Result.ok
-      |> Option.value ~default:[]
-    in
-    let prefetch_package xdb_result =
-      let rev = Hg.Global_rev xdb_result.Xdb.global_rev in
-      let config_hash = xdb_result.Xdb.hhconfig_hash in
-      let saved_state_handle =
-        {
-          State_loader.saved_state_for_rev = rev;
-          saved_state_everstore_handle = xdb_result.Xdb.everstore_handle;
-          watchman_mergebase = None;
-        }
-      in
-      let cached_state =
-        (* TODO(hverr): Support 64-bit state *)
-        State_loader.cached_state
-          ~load_64bit:false
-          ~saved_state_handle
-          ~config_hash
-          ~rev
-      in
-      match cached_state with
-      | Some _ ->
-        Hh_logger.log
-          "Informant found cached saved state for %s"
-          (Hg.show_rev rev);
-        Future.of_value ()
-      | None ->
-        State_loader_prefetcher.fetch
-          ~hhconfig_hash:config_hash
-          ~cache_limit:t.saved_state_cache_limit
-          saved_state_handle
-    in
-    let not_yet_ready =
-      (* We use None to represent a not yet ready result. Check again later *)
-      None
-    in
-    let no_good_xdb_result () =
-      let () = clear_xdb_query ~global_rev t in
-      Some []
-    in
-    let good_xdb_result result =
-      let () = clear_xdb_query ~global_rev t in
-      Some [result]
-    in
-    Option.(
-      (* We run the prefetcher after the XDB lookup (because we need the XDB
-       * result to run the prefetcher). *)
-      query >>= fun { query; prefetcher } ->
-      match (query, !prefetcher) with
-      | (query, Some prefetcher) ->
-        begin
-          match Future.check_status prefetcher with
-          | Future.In_progress { age } when Float.(age > 90.0) ->
-            (* If prefetcher has taken longer than 90 seconds, we consider
-             * this as having no saved states. *)
-            let () = Hh_logger.log "Informant prefetcher timed out" in
-            let () =
-              HackEventLogger.informant_prefetcher_timed_out
-                (Future.start_t prefetcher)
-            in
-            no_good_xdb_result ()
-          | Future.In_progress _ ->
-            (* Prefetcher is still running. "Not yet ready, check later." *)
-            not_yet_ready
-          | Future.Complete_with_result (Ok ()) ->
-            (* This is the only case where we produce a positive result
-             * (where the prefetcher succeeded). Prefetchr is only run after
-             * XDB lookup finishes and produces a non-empty result list,
-             * so we know the XDB list is non-empty here. *)
-            let () =
-              HackEventLogger.informant_prefetcher_success
-                (Future.start_t prefetcher)
-            in
-            good_xdb_result (List.hd_exn (query_to_result_list query))
-          | Future.Complete_with_result (Error e) ->
-            Hh_logger.log
-              "Informant prefetcher failed with error: %s"
-              (Future.error_to_string e);
-            let () =
-              HackEventLogger.informant_prefetcher_failed
-                (Future.start_t prefetcher)
-                (Future.error_to_string e)
-            in
-            no_good_xdb_result ()
-        end
-      | (query, None) ->
-        begin
-          match Future.check_status query with
-          | Future.In_progress { age } when Float.(age > 15.0) ->
-            (* If lookup in XDB table has taken more than 15 seconds, we
-             * we consider this as having no saved state. *)
-            let () =
-              HackEventLogger.find_xdb_match_timed_out (Future.start_t query)
-            in
-            no_good_xdb_result ()
-          | Future.In_progress _ ->
-            (* XDB lookup still in progress. "Not yet ready, check later." *)
-            not_yet_ready
-          | Future.Complete_with_result _ ->
-            let result = query_to_result_list query in
-            if List.is_empty result then
-              let () =
-                Hh_logger.log
-                  "Got no XDB results on merge base change to %d"
-                  global_rev
-              in
-              let () = HackEventLogger.informant_no_xdb_result () in
-              no_good_xdb_result ()
-            else
-              let () =
-                HackEventLogger.find_xdb_match_success (Future.start_t query)
-              in
-              (* XDB looup is done, so we need to fire up the prefetcher.
-               * The prefetcher's status will be checked on the next loop. *)
-              let () =
-                prefetcher := Some (prefetch_package (List.hd_exn result))
-              in
-              not_yet_ready
-        end)
-
-  (**
-    * Looks up the global revision for this hg_rev, and prefetches the Saved State for that global
-    * rev. Converting hg_rev to an global rev takes on the order of seconds, and prefetching
-    * 10-20 seconds. This will run those operations asynchronously, stash those operations
-    * away for later checking.
-    *
-    * Returns the actual result after both operations have completed.
-    *
-    * Returns None while those operations are still in progress (on a None
-    * result, you should check again later).
-    * *)
-  let find_and_prefetch ~start_t hg_rev t =
-    let global_rev = find_global_rev hg_rev t in
-    Option.(
-      global_rev >>= fun global_rev ->
-      if t.use_xdb then
-        find_xdb_match global_rev t >>= fun xdb_results ->
-        (* We log the mergebase after the XDB lookup and prefetch has
-         * completed to avoid log spam, since the "find_global_rev" result
-         * is pinged once per second until completion. *)
-        let () =
-          Hh_logger.log "Informant Mergebase: %s -> %d" hg_rev global_rev
-        in
-        let () =
-          match xdb_results with
-          | [] ->
-            let () =
-              Hh_logger.log
-                "Informant Saved State not found or prefetcher failed for global_rev %d"
-                global_rev
-            in
-            HackEventLogger.informant_find_saved_state_failed start_t
-          | result :: _ ->
-            let distance = abs (global_rev - result.Xdb.global_rev) in
-            let () =
-              Hh_logger.log
-                "Informant found Saved State and prefetched for global_rev %d at distance %d"
-                global_rev
-                distance
-            in
-            HackEventLogger.informant_find_saved_state_success ~distance start_t
-        in
-        Some (global_rev, xdb_results)
-      else
-        Some (global_rev, []))
 end
 
 (**
@@ -410,10 +112,7 @@ module Revision_tracker = struct
     watchman: Watchman.watchman_instance ref;
     root: Path.t;
     min_distance_restart: int;
-    saved_state_cache_limit: int;
-    use_xdb: bool;
     ignore_hh_version: bool;
-    ignore_hhconfig: bool;
     is_saved_state_precomputed: bool;
   }
 
@@ -463,10 +162,7 @@ module Revision_tracker = struct
 
   let init
       ~min_distance_restart
-      ~use_xdb
       ~ignore_hh_version
-      ~ignore_hhconfig
-      ~saved_state_cache_limit
       ~is_saved_state_precomputed
       watchman
       root =
@@ -475,10 +171,7 @@ module Revision_tracker = struct
         watchman = ref watchman;
         root;
         min_distance_restart;
-        saved_state_cache_limit;
-        use_xdb;
         ignore_hh_version;
-        ignore_hhconfig;
         is_saved_state_precomputed;
       }
     in
@@ -499,12 +192,7 @@ module Revision_tracker = struct
     {
       inits = init_settings;
       current_base_revision = ref base_global_rev;
-      rev_map =
-        Revision_map.create
-          ~saved_state_cache_limit:init_settings.saved_state_cache_limit
-          ~use_xdb:init_settings.use_xdb
-          ~ignore_hh_version:init_settings.ignore_hh_version
-          ~ignore_hhconfig:init_settings.ignore_hhconfig;
+      rev_map = Revision_map.create ();
       state_changes = Queue.create ();
       is_in_hg_update_state = ref false;
       is_in_hg_transaction_state = ref false;
@@ -539,75 +227,29 @@ module Revision_tracker = struct
   (** Form a decision about whether or not we'd like to start a new server.
    * transition: The state transition for which we are forming a decision
    * global_rev: The corresponding global rev for this transition's hg rev.
-   * xdb_results: The nearest saved states for this global_rev provided by the XDB table.
    *)
-  let form_decision
-      ~start_t ~significant transition server_state xdb_results global_rev env =
-    let use_xdb = env.inits.use_xdb in
+  let form_decision ~significant transition server_state env =
     Informant_sig.(
-      match (significant, transition, server_state, xdb_results) with
-      | (_, State_leave _, Server_not_yet_started, _) ->
+      match (significant, transition, server_state) with
+      | (_, State_leave _, Server_not_yet_started) ->
         (* This is reachable when server stopped in the middle of rebase. Instead
       * of restarting immediately, we go back to Server_not_yet_started, and want
       * to restart only when hg.update state is vacated *)
         Restart_server None
-      | (_, State_leave _, Server_dead, _) ->
+      | (_, State_leave _, Server_dead) ->
         (* Regardless of whether we had a significant change or not, when the
          * server is not alive, we restart it on a state leave.*)
         Restart_server None
-      | (false, _, _, _) ->
+      | (false, _, _) ->
         let () = Hh_logger.log "Informant insignificant transition" in
         Move_along
-      | (true, State_enter _, _, _)
-      | (true, State_leave _, _, _) ->
+      | (true, State_enter _, _)
+      | (true, State_leave _, _) ->
         (* We use the State enter and leave events to kick off asynchronous
          * computations off the hg revisions when they arrive (during preprocess)
          * But actual actions are taken only on changed_merge_base below. *)
         Move_along
-      | (true, Changed_merge_base _, _, []) when use_xdb ->
-        (* No XDB results, so w don't restart. *)
-        Move_along
-      | ( true,
-          Changed_merge_base (_rev, files_changed, watchman_clock),
-          _,
-          nearest_xdb_result :: _ )
-        when use_xdb ->
-        let state_distance =
-          abs @@ (nearest_xdb_result.Xdb.global_rev - global_rev)
-        in
-        let incremental_distance =
-          abs @@ (global_rev - !(env.current_base_revision))
-        in
-        let () =
-          HackEventLogger.informant_decision_on_saved_state
-            ~start_t
-            ~state_distance
-            ~incremental_distance
-        in
-        if incremental_distance > state_distance then
-          let watchman_mergebase =
-            {
-              ServerMonitorUtils.mergebase_global_rev = global_rev;
-              files_changed;
-              watchman_clock;
-            }
-          in
-          let target_state =
-            {
-              ServerMonitorUtils.saved_state_everstore_handle =
-                nearest_xdb_result.Xdb.everstore_handle;
-              target_global_rev = nearest_xdb_result.Xdb.global_rev;
-              watchman_mergebase = Some watchman_mergebase;
-            }
-          in
-          Restart_server (Some target_state)
-        else
-          let () =
-            Hh_logger.log
-              "Informant: Incremental distance <= state distance. Ignoring fetched Saved State."
-          in
-          Move_along
-      | (true, Changed_merge_base _, _, _) ->
+      | (true, Changed_merge_base _, _) ->
         (* If the current server was started using a precomputed saved-state,
          * we don't want to relaunch the server. If we do, it'll reuse
          * the previously used saved-state for the new mergebase and more
@@ -634,11 +276,9 @@ module Revision_tracker = struct
       | Changed_merge_base (hg_rev, _, _) ->
         hg_rev
     in
-    match
-      Revision_map.find_and_prefetch ~start_t:timestamp hg_rev env.rev_map
-    with
+    match Revision_map.find_global_rev hg_rev env.rev_map with
     | None -> None
-    | Some (global_rev, xdb_results) ->
+    | Some global_rev ->
       let jump_distance = get_jump_distance global_rev env in
       let elapsed_t = Unix.time () -. timestamp in
       let significant =
@@ -647,16 +287,7 @@ module Revision_tracker = struct
           ~jump_distance
           elapsed_t
       in
-      Some
-        ( form_decision
-            ~start_t:timestamp
-            ~significant
-            transition
-            server_state
-            xdb_results
-            global_rev
-            env,
-          global_rev )
+      Some (form_decision ~significant transition server_state env, global_rev)
 
   (**
    * Keep popping state_changes queue until we reach a non-ready result.
@@ -959,11 +590,8 @@ let init
       allow_subscriptions;
       use_dummy;
       min_distance_restart;
-      saved_state_cache_limit;
-      use_xdb;
       watchman_debug_logging;
       ignore_hh_version;
-      ignore_hhconfig;
       is_saved_state_precomputed;
     } =
   if use_dummy then
@@ -1000,10 +628,7 @@ let init
           revision_tracker =
             Revision_tracker.init
               ~min_distance_restart
-              ~use_xdb
               ~ignore_hh_version
-              ~ignore_hhconfig
-              ~saved_state_cache_limit
               ~is_saved_state_precomputed
               (Watchman.Watchman_alive watchman_env)
               root;

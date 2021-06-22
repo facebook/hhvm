@@ -73,10 +73,7 @@ module Tools = struct
       use_dummy = false;
       watchman_debug_logging = false;
       min_distance_restart = 100;
-      use_xdb = true;
-      saved_state_cache_limit = 20;
       ignore_hh_version = false;
-      ignore_hhconfig = false;
       is_saved_state_precomputed = false;
     }
 end
@@ -135,7 +132,6 @@ let make_test test =
       let is_saved_state_precomputed _ = false
     end : Mock_server_config_sig )
   in
-  Xdb.Mocking.reset_find_nearest ();
   Tools.set_hg_to_global_rev_map ();
   fun () ->
     Tempfile.with_tempdir (fun temp_dir ->
@@ -218,26 +214,11 @@ let test_restart_server_with_target_saved_state mock_server_config temp_dir =
   let monitor = Test_monitor.check_and_run_loop_once monitor in
   ignore monitor;
   let last_call = Mock_server_config.get_last_start_server_call () in
-  let expected_mergebase =
-    {
-      ServerMonitorUtils.mergebase_global_rev = 200;
-      files_changed = SSet.empty;
-      watchman_clock = "dummy_clock";
-    }
-  in
-  let state_target =
-    {
-      ServerMonitorUtils.saved_state_everstore_handle =
-        "dummy_handle_for_global_200";
-      target_global_rev = 200;
-      watchman_mergebase = Some expected_mergebase;
-    }
-  in
-  let expected = Some (Some state_target) in
+  let expected = Some None in
   Start_server_args_opt_asserter.assert_equals
     expected
     last_call
-    "Should be starting fresh server with target saved state after significant Changed_merge_base";
+    "Should be starting fresh server without saved-state Changed_merge_base";
   true
 
 let test_server_restart_suppressed_on_hhconfig_version_change

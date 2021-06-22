@@ -105,11 +105,7 @@ let monitor_daemon_main
           ServerArgs.watchman_debug_logging options || debug_logging;
         min_distance_restart =
           local_config.ServerLocalConfig.informant_min_distance_restart;
-        saved_state_cache_limit =
-          local_config.ServerLocalConfig.saved_state_cache_limit;
-        use_xdb = local_config.ServerLocalConfig.informant_use_xdb;
         ignore_hh_version = ServerArgs.ignore_hh_version options;
-        ignore_hhconfig = ServerArgs.saved_state_ignore_hhconfig options;
         is_saved_state_precomputed =
           (match ServerArgs.with_saved_state options with
           | Some (ServerArgs.Saved_state_target_info _) -> true

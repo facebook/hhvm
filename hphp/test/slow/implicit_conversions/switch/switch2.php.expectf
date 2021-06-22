@@ -1,35 +1,51 @@
 --------------------------------
 NULL
+
+Notice: Comparing int and null using equality in %s/switch2.php on line 35
 0
 --------------------------------
 bool(true)
+
+Notice: Comparing bool and int using equality in %s/switch2.php on line %s
 -1
 --------------------------------
 bool(false)
+
+Notice: Comparing bool and int using equality in %s/switch2.php on line 35
 0
 --------------------------------
 int(5)
 5
 --------------------------------
 float(2)
+
+Notice: Comparing float and int using equality in %s/switch2.php on line %s
 2 or 4: 2
 --------------------------------
 float(2.2)
 default
 --------------------------------
 string(1) "2"
+
+Notice: Comparing int and string using equality in %s/switch2.php on line %s
 2 or 4: 2
 --------------------------------
 string(3) "2.0"
+
+Notice: Comparing int and string using equality in %s/switch2.php on line %s
 2 or 4: 2.0
 --------------------------------
 string(3) "2.2"
 default
 --------------------------------
 string(4) "blar"
+
+Notice: Comparing int and string using equality in %s/switch2.php on line 35
 0
 --------------------------------
 string(0) ""
+
+Notice: Comparing int and string using equality in %s/switch2.php on line 35
 0
 --------------------------------
 int(4)
@@ -48,12 +64,16 @@ default
 object(stdClass) (0) {
 }
 %r(\nNotice: Object of class stdClass could not be converted to int in %s\/switch2\.php on line %s\n?)+%r
+Notice: Comparing int and stdClass using equality in %s/switch2.php on line %s
 1
 --------------------------------
 object(C) (0) {
 }
 %r(\nNotice: Object of class C could not be converted to int in %s\/switch2\.php on line %s\n?)+%r
+Notice: Comparing C and int using equality in %s/switch2.php on line %s
 1
 --------------------------------
 resource(4) of type (stream)
+
+Notice: Comparing File and int using equality in %s/switch2.php on line %s
 2 or 4: Resource id #4

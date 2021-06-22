@@ -1397,9 +1397,10 @@ typename Op::RetType tvRelOp(TypedValue cell, T val) {
         case DataType::Vec:      return "vec";
         case DataType::Dict:     return "dict";
         case DataType::Keyset:   return "keyset";
-        case DataType::Object:   return "object";
         case DataType::Resource: return "resource";
         case DataType::ClsMeth:  return "clsmeth";
+        case DataType::Object:
+          return cell.val().pobj->getVMClass()->name()->data();
       }
       not_reached();
     }();

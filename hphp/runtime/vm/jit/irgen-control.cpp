@@ -115,8 +115,6 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
   assertx(IMPLIES(!(type <= TInt), bounded));
   assertx(IMPLIES(bounded, iv.size() > 2));
   SSATmp* index;
-  SSATmp* ssabase = cns(env, base);
-  SSATmp* ssatargets = cns(env, nTargets);
 
   Offset defaultOff = bcOff(env) + iv.vec32()[iv.size() - 1];
   Offset zeroOff = 0;
@@ -126,13 +124,30 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
     zeroOff = defaultOff;
   }
 
+  const auto emitConvNotice = [&] {
+    const auto level = flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForEq);
+    if (level == ConvNoticeLevel::None) return;
+    // give it an int RHS for message generation
+    const auto rhs = cns(env, 42);
+    gen(env, RaiseBadComparisonViolation, BadComparisonData{true}, switchVal, rhs);
+  };
+
   if (type <= TNull) {
+    if (zeroOff != defaultOff) emitConvNotice();
     gen(env, Jmp, getBlock(env, zeroOff));
     return;
   }
   if (type <= TBool) {
     Offset nonZeroOff = bcOff(env) + iv.vec32()[iv.size() - 2];
-    gen(env, JmpNZero, getBlock(env, nonZeroOff), switchVal);
+    ifThen(
+      env,
+      [&] (Block* taken) { gen(env, JmpNZero, taken, switchVal); },
+      [&] {
+        if (nonZeroOff != defaultOff) emitConvNotice();
+        gen(env, Jmp, getBlock(env, nonZeroOff));
+      }
+    );
+    if (zeroOff != defaultOff) emitConvNotice();
     gen(env, Jmp, getBlock(env, zeroOff));
     return;
   }
@@ -145,20 +160,12 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
   if (type <= TInt) {
     // No special treatment needed
     index = switchVal;
-  } else if (type <= TDbl) {
-    // switch(Double|String|Obj)Helper do bounds-checking for us, so we need to
-    // make sure the default case is in the jump table, and don't emit our own
-    // bounds-checking code.
-    bounded = false;
-    index = gen(env, LdSwitchDblIndex, switchVal, ssabase, ssatargets);
-  } else if (type <= TStr) {
-    bounded = false;
-    index = gen(env, LdSwitchStrIndex, switchVal, ssabase, ssatargets);
-  } else if (type <= TObj) {
-    // switchObjHelper can throw exceptions and reenter the VM so we use the
-    // catch block here.
-    bounded = false;
-    index = gen(env, LdSwitchObjIndex, switchVal, ssabase, ssatargets);
+  } else if (type <= TDbl || type <= TStr || type <= TObj) {
+    // determining whether we'll hit a coercion is too complicated for the jit
+    // so just punt to the interpreter. These cases should be pretty cold so
+    // it shouldn't be a major issue, hopefully. If it is an issue, we should
+    // be able to just fix www.
+    PUNT(Switch-MaybeCoercingType);
   } else {
     PUNT(Switch-UnknownType);
   }
@@ -175,10 +182,10 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
     gen(env, JmpZero, getBlock(env, defaultOff), ok);
     bounded = false;
   };
-  auto const offsets = iv.range32();
 
   // We lower Switch to a series of comparisons if any of the successors are in
   // included in the region.
+  auto const offsets = iv.range32();
   auto const shouldLower =
     std::any_of(offsets.begin(), offsets.end(), [&](Offset o) {
       SrcKey sk(curSrcKey(env), bcOff(env) + o);

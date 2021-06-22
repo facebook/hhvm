@@ -3755,7 +3755,7 @@ SSATmp* simplifyCheckClsMethFunc(State& env, const IRInstruction* inst) {
 SSATmp* simplifyNewClsMeth(State& env, const IRInstruction* inst) {
   auto const cls = inst->src(0);
   auto const func = inst->src(1);
-  if (!cls->hasConstVal() && !func->hasConstVal()) return nullptr;
+  if (!cls->hasConstVal() || !func->hasConstVal()) return nullptr;
   auto const clsmeth = ClsMethDataRef::create(
       const_cast<Class*>(cls->clsVal()),
       const_cast<Func*>(func->funcVal()));

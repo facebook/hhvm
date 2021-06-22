@@ -300,6 +300,7 @@ pcre_literal_data::pcre_literal_data(const char* pattern, int coptions) {
   }
   if (!*p) {
     /* This is an encoding of a literal string. */
+    ITRACE(2, "Literal pattern: {}\n", pattern_buffer);
     literal_str = std::move(pattern_buffer);
   }
 }
@@ -622,10 +623,9 @@ static void init_local_extra(pcre_extra* local, pcre_extra* shared) {
 
 static const char* const*
 get_subpat_names(const pcre_cache_entry* pce) {
+  assertx(!pce->literal_data);
   char **subpat_names = pce->subpat_names.load(std::memory_order_relaxed);
-  if (subpat_names) {
-    return subpat_names;
-  }
+  if (subpat_names) return subpat_names;
 
   /*
   * Build a mapping from subpattern numbers to their names. We will always
@@ -708,9 +708,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
 
   /* Try to lookup the cached regex entry, and if successful, just pass
      back the compiled pattern, otherwise go on and compile it. */
-  if (s_pcreCache.find(accessor, regex, tkc)) {
-    return true;
-  }
+  if (s_pcreCache.find(accessor, regex, tkc)) return true;
 
   /* Parse through the leading whitespace, and display a warning if we
      get to the end without encountering a delimiter. */
@@ -830,6 +828,37 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
     raise_error("Error: Null byte found in pattern");
   }
 
+  /* Store the compiled pattern and extra info in the cache. */
+  auto const store_pcre_entry =
+    [&](pcre_literal_data& pld, pcre* re=nullptr, pcre_extra* extra=nullptr) {
+    assertx((poptions & ~0x1) == 0);
+    assertx((coptions & 0x80000000) == 0);
+    pcre_cache_entry* new_entry = new pcre_cache_entry();
+    new_entry->re = re;
+    new_entry->extra = extra;
+    new_entry->preg_options = poptions;
+    new_entry->compile_options = coptions;
+
+    if (pld.isLiteral()) {
+      new_entry->literal_data =
+        std::make_unique<pcre_literal_data>(std::move(pld));
+      new_entry->num_subpats = 1;
+    } else {
+       /* Get pcre full info */
+      if (!get_pcre_fullinfo(new_entry)) {
+        delete new_entry;
+        return false;
+      }
+    }
+
+    s_pcreCache.insert(accessor, regex, tkc, new_entry);
+    return true;
+  };
+
+  // If the pattern is a literal, we can skip compiling it.
+  auto literal_data = pcre_literal_data(pattern, coptions);
+  if (literal_data.isLiteral()) return store_pcre_entry(literal_data);
+
   /* Compile pattern and display a warning if compilation failed. */
   const char  *error;
   int erroffset;
@@ -840,10 +869,6 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   }
 
   // Careful: from here 're' needs to be freed if something throws.
-
-  // TODO(t14969501): enable literal_data everywhere and skip the
-  // pcre_compile above.
-  auto const literal_data = pcre_literal_data(pattern, coptions);
 
   /* If study option was specified, study the pattern and
      store the result in extra for passing to pcre_exec. */
@@ -897,29 +922,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
     }
   }
 
-  /* Store the compiled pattern and extra info in the cache. */
-  pcre_cache_entry* new_entry = new pcre_cache_entry();
-  new_entry->re = re;
-  new_entry->extra = extra;
-  if (literal_data.isLiteral()) {
-    new_entry->literal_data =
-      std::make_unique<pcre_literal_data>(std::move(literal_data));
-  }
-
-  assertx((poptions & ~0x1) == 0);
-  new_entry->preg_options = poptions;
-
-  assertx((coptions & 0x80000000) == 0);
-  new_entry->compile_options = coptions;
-
-  /* Get pcre full info */
-  if (!get_pcre_fullinfo(new_entry)) {
-    delete new_entry;
-    return false;
-  }
-
-  s_pcreCache.insert(accessor, regex, tkc, new_entry);
-  return true;
+  return store_pcre_entry(literal_data, re, extra);
 }
 
 static int* create_offset_array(const pcre_cache_entry* pce,
@@ -1058,7 +1061,7 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
     /* Check for too many substrings condition. */
     if (count == 0) {
       raise_warning("Matched, but too many substrings");
-      count = size_offsets / 3;
+      count = pce->num_subpats;
     } else if (count < 0 && count != PCRE_ERROR_NOMATCH) {
       if (pcre_need_log_error(count)) {
         pcre_log_error(__FUNCTION__, __LINE__, count,
@@ -1093,22 +1096,13 @@ static Variant preg_match_impl(StringData* pattern,
   if (!pcre_get_compiled_regex_cache(accessor, pattern)) {
     return preg_return_bad_regex_error(false);
   }
-  const pcre_cache_entry* pce = accessor.get();
-
-  const bool includeNonMatchingCaptures = flags & PREG_FB__PRIVATE__HSL_IMPL;
-
   pcre_extra extra;
+  const pcre_cache_entry* pce = accessor.get();
   init_local_extra(&extra, pce->extra);
-  if (subpats) {
-    *subpats = Array::CreateDict();
-  }
-  int exec_options = 0;
-
   int subpats_order = global ? PREG_PATTERN_ORDER : 0;
-  bool offset_capture = false;
-  if (flags) {
-    offset_capture = flags & PREG_OFFSET_CAPTURE;
+  if (subpats) *subpats = Array::CreateDict();
 
+  if (flags) {
     /*
      * subpats_order is pre-set to pattern mode so we change it only if
      * necessary.
@@ -1135,15 +1129,8 @@ static Variant preg_match_impl(StringData* pattern,
   int size_offsets = 0;
   int* offsets = create_offset_array(pce, size_offsets);
   SmartFreeHelper offsetsFreer(offsets);
-  int num_subpats = size_offsets / 3;
-  if (offsets == nullptr) {
-    return preg_return_internal_error(false);
-  }
-
-  const char* const* subpat_names = get_subpat_names(pce);
-  if (subpat_names == nullptr) {
-    return preg_return_internal_error(false);
-  }
+  int num_subpats = pce->num_subpats;
+  if (offsets == nullptr) return preg_return_internal_error(false);
 
   /* Allocate match sets array and initialize the values. */
 
@@ -1155,23 +1142,72 @@ static Variant preg_match_impl(StringData* pattern,
     }
   }
 
-  int matched = 0;
-
-  int g_notempty = 0; // If the match should not be empty
+  /*
+   * If PREG_OFFSET_CAPTURE, each match, instead of being a string, will
+   * be an array where the first element is a substring containing the
+   * match and the second element is the position of the first character of
+   * the substring in the input.
+   */
+  bool offset_capture = flags & PREG_OFFSET_CAPTURE;
   const char** stringlist; // Holds list of subpatterns
-  int i;
-  do {
+  auto const get_value = [&](int i) {
+    auto const length = offsets[(i<<1)+1] - offsets[i<<1];
+    auto const match = String(stringlist[i], length, CopyString);
+    return offset_capture
+      ? Variant(str_offset_pair(match, offsets[i<<1]))
+      : Variant(match);
+  };
+  auto const get_value_empty = [&](int i) {
+    auto const match = empty_string();
+    return offset_capture
+      ? Variant(str_offset_pair(match, offsets[i<<1]))
+      : Variant(match);
+  };
 
+  /*
+   * Skip building name table when using literal_data. Name table is used
+   * to add named subpatterns to result array. Literal data has none of these,
+   * so we can skip this step.
+   */
+  const char* const* subpat_names = nullptr;
+  auto const is_literal = pce->literal_data != nullptr;
+  if (!is_literal) {
+    subpat_names = get_subpat_names(pce);
+    if (subpat_names == nullptr) return preg_return_internal_error(false);
+  }
+  auto const set_subpats = [&](auto& arr, int i, const Variant& value) {
+    if (is_literal) return;
+    if (subpat_names[i]) arr.set(String(subpat_names[i]), value);
+  };
+
+  int i;
+  const bool includeNonMatchingCaptures = flags & PREG_FB__PRIVATE__HSL_IMPL;
+
+  // Add matches to result array for this run
+  auto add_match_set = [&](auto& arr, int count) {
+    for (i = 0; i < count; i++) {
+      auto const value = get_value(i);
+      set_subpats(arr, i, value);
+      arr.set(i, value);
+    }
+    if (includeNonMatchingCaptures) {
+      for (; i < num_subpats; i++) {
+        auto const value = get_value_empty(i);
+        set_subpats(arr, i, value);
+        arr.set(i, value);
+      }
+    }
+  };
+
+  int matched = 0;
+  int g_notempty = 0; // If the match should not be empty
+  int exec_options = 0;
+
+  do {
     int count = 0;
     int options = exec_options | g_notempty;
-    /*
-     * Optimization: If the pattern defines a literal substring,
-     * compare the strings directly (i.e. memcmp) instead of performing
-     * the full regular expression evaluation.
-     * Take the slow path if there are any special compile options.
-     */
-    if (pce->literal_data && literalOptions(options)) {
-      assertx(pce->literal_data->isLiteral() && pce->num_subpats == 1);
+    if (is_literal) {
+      assertx(literalOptions(options));
       count = pce->literal_data->matches(subject, start_offset, offsets, options)
         ? 1 : PCRE_ERROR_NOMATCH;
     } else {
@@ -1186,7 +1222,7 @@ static Variant preg_match_impl(StringData* pattern,
     /* Check for too many substrings condition. */
     if (count == 0) {
       raise_warning("Matched, but too many substrings");
-      count = size_offsets / 3;
+      count = num_subpats;
     }
 
     /* If something has matched */
@@ -1202,15 +1238,11 @@ static Variant preg_match_impl(StringData* pattern,
           return preg_return_internal_error(false);
         }
 
-        if (global) {  /* global pattern matching */
+        if (global) {
           if (subpats_order == PREG_PATTERN_ORDER) {
             /* For each subpattern, insert it into the appropriate array. */
             for (i = 0; i < count; i++) {
-              auto const length = offsets[(i<<1)+1] - offsets[i<<1];
-              auto const match = String(stringlist[i], length, CopyString);
-              auto const value = offset_capture
-                ? Variant(str_offset_pair(match, offsets[i<<1]))
-                : Variant(match);
+              auto const value = get_value(i);
               auto& arr = asArrRef(match_sets.lval(i));
               assertx(arr->isVectorData());
               arr.set(safe_cast<int64_t>(arr.size()), value);
@@ -1220,71 +1252,21 @@ static Variant preg_match_impl(StringData* pattern,
              * less than the total possible number, pad the result
              * arrays with empty strings.
              */
-            if (count < num_subpats) {
-              for (; i < num_subpats; i++) {
-                auto& arr = asArrRef(match_sets.lval(i));
-                assertx(arr->isVectorData());
-                arr.set(safe_cast<int64_t>(arr.size()), empty_string());
-              }
+            for (; i < num_subpats; i++) {
+              auto& arr = asArrRef(match_sets.lval(i));
+              assertx(arr->isVectorData());
+              arr.set(safe_cast<int64_t>(arr.size()), empty_string());
             }
           } else {
             auto result_set = Array::CreateDict();
-
-            /* Add all the subpatterns to it */
-            for (i = 0; i < count; i++) {
-              auto const length = offsets[(i<<1)+1] - offsets[i<<1];
-              auto const match = String(stringlist[i], length, CopyString);
-              auto const value = offset_capture
-                ? Variant(str_offset_pair(match, offsets[i<<1]))
-                : Variant(match);
-              if (subpat_names[i]) {
-                result_set.set(String(subpat_names[i]), value);
-              }
-              result_set.set(i, value);
-            }
-            if (includeNonMatchingCaptures && count < num_subpats) {
-              auto const match = empty_string();
-              for (; i < num_subpats; i++) {
-                auto const value = offset_capture
-                  ? Variant(str_offset_pair(match, offsets[i<<1]))
-                  : Variant(match);
-                if (subpat_names[i]) {
-                  result_set.set(String(subpat_names[i]), value);
-                }
-                result_set.set(i, value);
-              }
-            }
-            /* And add it to the output array */
+            add_match_set(result_set, count);
             auto& arr = subpats->asArrRef();
             assertx(arr->isVectorData());
             arr.set(safe_cast<int64_t>(arr.size()), std::move(result_set));
           }
-        } else {      /* single pattern matching */
-          /* For each subpattern, insert it into the subpatterns array. */
+        } else {
           auto& arr = subpats->asArrRef();
-          for (i = 0; i < count; i++) {
-            auto const length = offsets[(i<<1)+1] - offsets[i<<1];
-            auto const match = String(stringlist[i], length, CopyString);
-            auto const value = offset_capture
-              ? Variant(str_offset_pair(match, offsets[i<<1]))
-              : Variant(match);
-            if (subpat_names[i]) {
-              arr.set(String(subpat_names[i]), value);
-            }
-            arr.set(i, value);
-          }
-          if (includeNonMatchingCaptures && count < num_subpats) {
-            auto const match = empty_string();
-            for (; i < num_subpats; i++) {
-              auto const value = offset_capture
-                ? Variant(str_offset_pair(match, offsets[i<<1]))
-                : Variant(match);
-              if (subpat_names[i]) {
-                arr.set(String(subpat_names[i]), value);
-              }
-              arr.set(i, value);
-            }
-          }
+          add_match_set(arr, count);
         }
         pcre_free((void *) stringlist);
       }
@@ -1323,9 +1305,8 @@ static Variant preg_match_impl(StringData* pattern,
   if (subpats && global && subpats_order == PREG_PATTERN_ORDER) {
     auto& arr = subpats->asArrRef();
     for (i = 0; i < num_subpats; i++) {
-      if (subpat_names[i]) {
-        arr.set(String(subpat_names[i]), match_sets[i]);
-      }
+      auto const value = match_sets[i];
+      set_subpats(arr, i, value);
       arr.set(i, match_sets[i]);
     }
   }
@@ -1367,7 +1348,7 @@ static String preg_do_repl_func(const Variant& function, const String& subject,
     auto off2 = offsets[(i<<1)+1];
     auto sub = subject.substr(off1, off2 - off1);
 
-    if (subpat_names[i]) {
+    if (subpat_names && subpat_names[i]) {
       subpats.set(String(subpat_names[i]), sub);
     }
     subpats.set(i, sub);
@@ -1432,10 +1413,11 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
   if (offsets == nullptr) {
     return preg_return_internal_error(init_null());
   }
-
-  const char* const* subpat_names = get_subpat_names(pce);
-  if (subpat_names == nullptr) {
-    return preg_return_internal_error(init_null());
+  auto const is_literal = pce->literal_data != nullptr;
+  const char* const* subpat_names = nullptr;
+  if (!is_literal) {
+    subpat_names = get_subpat_names(pce);
+    if (subpat_names == nullptr) return preg_return_internal_error(init_null());
   }
 
   const char* replace = nullptr;
@@ -1486,7 +1468,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
       /* Check for too many substrings condition. */
       if (count == 0) {
         raise_warning("Matched, but too many substrings");
-        count = size_offsets / 3;
+        count = pce->num_subpats;
       }
 
       const char* piece = subject.data() + start_offset;
@@ -1799,7 +1781,7 @@ Variant preg_split(const String& pattern, const String& subject,
     /* Check for too many substrings condition. */
     if (count == 0) {
       raise_warning("Matched, but too many substrings");
-      count = size_offsets / 3;
+      count = pce->num_subpats;
     }
 
     /* If something matched */

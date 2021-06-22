@@ -56,6 +56,11 @@ namespace HPHP {
 struct Array;
 struct Variant;
 
+/*
+  * Optimization: If the pattern defines a literal substring,
+  * compare the strings directly (i.e. memcmp) instead of performing
+  * the full regular expression evaluation.
+  */
 struct pcre_literal_data {
   pcre_literal_data(const char* pattern, int coptions);
 

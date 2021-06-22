@@ -212,6 +212,16 @@ bool emit(Venv& env, const bindaddr& i) {
   return true;
 }
 
+bool emit(Venv& env, const ldbindaddr& i) {
+  auto const mov_addr = emitSmashableMovq(*env.cb, env.meta, 0, r64(i.d));
+  setJmpTransID(env, mov_addr);
+  env.meta.smashableBinds.push_back({
+    IncomingBranch::ldaddr(mov_addr), i.target, i.spOff,
+    false /* fallback */});
+  return true;
+}
+
+
 bool emit(Venv& env, const fallback& i) {
   auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   registerFallbackJump(env, jmp, CC_None);

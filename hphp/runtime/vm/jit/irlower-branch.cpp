@@ -460,9 +460,7 @@ void cgLdBindAddr(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   // Emit service request to smash address of SrcKey into 'addr'.
-  auto const addrPtr = v.allocData<TCA>();
-  v << bindaddr{addrPtr, extra->sk, extra->bcSPOff};
-  v << loadqd{reinterpret_cast<uint64_t*>(addrPtr), dst};
+  v << ldbindaddr{extra->sk, extra->bcSPOff, dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

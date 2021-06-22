@@ -52,6 +52,7 @@ struct IncomingBranch {
     JMP,
     JCC,
     ADDR,
+    LDADDR,
   };
 
   using Opaque = CompactTaggedPtr<void>::Opaque;
@@ -64,6 +65,9 @@ struct IncomingBranch {
   }
   static IncomingBranch addr(TCA* from) {
     return IncomingBranch(Tag::ADDR, TCA(from));
+  }
+  static IncomingBranch ldaddr(TCA from) {
+    return IncomingBranch(Tag::LDADDR, from);
   }
 
   Opaque getOpaque() const {

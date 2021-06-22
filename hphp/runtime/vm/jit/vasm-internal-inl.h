@@ -105,6 +105,7 @@ bool emit(Venv& env, const callphps& i);
 bool emit(Venv& env, const bindjmp& i);
 bool emit(Venv& env, const bindjcc& i);
 bool emit(Venv& env, const bindaddr& i);
+bool emit(Venv& env, const ldbindaddr& i);
 bool emit(Venv& env, const fallback& i);
 bool emit(Venv& env, const fallbackcc& i);
 bool emit(Venv& env, const movqs& i);

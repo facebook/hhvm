@@ -52,6 +52,10 @@ void IncomingBranch::patch(TCA dest) {
       *addr = dest;
       break;
     }
+    case Tag::LDADDR: {
+      smashMovq(toSmash(), (uint64_t)dest);
+      break;
+    }
   }
 }
 
@@ -60,6 +64,7 @@ bool IncomingBranch::optimize() {
     case Tag::JMP: return optimizeSmashedJmp(toSmash());
     case Tag::JCC: return optimizeSmashedJcc(toSmash());
     case Tag::ADDR: return false;
+    case Tag::LDADDR: return false;
   }
   always_assert(false);
 }
@@ -74,6 +79,9 @@ TCA IncomingBranch::target() const {
 
     case Tag::ADDR:
       return *reinterpret_cast<TCA*>(toSmash());
+
+    case Tag::LDADDR:
+      return reinterpret_cast<TCA>(smashableMovqImm(toSmash()));
   }
   always_assert(false);
 }
@@ -84,6 +92,7 @@ std::string IncomingBranch::show() const {
       case Tag::JMP: return "jmp";
       case Tag::JCC: return "jcc";
       case Tag::ADDR: return "addr";
+      case Tag::LDADDR: return "ldaddr";
     }
     always_assert(false);
   }();

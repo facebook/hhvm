@@ -830,8 +830,22 @@ WorkList initInstructions(const IRUnit& unit, const BlockList& blocks,
 
 //////////////////////////////////////////////////////////////////////
 
+struct TrackedInstr {
+  // DecRefs which refer to the tracked instruction.
+  jit::vector<IRInstruction*> decs;
+
+  // Auxiliary instructions which must be killed if the tracked instruction is
+  // killed.
+  jit::vector<IRInstruction*> aux;
+
+  // Stores to the stack in catch traces that can be killed to kill the
+  // tracked instruction.
+  jit::vector<IRInstruction*> stores;
+};
+
 void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
-                       const UseCounts& uses) {
+                       const UseCounts& uses,
+                       jit::fast_map<IRInstruction*, TrackedInstr>& rcInsts) {
   assertx(block->front().is(BeginCatch));
   assertx(block->back().is(EndCatch));
 
@@ -954,16 +968,20 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
       } else {
         candidateIncRefs.erase(it);
       }
-    } else {
+    } else if (src->type().maybe(TCounted)) {
       auto const srcInst = src->inst();
       if (!srcInst->producesReference() ||
           !canDCE(srcInst) ||
           uses[src] != 1) {
+        if (srcInst->producesReference() && canDCE(srcInst)) {
+          rcInsts[srcInst].stores.emplace_back(store);
+        }
         continue;
+      } else {
+        FTRACE(3, "Erasing {} for {}\n",
+               srcInst->toString(), store->toString());
+        state[srcInst].setDead();
       }
-      FTRACE(3, "Erasing {} for {}\n",
-             srcInst->toString(), store->toString());
-      state[srcInst].setDead();
     }
     store->setSrc(1, unit.cns(TInitNull));
   }
@@ -980,16 +998,121 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
 void optimizeCatchBlocks(const BlockList& blocks,
                          DceState& state,
                          IRUnit& unit,
-                         const UseCounts& uses) {
+                         const UseCounts& uses,
+                         jit::fast_map<IRInstruction*, TrackedInstr>& rcInsts) {
   FTRACE(1, "OptimizeCatchBlocks:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(1, "OptimizeCatchBlocks:^^^^^^^^^^^^^^^^^^^^\n"); };
-
   for (auto block : blocks) {
     if (block->back().is(EndCatch) &&
         block->back().extra<EndCatch>()->mode !=
           EndCatchData::CatchMode::SideExit &&
         block->front().is(BeginCatch)) {
-      processCatchBlock(unit, state, block, uses);
+      processCatchBlock(unit, state, block, uses, rcInsts);
+    }
+  }
+}
+
+void optimizeConcats(jit::vector<IRInstruction*>& concats,
+                     DceState& state,
+                     IRUnit& unit,
+                     UseCounts& uses,
+                     jit::fast_map<IRInstruction*, TrackedInstr>& rcInsts) {
+  FTRACE(1, "OptimizeConcats:vvvvvvvvvvvvvvvvvvvv\n");
+  SCOPE_EXIT { FTRACE(1, "OptimizeConcats:^^^^^^^^^^^^^^^^^^^^\n"); };
+  auto const incref = [&] (auto inst, auto src) {
+    auto const blk = inst->block();
+    auto const ins = unit.gen(IncRef, inst->bcctx(), src);
+    blk->insert(blk->iteratorTo(inst), ins);
+    state[ins].setLive();
+    ++uses[src];
+    FTRACE(3, "Adding {}\n", ins->toString());
+  };
+  auto const decref = [&] (auto inst, auto src) {
+    auto const blk = inst->block();
+    auto const ins = unit.gen(DecRef, inst->bcctx(), DecRefData{}, src);
+    blk->insert(blk->iteratorTo(inst), ins);
+    state[ins].setLive();
+    ++uses[src];
+    FTRACE(3, "Adding {}\n", ins->toString());
+  };
+  auto const combine = [&] (auto inst, auto inst_prev,
+                            auto src1, auto src2, auto src3) {
+    /*
+     * ~~ Converting ~~
+     * t1 = ConcatStrStr a b (implicit Decref a)
+     * DecRef b
+     * t2 = ConcatStrStr t1 c (implicit Decref t1)
+     * DecRef c
+     *
+     * to
+     *
+     * IncRef a
+     * IncRef b
+     * t1 = ConcatStrStr a b (implicit Decref a)
+     * DecRef b
+     * t2 = ConcatStr3 a b c (implicit Decref a)
+     * DecRef b
+     * DecRef c
+
+     * ~~ Converting ~~
+     * t1 = ConcatStrStr a b (implicit Decref a)
+     * DecRef b
+     * t2 = ConcatStrStr c t1 (implicit Decref c)
+     * DecRef t1
+     *
+     * to
+     *
+     * IncRef a
+     * IncRef b
+     * t1 = ConcatStrStr a b (implicit Decref a)
+     * DecRef b
+     * t2 = ConcatStr3 c a b (implicit Decref c)
+     * DecRef a
+     * DecRef b
+     * DecRef t1
+     *
+     * We need to make sure refcounts are correct. We do this by increffing
+     * the sources of the first ConcatStrStr and then decreffing them after
+     * ConcatStr3 unless ConcatStr3 already consumes the reference
+     *
+     * Note that later stages of DCE will kill the extra ConcatStrStr and the
+     * refcounting.
+     */
+    assertx(inst_prev->is(ConcatStrStr));
+    assertx(inst->is(ConcatStrStr));
+    if (uses[inst_prev->dst()] == 1 + rcInsts[inst_prev].decs.size() +
+                                      rcInsts[inst_prev].stores.size()) {
+      FTRACE(3, "Combining {} into {}",
+             inst_prev->toString(), inst->toString());
+      auto next = inst->next();
+      unit.replace(inst, ConcatStr3, inst->taken(), src1, src2, src3);
+      inst->setNext(next);
+      FTRACE(3, " and got {}\n", inst->toString());
+      state[inst].setLive();
+      --uses[inst_prev->dst()];
+      ++uses[inst_prev->src(0)];
+      ++uses[inst_prev->src(1)];
+      // Incref the first source since the first ConcatStrStr controls
+      // its refcount
+      incref(inst_prev, inst_prev->src(0));
+      incref(inst_prev, inst_prev->src(1));
+      // ConcatStr3 ends the blocks, so insert the decrefs to the next block
+      assertx(inst->next() && !inst->next()->empty());
+      decref(&inst->next()->front(), src2);
+      if (src3 == inst_prev->src(1)) decref(&inst->next()->front(), src3);
+    }
+  };
+
+  for (auto& inst : concats) {
+    if (!inst->is(ConcatStrStr)) continue;
+    auto const src1 = inst->src(0);
+    auto const src2 = inst->src(1);
+    if (src1->inst()->is(ConcatStrStr)) {
+      combine(inst, src1->inst(),
+              src1->inst()->src(0), src1->inst()->src(1), src2);
+    } else if (src2->inst()->is(ConcatStrStr)) {
+      combine(inst, src2->inst(),
+              src1, src2->inst()->src(0), src2->inst()->src(1));
     }
   }
 }
@@ -1057,15 +1180,6 @@ void killInstrAdjustRC(
   state[inst].setDead();
 }
 
-struct TrackedInstr {
-  // DecRefs which refer to the tracked instruction.
-  jit::vector<IRInstruction*> decs;
-
-  // Auxiliary instructions which must be killed if the tracked instruction is
-  // killed.
-  jit::vector<IRInstruction*> aux;
-};
-
 //////////////////////////////////////////////////////////////////////
 
 } // anonymous namespace
@@ -1132,17 +1246,21 @@ void fullDCE(IRUnit& unit) {
     }
   }
 
+  optimizeCatchBlocks(blocks, state, unit, uses, rcInsts);
+  optimizeConcats(concats, state, unit, uses, rcInsts);
+
   // If every use of a dce-able PRc instruction is a DecRef or PureStore based
   // on its dst, then we can kill it, and DecRef any of its consumesReference
   // inputs.
   for (auto& pair : rcInsts) {
     auto& info = pair.second;
-    if (uses[pair.first->dst()] != info.decs.size() + info.aux.size()) continue;
+    auto const trackedUses =
+      info.decs.size() + info.aux.size() + info.stores.size();
+    if (uses[pair.first->dst()] != trackedUses) continue;
     killInstrAdjustRC(state, unit, pair.first, info.decs);
     for (auto inst : info.aux) killInstrAdjustRC(state, unit, inst, info.decs);
+    for (auto store : info.stores) store->setSrc(1, unit.cns(TInitNull));
   }
-
-  optimizeCatchBlocks(blocks, state, unit, uses);
 
   // Now remove instructions whose state is DEAD.
   removeDeadInstructions(unit, state);

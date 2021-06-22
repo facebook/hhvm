@@ -323,7 +323,11 @@ function do_jumpstart(string $flags, OptionMap $opts): string {
   $hhvm = get_hhvm_path($opts);
   $prof = '/tmp/jit.prof.'.posix_getpid();
   $requests = $opts->get('jit-serialize');
-  $cmd = "$hhvm $flags --file ".argv_for_shell()
+  $filename = argv_for_shell();
+  if (strlen($filename) === 0) {
+    throw new Error('Jumpstart expects a file!');
+  }
+  $cmd = "$hhvm $flags --file $filename"
     ." -v Eval.JitSerdesFile=$prof"
     .' -v Eval.JitSerdesMode=SerializeAndExit'
     .' >/dev/null 2>&1';
@@ -361,7 +365,12 @@ function run_hhvm(OptionMap $opts): void {
     $pfx .= 'perf record -g -o ' . $opts['perf'] . ' ';
   }
   $hhvm = get_hhvm_path($opts);
-  $cmd = "$pfx $hhvm $flags --file ".argv_for_shell();
+  $filename = argv_for_shell();
+  if (strlen($filename) === 0) {
+    $cmd = "$pfx $hhvm $flags";
+  } else {
+    $cmd = "$pfx $hhvm $flags --file $filename";
+  }
   if ($opts->containsKey('print-command')) {
     echo "\n$cmd\n\n";
   } else {

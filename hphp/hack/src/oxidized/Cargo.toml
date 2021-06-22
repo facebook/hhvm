@@ -13,7 +13,7 @@ arena_trait = { path = "../arena_trait" }
 bstr = { version = "0.2", features = ["serde1"] }
 eq_modulo_pos = { path = "../utils/eq_modulo_pos" }
 hh_autoimport_rust = { path = "../parser/cargo/hh_autoimport" }
-itertools = "0.8"
+itertools = "0.10.1"
 no_pos_hash = { path = "../utils/no_pos_hash" }
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }

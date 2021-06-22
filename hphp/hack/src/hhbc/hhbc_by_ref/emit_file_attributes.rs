@@ -33,7 +33,7 @@ pub fn emit_file_attributes_from_program<'arena, 'decl, D: DeclProvider<'decl>>(
                 None
             }
         })
-        .fold_results(vec![], |mut acc, attrs| {
+        .fold_ok(vec![], |mut acc, attrs| {
             acc.extend(attrs);
             acc
         })

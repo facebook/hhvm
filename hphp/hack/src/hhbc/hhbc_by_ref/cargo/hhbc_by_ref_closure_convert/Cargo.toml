@@ -25,7 +25,7 @@ hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence
 hhbc_by_ref_options = { path = "../hhbc_by_ref_options" }
 hhbc_by_ref_unique_id_builder = { path = "../hhbc_by_ref_unique_id_builder" }
 hhbc_by_ref_unique_list = { path = "../unique_list" }
-itertools = "0.8"
+itertools = "0.10.1"
 naming_special_names_rust = { path = "../../../../naming" }
 ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }

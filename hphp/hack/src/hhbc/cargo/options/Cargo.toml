@@ -10,7 +10,7 @@ path = "../../options.rs"
 [dependencies]
 bitflags = "1.2"
 fnv = "1.0"
-itertools = "0.8"
+itertools = "0.10.1"
 lazy_static = "1.0"
 lru = "0.6.5"
 options_serde = { path = "../options_serde" }

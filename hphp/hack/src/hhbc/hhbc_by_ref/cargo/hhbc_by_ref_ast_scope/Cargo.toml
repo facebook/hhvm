@@ -9,7 +9,7 @@ path = "../../ast_scope.rs"
 
 [dependencies]
 hhbc_by_ref_hhas_coeffects = { path = "../hhbc_by_ref_hhas_coeffects" }
-itertools = "0.8"
+itertools = "0.10.1"
 oxidized = { path = "../../../../oxidized" }
 
 [profile.release]

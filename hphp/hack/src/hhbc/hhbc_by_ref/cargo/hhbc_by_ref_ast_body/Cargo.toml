@@ -8,7 +8,7 @@ edition = "2018"
 path = "../../ast_body.rs"
 
 [dependencies]
-itertools = "0.8"
+itertools = "0.10.1"
 oxidized = { path = "../../../../oxidized" }
 
 [profile.release]

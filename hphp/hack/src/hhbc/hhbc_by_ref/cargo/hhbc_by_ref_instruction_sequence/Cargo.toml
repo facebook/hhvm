@@ -14,7 +14,7 @@ hhbc_by_ref_iterator = { path = "../hhbc_by_ref_iterator" }
 hhbc_by_ref_label = { path = "../hhbc_by_ref_label" }
 hhbc_by_ref_local = { path = "../hhbc_by_ref_local" }
 hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
-itertools = "0.8"
+itertools = "0.10.1"
 oxidized = { path = "../../../../oxidized" }
 thiserror = "1.0"
 

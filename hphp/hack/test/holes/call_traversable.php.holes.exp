@@ -120,23 +120,23 @@
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([25:3-59],
+           [([25:3-69],
              (Expr
-                (([25:3-58], void),
+                (([25:3-68], void),
                  (Call ((([25:3-4], (function(Traversable<int> $i): void)), (Id ([25:3-4], "\\i"))), 
-                    [], [(([25:5-57], Traversable<int>), (Hole ((([25:54-56], Traversable<float>), (Lvar ([25:54-56], $i))), (Traversable<float>), (Traversable<int>), UnsafeCast)))], None)))));
+                    [], [(([25:5-67], Traversable<int>), (Hole ((([25:64-66], Traversable<float>), (Lvar ([25:64-66], $i))), (Traversable<float>), (Traversable<int>), UnsafeCast)))], None)))));
              ([27:3-32],
               (Expr
                  (([27:3-31], TestTraversable),
                   (Binop ((Eq None), (([27:3-7], TestTraversable), (Lvar ([27:3-7], $foo))),
                      (([27:10-31], TestTraversable), (New ((([27:14-29], TestTraversable), (CI ([27:14-29], "\\TestTraversable"))), [], [], None, ([27:14-29], _)))))))));
-             ([30:3-65],
+             ([30:3-75],
               (Expr
-                 (([30:3-64], void),
+                 (([30:3-74], void),
                   (Call (
                      (([30:3-10], (function(Traversable<int> $i): void)),
                       (Obj_get ((([30:3-7], TestTraversable), (Lvar ([30:3-7], $foo))), (([30:9-10], (function(Traversable<int> $i): void)), (Id ([30:9-10], "i"))), OG_nullthrows, false))),
-                     [], [(([30:11-63], Traversable<int>), (Hole ((([30:60-62], Traversable<float>), (Lvar ([30:60-62], $i))), (Traversable<float>), (Traversable<int>), UnsafeCast)))], None)))))
+                     [], [(([30:11-73], Traversable<int>), (Hole ((([30:70-72], Traversable<float>), (Lvar ([30:70-72], $i))), (Traversable<float>), (Traversable<int>), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

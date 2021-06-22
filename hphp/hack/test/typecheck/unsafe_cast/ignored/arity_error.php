@@ -1,9 +1,9 @@
 <?hh
 
 function f(): int {
-  return unsafe_cast<string, int>();
+  return \HH_FIXME\UNSAFE_CAST<string, int>();
 }
 
 function g(mixed $m1, mixed $m2): int {
-  return unsafe_cast<mixed, int>($m1, $m2);
+  return \HH_FIXME\UNSAFE_CAST<mixed, int>($m1, $m2);
 }

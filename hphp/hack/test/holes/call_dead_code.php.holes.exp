@@ -70,11 +70,11 @@
              ([19:3-26:4],
               (If ((([19:7-11], bool), True),
                  [([20:5-19], (Expr (([20:5-18], string), (Binop ((Eq None), (([20:5-7], string), (Lvar ([20:5-7], $x))), (([20:10-18], string), (String "string")))))));
-                   ([22:5-38],
+                   ([22:5-48],
                     (Expr
-                       (([22:5-37], void),
+                       (([22:5-47], void),
                         (Call ((([22:5-8], (function(int $x): void)), (Id ([22:5-8], "\\foo"))), 
-                           [], [(([22:9-36], int), (Hole ((([22:33-35], string), (Lvar ([22:33-35], $x))), (string), (int), UnsafeCast)))], None)))))
+                           [], [(([22:9-46], int), (Hole ((([22:43-45], string), (Lvar ([22:43-45], $x))), (string), (int), UnsafeCast)))], None)))))
                    ],
                  [([24:5-19], (Expr (([24:5-18], string), (Binop ((Eq None), (([24:5-7], string), (Lvar ([24:5-7], $x))), (([24:10-18], string), (String "string")))))));
                    ([25:5-13], (Expr (([25:5-12], void), (Call ((([25:5-8], (function(int $x): void)), (Id ([25:5-8], "\\foo"))), [], [(([25:9-11], nothing), (Lvar ([25:9-11], $x)))], None)))))]

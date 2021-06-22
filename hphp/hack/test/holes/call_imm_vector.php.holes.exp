@@ -114,23 +114,23 @@
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([25:3-55],
+           [([25:3-65],
              (Expr
-                (([25:3-54], void),
+                (([25:3-64], void),
                  (Call ((([25:3-4], (function(ImmVector<int> $k): void)), (Id ([25:3-4], "\\k"))), 
-                    [], [(([25:5-53], ImmVector<int>), (Hole ((([25:50-52], ImmVector<float>), (Lvar ([25:50-52], $k))), (ImmVector<float>), (ImmVector<int>), UnsafeCast)))], None)))));
+                    [], [(([25:5-63], ImmVector<int>), (Hole ((([25:60-62], ImmVector<float>), (Lvar ([25:60-62], $k))), (ImmVector<float>), (ImmVector<int>), UnsafeCast)))], None)))));
              ([27:3-30],
               (Expr
                  (([27:3-29], TestImmVector),
                   (Binop ((Eq None), (([27:3-7], TestImmVector), (Lvar ([27:3-7], $foo))),
                      (([27:10-29], TestImmVector), (New ((([27:14-27], TestImmVector), (CI ([27:14-27], "\\TestImmVector"))), [], [], None, ([27:14-27], _)))))))));
-             ([30:3-61],
+             ([30:3-71],
               (Expr
-                 (([30:3-60], void),
+                 (([30:3-70], void),
                   (Call (
                      (([30:3-10], (function(ImmVector<int> $k): void)),
                       (Obj_get ((([30:3-7], TestImmVector), (Lvar ([30:3-7], $foo))), (([30:9-10], (function(ImmVector<int> $k): void)), (Id ([30:9-10], "k"))), OG_nullthrows, false))),
-                     [], [(([30:11-59], ImmVector<int>), (Hole ((([30:56-58], ImmVector<float>), (Lvar ([30:56-58], $k))), (ImmVector<float>), (ImmVector<int>), UnsafeCast)))], None)))))
+                     [], [(([30:11-69], ImmVector<int>), (Hole ((([30:66-68], ImmVector<float>), (Lvar ([30:66-68], $k))), (ImmVector<float>), (ImmVector<int>), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

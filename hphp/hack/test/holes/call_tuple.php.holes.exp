@@ -134,35 +134,35 @@
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([31:3-45],
+           [([31:3-55],
              (Expr
-                (([31:3-44], void),
+                (([31:3-54], void),
                  (Call ((([31:3-4], (function((int, int) $a): void)), (Id ([31:3-4], "\\a"))), 
-                    [], [(([31:5-43], (int, int)), (Hole ((([31:39-42], (int, bool)), (Lvar ([31:39-42], $a1))), ((int, bool)), ((int, int)), UnsafeCast)))], None)))));
-             ([33:3-45],
+                    [], [(([31:5-53], (int, int)), (Hole ((([31:49-52], (int, bool)), (Lvar ([31:49-52], $a1))), ((int, bool)), ((int, int)), UnsafeCast)))], None)))));
+             ([33:3-55],
               (Expr
-                 (([33:3-44], void),
+                 (([33:3-54], void),
                   (Call ((([33:3-4], (function((int, int) $a): void)), (Id ([33:3-4], "\\a"))), 
-                     [], [(([33:5-43], (int, int)), (Hole ((([33:39-42], (bool, int)), (Lvar ([33:39-42], $a2))), ((bool, int)), ((int, int)), UnsafeCast)))], None)))));
+                     [], [(([33:5-53], (int, int)), (Hole ((([33:49-52], (bool, int)), (Lvar ([33:49-52], $a2))), ((bool, int)), ((int, int)), UnsafeCast)))], None)))));
              ([35:3-26],
               (Expr
                  (([35:3-25], TestTuple),
                   (Binop ((Eq None), (([35:3-7], TestTuple), (Lvar ([35:3-7], $foo))),
                      (([35:10-25], TestTuple), (New ((([35:14-23], TestTuple), (CI ([35:14-23], "\\TestTuple"))), [], [], None, ([35:14-23], _)))))))));
-             ([38:3-51],
+             ([38:3-61],
               (Expr
-                 (([38:3-50], void),
+                 (([38:3-60], void),
                   (Call (
                      (([38:3-10], (function((int, int) $a): void)),
                       (Obj_get ((([38:3-7], TestTuple), (Lvar ([38:3-7], $foo))), (([38:9-10], (function((int, int) $a): void)), (Id ([38:9-10], "a"))), OG_nullthrows, false))),
-                     [], [(([38:11-49], (int, int)), (Hole ((([38:45-48], (int, bool)), (Lvar ([38:45-48], $a1))), ((int, bool)), ((int, int)), UnsafeCast)))], None)))));
-             ([40:3-51],
+                     [], [(([38:11-59], (int, int)), (Hole ((([38:55-58], (int, bool)), (Lvar ([38:55-58], $a1))), ((int, bool)), ((int, int)), UnsafeCast)))], None)))));
+             ([40:3-61],
               (Expr
-                 (([40:3-50], void),
+                 (([40:3-60], void),
                   (Call (
                      (([40:3-10], (function((int, int) $a): void)),
                       (Obj_get ((([40:3-7], TestTuple), (Lvar ([40:3-7], $foo))), (([40:9-10], (function((int, int) $a): void)), (Id ([40:9-10], "a"))), OG_nullthrows, false))),
-                     [], [(([40:11-49], (int, int)), (Hole ((([40:45-48], (bool, int)), (Lvar ([40:45-48], $a2))), ((bool, int)), ((int, int)), UnsafeCast)))], None)))))
+                     [], [(([40:11-59], (int, int)), (Hole ((([40:55-58], (bool, int)), (Lvar ([40:55-58], $a2))), ((bool, int)), ((int, int)), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

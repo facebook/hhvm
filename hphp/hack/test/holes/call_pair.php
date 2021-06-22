@@ -28,14 +28,14 @@ function call_pair_cast(
   Pair<int, bool> $b2,
 ): void {
   /* HH_FIXME[4417] */
-  b(unsafe_cast<Pair<bool,int>,Pair<int,int>>($b1));
+  b(\HH_FIXME\UNSAFE_CAST<Pair<bool,int>,Pair<int,int>>($b1));
   /* HH_FIXME[4417] */
-  b(unsafe_cast<Pair<int,bool>,Pair<int,int>>($b2));
+  b(\HH_FIXME\UNSAFE_CAST<Pair<int,bool>,Pair<int,int>>($b2));
 
   $foo = new TestPair();
 
   /* HH_FIXME[4417] */
-  $foo->b(unsafe_cast<Pair<bool,int>,Pair<int,int>>($b1));
+  $foo->b(\HH_FIXME\UNSAFE_CAST<Pair<bool,int>,Pair<int,int>>($b1));
   /* HH_FIXME[4417] */
-  $foo->b(unsafe_cast<Pair<int,bool>,Pair<int,int>>($b2));
+  $foo->b(\HH_FIXME\UNSAFE_CAST<Pair<int,bool>,Pair<int,int>>($b2));
 }

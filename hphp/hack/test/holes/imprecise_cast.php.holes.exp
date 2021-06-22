@@ -44,7 +44,7 @@
            [([8:3-18],
              (Expr
                 (([8:3-17], Sub), (Binop ((Eq None), (([8:3-5], Sub), (Lvar ([8:3-5], $b))), (([8:8-17], Sub), (New ((([8:12-15], Sub), (CI ([8:12-15], "\\Sub"))), [], [], None, ([8:12-15], _)))))))));
-             ([10:3-37], (Return (Some (([10:10-36], int), (Hole ((([10:33-35], Sub), (Lvar ([10:33-35], $b))), (Super), (int), UnsafeCast))))))];
+             ([10:3-47], (Return (Some (([10:10-46], int), (Hole ((([10:43-45], Sub), (Lvar ([10:43-45], $b))), (Super), (int), UnsafeCast))))))];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }

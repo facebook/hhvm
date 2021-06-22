@@ -22,10 +22,10 @@ function call_keyset_cast(
   keyset<string> $f,
 ): void {
   /* HH_FIXME[4417] */
-  f(unsafe_cast<keyset<string>,keyset<int>>($f));
+  f(\HH_FIXME\UNSAFE_CAST<keyset<string>,keyset<int>>($f));
 
   $foo = new TestKeyset();
 
   /* HH_FIXME[4417] */
-  $foo->f(unsafe_cast<keyset<string>,keyset<int>>($f));
+  $foo->f(\HH_FIXME\UNSAFE_CAST<keyset<string>,keyset<int>>($f));
 }

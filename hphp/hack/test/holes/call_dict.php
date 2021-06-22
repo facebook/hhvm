@@ -28,14 +28,14 @@ function call_dict_cast(
   dict<int, string> $n2,
 ): void {
   /* HH_FIXME[4417] */
-  n(unsafe_cast<dict<string,int>,dict<int,int>>($n1));
+  n(\HH_FIXME\UNSAFE_CAST<dict<string,int>,dict<int,int>>($n1));
   /* HH_FIXME[4417] */
-  n(unsafe_cast<dict<int,string>,dict<int,int>>($n2));
+  n(\HH_FIXME\UNSAFE_CAST<dict<int,string>,dict<int,int>>($n2));
 
   $foo = new TestDict();
 
   /* HH_FIXME[4417] */
-  $foo->n(unsafe_cast<dict<string,int>,dict<int,int>>($n1));
+  $foo->n(\HH_FIXME\UNSAFE_CAST<dict<string,int>,dict<int,int>>($n1));
   /* HH_FIXME[4417] */
-  $foo->n(unsafe_cast<dict<int,string>,dict<int,int>>($n2));
+  $foo->n(\HH_FIXME\UNSAFE_CAST<dict<int,string>,dict<int,int>>($n2));
 }

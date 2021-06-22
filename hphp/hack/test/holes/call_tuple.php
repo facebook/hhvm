@@ -28,14 +28,14 @@ function call_tuple_cast(
   (bool, int) $a2,
 ): void {
   /* HH_FIXME[4417] */
-  a(unsafe_cast<(int,bool),(int,int)>($a1));
+  a(\HH_FIXME\UNSAFE_CAST<(int,bool),(int,int)>($a1));
   /* HH_FIXME[4417] */
-  a(unsafe_cast<(bool,int),(int,int)>($a2));
+  a(\HH_FIXME\UNSAFE_CAST<(bool,int),(int,int)>($a2));
 
   $foo = new TestTuple();
 
   /* HH_FIXME[4417] */
-  $foo->a(unsafe_cast<(int,bool),(int,int)>($a1));
+  $foo->a(\HH_FIXME\UNSAFE_CAST<(int,bool),(int,int)>($a1));
   /* HH_FIXME[4417] */
-  $foo->a(unsafe_cast<(bool,int),(int,int)>($a2));
+  $foo->a(\HH_FIXME\UNSAFE_CAST<(bool,int),(int,int)>($a2));
 }

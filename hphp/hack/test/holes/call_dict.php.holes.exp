@@ -140,35 +140,35 @@
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([31:3-55],
+           [([31:3-65],
              (Expr
-                (([31:3-54], void),
+                (([31:3-64], void),
                  (Call ((([31:3-4], (function(dict<int, int> $n): void)), (Id ([31:3-4], "\\n"))), 
-                    [], [(([31:5-53], dict<int, int>), (Hole ((([31:49-52], dict<string, int>), (Lvar ([31:49-52], $n1))), (dict<string, int>), (dict<int, int>), UnsafeCast)))], None)))));
-             ([33:3-55],
+                    [], [(([31:5-63], dict<int, int>), (Hole ((([31:59-62], dict<string, int>), (Lvar ([31:59-62], $n1))), (dict<string, int>), (dict<int, int>), UnsafeCast)))], None)))));
+             ([33:3-65],
               (Expr
-                 (([33:3-54], void),
+                 (([33:3-64], void),
                   (Call ((([33:3-4], (function(dict<int, int> $n): void)), (Id ([33:3-4], "\\n"))), 
-                     [], [(([33:5-53], dict<int, int>), (Hole ((([33:49-52], dict<int, string>), (Lvar ([33:49-52], $n2))), (dict<int, string>), (dict<int, int>), UnsafeCast)))], None)))));
+                     [], [(([33:5-63], dict<int, int>), (Hole ((([33:59-62], dict<int, string>), (Lvar ([33:59-62], $n2))), (dict<int, string>), (dict<int, int>), UnsafeCast)))], None)))));
              ([35:3-25],
               (Expr
                  (([35:3-24], TestDict),
                   (Binop ((Eq None), (([35:3-7], TestDict), (Lvar ([35:3-7], $foo))),
                      (([35:10-24], TestDict), (New ((([35:14-22], TestDict), (CI ([35:14-22], "\\TestDict"))), [], [], None, ([35:14-22], _)))))))));
-             ([38:3-61],
+             ([38:3-71],
               (Expr
-                 (([38:3-60], void),
+                 (([38:3-70], void),
                   (Call (
                      (([38:3-10], (function(dict<int, int> $n): void)),
                       (Obj_get ((([38:3-7], TestDict), (Lvar ([38:3-7], $foo))), (([38:9-10], (function(dict<int, int> $n): void)), (Id ([38:9-10], "n"))), OG_nullthrows, false))),
-                     [], [(([38:11-59], dict<int, int>), (Hole ((([38:55-58], dict<string, int>), (Lvar ([38:55-58], $n1))), (dict<string, int>), (dict<int, int>), UnsafeCast)))], None)))));
-             ([40:3-61],
+                     [], [(([38:11-69], dict<int, int>), (Hole ((([38:65-68], dict<string, int>), (Lvar ([38:65-68], $n1))), (dict<string, int>), (dict<int, int>), UnsafeCast)))], None)))));
+             ([40:3-71],
               (Expr
-                 (([40:3-60], void),
+                 (([40:3-70], void),
                   (Call (
                      (([40:3-10], (function(dict<int, int> $n): void)),
                       (Obj_get ((([40:3-7], TestDict), (Lvar ([40:3-7], $foo))), (([40:9-10], (function(dict<int, int> $n): void)), (Id ([40:9-10], "n"))), OG_nullthrows, false))),
-                     [], [(([40:11-59], dict<int, int>), (Hole ((([40:55-58], dict<int, string>), (Lvar ([40:55-58], $n2))), (dict<int, string>), (dict<int, int>), UnsafeCast)))], None)))))
+                     [], [(([40:11-69], dict<int, int>), (Hole ((([40:65-68], dict<int, string>), (Lvar ([40:65-68], $n2))), (dict<int, string>), (dict<int, int>), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

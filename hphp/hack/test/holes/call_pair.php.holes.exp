@@ -140,35 +140,35 @@
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([31:3-53],
+           [([31:3-63],
              (Expr
-                (([31:3-52], void),
+                (([31:3-62], void),
                  (Call ((([31:3-4], (function(Pair<int, int> $b): void)), (Id ([31:3-4], "\\b"))), 
-                    [], [(([31:5-51], Pair<int, int>), (Hole ((([31:47-50], Pair<bool, int>), (Lvar ([31:47-50], $b1))), (Pair<bool, int>), (Pair<int, int>), UnsafeCast)))], None)))));
-             ([33:3-53],
+                    [], [(([31:5-61], Pair<int, int>), (Hole ((([31:57-60], Pair<bool, int>), (Lvar ([31:57-60], $b1))), (Pair<bool, int>), (Pair<int, int>), UnsafeCast)))], None)))));
+             ([33:3-63],
               (Expr
-                 (([33:3-52], void),
+                 (([33:3-62], void),
                   (Call ((([33:3-4], (function(Pair<int, int> $b): void)), (Id ([33:3-4], "\\b"))), 
-                     [], [(([33:5-51], Pair<int, int>), (Hole ((([33:47-50], Pair<int, bool>), (Lvar ([33:47-50], $b2))), (Pair<int, bool>), (Pair<int, int>), UnsafeCast)))], None)))));
+                     [], [(([33:5-61], Pair<int, int>), (Hole ((([33:57-60], Pair<int, bool>), (Lvar ([33:57-60], $b2))), (Pair<int, bool>), (Pair<int, int>), UnsafeCast)))], None)))));
              ([35:3-25],
               (Expr
                  (([35:3-24], TestPair),
                   (Binop ((Eq None), (([35:3-7], TestPair), (Lvar ([35:3-7], $foo))),
                      (([35:10-24], TestPair), (New ((([35:14-22], TestPair), (CI ([35:14-22], "\\TestPair"))), [], [], None, ([35:14-22], _)))))))));
-             ([38:3-59],
+             ([38:3-69],
               (Expr
-                 (([38:3-58], void),
+                 (([38:3-68], void),
                   (Call (
                      (([38:3-10], (function(Pair<int, int> $b): void)),
                       (Obj_get ((([38:3-7], TestPair), (Lvar ([38:3-7], $foo))), (([38:9-10], (function(Pair<int, int> $b): void)), (Id ([38:9-10], "b"))), OG_nullthrows, false))),
-                     [], [(([38:11-57], Pair<int, int>), (Hole ((([38:53-56], Pair<bool, int>), (Lvar ([38:53-56], $b1))), (Pair<bool, int>), (Pair<int, int>), UnsafeCast)))], None)))));
-             ([40:3-59],
+                     [], [(([38:11-67], Pair<int, int>), (Hole ((([38:63-66], Pair<bool, int>), (Lvar ([38:63-66], $b1))), (Pair<bool, int>), (Pair<int, int>), UnsafeCast)))], None)))));
+             ([40:3-69],
               (Expr
-                 (([40:3-58], void),
+                 (([40:3-68], void),
                   (Call (
                      (([40:3-10], (function(Pair<int, int> $b): void)),
                       (Obj_get ((([40:3-7], TestPair), (Lvar ([40:3-7], $foo))), (([40:9-10], (function(Pair<int, int> $b): void)), (Id ([40:9-10], "b"))), OG_nullthrows, false))),
-                     [], [(([40:11-57], Pair<int, int>), (Hole ((([40:53-56], Pair<int, bool>), (Lvar ([40:53-56], $b2))), (Pair<int, bool>), (Pair<int, int>), UnsafeCast)))], None)))))
+                     [], [(([40:11-67], Pair<int, int>), (Hole ((([40:63-66], Pair<int, bool>), (Lvar ([40:63-66], $b2))), (Pair<int, bool>), (Pair<int, int>), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

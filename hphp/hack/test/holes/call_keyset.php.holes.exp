@@ -114,23 +114,23 @@
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([25:3-50],
+           [([25:3-60],
              (Expr
-                (([25:3-49], void),
+                (([25:3-59], void),
                  (Call ((([25:3-4], (function(keyset<int> $f): void)), (Id ([25:3-4], "\\f"))), 
-                    [], [(([25:5-48], keyset<int>), (Hole ((([25:45-47], keyset<string>), (Lvar ([25:45-47], $f))), (keyset<string>), (keyset<int>), UnsafeCast)))], None)))));
+                    [], [(([25:5-58], keyset<int>), (Hole ((([25:55-57], keyset<string>), (Lvar ([25:55-57], $f))), (keyset<string>), (keyset<int>), UnsafeCast)))], None)))));
              ([27:3-27],
               (Expr
                  (([27:3-26], TestKeyset),
                   (Binop ((Eq None), (([27:3-7], TestKeyset), (Lvar ([27:3-7], $foo))),
                      (([27:10-26], TestKeyset), (New ((([27:14-24], TestKeyset), (CI ([27:14-24], "\\TestKeyset"))), [], [], None, ([27:14-24], _)))))))));
-             ([30:3-56],
+             ([30:3-66],
               (Expr
-                 (([30:3-55], void),
+                 (([30:3-65], void),
                   (Call (
                      (([30:3-10], (function(keyset<int> $f): void)),
                       (Obj_get ((([30:3-7], TestKeyset), (Lvar ([30:3-7], $foo))), (([30:9-10], (function(keyset<int> $f): void)), (Id ([30:9-10], "f"))), OG_nullthrows, false))),
-                     [], [(([30:11-54], keyset<int>), (Hole ((([30:51-53], keyset<string>), (Lvar ([30:51-53], $f))), (keyset<string>), (keyset<int>), UnsafeCast)))], None)))))
+                     [], [(([30:11-64], keyset<int>), (Hole ((([30:61-63], keyset<string>), (Lvar ([30:61-63], $f))), (keyset<string>), (keyset<int>), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -22,10 +22,10 @@ function call_vec_cast(
   vec<float> $e,
 ): void {
   /* HH_FIXME[4417] */
-  e(unsafe_cast<vec<float>,vec<int>>($e));
+  e(\HH_FIXME\UNSAFE_CAST<vec<float>,vec<int>>($e));
 
   $foo = new TestVec();
 
   /* HH_FIXME[4417] */
-  $foo->e(unsafe_cast<vec<float>,vec<int>>($e));
+  $foo->e(\HH_FIXME\UNSAFE_CAST<vec<float>,vec<int>>($e));
 }

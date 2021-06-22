@@ -120,23 +120,23 @@
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([25:3-58],
+           [([25:3-68],
              (Expr
-                (([25:3-57], void),
+                (([25:3-67], void),
                  (Call ((([25:3-4], (function(Collection<int> $l): void)), (Id ([25:3-4], "\\l"))), 
-                    [], [(([25:5-56], Collection<int>), (Hole ((([25:53-55], Collection<string>), (Lvar ([25:53-55], $l))), (Collection<string>), (Collection<int>), UnsafeCast)))], None)))));
+                    [], [(([25:5-66], Collection<int>), (Hole ((([25:63-65], Collection<string>), (Lvar ([25:63-65], $l))), (Collection<string>), (Collection<int>), UnsafeCast)))], None)))));
              ([27:3-31],
               (Expr
                  (([27:3-30], TestCollection),
                   (Binop ((Eq None), (([27:3-7], TestCollection), (Lvar ([27:3-7], $foo))),
                      (([27:10-30], TestCollection), (New ((([27:14-28], TestCollection), (CI ([27:14-28], "\\TestCollection"))), [], [], None, ([27:14-28], _)))))))));
-             ([30:3-64],
+             ([30:3-74],
               (Expr
-                 (([30:3-63], void),
+                 (([30:3-73], void),
                   (Call (
                      (([30:3-10], (function(Collection<int> $l): void)),
                       (Obj_get ((([30:3-7], TestCollection), (Lvar ([30:3-7], $foo))), (([30:9-10], (function(Collection<int> $l): void)), (Id ([30:9-10], "l"))), OG_nullthrows, false))),
-                     [], [(([30:11-62], Collection<int>), (Hole ((([30:59-61], Collection<string>), (Lvar ([30:59-61], $l))), (Collection<string>), (Collection<int>), UnsafeCast)))], None)))))
+                     [], [(([30:11-72], Collection<int>), (Hole ((([30:69-71], Collection<string>), (Lvar ([30:69-71], $l))), (Collection<string>), (Collection<int>), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

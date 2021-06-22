@@ -418,7 +418,7 @@ function one_linebreak_is_okay(): void {}
 
 /** A function with an HH_FIXME. */
 /* HH_FIXME[4030] Missing return type hint. */
-function hh_fixme() {}
+function needs_fixing() {}
 //       ^112:10
 "
 
@@ -598,9 +598,9 @@ the other stars.";
     ( ("docblock.php", 112, 10),
       [
         {
-          snippet = "hh_fixme";
+          snippet = "needs_fixing";
           addendum = ["A function with an HH_FIXME."];
-          pos = pos_at (112, 10) (112, 17);
+          pos = pos_at (112, 10) (112, 21);
         };
       ] );
   ]

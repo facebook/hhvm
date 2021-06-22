@@ -114,23 +114,23 @@
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([25:3-44],
+           [([25:3-54],
              (Expr
-                (([25:3-43], void),
+                (([25:3-53], void),
                  (Call ((([25:3-4], (function(Set<int> $h): void)), (Id ([25:3-4], "\\h"))), 
-                    [], [(([25:5-42], Set<int>), (Hole ((([25:39-41], Set<string>), (Lvar ([25:39-41], $h))), (Set<string>), (Set<int>), UnsafeCast)))], None)))));
+                    [], [(([25:5-52], Set<int>), (Hole ((([25:49-51], Set<string>), (Lvar ([25:49-51], $h))), (Set<string>), (Set<int>), UnsafeCast)))], None)))));
              ([27:3-24],
               (Expr
                  (([27:3-23], TestSet),
                   (Binop ((Eq None), (([27:3-7], TestSet), (Lvar ([27:3-7], $foo))),
                      (([27:10-23], TestSet), (New ((([27:14-21], TestSet), (CI ([27:14-21], "\\TestSet"))), [], [], None, ([27:14-21], _)))))))));
-             ([30:3-50],
+             ([30:3-60],
               (Expr
-                 (([30:3-49], void),
+                 (([30:3-59], void),
                   (Call (
                      (([30:3-10], (function(Set<int> $h): void)),
                       (Obj_get ((([30:3-7], TestSet), (Lvar ([30:3-7], $foo))), (([30:9-10], (function(Set<int> $h): void)), (Id ([30:9-10], "h"))), OG_nullthrows, false))),
-                     [], [(([30:11-48], Set<int>), (Hole ((([30:45-47], Set<string>), (Lvar ([30:45-47], $h))), (Set<string>), (Set<int>), UnsafeCast)))], None)))))
+                     [], [(([30:11-58], Set<int>), (Hole ((([30:55-57], Set<string>), (Lvar ([30:55-57], $h))), (Set<string>), (Set<int>), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -430,7 +430,6 @@ type t = {
   cpu_priority: int;
   can_skip_deptable: bool;
   shm_dirs: string list;
-  state_loader_timeouts: State_loader_config.timeouts;
   max_workers: int option;
   (* max_bucket_size is the default bucket size for ALL users of MultiWorker unless they provide a specific override max_size *)
   max_bucket_size: int;
@@ -586,7 +585,6 @@ let default =
     max_workers = None;
     max_bucket_size = Bucket.max_size ();
     small_buckets_for_dirty_names = false;
-    state_loader_timeouts = State_loader_config.default_timeouts;
     use_dummy_informant = true;
     informant_min_distance_restart = 100;
     use_full_fidelity_parser = true;
@@ -657,46 +655,6 @@ let path =
     with _ -> BuildOptions.system_config_path
   in
   Filename.concat dir "hh.conf"
-
-let state_loader_timeouts_ ~default config =
-  State_loader_config.(
-    let package_fetch_timeout =
-      int_
-        "state_loader_timeout_package_fetch"
-        ~default:default.package_fetch_timeout
-        config
-    in
-    let find_exact_state_timeout =
-      int_
-        "state_loader_timeout_find_exact_state"
-        ~default:default.find_exact_state_timeout
-        config
-    in
-    let find_nearest_state_timeout =
-      int_
-        "state_loader_timeout_find_nearest_state"
-        ~default:default.find_nearest_state_timeout
-        config
-    in
-    let current_hg_rev_timeout =
-      int_
-        "state_loader_timeout_current_hg_rev"
-        ~default:default.current_hg_rev_timeout
-        config
-    in
-    let current_base_rev_timeout =
-      int_
-        "state_loader_timeout_current_base_rev_timeout"
-        ~default:default.current_base_rev_timeout
-        config
-    in
-    {
-      State_loader_config.package_fetch_timeout;
-      find_exact_state_timeout;
-      find_nearest_state_timeout;
-      current_hg_rev_timeout;
-      current_base_rev_timeout;
-    })
 
 let apply_overrides ~silent ~current_version ~config ~overrides =
   (* First of all, apply the CLI overrides so the settings below could be specified
@@ -871,9 +829,6 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.load_state_natively_64bit
       ~current_version
       config
-  in
-  let state_loader_timeouts =
-    state_loader_timeouts_ ~default:State_loader_config.default_timeouts config
   in
   let use_dummy_informant =
     bool_if_min_version
@@ -1261,7 +1216,6 @@ let load_ fn ~silent ~current_version overrides =
     max_workers;
     max_bucket_size;
     small_buckets_for_dirty_names;
-    state_loader_timeouts;
     use_dummy_informant;
     informant_min_distance_restart;
     use_full_fidelity_parser;

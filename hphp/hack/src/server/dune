@@ -153,7 +153,6 @@
     build_options
     ci_util
     cli_args
-    config_state_loader
     diagnostic_subscription
     disk
     errors

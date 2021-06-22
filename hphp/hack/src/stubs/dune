@@ -136,14 +136,12 @@
   (name state_loader_stubs)
   (wrapped false)
   (modules
-    state_loader
     saved_state_loader
     state_loader_futures
     state_loader_lwt
     xdb)
   (libraries
     artifact_store_stubs
-    config_state_loader
     hg
     server_monitor)
   (preprocess

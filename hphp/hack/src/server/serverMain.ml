@@ -1133,11 +1133,9 @@ let serve genv env in_fds =
  * 1. If hh.conf lacks "use_mini_state = true", then don't load it.
  * 2. If hh_server --no-load, then don't load it.
  * 3. If hh_server --save-mini or -s, then save but don't load it.
- * 4. If monitor previously got a saved-state failure and restarts, it might decide
- *    to use Informant_induced_mini_state_target, targeting the saved-state it had previously!
- * 5. If "hh_server --with-mini-state", then load the one specified there!
- * 6. If hh.conf lacks "load_state_natively_v4", then don't load it
- * 7. Otherwise, load it normally!
+ * 4. If "hh_server --with-mini-state", then load the one specified there!
+ * 5. If hh.conf lacks "load_state_natively_v4", then don't load it
+ * 6. Otherwise, load it normally!
  *)
 let resolve_init_approach genv : ServerInit.init_approach * string =
   let nonce = genv.local_config.ServerLocalConfig.remote_nonce in
@@ -1176,10 +1174,6 @@ let resolve_init_approach genv : ServerInit.init_approach * string =
         ( genv.local_config.ServerLocalConfig.load_state_natively,
           ServerArgs.with_saved_state genv.options )
       with
-      | (_, Some (ServerArgs.Informant_induced_saved_state_target target)) ->
-        ( ServerInit.Saved_state_init
-            (ServerInit.Load_state_natively_with_target target),
-          "Load_state_natively_with_target" )
       | (_, Some (ServerArgs.Saved_state_target_info target)) ->
         ( ServerInit.Saved_state_init (ServerInit.Precomputed target),
           "Precomputed" )

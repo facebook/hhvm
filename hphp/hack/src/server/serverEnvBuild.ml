@@ -60,14 +60,6 @@ let make_genv options config local_config workers =
     if the two numbers given in argument and in hh.conf are different, we always take the minimum
     of the two.
   *)
-  let ( >>= ) = Option.( >>= ) in
-  let since_clockspec =
-    ServerArgs.with_saved_state options >>= function
-    | ServerArgs.Saved_state_target_info _ -> None
-    | ServerArgs.Informant_induced_saved_state_target target ->
-      target.ServerMonitorUtils.watchman_mergebase >>= fun mb ->
-      Some mb.ServerMonitorUtils.watchman_clock
-  in
   let SLC.Watchman.
         { enabled; sockname; subscribe; init_timeout; debug_logging; _ } =
     local_config.SLC.watchman
@@ -83,7 +75,6 @@ let make_genv options config local_config workers =
       Hh_logger.log "Using watchman";
       let watchman_env =
         Watchman.init
-          ?since_clockspec
           {
             Watchman.init_timeout =
               Watchman.Explicit_timeout (float init_timeout);
@@ -198,18 +189,6 @@ let make_genv options config local_config workers =
           wait_until_ready,
           options ))
     | Dfind_mode ->
-      (* Failed to start Watchman subscription. Clear out the watchman_mergebase
-       * inside the Informant-directed target mini state since it is no longer
-       * usable during init. *)
-      let options =
-        match ServerArgs.with_saved_state options with
-        | None -> options
-        | Some (ServerArgs.Saved_state_target_info _) -> options
-        | Some (ServerArgs.Informant_induced_saved_state_target target) ->
-          ServerArgs.set_saved_state_target
-            options
-            (Some { target with ServerMonitorUtils.watchman_mergebase = None })
-      in
       let indexer filter = Find.make_next_files ~name:"root" ~filter root in
       let in_fd = Daemon.null_fd () in
       let log_link = ServerFiles.dfind_log root in

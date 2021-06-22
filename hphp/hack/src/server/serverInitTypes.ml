@@ -25,8 +25,6 @@ type load_state_error =
 type load_state_approach =
   | Precomputed of ServerArgs.saved_state_target_info
   | Load_state_natively
-  | Load_state_natively_with_target of
-      (ServerMonitorUtils.target_saved_state[@opaque])
 [@@deriving show]
 
 type remote_init = {

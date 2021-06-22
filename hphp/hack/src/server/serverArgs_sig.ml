@@ -15,10 +15,7 @@ module type S = sig
 
   include module type of Cli_args
 
-  type saved_state_target =
-    | Informant_induced_saved_state_target of
-        ServerMonitorUtils.target_saved_state
-    | Saved_state_target_info of saved_state_target_info
+  type saved_state_target = Saved_state_target_info of saved_state_target_info
   [@@deriving show]
 
   (****************************************************************************)
@@ -110,9 +107,6 @@ module type S = sig
   val set_gen_saved_ignore_type_errors : options -> bool -> options
 
   val set_max_procs : options -> int -> options
-
-  val set_saved_state_target :
-    options -> ServerMonitorUtils.target_saved_state option -> options
 
   val set_no_load : options -> bool -> options
 

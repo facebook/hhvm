@@ -9,7 +9,7 @@
 
 type report =
   | Move_along  (** Nothing to see here. *)
-  | Restart_server of ServerMonitorUtils.target_saved_state option
+  | Restart_server
       (** Kill the server (if one is running) and start a new one. *)
 [@@deriving show]
 

@@ -239,24 +239,8 @@ let merge_saved_state_futures
   wait_until_ready future
 
 let download_and_load_state_exn
-    ~(target : ServerMonitorUtils.target_saved_state option)
-    ~(genv : ServerEnv.genv)
-    ~(ctx : Provider_context.t)
-    ~(root : Path.t) : (loaded_info, load_state_error) result =
-  let open ServerMonitorUtils in
-  let saved_state_handle =
-    match target with
-    | None -> None
-    | Some
-        { saved_state_everstore_handle; target_global_rev; watchman_mergebase }
-      ->
-      Some
-        {
-          State_loader.saved_state_everstore_handle;
-          saved_state_for_rev = Hg.Global_rev target_global_rev;
-          watchman_mergebase;
-        }
-  in
+    ~(genv : ServerEnv.genv) ~(ctx : Provider_context.t) ~(root : Path.t) :
+    (loaded_info, load_state_error) result =
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
   let ignore_hhconfig = ServerArgs.saved_state_ignore_hhconfig genv.options in
   let use_prechecked_files =
@@ -283,10 +267,7 @@ let download_and_load_state_exn
   in
   let dependency_table_saved_state_future :
       (State_loader.native_load_result, load_state_error) result Future.t =
-    if
-      genv.local_config.ServerLocalConfig.enable_devx_dependency_graph
-      && Option.is_none saved_state_handle
-    then begin
+    if genv.local_config.ServerLocalConfig.enable_devx_dependency_graph then begin
       Hh_logger.log "Downloading dependency graph from DevX infra";
       let loader_future =
         State_loader_futures.load
@@ -360,7 +341,7 @@ let download_and_load_state_exn
         State_loader.mk_state_future
           ~config:genv.local_config.SLC.state_loader_timeouts
           ~load_64bit:genv.local_config.SLC.load_state_natively_64bit
-          ?saved_state_handle
+          ?saved_state_handle:None
           ~config_hash:(ServerConfig.config_hash genv.config)
           root
           ~ignore_hh_version
@@ -1411,10 +1392,7 @@ let saved_state_init
       match load_state_approach with
       | Precomputed info ->
         Ok (use_precomputed_state_exn genv ctx info profiling)
-      | Load_state_natively ->
-        download_and_load_state_exn ~target:None ~genv ~ctx ~root
-      | Load_state_natively_with_target target ->
-        download_and_load_state_exn ~target:(Some target) ~genv ~ctx ~root
+      | Load_state_natively -> download_and_load_state_exn ~genv ~ctx ~root
     in
     state_result
   in

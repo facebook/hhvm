@@ -235,11 +235,11 @@ module Revision_tracker = struct
         (* This is reachable when server stopped in the middle of rebase. Instead
       * of restarting immediately, we go back to Server_not_yet_started, and want
       * to restart only when hg.update state is vacated *)
-        Restart_server None
+        Restart_server
       | (_, State_leave _, Server_dead) ->
         (* Regardless of whether we had a significant change or not, when the
          * server is not alive, we restart it on a state leave.*)
-        Restart_server None
+        Restart_server
       | (false, _, _) ->
         let () = Hh_logger.log "Informant insignificant transition" in
         Move_along
@@ -260,7 +260,7 @@ module Revision_tracker = struct
             "Server was started using a precomputed saved-state, not restarting.";
           Move_along
         end else
-          Restart_server None)
+          Restart_server)
 
   (**
    * If we have a cached global_rev for this hg_rev, make a decision on
@@ -331,8 +331,9 @@ module Revision_tracker = struct
         (* left is more recent transition, so we prefer its saved state target. *)
         let select_relevant left right =
           match (left, right) with
-          | (Restart_server target, _) -> Restart_server target
-          | (_, Restart_server target) -> Restart_server target
+          | (Restart_server, _)
+          | (_, Restart_server) ->
+            Restart_server
           | (_, _) -> Move_along
         in
         List.fold_left ~f:select_relevant ~init:Move_along decisions)
@@ -434,13 +435,13 @@ module Revision_tracker = struct
        * Otherwise, we continue as per usual. *)
       let report =
         match early_decision with
-        | Some (Restart_server target, global_rev) ->
+        | Some (Restart_server, global_rev) ->
           (* Early decision to restart, so the prior state changes don't
            * matter anymore. *)
           Hh_logger.log "Informant early decision: restart server";
           let () = Queue.clear env.state_changes in
           let () = set_base_revision global_rev env in
-          Restart_server target
+          Restart_server
         | Some (Move_along, _)
         | None ->
           handle_change_then_churn server_state change env
@@ -469,22 +470,21 @@ module Revision_tracker = struct
       (* We fold through the reports and take the "most active" one. *)
       let max_report a b =
         match (a, b) with
-        | (Restart_server target, _)
-        | (_, Restart_server target) ->
-          Restart_server target
+        | (Restart_server, _)
+        | (_, Restart_server) ->
+          Restart_server
         | (_, _) -> Move_along
       in
       let default_decision =
         match server_state with
-        | Server_not_yet_started when not (is_hg_updating env) ->
-          Restart_server None
+        | Server_not_yet_started when not (is_hg_updating env) -> Restart_server
         | _ -> Move_along
       in
       let decision =
         List.fold_left ~f:max_report ~init:default_decision reports
       in
       match decision with
-      | Restart_server _ when is_hg_updating env ->
+      | Restart_server when is_hg_updating env ->
         Hh_logger.log
           "Ignoring Restart_server because we are already in next hg.update state";
         Move_along
@@ -687,7 +687,7 @@ let report informant server_state =
   | (Resigned, Informant_sig.Server_not_yet_started) ->
     (* Actually, this case should never happen. But we force a restart
      * to avoid accidental wedged states anyway. *)
-    Informant_sig.Restart_server None
+    Informant_sig.Restart_server
   | (Resigned, _) -> Informant_sig.Move_along
   | (Active env, Informant_sig.Server_not_yet_started) ->
     if should_start_first_server informant then (
@@ -700,7 +700,7 @@ let report informant server_state =
         Revision_tracker.make_report server_state env.revision_tracker
       in
       (match report with
-      | Informant_sig.Restart_server _ ->
+      | Informant_sig.Restart_server ->
         HackEventLogger.informant_watcher_starting_server_from_settling ()
       | Informant_sig.Move_along -> ());
       report

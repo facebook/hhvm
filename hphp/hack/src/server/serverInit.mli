@@ -11,8 +11,6 @@ type load_state_approach =
   | Precomputed of ServerArgs.saved_state_target_info
   (* Load a saved state using Ocaml implementation of saved state loader. *)
   | Load_state_natively
-  (* Use the supplied saved state target to skip lookup in XDB. *)
-  | Load_state_natively_with_target of ServerMonitorUtils.target_saved_state
 
 type remote_init = {
   worker_key: string;

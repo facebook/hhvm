@@ -9,27 +9,7 @@ module Report_comparator :
   let to_string v =
     match v with
     | Move_along -> "Move_along"
-    | Restart_server state ->
-      let str =
-        match state with
-        | None -> "None"
-        | Some
-            {
-              ServerMonitorUtils.saved_state_everstore_handle;
-              target_global_rev;
-              watchman_mergebase;
-              _;
-            } ->
-          Printf.sprintf
-            "(Some %s %d %s)"
-            saved_state_everstore_handle
-            target_global_rev
-            (Option.value_map
-               watchman_mergebase
-               ~default:"None"
-               ~f:ServerMonitorUtils.watchman_mergebase_to_string)
-      in
-      Printf.sprintf "Restart_server %s" str
+    | Restart_server -> "Restart_server"
 
   let is_equal exp actual = String.equal (to_string exp) (to_string actual)
 end
@@ -131,7 +111,7 @@ let test_informant_restarts_significant_move temp_dir =
     Tools.Changed_merge_base
     Tools.hg_rev_200
     Informant_sig.Server_alive
-    (Informant_sig.Restart_server None)
+    Informant_sig.Restart_server
     "Move forward significant distance";
 
   (* Informant now sitting at revision 200. Moving to 230 no restart. *)
@@ -200,7 +180,7 @@ let test_informant_restarts_significant_move temp_dir =
     Tools.Changed_merge_base
     Tools.hg_rev_5
     Informant_sig.Server_alive
-    (Informant_sig.Restart_server None)
+    Informant_sig.Restart_server
     "Move back significant distance";
   true
 

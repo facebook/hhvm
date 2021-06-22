@@ -5,4 +5,4 @@ Wrong type hint (Typing[4339])
   File "test_array15.php", line 13, characters 10-20:
   Expected `vec<int>`
   File "test_array15.php", line 13, characters 27-34:
-  But got `dict<nothing, nothing>` because legacy arrays have been unified with Hack arrays
+  But got `dict<nothing, nothing>`

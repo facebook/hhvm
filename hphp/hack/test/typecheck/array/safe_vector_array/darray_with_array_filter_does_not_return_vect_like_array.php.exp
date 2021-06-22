@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
   File "darray_with_array_filter_does_not_return_vect_like_array.php", line 3, characters 35-46:
   Expected `vec<bool>`
   File "darray_with_array_filter_does_not_return_vect_like_array.php", line 4, characters 23-59:
-  But got `dict<string, bool>` because legacy arrays have been unified with Hack arrays
+  But got `dict<string, bool>`

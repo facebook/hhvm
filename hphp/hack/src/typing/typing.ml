@@ -323,12 +323,6 @@ let get_kvc_inst p kvc_kind ty =
   | _ -> get_key_value_collection_inst p ty
 
 (* Is this type darray<kty, vty> or a supertype for some kty and vty? *)
-let get_darray_inst p ty =
-  match get_node ty with
-  (* It's darray<kty, vty> *)
-  | Tdarray (kty, vty) -> Some (kty, vty)
-  | _ -> get_key_value_collection_inst p ty
-
 (* Check whether this is a function type that (a) either returns a disposable
  * or (b) has the <<__ReturnDisposable>> attribute
  *)
@@ -1456,13 +1450,10 @@ and safely_refine_is_array env ty p pred_name arg_expr =
       (* If we're refining the type for `is_array` we have a slightly more
        * involved process. Let's separate out that logic so we can re-use it.
        *)
-      let unification =
-        TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
-      in
       let array_ty =
         let tk = MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r)) in
         let tv = tfresh in
-        MakeType.varray_or_darray ~unification r tk tv
+        MakeType.varray_or_darray r tk tv
       in
       (* This is the refined type of e inside the branch *)
       let hint_ty =
@@ -1475,14 +1466,9 @@ and safely_refine_is_array env ty p pred_name arg_expr =
         | `HackDictOrDArray ->
           MakeType.union
             r
-            [
-              MakeType.dict r tarrkey tfresh;
-              MakeType.darray ~unification r tarrkey tfresh;
-            ]
+            [MakeType.dict r tarrkey tfresh; MakeType.darray r tarrkey tfresh]
         | `HackVecOrVArray ->
-          MakeType.union
-            r
-            [MakeType.vec r tfresh; MakeType.varray ~unification r tfresh]
+          MakeType.union r [MakeType.vec r tfresh; MakeType.varray r tfresh]
       in
       let ((arg_pos, _), _) = arg_expr in
       let (env, hint_ty) =
@@ -2784,24 +2770,11 @@ and expr_
           fun value_ty ->
             MakeType.class_type (Reason.Rwitness p) class_name [value_ty] )
       | Varray _ ->
-        let unification =
-          TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
-        in
-        if unification then
-          ( get_vc_inst Vec,
-            "varray",
-            array_value,
-            (fun th elements -> Aast.ValCollection (Vec, th, elements)),
-            fun value_ty ->
-              MakeType.varray ~unification (Reason.Rhack_arr_dv_arrs p) value_ty
-          )
-        else
-          ( get_varray_inst,
-            "varray",
-            array_value,
-            (fun th elements -> Aast.Varray (th, elements)),
-            fun value_ty ->
-              MakeType.varray ~unification (Reason.Rwitness p) value_ty )
+        ( get_vc_inst Vec,
+          "varray",
+          array_value,
+          (fun th elements -> Aast.ValCollection (Vec, th, elements)),
+          (fun value_ty -> MakeType.varray (Reason.Rwitness p) value_ty) )
       | _ ->
         (* The parent match makes this case impossible *)
         failwith "impossible match case"
@@ -2848,21 +2821,11 @@ and expr_
           (fun k v -> MakeType.class_type (Reason.Rwitness p) class_name [k; v])
         )
       | Darray _ ->
-        let unification =
-          TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
-        in
         let name = "darray" in
-        if unification then
-          ( get_kvc_inst p Dict,
-            name,
-            (fun th pairs -> Aast.KeyValCollection (Dict, th, pairs)),
-            fun k v ->
-              MakeType.darray ~unification (Reason.Rhack_arr_dv_arrs p) k v )
-        else
-          ( get_darray_inst p,
-            name,
-            (fun th pairs -> Aast.Darray (th, pairs)),
-            (fun k v -> MakeType.darray ~unification (Reason.Rwitness p) k v) )
+        ( get_kvc_inst p Dict,
+          name,
+          (fun th pairs -> Aast.KeyValCollection (Dict, th, pairs)),
+          (fun k v -> MakeType.darray (Reason.Rwitness p) k v) )
       | _ ->
         (* The parent match makes this case impossible *)
         failwith "impossible match case"
@@ -4320,11 +4283,19 @@ and expr_
     in
     let tchildren =
       match te with
-      | (_, New (_, _, [_; (_, Varray (_, children)); _; _], _, _)) -> children
-      | (_, New (_, _, [_; (_, ValCollection (Vec, _, children)); _; _], _, _))
-        when TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env) ->
-        (* Typing_xhp.rewrite_xml_into_new generates an AST node for a `varray[]` literal,
-         * which is interpreted as a vec[] during typing when hack_arr_dv_arrs is enabled. *)
+      | ( _,
+          New
+            ( _,
+              _,
+              [
+                _;
+                (_, (Varray (_, children) | ValCollection (Vec, _, children)));
+                _;
+                _;
+              ],
+              _,
+              _ ) ) ->
+        (* Typing_xhp.rewrite_xml_into_new generates an AST node for a `varray[]` literal, which is interpreted as a vec[]  *)
         children
       | _ ->
         (* We end up in this case when the cosntructed new expression does
@@ -4591,8 +4562,7 @@ and closure_bind_variadic env vparam variadic_ty =
   in
   let r = Reason.Rvar_param_from_decl pos in
   let arr_values = mk (r, get_node ty) in
-  let unification = TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env) in
-  let ty = MakeType.varray ~unification r arr_values in
+  let ty = MakeType.varray r arr_values in
   let (env, t_variadic) = bind_param env (ty, vparam) in
   (env, t_variadic)
 
@@ -5836,9 +5806,6 @@ and dispatch_call
             let (env, _te, ty) = expr env ea in
             let r = Reason.Rwitness p in
             let tmixed = MakeType.mixed r in
-            let unification =
-              TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
-            in
             let super =
               mk
                 ( Reason.Rnone,
@@ -5847,7 +5814,7 @@ and dispatch_call
                       MakeType.dynamic r;
                       MakeType.dict r tmixed tmixed;
                       MakeType.keyset r tmixed;
-                      MakeType.darray ~unification r tmixed tmixed;
+                      MakeType.darray r tmixed tmixed;
                     ] )
             in
             SubType.sub_type_or_fail env ty super (fun () ->
@@ -5902,10 +5869,7 @@ and dispatch_call
           match deref ety with
           | (r, Tvarray tv) ->
             let (env, tv) = get_value_type env tv in
-            let unification =
-              TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
-            in
-            (env, MakeType.varray ~unification r tv)
+            (env, MakeType.varray r tv)
           | (r, Tunion tyl) ->
             let (env, tyl) =
               List.map_env env tyl ~f:get_array_filter_return_type
@@ -5921,9 +5885,6 @@ and dispatch_call
           | (r, _) ->
             let (env, tk) = Env.fresh_type env p in
             let (env, tv) = Env.fresh_type env p in
-            let unification =
-              TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
-            in
             Errors.try_
               (fun () ->
                 let keyed_container_type =
@@ -5937,8 +5898,7 @@ and dispatch_call
                     (Errors.unify_error_at p)
                 in
                 let (env, tv) = get_value_type env tv in
-                ( env,
-                  MakeType.darray ~unification r (explain_array_filter tk) tv ))
+                (env, MakeType.darray r (explain_array_filter tk) tv))
               (fun _ ->
                 Errors.try_
                   (fun () ->
@@ -5953,7 +5913,6 @@ and dispatch_call
                     let (env, tv) = get_value_type env tv in
                     ( env,
                       MakeType.darray
-                        ~unification
                         r
                         (explain_array_filter (MakeType.arraykey r))
                         tv ))
@@ -6028,13 +5987,7 @@ and dispatch_call
             env * (env -> locl_ty -> env * locl_ty) =
           let (env, x) = Env.expand_type env x in
           match deref x with
-          | (r, Tvarray _) ->
-            ( env,
-              fun env tr ->
-                let unification =
-                  TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
-                in
-                (env, MakeType.varray ~unification r tr) )
+          | (r, Tvarray _) -> (env, (fun env tr -> (env, MakeType.varray r tr)))
           | (r, Tany _) ->
             (env, (fun env _ -> (env, mk (r, Typing_utils.tany env))))
           | (r, Terr) -> (env, (fun env _ -> (env, TUtils.terr env r)))
@@ -6061,15 +6014,12 @@ and dispatch_call
           | (r, _) ->
             let (env, tk) = Env.fresh_type env p in
             let (env, tv) = Env.fresh_type env p in
-            let unification =
-              TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
-            in
             let try_vector env =
               let vector_type = MakeType.const_vector r_fty tv in
               let env =
                 SubType.sub_type env x vector_type (Errors.unify_error_at pos)
               in
-              (env, (fun env tr -> (env, MakeType.varray ~unification r tr)))
+              (env, (fun env tr -> (env, MakeType.varray r tr)))
             in
             let try_keyed_container env =
               let keyed_container_type = MakeType.keyed_container r_fty tk tv in
@@ -6080,7 +6030,7 @@ and dispatch_call
                   keyed_container_type
                   (Errors.unify_error_at pos)
               in
-              (env, (fun env tr -> (env, MakeType.darray ~unification r tk tr)))
+              (env, (fun env tr -> (env, MakeType.darray r tk tr)))
             in
             let try_container env =
               let container_type = MakeType.container r_fty tv in
@@ -6092,8 +6042,7 @@ and dispatch_call
                   (Errors.unify_error_at pos)
               in
               ( env,
-                fun env tr ->
-                  (env, MakeType.darray ~unification r (MakeType.arraykey r) tr)
+                (fun env tr -> (env, MakeType.darray r (MakeType.arraykey r) tr))
               )
             in
             let (env, tr) =

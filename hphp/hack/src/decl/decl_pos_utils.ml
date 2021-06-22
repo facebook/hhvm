@@ -127,7 +127,6 @@ struct
     | Rsplice p -> Rsplice (pos p)
     | Ret_boolean p -> Ret_boolean (pos p)
     | Rdefault_capability p -> Rdefault_capability (pos_or_decl p)
-    | Rhack_arr_dv_arrs p -> Rhack_arr_dv_arrs (pos p)
     | Rconcat_operand p -> Rconcat_operand (pos p)
     | Rinterp_operand p -> Rinterp_operand (pos p)
     | Rdynamic_coercion r -> Rdynamic_coercion (reason r)

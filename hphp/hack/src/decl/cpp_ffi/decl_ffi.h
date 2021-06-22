@@ -21,7 +21,6 @@ bump const* create_arena();
 void free_arena(bump const* bump);
 
 decl_parser_options const* create_direct_decl_parse_options(
-    bool hack_arr_dv_arrs,
     // TODO: cxx doesn't support tuple,
     //auto_namespace_map: &'a [(&'a str, &'a str)],
     bool disable_xhp_element_mangling,

@@ -38,14 +38,12 @@ unsafe extern "C" fn free_arena(_: *mut bumpalo::Bump) {}
 
 #[no_mangle]
 unsafe extern "C" fn create_direct_decl_parse_options(
-    hack_arr_dv_arrs: bool,
     // TODO: cxx doesn't support tuple,
     //auto_namespace_map: &'a [(&'a str, &'a str)],
     disable_xhp_element_mangling: bool,
     interpret_soft_types_as_like_types: bool,
 ) -> *mut DeclParserOptions<'static> {
     Box::into_raw(Box::new(DeclParserOptions {
-        hack_arr_dv_arrs,
         auto_namespace_map: &[],
         disable_xhp_element_mangling,
         interpret_soft_types_as_like_types,

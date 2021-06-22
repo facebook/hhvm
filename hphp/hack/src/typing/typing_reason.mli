@@ -150,7 +150,6 @@ type _ t_ =
   | Rsplice : Pos.t -> locl_phase t_
   | Ret_boolean : Pos.t -> locl_phase t_
   | Rdefault_capability : Pos_or_decl.t -> 'phase t_
-  | Rhack_arr_dv_arrs : Pos.t -> locl_phase t_
   | Rconcat_operand : Pos.t -> locl_phase t_
   | Rinterp_operand : Pos.t -> locl_phase t_
   | Rdynamic_coercion of locl_phase t_

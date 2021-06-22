@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<093c234a96ecb3a2e6881c8fff55b408>>
+// @generated SignedSource<<e3cbab9e93ac233bd663329042b5f23b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -329,8 +329,6 @@ pub enum T_<'a> {
     RetBoolean(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     RdefaultCapability(&'a pos_or_decl::PosOrDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    RhackArrDvArrs(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     RconcatOperand(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

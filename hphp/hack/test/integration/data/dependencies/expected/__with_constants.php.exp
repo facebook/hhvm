@@ -32,11 +32,11 @@ const shape('a' => int, 'b' => string, ...) SHAPE3 = shape('a' => 0, 'b' => "");
 
 const (int, ?(string, float)) OPTION = tuple(0, null);
 
-const darray<string, int> ARR = darray[];
+const \HH\dict<string, int> ARR = dict[];
 
-const darray<string, int> AGE_RANGE = darray[];
+const \HH\dict<string, int> AGE_RANGE = dict[];
 
-const varray<string> MAP_INDEX = varray[];
+const \HH\vec<string> MAP_INDEX = vec[];
 
 const \HH\classname<\WithConst> CLASSNAME = \WithConst::class;
 
@@ -44,7 +44,7 @@ const \HH\keyset<string> KEYSET = keyset[];
 
 const \TypedefForString TYPEDEF = "";
 
-const varray_or_darray<int> CVARRAY_OR_DARRAY = varray[];
+const vec_or_dict<int> CVARRAY_OR_DARRAY = varray[];
 
 function with_constants(): void {
   $_ = WithConst::CFLOAT;

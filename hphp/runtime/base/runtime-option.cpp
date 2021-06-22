@@ -275,7 +275,6 @@ RepoOptions::getParserEnvironment() const {
     , false // disable_modes
     , DisallowHashComments
     , DisallowFunAndClsMethPseudoFuncs
-    , true  // array_unification
     , true  // interpret_soft_types_as_like_types
     };
 }
@@ -287,7 +286,6 @@ std::uint32_t RepoOptions::getCompilerFlags() const {
     SETFLAGS(LTRAssign, 0)                                      \
     SETFLAGS(UVS, 1)                                            \
     SETFLAGS(RuntimeOption::EvalHackArrCompatNotices, 2)        \
-    SETFLAGS(RuntimeOption::EvalHackArrDVArrs, 3)               \
     SETFLAGS(RuntimeOption::RepoAuthoritative, 4)               \
     SETFLAGS(RuntimeOption::EvalJitEnableRenameFunction, 5)     \
     SETFLAGS(RuntimeOption::EvalLogExternCompilerPerf, 6)       \

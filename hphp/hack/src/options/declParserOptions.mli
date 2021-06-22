@@ -7,7 +7,6 @@
  *)
 
 type t = {
-  hack_arr_dv_arrs: bool;
   auto_namespace_map: (string * string) list;
   disable_xhp_element_mangling: bool;
   interpret_soft_types_as_like_types: bool;

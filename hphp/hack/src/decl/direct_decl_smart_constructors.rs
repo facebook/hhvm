@@ -1182,27 +1182,19 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             Node::Token(t) if t.kind() == TokenKind::Varray => {
                 let pos = self.token_pos(t);
                 let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                let ty_ = if self.opts.hack_arr_dv_arrs {
-                    Ty_::Tapply(self.alloc((
-                        (self.token_pos(t), naming_special_names::collections::VEC),
-                        self.alloc([tany]),
-                    )))
-                } else {
-                    Ty_::Tvarray(tany)
-                };
+                let ty_ = Ty_::Tapply(self.alloc((
+                    (self.token_pos(t), naming_special_names::collections::VEC),
+                    self.alloc([tany]),
+                )));
                 Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_)))
             }
             Node::Token(t) if t.kind() == TokenKind::Darray => {
                 let pos = self.token_pos(t);
                 let tany = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                let ty_ = if self.opts.hack_arr_dv_arrs {
-                    Ty_::Tapply(self.alloc((
-                        (self.token_pos(t), naming_special_names::collections::DICT),
-                        self.alloc([tany, tany]),
-                    )))
-                } else {
-                    Ty_::Tdarray(self.alloc((tany, tany)))
-                };
+                let ty_ = Ty_::Tapply(self.alloc((
+                    (self.token_pos(t), naming_special_names::collections::DICT),
+                    self.alloc([tany, tany]),
+                )));
                 Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_)))
             }
             Node::Token(t) if t.kind() == TokenKind::This => {
@@ -1233,16 +1225,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         "nothing" => Ty_::Tunion(&[]),
                         "nonnull" => Ty_::Tnonnull,
                         "dynamic" => Ty_::Tdynamic,
-                        "varray_or_darray" => {
-                            let key_type = self.varray_or_darray_key(pos);
-                            let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
-                            if self.opts.hack_arr_dv_arrs {
-                                Ty_::TvecOrDict(self.alloc((key_type, value_type)))
-                            } else {
-                                Ty_::TvarrayOrDarray(self.alloc((key_type, value_type)))
-                            }
-                        }
-                        "vec_or_dict" => {
+                        "varray_or_darray" | "vec_or_dict" => {
                             let key_type = self.vec_or_dict_key(pos);
                             let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
                             Ty_::TvecOrDict(self.alloc((key_type, value_type)))
@@ -1807,18 +1790,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         ))
     }
 
-    /// The type used when a `varray_or_darray` typehint is missing its key type argument.
-    fn varray_or_darray_key(&self, pos: &'a Pos<'a>) -> &'a Ty<'a> {
-        if self.opts.hack_arr_dv_arrs {
-            self.vec_or_dict_key(pos)
-        } else {
-            self.alloc(Ty(
-                self.alloc(Reason::RvarrayOrDarrayKey(pos)),
-                Ty_::Tprim(self.alloc(aast::Tprim::Tarraykey)),
-            ))
-        }
-    }
-
     fn source_text_at_pos(&self, pos: &'a Pos<'a>) -> &'text [u8] {
         let start = pos.start_cnum();
         let end = pos.end_cnum();
@@ -1892,6 +1863,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             ))),
             Ty_::Tvarray(ty) => Ty_::Tvarray(self.convert_tapply_to_tgeneric(ty)),
             Ty_::TvarrayOrDarray(&(tk, tv)) => Ty_::TvarrayOrDarray(self.alloc((
+                self.convert_tapply_to_tgeneric(tk),
+                self.convert_tapply_to_tgeneric(tv),
+            ))),
+            Ty_::TvecOrDict(&(tk, tv)) => Ty_::TvecOrDict(self.alloc((
                 self.convert_tapply_to_tgeneric(tk),
                 self.convert_tapply_to_tgeneric(tv),
             ))),
@@ -2824,83 +2799,52 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             Some(id) => id,
             None => return Node::Ignored(SK::GenericTypeSpecifier),
         };
-        if class_id.1.trim_start_matches("\\") == "varray_or_darray" {
-            let id_pos = class_id.0;
-            let pos = self.merge(id_pos, self.get_pos(type_arguments));
-            let type_arguments = type_arguments.as_slice(self.arena);
-            let ty_ = match type_arguments {
-                [tk, tv] => {
-                    let tup = self.alloc((
-                        self.node_to_ty(*tk)
-                            .unwrap_or_else(|| self.tany_with_pos(id_pos)),
-                        self.node_to_ty(*tv)
-                            .unwrap_or_else(|| self.tany_with_pos(id_pos)),
-                    ));
-
-                    if self.opts.hack_arr_dv_arrs {
-                        Ty_::TvecOrDict(tup)
-                    } else {
-                        Ty_::TvarrayOrDarray(tup)
+        match class_id.1.trim_start_matches("\\") {
+            "varray_or_darray" | "vec_or_dict" => {
+                let id_pos = class_id.0;
+                let pos = self.merge(id_pos, self.get_pos(type_arguments));
+                let type_arguments = type_arguments.as_slice(self.arena);
+                let ty_ = match type_arguments {
+                    [tk, tv] => Ty_::TvecOrDict(
+                        self.alloc((
+                            self.node_to_ty(*tk)
+                                .unwrap_or_else(|| self.tany_with_pos(id_pos)),
+                            self.node_to_ty(*tv)
+                                .unwrap_or_else(|| self.tany_with_pos(id_pos)),
+                        )),
+                    ),
+                    [tv] => Ty_::TvecOrDict(
+                        self.alloc((
+                            self.vec_or_dict_key(pos),
+                            self.node_to_ty(*tv)
+                                .unwrap_or_else(|| self.tany_with_pos(id_pos)),
+                        )),
+                    ),
+                    _ => TANY_,
+                };
+                self.hint_ty(pos, ty_)
+            }
+            _ => {
+                let Id(pos, class_type) = class_id;
+                match class_type.rsplit('\\').next() {
+                    Some(name) if self.is_type_param_in_scope(name) => {
+                        let pos = self.merge(pos, self.get_pos(type_arguments));
+                        let type_arguments = self.slice(
+                            type_arguments
+                                .iter()
+                                .filter_map(|&node| self.node_to_ty(node)),
+                        );
+                        let ty_ = Ty_::Tgeneric(self.alloc((name, type_arguments)));
+                        self.hint_ty(pos, ty_)
                     }
-                }
-                [tv] => {
-                    let tup = self.alloc((
-                        self.varray_or_darray_key(pos),
-                        self.node_to_ty(*tv)
-                            .unwrap_or_else(|| self.tany_with_pos(id_pos)),
-                    ));
-                    if self.opts.hack_arr_dv_arrs {
-                        Ty_::TvecOrDict(tup)
-                    } else {
-                        Ty_::TvarrayOrDarray(tup)
+                    _ => {
+                        let class_type = self.elaborate_raw_id(class_type);
+                        self.make_apply(
+                            (pos, class_type),
+                            type_arguments,
+                            self.get_pos(type_arguments),
+                        )
                     }
-                }
-                _ => TANY_,
-            };
-            self.hint_ty(pos, ty_)
-        } else if class_id.1.trim_start_matches("\\") == "vec_or_dict" {
-            let id_pos = class_id.0;
-            let pos = self.merge(id_pos, self.get_pos(type_arguments));
-            let type_arguments = type_arguments.as_slice(self.arena);
-            let ty_ = match type_arguments {
-                [tk, tv] => Ty_::TvecOrDict(
-                    self.alloc((
-                        self.node_to_ty(*tk)
-                            .unwrap_or_else(|| self.tany_with_pos(id_pos)),
-                        self.node_to_ty(*tv)
-                            .unwrap_or_else(|| self.tany_with_pos(id_pos)),
-                    )),
-                ),
-                [tv] => Ty_::TvecOrDict(
-                    self.alloc((
-                        self.vec_or_dict_key(pos),
-                        self.node_to_ty(*tv)
-                            .unwrap_or_else(|| self.tany_with_pos(id_pos)),
-                    )),
-                ),
-                _ => TANY_,
-            };
-            self.hint_ty(pos, ty_)
-        } else {
-            let Id(pos, class_type) = class_id;
-            match class_type.rsplit('\\').next() {
-                Some(name) if self.is_type_param_in_scope(name) => {
-                    let pos = self.merge(pos, self.get_pos(type_arguments));
-                    let type_arguments = self.slice(
-                        type_arguments
-                            .iter()
-                            .filter_map(|&node| self.node_to_ty(node)),
-                    );
-                    let ty_ = Ty_::Tgeneric(self.alloc((name, type_arguments)));
-                    self.hint_ty(pos, ty_)
-                }
-                _ => {
-                    let class_type = self.elaborate_raw_id(class_type);
-                    self.make_apply(
-                        (pos, class_type),
-                        type_arguments,
-                        self.get_pos(type_arguments),
-                    )
                 }
             }
         }
@@ -4564,17 +4508,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         };
         self.hint_ty(
             self.merge_positions(varray_keyword, greater_than),
-            if self.opts.hack_arr_dv_arrs {
-                Ty_::Tapply(self.alloc((
-                    (
-                        self.get_pos(varray_keyword),
-                        naming_special_names::collections::VEC,
-                    ),
-                    self.alloc([tparam]),
-                )))
-            } else {
-                Ty_::Tvarray(tparam)
-            },
+            Ty_::Tapply(self.alloc((
+                (
+                    self.get_pos(varray_keyword),
+                    naming_special_names::collections::VEC,
+                ),
+                self.alloc([tparam]),
+            ))),
         )
     }
 
@@ -4593,17 +4533,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let value_type = self.node_to_ty(value_type).unwrap_or(TANY);
         self.hint_ty(
             pos,
-            if self.opts.hack_arr_dv_arrs {
-                Ty_::Tapply(self.alloc((
-                    (
-                        self.get_pos(darray),
-                        naming_special_names::collections::DICT,
-                    ),
-                    self.alloc([key_type, value_type]),
-                )))
-            } else {
-                Ty_::Tdarray(self.alloc((key_type, value_type)))
-            },
+            Ty_::Tapply(self.alloc((
+                (
+                    self.get_pos(darray),
+                    naming_special_names::collections::DICT,
+                ),
+                self.alloc([key_type, value_type]),
+            ))),
         )
     }
 

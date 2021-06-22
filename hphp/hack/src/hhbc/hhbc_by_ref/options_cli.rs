@@ -31,7 +31,6 @@ lazy_static! {
             "hack.compiler.optimizenullcheck" => "hack.compiler.optimize_null_checks",
             // group 2: also different prefix without any obvious rule
             "eval.hackarrcompatnotices" => "hhvm.hack_arr_compat_notices",
-            "eval.hackarrdvarrs" => "hhvm.hack_arr_dv_arrs",
             "eval.emit_meth_caller_func_pointers" => "hhvm.emit_meth_caller_func_pointers",
             "eval.jitenablerenamefunction" => "hhvm.jit_enable_rename_function",
             "eval.logexterncompilerperf" => "hhvm.log_extern_compiler_perf",

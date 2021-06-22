@@ -2,7 +2,7 @@
 <?hh // partial
 
 function expect_darray(
-  darray<EXTRACT_STANDALONE_ANY, EXTRACT_STANDALONE_ANY> $_,
+  \HH\dict<EXTRACT_STANDALONE_ANY, EXTRACT_STANDALONE_ANY> $_,
 ): void {
   throw new \Exception();
 }

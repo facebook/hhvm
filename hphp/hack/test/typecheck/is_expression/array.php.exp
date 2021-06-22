@@ -7,7 +7,7 @@ File "array.php", line 9, characters 5-15:
 File "array.php", line 11, characters 5-15:
   darray<_, _>
 File "array.php", line 13, characters 5-15:
-  varray_or_darray<arraykey, _>
+  vec_or_dict<arraykey, _>
 File "array.php", line 4, characters 13-21:
 Invalid `is` expression hint (Typing[4195])
   File "array.php", line 4, characters 13-21:

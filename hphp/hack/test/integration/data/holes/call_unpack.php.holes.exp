@@ -73,7 +73,7 @@
         }
       ]
     },
-    "expected_type": "(float, varray<int>, int, int, int, int)",
+    "expected_type": "(float, vec<int>, int, int, int, int)",
     "full_expected_type": {
       "src_pos": {
         "filename": "/call_unpack.php",
@@ -101,7 +101,8 @@
             "char_start": 22,
             "char_end": 32
           },
-          "kind": "varray",
+          "kind": "class",
+          "name": "\\HH\\vec",
           "args": [
             {
               "src_pos": {

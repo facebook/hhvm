@@ -9,8 +9,7 @@
         td_vis = Transparent; td_tparams = []; td_constraint = None;
         td_type =
         (Rhint ([10:16-32]),
-         (Tvarray_or_darray
-            (Rvarray_or_darray_key ([10:16-32]), (Tprim Tarraykey)),
+         (Tvec_or_dict (Rvec_or_dict_key ([10:16-32]), (Tprim Tarraykey)),
             (Rhint ([10:16-32]), Tany)))
         }));
   ("\\MyArray1",
@@ -25,7 +24,8 @@
         td_constraint = None;
         td_type =
         (Rhint ([11:20-29]),
-         (Tvarray (Rhint ([11:27-28]), (Tgeneric ("T", [])))))
+         (Tapply (([11:20-26], "\\HH\\vec"),
+            [(Rhint ([11:27-28]), (Tgeneric ("T", [])))])))
         }));
   ("\\MyArray2",
    (Shallow_decl_defs.Typedef
@@ -44,8 +44,10 @@
         td_constraint = None;
         td_type =
         (Rhint ([12:25-39]),
-         (Tdarray ((Rhint ([12:32-34]), (Tgeneric ("TK", []))),
-            (Rhint ([12:36-38]), (Tgeneric ("TV", []))))))
+         (Tapply (([12:25-31], "\\HH\\dict"),
+            [(Rhint ([12:32-34]), (Tgeneric ("TK", [])));
+              (Rhint ([12:36-38]), (Tgeneric ("TV", [])))]
+            )))
         }));
   ("\\MyDarray",
    (Shallow_decl_defs.Typedef
@@ -64,8 +66,10 @@
         td_constraint = None;
         td_type =
         (Rhint ([13:25-39]),
-         (Tdarray ((Rhint ([13:32-34]), (Tgeneric ("TK", []))),
-            (Rhint ([13:36-38]), (Tgeneric ("TV", []))))))
+         (Tapply (([13:25-31], "\\HH\\dict"),
+            [(Rhint ([13:32-34]), (Tgeneric ("TK", [])));
+              (Rhint ([13:36-38]), (Tgeneric ("TV", [])))]
+            )))
         }));
   ("\\MyVarray",
    (Shallow_decl_defs.Typedef
@@ -79,7 +83,8 @@
         td_constraint = None;
         td_type =
         (Rhint ([14:20-29]),
-         (Tvarray (Rhint ([14:27-28]), (Tgeneric ("T", [])))))
+         (Tapply (([14:20-26], "\\HH\\vec"),
+            [(Rhint ([14:27-28]), (Tgeneric ("T", [])))])))
         }));
   ("\\MyVarrayOrDarray",
    (Shallow_decl_defs.Typedef
@@ -98,7 +103,7 @@
         td_constraint = None;
         td_type =
         (Rhint ([15:33-57]),
-         (Tvarray_or_darray (Rhint ([15:50-52]), (Tgeneric ("TK", []))),
+         (Tvec_or_dict (Rhint ([15:50-52]), (Tgeneric ("TK", []))),
             (Rhint ([15:54-56]), (Tgeneric ("TV", [])))))
         }));
   ("\\MyString",

@@ -163,7 +163,6 @@ prefixed_flags!(
     ENABLE_INTRINSICS_EXTENSION,
     FOLD_LAZY_CLASS_KEYS,
     HACK_ARR_COMPAT_NOTICES,
-    HACK_ARR_DV_ARRS,
     JIT_ENABLE_RENAME_FUNCTION,
     LOG_EXTERN_COMPILER_PERF,
     RX_IS_ENABLED,
@@ -767,9 +766,6 @@ mod tests {
   "hhvm.hack_arr_compat_notices": {
     "global_value": false
   },
-  "hhvm.hack_arr_dv_arrs": {
-    "global_value": false
-  },
   "hhvm.include_roots": {
     "global_value": {}
   },
@@ -1137,7 +1133,7 @@ bitflags! {
         const RELABEL = 1 << 5;
         // No longer using bit 6.
         const HACK_ARR_COMPAT_NOTICES = 1 << 7;
-        const HACK_ARR_DV_ARRS = 1 << 8;
+        // No longer using bit 8.
         const AUTHORITATIVE = 1 << 9;
         const JIT_ENABLE_RENAME_FUNCTION = 1 << 10;
         // No longer using bits 11-13.

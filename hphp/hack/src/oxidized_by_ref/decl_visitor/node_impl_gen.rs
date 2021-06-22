@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<10be3d21497e96b6d83e926eaf031f6e>>
+// @generated SignedSource<<c71413d95c9fa3613c80b4e47e39f9ce>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -909,7 +909,6 @@ impl<'a> Node<'a> for T_<'a> {
             T_::Rsplice(ref __binding_0) => __binding_0.accept(v),
             T_::RetBoolean(ref __binding_0) => __binding_0.accept(v),
             T_::RdefaultCapability(ref __binding_0) => __binding_0.accept(v),
-            T_::RhackArrDvArrs(ref __binding_0) => __binding_0.accept(v),
             T_::RconcatOperand(ref __binding_0) => __binding_0.accept(v),
             T_::RinterpOperand(ref __binding_0) => __binding_0.accept(v),
             T_::RdynamicCoercion(ref __binding_0) => __binding_0.accept(v),

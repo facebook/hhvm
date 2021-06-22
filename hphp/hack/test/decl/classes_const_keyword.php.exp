@@ -112,8 +112,10 @@
            scc_name = ([22:29-36], "CDARRAY");
            scc_type =
            (Rhint ([22:9-28]),
-            (Tdarray ((Rhint ([22:16-22]), (Tprim Tstring)),
-               (Rhint ([22:24-27]), (Tprim Tint)))));
+            (Tapply (([22:9-15], "\\HH\\dict"),
+               [(Rhint ([22:16-22]), (Tprim Tstring));
+                 (Rhint ([22:24-27]), (Tprim Tint))]
+               )));
            scc_refs = [] };
           { Shallow_decl_defs.scc_abstract = false;
             scc_name = ([23:24-31], "CKEYSET");
@@ -133,7 +135,8 @@
             scc_name = ([25:24-31], "CVARRAY");
             scc_type =
             (Rhint ([25:9-23]),
-             (Tvarray (Rhint ([25:16-22]), (Tprim Tstring))));
+             (Tapply (([25:9-15], "\\HH\\vec"),
+                [(Rhint ([25:16-22]), (Tprim Tstring))])));
             scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];

@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,142 +1,142 @@
+@@ -1,144 +1,144 @@
  [("\\DeclPos",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -30,9 +30,9 @@
                  { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([4:34-64]),
-                    (Tvarray_or_darray
--                      (Rvarray_or_darray_key ([4:34-64]), (Tprim Tarraykey)),
-+                      (Rvarray_or_darray_key ([4:45-64]), (Tprim Tarraykey)),
+                    (Tvec_or_dict
+-                      (Rvec_or_dict_key ([4:34-64]), (Tprim Tarraykey)),
++                      (Rvec_or_dict_key ([4:45-64]), (Tprim Tarraykey)),
                        (Rhint ([4:62-63]), (Tgeneric ("T", [])))))
                    };
                  ft_flags =
@@ -74,8 +74,10 @@
                   { et_enforced = Typing_defs_core.Unenforced;
                     et_type =
                     (Rhint ([6:32-59]),
-                     (Tdarray ((Rhint ([6:50-53]), (Tprim Tint)),
-                        (Rhint ([6:55-58]), (Tprim Tint)))))
+                     (Tapply (([6:43-49], "\\HH\\dict"),
+                        [(Rhint ([6:50-53]), (Tprim Tint));
+                          (Rhint ([6:55-58]), (Tprim Tint))]
+                        )))
                     };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false

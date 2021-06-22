@@ -26,7 +26,6 @@ type t = {
   disallow_hash_comments: bool;
   disallow_fun_and_cls_meth_pseudo_funcs: bool;
   disallow_inst_meth: bool;
-  hack_arr_dv_arrs: bool;
   interpret_soft_types_as_like_types: bool;
 }
 [@@deriving show]
@@ -51,7 +50,6 @@ let default =
     disallow_hash_comments = false;
     disallow_fun_and_cls_meth_pseudo_funcs = false;
     disallow_inst_meth = false;
-    hack_arr_dv_arrs = false;
     interpret_soft_types_as_like_types = false;
   }
 
@@ -79,7 +77,6 @@ let make
     ?(disallow_fun_and_cls_meth_pseudo_funcs =
       default.disallow_fun_and_cls_meth_pseudo_funcs)
     ?(disallow_inst_meth = default.disallow_inst_meth)
-    ?(hack_arr_dv_arrs = default.hack_arr_dv_arrs)
     ?(interpret_soft_types_as_like_types =
       default.interpret_soft_types_as_like_types)
     () =
@@ -102,7 +99,6 @@ let make
     disallow_hash_comments;
     disallow_fun_and_cls_meth_pseudo_funcs;
     disallow_inst_meth;
-    hack_arr_dv_arrs;
     interpret_soft_types_as_like_types;
   }
 
@@ -142,7 +138,5 @@ let disallow_hash_comments e = e.disallow_hash_comments
 
 let disallow_fun_and_cls_meth_pseudo_funcs e =
   e.disallow_fun_and_cls_meth_pseudo_funcs
-
-let hack_arr_dv_arrs e = e.hack_arr_dv_arrs
 
 let interpret_soft_types_as_like_types e = e.interpret_soft_types_as_like_types

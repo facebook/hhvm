@@ -111,7 +111,6 @@ impl<'a> Reason<'a> {
             | RinterpOperand(p)
             | RsupportDynamicType(p)
             | RdynamicPartialEnforcement((p, _, _))
-            | RhackArrDvArrs(p)
             | RrigidTvarEscape((p, _, _, _)) => Some(p),
             RlostInfo((_, r, _))
             | Rinstantiate((_, _, r))

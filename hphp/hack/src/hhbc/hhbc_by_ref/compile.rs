@@ -75,7 +75,7 @@ bitflags! {
         const LTR_ASSIGN=1 << 0;
         const UVS=1 << 1;
         const HACK_ARR_COMPAT_NOTICES=1 << 2;
-        const HACK_ARR_DV_ARRS=1 << 3;
+        // No longer using bit 3.
         const AUTHORITATIVE=1 << 4;
         const JIT_ENABLE_RENAME_FUNCTION=1 << 5;
         const LOG_EXTERN_COMPILER_PERF=1 << 6;
@@ -159,9 +159,6 @@ impl HHBCFlags {
         }
         if self.contains(HHBCFlags::HACK_ARR_COMPAT_NOTICES) {
             f |= HhvmFlags::HACK_ARR_COMPAT_NOTICES;
-        }
-        if self.contains(HHBCFlags::HACK_ARR_DV_ARRS) {
-            f |= HhvmFlags::HACK_ARR_DV_ARRS;
         }
         if self.contains(HHBCFlags::JIT_ENABLE_RENAME_FUNCTION) {
             f |= HhvmFlags::JIT_ENABLE_RENAME_FUNCTION;

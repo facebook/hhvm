@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<39adbd8c9a5a882e3b9d6602e5dd9a57>>
+// @generated SignedSource<<1b243e25dca7b449c1bff5571ba2777c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -35,7 +35,6 @@ use crate::*;
     ToOcamlRep
 )]
 pub struct DeclParserOptions<'a> {
-    pub hack_arr_dv_arrs: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub auto_namespace_map: &'a [(&'a str, &'a str)],
     pub disable_xhp_element_mangling: bool,

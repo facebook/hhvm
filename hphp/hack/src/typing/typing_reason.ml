@@ -145,7 +145,6 @@ type _ t_ =
   | Rsplice : Pos.t -> locl_phase t_
   | Ret_boolean : Pos.t -> locl_phase t_
   | Rdefault_capability : Pos_or_decl.t -> 'phase t_
-  | Rhack_arr_dv_arrs : Pos.t -> locl_phase t_
   | Rconcat_operand : Pos.t -> locl_phase t_
   | Rinterp_operand : Pos.t -> locl_phase t_
   | Rdynamic_coercion of locl_phase t_
@@ -591,8 +590,6 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     ]
   | Rdefault_capability _ ->
     [(p, prefix ^ " because the function did not have an explicit context")]
-  | Rhack_arr_dv_arrs _ ->
-    [(p, prefix ^ " because legacy arrays have been unified with Hack arrays")]
   | Rconcat_operand _ -> [(p, "Expected `string` or `int`")]
   | Rinterp_operand _ -> [(p, "Expected `string` or `int`")]
   | Rdynamic_coercion r -> to_string prefix r
@@ -694,7 +691,6 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rkey_value_collection_key p
   | Rsplice p
   | Ret_boolean p
-  | Rhack_arr_dv_arrs p
   | Rconcat_operand p
   | Rinterp_operand p
   | Rrigid_tvar_escape (p, _, _, _) ->
@@ -834,7 +830,6 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rsplice _ -> "Rsplice"
   | Ret_boolean _ -> "Ret_boolean"
   | Rdefault_capability _ -> "Rdefault_capability"
-  | Rhack_arr_dv_arrs _ -> "Rhack_arr_dv_arrs"
   | Rconcat_operand _ -> "Rconcat_operand"
   | Rinterp_operand _ -> "Rinterp_operand"
   | Rdynamic_coercion _ -> "Rdynamic_coercion"

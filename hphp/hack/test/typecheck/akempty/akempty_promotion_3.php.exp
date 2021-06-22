@@ -5,4 +5,4 @@ Invalid argument (Typing[4110])
   File "akempty_promotion_3.php", line 15, characters 12-14:
   Expected `int`
   File "akempty_promotion_3.php", line 7, characters 8-15:
-  But got `vec<string>` because legacy arrays have been unified with Hack arrays
+  But got `vec<string>`

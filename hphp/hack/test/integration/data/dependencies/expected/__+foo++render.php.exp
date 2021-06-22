@@ -2,8 +2,8 @@
 
 class :xhp implements \XHPChild {
   public function __construct(
-    darray<string, mixed> $attr,
-    varray<mixed> $children,
+    \HH\dict<string, mixed> $attr,
+    \HH\vec<mixed> $children,
     string $file,
     int $line,
   ) {

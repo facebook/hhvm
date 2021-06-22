@@ -168,8 +168,6 @@ let enable_sound_dynamic = GlobalOptions.tco_enable_sound_dynamic
 
 let use_direct_decl_parser = GlobalOptions.tco_use_direct_decl_parser
 
-let hack_arr_dv_arrs = GlobalOptions.po_hack_arr_dv_arrs
-
 let interpret_soft_types_as_like_types =
   GlobalOptions.po_interpret_soft_types_as_like_types
 

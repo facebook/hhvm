@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
   File "allow_varray_where_dict_like_array_with_int_keys_is_required.php", line 3, characters 18-36:
   Expected `dict<int, string>`
   File "allow_varray_where_dict_like_array_with_int_keys_is_required.php", line 4, characters 10-26:
-  But got `vec<string>` because legacy arrays have been unified with Hack arrays
+  But got `vec<string>`

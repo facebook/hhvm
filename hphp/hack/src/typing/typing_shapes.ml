@@ -326,12 +326,9 @@ let to_array env pos shape_ty res =
       shape_ty
   in
   to_collection env shape_ty res (fun env r key value ->
-      let unification =
-        TypecheckerOptions.hack_arr_dv_arrs (Env.get_tcopt env)
-      in
       Typing_enforceability.make_locl_like_type
         env
-        (MakeType.darray ~unification r key value))
+        (MakeType.darray r key value))
 
 let to_dict env pos shape_ty res =
   let (env, shape_ty) =

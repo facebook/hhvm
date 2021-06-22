@@ -1,8 +1,19 @@
-Errors:
-  [4:10-19] Invalid return type
-  [3:16-34] Expected `varray_or_darray<[unresolved], [unresolved]>`
-  [4:10-19] But got `vec<int>` because legacy arrays have been unified with Hack arrays
-  [4:10-34] Invalid return type
-  [3:16-34] Expected `varray_or_darray<[unresolved], [unresolved]>`
-  [4:10-34] But got `dict<int, string>` because legacy arrays have been unified with Hack arrays
-No patches
+//// function_return_types_PHPism_FIXME_array.php--file1.php
+<?hh
+
+/* HH_FIXME[2071] Fixme'd to not have thousands of FIXMEs in WWW (for now) */
+ type PHPism_FIXME_Array = varray_or_darray;
+
+//// function_return_types_PHPism_FIXME_array.php--file2.php
+<?hh // partial
+
+function fa(): <<__Soft>> vec_or_dict<int, int> {
+  return varray[4];
+}
+
+//// function_return_types_PHPism_FIXME_array.php--file3.php
+<?hh // partial
+
+function fb(): <<__Soft>> vec_or_dict<int, string> {
+  return darray[4 => "why type?"];
+}

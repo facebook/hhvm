@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
   File "akempty_promotion_9.php", line 18, characters 12-30:
   Expected `dict<int, string>`
   File "akempty_promotion_9.php", line 8, characters 8-15:
-  But got `vec<string>` because legacy arrays have been unified with Hack arrays
+  But got `vec<string>`

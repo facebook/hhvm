@@ -265,7 +265,6 @@ let parse_options () =
   let use_direct_decl_parser = ref false in
   let disable_enum_classes = ref false in
   let enable_enum_supertyping = ref false in
-  let hack_arr_dv_arrs = ref true in
   let interpret_soft_types_as_like_types = ref false in
   let enable_strict_string_concat_interp = ref false in
   let ignore_unsafe_cast = ref false in
@@ -642,9 +641,6 @@ let parse_options () =
       ( "--enable-enum-supertyping",
         Arg.Set enable_enum_supertyping,
         " Enable the enum supertyping extension." );
-      ( "--hack-arr-dv-arrs",
-        Arg.Set hack_arr_dv_arrs,
-        " Varray and darray become vec and dict." );
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
         " Types declared with <<__Soft>> (runtime logs but doesn't throw) become like types."
@@ -838,7 +834,6 @@ let parse_options () =
       ~tco_use_direct_decl_parser:!use_direct_decl_parser
       ~po_enable_enum_classes:(not !disable_enum_classes)
       ~po_enable_enum_supertyping:!enable_enum_supertyping
-      ~po_hack_arr_dv_arrs:!hack_arr_dv_arrs
       ~po_interpret_soft_types_as_like_types:!interpret_soft_types_as_like_types
       ~tco_enable_strict_string_concat_interp:
         !enable_strict_string_concat_interp

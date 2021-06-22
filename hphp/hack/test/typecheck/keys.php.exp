@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
   File "keys.php", line 12, characters 37-54:
   Expected `dict<string, [unresolved]>`
   File "keys.php", line 8, characters 8-19:
-  But got `vec<bool>` because legacy arrays have been unified with Hack arrays
+  But got `vec<bool>`

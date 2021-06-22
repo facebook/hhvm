@@ -3,7 +3,7 @@ Invalid return type (Typing[4110])
   File "akempty_tuple_bad.php", line 4, characters 17-38:
   Expected `(?string, vec<int>)`
   File "akempty_tuple_bad.php", line 5, characters 8-15:
-  But got `vec<nothing>` because legacy arrays have been unified with Hack arrays
+  But got `vec<nothing>`
 File "akempty_tuple_bad.php", line 12, characters 8-9:
 Invalid `echo`/`print` argument (Typing[4438])
   File "akempty_tuple_bad.php", line 12, characters 3-6:

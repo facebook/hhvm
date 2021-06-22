@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
   File "varray.php", line 23, characters 38-41:
   Expected `bool`
   File "varray.php", line 24, characters 10-18:
-  But got `vec<int>` because legacy arrays have been unified with Hack arrays
+  But got `vec<int>`

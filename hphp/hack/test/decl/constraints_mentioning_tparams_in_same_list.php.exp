@@ -58,7 +58,8 @@
             tp_constraints =
             [(Constraint_as,
               (Rhint ([11:11-21]),
-               (Tvarray (Rhint ([11:18-20]), (Tgeneric ("Ta", []))))))
+               (Tapply (([11:11-17], "\\HH\\vec"),
+                  [(Rhint ([11:18-20]), (Tgeneric ("Ta", [])))]))))
               ];
             tp_reified = Erased; tp_user_attributes = [] };
           { Typing_defs_core.tp_variance = Invariant;
@@ -126,8 +127,10 @@
             tp_constraints =
             [(Constraint_as,
               (Rhint ([16:12-26]),
-               (Tdarray ((Rhint ([16:19-21]), (Tgeneric ("Ta", []))),
-                  (Rhint ([16:23-25]), (Tgeneric ("Tb", [])))))))
+               (Tapply (([16:12-18], "\\HH\\dict"),
+                  [(Rhint ([16:19-21]), (Tgeneric ("Ta", [])));
+                    (Rhint ([16:23-25]), (Tgeneric ("Tb", [])))]
+                  ))))
               ];
             tp_reified = Erased; tp_user_attributes = [] };
           { Typing_defs_core.tp_variance = Invariant;
@@ -135,7 +138,8 @@
             tp_constraints =
             [(Constraint_as,
               (Rhint ([17:12-22]),
-               (Tvarray (Rhint ([17:19-21]), (Tgeneric ("Ta", []))))))
+               (Tapply (([17:12-18], "\\HH\\vec"),
+                  [(Rhint ([17:19-21]), (Tgeneric ("Ta", [])))]))))
               ];
             tp_reified = Erased; tp_user_attributes = [] };
           { Typing_defs_core.tp_variance = Invariant;
@@ -143,8 +147,7 @@
             tp_constraints =
             [(Constraint_as,
               (Rhint ([18:13-37]),
-               (Tvarray_or_darray
-                  (Rhint ([18:30-32]), (Tgeneric ("Ta", []))),
+               (Tvec_or_dict (Rhint ([18:30-32]), (Tgeneric ("Ta", []))),
                   (Rhint ([18:34-36]), (Tgeneric ("Tb", []))))))
               ];
             tp_reified = Erased; tp_user_attributes = [] };

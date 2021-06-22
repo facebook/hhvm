@@ -199,7 +199,6 @@ impl<'src> AastParser {
             disallow_fun_and_cls_meth_pseudo_funcs: env
                 .parser_options
                 .po_disallow_fun_and_cls_meth_pseudo_funcs,
-            hack_arr_dv_arrs: env.parser_options.po_hack_arr_dv_arrs,
             interpret_soft_types_as_like_types: env
                 .parser_options
                 .po_interpret_soft_types_as_like_types,

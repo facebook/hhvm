@@ -437,7 +437,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ~tco_ifc_enabled:(ServerArgs.enable_ifc options)
       ?po_enable_enum_classes:(bool_opt "enable_enum_classes" config)
       ?po_enable_enum_supertyping:(bool_opt "enable_enum_supertyping" config)
-      ?po_hack_arr_dv_arrs:(bool_opt "hack_arr_dv_arrs" config)
       ?po_interpret_soft_types_as_like_types:
         (bool_opt "interpret_soft_types_as_like_types" config)
       ?tco_enable_strict_string_concat_interp:

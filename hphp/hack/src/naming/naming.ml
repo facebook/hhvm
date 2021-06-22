@@ -683,11 +683,6 @@ and try_castable_hint
       ~allow_wildcard
       ~allow_retonly:false
   in
-  let unif env =
-    (not ignore_hack_arr)
-    && TypecheckerOptions.hack_arr_dv_arrs
-         (Provider_context.get_tcopt (fst env).ctx)
-  in
   let canon = String.lowercase x in
   let opt_hint =
     match canon with
@@ -701,7 +696,7 @@ and try_castable_hint
         | [] ->
           if Partial.should_check_error (fst env).in_mode 2071 then
             Errors.too_few_type_arguments p;
-          if unif env then
+          if not ignore_hack_arr then
             N.Happly ((p, SN.Collections.cDict), [(p, N.Hany); (p, N.Hany)])
           else
             N.Hdarray ((p, N.Hany), (p, N.Hany))
@@ -709,7 +704,7 @@ and try_castable_hint
           Errors.too_few_type_arguments p;
           N.Hany
         | [key_; val_] ->
-          if unif env then
+          if not ignore_hack_arr then
             N.Happly ((p, SN.Collections.cDict), [hint env key_; hint env val_])
           else
             N.Hdarray (hint env key_, hint env val_)
@@ -722,12 +717,12 @@ and try_castable_hint
         | [] ->
           if Partial.should_check_error (fst env).in_mode 2071 then
             Errors.too_few_type_arguments p;
-          if unif env then
+          if not ignore_hack_arr then
             N.Happly ((p, SN.Collections.cVec), [(p, N.Hany)])
           else
             N.Hvarray (p, N.Hany)
         | [val_] ->
-          if unif env then
+          if not ignore_hack_arr then
             N.Happly ((p, SN.Collections.cVec), [hint env val_])
           else
             N.Hvarray (hint env val_)
@@ -741,7 +736,7 @@ and try_castable_hint
           if Partial.should_check_error (fst env).in_mode 2071 then
             Errors.too_few_type_arguments p;
 
-          if unif env then
+          if not ignore_hack_arr then
             N.Hvec_or_dict (None, (p, N.Hany))
           else
             (* Warning: These Hanys are here because they produce subtle
@@ -749,12 +744,12 @@ and try_castable_hint
                 if you change them to Herr *)
             N.Hvarray_or_darray (None, (p, N.Hany))
         | [val_] ->
-          if unif env then
+          if not ignore_hack_arr then
             N.Hvec_or_dict (None, hint env val_)
           else
             N.Hvarray_or_darray (None, hint env val_)
         | [key; val_] ->
-          if unif env then
+          if not ignore_hack_arr then
             N.Hvec_or_dict (Some (hint env key), hint env val_)
           else
             N.Hvarray_or_darray (Some (hint env key), hint env val_)

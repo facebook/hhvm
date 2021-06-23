@@ -1075,7 +1075,8 @@ function hhvm_cmd(
 }
 
 function hphp_cmd($options, $test, $program): string {
-  $extra_args = preg_replace("/-v\s*/", "-vRuntime.", extra_args($options));
+  // Transform extra_args like "-vName=Value" into "-vRuntime.Name=Value".
+  $extra_args = preg_replace("/(^-v|\s+-v)\s*/", "$1Runtime.", extra_args($options));
 
   $compiler_args = "";
   if (isset($options['hackc'])) {

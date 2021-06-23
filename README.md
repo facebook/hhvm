@@ -40,6 +40,8 @@ HHVM is licensed under the PHP and Zend licenses except as otherwise noted.
 
 The [Hack typechecker](hphp/hack) is licensed under the MIT [License](hphp/hack/LICENSE) except as otherwise noted.
 
+The [Hack Standard Library](hphp/hsl) is licensed under the MIT [License](hphp/hack/LICENSE) except as otherwise noted.
+
 ## Reporting Crashes
 
 See [Reporting Crashes](https://github.com/facebook/hhvm/wiki/Reporting-Crashes) for helpful tips on how to report crashes in an actionable manner.

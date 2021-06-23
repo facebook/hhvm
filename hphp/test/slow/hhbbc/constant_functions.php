@@ -1,6 +1,6 @@
 <?hh
 
-// Note that this test uses ConstantFunctions tointentionally change
+// Note that this test uses ConstantFunctions to intentionally change
 // the behavior in repo mode.
 
 function foo($x = 1, $y = 1) { return $x * $y; }

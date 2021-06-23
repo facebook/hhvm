@@ -103,7 +103,7 @@ String toString(const Array& arr, TSDisplayType type);
  * in the appropriate places to varrays. The reason we have to do that is a
  * consequence of how our serialization format for PHP arrays broke down:
  * we cannot distinguish between list-like darrays and varrays based on the
- * serialized data. Post HackArrDVArrs, it converts list-like dicts to vecs.
+ * serialized data. Converts list-like dicts to vecs.
  *
  * In summary, this function is tied closely to variable-unserializer formats.
  * If you think you need to use it for any other reason: THINK AGAIN. Think

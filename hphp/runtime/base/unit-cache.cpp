@@ -1335,7 +1335,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalForbidDynamicCallsWithAttr ? '1' : '0')
     + (RuntimeOption::EvalLogKnownMethodsAsDynamicCalls ? '1' : '0')
     + (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls ? '1' : '0')
-    + (RuntimeOption::EvalHackArrDVArrs ? '1' : '0')
     + (RuntimeOption::EvalAssemblerFoldDefaultValues ? '1' : '0')
     + RuntimeOption::EvalHackCompilerCommand + '\0'
     + RuntimeOption::EvalHackCompilerArgs + '\0'

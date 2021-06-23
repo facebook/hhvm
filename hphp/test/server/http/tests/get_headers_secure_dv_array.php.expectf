@@ -23,28 +23,3 @@ string(%d) "dict(5) {
     string(2) "44"
   }
 }"
-Requesting 'test_get_headers_secure.php'
-string(%d) "dict(5) {
-  ["accept"]=>
-  vec(1) {
-    string(3) "*/*"
-  }
-  ["host"]=>
-  vec(1) {
-    string(%d) "%s"
-  }
-  ["user-agent"]=>
-  vec(1) {
-    string(%d) "%s"
-  }
-  ["xxxxx"]=>
-  vec(1) {
-    string(2) "45"
-  }
-  ["xyzzy"]=>
-  vec(3) {
-    string(2) "42"
-    string(2) "43"
-    string(2) "44"
-  }
-}"

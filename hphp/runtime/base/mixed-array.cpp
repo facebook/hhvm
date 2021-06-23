@@ -102,7 +102,7 @@ struct MixedArray::MarkedDictArrayInitializer {
     ad->initHeader_16(HeaderKind::Dict, StaticValue,
                       kLegacyArray | kHasStrKeyTable);
     ad->mutableStrKeyTable()->reset();
-    assertx(!RuntimeOption::EvalHackArrDVArrs || ad->checkInvariants());
+    assertx(ad->checkInvariants());
   }
 };
 MixedArray::MarkedDictArrayInitializer MixedArray::s_marked_dict_initializer;

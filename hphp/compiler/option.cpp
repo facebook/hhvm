@@ -199,10 +199,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 #undef BIND_HAC_OPTION_SELF
 #undef BIND_HAC_OPTION
 
-  Config::Bind(RuntimeOption::EvalHackArrDVArrs,
-               ini, config, "HackArrDVArrs",
-               RuntimeOption::EvalHackArrDVArrs);
-
   Config::Bind(RuntimeOption::EvalForbidDynamicCallsToFunc,
                ini, config, "ForbidDynamicCallsToFunc",
                RuntimeOption::EvalForbidDynamicCallsToFunc);

@@ -46,7 +46,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalRaiseClsMethConversionWarning         = RaiseClsMethConversionWarning;
   RO::EvalNoticeOnCoerceForStrConcat            = NoticeOnCoerceForStrConcat;
   RO::EvalNoticeOnCoerceForBitOp                = NoticeOnCoerceForBitOp;
-  RO::EvalHackArrDVArrs                         = true; // TODO(kshaunak): Clean up.
   RO::EvalTraitConstantInterfaceBehavior        = TraitConstantInterfaceBehavior;
 
   if (HardGenericsUB) RO::EvalEnforceGenericsUB = 2;

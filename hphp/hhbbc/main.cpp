@@ -524,7 +524,6 @@ int main(int argc, char** argv) try {
   RO::EvalNoticeOnCoerceForStrConcat            = gd.NoticeOnCoerceForStrConcat;
   RO::EvalNoticeOnCoerceForBitOp                = gd.NoticeOnCoerceForBitOp;
   RO::StrictArrayFillKeys                       = gd.StrictArrayFillKeys;
-  RO::EvalHackArrDVArrs                         = true; // TODO(kshaunak): Clean it up.
   RO::EvalArrayProvenance                       = false; // TODO(kshaunak): Clean it up.
   RO::EvalEnforceGenericsUB                     = gd.HardGenericsUB ? 2 : 1;
   RO::EvalTraitConstantInterfaceBehavior        = gd.TraitConstantInterfaceBehavior;

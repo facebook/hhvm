@@ -194,8 +194,6 @@ function determine_flags(OptionMap $opts): string {
     'opt-ir'          => '-v Eval.HHIRGenerateAsserts=0 ',
     'jit-gdb'         => '-v Eval.JitNoGdb=false ',
     'no-pgo'          => '-v Eval.JitPGO=false ',
-    'hadva'           => '-v Eval.HackArrDVArrs=true '.
-                         '-v Eval.HackArrDVArrMark=true ',
     'hphpd'           => '-m debug ',
     'server'          => '-m server ',
   };

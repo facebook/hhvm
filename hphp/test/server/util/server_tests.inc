@@ -130,7 +130,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
       ServerUtilServerTests::$repo_builds[$repoKey] =
         "{$LOG_ROOT}_bytecode{$test_run_id}_{$instance_id}";
       $cmd = "$hhvm --hphp -k1 -l2 -t hhbc -o " . ServerUtilServerTests::$repo_builds[$repoKey] .
-        " --input-dir $root -vRuntime.Eval.HackArrDVArrs=1 $repoArgs";
+        " --input-dir $root $repoArgs";
 
       tlog('Building repo with command: '.$cmd);
       $output = null;
@@ -147,7 +147,6 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
   $cmd = "exec env MALLOC_CONF=junk:true TESTID={$serverId} " .
     "SERVERPORT={$serverPort} $hhvm" .
     ' --mode=server' . $serverConfig . $logFileConfig .
-    ' -vEval.HackArrDVArrs=1' .
     ' -vServer.ExitOnBindFail=true' .
     ' --instance-id=' . $test_run_id .
     ' -vPageletServer.ThreadCount=5' .

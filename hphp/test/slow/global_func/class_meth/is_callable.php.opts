@@ -1,6 +1,3 @@
 -vEval.IsCompatibleClsMethType=1
-
 -vEval.RaiseClsMethConversionWarning=1
 -vEval.RaiseClassConversionWarning=1
-
--vEval.HackArrDVArrs=1

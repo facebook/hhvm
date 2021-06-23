@@ -52,8 +52,8 @@ enum class VariantControllerHackArraysMode {
   // Serialize Hack arrays (excluding keysets), and unserialize them as the
   // same Hack arrays, except for one case: unserialize marked vecs as dicts.
   ON,
-  // (Un)serialize varrays / darrays: this will accept / emit Hack arrays if
-  // HackArrDVArrs is set. Intish-cast dict keys.
+  // (Un)serialize varrays / darrays: this will accept / emit Hack arrays.
+  // Intish-cast dict keys.
   MIGRATORY,
   // Serialize Hack arrays (including keysets), and unserialize them as the
   // same Hack arrays, except for one case: unserialize marked vecs as dicts.

@@ -24,9 +24,9 @@ function entrypoint_mcrypt_ecb_variation4(): void {
   error_reporting(E_ALL & ~E_DEPRECATED);
 
   /* Prototype  : string mcrypt_ecb(string cipher, string key, string data, int mode, string iv)
-   * Description: ECB crypt/decrypt data using key key with cipher cipher starting with iv 
+   * Description: ECB crypt/decrypt data using key key with cipher cipher starting with iv
    * Source code: ext/mcrypt/mcrypt.c
-   * Alias to functions: 
+   * Alias to functions:
    */
 
   echo "*** Testing mcrypt_ecb() : usage variation ***\n";
@@ -87,14 +87,8 @@ EOT;
         'mixed case string' => "sTrInG",
         'heredoc' => $heredoc,
 
-        // object data
-        'instance of classWithToString' => new classWithToString(),
-        'instance of classWithoutToString' => new classWithoutToString(),
-
-
-
         // resource variable
-        'resource' => $fp      
+        'resource' => $fp
   ];
 
   // loop through each element of the array for mode

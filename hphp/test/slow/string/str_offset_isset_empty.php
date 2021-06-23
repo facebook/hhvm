@@ -18,7 +18,11 @@ function main(): void {
   foreach ($arr as $x) {
     var_dump($x);
     _try(() ==> $str[$x]);
-    var_dump(isset($str[$x]));
+    try {
+      var_dump(isset($str[$x]));
+    } catch (TypecastException $e) {
+      var_dump($e->getMessage());
+    }
     echo "\n";
   }
 }

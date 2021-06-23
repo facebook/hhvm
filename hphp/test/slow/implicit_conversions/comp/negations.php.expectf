@@ -25,10 +25,7 @@ Notice: Comparing int and string using a relational operator in %s/negations.php
 
 Notice: Comparing float and string using a relational operator in %s/negations.php on line 101
 !(new A() < 42)
-
-Notice: Object of class A could not be converted to int in %s/negations.php on line 104
-
-Notice: Comparing A and int using a relational operator in %s/negations.php on line 104
+Threw: Object of class A could not be converted to int
 !(new A() < new A(new A()))
 
 Notice: Comparing A and string using a relational operator in %s/negations.php on line 106
@@ -37,10 +34,7 @@ Notice: Comparing A and string using a relational operator in %s/negations.php o
 Notice: Comparing object of class B and object of class C using a relational operator in %s/negations.php on line 108
 !(DateTime1(1000) < new DateTime2())
 !(DateTime1(1000) < 42)
-
-Notice: Object of class DateTime1 could not be converted to int in %s/negations.php on line 113
-
-Notice: Comparing DateTime1 and int using a relational operator in %s/negations.php on line 113
+Threw: Object of class DateTime1 could not be converted to int
 !(xml < 42)
 
 Notice: Comparing SimpleXMLElement and int using a relational operator in %s/negations.php on line 116
@@ -53,10 +47,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(Pair < 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(closure < 42)
-
-Notice: Object of class Closure$less#5;%s could not be converted to int in %s/negations.php on line 132
-
-Notice: Comparing Closure$less#5;%s and int using a relational operator in %s/negations.php on line 132
+Threw: Object of class Closure$less#10;%s could not be converted to int
 !(fun < 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun < 'baz')
@@ -68,15 +59,15 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(class_meth < vec['foo', 'bar'])
 !(class_meth < vec['Bar', 42])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 145
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 149
 !(rclass_meth < 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
 !(vec[99] < vec['foo'])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 150
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 154
 !(vec[vec[99]] < vec[vec['foo']])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 152
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 156
 !(vec[42] < dict[0 => 42])
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 !(vec[42] < dict[0 => '42'])
@@ -89,54 +80,48 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 !(imagecreate(10, 10) < 42)
 
-Notice: Comparing gd and int using a relational operator in %s/negations.php on line 166
+Notice: Comparing gd and int using a relational operator in %s/negations.php on line 170
 
 <=
 
 !(null <= false)
 
-Notice: Comparing bool and null using a relational operator in %s/negations.php on line 172
+Notice: Comparing bool and null using a relational operator in %s/negations.php on line 176
 !(true <= 0)
 
-Notice: Comparing bool and int using a relational operator in %s/negations.php on line 174
+Notice: Comparing bool and int using a relational operator in %s/negations.php on line 178
 !(99 <= 99.0)
 !(empty string <= NAN)
 
-Notice: Comparing float and string using a relational operator in %s/negations.php on line 178
+Notice: Comparing float and string using a relational operator in %s/negations.php on line 182
 !('0' <= 'baz')
 !('0' <= 42)
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 182
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 186
 !('0bcd' <= 1.234)
 
-Notice: Comparing float and string using a relational operator in %s/negations.php on line 184
+Notice: Comparing float and string using a relational operator in %s/negations.php on line 188
 !('0bcd' <= 'baz')
 !('0bcd' <= 42)
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 188
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 192
 !('0bcd' <= 1.234)
 
-Notice: Comparing float and string using a relational operator in %s/negations.php on line 190
+Notice: Comparing float and string using a relational operator in %s/negations.php on line 194
 !(new A() <= 42)
-
-Notice: Object of class A could not be converted to int in %s/negations.php on line 193
-
-Notice: Comparing A and int using a relational operator in %s/negations.php on line 193
+Threw: Object of class A could not be converted to int
 !(new A() <= new A(new A()))
 
-Notice: Comparing A and string using a relational operator in %s/negations.php on line 195
+Notice: Comparing A and string using a relational operator in %s/negations.php on line 199
 !(new B() <= new C())
 
-Notice: Comparing object of class B and object of class C using a relational operator in %s/negations.php on line 197
+Notice: Comparing object of class B and object of class C using a relational operator in %s/negations.php on line 201
 !(DateTime1(1000) <= new DateTime2())
 !(DateTime1(1000) <= 42)
-
-Notice: Object of class DateTime1 could not be converted to int in %s/negations.php on line 202
-
-Notice: Comparing DateTime1 and int using a relational operator in %s/negations.php on line 202
+Threw: Object of class DateTime1 could not be converted to int
 !(xml <= 42)
 
-Notice: Comparing SimpleXMLElement and int using a relational operator in %s/negations.php on line 205
+Notice: Comparing SimpleXMLElement and int using a relational operator in %s/negations.php on line 209
 !(Vector <= Vector)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(Vector <= 42)
@@ -146,10 +131,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(Pair <= 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(closure <= 42)
-
-Notice: Object of class Closure$lesseq#5;%s could not be converted to int in %s/negations.php on line 221
-
-Notice: Comparing Closure$lesseq#5;%s and int using a relational operator in %s/negations.php on line 221
+Threw: Object of class Closure$lesseq#10;%s could not be converted to int
 !(fun <= 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun <= 'baz')
@@ -161,15 +143,15 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(class_meth <= vec['foo', 'bar'])
 !(class_meth <= vec['Bar', 42])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 234
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 242
 !(rclass_meth <= 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
 !(vec[99] <= vec['foo'])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 239
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 247
 !(vec[vec[99]] <= vec[vec['foo']])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 241
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 249
 !(vec[42] <= dict[0 => 42])
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 !(vec[42] <= dict[0 => '42'])
@@ -182,54 +164,48 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 !(imagecreate(10, 10) <= 42)
 
-Notice: Comparing gd and int using a relational operator in %s/negations.php on line 255
+Notice: Comparing gd and int using a relational operator in %s/negations.php on line 263
 
 >
 
 !(null > false)
 
-Notice: Comparing bool and null using a relational operator in %s/negations.php on line 261
+Notice: Comparing bool and null using a relational operator in %s/negations.php on line 269
 !(true > 0)
 
-Notice: Comparing bool and int using a relational operator in %s/negations.php on line 263
+Notice: Comparing bool and int using a relational operator in %s/negations.php on line 271
 !(99 > 99.0)
 !(empty string > NAN)
 
-Notice: Comparing float and string using a relational operator in %s/negations.php on line 267
+Notice: Comparing float and string using a relational operator in %s/negations.php on line 275
 !('0' > 'baz')
 !('0' > 42)
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 271
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 279
 !('0bcd' > 1.234)
 
-Notice: Comparing float and string using a relational operator in %s/negations.php on line 273
+Notice: Comparing float and string using a relational operator in %s/negations.php on line 281
 !('0bcd' > 'baz')
 !('0bcd' > 42)
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 277
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 285
 !('0bcd' > 1.234)
 
-Notice: Comparing float and string using a relational operator in %s/negations.php on line 279
+Notice: Comparing float and string using a relational operator in %s/negations.php on line 287
 !(new A() > 42)
-
-Notice: Object of class A could not be converted to int in %s/negations.php on line 282
-
-Notice: Comparing A and int using a relational operator in %s/negations.php on line 282
+Threw: Object of class A could not be converted to int
 !(new A() > new A(new A()))
 
-Notice: Comparing A and string using a relational operator in %s/negations.php on line 284
+Notice: Comparing A and string using a relational operator in %s/negations.php on line 292
 !(new B() > new C())
 
-Notice: Comparing object of class B and object of class C using a relational operator in %s/negations.php on line 286
+Notice: Comparing object of class B and object of class C using a relational operator in %s/negations.php on line 294
 !(DateTime1(1000) > new DateTime2())
 !(DateTime1(1000) > 42)
-
-Notice: Object of class DateTime1 could not be converted to int in %s/negations.php on line 291
-
-Notice: Comparing DateTime1 and int using a relational operator in %s/negations.php on line 291
+Threw: Object of class DateTime1 could not be converted to int
 !(xml > 42)
 
-Notice: Comparing SimpleXMLElement and int using a relational operator in %s/negations.php on line 294
+Notice: Comparing SimpleXMLElement and int using a relational operator in %s/negations.php on line 302
 !(Vector > Vector)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(Vector > 42)
@@ -239,10 +215,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(Pair > 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(closure > 42)
-
-Notice: Object of class Closure$gt#5;%s could not be converted to int in %s/negations.php on line 310
-
-Notice: Comparing Closure$gt#5;%s and int using a relational operator in %s/negations.php on line 310
+Threw: Object of class Closure$gt#10;%s could not be converted to int
 !(fun > 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun > 'baz')
@@ -254,15 +227,15 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(class_meth > vec['foo', 'bar'])
 !(class_meth > vec['Bar', 42])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 323
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 335
 !(rclass_meth > 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
 !(vec[99] > vec['foo'])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 328
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 340
 !(vec[vec[99]] > vec[vec['foo']])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 330
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 342
 !(vec[42] > dict[0 => 42])
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 !(vec[42] > dict[0 => '42'])
@@ -275,54 +248,48 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 !(imagecreate(10, 10) > 42)
 
-Notice: Comparing gd and int using a relational operator in %s/negations.php on line 344
+Notice: Comparing gd and int using a relational operator in %s/negations.php on line 356
 
 >=
 
 !(null >= false)
 
-Notice: Comparing bool and null using a relational operator in %s/negations.php on line 350
+Notice: Comparing bool and null using a relational operator in %s/negations.php on line 362
 !(true >= 0)
 
-Notice: Comparing bool and int using a relational operator in %s/negations.php on line 352
+Notice: Comparing bool and int using a relational operator in %s/negations.php on line 364
 !(99 >= 99.0)
 !(empty string >= NAN)
 
-Notice: Comparing float and string using a relational operator in %s/negations.php on line 356
+Notice: Comparing float and string using a relational operator in %s/negations.php on line 368
 !('0' >= 'baz')
 !('0' >= 42)
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 360
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 372
 !('0bcd' >= 1.234)
 
-Notice: Comparing float and string using a relational operator in %s/negations.php on line 362
+Notice: Comparing float and string using a relational operator in %s/negations.php on line 374
 !('0bcd' >= 'baz')
 !('0bcd' >= 42)
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 366
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 378
 !('0bcd' >= 1.234)
 
-Notice: Comparing float and string using a relational operator in %s/negations.php on line 368
+Notice: Comparing float and string using a relational operator in %s/negations.php on line 380
 !(new A() >= 42)
-
-Notice: Object of class A could not be converted to int in %s/negations.php on line 371
-
-Notice: Comparing A and int using a relational operator in %s/negations.php on line 371
+Threw: Object of class A could not be converted to int
 !(new A() >= new A(new A()))
 
-Notice: Comparing A and string using a relational operator in %s/negations.php on line 373
+Notice: Comparing A and string using a relational operator in %s/negations.php on line 385
 !(new B() >= new C())
 
-Notice: Comparing object of class B and object of class C using a relational operator in %s/negations.php on line 375
+Notice: Comparing object of class B and object of class C using a relational operator in %s/negations.php on line 387
 !(DateTime1(1000) >= new DateTime2())
 !(DateTime1(1000) >= 42)
-
-Notice: Object of class DateTime1 could not be converted to int in %s/negations.php on line 380
-
-Notice: Comparing DateTime1 and int using a relational operator in %s/negations.php on line 380
+Threw: Object of class DateTime1 could not be converted to int
 !(xml >= 42)
 
-Notice: Comparing SimpleXMLElement and int using a relational operator in %s/negations.php on line 383
+Notice: Comparing SimpleXMLElement and int using a relational operator in %s/negations.php on line 395
 !(Vector >= Vector)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(Vector >= 42)
@@ -332,10 +299,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(Pair >= 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(closure >= 42)
-
-Notice: Object of class Closure$gte#5;%s could not be converted to int in %s/negations.php on line 399
-
-Notice: Comparing Closure$gte#5;%s and int using a relational operator in %s/negations.php on line 399
+Threw: Object of class Closure$gte#10;%s could not be converted to int
 !(fun >= 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun >= 'baz')
@@ -347,15 +311,15 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(class_meth >= vec['foo', 'bar'])
 !(class_meth >= vec['Bar', 42])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 412
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 428
 !(rclass_meth >= 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
 !(vec[99] >= vec['foo'])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 417
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 433
 !(vec[vec[99]] >= vec[vec['foo']])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 419
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 435
 !(vec[42] >= dict[0 => 42])
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 !(vec[42] >= dict[0 => '42'])
@@ -368,54 +332,48 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 !(imagecreate(10, 10) >= 42)
 
-Notice: Comparing gd and int using a relational operator in %s/negations.php on line 433
+Notice: Comparing gd and int using a relational operator in %s/negations.php on line 449
 
 <=>
 
 !(null <=> false)
 
-Notice: Comparing bool and null using a relational operator in %s/negations.php on line 440
+Notice: Comparing bool and null using a relational operator in %s/negations.php on line 456
 !(true <=> 0)
 
-Notice: Comparing bool and int using a relational operator in %s/negations.php on line 442
+Notice: Comparing bool and int using a relational operator in %s/negations.php on line 458
 !(99 <=> 99.0)
 !(empty string <=> NAN)
 
-Notice: Comparing float and string using a relational operator in %s/negations.php on line 446
+Notice: Comparing float and string using a relational operator in %s/negations.php on line 462
 !('0' <=> 'baz')
 !('0' <=> 42)
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 450
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 466
 !('0bcd' <=> 1.234)
 
-Notice: Comparing float and string using a relational operator in %s/negations.php on line 452
+Notice: Comparing float and string using a relational operator in %s/negations.php on line 468
 !('0bcd' <=> 'baz')
 !('0bcd' <=> 42)
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 456
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 472
 !('0bcd' <=> 1.234)
 
-Notice: Comparing float and string using a relational operator in %s/negations.php on line 458
+Notice: Comparing float and string using a relational operator in %s/negations.php on line 474
 !(new A() <=> 42)
-
-Notice: Object of class A could not be converted to int in %s/negations.php on line 461
-
-Notice: Comparing A and int using a relational operator in %s/negations.php on line 461
+Threw: Object of class A could not be converted to int
 !(new A() <=> new A(new A()))
 
-Notice: Comparing A and string using a relational operator in %s/negations.php on line 463
+Notice: Comparing A and string using a relational operator in %s/negations.php on line 479
 !(new B() <=> new C())
 
-Notice: Comparing object of class B and object of class C using a relational operator in %s/negations.php on line 465
+Notice: Comparing object of class B and object of class C using a relational operator in %s/negations.php on line 481
 !(DateTime1(1000) <=> new DateTime2())
 !(DateTime1(1000) <=> 42)
-
-Notice: Object of class DateTime1 could not be converted to int in %s/negations.php on line 470
-
-Notice: Comparing DateTime1 and int using a relational operator in %s/negations.php on line 470
+Threw: Object of class DateTime1 could not be converted to int
 !(xml <=> 42)
 
-Notice: Comparing SimpleXMLElement and int using a relational operator in %s/negations.php on line 473
+Notice: Comparing SimpleXMLElement and int using a relational operator in %s/negations.php on line 489
 !(Vector <=> Vector)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(Vector <=> 42)
@@ -425,10 +383,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(Pair <=> 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(closure <=> 42)
-
-Notice: Object of class Closure$cmp#5;%s could not be converted to int in %s/negations.php on line 489
-
-Notice: Comparing Closure$cmp#5;%s and int using a relational operator in %s/negations.php on line 489
+Threw: Object of class Closure$cmp#10;%s could not be converted to int
 !(fun <=> 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun <=> 'baz')
@@ -440,15 +395,15 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(class_meth <=> vec['foo', 'bar'])
 !(class_meth <=> vec['Bar', 42])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 502
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 522
 !(rclass_meth <=> 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
 !(vec[99] <=> vec['foo'])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 507
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 527
 !(vec[vec[99]] <=> vec[vec['foo']])
 
-Notice: Comparing int and string using a relational operator in %s/negations.php on line 509
+Notice: Comparing int and string using a relational operator in %s/negations.php on line 529
 !(vec[42] <=> dict[0 => 42])
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 !(vec[42] <=> dict[0 => '42'])
@@ -461,4 +416,4 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 !(imagecreate(10, 10) <=> 42)
 
-Notice: Comparing gd and int using a relational operator in %s/negations.php on line 523
+Notice: Comparing gd and int using a relational operator in %s/negations.php on line 543

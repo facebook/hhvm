@@ -43,15 +43,9 @@ int(1) != string(3) "2.5"
 int(1) != NULL
 int(1) == bool(true)
 int(1) != bool(false)
-int(1)
-Notice: Object of class stdClass could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- == object(stdClass) (0) {}
-int(1)
-Notice: Object of class stdClass could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- == object(stdClass) (0) {}
-int(1)
-Notice: Object of class test could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- == object(test) (0) {}
+int(1) cannot be compared to object(stdClass) (0) {}
+int(1) cannot be compared to object(stdClass) (0) {}
+int(1) cannot be compared to object(test) (0) {}
 int(1) != vec(0) {}
 int(1) != int(-9223372036854775808)
 int(1) != string(20) "-9223372036854775808"
@@ -66,15 +60,9 @@ float(2.5) == string(3) "2.5"
 float(2.5) != NULL
 float(2.5) == bool(true)
 float(2.5) != bool(false)
-float(2.5)
-Notice: Object of class stdClass could not be converted to float in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != object(stdClass) (0) {}
-float(2.5)
-Notice: Object of class stdClass could not be converted to float in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != object(stdClass) (0) {}
-float(2.5)
-Notice: Object of class test could not be converted to float in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != object(test) (0) {}
+float(2.5) cannot be compared to object(stdClass) (0) {}
+float(2.5) cannot be compared to object(stdClass) (0) {}
+float(2.5) cannot be compared to object(test) (0) {}
 float(2.5) != vec(0) {}
 float(2.5) != int(-9223372036854775808)
 float(2.5) != string(20) "-9223372036854775808"
@@ -89,15 +77,9 @@ int(0) != string(3) "2.5"
 int(0) == NULL
 int(0) != bool(true)
 int(0) == bool(false)
-int(0)
-Notice: Object of class stdClass could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != object(stdClass) (0) {}
-int(0)
-Notice: Object of class stdClass could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != object(stdClass) (0) {}
-int(0)
-Notice: Object of class test could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != object(test) (0) {}
+int(0) cannot be compared to object(stdClass) (0) {}
+int(0) cannot be compared to object(stdClass) (0) {}
+int(0) cannot be compared to object(test) (0) {}
 int(0) != vec(0) {}
 int(0) != int(-9223372036854775808)
 int(0) != string(20) "-9223372036854775808"
@@ -205,15 +187,9 @@ bool(false) != int(-9223372036854775808)
 bool(false) != string(20) "-9223372036854775808"
 object(stdClass) (0) {} != vec(3) {  int(1)  int(2)  int(3)}
 object(stdClass) (0) {} != string(0) ""
-object(stdClass) (0) {}
-Notice: Object of class stdClass could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- == int(1)
-object(stdClass) (0) {}
-Notice: Object of class stdClass could not be converted to float in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != float(2.5)
-object(stdClass) (0) {}
-Notice: Object of class stdClass could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != int(0)
+object(stdClass) (0) {} cannot be compared to int(1)
+object(stdClass) (0) {} cannot be compared to float(2.5)
+object(stdClass) (0) {} cannot be compared to int(0)
 object(stdClass) (0) {} != string(6) "string"
 object(stdClass) (0) {} != string(3) "123"
 object(stdClass) (0) {} != string(3) "2.5"
@@ -224,21 +200,13 @@ object(stdClass) (0) {} == object(stdClass) (0) {}
 object(stdClass) (0) {} == object(stdClass) (0) {}
 object(stdClass) (0) {} != object(test) (0) {}
 object(stdClass) (0) {} != vec(0) {}
-object(stdClass) (0) {}
-Notice: Object of class stdClass could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != int(-9223372036854775808)
+object(stdClass) (0) {} cannot be compared to int(-9223372036854775808)
 object(stdClass) (0) {} != string(20) "-9223372036854775808"
 object(stdClass) (0) {} != vec(3) {  int(1)  int(2)  int(3)}
 object(stdClass) (0) {} != string(0) ""
-object(stdClass) (0) {}
-Notice: Object of class stdClass could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- == int(1)
-object(stdClass) (0) {}
-Notice: Object of class stdClass could not be converted to float in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != float(2.5)
-object(stdClass) (0) {}
-Notice: Object of class stdClass could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != int(0)
+object(stdClass) (0) {} cannot be compared to int(1)
+object(stdClass) (0) {} cannot be compared to float(2.5)
+object(stdClass) (0) {} cannot be compared to int(0)
 object(stdClass) (0) {} != string(6) "string"
 object(stdClass) (0) {} != string(3) "123"
 object(stdClass) (0) {} != string(3) "2.5"
@@ -249,21 +217,13 @@ object(stdClass) (0) {} == object(stdClass) (0) {}
 object(stdClass) (0) {} == object(stdClass) (0) {}
 object(stdClass) (0) {} != object(test) (0) {}
 object(stdClass) (0) {} != vec(0) {}
-object(stdClass) (0) {}
-Notice: Object of class stdClass could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != int(-9223372036854775808)
+object(stdClass) (0) {} cannot be compared to int(-9223372036854775808)
 object(stdClass) (0) {} != string(20) "-9223372036854775808"
 object(test) (0) {} != vec(3) {  int(1)  int(2)  int(3)}
 object(test) (0) {} != string(0) ""
-object(test) (0) {}
-Notice: Object of class test could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- == int(1)
-object(test) (0) {}
-Notice: Object of class test could not be converted to float in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != float(2.5)
-object(test) (0) {}
-Notice: Object of class test could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != int(0)
+object(test) (0) {} cannot be compared to int(1)
+object(test) (0) {} cannot be compared to float(2.5)
+object(test) (0) {} cannot be compared to int(0)
 object(test) (0) {} != string(6) "string"
 object(test) (0) {} != string(3) "123"
 object(test) (0) {} != string(3) "2.5"
@@ -274,9 +234,7 @@ object(test) (0) {} != object(stdClass) (0) {}
 object(test) (0) {} != object(stdClass) (0) {}
 object(test) (0) {} == object(test) (0) {}
 object(test) (0) {} != vec(0) {}
-object(test) (0) {}
-Notice: Object of class test could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != int(-9223372036854775808)
+object(test) (0) {} cannot be compared to int(-9223372036854775808)
 object(test) (0) {} != string(20) "-9223372036854775808"
 vec(0) {} != vec(3) {  int(1)  int(2)  int(3)}
 vec(0) {} != string(0) ""
@@ -306,15 +264,9 @@ int(-9223372036854775808) != string(3) "2.5"
 int(-9223372036854775808) != NULL
 int(-9223372036854775808) == bool(true)
 int(-9223372036854775808) != bool(false)
-int(-9223372036854775808)
-Notice: Object of class stdClass could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != object(stdClass) (0) {}
-int(-9223372036854775808)
-Notice: Object of class stdClass could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != object(stdClass) (0) {}
-int(-9223372036854775808)
-Notice: Object of class test could not be converted to int in %s/test/zend/good/Zend/tests/compare_001_64bit.php on line 38
- != object(test) (0) {}
+int(-9223372036854775808) cannot be compared to object(stdClass) (0) {}
+int(-9223372036854775808) cannot be compared to object(stdClass) (0) {}
+int(-9223372036854775808) cannot be compared to object(test) (0) {}
 int(-9223372036854775808) != vec(0) {}
 int(-9223372036854775808) == int(-9223372036854775808)
 int(-9223372036854775808) == string(20) "-9223372036854775808"

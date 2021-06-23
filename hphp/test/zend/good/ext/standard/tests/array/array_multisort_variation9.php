@@ -5,14 +5,6 @@
  * Alias to functions:
  */
 
-// define some classes
-class classWithToString {
-    public function __toString() {
-        return "Class A object";
-    }
-}
-
-class classWithoutToString { }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_multisort() : usage variation  - test sort order of all types***\n";
 
@@ -24,8 +16,6 @@ $inputs = darray[
       'lowercase true' => true,
       'empty string DQ' => "",
       'string DQ' => "string",
-      'instance of classWithToString' => new classWithToString(),
-      'instance of classWithoutToString' => new classWithoutToString()
 ];
 
 $numeric = SORT_NUMERIC;

@@ -1,34 +1,20 @@
 *** Testing array_multisort() : usage variation  - test sort order of all types***
-
-Notice: Object of class classWithToString could not be converted to float in %s/test/zend/good/ext/standard/tests/array/array_multisort_variation9.php on line 32
-
-Notice: Object of class classWithoutToString could not be converted to float in %s/test/zend/good/ext/standard/tests/array/array_multisort_variation9.php on line 32
-
-Notice: Object of class classWithoutToString could not be converted to float in %s/test/zend/good/ext/standard/tests/array/array_multisort_variation9.php on line 32
-
-Notice: Object of class classWithoutToString could not be converted to float in %s/test/zend/good/ext/standard/tests/array/array_multisort_variation9.php on line 32
 bool(true)
-dict(9) {
+dict(7) {
   ["float -10.5"]=>
   float(-10.5)
-  ["empty string DQ"]=>
-  string(0) ""
   ["string DQ"]=>
   string(6) "string"
-  ["int 0"]=>
-  int(0)
+  ["empty string DQ"]=>
+  string(0) ""
   ["uppercase NULL"]=>
   NULL
   [0]=>
   vec(0) {
   }
-  ["instance of classWithoutToString"]=>
-  object(classWithoutToString) (0) {
-  }
+  ["int 0"]=>
+  int(0)
   ["lowercase true"]=>
   bool(true)
-  ["instance of classWithToString"]=>
-  object(classWithToString) (0) {
-  }
 }
 ===DONE===

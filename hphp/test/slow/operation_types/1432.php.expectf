@@ -7,17 +7,11 @@ int(1)
 float(1)
 float(1)
 int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 30
-int(1)
 int(0)
 int(1)
 float(1)
 float(1)
 int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 54
-int(1)
 int(0)
 int(1)
 int(0)
@@ -25,17 +19,11 @@ int(1)
 float(1)
 float(1)
 int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 85
-int(1)
 int(0)
 int(1)
 float(1)
 float(1)
 int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 115
-int(1)
 int(0)
 int(-1)
 int(0)
@@ -43,17 +31,11 @@ int(-1)
 float(-1)
 float(-1)
 int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 140
-int(-1)
 int(0)
 int(-1)
 float(-1)
 float(-1)
 int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 164
-int(-1)
 int(0)
 int(-1)
 int(0)
@@ -61,34 +43,10 @@ int(-1)
 float(-1)
 float(-1)
 int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 195
-int(-1)
 int(0)
 int(-1)
 float(-1)
 float(-1)
-int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 225
-int(-1)
-int(0)
-int(0)
-int(0)
-int(0)
-float(0)
-float(0)
-int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 250
-int(0)
-int(0)
-int(0)
-float(0)
-float(0)
-int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 274
 int(0)
 int(0)
 int(0)
@@ -97,16 +55,22 @@ int(0)
 float(0)
 float(0)
 int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 305
+int(0)
+int(0)
+float(0)
+float(0)
+int(0)
+int(0)
 int(0)
 int(0)
 int(0)
 float(0)
 float(0)
 int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 335
+int(0)
+int(0)
+float(0)
+float(0)
 int(0)
 int(0)
 int(0)
@@ -129,17 +93,11 @@ int(2)
 float(2)
 float(2)
 int(1)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 415
-int(2)
 int(1)
 int(2)
 float(2)
 float(2)
 int(1)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 439
-int(2)
 int(1)
 int(2)
 int(1)
@@ -147,17 +105,11 @@ int(2)
 float(2)
 float(2)
 int(1)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 470
-int(2)
 int(1)
 int(2)
 float(2)
 float(2)
 int(1)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 500
-int(2)
 int(1)
 int(0)
 int(1)
@@ -165,17 +117,11 @@ int(0)
 float(0)
 float(0)
 int(1)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 525
-int(0)
 int(1)
 int(0)
 float(0)
 float(0)
 int(1)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 549
-int(0)
 int(1)
 int(0)
 int(1)
@@ -183,34 +129,10 @@ int(0)
 float(0)
 float(0)
 int(1)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 580
-int(0)
 int(1)
 int(0)
 float(0)
 float(0)
-int(1)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 610
-int(0)
-int(0)
-int(1)
-int(0)
-int(1)
-float(1)
-float(1)
-int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 635
-int(1)
-int(0)
-int(1)
-float(1)
-float(1)
-int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 659
 int(1)
 int(0)
 int(1)
@@ -219,17 +141,23 @@ int(1)
 float(1)
 float(1)
 int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 690
+int(0)
+int(1)
+float(1)
+float(1)
+int(0)
+int(0)
 int(1)
 int(0)
 int(1)
 float(1)
 float(1)
 int(0)
-
-Notice: Object of class Exception could not be converted to int in %s/test/slow/operation_types/1432.php on line 720
+int(0)
 int(1)
+float(1)
+float(1)
+int(0)
 int(1)
 int(1)
 float(1)

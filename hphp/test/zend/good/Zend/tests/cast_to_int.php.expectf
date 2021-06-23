@@ -11,6 +11,7 @@ int(1)
 int(0)
 int(%d)
 
-Notice: %s
-int(1)
-Done
+Fatal error: Uncaught exception 'TypecastException' with message 'Object of class test could not be converted to int' in %s/cast_to_int.php:30
+Stack trace:
+#0 (): main()
+#1 {main}

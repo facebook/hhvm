@@ -903,63 +903,63 @@ F       T       Err     Err     F       T       Err     Err     Err
 int 0 cmp keyset ks13:
 F       T       Err     Err     F       T       Err     Err     Err
 int 0 cmp object a1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a5:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a6:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a7:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a8:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a10:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a11:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a12:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a13:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a14:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a15:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a16:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a17:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object a18:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object b1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object c1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object s1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object s2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object s3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object s4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object t1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object t2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object t3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object t4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object t5:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp object xml:
 F       T       F       T       T       F       T       F       0
 int 0 cmp vector v1:
@@ -975,9 +975,9 @@ F       T       Err     Err     F       T       Err     Err     Err
 int 0 cmp pair p3:
 F       T       Err     Err     F       T       Err     Err     Err
 int 0 cmp closure clo1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp closure clo2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 0 cmp resource f1:
 F       T       T       T       F       T       F       F       -1
 int 0 cmp resource f2:
@@ -1151,63 +1151,63 @@ F       T       Err     Err     F       T       Err     Err     Err
 int 99 cmp keyset ks13:
 F       T       Err     Err     F       T       Err     Err     Err
 int 99 cmp object a1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a5:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a6:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a7:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a8:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a9:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a10:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a11:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a12:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a13:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a14:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a15:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a16:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a17:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object a18:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object b1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object c1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object s1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object s2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object s3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object s4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object t1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object t2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object t3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object t4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object t5:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp object xml:
 F       T       F       F       F       T       T       T       1
 int 99 cmp vector v1:
@@ -1223,9 +1223,9 @@ F       T       Err     Err     F       T       Err     Err     Err
 int 99 cmp pair p3:
 F       T       Err     Err     F       T       Err     Err     Err
 int 99 cmp closure clo1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp closure clo2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int 99 cmp resource f1:
 F       T       F       F       F       T       T       T       1
 int 99 cmp resource f2:
@@ -1399,63 +1399,63 @@ F       T       Err     Err     F       T       Err     Err     Err
 int -1 cmp keyset ks13:
 F       T       Err     Err     F       T       Err     Err     Err
 int -1 cmp object a1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a5:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a6:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a7:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a8:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a10:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a11:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a12:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a13:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a14:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a15:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a16:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a17:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object a18:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object b1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object c1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object s1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object s2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object s3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object s4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object t1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object t2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object t3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object t4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object t5:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 int -1 cmp vector v1:
@@ -1471,9 +1471,9 @@ F       T       Err     Err     F       T       Err     Err     Err
 int -1 cmp pair p3:
 F       T       Err     Err     F       T       Err     Err     Err
 int -1 cmp closure clo1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp closure clo2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 int -1 cmp resource f1:
 F       T       T       T       F       T       F       F       -1
 int -1 cmp resource f2:
@@ -1647,63 +1647,63 @@ F       T       Err     Err     F       T       Err     Err     Err
 float 0 cmp keyset ks13:
 F       T       Err     Err     F       T       Err     Err     Err
 float 0 cmp object a1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a5:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a6:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a7:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a8:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a10:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a11:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a12:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a13:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a14:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a15:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a16:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a17:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object a18:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object b1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object c1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object s1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object s2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object s3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object s4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object t1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object t2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object t3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object t4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object t5:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp object xml:
 F       T       F       T       T       F       T       F       0
 float 0 cmp vector v1:
@@ -1719,9 +1719,9 @@ F       T       Err     Err     F       T       Err     Err     Err
 float 0 cmp pair p3:
 F       T       Err     Err     F       T       Err     Err     Err
 float 0 cmp closure clo1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp closure clo2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 0 cmp resource f1:
 F       T       T       T       F       T       F       F       -1
 float 0 cmp resource f2:
@@ -1895,63 +1895,63 @@ F       T       Err     Err     F       T       Err     Err     Err
 double 99 cmp keyset ks13:
 F       T       Err     Err     F       T       Err     Err     Err
 double 99 cmp object a1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a5:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a6:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a7:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a8:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a9:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a10:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a11:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a12:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a13:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a14:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a15:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a16:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a17:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object a18:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object b1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object c1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object s1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object s2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object s3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object s4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object t1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object t2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object t3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object t4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object t5:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp object xml:
 F       T       F       F       F       T       T       T       1
 double 99 cmp vector v1:
@@ -1967,9 +1967,9 @@ F       T       Err     Err     F       T       Err     Err     Err
 double 99 cmp pair p3:
 F       T       Err     Err     F       T       Err     Err     Err
 double 99 cmp closure clo1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp closure clo2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 double 99 cmp resource f1:
 F       T       F       F       F       T       T       T       1
 double 99 cmp resource f2:
@@ -2143,63 +2143,63 @@ F       T       Err     Err     F       T       Err     Err     Err
 float 99 cmp keyset ks13:
 F       T       Err     Err     F       T       Err     Err     Err
 float 99 cmp object a1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a5:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a6:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a7:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a8:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a9:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a10:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a11:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a12:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a13:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a14:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a15:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a16:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a17:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object a18:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object b1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object c1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object s1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object s2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object s3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object s4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object t1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object t2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object t3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object t4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object t5:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp object xml:
 F       T       F       F       F       T       T       T       1
 float 99 cmp vector v1:
@@ -2215,9 +2215,9 @@ F       T       Err     Err     F       T       Err     Err     Err
 float 99 cmp pair p3:
 F       T       Err     Err     F       T       Err     Err     Err
 float 99 cmp closure clo1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp closure clo2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float 99 cmp resource f1:
 F       T       F       F       F       T       T       T       1
 float 99 cmp resource f2:
@@ -2391,63 +2391,63 @@ F       T       Err     Err     F       T       Err     Err     Err
 float -1 cmp keyset ks13:
 F       T       Err     Err     F       T       Err     Err     Err
 float -1 cmp object a1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a5:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a6:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a7:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a8:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a10:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a11:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a12:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a13:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a14:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a15:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a16:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a17:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object a18:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object b1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object c1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object s1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object s2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object s3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object s4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object t1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object t2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object t3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object t4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object t5:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp object xml:
 F       T       T       T       F       T       F       F       -1
 float -1 cmp vector v1:
@@ -2463,9 +2463,9 @@ F       T       Err     Err     F       T       Err     Err     Err
 float -1 cmp pair p3:
 F       T       Err     Err     F       T       Err     Err     Err
 float -1 cmp closure clo1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp closure clo2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 float -1 cmp resource f1:
 F       T       T       T       F       T       F       F       -1
 float -1 cmp resource f2:
@@ -2639,63 +2639,63 @@ F       T       Err     Err     F       T       Err     Err     Err
 INF cmp keyset ks13:
 F       T       Err     Err     F       T       Err     Err     Err
 INF cmp object a1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a5:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a6:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a7:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a8:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a9:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a10:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a11:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a12:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a13:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a14:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a15:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a16:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a17:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object a18:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object b1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object c1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object s1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object s2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object s3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object s4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object t1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object t2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object t3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object t4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object t5:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp object xml:
 F       T       F       F       F       T       T       T       1
 INF cmp vector v1:
@@ -2711,9 +2711,9 @@ F       T       Err     Err     F       T       Err     Err     Err
 INF cmp pair p3:
 F       T       Err     Err     F       T       Err     Err     Err
 INF cmp closure clo1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp closure clo2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 INF cmp resource f1:
 F       T       F       F       F       T       T       T       1
 INF cmp resource f2:
@@ -2887,63 +2887,63 @@ F       T       Err     Err     F       T       Err     Err     Err
 -INF cmp keyset ks13:
 F       T       Err     Err     F       T       Err     Err     Err
 -INF cmp object a1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a5:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a6:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a7:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a8:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a10:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a11:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a12:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a13:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a14:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a15:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a16:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a17:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object a18:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object b1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object c1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object s1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object s2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object s3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object s4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object t1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object t2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object t3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object t4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object t5:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp object xml:
 F       T       T       T       F       T       F       F       -1
 -INF cmp vector v1:
@@ -2959,9 +2959,9 @@ F       T       Err     Err     F       T       Err     Err     Err
 -INF cmp pair p3:
 F       T       Err     Err     F       T       Err     Err     Err
 -INF cmp closure clo1:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp closure clo2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 -INF cmp resource f1:
 F       T       T       T       F       T       F       F       -1
 -INF cmp resource f2:
@@ -3135,63 +3135,63 @@ F       T       Err     Err     F       T       Err     Err     Err
 NAN cmp keyset ks13:
 F       T       Err     Err     F       T       Err     Err     Err
 NAN cmp object a1:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a2:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a3:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a4:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a5:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a6:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a7:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a8:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a9:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a10:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a11:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a12:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a13:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a14:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a15:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a16:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a17:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object a18:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object b1:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object c1:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object s1:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object s2:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object s3:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object s4:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object t1:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object t2:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object t3:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object t4:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object t5:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp object xml:
 F       T       F       F       F       T       F       F       -1
 NAN cmp vector v1:
@@ -3207,9 +3207,9 @@ F       T       Err     Err     F       T       Err     Err     Err
 NAN cmp pair p3:
 F       T       Err     Err     F       T       Err     Err     Err
 NAN cmp closure clo1:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp closure clo2:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 NAN cmp resource f1:
 F       T       F       F       F       T       F       F       -1
 NAN cmp resource f2:
@@ -5801,13 +5801,13 @@ F       T       T       T       F       T       F       F       -1
 array arr2 cmp vec vec4:
 F       T       T       T       F       T       F       F       -1
 array arr2 cmp vec vec5:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 array arr2 cmp vec vec6:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 array arr2 cmp vec vec7:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 array arr2 cmp vec vec8:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 array arr2 cmp vec vec9:
 F       T       T       T       F       T       F       F       -1
 array arr2 cmp vec vec10:
@@ -7035,7 +7035,7 @@ F       T       F       F       F       T       T       T       1
 array arr7 cmp vec vec1:
 F       T       F       F       F       T       T       T       1
 array arr7 cmp vec vec2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 array arr7 cmp vec vec3:
 F       T       T       T       F       T       F       F       -1
 array arr7 cmp vec vec4:
@@ -7283,7 +7283,7 @@ F       T       F       F       F       T       T       T       1
 array arr8 cmp vec vec1:
 F       T       F       F       F       T       T       T       1
 array arr8 cmp vec vec2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 array arr8 cmp vec vec3:
 F       T       T       T       F       T       F       F       -1
 array arr8 cmp vec vec4:
@@ -7531,7 +7531,7 @@ F       T       F       F       F       T       T       T       1
 array arr9 cmp vec vec1:
 F       T       F       F       F       T       T       T       1
 array arr9 cmp vec vec2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 array arr9 cmp vec vec3:
 F       T       T       T       F       T       F       F       -1
 array arr9 cmp vec vec4:
@@ -7779,7 +7779,7 @@ F       T       F       F       F       T       T       T       1
 array arr10 cmp vec vec1:
 F       T       F       F       F       T       T       T       1
 array arr10 cmp vec vec2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 array arr10 cmp vec vec3:
 F       T       T       T       F       T       F       F       -1
 array arr10 cmp vec vec4:
@@ -8027,7 +8027,7 @@ F       T       F       F       F       T       T       T       1
 array arr11 cmp vec vec1:
 F       T       F       F       F       T       T       T       1
 array arr11 cmp vec vec2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 array arr11 cmp vec vec3:
 F       T       T       T       F       T       F       F       -1
 array arr11 cmp vec vec4:
@@ -11217,15 +11217,15 @@ F       T       F       F       F       T       T       T       1
 vec vec2 cmp array arr6:
 F       T       F       F       F       T       T       T       1
 vec vec2 cmp array arr7:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 vec vec2 cmp array arr8:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 vec vec2 cmp array arr9:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 vec vec2 cmp array arr10:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 vec vec2 cmp array arr11:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 vec vec2 cmp array arr12:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec2 cmp array arr13:
@@ -11517,7 +11517,7 @@ F       T       T       T       F       T       F       F       -1
 vec vec3 cmp vec vec10:
 F       T       F       F       F       T       T       T       1
 vec vec3 cmp vec vec11:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 vec vec3 cmp dict dict1:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec3 cmp dict dict2:
@@ -11765,7 +11765,7 @@ F       T       T       T       F       T       F       F       -1
 vec vec4 cmp vec vec10:
 F       T       F       F       F       T       T       T       1
 vec vec4 cmp vec vec11:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 vec vec4 cmp dict dict1:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec4 cmp dict dict2:
@@ -11951,7 +11951,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec5 cmp array arr1:
 F       T       F       F       F       T       T       T       1
 vec vec5 cmp array arr2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 vec vec5 cmp array arr3:
 F       T       F       T       T       F       T       F       0
 vec vec5 cmp array arr4:
@@ -12199,7 +12199,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec6 cmp array arr1:
 F       T       F       F       F       T       T       T       1
 vec vec6 cmp array arr2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 vec vec6 cmp array arr3:
 F       T       Err     Err     Err     Err     Err     Err     Err
 vec vec6 cmp array arr4:
@@ -12447,7 +12447,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec7 cmp array arr1:
 F       T       F       F       F       T       T       T       1
 vec vec7 cmp array arr2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 vec vec7 cmp array arr3:
 F       T       F       F       F       T       T       T       1
 vec vec7 cmp array arr4:
@@ -12695,7 +12695,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec8 cmp array arr1:
 F       T       F       F       F       T       T       T       1
 vec vec8 cmp array arr2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 vec vec8 cmp array arr3:
 F       T       F       F       F       T       T       T       1
 vec vec8 cmp array arr4:
@@ -13485,9 +13485,9 @@ F       T       F       F       F       T       T       T       1
 vec vec11 cmp vec vec2:
 F       T       F       F       F       T       T       T       1
 vec vec11 cmp vec vec3:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 vec vec11 cmp vec vec4:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 vec vec11 cmp vec vec5:
 F       T       F       F       F       T       T       T       1
 vec vec11 cmp vec vec6:
@@ -19599,25 +19599,25 @@ F       T       F       F       F       T       T       T       1
 object a1 cmp true:
 F       T       F       T       T       F       T       F       0
 object a1 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a1 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a1 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a1 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a1 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a1 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a1 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a1 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a1 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a1 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a1 cmp "":
 F       T       F       F       F       T       T       T       1
 object a1 cmp "0":
@@ -19847,25 +19847,25 @@ F       T       F       F       F       T       T       T       1
 object a2 cmp true:
 F       T       F       T       T       F       T       F       0
 object a2 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a2 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a2 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a2 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a2 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a2 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a2 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a2 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a2 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a2 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a2 cmp "":
 F       T       F       F       F       T       T       T       1
 object a2 cmp "0":
@@ -20095,25 +20095,25 @@ F       T       F       F       F       T       T       T       1
 object a3 cmp true:
 F       T       F       T       T       F       T       F       0
 object a3 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a3 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a3 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a3 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a3 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a3 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a3 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a3 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a3 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a3 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a3 cmp "":
 F       T       F       F       F       T       T       T       1
 object a3 cmp "0":
@@ -20263,7 +20263,7 @@ F       T       F       F       F       T       F       F       1
 object a3 cmp object a8:
 F       T       F       F       F       T       F       F       1
 object a3 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a3 cmp object a10:
 F       T       F       F       F       T       F       F       1
 object a3 cmp object a11:
@@ -20279,9 +20279,9 @@ F       T       F       F       F       T       F       F       1
 object a3 cmp object a16:
 F       T       T       T       F       T       F       F       -1
 object a3 cmp object a17:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a3 cmp object a18:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a3 cmp object b1:
 F       T       F       F       F       T       F       F       1
 object a3 cmp object c1:
@@ -20343,25 +20343,25 @@ F       T       F       F       F       T       T       T       1
 object a4 cmp true:
 F       T       F       T       T       F       T       F       0
 object a4 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a4 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a4 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a4 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a4 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a4 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a4 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a4 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a4 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a4 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a4 cmp "":
 F       T       F       F       F       T       T       T       1
 object a4 cmp "0":
@@ -20511,7 +20511,7 @@ F       T       F       F       F       T       F       F       1
 object a4 cmp object a8:
 F       T       F       F       F       T       F       F       1
 object a4 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a4 cmp object a10:
 F       T       F       F       F       T       F       F       1
 object a4 cmp object a11:
@@ -20527,9 +20527,9 @@ F       T       F       F       F       T       F       F       1
 object a4 cmp object a16:
 F       T       T       T       F       T       F       F       -1
 object a4 cmp object a17:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a4 cmp object a18:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a4 cmp object b1:
 F       T       F       F       F       T       F       F       1
 object a4 cmp object c1:
@@ -20591,25 +20591,25 @@ F       T       F       F       F       T       T       T       1
 object a5 cmp true:
 F       T       F       T       T       F       T       F       0
 object a5 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a5 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a5 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a5 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a5 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a5 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a5 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a5 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a5 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a5 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a5 cmp "":
 F       T       F       F       F       T       T       T       1
 object a5 cmp "0":
@@ -20839,25 +20839,25 @@ F       T       F       F       F       T       T       T       1
 object a6 cmp true:
 F       T       F       T       T       F       T       F       0
 object a6 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a6 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a6 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a6 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a6 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a6 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a6 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a6 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a6 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a6 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a6 cmp "":
 F       T       F       F       F       T       T       T       1
 object a6 cmp "0":
@@ -21007,7 +21007,7 @@ F       T       F       F       F       T       T       T       1
 object a6 cmp object a8:
 F       T       F       F       F       T       F       F       1
 object a6 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a6 cmp object a10:
 F       T       F       F       F       T       T       T       1
 object a6 cmp object a11:
@@ -21023,9 +21023,9 @@ F       T       F       F       F       T       F       F       1
 object a6 cmp object a16:
 F       T       T       T       F       T       F       F       -1
 object a6 cmp object a17:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a6 cmp object a18:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a6 cmp object b1:
 F       T       F       F       F       T       F       F       1
 object a6 cmp object c1:
@@ -21087,25 +21087,25 @@ F       T       F       F       F       T       T       T       1
 object a7 cmp true:
 F       T       F       T       T       F       T       F       0
 object a7 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a7 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a7 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a7 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a7 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a7 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a7 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a7 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a7 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a7 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a7 cmp "":
 F       T       F       F       F       T       T       T       1
 object a7 cmp "0":
@@ -21255,7 +21255,7 @@ T       F       F       T       T       F       T       F       0
 object a7 cmp object a8:
 F       T       F       F       F       T       F       F       1
 object a7 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a7 cmp object a10:
 F       T       F       F       F       T       T       T       1
 object a7 cmp object a11:
@@ -21271,9 +21271,9 @@ F       T       F       F       F       T       F       F       1
 object a7 cmp object a16:
 F       T       T       T       F       T       F       F       -1
 object a7 cmp object a17:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a7 cmp object a18:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a7 cmp object b1:
 F       T       F       F       F       T       F       F       1
 object a7 cmp object c1:
@@ -21335,25 +21335,25 @@ F       T       F       F       F       T       T       T       1
 object a8 cmp true:
 F       T       F       T       T       F       T       F       0
 object a8 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a8 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a8 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a8 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a8 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a8 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a8 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a8 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a8 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a8 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a8 cmp "":
 F       T       F       F       F       T       T       T       1
 object a8 cmp "0":
@@ -21503,7 +21503,7 @@ F       T       F       F       F       T       F       F       1
 object a8 cmp object a8:
 T       F       F       T       T       F       T       F       0
 object a8 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a8 cmp object a10:
 F       T       F       F       F       T       F       F       1
 object a8 cmp object a11:
@@ -21519,9 +21519,9 @@ F       T       F       F       F       T       F       F       1
 object a8 cmp object a16:
 F       T       T       T       F       T       F       F       -1
 object a8 cmp object a17:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a8 cmp object a18:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a8 cmp object b1:
 F       T       F       F       F       T       F       F       1
 object a8 cmp object c1:
@@ -21583,25 +21583,25 @@ F       T       F       F       F       T       T       T       1
 object a9 cmp true:
 F       T       F       T       T       F       T       F       0
 object a9 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp "":
 F       T       F       F       F       T       T       T       1
 object a9 cmp "0":
@@ -21739,31 +21739,31 @@ F       T       F       F       F       T       T       T       1
 object a9 cmp object a2:
 F       T       F       F       F       T       T       T       1
 object a9 cmp object a3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp object a4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp object a5:
 F       T       F       F       F       T       T       T       1
 object a9 cmp object a6:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp object a7:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp object a8:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp object a9:
 T       F       F       T       T       F       T       F       0
 object a9 cmp object a10:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp object a11:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp object a12:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp object a13:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp object a14:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp object a15:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a9 cmp object a16:
 F       T       T       T       F       T       F       F       -1
 object a9 cmp object a17:
@@ -21831,25 +21831,25 @@ F       T       F       F       F       T       T       T       1
 object a10 cmp true:
 F       T       F       T       T       F       T       F       0
 object a10 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a10 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a10 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a10 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a10 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a10 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a10 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a10 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a10 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a10 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a10 cmp "":
 F       T       F       F       F       T       T       T       1
 object a10 cmp "0":
@@ -21999,7 +21999,7 @@ F       T       T       T       F       T       F       F       -1
 object a10 cmp object a8:
 F       T       F       F       F       T       F       F       1
 object a10 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a10 cmp object a10:
 T       F       F       T       T       F       T       F       0
 object a10 cmp object a11:
@@ -22015,9 +22015,9 @@ F       T       F       F       F       T       F       F       1
 object a10 cmp object a16:
 F       T       T       T       F       T       F       F       -1
 object a10 cmp object a17:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a10 cmp object a18:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a10 cmp object b1:
 F       T       F       F       F       T       F       F       1
 object a10 cmp object c1:
@@ -22079,25 +22079,25 @@ F       T       F       F       F       T       T       T       1
 object a11 cmp true:
 F       T       F       T       T       F       T       F       0
 object a11 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a11 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a11 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a11 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a11 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a11 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a11 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a11 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a11 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a11 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a11 cmp "":
 F       T       F       F       F       T       T       T       1
 object a11 cmp "0":
@@ -22247,7 +22247,7 @@ F       T       F       F       F       T       F       F       1
 object a11 cmp object a8:
 F       T       F       F       F       T       F       F       1
 object a11 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a11 cmp object a10:
 F       T       F       F       F       T       F       F       1
 object a11 cmp object a11:
@@ -22263,9 +22263,9 @@ F       T       F       F       F       T       T       T       1
 object a11 cmp object a16:
 F       T       T       T       F       T       F       F       -1
 object a11 cmp object a17:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a11 cmp object a18:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a11 cmp object b1:
 F       T       F       F       F       T       F       F       1
 object a11 cmp object c1:
@@ -22327,25 +22327,25 @@ F       T       F       F       F       T       T       T       1
 object a12 cmp true:
 F       T       F       T       T       F       T       F       0
 object a12 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a12 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a12 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a12 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a12 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a12 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a12 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a12 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a12 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a12 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a12 cmp "":
 F       T       F       F       F       T       T       T       1
 object a12 cmp "0":
@@ -22495,7 +22495,7 @@ F       T       F       F       F       T       F       F       1
 object a12 cmp object a8:
 F       T       F       F       F       T       F       F       1
 object a12 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a12 cmp object a10:
 F       T       F       F       F       T       F       F       1
 object a12 cmp object a11:
@@ -22511,9 +22511,9 @@ F       T       F       F       F       T       T       T       1
 object a12 cmp object a16:
 F       T       T       T       F       T       F       F       -1
 object a12 cmp object a17:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a12 cmp object a18:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a12 cmp object b1:
 F       T       F       F       F       T       F       F       1
 object a12 cmp object c1:
@@ -22575,25 +22575,25 @@ F       T       F       F       F       T       T       T       1
 object a13 cmp true:
 F       T       F       T       T       F       T       F       0
 object a13 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a13 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a13 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a13 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a13 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a13 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a13 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a13 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a13 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a13 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a13 cmp "":
 F       T       F       F       F       T       T       T       1
 object a13 cmp "0":
@@ -22743,7 +22743,7 @@ F       T       F       F       F       T       F       F       1
 object a13 cmp object a8:
 F       T       F       F       F       T       F       F       1
 object a13 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a13 cmp object a10:
 F       T       F       F       F       T       F       F       1
 object a13 cmp object a11:
@@ -22759,9 +22759,9 @@ F       T       F       T       T       F       T       F       0
 object a13 cmp object a16:
 F       T       T       T       F       T       F       F       -1
 object a13 cmp object a17:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a13 cmp object a18:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a13 cmp object b1:
 F       T       F       F       F       T       F       F       1
 object a13 cmp object c1:
@@ -22823,25 +22823,25 @@ F       T       F       F       F       T       T       T       1
 object a14 cmp true:
 F       T       F       T       T       F       T       F       0
 object a14 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a14 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a14 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a14 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a14 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a14 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a14 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a14 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a14 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a14 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a14 cmp "":
 F       T       F       F       F       T       T       T       1
 object a14 cmp "0":
@@ -22991,7 +22991,7 @@ F       T       F       F       F       T       F       F       1
 object a14 cmp object a8:
 F       T       F       F       F       T       F       F       1
 object a14 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a14 cmp object a10:
 F       T       F       F       F       T       F       F       1
 object a14 cmp object a11:
@@ -23007,9 +23007,9 @@ F       T       Err     Err     Err     Err     Err     Err     Err
 object a14 cmp object a16:
 F       T       T       T       F       T       F       F       -1
 object a14 cmp object a17:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a14 cmp object a18:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a14 cmp object b1:
 F       T       F       F       F       T       F       F       1
 object a14 cmp object c1:
@@ -23071,25 +23071,25 @@ F       T       F       F       F       T       T       T       1
 object a15 cmp true:
 F       T       F       T       T       F       T       F       0
 object a15 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a15 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a15 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a15 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a15 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a15 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a15 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a15 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a15 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a15 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a15 cmp "":
 F       T       F       F       F       T       T       T       1
 object a15 cmp "0":
@@ -23239,7 +23239,7 @@ F       T       F       F       F       T       F       F       1
 object a15 cmp object a8:
 F       T       F       F       F       T       F       F       1
 object a15 cmp object a9:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a15 cmp object a10:
 F       T       F       F       F       T       F       F       1
 object a15 cmp object a11:
@@ -23255,9 +23255,9 @@ T       F       F       T       T       F       T       F       0
 object a15 cmp object a16:
 F       T       T       T       F       T       F       F       -1
 object a15 cmp object a17:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a15 cmp object a18:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a15 cmp object b1:
 F       T       F       F       F       T       F       F       1
 object a15 cmp object c1:
@@ -23319,25 +23319,25 @@ F       T       F       F       F       T       T       T       1
 object a16 cmp true:
 F       T       F       T       T       F       T       F       0
 object a16 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a16 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a16 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a16 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a16 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a16 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a16 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a16 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a16 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a16 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a16 cmp "":
 F       T       F       F       F       T       T       T       1
 object a16 cmp "0":
@@ -23567,25 +23567,25 @@ F       T       F       F       F       T       T       T       1
 object a17 cmp true:
 F       T       F       T       T       F       T       F       0
 object a17 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp "":
 F       T       F       F       F       T       T       T       1
 object a17 cmp "0":
@@ -23723,31 +23723,31 @@ F       T       T       T       F       T       T       T       -1
 object a17 cmp object a2:
 F       T       T       T       F       T       T       T       -1
 object a17 cmp object a3:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp object a4:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp object a5:
 F       T       T       T       F       T       T       T       -1
 object a17 cmp object a6:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp object a7:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp object a8:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp object a9:
 F       T       T       T       F       T       T       T       -1
 object a17 cmp object a10:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp object a11:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp object a12:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp object a13:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp object a14:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp object a15:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a17 cmp object a16:
 F       T       T       T       F       T       F       F       -1
 object a17 cmp object a17:
@@ -23815,25 +23815,25 @@ F       T       F       F       F       T       T       T       1
 object a18 cmp true:
 F       T       F       T       T       F       T       F       0
 object a18 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp "":
 F       T       F       F       F       T       T       T       1
 object a18 cmp "0":
@@ -23971,31 +23971,31 @@ F       T       T       T       F       T       T       T       -1
 object a18 cmp object a2:
 F       T       T       T       F       T       T       T       -1
 object a18 cmp object a3:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp object a4:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp object a5:
 F       T       T       T       F       T       T       T       -1
 object a18 cmp object a6:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp object a7:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp object a8:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp object a9:
 F       T       T       T       F       T       T       T       -1
 object a18 cmp object a10:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp object a11:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp object a12:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp object a13:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp object a14:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp object a15:
-F       T       T       T       F       T       T       T       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object a18 cmp object a16:
 F       T       T       T       F       T       F       F       -1
 object a18 cmp object a17:
@@ -24063,25 +24063,25 @@ F       T       F       F       F       T       T       T       1
 object b1 cmp true:
 F       T       F       T       T       F       T       F       0
 object b1 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object b1 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object b1 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object b1 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object b1 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object b1 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object b1 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object b1 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object b1 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object b1 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object b1 cmp "":
 F       T       F       F       F       T       T       T       1
 object b1 cmp "0":
@@ -24311,25 +24311,25 @@ F       T       F       F       F       T       T       T       1
 object c1 cmp true:
 F       T       F       T       T       F       T       F       0
 object c1 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object c1 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object c1 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object c1 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object c1 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object c1 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object c1 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object c1 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object c1 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object c1 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object c1 cmp "":
 F       T       F       F       F       T       T       T       1
 object c1 cmp "0":
@@ -24559,25 +24559,25 @@ F       T       F       F       F       T       T       T       1
 object s1 cmp true:
 F       T       F       T       T       F       T       F       0
 object s1 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s1 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s1 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s1 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s1 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s1 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s1 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s1 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s1 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s1 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s1 cmp "":
 F       T       F       F       F       T       T       T       1
 object s1 cmp "0":
@@ -24807,25 +24807,25 @@ F       T       F       F       F       T       T       T       1
 object s2 cmp true:
 F       T       F       T       T       F       T       F       0
 object s2 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s2 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s2 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s2 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s2 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s2 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s2 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s2 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s2 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s2 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s2 cmp "":
 F       T       F       F       F       T       T       T       1
 object s2 cmp "0":
@@ -25055,25 +25055,25 @@ F       T       F       F       F       T       T       T       1
 object s3 cmp true:
 F       T       F       T       T       F       T       F       0
 object s3 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s3 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s3 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s3 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s3 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s3 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s3 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s3 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s3 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s3 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s3 cmp "":
 F       T       F       F       F       T       T       T       1
 object s3 cmp "0":
@@ -25303,25 +25303,25 @@ F       T       F       F       F       T       T       T       1
 object s4 cmp true:
 F       T       F       T       T       F       T       F       0
 object s4 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s4 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s4 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s4 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s4 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s4 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s4 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s4 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s4 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s4 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object s4 cmp "":
 F       T       Err     Err     Err     Err     Err     Err     Err
 object s4 cmp "0":
@@ -25551,25 +25551,25 @@ F       T       F       F       F       T       T       T       1
 object t1 cmp true:
 F       T       F       T       T       F       T       F       0
 object t1 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t1 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t1 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t1 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t1 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t1 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t1 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t1 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t1 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t1 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t1 cmp "":
 F       T       F       F       F       T       T       T       1
 object t1 cmp "0":
@@ -25799,25 +25799,25 @@ F       T       F       F       F       T       T       T       1
 object t2 cmp true:
 F       T       F       T       T       F       T       F       0
 object t2 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t2 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t2 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t2 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t2 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t2 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t2 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t2 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t2 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t2 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t2 cmp "":
 F       T       F       F       F       T       T       T       1
 object t2 cmp "0":
@@ -26047,25 +26047,25 @@ F       T       F       F       F       T       T       T       1
 object t3 cmp true:
 F       T       F       T       T       F       T       F       0
 object t3 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t3 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t3 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t3 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t3 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t3 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t3 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t3 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t3 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t3 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t3 cmp "":
 F       T       F       F       F       T       T       T       1
 object t3 cmp "0":
@@ -26295,25 +26295,25 @@ F       T       F       F       F       T       T       T       1
 object t4 cmp true:
 F       T       F       T       T       F       T       F       0
 object t4 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t4 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t4 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t4 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t4 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t4 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t4 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t4 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t4 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t4 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t4 cmp "":
 F       T       F       F       F       T       T       T       1
 object t4 cmp "0":
@@ -26543,25 +26543,25 @@ F       T       F       F       F       T       T       T       1
 object t5 cmp true:
 F       T       F       T       T       F       T       F       0
 object t5 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t5 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t5 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t5 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t5 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t5 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t5 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t5 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t5 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t5 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 object t5 cmp "":
 F       T       F       F       F       T       T       T       1
 object t5 cmp "0":
@@ -28527,25 +28527,25 @@ F       T       F       F       F       T       T       T       1
 closure clo1 cmp true:
 F       T       F       T       T       F       T       F       0
 closure clo1 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo1 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo1 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo1 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo1 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo1 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo1 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo1 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo1 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo1 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo1 cmp "":
 F       T       F       F       F       T       T       T       1
 closure clo1 cmp "0":
@@ -28775,25 +28775,25 @@ F       T       F       F       F       T       T       T       1
 closure clo2 cmp true:
 F       T       F       T       T       F       T       F       0
 closure clo2 cmp int 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo2 cmp int 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo2 cmp int -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo2 cmp float 0:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo2 cmp double 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo2 cmp float 99:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo2 cmp float -1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo2 cmp INF:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo2 cmp -INF:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo2 cmp NAN:
-F       T       F       F       F       T       F       F       -1
+F       T       Err     Err     Err     Err     Err     Err     Err
 closure clo2 cmp "":
 F       T       F       F       F       T       T       T       1
 closure clo2 cmp "0":

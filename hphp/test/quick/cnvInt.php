@@ -47,7 +47,11 @@ function bar($i) {
   var_dump((int)$v6);
   var_dump((int)$v7);
   var_dump((int)$v8);
-  var_dump((int)$v9);
+  try {
+    var_dump((int)$v9);
+  } catch (TypecastException $e) {
+    var_dump($e->getMessage());
+  }
   var_dump((int)$v10);
   var_dump((int)$v11);
 }
@@ -64,7 +68,11 @@ function baz($i) {
 }
 <<__EntryPoint>> function main(): void {
 foo2();
-var_dump(foo(new C));
+try {
+  var_dump(foo(new C));
+} catch (TypecastException $e) {
+  var_dump($e->getMessage());
+}
 bar(1);
 baz(1);
 }

@@ -19,7 +19,7 @@ default
 bool(true)
 goes to:
 
-Notice: Comparing bool and int using equality in %s/basic_int.php on line 45
+Notice: Comparing bool and int using equality in %s/basic_int.php on line %s
 5
 bool(false)
 goes to:
@@ -71,7 +71,7 @@ Notice: Comparing int and string using equality in %s/basic_int.php on line %s
 string(1) "5"
 goes to:
 
-Notice: Comparing int and string using equality in %s/basic_int.php on line 45
+Notice: Comparing int and string using equality in %s/basic_int.php on line %s
 5
 string(1) "1"
 goes to:
@@ -81,9 +81,7 @@ Notice: Comparing int and string using equality in %s/basic_int.php on line %s
 object(M) (0) {
 }
 goes to:
-%r(\nNotice: Object of class M could not be converted to int in %s\/basic_int\.php on line %s\n?)+%r
-Notice: Comparing M and int using equality in %s/basic_int.php on line %s
-1
+Object of class M could not be converted to int
 float(5.392)
 goes to:
 default
@@ -96,7 +94,7 @@ default
 float(5)
 goes to:
 
-Notice: Comparing float and int using equality in %s/basic_int.php on line 45
+Notice: Comparing float and int using equality in %s/basic_int.php on line %s
 5
 float(-INF)
 goes to:
@@ -113,5 +111,5 @@ default
 string(3) "5.0"
 goes to:
 
-Notice: Comparing int and string using equality in %s/basic_int.php on line 45
+Notice: Comparing int and string using equality in %s/basic_int.php on line %s
 5

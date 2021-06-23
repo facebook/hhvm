@@ -72,12 +72,8 @@
 -2
 -2
 -
-
-Notice: Object of class stdClass could not be converted to int in %s on line 108
-1
-
-Notice: Object of class stdClass could not be converted to int in %s on line 109
-1
+string(54) "Object of class stdClass could not be converted to int"
+string(54) "Object of class stdClass could not be converted to int"
 -
 -9223372036854775808
 -9223372036854775808

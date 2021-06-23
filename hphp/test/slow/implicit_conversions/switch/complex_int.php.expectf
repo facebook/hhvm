@@ -1,7 +1,7 @@
 --------------------------------
 NULL
 
-Notice: Comparing int and null using equality in %s/complex_int.php on line 35
+Notice: Comparing int and null using equality in %s/complex_int.php on line %s
 0
 --------------------------------
 bool(true)
@@ -11,7 +11,7 @@ Notice: Comparing bool and int using equality in %s/complex_int.php on line %s
 --------------------------------
 bool(false)
 
-Notice: Comparing bool and int using equality in %s/complex_int.php on line 35
+Notice: Comparing bool and int using equality in %s/complex_int.php on line %s
 0
 --------------------------------
 int(5)
@@ -40,12 +40,12 @@ default
 --------------------------------
 string(4) "blar"
 
-Notice: Comparing int and string using equality in %s/complex_int.php on line 35
+Notice: Comparing int and string using equality in %s/complex_int.php on line %s
 0
 --------------------------------
 string(0) ""
 
-Notice: Comparing int and string using equality in %s/complex_int.php on line 35
+Notice: Comparing int and string using equality in %s/complex_int.php on line %s
 0
 --------------------------------
 int(4)
@@ -63,15 +63,11 @@ default
 --------------------------------
 object(stdClass) (0) {
 }
-%r(\nNotice: Object of class stdClass could not be converted to int in %s\/complex_int\.php on line %s\n?)+%r
-Notice: Comparing int and stdClass using equality in %s/complex_int.php on line %s
-1
+Object of class stdClass could not be converted to int
 --------------------------------
 object(C) (0) {
 }
-%r(\nNotice: Object of class C could not be converted to int in %s\/complex_int\.php on line %s\n?)+%r
-Notice: Comparing C and int using equality in %s/complex_int.php on line %s
-1
+Object of class C could not be converted to int
 --------------------------------
 resource(4) of type (stream)
 

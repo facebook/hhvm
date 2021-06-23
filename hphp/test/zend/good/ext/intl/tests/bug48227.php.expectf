@@ -2,5 +2,8 @@ string(1) "0"
 string(1) "1"
 string(1) "0"
 
-Notice: %s
-string(1) "1"
+Fatal error: Uncaught exception 'TypecastException' with message 'Object of class NumberFormatter could not be converted to int' in %s/bug48227.php:7
+Stack trace:
+#0 %s/bug48227.php(7): NumberFormatter->format()
+#1 (): main()
+#2 {main}

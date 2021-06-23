@@ -63,14 +63,6 @@ string(32) "6438db90653c4d300909aa02fd6163c2"
 --heredoc--
 string(32) "6438db90653c4d300909aa02fd6163c2"
 
---instance of classWithToString--
-Error: 8 - Object of class classWithToString could not be converted to int, %s(%d)
-string(32) "a80c6cef6b42c8759143586a57bb7dc6"
-
---instance of classWithoutToString--
-Error: 8 - Object of class classWithoutToString could not be converted to int, %s(%d)
-string(32) "a80c6cef6b42c8759143586a57bb7dc6"
-
 --resource--
 string(%d) %s
 ===DONE===

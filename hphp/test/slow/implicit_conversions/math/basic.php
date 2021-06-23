@@ -15,23 +15,15 @@ const vec<mixed> VALS = vec[
   dict['foobar' => false],
 ];
 
-class Foo {}
 
 <<__EntryPoint>>
 function main(): void {
-  $o = new Foo();
   foreach(VALS as $i) {
     foreach(VALS as $j) {
       echo '$i '; var_dump($i); echo '$j '; var_dump($j);
       do_the_thing($i, $j);
     }
-    // hand-do the object ones since they can't be in the constant
-    echo "Foo on right and then left\n";
-    do_the_thing($i, $o);
-    do_the_thing($o, $i);
   }
-  echo "Foo on both\n";
-  do_the_thing($o, $o);
 }
 
 function do_the_thing(mixed $i, mixed $j): void {

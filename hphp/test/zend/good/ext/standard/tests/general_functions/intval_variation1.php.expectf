@@ -74,12 +74,4 @@ int(0)
 
 --heredoc--
 int(0)
-
---instance of classWithToString--
-Error: 8 - Object of class classWithToString could not be converted to int, %s(%d)
-int(1)
-
---instance of classWithoutToString--
-Error: 8 - Object of class classWithoutToString could not be converted to int, %s(%d)
-int(1)
 ===DONE===

@@ -24,7 +24,11 @@ function main() {
     fopen("/dev/null", "w"),
   ];
   foreach ($things as $t) {
-    doswitch($t);
+    try {
+      doswitch($t);
+    } catch (Exception $e) {
+      echo $e->getMessage()."\n";
+    }
   }
 }
 

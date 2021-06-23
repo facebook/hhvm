@@ -1,22 +1,6 @@
-
-Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 7
-
-Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 7
-bool(true)
-
-Notice: Object of class stdClass could not be converted to float in %s/test/slow/comparisons/1054.php on line 8
-
-Notice: Object of class stdClass could not be converted to float in %s/test/slow/comparisons/1054.php on line 8
-bool(true)
-
-Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 9
-bool(true)
-
-Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 10
-bool(true)
-
-Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 11
-bool(true)
-
-Notice: Object of class stdClass could not be converted to int in %s/test/slow/comparisons/1054.php on line 12
-bool(true)
+string(54) "Object of class stdClass could not be converted to int"
+string(56) "Object of class stdClass could not be converted to float"
+string(54) "Object of class stdClass could not be converted to int"
+string(54) "Object of class stdClass could not be converted to int"
+string(54) "Object of class stdClass could not be converted to int"
+string(54) "Object of class stdClass could not be converted to int"

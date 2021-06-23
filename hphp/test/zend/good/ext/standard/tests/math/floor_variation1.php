@@ -4,10 +4,6 @@
  * Source code: ext/standard/math.c
  */
 
-// get a class
-class classA
-{
-}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing floor() : usage variations ***\n";
 
@@ -41,11 +37,6 @@ $inputs = varray[
 /*10*/ "abcxyz",
        'abcxyz}',
        $heredoc,
-
-       // object data
-/*13*/ new classA(),
-
-
 
        // resource variable
 /*14*/ $fp

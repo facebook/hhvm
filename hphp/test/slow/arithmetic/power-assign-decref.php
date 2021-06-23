@@ -14,15 +14,51 @@ function main() {
   $i8 = new D;
   $i9 = new D;
 
-  $i1 += 1;
-  $i2 -= 1;
-  $i3 *= 1;
-  $i4 /= 1;
-  $i5 %= 1;
-  $i6 **= 1;
-  $i7 &= 1;
-  $i8 |= 1;
-  $i9 ^= 1;
+  try {
+    $i1 += 1;
+  } catch (TypecastException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    $i2 -= 1;
+  } catch (TypecastException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    $i3 *= 1;
+  } catch (TypecastException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    $i4 /= 1;
+  } catch (TypecastException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    $i5 %= 1;
+  } catch (TypecastException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    $i6 **= 1;
+  } catch (TypecastException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    $i7 &= 1;
+  } catch (TypecastException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    $i8 |= 1;
+  } catch (TypecastException $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    $i9 ^= 1;
+  } catch (TypecastException $e) {
+    var_dump($e->getMessage());
+  }
 
   var_dump($i1);
   var_dump($i2);

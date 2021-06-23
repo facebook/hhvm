@@ -1,6 +1,3 @@
-
-Notice: Object of class stdClass could not be converted to int in %s/add_003.php on line 8
-
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Invalid operand type was used: cannot perform this operation with vecs' in %s/add_003.php:8
+Fatal error: Uncaught exception 'TypecastException' with message 'Object of class stdClass could not be converted to int' in %s/add_003.php:8
 Stack trace:
 %A

@@ -1,9 +1,5 @@
 <?hh
 
-function err() {
-  return true;
-}
-
 function doswitch($foo) {
   echo "--------------------------------\n";
   var_dump($foo);
@@ -37,6 +33,7 @@ function doswitch($foo) {
 
 class c {}
 
+<<__EntryPoint>>
 function main() {
   $f = fopen("/dev/null", "w");
   $things = varray[
@@ -60,11 +57,10 @@ function main() {
   ];
   var_dump($f == 4);
   foreach ($things as $t) {
-    doswitch($t);
+    try {
+      doswitch($t);
+    } catch (Exception $e) {
+      var_dump($e->getMessage());
+    }
   }
-}
-<<__EntryPoint>>
-function main_entry(): void {
-  set_error_handler(err<>);
-  main();
 }

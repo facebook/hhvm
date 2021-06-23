@@ -8,8 +8,9 @@
 
 let initialize_lease () = failwith "not implemented"
 
-let process_file (_ : Relative_path.t) (_ : Typing_deps.Mode.t) =
+let process_file (_ : ReEnv.t) (_ : Relative_path.t) (_ : Typing_deps.Mode.t) =
   failwith "not implemented"
 
-let process_files (_ : Relative_path.t list) (_ : Typing_deps.Mode.t) =
+let process_files
+    (_ : ReEnv.t) (_ : Relative_path.t list) (_ : Typing_deps.Mode.t) =
   failwith "not implemented"

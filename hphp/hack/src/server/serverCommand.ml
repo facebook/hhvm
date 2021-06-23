@@ -156,13 +156,13 @@ let force_remote_execution_files = function
   | Rpc (_metadata, x) -> rpc_files x
   | _ -> Relative_path.Set.empty
 
-let rpc_remote_execution : type a. a t -> bool = function
-  | STATUS_REMOTE_EXECUTION _ -> true
-  | _ -> false
+let rpc_remote_execution : type a. a t -> ReEnv.t option = function
+  | STATUS_REMOTE_EXECUTION _ -> Some (Re.initialize_lease ())
+  | _ -> None
 
 let force_remote_execution = function
   | Rpc (_metadata, x) -> rpc_remote_execution x
-  | _ -> false
+  | _ -> None
 
 let ignore_ide = function
   | Rpc (_metadata, STATUS status) -> status.ignore_ide
@@ -318,7 +318,6 @@ let handle
       ServerEnv.remote_execution = force_remote_execution msg;
     }
   in
-  if env.ServerEnv.remote_execution then Re.initialize_lease ();
   let env = { env with ServerEnv.remote = force_remote msg } in
   let full_recheck_needed = command_needs_full_check msg in
   let is_stale = ServerEnv.(env.last_recheck_loop_stats.updates_stale) in

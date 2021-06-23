@@ -142,12 +142,13 @@ type process_file_results = {
 }
 
 let process_files_remote_execution
+    (re_env : ReEnv.t)
     (ctx : Provider_context.t)
     (errors : Errors.t)
     (files : check_file_computation list) : process_file_results =
   let fns = List.map files ~f:(fun file -> file.path) in
   let deps_mode = Provider_context.get_deps_mode ctx in
-  let errors' = Re.process_files fns deps_mode in
+  let errors' = Re.process_files re_env fns deps_mode in
   { errors = Errors.merge errors' errors; deferred_decls = [] }
 
 let process_file
@@ -380,7 +381,7 @@ let process_files
     (progress : computation_progress)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(remote_execution : bool)
+    ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : typing_result * computation_progress =
   if not longlived_workers then SharedMem.invalidate_caches ();
   File_provider.local_changes_push_sharedmem_stack ();
@@ -487,17 +488,19 @@ let process_files
           (errors, [], ProcessFilesTally.incr_prefetches tally)
       in
       let (fns, check_fns, errors) =
-        if remote_execution then
+        match remote_execution with
+        | Some re_env ->
           let (check_fns, fns) =
             List.partition_map fns ~f:(function
                 | Check file -> First file
                 | fn -> Second fn)
           in
-          let result = process_files_remote_execution ctx errors check_fns in
+          let result =
+            process_files_remote_execution re_env ctx errors check_fns
+          in
           let check_fns = List.map check_fns ~f:(fun f -> Check f) in
           (fns, check_fns, result.errors)
-        else
-          (fns, [], errors)
+        | None -> (fns, [], errors)
       in
       let progress =
         {
@@ -574,7 +577,7 @@ let load_and_process_files
     (progress : computation_progress)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(remote_execution : bool)
+    ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : typing_result * computation_progress =
   (* When the type-checking worker receives SIGUSR1, display a position which
      corresponds approximately with the function/expression being checked. *)
@@ -688,12 +691,11 @@ let next
     (files_to_process : file_computation BigList.t ref)
     (files_in_progress : file_computation Hash_set.Poly.t)
     (record : Measure.record)
-    (remote_execution : bool) =
+    (remote_execution : ReEnv.t option) =
   let max_size =
-    if remote_execution then
-      25000
-    else
-      Bucket.max_size ()
+    match remote_execution with
+    | Some _ -> 25000
+    | _ -> Bucket.max_size ()
   in
   let num_workers =
     match workers with
@@ -807,7 +809,7 @@ let process_in_parallel
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(remote_execution : bool)
+    ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) :
     typing_result * Delegate.state * Telemetry.t * _ * Relative_path.t list =
   let record = Measure.create () in
@@ -968,7 +970,7 @@ let go_with_interrupt
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(remote_execution : bool)
+    ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
     ~(profiling : CgroupProfiler.Profiling.t) :
     (Errors.t, Delegate.state, Telemetry.t, _) job_result =
@@ -1023,10 +1025,9 @@ let go_with_interrupt
     end else begin
       Hh_logger.log "Type checking service will process files in parallel";
       let num_workers =
-        if remote_execution then
-          Some 1
-        else
-          TypecheckerOptions.num_local_workers opts
+        match remote_execution with
+        | Some _ -> Some 1
+        | _ -> TypecheckerOptions.num_local_workers opts
       in
       let workers =
         match (workers, num_workers) with
@@ -1099,7 +1100,7 @@ let go
     (fnl : Relative_path.t list)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(remote_execution : bool)
+    ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : Errors.t * Delegate.state * Telemetry.t =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (res, delegate_state, telemetry, (), cancelled) =

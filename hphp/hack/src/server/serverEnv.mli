@@ -214,7 +214,7 @@ type env = {
   last_idle_job_time: float;  (** Timestamp of last ServerIdle.go run *)
   remote_execution_files: Relative_path.Set.t;
       (** Files that need to be typechecked via remote execution *)
-  remote_execution: bool;
+  remote_execution: ReEnv.t option;
       (** Whether type check should happen via remote execution *)
   editor_open_files: Relative_path.Set.t;
       (** The map from full path to synchronized file contents *)

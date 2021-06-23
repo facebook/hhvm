@@ -78,7 +78,7 @@ let test () =
       [bar_path]
       ~memory_cap
       ~longlived_workers:false
-      ~remote_execution:false
+      ~remote_execution:None
       ~check_info
   in
   Test.assert_errors errors "";
@@ -92,7 +92,7 @@ let test () =
       [bar_path]
       ~memory_cap
       ~longlived_workers:false
-      ~remote_execution:false
+      ~remote_execution:None
       ~check_info
   in
   Test.assert_errors errors "";
@@ -107,7 +107,7 @@ let test () =
       [foo_path]
       ~memory_cap
       ~longlived_workers:false
-      ~remote_execution:false
+      ~remote_execution:None
       ~check_info
   in
   Test.assert_errors errors expected_errors;
@@ -121,7 +121,7 @@ let test () =
       [foo_path]
       ~memory_cap
       ~longlived_workers:false
-      ~remote_execution:false
+      ~remote_execution:None
       ~check_info
   in
   Test.assert_errors errors expected_errors;

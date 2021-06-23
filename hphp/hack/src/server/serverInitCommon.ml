@@ -218,9 +218,7 @@ let type_check
       let longlived_workers =
         genv.local_config.ServerLocalConfig.longlived_workers
       in
-      let remote_execution =
-        genv.local_config.ServerLocalConfig.remote_execution
-      in
+      let remote_execution = env.ServerEnv.remote_execution in
       let ctx = Provider_utils.ctx_from_server_env env in
       CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
       @@ fun () ->

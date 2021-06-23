@@ -158,7 +158,7 @@
 (library
   (name re_stubs)
   (wrapped false)
-  (modules re)
+  (modules re reEnv)
   (libraries errors relative_path typing_deps)
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))

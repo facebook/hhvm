@@ -155,6 +155,9 @@ Examples:
   # Quick tests in JIT mode with some extra runtime options:
   % {$argv[0]} test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRRefcountOpts=0'
 
+  # Quick tests in JIT mode with RepoAuthoritative and an extra compile-time option:
+  % {$argv[0]} test/quick -r --compiler-args '--parse-on-demand=false'
+
   # All quick tests except debugger
   % {$argv[0]} -e debugger test/quick
 
@@ -413,7 +416,8 @@ function rel_path($to) {
 }
 
 function get_options($argv): (darray<string, mixed>, varray<string>) {
-  // Options marked * affect test behavior, and need to be reported by list_tests
+  // Options marked * affect test behavior, and need to be reported by list_tests.
+  // Options with a trailing : take a value.
   $parameters = darray[
     '*env:' => '',
     'exclude:' => 'e:',
@@ -436,6 +440,7 @@ function get_options($argv): (darray<string, mixed>, varray<string>) {
     'testpilot' => '',
     'threads:' => '',
     '*args:' => 'a:',
+    '*compiler-args:' => '',
     'log' => 'l',
     'failure-file:' => '',
     '*wholecfg' => '',
@@ -854,6 +859,10 @@ function extra_args($options): string {
   return $args;
 }
 
+function extra_compiler_args($options): string {
+  return $options['compiler-args'] ?? '';
+}
+
 function hhvm_cmd_impl(
   $options,
   $config,
@@ -1078,13 +1087,14 @@ function hphp_cmd($options, $test, $program): string {
   // Transform extra_args like "-vName=Value" into "-vRuntime.Name=Value".
   $extra_args = preg_replace("/(^-v|\s+-v)\s*/", "$1Runtime.", extra_args($options));
 
-  $compiler_args = "";
+  $compiler_args = extra_compiler_args($options);
   if (isset($options['hackc'])) {
     $hh_single_compile = hh_codegen_path();
     $compiler_args = implode(" ", varray[
       '-vRuntime.Eval.HackCompilerUseEmbedded=false',
       "-vRuntime.Eval.HackCompilerInheritConfig=true",
-      "-vRuntime.Eval.HackCompilerCommand=\"{$hh_single_compile} --daemon --dump-symbol-refs\""
+      "-vRuntime.Eval.HackCompilerCommand=\"{$hh_single_compile} --daemon --dump-symbol-refs\"",
+      $compiler_args
     ]);
   }
 

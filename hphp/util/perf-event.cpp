@@ -23,7 +23,6 @@
 #include "hphp/util/safe-cast.h"
 
 #include <folly/FileUtil.h>
-#include <folly/Optional.h>
 #include <folly/String.h>
 
 #include <mutex>
@@ -174,10 +173,10 @@ void signal_event(int sig, siginfo_t* info, void* /*context*/) {
 
   if (tl_perf_event.signal == nullptr) return;
 
-  auto const type = [&]() -> folly::Optional<PerfEvent> {
+  auto const type = [&]() -> Optional<PerfEvent> {
     if (info->si_fd == tl_perf_event.loads.fd)  return PerfEvent::Load;
     if (info->si_fd == tl_perf_event.stores.fd) return PerfEvent::Store;
-    return folly::none;
+    return std::nullopt;
   }();
   if (!type) return;
 
@@ -270,9 +269,9 @@ void close_event(const perf_event_handle& pe) {
  * Open a file descriptor for perf events with `event_name', mmap it, and set
  * things up so that the calling thread receives SIGIO signals from it.
  *
- * Returns the perf_event_handle on success, else folly::none.
+ * Returns the perf_event_handle on success, else std::nullopt.
  */
-folly::Optional<perf_event_handle> enable_event(const char* event_name,
+Optional<perf_event_handle> enable_event(const char* event_name,
                                                 uint64_t sample_freq) {
   struct perf_event_attr attr = {};
   pfm_perf_encode_arg_t arg = {};
@@ -285,7 +284,7 @@ folly::Optional<perf_event_handle> enable_event(const char* event_name,
   if (pfmr != PFM_SUCCESS) {
     Logger::Warning("perf_event: failed to get encoding for %s: %s",
                     event_name, pfm_strerror(pfmr));
-    return folly::none;
+    return std::nullopt;
   }
 
   // Finish setting up `attr' and open the event.
@@ -311,7 +310,7 @@ folly::Optional<perf_event_handle> enable_event(const char* event_name,
     // memory address.  Just fail silently in this case.
     Logger::Verbose("perf_event: perf_event_open failed with: %s",
                     folly::errnoStr(errno).c_str());
-    return folly::none;
+    return std::nullopt;
   }
   auto const fd = safe_cast<int>(ret);
 
@@ -333,7 +332,7 @@ folly::Optional<perf_event_handle> enable_event(const char* event_name,
     Logger::Warning("perf_event: failed to set up asynchronous I/O: %s",
                     folly::errnoStr(errno).c_str());
     close(fd);
-    return folly::none;
+    return std::nullopt;
   }
 
   // Map the ring buffer for our samples.
@@ -343,7 +342,7 @@ folly::Optional<perf_event_handle> enable_event(const char* event_name,
     Logger::Warning("perf_event: failed to mmap perf_event: %s",
                     folly::errnoStr(errno).c_str());
     close(fd);
-    return folly::none;
+    return std::nullopt;
   }
   auto const meta = reinterpret_cast<struct perf_event_mmap_page*>(base);
 
@@ -356,7 +355,7 @@ folly::Optional<perf_event_handle> enable_event(const char* event_name,
     Logger::Warning("perf_event: failed to reset perf_event: %s",
                     folly::errnoStr(errno).c_str());
     close_event(pe);
-    return folly::none;
+    return std::nullopt;
   }
 
   // Enable the event.  The man page and other examples of usage all suggest
@@ -367,7 +366,7 @@ folly::Optional<perf_event_handle> enable_event(const char* event_name,
     Logger::Warning("perf_event: failed to enable perf_event: %s",
                     folly::errnoStr(errno).c_str());
     close_event(pe);
-    return folly::none;
+    return std::nullopt;
   }
 
   return pe;

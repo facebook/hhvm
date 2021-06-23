@@ -581,7 +581,7 @@ namespace {
 
 void definePrologueFrameAndStack(IRGS& env, const Func* callee, uint32_t argc) {
   // Define caller's frame. It is unknown if/where it lives on the stack.
-  gen(env, DefFP, DefFPData { folly::none });
+  gen(env, DefFP, DefFPData { std::nullopt });
   updateMarker(env);
 
   // The stack base of prologues points to the stack without the potentially

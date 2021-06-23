@@ -16,7 +16,6 @@
 #pragma once
 
 #include <folly/Hash.h>
-#include <folly/Optional.h>
 
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/representation.h"
@@ -113,4 +112,3 @@ struct VisitContext {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

@@ -16,7 +16,6 @@
 #pragma once
 
 #include <memory>
-#include <optional>
 #include <utility>
 
 #include <folly/experimental/io/FsUtil.h>
@@ -106,7 +105,7 @@ struct AutoloadHandler final : RequestEventHandler {
     return m_facts;
   }
 
-  std::optional<String> getFile(const String& name,
+  Optional<String> getFile(const String& name,
                                   AutoloadMap::KindOf kind);
 
   Array getSymbols(const String& path, AutoloadMap::KindOf kind);

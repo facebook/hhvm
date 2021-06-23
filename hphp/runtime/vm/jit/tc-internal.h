@@ -25,8 +25,6 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/util/mutex.h"
 
-#include <folly/Optional.h>
-
 namespace HPHP { namespace jit { namespace tc {
 
 /*
@@ -253,4 +251,3 @@ void recycleInit();
 void recycleStop();
 
 }}}
-

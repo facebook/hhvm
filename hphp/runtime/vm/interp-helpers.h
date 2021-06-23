@@ -67,20 +67,20 @@ struct CoeffectsSaver {
   explicit CoeffectsSaver(bool hasCoeffects) : m_coeffects(pop(hasCoeffects)) {}
   ~CoeffectsSaver() { push(m_coeffects); }
 
-  static folly::Optional<RuntimeCoeffects> pop(bool hasCoeffects) {
-    if (LIKELY(!hasCoeffects)) return folly::none;
+  static Optional<RuntimeCoeffects> pop(bool hasCoeffects) {
+    if (LIKELY(!hasCoeffects)) return std::nullopt;
     assertx(tvIsInt(vmStack().topC()));
     auto const coeffects = vmStack().topC()->m_data.num;
     vmStack().discard();
     return RuntimeCoeffects::fromValue(coeffects);
   }
-  static void push(folly::Optional<RuntimeCoeffects> coeffects) {
+  static void push(Optional<RuntimeCoeffects> coeffects) {
     if (LIKELY(!coeffects)) return;
     vmStack().pushInt(coeffects->value());
   }
 
 private:
-  folly::Optional<RuntimeCoeffects> m_coeffects;
+  Optional<RuntimeCoeffects> m_coeffects;
 };
 
 inline void callerInOutChecks(const Func* func, const FCallArgs& fca) {

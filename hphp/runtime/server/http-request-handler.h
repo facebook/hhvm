@@ -22,8 +22,6 @@
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/source-root-info.h"
 
-#include <folly/Optional.h>
-
 namespace HPHP {
 
 struct SourceRootInfo;
@@ -60,7 +58,7 @@ public:
 private:
   bool m_pathTranslation;
   ServiceData::ExportedTimeSeries* m_requestTimedOutOnQueue;
-  folly::Optional<SourceRootInfo> m_sourceRootInfo;
+  Optional<SourceRootInfo> m_sourceRootInfo;
 
   bool handleFileRequest(Transport *transport, const String& translated,
                          const std::string& path, const char* ext);
@@ -82,4 +80,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

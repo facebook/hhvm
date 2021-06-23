@@ -254,7 +254,7 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
     !hasConstraint() || isTypeVar() || isTypeConstant(),
     isMixed()));
 
-  if (!isPrecise()) return folly::none;
+  if (!isPrecise()) return std::nullopt;
 
   auto t = underlyingDataType();
   assertx(t);
@@ -279,7 +279,7 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
       if (metatype == MetaType::Precise) {
         t = getAnnotDataType(td->type);
       } else {
-        t = folly::none;
+        t = std::nullopt;
       }
     } else {
       c = td->klass;
@@ -1137,7 +1137,7 @@ void TypeConstraint::verifyFail(const Func* func, tv_lval c,
 
   if (isClsMethType(c.type()) && convertClsMethToArrLike()) {
     if (RuntimeOption::EvalVecHintNotices) {
-      auto const i = id == ReturnId ? folly::none : folly::make_optional(id);
+      auto const i = id == ReturnId ? std::nullopt : make_optional(id);
       raise_clsmeth_compat_type_hint(func, name, i);
     }
     castClsMeth(c, make_varray<String,String>);

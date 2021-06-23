@@ -294,7 +294,7 @@ struct PropagatedStates {
 
   // The value pushed by current instruction (IE, the top of the stack
   // before next()).
-  const folly::Optional<Type>& lastPush() const { return m_lastPush; }
+  const Optional<Type>& lastPush() const { return m_lastPush; }
 
   // Interp flags for the current instruction.
   bool wasPEI() const { return currentMark().wasPEI; }
@@ -310,7 +310,7 @@ private:
     return *mark;
   }
 
-  folly::Optional<Type> m_lastPush;
+  Optional<Type> m_lastPush;
   CompactVector<Type> m_stack;
   CompactVector<Type> m_locals;
   CompactVector<std::pair<LocalId, Type>> m_afterLocals;

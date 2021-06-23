@@ -507,7 +507,7 @@ protected:
 
   ThreadType m_threadType{ThreadType::RequestThread};
 
-  folly::Optional<rqtrace::Trace> m_requestTrace;
+  Optional<rqtrace::Trace> m_requestTrace;
 
   // helpers
   void parseGetParams();

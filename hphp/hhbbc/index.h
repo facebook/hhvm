@@ -25,7 +25,6 @@
 #include <tbb/concurrent_hash_map.h>
 
 #include <folly/synchronization/Baton.h>
-#include <folly/Optional.h>
 #include <folly/Hash.h>
 
 #include "hphp/util/compact-vector.h"
@@ -344,15 +343,15 @@ struct Class {
 
   /*
    * Returns the Class that is the first common ancestor between 'this' and 'o'.
-   * If there is no common ancestor folly::none is returned
+   * If there is no common ancestor std::nullopt is returned
    */
-  folly::Optional<Class> commonAncestor(const Class& o) const;
+  Optional<Class> commonAncestor(const Class& o) const;
 
   /*
    * Returns the res::Class for this Class's parent if there is one,
    * or nullptr.
    */
-  folly::Optional<Class> parent() const;
+  Optional<Class> parent() const;
 
   /*
    * Returns true if we have a ClassInfo for this Class.
@@ -430,14 +429,14 @@ struct Record {
    * Returns the res::Record for this Record's parent if there is one,
    * or nullptr.
    */
-  folly::Optional<Record> parent() const;
+  Optional<Record> parent() const;
 
   /*
    * Returns the Record that is the first common ancestor between
    * 'this' and 'o'.
-   * If there is no common ancestor folly::none is returned
+   * If there is no common ancestor std::nullopt is returned
    */
-  folly::Optional<Record> commonAncestor(const Record&) const;
+  Optional<Record> commonAncestor(const Record&) const;
 
   /*
    * Returns true if we have a RecordInfo for this Record.
@@ -635,10 +634,10 @@ struct Index {
    * program point you care about (it could be non-hoistable, even
    * though it's unique, for example).
    *
-   * Returns folly::none if we can't prove the supplied name must be a
+   * Returns std::nullopt if we can't prove the supplied name must be a
    * record type.  (E.g. if there are type aliases.)
    */
-  folly::Optional<res::Record> resolve_record(SString name) const;
+  Optional<res::Record> resolve_record(SString name) const;
 
   /*
    * Find all the closures created inside the context of a given
@@ -674,16 +673,16 @@ struct Index {
    * program point you care about (it could be non-hoistable, even
    * though it's unique, for example).
    *
-   * Returns folly::none if we can't prove the supplied name must be a
+   * Returns std::nullopt if we can't prove the supplied name must be a
    * object type.  (E.g. if there are type aliases.)
    */
-  folly::Optional<res::Class> resolve_class(Context, SString name) const;
+  Optional<res::Class> resolve_class(Context, SString name) const;
 
   /*
    * Try to resolve self/parent types for the given context
    */
-  folly::Optional<res::Class> selfCls(const Context& ctx) const;
-  folly::Optional<res::Class> parentCls(const Context& ctx) const;
+  Optional<res::Class> selfCls(const Context& ctx) const;
+  Optional<res::Class> parentCls(const Context& ctx) const;
 
   template <typename T>
   struct ResolvedInfo {
@@ -734,10 +733,10 @@ struct Index {
   /*
    * Try to resolve a class constructor for the supplied class type.
    *
-   * Returns: folly::none if it can't at least figure out a func
+   * Returns: std::nullopt if it can't at least figure out a func
    * family for the call.
    */
-  folly::Optional<res::Func>
+  Optional<res::Func>
   resolve_ctor(Context, res::Class rcls, bool exact) const;
 
   /*
@@ -878,7 +877,7 @@ struct Index {
   /*
    * Returns the number of inout parameters expected by func (if known).
    */
-  folly::Optional<uint32_t> lookup_num_inout_params(Context, res::Func) const;
+  Optional<uint32_t> lookup_num_inout_params(Context, res::Func) const;
 
   /*
    * Returns the control-flow insensitive inferred private instance
@@ -1155,7 +1154,7 @@ struct Index {
   /*
    * Return true if the resolved function supports async eager return.
    */
-  folly::Optional<bool> supports_async_eager_return(res::Func rfunc) const;
+  Optional<bool> supports_async_eager_return(res::Func rfunc) const;
 
   /*
    * Return true if the function is effect free.
@@ -1214,7 +1213,7 @@ private:
   resolve_type_name_internal(SString name) const;
 
   template<typename T>
-  folly::Optional<T> resolve_type_impl(SString name) const;
+  Optional<T> resolve_type_impl(SString name) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;

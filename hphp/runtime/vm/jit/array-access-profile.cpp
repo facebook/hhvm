@@ -26,8 +26,6 @@
 
 #include "hphp/util/safe-cast.h"
 
-#include <folly/Optional.h>
-
 #include <algorithm>
 #include <cstring>
 #include <sstream>

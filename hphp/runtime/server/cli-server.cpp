@@ -1311,7 +1311,7 @@ int mkdir_recursive(const char* path, int mode) {
   return 0;
 }
 
-folly::Optional<int> cli_process_command_loop(int fd) {
+Optional<int> cli_process_command_loop(int fd) {
   FTRACE(1, "cli_process_command_loop({}): starting...\n", fd);
   std::string cmd;
   cli_read(fd, cmd);
@@ -1319,13 +1319,13 @@ folly::Optional<int> cli_process_command_loop(int fd) {
   if (cmd == "version_bad") {
     // Returning will cause us to re-run the script locally when not in force
     // server mode.
-    return folly::none;
+    return std::nullopt;
   }
 
   if (cmd != "version_ok") {
     // Server is too old / didn't send a version. Only version 0 is compatible
     // with an unversioned server.
-    return folly::none;
+    return std::nullopt;
   } else {
     cli_read(fd, cmd);
   }
@@ -1588,12 +1588,12 @@ folly::Optional<int> cli_process_command_loop(int fd) {
   }
 }
 
-folly::Optional<int> run_client(const char* sock_path,
+Optional<int> run_client(const char* sock_path,
                                 const std::vector<std::string>& args) {
   if (RuntimeOption::RepoAuthoritative) {
     Logger::Warning("Unable to use CLI server to run script in "
                     "repo-auth mode.");
-    return folly::none;
+    return std::nullopt;
   }
   FTRACE(1, "run_command_on_cli_server({}, ...): sending command...\n",
          sock_path);
@@ -1608,7 +1608,7 @@ folly::Optional<int> run_client(const char* sock_path,
   if (delegate < 0) {
     Logger::Warning("Could not create delegate for CLI server: %s",
                     folly::errnoStr(errno).c_str());
-    return folly::none;
+    return std::nullopt;
   }
   FTRACE(2, "run_command_on_cli_server(): delegate = {}\n", delegate);
 
@@ -1617,7 +1617,7 @@ folly::Optional<int> run_client(const char* sock_path,
   if (fd < 0) {
     Logger::Info("Could not attach to CLI server: %s",
                  folly::errnoStr(errno).c_str());
-    return folly::none;
+    return std::nullopt;
   }
 
   FTRACE(2, "run_command_on_cli_server(): fd = {}\n", fd);

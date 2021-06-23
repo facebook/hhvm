@@ -764,8 +764,8 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
 
   /*
    * Builtin functions get some extra information.  The returnType flag is only
-   * non-folly::none for these, but note that something may be a builtin and
-   * still have a folly::none return type.
+   * non-std::nullopt for these, but note that something may be a builtin and
+   * still have a std::nullopt return type.
    */
   if (fe.isNative) {
     auto const f = [&] () -> HPHP::Func* {

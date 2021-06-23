@@ -25,7 +25,6 @@
 #include "hphp/util/rds-local.h"
 
 #include <folly/Format.h>
-#include <folly/Optional.h>
 
 namespace HPHP { namespace arrprov {
 

@@ -239,7 +239,7 @@ void callFunc(const Func* const func,
   auto const SIMD_count = regs.SIMD_count;
 
   if (!retType) {
-    // A folly::none return signifies Variant.
+    // A std::nullopt return signifies Variant.
     if (func->isReturnByValue()) {
       ret = callFuncTVImpl(f, GP_args, GP_count, SIMD_args, SIMD_count);
     } else {
@@ -541,7 +541,7 @@ MaybeDataType builtinOutType(
   return dt ? dt : tcDT;
 }
 
-static folly::Optional<TypedValue> builtinInValue(
+static Optional<TypedValue> builtinInValue(
   const Func::ParamInfo& pinfo
 ) {
   auto& map = pinfo.userAttributes;
@@ -580,7 +580,7 @@ static folly::Optional<TypedValue> builtinInValue(
   not_reached();
 }
 
-folly::Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i) {
+Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i) {
   return builtinInValue(builtin->params()[i]);
 }
 

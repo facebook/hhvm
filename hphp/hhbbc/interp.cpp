@@ -20,7 +20,6 @@
 #include <string>
 #include <iterator>
 
-#include <folly/Optional.h>
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
 
@@ -962,13 +961,13 @@ void in(ISS& env, const bc::AddElemC&) {
   // Unspecialize modifies the stack location
   if (env.undo) env.undo->onStackWrite(env.state.stack.size() - 3, inTy);
 
-  auto outTy = [&] (const Type& key) -> folly::Optional<Type> {
-    if (!key.subtypeOf(BArrKey)) return folly::none;
+  auto outTy = [&] (const Type& key) -> Optional<Type> {
+    if (!key.subtypeOf(BArrKey)) return std::nullopt;
     if (inTy.subtypeOf(BDict)) {
       auto const r = array_like_set(std::move(inTy), key, v);
       if (!r.second) return r.first;
     }
-    return folly::none;
+    return std::nullopt;
   }(k);
 
   if (outTy && !promoteMayThrow && will_reduce(env)) {
@@ -1017,12 +1016,12 @@ void in(ISS& env, const bc::AddNewElemC&) {
   // Unspecialize modifies the stack location
   if (env.undo) env.undo->onStackWrite(env.state.stack.size() - 2, inTy);
 
-  auto outTy = [&] () -> folly::Optional<Type> {
+  auto outTy = [&] () -> Optional<Type> {
     if (inTy.subtypeOf(BVec | BKeyset)) {
       auto const r = array_like_newelem(std::move(inTy), v);
       if (!r.second) return r.first;
     }
-    return folly::none;
+    return std::nullopt;
   }();
 
   if (outTy && will_reduce(env)) {
@@ -2513,7 +2512,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   // memo key is a parameter, then we can possibly using the type constraint to
   // infer a more efficient memo key mode.
   using MK = MemoKeyConstraint;
-  folly::Optional<res::Class> resolvedCls;
+  Optional<res::Class> resolvedCls;
   auto const mkc = [&] {
     if (op.nloc1.id >= env.ctx.func->params.size()) return MK::None;
     auto tc = env.ctx.func->params[op.nloc1.id].typeConstraint;
@@ -2910,8 +2909,8 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
   };
 
   auto check = [&] (
-    const folly::Optional<Type> type,
-    const folly::Optional<Type> deopt = folly::none
+    const Optional<Type> type,
+    const Optional<Type> deopt = std::nullopt
   ) {
     if (!type || is_type_might_raise(*type, t)) return result(TBool);
     auto test = type.value();
@@ -2932,7 +2931,7 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
 
   auto const ts_type = type_of_type_structure(env.index, env.ctx, ts);
 
-  if (is_nullable_ts && !is_definitely_not_null && ts_type == folly::none) {
+  if (is_nullable_ts && !is_definitely_not_null && ts_type == std::nullopt) {
     // Ts is nullable and we know that t could be null but we dont know for sure
     // Also we didn't get a type out of the type structure
     return result(TBool);
@@ -3232,12 +3231,12 @@ namespace {
 
 /*
  * If the value on the top of the stack is known to be equivalent to the local
- * its being moved/copied to, return folly::none without modifying any
+ * its being moved/copied to, return std::nullopt without modifying any
  * state. Otherwise, pop the stack value, perform the set, and return a pair
  * giving the value's type, and any other local its known to be equivalent to.
  */
 template <typename Set>
-folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
+Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
                                                         const Set& op) {
   if (auto const prev = last_op(env, 1)) {
     if (prev->op == Op::CGetL2 &&
@@ -3245,7 +3244,7 @@ folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
         last_op(env)->op == Op::Concat) {
       rewind(env, 2);
       reduce(env, bc::SetOpL { op.loc1, SetOpOp::ConcatEqual });
-      return folly::none;
+      return std::nullopt;
     }
   }
 
@@ -3255,7 +3254,7 @@ folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
   if (equivLoc == StackThisId && env.state.thisLoc != NoLocalId) {
     if (env.state.thisLoc == op.loc1 ||
                locsAreEquiv(env, env.state.thisLoc, op.loc1)) {
-      return folly::none;
+      return std::nullopt;
     } else {
       equivLoc = env.state.thisLoc;
     }
@@ -3267,7 +3266,7 @@ folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
         // We allow equivalency to ignore Uninit, so we need to check
         // the types here.
         if (peekLocRaw(env, op.loc1) == topC(env)) {
-          return folly::none;
+          return std::nullopt;
         }
       }
     } else if (equivLoc == NoLocalId) {
@@ -3532,7 +3531,7 @@ bool fcallOptimizeChecks(
   const FCallArgs& fca,
   const res::Func& func,
   FCallWithFCA fcallWithFCA,
-  folly::Optional<uint32_t> inOutNum
+  Optional<uint32_t> inOutNum
 ) {
   if (fca.enforceInOut()) {
     if (inOutNum == fca.numRets() - 1) {
@@ -3726,7 +3725,7 @@ void fcallKnownImpl(
   bool nullsafe,
   uint32_t numExtraInputs,
   FCallWithFCA fcallWithFCA,
-  folly::Optional<uint32_t> inOutNum
+  Optional<uint32_t> inOutNum
 ) {
   auto const numArgs = fca.numArgs();
   auto returnType = [&] {
@@ -3816,7 +3815,7 @@ void in(ISS& env, const bc::FCallFuncD& op) {
 
   auto const numInOut = op.fca.enforceInOut()
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
-    : folly::none;
+    : std::nullopt;
 
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
       fcallTryFold(env, op.fca, rfunc, TBottom, false, 0)) {
@@ -3879,7 +3878,7 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
 
   auto const numInOut = op.fca.enforceInOut()
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
-    : folly::none;
+    : std::nullopt;
 
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut)) return;
   fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 1, updateBC, numInOut);
@@ -3925,7 +3924,7 @@ Type ctxCls(ISS& env) {
 
 Type specialClsRefToCls(ISS& env, SpecialClsRef ref) {
   if (!env.ctx.cls) return TCls;
-  auto const op = [&]()-> folly::Optional<Type> {
+  auto const op = [&]()-> Optional<Type> {
     switch (ref) {
       case SpecialClsRef::Static: return ctxCls(env);
       case SpecialClsRef::Self:   return selfClsExact(env);
@@ -4104,7 +4103,7 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
 
   auto const numInOut = op.fca.enforceInOut()
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
-    : folly::none;
+    : std::nullopt;
 
   auto const canFold = !mayUseNullsafe && !mayThrowNonObj;
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
@@ -4199,7 +4198,7 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
 
   auto const numInOut = op.fca.enforceInOut()
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
-    : folly::none;
+    : std::nullopt;
 
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
       fcallTryFold(env, op.fca, rfunc, clsTy, dynamic, numExtraInputs)) {
@@ -4299,7 +4298,7 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
 
   auto const numInOut = op.fca.enforceInOut()
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
-    : folly::none;
+    : std::nullopt;
 
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
       fcallTryFold(env, op.fca, rfunc, ctxCls(env), dynamic,
@@ -4503,7 +4502,7 @@ void in(ISS& env, const bc::FCallCtor& op) {
 
   auto const numInOut = op.fca.enforceInOut()
     ? env.index.lookup_num_inout_params(env.ctx, *rfunc)
-    : folly::none;
+    : std::nullopt;
 
   auto const canFold = obj.subtypeOf(BObj);
   if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA, numInOut) ||
@@ -5902,7 +5901,7 @@ void default_dispatch(ISS& env, const Bytecode& op) {
   }
 }
 
-folly::Optional<Type> thisType(const Index& index, Context ctx) {
+Optional<Type> thisType(const Index& index, Context ctx) {
   return thisTypeFromContext(index, ctx);
 }
 

@@ -24,6 +24,8 @@
 
 #include "hphp/runtime/ext/facts/watchman.h"
 
+#include "hphp/util/optional.h"
+
 using namespace HPHP::Facts;
 
 int main(int argc, char** argv) {
@@ -35,7 +37,7 @@ int main(int argc, char** argv) {
   }
 
   std::string root = argv[1];
-  std::optional<std::string> sock;
+  HPHP::Optional<std::string> sock;
   if (argc > 2) {
     sock = {{argv[2]}};
   }

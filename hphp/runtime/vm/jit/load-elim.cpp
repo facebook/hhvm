@@ -19,7 +19,6 @@
 #include <algorithm>
 
 #include <boost/variant.hpp>
-#include <folly/Optional.h>
 #include <folly/ScopeGuard.h>
 #include <folly/Hash.h>
 
@@ -322,14 +321,14 @@ int64_t iter_type_immediate(const IterTypeData& data) {
 }
 
 TrackedLoc* find_tracked(State& state,
-                         folly::Optional<ALocMeta> meta) {
+                         Optional<ALocMeta> meta) {
   if (!meta) return nullptr;
   return state.avail[meta->index] ? &state.tracked[meta->index]
                                   : nullptr;
 }
 
 TrackedLoc* find_tracked(Local& env,
-                         folly::Optional<ALocMeta> meta) {
+                         Optional<ALocMeta> meta) {
   return find_tracked(env.state, meta);
 }
 
@@ -460,9 +459,9 @@ Flags handle_general_effects(Local& env,
     return FNone{};
   }
 
-  auto handleCheck = [&](Type typeParam) -> folly::Optional<Flags> {
+  auto handleCheck = [&](Type typeParam) -> Optional<Flags> {
     auto const meta = env.global.ainfo.find(canonicalize(m.loads));
-    if (!meta) return folly::none;
+    if (!meta) return std::nullopt;
 
     auto const tloc = &env.state.tracked[meta->index];
     if (!env.state.avail[meta->index]) {
@@ -486,7 +485,7 @@ Flags handle_general_effects(Local& env,
     if (tloc->knownValue != nullptr) {
       return Flags{FReducible{tloc->knownValue, tloc->knownType, meta->index}};
     }
-    return folly::none;
+    return std::nullopt;
   };
 
   switch (inst.op()) {
@@ -594,7 +593,7 @@ void handle_call_effects(Local& env,
 }
 
 Flags handle_assert(Local& env, const IRInstruction& inst) {
-  auto const acls = [&] () -> folly::Optional<AliasClass> {
+  auto const acls = [&] () -> Optional<AliasClass> {
     switch (inst.op()) {
     case AssertLoc:
       return AliasClass {
@@ -606,7 +605,7 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
       };
     default: break;
     }
-    return folly::none;
+    return std::nullopt;
   }();
   if (!acls) return FNone{};
 
@@ -990,7 +989,7 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
   DEBUG_ONLY Opcode oldOp = inst.op();
   DEBUG_ONLY Opcode newOp;
 
-  auto const reduce_to = [&] (Opcode op, folly::Optional<Type> typeParam) {
+  auto const reduce_to = [&] (Opcode op, Optional<Type> typeParam) {
     auto const taken = hasEdges(op) ? inst.taken() : nullptr;
     auto const newInst = env.unit.gen(
       op,
@@ -1017,7 +1016,7 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
     break;
 
   case CheckInitMem:
-    reduce_to(CheckInit, folly::none);
+    reduce_to(CheckInit, std::nullopt);
     break;
 
   case AssertLoc:

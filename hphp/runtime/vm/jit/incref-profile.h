@@ -18,7 +18,6 @@
 
 #include <folly/dynamic.h>
 #include <folly/Format.h>
-#include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/target-profile.h"
 
@@ -109,4 +108,3 @@ struct IncRefProfile {
 ///////////////////////////////////////////////////////////////////////////////
 
 } }
-

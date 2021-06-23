@@ -297,14 +297,14 @@ void doMemoSetValue(
   HandleT handle,
   Type memoTy,
   uint32_t valIndex,
-  folly::Optional<bool> asyncEager
+  Optional<bool> asyncEager
 ) {
   auto& v = vmain(env);
   auto const val = inst->src(valIndex);
   auto const valLoc = srcLoc(env, inst, valIndex);
 
-  auto const aux = [&] () -> folly::Optional<AuxUnion> {
-    if (!asyncEager) return folly::none;
+  auto const aux = [&] () -> Optional<AuxUnion> {
+    if (!asyncEager) return std::nullopt;
     return *asyncEager
       ? AuxUnion{std::numeric_limits<uint32_t>::max()}
       : AuxUnion{0};
@@ -446,8 +446,8 @@ void doMemoSetCache(
   auto const handleAddr = v.makeReg();
   v << lea{getHandleAddr(handle), handleAddr};
 
-  auto const aux = [&] () -> folly::Optional<AuxUnion> {
-    if (!extra->asyncEager) return folly::none;
+  auto const aux = [&] () -> Optional<AuxUnion> {
+    if (!extra->asyncEager) return std::nullopt;
     return *extra->asyncEager
       ? AuxUnion{std::numeric_limits<uint32_t>::max()}
       : AuxUnion{0};
@@ -618,8 +618,8 @@ void cgMemoSetInstanceValue(IRLS& env, const IRInstruction* inst) {
 
   // Store it (overwriting any previous value).
 
-  auto const aux = [&] () -> folly::Optional<AuxUnion> {
-    if (!extra->asyncEager) return folly::none;
+  auto const aux = [&] () -> Optional<AuxUnion> {
+    if (!extra->asyncEager) return std::nullopt;
     return *extra->asyncEager
       ? AuxUnion{std::numeric_limits<uint32_t>::max()}
       : AuxUnion{0};
@@ -787,8 +787,8 @@ void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
     obj[slotOff + TVOFF(m_type)]
   };
 
-  auto const aux = [&] () -> folly::Optional<AuxUnion> {
-    if (!extra->asyncEager) return folly::none;
+  auto const aux = [&] () -> Optional<AuxUnion> {
+    if (!extra->asyncEager) return std::nullopt;
     return *extra->asyncEager
       ? AuxUnion{std::numeric_limits<uint32_t>::max()}
       : AuxUnion{0};

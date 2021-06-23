@@ -155,7 +155,7 @@ folly::dynamic OfflineCode::getDisasm(TCA startAddr,
                                       const vector<TransBCMapping>& bcMap,
                                       const PerfEventsMap<TCA>& perfEvents,
                                       bool hostOpcodes,
-                                      folly::Optional<printir::Unit> unit) {
+                                      Optional<printir::Unit> unit) {
   auto const tcr = findTCRegionContaining(startAddr);
   auto mappingInfo = BCMappingInfo(tcr, bcMap);
 

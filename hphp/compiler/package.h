@@ -21,8 +21,6 @@
 #include <set>
 #include <vector>
 
-#include <folly/Optional.h>
-
 #include "hphp/util/file-cache.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/mutex.h"

@@ -18,8 +18,6 @@
 #include <limits>
 #include <string>
 
-#include <folly/Optional.h>
-
 #include "hphp/util/assertions.h"
 #include "hphp/util/compact-tagged-ptrs.h"
 

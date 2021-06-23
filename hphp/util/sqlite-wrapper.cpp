@@ -480,7 +480,7 @@ const std::string_view SQLiteQuery::getString(int iCol) {
   return {text, static_cast<size_t>(size)};
 }
 
-std::optional<const std::string_view> SQLiteQuery::getNullableString(
+Optional<const std::string_view> SQLiteQuery::getNullableString(
     int iCol) {
   assertx(m_stmt != nullptr);
   sqlite3_stmt* stmt = m_stmt->m_stmt;

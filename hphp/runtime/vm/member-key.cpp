@@ -54,13 +54,13 @@ const char* readOnlyString(ReadOnlyOp op) {
   return readOnlyNames[static_cast<uint8_t>(op)];
 }
 
-folly::Optional<MemberCode> parseMemberCode(const char* s) {
+Optional<MemberCode> parseMemberCode(const char* s) {
   for (auto i = 0; i < memberNamesCount; i++) {
     if (!strcmp(memberNames[i], s)) {
       return MemberCode(i);
     }
   }
-  return folly::none;
+  return std::nullopt;
 }
 
 std::string show(MemberKey mk) {

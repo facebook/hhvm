@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <optional>
 #include <vector>
 
 #include "hphp/runtime/base/array-init.h"
@@ -51,13 +50,13 @@ struct RepoAutoloadMap final : AutoloadMap {
       CaseSensitiveMap constants,
       CaseInsensitiveMap typeAliases);
 
-  virtual std::optional<String> getTypeFile(
+  virtual Optional<String> getTypeFile(
       const String& typeName) override;
-  virtual std::optional<String> getFunctionFile(
+  virtual Optional<String> getFunctionFile(
       const String& functionName) override;
-  virtual std::optional<String> getConstantFile(
+  virtual Optional<String> getConstantFile(
       const String& constantName) override;
-  virtual std::optional<String> getTypeAliasFile(
+  virtual Optional<String> getTypeAliasFile(
       const String& typeAliasName) override;
 
   virtual Array getFileTypes(const String& path) override;

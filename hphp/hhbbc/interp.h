@@ -19,8 +19,6 @@
 #include <vector>
 #include <bitset>
 
-#include <folly/Optional.h>
-
 #include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/index.h"
@@ -60,7 +58,7 @@ struct RunFlags {
    * If this is not none, the interpreter executed a return in this
    * block, with this type.
    */
-  folly::Optional<Type> returned;
+  Optional<Type> returned;
 
   /*
    * If returned is set, and the returned value was a parameter,
@@ -147,7 +145,7 @@ struct StepFlags {
    * If this is not none, the interpreter executed a return on this
    * step, with this type.
    */
-  folly::Optional<Type> returned;
+  Optional<Type> returned;
 
   /*
    * If returned is set, and the returned value was a parameter,
@@ -212,11 +210,11 @@ bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca);
 
 bool handle_function_exists(ISS& env, const Type& name);
 
-folly::Optional<Type>
+Optional<Type>
 const_fold(ISS& env, uint32_t nArgs, uint32_t numExtraInputs,
            const php::Func& phpFunc, bool variadicsPacked);
 
-folly::Optional<Type> thisType(const Index& index, Context ctx);
+Optional<Type> thisType(const Index& index, Context ctx);
 
 /*
  * Extracts name from the type either by using a reified name specialization or

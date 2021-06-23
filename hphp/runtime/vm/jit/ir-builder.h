@@ -29,7 +29,6 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-#include <folly/Optional.h>
 #include <folly/ScopeGuard.h>
 
 #include <functional>
@@ -333,7 +332,7 @@ private:
                       GuardConstraint gc, Type srcType);
   bool constrainAssert(const IRInstruction* inst,
                        GuardConstraint gc, Type srcType,
-                       folly::Optional<Type> knownType = folly::none);
+                       Optional<Type> knownType = std::nullopt);
   bool constrainTypeSrc(TypeSource typeSrc, GuardConstraint gc);
   bool shouldConstrainGuards() const;
 

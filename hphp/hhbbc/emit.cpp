@@ -24,7 +24,6 @@
 
 #include <folly/gen/Base.h>
 #include <folly/Conv.h>
-#include <folly/Optional.h>
 #include <folly/Memory.h>
 
 #include "hphp/hhbbc/cfg.h"
@@ -205,7 +204,7 @@ struct EmitBcInfo {
     // depth at the jump site here.  This is needed to track
     // currentStackDepth correctly (and we also assert all the jumps
     // have the same depth).
-    folly::Optional<uint32_t> expectedStackDepth;
+    Optional<uint32_t> expectedStackDepth;
   };
 
   std::vector<BlockId> blockOrder;

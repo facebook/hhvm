@@ -38,7 +38,6 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <folly/Format.h>
-#include <folly/Optional.h>
 
 #include <algorithm>
 #include <random>
@@ -339,9 +338,9 @@ public:
   jit::vector<Vlabel> blocks;
   // [start,end) position of each block.
   jit::vector<LiveRange> block_ranges;
-  // Per-block sp[offset] to spill-slots.  folly::none in cases where we
+  // Per-block sp[offset] to spill-slots.  std::nullopt in cases where we
   // have still not reached the recordbasenativesp instruction.
-  jit::vector<folly::Optional<int>> spill_offsets;
+  jit::vector<Optional<int>> spill_offsets;
   // Per-block live-in sets.
   jit::vector<LiveSet> livein;
 };
@@ -673,14 +672,14 @@ int spEffect(const Vunit& unit, const Vinstr& inst, PhysReg sp,
 /*
  * Compute the offset from `sp' to the spill area at each block start.
  */
-jit::vector<folly::Optional<int>> analyzeSP(const Vunit& unit,
+jit::vector<Optional<int>> analyzeSP(const Vunit& unit,
                                             const jit::vector<Vlabel>& blocks,
                                             PhysReg sp) {
   auto visited = boost::dynamic_bitset<>(unit.blocks.size());
-  auto spill_offsets = jit::vector<folly::Optional<int>>(unit.blocks.size());
+  auto spill_offsets = jit::vector<Optional<int>>(unit.blocks.size());
 
   for (auto const b : blocks) {
-    auto offset = visited.test(b) ? spill_offsets[b] : folly::none;
+    auto offset = visited.test(b) ? spill_offsets[b] : std::nullopt;
 
     for (unsigned j = 0; j < unit.blocks[b].code.size(); j++) {
       auto const& inst = unit.blocks[b].code[j];
@@ -693,7 +692,7 @@ jit::vector<folly::Optional<int>> analyzeSP(const Vunit& unit,
                     "already uninitialized.", size_t(b), j);
         assert_flog(*offset == 0, "Block B{} Instr {} uninitiailizes native SP, "
                     "but SPOffset is nonzero.", size_t(b), j);
-        offset = folly::none;
+        offset = std::nullopt;
       } else if (offset) {
         *offset -= spEffect(unit, inst, sp);
       }
@@ -1253,7 +1252,7 @@ PhysReg tryCoalesce(const jit::vector<Variable*>& variables,
  * targets (if F is a phijmp).  The second hint accounts for F's entire
  * equivalence class---see analyzePhiHints() for more details.
  */
-folly::Optional<std::pair<PhysReg,PhysReg>>
+Optional<std::pair<PhysReg,PhysReg>>
 tryPhiHint(const jit::vector<Variable*>& variables,
            const Interval* ivl, const HintInfo& hint_info,
            const PosVec& free_until) {
@@ -1288,7 +1287,7 @@ tryPhiHint(const jit::vector<Variable*>& variables,
     }
     return std::make_pair(preferred, group_hint);
   }
-  return folly::none;
+  return std::nullopt;
 }
 
 /*
@@ -2303,7 +2302,7 @@ void renameOperands(Vunit& unit, const VxlsContext& ctx,
  * Updates `j' to refer to the same instruction after the code insertions.
  */
 void insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
-                    const CopyPlan& spills, folly::Optional<MemoryRef> slots,
+                    const CopyPlan& spills, Optional<MemoryRef> slots,
                     unsigned pos) {
   jit::vector<Vinstr> stores;
 
@@ -2363,7 +2362,7 @@ void insertCopiesAt(const VxlsContext& ctx,
  * Updates `j' to refer to the same instruction after the code insertions.
  */
 void insertLoadsAt(jit::vector<Vinstr>& code, unsigned& j,
-                   const CopyPlan& plan, folly::Optional<MemoryRef> slots,
+                   const CopyPlan& plan, Optional<MemoryRef> slots,
                    unsigned pos) {
   jit::vector<Vinstr> loads;
 
@@ -2406,8 +2405,8 @@ void insertLoadsAt(jit::vector<Vinstr>& code, unsigned& j,
 void insertCopies(Vunit& unit, const VxlsContext& ctx,
                   const jit::vector<Variable*>& /*variables*/,
                   const ResolutionPlan& resolution) {
-  auto const getSlots = [&] (folly::Optional<int> offset) {
-      folly::Optional<MemoryRef> slots;
+  auto const getSlots = [&] (Optional<int> offset) {
+      Optional<MemoryRef> slots;
       if (offset) slots = ctx.sp[*offset];
       return slots;
   };
@@ -2450,7 +2449,7 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
                     "already uninitialized.", size_t(b), j);
         assert_flog(*offset == 0, "Block B{} Instr {} uninitiailizes native "
                     "SP, but SP offset is non zero.", size_t(b), j);
-        offset = folly::none;
+        offset = std::nullopt;
       } else if (offset) {
         *offset -= spEffect(unit, code[j], ctx.sp);
       }

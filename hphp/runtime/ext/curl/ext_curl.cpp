@@ -40,7 +40,6 @@
 #include "hphp/util/lock.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
-#include <folly/Optional.h>
 #include <folly/portability/OpenSSL.h>
 #include <curl/curl.h>
 #include <curl/easy.h>

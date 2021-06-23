@@ -21,8 +21,6 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-map.h"
 
-#include <folly/Optional.h>
-
 #include <memory>
 
 namespace HPHP {
@@ -88,4 +86,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

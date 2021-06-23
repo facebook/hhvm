@@ -18,8 +18,6 @@
 
 #include "hphp/runtime/vm/class.h"
 
-#include <folly/Optional.h>
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 namespace jit {
@@ -189,7 +187,7 @@ struct CoeffectRule final {
   bool isGeneratorThis() const;
   bool isCaller() const;
 
-  folly::Optional<std::string> toString(const Func*) const;
+  Optional<std::string> toString(const Func*) const;
   std::string getDirectiveString() const;
 
   template<class SerDe>

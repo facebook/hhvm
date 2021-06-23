@@ -114,7 +114,7 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
                                 O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
 
   static int sig = sigin;
-  static folly::Optional<StackTraceNoHeap> st;
+  static Optional<StackTraceNoHeap> st;
   static void* sig_addr = info ? info->si_addr : nullptr;
 #if defined(__x86_64__) && defined(__linux__)
   static uintptr_t sig_rip = ((ucontext_t*) args)->uc_mcontext.gregs[REG_RIP];

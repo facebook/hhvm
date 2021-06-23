@@ -45,7 +45,7 @@ struct AddrToBcMapper : Mapper<TCA, ExtOpcode> {
   explicit AddrToBcMapper(const OfflineTransData* _transData) :
     transData(_transData) {}
 
-  folly::Optional<ExtOpcode> operator()(const TCA& addr) override;
+  Optional<ExtOpcode> operator()(const TCA& addr) override;
 
  private:
   const OfflineTransData* transData;
@@ -56,11 +56,11 @@ struct AddrToBcMapper : Mapper<TCA, ExtOpcode> {
 struct AddrToTransMapper : Mapper<TCA, TransID> {
   explicit AddrToTransMapper(const OfflineTransData* _tdata) : tdata(_tdata) {}
 
-  folly::Optional<TransID> operator()(const TCA& addr) override {
+  Optional<TransID> operator()(const TCA& addr) override {
     always_assert(tdata);
     TransID tid = tdata->getTransContaining(addr);
     if (tid != INVALID_ID) return tid;
-    return folly::none;
+    return std::nullopt;
   }
 
 private:
@@ -89,7 +89,7 @@ struct AddrToTransFragmentMapper : Mapper<TCA, TransFragment> {
                             ExtOpcode _filterBy) :
     tdata(_tdata), filterBy(_filterBy) {}
 
-  folly::Optional<TransFragment> operator()(const TCA& addr) override;
+  Optional<TransFragment> operator()(const TCA& addr) override;
 
  private:
   TransFragment extractTransFragment(TCA addr, ExtOpcode opcode);
@@ -104,7 +104,7 @@ private:
 struct TransToFuncMapper : Mapper<TransID, FuncId> {
   explicit TransToFuncMapper(const OfflineTransData* _tdata) : tdata(_tdata) {}
 
-  folly::Optional<FuncId> operator()(const TransID& tid) override {
+  Optional<FuncId> operator()(const TransID& tid) override {
     always_assert(tdata);
     return tdata->getTransRec(tid)->src.funcID();
   }

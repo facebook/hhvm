@@ -24,7 +24,6 @@
 #include <signal.h>
 
 #include <boost/filesystem.hpp>
-#include <folly/Optional.h>
 #include <folly/Random.h>
 #include <folly/portability/SysTime.h>
 
@@ -535,7 +534,7 @@ std::string RequestInjectionData::getDefaultIncludePath() {
 }
 
 void RequestInjectionData::onSessionInit() {
-  static auto open_basedir_val = []() -> folly::Optional<std::string> {
+  static auto open_basedir_val = []() -> Optional<std::string> {
     Variant v;
     if (IniSetting::GetSystem("open_basedir", v)) {
       return { v.toString().toCppString() };

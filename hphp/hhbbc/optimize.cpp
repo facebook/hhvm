@@ -24,7 +24,6 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include <folly/Optional.h>
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
 
@@ -84,17 +83,17 @@ bool ignoresStackInput(Op op) {
 }
 
 template<class TyBC, class ArgType>
-folly::Optional<Bytecode> makeAssert(ArrayTypeTable::Builder& arrTable,
+Optional<Bytecode> makeAssert(ArrayTypeTable::Builder& arrTable,
                                      ArgType arg,
                                      Type t) {
-  if (t.subtypeOf(BBottom)) return folly::none;
+  if (t.subtypeOf(BBottom)) return std::nullopt;
   auto const rat = make_repo_type(arrTable, t);
   using T = RepoAuthType::Tag;
   if (options.FilterAssertions) {
     // Cell and InitCell don't add any useful information, so leave them
     // out entirely.
-    if (rat == RepoAuthType{T::Cell})     return folly::none;
-    if (rat == RepoAuthType{T::InitCell}) return folly::none;
+    if (rat == RepoAuthType{T::Cell})     return std::nullopt;
+    if (rat == RepoAuthType{T::InitCell}) return std::nullopt;
   }
   return Bytecode { TyBC { arg, rat } };
 }
@@ -658,11 +657,11 @@ void fixTypeConstraint(const Index& index, TypeConstraint& tc) {
   auto const resolved = index.resolve_type_name(tc.typeName());
 
   if (resolved.type == AnnotType::Object) {
-    auto const resolvedValue = match<folly::Optional<res::Class>>(
+    auto const resolvedValue = match<Optional<res::Class>>(
       resolved.value,
-      [&] (boost::blank) { return folly::none; },
-      [&] (const res::Class& c) { return folly::make_optional(c); },
-      [&] (const res::Record&) { always_assert(false); return folly::none; }
+      [&] (boost::blank) { return std::nullopt; },
+      [&] (const res::Class& c) { return make_optional(c); },
+      [&] (const res::Record&) { always_assert(false); return std::nullopt; }
     );
     if (!resolvedValue || !resolvedValue->resolved()) return;
     // Can't resolve if it resolves to a magic interface. If we mark it as
@@ -683,8 +682,8 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
   FTRACE(2, "{:-^70} {}\n", "Optimize Func", func->name);
 
   bool again;
-  folly::Optional<CollectedInfo> collect;
-  folly::Optional<VisitContext> visit;
+  Optional<CollectedInfo> collect;
+  Optional<VisitContext> visit;
   collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, &ainfo);
   visit.emplace(index, ainfo, *collect, func);
 

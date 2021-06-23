@@ -16,22 +16,22 @@
 #pragma once
 
 #include "hphp/runtime/base/req-malloc.h"
+
+#include "hphp/util/optional.h"
 #include "hphp/util/type-scan.h"
-#include <folly/Optional.h>
 
 namespace HPHP { namespace req {
 
 /*
- * Like folly::Optional, but exactly scans T
+ * Like Optional, but exactly scans T
  */
 template<typename T>
-struct Optional: folly::Optional<T> {
-  using Base = folly::Optional<T>;
+struct Optional: HPHP::Optional<T> {
+  using Base = HPHP::Optional<T>;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
-    if (this->hasValue()) scanner.scan(*this->get_pointer());
+    if (this->has_value()) scanner.scan(*this->get_pointer());
   }
 };
 
 }}
-

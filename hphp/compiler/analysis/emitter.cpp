@@ -340,9 +340,9 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
         genText(ues_to_print, outputPath);
       };
 
-      folly::Optional<RepoAutoloadMapBuilder> autoloadMapBuilder;
-      folly::Optional<RepoFileBuilder> repoBuilder;
-      folly::Optional<SymbolSets> symbolSets;
+      Optional<RepoAutoloadMapBuilder> autoloadMapBuilder;
+      Optional<RepoFileBuilder> repoBuilder;
+      Optional<SymbolSets> symbolSets;
       if (Option::GenerateBinaryHHBC) {
         autoloadMapBuilder.emplace();
         repoBuilder.emplace(RuntimeOption::RepoPath);
@@ -413,7 +413,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
         }
       );
 
-      folly::Optional<Timer> commitTime;
+      Optional<Timer> commitTime;
       while (auto encoded = ueq.pop()) {
         if (!commitTime) {
           commitTime.emplace(Timer::WallTime, "committing units to repo");

@@ -89,8 +89,8 @@ THREAD_LOCAL(std::string, tl_extractPath);
 std::mutex s_extractLock;
 std::string s_extractPath;
 
-folly::Optional<std::string> hackcExtractPath() {
-  if (!RuntimeOption::EvalHackCompilerUseEmbedded) return folly::none;
+Optional<std::string> hackcExtractPath() {
+  if (!RuntimeOption::EvalHackCompilerUseEmbedded) return std::nullopt;
 
   auto check = [] (const std::string& s) {
     if (s.empty()) return false;
@@ -122,7 +122,7 @@ folly::Optional<std::string> hackcExtractPath() {
   embedded_data desc;
   if (!get_embedded_data("hackc_binary", &desc)) {
     Logger::Error("Embedded hackc binary is missing");
-    return folly::none;
+    return std::nullopt;
   }
   auto const binary = [&]() -> std::string {
     auto const cbinary = read_embedded_data(desc);
@@ -161,19 +161,19 @@ folly::Optional<std::string> hackcExtractPath() {
     Logger::FError(
       "Unable to create temp file for hackc binary: {}", folly::errnoStr(errno)
     );
-    return folly::none;
+    return std::nullopt;
   }
 
   if (folly::writeFull(fd, binary.data(), binary.size()) == -1) {
     Logger::FError(
       "Failed to write extern hackc binary: {}", folly::errnoStr(errno)
     );
-    return folly::none;
+    return std::nullopt;
   }
 
   if (chmod(fallback.data(), 0755) != 0) {
     Logger::Error("Unable to mark hackc binary as writable");
-    return folly::none;
+    return std::nullopt;
   }
 
   return set(fallback);
@@ -934,7 +934,7 @@ private:
 
   std::atomic<bool> m_started{false};
   std::mutex m_compilers_start_lock;
-  folly::Optional<std::string> m_username;
+  Optional<std::string> m_username;
 } s_manager;
 
 struct UseLightDelegate final {

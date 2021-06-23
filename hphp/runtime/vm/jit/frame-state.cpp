@@ -35,7 +35,6 @@
 #include "hphp/util/trace.h"
 
 #include <boost/range/adaptor/reversed.hpp>
-#include <folly/Optional.h>
 
 #include <algorithm>
 
@@ -574,12 +573,12 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
   auto const base = pointee(baseTmp);
   auto const mbase = cur().mbr.pointee;
 
-  auto const effect_on = [&] (Type ty) -> folly::Optional<Type> {
+  auto const effect_on = [&] (Type ty) -> Optional<Type> {
     auto const effects = MInstrEffects(inst->op(), ty);
     if (effects.baseTypeChanged || effects.baseValChanged) {
       return effects.baseType;
     }
-    return folly::none;
+    return std::nullopt;
   };
 
   // If we don't know exactly where the base is, we have to be conservative and
@@ -612,14 +611,14 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
     // When the member base register refers to a single known memory location
     // `l' (with corresponding Ptr type `kind'), we apply the effect of `inst'
     // only to `l'.  Returns the base value type if `inst' had an effect.
-    auto const apply_one = [&] (Location l, Ptr kind) -> folly::Optional<Type> {
+    auto const apply_one = [&] (Location l, Ptr kind) -> Optional<Type> {
       auto const oldTy = typeOf(l) & TCell;  // exclude TCls from ptr()
       if (auto const ptrTy = effect_on(oldTy.lval(kind))) {
         auto const baseTy = ptrTy->derefIfPtr();
         setType(l, baseTy);
         return baseTy;
       }
-      return folly::none;
+      return std::nullopt;
     };
 
     if (auto const blocal = base.local()) {
@@ -1237,7 +1236,7 @@ template<LTag tag>
 void FrameStateMgr::setValueImpl(Location l,
                                  LocationState<tag>& state,
                                  SSATmp* value,
-                                 folly::Optional<Type> predicted) {
+                                 Optional<Type> predicted) {
   FTRACE(2, "{} := {}\n", jit::show(l), value ? value->toString() : "<>");
   state.value = value;
   state.type = value ? value->type() : LocationState<tag>::default_type();
@@ -1446,7 +1445,7 @@ void FrameStateMgr::clearLocals() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void FrameStateMgr::setMemberBase(SSATmp* base) {
-  setValueImpl(Location::MBase{}, cur().mbase, base, folly::none);
+  setValueImpl(Location::MBase{}, cur().mbase, base, std::nullopt);
 }
 
 void FrameStateMgr::setMBR(SSATmp* mbr) {

@@ -42,7 +42,7 @@ struct InterceptRequestData final : RequestEventHandler {
 
   void clear() {
     m_global_handler.releaseForSweep();
-    m_intercept_handlers.clear();
+    m_intercept_handlers.reset();
   }
 
   void requestInit() override { clear(); }
@@ -58,7 +58,7 @@ struct InterceptRequestData final : RequestEventHandler {
             m_intercept_handlers->empty();
   }
   void clearHandlers() {
-    m_intercept_handlers.clear();
+    m_intercept_handlers.reset();
   }
 
 private:

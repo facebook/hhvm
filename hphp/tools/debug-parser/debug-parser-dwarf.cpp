@@ -114,7 +114,7 @@ struct Scope {
 
   void incUnnamedTypeCount() { ++m_scope.back().unnamed_count; }
 
-  folly::Optional<GlobalOff> typeOffset() const {
+  HPHP::Optional<GlobalOff> typeOffset() const {
     return m_scope.back().offset;
   }
 
@@ -164,7 +164,7 @@ private:
     ObjectTypeName name;
     bool in_namespace_scope;
     std::size_t unnamed_count = 0;
-    folly::Optional<GlobalOff> offset;
+    HPHP::Optional<GlobalOff> offset;
   };
   std::vector<Context> m_scope;
   GlobalOff m_cu_offset;
@@ -218,9 +218,9 @@ private:
                        Scope& scope,
                        std::vector<GlobalOff>* template_params = nullptr);
 
-  static folly::Optional<uintptr_t> interpretLocAddress(const DwarfState& dwarf,
+  static HPHP::Optional<uintptr_t> interpretLocAddress(const DwarfState& dwarf,
                                                         Dwarf_Attribute attr);
-  static folly::Optional<GlobalOff> parseSpecification(const DwarfState& dwarf,
+  static HPHP::Optional<GlobalOff> parseSpecification(const DwarfState& dwarf,
                                                        Dwarf_Die die,
                                                        bool first,
                                                        StaticSpec& spec);
@@ -236,7 +236,7 @@ private:
   Object::Function genFunction(Dwarf_Die die);
   Object::Base genBase(Dwarf_Die die, const ObjectTypeName& parent_name);
   Object::TemplateParam genTemplateParam(Dwarf_Die die);
-  folly::Optional<size_t> determineArrayBound(Dwarf_Die die);
+  HPHP::Optional<size_t> determineArrayBound(Dwarf_Die die);
 
   void fillFuncArgs(Dwarf_Die die, FuncType& func);
 
@@ -676,23 +676,23 @@ Object TypeParserImpl::getObject(ObjectTypeKey key) {
 // For static members, determine how that member's address can be
 // determined. In theory, this can be any arbitrary expression, but we only
 // support constant addresses right now.
-folly::Optional<uintptr_t>
+HPHP::Optional<uintptr_t>
 TypeParserImpl::interpretLocAddress(const DwarfState& dwarf,
                                     Dwarf_Attribute attr) {
   auto form = dwarf.getAttributeForm(attr);
-  if (form != DW_FORM_exprloc) return folly::none;
+  if (form != DW_FORM_exprloc) return std::nullopt;
   auto exprs = dwarf.getAttributeValueExprLoc(attr);
-  if (exprs.size() != 1) return folly::none;
-  if (exprs[0].lr_atom != DW_OP_addr) return folly::none;
-  return folly::Optional<uintptr_t>{exprs[0].lr_number};
+  if (exprs.size() != 1) return std::nullopt;
+  if (exprs[0].lr_atom != DW_OP_addr) return std::nullopt;
+  return HPHP::Optional<uintptr_t>{exprs[0].lr_number};
 }
 
-folly::Optional<GlobalOff>
+HPHP::Optional<GlobalOff>
 TypeParserImpl::parseSpecification(const DwarfState& dwarf,
                                    Dwarf_Die die,
                                    bool first,
                                    StaticSpec &spec) {
-  folly::Optional<GlobalOff> offset;
+  HPHP::Optional<GlobalOff> offset;
   bool is_inline = false;
   dwarf.forEachAttribute(
     die,
@@ -748,7 +748,7 @@ TypeParserImpl::parseSpecification(const DwarfState& dwarf,
                 (spec.linkage_name.empty() &&
                  spec.address == StaticSpec::kNoAddress &&
                  !spec.is_member))) {
-    return folly::none;
+    return std::nullopt;
   }
   return offset;
 }
@@ -789,14 +789,14 @@ void TypeParserImpl::genNames(Env& env,
       // If this is a type-unit definition with a separate declaration
       // in the same tu, declarationOffset will point to the
       // declaration.
-      folly::Optional<GlobalOff> declarationOffset;
+      HPHP::Optional<GlobalOff> declarationOffset;
 
       // If this is a declaration in a cu, referring back to a
       // tu-definition, definitionOffset will point to that
       // definition. Such declarations are emitted for the
       // *definitions* of static members (which always happen in cus,
       // not tus)
-      folly::Optional<GlobalOff> definitionOffset;
+      HPHP::Optional<GlobalOff> definitionOffset;
 
       // Determine the base name, whether this type was unnamed, and whether
       // this is an incomplete type or not from the DIE's attributes.
@@ -1190,9 +1190,9 @@ Object TypeParserImpl::genObject(Dwarf_Die die,
     }
   }();
 
-  folly::Optional<std::size_t> size;
+  HPHP::Optional<std::size_t> size;
   bool incomplete = false;
-  folly::Optional<GlobalOff> definition_offset;
+  HPHP::Optional<GlobalOff> definition_offset;
 
   m_dwarf.forEachAttribute(
     die,
@@ -1322,14 +1322,14 @@ Object TypeParserImpl::genObject(Dwarf_Die die,
 Type TypeParserImpl::genType(Dwarf_Die die) {
   // Offset of a different type this type refers to. If not present, that type
   // is implicitly "void".
-  folly::Optional<GlobalOff> type_offset;
+  HPHP::Optional<GlobalOff> type_offset;
   // For pointers to members, the type referring to the object the member
   // belongs to.
-  folly::Optional<GlobalOff> containing_type_offset;
+  HPHP::Optional<GlobalOff> containing_type_offset;
 
   // A struct can have a declaration which refers to the definition
   // via a DW_AT_signature.
-  folly::Optional<GlobalOff> definition_offset;
+  HPHP::Optional<GlobalOff> definition_offset;
 
   m_dwarf.forEachAttribute(
     die,
@@ -1478,8 +1478,8 @@ Object::Member TypeParserImpl::genMember(Dwarf_Die die,
   std::string name;
   std::string linkage_name;
   std::size_t offset = 0;
-  folly::Optional<GlobalOff> die_offset;
-  folly::Optional<uintptr_t> address;
+  HPHP::Optional<GlobalOff> die_offset;
+  HPHP::Optional<uintptr_t> address;
   bool is_static = false;
 
   m_dwarf.forEachAttribute(
@@ -1554,7 +1554,7 @@ Object::Member TypeParserImpl::genMember(Dwarf_Die die,
 
   return Object::Member{
     name,
-    is_static ? folly::none : folly::Optional<std::size_t>{offset},
+    is_static ? std::nullopt : HPHP::Optional<std::size_t>{offset},
     linkage_name,
     address,
     std::move(type)
@@ -1656,7 +1656,7 @@ Object::Function TypeParserImpl::genFunction(Dwarf_Die die) {
     }
   );
 
-  folly::Optional<std::uintptr_t> address;
+  HPHP::Optional<std::uintptr_t> address;
 
   // Similar to static variables, find any definitions which refer to this
   // function in order to extract linkage information.
@@ -1689,8 +1689,8 @@ Object::Function TypeParserImpl::genFunction(Dwarf_Die die) {
 Object::Base TypeParserImpl::genBase(Dwarf_Die die,
                                      const ObjectTypeName& parent_name) {
   std::string name;
-  folly::Optional<std::size_t> offset;
-  folly::Optional<GlobalOff> die_offset;
+  HPHP::Optional<std::size_t> offset;
+  HPHP::Optional<GlobalOff> die_offset;
   bool is_virtual = false;
 
   m_dwarf.forEachAttribute(
@@ -1768,7 +1768,7 @@ Object::Base TypeParserImpl::genBase(Dwarf_Die die,
 }
 
 Object::TemplateParam TypeParserImpl::genTemplateParam(Dwarf_Die die) {
-  folly::Optional<GlobalOff> die_offset;
+  HPHP::Optional<GlobalOff> die_offset;
 
   m_dwarf.forEachAttribute(
     die,
@@ -1794,9 +1794,9 @@ Object::TemplateParam TypeParserImpl::genTemplateParam(Dwarf_Die die) {
   };
 }
 
-folly::Optional<std::size_t>
+HPHP::Optional<std::size_t>
 TypeParserImpl::determineArrayBound(Dwarf_Die die) {
-  folly::Optional<std::size_t> bound;
+  HPHP::Optional<std::size_t> bound;
 
   m_dwarf.forEachChild(
     die,
@@ -1837,7 +1837,7 @@ void TypeParserImpl::fillFuncArgs(Dwarf_Die die, FuncType& func) {
     [&](Dwarf_Die child) {
       switch (m_dwarf.getTag(child)) {
         case DW_TAG_formal_parameter: {
-          folly::Optional<GlobalOff> type_offset;
+          HPHP::Optional<GlobalOff> type_offset;
 
           m_dwarf.forEachAttribute(
             child,
@@ -1900,7 +1900,7 @@ void printDIE(std::ostream& os,
     // Find the last child DIE which does not start with the begin/end
     // range. This DIE is the first one which contains some data within the
     // begin/end range, so that must be the first one to begin recursion at.
-    folly::Optional<uint64_t> first;
+    HPHP::Optional<uint64_t> first;
     if (begin > 0) {
       dwarf.forEachChild(
         die,
@@ -2079,7 +2079,7 @@ private:
     // the compilation units. Find the first compilation unit which at least
     // partially lies within the range given by the begin parameter. This is the
     // first compilation unit to begin printing from.
-    folly::Optional<uint64_t> last;
+    HPHP::Optional<uint64_t> last;
     if (begin > 0) {
       dwarf.forEachTopLevelUnit(
         [&](Dwarf_Die cu) {
@@ -2262,7 +2262,7 @@ private:
   void visit_die_for_address(const DwarfState& dwarf, const Dwarf_Die die,
                              std::vector<AddressTableEntry>& entries,
                              uint32_t cu_index) const {
-    folly::Optional<uint64_t> low, high;
+    HPHP::Optional<uint64_t> low, high;
     std::vector<DwarfState::Dwarf_Ranges> ranges;
     bool is_high_udata = false;
     dwarf.forEachAttribute(

@@ -17,8 +17,6 @@
 
 #include <algorithm>
 
-#include <folly/Optional.h>
-
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/array-provenance.h"
 
@@ -83,7 +81,7 @@ struct ISS {
   PropagateFn propagate;
   bool recordUsedParams{true};
 
-  folly::Optional<State> stateBefore;
+  Optional<State> stateBefore;
 
   // If we're inside an impl (as opposed to reduce) this will be > 0
   uint32_t analyzeDepth{0};
@@ -352,9 +350,9 @@ bool thisAvailable(ISS& env) {
 // Returns the type $this would have if it's not null.  Generally
 // you have to check thisAvailable() before assuming it can't be
 // null.
-folly::Optional<Type> thisTypeFromContext(const Index& index, Context ctx) {
+Optional<Type> thisTypeFromContext(const Index& index, Context ctx) {
   if (auto rcls = index.selfCls(ctx)) return setctx(subObj(*rcls));
-  return folly::none;
+  return std::nullopt;
 }
 
 Type thisType(ISS& env) {
@@ -367,24 +365,24 @@ Type thisTypeNonNull(ISS& env) {
   return env.state.thisType;
 }
 
-folly::Optional<Type> selfCls(ISS& env) {
+Optional<Type> selfCls(ISS& env) {
   if (auto rcls = env.index.selfCls(env.ctx)) return subCls(*rcls);
-  return folly::none;
+  return std::nullopt;
 }
 
-folly::Optional<Type> selfClsExact(ISS& env) {
+Optional<Type> selfClsExact(ISS& env) {
   if (auto rcls = env.index.selfCls(env.ctx)) return clsExact(*rcls);
-  return folly::none;
+  return std::nullopt;
 }
 
-folly::Optional<Type> parentCls(ISS& env) {
+Optional<Type> parentCls(ISS& env) {
   if (auto rcls = env.index.parentCls(env.ctx)) return subCls(*rcls);
-  return folly::none;
+  return std::nullopt;
 }
 
-folly::Optional<Type> parentClsExact(ISS& env) {
+Optional<Type> parentClsExact(ISS& env) {
   if (auto rcls = env.index.parentCls(env.ctx)) return clsExact(*rcls);
-  return folly::none;
+  return std::nullopt;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -888,11 +886,11 @@ bool iterIsDead(ISS& env, IterId iter) {
  * here actually just union the new type into what we already had.
  */
 
-folly::Optional<Type> thisPropType(ISS& env, SString name) {
+Optional<Type> thisPropType(ISS& env, SString name) {
   if (auto const elem = env.collect.props.readPrivateProp(name)) {
     return elem->ty;
   }
-  return folly::none;
+  return std::nullopt;
 }
 
 bool isMaybeThisPropAttr(ISS& env, SString name, Attr attr) {
@@ -922,9 +920,9 @@ void killThisProps(ISS& env) {
  * This function returns a type that includes all the possible types
  * that could result from reading a property $this->name.
  */
-folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
+Optional<Type> thisPropAsCell(ISS& env, SString name) {
   auto const elem = env.collect.props.readPrivateProp(name);
-  if (!elem) return folly::none;
+  if (!elem) return std::nullopt;
   if (elem->ty.couldBe(BUninit) && !is_specialized_obj(thisType(env))) {
     return TInitCell;
   }

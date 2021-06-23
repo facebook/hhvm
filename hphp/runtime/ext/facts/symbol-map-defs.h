@@ -98,7 +98,7 @@ template <typename S> SymbolMap<S>::~SymbolMap() {
 }
 
 template <typename S>
-std::optional<Symbol<S, SymKind::Type>>
+Optional<Symbol<S, SymKind::Type>>
 SymbolMap<S>::getTypeName(const S& typeName) {
   Symbol<S, SymKind::Type> type{typeName};
   auto path = getOnlyPath(type);
@@ -317,7 +317,7 @@ std::vector<Symbol<S, SymKind::Type>> SymbolMap<S>::getBaseTypes(
   };
 
   return readOrUpdate<TypeVec>(
-      [&](const Data& data) -> std::optional<TypeVec> {
+      [&](const Data& data) -> Optional<TypeVec> {
         auto const* baseTypes = data.m_inheritanceInfo.getBaseTypes(
             derivedType, derivedTypePath, kind);
         if (!baseTypes) {
@@ -371,7 +371,7 @@ std::vector<Symbol<S, SymKind::Type>> SymbolMap<S>::getDerivedTypes(
     return subtypes;
   };
   auto subtypes = readOrUpdate<TypeVec>(
-      [&](const Data& data) -> std::optional<TypeVec> {
+      [&](const Data& data) -> Optional<TypeVec> {
         auto const* derivedTypes =
             data.m_inheritanceInfo.getDerivedTypes(baseType, kind);
         if (!derivedTypes) {
@@ -459,7 +459,7 @@ SymbolMap<S>::getAttributesOfType(Symbol<S, SymKind::Type> type) {
     return attrVec;
   };
   return readOrUpdate<AttrVec>(
-      [&](const Data& data) -> std::optional<AttrVec> {
+      [&](const Data& data) -> Optional<AttrVec> {
         auto const* attrs = data.m_typeAttrs.getAttributes({type, path});
         if (!attrs) {
           return std::nullopt;
@@ -504,7 +504,7 @@ SymbolMap<S>::getTypesAndTypeAliasesWithAttribute(
     return typeVec;
   };
   auto types = readOrUpdate<TypeVec>(
-      [&](const Data& data) -> std::optional<TypeVec> {
+      [&](const Data& data) -> Optional<TypeVec> {
         auto const* attrs = data.m_typeAttrs.getKeysWithAttribute(attr);
         if (!attrs) {
           return std::nullopt;
@@ -559,7 +559,7 @@ std::vector<Symbol<S, SymKind::Type>> SymbolMap<S>::getAttributesOfMethod(
     return attrVec;
   };
   return readOrUpdate<AttrVec>(
-      [&](const Data& data) -> std::optional<AttrVec> {
+      [&](const Data& data) -> Optional<AttrVec> {
         auto const* attrs =
             data.m_methodAttrs.getAttributes({{type, path}, method});
         if (!attrs) {
@@ -608,7 +608,7 @@ SymbolMap<S>::getMethodsWithAttribute(Symbol<S, SymKind::Type> attr) {
     return methodVec;
   };
   auto methods = readOrUpdate<MethodVec>(
-      [&](const Data& data) -> std::optional<MethodVec> {
+      [&](const Data& data) -> Optional<MethodVec> {
         auto const* attrs = data.m_methodAttrs.getKeysWithAttribute(attr);
         if (!attrs) {
           return std::nullopt;
@@ -668,7 +668,7 @@ SymbolMap<S>::getAttributesOfFile(Path<S> path) {
     return attrVec;
   };
   return readOrUpdate<AttrVec>(
-      [&](const Data& data) -> std::optional<AttrVec> {
+      [&](const Data& data) -> Optional<AttrVec> {
         auto const* attrs = data.m_fileAttrs.getAttributes({path});
         if (!attrs) {
           return std::nullopt;
@@ -705,7 +705,7 @@ SymbolMap<S>::getFilesWithAttribute(Symbol<S, SymKind::Type> attr) {
     return pathVec;
   };
   auto paths = readOrUpdate<PathVec>(
-      [&](const Data& data) -> std::optional<PathVec> {
+      [&](const Data& data) -> Optional<PathVec> {
         auto const* attrs = data.m_fileAttrs.getKeysWithAttribute(attr);
         if (!attrs) {
           return std::nullopt;
@@ -742,7 +742,7 @@ std::vector<folly::dynamic> SymbolMap<S>::getTypeAttributeArgs(
   }
   using ArgVec = std::vector<folly::dynamic>;
   return readOrUpdate<ArgVec>(
-      [&](const Data& data) -> std::optional<ArgVec> {
+      [&](const Data& data) -> Optional<ArgVec> {
         auto const* args =
             data.m_typeAttrs.getAttributeArgs({type, path}, attr);
         if (!args) {
@@ -778,7 +778,7 @@ std::vector<folly::dynamic> SymbolMap<S>::getMethodAttributeArgs(
   }
   using ArgVec = std::vector<folly::dynamic>;
   return readOrUpdate<ArgVec>(
-      [&](const Data& data) -> std::optional<ArgVec> {
+      [&](const Data& data) -> Optional<ArgVec> {
         auto const* args =
             data.m_methodAttrs.getAttributeArgs({{type, path}, method}, attr);
         if (!args) {
@@ -813,7 +813,7 @@ std::vector<folly::dynamic> SymbolMap<S>::getFileAttributeArgs(
   }
   using ArgVec = std::vector<folly::dynamic>;
   return readOrUpdate<ArgVec>(
-      [&](const Data& data) -> std::optional<ArgVec> {
+      [&](const Data& data) -> Optional<ArgVec> {
         auto const* args = data.m_fileAttrs.getAttributeArgs({path}, attr);
         if (!args) {
           return std::nullopt;
@@ -876,7 +876,7 @@ SymbolMap<S>::getKindAndFlags(Symbol<S, SymKind::Type> type, Path<S> path) {
     return {TypeKind::Unknown, static_cast<TypeFlagMask>(TypeFlag::Empty)};
   }
   return readOrUpdate<std::pair<TypeKind, TypeFlagMask>>(
-      [&](const Data& data) -> std::optional<std::pair<TypeKind, int>> {
+      [&](const Data& data) -> Optional<std::pair<TypeKind, int>> {
         return data.m_typeKind.getKindAndFlags(type, path);
       },
       [&](AutoloadDB& db, SQLiteTxn& txn) -> std::pair<TypeKind, TypeFlagMask> {
@@ -894,7 +894,7 @@ SymbolMap<S>::getKindAndFlags(Symbol<S, SymKind::Type> type, Path<S> path) {
 }
 
 template <typename S>
-std::optional<SHA1> SymbolMap<S>::getSha1Hash(Path<S> path) const {
+Optional<SHA1> SymbolMap<S>::getSha1Hash(Path<S> path) const {
   auto rlock = m_syncedData.rlock();
   auto const& sha1Hashes = rlock->m_sha1Hashes;
   auto const it = sha1Hashes.find(path);
@@ -982,7 +982,7 @@ void SymbolMap<S>::update(
               while (true) {
                 auto maybeWork = m_syncedData.withRLock(
                     [](const Data& data)
-                        -> std::optional<HPHP::Facts::UpdateDBWorkItem> {
+                        -> Optional<HPHP::Facts::UpdateDBWorkItem> {
                       if (data.m_updateDBWork.empty()) {
                         return std::nullopt;
                       }
@@ -1000,7 +1000,7 @@ void SymbolMap<S>::update(
                     work.m_alteredPathFacts);
                 auto _workItemToDestroy =
                     m_syncedData.withWLock([&work](Data& data) {
-                      std::optional<UpdateDBWorkItem> workItemToDestroy;
+                      Optional<UpdateDBWorkItem> workItemToDestroy;
                       if (data.m_updateDBWork.empty()) {
                         return workItemToDestroy;
                       }
@@ -1318,7 +1318,7 @@ Path<S> SymbolMap<S>::getOnlyPath(Symbol<S, k> symbol) {
   };
 
   return readOrUpdate<Path<S>>(
-      [&](const Data& data) -> std::optional<Path<S>> {
+      [&](const Data& data) -> Optional<Path<S>> {
         auto paths = getPathSymMap<S, k>(data).getSymbolPaths(symbol);
         if (paths) {
           return {onlyPath(*paths)};
@@ -1361,7 +1361,7 @@ SymbolMap<S>::getPathSymbols(Path<S> path) {
       const typename PathToSymbolsMap<S, k>::PathSymbolMap::ValuesSet>;
 
   return readOrUpdate<SymbolSetRef>(
-      [&](const Data& data) -> std::optional<SymbolSetRef> {
+      [&](const Data& data) -> Optional<SymbolSetRef> {
         auto const* symbols = getPathSymMap<S, k>(data).getPathSymbols(path);
         if (symbols) {
           return {*symbols};

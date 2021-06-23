@@ -1668,11 +1668,11 @@ void if_aset(Env& env, SSATmp* tmp, Fn fn) {
   fn(asetID);
 }
 
-folly::Optional<ASetID> lookup_aset(Env& env, SSATmp* tmp) {
+Optional<ASetID> lookup_aset(Env& env, SSATmp* tmp) {
   auto const asetID = env.asetMap[tmp];
   if (asetID != -1) return asetID;
   assertx(!tmp->type().maybe(TCounted));
-  return folly::none;
+  return std::nullopt;
 }
 
 void reduce_lower_bound(Env& /*env*/, RCState& state, uint32_t asetID) {

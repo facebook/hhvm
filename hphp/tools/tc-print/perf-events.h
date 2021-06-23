@@ -30,7 +30,6 @@
 #include <vector>
 
 #include <folly/Format.h>
-#include <folly/Optional.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -71,7 +70,7 @@ struct PerfEvent {
 template<typename S, typename T>
 struct Mapper {
   virtual ~Mapper() {}
-  virtual folly::Optional<T> operator()(const S&) = 0;
+  virtual Optional<T> operator()(const S&) = 0;
 };
 
 struct StackTraceTree {
@@ -240,7 +239,7 @@ public:
     PerfEventsMap<NewKeyType> newMap;
 
     for (const_iterator itEvents = begin(); itEvents != end(); itEvents++) {
-      folly::Optional<NewKeyType> newKey = mapper(itEvents->first);
+      Optional<NewKeyType> newKey = mapper(itEvents->first);
       if (!newKey) continue;
       newMap.addEvents(*newKey, getAllEvents(itEvents->first));
 

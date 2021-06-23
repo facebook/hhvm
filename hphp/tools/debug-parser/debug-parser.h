@@ -25,9 +25,9 @@
 #include <utility>
 
 #include <folly/DiscriminatedPtr.h>
-#include <folly/Optional.h>
 
 #include "hphp/util/match.h"
+#include "hphp/util/optional.h"
 
 #include <tbb/concurrent_hash_map.h>
 
@@ -315,7 +315,7 @@ struct RValueRefType {
 // represents an array of indeterminate size.
 struct ArrType {
   Type element;
-  folly::Optional<std::size_t> count;
+  HPHP::Optional<std::size_t> count;
 };
 
 // An object (a class, union, enum, or primitive), which has a name (see above)
@@ -416,7 +416,7 @@ struct Object {
     ObjectType type;
     // The offset within this object where this base class is placed. If the
     // offset isn't present, the base class is virtual.
-    folly::Optional<std::size_t> offset;
+    HPHP::Optional<std::size_t> offset;
   };
   std::vector<Base> bases;
 
@@ -426,13 +426,13 @@ struct Object {
     std::string name;
     // Offset of the member from the beginning of the object. If no offset is
     // present, the member is static.
-    folly::Optional<std::size_t> offset;
+    HPHP::Optional<std::size_t> offset;
     // Optional string for static members giving the symbol for this member.
     std::string linkage_name;
     // Optional address for static members giving the address for this
     // member. Whether this address is absolute or relocatable depends on the
     // file the information is being extracted from.
-    folly::Optional<std::uintptr_t> address;
+    HPHP::Optional<std::uintptr_t> address;
     Type type;
   };
   std::vector<Member> members;
@@ -458,7 +458,7 @@ struct Object {
     // Optional address for static functions giving the address for this
     // function. Whether this addresss is absolute or relocatable depends on the
     // file the information is being extracted from.
-    folly::Optional<std::uintptr_t> address;
+    HPHP::Optional<std::uintptr_t> address;
   };
   std::vector<Function> functions;
 

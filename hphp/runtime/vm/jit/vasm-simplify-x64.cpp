@@ -90,8 +90,8 @@ struct CmpUseChecker {
   void across(T /*r*/) {}
 
   VregSF target;
-  folly::Optional<bool> cc_result;
-  folly::Optional<bool> use_result;
+  Optional<bool> cc_result;
+  Optional<bool> use_result;
 };
 
 /*

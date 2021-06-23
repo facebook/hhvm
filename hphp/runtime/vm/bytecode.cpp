@@ -2758,7 +2758,7 @@ OPTBLD_INLINE void iopDim(MOpMode mode, MemberKey mk) {
 
 static OPTBLD_INLINE void mFinal(MInstrState& mstate,
                                  int32_t nDiscard,
-                                 folly::Optional<TypedValue> result) {
+                                 Optional<TypedValue> result) {
   auto& stack = vmStack();
   for (auto i = 0; i < nDiscard; ++i) stack.popTV();
   if (result) tvCopy(*result, *stack.allocTV());
@@ -2837,7 +2837,7 @@ OPTBLD_INLINE void iopSetRangeM( uint32_t nDiscard, uint32_t size, SetRangeOp op
     SetRange<true>(mstate.base, offset, src, count, size);
   }
 
-  mFinal(mstate, nDiscard + 3, folly::none);
+  mFinal(mstate, nDiscard + 3, std::nullopt);
 }
 
 OPTBLD_INLINE void iopIncDecM(uint32_t nDiscard, IncDecOp subop, MemberKey mk) {
@@ -2889,7 +2889,7 @@ OPTBLD_INLINE void iopUnsetM(uint32_t nDiscard, MemberKey mk) {
     UnsetElem(mstate.base, key);
   }
 
-  mFinal(mstate, nDiscard, folly::none);
+  mFinal(mstate, nDiscard, std::nullopt);
 }
 
 namespace {

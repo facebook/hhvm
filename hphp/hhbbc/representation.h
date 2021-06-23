@@ -189,10 +189,10 @@ struct Param {
 
   /*
    * The type of the arguments for builtin functions, or for HNI
-   * functions with a native implementation.  folly::none for
+   * functions with a native implementation.  std::nullopt for
    * non-builtins.
    */
-  folly::Optional<DataType> builtinType;
+  Optional<DataType> builtinType;
 
   /*
    * Whether this parameter is passed as inout.
@@ -223,9 +223,9 @@ struct Local {
 struct NativeInfo {
   /*
    * Return type from the C++ implementation function, as an optional DataType;
-   * folly::none stands for a Variant return.
+   * std::nullopt stands for a Variant return.
    */
-  folly::Optional<DataType> returnType;
+  Optional<DataType> returnType;
 };
 
 using BlockVec = CompactVector<copy_ptr<Block>>;
@@ -450,7 +450,7 @@ struct Const {
    * using an 86cinit method.
    *
    */
-  folly::Optional<TypedValue> val;
+  Optional<TypedValue> val;
 
   /*
    * We pass through eval'able php code and a string type constraint,

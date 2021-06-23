@@ -71,7 +71,7 @@ void removeDeadCode(Vunit& unit, MaybeVinstrId clobber) {
   };
 
   // Lazily load preds as needed
-  folly::Optional<PredVector> preds;
+  Optional<PredVector> preds;
   auto const getPreds = [&] () -> const PredVector& {
     if (preds) return *preds;
     preds = computePreds(unit);

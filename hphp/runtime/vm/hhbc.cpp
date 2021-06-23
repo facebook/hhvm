@@ -1007,19 +1007,19 @@ bool subopValidImpl(const char* (&/*arr*/)[Sz], T op, int off) {
 }
 
 template<class T, size_t Sz>
-folly::Optional<T> nameToSubopImpl(const char* (&arr)[Sz],
+Optional<T> nameToSubopImpl(const char* (&arr)[Sz],
   const char* str, int off) {
   for (auto i = size_t{0}; i < Sz; ++i) {
     if (!strcmp(str, arr[i])) return static_cast<T>(i + off);
   }
-  return folly::none;
+  return std::nullopt;
 }
 
 namespace {
 template<class T> struct NameToSubopHelper;
 }
 
-template<class T> folly::Optional<T> nameToSubop(const char* str) {
+template<class T> Optional<T> nameToSubop(const char* str) {
   return NameToSubopHelper<T>::conv(str);
 }
 
@@ -1032,12 +1032,12 @@ template<class T> folly::Optional<T> nameToSubop(const char* str) {
   }                                                                \
   namespace {                                                      \
   template<> struct NameToSubopHelper<subop> {                     \
-    static folly::Optional<subop> conv(const char* str) {          \
+    static Optional<subop> conv(const char* str) {          \
       return nameToSubopImpl<subop>(subop##_names, str, off);      \
     }                                                              \
   };                                                               \
   }                                                                \
-  template folly::Optional<subop> nameToSubop(const char*);
+  template Optional<subop> nameToSubop(const char*);
 
 // Not all subops start indexing at 0
 /*Subop Name      Numerically first value */

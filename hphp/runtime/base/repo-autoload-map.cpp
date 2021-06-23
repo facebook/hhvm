@@ -62,7 +62,7 @@ RepoAutoloadMap::RepoAutoloadMap(
 }
 
 template <typename Compare>
-static std::optional<String> getPathFromSymbol(
+static Optional<String> getPathFromSymbol(
     const RepoAutoloadMap::Map<Compare>& map,
     const String& name) {
   auto search = map.find(name.get());
@@ -119,22 +119,22 @@ Array getSymbolFromPath(
   return ret;
 }
 
-std::optional<String> RepoAutoloadMap::getTypeFile(
+Optional<String> RepoAutoloadMap::getTypeFile(
   const String& typeName) {
   return getPathFromSymbol(m_types, typeName);
 }
 
-std::optional<String> RepoAutoloadMap::getFunctionFile(
+Optional<String> RepoAutoloadMap::getFunctionFile(
   const String& funcName) {
   return getPathFromSymbol(m_functions, funcName);
 }
 
-std::optional<String> RepoAutoloadMap::getConstantFile(
+Optional<String> RepoAutoloadMap::getConstantFile(
   const String& constName) {
   return getPathFromSymbol(m_constants, constName);
 }
 
-std::optional<String> RepoAutoloadMap::getTypeAliasFile(
+Optional<String> RepoAutoloadMap::getTypeAliasFile(
   const String& typeAliasName) {
   return getPathFromSymbol(m_typeAliases, typeAliasName);
 }

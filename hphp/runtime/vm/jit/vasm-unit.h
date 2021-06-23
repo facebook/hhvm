@@ -277,7 +277,7 @@ struct Vunit {
   uint16_t cur_voff{0};  // current instruction index managed by Vout
   bool padding{false};
   bool profiling{false};
-  folly::Optional<TransContext> context;
+  Optional<TransContext> context;
   StructuredLogEntry* log_entry{nullptr};
   Annotations annotations;
 };

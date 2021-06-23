@@ -157,7 +157,7 @@ struct Func final {
     template<class SerDe> void serde(SerDe& sd);
 
     // Typehint for builtins.
-    MaybeDataType builtinType{folly::none};
+    MaybeDataType builtinType{std::nullopt};
     // Flags as defined by the Flags enum.
     uint8_t flags{0};
     // DV initializer funclet offset.
@@ -449,12 +449,12 @@ struct Func final {
   // Return type.                                                       [const]
 
   /*
-   * CPP builtin's return type. Returns folly::none if function is not a CPP
+   * CPP builtin's return type. Returns std::nullopt if function is not a CPP
    * builtin.
    *
    * There are a number of caveats regarding this value:
    *
-   *    - If the return type is folly::none, the return is a Variant.
+   *    - If the return type is std::nullopt, the return is a Variant.
    *
    *    - If the return type is a string, array-like, object, ref, or resource
    *      type, null may also be returned.
@@ -955,7 +955,7 @@ struct Func final {
    * N.B. When errors are enabled for dynamic calls this overrides that behavior
    *      for functions which specify it.
    */
-  folly::Optional<int64_t> dynCallSampleRate() const;
+  Optional<int64_t> dynCallSampleRate() const;
 
   /*
    * Is this a meth_caller func?

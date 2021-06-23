@@ -47,16 +47,16 @@ template<typename T, typename M>
 struct TransProfCounters {
 
   // Helper methods for accessing indices
-  folly::Optional<Indices>
+  Optional<Indices>
   findIndices(const PrologueID& pid) const {
     auto const it = m_prologueIndices.find(pid);
-    if (it == m_prologueIndices.end()) return folly::none;
+    if (it == m_prologueIndices.end()) return std::nullopt;
     return it->second;
   }
-  folly::Optional<Indices>
+  Optional<Indices>
   findIndices(const RegionEntryKey& regionKey) const {
     auto const it = m_regionIndices.find(regionKey);
-    if (it == m_regionIndices.end()) return folly::none;
+    if (it == m_regionIndices.end()) return std::nullopt;
     return it->second;
   }
 
@@ -86,12 +86,12 @@ struct TransProfCounters {
    * keep counters sorted by e.g. RPO order, so the first one is for the entry.
    */
   template <typename K>
-  folly::Optional<T> getFirstCounter(const K& key) {
+  Optional<T> getFirstCounter(const K& key) {
     folly::SharedMutex::ReadHolder lock(m_lock);
     auto const& opt = findIndices(key);
-    if (opt == folly::none) return folly::none;
+    if (opt == std::nullopt) return std::nullopt;
     auto const& indices = opt.value();
-    if (indices.empty()) return folly::none;
+    if (indices.empty()) return std::nullopt;
     return m_counters.get(indices[0]);
   }
 
@@ -106,7 +106,7 @@ struct TransProfCounters {
     meta.clear();
     jit::vector<T> counters;
     auto const& opt = findIndices(key);
-    if (opt == folly::none) return counters;
+    if (opt == std::nullopt) return counters;
     auto const& indices = opt.value();
     for (auto index : indices) {
       counters.push_back(m_counters.get(index));

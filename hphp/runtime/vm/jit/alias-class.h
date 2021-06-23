@@ -22,8 +22,6 @@
 #include "hphp/runtime/vm/jit/alias-id-set.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 
-#include <folly/Optional.h>
-
 #include <bitset>
 #include <string>
 #include <cstdint>
@@ -346,17 +344,17 @@ struct AliasClass {
 
   /*
    * Return an AliasClass that is the precise union of this class and another
-   * class, or folly::none if that precise union cannot be represented.
+   * class, or std::nullopt if that precise union cannot be represented.
    *
    * Guaranteed to be commutative.
    */
-  folly::Optional<AliasClass> precise_union(AliasClass) const;
+  Optional<AliasClass> precise_union(AliasClass) const;
 
   /*
    * Create an alias class that is at least as big as the true union of this
    * alias class and another one.
    *
-   * If this.precise_union(o) is not folly::none, this function is guaranteed
+   * If this.precise_union(o) is not std::nullopt, this function is guaranteed
    * to return *this.precise_union(o).  Otherwise it may return an arbitrary
    * AliasClass bigger than the (unrepresentable) true union---callers should
    * not rely on specifics about how much bigger it is.
@@ -386,19 +384,19 @@ struct AliasClass {
   /*
    * Conditionally access specific known information of various kinds.
    *
-   * Returns folly::none if this alias class has no specialization in that way.
+   * Returns std::nullopt if this alias class has no specialization in that way.
    */
-  folly::Optional<ALocal>          local() const;
-  folly::Optional<AIter>           iter() const;
-  folly::Optional<AProp>           prop() const;
-  folly::Optional<AElemI>          elemI() const;
-  folly::Optional<AElemS>          elemS() const;
-  folly::Optional<AStack>          stack() const;
-  folly::Optional<ARds>            rds() const;
-  folly::Optional<AFContext>       fcontext() const;
-  folly::Optional<AFFunc>          ffunc() const;
-  folly::Optional<AFMeta>          fmeta() const;
-  folly::Optional<AActRec>         actrec() const;
+  Optional<ALocal>          local() const;
+  Optional<AIter>           iter() const;
+  Optional<AProp>           prop() const;
+  Optional<AElemI>          elemI() const;
+  Optional<AElemS>          elemS() const;
+  Optional<AStack>          stack() const;
+  Optional<ARds>            rds() const;
+  Optional<AFContext>       fcontext() const;
+  Optional<AFFunc>          ffunc() const;
+  Optional<AFMeta>          fmeta() const;
+  Optional<AActRec>         actrec() const;
 
   /*
    * Conditionally access specific known information, but also checking that
@@ -406,28 +404,28 @@ struct AliasClass {
    *
    * I.e., cls.is_foo() is semantically equivalent to:
    *
-   *   cls <= AFooAny ? cls.foo() : folly::none
+   *   cls <= AFooAny ? cls.foo() : std::nullopt
    */
-  folly::Optional<ALocal>          is_local() const;
-  folly::Optional<AIter>           is_iter() const;
-  folly::Optional<AProp>           is_prop() const;
-  folly::Optional<AElemI>          is_elemI() const;
-  folly::Optional<AElemS>          is_elemS() const;
-  folly::Optional<AStack>          is_stack() const;
-  folly::Optional<ARds>            is_rds() const;
-  folly::Optional<AFContext>       is_fcontext() const;
-  folly::Optional<AFFunc>          is_ffunc() const;
-  folly::Optional<AFMeta>          is_fmeta() const;
-  folly::Optional<AActRec>         is_actrec() const;
+  Optional<ALocal>          is_local() const;
+  Optional<AIter>           is_iter() const;
+  Optional<AProp>           is_prop() const;
+  Optional<AElemI>          is_elemI() const;
+  Optional<AElemS>          is_elemS() const;
+  Optional<AStack>          is_stack() const;
+  Optional<ARds>            is_rds() const;
+  Optional<AFContext>       is_fcontext() const;
+  Optional<AFFunc>          is_ffunc() const;
+  Optional<AFMeta>          is_fmeta() const;
+  Optional<AActRec>         is_actrec() const;
 
   /*
    * Like the other foo() and is_foo() methods, but since we don't have an
    * AMIState anymore, these return AliasClass instead.
    */
-  folly::Optional<AliasClass> mis() const;
-  folly::Optional<AliasClass> is_mis() const;
-  folly::Optional<AliasClass> frame_base() const;
-  folly::Optional<AliasClass> is_frame_base() const;
+  Optional<AliasClass> mis() const;
+  Optional<AliasClass> is_mis() const;
+  Optional<AliasClass> frame_base() const;
+  Optional<AliasClass> is_frame_base() const;
 
 private:
   enum class STag {
@@ -451,7 +449,7 @@ private:
   bool maybeData(AliasClass) const;
   bool diffSTagSubclassData(rep relevant_bits, AliasClass) const;
   bool diffSTagMaybeData(rep relevant_bits, AliasClass) const;
-  folly::Optional<UFrameBase> asUFrameBase() const;
+  Optional<UFrameBase> asUFrameBase() const;
   static AliasClass unionData(rep newBits, AliasClass, AliasClass);
   static STag stagFor(rep bits);
 

@@ -18,8 +18,6 @@
 
 #include <algorithm>
 
-#include <folly/Optional.h>
-
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/edge.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -406,13 +404,12 @@ inline const char* blockHintName(Block::Hint hint) {
   not_reached();
 }
 
-inline folly::Optional<Block::Hint> nameToHint(const std::string& hintStr) {
+inline Optional<Block::Hint> nameToHint(const std::string& hintStr) {
   if (hintStr == "Unused")   return Block::Hint::Unused;
   if (hintStr == "Unlikely") return Block::Hint::Unlikely;
   if (hintStr == "Neither")  return Block::Hint::Neither;
   if (hintStr == "Likely")   return Block::Hint::Likely;
-  return folly::none;
+  return std::nullopt;
 }
 
 }}
-

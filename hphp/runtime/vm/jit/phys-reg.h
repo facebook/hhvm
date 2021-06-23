@@ -20,8 +20,6 @@
 #include "hphp/util/bitops.h"
 #include "hphp/vixl/a64/assembler-a64.h"
 
-#include <folly/Optional.h>
-
 #include <type_traits>
 
 namespace HPHP { namespace jit {
@@ -501,4 +499,3 @@ namespace std {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-

@@ -40,7 +40,7 @@ namespace HPHP {
 namespace {
 
 struct HackCFactsExtractor {
-  using result_type = folly::Optional<FactsJSONString>;
+  using result_type = Optional<FactsJSONString>;
   using state_type = std::unique_ptr<FactsParser>;
 
   static int get_workers_count() {
@@ -56,7 +56,7 @@ struct HackCFactsExtractor {
   }
 
   static void mark_failed(result_type& workerResult) {
-    workerResult = folly::none;
+    workerResult = std::nullopt;
   }
 
   static void parse_file_impl(

@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <folly/Optional.h>
-
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
@@ -59,7 +57,7 @@ enum class ResumeMode : uint8_t {
 };
 
 char* resumeModeShortName(ResumeMode resumeMode);
-folly::Optional<ResumeMode> nameToResumeMode(const std::string& name);
+Optional<ResumeMode> nameToResumeMode(const std::string& name);
 
 ALWAYS_INLINE bool isResumed(const ActRec* ar) {
   assertx(ar && ar->func()->validate());
@@ -243,4 +241,3 @@ static_assert(Resumable::arOff() == 0,
 //////////////////////////////////////////////////////////////////////
 
 }
-

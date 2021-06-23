@@ -17,10 +17,11 @@
 #pragma once
 
 #include <memory>
-#include <optional>
 #include <vector>
 
 #include "hphp/util/hash-map.h"
+#include "hphp/util/optional.h"
+
 #include <folly/dynamic.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/experimental/io/FsUtil.h>
@@ -50,12 +51,12 @@ public:
    * Return the Watchman singleton for the chosen root.
    */
   static std::shared_ptr<Watchman>
-  get(const folly::fs::path& path, const std::optional<std::string>& sockPath);
+  get(const folly::fs::path& path, const Optional<std::string>& sockPath);
 
   /**
    * Public for make_shared only, use Watchman::get instead
    */
-  Watchman(folly::fs::path path, std::optional<std::string> sockPath);
+  Watchman(folly::fs::path path, Optional<std::string> sockPath);
 
   Watchman(const Watchman&) = delete;
   Watchman(Watchman&&) noexcept = delete;
@@ -111,7 +112,7 @@ private:
   folly::IOThreadPoolExecutor m_exec{1};
 
   const folly::fs::path m_path;
-  const std::optional<std::string> m_sockPath;
+  const Optional<std::string> m_sockPath;
 
   struct Data {
     // This future must complete before you can perform query() or subscribe()

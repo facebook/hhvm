@@ -68,7 +68,7 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
     // - fp(env) and sp(env) are backed by rvmfp() and rvmsp() registers
     // - sp(env) points to the top of the stack at translation entry
     // - stack base is `irSPOff` away from sp(env)
-    gen(env, DefFP, DefFPData { folly::none });
+    gen(env, DefFP, DefFPData { std::nullopt });
     updateMarker(env);
 
     auto const irSPOff = bcSPOff;

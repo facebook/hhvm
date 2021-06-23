@@ -102,7 +102,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   if (inst->is(Nop, DefConst)) return;
 
   if (shouldConstrainGuards()) {
-    auto const l = [&]() -> folly::Optional<Location> {
+    auto const l = [&]() -> Optional<Location> {
       switch (inst->op()) {
         case AssertLoc:
         case CheckLoc:
@@ -116,15 +116,15 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
         case AssertMBase:
         case CheckMBase:
-          return folly::make_optional<Location>(Location::MBase{});
+          return make_optional<Location>(Location::MBase{});
 
         case LdMem:
           return isMBaseLoad(inst)
-            ? folly::make_optional<Location>(Location::MBase{})
-            : folly::none;
+            ? make_optional<Location>(Location::MBase{})
+            : std::nullopt;
 
         default:
-          return folly::none;
+          return std::nullopt;
       }
       not_reached();
     }();
@@ -683,7 +683,7 @@ bool IRBuilder::constrainTypeSrc(TypeSource typeSrc, GuardConstraint gc) {
  */
 bool IRBuilder::constrainAssert(const IRInstruction* inst,
                                 GuardConstraint gc, Type srcType,
-                                folly::Optional<Type> knownType) {
+                                Optional<Type> knownType) {
   if (!knownType) knownType = inst->typeParam();
 
   // If the known type fits the constraint, we're done.

@@ -229,7 +229,7 @@ void raise_str_to_class_notice(const StringData* name);
  * class_meth compact notices.
  */
 void raise_clsmeth_compat_type_hint(
-  const Func* func, const std::string& displayName, folly::Optional<int> param);
+  const Func* func, const std::string& displayName, Optional<int> param);
 void raise_clsmeth_compat_type_hint_outparam_notice(
   const Func* func, const std::string& displayName, int paramNum);
 void raise_clsmeth_compat_type_hint_property_notice(

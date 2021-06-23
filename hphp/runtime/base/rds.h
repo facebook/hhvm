@@ -19,9 +19,9 @@
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/optional.h"
 #include "hphp/util/type-scan.h"
 
-#include <folly/Optional.h>
 #include <folly/Range.h>
 
 #include <atomic>
@@ -427,7 +427,7 @@ bool testAndSetBit(size_t bit);
 /*
  * Table mapping handles to their symbols.  This excludes Profiling symbols.
  */
-folly::Optional<Symbol> reverseLink(Handle handle);
+Optional<Symbol> reverseLink(Handle handle);
 
 //////////////////////////////////////////////////////////////////////
 

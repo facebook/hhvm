@@ -18,7 +18,6 @@
 #include <memory>
 #include <string>
 
-#include <folly/Optional.h>
 #include <folly/dynamic.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/futures/Future.h>

@@ -19,8 +19,7 @@
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/util/hash.h"
-
-#include <folly/Optional.h>
+#include "hphp/util/optional.h"
 
 #include <cstdint>
 #include <string>
@@ -62,7 +61,7 @@ constexpr size_t NumMemberCodes = MW + 1;
   OP(Any)               \
   OP(ReadOnly)          \
   OP(Mutable)           \
-  OP(CheckROCOW)        
+  OP(CheckROCOW)
 
 enum class ReadOnlyOp : uint8_t {
 #define OP(name) name,
@@ -77,9 +76,9 @@ enum class ReadOnlyOp : uint8_t {
 const char* memberCodeString(MemberCode mc);
 
 /*
- * Try to parse the input as a MemberCode, returning folly::none on failure.
+ * Try to parse the input as a MemberCode, returning std::nullopt on failure.
  */
-folly::Optional<MemberCode> parseMemberCode(const char*);
+Optional<MemberCode> parseMemberCode(const char*);
 
 constexpr bool mcodeIsProp(MemberCode mcode) {
   return mcode == MPC || mcode == MPL || mcode == MPT || mcode == MQT;

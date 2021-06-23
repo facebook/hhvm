@@ -23,7 +23,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include <folly/Optional.h>
 #include <folly/Varint.h>
 
 #include "hphp/compiler/option.h"
@@ -37,6 +36,7 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 
 #include "hphp/util/compact-vector.h"
+#include "hphp/util/optional.h"
 
 /*
  * This module contains helpers for serializing and deserializing
@@ -212,8 +212,8 @@ struct BlobEncoder {
   void encode(const TypedValueAux& tv) = delete;
 
   template<class T>
-  void encode(const folly::Optional<T>& opt) {
-    const bool some = opt.hasValue();
+  void encode(const Optional<T>& opt) {
+    const bool some = opt.has_value();
     encode(some);
     if (some) encode(*opt);
   }
@@ -455,12 +455,12 @@ struct BlobDecoder {
   void decode(TypedValueAux& tv) = delete;
 
   template<class T>
-  void decode(folly::Optional<T>& opt) {
+  void decode(Optional<T>& opt) {
     bool some;
     decode(some);
 
     if (!some) {
-      opt = folly::none;
+      opt = std::nullopt;
     } else {
       T value;
       decode(value);

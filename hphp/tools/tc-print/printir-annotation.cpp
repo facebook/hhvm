@@ -72,9 +72,9 @@ HPHP::jit::TCA parseTCA(const std::string& raw) {
 namespace folly {
 using namespace HPHP;
 
-template <typename T> Optional<T> DynamicConverter<Optional<T>>::convert(
+template <typename T> HPHP::Optional<T> DynamicConverter<HPHP::Optional<T>>::convert(
   const dynamic& d) {
-  return d.isNull() ? none : Optional<T>(convertTo<T>(d));
+  return d.isNull() ? std::nullopt : HPHP::Optional<T>(convertTo<T>(d));
 }
 
 jit::Opcode DynamicConverter<jit::Opcode>::convert(const dynamic& d) {
@@ -146,20 +146,20 @@ printir::Instr DynamicConverter<printir::Instr>::convert(const dynamic& d) {
     typeError("Instr", dynamic::Type::OBJECT, d.type());
   }
 
-  auto maybeMarker = convertTo<Optional<string>>(
+  auto maybeMarker = convertTo<HPHP::Optional<string>>(
     d.getDefault("marker").getDefault("raw", {}));
   auto phiPseudoInstrs = convertTo<vector<printir::PhiPseudoInstr>>(
     d.getDefault("phiPseudoInstrs", dynamic::array));
   auto const opcode = convertTo<jit::Opcode>(d.getDefault("opcodeName", {}));
-  auto typeParam = convertTo<Optional<string>>(
+  auto typeParam = convertTo<HPHP::Optional<string>>(
     d.getDefault("typeParam", {}));
-  auto guard = convertTo<Optional<string>>(d.getDefault("guard", {}));
-  auto extra = convertTo<Optional<string>>(d.getDefault("extra", {}));
+  auto guard = convertTo<HPHP::Optional<string>>(d.getDefault("guard", {}));
+  auto extra = convertTo<HPHP::Optional<string>>(d.getDefault("extra", {}));
   auto const id = convertTo<uint32_t>(d.getDefault("id", {}));
   auto dsts = convertTo<vector<printir::SSATmp>>(
     d.getDefault("dsts", {}));
   auto const maybeTaken = d.getDefault("taken", {});
-  auto taken = convertTo<Optional<printir::BlockId>>(
+  auto taken = convertTo<HPHP::Optional<printir::BlockId>>(
     (maybeTaken.isNull() ? dynamic() : maybeTaken.getDefault("id", {})));
   auto const offset = convertTo<Offset>(d.getDefault("offset", {}));
   auto profileData = convertTo<vector<printir::Profile>>(
@@ -171,13 +171,13 @@ printir::Instr DynamicConverter<printir::Instr>::convert(const dynamic& d) {
 
   // TODO(T52857257) - rewrite to maybe use boost::variant?
   //                      other options to standardize?
-  Optional<vector<printir::SSATmp>> srcs;
-  Optional<string> counterName;
+  HPHP::Optional<vector<printir::SSATmp>> srcs;
+  HPHP::Optional<string> counterName;
   auto const& d_srcs = d.getDefault("srcs", {});
   if (d_srcs.isArray()) {
     srcs = convertTo<vector<printir::SSATmp>>(d_srcs);
   } else if (d_srcs.isObject()) {
-    counterName = convertTo<Optional<string>>(
+    counterName = convertTo<HPHP::Optional<string>>(
       d_srcs.getDefault("counterName", {}));
   } else {
     // Unique error case, no one "expected" type, but we know this current shape
@@ -214,7 +214,7 @@ printir::Block DynamicConverter<printir::Block>::convert(const dynamic& d) {
   auto preds = convertTo<vector<printir::BlockId>>(
     d.getDefault("preds", {}));
   auto const maybeNext = d.getDefault("next", {});
-  auto maybeNextId = convertTo<Optional<printir::BlockId>>(
+  auto maybeNextId = convertTo<HPHP::Optional<printir::BlockId>>(
     (maybeNext.isNull() ? dynamic() : maybeNext.getDefault("id", {})));
 
   auto instrs = convertTo<vector<printir::Instr>>(d.getDefault("instrs", {}));
@@ -277,8 +277,8 @@ printir::InliningDecision DynamicConverter<printir::InliningDecision>::convert(
 
   auto const wasInlined = convertTo<bool>(d.getDefault("wasInlined", {}));
   auto const offset = convertTo<Offset>(d.getDefault("offset", {}));
-  auto callerName = convertTo<Optional<string>>(d.getDefault("caller", {}));
-  auto calleeName = convertTo<Optional<string>>(d.getDefault("callee", {}));
+  auto callerName = convertTo<HPHP::Optional<string>>(d.getDefault("caller", {}));
+  auto calleeName = convertTo<HPHP::Optional<string>>(d.getDefault("callee", {}));
   auto reason = convertTo<string>(d.getDefault("reason", {}));
 
   return printir::InliningDecision{wasInlined, offset, std::move(callerName),
@@ -310,8 +310,8 @@ printir::Unit DynamicConverter<printir::Unit>::convert(const dynamic& d) {
                        std::move(inliningDecisions)};
 }
 
-template <typename T>  dynamic DynamicConstructor<Optional<T>>::construct(
-  const Optional<T>& opt) {
+template <typename T>  dynamic DynamicConstructor<HPHP::Optional<T>>::construct(
+    const HPHP::Optional<T>& opt) {
   return opt ? toDynamic(*opt) : dynamic();
 }
 

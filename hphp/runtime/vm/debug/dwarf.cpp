@@ -139,7 +139,7 @@ void DwarfInfo::compactChunks() {
 static Mutex s_lock(RankLeaf);
 
 DwarfChunk* DwarfInfo::addTracelet(TCRange range,
-                                   folly::Optional<std::string> name,
+                                   Optional<std::string> name,
                                    const Func *func,
                                    int lineNumber,
                                    bool inPrologue) {

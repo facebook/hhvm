@@ -37,7 +37,7 @@ struct SSATmp;
  * to be empty).
  */
 enum class VecBounds { In, Out, Unknown };
-VecBounds vecBoundsStaticCheck(Type, folly::Optional<int64_t>);
+VecBounds vecBoundsStaticCheck(Type, Optional<int64_t>);
 
 /*
 * Get the most specific type of the element at idx for an array type using

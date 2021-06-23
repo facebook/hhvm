@@ -296,13 +296,13 @@ inline Type Type::cns(TypedValue tv) {
   always_assert(false && "Invalid KindOf for constant TypedValue");
 }
 
-inline folly::Optional<Type> Type::tryCns(TypedValue tv) {
+inline Optional<Type> Type::tryCns(TypedValue tv) {
   assertx(tvIsPlausible(tv));
 
   if (tv.m_type == KindOfUninit) return TUninit;
   if (tv.m_type == KindOfNull)   return TInitNull;
 
-  auto ret = [&] () -> folly::Optional<Type> {
+  auto ret = [&] () -> Optional<Type> {
     switch (tv.m_type) {
       case KindOfUninit:
       case KindOfNull:
@@ -335,7 +335,7 @@ inline folly::Optional<Type> Type::tryCns(TypedValue tv) {
       case KindOfClsMeth:
       case KindOfRClsMeth:
       case KindOfRecord:
-        return folly::none;
+        return std::nullopt;
     }
     not_reached();
   }();

@@ -53,7 +53,6 @@
 
 #include <folly/Bits.h>
 #include <folly/MapUtil.h>
-#include <folly/Optional.h>
 #include <folly/Random.h>
 
 #include <algorithm>
@@ -908,7 +907,7 @@ void Class::initSProps() const {
   assertx(needsInitSProps() || m_sPropCacheInit.isPersistent());
 
   const bool hasNonscalarInit = !m_sinitVec.empty() || !m_linitVec.empty();
-  folly::Optional<VMRegAnchor> _;
+  Optional<VMRegAnchor> _;
   if (hasNonscalarInit) {
     _.emplace();
   }
@@ -1458,7 +1457,7 @@ Slot Class::getCoeffectsProp() const {
 
 const StaticString s_classname("classname");
 
-folly::Optional<RuntimeCoeffects>
+Optional<RuntimeCoeffects>
 Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
   auto const slot = m_constants.findIndex(name);
   auto const coinflip = []{
@@ -1467,7 +1466,7 @@ Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
   };
 
   if (slot == kInvalidSlot) {
-    if (!failIsFatal) return folly::none;
+    if (!failIsFatal) return std::nullopt;
     if (coinflip()) {
       // TODO: Once coeffect migration is done, convert this back to raise_error
       raise_warning("Context constant %s does not exist", name->data());
@@ -1476,12 +1475,12 @@ Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
   }
   auto const& cns = m_constants[slot];
   if (cns.kind() != ConstModifiers::Kind::Context) {
-    if (!failIsFatal) return folly::none;
+    if (!failIsFatal) return std::nullopt;
     raise_error("%s is a %s, looking for a context constant",
                 name->data(), ConstModifiers::show(cns.kind()));
   }
   if (cns.isAbstractAndUninit()) {
-    if (!failIsFatal) return folly::none;
+    if (!failIsFatal) return std::nullopt;
     if (RO::EvalAbstractContextConstantUninitAccess || coinflip()) {
       // TODO: Once coeffect migration is done, convert this back to raise_error
       raise_warning("Context constant %s is abstract", name->data());

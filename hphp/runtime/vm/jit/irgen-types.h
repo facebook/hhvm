@@ -18,8 +18,6 @@
 #include "hphp/runtime/vm/containers.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-#include <folly/Optional.h>
-
 namespace HPHP {
 
 struct RepoAuthType;
@@ -58,4 +56,3 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className);
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

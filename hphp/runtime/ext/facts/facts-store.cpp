@@ -15,7 +15,6 @@
 */
 
 #include <memory>
-#include <optional>
 #include <sstream>
 #include <thread>
 
@@ -55,7 +54,7 @@ namespace {
  * Return a path relative to `root` with the same canonical location as `p`. If
  * `p` does not exist within `root`, return `std::nullopt`.
  */
-std::optional<folly::fs::path> resolvePathRelativeToRoot(
+Optional<folly::fs::path> resolvePathRelativeToRoot(
     const folly::fs::path& path, const folly::fs::path& root) {
   if (path.is_relative()) {
     return path;
@@ -378,7 +377,7 @@ folly::dynamic getQuery(folly::dynamic queryExpr) {
  * reparse the file, hash it ourselves, and move on with our
  * lives.
  */
-std::optional<std::string> getSha1Hash(const folly::dynamic& pathData) {
+Optional<std::string> getSha1Hash(const folly::dynamic& pathData) {
   auto const& sha1hex = pathData["content.sha1hex"];
   if (!sha1hex.isString()) {
     return {};
@@ -608,7 +607,7 @@ struct FactsStoreImpl final
     return m_map.isTypeFinal(*type.get());
   }
 
-  std::optional<String> getTypeFile(const String& type) override {
+  Optional<String> getTypeFile(const String& type) override {
     return getSymbolFile<SymKind::Type>(
         type,
         [](SymbolMap<StringData>& m, Symbol<StringData, SymKind::Type> s) {
@@ -616,7 +615,7 @@ struct FactsStoreImpl final
         });
   }
 
-  std::optional<String> getFunctionFile(const String& function) override {
+  Optional<String> getFunctionFile(const String& function) override {
     return getSymbolFile<SymKind::Function>(
         function,
         [](SymbolMap<StringData>& m, Symbol<StringData, SymKind::Function> s) {
@@ -624,7 +623,7 @@ struct FactsStoreImpl final
         });
   }
 
-  std::optional<String> getConstantFile(const String& constant) override {
+  Optional<String> getConstantFile(const String& constant) override {
     return getSymbolFile<SymKind::Constant>(
         constant,
         [](SymbolMap<StringData>& m, Symbol<StringData, SymKind::Constant> s) {
@@ -632,7 +631,7 @@ struct FactsStoreImpl final
         });
   }
 
-  std::optional<String> getTypeAliasFile(const String& typeAlias) override {
+  Optional<String> getTypeAliasFile(const String& typeAlias) override {
     return getSymbolFile<SymKind::Type>(
         typeAlias,
         [](SymbolMap<StringData>& m, Symbol<StringData, SymKind::Type> s) {
@@ -1140,7 +1139,7 @@ private:
     folly::Future<watchman::SubscriptionPtr> m_subscribeFuture{nullptr};
     folly::FutureSplitter<folly::Unit> m_updateFuture{folly::makeFuture()};
   };
-  std::optional<WatchmanData> m_watchmanData;
+  Optional<WatchmanData> m_watchmanData;
 
   template <SymKind k, typename TLambda>
   Array getFileSymbols(const String& path, TLambda lambda) {
@@ -1167,7 +1166,7 @@ private:
   }
 
   template <SymKind k, class T>
-  std::optional<String> getSymbolFile(const String& symbol, T lambda) {
+  Optional<String> getSymbolFile(const String& symbol, T lambda) {
     const StringData* fileStr =
         lambda(m_map, Symbol<StringData, k>{*symbol.get()}).get();
     if (UNLIKELY(fileStr == nullptr)) {

@@ -48,6 +48,7 @@ const folly::F14FastSet<std::string> forbidden_template = {
   "boost::container::flat_set",
   "HPHP::FixedVector",
   "HPHP::TinyVector",
+  "HPHP::Optional",
   "std::deque",
   "std::forward_list",
   "std::list",
@@ -69,7 +70,7 @@ const folly::F14FastSet<std::string> forbidden_template = {
 
 const folly::F14FastSet<std::string> forced_conservative = {
   "boost::variant",
-  "folly::Optional",
+  "boost::Optional",
   "std::optional",
   "std::function"
 };

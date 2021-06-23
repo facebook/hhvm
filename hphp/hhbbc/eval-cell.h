@@ -19,7 +19,6 @@
 #include <exception>
 
 #include <folly/ScopeGuard.h>
-#include <folly/Optional.h>
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -42,7 +41,7 @@ namespace HPHP { namespace HHBBC {
  * an exception it returns TInitCell.
  */
 template<class Pred>
-folly::Optional<Type> eval_cell(Pred p) {
+Optional<Type> eval_cell(Pred p) {
   try {
     assertx(!RuntimeOption::EvalJit);
     ThrowAllErrorsSetter taes;
@@ -61,24 +60,24 @@ folly::Optional<Type> eval_cell(Pred p) {
     auto const t = from_cell(c);
     return options.ConstantProp ? t : loosen_staticness(t);
   } catch (const Object&) {
-    return folly::none;
+    return std::nullopt;
   } catch (const std::exception&) {
-    return folly::none;
+    return std::nullopt;
   } catch (...) {
     always_assert_flog(0, "a non-std::exception was thrown in eval_cell");
   }
 }
 
 template<typename Pred>
-folly::Optional<typename std::result_of<Pred()>::type>
+Optional<typename std::result_of<Pred()>::type>
 eval_cell_value(Pred p) {
   try {
     ThrowAllErrorsSetter taes;
     return p();
   } catch (const Object&) {
-    return folly::none;
+    return std::nullopt;
   } catch (const std::exception&) {
-    return folly::none;
+    return std::nullopt;
   } catch (...) {
     always_assert_flog(0, "a non-std::exception was thrown in eval_cell_value");
   }

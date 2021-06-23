@@ -30,7 +30,6 @@
 
 #include <string>
 #include <type_traits>
-#include <folly/Optional.h>
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
@@ -188,7 +187,7 @@ struct IRUnit {
    * Return the "start" timestamp when this IRUnit was constructed.
    */
   int64_t startNanos() const;
-  folly::Optional<StructuredLogEntry>& logEntry() const;
+  Optional<StructuredLogEntry>& logEntry() const;
   void initLogEntry(const Func*);
 
   /////////////////////////////////////////////////////////////////////////////
@@ -266,7 +265,7 @@ private:
   Block::Hint m_defHint{Block::Hint::Neither};
 
   int64_t m_startNanos; // Timestamp at construction time.
-  mutable folly::Optional<StructuredLogEntry> m_logEntry;
+  mutable Optional<StructuredLogEntry> m_logEntry;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -300,4 +299,3 @@ jit::vector<Block*> findMainExitBlocks(const IRUnit& unit, SrcKey lastSk);
 }}
 
 #include "hphp/runtime/vm/jit/ir-unit-inl.h"
-

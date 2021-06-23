@@ -374,16 +374,16 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
     return ::stat(path, st);
   };
 
-  auto const wrapped_open = [&](const char* path) -> folly::Optional<String> {
+  auto const wrapped_open = [&](const char* path) -> Optional<String> {
     if (wrapper) {
       if (auto const file = wrapper->open(path, "r", 0, nullptr)) {
         return file->read();
       }
-      return folly::none;
+      return std::nullopt;
     }
 
     auto const fd = open(path, O_RDONLY);
-    if (fd < 0) return folly::none;
+    if (fd < 0) return std::nullopt;
     auto file = req::make<PlainFile>(fd);
     return file->read();
 
@@ -1150,7 +1150,7 @@ uint64_t ahotDefault() {
   return RuntimeOption::RepoAuthoritative ? 4 << 20 : 0;
 }
 
-folly::Optional<folly::fs::path> RuntimeOption::GetHomePath(
+Optional<folly::fs::path> RuntimeOption::GetHomePath(
   const folly::StringPiece user) {
 
   auto homePath = folly::fs::path{RuntimeOption::SandboxHome}

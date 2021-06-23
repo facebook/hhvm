@@ -185,7 +185,7 @@ const bespoke::Layout* ArrayLayout::bespokeLayout() const {
   return bespoke::Layout::FromIndex(*index);
 }
 
-folly::Optional<bespoke::LayoutIndex> ArrayLayout::layoutIndex() const {
+Optional<bespoke::LayoutIndex> ArrayLayout::layoutIndex() const {
   auto const index = int(sort) - int(Sort::Bespoke);
   if (index < 0) return {};
   return bespoke::LayoutIndex { safe_cast<uint16_t>(index) };

@@ -114,7 +114,7 @@ StaticCoeffects::storage_t StaticCoeffects::locals() const {
   return (((~m_data) >> 1) & m_data) & CoeffectsConfig::escapeMask();
 }
 
-folly::Optional<std::string> CoeffectRule::toString(const Func* f) const {
+Optional<std::string> CoeffectRule::toString(const Func* f) const {
   auto const typesToString = [&] {
     std::vector<std::string> types;
     for (auto type : m_types) {
@@ -141,7 +141,7 @@ folly::Optional<std::string> CoeffectRule::toString(const Func* f) const {
     case Type::ClosureParentScope:
     case Type::GeneratorThis:
     case Type::Caller:
-      return folly::none;
+      return std::nullopt;
     case Type::Invalid:
       always_assert(false);
   }

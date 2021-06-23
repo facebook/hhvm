@@ -21,7 +21,6 @@
 #include <iterator>
 #include <vector>
 
-#include <folly/Optional.h>
 #include <folly/Traits.h>
 #include <folly/Hash.h>
 
@@ -203,12 +202,12 @@ std::pair<trep, trep> allowedValBits(trep b, bool packed) {
  * The following functions make DArr* structs out of static arrays, to
  * simplify implementing some of the type system operations on them.
  *
- * When they return folly::none it is not a conservative thing: it
+ * When they return std::nullopt it is not a conservative thing: it
  * implies the array is definitely not packed, packedN, struct-like,
  * etc (we use this to return false in couldBe).
  */
 
-folly::Optional<DArrLikePacked> toDArrLikePacked(SArray ar) {
+Optional<DArrLikePacked> toDArrLikePacked(SArray ar) {
   assertx(!ar->empty());
 
   std::vector<Type> elems;
@@ -216,30 +215,30 @@ folly::Optional<DArrLikePacked> toDArrLikePacked(SArray ar) {
   auto idx = size_t{0};
   for (ArrayIter iter(ar); iter; ++iter, ++idx) {
     auto const key = *iter.first().asTypedValue();
-    if (key.m_type != KindOfInt64) return folly::none;
-    if (key.m_data.num != idx)     return folly::none;
+    if (key.m_type != KindOfInt64) return std::nullopt;
+    if (key.m_data.num != idx)     return std::nullopt;
     elems.emplace_back(from_cell(iter.secondVal()));
   }
 
   return DArrLikePacked { std::move(elems) };
 }
 
-folly::Optional<DArrLikePackedN> toDArrLikePackedN(SArray ar) {
+Optional<DArrLikePackedN> toDArrLikePackedN(SArray ar) {
   assertx(!ar->empty());
 
   auto t = TBottom;
   auto idx = int64_t{0};
   for (ArrayIter iter(ar); iter; ++iter, ++idx) {
     auto const key = *iter.first().asTypedValue();
-    if (key.m_type != KindOfInt64) return folly::none;
-    if (key.m_data.num != idx)     return folly::none;
+    if (key.m_type != KindOfInt64) return std::nullopt;
+    if (key.m_data.num != idx)     return std::nullopt;
     t |= from_cell(iter.secondVal());
   }
 
   return DArrLikePackedN { std::move(t) };
 }
 
-folly::Optional<DArrLikeMap> toDArrLikeMap(SArray ar) {
+Optional<DArrLikeMap> toDArrLikeMap(SArray ar) {
   assertx(!ar->empty());
   auto map = MapElems{};
   auto idx = int64_t{0};
@@ -258,12 +257,12 @@ folly::Optional<DArrLikeMap> toDArrLikeMap(SArray ar) {
         : MapElem::SStrKey(from_cell(value))
     );
   }
-  if (packed) return folly::none;
+  if (packed) return std::nullopt;
 
   return DArrLikeMap { std::move(map), TBottom, TBottom };
 }
 
-folly::Optional<DArrLikeMapN> toDArrLikeMapN(SArray ar) {
+Optional<DArrLikeMapN> toDArrLikeMapN(SArray ar) {
   assertx(!ar->empty());
 
   auto k = TBottom;
@@ -280,7 +279,7 @@ folly::Optional<DArrLikeMapN> toDArrLikeMapN(SArray ar) {
     }
   }
 
-  if (packed || is_scalar_counted(k)) return folly::none;
+  if (packed || is_scalar_counted(k)) return std::nullopt;
   return DArrLikeMapN { std::move(k), std::move(v) };
 }
 
@@ -727,16 +726,16 @@ struct DualDispatchIntersectionImpl {
    * bits). This is a rare operation so there's no real cost.
    *
    * All the intersection helper functions take the current trep by
-   * ref and return an optional Type. If it returns folly::none, the
+   * ref and return an optional Type. If it returns std::nullopt, the
    * trep is assumed to be modified and the process
    * restarts. Otherwise the operation is assumed to have finished
    * successfully. This is guaranteed to terminate because we only
-   * return folly::none when we've removed bits from the trep (and
+   * return std::nullopt when we've removed bits from the trep (and
    * thus we'll eventually run out of bits to remove).
    */
 
   template <typename F>
-  folly::Optional<Type> intersect_packed(trep& bits,
+  Optional<Type> intersect_packed(trep& bits,
                                          std::vector<Type> elems,
                                          F next) const {
     auto const valBits = allowedValBits(bits, true);
@@ -763,20 +762,20 @@ struct DualDispatchIntersectionImpl {
         if (couldBe(bits, BKeysetN) && !e.couldBe(BInt)) {
           bits &= ~BKeysetN;
           if (!couldBe(bits, BArrLikeN)) return TBottom;
-          return folly::none;
+          return std::nullopt;
         }
 
         if (mustContainUncounted(bits) && !e.couldBe(BUnc)) {
           bits = remove_single_static_bits(bits);
           if (!couldBe(bits, BArrLikeN)) return TBottom;
-          return folly::none;
+          return std::nullopt;
         }
       }
 
       if (couldBe(bits, BKeysetN) && !e.couldBe(ival(i))) {
         bits &= ~BKeysetN;
         if (!couldBe(bits, BArrLikeN)) return TBottom;
-        return folly::none;
+        return std::nullopt;
       }
 
       ++i;
@@ -785,7 +784,7 @@ struct DualDispatchIntersectionImpl {
     return packed_impl(bits, ham, std::move(elems));
   }
 
-  folly::Optional<Type> handle_packedn(trep& bits, Type val) const {
+  Optional<Type> handle_packedn(trep& bits, Type val) const {
     if (val.is(BBottom)) return TBottom;
 
     auto const valBits = allowedValBits(bits, true);
@@ -811,13 +810,13 @@ struct DualDispatchIntersectionImpl {
       if (couldBe(bits, BKeysetN) && !val.couldBe(BInt)) {
         bits &= ~BKeysetN;
         if (!couldBe(bits, BArrLikeN)) return TBottom;
-        return folly::none;
+        return std::nullopt;
       }
 
       if (mustContainUncounted(bits) && !val.couldBe(BUnc)) {
         bits = remove_single_static_bits(bits);
         if (!couldBe(bits, BArrLikeN)) return TBottom;
-        return folly::none;
+        return std::nullopt;
       }
     }
 
@@ -826,13 +825,13 @@ struct DualDispatchIntersectionImpl {
         ival_of(val) != 0) {
       bits &= ~BKeysetN;
       if (!couldBe(bits, BArrLikeN)) return TBottom;
-      return folly::none;
+      return std::nullopt;
     }
 
     return packedn_impl(bits, ham, std::move(val));
   }
 
-  folly::Optional<Type> handle_mapn(trep& bits, Type key, Type val) const {
+  Optional<Type> handle_mapn(trep& bits, Type key, Type val) const {
     if (key.is(BBottom) || val.is(BBottom)) return TBottom;
 
     // Special case: A Vec on its own cannot have a Map specialization
@@ -866,7 +865,7 @@ struct DualDispatchIntersectionImpl {
       if (couldBe(bits, BVecN) && !key.couldBe(BInt)) {
         bits &= ~BVecN;
         if (!couldBe(bits, BArrLikeN)) return TBottom;
-        return folly::none;
+        return std::nullopt;
       }
 
       if (couldBe(bits, BKeysetN)) {
@@ -875,14 +874,14 @@ struct DualDispatchIntersectionImpl {
         if (!key.couldBe(arrkey)) {
           bits &= ~BKeysetN;
           if (!couldBe(bits, BArrLikeN)) return TBottom;
-          return folly::none;
+          return std::nullopt;
         }
       }
 
       if (mustContainUncounted(bits) && !key.couldBe(BUnc)) {
         bits = remove_single_static_bits(bits);
         if (!couldBe(bits, BArrLikeN)) return TBottom;
-        return folly::none;
+        return std::nullopt;
       }
     }
 
@@ -893,27 +892,27 @@ struct DualDispatchIntersectionImpl {
         if (!val.couldBe(arrkey)) {
           bits &= ~BKeysetN;
           if (!couldBe(bits, BArrLikeN)) return TBottom;
-          return folly::none;
+          return std::nullopt;
         }
       }
 
       if (mustContainUncounted(bits) && !val.couldBe(BUnc)) {
         bits = remove_single_static_bits(bits);
         if (!couldBe(bits, BArrLikeN)) return TBottom;
-        return folly::none;
+        return std::nullopt;
       }
     }
 
     if (couldBe(bits, BKeysetN) && !key.couldBe(val)) {
       bits &= ~BKeysetN;
       if (!couldBe(bits, BArrLikeN)) return TBottom;
-      return folly::none;
+      return std::nullopt;
     }
 
     return mapn_impl(bits, ham, std::move(key), std::move(val));
   }
 
-  folly::Optional<Type> handle_map(trep& bits,
+  Optional<Type> handle_map(trep& bits,
                                    MapElems elems,
                                    Type optKey,
                                    Type optVal) const {
@@ -951,7 +950,7 @@ struct DualDispatchIntersectionImpl {
           kv.second.keyStaticness == TriBool::No) {
         bits = remove_single_static_bits(bits);
         if (!couldBe(bits, BArrLikeN)) return TBottom;
-        return folly::none;
+        return std::nullopt;
       }
 
       if (!kv.second.val.couldBe(valBits.second)) {
@@ -961,20 +960,20 @@ struct DualDispatchIntersectionImpl {
           if (!kv.second.val.couldBe(val)) {
             bits &= ~BKeysetN;
             if (!couldBe(bits, BArrLikeN)) return TBottom;
-            return folly::none;
+            return std::nullopt;
           }
         }
         if (mustContainUncounted(bits) && !kv.second.val.couldBe(BUnc)) {
           bits = remove_single_static_bits(bits);
           if (!couldBe(bits, BArrLikeN)) return TBottom;
-          return folly::none;
+          return std::nullopt;
         }
       }
       if (couldBe(bits, BKeysetN) &&
           !kv.second.val.couldBe(map_key(kv.first, kv.second))) {
         bits &= ~BKeysetN;
         if (!couldBe(bits, BArrLikeN)) return TBottom;
-        return folly::none;
+        return std::nullopt;
       }
     }
 
@@ -1114,7 +1113,7 @@ struct DualDispatchIntersectionImpl {
   }
   Type operator()(const DArrLikeMapN& a, const DArrLikeMap& b) const {
     return handle(
-      [&] (trep& bits) -> folly::Optional<Type> {
+      [&] (trep& bits) -> Optional<Type> {
         auto map = MapElems{};
 
         for (auto const& kv : b.map) {
@@ -1151,7 +1150,7 @@ struct DualDispatchIntersectionImpl {
     }
 
     return handle(
-      [&] (trep& bits) -> folly::Optional<Type> {
+      [&] (trep& bits) -> Optional<Type> {
         auto map = MapElems{};
 
         auto aIt = begin(a.map);
@@ -1218,7 +1217,7 @@ struct DualDispatchIntersectionImpl {
   }
   Type operator()(const DArrLikeNone&, const DArrLikePackedN& b) const {
     return handle(
-      [&] (trep& bits) -> folly::Optional<Type> {
+      [&] (trep& bits) -> Optional<Type> {
         auto const keys = allowedKeyBits(bits).first;
         if (!couldBe(keys, BInt)) return TBottom;
         auto const vals = allowedValBits(bits, true).first;
@@ -1228,7 +1227,7 @@ struct DualDispatchIntersectionImpl {
   }
   Type operator()(const DArrLikeNone&, const DArrLikePacked& b) const {
     return handle(
-      [&] (trep& bits) -> folly::Optional<Type> {
+      [&] (trep& bits) -> Optional<Type> {
         auto const keys = allowedKeyBits(bits).first;
         if (!couldBe(keys, BInt)) return TBottom;
         auto const vals = Type{allowedValBits(bits, true).first};
@@ -1251,7 +1250,7 @@ struct DualDispatchIntersectionImpl {
   }
   Type operator()(const DArrLikeNone&, const DArrLikeMap& b) const {
     return handle(
-      [&] (trep& bits) -> folly::Optional<Type> {
+      [&] (trep& bits) -> Optional<Type> {
         auto const keys = Type{allowedKeyBits(bits).first};
         auto const vals = Type{allowedValBits(bits, false).first};
 
@@ -1757,17 +1756,17 @@ using DualDispatchIntersection = Commute<DualDispatchIntersectionImpl>;
 // Helpers for creating literal array-like types
 
 template<typename AInit, bool force_static, bool allow_counted>
-folly::Optional<TypedValue> fromTypeVec(const std::vector<Type>& elems,
+Optional<TypedValue> fromTypeVec(const std::vector<Type>& elems,
                                         trep bits,
                                         HAMSandwich ham) {
   assertx(ham.checkInvariants(bits));
   auto const legacyMark = ham.legacyMark(bits);
-  if (legacyMark == LegacyMark::Unknown) return folly::none;
+  if (legacyMark == LegacyMark::Unknown) return std::nullopt;
 
   AInit ai{elems.size()};
   for (auto const& t : elems) {
     auto const v = allow_counted ? tvCounted(t) : tv(t);
-    if (!v) return folly::none;
+    if (!v) return std::nullopt;
     ai.append(tvAsCVarRef(&*v));
   }
   auto var = ai.toVariant();
@@ -1806,12 +1805,12 @@ void add(KeysetInit& ai, const Variant& key, const Variant& value) {
 }
 
 template<typename AInit, bool force_static, bool allow_counted>
-folly::Optional<TypedValue> fromTypeMap(const MapElems& elems,
-                                        trep bits,
-                                        HAMSandwich ham) {
+Optional<TypedValue> fromTypeMap(const MapElems& elems,
+                                 trep bits,
+                                 HAMSandwich ham) {
   assertx(ham.checkInvariants(bits));
   auto const legacyMark = ham.legacyMark(bits);
-  if (legacyMark == LegacyMark::Unknown) return folly::none;
+  if (legacyMark == LegacyMark::Unknown) return std::nullopt;
 
   auto val = eval_cell_value([&] () -> TypedValue {
     AInit ai{elems.size()};
@@ -1833,7 +1832,7 @@ folly::Optional<TypedValue> fromTypeMap(const MapElems& elems,
     if (force_static) var.setEvalScalar();
     return tvReturn(std::move(var));
   });
-  if (val && val->m_type == KindOfUninit) val.clear();
+  if (val && val->m_type == KindOfUninit) val.reset();
   return val;
 }
 
@@ -3473,16 +3472,16 @@ Type objcls(const Type& t) {
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<int64_t> arr_size(const Type& t) {
+Optional<int64_t> arr_size(const Type& t) {
   if (t.subtypeOf(BArrLikeE)) return 0;
-  if (!t.subtypeOf(BArrLikeN)) return folly::none;
+  if (!t.subtypeOf(BArrLikeN)) return std::nullopt;
 
   switch (t.m_dataTag) {
     case DataTag::ArrLikeVal:
       return t.m_data.aval->size();
 
     case DataTag::ArrLikeMap:
-      if (t.m_data.map->hasOptElements()) return folly::none;
+      if (t.m_data.map->hasOptElements()) return std::nullopt;
       return t.m_data.map->map.size();
 
     case DataTag::ArrLikePacked:
@@ -3499,7 +3498,7 @@ folly::Optional<int64_t> arr_size(const Type& t) {
     case DataTag::WaitHandle:
     case DataTag::Cls:
     case DataTag::Record:
-      return folly::none;
+      return std::nullopt;
   }
   not_reached();
 }
@@ -3756,16 +3755,16 @@ R tvImpl(const Type& t) {
   return R{};
 }
 
-folly::Optional<TypedValue> tv(const Type& t) {
-  return tvImpl<folly::Optional<TypedValue>, true, false>(t);
+Optional<TypedValue> tv(const Type& t) {
+  return tvImpl<Optional<TypedValue>, true, false>(t);
 }
 
-folly::Optional<TypedValue> tvNonStatic(const Type& t) {
-  return tvImpl<folly::Optional<TypedValue>, false, false>(t);
+Optional<TypedValue> tvNonStatic(const Type& t) {
+  return tvImpl<Optional<TypedValue>, false, false>(t);
 }
 
-folly::Optional<TypedValue> tvCounted(const Type& t) {
-  return tvImpl<folly::Optional<TypedValue>, true, true>(t);
+Optional<TypedValue> tvCounted(const Type& t) {
+  return tvImpl<Optional<TypedValue>, true, true>(t);
 }
 
 bool is_scalar(const Type& t) {
@@ -3836,7 +3835,7 @@ Type type_of_istype(IsTypeOp op) {
   not_reached();
 }
 
-folly::Optional<IsTypeOp> type_to_istypeop(const Type& t) {
+Optional<IsTypeOp> type_to_istypeop(const Type& t) {
   if (t.subtypeOf(BNull))   return IsTypeOp::Null;
   if (t.subtypeOf(BBool))   return IsTypeOp::Bool;
   if (t.subtypeOf(BInt))    return IsTypeOp::Int;
@@ -3851,13 +3850,13 @@ folly::Optional<IsTypeOp> type_to_istypeop(const Type& t) {
   if (t.subtypeOf(BCls)) return IsTypeOp::Class;
   if (t.subtypeOf(BLazyCls)) return IsTypeOp::Class;
   if (t.subtypeOf(BFunc)) return IsTypeOp::Func;
-  return folly::none;
+  return std::nullopt;
 }
 
-folly::Optional<Type> type_of_type_structure(const Index& index,
+Optional<Type> type_of_type_structure(const Index& index,
                                              Context ctx,
                                              SArray ts) {
-  auto base = [&] () -> folly::Optional<Type> {
+  auto base = [&] () -> Optional<Type> {
     switch (get_ts_kind(ts)) {
       case TypeStructure::Kind::T_int:      return TInt;
       case TypeStructure::Kind::T_bool:     return TBool;
@@ -3881,16 +3880,16 @@ folly::Optional<Type> type_of_type_structure(const Index& index,
         for (auto i = 0; i < tsElems->size(); i++) {
           auto t = type_of_type_structure(
             index, ctx, tsElems->getValue(i).getArrayData());
-          if (!t) return folly::none;
+          if (!t) return std::nullopt;
           v.emplace_back(remove_uninit(std::move(t.value())));
         }
-        if (v.empty()) return folly::none;
+        if (v.empty()) return std::nullopt;
         return vec(v);
       }
       case TypeStructure::Kind::T_shape: {
         // Taking a very conservative approach to shapes where we dont do any
         // conversions if the shape contains unknown or optional fields
-        if (does_ts_shape_allow_unknown_fields(ts)) return folly::none;
+        if (does_ts_shape_allow_unknown_fields(ts)) return std::nullopt;
         auto map = MapElems{};
         auto const fields = get_ts_fields(ts);
         for (auto i = 0; i < fields->size(); i++) {
@@ -3909,26 +3908,26 @@ folly::Optional<Type> type_of_type_structure(const Index& index,
 
             auto const rcls = index.resolve_class(ctx, makeStaticString(cls));
             if (!rcls || index.lookup_class_init_might_raise(ctx, *rcls)) {
-              return folly::none;
+              return std::nullopt;
             }
             auto const tcns = index.lookup_class_constant(
               ctx, *rcls, makeStaticString(cns), false);
 
             auto const vcns = tv(tcns);
-            if (!vcns || !isStringType(type(*vcns))) return folly::none;
+            if (!vcns || !isStringType(type(*vcns))) return std::nullopt;
             key = val(*vcns).pstr;
           }
 
           // Optional fields are hard to represent as a type
-          if (is_optional_ts_shape_field(wrapper)) return folly::none;
+          if (is_optional_ts_shape_field(wrapper)) return std::nullopt;
           auto t = type_of_type_structure(index, ctx, get_ts_value(wrapper));
-          if (!t) return folly::none;
+          if (!t) return std::nullopt;
           map.emplace_back(
             make_tv<KindOfPersistentString>(key),
             MapElem::SStrKey(remove_uninit(std::move(t.value())))
           );
         }
-        if (map.empty()) return folly::none;
+        if (map.empty()) return std::nullopt;
         return dict_map(map);
       }
       case TypeStructure::Kind::T_vec_or_dict: return union_of(TVec, TDict);
@@ -3951,7 +3950,7 @@ folly::Optional<Type> type_of_type_structure(const Index& index,
       case TypeStructure::Kind::T_typevar:
       case TypeStructure::Kind::T_trait:
       case TypeStructure::Kind::T_reifiedtype:
-        return folly::none;
+        return std::nullopt;
     }
     not_reached();
   }();
@@ -4153,8 +4152,8 @@ Type intersection_of(Type a, Type b) {
 
   // Try to determine if the given wait-handle and given specialized
   // object are a subtype of either. If so, return the (reused) more
-  // specific type. Return folly::none if neither are.
-  auto const whAndObj = [&] (Type& wh, Type& obj) -> folly::Optional<Type> {
+  // specific type. Return std::nullopt if neither are.
+  auto const whAndObj = [&] (Type& wh, Type& obj) -> Optional<Type> {
     if (obj.m_data.dobj.type == DObj::Sub &&
         obj.m_data.dobj.cls.same(wh.m_data.dwh.cls) &&
         !obj.m_data.dobj.isCtx) {
@@ -4167,7 +4166,7 @@ Type intersection_of(Type a, Type b) {
     if (obj.m_data.dobj.type == DObj::Sub &&
         obj.m_data.dobj.cls.couldBeInterface()) return reuse(wh);
 
-    return folly::none;
+    return std::nullopt;
   };
 
   // If both sides have matching specialized data, check if the
@@ -4419,9 +4418,9 @@ Type union_of(Type a, Type b) {
   };
 
   // Check if the given DWaitHandle or DObj is a subtype of each
-  // other, returning the less specific type. Returns folly::none if
+  // other, returning the less specific type. Returns std::nullopt if
   // neither of them is.
-  auto const whAndObj = [&] (Type& wh, Type& obj) -> folly::Optional<Type> {
+  auto const whAndObj = [&] (Type& wh, Type& obj) -> Optional<Type> {
     if (obj.m_data.dobj.type == DObj::Sub &&
         obj.m_data.dobj.cls.same(wh.m_data.dwh.cls) &&
         !obj.m_data.dobj.isCtx) {
@@ -4430,7 +4429,7 @@ Type union_of(Type a, Type b) {
     const DObj whDObj{ DObj::Sub, wh.m_data.dwh.cls };
     if (subtypeObj<true>(obj.m_data.dobj, whDObj)) return reuse(wh);
     if (subtypeObj<true>(whDObj, obj.m_data.dobj)) return reuse(obj);
-    return folly::none;
+    return std::nullopt;
   };
 
   // If both sides have the same specialization, check if they are
@@ -5462,7 +5461,7 @@ IterTypes iter_types(const Type& iterable) {
   // that possibly "empty".
   auto const maybeEmpty = mayThrow || !iterable.subtypeOf(BOptArrLikeN);
 
-  auto const count = [&] (folly::Optional<size_t> size) {
+  auto const count = [&] (Optional<size_t> size) {
     if (size) {
       assertx(*size > 0);
       if (*size == 1) {
@@ -5497,7 +5496,7 @@ IterTypes iter_types(const Type& iterable) {
     return {
       std::move(kv.first),
       std::move(kv.second),
-      count(folly::none),
+      count(std::nullopt),
       mayThrow,
       false
     };
@@ -5536,7 +5535,7 @@ IterTypes iter_types(const Type& iterable) {
     return {
       TInt,
       iterable.m_data.packedn->type,
-      count(folly::none),
+      count(std::nullopt),
       mayThrow,
       false
     };
@@ -5546,7 +5545,7 @@ IterTypes iter_types(const Type& iterable) {
       std::move(kv.first),
       std::move(kv.second),
       iterable.m_data.map->hasOptElements()
-        ? count(folly::none)
+        ? count(std::nullopt)
         : count(iterable.m_data.map->map.size()),
       mayThrow,
       false
@@ -5556,7 +5555,7 @@ IterTypes iter_types(const Type& iterable) {
     return {
       iterable.m_data.mapn->key,
       iterable.m_data.mapn->val,
-      count(folly::none),
+      count(std::nullopt),
       mayThrow,
       false
     };
@@ -5646,7 +5645,7 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
   // If either is an empty array, there are no inner elements to warn about.
   if (!t1.couldBe(BArrLikeN) || !t2.couldBe(BArrLikeN)) return false;
 
-  auto const checkOne = [&] (const Type& t, folly::Optional<size_t>& sz) {
+  auto const checkOne = [&] (const Type& t, Optional<size_t>& sz) {
     switch (t.m_dataTag) {
       case DataTag::None:
         return true;
@@ -5678,9 +5677,9 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
     not_reached();
   };
 
-  folly::Optional<size_t> sz1;
+  Optional<size_t> sz1;
   if (!checkOne(t1, sz1)) return false;
-  folly::Optional<size_t> sz2;
+  Optional<size_t> sz2;
   if (!checkOne(t2, sz2)) return false;
 
   // if the arrays have different sizes, we don't even check their contents
@@ -5695,13 +5694,13 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
     MapElems::iterator it;
   } p1, p2;
 
-  folly::Optional<Type> vals1;
-  folly::Optional<Type> vals2;
+  Optional<Type> vals1;
+  Optional<Type> vals2;
 
   for (size_t i = 0; i < numToCheck; i++) {
     auto const nextType = [&] (const Type& t,
                                ArrPos& p,
-                               folly::Optional<Type>& vals) {
+                               Optional<Type>& vals) {
       switch (t.m_dataTag) {
         case DataTag::None:
           return TInitCell;
@@ -5758,13 +5757,13 @@ bool compare_might_raise(const Type& t1, const Type& t2) {
     return false;
   }
 
-  auto const checkOne = [&] (const trep bits) -> folly::Optional<bool> {
+  auto const checkOne = [&] (const trep bits) -> Optional<bool> {
     if (t1.subtypeOf(bits) && t2.subtypeOf(bits)) {
       return inner_types_might_raise(t1, t2);
     }
     if (t1.couldBe(bits) && t2.couldBe(BArrLike)) return true;
     if (t2.couldBe(bits) && t1.couldBe(BArrLike)) return true;
-    return folly::none;
+    return std::nullopt;
   };
 
   if (auto const f = checkOne(BDict)) return *f;
@@ -6770,13 +6769,13 @@ std::pair<Type, Promotion> promote_classlike_to_key(Type ty) {
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<RepoAuthType>
+Optional<RepoAuthType>
 make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
                    const Type& t) {
   assertx(t.subtypeOf(BOptArrLike));
   assertx(is_specialized_array_like(t));
 
-  auto const tag = [&]() -> folly::Optional<RepoAuthType::Tag> {
+  auto const tag = [&]() -> Optional<RepoAuthType::Tag> {
     if (t.subtypeOf(BSVec))     return RepoAuthType::Tag::SVec;
     if (t.subtypeOf(BVec))      return RepoAuthType::Tag::Vec;
     if (t.subtypeOf(BOptSVec))  return RepoAuthType::Tag::OptSVec;
@@ -6795,9 +6794,9 @@ make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
     // The JIT doesn't (currently) take advantage of specializations
     // for any array types except the above, so there's no point in
     // encoding them.
-    return folly::none;
+    return std::nullopt;
   }();
-  if (!tag) return folly::none;
+  if (!tag) return std::nullopt;
 
   // NB: Because of the type checks above for the tag, we know that
   // the empty bits must correspond to the specialization (which is
@@ -7041,7 +7040,7 @@ Type make_arrval_for_testing(trep bits, SArray a) {
 
 Type make_arrpacked_for_testing(trep bits,
                                 std::vector<Type> elems,
-                                folly::Optional<LegacyMark> mark) {
+                                Optional<LegacyMark> mark) {
   auto t = Type { bits, HAMSandwich::TopForBits(bits) };
   construct_inner(t.m_data.packed, std::move(elems));
   t.m_dataTag = DataTag::ArrLikePacked;
@@ -7062,7 +7061,7 @@ Type make_arrmap_for_testing(trep bits,
                              MapElems m,
                              Type optKey,
                              Type optVal,
-                             folly::Optional<LegacyMark> mark) {
+                             Optional<LegacyMark> mark) {
   auto t = Type { bits, HAMSandwich::TopForBits(bits) };
   construct_inner(
     t.m_data.map,

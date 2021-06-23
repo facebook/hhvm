@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/req-tiny-vector.h"
 
-#include <folly/Optional.h>
+#include "hphp/util/optional.h"
 
 namespace HPHP { namespace jit {
 
@@ -64,7 +64,7 @@ struct ArrayLayout {
 
   // The result is non-null iff the layout is a bespoke layout.
   const bespoke::Layout* bespokeLayout() const;
-  folly::Optional<bespoke::LayoutIndex> layoutIndex() const;
+  Optional<bespoke::LayoutIndex> layoutIndex() const;
 
   LayoutTest bespokeLayoutTest() const;
 

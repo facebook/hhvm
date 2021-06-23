@@ -16,18 +16,18 @@
 
 #include "hphp/util/jemalloc-util.h"
 
-#include <folly/Optional.h>
+#include "hphp/util/optional.h"
 
 namespace HPHP {
 
 namespace {
 #ifdef USE_JEMALLOC
-folly::Optional<unsigned> allArenas() {
+Optional<unsigned> allArenas() {
   assert(mallctlnametomib && mallctlbymib);
   unsigned allArenas = 0;
 #ifndef MALLCTL_ARENAS_ALL
   if (mallctlRead<unsigned, true>("arenas.narenas", &allArenas)) {
-    return folly::none;
+    return std::nullopt;
   }
 #else
   allArenas = MALLCTL_ARENAS_ALL;

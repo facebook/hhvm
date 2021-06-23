@@ -296,7 +296,7 @@ TypedValue HHVM_FUNCTION(array_count_values,
 Array HHVM_FUNCTION(array_fill_keys,
                     const Variant& keys,
                     const Variant& value) {
-  folly::Optional<DArrayInit> ai;
+  Optional<DArrayInit> ai;
   auto ok = IterateV(
     *keys.asTypedValue(),
     [&](ArrayData* adata) {
@@ -1202,7 +1202,7 @@ TypedValue HHVM_FUNCTION(array_values,
     return tvReturn(input.toVec());
   }
 
-  folly::Optional<VArrayInit> ai;
+  Optional<VArrayInit> ai;
   auto ok = IterateV(*input.asTypedValue(),
                      [&](ArrayData* adata) {
                        ai.emplace(adata->size());

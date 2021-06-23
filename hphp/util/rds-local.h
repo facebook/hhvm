@@ -19,9 +19,8 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/optional.h"
 #include "hphp/util/thread-local.h"
-
-#include <folly/Optional.h>
 
 namespace HPHP {
 
@@ -167,11 +166,11 @@ struct RDSLocalBase;
 template<typename T>
 struct RDSLocalBase<T, std::enable_if_t<std::is_copy_constructible<T>::value>>
     : RDSLocalNode {
-  folly::Optional<T> m_defaultValue;
+  Optional<T> m_defaultValue;
   void setDefault(const T& v) {
     m_defaultValue = v;
   }
-  folly::Optional<T> getDefault() const {
+  Optional<T> getDefault() const {
     return m_defaultValue;
   }
 };
@@ -180,7 +179,7 @@ template<typename T>
 struct RDSLocalBase<T, std::enable_if_t<!std::is_copy_constructible<T>::value>>
   : RDSLocalNode {
   void setDefault(const T& v) {}
-  folly::Optional<T> getDefault() const { return folly::none; }
+  Optional<T> getDefault() const { return std::nullopt; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -341,7 +340,7 @@ protected:
   template<typename V = void>
   NREH_t<V> rehInit() const {}
 
-  // Node reimplements parts of what folly::Optional supplies, however it does
+  // Node reimplements parts of what Optional supplies, however it does
   // so trusting that the user will check values are present as appropriate.
   struct Node {
     Node() : hasValue(false) {}

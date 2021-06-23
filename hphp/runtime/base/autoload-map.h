@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <optional>
 #include <vector>
 
 #include "hphp/runtime/base/type-string.h"
@@ -76,7 +75,7 @@ struct AutoloadMap {
    * Return None if the file is defined in zero places or more than
    * one place.
    */
-  std::optional<String> getFile(KindOf kind,
+  Optional<String> getFile(KindOf kind,
                                   const String& typeName) {
     switch (kind) {
       case AutoloadMap::KindOf::Type:
@@ -116,13 +115,13 @@ struct AutoloadMap {
   /**
    * Map symbols to files
    */
-  virtual std::optional<String> getTypeFile(
+  virtual Optional<String> getTypeFile(
       const String& typeName) = 0;
-  virtual std::optional<String> getFunctionFile(
+  virtual Optional<String> getFunctionFile(
       const String& functionName) = 0;
-  virtual std::optional<String> getConstantFile(
+  virtual Optional<String> getConstantFile(
       const String& constantName) = 0;
-  virtual std::optional<String> getTypeAliasFile(
+  virtual Optional<String> getTypeAliasFile(
       const String& typeAliasName) = 0;
 
   /**

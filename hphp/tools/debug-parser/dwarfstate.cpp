@@ -18,6 +18,8 @@
 
 #include "hphp/tools/debug-parser/dwarfstate.h"
 
+#include "hphp/util/optional.h"
+
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -1174,7 +1176,7 @@ DwarfState::getRanges(Dwarf_Attribute attr) const -> std::vector<Dwarf_Ranges> {
 
 namespace {
 template<typename R, typename T, typename F>
-folly::Optional<R> thingToResult(T thing, F values) {
+HPHP::Optional<R> thingToResult(T thing, F values) {
   auto init = [] (auto v) {
     std::sort(v.begin(), v.end(), [] (const auto& a, const auto& b) {
         return a.first < b.first;
@@ -1187,7 +1189,7 @@ folly::Optional<R> thingToResult(T thing, F values) {
                                return p.first < thing;
                              });
   if (it != things.end() && it->first == thing) return it->second;
-  return folly::none;
+  return std::nullopt;
 }
 
 template<typename T, typename F>

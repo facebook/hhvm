@@ -215,7 +215,7 @@ const StaticString
   s_file("file"),
   s_line("line");
 
-std::optional<String> AutoloadHandler::getFile(const String& clsName,
+Optional<String> AutoloadHandler::getFile(const String& clsName,
                                                AutoloadMap::KindOf kind) {
   assertx(m_map);
   // Always normalize name before autoloading

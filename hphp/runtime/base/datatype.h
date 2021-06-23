@@ -21,10 +21,10 @@
 #include <string>
 
 #include <folly/Format.h>
-#include <folly/Optional.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/low-ptr.h"
+#include "hphp/util/optional.h"
 #include "hphp/util/portability.h"
 
 namespace HPHP {
@@ -192,7 +192,7 @@ constexpr DataType dt_modulo_persistence(DataType dt) {
  * context.  Users who wish to use (DataType|KindOfNoneType|KindOfAnyType)
  * should consider dying in a fire.
  */
-using MaybeDataType = folly::Optional<DataType>;
+using MaybeDataType = Optional<DataType>;
 
 /*
  * Extracts the DataType from the given type
@@ -276,7 +276,7 @@ constexpr bool isRealType(DataType t) {
  * Whether a builtin return or param type is not a simple type.
  *
  * This is different from isRefcountedType because builtins can accept and
- * return Variants, and we use folly::none to denote these cases.
+ * return Variants, and we use std::nullopt to denote these cases.
  */
 inline bool isBuiltinByRef(MaybeDataType t) {
   return t != KindOfNull &&
@@ -428,4 +428,3 @@ template<> class FormatValue<HPHP::DataType> {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-

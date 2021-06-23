@@ -48,8 +48,6 @@
 
 #include "hphp/util/trace.h"
 
-#include <folly/Optional.h>
-
 namespace HPHP { namespace jit { namespace irlower {
 
 TRACE_SET_MOD(irlower);

@@ -40,7 +40,7 @@ struct PrologueTranslator final : Translator {
     , nPassed(nPassed)
   {}
   int paramIndex() const;
-  folly::Optional<TranslationResult> getCached() override;
+  Optional<TranslationResult> getCached() override;
   void resetCached() override;
   void setCachedForProcessFail() override;
   void smashBackup() override;

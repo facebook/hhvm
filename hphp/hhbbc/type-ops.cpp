@@ -15,8 +15,6 @@
 */
 #include "hphp/hhbbc/type-ops.h"
 
-#include <folly/Optional.h>
-
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-arith.h"
 
@@ -29,7 +27,7 @@ namespace HPHP { namespace HHBBC {
 
 namespace {
 
-folly::Optional<Type> usual_arith_conversions(Type t1, Type t2) {
+Optional<Type> usual_arith_conversions(Type t1, Type t2) {
   /*
    * TODO(#3577303): some of these could be nothrow, which is probably
    * information we have want to propagate back out through the return
@@ -41,15 +39,15 @@ folly::Optional<Type> usual_arith_conversions(Type t1, Type t2) {
   if (t1.subtypeOf(BDbl) && t2.subtypeOf(BInt)) return TDbl;
   if (t1.subtypeOf(BDbl) && t2.subtypeOf(BDbl)) return TDbl;
   if (t1.subtypeOf(BNum) && t2.subtypeOf(BNum)) return TNum;
-  return folly::none;
+  return std::nullopt;
 }
 
 template<class Fun>
-folly::Optional<Type> eval_const(Type t1, Type t2, Fun fun) {
+Optional<Type> eval_const(Type t1, Type t2, Fun fun) {
   auto const v1 = tv(t1);
   auto const v2 = tv(t2);
   if (v1 && v2) return eval_cell([&] { return fun(*v1, *v2); });
-  return folly::none;
+  return std::nullopt;
 }
 
 template<class Fun>

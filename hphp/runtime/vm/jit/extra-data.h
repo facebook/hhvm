@@ -29,12 +29,12 @@
 #include "hphp/runtime/ext/generator/ext_generator.h"
 
 #include "hphp/util/arena.h"
+#include "hphp/util/optional.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/safe-cast.h"
 
 #include <folly/Conv.h>
 #include <folly/Hash.h>
-#include <folly/Optional.h>
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
 
@@ -699,7 +699,7 @@ struct TransIDData : IRExtraData {
 };
 
 struct DefFPData : IRExtraData {
-  explicit DefFPData(folly::Optional<IRSPRelOffset> offset) : offset(offset) {}
+  explicit DefFPData(Optional<IRSPRelOffset> offset) : offset(offset) {}
 
   std::string show() const {
     if (!offset) return "IRSPOff unknown";
@@ -712,7 +712,7 @@ struct DefFPData : IRExtraData {
   }
 
   // Frame position on the stack, if it lives there and the position is known.
-  folly::Optional<IRSPRelOffset> offset;
+  Optional<IRSPRelOffset> offset;
 };
 
 /*
@@ -1032,7 +1032,7 @@ struct StFrameMetaData : IRExtraData {
 
 struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPRelOffset spOffset,
-                           folly::Optional<IRSPRelOffset> retSpOffset,
+                           Optional<IRSPRelOffset> retSpOffset,
                            const Func* callee)
     : spOffset(spOffset)
     , retSpOffset(retSpOffset)
@@ -1061,7 +1061,7 @@ struct CallBuiltinData : IRExtraData {
   }
 
   IRSPRelOffset spOffset; // offset from StkPtr to last passed arg
-  folly::Optional<IRSPRelOffset> retSpOffset; // offset from StkPtr after a return
+  Optional<IRSPRelOffset> retSpOffset; // offset from StkPtr after a return
   const Func* callee;
 };
 
@@ -1740,7 +1740,7 @@ struct NewKeysetArrayData : IRExtraData {
 
 struct MemoValueStaticData : IRExtraData {
   explicit MemoValueStaticData(const Func* func,
-                               folly::Optional<bool> asyncEager,
+                               Optional<bool> asyncEager,
                                bool loadAux)
     : func{func}
     , asyncEager{asyncEager}
@@ -1757,7 +1757,7 @@ struct MemoValueStaticData : IRExtraData {
   size_t stableHash() const {
     return folly::hash::hash_combine(
       func->stableHash(),
-      std::hash<folly::Optional<bool>>()(asyncEager),
+      std::hash<Optional<bool>>()(asyncEager),
       std::hash<bool>()(loadAux)
     );
   }
@@ -1767,14 +1767,14 @@ struct MemoValueStaticData : IRExtraData {
   }
 
   const Func* func;
-  folly::Optional<bool> asyncEager;
+  Optional<bool> asyncEager;
   bool loadAux;
 };
 
 struct MemoValueInstanceData : IRExtraData {
   explicit MemoValueInstanceData(Slot slot,
                                  const Func* func,
-                                 folly::Optional<bool> asyncEager,
+                                 Optional<bool> asyncEager,
                                  bool loadAux)
     : slot{slot}
     , func{func}
@@ -1794,7 +1794,7 @@ struct MemoValueInstanceData : IRExtraData {
     return folly::hash::hash_combine(
       std::hash<Slot>()(slot),
       func->stableHash(),
-      std::hash<folly::Optional<bool>>()(asyncEager),
+      std::hash<Optional<bool>>()(asyncEager),
       std::hash<bool>()(loadAux)
     );
   }
@@ -1806,7 +1806,7 @@ struct MemoValueInstanceData : IRExtraData {
 
   Slot slot;
   const Func* func;
-  folly::Optional<bool> asyncEager;
+  Optional<bool> asyncEager;
   bool loadAux;
 };
 
@@ -1814,7 +1814,7 @@ struct MemoCacheStaticData : IRExtraData {
   MemoCacheStaticData(const Func* func,
                       LocalRange keys,
                       const bool* types,
-                      folly::Optional<bool> asyncEager,
+                      Optional<bool> asyncEager,
                       bool loadAux)
     : func{func}
     , keys{keys}
@@ -1848,7 +1848,7 @@ struct MemoCacheStaticData : IRExtraData {
   size_t stableHash() const {
     auto hash = folly::hash::hash_combine(
       func->stableHash(),
-      std::hash<folly::Optional<bool>>()(asyncEager),
+      std::hash<Optional<bool>>()(asyncEager),
       std::hash<uint32_t>()(keys.first),
       std::hash<uint32_t>()(keys.count),
       std::hash<bool>()(loadAux)
@@ -1876,7 +1876,7 @@ struct MemoCacheStaticData : IRExtraData {
   const Func* func;
   LocalRange keys;
   const bool* types;
-  folly::Optional<bool> asyncEager;
+  Optional<bool> asyncEager;
   bool loadAux;
 };
 
@@ -1886,7 +1886,7 @@ struct MemoCacheInstanceData : IRExtraData {
                         const bool* types,
                         const Func* func,
                         bool shared,
-                        folly::Optional<bool> asyncEager,
+                        Optional<bool> asyncEager,
                         bool loadAux)
     : slot{slot}
     , keys{keys}
@@ -1926,7 +1926,7 @@ struct MemoCacheInstanceData : IRExtraData {
     auto hash = folly::hash::hash_combine(
       std::hash<Slot>()(slot),
       func->stableHash(),
-      std::hash<folly::Optional<bool>>()(asyncEager),
+      std::hash<Optional<bool>>()(asyncEager),
       std::hash<uint32_t>()(keys.first),
       std::hash<uint32_t>()(keys.count),
       std::hash<bool>()(loadAux),
@@ -1958,7 +1958,7 @@ struct MemoCacheInstanceData : IRExtraData {
   const bool* types;
   const Func* func;
   bool shared;
-  folly::Optional<bool> asyncEager;
+  Optional<bool> asyncEager;
   bool loadAux;
 };
 

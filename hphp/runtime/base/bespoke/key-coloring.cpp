@@ -28,7 +28,7 @@ TRACE_SET_MOD(bespoke);
 namespace {
 
 struct ColoringMetadata {
-  folly::Optional<ColorMap> coloring;
+  Optional<ColorMap> coloring;
   LayoutWeightVector coloringAcceptedLayouts;
   LayoutWeightVector coloringDiscardedLayouts;
 };
@@ -37,7 +37,7 @@ ColoringMetadata s_metadata;
 
 //////////////////////////////////////////////////////////////////////////////
 
-folly::Optional<ColorMap> performColoring(
+Optional<ColorMap> performColoring(
     const LayoutWeightVector::const_iterator& begin,
     const LayoutWeightVector::const_iterator& end) {
   FTRACE(3, "Attempting to color {} layouts.\n", std::distance(begin, end));
@@ -111,7 +111,7 @@ folly::Optional<ColorMap> performColoring(
     if (!colorAssigned) {
       FTRACE(3, "Colors exhausted while coloring {} layouts.\n",
              std::distance(begin, end));
-      return folly::none;
+      return std::nullopt;
     }
   }
 
@@ -149,7 +149,7 @@ folly::Optional<ColorMap> performColoring(
 
 //////////////////////////////////////////////////////////////////////////////
 
-std::pair<LayoutWeightVector::const_iterator, folly::Optional<ColorMap>>
+std::pair<LayoutWeightVector::const_iterator, Optional<ColorMap>>
  findKeyColoring(LayoutWeightVector& layouts) {
   FTRACE(3, "Attempting to color a prefix of {} layouts.\n", layouts.size());
   if (layouts.empty()) return {layouts.begin(), {}};

@@ -41,7 +41,7 @@ struct Vreg;
  */
 struct Vout {
   Vout(Vunit& u, Vlabel b,
-       folly::Optional<Vinstr::ir_context> irctx = folly::none)
+       Optional<Vinstr::ir_context> irctx = std::nullopt)
     : m_unit(u)
     , m_block(b)
     , m_irctx ( irctx ? *irctx

@@ -688,7 +688,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
   void insertSha1Hex(
       SQLiteTxn& txn,
       const folly::fs::path& path,
-      const std::optional<std::string>& sha1hex) override {
+      const Optional<std::string>& sha1hex) override {
     assertx(path.is_relative());
     auto query = txn.query(m_sha1HexStmts.m_insert);
     query.bindString("@path", path.native());
@@ -861,7 +861,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
       const folly::fs::path& path,
       const std::string_view type,
       const std::string_view attributeName,
-      std::optional<int> attributePosition,
+      Optional<int> attributePosition,
       const folly::dynamic* attributeValue) override {
 
     std::string attrValueJson;
@@ -896,7 +896,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
       std::string_view type,
       std::string_view method,
       std::string_view attributeName,
-      std::optional<int> attributePosition,
+      Optional<int> attributePosition,
       const folly::dynamic* attributeValue) override {
 
     std::string attrValueJson;
@@ -930,7 +930,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
       SQLiteTxn& txn,
       const folly::fs::path& path,
       std::string_view attributeName,
-      std::optional<int> attributePosition,
+      Optional<int> attributePosition,
       const folly::dynamic* attributeValue) override {
 
     std::string attrValueJson;

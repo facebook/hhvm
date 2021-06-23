@@ -20,8 +20,6 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/eh-frame.h"
 
-#include <folly/Optional.h>
-
 #include <string>
 #include <vector>
 
@@ -176,7 +174,7 @@ struct DwarfInfo {
   void transferFuncs(DwarfChunk* from, DwarfChunk* to);
   void compactChunks();
   DwarfChunk* addTracelet(TCRange range,
-                          folly::Optional<std::string> name,
+                          Optional<std::string> name,
                           const Func* func,
                           int lineNumber,
                           bool inPrologue);

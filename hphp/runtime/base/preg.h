@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/type-string.h"
 
 #include <folly/File.h>
-#include <folly/Optional.h>
 
 #include <cstdint>
 #include <cstddef>
@@ -71,7 +70,7 @@ struct pcre_literal_data {
   bool matches(const StringData* subject, int pos, int* offsets,
                int extra_options) const;
 
-  folly::Optional<std::string> literal_str;
+  Optional<std::string> literal_str;
   int options;
 };
 

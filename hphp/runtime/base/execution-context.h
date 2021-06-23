@@ -33,6 +33,7 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/optional.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/thread-local.h"
 
@@ -625,7 +626,7 @@ private:
   ExcLoggerHook m_logger_hook;
   rqtrace::Trace* m_requestTrace{nullptr};
 
-  folly::Optional<RepoOptions> m_requestOptions;
+  Optional<RepoOptions> m_requestOptions;
 
   Array m_debuggerEnv; // variables read/written in the REPL
 public:

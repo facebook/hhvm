@@ -131,7 +131,7 @@ StructSpec compileSpec(const Array& spec, const Class* cls, bool isBinary) {
   // A union field also writes to a property named __type. If one exists, we
   // need to also verify that it accepts integer values. We only need to do
   // this once, so cache it in the optional.
-  folly::Optional<bool> endPropOk;
+  Optional<bool> endPropOk;
   std::vector<FieldSpec> temp(spec.size());
   ArrayIter specIt = spec.begin();
   for (int i = 0; i < spec.size(); ++i, ++specIt) {

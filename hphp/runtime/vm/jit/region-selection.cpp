@@ -269,15 +269,15 @@ const RegionDesc::BlockIdSet& RegionDesc::merged(BlockId id) const {
   return data(id).merged;
 }
 
-folly::Optional<RegionDesc::BlockId> RegionDesc::prevRetrans(BlockId id) const {
+Optional<RegionDesc::BlockId> RegionDesc::prevRetrans(BlockId id) const {
   auto const prev = data(id).prevRetransId;
-  if (prev == kInvalidTransID) return folly::none;
+  if (prev == kInvalidTransID) return std::nullopt;
   return prev;
 }
 
-folly::Optional<RegionDesc::BlockId> RegionDesc::nextRetrans(BlockId id) const {
+Optional<RegionDesc::BlockId> RegionDesc::nextRetrans(BlockId id) const {
   auto const next = data(id).nextRetransId;
-  if (next == kInvalidTransID) return folly::none;
+  if (next == kInvalidTransID) return std::nullopt;
   return next;
 }
 

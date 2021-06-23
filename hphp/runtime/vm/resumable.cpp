@@ -36,11 +36,11 @@ char* resumeModeShortName(ResumeMode resumeMode) {
   }
 }
 
-folly::Optional<ResumeMode> nameToResumeMode(const std::string& name) {
+Optional<ResumeMode> nameToResumeMode(const std::string& name) {
   if (name == "") return ResumeMode::None;
   if (name == "ra") return ResumeMode::Async;
   if (name == "rg") return ResumeMode::GenIter;
-  return folly::none;
+  return std::nullopt;
 }
 
 ResumeMode resumeModeFromActRecImpl(ActRec* ar) {

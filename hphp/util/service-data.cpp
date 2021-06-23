@@ -83,7 +83,7 @@ void ExportedTimeSeries::exportAll(const std::string& prefix,
   }
 }
 
-folly::Optional<int64_t>
+Optional<int64_t>
 ExportedTimeSeries::getCounter(StatsType type, int seconds) {
   SYNCHRONIZED(m_timeseries) {
     m_timeseries.update(detail::nowAsSeconds());
@@ -101,7 +101,7 @@ ExportedTimeSeries::getCounter(StatsType type, int seconds) {
       }
     }
   }
-  return folly::none;
+  return std::nullopt;
 }
 
 int64_t ExportedTimeSeries::getSum() {
@@ -288,8 +288,8 @@ struct Impl {
     }
   }
 
-  folly::Optional<int64_t> exportCounterByKey(const std::string& key) {
-    if (key.empty()) return folly::none;
+  Optional<int64_t> exportCounterByKey(const std::string& key) {
+    if (key.empty()) return std::nullopt;
     auto const counterIter = m_counterMap.find(key);
     if (counterIter != m_counterMap.end()) {
       return counterIter->second->getValue();
@@ -310,7 +310,7 @@ struct Impl {
     int duration = 0;
     size_t index = key.size() - 1;
     while (isdigit(data[index])) {
-      if (index == 0) return folly::none;
+      if (index == 0) return std::nullopt;
       --index;
     }
     if (data[index] == '.') {
@@ -320,7 +320,7 @@ struct Impl {
     // Find the StatsType from: avg, sum, pct, rate, count
     auto const typeEnd = index;
     while (index > 0 && data[index] != '.') --index;
-    if (index == 0) return folly::none;
+    if (index == 0) return std::nullopt;
     if (typeEnd - index == 3) {
       if (!memcmp(data + index, ".avg", 4)) {
         type = ServiceData::StatsType::AVG;
@@ -329,24 +329,24 @@ struct Impl {
       } else if (!memcmp(data + index, ".pct", 4)) {
         type = ServiceData::StatsType::PCT;
       } else {
-        return folly::none;
+        return std::nullopt;
       }
     } else if (typeEnd - index == 4) {
       if (!memcmp(data + index, ".rate", 5)) {
         type = ServiceData::StatsType::RATE;
       } else {
-        return folly::none;
+        return std::nullopt;
       }
     } else if (typeEnd - index == 5) {
       if (!memcmp(data + index, ".count", 6)) {
         type = ServiceData::StatsType::COUNT;
       } else {
-        return folly::none;
+        return std::nullopt;
       }
     }
     auto const tsName = key.substr(0, index);
     auto const tsIter = m_timeseriesMap.find(tsName);
-    if (tsIter == m_timeseriesMap.end()) return folly::none;
+    if (tsIter == m_timeseriesMap.end()) return std::nullopt;
     auto const ts = tsIter->second;
     return ts->getCounter(type, duration);
   }
@@ -446,7 +446,7 @@ void exportAll(std::map<std::string, int64_t>& statsMap) {
   return getServiceDataInstance().exportAll(statsMap);
 }
 
-folly::Optional<int64_t> exportCounterByKey(const std::string& key) {
+Optional<int64_t> exportCounterByKey(const std::string& key) {
   return getServiceDataInstance().exportCounterByKey(key);
 }
 

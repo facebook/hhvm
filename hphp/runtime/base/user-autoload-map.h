@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <optional>
 #include <vector>
 
 #include "hphp/runtime/base/array-init.h"
@@ -79,10 +78,10 @@ struct UserAutoloadMap : AutoloadMap {
 
   Array getAllFiles() const override;
 
-  std::optional<String> getTypeFile(const String& typeName) override;
-  std::optional<String> getFunctionFile(const String& functionName) override;
-  std::optional<String> getConstantFile(const String& constantName) override;
-  std::optional<String> getTypeAliasFile(const String& typeAliasName) override;
+  Optional<String> getTypeFile(const String& typeName) override;
+  Optional<String> getFunctionFile(const String& functionName) override;
+  Optional<String> getConstantFile(const String& constantName) override;
+  Optional<String> getTypeAliasFile(const String& typeAliasName) override;
 
   Array getFileTypes(const String& path) override;
   Array getFileFunctions(const String& path) override;
@@ -97,7 +96,7 @@ struct UserAutoloadMap : AutoloadMap {
                                     const Variant& err) const override;
 
  private:
-  std::optional<String> getFileFromMap(const Array& map,
+  Optional<String> getFileFromMap(const Array& map,
                                        const String& key) const;
 };
 

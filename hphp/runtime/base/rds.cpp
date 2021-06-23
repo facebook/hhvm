@@ -181,7 +181,7 @@ void addFreeBlock(FreeLists& lists, size_t where, size_t size) {
  * found instead, the remaining space before and/or after the return space is
  * re-added to the appropriate free lists.
  */
-folly::Optional<Handle> findFreeBlock(FreeLists& lists, size_t size,
+Optional<Handle> findFreeBlock(FreeLists& lists, size_t size,
                                       size_t align) {
   for (auto it = lists.lower_bound(size); it != lists.end(); ++it) {
     auto const blockSize = it->first;
@@ -205,7 +205,7 @@ folly::Optional<Handle> findFreeBlock(FreeLists& lists, size_t size,
       return handle;
     }
   }
-  return folly::none;
+  return std::nullopt;
 }
 
 // Create a new chunk for use in persistent RDS, but don't add to
@@ -734,11 +734,11 @@ std::vector<void*> allTLBases() {
   return s_tlBaseList;
 }
 
-folly::Optional<Symbol> reverseLink(Handle handle) {
+Optional<Symbol> reverseLink(Handle handle) {
   Guard g(s_allocMutex);
   auto const it = s_handleTable.lower_bound(handle);
-  if (it == s_handleTable.end()) return folly::none;
-  if (it->first + it->second.size < handle) return folly::none;
+  if (it == s_handleTable.end()) return std::nullopt;
+  if (it->first + it->second.size < handle) return std::nullopt;
   return it->second.sym;
 }
 

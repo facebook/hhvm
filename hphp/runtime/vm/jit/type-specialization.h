@@ -21,8 +21,6 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/jit/array-layout.h"
 
-#include <folly/Optional.h>
-
 #include <cstdint>
 
 namespace HPHP {
@@ -331,4 +329,3 @@ private:
 }}
 
 #include "hphp/runtime/vm/jit/type-specialization-inl.h"
-

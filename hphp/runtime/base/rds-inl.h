@@ -18,7 +18,6 @@
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/safe-cast.h"
 
-#include <folly/Optional.h>
 #include <tbb/concurrent_vector.h>
 
 #include <atomic>
@@ -400,4 +399,3 @@ template <typename F> inline void forEachLocalAlloc(F f) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

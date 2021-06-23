@@ -24,8 +24,6 @@
 
 #include "hphp/util/trace.h"
 
-#include <folly/Optional.h>
-
 #include <iterator>
 
 namespace HPHP { namespace jit {

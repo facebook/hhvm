@@ -22,7 +22,6 @@
 
 #include "hphp/util/low-ptr.h"
 
-#include <folly/Optional.h>
 #include <folly/small_vector.h>
 
 #include <cstdint>
@@ -436,4 +435,3 @@ backtrace_detail::from_ret_t<F> fromLeafWH(
 #define incl_HPHP_BACKTRACE_INL_H_
 #include "hphp/runtime/base/backtrace-inl.h"
 #undef incl_HPHP_BACKTRACE_INL_H_
-

@@ -25,7 +25,6 @@
 #define BUFLEN 1000
 
 using folly::IOBuf;
-using folly::Optional;
 using std::string;
 
 namespace HPHP {
@@ -56,7 +55,7 @@ Optional<FileInfo> AnnotationCache::getFileInfo(const string& annotation) {
 
   fileName = folly::sformat("{}/{}", m_dumpDir, fileName);
 
-  return Optional(FileInfo{fileName, offset, length});
+  return make_optional(FileInfo{fileName, offset, length});
 }
 
 const uint8_t* AnnotationCache::getIOBuf(const string& fileName) {

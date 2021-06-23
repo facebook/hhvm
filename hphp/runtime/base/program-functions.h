@@ -18,8 +18,9 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/util/optional.h"
+
 #include <boost/program_options/parsers.hpp>
-#include <folly/Optional.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -160,9 +161,8 @@ struct HphpSessionAndThread {
   HphpSessionAndThread(const HphpSessionAndThread&) = delete;
   HphpSessionAndThread& operator=(const HphpSessionAndThread&) = delete;
  private:
-  folly::Optional<HphpSession> session;
+  Optional<HphpSession> session;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <optional>
 #include <string>
 
 #include <folly/experimental/io/FsUtil.h>
@@ -26,7 +25,7 @@ namespace Facts {
 
 struct PathAndHash {
   folly::fs::path m_path;
-  std::optional<std::string> m_hash;
+  Optional<std::string> m_hash;
 };
 
 } // namespace Facts

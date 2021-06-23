@@ -57,7 +57,6 @@
 
 #include <folly/AtomicHashMap.h>
 #include <folly/FileUtil.h>
-#include <folly/Optional.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/task_queue/PriorityUnboundedBlockingQueue.h>
 #include <folly/portability/Fcntl.h>
@@ -77,7 +76,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-using OptLog = folly::Optional<StructuredLogEntry>;
+using OptLog = Optional<StructuredLogEntry>;
 
 struct LogTimer {
   LogTimer(const char* name, OptLog& ent)
@@ -441,7 +440,7 @@ bool canBeBoundToPath(const CachedFilePtr& cachedUnit,
   return canBeBoundToPath(cachedUnit->cu.unit, path);
 }
 
-folly::Optional<String> readFileAsString(const StringData* path,
+Optional<String> readFileAsString(const StringData* path,
                                          Stream::Wrapper* w) {
   tracing::Block _{
     "read-file", [&] { return tracing::Props{}.add("path", path); }
@@ -452,11 +451,11 @@ folly::Optional<String> readFileAsString(const StringData* path,
     // We only allow normal file streams, which cannot re-enter
     assertx(w->isNormalFileStream());
     if (auto const f = w->open(StrNR(path), "r", 0, nullptr)) return f->read();
-    return folly::none;
+    return std::nullopt;
   }
 
   auto const fd = open(path->data(), O_RDONLY);
-  if (fd < 0) return folly::none;
+  if (fd < 0) return std::nullopt;
   auto file = req::make<PlainFile>(fd);
   return file->read();
 }
@@ -1616,7 +1615,7 @@ void prefetchUnit(StringData* requestedPath,
     !RID().hasSafeFileAccess() &&
     (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath);
 
-  folly::Optional<struct stat> fileStat;
+  Optional<struct stat> fileStat;
   const StringData* path = nullptr;
   if (!deferResolveVmInclude) {
     // We can't safely defer resolveVmInclude(). Do it now.

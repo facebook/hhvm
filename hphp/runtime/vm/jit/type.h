@@ -26,8 +26,6 @@
 #include "hphp/util/bitset.h"
 #include "hphp/util/low-ptr.h"
 
-#include <folly/Optional.h>
-
 #include <cstdint>
 #include <type_traits>
 
@@ -584,10 +582,10 @@ public:
   /*
    * Return a const type for `tv'. `cns' will assert if given a type
    * which isn't allowed to have constants, while `tryCns' will return
-   * folly::none.
+   * std::nullopt.
    */
   static Type cns(TypedValue tv);
-  static folly::Optional<Type> tryCns(TypedValue tv);
+  static Optional<Type> tryCns(TypedValue tv);
 
   /*
    * If this represents a constant value, return the most specific strict
@@ -890,7 +888,7 @@ private:
   };
 };
 
-using OptType = folly::Optional<Type>;
+using OptType = Optional<Type>;
 
 /////////////////////////////////////////////////////////////////////////////
 

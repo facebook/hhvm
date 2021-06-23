@@ -121,7 +121,7 @@ struct CGMeta {
    * pools/veneers.  This metadata is kept around so the relocator can properly
    * adjust or remove the jump to keep it pointing directly after the Vunit.
    */
-  folly::Optional<TCA> fallthru;
+  Optional<TCA> fallthru;
 
   /*
    * Code addresses of interest to other code.
@@ -192,7 +192,7 @@ const uint64_t* addrForLiteral(uint64_t val);
 /*
  * Look up a TCA-to-landingpad mapping.
  */
-folly::Optional<TCA> getCatchTrace(CTCA ip);
+Optional<TCA> getCatchTrace(CTCA ip);
 
 /*
  * Return the number of registered catch traces
@@ -220,7 +220,7 @@ void poolLiteral(CodeBlock& cb, CGMeta& meta, uint64_t val, uint8_t width,
 
 void addVeneer(CGMeta& meta, TCA source, TCA target);
 
-folly::Optional<IStack> inlineStackAt(CTCA addr);
+Optional<IStack> inlineStackAt(CTCA addr);
 IFrame getInlineFrame(IFrameID id);
 void eraseInlineStack(CTCA addr);
 void eraseInlineStacksInRange(CTCA start, CTCA end);

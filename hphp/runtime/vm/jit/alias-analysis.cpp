@@ -70,14 +70,14 @@ void visit_locations(const BlockList& blocks, Visit visit) {
   }
 }
 
-folly::Optional<uint32_t> add_class(AliasAnalysis& ret, AliasClass acls) {
+Optional<uint32_t> add_class(AliasAnalysis& ret, AliasClass acls) {
   assertx(acls.isSingleLocation());
   auto const ins = ret.locations.insert(std::make_pair(acls, ALocMeta{}));
   if (!ins.second) return ins.first->second.index;
   if (ret.locations.size() > kMaxTrackedALocs) {
     always_assert(ret.locations.size() == kMaxTrackedALocs + 1);
     ret.locations.erase(acls);
-    return folly::none;
+    return std::nullopt;
   }
   FTRACE(1, "    new: {}\n", show(acls));
   auto& meta = ins.first->second;
@@ -92,7 +92,7 @@ folly::Optional<uint32_t> add_class(AliasAnalysis& ret, AliasClass acls) {
 template<class T>
 ALocBits may_alias_component(const AliasAnalysis& aa,
                              AliasClass acls,
-                             folly::Optional<T> proj,
+                             Optional<T> proj,
                              const AliasAnalysis::LocationMap& sets,
                              AliasClass any,
                              ALocBits pessimistic) {
@@ -120,7 +120,7 @@ ALocBits may_alias_component(const AliasAnalysis& aa,
 template<class T>
 ALocBits may_alias_part(const AliasAnalysis& aa,
                         AliasClass acls,
-                        folly::Optional<T> proj,
+                        Optional<T> proj,
                         AliasClass any,
                         ALocBits pessimistic) {
   if (proj) {
@@ -139,7 +139,7 @@ ALocBits may_alias_part(const AliasAnalysis& aa,
 template<class T>
 ALocBits expand_component(const AliasAnalysis& aa,
                           AliasClass acls,
-                          folly::Optional<T> loc,
+                          Optional<T> loc,
                           const AliasAnalysis::LocationMap& sets,
                           AliasClass any,
                           ALocBits all) {
@@ -165,7 +165,7 @@ ALocBits expand_component(const AliasAnalysis& aa,
 template<class T>
 ALocBits expand_part(const AliasAnalysis& aa,
                      AliasClass acls,
-                     folly::Optional<T> proj,
+                     Optional<T> proj,
                      AliasClass any,
                      ALocBits all) {
   auto ret = ALocBits{};
@@ -181,7 +181,7 @@ ALocBits expand_part(const AliasAnalysis& aa,
 
 template<class T>
 bool collect_component(AliasAnalysis& aa,
-                       folly::Optional<T> loc,
+                       Optional<T> loc,
                        AliasAnalysis::LocationMap& map) {
   if (loc) {
     assertx(!loc->ids.empty());
@@ -214,9 +214,9 @@ bool collect_component(AliasAnalysis& aa,
 
 AliasAnalysis::AliasAnalysis(const IRUnit& /*unit*/) {}
 
-folly::Optional<ALocMeta> AliasAnalysis::find(AliasClass acls) const {
+Optional<ALocMeta> AliasAnalysis::find(AliasClass acls) const {
   auto const it = locations.find(acls);
-  if (it == end(locations)) return folly::none;
+  if (it == end(locations)) return std::nullopt;
   return it->second;
 }
 

@@ -36,7 +36,6 @@
 #include <folly/Lazy.h>
 #include <folly/MapUtil.h>
 #include <folly/Memory.h>
-#include <folly/Optional.h>
 #include <folly/Range.h>
 #include <folly/String.h>
 #include <folly/concurrency/ConcurrentHashMap.h>
@@ -416,7 +415,7 @@ struct res::Func::FuncFamily {
 
   PFuncVec  m_v;
   LockFreeLazy<Type> m_returnTy;
-  folly::Optional<uint32_t> m_numInOut;
+  Optional<uint32_t> m_numInOut;
 };
 
 namespace {
@@ -730,8 +729,8 @@ std::string show(const Record& r) {
   );
 }
 
-folly::Optional<Record> Record::commonAncestor(const Record& r) const {
-  if (val.left() || r.val.left()) return folly::none;
+Optional<Record> Record::commonAncestor(const Record& r) const {
+  if (val.left() || r.val.left()) return std::nullopt;
   auto const c1 = val.right();
   auto const c2 = r.val.right();
   // Walk the arrays of base classes until they match. For common ancestors
@@ -745,7 +744,7 @@ folly::Optional<Record> Record::commonAncestor(const Record& r) const {
     ++it1; ++it2;
   }
   if (ancestor == nullptr) {
-    return folly::none;
+    return std::nullopt;
   }
   return res::Record { ancestor };
 }
@@ -895,8 +894,8 @@ bool Class::derivedCouldHaveConstProp() const {
   );
 }
 
-folly::Optional<Class> Class::commonAncestor(const Class& o) const {
-  if (val.left() || o.val.left()) return folly::none;
+Optional<Class> Class::commonAncestor(const Class& o) const {
+  if (val.left() || o.val.left()) return std::nullopt;
   auto const c1 = val.right();
   auto const c2 = o.val.right();
   if (c1 == c2) return res::Class { c1 };
@@ -911,15 +910,15 @@ folly::Optional<Class> Class::commonAncestor(const Class& o) const {
     ++it1; ++it2;
   }
   if (ancestor == nullptr) {
-    return folly::none;
+    return std::nullopt;
   }
   return res::Class { ancestor };
 }
 
-folly::Optional<res::Class> Class::parent() const {
-  if (!val.right()) return folly::none;
+Optional<res::Class> Class::parent() const {
+  if (!val.right()) return std::nullopt;
   auto parent = val.right()->parent;
-  if (!parent) return folly::none;
+  if (!parent) return std::nullopt;
   return res::Class { parent };
 }
 
@@ -2211,7 +2210,7 @@ void add_system_constants_to_index(IndexData& index) {
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<uint32_t> func_num_inout(const php::Func* func) {
+Optional<uint32_t> func_num_inout(const php::Func* func) {
   if (!func->hasInOutArgs) return 0;
   uint32_t count = 0;
   for (auto& p : func->params) count += p.inout;
@@ -2219,7 +2218,7 @@ folly::Optional<uint32_t> func_num_inout(const php::Func* func) {
 }
 
 template<typename PossibleFuncRange>
-folly::Optional<uint32_t> num_inout_from_set(PossibleFuncRange range) {
+Optional<uint32_t> num_inout_from_set(PossibleFuncRange range) {
   if (begin(range) == end(range)) return 0;
 
   struct FuncFind {
@@ -2228,11 +2227,11 @@ folly::Optional<uint32_t> num_inout_from_set(PossibleFuncRange range) {
     static F get(const MethTabEntryPair* mte) { return mte->second.func; }
   };
 
-  folly::Optional<uint32_t> num;
+  Optional<uint32_t> num;
   for (auto const& item : range) {
     auto const n = func_num_inout(FuncFind::get(item));
-    if (!n.hasValue()) return folly::none;
-    if (num.hasValue() && n != num) return folly::none;
+    if (!n.has_value()) return std::nullopt;
+    if (num.has_value() && n != num) return std::nullopt;
     num = n;
   }
   return num;
@@ -3911,7 +3910,7 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
     static F get(const MethTabEntryPair* mte) { return mte->second.func; }
   };
 
-  folly::Optional<PrepKind> prep;
+  Optional<PrepKind> prep;
   for (auto& item : range) {
     switch (func_param_prep(FuncFind::get(item), paramId)) {
     case PrepKind::Unknown:
@@ -4191,7 +4190,7 @@ PropLookupResult<> lookup_static_impl(IndexData& data,
   assertx(!startOnly);
   auto const result = visit_parent_cinfo(
     start,
-    [&] (const ClassInfo* ci) -> folly::Optional<PropLookupResult<>> {
+    [&] (const ClassInfo* ci) -> Optional<PropLookupResult<>> {
       for (auto const& prop : ci->cls->properties) {
         if (prop.name != propName) continue;
         // We have a matching prop. If its not static or not
@@ -4209,7 +4208,7 @@ PropLookupResult<> lookup_static_impl(IndexData& data,
         ITRACE(6, "found {}:${} {}\n", ci->cls->name, propName, show(r));
         return r;
       }
-      return folly::none;
+      return std::nullopt;
     }
   );
   if (!result) {
@@ -4347,7 +4346,7 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
   assertx(!startOnly);
   auto result = visit_parent_cinfo(
     start,
-    [&] (const ClassInfo* ci) -> folly::Optional<PropMergeResult<>> {
+    [&] (const ClassInfo* ci) -> Optional<PropMergeResult<>> {
       for (auto const& prop : ci->cls->properties) {
         if (prop.name != propName) continue;
         // We found a property with the right name, but its
@@ -4379,7 +4378,7 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
         }
         return merge(prop, ci);
       }
-      return folly::none;
+      return std::nullopt;
     }
   );
   if (!result) {
@@ -4911,12 +4910,12 @@ void Index::rewrite_default_initial_values(php::Program& program) const {
     for (auto const& cinfo : oldWorkList) {
       // Retrieve the set of properties which are flowing into this Class and
       // have to be null.
-      auto inState = [&] () -> folly::Optional<PropSet> {
+      auto inState = [&] () -> Optional<PropSet> {
         PropSet in;
         for (auto const& sub : cinfo->subclassList) {
           if (sub == cinfo || sub->parent != cinfo) continue;
           auto const it = outStates.find(sub);
-          if (it == outStates.end()) return folly::none;
+          if (it == outStates.end()) return std::nullopt;
           in.insert(it->second.begin(), it->second.end());
         }
         return in;
@@ -4964,13 +4963,13 @@ void Index::rewrite_default_initial_values(php::Program& program) const {
     for (auto& c : unit->classes) {
       if (is_closure(*c)) continue;
 
-      auto const out = [&] () -> folly::Optional<PropSet> {
-        folly::Optional<PropSet> props;
+      auto const out = [&] () -> Optional<PropSet> {
+        Optional<PropSet> props;
         auto const range = m_data->classInfo.equal_range(c->name);
         for (auto it = range.first; it != range.second; ++it) {
           if (it->second->cls != c.get()) continue;
           auto const outStateIt = outStates.find(it->second);
-          if (outStateIt == outStates.end()) return folly::none;
+          if (outStateIt == outStates.end()) return std::nullopt;
           if (!props) props.emplace();
           props->insert(outStateIt->second.begin(), outStateIt->second.end());
         }
@@ -5045,7 +5044,7 @@ Index::lookup_extra_methods(const php::Class* cls) const {
 //////////////////////////////////////////////////////////////////////
 
 template<typename T>
-folly::Optional<T> Index::resolve_type_impl(SString name) const {
+Optional<T> Index::resolve_type_impl(SString name) const {
   auto const& infomap = m_data->infoMap<T>();
   auto const& omap = m_data->infoMap<typename ResTypeHelper<T>::OtherT>();
   auto const it = infomap.find(name);
@@ -5087,10 +5086,10 @@ folly::Optional<T> Index::resolve_type_impl(SString name) const {
     return T { name };
   }
 
-  return folly::none;
+  return std::nullopt;
 }
 
-folly::Optional<res::Record> Index::resolve_record(SString recName) const {
+Optional<res::Record> Index::resolve_record(SString recName) const {
   recName = normalizeNS(recName);
   return resolve_type_impl<res::Record>(recName);
 }
@@ -5112,7 +5111,7 @@ res::Class Index::resolve_class(const php::Class* cls) const {
   return res::Class { cls->name.get() };
 }
 
-folly::Optional<res::Class> Index::resolve_class(Context ctx,
+Optional<res::Class> Index::resolve_class(Context ctx,
                                                  SString clsName) const {
   clsName = normalizeNS(clsName);
 
@@ -5128,13 +5127,13 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
   return resolve_type_impl<res::Class>(clsName);
 }
 
-folly::Optional<res::Class> Index::selfCls(const Context& ctx) const {
-  if (!ctx.cls || is_used_trait(*ctx.cls)) return folly::none;
+Optional<res::Class> Index::selfCls(const Context& ctx) const {
+  if (!ctx.cls || is_used_trait(*ctx.cls)) return std::nullopt;
   return resolve_class(ctx.cls);
 }
 
-folly::Optional<res::Class> Index::parentCls(const Context& ctx) const {
-  if (!ctx.cls || !ctx.cls->parentName) return folly::none;
+Optional<res::Class> Index::parentCls(const Context& ctx) const {
+  if (!ctx.cls || !ctx.cls->parentName) return std::nullopt;
   if (auto const parent = resolve_class(ctx.cls).parent()) return parent;
   return resolve_class(ctx, ctx.cls->parentName);
 }
@@ -5158,7 +5157,7 @@ Index::resolve_type_name(SString inName) const {
 
 Index::ResolvedInfo<boost::variant<boost::blank,SString,ClassInfo*,RecordInfo*>>
 Index::resolve_type_name_internal(SString inName) const {
-  folly::Optional<hphp_fast_set<const void*>> seen;
+  Optional<hphp_fast_set<const void*>> seen;
 
   auto nullable = false;
   auto name = inName;
@@ -5218,11 +5217,11 @@ struct Index::ConstraintResolution {
   /* implicit */ ConstraintResolution(Type type)
     : type{std::move(type)}
     , maybeMixed{false} {}
-  ConstraintResolution(folly::Optional<Type> type, bool maybeMixed)
+  ConstraintResolution(Optional<Type> type, bool maybeMixed)
     : type{std::move(type)}
     , maybeMixed{maybeMixed} {}
 
-  folly::Optional<Type> type;
+  Optional<Type> type;
   bool maybeMixed;
 };
 
@@ -5234,7 +5233,7 @@ Index::ConstraintResolution Index::resolve_named_type(
   if (res.nullable && candidate.subtypeOf(BInitNull)) return TInitNull;
 
   if (res.type == AnnotType::Object) {
-    auto resolve = [&] (const res::Class& rcls) -> folly::Optional<Type> {
+    auto resolve = [&] (const res::Class& rcls) -> Optional<Type> {
       if (!interface_supports_non_objects(rcls.name()) ||
           candidate.subtypeOf(BOptObj)) {
         return subObj(rcls);
@@ -5253,7 +5252,7 @@ Index::ConstraintResolution Index::resolve_named_type(
       } else if (candidate.subtypeOf(BOptDbl)) {
         if (interface_supports_double(rcls.name())) return TDbl;
       }
-      return folly::none;
+      return std::nullopt;
     };
 
     auto const val = match<Either<SString, ClassInfo*>>(
@@ -5263,7 +5262,7 @@ Index::ConstraintResolution Index::resolve_named_type(
       [&] (ClassInfo* c) { return c; },
       [&] (RecordInfo*) { always_assert(false); return nullptr; }
     );
-    if (val.isNull()) return ConstraintResolution{ folly::none, true };
+    if (val.isNull()) return ConstraintResolution{ std::nullopt, true };
     auto ty = resolve(res::Class { val });
     if (ty && res.nullable) *ty = opt(std::move(*ty));
     return ConstraintResolution{ std::move(ty), false };
@@ -5275,7 +5274,7 @@ Index::ConstraintResolution Index::resolve_named_type(
       [&] (ClassInfo* c) { always_assert(false); return nullptr; },
       [&] (RecordInfo* r) { return r; }
     );
-    if (val.isNull()) return ConstraintResolution{ folly::none, true };
+    if (val.isNull()) return ConstraintResolution{ std::nullopt, true };
     return subRecord(res::Record { val });
   }
 
@@ -5430,14 +5429,14 @@ res::Func Index::resolve_method(Context ctx,
   not_reached();
 }
 
-folly::Optional<res::Func>
+Optional<res::Func>
 Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
   auto const cinfo = rcls.val.right();
-  if (!cinfo) return folly::none;
-  if (cinfo->cls->attrs & (AttrInterface|AttrTrait)) return folly::none;
+  if (!cinfo) return std::nullopt;
+  if (cinfo->cls->attrs & (AttrInterface|AttrTrait)) return std::nullopt;
 
   auto const cit = cinfo->methods.find(s_construct.get());
-  if (cit == end(cinfo->methods)) return folly::none;
+  if (cit == end(cinfo->methods)) return std::nullopt;
 
   auto const ctor = mteFromIt(cit);
   if (exact || ctor->second.attrs & AttrNoOverride) {
@@ -5445,14 +5444,14 @@ Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
     return res::Func { this, ctor };
   }
 
-  if (!options.FuncFamilies) return folly::none;
+  if (!options.FuncFamilies) return std::nullopt;
 
   auto const singleFamIt = cinfo->singleMethodFamilies.find(s_construct.get());
   if (singleFamIt != cinfo->singleMethodFamilies.end()) {
     return res::Func { this, singleFamIt->second};
   }
   auto const famIt = cinfo->methodFamilies.find(s_construct.get());
-  if (famIt == end(cinfo->methodFamilies)) return folly::none;
+  if (famIt == end(cinfo->methodFamilies)) return std::nullopt;
   assertx(famIt->second->possibleFuncs().size() > 1);
   return res::Func { this, famIt->second };
 }
@@ -5630,7 +5629,7 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
         if (candidate.subtypeOf(BLazyCls)) return TLazyCls;
       }
     }
-    return ConstraintResolution{ folly::none, false };
+    return ConstraintResolution{ std::nullopt, false };
   }();
 
   if (mainType.type && nullable) {
@@ -5684,7 +5683,7 @@ bool Index::could_have_reified_type(Context ctx,
   return rcls.couldHaveReifiedGenerics();
 }
 
-folly::Optional<bool>
+Optional<bool>
 Index::supports_async_eager_return(res::Func rfunc) const {
   auto const supportsAER = [] (const php::Func* func) {
     // Async functions always support async eager return.
@@ -5694,19 +5693,19 @@ Index::supports_async_eager_return(res::Func rfunc) const {
     return false;
   };
 
-  return match<folly::Optional<bool>>(
+  return match<Optional<bool>>(
     rfunc.val,
-    [&](res::Func::FuncName)   { return folly::none; },
-    [&](res::Func::MethodName) { return folly::none; },
+    [&](res::Func::FuncName)   { return std::nullopt; },
+    [&](res::Func::MethodName) { return std::nullopt; },
     [&](FuncInfo* finfo) { return supportsAER(finfo->func); },
     [&](const MethTabEntryPair* mte) { return supportsAER(mte->second.func); },
-    [&](FuncFamily* fam) -> folly::Optional<bool> {
-      auto ret = folly::Optional<bool>{};
+    [&](FuncFamily* fam) -> Optional<bool> {
+      auto ret = Optional<bool>{};
       for (auto const pf : fam->possibleFuncs()) {
         // Abstract functions are never called.
         if (pf->second.attrs & AttrAbstract) continue;
         auto const val = supportsAER(pf->second.func);
-        if (ret && *ret != val) return folly::none;
+        if (ret && *ret != val) return std::nullopt;
         ret = val;
       }
       return ret;
@@ -6023,20 +6022,20 @@ bool Index::lookup_this_available(const php::Func* f) const {
   return !(f->cls->attrs & AttrTrait) && !(f->attrs & AttrStatic);
 }
 
-folly::Optional<uint32_t> Index::lookup_num_inout_params(
+Optional<uint32_t> Index::lookup_num_inout_params(
   Context,
   res::Func rfunc
 ) const {
-  return match<folly::Optional<uint32_t>>(
+  return match<Optional<uint32_t>>(
     rfunc.val,
-    [&] (res::Func::FuncName s) -> folly::Optional<uint32_t> {
-      if (s.renamable) return folly::none;
+    [&] (res::Func::FuncName s) -> Optional<uint32_t> {
+      if (s.renamable) return std::nullopt;
       auto const it = m_data->funcs.find(s.name);
       return it != end(m_data->funcs)
        ? func_num_inout(it->second)
        : 0;
     },
-    [&] (res::Func::MethodName s) -> folly::Optional<uint32_t> {
+    [&] (res::Func::MethodName s) -> Optional<uint32_t> {
       auto const it = m_data->method_inout_params_by_name.find(s.name);
       if (it == end(m_data->method_inout_params_by_name)) {
         // There was no entry, so no method by this name takes a parameter
@@ -6052,7 +6051,7 @@ folly::Optional<uint32_t> Index::lookup_num_inout_params(
     [&] (const MethTabEntryPair* mte) {
       return func_num_inout(mte->second.func);
     },
-    [&] (FuncFamily* fam) -> folly::Optional<uint32_t> {
+    [&] (FuncFamily* fam) -> Optional<uint32_t> {
       return fam->m_numInOut;
     }
   );
@@ -6219,7 +6218,7 @@ PropLookupResult<> Index::lookup_static(Context ctx,
       // the potential results. This could potentially visit a lot of
       // parent classes redundently, so tell it not to look into
       // parent classes, unless we're processing dcls.type.
-      folly::Optional<PropLookupResult<>> result;
+      Optional<PropLookupResult<>> result;
       for (auto const sub : cinfo->subclassList) {
         auto r = lookup_static_impl(
           *m_data,
@@ -6432,7 +6431,7 @@ PropMergeResult<> Index::merge_static_type(
       // work, only iterate into parent classes if we're dcls.type
       // (this is only a matter of efficiency. The merge is
       // idiompotent).
-      folly::Optional<PropMergeResult<>> result;
+      Optional<PropMergeResult<>> result;
       for (auto const sub : cinfo->subclassList) {
         auto r = merge_static_type_impl(
           *m_data,

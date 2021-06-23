@@ -75,9 +75,9 @@ struct MixedArrayKeys {
    * with the key bitset and the result is zero, then all keys match `type`.
    *
    * Some types can't be tested against this bitset; for these types, this
-   * method will return folly::none.
+   * method will return std::nullopt.
    */
-  static folly::Optional<uint8_t> getMask(const jit::Type& type);
+  static Optional<uint8_t> getMask(const jit::Type& type);
 
   /*
    * Call these methods to get key types in m_aux format. We initialize m_aux

@@ -59,7 +59,7 @@ public:
    * definitely doesn't contain the given value. `std::nullopt` if this question
    * can't be answered without falling back to the DB.
    */
-  std::optional<bool> contains(const T& value) const {
+  Optional<bool> contains(const T& value) const {
     if (m_included.count(value)) {
       return true;
     }

@@ -69,7 +69,7 @@ bool            collectBCStats  = false;
 bool            inclusiveStats  = false;
 bool            verboseStats    = false;
 bool            hostOpcodes     = false;
-folly::Optional<SHA1> sha1Filter;
+Optional<SHA1> sha1Filter;
 PerfEventType   sortBy          = EVENT_CYCLES;
 bool            sortByDensity   = false;
 bool            sortBySize      = false;
@@ -680,14 +680,14 @@ dynamic getTrans(TransID transId) {
 
   auto const annotationDynamic = getAnnotation(tRec->annotations);
 
-  auto const maybeUnit = [&]() -> folly::Optional<printir::Unit> {
-    if (!annotationDynamic.isObject()) return folly::none;
+  auto const maybeUnit = [&]() -> Optional<printir::Unit> {
+    if (!annotationDynamic.isObject()) return std::nullopt;
     try {
       return folly::convertTo<printir::Unit>(annotationDynamic);
     }
     catch (const printir::ParseError& pe) {
       std::cerr << pe.what() << std::endl;
-      return folly::none;
+      return std::nullopt;
     }
   }();
 
@@ -1108,7 +1108,7 @@ int main(int argc, char *argv[]) {
   parseOptions(argc, argv);
 
   #ifdef FACEBOOK
-  folly::Optional<DBLogger> dblogger = folly::none;
+  Optional<DBLogger> dblogger = std::nullopt;
   if (printToDB) {
     dblogger = DBLogger{};
     g_logger = &dblogger.value();

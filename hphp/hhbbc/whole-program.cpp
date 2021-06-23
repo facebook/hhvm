@@ -293,9 +293,9 @@ void analyze_iteratively(Index& index, php::Program& program,
       );
       return parallel::map(
         work,
-        // We have a folly::Optional just to keep the result type
+        // We have a Optional just to keep the result type
         // DefaultConstructible.
-        [&] (const WorkItem& wi) -> folly::Optional<WorkResult> {
+        [&] (const WorkItem& wi) -> Optional<WorkResult> {
           switch (wi.type) {
           case WorkType::Func: {
             ++total_funcs;
@@ -509,10 +509,10 @@ void UnitEmitterQueue::finish() {
   notify();
 }
 
-folly::Optional<RepoFileBuilder::EncodedUE> UnitEmitterQueue::pop() {
+Optional<RepoFileBuilder::EncodedUE> UnitEmitterQueue::pop() {
   Lock lock(this);
   while (m_encoded.empty()) {
-    if (m_done.load(std::memory_order_relaxed)) return folly::none;
+    if (m_done.load(std::memory_order_relaxed)) return std::nullopt;
     wait();
   }
   assertx(m_encoded.size() > 0);

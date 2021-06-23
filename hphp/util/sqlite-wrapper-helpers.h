@@ -16,10 +16,11 @@
 
 #pragma once
 
-#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+
+#include "hphp/util/optional.h"
 
 struct sqlite3_stmt;
 
@@ -160,7 +161,7 @@ struct SQLiteQuery {
   double getDouble(int iCol);                               // throws(SQLiteExc)
   void getBlob(int iCol, const void*& blob, size_t& size);  // throws(SQLiteExc)
   const std::string_view getString(int iCol);               // throws(SQLiteExc)
-  std::optional<const std::string_view> getNullableString(
+  Optional<const std::string_view> getNullableString(
       int iCol);                                            // throws(SQLiteExc)
 
  private:

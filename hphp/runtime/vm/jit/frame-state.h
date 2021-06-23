@@ -24,7 +24,6 @@
 #include "hphp/runtime/vm/jit/type-source.h"
 
 #include <boost/dynamic_bitset.hpp>
-#include <folly/Optional.h>
 
 #include <memory>
 #include <vector>
@@ -464,7 +463,7 @@ private:
 
   template<LTag tag>
   void setValueImpl(Location l, LocationState<tag>& state, SSATmp* value,
-                    folly::Optional<Type> predicted = folly::none);
+                    Optional<Type> predicted = std::nullopt);
   template<LTag tag>
   void refinePredictedTypeImpl(LocationState<tag>& state, Type type);
 
@@ -483,9 +482,9 @@ private:
     jit::vector<FrameState> in;
     // Optionally-saved out-state.  Non-none but empty indicates that out-state
     // should be saved.
-    folly::Optional<jit::vector<FrameState>> out;
+    Optional<jit::vector<FrameState>> out;
     // Paused state, used by IRBuilder::{push,pop}Block().
-    folly::Optional<jit::vector<FrameState>> paused;
+    Optional<jit::vector<FrameState>> paused;
   };
 
   /////////////////////////////////////////////////////////////////////////////

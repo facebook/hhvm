@@ -89,13 +89,13 @@ inline bool Event::finished() const {
   return m_stopMicro && m_stopMicro;
 }
 
-inline void Event::begin(folly::Optional<timespec> t) {
+inline void Event::begin(Optional<timespec> t) {
   assertx(!m_startMicro);
   m_startMicro = detail::CurrentMicroTime();
   m_startMicro = t ? detail::to_micros(*t) : detail::CurrentMicroTime();
 }
 
-inline void Event::end(folly::Optional<timespec> t) {
+inline void Event::end(Optional<timespec> t) {
   assertx(m_startMicro && !m_stopMicro);
   m_stopMicro = t ? detail::to_micros(*t) : detail::CurrentMicroTime();
 }
@@ -186,7 +186,7 @@ inline bool Trace::hasActiveScope() const {
 inline EventGuard::EventGuard(
   Trace* t,
   folly::StringPiece name,
-  folly::Optional<timespec> ts
+  Optional<timespec> ts
 ) : m_trace(t && t->hasActiveScope() ? t : nullptr)
   , m_event(name)
 {
@@ -204,7 +204,7 @@ inline void EventGuard::annotate(
   if (m_trace) m_event.annotate(key, value);
 }
 
-inline void EventGuard::finish(folly::Optional<timespec> t) {
+inline void EventGuard::finish(Optional<timespec> t) {
   if (m_trace) {
     m_event.end(t);
     m_trace->appendEvent(std::move(m_event));
@@ -217,7 +217,7 @@ inline void EventGuard::finish(folly::Optional<timespec> t) {
 inline ScopeGuard::ScopeGuard(
   Trace* t,
   folly::StringPiece name,
-  folly::Optional<timespec> ts
+  Optional<timespec> ts
 ) : m_trace(t)
   , m_scope(t ? &t->createScope(name) : nullptr)
 {
@@ -240,7 +240,7 @@ inline void ScopeGuard::setEventSuffix(folly::StringPiece fx) {
   if (m_scope) m_scope->setEventSuffix(fx);
 }
 
-inline void ScopeGuard::finish(folly::Optional<timespec> t) {
+inline void ScopeGuard::finish(Optional<timespec> t) {
   if (m_scope) {
     m_scope->end(t);
     m_trace->finishScope();

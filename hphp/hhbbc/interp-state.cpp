@@ -379,11 +379,11 @@ MethodsInfo::MethodsInfo(Context ctx, ClassAnalysis* cls)
   , m_func{ctx.func}
 {}
 
-folly::Optional<Type> MethodsInfo::lookupReturnType(const php::Func& f) {
-  if (!m_cls || !m_cls->work) return folly::none;
+Optional<Type> MethodsInfo::lookupReturnType(const php::Func& f) {
+  if (!m_cls || !m_cls->work) return std::nullopt;
   auto const& types = m_cls->work->returnTypes;
   auto const it = types.find(&f);
-  if (it == types.end()) return folly::none;
+  if (it == types.end()) return std::nullopt;
   m_cls->work->worklist.addReturnTypeDep(f, *m_func);
   return it->second;
 }

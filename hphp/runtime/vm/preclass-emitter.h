@@ -153,7 +153,7 @@ struct PreClassEmitter {
     const StringData* name() const { return m_name; }
     const StringData* typeConstraint() const { return m_typeConstraint; }
     const TypedValue& val() const { return m_val.value(); }
-    const folly::Optional<TypedValue>& valOption() const { return m_val; }
+    const Optional<TypedValue>& valOption() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
     bool isAbstract() const { return m_isAbstract; }
     const CoeffectsVec& coeffects() const { return m_coeffects; }
@@ -173,7 +173,7 @@ struct PreClassEmitter {
    private:
     LowStringPtr m_name;
     LowStringPtr m_typeConstraint;
-    folly::Optional<TypedValue> m_val;
+    Optional<TypedValue> m_val;
     LowStringPtr m_phpCode;
     CoeffectsVec m_coeffects;
     ConstModifiers::Kind m_kind;

@@ -21,6 +21,7 @@
 #include <folly/container/F14Map.h>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/optional.h"
 
 namespace HPHP {
 
@@ -36,9 +37,9 @@ struct UnionFind {
   }
 
   // Return the index of the given node, assigned sequentially at insertion.
-  folly::Optional<size_t> lookup(const T& node) const {
+  Optional<size_t> lookup(const T& node) const {
     auto const it = indices.find(node);
-    return it == indices.end() ? folly::none : folly::make_optional(it->second);
+    return it == indices.end() ? std::nullopt : make_optional(it->second);
   }
 
   // Merge the disjoint sets containing the two nodes. The nodes must have

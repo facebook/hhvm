@@ -57,7 +57,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_bcmax(0)
   , name(n)
   , maxStackCells(0)
-  , hniReturnType(folly::none)
+  , hniReturnType(std::nullopt)
   , retUserType(nullptr)
   , docComment(nullptr)
   , originalFilename(nullptr)
@@ -83,7 +83,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_bcmax(0)
   , name(n)
   , maxStackCells(0)
-  , hniReturnType(folly::none)
+  , hniReturnType(std::nullopt)
   , retUserType(nullptr)
   , docComment(nullptr)
   , originalFilename(nullptr)
@@ -247,7 +247,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   if (!coeffectRules.empty()) attrs |= AttrHasCoeffectRules;
 
-  auto const dynCallSampleRate = [&] () -> folly::Optional<int64_t> {
+  auto const dynCallSampleRate = [&] () -> Optional<int64_t> {
     if (!(attrs & AttrDynamicallyCallable)) return {};
 
     auto const uattr = userAttributes.find(s_DynamicallyCallable.get());
@@ -600,8 +600,8 @@ void FuncEmitter::setBcToken(Func::BCPtr::Token token, size_t bclen) {
   m_bc = Func::BCPtr::FromToken(token);
 }
 
-folly::Optional<Func::BCPtr::Token> FuncEmitter::loadBc() {
-  if (m_bc.isPtr()) return folly::none;
+Optional<Func::BCPtr::Token> FuncEmitter::loadBc() {
+  if (m_bc.isPtr()) return std::nullopt;
   assertx(RO::RepoAuthoritative);
   auto const old = m_bc.token();
   auto bc = (unsigned char*)malloc(m_bclen);

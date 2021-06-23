@@ -102,13 +102,13 @@ void processInlineFrames(const CGMeta& cm) {
 
 }
 
-folly::Optional<IStack> inlineStackAt(CTCA addr) {
-  if (!addr) return folly::none;
+Optional<IStack> inlineStackAt(CTCA addr) {
+  if (!addr) return std::nullopt;
   auto off = stackAddrToOffset(addr);
   if (auto pos = s_inlineStacks.find(off)) {
     if (pos->frame != kInvalidFrameID) return *pos;
   }
-  return folly::none;
+  return std::nullopt;
 }
 
 IFrame getInlineFrame(IFrameID id) {
@@ -147,10 +147,10 @@ void eraseCatchTrace(CTCA addr) {
   }
 }
 
-folly::Optional<TCA> getCatchTrace(CTCA ip) {
+Optional<TCA> getCatchTrace(CTCA ip) {
   auto const found = s_catchTraceMap.find(tc::addrToOffset(ip));
   if (found && *found != kInvalidCatchTrace) return tc::offsetToAddr(*found);
-  return folly::none;
+  return std::nullopt;
 }
 
 Reason* getTrapReason(CTCA addr) {

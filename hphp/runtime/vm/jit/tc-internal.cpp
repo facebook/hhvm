@@ -493,7 +493,7 @@ LocalTCBuffer::LocalTCBuffer(Address start, size_t initialSize) {
 }
 
 OptView LocalTCBuffer::view() {
-  if (!valid()) return folly::none;
+  if (!valid()) return std::nullopt;
   return CodeCache::View(m_main, m_cold, m_frozen, m_data, true);
 }
 
@@ -505,7 +505,7 @@ Translator::Translator(SrcKey sk, TransKind kind)
 
 Translator::~Translator() = default;
 
-folly::Optional<TranslationResult>
+Optional<TranslationResult>
 Translator::acquireLeaseAndRequisitePaperwork() {
   computeKind();
 
@@ -572,8 +572,8 @@ TranslationResult::Scope Translator::shouldTranslate(bool noSizeLimit) {
   return ::HPHP::jit::tc::shouldTranslate(sk, kind);
 }
 
-folly::Optional<TranslationResult>
-Translator::translate(folly::Optional<CodeCache::View> view) {
+Optional<TranslationResult>
+Translator::translate(Optional<CodeCache::View> view) {
   if (isProfiling(kind)) {
     transId = profData()->allocTransID();
   }
@@ -609,7 +609,7 @@ Translator::translate(folly::Optional<CodeCache::View> view) {
   };
 
   auto codeLock = lockCode(false);
-  if (!view.hasValue()) {
+  if (!view.has_value()) {
     if (RuntimeOption::EvalEnableReusableTC) {
       auto const initialSize = 256;
       m_localBuffer = std::make_unique<uint8_t[]>(initialSize);
@@ -625,7 +625,7 @@ Translator::translate(folly::Optional<CodeCache::View> view) {
   // Tag the translation start, and build the trans meta.
   // Generate vasm into the code view, retrying if we fill hot.
   while (true) {
-    if (!view.hasValue() || !view->isLocal()) {
+    if (!view.has_value() || !view->isLocal()) {
       view.emplace(code().view(kind));
     }
     CGMeta fixups;
@@ -684,20 +684,20 @@ Translator::translate(folly::Optional<CodeCache::View> view) {
     logFrames(*vunit);
   }
 
-  return folly::none;
+  return std::nullopt;
 }
 
 bool Translator::translateSuccess() const {
   return transMeta.has_value();
 }
 
-folly::Optional<TranslationResult> Translator::relocate(bool alignMain) {
-  assertx(transMeta.hasValue());
+Optional<TranslationResult> Translator::relocate(bool alignMain) {
+  assertx(transMeta.has_value());
   // Code emitted directly is relocated during emission (or emitted
   // directly in place).
   if (!transMeta->view.isLocal()) {
     assertx(!RuntimeOption::EvalEnableReusableTC);
-    return folly::none;
+    return std::nullopt;
   }
 
   WorkloadStats::EnsureInit();
@@ -772,11 +772,11 @@ folly::Optional<TranslationResult> Translator::relocate(bool alignMain) {
   adjustForRelocation(rel);
   adjustMetaDataForRelocation(rel, nullptr, fixups);
   adjustCodeForRelocation(rel, fixups);
-  return folly::none;
+  return std::nullopt;
 }
 
-folly::Optional<TranslationResult> Translator::bindOutgoingEdges() {
-  assertx(transMeta.hasValue());
+Optional<TranslationResult> Translator::bindOutgoingEdges() {
+  assertx(transMeta.has_value());
   auto& meta = transMeta->fixups;
   for (auto& b : meta.smashableBinds) {
     // We can't bind to fallback translations, so use the stub. they do not
@@ -820,11 +820,11 @@ folly::Optional<TranslationResult> Translator::bindOutgoingEdges() {
     sr->chainFrom(b.smashable, stub);
   }
 
-  return folly::none;
+  return std::nullopt;
 }
 
 TranslationResult Translator::publish() {
-  assertx(transMeta.hasValue());
+  assertx(transMeta.has_value());
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
   publishMetaInternal();
@@ -833,12 +833,12 @@ TranslationResult Translator::publish() {
 }
 
 void Translator::publishMetaInternal() {
-  assertx(transMeta.hasValue());
+  assertx(transMeta.has_value());
   this->publishMetaImpl();
 }
 
 void Translator::publishCodeInternal() {
-  assertx(transMeta.hasValue());
+  assertx(transMeta.has_value());
   this->publishCodeImpl();
   updateCodeSizeCounters();
 }

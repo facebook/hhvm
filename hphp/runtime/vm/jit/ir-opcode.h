@@ -142,10 +142,10 @@ bool isGuardOp(Opcode opc);
  * Returns the negated version of the specified opcode, if its a comparison
  * opcode and can be negated (not all comparisons can be negated).
  */
-folly::Optional<Opcode> negateCmpOp(Opcode opc);
+Optional<Opcode> negateCmpOp(Opcode opc);
 
 const char* opcodeName(Opcode opcode);
-folly::Optional<Opcode> nameToOpcode(const std::string&);
+Optional<Opcode> nameToOpcode(const std::string&);
 
 bool opHasExtraData(Opcode op);
 

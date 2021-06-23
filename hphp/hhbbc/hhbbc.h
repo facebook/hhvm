@@ -101,7 +101,7 @@ struct UnitEmitterQueue : Synchronizable {
   void push(std::unique_ptr<UnitEmitter> ue);
   void finish();
   // Get the next ue, or nullptr to indicate we're done.
-  folly::Optional<RepoFileBuilder::EncodedUE> pop();
+  Optional<RepoFileBuilder::EncodedUE> pop();
   std::unique_ptr<UnitEmitter> popUnitEmitter();
  private:
   bool m_storeUnitEmitters;

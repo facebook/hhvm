@@ -54,11 +54,11 @@ Trace* activeTrace() {
 }
 }
 
-ScopeGuard::ScopeGuard(folly::StringPiece name,folly::Optional<timespec> t)
+ScopeGuard::ScopeGuard(folly::StringPiece name,Optional<timespec> t)
   : ScopeGuard(activeTrace(), name, t)
 {}
 
-EventGuard::EventGuard(folly::StringPiece name,folly::Optional<timespec> t)
+EventGuard::EventGuard(folly::StringPiece name,Optional<timespec> t)
   : EventGuard(activeTrace(), name, t)
 {}
 

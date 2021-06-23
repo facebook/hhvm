@@ -750,7 +750,7 @@ String HHVM_FUNCTION(php_sapi_name) {
 
 #ifdef _WIN32
 const char* php_get_edition_name(DWORD majVer, DWORD minVer);
-folly::Optional<String> php_get_windows_name();
+Optional<String> php_get_windows_name();
 String php_get_windows_cpu();
 #endif
 

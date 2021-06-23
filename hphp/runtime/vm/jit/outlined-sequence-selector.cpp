@@ -26,7 +26,6 @@
 #include "hphp/util/trace.h"
 
 #include <folly/hash/Hash.h>
-#include <folly/Optional.h>
 
 // Outlining first involves identifying what to be outlined.  Ideal candidates
 // are repeated code sequences that can be put in common by moving the code to
@@ -72,8 +71,8 @@ struct Record {
   // find Records for subsequences of this sequence.  The build optimized
   // hashes phase uses this process to adjust occurrence counts of
   // subsequences as it marks hashes to be outlined.
-  folly::Optional<Hash> withoutSuffixHash;
-  folly::Optional<Hash> withoutPrefixHash;
+  Optional<Hash> withoutSuffixHash;
+  Optional<Hash> withoutPrefixHash;
 
   size_t averageMainBytes() const {
     if (!occurrences) return 0;
@@ -122,8 +121,8 @@ struct Record {
       // performance issue, not a correctness issue.  Note: we could have
       // undetected collisions.  This is just one of the easily detectable
       // cases.
-      DEBUG_ONLY auto const optHashToStr = [] (const folly::Optional<Hash>& h) {
-        if (!h.hasValue()) return std::string("none");
+      DEBUG_ONLY auto const optHashToStr = [] (const Optional<Hash>& h) {
+        if (!h.has_value()) return std::string("none");
         return folly::sformat("{:016X}", *h);
       };
       FTRACE(
@@ -159,8 +158,8 @@ InitFiniNode s_registerTlDataStore([] () {
 // processing multiple MetaBuilders will be in use at the same time.  One
 // starting at each instruction in the block.
 struct MetaBuilder {
-  folly::Optional<Hash> hash{};
-  folly::Optional<Hash> chainedFromHash{};
+  Optional<Hash> hash{};
+  Optional<Hash> chainedFromHash{};
   size_t mainBytes{0};
   uint64_t profCount;
   uint32_t numInstructions{0};
@@ -177,7 +176,7 @@ struct MetaBuilder {
     // Build the hash.  It is important the hash used be stable across HHVM
     // restarts, as they will be serialized into the jumpstart package.
     chainedFromHash = hash;
-    if (!hash.hasValue()) hash = 0;
+    if (!hash.has_value()) hash = 0;
 
     Hash srcsDsts{0};
     auto const srcDstBuilder = [&] (auto const& tmps) {
@@ -248,14 +247,14 @@ void recordBlock(const Block* block, AsmInfo* ai) {
     }
     for (size_t i = 0; i < metaBuilders.size(); i++) {
       auto const& mb = metaBuilders[i];
-      assertx(mb.hash.hasValue());
+      assertx(mb.hash.has_value());
       Record r {
         mb.mainBytes,
         mb.profCount,
         1,
         mb.numInstructions,
         mb.chainedFromHash,
-        i + 1 < metaBuilders.size() ? metaBuilders[i + 1].hash : folly::none
+        i + 1 < metaBuilders.size() ? metaBuilders[i + 1].hash : std::nullopt
       };
       recordRecord(*mb.hash, r);
     }
@@ -328,11 +327,11 @@ void buildOptimizedHashes() {
       auto& r = data[h];
       r.reduceCounts(removed);
       insert(h);
-      if (r.withoutSuffixHash.hasValue()) {
+      if (r.withoutSuffixHash.has_value()) {
         impl_ref(*r.withoutSuffixHash, removed, suffixesRemoved + 1,
                  prefixesRemoved, impl_ref);
       }
-      if (r.withoutPrefixHash.hasValue()) {
+      if (r.withoutPrefixHash.has_value()) {
         impl_ref(*r.withoutPrefixHash, removed, suffixesRemoved,
                  prefixesRemoved + 1, impl_ref);
       }

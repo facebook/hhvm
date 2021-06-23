@@ -1486,7 +1486,7 @@ void emitConcatN(IRGS& env, uint32_t n) {
 }
 
 void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
-  auto const subOpc = [&]() -> folly::Optional<Op> {
+  auto const subOpc = [&]() -> Optional<Op> {
     switch (subop) {
     case SetOpOp::PlusEqual:   return Op::Add;
     case SetOpOp::MinusEqual:  return Op::Sub;
@@ -1494,15 +1494,15 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
     case SetOpOp::PlusEqualO:  return Op::AddO;
     case SetOpOp::MinusEqualO: return Op::SubO;
     case SetOpOp::MulEqualO:   return Op::MulO;
-    case SetOpOp::DivEqual:    return folly::none;
+    case SetOpOp::DivEqual:    return std::nullopt;
     case SetOpOp::ConcatEqual: return Op::Concat;
-    case SetOpOp::ModEqual:    return folly::none;
-    case SetOpOp::PowEqual:    return folly::none;
+    case SetOpOp::ModEqual:    return std::nullopt;
+    case SetOpOp::PowEqual:    return std::nullopt;
     case SetOpOp::AndEqual:    return Op::BitAnd;
     case SetOpOp::OrEqual:     return Op::BitOr;
     case SetOpOp::XorEqual:    return Op::BitXor;
-    case SetOpOp::SlEqual:     return folly::none;
-    case SetOpOp::SrEqual:     return folly::none;
+    case SetOpOp::SlEqual:     return std::nullopt;
+    case SetOpOp::SrEqual:     return std::nullopt;
     }
     not_reached();
   }();

@@ -17,8 +17,6 @@
 
 #include <string>
 
-#include <folly/Optional.h>
-
 #include <boost/variant.hpp>
 
 #include "hphp/runtime/vm/jit/alias-class.h"
@@ -219,4 +217,3 @@ std::string show(MemEffects);
 //////////////////////////////////////////////////////////////////////
 
 }}
-

@@ -334,7 +334,7 @@ Type arrLikePosType(Type arr, Type pos, bool isKey, const Class* ctx) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-VecBounds vecBoundsStaticCheck(Type arrayType, folly::Optional<int64_t> idx) {
+VecBounds vecBoundsStaticCheck(Type arrayType, Optional<int64_t> idx) {
   assertx(arrayType <= TVec);
   if (idx && (*idx < 0 || *idx > MixedArray::MaxSize)) return VecBounds::Out;
 

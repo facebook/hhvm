@@ -632,7 +632,7 @@ public:
   /*
    * If the class is called dynamically should we sample the calls?
    */
-  folly::Optional<int64_t> dynConstructSampleRate() const;
+  Optional<int64_t> dynConstructSampleRate() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1059,7 +1059,7 @@ public:
    * When failIsFatal is set, raises an error if the context constant
    * is not defined, is abstract or is a type/value constant.
    */
-  folly::Optional<RuntimeCoeffects>
+  Optional<RuntimeCoeffects>
   clsCtxCnsGet(const StringData* name, bool failIsFatal) const;
 
   /*
@@ -1318,7 +1318,7 @@ public:
   /*
    * Get the underlying enum base type if this is an enum.
    *
-   * A return of folly::none represents the `mixed' type.
+   * A return of std::nullopt represents the `mixed' type.
    */
   MaybeDataType enumBaseTy() const;
 

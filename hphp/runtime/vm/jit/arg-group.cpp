@@ -43,7 +43,7 @@ const char* destTypeName(DestType dt) {
 ArgDesc::ArgDesc(SSATmp* tmp,
                  Vloc loc,
                  bool val,
-                 folly::Optional<AuxUnion> aux) {
+                 Optional<AuxUnion> aux) {
   assertx(IMPLIES(aux, !val));
 
   auto const setTypeImm = [&] {
@@ -120,7 +120,7 @@ ArgGroup& ArgGroup::ssa(int i, bool allowFP) {
   return *this;
 }
 
-ArgGroup& ArgGroup::typedValue(int i, folly::Optional<AuxUnion> aux) {
+ArgGroup& ArgGroup::typedValue(int i, Optional<AuxUnion> aux) {
   // If there's exactly one register argument slot left, the whole TypedValue
   // goes on the stack instead of being split between a register and the stack.
   if (m_gpArgs.size() == num_arg_regs() - 1) m_override = &m_stkArgs;

@@ -570,7 +570,7 @@ void raise_str_to_class_notice(const StringData* name) {
 
 void raise_clsmeth_compat_type_hint(
   const Func* func, const std::string& displayName,
-  folly::Optional<int> param) {
+  Optional<int> param) {
   if (param) {
     raise_notice(
       "class_meth Compat: Argument %d passed to %s()"

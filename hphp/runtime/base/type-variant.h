@@ -273,7 +273,7 @@ inline variant_ref::operator const_variant_ref() const {
 struct Variant : private TypedValue {
   friend variant_ref;
 
-  // Used by VariantTraits to create a folly::Optional-like
+  // Used by VariantTraits to create a Optional-like
   // optional Variant which fits in 16 bytes.
   using Optional = OptionalVariant;
 

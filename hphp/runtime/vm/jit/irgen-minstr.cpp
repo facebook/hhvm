@@ -45,8 +45,6 @@
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/struct-log.h"
 
-#include <folly/Optional.h>
-
 #include <sstream>
 
 namespace HPHP { namespace jit { namespace irgen {
@@ -136,24 +134,24 @@ Type knownTypeForProp(const Class::Prop& prop,
 
 /*
  * Try to find a property offset for the given key in baseClass. Will return
- * folly::none if the mapping from baseClass's name to the Class* can change
+ * std::nullopt if the mapping from baseClass's name to the Class* can change
  * (which happens in sandbox mode when the ctx class is unrelated to baseClass).
  */
-folly::Optional<PropInfo>
+Optional<PropInfo>
 getPropertyOffset(IRGS& env,
                   const Class* baseClass,
                   Type keyType,
                   bool ignoreLateInit) {
-  if (!baseClass) return folly::none;
+  if (!baseClass) return std::nullopt;
 
-  if (!keyType.hasConstVal(TStr)) return folly::none;
+  if (!keyType.hasConstVal(TStr)) return std::nullopt;
   auto const name = keyType.strVal();
 
   auto const ctx = curClass(env);
 
   // We need to check that baseClass cannot change between requests.
   if (!(baseClass->preClass()->attrs() & AttrUnique)) {
-    if (!ctx) return folly::none;
+    if (!ctx) return std::nullopt;
     if (!ctx->classof(baseClass)) {
       if (baseClass->classof(ctx)) {
         // baseClass can change on us in between requests, but since
@@ -163,7 +161,7 @@ getPropertyOffset(IRGS& env,
       } else {
         // baseClass can change on us in between requests and it is
         // not related to ctx, so bail out
-        return folly::none;
+        return std::nullopt;
       }
     }
   }
@@ -174,7 +172,7 @@ getPropertyOffset(IRGS& env,
 
   // If we couldn't find a property that is accessible in the current context,
   // bail out
-  if (slot == kInvalidSlot || !lookup.accessible) return folly::none;
+  if (slot == kInvalidSlot || !lookup.accessible) return std::nullopt;
 
   // If it's a declared property we're good to go: even if a subclass redefines
   // an accessible property with the same name it's guaranteed to be at the same
@@ -244,10 +242,10 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<GuardConstraint> simpleOpConstraint(SimpleOp op) {
+Optional<GuardConstraint> simpleOpConstraint(SimpleOp op) {
   switch (op) {
     case SimpleOp::None:
-      return folly::none;
+      return std::nullopt;
 
     case SimpleOp::Vec:
     case SimpleOp::Dict:
@@ -327,7 +325,7 @@ void specializeObjBase(IRGS& env, SSATmp* base) {
 //////////////////////////////////////////////////////////////////////
 // Intermediate ops
 
-folly::Optional<PropInfo>
+Optional<PropInfo>
 getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
                          bool ignoreLateInit) {
   // We allow the use of classes from nullable objects because
@@ -335,7 +333,7 @@ getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
   // doing the property access.
   auto const baseType = base->type().derefIfPtr();
   if (!(baseType < (TObj | TInitNull) && baseType.clsSpec())) {
-    return folly::none;
+    return std::nullopt;
   }
 
   auto const baseCls = baseType.clsSpec().cls();
@@ -1761,23 +1759,23 @@ void emitIncDecM(IRGS& env, uint32_t nDiscard, IncDecOp incDec, MemberKey mk) {
 }
 
 SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
-  auto const maybeOp = [&]() -> folly::Optional<Op> {
+  auto const maybeOp = [&]() -> Optional<Op> {
     switch (op) {
     case SetOpOp::PlusEqual:   return Op::Add;
     case SetOpOp::MinusEqual:  return Op::Sub;
     case SetOpOp::MulEqual:    return Op::Mul;
-    case SetOpOp::PlusEqualO:  return folly::none;
-    case SetOpOp::MinusEqualO: return folly::none;
-    case SetOpOp::MulEqualO:   return folly::none;
-    case SetOpOp::DivEqual:    return folly::none;
-    case SetOpOp::ConcatEqual: return folly::none;
-    case SetOpOp::ModEqual:    return folly::none;
-    case SetOpOp::PowEqual:    return folly::none;
+    case SetOpOp::PlusEqualO:  return std::nullopt;
+    case SetOpOp::MinusEqualO: return std::nullopt;
+    case SetOpOp::MulEqualO:   return std::nullopt;
+    case SetOpOp::DivEqual:    return std::nullopt;
+    case SetOpOp::ConcatEqual: return std::nullopt;
+    case SetOpOp::ModEqual:    return std::nullopt;
+    case SetOpOp::PowEqual:    return std::nullopt;
     case SetOpOp::AndEqual:    return Op::BitAnd;
     case SetOpOp::OrEqual:     return Op::BitOr;
     case SetOpOp::XorEqual:    return Op::BitXor;
-    case SetOpOp::SlEqual:     return folly::none;
-    case SetOpOp::SrEqual:     return folly::none;
+    case SetOpOp::SlEqual:     return std::nullopt;
+    case SetOpOp::SrEqual:     return std::nullopt;
     }
     not_reached();
   }();

@@ -193,7 +193,7 @@ struct TypeConstraint {
    * Returns the underlying DataType for this TypeConstraint.
    */
   MaybeDataType underlyingDataType() const {
-    return isPrecise() ? MaybeDataType(getAnnotDataType(m_type)) : folly::none;
+    return isPrecise() ? MaybeDataType(getAnnotDataType(m_type)) : std::nullopt;
   }
 
   /*

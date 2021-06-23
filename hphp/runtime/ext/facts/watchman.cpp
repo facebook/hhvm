@@ -17,7 +17,6 @@
 #include <chrono>
 #include <string>
 
-#include <folly/Optional.h>
 #include <folly/Singleton.h>
 #include <folly/Synchronized.h>
 #include <folly/concurrency/ConcurrentHashMap.h>
@@ -27,6 +26,7 @@
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/watchman.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/optional.h"
 #include "hphp/util/trace.h"
 
 TRACE_SET_MOD(facts);
@@ -35,14 +35,14 @@ namespace HPHP {
 namespace Facts {
 
 std::shared_ptr<Watchman> Watchman::get(
-    const folly::fs::path& path, const std::optional<std::string>& sockPath) {
+    const folly::fs::path& path, const Optional<std::string>& sockPath) {
   assertx(path.is_absolute());
   auto watchman = std::make_shared<Watchman>(path, sockPath);
   watchman->reconnect();
   return watchman;
 }
 
-Watchman::Watchman(folly::fs::path path, std::optional<std::string> sockPath)
+Watchman::Watchman(folly::fs::path path, Optional<std::string> sockPath)
     : m_path{std::move(path)}, m_sockPath{std::move(sockPath)} {
 }
 

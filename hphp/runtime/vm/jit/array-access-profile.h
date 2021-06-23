@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/extra-data.h"
 
 #include <folly/dynamic.h>
-#include <folly/Optional.h>
 
 #include <cstdint>
 

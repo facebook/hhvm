@@ -138,6 +138,7 @@ struct RepoOptions {
     // bigger problems.
     return m_sha1 == o.m_sha1;
   }
+  bool operator!=(const RepoOptions& o) const { return !(*this == o); }
 
   // Getters for the parser options we pass to HackC for extracting facts
   bool allowNewAttributeSyntax() const noexcept {
@@ -215,7 +216,7 @@ struct RuntimeOption {
     std::set<std::string>& xboxPasswords
   );
 
-  static folly::Optional<folly::fs::path> GetHomePath(
+  static Optional<folly::fs::path> GetHomePath(
     const folly::StringPiece user);
 
   static std::string GetDefaultUser();

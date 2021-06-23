@@ -18,8 +18,6 @@
 
 #include "hphp/util/assertions.h"
 
-#include <folly/Optional.h>
-
 #include <string>
 
 namespace HPHP { namespace jit {
@@ -249,4 +247,3 @@ static_assert(sizeof(AliasIdSet) == sizeof(uint64_t), "");
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
-

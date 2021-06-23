@@ -273,11 +273,11 @@ void emitGuards(irgen::IRGS& irgs,
 /*
  * Returns the id of the next region block in workQ whose
  * corresponding IR block is currently reachable from the IR unit's
- * entry, or folly::none if no such block exists.  Furthermore, any
+ * entry, or std::nullopt if no such block exists.  Furthermore, any
  * unreachable blocks appearing before the first reachable block are
  * moved to the end of workQ.
  */
-folly::Optional<RegionDesc::BlockId> nextReachableBlock(
+Optional<RegionDesc::BlockId> nextReachableBlock(
   jit::queue<RegionDesc::BlockId>& workQ,
   const irgen::IRBuilder& irb,
   const BlockIdToIRBlockMap& blockIdToIRBlock
@@ -294,7 +294,7 @@ folly::Optional<RegionDesc::BlockId> nextReachableBlock(
     // reachable after processing some of the other blocks.
     workQ.push(regionBlockId);
   }
-  return folly::none;
+  return std::nullopt;
 }
 
 /*
@@ -383,8 +383,8 @@ static bool isSimpleOp(Op op) {
       op == Op::CastInt;
 }
 
-folly::Optional<unsigned> scheduleSurprise(const RegionDesc::Block& block) {
-  folly::Optional<unsigned> checkIdx;
+Optional<unsigned> scheduleSurprise(const RegionDesc::Block& block) {
+  Optional<unsigned> checkIdx;
   auto sk = block.start();
   for (unsigned i = 0; i < block.length(); ++i, sk.advance(block.func())) {
     auto const backwards = [&]{

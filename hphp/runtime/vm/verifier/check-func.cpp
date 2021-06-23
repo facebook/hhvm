@@ -52,7 +52,7 @@ struct State {
   bool* iters{};      // defined/not-defined state of each iter var.
   int stklen{0};       // length of evaluation stack.
   bool mbr_live{false};    // liveness of member base register
-  folly::Optional<MOpMode> mbr_mode; // mode of member base register
+  Optional<MOpMode> mbr_mode; // mode of member base register
   boost::dynamic_bitset<> silences; // set of silenced local variables
   bool guaranteedThis; // whether $this is guaranteed to be non-null
   // immediately following BaseL or BaseH in a minstr sequence, when the base
@@ -975,7 +975,7 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
   }
 
   if (cur->mbr_live && isMemberOp(op)) {
-    folly::Optional<MOpMode> op_mode;
+    Optional<MOpMode> op_mode;
     auto new_pc = pc;
     if (op == Op::QueryM) {
       decode_op(new_pc);

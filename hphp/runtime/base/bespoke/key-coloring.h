@@ -36,7 +36,7 @@ using ColorMap = folly::F14FastMap<const StringData*, Color>;
 //
 // The current implementation sorts the layouts by weight and finds a colorable
 // prefix of the resulting order.
-std::pair<LayoutWeightVector::const_iterator, folly::Optional<ColorMap>>
+std::pair<LayoutWeightVector::const_iterator, Optional<ColorMap>>
   findKeyColoring(LayoutWeightVector& layouts);
 
 void applyColoring(const ColorMap& coloring);

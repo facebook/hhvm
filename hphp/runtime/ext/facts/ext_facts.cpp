@@ -18,7 +18,6 @@
 #include <functional>
 #include <iomanip>
 #include <mutex>
-#include <optional>
 #include <pwd.h>
 #include <sstream>
 #include <string>
@@ -441,11 +440,11 @@ struct Facts final : Extension {
     return m_data->m_expirationTime;
   }
 
-  const std::optional<std::string>& getWatchmanDefaultSocket() const {
+  const Optional<std::string>& getWatchmanDefaultSocket() const {
     return m_data->m_watchmanDefaultSocket;
   }
 
-  const std::optional<std::string>& getWatchmanRootSocket() const {
+  const Optional<std::string>& getWatchmanRootSocket() const {
     return m_data->m_watchmanRootSocket;
   }
 
@@ -470,20 +469,20 @@ private:
   // your new member is destroyed at the right time.
   struct FactsData {
     std::chrono::seconds m_expirationTime{30 * 60};
-    std::optional<std::string> m_watchmanDefaultSocket;
-    std::optional<std::string> m_watchmanRootSocket;
+    Optional<std::string> m_watchmanDefaultSocket;
+    Optional<std::string> m_watchmanRootSocket;
     hphp_hash_set<std::string> m_excludedRepos;
     folly::ConcurrentHashMap<std::string, std::shared_ptr<Watchman>>
         m_watchmanClients{};
     std::unique_ptr<WatchmanAutoloadMapFactory> m_mapFactory;
   };
-  std::optional<FactsData> m_data;
+  Optional<FactsData> m_data;
 
   /**
    * Discover who owns the given repo and return the Watchman socket
    * corresponding to that user.
    */
-  std::optional<std::string> getPerUserWatchmanSocket() {
+  Optional<std::string> getPerUserWatchmanSocket() {
     IniSetting::Map ini = IniSetting::Map::object;
     Hdf config;
     auto* repoOptions = g_context->getRepoOptionsForRequest();
@@ -543,7 +542,7 @@ private:
 FactsStore*
 WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
 
-  auto mapKey = [&]() -> std::optional<WatchmanAutoloadMapKey> {
+  auto mapKey = [&]() -> Optional<WatchmanAutoloadMapKey> {
     try {
       auto mk = WatchmanAutoloadMapKey::get(options);
       if (!mk.isAutoloadableRepo()) {
@@ -654,7 +653,7 @@ bool HHVM_FUNCTION(facts_enabled) {
 
 Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
   // Turn rootStr into an absolute path.
-  auto root = [&]() -> std::optional<folly::fs::path> {
+  auto root = [&]() -> Optional<folly::fs::path> {
     folly::fs::path maybeRoot{rootStr.get()->slice()};
     if (maybeRoot.is_absolute()) {
       return maybeRoot;

@@ -259,7 +259,7 @@ public:
    */
   void setBc(const unsigned char* bc, size_t bclen);
   void setBcToken(Func::BCPtr::Token token, size_t bclen);
-  folly::Optional<Func::BCPtr::Token> loadBc();
+  Optional<Func::BCPtr::Token> loadBc();
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode emit.

@@ -1087,11 +1087,11 @@ SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
   always_assert(false);
 }
 
-folly::Optional<int> specialClsReifiedPropSlot(IRGS& env, SpecialClsRef ref) {
+Optional<int> specialClsReifiedPropSlot(IRGS& env, SpecialClsRef ref) {
   auto const cls = curClass(env);
-  if (!cls) return folly::none;
-  auto result = [&] (const Class* cls) -> folly::Optional<int> {
-    if (!cls->hasReifiedGenerics()) return folly::none;
+  if (!cls) return std::nullopt;
+  auto result = [&] (const Class* cls) -> Optional<int> {
+    if (!cls->hasReifiedGenerics()) return std::nullopt;
     auto const slot = cls->lookupReifiedInitProp();
     assertx(slot != kInvalidSlot);
     return slot;
@@ -1099,11 +1099,11 @@ folly::Optional<int> specialClsReifiedPropSlot(IRGS& env, SpecialClsRef ref) {
   switch (ref) {
     case SpecialClsRef::Static:
       // Currently we disallow new static on reified classes
-      return folly::none;
+      return std::nullopt;
     case SpecialClsRef::Self:
       return result(cls);
     case SpecialClsRef::Parent:
-      if (!cls->parent()) return folly::none;
+      if (!cls->parent()) return std::nullopt;
       return result(cls->parent());
   }
   always_assert(false);
@@ -1215,7 +1215,7 @@ void emitNewObjS(IRGS& env, SpecialClsRef ref) {
   auto const cls = specialClsRefToCls(env, ref);
   if (!cls) return interpOne(env);
   auto const slot = specialClsReifiedPropSlot(env, ref);
-  if (slot == folly::none) {
+  if (slot == std::nullopt) {
     push(env, gen(env, AllocObj, cls));
     return;
   }

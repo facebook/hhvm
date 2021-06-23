@@ -276,10 +276,10 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
 
 void DebugInfo::recordTracelet(TCRange range, SrcKey sk) {
   if (range.isAcold()) {
-    m_acoldDwarfInfo.addTracelet(range, folly::none, sk.func(), sk.lineNumber(),
+    m_acoldDwarfInfo.addTracelet(range, std::nullopt, sk.func(), sk.lineNumber(),
                                  sk.prologue());
   } else {
-    m_aDwarfInfo.addTracelet(range, folly::none, sk.func(), sk.lineNumber(),
+    m_aDwarfInfo.addTracelet(range, std::nullopt, sk.func(), sk.lineNumber(),
                              sk.prologue());
   }
 }

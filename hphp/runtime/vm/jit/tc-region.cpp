@@ -599,7 +599,7 @@ void RegionTranslator::computeKind() {
   }
 }
 
-folly::Optional<TranslationResult> RegionTranslator::getCached() {
+Optional<TranslationResult> RegionTranslator::getCached() {
   auto const srcRec = srcDB().find(sk);
   auto const numTrans = srcRec->numTrans();
   if (prevNumTranslations != -1 && prevNumTranslations != numTrans) {
@@ -614,7 +614,7 @@ folly::Optional<TranslationResult> RegionTranslator::getCached() {
   // getCached is called while the lease is held to check the
   // number of translations in the srcRec is not over max
   // capacity.
-  if (!m_lease || !(*m_lease)) return folly::none;
+  if (!m_lease || !(*m_lease)) return std::nullopt;
   // Check for potential interp anchor translation
   if (kind == TransKind::Profile) {
     if (numTrans > RuntimeOption::EvalJitMaxProfileTranslations) {
@@ -626,7 +626,7 @@ folly::Optional<TranslationResult> RegionTranslator::getCached() {
     always_assert(numTrans == RuntimeOption::EvalJitMaxTranslations + 1);
     return TranslationResult{srcRec->getTopTranslation()};
   }
-  return folly::none;
+  return std::nullopt;
 }
 
 void RegionTranslator::resetCached() {

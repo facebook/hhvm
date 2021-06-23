@@ -143,7 +143,7 @@ void optimize(tc::FuncMetaInfo& info) {
   FTRACE(4, "Translating {} regions for {} (includedBody={})\n",
          regions.size(), func->fullName(), includedBody);
 
-  folly::Optional<uint64_t> maxWeight;
+  Optional<uint64_t> maxWeight;
   for (auto region : regions) {
     auto const weight = VasmBlockCounters::getRegionWeight(*region);
     if (weight) {

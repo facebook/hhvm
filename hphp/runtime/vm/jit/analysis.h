@@ -92,10 +92,8 @@ SSATmp* least_common_ancestor(SSATmp*, SSATmp*);
  * If a frame specified by its frame pointer lives on the stack and its offset
  * is known, return its offset relative to SP.
  */
-folly::Optional<IRSPRelOffset> offsetOfFrame(SSATmp *fp);
+Optional<IRSPRelOffset> offsetOfFrame(SSATmp *fp);
 
 //////////////////////////////////////////////////////////////////////
 
 }}
-
-

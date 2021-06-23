@@ -438,12 +438,12 @@ using bespoke::StructDict;
 using bespoke::StructLayout;
 
 // Returns none if the layout is an abstract struct layout.
-folly::Optional<Slot> getStructSlot(const SSATmp* arr, const SSATmp* key) {
+Optional<Slot> getStructSlot(const SSATmp* arr, const SSATmp* key) {
   assertx(key->hasConstVal(TStr));
   auto const layout = arr->type().arrSpec().layout();
   assertx(layout.is_struct());
 
-  if (!layout.bespokeLayout()->isConcrete()) return folly::none;
+  if (!layout.bespokeLayout()->isConcrete()) return std::nullopt;
 
   auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
   return slayout->keySlot(key->strVal());

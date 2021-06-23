@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <folly/Optional.h>
-
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -89,4 +87,3 @@ void simplifyPass(IRUnit&);
 //////////////////////////////////////////////////////////////////////
 
 }}
-

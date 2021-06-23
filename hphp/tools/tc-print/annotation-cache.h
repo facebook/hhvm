@@ -16,11 +16,13 @@
 
 #ifndef incl_HPHP_ANNOTATION_CACHE_H_
 #define incl_HPHP_ANNOTATION_CACHE_H_
+
+#include "hphp/util/optional.h"
+
 #include <unordered_map>
 #include <string>
 
 #include <folly/io/IOBuf.h>
-#include <folly/Optional.h>
 #include <folly/Range.h>
 
 namespace HPHP {
@@ -54,7 +56,7 @@ struct AnnotationCache {
    * empty Optional if either the annotation string is not a redirect or if it
    * is improperly formatted.
    */
-  folly::Optional<FileInfo> getFileInfo(const std::string& annotation);
+  Optional<FileInfo> getFileInfo(const std::string& annotation);
 
   /*
    * Given FileInfo, attempt to read the (decompressed) file in
@@ -67,7 +69,7 @@ struct AnnotationCache {
    * If file reading fails, the failure is also cached so that we don't retry
    * reading the same broken file.
    */
-  folly::Optional<folly::StringPiece> getValue(const FileInfo&);
+  Optional<folly::StringPiece> getValue(const FileInfo&);
 
 private:
   const uint8_t* getIOBuf(const std::string& fileName);

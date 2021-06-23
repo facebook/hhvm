@@ -203,7 +203,7 @@ bool isGuardOp(Opcode opc) {
   }
 }
 
-folly::Optional<Opcode> negateCmpOp(Opcode opc) {
+Optional<Opcode> negateCmpOp(Opcode opc) {
   switch (opc) {
     case GtBool:              return LteBool;
     case GteBool:             return LtBool;
@@ -260,7 +260,7 @@ folly::Optional<Opcode> negateCmpOp(Opcode opc) {
     case EqRes:               return NeqRes;
     case NeqRes:              return EqRes;
 
-    default:                  return folly::none;
+    default:                  return std::nullopt;
   }
 }
 

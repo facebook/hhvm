@@ -254,7 +254,7 @@ TypeOrReduced builtin_is_callable(ISS& env, const php::Func* func,
 
   auto const ty = getArg(env, func, fca, 0);
   if (ty == TInitCell) return NoReduced{};
-  auto const res = [&]() -> folly::Optional<bool> {
+  auto const res = [&]() -> Optional<bool> {
     if (ty.subtypeOf(BClsMeth | BFunc)) return true;
     if (ty.subtypeOf(BArrLikeE | BKeyset) ||
         !ty.couldBe(BClsMeth | BFunc | BVec | BDict | BObj | BStr)) {
@@ -506,7 +506,7 @@ bool handle_function_exists(ISS& env, const Type& name) {
   return rfunc.exactFunc();
 }
 
-folly::Optional<Type> const_fold(ISS& env,
+Optional<Type> const_fold(ISS& env,
                                  uint32_t nArgs,
                                  uint32_t numExtraInputs,
                                  const php::Func& phpFunc,
@@ -517,7 +517,7 @@ folly::Optional<Type> const_fold(ISS& env,
   auto const firstArgPos = numExtraInputs + nArgs - 1;
   for (auto i = uint32_t{0}; i < nArgs; ++i) {
     auto const val = tv(topT(env, firstArgPos - i));
-    if (!val || val->m_type == KindOfUninit) return folly::none;
+    if (!val || val->m_type == KindOfUninit) return std::nullopt;
     args[i] = *val;
   }
 
@@ -533,14 +533,14 @@ folly::Optional<Type> const_fold(ISS& env,
     return Func::lookupBuiltin(phpFunc.name);
   }();
 
-  if (!func) return folly::none;
+  if (!func) return std::nullopt;
 
   // If the function is variadic and all the variadic parameters are already
   // packed into an array as the last parameter, we need to unpack them, as
   // invokeFuncFew expects them to be unpacked.
   if (func->hasVariadicCaptureParam() && variadicsPacked) {
-    if (args.empty()) return folly::none;
-    if (!isVecType(args.back().m_type)) return folly::none;
+    if (args.empty()) return std::nullopt;
+    if (!isVecType(args.back().m_type)) return std::nullopt;
     auto const variadic = args.back();
     args.pop_back();
     IterateV(

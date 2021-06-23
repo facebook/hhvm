@@ -78,7 +78,7 @@ struct RefineTmpsRec {
   void go(Block* blk) {
     TRACE_SET_MOD(hhir_refineTmps);
 
-    auto saved_state = folly::Optional<sparse_idptr_map<SSATmp,SSATmp*>>{};
+    auto saved_state = Optional<sparse_idptr_map<SSATmp,SSATmp*>>{};
 
     FTRACE(3, "B{}\n", blk->id());
     for (auto& inst : blk->instrs()) {

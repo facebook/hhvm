@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <folly/Optional.h>
-
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/type-string.h"
@@ -180,17 +178,17 @@ COLLECTIONS_ALL_TYPES(X)
 }
 
 /*
- * Returns a CollectionType given a name, folly::none if name is not a
+ * Returns a CollectionType given a name, std::nullopt if name is not a
  * collection type.
  */
-inline folly::Optional<CollectionType> stringToType(const StringData* name) {
+inline Optional<CollectionType> stringToType(const StringData* name) {
 #define X(type) if (name->isame(s_##type.get())) return CollectionType::type;
 COLLECTIONS_ALL_TYPES(X)
 #undef X
-  return folly::none;
+  return std::nullopt;
 }
 
-inline folly::Optional<CollectionType> stringToType(const std::string& s) {
+inline Optional<CollectionType> stringToType(const std::string& s) {
   return stringToType(
     req::ptr<StringData>::attach(StringData::Make(s)).get()
   );

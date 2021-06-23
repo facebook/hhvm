@@ -21,8 +21,6 @@
 
 #include <boost/variant.hpp>
 
-#include <folly/Optional.h>
-
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/misc.h"
@@ -523,9 +521,9 @@ struct MethodsInfo {
   MethodsInfo(Context, ClassAnalysis*);
 
   // Look up the best known return type for the current class's
-  // method, return folly::none if not known, or if the Func is not a
+  // method, return std::nullopt if not known, or if the Func is not a
   // method of the current class.
-  folly::Optional<Type> lookupReturnType(const php::Func&);
+  Optional<Type> lookupReturnType(const php::Func&);
 
 private:
   ClassAnalysis* m_cls;

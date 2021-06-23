@@ -32,7 +32,6 @@
 #include <atomic>
 #include <array>
 #include <folly/lang/Bits.h>
-#include <folly/Optional.h>
 #include <vector>
 #include <sstream>
 
@@ -68,7 +67,7 @@ bool checkLayoutTest(
   return true;
 }
 
-folly::Optional<LayoutTest> compute2ByteTest(
+Optional<LayoutTest> compute2ByteTest(
     const std::vector<uint16_t>& liveVec,
     const std::vector<uint16_t>& deadVec) {
   assertx(!liveVec.empty());
@@ -83,7 +82,7 @@ folly::Optional<LayoutTest> compute2ByteTest(
   auto const and = LayoutTest { imm, LayoutTest::And2Byte };
   if (checkLayoutTest(liveVec, deadVec, and)) return and;
 
-  return folly::none;
+  return std::nullopt;
 }
 
 std::string show(LayoutTest test) {
@@ -148,10 +147,10 @@ struct Layout::BFSWalker {
   {}
 
   /*
-   * Return the next new node in the graph discovered by BFS, or folly::none if
+   * Return the next new node in the graph discovered by BFS, or std::nullopt if
    * the BFS has terminated.
    */
-  folly::Optional<LayoutIndex> next() {
+  Optional<LayoutIndex> next() {
     while (!m_workQ.empty()) {
       auto const index = m_workQ.front();
       m_workQ.pop_front();
@@ -164,7 +163,7 @@ struct Layout::BFSWalker {
       }
       return index;
     }
-    return folly::none;
+    return std::nullopt;
   }
 
   /*

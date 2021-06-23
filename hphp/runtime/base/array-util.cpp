@@ -28,8 +28,6 @@
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
-#include <folly/Optional.h>
-
 #include <set>
 #include <utility>
 #include <vector>

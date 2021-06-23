@@ -22,14 +22,14 @@
 
 namespace HPHP {
 
-folly::Optional<uint8_t> MixedArrayKeys::getMask(const jit::Type& type) {
+Optional<uint8_t> MixedArrayKeys::getMask(const jit::Type& type) {
   using namespace jit;
   auto const str = kNonStaticStrKey | kStaticStrKey;
   if (type == TInt)          return ~kIntKey;
   if (type == (TInt | TStr)) return ~(kIntKey | str);
   if (type == TStaticStr)    return ~kStaticStrKey;
   if (type == TStr)          return ~str;
-  return folly::none;
+  return std::nullopt;
 }
 
 bool MixedArrayKeys::checkInvariants(const MixedArray* ad) const {

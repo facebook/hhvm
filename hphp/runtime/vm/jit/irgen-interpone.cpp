@@ -99,8 +99,8 @@ uint32_t localInputId(SrcKey sk) {
   }
 }
 
-folly::Optional<Type> interpOutputType(IRGS& env,
-                                       folly::Optional<Type>& checkTypeType) {
+Optional<Type> interpOutputType(IRGS& env,
+                                       Optional<Type>& checkTypeType) {
   using namespace jit::InstrFlags;
   auto const sk = curSrcKey(env);
   auto localType = [&]{
@@ -133,7 +133,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutRecord:      return TRecord;
     case OutResource:    return TRes;
 
-    case OutFDesc:       return folly::none;
+    case OutFDesc:       return std::nullopt;
     case OutCns:         return TCell;
 
     case OutSameAsInput1: return topType(env, BCSPRelOffset{0});
@@ -160,7 +160,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
       auto ty = localType();
       return ty <= TDbl ? ty : TCell;
     }
-    case OutNone:       return folly::none;
+    case OutNone:       return std::nullopt;
 
     case OutCInput: {
       return topType(env, BCSPRelOffset{0});
@@ -187,7 +187,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
 jit::vector<InterpOneData::LocalType>
 interpOutputLocals(IRGS& env,
                    bool& smashesAllLocals,
-                   folly::Optional<Type> pushedType) {
+                   Optional<Type> pushedType) {
   using namespace jit::InstrFlags;
   auto const sk = curSrcKey(env);
   auto const& info = getInstrInfo(sk.op());
@@ -286,7 +286,7 @@ interpOutputLocals(IRGS& env,
 }
 
 void interpOne(IRGS& env) {
-  folly::Optional<Type> checkTypeType;
+  Optional<Type> checkTypeType;
   auto const sk = curSrcKey(env);
   auto stackType = interpOutputType(env, checkTypeType);
   auto popped = getStackPopped(sk.pc());
@@ -315,7 +315,7 @@ void interpOne(IRGS& env) {
 
 void interpOne(IRGS& env, int popped) {
   InterpOneData idata { spOffBCFromIRSP(env) };
-  interpOne(env, folly::none, popped, 0, idata);
+  interpOne(env, std::nullopt, popped, 0, idata);
 }
 
 void interpOne(IRGS& env, Type outType, int popped) {
@@ -324,7 +324,7 @@ void interpOne(IRGS& env, Type outType, int popped) {
 }
 
 void interpOne(IRGS& env,
-               folly::Optional<Type> outType,
+               Optional<Type> outType,
                int popped,
                int pushed,
                InterpOneData& idata) {

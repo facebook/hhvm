@@ -18,8 +18,6 @@
 
 #include <type_traits>
 
-#include <folly/Optional.h>
-
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
@@ -947,11 +945,11 @@ bool subopValid(Subop);
 /*
  * Try to parse a string into a subop name of a given type.
  *
- * Returns folly::none if the string is not recognized as that type of
+ * Returns std::nullopt if the string is not recognized as that type of
  * subop.
  */
 template<class SubOpType>
-folly::Optional<SubOpType> nameToSubop(const char*);
+Optional<SubOpType> nameToSubop(const char*);
 
 using OffsetList = std::vector<Offset>;
 

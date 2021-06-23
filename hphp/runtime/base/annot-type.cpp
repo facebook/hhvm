@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/annot-type.h"
 
-#include <folly/Optional.h>
 #include <folly/MapUtil.h>
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -46,12 +45,12 @@ const StaticString
 
 MaybeDataType nameToMaybeDataType(const StringData* typeName) {
   auto const* type = nameToAnnotType(typeName);
-  return type ? MaybeDataType(getAnnotDataType(*type)) : folly::none;
+  return type ? MaybeDataType(getAnnotDataType(*type)) : std::nullopt;
 }
 
 MaybeDataType nameToMaybeDataType(const std::string& typeName) {
   auto const* type = nameToAnnotType(typeName);
-  return type ? MaybeDataType(getAnnotDataType(*type)) : folly::none;
+  return type ? MaybeDataType(getAnnotDataType(*type)) : std::nullopt;
 }
 
 /**

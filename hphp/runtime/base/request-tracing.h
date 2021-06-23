@@ -16,7 +16,8 @@
 
 #pragma once
 
-#include <folly/Optional.h>
+#include "hphp/util/optional.h"
+
 #include <folly/Range.h>
 #include <folly/container/F14Map.h>
 #include <time.h>
@@ -62,8 +63,8 @@ struct Event {
   const AnnotationMap& annotations() const;
   bool finished() const;
 
-  void begin(folly::Optional<timespec>);
-  void end(folly::Optional<timespec>);
+  void begin(Optional<timespec>);
+  void end(Optional<timespec>);
   void annotate(folly::StringPiece key, folly::StringPiece value);
 
 private:
@@ -123,12 +124,12 @@ private:
 struct EventGuard final {
   explicit EventGuard(
     folly::StringPiece name,
-    folly::Optional<timespec> = folly::none
+    Optional<timespec> = std::nullopt
   );
   EventGuard(
     Trace* t,
     folly::StringPiece name,
-    folly::Optional<timespec> = folly::none
+    Optional<timespec> = std::nullopt
   );
   ~EventGuard();
 
@@ -139,7 +140,7 @@ struct EventGuard final {
   EventGuard& operator=(EventGuard&&) = delete;
 
   void annotate(folly::StringPiece key, folly::StringPiece value);
-  void finish(folly::Optional<timespec> = folly::none);
+  void finish(Optional<timespec> = std::nullopt);
 
 private:
   Trace* m_trace;
@@ -149,12 +150,12 @@ private:
 struct ScopeGuard final {
   explicit ScopeGuard(
     folly::StringPiece name,
-    folly::Optional<timespec> = folly::none
+    Optional<timespec> = std::nullopt
   );
   ScopeGuard(
     Trace* t,
     folly::StringPiece name,
-    folly::Optional<timespec> = folly::none
+    Optional<timespec> = std::nullopt
   );
   ~ScopeGuard();
 
@@ -167,7 +168,7 @@ struct ScopeGuard final {
   void annotate(folly::StringPiece key, folly::StringPiece value);
   void setEventPrefix(folly::StringPiece);
   void setEventSuffix(folly::StringPiece);
-  void finish(folly::Optional<timespec> = folly::none);
+  void finish(Optional<timespec> = std::nullopt);
 
 private:
   Trace* m_trace;
@@ -228,4 +229,3 @@ void visit_process_stats(F&&);
 }}
 
 #include "hphp/runtime/base/request-tracing-inl.h"
-

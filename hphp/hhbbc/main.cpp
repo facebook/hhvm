@@ -388,7 +388,7 @@ void compile_repo() {
   {
     RepoFileBuilder repoBuilder{output_repo};
 
-    folly::Optional<trace_time> timer;
+    Optional<trace_time> timer;
     while (auto ue = ueq.pop()) {
       if (!timer) timer.emplace("writing output repo");
       repoBuilder.add(*ue);

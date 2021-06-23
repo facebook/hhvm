@@ -21,8 +21,6 @@
 
 #include "hphp/util/trace.h"
 
-#include <folly/Optional.h>
-
 namespace HPHP { namespace jit {
 
 struct ProfTransRec;
@@ -67,4 +65,3 @@ bool retranslateAllComplete();
 CompactVector<Trace::BumpRelease> unbumpFunctions();
 
 }}}
-

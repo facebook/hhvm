@@ -19,7 +19,6 @@
 #include <atomic>
 #include <memory>
 #include <mutex>
-#include <optional>
 #include <queue>
 #include <string>
 #include <vector>
@@ -86,7 +85,7 @@ template <typename S> struct SymbolMap {
    * Return nullptr if the type is not defined, or if the type is defined in
    * more than one file.
    */
-  std::optional<Symbol<S, SymKind::Type>> getTypeName(const S& type);
+  Optional<Symbol<S, SymKind::Type>> getTypeName(const S& type);
 
   /**
    * Return the one and only definition for the given symbol.
@@ -279,7 +278,7 @@ template <typename S> struct SymbolMap {
   /**
    * Return a hash representing the given path's last-known checksum.
    */
-  std::optional<SHA1> getSha1Hash(Path<S> path) const;
+  Optional<SHA1> getSha1Hash(Path<S> path) const;
 
   /**
    * For each file, update the SymbolMap with the given file facts.
@@ -417,7 +416,7 @@ template <typename S> struct SymbolMap {
         defs.push_back({path, {kind, flags}});
       }
 
-      std::optional<std::pair<TypeKind, int>>
+      Optional<std::pair<TypeKind, int>>
       getKindAndFlags(Symbol<S, SymKind::Type> type, Path<S> path) const {
         auto const it = m_map.find(type);
         if (it == m_map.end()) {
@@ -530,7 +529,7 @@ private:
   /**
    * Helper function to read from and write to m_synchronizedData.
    *
-   * readFn: ((const Data&) -> std::optional<Ret>)
+   * readFn: ((const Data&) -> Optional<Ret>)
    * GetFromDBFn: ((AutoloadDB&, SQLiteTxn&) -> DataFromDB)
    * writeFn: ((Data&, DataFromDB) -> Ret)
    */

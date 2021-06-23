@@ -26,9 +26,9 @@ namespace HPHP {
 
 template<class SerDe>
 void EHEnt::serde(SerDe& sd) {
-  folly::Optional<Offset> end;
+  Optional<Offset> end;
   if (!SerDe::deserializing) {
-    end = (m_end == kInvalidOffset) ? folly::none : folly::make_optional(m_end);
+    end = (m_end == kInvalidOffset) ? std::nullopt : make_optional(m_end);
   }
 
   sd(m_base)
@@ -344,7 +344,7 @@ inline void Func::setCtiEntry(Offset base, uint32_t size) {
 
 inline MaybeDataType Func::hniReturnType() const {
   auto const ex = extShared();
-  return ex ? ex->m_hniReturnType : folly::none;
+  return ex ? ex->m_hniReturnType : std::nullopt;
 }
 
 inline RepoAuthType Func::repoReturnType() const {
@@ -697,11 +697,11 @@ inline bool Func::isDynamicallyCallable() const {
   return m_attrs & AttrDynamicallyCallable;
 }
 
-inline folly::Optional<int64_t> Func::dynCallSampleRate() const {
+inline Optional<int64_t> Func::dynCallSampleRate() const {
   if (auto const ex = extShared()) {
     if (ex->m_dynCallSampleRate >= 0) return ex->m_dynCallSampleRate;
   }
-  return folly::none;
+  return std::nullopt;
 }
 
 inline bool Func::isMethCaller() const {

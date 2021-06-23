@@ -24,7 +24,6 @@
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/array-layout.h"
 
-#include <folly/Optional.h>
 #include <folly/String.h>
 
 #include <folly/container/F14Map.h>
@@ -138,7 +137,7 @@ struct LoggingProfileKey {
     return locationType == LocationType::Runtime;
   }
 
-  folly::Optional<Op> op() const {
+  Optional<Op> op() const {
     switch (locationType) {
       case LocationType::SrcKey:
         return {sk.op()};
@@ -147,7 +146,7 @@ struct LoggingProfileKey {
       case LocationType::APCKey:
       case LocationType::Runtime:
       case LocationType::StaticProperty:
-        return folly::none;
+        return std::nullopt;
     }
     always_assert(false);
   }

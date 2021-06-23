@@ -230,13 +230,13 @@ MaybeDataType get_datatype(
     if (!strcasecmp(name.c_str(), "HH\\keyset")) return KindOfKeyset;
     if (!strcasecmp(name.c_str(), "HH\\varray")) return KindOfVec;
     if (!strcasecmp(name.c_str(), "HH\\darray")) return KindOfDict;
-    if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return folly::none;
-    if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return folly::none;
-    if (!strcasecmp(name.c_str(), "HH\\AnyArray")) return folly::none;
+    if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return std::nullopt;
+    if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return std::nullopt;
+    if (!strcasecmp(name.c_str(), "HH\\AnyArray")) return std::nullopt;
     return KindOfObject;
   }
   if (is_nullable || is_soft) {
-    return folly::none;
+    return std::nullopt;
   }
   if (!strcasecmp(name.c_str(), "null") ||
       !strcasecmp(name.c_str(), "HH\\null") ||
@@ -246,23 +246,23 @@ MaybeDataType get_datatype(
   if (!strcasecmp(name.c_str(), "HH\\bool"))     return KindOfBoolean;
   if (!strcasecmp(name.c_str(), "HH\\int"))      return KindOfInt64;
   if (!strcasecmp(name.c_str(), "HH\\float"))    return KindOfDouble;
-  if (!strcasecmp(name.c_str(), "HH\\num"))      return folly::none;
-  if (!strcasecmp(name.c_str(), "HH\\arraykey")) return folly::none;
+  if (!strcasecmp(name.c_str(), "HH\\num"))      return std::nullopt;
+  if (!strcasecmp(name.c_str(), "HH\\arraykey")) return std::nullopt;
   if (!strcasecmp(name.c_str(), "HH\\string"))   return KindOfString;
   if (!strcasecmp(name.c_str(), "HH\\dict"))     return KindOfDict;
   if (!strcasecmp(name.c_str(), "HH\\vec"))      return KindOfVec;
   if (!strcasecmp(name.c_str(), "HH\\keyset"))   return KindOfKeyset;
   if (!strcasecmp(name.c_str(), "HH\\varray"))   return KindOfVec;
   if (!strcasecmp(name.c_str(), "HH\\darray"))   return KindOfDict;
-  if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return folly::none;
-  if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return folly::none;
-  if (!strcasecmp(name.c_str(), "HH\\AnyArray")) return folly::none;
+  if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return std::nullopt;
+  if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return std::nullopt;
+  if (!strcasecmp(name.c_str(), "HH\\AnyArray")) return std::nullopt;
   if (!strcasecmp(name.c_str(), "HH\\resource")) return KindOfResource;
-  if (!strcasecmp(name.c_str(), "HH\\mixed"))    return folly::none;
-  if (!strcasecmp(name.c_str(), "HH\\nonnull"))  return folly::none;
+  if (!strcasecmp(name.c_str(), "HH\\mixed"))    return std::nullopt;
+  if (!strcasecmp(name.c_str(), "HH\\nonnull"))  return std::nullopt;
   if (!strcasecmp(name.c_str(), "HH\\classname") &&
       RO::EvalClassPassesClassname) {
-    return folly::none;
+    return std::nullopt;
   }
 
   return KindOfObject;

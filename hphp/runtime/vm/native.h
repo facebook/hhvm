@@ -416,7 +416,7 @@ struct NativeFunctionInfo {
  * values, ignoring their inputs.
  */
 MaybeDataType builtinOutType(const TypeConstraint&, const UserAttributeMap&);
-folly::Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i);
+Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i);
 
 /////////////////////////////////////////////////////////////////////////////
 

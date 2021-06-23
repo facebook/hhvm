@@ -19,8 +19,6 @@
 #include <vector>
 #include <utility>
 
-#include <folly/Optional.h>
-
 #include "hphp/util/copy-ptr.h"
 #include "hphp/util/low-ptr.h"
 
@@ -483,7 +481,7 @@ struct Type {
   };
 
 private:
-  friend folly::Optional<int64_t> arr_size(const Type& t);
+  friend Optional<int64_t> arr_size(const Type& t);
   friend ArrayCat categorize_array(const Type& t);
   friend CompactVector<LSString> get_string_keys(const Type& t);
   friend Type wait_handle(const Index&, Type);
@@ -573,7 +571,7 @@ private:
   friend bool arr_map_set(Type&, const Type&, const Type&, bool);
   friend bool arr_map_newelem(Type&, const Type&, bool);
   friend IterTypes iter_types(const Type&);
-  friend folly::Optional<RepoAuthType> make_repo_type_arr(ArrayTypeTable::Builder&,
+  friend Optional<RepoAuthType> make_repo_type_arr(ArrayTypeTable::Builder&,
                                                           const Type&);
 
   friend Type vec_val(SArray);
@@ -611,10 +609,10 @@ private:
   friend Type make_record_for_testing(trep, res::Record, DRecord::Tag);
   friend Type make_arrval_for_testing(trep, SArray);
   friend Type make_arrpacked_for_testing(trep, std::vector<Type>,
-                                         folly::Optional<LegacyMark>);
+                                         Optional<LegacyMark>);
   friend Type make_arrpackedn_for_testing(trep, Type);
   friend Type make_arrmap_for_testing(trep, MapElems, Type, Type,
-                                      folly::Optional<LegacyMark>);
+                                      Optional<LegacyMark>);
   friend Type make_arrmapn_for_testing(trep, Type, Type);
 
   friend Type set_mark_for_testing(Type, LegacyMark);
@@ -1026,25 +1024,25 @@ Type objcls(const Type& t);
 
 /*
  * If the type t has a known constant value, return it as a
- * TypedValue. Otherwise return folly::none. tv() will fail to return
+ * TypedValue. Otherwise return std::nullopt. tv() will fail to return
  * a constant value if the type is known to be counted. tvCounted()
  * will return the constant value regardless of the type's
  * countedness.
  *
  * The returned TypedValue can only contain non-reference-counted types.
  */
-folly::Optional<TypedValue> tv(const Type& t);
-folly::Optional<TypedValue> tvCounted(const Type& t);
+Optional<TypedValue> tv(const Type& t);
+Optional<TypedValue> tvCounted(const Type& t);
 
 /*
  * If the type t has a known constant value, return it as a TypedValue.
- * Otherwise return folly::none.
+ * Otherwise return std::nullopt.
  *
  * The returned TypedValue may contain reference-counted types.
  *
  * You are responsible for any required ref-counting.
  */
-folly::Optional<TypedValue> tvNonStatic(const Type& t);
+Optional<TypedValue> tvNonStatic(const Type& t);
 
 /*
  * If the type t has a known constant value, return true. Otherwise
@@ -1078,18 +1076,18 @@ Type type_of_istype(IsTypeOp op);
 
 /*
  * Get the hhbc IsTypeOp that corresponds to the type in our typesystem.
- * Returns folly::none if no matching IsTypeOp is found.
+ * Returns std::nullopt if no matching IsTypeOp is found.
  */
-folly::Optional<IsTypeOp> type_to_istypeop(const Type& t);
+Optional<IsTypeOp> type_to_istypeop(const Type& t);
 
 /*
  * Get the type in our typesystem that corresponds to type given by the
  * potentially unresolved type structure.
- * Returns folly::none if the type structure is unresolved or
+ * Returns std::nullopt if the type structure is unresolved or
  * no matching Type is found.
  *
  */
-folly::Optional<Type> type_of_type_structure(const Index&, Context, SArray ts);
+Optional<Type> type_of_type_structure(const Index&, Context, SArray ts);
 
 /*
  * Return the DObj structure for a strict subtype of TObj or TOptObj.
@@ -1345,9 +1343,9 @@ Type assert_nonemptiness(Type);
 
 /*
  * If t is definitely an array with a known size, return
- * it. folly::none otherwise.
+ * it. std::nullopt otherwise.
  */
-folly::Optional<int64_t> arr_size(const Type&);
+Optional<int64_t> arr_size(const Type&);
 
 /*
  *

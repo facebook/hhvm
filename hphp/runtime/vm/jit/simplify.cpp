@@ -2833,8 +2833,8 @@ SSATmp* simplifyCheckVecBounds(State& env, const IRInstruction* inst) {
   auto const idx   = inst->src(1);
 
   auto const idxVal = idx->hasConstVal()
-    ? folly::Optional<int64_t>(idx->intVal())
-    : folly::none;
+    ? Optional<int64_t>(idx->intVal())
+    : std::nullopt;
   switch (vecBoundsStaticCheck(array->type(), idxVal)) {
   case VecBounds::In:       return gen(env, Nop);
   case VecBounds::Out:      return gen(env, Jmp, inst->taken());

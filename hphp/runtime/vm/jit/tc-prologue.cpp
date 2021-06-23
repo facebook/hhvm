@@ -80,7 +80,7 @@ int PrologueTranslator::paramIndexHelper(const Func* f, int passed) {
   return passed <= numParams ? passed : numParams + 1;
 }
 
-folly::Optional<TranslationResult> PrologueTranslator::getCached() {
+Optional<TranslationResult> PrologueTranslator::getCached() {
   if (UNLIKELY(RuntimeOption::EvalFailJitPrologs)) {
     return TranslationResult::failTransiently();
   }
@@ -96,7 +96,7 @@ folly::Optional<TranslationResult> PrologueTranslator::getCached() {
     assertx(isValidCodeAddress(prologue));
     return TranslationResult{prologue};
   }
-  return folly::none;
+  return std::nullopt;
 }
 
 void PrologueTranslator::resetCached() {

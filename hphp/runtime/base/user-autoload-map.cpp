@@ -116,22 +116,22 @@ Array UserAutoloadMap::getAllFiles() const {
   return ret.toVec();
 }
 
-std::optional<String> UserAutoloadMap::getTypeFile(
+Optional<String> UserAutoloadMap::getTypeFile(
   const String& typeName) {
   return getFileFromMap(m_typeFile, HHVM_FN(strtolower)(typeName));
 }
 
-std::optional<String> UserAutoloadMap::getFunctionFile(
+Optional<String> UserAutoloadMap::getFunctionFile(
   const String& funcName) {
   return getFileFromMap(m_functionFile, HHVM_FN(strtolower)(funcName));
 }
 
-std::optional<String> UserAutoloadMap::getConstantFile(
+Optional<String> UserAutoloadMap::getConstantFile(
   const String& constName) {
   return getFileFromMap(m_constantFile, constName);
 }
 
-std::optional<String> UserAutoloadMap::getTypeAliasFile(
+Optional<String> UserAutoloadMap::getTypeAliasFile(
   const String& typeAliasName) {
   return getFileFromMap(m_typeAliasFile, HHVM_FN(strtolower)(typeAliasName));
 }
@@ -178,7 +178,7 @@ AutoloadMap::Result UserAutoloadMap::handleFailure(
   return AutoloadMap::Result::StopAutoloading;
 }
 
-std::optional<String> UserAutoloadMap::getFileFromMap(
+Optional<String> UserAutoloadMap::getFileFromMap(
     const Array& map, const String& key) const {
   auto const& filePath = map[key];
   if (!filePath.isString()) {

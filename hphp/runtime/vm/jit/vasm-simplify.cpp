@@ -1138,7 +1138,7 @@ bool shrink_test_immediate(Env& env, uint64_t v, Vptr ptr, Vreg sf,
   if (!v) return simplify_impl(env, b, i, testbi{ 0, rarg(0), sf });
 
   auto getNewVal = [&] (uint64_t val, int bits, bool top_bits, Vreg sf)
-      -> folly::Optional<int> {
+      -> Optional<int> {
     auto const mask = (1LL << bits) - 1;
     auto const low = mask >> 1;
     val &= mask;
@@ -1174,7 +1174,7 @@ bool shrink_test_immediate(Env& env, uint64_t v, Vptr ptr, Vreg sf,
         }
         not_reached();
       })) {
-      return folly::none;
+      return std::nullopt;
     }
 
     return (val & low) - (mask - low);

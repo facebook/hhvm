@@ -25,8 +25,6 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
-#include <folly/Optional.h>
-
 namespace HPHP {
 
 struct ActRec;

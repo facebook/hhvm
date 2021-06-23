@@ -17,7 +17,6 @@
 #include "hphp/runtime/ext/std/ext_std_options.h"
 
 #include <folly/Format.h>
-#include <folly/Optional.h>
 #include <folly/portability/Windows.h>
 
 #include "hphp/runtime/base/strings.h"
@@ -202,7 +201,7 @@ const char* php_get_edition_name(DWORD majVer, DWORD minVer) {
   return nullptr;
 }
 
-folly::Optional<String> php_get_windows_name() {
+Optional<String> php_get_windows_name() {
   const char* majorName = nullptr;
   const char* edName = nullptr;
 
@@ -210,7 +209,7 @@ folly::Optional<String> php_get_windows_name() {
   verInf.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
   GetVersionEx((OSVERSIONINFO*)&verInf);
   if (verInf.dwPlatformId != VER_PLATFORM_WIN32_NT) {
-    return folly::none;
+    return std::nullopt;
   }
 
   // These are accessed a lot, so use short names to keep things readable.

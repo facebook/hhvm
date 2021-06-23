@@ -237,7 +237,7 @@ Type make_specialized_arrval(trep bits, SArray ar) {
 
 Type make_specialized_arrpacked(trep bits,
                                 std::vector<Type> elems,
-                                folly::Optional<LegacyMark> mark = folly::none) {
+                                Optional<LegacyMark> mark = std::nullopt) {
   return make_arrpacked_for_testing(bits, std::move(elems), mark);
 }
 
@@ -247,7 +247,7 @@ Type make_specialized_arrpackedn(trep bits, Type type) {
 
 Type make_specialized_arrmap(trep bits, MapElems elems,
                              Type optKey = TBottom, Type optVal = TBottom,
-                             folly::Optional<LegacyMark> mark = folly::none) {
+                             Optional<LegacyMark> mark = std::nullopt) {
   return make_arrmap_for_testing(
     bits, std::move(elems), std::move(optKey), std::move(optVal), mark
   );

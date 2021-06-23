@@ -54,7 +54,6 @@
 #include "hphp/util/trace.h"
 
 #include <folly/Format.h>
-#include <folly/Optional.h>
 
 namespace HPHP { namespace jit { namespace irlower {
 

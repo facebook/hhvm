@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/util/optional.h"
 #include "hphp/util/trace.h"
 
 #include <folly/ScopeGuard.h>
@@ -117,8 +118,8 @@ private:
   void setter(IRInstruction* inst, Type t) {
     inst->setTypeParam(t);
   }
-  void setter(IRInstruction* inst, folly::Optional<Type> t) {
-    if (t.hasValue()) {
+  void setter(IRInstruction* inst, Optional<Type> t) {
+    if (t.has_value()) {
       inst->setTypeParam(t.value());
     }
   }
@@ -279,7 +280,7 @@ inline int64_t IRUnit::startNanos() const {
   return m_startNanos;
 }
 
-inline folly::Optional<StructuredLogEntry>& IRUnit::logEntry() const {
+inline Optional<StructuredLogEntry>& IRUnit::logEntry() const {
   return m_logEntry;
 }
 

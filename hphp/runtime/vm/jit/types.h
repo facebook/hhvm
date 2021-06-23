@@ -18,14 +18,13 @@
 
 #include <vector>
 
-#include <folly/Optional.h>
-
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/runtime/vm/jit/containers.h"
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/compact-tagged-ptrs.h"
+#include "hphp/util/optional.h"
 #include "hphp/util/hash-set.h"
 
 namespace HPHP { namespace jit {
@@ -110,11 +109,11 @@ inline std::string show(TransKind k) {
   not_reached();
 }
 
-inline folly::Optional<TransKind> nameToTransKind(const std::string& str) {
+inline Optional<TransKind> nameToTransKind(const std::string& str) {
 #define DO(name) if (str == "Trans" #name) return TransKind::name;
   TRANS_KINDS
 #undef DO
-  return folly::none;
+  return std::nullopt;
 }
 
 inline bool isProfiling(TransKind k) {
@@ -217,11 +216,11 @@ inline std::string areaAsString(AreaIndex area) {
   always_assert(false);
 }
 
-inline folly::Optional<AreaIndex> nameToAreaIndex(const std::string name) {
+inline Optional<AreaIndex> nameToAreaIndex(const std::string name) {
   if (name == "Main") return AreaIndex::Main;
   if (name == "Cold") return AreaIndex::Cold;
   if (name == "Frozen") return AreaIndex::Frozen;
-  return folly::none;
+  return std::nullopt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

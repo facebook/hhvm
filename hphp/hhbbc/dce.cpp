@@ -413,7 +413,7 @@ struct DceState {
    * whole sequence is non-pei, we can replace it with pops plus the
    * constant.
    */
-  folly::Optional<UseInfo> minstrUI;
+  Optional<UseInfo> minstrUI;
   /*
    * Flag to indicate local vs global dce.
    */
@@ -1969,7 +1969,7 @@ struct DceOutState {
   /*
    * The union of the dceStacks from the start of the normal successors.
    */
-  folly::Optional<std::vector<UseInfo>>      dceStack;
+  Optional<std::vector<UseInfo>>      dceStack;
 
   /*
    * Whether this is for local_dce
@@ -1977,7 +1977,7 @@ struct DceOutState {
   bool                                        isLocal{false};
 };
 
-folly::Optional<DceState>
+Optional<DceState>
 dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
           const DceOutState& dceOutState,
           LocalRemappingIndex* localRemappingIndex = nullptr) {
@@ -1991,7 +1991,7 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
      * to these---another pass is responsible for removing completely
      * unreachable blocks.
      */
-    return folly::none;
+    return std::nullopt;
   }
 
   auto& func = visit.func;
@@ -2840,7 +2840,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
     return ret;
   };
 
-  auto mergeUIVecs = [&] (folly::Optional<std::vector<UseInfo>>& stkOut,
+  auto mergeUIVecs = [&] (Optional<std::vector<UseInfo>>& stkOut,
                           const std::vector<UseInfo>& stkIn,
                           BlockId blk, bool isSlot) {
     if (!stkOut) {
@@ -2960,10 +2960,10 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
     // to the in-state of the done block. (Catch blocks are handled further
     // down and this logic never applies to them.)
     auto const killIterOutputs = [] (const php::Block* blk, BlockId succId)
-        -> folly::Optional<IterArgs> {
+        -> Optional<IterArgs> {
       auto const& lastOpc = blk->hhbcs.back();
       auto const next = blk->fallthrough == succId;
-      auto ita = folly::Optional<IterArgs>{};
+      auto ita = Optional<IterArgs>{};
       auto const kill = [&]{
         switch (lastOpc.op) {
           case Op::IterInit:
@@ -2982,7 +2982,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
             return false;
         }
       }();
-      return kill ? ita : folly::none;
+      return kill ? ita : std::nullopt;
     };
 
     auto const isCFPushTaken = [] (const php::Block* blk, BlockId succId) {

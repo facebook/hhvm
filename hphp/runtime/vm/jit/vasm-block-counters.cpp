@@ -222,13 +222,13 @@ void setWeights(Vunit& unit, const T& key) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-folly::Optional<uint64_t> getRegionWeight(const RegionDesc& region) {
+Optional<uint64_t> getRegionWeight(const RegionDesc& region) {
   if (!RO::EvalJitPGOVasmBlockCounters || !isJitDeserializing()) {
-    return folly::none;
+    return std::nullopt;
   }
   auto const key = RegionEntryKey(region);
   auto const weight = s_blockCounters.getFirstCounter(key);
-  if (!weight) return folly::none;
+  if (!weight) return std::nullopt;
   return safe_cast<uint64_t>(*weight);
 }
 

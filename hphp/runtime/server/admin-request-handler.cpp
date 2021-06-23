@@ -77,7 +77,6 @@
 #include <folly/Conv.h>
 #include <folly/File.h>
 #include <folly/FileUtil.h>
-#include <folly/Optional.h>
 #include <folly/Random.h>
 #include <folly/portability/Unistd.h>
 
@@ -264,11 +263,11 @@ struct DumpFile {
   folly::File file;
 };
 
-folly::Optional<DumpFile> dump_file(const char* name) {
+Optional<DumpFile> dump_file(const char* name) {
   auto const path = folly::sformat("{}/{}", RO::AdminDumpPath, name);
 
   // mkdir -p the directory prefix of `path`
-  if (FileUtil::mkdir(path) != 0) return folly::none;
+  if (FileUtil::mkdir(path) != 0) return std::nullopt;
 
   // If remove fails because of a permissions issue, then we won't be
   // able to open the file for exclusive write below.
@@ -277,7 +276,7 @@ folly::Optional<DumpFile> dump_file(const char* name) {
   // Create the file, failing if it already exists. Doing so ensures
   // that we have write access to the file and that no other user does.
   auto const fd = open(path.c_str(), O_CREAT|O_EXCL|O_RDWR, 0666);
-  if (fd < 0) return folly::none;
+  if (fd < 0) return std::nullopt;
 
   return DumpFile{path, folly::File(fd, /*owns=*/true)};
 }

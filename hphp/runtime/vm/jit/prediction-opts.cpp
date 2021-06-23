@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/jit/timer.h"
 
 #include <folly/Lazy.h>
-#include <folly/Optional.h>
 
 #include <iterator>
 

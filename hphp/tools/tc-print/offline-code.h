@@ -20,8 +20,6 @@
 #include <string>
 #include <unordered_map>
 
-#include <folly/Optional.h>
-
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
@@ -142,15 +140,15 @@ struct TCRangeInfo {
   TCA start;
   TCA end;
 
-  folly::Optional<SrcKey> sk;
-  folly::Optional<SHA1> sha1;
+  Optional<SrcKey> sk;
+  Optional<SHA1> sha1;
 
-  folly::Optional<const Func*> func;
-  folly::Optional<std::string> instrStr;
-  folly::Optional<int> lineNum;
-  folly::Optional<const Unit*> unit;
+  Optional<const Func*> func;
+  Optional<std::string> instrStr;
+  Optional<int> lineNum;
+  Optional<const Unit*> unit;
 
-  folly::Optional<printir::TCRange> annotation;
+  Optional<printir::TCRange> annotation;
   std::vector<TCDisasmInfo> disasm;
 };
 
@@ -215,7 +213,7 @@ struct OfflineCode {
                            const std::vector<TransBCMapping>& bcMap,
                            const PerfEventsMap<TCA>& perfEvents,
                            bool hostOpcodes,
-                           folly::Optional<printir::Unit> = folly::none);
+                           Optional<printir::Unit> = std::nullopt);
 
   // Returns the fall-thru successor from 'a', if any
   TCA getTransJmpTargets(const TransRec *transRec,

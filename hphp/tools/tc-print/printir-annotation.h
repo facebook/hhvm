@@ -21,7 +21,6 @@
 
 #include <folly/dynamic.h>
 #include <folly/DynamicConverter.h>
-#include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -70,20 +69,20 @@ struct Profile {
 
 struct Instr {
   const InstrId id;
-  const folly::Optional<std::string> rawMarker;
+  const Optional<std::string> rawMarker;
   std::vector<PhiPseudoInstr> phiPseudoInstrs;
   const jit::Opcode opcode;
-  const folly::Optional<std::string> typeParam;
-  const folly::Optional<std::string> guard;
-  const folly::Optional<std::string> extra;
-  const folly::Optional<BlockId> taken;
+  const Optional<std::string> typeParam;
+  const Optional<std::string> guard;
+  const Optional<std::string> extra;
+  const Optional<BlockId> taken;
   std::vector<TCRange> tcRanges;
   const std::vector<SSATmp> dsts;
   const Offset offset;
   const std::vector<Profile> profileData;
   // Only one of these two should be present, they are mutually exclusive
-  const folly::Optional<std::vector<SSATmp>> srcs;
-  const folly::Optional<std::string> counterName;
+  const Optional<std::vector<SSATmp>> srcs;
+  const Optional<std::string> counterName;
   const int startLine;
 
   BlockId parentBlockId;
@@ -95,7 +94,7 @@ struct Block {
   const jit::Block::Hint hint;
   const uint64_t profCount;
   const std::vector<BlockId> preds;
-  const folly::Optional<BlockId> next;
+  const Optional<BlockId> next;
   std::vector<Instr> instrs;
   const jit::AreaIndex area;
 };
@@ -124,8 +123,8 @@ struct TransContext {
 struct InliningDecision {
   const bool wasInlined;
   const Offset offset;
-  const folly::Optional<std::string> callerName;
-  const folly::Optional<std::string> calleeName;
+  const Optional<std::string> callerName;
+  const Optional<std::string> calleeName;
   const std::string reason;
 };
 
@@ -140,8 +139,8 @@ struct Unit {
 namespace folly {
 using namespace HPHP;
 
-template <typename T> struct DynamicConverter<Optional<T>> {
-  static Optional<T> convert(const dynamic& opt);
+template <typename T> struct DynamicConverter<HPHP::Optional<T>> {
+  static HPHP::Optional<T> convert(const dynamic& opt);
 };
 
 template <> struct DynamicConverter<jit::Opcode> {
@@ -188,8 +187,8 @@ template <> struct DynamicConverter<printir::Unit> {
   static printir::Unit convert(const dynamic&);
 };
 
-template <typename T> struct DynamicConstructor<Optional<T>> {
-  static dynamic construct(const Optional<T>& opt);
+template <typename T> struct DynamicConstructor<HPHP::Optional<T>> {
+  static dynamic construct(const HPHP::Optional<T>& opt);
 };
 
 template <> struct DynamicConstructor<jit::Opcode> {

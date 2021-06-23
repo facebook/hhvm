@@ -215,9 +215,9 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
     assertx(checkInvariants());                             \
   }                                                         \
                                                             \
-  folly::Optional<A##What> AliasClass::is_##what() const {  \
+  Optional<A##What> AliasClass::is_##what() const {  \
     if (*this <= A##What##Any) return what();               \
-    return folly::none;                                     \
+    return std::nullopt;                                     \
   }
 
 X(Local, local)
@@ -231,9 +231,9 @@ X(Rds, rds)
 #undef X
 
 #define X(What, what)                                       \
-  folly::Optional<A##What> AliasClass::what() const {       \
+  Optional<A##What> AliasClass::what() const {       \
     if (m_stagBits & B##What) return m_##what;              \
-    return folly::none;                                     \
+    return std::nullopt;                                     \
   }
 
 X(Local, local)
@@ -255,15 +255,15 @@ X(Rds, rds)
     assertx(checkInvariants());                             \
   }                                                         \
                                                             \
-  folly::Optional<A##What> AliasClass::is_##what() const {  \
+  Optional<A##What> AliasClass::is_##what() const {  \
     if (*this <= A##What##Any) return what();               \
-    return folly::none;                                     \
+    return std::nullopt;                                     \
   }                                                         \
-  folly::Optional<A##What> AliasClass::what() const {       \
+  Optional<A##What> AliasClass::what() const {       \
     if (m_stagBits & B##What) {                             \
       return A##What { m_frameAll.frameIdx };               \
     }                                                       \
-    return folly::none;                                     \
+    return std::nullopt;                                     \
   }
 
 X(FContext, fcontext)
@@ -274,28 +274,28 @@ X(ActRec, actrec)
 #undef X
 #undef Y
 
-folly::Optional<AliasClass> AliasClass::mis() const {
+Optional<AliasClass> AliasClass::mis() const {
   auto const bits = static_cast<rep>(m_bits & BMIState);
 
   if (bits != BEmpty) return AliasClass{bits};
-  return folly::none;
+  return std::nullopt;
 }
 
-folly::Optional<AliasClass> AliasClass::is_mis() const {
+Optional<AliasClass> AliasClass::is_mis() const {
   if (*this <= AMIStateAny) return mis();
-  return folly::none;
+  return std::nullopt;
 }
 
-folly::Optional<AliasClass> AliasClass::frame_base() const {
+Optional<AliasClass> AliasClass::frame_base() const {
   auto const bits = static_cast<rep>(m_bits & BFBasePtr);
 
   if (bits != BEmpty) return AliasClass{bits};
-  return folly::none;
+  return std::nullopt;
 }
 
-folly::Optional<AliasClass> AliasClass::is_frame_base() const {
+Optional<AliasClass> AliasClass::is_frame_base() const {
   if (*this <= AFBasePtr) return frame_base();
-  return folly::none;
+  return std::nullopt;
 }
 
 AliasClass::STag AliasClass::stagFor(rep bits) {
@@ -396,7 +396,7 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
   return AliasClass{newBits};
 }
 
-folly::Optional<AliasClass> AliasClass::precise_union(AliasClass o) const {
+Optional<AliasClass> AliasClass::precise_union(AliasClass o) const {
   if (o <= *this) return *this;
   if (*this <= o) return o;
 
@@ -426,8 +426,8 @@ folly::Optional<AliasClass> AliasClass::precise_union(AliasClass o) const {
     }
   }
   assertx(stag1 != STag::None);
-  if (stag2 != STag::None) return folly::none;
-  if (o.m_bits & m_stagBits) return folly::none;
+  if (stag2 != STag::None) return std::nullopt;
+  if (o.m_bits & m_stagBits) return std::nullopt;
 
   // Keep the data and stag from this, but change its bits.
   auto ret = *this;
@@ -536,7 +536,7 @@ bool AliasClass::subclassData(AliasClass o) const {
   not_reached();
 }
 
-folly::Optional<UFrameBase> AliasClass::asUFrameBase() const {
+Optional<UFrameBase> AliasClass::asUFrameBase() const {
   switch (stagFor(m_stagBits)) {
   case STag::None:
   case STag::Prop:
@@ -544,7 +544,7 @@ folly::Optional<UFrameBase> AliasClass::asUFrameBase() const {
   case STag::ElemS:
   case STag::Rds:
   case STag::Stack:
-    return folly::none;
+    return std::nullopt;
   case STag::Local:     return m_local;
   case STag::Iter:      return m_iter;
   case STag::FrameAll:  return m_frameAll;

@@ -1069,7 +1069,7 @@ void PropagatedStates::next() {
   assertx(!m_undos.events.empty());
   assertx(boost::get<StateMutationUndo::Mark>(&m_undos.events.back()));
 
-  m_lastPush.clear();
+  m_lastPush.reset();
   m_afterLocals.clear();
   m_undos.events.pop_back();
 

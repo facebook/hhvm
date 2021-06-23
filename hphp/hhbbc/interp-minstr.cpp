@@ -20,7 +20,6 @@
 #include <string>
 #include <utility>
 
-#include <folly/Optional.h>
 #include <folly/Format.h>
 
 #include "hphp/util/trace.h"
@@ -65,7 +64,7 @@ Effects unionEffects(Effects e1, Effects e2) {
 // together. Instead you want to start with the first Effect you
 // see. This keeps the Effect from taking a value until you union one
 // into it.
-using OptEffects = folly::Optional<Effects>;
+using OptEffects = Optional<Effects>;
 
 OptEffects unionEffects(OptEffects e1, Effects e2) {
   if (!e1) return e2;
@@ -509,22 +508,22 @@ auto update_discard(Op& op) -> decltype(op.arg1, true) {
 
 /*
  * Return the type of the key and whether any promotions happened, or
- * reduce op and return folly::none.  Note that when folly::none is
+ * reduce op and return std::nullopt.  Note that when std::nullopt is
  * returned, there is nothing further to do.
  */
 template<typename Op>
-folly::Optional<std::pair<Type,Promotion>> key_type_or_fixup(ISS& env, Op op) {
+Optional<std::pair<Type,Promotion>> key_type_or_fixup(ISS& env, Op op) {
   if (env.collect.mInstrState.extraPop) {
     auto const mkey = update_mkey(op);
     if (update_discard(op) || mkey) {
       env.collect.mInstrState.extraPop = false;
       reduce(env, op);
       env.collect.mInstrState.extraPop = true;
-      return folly::none;
+      return std::nullopt;
     }
   }
   auto const fixup = [&] (Type ty, bool isProp, bool couldBeUninit)
-    -> folly::Optional<std::pair<Type,Promotion>> {
+    -> Optional<std::pair<Type,Promotion>> {
 
     // Handle any classlike key promotions
     auto promoted = promote_classlike_to_key(std::move(ty));
@@ -539,13 +538,13 @@ folly::Optional<std::pair<Type,Promotion>> key_type_or_fixup(ISS& env, Op op) {
         op.mkey.mcode = isProp ? MPT : MET;
         op.mkey.litstr = val->m_data.pstr;
         reduce(env, op);
-        return folly::none;
+        return std::nullopt;
       }
       if (!isProp && val->m_type == KindOfInt64) {
         op.mkey.mcode = MEI;
         op.mkey.int64 = val->m_data.num;
         reduce(env, op);
-        return folly::none;
+        return std::nullopt;
       }
     }
     return promoted;
@@ -561,7 +560,7 @@ folly::Optional<std::pair<Type,Promotion>> key_type_or_fixup(ISS& env, Op op) {
         if (minLocEquiv != NoLocalId) {
           op.mkey.local = NamedLocal { kInvalidLocalName, minLocEquiv };
           reduce(env, op);
-          return folly::none;
+          return std::nullopt;
         }
       }
       return fixup(

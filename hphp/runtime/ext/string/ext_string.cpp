@@ -766,8 +766,8 @@ static Variant substr_replace(const Variant& str, const Variant& replacement,
   // them to ints and always use those.
   Array ret;
   Array strArr = str.toArray();
-  folly::Optional<int> opStart;
-  folly::Optional<int> opLength;
+  Optional<int> opStart;
+  Optional<int> opLength;
   if (!start.isArray()) {
     opStart = start.toInt32();
   }

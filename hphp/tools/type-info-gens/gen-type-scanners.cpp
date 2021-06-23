@@ -169,12 +169,12 @@ struct Generator {
     // Symbol of the custom scanner function which handles the entire type. If
     // present, but empty, the scanner does not have linkage (which is an
     // error).
-    folly::Optional<std::string> custom_all;
+    HPHP::Optional<std::string> custom_all;
 
     // Symbol of the custom scanner function which handles scanning base
     // classes. If present, but empty, the scanner does not have linkage (which
     // is an error).
-    folly::Optional<std::string> custom_bases_scanner;
+    HPHP::Optional<std::string> custom_bases_scanner;
 
     // If non-empty, the name of the field in the object which is a "flexible
     // array" member (a trailing array of unbound size). Each object can only
@@ -620,7 +620,7 @@ struct Generator::IndexedType {
 
   // If there was an error while automatically generating the layout for this
   // underlying type, it is stored here until they are all reported.
-  folly::Optional<LayoutError> errors;
+  HPHP::Optional<LayoutError> errors;
 };
 
 size_t NumThreads = 24;

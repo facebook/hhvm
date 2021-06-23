@@ -460,7 +460,7 @@ struct StackDepth {
    */
   int minOffset;
   int minOffsetLine;
-  folly::Optional<int> baseValue;
+  Optional<int> baseValue;
 
   /*
    * During the parsing process, when a Jmp instruction is encountered, the
@@ -2692,7 +2692,7 @@ MaybeDataType type_constraint_to_data_type(
         tc.isNullable(),
         tc.isSoft());
     }
-    return folly::none;
+    return std::nullopt;
 }
 
 /*

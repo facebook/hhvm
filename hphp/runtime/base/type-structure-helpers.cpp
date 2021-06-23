@@ -150,9 +150,9 @@ ArrayData* getShapeFieldElement(const TypedValue& v) {
 }
 
 ALWAYS_INLINE
-folly::Optional<ArrayData*> getGenericTypesOpt(const ArrayData* ts) {
+Optional<ArrayData*> getGenericTypesOpt(const ArrayData* ts) {
   auto const generics_field = ts->get(s_generic_types.get());
-  if (!generics_field.is_init()) return folly::none;
+  if (!generics_field.is_init()) return std::nullopt;
   assertx(tvIsVec(generics_field));
   return generics_field.val().parr;
 }
@@ -634,7 +634,7 @@ bool checkTypeStructureMatchesTVImpl(
       assertx(ts.exists(s_classname));
       auto const cls = Class::lookup(ts[s_classname].asStrRef().get());
       if (!isOrAsOp) {
-        if (auto const dt = cls ? cls->enumBaseTy() : folly::none) {
+        if (auto const dt = cls ? cls->enumBaseTy() : std::nullopt) {
           return equivDataTypes(*dt, type);
         }
         return isIntType(type) || isStringType(type);

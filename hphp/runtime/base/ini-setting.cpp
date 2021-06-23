@@ -892,7 +892,7 @@ struct LocalSettings {
     if (!settings) settings.emplace();
     return settings.value();
   }
-  void clear() { settings.clear(); }
+  void clear() { settings.reset(); }
   bool empty() { return !settings.has_value() || settings.value().empty(); }
 };
 

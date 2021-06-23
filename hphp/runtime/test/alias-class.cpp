@@ -53,7 +53,7 @@ std::vector<AliasClass> specialized_classes(IRUnit& unit) {
 
   // Specialized test cases need some SSATmp*'s and similar things, so let's
   // make some instructions.
-  auto const mainFP = unit.gen(DefFP, bcctx, DefFPData { folly::none })->dst();
+  auto const mainFP = unit.gen(DefFP, bcctx, DefFPData { std::nullopt })->dst();
 
   return {
     // Frame locals.
@@ -385,7 +385,7 @@ TEST(AliasClass, StackUnions) {
 TEST(AliasClass, IterUnion) {
   IRUnit unit{test_context};
   auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
-  auto const FP = unit.gen(DefFP, bcctx, DefFPData { folly::none })->dst();
+  auto const FP = unit.gen(DefFP, bcctx, DefFPData { std::nullopt })->dst();
 
   {
     AliasClass const iterP0 = aiter_pos(FP, 0);
@@ -485,7 +485,7 @@ TEST(AliasClass, FrameUnion) {
   auto const dsData = DefStackData { SBInvOffset { 0 }, SBInvOffset { 0 } };
   auto const biData = BeginInliningData { IRSPRelOffset { 0 }, nullptr, 0, 0 };
   auto const SP = unit.gen(DefRegSP, bcctx, dsData)->dst();
-  auto const FP1 = unit.gen(DefFP, bcctx, DefFPData { folly::none })->dst();
+  auto const FP1 = unit.gen(DefFP, bcctx, DefFPData { std::nullopt })->dst();
   auto const FP2 = unit.gen(BeginInlining, bcctx, biData, SP, FP1)->dst();
 
   AliasClass const local1 = ALocal { FP1, 0 };
@@ -511,10 +511,10 @@ TEST(AliasClass, FrameUnion) {
   EXPECT_FALSE(u1 <= localR);
   EXPECT_FALSE(u1.maybe(fctx2));
   EXPECT_FALSE(u2.maybe(fctx2));
-  EXPECT_TRUE(u3.local().hasValue());
-  EXPECT_FALSE(u3.fcontext().hasValue());
+  EXPECT_TRUE(u3.local().has_value());
+  EXPECT_FALSE(u3.fcontext().has_value());
   EXPECT_EQ(u3, u4);
-  EXPECT_TRUE(u5.local().hasValue());
+  EXPECT_TRUE(u5.local().has_value());
   EXPECT_EQ(u5.local()->frameIdx, local1.local()->frameIdx);
   EXPECT_EQ(u5.local()->ids, local1.local()->ids);
 }

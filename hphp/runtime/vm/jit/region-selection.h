@@ -25,7 +25,6 @@
 
 #include <folly/Format.h>
 #include <folly/Hash.h>
-#include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/location.h"
@@ -137,8 +136,8 @@ struct RegionDesc {
   void              addArc(BlockId src, BlockId dst);
   void              removeArc(BlockId src, BlockId dst);
   void              addMerged(BlockId fromId, BlockId intoId);
-  folly::Optional<BlockId> prevRetrans(BlockId id) const;
-  folly::Optional<BlockId> nextRetrans(BlockId id) const;
+  Optional<BlockId> prevRetrans(BlockId id) const;
+  Optional<BlockId> nextRetrans(BlockId id) const;
   void              clearPrevRetrans(BlockId id);
   void              clearNextRetrans(BlockId id);
   void              setNextRetrans(BlockId id, BlockId next);
@@ -150,7 +149,7 @@ struct RegionDesc {
   std::string       toString() const;
 
   void setHotWeight(uint64_t weight) { m_hotWeight = weight; }
-  folly::Optional<uint64_t> getHotWeight() const { return m_hotWeight; }
+  Optional<uint64_t> getHotWeight() const { return m_hotWeight; }
 
   const std::vector<Type>& inlineInputTypes() const {
     return m_inlineInputTypes;
@@ -194,7 +193,7 @@ private:
 
   // When optimizing, we may know what a "hot weight" for this region would be
   // relative to other regions. Pass this information down to vasm-layout.
-  folly::Optional<uint64_t> m_hotWeight;
+  Optional<uint64_t> m_hotWeight;
 
   // For regions selected for inlining, track the types of input arguments
   std::vector<Type> m_inlineInputTypes;

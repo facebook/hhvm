@@ -1799,7 +1799,7 @@ SSATmp* builtinCall(IRGS& env,
     uint32_t aoff = params.ctx ? 3 : 2;
     for (auto i = uint32_t{0}; i < params.size(); ++i) {
       if (!params[i].isInOut) continue;
-      auto ty = [&] () -> folly::Optional<Type> {
+      auto ty = [&] () -> Optional<Type> {
         auto const r = builtinOutType(callee, i);
         if (r.isKnownDataType()) return r;
         return {};
@@ -1836,10 +1836,10 @@ SSATmp* builtinCall(IRGS& env,
   // non-inlined NativeImpl. In that case, there shouldn't be anything
   // on the stack and any out parameters point to the caller's stack,
   // so there's nothing for FrameState to do.
-  auto const retOff = [&] () -> folly::Optional<IRSPRelOffset> {
+  auto const retOff = [&] () -> Optional<IRSPRelOffset> {
     if (params.forNativeImpl && !catchMaker.inlining()) {
       assertx(spOffBCFromStackBase(env) == spOffEmpty(env));
-      return folly::none;
+      return std::nullopt;
     }
     return offsetFromIRSP(
       env,
@@ -2512,7 +2512,7 @@ void memoGetImpl(IRGS& env,
         return gen(
           env,
           MemoGetInstanceValue,
-          MemoValueInstanceData { memoInfo.first, func, folly::none, loadAux },
+          MemoValueInstanceData { memoInfo.first, func, std::nullopt, loadAux },
           notFound,
           retTy,
           this_
@@ -2528,7 +2528,7 @@ void memoGetImpl(IRGS& env,
           types.data(),
           func,
           memoInfo.second,
-          folly::none,
+          std::nullopt,
           loadAux
         },
         notFound,
@@ -2549,7 +2549,7 @@ void memoGetImpl(IRGS& env,
             func,
             keys,
             types.data(),
-            folly::none,
+            std::nullopt,
             loadAux
           },
           notFound,
@@ -2561,7 +2561,7 @@ void memoGetImpl(IRGS& env,
       return gen(
         env,
         MemoGetLSBValue,
-        MemoValueStaticData { func, folly::none, loadAux },
+        MemoValueStaticData { func, std::nullopt, loadAux },
         notFound,
         retTy,
         lsbCls
@@ -2573,7 +2573,7 @@ void memoGetImpl(IRGS& env,
       return gen(
         env,
         MemoGetStaticCache,
-        MemoCacheStaticData { func, keys, types.data(), folly::none, loadAux },
+        MemoCacheStaticData { func, keys, types.data(), std::nullopt, loadAux },
         notFound,
         retTy,
         fp(env)
@@ -2582,7 +2582,7 @@ void memoGetImpl(IRGS& env,
     return gen(
       env,
       MemoGetStaticValue,
-      MemoValueStaticData { func, folly::none, loadAux },
+      MemoValueStaticData { func, std::nullopt, loadAux },
       notFound,
       retTy
     );
@@ -2673,8 +2673,8 @@ void memoSetImpl(IRGS& env, LocalRange keys, bool eager) {
 
   auto const func = curFunc(env);
 
-  auto const asyncEager = [&] () -> folly::Optional<bool> {
-    if (!func->isAsyncFunction()) return folly::none;
+  auto const asyncEager = [&] () -> Optional<bool> {
+    if (!func->isAsyncFunction()) return std::nullopt;
     return eager;
   }();
 

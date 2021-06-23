@@ -185,7 +185,7 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
   DEBUG_ONLY auto cold_start = cold_in.frontier();
   auto frozen_start = frozen->frontier();
 
-  folly::Optional<AsmInfo> optAI;
+  Optional<AsmInfo> optAI;
   if (unit && (RuntimeOption::EvalJitBuildOutliningHashes ||
                dumpIREnabled(unit->context().kind))) {
     optAI.emplace(*unit);

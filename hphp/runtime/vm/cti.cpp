@@ -137,7 +137,7 @@ Offset compile_cti(Func* func, PC unitpc) {
   auto cti_size = compute_size(func);
   auto mem = cti_size ? (TCA) cti_code().allocInner(cti_size) :
              nullptr;
-  folly::Optional<CodeBlock> inner_block;
+  Optional<CodeBlock> inner_block;
   if (mem) {
     inner_block.emplace();
     inner_block->init(mem, cti_size, "");

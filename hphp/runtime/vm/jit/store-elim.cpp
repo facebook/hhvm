@@ -19,7 +19,6 @@
 #include <string>
 
 #include <folly/Format.h>
-#include <folly/Optional.h>
 #include <folly/ScopeGuard.h>
 
 #include "hphp/util/bisector.h"
@@ -388,11 +387,11 @@ bool srcsCanSpanCall(const IRInstruction& inst) {
   return true;
 }
 
-folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
+Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
   if (auto const meta = env.global.ainfo.find(canonicalize(acls))) {
     return meta->index;
   }
-  return folly::none;
+  return std::nullopt;
 }
 
 void set_movable_store(Local& env, uint32_t bit, IRInstruction& inst) {
@@ -1561,7 +1560,7 @@ void fix_inline_frames(Global& genv) {
     }
 
     auto fp = state.entry;
-    folly::Optional<IRSPRelOffset> lastSync;
+    Optional<IRSPRelOffset> lastSync;
     populate_ancestor_frames(fp, published_frames);
     assertx(published_frames.size() == state.exitDepth);
 

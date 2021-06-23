@@ -135,13 +135,13 @@ void enqueueJob(Job j) {
   s_qcv.notify_all();
 }
 
-folly::Optional<Job> dequeueJob() {
+Optional<Job> dequeueJob() {
   std::unique_lock<std::mutex> l{s_qlock};
   s_qcv.wait(l, [] {
     return !s_running.load(std::memory_order_acquire) || !s_jobq.empty();
   });
 
-  if (!s_running.load(std::memory_order_relaxed)) return folly::none;
+  if (!s_running.load(std::memory_order_relaxed)) return std::nullopt;
   assertx(!s_jobq.empty());
   auto ret = s_jobq.front();
   s_jobq.pop();
@@ -167,7 +167,7 @@ void clearProfCaller(TCA toSmash, ProfTransRec* rec) {
  * Erase any metadata referencing a call at address start and return the
  * SmashedCall record if the call referenced a ProfTransRec.
  */
-folly::Optional<SmashedCall> eraseSmashedCall(TCA start) {
+Optional<SmashedCall> eraseSmashedCall(TCA start) {
   auto dataLock = lockData();
   auto it = s_smashedCalls.find(start);
   if (it != s_smashedCalls.end()) {
@@ -178,7 +178,7 @@ folly::Optional<SmashedCall> eraseSmashedCall(TCA start) {
     s_smashedCalls.erase(it);
     if (scall.rec) return scall;
   }
-  return folly::none;
+  return std::nullopt;
 }
 
 /*
@@ -347,11 +347,11 @@ void reclaimSrcRecSync(const SrcRec* rec) {
 void reclaimTranslation(TransLoc loc) { enqueueJob(loc); }
 void reclaimSrcRec(const SrcRec* sr) { enqueueJob(sr); }
 
-folly::Optional<FuncInfo> eraseFuncInfo(FuncId fid) {
+Optional<FuncInfo> eraseFuncInfo(FuncId fid) {
   auto dataLock = lockData();
 
   auto it = s_funcTCData.find(fid);
-  if (it == s_funcTCData.end()) return folly::none;
+  if (it == s_funcTCData.end()) return std::nullopt;
 
   auto data = std::move(it->second);
   s_funcTCData.erase(it);

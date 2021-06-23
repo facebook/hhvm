@@ -305,16 +305,6 @@ let parse_options () : options =
     Exit.exit Exit_status.Input_error
   | _ -> ());
   let root_path = Path.make !root in
-  (ai_mode :=
-     match !ai_mode with
-     | Some ai ->
-       (* ai may have json mode enabled internally, in which case,
-        * it should not be disabled by hack if --json was not used *)
-       if !json_mode then
-         Some (Ai_options.set_json_mode ai true)
-       else
-         Some ai
-     | None -> None);
   Wwwroot.assert_www_directory root_path;
   if Option.is_some !save && Option.is_some save_with_spec then (
     Printf.eprintf

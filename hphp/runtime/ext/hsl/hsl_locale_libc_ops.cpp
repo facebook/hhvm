@@ -184,4 +184,20 @@ int64_t HSLLocaleLibcOps::strripos(const String& haystack, const String& needle,
   return pos.m_data.num;
 }
 
+String HSLLocaleLibcOps::slice(const String& str, int64_t offset, int64_t length) const {
+  if (length < 0) {
+    length += str.length();
+    if (length <= 0) {
+      return empty_string();
+    }
+  }
+  if (offset < 0) {
+    offset += str.length();
+  }
+  if (offset < 0 || offset >= str.length()) {
+    return empty_string();
+  }
+  return str.substr(offset, length);
+}
+
 } // namespace HPHP

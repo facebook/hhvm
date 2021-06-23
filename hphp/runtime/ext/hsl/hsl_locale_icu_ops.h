@@ -49,6 +49,7 @@ namespace HPHP {
     virtual int64_t stripos(const String& haystack, const String& needle, int64_t offset) const override;
     virtual int64_t strripos(const String& haystack, const String& needle, int64_t offset) const override;
 
+    virtual String slice(const String& str, int64_t offset, int64_t length) const override;
     private:
       icu::Locale m_collate;
       icu::Locale m_ctype;

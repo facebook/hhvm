@@ -345,4 +345,29 @@ int64_t HSLLocaleICUOps::strripos(const String& haystack, const String& needle, 
                      m_caseFoldFlags);
 }
 
+String HSLLocaleICUOps::slice(const String& str, int64_t offset, int64_t length) const {
+  auto ustr = ustr_from_utf8(str);
+  const auto char32_full_len = ustr.countChar32();
+  if (length < 0) {
+    length += char32_full_len;
+    if (length <= 0) {
+      return empty_string();
+    }
+  }
+
+  if (offset < 0) {
+    offset += char32_full_len;
+  }
+  if (offset < 0 || offset >= char32_full_len) {
+    return empty_string();
+  }
+
+  const auto char16_start = ustr.moveIndex32(0, offset);
+  const auto char16_end = ustr.moveIndex32(char16_start, length);
+  auto uslice = ustr.tempSubStringBetween(char16_start, char16_end);
+  std::string ret;
+  uslice.toUTF8String(ret);
+  return ret;
+}
+
 } // namespace HPHP

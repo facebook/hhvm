@@ -168,6 +168,14 @@ int64_t HHVM_FUNCTION(strripos_l,
   return get_locale(maybe_loc)->ops()->strripos(haystack, needle, offset);
 }
 
+String HHVM_FUNCTION(slice_l,
+                     const String& str,
+                     int64_t offset,
+                     int64_t length,
+                     const Variant& maybe_loc) {
+  return get_locale(maybe_loc)->ops()->slice(str, offset, length);
+}
+
 struct HSLStrExtension final : Extension {
   HSLStrExtension() : Extension("hsl_str", "0.1") {}
 
@@ -197,6 +205,9 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strrpos_l, strrpos_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\stripos_l, stripos_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strripos_l, strripos_l);
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\slice_l, slice_l);
+
     loadSystemlib();
   }
 

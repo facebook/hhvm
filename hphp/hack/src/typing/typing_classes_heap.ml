@@ -338,13 +338,6 @@ module ApiLazy = struct
     | Lazy (_sc, lc) -> LSTable.mem (Lazy.force lc).req_ancestor_names ancestor
     | Eager c -> SSet.mem ancestor c.tc_req_ancestors_extends
 
-  let extends (decl, t) ancestor =
-    Decl_counters.count_subdecl decl (Decl_counters.Extends ancestor)
-    @@ fun () ->
-    match t with
-    | Lazy (_sc, lc) -> LSTable.mem (Lazy.force lc).parents_and_traits ancestor
-    | Eager c -> SSet.mem ancestor c.tc_extends
-
   let is_disposable (decl, t) =
     Decl_counters.count_subdecl decl Decl_counters.Is_disposable @@ fun () ->
     match t with

@@ -103,8 +103,6 @@ module Api : sig
 
   val get_support_dynamic_type : t -> bool
 
-  val extends : t -> string -> bool
-
   val all_ancestors : t -> (string * decl_ty) list
 
   val all_ancestor_names : t -> string list

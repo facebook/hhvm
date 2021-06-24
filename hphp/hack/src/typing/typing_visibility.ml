@@ -69,7 +69,7 @@ let is_protected_visible env origin_id self_id =
       (* Parents can call direct children's protected methods
        * (like a constructor)
        *)
-      if Cls.extends origin_class self_id then
+      if Cls.has_ancestor origin_class self_id then
         None
       else
         Some

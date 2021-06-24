@@ -103,7 +103,8 @@ let lint_single_xcontroller ctx name =
   let module Cls = Decl_provider.Class in
   match Decl_provider.get_class ctx name with
   | Some class_ ->
-    if Cls.extends class_ "\\XControllerBase" && not (Cls.abstract class_) then
+    if Cls.has_ancestor class_ "\\XControllerBase" && not (Cls.abstract class_)
+    then
       Linting_service.lint_xcontroller
         ctx
         Cls.(pos class_ |> Naming_provider.resolve_position ctx, name class_)

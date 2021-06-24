@@ -196,6 +196,7 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     t_vis = td_vis;
     t_span = _;
     t_emit_id = _;
+    t_is_ctx = _;
   } =
     tdef
   in

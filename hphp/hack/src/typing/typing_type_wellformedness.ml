@@ -355,6 +355,7 @@ let typedef tenv t =
     t_user_attributes = _;
     t_span = _;
     t_emit_id = _;
+    t_is_ctx = _;
   } =
     t
   in

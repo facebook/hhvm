@@ -24,7 +24,15 @@ pub fn emit_typedefs_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     prog: &'a [tast::Def],
 ) -> Result<Vec<Typedef<'arena>>> {
     prog.iter()
-        .filter_map(|def| def.as_typedef().map(|td| emit_typedef(alloc, e, td)))
+        .filter_map(|def| {
+            def.as_typedef().and_then(|td| {
+                if !td.is_ctx {
+                    Some(emit_typedef(alloc, e, td))
+                } else {
+                    None
+                }
+            })
+        })
         .collect()
 }
 

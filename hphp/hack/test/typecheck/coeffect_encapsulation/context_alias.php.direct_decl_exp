@@ -1,0 +1,65 @@
+--- legacy
++++ direct decl
+@@ -1,37 +1,26 @@
+-[("\\X",
+-  (Shallow_decl_defs.Typedef
+-     { Typing_defs.td_module = None; td_pos = [4:9-10]; td_vis = Opaque;
+-       td_tparams = [];
+-       td_constraint = (Some (Rhint ([4:14-16]), (Tintersection [])));
+-       td_type =
+-       (Rhint ([4:19-41]),
+-        (Tintersection
+-           [(Rhint ([4:20-40]),
+-             (Tapply (([4:20-40], "\\HH\\Contexts\\defaults"), [])))]))
+-       }));
+-  ("\\test",
+-   (Shallow_decl_defs.Fun
+-      { Typing_defs.fe_deprecated = None; fe_module = None;
+-        fe_internal = false;
+-        fe_type =
+-        (Rwitness_from_decl ([6:10-14]),
+-         (Tfun
+-            { ft_arity = (Fstandard ()); ft_tparams = [];
+-              ft_where_constraints = []; ft_params = [];
+-              ft_implicit_params =
+-              { capability =
+-                (CapTy (Rhint ([6:16-20]),
+-                        (Tintersection
+-                           [(Rhint ([6:17-19]),
+-                             (Tapply (([6:17-19], "\\X"), [])))])))
+-                };
+-              ft_ret =
+-              { et_enforced = Typing_defs_core.Unenforced;
+-                et_type = (Rhint ([6:22-26]), (Tprim Tvoid)) };
+-              ft_flags =
+-              (make_ft_flags FSync ~return_disposable:false
+-                ~returns_readonly:false ~readonly_this:false);
+-              ft_ifc_decl = FDPolicied {PUBLIC} }));
+-        fe_pos = [6:10-14]; fe_php_std_lib = false;
+-        fe_support_dynamic_type = false }))
++[("\\test",
++  (Shallow_decl_defs.Fun
++     { Typing_defs.fe_deprecated = None; fe_module = None;
++       fe_internal = false;
++       fe_type =
++       (Rwitness_from_decl ([6:10-14]),
++        (Tfun
++           { ft_arity = (Fstandard ()); ft_tparams = [];
++             ft_where_constraints = []; ft_params = [];
++             ft_implicit_params =
++             { capability =
++               (CapTy (Rhint ([6:16-20]),
++                       (Tintersection
++                          [(Rhint ([6:17-19]),
++                            (Tapply (([6:17-19], "\\HH\\Contexts\\X"), [])))])))
++               };
++             ft_ret =
++             { et_enforced = Typing_defs_core.Unenforced;
++               et_type = (Rhint ([6:22-26]), (Tprim Tvoid)) };
++             ft_flags =
++             (make_ft_flags FSync ~return_disposable:false
++               ~returns_readonly:false ~readonly_this:false);
++             ft_ifc_decl = FDPolicied {PUBLIC} }));
++       fe_pos = [6:10-14]; fe_php_std_lib = false;
++       fe_support_dynamic_type = false }))
+   ]

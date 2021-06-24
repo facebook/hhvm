@@ -5156,6 +5156,40 @@ where
                     kind: Self::p_hint(&c.type_, env)?,
                     span: Self::p_pos(node, env),
                     emit_id: None,
+                    is_ctx: false,
+                })])
+            }
+            ContextAliasDeclaration(c) => {
+                let tparams = Self::p_tparam_l(false, &c.generic_parameter, env)?;
+                for tparam in tparams.iter() {
+                    if tparam.reified != ast::ReifyKind::Erased {
+                        Self::raise_parsing_error(node, env, &syntax_error::invalid_reified)
+                    }
+                }
+                let (_super_constraint, as_constraint) =
+                    Self::p_ctx_constraints(&c.as_constraint, env)?;
+                Ok(vec![ast::Def::mk_typedef(ast::Typedef {
+                    annotation: (),
+                    name: Self::pos_name(&c.name, env)?,
+                    tparams,
+                    constraint: as_constraint,
+                    user_attributes: itertools::concat(
+                        c.attribute_spec
+                            .syntax_node_to_list_skip_separator()
+                            .map(|attr| Self::p_user_attribute(attr, env))
+                            .collect::<Result<Vec<Vec<_>>, _>>()?,
+                    ),
+                    namespace: Self::mk_empty_ns_env(env),
+                    mode: env.file_mode(),
+                    vis: match Self::token_kind(&c.keyword) {
+                        Some(TK::Type) => ast::TypedefVisibility::Transparent,
+                        Some(TK::Newtype) => ast::TypedefVisibility::Opaque,
+                        _ => Self::missing_syntax("kind", &c.keyword, env)?,
+                    },
+                    kind: Self::p_context_list_to_intersection(&c.context, env)?.unwrap(),
+                    span: Self::p_pos(node, env),
+                    emit_id: None,
+                    is_ctx: true,
                 })])
             }
             EnumDeclaration(c) => {

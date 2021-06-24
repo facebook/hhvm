@@ -1,0 +1,40 @@
+
+
+(Relative_path.Dummy, "ctx_alias.php"):
+
+[(Typedef
+    { t_annotation = (); t_name = ([4:9-10], "\\X"); t_tparams = []; 
+      t_constraint = (Some ([4:14-16], (Hintersection []))); t_kind = ([4:19-41], (Hintersection [([4:20-40], (Happly (([4:20-40], "\\HH\\Contexts\\defaults"), [])))])); 
+      t_user_attributes = []; t_mode = Mstrict; t_vis = Opaque;
+      t_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      t_span = [4:1-42]; t_emit_id = None; t_is_ctx = true });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [([2:33-60], (String "context_alias_declaration"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+            ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+            ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [6:1-29]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([6:22-26], (Hprim Tvoid)))); 
+         f_name = ([6:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+         f_variadic = FVnonVariadic; f_params = []; f_ctxs = (Some ([6:16-20], [([6:17-19], (Happly (([6:17-19], "\\X"), [])))]));
+         f_unsafe_ctxs = (Some ([6:16-20], [([6:17-19], (Happly (([6:17-19], "\\X"), [])))])); 
+         f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })
+  ]

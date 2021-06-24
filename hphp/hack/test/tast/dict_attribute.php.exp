@@ -506,4 +506,4 @@
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       t_span = [35:1-36:15]; t_emit_id = None })
+       t_span = [35:1-36:15]; t_emit_id = None; t_is_ctx = false })

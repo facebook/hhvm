@@ -995,6 +995,7 @@ let typedef : Typing_env_types.env -> Nast.typedef -> unit =
     t_namespace = _;
     t_span = _;
     t_emit_id = _;
+    t_is_ctx = _;
   } =
     typedef
   in

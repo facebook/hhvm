@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<74a184a198570d61fdb916c911de38c1>>
+// @generated SignedSource<<38e7388cd3b190af2fe12100b66099d8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1677,6 +1677,7 @@ impl<'a> Node<'a> for Typedef<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBody
                 namespace: ref __binding_8,
                 span: ref __binding_9,
                 emit_id: ref __binding_10,
+                is_ctx: ref __binding_11,
             } => {
                 {
                     __binding_0.accept(v)
@@ -1708,7 +1709,10 @@ impl<'a> Node<'a> for Typedef<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBody
                 {
                     __binding_9.accept(v)
                 }
-                { __binding_10.accept(v) }
+                {
+                    __binding_10.accept(v)
+                }
+                { __binding_11.accept(v) }
             }
         }
     }

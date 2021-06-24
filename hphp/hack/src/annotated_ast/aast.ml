@@ -975,6 +975,7 @@ and ('ex, 'fb, 'en, 'hi) typedef = {
   t_namespace: nsenv;
   t_span: pos;
   t_emit_id: emit_id option;
+  t_is_ctx: bool;
 }
 
 and ('ex, 'fb, 'en, 'hi) gconst = {

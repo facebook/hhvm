@@ -2483,6 +2483,7 @@ let typedef ctx tdef =
     t_vis = tdef.Aast.t_vis;
     t_span = tdef.Aast.t_span;
     t_emit_id = tdef.Aast.t_emit_id;
+    t_is_ctx = tdef.Aast.t_is_ctx;
   }
 
 (**************************************************************************)

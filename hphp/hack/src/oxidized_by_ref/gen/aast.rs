@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5a343b51a9e531352e347f35d740c3ad>>
+// @generated SignedSource<<23c42abe3f29b122762a2cea1e2c1adc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2184,6 +2184,7 @@ pub struct Typedef<'a, Ex, Fb, En, Hi> {
     pub span: &'a Pos<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub emit_id: Option<&'a oxidized::aast::EmitId>,
+    pub is_ctx: bool,
 }
 impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
     for Typedef<'a, Ex, Fb, En, Hi>

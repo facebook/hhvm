@@ -454,6 +454,13 @@ void cgReqRetranslateOpt(IRLS& env, const IRInstruction* inst) {
   };
 }
 
+void cgReqInterpBBNoTranslate(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<ReqInterpBBNoTranslate>();
+  auto& v = vmain(env);
+  maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
+  emitInterpReqNoTranslate(v, extra->target, extra->invSPOff);
+}
+
 void cgLdBindAddr(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<LdBindAddr>();
   auto const dst = dstLoc(env, inst, 0).reg();

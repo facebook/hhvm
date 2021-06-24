@@ -885,6 +885,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RBTraceMsg:
   case RecordFuncCall:
   case ReqBindJmp:
+  case ReqInterpBBNoTranslate:
   case ReqRetranslate:
   case ReqRetranslateOpt:
   case ReserveVecNewElem:

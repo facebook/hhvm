@@ -154,8 +154,12 @@ void checkCoverage(IRGS& env) {
     env,
     [&] (Block* next) { gen(env, CheckRDSInitialized, next, handle); },
     [&] {
+      // Exit to the interpreter at the current SrcKey location.
       hint(env, Block::Hint::Unlikely);
-      gen(env, Jmp, makeExitSlow(env));
+      auto const irSP = spOffBCFromIRSP(env);
+      auto const invSP = spOffBCFromStackBase(env);
+      auto const rbjData = ReqBindJmpData { curSrcKey(env), invSP, irSP };
+      gen(env, ReqInterpBBNoTranslate, rbjData, sp(env), fp(env));
     }
   );
 }

@@ -500,6 +500,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AUnknown,
       stack_below(inst.extra<ReqBindJmp>()->irSPOff)
     };
+  case ReqInterpBBNoTranslate:
+    return ExitEffects {
+      AUnknown,
+      stack_below(inst.extra<ReqInterpBBNoTranslate>()->irSPOff)
+    };
   case ReqRetranslate:
     return ExitEffects {
       AUnknown,

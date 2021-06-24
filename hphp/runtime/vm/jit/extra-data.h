@@ -2716,6 +2716,7 @@ X(InlineCall,                   InlineCallData);
 X(StFrameMeta,                  StFrameMetaData);
 X(BeginInlining,                BeginInliningData);
 X(ReqBindJmp,                   ReqBindJmpData);
+X(ReqInterpBBNoTranslate,       ReqBindJmpData);
 X(ReqRetranslate,               IRSPRelOffsetData);
 X(ReqRetranslateOpt,            IRSPRelOffsetData);
 X(CheckCold,                    TransIDData);

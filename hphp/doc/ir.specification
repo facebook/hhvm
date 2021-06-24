@@ -1800,11 +1800,12 @@ To string conversions:
 
   Sync the given vmfp and vmsp to their in-memory locations.
 
-| ReqBindJmp<bcOff,transFlags>, ND, S(StkPtr) S(FramePtr), T
+| ReqBindJmp<target,invSPOff,irSPOff>, ND, S(StkPtr) S(FramePtr), T
 
-  Emit a jump to a REQ_BIND_JMP service request to the target offset bcOff.
+  Emit a jump to a translation starting at `target'. If it does not exist, jump
+  to a service request that will translate the code and bind this jump to it.
 
-| ReqRetranslate<transFlags>, ND, S(StkPtr) S(FramePtr), T
+| ReqRetranslate<irSPOff>, ND, S(StkPtr) S(FramePtr), T
 
   Emit a jump to a service request that will chain to a retranslation of this
   tracelet.
@@ -1812,11 +1813,17 @@ To string conversions:
   This instruction is used in exit traces for a type prediction that occurs at
   the first bytecode offset of a tracelet.
 
-| ReqRetranslateOpt<transId,bcOff>, ND, S(StkPtr) S(FramePtr), T
+| ReqRetranslateOpt<irSPOff>, ND, S(StkPtr) S(FramePtr), T
 
-  Emit a service request to retranslate, with a higher optimization gear,
-  translation transID, which starts at bcOff. This instruction is used in exit
-  traces that trigger profile-guided optimizations.
+  Emit a service request to retranslate the current function with a higher
+  optimization gear. This instruction is used in exit traces that trigger
+  profile-guided optimizations.
+
+| ReqInterpBBNoTranslate<target,invSPOff,irSPOff>, ND, S(StkPtr) S(FramePtr), T
+
+  Jump to the `interpHelperNoTranslate' stub, which first interprets the basic
+  block starting at `target' and then continues interpreting basic blocks until
+  an already existing translation is found.
 
 
 11. Refcounting and copies

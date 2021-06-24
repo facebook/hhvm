@@ -51,8 +51,7 @@ void surpriseCheckWithTarget(IRGS& env, Offset targetBcOff) {
  * may be a side exit or a normal IR block, depending on whether or not the
  * offset is in the current RegionDesc.
  */
-Block* getBlock(IRGS& env, Offset offset) {
-  SrcKey sk(curSrcKey(env), offset);
+Block* getBlock(IRGS& env, SrcKey sk) {
   // If hasBlock returns true, then IRUnit already has a block for that offset
   // and makeBlock will just return it.  This will be the proper successor
   // block set by setSuccIRBlocks.  Otherwise, the given offset doesn't belong
@@ -62,12 +61,20 @@ Block* getBlock(IRGS& env, Offset offset) {
   return env.irb->makeBlock(sk, curProfCount(env));
 }
 
+Block* getBlock(IRGS& env, Offset offset) {
+  return getBlock(env, SrcKey{curSrcKey(env), offset});
+}
+
 //////////////////////////////////////////////////////////////////////
 
-void jmpImpl(IRGS& env, Offset offset) {
-  auto target = getBlock(env, offset);
+void jmpImpl(IRGS& env, SrcKey sk) {
+  auto target = getBlock(env, sk);
   assertx(target != nullptr);
   gen(env, Jmp, target);
+}
+
+void jmpImpl(IRGS& env, Offset offset) {
+  return jmpImpl(env, SrcKey{curSrcKey(env), offset});
 }
 
 void implCondJmp(IRGS& env, Offset taken, bool negate, SSATmp* src) {

@@ -255,12 +255,12 @@ Type provenType(const IRGS& env, const Location& loc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void endBlock(IRGS& env, Offset next) {
+void endBlock(IRGS& env, SrcKey nextSk) {
   // If there's no fp, we've already executed a RetCtrl or similar, so there's
   // no reason to try to jump anywhere now. We can probably drop the fp check
   // here and rely on the unreachable check alone.
   if (!fp(env) || env.irb->inUnreachableState()) return;
-  jmpImpl(env, next);
+  jmpImpl(env, nextSk);
 }
 
 void prepareForNextHHBC(IRGS& env, SrcKey newSk) {

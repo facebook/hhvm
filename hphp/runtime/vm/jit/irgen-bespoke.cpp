@@ -942,7 +942,7 @@ jit::ArrayLayout guardToLayout(
         }
         auto const next = [&]{
           IRUnit::Hinter next_hinter(env.irb->unit(), next_hint);
-          return getBlock(env, nextBcOff(env));
+          return getBlock(env, nextSrcKey(env));
         }();
         gen(env, Jmp, next);
       }
@@ -1129,7 +1129,7 @@ void skipTrivialCast(IRGS& env, Op op) {
   auto const input = topC(env);
   if (!input->type().maybe(type)) return;
 
-  auto const next = getBlock(env, nextBcOff(env));
+  auto const next = getBlock(env, nextSrcKey(env));
   if (input->isA(type)) gen(env, Jmp, next);
   ifThen(env,
     [&](Block* taken) { gen(env, CheckType, type, taken, input); },

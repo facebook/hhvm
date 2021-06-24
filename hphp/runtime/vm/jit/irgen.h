@@ -169,7 +169,7 @@ void finishHHBC(IRGS&);
  */
 void endRegion(IRGS&);
 void endRegion(IRGS&, SrcKey);
-void endBlock(IRGS&, Offset next);
+void endBlock(IRGS&, SrcKey nextSk);
 
 /*
  * When we're done creating the IRUnit, this function must be called to ensure

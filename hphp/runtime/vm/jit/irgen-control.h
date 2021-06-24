@@ -16,6 +16,7 @@
 #pragma once
 
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace jit {
 
@@ -34,6 +35,7 @@ struct IRGS;
  * intermediate block that passes the current sp.
  */
 Block* getBlock(IRGS& env, Offset offset);
+Block* getBlock(IRGS& env, SrcKey sk);
 
 /*
  * Helpers for unconditional and conditional jumps.
@@ -42,6 +44,7 @@ void surpriseCheck(IRGS&);
 void surpriseCheck(IRGS&, Offset);
 void surpriseCheckWithTarget(IRGS&, Offset);
 void jmpImpl(IRGS&, Offset);
+void jmpImpl(IRGS&, SrcKey);
 void implCondJmp(IRGS&, Offset taken, bool negate, SSATmp*);
 
 //////////////////////////////////////////////////////////////////////

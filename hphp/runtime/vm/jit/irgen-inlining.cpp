@@ -568,7 +568,7 @@ bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
     if (rt.asyncEagerOffset == kInvalidOffset) {
       gen(env, Jmp, makeExit(env, nextSrcKey(env)));
     } else {
-      jmpImpl(env, nextBcOff(env));
+      jmpImpl(env, nextSrcKey(env));
     }
   }
   return true;

@@ -462,7 +462,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     // Set the first callee block as a successor to the FCall's block and
     // "fallthrough" from the caller into the callee's first block.
     setIRBlock(irgs, region.entry()->id(), region, blockIdToIRBlock);
-    irgen::endBlock(irgs, region.start().offset());
+    irgen::endBlock(irgs, region.start());
   }
 
   RegionDesc::BlockIdSet processedBlocks;
@@ -577,7 +577,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
             irgen::endRegion(irgs);
           }
         } else if (instrAllowsFallThru(inst.op())) {
-          irgen::endBlock(irgs, inst.nextSk().offset());
+          irgen::endBlock(irgs, inst.nextSk());
         }
       }
     }

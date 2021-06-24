@@ -699,7 +699,7 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
       gen(env, Jmp, footer, pos);
     },
     [&]{
-      auto const next = getBlock(env, nextBcOff(env));
+      auto const next = getBlock(env, nextSrcKey(env));
       env.irb->curBlock()->setProfCount(next->profCount());
 
       if (local) {
@@ -741,7 +741,7 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
 
   // `body` and `done` are at a different stack depth for non-local IterInits.
   if (!local) env.irb->fs().decBCSPDepth();
-  auto const body = getBlock(env, nextBcOff(env));
+  auto const body = getBlock(env, nextSrcKey(env));
   auto const done = getBlock(env, bcOff(env) + doneOffset);
   if (!local) env.irb->fs().incBCSPDepth();
   auto const iter = env.iters.contains(body) ? env.iters[body].get() : nullptr;

@@ -1,1 +1,5 @@
-Fatal error: "is" and "as" operators cannot be used with an array in %s on line %d
+varray
+not varray
+not varray
+varray
+not varray

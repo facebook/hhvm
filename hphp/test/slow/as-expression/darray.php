@@ -11,5 +11,9 @@ function f(mixed $x): void {
 
 <<__EntryPoint>>
 function main_darray() {
-f(darray[]);
+f(vec[]);
+f(dict[]);
+f(keyset[]);
+f(HH\array_mark_legacy(vec[]));
+f(HH\array_mark_legacy(dict[]));
 }

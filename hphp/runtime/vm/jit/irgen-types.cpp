@@ -952,6 +952,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
       }
       return unionOf(TVec, TDict, TKeyset);
     case TypeStructure::Kind::T_vec_or_dict:
+    case TypeStructure::Kind::T_varray_or_darray:
       if (RO::EvalIsCompatibleClsMethType && t->type().maybe(TClsMeth)) {
         if (t->isA(TClsMeth)) {
           if (RuntimeOption::EvalIsVecNotices) {
@@ -965,30 +966,27 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
       }
       // fallthrough
     case TypeStructure::Kind::T_dict:
-    case TypeStructure::Kind::T_vec: {
+    case TypeStructure::Kind::T_vec:
+    case TypeStructure::Kind::T_darray:
+    case TypeStructure::Kind::T_varray: {
       popC(env); // pop the ts that's on the stack
       auto const c = popC(env);
       auto const res = [&]{
-        if (kind == TypeStructure::Kind::T_dict) {
+        if (kind == TypeStructure::Kind::T_dict ||
+            kind == TypeStructure::Kind::T_darray) {
           return isDictImpl(env, c);
-        } else if (kind == TypeStructure::Kind::T_vec) {
+        } else if (kind == TypeStructure::Kind::T_vec ||
+                   kind == TypeStructure::Kind::T_varray) {
           return isVecImpl(env, c);
-        } else if (kind == TypeStructure::Kind::T_vec_or_dict) {
+        } else {
+          assertx(kind == TypeStructure::Kind::T_vec_or_dict ||
+                  kind == TypeStructure::Kind::T_varray_or_darray);
           return cond(
             env,
-            [&](Block* taken) {
-              auto vec = isVecImpl(env, c);
-              gen(env, JmpZero, taken, vec);
-            },
-            [&] {
-              return cns(env, true);
-            },
-            [&] {
-              return isDictImpl(env, c);
-            }
+            [&](Block* taken) { gen(env, JmpZero, taken, isVecImpl(env, c)); },
+            [&] { return cns(env, true); },
+            [&] { return isDictImpl(env, c); }
           );
-        } else {
-          not_reached();
         }
       }();
       push(env, is_nullable_ts ? check_nullable(env, res, c) : res);
@@ -1019,9 +1017,6 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_typevar:
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_trait:
-    case TypeStructure::Kind::T_darray:
-    case TypeStructure::Kind::T_varray:
-    case TypeStructure::Kind::T_varray_or_darray:
       // Not supported, will throw an error on these at the resolution phase
       return false;
     case TypeStructure::Kind::T_enum:

@@ -605,9 +605,13 @@ bool checkTypeStructureMatchesTVImpl(
              !reinterpret_cast<const Resource*>(&data.pres)->isInvalid();
 
     case TypeStructure::Kind::T_darray:
+      return isOrAsOp ? is_dict(&c1) : is_vec(&c1) || is_dict(&c1);
+
     case TypeStructure::Kind::T_varray:
+      return isOrAsOp ? is_vec(&c1) : is_vec(&c1) || is_dict(&c1);
+
     case TypeStructure::Kind::T_varray_or_darray:
-      return !isOrAsOp && (is_vec(&c1) || is_dict(&c1));
+      return is_vec(&c1) || is_dict(&c1);
 
     case TypeStructure::Kind::T_dict:
       return is_dict(&c1);
@@ -907,6 +911,9 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
+    case TypeStructure::Kind::T_darray:
+    case TypeStructure::Kind::T_varray:
+    case TypeStructure::Kind::T_varray_or_darray:
     case TypeStructure::Kind::T_any_array:
     case TypeStructure::Kind::T_null:
     case TypeStructure::Kind::T_void:
@@ -927,10 +934,6 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
         errorOnIsAsExpressionInvalidTypesList(tv.val().parr, dryrun, true) :
         false;
     }
-    case TypeStructure::Kind::T_darray:
-    case TypeStructure::Kind::T_varray:
-    case TypeStructure::Kind::T_varray_or_darray:
-      return err("an array");
     case TypeStructure::Kind::T_fun:
       return err("a function");
     case TypeStructure::Kind::T_typevar:

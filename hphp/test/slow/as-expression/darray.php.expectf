@@ -1,1 +1,7 @@
-Fatal error: "is" and "as" operators cannot be used with an array in %s on line %d
+not darray: vec
+dict(0) {
+}
+not darray: keyset
+not darray: array
+darray(0) {
+}

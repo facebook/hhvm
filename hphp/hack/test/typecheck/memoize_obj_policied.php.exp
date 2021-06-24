@@ -1,0 +1,32 @@
+File "memoize_obj_policied.php", line 31, characters 3-11:
+This function can only be memoized using __PolicyShardedMemoize because it has policied context (Parsing[1002])
+File "memoize_obj_policied.php", line 14, characters 17-24:
+Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
+  File "memoize_obj_policied.php", line 14, characters 29-30:
+  The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "memoize_obj_policied.php", line 17, characters 23-27:
+Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
+  File "memoize_obj_policied.php", line 17, characters 32-33:
+  The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "memoize_obj_policied.php", line 20, characters 24-34:
+Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
+  File "memoize_obj_policied.php", line 20, characters 39-40:
+  The local (enclosing) context provides the capability set {}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "memoize_obj_policied.php", line 23, characters 18-25:
+Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
+  File "memoize_obj_policied.php", line 23, characters 31-41:
+  The local (enclosing) context provides the capability WriteProperty
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "memoize_obj_policied.php", line 32, characters 26-33:
+Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
+  File "memoize_obj_policied.php", line 32, characters 39-46:
+  The local (enclosing) context provides the capability set {IO, ImplicitPolicy, ReadGlobals, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here

@@ -72,6 +72,16 @@ let enforce_mutable_static_variable ?msg (op_pos : Pos.t) env =
     op_pos
     env
 
+(* Temporarily FIXMEable error for memoizing objects. Once ~65 current cases are removed
+we can change this *)
+let enforce_memoize_object =
+  enforce_local_capability
+    ~err_code:
+      (Error_codes.Typing.err_code
+         Error_codes.Typing.MemoizeObjectWithoutGlobals)
+    Capabilities.(mk accessGlobals)
+    "Memoizing object parameters"
+
 let enforce_io =
   enforce_local_capability Capabilities.(mk io) "`echo` or `print` builtin"
 

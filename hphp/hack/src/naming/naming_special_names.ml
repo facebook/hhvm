@@ -815,6 +815,8 @@ module Capabilities = struct
 
   let readGlobals = prefix ^ "ReadGlobals"
 
+  let implicit_policy = prefix ^ "ImplicitPolicy"
+
   let io = prefix ^ "IO"
 
   let rx = prefix ^ "Rx"

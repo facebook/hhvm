@@ -333,9 +333,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    * (e.g. SimpleXMLElement -> bool)
    */
   bool toBoolean() const;
-  int64_t toInt64(
-    ConvNoticeLevel level = ConvNoticeLevel::None,
-    const StringData* notice_reason = nullptr) const;
+  int64_t toInt64() const;
   double toDouble() const;
 
   template <IntishCast IC = IntishCast::None>
@@ -567,8 +565,6 @@ private:
     ObjectData* src, Class* cls, size_t nProps);
 
   bool toBooleanImpl() const noexcept;
-  int64_t toInt64Impl() const noexcept;
-  double toDoubleImpl() const noexcept;
 
   bool slowDestroyCheck() const;
   void slowDestroyCases();

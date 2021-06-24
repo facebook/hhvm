@@ -107,8 +107,6 @@ Notice: Implicit varray/vec to int conversion for math in %s/literals.php on lin
 
 Notice: Implicit darray/dict to int conversion for math in %s/literals.php on line 164
 0
-Notice: Implicit object to int conversion for math in %s/literals.php on line 166
-
 Object of class Foo could not be converted to int
 >
 modeq<
@@ -121,8 +119,6 @@ Notice: Implicit string to int conversion for math in %s/literals.php on line 17
 Notice: Implicit varray/vec to int conversion for math in %s/literals.php on line 180
 
 Notice: Implicit darray/dict to int conversion for math in %s/literals.php on line 181
-
-Notice: Implicit object to int conversion for math in %s/literals.php on line 183
 
 Object of class Foo could not be converted to int
 0>

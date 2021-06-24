@@ -265,18 +265,22 @@ bool ObjectData::toBooleanImpl() const noexcept {
   return false;
 }
 
-int64_t ObjectData::toInt64Impl() const noexcept {
-  // SimpleXMLElement is the only class that has proper custom int casting.
-  assertx(instanceof(SimpleXMLElement_classof()));
+int64_t ObjectData::toInt64() const {
+  /* SimpleXMLElement is the only class that has proper custom num casting. */
+  if (LIKELY(!instanceof(SimpleXMLElement_classof()))) {
+    throwObjToIntException(classname_cstr());
+  }
   if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
     raise_notice("SimpleXMLElement to integer cast");
   }
   return SimpleXMLElement_objectCast(this, KindOfInt64).toInt64();
 }
 
-double ObjectData::toDoubleImpl() const noexcept {
-  // SimpleXMLElement is the only class that has custom double casting.
-  assertx(instanceof(SimpleXMLElement_classof()));
+double ObjectData::toDouble() const {
+  /* SimpleXMLElement is the only class that has proper custom num casting. */
+  if (LIKELY(!instanceof(SimpleXMLElement_classof()))) {
+    throwObjToDoubleException(classname_cstr());
+  }
   if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
     raise_notice("SimpleXMLElement to double cast");
   }

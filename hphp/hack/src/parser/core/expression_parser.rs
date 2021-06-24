@@ -1618,7 +1618,7 @@ where
         //   term '#' name '(' ... ')'
         let hash = self.assert_token(TokenKind::Hash);
         let label_name = self.require_name();
-        if self.peek_token_kind() == TokenKind::LeftParen {
+        let result = if self.peek_token_kind() == TokenKind::LeftParen {
             let missing = S!(make_missing, self, self.pos());
             let enum_class_label = S!(
                 make_enum_class_label_expression,
@@ -1636,7 +1636,8 @@ where
                 hash,
                 label_name
             )
-        }
+        };
+        self.parse_remaining_expression(result)
     }
 
     fn parse_function_call(&mut self, enum_class_label: S::R, receiver: S::R) -> S::R {

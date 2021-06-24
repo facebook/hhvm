@@ -1027,6 +1027,228 @@
                     "line_number":8
                   }
                 }
+              },
+              {
+                "kind":"if_statement",
+                "if_keyword":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"if",
+                    "text":"if",
+                    "offset":193,
+                    "leading_width":3,
+                    "width":2,
+                    "trailing_width":1,
+                    "leading":[
+                      {"kind":"end_of_line","text":"\n","offset":193,"width":1},
+                      {"kind":"whitespace","text":"  ","offset":194,"width":2}
+                    ],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":198,"width":1}],
+                    "line_number":10
+                  }
+                },
+                "if_left_paren":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"(",
+                    "text":"(",
+                    "offset":199,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":0,
+                    "leading":[],
+                    "trailing":[],
+                    "line_number":10
+                  }
+                },
+                "if_condition":{
+                  "kind":"binary_expression",
+                  "binary_left_operand":{
+                    "kind":"enum_class_label",
+                    "enum_class_label_qualifier":{
+                      "kind":"token",
+                      "token":{
+                        "kind":"name",
+                        "text":"E",
+                        "offset":200,
+                        "leading_width":0,
+                        "width":1,
+                        "trailing_width":0,
+                        "leading":[],
+                        "trailing":[],
+                        "line_number":10
+                      }
+                    },
+                    "enum_class_label_hash":{
+                      "kind":"token",
+                      "token":{
+                        "kind":"#",
+                        "text":"#",
+                        "offset":201,
+                        "leading_width":0,
+                        "width":1,
+                        "trailing_width":0,
+                        "leading":[],
+                        "trailing":[],
+                        "line_number":10
+                      }
+                    },
+                    "enum_class_label_expression":{
+                      "kind":"token",
+                      "token":{
+                        "kind":"name",
+                        "text":"A",
+                        "offset":202,
+                        "leading_width":0,
+                        "width":1,
+                        "trailing_width":1,
+                        "leading":[],
+                        "trailing":[{"kind":"whitespace","text":" ","offset":203,"width":1}],
+                        "line_number":10
+                      }
+                    }
+                  },
+                  "binary_operator":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"==",
+                      "text":"==",
+                      "offset":204,
+                      "leading_width":0,
+                      "width":2,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":206,"width":1}],
+                      "line_number":10
+                    }
+                  },
+                  "binary_right_operand":{
+                    "kind":"variable",
+                    "variable_expression":{
+                      "kind":"token",
+                      "token":{
+                        "kind":"variable",
+                        "text":"$x",
+                        "offset":207,
+                        "leading_width":0,
+                        "width":2,
+                        "trailing_width":0,
+                        "leading":[],
+                        "trailing":[],
+                        "line_number":10
+                      }
+                    }
+                  }
+                },
+                "if_right_paren":{
+                  "kind":"token",
+                  "token":{
+                    "kind":")",
+                    "text":")",
+                    "offset":209,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":210,"width":1}],
+                    "line_number":10
+                  }
+                },
+                "if_statement":{
+                  "kind":"compound_statement",
+                  "compound_left_brace":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"{",
+                      "text":"{",
+                      "offset":211,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":212,"width":1}],
+                      "line_number":10
+                    }
+                  },
+                  "compound_statements":{
+                    "kind":"list",
+                    "elements":[
+                      {
+                        "kind":"echo_statement",
+                        "echo_keyword":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"echo",
+                            "text":"echo",
+                            "offset":213,
+                            "leading_width":0,
+                            "width":4,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":217,"width":1}],
+                            "line_number":10
+                          }
+                        },
+                        "echo_expressions":{
+                          "kind":"list",
+                          "elements":[
+                            {
+                              "kind":"list_item",
+                              "list_item":{
+                                "kind":"literal",
+                                "literal_expression":{
+                                  "kind":"token",
+                                  "token":{
+                                    "kind":"double_quoted_string_literal",
+                                    "text":"\"42\\n\"",
+                                    "offset":218,
+                                    "leading_width":0,
+                                    "width":6,
+                                    "trailing_width":0,
+                                    "leading":[],
+                                    "trailing":[],
+                                    "line_number":10
+                                  }
+                                }
+                              },
+                              "list_separator":{"kind":"missing"}
+                            }
+                          ]
+                        },
+                        "echo_semicolon":{
+                          "kind":"token",
+                          "token":{
+                            "kind":";",
+                            "text":";",
+                            "offset":224,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":225,"width":1}],
+                            "line_number":10
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "compound_right_brace":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"}",
+                      "text":"}",
+                      "offset":226,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"end_of_line","text":"\n","offset":227,"width":1}],
+                      "line_number":10
+                    }
+                  }
+                },
+                "if_elseif_clauses":{"kind":"missing"},
+                "if_else_clause":{"kind":"missing"}
               }
             ]
           },
@@ -1035,13 +1257,13 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":193,
+              "offset":228,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":194,"width":1}],
-              "line_number":9
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":229,"width":1}],
+              "line_number":11
             }
           }
         }
@@ -1053,13 +1275,13 @@
           "token":{
             "kind":"end_of_file",
             "text":"",
-            "offset":195,
+            "offset":230,
             "leading_width":0,
             "width":0,
             "trailing_width":0,
             "leading":[],
             "trailing":[],
-            "line_number":10
+            "line_number":12
           }
         }
       }

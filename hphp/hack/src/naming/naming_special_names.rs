@@ -846,6 +846,41 @@ pub mod math {
     pub const NEG_INF: &str = "-INF";
 }
 
+pub mod expression_trees {
+    pub const MAKE_TREE: &str = "makeTree";
+
+    pub const INT_TYPE: &str = "intType";
+    pub const FLOAT_TYPE: &str = "floatType";
+    pub const BOOL_TYPE: &str = "boolType";
+    pub const STRING_TYPE: &str = "stringType";
+    pub const NULL_TYPE: &str = "nullType";
+    pub const VOID_TYPE: &str = "voidType";
+    pub const SYMBOL_TYPE: &str = "symbolType";
+
+    pub const VISIT_INT: &str = "visitInt";
+    pub const VISIT_FLOAT: &str = "visitFloat";
+    pub const VISIT_BOOL: &str = "visitBool";
+    pub const VISIT_STRING: &str = "visitString";
+    pub const VISIT_NULL: &str = "visitNull";
+    pub const VISIT_BINOP: &str = "visitBinop";
+    pub const VISIT_UNOP: &str = "visitUnop";
+    pub const VISIT_LOCAL: &str = "visitLocal";
+    pub const VISIT_LAMBDA: &str = "visitLambda";
+    pub const VISIT_GLOBAL_FUNCTION: &str = "visitGlobalFunction";
+    pub const VISIT_STATIC_METHOD: &str = "visitStaticMethod";
+    pub const VISIT_CALL: &str = "visitCall";
+    pub const VISIT_ASSIGN: &str = "visitAssign";
+    pub const VISIT_TERNARY: &str = "visitTernary";
+    pub const VISIT_IF: &str = "visitIf";
+    pub const VISIT_WHILE: &str = "visitWhile";
+    pub const VISIT_RETURN: &str = "visitReturn";
+    pub const VISIT_FOR: &str = "visitFor";
+    pub const VISIT_BREAK: &str = "visitBreak";
+    pub const VISIT_CONTINUE: &str = "visitContinue";
+
+    pub const SPLICE: &str = "splice";
+}
+
 #[cfg(test)]
 mod test {
     use crate::members::is_special_xhp_attribute;

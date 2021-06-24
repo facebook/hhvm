@@ -336,8 +336,9 @@ let visitor =
       let ( + ) = self#plus in
       let ea =
         match snd e with
-        | Aast.Call ((_, Aast.Class_const (_, (_, "symbolType"))), _, [arg], _)
-          when Tast_env.is_in_expr_tree env ->
+        | Aast.Call ((_, Aast.Class_const (_, (_, methName))), _, [arg], _)
+          when Tast_env.is_in_expr_tree env
+               && String.equal methName SN.ExpressionTrees.symbolType ->
           (* Treat MyVisitor::symbolType(foo<>) as just foo(). *)
           self#on_expr env arg
         | Aast.Id id -> process_fun_id id

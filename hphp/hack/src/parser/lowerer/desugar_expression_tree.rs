@@ -1,6 +1,6 @@
 use crate::lowerer::Env;
 use bstr::BString;
-use naming_special_names_rust::{classes, pseudo_functions};
+use naming_special_names_rust::{classes, expression_trees as et, pseudo_functions};
 use oxidized::{
     aast,
     aast_visitor::{visit, AstParams, Node, NodeMut, Visitor, VisitorMut},
@@ -142,7 +142,7 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
 
     let make_tree = static_meth_call(
         &visitor_name,
-        "makeTree",
+        et::MAKE_TREE,
         vec![exprpos(&et_literal_pos), metadata, visitor_lambda],
         &et_literal_pos.clone(),
     );
@@ -561,27 +561,33 @@ fn rewrite_expr<TF>(
         // Virtualized: MyDsl::intType()
         // Desugared: $0v->visitInt(new ExprPos(...), 1)
         Int(_) => {
-            let virtual_expr = static_meth_call(visitor_name, "intType", vec![], &pos);
-            let desugar_expr =
-                v_meth_call("visitInt", vec![pos_expr, Expr(pos.clone(), expr_)], &pos);
+            let virtual_expr = static_meth_call(visitor_name, et::INT_TYPE, vec![], &pos);
+            let desugar_expr = v_meth_call(
+                et::VISIT_INT,
+                vec![pos_expr, Expr(pos.clone(), expr_)],
+                &pos,
+            );
             (virtual_expr, desugar_expr)
         }
         // Source: MyDsl`1.0`
         // Virtualized: MyDsl::floatType()
         // Desugared: $0v->visitFloat(new ExprPos(...), 1.0)
         Float(_) => {
-            let virtual_expr = static_meth_call(visitor_name, "floatType", vec![], &pos);
-            let desugar_expr =
-                v_meth_call("visitFloat", vec![pos_expr, Expr(pos.clone(), expr_)], &pos);
+            let virtual_expr = static_meth_call(visitor_name, et::FLOAT_TYPE, vec![], &pos);
+            let desugar_expr = v_meth_call(
+                et::VISIT_FLOAT,
+                vec![pos_expr, Expr(pos.clone(), expr_)],
+                &pos,
+            );
             (virtual_expr, desugar_expr)
         }
         // Source: MyDsl`'foo'`
         // Virtualized: MyDsl::stringType()
         // Desugared: $0v->visitString(new ExprPos(...), 'foo')
         String(_) => {
-            let virtual_expr = static_meth_call(visitor_name, "stringType", vec![], &pos);
+            let virtual_expr = static_meth_call(visitor_name, et::STRING_TYPE, vec![], &pos);
             let desugar_expr = v_meth_call(
-                "visitString",
+                et::VISIT_STRING,
                 vec![pos_expr, Expr(pos.clone(), expr_)],
                 &pos,
             );
@@ -591,17 +597,20 @@ fn rewrite_expr<TF>(
         // Virtualized: MyDsl::boolType()
         // Desugared: $0v->visitBool(new ExprPos(...), true)
         True | False => {
-            let virtual_expr = static_meth_call(visitor_name, "boolType", vec![], &pos);
-            let desugar_expr =
-                v_meth_call("visitBool", vec![pos_expr, Expr(pos.clone(), expr_)], &pos);
+            let virtual_expr = static_meth_call(visitor_name, et::BOOL_TYPE, vec![], &pos);
+            let desugar_expr = v_meth_call(
+                et::VISIT_BOOL,
+                vec![pos_expr, Expr(pos.clone(), expr_)],
+                &pos,
+            );
             (virtual_expr, desugar_expr)
         }
         // Source: MyDsl`null`
         // Virtualized: MyDsl::nullType()
         // Desugared: $0v->visitNull(new ExprPos(...))
         Null => {
-            let virtual_expr = static_meth_call(visitor_name, "nullType", vec![], &pos);
-            let desugar_expr = v_meth_call("visitNull", vec![pos_expr], &pos);
+            let virtual_expr = static_meth_call(visitor_name, et::NULL_TYPE, vec![], &pos);
+            let desugar_expr = v_meth_call(et::VISIT_NULL, vec![pos_expr], &pos);
             (virtual_expr, desugar_expr)
         }
         // Source: MyDsl`$x`
@@ -609,7 +618,7 @@ fn rewrite_expr<TF>(
         // Desugared: $0v->visitLocal(new ExprPos(...), '$x')
         Lvar(lid) => {
             let desugar_expr = v_meth_call(
-                "visitLocal",
+                et::VISIT_LOCAL,
                 vec![pos_expr, string_literal(lid.0.clone(), &((lid.1).1))],
                 &pos,
             );
@@ -625,7 +634,7 @@ fn rewrite_expr<TF>(
                 // Virtualized: $x = ...
                 // Desugared: $0v->visitAssign(new ExprPos(...), $0v->visitLocal(...), ...)
                 let desugar_expr = v_meth_call(
-                    "visitAssign",
+                    et::VISIT_ASSIGN,
                     vec![pos_expr, desugar_lhs, desugar_rhs],
                     &pos,
                 );
@@ -694,7 +703,7 @@ fn rewrite_expr<TF>(
                 };
                 let virtual_expr = meth_call(virtual_lhs, &binop_str, vec![virtual_rhs], &pos);
                 let desugar_expr = v_meth_call(
-                    "visitBinop",
+                    et::VISIT_BINOP,
                     vec![
                         pos_expr,
                         desugar_lhs,
@@ -748,7 +757,7 @@ fn rewrite_expr<TF>(
             };
             let virtual_expr = meth_call(virtual_operand, &op_str, vec![], &pos);
             let desugar_expr = v_meth_call(
-                "visitUnop",
+                et::VISIT_UNOP,
                 vec![
                     pos_expr,
                     desugar_operand,
@@ -775,7 +784,7 @@ fn rewrite_expr<TF>(
             let (virtual_e3, desugar_e3) = rewrite_expr(env, e3, visitor_name)?;
 
             let desugar_expr = v_meth_call(
-                "visitTernary",
+                et::VISIT_TERNARY,
                 vec![pos_expr, desugar_e1, desugar_e2, desugar_e3],
                 &pos,
             );
@@ -825,12 +834,12 @@ fn rewrite_expr<TF>(
                 Id(sid) => {
                     let fp = global_func_ptr(&sid);
                     let callee =
-                        static_meth_call(visitor_name, "symbolType", vec![fp.clone()], &pos);
+                        static_meth_call(visitor_name, et::SYMBOL_TYPE, vec![fp.clone()], &pos);
 
                     let desugar_recv =
-                        v_meth_call("visitGlobalFunction", vec![pos_expr.clone(), fp], &pos);
+                        v_meth_call(et::VISIT_GLOBAL_FUNCTION, vec![pos_expr.clone(), fp], &pos);
                     let desugar_expr = v_meth_call(
-                        "visitCall",
+                        et::VISIT_CALL,
                         vec![pos_expr, desugar_recv, vec_literal(desugar_args)],
                         &pos,
                     );
@@ -862,12 +871,12 @@ fn rewrite_expr<TF>(
                     let fp = static_meth_ptr(&pos, &cid, &s);
 
                     let callee =
-                        static_meth_call(visitor_name, "symbolType", vec![fp.clone()], &pos);
+                        static_meth_call(visitor_name, et::SYMBOL_TYPE, vec![fp.clone()], &pos);
 
                     let desugar_recv =
-                        v_meth_call("visitStaticMethod", vec![pos_expr.clone(), fp], &pos);
+                        v_meth_call(et::VISIT_STATIC_METHOD, vec![pos_expr.clone(), fp], &pos);
                     let desugar_expr = v_meth_call(
-                        "visitCall",
+                        et::VISIT_CALL,
                         vec![pos_expr, desugar_recv, vec_literal(desugar_args)],
                         &pos,
                     );
@@ -879,7 +888,7 @@ fn rewrite_expr<TF>(
                     let (virtual_recv, desugar_recv) =
                         rewrite_expr(env, Expr(recv.0, recv.1), visitor_name)?;
                     let desugar_expr = v_meth_call(
-                        "visitCall",
+                        et::VISIT_CALL,
                         vec![pos_expr, desugar_recv, vec_literal(desugar_args)],
                         &pos,
                     );
@@ -920,7 +929,7 @@ fn rewrite_expr<TF>(
                     pos.clone(),
                     aast::Stmt_::Return(Box::new(Some(static_meth_call(
                         visitor_name,
-                        "voidType",
+                        et::VOID_TYPE,
                         vec![],
                         &pos,
                     )))),
@@ -928,7 +937,7 @@ fn rewrite_expr<TF>(
             }
 
             let desugar_expr = v_meth_call(
-                "visitLambda",
+                et::VISIT_LAMBDA,
                 vec![
                     pos_expr,
                     vec_literal(param_names),
@@ -951,7 +960,7 @@ fn rewrite_expr<TF>(
             } else {
                 return Err((pos, "Please report a bug".into()));
             };
-            let desugar_expr = v_meth_call("splice", vec![pos_expr, s, *e.clone()], &pos);
+            let desugar_expr = v_meth_call(et::SPLICE, vec![pos_expr, s, *e.clone()], &pos);
             let virtual_expr = Expr(pos, ETSplice(e));
             (virtual_expr, desugar_expr)
         }
@@ -1018,7 +1027,8 @@ fn rewrite_stmt<TF>(
             // Desugared: $0v->visitReturn(new ExprPos(...), $0v->...)
             Some(e) => {
                 let (virtual_expr, desugar_expr) = rewrite_expr(env, e, visitor_name)?;
-                let desugar_expr = v_meth_call("visitReturn", vec![pos_expr, desugar_expr], &pos);
+                let desugar_expr =
+                    v_meth_call(et::VISIT_RETURN, vec![pos_expr, desugar_expr], &pos);
                 let virtual_stmt = Stmt(pos, Return(Box::new(Some(virtual_expr))));
                 (virtual_stmt, Some(desugar_expr))
             }
@@ -1027,12 +1037,12 @@ fn rewrite_stmt<TF>(
             // Desugared: $0v->visitReturn(new ExprPos(...), null)
             None => {
                 let desugar_expr = v_meth_call(
-                    "visitReturn",
+                    et::VISIT_RETURN,
                     vec![pos_expr, null_literal(pos.clone())],
                     &pos,
                 );
 
-                let virtual_void_expr = static_meth_call(visitor_name, "voidType", vec![], &pos);
+                let virtual_void_expr = static_meth_call(visitor_name, et::VOID_TYPE, vec![], &pos);
                 let virtual_stmt = Stmt(pos, Return(Box::new(Some(virtual_void_expr))));
                 (virtual_stmt, Some(desugar_expr))
             }
@@ -1047,7 +1057,7 @@ fn rewrite_stmt<TF>(
             let (virtual_else_stmts, desugar_else) = rewrite_stmts(env, else_block, visitor_name)?;
 
             let desugar_expr = v_meth_call(
-                "visitIf",
+                et::VISIT_IF,
                 vec![
                     pos_expr,
                     desugar_cond,
@@ -1075,7 +1085,7 @@ fn rewrite_stmt<TF>(
             let (virtual_body_stmts, desugar_body) = rewrite_stmts(env, body, visitor_name)?;
 
             let desugar_expr = v_meth_call(
-                "visitWhile",
+                et::VISIT_WHILE,
                 vec![pos_expr, desugar_cond, vec_literal(desugar_body)],
                 &pos,
             );
@@ -1102,7 +1112,7 @@ fn rewrite_stmt<TF>(
             let (virtual_body_stmts, desugar_body) = rewrite_stmts(env, body, visitor_name)?;
 
             let desugar_expr = v_meth_call(
-                "visitFor",
+                et::VISIT_FOR,
                 vec![
                     pos_expr,
                     vec_literal(desugar_init_exprs),
@@ -1127,7 +1137,7 @@ fn rewrite_stmt<TF>(
         // Virtualized: break;
         // Desugared: $0v->visitBreak(new ExprPos(...))
         Break => {
-            let desugar_expr = v_meth_call("visitBreak", vec![pos_expr], &pos);
+            let desugar_expr = v_meth_call(et::VISIT_BREAK, vec![pos_expr], &pos);
             let virtual_stmt = Stmt(pos, Break);
             (virtual_stmt, Some(desugar_expr))
         }
@@ -1135,7 +1145,7 @@ fn rewrite_stmt<TF>(
         // Virtualized: continue;
         // Desugared: $0v->visitContinue(new ExprPos(...))
         Continue => {
-            let desugar_expr = v_meth_call("visitContinue", vec![pos_expr], &pos);
+            let desugar_expr = v_meth_call(et::VISIT_CONTINUE, vec![pos_expr], &pos);
             let virtual_stmt = Stmt(pos, Continue);
             (virtual_stmt, Some(desugar_expr))
         }

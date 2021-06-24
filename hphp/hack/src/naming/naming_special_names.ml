@@ -819,3 +819,63 @@ module Capabilities = struct
 
   let rx = prefix ^ "Rx"
 end
+
+module ExpressionTrees = struct
+  let makeTree = "makeTree"
+
+  let intType = "intType"
+
+  let floatType = "floatType"
+
+  let boolType = "boolType"
+
+  let stringType = "stringType"
+
+  let nullType = "nullType"
+
+  let voidType = "voidType"
+
+  let symbolType = "symbolType"
+
+  let visitInt = "visitInt"
+
+  let visitFloat = "visitFloat"
+
+  let visitBool = "visitBool"
+
+  let visitString = "visitString"
+
+  let visitNull = "visitNull"
+
+  let visitBinop = "visitBinop"
+
+  let visitUnop = "visitUnop"
+
+  let visitLocal = "visitLocal"
+
+  let visitLambda = "visitLambda"
+
+  let visitGlobalFunction = "visitGlobalFunction"
+
+  let visitStaticMethod = "visitStaticMethod"
+
+  let visitCall = "visitCall"
+
+  let visitAssign = "visitAssign"
+
+  let visitTernary = "visitTernary"
+
+  let visitIf = "visitIf"
+
+  let visitWhile = "visitWhile"
+
+  let visitReturn = "visitReturn"
+
+  let visitFor = "visitFor"
+
+  let visitBreak = "visitBreak"
+
+  let visitContinue = "visitContinue"
+
+  let splice = "splice"
+end

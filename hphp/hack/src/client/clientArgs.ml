@@ -541,8 +541,8 @@ let parse_check_args cmd =
         ^ "[\"Class\", \"Function\", \"Method\"] <Current Name> <New Name>" );
       ("--remote", Arg.Set remote, " force remote type checking");
       ( "--remote-execution",
-        Arg.Unit (fun () -> set_mode MODE_STATUS_REMOTE_EXECUTION),
-        "force type checking with remote execution" );
+        Arg.String (fun x -> set_mode (MODE_STATUS_REMOTE_EXECUTION x)),
+        " force type checking with remote execution" );
       ( "--remove-dead-fixme",
         Arg.Int
           begin

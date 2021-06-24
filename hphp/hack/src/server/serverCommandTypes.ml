@@ -334,7 +334,7 @@ type _ t =
       -> (Errors.finalized_error list * int) t
   | STATUS_SINGLE_REMOTE_EXECUTION : string -> (string * string) t
   | STATUS_REMOTE_EXECUTION :
-      int option
+      string * int option
       -> (Errors.finalized_error list * int) t
   | STATUS_MULTI_REMOTE_EXECUTION : string list -> (string * string) t
   | INFER_TYPE : file_input * int * int * bool -> InferAtPosService.result t

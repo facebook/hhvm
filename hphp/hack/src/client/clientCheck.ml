@@ -696,9 +696,9 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
           args.max_errors
       in
       Lwt.return (exit_status, telemetry)
-    | MODE_STATUS_REMOTE_EXECUTION ->
+    | MODE_STATUS_REMOTE_EXECUTION x ->
       let%lwt ((error_list, dropped_count), telemetry) =
-        rpc args (Rpc.STATUS_REMOTE_EXECUTION args.max_errors)
+        rpc args (Rpc.STATUS_REMOTE_EXECUTION (x, args.max_errors))
       in
       let status =
         {

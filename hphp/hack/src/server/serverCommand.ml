@@ -157,7 +157,17 @@ let force_remote_execution_files = function
   | _ -> Relative_path.Set.empty
 
 let rpc_remote_execution : type a. a t -> ReEnv.t option = function
-  | STATUS_REMOTE_EXECUTION _ -> Some (Re.initialize_lease ())
+  | STATUS_REMOTE_EXECUTION (mode, _) ->
+    let re_env =
+      if String.equal mode "warm" then
+        Re.initialize_lease ~acquire_new_lease:false
+      else if String.equal mode "cold" then
+        Re.initialize_lease ~acquire_new_lease:true
+      else
+        failwith
+          "Invalid argument to --remote-execution. Please specify \"cold\" or \"warm\""
+    in
+    Some re_env
   | _ -> None
 
 let force_remote_execution = function

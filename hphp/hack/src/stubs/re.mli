@@ -6,7 +6,7 @@
  *
  *)
 
-val initialize_lease : unit -> ReEnv.t
+val initialize_lease : acquire_new_lease:bool -> ReEnv.t
 
 val process_file : ReEnv.t -> Relative_path.t -> Typing_deps.Mode.t -> Errors.t
 

@@ -1,0 +1,12 @@
+File "module_typedef.php", line 13, characters 21-22:
+You cannot use this type in a public declaration. (Typing[4446])
+  File "module_typedef.php", line 7, characters 6-7:
+  It is declared as `internal` here
+File "module_typedef.php", line 27, characters 12-13:
+Cannot access an internal element from module `A` in module `B` (Typing[4444])
+  File "module_typedef.php", line 7, characters 6-7:
+  This is from module `A`
+File "module_typedef.php", line 29, characters 12-13:
+Cannot access an internal element from module `A` outside of a module (Typing[4444])
+  File "module_typedef.php", line 7, characters 6-7:
+  This is from module `A`

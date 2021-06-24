@@ -381,7 +381,8 @@ let typedef tenv t =
     {
       typedef_tparams =
         (match t_vis with
-        | Transparent ->
+        | Transparent
+        | Tinternal ->
           (* Since type aliases cannot have constraints we shouldn't check
            * if its type params satisfy the constraints of any tapply it
            * references.

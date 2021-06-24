@@ -208,6 +208,12 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
   let td_module =
     Naming_attributes_params.get_module_attribute t_user_attributes
   in
+  let td_vis =
+    if Naming_attributes_params.has_internal_attribute t_user_attributes then
+      Tinternal
+    else
+      td_vis
+  in
   { td_module; td_vis; td_tparams; td_constraint; td_type; td_pos }
 
 let typedef_naming_and_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :

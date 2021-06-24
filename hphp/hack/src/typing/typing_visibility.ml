@@ -118,16 +118,38 @@ let is_internal_visible env mname =
            mname
            m)
 
-let check_classname_access ~use_pos ~in_signature env cls =
-  if Cls.internal cls then
+let check_internal_access ~use_pos ~in_signature ~def_pos env internal modul =
+  if internal then
     let cur_module = Env.get_module env in
-    let cls_module = Cls.get_module cls in
-    match cls_module with
-    | Some m when not (Option.equal String.equal cls_module cur_module) ->
-      Errors.module_mismatch use_pos (Cls.pos cls) cur_module m
+    match modul with
+    | Some m when not (Option.equal String.equal modul cur_module) ->
+      Errors.module_mismatch use_pos def_pos cur_module m
     | _ ->
       if in_signature && not (Env.get_internal env) then
-        Errors.module_hint ~use_pos ~def_pos:(Cls.pos cls)
+        Errors.module_hint ~use_pos ~def_pos
+
+let check_classname_access ~use_pos ~in_signature env cls =
+  check_internal_access
+    ~use_pos
+    ~in_signature
+    ~def_pos:(Cls.pos cls)
+    env
+    (Cls.internal cls)
+    (Cls.get_module cls)
+
+let check_typedef_access ~use_pos ~in_signature env td =
+  let internal =
+    match td.td_vis with
+    | Tinternal -> true
+    | _ -> false
+  in
+  check_internal_access
+    ~use_pos
+    ~in_signature
+    ~def_pos:td.td_pos
+    env
+    internal
+    td.td_module
 
 let is_visible_for_obj env vis =
   match vis with

@@ -183,6 +183,7 @@ and use_as_visibility =
 and typedef_visibility =
   | Transparent
   | Opaque
+  | Tinternal
 
 and enum_ = {
   e_base: hint;

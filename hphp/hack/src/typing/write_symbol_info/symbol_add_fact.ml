@@ -357,6 +357,7 @@ let add_typedef_defn_fact ctx source_map elem decl_id progress =
   let is_transparent =
     match elem.t_vis with
     | Transparent -> true
+    | Tinternal -> true
     | Opaque -> false
   in
   let tparams =

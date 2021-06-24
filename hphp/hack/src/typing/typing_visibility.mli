@@ -45,3 +45,15 @@ val is_visible :
  *)
 val check_classname_access :
   use_pos:Pos.t -> in_signature:bool -> env -> Decl_provider.class_decl -> unit
+
+(* Can the typdef in a type hint be accessed from code or signature checked under [env]?
+ *   If type is public, then yes
+ *   If type is internal, then only if modules match, and in the case that
+ *     we are in a signature, the signature had better be internal too.
+ *)
+val check_typedef_access :
+  use_pos:Pos.t ->
+  in_signature:bool ->
+  env ->
+  Decl_provider.typedef_decl ->
+  unit

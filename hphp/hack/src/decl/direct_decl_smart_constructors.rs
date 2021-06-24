@@ -4025,10 +4025,20 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             attributes.dynamically_callable,
         );
         flags.set(MethodFlags::PHP_STD_LIB, attributes.php_std_lib);
+        let visibility = match modifiers.visibility {
+            aast::Visibility::Public => {
+                if attributes.internal {
+                    aast::Visibility::Internal
+                } else {
+                    aast::Visibility::Public
+                }
+            }
+            _ => modifiers.visibility,
+        };
         let method = self.alloc(ShallowMethod {
             name: id,
             type_: ty,
-            visibility: modifiers.visibility,
+            visibility,
             deprecated,
             flags,
         });

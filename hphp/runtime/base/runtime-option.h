@@ -842,7 +842,7 @@ struct RuntimeOption {
   F(bool,     JitBuildOutliningHashes, false)                           \
   F(bool,     JitPGOLayoutSplitHotCold, pgoLayoutSplitHotColdDefault()) \
   F(bool,     JitPGOVasmBlockCounters, true)                            \
-  F(bool,     JitPGOVasmBlockCountersOptPrologue, false)                \
+  F(bool,     JitPGOVasmBlockCountersOptPrologue, true)                 \
   F(bool,     JitPGOVasmBlockCountersForceSaveSF, false)                \
   F(bool,     JitPGOVasmBlockCountersForceSaveGP, false)                \
   F(uint32_t, JitPGOVasmBlockCountersMaxOpMismatches, 12)               \

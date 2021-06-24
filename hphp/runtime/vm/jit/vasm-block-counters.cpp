@@ -87,7 +87,7 @@ void insert(Vunit& unit, const T& key) {
     // the native stack before/after if needed.
     // NB: decqmlock instructions are currently used to update the counters, so
     // they actually start at zero and grow down from there.  The sign is then
-    // flipped when serializing the data in RegionProfCounters::serialize().
+    // flipped when serializing the data in TransProfCounters::serialize().
     jit::vector<Vinstr> new_insts;
     if (save_gp) new_insts.insert(new_insts.end(), push{rgp});
     if (save_sf) new_insts.insert(new_insts.end(), pushf{rsf});
@@ -114,29 +114,35 @@ void insert(Vunit& unit, const T& key) {
 
 /*
  * Checks whether the profile data in `counters' and `opcodes' matches the given
- * `unit'.  If they don't, a string with the error found is returned.  Otherwise
+ * `unit'. If they don't, a string with the error found is returned. Otherwise
  * (on success), an empty string is returned.
  */
 std::string checkProfile(const Vunit& unit,
                          const jit::vector<Vlabel>& sortedBlocks,
                          const jit::vector<int64_t>& counters,
                          const jit::vector<VOpRaw>& opcodes) {
-  if (counters.size() == 0) return "no profile for this region";
+  auto const kind = unit.context->kind == TransKind::OptPrologue ? "prologue" : "region";
+  if (counters.size() == 0) return folly::sformat("no profile for this {}", kind);
 
   std::string errorMsg;
   size_t opcodeMismatches=0;
 
-  auto reportRegion = [&] {
+  auto report = [&] {
     if (!errorMsg.empty()) return;
-    errorMsg = show(unit.context->region->entry()->start()) + "\n";
-    FTRACE(1, "VasmBlockCounters::checkProfile: SrcKey={}", errorMsg);
+    if (unit.context->kind == TransKind::OptPrologue) {
+      errorMsg = show(unit.context->pid) + "\n";
+      FTRACE(1, "VasmBlockCounters::checkProfile: PrologueID={}", errorMsg);
+    } else {
+      errorMsg = show(unit.context->region->entry()->start()) + "\n";
+      FTRACE(1, "VasmBlockCounters::checkProfile: SrcKey={}", errorMsg);
+    }
   };
 
   for (size_t index = 0; index < sortedBlocks.size(); index++) {
     auto b = sortedBlocks[index];
     auto& block = unit.blocks[b];
     if (index >= counters.size()) {
-      reportRegion();
+      report();
       auto const msg = folly::sformat(
         "missing block counter for B{} (index = {}, counters.size() = {})\n",
         size_t{b}, index, counters.size());
@@ -147,7 +153,7 @@ std::string checkProfile(const Vunit& unit,
     auto const op_opti = block.code.front().op;
     auto const op_prof = opcodes[index];
     if (op_prof != op_opti) {
-      reportRegion();
+      report();
       auto const msg = folly::sformat(
         "mismatch opcode for B{} (index = {}): "
         "profile was {} optimized is {}\n",

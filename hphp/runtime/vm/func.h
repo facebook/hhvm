@@ -1089,8 +1089,6 @@ struct Func final {
 
   void prettyPrint(std::ostream& out, const PrintOpts& = PrintOpts()) const;
 
-  void prettyPrintInstruction(std::ostream& out, Offset offset) const;
-
   /*
    * Print function attributes to out.
    */

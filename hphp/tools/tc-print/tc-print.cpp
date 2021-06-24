@@ -663,17 +663,22 @@ dynamic getTrans(TransID transId) {
   for (auto const& block : tRec->blocks) {
     std::stringstream byteInfo; // TODO(T52857125) - translate to actual data
 
-    auto const newFunc = block.sk.valid() ? block.sk.func() : nullptr;
-    if (newFunc) {
-      newFunc->prettyPrint(byteInfo,
-                           HPHP::Func::PrintOpts().noName().noMetadata()
-                                                  .range(block.sk.offset(), block.bcPast));
+    auto const sk = block.sk;
+    if (sk.valid()) {
+      assertx(!sk.prologue());
+      sk.func()->prettyPrint(
+        byteInfo,
+        HPHP::Func::PrintOpts()
+          .noName()
+          .noMetadata()
+          .range(sk.offset(), block.bcPast)
+      );
     }
 
     blocks.push_back(dynamic::object("sha1", block.sha1.toString())
-                                    ("start", block.sk.offset())
+                                    ("start", sk.printableOffset())
                                     ("end", block.bcPast)
-                                    ("unit", newFunc ?
+                                    ("unit", sk.valid() ?
                                              byteInfo.str() :
                                              dynamic()));
   }
@@ -759,23 +764,31 @@ void printTrans(TransID transId) {
     const Func* curFunc = nullptr;
     for (auto& block : tRec->blocks) {
       std::stringstream byteInfo;
-      auto newFunc = block.sk.valid() ? block.sk.func() : nullptr;
-      if (!newFunc) {
+      auto const sk = block.sk;
+      if (!sk.valid()) {
         byteInfo << folly::format(
           "<<< couldn't find func in {} to print bytecode range [{},{}) >>>\n",
-          block.sha1, block.sk.offset(), block.bcPast);
+          block.sha1, block.sk.printableOffset(), block.bcPast);
         continue;
       }
 
-      if (newFunc != curFunc) {
+      if (sk.func() != curFunc) {
+        curFunc = sk.func();
         byteInfo << '\n';
-        newFunc->prettyPrint(byteInfo, Func::PrintOpts().noMetadata().noBytecode());
+        curFunc->prettyPrint(
+          byteInfo,
+          Func::PrintOpts().noMetadata().noBytecode()
+        );
       }
-      curFunc = newFunc;
 
-      newFunc->prettyPrint(
+      assertx(!sk.prologue());
+      curFunc->prettyPrint(
         byteInfo,
-        Func::PrintOpts().noName().noMetadata().range(block.sk.offset(), block.bcPast));
+        Func::PrintOpts()
+          .noName()
+          .noMetadata()
+          .range(sk.offset(), block.bcPast)
+      );
       g_logger->printBytecode(byteInfo.str());
     }
   }
@@ -865,8 +878,8 @@ void printCFG() {
       continue;
     }
 
-    uint32_t bcStart   = TREC(tid)->src.offset();
-    uint32_t bcStop    = TREC(tid)->bcPast();
+    auto const bcStart = TREC(tid)->src.printableOffset();
+    uint32_t bcStop = TREC(tid)->bcPast();
     auto const shape = [&] {
       switch (TREC(tid)->kind) {
         case TransKind::Optimize: return "oval";
@@ -875,8 +888,8 @@ void printCFG() {
       }
     }();
     g_logger->printGeneric(
-      "t%u [shape=%s,label=\"T: %u\\nbc: [0x%x-0x%x)\",style=filled];\n",
-      tid, shape, tid, bcStart, bcStop
+      "t%u [shape=%s,label=\"T: %u\\nbc: [%s-%d)\",style=filled];\n",
+      tid, shape, tid, bcStart.c_str(), bcStop
     );
   }
 

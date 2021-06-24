@@ -66,17 +66,38 @@ fn count_key_vertex(db: &rusqlite::Connection) -> Result<usize> {
     }
 }
 
+/// Auxiliary function to print a 32-bit edge
+fn print_edge_u32(key: u32, dst: u32, hex_dump: bool) {
+    const DIGITS: usize = 10; // (u32::MAX as f32).log10() as usize + 1;
+
+    if hex_dump {
+        println!("  {key:#08x}  {:#08x}", dst, key = key);
+    } else {
+        println!("  {key:>width$}  {}", dst, key = key, width = DIGITS);
+    }
+}
+
+/// Auxiliary function to print a 64-bit edge
+fn print_edge_u64(key: u64, dst: u64, hex_dump: bool) {
+    const DIGITS: usize = 20; // (u64::MAX as f64).log10() as usize + 1;
+
+    if hex_dump {
+        println!("  {key:#016x} {:#016x}", dst, key = key);
+    } else {
+        println!("  {key:>width$}  {}", dst, key = key, width = DIGITS);
+    }
+}
+
 /// Print an ASCII representation of a 32-bit depgraph to stdout.
-fn dump_depgraph32(file: &str) -> Result<()> {
+fn dump_depgraph32(file: &str, hex_dump: bool) -> Result<()> {
     let db = rusqlite::Connection::open(file)?;
     let mut stmt = db.prepare("select * from deptable")?;
     let mut rows = stmt.query(rusqlite::NO_PARAMS)?;
-    let digits = (u32::MAX as f32).log10() as usize + 1;
     while let Some(row) = rows.next()? {
         let key = key_vertex(row)?;
         let dests = value_vertex(row)?;
         for dst in dests {
-            println!("  {key:>width$}  {}", dst, key = key, width = digits);
+            print_edge_u32(key, dst, hex_dump)
         }
     }
     Ok(())
@@ -91,7 +112,12 @@ fn add_edges<T: Ord + Clone>(es: &mut Vec<(T, T)>, k: T, vs: &std::collections::
 ///
 /// Calculate the edges in `rfile` not in `lfile` (missing edges) and
 /// the edges in `lfile` not in `rfile` (extraneous edges).
-fn comp_depgraph32(no_progress_bar: bool, test_file: &str, control_file: &str) -> Result<()> {
+fn comp_depgraph32(
+    no_progress_bar: bool,
+    test_file: &str,
+    control_file: &str,
+    hex_dump: bool,
+) -> Result<()> {
     let (ldb, rdb) = (
         rusqlite::Connection::open(test_file)?,
         rusqlite::Connection::open(control_file)?,
@@ -193,7 +219,6 @@ fn comp_depgraph32(no_progress_bar: bool, test_file: &str, control_file: &str) -
     if let Some(bar) = bar {
         bar.finish_and_clear()
     };
-    let digits = (u32::MAX as f32).log10() as usize + 1;
     let num_edges_missing = missing.len(); // If non-zero, `l` is broken.
     println!("\nResults\n=======");
     println!("Processed {}/{} of nodes in 'test'", lproc, lnum_keys);
@@ -205,14 +230,14 @@ fn comp_depgraph32(no_progress_bar: bool, test_file: &str, control_file: &str) -
         missing.len()
     );
     for (key, dst) in missing {
-        println!("  {key:>width$}  {}", dst, key = key, width = digits);
+        print_edge_u32(key, dst, hex_dump);
     }
     println!(
         "Edges in 'test' missing in 'control' (there are {}):",
         extra.len()
     );
     for (key, dst) in extra {
-        println!("  {key:>width$}  {}", dst, key = key, width = digits);
+        print_edge_u32(key, dst, hex_dump);
     }
 
     if num_edges_missing == 0 {
@@ -239,30 +264,40 @@ fn hashes(g: &depgraph::reader::DepGraph, k: u64) -> std::collections::BTreeSet<
 }
 
 /// Print an ASCII representation of a 64-bit depgraph to stdout.
-fn dump_depgraph64(file: &str) -> Result<()> {
-    let digits = (u64::MAX as f64).log10() as usize + 1;
+fn dump_depgraph64(file: &str, dependency_hash: Option<u64>, hex_dump: bool) -> Result<()> {
     let o = depgraph::reader::DepGraphOpener::from_path(file)?;
-    match (|| {
-        let dg = o.open()?;
-        let () = dg.validate_hash_lists()?;
-        for &key in dg.all_hashes().iter() {
-            let dests = hashes(&dg, key);
-            for dst in dests {
-                println!("  {key:>width$}  {}", dst, key = key, width = digits);
+    let dg = o.open().map_err(Error::DepgraphError)?;
+    let () = dg.validate_hash_lists().map_err(Error::DepgraphError)?;
+
+    let print_edges_for_key = |key: u64| {
+        let dests = hashes(&dg, key);
+        for dst in dests {
+            print_edge_u64(key, dst, hex_dump);
+        }
+    };
+
+    match dependency_hash {
+        None => {
+            for &key in dg.all_hashes().iter() {
+                print_edges_for_key(key)
             }
         }
-        Ok(())
-    })() {
-        Ok(()) => Ok(()),
-        Err(msg) => Err(Error::DepgraphError(msg)),
-    }
+        Some(dependency_hash) => print_edges_for_key(dependency_hash),
+    };
+
+    Ok(())
 }
 
 /// Compare two 64-bit dependency graphs.
 ///
 /// Calculate the edges in `control_file` not in `test_file` (missing edges) and
 /// the edges in `test_file` not in `control_file` (extraneous edges).
-fn comp_depgraph64(no_progress_bar: bool, test_file: &str, control_file: &str) -> Result<()> {
+fn comp_depgraph64(
+    no_progress_bar: bool,
+    test_file: &str,
+    control_file: &str,
+    hex_dump: bool,
+) -> Result<()> {
     let lo = depgraph::reader::DepGraphOpener::from_path(test_file)?;
     let ro = depgraph::reader::DepGraphOpener::from_path(control_file)?;
     let mut num_edges_missing = 0;
@@ -361,7 +396,6 @@ fn comp_depgraph64(no_progress_bar: bool, test_file: &str, control_file: &str) -
         if let Some(bar) = bar {
             bar.finish_and_clear()
         };
-        let digits = (u64::MAX as f64).log10() as usize + 1;
         num_edges_missing = missing.len();
         println!("\nResults\n=======");
         println!("Processed {}/{} of nodes in 'test'", lproc, lnum_keys);
@@ -373,14 +407,14 @@ fn comp_depgraph64(no_progress_bar: bool, test_file: &str, control_file: &str) -
             missing.len()
         );
         for (key, dst) in missing {
-            println!("  {key:>width$}  {}", dst, key = key, width = digits);
+            print_edge_u64(key, dst, hex_dump);
         }
         println!(
             "Edges in 'test' missing in 'control' (there are {}):",
             extra.len()
         );
         for (key, dst) in extra {
-            println!("  {key:>width$}  {}", dst, key = key, width = digits);
+            print_edge_u64(key, dst, hex_dump);
         }
         Ok(())
     })() {
@@ -402,6 +436,16 @@ fn comp_depgraph64(no_progress_bar: bool, test_file: &str, control_file: &str) -
 }
 
 use structopt::StructOpt;
+
+fn parse_hex_or_decimal(src: &str) -> std::result::Result<u64, std::num::ParseIntError> {
+    let src_trim = src.trim_start_matches("0x");
+    if src_trim.len() != src.len() {
+        u64::from_str_radix(src_trim, 16)
+    } else {
+        u64::from_str_radix(src_trim, 10)
+    }
+}
+
 #[derive(Debug, structopt::StructOpt)]
 #[structopt(
     name = "dump_saved_state_depgraph",
@@ -425,6 +469,16 @@ struct Opt {
     #[structopt(long = "dump", help = "graph to render as text")]
     dump: Option<String>,
 
+    #[structopt(
+        long = "dependency-hash",
+        help = "(with --dump; only for 64-bit) only dump edges for the given dependency hash",
+        parse(try_from_str = parse_hex_or_decimal)
+    )]
+    dependency_hash: Option<u64>,
+
+    #[structopt(long = "print-hex", help = "print hexadecimal hashes")]
+    print_hex: bool,
+
     #[structopt(long = "test", help = "'test' graph")]
     test: Option<String>,
 
@@ -438,27 +492,32 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         Opt {
             bitness: 32,
             dump: Some(file),
+            print_hex,
             ..
-        } => dump_depgraph32(&file),
+        } => dump_depgraph32(&file, print_hex),
         Opt {
             bitness: 64,
             dump: Some(file),
+            dependency_hash,
+            print_hex,
             ..
-        } => dump_depgraph64(&file),
+        } => dump_depgraph64(&file, dependency_hash, print_hex),
         Opt {
             with_progress_bar,
             bitness: 32,
             test: Some(test),
             control: Some(control),
+            print_hex,
             ..
-        } => comp_depgraph32(!with_progress_bar, &test, &control),
+        } => comp_depgraph32(!with_progress_bar, &test, &control, print_hex),
         Opt {
             with_progress_bar,
             bitness: 64,
             test: Some(test),
             control: Some(control),
+            print_hex,
             ..
-        } => comp_depgraph64(!with_progress_bar, &test, &control),
+        } => comp_depgraph64(!with_progress_bar, &test, &control, print_hex),
         _ => Ok(()),
     } {
         Ok(()) => Ok(()),

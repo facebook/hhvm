@@ -8,10 +8,8 @@
 // folds many shallow class declarations into one. We don't have this type / logic in Rust yet.
 pub type FunDecl<'a> = oxidized_by_ref::shallow_decl_defs::FunElt<'a>;
 pub type ClassDecl<'a> = oxidized_by_ref::shallow_decl_defs::ShallowClass<'a>;
-pub type ClassType<'a> = oxidized_by_ref::typing_defs::ClassType<'a>;
 
 pub trait DeclProvider {
     fn get_fun(&self, s: &str) -> Option<&FunDecl<'_>>;
     fn get_shallow_class(&self, s: &str) -> Option<&ClassDecl<'_>>;
-    fn get_class(&self, s: &str) -> Option<&ClassType<'_>>;
 }

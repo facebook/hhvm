@@ -8,11 +8,31 @@
 
 exception Decl_heap_elems_bug
 
-(** Fold together all the heap entries for a class
-    (the class itself + its individual members)
-    into a single data structure.
-    The parameters might not contain all the member entries,
-    in which case those are fetched from the member heaps. *)
-val to_class_type :
-  Decl_defs.decl_class_type * Decl_store.class_members option ->
-  Typing_defs.class_type
+val map_property :
+  Decl_defs.decl_class_type ->
+  string ->
+  Decl_defs.element ->
+  Typing_defs.class_elt
+
+val map_static_property :
+  Decl_defs.decl_class_type ->
+  string ->
+  Decl_defs.element ->
+  Typing_defs.class_elt
+
+val map_method :
+  Decl_defs.decl_class_type ->
+  string ->
+  Decl_defs.element ->
+  Typing_defs.class_elt
+
+val map_static_method :
+  Decl_defs.decl_class_type ->
+  string ->
+  Decl_defs.element ->
+  Typing_defs.class_elt
+
+val map_constructor :
+  Decl_defs.subst_context SMap.t ->
+  Decl_defs.element option * Typing_defs.consistent_kind ->
+  Typing_defs.class_elt option * Typing_defs.consistent_kind

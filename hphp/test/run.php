@@ -426,6 +426,7 @@ function get_options($argv): (darray<string, mixed>, varray<string>) {
     'include:' => 'i:',
     'include-pattern:' => 'I:',
     '*repo' => 'r',
+    '*split-hphpc' => '',
     '*repo-single' => '',
     '*repo-separate' => '',
     '*repo-threads:' => '',
@@ -550,6 +551,17 @@ function get_options($argv): (darray<string, mixed>, varray<string>) {
     }
     if (isset($options['mode']) && $options['mode'] != 'jit') {
       echo "jit-serialize only works in jit mode\n";
+      exit(1);
+    }
+  }
+
+  if (isset($options['split-hphpc'])) {
+    if (!isset($options['repo'])) {
+      echo "split-hphpc only works in repo mode\n";
+      exit(1);
+    }
+    if (!isset($options['repo-separate'])) {
+      echo "split-hphpc only works in repo-separate mode\n";
       exit(1);
     }
   }
@@ -1138,10 +1150,24 @@ function hphp_cmd($options, $test, $program): string {
   ]);
 }
 
+function hphpc_path($options) {
+  if (isset($options['split-hphpc'])) {
+    $file = "";
+    $file = bin_root().'/hphpc';
+
+    if (!is_file($file)) {
+      error("$file doesn't exist. Did you forget to build first?");
+    }
+    return rel_path($file);
+  } else {
+    return hhvm_path();
+  }
+}
+
 function hhbbc_cmd($options, $test, $program) {
   $test_repo = test_repo($options, $test);
   return implode(" ", varray[
-    hhvm_path(),
+    hphpc_path($options),
     '--hhbbc',
     '--no-logging',
     '--no-cores',

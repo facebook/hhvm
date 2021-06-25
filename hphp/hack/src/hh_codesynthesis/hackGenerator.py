@@ -23,7 +23,22 @@ import clingo
 from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
 
 
-class _HackInterfaceGenerator(object):
+class _HackBaseGenerator(object):
+    """
+    _HackBaseGenerator for the shared part of _HackInterfaceGenerator and
+    _HackClassGenerator. In this case is the body of each class or interface
+    definition. We are extending this to support method declaration/definition.
+    """
+
+    def __init__(self) -> None:
+        super(_HackBaseGenerator, self).__init__()
+        self.name = "Base"
+
+    def _print_body(self) -> str:
+        return "{}"
+
+
+class _HackInterfaceGenerator(_HackBaseGenerator):
     """A generator to emit Hack Interface definition."""
 
     def __init__(self, name: str, **kwargs: Dict[str, Any]) -> None:
@@ -40,14 +55,11 @@ class _HackInterfaceGenerator(object):
             return ""
         return "extends {}".format(",".join(sorted(self.extends)))
 
-    def _print_body(self) -> str:
-        return "{}"
-
     def __str__(self) -> str:
         return f"interface {self.name} {self._print_extends()} {self._print_body()}"
 
 
-class _HackClassGenerator(object):
+class _HackClassGenerator(_HackBaseGenerator):
     """A generator to emit Hack Class definition."""
 
     def __init__(self, name: str, **kwargs: Dict[str, Any]) -> None:
@@ -73,9 +85,6 @@ class _HackClassGenerator(object):
         if len(self.implements) == 0:
             return ""
         return "implements {}".format(",".join(sorted(self.implements)))
-
-    def _print_body(self) -> str:
-        return "{}"
 
     def __str__(self) -> str:
         return (

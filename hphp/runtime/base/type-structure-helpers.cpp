@@ -213,6 +213,9 @@ bool typeStructureIsType(
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
+    case TypeStructure::Kind::T_darray:
+    case TypeStructure::Kind::T_varray:
+    case TypeStructure::Kind::T_varray_or_darray:
     case TypeStructure::Kind::T_any_array: {
       if (is_ts_nullable(type)) {
         auto const inputT = get_ts_kind(input);
@@ -338,9 +341,6 @@ bool typeStructureIsType(
         ? typeStructureIsType(inputV, typeV, warn, strict)
         : inputV == typeV;
     }
-    case TypeStructure::Kind::T_darray:
-    case TypeStructure::Kind::T_varray:
-    case TypeStructure::Kind::T_varray_or_darray:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_trait:
     case TypeStructure::Kind::T_reifiedtype:

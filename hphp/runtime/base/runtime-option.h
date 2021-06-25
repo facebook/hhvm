@@ -1174,8 +1174,6 @@ struct RuntimeOption {
   /* Raise notices on intish-cast (which may use an is_array check) */  \
   F(bool, HackArrCompatIntishCastNotices, false)                        \
   F(bool, HackArrCompatSerializeNotices, false)                         \
-  /* Raise notices when fb_compact_*() would change behavior */         \
-  F(bool, HackArrCompatCompactSerializeNotices, false)                  \
   /* Raise notices when we cast a marked dvarray to a vec or a marked   \
    * darray to a dict (implicitly clearing the legacy mark). */         \
   F(bool, HackArrCompatCastMarkedArrayNotices, false)                   \

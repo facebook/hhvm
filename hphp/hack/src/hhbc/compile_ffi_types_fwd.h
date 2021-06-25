@@ -5,8 +5,12 @@
  LICENSE file in the "hack" directory of this source tree.
 */
 
-struct hackc_compile_native_environment;
+namespace HPHP { namespace hackc { namespace compile {
 
-struct hackc_compile_output_config;
+struct native_environment;
 
-struct hackc_error_buf_t;
+struct output_config;
+
+struct error_buf_t;
+
+}}} //namespace HPHP::hackc::compile

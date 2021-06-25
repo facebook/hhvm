@@ -5,23 +5,31 @@
  LICENSE file in the "hack" directory of this source tree.
 */
 
-struct hackc_compile_native_environment {
+#pragma once
+
+#include <cstdint>
+
+namespace HPHP { namespace hackc { namespace compile {
+
+struct native_environment {
   char const* filepath;
   char const * aliased_namespaces;
   char const * include_roots;
-  int32_t emit_class_pointers;
-  int32_t check_int_overflow;
-  uint32_t hhbc_flags;
-  uint32_t parser_flags;
-  uint8_t flags;
+  std::int32_t emit_class_pointers;
+  std::int32_t check_int_overflow;
+  std::uint32_t hhbc_flags;
+  std::uint32_t parser_flags;
+  std::uint8_t flags;
 };
 
-struct hackc_compile_output_config {
+struct output_config {
   bool include_header;
   char const* output_file;
 };
 
-struct hackc_error_buf_t {
+struct error_buf_t {
   char* buf;
   int buf_siz;
 };
+
+}}} //namespace HPHP::hackc::compile

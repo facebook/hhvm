@@ -4,15 +4,17 @@
  This source code is licensed under the MIT license found in the
  LICENSE file in the "hack" directory of this source tree.
 */
-#if !defined(COMPILE_FFI_H)
-#  define COMPILE_FFI_H
+#pragma once
 
-#  include<stdint.h>
-#  include<stddef.h>
+#include "hphp/hack/src/hhbc/compile_ffi_types_fwd.h"
 
-#  include "hphp/hack/src/hhbc/compile_ffi_types_fwd.h"
+#include <cstdint>
+#include <cstddef>
+#include <memory>
 
-enum hackc_compile_env_flags {
+namespace HPHP { namespace hackc { namespace compile {
+
+enum env_flags {
     IS_SYSTEMLIB=1 << 0
   , IS_EVALED=1 << 1
   , FOR_DEBUGGER_EVAL=1 << 2
@@ -20,32 +22,25 @@ enum hackc_compile_env_flags {
   , DISABLE_TOPLEVEL_ENUMERATION=1 << 4
 };
 
-#  if defined(__cplusplus)
 extern "C" {
-#  endif /*defined(__cplusplus)*/
 char const* hackc_compile_from_text_cpp_ffi(
-       hackc_compile_native_environment const* env
+       native_environment const* env
      , char const* source_text
-     , hackc_compile_output_config const* config
-     , hackc_error_buf_t* error_buf );
+     , output_config const* config
+     , error_buf_t* error_buf );
 
 void hackc_compile_from_text_free_string_cpp_ffi(char const*);
-#  if defined(__cplusplus)
-}
-
-#  include <memory>
-
-namespace HPHP {
+}//extern"C"
 
 using hackc_compile_from_text_ptr =
   std::unique_ptr<char const, void(*)(char const*)>;
 
 inline hackc_compile_from_text_ptr
   hackc_compile_from_text(
-      hackc_compile_native_environment const* env
+      native_environment const* env
     , char const* source_text
-    , hackc_compile_output_config const* config
-    , hackc_error_buf_t* error_buf
+    , output_config const* config
+    , error_buf_t* error_buf
   ) {
   return hackc_compile_from_text_ptr {
       hackc_compile_from_text_cpp_ffi(env, source_text, config, error_buf)
@@ -53,7 +48,4 @@ inline hackc_compile_from_text_ptr
   };
 }
 
-}//namespace HPHP
-#  endif /*defined(__cplusplus)*/
-
-#endif/*!defined(COMPILE_FFI_H)*/
+}}} //namespace HPHP::hackc::compile

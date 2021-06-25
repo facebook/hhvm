@@ -1098,6 +1098,9 @@ CompilerResult hackc_compile(
       mode
     );
   } else {
+
+    using namespace ::HPHP::hackc::compile;
+
     std::uint8_t flags = 0;
     if(forDebuggerEval) {
       flags |= FOR_DEBUGGER_EVAL;
@@ -1109,7 +1112,7 @@ CompilerResult hackc_compile(
 
     std::string aliased_namespaces = options.getAliasedNamespacesConfig();
 
-    hackc_compile_native_environment const native_env = {
+    native_environment const native_env{
       filename,
       aliased_namespaces.data(),
       s_misc_config.data(),
@@ -1120,11 +1123,11 @@ CompilerResult hackc_compile(
       flags
     };
 
-    hackc_compile_output_config const output{true, nullptr};
+    output_config const output{true, nullptr};
 
     std::array<char, 256> buf;
     buf.fill(0);
-    hackc_error_buf_t error_buf {buf.data(), buf.size()};
+    error_buf_t error_buf {buf.data(), buf.size()};
 
     hackc_compile_from_text_ptr hhas{
       hackc_compile_from_text(&native_env, code, &output, &error_buf)

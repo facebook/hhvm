@@ -83,7 +83,6 @@ struct RepoGlobalData {
    * may be disabled.
    */
   bool HackArrCompatNotices = false;
-  bool HackArrCompatIsVecDictNotices = false;
   bool HackArrCompatSerializeNotices = false;
 
   /*
@@ -190,7 +189,6 @@ struct RepoGlobalData {
       (PHP7_Substr)
       (PHP7_Builtins)
       (HackArrCompatNotices)
-      (HackArrCompatIsVecDictNotices)
       (HackArrCompatSerializeNotices)
       (EnableIntrinsicsExtension)
       (ForbidDynamicCallsToFunc)

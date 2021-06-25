@@ -1173,8 +1173,6 @@ struct RuntimeOption {
   F(bool, HackArrCompatNotices, false)                                  \
   /* Raise notices on intish-cast (which may use an is_array check) */  \
   F(bool, HackArrCompatIntishCastNotices, false)                        \
-  /* Raise notices when is_vec or is_dict  is called with a v/darray */ \
-  F(bool, HackArrCompatIsVecDictNotices, false)                         \
   F(bool, HackArrCompatSerializeNotices, false)                         \
   /* Raise notices when fb_compact_*() would change behavior */         \
   F(bool, HackArrCompatCompactSerializeNotices, false)                  \

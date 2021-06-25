@@ -164,8 +164,6 @@ RepoGlobalData getGlobalData() {
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
-  gd.HackArrCompatIsVecDictNotices =
-    RuntimeOption::EvalHackArrCompatIsVecDictNotices;
   gd.HackArrCompatSerializeNotices =
     RuntimeOption::EvalHackArrCompatSerializeNotices;
   gd.AbortBuildOnVerifyError = RuntimeOption::EvalAbortBuildOnVerifyError;

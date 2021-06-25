@@ -314,8 +314,6 @@ RepoGlobalData get_global_data() {
   gd.EnableArgsInBacktraces      = RuntimeOption::EnableArgsInBacktraces;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
-  gd.HackArrCompatIsVecDictNotices =
-    RuntimeOption::EvalHackArrCompatIsVecDictNotices;
   gd.HackArrCompatSerializeNotices =
     RuntimeOption::EvalHackArrCompatSerializeNotices;
   gd.InitialNamedEntityTableSize  =
@@ -508,7 +506,6 @@ int main(int argc, char** argv) try {
   RO::EvalForbidDynamicCallsWithAttr            = gd.ForbidDynamicCallsWithAttr;
   RO::EvalLogKnownMethodsAsDynamicCalls         = gd.LogKnownMethodsAsDynamicCalls;
   RO::EvalNoticeOnBuiltinDynamicCalls           = gd.NoticeOnBuiltinDynamicCalls;
-  RO::EvalHackArrCompatIsVecDictNotices         = gd.HackArrCompatIsVecDictNotices;
   RO::EvalHackArrCompatSerializeNotices         = gd.HackArrCompatSerializeNotices;
   RO::EvalAbortBuildOnVerifyError               = gd.AbortBuildOnVerifyError;
   RO::EnableArgsInBacktraces                    = gd.EnableArgsInBacktraces;

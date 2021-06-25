@@ -1,4 +1,3 @@
 -vEval.HackArrCompatNotices=1
--vEval.HackArrCompatIsVecDictNotices=0
 -vEval.HackArrCompatSerializeNotices=0
 -vEval.RaiseArraySerializationNotices=1

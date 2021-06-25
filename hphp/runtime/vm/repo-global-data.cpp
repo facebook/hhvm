@@ -38,7 +38,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalEmitClassPointers                     = EmitClassPointers;
   RO::EvalEmitClsMethPointers                   = EmitClsMethPointers;
   RO::EvalForbidDynamicCallsWithAttr            = ForbidDynamicCallsWithAttr;
-  RO::EvalHackArrCompatIsVecDictNotices         = HackArrCompatIsVecDictNotices;
   RO::EvalRaiseClassConversionWarning           = RaiseClassConversionWarning;
   RO::EvalClassPassesClassname                  = ClassPassesClassname;
   RO::EvalClassnameNotices                      = ClassnameNotices;

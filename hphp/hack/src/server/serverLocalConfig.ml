@@ -545,6 +545,8 @@ type t = {
   go_to_implementation: bool;
   (* Allows unstabled features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
   allow_unstable_features: bool;
+  stream_errors: bool;
+      (** Whether to send errors to client as soon as they are discovered. *)
   watchman: Watchman.t;
   (* If enabled, saves naming table into a temp folder and uploads it to the remote typechecker *)
   save_and_upload_naming_table: bool;
@@ -644,6 +646,7 @@ let default =
     profile_desc = "";
     go_to_implementation = true;
     allow_unstable_features = false;
+    stream_errors = false;
     watchman = Watchman.default;
     save_and_upload_naming_table = false;
   }
@@ -1180,6 +1183,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let stream_errors =
+    bool_if_min_version
+      "stream_errors"
+      ~default:default.stream_errors
+      ~current_version
+      config
+  in
   let save_and_upload_naming_table =
     bool_if_min_version
       "save_and_upload_naming_table"
@@ -1272,6 +1282,7 @@ let load_ fn ~silent ~current_version overrides =
     profile_desc;
     go_to_implementation;
     allow_unstable_features;
+    stream_errors;
     watchman;
     force_remote_type_check;
     save_and_upload_naming_table;

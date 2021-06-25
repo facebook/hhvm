@@ -42,6 +42,8 @@ let remote_min_batch_size = GlobalOptions.tco_remote_min_batch_size
 
 let num_remote_workers = GlobalOptions.tco_num_remote_workers
 
+let stream_errors = GlobalOptions.tco_stream_errors
+
 let remote_version_specifier = GlobalOptions.so_remote_version_specifier
 
 let disallow_array_typehint = GlobalOptions.tco_disallow_array_typehint

@@ -383,11 +383,10 @@ let visitor =
       self#plus acc (super#on_catch env (sid, lid, block))
 
     method! on_class_ env class_ =
-      Aast.(
-        class_name := Some class_.c_name;
-        let acc = process_class class_ in
+      class_name := Some class_.Aast.c_name;
+      let acc = process_class class_ in
 
-        (*
+      (*
       Enums implicitly extend BuiltinEnum. However, BuiltinEnums also extend
       the same Enum as a type parameter.
 
@@ -395,20 +394,101 @@ let visitor =
 
       This will return the definition of the enum twice when finding references
       on it. As a result, we set the extends property of an enum's tast to an empty list.
+
+      The same situation applies to Enum classes that extends
+      BuiltinEnumClass. However in this case we just want to filter out
+      this one extends, and keep the other unchanged.
     *)
-        let class_ =
-          match class_.c_extends with
-          | [(_, Happly ((_, builtin_enum), [(_, Happly (c_name, []))]))]
-            when String.equal (snd c_name) (snd class_.c_name)
-                 && String.equal
-                      builtin_enum
-                      Naming_special_names.Classes.cHH_BuiltinEnum ->
-            { class_ with c_extends = [] }
-          | _ -> class_
+      let class_ =
+        let open Aast in
+        let c_name = snd class_.c_name in
+        (* Checks if the hint is matching the pattern
+         * `HH\BuiltinEnumClass<HH\MemberOf<c_name, _>>`
+         *)
+        let is_generated_builtin_enum_class = function
+          | ( _,
+              Happly
+                ( (_, builtin_enum_class),
+                  [
+                    ( _,
+                      Happly
+                        ( (_, memberof),
+                          [(_, Happly ((_, name), [])); _interface] ) );
+                  ] ) ) ->
+            String.equal builtin_enum_class SN.Classes.cHH_BuiltinEnumClass
+            && String.equal memberof SN.Classes.cMemberOf
+            && String.equal name c_name
+          | _ -> false
         in
-        let acc = self#plus acc (super#on_class_ env class_) in
-        class_name := None;
-        acc)
+        (* Checks if the hint is matching the pattern
+         * `HH\BuiltinEnum<c_name>`
+         *)
+        let is_generated_builtin_enum = function
+          | (_, Happly ((_, builtin_enum), [(_, Happly ((_, name), []))])) ->
+            String.equal builtin_enum SN.Classes.cHH_BuiltinEnum
+            && String.equal name c_name
+          | _ -> false
+        in
+        match (class_.c_kind, class_.c_enum) with
+        | (Ast_defs.Cenum, Some enum) ->
+          (* If the class is an enum or enum class, remove the generated
+           * occurrences.
+           *)
+          if enum.Aast_defs.e_enum_class then
+            (* Enum classes might extend other classes, so we filter
+             * the list and we don't depend on their order.
+             *)
+            let c_extends =
+              List.filter_map
+                ~f:(fun h ->
+                  if is_generated_builtin_enum_class h then
+                    (* don't take this occurrence into account *)
+                    None
+                  else
+                    Some h)
+                class_.c_extends
+            in
+            (* We also have to take care of the type of constants that
+             * are rewritten from Foo to MemberOf<EnumName, Foo>
+             *)
+            let c_consts =
+              List.map
+                ~f:(fun cc ->
+                  let cc_type =
+                    Option.map
+                      ~f:(fun h ->
+                        match snd h with
+                        | Happly ((_, name), [_; h])
+                          when String.equal name SN.Classes.cMemberOf ->
+                          h
+                        | _ -> h)
+                      cc.cc_type
+                  in
+                  { cc with cc_type })
+                class_.c_consts
+            in
+            { class_ with c_extends; c_consts }
+          else
+            (* For enums, we could remove everything as they don't extends
+             * other classes, but let's filter anyway, just to be resilient
+             * to future evolutions
+             *)
+            let c_extends =
+              List.filter_map
+                ~f:(fun h ->
+                  if is_generated_builtin_enum h then
+                    (* don't take this occurrence into account *)
+                    None
+                  else
+                    Some h)
+                class_.c_extends
+            in
+            { class_ with c_extends }
+        | _ -> class_
+      in
+      let acc = self#plus acc (super#on_class_ env class_) in
+      class_name := None;
+      acc
 
     method! on_fun_ env fun_ =
       let acc = process_fun_id ~is_declaration:true fun_.Aast.f_name in

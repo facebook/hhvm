@@ -279,6 +279,49 @@ class DoReasoningTest(unittest.TestCase):
         hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
+    def test_type_dependency(self) -> None:
+        # This one covered the 'has_method_with_parameter'.
+        exp = ['class("B")', 'has_method_with_parameter("C","B")', 'interface("C")']
+        rules = ['type("B", "C").' 'symbols("B"; "C").']
+        raw_codegen = hh_codesynthesis.CodeGenerator()
+        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        self.assertListEqual(sorted(str(raw_codegen).split()), exp)
+
+    def test_method_dependency(self) -> None:
+        # This one covered the 'invokes_in_method', as well as the
+        # 'has_method_with_parameter', since we need to pass the object as parameter,
+        # then invoke its method.
+        exp = [
+            'add_method("B","Foo")',
+            'class("C")',
+            'has_method_with_parameter("C","B")',
+            'interface("B")',
+            'invokes_in_method("C","B","Foo")',
+        ]
+        rules = ['method("B", "Foo", "C").' 'symbols("B"; "C").']
+        raw_codegen = hh_codesynthesis.CodeGenerator()
+        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        self.assertListEqual(sorted(str(raw_codegen).split()), exp)
+
+    def test_method_type_extends_dependencies(self) -> None:
+        # This one covered the 'override' in the "Extend" and "Method" edge.
+        exp = [
+            'add_method("B","Foo")',
+            'add_method("C","Foo")',
+            'class("C")',
+            'implements("C","B")',
+            'interface("B")',
+        ]
+        rules = [
+            'extends_to("B", "C").',
+            'method("B", "Foo", "C").',
+            'type("B", "C").',
+            'symbols("B"; "C").',
+        ]
+        raw_codegen = hh_codesynthesis.CodeGenerator()
+        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        self.assertListEqual(sorted(str(raw_codegen).split()), exp)
+
     def test_extends_dependency_with_rule_extraction(self) -> None:
         exp = [
             'class("B")',

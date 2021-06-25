@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<83e8798b7c83b6ea995e13211263b53f>>
+// @generated SignedSource<<c5889324a6fd13dd572d4f8e554bf81e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -92,6 +92,17 @@ impl<'a> Node<'a> for ClassConstFrom<'a> {
         match self {
             ClassConstFrom::Self_ => {}
             ClassConstFrom::From(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
+impl<'a> Node<'a> for ClassConstKind {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_class_const_kind(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassConstKind::CCAbstract(ref __binding_0) => __binding_0.accept(v),
+            ClassConstKind::CCConcrete => {}
         }
     }
 }

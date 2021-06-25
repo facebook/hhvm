@@ -60,36 +60,38 @@ let make_visibility attrs = function
 
 let class_const env (cc : Nast.class_const) =
   let gather_constants = gather_constants#on_expr CCRSet.empty in
-  let { cc_id = name; cc_type = h; cc_expr = e; cc_doc_comment = _ } = cc in
+  let { cc_id = name; cc_type = h; cc_kind = k; cc_doc_comment = _ } = cc in
   let pos = Decl_env.make_decl_pos env (fst name) in
-  let (ty, abstract, scc_refs) =
-    (* Optional hint h, optional expression e *)
-    match (h, e) with
-    | (Some h, Some e) -> (Decl_hint.hint env h, false, gather_constants e)
-    | (Some h, None) -> (Decl_hint.hint env h, true, CCRSet.empty)
-    | (None, Some e) ->
-      let (e_pos, e_) = e in
-      let cc_refs = gather_constants e in
-      begin
-        match Decl_utils.infer_const e_ with
-        | Some tprim ->
-          ( mk
+  let (abstract, scc_refs) =
+    match k with
+    | CCAbstract (Some default) -> (CCAbstract true, gather_constants default)
+    | CCAbstract None -> (CCAbstract false, CCRSet.empty)
+    | CCConcrete e -> (CCConcrete, gather_constants e)
+  in
+  let ty =
+    match h with
+    | Some h -> Decl_hint.hint env h
+    | None ->
+      (* Error recovery for when a type hint is missing on a constant *)
+      (match k with
+      | CCAbstract (Some (e_pos, e_))
+      | CCConcrete (e_pos, e_) ->
+        begin
+          match Decl_utils.infer_const e_ with
+          | Some tprim ->
+            mk
               ( Reason.Rwitness_from_decl (Decl_env.make_decl_pos env e_pos),
-                Tprim tprim ),
-            false,
-            cc_refs )
-        | None ->
-          (* Typing will take care of rejecting constants that have neither
-           * an initializer nor a literal initializer *)
-          ( mk (Reason.Rwitness_from_decl pos, Typing_defs.make_tany ()),
-            false,
-            cc_refs )
-      end
-    | (None, None) ->
-      (* Typing will take care of rejecting constants that have neither
-       * an initializer nor a literal initializer *)
-      let r = Reason.Rwitness_from_decl pos in
-      (mk (r, Typing_defs.make_tany ()), true, CCRSet.empty)
+                Tprim tprim )
+          | None ->
+            (* Typing will take care of rejecting constants that have neither
+             * an initializer nor a literal initializer *)
+            mk (Reason.Rwitness_from_decl pos, Typing_defs.make_tany ())
+        end
+      | CCAbstract None ->
+        (* Typing will take care of rejecting constants that have neither
+         * an initializer nor a literal initializer *)
+        let r = Reason.Rwitness_from_decl pos in
+        mk (r, Typing_defs.make_tany ()))
   in
   (* dropping to list to avoid the memory cost of a set. We don't really
    * need a set once the elements are generated.

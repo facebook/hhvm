@@ -88,7 +88,7 @@ fn emit_constant<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     env: &mut Env<'a, 'arena>,
     constant: &'a tast::Gconst,
 ) -> Result<(HhasConstant<'arena>, Option<HhasFunction<'arena>>)> {
-    let c = hhas_constant::from_ast(e, env, &constant.name, Some(&constant.value))?;
+    let c = hhas_constant::from_ast(e, env, &constant.name, false, Some(&constant.value))?;
     let f = emit_constant_cinit(e, env, constant, &c)?;
     Ok((c, f))
 }

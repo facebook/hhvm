@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5186be69053760a5fa5980b0a9d0491a>>
+// @generated SignedSource<<ae1721d36b6883d50b71549fcdd9b784>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,7 +39,7 @@ pub use typing_defs::ConstDecl;
     ToOcamlRep
 )]
 pub struct ShallowClassConst<'a> {
-    pub abstract_: bool,
+    pub abstract_: typing_defs::ClassConstKind,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: typing_defs::PosId<'a>,
     /// This field is used for two different meanings in two different places...

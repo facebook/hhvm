@@ -28,17 +28,17 @@ pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
     id: &'a tast::Id,
+    is_abstract: bool,
     expr: Option<&tast::Expr>,
 ) -> Result<HhasConstant<'arena>> {
     let alloc = env.arena;
-    let (value, initializer_instrs, is_abstract) = match expr {
-        None => (None, None, true),
+    let (value, initializer_instrs) = match expr {
+        None => (None, None),
         Some(init) => match ast_constant_folder::expr_to_typed_value(alloc, emitter, init) {
-            Ok(v) => (Some(v), None, false),
+            Ok(v) => (Some(v), None),
             Err(_) => (
                 Some(TypedValue::Uninit),
                 Some(emit_expr::emit_expr(emitter, env, init)?),
-                false,
             ),
         },
     };

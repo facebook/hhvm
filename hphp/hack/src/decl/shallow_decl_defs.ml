@@ -157,7 +157,7 @@ end
 [@@ocamlformat "disable"]
 
 type shallow_class_const = {
-  scc_abstract: bool;
+  scc_abstract: Typing_defs.class_const_kind;
   scc_name: Typing_defs.pos_id;
   scc_type: decl_ty;
       (** This field is used for two different meanings in two different places...

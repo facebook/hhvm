@@ -1371,13 +1371,20 @@ and constant_expr env ~in_enum_class e =
   else
     invalid_expr (fst e)
 
+and class_const_kind env ~in_enum_class kind =
+  match kind with
+  | Aast.CCConcrete e -> N.CCConcrete (constant_expr env ~in_enum_class e)
+  | Aast.CCAbstract default ->
+    let default = Option.map default ~f:(constant_expr env ~in_enum_class) in
+    N.CCAbstract default
+
 and class_const env ~in_enum_class cc =
   let h = Option.map cc.Aast.cc_type ~f:(hint env) in
-  let e = Option.map cc.Aast.cc_expr ~f:(constant_expr env ~in_enum_class) in
+  let kind = class_const_kind env ~in_enum_class cc.Aast.cc_kind in
   {
     N.cc_type = h;
     N.cc_id = cc.Aast.cc_id;
-    N.cc_expr = e;
+    N.cc_kind = kind;
     N.cc_doc_comment = cc.Aast.cc_doc_comment;
   }
 

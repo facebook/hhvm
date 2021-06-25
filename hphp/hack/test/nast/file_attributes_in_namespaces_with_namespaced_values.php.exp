@@ -66,7 +66,8 @@
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
        c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false; 
        c_where_constraints = [];
-       c_consts = [{ cc_type = (Some ([9:11-17], (Hprim Tstring))); cc_id = ([9:18-32], "MY_CLASS_CONST"); cc_expr = (Some ([9:35-57], (String "my class const value"))); cc_doc_comment = None }];
+       c_consts =
+       [{ cc_type = (Some ([9:11-17], (Hprim Tstring))); cc_id = ([9:18-32], "MY_CLASS_CONST"); cc_kind = (CCConcrete ([9:35-57], (String "my class const value"))); cc_doc_comment = None }];
        c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = []; 
        c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =

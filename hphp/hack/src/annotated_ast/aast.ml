@@ -870,11 +870,23 @@ and ca_type =
   | CA_hint of hint
   | CA_enum of string list
 
+and ('ex, 'fb, 'en, 'hi) class_const_kind =
+  | CCAbstract of ('ex, 'fb, 'en, 'hi) expr option
+      (** CCAbstract represents the states
+       *    abstract const int X;
+       *    abstract const int Y = 4;
+       * The expr option is a default value
+       *)
+  | CCConcrete of ('ex, 'fb, 'en, 'hi) expr
+      (** CCConcrete represents
+       *    const int Z = 4;
+       * The expr is the value of the constant. It is not optional
+       *)
+
 and ('ex, 'fb, 'en, 'hi) class_const = {
   cc_type: hint option;
   cc_id: sid;
-  cc_expr: ('ex, 'fb, 'en, 'hi) expr option;
-      (** expr = None indicates an abstract const *)
+  cc_kind: ('ex, 'fb, 'en, 'hi) class_const_kind;
   cc_doc_comment: doc_comment option;
 }
 

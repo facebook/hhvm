@@ -442,14 +442,15 @@ let check_const_override
   let check_params = should_check_params parent_class class_ in
   (* Shared preconditons for const_interface_member_not_unique and
      is_bad_interface_const_override *)
+  let ( = ) = Typing_defs.equal_class_const_kind in
   let both_are_non_synthetic_and_concrete =
     (* Synthetic  *)
     (not class_const.cc_synthesized)
     (* The parent we are checking is synthetic, no point in checking *)
     && (not parent_class_const.cc_synthesized)
     (* Only check if parent and child have concrete definitions *)
-    && (not class_const.cc_abstract)
-    && not parent_class_const.cc_abstract
+    && class_const.cc_abstract = CCConcrete
+    && parent_class_const.cc_abstract = CCConcrete
   in
   let const_interface_member_not_unique =
     (* Similar to should_check_member_unique, we check if there are multiple
@@ -477,7 +478,9 @@ let check_const_override
     | Ast_defs.(Cabstract | Cnormal | Ctrait | Cenum) -> false
   in
   let is_abstract_concrete_override =
-    (not parent_class_const.cc_abstract) && class_const.cc_abstract
+    match (parent_class_const.cc_abstract, class_const.cc_abstract) with
+    | (CCConcrete, CCAbstract _) -> true
+    | _ -> false
   in
 
   if check_params then

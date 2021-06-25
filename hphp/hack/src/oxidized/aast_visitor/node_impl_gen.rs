@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<79c80ea902b1146e126f48fe5666371e>>
+// @generated SignedSource<<c9202b11864880065192dec7a3d5eb41>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -288,9 +288,34 @@ impl<P: Params> Node<P> for ClassConst<P::Ex, P::Fb, P::En, P::Hi> {
     ) -> Result<(), P::Error> {
         self.type_.accept(c, v)?;
         self.id.accept(c, v)?;
-        self.expr.accept(c, v)?;
+        self.kind.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
         Ok(())
+    }
+}
+impl<P: Params> Node<P> for ClassConstKind<P::Ex, P::Fb, P::En, P::Hi> {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_class_const_kind(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            ClassConstKind::CCAbstract(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
+            ClassConstKind::CCConcrete(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
+        }
     }
 }
 impl<P: Params> Node<P> for ClassGetExpr<P::Ex, P::Fb, P::En, P::Hi> {

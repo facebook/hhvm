@@ -6723,14 +6723,16 @@ and class_get_inner
           (env, (TUtils.terr env Reason.Rnone, []), dflt_err)
         | Some { cc_type; cc_abstract; cc_pos; _ } ->
           let (env, cc_locl_type) = Phase.localize ~ety_env env cc_type in
-          ( if cc_abstract then
-            match cid_ with
+          (match cc_abstract with
+          | CCAbstract _ ->
+            (match cid_ with
             | CIstatic
             | CIexpr _ ->
               ()
             | _ ->
               let cc_name = Cls.name class_ ^ "::" ^ mid in
-              Errors.abstract_const_usage p cc_pos cc_name );
+              Errors.abstract_const_usage p cc_pos cc_name)
+          | CCConcrete -> ());
           (env, (cc_locl_type, []), dflt_err)
       ) else
         let static_member_opt =

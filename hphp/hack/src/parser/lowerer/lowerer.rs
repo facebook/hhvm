@@ -4236,6 +4236,8 @@ where
         };
         match &node.children {
             ConstDeclaration(c) => {
+                let kinds = Self::p_kinds(&c.modifiers, env)?;
+                let has_abstract = kinds.has(modifier::ABSTRACT);
                 // TODO: make wrap `type_` `doc_comment` by `Rc` in ClassConst to avoid clone
                 let type_ = Self::mp_optional(Self::p_hint, &c.type_specifier, env)?;
                 // ocaml's behavior is that if anything throw, it will
@@ -4246,19 +4248,20 @@ where
                         match &n.children {
                             ConstantDeclarator(c) => {
                                 let id = Self::pos_name(&c.name, e)?;
-                                let expr = if n.is_abstract() {
-                                    None
-                                } else {
-                                    Self::mp_optional(
+                                use aast::ClassConstKind::*;
+                                let kind = if has_abstract {
+                                    CCAbstract(Self::mp_optional(
                                         Self::p_simple_initializer,
                                         &c.initializer,
                                         e,
-                                    )?
+                                    )?)
+                                } else {
+                                    CCConcrete(Self::p_simple_initializer(&c.initializer, e)?)
                                 };
                                 Ok(ast::ClassConst {
                                     type_: type_.clone(),
                                     id,
-                                    expr,
+                                    kind,
                                     doc_comment: doc_comment_opt.clone(),
                                 })
                             }
@@ -5199,7 +5202,7 @@ where
                             Enumerator(c) => Ok(ast::ClassConst {
                                 type_: None,
                                 id: Self::pos_name(&c.name, e)?,
-                                expr: Some(Self::p_expr(&c.value, e)?),
+                                kind: ast::ClassConstKind::CCConcrete(Self::p_expr(&c.value, e)?),
                                 doc_comment: None,
                             }),
                             _ => Self::missing_syntax("enumerator", n, e),
@@ -5346,7 +5349,7 @@ where
                             let class_const = ast::ClassConst {
                                 type_: Some(full_type),
                                 id: name,
-                                expr: Some(initial_value),
+                                kind: ast::ClassConstKind::CCConcrete(initial_value),
                                 doc_comment: None,
                             };
                             enum_class.consts.push(class_const)

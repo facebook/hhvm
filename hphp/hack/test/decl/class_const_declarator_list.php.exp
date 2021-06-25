@@ -8,10 +8,10 @@
        sc_req_implements = []; sc_implements = [];
        sc_support_dynamic_type = false;
        sc_consts =
-       [{ Shallow_decl_defs.scc_abstract = false;
+       [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([5:5-8], "FOO");
           scc_type = (Rhint ([4:9-12]), (Tprim Tint)); scc_refs = [] };
-         { Shallow_decl_defs.scc_abstract = false;
+         { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([6:5-8], "BAR");
            scc_type = (Rhint ([4:9-12]), (Tprim Tint)); scc_refs = [] }
          ];

@@ -1,1 +1,1 @@
-Fatal error: An abstract constant declaration must not have an initializer. in %s/test/slow/class_constant/abstract_const2.php on line 5
+ok

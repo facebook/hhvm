@@ -32,6 +32,7 @@ pub type Case = aast::Case<Ex, Fb, En, Hi>;
 pub type Catch = aast::Catch<Ex, Fb, En, Hi>;
 pub type Class_ = aast::Class_<Ex, Fb, En, Hi>;
 pub type ClassAttr = aast::ClassAttr<Ex, Fb, En, Hi>;
+pub type ClassConstKind = aast::ClassConstKind<Ex, Fb, En, Hi>;
 pub type ClassConst = aast::ClassConst<Ex, Fb, En, Hi>;
 pub type ClassGetExpr = aast::ClassGetExpr<Ex, Fb, En, Hi>;
 pub type ClassId = aast::ClassId<Ex, Fb, En, Hi>;

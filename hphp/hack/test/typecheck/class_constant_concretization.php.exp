@@ -1,0 +1,8 @@
+File "class_constant_concretization.php", line 11, characters 3-13:
+  int
+File "class_constant_concretization.php", line 4, characters 22-26:
+Cannot use unstable feature: `class_const_default` (Parsing[1002])
+File "class_constant_concretization.php", line 12, characters 14-14:
+Cannot reference abstract constant `A::X` directly (Typing[4129])
+  File "class_constant_concretization.php", line 4, characters 22-22:
+  Declaration is here

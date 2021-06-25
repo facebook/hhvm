@@ -2066,10 +2066,10 @@ let handle_mode
       | None -> ()
       | Some cc ->
         let abstract =
-          if cc.Typing_defs.cc_abstract then
-            "abstract "
-          else
-            ""
+          Typing_defs.(
+            match cc.cc_abstract with
+            | CCAbstract _ -> "abstract "
+            | CCConcrete -> "")
         in
         let origin = cc.Typing_defs.cc_origin in
         let from =

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<23c42abe3f29b122762a2cea1e2c1adc>>
+// @generated SignedSource<<01966d6e4693239d19fbf2f4e08fbd50>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1853,6 +1853,43 @@ arena_deserializer::impl_deserialize_in_arena!(CaType<'arena>);
 
 #[derive(
     Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, Fb: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>, Hi: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+pub enum ClassConstKind<'a, Ex, Fb, En, Hi> {
+    /// CCAbstract represents the states
+    ///    abstract const int X;
+    ///    abstract const int Y = 4;
+    /// The expr option is a default value
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    CCAbstract(Option<&'a Expr<'a, Ex, Fb, En, Hi>>),
+    /// CCConcrete represents
+    ///    const int Z = 4;
+    /// The expr is the value of the constant. It is not optional
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    CCConcrete(&'a Expr<'a, Ex, Fb, En, Hi>),
+}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for ClassConstKind<'a, Ex, Fb, En, Hi>
+{
+}
+arena_deserializer::impl_deserialize_in_arena!(ClassConstKind<'arena, Ex, Fb, En, Hi>);
+
+#[derive(
+    Clone,
     Debug,
     Deserialize,
     Eq,
@@ -1873,9 +1910,8 @@ pub struct ClassConst<'a, Ex, Fb, En, Hi> {
     pub type_: Option<&'a Hint<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub id: Sid<'a>,
-    /// expr = None indicates an abstract const
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub expr: Option<&'a Expr<'a, Ex, Fb, En, Hi>>,
+    pub kind: ClassConstKind<'a, Ex, Fb, En, Hi>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub doc_comment: Option<&'a DocComment<'a>>,
 }

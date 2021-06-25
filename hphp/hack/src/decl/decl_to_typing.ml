@@ -140,13 +140,20 @@ let shallow_prop_to_telt child_class mname mro subst prop : tagged_elt =
   }
 
 let shallow_const_to_class_const child_class mro subst const =
-  let { scc_abstract = cc_abstract; scc_name; scc_type; scc_refs } = const in
+  let { scc_abstract; scc_name; scc_type; scc_refs } = const in
   let ty =
     let ty = scc_type in
     if String.equal child_class mro.mro_name then
       ty
     else
       Decl_instantiate.instantiate subst ty
+  in
+  let cc_abstract =
+    match scc_abstract with
+    | CCAbstract true
+      when not (is_set mro_passthrough_abstract_typeconst mro.mro_flags) ->
+      CCConcrete
+    | _ -> scc_abstract
   in
   ( snd scc_name,
     {
@@ -169,7 +176,7 @@ let classname_const : Typing_defs.pos_id -> string * Typing_defs.class_const =
   in
   ( SN.Members.mClass,
     {
-      cc_abstract = false;
+      cc_abstract = CCConcrete;
       cc_pos = pos;
       cc_synthesized = true;
       cc_type = classname_ty;
@@ -194,11 +201,12 @@ let typeconst_structure mro class_name stc =
     match stc.stc_kind with
     | TCAbstract { atc_default = Some _; _ }
       when not (is_set mro_passthrough_abstract_typeconst mro.mro_flags) ->
-      false
-    | TCAbstract _ -> true
+      CCConcrete
+    | TCAbstract { atc_default = default; _ } ->
+      CCAbstract (Option.is_some default)
     | TCPartiallyAbstract _
     | TCConcrete _ ->
-      false
+      CCConcrete
   in
   ( snd stc.stc_name,
     {

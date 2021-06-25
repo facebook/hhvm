@@ -9,6 +9,7 @@ aast::AssertExpr
 aast::Case
 aast::CaType
 aast::ClassAttr
+aast::ClassConstKind
 aast::ClassGetExpr
 aast::ClassId_
 aast::ClassTypeconst
@@ -144,6 +145,7 @@ typing_defs_flags::FunParamFlags
 typing_defs_flags::FunTypeFlags
 typing_defs::CeVisibility
 typing_defs::ClassConstFrom
+typing_defs::ClassConstKind
 typing_defs::ClassConstRef
 typing_defs::CollectionStyle
 typing_defs::ConsistentKind

@@ -117,7 +117,8 @@ let add_const name const acc =
          In this case, Child still doesn't have a value for the FOO
          constant. *)
       acc
-    | (_, _, true, false) ->
+    | (_, _, CCAbstract false, CCAbstract true)
+    | (_, _, CCAbstract _, CCConcrete) ->
       (* Don't replace a concrete constant with an abstract constant
            found later in the MRO.*)
       acc

@@ -327,9 +327,15 @@ and class_is_abstract (c : Shallow_decl_defs.shallow_class) : bool =
     true
   | _ -> false
 
+and synthesize_const_defaults c =
+  let open Typing_defs in
+  match c.cc_abstract with
+  | CCAbstract true -> { c with cc_abstract = CCConcrete }
+  | _ -> c
+
 (* When all type constants have been inherited and declared, this step synthesizes
  * the defaults of abstract type constants into concrete type constants. *)
-and synthesize_defaults
+and synthesize_typeconst_defaults
     (k : string)
     (tc : Typing_defs.typeconst_type)
     ((typeconsts, consts) :
@@ -349,7 +355,7 @@ and synthesize_defaults
     let constant = SMap.find_opt k consts in
     let consts =
       Option.value_map constant ~default:consts ~f:(fun c ->
-          SMap.add k { c with cc_abstract = false } consts)
+          SMap.add k { c with cc_abstract = CCConcrete } consts)
     in
     (typeconsts, consts)
   | _ -> (typeconsts, consts)
@@ -392,7 +398,8 @@ and class_decl
   in
   let (typeconsts, consts) =
     if Ast_defs.(equal_class_kind c.sc_kind Cnormal) then
-      SMap.fold synthesize_defaults typeconsts (typeconsts, consts)
+      let consts = SMap.map synthesize_const_defaults consts in
+      SMap.fold synthesize_typeconst_defaults typeconsts (typeconsts, consts)
     else
       (typeconsts, consts)
   in
@@ -681,7 +688,7 @@ and class_class_decl (class_id : Typing_defs.pos_id) : Typing_defs.class_const =
     mk (reason, Tapply ((pos, SN.Classes.cClassname), [mk (reason, Tthis)]))
   in
   {
-    cc_abstract = false;
+    cc_abstract = CCConcrete;
     cc_pos = pos;
     cc_synthesized = true;
     cc_type = classname_ty;
@@ -793,8 +800,9 @@ and typeconst_structure
   in
   let abstract =
     match stc.stc_kind with
-    | TCAbstract _ -> true
-    | _ -> false
+    | TCAbstract { atc_default = default; _ } ->
+      CCAbstract (Option.is_some default)
+    | _ -> CCConcrete
   in
   {
     cc_abstract = abstract;

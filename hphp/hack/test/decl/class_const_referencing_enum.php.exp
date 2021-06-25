@@ -13,11 +13,11 @@
        sc_req_extends = []; sc_req_implements = []; sc_implements = [];
        sc_support_dynamic_type = false;
        sc_consts =
-       [{ Shallow_decl_defs.scc_abstract = false;
+       [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([4:3-6], "FOO");
           scc_type = (Rwitness_from_decl ([4:9-14]), (Tprim Tstring));
           scc_refs = [] };
-         { Shallow_decl_defs.scc_abstract = false;
+         { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([5:3-6], "BAR");
            scc_type = (Rwitness_from_decl ([5:9-14]), (Tprim Tstring));
            scc_refs = [] }
@@ -41,7 +41,7 @@
         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
         sc_support_dynamic_type = false;
         sc_consts =
-        [{ Shallow_decl_defs.scc_abstract = false;
+        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([10:28-39], "WORD_VALUES");
            scc_type =
            (Rhint ([10:9-27]),

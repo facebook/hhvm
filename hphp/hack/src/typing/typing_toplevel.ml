@@ -1215,9 +1215,11 @@ let check_extend_abstract_typeconst ~is_final p seq =
 
 let check_extend_abstract_const ~is_final p seq =
   List.iter seq ~f:(fun (x, cc) ->
-      if cc.cc_abstract && not cc.cc_synthesized then
+      match cc.cc_abstract with
+      | CCAbstract _ when not cc.cc_synthesized ->
         let cc_pos = get_pos cc.cc_type in
-        Errors.implement_abstract ~is_final p cc_pos "constant" x)
+        Errors.implement_abstract ~is_final p cc_pos "constant" x
+      | _ -> ())
 
 exception Found of Pos_or_decl.t
 
@@ -1419,14 +1421,15 @@ let is_literal_expr e =
   | _ -> false
 
 let class_const_def ~in_enum_class c env cc =
-  let { cc_type = h; cc_id = id; cc_expr = e; _ } = cc in
-  let (env, ty, opt_expected) =
+  let { cc_type = h; cc_id = id; cc_kind = k; _ } = cc in
+  let (env, hint_ty, opt_expected) =
     match h with
     | None ->
       begin
-        match e with
-        | None -> ()
-        | Some e ->
+        match k with
+        | CCAbstract None -> ()
+        | CCAbstract (Some e (* default *))
+        | CCConcrete e ->
           if
             (not (is_literal_expr e))
             && Partial.should_check_error c.c_mode 2035
@@ -1460,60 +1463,66 @@ let class_const_def ~in_enum_class c env cc =
         Some (ExpectedTy.make_and_allow_coercion (fst id) Reason.URhint opt_ty)
       )
   in
-  let (env, eopt, ty) =
-    match e with
-    | Some ((e_pos, _) as e) ->
+  let check env ty' =
+    (* Lifted out to closure to illustrate which variables are captured *)
+    Typing_coercion.coerce_type
+      (fst id)
+      Reason.URhint
+      env
+      ty'
+      hint_ty
+      Errors.class_constant_value_does_not_match_hint
+  in
+  let type_and_check env e =
+    let (env, (te, ty')) =
+      Typing.(
+        expr_with_pure_coeffects ?expected:opt_expected env e |> triple_to_pair)
+    in
+    let env = check env ty' in
+    (env, te, ty')
+  in
+  let (env, kind, ty) =
+    match k with
+    | CCConcrete ((e_pos, _) as e) when in_enum_class ->
       let (env, cap, unsafe_cap) =
-        if in_enum_class then
-          (* Enum class constant initializers are restricted to be `write_props` *)
-          let make_hint pos s = (pos, Aast.Happly ((pos, s), [])) in
-          let enum_class_ctx =
-            Some (e_pos, [make_hint e_pos SN.Capabilities.writeProperty])
-          in
-          Typing.type_capability env enum_class_ctx enum_class_ctx e_pos
-        else
-          let pure = MakeType.mixed (Reason.Rwitness e_pos) in
-          (env, pure, pure)
+        (* Enum class constant initializers are restricted to be `write_props` *)
+        let make_hint pos s = (pos, Aast.Happly ((pos, s), [])) in
+        let enum_class_ctx =
+          Some (e_pos, [make_hint e_pos SN.Capabilities.writeProperty])
+        in
+        Typing.type_capability env enum_class_ctx enum_class_ctx e_pos
       in
       let (env, (te, ty')) =
         Typing.(
           with_special_coeffects env cap unsafe_cap @@ fun env ->
           expr env ?expected:opt_expected e |> triple_to_pair)
       in
-      (* If we are checking an enum class, wrap ty' into the right
-       * HH\MemberOf<class name, ty'> alias
-       *)
       let (te, ty') =
-        if in_enum_class then
-          match deref ty.et_type with
-          | (r, Tnewtype (memberof, [enum_name; _], _))
-            when String.equal memberof SN.Classes.cMemberOf ->
-            let lift r ty = mk (r, Tnewtype (memberof, [enum_name; ty], ty)) in
-            let ((p, te_ty), te) = te in
-            let te = ((p, lift (get_reason te_ty) te_ty), te) in
-            let ty' = lift r ty' in
-            (te, ty')
-          | _ -> (te, ty')
-        else
+        match deref hint_ty.et_type with
+        | (r, Tnewtype (memberof, [enum_name; _], _))
+          when String.equal memberof SN.Classes.cMemberOf ->
+          let lift r ty = mk (r, Tnewtype (memberof, [enum_name; ty], ty)) in
+          let ((p, te_ty), te) = te in
+          let te = ((p, lift (get_reason te_ty) te_ty), te) in
+          let ty' = lift r ty' in
           (te, ty')
+        | _ -> (te, ty')
       in
-      let env =
-        Typing_coercion.coerce_type
-          (fst id)
-          Reason.URhint
-          env
-          ty'
-          ty
-          Errors.class_constant_value_does_not_match_hint
-      in
-      (env, Some te, ty')
-    | None -> (env, None, ty.et_type)
+      let env = check env ty' in
+      (env, Aast.CCConcrete te, ty')
+    | CCConcrete e ->
+      let (env, te, ty') = type_and_check env e in
+      (env, Aast.CCConcrete te, ty')
+    | CCAbstract (Some default) ->
+      let (env, tdefault, ty') = type_and_check env default in
+      (env, CCAbstract (Some tdefault), ty')
+    | CCAbstract None -> (env, CCAbstract None, hint_ty.et_type)
   in
   ( env,
     ( {
         Aast.cc_type = cc.cc_type;
         Aast.cc_id = cc.cc_id;
-        Aast.cc_expr = eopt;
+        Aast.cc_kind = kind;
         Aast.cc_doc_comment = cc.cc_doc_comment;
       },
       ty ) )

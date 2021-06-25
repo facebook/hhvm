@@ -1687,8 +1687,8 @@ bool build_class_constants(ClassInfo* cinfo, ClsPreResolveUpdates& updates) {
       // Need this check otherwise constants from traits that conflict with
       // declared interfaces will silently lose and not conflict in the runtime
       // Type and Context constants can be overriden.
-      if (cns->kind != ConstModifiers::Kind::Type &&
-          cns->kind != ConstModifiers::Kind::Context &&
+      if (cns->kind == ConstModifiers::Kind::Value &&
+          !existing->isAbstract &&
           existing->cls->attrs & AttrInterface &&
           !(cns->cls->attrs & AttrInterface && fromTrait)) {
         for (auto const& interface : cinfo->declInterfaces) {

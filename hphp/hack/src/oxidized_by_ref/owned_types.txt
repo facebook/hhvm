@@ -28,6 +28,7 @@ typing_defs_core::XhpAttr
 typing_defs_core::XhpAttrTag
 typing_defs_flags::FunParamFlags
 typing_defs_flags::FunTypeFlags
+typing_defs::ClassConstKind
 typing_defs::CollectionStyle
 typing_defs::ConsistentKind
 typing_defs::DestructureKind

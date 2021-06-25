@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f6a6884bfaf1b95983f52d523dcbda2d>>
+// @generated SignedSource<<7f3ef06725b91a26a71826c5079f644c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -288,9 +288,34 @@ impl<P: Params> NodeMut<P> for ClassConst<P::Ex, P::Fb, P::En, P::Hi> {
     ) -> Result<(), P::Error> {
         self.type_.accept(c, v)?;
         self.id.accept(c, v)?;
-        self.expr.accept(c, v)?;
+        self.kind.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
         Ok(())
+    }
+}
+impl<P: Params> NodeMut<P> for ClassConstKind<P::Ex, P::Fb, P::En, P::Hi> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_class_const_kind(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            ClassConstKind::CCAbstract(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
+            ClassConstKind::CCConcrete(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
+        }
     }
 }
 impl<P: Params> NodeMut<P> for ClassGetExpr<P::Ex, P::Fb, P::En, P::Hi> {

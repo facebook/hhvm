@@ -284,10 +284,17 @@ fn from_class_elt_constants<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     env: &Env<'a, 'arena>,
     class_: &'a tast::Class_,
 ) -> Result<Vec<HhasConstant<'arena>>> {
+    use oxidized::aast::ClassConstKind::*;
     class_
         .consts
         .iter()
-        .map(|x| hhas_constant::from_ast(emitter, env, &x.id, x.expr.as_ref()))
+        .map(|x| {
+            let (is_abstract, init_opt) = match &x.kind {
+                CCAbstract(default) => (true, default.as_ref()),
+                CCConcrete(expr) => (false, Some(expr)),
+            };
+            hhas_constant::from_ast(emitter, env, &x.id, is_abstract, init_opt)
+        })
         .collect()
 }
 

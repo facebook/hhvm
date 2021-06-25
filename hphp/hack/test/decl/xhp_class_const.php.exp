@@ -8,7 +8,7 @@
        sc_req_implements = []; sc_implements = [];
        sc_support_dynamic_type = false;
        sc_consts =
-       [{ Shallow_decl_defs.scc_abstract = false;
+       [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([4:13-14], "X");
           scc_type = (Rhint ([4:9-12]), (Tprim Tint)); scc_refs = [] }
          ];

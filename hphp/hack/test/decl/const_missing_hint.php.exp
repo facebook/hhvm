@@ -41,7 +41,7 @@
         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
         sc_support_dynamic_type = false;
         sc_consts =
-        [{ Shallow_decl_defs.scc_abstract = false;
+        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([14:3-12], "FromConst");
            scc_type = (Rwitness_from_decl ([14:3-12]), Tany); scc_refs = [] }
           ];

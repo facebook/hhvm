@@ -315,19 +315,20 @@ let make_consts_cache class_name lin =
   let get_single_seq target =
     lin (SingleMember target) |> Sequence.map ~f:snd
   in
+  let ( = ) = Typing_defs.equal_class_const_kind in
   LSTable.make
     (lin AllMembers)
     ~get_single_seq
     ~is_canonical:(fun cc ->
-      String.equal cc.cc_origin class_name || not cc.cc_abstract)
+      String.equal cc.cc_origin class_name || cc.cc_abstract = CCConcrete)
     ~merge:
       begin
         fun ~earlier ~later ->
         if String.equal earlier.cc_origin class_name then
           earlier
-        else if not earlier.cc_abstract then
+        else if earlier.cc_abstract = CCConcrete then
           earlier
-        else if not later.cc_abstract then
+        else if later.cc_abstract = CCConcrete then
           later
         else
           earlier

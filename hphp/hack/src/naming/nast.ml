@@ -1170,9 +1170,10 @@ module Visitor_DEPRECATED = struct
         in
         let acc = this#on_id acc c_const.cc_id in
         let acc =
-          match c_const.cc_expr with
-          | Some e -> this#on_expr acc e
-          | None -> acc
+          match c_const.cc_kind with
+          | CCConcrete e -> this#on_expr acc e
+          | CCAbstract (Some default) -> this#on_expr acc default
+          | CCAbstract None -> acc
         in
         acc
 

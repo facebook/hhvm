@@ -304,8 +304,6 @@ pub const error2049: Error =
     Cow::Borrowed("A namespace `use` clause may not specify the kind here.");
 pub const error2050: Error =
     Cow::Borrowed("A concrete constant declaration must have an initializer.");
-pub const error2051: Error =
-    Cow::Borrowed("An abstract constant declaration must not have an initializer.");
 pub const error2052: Error = Cow::Borrowed(concat!(
     "Cannot mix bracketed namespace declarations with ",
     "unbracketed namespace declarations"

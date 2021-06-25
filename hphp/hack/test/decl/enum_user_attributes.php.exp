@@ -13,10 +13,12 @@
        sc_req_extends = []; sc_req_implements = []; sc_implements = [];
        sc_support_dynamic_type = false;
        sc_consts =
-       [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([5:3-4], "A");
+       [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+          scc_name = ([5:3-4], "A");
           scc_type = (Rwitness_from_decl ([5:7-10]), (Tprim Tstring));
           scc_refs = [] };
-         { Shallow_decl_defs.scc_abstract = false; scc_name = ([6:3-4], "B");
+         { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+           scc_name = ([6:3-4], "B");
            scc_type = (Rwitness_from_decl ([6:7-10]), (Tprim Tstring));
            scc_refs = [] }
          ];

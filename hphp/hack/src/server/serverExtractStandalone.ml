@@ -2219,20 +2219,24 @@ end = struct
       let pos = Target.pos ctx tgt in
       EltTargetMethod (Pos.line pos, Target.source_text ctx tgt)
 
-    let mk_const ctx Aast.{ cc_id = (pos, name); cc_expr; cc_type; _ } =
+    let mk_const ctx Aast.{ cc_id = (pos, name); cc_kind; cc_type; _ } =
+      let open Aast in
       let is_abstract =
-        Option.value_map ~default:true ~f:Fn.(const false) cc_expr
+        match cc_kind with
+        | CCAbstract _ -> true
+        | CCConcrete _ -> false
       in
       let (type_, init_val) =
-        match (cc_type, cc_expr) with
+        match (cc_type, cc_kind) with
         | (Some hint, _) -> (Some hint, Some (init_value ctx hint))
-        | (_, Some (e_pos, e_)) ->
+        | (_, CCAbstract (Some (e_pos, e_)))
+        | (_, CCConcrete (e_pos, e_)) ->
           (match Decl_utils.infer_const e_ with
           | Some tprim ->
             let hint = (e_pos, Aast.Hprim tprim) in
             (None, Some (init_value ctx hint))
           | None -> raise Unsupported)
-        | (None, None) -> (None, None)
+        | (None, CCAbstract None) -> (None, None)
       in
       let line = Pos.line pos in
       EltConst { name; line; is_abstract; type_; init_val }

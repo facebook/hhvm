@@ -58,7 +58,9 @@ let diff_const (c1 : shallow_class_const) c2 : member_change option =
   let c2 = Decl_pos_utils.NormalizeSig.shallow_class_const c2 in
   if equal_shallow_class_const c1 c2 then
     None
-  else if Bool.( <> ) c1.scc_abstract c2.scc_abstract then
+  else if
+    not (Typing_defs.equal_class_const_kind c1.scc_abstract c2.scc_abstract)
+  then
     Some Changed_inheritance
   else
     Some Modified

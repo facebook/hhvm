@@ -67,9 +67,14 @@ type fun_elt = {
 }
 [@@deriving show]
 
+type class_const_kind =
+  | CCAbstract of bool (* has default *)
+  | CCConcrete
+[@@deriving eq, show]
+
 type class_const = {
   cc_synthesized: bool;
-  cc_abstract: bool;
+  cc_abstract: class_const_kind;
   cc_pos: Pos_or_decl.t;
   cc_type: decl_ty;
   cc_origin: string;

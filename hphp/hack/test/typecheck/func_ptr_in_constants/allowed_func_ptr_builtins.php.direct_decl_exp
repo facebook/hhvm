@@ -76,7 +76,7 @@
          sc_req_implements = []; sc_implements = [];
          sc_support_dynamic_type = false;
          sc_consts =
-         [{ Shallow_decl_defs.scc_abstract = false;
+         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
             scc_name = ([17:9-18], "const_arr");
 -           scc_type = (Rwitness_from_decl ([17:9-18]), Tany); scc_refs = [] }
 +           scc_type = (Rwitness_from_decl ([17:9-18]), Tany);

@@ -64,11 +64,13 @@ enum BinopAllowsAwaitInPositions {
     BinopAllowAwaitNone,
 }
 
-#[allow(dead_code)] // Preview is currently unused
+#[allow(dead_code)] // Deprecated is currently unused
 #[derive(Eq, PartialEq)]
 enum FeatureStatus {
     Unstable,
     Preview,
+    Migration,
+    Deprecated,
     // TODO: add other modes like "Advanced" or "Deprecated" if necessary.
     // Those are just variants of "Preview" for the runtime's sake, though,
     // and likely only need to be distinguished in the lint rule rather than here
@@ -96,6 +98,7 @@ enum UnstableFeatures {
     Readonly,
     Modules,
     ContextAliasDeclaration,
+    ClassConstDefault,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -111,6 +114,7 @@ impl UnstableFeatures {
             UnstableFeatures::Readonly => Preview,
             UnstableFeatures::Modules => Unstable,
             UnstableFeatures::ContextAliasDeclaration => Unstable,
+            UnstableFeatures::ClassConstDefault => Migration,
         }
     }
 }
@@ -4487,12 +4491,9 @@ where
 
     fn const_decl_errors(&mut self, node: S<'a, Token, Value>) {
         if let ConstantDeclarator(cd) = &node.children {
-            self.produce_error(
-                |self_, x| self_.constant_abstract_with_initializer(x),
-                &cd.initializer,
-                || errors::error2051,
-                &cd.initializer,
-            );
+            if self.constant_abstract_with_initializer(&cd.initializer) {
+                self.check_can_use_feature(node, &UnstableFeatures::ClassConstDefault);
+            }
 
             self.produce_error(
                 |self_, x| self_.constant_concrete_without_initializer(x),

@@ -1,4 +1,4 @@
 (5,3)-(5,49) An `abstract` property must not have an initializer.
-(6,24)-(6,27) An abstract constant declaration must not have an initializer.
+(6,22)-(6,27) Cannot use unstable feature: `class_const_default`
 (9,3)-(9,36) A `const static` property must have an initializer.
 (10,14)-(10,14) A concrete constant declaration must have an initializer.

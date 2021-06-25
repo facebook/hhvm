@@ -237,9 +237,10 @@ let add_property_defn_fact ctx source_map prop decl_id progress =
 let add_class_const_defn_fact ctx source_map const decl_id progress =
   let base_fields = [("declaration", build_id_json decl_id)] in
   let json_fields =
-    match const.cc_expr with
-    | None -> base_fields
-    | Some ((expr_pos, _), _) ->
+    match const.cc_kind with
+    | CCAbstract None -> base_fields
+    | CCAbstract (Some ((expr_pos, _), _))
+    | CCConcrete ((expr_pos, _), _) ->
       let fp = Relative_path.to_absolute (Pos.filename expr_pos) in
       let value =
         match SMap.find_opt fp source_map with

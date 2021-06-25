@@ -40,11 +40,11 @@ use oxidized_by_ref::{
     shape_map::ShapeField,
     t_shape_map::TShapeField,
     typing_defs::{
-        self, AbstractTypeconst, Capability::*, ConcreteTypeconst, ConstDecl, Enforcement,
-        EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType, IfcFunDecl,
-        ParamMode, PartiallyAbstractTypeconst, PosByteString, PosId, PosString, PossiblyEnforcedTy,
-        RecordFieldReq, ShapeFieldType, ShapeKind, TaccessType, Tparam, TshapeFieldName, Ty, Ty_,
-        Typeconst, TypedefType, WhereConstraint, XhpAttrTag,
+        self, AbstractTypeconst, Capability::*, ClassConstKind, ConcreteTypeconst, ConstDecl,
+        Enforcement, EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType,
+        IfcFunDecl, ParamMode, PartiallyAbstractTypeconst, PosByteString, PosId, PosString,
+        PossiblyEnforcedTy, RecordFieldReq, ShapeFieldType, ShapeKind, TaccessType, Tparam,
+        TshapeFieldName, Ty, Ty_, Typeconst, TypedefType, WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -3324,13 +3324,18 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     self.alloc(self.slice(consts.iter().filter_map(|cst| match cst {
                         Node::ConstInitializer(&(name, initializer, refs)) => {
                             let id = name.as_id()?;
+                            let modifiers = read_member_modifiers(modifiers.iter());
+                            let abstract_ = if modifiers.is_abstract {
+                                ClassConstKind::CCAbstract(!initializer.is_ignored())
+                            } else {
+                                ClassConstKind::CCConcrete
+                            };
                             let ty = ty
                                 .or_else(|| self.infer_const(name, initializer))
                                 .unwrap_or_else(|| tany());
-                            let modifiers = read_member_modifiers(modifiers.iter());
                             Some(Node::Const(self.alloc(
                                 shallow_decl_defs::ShallowClassConst {
-                                    abstract_: modifiers.is_abstract,
+                                    abstract_,
                                     name: id.into(),
                                     type_: ty,
                                     refs,
@@ -4197,7 +4202,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
         Node::Const(
             self.alloc(ShallowClassConst {
-                abstract_: false,
+                abstract_: ClassConstKind::CCConcrete,
                 name: id.into(),
                 type_: self
                     .infer_const(name, value)
@@ -4345,7 +4350,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         )));
         let type_ = self.alloc(Ty(self.alloc(Reason::hint(pos)), type_));
         Node::Const(self.alloc(ShallowClassConst {
-            abstract_: false,
+            abstract_: ClassConstKind::CCConcrete,
             name: name.into(),
             type_,
             refs,

@@ -60,6 +60,7 @@ HPHP::jit::mcgen::(anonymous namespace)::s_bumpers
 HPHP::jit::tl_debuggerCatches
 HPHP::jit::VMProtect::is_protected
 HPHP::rds::(anonymous namespace)::s_hasFullInit
+HPHP::rds::(anonymous namespace)::s_settingPreAssignments
 HPHP::rds::local::detail::rl_hotSection
 HPHP::rds::tl_base
 HPHP::Intl::s_lctranslit

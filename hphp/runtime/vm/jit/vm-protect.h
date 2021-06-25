@@ -36,6 +36,7 @@ struct VMProtect {
 #ifndef NDEBUG
     Pause();
     ~Pause();
+    bool m_active = true;
 #else
     Pause() {}
 #endif

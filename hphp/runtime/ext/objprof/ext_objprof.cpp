@@ -172,10 +172,10 @@ bool isObjprofRoot(
   if ((flags & ObjprofFlags::USER_TYPES_ONLY) != 0) {
     if (cls_name.compare(0, 3, "HH\\") == 0) return false;
   }
-  if (SSWH::NullHandle.bound() && SSWH::NullHandle.isInit()) {
-    if (obj == SSWH::NullHandle->get())  return false;
-    if (obj == SSWH::TrueHandle->get())  return false;
-    if (obj == SSWH::FalseHandle->get()) return false;
+  if (SSWH::NullHandle.bound() && SSWH::NullHandle.isInitNoProfile()) {
+    if (obj == SSWH::NullHandle.getNoProfile()->get())  return false;
+    if (obj == SSWH::TrueHandle.getNoProfile()->get())  return false;
+    if (obj == SSWH::FalseHandle.getNoProfile()->get()) return false;
   }
   return true;
 }

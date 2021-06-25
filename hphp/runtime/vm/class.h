@@ -934,7 +934,6 @@ public:
    */
   rds::Handle sPropHandle(Slot index) const;
   rds::Link<StaticPropData, rds::Mode::NonNormal> sPropLink(Slot index) const;
-  rds::Link<bool, rds::Mode::NonLocal> sPropInitLink() const;
 
   /*
    * Get the PropInitVec for the current request.
@@ -1465,6 +1464,8 @@ private:
      * methods are present.
      */
     rds::Handle* m_handles{nullptr};
+
+    VMCompactVector<std::pair<rds::Symbol, rds::Handle>> m_symbols;
   };
 
   struct ExtraData {

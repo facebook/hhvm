@@ -245,6 +245,7 @@ void initObjProps(IRGS& env, const Class* cls, SSATmp* obj) {
 void initSProps(IRGS& env, const Class* cls) {
   cls->initSPropHandles();
   if (rds::isPersistentHandle(cls->sPropInitHandle())) return;
+
   ifThen(
     env,
     [&] (Block* taken) {

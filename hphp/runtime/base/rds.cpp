@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -92,12 +93,36 @@ struct RevLinkEntry {
 using RevLinkTable = std::map<Handle,RevLinkEntry>;
 RevLinkTable s_handleTable;
 
+struct ProfilingMeta {
+  Handle countHandle;
+  Symbol symbol;
+  Mode mode;
+  size_t size;
+  size_t alignment;
+};
+folly_concurrent_hash_map_simd<Handle, ProfilingMeta> s_profiling;
+
+struct PreAssignment {
+  PreAssignment(size_t size, size_t alignment, Handle handle)
+    : size{size}, alignment{alignment}, handle{handle} {}
+  size_t size;
+  size_t alignment;
+  std::atomic<Handle> handle;
+};
+using PreAssignmentMap =
+  hphp_fast_map<std::string, std::unique_ptr<PreAssignment>>;
+PreAssignmentMap s_persistent_preassign;
+PreAssignmentMap s_local_preassign;
+PreAssignmentMap s_normal_preassign;
+
+__thread bool s_settingPreAssignments{false};
+
 __thread std::atomic<bool> s_hasFullInit{false};
 
-struct StoreRevLink : boost::static_visitor<bool> {
-  bool operator()(Profile) const { return false; }
+struct IsProfile : boost::static_visitor<bool> {
+  bool operator()(Profile) const { return true; }
   template<typename T>
-  bool operator()(T) const { return true; }
+  bool operator()(T) const { return false; }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -116,6 +141,13 @@ FreeLists s_persistent_free_lists;
 // Allocate 2M from low memory each time.
 constexpr size_t kPersistentChunkSize = 1u << 20;
 #endif
+
+//////////////////////////////////////////////////////////////////////
+
+std::string profilingKeyForSymbol(const Symbol& s) {
+  return symbol_kind(s) + "->" + symbol_rep(s);
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -237,53 +269,77 @@ NEVER_INLINE void addNewPersistentChunk(size_t size) {
 }
 
 Handle alloc(Mode mode, size_t numBytes,
-             size_t align, type_scan::Index tyIndex) {
+             size_t align, type_scan::Index tyIndex,
+             const Symbol* symbol) {
+  // If the symbol has been pre-assigned an offset, use it. Once
+  // claimed, it cannot be claimed again (this deals with potential
+  // symbol clashes).
+  auto const claimPreAssign = [&] (const PreAssignmentMap& map) {
+    if (!symbol) return kUninitHandle;
+    auto const it = map.find(profilingKeyForSymbol(*symbol));
+    if (it == map.end()) return kUninitHandle;
+    if (it->second->handle.load() == kUninitHandle) return kUninitHandle;
+    if (it->second->size != numBytes) return kUninitHandle;
+    if (it->second->alignment != align) return kUninitHandle;
+    while (true) {
+      auto h = it->second->handle.load();
+      if (h == kUninitHandle) return kUninitHandle;
+      if (it->second->handle.compare_exchange_weak(h, kUninitHandle)) {
+        return h;
+      }
+    }
+  };
+
   assertx(align <= 16);
   switch (mode) {
     case Mode::Normal: {
-      align = folly::nextPowTwo(std::max(align, alignof(GenNumber)));
-      auto const prefix = roundUp(sizeof(GenNumber), align);
-      auto const adjBytes = numBytes + prefix;
-      always_assert(align <= adjBytes);
+      auto handle = claimPreAssign(s_normal_preassign);
+      if (handle == kUninitHandle) {
+        align = folly::nextPowTwo(std::max(align, alignof(GenNumber)));
+        auto const prefix = roundUp(sizeof(GenNumber), align);
+        auto const adjBytes = numBytes + prefix;
+        always_assert(align <= adjBytes);
 
-      if (auto free = findFreeBlock(s_normal_free_lists, adjBytes, align)) {
-        auto const begin = *free;
-        addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
-        auto const handle = begin + prefix;
-        if (type_scan::hasScanner(tyIndex)) {
-          assertx(s_normal_alloc_descs_size.load(std::memory_order_acquire) ==
-                  s_normal_alloc_descs.size());
-          s_normal_alloc_descs.push_back(
-            AllocDescriptor{Handle(handle), uint32_t(numBytes), tyIndex}
-          );
-          s_normal_alloc_descs_size.fetch_add(1, std::memory_order_acq_rel);
+        if (auto free = findFreeBlock(s_normal_free_lists, adjBytes, align)) {
+          auto const begin = *free;
+          addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
+          auto const handle = begin + prefix;
+          if (type_scan::hasScanner(tyIndex)) {
+            assertx(s_normal_alloc_descs_size.load(std::memory_order_acquire) ==
+                    s_normal_alloc_descs.size());
+            s_normal_alloc_descs.push_back(
+              AllocDescriptor{Handle(handle), uint32_t(numBytes), tyIndex}
+            );
+            s_normal_alloc_descs_size.fetch_add(1, std::memory_order_acq_rel);
+          }
+          return handle;
         }
-        return handle;
-      }
 
-      auto const oldFrontier = s_normal_frontier;
-      s_normal_frontier = roundUp(s_normal_frontier, align);
+        auto const oldFrontier = s_normal_frontier;
+        s_normal_frontier = roundUp(s_normal_frontier, align);
 
-      addFreeBlock(s_normal_free_lists, oldFrontier,
-                   s_normal_frontier - oldFrontier);
-      s_normal_frontier += adjBytes;
-      if (debug && !jit::VMProtect::is_protected) {
-        memset(
-          (char*)(tl_base) + oldFrontier,
-          kRDSTrashFill,
-          s_normal_frontier - oldFrontier
+        addFreeBlock(s_normal_free_lists, oldFrontier,
+                     s_normal_frontier - oldFrontier);
+        s_normal_frontier += adjBytes;
+        // tl_base might be nullptr here, if we're generating
+        // pre-allocations
+        if (debug && !jit::VMProtect::is_protected && tl_base) {
+          memset(
+            (char*)(tl_base) + oldFrontier,
+            kRDSTrashFill,
+            s_normal_frontier - oldFrontier
+          );
+        }
+        always_assert_flog(
+          s_normal_frontier < s_local_frontier,
+          "Ran out of RDS space (mode=Normal)"
         );
+
+        auto const begin = s_normal_frontier - adjBytes;
+        addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
+
+        handle = begin + prefix;
       }
-      always_assert_flog(
-        s_normal_frontier < s_local_frontier,
-        "Ran out of RDS space (mode=Normal)"
-      );
-
-      auto const begin = s_normal_frontier - adjBytes;
-      addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
-
-      auto const handle = begin + prefix;
-
       if (type_scan::hasScanner(tyIndex)) {
         assertx(s_normal_alloc_descs_size.load(std::memory_order_acquire) ==
                 s_normal_alloc_descs.size());
@@ -295,6 +351,9 @@ Handle alloc(Mode mode, size_t numBytes,
       return handle;
     }
     case Mode::Persistent: {
+      auto const handle = claimPreAssign(s_persistent_preassign);
+      if (handle != kUninitHandle) return handle;
+
       align = folly::nextPowTwo(align);
       always_assert(align <= numBytes);
       s_persistent_usage += numBytes;
@@ -314,7 +373,7 @@ Handle alloc(Mode mode, size_t numBytes,
       // Allocate on demand, add kPersistentChunkSize each time.
       assertx(numBytes <= kPersistentChunkSize);
       addNewPersistentChunk(kPersistentChunkSize);
-      return alloc(mode, numBytes, align, tyIndex); // retry after a new chunk
+      return alloc(mode, numBytes, align, tyIndex, symbol); // retry after a new chunk
 #else
       // We reserved plenty of space in s_persistent_free_lists in the beginning
       // of the process, but maybe it is time to increase the size in the
@@ -326,27 +385,32 @@ Handle alloc(Mode mode, size_t numBytes,
 #endif
     }
     case Mode::Local: {
-      align = folly::nextPowTwo(align);
-      always_assert(align <= numBytes);
+      auto handle = claimPreAssign(s_local_preassign);
+      if (handle == kUninitHandle) {
+        align = folly::nextPowTwo(align);
+        always_assert(align <= numBytes);
 
-      auto& frontier = s_local_frontier;
+        auto& frontier = s_local_frontier;
 
-      frontier -= numBytes;
-      frontier &= ~(align - 1);
+        frontier -= numBytes;
+        frontier &= ~(align - 1);
 
-      always_assert_flog(
-        frontier >= s_normal_frontier,
-        "Ran out of RDS space (mode=Local)"
-      );
+        always_assert_flog(
+          frontier >= s_normal_frontier,
+          "Ran out of RDS space (mode=Local)"
+        );
+
+        handle = frontier;
+      }
       if (type_scan::hasScanner(tyIndex)) {
         assertx(s_local_alloc_descs_size.load(std::memory_order_acquire) ==
                 s_local_alloc_descs.size());
         s_local_alloc_descs.push_back(
-          AllocDescriptor{Handle(frontier), uint32_t(numBytes), tyIndex}
+          AllocDescriptor{Handle(handle), uint32_t(numBytes), tyIndex}
         );
         s_local_alloc_descs_size.fetch_add(1, std::memory_order_acq_rel);
       }
-      return frontier;
+      return handle;
     }
     default:
       not_reached();
@@ -354,9 +418,10 @@ Handle alloc(Mode mode, size_t numBytes,
 }
 
 Handle allocUnlocked(Mode mode, size_t numBytes,
-                     size_t align, type_scan::Index tyIndex) {
+                     size_t align, type_scan::Index tyIndex,
+                     const Symbol* symbol) {
   Guard g(s_allocMutex);
-  return alloc(mode, numBytes, align, tyIndex);
+  return alloc(mode, numBytes, align, tyIndex, symbol);
 }
 
 Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
@@ -367,8 +432,24 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
   Guard g(s_allocMutex);
   if (s_linkTable.find(acc, key)) return acc->second.handle;
 
-  auto const handle = alloc(mode, sizeBytes, align, tyIndex);
+  auto const handle = alloc(mode, sizeBytes, align, tyIndex, &key);
   recordRds(handle, sizeBytes, key);
+
+  if (shouldProfileAccesses() && !boost::apply_visitor(IsProfile(), key)) {
+    // Allocate an integer in the local section to profile this
+    // symbol.
+    auto const profile = alloc(
+      Mode::Local,
+      sizeof(uint64_t),
+      alignof(uint64_t),
+      type_scan::kIndexUnknownNoPtrs,
+      nullptr
+    );
+    s_profiling.insert(
+      handle,
+      ProfilingMeta{profile, key, mode, sizeBytes, align}
+    );
+  }
 
   LinkTable::const_accessor insert_acc;
   // insert_acc is held until after s_handleTable is updated
@@ -377,7 +458,7 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
         LinkTable::value_type(key, {handle, safe_cast<uint32_t>(sizeBytes)}))) {
     always_assert(0);
   }
-  if (boost::apply_visitor(StoreRevLink(), key)) {
+  if (!boost::apply_visitor(IsProfile(), key)) {
     s_handleTable.emplace(handle, RevLinkEntry {
       safe_cast<uint32_t>(sizeBytes), key
     });
@@ -400,11 +481,24 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
                                      std::memory_order_relaxed,
                                      std::memory_order_relaxed)) {
     // we flipped it from kUninitHandle, so we get to fill in the value.
-    auto const h = allocUnlocked(mode, size, align, tsi);
+    auto const h = allocUnlocked(mode, size, align, tsi, &sym);
     recordRds(h, size, sym);
 
+    if (shouldProfileAccesses() && !boost::apply_visitor(IsProfile(), sym)) {
+      // Allocate an integer in the local section to profile this
+      // symbol.
+      auto const profile = allocUnlocked(
+        Mode::Local,
+        sizeof(uint64_t),
+        alignof(uint64_t),
+        type_scan::kIndexUnknownNoPtrs,
+        nullptr
+      );
+      s_profiling.insert(h, ProfilingMeta{profile, sym, mode, size, align});
+    }
+
     if (init_val != nullptr && isPersistentHandle(h)) {
-      memcpy(handleToPtr<void, Mode::Persistent>(h), init_val, size);
+      memcpy(handleToPtr<void, Mode::Persistent, false>(h), init_val, size);
     }
     if (handle.exchange(h, std::memory_order_relaxed) ==
         kBeingBoundWithWaiters) {
@@ -430,6 +524,7 @@ void unbind(Symbol key, Handle handle) {
   Guard g(s_allocMutex);
   s_linkTable.erase(key);
   s_handleTable.erase(handle);
+  if (shouldProfileAccesses()) s_profiling.erase(handle);
 }
 
 using namespace detail;
@@ -476,10 +571,26 @@ void processInit() {
 #else
   auto const allocSize = RuntimeOption::EvalRDSSize / 4;
 #endif
-  addNewPersistentChunk(allocSize),
+  addNewPersistentChunk(allocSize);
 
-  s_persistentTrue.bind(Mode::Persistent, LinkID{"RDSTrue"});
-  *s_persistentTrue = true;
+  // Attempt to load any RDS preassignments from the profiling file.
+  if (RO::RepoAuthoritative &&
+      RO::EvalReorderRDS &&
+      !RO::EvalJitSerdesFile.empty() &&
+      jit::mcgen::retranslateAllEnabled()) {
+    s_settingPreAssignments = true;
+    SCOPE_EXIT { s_settingPreAssignments = false; };
+    if (isJitDeserializing()) {
+      jit::deserializeProfData(RO::EvalJitSerdesFile, 1, true);
+    } else if (isJitSerializing() &&
+               jit::serializeOptProfEnabled() &&
+               RO::EvalJitSerializeOptProfRestart) {
+      jit::tryDeserializePartialProfData(RO::EvalJitSerdesFile, 1, true);
+    }
+  }
+
+  auto const init = true;
+  s_persistentTrue.bind(Mode::Persistent, LinkID{"RDSTrue"}, &init);
 
   local::RDSInit();
 }
@@ -523,14 +634,32 @@ void flush() {
   }
   if (jit::mcgen::retranslateAllEnabled() &&
       !jit::mcgen::retranslateAllPending()) {
-    size_t offset = s_local_frontier & ~0xfff;
-    size_t protectedSpace = local::detail::s_usedbytes +
-                            (-local::detail::s_usedbytes & 0xfff);
-    if (madvise(static_cast<char*>(tl_base) + offset,
-                s_local_base - protectedSpace - offset,
-                MADV_DONTNEED)) {
-      Logger::Warning("RDS local madvise failure: %s\n",
-                      folly::errnoStr(errno).c_str());
+    // Madvise away everything except the rds-locals. These may lie in
+    // the middle of the local section, we have to do it separately
+    // for the data before and after (rounding up to page sizes).
+    auto const rdsLocalsBegin =
+      local::detail::RDSLocalNode::s_RDSLocalsBase & ~0xfff;
+    auto const rdsLocalsEnd = roundUp(
+      local::detail::RDSLocalNode::s_RDSLocalsBase + local::detail::s_usedbytes,
+      4096
+    );
+
+    if (s_local_frontier < rdsLocalsBegin) {
+      auto const offset = s_local_frontier & ~0xfff;
+      if (madvise(static_cast<char*>(tl_base) + offset,
+                  rdsLocalsBegin - s_local_frontier,
+                  MADV_DONTNEED)) {
+        Logger::Warning("RDS local madvise failure: %s\n",
+                        folly::errnoStr(errno).c_str());
+      }
+    }
+    if (rdsLocalsEnd < s_local_base) {
+      if (madvise(static_cast<char*>(tl_base) + rdsLocalsEnd,
+                  s_local_base - rdsLocalsEnd,
+                  MADV_DONTNEED)) {
+        Logger::Warning("RDS local madvise failure: %s\n",
+                        folly::errnoStr(errno).c_str());
+      }
     }
   }
 }
@@ -599,7 +728,8 @@ size_t allocBit() {
       Mode::Normal,
       kAllocBitNumBytes,
       kAllocBitNumBytes,
-      type_scan::getIndexForScan<unsigned char[kAllocBitNumBytes]>()
+      type_scan::getIndexForScan<unsigned char[kAllocBitNumBytes]>(),
+      nullptr
     );
     s_next_bit = handle * CHAR_BIT;
     s_bits_to_go = kAllocBitNumBytes * CHAR_BIT;
@@ -630,6 +760,168 @@ bool isValidHandle(Handle handle) {
     (handle >= sizeof(Header) && handle < s_normal_frontier) ||
     (handle >= s_local_frontier && handle < s_local_base);
 }
+
+//////////////////////////////////////////////////////////////////////
+
+Handle profileForHandle(Handle h) {
+  assertx(shouldProfileAccesses());
+  assertx(RO::RepoAuthoritative);
+  auto const it = s_profiling.find(h);
+  if (it == s_profiling.end()) return kUninitHandle;
+  assertx(isLocalHandle(it->second.countHandle));
+  return it->second.countHandle;
+}
+
+void markAccess(Handle h) {
+  auto const profile = profileForHandle(h);
+  if (profile == kUninitHandle) return;
+  jit::VMProtect::Pause _;
+  ++handleToRef<uint64_t, Mode::Local, false>(profile);
+}
+
+// Based on profiling, calculate a more optimal ordering of RDS
+// symbols.
+Ordering profiledOrdering() {
+  assertx(shouldProfileAccesses());
+  assertx(RO::RepoAuthoritative);
+
+  Guard g(s_allocMutex);
+
+  struct ItemHasher {
+    size_t operator()(const Ordering::Item& i) const {
+      return folly::hash::hash_combine(
+        i.key,
+        i.size,
+        i.alignment
+      );
+    }
+  };
+  struct ItemEquals {
+    bool operator()(const Ordering::Item& i1,
+                    const Ordering::Item& i2) const {
+      return
+        i1.key == i2.key &&
+        i1.size == i2.size &&
+        i1.alignment == i2.alignment;
+    }
+  };
+
+  using Map = hphp_fast_map<Ordering::Item, uint64_t, ItemHasher, ItemEquals>;
+  Map persistentMap;
+  Map localMap;
+  Map normalMap;
+
+  auto const bases = allTLBases();
+  for (auto const& profile : s_profiling) {
+    assertx(isLocalHandle(profile.second.countHandle));
+
+    auto& map = [&] () -> Map& {
+      switch (profile.second.mode) {
+        case Mode::Persistent: return persistentMap;
+        case Mode::Local:      return localMap;
+        case Mode::Normal:     return normalMap;
+        default:               break;
+      }
+      always_assert(false);
+    }();
+
+    auto const key = Ordering::Item{
+      profilingKeyForSymbol(profile.second.symbol),
+      profile.second.size,
+      profile.second.alignment
+    };
+
+    for (auto const base : bases) {
+      map[key] += handleToRef<uint64_t, Mode::Local, false>(
+        base,
+        profile.second.countHandle
+      );
+    }
+  }
+
+  // Sort the symbols according to their hit count within their
+  // respective sections. The most hit symbols will cluster at the
+  // beginning of the section.
+  auto const order = [&] (const Map& map) {
+    std::vector<Ordering::Item> ordered;
+    uint64_t total = 0;
+
+    ordered.reserve(map.size());
+    for (auto const& kv : map) {
+      if (!kv.second) continue;
+      ordered.emplace_back(kv.first);
+      total += kv.second;
+    }
+
+    if (ordered.empty()) return ordered;
+    assertx(total > 0);
+
+    std::stable_sort(
+      ordered.begin(), ordered.end(),
+      [&] (const Ordering::Item& k1, const Ordering::Item& k2) {
+        auto const it1 = map.find(k1);
+        assertx(it1 != map.end());
+        auto const it2 = map.find(k2);
+        assertx(it2 != map.end());
+        if (it1->second != it2->second) return it1->second > it2->second;
+        if (k1.size != k2.size) return k1.size > k2.size;
+        return k1.alignment > k2.alignment;
+      }
+    );
+
+    // Avoid ordering symbols which are hit infrequently. There's
+    // little benefit to doing so.
+    auto trimIt = ordered.begin();
+    while (trimIt != ordered.end()) {
+      auto const mapIt = map.find(*trimIt);
+      assertx(mapIt != map.end());
+      assertx(mapIt->second > 0);
+      auto const percentage = (double)mapIt->second / total;
+      if (percentage < RO::EvalRDSReorderThreshold) break;
+      ++trimIt;
+    }
+    ordered.erase(trimIt, ordered.end());
+    return ordered;
+  };
+
+  Ordering ordering;
+  ordering.persistent = order(persistentMap);
+  ordering.local      = order(localMap);
+  ordering.normal     = order(normalMap);
+  return ordering;
+}
+
+// Assign offsets to symbols that were ordered in the profiling file.
+void setPreAssignments(const Ordering& ordering) {
+  assertx(RO::RepoAuthoritative);
+  assertx(RO::EvalReorderRDS);
+  assertx(s_settingPreAssignments);
+
+  Guard g(s_allocMutex);
+
+  auto const assign = [&] (PreAssignmentMap& map,
+                           const std::vector<Ordering::Item>& items,
+                           Mode mode) {
+    for (auto const& item : items) {
+      auto const handle = alloc(
+        mode,
+        item.size,
+        item.alignment,
+        type_scan::kIndexUnknownNoPtrs,
+        nullptr
+      );
+      map.emplace(
+        item.key,
+        std::make_unique<PreAssignment>(item.size, item.alignment, handle)
+      );
+    }
+  };
+  assign(s_persistent_preassign, ordering.persistent, Mode::Persistent);
+  assign(s_local_preassign, ordering.local, Mode::Local);
+  assign(s_normal_preassign, ordering.normal, Mode::Normal);
+}
+
+//////////////////////////////////////////////////////////////////////
 
 void threadInit(bool shouldRegister) {
   if (!s_local_base) {
@@ -748,7 +1040,8 @@ local::RegisterConfig s_rdsLocalConfigRegistration({
     [] (size_t size) -> uint32_t {
       return rds::detail::allocUnlocked(rds::Mode::Local,
                                         std::max(size, 16UL), 16U,
-                                        type_scan::kIndexUnknown);
+                                        type_scan::kIndexUnknown,
+                                        nullptr);
     },
   .initFunc =
     [](size_t size, uint32_t handle) -> void* {

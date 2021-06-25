@@ -2546,7 +2546,8 @@ void hphp_process_init() {
 #endif
       return f(
         RO::EvalJitSerdesFile,
-        RO::EvalJitParallelDeserialize ? numWorkers : 1
+        RO::EvalJitParallelDeserialize ? numWorkers : 1,
+        false
       );
     };
 

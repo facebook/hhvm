@@ -829,6 +829,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LtRes:
   case LtStr:
   case MapIsset:
+  case MarkRDSAccess:
   case MarkRDSInitialized:
   case MemoGetInstanceCache:
   case MemoGetInstanceValue:

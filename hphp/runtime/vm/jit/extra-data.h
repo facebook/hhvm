@@ -2791,6 +2791,7 @@ X(ProfileIsTypeStruct,          RDSHandleData);
 X(LdRDSAddr,                    RDSHandleData);
 X(CheckRDSInitialized,          RDSHandleData);
 X(MarkRDSInitialized,           RDSHandleData);
+X(MarkRDSAccess,                RDSHandleData);
 X(LdInitRDSAddr,                RDSHandleData);
 X(BaseG,                        MOpModeData);
 X(PropX,                        PropData);

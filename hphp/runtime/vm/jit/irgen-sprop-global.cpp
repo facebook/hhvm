@@ -80,6 +80,8 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
     }
   }
 
+  profileRDSAccess(env, handle);
+
   auto const ptrTy = knownType.ptr(Ptr::SProp);
 
   auto const addr = [&]{
@@ -448,6 +450,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
         );
       }
 
+      profileRDSAccess(env, handle);
       auto const base = gen(
         env,
         LdRDSAddr,

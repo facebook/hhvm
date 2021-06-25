@@ -64,6 +64,7 @@
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/managed-arena.h"
+#include "hphp/util/match.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/process.h"
 #include "hphp/util/service-data.h"
@@ -854,6 +855,47 @@ void write_target_profiles(ProfDataSerializer& ser) {
   write_raw(ser, uint32_t{});
 }
 
+void write_rds_ordering_item(ProfDataSerializer& ser,
+                             const rds::Ordering::Item& item) {
+  write_string(ser, item.key);
+  write_raw(ser, item.size);
+  write_raw(ser, item.alignment);
+}
+
+rds::Ordering::Item read_rds_ordering_item(ProfDataDeserializer& des) {
+  auto const key = read_cpp_string(des);
+  auto const size =
+    read_raw<decltype(rds::Ordering::Item::size)>(des);
+  auto const alignment =
+    read_raw<decltype(rds::Ordering::Item::alignment)>(des);
+  return rds::Ordering::Item{key, size, alignment};
+}
+
+void write_rds_ordering(ProfDataSerializer& ser) {
+  rds::Ordering order;
+  if (RO::EvalReorderRDS) order = rds::profiledOrdering();
+  write_container(ser, order.persistent, write_rds_ordering_item);
+  write_container(ser, order.local, write_rds_ordering_item);
+  write_container(ser, order.normal, write_rds_ordering_item);
+}
+
+rds::Ordering read_rds_ordering(ProfDataDeserializer& des) {
+  rds::Ordering order;
+  read_container(
+    des,
+    [&] { order.persistent.emplace_back(read_rds_ordering_item(des)); }
+  );
+  read_container(
+    des,
+    [&] { order.local.emplace_back(read_rds_ordering_item(des)); }
+  );
+  read_container(
+    des,
+    [&] { order.normal.emplace_back(read_rds_ordering_item(des)); }
+  );
+  return order;
+}
+
 template<typename T>
 auto read_impl(ProfDataDeserializer& ser, T& out, bool) ->
   decltype(out.deserialize(ser),void()) {
@@ -1372,11 +1414,28 @@ void write_string(ProfDataSerializer& ser, const StringData* str) {
   write_raw_string(ser, str);
 }
 
+void write_string(ProfDataSerializer& ser, const std::string& str) {
+  uint64_t size = str.size();
+  write_raw(ser, size);
+  write_raw(ser, str.data(), size);
+}
+
 StringData* read_string(ProfDataDeserializer& ser) {
   return deserialize(
     ser,
     [&] { return read_raw_string(ser); }
   );
+}
+
+std::string read_cpp_string(ProfDataDeserializer& ser) {
+  auto const size = read_raw<uint64_t>(ser);
+  constexpr uint32_t kMaxStringLen = 2 << 20;
+  if (size > kMaxStringLen) {
+    throw std::runtime_error("string too long, likely corrupt");
+  }
+  auto const buf = std::make_unique<char[]>(size);
+  read_raw(ser, buf.get(), size);
+  return std::string{buf.get(), size};
 }
 
 void write_array(ProfDataSerializer& ser, const ArrayData* arr) {
@@ -1843,6 +1902,8 @@ std::string serializeProfData(const std::string& filename) {
       Func::s_treadmill = false;
     };
 
+    write_rds_ordering(ser);
+
     write_units_preload(ser);
     ExtensionRegistry::serialize(ser);
     PropertyProfile::serialize(ser);
@@ -1909,9 +1970,11 @@ std::string serializeOptProfData(const std::string& filename) {
   }
 }
 
-std::string deserializeProfData(const std::string& filename, int numWorkers) {
+std::string deserializeProfData(const std::string& filename,
+                                int numWorkers,
+                                bool rds) {
   try {
-    ProfData::setTriedDeserialization();
+    if (!rds) ProfData::setTriedDeserialization();
 
     ProfDataDeserializer ser{filename};
 
@@ -1958,6 +2021,13 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
       throw std::runtime_error(
           folly::sformat("profile data build timestame: {}, currTime: {}",
                          buildTime, currTime).c_str());
+    }
+
+    // If we're loading RDS ordering, we can stop here.
+    auto const ordering = read_rds_ordering(ser);
+    if (rds) {
+      rds::setPreAssignments(ordering);
+      return "";
     }
 
     read_units_preload(ser);
@@ -2027,9 +2097,10 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
 }
 
 bool tryDeserializePartialProfData(const std::string& filename,
-                                   int numWorkers) {
+                                   int numWorkers,
+                                   bool rds) {
   auto const mangled = mangleFilenameForAppendStart(filename);
-  return deserializeProfData(mangled, numWorkers).empty();
+  return deserializeProfData(mangled, numWorkers, rds).empty();
 }
 
 bool serializeOptProfEnabled() {

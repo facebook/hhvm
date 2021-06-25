@@ -248,6 +248,8 @@ void cgInitObjProps(IRLS& env, const IRInstruction* inst) {
       auto const propHandle = cls->propHandle();
       assertx(rds::isNormalHandle(propHandle));
 
+      markRDSAccess(v, propHandle);
+
       auto const propInitVec = v.makeReg();
       auto const propData = v.makeReg();
       v << load{Vreg(rvmtl())[propHandle], propInitVec};

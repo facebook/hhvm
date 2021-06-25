@@ -572,6 +572,7 @@ static Vptr getRDSHandleGenNumberAddr(Vreg handle) {
 
 template<typename HandleT>
 Vreg doCheckRDSHandleInitialized(Vout& v, HandleT ch) {
+  markRDSAccess(v, ch);
   auto const gen = v.makeReg();
   auto const sf = v.makeReg();
   v << loadb{getRDSHandleGenNumberAddr(ch), gen};
@@ -588,7 +589,8 @@ Vreg checkRDSHandleInitialized(Vout& v, Vreg ch) {
 }
 
 template<typename HandleT>
-void doMarkRDSHandleInitialized(Vout &v, HandleT ch) {
+void doMarkRDSHandleInitialized(Vout& v, HandleT ch) {
+  markRDSAccess(v, ch);
   auto const gen = v.makeReg();
   v << loadb{rvmtl()[rds::currentGenNumberHandle()], gen};
   v << storeb{gen, getRDSHandleGenNumberAddr(ch)};
@@ -601,6 +603,27 @@ void markRDSHandleInitialized(Vout& v, rds::Handle ch) {
 
 void markRDSHandleInitialized(Vout& v, Vreg ch) {
   doMarkRDSHandleInitialized(v, ch);
+}
+
+void markRDSAccess(Vout& v, rds::Handle ch) {
+  if (!rds::shouldProfileAccesses()) return;
+  auto const& vunit = v.unit();
+  if (vunit.context && !isProfiling(vunit.context->kind)) return;
+  auto const profile = rds::profileForHandle(ch);
+  if (profile == rds::kUninitHandle) return;
+  v << incqm{rvmtl()[profile], v.makeReg()};
+}
+
+void markRDSAccess(Vout& v, Vreg ch) {
+  if (!rds::shouldProfileAccesses()) return;
+  auto const& vunit = v.unit();
+  if (vunit.context && !isProfiling(vunit.context->kind)) return;
+  v << vcall{
+    CallSpec::direct(rds::markAccess),
+    v.makeVcallArgs({{ch}}),
+    v.makeTuple({}),
+    Fixup::none()
+  };
 }
 
 ////////////////////////////////////////////////////////////////////////////////

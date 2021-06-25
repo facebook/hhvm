@@ -293,6 +293,9 @@ Vreg checkRDSHandleInitialized(Vout& v, Vreg ch);
 void markRDSHandleInitialized(Vout& v, rds::Handle ch);
 void markRDSHandleInitialized(Vout& v, Vreg ch);
 
+void markRDSAccess(Vout& v, rds::Handle ch);
+void markRDSAccess(Vout& v, Vreg ch);
+
 ///////////////////////////////////////////////////////////////////////////////
 // Locals
 

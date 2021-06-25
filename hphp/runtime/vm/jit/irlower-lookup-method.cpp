@@ -214,6 +214,7 @@ void cgLdClsMethodCacheFunc(IRLS& env, const IRInstruction* inst) {
 
   auto const sf = checkRDSHandleInitialized(v, ch);
   fwdJcc(v, env, CC_NE, sf, inst->taken());
+  markRDSAccess(v, ch);
   emitLdLowPtr(v, rvmtl()[ch + offsetof(StaticMethodCache, m_func)],
                dst, sizeof(LowPtr<const Func>));
 }
@@ -229,6 +230,8 @@ void cgLdClsMethodCacheCls(IRLS& env, const IRInstruction* inst) {
     ctxName(extra->context)
   );
   assertx(rds::isNormalHandle(ch));
+
+  markRDSAccess(v, ch);
 
   // The StaticMethodCache here is guaranteed to already be initialized in RDS
   // by the pre-conditions of this instruction.
@@ -277,6 +280,7 @@ void cgLdClsMethodFCacheFunc(IRLS& env, const IRInstruction* inst) {
 
   auto const sf = checkRDSHandleInitialized(v, ch);
   fwdJcc(v, env, CC_NE, sf, inst->taken());
+  markRDSAccess(v, ch);
   emitLdLowPtr(v, rvmtl()[ch + offsetof(StaticMethodFCache, m_func)],
                dst, sizeof(LowPtr<const Func>));
 }

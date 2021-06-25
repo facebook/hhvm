@@ -287,7 +287,14 @@ void doMemoGetValue(
   auto& v = vmain(env);
   auto const sf = checkRDSHandleInitialized(v, handle);
   fwdJcc(v, env, CC_NE, sf, inst->taken());
-  loadTV(v, inst->dst(), dstLoc(env, inst, 0), getHandleAddr(handle), loadAux);
+  markRDSAccess(v, handle);
+  loadTV(
+    v,
+    inst->dst(),
+    dstLoc(env, inst, 0),
+    getHandleAddr(handle),
+    loadAux
+  );
 }
 
 template<typename HandleT>
@@ -311,6 +318,7 @@ void doMemoSetValue(
   }();
 
   auto const store = [&] {
+    markRDSAccess(v, handle);
     if (!aux) return storeTV(v, getHandleAddr(handle), valLoc, val);
     storeTVWithAux(v, getHandleAddr(handle), valLoc, val, *aux);
   };
@@ -327,6 +335,7 @@ void doMemoSetValue(
   unlikelyIfThenElse(
     v, vcold(env), CC_E, sf,
     [&](Vout& v) {
+      markRDSAccess(v, handle);
       auto const handleAddr = v.makeReg();
       v << lea{getHandleAddr(handle), handleAddr};
       cgCallHelper(
@@ -366,6 +375,7 @@ void doMemoGetCache(
   auto const sf = checkRDSHandleInitialized(v, handle);
   fwdJcc(v, env, CC_NE, sf, inst->taken());
 
+  markRDSAccess(v, handle);
   auto const cachePtr = v.makeReg();
   v << load{getHandleAddr(handle), cachePtr};
 
@@ -438,11 +448,13 @@ void doMemoSetCache(
   ifThen(
     v, CC_NE, sf,
     [&](Vout& v) {
+      markRDSAccess(v, handle);
       v << storeqi{0, getHandleAddr(handle)};
       markRDSHandleInitialized(v, handle);
     }
   );
 
+  markRDSAccess(v, handle);
   auto const handleAddr = v.makeReg();
   v << lea{getHandleAddr(handle), handleAddr};
 

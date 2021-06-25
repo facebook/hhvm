@@ -1400,6 +1400,10 @@ To string conversions:
 
   Mark the given RDS entry as being initialized.
 
+| MarkRDSAccess<RDSHandle>, ND, NA, NF
+
+  Mark the given RDS entry as being accessed for profiling.
+
 | PropTypeRedefineCheck, ND, C(Cls) C(Int), NF
 
   Check that the specified property at the slot S1 on S0, which redeclares a

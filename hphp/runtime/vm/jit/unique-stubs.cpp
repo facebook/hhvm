@@ -1144,6 +1144,7 @@ TCA emitUnwinderAsyncRet(CodeBlock& cb, DataBlock& data) {
   alignCacheLine(cb);
   alignJmpTarget(cb);
   return vwrap(cb, data, [&] (Vout& v) {
+    markRDSAccess(v, g_unwind_rds.handle());
     v << load{rvmtl()[unwinderFSWHOff()], rret_data()};
     v << movzbq{v.cns(KindOfObject), rret_type()};
     v << pushm{rvmtl()[unwinderSavedRipOff()]};
@@ -1156,6 +1157,7 @@ TCA emitUnwinderAsyncNullRet(CodeBlock& cb, DataBlock& data) {
   alignCacheLine(cb);
   alignJmpTarget(cb);
   return vwrap(cb, data, [&] (Vout& v) {
+    markRDSAccess(v, g_unwind_rds.handle());
     v << movzbq{v.cns(KindOfUninit), rret_type()};
     v << pushm{rvmtl()[unwinderSavedRipOff()]};
     v << load{rvmtl()[rds::kVmspOff], rvmsp()};

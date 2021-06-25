@@ -74,6 +74,7 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
   if (rds::isNormalHandle(ch)) {
     auto const sf = checkRDSHandleInitialized(v, ch);
     fwdJcc(v, env, CC_NE, sf, inst->taken());
+    markRDSAccess(v, ch);
     loadTV(v, inst->dst(), dst, rvmtl()[ch]);
     checkUninit();
     return;
@@ -82,6 +83,7 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
   auto const pcns = rds::handleToPtr<TypedValue, rds::Mode::Persistent>(ch);
 
   if (pcns->m_type == KindOfUninit) {
+    markRDSAccess(v, ch);
     loadTV(v, inst->dst(), dst, *v.cns(pcns));
     checkUninit();
   } else {
@@ -139,7 +141,7 @@ TypedValue lookupCnsEHelper(StringData* nm) {
 }
 
 static TypedValue lookupCnsEHelperNormal(rds::Handle tv_handle,
-                                  StringData* nm) {
+                                         StringData* nm) {
   assertx(rds::isNormalHandle(tv_handle));
   if (UNLIKELY(rds::isHandleInit(tv_handle))) {
     auto const tv = rds::handleToPtr<TypedValue, rds::Mode::Normal>(tv_handle);
@@ -166,6 +168,7 @@ static TypedValue lookupCnsEHelperNormal(rds::Handle tv_handle,
 static TypedValue lookupCnsEHelperPersistent(rds::Handle tv_handle,
                                              StringData* nm) {
   assertx(rds::isPersistentHandle(tv_handle));
+
   auto tv = rds::handleToPtr<TypedValue, rds::Mode::Persistent>(tv_handle);
   assertx(type(tv) == KindOfUninit);
 
@@ -216,6 +219,7 @@ void cgLdClsCns(IRLS& env, const IRInstruction* inst) {
 
   auto const sf = checkRDSHandleInitialized(v, link.handle());
   fwdJcc(v, env, CC_NE, sf, inst->taken());
+  markRDSAccess(v, link.handle());
   loadTV(v, inst->dst(), dst, rvmtl()[link.handle()]);
 }
 
@@ -343,6 +347,7 @@ void cgInitClsCns(IRLS& env, const IRInstruction* inst) {
   assertx(link.isNormal());
   auto& v = vmain(env);
 
+  markRDSAccess(v, link.handle());
   auto const args = argGroup(env, inst)
     .addr(rvmtl(), safe_cast<int32_t>(link.handle()))
     .immPtr(NamedEntity::get(extra->clsName))

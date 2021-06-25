@@ -90,12 +90,17 @@ VMProtect::~VMProtect() {
 }
 
 VMProtect::Pause::Pause() {
+  if (!VMProtect::is_protected) {
+    m_active = false;
+    return;
+  }
   if (auto const prot = tl_active_prot) {
     unprotect(prot->m_oldBase, prot->m_oldState);
   }
 }
 
 VMProtect::Pause::~Pause() {
+  if (!m_active) return;
   if (tl_active_prot) protect();
 }
 

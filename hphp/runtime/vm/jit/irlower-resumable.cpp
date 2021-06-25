@@ -310,6 +310,7 @@ void cgCreateSSWH(IRLS& env, const IRInstruction* inst) {
 
   if (inst->src(0)->type() <= TNull) {
     auto const handle = c_StaticWaitHandle::NullHandle.handle();
+    markRDSAccess(v, handle);
     v << load{rvmtl()[handle], dst};
     emitIncRef(v, dst, TRAP_REASON);
     return;
@@ -321,6 +322,7 @@ void cgCreateSSWH(IRLS& env, const IRInstruction* inst) {
 
     if (inst->src(0)->hasConstVal(TBool)) {
       auto const handle = inst->src(0)->boolVal() ? trueHandle : falseHandle;
+      markRDSAccess(v, handle);
       v << load{rvmtl()[handle], dst};
       emitIncRef(v, dst, TRAP_REASON);
       return;
@@ -330,6 +332,7 @@ void cgCreateSSWH(IRLS& env, const IRInstruction* inst) {
     auto const hreg = v.makeReg();
     v << testb{val, val, sf};
     v << cmovq{CC_NZ, sf, v.cns(falseHandle), v.cns(trueHandle), hreg};
+    markRDSAccess(v, hreg);
     v << load{hreg[rvmtl()], dst};
     emitIncRef(v, dst, TRAP_REASON);
     return;
@@ -476,6 +479,7 @@ void cgAFWHBlockOn(IRLS& env, const IRInstruction* inst) {
 
   if (RO::EvalEnableImplicitContext) {
     // parent->m_implicitContext = *ImplicitContext::activeCtx
+    markRDSAccess(v, ImplicitContext::activeCtx.handle());
     auto const implicitContext = v.makeReg();
     v << load{rvmtl()[ImplicitContext::activeCtx.handle()], implicitContext};
     v << store{implicitContext, parentAR[ar_rel(AFWH::implicitContextOff())]};

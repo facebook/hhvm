@@ -296,6 +296,7 @@ void cgIsTypeStructCached(IRLS& env, const IRInstruction* inst) {
   };
 
   auto const ch = rds::bindTSCache(inst->func());
+  markRDSAccess(v, ch.handle());
   auto const sf = v.makeReg();
   v << cmpqm{arr, offset[rvmtl() + ch.handle()], sf};
   ifThen(v, CC_NE, sf, branch);
@@ -307,6 +308,7 @@ void cgIsTypeStructCached(IRLS& env, const IRInstruction* inst) {
     return;
   }
 
+  markRDSAccess(v, ch.handle());
   auto const rhs = v.makeReg();
   emitLdLowPtr(v, offset[rvmtl() + ch.handle() + sizeof(ArrayData*)],
                rhs, sizeof(LowPtr<const Class>));

@@ -186,7 +186,7 @@ struct ProfDataDeserializer {
   RevMapper<const RepoAuthType::Array*> ratMap;
   RevMapper<FuncId::Int> funcIdMap;
 
-  friend std::string deserializeProfData(const std::string&, int);
+  friend std::string deserializeProfData(const std::string&, int, bool);
 };
 
 void write_raw(ProfDataSerializer& ser, const void* data, size_t sz);
@@ -224,7 +224,9 @@ T read_raw(ProfDataDeserializer& ser) {
 void write_raw_string(ProfDataSerializer& ser, const StringData* str);
 StringData* read_raw_string(ProfDataDeserializer& ser, bool skip = false);
 void write_string(ProfDataSerializer& ser, const StringData* str);
+void write_string(ProfDataSerializer& ser, const std::string& str);
 StringData* read_string(ProfDataDeserializer& ser);
+std::string read_cpp_string(ProfDataDeserializer& ser);
 void write_array(ProfDataSerializer& ser, const ArrayData* arr);
 ArrayData* read_array(ProfDataDeserializer& ser);
 void write_array_rat(ProfDataSerializer& ser, const RepoAuthType::Array*);
@@ -258,9 +260,15 @@ FuncId read_func_id(ProfDataDeserializer& des);
 // of failure otherwise.
 std::string serializeProfData(const std::string& filename);
 std::string serializeOptProfData(const std::string& filename);
-std::string deserializeProfData(const std::string& filename, int numWorkers);
+// If loadRDS is true, only the RDS ordering information will be
+// loaded.
+std::string deserializeProfData(const std::string& filename,
+                                int numWorkers,
+                                bool loadRDS);
 
-bool tryDeserializePartialProfData(const std::string& filename, int numWorkers);
+bool tryDeserializePartialProfData(const std::string& filename,
+                                   int numWorkers,
+                                   bool loadRDS);
 
 // Return whether or not serialization of profile data for optimized code is
 // enabled.

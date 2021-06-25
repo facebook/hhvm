@@ -41,7 +41,6 @@ struct SymbolKind : boost::static_visitor<std::string> {
   std::string operator()(StaticMethodF) const { return "StaticMethodF"; }
   std::string operator()(Profile) const { return "Profile"; }
   std::string operator()(SPropCache) const { return "SPropCache"; }
-  std::string operator()(SMultiPropCache) const { return "SMultiPropCache"; }
   std::string operator()(StaticMemoValue) const { return "StaticMemoValue"; }
   std::string operator()(StaticMemoCache) const { return "StaticMemoCache"; }
   std::string operator()(LSBMemoValue) const { return "LSBMemoValue"; }
@@ -71,9 +70,6 @@ struct SymbolRep : boost::static_visitor<std::string> {
   std::string operator()(SPropCache k) const {
     return k.cls->name()->toCppString() + "::" +
            k.cls->staticProperties()[k.slot].name->toCppString();
-  }
-  std::string operator()(SMultiPropCache k) const {
-    return k.cls->name()->toCppString();
   }
 
   std::string operator()(StaticMemoValue k) const {
@@ -145,10 +141,6 @@ struct SymbolEq : boost::static_visitor<bool> {
     return k1.cls == k2.cls && k1.slot == k2.slot;
   }
 
-  bool operator()(SMultiPropCache k1, SMultiPropCache k2) const {
-    return k1.cls == k2.cls;
-  }
-
   bool operator()(StaticMemoValue k1, StaticMemoValue k2) const {
     return k1.funcId == k2.funcId;
   }
@@ -205,10 +197,6 @@ struct SymbolHash : boost::static_visitor<size_t> {
     return folly::hash::hash_combine(
       k.cls.get(), k.slot
     );
-  }
-
-  size_t operator()(SMultiPropCache k) const {
-    return std::hash<const Class*>()(k.cls.get());
   }
 
   size_t operator()(StaticMemoValue k) const {

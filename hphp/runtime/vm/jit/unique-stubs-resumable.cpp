@@ -186,6 +186,7 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
     };
 
     if (RO::EvalEnableImplicitContext) {
+      markRDSAccess(v, ImplicitContext::activeCtx.handle());
       auto const implicitContext = v.makeReg();
       v << load {
         afwh[c_ResumableWaitHandle::implicitContextOff()],
@@ -320,6 +321,7 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
   v << storebi{runningState, parentBl[afwhToBl(AFWH::stateOff())]};
 
   if (RO::EvalEnableImplicitContext) {
+    markRDSAccess(v, ImplicitContext::activeCtx.handle());
     auto const implicitContext = v.makeReg();
     v << load{parentBl[afwhToBl(AFWH::implicitContextOff())], implicitContext};
     v << store{implicitContext, rvmtl()[ImplicitContext::activeCtx.handle()]};

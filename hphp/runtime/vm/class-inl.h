@@ -488,10 +488,6 @@ Class::sPropLink(Slot index) const {
   return m_sPropCache[index];
 }
 
-inline rds::Link<bool, rds::Mode::NonLocal> Class::sPropInitLink() const {
-  return m_sPropCacheInit;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Constants.
 

@@ -1016,6 +1016,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AEmpty,
       ARds { inst.extra<MarkRDSInitialized>()->handle }
     );
+  case MarkRDSAccess:
+    return IrrelevantEffects{};
 
   case InitProps:
     return may_load_store(

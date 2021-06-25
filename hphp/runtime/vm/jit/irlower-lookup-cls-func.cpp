@@ -1,3 +1,4 @@
+
 /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
@@ -256,6 +257,7 @@ void implLdCached(IRLS& env, const IRInstruction* inst,
       v, vcold(env), CC_NE, sf, dst,
       [&] (Vout& v) { return fill_cache(v, ch); },
       [&] (Vout& v) {
+        markRDSAccess(v, ch);
         auto const ptr = v.makeReg();
         emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<T>));
         return ptr;
@@ -263,6 +265,7 @@ void implLdCached(IRLS& env, const IRInstruction* inst,
     );
   } else {
     auto const pptr = rds::handleToPtr<LowPtr<T>, rds::Mode::Persistent>(ch);
+    markRDSAccess(v, ch);
     auto const ptr = v.makeReg();
     emitLdLowPtr(v, *v.cns(pptr), ptr, sizeof(LowPtr<T>));
 
@@ -284,10 +287,12 @@ void implLdCachedSafe(IRLS& env, const IRInstruction* inst,
   if (rds::isNormalHandle(ch)) {
     auto const sf = checkRDSHandleInitialized(v, ch);
     fwdJcc(v, env, CC_NE, sf, inst->taken());
+    markRDSAccess(v, ch);
     emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<T>));
   } else {
     assertx(rds::isPersistentHandle(ch));
     auto const pptr = rds::handleToPtr<LowPtr<T>, rds::Mode::Persistent>(ch);
+    markRDSAccess(v, ch);
     emitLdLowPtr(v, *v.cns(pptr), dst, sizeof(LowPtr<T>));
   }
 }

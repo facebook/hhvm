@@ -152,6 +152,7 @@ void cgLdClsInitData(IRLS& env, const IRInstruction* inst) {
   auto const handle = v.makeReg();
   auto const vec = v.makeReg();
   v << loadzlq{cls[offset], handle};
+  markRDSAccess(v, handle);
   v << load{Vreg(rvmtl())[handle], vec};
   v << load{vec[Class::PropInitVec::dataOff()], dst};
 }

@@ -107,6 +107,7 @@ void cgEndCatch(IRLS& env, const IRInstruction* inst) {
 void cgUnwindCheckSideExit(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
+  markRDSAccess(v, g_unwind_rds.handle());
   auto const sf = v.makeReg();
   v << cmpbim{0, rvmtl()[unwinderSideExitOff()], sf};
   fwdJcc(v, env, CC_E, sf, inst->taken());
@@ -117,6 +118,7 @@ void cgUnwindCheckSideExit(IRLS& env, const IRInstruction* inst) {
 
 void cgLdUnwinderValue(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
+  markRDSAccess(v, g_unwind_rds.handle());
   loadTV(v, inst->dst(), dstLoc(env, inst, 0), rvmtl()[unwinderTVOff()]);
 }
 
@@ -131,6 +133,8 @@ void cgEnterTCUnwind(IRLS& env, const IRInstruction* inst) {
   v << lea{sp[cellsToBytes(extra->offset.offset)], syncSP};
   emitEagerSyncPoint(v, inst->marker().fixupSk().pc(), rvmtl(), fp, syncSP);
 
+  markRDSAccess(v, g_unwind_rds.handle());
+  markRDSAccess(v, g_unwind_rds.handle());
   v << storebi{1, rvmtl()[unwinderSideEnterOff()]};
   v << store{exn, rvmtl()[unwinderExnOff()]};
 

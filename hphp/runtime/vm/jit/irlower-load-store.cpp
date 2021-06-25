@@ -249,6 +249,7 @@ void cgStImplicitContext(IRLS& env, const IRInstruction* inst) {
   assertx(RO::EvalEnableImplicitContext);
   auto& v = vmain(env);
   auto const wh = srcLoc(env, inst, 0).reg();
+  markRDSAccess(v, ImplicitContext::activeCtx.handle());
   auto const ctx = v.makeReg();
   v << load{
     rvmtl()[ImplicitContext::activeCtx.handle()],
@@ -260,6 +261,7 @@ void cgStImplicitContext(IRLS& env, const IRInstruction* inst) {
 void cgCheckImplicitContextNull(IRLS& env, const IRInstruction* inst) {
   assertx(RO::EvalEnableImplicitContext);
   auto& v = vmain(env);
+  markRDSAccess(v, ImplicitContext::activeCtx.handle());
   auto const ctx = v.makeReg();
   auto const sf = v.makeReg();
   v << load{rvmtl()[ImplicitContext::activeCtx.handle()], ctx};
@@ -406,6 +408,11 @@ void cgCheckRDSInitialized(IRLS& env, const IRInstruction* inst) {
 void cgMarkRDSInitialized(IRLS& env, const IRInstruction* inst) {
   auto const handle = inst->extra<MarkRDSInitialized>()->handle;
   if (rds::isNormalHandle(handle)) markRDSHandleInitialized(vmain(env), handle);
+}
+
+void cgMarkRDSAccess(IRLS& env, const IRInstruction* inst) {
+  assertx(rds::shouldProfileAccesses());
+  markRDSAccess(vmain(env), inst->extra<MarkRDSAccess>()->handle);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -694,6 +694,7 @@ bool canDCE(IRInstruction* inst) {
   case ResolveTypeStruct:
   case CheckRDSInitialized:
   case MarkRDSInitialized:
+  case MarkRDSAccess:
   case ProfileProp:
   case ProfileIsTypeStruct:
   case StFrameCtx:

@@ -451,6 +451,9 @@ EnumValues* Class::setEnumValues(EnumValues* values) {
 Class::ExtraData::~ExtraData() {
   delete m_enumValues.load(std::memory_order_relaxed);
   if (m_lsbMemoExtra.m_handles) {
+    for (auto const& kv : m_lsbMemoExtra.m_symbols) {
+      rds::unbind(kv.first, kv.second);
+    }
     vm_free(m_lsbMemoExtra.m_handles);
   }
 }
@@ -1194,7 +1197,6 @@ TypedValue* Class::getSPropData(Slot index) const {
     ? &m_sPropCache[index].get()->val
     : nullptr;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Property lookup and accessibility.
@@ -2033,6 +2035,8 @@ Class::Class(PreClass* preClass, Class* parent,
   , m_magic{kMagic}
 #endif
 {
+  SCOPE_FAIL { if (m_extra) delete m_extra.raw(); };
+
   if (usedTraits.size()) {
     allocExtraData();
     m_extra.raw()->m_usedTraits = std::move(usedTraits);
@@ -3959,8 +3963,14 @@ void Class::initLSBMemoHandles() {
       assertx(slot >= 0 && slot < numSlots);
       if (func->numParams() == 0) {
         handles[slot] = rds::bindLSBMemoValue(this, func).handle();
+        mx.m_symbols.emplace_back(
+          std::make_pair(rds::LSBMemoValue { this, kv.first }, handles[slot])
+        );
       } else {
         handles[slot] = rds::bindLSBMemoCache(this, func).handle();
+        mx.m_symbols.emplace_back(
+          std::make_pair(rds::LSBMemoCache { this, kv.first }, handles[slot])
+        );
       }
       ++assignCount;
       assignSum += slot;

@@ -2476,6 +2476,13 @@ SSATmp* simplifyMarkRDSInitialized(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyMarkRDSAccess(State& env, const IRInstruction* inst) {
+  auto const handle = inst->extra<MarkRDSAccess>()->handle;
+  auto const profile = rds::profileForHandle(handle);
+  if (profile == rds::kUninitHandle) return gen(env, Nop);
+  return nullptr;
+}
+
 SSATmp* simplifyInitObjProps(State& env, const IRInstruction* inst) {
   auto const cls = inst->extra<InitObjProps>()->cls;
   if (cls->numDeclProperties() == 0 && !cls->hasMemoSlots()) {
@@ -3819,6 +3826,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(CheckInitMem)
       X(CheckRDSInitialized)
       X(MarkRDSInitialized)
+      X(MarkRDSAccess)
       X(CheckLoc)
       X(CheckMBase)
       X(CheckInOuts)

@@ -56,7 +56,7 @@ if [ -z "${HHVM_REPO_SCHEMA}" ] ; then
     # Use Perl as BSD grep (MacOS) does not support negated groups
     HHVM_REPO_SCHEMA=$("${find_files[@]}" |\
         { perl -ne 'chomp; print "$_\n" if !m#^hphp/(bin|facebook(?!/extensions)|hack(?!/src)|neo|public_tld|test|tools|util|vixl|zend)|(/\.|/test/)# && !-l && -f' | \
-        LC_ALL=C sort | xargs -d'\n' "${xargs_args[@]}" ; echo "${USE_LOWPTR}" ; } | "${SHA1SUM[@]}" | cut -b-40)
+        LC_ALL=C sort | xargs -d'\n' "${xargs_args[@]}" ; } | "${SHA1SUM[@]}" | cut -b-40)
 fi
 
 ################################################################################

@@ -1651,7 +1651,8 @@ static int execute_program_impl(int argc, char** argv) {
   if (vm.count("version")) {
     cout << "HipHop VM";
     cout << " " << HHVM_VERSION;
-    cout << " (" << (debug ? "dbg" : "rel") << ")\n";
+    cout << " (" << (debug ? "dbg" : "rel") << ")";
+    cout << " (" << (use_lowptr ? "lowptr" : "non-lowptr") << ")\n";
     cout << "Compiler: " << compilerId() << "\n";
     cout << "Repo schema: " << repoSchemaId() << "\n";
     return 0;

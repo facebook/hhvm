@@ -99,7 +99,7 @@ function jit_serialize_option(string $cmd, $test, $options, $serialize) {
   $cmds = explode(' -- ', $cmd, 2);
   $cmds[0] .=
     ' --count=' . ($serialize ? (int)$options['jit-serialize'] + 1 : 1) .
-    " -vEval.JitSerdesFile=" . $serialized .
+    " -vEval.JitSerdesFile=\"" . $serialized . "\"" .
     " -vEval.JitSerdesMode=" . ($serialize ? 'Serialize' : 'DeserializeOrFail').
     ($serialize ? " -vEval.JitSerializeOptProfRequests=1" : '');
   if (isset($options['jitsample']) && $serialize) {
@@ -2399,6 +2399,12 @@ function should_skip_test_simple(
   if (isset($options['lazyclass']) &&
       file_exists("$test.$no_lazyclass_tag")) {
     return 'skip-lazyclass';
+  }
+
+  $no_jitserialize_tag = "nojitserialize";
+  if (isset($options['jit-serialize']) &&
+      file_exists("$test.$no_jitserialize_tag")) {
+    return 'skip-jit-serialize';
   }
 
   return null;

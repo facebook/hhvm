@@ -120,7 +120,6 @@ std::atomic<size_t> Unit::s_liveUnits{0};
 Unit::Unit()
   : m_interpretOnly(false)
   , m_extended(false)
-  , m_serialized(false)
   , m_ICE(false)
 {
   ++s_createdUnits;

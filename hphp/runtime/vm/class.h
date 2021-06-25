@@ -829,19 +829,6 @@ public:
    */
   bool forbidsDynamicProps() const;
 
-  /*
-   * Return true, and set the m_serialized flag, iff this Class hasn't
-   * been serialized yet (see prof-data-serialize.cpp).
-   *
-   * Not thread safe - caller is responsible for any necessary locking.
-   */
-  bool serialize() const;
-
-  /*
-   * Return true if this class was already serialized.
-   */
-  bool wasSerialized() const;
-
   /////////////////////////////////////////////////////////////////////////////
   // Property initialization.                                           [const]
 
@@ -1853,10 +1840,6 @@ private:
 
   bool m_needsInitThrowable : 1;
   bool m_hasDeepInitProps : 1;
-  /*
-   * Whether this class has been serialized yet.
-   */
-  mutable bool m_serialized : 1;
 
   // NB: 7 bits available here (in USE_LOWPTR builds).
 

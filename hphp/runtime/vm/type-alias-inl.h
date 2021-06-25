@@ -54,19 +54,6 @@ inline TypeAlias TypeAlias::From(TypeAlias req, const PreTypeAlias* alias) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Serialization.
-
-inline bool TypeAlias::serialize() const {
-  if (m_serialized) return false;
-  m_serialized = true;
-  return true;
-}
-
-inline bool TypeAlias::wasSerialized() const {
-  return m_serialized;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Comparison.
 
 inline bool TypeAlias::same(const TypeAlias& req) const {

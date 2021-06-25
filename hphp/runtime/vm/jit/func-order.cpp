@@ -331,7 +331,7 @@ uint64_t compute() {
 void serialize(ProfDataSerializer& ser) {
   write_raw(ser, safe_cast<uint32_t>(s_funcOrder.size()));
   for (auto const funcId : s_funcOrder) {
-    write_raw(ser, funcId);
+    write_func_id(ser, funcId);
   }
 }
 
@@ -340,8 +340,7 @@ void deserialize(ProfDataDeserializer& des) {
   s_funcOrder.clear();
   s_funcOrder.reserve(sz);
   for (auto i = sz; i > 0; --i) {
-    auto const origId = read_raw<FuncId>(des);
-    s_funcOrder.push_back(FuncId::fromInt(des.getFid(origId.toInt())));
+    s_funcOrder.push_back(read_func_id(des));
   }
 }
 

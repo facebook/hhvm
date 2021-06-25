@@ -418,16 +418,6 @@ inline bool Class::forbidsDynamicProps() const {
   return attrs() & AttrForbidDynamicProps;
 }
 
-inline bool Class::serialize() const {
-  if (m_serialized) return false;
-  m_serialized = true;
-  return true;
-}
-
-inline bool Class::wasSerialized() const {
-  return m_serialized;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Property initialization.
 

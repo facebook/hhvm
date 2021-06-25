@@ -2028,7 +2028,6 @@ Class::Class(PreClass* preClass, Class* parent,
   , m_needsPropInitialCheck{false}
   , m_hasReifiedGenerics{false}
   , m_hasReifiedParent{false}
-  , m_serialized(false)
   , m_parent(parent)
 #ifndef NDEBUG
   , m_magic{kMagic}

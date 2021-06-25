@@ -200,8 +200,7 @@ void RecordDesc::setFields() {
 
 RecordDesc::RecordDesc(PreRecordDesc* preRec, RecordDesc* parent)
   : m_parent(parent)
-  , m_preRec(PreRecordDescPtr(preRec))
-  , m_serialized(false) {
+  , m_preRec(PreRecordDescPtr(preRec)) {
   setParent();
   setFields();
 }
@@ -231,13 +230,4 @@ const RecordDesc* RecordDesc::commonAncestor(const RecordDesc* rec) const {
   return nullptr;
 }
 
-bool RecordDesc::serialize() const {
-  if (m_serialized) return false;
-  m_serialized = true;
-  return true;
-}
-
-bool RecordDesc::wasSerialized() const {
-  return m_serialized;
-}
 }

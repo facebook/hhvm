@@ -186,6 +186,14 @@ inline ArraySpec::ArraySpec(const RepoAuthType::Array* type)
   assertx(checkInvariants());
 }
 
+inline ArraySpec::ArraySpec(ArrayLayout layout,
+                            const RepoAuthType::Array* type)
+  : m_layout(layout.toUint16())
+  , m_type(reinterpret_cast<uintptr_t>(type))
+{
+  assertx(checkInvariants());
+}
+
 inline ArraySpec ArraySpec::narrowToLayout(ArrayLayout layout) const {
   return *this & ArraySpec(layout);
 }

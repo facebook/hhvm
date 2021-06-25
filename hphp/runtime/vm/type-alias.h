@@ -105,7 +105,6 @@ struct TypeAlias {
 
   explicit TypeAlias(const PreTypeAlias* preTypeAlias)
     : m_preTypeAlias(preTypeAlias)
-    , m_serialized(false)
   {}
 
   const PreTypeAlias* preTypeAlias() const { return m_preTypeAlias; }
@@ -114,25 +113,8 @@ struct TypeAlias {
   UserAttributeMap userAttrs() const { return m_preTypeAlias->userAttrs; }
   Array typeStructure() const { return m_preTypeAlias->typeStructure; }
 
-  /*
-   * Return true, and set the m_serialized flag, iff this Class hasn't
-   * been serialized yet (see prof-data-serialize.cpp).
-   *
-   * Not thread safe - caller is responsible for any necessary locking.
-   */
-  bool serialize() const;
-
-  /*
-   * Return true if this class was already serialized.
-   */
-  bool wasSerialized() const;
-
 private:
   const PreTypeAlias* m_preTypeAlias{nullptr};
-  /*
-   * Whether this type alias has been serialized yet.
-   */
-  mutable bool m_serialized : 1;
 };
 
 bool operator==(const TypeAlias& l, const TypeAlias& r);
@@ -144,4 +126,3 @@ bool operator!=(const TypeAlias& l, const TypeAlias& r);
 #define incl_HPHP_TYPE_ALIAS_INL_H_
 #include "hphp/runtime/vm/type-alias-inl.h"
 #undef incl_HPHP_TYPE_ALIAS_INL_H_
-

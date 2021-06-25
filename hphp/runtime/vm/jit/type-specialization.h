@@ -53,6 +53,7 @@ struct ArraySpec {
   constexpr ArraySpec();
   explicit ArraySpec(ArrayLayout layout);
   explicit ArraySpec(const RepoAuthType::Array* type);
+  ArraySpec(ArrayLayout layout, const RepoAuthType::Array* type);
 
   /*
    * Update the layout of the ArraySpec wit the given info, if it is possible

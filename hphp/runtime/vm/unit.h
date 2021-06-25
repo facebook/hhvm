@@ -632,14 +632,6 @@ public:
    */
   SymbolRefs* claimSymbolRefsForPrefetch();
 
-  // Return true, and set the m_serialized flag, iff this Unit hasn't
-  // been serialized yet (see prof-data-serialize.cpp).
-  bool serialize() const {
-    if (m_serialized) return false;
-    const_cast<Unit*>(this)->m_serialized = true;
-    return true;
-  }
-
   // Total number of Units ever created
   static size_t createdUnitCount() { return s_createdUnits; }
 
@@ -671,7 +663,6 @@ private:
   std::atomic<uint8_t> m_mergeState{MergeState::Unmerged};
   bool m_interpretOnly : 1;
   bool m_extended : 1;
-  bool m_serialized : 1;
   bool m_ICE : 1; // was this unit the result of an internal compiler error
 
   FuncVec m_funcs;

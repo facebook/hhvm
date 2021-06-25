@@ -799,12 +799,6 @@ inline void Func::setMethodSlot(Slot s) {
   m_methodSlot = s;
 }
 
-inline bool Func::serialize() const {
-  if (m_serialized) return false;
-  const_cast<Func*>(this)->m_serialized = true;
-  return true;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 inline const Func::ExtendedSharedData* Func::extShared() const {

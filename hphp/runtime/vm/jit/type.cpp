@@ -398,7 +398,9 @@ void Type::serialize(ProfDataSerializer& ser) const {
     return write_record(ser, t.recSpec().rec());
   }
   if (key == TypeKey::ArrSpec) {
-    return write_raw(ser, t.m_extra);
+    auto const arrSpec = t.arrSpec();
+    write_layout(ser, arrSpec.layout());
+    return write_array_rat(ser, arrSpec.type());
   }
 }
 
@@ -460,10 +462,9 @@ Type Type::deserialize(ProfDataDeserializer& ser) {
       }
     } else {
       assertx(key == TypeKey::ArrSpec);
-      read_raw(ser, t.m_extra);
-      if (auto const arr = t.m_arrSpec.type()) {
-        t.m_arrSpec.setType(ser.remap(arr));
-      }
+      auto const layout = read_layout(ser);
+      auto const type = read_array_rat(ser);
+      t.m_arrSpec = ArraySpec{layout, type};
     }
     return t;
   }();

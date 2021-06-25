@@ -1162,13 +1162,6 @@ struct Func final {
   void setMethodSlot(Slot s);
   void setGenerated(bool b);
 
-  // Return true, and set the m_serialized flag, iff this Func hasn't
-  // been serialized yet (see prof-data-serialize.cpp).
-  bool serialize() const;
-
-  // Returns true if this function has already been serialized.
-  bool wasSerialized() const { return m_serialized; }
-
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
@@ -1713,7 +1706,6 @@ private:
   bool m_isPreFunc : 1;
   bool m_hasPrivateAncestor : 1;
   bool m_shouldSampleJit : 1;
-  bool m_serialized : 1;
   bool m_hasForeignThis : 1;
   bool m_registeredInDataMap : 1;
   // 2 free bits

@@ -1,0 +1,2 @@
+File "context_alias_error.php", line 4, characters 9-9:
+Context x should begin with an uppercase letter (Parsing[1002])

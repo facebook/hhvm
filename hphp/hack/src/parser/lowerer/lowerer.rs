@@ -5171,9 +5171,20 @@ where
                 }
                 let (_super_constraint, as_constraint) =
                     Self::p_ctx_constraints(&c.as_constraint, env)?;
+
+                let pos_name = Self::pos_name(&c.name, env)?;
+                if let Some(first_char) = pos_name.1.chars().nth(0) {
+                    if first_char.is_lowercase() {
+                        Self::raise_parsing_error(
+                            &c.name,
+                            env,
+                            &syntax_error::user_ctx_should_be_caps(&pos_name.1),
+                        )
+                    }
+                }
                 Ok(vec![ast::Def::mk_typedef(ast::Typedef {
                     annotation: (),
-                    name: Self::pos_name(&c.name, env)?,
+                    name: pos_name,
                     tparams,
                     constraint: as_constraint,
                     user_attributes: itertools::concat(

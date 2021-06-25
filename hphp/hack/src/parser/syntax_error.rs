@@ -1022,3 +1022,10 @@ pub fn out_of_float_range(float: &str) -> Error {
         float.to_string(),
     ))
 }
+
+pub fn user_ctx_should_be_caps(ctx_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Context {} should begin with an uppercase letter",
+        ctx_name.to_string()
+    ))
+}

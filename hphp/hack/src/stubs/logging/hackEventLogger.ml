@@ -455,7 +455,19 @@ module CGroup = struct
 end
 
 module ReHulk = struct
-  let profile ~trace_log:_ = ()
+  let profile
+      ~recheck_id:_
+      ~start_time:_
+      ~action:_
+      ~re_worker:_
+      ~queued_duration:_
+      ~input_upload_duration:_
+      ~input_fetch_duration:_
+      ~output_upload_duration:_
+      ~output_fetch_duration:_
+      ~worker_duration:_
+      ~execution_duration:_ =
+    ()
 end
 
 module Memory = struct

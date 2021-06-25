@@ -145,10 +145,11 @@ let process_files_remote_execution
     (re_env : ReEnv.t)
     (ctx : Provider_context.t)
     (errors : Errors.t)
-    (files : check_file_computation list) : process_file_results =
+    (files : check_file_computation list)
+    (recheck_id : string option) : process_file_results =
   let fns = List.map files ~f:(fun file -> file.path) in
   let deps_mode = Provider_context.get_deps_mode ctx in
-  let errors' = Re.process_files re_env fns deps_mode in
+  let errors' = Re.process_files re_env fns deps_mode recheck_id in
   { errors = Errors.merge errors' errors; deferred_decls = [] }
 
 let process_file
@@ -496,7 +497,12 @@ let process_files
                 | fn -> Second fn)
           in
           let result =
-            process_files_remote_execution re_env ctx errors check_fns
+            process_files_remote_execution
+              re_env
+              ctx
+              errors
+              check_fns
+              check_info.recheck_id
           in
           let check_fns = List.map check_fns ~f:(fun f -> Check f) in
           (fns, check_fns, result.errors)

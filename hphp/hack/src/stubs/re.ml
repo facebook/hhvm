@@ -7,6 +7,10 @@
  *)
 
 let initialize_lease ~acquire_new_lease:_ = failwith "not implemented"
+
 let process_files
-    (_ : ReEnv.t) (_ : Relative_path.t list) (_ : Typing_deps.Mode.t) =
+    (_ : ReEnv.t)
+    (_ : Relative_path.t list)
+    (_ : Typing_deps.Mode.t)
+    (_ : string option) =
   failwith "not implemented"

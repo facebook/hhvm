@@ -9,4 +9,8 @@
 val initialize_lease : acquire_new_lease:bool -> ReEnv.t
 
 val process_files :
-  ReEnv.t -> Relative_path.t list -> Typing_deps.Mode.t -> Errors.t
+  ReEnv.t ->
+  Relative_path.t list ->
+  Typing_deps.Mode.t ->
+  string option ->
+  Errors.t

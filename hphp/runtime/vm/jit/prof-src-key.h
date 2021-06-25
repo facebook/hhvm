@@ -26,7 +26,7 @@ namespace HPHP { namespace jit {
  * A simple struct identifying a bytecode instruction in a given
  * profiling translation.
  */
-struct ProfSrcKey : private boost::totally_ordered<ProfSrcKey> {
+struct ProfSrcKey {
   TransID profTransId;
   SrcKey  srcKey;
 
@@ -37,11 +37,6 @@ struct ProfSrcKey : private boost::totally_ordered<ProfSrcKey> {
 
   bool operator==(const ProfSrcKey& other) const {
     return profTransId == other.profTransId && srcKey == other.srcKey;
-  }
-
-  bool operator<(const ProfSrcKey& other) const {
-    return profTransId < other.profTransId ||
-      (profTransId == other.profTransId && srcKey < other.srcKey);
   }
 
   struct Hasher;

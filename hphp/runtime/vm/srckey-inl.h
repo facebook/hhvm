@@ -178,8 +178,8 @@ inline bool SrcKey::operator==(const SrcKey& r) const {
   return m_atomicInt == r.m_atomicInt;
 }
 
-inline bool SrcKey::operator<(const SrcKey& r) const {
-  return m_atomicInt < r.m_atomicInt;
+inline bool SrcKey::operator!=(const SrcKey& r) const {
+  return m_atomicInt != r.m_atomicInt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

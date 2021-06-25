@@ -849,13 +849,11 @@ void IRBuilder::resetOffsetMapping() {
   m_skToBlockMap.clear();
 }
 
-jit::flat_map<SrcKey, Block*> IRBuilder::saveAndClearOffsetMapping() {
+IRBuilder::SkToBlockMap IRBuilder::saveAndClearOffsetMapping() {
   return std::move(m_skToBlockMap);
 }
 
-void IRBuilder::restoreOffsetMapping(
-  jit::flat_map<SrcKey, Block*>&& offsetMapping
-) {
+void IRBuilder::restoreOffsetMapping(SkToBlockMap&& offsetMapping) {
   m_skToBlockMap = std::move(offsetMapping);
 }
 

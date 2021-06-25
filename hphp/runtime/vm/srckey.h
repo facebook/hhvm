@@ -35,7 +35,7 @@ struct Unit;
  * A SrcKey is a logical source instruction---it's enough to identify
  * these using a (Func id, hhbc instruction) pair.
  */
-struct SrcKey : private boost::totally_ordered<SrcKey> {
+struct SrcKey {
   static_assert(sizeof(FuncId) == sizeof(uint32_t), "");
   static_assert(sizeof(Offset) == sizeof(uint32_t), "");
 
@@ -157,7 +157,7 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
    * SrcKeys are ordered by their AtomicInt values.
    */
   bool operator==(const SrcKey& r) const;
-  bool operator<(const SrcKey& r) const;
+  bool operator!=(const SrcKey& r) const;
 
   /*
    * Stringification.

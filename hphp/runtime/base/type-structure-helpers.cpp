@@ -363,8 +363,7 @@ bool typeStructureIsTypeList(
   std::vector<TypeParamInfo> tpinfo;
   bool found = false;
   if (!strict && clsname) {
-    auto const ne = NamedEntity::get(clsname);
-    if (auto const cls = Class::lookup(ne)) {
+    if (auto const cls = Class::lookup(clsname)) {
       found = true;
       tpinfo = cls->getReifiedGenericsInfo().m_typeParamInfo;
       if (tpinfo.size() == 0) return true;

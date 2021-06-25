@@ -771,12 +771,20 @@ inline Class* Class::load(const StringData* name) {
 }
 
 inline Class* Class::get(const StringData* name, bool tryAutoload) {
+  if (name->isSymbol()) {
+    if (auto const result = name->getCachedClass()) return result;
+  }
+  auto const orig = name;
   String normStr;
   auto ne = NamedEntity::get(name, true, &normStr);
   if (normStr) {
     name = normStr.get();
   }
-  return get(ne, name, tryAutoload);
+  auto const result = get(ne, name, tryAutoload);
+  if (orig->isSymbol() && result && classHasPersistentRDS(result)) {
+    const_cast<StringData*>(orig)->setCachedClass(result);
+  }
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

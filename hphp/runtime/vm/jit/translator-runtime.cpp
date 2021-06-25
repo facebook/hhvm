@@ -647,10 +647,6 @@ const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
 
 //////////////////////////////////////////////////////////////////////
 
-Class* lookupClsRDS(const StringData* name) {
-  return NamedEntity::get(name)->getCachedClass();
-}
-
 TypedValue lookupClsCns(const Class* cls, const StringData* cnsName) {
   return cls->clsCnsGet(cnsName);
 }

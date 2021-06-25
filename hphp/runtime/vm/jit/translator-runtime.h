@@ -163,8 +163,6 @@ int lookupClsCtxCns(const Class* cls, const StringData* cnsName);
 void trimExtraArgs(ActRec* ar);
 void shuffleExtraArgsVariadic(ActRec* ar);
 
-Class* lookupClsRDS(const StringData* name);
-
 /* Check if a method of the given name exists on the class. */
 bool methodExistsHelper(Class*, StringData*);
 

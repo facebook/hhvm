@@ -722,7 +722,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
     if (strncmp(cmd.c_str(), "jit-des-info", 13) == 0) {
-      if (!jit::ProfData::wasDeserialized()) {
+      if (isJitSerializing() || !jit::ProfData::wasDeserialized()) {
         transport->sendString("", 200);
         break;
       }

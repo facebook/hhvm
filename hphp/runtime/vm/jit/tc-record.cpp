@@ -143,7 +143,17 @@ void reportJitMaturity() {
   // When we jit from serialized profile data, aprof is empty. In order to make
   // jit maturity somewhat comparable between the two cases, we pretend to have
   // some profiling code.
-  auto const profSize = std::max(code().prof().used(), hotSize);
+  //
+  // If we've restarted to reload profiling data before RTA, aprof
+  // will be empty. Since hotSize and mainSize will also be zero in
+  // this case, our maturity will sit at 0. To avoid this, we've
+  // recorded the size of aprof before we restarted in the profiling
+  // data. Use that to simulate the size of aprof (this will be zero
+  // if we haven't restarted).
+  auto const profSize = std::max(
+    code().prof().used() + (isJitSerializing() ? ProfData::prevProfSize() : 0),
+    hotSize
+  );
   auto const mainSize = code().main().used();
 
   auto const fullSize = RuntimeOption::EvalJitMatureSize;

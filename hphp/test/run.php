@@ -100,8 +100,8 @@ function jit_serialize_option(string $cmd, $test, $options, $serialize) {
   $cmds[0] .=
     ' --count=' . ($serialize ? (int)$options['jit-serialize'] + 1 : 1) .
     " -vEval.JitSerdesFile=\"" . $serialized . "\"" .
-    " -vEval.JitSerdesMode=" . ($serialize ? 'Serialize' : 'DeserializeOrFail').
-    ($serialize ? " -vEval.JitSerializeOptProfRequests=1" : '');
+    " -vEval.JitSerdesMode=" . ($serialize ? 'Serialize' : 'DeserializeOrFail') .
+    ($serialize ? " -vEval.JitSerializeOptProfRequests=" . (int)$options['jit-serialize'] : '');
   if (isset($options['jitsample']) && $serialize) {
     $cmds[0] .= ' -vDeploymentId="' . $options['jitsample'] . '-serialize"';
   }
@@ -3086,6 +3086,9 @@ function run_test($options, $test) {
       $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
       $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
       if ($outputs === false) return false;
+      $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
+      $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
+      if ($outputs === false) return false;
       $hhvm[0] = jit_serialize_option($hhvm[0], $test, $options, false);
     }
 
@@ -3191,6 +3194,8 @@ function print_commands($tests, $options) {
     }
     if (isset($options['jit-serialize'])) {
       invariant(count($commands) === 1, 'get_options enforces jit mode only');
+      $hhbbc_cmds .=
+        jit_serialize_option($commands[0], $test, $options, true) . "\n";
       $hhbbc_cmds .=
         jit_serialize_option($commands[0], $test, $options, true) . "\n";
       $commands[0] = jit_serialize_option($commands[0], $test, $options, false);

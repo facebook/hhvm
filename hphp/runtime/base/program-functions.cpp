@@ -2534,22 +2534,65 @@ void hphp_process_init() {
       !RuntimeOption::EvalJitSerdesFile.empty() &&
       jit::mcgen::retranslateAllEnabled()) {
     auto const mode = RuntimeOption::EvalJitSerdesMode;
+    auto const numWorkers = RuntimeOption::EvalJitWorkerThreadsForSerdes ?
+        RuntimeOption::EvalJitWorkerThreadsForSerdes : Process::GetCPUCount();
+
+    auto const deserialize = [&] (auto const& f) {
+#if USE_JEMALLOC_EXTENT_HOOKS
+      auto const numArenas =
+        std::min(RO::EvalJitWorkerArenas,
+                 std::max(RO::EvalJitWorkerThreads, numWorkers));
+      setup_extra_arenas(numArenas);
+#endif
+      return f(
+        RO::EvalJitSerdesFile,
+        RO::EvalJitParallelDeserialize ? numWorkers : 1
+      );
+    };
+
+    auto const rta = [&] (const std::string& mark, bool skipSerialize) {
+      BootStats::mark(mark);
+      BootStats::set("prof_data_source_host",
+                     jit::ProfData::buildHost()->toCppString());
+      BootStats::set("prof_data_timestamp", jit::ProfData::buildTime());
+      RO::EvalJitProfileRequests = 0;
+      RO::EvalJitWorkerThreads = numWorkers;
+      // Run retranslateAll asynchronously, without waiting for it to finish
+      // here.
+      jit::mcgen::checkRetranslateAll(true, skipSerialize);
+    };
+
+    auto const tryPartialDeserialize = [&] {
+      if (!isJitSerializing()) return;
+      if (!jit::serializeOptProfEnabled()) return;
+      if (!RO::EvalJitSerializeOptProfRestart) return;
+
+      if (RO::ServerExecutionMode()) {
+        Logger::FInfo("Attempting to deserialize partial profile-data file: {}",
+                      RO::EvalJitSerdesFile);
+      }
+
+      auto const success = deserialize(jit::tryDeserializePartialProfData);
+      if (success) {
+        if (RO::ServerExecutionMode()) {
+          Logger::FInfo("Successfully deserialized partial profile-data file. "
+                        "Loaded {} units with {} workers",
+                        numLoadedUnits(), numWorkers);
+        }
+        rta("jit::tryDeserializePartialProfData", true);
+      } else if (RO::ServerExecutionMode()) {
+        Logger::FInfo("Failed deserializing partial profile-data file. "
+                      "Proceeding normally");
+      }
+    };
+
     if (isJitDeserializing()) {
       if (RuntimeOption::ServerExecutionMode()) {
         Logger::FInfo("JitDeserializeFrom: {}",
                       RuntimeOption::EvalJitSerdesFile);
       }
-      auto const numWorkers = RuntimeOption::EvalJitWorkerThreadsForSerdes ?
-        RuntimeOption::EvalJitWorkerThreadsForSerdes : Process::GetCPUCount();
-#if USE_JEMALLOC_EXTENT_HOOKS
-      auto const numArenas =
-        std::min(RuntimeOption::EvalJitWorkerArenas,
-                 std::max(RuntimeOption::EvalJitWorkerThreads, numWorkers));
-      setup_extra_arenas(numArenas);
-#endif
-      auto const errMsg = jit::deserializeProfData(
-        RuntimeOption::EvalJitSerdesFile,
-        RuntimeOption::EvalJitParallelDeserialize ? numWorkers : 1);
+
+      auto const errMsg = deserialize(jit::deserializeProfData);
 
       if (mode == JitSerdesMode::DeserializeAndDelete) {
         // Delete the serialized profile data when we finish reading
@@ -2565,16 +2608,8 @@ void hphp_process_init() {
           Logger::FInfo("JitDeserialize: Loaded {} Units with {} workers",
                         numLoadedUnits(), numWorkers);
         }
-        BootStats::mark("jit::deserializeProfData");
-        BootStats::set("prof_data_source_host",
-                       jit::ProfData::buildHost()->toCppString());
-        BootStats::set("prof_data_timestamp", jit::ProfData::buildTime());
-        RuntimeOption::EvalJitProfileRequests = 0;
-        RuntimeOption::EvalJitWorkerThreads = numWorkers;
+        rta("jit::deserializeProfData", false);
 
-        // Run retranslateAll asynchronously, without waiting for it to finish
-        // here.
-        jit::mcgen::checkRetranslateAll(true);
         if (mode == JitSerdesMode::DeserializeAndExit) {
           if (RuntimeOption::ServerExecutionMode()) {
             Logger::Info("JitDeserialize finished; exiting");
@@ -2597,10 +2632,15 @@ void hphp_process_init() {
           Logger::Info(errMsg +
                        ", scheduling one time serialization and restart");
           RuntimeOption::EvalJitSerdesMode = JitSerdesMode::SerializeAndExit;
+          tryPartialDeserialize();
         } else {
           Logger::Info(errMsg + ", will profile then retranslateAll");
         }
       }
+    } else {
+      // We're not deserializing. Check if we're serializing and if we
+      // have a partial file. If so, deserialize it and do a RTA.
+      tryPartialDeserialize();
     }
   }
 

@@ -66,9 +66,8 @@ struct ProfDataSerializer {
   // Atomically create the output file, or throw runtime error upon failure.
   void finalize();
 
-  std::string filename() {
-    return fileName;
-  }
+  const std::string& filename() const { return baseFileName; }
+
   struct Mappers {
   private:
     template <typename T>
@@ -116,7 +115,8 @@ private:
   static constexpr uint32_t buffer_size = 8192;
   uint32_t offset{0};
   char buffer[buffer_size];
-  const std::string& fileName;
+  std::string baseFileName;
+  std::string fileName;
   const FileMode fileMode;
   Mappers mappers;
 };
@@ -259,6 +259,8 @@ FuncId read_func_id(ProfDataDeserializer& des);
 std::string serializeProfData(const std::string& filename);
 std::string serializeOptProfData(const std::string& filename);
 std::string deserializeProfData(const std::string& filename, int numWorkers);
+
+bool tryDeserializePartialProfData(const std::string& filename, int numWorkers);
 
 // Return whether or not serialization of profile data for optimized code is
 // enabled.

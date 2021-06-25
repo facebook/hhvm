@@ -287,6 +287,14 @@ struct ProfData {
     s_wasDeserialized.store(true, std::memory_order_relaxed);
   }
 
+  static size_t prevProfSize() {
+    return s_prevProfSize.load(std::memory_order_relaxed);
+  }
+  static void setPrevProfSize(size_t s) {
+    assertx(isJitSerializing());
+    s_prevProfSize.store(s, std::memory_order_relaxed);
+  }
+
   /*
    * Allocate a new id for a translation. Depending on the kind of the
    * translation, a TransRec for it may or may not be created later by calling
@@ -653,6 +661,7 @@ struct ProfData {
   static std::atomic<StringData*> s_buildHost;
   static std::atomic<StringData*> s_tag;
   static std::atomic<int64_t> s_buildTime;
+  static std::atomic<size_t> s_prevProfSize;
 };
 
 //////////////////////////////////////////////////////////////////////

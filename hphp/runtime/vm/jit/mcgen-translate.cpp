@@ -270,8 +270,7 @@ void killProcess() {
 
 /*
  * Serialize the profile data, logging start/finish/error messages in server
- * mode.  This function returns true iff we have stopped the server in
- * SerializeAndExit mode.
+ * mode. This function returns true if retranslate-all should be skipped.
  */
 bool serializeProfDataAndLog() {
   auto const serverMode = RuntimeOption::ServerExecutionMode();
@@ -283,18 +282,32 @@ bool serializeProfDataAndLog() {
   VMWorker([&errMsg] () {
     errMsg = serializeProfData(RuntimeOption::EvalJitSerdesFile);
   }).run();
+
   if (serverMode) {
     if (errMsg.empty()) {
       Logger::Info("retranslateAll: serializing done");
     } else {
       Logger::FError("serializeProfData failed with: {}", errMsg);
     }
-    if (mode == JitSerdesMode::SerializeAndExit && !serializeOptProfEnabled()) {
+
+    if (mode == JitSerdesMode::Serialize) {
+      if (serializeOptProfEnabled() && RO::EvalJitSerializeOptProfRestart) {
+        Logger::Info("retranslateAll: deferring retranslate-all until restart");
+        return true;
+      }
+      return false;
+    }
+
+    assertx(mode == JitSerdesMode::SerializeAndExit);
+    if (!serializeOptProfEnabled() || RO::EvalJitSerializeOptProfRestart) {
+      Logger::Info("retranslateAll: deferring retranslate-all until restart");
       killProcess();
       return true;
     }
+    return false;
   }
-  return false;
+
+  return serializeOptProfEnabled() && RO::EvalJitSerializeOptProfRestart;
 }
 
 /*
@@ -321,8 +334,11 @@ void scheduleSerializeOptProf() {
     }
   }
 
-  auto const uptime = static_cast<int>(f_server_uptime()); // may be -1
-  if (delaySeconds > 0 && uptime >= 0) {
+  // f_server_uptime will return -1 if the http server is not yet
+  // active. In that case, set the uptime to 0, so that we'll trigger
+  // exactly delaySeconds after the server becomes active.
+  auto const uptime = std::max(0, static_cast<int>(f_server_uptime()));
+  if (delaySeconds > 0) {
     s_serializeOptProfSeconds = uptime + delaySeconds;
     if (serverMode) {
       Logger::FInfo("retranslateAll: scheduled serialization of optimized "
@@ -349,7 +365,7 @@ void scheduleSerializeOptProf() {
  *   4) Generate machine code for each of the profiled functions.
  *   5) Relocate the functions in the TC according to the selected order.
  */
-void retranslateAll() {
+void retranslateAll(bool skipSerialize) {
   const bool serverMode = RuntimeOption::ServerExecutionMode();
   const bool serialize = RuntimeOption::RepoAuthoritative &&
                          !RuntimeOption::EvalJitSerdesFile.empty() &&
@@ -378,7 +394,7 @@ void retranslateAll() {
   //    SerializeAndExit mode, without really doing the JIT, unless
   //    serialization of optimized code's profile is also enabled.
 
-  if (serialize && serializeProfDataAndLog()) return;
+  if (serialize && !skipSerialize && serializeProfDataAndLog()) return;
 
   // 4) Generate machine code for all the profiled functions.
 
@@ -581,11 +597,15 @@ bool retranslateAllEnabled() {
     RuntimeOption::EvalJitRetranslateAllSeconds != 0;
 }
 
-void checkRetranslateAll(bool force) {
+void checkRetranslateAll(bool force, bool skipSerialize) {
+  assertx(IMPLIES(skipSerialize, force));
+
   if (s_retranslateAllScheduled.load(std::memory_order_relaxed) ||
       !retranslateAllEnabled()) {
+    assertx(!force);
     return;
   }
+
   auto const serverMode = RuntimeOption::ServerExecutionMode();
   if (!force) {
     auto const uptime = static_cast<int>(f_server_uptime()); // may be -1
@@ -604,6 +624,7 @@ void checkRetranslateAll(bool force) {
 
   if (s_retranslateAllScheduled.exchange(true)) {
     // Another thread beat us.
+    assertx(!force);
     return;
   }
 
@@ -620,18 +641,18 @@ void checkRetranslateAll(bool force) {
         rds::local::init();
         zend_get_bigint_data();
         SCOPE_EXIT { rds::local::fini(); };
-        retranslateAll();
+        retranslateAll(false);
       });
     });
   } else {
     std::unique_lock<std::mutex> lock{s_rtaThreadMutex};
-    s_retranslateAllThread = std::thread([] {
+    s_retranslateAllThread = std::thread([skipSerialize] {
       BootStats::Block timer("retranslateall",
                              RuntimeOption::ServerExecutionMode());
       rds::local::init();
       zend_get_bigint_data();
       SCOPE_EXIT { rds::local::fini(); };
-      retranslateAll();
+      retranslateAll(skipSerialize);
     });
     if (!serverMode) s_retranslateAllThread.join();
   }

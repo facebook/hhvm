@@ -233,6 +233,7 @@ std::atomic_bool ProfData::s_wasDeserialized{false};
 std::atomic<StringData*> ProfData::s_buildHost{nullptr};
 std::atomic<StringData*> ProfData::s_tag{nullptr};
 std::atomic<int64_t> ProfData::s_buildTime{0};
+std::atomic<size_t> ProfData::s_prevProfSize{0};
 
 RDS_LOCAL_NO_CHECK(ProfData*, rl_profData)(nullptr);
 

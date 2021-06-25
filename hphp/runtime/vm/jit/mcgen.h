@@ -95,7 +95,7 @@ bool retranslateOpt(FuncId funcId);
  * In CLI mode, or when force is true, wait for retranslateAll to
  * finish; otherwise let it run in parallel.
  */
-void checkRetranslateAll(bool force = false);
+void checkRetranslateAll(bool force = false, bool skipSerialize = false);
 
 /*
  * If JIT optimized code profile-data serialization is enabled and scheduled to

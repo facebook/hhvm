@@ -46,6 +46,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/switch-profile.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/runtime/vm/jit/vasm-block-counters.h"
@@ -1011,32 +1012,61 @@ void merge_loaded_units(int numWorkers) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+void renameFile(const std::string& src, const std::string& dst) {
+  if (::rename(src.c_str(), dst.c_str()) != -1) return;
+
+  auto const msg =
+    folly::sformat("Failed to rename {} to {}, {}",
+                   src, dst, folly::errnoStr(errno));
+  Logger::Error(msg);
+  throw std::runtime_error(msg);
+};
+
+std::string mangleFilenameForCreate(const std::string& name) {
+  return name + ".part1";
+}
+
+std::string mangleFilenameForAppendStart(const std::string& name) {
+  return name + ".part2";
+}
+
+std::string mangleFilenameForAppendInProgress(const std::string& name) {
+  return name + ".part3";
+}
+
+////////////////////////////////////////////////////////////////////////////////
 }
 
 ProfDataSerializer::ProfDataSerializer(const std::string& name, FileMode mode)
-  : fileName(name)
+  : baseFileName(name)
   , fileMode(mode) {
 
-  std::string partialFile = name + ".part";
+  auto const check = [] (int ret, const std::string& file) {
+    if (ret != -1) return;
+    auto const msg =
+      folly::sformat("Failed to open file for write {}, {}", file,
+                     folly::errnoStr(errno));
+    Logger::Error(msg);
+    throw std::runtime_error(msg);
+  };
 
   if (fileMode == FileMode::Append) {
-    fd = open(partialFile.c_str(),
+    fileName = mangleFilenameForAppendInProgress(name);
+    auto const mangled = mangleFilenameForAppendStart(name);
+    fd = open(mangled.c_str(),
               O_CLOEXEC | O_APPEND | O_WRONLY, 0644);
+    check(fd, mangled);
+    renameFile(mangled, fileName);
   } else {
     // Delete old profile data to avoid confusion.  This should've happened from
     // outside the process, but in case it didn't happen, try to do it here.
     unlink(name.c_str());
 
-    fd = open(partialFile.c_str(),
+    fileName = mangleFilenameForCreate(name);
+    fd = open(fileName.c_str(),
               O_CLOEXEC | O_CREAT | O_TRUNC | O_WRONLY, 0644);
-  }
-
-  if (fd == -1) {
-    auto const msg =
-      folly::sformat("Failed to open file for write {}, {}", name,
-                     folly::errnoStr(errno));
-    Logger::Error(msg);
-    throw std::runtime_error(msg);
+    check(fd, fileName);
   }
 }
 
@@ -1046,21 +1076,19 @@ void ProfDataSerializer::finalize() {
   offset = 0;
   close(fd);
   fd = -1;
-  std::string partialFile = fileName + ".part";
+
+  // Rename file to its appropriate new name. If we're going to append
+  // additional profile data, rename it to another (different)
+  // temporary name (to mark the base data has been written). If not,
+  // rename it to its file name (signifying completion).
   if (fileMode == FileMode::Create && serializeOptProfEnabled()) {
     // Don't rename the file to it's final name yet as we're still going to
     // append the profile data collected for the optimized code to it.
-    FTRACE(1, "Finished serializing base profile data to {}\n", partialFile);
+    FTRACE(1, "Finished serializing base profile data to {}\n", fileName);
+    renameFile(fileName, mangleFilenameForAppendStart(baseFileName));
   } else {
-    if (rename(partialFile.c_str(), fileName.c_str()) == -1) {
-      auto const msg =
-        folly::sformat("Failed to rename {} to {}, {}",
-                       partialFile, fileName, folly::errnoStr(errno));
-      Logger::Error(msg);
-      throw std::runtime_error(msg);
-    } else {
-      FTRACE(1, "Finished serializing all profile data to {}\n", fileName);
-    }
+    FTRACE(1, "Finished serializing all profile data to {}\n", fileName);
+    renameFile(fileName, baseFileName);
   }
 }
 
@@ -1070,8 +1098,7 @@ ProfDataSerializer::~ProfDataSerializer() {
     // the data.  The file is likely corrupt or incomplete, so discard it.
     ftruncate(fd, 0);
     close(fd);
-    std::string partialFile = fileName + ".part";
-    unlink(partialFile.c_str());
+    unlink(fileName.c_str());
   }
 }
 
@@ -1842,6 +1869,10 @@ std::string serializeProfData(const std::string& filename) {
       serializeBespokeLayouts(ser);
     }
 
+    // Record the size of prof so we can use it to fake jit.maturity
+    // if we're going to restart before running RTA.
+    write_raw(ser, (size_t)jit::tc::code().prof().used());
+
     ser.finalize();
 
     if (serializeOptProfEnabled()) {
@@ -1952,6 +1983,12 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
       deserializeBespokeLayouts(ser);
     }
 
+    // If isJitSerializing() is true, we've restarted to reload the
+    // profiling data. Record the size of prof before we restarted so
+    // we can fake jit.maturity.
+    auto const prevProfSize = read_raw<size_t>(ser);
+    if (isJitSerializing()) ProfData::setPrevProfSize(prevProfSize);
+
     if (!ser.done()) {
       // We have profile data for the optimized code, so deserialize it too.
       FuncOrder::deserialize(ser);
@@ -1978,11 +2015,21 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     // in (resulting in fatals when the wrapper tries to call it).
     merge_loaded_units(numWorkers);
 
+    if (isJitSerializing() && serializeOptProfEnabled()) {
+      s_lastMappers = ser.getMappers();
+    }
+
     return "";
   } catch (std::runtime_error& err) {
     return folly::sformat("Failed to deserialize profile data {}: {}",
                           filename, err.what());
   }
+}
+
+bool tryDeserializePartialProfData(const std::string& filename,
+                                   int numWorkers) {
+  auto const mangled = mangleFilenameForAppendStart(filename);
+  return deserializeProfData(mangled, numWorkers).empty();
 }
 
 bool serializeOptProfEnabled() {

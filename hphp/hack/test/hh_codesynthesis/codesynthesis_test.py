@@ -144,12 +144,18 @@ class ExtractLogicRulesTest(unittest.TestCase):
             'extends_to("A", "B").',
             'extends_to("I", "B").',
             'extends_to("T", "A").',
+            'method("A", "foo", "B").',
+            'type("A", "B").',
+            'type("I", "B").',
+            'type("T", "A").',
+            'type("T", "B").',
             'symbols("A";"B";"I";"T").',
         ]
         deps = """\
 Extends A -> Type B
 Extends I -> Type B
 Extends T -> Type A, Broke
+Method A::foo -> Type B
 Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B"""
@@ -231,17 +237,23 @@ Extends I4 -> Type C5,
             hh_codesynthesis.extract_logic_rules(deps.replace(",\n", ",").split("\n")),
         )
 
-    def test_extends_dependency(self) -> None:
+    def test_extends_type_method_dependency(self) -> None:
         exp = [
             'extends_to("A", "B").',
             'extends_to("I", "B").',
             'extends_to("T", "A").',
+            'method("A", "foo", "B").',
+            'type("A", "B").',
+            'type("I", "B").',
+            'type("T", "A").',
+            'type("T", "B").',
             'symbols("A";"B";"I";"T").',
         ]
         deps = """\
 Extends A -> Type B
 Extends I -> Type B
 Extends T -> Type A
+Method A::foo -> Type B
 Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B"""
@@ -324,6 +336,8 @@ class DoReasoningTest(unittest.TestCase):
 
     def test_extends_dependency_with_rule_extraction(self) -> None:
         exp = [
+            'add_method("A","foo")',
+            'add_method("B","foo")',
             'class("B")',
             'class("I")',
             'extends("A","T")',
@@ -336,6 +350,7 @@ class DoReasoningTest(unittest.TestCase):
 Extends A -> Type B
 Extends I -> Type B
 Extends T -> Type A
+Method A::foo -> Type B
 Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B
@@ -395,12 +410,18 @@ class ReadFromFileTest(unittest.TestCase):
             'extends_to("A", "B").',
             'extends_to("I", "B").',
             'extends_to("T", "A").',
+            'method("A", "foo", "B").',
+            'type("A", "B").',
+            'type("I", "B").',
+            'type("T", "A").',
+            'type("T", "B").',
             'symbols("A";"B";"I";"T").',
         ]
         deps = """\
 Extends A -> Type B
 Extends I -> Type B
 Extends T -> Type A
+Method A::foo -> Type B
 Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B

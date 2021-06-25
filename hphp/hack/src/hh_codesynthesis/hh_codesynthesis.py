@@ -61,6 +61,42 @@ class ClingoContext:
         return Number(self.higher_bound)
 
 
+# Helper classes to handle each dependency edge.
+# lhs_parser parse the left hand side symbols into potential depends on the
+# separator. For example,
+#       Class::Method with "::" will produce [Class, Method]
+#       Class with None will produce [Class]
+class DependencyEdgeHandler:
+    def lhs_parser(self, lhs: str, separator: Optional[str]) -> List[str]:
+        return lhs.split(separator)
+
+
+# The following rule_writers takes the return value from `lhs_parser` along
+# with a rhs dep_symbol to output a rule accordingly.
+class ExtendEdgeHandler(DependencyEdgeHandler):
+    def parse(self, lhs: str) -> List[str]:
+        return self.lhs_parser(lhs, None)
+
+    def rule_writer(self, lhs: List[str], rhs: str) -> str:
+        return f'extends_to("{lhs[0]}", "{rhs}").'
+
+
+class TypeEdgeHandler(DependencyEdgeHandler):
+    def parse(self, lhs: str) -> List[str]:
+        return self.lhs_parser(lhs, None)
+
+    def rule_writer(self, lhs: List[str], rhs: str) -> str:
+        return f'type("{lhs[0]}", "{rhs}").'
+
+
+class MethodEdgeHandler(DependencyEdgeHandler):
+    def parse(self, lhs: str) -> List[str]:
+        return self.lhs_parser(lhs, "::")
+
+    def rule_writer(self, lhs: List[str], rhs: str) -> str:
+        return f'method("{lhs[0]}", "{lhs[1]}", "{rhs}").'
+
+
 # Generate logic rules based on given parameters.
 def generate_logic_rules() -> List[str]:
     rules: List[str] = []
@@ -96,6 +132,11 @@ def generate_logic_rules() -> List[str]:
 def extract_logic_rules(lines: List[str]) -> List[str]:
     rules = []
     symbols = set()
+    handlers = {
+        "Extends": ExtendEdgeHandler(),
+        "Type": TypeEdgeHandler(),
+        "Method": MethodEdgeHandler(),
+    }
 
     for line in lines:
         # Required input formatting to get "Extends A -> Type B, Type C, Type D".
@@ -114,20 +155,24 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
             # ToDo: Add logging if we needed to track wrong format on lhs.
             continue
 
-        # ToDo: Dict{"lhs[0]": "function to convert"} for later extension.
-        if lhs[0] == "Extends":
-            # Collecting symbols.
-            symbols.add(f'"{lhs[1]}"')
-            # Processing each deps ["Type B", "Type C", "Type D"]
-            for dep in rhs.rstrip("\n").split(","):
-                # dep = "Type X"
-                dep = dep.split()
-                if len(dep) != 2:
-                    # ToDo: Add logging if we needed to track wrong format on rhs.
-                    continue
-                (dep_type, dep_symbol) = dep
-                symbols.add(f'"{dep_symbol}"')
-                rules.append(f'extends_to("{lhs[1]}", "{dep_symbol}").')
+        # Dict{"lhs[0]": "handler to convert"}.
+        if lhs[0] not in handlers:
+            continue
+        handler = handlers[lhs[0]]
+
+        lhs_tokens = handler.parse(lhs[1])
+        # Collecting symbols.
+        symbols.add(f'"{lhs_tokens[0]}"')
+        # Processing each deps ["Type B", "Type C", "Type D"]
+        for dep in rhs.rstrip("\n").split(","):
+            # dep = "Type X"
+            dep = dep.split()
+            if len(dep) != 2:
+                # ToDo: Add logging if we needed to track wrong format on rhs.
+                continue
+            (dep_type, dep_symbol) = dep
+            symbols.add(f'"{dep_symbol}"')
+            rules.append(handler.rule_writer(lhs_tokens, dep_symbol))
 
     rules.append("symbols({}).".format(";".join(sorted(symbols))))
     return rules

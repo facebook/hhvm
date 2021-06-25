@@ -1176,8 +1176,6 @@ struct RuntimeOption {
   F(bool, HackArrCompatSerializeNotices, false)                         \
   /* When this flag is on, var_export outputs d/varrays. */             \
   F(bool, HackArrDVArrVarExport, false)                                 \
-  /* Raise a notice for `$dict is shape` and `$vec is tuple`. */        \
-  F(bool, HackArrIsShapeTupleNotices, false)                            \
   /* Notice on array serialization behavior, even if array provenance   \
    * is disabled. If we see these notices, we're missing markings. */   \
   F(bool, RaiseArraySerializationNotices, false)                        \

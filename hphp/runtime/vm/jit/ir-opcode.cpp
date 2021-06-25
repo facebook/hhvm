@@ -267,8 +267,7 @@ Optional<Opcode> negateCmpOp(Opcode opc) {
 bool opcodeMayRaise(Opcode opc) {
   switch (opc) {
   case IsTypeStruct:
-    return RuntimeOption::EvalHackArrIsShapeTupleNotices ||
-           RuntimeOption::EvalIsExprEnableUnresolvedWarning ||
+    return RuntimeOption::EvalIsExprEnableUnresolvedWarning ||
            RuntimeOption::EvalIsVecNotices;
 
   case EqStr:

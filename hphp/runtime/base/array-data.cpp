@@ -705,12 +705,7 @@ int64_t ArrayData::Compare(const ArrayData* ad1, const ArrayData* ad2) {
 bool ArrayData::same(const ArrayData* v2) const {
   assertx(v2);
 
-  if (toDataType() != v2->toDataType()) {
-    if (UNLIKELY(checkHACCompare())) {
-      raiseHackArrCompatArrHackArrCmp();
-    }
-    return false;
-  }
+  if (toDataType() != v2->toDataType()) return false;
 
   if (!bothVanilla(this, v2)) return Same(this, v2);
   if (isVanillaVec())  return PackedArray::VecSame(this, v2);

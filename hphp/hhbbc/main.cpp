@@ -501,7 +501,6 @@ int main(int argc, char** argv) try {
   // When running hhbbc, these option is loaded from GD, and will override CLI.
   // When running hhvm, these option is not loaded from GD, but read from CLI.
   RO::EvalHackArrCompatNotices                  = gd.HackArrCompatNotices;
-  RO::EvalHackArrCompatCheckCompare             = gd.HackArrCompatNotices;
   RO::EvalForbidDynamicCallsToFunc              = gd.ForbidDynamicCallsToFunc;
   RO::EvalForbidDynamicCallsToClsMeth           = gd.ForbidDynamicCallsToClsMeth;
   RO::EvalForbidDynamicCallsToInstMeth          = gd.ForbidDynamicCallsToInstMeth;

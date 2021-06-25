@@ -787,8 +787,6 @@ std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);
 
 StringData* getHackArrCompatNullHackArrayKeyMsg();
 
-bool checkHACCompare();
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }

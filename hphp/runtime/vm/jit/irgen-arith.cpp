@@ -802,16 +802,6 @@ void raiseClsMethToVecWarningHelper(IRGS& env) {
   }
 }
 
-void raiseHACCompareWarningHelper(IRGS& env) {
-  if (checkHACCompare()) {
-    gen(
-      env,
-      RaiseHackArrCompatNotice,
-      cns(env, makeStaticString(Strings::HACKARR_COMPAT_ARR_HACK_ARR_CMP))
-    );
-  }
-}
-
 }
 
 SSATmp* implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {

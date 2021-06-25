@@ -192,7 +192,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 #define BIND_HAC_OPTION_SELF(Name)  BIND_HAC_OPTION(Name, Name)
 
   BIND_HAC_OPTION_SELF(Notices)
-  BIND_HAC_OPTION(CheckCompare, Notices)
   BIND_HAC_OPTION_SELF(SerializeNotices)
   BIND_HAC_OPTION_SELF(CompactSerializeNotices)
 

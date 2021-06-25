@@ -266,10 +266,6 @@ Optional<Opcode> negateCmpOp(Opcode opc) {
 
 bool opcodeMayRaise(Opcode opc) {
   switch (opc) {
-  case NSameArrLike:
-  case SameArrLike:
-    return RuntimeOption::EvalHackArrCompatCheckCompare;
-
   case IsTypeStruct:
     return RuntimeOption::EvalHackArrIsShapeTupleNotices ||
            RuntimeOption::EvalIsExprEnableUnresolvedWarning ||
@@ -406,6 +402,7 @@ bool opcodeMayRaise(Opcode opc) {
   case NeqStrInt:
   case NewKeysetArray:
   case NewRecord:
+  case NSameArrLike:
   case OODeclExists:
   case OrdStrIdx:
   case OutlineSetOp:
@@ -436,6 +433,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RecordReifiedGenericsAndGetTSList:
   case ResolveTypeStruct:
   case ReturnHook:
+  case SameArrLike:
   case SetElem:
   case SetNewElem:
   case SetNewElemDict:

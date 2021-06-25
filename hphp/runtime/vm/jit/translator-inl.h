@@ -44,7 +44,6 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::IterNext:  // Ditto
     case Op::LIterNext: // Ditto
     case Op::Throw:
-    case Op::Eval:
     case Op::NativeImpl:
     case Op::BreakTraceHint:
     case Op::MemoGet:
@@ -64,11 +63,6 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::FCallObjMethodD:
     case Op::ContEnter:
     case Op::ContRaise:
-    case Op::Incl:
-    case Op::InclOnce:
-    case Op::Req:
-    case Op::ReqOnce:
-    case Op::ReqDoc:
       return ControlFlowInfo::ChangesPC;
     default:
       return ControlFlowInfo::None;

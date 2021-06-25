@@ -4567,8 +4567,7 @@ OPTBLD_INLINE void iopLIterFree(Iter* it, tv_lval) {
   it->free();
 }
 
-OPTBLD_INLINE void inclOp(PC origpc, PC& pc, InclOpFlags flags,
-                          const char* opName) {
+OPTBLD_INLINE void inclOp(InclOpFlags flags, const char* opName) {
   TypedValue* c1 = vmStack().topC();
   auto path = String::attach(prepareKey(*c1));
   bool initial;
@@ -4614,38 +4613,35 @@ OPTBLD_INLINE void inclOp(PC origpc, PC& pc, InclOpFlags flags,
   }
 
   if (!(flags & InclOpFlags::Once) || initial) {
-    vmpc() = origpc;
     unit->merge();
   }
   vmStack().pushBool(true);
 }
 
-OPTBLD_INLINE void iopIncl(PC origpc, PC& pc) {
-  inclOp(origpc, pc, InclOpFlags::Default, "include");
+OPTBLD_INLINE void iopIncl() {
+  inclOp(InclOpFlags::Default, "include");
 }
 
-OPTBLD_INLINE void iopInclOnce(PC origpc, PC& pc) {
-  inclOp(origpc, pc, InclOpFlags::Once, "include_once");
+OPTBLD_INLINE void iopInclOnce() {
+  inclOp(InclOpFlags::Once, "include_once");
 }
 
-OPTBLD_INLINE void iopReq(PC origpc, PC& pc) {
-  inclOp(origpc, pc, InclOpFlags::Fatal, "require");
+OPTBLD_INLINE void iopReq() {
+  inclOp(InclOpFlags::Fatal, "require");
 }
 
-OPTBLD_INLINE void iopReqOnce(PC origpc, PC& pc) {
-  inclOp(origpc, pc, InclOpFlags::Fatal | InclOpFlags::Once, "require_once");
+OPTBLD_INLINE void iopReqOnce() {
+  inclOp(InclOpFlags::Fatal | InclOpFlags::Once, "require_once");
 }
 
-OPTBLD_INLINE void iopReqDoc(PC origpc, PC& pc) {
+OPTBLD_INLINE void iopReqDoc() {
   inclOp(
-    origpc,
-    pc,
     InclOpFlags::Fatal | InclOpFlags::Once | InclOpFlags::DocRoot,
     "require_once"
   );
 }
 
-OPTBLD_INLINE void iopEval(PC origpc, PC& pc) {
+OPTBLD_INLINE void iopEval() {
   TypedValue* c1 = vmStack().topC();
 
   if (UNLIKELY(RuntimeOption::EvalAuthoritativeMode)) {
@@ -4688,7 +4684,6 @@ OPTBLD_INLINE void iopEval(PC origpc, PC& pc) {
     vmStack().pushBool(false);
     return;
   }
-  vmpc() = origpc;
   unit->merge();
   vmStack().pushBool(true);
 }

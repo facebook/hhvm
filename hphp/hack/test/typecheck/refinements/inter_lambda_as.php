@@ -1,7 +1,7 @@
 <?hh
 
-class B {}
-class C {}
+interface B {}
+interface C {}
 function test(vec<B> $v): void {
   $w = Vec_map($v, $x ==> $x as ?C);
   hh_force_solve();

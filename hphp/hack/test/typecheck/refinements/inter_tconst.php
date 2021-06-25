@@ -5,7 +5,7 @@ abstract class A {
   abstract const type Ta as arraykey;
   abstract public function get(): this::Ta;
 }
-class B {}
+interface B {}
 
 function geta<T as A, Ta>(T $x): Ta where Ta = T::Ta {
   return $x->get();

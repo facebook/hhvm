@@ -24,10 +24,16 @@ class E extends D {
   protected function accessible(): void {}
 }
 
-trait T where this as C this as E {
+trait T where this as E {
   public function foo(): void {
     $this->accessible();
     $this->me(); // Error!
+  }
+}
+
+trait T2 where this as C {
+  public function foo(): void {
+    $this->accessible(); // Error
   }
 }
 

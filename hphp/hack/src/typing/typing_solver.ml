@@ -757,7 +757,7 @@ let rec non_null env pos ty =
 
       method! on_tdependent env r dep cstr =
         let ty = mk (r, Tdependent (dep, cstr)) in
-        match TUtils.get_concrete_supertypes env ty with
+        match TUtils.get_concrete_supertypes ~abstract_enum:true env ty with
         | (env, [ty'])
           when Typing_utils.is_sub_type_for_union
                  env
@@ -769,7 +769,7 @@ let rec non_null env pos ty =
 
       method! on_tnewtype env r x tyl cstr =
         let ty = mk (r, Tnewtype (x, tyl, cstr)) in
-        match TUtils.get_concrete_supertypes env ty with
+        match TUtils.get_concrete_supertypes ~abstract_enum:true env ty with
         | (env, [ty'])
           when Typing_utils.is_sub_type_for_union
                  env

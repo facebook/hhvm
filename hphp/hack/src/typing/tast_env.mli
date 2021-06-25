@@ -112,8 +112,12 @@ val non_null : env -> Pos_or_decl.t -> Tast.ty -> env * Tast.ty
     return the type itself if there is no "as" constraint. In the case of a
     generic parameter whose "as" constraint is another generic parameter, repeat
     the process until a type is reached that is not a generic parameter. Don't
-    loop on cycles. (For example, function foo<Tu as Tv, Tv as Tu>(...)) *)
-val get_concrete_supertypes : env -> Tast.ty -> env * Tast.ty list
+    loop on cycles. (For example, function foo<Tu as Tv, Tv as Tu>(...))
+    The abstract_enum flag controls whether arraykey bound enums are considered
+    abstract, or as arraykey bound.
+     *)
+val get_concrete_supertypes :
+  abstract_enum:bool -> env -> Tast.ty -> env * Tast.ty list
 
 (** Return {true} if the given {Decl_provider.class_decl} (referred to by the given
     {class_id_}, if provided) allows the current class (the one returned by

@@ -135,7 +135,9 @@ let rec is_byval_collection_or_string_or_any_type env ty =
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   in
-  let (_, tl) = Typing_utils.get_concrete_supertypes env ty in
+  let (_, tl) =
+    Typing_utils.get_concrete_supertypes ~abstract_enum:true env ty
+  in
   List.for_all tl ~f:check
 
 let mutating_this_in_ctor env e : bool =

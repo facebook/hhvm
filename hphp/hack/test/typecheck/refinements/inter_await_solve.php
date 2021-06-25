@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 interface A {}
-final class B {
+class B {
   public function foo(): void {}
 }
 

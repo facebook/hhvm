@@ -489,7 +489,9 @@ let referenced_typeconsts env ety_env (root, ids) =
     ~f:
       begin
         fun ((env, root), acc) (pos, tconst) ->
-        let (env, tyl) = Typing_utils.get_concrete_supertypes env root in
+        let (env, tyl) =
+          Typing_utils.get_concrete_supertypes ~abstract_enum:true env root
+        in
         let acc =
           List.fold tyl ~init:acc ~f:(fun acc ty ->
               let (env, ty) = Env.expand_type env ty in

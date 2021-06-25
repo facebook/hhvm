@@ -38,7 +38,7 @@ let rec is_stringish env ty =
   | Tgeneric _
   | Tnewtype _
   | Tdependent _ ->
-    let (env, tyl) = Env.get_concrete_supertypes env ty in
+    let (env, tyl) = Env.get_concrete_supertypes ~abstract_enum:true env ty in
     List.for_all ~f:(is_stringish env) tyl
   | Tclass (x, _, _) -> Option.is_none (Env.get_class env (snd x))
   | Tany _

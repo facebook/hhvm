@@ -266,6 +266,44 @@ let is_tprim_disjoint tp1 tp2 =
   in
   (not (Aast_defs.equal_tprim tp1 tp2)) && one_side tp1 tp2 && one_side tp2 tp1
 
+(* Two classes c1 and c2 are disjoint iff there exists no c3 such that
+   c3 <: c1 and c3 <: c2. *)
+let is_class_disjoint env c1 c2 =
+  let is_interface_or_trait c_def =
+    Ast_defs.(
+      match Cls.kind c_def with
+      | Cinterface
+      | Ctrait ->
+        true
+      | Cabstract
+      | Cnormal
+      | Cenum ->
+        false)
+  in
+  if String.equal c1 c2 then
+    false
+  else
+    match (Env.get_class env c1, Env.get_class env c2) with
+    | (Some c1_def, Some c2_def) ->
+      if Cls.final c1_def then
+        (* if c1 is final, then c3 would have to be equal to c1 *)
+        not (Cls.has_ancestor c1_def c2)
+      else if Cls.final c2_def then
+        (* if c2 is final, then c3 would have to be equal to c2 *)
+        not (Cls.has_ancestor c2_def c1)
+      else
+        (* Given two non-final classes, if either is an interface or trait, then
+         there could be a c3, and so we consider the classes to not be disjoint.
+         However, if they are both classes, then c3 must be either c1 or c2 since
+         we don't have multiple inheritance. *)
+        (not (is_interface_or_trait c1_def))
+        && (not (is_interface_or_trait c2_def))
+        && (not (Cls.has_ancestor c2_def c1))
+        && not (Cls.has_ancestor c1_def c2)
+    | _ ->
+      (* This is a decl error that should have already been caught *)
+      false
+
 let find_type_with_exact_negation env tyl =
   let rec find env tyl acc_tyl =
     match tyl with
@@ -3260,6 +3298,139 @@ and try_union env ty tyl =
       | LoclType ty -> ty
       | _ -> failwith "The union of two locl type should always be a locl type.")
 
+let is_type_disjoint env ty1 ty2 =
+  (* visited_tyvars record which type variables we've seen, to cut off cycles. *)
+  let rec is_type_disjoint visited_tyvars env ty1 ty2 =
+    let (env, ty1) = Env.expand_type env ty1 in
+    let (env, ty2) = Env.expand_type env ty2 in
+    match (get_node ty1, get_node ty2) with
+    | (_, (Tany _ | Terr | Tdynamic | Taccess _ | Tunapplied_alias _))
+    | ((Tany _ | Terr | Tdynamic | Taccess _ | Tunapplied_alias _), _) ->
+      false
+    | (Tshape _, Tshape _) ->
+      (* This could be more precise, e.g., if we have two closed shapes with different fields.
+         However, intersection already detects this and simplifies to nothing, so it's not
+         so important here. *)
+      false
+    | ((Tshape _ | Tdarray _), _) ->
+      (* Treat shapes as dict<arraykey, mixed> because that implementation detail
+       leaks through when doing is dict<_, _> on them, and they are also
+       Traversable, KeyedContainer, etc. (along with darrays).
+       We could translate darray to a more precise dict type with the same
+       type arguments, but it doesn't matter since disjointness doesn't ever
+       look at them. *)
+      let r = get_reason ty1 in
+      is_type_disjoint
+        visited_tyvars
+        env
+        MakeType.(dict r (arraykey r) (mixed r))
+        ty2
+    | (_, (Tshape _ | Tdarray _)) ->
+      let r = get_reason ty2 in
+      is_type_disjoint
+        visited_tyvars
+        env
+        ty1
+        MakeType.(dict r (arraykey r) (mixed r))
+    | (Ttuple tyl1, Ttuple tyl2) ->
+      (match
+         List.exists2 ~f:(is_type_disjoint visited_tyvars env) tyl1 tyl2
+       with
+      | List.Or_unequal_lengths.Ok res -> res
+      | List.Or_unequal_lengths.Unequal_lengths -> true)
+    | ((Ttuple _ | Tvarray _), _) ->
+      (* Treat tuples as vec<mixed> because that implementation detail
+       leaks through when doing is vec<_> on them, and they are also
+       Traversable, Container, etc. along with varrays.
+       We could translate varray to a more precise vec type with the same
+       type argument, but it doesn't matter since disjointness doesn't ever
+       look at it. *)
+      let r = get_reason ty1 in
+      is_type_disjoint visited_tyvars env MakeType.(vec r (mixed r)) ty2
+    | (_, (Ttuple _ | Tvarray _)) ->
+      let r = get_reason ty2 in
+      is_type_disjoint visited_tyvars env ty1 MakeType.(vec r (mixed r))
+    | ((Tvec_or_dict (tyk, tyv) | Tvarray_or_darray (tyk, tyv)), _) ->
+      let r = get_reason ty1 in
+      is_type_disjoint
+        visited_tyvars
+        env
+        MakeType.(union r [vec r tyv; dict r tyk tyv])
+        ty2
+    | (_, (Tvec_or_dict (tyk, tyv) | Tvarray_or_darray (tyk, tyv))) ->
+      let r = get_reason ty2 in
+      is_type_disjoint
+        visited_tyvars
+        env
+        ty1
+        MakeType.(union r [vec r tyv; dict r tyk tyv])
+    | ((Tgeneric _ | Tnewtype _ | Tdependent _ | Tintersection _), _) ->
+      let (env, bounds) =
+        Typing_utils.get_concrete_supertypes ~abstract_enum:false env ty1
+      in
+      is_intersection_type_disjoint visited_tyvars env bounds ty2
+    | (_, (Tgeneric _ | Tnewtype _ | Tdependent _ | Tintersection _)) ->
+      let (env, bounds) =
+        Typing_utils.get_concrete_supertypes ~abstract_enum:false env ty2
+      in
+      is_intersection_type_disjoint visited_tyvars env bounds ty1
+    | (Tvar tv, _) -> is_tyvar_disjoint visited_tyvars env tv ty2
+    | (_, Tvar tv) -> is_tyvar_disjoint visited_tyvars env tv ty1
+    | (Tunion tyl, _) ->
+      List.for_all ~f:(is_type_disjoint visited_tyvars env ty2) tyl
+    | (_, Tunion tyl) ->
+      List.for_all ~f:(is_type_disjoint visited_tyvars env ty1) tyl
+    | (Toption ty1, _) ->
+      is_type_disjoint visited_tyvars env ty1 ty2
+      && is_type_disjoint visited_tyvars env (MakeType.null Reason.Rnone) ty2
+    | (_, Toption ty2) ->
+      is_type_disjoint visited_tyvars env ty1 ty2
+      && is_type_disjoint visited_tyvars env ty1 (MakeType.null Reason.Rnone)
+    | (Tnonnull, _) ->
+      is_sub_type_for_union env ty2 (MakeType.null Reason.Rnone)
+    | (_, Tnonnull) ->
+      is_sub_type_for_union env ty1 (MakeType.null Reason.Rnone)
+    | (Tneg tp1, _) ->
+      is_sub_type_for_union env ty2 (MakeType.prim_type Reason.Rnone tp1)
+    | (_, Tneg tp2) ->
+      is_sub_type_for_union env ty1 (MakeType.prim_type Reason.Rnone tp2)
+    | (Tprim tp1, Tprim tp2) -> is_tprim_disjoint tp1 tp2
+    | (Tprim _, (Tfun _ | Tobject | Tclass _))
+    | ((Tfun _ | Tobject | Tclass _), Tprim _) ->
+      true
+    | (Tfun _, Tfun _) -> false
+    | (Tfun _, (Tobject | Tclass _))
+    | ((Tobject | Tclass _), Tfun _) ->
+      true
+    | (Tobject, (Tobject | Tclass _))
+    | (Tclass _, Tobject) ->
+      false
+    | (Tclass ((_, c1), _, _), Tclass ((_, c2), _, _)) ->
+      is_class_disjoint env c1 c2
+  (* incomplete, e.g., is_intersection_type_disjoint (?int & ?float) num *)
+  and is_intersection_type_disjoint visited_tvyars env inter_tyl ty =
+    List.exists ~f:(is_type_disjoint visited_tvyars env ty) inter_tyl
+  and is_intersection_itype_set_disjoint visited_tvyars env inter_ty_set ty =
+    ITySet.exists (is_itype_disjoint visited_tvyars env ty) inter_ty_set
+  and is_itype_disjoint
+      visited_tvyars env (lty1 : locl_ty) (ity : internal_type) =
+    match ity with
+    | LoclType lty2 -> is_type_disjoint visited_tvyars env lty1 lty2
+    | ConstraintType _ -> false
+  and is_tyvar_disjoint visited_tyvars env (tyvar : int) ty =
+    if ISet.mem tyvar visited_tyvars then
+      (* There is a cyclic type variable bound, this will lead to a type error *)
+      false
+    else
+      let bounds = Env.get_tyvar_upper_bounds env tyvar in
+      is_intersection_itype_set_disjoint
+        (ISet.add tyvar visited_tyvars)
+        env
+        bounds
+        ty
+  in
+  is_type_disjoint ISet.empty env ty1 ty2
+
 let decompose_subtype_add_bound
     (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) : env =
   let (env, ty_super) = Env.expand_type env ty_super in
@@ -3571,6 +3742,7 @@ let set_fun_refs () =
   Typing_utils.is_sub_type_for_union_ref := is_sub_type_for_union;
   Typing_utils.is_sub_type_for_union_i_ref := is_sub_type_for_union_i;
   Typing_utils.is_sub_type_ignore_generic_params_ref :=
-    is_sub_type_ignore_generic_params
+    is_sub_type_ignore_generic_params;
+  Typing_utils.is_type_disjoint_ref := is_type_disjoint
 
 let () = set_fun_refs ()

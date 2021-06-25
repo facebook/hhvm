@@ -1,6 +1,8 @@
 <?hh // strict
 
-class A<T> {
+class C {}
+
+class A<T> extends C {
   public function __construct(private T $x) {}
   public function get(): T {
     return $this->x;
@@ -32,11 +34,11 @@ function test2(): string {
   $y = $x->get();
   if ($y is B) {}
   // hh_show($y); // legacy: (string | B), new infer: (#28401 | B)
-  return $y; // legacy and new infer: error B incompatible with string
+  return $y;
 }
 
 function test3(): void {
-  $x = new B();
+  $x = new C();
   if ($x is A<_>) {
     $x->set(""); // legacy and new inference: error string incompatible with T#1
     expect_int($x->get()); // legacy and new inference: error T#1 incompatible with int
@@ -46,7 +48,7 @@ function test3(): void {
 function test4(): void {
   $x = new A("");
   if ($x is A<_>) {
-    expect_string($x->get()); // legacy and new inference: error string incompatible with T#1
+    expect_string($x->get());
     expect_int($x->get()); // legacy and new inference: error int incompatible with T#1
   }
 }

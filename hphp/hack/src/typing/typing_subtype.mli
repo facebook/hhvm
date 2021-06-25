@@ -23,6 +23,10 @@ val is_sub_type_for_union :
   locl_ty ->
   bool
 
+(** Determines whether the types are definitely disjoint, or whether they might
+    overlap. *)
+val is_type_disjoint : env -> locl_ty -> locl_ty -> bool
+
 val can_sub_type : env -> locl_ty -> locl_ty -> bool
 
 (**

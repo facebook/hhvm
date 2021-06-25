@@ -1,6 +1,6 @@
-File "is_as_deep_inference_check.php", line 17, characters 5-6:
+File "is_as_deep_inference_check.php", line 16, characters 5-6:
 Invalid argument (Typing[4110])
-  File "is_as_deep_inference_check.php", line 8, characters 12-45:
+  File "is_as_deep_inference_check.php", line 7, characters 12-45:
   Expected `Reified<Reified<Reified<int>>>`
-  File "is_as_deep_inference_check.php", line 13, characters 8-14:
-  But got `(D & <expr#1> as Reified<Reified<int>>)` from this "as" assertion
+  File "is_as_deep_inference_check.php", line 12, characters 8-9:
+  But got `(<expr#1> as I & <expr#1> as Reified<Reified<int>>)` from this "as" assertion

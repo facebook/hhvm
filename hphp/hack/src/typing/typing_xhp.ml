@@ -74,7 +74,9 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
   | Tgeneric _
   | Tdependent _
   | Tnewtype _ ->
-    let (env, tyl) = TUtils.get_concrete_supertypes env cty in
+    let (env, tyl) =
+      TUtils.get_concrete_supertypes ~abstract_enum:true env cty
+    in
     walk_list_and_gather_xhp env pos tyl
   | Tclass ((_, c), _, tyl) ->
     begin

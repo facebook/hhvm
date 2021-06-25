@@ -959,7 +959,9 @@ and obj_get_inner
       id
       on_error
   | (r, Tgeneric (_name, _)) ->
-    let (env, tyl) = TUtils.get_concrete_supertypes env ety1 in
+    let (env, tyl) =
+      TUtils.get_concrete_supertypes ~abstract_enum:true env ety1
+    in
     if List.is_empty tyl then (
       let err =
         if read_context then

@@ -3,14 +3,13 @@
 
 class Reified<reify T> {}
 interface I {}
-class D implements I {}
 
 function f(Reified<Reified<
   Reified<int>
 >> $r) : void {}
 
-function g(): void {
-  $a = new D() as Reified<Reified<
+function g(I $i): void {
+  $a = $i as Reified<Reified<
     int
   >>;
 

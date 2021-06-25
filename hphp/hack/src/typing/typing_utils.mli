@@ -412,6 +412,7 @@ val wrap_union_inter_ty_in_var :
   Typing_env_types.env * Typing_defs.locl_ty
 
 val get_concrete_supertypes :
+  abstract_enum:bool ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_set.elt list
@@ -468,6 +469,13 @@ type simplify_intersections =
   Typing_env_types.env * Typing_defs.locl_ty
 
 val simplify_intersections_ref : simplify_intersections ref
+
+val is_type_disjoint :
+  Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool
+
+val is_type_disjoint_ref :
+  (Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool)
+  ref
 
 val collect_enum_class_upper_bounds : Typing_env_types.env -> string -> SSet.t
 

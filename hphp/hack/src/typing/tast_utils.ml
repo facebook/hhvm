@@ -161,7 +161,7 @@ let rec truthiness env ty =
   | Tgeneric _
   | Tnewtype _
   | Tdependent _ ->
-    let (env, tyl) = Env.get_concrete_supertypes env ty in
+    let (env, tyl) = Env.get_concrete_supertypes ~abstract_enum:true env ty in
     begin
       match List.map tyl ~f:(truthiness env) with
       | [] -> Unknown
@@ -250,7 +250,7 @@ let rec find_sketchy_types env acc ty =
   | Tgeneric _
   | Tnewtype _
   | Tdependent _ ->
-    let (env, tyl) = Env.get_concrete_supertypes env ty in
+    let (env, tyl) = Env.get_concrete_supertypes ~abstract_enum:true env ty in
     List.fold tyl ~init:acc ~f:(find_sketchy_types env)
   | Tany _
   | Tnonnull

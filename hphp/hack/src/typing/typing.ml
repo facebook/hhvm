@@ -972,7 +972,9 @@ let class_contains_smethod env cty (_pos, mid) =
         Option.is_some @@ Env.get_static_member true env class_ mid)
     | None -> false
   in
-  let (_env, tyl) = TUtils.get_concrete_supertypes env cty in
+  let (_env, tyl) =
+    TUtils.get_concrete_supertypes ~abstract_enum:true env cty
+  in
   List.exists tyl ~f:lookup_member
 
 (* To be a valid trait declaration, all of its 'require extends' must
@@ -1298,7 +1300,9 @@ let safely_refine_class_type
    *
    * We only wish to do this if the types are in a possible subtype relationship.
    *)
-  let (env, supertypes) = TUtils.get_concrete_supertypes env ivar_ty in
+  let (env, supertypes) =
+    TUtils.get_concrete_supertypes ~abstract_enum:true env ivar_ty
+  in
   let rec might_be_supertype ty =
     let (_env, ty) = Env.expand_type env ty in
     match get_node ty with
@@ -1479,7 +1483,9 @@ and safely_refine_is_array env ty p pred_name arg_expr =
        * and refined_ty is keyset<T#1> then we know T#1 <: T.
        * See analogous code in safely_refine_class_type.
        *)
-      let (env, supertypes) = TUtils.get_concrete_supertypes env arg_ty in
+      let (env, supertypes) =
+        TUtils.get_concrete_supertypes ~abstract_enum:true env arg_ty
+      in
       let env =
         List.fold_left supertypes ~init:env ~f:(fun env ty ->
             SubType.add_constraint
@@ -6621,7 +6627,9 @@ and class_get_inner
       ty
       (p, mid)
   | (r, Tgeneric _) ->
-    let (env, tyl) = TUtils.get_concrete_supertypes env cty in
+    let (env, tyl) =
+      TUtils.get_concrete_supertypes ~abstract_enum:true env cty
+    in
     if List.is_empty tyl then begin
       Errors.non_class_member
         ~is_method
@@ -7237,7 +7245,7 @@ and call
     env * (Tast.expr list * Tast.expr option * locl_ty * bool) =
   let expr = expr ~allow_awaitable:(*?*) false in
   let exprs = exprs ~allow_awaitable:(*?*) false in
-  let (env, tyl) = TUtils.get_concrete_supertypes env fty in
+  let (env, tyl) = TUtils.get_concrete_supertypes ~abstract_enum:true env fty in
   if List.is_empty tyl then begin
     bad_call env pos fty;
     let env = call_untyped_unpack env (get_pos fty) unpacked_element in

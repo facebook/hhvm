@@ -39,7 +39,9 @@ let check_types env ((p, _), te) =
         | Tgeneric _
         | Tnewtype _
         | Tdependent _ ->
-          let (_, tyl) = Env.get_concrete_supertypes env ety1 in
+          let (_, tyl) =
+            Env.get_concrete_supertypes ~abstract_enum:true env ety1
+          in
           List.exists ~f:iter tyl
         | _ -> false
       in

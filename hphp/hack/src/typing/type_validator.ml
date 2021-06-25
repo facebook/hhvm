@@ -65,7 +65,9 @@ class virtual type_validator =
 
     method! on_taccess acc _r (root, id) =
       let (env, root) = Env.localize acc.env acc.ety_env root in
-      let (env, tyl) = Env.get_concrete_supertypes env root in
+      let (env, tyl) =
+        Env.get_concrete_supertypes ~abstract_enum:true env root
+      in
       List.fold tyl ~init:acc ~f:(fun acc ty ->
           let (env, ty) = Env.expand_type env ty in
           match get_node ty with

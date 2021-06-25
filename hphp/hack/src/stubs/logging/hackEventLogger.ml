@@ -454,6 +454,10 @@ module CGroup = struct
     ()
 end
 
+module ReHulk = struct
+  let profile ~trace_log:_ = ()
+end
+
 module Memory = struct
   let profile_if_needed () = ()
 end

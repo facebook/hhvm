@@ -7,11 +7,11 @@
 // define some class with method
 class MyClass
 {
-    static function static_compare_func($a, $b) {
+    <<__DynamicallyCallable>> static function static_compare_func($a, $b) {
         return strcasecmp((string)$a, (string)$b);
     }
 
-    public function class_compare_func($a, $b) {
+    <<__DynamicallyCallable>> public function class_compare_func($a, $b) {
         return strcasecmp((string)$a, (string)$b);
     }
 }

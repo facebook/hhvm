@@ -1,10 +1,10 @@
 <?hh
 
 class Thing {
-  public static function testOne() { echo "one\n"; }
-  public static function testTwo() { echo "two\n"; }
-  public static function testThree() { echo "three\n"; }
-  public static function testFour() { echo "four\n"; }
+  <<__DynamicallyCallable>> public static function testOne() { echo "one\n"; }
+  <<__DynamicallyCallable>> public static function testTwo() { echo "two\n"; }
+  <<__DynamicallyCallable>> public static function testThree() { echo "three\n"; }
+  <<__DynamicallyCallable>> public static function testFour() { echo "four\n"; }
 }
 
 <<__EntryPoint>> function main(): void {

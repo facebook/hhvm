@@ -2,13 +2,13 @@
 
 class ErrorHandling
 {
-    public function errorHandler1($errno, $errstr)
+    <<__DynamicallyCallable>> public function errorHandler1($errno, $errstr)
     {
         echo "Caught on first level: '$errstr'\n";
         return true;
     }
 
-    public function errorHandler2($errno, $errstr)
+    <<__DynamicallyCallable>> public function errorHandler2($errno, $errstr)
     {
         echo "Caught on second level: '$errstr'\n";
         return true;

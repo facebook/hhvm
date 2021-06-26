@@ -7,18 +7,22 @@ class A {
     $this->data = $data;
   }
 
+  <<__DynamicallyCallable>>
   public function M1() {
     return $this->data;
   }
 
+  <<__DynamicallyCallable>>
   protected function M2() {
     return $this->data;
   }
 
+  <<__DynamicallyCallable>>
   private function M3() {
     return $this->data;
   }
 
+  <<__DynamicallyCallable>>
   static function M4() {
     return 'static';
   }

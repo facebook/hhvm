@@ -2,8 +2,8 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class A {
-  public function func1($x) { return $x; }
-  public static function func2($x) { return $x; }
+  <<__DynamicallyCallable>> public function func1($x) { return $x; }
+  <<__DynamicallyCallable>> public static function func2($x) { return $x; }
 }
 
 function call1($c, $x) { return $c($x); }

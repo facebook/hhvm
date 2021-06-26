@@ -1,9 +1,9 @@
 <?hh
 
 class foo {
-    static public function a() {
-        print "ok\n";
-    }
+  <<__DynamicallyCallable>> static public function a() {
+    print "ok\n";
+  }
 }
 <<__EntryPoint>> function main(): void {
 $a = 'a';

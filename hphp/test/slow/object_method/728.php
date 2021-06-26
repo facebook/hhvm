@@ -1,18 +1,18 @@
 <?hh
 
 class A1 {
-  function a1f($a) {
+  <<__DynamicallyCallable>> function a1f($a) {
     var_dump('a1f:0');
   }
-  static function a1b($a) {
+  <<__DynamicallyCallable>> static function a1b($a) {
     var_dump('a1b:0');
   }
 }
 class B1 extends A1 {
-  function b1f($a) {
+  <<__DynamicallyCallable>> function b1f($a) {
     var_dump('b1f:0');
   }
-  static function b1b($a) {
+  <<__DynamicallyCallable>> static function b1b($a) {
     var_dump('b1b:0');
   }
 }

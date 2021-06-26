@@ -2,7 +2,7 @@
 
 class B {
   public static $a = 100;
-  static function f() {
+  <<__DynamicallyCallable>> static function f() {
     var_dump(static::$a);
   }
 }

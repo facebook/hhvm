@@ -1,6 +1,6 @@
 <?hh
 class A {
-    public static function test() {
+    <<__DynamicallyCallable>> public static function test() {
         echo static::class."\n";
     }
 }

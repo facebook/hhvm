@@ -6,7 +6,7 @@ class test {
         set_exception_handler(varray[$this, "bar"]);
     }
 
-    function bar($e) {
+    <<__DynamicallyCallable>> function bar($e) {
         var_dump(get_class($e)." thrown!");
     }
 }

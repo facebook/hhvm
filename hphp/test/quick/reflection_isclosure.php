@@ -1,9 +1,11 @@
 <?hh
 
+<<__DynamicallyCallable>>
 function not_a_closure() {
   return 1;
 }
 
+<<__DynamicallyCallable>>
 function is_a_generator() {
   yield 1;
   yield 2;

@@ -1,25 +1,21 @@
 <?hh
-class Foo
-{
-    public function run()
-    {
-        return call_user_func(varray['Bar', 'getValue']);
-    }
+class Foo {
+  public function run() {
+    return call_user_func(varray['Bar', 'getValue']);
+  }
 
-    private static function getValue()
-    {
-        return 'Foo';
-    }
+  <<__DynamicallyCallable>> private static function getValue() {
+    return 'Foo';
+  }
 }
 
-class Bar extends Foo
-{
-    public static function getValue()
-    {
-        return 'Bar';
-    }
+class Bar extends Foo {
+  <<__DynamicallyCallable>> public static function getValue() {
+    return 'Bar';
+  }
 }
+
 <<__EntryPoint>> function main(): void {
-$x = new Bar;
-var_dump($x->run());
+  $x = new Bar;
+  var_dump($x->run());
 }

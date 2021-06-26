@@ -1,7 +1,7 @@
 <?hh
 
 class Test {
-
+  <<__DynamicallyCallable>>
   public function normal($args) {
     var_dump($args);
   }

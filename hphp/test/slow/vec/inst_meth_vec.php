@@ -1,7 +1,7 @@
 <?hh
 
 class C {
-  public function mth() {
+  <<__DynamicallyCallable>> public function mth() {
     return 1;
   }
 }

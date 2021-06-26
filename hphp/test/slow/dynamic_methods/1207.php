@@ -1,10 +1,10 @@
 <?hh
 
 class A {
-  function itest($a, $b) {
+  <<__DynamicallyCallable>> function itest($a, $b) {
     var_dump($a, $b);
   }
-  static function stest($a, $b) {
+  <<__DynamicallyCallable>> static function stest($a, $b) {
     var_dump($a, $b);
   }
 }

@@ -8,7 +8,7 @@ class Test {
     );
   }
 
-  function transform($buffer) {
+  <<__DynamicallyCallable>> function transform($buffer) {
     return 'success';
   }
 }

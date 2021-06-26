@@ -6,8 +6,8 @@
  */
 
 class A {
-  static function adder($a, $b) {return $a + $b;}
-  public function adder2($a, $b) {return $a + $b;}
+  <<__DynamicallyCallable>> static function adder($a, $b) {return $a + $b;}
+  <<__DynamicallyCallable>> public function adder2($a, $b) {return $a + $b;}
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_reduce() : variation - object callbacks ***\n";

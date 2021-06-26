@@ -6,15 +6,15 @@
 
 class MyClass
 {
-    static function static_compare_func($key1, $key2) {
-        return strcasecmp($key1, $key2);
-    }
+  <<__DynamicallyCallable>> static function static_compare_func($key1, $key2) {
+    return strcasecmp($key1, $key2);
+  }
 
-    public function class_compare_func($key1, $key2) {
-        return strcasecmp($key1, $key2);
-    }
-
+  <<__DynamicallyCallable>> public function class_compare_func($key1, $key2) {
+    return strcasecmp($key1, $key2);
+  }
 }
+
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect_ukey() : usage variation ***\n";
 

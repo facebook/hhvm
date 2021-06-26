@@ -1,6 +1,6 @@
 <?hh
 class A {
-    static function foo() { return 'foo'; }
+  <<__DynamicallyCallable>> static function foo() { return 'foo'; }
 }
 <<__EntryPoint>> function main(): void {
 $classname        =  'A';

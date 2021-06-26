@@ -8,7 +8,7 @@ class z {
     $x = varray[1,2,3];
     array_map(varray['z', 'p'], $x);
   }
-  static function p($x) {
+  <<__DynamicallyCallable>> static function p($x) {
     var_dump($x);
   }
 }

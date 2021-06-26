@@ -2,7 +2,7 @@
 
 class TestClass
 {
-    static function test()
+    <<__DynamicallyCallable>> static function test()
     {
         echo __METHOD__ . "()\n";
     }

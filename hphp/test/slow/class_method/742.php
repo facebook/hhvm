@@ -1,9 +1,9 @@
 <?hh
 
 class A {
-   function f() {
- return "hello" ;
-}
+  <<__DynamicallyCallable>> function f() {
+    return "hello" ;
+  }
 }
 
 <<__EntryPoint>>

@@ -1,6 +1,6 @@
 <?hh
 class C {
-  static public function func1() {
+  <<__DynamicallyCallable>> static public function func1() {
     return 1;
   }
 }

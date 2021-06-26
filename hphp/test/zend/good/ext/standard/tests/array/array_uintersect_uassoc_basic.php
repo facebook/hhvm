@@ -8,11 +8,11 @@ class cr {
     function __construct($val) {
         $this->priv_member = $val;
     }
-    static function comp_func_cr($a, $b) {
+    <<__DynamicallyCallable>> static function comp_func_cr($a, $b) {
         if ($a->priv_member === $b->priv_member) return 0;
         return ($a->priv_member > $b->priv_member) ? 1 : -1;
     }
-    static function comp_func_key($a, $b) {
+    <<__DynamicallyCallable>> static function comp_func_key($a, $b) {
         if ($a === $b) return 0;
         return ($a > $b) ? 1 : -1;
     }

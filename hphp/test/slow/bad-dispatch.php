@@ -1,8 +1,8 @@
 <?hh
 
 class Foo {
-  function a() {}
-  static function b() {}
+  <<__DynamicallyCallable>> function a() {}
+  <<__DynamicallyCallable>> static function b() {}
 }
 
 <<__EntryPoint>>

@@ -1,8 +1,8 @@
 <?hh
 
 class test {
-     function throwException() { throw new Exception("Hello World!\n");
-} }
+  <<__DynamicallyCallable>> function throwException() { throw new Exception("Hello World!\n"); }
+}
 <<__EntryPoint>> function main(): void {
 $array = varray[new test(), 'throwException'];
 try {

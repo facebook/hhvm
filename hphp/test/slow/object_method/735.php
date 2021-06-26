@@ -3,16 +3,16 @@
 function foo() {
  echo 'Caught';
  exit;
- }
+}
 class X {
- function foo() {
- var_dump($this);
- }
- }
+  function foo() {
+    var_dump($this);
+  }
+}
 class Y {
-  function bar(X $a) {
- $a->foo();
- }
+  <<__DynamicallyCallable>> function bar(X $a) {
+    $a->foo();
+  }
 }
 function test($y,$z) {
   $y->$z($y);
@@ -20,6 +20,6 @@ function test($y,$z) {
 
 <<__EntryPoint>>
 function main_735() {
-set_error_handler(foo<>, E_ALL);
-test(new Y, 'bar');
+  set_error_handler(foo<>, E_ALL);
+  test(new Y, 'bar');
 }

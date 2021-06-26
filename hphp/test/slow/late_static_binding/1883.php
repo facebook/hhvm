@@ -1,13 +1,13 @@
 <?hh
 
 class X {
-  public function foo($y) {
+  <<__DynamicallyCallable>> public function foo($y) {
     call_user_func(varray[$y, 'foo']);
     $y::foo();
   }
 }
 class Y {
-  public static function foo() {
+  <<__DynamicallyCallable>> public static function foo() {
     var_dump(__METHOD__);
     static::bar();
   }

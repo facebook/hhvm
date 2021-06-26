@@ -1,6 +1,6 @@
 <?hh
 class C {
-  public static function foo(...$args) {
+  <<__DynamicallyCallable>> public static function foo(...$args) {
     var_dump(__FUNCTION__, $args);
   }
 }

@@ -1,6 +1,6 @@
 <?hh
 class C {
-  public static function log(Exception $exception) {
+  <<__DynamicallyCallable>> public static function log(Exception $exception) {
     $msg = get_class($exception).': '.$exception->getMessage();
     var_dump($msg);
   }

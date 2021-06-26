@@ -1,6 +1,7 @@
 <?hh
 
 class Fooz {
+  <<__DynamicallyCallable>>
   function baz() {
     register_shutdown_function(onShutdown2<>);
     echo "in Fooz::baz\n";

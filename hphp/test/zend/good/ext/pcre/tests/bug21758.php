@@ -13,7 +13,7 @@ class Foo {
              ));
   }
 
-  function bar() {
+  <<__DynamicallyCallable>> function bar() {
     return 'working';
   }
 }

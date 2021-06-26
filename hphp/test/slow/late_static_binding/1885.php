@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  public static function foo() {
+  <<__DynamicallyCallable>> public static function foo() {
     var_dump(static::class);
   }
   public static function bar() {

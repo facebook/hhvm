@@ -501,8 +501,8 @@ std::string RepoOptions::toJSON() const {
   return folly::toJson(toDynamic());
 }
 
-folly::dynamic RepoOptions::toDynamic() const {
-  folly::dynamic json = folly::dynamic::object();
+void RepoOptions::calcDynamic() {
+  m_cachedDynamic = folly::dynamic::object();
 #define OUT(key, var)                                \
   {                                                  \
     auto const ini_name = Config::IniName(key);      \
@@ -511,7 +511,7 @@ folly::dynamic RepoOptions::toDynamic() const {
     entry["global_value"] = ini_value;               \
     entry["local_value"] = ini_value;                \
     entry["access"] = 4;                             \
-    json[ini_name] = entry;                          \
+    m_cachedDynamic[ini_name] = entry;               \
   }
 
 #define N(_, n, ...) OUT(#n, n)
@@ -526,8 +526,6 @@ AUTOLOADFLAGS();
 #undef E
 
 #undef OUT
-
-  return json;
 }
 
 const RepoOptions& RepoOptions::defaults() {
@@ -582,6 +580,7 @@ AUTOLOADFLAGS();
 
   filterNamespaces();
   calcCacheKey();
+  calcDynamic();
 }
 
 void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {

@@ -123,7 +123,7 @@ struct RepoOptions {
   std::string path() const { return m_path; }
   SHA1 cacheKeySha1() const { return m_sha1; }
   std::string toJSON() const;
-  folly::dynamic toDynamic() const;
+  const folly::dynamic& toDynamic() const { return m_cachedDynamic; }
   std::uint32_t getParserFlags() const;
   std::uint32_t getCompilerFlags() const;
   std::uint32_t getFactsFlags() const;
@@ -163,6 +163,7 @@ private:
   void filterNamespaces();
   void initDefaults(const Hdf& hdf, const IniSettingMap& ini);
   void calcCacheKey();
+  void calcDynamic();
 
   #define N(t, n, ...) t n;
   #define P(t, n, ...) t n;
@@ -179,6 +180,8 @@ private:
   struct stat m_stat;
 
   SHA1 m_sha1;
+
+  folly::dynamic m_cachedDynamic;
 
   static bool s_init;
   static RepoOptions s_defaults;

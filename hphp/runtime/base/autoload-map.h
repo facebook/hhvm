@@ -209,6 +209,11 @@ struct FactsStore : public AutoloadMap {
   virtual Array getMethodsWithAttribute(const String& attr) = 0;
 
   /**
+   * Return all files decorated with the given attribute.
+   */
+  virtual Array getFilesWithAttribute(const String& attr) = 0;
+
+  /**
    * Return all attributes decorating the given type.
    */
   virtual Array getTypeAttributes(const String& type) = 0;
@@ -217,6 +222,11 @@ struct FactsStore : public AutoloadMap {
    * Return all attributes decorating the given method.
    */
   virtual Array getMethodAttributes(const String& type, const String& method) = 0;
+
+  /**
+   * Return all attributes decorating the given file.
+   */
+  virtual Array getFileAttributes(const String& file) = 0;
 
   /**
    * Return the arguments associated with the given type and attribute, as a
@@ -234,6 +244,14 @@ struct FactsStore : public AutoloadMap {
    */
   virtual Array getMethodAttrArgs(
       const String& type, const String& method, const String& attr) = 0;
+
+  /**
+   * Return the arguments associated with the given file and attribute, as a
+   * vec.
+   *
+   * If the given file does not have the given attribute, return an empty vec.
+   */
+  virtual Array getFileAttrArgs(const String& file, const String& attr) = 0;
 
   /**
    * Return all symbols defined in the repo, as a dict mapping each symbol

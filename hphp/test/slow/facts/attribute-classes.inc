@@ -16,6 +16,14 @@ class TwoArgMethodAttr implements HH\MethodAttribute {
   public function __construct(dynamic $arg0, dynamic $arg1) {}
 }
 
+class NoArgFileAttr implements HH\FileAttribute {}
+
+class TwoArgFileAttr implements HH\FileAttribute {
+  public function __construct(dynamic $arg0, dynamic $arg1) {}
+}
+
+<<file: NoArgFileAttr, TwoArgFileAttr("Hello", "There")>>
+
 <<TwoArgAttr("apple", "banana")>>
 class AppleThenBanana extends BaseClassForAttributeFiltering {}
 

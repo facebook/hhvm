@@ -142,6 +142,18 @@ function print_method_attrs(
   print "Attributes of $type::$method: $attrs_json\n";
 }
 
+function print_file_attrs(
+  string $file,
+): void {
+  $attrs = dict[];
+  foreach (HH\Facts\file_attributes($file) as $attr) {
+    $attrs[$attr] = HH\Facts\file_attribute_parameters($file, $attr);
+  }
+  \ksort(inout $attrs);
+  $attrs_json = \json_encode($attrs);
+  print "Attributes of $file: $attrs_json\n";
+}
+
 function print_attr_types(
   classname<\HH\ClassAttribute> $attr,
 ): void {
@@ -171,6 +183,15 @@ function print_attr_methods(
   \sort(inout $methods);
   $methods_json = \json_encode($methods);
   print "Methods decorated with $attr: $methods_json\n";
+}
+
+function print_attr_files(
+  classname<\HH\FileAttribute> $attr,
+): void {
+  $files = HH\Facts\files_with_attribute($attr);
+  \sort(inout $files);
+  $files_json = \json_encode($files);
+  print "Files decorated with $attr: $files_json\n";
 }
 
 function print_num_symbols(
@@ -444,6 +465,11 @@ function facts(): void {
 
   print "\nGetting type aliases with attribute\n";
   print_attr_type_aliases(TypeAliasAttr::class);
+
+  print "\nGetting file attributes\n";
+  print_attr_files(NoArgFileAttr::class);
+  print_attr_files(TwoArgFileAttr::class);
+  print_file_attrs('attribute-classes.inc');
 
   print "\nChecking nonexistent paths\n";
   print_num_symbols('this/path/does/not/exist.php');

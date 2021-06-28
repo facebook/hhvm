@@ -713,6 +713,10 @@ struct FactsStoreImpl final
     return makeVecOfStringString(m_map.getMethodsWithAttribute(*attr.get()));
   }
 
+  Array getFilesWithAttribute(const String& attr) override {
+    return makeVecOfString(m_map.getFilesWithAttribute(*attr.get()));
+  }
+
   Array getTypeAttributes(const String& type) override {
     return makeVecOfString(m_map.getAttributesOfType(*type.get()));
   }
@@ -720,6 +724,10 @@ struct FactsStoreImpl final
   Array getMethodAttributes(const String& type, const String& method) override {
     return makeVecOfString(
         m_map.getAttributesOfMethod(*type.get(), *method.get()));
+  }
+
+  Array getFileAttributes(const String& file) override {
+    return makeVecOfString(m_map.getAttributesOfFile(Path{*file.get()}));
   }
 
   Array getTypeAttrArgs(const String& type, const String& attribute) override {
@@ -733,6 +741,12 @@ struct FactsStoreImpl final
       const String& attribute) override {
     return makeVecOfDynamic(m_map.getMethodAttributeArgs(
         *type.get(), *method.get(), *attribute.get()));
+  }
+
+  Array getFileAttrArgs(
+      const String& file, const String& attribute) override {
+    return makeVecOfDynamic(
+        m_map.getFileAttributeArgs(Path{*file.get()}, *attribute.get()));
   }
 
   Array getAllTypes() override {

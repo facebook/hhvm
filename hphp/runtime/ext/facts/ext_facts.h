@@ -27,10 +27,12 @@ Array HHVM_FUNCTION(
 Array HHVM_FUNCTION(facts_types_with_attribute, const String& attr);
 Array HHVM_FUNCTION(facts_type_aliases_with_attribute, const String& attr);
 Array HHVM_FUNCTION(facts_methods_with_attribute, const String& attr);
+Array HHVM_FUNCTION(facts_files_with_attribute, const String& attr);
 Array HHVM_FUNCTION(facts_type_attributes, const String& type);
 Array HHVM_FUNCTION(facts_type_alias_attributes, const String& type);
 Array HHVM_FUNCTION(
     facts_method_attributes, const String& type, const String& method);
+Array HHVM_FUNCTION(facts_file_attributes, const String& file);
 Array HHVM_FUNCTION(
     facts_type_attribute_parameters, const String& type, const String& attr);
 Array HHVM_FUNCTION(
@@ -42,6 +44,8 @@ Array HHVM_FUNCTION(
     const String& type,
     const String& method,
     const String& attr);
+Array HHVM_FUNCTION(
+    facts_file_attribute_parameters, const String& file, const String& attr);
 
 Array HHVM_FUNCTION(facts_all_types);
 Array HHVM_FUNCTION(facts_all_functions);

@@ -208,6 +208,16 @@ function methods_with_attribute(
 ): vec<string>; /* vec<(classname<nonnull>, string)> */
 
 /**
+ * Get all files matching the given filters.
+ *
+ * Throws InvalidOperationException if Facts is not enabled.
+ */
+<<__Native>>
+function files_with_attribute(
+  /* classname<\HH\FileAttribute> */ string $attribute,
+): vec<string>;
+
+/**
  * Get all attributes on the given type.
  *
  * Throw InvalidOperationException if Facts is not enabled.
@@ -239,6 +249,16 @@ function method_attributes(
   /* classname<nonnull> */ string $type,
   string $method,
 ): vec<string>; /* vec<classname<\HH\MethodAttribute>> */
+
+/**
+ * Get all attributes on the given file.
+ *
+ * Throw InvalidOperationException if Facts is not enabled.
+ */
+<<__Native>>
+function file_attributes(
+  string $file,
+): vec<string>; /* vec<classname<\HH\FileAttribute>> */
 
 /**
  * Get all parameters for the given attribute on the given type.
@@ -281,6 +301,20 @@ function method_attribute_parameters(
   /* classname<nonnull> */ string $type,
   string $method,
   /* classname<\HH\MethodAttribute> */ string $attribute,
+): vec<dynamic>;
+
+/**
+ * Get all parameters for the given attribute on the given file.
+ *
+ * Return an empty vec if the file doesn't exist or doesn't have the given
+ * attribute.
+ *
+ * Throw InvalidOperationException if Facts is not enabled.
+ */
+<<__Native>>
+function file_attribute_parameters(
+  string $file,
+  /* classname<\HH\FileAttribute> */ string $attribute,
 ): vec<dynamic>;
 
 /**

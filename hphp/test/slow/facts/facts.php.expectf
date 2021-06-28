@@ -74,6 +74,11 @@ Methods decorated with TwoArgMethodAttr: ["AnnoyingNS\\TerribleClass::terribleMe
 Getting type aliases with attribute
 Type aliases decorated with TypeAliasAttr: ["TypeAliasWithAttr"]
 
+Getting file attributes
+Files decorated with NoArgFileAttr: ["attribute-classes.inc"]
+Files decorated with TwoArgFileAttr: ["attribute-classes.inc"]
+Attributes of attribute-classes.inc: {"NoArgFileAttr":[],"TwoArgFileAttr":["Hello","There"]}
+
 Checking nonexistent paths
 this/path/does/not/exist.php has 0 types
 this/path/does/not/exist.php has 0 functions
@@ -139,6 +144,9 @@ IimplementsIRequireExtendsBaseClass => derived-class.inc
 NoArgAttr => attribute-classes.inc
   Abstract? false
   Final? false
+NoArgFileAttr => attribute-classes.inc
+  Abstract? false
+  Final? false
 NoArgMethodAttr => attribute-classes.inc
   Abstract? false
   Final? false
@@ -166,6 +174,9 @@ TRequireImplementsIBase => derived-class.inc
 TwoArgAttr => attribute-classes.inc
   Abstract? false
   Final? false
+TwoArgFileAttr => attribute-classes.inc
+  Abstract? false
+  Final? false
 TwoArgMethodAttr => attribute-classes.inc
   Abstract? false
   Final? false
@@ -180,9 +191,11 @@ Getting all functions
 facts => facts.php
 jsonify_arr => facts.php
 jsonify_filters => facts.php
+print_attr_files => facts.php
 print_attr_methods => facts.php
 print_attr_type_aliases => facts.php
 print_attr_types => facts.php
+print_file_attrs => facts.php
 print_kind => facts.php
 print_method_attrs => facts.php
 print_num_symbols => facts.php
@@ -276,6 +289,11 @@ Methods decorated with TwoArgMethodAttr: ["AnnoyingNS\\TerribleClass::terribleMe
 Getting type aliases with attribute
 Type aliases decorated with TypeAliasAttr: ["TypeAliasWithAttr"]
 
+Getting file attributes
+Files decorated with NoArgFileAttr: ["attribute-classes.inc"]
+Files decorated with TwoArgFileAttr: ["attribute-classes.inc"]
+Attributes of attribute-classes.inc: {"NoArgFileAttr":[],"TwoArgFileAttr":["Hello","There"]}
+
 Checking nonexistent paths
 this/path/does/not/exist.php has 0 types
 this/path/does/not/exist.php has 0 functions
@@ -341,6 +359,9 @@ IimplementsIRequireExtendsBaseClass => derived-class.inc
 NoArgAttr => attribute-classes.inc
   Abstract? false
   Final? false
+NoArgFileAttr => attribute-classes.inc
+  Abstract? false
+  Final? false
 NoArgMethodAttr => attribute-classes.inc
   Abstract? false
   Final? false
@@ -368,6 +389,9 @@ TRequireImplementsIBase => derived-class.inc
 TwoArgAttr => attribute-classes.inc
   Abstract? false
   Final? false
+TwoArgFileAttr => attribute-classes.inc
+  Abstract? false
+  Final? false
 TwoArgMethodAttr => attribute-classes.inc
   Abstract? false
   Final? false
@@ -382,9 +406,11 @@ Getting all functions
 facts => facts.php
 jsonify_arr => facts.php
 jsonify_filters => facts.php
+print_attr_files => facts.php
 print_attr_methods => facts.php
 print_attr_type_aliases => facts.php
 print_attr_types => facts.php
+print_file_attrs => facts.php
 print_kind => facts.php
 print_method_attrs => facts.php
 print_num_symbols => facts.php

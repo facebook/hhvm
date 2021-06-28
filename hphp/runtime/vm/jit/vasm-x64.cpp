@@ -201,6 +201,7 @@ struct Vgen {
   void emit(const jmpr& i) { a.jmp(i.target); }
   void emit(const jmpm& i) { a.prefix(i.target.mr()).jmp(i.target); }
   void emit(const jmpi& i);
+  void emit(const ldbindretaddr& i);
   void emit(const lea& i);
   void emit(const leap& i) { a.lea(i.s, i.d); }
   void emit(const leav& i);
@@ -715,7 +716,7 @@ void Vgen<X64Asm>::emit(const calls& i) {
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const stubret& i) {
   if (i.saveframe) {
-    a.pop(rvmfp());
+    a.pop(x64::rvmfp());
   } else {
     a.addq(8, reg::rsp);
   }
@@ -751,7 +752,7 @@ template<class X64Asm>
 void Vgen<X64Asm>::emit(const phpret& i) {
   a.push(i.fp[AROFF(m_savedRip)]);
   if (!i.noframe) {
-    a.loadq(i.fp[AROFF(m_sfp)], rvmfp());
+    a.loadq(i.fp[AROFF(m_sfp)], x64::rvmfp());
   }
   a.ret();
 }
@@ -927,6 +928,13 @@ void Vgen<X64Asm>::emit(const jmpi& i) {
 }
 
 template<class X64Asm>
+void Vgen<X64Asm>::emit(const ldbindretaddr& i) {
+  auto const addr = a.frontier();
+  emit(leap{reg::rip[0x8000beef], i.d});
+  env.ldbindretaddrs.push_back({addr, i.target, i.spOff});
+}
+
+template<class X64Asm>
 void Vgen<X64Asm>::emit(const lea& i) {
   assertx(i.s.seg == Segment::DS);
   // could do this in a simplify pass
@@ -940,7 +948,7 @@ void Vgen<X64Asm>::emit(const lea& i) {
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const leav& i) {
   auto const addr = a.frontier();
-  emit(leap{reg::rip[0xdeadbeef], i.d});
+  emit(leap{reg::rip[0x8000beef], i.d});
   env.leas.push_back({addr, i.s});
 }
 
@@ -1092,7 +1100,7 @@ void lower(Vunit& unit, pushpm& inst, Vlabel b, size_t i) {
 
 void lower(Vunit& unit, stublogue& inst, Vlabel b, size_t i) {
   if (inst.saveframe) {
-    unit.blocks[b].code[i] = push{rvmfp()};
+    unit.blocks[b].code[i] = push{x64::rvmfp()};
   } else {
     unit.blocks[b].code[i] = lea{reg::rsp[-8], reg::rsp};
   }
@@ -1210,8 +1218,8 @@ void lowerForX64(Vunit& unit) {
 
 void stressTestLiveness(Vunit& unit) {
   auto const blocks = sortBlocks(unit);
-  auto const livein = computeLiveness(unit, abi(), blocks);
-  auto const gp_regs = abi().gpUnreserved;
+  auto const livein = computeLiveness(unit, x64::abi(), blocks);
+  auto const gp_regs = x64::abi().gpUnreserved;
 
   for (auto b : blocks) {
     auto& block = unit.blocks[b];

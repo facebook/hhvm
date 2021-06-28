@@ -96,6 +96,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::bindjcc:
     case Vinstr::bindaddr:
     case Vinstr::ldbindaddr:
+    case Vinstr::ldbindretaddr:
     case Vinstr::fallback:
     case Vinstr::fallbackcc:
     // vasm intrinsics

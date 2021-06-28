@@ -39,7 +39,6 @@ bool isReturnHelper(void* address) {
   return tca == u.retHelper ||
          tca == u.genRetHelper ||
          tca == u.asyncGenRetHelper ||
-         tca == u.retInlHelper ||
          tca == u.callToExit;
 }
 

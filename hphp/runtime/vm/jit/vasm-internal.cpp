@@ -221,7 +221,6 @@ bool emit(Venv& env, const ldbindaddr& i) {
   return true;
 }
 
-
 bool emit(Venv& env, const fallback& i) {
   auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   registerFallbackJump(env, jmp, CC_None);

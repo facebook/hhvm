@@ -206,6 +206,40 @@ void check_nop_interval(Venv& env, const Vinstr& inst,
   }
 }
 
+template<class Vemit>
+void emitLdBindRetAddrStubs(Venv& env) {
+  jit::fast_map<SrcKey, CodeAddress, SrcKey::Hasher> stubs;
+  env.cb = &env.text.areas().back().code;
+
+  for (auto const& ldbindretaddr : env.ldbindretaddrs) {
+    CodeAddress stub = [&] {
+      auto const i = stubs.find(ldbindretaddr.target);
+      if (i != stubs.end()) return i->second;
+
+      auto const start = env.cb->frontier();
+      stubs.insert({ldbindretaddr.target, start});
+
+      // Store return value to the stack.
+      Vemit(env).emit(store{rret_data(), rvmsp()[TVOFF(m_data)]});
+      Vemit(env).emit(store{rret_type(), rvmsp()[TVOFF(m_type)]});
+
+      // Bind jump to the translation.
+      emit(env, bindjmp{
+        ldbindretaddr.target,
+        ldbindretaddr.spOff,
+        cross_trace_regs_resumed()
+      });
+
+      return start;
+    }();
+
+    auto const addr = env.unit.makeAddr();
+    assertx(env.vaddrs.size() == addr);
+    env.vaddrs.push_back(stub);
+    env.leas.push_back({ldbindretaddr.instr, addr});
+  }
+}
+
 void computeFrames(Vunit& unit);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -309,6 +343,8 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
     if (block.frame != -1) record_frame(env);
     irmu.register_block_end();
   }
+
+  emitLdBindRetAddrStubs<Vemit>(env);
 
   Vemit::emitVeneers(env);
 

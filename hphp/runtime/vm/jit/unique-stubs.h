@@ -187,16 +187,6 @@ struct UniqueStubs {
   TCA asyncGenRetHelper;  // version for async generators
 
   /*
-   * Return from a function when the ActRec was pushed by an inlined call.
-   *
-   * This is the same as retHelper, but is kept separate to aid in debugging.
-   *
-   * @reached:  phpret from TC
-   * @context:  func body (after returning to caller)
-   */
-  TCA retInlHelper;
-
-  /*
    * Return from a resumed async function.
    *
    * Store result into the AsyncFunctionWaitHandle, mark it as finished and

@@ -1004,6 +1004,8 @@ struct InlineCallData : IRExtraData {
 
   IRSPRelOffset spOffset; // offset from caller SP to bottom of callee's ActRec
   PC syncVmpc{nullptr};
+  SrcKey returnSk;
+  SBInvOffset returnSPOff;
 };
 
 struct StFrameMetaData : IRExtraData {

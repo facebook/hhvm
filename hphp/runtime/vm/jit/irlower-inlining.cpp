@@ -76,8 +76,10 @@ void cgInlineCall(IRLS& env, const IRInstruction* inst) {
 
   // Do roughly the same work as an HHIR Call.
   v << store{callerFP, calleeFP[AROFF(m_sfp)]};
-  emitImmStoreq(v, uintptr_t(tc::ustubs().retInlHelper),
-                calleeFP[AROFF(m_savedRip)]);
+
+  auto const retAddr = v.makeReg();
+  v << ldbindretaddr{extra->returnSk, extra->returnSPOff, retAddr};
+  v << store{retAddr, calleeFP[AROFF(m_savedRip)]};
 
   if (extra->syncVmpc) {
     // If we are in a catch block, update the vmfp() to point to the inlined

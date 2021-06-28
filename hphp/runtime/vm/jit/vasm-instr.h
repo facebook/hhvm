@@ -64,6 +64,7 @@ struct Vunit;
   O(bindjcc, I(cc) I(target) I(spOff), U(sf) U(args), Dn)\
   O(bindaddr, I(addr) I(target) I(spOff), Un, Dn)\
   O(ldbindaddr, I(target) I(spOff), Un, D(d))\
+  O(ldbindretaddr, I(target) I(spOff), Un, D(d))\
   O(fallback, I(target) I(spOff), U(args), Dn)\
   O(fallbackcc, I(cc) I(target) I(spOff), U(sf) U(args), Dn)\
   /* vasm intrinsics */\
@@ -435,6 +436,12 @@ struct bindaddr {
 };
 
 struct ldbindaddr {
+  SrcKey target;
+  SBInvOffset spOff;
+  Vreg64 d;
+};
+
+struct ldbindretaddr {
   SrcKey target;
   SBInvOffset spOff;
   Vreg64 d;

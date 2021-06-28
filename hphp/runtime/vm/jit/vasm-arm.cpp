@@ -336,6 +336,7 @@ struct Vgen {
   void emit(const jmp& i);
   void emit(const jmpi& i);
   void emit(const jmpr& i) { a->Br(X(i.target)); }
+  void emit(const ldbindretaddr& i);
   void emit(const lea& i);
   void emit(const leap& i);
   void emit(const leav& i);
@@ -753,7 +754,7 @@ void Vgen::emit(const load& i) {
 
 void Vgen::emit(const store& i) {
   if (i.s.isGP()) {
-    if (i.s == rsp()) {
+    if (i.s == arm::rsp()) {
       a->Mov(rAsm, X(i.s));
       a->Str(rAsm, M(i.d));
     } else {
@@ -815,7 +816,7 @@ void Vgen::emit(const callfaststub& i) {
 void Vgen::emit(const phpret& i) {
   // prefer load-pair instruction
   if (!i.noframe) {
-    a->ldp(X(rvmfp()), X(rlr()), X(i.fp)[AROFF(m_sfp)]);
+    a->ldp(X(arm::rvmfp()), X(rlr()), X(i.fp)[AROFF(m_sfp)]);
   } else {
     a->Ldr(X(rlr()), X(i.fp)[AROFF(m_savedRip)]);
   }
@@ -1024,6 +1025,12 @@ void Vgen::emit(const jmpi& i) {
   }
 }
 
+void Vgen::emit(const ldbindretaddr& i) {
+  auto const addr = a->frontier();
+  emit(leap{reg::rip[0x8000beef], i.d});
+  env.ldbindretaddrs.push_back({addr, i.target, i.spOff});
+}
+
 void Vgen::emit(const lea& i) {
   auto p = i.s;
   assertx(p.base.isValid());
@@ -1037,7 +1044,7 @@ void Vgen::emit(const lea& i) {
 
 void Vgen::emit(const leav& i) {
   auto const addr = a->frontier();
-  emit(leap{reg::rip[0xdeadbeef], i.d});
+  emit(leap{reg::rip[0x8000beef], i.d});
   env.leas.push_back({addr, i.s});
 }
 
@@ -1689,7 +1696,7 @@ void lower(const VLS& e, jmpm& i, Vlabel b, size_t z) {
 void lower(const VLS& e, stublogue& /*i*/, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Push both the LR and FP regardless of i.saveframe to align SP.
-    v << pushp{rlr(), rvmfp()};
+    v << pushp{rlr(), arm::rvmfp()};
   });
 }
 
@@ -1704,7 +1711,7 @@ void lower(const VLS& e, stubret& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Pop LR and (optionally) FP.
     if (i.saveframe) {
-      v << popp{rvmfp(), rlr()};
+      v << popp{arm::rvmfp(), rlr()};
     } else {
       v << popp{PhysReg(rAsm), rlr()};
     }
@@ -1742,14 +1749,14 @@ void lower(const VLS& e, stubunwind& i, Vlabel b, size_t z) {
 void lower(const VLS& e, stubtophp& /*i*/, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Pop the call frame
-    v << lea{rsp()[16], rsp()};
+    v << lea{arm::rsp()[16], arm::rsp()};
   });
 }
 
 void lower(const VLS& e, loadstubret& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Load the LR to the destination.
-    v << load{rsp()[AROFF(m_savedRip)], i.d};
+    v << load{arm::rsp()[AROFF(m_savedRip)], i.d};
   });
 }
 

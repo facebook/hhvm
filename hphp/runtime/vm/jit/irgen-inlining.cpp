@@ -232,7 +232,7 @@ void beginInlining(IRGS& env,
   auto const callFlags = cns(env, CallFlags(
     fca.hasGenerics(),
     dynamicCall,
-    returnTarget.asyncEagerOffset != kInvalidOffset,
+    false, // inline return stub doesn't support async eager return
     0, // call offset unused by the logic below
     0,
     RuntimeCoeffects::none() // coeffects may not be known statically
@@ -296,6 +296,7 @@ void beginInlining(IRGS& env,
   for (auto i = 0; i < numTotalInputs; ++i) {
     inputs[numTotalInputs - i - 1] = popCU(env);
   }
+  updateMarker(env);
 
   // NB: Now that we've popped the callee's arguments off the stack
   // and thus modified the caller's frame state, we're committed to
@@ -314,10 +315,11 @@ void beginInlining(IRGS& env,
     fp(env)
   );
 
+  // Inline return stub doesn't support async eager return.
   StFrameMetaData meta;
   meta.callBCOff = callBcOffset;
   meta.isInlined = true;
-  meta.asyncEagerReturn = returnTarget.asyncEagerOffset != kInvalidOffset;
+  meta.asyncEagerReturn = false;
 
   gen(env, StFrameMeta, meta, calleeFP);
   gen(env, StFrameFunc, FuncData { target }, calleeFP);
@@ -325,6 +327,8 @@ void beginInlining(IRGS& env,
   InlineCallData data;
   data.spOffset = calleeAROff;
   data.syncVmpc = nullptr;
+  data.returnSk = nextSrcKey(env);
+  data.returnSPOff = spOffBCFromStackBase(env) - kNumActRecCells + 1;
 
   assertx(startSk.func() == target &&
           startSk.offset() == target->getEntryForNumArgs(numArgsInclUnpack) &&

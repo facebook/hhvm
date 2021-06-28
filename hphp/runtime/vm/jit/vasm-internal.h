@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -42,6 +43,11 @@ struct Venv {
   struct LabelPatch { CodeAddress instr; Vlabel target; };
   struct AddrPatch { CodeAddress instr; Vaddr target; };
   struct VaddrBind { Vaddr vaddr; Vlabel target; };
+  struct LdBindRetAddrPatch {
+    CodeAddress instr;
+    SrcKey target;
+    SBInvOffset spOff;
+  };
 
   Venv(Vunit& unit, Vtext& text, CGMeta& meta);
 
@@ -67,6 +73,7 @@ struct Venv {
   jit::vector<AddrPatch> leas;
   jit::vector<LabelPatch> jmps, jccs;
   jit::vector<LabelPatch> catches;
+  jit::vector<LdBindRetAddrPatch> ldbindretaddrs;
   jit::vector<std::pair<TCA,IStack>> stacks;
 };
 

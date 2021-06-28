@@ -345,6 +345,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::andbim:
     case Vinstr::bindaddr:
     case Vinstr::ldbindaddr:
+    case Vinstr::ldbindretaddr:
     case Vinstr::bindjcc:
     case Vinstr::bindjmp:
     case Vinstr::call:

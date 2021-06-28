@@ -1261,7 +1261,6 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(retHelper, hotView(), emitInterpRet(hot(), data));
   ADD(genRetHelper, view, emitInterpGenRet<false>(cold, data));
   ADD(asyncGenRetHelper, hotView(), emitInterpGenRet<true>(hot(), data));
-  ADD(retInlHelper, hotView(), emitInterpRet(hot(), data));
 
   ADD(handleTranslate, view, emitHandleTranslate(cold, data));
   ADD(handleRetranslate, view, emitHandleRetranslate(cold, data));

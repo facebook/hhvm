@@ -1592,6 +1592,8 @@ void fix_inline_frames(Global& genv) {
         InlineCallData data;
         data.syncVmpc = state.catchSk.valid() ? state.catchSk.pc() : nullptr;
         data.spOffset = parent->extra<BeginInlining>()->spOffset;
+        data.returnSk = parent->marker().sk().advanced();
+        data.returnSPOff = parent->marker().bcSPOff() - kNumActRecCells + 1;
         genv.unit.replace(&inst, InlineCall, data, parent->dst(), fp);
         // fallthrough to the InlineCall logic
       }

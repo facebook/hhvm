@@ -7,6 +7,7 @@
  *
  *)
 
+(** Perform necessary hooks on opening a file. *)
 val open_file :
   predeclare:bool -> ServerEnv.env -> string -> string -> ServerEnv.env
 

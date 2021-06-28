@@ -15,7 +15,7 @@ val get_message_pos : 'a message -> 'a
 
 val get_message_str : 'a message -> string
 
-type error = (Pos.t, Pos_or_decl.t) error_ [@@deriving eq]
+type error = (Pos.t, Pos_or_decl.t) error_ [@@deriving eq, show]
 
 type finalized_error = (Pos.absolute, Pos.absolute) error_
 
@@ -58,6 +58,14 @@ type typing_error_callback =
 
 type error_from_reasons_callback =
   ?code:int -> (Pos_or_decl.t * string) list -> unit
+
+(** Type representing the errors for a single file. *)
+type per_file_errors
+
+(** The type of collections of errors *)
+type t [@@deriving eq]
+
+module ErrorSet : Caml.Set.S with type elt := error
 
 (** This will check that the first position of the given reasons is in the
     current decl and if yes use it as primary error position. If no,
@@ -161,12 +169,6 @@ val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 
 val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
 
-(** Type representing the errors for a single file. *)
-type per_file_errors
-
-(** The type of collections of errors *)
-type t [@@deriving eq]
-
 (** Return the list of errors caused by the function passed as parameter
     along with its result. *)
 val do_ : (unit -> 'a) -> t * 'a
@@ -226,7 +228,12 @@ val get_error_list : t -> error list
 
 val get_sorted_error_list : t -> error list
 
+val as_map : t -> error list Relative_path.Map.t
+
 val from_error_list : error list -> t
+
+(** Default applied phase is Typing. *)
+val from_file_error_list : ?phase:phase -> (Relative_path.t * error) list -> t
 
 val per_file_error_count : per_file_errors -> int
 

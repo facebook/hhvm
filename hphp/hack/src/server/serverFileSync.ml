@@ -31,19 +31,19 @@ let get_file_content = function
     (* In case of errors, proceed with empty file contents *)
     |> Option.value ~default:""
 
-(* Warning: this takes O(global error list) time. Should be OK while
- * it's only used in editor, where opening a file is a rare (compared to other
- * kind of queries) operation, but if this ever ends up being called by
- * other automation there is room for improvement (i.e finally changing global
- * error list to be a error map)
- *)
+(** Update diagnostic subscription priority files and errors.
+
+    Warning: this takes O(global error list) time. Should be OK while
+    it's only used in editor, where opening a file is a rare (compared to other
+    kind of queries) operation, but if this ever ends up being called by
+    other automation there is room for improvement (i.e finally changing global
+    error list to be a error map) *)
 let update_diagnostics diag_subscribe editor_open_files errorl =
-  Option.map diag_subscribe ~f:(fun diag_subscribe ->
-      Diagnostic_subscription.update
-        diag_subscribe
+  diag_subscribe
+  >>| Diagnostic_subscription.update
         ~priority_files:editor_open_files
         ~global_errors:errorl
-        ~full_check_done:true)
+        ~full_check_done:true
 
 let open_file ~predeclare env path content =
   let prev_content = get_file_content (ServerCommandTypes.FileName path) in

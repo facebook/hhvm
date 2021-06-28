@@ -11,11 +11,11 @@ open Hh_prelude
 open Reordered_argument_collections
 open String_utils
 
-type error_code = int [@@deriving eq]
+type error_code = int [@@deriving eq, ord, show]
 
 (** We use `Pos.t message` and `Pos_or_decl.t message` on the server
     and convert to `Pos.absolute message` before sending it to the client *)
-type 'a message = 'a * string [@@deriving eq, ord]
+type 'a message = 'a * string [@@deriving eq, ord, show]
 
 let get_message_pos (msg : 'a message) = fst msg
 
@@ -147,17 +147,23 @@ type ('prim_pos, 'pos) error_ = {
   claim: 'prim_pos message;
   reasons: 'pos message list;
 }
-[@@deriving eq]
+[@@deriving eq, ord, show]
 
 type finalized_error = (Pos.absolute, Pos.absolute) error_
 
-type error = (Pos.t, Pos_or_decl.t) error_ [@@deriving eq]
+type error = (Pos.t, Pos_or_decl.t) error_ [@@deriving eq, ord, show]
 
 type applied_fixme = Pos.t * int [@@deriving eq]
 
 type per_file_errors = error file_t
 
 type t = error files_t * applied_fixme files_t [@@deriving eq]
+
+module Error = struct
+  type t = error [@@deriving ord]
+end
+
+module ErrorSet = Caml.Set.Make (Error)
 
 let applied_fixmes : applied_fixme files_t ref = ref Relative_path.Map.empty
 
@@ -880,6 +886,34 @@ and get_error_list (err, _fixmes) = files_t_to_list err
 and get_applied_fixmes (_err, fixmes) = files_t_to_list fixmes
 
 and from_error_list err = (list_to_files_t err, Relative_path.Map.empty)
+
+let from_file_error_list : ?phase:phase -> (Relative_path.t * error) list -> t =
+ fun ?(phase = Typing) errors ->
+  let errors =
+    List.fold
+      errors
+      ~init:Relative_path.Map.empty
+      ~f:(fun errors (file, error) ->
+        let errors_for_file =
+          Relative_path.Map.find_opt errors file
+          |> Option.value ~default:PhaseMap.empty
+        in
+        let errors_for_phase =
+          PhaseMap.find_opt errors_for_file phase |> Option.value ~default:[]
+        in
+        let errors_for_phase = error :: errors_for_phase in
+        let errors_for_file =
+          PhaseMap.add errors_for_file ~key:phase ~data:errors_for_phase
+        in
+        Relative_path.Map.add errors ~key:file ~data:errors_for_file)
+  in
+  (errors, Relative_path.Map.empty)
+
+let as_map : t -> error list Relative_path.Map.t =
+ fun (errors, _fixmes) ->
+  Relative_path.Map.map
+    errors
+    ~f:(PhaseMap.fold ~init:[] ~f:(fun _ -> List.append))
 
 let add_error_assert_primary_pos_in_current_decl :
     current_decl_and_file:Pos_or_decl.ctx ->

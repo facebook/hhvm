@@ -585,3 +585,16 @@
     watchman_client
     write_symbol_info)
   (preprocess (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name diagnostic_pusher)
+  (wrapped false)
+  (modules
+    diagnostic_pusher)
+  (libraries
+    errors
+    relative_path
+    utils_core
+    server_client_provider
+    server_command_types)
+  (preprocess (pps lwt_ppx ppx_deriving.std)))

@@ -23,5 +23,5 @@ function main_func_family_004() {
 try {
   main(new D2);
   main(new D1);
-} catch (exception $x) {}
+} catch (Exception $x) {}
 }

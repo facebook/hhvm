@@ -20,9 +20,9 @@ class MyHelloWorld {
 }
 
 <<__EntryPoint>> function main(): void {
-$o= myHelloWorld::getInstance(1);
-$o= myHelloWorld::getInstance(1);
-$o= myHelloWorld::getInstance(2);
-$o= myHelloWorld::getInstance(darray[1=>2]);
-$o= myHelloWorld::getInstance(darray[1=>2]);
+$o= MyHelloWorld::getInstance(1);
+$o= MyHelloWorld::getInstance(1);
+$o= MyHelloWorld::getInstance(2);
+$o= MyHelloWorld::getInstance(darray[1=>2]);
+$o= MyHelloWorld::getInstance(darray[1=>2]);
 }

@@ -6,10 +6,10 @@ class X {
 class Y {
 }
 function test($x) {
-  return new $x($x = 'y');
+  return new $x($x = 'Y');
 }
 
 <<__EntryPoint>>
 function main_784() {
-var_dump(test('x'));
+var_dump(test('X'));
 }

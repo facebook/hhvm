@@ -19,6 +19,6 @@ class Y {
 <<__EntryPoint>>
 function main_1883() {
 $x = new X;
-$x->foo('y');
+$x->foo('Y');
 $x->foo(new Y);
 }

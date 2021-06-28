@@ -18,7 +18,7 @@ class Baz extends Foo {
 
 <<__EntryPoint>>
 function main_reflective_constant() {
-foo::bar();
+Foo::bar();
 $b = new Baz;
 $b->qux();
 }

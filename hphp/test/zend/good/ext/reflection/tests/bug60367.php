@@ -13,7 +13,7 @@ class B extends A {
 }
 
 <<__EntryPoint>> function main(): void {
-  $method = new ReflectionMethod("b::call");
+  $method = new ReflectionMethod("B::call");
   $method->invoke(null);
   $method->invokeArgs(null, varray[]);
   $method = new ReflectionMethod("A::call");

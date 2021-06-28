@@ -1,5 +1,5 @@
 <?hh
-class pwa {
+class Pwa {
     public $var;
 
     function __construct(){

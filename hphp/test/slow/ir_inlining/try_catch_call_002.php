@@ -30,7 +30,7 @@ function main() {
   try {
     $z = better_handle_retbcoff_if_you_inline();
     var_dump($z);
-  } catch (exception $e) {
+  } catch (Exception $e) {
     echo "got it\n";
   }
 }

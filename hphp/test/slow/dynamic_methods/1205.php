@@ -8,6 +8,6 @@ class dyn_A{
 
  <<__EntryPoint>>
 function main_1205() {
-$cls = 'dyn_a';
+$cls = 'dyn_A';
  $a = new $cls();
 }

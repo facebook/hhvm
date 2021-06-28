@@ -14,10 +14,10 @@ function main_430() {
 ;
 ;
 $attr=darray[];
-$attr[a::i1]='abc';
-$attr[a::i2]='def';
+$attr[A::i1]='abc';
+$attr[A::i2]='def';
 $attr[-3]='ghi';
-$attr[a::$s]='jkl';
-$attr[b::$s]='mno';
+$attr[A::$s]='jkl';
+$attr[B::$s]='mno';
 var_dump($attr);
 }

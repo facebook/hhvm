@@ -32,6 +32,6 @@ class A extends aParent {
 <<__EntryPoint>> function main(): void {
 A::staticTest();
 
-$a = new a;
+$a = new A;
 $a->nonstaticTest();
 }

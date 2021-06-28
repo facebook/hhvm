@@ -17,7 +17,7 @@ function main2() {
 
 <<__EntryPoint>>
 function main_fcall_noreturn() {
-try { main1(); } catch (exception $e) { echo "o"; }
-try { main2(); } catch (exception $f) { echo "k"; }
+try { main1(); } catch (Exception $e) { echo "o"; }
+try { main2(); } catch (Exception $f) { echo "k"; }
 echo "\n";
 }

@@ -1,9 +1,9 @@
-<?hh 
+<?hh
 <<__EntryPoint>> function main(): void {
 $a = new stdClass;
 var_dump($a is stdClass);
 
-var_dump(new stdCLass is stdClass);
+var_dump(new stdClass is stdClass);
 
 $b = () ==> new stdClass;
 var_dump($b() is stdClass);

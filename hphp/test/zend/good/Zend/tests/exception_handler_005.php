@@ -12,7 +12,7 @@ function foo1($e) {
 set_exception_handler(foo<>);
 set_exception_handler(foo1<>);
 
-throw new excEption();
+throw new Exception();
 
 echo "Done\n";
 }

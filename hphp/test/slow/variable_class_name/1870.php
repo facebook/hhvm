@@ -11,7 +11,7 @@ class A {
 
 <<__EntryPoint>>
 function main_1870() {
-$cls = 'a';
+$cls = 'A';
 
 var_dump($cls::C);
  // ClassConstant

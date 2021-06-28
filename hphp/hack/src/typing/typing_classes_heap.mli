@@ -111,8 +111,6 @@ module Api : sig
 
   val all_ancestor_req_names : t -> string list
 
-  val all_extends_ancestors : t -> string list
-
   val get_const : t -> string -> class_const option
 
   val get_typeconst : t -> string -> typeconst_type option

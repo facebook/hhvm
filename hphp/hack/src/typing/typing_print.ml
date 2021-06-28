@@ -1657,7 +1657,6 @@ module PrintClass = struct
     let tc_req_ancestors_extends =
       String.concat ~sep:" " (Cls.all_ancestor_req_names c)
     in
-    let tc_extends = String.concat ~sep:" " (Cls.all_extends_ancestors c) in
     "tc_need_init: "
     ^ tc_need_init
     ^ "\n"
@@ -1702,9 +1701,6 @@ module PrintClass = struct
     ^ "\n"
     ^ "tc_ancestors: "
     ^ tc_ancestors
-    ^ "\n"
-    ^ "tc_extends: "
-    ^ tc_extends
     ^ "\n"
     ^ "tc_req_ancestors: "
     ^ tc_req_ancestors

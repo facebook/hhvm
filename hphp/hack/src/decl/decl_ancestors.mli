@@ -12,10 +12,6 @@ val all_ancestors :
   lin_ancestors_drop_one:Decl_defs.linearization ->
   (string * Typing_defs.decl_ty) Sequence.t
 
-(** Names of parents and traits only *)
-val parents_and_traits :
-  lin_ancestors_drop_one:Decl_defs.linearization -> (string * unit) Sequence.t
-
 val members_fully_known :
   lin_ancestors_drop_one:Decl_defs.linearization -> bool Lazy.t
 

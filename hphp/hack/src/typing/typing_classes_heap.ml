@@ -20,7 +20,6 @@ type lazy_class_type = {
   lin_ancestors: Decl_defs.linearization;
   ih: inherited_members;
   ancestors: decl_ty LSTable.t;  (** Types of parents, interfaces, and traits *)
-  parents_and_traits: unit LSTable.t;  (** Names of parents and traits only *)
   members_fully_known: bool Lazy.t;
   req_ancestor_names: unit LSTable.t;
   all_requirements: (Pos_or_decl.t * decl_ty) Sequence.t;
@@ -77,11 +76,6 @@ let make_lazy_class_type ctx class_name =
              Decl_inheritance.make ctx class_name lin_members (fun x ->
                  LSTable.get ancestors x);
            ancestors;
-           parents_and_traits =
-             LSTable.make
-               (Decl_ancestors.parents_and_traits ~lin_ancestors_drop_one)
-               ~is_canonical
-               ~merge;
            members_fully_known =
              Decl_ancestors.members_fully_known ~lin_ancestors_drop_one;
            req_ancestor_names =
@@ -523,14 +517,6 @@ module ApiEager = struct
     | Lazy (_sc, lc) ->
       LSTable.to_list (Lazy.force lc).req_ancestor_names |> List.map ~f:fst
     | Eager (c, _) -> SSet.elements c.Decl_defs.dc_req_ancestors_extends
-
-  let all_extends_ancestors (decl, t) =
-    Decl_counters.count_subdecl decl Decl_counters.All_extends_ancestors
-    @@ fun () ->
-    match t with
-    | Lazy (_sc, lc) ->
-      LSTable.to_list (Lazy.force lc).parents_and_traits |> List.map ~f:fst
-    | Eager (c, _) -> SSet.elements c.Decl_defs.dc_extends
 
   let all_ancestors (decl, t) =
     Decl_counters.count_subdecl decl Decl_counters.All_ancestors @@ fun () ->

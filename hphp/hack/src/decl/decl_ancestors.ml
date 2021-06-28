@@ -21,11 +21,6 @@ let all_ancestors ~lin_ancestors_drop_one =
   Sequence.map lin_ancestors_drop_one ~f:(fun mro ->
       (mro.mro_name, type_of_mro_element mro))
 
-let parents_and_traits ~lin_ancestors_drop_one =
-  lin_ancestors_drop_one
-  |> Sequence.filter ~f:(fun mro -> not (is_set mro_consts_only mro.mro_flags))
-  |> Sequence.map ~f:(fun mro -> (mro.mro_name, ()))
-
 let members_fully_known ~lin_ancestors_drop_one =
   lazy
     (Sequence.for_all lin_ancestors_drop_one ~f:(fun mro ->

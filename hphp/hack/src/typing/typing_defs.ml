@@ -105,8 +105,8 @@ type fun_elt = {
 [@@deriving show]
 
 (* TODO(T71787342) This is temporary. It is necessary because legacy decl
- * uses Typing_defs types to represent folded inherited members. This will 
- * be removed when shallow decl ships as this information is only necessary 
+ * uses Typing_defs types to represent folded inherited members. This will
+ * be removed when shallow decl ships as this information is only necessary
  * there. *)
 type class_const_kind =
   | CCAbstract of bool (* has default *)

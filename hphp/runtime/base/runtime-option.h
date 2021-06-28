@@ -1181,9 +1181,6 @@ struct RuntimeOption {
   F(bool, HackArrCompatSerializeNotices, false)                         \
   /* When this flag is on, var_export outputs d/varrays. */             \
   F(bool, HackArrDVArrVarExport, false)                                 \
-  /* Notice on array serialization behavior, even if array provenance   \
-   * is disabled. If we see these notices, we're missing markings. */   \
-  F(bool, RaiseArraySerializationNotices, false)                        \
   /* Dead flags. Will clean up when we clean them up in GlobalData. */  \
   F(bool, ArrayProvenance, false)                                       \
   F(bool, LogArrayProvenance, false)                                    \

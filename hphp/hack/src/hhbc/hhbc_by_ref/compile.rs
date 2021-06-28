@@ -66,6 +66,7 @@ bitflags! {
         const FOR_DEBUGGER_EVAL = 1 << 2;
         const DUMP_SYMBOL_REFS = 1 << 3;
         const DISABLE_TOPLEVEL_ELABORATION = 1 << 4;
+        const ENABLE_DECL = 1 << 5;
     }
 
 }

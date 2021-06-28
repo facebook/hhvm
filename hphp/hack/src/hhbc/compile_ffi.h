@@ -20,6 +20,7 @@ enum env_flags {
   , FOR_DEBUGGER_EVAL=1 << 2
   , DUMP_SYMBOL_REFS=1 << 3
   , DISABLE_TOPLEVEL_ENUMERATION=1 << 4
+  , ENABLE_DECL=1 << 5
 };
 
 extern "C" {

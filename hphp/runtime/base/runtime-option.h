@@ -749,6 +749,8 @@ struct RuntimeOption {
   F(bool, HackCompilerInheritConfig,   true)                            \
   /* Use compiler pool to get hhas from hh_single_compile process */    \
   F(bool, HackCompilerUseCompilerPool, true)                            \
+  /* enable decls in compilation */                                     \
+  F(bool, EnableDecl, false)                                     \
   /* When using embedded data, extract it to the ExtractPath or the
    * ExtractFallback. */                                                \
   F(string, EmbeddedDataExtractPath,   "/var/run/hhvm_%{type}_%{buildid}") \

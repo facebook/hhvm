@@ -1108,6 +1108,9 @@ CompilerResult hackc_compile(
     if(!SystemLib::s_inited) {
       flags |= IS_SYSTEMLIB;
     }
+    if (RuntimeOption::EvalEnableDecl) {
+      flags |= ENABLE_DECL;
+    }
     flags |= DUMP_SYMBOL_REFS;
 
     std::string aliased_namespaces = options.getAliasedNamespacesConfig();

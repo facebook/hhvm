@@ -165,7 +165,7 @@ end
 
 let test_push _ =
   let pusher = Diagnostic_pusher.init in
-  let _ = TestClientProvider.make_persistent () in
+  let _ = TestClientProvider.make_and_store_persistent () in
 
   let errors = errors1 file1 in
   let errors_absolute = errors1_absolute file1_absolute in
@@ -209,7 +209,7 @@ let test_initially_no_client _ =
   assert_equal_messages [] pushed_messages;
 
   (* Connect a persistent client. *)
-  let _ = TestClientProvider.make_persistent () in
+  let _ = TestClientProvider.make_and_store_persistent () in
 
   (* Add an new batch of new errors. *)
   let errors = errors2 file2 in
@@ -238,7 +238,7 @@ let test_initially_no_client _ =
 let test_switch_client _ =
   let pusher = Diagnostic_pusher.init in
 
-  let _ = TestClientProvider.make_persistent () in
+  let _ = TestClientProvider.make_and_store_persistent () in
 
   let errors = errors1 file1 in
   let errors1_absolute = errors1_absolute file1_absolute in
@@ -255,7 +255,7 @@ let test_switch_client _ =
   assert_equal_messages expected_pushed_messages pushed_messages;
 
   (* A new client connects and replaces the previous one. *)
-  let _ = TestClientProvider.make_persistent () in
+  let _ = TestClientProvider.make_and_store_persistent () in
 
   (* Add an new batch of new errors. *)
   let errors = errors2 file2 in
@@ -281,7 +281,7 @@ let test_switch_client _ =
 let test_switch_client_erase _ =
   let pusher = Diagnostic_pusher.init in
 
-  let _ = TestClientProvider.make_persistent () in
+  let _ = TestClientProvider.make_and_store_persistent () in
 
   let errors = errors1 file1 in
   let errors1_absolute = errors1_absolute file1_absolute in
@@ -298,7 +298,7 @@ let test_switch_client_erase _ =
   assert_equal_messages expected_pushed_messages pushed_messages;
 
   (* A new client connects and replaces the previous one. *)
-  let _ = TestClientProvider.make_persistent () in
+  let _ = TestClientProvider.make_and_store_persistent () in
 
   (* No more errors in file1. *)
   let _pusher =

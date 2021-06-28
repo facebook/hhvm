@@ -252,7 +252,8 @@ let handle_connection_ genv env client =
       let env =
         {
           env with
-          persistent_client = Some (ClientProvider.make_persistent client);
+          persistent_client =
+            Some (ClientProvider.make_and_store_persistent client);
         }
       in
       (* If the client connected in the middle of recheck, let them know it's

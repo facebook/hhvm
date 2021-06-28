@@ -216,7 +216,7 @@ let priority_to_string (_client : client) : string = "mock"
 
 let persistent_client : (client_id * client) option ref = ref None
 
-let make_persistent _ =
+let make_and_store_persistent _ =
   let client = ServerCommandTypes.Persistent in
   persistent_client := Some (ClientId.make (), client);
   client

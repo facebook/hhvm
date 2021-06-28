@@ -20,6 +20,11 @@ type priority =
   | Priority_default
   | Priority_dormant
 
+type persistent_client = {
+  fd: Unix.file_descr;
+  mutable tracker: Connection_tracker.t;
+}
+
 type client =
   | Non_persistent_client of {
       ic: Timeout.in_channel;
@@ -28,12 +33,39 @@ type client =
       mutable tracker: Connection_tracker.t;
     }
       (** In practice this is hh_client. There can be multiple non-persistent clients. *)
-  | Persistent_client of {
-      fd: Unix.file_descr;
-      mutable tracker: Connection_tracker.t;
-    }  (** In practice this is the IDE. There is only one persistent client. *)
+  | Persistent_client of persistent_client
+      (** In practice this is the IDE. There is only one persistent client. *)
 
-type client_id = int
+module ClientId : sig
+  type t = int
+
+  val make : unit -> t
+end = struct
+  type t = int
+
+  let next_id : t ref = ref 0
+
+  let make () =
+    let id = !next_id in
+    next_id := id + 1;
+    id
+end
+
+type client_id = ClientId.t
+
+module PersistentClientStore : sig
+  val set : persistent_client -> unit
+
+  val get : unit -> (client_id * persistent_client) option
+end = struct
+  let persistent_client : (client_id * persistent_client) option ref = ref None
+
+  let set client =
+    let id = ClientId.make () in
+    persistent_client := Some (id, client)
+
+  let get () = !persistent_client
+end
 
 let provider_from_file_descriptors x = x
 
@@ -234,7 +266,7 @@ let read_connection_type (client : client) : connection_type =
   | Persistent_client _ ->
     (* Every client starts as Non_persistent_client, and after we read its
      * desired connection type, can be turned into Persistent_client
-     * (via make_persistent). *)
+     * (via make_and_store_persistent). *)
     assert false
 
 [@@@warning "+52"]
@@ -299,15 +331,22 @@ let get_channels = function
      * never be hit *)
     assert false
 
-let make_persistent = function
-  | Non_persistent_client { ic; tracker; _ } ->
-    Persistent_client { fd = Timeout.descr_of_in_channel ic; tracker }
-  | Persistent_client _ ->
-    (* See comment on read_connection_type. Non_persistent_client can be
-     * turned into Persistent_client, but not the other way *)
-    assert false
+let make_and_store_persistent client =
+  let persistent_client =
+    match client with
+    | Non_persistent_client { ic; tracker; _ } ->
+      { fd = Timeout.descr_of_in_channel ic; tracker }
+    | Persistent_client _ ->
+      (* See comment on read_connection_type. Non_persistent_client can be
+      * turned into Persistent_client, but not the other way *)
+      assert false
+  in
+  PersistentClientStore.set persistent_client;
+  Persistent_client persistent_client
 
-let get_persistent_client () = (* TODO T77949124 *) None
+let get_persistent_client () =
+  PersistentClientStore.get ()
+  |> Option.map ~f:(fun (id, client) -> (id, Persistent_client client))
 
 let is_persistent = function
   | Non_persistent_client _ -> false

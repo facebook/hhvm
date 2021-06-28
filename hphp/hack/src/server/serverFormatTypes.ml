@@ -8,6 +8,7 @@
  *)
 
 type action = string * int * int (* file contents, offset start, offset end *)
+[@@deriving show]
 
 type result = (string, string) Stdlib.result
 

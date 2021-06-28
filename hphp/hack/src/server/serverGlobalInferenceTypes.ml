@@ -11,6 +11,7 @@ type mode =
   | MSolve
   | MExport
   | MRewrite
+[@@deriving show]
 
 type result =
   | RMerge of unit

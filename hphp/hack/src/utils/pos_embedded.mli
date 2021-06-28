@@ -10,7 +10,7 @@
 (* Note: While Pos.string prints out positions as closed intervals, pos_start
  * and pos_end actually form a half-open interval (i.e. pos_end points to the
  * character *after* the last character of the relevant lexeme.) *)
-type 'a pos [@@deriving eq, ord]
+type 'a pos [@@deriving eq, ord, show]
 
 (** The underlying type used to construct Pos instances.
  *
@@ -21,7 +21,7 @@ type t = Relative_path.t pos [@@deriving eq]
 
 val pp : Format.formatter -> t -> unit
 
-type absolute = string pos [@@deriving eq]
+type absolute = string pos [@@deriving eq, ord, show]
 
 val none : t
 

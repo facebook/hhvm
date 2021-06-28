@@ -27,12 +27,16 @@ module ErrorTracker : sig
   val get_errors_to_push :
     t ->
     rechecked:Relative_path.Set.t ->
-    Errors.t ->
+    new_errors:Errors.t ->
     t * Errors.finalized_error list SMap.t
 
   (** Inform the tracker that errors yet to be pushed have been successfully pushed
       to the IDE. *)
   val commit_pushed_errors : t -> t
+
+  (** Reset the tracker for when the previous client has been lost
+      and we have got / will get a new one. *)
+  val reset_for_new_client : t -> t
 
   (** Module to export internal functions for unit testing. Do not use in production code. *)
   module TestExporter : sig
@@ -115,28 +119,33 @@ end = struct
   let get_errors_to_push :
       t ->
       rechecked:Relative_path.Set.t ->
-      Errors.t ->
+      new_errors:Errors.t ->
       t * Errors.finalized_error list SMap.t =
-   fun { errors_in_ide; to_push } ~rechecked new_errors ->
+   fun { errors_in_ide; to_push } ~rechecked ~new_errors ->
     let new_errors : error list FileMap.t = Errors.as_map new_errors in
     let to_push = merge_errors_to_push to_push ~rechecked ~new_errors in
     let to_push = erase_errors to_push ~errors_in_ide ~rechecked in
     let to_push_absolute = to_absolute_errors to_push in
     ({ errors_in_ide; to_push }, to_push_absolute)
 
+  let compute_total_errors errors_in_ide to_push =
+    FileMap.fold
+      to_push
+      ~init:errors_in_ide
+      ~f:(fun file errors errors_in_ide ->
+        match errors with
+        | [] -> FileMap.remove errors_in_ide file
+        | errors -> FileMap.add errors_in_ide ~key:file ~data:errors)
+
   let commit_pushed_errors : t -> t =
    fun { errors_in_ide; to_push } ->
-    let errors_in_ide =
-      FileMap.fold
-        to_push
-        ~init:errors_in_ide
-        ~f:(fun file errors errors_in_ide ->
-          match errors with
-          | [] -> FileMap.remove errors_in_ide file
-          | errors -> FileMap.add errors_in_ide ~key:file ~data:errors)
-    in
-    let to_push = FileMap.empty in
-    { errors_in_ide; to_push }
+    let all_errors = compute_total_errors errors_in_ide to_push in
+    { errors_in_ide = all_errors; to_push = FileMap.empty }
+
+  let reset_for_new_client : t -> t =
+   fun { errors_in_ide; to_push } ->
+    let all_errors = compute_total_errors errors_in_ide to_push in
+    { errors_in_ide = FileMap.empty; to_push = all_errors }
 
   module TestExporter = struct
     let make ~errors_in_ide ~to_push = { errors_in_ide; to_push }
@@ -145,8 +154,10 @@ end
 
 type t = {
   error_tracker: ErrorTracker.t;
-  client: ClientProvider.client;
+  tracked_client_id: int option;
 }
+
+let init = { error_tracker = ErrorTracker.init; tracked_client_id = None }
 
 let push_to_client :
     Errors.finalized_error list SMap.t -> ClientProvider.client -> bool =
@@ -154,7 +165,7 @@ let push_to_client :
   if ClientProvider.client_has_message client then
     false
   else if SMap.is_empty errors then
-    true
+    false
   else
     let res = ServerCommandTypes.DIAGNOSTIC { errors; is_truncated = None } in
     try
@@ -162,19 +173,58 @@ let push_to_client :
       true
     with ClientProvider.Client_went_away -> false
 
-let push_new_errors : t -> rechecked:Relative_path.Set.t -> Errors.t -> t =
- fun { error_tracker; client } ~rechecked new_errors ->
-  let (error_tracker, to_push) =
-    ErrorTracker.get_errors_to_push error_tracker ~rechecked new_errors
+(** Reset the error tracker if the new client ID is different from the tracked one. *)
+let possibly_reset_tracker { error_tracker; tracked_client_id } new_client_id =
+  let client_went_away =
+    match (tracked_client_id, new_client_id) with
+    | (None, _) -> false
+    | (Some _, None) -> true
+    | (Some tracked_client_id, Some client_id) ->
+      not (Int.equal tracked_client_id client_id)
   in
-  let success = push_to_client to_push client in
   let error_tracker =
-    if success then
+    if client_went_away then
+      ErrorTracker.reset_for_new_client error_tracker
+    else
+      error_tracker
+  in
+  let tracked_client_id = new_client_id in
+  { error_tracker; tracked_client_id }
+
+let option_of_tuple_to_tuple_of_options :
+    ('a * 'b) option -> 'a option * 'b option = function
+  | None -> (None, None)
+  | Some (a, b) -> (Some a, Some b)
+
+(** Get client from the client provider and possibly reset the error tracker
+    if we've lost the previous client. *)
+let get_client : t -> t * ClientProvider.client option =
+ fun pusher ->
+  let (current_client_id, current_client) =
+    ClientProvider.get_persistent_client ()
+    |> option_of_tuple_to_tuple_of_options
+  in
+  let pusher = possibly_reset_tracker pusher current_client_id in
+  (pusher, current_client)
+
+let push_new_errors : t -> rechecked:Relative_path.Set.t -> Errors.t -> t =
+ fun pusher ~rechecked new_errors ->
+  let ({ error_tracker; tracked_client_id }, client) = get_client pusher in
+  let (error_tracker, to_push) =
+    ErrorTracker.get_errors_to_push error_tracker ~rechecked ~new_errors
+  in
+  let was_pushed =
+    match client with
+    | None -> false
+    | Some client -> push_to_client to_push client
+  in
+  let error_tracker =
+    if was_pushed then
       ErrorTracker.commit_pushed_errors error_tracker
     else
       error_tracker
   in
-  { error_tracker; client }
+  { error_tracker; tracked_client_id }
 
 module TestExporter = struct
   module FileMap = FileMap

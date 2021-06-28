@@ -33,6 +33,8 @@ type client =
       mutable tracker: Connection_tracker.t;
     }  (** In practice this is the IDE. There is only one persistent client. *)
 
+type client_id = int
+
 let provider_from_file_descriptors x = x
 
 let provider_for_test () = failwith "for use in tests only"
@@ -304,6 +306,8 @@ let make_persistent = function
     (* See comment on read_connection_type. Non_persistent_client can be
      * turned into Persistent_client, but not the other way *)
     assert false
+
+let get_persistent_client () = (* TODO T77949124 *) None
 
 let is_persistent = function
   | Non_persistent_client _ -> false

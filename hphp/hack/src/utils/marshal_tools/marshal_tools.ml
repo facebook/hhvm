@@ -51,6 +51,7 @@ type remote_exception_data = {
   message: string;
   stack: string;
 }
+[@@deriving eq]
 
 type error =
   | Rpc_absent of Exception.t

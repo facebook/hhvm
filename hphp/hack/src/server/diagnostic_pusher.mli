@@ -12,6 +12,8 @@
     keep track of diagnostics. *)
 type t
 
+val init : t
+
 (** Push a new batch of errors to the LSP client. [rechecked] is the full
     set of files that have been rechecked to produce this new batch of errors. *)
 val push_new_errors : t -> rechecked:Relative_path.Set.t -> Errors.t -> t
@@ -28,7 +30,7 @@ module TestExporter : sig
     val get_errors_to_push :
       t ->
       rechecked:Relative_path.Set.t ->
-      Errors.t ->
+      new_errors:Errors.t ->
       t * Errors.finalized_error list SMap.t
 
     val commit_pushed_errors : t -> t

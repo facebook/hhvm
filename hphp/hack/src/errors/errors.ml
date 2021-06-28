@@ -150,6 +150,7 @@ type ('prim_pos, 'pos) error_ = {
 [@@deriving eq, ord, show]
 
 type finalized_error = (Pos.absolute, Pos.absolute) error_
+[@@deriving eq, ord, show]
 
 type error = (Pos.t, Pos_or_decl.t) error_ [@@deriving eq, ord, show]
 
@@ -164,6 +165,12 @@ module Error = struct
 end
 
 module ErrorSet = Caml.Set.Make (Error)
+
+module FinalizedError = struct
+  type t = finalized_error [@@deriving ord]
+end
+
+module FinalizedErrorSet = Caml.Set.Make (FinalizedError)
 
 let applied_fixmes : applied_fixme files_t ref = ref Relative_path.Map.empty
 

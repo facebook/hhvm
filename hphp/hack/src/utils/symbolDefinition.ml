@@ -48,7 +48,7 @@ and 'a t = {
   params: 'a t list option;
   docblock: string option;
 }
-[@@deriving ord]
+[@@deriving ord, show]
 
 let rec to_absolute x =
   {

@@ -52,6 +52,7 @@ module Method_jumps = struct
     | Class
     | Interface
     | Trait
+  [@@deriving show]
 
   let readable_place name pos p_name =
     let readable = Pos.string pos in
@@ -108,7 +109,7 @@ module Done_or_retry = struct
   (* Note: this is designed to work with calls that always will succeed on second try
    * (the reason for retrying is a one time event that is resolved during first call).
    * If this ends up throwing, it's a bug in hh_server. *)
-  let rec call ~(f : unit -> 'a t Lwt.t) ~(depth : int) : 'a Lwt.t =
+  let rec call ~(f : unit -> 'a t Lwt.t) ~(depth : int) : _ Lwt.t =
     Lwt.Infix.(
       ( if depth = 2 then
         Lwt.fail Two_retries_in_a_row
@@ -122,7 +123,7 @@ module Done_or_retry = struct
 
   (* Call the function returning Done_or_retry.t with at most one retry, expecting
    * that this is enough to yield a non-Retry value, which is returned *)
-  let call ~(f : unit -> 'a t Lwt.t) : 'a Lwt.t = call ~f ~depth:0
+  let call ~(f : unit -> 'a t Lwt.t) : _ Lwt.t = call ~f ~depth:0
 
   (* Helper function useful when mapping over results from functions that (in addition
    * to Done_or_retry.t result) thread through some kind of environment. *)
@@ -138,6 +139,7 @@ module Find_refs = struct
     | Property of string
     | Class_const of string
     | Typeconst of string
+  [@@deriving show]
 
   type action =
     | Class of string
@@ -152,6 +154,7 @@ module Find_refs = struct
         line: int;
         char: int;
       }
+  [@@deriving show]
 
   type server_result = (string * Pos.t) list
 
@@ -189,6 +192,7 @@ module Symbol_type = struct
     type_: string;
     ident_: int;
   }
+  [@@deriving show]
 end
 
 module Symbol_info_service = struct
@@ -196,7 +200,7 @@ module Symbol_info_service = struct
     | Function
     | Method
     | Constructor
-  [@@deriving ord]
+  [@@deriving ord, show]
 
   type symbol_fun_call = {
     name: string;
@@ -204,6 +208,7 @@ module Symbol_info_service = struct
     pos: string Pos.pos;
     caller: string;
   }
+  [@@deriving show]
 
   type result = {
     fun_calls: symbol_fun_call list;
@@ -268,6 +273,7 @@ module Ide_refactor_type = struct
     char: int;
     new_name: string;
   }
+  [@@deriving show]
 end
 
 module Go_to_definition = struct
@@ -282,6 +288,7 @@ module Extract_standalone = struct
   type target =
     | Function of string
     | Method of string * string
+  [@@deriving show]
 end
 
 module Tast_hole = struct
@@ -289,6 +296,7 @@ module Tast_hole = struct
     | Typing
     | Cast
     | Any
+  [@@deriving show]
 end
 
 type file_input =
@@ -308,17 +316,20 @@ type lint_stdin_input = {
   filename: string;
   contents: string;
 }
+[@@deriving show]
 
 type cst_search_input = {
   sort_results: bool;
   input: Hh_json.json;
   files_to_search: string list option; (* if None, search all files *)
 }
+[@@deriving show]
 
 type subscribe_diagnostic = {
   id: int;
   error_limit: int option;
 }
+[@@deriving show]
 
 (* The following datatypes can be interpreted as follows:
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
@@ -466,9 +477,18 @@ and streamed =
   | SHOW of string
   | LIST_MODES
 
+type errors = Errors.finalized_error list [@@deriving show]
+
+let equal_errors errors1 errors2 =
+  let errors1 = Errors.FinalizedErrorSet.of_list errors1 in
+  let errors2 = Errors.FinalizedErrorSet.of_list errors2 in
+  Errors.FinalizedErrorSet.equal errors1 errors2
+
+type diagnostic_errors = errors SMap.t [@@deriving eq, show]
+
 type push =
   | DIAGNOSTIC of {
-      errors: Errors.finalized_error list SMap.t; [@opaque]
+      errors: diagnostic_errors;
       is_truncated: int option;
           (** Whether the list of errors has been truncated
               to preserve IDE perf. *)
@@ -492,7 +512,9 @@ and global_typecheck_kind =
   | Blocking
   | Interruptible
   | Remote_blocking of string
-[@@deriving show]
+[@@deriving eq, show]
+
+type pushes = push list [@@deriving eq, show]
 
 type 'a message_type =
   | Hello

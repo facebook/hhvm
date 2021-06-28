@@ -254,6 +254,7 @@
     ide_rpc_api_types
     lsp
     lwt
+    marshal_tools
     pos
     search_utils
     symbol

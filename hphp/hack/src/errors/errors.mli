@@ -17,7 +17,7 @@ val get_message_str : 'a message -> string
 
 type error = (Pos.t, Pos_or_decl.t) error_ [@@deriving eq, show]
 
-type finalized_error = (Pos.absolute, Pos.absolute) error_
+type finalized_error = (Pos.absolute, Pos.absolute) error_ [@@deriving eq, show]
 
 type applied_fixme = Pos.t * int
 
@@ -66,6 +66,8 @@ type per_file_errors
 type t [@@deriving eq]
 
 module ErrorSet : Caml.Set.S with type elt := error
+
+module FinalizedErrorSet : Caml.Set.S with type elt := finalized_error
 
 (** This will check that the first position of the given reasons is in the
     current decl and if yes use it as primary error position. If no,

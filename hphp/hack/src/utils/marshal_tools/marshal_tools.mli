@@ -25,6 +25,7 @@ type remote_exception_data = {
   message: string;
   stack: string;
 }
+[@@deriving eq]
 
 (** Some say we should represent network communications failures with results,
 not exceptions. Here we go for those who favor results... *)

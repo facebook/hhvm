@@ -43,6 +43,7 @@ type action =
       char: int;
       new_name: string;
     }
+[@@deriving show]
 
 type deprecated_wrapper_function_ref =
   | DeprecatedStaticMethodRef

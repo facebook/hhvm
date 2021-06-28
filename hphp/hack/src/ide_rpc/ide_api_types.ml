@@ -14,11 +14,13 @@ type position = {
   line: int;
   column: int;
 }
+[@@deriving show]
 
 type range = {
   st: position;
   ed: position;
 }
+[@@deriving show]
 
 type file_position = {
   filename: string;
@@ -34,6 +36,7 @@ type text_edit = {
   range: range option;
   text: string;
 }
+[@@deriving show]
 
 type coverage_level =
   | Unchecked (* Completely unchecked code, i.e. Tanys *)

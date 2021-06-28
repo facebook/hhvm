@@ -5,7 +5,7 @@
   (link_flags (:standard (:include ../../../src/dune_config/ld-opts.sexp)))
   (modules diagnostic_pusher_test)
   (libraries
-    default_injector_config
+    test_injector_config
     diagnostic_pusher
     ounit2
     utils_core))

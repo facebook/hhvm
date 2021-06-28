@@ -1027,6 +1027,7 @@ struct StFrameMetaData : IRExtraData {
 
 
   Offset callBCOff;
+  bool isInlined;
   bool asyncEagerReturn;
 };
 

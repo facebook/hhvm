@@ -74,8 +74,8 @@ namespace backtrace_detail {
 
 BTContext::BTContext() {
   // don't attempt to read locals
-  auto const flags = 1U << ActRec::LocalsDecRefd;
-  auto const handler = (intptr_t)jit::tc::ustubs().retInlHelper;
+  auto const flags = (1U << ActRec::LocalsDecRefd) | (1U << ActRec::IsInlined);
+  auto const handler = (intptr_t)jit::tc::ustubs().retHelper;
   fakeAR[0].m_sfp = &fakeAR[1];
   fakeAR[1].m_sfp = &fakeAR[0];
   fakeAR[0].m_savedRip = fakeAR[1].m_savedRip = handler;

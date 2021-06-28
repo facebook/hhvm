@@ -88,6 +88,9 @@ struct ActRec {
     // down (locals freed).
     LocalsDecRefd,
 
+    // Indicates whether this frame is inlined.
+    IsInlined,
+
     // Async eager return was requested.
     AsyncEagerRet,
 
@@ -141,11 +144,6 @@ struct ActRec {
    */
   bool skipFrame() const;
 
-  /*
-   * Whether this frame is inlined.
-   */
-  bool isInlined() const;
-
   /////////////////////////////////////////////////////////////////////////////
   // Flags, call offset, number of args.
 
@@ -153,6 +151,7 @@ struct ActRec {
    * Raw flags accessors.
    */
   bool localsDecRefd() const;
+  bool isInlined() const;
   bool isAsyncEagerReturn() const;
 
   /*

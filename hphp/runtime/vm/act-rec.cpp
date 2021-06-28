@@ -67,11 +67,6 @@ bool ActRec::skipFrame() const {
   return func() && func()->isSkipFrame();
 }
 
-bool ActRec::isInlined() const {
-  return reinterpret_cast<jit::TCA>(m_savedRip) ==
-    jit::tc::ustubs().retInlHelper;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }

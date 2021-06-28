@@ -46,6 +46,10 @@ inline bool ActRec::localsDecRefd() const {
   return m_callOffAndFlags & (1 << LocalsDecRefd);
 }
 
+inline bool ActRec::isInlined() const {
+  return m_callOffAndFlags & (1 << IsInlined);
+}
+
 inline bool ActRec::isAsyncEagerReturn() const {
   return m_callOffAndFlags & (1 << AsyncEagerRet);
 }
@@ -60,7 +64,7 @@ inline void ActRec::initCallOffset(Offset offset) {
 
 inline uint32_t ActRec::encodeCallOffsetAndFlags(Offset offset,
                                                  uint32_t flags) {
-  assertx(!(flags & ~((1 << AsyncEagerRet)|(1 << LocalsDecRefd))));
+  assertx(!(flags & ~((1 << CallOffsetStart) - 1)));
   return (offset << CallOffsetStart) | flags;
 }
 

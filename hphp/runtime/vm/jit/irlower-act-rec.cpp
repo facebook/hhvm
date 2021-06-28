@@ -81,11 +81,13 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   int32_t constexpr flagsDelta =
     CallFlags::Flags::CallOffsetStart - ActRec::CallOffsetStart;
   assertx(ActRec::LocalsDecRefd == 0);
-  assertx(ActRec::AsyncEagerRet == 1);
-  assertx(ActRec::CallOffsetStart == 2);
-  assertx(CallFlags::Flags::ReservedZero == flagsDelta + 0);
-  assertx(CallFlags::Flags::AsyncEagerReturn == flagsDelta + 1);
-  assertx(CallFlags::Flags::CallOffsetStart == flagsDelta + 2);
+  assertx(ActRec::IsInlined == 1);
+  assertx(ActRec::AsyncEagerRet == 2);
+  assertx(ActRec::CallOffsetStart == 3);
+  assertx(CallFlags::Flags::ReservedZero0 == flagsDelta + 0);
+  assertx(CallFlags::Flags::ReservedZero1 == flagsDelta + 1);
+  assertx(CallFlags::Flags::AsyncEagerReturn == flagsDelta + 2);
+  assertx(CallFlags::Flags::CallOffsetStart == flagsDelta + 3);
   auto const callFlagsLow32 = v.makeReg();
   auto const callOffAndFlags = v.makeReg();
   v << movtql{callFlags, callFlagsLow32};
@@ -170,7 +172,8 @@ void cgStFrameMeta(IRLS& env, const IRInstruction* inst) {
   // Set m_callOffAndFlags.
   auto const coaf = safe_cast<int32_t>(ActRec::encodeCallOffsetAndFlags(
     extra->callBCOff,
-    extra->asyncEagerReturn ? (1 << ActRec::AsyncEagerRet) : 0
+    (extra->asyncEagerReturn ? (1 << ActRec::AsyncEagerRet) : 0) |
+      (extra->isInlined ? (1 << ActRec::IsInlined) : 0)
   ));
   v << storeli{coaf, fp[AROFF(m_callOffAndFlags)]};
 }

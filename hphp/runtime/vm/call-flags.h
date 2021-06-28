@@ -42,7 +42,8 @@ struct CallFlags {
   enum Flags {
     HasGenerics,
     IsDynamicCall,
-    ReservedZero,
+    ReservedZero0,
+    ReservedZero1,
     AsyncEagerReturn,
     CallOffsetStart,
     GenericsBitmapStart = 32,

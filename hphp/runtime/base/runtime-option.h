@@ -1176,8 +1176,6 @@ struct RuntimeOption {
    * HackArrCompatNotices option, and control whether various runtime   \
    * checks are made; they do not affect any optimizations. */          \
   F(bool, HackArrCompatNotices, false)                                  \
-  /* Raise notices on intish-cast (which may use an is_array check) */  \
-  F(bool, HackArrCompatIntishCastNotices, false)                        \
   F(bool, HackArrCompatSerializeNotices, false)                         \
   /* When this flag is on, var_export outputs d/varrays. */             \
   F(bool, HackArrDVArrVarExport, false)                                 \

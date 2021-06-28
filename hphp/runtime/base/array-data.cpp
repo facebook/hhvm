@@ -860,10 +860,6 @@ ArrayData* ArrayData::toDictIntishCast(bool copy) {
   });
   if (!intish) return base;
 
-  if (RO::EvalHackArrCompatIntishCastNotices) {
-    raise_hackarr_compat_notice("triggered IntishCast for toDictIntishCast");
-  }
-
   // Create a new, plain PHP array with the casted keys.
   auto result = MixedArrayInit(base->size());
   IterateKV(base, [&](TypedValue k, TypedValue v) {
@@ -887,13 +883,7 @@ ArrayData* ArrayData::toDictIntishCast(bool copy) {
 }
 
 bool ArrayData::IntishCastKey(const StringData* key, int64_t& i) {
-  if (key->isStrictlyInteger(i)) {
-    if (RO::EvalHackArrCompatIntishCastNotices) {
-      raise_hackarr_compat_notice("triggered IntishCast for set");
-    }
-    return true;
-  }
-  return false;
+  return key->isStrictlyInteger(i);
 }
 
 ArrayData* ArrayData::setLegacyArray(bool copy, bool legacy) {

@@ -266,6 +266,7 @@
     core_kernel
     decl_counters
     decl_service
+    diagnostic_pusher
     errors
     file_info
     nast

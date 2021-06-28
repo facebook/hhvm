@@ -604,6 +604,23 @@ let load_and_process_files
 (* Let's go! That's where the action is *)
 (*****************************************************************************)
 
+let push_new_errors_to_lsp_client :
+    Diagnostic_pusher.t ref ->
+    completed:file_computation list ->
+    Errors.t ->
+    unit =
+ fun diag ~completed new_errors ->
+  let rechecked =
+    completed
+    |> List.filter_map ~f:(function
+           | Check { path; deferred_count = _ } -> Some path
+           | Declare _
+           | Prefetch _ ->
+             None)
+    |> Relative_path.Set.of_list
+  in
+  diag := Diagnostic_pusher.push_new_errors !diag ~rechecked new_errors
+
 (** Merge the results from multiple workers.
 
     We don't really care about which files are left unchecked since we use
@@ -611,21 +628,23 @@ let load_and_process_files
     empty list for the list of unchecked files. *)
 let merge
     ~(should_prefetch_deferred_files : bool)
+    (ctx : Provider_context.t)
     (delegate_state : Delegate.state ref)
     (files_to_process : file_computation BigList.t ref)
     (files_initial_count : int)
     (files_in_progress : file_computation Hash_set.t)
     (files_checked_count : int ref)
-    ((produced_by_job : typing_result), (progress : progress))
+    (diagnostic_pusher : Diagnostic_pusher.t ref)
+    ( (produced_by_job : typing_result),
+      ({ kind = progress_kind; progress : computation_progress } : progress) )
     (acc : typing_result) : typing_result =
   let () =
-    match progress.kind with
+    match progress_kind with
     | Progress -> ()
     | DelegateProgress _ ->
       delegate_state :=
-        Delegate.merge !delegate_state produced_by_job.errors progress.progress
+        Delegate.merge !delegate_state produced_by_job.errors progress
   in
-  let progress = progress.progress in
 
   files_to_process := BigList.append progress.remaining !files_to_process;
 
@@ -689,6 +708,13 @@ let merge
     ~total_count:files_initial_count
     ~unit:"files"
     ~extra:delegate_progress;
+
+  if TypecheckerOptions.stream_errors (Provider_context.get_tcopt ctx) then
+    push_new_errors_to_lsp_client
+      diagnostic_pusher
+      ~completed:progress.completed
+      produced_by_job.errors;
+
   accumulate_job_output produced_by_job acc
 
 let next
@@ -825,6 +851,7 @@ let process_in_parallel
   let files_in_progress = Hash_set.Poly.create () in
   let files_processed_count = ref 0 in
   let files_initial_count = BigList.length fnl in
+  let diagnostic_pusher = ref Diagnostic_pusher.init in
   let delegate_progress =
     Typing_service_delegate.get_progress !delegate_state
   in
@@ -874,11 +901,13 @@ let process_in_parallel
       ~merge:
         (merge
            ~should_prefetch_deferred_files
+           ctx
            delegate_state
            files_to_process
            files_initial_count
            files_in_progress
-           files_processed_count)
+           files_processed_count
+           diagnostic_pusher)
       ~next
       ~on_cancelled:(on_cancelled next files_to_process files_in_progress)
       ~interrupt

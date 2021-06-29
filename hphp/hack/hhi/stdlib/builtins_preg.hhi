@@ -143,8 +143,6 @@ function sql_regcase(string $str);
 const int PREG_PATTERN_ORDER = 0;
 const int PREG_SET_ORDER = 0;
 const int PREG_OFFSET_CAPTURE = 0;
-const int PREG_FB_HACK_ARRAYS = 0;
-const int PREG_HACK_ARR = 0; // legacy, equivalent to FB_HACK_ARRAYS
 const int PREG_SPLIT_NO_EMPTY = 0;
 const int PREG_SPLIT_DELIM_CAPTURE = 0;
 const int PREG_SPLIT_OFFSET_CAPTURE = 0;

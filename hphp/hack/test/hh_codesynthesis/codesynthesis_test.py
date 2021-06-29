@@ -261,6 +261,22 @@ Type T -> Type A, Type B"""
             exp, hh_codesynthesis.extract_logic_rules(deps.split("\n"))
         )
 
+    def test_unsupported_type_dependency(self) -> None:
+        # T94428437 Temporary skipping all built-in functions for now.
+        exp = [
+            'extends_to("A", "B").',
+            'type("A", "B").',
+            'symbols("A";"B").',
+        ]
+        deps = r"""
+Extends A -> Type B
+Type A -> Type B
+Type HH\Capabilities\AccessGlobals -> Type B
+Type HH\Contexts\Unsafe\globals -> Type A"""
+        self.assertListEqual(
+            exp, hh_codesynthesis.extract_logic_rules(deps.split("\n"))
+        )
+
 
 class DoReasoningTest(unittest.TestCase):
     def extract_run_and_compare(

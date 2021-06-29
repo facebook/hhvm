@@ -35,6 +35,10 @@ class DependencyEdges(object):
             if len(lhs) != 2:
                 raise RuntimeError("Unexpected lhs.")
 
+            # T94428437 Temporary skipping all built-in functions for now.
+            if lhs[1].startswith("HH\\"):
+                continue
+
             if lhs[0] in self.edge_types:
                 self.objs[lhs[0]].append(line)
 

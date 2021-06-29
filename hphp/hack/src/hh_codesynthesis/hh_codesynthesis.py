@@ -160,6 +160,10 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
             continue
         handler = handlers[lhs[0]]
 
+        # T94428437 Temporary skipping all built-in functions for now.
+        if lhs[1].startswith("HH\\"):
+            continue
+
         lhs_tokens = handler.parse(lhs[1])
         # Collecting symbols.
         symbols.add(f'"{lhs_tokens[0]}"')

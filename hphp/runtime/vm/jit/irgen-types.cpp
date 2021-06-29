@@ -104,8 +104,7 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
   if (s_Awaitable.get()->isame(className)) {
     return gen(env, IsWaitHandle, src);
   }
-  if (s_Stringish.get()->isame(className)
-     || s_StringishObject.get()->isame(className)) {
+  if (s_StringishObject.get()->isame(className)) {
     return gen(env, HasToString, src);
   }
 

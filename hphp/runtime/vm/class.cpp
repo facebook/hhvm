@@ -3658,8 +3658,7 @@ void Class::setInterfaces() {
     if ((!interfacesBuilder.contains(s_StringishObject.get()) ||
          !interfacesBuilder.contains(s_Stringish.get())) &&
         (!(attrs() & AttrInterface) ||
-         (!m_preClass->name()->isame(s_StringishObject.get()) &&
-          !m_preClass->name()->isame(s_Stringish.get())))) {
+         !m_preClass->name()->isame(s_StringishObject.get()))) {
 
       // Add Stringish & XHP child (All StringishObjects are also XHPChild)
       const auto maybe_add = [&](StaticString name) {

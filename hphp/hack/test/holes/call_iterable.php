@@ -22,10 +22,10 @@ function call_iterable_cast(
   Iterable<float> $m,
 ): void {
   /* HH_FIXME[4417] */
-  m(\HH_FIXME\UNSAFE_CAST<Iterable<float>,Iterable<int>>($m));
+  m(\HH\FIXME\UNSAFE_CAST<Iterable<float>,Iterable<int>>($m));
 
   $foo = new TestIterable();
 
   /* HH_FIXME[4417] */
-  $foo->m(\HH_FIXME\UNSAFE_CAST<Iterable<float>,Iterable<int>>($m));
+  $foo->m(\HH\FIXME\UNSAFE_CAST<Iterable<float>,Iterable<int>>($m));
 }

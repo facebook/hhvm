@@ -22,10 +22,10 @@ function call_varray_or_darray_cast(
   varray_or_darray<float> $d,
 ): void {
   /* HH_FIXME[4417] */
-  d(\HH_FIXME\UNSAFE_CAST<varray_or_darray<float>,varray_or_darray<int>>($d));
+  d(\HH\FIXME\UNSAFE_CAST<varray_or_darray<float>,varray_or_darray<int>>($d));
 
   $foo = new TestVarrayOrDarray();
 
   /* HH_FIXME[4417] */
-  $foo->d(\HH_FIXME\UNSAFE_CAST<varray_or_darray<float>,varray_or_darray<int>>($d));
+  $foo->d(\HH\FIXME\UNSAFE_CAST<varray_or_darray<float>,varray_or_darray<int>>($d));
 }

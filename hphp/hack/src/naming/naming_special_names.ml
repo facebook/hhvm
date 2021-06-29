@@ -462,7 +462,7 @@ module PseudoFunctions = struct
 
   let die = "\\die"
 
-  let unsafe_cast = "\\HH_FIXME\\UNSAFE_CAST"
+  let unsafe_cast = "\\HH\\FIXME\\UNSAFE_CAST"
 
   let all_pseudo_functions =
     HashSet.of_list

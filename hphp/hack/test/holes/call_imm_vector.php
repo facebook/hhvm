@@ -22,10 +22,10 @@ function call_immvector_cast(
   ImmVector<float> $k,
 ): void {
   /* HH_FIXME[4417] */
-  k(\HH_FIXME\UNSAFE_CAST<ImmVector<float>,ImmVector<int>>($k));
+  k(\HH\FIXME\UNSAFE_CAST<ImmVector<float>,ImmVector<int>>($k));
 
   $foo = new TestImmVector();
 
   /* HH_FIXME[4417] */
-  $foo->k(\HH_FIXME\UNSAFE_CAST<ImmVector<float>,ImmVector<int>>($k));
+  $foo->k(\HH\FIXME\UNSAFE_CAST<ImmVector<float>,ImmVector<int>>($k));
 }

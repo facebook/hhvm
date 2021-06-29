@@ -9,5 +9,5 @@ function call_generic(int $x, string $y): void {
 
 function call_generic_cast(int $x, string $y): void {
   /* HH_FIXME[4417] */
-  generic_bounded($x, \HH_FIXME\UNSAFE_CAST<string,float>($y));
+  generic_bounded($x, \HH\FIXME\UNSAFE_CAST<string,float>($y));
 }

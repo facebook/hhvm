@@ -28,14 +28,14 @@ function call_keyed_traversable_cast(
   KeyedTraversable<int, string> $o2,
 ): void {
   /* HH_FIXME[4417] */
-  o(\HH_FIXME\UNSAFE_CAST<KeyedTraversable<string,int>,KeyedTraversable<int,int>>($o1));
+  o(\HH\FIXME\UNSAFE_CAST<KeyedTraversable<string,int>,KeyedTraversable<int,int>>($o1));
   /* HH_FIXME[4417] */
-  o(\HH_FIXME\UNSAFE_CAST<KeyedTraversable<int,string>,KeyedTraversable<int,int>>($o2));
+  o(\HH\FIXME\UNSAFE_CAST<KeyedTraversable<int,string>,KeyedTraversable<int,int>>($o2));
 
   $foo = new TestKeyedTraversable();
 
   /* HH_FIXME[4417] */
-  $foo->o(\HH_FIXME\UNSAFE_CAST<KeyedTraversable<string,int>,KeyedTraversable<int,int>>($o1));
+  $foo->o(\HH\FIXME\UNSAFE_CAST<KeyedTraversable<string,int>,KeyedTraversable<int,int>>($o1));
   /* HH_FIXME[4417] */
-  $foo->o(\HH_FIXME\UNSAFE_CAST<KeyedTraversable<int,string>,KeyedTraversable<int,int>>($o2));
+  $foo->o(\HH\FIXME\UNSAFE_CAST<KeyedTraversable<int,string>,KeyedTraversable<int,int>>($o2));
 }

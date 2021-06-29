@@ -22,10 +22,10 @@ function call_set_cast(
   Set<string> $h,
 ): void {
   /* HH_FIXME[4417] */
-  h(\HH_FIXME\UNSAFE_CAST<Set<string>,Set<int>>($h));
+  h(\HH\FIXME\UNSAFE_CAST<Set<string>,Set<int>>($h));
 
   $foo = new TestSet();
 
   /* HH_FIXME[4417] */
-  $foo->h(\HH_FIXME\UNSAFE_CAST<Set<string>,Set<int>>($h));
+  $foo->h(\HH\FIXME\UNSAFE_CAST<Set<string>,Set<int>>($h));
 }

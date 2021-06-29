@@ -22,10 +22,10 @@ function call_vector_cast(
   Vector<float> $g,
 ): void {
   /* HH_FIXME[4417] */
-  g(\HH_FIXME\UNSAFE_CAST<Vector<float>,Vector<int>>($g));
+  g(\HH\FIXME\UNSAFE_CAST<Vector<float>,Vector<int>>($g));
 
   $foo = new TestVector();
 
   /* HH_FIXME[4417] */
-  $foo->g(\HH_FIXME\UNSAFE_CAST<Vector<float>,Vector<int>>($g));
+  $foo->g(\HH\FIXME\UNSAFE_CAST<Vector<float>,Vector<int>>($g));
 }

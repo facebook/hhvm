@@ -19,7 +19,7 @@ function call_dead_code_cast(): void {
   if (true) {
     $x = 'string';
     /* HH_FIXME[4417] */
-    foo(\HH_FIXME\UNSAFE_CAST<string,int>($x));
+    foo(\HH\FIXME\UNSAFE_CAST<string,int>($x));
   } else {
     $x = 'string';
     foo($x);

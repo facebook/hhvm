@@ -22,10 +22,10 @@ function call_collection_cast(
   Collection<string> $l,
 ): void {
   /* HH_FIXME[4417] */
-  l(\HH_FIXME\UNSAFE_CAST<Collection<string>,Collection<int>>($l));
+  l(\HH\FIXME\UNSAFE_CAST<Collection<string>,Collection<int>>($l));
 
   $foo = new TestCollection();
 
   /* HH_FIXME[4417] */
-  $foo->l(\HH_FIXME\UNSAFE_CAST<Collection<string>,Collection<int>>($l));
+  $foo->l(\HH\FIXME\UNSAFE_CAST<Collection<string>,Collection<int>>($l));
 }

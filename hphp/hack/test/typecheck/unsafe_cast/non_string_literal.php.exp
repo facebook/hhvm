@@ -8,7 +8,7 @@ File "non_string_literal.php", line 5, characters 3-44:
 This cast violates type safety and may lead to unexpected behavior at runtime. (Typing[4417])
 File "non_string_literal.php", line 5, characters 40-43:
 Invalid argument (Typing[4110])
-  File "soundness.hhi", line 7, characters 72-96:
+  File "soundness.hhi", line 8, characters 72-96:
   Expected `HH\FormatString<nothing>`
   File "non_string_literal.php", line 4, characters 10-16:
   But got `string`

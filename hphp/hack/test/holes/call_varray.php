@@ -22,10 +22,10 @@ function call_varray_cast(
   varray<float> $c,
 ): void {
   /* HH_FIXME[4417] */
-  c(\HH_FIXME\UNSAFE_CAST<varray<float>,varray<int>>($c));
+  c(\HH\FIXME\UNSAFE_CAST<varray<float>,varray<int>>($c));
 
   $foo = new TestVarray();
 
   /* HH_FIXME[4417] */
-  $foo->c(\HH_FIXME\UNSAFE_CAST<varray<float>,varray<int>>($c));
+  $foo->c(\HH\FIXME\UNSAFE_CAST<varray<float>,varray<int>>($c));
 }

@@ -22,10 +22,10 @@ function call_traversable_cast(
   Traversable<float> $i,
 ): void {
   /* HH_FIXME[4417] */
-  i(\HH_FIXME\UNSAFE_CAST<Traversable<float>,Traversable<int>>($i));
+  i(\HH\FIXME\UNSAFE_CAST<Traversable<float>,Traversable<int>>($i));
 
   $foo = new TestTraversable();
 
   /* HH_FIXME[4417] */
-  $foo->i(\HH_FIXME\UNSAFE_CAST<Traversable<float>,Traversable<int>>($i));
+  $foo->i(\HH\FIXME\UNSAFE_CAST<Traversable<float>,Traversable<int>>($i));
 }

@@ -646,6 +646,11 @@ module CustomGraph = struct
           filter_discovered_deps_batch mode
       end
     )
+
+  let idep_exists mode dependent dependency =
+    let idependent = Dep.make Hash64Bit dependent in
+    let idependency = Dep.make Hash64Bit dependency in
+    hh_custom_dep_graph_has_edge mode idependent idependency
 end
 
 module SaveCustomGraph = struct
@@ -857,6 +862,11 @@ let add_idep mode dependent dependency =
   | SQLiteMode -> SQLiteGraph.add_idep dependent dependency
   | CustomMode _ -> CustomGraph.add_idep mode dependent dependency
   | SaveCustomMode _ -> SaveCustomGraph.add_idep mode dependent dependency
+
+let idep_exists mode dependent dependency =
+  match mode with
+  | CustomMode _ -> CustomGraph.idep_exists mode dependent dependency
+  | _ -> false
 
 let add_idep_directly_to_graph mode ~dependent ~dependency =
   match mode with

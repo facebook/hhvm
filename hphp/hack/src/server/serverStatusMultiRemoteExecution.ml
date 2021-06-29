@@ -11,7 +11,11 @@ open Hh_prelude
 let go (filenames : string list) ctx =
   let dep_edges = HashSet.create () in
   let multi_remote_execution_trace root obj =
-    HashSet.add dep_edges (root, obj)
+    if
+      not
+        (Typing_deps.idep_exists (Provider_context.get_deps_mode ctx) root obj)
+    then
+      HashSet.add dep_edges (root, obj)
   in
   Typing_deps.add_dependency_callback
     "multi_remote_execution_trace"

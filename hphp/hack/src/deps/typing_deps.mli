@@ -186,6 +186,9 @@ val allow_dependency_table_reads : Mode.t -> bool -> bool
 val add_idep :
   Mode.t -> Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit
 
+val idep_exists :
+  Mode.t -> Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> bool
+
 val add_idep_directly_to_graph :
   Mode.t -> dependent:Dep.t -> dependency:Dep.t -> unit
 

@@ -541,8 +541,14 @@ let parse_check_args cmd =
         ^ "[\"Class\", \"Function\", \"Method\"] <Current Name> <New Name>" );
       ("--remote", Arg.Set remote, " force remote type checking");
       ( "--remote-execution",
-        Arg.String (fun x -> set_mode (MODE_STATUS_REMOTE_EXECUTION x)),
-        " force type checking with remote execution" );
+        Arg.String
+          (fun s ->
+            if String.equal s "cold" || String.equal s "warm" then
+              set_mode (MODE_STATUS_REMOTE_EXECUTION s)
+            else
+              print_string
+                "Warning: unrecognized remote-execution hulk mode. Please pass in \"cold\" or \"warm\".\n"),
+        "<cold|warm> force type checking with remote execution" );
       ( "--remove-dead-fixme",
         Arg.Int
           begin

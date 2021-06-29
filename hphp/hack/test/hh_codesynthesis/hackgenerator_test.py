@@ -27,6 +27,20 @@ class _HackInterfaceGeneratorTest(unittest.TestCase):
         self.obj.add_extend("I2")
         self.assertEqual("interface I0 extends I1,I2 {}", str(self.obj))
 
+    def test_single_method_interface(self) -> None:
+        self.obj.add_method("foo")
+        self.assertEqual(
+            "interface I0  {\npublic function foo(): void;\n}", str(self.obj)
+        )
+
+    def test_multiple_methods_interface(self) -> None:
+        self.obj.add_method("foo")
+        self.obj.add_method("bar")
+        self.assertEqual(
+            "interface I0  {\npublic function bar(): void;\n\npublic function foo(): void;\n}",
+            str(self.obj),
+        )
+
 
 class _HackClassGeneratorTest(unittest.TestCase):
     def setUp(self) -> None:
@@ -51,6 +65,20 @@ class _HackClassGeneratorTest(unittest.TestCase):
         # invoke set_extend again, will overwrite the previous "C1"
         self.obj.set_extend("C2")
         self.assertEqual("class C0 extends C2 implements I1,I2 {}", str(self.obj))
+
+    def test_single_method_class(self) -> None:
+        self.obj.add_method("bar")
+        self.assertEqual(
+            "class C0   {\npublic function bar(): void{}\n}", str(self.obj)
+        )
+
+    def test_multiple_methods_class(self) -> None:
+        self.obj.add_method("bar")
+        self.obj.add_method("foo")
+        self.assertEqual(
+            "class C0   {\npublic function bar(): void{}\n\npublic function foo(): void{}\n}",
+            str(self.obj),
+        )
 
 
 class HackCodeGeneratorTest(unittest.TestCase):
@@ -103,4 +131,57 @@ interface I2  {}
         self.obj._add_extend("I1", "I0")
         self.obj._add_implement("C1", "I1")
         self.obj._add_implement("C1", "I2")
+        self.assertEqual(exp, str(self.obj))
+
+    def test_class_implements_interface_with_method_override(self) -> None:
+        exp = """\
+<?hh
+class C0  implements I0 {
+public function foo(): void{}
+}
+interface I0  {
+public function foo(): void;
+}
+"""
+        self.obj._add_class("C0")
+        self.obj._add_interface("I0")
+        self.obj._add_implement("C0", "I0")
+        self.obj._add_method("I0", "foo")
+        self.obj._add_method("C0", "foo")
+        self.assertEqual(exp, str(self.obj))
+
+    def test_class_extends_class_with_method_override(self) -> None:
+        exp = """\
+<?hh
+class C0 extends C1  {
+public function foo(): void{}
+}
+class C1   {
+public function foo(): void{}
+}
+
+"""
+        self.obj._add_class("C0")
+        self.obj._add_class("C1")
+        self.obj._add_extend("C0", "C1")
+        self.obj._add_method("C1", "foo")
+        self.obj._add_method("C0", "foo")
+        self.assertEqual(exp, str(self.obj))
+
+    def test_interface_extends_interface_with_method_override(self) -> None:
+        exp = """\
+<?hh
+
+interface I0 extends I1 {
+public function bar(): void;
+}
+interface I1  {
+public function bar(): void;
+}
+"""
+        self.obj._add_interface("I0")
+        self.obj._add_interface("I1")
+        self.obj._add_extend("I0", "I1")
+        self.obj._add_method("I1", "bar")
+        self.obj._add_method("I0", "bar")
         self.assertEqual(exp, str(self.obj))

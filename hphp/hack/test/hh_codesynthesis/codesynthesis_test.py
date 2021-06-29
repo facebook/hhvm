@@ -263,6 +263,15 @@ Type T -> Type A, Type B"""
 
 
 class DoReasoningTest(unittest.TestCase):
+    def extract_run_and_compare(
+        self, deps: str, exp: str, generator: hh_codesynthesis.CodeGenerator
+    ) -> None:
+        additional_programs = hh_codesynthesis.extract_logic_rules(deps.split("\n"))
+        hh_codesynthesis.do_reasoning(
+            additional_programs=additional_programs, generator=generator
+        )
+        self.assertEqual(str(generator), exp)
+
     def test_clingo_exception(self) -> None:
         deps = ["rule_without_period(symbol1, symbol2)"]
         raw_codegen = hh_codesynthesis.CodeGenerator()
@@ -396,12 +405,24 @@ Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B
 """
-        hack_codegen = hackGenerator.HackCodeGenerator()
-        additional_programs = hh_codesynthesis.extract_logic_rules(deps.split("\n"))
-        hh_codesynthesis.do_reasoning(
-            additional_programs=additional_programs, generator=hack_codegen
-        )
-        self.assertEqual(str(hack_codegen), exp)
+        self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
+
+    def test_method_dependency_with_rule_extraction_hack_codegen_override(self) -> None:
+        exp = """\
+<?hh
+class B  implements A {
+public function foo(): void{}
+}
+interface A  {
+public function foo(): void;
+}
+"""
+        deps = """\
+Extends A -> Type B
+Method A::foo -> Type B
+Type A -> Type B
+"""
+        self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
 
 
 class ReadFromFileTest(unittest.TestCase):

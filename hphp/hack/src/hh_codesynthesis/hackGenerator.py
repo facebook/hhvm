@@ -33,9 +33,23 @@ class _HackBaseGenerator(object):
     def __init__(self) -> None:
         super(_HackBaseGenerator, self).__init__()
         self.name = "Base"
+        # A set of methods in this class/interface.
+        self.methods: Set[str] = set()
+
+    def add_method(self, method_name: str) -> None:
+        self.methods.add(method_name)
+
+    def _print_method_body(self) -> str:
+        return ";"
+
+    def _print_method(self, method_name: str) -> str:
+        return f"\npublic function {method_name}(): void{self._print_method_body()}\n"
+
+    def _print_methods(self) -> str:
+        return "".join(list(map(self._print_method, sorted(self.methods))))
 
     def _print_body(self) -> str:
-        return "{}"
+        return "{" + self._print_methods() + "}"
 
 
 class _HackInterfaceGenerator(_HackBaseGenerator):
@@ -86,6 +100,9 @@ class _HackClassGenerator(_HackBaseGenerator):
             return ""
         return "implements {}".format(",".join(sorted(self.implements)))
 
+    def _print_method_body(self) -> str:
+        return "{}"
+
     def __str__(self) -> str:
         return (
             f"class {self.name} {self._print_extend()} "
@@ -117,6 +134,12 @@ class HackCodeGenerator(CodeGenerator):
         if name in self.class_objs:
             self.class_objs[name].add_implement(implement)
 
+    def _add_method(self, name: str, method_name: str) -> None:
+        if name in self.class_objs:
+            self.class_objs[name].add_method(method_name)
+        if name in self.interface_objs:
+            self.interface_objs[name].add_method(method_name)
+
     def __str__(self) -> str:
         return (
             "<?hh\n"
@@ -128,9 +151,14 @@ class HackCodeGenerator(CodeGenerator):
 
     def on_model(self, m: clingo.Model) -> None:
         # Separate into 'class(?)', 'interface(?)', 'implements(?, ?)', 'extends(?, ?)'
+        # 'add_method(?, ?)',
         predicates = m.symbols(atoms=True)
         node_func = {"class": self._add_class, "interface": self._add_interface}
-        edge_func = {"extends": self._add_extend, "implements": self._add_implement}
+        edge_func = {
+            "extends": self._add_extend,
+            "implements": self._add_implement,
+            "add_method": self._add_method,
+        }
         # Two passes,
         #   First pass creates individual nodes like class, interface.
         for predicate in predicates:

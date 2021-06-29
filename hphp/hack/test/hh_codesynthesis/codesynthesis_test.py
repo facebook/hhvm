@@ -424,6 +424,19 @@ Type A -> Type B
 """
         self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
 
+    def test_type_dependency_with_rule_extraction_hack_codegen(self) -> None:
+        exp = """\
+<?hh
+class A   {}
+interface B  {
+public function dummy_B_method(A $A_obj): void;
+}
+"""
+        deps = """\
+Type A -> Type B
+"""
+        self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
+
 
 class ReadFromFileTest(unittest.TestCase):
     def test_read(self) -> None:

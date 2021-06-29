@@ -41,6 +41,21 @@ class _HackInterfaceGeneratorTest(unittest.TestCase):
             str(self.obj),
         )
 
+    def test_single_parameter_dummy_method_interface(self) -> None:
+        self.obj.add_parameter("C0")
+        self.assertEqual(
+            "interface I0  {\npublic function dummy_I0_method(C0 $C0_obj): void;\n}",
+            str(self.obj),
+        )
+
+    def test_multiple_parameters_dummy_method_interface(self) -> None:
+        self.obj.add_parameter("C0")
+        self.obj.add_parameter("C1")
+        self.assertEqual(
+            "interface I0  {\npublic function dummy_I0_method(C0 $C0_obj, C1 $C1_obj): void;\n}",
+            str(self.obj),
+        )
+
 
 class _HackClassGeneratorTest(unittest.TestCase):
     def setUp(self) -> None:
@@ -77,6 +92,21 @@ class _HackClassGeneratorTest(unittest.TestCase):
         self.obj.add_method("foo")
         self.assertEqual(
             "class C0   {\npublic function bar(): void{}\n\npublic function foo(): void{}\n}",
+            str(self.obj),
+        )
+
+    def test_single_parameter_dummy_method_class(self) -> None:
+        self.obj.add_parameter("C1")
+        self.assertEqual(
+            "class C0   {\npublic function dummy_C0_method(C1 $C1_obj): void{}\n}",
+            str(self.obj),
+        )
+
+    def test_multiple_parameters_dummy_method_class(self) -> None:
+        self.obj.add_parameter("C2")
+        self.obj.add_parameter("C1")
+        self.assertEqual(
+            "class C0   {\npublic function dummy_C0_method(C1 $C1_obj, C2 $C2_obj): void{}\n}",
             str(self.obj),
         )
 
@@ -184,4 +214,33 @@ public function bar(): void;
         self.obj._add_extend("I0", "I1")
         self.obj._add_method("I1", "bar")
         self.obj._add_method("I0", "bar")
+        self.assertEqual(exp, str(self.obj))
+
+    def test_interface_passed_as_parameter_to_class(self) -> None:
+        exp = """\
+<?hh
+class C0   {
+public function dummy_C0_method(I0 $I0_obj): void{}
+}
+interface I0  {}
+"""
+        self.obj._add_interface("I0")
+        self.obj._add_class("C0")
+        self.obj._add_to_parameter_set("C0", "I0")
+        self.assertEqual(exp, str(self.obj))
+
+    def test_naming_conflict_with_dummy_method(self) -> None:
+        exp = """\
+<?hh
+class C0   {
+public function dummy_C0_method_(I0 $I0_obj): void{}
+
+public function dummy_C0_method(): void{}
+}
+interface I0  {}
+"""
+        self.obj._add_interface("I0")
+        self.obj._add_class("C0")
+        self.obj._add_method("C0", "dummy_C0_method")
+        self.obj._add_to_parameter_set("C0", "I0")
         self.assertEqual(exp, str(self.obj))

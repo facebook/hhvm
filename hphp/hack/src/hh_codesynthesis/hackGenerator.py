@@ -35,9 +35,31 @@ class _HackBaseGenerator(object):
         self.name = "Base"
         # A set of methods in this class/interface.
         self.methods: Set[str] = set()
+        # A set of parameters invoked in dummy method.
+        self.parameter_set: Set[str] = set()
 
     def add_method(self, method_name: str) -> None:
         self.methods.add(method_name)
+
+    def add_parameter(self, parameter_type: str) -> None:
+        self.parameter_set.add(parameter_type)
+
+    def _print_dummy_method_body(self) -> str:
+        return ";"
+
+    def _print_dummy_method(self) -> str:
+        parameter_list = ", ".join(
+            (map(lambda x: f"{x} ${x}_obj", sorted(self.parameter_set)))
+        )
+        if parameter_list == "":
+            return ""
+        dummy_name = f"dummy_{self.name}_method"
+
+        # We are defining a unique dummy_method among all the methods defined by
+        # the user. If there is a naming conflict, simply extending it with "_".
+        while dummy_name in self.methods:
+            dummy_name += "_"
+        return f"\npublic function {dummy_name}({parameter_list}): void{self._print_dummy_method_body()}\n"
 
     def _print_method_body(self) -> str:
         return ";"
@@ -49,7 +71,7 @@ class _HackBaseGenerator(object):
         return "".join(list(map(self._print_method, sorted(self.methods))))
 
     def _print_body(self) -> str:
-        return "{" + self._print_methods() + "}"
+        return "{" + self._print_dummy_method() + self._print_methods() + "}"
 
 
 class _HackInterfaceGenerator(_HackBaseGenerator):
@@ -100,6 +122,9 @@ class _HackClassGenerator(_HackBaseGenerator):
             return ""
         return "implements {}".format(",".join(sorted(self.implements)))
 
+    def _print_dummy_method_body(self) -> str:
+        return "{}"
+
     def _print_method_body(self) -> str:
         return "{}"
 
@@ -140,6 +165,12 @@ class HackCodeGenerator(CodeGenerator):
         if name in self.interface_objs:
             self.interface_objs[name].add_method(method_name)
 
+    def _add_to_parameter_set(self, name: str, parameter_type: str) -> None:
+        if name in self.class_objs:
+            self.class_objs[name].add_parameter(parameter_type)
+        elif name in self.interface_objs:
+            self.interface_objs[name].add_parameter(parameter_type)
+
     def __str__(self) -> str:
         return (
             "<?hh\n"
@@ -152,12 +183,14 @@ class HackCodeGenerator(CodeGenerator):
     def on_model(self, m: clingo.Model) -> None:
         # Separate into 'class(?)', 'interface(?)', 'implements(?, ?)', 'extends(?, ?)'
         # 'add_method(?, ?)',
+        # 'add_method(?, ?)', 'has_method_with_parameter(?, ?)'
         predicates = m.symbols(atoms=True)
         node_func = {"class": self._add_class, "interface": self._add_interface}
         edge_func = {
             "extends": self._add_extend,
             "implements": self._add_implement,
             "add_method": self._add_method,
+            "has_method_with_parameter": self._add_to_parameter_set,
         }
         # Two passes,
         #   First pass creates individual nodes like class, interface.

@@ -114,7 +114,7 @@ impl UnstableFeatures {
             UnstableFeatures::Readonly => Preview,
             UnstableFeatures::Modules => Unstable,
             UnstableFeatures::ContextAliasDeclaration => Unstable,
-            UnstableFeatures::ClassConstDefault => Migration,
+            UnstableFeatures::ClassConstDefault => Unstable,
         }
     }
 }

@@ -5513,16 +5513,19 @@ and arraykey_value
     else
       (MakeType.arraykey (Reason.Ridx_dict pos), Reason.index_class class_name)
   in
-  let env =
-    Typing_coercion.coerce_type
-      p
-      reason
-      env
-      ty
-      { et_type = ty_arraykey; et_enforced = Enforced }
-      Errors.unify_error
+  let (env, err_opt) =
+    Result.fold
+      ~ok:(fun env -> (env, None))
+      ~error:(fun env -> (env, Some (ty, ty_arraykey)))
+    @@ Typing_coercion.coerce_type_res
+         p
+         reason
+         env
+         ty
+         { et_type = ty_arraykey; et_enforced = Enforced }
+         Errors.unify_error
   in
-  (env, (te, ty))
+  (env, (hole_on_err ~err_opt te, ty))
 
 and check_parent_construct pos env el unpacked_element env_parent =
   let check_not_abstract = false in

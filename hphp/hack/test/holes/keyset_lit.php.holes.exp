@@ -1,0 +1,25 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:24-28], (Hprim Tvoid)))); 
+        f_name = ([3:10-20], "\\keyset_lit"); f_tparams = []; f_where_constraints = []; 
+        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:3-24],
+            (Expr
+               (([5:3-23], keyset<(int | bool)>),
+                (Binop ((Eq None), (([5:3-5], keyset<(int | bool)>), (Lvar ([5:3-5], $x))),
+                   (([5:8-23], keyset<(int | bool)>),
+                    (ValCollection (Keyset, None, [(([5:15-16], int), (Int "1")); (([5:18-22], bool), (Hole ((([5:18-22], bool), True), (bool), (arraykey), Typing)))])))
+                   )))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

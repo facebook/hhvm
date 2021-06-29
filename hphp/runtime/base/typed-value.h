@@ -95,7 +95,11 @@ struct ConstModifiers {
   }
   void setCoeffects(StaticCoeffects coeffects);
   void setIsAbstract(bool isAbstract) {
-    rawData |= (isAbstract ? kAbstractMask : 0);
+    if (isAbstract) {
+      rawData |= kAbstractMask;
+    } else {
+      rawData &= ~kAbstractMask;
+    }
   }
   void setKind(Kind kind) {
     rawData |= (uint32_t(kind) & kKindMask);

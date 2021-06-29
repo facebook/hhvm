@@ -2583,6 +2583,14 @@ void Class::setConstants() {
       assertx(idx != -1);
       cns.val = preConsts[idx].val();
     }
+
+    // Concretize inherited abstract type constants with defaults
+    if (isNormalClass(this) && !isAbstract(this)) {
+      if (cns.isAbstract() && cns.val.is_init()) {
+        cns.concretize();
+      }
+    }
+
 #ifndef USE_LOWPTR
     cns.pointedClsName = nullptr;
 #endif

@@ -1813,6 +1813,24 @@ bool build_class_constants(ClassInfo* cinfo, ClsPreResolveUpdates& updates) {
     for (auto const& c : t->traitConsts)    addTraitConst(c);
   }
 
+  if (!(cinfo->cls->attrs & (AttrAbstract | AttrInterface | AttrTrait))) {
+    // If we are in a concrete class, concretize the defaults of inherited abstract type constants
+    auto const cls = const_cast<php::Class*>(cinfo->cls);
+    for (auto t : cinfo->clsConstants) {
+      auto const& cns = *t.second;
+      if (cns.isAbstract && cns.val) {
+        auto concretizedCns = cns;
+        concretizedCns.cls = cls;
+        concretizedCns.isAbstract = false;
+
+        // this is similar to trait constant flattening
+        cls->constants.push_back(concretizedCns);
+        cinfo->clsConstants[concretizedCns.name].cls = cls;
+        cinfo->clsConstants[concretizedCns.name].idx = cls->constants.size() - 1;
+      }
+    }
+  }
+
   return true;
 }
 

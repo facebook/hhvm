@@ -1,0 +1,4 @@
+A::T is abstract
+B::T is abstract
+BConcrete::T is not abstract
+C::T is not abstract

@@ -234,6 +234,12 @@ struct Class : AtomicCountable {
     bool isAbstract() const {
       return val.constModifiers().isAbstract();
     }
+    void concretize() {
+      // Type constant is abstract and has a default
+      assertx(isAbstract() && val.is_init());
+      val.constModifiers().setIsAbstract(false);
+    }
+
     ConstModifiers::Kind kind() const { return val.constModifiers().kind(); }
 
     StringData* getPointedClsName() const {

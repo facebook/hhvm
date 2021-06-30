@@ -863,9 +863,12 @@ IRInstruction* resolve_flat(Global& genv, Block* blk, uint32_t id,
       auto const st = stores[j++];
       auto si = st->src(i);
       if (!si->inst()->is(DefConst) && si->type().admitsSingleVal()) {
-        si = genv.unit.cns(si->type());
+        // If edges do not all have the same SSATmp src,
+        // rewrite srcs with constant values to use DefConst.
+        phiInputs[edge.from()] = genv.unit.cns(si->type());
+      } else {
+        phiInputs[edge.from()] = si;
       }
-      phiInputs[edge.from()] = si;
       if (temp == nullptr) temp = si;
       if (si != temp) same = false;
     }

@@ -7,7 +7,8 @@
  *
  *)
 
-type ('a, 'b, 'c, 'd) job_result = 'a * 'b * 'c * 'd * Relative_path.t list
+type ('a, 'b, 'c, 'd, 'e) job_result =
+  'a * 'b * 'c * 'd * 'e * Relative_path.t list
 
 type process_file_results = {
   errors: Errors.t;
@@ -39,6 +40,7 @@ val go :
   Errors.t * Typing_service_delegate.state * Telemetry.t
 
 val go_with_interrupt :
+  ?diagnostic_pusher:Diagnostic_pusher.t ->
   Provider_context.t ->
   MultiWorker.worker list option ->
   Typing_service_delegate.state ->
@@ -51,7 +53,12 @@ val go_with_interrupt :
   remote_execution:ReEnv.t option ->
   check_info:Typing_service_types.check_info ->
   profiling:CgroupProfiler.Profiling.t ->
-  (Errors.t, Typing_service_delegate.state, Telemetry.t, 'a) job_result
+  ( Errors.t,
+    Typing_service_delegate.state,
+    Telemetry.t,
+    'a,
+    Diagnostic_pusher.t option )
+  job_result
 
 module TestMocking : sig
   val set_is_cancelled : Relative_path.t -> unit

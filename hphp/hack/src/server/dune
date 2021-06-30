@@ -154,6 +154,7 @@
     ci_util
     cli_args
     diagnostic_subscription
+    diagnostic_pusher
     disk
     errors
     experiments_config_file_stubs

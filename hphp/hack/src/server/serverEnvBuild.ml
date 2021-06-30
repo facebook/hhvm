@@ -271,7 +271,7 @@ let default_genv =
     debug_channels = None;
   }
 
-let make_env ~init_id ~deps_mode config =
+let make_env ~init_id ~deps_mode config : ServerEnv.env =
   {
     tcopt = ServerConfig.typechecker_options config;
     popt = ServerConfig.parser_options config;
@@ -323,6 +323,7 @@ let make_env ~init_id ~deps_mode config =
         naming_table_manifold_path = None;
       };
     diag_subscribe = None;
+    diagnostic_pusher = Diagnostic_pusher.init;
     last_recheck_loop_stats = empty_recheck_loop_stats ~recheck_id:"<none>";
     last_recheck_loop_stats_for_actual_work = None;
     local_symbol_table = SearchUtils.default_si_env;

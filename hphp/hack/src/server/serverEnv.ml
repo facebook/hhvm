@@ -207,6 +207,8 @@ type env = {
           recheck (for logging/debugging purposes) *)
   diag_subscribe: Diagnostic_subscription.t option;
       (** The diagnostic subscription information of the current client *)
+  diagnostic_pusher: Diagnostic_pusher.t;
+      (** Structure tracking errors to push to LSP client. *)
   last_recheck_loop_stats: recheck_loop_stats;
   last_recheck_loop_stats_for_actual_work: recheck_loop_stats option;
   local_symbol_table: SearchUtils.si_env; [@opaque]

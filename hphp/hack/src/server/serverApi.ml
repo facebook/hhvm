@@ -203,50 +203,47 @@ let make_remote_server_api
     let type_check ctx ~init_id ~check_id files_to_check ~state_filename =
       let t = Unix.gettimeofday () in
       Hh_logger.log "Type checking a batch...";
-      Typing_check_service.(
-        let check_info =
-          {
-            init_id;
-            recheck_id = Some check_id;
-            profile_log = true;
-            profile_type_check_twice = false;
-            profile_decling = Typing_service_types.DeclingOff;
-            profile_type_check_duration_threshold = 0.0;
-            profile_type_check_memory_threshold_mb = 0;
-          }
-        in
-        (* TODO: use the telemetry *)
-        let (errors, _, _telemetry) =
-          go
-            ctx
-            workers
-            Typing_service_delegate.default
-            (Telemetry.create ())
-            Relative_path.Set.empty
-            files_to_check
-            ~memory_cap:None
-            ~longlived_workers:false
-            ~remote_execution:None
-            ~check_info
-        in
-        HackEventLogger.remote_worker_type_check_end t;
-        let t =
-          Hh_logger.log_duration "Type checked files in remote worker" t
-        in
-        let dep_table_edges_added =
-          Typing_deps.save_discovered_edges
-            (Provider_context.get_deps_mode ctx)
-            ~dest:state_filename
-            ~build_revision:Build_id.build_revision
-            ~reset_state_after_saving:true
-        in
-        let _t : float =
-          Hh_logger.log_duration
-            (Printf.sprintf
-               "Saved partial dependency graph (%d edges)"
-               dep_table_edges_added)
-            t
-        in
-        errors)
+      let check_info =
+        {
+          init_id;
+          recheck_id = Some check_id;
+          profile_log = true;
+          profile_type_check_twice = false;
+          profile_decling = Typing_service_types.DeclingOff;
+          profile_type_check_duration_threshold = 0.0;
+          profile_type_check_memory_threshold_mb = 0;
+        }
+      in
+      (* TODO: use the telemetry *)
+      let (errors, _, _telemetry) =
+        Typing_check_service.go
+          ctx
+          workers
+          Typing_service_delegate.default
+          (Telemetry.create ())
+          Relative_path.Set.empty
+          files_to_check
+          ~memory_cap:None
+          ~longlived_workers:false
+          ~remote_execution:None
+          ~check_info
+      in
+      HackEventLogger.remote_worker_type_check_end t;
+      let t = Hh_logger.log_duration "Type checked files in remote worker" t in
+      let dep_table_edges_added =
+        Typing_deps.save_discovered_edges
+          (Provider_context.get_deps_mode ctx)
+          ~dest:state_filename
+          ~build_revision:Build_id.build_revision
+          ~reset_state_after_saving:true
+      in
+      let _t : float =
+        Hh_logger.log_duration
+          (Printf.sprintf
+             "Saved partial dependency graph (%d edges)"
+             dep_table_edges_added)
+          t
+      in
+      errors
   end : RemoteServerApi
     with type naming_table = Naming_table.t option )

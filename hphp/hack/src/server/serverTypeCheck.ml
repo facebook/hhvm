@@ -1083,35 +1083,47 @@ functor
       let longlived_workers =
         genv.local_config.ServerLocalConfig.longlived_workers
       in
-      let fnl = Relative_path.Set.elements files_to_check in
-      let (errorl', delegate_state, telemetry, env', cancelled) =
+      let diag_subscribe_before = env.diag_subscribe in
+
+      let (errorl', telemetry, env, cancelled) =
         let ctx = Provider_utils.ctx_from_server_env env in
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"type check"
         @@ fun () ->
-        Typing_check_service.go_with_interrupt
-          ctx
-          genv.workers
-          env.typing_service.delegate_state
-          telemetry
-          dynamic_view_files
-          fnl
-          ~interrupt
-          ~memory_cap
-          ~longlived_workers
-          ~remote_execution:env.ServerEnv.remote_execution
-          ~check_info:(get_check_info genv env)
-          ~profiling
+        let ( errorl,
+              delegate_state,
+              telemetry,
+              env,
+              diagnostic_pusher,
+              cancelled ) =
+          Typing_check_service.go_with_interrupt
+            ~diagnostic_pusher:env.ServerEnv.diagnostic_pusher
+            ctx
+            genv.workers
+            env.typing_service.delegate_state
+            telemetry
+            dynamic_view_files
+            (files_to_check |> Relative_path.Set.elements)
+            ~interrupt
+            ~memory_cap
+            ~longlived_workers
+            ~remote_execution:env.ServerEnv.remote_execution
+            ~check_info:(get_check_info genv env)
+            ~profiling
+        in
+        let env =
+          {
+            env with
+            diagnostic_pusher =
+              Option.value diagnostic_pusher ~default:env.diagnostic_pusher;
+            typing_service = { env.typing_service with delegate_state };
+          }
+        in
+        (errorl, telemetry, env, cancelled)
       in
       log_if_diag_subscribe_changed
         "type_checking.go_with_interrupt"
-        ~before:env.diag_subscribe
-        ~after:env'.diag_subscribe;
-      let env =
-        {
-          env' with
-          typing_service = { env'.typing_service with delegate_state };
-        }
-      in
+        ~before:diag_subscribe_before
+        ~after:env.diag_subscribe;
       (* Add new things that need to be rechecked *)
       let needs_recheck =
         Relative_path.Set.union env.needs_recheck lazy_check_later

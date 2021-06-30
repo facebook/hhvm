@@ -166,194 +166,9 @@ let finalize_init init_env typecheck_telemetry init_telemetry =
     (Telemetry.to_string telemetry);
   ()
 
-let shutdown_persistent_client client env =
-  ClientProvider.shutdown_client client;
-  let env =
-    {
-      env with
-      pending_command_needs_writes = None;
-      persistent_client_pending_command_needs_full_check = None;
-    }
-  in
-  ServerFileSync.clear_sync_data env
-
 (*****************************************************************************)
 (* The main loop *)
 (*****************************************************************************)
-
-[@@@warning "-52"]
-
-(* we have no alternative but to depend on Sys_error strings *)
-
-let handle_connection_exception
-    ~(env : ServerEnv.env) ~(client : ClientProvider.client) (e : Exception.t) :
-    ServerEnv.env =
-  match Exception.to_exn e with
-  | ClientProvider.Client_went_away
-  | ServerCommandTypes.Read_command_timeout ->
-    ClientProvider.shutdown_client client;
-    env
-  (* Connection dropped off. Its unforunate that we don't actually know
-   * which connection went bad (could be any write to any connection to
-   * child processes/daemons), we just assume at this top-level that
-   * since its not caught elsewhere, its the connection to the client.
-   *
-   * TODO: Make sure the pipe exception is really about this client.*)
-  | Unix.Unix_error (Unix.EPIPE, _, _)
-  | Sys_error "Broken pipe"
-  | Sys_error "Connection reset by peer" ->
-    Hh_logger.log "Client channel went bad. Shutting down client connection";
-    ClientProvider.shutdown_client client;
-    env
-  | exn ->
-    let e = Exception.wrap exn in
-    HackEventLogger.handle_connection_exception "inner" e;
-    Hh_logger.log
-      "HANDLE_CONNECTION_EXCEPTION(inner) %s"
-      (Exception.to_string e);
-    ClientProvider.shutdown_client client;
-    env
-
-[@@@warning "+52"]
-
-(* CARE! scope of suppression should be only handle_connection_exception *)
-
-(* f represents a non-persistent command coming from client. If executing f
- * throws, we need to dispopose of this client (possibly recovering updated
- * environment from Nonfatal_rpc_exception). "return" is a constructor
- * wrapping the return value to make it match return type of f *)
-let handle_connection_try return client env f =
-  try f () with
-  | ServerCommand.Nonfatal_rpc_exception (e, env) ->
-    return (handle_connection_exception ~env ~client e)
-  | exn ->
-    let e = Exception.wrap exn in
-    return (handle_connection_exception ~env ~client e)
-
-let handle_connection_ genv env client =
-  ClientProvider.track
-    client
-    ~key:Connection_tracker.Server_start_handle_connection;
-  handle_connection_try (fun x -> ServerUtils.Done x) client env @@ fun () ->
-  match ClientProvider.read_connection_type client with
-  | ServerCommandTypes.Persistent ->
-    let f env =
-      let env =
-        match env.persistent_client with
-        | Some old_client ->
-          ClientProvider.send_push_message_to_client
-            old_client
-            ServerCommandTypes.NEW_CLIENT_CONNECTED;
-          shutdown_persistent_client old_client env
-        | None -> env
-      in
-      ClientProvider.track client ~key:Connection_tracker.Server_start_handle;
-      ClientProvider.send_response_to_client client ServerCommandTypes.Connected;
-      let env =
-        {
-          env with
-          persistent_client =
-            Some (ClientProvider.make_and_store_persistent client);
-        }
-      in
-      (* If the client connected in the middle of recheck, let them know it's
-       * happening. *)
-      if is_full_check_started env.full_check_status then
-        ServerBusyStatus.send
-          env
-          (ServerCommandTypes.Doing_global_typecheck
-             (ServerCheckUtils.global_typecheck_kind genv env));
-      env
-    in
-    if
-      Option.is_some env.persistent_client
-      (* Cleaning up after existing client (in shutdown_persistent_client)
-       * will attempt to write to shared memory *)
-    then
-      ServerUtils.Needs_writes (env, f, true, "Cleaning up persistent client")
-    else
-      ServerUtils.Done (f env)
-  | ServerCommandTypes.Non_persistent -> ServerCommand.handle genv env client
-
-let handle_persistent_connection_exception
-    ~(client : ClientProvider.client) ~(is_fatal : bool) (e : Exception.t) :
-    unit =
-  let open Marshal_tools in
-  let remote_e =
-    {
-      message = Exception.get_ctor_string e;
-      stack = Exception.get_backtrace_string e |> Exception.clean_stack;
-    }
-  in
-  let push =
-    if is_fatal then
-      ServerCommandTypes.FATAL_EXCEPTION remote_e
-    else
-      ServerCommandTypes.NONFATAL_EXCEPTION remote_e
-  in
-  begin
-    try ClientProvider.send_push_message_to_client client push with _ -> ()
-  end;
-  HackEventLogger.handle_persistent_connection_exception "inner" ~is_fatal e;
-  Hh_logger.error
-    "HANDLE_PERSISTENT_CONNECTION_EXCEPTION(inner) %s"
-    (Exception.to_string e);
-  ()
-
-(* Same as handle_connection_try, but for persistent clients *)
-[@@@warning "-52"]
-
-(* we have no alternative but to depend on Sys_error strings *)
-
-let handle_persistent_connection_try return client env f =
-  try f () with
-  (* TODO: Make sure the pipe exception is really about this client. *)
-  | Unix.Unix_error (Unix.EPIPE, _, _)
-  | Sys_error "Connection reset by peer"
-  | Sys_error "Broken pipe"
-  | ServerCommandTypes.Read_command_timeout
-  | ServerClientProvider.Client_went_away ->
-    return
-      env
-      (shutdown_persistent_client client)
-      ~needs_writes:(Some "Client_went_away")
-  | ServerCommand.Nonfatal_rpc_exception (e, env) ->
-    handle_persistent_connection_exception ~client ~is_fatal:false e;
-    return env (fun env -> env) ~needs_writes:None
-  | exn ->
-    let e = Exception.wrap exn in
-    handle_persistent_connection_exception ~client ~is_fatal:true e;
-    let needs_writes = Some (Exception.to_string e) in
-    return env (shutdown_persistent_client client) ~needs_writes
-
-[@@@warning "+52"]
-
-(* CARE! scope of suppression should be only handle_persistent_connection_try *)
-
-let handle_persistent_connection_ genv env client =
-  let return env f ~needs_writes =
-    match needs_writes with
-    | Some reason -> ServerUtils.Needs_writes (env, f, true, reason)
-    | None -> ServerUtils.Done (f env)
-  in
-  handle_persistent_connection_try return client env @@ fun () ->
-  let env = { env with ide_idle = false } in
-  ServerCommand.handle genv env client
-
-let handle_connection genv env client client_kind =
-  ServerIdle.stamp_connection ();
-
-  (* This "return" is guaranteed to be run as part of main loop, when workers
-   * are not busy, so we can ignore whether it needs writes or not - it's always
-   * safe for it to write. *)
-  let return env f ~needs_writes:_ = f env in
-  match client_kind with
-  | `Persistent ->
-    handle_persistent_connection_ genv env client
-    |> ServerUtils.wrap (handle_persistent_connection_try return client)
-  | `Non_persistent ->
-    handle_connection_ genv env client
-    |> ServerUtils.wrap (handle_connection_try (fun x -> x) client)
 
 let query_notifier genv env query_kind start_time =
   let open ServerNotifierTypes in
@@ -520,7 +335,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
   in
   (* We have some new, or previously un-processed updates *)
   let full_check =
-    is_full_check_started env.full_check_status
+    ServerEnv.is_full_check_started env.full_check_status
     (* Prioritize building search index over full rechecks. *)
     && ( Queue.is_empty SearchServiceRunner.SearchServiceRunner.queue
        (* Unless there is something actively waiting for this *)
@@ -622,7 +437,7 @@ let new_serve_iteration_id () = Random_id.short_string ()
 let main_loop_command_handler client_kind client result =
   match result with
   | ServerUtils.Done env -> env
-  | ServerUtils.Needs_full_recheck (env, f, reason) ->
+  | ServerUtils.Needs_full_recheck { env; finish_command_handling; reason } ->
     begin
       match client_kind with
       | `Non_persistent ->
@@ -633,7 +448,7 @@ let main_loop_command_handler client_kind client result =
         {
           env with
           nonpersistent_client_pending_command_needs_full_check =
-            Some (f, reason, client);
+            Some (finish_command_handling, reason, client);
         }
       | `Persistent ->
         (* Persistent client will not send any further commands until previous one
@@ -643,10 +458,18 @@ let main_loop_command_handler client_kind client result =
         );
         {
           env with
-          persistent_client_pending_command_needs_full_check = Some (f, reason);
+          persistent_client_pending_command_needs_full_check =
+            Some (finish_command_handling, reason);
         }
     end
-  | ServerUtils.Needs_writes (env, f, _, _) -> f env
+  | ServerUtils.Needs_writes
+      {
+        env;
+        finish_command_handling;
+        recheck_restart_is_needed = _;
+        reason = _;
+      } ->
+    finish_command_handling env
 
 let has_pending_disk_changes genv =
   match genv.notifier_async_reader () with
@@ -849,7 +672,12 @@ let serve_one_iteration genv env client_provider =
             ~key:Connection_tracker.Server_sent_diagnostics
             ~time:t_sent_diagnostics;
           let env =
-            handle_connection genv env client `Non_persistent
+            Client_command_handler
+            .handle_client_command_or_persistent_connection
+              genv
+              env
+              client
+              `Non_persistent
             |> main_loop_command_handler `Non_persistent client
           in
           HackEventLogger.handled_connection t_start_recheck;
@@ -885,7 +713,11 @@ let serve_one_iteration genv env client_provider =
       HackEventLogger.got_persistent_client_channels t_start_recheck;
       try
         let env =
-          handle_connection genv env client `Persistent
+          Client_command_handler.handle_client_command_or_persistent_connection
+            genv
+            env
+            client
+            `Persistent
           |> main_loop_command_handler `Persistent client
         in
         HackEventLogger.handled_persistent_connection t_start_recheck;
@@ -926,7 +758,8 @@ let serve_one_iteration genv env client_provider =
   in
   env
 
-let watchman_interrupt_handler genv env =
+let watchman_interrupt_handler genv : env MultiThreadedCall.interrupt_handler =
+ fun env ->
   let start_time = Unix.gettimeofday () in
   let (env, updates, updates_stale, _telemetry) =
     query_notifier genv env `Async start_time
@@ -945,12 +778,14 @@ let watchman_interrupt_handler genv env =
   ) else
     (env, MultiThreadedCall.Continue)
 
-let priority_client_interrupt_handler genv client_provider env =
+let priority_client_interrupt_handler genv client_provider :
+    env MultiThreadedCall.interrupt_handler =
+ fun env ->
   let t = Unix.gettimeofday () in
   (* For non-persistent clients that don't synchronize file contents, users
    * expect that a query they do immediately after saving a file will reflect
    * this file contents. Async notifications are not always fast enough to
-   * quarantee it, so we need an additional sync query before accepting such
+   * guarantee it, so we need an additional sync query before accepting such
    * client *)
   let (env, updates, _updates_stale, _telemetry) =
     query_notifier genv env `Sync t
@@ -986,12 +821,18 @@ let priority_client_interrupt_handler genv client_provider env =
          * sleep_and_check. *)
         env
       | ClientProvider.Select_new client ->
-        (match handle_connection genv env client `Non_persistent with
-        | ServerUtils.Needs_full_recheck (_, _, reason) ->
+        (match
+           Client_command_handler.handle_client_command_or_persistent_connection
+             genv
+             env
+             client
+             `Non_persistent
+         with
+        | ServerUtils.Needs_full_recheck { reason; _ } ->
           failwith
             ( "unexpected command needing full recheck in priority channel: "
             ^ reason )
-        | ServerUtils.Needs_writes (_, _, _, reason) ->
+        | ServerUtils.Needs_writes { reason; _ } ->
           failwith
             ("unexpected command needing writes in priority channel: " ^ reason)
         | ServerUtils.Done env -> env)
@@ -1025,34 +866,49 @@ let priority_client_interrupt_handler genv client_provider env =
     in
     (env, decision)
 
-let persistent_client_interrupt_handler genv env =
+let persistent_client_interrupt_handler genv :
+    env MultiThreadedCall.interrupt_handler =
+ fun env ->
   match env.persistent_client with
   (* Several handlers can become ready simultaneously and one of them can remove
    * the persistent client before we get to it. *)
   | None -> (env, MultiThreadedCall.Continue)
   | Some client ->
-    (match handle_connection genv env client `Persistent with
-    | ServerUtils.Needs_full_recheck (env, f, reason) ->
+    (match
+       Client_command_handler.handle_client_command_or_persistent_connection
+         genv
+         env
+         client
+         `Persistent
+     with
+    | ServerUtils.Needs_full_recheck { env; finish_command_handling; reason } ->
       (* This should not be possible, because persistent client will not send
        * the next command before receiving results from the previous one. *)
       assert (
         Option.is_none env.persistent_client_pending_command_needs_full_check );
       ( {
           env with
-          persistent_client_pending_command_needs_full_check = Some (f, reason);
+          persistent_client_pending_command_needs_full_check =
+            Some (finish_command_handling, reason);
         },
         MultiThreadedCall.Continue )
-    | ServerUtils.Needs_writes (env, f, should_restart_recheck, _) ->
+    | ServerUtils.Needs_writes
+        { env; finish_command_handling; recheck_restart_is_needed; reason = _ }
+      ->
       let full_check_status =
         match env.full_check_status with
-        | Full_check_started when not should_restart_recheck ->
+        | Full_check_started when not recheck_restart_is_needed ->
           Full_check_needed
         | x -> x
       in
       (* this should not be possible, because persistent client will not send
        * the next command before receiving results from the previous one *)
       assert (Option.is_none env.pending_command_needs_writes);
-      ( { env with pending_command_needs_writes = Some f; full_check_status },
+      ( {
+          env with
+          pending_command_needs_writes = Some finish_command_handling;
+          full_check_status;
+        },
         MultiThreadedCall.Cancel )
     | ServerUtils.Done env -> (env, MultiThreadedCall.Continue))
 
@@ -1069,14 +925,13 @@ let setup_interrupts env client_provider =
           interrupt_on_watchman && env.can_interrupt
         in
         let interrupt_on_client = interrupt_on_client && env.can_interrupt in
+        let handlers = [] in
         let handlers =
           match genv.notifier_async_reader () with
           | Some reader when interrupt_on_watchman ->
-            [
-              ( Buffered_line_reader.get_fd reader,
-                watchman_interrupt_handler genv );
-            ]
-          | _ -> []
+            (Buffered_line_reader.get_fd reader, watchman_interrupt_handler genv)
+            :: handlers
+          | _ -> handlers
         in
         let handlers =
           match ClientProvider.priority_fd client_provider with

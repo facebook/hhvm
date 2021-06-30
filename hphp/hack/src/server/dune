@@ -547,6 +547,7 @@
   (name hh_server_monitor)
   (wrapped false)
   (modules
+    client_command_handler
     hhMonitorInformant
     hhMonitorInformant_sig
     hhServerMonitor

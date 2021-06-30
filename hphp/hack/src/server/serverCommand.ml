@@ -121,7 +121,7 @@ let rpc_command_needs_writes : type a. a t -> bool = function
 
 let commands_needs_writes = function
   | Rpc (_metadata, x) -> rpc_command_needs_writes x
-  | _ -> false
+  | Debug -> false
 
 let full_recheck_if_needed' genv env reason profiling =
   if
@@ -261,6 +261,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
       ~time:t_start;
     Sys_utils.start_gc_profiling ();
     Full_fidelity_parser_profiling.start_profiling ();
+
     let (new_env, response) =
       try ServerRpc.handle ~is_stale genv env cmd
       with exn ->
@@ -270,6 +271,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
         else
           raise (Nonfatal_rpc_exception (e, env))
     in
+
     let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
     ClientProvider.track client ~key:Connection_tracker.Server_end_handle;
     let t_end = Unix.gettimeofday () in
@@ -296,7 +298,9 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
       ~major_gc_time
       ~minor_gc_time
       ~parsed_files;
+
     ClientProvider.send_response_to_client client response;
+
     if
       ServerCommandTypes.is_disconnect_rpc cmd
       || (not @@ ClientProvider.is_persistent client)
@@ -315,7 +319,9 @@ let handle
     (client : ClientProvider.client) :
     ServerEnv.env ServerUtils.handle_command_result =
   ClientProvider.track client ~key:Connection_tracker.Server_waiting_for_cmd;
+
   let msg = ClientProvider.read_client_msg client in
+
   ClientProvider.track client ~key:Connection_tracker.Server_got_cmd;
   ServerProgress.send_progress
     ~include_in_logs:false
@@ -331,9 +337,11 @@ let handle
   let env = { env with ServerEnv.remote = force_remote msg } in
   let full_recheck_needed = command_needs_full_check msg in
   let is_stale = ServerEnv.(env.last_recheck_loop_stats.updates_stale) in
-  let continuation =
+
+  let handle_command =
     actually_handle genv client msg full_recheck_needed ~is_stale
   in
+
   if commands_needs_writes msg then
     (* IDE edits can come in quick succession and be immediately followed
      * by time sensitivie queries (like autocomplete). There is a constant cost
@@ -341,11 +349,14 @@ let handle
      * flaky experience. To avoid this, we don't restart the global rechecking
      * after IDE edits - you need to save the file again to restart it. *)
     ServerUtils.Needs_writes
-      ( env,
-        continuation,
-        not (is_edit msg),
-        ServerCommandTypesUtils.debug_describe_cmd msg )
+      {
+        env;
+        finish_command_handling = handle_command;
+        recheck_restart_is_needed = not (is_edit msg);
+        reason = ServerCommandTypesUtils.debug_describe_cmd msg;
+      }
   else if full_recheck_needed then
-    ServerUtils.Needs_full_recheck (env, continuation, reason msg)
+    ServerUtils.Needs_full_recheck
+      { env; finish_command_handling = handle_command; reason = reason msg }
   else
-    ServerUtils.Done (continuation env)
+    ServerUtils.Done (handle_command env)

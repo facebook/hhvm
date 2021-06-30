@@ -13,5 +13,5 @@ function foo() {
 <<__EntryPoint>> function main(): void {
 foo();
 \test\foo();
-\test\test::foo();
+\test\Test::foo();
 }

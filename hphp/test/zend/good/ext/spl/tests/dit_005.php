@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$a = new FileSystemIterator(__DIR__);
+$a = new FilesystemIterator(__DIR__);
 $b = clone $a;
 var_dump((string)$b == (string)$a);
 var_dump($a->key() == $b->key());

@@ -15,7 +15,7 @@ function main_entry(): void {
   if (!$zip->addFile($dirname . 'utils.inc', 'test.php')) {
   	echo "failed\n";
   }
-  if ($zip->status == ZIPARCHIVE::ER_OK) {
+  if ($zip->status == ZipArchive::ER_OK) {
   	dump_entries_name($zip);
   	$zip->close();
   } else {

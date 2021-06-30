@@ -38,9 +38,9 @@ function foo($x) {
 
 <<__EntryPoint>>
 function main_697() {
-$y = new y;
+$y = new Y;
 foo($y);
-$z = new z;
+$z = new Z;
 foo($z);
 unset($z, $y);
 }

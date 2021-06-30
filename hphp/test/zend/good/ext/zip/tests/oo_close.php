@@ -6,7 +6,7 @@ if (!$zip->open($dirname . 'test.zip')) {
 	exit('failed');
 }
 
-if ($zip->status == ZIPARCHIVE::ER_OK) {
+if ($zip->status == ZipArchive::ER_OK) {
 	$zip->close();
 	echo "ok\n";
 } else {

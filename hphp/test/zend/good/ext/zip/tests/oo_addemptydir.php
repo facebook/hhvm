@@ -14,7 +14,7 @@ function main_entry(): void {
   }
 
   $zip->addEmptyDir('emptydir');
-  if ($zip->status == ZIPARCHIVE::ER_OK) {
+  if ($zip->status == ZipArchive::ER_OK) {
   	dump_entries_name($zip);
   	$zip->close();
   } else {

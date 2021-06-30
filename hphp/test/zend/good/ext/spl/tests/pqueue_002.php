@@ -1,7 +1,7 @@
 <?hh
 class myPQueue extends SplPriorityQueue {
     public function compare($a, $b) {
-        throw new exception("foo");
+        throw new Exception("foo");
     }
 }
 <<__EntryPoint>> function main(): void {

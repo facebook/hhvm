@@ -11,7 +11,7 @@ class Foo {
   }
 }
 
-<<__Entrypoint>> function main(): void {
+<<__EntryPoint>> function main(): void {
   $foo = new Foo(() ==> { var_dump('hello'); return 42; });
   var_dump($foo->bar());
 }

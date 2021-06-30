@@ -1,8 +1,8 @@
 <?hh
 
-class fOo {
+class Foo {
 }
-interface ioO {
+interface Ioo {
 }
 
 <<__EntryPoint>>

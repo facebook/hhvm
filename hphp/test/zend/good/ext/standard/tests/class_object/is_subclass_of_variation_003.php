@@ -12,7 +12,7 @@ echo "*** Testing is_subclass_of() : usage variations ***\n";
 
 echo "*** Testing is_a() : usage variations ***\n";
 
-var_dump(is_subclass_of('caseSensitivityTestCHILD', 'caseSensitivityTEST'));
+var_dump(is_subclass_of('caseSensitivityTestChild', 'caseSensitivityTest'));
 
 echo "Done";
 }

@@ -8,7 +8,7 @@ function main_entry(): void {
   @unlink($file);
 
   $zip = new ZipArchive;
-  if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
+  if (!$zip->open($file, ZipArchive::CREATE)) {
   	exit('failed');
   }
 
@@ -16,7 +16,7 @@ function main_entry(): void {
   $zip->addFromString('entry2.txt', 'entry #2');
   $zip->addFromString('dir/entry2.txt', 'entry #2');
 
-  if (!$zip->status == ZIPARCHIVE::ER_OK) {
+  if (!$zip->status == ZipArchive::ER_OK) {
   	var_dump($zip);
   	echo "failed\n";
   }

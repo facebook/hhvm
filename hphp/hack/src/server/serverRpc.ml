@@ -457,21 +457,24 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       } )
   | DISCONNECT -> (ServerFileSync.clear_sync_data env, ())
   | SUBSCRIBE_DIAGNOSTIC { id; error_limit } ->
-    let initial_errors =
-      if is_full_check_done env.full_check_status then
-        env.errorl
-      else
-        Errors.empty
-    in
-    let new_env =
-      {
-        env with
-        diag_subscribe =
-          Some (Diagnostic_subscription.of_id id ~initial_errors ?error_limit);
-      }
-    in
-    let () = Hh_logger.log "Diag_subscribe: SUBSCRIBE %d" id in
-    (new_env, ())
+    if TypecheckerOptions.stream_errors env.tcopt then
+      (env, ())
+    else
+      let initial_errors =
+        if is_full_check_done env.full_check_status then
+          env.errorl
+        else
+          Errors.empty
+      in
+      let new_env =
+        {
+          env with
+          diag_subscribe =
+            Some (Diagnostic_subscription.of_id id ~initial_errors ?error_limit);
+        }
+      in
+      let () = Hh_logger.log "Diag_subscribe: SUBSCRIBE %d" id in
+      (new_env, ())
   | UNSUBSCRIBE_DIAGNOSTIC id ->
     let diag_subscribe =
       match env.diag_subscribe with

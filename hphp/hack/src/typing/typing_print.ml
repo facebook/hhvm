@@ -1828,7 +1828,6 @@ let coeffects env ty =
           ty)
   in
   let exception UndesugarableCoeffect of locl_ty in
-  let exception Defaults in
   let rec desugar_simple_intersection (ty : locl_ty) : string list =
     match snd @@ deref ty with
     | Tvar v ->
@@ -1845,9 +1844,6 @@ let coeffects env ty =
       in
       List.concat_map ~f:desugar_simple_intersection upper_bounds
     | Tintersection tyl -> List.concat_map ~f:desugar_simple_intersection tyl
-    | Tunion [] ->
-      (* TODO(coeffects) delete this special case when defaults is no longer equal to nothing *)
-      raise Defaults
     | Tunion [ty] -> desugar_simple_intersection ty
     | Tunion _
     | Tnonnull
@@ -1891,7 +1887,4 @@ let coeffects env ty =
         |> List.dedup_and_sort ~compare:String.compare
         |> String.concat ~sep:", " )
       ^ "}"
-  with
-  | UndesugarableCoeffect _ -> to_string ty
-  | Defaults ->
-    "the default capability set {AccessGlobals, Output, WriteProperty}"
+  with UndesugarableCoeffect _ -> to_string ty

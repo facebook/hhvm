@@ -15,5 +15,5 @@ function f(): (function (int): void) {
       break;
     };
   }
-  return function ($x) {};
+  return ($x)[] ==> {};
 }

@@ -65,20 +65,20 @@ function krsort<Tk as arraykey, Tv>(
 function usort<Tv, T as Container<Tv>>(
 
   inout T $arg,
-  (function(Tv, Tv): num) $c,
-)[]: bool;
+  (function(Tv, Tv)[_]: num) $c,
+)[ctx $c]: bool;
 <<__PHPStdLib>>
 function uasort<Tk as arraykey, Tv>(
 
   inout KeyedContainer<Tk, Tv> $arg,
-  (function(Tv, Tv): num) $c,
-)[]: bool;
+  (function(Tv, Tv)[_]: num) $c,
+)[ctx $c]: bool;
 <<__PHPStdLib>>
 function uksort<Tk as arraykey, Tv>(
 
   inout KeyedContainer<Tk, Tv> $arg,
-  (function(Tk, Tk): num) $c,
-)[]: bool;
+  (function(Tk, Tk)[_]: num) $c,
+)[ctx $c]: bool;
 
 }
 

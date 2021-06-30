@@ -1,1 +1,2 @@
 GConst NS\C -> Fun NS\bar
+Type HH\Capabilities\AccessGlobals -> Fun NS\bar

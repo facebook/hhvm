@@ -1,15 +1,15 @@
 //// file1.php
 <?hh
-function foo(): string { return ''; }
+function foo()[]: string { return ''; }
 
 namespace NS {
-  function foo(): int { return 0; }
+  function foo()[]: int { return 0; }
 }
 
 //// file2.php
 <?hh
 namespace NS {
-  function bar(): int {
+  function bar()[]: int {
     return foo();
   }
 }

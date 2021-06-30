@@ -3,3 +3,6 @@ Extends B -> Type C
 Fun f1 -> Fun f2
 Method B::foo -> Type C
 Type B -> Type C
+Type HH\Capabilities\AccessGlobals -> Fun f1, Fun f2, Type B, Type C
+Type HH\Contexts\Unsafe\write_props -> Type B
+Type HH\Contexts\write_props -> Type B, Type C

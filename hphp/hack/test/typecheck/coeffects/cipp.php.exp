@@ -43,7 +43,7 @@ This call is not allowed because its coeffects are incompatible with the context
   File "cipp.php", line 5, characters 25-32:
   From this declaration, the context of this function body provides the capability set {IO, ImplicitPolicy, ReadGlobals, WriteProperty}
   File "cipp.php", line 60, characters 10-17:
-  But the function being called requires the default capability set {AccessGlobals, Output, WriteProperty}
+  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 17, characters 3-19:
@@ -75,7 +75,31 @@ This call is not allowed because its coeffects are incompatible with the context
   File "cipp.php", line 14, characters 33-48:
   From this declaration, the context of this function body provides the capability set {IO, ImplicitPolicyLocal, ReadGlobals, WriteProperty}
   File "cipp.php", line 60, characters 10-17:
-  But the function being called requires the default capability set {AccessGlobals, Output, WriteProperty}
+  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "cipp.php", line 27, characters 3-19:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "cipp.php", line 23, characters 31-44:
+  From this declaration, the context of this function body provides the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, WriteProperty}
+  File "cipp.php", line 33, characters 28-41:
+  But the function being called requires the capability set {IO, ImplicitPolicyOf<A>, ReadGlobals, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "cipp.php", line 28, characters 3-27:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "cipp.php", line 23, characters 31-44:
+  From this declaration, the context of this function body provides the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, WriteProperty}
+  File "cipp.php", line 42, characters 36-57:
+  But the function being called requires the capability set {IO, ImplicitPolicyOfShallow<A>, ReadGlobals, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "cipp.php", line 29, characters 3-25:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "cipp.php", line 23, characters 31-44:
+  From this declaration, the context of this function body provides the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, WriteProperty}
+  File "cipp.php", line 51, characters 34-53:
+  But the function being called requires the capability set {IO, ImplicitPolicyOfLocal<A>, ReadGlobals, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 35, characters 3-24:
@@ -115,7 +139,7 @@ This call is not allowed because its coeffects are incompatible with the context
   File "cipp.php", line 33, characters 28-41:
   From this declaration, the context of this function body provides the capability set {IO, ImplicitPolicyOf<A>, ReadGlobals, WriteProperty}
   File "cipp.php", line 60, characters 10-17:
-  But the function being called requires the default capability set {AccessGlobals, Output, WriteProperty}
+  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "cipp.php", line 48, characters 3-12:
@@ -123,6 +147,30 @@ This call is not allowed because its coeffects are incompatible with the context
   File "cipp.php", line 42, characters 36-57:
   From this declaration, the context of this function body provides the capability set {IO, ImplicitPolicyOfLocal<A>, ReadGlobals, WriteProperty}
   File "cipp.php", line 60, characters 10-17:
-  But the function being called requires the default capability set {AccessGlobals, Output, WriteProperty}
+  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "cipp.php", line 65, characters 3-19:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "cipp.php", line 60, characters 10-17:
+  From this declaration, the context of this function body provides the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, WriteProperty}
+  File "cipp.php", line 33, characters 28-41:
+  But the function being called requires the capability set {IO, ImplicitPolicyOf<A>, ReadGlobals, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "cipp.php", line 66, characters 3-27:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "cipp.php", line 60, characters 10-17:
+  From this declaration, the context of this function body provides the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, WriteProperty}
+  File "cipp.php", line 42, characters 36-57:
+  But the function being called requires the capability set {IO, ImplicitPolicyOfShallow<A>, ReadGlobals, WriteProperty}
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "cipp.php", line 67, characters 3-25:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "cipp.php", line 60, characters 10-17:
+  From this declaration, the context of this function body provides the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, WriteProperty}
+  File "cipp.php", line 51, characters 34-53:
+  But the function being called requires the capability set {IO, ImplicitPolicyOfLocal<A>, ReadGlobals, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

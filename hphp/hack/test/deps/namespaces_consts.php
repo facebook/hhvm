@@ -9,7 +9,7 @@ const C = 1;
 namespace NS {
   const C = 'a';
 
-  function bar(): int {
+  function bar()[]: int {
     return C;
   }
 }

@@ -3,7 +3,7 @@ This call is not allowed because its coeffects are incompatible with the context
   File "construct_default_values.php", line 12, characters 17-18:
   From this declaration, the context of this function body provides the capability AccessGlobals
   File "construct_default_values.php", line 5, characters 19-21:
-  But the function being called requires the default capability set {AccessGlobals, Output, WriteProperty}
+  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "construct_default_values.php", line 12, characters 29-29:

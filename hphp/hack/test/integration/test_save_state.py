@@ -139,9 +139,10 @@ watchman_init_timeout = 1
             files_to_check=["class_1.php"], assert_edges_added=True, filename="partial1"
         )
 
-        self.assertTrue(
-            result1.returned_values.get_edges_added() == 0,
-            "class_1 has no dependencies",
+        self.assertEqual(
+            result1.returned_values.get_edges_added(),
+            7,
+            "class_1 has no dependencies except pure coeffect (mixed)",
         )
 
         result2 = self.test_driver.save_partial(
@@ -159,9 +160,9 @@ watchman_init_timeout = 1
             assert_edges_added=True,
             filename="partial4",
         )
-        assert (
-            result4.returned_values.get_edges_added()
-            == result3.returned_values.get_edges_added()
+        self.assertEqual(
+            result4.returned_values.get_edges_added(),
+            result3.returned_values.get_edges_added(),
         )
 
         result5 = self.test_driver.save_partial(
@@ -171,9 +172,9 @@ watchman_init_timeout = 1
             assert_edges_added=True,
             filename="partial5",
         )
-        assert (
-            result5.returned_values.get_edges_added()
-            == result2.returned_values.get_edges_added()
+        self.assertEqual(
+            result5.returned_values.get_edges_added(),
+            result2.returned_values.get_edges_added(),
         )
 
     def test_incrementally_generated_saved_state(self) -> None:

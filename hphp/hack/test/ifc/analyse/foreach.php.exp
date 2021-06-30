@@ -9,9 +9,67 @@ Analyzing \dict_lit_flow:
 * Final environment:
   Deps: {}
   Constraints:
-    [5:12-30] Dict'1 < $key, Dict < $value
+    [5:12-30]
+      HH\Capabilities\RxLocal_lump = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal < HH\Capabilities\RxLocal'1,
+      HH\Capabilities\IO_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\IO'1,
+      HH\Capabilities\AccessGlobals_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\AccessGlobals'1,
+      HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\ImplicitPolicyLocal'1,
+      HH\Capabilities\RxLocal_lump = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\RxLocal < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\WriteProperty_lump'2 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessGlobals_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\AccessGlobals'3,
+      HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\RxLocal'3,
+      HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
+      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\IO'3, Dict'1 < $key,
+      Dict < $value,
+      HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\IO_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\IO'1,
+      HH\Capabilities\AccessGlobals_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\AccessGlobals'1,
+      HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\ImplicitPolicyLocal'1,
+      HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\WriteProperty_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessGlobals_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\AccessGlobals'3,
+      HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\RxLocal'3,
+      HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
+      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\IO'3
   Locals:
-    { $#capability -> nothing; $#local_capability -> nothing }
+    { $#capability ->
+      (\HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'1,
+                                  HH\Capabilities\RxLocal_lump'1> &
+         \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1> &
+         \HH\Capabilities\AccessGlobals<HH\Capabilities\AccessGlobals'1,
+                                          HH\Capabilities\AccessGlobals_lump'1> &
+         \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
+                                                HH\Capabilities\ImplicitPolicyLocal_lump'1> &
+         \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'1,
+                                          HH\Capabilities\WriteProperty_lump'1>);
+      $#local_capability ->
+      (\HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
+                                        HH\Capabilities\WriteProperty_lump'3> &
+         \HH\Capabilities\AccessGlobals<HH\Capabilities\AccessGlobals'3,
+                                          HH\Capabilities\AccessGlobals_lump'3> &
+         \HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'3,
+                                    HH\Capabilities\RxLocal_lump'3> &
+         \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
+                                                HH\Capabilities\ImplicitPolicyLocal_lump'3> &
+         \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>) }
 
 Analyzing \dict_var_flow:
 * pc: pc
@@ -24,11 +82,67 @@ Analyzing \dict_var_flow:
   Deps: {}
   Constraints:
     [10:12-17]
+      HH\Capabilities\RxLocal_lump = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal < HH\Capabilities\RxLocal'1,
+      HH\Capabilities\IO_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\IO'1,
+      HH\Capabilities\AccessGlobals_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\AccessGlobals'1,
+      HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\ImplicitPolicyLocal'1,
+      HH\Capabilities\RxLocal_lump = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\RxLocal < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\WriteProperty_lump'2 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessGlobals_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\AccessGlobals'3,
+      HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\RxLocal'3,
+      HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
+      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\IO'3,
       $dict'1 < $dict'3, $dict < $dict'2, len < len'1, $dict'3 < $key,
-      $dict'2 < $value
+      $dict'2 < $value,
+      HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\IO_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\IO'1,
+      HH\Capabilities\AccessGlobals_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\AccessGlobals'1,
+      HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\ImplicitPolicyLocal'1,
+      HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\WriteProperty_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessGlobals_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\AccessGlobals'3,
+      HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\RxLocal'3,
+      HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
+      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\IO'3
   Locals:
-    { $#capability -> nothing;
-      $#local_capability -> nothing;
+    { $#capability ->
+      (\HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'1,
+                                  HH\Capabilities\RxLocal_lump'1> &
+         \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1> &
+         \HH\Capabilities\AccessGlobals<HH\Capabilities\AccessGlobals'1,
+                                          HH\Capabilities\AccessGlobals_lump'1> &
+         \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
+                                                HH\Capabilities\ImplicitPolicyLocal_lump'1> &
+         \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'1,
+                                          HH\Capabilities\WriteProperty_lump'1>);
+      $#local_capability ->
+      (\HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
+                                        HH\Capabilities\WriteProperty_lump'3> &
+         \HH\Capabilities\AccessGlobals<HH\Capabilities\AccessGlobals'3,
+                                          HH\Capabilities\AccessGlobals_lump'3> &
+         \HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'3,
+                                    HH\Capabilities\RxLocal_lump'3> &
+         \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
+                                                HH\Capabilities\ImplicitPolicyLocal_lump'3> &
+         \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>);
       $dict -> dict<<$dict'3> => <$dict'2>; |len'1|> }
 
 Analyzing \vec_lit_flow:
@@ -41,9 +155,66 @@ Analyzing \vec_lit_flow:
 * Final environment:
   Deps: {}
   Constraints:
-    [15:12-22] Vec < $value
+    [15:12-22]
+      HH\Capabilities\RxLocal_lump = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal < HH\Capabilities\RxLocal'1,
+      HH\Capabilities\IO_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\IO'1,
+      HH\Capabilities\AccessGlobals_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\AccessGlobals'1,
+      HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\ImplicitPolicyLocal'1,
+      HH\Capabilities\RxLocal_lump = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\RxLocal < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\WriteProperty_lump'2 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessGlobals_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\AccessGlobals'3,
+      HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\RxLocal'3,
+      HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
+      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\IO'3, Vec < $value,
+      HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\IO_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\IO'1,
+      HH\Capabilities\AccessGlobals_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\AccessGlobals'1,
+      HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\ImplicitPolicyLocal'1,
+      HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\WriteProperty_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessGlobals_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\AccessGlobals'3,
+      HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\RxLocal'3,
+      HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
+      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\IO'3
   Locals:
-    { $#capability -> nothing; $#local_capability -> nothing }
+    { $#capability ->
+      (\HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'1,
+                                  HH\Capabilities\RxLocal_lump'1> &
+         \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1> &
+         \HH\Capabilities\AccessGlobals<HH\Capabilities\AccessGlobals'1,
+                                          HH\Capabilities\AccessGlobals_lump'1> &
+         \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
+                                                HH\Capabilities\ImplicitPolicyLocal_lump'1> &
+         \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'1,
+                                          HH\Capabilities\WriteProperty_lump'1>);
+      $#local_capability ->
+      (\HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
+                                        HH\Capabilities\WriteProperty_lump'3> &
+         \HH\Capabilities\AccessGlobals<HH\Capabilities\AccessGlobals'3,
+                                          HH\Capabilities\AccessGlobals_lump'3> &
+         \HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'3,
+                                    HH\Capabilities\RxLocal_lump'3> &
+         \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
+                                                HH\Capabilities\ImplicitPolicyLocal_lump'3> &
+         \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>) }
 
 Analyzing \vec_var_flow:
 * pc: pc
@@ -55,10 +226,67 @@ Analyzing \vec_var_flow:
 * Final environment:
   Deps: {}
   Constraints:
-    [20:12-16] key < key'1, $vec < $vec'1, len < len'1, $vec'1 < $value
+    [20:12-16]
+      HH\Capabilities\RxLocal_lump = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal < HH\Capabilities\RxLocal'1,
+      HH\Capabilities\IO_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\IO'1,
+      HH\Capabilities\AccessGlobals_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\AccessGlobals'1,
+      HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\ImplicitPolicyLocal'1,
+      HH\Capabilities\RxLocal_lump = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\RxLocal < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\WriteProperty_lump'2 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessGlobals_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\AccessGlobals'3,
+      HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\RxLocal'3,
+      HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
+      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\IO'3, key < key'1,
+      $vec < $vec'1, len < len'1, $vec'1 < $value,
+      HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\IO_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\IO'1,
+      HH\Capabilities\AccessGlobals_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\AccessGlobals'1,
+      HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\ImplicitPolicyLocal'1,
+      HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\WriteProperty_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessGlobals_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\AccessGlobals'3,
+      HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\RxLocal'3,
+      HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
+      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\IO'3
   Locals:
-    { $#capability -> nothing;
-      $#local_capability -> nothing;
+    { $#capability ->
+      (\HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'1,
+                                  HH\Capabilities\RxLocal_lump'1> &
+         \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1> &
+         \HH\Capabilities\AccessGlobals<HH\Capabilities\AccessGlobals'1,
+                                          HH\Capabilities\AccessGlobals_lump'1> &
+         \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
+                                                HH\Capabilities\ImplicitPolicyLocal_lump'1> &
+         \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'1,
+                                          HH\Capabilities\WriteProperty_lump'1>);
+      $#local_capability ->
+      (\HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
+                                        HH\Capabilities\WriteProperty_lump'3> &
+         \HH\Capabilities\AccessGlobals<HH\Capabilities\AccessGlobals'3,
+                                          HH\Capabilities\AccessGlobals_lump'3> &
+         \HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'3,
+                                    HH\Capabilities\RxLocal_lump'3> &
+         \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
+                                                HH\Capabilities\ImplicitPolicyLocal_lump'3> &
+         \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>);
       $vec -> vec<<key'1> => <$vec'1>; |len'1|> }
 
 Analyzing \keyset_lit_flow:
@@ -71,9 +299,67 @@ Analyzing \keyset_lit_flow:
 * Final environment:
   Deps: {}
   Constraints:
-    [25:12-25] Keyset < $value
+    [25:12-25]
+      HH\Capabilities\RxLocal_lump = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal < HH\Capabilities\RxLocal'1,
+      HH\Capabilities\IO_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\IO'1,
+      HH\Capabilities\AccessGlobals_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\AccessGlobals'1,
+      HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\ImplicitPolicyLocal'1,
+      HH\Capabilities\RxLocal_lump = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\RxLocal < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\WriteProperty_lump'2 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessGlobals_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\AccessGlobals'3,
+      HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\RxLocal'3,
+      HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
+      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\IO'3,
+      Keyset < $value,
+      HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\IO_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\IO'1,
+      HH\Capabilities\AccessGlobals_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\AccessGlobals'1,
+      HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\ImplicitPolicyLocal'1,
+      HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\WriteProperty_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessGlobals_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\AccessGlobals'3,
+      HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\RxLocal'3,
+      HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
+      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\IO'3
   Locals:
-    { $#capability -> nothing; $#local_capability -> nothing }
+    { $#capability ->
+      (\HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'1,
+                                  HH\Capabilities\RxLocal_lump'1> &
+         \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1> &
+         \HH\Capabilities\AccessGlobals<HH\Capabilities\AccessGlobals'1,
+                                          HH\Capabilities\AccessGlobals_lump'1> &
+         \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
+                                                HH\Capabilities\ImplicitPolicyLocal_lump'1> &
+         \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'1,
+                                          HH\Capabilities\WriteProperty_lump'1>);
+      $#local_capability ->
+      (\HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
+                                        HH\Capabilities\WriteProperty_lump'3> &
+         \HH\Capabilities\AccessGlobals<HH\Capabilities\AccessGlobals'3,
+                                          HH\Capabilities\AccessGlobals_lump'3> &
+         \HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'3,
+                                    HH\Capabilities\RxLocal_lump'3> &
+         \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
+                                                HH\Capabilities\ImplicitPolicyLocal_lump'3> &
+         \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>) }
 
 Analyzing \keyset_var_flow:
 * pc: pc
@@ -86,10 +372,66 @@ Analyzing \keyset_var_flow:
   Deps: {}
   Constraints:
     [30:12-19]
+      HH\Capabilities\RxLocal_lump = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal < HH\Capabilities\RxLocal'1,
+      HH\Capabilities\IO_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\IO'1,
+      HH\Capabilities\AccessGlobals_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\AccessGlobals'1,
+      HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\RxLocal_lump,
+      HH\Capabilities\RxLocal < HH\Capabilities\ImplicitPolicyLocal'1,
+      HH\Capabilities\RxLocal_lump = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\RxLocal < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\WriteProperty_lump'2 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\WriteProperty'3,
+      HH\Capabilities\AccessGlobals_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\AccessGlobals'3,
+      HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\RxLocal'3,
+      HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
+      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\IO'3,
       $keyset < $keyset'1, $keyset < $keyset'1, len < len'1,
-      $keyset'1 < $value
+      $keyset'1 < $value,
+      HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\IO_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\IO'1,
+      HH\Capabilities\AccessGlobals_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\AccessGlobals'1,
+      HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\RxLocal_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\ImplicitPolicyLocal'1,
+      HH\Capabilities\RxLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\RxLocal'1 < HH\Capabilities\WriteProperty'1,
+      HH\Capabilities\WriteProperty_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\AccessGlobals_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\AccessGlobals'3,
+      HH\Capabilities\RxLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\RxLocal'3,
+      HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
+      HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\IO'3
   Locals:
-    { $#capability -> nothing;
-      $#local_capability -> nothing;
+    { $#capability ->
+      (\HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'1,
+                                  HH\Capabilities\RxLocal_lump'1> &
+         \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1> &
+         \HH\Capabilities\AccessGlobals<HH\Capabilities\AccessGlobals'1,
+                                          HH\Capabilities\AccessGlobals_lump'1> &
+         \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
+                                                HH\Capabilities\ImplicitPolicyLocal_lump'1> &
+         \HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'1,
+                                          HH\Capabilities\WriteProperty_lump'1>);
+      $#local_capability ->
+      (\HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
+                                        HH\Capabilities\WriteProperty_lump'3> &
+         \HH\Capabilities\AccessGlobals<HH\Capabilities\AccessGlobals'3,
+                                          HH\Capabilities\AccessGlobals_lump'3> &
+         \HH\Capabilities\RxLocal<HH\Capabilities\RxLocal'3,
+                                    HH\Capabilities\RxLocal_lump'3> &
+         \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
+                                                HH\Capabilities\ImplicitPolicyLocal_lump'3> &
+         \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>);
       $keyset -> keyset<<$keyset'1> => <$keyset'1>; |len'1|> }
 

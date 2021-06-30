@@ -72,14 +72,13 @@ namespace HH\Contexts {
    * Typing_make_type.default_capability for performance reasons. The alias is
    * still present so that it may be directly used as [defaults]
    */
-  type defaults = nothing; // an infinite set of all capabilities
-
-  // TODO(coeffects) after implementing lower bounds on const ctx/type, do:
-  /* = (
+  type defaults = (
     \HH\Capabilities\WriteProperty &
     \HH\Capabilities\AccessGlobals &
+    \HH\Capabilities\RxLocal &
+    \HH\Capabilities\ImplicitPolicyLocal &
     \HH\Capabilities\IO
-  ); */
+  );
 
   /**
    * Described at the top of this file; this indicates that a method could

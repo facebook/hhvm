@@ -183,8 +183,9 @@ let test_compute_tast_counting () =
     Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
   in
 
+  let expected_decling_count = 96 in
   Asserter.Int_asserter.assert_equals
-    40
+    expected_decling_count
     (Telemetry_test_utils.int_exn telemetry "decling.count")
     "There should be this many decling_count for shared_mem provider";
   Asserter.Int_asserter.assert_equals
@@ -214,7 +215,7 @@ let test_compute_tast_counting () =
         Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
       in
       Asserter.Int_asserter.assert_equals
-        40
+        expected_decling_count
         (Telemetry_test_utils.int_exn telemetry "decling.count")
         "There should be this many decling_count for local_memory provider";
       Asserter.Int_asserter.assert_equals

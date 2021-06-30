@@ -175,7 +175,7 @@ let test_dep_graph_blob () =
           "Unexpected type errors";
 
         Asserter.Int_asserter.assert_equals
-          1
+          2
           (SharedMem.get_in_memory_dep_table_entry_count ())
           "Expected the correct # of edges in memory after saving dep table blob";
 
@@ -188,7 +188,7 @@ let test_dep_graph_blob () =
         in
 
         Asserter.Int_asserter.assert_equals
-          2
+          4
           edges
           "Expected # of edges to be correct";
 

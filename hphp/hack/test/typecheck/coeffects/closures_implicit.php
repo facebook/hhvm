@@ -14,7 +14,7 @@ function implicit_context(): void {
   $default_lambda = () ==> {
     implicit_context(); // ok
     default_context(); // ok
-    rx_context(); // ok (Rx <: defaults)
+    rx_context(); // ok (Rx <: defaults (with unsafe))
   };
 
   $rx_lambda = ()[oldrx] ==> {};

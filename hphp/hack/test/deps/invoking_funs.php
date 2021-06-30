@@ -2,10 +2,10 @@
 
 type C = int;
 
-function A() : int {
+function A()[read_globals] : int {
     return 0;
 }
 
-function B() : C {
+function B()[globals] : C {
     return A();
 }

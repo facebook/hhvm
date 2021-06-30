@@ -14,6 +14,6 @@ function f(): (function (): void) {
     return function () {
       break;
     };
-  }
-  return function () {};
+  } // FIXME(coeffects) below should be also OK without [defaults]
+  return function ()[defaults] {};
 }

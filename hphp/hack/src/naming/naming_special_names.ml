@@ -817,9 +817,13 @@ module Capabilities = struct
 
   let implicit_policy = prefix ^ "ImplicitPolicy"
 
+  let implicitPolicyLocal = prefix ^ "ImplicitPolicyLocal"
+
   let io = prefix ^ "IO"
 
   let rx = prefix ^ "Rx"
+
+  let rxLocal = rx ^ "Local"
 end
 
 module ExpressionTrees = struct

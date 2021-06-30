@@ -762,9 +762,7 @@ let type_capability env ctxs unsafe_ctxs default_pos =
   let (env, unsafe_cap_ty) =
     match snd @@ cc env.decl_env unsafe_ctxs default_pos with
     | CapTy ty -> Phase.localize_no_subst env ~ignore_errors:false ty
-    | CapDefaults p ->
-      (* default is no unsafe capabilities *)
-      (env, MakeType.mixed (Reason.Rhint p))
+    | CapDefaults p -> (env, MakeType.default_capability_unsafe p)
   in
   (env, cap_ty, unsafe_cap_ty)
 

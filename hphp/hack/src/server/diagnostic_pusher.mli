@@ -39,7 +39,10 @@ module TestExporter : sig
       val make :
         errors_in_ide:Errors.error list FileMap.t ->
         to_push:Errors.error list FileMap.t ->
+        errors_beyond_limit:Errors.error list FileMap.t ->
         t
+
+      val with_error_limit : int -> (unit -> 'result) -> 'result
     end
   end
 end

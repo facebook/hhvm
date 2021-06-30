@@ -221,6 +221,8 @@ let make_and_store_persistent _ =
   persistent_client := Some (ClientId.make (), client);
   client
 
+let disconnect_persistent () = persistent_client := None
+
 let get_persistent_client () = !persistent_client
 
 let shutdown_client _ = ()

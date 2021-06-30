@@ -12,6 +12,7 @@ module type S = sig
 
   val add : ?combine:('a -> 'a -> 'a) -> key -> 'a -> 'a t -> 'a t
 
+  (** [combine] defaults to picking the first value argument. *)
   val union : ?combine:(key -> 'a -> 'a -> 'a option) -> 'a t -> 'a t -> 'a t
 
   val union_env :

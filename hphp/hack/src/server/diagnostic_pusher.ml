@@ -41,7 +41,12 @@ module ErrorTracker : sig
   (** Module to export internal functions for unit testing. Do not use in production code. *)
   module TestExporter : sig
     val make :
-      errors_in_ide:error list FileMap.t -> to_push:error list FileMap.t -> t
+      errors_in_ide:error list FileMap.t ->
+      to_push:error list FileMap.t ->
+      errors_beyond_limit:error list FileMap.t ->
+      t
+
+    val with_error_limit : int -> (unit -> 'result) -> 'result
   end
 end = struct
   type errors = error list [@@deriving show]
@@ -56,10 +61,28 @@ end = struct
         (** The set of errors currently in the IDE, based on what has been pushed so far. *)
     to_push: errors FileMap.t;
         (** The set of errors yet to be pushed to the IDE. *)
+    errors_beyond_limit: errors FileMap.t;
+        (** Errors beyond the limit on the number of errors we want to have in the IDE.
+            We may be able to send those later. *)
   }
   [@@deriving eq, show]
 
-  let init = { errors_in_ide = FileMap.empty; to_push = FileMap.empty }
+  (** Limit on the number of errors we want to have in the IDE.
+      The IDE may not be very resonsive beyond this limit. *)
+  let default_error_limit = 1000
+
+  let error_limit : int ref = ref default_error_limit
+
+  let init =
+    {
+      errors_in_ide = FileMap.empty;
+      to_push = FileMap.empty;
+      errors_beyond_limit = FileMap.empty;
+    }
+
+  let error_count_in_file_map : errors FileMap.t -> int =
+    FileMap.fold ~init:0 ~f:(fun _file errors count ->
+        count + List.length errors)
 
   (** For each file key from [rechecked], update value in [errors] with value from
       [new_error], possibly removing entry. *)
@@ -116,17 +139,91 @@ end = struct
           (List.map el ~f:Errors.to_absolute)
           acc)
 
+  (** Truncate the list of errors to push so that the total number of errors
+      in the IDE does not exceed [error_limit]. This partitions the errors as
+      a set of errors we can push now and the remainder of the errors. *)
+  let truncate to_push_candidates ~errors_in_ide =
+    let error_count_in_ide = error_count_in_file_map errors_in_ide in
+    (* First push errors in files which already have errors *)
+    let (to_push, to_push_candidates, error_count_in_ide) =
+      FileMap.fold
+        to_push_candidates
+        ~init:(FileMap.empty, FileMap.empty, error_count_in_ide)
+        ~f:(fun file errors (to_push, to_push_candidates, error_count_in_ide) ->
+          let error_count = List.length errors in
+          match FileMap.find_opt errors_in_ide file with
+          | None ->
+            (* Let's consider it again later. *)
+            let to_push_candidates =
+              FileMap.add to_push_candidates ~key:file ~data:errors
+            in
+            (to_push, to_push_candidates, error_count_in_ide)
+          | Some errors_in_ide ->
+            let error_count_before = List.length errors_in_ide in
+            if
+              error_count_in_ide + error_count - error_count_before
+              <= !error_limit
+            then
+              let error_count_in_ide =
+                error_count_in_ide + error_count - error_count_before
+              in
+              let to_push = FileMap.add to_push ~key:file ~data:errors in
+              (to_push, to_push_candidates, error_count_in_ide)
+            else
+              (* Erase those errors in the IDE, because for each file we want either all errors or none,
+                 and we can't have all errors here because we'd need to go beyond the limit. *)
+              let to_push = FileMap.add to_push ~key:file ~data:[] in
+              let error_count_in_ide =
+                error_count_in_ide - error_count_before
+              in
+              let to_push_candidates =
+                FileMap.add to_push_candidates ~key:file ~data:errors
+              in
+              (to_push, to_push_candidates, error_count_in_ide))
+    in
+    (* Keep pushing until we reach the limit. *)
+    let (to_push, errors_beyond_limit, _error_count_in_ide) =
+      FileMap.fold
+        to_push_candidates
+        ~init:(to_push, FileMap.empty, error_count_in_ide)
+        ~f:(fun file
+                errors
+                (to_push, errors_beyond_limit, error_count_in_ide)
+                ->
+          (* [to_push_candidates] now only contains files which are not in
+             [errors_in_ide] or have been deduced from it. *)
+          let error_count = List.length errors in
+          if error_count_in_ide + error_count <= !error_limit then
+            let to_push = FileMap.add to_push ~key:file ~data:errors in
+            let error_count_in_ide = error_count_in_ide + error_count in
+            (to_push, errors_beyond_limit, error_count_in_ide)
+          else
+            let errors_beyond_limit =
+              FileMap.add errors_beyond_limit ~key:file ~data:errors
+            in
+            (to_push, errors_beyond_limit, error_count_in_ide))
+    in
+    (to_push, errors_beyond_limit)
+
   let get_errors_to_push :
       t ->
       rechecked:Relative_path.Set.t ->
       new_errors:Errors.t ->
       t * Errors.finalized_error list SMap.t =
-   fun { errors_in_ide; to_push } ~rechecked ~new_errors ->
+   fun { errors_in_ide; to_push; errors_beyond_limit } ~rechecked ~new_errors ->
     let new_errors : error list FileMap.t = Errors.as_map new_errors in
+    (* Merge to_push and errors_beyond_limit to obtain the total
+     * set of errors to be pushed. *)
+    let to_push = FileMap.union errors_beyond_limit to_push in
+    (* Update that set with the new errors. *)
     let to_push = merge_errors_to_push to_push ~rechecked ~new_errors in
+    (* Clear any old errors that are no longer there. *)
     let to_push = erase_errors to_push ~errors_in_ide ~rechecked in
+    (* Separate errors we'll push now vs. errors we won't push yet
+     * because they are beyond the error limit *)
+    let (to_push, errors_beyond_limit) = truncate to_push ~errors_in_ide in
     let to_push_absolute = to_absolute_errors to_push in
-    ({ errors_in_ide; to_push }, to_push_absolute)
+    ({ errors_in_ide; to_push; errors_beyond_limit }, to_push_absolute)
 
   let compute_total_errors errors_in_ide to_push =
     FileMap.fold
@@ -138,17 +235,25 @@ end = struct
         | errors -> FileMap.add errors_in_ide ~key:file ~data:errors)
 
   let commit_pushed_errors : t -> t =
-   fun { errors_in_ide; to_push } ->
+   fun { errors_in_ide; to_push; errors_beyond_limit } ->
     let all_errors = compute_total_errors errors_in_ide to_push in
-    { errors_in_ide = all_errors; to_push = FileMap.empty }
+    { errors_in_ide = all_errors; to_push = FileMap.empty; errors_beyond_limit }
 
   let reset_for_new_client : t -> t =
-   fun { errors_in_ide; to_push } ->
+   fun { errors_in_ide; to_push; errors_beyond_limit } ->
     let all_errors = compute_total_errors errors_in_ide to_push in
-    { errors_in_ide = FileMap.empty; to_push = all_errors }
+    { errors_in_ide = FileMap.empty; to_push = all_errors; errors_beyond_limit }
 
   module TestExporter = struct
-    let make ~errors_in_ide ~to_push = { errors_in_ide; to_push }
+    let make ~errors_in_ide ~to_push ~errors_beyond_limit =
+      { errors_in_ide; to_push; errors_beyond_limit }
+
+    let with_error_limit limit f =
+      let previous_error_limit = !error_limit in
+      error_limit := limit;
+      let result = f () in
+      error_limit := previous_error_limit;
+      result
   end
 end
 

@@ -13,51 +13,55 @@ open Diagnostic_pusher.TestExporter.ErrorTracker
 
 open Diagnostic_pusher.TestExporter.ErrorTracker.TestExporter
 
-let file1_absolute = "file1.php"
+module Constants = struct
+  let file1_absolute = "file1.php"
 
-let file1 : Relative_path.t =
-  Relative_path.create Relative_path.Dummy file1_absolute
+  let file1 : Relative_path.t =
+    Relative_path.create Relative_path.Dummy file1_absolute
 
-let file2_absolute = "file2.php"
+  let file2_absolute = "file2.php"
 
-let file2 : Relative_path.t =
-  Relative_path.create Relative_path.Dummy file2_absolute
+  let file2 : Relative_path.t =
+    Relative_path.create Relative_path.Dummy file2_absolute
 
-let files1 : Relative_path.Set.t = Relative_path.Set.of_list [file1]
+  let files1 : Relative_path.Set.t = Relative_path.Set.of_list [file1]
 
-let files2 : Relative_path.Set.t = Relative_path.Set.of_list [file2]
+  let files2 : Relative_path.Set.t = Relative_path.Set.of_list [file2]
 
-let files12 : Relative_path.Set.t = Relative_path.Set.of_list [file1; file2]
+  let files12 : Relative_path.Set.t = Relative_path.Set.of_list [file1; file2]
 
-let error1 : Errors.error = Errors.make_error 123 (Pos.none, "error1") []
+  let error1 : Errors.error = Errors.make_error 123 (Pos.none, "error1") []
 
-let error1_absolute : Errors.finalized_error = Errors.to_absolute error1
+  let error1_absolute : Errors.finalized_error = Errors.to_absolute error1
 
-let error2 : Errors.error = Errors.make_error 124 (Pos.none, "error2") []
+  let error2 : Errors.error = Errors.make_error 124 (Pos.none, "error2") []
 
-let error2_absolute : Errors.finalized_error = Errors.to_absolute error2
+  let error2_absolute : Errors.finalized_error = Errors.to_absolute error2
 
-let error3 : Errors.error = Errors.make_error 125 (Pos.none, "error3") []
+  let error3 : Errors.error = Errors.make_error 125 (Pos.none, "error3") []
 
-let no_errors : Errors.t = Errors.from_file_error_list []
+  let no_errors : Errors.t = Errors.from_file_error_list []
 
-let no_errors_absolute = SMap.empty
+  let no_errors_absolute = SMap.empty
 
-let one_error file error : Errors.t =
-  Errors.from_file_error_list [(file, error)]
+  let one_error file error : Errors.t =
+    Errors.from_file_error_list [(file, error)]
 
-let one_error_absolute file error = SMap.of_list [(file, [error])]
+  let one_error_absolute file error = SMap.of_list [(file, [error])]
 
-let errors1 file : Errors.t = one_error file error1
+  let errors1 file : Errors.t = one_error file error1
 
-let errors1_absolute file = one_error_absolute file error1_absolute
+  let errors1_absolute file = one_error_absolute file error1_absolute
 
-let errors2 file : Errors.t = one_error file error2
+  let errors2 file : Errors.t = one_error file error2
 
-let errors2_absolute file = one_error_absolute file error2_absolute
+  let errors2_absolute file = one_error_absolute file error2_absolute
 
-let errors12 file : Errors.t =
-  Errors.from_file_error_list [(file, error1); (file, error2)]
+  let errors12 file : Errors.t =
+    Errors.from_file_error_list [(file, error1); (file, error2)]
+end
+
+open Constants
 
 let assert_equal_trackers =
   assert_equal ~printer:ErrorTracker.show ~cmp:ErrorTracker.equal
@@ -68,6 +72,8 @@ let assert_equal_messages =
     ~cmp:ServerCommandTypes.equal_pushes
 
 module ErrorTrackerTest = struct
+  let make_no_limit = make ~errors_beyond_limit:FileMap.empty
+
   let test_never_commit _ =
     let tracker = init in
 
@@ -76,7 +82,7 @@ module ErrorTrackerTest = struct
       get_errors_to_push tracker ~rechecked:files1 ~new_errors:(errors1 file1)
     in
     let expected_tracker =
-      make
+      make_no_limit
         ~errors_in_ide:FileMap.empty
         ~to_push:(FileMap.of_list [(file1, [error1])])
     in
@@ -87,7 +93,7 @@ module ErrorTrackerTest = struct
       get_errors_to_push tracker ~rechecked:files1 ~new_errors:(errors2 file1)
     in
     let expected_tracker =
-      make
+      make_no_limit
         ~errors_in_ide:FileMap.empty
         ~to_push:(FileMap.of_list [(file1, [error2])])
     in
@@ -98,7 +104,7 @@ module ErrorTrackerTest = struct
       get_errors_to_push tracker ~rechecked:files1 ~new_errors:no_errors
     in
     let expected_tracker =
-      make ~errors_in_ide:FileMap.empty ~to_push:(FileMap.of_list [])
+      make_no_limit ~errors_in_ide:FileMap.empty ~to_push:(FileMap.of_list [])
     in
     assert_equal_trackers expected_tracker tracker;
 
@@ -113,7 +119,7 @@ module ErrorTrackerTest = struct
     in
     let expected_to_push = FileMap.of_list [(file1, [error1; error2])] in
     let expected_tracker =
-      make ~errors_in_ide:FileMap.empty ~to_push:expected_to_push
+      make_no_limit ~errors_in_ide:FileMap.empty ~to_push:expected_to_push
     in
     assert_equal_trackers expected_tracker tracker;
 
@@ -121,7 +127,7 @@ module ErrorTrackerTest = struct
     let tracker = commit_pushed_errors tracker in
     let expected_errors_in_ide = expected_to_push in
     let expected_tracker =
-      make ~errors_in_ide:expected_errors_in_ide ~to_push:FileMap.empty
+      make_no_limit ~errors_in_ide:expected_errors_in_ide ~to_push:FileMap.empty
     in
     assert_equal_trackers expected_tracker tracker;
 
@@ -131,7 +137,9 @@ module ErrorTrackerTest = struct
     in
     let expected_to_push = FileMap.of_list [(file1, [error1])] in
     let expected_tracker =
-      make ~errors_in_ide:expected_errors_in_ide ~to_push:expected_to_push
+      make_no_limit
+        ~errors_in_ide:expected_errors_in_ide
+        ~to_push:expected_to_push
     in
     assert_equal_trackers expected_tracker tracker;
 
@@ -139,7 +147,7 @@ module ErrorTrackerTest = struct
     let tracker = commit_pushed_errors tracker in
     let expected_errors_in_ide = expected_to_push in
     let expected_tracker =
-      make ~errors_in_ide:expected_errors_in_ide ~to_push:FileMap.empty
+      make_no_limit ~errors_in_ide:expected_errors_in_ide ~to_push:FileMap.empty
     in
     assert_equal_trackers expected_tracker tracker;
 
@@ -149,14 +157,16 @@ module ErrorTrackerTest = struct
     in
     let expected_to_push = FileMap.of_list [(file1, [])] in
     let expected_tracker =
-      make ~errors_in_ide:expected_errors_in_ide ~to_push:expected_to_push
+      make_no_limit
+        ~errors_in_ide:expected_errors_in_ide
+        ~to_push:expected_to_push
     in
     assert_equal_trackers expected_tracker tracker;
 
     (* Push successful *)
     let tracker = commit_pushed_errors tracker in
     let expected_tracker =
-      make ~errors_in_ide:FileMap.empty ~to_push:FileMap.empty
+      make_no_limit ~errors_in_ide:FileMap.empty ~to_push:FileMap.empty
     in
     assert_equal_trackers expected_tracker tracker;
 
@@ -310,16 +320,126 @@ let test_switch_client_erase _ =
 
   ()
 
+let test_error_limit_one_file _ =
+  with_error_limit 1 @@ fun () ->
+  let pusher = Diagnostic_pusher.init in
+  let _ = TestClientProvider.make_and_store_persistent () in
+
+  (* Add 2 errors in the same file file1: nothing should be pushed. *)
+  let pusher =
+    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 (errors12 file1)
+  in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  assert_equal_messages [] pushed_messages;
+
+  (* Now file1 only has 1 error: it should be pushed. *)
+  let pusher =
+    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 (errors1 file1)
+  in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        {
+          errors = SMap.of_list [(file1_absolute, [error1_absolute])];
+          is_truncated = None;
+        };
+    ]
+  in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  (* Now file1 has 2 errors again: the previous error should be erased
+   * because for a given file, we want either all errors or none. *)
+  let pusher =
+    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 (errors12 file1)
+  in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        { errors = SMap.of_list [(file1_absolute, [])]; is_truncated = None };
+    ]
+  in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  ignore pusher;
+  ()
+
+let test_error_limit_two_files _ =
+  with_error_limit 2 @@ fun () ->
+  let pusher = Diagnostic_pusher.init in
+  let _ = TestClientProvider.make_and_store_persistent () in
+
+  (* Add 2 errors in file1: they should be pushed *)
+  let pusher =
+    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 (errors12 file1)
+  in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        {
+          errors =
+            SMap.of_list [(file1_absolute, [error1_absolute; error2_absolute])];
+          is_truncated = None;
+        };
+    ]
+  in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  (* Add 1 error in file2: it should not be pushed *)
+  let pusher =
+    Diagnostic_pusher.push_new_errors pusher ~rechecked:files2 (errors2 file2)
+  in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  assert_equal_messages [] pushed_messages;
+
+  (* Now file1 only has 1 error: we should push that error and the error in file2. *)
+  let pusher =
+    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 (errors1 file1)
+  in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        {
+          errors =
+            SMap.of_list
+              [
+                (file1_absolute, [error1_absolute]);
+                (file2_absolute, [error2_absolute]);
+              ];
+          is_truncated = None;
+        };
+    ]
+  in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  ignore pusher;
+  ()
+
+let tear_down () =
+  TestClientProvider.disconnect_persistent ();
+  ()
+
+let with_tear_down f ctx =
+  f ctx;
+  tear_down ();
+  ()
+
 let () =
   "diagnostic_pusher_test"
   >::: [
          "ErrorTrackerTest.test_never_commit"
-         >:: ErrorTrackerTest.test_never_commit;
+         >:: with_tear_down ErrorTrackerTest.test_never_commit;
          "ErrorTrackerTest.test_push_commit_erase"
-         >:: ErrorTrackerTest.test_push_commit_erase;
-         "test_push" >:: test_push;
-         "test_initially_no_client" >:: test_initially_no_client;
-         "test_switch_client" >:: test_switch_client;
-         "test_switch_client_erase" >:: test_switch_client_erase;
+         >:: with_tear_down ErrorTrackerTest.test_push_commit_erase;
+         "test_push" >:: with_tear_down test_push;
+         "test_initially_no_client" >:: with_tear_down test_initially_no_client;
+         "test_switch_client" >:: with_tear_down test_switch_client;
+         "test_error_limit_one_file"
+         >:: with_tear_down test_error_limit_one_file;
+         "test_error_limit_two_files"
+         >:: with_tear_down test_error_limit_two_files;
        ]
   |> run_test_tt_main

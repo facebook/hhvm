@@ -3,6 +3,5 @@ Cstr M -> Type N
 Extends Foo -> Type Bar
 Extends M -> Type N
 Type Foo -> Type Bar
-Type HH\Capabilities\AccessGlobals -> Type Bar, Type Foo, Type M, Type N
 Type M -> Type Bar, Type Foo, Type N
 Type N -> Type Bar

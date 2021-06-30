@@ -6,10 +6,4 @@ Extends Foo -> Type Bar
 Extends N\Foo -> Type N\Bar, Type Qux
 Type Bar -> Type Baz
 Type Foo -> Type Bar, Type Baz
-Type HH\Capabilities\AccessGlobals -> Type Bar,
-                                      Type Baz,
-                                      Type Foo,
-                                      Type N\Bar,
-                                      Type N\Foo,
-                                      Type Qux
 Type N\Foo -> Type N\Bar, Type Qux

@@ -103,7 +103,7 @@ type subtype_env = {
           constraints on type parameters, if any. *)
   is_coeffect: bool;
       (** A flag which, if set, indicates that coeffects are being subtyped.
-          Note: this is a short-term solution to provide pretty-printing of
+          Note: this is a short-term solution to provide coeffects.pretty-printing of
           `locl_ty`s that represent coeffects, since there is no good way to
           tell apart coeffects from regular types *)
 }
@@ -428,7 +428,7 @@ let describe_ty ~is_coeffect : env -> internal_type -> string =
     describe_ty_default
   else
     fun env -> function
-  | LoclType ty -> Typing_print.coeffects env ty
+  | LoclType ty -> Typing_coeffects.pretty env ty
   | ty -> describe_ty_default env ty
 
 let rec describe_ty_super ~is_coeffect env ty =
@@ -2483,9 +2483,9 @@ and simplify_subtype_implicit_params
             let got = Typing_coeffects.get_type super_cap in
             Errors.coeffect_subtyping_error
               (get_pos expected)
-              (Typing_print.coeffects env expected)
+              (Typing_coeffects.pretty env expected)
               (get_pos got)
-              (Typing_print.coeffects env got)
+              (Typing_coeffects.pretty env got)
               subtype_env.on_error
           end;
       }

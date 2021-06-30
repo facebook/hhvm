@@ -141,7 +141,7 @@ watchman_init_timeout = 1
 
         self.assertEqual(
             result1.returned_values.get_edges_added(),
-            7,
+            0,
             "class_1 has no dependencies except pure coeffect (mixed)",
         )
 

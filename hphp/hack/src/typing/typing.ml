@@ -7617,10 +7617,10 @@ and call
               Errors.call_coeffect_error
                 pos
                 ~available_incl_unsafe:
-                  (Typing_print.coeffects env env_capability)
+                  (Typing_coeffects.pretty env env_capability)
                 ~available_pos:(Typing_defs.get_pos env_capability)
                 ~required_pos:(Typing_defs.get_pos capability)
-                ~required:(Typing_print.coeffects env capability))
+                ~required:(Typing_coeffects.pretty env capability))
       in
       let should_forget_fakes =
         (* If the function doesn't have write priveleges to properties, fake

@@ -1,6 +1,5 @@
 Fun A -> Fun B
 Type C -> Fun B
-Type HH\Capabilities\AccessGlobals -> Fun A, Fun B, Type C
 Type HH\Contexts\Unsafe\globals -> Fun B
 Type HH\Contexts\Unsafe\read_globals -> Fun A
 Type HH\Contexts\globals -> Fun B

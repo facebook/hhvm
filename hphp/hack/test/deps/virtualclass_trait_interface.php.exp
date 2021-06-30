@@ -4,6 +4,5 @@ Extends A -> Type B
 Extends I -> Type B
 Extends T -> Type A
 Type A -> Type B
-Type HH\Capabilities\AccessGlobals -> Type A, Type B, Type I, Type T
 Type I -> Type B
 Type T -> Type A, Type B

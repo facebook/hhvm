@@ -35,9 +35,9 @@ let enforce_local_capability
     mk_required
     (fun available required ->
       Errors.op_coeffect_error
-        ~locally_available:(Typing_print.coeffects env available)
+        ~locally_available:(Typing_coeffects.pretty env available)
         ~available_pos:(Typing_defs.get_pos available)
-        ~required:(Typing_print.coeffects env required)
+        ~required:(Typing_coeffects.pretty env required)
         ~err_code
         ~suggestion
         op
@@ -182,9 +182,9 @@ let check_assignment_or_unset_target
     capability_required =
   let fail =
     Errors.op_coeffect_error
-      ~locally_available:(Typing_print.coeffects env capability_available)
+      ~locally_available:(Typing_coeffects.pretty env capability_available)
       ~available_pos:(Typing_defs.get_pos capability_available)
-      ~required:(Typing_print.coeffects env capability_required)
+      ~required:(Typing_coeffects.pretty env capability_required)
       ~err_code:(Error_codes.Typing.err_code Error_codes.Typing.OpCoeffects)
   in
   let ((p, _), _) = te1 in

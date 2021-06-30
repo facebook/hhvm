@@ -33,7 +33,6 @@ let register_capabilities env (cap_ty : locl_ty) (unsafe_cap_ty : locl_ty) =
       cap_ty
       unsafe_cap_ty
   in
-  let (env, ty) = Typing_intersection.simplify_intersections env ty in
   (* The implicit argument for ft_implicit_params.capability *)
   ( Env.set_local env capability_id ty (Pos_or_decl.unsafe_to_raw_pos cap_pos),
     ty )
@@ -56,3 +55,7 @@ let rec validate_capability env pos ty =
     | Tnonnull -> ()
     | _ -> Errors.illegal_context pos (Typing_print.full env ty))
   | _ -> Errors.illegal_context pos (Typing_print.full env ty)
+
+let pretty env ty =
+  let (env, ty) = Typing_intersection.simplify_intersections env ty in
+  Typing_print.coeffects env ty

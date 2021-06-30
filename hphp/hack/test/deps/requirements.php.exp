@@ -6,9 +6,4 @@ Extends IFoo -> Type Foo
 Type Bar -> Type Foo
 Type FooParent -> Type Bar, Type Foo, Type IFoo
 Type G -> Type Bar, Type Foo, Type IFoo
-Type HH\Capabilities\AccessGlobals -> Type Bar,
-                                      Type Foo,
-                                      Type FooParent,
-                                      Type G,
-                                      Type IFoo
 Type IFoo -> Type Foo

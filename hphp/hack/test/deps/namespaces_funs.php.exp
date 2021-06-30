@@ -1,2 +1,1 @@
 Fun NS\foo -> Fun NS\bar
-Type HH\Capabilities\AccessGlobals -> Fun NS\bar, Fun NS\foo, Fun foo

@@ -1,3 +1,2 @@
 Extends :foo -> Type :bar
 Type :foo -> Type :bar
-Type HH\Capabilities\AccessGlobals -> Type :bar, Type :foo

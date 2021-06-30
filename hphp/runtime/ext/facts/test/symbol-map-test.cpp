@@ -631,7 +631,7 @@ TEST_F(SymbolMapTest, CopiedFile) {
   EXPECT_EQ(path1Functions.size(), 1);
   EXPECT_EQ(path1Functions.at(0).slice(), "SomeFunction");
 
-  auto path2Functions = m2.getFileFunctions(path1);
+  auto path2Functions = m2.getFileFunctions(path2);
   EXPECT_EQ(path2Functions.size(), 1);
   EXPECT_EQ(path2Functions.at(0).slice(), "SomeFunction");
 
@@ -639,7 +639,7 @@ TEST_F(SymbolMapTest, CopiedFile) {
   EXPECT_EQ(path1Constants.size(), 1);
   EXPECT_EQ(path1Constants.at(0).slice(), "SomeConstant");
 
-  auto path2Constants = m2.getFileConstants(path1);
+  auto path2Constants = m2.getFileConstants(path2);
   EXPECT_EQ(path2Constants.size(), 1);
   EXPECT_EQ(path2Constants.at(0).slice(), "SomeConstant");
 
@@ -647,7 +647,7 @@ TEST_F(SymbolMapTest, CopiedFile) {
   EXPECT_EQ(path1TypeAliases.size(), 1);
   EXPECT_EQ(path1TypeAliases.at(0).slice(), "SomeTypeAlias");
 
-  auto path2TypeAliases = m2.getFileTypeAliases(path1);
+  auto path2TypeAliases = m2.getFileTypeAliases(path2);
   EXPECT_EQ(path2TypeAliases.size(), 1);
   EXPECT_EQ(path2TypeAliases.at(0).slice(), "SomeTypeAlias");
 }

@@ -63,4 +63,7 @@ function slice_l(string $str, int $offset, int $length, ?Locale $loc = null): st
 <<__Native>>
 function reverse_l(string $str, ?Locale $loc = null): string;
 
+<<__Native>>
+function vsprintf_l(?Locale $loc, string $fmt, vec<mixed> $args): string;
+
 } // namespace HH\Lib\_Private\_Str

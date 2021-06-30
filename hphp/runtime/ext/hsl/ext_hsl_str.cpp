@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/hsl/ext_hsl_locale.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_ops.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/system/systemlib.h"
@@ -185,6 +186,25 @@ String HHVM_FUNCTION(reverse_l,
   return get_locale(maybe_loc)->ops()->reverse(str);
 }
 
+String HHVM_FUNCTION(vsprintf_l,
+                     const Variant& maybe_loc,
+                     const String& fmt,
+                     const Array& args) {
+
+  // Okay, quite a few layers here :p
+  // 1. get an HSLLocale from a nullable Locale object
+  // 2. get an std::shared_ptr<HPHP::Locale> from an HSL Locale
+  // 3. get a locale_t from an HPHP::Locale
+  auto loc = get_locale(maybe_loc)->get()->get();
+  auto thread_loc = ::uselocale((locale_t) 0);
+  if (LIKELY(loc == thread_loc)) {
+    return string_printf(fmt.data(), fmt.size(), args);
+  }
+  SCOPE_EXIT { ::uselocale(thread_loc); };
+  ::uselocale(loc);
+  return string_printf(fmt.data(), fmt.size(), args);
+}
+
 struct HSLStrExtension final : Extension {
   HSLStrExtension() : Extension("hsl_str", "0.1") {}
 
@@ -218,6 +238,8 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\slice_l, slice_l);
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\reverse_l, reverse_l);
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\vsprintf_l, vsprintf_l);
 
     loadSystemlib();
   }

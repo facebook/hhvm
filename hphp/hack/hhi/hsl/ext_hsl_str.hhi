@@ -33,5 +33,6 @@ function strripos_l(string $haystack, string $needle, int $offset, ?Locale $loc 
 
 function slice_l(string $str, int $offset, int $length, ?Locale $loc = null): string;
 function reverse_l(string $str, ?Locale $loc = null): string;
+function vsprintf_l(?Locale $loc, string $fmt, vec<mixed> $args): string;
 
 } // namespace HH\Lib\_Private\_Str

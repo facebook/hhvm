@@ -45,6 +45,8 @@ namespace HPHP {
     virtual int64_t strripos(const String& haystack, const String& needle, int64_t offset) const override;
 
     virtual String slice(const String& str, int64_t offset, int64_t length) const override;
+
+    virtual String reverse(const String& str) const override;
     private:
       locale_t m_loc;
   };

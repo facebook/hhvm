@@ -370,4 +370,12 @@ String HSLLocaleICUOps::slice(const String& str, int64_t offset, int64_t length)
   return ret;
 }
 
+String HSLLocaleICUOps::reverse(const String& str) const {
+  auto mut = ustr_from_utf8(str);
+  mut.reverse();
+  std::string ret;
+  mut.toUTF8String(ret);
+  return ret;
+}
+
 } // namespace HPHP

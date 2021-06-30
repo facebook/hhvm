@@ -200,4 +200,8 @@ String HSLLocaleLibcOps::slice(const String& str, int64_t offset, int64_t length
   return str.substr(offset, length);
 }
 
+String HSLLocaleLibcOps::reverse(const String& str) const {
+  return HHVM_FN(strrev)(str);
+}
+
 } // namespace HPHP

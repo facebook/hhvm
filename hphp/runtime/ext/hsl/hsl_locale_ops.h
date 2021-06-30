@@ -47,5 +47,7 @@ namespace HPHP {
     virtual int64_t strripos(const String& haystack, const String& needle, int64_t offset) const = 0;
 
     virtual String slice(const String& str, int64_t offset, int64_t length) const = 0;
+
+    virtual String reverse(const String& str) const = 0;
   };
 } // namespace HPHP

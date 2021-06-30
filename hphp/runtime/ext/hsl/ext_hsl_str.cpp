@@ -176,6 +176,15 @@ String HHVM_FUNCTION(slice_l,
   return get_locale(maybe_loc)->ops()->slice(str, offset, length);
 }
 
+String HHVM_FUNCTION(reverse_l,
+                     const String& str,
+                     const Variant& maybe_loc) {
+  if (str.empty()) {
+    return str;
+  }
+  return get_locale(maybe_loc)->ops()->reverse(str);
+}
+
 struct HSLStrExtension final : Extension {
   HSLStrExtension() : Extension("hsl_str", "0.1") {}
 
@@ -207,6 +216,8 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strripos_l, strripos_l);
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\slice_l, slice_l);
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\reverse_l, reverse_l);
 
     loadSystemlib();
   }

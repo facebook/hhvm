@@ -2127,10 +2127,6 @@ To string conversions:
   Throws a BadMethodCallException to indicate that S0 was called without reified
   generics.
 
-| RaiseHackArrCompatNotice, ND, S(Str), NF
-
-  Raises a Hack array compat notice with the text in S0 as its message.
-
 | ThrowParamInOutMismatch<paramIndex>, ND, S(Func), T
 
   Throw an exception indicating that the inout-ness of a parameter was

@@ -153,15 +153,6 @@ IMPL_OPCODE_CALL(DebugBacktrace)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void raiseHackArrCompatNotice(const StringData* msg) {
-  raise_hackarr_compat_notice(msg->toCppString());
-}
-
-void cgRaiseHackArrCompatNotice(IRLS& env, const IRInstruction* inst) {
-  cgCallHelper(vmain(env), env, CallSpec::direct(raiseHackArrCompatNotice),
-               kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
-}
-
 static void raiseForbiddenDynCall(const Func* func) {
   auto dynCallable = func->isDynamicallyCallable();
   assertx(!dynCallable || RO::EvalForbidDynamicCallsWithAttr);

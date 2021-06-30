@@ -78,11 +78,6 @@ struct RepoGlobalData {
    */
   bool PHP7_Substr = false;
 
-  /*
-   * Are Hack array compatibility notices enabled? If so, certain optimizations
-   * may be disabled.
-   */
-  bool HackArrCompatNotices = false;
   bool HackArrCompatSerializeNotices = false;
 
   /*
@@ -188,7 +183,6 @@ struct RepoGlobalData {
       (PHP7_NoHexNumerics)
       (PHP7_Substr)
       (PHP7_Builtins)
-      (HackArrCompatNotices)
       (HackArrCompatSerializeNotices)
       (EnableIntrinsicsExtension)
       (ForbidDynamicCallsToFunc)

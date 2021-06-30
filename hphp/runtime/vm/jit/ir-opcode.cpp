@@ -422,7 +422,6 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
-  case RaiseHackArrCompatNotice:
   case RaiseNotice:
   case RaiseStrToClassNotice:
   case RaiseTooManyArg:

@@ -1168,14 +1168,6 @@ struct RuntimeOption {
   F(double, BespokeArraySinkSideExitThreshold, 95.0)                    \
   F(uint64_t, BespokeArraySinkSideExitMaxSources, 64)                   \
   F(uint64_t, BespokeArraySinkSideExitMinSampleCount, 4)                \
-  /* Raise notices on various array operations which may present        \
-   * compatibility issues with Hack arrays.                             \
-   *                                                                    \
-   * The various *Notices options independently control separate        \
-   * subsets of notices.  The Check* options are subordinate to the     \
-   * HackArrCompatNotices option, and control whether various runtime   \
-   * checks are made; they do not affect any optimizations. */          \
-  F(bool, HackArrCompatNotices, false)                                  \
   F(bool, HackArrCompatSerializeNotices, false)                         \
   /* When this flag is on, var_export outputs d/varrays. */             \
   F(bool, HackArrDVArrVarExport, false)                                 \

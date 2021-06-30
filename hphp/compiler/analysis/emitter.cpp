@@ -145,7 +145,6 @@ RepoGlobalData getGlobalData() {
   gd.PHP7_Substr                 = RuntimeOption::PHP7_Substr;
   gd.PHP7_Builtins               = RuntimeOption::PHP7_Builtins;
   gd.HardGenericsUB              = RuntimeOption::EvalEnforceGenericsUB >= 2;
-  gd.HackArrCompatNotices        = RuntimeOption::EvalHackArrCompatNotices;
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
   gd.ForbidDynamicCallsToFunc    = RuntimeOption::EvalForbidDynamicCallsToFunc;
   gd.ForbidDynamicCallsWithAttr  =

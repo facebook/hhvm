@@ -1382,12 +1382,8 @@ std::pair<Type,bool> resolveSame(ISS& env) {
   auto const l2 = topStkEquiv(env, 1);
   auto const t2 = topC(env, 1);
 
-  // EvalHackArrCompatNotices will notice on === and !== between PHP arrays and
-  // Hack arrays. We can't really do better than this in general because of
-  // arrays inside these arrays.
   auto warningsEnabled =
-    (RuntimeOption::EvalHackArrCompatNotices ||
-     RuntimeOption::EvalEmitClsMethPointers ||
+    (RuntimeOption::EvalEmitClsMethPointers ||
      RuntimeOption::EvalRaiseClassConversionWarning);
 
   auto const result = [&] {

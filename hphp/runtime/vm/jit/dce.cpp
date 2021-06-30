@@ -513,7 +513,6 @@ bool canDCE(IRInstruction* inst) {
   case RaiseNotice:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
-  case RaiseHackArrCompatNotice:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
   case RaiseCoeffectsCallViolation:

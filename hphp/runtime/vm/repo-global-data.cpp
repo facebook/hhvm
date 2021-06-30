@@ -79,7 +79,6 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(PHP7_NoHexNumerics);
   SHOW(PHP7_Builtins);
   SHOW(PHP7_Substr);
-  SHOW(HackArrCompatNotices);
   SHOW(HackArrCompatSerializeNotices);
   SHOW(EnableIntrinsicsExtension);
   SHOW(ForbidDynamicCallsToFunc);

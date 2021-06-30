@@ -75,7 +75,7 @@ bitflags! {
       pub struct HHBCFlags: u32 {
         const LTR_ASSIGN=1 << 0;
         const UVS=1 << 1;
-        const HACK_ARR_COMPAT_NOTICES=1 << 2;
+        // No longer using bit 2.
         // No longer using bit 3.
         const AUTHORITATIVE=1 << 4;
         const JIT_ENABLE_RENAME_FUNCTION=1 << 5;
@@ -157,9 +157,6 @@ impl HHBCFlags {
         }
         if self.contains(HHBCFlags::FOLD_LAZY_CLASS_KEYS) {
             f |= HhvmFlags::FOLD_LAZY_CLASS_KEYS;
-        }
-        if self.contains(HHBCFlags::HACK_ARR_COMPAT_NOTICES) {
-            f |= HhvmFlags::HACK_ARR_COMPAT_NOTICES;
         }
         if self.contains(HHBCFlags::JIT_ENABLE_RENAME_FUNCTION) {
             f |= HhvmFlags::JIT_ENABLE_RENAME_FUNCTION;

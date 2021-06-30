@@ -298,7 +298,6 @@ RepoGlobalData get_global_data() {
   gd.PHP7_NoHexNumerics          = RuntimeOption::PHP7_NoHexNumerics;
   gd.PHP7_Substr                 = RuntimeOption::PHP7_Substr;
   gd.PHP7_Builtins               = RuntimeOption::PHP7_Builtins;
-  gd.HackArrCompatNotices        = RuntimeOption::EvalHackArrCompatNotices;
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
   gd.ForbidDynamicCallsToFunc    = RuntimeOption::EvalForbidDynamicCallsToFunc;
   gd.ForbidDynamicCallsToClsMeth =
@@ -498,7 +497,6 @@ int main(int argc, char** argv) try {
 
   // When running hhbbc, these option is loaded from GD, and will override CLI.
   // When running hhvm, these option is not loaded from GD, but read from CLI.
-  RO::EvalHackArrCompatNotices                  = gd.HackArrCompatNotices;
   RO::EvalForbidDynamicCallsToFunc              = gd.ForbidDynamicCallsToFunc;
   RO::EvalForbidDynamicCallsToClsMeth           = gd.ForbidDynamicCallsToClsMeth;
   RO::EvalForbidDynamicCallsToInstMeth          = gd.ForbidDynamicCallsToInstMeth;

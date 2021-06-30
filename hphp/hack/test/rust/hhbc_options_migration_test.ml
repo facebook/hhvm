@@ -24,9 +24,6 @@ let assert_opts_equal caml rust =
     Hhbc_options.(php7_ltr_assign caml)
     Hhbc_options.(php7_ltr_assign rust);
   assert_equal
-    Hhbc_options.(hack_arr_compat_notices caml)
-    Hhbc_options.(hack_arr_compat_notices rust);
-  assert_equal
     Hhbc_options.(repo_authoritative caml)
     Hhbc_options.(repo_authoritative rust);
   assert_equal
@@ -356,9 +353,6 @@ let test_all_overrides_json_only _ =
   \"hhvm.hack.lang.phpism.disable_nontoplevel_declarations\": {
     \"global_value\": true
   },
-  \"hhvm.hack_arr_compat_notices\": {
-    \"global_value\": true
-  },
   \"hhvm.include_roots\": {
     \"global_value\": {\"key\": \"val\"}
   },
@@ -469,8 +463,6 @@ module CliArgOverrides = struct
   let hhvm'hack'lang'phpism'disable_nontoplevel_declarations =
     "-vhack.lang.phpism.disablenontopleveldeclarations=true"
 
-  let hhvm'hack_arr_compat_notices = "-veval.hackarrcompatnotices=true"
-
   (* let hhvm'include_roots = "UNSUPPORTED BY CLI" *)
 
   let hhvm'jit_enable_rename_function = "-veval.jitenablerenamefunction=true"
@@ -530,7 +522,6 @@ let test_all_overrides_cli_only _ =
       hhvm'hack'lang'enable_class_level_where_clauses;
       hhvm'hack'lang'enable_xhp_class_modifier;
       hhvm'hack'lang'phpism'disable_nontoplevel_declarations;
-      hhvm'hack_arr_compat_notices;
       (* hhvm'include_roots; *)
       hhvm'jit_enable_rename_function;
       hhvm'log_extern_compiler_perf;

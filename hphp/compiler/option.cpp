@@ -183,20 +183,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                ini, config, "JitEnableRenameFunction",
                RuntimeOption::EvalJitEnableRenameFunction);
   Config::Bind(EnableShortTags, ini, config, "EnableShortTags", true);
-
-#define BIND_HAC_OPTION(Name, Def)                      \
-  Config::Bind(RuntimeOption::EvalHackArrCompat##Name,  \
-               ini, config, "HackArrCompat" #Name,      \
-               RuntimeOption::EvalHackArrCompat##Def);
-
-#define BIND_HAC_OPTION_SELF(Name)  BIND_HAC_OPTION(Name, Name)
-
-  BIND_HAC_OPTION_SELF(Notices)
-  BIND_HAC_OPTION_SELF(SerializeNotices)
-
-#undef BIND_HAC_OPTION_SELF
-#undef BIND_HAC_OPTION
-
+  Config::Bind(RuntimeOption::EvalHackArrCompatSerializeNotices,
+               ini, config, "HackArrCompatSerializeNotices",
+               RuntimeOption::EvalHackArrCompatSerializeNotices);
   Config::Bind(RuntimeOption::EvalForbidDynamicCallsToFunc,
                ini, config, "ForbidDynamicCallsToFunc",
                RuntimeOption::EvalForbidDynamicCallsToFunc);

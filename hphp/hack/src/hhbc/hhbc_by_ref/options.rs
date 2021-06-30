@@ -162,7 +162,6 @@ prefixed_flags!(
     EMIT_METH_CALLER_FUNC_POINTERS,
     ENABLE_INTRINSICS_EXTENSION,
     FOLD_LAZY_CLASS_KEYS,
-    HACK_ARR_COMPAT_NOTICES,
     JIT_ENABLE_RENAME_FUNCTION,
     LOG_EXTERN_COMPILER_PERF,
     RX_IS_ENABLED,
@@ -763,9 +762,6 @@ mod tests {
   "hhvm.hack.lang.rust_emitter": {
     "global_value": false
   },
-  "hhvm.hack_arr_compat_notices": {
-    "global_value": false
-  },
   "hhvm.include_roots": {
     "global_value": {}
   },
@@ -1011,23 +1007,6 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_options_de_from_cli_override_json() {
-        let cli_args = [
-            "eval.jitenablerenamefunction=1",
-            "eval.hackarrcompatnotices=true",
-        ];
-        let json = json!({
-            "hhvm.hack_arr_compat_notices": {
-                "global_value": "0",
-            },
-            "hhvm.log_extern_compiler_perf": {
-                "global_value": "true",
-            },
-        });
-        let act = Options::from_configs_(&[json.to_string()], &cli_args).unwrap();
-        assert!(act.hhvm.flags.contains(HhvmFlags::HACK_ARR_COMPAT_NOTICES));
-    }
 
     #[test]
     fn test_options_de_from_cli_comma_separated_key_value() {
@@ -1132,7 +1111,7 @@ bitflags! {
         /// HHVM it's helpful to renumber in order that the labels match more closely
         const RELABEL = 1 << 5;
         // No longer using bit 6.
-        const HACK_ARR_COMPAT_NOTICES = 1 << 7;
+        // No longer using bit 7.
         // No longer using bit 8.
         const AUTHORITATIVE = 1 << 9;
         const JIT_ENABLE_RENAME_FUNCTION = 1 << 10;

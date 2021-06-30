@@ -25,13 +25,42 @@
 #include <folly/executors/ManualExecutor.h>
 #include <folly/experimental/TestUtil.h>
 #include <folly/portability/GTest.h>
+#include <folly/portability/GMock.h>
 
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/runtime/ext/facts/symbol-map.h"
 
+using ::testing::AllOf;
+using ::testing::Contains;
+using ::testing::ElementsAre;
+using ::testing::Eq;
+using ::testing::IsEmpty;
+using ::testing::SizeIs;
+using ::testing::UnorderedElementsAre;
+
 namespace HPHP {
 namespace Facts {
+
+template<typename S, SymKind k>
+void PrintTo(const Symbol<S, k>& symbol, ::std::ostream* os) {
+  *os << symbol.slice();
+}
+
+template<typename S, SymKind k>
+bool operator==(const Symbol<S, k>& symbol, const char* str) {
+  return symbol.slice() == str;
+}
+
+template<typename S, SymKind k, typename T, typename U>
+void PrintTo(const std::tuple<Symbol<S, k>, Path<S>, T, U>& typeInfo, ::std::ostream* os) {
+  *os << std::get<0>(typeInfo).slice();
+}
+
+template<typename S, SymKind k, typename T, typename U>
+bool operator==(const std::tuple<Symbol<S, k>, Path<S>, T, U>& typeInfo, const char* str) {
+  return std::get<0>(typeInfo) == str;
+}
 
 namespace {
 
@@ -80,36 +109,6 @@ void waitForDB(
   ASSERT_EQ(m.m_exec.get(), static_cast<folly::Executor*>(exec.get()));
   exec->drain();
   m.waitForDBUpdate();
-}
-
-bool collectionContains(
-    std::vector<Symbol<std::string, SymKind::Type>> collection,
-    std::string_view type) {
-  return std::find_if(collection.begin(), collection.end(), [&](auto const& t) {
-           return t.slice() == type;
-         }) != collection.end();
-}
-
-using DerivedTypeInfo = typename SymbolMap<std::string>::DerivedTypeInfo;
-bool collectionContains(
-    std::vector<DerivedTypeInfo> collection, const std::string_view type) {
-  return std::find_if(
-             collection.begin(),
-             collection.end(),
-             [&](const DerivedTypeInfo& def) {
-               return std::get<0>(def).slice() == type;
-             }) != collection.end();
-}
-
-bool collectionContains(
-    std::vector<MethodDecl<std::string>> collection,
-    MethodDecl<std::string> method) {
-  return std::find_if(
-             collection.begin(),
-             collection.end(),
-             [&](const MethodDecl<std::string>& def) {
-               return method == def;
-             }) != collection.end();
 }
 
 } // namespace
@@ -182,25 +181,11 @@ TEST_F(SymbolMapTest, addPaths) {
   EXPECT_EQ(m.getTypeFile("SomeTypeAlias"), nullptr);
 
   // file -> symbols
-  auto types = m.getFileTypes(path1);
-  EXPECT_EQ(types.size(), 2);
-  EXPECT_NE(
-      std::find_if(
-          types.begin(),
-          types.end(),
-          [](Symbol<std::string, SymKind::Type> t) {
-            return t.slice() == "BaseClass";
-          }),
-      types.end());
-  EXPECT_NE(
-      std::find_if(
-          types.begin(),
-          types.end(),
-          [](auto const t) { return t.slice() == "SomeClass"; }),
-      types.end());
-  EXPECT_EQ(m.getFileFunctions(path1).at(0).slice(), "some_fn");
-  EXPECT_EQ(m.getFileConstants(path1).at(0).slice(), "SOME_CONSTANT");
-  EXPECT_EQ(m.getFileTypeAliases(path1).at(0).slice(), "SomeTypeAlias");
+  EXPECT_THAT(
+    m.getFileTypes(path1), UnorderedElementsAre("BaseClass", "SomeClass"));
+  EXPECT_EQ(m.getFileFunctions(path1).at(0), "some_fn");
+  EXPECT_EQ(m.getFileConstants(path1).at(0), "SOME_CONSTANT");
+  EXPECT_EQ(m.getFileTypeAliases(path1).at(0), "SomeTypeAlias");
 
   // Check for case insensitivity (constants are case-sensitive, nothing else
   // is)
@@ -217,13 +202,11 @@ TEST_F(SymbolMapTest, addPaths) {
 
   // Check inheritance
   EXPECT_EQ(
-      m.getBaseTypes("SomeClass", DeriveKind::Extends).at(0).slice(),
-      "BaseClass");
+      m.getBaseTypes("SomeClass", DeriveKind::Extends).at(0), "BaseClass");
   EXPECT_TRUE(m.getDerivedTypes("SomeClass", DeriveKind::Extends).empty());
   EXPECT_TRUE(m.getBaseTypes("BaseClass", DeriveKind::Extends).empty());
   EXPECT_EQ(
-      m.getDerivedTypes("BaseClass", DeriveKind::Extends).at(0).slice(),
-      "SomeClass");
+      m.getDerivedTypes("BaseClass", DeriveKind::Extends).at(0), "SomeClass");
 
   // Define duplicate symbols in path2
   folly::fs::path path2 = {"some/path2.php"};
@@ -249,18 +232,16 @@ TEST_F(SymbolMapTest, addPaths) {
   EXPECT_EQ(m.getConstantFile("SOME_CONSTANT"), path2.native());
   EXPECT_EQ(m.getTypeAliasFile("SomeTypeAlias"), path2.native());
 
-  {
-    auto baseTypes = m.getBaseTypes("SomeClass", DeriveKind::Extends);
-    EXPECT_EQ(baseTypes.size(), 1);
-    EXPECT_EQ(baseTypes.at(0).slice(), "BaseClass");
-  }
+  EXPECT_THAT(
+    m.getBaseTypes("SomeClass", DeriveKind::Extends),
+    ElementsAre("BaseClass"));
+
   EXPECT_TRUE(m.getDerivedTypes("SomeClass", DeriveKind::Extends).empty());
   EXPECT_TRUE(m.getBaseTypes("BaseClass", DeriveKind::Extends).empty());
-  {
-    auto derivedTypes = m.getDerivedTypes("BaseClass", DeriveKind::Extends);
-    EXPECT_EQ(derivedTypes.size(), 1);
-    EXPECT_EQ(derivedTypes.at(0).slice(), "SomeClass");
-  }
+
+  EXPECT_THAT(
+    m.getDerivedTypes("BaseClass", DeriveKind::Extends),
+    ElementsAre("SomeClass"));
 }
 
 TEST_F(SymbolMapTest, duplicateSymbols) {
@@ -312,32 +293,17 @@ TEST_F(SymbolMapTest, DBFill) {
   EXPECT_EQ(m1.getTypeAliasFile("SomeTypeAlias"), path.native());
 
   // file -> symbol
-  {
-    auto fileTypes = m1.getFileTypes(path);
-    ASSERT_EQ(fileTypes.size(), 2);
-    EXPECT_NE(
-        std::find_if(
-            fileTypes.begin(),
-            fileTypes.end(),
-            [](auto const t) { return t.slice() == "BaseClass"; }),
-        fileTypes.end());
-    EXPECT_NE(
-        std::find_if(
-            fileTypes.begin(),
-            fileTypes.end(),
-            [](auto const t) { return t.slice() == "SomeClass"; }),
-        fileTypes.end());
-  }
-  EXPECT_EQ(m1.getFileFunctions(path).at(0).slice(), "some_fn");
-  EXPECT_EQ(m1.getFileConstants(path).at(0).slice(), "SOME_CONSTANT");
-  EXPECT_EQ(m1.getFileTypeAliases(path).at(0).slice(), "SomeTypeAlias");
+  EXPECT_THAT(
+      m1.getFileTypes(path),
+      UnorderedElementsAre("BaseClass", "SomeClass"));
+  EXPECT_EQ(m1.getFileFunctions(path).at(0), "some_fn");
+  EXPECT_EQ(m1.getFileConstants(path).at(0), "SOME_CONSTANT");
+  EXPECT_EQ(m1.getFileTypeAliases(path).at(0), "SomeTypeAlias");
 
   // inheritance
-  {
-    auto baseTypes = m1.getBaseTypes("SomeClass", DeriveKind::Extends);
-    ASSERT_EQ(baseTypes.size(), 1);
-    EXPECT_EQ(baseTypes.at(0).slice(), "BaseClass");
-  }
+  EXPECT_THAT(
+      m1.getBaseTypes("SomeClass", DeriveKind::Extends),
+      ElementsAre("BaseClass"));
   EXPECT_TRUE(m1.getDerivedTypes("SomeClass", DeriveKind::Extends).empty());
   EXPECT_TRUE(m1.getBaseTypes("BaseClass", DeriveKind::Extends).empty());
   EXPECT_EQ(
@@ -349,22 +315,9 @@ TEST_F(SymbolMapTest, DBFill) {
   m2.update("1:2:3", "2:3:4", {}, {}, {});
 
   // file -> symbol
-  {
-    auto fileTypes = m1.getFileTypes(path);
-    ASSERT_EQ(fileTypes.size(), 2);
-    EXPECT_NE(
-        std::find_if(
-            fileTypes.begin(),
-            fileTypes.end(),
-            [](auto const t) { return t.slice() == "BaseClass"; }),
-        fileTypes.end());
-    EXPECT_NE(
-        std::find_if(
-            fileTypes.begin(),
-            fileTypes.end(),
-            [](auto const t) { return t.slice() == "SomeClass"; }),
-        fileTypes.end());
-  }
+  EXPECT_THAT(
+    m1.getFileTypes(path),
+    UnorderedElementsAre("BaseClass", "SomeClass"));
   EXPECT_EQ(m2.getFileFunctions(path).at(0).slice(), "some_fn");
   EXPECT_EQ(m2.getFileConstants(path).at(0).slice(), "SOME_CONSTANT");
   EXPECT_EQ(m2.getFileTypeAliases(path).at(0).slice(), "SomeTypeAlias");
@@ -377,18 +330,14 @@ TEST_F(SymbolMapTest, DBFill) {
   EXPECT_EQ(m2.getTypeAliasFile("SomeTypeAlias"), path.native());
 
   // inheritance
-  {
-    auto baseTypes = m2.getBaseTypes("SomeClass", DeriveKind::Extends);
-    ASSERT_EQ(baseTypes.size(), 1);
-    EXPECT_EQ(baseTypes.at(0).slice(), "BaseClass");
-  }
+  EXPECT_THAT(
+      m2.getBaseTypes("SomeClass", DeriveKind::Extends),
+      ElementsAre("BaseClass"));
   EXPECT_TRUE(m2.getDerivedTypes("SomeClass", DeriveKind::Extends).empty());
   EXPECT_TRUE(m2.getBaseTypes("BaseClass", DeriveKind::Extends).empty());
-  {
-    auto derivedTypes = m2.getDerivedTypes("BaseClass", DeriveKind::Extends);
-    ASSERT_EQ(derivedTypes.size(), 1);
-    EXPECT_EQ(derivedTypes.at(0).slice(), "SomeClass");
-  }
+  EXPECT_THAT(
+      m2.getDerivedTypes("BaseClass", DeriveKind::Extends),
+      ElementsAre("SomeClass"));
 }
 
 TEST_F(SymbolMapTest, ChangeSymbolCase) {
@@ -440,30 +389,22 @@ TEST_F(SymbolMapTest, ChangeBaseClassSymbolCase) {
   folly::fs::path path1 = {"some/path1.php"};
   folly::fs::path path2 = {"some/path2.php"};
   m.update("", "1:2:3", {path1, path2}, {}, {ff1, ff2});
-  {
-    auto baseTypes = m.getBaseTypes("SomeClass", DeriveKind::Extends);
-    EXPECT_EQ(baseTypes.size(), 1);
-    EXPECT_EQ(baseTypes.at(0).slice(), "baseclass");
-  }
-  {
-    auto derivedTypes = m.getDerivedTypes("baseclass", DeriveKind::Extends);
-    EXPECT_EQ(derivedTypes.size(), 1);
-    EXPECT_EQ(derivedTypes.at(0).slice(), "SomeClass");
-  }
+  EXPECT_THAT(
+      m.getBaseTypes("SomeClass", DeriveKind::Extends),
+      ElementsAre("baseclass"));
+  EXPECT_THAT(
+      m.getDerivedTypes("baseclass", DeriveKind::Extends),
+      ElementsAre("SomeClass"));
 
   ff1.m_types.at(0).m_baseTypes.at(0) = "BaseClass";
   ff2.m_types.at(0).m_name = "BaseClass";
   m.update("1:2:3", "1:2:4", {path1, path2}, {}, {ff1, ff2});
-  {
-    auto baseTypes = m.getBaseTypes("SomeClass", DeriveKind::Extends);
-    EXPECT_EQ(baseTypes.size(), 1);
-    EXPECT_EQ(baseTypes.at(0).slice(), "BaseClass");
-  }
-  {
-    auto derivedTypes = m.getDerivedTypes("BaseClass", DeriveKind::Extends);
-    EXPECT_EQ(derivedTypes.size(), 1);
-    EXPECT_EQ(derivedTypes.at(0).slice(), "SomeClass");
-  }
+  EXPECT_THAT(
+      m.getBaseTypes("SomeClass", DeriveKind::Extends),
+      ElementsAre("BaseClass"));
+  EXPECT_THAT(
+      m.getDerivedTypes("BaseClass", DeriveKind::Extends),
+      ElementsAre("SomeClass"));
 }
 
 /**
@@ -597,59 +538,16 @@ TEST_F(SymbolMapTest, CopiedFile) {
   EXPECT_EQ(m2.getConstantFile("SomeConstant"), nullptr);
   EXPECT_EQ(m2.getTypeAliasFile("SomeTypeAlias"), nullptr);
 
-  auto path1Types = m2.getFileTypes(path1);
-  EXPECT_EQ(path1Types.size(), 2);
-  EXPECT_NE(
-      std::find_if(
-          path1Types.begin(),
-          path1Types.end(),
-          [](auto const t) { return t.slice() == "SomeClass"; }),
-      path1Types.end());
-  EXPECT_NE(
-      std::find_if(
-          path1Types.begin(),
-          path1Types.end(),
-          [](auto const t) { return t.slice() == "OtherClass"; }),
-      path1Types.end());
-
-  auto path2Types = m2.getFileTypes(path2);
-  EXPECT_EQ(path2Types.size(), 2);
-  EXPECT_NE(
-      std::find_if(
-          path2Types.begin(),
-          path2Types.end(),
-          [](auto const t) { return t.slice() == "SomeClass"; }),
-      path2Types.end());
-  EXPECT_NE(
-      std::find_if(
-          path2Types.begin(),
-          path2Types.end(),
-          [](auto const t) { return t.slice() == "OtherClass"; }),
-      path2Types.end());
-
-  auto path1Functions = m2.getFileFunctions(path1);
-  EXPECT_EQ(path1Functions.size(), 1);
-  EXPECT_EQ(path1Functions.at(0).slice(), "SomeFunction");
-
-  auto path2Functions = m2.getFileFunctions(path2);
-  EXPECT_EQ(path2Functions.size(), 1);
-  EXPECT_EQ(path2Functions.at(0).slice(), "SomeFunction");
-
-  auto path1Constants = m2.getFileConstants(path1);
-  EXPECT_EQ(path1Constants.size(), 1);
-  EXPECT_EQ(path1Constants.at(0).slice(), "SomeConstant");
-
-  auto path2Constants = m2.getFileConstants(path2);
-  EXPECT_EQ(path2Constants.size(), 1);
-  EXPECT_EQ(path2Constants.at(0).slice(), "SomeConstant");
-
-  auto path1TypeAliases = m2.getFileTypeAliases(path1);
-  EXPECT_EQ(path1TypeAliases.size(), 1);
-  EXPECT_EQ(path1TypeAliases.at(0).slice(), "SomeTypeAlias");
-
-  auto path2TypeAliases = m2.getFileTypeAliases(path2);
-  EXPECT_EQ(path2TypeAliases.size(), 1);
-  EXPECT_EQ(path2TypeAliases.at(0).slice(), "SomeTypeAlias");
+  EXPECT_THAT(
+      m2.getFileTypes(path1), UnorderedElementsAre("SomeClass", "OtherClass"));
+  EXPECT_THAT(
+      m2.getFileTypes(path2), UnorderedElementsAre("SomeClass", "OtherClass"));
+  EXPECT_THAT(m2.getFileFunctions(path1), ElementsAre("SomeFunction"));
+  EXPECT_THAT(m2.getFileFunctions(path2), ElementsAre("SomeFunction"));
+  EXPECT_THAT(m2.getFileConstants(path1), ElementsAre("SomeConstant"));
+  EXPECT_THAT(m2.getFileConstants(path2), ElementsAre("SomeConstant"));
+  EXPECT_THAT(m2.getFileTypeAliases(path1), ElementsAre("SomeTypeAlias"));
+  EXPECT_THAT(m2.getFileTypeAliases(path2), ElementsAre("SomeTypeAlias"));
 }
 
 TEST_F(SymbolMapTest, ConcurrentCallsToGetTypeFile) {
@@ -685,36 +583,14 @@ TEST_F(SymbolMapTest, ConcurrentCallsToGetTypeFile) {
         EXPECT_EQ(m2.getTypeFile("OtherClass"), nullptr);
       }));
       futures.push_back(folly::via(folly::getCPUExecutor().get(), [&]() {
-        auto path1Types = m2.getFileTypes(path1);
-        EXPECT_EQ(path1Types.size(), 2);
-        EXPECT_NE(
-            std::find_if(
-                path1Types.begin(),
-                path1Types.end(),
-                [](auto const t) { return t.slice() == "SomeClass"; }),
-            path1Types.end());
-        EXPECT_NE(
-            std::find_if(
-                path1Types.begin(),
-                path1Types.end(),
-                [](auto const t) { return t.slice() == "OtherClass"; }),
-            path1Types.end());
+        EXPECT_THAT(
+          m2.getFileTypes(path1),
+          UnorderedElementsAre("SomeClass", "OtherClass"));
       }));
       futures.push_back(folly::via(folly::getCPUExecutor().get(), [&]() {
-        auto path2Types = m2.getFileTypes(path2);
-        EXPECT_EQ(path2Types.size(), 2);
-        EXPECT_NE(
-            std::find_if(
-                path2Types.begin(),
-                path2Types.end(),
-                [](auto const t) { return t.slice() == "SomeClass"; }),
-            path2Types.end());
-        EXPECT_NE(
-            std::find_if(
-                path2Types.begin(),
-                path2Types.end(),
-                [](auto const t) { return t.slice() == "OtherClass"; }),
-            path2Types.end());
+        EXPECT_THAT(
+          m2.getFileTypes(path2),
+          UnorderedElementsAre("SomeClass", "OtherClass"));
       }));
     }
   }
@@ -799,23 +675,13 @@ TEST_F(SymbolMapTest, DelayedDBUpdateDoesNotMakeResultsIncorrect) {
   EXPECT_EQ(m2.getKind("BaseClass"), TypeKind::Class);
   EXPECT_EQ(m2.getTypeFile("SomeClass"), path1.native());
   EXPECT_EQ(m2.getTypeFile("BaseClass"), path1.native());
-  EXPECT_EQ(
-      m2.getBaseTypes("SomeClass", DeriveKind::Extends).at(0).slice(),
-      "BaseClass");
-  EXPECT_EQ(
-      m2.getDerivedTypes("BaseClass", DeriveKind::Extends).at(0).slice(),
-      "SomeClass");
+  EXPECT_THAT(
+      m2.getBaseTypes("SomeClass", DeriveKind::Extends),
+      ElementsAre("BaseClass"));
+  EXPECT_THAT(
+      m2.getDerivedTypes("BaseClass", DeriveKind::Extends),
+      ElementsAre("SomeClass"));
   EXPECT_TRUE(m2.getFileTypes(path2).empty());
-  {
-    auto baseTypes = m2.getBaseTypes("SomeClass", DeriveKind::Extends);
-    ASSERT_EQ(baseTypes.size(), 1);
-    EXPECT_EQ(baseTypes.at(0).slice(), "BaseClass");
-  }
-  {
-    auto derivedTypes = m2.getDerivedTypes("BaseClass", DeriveKind::Extends);
-    ASSERT_EQ(derivedTypes.size(), 1);
-    EXPECT_EQ(derivedTypes.at(0).slice(), "SomeClass");
-  }
 
   m2.update("1:2:4", "1:2:5", {}, {path1}, {});
   EXPECT_EQ(m2.getKind("SomeClass"), TypeKind::Unknown);
@@ -954,32 +820,18 @@ TEST_F(SymbolMapTest, DeriveKinds) {
   m1.update("", "1:2:3", {path}, {}, {ff});
   EXPECT_EQ(m1.getClock(), "1:2:3");
   EXPECT_TRUE(m1.getBaseTypes("SomeTrait", DeriveKind::Extends).empty());
-
-  {
-    auto requireExtendsTypes =
-        m1.getBaseTypes("SomeTrait", DeriveKind::RequireExtends);
-    EXPECT_EQ(requireExtendsTypes.size(), 1);
-    EXPECT_EQ(requireExtendsTypes.at(0).slice(), "BaseClass");
-  }
-  {
-    auto requireImplementsTypes =
-        m1.getBaseTypes("SomeTrait", DeriveKind::RequireImplements);
-    EXPECT_EQ(requireImplementsTypes.size(), 1);
-    EXPECT_EQ(requireImplementsTypes.at(0).slice(), "BaseInterface");
-  }
-
-  {
-    auto requireExtendsTypes =
-        m1.getDerivedTypes("BaseClass", DeriveKind::RequireExtends);
-    EXPECT_EQ(requireExtendsTypes.size(), 1);
-    EXPECT_EQ(requireExtendsTypes.at(0).slice(), "SomeTrait");
-  }
-  {
-    auto requireImplementsTypes =
-        m1.getDerivedTypes("BaseInterface", DeriveKind::RequireImplements);
-    EXPECT_EQ(requireImplementsTypes.size(), 1);
-    EXPECT_EQ(requireImplementsTypes.at(0).slice(), "SomeTrait");
-  }
+  EXPECT_THAT(
+    m1.getBaseTypes("SomeTrait", DeriveKind::RequireExtends),
+    ElementsAre("BaseClass"));
+  EXPECT_THAT(
+    m1.getBaseTypes("SomeTrait", DeriveKind::RequireImplements),
+    ElementsAre("BaseInterface"));
+  EXPECT_THAT(
+    m1.getDerivedTypes("BaseClass", DeriveKind::RequireExtends),
+    ElementsAre("SomeTrait"));
+  EXPECT_THAT(
+    m1.getDerivedTypes("BaseInterface", DeriveKind::RequireImplements),
+    ElementsAre("SomeTrait"));
 
   auto& someTraitFacts = ff.m_types[2];
   ASSERT_EQ(someTraitFacts.m_name, "SomeTrait");
@@ -1104,15 +956,13 @@ TEST_F(SymbolMapTest, DuplicateDefineDerivedType) {
 
   EXPECT_EQ(m.getTypeFile("SomeClass"), path1.native());
 
-  EXPECT_EQ(m.getBaseTypes("SomeClass", DeriveKind::Extends).size(), 1);
-  EXPECT_EQ(
-      m.getBaseTypes("SomeClass", DeriveKind::Extends).at(0).slice(),
-      "BaseClass");
+  EXPECT_THAT(
+    m.getBaseTypes("SomeClass", DeriveKind::Extends),
+    ElementsAre("BaseClass"));
 
-  EXPECT_EQ(m.getDerivedTypes("BaseClass", DeriveKind::Extends).size(), 1);
-  EXPECT_EQ(
-      m.getDerivedTypes("BaseClass", DeriveKind::Extends).at(0).slice(),
-      "SomeClass");
+  EXPECT_THAT(
+    m.getDerivedTypes("BaseClass", DeriveKind::Extends),
+    ElementsAre("SomeClass"));
 }
 
 TEST_F(SymbolMapTest, DBUpdatesOutOfOrder) {
@@ -1202,15 +1052,8 @@ TEST_F(SymbolMapTest, ChangeAndMoveClassAttrs) {
   folly::fs::path p1{"p1.php"};
 
   m.update("", "1", {p1}, {}, {ffWithAttr});
-  {
-    auto c1Attrs = m.getAttributesOfType("C1");
-    EXPECT_EQ(c1Attrs.size(), 1);
-    EXPECT_EQ(c1Attrs.at(0).slice(), "A1");
-
-    auto a1Types = m.getTypesAndTypeAliasesWithAttribute("A1");
-    EXPECT_EQ(a1Types.size(), 1);
-    EXPECT_EQ(a1Types.at(0).slice(), "C1");
-  }
+  EXPECT_THAT(m.getAttributesOfType("C1"), ElementsAre("A1"));
+  EXPECT_THAT(m.getTypesAndTypeAliasesWithAttribute("A1"), ElementsAre("C1"));
 
   FileFacts ffEmpty{.m_sha1hex = kSHA};
   FileFacts ffNoAttr{
@@ -1219,13 +1062,8 @@ TEST_F(SymbolMapTest, ChangeAndMoveClassAttrs) {
   folly::fs::path p2{"p2.php"};
 
   m.update("1", "2", {p1, p2}, {}, {ffEmpty, ffNoAttr});
-  {
-    auto c1Attrs = m.getAttributesOfType("C1");
-    EXPECT_TRUE(c1Attrs.empty());
-
-    auto a1Types = m.getTypesAndTypeAliasesWithAttribute("A1");
-    EXPECT_TRUE(a1Types.empty());
-  }
+  EXPECT_THAT(m.getAttributesOfType("C1"), IsEmpty());
+  EXPECT_THAT(m.getTypesAndTypeAliasesWithAttribute("A1"), IsEmpty());
 }
 
 TEST_F(SymbolMapTest, RemovePathFromExistingFile) {
@@ -1342,14 +1180,12 @@ TEST_F(SymbolMapTest, TwoFilesDisagreeOnBaseTypes) {
   expectAlways();
 
   EXPECT_EQ(m.getTypeFile("SomeClass"), pSomeClass2.native());
-  EXPECT_EQ(m.getBaseTypes("SomeClass", DeriveKind::Extends).size(), 1);
-  EXPECT_EQ(
-      m.getBaseTypes("SomeClass", DeriveKind::Extends).at(0).slice(),
-      "BaseClass");
-  EXPECT_EQ(m.getDerivedTypes("BaseClass", DeriveKind::Extends).size(), 1);
-  EXPECT_EQ(
-      m.getDerivedTypes("BaseClass", DeriveKind::Extends).at(0).slice(),
-      "SomeClass");
+  EXPECT_THAT(
+      m.getBaseTypes("SomeClass", DeriveKind::Extends),
+      ElementsAre("BaseClass"));
+  EXPECT_THAT(
+      m.getDerivedTypes("BaseClass", DeriveKind::Extends),
+      ElementsAre("SomeClass"));
 
   // Add pSomeClass1 back in
   m.update("1:2:5", "1:2:6", {pSomeClass1}, {}, {ffSomeClassDerivesNobody});
@@ -1421,28 +1257,16 @@ TEST_F(SymbolMapTest, PartiallyFillDerivedTypeInfo) {
   m2.update("1:2:3", "1:2:3", {}, {}, {});
 
   // Fetch the supertypes of SomeClass from the DB
-  auto someClassBaseTypes = m2.getBaseTypes("SomeClass", DeriveKind::Extends);
-  EXPECT_EQ(someClassBaseTypes.size(), 1);
-  EXPECT_EQ(someClassBaseTypes.at(0).slice(), "BaseClass");
+  EXPECT_THAT(
+      m2.getBaseTypes("SomeClass", DeriveKind::Extends),
+      ElementsAre("BaseClass"));
 
   // Now query the subtypes of BaseClass. We should remember that SomeClass is a
   // subtype of BaseClass, but we should also fetch information from the DB
   // about OtherClass being a subtype of BaseClass.
-  auto baseClassDerivedTypes =
-      m2.getDerivedTypes("BaseClass", DeriveKind::Extends);
-  EXPECT_EQ(baseClassDerivedTypes.size(), 2);
-  EXPECT_NE(
-      std::find_if(
-          baseClassDerivedTypes.begin(),
-          baseClassDerivedTypes.end(),
-          [](auto const t) { return t.slice() == "SomeClass"; }),
-      baseClassDerivedTypes.end());
-  EXPECT_NE(
-      std::find_if(
-          baseClassDerivedTypes.begin(),
-          baseClassDerivedTypes.end(),
-          [](auto const t) { return t.slice() == "OtherClass"; }),
-      baseClassDerivedTypes.end());
+  EXPECT_THAT(
+      m2.getDerivedTypes("BaseClass", DeriveKind::Extends),
+      UnorderedElementsAre("SomeClass", "OtherClass"));
 }
 
 TEST_F(SymbolMapTest, BaseTypesWithDifferentCases) {
@@ -1484,21 +1308,15 @@ TEST_F(SymbolMapTest, BaseTypesWithDifferentCases) {
   // Remove references to "baseclass", keep references to "BaseClass"
   m.update("1:2:3", "1:2:4", {}, {p2, p4}, {});
   EXPECT_EQ(m.getTypeFile("SomeClass"), p1.native());
-  {
-    auto baseTypes = m.getBaseTypes("SomeClass", DeriveKind::Extends);
-    EXPECT_EQ(baseTypes.size(), 1);
-    EXPECT_EQ(baseTypes.at(0).slice(), "BaseClass");
-  }
-  {
-    auto derivedTypes = m.getDerivedTypes("BaseClass", DeriveKind::Extends);
-    EXPECT_EQ(derivedTypes.size(), 1);
-    EXPECT_EQ(derivedTypes.at(0).slice(), "SomeClass");
-  }
-  {
-    auto derivedTypes = m.getDerivedTypes("baseclass", DeriveKind::Extends);
-    EXPECT_EQ(derivedTypes.size(), 1);
-    EXPECT_EQ(derivedTypes.at(0).slice(), "SomeClass");
-  }
+  EXPECT_THAT(
+      m.getBaseTypes("SomeClass", DeriveKind::Extends),
+      ElementsAre("BaseClass"));
+  EXPECT_THAT(
+      m.getDerivedTypes("BaseClass", DeriveKind::Extends),
+      ElementsAre("SomeClass"));
+  EXPECT_THAT(
+      m.getDerivedTypes("baseclass", DeriveKind::Extends),
+      ElementsAre("SomeClass"));
 }
 
 TEST_F(SymbolMapTest, DerivedTypesWithDifferentCases) {
@@ -1516,14 +1334,10 @@ TEST_F(SymbolMapTest, DerivedTypesWithDifferentCases) {
 
   m.update("", "1", {p1}, {}, {ff1});
   EXPECT_EQ(m.getTypeFile("SomeClass").slice(), p1.native());
-  EXPECT_EQ(m.getBaseTypes("SomeClass", DeriveKind::Extends).size(), 1);
-  EXPECT_EQ(
-      m.getBaseTypes("SomeClass", DeriveKind::Extends).at(0).slice(),
-      "BaseClass");
-  EXPECT_EQ(m.getDerivedTypes("BaseClass", DeriveKind::Extends).size(), 1);
-  EXPECT_EQ(
-      m.getDerivedTypes("BaseClass", DeriveKind::Extends).at(0).slice(),
-      "SomeClass");
+  EXPECT_THAT(m.getBaseTypes("SomeClass", DeriveKind::Extends),
+      ElementsAre("BaseClass"));
+  EXPECT_THAT(m.getDerivedTypes("BaseClass", DeriveKind::Extends),
+      ElementsAre("SomeClass"));
 
   // Replace "SomeClass" with "SOMECLASS"
   FileFacts ff2{
@@ -1535,15 +1349,13 @@ TEST_F(SymbolMapTest, DerivedTypesWithDifferentCases) {
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
   m.update("1", "2", {p1}, {}, {ff2});
 
-  EXPECT_EQ(m.getTypeFile("SOMECLASS").slice(), p1.native());
-  EXPECT_EQ(m.getBaseTypes("SOMECLASS", DeriveKind::Extends).size(), 1);
-  EXPECT_EQ(
-      m.getBaseTypes("SOMECLASS", DeriveKind::Extends).at(0).slice(),
-      "BaseClass");
-  EXPECT_EQ(m.getDerivedTypes("BaseClass", DeriveKind::Extends).size(), 1);
-  EXPECT_EQ(
-      m.getDerivedTypes("BaseClass", DeriveKind::Extends).at(0).slice(),
-      "SOMECLASS");
+  EXPECT_EQ(m.getTypeFile("SOMECLASS"), p1.native());
+  EXPECT_THAT(
+      m.getBaseTypes("SOMECLASS", DeriveKind::Extends),
+      ElementsAre("BaseClass"));
+  EXPECT_THAT(
+      m.getDerivedTypes("BaseClass", DeriveKind::Extends),
+      ElementsAre("SOMECLASS"));
 }
 
 TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
@@ -1560,22 +1372,9 @@ TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
   m1.update("", "1:2:3", {path}, {}, {ff});
 
   EXPECT_EQ(m1.getTypeFile("SomeClass"), path.native());
-  {
-    auto types = m1.getFileTypes(path.native());
-    EXPECT_EQ(types.size(), 2);
-    EXPECT_NE(
-        std::find_if(
-            types.begin(),
-            types.end(),
-            [](auto const t) { return t.slice() == "SomeClass"; }),
-        types.end());
-    EXPECT_NE(
-        std::find_if(
-            types.begin(),
-            types.end(),
-            [](auto const t) { return t.slice() == "OtherClass"; }),
-        types.end());
-  }
+  EXPECT_THAT(
+    m1.getFileTypes(path.native()),
+    UnorderedElementsAre("SomeClass", "OtherClass"));
   EXPECT_EQ(m1.getTypeFile("OtherClass"), path.native());
 
   waitForDB(m1, m_exec);
@@ -1587,22 +1386,9 @@ TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
   // Make sure we never think we know all the types in a given path when we
   // really only know some of them.
   EXPECT_EQ(m2.getTypeFile("SomeClass"), path.native());
-  {
-    auto types = m2.getFileTypes(path.native());
-    EXPECT_EQ(types.size(), 2);
-    EXPECT_NE(
-        std::find_if(
-            types.begin(),
-            types.end(),
-            [](auto const t) { return t.slice() == "SomeClass"; }),
-        types.end());
-    EXPECT_NE(
-        std::find_if(
-            types.begin(),
-            types.end(),
-            [](auto const t) { return t.slice() == "OtherClass"; }),
-        types.end());
-  }
+  EXPECT_THAT(
+    m2.getFileTypes(path.native()),
+    UnorderedElementsAre("SomeClass", "OtherClass"));
   EXPECT_EQ(m2.getTypeFile("OtherClass"), path.native());
 }
 
@@ -1651,144 +1437,46 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
 
   m1.update("", "1:2:3", {p}, {}, {ff});
   EXPECT_EQ(m1.getTypeFile("SomeClass"), p.native());
-  {
-    auto fooTypes = m1.getTypesAndTypeAliasesWithAttribute("Foo");
-    EXPECT_EQ(fooTypes.size(), 2);
-    EXPECT_TRUE(collectionContains(fooTypes, "SomeClass"));
-    EXPECT_TRUE(collectionContains(fooTypes, "SomeTypeAlias"));
-  }
-  {
-    auto barTypes = m1.getTypesAndTypeAliasesWithAttribute("Bar");
-    EXPECT_EQ(barTypes.size(), 2);
-    EXPECT_NE(
-        std::find_if(
-            barTypes.begin(),
-            barTypes.end(),
-            [&](auto const& type) { return type.slice() == "SomeClass"; }),
-        barTypes.end());
-    EXPECT_NE(
-        std::find_if(
-            barTypes.begin(),
-            barTypes.end(),
-            [&](auto const& type) { return type.slice() == "OtherClass"; }),
-        barTypes.end());
-  }
-  {
-    auto someClassAttrs = m1.getAttributesOfType("SomeClass");
-    EXPECT_EQ(someClassAttrs.size(), 3);
-    EXPECT_NE(
-        std::find_if(
-            someClassAttrs.begin(),
-            someClassAttrs.end(),
-            [&](auto const& attr) { return attr.slice() == "Bar"; }),
-        someClassAttrs.end());
-    EXPECT_NE(
-        std::find_if(
-            someClassAttrs.begin(),
-            someClassAttrs.end(),
-            [&](auto const& attr) { return attr.slice() == "Baz"; }),
-        someClassAttrs.end());
-    EXPECT_NE(
-        std::find_if(
-            someClassAttrs.begin(),
-            someClassAttrs.end(),
-            [&](auto const& attr) { return attr.slice() == "Foo"; }),
-        someClassAttrs.end());
-    {
-      auto args = m1.getTypeAttributeArgs("SomeClass", "Foo");
-      EXPECT_EQ(args.size(), 2);
-      EXPECT_EQ(args.at(0), "apple");
-      EXPECT_EQ(args.at(1), 38);
-    }
-    {
-      auto args = m1.getTypeAttributeArgs("SomeClass", "Bar");
-      EXPECT_EQ(args.size(), 1);
-      EXPECT_EQ(args.at(0), nullptr);
-    }
-    {
-      auto args = m1.getTypeAttributeArgs("SomeClass", "Baz");
-      EXPECT_TRUE(args.empty());
-    }
-  }
-  {
-    auto someTypeAliasAttrs = m1.getAttributesOfType("SomeTypeAlias");
-    EXPECT_EQ(someTypeAliasAttrs.size(), 1);
-    EXPECT_TRUE(collectionContains(someTypeAliasAttrs, "Foo"));
-  }
+  EXPECT_THAT(
+      m1.getTypesAndTypeAliasesWithAttribute("Foo"),
+      UnorderedElementsAre("SomeClass", "SomeTypeAlias"));
+  EXPECT_THAT(
+      m1.getTypesAndTypeAliasesWithAttribute("Bar"),
+      UnorderedElementsAre("SomeClass", "OtherClass"));
+  EXPECT_THAT(
+      m1.getAttributesOfType("SomeClass"),
+      UnorderedElementsAre("Bar", "Baz", "Foo"));
+  EXPECT_THAT(
+      m1.getTypeAttributeArgs("SomeClass", "Foo"), ElementsAre("apple", 38));
+  EXPECT_THAT(
+      m1.getTypeAttributeArgs("SomeClass", "Bar"), ElementsAre(nullptr));
+  EXPECT_THAT(m1.getTypeAttributeArgs("SomeClass", "Baz"), IsEmpty());
+  EXPECT_THAT(
+      m1.getAttributesOfType("SomeTypeAlias"), ElementsAre("Foo"));
+
   waitForDB(m1, m_exec);
 
   auto& m2 = make("/var/www", m_exec);
   m2.update("1:2:3", "1:2:3", {}, {}, {});
-  {
-    auto someClassAttrs = m2.getAttributesOfType("SomeClass");
-    EXPECT_EQ(someClassAttrs.size(), 3);
-    EXPECT_NE(
-        std::find_if(
-            someClassAttrs.begin(),
-            someClassAttrs.end(),
-            [&](auto const& attr) { return attr.slice() == "Bar"; }),
-        someClassAttrs.end());
-    EXPECT_NE(
-        std::find_if(
-            someClassAttrs.begin(),
-            someClassAttrs.end(),
-            [&](auto const& attr) { return attr.slice() == "Baz"; }),
-        someClassAttrs.end());
-    EXPECT_NE(
-        std::find_if(
-            someClassAttrs.begin(),
-            someClassAttrs.end(),
-            [&](auto const& attr) { return attr.slice() == "Foo"; }),
-        someClassAttrs.end());
-  }
+  EXPECT_THAT(
+    m2.getAttributesOfType("SomeClass"),
+    UnorderedElementsAre("Bar", "Baz", "Foo"));
   EXPECT_EQ(m2.getTypeFile("SomeClass"), p.native());
-  {
-    auto fooTypes = m2.getTypesAndTypeAliasesWithAttribute("Foo");
-    EXPECT_EQ(fooTypes.size(), 2);
-    EXPECT_TRUE(collectionContains(fooTypes, "SomeClass"));
-    EXPECT_TRUE(collectionContains(fooTypes, "SomeTypeAlias"));
-
-    auto fooArgs = m2.getTypeAttributeArgs("SomeTypeAlias", "Foo");
-    EXPECT_EQ(fooArgs.size(), 2);
-    EXPECT_EQ(fooArgs.at(0), 42);
-    EXPECT_EQ(fooArgs.at(1), "a");
-  }
-  {
-    auto barTypes = m2.getTypesAndTypeAliasesWithAttribute("Bar");
-    EXPECT_EQ(barTypes.size(), 2);
-    EXPECT_NE(
-        std::find_if(
-            barTypes.begin(),
-            barTypes.end(),
-            [&](auto const& type) { return type.slice() == "SomeClass"; }),
-        barTypes.end());
-    EXPECT_NE(
-        std::find_if(
-            barTypes.begin(),
-            barTypes.end(),
-            [&](auto const& type) { return type.slice() == "OtherClass"; }),
-        barTypes.end());
-  }
-  {
-    auto args = m1.getTypeAttributeArgs("SomeClass", "Foo");
-    EXPECT_EQ(args.size(), 2);
-    EXPECT_EQ(args.at(0), "apple");
-    EXPECT_EQ(args.at(1), 38);
-  }
-  {
-    auto args = m1.getTypeAttributeArgs("SomeClass", "Bar");
-    EXPECT_EQ(args.size(), 1);
-    EXPECT_EQ(args.at(0), nullptr);
-  }
-  {
-    auto args = m1.getTypeAttributeArgs("SomeClass", "Baz");
-    EXPECT_TRUE(args.empty());
-  }
-  {
-    auto someTypeAliasAttrs = m1.getAttributesOfType("SomeTypeAlias");
-    EXPECT_EQ(someTypeAliasAttrs.size(), 1);
-    EXPECT_TRUE(collectionContains(someTypeAliasAttrs, "Foo"));
-  }
+  EXPECT_THAT(
+    m2.getTypesAndTypeAliasesWithAttribute("Foo"),
+    UnorderedElementsAre("SomeClass", "SomeTypeAlias"));
+  EXPECT_THAT(
+    m2.getTypeAttributeArgs("SomeTypeAlias", "Foo"), ElementsAre(42, "a"));
+  EXPECT_THAT(
+    m2.getTypesAndTypeAliasesWithAttribute("Bar"),
+    UnorderedElementsAre("SomeClass", "OtherClass"));
+  EXPECT_THAT(
+    m1.getTypeAttributeArgs("SomeClass", "Foo"), ElementsAre("apple", 38));
+  EXPECT_THAT(
+    m1.getTypeAttributeArgs("SomeClass", "Bar"), ElementsAre(nullptr));
+  EXPECT_THAT(m1.getTypeAttributeArgs("SomeClass", "Baz"), IsEmpty());
+  EXPECT_THAT(
+    m1.getAttributesOfType("SomeTypeAlias"), ElementsAre("Foo"));
 }
 
 TEST_F(SymbolMapTest, getTypesWithAttributeFiltersDuplicateDefs) {
@@ -1818,8 +1506,7 @@ TEST_F(SymbolMapTest, getTypesWithAttributeFiltersDuplicateDefs) {
 
   m2.update("1:2:3", "1:2:4", {}, {p2}, {});
   auto fooTypes = m2.getTypesAndTypeAliasesWithAttribute("Foo");
-  EXPECT_EQ(fooTypes.size(), 1);
-  EXPECT_EQ(fooTypes.at(0).slice(), "SomeClass");
+  EXPECT_THAT(fooTypes, ElementsAre("SomeClass"));
   EXPECT_EQ(m2.getTypeFile("SomeClass"), p1.native());
 }
 
@@ -1846,47 +1533,21 @@ TEST_F(SymbolMapTest, GetMethodsWithAttribute) {
 
   auto testMap = [&p1](auto& m) {
     auto methods = m.getMethodsWithAttribute("A1");
-    ASSERT_EQ(methods.size(), 2);
-    EXPECT_TRUE(collectionContains(
-        methods,
-        MethodDecl<std::string>{
-            .m_type =
-                {.m_name =
-                     Symbol<std::string, SymKind::Type>{std::string{"C1"}},
-                 .m_path = Path<std::string>{p1}},
-            .m_method =
-                Symbol<std::string, SymKind::Function>{std::string{"m1"}}}));
+    EXPECT_THAT(methods, AllOf(
+          SizeIs(2),
+          Contains(
+            MethodDecl<std::string>{
+                .m_type =
+                    {.m_name =
+                         Symbol<std::string, SymKind::Type>{std::string{"C1"}},
+                     .m_path = Path<std::string>{p1}},
+                .m_method =
+                    Symbol<std::string, SymKind::Function>{std::string{"m1"}}})));
 
-    EXPECT_TRUE(collectionContains(
-        methods,
-        MethodDecl<std::string>{
-            .m_type =
-                {.m_name =
-                     Symbol<std::string, SymKind::Type>{std::string{"C1"}},
-                 .m_path = Path<std::string>{p1}},
-            .m_method =
-                Symbol<std::string, SymKind::Function>{std::string{"m2"}}}));
-
-    {
-      auto attrs = m.getAttributesOfMethod("C1", "m1");
-      ASSERT_EQ(attrs.size(), 1);
-      EXPECT_EQ(attrs[0].slice(), "A1");
-    }
-    {
-      auto args = m.getMethodAttributeArgs("C1", "m1", "A1");
-      ASSERT_EQ(args.size(), 1);
-      EXPECT_EQ(args[0], 1);
-    }
-    {
-      auto attrs = m.getAttributesOfMethod("C1", "m2");
-      ASSERT_EQ(attrs.size(), 1);
-      EXPECT_EQ(attrs[0].slice(), "A1");
-    }
-    {
-      auto args = m.getMethodAttributeArgs("C1", "m2", "A1");
-      ASSERT_EQ(args.size(), 1);
-      EXPECT_EQ(args[0], 2);
-    }
+    EXPECT_THAT(m.getAttributesOfMethod("C1", "m1"), ElementsAre("A1"));
+    EXPECT_THAT(m.getMethodAttributeArgs("C1", "m1", "A1"), ElementsAre(1));
+    EXPECT_THAT(m.getAttributesOfMethod("C1", "m2"), ElementsAre("A1"));
+    EXPECT_THAT(m.getMethodAttributeArgs("C1", "m2", "A1"), ElementsAre(2));
   };
   testMap(m1);
 
@@ -1958,16 +1619,13 @@ TEST_F(SymbolMapTest, GetFilesWithAttribute) {
 
   auto testMap = [&p1](auto& m) {
     auto files = m.getFilesWithAttribute("A1");
-    ASSERT_EQ(files.size(), 1);
-    EXPECT_EQ(files[0], p1.native());
+    EXPECT_THAT(files, ElementsAre(p1.native()));
 
     auto attrs = m.getAttributesOfFile(Path{p1.native()});
-    ASSERT_EQ(attrs.size(), 1);
-    EXPECT_EQ(attrs[0].slice(), "A1");
+    EXPECT_THAT(attrs, ElementsAre("A1"));
 
     auto args = m.getFileAttributeArgs(Path{p1.native()}, "A1");
-    ASSERT_EQ(args.size(), 1);
-    EXPECT_EQ(args[0], 1);
+    EXPECT_THAT(args, ElementsAre(1));
   };
   testMap(m1);
 
@@ -2013,38 +1671,23 @@ TEST_F(SymbolMapTest, TransitiveSubtypes) {
 
   m1.update("", "1:2:3", {p}, {}, {ff});
 
-  {
-    auto derivedTypes = m1.getTransitiveDerivedTypes("C0");
-    EXPECT_EQ(derivedTypes.size(), 6);
-    EXPECT_TRUE(collectionContains(derivedTypes, "C1"));
-    EXPECT_TRUE(collectionContains(derivedTypes, "C2"));
-    EXPECT_TRUE(collectionContains(derivedTypes, "C3"));
-    EXPECT_TRUE(collectionContains(derivedTypes, "I1"));
-    EXPECT_TRUE(collectionContains(derivedTypes, "T0"));
-    EXPECT_TRUE(collectionContains(derivedTypes, "T1"));
-  }
-  {
-    auto derivedTypes =
-        m1.getTransitiveDerivedTypes("C0", static_cast<int>(TypeKind::Class));
-    EXPECT_EQ(derivedTypes.size(), 2);
-    EXPECT_TRUE(collectionContains(derivedTypes, "C1"));
-    EXPECT_TRUE(collectionContains(derivedTypes, "C2"));
-  }
-  {
-    auto derivedTypes = m1.getTransitiveDerivedTypes(
-        "C0", kTypeKindAll, static_cast<int>(DeriveKind::Extends));
-    EXPECT_EQ(derivedTypes.size(), 4);
-    EXPECT_TRUE(collectionContains(derivedTypes, "C1"));
-    EXPECT_TRUE(collectionContains(derivedTypes, "C2"));
-    EXPECT_TRUE(collectionContains(derivedTypes, "C3"));
-    EXPECT_TRUE(collectionContains(derivedTypes, "I1"));
-  }
-  {
-    auto derivedTypes = m1.getTransitiveDerivedTypes(
-        "C0", kTypeKindAll, static_cast<int>(DeriveKind::RequireExtends));
-    EXPECT_EQ(derivedTypes.size(), 1);
-    EXPECT_TRUE(collectionContains(derivedTypes, "T0"));
-  }
+  EXPECT_THAT(
+    m1.getTransitiveDerivedTypes("C0"),
+    UnorderedElementsAre("C1", "C2", "C3", "I1", "T0", "T1"));
+
+  EXPECT_THAT(
+    m1.getTransitiveDerivedTypes("C0", static_cast<int>(TypeKind::Class)),
+    UnorderedElementsAre("C1", "C2"));
+
+  EXPECT_THAT(
+    m1.getTransitiveDerivedTypes(
+      "C0", kTypeKindAll, static_cast<int>(DeriveKind::Extends)),
+    UnorderedElementsAre("C1", "C2", "C3", "I1"));
+
+  EXPECT_THAT(
+    m1.getTransitiveDerivedTypes(
+        "C0", kTypeKindAll, static_cast<int>(DeriveKind::RequireExtends)),
+    ElementsAre("T0"));
 }
 
 TEST_F(SymbolMapTest, ConcurrentFillsFromDB) {

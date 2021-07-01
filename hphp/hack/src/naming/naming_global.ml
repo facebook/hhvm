@@ -206,16 +206,16 @@ module Env = struct
   let new_typedef_error_if_already_bound ctx =
     new_cid_error_if_already_bound ctx Naming_types.TTypedef
 
-  let new_global_const_error_if_already_bound ctx (p, x) =
-    match Naming_provider.get_const_pos ctx x with
+  let new_global_const_error_if_already_bound ctx (p, name) =
+    match Naming_provider.get_const_pos ctx name with
     | Some p' ->
-      if not @@ GEnv.compare_pos ctx p' p x then
-        let (p, x) = GEnv.get_const_full_pos ctx (p, x) in
-        let (p', x) = GEnv.get_const_full_pos ctx (p', x) in
-        Errors.error_name_already_bound x x p p'
+      if not @@ GEnv.compare_pos ctx p' p name then
+        let (p, name) = GEnv.get_const_full_pos ctx (p, name) in
+        let (p', name) = GEnv.get_const_full_pos ctx (p', name) in
+        Errors.error_name_already_bound name name p p'
     | None ->
       let backend = Provider_context.get_backend ctx in
-      Naming_provider.add_const backend x p
+      Naming_provider.add_const backend name p
 end
 
 (*****************************************************************************)

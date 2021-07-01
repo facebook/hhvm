@@ -58,8 +58,6 @@ module GEnv = struct
     | Some pos -> (pos, name)
     | None -> file_disappeared_under_our_feet (pos, name)
 
-  let type_canon_name ctx name = Naming_provider.get_type_canon_name ctx name
-
   let type_pos ctx name =
     match Naming_provider.get_type_pos ctx name with
     | Some pos ->
@@ -76,8 +74,6 @@ module GEnv = struct
       let (p, _) = get_type_full_pos ctx (pos, name) in
       Some (p, kind)
     | None -> None
-
-  let fun_canon_name ctx name = Naming_provider.get_fun_canon_name ctx name
 
   let fun_pos ctx name =
     match Naming_provider.get_fun_pos ctx name with
@@ -330,10 +326,12 @@ let ndecl_file_error_if_already_bound ctx fn fileinfo =
      * were actually duplicates?
      *)
     let type_canon_pos name =
-      GEnv.type_canon_name ctx name |> Option.bind ~f:(GEnv.type_pos ctx)
+      Naming_provider.get_type_canon_name ctx name
+      |> Option.bind ~f:(GEnv.type_pos ctx)
     in
     let fun_canon_pos name =
-      GEnv.fun_canon_name ctx name |> Option.bind ~f:(GEnv.fun_pos ctx)
+      Naming_provider.get_fun_canon_name ctx name
+      |> Option.bind ~f:(GEnv.fun_pos ctx)
     in
 
     let failed = Relative_path.Set.singleton fn in

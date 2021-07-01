@@ -76,7 +76,7 @@ let check_fun_name env ((_, name) as id) =
   else if
     has_canon_name
       env
-      Naming_global.GEnv.fun_canon_name
+      Naming_provider.get_fun_canon_name
       Naming_global.GEnv.fun_pos
       id
   then
@@ -122,7 +122,7 @@ let check_type_name
           if
             has_canon_name
               env
-              Naming_global.GEnv.type_canon_name
+              Naming_provider.get_type_canon_name
               Naming_global.GEnv.type_pos
               id
           then

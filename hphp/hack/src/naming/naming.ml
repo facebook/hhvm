@@ -1158,7 +1158,7 @@ and type_param ~forbid_this (genv, lenv) t =
         let (def_pos, _) = GEnv.get_type_full_pos genv.ctx (def_pos, name) in
         Errors.error_name_already_bound name name pos def_pos
       | None ->
-        (match GEnv.type_canon_name genv.ctx name with
+        (match Naming_provider.get_type_canon_name genv.ctx name with
         | Some canonical ->
           let def_pos =
             Option.value ~default:Pos.none (GEnv.type_pos genv.ctx canonical)

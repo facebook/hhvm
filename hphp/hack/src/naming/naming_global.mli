@@ -7,10 +7,7 @@
  *
  *)
 
-(** Module "naming" a program.
- * Get all the global names
- *)
-
+(** GEnv is solely a set of thin wrappers around Naming_provider. *)
 module GEnv : sig
   val get_fun_full_pos :
     Provider_context.t -> FileInfo.pos * string -> Pos.t * string
@@ -23,14 +20,10 @@ module GEnv : sig
 
   val type_pos : Provider_context.t -> string -> Pos.t option
 
-  val type_canon_name : Provider_context.t -> string -> string option
-
   val type_info :
     Provider_context.t -> string -> (Pos.t * Naming_types.kind_of_type) option
 
   val fun_pos : Provider_context.t -> string -> Pos.t option
-
-  val fun_canon_name : Provider_context.t -> string -> string option
 
   val typedef_pos : Provider_context.t -> string -> Pos.t option
 

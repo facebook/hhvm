@@ -1054,6 +1054,8 @@ let create_nasts ctx files_info =
   in
   Relative_path.Map.mapi ~f:build_nast files_info
 
+(** This is an almost-pure function which returns what we get out of parsing.
+The only side-effect it has is on the global errors list. *)
 let parse_and_name ctx files_contents =
   let parsed_files =
     Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
@@ -1096,23 +1098,37 @@ let parse_and_name ctx files_contents =
         end
       parsed_files
   in
-  Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
-      let (errors, _failed_naming_fns) =
-        Naming_global.ndecl_file_error_if_already_bound ctx fn fileinfo
-      in
-      Errors.merge_into_current errors);
   (parsed_files, files_info)
 
+(** This function is used for gathering naming and parsing errors,
+and the side-effect of updating the global reverse naming table (and
+picking up duplicate-name errors along the way), and for the side effect
+of updating the decl heap (and picking up decling errors along the way). *)
 let parse_name_and_decl ctx files_contents =
   Errors.do_ (fun () ->
       let (parsed_files, files_info) = parse_and_name ctx files_contents in
+      Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
+          let (errors, _failed_naming_fns) =
+            Naming_global.ndecl_file_error_if_already_bound ctx fn fileinfo
+          in
+          Errors.merge_into_current errors);
       Relative_path.Map.iter parsed_files ~f:(fun fn _ ->
           Errors.run_in_context fn Errors.Decl (fun () ->
               Decl.make_env ~sh:SharedMem.Uses ctx fn));
 
       files_info)
 
-let parse_name_and_shallow_decl ctx filename file_contents :
+(** This function is used solely for its side-effect of putting decls into shared-mem *)
+let add_decls_to_heap ctx files_contents =
+  Errors.ignore_ (fun () ->
+      let (parsed_files, _files_info) = parse_and_name ctx files_contents in
+      Relative_path.Map.iter parsed_files ~f:(fun fn _ ->
+          Errors.run_in_context fn Errors.Decl (fun () ->
+              Decl.make_env ~sh:SharedMem.Uses ctx fn)));
+  ()
+
+(** This function doesn't have side-effects. Its sole job is to return shallow decls. *)
+let get_shallow_decls ctx filename file_contents :
     Shallow_decl_defs.shallow_class SMap.t =
   Errors.ignore_ (fun () ->
       let files_contents = Relative_path.Map.singleton filename file_contents in
@@ -1129,8 +1145,8 @@ let test_shallow_class_diff popt filename =
   let filename_after = Relative_path.to_absolute filename ^ ".after" in
   let contents1 = Sys_utils.cat (Relative_path.to_absolute filename) in
   let contents2 = Sys_utils.cat filename_after in
-  let decls1 = parse_name_and_shallow_decl popt filename contents1 in
-  let decls2 = parse_name_and_shallow_decl popt filename contents2 in
+  let decls1 = get_shallow_decls popt filename contents1 in
+  let decls2 = get_shallow_decls popt filename contents2 in
   let decls =
     SMap.merge (fun _ a b -> Some (a, b)) decls1 decls2 |> SMap.bindings
   in
@@ -1277,7 +1293,7 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
       ~collect_garbage:false;
 
     let files_contents = Relative_path.Map.map files_contents ~f:add_newline in
-    let (_, _) = parse_name_and_decl ctx files_contents in
+    add_decls_to_heap ctx files_contents;
     let (typedefs2, funs2, classes2) = get_decls defs in
     let deps_mode = Provider_context.get_deps_mode ctx in
     List.iter2_exn typedefs1 typedefs2 ~f:compare_typedefs;

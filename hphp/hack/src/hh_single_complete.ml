@@ -170,6 +170,8 @@ let parse_options () =
     None,
     SharedMem.default_config )
 
+(** This is an almost-pure function which returns what we get out of parsing.
+The only side-effect it has is on the global errors list. *)
 let parse_and_name ctx files_contents =
   let parsed_files =
     Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
@@ -212,20 +214,28 @@ let parse_and_name ctx files_contents =
         end
       parsed_files
   in
-  Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
-      let (errors, _failed_naming_fns) =
-        Naming_global.ndecl_file_error_if_already_bound ctx fn fileinfo
-      in
-      Errors.merge_into_current errors);
   (parsed_files, files_info)
 
+(** This function is used for gathering naming and parsing errors,
+and the side-effect of updating the global reverse naming table (and
+picking up duplicate-name errors along the way), and for the side effect
+of updating the decl heap (and picking up decling errors along the way). *)
 let parse_name_and_decl ctx files_contents =
   Errors.do_ (fun () ->
+      (* parse_and_name has side effect of reporting errors *)
       let (parsed_files, files_info) = parse_and_name ctx files_contents in
+      (* ndecl_file has side effect of updating the global reverse naming-table,
+      and reporting errors. *)
+      Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
+          let (errors, _failed_naming_fns) =
+            Naming_global.ndecl_file_error_if_already_bound ctx fn fileinfo
+          in
+          Errors.merge_into_current errors);
+      (* Decl.make_env has the side effect of updating the decl heap, and
+      reporting errors. *)
       Relative_path.Map.iter parsed_files ~f:(fun fn _ ->
           Errors.run_in_context fn Errors.Decl (fun () ->
               Decl.make_env ~sh:SharedMem.Uses ctx fn));
-
       files_info)
 
 let scan_files_for_symbol_index
@@ -233,7 +243,9 @@ let scan_files_for_symbol_index
     (sienv : SearchUtils.si_env)
     (ctx : Provider_context.t) : SearchUtils.si_env =
   let files_contents = Multifile.file_to_files filename in
-  let (_, individual_file_info) = parse_name_and_decl ctx files_contents in
+  let (_, individual_file_info) =
+    Errors.ignore_ (fun () -> parse_and_name ctx files_contents)
+  in
   let fileinfo_list = Relative_path.Map.values individual_file_info in
   let transformed_list =
     List.map fileinfo_list ~f:(fun fileinfo ->

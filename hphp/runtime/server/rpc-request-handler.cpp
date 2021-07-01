@@ -107,6 +107,12 @@ bool RPCRequestHandler::needReset() const {
           (m_requestsSinceReset >= m_serverInfo->getMaxRequest()));
 }
 
+bool RPCRequestHandler::ignoreParams() const {
+  // Xbox requests should not try to extract param information from the call
+  // message we pass through the POST data
+  return m_serverInfo->getType() == SatelliteServer::Type::KindOfXboxServer;
+}
+
 void RPCRequestHandler::handleRequest(Transport *transport) {
   if (needReset()) {
     if (vmStack().isAllocated()) cleanupState();
@@ -182,7 +188,8 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
 
   // return encoding type
   ReturnEncodeType returnEncodeType = m_returnEncodeType;
-  if (transport->getParam("return", m_serverInfo->getMethod()) == "serialize") {
+  if (!ignoreParams() &&
+      transport->getParam("return", m_serverInfo->getMethod()) == "serialize") {
     returnEncodeType = ReturnEncodeType::Serialize;
   }
 
@@ -270,22 +277,29 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
 
   Array params;
   Transport::Method requestMethod = m_serverInfo->getMethod();
-  std::string sparams = transport->getParam("params", requestMethod);
-  if (!sparams.empty()) {
-    ARRPROV_USE_RUNTIME_LOCATION();
-    auto jparams = Variant::attach(
-      HHVM_FN(json_decode)(String(sparams), true)
-    );
-    if (jparams.isArray()) {
-      params = jparams.toArray();
-    } else {
-      error = true;
+  if (ignoreParams()) {
+    // single string parameter, used by xbox to avoid any en/decoding
+    size_t size;
+    const void *data = transport->getPostData(size);
+    if (data && size) {
+      params.append(String((char*)data, size, CopyString));
     }
   } else {
-    ARRPROV_USE_RUNTIME_LOCATION();
-    std::vector<std::string> sparams;
-    transport->getArrayParam("p", sparams, requestMethod);
+    std::string sparams = transport->getParam("params", requestMethod);
     if (!sparams.empty()) {
+      ARRPROV_USE_RUNTIME_LOCATION();
+      auto jparams = Variant::attach(
+        HHVM_FN(json_decode)(String(sparams), true)
+      );
+      if (jparams.isArray()) {
+        params = jparams.toArray();
+      } else {
+        error = true;
+      }
+    } else {
+      ARRPROV_USE_RUNTIME_LOCATION();
+      std::vector<std::string> sparams;
+      transport->getArrayParam("p", sparams, requestMethod);
       for (unsigned int i = 0; i < sparams.size(); i++) {
         auto jparams = Variant::attach(
           HHVM_FN(json_decode)(String(sparams[i]), true)
@@ -296,20 +310,16 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
         }
         params.append(jparams);
       }
-    } else {
-      // single string parameter, used by xbox to avoid any en/decoding
-      size_t size;
-      const void *data = transport->getPostData(size);
-      if (data && size) {
-        params.append(String((char*)data, size, CopyString));
-      }
     }
   }
 
-  if (transport->getIntParam("reset", requestMethod) == 1) {
-    m_reset = true;
+  int output = 0;
+  if (!ignoreParams()) {
+    if (transport->getIntParam("reset", requestMethod) == 1) {
+      m_reset = true;
+    }
+    output = transport->getIntParam("output", requestMethod);
   }
-  int output = transport->getIntParam("output", requestMethod);
 
   int code;
   if (!error) {
@@ -334,7 +344,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     if (isFile) {
       rpcFile = rpcFunc;
       rpcFunc.clear();
-    } else {
+    } else if (!ignoreParams()) {
       rpcFile = transport->getParam("include", requestMethod);
       if (rpcFile.empty()) {
         rpcFile = transport->getParam("include_once", requestMethod);

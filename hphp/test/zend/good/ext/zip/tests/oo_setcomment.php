@@ -9,7 +9,7 @@ function main_entry(): void {
   @unlink($file);
 
   $zip = new ZipArchive;
-  if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
+  if (!$zip->open($file, ZipArchive::CREATE)) {
   	exit('failed');
   }
 
@@ -29,7 +29,7 @@ function main_entry(): void {
   var_dump($zip->setCommentIndex(4, 'entry5.txt'));
   var_dump($zip->setArchiveComment('archive'));
 
-  if (!$zip->status == ZIPARCHIVE::ER_OK) {
+  if (!$zip->status == ZipArchive::ER_OK) {
   	echo "failed to write zip\n";
   }
   $zip->close();

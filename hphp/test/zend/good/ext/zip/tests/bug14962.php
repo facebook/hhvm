@@ -4,7 +4,7 @@ $file = '__tmp14962.txt';
 $fullpath = __SystemLib\hphp_test_tmppath($file);
 $zipfile = __SystemLib\hphp_test_tmppath('__14962.zip');
 $za = new ZipArchive;
-$za->open($zipfile, ZIPARCHIVE::CREATE);
+$za->open($zipfile, ZipArchive::CREATE);
 $za->addFromString($file, '1234');
 $za->close();
 

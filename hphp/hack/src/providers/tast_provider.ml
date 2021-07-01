@@ -66,36 +66,18 @@ let compute_tast_and_errors_unquarantined_internal
         ~popt:(Provider_context.get_popt ctx)
         ~entry
     in
+    (* Note: this only picks up errors during Naming.program.
+    It doesn't pick up "this name is already bound" errors.
+    How do other parts of the code pick them up? - during ServerTypeCheck.declare_names,
+    during the course of updating the reverse naming table.
+    There isn't a clean way to do the same here, and indeed
+    most consumers of Tast_provider such as serverHover don't
+    even care for such errors. *)
     let (naming_errors, nast) =
-      (* [Naming_global.ndecl_file] actually updates the reverse naming
-      table, so wrap in a call to `Naming_provider.with_quarantined_writes.
-
-      The correctness conditions here are subtle. Duplicate name errors are
-      detected by looking at each name's position in the file, and then
-      comparing to the position of the same name in the reverse naming table.
-      If they don't match, then an error is emitted.
-
-      XXX: Currently, names in entries are returned before names in the
-      reverse naming table by `Naming_provider`. This means that this
-      correctly detects duplicate symbols within the same entry, but will not
-      detect duplicate names if one definition is in an entry and the other
-      definition is in a file not in an entry. This should be fixed.
-      *)
-      Naming_provider.with_quarantined_writes ~f:(fun () ->
-          let path = entry.Provider_context.path in
-          let file_info =
-            Ast_provider.compute_file_info
-              ~popt:(Provider_context.get_popt ctx)
-              ~entry
-          in
-          let (reverse_naming_table_errors, _failed_naming) =
-            Naming_global.ndecl_file_error_if_already_bound ctx path file_info
-          in
-          let (nast_errors, nast) =
-            Errors.do_with_context path Errors.Naming (fun () ->
-                Naming.program ctx ast)
-          in
-          (Errors.merge nast_errors reverse_naming_table_errors, nast))
+      Errors.do_with_context
+        entry.Provider_context.path
+        Errors.Naming
+        (fun () -> Naming.program ctx ast)
     in
     let () =
       Decl_provider.prepare_for_typecheck

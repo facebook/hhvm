@@ -9,8 +9,6 @@
 open Hh_prelude
 open Reordered_argument_collections
 
-let writes_enabled = ref true
-
 let db_path_of_ctx (ctx : Provider_context.t) : Naming_sqlite.db_path option =
   ctx |> Provider_context.get_backend |> Db_path_provider.get_naming_db_path
 
@@ -149,17 +147,16 @@ let get_const_path (ctx : Provider_context.t) (name : string) :
 
 let add_const
     (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
-  if !writes_enabled then
-    match backend with
-    | Provider_backend.Analysis -> failwith "invalid"
-    | Provider_backend.Shared_memory -> Naming_heap.Consts.add name pos
-    | Provider_backend.Local_memory
-        { Provider_backend.reverse_naming_table_delta; _ } ->
-      let open Provider_backend.Reverse_naming_table_delta in
-      let data = Pos ((FileInfo.Const, FileInfo.get_pos_filename pos), []) in
-      reverse_naming_table_delta.consts :=
-        SMap.add !(reverse_naming_table_delta.consts) ~key:name ~data
-    | Provider_backend.Decl_service _ as backend -> not_implemented backend
+  match backend with
+  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Shared_memory -> Naming_heap.Consts.add name pos
+  | Provider_backend.Local_memory
+      { Provider_backend.reverse_naming_table_delta; _ } ->
+    let open Provider_backend.Reverse_naming_table_delta in
+    let data = Pos ((FileInfo.Const, FileInfo.get_pos_filename pos), []) in
+    reverse_naming_table_delta.consts :=
+      SMap.add !(reverse_naming_table_delta.consts) ~key:name ~data
+  | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
 let remove_const_batch (backend : Provider_backend.t) (names : string list) :
     unit =
@@ -268,26 +265,25 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
 
 let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
     : unit =
-  if !writes_enabled then
-    match backend with
-    | Provider_backend.Analysis -> failwith "invalid"
-    | Provider_backend.Shared_memory -> Naming_heap.Funs.add name pos
-    | Provider_backend.Local_memory
-        { Provider_backend.reverse_naming_table_delta; _ } ->
-      let open Provider_backend.Reverse_naming_table_delta in
-      let data = Pos ((FileInfo.Fun, FileInfo.get_pos_filename pos), []) in
-      reverse_naming_table_delta.funs :=
-        SMap.add !(reverse_naming_table_delta.funs) ~key:name ~data;
-      reverse_naming_table_delta.funs_canon_key :=
-        SMap.add
-          !(reverse_naming_table_delta.funs_canon_key)
-          ~key:(Naming_sqlite.to_canon_name_key name)
-          ~data
-    | Provider_backend.Decl_service _ ->
-      (* Do nothing. All naming table updates are expected to have happened
+  match backend with
+  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Shared_memory -> Naming_heap.Funs.add name pos
+  | Provider_backend.Local_memory
+      { Provider_backend.reverse_naming_table_delta; _ } ->
+    let open Provider_backend.Reverse_naming_table_delta in
+    let data = Pos ((FileInfo.Fun, FileInfo.get_pos_filename pos), []) in
+    reverse_naming_table_delta.funs :=
+      SMap.add !(reverse_naming_table_delta.funs) ~key:name ~data;
+    reverse_naming_table_delta.funs_canon_key :=
+      SMap.add
+        !(reverse_naming_table_delta.funs_canon_key)
+        ~key:(Naming_sqlite.to_canon_name_key name)
+        ~data
+  | Provider_backend.Decl_service _ ->
+    (* Do nothing. All naming table updates are expected to have happened
        already--we should have sent a control request to the decl service asking
        it to update in response to the list of changed files. *)
-      ()
+    ()
 
 let remove_fun_batch (backend : Provider_backend.t) (names : string list) : unit
     =
@@ -320,26 +316,25 @@ let add_type
     (name : string)
     (pos : FileInfo.pos)
     (kind : Naming_types.kind_of_type) : unit =
-  if !writes_enabled then
-    match backend with
-    | Provider_backend.Analysis -> failwith "invalid"
-    | Provider_backend.Shared_memory -> Naming_heap.Types.add name (pos, kind)
-    | Provider_backend.Local_memory
-        { Provider_backend.reverse_naming_table_delta; _ } ->
-      let open Provider_backend.Reverse_naming_table_delta in
-      let data =
-        Pos ((kind_to_name_type kind, FileInfo.get_pos_filename pos), [])
-      in
-      reverse_naming_table_delta.types :=
-        SMap.add !(reverse_naming_table_delta.types) ~key:name ~data;
-      reverse_naming_table_delta.types_canon_key :=
-        SMap.add
-          !(reverse_naming_table_delta.types_canon_key)
-          ~key:(Naming_sqlite.to_canon_name_key name)
-          ~data
-    | Provider_backend.Decl_service _ ->
-      (* Do nothing. Naming table updates should be done already. *)
-      ()
+  match backend with
+  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Shared_memory -> Naming_heap.Types.add name (pos, kind)
+  | Provider_backend.Local_memory
+      { Provider_backend.reverse_naming_table_delta; _ } ->
+    let open Provider_backend.Reverse_naming_table_delta in
+    let data =
+      Pos ((kind_to_name_type kind, FileInfo.get_pos_filename pos), [])
+    in
+    reverse_naming_table_delta.types :=
+      SMap.add !(reverse_naming_table_delta.types) ~key:name ~data;
+    reverse_naming_table_delta.types_canon_key :=
+      SMap.add
+        !(reverse_naming_table_delta.types_canon_key)
+        ~key:(Naming_sqlite.to_canon_name_key name)
+        ~data
+  | Provider_backend.Decl_service _ ->
+    (* Do nothing. Naming table updates should be done already. *)
+    ()
 
 let remove_type_batch (backend : Provider_backend.t) (names : string list) :
     unit =
@@ -467,11 +462,11 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     | Provider_backend.Analysis
     | Provider_backend.Shared_memory ->
       (* NB: as written, this code may return a canon name even when the
-    given symbol has been deleted in a context entry. We're relying on
-    the caller to have called `remove_fun_batch` on any deleted symbols
-    before having called this function. `get_type_canon_name` is only
-    called in some functions in `Naming_global`, which expects the caller
-    to have called `Naming_global.remove_decls` already. *)
+      given symbol has been deleted in a context entry. We're relying on
+      the caller to have called `remove_fun_batch` on any deleted symbols
+      before having called this function. `get_type_canon_name` is only
+      called in some functions in `Naming_global`, which expects the caller
+      to have called `Naming_global.remove_decls` already. *)
       Naming_heap.Types.get_canon_name ctx name
     | Provider_backend.Local_memory
         { Provider_backend.reverse_naming_table_delta; _ } ->
@@ -823,8 +818,3 @@ let local_changes_push_sharedmem_stack () : unit =
 
 let local_changes_pop_sharedmem_stack () : unit =
   Naming_heap.pop_local_changes ()
-
-let with_quarantined_writes ~(f : unit -> 'a) : 'a =
-  let old_writes_enabled = !writes_enabled in
-  writes_enabled := false;
-  Utils.try_finally ~f ~finally:(fun () -> writes_enabled := old_writes_enabled)

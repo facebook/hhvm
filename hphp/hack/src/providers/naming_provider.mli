@@ -164,11 +164,5 @@ val local_changes_push_sharedmem_stack : unit -> unit
 
 val local_changes_pop_sharedmem_stack : unit -> unit
 
-(** HACK: Causes the `add_*` functions in this module to do nothing when
-called. Only needed because checking for duplicate names using the functions
-in `Naming_global`s requires updating the reverse naming table. When that is
-no longer the case, this function won't be necessary. *)
-val with_quarantined_writes : f:(unit -> 'a) -> 'a
-
 (** Resolve a decl position to a raw position using a provider context. *)
 val resolve_position : Provider_context.t -> Pos_or_decl.t -> Pos.t

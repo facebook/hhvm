@@ -21,7 +21,8 @@ module Compute_tast_and_errors : sig
   }
 end
 
-(** Computes TAST and error-list by taking the AST in a context entry,
+(** Computes TAST and error-list (other than "name already
+bound" errors) by taking the AST in a context entry,
 and typechecking it, and memoizing the result (caching the results in the
 context entry). CAUTION: this function doesn't use a quarantine, and so
 is inappropriate for IDE scenarios. *)

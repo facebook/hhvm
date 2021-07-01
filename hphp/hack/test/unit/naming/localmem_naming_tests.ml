@@ -40,7 +40,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
     Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
   in
   Asserter.Int_asserter.assert_equals
-    6
+    3
     (Telemetry_test_utils.int_exn telemetry "get_ast.count")
     "unsaved: compute_tast(class Foo) should have this many calls to get_ast";
   Asserter.Int_asserter.assert_equals
@@ -69,7 +69,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
     Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
   in
   Asserter.Int_asserter.assert_equals
-    4
+    1
     (Telemetry_test_utils.int_exn telemetry "get_ast.count")
     "unsaved: compute_tast(class Foo1) should have this many calls to get_ast";
   Asserter.Int_asserter.assert_equals
@@ -96,7 +96,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
     Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
   in
   Asserter.Int_asserter.assert_equals
-    4
+    1
     (Telemetry_test_utils.int_exn telemetry "get_ast.count")
     "unsaved: compute_tast(class Foo again) should have this many calls to get_ast";
   Asserter.Int_asserter.assert_equals

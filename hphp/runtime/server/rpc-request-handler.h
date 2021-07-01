@@ -69,6 +69,8 @@ private:
 
   void initState();
   bool needReset() const;
+  bool ignoreParams() const;
+
   bool executePHPFunction(Transport *transport,
                           SourceRootInfo &sourceRootInfo,
                           ReturnEncodeType returnEncodeType);

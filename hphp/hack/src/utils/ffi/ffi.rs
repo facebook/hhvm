@@ -186,6 +186,30 @@ impl<'arena, T: Clone> Clone for BumpSliceMut<'arena, T> {
     }
 }
 
+#[repr(C)]
+pub struct Bytes {
+    pub data: *mut u8,
+    pub len: usize,
+    pub cap: usize,
+}
+
+impl std::convert::From<Vec<u8>> for Bytes {
+    fn from(bytes: Vec<u8>) -> Self {
+        let mut leaked_bytes = std::mem::ManuallyDrop::new(bytes);
+        Self {
+            data: leaked_bytes.as_mut_ptr(),
+            len: leaked_bytes.len(),
+            cap: leaked_bytes.capacity(),
+        }
+    }
+}
+
+impl std::ops::Drop for Bytes {
+    fn drop(&mut self) {
+        let _ = unsafe { Vec::from_raw_parts(self.data, self.len, self.cap) };
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

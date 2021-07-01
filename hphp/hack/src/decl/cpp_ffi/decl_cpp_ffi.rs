@@ -4,8 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![feature(vec_into_raw_parts)]
-
 use arena_deserializer::serde::Deserialize;
 use bincode::Options;
 use no_pos_hash::position_insensitive_hash;
@@ -16,15 +14,9 @@ use libc::c_char;
 use std::os::unix::ffi::OsStrExt;
 
 #[repr(C)]
-struct Bytes {
-    data: *mut u8,
-    len: usize,
-}
-
-#[repr(C)]
 pub struct DeclResult<'a> {
     hash: u64,
-    serialized: Bytes,
+    serialized: ffi::Bytes,
     decls: *mut oxidized_by_ref::direct_decl_parser::Decls<'a>,
 }
 
@@ -72,17 +64,15 @@ unsafe extern "C" fn direct_decl_parse<'a>(
     );
 
     let op = bincode::config::Options::with_native_endian(bincode::options());
-    let (data, len, _cap) = op
+    let data = op
         .serialize(&decls)
         .map_err(|e| format!("failed to serialize, error: {}", e))
-        .unwrap()
-        .into_raw_parts();
-    let serialized = Bytes { len, data };
+        .unwrap();
 
     DeclResult {
         hash: position_insensitive_hash(&decls),
         decls: Box::into_raw(Box::new(decls)),
-        serialized,
+        serialized: data.into(),
     }
 }
 
@@ -93,7 +83,7 @@ unsafe extern "C" fn print_decls(decls: *const Decls) {
 
 #[no_mangle]
 unsafe extern "C" fn verify_deserialization(
-    serialized: *const Bytes,
+    serialized: *const ffi::Bytes,
     expected: *const Decls,
 ) -> bool {
     let arena = bumpalo::Bump::new();

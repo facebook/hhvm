@@ -5,6 +5,11 @@
  LICENSE file in the "hack" directory of this source tree.
 */
 
+#pragma once
+
+#include <cstdint>
+#include <cstddef>
+
 struct decls;
 
 struct bump;
@@ -12,12 +17,13 @@ struct bump;
 struct decl_parser_options;
 
 struct bytes {
-    uint8_t const* data;
-    size_t len;
+    std::uint8_t const* data;
+    std::size_t len;
+    std::size_t cap;
 };
 
 struct decl_result {
-    size_t hash;
+    std::size_t hash;
     bytes serialized;
     decls const* decl_list;
 };

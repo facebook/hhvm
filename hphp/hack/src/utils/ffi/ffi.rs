@@ -61,6 +61,14 @@ pub struct Slice<'a, T> {
     pub len: usize,
     pub marker: std::marker::PhantomData<&'a ()>,
 }
+impl<'a, T> AsRef<[T]> for Slice<'a, T> {
+    fn as_ref(&self) -> &[T] {
+        //Safety: Assumes `self` has been constructed via `Slice<'a,
+        // T>::new()` from some `&'a[T]` and so the call to
+        // `from_raw_parts` is a valid.
+        unsafe { std::slice::from_raw_parts(self.data, self.len) }
+    }
+}
 impl<'a, T> Slice<'a, T> {
     pub fn new(t: &'a [T]) -> Self {
         Slice {
@@ -121,10 +129,23 @@ pub type Str<'a> = Slice<'a, u8>;
 // std::string slice_to_string(Str s) {
 //    return std::string{s.data, s.data + s.len};
 // }
+impl<'a> Str<'a> {
+    /// Cast a `Str<'a>` back into a `&'a str`.
+    pub fn as_str(&self) -> &'a str {
+        //Safety: Assumes `self` has been constructed via `Slice<'a,
+        // T>::new()` from some `&'a str` and so the calls to
+        // `from_raw_parts` and `from_utf8_unchecked` are valid.
+        unsafe { std::str::from_utf8_unchecked(std::slice::from_raw_parts(self.data, self.len)) }
+    }
+}
+impl<'a> AsRef<str> for Str<'a> {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
 
 #[derive(Debug)]
 #[repr(C)]
-
 /// A type for an arena backed `&'a mut[T]`. Similar to `Slice<'a, T>`
 /// but with mutable contents and an allocator reference (enabling
 /// `Clone` support).
@@ -200,4 +221,11 @@ mod tests {
         let t = Slice::new(data);
         assert_eq!(s, t)
     }
+}
+
+// For cbindgen
+#[allow(clippy::needless_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn ffi_07<'arena>(_: Str<'arena>) {
+    unimplemented!()
 }

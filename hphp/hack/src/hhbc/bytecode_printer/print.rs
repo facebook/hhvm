@@ -1838,7 +1838,9 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
             w.write(" ")?;
             w.write(s)
         }
-        M::AssertRATStk(n, s) => concat_str_by(w, " ", ["AssertRATStk", n.to_string().as_str(), s]),
+        M::AssertRATStk(n, s) => {
+            concat_str_by(w, " ", ["AssertRATStk", n.to_string().as_str(), s.as_str()])
+        }
         M::GetMemoKeyL(local) => {
             w.write("GetMemoKeyL ")?;
             print_local(w, local)

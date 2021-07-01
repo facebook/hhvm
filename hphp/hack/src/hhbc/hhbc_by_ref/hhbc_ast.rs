@@ -3,27 +3,31 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::{Slice, Str};
 use hhbc_by_ref_local as local;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum CheckStarted {
     IgnoreStarted,
     CheckStarted,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum FreeIterator {
     IgnoreIter,
     FreeIter,
 }
 
 /// see runtime/base/repo-auth-type.h
-pub type RepoAuthType<'arena> = &'arena str;
+pub type RepoAuthType<'arena> = Str<'arena>;
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum ParamId<'arena> {
     ParamUnnamed(isize),
-    ParamNamed(&'arena str),
+    ParamNamed(Str<'arena>),
 }
 
 pub type ParamNum = isize;
@@ -40,9 +44,10 @@ pub type ConstId<'arena> = hhbc_by_ref_hhbc_id::r#const::Type<'arena>;
 pub type PropId<'arena> = hhbc_by_ref_hhbc_id::prop::Type<'arena>;
 
 pub type NumParams = usize;
-pub type ByRefs<'arena> = &'arena [bool];
+pub type ByRefs<'arena> = Slice<'arena, bool>;
 
 bitflags::bitflags! {
+    #[repr(C)]
     pub struct FcallFlags: u8 {
         const HAS_UNPACK =                  0b0001;
         const HAS_GENERICS =                0b0010;
@@ -69,12 +74,12 @@ impl<'arena> FcallArgs<'arena> {
     pub fn new(
         flags: FcallFlags,
         num_rets: usize,
-        inouts: &'arena [bool],
+        inouts: Slice<'arena, bool>,
         async_eager_label: Option<hhbc_by_ref_label::Label>,
         num_args: usize,
         context: Option<&'arena str>,
     ) -> FcallArgs<'arena> {
-        if !inouts.is_empty() && inouts.len() != num_args {
+        if !inouts.len == 0 && inouts.len != num_args {
             panic!("length of by_refs must be either zero or num_args");
         }
         FcallArgs(
@@ -623,4 +628,17 @@ pub enum Instruct<'arena> {
     IAsync(AsyncFunctions<'arena>),
     IGenerator(GenCreationExecution),
     IIncludeEvalDefine(InstructIncludeEvalDefine),
+}
+
+#[repr(C)]
+pub struct Dummy<'a>(pub Slice<'a, i32>);
+
+#[no_mangle]
+pub unsafe extern "C" fn hhbc_ast_07<'a, 'arena>(
+    _: CheckStarted,
+    _: FreeIterator,
+    _: FcallFlags,
+    _: Dummy,
+) {
+    unimplemented!()
 }

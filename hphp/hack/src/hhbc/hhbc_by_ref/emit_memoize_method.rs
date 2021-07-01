@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use decl_provider::DeclProvider;
+use ffi::Slice;
 use hhbc_by_ref_ast_scope::{self as ast_scope, Scope, ScopeItem};
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_body as emit_body;
@@ -262,9 +263,16 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
             fcall_flags |= FcallFlags::HAS_GENERICS;
         };
         if args.flags.contains(Flags::IS_ASYNC) {
-            FcallArgs::new(fcall_flags, 1, &[], Some(eager_set), param_count, None)
+            FcallArgs::new(
+                fcall_flags,
+                1,
+                Slice::new(&[]),
+                Some(eager_set),
+                param_count,
+                None,
+            )
         } else {
-            FcallArgs::new(fcall_flags, 1, &[], None, param_count, None)
+            FcallArgs::new(fcall_flags, 1, Slice::new(&[]), None, param_count, None)
         }
     };
     let (reified_get, reified_memokeym) = if !args.flags.contains(Flags::IS_REFIED) {
@@ -387,7 +395,7 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl>>
     let fcall_args = FcallArgs::new(
         FcallFlags::default(),
         1,
-        &[],
+        Slice::new(&[]),
         if args.flags.contains(Flags::IS_ASYNC) {
             Some(eager_set)
         } else {

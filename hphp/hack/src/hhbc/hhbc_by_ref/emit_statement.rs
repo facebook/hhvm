@@ -18,6 +18,7 @@ use hhbc_by_ref_local as local;
 use hhbc_by_ref_scope::scope;
 use hhbc_by_ref_statement_state::StatementState;
 
+use ffi::Slice;
 use lazy_static::lazy_static;
 use naming_special_names_rust::{special_functions, special_idents, superglobals};
 use oxidized::{aast as a, ast as tast, ast_defs, local_id, pos::Pos};
@@ -569,7 +570,7 @@ fn emit_using<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             FcallArgs::new(
                                 FcallFlags::empty(),
                                 1,
-                                bumpalo::vec![in alloc;].into_bump_slice(),
+                                Slice::new(bumpalo::vec![in alloc;].into_bump_slice()),
                                 async_eager_label,
                                 0,
                                 env.call_context
@@ -1173,7 +1174,7 @@ fn emit_foreach_await<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     FcallArgs::new(
                         FcallFlags::empty(),
                         1,
-                        bumpalo::vec![in alloc;].into_bump_slice(),
+                        Slice::new(bumpalo::vec![in alloc;].into_bump_slice()),
                         Some(async_eager_label),
                         0,
                         None,

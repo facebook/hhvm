@@ -819,6 +819,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7360491ce676a36bf9bb3c56c1aa791658183a54d2744120f27285738d90465a"
 
 [[package]]
+name = "ffi"
+version = "0.0.0"
+dependencies = [
+ "bumpalo",
+]
+
+[[package]]
 name = "find_utils"
 version = "0.0.0"
 dependencies = [
@@ -1218,6 +1225,7 @@ dependencies = [
  "bstr",
  "bumpalo",
  "decl_provider",
+ "ffi",
  "hash",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_ast_class_expr",
@@ -1262,6 +1270,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "decl_provider",
+ "ffi",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_body",
  "hhbc_by_ref_emit_expression",
@@ -1323,6 +1332,7 @@ dependencies = [
  "bstr",
  "bumpalo",
  "decl_provider",
+ "ffi",
  "hash",
  "hhbc_by_ref_ast_class_expr",
  "hhbc_by_ref_ast_constant_folder",
@@ -1381,6 +1391,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "decl_provider",
+ "ffi",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_body",
@@ -1427,6 +1438,7 @@ dependencies = [
  "bitflags",
  "bumpalo",
  "decl_provider",
+ "ffi",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_body",
@@ -1903,6 +1915,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
+ "ffi",
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_iterator",
  "hhbc_by_ref_label",
@@ -1915,6 +1928,7 @@ name = "hhbc_by_ref_hhbc_id"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "ffi",
  "hhbc_by_ref_hhbc_string_utils",
 ]
 

@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use decl_provider::DeclProvider;
+use ffi::Slice;
 use hhbc_by_ref_ast_scope::{self as ast_scope, Scope, ScopeItem};
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_body as emit_body;
@@ -166,7 +167,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
         FcallArgs::new(
             fcall_flags,
             1,
-            &[],
+            Slice::new(&[]),
             if is_async { Some(eager_set) } else { None },
             param_count,
             None,
@@ -265,7 +266,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
     let fcall_args = FcallArgs::new(
         FcallFlags::default(),
         1,
-        &[],
+        Slice::new(&[]),
         if is_async { Some(eager_set) } else { None },
         0,
         None,

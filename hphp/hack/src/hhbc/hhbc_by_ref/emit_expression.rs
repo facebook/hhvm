@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
+use ffi::Slice;
 use hhbc_by_ref_ast_class_expr::ClassExpr;
 use hhbc_by_ref_ast_constant_folder as ast_constant_folder;
 use hhbc_by_ref_emit_adata as emit_adata;
@@ -937,7 +938,7 @@ fn inline_gena_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     FcallArgs::new(
                         FcallFlags::default(),
                         1,
-                        bumpalo::vec![in alloc;].into_bump_slice(),
+                        Slice::new(bumpalo::vec![in alloc;].into_bump_slice()),
                         Some(async_eager_label),
                         1,
                         None,
@@ -2169,7 +2170,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                         let fcall_args = FcallArgs::new(
                                             FcallFlags::default(),
                                             1,
-                                            bumpalo::vec![in alloc;].into_bump_slice(),
+                                            Slice::new(bumpalo::vec![in alloc;].into_bump_slice()),
                                             None,
                                             1,
                                             None,
@@ -2683,8 +2684,10 @@ fn get_fcall_args<'arena>(
     FcallArgs::new(
         flags,
         num_rets,
-        bumpalo::collections::Vec::from_iter_in(args.iter().map(is_inout_arg), alloc)
-            .into_bump_slice(),
+        Slice::new(
+            bumpalo::collections::Vec::from_iter_in(args.iter().map(is_inout_arg), alloc)
+                .into_bump_slice(),
+        ),
         async_eager_label,
         num_args,
         context

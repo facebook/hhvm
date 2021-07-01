@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
+use ffi::Slice;
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_body as emit_body;
 use hhbc_by_ref_emit_expression as emit_expression;
@@ -446,7 +447,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 generic_arr,
                 instr::fcallclsmethodsd(
                     alloc,
-                    FcallArgs::new(FcallFlags::default(), 1, &[], None, 1, None),
+                    FcallArgs::new(FcallFlags::default(), 1, Slice::new(&[]), None, 1, None),
                     SpecialClsRef::Parent,
                     method::from_raw_string(alloc, INIT_METH_NAME),
                 ),

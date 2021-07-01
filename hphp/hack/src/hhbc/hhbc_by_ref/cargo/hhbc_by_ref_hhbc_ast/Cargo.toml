@@ -10,6 +10,7 @@ path = "../../hhbc_ast.rs"
 [dependencies]
 bitflags = "1.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
+ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
 hhbc_by_ref_iterator = { path = "../hhbc_by_ref_iterator" }
 hhbc_by_ref_label = { path = "../hhbc_by_ref_label" }

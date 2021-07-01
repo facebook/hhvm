@@ -49,6 +49,8 @@ use oxidized::{
     aast, aast_defs, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos,
 };
 
+use ffi::Slice;
+
 use bitflags::bitflags;
 use indexmap::IndexSet;
 use itertools::Either;
@@ -866,7 +868,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let mut make_param_instr =
         |(param, ast_param): (&HhasParam<'arena>, &tast::FunParam)| -> Result<Option<InstrSeq<'arena>>> {
             let param_name = &param.name;
-            let param_name = || ParamId::ParamNamed(bumpalo::collections::String::from_str_in(param_name, alloc).into_bump_str());
+            let param_name = || ParamId::ParamNamed(Slice::new(bumpalo::collections::String::from_str_in(param_name, alloc).into_bump_str().as_bytes()));
             if param.is_variadic {
                 Ok(None)
             } else {
@@ -1026,7 +1028,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                             FcallArgs::new(
                                 FcallFlags::default(),
                                 1,
-                                bumpalo::vec![in alloc;].into_bump_slice(),
+                                Slice::new(bumpalo::vec![in alloc;].into_bump_slice()),
                                 None,
                                 3,
                                 None,

@@ -496,16 +496,19 @@ let process_files
                 | Check file -> First file
                 | fn -> Second fn)
           in
-          let result =
-            process_files_remote_execution
-              re_env
-              ctx
-              errors
-              check_fns
-              check_info.recheck_id
-          in
-          let check_fns = List.map check_fns ~f:(fun f -> Check f) in
-          (fns, check_fns, result.errors)
+          if List.is_empty check_fns then
+            (fns, [], errors)
+          else
+            let result =
+              process_files_remote_execution
+                re_env
+                ctx
+                errors
+                check_fns
+                check_info.recheck_id
+            in
+            let check_fns = List.map check_fns ~f:(fun f -> Check f) in
+            (fns, check_fns, result.errors)
         | None -> (fns, [], errors)
       in
       let progress =

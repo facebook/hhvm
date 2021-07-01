@@ -129,6 +129,7 @@ struct APCTypedValue {
   }
 
   ArrayData* getArrayData() const;
+  void setArrayData(ArrayData* ad);
 
   TypedValue toTypedValue() const;
 
@@ -172,10 +173,10 @@ private:
     int64_t num;
     double dbl;
     StringData* str;
-    ArrayData* arr;
     const Func* func;
     const Class* cls;
     ClsMethDataRef pclsmeth;
+    std::atomic<ArrayData*> arr;
   } m_data;
   APCHandle m_handle;
 };

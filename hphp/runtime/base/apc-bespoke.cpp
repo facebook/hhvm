@@ -386,6 +386,13 @@ ArrayData* readAPCBespoke(const APCTypedValue* tv) {
       DecRefUncountedArray(result);
       return expected;
     }
+    // Clean up after ourselves: treadmill the vanilla and logging arrays.
+    auto const lad = data->logging_result;
+    const_cast<APCTypedValue*>(tv)->setArrayData(result);
+    Treadmill::enqueue([vad, lad]{
+      DecRefUncountedArray(vad);
+      DecRefUncountedArray(lad);
+    });
     return result;
   }
 
@@ -410,8 +417,10 @@ void freeAPCBespoke(APCTypedValue* tv) {
   auto const data = reinterpret_cast<APCBespokeData*>(tv);
   if (auto const ad = data->array.load(std::memory_order_acquire)) {
     DecRefUncountedArray(ad);
+  } else {
+    DecRefUncountedArray(tv->getArrayData());
+    DecRefUncountedArray(data->logging_result);
   }
-  DecRefUncountedArray(data->logging_result);
   free(data);
 }
 

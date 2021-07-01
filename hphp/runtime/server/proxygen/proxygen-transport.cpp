@@ -50,6 +50,7 @@ static std::set<std::string> s_post_methods{
   "REPORT",
   "PROPFIND",
   "PROPPATCH",
+  "PATCH",
   "MKCOL",
   "MKCALENDAR",
   "PUT",

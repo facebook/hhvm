@@ -140,9 +140,9 @@ module Env = struct
       let backend = Provider_context.get_backend ctx in
       Naming_provider.add_fun backend name (FileInfo.File (FileInfo.Fun, fn))
 
-  let new_cid_skip_if_already_bound ctx fn (_p, name) cid_kind =
-    let mode =
-      match cid_kind with
+  let new_type_skip_if_already_bound ctx fn ~kind (_p, name) =
+    let name_type =
+      match kind with
       | Naming_types.TClass -> FileInfo.Class
       | Naming_types.TTypedef -> FileInfo.Typedef
       | Naming_types.TRecordDef -> FileInfo.RecordDef
@@ -153,16 +153,7 @@ module Env = struct
       let backend = Provider_context.get_backend ctx in
       (* We store redundant info in this case, but if the position is a *)
       (* Full position, we don't store the kind, so this is necessary *)
-      Naming_provider.add_type backend name (FileInfo.File (mode, fn)) cid_kind
-
-  let new_class_skip_if_already_bound ctx fn cid =
-    new_cid_skip_if_already_bound ctx fn cid Naming_types.TClass
-
-  let new_record_decl_skip_if_already_bound ctx fn cid =
-    new_cid_skip_if_already_bound ctx fn cid Naming_types.TRecordDef
-
-  let new_typedef_skip_if_already_bound ctx fn cid =
-    new_cid_skip_if_already_bound ctx fn cid Naming_types.TTypedef
+      Naming_provider.add_type backend name (FileInfo.File (name_type, fn)) kind
 
   let new_global_const_skip_if_already_bound ctx fn (_p, name) =
     let backend = Provider_context.get_backend ctx in
@@ -180,7 +171,7 @@ module Env = struct
       let backend = Provider_context.get_backend ctx in
       Naming_provider.add_fun backend name p
 
-  let new_cid_error_if_already_bound ctx cid_kind (p, name) =
+  let new_type_error_if_already_bound ctx ~kind (p, name) =
     if not (check_type_not_typehint ctx (p, name)) then
       ()
     else
@@ -195,16 +186,7 @@ module Env = struct
           Errors.error_name_already_bound name canonical p p'
       | None ->
         let backend = Provider_context.get_backend ctx in
-        Naming_provider.add_type backend name p cid_kind
-
-  let new_class_error_if_already_bound ctx =
-    new_cid_error_if_already_bound ctx Naming_types.TClass
-
-  let new_record_decl_error_if_already_bound ctx =
-    new_cid_error_if_already_bound ctx Naming_types.TRecordDef
-
-  let new_typedef_error_if_already_bound ctx =
-    new_cid_error_if_already_bound ctx Naming_types.TTypedef
+        Naming_provider.add_type backend name p kind
 
   let new_global_const_error_if_already_bound ctx (p, name) =
     match Naming_provider.get_const_pos ctx name with
@@ -234,13 +216,13 @@ let make_env_error_if_already_bound ctx fileinfo =
   List.iter fileinfo.FileInfo.funs ~f:(Env.new_fun_error_if_already_bound ctx);
   List.iter
     fileinfo.FileInfo.classes
-    ~f:(Env.new_class_error_if_already_bound ctx);
+    ~f:(Env.new_type_error_if_already_bound ctx ~kind:Naming_types.TClass);
   List.iter
     fileinfo.FileInfo.record_defs
-    ~f:(Env.new_record_decl_error_if_already_bound ctx);
+    ~f:(Env.new_type_error_if_already_bound ctx ~kind:Naming_types.TRecordDef);
   List.iter
     fileinfo.FileInfo.typedefs
-    ~f:(Env.new_typedef_error_if_already_bound ctx);
+    ~f:(Env.new_type_error_if_already_bound ctx ~kind:Naming_types.TTypedef);
   List.iter
     fileinfo.FileInfo.consts
     ~f:(Env.new_global_const_error_if_already_bound ctx)
@@ -249,13 +231,13 @@ let make_env_skip_if_already_bound ctx fn fileinfo =
   List.iter fileinfo.FileInfo.funs ~f:(Env.new_fun_skip_if_already_bound ctx fn);
   List.iter
     fileinfo.FileInfo.classes
-    ~f:(Env.new_class_skip_if_already_bound ctx fn);
+    ~f:(Env.new_type_skip_if_already_bound ctx fn ~kind:Naming_types.TClass);
   List.iter
     fileinfo.FileInfo.record_defs
-    ~f:(Env.new_record_decl_skip_if_already_bound ctx fn);
+    ~f:(Env.new_type_skip_if_already_bound ctx fn ~kind:Naming_types.TRecordDef);
   List.iter
     fileinfo.FileInfo.typedefs
-    ~f:(Env.new_typedef_skip_if_already_bound ctx fn);
+    ~f:(Env.new_type_skip_if_already_bound ctx fn ~kind:Naming_types.TTypedef);
   List.iter
     fileinfo.FileInfo.consts
     ~f:(Env.new_global_const_skip_if_already_bound ctx fn);

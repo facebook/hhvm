@@ -18,48 +18,48 @@ goes to:
 default
 bool(true)
 goes to:
-5
+default
 bool(false)
 goes to:
-0
+default
 NULL
 goes to:
-0
+default
 vec(0) {
 }
 goes to:
 default
 float(1)
 goes to:
-1
+default
 string(4) "1abc"
 goes to:
-1
+default
 string(1) "3"
 goes to:
 default
 string(3) "foo"
 goes to:
-0
+default
 string(1) "0"
 goes to:
-0
+default
 string(0) ""
 goes to:
-0
+default
 string(4) "jazz"
 goes to:
-0
+default
 string(1) "5"
 goes to:
-5
+default
 string(1) "1"
 goes to:
-1
+default
 object(M) (0) {
 }
 goes to:
-Object of class M could not be converted to int
+default
 float(5.392)
 goes to:
 default
@@ -71,7 +71,7 @@ goes to:
 default
 float(5)
 goes to:
-5
+default
 float(-INF)
 goes to:
 default
@@ -86,4 +86,4 @@ goes to:
 default
 string(3) "5.0"
 goes to:
-5
+default

@@ -1938,6 +1938,12 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
     return;
   }
 
+  if (!tvIsInt(val) && useStrictEquality()) {
+    pc = origpc + jmptab[veclen - 1];
+    vmStack().popC();
+    return;
+  }
+
   // Generic integer switch
   int64_t intval = -1;
   SwitchMatch match = SwitchMatch::NORMAL;

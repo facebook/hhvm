@@ -8,4 +8,4 @@ clsmeth != arry1
 clsmeth != arry2
 clsmeth != arry3
 clsmeth == arry4
-clsmeth == arry5
+clsmeth != arry5

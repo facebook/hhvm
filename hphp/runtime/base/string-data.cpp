@@ -19,6 +19,7 @@
 #include <cmath>
 #include <utility>
 
+#include "hphp/runtime/base/tv-conv-notice.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/stacktrace-profiler.h"
@@ -933,7 +934,7 @@ bool StringData::equal(const StringData *s) const {
   if (s == this) return true;
   int ret;
 
-  if (!(m_hash < 0 || s->m_hash < 0)) {
+  if (!(m_hash < 0 || s->m_hash < 0 || useStrictEquality())) {
     ret = numericCompare(s, true);
     if (ret >= -1) {
       return ret == 0;

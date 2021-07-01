@@ -134,7 +134,7 @@ function h($x) {
       print "3";
       break;
     default:
-      print "";
+      print "default";
   }
   echo "\n";
 }

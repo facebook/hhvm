@@ -124,6 +124,12 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
   SSATmp* index;
 
   Offset defaultOff = bcOff(env) + iv.vec32()[iv.size() - 1];
+
+  if (!(type <= TInt) && useStrictEquality()) {
+    if (type <= TArrLike) decRef(env, switchVal);
+    gen(env, Jmp, getBlock(env, defaultOff));
+  }
+
   Offset zeroOff = 0;
   if (base <= 0 && (base + nTargets) > 0) {
     zeroOff = bcOff(env) + iv.vec32()[0 - base];

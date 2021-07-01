@@ -1162,7 +1162,7 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-char const *conv_notice_level_names[] = { "None", "Log", "Throw" };
+char const *conv_notice_level_names[] = { "None", "Log", "Throw", "Change" };
 
 const char* convOpToName(ConvNoticeLevel level) {
   return conv_notice_level_names[
@@ -1232,6 +1232,8 @@ void handleConvNoticeLevelImpl(ConvNoticeLevel level, const std::string& str) {
   } else if (level == ConvNoticeLevel::Log) {
     raise_notice(str);
   }
+  // we should never be getting here if conv level is change
+  always_assert(level != ConvNoticeLevel::Change);
 }
 }
 

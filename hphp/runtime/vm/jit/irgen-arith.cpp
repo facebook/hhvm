@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/strings.h"
 
+#include "hphp/runtime/base/tv-conv-notice.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
@@ -1271,6 +1272,8 @@ void maybeRaiseBadComparisonViolation(
     eqOp
       ? RuntimeOption::EvalNoticeOnCoerceForEq
       : RuntimeOption::EvalNoticeOnCoerceForCmp);
+  // we should never be getting here if conv level is change
+  assertx(level != ConvNoticeLevel::Change);
   if (level == ConvNoticeLevel::None) return;
   if (!eqOp) {
     gen(env, RaiseBadComparisonViolation, BadComparisonData{false}, lhs, rhs);
@@ -1336,7 +1339,9 @@ void implCmp(IRGS& env, Op op) {
   // account Str and StaticStr), lower to a bool comparison of
   // constants. Otherwise, switch on the type of the left operand to emit the
   // right kind of comparison.
-  if ((op == Op::Same || op == Op::NSame) && !equiv()) {
+  if (((op == Op::Same || op == Op::NSame) ||
+        (isEqualityOp(op) && useStrictEquality())) &&
+       !equiv()) {
     push(env, emitConstCmp(env, op, false, true));
   } else {
     SSATmp* res = [&]() {

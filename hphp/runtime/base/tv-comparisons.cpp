@@ -18,6 +18,7 @@
 #include <type_traits>
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/tv-conv-notice.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -63,14 +64,31 @@ void handleConvNotice(const std::string& lhs, const std::string& rhs) {
   }
 }
 
+
+/*
+ * Return whether two DataTypes for primitive types are "equivalent" including
+ * testing for in-progress migrations
+ */
+bool equivDataTypesIncludingMigrations(DataType t1, DataType t2) {
+  if (equivDataTypes(t1, t2)) return true;
+  if (RO::EvalIsCompatibleClsMethType &&
+      ((t1 == KindOfClsMeth && equivDataTypes(t2, KindOfVec)) ||
+        (equivDataTypes(t1, KindOfVec) && t2 == KindOfClsMeth))) {
+    return true;
+  }
+
+  if (!RO::EvalRaiseClassConversionWarning) {
+    const auto isStringOrClassish = [](DataType t) {
+      return isStringType(t) || isClassType(t) || isLazyClassType(t);
+    };
+    return isStringOrClassish(t1) && isStringOrClassish(t2);
+  }
+  return false;
+}
+
 template<class Op> bool shouldMaybeTriggerConvNotice(
     DataType d1, DataType d2, typename Op::RetType res) {
-  if (equivDataTypes(d1, d2)) return false;
-  if (RO::EvalIsCompatibleClsMethType &&
-     ((d1 == KindOfClsMeth && equivDataTypes(d2, KindOfVec)) ||
-      (equivDataTypes(d1, KindOfVec) && d2 == KindOfClsMeth))) {
-   return false;
-  }
+  if (equivDataTypesIncludingMigrations(d1, d2)) return false;
   // if eq op, only notice if the comparison was true
   if constexpr (isEqualityOp<Op>()) return res;
   // only applies to comparison ops
@@ -853,10 +871,17 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Class* val) {
   not_reached();
 }
 
+struct Eq;
+
 template<class Op>
 typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
   assertx(tvIsPlausible(c1));
   assertx(tvIsPlausible(c2));
+
+  if (std::is_same_v<Op, Eq> && useStrictEquality() &&
+      !equivDataTypesIncludingMigrations(c1.m_type, c2.m_type)) {
+    return false;
+  }
 
   const auto res = [&](){
     switch (c2.m_type) {
@@ -1376,6 +1401,11 @@ bool tvSame(TypedValue c1, TypedValue c2) {
 
 template<class Op, DataType DT, typename T>
 typename Op::RetType tvRelOp(TypedValue cell, T val) {
+  if (std::is_same_v<Op, Eq> && useStrictEquality() &&
+      !equivDataTypesIncludingMigrations(cell.m_type, DT)) {
+    return false;
+  }
+
   typename Op::RetType res;
   if constexpr (DT == DataType::Vec) res         = tvRelOpVec(Op(), cell, val);
   else if constexpr (DT == DataType::Dict) res   = tvRelOpDict(Op(), cell, val);

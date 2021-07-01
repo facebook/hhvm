@@ -3,17 +3,17 @@ same    nsame   eq      neq
 null cmp null:
 T       F       T       F
 null cmp false:
-F       T       T       F
+F       T       F       T
 null cmp true:
 F       T       F       T
 null cmp int 0:
-F       T       T       F
+F       T       F       T
 null cmp int 99:
 F       T       F       T
 null cmp int -1:
 F       T       F       T
 null cmp float 0:
-F       T       T       F
+F       T       F       T
 null cmp double 99:
 F       T       F       T
 null cmp float 99:
@@ -27,7 +27,7 @@ F       T       F       T
 null cmp NAN:
 F       T       F       T
 null cmp "":
-F       T       T       F
+F       T       F       T
 null cmp "0":
 F       T       F       T
 null cmp "99":
@@ -45,7 +45,7 @@ F       T       F       T
 null cmp "BAZ":
 F       T       F       T
 null cmp array arr1:
-F       T       T       F
+F       T       F       T
 null cmp array arr2:
 F       T       F       T
 null cmp array arr3:
@@ -83,7 +83,7 @@ F       T       F       T
 null cmp array arr21:
 F       T       F       T
 null cmp vec vec1:
-F       T       T       F
+F       T       F       T
 null cmp vec vec2:
 F       T       F       T
 null cmp vec vec3:
@@ -99,7 +99,7 @@ F       T       F       T
 null cmp vec vec10:
 F       T       F       T
 null cmp dict dict1:
-F       T       T       F
+F       T       F       T
 null cmp dict dict2:
 F       T       F       T
 null cmp dict dict3:
@@ -115,7 +115,7 @@ F       T       F       T
 null cmp dict dict10:
 F       T       F       T
 null cmp keyset ks1:
-F       T       T       F
+F       T       F       T
 null cmp keyset ks2:
 F       T       F       T
 null cmp keyset ks3:
@@ -215,19 +215,19 @@ F       T       F       T
 null cmp rclsmeth:
 F       T       F       T
 false cmp null:
-F       T       T       F
+F       T       F       T
 false cmp false:
 T       F       T       F
 false cmp true:
 F       T       F       T
 false cmp int 0:
-F       T       T       F
+F       T       F       T
 false cmp int 99:
 F       T       F       T
 false cmp int -1:
 F       T       F       T
 false cmp float 0:
-F       T       T       F
+F       T       F       T
 false cmp double 99:
 F       T       F       T
 false cmp float 99:
@@ -241,9 +241,9 @@ F       T       F       T
 false cmp NAN:
 F       T       F       T
 false cmp "":
-F       T       T       F
+F       T       F       T
 false cmp "0":
-F       T       T       F
+F       T       F       T
 false cmp "99":
 F       T       F       T
 false cmp "-1":
@@ -259,7 +259,7 @@ F       T       F       T
 false cmp "BAZ":
 F       T       F       T
 false cmp array arr1:
-F       T       T       F
+F       T       F       T
 false cmp array arr2:
 F       T       F       T
 false cmp array arr3:
@@ -297,7 +297,7 @@ F       T       F       T
 false cmp array arr21:
 F       T       F       T
 false cmp vec vec1:
-F       T       T       F
+F       T       F       T
 false cmp vec vec2:
 F       T       F       T
 false cmp vec vec3:
@@ -313,7 +313,7 @@ F       T       F       T
 false cmp vec vec10:
 F       T       F       T
 false cmp dict dict1:
-F       T       T       F
+F       T       F       T
 false cmp dict dict2:
 F       T       F       T
 false cmp dict dict3:
@@ -329,7 +329,7 @@ F       T       F       T
 false cmp dict dict10:
 F       T       F       T
 false cmp keyset ks1:
-F       T       T       F
+F       T       F       T
 false cmp keyset ks2:
 F       T       F       T
 false cmp keyset ks3:
@@ -397,7 +397,7 @@ F       T       F       T
 false cmp object t5:
 F       T       F       T
 false cmp object xml:
-F       T       T       F
+F       T       F       T
 false cmp vector v1:
 F       T       F       T
 false cmp vector v2:
@@ -437,203 +437,203 @@ T       F       T       F
 true cmp int 0:
 F       T       F       T
 true cmp int 99:
-F       T       T       F
+F       T       F       T
 true cmp int -1:
-F       T       T       F
+F       T       F       T
 true cmp float 0:
 F       T       F       T
 true cmp double 99:
-F       T       T       F
+F       T       F       T
 true cmp float 99:
-F       T       T       F
+F       T       F       T
 true cmp float -1:
-F       T       T       F
+F       T       F       T
 true cmp INF:
-F       T       T       F
+F       T       F       T
 true cmp -INF:
-F       T       T       F
+F       T       F       T
 true cmp NAN:
-F       T       T       F
+F       T       F       T
 true cmp "":
 F       T       F       T
 true cmp "0":
 F       T       F       T
 true cmp "99":
-F       T       T       F
+F       T       F       T
 true cmp "-1":
-F       T       T       F
+F       T       F       T
 true cmp "0.0":
-F       T       T       F
+F       T       F       T
 true cmp "99.0":
-F       T       T       F
+F       T       F       T
 true cmp "-1.0":
-F       T       T       F
+F       T       F       T
 true cmp "foo":
-F       T       T       F
+F       T       F       T
 true cmp "BAZ":
-F       T       T       F
+F       T       F       T
 true cmp array arr1:
 F       T       F       T
 true cmp array arr2:
-F       T       T       F
+F       T       F       T
 true cmp array arr3:
-F       T       T       F
+F       T       F       T
 true cmp array arr4:
-F       T       T       F
+F       T       F       T
 true cmp array arr5:
-F       T       T       F
+F       T       F       T
 true cmp array arr6:
-F       T       T       F
+F       T       F       T
 true cmp array arr7:
-F       T       T       F
+F       T       F       T
 true cmp array arr8:
-F       T       T       F
+F       T       F       T
 true cmp array arr9:
-F       T       T       F
+F       T       F       T
 true cmp array arr12:
-F       T       T       F
+F       T       F       T
 true cmp array arr13:
-F       T       T       F
+F       T       F       T
 true cmp array arr14:
-F       T       T       F
+F       T       F       T
 true cmp array arr15:
-F       T       T       F
+F       T       F       T
 true cmp array arr16:
-F       T       T       F
+F       T       F       T
 true cmp array arr17:
-F       T       T       F
+F       T       F       T
 true cmp array arr18:
-F       T       T       F
+F       T       F       T
 true cmp array arr19:
-F       T       T       F
+F       T       F       T
 true cmp array arr20:
-F       T       T       F
+F       T       F       T
 true cmp array arr21:
-F       T       T       F
+F       T       F       T
 true cmp vec vec1:
 F       T       F       T
 true cmp vec vec2:
-F       T       T       F
+F       T       F       T
 true cmp vec vec3:
-F       T       T       F
+F       T       F       T
 true cmp vec vec4:
-F       T       T       F
+F       T       F       T
 true cmp vec vec7:
-F       T       T       F
+F       T       F       T
 true cmp vec vec8:
-F       T       T       F
+F       T       F       T
 true cmp vec vec9:
-F       T       T       F
+F       T       F       T
 true cmp vec vec10:
-F       T       T       F
+F       T       F       T
 true cmp dict dict1:
 F       T       F       T
 true cmp dict dict2:
-F       T       T       F
+F       T       F       T
 true cmp dict dict3:
-F       T       T       F
+F       T       F       T
 true cmp dict dict4:
-F       T       T       F
+F       T       F       T
 true cmp dict dict5:
-F       T       T       F
+F       T       F       T
 true cmp dict dict8:
-F       T       T       F
+F       T       F       T
 true cmp dict dict9:
-F       T       T       F
+F       T       F       T
 true cmp dict dict10:
-F       T       T       F
+F       T       F       T
 true cmp keyset ks1:
 F       T       F       T
 true cmp keyset ks2:
-F       T       T       F
+F       T       F       T
 true cmp keyset ks3:
-F       T       T       F
+F       T       F       T
 true cmp keyset ks4:
-F       T       T       F
+F       T       F       T
 true cmp keyset ks5:
-F       T       T       F
+F       T       F       T
 true cmp keyset ks6:
-F       T       T       F
+F       T       F       T
 true cmp keyset ks7:
-F       T       T       F
+F       T       F       T
 true cmp keyset ks8:
-F       T       T       F
+F       T       F       T
 true cmp keyset ks9:
-F       T       T       F
+F       T       F       T
 true cmp keyset ks10:
-F       T       T       F
+F       T       F       T
 true cmp keyset ks11:
-F       T       T       F
+F       T       F       T
 true cmp keyset ks12:
-F       T       T       F
+F       T       F       T
 true cmp keyset ks13:
-F       T       T       F
+F       T       F       T
 true cmp object a1:
-F       T       T       F
+F       T       F       T
 true cmp object a2:
-F       T       T       F
+F       T       F       T
 true cmp object a3:
-F       T       T       F
+F       T       F       T
 true cmp object a4:
-F       T       T       F
+F       T       F       T
 true cmp object a5:
-F       T       T       F
+F       T       F       T
 true cmp object a9:
-F       T       T       F
+F       T       F       T
 true cmp object a11:
-F       T       T       F
+F       T       F       T
 true cmp object a12:
-F       T       T       F
+F       T       F       T
 true cmp object a13:
-F       T       T       F
+F       T       F       T
 true cmp object a14:
-F       T       T       F
+F       T       F       T
 true cmp object a15:
-F       T       T       F
+F       T       F       T
 true cmp object a16:
-F       T       T       F
+F       T       F       T
 true cmp object a17:
-F       T       T       F
+F       T       F       T
 true cmp object a18:
-F       T       T       F
+F       T       F       T
 true cmp object b1:
-F       T       T       F
+F       T       F       T
 true cmp object c1:
-F       T       T       F
+F       T       F       T
 true cmp object t1:
-F       T       T       F
+F       T       F       T
 true cmp object t2:
-F       T       T       F
+F       T       F       T
 true cmp object t3:
-F       T       T       F
+F       T       F       T
 true cmp object t4:
-F       T       T       F
+F       T       F       T
 true cmp object t5:
-F       T       T       F
+F       T       F       T
 true cmp object xml:
 F       T       F       T
 true cmp vector v1:
-F       T       T       F
+F       T       F       T
 true cmp vector v2:
-F       T       T       F
+F       T       F       T
 true cmp vector v3:
-F       T       T       F
+F       T       F       T
 true cmp pair p1:
-F       T       T       F
+F       T       F       T
 true cmp pair p2:
-F       T       T       F
+F       T       F       T
 true cmp pair p3:
-F       T       T       F
+F       T       F       T
 true cmp closure clo1:
-F       T       T       F
+F       T       F       T
 true cmp closure clo2:
-F       T       T       F
+F       T       F       T
 true cmp resource f1:
-F       T       T       F
+F       T       F       T
 true cmp resource f2:
-F       T       T       F
+F       T       F       T
 true cmp resource f3:
-F       T       T       F
+F       T       F       T
 true cmp func_ptr:
 F       T       F       T
 true cmp rfunc_ptr:
@@ -643,9 +643,9 @@ F       T       F       T
 true cmp rclsmeth:
 F       T       F       T
 int 0 cmp null:
-F       T       T       F
+F       T       F       T
 int 0 cmp false:
-F       T       T       F
+F       T       F       T
 int 0 cmp true:
 F       T       F       T
 int 0 cmp int 0:
@@ -655,7 +655,7 @@ F       T       F       T
 int 0 cmp int -1:
 F       T       F       T
 int 0 cmp float 0:
-F       T       T       F
+F       T       F       T
 int 0 cmp double 99:
 F       T       F       T
 int 0 cmp float 99:
@@ -669,23 +669,23 @@ F       T       F       T
 int 0 cmp NAN:
 F       T       F       T
 int 0 cmp "":
-F       T       T       F
+F       T       F       T
 int 0 cmp "0":
-F       T       T       F
+F       T       F       T
 int 0 cmp "99":
 F       T       F       T
 int 0 cmp "-1":
 F       T       F       T
 int 0 cmp "0.0":
-F       T       T       F
+F       T       F       T
 int 0 cmp "99.0":
 F       T       F       T
 int 0 cmp "-1.0":
 F       T       F       T
 int 0 cmp "foo":
-F       T       T       F
+F       T       F       T
 int 0 cmp "BAZ":
-F       T       T       F
+F       T       F       T
 int 0 cmp array arr1:
 F       T       F       T
 int 0 cmp array arr2:
@@ -783,49 +783,49 @@ F       T       F       T
 int 0 cmp keyset ks13:
 F       T       F       T
 int 0 cmp object a1:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object a2:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object a3:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object a4:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object a5:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object a9:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object a11:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object a12:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object a13:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object a14:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object a15:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object a16:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object a17:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object a18:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object b1:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object c1:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object t1:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object t2:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object t3:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object t4:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object t5:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp object xml:
-F       T       T       F
+F       T       F       T
 int 0 cmp vector v1:
 F       T       F       T
 int 0 cmp vector v2:
@@ -839,9 +839,9 @@ F       T       F       T
 int 0 cmp pair p3:
 F       T       F       T
 int 0 cmp closure clo1:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp closure clo2:
-F       T       Err     Err
+F       T       F       T
 int 0 cmp resource f1:
 F       T       F       T
 int 0 cmp resource f2:
@@ -861,7 +861,7 @@ F       T       F       T
 int 99 cmp false:
 F       T       F       T
 int 99 cmp true:
-F       T       T       F
+F       T       F       T
 int 99 cmp int 0:
 F       T       F       T
 int 99 cmp int 99:
@@ -871,9 +871,9 @@ F       T       F       T
 int 99 cmp float 0:
 F       T       F       T
 int 99 cmp double 99:
-F       T       T       F
+F       T       F       T
 int 99 cmp float 99:
-F       T       T       F
+F       T       F       T
 int 99 cmp float -1:
 F       T       F       T
 int 99 cmp INF:
@@ -887,13 +887,13 @@ F       T       F       T
 int 99 cmp "0":
 F       T       F       T
 int 99 cmp "99":
-F       T       T       F
+F       T       F       T
 int 99 cmp "-1":
 F       T       F       T
 int 99 cmp "0.0":
 F       T       F       T
 int 99 cmp "99.0":
-F       T       T       F
+F       T       F       T
 int 99 cmp "-1.0":
 F       T       F       T
 int 99 cmp "foo":
@@ -997,47 +997,47 @@ F       T       F       T
 int 99 cmp keyset ks13:
 F       T       F       T
 int 99 cmp object a1:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object a2:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object a3:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object a4:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object a5:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object a9:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object a11:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object a12:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object a13:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object a14:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object a15:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object a16:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object a17:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object a18:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object b1:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object c1:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object t1:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object t2:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object t3:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object t4:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object t5:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp object xml:
 F       T       F       T
 int 99 cmp vector v1:
@@ -1053,9 +1053,9 @@ F       T       F       T
 int 99 cmp pair p3:
 F       T       F       T
 int 99 cmp closure clo1:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp closure clo2:
-F       T       Err     Err
+F       T       F       T
 int 99 cmp resource f1:
 F       T       F       T
 int 99 cmp resource f2:
@@ -1075,7 +1075,7 @@ F       T       F       T
 int -1 cmp false:
 F       T       F       T
 int -1 cmp true:
-F       T       T       F
+F       T       F       T
 int -1 cmp int 0:
 F       T       F       T
 int -1 cmp int 99:
@@ -1089,7 +1089,7 @@ F       T       F       T
 int -1 cmp float 99:
 F       T       F       T
 int -1 cmp float -1:
-F       T       T       F
+F       T       F       T
 int -1 cmp INF:
 F       T       F       T
 int -1 cmp -INF:
@@ -1103,13 +1103,13 @@ F       T       F       T
 int -1 cmp "99":
 F       T       F       T
 int -1 cmp "-1":
-F       T       T       F
+F       T       F       T
 int -1 cmp "0.0":
 F       T       F       T
 int -1 cmp "99.0":
 F       T       F       T
 int -1 cmp "-1.0":
-F       T       T       F
+F       T       F       T
 int -1 cmp "foo":
 F       T       F       T
 int -1 cmp "BAZ":
@@ -1211,47 +1211,47 @@ F       T       F       T
 int -1 cmp keyset ks13:
 F       T       F       T
 int -1 cmp object a1:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object a2:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object a3:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object a4:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object a5:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object a9:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object a11:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object a12:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object a13:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object a14:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object a15:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object a16:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object a17:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object a18:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object b1:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object c1:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object t1:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object t2:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object t3:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object t4:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object t5:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp object xml:
 F       T       F       T
 int -1 cmp vector v1:
@@ -1267,9 +1267,9 @@ F       T       F       T
 int -1 cmp pair p3:
 F       T       F       T
 int -1 cmp closure clo1:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp closure clo2:
-F       T       Err     Err
+F       T       F       T
 int -1 cmp resource f1:
 F       T       F       T
 int -1 cmp resource f2:
@@ -1285,13 +1285,13 @@ F       T       F       T
 int -1 cmp rclsmeth:
 F       T       F       T
 float 0 cmp null:
-F       T       T       F
+F       T       F       T
 float 0 cmp false:
-F       T       T       F
+F       T       F       T
 float 0 cmp true:
 F       T       F       T
 float 0 cmp int 0:
-F       T       T       F
+F       T       F       T
 float 0 cmp int 99:
 F       T       F       T
 float 0 cmp int -1:
@@ -1311,23 +1311,23 @@ F       T       F       T
 float 0 cmp NAN:
 F       T       F       T
 float 0 cmp "":
-F       T       T       F
+F       T       F       T
 float 0 cmp "0":
-F       T       T       F
+F       T       F       T
 float 0 cmp "99":
 F       T       F       T
 float 0 cmp "-1":
 F       T       F       T
 float 0 cmp "0.0":
-F       T       T       F
+F       T       F       T
 float 0 cmp "99.0":
 F       T       F       T
 float 0 cmp "-1.0":
 F       T       F       T
 float 0 cmp "foo":
-F       T       T       F
+F       T       F       T
 float 0 cmp "BAZ":
-F       T       T       F
+F       T       F       T
 float 0 cmp array arr1:
 F       T       F       T
 float 0 cmp array arr2:
@@ -1425,49 +1425,49 @@ F       T       F       T
 float 0 cmp keyset ks13:
 F       T       F       T
 float 0 cmp object a1:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object a2:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object a3:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object a4:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object a5:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object a9:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object a11:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object a12:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object a13:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object a14:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object a15:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object a16:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object a17:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object a18:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object b1:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object c1:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object t1:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object t2:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object t3:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object t4:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object t5:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp object xml:
-F       T       T       F
+F       T       F       T
 float 0 cmp vector v1:
 F       T       F       T
 float 0 cmp vector v2:
@@ -1481,9 +1481,9 @@ F       T       F       T
 float 0 cmp pair p3:
 F       T       F       T
 float 0 cmp closure clo1:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp closure clo2:
-F       T       Err     Err
+F       T       F       T
 float 0 cmp resource f1:
 F       T       F       T
 float 0 cmp resource f2:
@@ -1503,11 +1503,11 @@ F       T       F       T
 double 99 cmp false:
 F       T       F       T
 double 99 cmp true:
-F       T       T       F
+F       T       F       T
 double 99 cmp int 0:
 F       T       F       T
 double 99 cmp int 99:
-F       T       T       F
+F       T       F       T
 double 99 cmp int -1:
 F       T       F       T
 double 99 cmp float 0:
@@ -1529,13 +1529,13 @@ F       T       F       T
 double 99 cmp "0":
 F       T       F       T
 double 99 cmp "99":
-F       T       T       F
+F       T       F       T
 double 99 cmp "-1":
 F       T       F       T
 double 99 cmp "0.0":
 F       T       F       T
 double 99 cmp "99.0":
-F       T       T       F
+F       T       F       T
 double 99 cmp "-1.0":
 F       T       F       T
 double 99 cmp "foo":
@@ -1639,47 +1639,47 @@ F       T       F       T
 double 99 cmp keyset ks13:
 F       T       F       T
 double 99 cmp object a1:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object a2:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object a3:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object a4:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object a5:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object a9:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object a11:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object a12:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object a13:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object a14:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object a15:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object a16:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object a17:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object a18:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object b1:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object c1:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object t1:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object t2:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object t3:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object t4:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object t5:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp object xml:
 F       T       F       T
 double 99 cmp vector v1:
@@ -1695,9 +1695,9 @@ F       T       F       T
 double 99 cmp pair p3:
 F       T       F       T
 double 99 cmp closure clo1:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp closure clo2:
-F       T       Err     Err
+F       T       F       T
 double 99 cmp resource f1:
 F       T       F       T
 double 99 cmp resource f2:
@@ -1717,11 +1717,11 @@ F       T       F       T
 float 99 cmp false:
 F       T       F       T
 float 99 cmp true:
-F       T       T       F
+F       T       F       T
 float 99 cmp int 0:
 F       T       F       T
 float 99 cmp int 99:
-F       T       T       F
+F       T       F       T
 float 99 cmp int -1:
 F       T       F       T
 float 99 cmp float 0:
@@ -1743,13 +1743,13 @@ F       T       F       T
 float 99 cmp "0":
 F       T       F       T
 float 99 cmp "99":
-F       T       T       F
+F       T       F       T
 float 99 cmp "-1":
 F       T       F       T
 float 99 cmp "0.0":
 F       T       F       T
 float 99 cmp "99.0":
-F       T       T       F
+F       T       F       T
 float 99 cmp "-1.0":
 F       T       F       T
 float 99 cmp "foo":
@@ -1853,47 +1853,47 @@ F       T       F       T
 float 99 cmp keyset ks13:
 F       T       F       T
 float 99 cmp object a1:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object a2:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object a3:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object a4:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object a5:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object a9:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object a11:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object a12:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object a13:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object a14:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object a15:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object a16:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object a17:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object a18:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object b1:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object c1:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object t1:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object t2:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object t3:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object t4:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object t5:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp object xml:
 F       T       F       T
 float 99 cmp vector v1:
@@ -1909,9 +1909,9 @@ F       T       F       T
 float 99 cmp pair p3:
 F       T       F       T
 float 99 cmp closure clo1:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp closure clo2:
-F       T       Err     Err
+F       T       F       T
 float 99 cmp resource f1:
 F       T       F       T
 float 99 cmp resource f2:
@@ -1931,13 +1931,13 @@ F       T       F       T
 float -1 cmp false:
 F       T       F       T
 float -1 cmp true:
-F       T       T       F
+F       T       F       T
 float -1 cmp int 0:
 F       T       F       T
 float -1 cmp int 99:
 F       T       F       T
 float -1 cmp int -1:
-F       T       T       F
+F       T       F       T
 float -1 cmp float 0:
 F       T       F       T
 float -1 cmp double 99:
@@ -1959,13 +1959,13 @@ F       T       F       T
 float -1 cmp "99":
 F       T       F       T
 float -1 cmp "-1":
-F       T       T       F
+F       T       F       T
 float -1 cmp "0.0":
 F       T       F       T
 float -1 cmp "99.0":
 F       T       F       T
 float -1 cmp "-1.0":
-F       T       T       F
+F       T       F       T
 float -1 cmp "foo":
 F       T       F       T
 float -1 cmp "BAZ":
@@ -2067,47 +2067,47 @@ F       T       F       T
 float -1 cmp keyset ks13:
 F       T       F       T
 float -1 cmp object a1:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object a2:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object a3:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object a4:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object a5:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object a9:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object a11:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object a12:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object a13:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object a14:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object a15:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object a16:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object a17:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object a18:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object b1:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object c1:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object t1:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object t2:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object t3:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object t4:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object t5:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp object xml:
 F       T       F       T
 float -1 cmp vector v1:
@@ -2123,9 +2123,9 @@ F       T       F       T
 float -1 cmp pair p3:
 F       T       F       T
 float -1 cmp closure clo1:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp closure clo2:
-F       T       Err     Err
+F       T       F       T
 float -1 cmp resource f1:
 F       T       F       T
 float -1 cmp resource f2:
@@ -2145,7 +2145,7 @@ F       T       F       T
 INF cmp false:
 F       T       F       T
 INF cmp true:
-F       T       T       F
+F       T       F       T
 INF cmp int 0:
 F       T       F       T
 INF cmp int 99:
@@ -2281,47 +2281,47 @@ F       T       F       T
 INF cmp keyset ks13:
 F       T       F       T
 INF cmp object a1:
-F       T       Err     Err
+F       T       F       T
 INF cmp object a2:
-F       T       Err     Err
+F       T       F       T
 INF cmp object a3:
-F       T       Err     Err
+F       T       F       T
 INF cmp object a4:
-F       T       Err     Err
+F       T       F       T
 INF cmp object a5:
-F       T       Err     Err
+F       T       F       T
 INF cmp object a9:
-F       T       Err     Err
+F       T       F       T
 INF cmp object a11:
-F       T       Err     Err
+F       T       F       T
 INF cmp object a12:
-F       T       Err     Err
+F       T       F       T
 INF cmp object a13:
-F       T       Err     Err
+F       T       F       T
 INF cmp object a14:
-F       T       Err     Err
+F       T       F       T
 INF cmp object a15:
-F       T       Err     Err
+F       T       F       T
 INF cmp object a16:
-F       T       Err     Err
+F       T       F       T
 INF cmp object a17:
-F       T       Err     Err
+F       T       F       T
 INF cmp object a18:
-F       T       Err     Err
+F       T       F       T
 INF cmp object b1:
-F       T       Err     Err
+F       T       F       T
 INF cmp object c1:
-F       T       Err     Err
+F       T       F       T
 INF cmp object t1:
-F       T       Err     Err
+F       T       F       T
 INF cmp object t2:
-F       T       Err     Err
+F       T       F       T
 INF cmp object t3:
-F       T       Err     Err
+F       T       F       T
 INF cmp object t4:
-F       T       Err     Err
+F       T       F       T
 INF cmp object t5:
-F       T       Err     Err
+F       T       F       T
 INF cmp object xml:
 F       T       F       T
 INF cmp vector v1:
@@ -2337,9 +2337,9 @@ F       T       F       T
 INF cmp pair p3:
 F       T       F       T
 INF cmp closure clo1:
-F       T       Err     Err
+F       T       F       T
 INF cmp closure clo2:
-F       T       Err     Err
+F       T       F       T
 INF cmp resource f1:
 F       T       F       T
 INF cmp resource f2:
@@ -2359,7 +2359,7 @@ F       T       F       T
 -INF cmp false:
 F       T       F       T
 -INF cmp true:
-F       T       T       F
+F       T       F       T
 -INF cmp int 0:
 F       T       F       T
 -INF cmp int 99:
@@ -2495,47 +2495,47 @@ F       T       F       T
 -INF cmp keyset ks13:
 F       T       F       T
 -INF cmp object a1:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object a2:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object a3:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object a4:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object a5:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object a9:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object a11:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object a12:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object a13:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object a14:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object a15:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object a16:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object a17:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object a18:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object b1:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object c1:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object t1:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object t2:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object t3:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object t4:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object t5:
-F       T       Err     Err
+F       T       F       T
 -INF cmp object xml:
 F       T       F       T
 -INF cmp vector v1:
@@ -2551,9 +2551,9 @@ F       T       F       T
 -INF cmp pair p3:
 F       T       F       T
 -INF cmp closure clo1:
-F       T       Err     Err
+F       T       F       T
 -INF cmp closure clo2:
-F       T       Err     Err
+F       T       F       T
 -INF cmp resource f1:
 F       T       F       T
 -INF cmp resource f2:
@@ -2573,7 +2573,7 @@ F       T       F       T
 NAN cmp false:
 F       T       F       T
 NAN cmp true:
-F       T       T       F
+F       T       F       T
 NAN cmp int 0:
 F       T       F       T
 NAN cmp int 99:
@@ -2709,47 +2709,47 @@ F       T       F       T
 NAN cmp keyset ks13:
 F       T       F       T
 NAN cmp object a1:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object a2:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object a3:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object a4:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object a5:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object a9:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object a11:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object a12:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object a13:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object a14:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object a15:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object a16:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object a17:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object a18:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object b1:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object c1:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object t1:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object t2:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object t3:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object t4:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object t5:
-F       T       Err     Err
+F       T       F       T
 NAN cmp object xml:
 F       T       F       T
 NAN cmp vector v1:
@@ -2765,9 +2765,9 @@ F       T       F       T
 NAN cmp pair p3:
 F       T       F       T
 NAN cmp closure clo1:
-F       T       Err     Err
+F       T       F       T
 NAN cmp closure clo2:
-F       T       Err     Err
+F       T       F       T
 NAN cmp resource f1:
 F       T       F       T
 NAN cmp resource f2:
@@ -2783,19 +2783,19 @@ F       T       F       T
 NAN cmp rclsmeth:
 F       T       F       T
 "" cmp null:
-F       T       T       F
+F       T       F       T
 "" cmp false:
-F       T       T       F
+F       T       F       T
 "" cmp true:
 F       T       F       T
 "" cmp int 0:
-F       T       T       F
+F       T       F       T
 "" cmp int 99:
 F       T       F       T
 "" cmp int -1:
 F       T       F       T
 "" cmp float 0:
-F       T       T       F
+F       T       F       T
 "" cmp double 99:
 F       T       F       T
 "" cmp float 99:
@@ -2965,7 +2965,7 @@ F       T       F       T
 "" cmp object t5:
 F       T       F       T
 "" cmp object xml:
-F       T       T       F
+F       T       F       T
 "" cmp vector v1:
 F       T       F       T
 "" cmp vector v2:
@@ -2999,17 +2999,17 @@ F       T       F       T
 "0" cmp null:
 F       T       F       T
 "0" cmp false:
-F       T       T       F
+F       T       F       T
 "0" cmp true:
 F       T       F       T
 "0" cmp int 0:
-F       T       T       F
+F       T       F       T
 "0" cmp int 99:
 F       T       F       T
 "0" cmp int -1:
 F       T       F       T
 "0" cmp float 0:
-F       T       T       F
+F       T       F       T
 "0" cmp double 99:
 F       T       F       T
 "0" cmp float 99:
@@ -3031,7 +3031,7 @@ F       T       F       T
 "0" cmp "-1":
 F       T       F       T
 "0" cmp "0.0":
-F       T       T       F
+F       T       F       T
 "0" cmp "99.0":
 F       T       F       T
 "0" cmp "-1.0":
@@ -3215,19 +3215,19 @@ F       T       F       T
 "99" cmp false:
 F       T       F       T
 "99" cmp true:
-F       T       T       F
+F       T       F       T
 "99" cmp int 0:
 F       T       F       T
 "99" cmp int 99:
-F       T       T       F
+F       T       F       T
 "99" cmp int -1:
 F       T       F       T
 "99" cmp float 0:
 F       T       F       T
 "99" cmp double 99:
-F       T       T       F
+F       T       F       T
 "99" cmp float 99:
-F       T       T       F
+F       T       F       T
 "99" cmp float -1:
 F       T       F       T
 "99" cmp INF:
@@ -3247,7 +3247,7 @@ F       T       F       T
 "99" cmp "0.0":
 F       T       F       T
 "99" cmp "99.0":
-F       T       T       F
+F       T       F       T
 "99" cmp "-1.0":
 F       T       F       T
 "99" cmp "foo":
@@ -3429,13 +3429,13 @@ F       T       F       T
 "-1" cmp false:
 F       T       F       T
 "-1" cmp true:
-F       T       T       F
+F       T       F       T
 "-1" cmp int 0:
 F       T       F       T
 "-1" cmp int 99:
 F       T       F       T
 "-1" cmp int -1:
-F       T       T       F
+F       T       F       T
 "-1" cmp float 0:
 F       T       F       T
 "-1" cmp double 99:
@@ -3443,7 +3443,7 @@ F       T       F       T
 "-1" cmp float 99:
 F       T       F       T
 "-1" cmp float -1:
-F       T       T       F
+F       T       F       T
 "-1" cmp INF:
 F       T       F       T
 "-1" cmp -INF:
@@ -3463,7 +3463,7 @@ F       T       F       T
 "-1" cmp "99.0":
 F       T       F       T
 "-1" cmp "-1.0":
-F       T       T       F
+F       T       F       T
 "-1" cmp "foo":
 F       T       F       T
 "-1" cmp "BAZ":
@@ -3643,15 +3643,15 @@ F       T       F       T
 "0.0" cmp false:
 F       T       F       T
 "0.0" cmp true:
-F       T       T       F
+F       T       F       T
 "0.0" cmp int 0:
-F       T       T       F
+F       T       F       T
 "0.0" cmp int 99:
 F       T       F       T
 "0.0" cmp int -1:
 F       T       F       T
 "0.0" cmp float 0:
-F       T       T       F
+F       T       F       T
 "0.0" cmp double 99:
 F       T       F       T
 "0.0" cmp float 99:
@@ -3667,7 +3667,7 @@ F       T       F       T
 "0.0" cmp "":
 F       T       F       T
 "0.0" cmp "0":
-F       T       T       F
+F       T       F       T
 "0.0" cmp "99":
 F       T       F       T
 "0.0" cmp "-1":
@@ -3857,19 +3857,19 @@ F       T       F       T
 "99.0" cmp false:
 F       T       F       T
 "99.0" cmp true:
-F       T       T       F
+F       T       F       T
 "99.0" cmp int 0:
 F       T       F       T
 "99.0" cmp int 99:
-F       T       T       F
+F       T       F       T
 "99.0" cmp int -1:
 F       T       F       T
 "99.0" cmp float 0:
 F       T       F       T
 "99.0" cmp double 99:
-F       T       T       F
+F       T       F       T
 "99.0" cmp float 99:
-F       T       T       F
+F       T       F       T
 "99.0" cmp float -1:
 F       T       F       T
 "99.0" cmp INF:
@@ -3883,7 +3883,7 @@ F       T       F       T
 "99.0" cmp "0":
 F       T       F       T
 "99.0" cmp "99":
-F       T       T       F
+F       T       F       T
 "99.0" cmp "-1":
 F       T       F       T
 "99.0" cmp "0.0":
@@ -4071,13 +4071,13 @@ F       T       F       T
 "-1.0" cmp false:
 F       T       F       T
 "-1.0" cmp true:
-F       T       T       F
+F       T       F       T
 "-1.0" cmp int 0:
 F       T       F       T
 "-1.0" cmp int 99:
 F       T       F       T
 "-1.0" cmp int -1:
-F       T       T       F
+F       T       F       T
 "-1.0" cmp float 0:
 F       T       F       T
 "-1.0" cmp double 99:
@@ -4085,7 +4085,7 @@ F       T       F       T
 "-1.0" cmp float 99:
 F       T       F       T
 "-1.0" cmp float -1:
-F       T       T       F
+F       T       F       T
 "-1.0" cmp INF:
 F       T       F       T
 "-1.0" cmp -INF:
@@ -4099,7 +4099,7 @@ F       T       F       T
 "-1.0" cmp "99":
 F       T       F       T
 "-1.0" cmp "-1":
-F       T       T       F
+F       T       F       T
 "-1.0" cmp "0.0":
 F       T       F       T
 "-1.0" cmp "99.0":
@@ -4285,15 +4285,15 @@ F       T       F       T
 "foo" cmp false:
 F       T       F       T
 "foo" cmp true:
-F       T       T       F
+F       T       F       T
 "foo" cmp int 0:
-F       T       T       F
+F       T       F       T
 "foo" cmp int 99:
 F       T       F       T
 "foo" cmp int -1:
 F       T       F       T
 "foo" cmp float 0:
-F       T       T       F
+F       T       F       T
 "foo" cmp double 99:
 F       T       F       T
 "foo" cmp float 99:
@@ -4499,15 +4499,15 @@ F       T       F       T
 "BAZ" cmp false:
 F       T       F       T
 "BAZ" cmp true:
-F       T       T       F
+F       T       F       T
 "BAZ" cmp int 0:
-F       T       T       F
+F       T       F       T
 "BAZ" cmp int 99:
 F       T       F       T
 "BAZ" cmp int -1:
 F       T       F       T
 "BAZ" cmp float 0:
-F       T       T       F
+F       T       F       T
 "BAZ" cmp double 99:
 F       T       F       T
 "BAZ" cmp float 99:
@@ -4709,9 +4709,9 @@ F       T       F       T
 "BAZ" cmp rclsmeth:
 F       T       F       T
 array arr1 cmp null:
-F       T       T       F
+F       T       F       T
 array arr1 cmp false:
-F       T       T       F
+F       T       F       T
 array arr1 cmp true:
 F       T       F       T
 array arr1 cmp int 0:
@@ -4927,7 +4927,7 @@ F       T       F       T
 array arr2 cmp false:
 F       T       F       T
 array arr2 cmp true:
-F       T       T       F
+F       T       F       T
 array arr2 cmp int 0:
 F       T       F       T
 array arr2 cmp int 99:
@@ -5013,9 +5013,9 @@ F       T       F       T
 array arr2 cmp vec vec4:
 F       T       F       T
 array arr2 cmp vec vec7:
-F       T       Err     Err
+F       T       F       T
 array arr2 cmp vec vec8:
-F       T       Err     Err
+F       T       F       T
 array arr2 cmp vec vec9:
 F       T       F       T
 array arr2 cmp vec vec10:
@@ -5141,7 +5141,7 @@ F       T       F       T
 array arr3 cmp false:
 F       T       F       T
 array arr3 cmp true:
-F       T       T       F
+F       T       F       T
 array arr3 cmp int 0:
 F       T       F       T
 array arr3 cmp int 99:
@@ -5355,7 +5355,7 @@ F       T       F       T
 array arr4 cmp false:
 F       T       F       T
 array arr4 cmp true:
-F       T       T       F
+F       T       F       T
 array arr4 cmp int 0:
 F       T       F       T
 array arr4 cmp int 99:
@@ -5569,7 +5569,7 @@ F       T       F       T
 array arr5 cmp false:
 F       T       F       T
 array arr5 cmp true:
-F       T       T       F
+F       T       F       T
 array arr5 cmp int 0:
 F       T       F       T
 array arr5 cmp int 99:
@@ -5783,7 +5783,7 @@ F       T       F       T
 array arr6 cmp false:
 F       T       F       T
 array arr6 cmp true:
-F       T       T       F
+F       T       F       T
 array arr6 cmp int 0:
 F       T       F       T
 array arr6 cmp int 99:
@@ -5997,7 +5997,7 @@ F       T       F       T
 array arr7 cmp false:
 F       T       F       T
 array arr7 cmp true:
-F       T       T       F
+F       T       F       T
 array arr7 cmp int 0:
 F       T       F       T
 array arr7 cmp int 99:
@@ -6077,7 +6077,7 @@ F       T       F       T
 array arr7 cmp vec vec1:
 F       T       F       T
 array arr7 cmp vec vec2:
-F       T       Err     Err
+F       T       F       T
 array arr7 cmp vec vec3:
 F       T       F       T
 array arr7 cmp vec vec4:
@@ -6211,7 +6211,7 @@ F       T       F       T
 array arr8 cmp false:
 F       T       F       T
 array arr8 cmp true:
-F       T       T       F
+F       T       F       T
 array arr8 cmp int 0:
 F       T       F       T
 array arr8 cmp int 99:
@@ -6291,7 +6291,7 @@ F       T       F       T
 array arr8 cmp vec vec1:
 F       T       F       T
 array arr8 cmp vec vec2:
-F       T       Err     Err
+F       T       F       T
 array arr8 cmp vec vec3:
 F       T       F       T
 array arr8 cmp vec vec4:
@@ -6425,7 +6425,7 @@ F       T       F       T
 array arr9 cmp false:
 F       T       F       T
 array arr9 cmp true:
-F       T       T       F
+F       T       F       T
 array arr9 cmp int 0:
 F       T       F       T
 array arr9 cmp int 99:
@@ -6505,7 +6505,7 @@ F       T       F       T
 array arr9 cmp vec vec1:
 F       T       F       T
 array arr9 cmp vec vec2:
-F       T       Err     Err
+F       T       F       T
 array arr9 cmp vec vec3:
 F       T       F       T
 array arr9 cmp vec vec4:
@@ -6639,7 +6639,7 @@ F       T       F       T
 array arr12 cmp false:
 F       T       F       T
 array arr12 cmp true:
-F       T       T       F
+F       T       F       T
 array arr12 cmp int 0:
 F       T       F       T
 array arr12 cmp int 99:
@@ -6853,7 +6853,7 @@ F       T       F       T
 array arr13 cmp false:
 F       T       F       T
 array arr13 cmp true:
-F       T       T       F
+F       T       F       T
 array arr13 cmp int 0:
 F       T       F       T
 array arr13 cmp int 99:
@@ -7067,7 +7067,7 @@ F       T       F       T
 array arr14 cmp false:
 F       T       F       T
 array arr14 cmp true:
-F       T       T       F
+F       T       F       T
 array arr14 cmp int 0:
 F       T       F       T
 array arr14 cmp int 99:
@@ -7281,7 +7281,7 @@ F       T       F       T
 array arr15 cmp false:
 F       T       F       T
 array arr15 cmp true:
-F       T       T       F
+F       T       F       T
 array arr15 cmp int 0:
 F       T       F       T
 array arr15 cmp int 99:
@@ -7495,7 +7495,7 @@ F       T       F       T
 array arr16 cmp false:
 F       T       F       T
 array arr16 cmp true:
-F       T       T       F
+F       T       F       T
 array arr16 cmp int 0:
 F       T       F       T
 array arr16 cmp int 99:
@@ -7709,7 +7709,7 @@ F       T       F       T
 array arr17 cmp false:
 F       T       F       T
 array arr17 cmp true:
-F       T       T       F
+F       T       F       T
 array arr17 cmp int 0:
 F       T       F       T
 array arr17 cmp int 99:
@@ -7923,7 +7923,7 @@ F       T       F       T
 array arr18 cmp false:
 F       T       F       T
 array arr18 cmp true:
-F       T       T       F
+F       T       F       T
 array arr18 cmp int 0:
 F       T       F       T
 array arr18 cmp int 99:
@@ -8137,7 +8137,7 @@ F       T       F       T
 array arr19 cmp false:
 F       T       F       T
 array arr19 cmp true:
-F       T       T       F
+F       T       F       T
 array arr19 cmp int 0:
 F       T       F       T
 array arr19 cmp int 99:
@@ -8351,7 +8351,7 @@ F       T       F       T
 array arr20 cmp false:
 F       T       F       T
 array arr20 cmp true:
-F       T       T       F
+F       T       F       T
 array arr20 cmp int 0:
 F       T       F       T
 array arr20 cmp int 99:
@@ -8565,7 +8565,7 @@ F       T       F       T
 array arr21 cmp false:
 F       T       F       T
 array arr21 cmp true:
-F       T       T       F
+F       T       F       T
 array arr21 cmp int 0:
 F       T       F       T
 array arr21 cmp int 99:
@@ -8775,9 +8775,9 @@ F       T       F       T
 array arr21 cmp rclsmeth:
 F       T       F       T
 vec vec1 cmp null:
-F       T       T       F
+F       T       F       T
 vec vec1 cmp false:
-F       T       T       F
+F       T       F       T
 vec vec1 cmp true:
 F       T       F       T
 vec vec1 cmp int 0:
@@ -8993,7 +8993,7 @@ F       T       F       T
 vec vec2 cmp false:
 F       T       F       T
 vec vec2 cmp true:
-F       T       T       F
+F       T       F       T
 vec vec2 cmp int 0:
 F       T       F       T
 vec vec2 cmp int 99:
@@ -9045,11 +9045,11 @@ F       T       F       T
 vec vec2 cmp array arr6:
 F       T       F       T
 vec vec2 cmp array arr7:
-F       T       Err     Err
+F       T       F       T
 vec vec2 cmp array arr8:
-F       T       Err     Err
+F       T       F       T
 vec vec2 cmp array arr9:
-F       T       Err     Err
+F       T       F       T
 vec vec2 cmp array arr12:
 F       T       F       T
 vec vec2 cmp array arr13:
@@ -9207,7 +9207,7 @@ F       T       F       T
 vec vec3 cmp false:
 F       T       F       T
 vec vec3 cmp true:
-F       T       T       F
+F       T       F       T
 vec vec3 cmp int 0:
 F       T       F       T
 vec vec3 cmp int 99:
@@ -9421,7 +9421,7 @@ F       T       F       T
 vec vec4 cmp false:
 F       T       F       T
 vec vec4 cmp true:
-F       T       T       F
+F       T       F       T
 vec vec4 cmp int 0:
 F       T       F       T
 vec vec4 cmp int 99:
@@ -9635,7 +9635,7 @@ F       T       F       T
 vec vec7 cmp false:
 F       T       F       T
 vec vec7 cmp true:
-F       T       T       F
+F       T       F       T
 vec vec7 cmp int 0:
 F       T       F       T
 vec vec7 cmp int 99:
@@ -9677,7 +9677,7 @@ F       T       F       T
 vec vec7 cmp array arr1:
 F       T       F       T
 vec vec7 cmp array arr2:
-F       T       Err     Err
+F       T       F       T
 vec vec7 cmp array arr3:
 F       T       F       T
 vec vec7 cmp array arr4:
@@ -9849,7 +9849,7 @@ F       T       F       T
 vec vec8 cmp false:
 F       T       F       T
 vec vec8 cmp true:
-F       T       T       F
+F       T       F       T
 vec vec8 cmp int 0:
 F       T       F       T
 vec vec8 cmp int 99:
@@ -9891,7 +9891,7 @@ F       T       F       T
 vec vec8 cmp array arr1:
 F       T       F       T
 vec vec8 cmp array arr2:
-F       T       Err     Err
+F       T       F       T
 vec vec8 cmp array arr3:
 F       T       F       T
 vec vec8 cmp array arr4:
@@ -10063,7 +10063,7 @@ F       T       F       T
 vec vec9 cmp false:
 F       T       F       T
 vec vec9 cmp true:
-F       T       T       F
+F       T       F       T
 vec vec9 cmp int 0:
 F       T       F       T
 vec vec9 cmp int 99:
@@ -10277,7 +10277,7 @@ F       T       F       T
 vec vec10 cmp false:
 F       T       F       T
 vec vec10 cmp true:
-F       T       T       F
+F       T       F       T
 vec vec10 cmp int 0:
 F       T       F       T
 vec vec10 cmp int 99:
@@ -10487,9 +10487,9 @@ F       T       F       T
 vec vec10 cmp rclsmeth:
 F       T       F       T
 dict dict1 cmp null:
-F       T       T       F
+F       T       F       T
 dict dict1 cmp false:
-F       T       T       F
+F       T       F       T
 dict dict1 cmp true:
 F       T       F       T
 dict dict1 cmp int 0:
@@ -10705,7 +10705,7 @@ F       T       F       T
 dict dict2 cmp false:
 F       T       F       T
 dict dict2 cmp true:
-F       T       T       F
+F       T       F       T
 dict dict2 cmp int 0:
 F       T       F       T
 dict dict2 cmp int 99:
@@ -10919,7 +10919,7 @@ F       T       F       T
 dict dict3 cmp false:
 F       T       F       T
 dict dict3 cmp true:
-F       T       T       F
+F       T       F       T
 dict dict3 cmp int 0:
 F       T       F       T
 dict dict3 cmp int 99:
@@ -11133,7 +11133,7 @@ F       T       F       T
 dict dict4 cmp false:
 F       T       F       T
 dict dict4 cmp true:
-F       T       T       F
+F       T       F       T
 dict dict4 cmp int 0:
 F       T       F       T
 dict dict4 cmp int 99:
@@ -11347,7 +11347,7 @@ F       T       F       T
 dict dict5 cmp false:
 F       T       F       T
 dict dict5 cmp true:
-F       T       T       F
+F       T       F       T
 dict dict5 cmp int 0:
 F       T       F       T
 dict dict5 cmp int 99:
@@ -11561,7 +11561,7 @@ F       T       F       T
 dict dict8 cmp false:
 F       T       F       T
 dict dict8 cmp true:
-F       T       T       F
+F       T       F       T
 dict dict8 cmp int 0:
 F       T       F       T
 dict dict8 cmp int 99:
@@ -11775,7 +11775,7 @@ F       T       F       T
 dict dict9 cmp false:
 F       T       F       T
 dict dict9 cmp true:
-F       T       T       F
+F       T       F       T
 dict dict9 cmp int 0:
 F       T       F       T
 dict dict9 cmp int 99:
@@ -11989,7 +11989,7 @@ F       T       F       T
 dict dict10 cmp false:
 F       T       F       T
 dict dict10 cmp true:
-F       T       T       F
+F       T       F       T
 dict dict10 cmp int 0:
 F       T       F       T
 dict dict10 cmp int 99:
@@ -12199,9 +12199,9 @@ F       T       F       T
 dict dict10 cmp rclsmeth:
 F       T       F       T
 keyset ks1 cmp null:
-F       T       T       F
+F       T       F       T
 keyset ks1 cmp false:
-F       T       T       F
+F       T       F       T
 keyset ks1 cmp true:
 F       T       F       T
 keyset ks1 cmp int 0:
@@ -12417,7 +12417,7 @@ F       T       F       T
 keyset ks2 cmp false:
 F       T       F       T
 keyset ks2 cmp true:
-F       T       T       F
+F       T       F       T
 keyset ks2 cmp int 0:
 F       T       F       T
 keyset ks2 cmp int 99:
@@ -12631,7 +12631,7 @@ F       T       F       T
 keyset ks3 cmp false:
 F       T       F       T
 keyset ks3 cmp true:
-F       T       T       F
+F       T       F       T
 keyset ks3 cmp int 0:
 F       T       F       T
 keyset ks3 cmp int 99:
@@ -12845,7 +12845,7 @@ F       T       F       T
 keyset ks4 cmp false:
 F       T       F       T
 keyset ks4 cmp true:
-F       T       T       F
+F       T       F       T
 keyset ks4 cmp int 0:
 F       T       F       T
 keyset ks4 cmp int 99:
@@ -13059,7 +13059,7 @@ F       T       F       T
 keyset ks5 cmp false:
 F       T       F       T
 keyset ks5 cmp true:
-F       T       T       F
+F       T       F       T
 keyset ks5 cmp int 0:
 F       T       F       T
 keyset ks5 cmp int 99:
@@ -13273,7 +13273,7 @@ F       T       F       T
 keyset ks6 cmp false:
 F       T       F       T
 keyset ks6 cmp true:
-F       T       T       F
+F       T       F       T
 keyset ks6 cmp int 0:
 F       T       F       T
 keyset ks6 cmp int 99:
@@ -13487,7 +13487,7 @@ F       T       F       T
 keyset ks7 cmp false:
 F       T       F       T
 keyset ks7 cmp true:
-F       T       T       F
+F       T       F       T
 keyset ks7 cmp int 0:
 F       T       F       T
 keyset ks7 cmp int 99:
@@ -13701,7 +13701,7 @@ F       T       F       T
 keyset ks8 cmp false:
 F       T       F       T
 keyset ks8 cmp true:
-F       T       T       F
+F       T       F       T
 keyset ks8 cmp int 0:
 F       T       F       T
 keyset ks8 cmp int 99:
@@ -13915,7 +13915,7 @@ F       T       F       T
 keyset ks9 cmp false:
 F       T       F       T
 keyset ks9 cmp true:
-F       T       T       F
+F       T       F       T
 keyset ks9 cmp int 0:
 F       T       F       T
 keyset ks9 cmp int 99:
@@ -14129,7 +14129,7 @@ F       T       F       T
 keyset ks10 cmp false:
 F       T       F       T
 keyset ks10 cmp true:
-F       T       T       F
+F       T       F       T
 keyset ks10 cmp int 0:
 F       T       F       T
 keyset ks10 cmp int 99:
@@ -14343,7 +14343,7 @@ F       T       F       T
 keyset ks11 cmp false:
 F       T       F       T
 keyset ks11 cmp true:
-F       T       T       F
+F       T       F       T
 keyset ks11 cmp int 0:
 F       T       F       T
 keyset ks11 cmp int 99:
@@ -14557,7 +14557,7 @@ F       T       F       T
 keyset ks12 cmp false:
 F       T       F       T
 keyset ks12 cmp true:
-F       T       T       F
+F       T       F       T
 keyset ks12 cmp int 0:
 F       T       F       T
 keyset ks12 cmp int 99:
@@ -14771,7 +14771,7 @@ F       T       F       T
 keyset ks13 cmp false:
 F       T       F       T
 keyset ks13 cmp true:
-F       T       T       F
+F       T       F       T
 keyset ks13 cmp int 0:
 F       T       F       T
 keyset ks13 cmp int 99:
@@ -14985,27 +14985,27 @@ F       T       F       T
 object a1 cmp false:
 F       T       F       T
 object a1 cmp true:
-F       T       T       F
+F       T       F       T
 object a1 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object a1 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object a1 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object a1 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object a1 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object a1 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object a1 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object a1 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object a1 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object a1 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object a1 cmp "":
 F       T       F       T
 object a1 cmp "0":
@@ -15199,27 +15199,27 @@ F       T       F       T
 object a2 cmp false:
 F       T       F       T
 object a2 cmp true:
-F       T       T       F
+F       T       F       T
 object a2 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object a2 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object a2 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object a2 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object a2 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object a2 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object a2 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object a2 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object a2 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object a2 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object a2 cmp "":
 F       T       F       T
 object a2 cmp "0":
@@ -15413,27 +15413,27 @@ F       T       F       T
 object a3 cmp false:
 F       T       F       T
 object a3 cmp true:
-F       T       T       F
+F       T       F       T
 object a3 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object a3 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object a3 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object a3 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object a3 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object a3 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object a3 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object a3 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object a3 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object a3 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object a3 cmp "":
 F       T       F       T
 object a3 cmp "0":
@@ -15559,7 +15559,7 @@ F       T       T       F
 object a3 cmp object a5:
 F       T       F       T
 object a3 cmp object a9:
-F       T       Err     Err
+F       T       F       T
 object a3 cmp object a11:
 F       T       F       T
 object a3 cmp object a12:
@@ -15573,9 +15573,9 @@ F       T       F       T
 object a3 cmp object a16:
 F       T       F       T
 object a3 cmp object a17:
-F       T       Err     Err
+F       T       F       T
 object a3 cmp object a18:
-F       T       Err     Err
+F       T       F       T
 object a3 cmp object b1:
 F       T       F       T
 object a3 cmp object c1:
@@ -15627,27 +15627,27 @@ F       T       F       T
 object a4 cmp false:
 F       T       F       T
 object a4 cmp true:
-F       T       T       F
+F       T       F       T
 object a4 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object a4 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object a4 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object a4 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object a4 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object a4 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object a4 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object a4 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object a4 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object a4 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object a4 cmp "":
 F       T       F       T
 object a4 cmp "0":
@@ -15773,7 +15773,7 @@ T       F       T       F
 object a4 cmp object a5:
 F       T       F       T
 object a4 cmp object a9:
-F       T       Err     Err
+F       T       F       T
 object a4 cmp object a11:
 F       T       F       T
 object a4 cmp object a12:
@@ -15787,9 +15787,9 @@ F       T       F       T
 object a4 cmp object a16:
 F       T       F       T
 object a4 cmp object a17:
-F       T       Err     Err
+F       T       F       T
 object a4 cmp object a18:
-F       T       Err     Err
+F       T       F       T
 object a4 cmp object b1:
 F       T       F       T
 object a4 cmp object c1:
@@ -15841,27 +15841,27 @@ F       T       F       T
 object a5 cmp false:
 F       T       F       T
 object a5 cmp true:
-F       T       T       F
+F       T       F       T
 object a5 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object a5 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object a5 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object a5 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object a5 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object a5 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object a5 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object a5 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object a5 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object a5 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object a5 cmp "":
 F       T       F       T
 object a5 cmp "0":
@@ -16055,27 +16055,27 @@ F       T       F       T
 object a9 cmp false:
 F       T       F       T
 object a9 cmp true:
-F       T       T       F
+F       T       F       T
 object a9 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp "":
 F       T       F       T
 object a9 cmp "0":
@@ -16195,23 +16195,23 @@ F       T       F       T
 object a9 cmp object a2:
 F       T       F       T
 object a9 cmp object a3:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp object a4:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp object a5:
 F       T       F       T
 object a9 cmp object a9:
 T       F       T       F
 object a9 cmp object a11:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp object a12:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp object a13:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp object a14:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp object a15:
-F       T       Err     Err
+F       T       F       T
 object a9 cmp object a16:
 F       T       F       T
 object a9 cmp object a17:
@@ -16269,27 +16269,27 @@ F       T       F       T
 object a11 cmp false:
 F       T       F       T
 object a11 cmp true:
-F       T       T       F
+F       T       F       T
 object a11 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object a11 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object a11 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object a11 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object a11 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object a11 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object a11 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object a11 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object a11 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object a11 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object a11 cmp "":
 F       T       F       T
 object a11 cmp "0":
@@ -16415,7 +16415,7 @@ F       T       F       T
 object a11 cmp object a5:
 F       T       F       T
 object a11 cmp object a9:
-F       T       Err     Err
+F       T       F       T
 object a11 cmp object a11:
 T       F       T       F
 object a11 cmp object a12:
@@ -16429,9 +16429,9 @@ F       T       F       T
 object a11 cmp object a16:
 F       T       F       T
 object a11 cmp object a17:
-F       T       Err     Err
+F       T       F       T
 object a11 cmp object a18:
-F       T       Err     Err
+F       T       F       T
 object a11 cmp object b1:
 F       T       F       T
 object a11 cmp object c1:
@@ -16483,27 +16483,27 @@ F       T       F       T
 object a12 cmp false:
 F       T       F       T
 object a12 cmp true:
-F       T       T       F
+F       T       F       T
 object a12 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object a12 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object a12 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object a12 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object a12 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object a12 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object a12 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object a12 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object a12 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object a12 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object a12 cmp "":
 F       T       F       T
 object a12 cmp "0":
@@ -16629,7 +16629,7 @@ F       T       F       T
 object a12 cmp object a5:
 F       T       F       T
 object a12 cmp object a9:
-F       T       Err     Err
+F       T       F       T
 object a12 cmp object a11:
 F       T       T       F
 object a12 cmp object a12:
@@ -16643,9 +16643,9 @@ F       T       F       T
 object a12 cmp object a16:
 F       T       F       T
 object a12 cmp object a17:
-F       T       Err     Err
+F       T       F       T
 object a12 cmp object a18:
-F       T       Err     Err
+F       T       F       T
 object a12 cmp object b1:
 F       T       F       T
 object a12 cmp object c1:
@@ -16697,27 +16697,27 @@ F       T       F       T
 object a13 cmp false:
 F       T       F       T
 object a13 cmp true:
-F       T       T       F
+F       T       F       T
 object a13 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object a13 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object a13 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object a13 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object a13 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object a13 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object a13 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object a13 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object a13 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object a13 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object a13 cmp "":
 F       T       F       T
 object a13 cmp "0":
@@ -16843,7 +16843,7 @@ F       T       F       T
 object a13 cmp object a5:
 F       T       F       T
 object a13 cmp object a9:
-F       T       Err     Err
+F       T       F       T
 object a13 cmp object a11:
 F       T       F       T
 object a13 cmp object a12:
@@ -16857,9 +16857,9 @@ F       T       T       F
 object a13 cmp object a16:
 F       T       F       T
 object a13 cmp object a17:
-F       T       Err     Err
+F       T       F       T
 object a13 cmp object a18:
-F       T       Err     Err
+F       T       F       T
 object a13 cmp object b1:
 F       T       F       T
 object a13 cmp object c1:
@@ -16911,27 +16911,27 @@ F       T       F       T
 object a14 cmp false:
 F       T       F       T
 object a14 cmp true:
-F       T       T       F
+F       T       F       T
 object a14 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object a14 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object a14 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object a14 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object a14 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object a14 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object a14 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object a14 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object a14 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object a14 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object a14 cmp "":
 F       T       F       T
 object a14 cmp "0":
@@ -17057,7 +17057,7 @@ F       T       F       T
 object a14 cmp object a5:
 F       T       F       T
 object a14 cmp object a9:
-F       T       Err     Err
+F       T       F       T
 object a14 cmp object a11:
 F       T       Err     Err
 object a14 cmp object a12:
@@ -17071,9 +17071,9 @@ F       T       Err     Err
 object a14 cmp object a16:
 F       T       F       T
 object a14 cmp object a17:
-F       T       Err     Err
+F       T       F       T
 object a14 cmp object a18:
-F       T       Err     Err
+F       T       F       T
 object a14 cmp object b1:
 F       T       F       T
 object a14 cmp object c1:
@@ -17125,27 +17125,27 @@ F       T       F       T
 object a15 cmp false:
 F       T       F       T
 object a15 cmp true:
-F       T       T       F
+F       T       F       T
 object a15 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object a15 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object a15 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object a15 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object a15 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object a15 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object a15 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object a15 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object a15 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object a15 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object a15 cmp "":
 F       T       F       T
 object a15 cmp "0":
@@ -17271,7 +17271,7 @@ F       T       F       T
 object a15 cmp object a5:
 F       T       F       T
 object a15 cmp object a9:
-F       T       Err     Err
+F       T       F       T
 object a15 cmp object a11:
 F       T       F       T
 object a15 cmp object a12:
@@ -17285,9 +17285,9 @@ T       F       T       F
 object a15 cmp object a16:
 F       T       F       T
 object a15 cmp object a17:
-F       T       Err     Err
+F       T       F       T
 object a15 cmp object a18:
-F       T       Err     Err
+F       T       F       T
 object a15 cmp object b1:
 F       T       F       T
 object a15 cmp object c1:
@@ -17339,27 +17339,27 @@ F       T       F       T
 object a16 cmp false:
 F       T       F       T
 object a16 cmp true:
-F       T       T       F
+F       T       F       T
 object a16 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object a16 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object a16 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object a16 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object a16 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object a16 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object a16 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object a16 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object a16 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object a16 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object a16 cmp "":
 F       T       F       T
 object a16 cmp "0":
@@ -17553,27 +17553,27 @@ F       T       F       T
 object a17 cmp false:
 F       T       F       T
 object a17 cmp true:
-F       T       T       F
+F       T       F       T
 object a17 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp "":
 F       T       F       T
 object a17 cmp "0":
@@ -17693,23 +17693,23 @@ F       T       F       T
 object a17 cmp object a2:
 F       T       F       T
 object a17 cmp object a3:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp object a4:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp object a5:
 F       T       F       T
 object a17 cmp object a9:
 F       T       F       T
 object a17 cmp object a11:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp object a12:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp object a13:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp object a14:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp object a15:
-F       T       Err     Err
+F       T       F       T
 object a17 cmp object a16:
 F       T       F       T
 object a17 cmp object a17:
@@ -17767,27 +17767,27 @@ F       T       F       T
 object a18 cmp false:
 F       T       F       T
 object a18 cmp true:
-F       T       T       F
+F       T       F       T
 object a18 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp "":
 F       T       F       T
 object a18 cmp "0":
@@ -17907,23 +17907,23 @@ F       T       F       T
 object a18 cmp object a2:
 F       T       F       T
 object a18 cmp object a3:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp object a4:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp object a5:
 F       T       F       T
 object a18 cmp object a9:
 F       T       F       T
 object a18 cmp object a11:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp object a12:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp object a13:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp object a14:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp object a15:
-F       T       Err     Err
+F       T       F       T
 object a18 cmp object a16:
 F       T       F       T
 object a18 cmp object a17:
@@ -17981,27 +17981,27 @@ F       T       F       T
 object b1 cmp false:
 F       T       F       T
 object b1 cmp true:
-F       T       T       F
+F       T       F       T
 object b1 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object b1 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object b1 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object b1 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object b1 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object b1 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object b1 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object b1 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object b1 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object b1 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object b1 cmp "":
 F       T       F       T
 object b1 cmp "0":
@@ -18195,27 +18195,27 @@ F       T       F       T
 object c1 cmp false:
 F       T       F       T
 object c1 cmp true:
-F       T       T       F
+F       T       F       T
 object c1 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object c1 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object c1 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object c1 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object c1 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object c1 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object c1 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object c1 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object c1 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object c1 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object c1 cmp "":
 F       T       F       T
 object c1 cmp "0":
@@ -18409,27 +18409,27 @@ F       T       F       T
 object t1 cmp false:
 F       T       F       T
 object t1 cmp true:
-F       T       T       F
+F       T       F       T
 object t1 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object t1 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object t1 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object t1 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object t1 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object t1 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object t1 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object t1 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object t1 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object t1 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object t1 cmp "":
 F       T       F       T
 object t1 cmp "0":
@@ -18623,27 +18623,27 @@ F       T       F       T
 object t2 cmp false:
 F       T       F       T
 object t2 cmp true:
-F       T       T       F
+F       T       F       T
 object t2 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object t2 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object t2 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object t2 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object t2 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object t2 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object t2 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object t2 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object t2 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object t2 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object t2 cmp "":
 F       T       F       T
 object t2 cmp "0":
@@ -18837,27 +18837,27 @@ F       T       F       T
 object t3 cmp false:
 F       T       F       T
 object t3 cmp true:
-F       T       T       F
+F       T       F       T
 object t3 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object t3 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object t3 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object t3 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object t3 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object t3 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object t3 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object t3 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object t3 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object t3 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object t3 cmp "":
 F       T       F       T
 object t3 cmp "0":
@@ -19051,27 +19051,27 @@ F       T       F       T
 object t4 cmp false:
 F       T       F       T
 object t4 cmp true:
-F       T       T       F
+F       T       F       T
 object t4 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object t4 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object t4 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object t4 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object t4 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object t4 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object t4 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object t4 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object t4 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object t4 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object t4 cmp "":
 F       T       F       T
 object t4 cmp "0":
@@ -19265,27 +19265,27 @@ F       T       F       T
 object t5 cmp false:
 F       T       F       T
 object t5 cmp true:
-F       T       T       F
+F       T       F       T
 object t5 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 object t5 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 object t5 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 object t5 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 object t5 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 object t5 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 object t5 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 object t5 cmp INF:
-F       T       Err     Err
+F       T       F       T
 object t5 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 object t5 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 object t5 cmp "":
 F       T       F       T
 object t5 cmp "0":
@@ -19477,17 +19477,17 @@ F       T       F       T
 object xml cmp null:
 F       T       F       T
 object xml cmp false:
-F       T       T       F
+F       T       F       T
 object xml cmp true:
 F       T       F       T
 object xml cmp int 0:
-F       T       T       F
+F       T       F       T
 object xml cmp int 99:
 F       T       F       T
 object xml cmp int -1:
 F       T       F       T
 object xml cmp float 0:
-F       T       T       F
+F       T       F       T
 object xml cmp double 99:
 F       T       F       T
 object xml cmp float 99:
@@ -19501,7 +19501,7 @@ F       T       F       T
 object xml cmp NAN:
 F       T       F       T
 object xml cmp "":
-F       T       T       F
+F       T       F       T
 object xml cmp "0":
 F       T       F       T
 object xml cmp "99":
@@ -19693,7 +19693,7 @@ F       T       F       T
 vector v1 cmp false:
 F       T       F       T
 vector v1 cmp true:
-F       T       T       F
+F       T       F       T
 vector v1 cmp int 0:
 F       T       F       T
 vector v1 cmp int 99:
@@ -19907,7 +19907,7 @@ F       T       F       T
 vector v2 cmp false:
 F       T       F       T
 vector v2 cmp true:
-F       T       T       F
+F       T       F       T
 vector v2 cmp int 0:
 F       T       F       T
 vector v2 cmp int 99:
@@ -20121,7 +20121,7 @@ F       T       F       T
 vector v3 cmp false:
 F       T       F       T
 vector v3 cmp true:
-F       T       T       F
+F       T       F       T
 vector v3 cmp int 0:
 F       T       F       T
 vector v3 cmp int 99:
@@ -20335,7 +20335,7 @@ F       T       F       T
 pair p1 cmp false:
 F       T       F       T
 pair p1 cmp true:
-F       T       T       F
+F       T       F       T
 pair p1 cmp int 0:
 F       T       F       T
 pair p1 cmp int 99:
@@ -20549,7 +20549,7 @@ F       T       F       T
 pair p2 cmp false:
 F       T       F       T
 pair p2 cmp true:
-F       T       T       F
+F       T       F       T
 pair p2 cmp int 0:
 F       T       F       T
 pair p2 cmp int 99:
@@ -20763,7 +20763,7 @@ F       T       F       T
 pair p3 cmp false:
 F       T       F       T
 pair p3 cmp true:
-F       T       T       F
+F       T       F       T
 pair p3 cmp int 0:
 F       T       F       T
 pair p3 cmp int 99:
@@ -20977,27 +20977,27 @@ F       T       F       T
 closure clo1 cmp false:
 F       T       F       T
 closure clo1 cmp true:
-F       T       T       F
+F       T       F       T
 closure clo1 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 closure clo1 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 closure clo1 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 closure clo1 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 closure clo1 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 closure clo1 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 closure clo1 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 closure clo1 cmp INF:
-F       T       Err     Err
+F       T       F       T
 closure clo1 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 closure clo1 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 closure clo1 cmp "":
 F       T       F       T
 closure clo1 cmp "0":
@@ -21191,27 +21191,27 @@ F       T       F       T
 closure clo2 cmp false:
 F       T       F       T
 closure clo2 cmp true:
-F       T       T       F
+F       T       F       T
 closure clo2 cmp int 0:
-F       T       Err     Err
+F       T       F       T
 closure clo2 cmp int 99:
-F       T       Err     Err
+F       T       F       T
 closure clo2 cmp int -1:
-F       T       Err     Err
+F       T       F       T
 closure clo2 cmp float 0:
-F       T       Err     Err
+F       T       F       T
 closure clo2 cmp double 99:
-F       T       Err     Err
+F       T       F       T
 closure clo2 cmp float 99:
-F       T       Err     Err
+F       T       F       T
 closure clo2 cmp float -1:
-F       T       Err     Err
+F       T       F       T
 closure clo2 cmp INF:
-F       T       Err     Err
+F       T       F       T
 closure clo2 cmp -INF:
-F       T       Err     Err
+F       T       F       T
 closure clo2 cmp NAN:
-F       T       Err     Err
+F       T       F       T
 closure clo2 cmp "":
 F       T       F       T
 closure clo2 cmp "0":
@@ -21405,7 +21405,7 @@ F       T       F       T
 resource f1 cmp false:
 F       T       F       T
 resource f1 cmp true:
-F       T       T       F
+F       T       F       T
 resource f1 cmp int 0:
 F       T       F       T
 resource f1 cmp int 99:
@@ -21619,7 +21619,7 @@ F       T       F       T
 resource f2 cmp false:
 F       T       F       T
 resource f2 cmp true:
-F       T       T       F
+F       T       F       T
 resource f2 cmp int 0:
 F       T       F       T
 resource f2 cmp int 99:
@@ -21833,7 +21833,7 @@ F       T       F       T
 resource f3 cmp false:
 F       T       F       T
 resource f3 cmp true:
-F       T       T       F
+F       T       F       T
 resource f3 cmp int 0:
 F       T       F       T
 resource f3 cmp int 99:
@@ -22261,7 +22261,7 @@ F       T       F       T
 rfunc_ptr cmp false:
 F       T       F       T
 rfunc_ptr cmp true:
-F       T       T       F
+F       T       F       T
 rfunc_ptr cmp int 0:
 F       T       F       T
 rfunc_ptr cmp int 99:
@@ -22689,7 +22689,7 @@ F       T       F       T
 rclsmeth cmp false:
 F       T       F       T
 rclsmeth cmp true:
-F       T       T       F
+F       T       F       T
 rclsmeth cmp int 0:
 F       T       F       T
 rclsmeth cmp int 99:

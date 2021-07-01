@@ -278,9 +278,6 @@ DEBUG_ONLY bool validate(const State& env,
 
 //////////////////////////////////////////////////////////////////////
 
-bool handleConvNoticeImpl(
-    State& env, Block* trace, ConvNoticeLevel level, const std::string& str);
-
 // return true if throws
 bool handleConvNoticeLevel(
   State& env,
@@ -291,36 +288,20 @@ bool handleConvNoticeLevel(
   // do this check here because if notice level is none, reason may be nullptr
   if (notice_data->level == ConvNoticeLevel::None) return false;
   assertx(notice_data->reason != nullptr);
-  const auto str = folly::sformat(
-    "Implicit {} to {} conversion for {}", from, to, notice_data->reason);
-  return handleConvNoticeImpl(env, trace, notice_data->level, str);
-}
-
-// return true if throws
-bool handleConvNoticeEq(
-    State& env,
-    Block* trace,
-    const char* lhs,
-    const char* rhs) {
-  if (strcmp(lhs, rhs) > 0) std::swap(lhs, rhs);
-  const auto str = folly::sformat(
-    "Comparing {} and {} using equality", lhs, rhs);
-  const auto level =
-    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForEq);
-  return handleConvNoticeImpl(env, trace, level, str);
-}
-
-bool handleConvNoticeImpl(
-    State& env, Block* trace, ConvNoticeLevel level, const std::string& str) {
-  switch(level) {
+  always_assert(notice_data->level != ConvNoticeLevel::Change);
+  const auto str = cns(env, makeStaticString(folly::sformat(
+    "Implicit {} to {} conversion for {}", from, to, notice_data->reason)));
+  switch(notice_data->level) {
     case ConvNoticeLevel::Throw:
-      gen(env, ThrowInvalidOperation, trace, cns(env, makeStaticString(str)));
+      gen(env, ThrowInvalidOperation, trace, str);
       return true;
     case ConvNoticeLevel::Log:
-      gen(env, RaiseNotice, trace, cns(env, makeStaticString(str)));
+      gen(env, RaiseNotice, trace, str);
     // FALLTHROUGH
     case ConvNoticeLevel::None:
       return false;
+    case ConvNoticeLevel::Change:
+      not_reached();
   }
   not_reached();
 }

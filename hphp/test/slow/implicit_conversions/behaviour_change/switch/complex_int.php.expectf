@@ -1,36 +1,36 @@
 --------------------------------
 NULL
-0
+default
 --------------------------------
 bool(true)
--1
+default
 --------------------------------
 bool(false)
-0
+default
 --------------------------------
 int(5)
 5
 --------------------------------
 float(2)
-2 or 4: 2
+default
 --------------------------------
 float(2.2)
 default
 --------------------------------
 string(1) "2"
-2 or 4: 2
+default
 --------------------------------
 string(3) "2.0"
-2 or 4: 2.0
+default
 --------------------------------
 string(3) "2.2"
 default
 --------------------------------
 string(4) "blar"
-0
+default
 --------------------------------
 string(0) ""
-0
+default
 --------------------------------
 int(4)
 2 or 4: 4
@@ -47,11 +47,11 @@ default
 --------------------------------
 object(stdClass) (0) {
 }
-Object of class stdClass could not be converted to int
+default
 --------------------------------
 object(C) (0) {
 }
-Object of class C could not be converted to int
+default
 --------------------------------
 resource(4) of type (stream)
-2 or 4: Resource id #4
+default

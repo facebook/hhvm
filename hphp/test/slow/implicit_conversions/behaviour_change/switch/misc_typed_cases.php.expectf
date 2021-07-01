@@ -6,88 +6,88 @@ goes to:
 false
 NULL
 goes to:
-false
+null
 string(3) "str"
 goes to:
-true
+str
 int(1234)
 goes to:
-true
+default
 float(1234.5)
 goes to:
-true
+default
 string(4) "1234"
 goes to:
-true
+'1234'
 string(6) "1234.5"
 goes to:
-true
+'1234.5'
 int(42)
 goes to:
-true
+42
 float(42.5)
 goes to:
-true
+42.5
 string(2) "42"
 goes to:
-true
+default
 string(4) "42.5"
 goes to:
-true
+default
 string(0) ""
 goes to:
-false
+default
 object(Derp) (0) {
 }
 goes to:
-true
+derp
 object(Herp) (1) {
   ["x"]=>
   string(1) "1"
 }
 goes to:
-true
+default
 object(Herp) (1) {
   ["x"]=>
   int(1)
 }
 goes to:
-true
+Herp(1)
 object(stdClass) (0) {
 }
 goes to:
-true
+default
 int(1)
 goes to:
-true
+default
 int(0)
 goes to:
-false
+default
 string(1) "0"
 goes to:
-false
+default
 resource(1) of type (stream)
 goes to:
-true
+stdin
 vec(1) {
   int(1)
 }
 goes to:
-true
+vec[1]
 vec(1) {
   string(1) "1"
 }
 goes to:
-true
+default
 object(HH\Vector) (1) {
   [0]=>
   int(1)
 }
 goes to:
-true
+Vector{1}
 object(HH\Vector) (1) {
   [0]=>
   string(1) "1"
 }
 goes to:
-true
+default

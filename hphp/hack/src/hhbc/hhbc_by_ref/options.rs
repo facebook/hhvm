@@ -1007,7 +1007,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn test_options_de_from_cli_comma_separated_key_value() {
         let mut exp_include_roots = BTreeMap::<String, String>::new();

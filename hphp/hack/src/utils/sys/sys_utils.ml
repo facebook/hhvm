@@ -605,15 +605,20 @@ let rec waitpid_non_intr flags pid =
   with Unix.Unix_error (Unix.EINTR, _, _) -> waitpid_non_intr flags pid
 
 let find_oom_in_dmesg_output pid name lines =
+  (* oomd: "Memory cgroup out of memory: Killed process 4083583 (hh_server)" (https://facebookmicrosites.github.io/oomd/)
+     oomkiller: "Out of memory: Kill process 4083583 (hh_server)" *)
   let re =
     Str.regexp
-      (Printf.sprintf "Out of memory: Kill process \\([0-9]+\\) (%s)" name)
+      (Printf.sprintf
+         "[Oo]ut of memory: Kill\\(ed\\)? process \\([0-9]+\\) (%s)"
+         name)
   in
+  let pid = string_of_int pid in
   List.exists lines ~f:(fun line ->
       try
         ignore @@ Str.search_forward re line 0;
-        let pid_s = Str.matched_group 1 line in
-        int_of_string pid_s = pid
+        let pid_s = Str.matched_group 2 line in
+        String.equal pid_s pid
       with Caml.Not_found -> false)
 
 let check_dmesg_for_oom pid name =

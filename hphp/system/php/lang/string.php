@@ -4,7 +4,9 @@ namespace {
 
 interface XHPChild {}
 
-interface Stringish extends XHPChild {}
+interface Stringish extends XHPChild {
+  public function __toString();
+}
 
 interface StringishObject extends Stringish {
   public function __toString(): string;

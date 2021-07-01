@@ -844,7 +844,10 @@ interface XHPChild {}
  * objects: that is, objects that provide the __toString method
  */
 
-interface Stringish extends XHPChild {}
+interface Stringish extends XHPChild {
+  <<__Deprecated('Use `stringish_cast(<expression>)` instead.')>>
+  public function __toString(): string;
+}
 
 /**
  * StringishObject represents values of Stringish that are specifically objects

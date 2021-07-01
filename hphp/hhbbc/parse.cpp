@@ -837,7 +837,9 @@ void add_stringish(php::Class* cls) {
   // The runtime adds StringishObject to any class providing a __toString() function,
   // so we mirror that here to make sure analysis of interfaces is correct.
   // All StringishObjects are also XHPChild, so handle it here as well.
-  if (cls->attrs & AttrInterface && cls->name->isame(s_StringishObject.get())) {
+  if (cls->attrs & AttrInterface &&
+      (cls->name->isame(s_StringishObject.get()) ||
+       cls->name->isame(s_Stringish.get()))) {
     return;
   }
 

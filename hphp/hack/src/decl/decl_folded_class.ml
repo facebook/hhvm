@@ -430,7 +430,8 @@ and class_decl
           String.equal (snd sm.sm_name) SN.Members.__toString)
     with
     | Some { sm_name = (pos, _); _ }
-      when String.( <> ) cls_name SN.Classes.cStringishObject ->
+      when String.( <> ) cls_name SN.Classes.cStringishObject
+           && String.( <> ) cls_name SN.Classes.cStringish ->
       (* HHVM implicitly adds StringishObject interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
       (* Declare StringishObject and parents if not already declared *)

@@ -4,6 +4,7 @@ members = [
     "src/arena_trait",
     "src/decl/decl_rust",
     "src/decl/direct_decl_smart_constructors",
+    "src/decl/cpp_ffi",
     "src/decl/ffi",
     "src/depgraph",
     "src/deps/cargo/deps_rust",

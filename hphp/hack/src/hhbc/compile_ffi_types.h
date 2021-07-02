@@ -9,9 +9,13 @@
 
 #include <cstdint>
 
+#include "hphp/hack/src/decl/cpp_ffi/decl_ffi_types_fwd.h"
+
 namespace HPHP { namespace hackc { namespace compile {
 
 struct native_environment {
+  hackc::decl::decls const* (*decl_getter)(void*, char const*);
+  void* decl_provider;
   char const* filepath;
   char const * aliased_namespaces;
   char const * include_roots;

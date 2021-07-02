@@ -438,6 +438,7 @@ macro(hphp_link target)
   target_link_libraries(${target} libcompile_ffi_stubs)
   target_link_libraries(${target} librust_facts_ffi_stubs)
   target_link_libraries(${target} librust_parser_ffi_stubs)
+  target_link_libraries(${target} libdecl_cpp_ffi_stubs)
 
   if (ENABLE_MCROUTER)
     target_link_libraries(${target} mcrouter)

@@ -21,16 +21,18 @@ pub struct DeclResult<'a> {
 }
 
 #[no_mangle]
-unsafe extern "C" fn create_arena() -> *mut bumpalo::Bump {
+unsafe extern "C" fn hackc_create_arena() -> *mut bumpalo::Bump {
     Box::into_raw(Box::new(bumpalo::Bump::new()))
 }
 
 #[no_mangle]
-unsafe extern "C" fn free_arena(_: *mut bumpalo::Bump) {}
+unsafe extern "C" fn hackc_free_arena(arena: *mut bumpalo::Bump) {
+    let _ = Box::from_raw(arena);
+}
 
 #[no_mangle]
-unsafe extern "C" fn create_direct_decl_parse_options(
-    // TODO: cxx doesn't support tuple,
+unsafe extern "C" fn hackc_create_direct_decl_parse_options(
+    // TODO(Shayne): cxx doesn't support tuple,
     //auto_namespace_map: &'a [(&'a str, &'a str)],
     disable_xhp_element_mangling: bool,
     interpret_soft_types_as_like_types: bool,
@@ -42,8 +44,9 @@ unsafe extern "C" fn create_direct_decl_parse_options(
     }))
 }
 
+// TODO(shiqicao): wrap catch_unwind
 #[no_mangle]
-unsafe extern "C" fn direct_decl_parse<'a>(
+unsafe extern "C" fn hackc_direct_decl_parse<'a>(
     opts: *const DeclParserOptions<'a>,
     filename: *const c_char,
     text: *const c_char,
@@ -77,12 +80,12 @@ unsafe extern "C" fn direct_decl_parse<'a>(
 }
 
 #[no_mangle]
-unsafe extern "C" fn print_decls(decls: *const Decls) {
+unsafe extern "C" fn hackc_print_decls(decls: *const Decls) {
     println!("{:#?}", *decls)
 }
 
 #[no_mangle]
-unsafe extern "C" fn verify_deserialization(
+unsafe extern "C" fn hackc_verify_deserialization(
     serialized: *const ffi::Bytes,
     expected: *const Decls,
 ) -> bool {

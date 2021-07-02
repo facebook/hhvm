@@ -10,11 +10,12 @@
 #include <cstdint>
 #include <cstddef>
 
-struct decls;
+#include "hphp/hack/src/decl/cpp_ffi/decl_ffi_types_fwd.h"
 
-struct bump;
+// These definitions must be kept in sync with the corresponding rust
+// definitions in 'decl_cpp_ffi.rs'.
 
-struct decl_parser_options;
+namespace HPHP { namespace hackc { namespace decl {
 
 struct bytes {
     std::uint8_t const* data;
@@ -27,3 +28,5 @@ struct decl_result {
     bytes serialized;
     decls const* decl_list;
 };
+
+}}} // namespace HPHP::hackc::decl

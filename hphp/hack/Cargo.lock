@@ -336,6 +336,8 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "atty",
+ "decl_provider",
+ "external_decl_provider",
  "hhbc_by_ref_compile",
  "libc",
  "log",
@@ -551,6 +553,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "decl_cpp_ffi"
+version = "0.0.0"
+dependencies = [
+ "arena_deserializer",
+ "bincode",
+ "bumpalo",
+ "decl_rust",
+ "ffi",
+ "libc",
+ "no_pos_hash",
+ "oxidized",
+ "oxidized_by_ref",
+]
+
+[[package]]
 name = "decl_mode_parser"
 version = "0.0.0"
 dependencies = [
@@ -757,6 +774,15 @@ dependencies = [
  "bstr",
  "bumpalo",
  "pretty_assertions",
+]
+
+[[package]]
+name = "external_decl_provider"
+version = "0.0.0"
+dependencies = [
+ "decl_provider",
+ "libc",
+ "oxidized_by_ref",
 ]
 
 [[package]]

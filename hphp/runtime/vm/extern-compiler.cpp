@@ -18,6 +18,9 @@
 
 #include <cinttypes>
 #include <condition_variable>
+#include <fstream>
+#include <iterator>
+#include <memory>
 #include <mutex>
 #include <signal.h>
 #include <sstream>
@@ -37,10 +40,13 @@
 #include "hphp/hack/src/hhbc/compile_ffi_types.h"
 #include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi.h"
 #include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi_types.h"
+#include "hphp/runtime/base/autoload-map.h"
+#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/hhvm_decl_provider.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/embedded-data.h"
@@ -1113,9 +1119,13 @@ CompilerResult hackc_compile(
     }
     flags |= DUMP_SYMBOL_REFS;
 
+    HhvmDeclProvider decl_provider;
+
     std::string aliased_namespaces = options.getAliasedNamespacesConfig();
 
     native_environment const native_env{
+      &hhvm_decl_provider_get_decl,
+      &decl_provider,
       filename,
       aliased_namespaces.data(),
       s_misc_config.data(),

@@ -4,6 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use decl_provider::NoDeclProvider;
+use external_decl_provider::ExternalDeclProvider;
 use ocamlrep::{rc::RcOc, FromOcamlRep};
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_ocamlpool::to_ocaml;
@@ -80,6 +82,9 @@ impl RustOutputConfig {
 
 #[repr(C)]
 struct CNativeEnv {
+    decl_getter:
+        unsafe extern "C" fn(*const std::ffi::c_void, *const c_char) -> *const std::ffi::c_void,
+    decl_provider: *const std::ffi::c_void,
     filepath: *const c_char,
     aliased_namespaces: *const c_char,
     include_roots: *const c_char,
@@ -174,8 +179,9 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
                 // legitmately reinterpreted as a `*const CEnv` and that
                 // on doing so, it points to a valid properly initialized
                 // value.
+                let cnative_env = env as *const CNativeEnv;
                 let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
-                    CNativeEnv::to_compile_env(env as *const CNativeEnv).unwrap();
+                    CNativeEnv::to_compile_env(cnative_env).unwrap();
                 let env = hhbc_by_ref_compile::Env::<&str> {
                     filepath: native_env.filepath.clone(),
                     config_jsons: vec![],
@@ -184,17 +190,34 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
                 };
                 let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
                 let mut w = String::new();
-                match hhbc_by_ref_compile::from_text_(
-                    &env,
-                    stack_limit,
-                    &mut w,
-                    source_text,
-                    Some(&native_env),
-                ) {
-                    Ok(_) => {
-                        //print_output(w, output_config, &env.filepath, profile)?;
-                        Ok(w)
-                    }
+                let compile_result = if native_env
+                    .flags
+                    .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
+                {
+                    hhbc_by_ref_compile::from_text_(
+                        &env,
+                        stack_limit,
+                        &mut w,
+                        source_text,
+                        Some(&native_env),
+                        ExternalDeclProvider(
+                            (*cnative_env).decl_getter,
+                            (*cnative_env).decl_provider,
+                            std::marker::PhantomData,
+                        ),
+                    )
+                } else {
+                    hhbc_by_ref_compile::from_text_(
+                        &env,
+                        stack_limit,
+                        &mut w,
+                        source_text,
+                        Some(&native_env),
+                        NoDeclProvider,
+                    )
+                };
+                match compile_result {
+                    Ok(_) => Ok(w),
                     Err(e) => Err(anyhow!("{}", e)),
                 }
             }
@@ -295,6 +318,7 @@ extern "C" fn compile_from_text_ffi(
                         &mut w,
                         source_text,
                         None,
+                        NoDeclProvider,
                     ) {
                         Ok(profile) => print_output(
                             w,

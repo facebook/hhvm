@@ -340,15 +340,16 @@ where
     W::Error: Send + Sync + 'static, // required by anyhow::Error
 {
     let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-    from_text_(env, stack_limit, writer, source_text, None)
+    from_text_(env, stack_limit, writer, source_text, None, NoDeclProvider)
 }
 
-pub fn from_text_<W, S: AsRef<str>>(
+pub fn from_text_<'decl, W, S: AsRef<str>, D: DeclProvider<'decl>>(
     env: &Env<S>,
     stack_limit: &StackLimit,
     writer: &mut W,
     source_text: SourceText,
     native_env: Option<&NativeEnv<S>>,
+    decl_provider: D,
 ) -> anyhow::Result<Option<Profile>>
 where
     W: Write,
@@ -364,7 +365,7 @@ where
         opts,
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
-        NoDeclProvider,
+        decl_provider,
     );
 
     let namespace_env = RcOc::new(NamespaceEnv::empty(
@@ -474,6 +475,21 @@ fn emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
     if env.flags.contains(EnvFlags::IS_SYSTEMLIB) {
         flags |= FromAstFlags::IS_SYSTEMLIB;
     }
+
+    // TODO: Currently decls are not used anywhere in emitter, so
+    //   we can't tell from bytecode whether decl provider can resolve
+    //   symbol successfully. So for ad hoc testing, output decl provider
+    //   result to file. Why output to a file, since here we can't access
+    //   HHVM's logger. REMOVE THIS AFTER FRIST DECL PROVIDER IS USED IN
+    //   EMITTER.
+    /*
+    if !env.flags.contains(EnvFlags::IS_SYSTEMLIB) {
+        let foo = emitter.decl_provider.get_decl("\\DeclTest");
+        let ss = format!("{:#?}", foo);
+        std::fs::write("/tmp/hackc_compile_debug.txt", ss).unwrap();
+    }
+    */
+
     emit_program(alloc, emitter, flags, namespace, ast)
 }
 

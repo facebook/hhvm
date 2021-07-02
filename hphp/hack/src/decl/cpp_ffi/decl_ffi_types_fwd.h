@@ -5,12 +5,20 @@
  LICENSE file in the "hack" directory of this source tree.
 */
 
+#pragma once
+
+// These declarations correspond to types in 'decl_cpp_ffi.rs'.
+
+namespace HPHP { namespace hackc { namespace decl {
+
 struct decls;
 
-struct bump;
+struct bump_allocator;
 
 struct decl_parser_options;
 
 struct decl_result;
 
 struct bytes;
+
+}}} // namespace HPHP::hackc::decl

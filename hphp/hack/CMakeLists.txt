@@ -127,7 +127,8 @@ add_custom_target(
    . "${CMAKE_CURRENT_BINARY_DIR}/dev_env.sh" &&
     ${CARGO_BUILD} hack_parser_ffi rust_parser_ffi &&
     ${CARGO_BUILD} rust_facts_ffi rust_facts_ffi &&
-    ${CARGO_BUILD} compile_ffi compile_ffi
+    ${CARGO_BUILD} compile_ffi compile_ffi &&
+    ${CARGO_BUILD} decl_cpp_ffi decl_cpp_ffi
   COMMENT "Compiling Rust FFI"
 )
 
@@ -177,6 +178,11 @@ set(LIBRUST_PARSER_PATH "${CMAKE_BINARY_DIR}/hphp/hack/librust_parser_ffi_stubs.
 add_library(librust_parser_ffi_stubs STATIC IMPORTED GLOBAL)
 add_dependencies(librust_parser_ffi_stubs hack_ffi)
 set_target_properties(librust_parser_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBRUST_PARSER_PATH})
+
+set(LIBRUST_DECL_PATH "${CMAKE_BINARY_DIR}/hphp/hack/libdecl_cpp_ffi_stubs.a")
+add_library(libdecl_cpp_ffi_stubs STATIC IMPORTED GLOBAL)
+add_dependencies(libdecl_cpp_ffi_stubs hack_ffi)
+set_target_properties(libdecl_cpp_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBRUST_DECL_PATH})
 
 configure_file(dev_env.sh.in dev_env.sh ESCAPE_QUOTES @ONLY)
 

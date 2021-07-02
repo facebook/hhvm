@@ -93,6 +93,7 @@ bitflags! {
     }
 }
 
+// Mapping must match getParserFlags() in runtime-option.cpp
 bitflags! {
     pub struct ParserFlags: u32 {
         const ABSTRACT_STATIC_PROPS=1 << 0;
@@ -114,8 +115,8 @@ bitflags! {
         const ENABLE_ENUM_CLASSES=1 << 16;
         const ENABLE_XHP_CLASS_MODIFIER=1 << 17;
         const DISALLOW_DYNAMIC_METH_CALLER_ARGS=1 << 18;
-        const ENABLE_CLASS_LEVEL_WHERE_CLAUSES=1 << 19;
-        const ENABLE_READONLY_ENFORCEMENT=1 << 20;
+        const ENABLE_READONLY_ENFORCEMENT=1 << 19;
+        const ENABLE_CLASS_LEVEL_WHERE_CLAUSES=1 << 20;
         const ESCAPE_BRACE=1 << 21;
   }
 }

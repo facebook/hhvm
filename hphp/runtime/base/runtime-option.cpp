@@ -279,6 +279,7 @@ RepoOptions::getParserEnvironment() const {
     };
 }
 
+// Mapping must match HHBCFlags in compile.rs
 std::uint32_t RepoOptions::getCompilerFlags() const {
   std::uint32_t hhbc_flags = 0;
 
@@ -321,6 +322,7 @@ std::uint32_t RepoOptions::getFactsFlags() const {
   return flags;
 }
 
+// Mapping must match ParserFlags in compile.rs
 std::uint32_t RepoOptions::getParserFlags() const {
   std::uint32_t parser_flags = 0;
 

@@ -218,8 +218,7 @@ let make_hover_attr_docs name =
   | "__ProvenanceSkipFrame" ->
     [
       "Don't track Hack arrays created by this function."
-      ^ " This is useful when migrating code from PHP arrays to Hack arrays."
-      ^ "\n\nThe HHVM option LogArrayProvenance is necessary to observe array provenance.";
+      ^ " This is useful when migrating code from PHP arrays to Hack arrays.";
     ]
   | "__Reifiable" ->
     [

@@ -251,9 +251,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalNoticeOnCoerceForBitOp, ini, config,
                "NoticeOnCoerceForBitOp",
                RuntimeOption::EvalNoticeOnCoerceForBitOp);
-
-  RO::EvalArrayProvenance = false;
-  RO::EvalLogArrayProvenance = false;
 }
 
 void Option::Load() {

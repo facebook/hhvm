@@ -294,7 +294,6 @@ std::uint32_t RepoOptions::getCompilerFlags() const {
     SETFLAGS(RuntimeOption::EvalEmitClsMethPointers, 10)        \
     SETFLAGS(RuntimeOption::EvalEmitMethCallerFuncPointers, 11) \
     SETFLAGS(RuntimeOption::EvalRxIsEnabled, 12)                \
-    SETFLAGS(RuntimeOption::EvalArrayProvenance, 13)            \
     SETFLAGS(RuntimeOption::EvalFoldLazyClassKeys, 15)          \
     SETFLAGS(EmitInstMethPointers,16)                           \
 
@@ -2970,10 +2969,6 @@ void RuntimeOption::Load(
       throw std::runtime_error("Can't use Eval.JitEnableRenameFunction if "
                                " RepoAuthoritative is turned on");
   }
-
-  // arrprov is no longer functional. We must clean it up.
-  RO::EvalArrayProvenance = false;
-  RO::EvalLogArrayProvenance = false;
 
   // Bespoke array-likes
 

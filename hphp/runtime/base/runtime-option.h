@@ -1171,12 +1171,6 @@ struct RuntimeOption {
   F(bool, HackArrCompatSerializeNotices, false)                         \
   /* When this flag is on, var_export outputs d/varrays. */             \
   F(bool, HackArrDVArrVarExport, false)                                 \
-  /* Dead flags. Will clean up when we clean them up in GlobalData. */  \
-  F(bool, ArrayProvenance, false)                                       \
-  F(bool, LogArrayProvenance, false)                                    \
-  F(uint32_t, LogArrayProvenanceSampleRatio, 1000)                      \
-  F(uint32_t, ArrayProvenanceLargeEnumLimit, 256)                       \
-  F(uint32_t, LogArrayProvenanceDiagnosticsSampleRate, 0)               \
   /* Raise a notice when the result of appending to a dict or darray    \
    * is affected by removing keys from that array-like. */              \
   F(bool, DictDArrayAppendNotices, true)                                \

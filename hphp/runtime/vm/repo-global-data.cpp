@@ -49,9 +49,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
 
   if (HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
 
-  always_assert(!RO::EvalArrayProvenance);
-  always_assert(!RO::EvalLogArrayProvenance);
-
   if (loadConstantFuncs) {
     RO::ConstantFunctions.clear();
     for (auto const& elm : ConstantFunctions) {

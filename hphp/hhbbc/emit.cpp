@@ -1315,34 +1315,40 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       return rat;
     };
 
-    auto const privPropTy = [&] (const PropState& ps) -> Type {
+    auto const privPropTy = [&] (const PropState& ps) -> std::pair<Type, bool> {
       if (is_closure(cls)) {
         // For closures use variables will be the first properties of the
         // closure object, in declaration order
-        if (uvIt != useVars.end()) return *uvIt++;
-        return TCell;
+        if (uvIt != useVars.end()) return std::make_pair(*uvIt++, true);
+        return std::make_pair(TCell, true);
       }
 
       auto it = ps.find(prop.name);
-      if (it == end(ps)) return TCell;
-      return it->second.ty;
+      if (it == end(ps)) return std::make_pair(TCell, true);
+      return std::make_pair(it->second.ty, it->second.everModified);
     };
 
     auto propTy = TCell;
-    auto const attrs = prop.attrs;
+    auto everModified = true;
+    auto attrs = prop.attrs;
     if (attrs & AttrPrivate) {
-      propTy = privPropTy((attrs & AttrStatic) ? privateStatics : privateProps);
+      std::tie(propTy, everModified) =
+        privPropTy((attrs & AttrStatic) ? privateStatics : privateProps);
     } else if ((attrs & (AttrPublic|AttrProtected)) && (attrs & AttrStatic)) {
-      propTy = [&] {
+      std::tie(propTy, everModified) = [&] {
         auto const it = publicStatics.find(prop.name);
-        if (it == end(publicStatics)) return TCell;
-        return it->second.ty;
+        if (it == end(publicStatics)) return std::make_pair(TCell, true);
+        return std::make_pair(it->second.ty, it->second.everModified);
       }();
+    }
+
+    if (!everModified && (attrs & AttrStatic)) {
+      attrs |= AttrPersistent;
     }
 
     pce->addProperty(
       prop.name,
-      prop.attrs,
+      attrs,
       prop.userType,
       prop.typeConstraint,
       prop.ubs,

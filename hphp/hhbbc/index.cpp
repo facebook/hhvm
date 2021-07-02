@@ -216,6 +216,7 @@ struct PublicSPropEntry {
    * time we read the flag in refine_public_statics.
    */
   bool initialValueResolved;
+  bool everModified;
 };
 
 /*
@@ -298,6 +299,7 @@ PropState make_unknown_propstate(const php::Class* cls,
       elem.ty = TCell;
       elem.tc = &prop.typeConstraint;
       elem.attrs = prop.attrs;
+      elem.everModified = true;
     }
   }
   return ret;
@@ -6159,15 +6161,23 @@ PropState Index::lookup_public_statics(const php::Class* cls) const {
       continue;
     }
 
-    auto ty = [&] {
-      if (!cinfo) return TInitCell;
+    auto [ty, everModified] = [&] {
+      if (!cinfo) return std::make_pair(TInitCell, true);
       auto const it = cinfo->publicStaticProps.find(prop.name);
       assertx(it != end(cinfo->publicStaticProps));
-      return remove_uninit(it->second.inferredType);
+      return std::make_pair(
+        remove_uninit(it->second.inferredType),
+        it->second.everModified
+      );
     }();
     state.emplace(
       prop.name,
-      PropStateElem<>{std::move(ty), &prop.typeConstraint, prop.attrs}
+      PropStateElem<>{
+        std::move(ty),
+        &prop.typeConstraint,
+        prop.attrs,
+        everModified
+      }
     );
   }
   return state;
@@ -6553,7 +6563,8 @@ void Index::init_public_static_prop_types() {
           initial,
           &prop,
           0,
-          false
+          false,
+          true
       };
     }
   }
@@ -6814,6 +6825,18 @@ void refine_private_propstate(Container& cont,
       show(target.ty)
     );
     target.ty = kv.second.ty;
+
+    if (kv.second.everModified) {
+      always_assert_flog(
+        target.everModified,
+        "PropState refinement failed on {}::${} -- "
+        "everModified flag went from false to true\n",
+        cls->name->data(),
+        kv.first->data()
+      );
+    } else {
+      target.everModified = false;
+    }
   }
 }
 
@@ -6832,6 +6855,7 @@ void Index::refine_private_statics(const php::Class* cls,
     elem.ty = unctx(prop.second.ty);
     elem.tc = prop.second.tc;
     elem.attrs = prop.second.attrs;
+    elem.everModified = prop.second.everModified;
   }
 
   refine_private_propstate(m_data->privateStaticPropInfo, cls, cleanedState);
@@ -6919,6 +6943,18 @@ void Index::refine_public_statics(DependencyContextSet& deps) {
         &kv.second.prop->typeConstraint,
         unctx(union_of(std::move(knownClsType), std::move(unknownClsType)))
       );
+
+      if (!newType.is(BBottom)) {
+        always_assert_flog(
+          kv.second.everModified,
+          "Static property index invariant violated on {}::{}:\n"
+          " everModified flag went from false to true",
+          cinfo->cls->name->data(),
+          kv.first->data()
+        );
+      } else {
+        kv.second.everModified = false;
+      }
 
       if (kv.second.initialValueResolved) {
         for (auto& prop : cinfo->cls->properties) {

@@ -3446,6 +3446,7 @@ OPTBLD_INLINE void iopSetS(ReadOnlyOp op) {
       }
     }
   }
+  always_assert(cls->sPropLink(slot).isLocal());
   tvSet(*tv1, *val);
   tvDecRefGen(propn);
   memcpy(output, tv1, sizeof(TypedValue));
@@ -3509,8 +3510,10 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op) {
     sprop.typeConstraint.verifyStaticProperty(
       &temp, cls, sprop.cls, name
     );
+    always_assert(cls->sPropLink(slot).isLocal());
     tvMove(temp, *val);
   } else {
+    always_assert(cls->sPropLink(slot).isLocal());
     setopBody(val, op, fr);
   }
 
@@ -3573,9 +3576,11 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
       checkable_sprop->cls,
       ss.name
     );
+    always_assert(ss.cls->sPropLink(ss.slot).isLocal());
     tvMove(temp, *val);
     tvCopy(result, *ss.output);
   } else {
+    always_assert(ss.cls->sPropLink(ss.slot).isLocal());
     tvCopy(IncDecBody(op, val), *ss.output);
   }
 }

@@ -99,7 +99,9 @@ void dump_class_state(std::ostream& out,
     );
     for (auto const& kv : private_sprops) {
       out << clsName << "::$" << kv.first->data() << " :: "
-          << show(kv.second.ty) << '\n';
+          << show(kv.second.ty);
+      if (!kv.second.everModified) out << " (persistent)";
+      out << '\n';
     }
 
     auto const public_sprops = sorted_prop_state(
@@ -107,7 +109,9 @@ void dump_class_state(std::ostream& out,
     );
     for (auto const& kv : public_sprops) {
       out << clsName << "::$" << kv.first->data() << " :: "
-          << show(kv.second.ty) << '\n';
+          << show(kv.second.ty);
+      if (!kv.second.everModified) out << " (persistent)";
+      out << '\n';
     }
   }
 

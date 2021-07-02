@@ -261,6 +261,7 @@ void PropertiesInfo::mergeInPrivateProp(const Index& index,
     m_cls->work->worklist.addPropMutateDep(name, *m_func);
     m_cls->work->propMutators[m_func].emplace(name);
   }
+  it->second.everModified = true;
   auto newT = union_of(
     it->second.ty,
     adjust_type_for_prop(index, *m_cls->ctx.cls, it->second.tc, t)
@@ -288,6 +289,7 @@ void PropertiesInfo::mergeInPrivateStatic(const Index& index,
     m_cls->work->worklist.addPropMutateDep(name, *m_func);
     m_cls->work->propMutators[m_func].emplace(name);
   }
+  it->second.everModified = true;
   auto newT = union_of(
     it->second.ty,
     adjust_type_for_prop(index, *m_cls->ctx.cls, it->second.tc, t)
@@ -310,6 +312,7 @@ void PropertiesInfo::mergeInPrivateStaticPreAdjusted(SString name,
     m_cls->work->worklist.addPropMutateDep(name, *m_func);
     m_cls->work->propMutators[m_func].emplace(name);
   }
+  it->second.everModified = true;
   auto newT = union_of(it->second.ty, t);
   if (it->second.ty.strictlyMoreRefined(newT)) {
     it->second.ty = std::move(newT);
@@ -328,6 +331,7 @@ void PropertiesInfo::mergeInAllPrivateProps(const Index& index,
       m_cls->work->worklist.addPropMutateDep(kv.first, *m_func);
       m_cls->work->propMutators[m_func].emplace(kv.first);
     }
+    kv.second.everModified = true;
     auto newT = union_of(
       kv.second.ty,
       adjust_type_for_prop(index, *m_cls->ctx.cls, kv.second.tc, t)
@@ -354,6 +358,7 @@ void PropertiesInfo::mergeInAllPrivateStatics(const Index& index,
       m_cls->work->worklist.addPropMutateDep(kv.first, *m_func);
       m_cls->work->propMutators[m_func].emplace(kv.first);
     }
+    kv.second.everModified = true;
     auto newT = union_of(
       kv.second.ty,
       adjust_type_for_prop(index, *m_cls->ctx.cls, kv.second.tc, t)

@@ -159,9 +159,14 @@ struct PropStateElem {
   T ty;
   const TypeConstraint* tc = nullptr;
   Attr attrs;
+  bool everModified;
 
   bool operator==(const PropStateElem<T>& o) const {
-    return ty == o.ty && tc == o.tc && attrs == o.attrs;
+    return
+      ty == o.ty &&
+      tc == o.tc &&
+      attrs == o.attrs &&
+      everModified == o.everModified;
   }
 };
 using PropState = std::map<LSString,PropStateElem<>>;

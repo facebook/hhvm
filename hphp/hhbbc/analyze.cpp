@@ -516,6 +516,8 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
     auto it = propState.find(prop.name);
     if (it == end(propState)) return;
 
+    it->second.everModified = true;
+
     /*
      * When any functions are interceptable, we don't require the constraints to
      * actually match, and relax all the HNI types to Gen.
@@ -700,6 +702,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       elem.ty = std::move(t);
       elem.tc = &prop.typeConstraint;
       elem.attrs = prop.attrs;
+      elem.everModified = false;
     } else {
       // Same thing as the above regarding TUninit and TBottom.
       // Static properties don't need to exclude closures for this,
@@ -713,6 +716,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       elem.ty = std::move(t);
       elem.tc = &prop.typeConstraint;
       elem.attrs = prop.attrs;
+      elem.everModified = false;
     }
   }
 
@@ -987,6 +991,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
         }
         assertx(srcIt != src.end());
         dstIt->second.ty = srcIt->second.ty;
+        dstIt->second.everModified = srcIt->second.everModified;
       };
 
       hphp_fast_set<SString> retryProps;

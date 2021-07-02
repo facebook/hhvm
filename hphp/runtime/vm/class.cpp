@@ -637,6 +637,7 @@ void Class::releaseSProps() {
 
   for (Slot i = 0, n = numStaticProperties(); i < n; ++i) {
     auto const& sProp = m_staticProperties[i];
+    if (m_sPropCache[i].bound() && m_sPropCache[i].isPersistent()) continue;
     if (sProp.cls == this || (sProp.attrs & AttrLSB)) {
       unbindLink(&m_sPropCache[i], rds::SPropCache{this, i});
     }
@@ -909,6 +910,8 @@ bool Class::needsInitSProps() const {
 void Class::initSProps() const {
   assertx(needsInitSProps() || m_sPropCacheInit.isPersistent());
 
+  if (m_sPropCacheInit.bound() && m_sPropCacheInit.isPersistent()) return;
+
   const bool hasNonscalarInit = !m_sinitVec.empty() || !m_linitVec.empty();
   Optional<VMRegAnchor> _;
   if (hasNonscalarInit) {
@@ -924,16 +927,18 @@ void Class::initSProps() const {
   if (!numStaticProperties()) return;
 
   initSPropHandles();
+  if (m_sPropCacheInit.isPersistent()) return;
 
   // Perform scalar inits.
   for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
+    if (m_sPropCache[slot].isPersistent()) continue;
+
     auto const& sProp = m_staticProperties[slot];
     // TODO(T61738946): We can remove the temporary here once we no longer
     // coerce class_meth types.
     auto val = sProp.val;
 
-    if ((sProp.cls == this && !m_sPropCache[slot].isPersistent()) ||
-        sProp.attrs & AttrLSB) {
+    if (sProp.cls == this || sProp.attrs & AttrLSB) {
       if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
           !(sProp.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) &&
           sProp.val.m_type != KindOfUninit) {
@@ -3282,6 +3287,12 @@ void Class::importTraitStaticProp(
     }
     prevProp.cls = this;
     prevProp.val = prevPropVal;
+
+    attrSetter(
+      prevProp.attrs,
+      traitProp.attrs & AttrPersistent,
+      AttrPersistent
+    );
 
     assertx(staticSerializationVisited.size() > prevIt->second);
     if (!staticSerializationVisited[prevIt->second]) {

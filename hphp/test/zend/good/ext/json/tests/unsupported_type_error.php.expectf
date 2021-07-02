@@ -5,7 +5,7 @@ bool(false)
 int(8)
 string(21) "Type is not supported"
 
-Warning: json_encode(): type is unsupported, encoded as null in %s/test/zend/good/ext/json/tests/unsupported_type_error.php on line 19
+Warning: json_encode(): type is unsupported, encoded as null in %s/test/zend/good/ext/json/tests/unsupported_type_error.php on line %d
 string(4) "null"
 int(8)
 string(21) "Type is not supported"

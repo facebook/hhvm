@@ -569,7 +569,8 @@ namespace HH\ReifiedGenerics {
 namespace HH\Coeffects {
 
   /**
-   * Creates an unsafe way to call a function by providing defaults coeffects
+   * Creates an unsafe way to call a function by providing defaults coeffects.
+   * EXTREMELY UNSAFE. USE WITH CAUTION.
    */
   <<__Native>>
   function backdoor((function()[defaults]: Tout) $f)[]: mixed;

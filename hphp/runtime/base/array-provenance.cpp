@@ -186,8 +186,7 @@ TypedValue markTvImpl(TypedValue in, bool legacy, uint32_t depth) {
     warned = true;
   };
 
-  // The closure: pre-HAM, tag dvarrays and notice on vec / dicts / PHP arrays;
-  // post-HAM, tag vecs and dicts and notice on any other array-like inputs.
+  // The closure: tag vecs and dicts and notice on any other array-like inputs.
   auto const mark_tv = [&](ArrayData* ad, bool cow) -> ArrayData* {
     if (!ad->isVecType() && !ad->isDictType()) {
       warn_once(raised_non_hack_array_notice,

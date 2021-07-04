@@ -63,7 +63,7 @@ enum class CaseMode {
 namespace {
 
 // Create a new array-like with the given type and with enough capacity to
-// store `size` elements. HAM safe: it returns the same type as its input.
+// store `size` elements.
 Array makeReserveLike(DataType type, size_t size) {
   auto const ad = [&]{
     switch (dt_with_rc(type)) {

@@ -303,7 +303,7 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
   auto const result = m_formatMaxLen < 0
     ? DebuggerClient::FormatVariable(value)
     : DebuggerClient::FormatVariableWithLimit(value, m_formatMaxLen);
-  m_variables = make_darray(m_varName, result);
+  m_variables = make_dict_array(m_varName, result);
 
   // Remove the entry if its name or context does not match the filter.
   if (!m_filter.empty() && m_varName.find(m_filter, 0, false) < 0) {

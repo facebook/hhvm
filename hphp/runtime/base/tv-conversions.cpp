@@ -1113,7 +1113,7 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
         throwInvalidClsMethToType("object");
       }
       raiseClsMethConvertWarningHelper("object");
-      auto const arr = make_darray(0, val(tv).pclsmeth->getClsStr(),
+      auto const arr = make_dict_array(0, val(tv).pclsmeth->getClsStr(),
                                    1, val(tv).pclsmeth->getFuncStr());
       return ObjectData::FromArray(arr.get()).detach();
     }

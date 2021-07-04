@@ -695,14 +695,14 @@ bool socket_create_pair_impl(int domain, int type, int protocol, Variant& fd,
   }
 
   if (asStream) {
-    fd = make_varray(
+    fd = make_vec_array(
       Variant(req::make<StreamSocket>(fds_array[0], domain, nullptr, 0, 0.0,
                                       s_socktype_generic)),
       Variant(req::make<StreamSocket>(fds_array[1], domain, nullptr, 0, 0.0,
                                       s_socktype_generic))
     );
   } else {
-    fd = make_varray(
+    fd = make_vec_array(
       Variant(req::make<ConcreteSocket>(fds_array[0], domain, nullptr, 0, 0.0,
                                         s_socktype_generic)),
       Variant(req::make<ConcreteSocket>(fds_array[1], domain, nullptr, 0, 0.0,
@@ -744,7 +744,7 @@ Variant HHVM_FUNCTION(socket_get_option,
         return false;
       }
 
-      return make_darray(
+      return make_dict_array(
         s_l_onoff, linger_val.l_onoff,
         s_l_linger, linger_val.l_linger
       );
@@ -760,7 +760,7 @@ Variant HHVM_FUNCTION(socket_get_option,
         SOCKET_ERROR(sock, "unable to retrieve socket option", errno);
         return false;
       }
-      return make_darray(
+      return make_dict_array(
         s_sec,  (int)tv.tv_sec,
         s_usec, (int)tv.tv_usec
       );
@@ -1636,7 +1636,7 @@ Variant HHVM_FUNCTION(getaddrinfo,
   Array ret = Array::CreateVec();
 
   for (res = res0; res; res = res->ai_next) {
-    Array data = make_darray(
+    Array data = make_dict_array(
       s_family, res->ai_family,
       s_socktype, res->ai_socktype,
       s_protocol, res->ai_protocol
@@ -1651,7 +1651,7 @@ Variant HHVM_FUNCTION(getaddrinfo,
           a = (struct sockaddr_in *)res->ai_addr;
           data.set(
             s_sockaddr,
-            make_darray(
+            make_dict_array(
               s_address, buffer,
               s_port, ntohs(a->sin_port)
             )
@@ -1667,7 +1667,7 @@ Variant HHVM_FUNCTION(getaddrinfo,
           a = (struct sockaddr_in6 *)res->ai_addr;
           data.set(
             s_sockaddr,
-            make_darray(
+            make_dict_array(
               s_address, buffer,
               s_port, ntohs(a->sin6_port),
               s_flow_info, (int32_t)a->sin6_flowinfo,

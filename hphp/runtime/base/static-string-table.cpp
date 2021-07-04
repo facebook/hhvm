@@ -353,7 +353,7 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
   }
 
   if (categorize) {
-    return make_darray(
+    return make_dict_array(
       s_user, usr,
       s_Core, sys
     );

@@ -55,7 +55,7 @@ TEST(Array, Constructors) {
   EXPECT_FALSE(arr.isVec());
   EXPECT_FALSE(arr.isKeyset());
 
-  arr = make_varray(0);
+  arr = make_vec_array(0);
   EXPECT_TRUE(!arr.empty());
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
@@ -65,7 +65,7 @@ TEST(Array, Constructors) {
   EXPECT_FALSE(arr.isDict());
   EXPECT_FALSE(arr.isKeyset());
 
-  arr = make_varray("test");
+  arr = make_vec_array("test");
   EXPECT_TRUE(!arr.empty());
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
@@ -76,7 +76,7 @@ TEST(Array, Constructors) {
   EXPECT_FALSE(arr.isKeyset());
 
   Array arrCopy = arr;
-  arr = make_varray(arrCopy);
+  arr = make_vec_array(arrCopy);
   EXPECT_TRUE(!arr.empty());
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
@@ -183,7 +183,7 @@ TEST(Array, Conversions) {
   EXPECT_TRUE(arr0.toDouble() == 0.0);
   EXPECT_TRUE(arr0.toString().empty());
 
-  Array arr1 = make_varray("test");
+  Array arr1 = make_vec_array("test");
   EXPECT_TRUE(arr1.toBoolean() == true);
   EXPECT_TRUE(arr1.toByte() == 1);
   EXPECT_TRUE(arr1.toInt16() == 1);
@@ -252,7 +252,7 @@ TEST(Array, Offsets) {
     Array arr;
     arr.set(0, "v1");
     arr.set(1, "v2");
-    EXPECT_TRUE(same_arrays(arr, make_varray("v1", "v2").toDict()));
+    EXPECT_TRUE(same_arrays(arr, make_vec_array("v1", "v2").toDict()));
   }
   {
     Array arr;
@@ -266,7 +266,7 @@ TEST(Array, Offsets) {
     Variant v2 = String("v2");
     arr.set(0, *v1.asTypedValue());
     arr.set(1, *v2.asTypedValue());
-    EXPECT_TRUE(same_arrays(arr, make_varray("v1", "v2").toDict()));
+    EXPECT_TRUE(same_arrays(arr, make_vec_array("v1", "v2").toDict()));
   }
   {
     Array arr = Array::CreateDict();
@@ -417,12 +417,12 @@ TEST(Array, Membership) {
   {
     Array arr;
     arr.append(Variant("test"));
-    EXPECT_TRUE(same_arrays(arr, make_varray("test").toDict()));
+    EXPECT_TRUE(same_arrays(arr, make_vec_array("test").toDict()));
   }
   {
     Array arr = Array::CreateVec();
     arr.append(Variant("test"));
-    EXPECT_TRUE(same_arrays(arr, make_varray("test")));
+    EXPECT_TRUE(same_arrays(arr, make_vec_array("test")));
   }
   {
     Array arr = Array::CreateDict();

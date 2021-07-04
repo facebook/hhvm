@@ -2607,7 +2607,7 @@ Variant HHVM_METHOD(SoapClient, soapcallImpl,
     soap_headers = input_headers;
   } else if (input_headers.isObject() &&
              input_headers.toObject().instanceof(SoapHeader::getClass())) {
-    soap_headers = make_varray(input_headers);
+    soap_headers = make_vec_array(input_headers);
   } else{
     raise_warning("Invalid SOAP header");
     return init_null();
@@ -2960,7 +2960,7 @@ Variant HHVM_METHOD(SoapClient, __setcookie,
   auto* data = Native::data<SoapClient>(this_);
   // FIXME: data->m_cookies is a write-only value
   if (!value.isNull()) {
-    data->m_cookies.set(name, make_varray(value.toString()));
+    data->m_cookies.set(name, make_vec_array(value.toString()));
   } else {
     data->m_cookies.remove(name);
   }
@@ -2988,7 +2988,7 @@ bool HHVM_METHOD(SoapClient, __setsoapheaders,
     data->m_default_headers = arr;
   } else if (headers.isObject() &&
              headers.toObject().instanceof(SoapHeader::getClass())) {
-    data->m_default_headers = make_varray(headers);
+    data->m_default_headers = make_vec_array(headers);
   } else {
     raise_warning("Invalid SOAP header");
   }

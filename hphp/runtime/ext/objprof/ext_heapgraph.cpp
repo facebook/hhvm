@@ -344,7 +344,7 @@ Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
     kind_str = s_Root.get(); // fake HeaderKind "Root"
   }
 
-  auto node_arr = make_darray(
+  auto node_arr = make_dict_array(
     s_index, VarNR(index),
     s_kind, VarNR(kind_str),
     s_size, VarNR(int64_t(node.size))
@@ -370,7 +370,7 @@ Array createPhpEdge(HeapGraphContextPtr hgptr, int index) {
   const auto& cptr = hgptr->cptrs[index];
   const auto& cfrom = hgptr->cnodes[ptr.from];
 
-  auto ptr_arr = make_darray(
+  auto ptr_arr = make_dict_array(
     s_index, VarNR(index),
     s_kind, VarNR(edgeKindName(ptr.ptr_kind)),
     s_from, VarNR(ptr.from),
@@ -579,7 +579,7 @@ Array HHVM_FUNCTION(heapgraph_node_in_edges,
 Array HHVM_FUNCTION(heapgraph_stats, const Resource& resource) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return Array::CreateDict();
-  auto result = make_darray(
+  auto result = make_dict_array(
     s_nodes, VarNR(int64_t(hgptr->hg.nodes.size())),
     s_edges, VarNR(int64_t(hgptr->hg.ptrs.size())),
     s_roots, VarNR(int64_t(hgptr->hg.root_ptrs.size())),

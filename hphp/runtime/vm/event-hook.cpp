@@ -322,9 +322,9 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
   Array frameinfo;
   {
     if (retval) {
-      frameinfo = make_darray(s_return, tvAsCVarRef(retval));
+      frameinfo = make_dict_array(s_return, tvAsCVarRef(retval));
     } else if (exception) {
-      frameinfo = make_darray(s_exception, Variant{exception});
+      frameinfo = make_dict_array(s_exception, Variant{exception});
     }
   }
   addFramePointers(ar, frameinfo, false);

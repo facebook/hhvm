@@ -65,11 +65,11 @@ Array c_Pair::toPHPArrayImpl() const {
 }
 
 Array c_Pair::toVArrayImpl() const {
-  return make_varray(tvAsCVarRef(&elm0), tvAsCVarRef(&elm1));
+  return make_vec_array(tvAsCVarRef(&elm0), tvAsCVarRef(&elm1));
 }
 
 Array c_Pair::toDArrayImpl() const {
-  return make_darray(0, tvAsCVarRef(&elm0), 1, tvAsCVarRef(&elm1));
+  return make_dict_array(0, tvAsCVarRef(&elm0), 1, tvAsCVarRef(&elm1));
 }
 
 c_Pair* c_Pair::Clone(ObjectData* obj) {

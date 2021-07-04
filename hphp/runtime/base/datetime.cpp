@@ -173,7 +173,7 @@ Array DateTime::ParseAsStrptime(const String& format, const String& date) {
     return Array();
   }
 
-  return make_darray(
+  return make_dict_array(
     s_tm_sec,  parsed_time.tm_sec,
     s_tm_min,  parsed_time.tm_min,
     s_tm_hour, parsed_time.tm_hour,
@@ -247,7 +247,7 @@ Array DateTime::ParseAsStrptime(const String& format, const String& date) {
   }
 
   if (parsed_time->have_relative) {
-    auto element = make_darray(
+    auto element = make_dict_array(
       s_year,   parsed_time->relative.y,
       s_month,  parsed_time->relative.m,
       s_day,    parsed_time->relative.d,
@@ -901,7 +901,7 @@ Array DateTime::toArray(ArrayFormat format) const {
   bool error;
   switch (format) {
   case ArrayFormat::TimeMap:
-    return make_darray(
+    return make_dict_array(
       s_seconds, second(),
       s_minutes, minute(),
       s_hours,   hour(),
@@ -918,7 +918,7 @@ Array DateTime::toArray(ArrayFormat format) const {
     {
       struct tm tm;
       toTm(tm);
-      return make_darray(
+      return make_dict_array(
         s_tm_sec,   tm.tm_sec,
         s_tm_min,   tm.tm_min,
         s_tm_hour,  tm.tm_hour,
@@ -934,7 +934,7 @@ Array DateTime::toArray(ArrayFormat format) const {
     {
       struct tm tm;
       toTm(tm);
-      return make_varray(
+      return make_vec_array(
         tm.tm_sec,
         tm.tm_min,
         tm.tm_hour,

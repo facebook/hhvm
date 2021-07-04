@@ -274,7 +274,7 @@ Array XenonRequestLocalData::createResponse() {
   VArrayInit stacks(m_stackSnapshots.size());
   for (ArrayIter it(m_stackSnapshots); it; ++it) {
     const auto& frame = it.second().toArray();
-    stacks.append(make_darray(
+    stacks.append(make_dict_array(
       s_time, frame[s_time],
       s_time_ns, frame[s_time_ns],
       s_lastTriggerTime, frame[s_lastTriggerTime],
@@ -314,7 +314,7 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
                              .fromWaitHandle(wh)
                              .withMetadata()
                              .ignoreArgs());
-  m_stackSnapshots.append(make_darray(
+  m_stackSnapshots.append(make_dict_array(
     s_time, now,
     s_time_ns, now_ns,
     s_lastTriggerTime, triggerTime,

@@ -80,7 +80,7 @@ bool TestExtServer::test_pagelet_server_task_result() {
     String header = baseheader + String(i);
     String post = basepost + String(i);
     Resource task = HHVM_FN(pagelet_server_task_start)(url,
-      make_varray(header), post);
+      make_vec_array(header), post);
     tasks.push_back(task);
   }
 

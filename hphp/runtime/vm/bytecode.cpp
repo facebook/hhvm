@@ -4078,7 +4078,7 @@ void resolveMethodImpl(TypedValue* c1, TypedValue* c2) {
   ObjectData* thiz = nullptr;
   HPHP::Class* cls = nullptr;
   bool dynamic = false;
-  auto arr = make_varray(tvAsVariant(*c2), tvAsVariant(*c1));
+  auto arr = make_vec_array(tvAsVariant(*c2), tvAsVariant(*c1));
   auto const func = vm_decode_function(
     Variant{arr},
     vmfp(),

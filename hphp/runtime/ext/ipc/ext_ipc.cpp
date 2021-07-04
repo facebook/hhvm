@@ -216,7 +216,7 @@ Array HHVM_FUNCTION(msg_stat_queue,
 
   struct msqid_ds stat;
   if (msgctl(q->id, IPC_STAT, &stat) == 0) {
-    return make_darray(
+    return make_dict_array(
       s_msg_perm_uid,  (int64_t)stat.msg_perm.uid,
       s_msg_perm_gid,  (int64_t)stat.msg_perm.gid,
       s_msg_perm_mode, (int32_t)stat.msg_perm.mode,

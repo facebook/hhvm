@@ -199,7 +199,7 @@ Array HHVM_FUNCTION(hphp_get_extension_info, const String& name) {
 
   Extension *ext = ExtensionRegistry::get(name);
 
-  return make_darray(
+  return make_dict_array(
     s_name,      name,
     s_version,   ext ? ext->getVersion() : "",
     s_info,      empty_string(),

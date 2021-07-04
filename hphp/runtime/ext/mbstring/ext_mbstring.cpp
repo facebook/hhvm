@@ -3814,7 +3814,7 @@ static Variant _php_mb_regex_ereg_search_exec(const String& pattern,
       {
         beg = MBSTRG(search_regs)->beg[0];
         end = MBSTRG(search_regs)->end[0];
-        ret = make_varray(beg, end - beg);
+        ret = make_vec_array(beg, end - beg);
       }
       break;
     case 2:

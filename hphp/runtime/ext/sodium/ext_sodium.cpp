@@ -965,7 +965,7 @@ Array HHVM_FUNCTION(sodium_crypto_kx_##SIDE##_session_keys,\
   rx.setSize(crypto_kx_SESSIONKEYBYTES);\
   tx.setSize(crypto_kx_SESSIONKEYBYTES);\
 \
-  return make_varray(rx, tx);\
+  return make_vec_array(rx, tx);\
 }
 DEFINE_KX_SESSION_KEYS_FUNC(client);
 DEFINE_KX_SESSION_KEYS_FUNC(server);

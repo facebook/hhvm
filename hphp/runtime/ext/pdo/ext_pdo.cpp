@@ -458,7 +458,7 @@ void pdo_handle_error(sp_PDOResource rsrc, PDOStatement* stmt) {
   String supp;
   Array info;
   if (dbh->support(PDOConnection::MethodFetchErr)) {
-    info = make_varray(String(*pdo_err, CopyString));
+    info = make_vec_array(String(*pdo_err, CopyString));
     if (dbh->fetchErr(stmt, info)) {
       if (info.exists(1)) {
         native_code = info[1].toInt64();

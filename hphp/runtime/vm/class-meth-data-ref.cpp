@@ -79,7 +79,7 @@ void raiseClsMethConvertWarningHelper(const char* toType) {
 Array clsMethToVecHelper(ClsMethDataRef clsMeth) {
   assertx(RO::EvalIsCompatibleClsMethType);
 
-  return make_varray(clsMeth->getClsStr(), clsMeth->getFuncStr());
+  return make_vec_array(clsMeth->getClsStr(), clsMeth->getFuncStr());
 }
 
 void throwInvalidClsMethToType(const char* ty) {

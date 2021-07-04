@@ -209,23 +209,23 @@ Object AllocSoapFaultObject(const Variant& code,
                                  const Variant& header /* = uninit_variant */) {
   return createAndConstruct(
     s_SoapFaultClass,
-    make_varray(code, message, actor, detail, name, header)
+    make_vec_array(code, message, actor, detail, name, header)
   );
 }
 
 Object AllocLazyKVZipIterableObject(const Variant& mp) {
   return createAndConstruct(s_LazyKVZipIterableClass,
-                            make_varray(mp));
+                            make_vec_array(mp));
 }
 
 Object AllocLazyIterableViewObject(const Variant& iterable) {
   return createAndConstruct(s_LazyIterableViewClass,
-                            make_varray(iterable));
+                            make_vec_array(iterable));
 }
 
 Object AllocLazyKeyedIterableViewObject(const Variant& iterable) {
   return createAndConstruct(s_LazyKeyedIterableViewClass,
-                            make_varray(iterable));
+                            make_vec_array(iterable));
 }
 
 Object AllocUndefinedVariableExceptionObject(const Variant& message) {

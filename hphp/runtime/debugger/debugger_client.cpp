@@ -79,7 +79,7 @@ const StaticString
 static String wordwrap(const String& str, int width /* = 75 */,
                        const String& wordbreak /* = "\n" */,
                        bool cut /* = false */) {
-  Array args = make_varray(str, width, wordbreak, cut);
+  Array args = make_vec_array(str, width, wordbreak, cut);
   return vm_call_user_func(Func::lookup(s_wordwrap.get()), args).toString();
 }
 

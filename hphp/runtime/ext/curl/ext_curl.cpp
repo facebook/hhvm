@@ -133,12 +133,12 @@ Array HHVM_FUNCTION(curl_list_pools) {
   DArrayInit ret(size);
   for (auto it: CurlHandlePool::namedPools) {
     auto pool = it.second;
-    auto stats = make_darray(
+    auto stats = make_dict_array(
       s_fetches, pool->statsFetches(),
       s_empty, pool->statsEmpty(),
       s_fetchMs, pool->statsFetchUs() / 1000
     );
-    ret.set(String(it.first), make_darray(s_size, pool->size(),
+    ret.set(String(it.first), make_dict_array(s_size, pool->size(),
                                           s_connGetTimeout,
                                           pool->connGetTimeout(),
                                           s_reuseLimit,

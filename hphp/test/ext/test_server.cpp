@@ -124,7 +124,7 @@ bool TestServer::VerifyServerResponse(const char* input, const char** outputs,
       }
       if (header) {
         HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_HTTPHEADER,
-                      make_varray(header));
+                      make_vec_array(header));
       }
       if (responseHeader) {
         HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_HEADER, 1);

@@ -164,7 +164,7 @@ TypedValue json_encode_with_error_impl(const Variant& value, Variant& error,
   if (error_code == k_JSON_ERROR_NONE) {
     error.setNull();
   } else {
-    error = make_varray(error_code, json_get_last_error_msg());
+    error = make_vec_array(error_code, json_get_last_error_msg());
   }
 
   json_set_last_error_code(prior_error_code);
@@ -299,7 +299,7 @@ TypedValue HHVM_FUNCTION(json_decode_with_error, const String& json,
   if (error_code == k_JSON_ERROR_NONE) {
     error.setNull();
   } else {
-    error = make_varray(error_code, json_get_last_error_msg());
+    error = make_vec_array(error_code, json_get_last_error_msg());
   }
 
   json_set_last_error_code(prior_error_code);

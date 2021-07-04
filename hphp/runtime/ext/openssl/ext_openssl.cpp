@@ -1895,7 +1895,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
   char *pbio;
   unsigned int pbio_len = BIO_get_mem_data(out, &pbio);
 
-  auto ret = make_darray(
+  auto ret = make_dict_array(
     s_bits, EVP_PKEY_bits(pkey),
     s_key, String(pbio, pbio_len, CopyString)
   );
@@ -2738,7 +2738,7 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
       int id = X509_PURPOSE_get_id(purp);
       char * pname = shortnames ? X509_PURPOSE_get0_sname(purp) :
         X509_PURPOSE_get0_name(purp);
-      auto subsub = make_varray(
+      auto subsub = make_vec_array(
         (bool)X509_check_purpose(cert, id, 0),
         (bool)X509_check_purpose(cert, id, 1),
         String(pname, CopyString)

@@ -102,14 +102,14 @@ Array HHVM_FUNCTION(hphp_debug_caller_info) {
     auto const path = fp->func()->originalFilename() ?
       fp->func()->originalFilename() : fp->func()->unit()->filepath();
     if (cls && !fp->func()->isClosureBody()) {
-      ret = make_darray(
+      ret = make_dict_array(
         s_class, const_cast<StringData*>(cls->name()),
         s_file, const_cast<StringData*>(path),
         s_function, const_cast<StringData*>(fp->func()->name()),
         s_line, line
       );
     } else {
-      ret = make_darray(
+      ret = make_dict_array(
         s_file, const_cast<StringData*>(path),
         s_function, const_cast<StringData*>(fp->func()->name()),
         s_line, line
@@ -192,7 +192,7 @@ Array HHVM_FUNCTION(error_get_last) {
   if (lastError.isNull()) {
     return null_array;
   }
-  return make_darray(
+  return make_dict_array(
     s_type, g_context->getLastErrorNumber(),
     s_message, g_context->getLastError(),
     s_file, g_context->getLastErrorPath(),

@@ -41,18 +41,18 @@ namespace {
     if (status.isBoolean()) {
       assertx(status.asBooleanVal() == false);
       assertx(error.isInteger());
-      return make_varray(init_null(), std::move(error));
+      return make_vec_array(init_null(), std::move(error));
     }
     if (status.isNull()) {
       assertx(error.isInteger());
-      return make_varray(init_null(), std::move(error));
+      return make_vec_array(init_null(), std::move(error));
     }
 
     assertx(status.isInteger());
     assertx(error.isNull());
 
     if (status.asInt64Val() == 0) {
-      return make_varray(init_null(), init_null()); // no match
+      return make_vec_array(init_null(), init_null()); // no match
     }
 
     // match
@@ -72,7 +72,7 @@ namespace {
     assertx(matches.asCArrRef()[0].asCArrRef().exists(1));
     assertx(matches.asCArrRef()[0].asCArrRef()[1].isInteger());
     offset = matches.asCArrRef()[0].asCArrRef()[1].asInt64Val();
-    return make_varray(matches_out.toArray(), init_null());
+    return make_vec_array(matches_out.toArray(), init_null());
   }
 
   Array HHVM_FUNCTION(HH_regex_replace, const String& haystack,
@@ -92,7 +92,7 @@ namespace {
     // haystack is a string so preg_replace_impl returns string, false, or null
     if (replaced.isString()) {
       assertx(error.isNull());
-      return make_varray(std::move(replaced), init_null());
+      return make_vec_array(std::move(replaced), init_null());
     }
 
     assertx(error.isInteger());
@@ -101,7 +101,7 @@ namespace {
     } else {
       assertx(replaced.isNull());
     }
-    return make_varray(init_null(), std::move(error));
+    return make_vec_array(init_null(), std::move(error));
   }
 
   struct RegexExtension final : Extension {

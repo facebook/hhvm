@@ -768,7 +768,7 @@ static void sxe_properties_add(Array& rv, char* name, const Variant& value) {
       arr.append(value);
       rv.set(sName, arr);
     } else {
-      Array arr = make_varray(existVal, value);
+      Array arr = make_vec_array(existVal, value);
       rv.set(sName, arr);
     }
   } else {

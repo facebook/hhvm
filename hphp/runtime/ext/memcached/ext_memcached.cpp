@@ -338,7 +338,7 @@ struct MemcachedData {
     String sKey(key, keyLength, CopyString);
     double cas = (double) memcached_result_cas(&result);
 
-    item = make_darray(s_key, sKey, s_value, value, s_cas, cas);
+    item = make_dict_array(s_key, sKey, s_value, value, s_cas, cas);
     return true;
   }
   typedef memcached_return_t (*SetOperation)(memcached_st *,
@@ -837,13 +837,13 @@ doServerListCallback(const memcached_st* /*ptr*/,
   const char* hostname = LMCD_SERVER_HOSTNAME(server);
   in_port_t port = LMCD_SERVER_PORT(server);
 #ifdef LMCD_SERVER_QUERY_INCLUDES_WEIGHT
-  returnValue->append(make_darray(
+  returnValue->append(make_dict_array(
     s_host, String(hostname, CopyString),
     s_port, (int32_t)port,
     s_weight, (int32_t)server->weight
   ));
 #else
-  returnValue->append(make_darray(
+  returnValue->append(make_dict_array(
     s_host, String(hostname, CopyString),
     s_port, (int32_t)port
   ));
@@ -885,13 +885,13 @@ Variant HHVM_METHOD(Memcached, getserverbykey, const String& server_key) {
   const char* hostname = LMCD_SERVER_HOSTNAME(server);
   in_port_t port = LMCD_SERVER_PORT(server);
 #ifdef LMCD_SERVER_QUERY_INCLUDES_WEIGHT
-  return make_darray(
+  return make_dict_array(
     s_host, String(hostname, CopyString),
     s_port, (int32_t)port,
     s_weight, (int32_t)server->weight
   );
 #else
-  return make_darray(
+  return make_dict_array(
     s_host, String(hostname, CopyString),
     s_port, (int32_t)port
   );
@@ -942,7 +942,7 @@ doStatsCallback(const memcached_st* /*ptr*/,
   ssize_t i = context->returnValue.size();
 
   context->returnValue.set(String(key, CopyString),
-    make_darray(
+    make_dict_array(
       s_pid,                        (int64_t)stats[i].pid,
       s_uptime,                     (int64_t)stats[i].uptime,
       s_threads,                    (int64_t)stats[i].threads,

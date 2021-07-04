@@ -1354,7 +1354,7 @@ static String preg_do_repl_func(const Variant& function, const String& subject,
     subpats.set(i, sub);
   }
 
-  return vm_call_user_func(function, make_varray(subpats)).toString();
+  return vm_call_user_func(function, make_vec_array(subpats)).toString();
 }
 
 static bool preg_get_backref(const char** str, int* backref) {

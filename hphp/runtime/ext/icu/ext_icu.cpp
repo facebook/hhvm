@@ -120,7 +120,7 @@ static Variant icu_match_impl(const String& pattern,
           }
 
           start = usubject.countChar32(0, start);
-          matchesArr.append(make_varray(match, start));
+          matchesArr.append(make_vec_array(match, start));
         } else {
           matchesArr.append(match);
         }

@@ -1025,7 +1025,7 @@ Array HHVM_FUNCTION(proc_get_status,
   }
 #endif
 
-  return make_darray(
+  return make_dict_array(
     s_command,  proc->command,
     s_pid, (int)proc->child,
     s_running,  running,

@@ -73,7 +73,7 @@ Array BZ2File::error() {
   int errnum;
   const char * errstr;
   errstr = BZ2_bzerror(m_bzFile, &errnum);
-  return make_darray(s_errno, errnum, s_errstr, String(errstr));
+  return make_dict_array(s_errno, errnum, s_errstr, String(errstr));
 }
 
 bool BZ2File::flush() {

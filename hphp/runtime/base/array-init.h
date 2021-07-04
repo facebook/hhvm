@@ -885,21 +885,6 @@ namespace make_array_detail {
 }
 
 /*
- * Helper for creating packed varrays.
- *
- * Usage:
- *
- *   auto newArray = make_varray(1, 2, 3, 4);
- */
-template<class... Vals>
-Array make_varray(Vals&&... vals) {
-  static_assert(sizeof...(vals), "use Array::CreateVec() instead");
-  VArrayInit init(sizeof...(vals));
-  make_array_detail::varray_impl(init, std::forward<Vals>(vals)...);
-  return init.toArray();
-}
-
-/*
  * Helper for creating Hack vec arrays (vector-like).
  *
  * Usage:
@@ -931,25 +916,6 @@ Array make_map_array(KVPairs&&... kvpairs) {
     sizeof...(kvpairs) % 2 == 0, "make_map_array needs key value pairs");
   ArrayInit init(sizeof...(kvpairs) / 2, ArrayInit::Map{});
   make_array_detail::map_impl(init, std::forward<KVPairs>(kvpairs)...);
-  return init.toArray();
-}
-
-/*
- * Helper for creating darrays.  Takes pairs of arguments for the keys and
- * values.
- *
- * Usage:
- *
- *   auto newArray = make_darray(keyOne, valueOne, otherKey, otherValue);
- *
- */
-template<class... KVPairs>
-Array make_darray(KVPairs&&... kvpairs) {
-  static_assert(sizeof...(kvpairs), "use Array::CreateDict() instead");
-  static_assert(
-    sizeof...(kvpairs) % 2 == 0, "make_darray needs key value pairs");
-  DArrayInit init(sizeof...(kvpairs) / 2);
-  make_array_detail::darray_impl(init, std::forward<KVPairs>(kvpairs)...);
   return init.toArray();
 }
 

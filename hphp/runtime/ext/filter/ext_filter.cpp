@@ -359,7 +359,7 @@ Variant HHVM_FUNCTION(filter_var,
   Variant ret;
   FAIL_IF(!filter_var(ret, variable, filter, options));
   if (filter_flags & k_FILTER_FORCE_ARRAY && !ret.isArray()) {
-    ret = make_varray(ret);
+    ret = make_vec_array(ret);
   }
   return ret;
 }

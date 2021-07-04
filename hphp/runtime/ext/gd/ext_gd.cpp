@@ -2808,7 +2808,7 @@ static Variant php_imagettftext_common(int mode, int extended,
   }
 
   /* return array with the text's bounding box */
-  return make_varray(
+  return make_vec_array(
     brect[0],
     brect[1],
     brect[2],
@@ -3795,7 +3795,7 @@ Variant HHVM_FUNCTION(imagecolorsforindex, const Resource& image,
   if (!im) return false;
   if (index >= 0 &&
       (gdImageTrueColor(im) || index < gdImageColorsTotal(im))) {
-    return make_darray(
+    return make_dict_array(
       s_red,  gdImageRed(im,index),
       s_green, gdImageGreen(im,index),
       s_blue, gdImageBlue(im,index),

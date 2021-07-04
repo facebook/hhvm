@@ -332,7 +332,7 @@ Array HHVM_METHOD(DateTime, __sleep) {
                  make_tv<KindOfInt64>(zoneType));
   auto const timezone = zone_type_to_string(zoneType, data->m_dt);
   this_->setProp(nullptr, s_timezone.get(), timezone.asTypedValue());
-  return make_varray(s_date, s_timezone_type, s_timezone);
+  return make_vec_array(s_date, s_timezone_type, s_timezone);
 }
 
 void HHVM_METHOD(DateTime, __wakeup) {
@@ -356,7 +356,7 @@ Array HHVM_METHOD(DateTime, __debugInfo) {
 
 Array DateTimeData::getDebugInfo() const {
   assertx(m_dt);
-  return make_darray(
+  return make_dict_array(
     s_date, format(s_ISOformat),
     s_timezone_type, m_dt->zoneType(),
     s_timezone, zone_type_to_string(m_dt->zoneType(), m_dt)
@@ -544,7 +544,7 @@ Array HHVM_METHOD(DateTimeZone, __debugInfo) {
 
 Array DateTimeZoneData::getDebugInfo() const {
   assertx(m_tz);
-  return make_darray(
+  return make_dict_array(
     s_timezone_type, m_tz->type(),
     s_timezone, m_tz->name()
   );

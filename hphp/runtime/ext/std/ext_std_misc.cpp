@@ -504,7 +504,7 @@ Variant HHVM_FUNCTION(time_nanosleep, int seconds, int nanoseconds) {
 
   recordNanosleepTime(req, &rem);
   if (errno == EINTR) {
-    return make_darray(
+    return make_dict_array(
       s_seconds, (int64_t)rem.tv_sec,
       s_nanoseconds, (int64_t)rem.tv_nsec
     );
@@ -581,7 +581,7 @@ Variant HHVM_FUNCTION(unpack, const String& format, const String& data) {
 Array HHVM_FUNCTION(sys_getloadavg) {
   double load[3];
   getloadavg(load, 3);
-  return make_varray(load[0], load[1], load[2]);
+  return make_vec_array(load[0], load[1], load[2]);
 }
 
 Variant HHVM_FUNCTION(array_mark_legacy, const Variant& v, bool recursive) {

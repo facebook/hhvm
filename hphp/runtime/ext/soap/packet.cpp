@@ -379,7 +379,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
                 }
                 asArrRef(lval).append(tmp);
               } else if (val->next && get_node(val->next, (char*)val->name)) {
-                Array arr = make_varray(tmp);
+                Array arr = make_vec_array(tmp);
                 return_value.asArrRef().set(key, arr);
               } else {
                 return_value.asArrRef().set(key, tmp);

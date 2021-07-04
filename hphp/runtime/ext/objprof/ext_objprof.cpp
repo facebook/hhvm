@@ -923,7 +923,7 @@ Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
   for (auto& it : metrics) {
     if (it.second.dups < min_dup) continue;
 
-    auto metrics_val = make_darray(
+    auto metrics_val = make_dict_array(
       s_dups, Variant(it.second.dups),
       s_refs, Variant(it.second.refs),
       s_srefs, Variant(it.second.srefs),
@@ -998,7 +998,7 @@ Array HHVM_FUNCTION(objprof_get_data,
       key += "::" + c.second;
     }
 
-    auto metrics_val = make_darray(
+    auto metrics_val = make_dict_array(
       s_instances, Variant(it.second.instances),
       s_bytes, Variant(it.second.bytes),
       s_bytes_rel, it.second.bytes_rel,
@@ -1137,14 +1137,14 @@ Array HHVM_FUNCTION(objprof_get_paths,
     DArrayInit pathsArr(clsPaths.size());
     for (auto const& pathIt : clsPaths) {
       auto pathStr = pathIt.first;
-      auto path_metrics_val = make_darray(
+      auto path_metrics_val = make_dict_array(
         s_refs, pathIt.second.refs
       );
 
       pathsArr.setValidKey(Variant(pathStr), Variant(path_metrics_val));
     }
 
-    auto metrics_val = make_darray(
+    auto metrics_val = make_dict_array(
       s_instances, Variant(it.second.instances),
       s_bytes, Variant(it.second.bytes),
       s_bytes_rel, it.second.bytes_rel,
@@ -1205,7 +1205,7 @@ Array HHVM_FUNCTION(thread_memory_stats, void) {
   auto stack_size = get_thread_stack_size();
   auto stack_size_peak = get_thread_stack_peak_size();
 
-  auto stats = make_darray(
+  auto stats = make_dict_array(
       s_cpp_stack, Variant(stack_size),
       s_cpp_stack_peak, Variant(stack_size_peak)
   );

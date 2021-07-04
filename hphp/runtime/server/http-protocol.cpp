@@ -740,7 +740,7 @@ static void CopyPathInfo(Array& server,
   }
   server.set(s_QUERY_STRING, r.queryString());
 
-  server.set(s_argv, make_varray(r.queryString()));
+  server.set(s_argv, make_vec_array(r.queryString()));
   server.set(s_argc, 1);
 }
 

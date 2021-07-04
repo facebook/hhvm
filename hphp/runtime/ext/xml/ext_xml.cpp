@@ -543,7 +543,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           if (parser->level <= XML_MAXLEVEL && parser->level > 0) {
             _xml_add_to_info(parser, parser->ltags[parser->level-1] +
                              parser->toffset);
-            Array tag = make_darray(
+            Array tag = make_dict_array(
               s_tag, String(parser->ltags[parser->level-1] +
                                   parser->toffset, CopyString),
               s_value, decoded_value,
@@ -583,7 +583,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
     String tag_name = _xml_decode_tag(parser, (const char*)name);
 
     if (parser->startElementHandler.toBoolean()) {
-      Array args = make_varray(
+      Array args = make_vec_array(
         Variant(parser),
         tag_name,
         Array::CreateDict()

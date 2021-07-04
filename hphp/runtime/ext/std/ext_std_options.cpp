@@ -516,7 +516,7 @@ static Array HHVM_FUNCTION(getopt, const String& options,
       if (ret.exists(optname_int)) {
         auto const lval = ret.lval(optname_int);
         if (!isArrayLikeType(lval.type())) {
-          ret.set(optname_int, make_varray(Variant::wrap(lval.tv()), val));
+          ret.set(optname_int, make_vec_array(Variant::wrap(lval.tv()), val));
         } else {
           asArrRef(lval).append(val);
         }
@@ -529,7 +529,7 @@ static Array HHVM_FUNCTION(getopt, const String& options,
       if (ret.exists(key)) {
         auto const lval = ret.lval(key);
         if (!isArrayLikeType(lval.type())) {
-          ret.set(key, make_varray(Variant::wrap(lval.tv()), val));
+          ret.set(key, make_vec_array(Variant::wrap(lval.tv()), val));
         } else {
           asArrRef(lval).append(val);
         }
@@ -591,7 +591,7 @@ static Array HHVM_FUNCTION(getrusage, int64_t who /* = 0 */) {
       folly::errnoStr(errno).c_str());
   }
 
-  return make_darray(
+  return make_dict_array(
     PHP_RUSAGE_PARA(ru_oublock),
     PHP_RUSAGE_PARA(ru_inblock),
     PHP_RUSAGE_PARA(ru_msgsnd),

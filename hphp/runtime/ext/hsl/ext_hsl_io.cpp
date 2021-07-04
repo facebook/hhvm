@@ -31,7 +31,7 @@ namespace {
     if (::pipe(fds) != 0) {
       raise_error("Failed to pipe(2)");
     }
-    return make_varray(
+    return make_vec_array(
       req::make<PlainFile>(fds[0]),
       req::make<PlainFile>(fds[1])
     );

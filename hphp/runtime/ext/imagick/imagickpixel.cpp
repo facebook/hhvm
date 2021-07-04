@@ -171,7 +171,7 @@ static Array HHVM_METHOD(ImagickPixel, getHSL) {
   auto wand = getPixelWandResource(Object{this_});
   double hue, saturation, luminosity;
   PixelGetHSL(wand->getWand(), &hue, &saturation, &luminosity);
-  return make_darray(
+  return make_dict_array(
     s_hue, hue,
     s_saturation, saturation,
     s_luminosity, luminosity);

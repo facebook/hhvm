@@ -682,7 +682,7 @@ const StaticString s_created_pool_connections("created_pool_connections"),
 static Array HHVM_METHOD(AsyncMysqlConnectionPool, getPoolStats) {
   auto* data = Native::data<AsyncMysqlConnectionPool>(this_);
   auto* pool_stats = data->m_async_pool->stats();
-  Array ret = make_darray(
+  Array ret = make_dict_array(
       s_created_pool_connections,
       pool_stats->numCreatedPoolConnections(),
       s_destroyed_pool_connections,
@@ -1550,7 +1550,7 @@ void AsyncMysqlConnectAndMultiQueryEvent::unserialize(TypedValue& result) {
   auto connResult = AsyncMysqlConnectResult::newInstance(
       m_connect_op, m_clientStats);
   if (m_multi_query_op->ok()) {
-    auto resTuple = make_varray(connResult, queryResults);
+    auto resTuple = make_vec_array(connResult, queryResults);
     tvCopy(make_array_like_tv(resTuple.detach()), result);
   } else {
     throwAsyncMysqlQueryException("AsyncMysqlQueryException", m_multi_query_op,

@@ -225,7 +225,7 @@ Array HHVM_FUNCTION(
   Variant& outObj
 ) {
   auto const orig = retOrig
-    ? make_varray(s.get(), str, num, i, obj, o.get(), m, mix)
+    ? make_vec_array(s.get(), str, num, i, obj, o.get(), m, mix)
     : Array::CreateVec();
 
   str += ";; IN =\"";
@@ -240,7 +240,7 @@ Array HHVM_FUNCTION(
   obj = Object{o.get()};
 
   outArr = retOrig
-    ? make_varray(outBool, outArr, outObj)
+    ? make_vec_array(outBool, outArr, outObj)
     : Array::CreateVec();
   outBool = true;
   outObj = SystemLib::AllocStdClassObject();
@@ -280,7 +280,7 @@ struct DummyDArrayAwait : AsioExternalThreadEvent {
   DummyDArrayAwait() { markAsFinished(); }
 
   void unserialize(TypedValue& tv) override {
-    auto arr = make_darray("foo", "bar", "baz", "quux");
+    auto arr = make_dict_array("foo", "bar", "baz", "quux");
     tv = make_array_like_tv(arr.detach());
   }
 };

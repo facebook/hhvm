@@ -421,7 +421,7 @@ struct HSLFileDescriptor {
       default:
         assertx(false);
     }
-    return make_darray(
+    return make_dict_array(
       s_type, type,
       s_fd, VarNR{make_tv<KindOfInt64>(rawfd())}
     );
@@ -532,7 +532,7 @@ Array HHVM_FUNCTION(HSL_os_mkostemps, const String& path_template, int64_t suffi
     suffixlen,
     flags
   );
-  return make_varray(
+  return make_vec_array(
     HSLFileDescriptor::newInstance(fd.fd),
     path
   );
@@ -590,7 +590,7 @@ void HHVM_FUNCTION(HSL_os_close, const Object& obj) {
 Array HHVM_FUNCTION(HSL_os_pipe) {
   int fds[2];
   throw_errno_if_minus_one(retry_on_eintr(-1, ::pipe, fds));
-  return make_varray(
+  return make_vec_array(
     HSLFileDescriptor::newInstance(fds[0]),
     HSLFileDescriptor::newInstance(fds[1])
   );
@@ -620,7 +620,7 @@ Array HHVM_FUNCTION(HSL_os_socketpair, int64_t domain, int64_t type, int64_t pro
   }
   int fds[2];
   throw_errno_if_minus_one(retry_on_eintr(-1, ::socketpair, domain, type, protocol, fds));
-  return make_varray(
+  return make_vec_array(
     HSLFileDescriptor::newInstance(fds[0]),
     HSLFileDescriptor::newInstance(fds[1])
   );
@@ -727,7 +727,7 @@ Array HHVM_FUNCTION(HSL_os_accept, const Object& hsl_server_fd) {
     &ss_len
   );
   throw_errno_if_minus_one(fd);
-  return make_varray(
+  return make_vec_array(
     HSLFileDescriptor::newInstance(fd),
     hsl_sockaddr_from_native(ss, ss_len)
   );

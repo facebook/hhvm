@@ -199,7 +199,7 @@ void CmdMachine::UpdateIntercept(DebuggerClient &client,
                                  const std::string &host, int port) {
   CmdMachine cmd;
   cmd.m_body = "rpc";
-  cmd.m_rpcConfig = make_darray
+  cmd.m_rpcConfig = make_dict_array
     (s_host_string, String(host),
      s_port, port ? port : RuntimeOption::DebuggerDefaultRpcPort,
      s_auth, String(RuntimeOption::DebuggerDefaultRpcAuth),

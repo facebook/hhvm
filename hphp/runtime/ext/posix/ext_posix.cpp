@@ -200,7 +200,7 @@ static Variant php_posix_group_to_array(group* gr) {
     members.append(String(gr->gr_mem[count], CopyString));
   }
 
-  return make_darray(
+  return make_dict_array(
     s_name, String(gr->gr_name, CopyString),
     s_passwd, String(gr->gr_passwd, CopyString),
     s_members, members,
@@ -283,7 +283,7 @@ static Variant php_posix_passwd_to_array(passwd* pw) {
   // Invalid user.
   if (pw == nullptr) return false;
 
-  return make_darray(
+  return make_dict_array(
     s_name,   String(pw->pw_name,   CopyString),
     s_passwd, String(pw->pw_passwd, CopyString),
     s_uid,    (int)pw->pw_uid,
@@ -524,7 +524,7 @@ Variant HHVM_FUNCTION(posix_times) {
     return false;
   }
 
-  return make_darray(
+  return make_dict_array(
     s_ticks,  (int)ticks,        /* clock ticks */
     s_utime,  (int)t.tms_utime,  /* user time */
     s_stime,  (int)t.tms_stime,  /* system time */
@@ -563,7 +563,7 @@ Variant HHVM_FUNCTION(posix_uname) {
     return false;
   }
 
-  return make_darray(
+  return make_dict_array(
     s_sysname,      String(u.sysname,    CopyString)
     , s_nodename,   String(u.nodename,   CopyString)
     , s_release,    String(u.release,    CopyString)

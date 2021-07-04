@@ -66,7 +66,7 @@ Array HHVM_FUNCTION(apache_request_headers) {
 static Array get_raw_headers(const proxygen::HTTPHeaders &headers) {
   VArrayInit ret(headers.size());
   headers.forEach([&] (const std::string &header, const std::string &val) {
-    auto headerValPair = make_varray(header.c_str(), val.c_str());
+    auto headerValPair = make_vec_array(header.c_str(), val.c_str());
     ret.append(headerValPair);
   });
   return ret.toArray();
@@ -120,7 +120,7 @@ Array HHVM_FUNCTION(apache_get_config) {
     health_level = (int)(ApacheExtension::GetHealthLevel());
   }
 
-  return make_darray(
+  return make_dict_array(
     s_restart_time, HttpServer::StartTime,
     s_max_clients, RuntimeOption::ServerThreadCount,
     s_active_clients, workers,

@@ -576,7 +576,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
     );
     not_reached();
   } else if (UNLIKELY(instanceof(c_Closure::classof()))) {
-    return make_varray(Object(const_cast<ObjectData*>(this)));
+    return make_vec_array(Object(const_cast<ObjectData*>(this)));
   } else if (UNLIKELY(instanceof(DateTimeData::getClass()))) {
     return Native::data<DateTimeData>(this)->getDebugInfo();
   } else {

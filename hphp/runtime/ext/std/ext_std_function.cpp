@@ -42,7 +42,7 @@ const StaticString
   s_user("user");
 
 Array HHVM_FUNCTION(get_defined_functions) {
-  return make_darray(s_internal, Unit::getSystemFunctions(),
+  return make_dict_array(s_internal, Unit::getSystemFunctions(),
                      s_user, Unit::getUserFunctions());
 }
 

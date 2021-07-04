@@ -45,7 +45,7 @@ const StaticString
   s_r("r");
 
 Array Directory::getMetaData() {
-  return make_darray(
+  return make_dict_array(
     s_wrapper_type, s_plainfile, // PHP5 compatibility
     s_stream_type,  s_dir,
     s_mode,         s_r,

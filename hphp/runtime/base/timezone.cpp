@@ -468,7 +468,7 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
     int index = m_tzi->trans ? m_tzi->trans_idx[lastBefore] : 0;
     ttinfo &offset = m_tzi->type[index];
     const char *abbr = m_tzi->timezone_abbr + offset.abbr_idx;
-    ret.append(make_darray(
+    ret.append(make_dict_array(
       s_ts, timestamp_begin,
       s_time, dt->toString(DateTime::DateFormat::ISO8601),
       s_offset, offset.offset,
@@ -487,7 +487,7 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
       ttinfo &offset = m_tzi->type[index];
       const char *abbr = m_tzi->timezone_abbr + offset.abbr_idx;
 
-      ret.append(make_darray(
+      ret.append(make_dict_array(
         s_ts, timestamp,
         s_time, dt->toString(DateTime::DateFormat::ISO8601),
         s_offset, offset.offset,

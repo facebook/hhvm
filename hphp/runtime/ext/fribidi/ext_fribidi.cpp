@@ -140,7 +140,7 @@ static Array HHVM_FUNCTION(
 static Array HHVM_FUNCTION(
   fribidi_get_charsets
 ) {
-  return make_darray(
+  return make_dict_array(
     FRIBIDI_CHAR_SET_UTF8,      Variant{s_FRIBIDI_CHARSET_UTF8.get()},
     FRIBIDI_CHAR_SET_ISO8859_6, Variant{s_FRIBIDI_CHARSET_8859_6.get()},
     FRIBIDI_CHAR_SET_ISO8859_8, Variant{s_FRIBIDI_CHARSET_8859_8.get()},

@@ -157,7 +157,7 @@
     diagnostic_pusher
     disk
     errors
-    experiments_config_file_stubs
+    experiments_config_file
     file_info
     glean_options
     symbol_write_options

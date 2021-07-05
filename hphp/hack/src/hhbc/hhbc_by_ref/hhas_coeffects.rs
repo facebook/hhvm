@@ -69,7 +69,7 @@ impl fmt::Display for Ctx {
 #[derive(Debug)]
 pub struct HhasCtxConstant {
     pub name: String,
-    pub coeffects: Vec<Ctx>,
+    pub coeffects: (Vec<Ctx>, Vec<String>),
     pub is_abstract: bool,
 }
 
@@ -185,21 +185,30 @@ impl HhasCoeffects {
         result
     }
 
-    pub fn from_ctx_constant(hint: &Hint) -> Vec<Ctx> {
+    pub fn from_ctx_constant(hint: &Hint) -> (Vec<Ctx>, Vec<String>) {
+        let mut static_coeffects = vec![];
+        let mut unenforced_static_coeffects = vec![];
         let Hint(_, h) = hint;
         match &**h {
-            Hint_::Hintersection(hl) if hl.is_empty() => vec![Ctx::Pure],
+            Hint_::Hintersection(hl) if hl.is_empty() => static_coeffects.push(Ctx::Pure),
             Hint_::Hintersection(hl) => {
-                let mut result = vec![];
                 for h in hl {
-                    if let Some(c) = HhasCoeffects::from_type_static(h) {
-                        result.push(c);
+                    let Hint(_, h_inner) = h;
+                    match &**h_inner {
+                        Hint_::Happly(Id(_, id), _) => {
+                            if let Some(c) = HhasCoeffects::from_type_static(h) {
+                                static_coeffects.push(c)
+                            } else {
+                                unenforced_static_coeffects.push(strip_ns(id.as_str()).to_string());
+                            }
+                        }
+                        _ => {}
                     }
                 }
-                result
             }
-            _ => vec![],
+            _ => {}
         }
+        (static_coeffects, unenforced_static_coeffects)
     }
 
     pub fn from_ast<Ex, Fb, En, Hi>(

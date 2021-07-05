@@ -371,7 +371,11 @@ fn print_ctx_constant<W: Write>(
     if c.is_abstract {
         w.write(" isAbstract")?;
     }
-    if let Some(coeffects) = HhasCoeffects::vec_to_string(&c.coeffects, |c| c.to_string()) {
+    if let Some(coeffects) = HhasCoeffects::vec_to_string(&c.coeffects.0, |c| c.to_string()) {
+        w.write(" ")?;
+        w.write(coeffects)?;
+    }
+    if let Some(coeffects) = HhasCoeffects::vec_to_string(&c.coeffects.1, |c| c.to_string()) {
         w.write(" ")?;
         w.write(coeffects)?;
     }

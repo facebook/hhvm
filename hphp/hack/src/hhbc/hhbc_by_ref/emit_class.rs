@@ -210,19 +210,14 @@ fn from_ctx_constant(tc: &tast::ClassTypeconstDef) -> Result<HhasCtxConstant> {
     use tast::ClassTypeconst::*;
     let name = tc.name.1.to_string();
     let coeffects = match &tc.kind {
-        TCAbstract(tast::ClassAbstractTypeconst { default: None, .. }) => vec![],
-        TCPartiallyAbstract(_) => vec![], // does not parse
+        TCAbstract(tast::ClassAbstractTypeconst { default: None, .. }) => (vec![], vec![]),
+        TCPartiallyAbstract(_) => (vec![], vec![]), // does not parse
         TCAbstract(tast::ClassAbstractTypeconst {
             default: Some(hint),
             ..
         })
         | TCConcrete(tast::ClassConcreteTypeconst { c_tc_type: hint }) => {
-            let result = HhasCoeffects::from_ctx_constant(hint);
-            if result.is_empty() {
-                vec![hhbc_by_ref_hhas_coeffects::Ctx::Pure]
-            } else {
-                result
-            }
+            HhasCoeffects::from_ctx_constant(hint)
         }
     };
     let is_abstract = match &tc.kind {

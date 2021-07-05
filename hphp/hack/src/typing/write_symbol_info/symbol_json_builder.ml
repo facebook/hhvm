@@ -131,26 +131,59 @@ let process_container_decl ctx source_map con (all_decls, progress) =
   let prog = process_doc_comment con.c_doc_comment ref_json prog in
   (all_decls, prog)
 
-let process_xref
-    decl_fun
-    decl_ref_fun
-    (symbol_def : Relative_path.t SymbolDefinition.t)
-    symbol_pos
-    (xrefs, progress) =
-  let (target_id, prog) = decl_fun symbol_def.name progress in
+let process_xref decl_fun decl_ref_fun symbol_name symbol_pos (xrefs, progress)
+    =
+  let (target_id, prog) = decl_fun symbol_name progress in
   let xref_json = decl_ref_fun target_id in
   let target_json = build_decl_target_json xref_json in
   let xrefs = add_xref target_json target_id symbol_pos xrefs in
   (xrefs, prog)
 
 let process_container_xref
-    (con_type, decl_pred) symbol_def symbol_pos (xrefs, progress) =
+    (con_type, decl_pred) symbol_name symbol_pos (xrefs, progress) =
   process_xref
     (add_container_decl_fact decl_pred)
     (build_container_decl_json_ref con_type)
-    symbol_def
+    symbol_name
     symbol_pos
     (xrefs, progress)
+
+let process_attribute_xref ctx attr (xrefs, prog) =
+  (* Ignore built-in attributes *)
+  if String.is_prefix attr.name ~prefix:"__" then
+    (xrefs, prog)
+  else
+    try
+      (* Look for a container declaration with the same name as the attribute,
+    which will be where it is defined *)
+      let con_name_with_ns = Utils.add_ns attr.name in
+      match ServerSymbolDefinition.get_class_by_name ctx con_name_with_ns with
+      | None ->
+        Hh_logger.log
+          "WARNING: could not find declaration container %s for reference to attribute %s"
+          con_name_with_ns
+          attr.name;
+        (xrefs, prog)
+      | Some cls ->
+        if phys_equal cls.c_kind Cenum then (
+          Hh_logger.log
+            "WARNING: unexpected enum %s defining attribute %s"
+            con_name_with_ns
+            attr.name;
+          (xrefs, prog)
+        ) else
+          let con_pred_types = parent_decl_predicate (get_parent_kind cls) in
+          process_container_xref
+            con_pred_types
+            con_name_with_ns
+            attr.pos
+            (xrefs, prog)
+    with e ->
+      Hh_logger.log
+        "WARNING: error processing reference to attribute %s\n: %s\n"
+        attr.name
+        (Exn.to_string e);
+      (xrefs, prog)
 
 let process_enum_decl ctx source_map enm (all_decls, progress) =
   let (pos, id) = enm.c_name in
@@ -183,11 +216,11 @@ let process_enum_decl ctx source_map enm (all_decls, progress) =
     let prog = process_doc_comment enm.c_doc_comment enum_decl_ref prog in
     (all_decls @ (enum_decl_ref :: decl_refs), prog)
 
-let process_enum_xref symbol_def pos (xrefs, progress) =
+let process_enum_xref symbol_name pos (xrefs, progress) =
   process_xref
     add_enum_decl_fact
     build_enum_decl_json_ref
-    symbol_def
+    symbol_name
     pos
     (xrefs, progress)
 
@@ -208,11 +241,11 @@ let process_func_decl ctx source_map fd (all_decls, progress) =
   in
   (all_decls @ [build_func_decl_json_ref decl_id], prog)
 
-let process_function_xref symbol_def pos (xrefs, progress) =
+let process_function_xref symbol_name pos (xrefs, progress) =
   process_xref
     add_func_decl_fact
     build_func_decl_json_ref
-    symbol_def
+    symbol_name
     pos
     (xrefs, progress)
 
@@ -260,7 +293,7 @@ let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
           process_xref
             (add_enumerator_fact enum_id)
             build_enumerator_decl_json_ref
-            member
+            member.name
             pos
             (xrefs, prog)
         (* This includes references to built-in enum methods *)
@@ -274,7 +307,7 @@ let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
         process_xref
           (mem_decl_fun con_type con_decl_id)
           ref_fun
-          member
+          member.name
           pos
           (xrefs, prog))
 
@@ -294,11 +327,11 @@ let process_typedef_decl ctx source_map elem (all_decls, progress) =
   in
   (all_decls @ [build_typedef_decl_json_ref decl_id], prog)
 
-let process_typedef_xref symbol_def pos (xrefs, progress) =
+let process_typedef_xref symbol_name pos (xrefs, progress) =
   process_xref
     add_typedef_decl_fact
     build_typedef_decl_json_ref
-    symbol_def
+    symbol_name
     pos
     (xrefs, progress)
 
@@ -343,41 +376,48 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
             if occ.is_declaration then
               (xrefs, prog)
             else
-              let symbol_def_res = ServerSymbolDefinition.go ctx None occ in
-              match symbol_def_res with
-              | None -> (xrefs, prog)
-              | Some sym_def ->
-                let proc_mem = process_member_xref ctx sym_def occ.pos in
-                (match sym_def.kind with
-                | Class ->
-                  let con_kind = parent_decl_predicate ClassContainer in
-                  process_container_xref con_kind sym_def occ.pos (xrefs, prog)
-                | Const ->
-                  (match occ.type_ with
-                  | ClassConst _ ->
-                    let ref_fun = build_class_const_decl_json_ref in
-                    proc_mem add_class_const_decl_fact ref_fun (xrefs, prog)
-                  | GConst -> process_gconst_xref sym_def occ.pos (xrefs, prog)
-                  | _ -> (xrefs, prog))
-                | Enum -> process_enum_xref sym_def occ.pos (xrefs, prog)
-                | Function -> process_function_xref sym_def occ.pos (xrefs, prog)
-                | Interface ->
-                  let con_kind = parent_decl_predicate InterfaceContainer in
-                  process_container_xref con_kind sym_def occ.pos (xrefs, prog)
-                | Method ->
-                  let ref_fun = build_method_decl_json_ref in
-                  proc_mem add_method_decl_fact ref_fun (xrefs, prog)
-                | Property ->
-                  let ref_fun = build_property_decl_json_ref in
-                  proc_mem add_property_decl_fact ref_fun (xrefs, prog)
-                | Typeconst ->
-                  let ref_fun = build_type_const_decl_json_ref in
-                  proc_mem add_type_const_decl_fact ref_fun (xrefs, prog)
-                | Typedef -> process_typedef_xref sym_def occ.pos (xrefs, prog)
-                | Trait ->
-                  let con_kind = parent_decl_predicate TraitContainer in
-                  process_container_xref con_kind sym_def occ.pos (xrefs, prog)
-                | _ -> (xrefs, prog)))
+              match occ.type_ with
+              | Attribute _ ->
+                (* Attributes don't have symbolDefinitions *)
+                process_attribute_xref ctx occ (xrefs, prog)
+              | _ ->
+                let symbol_def_res = ServerSymbolDefinition.go ctx None occ in
+                (match symbol_def_res with
+                | None -> (xrefs, prog)
+                | Some sym_def ->
+                  let proc_mem = process_member_xref ctx sym_def occ.pos in
+                  let name = sym_def.name in
+                  let pos = occ.pos in
+                  (match sym_def.kind with
+                  | Class ->
+                    let con_kind = parent_decl_predicate ClassContainer in
+                    process_container_xref con_kind name pos (xrefs, prog)
+                  | Const ->
+                    (match occ.type_ with
+                    | ClassConst _ ->
+                      let ref_fun = build_class_const_decl_json_ref in
+                      proc_mem add_class_const_decl_fact ref_fun (xrefs, prog)
+                    | GConst -> process_gconst_xref name pos (xrefs, prog)
+                    | _ -> (xrefs, prog))
+                  | Enum -> process_enum_xref name pos (xrefs, prog)
+                  | Function -> process_function_xref name pos (xrefs, prog)
+                  | Interface ->
+                    let con_kind = parent_decl_predicate InterfaceContainer in
+                    process_container_xref con_kind name pos (xrefs, prog)
+                  | Method ->
+                    let ref_fun = build_method_decl_json_ref in
+                    proc_mem add_method_decl_fact ref_fun (xrefs, prog)
+                  | Property ->
+                    let ref_fun = build_property_decl_json_ref in
+                    proc_mem add_property_decl_fact ref_fun (xrefs, prog)
+                  | Typeconst ->
+                    let ref_fun = build_type_const_decl_json_ref in
+                    proc_mem add_type_const_decl_fact ref_fun (xrefs, prog)
+                  | Typedef -> process_typedef_xref name pos (xrefs, prog)
+                  | Trait ->
+                    let con_kind = parent_decl_predicate TraitContainer in
+                    process_container_xref con_kind name pos (xrefs, prog)
+                  | _ -> (xrefs, prog))))
       in
       SMap.fold
         (fun fp target_map acc ->

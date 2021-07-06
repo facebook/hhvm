@@ -1126,7 +1126,7 @@ function hphp_cmd($options, $test, $program): string {
   }
 
   return implode(" ", varray[
-    hhvm_path(),
+    hphpc_path($options),
     '--hphp',
     '-vUseHHBBC='. (repo_separate($options, $test) ? 'false' : 'true'),
     '--config',

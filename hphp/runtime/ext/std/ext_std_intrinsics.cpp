@@ -271,7 +271,7 @@ struct DummyArrayAwait : AsioExternalThreadEvent {
   DummyArrayAwait() { markAsFinished(); }
 
   void unserialize(TypedValue& tv) override {
-    auto arr = make_map_array("foo", "bar", "baz", "quux");
+    auto arr = make_dict_array("foo", "bar", "baz", "quux");
     tv = make_array_like_tv(arr.detach());
   }
 };

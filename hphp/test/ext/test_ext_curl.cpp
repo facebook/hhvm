@@ -169,7 +169,7 @@ bool TestExtCurl::test_curl_setopt_array() {
   Variant c = HHVM_FN(curl_init)();
   HHVM_FN(curl_setopt_array)
     (c.toResource(),
-     make_map_array(CURLOPT_URL, String(get_request_uri()),
+     make_dict_array(CURLOPT_URL, String(get_request_uri()),
                     CURLOPT_RETURNTRANSFER, true));
   Variant res = HHVM_FN(curl_exec)(c.toResource());
   VS(res, "OK");

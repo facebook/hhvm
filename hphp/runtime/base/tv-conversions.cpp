@@ -735,9 +735,9 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
           throwInvalidClsMethToType("array");
         }
         raiseClsMethConvertWarningHelper("array");
-        a = make_map_array(
-          0, val(tv).pclsmeth->getClsStr(),
-          1, val(tv).pclsmeth->getFuncStr()
+        a = make_dict_array(
+            0, val(tv).pclsmeth->getClsStr(),
+            1, val(tv).pclsmeth->getFuncStr()
         ).detach();
         continue;
       }

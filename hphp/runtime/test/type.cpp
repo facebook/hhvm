@@ -870,7 +870,7 @@ TEST(Type, Const) {
   EXPECT_EQ(TBottom, five & True);
   EXPECT_EQ(Type::cns(false), TBool - True);
 
-  auto const arrData = ArrayData::GetScalarArray(make_map_array(1, 2, 3, 4));
+  auto const arrData = ArrayData::GetScalarArray(make_dict_array(1, 2, 3, 4));
   auto const constArray = Type::cns(arrData);
 
   EXPECT_EQ(constArray, constArray & TDict);

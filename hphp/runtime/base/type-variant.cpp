@@ -511,8 +511,8 @@ Array Variant::toPHPArrayHelper() const {
         throwInvalidClsMethToType("array");
       }
       raiseClsMethConvertWarningHelper("array");
-      return make_map_array(0, m_data.pclsmeth->getClsStr(),
-                            1, m_data.pclsmeth->getFuncStr());
+      return make_dict_array(0, m_data.pclsmeth->getClsStr(),
+                             1, m_data.pclsmeth->getFuncStr());
     case KindOfRClsMeth:
       SystemLib::throwInvalidOperationExceptionObject(
         "RClsMeth to PHPArray conversion");

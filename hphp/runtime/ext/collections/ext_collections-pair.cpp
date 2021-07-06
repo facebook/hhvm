@@ -60,8 +60,8 @@ int64_t c_Pair::linearSearch(const Variant& value) const {
 }
 
 Array c_Pair::toPHPArrayImpl() const {
-  return make_map_array(0, tvAsCVarRef(&elm0),
-                        1, tvAsCVarRef(&elm1));
+  return make_dict_array(0, tvAsCVarRef(&elm0),
+                         1, tvAsCVarRef(&elm1));
 }
 
 Array c_Pair::toVArrayImpl() const {

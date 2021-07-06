@@ -736,14 +736,6 @@ namespace make_array_detail {
   inline const String& init_key(const String& k) { return k; }
   inline const String init_key(StringData* k) { return String{k}; }
 
-  inline void map_impl(ArrayInit&) {}
-
-  template<class Key, class Val, class... KVPairs>
-  void map_impl(ArrayInit& init, Key&& key, Val&& val, KVPairs&&... kvpairs) {
-    init.set(init_key(std::forward<Key>(key)), Variant(std::forward<Val>(val)));
-    map_impl(init, std::forward<KVPairs>(kvpairs)...);
-  }
-
   inline String darray_init_key(const char* s) { return String(s); }
   inline int64_t darray_init_key(int k) { return k; }
   inline int64_t darray_init_key(int64_t k) { return k; }
@@ -803,26 +795,6 @@ Array make_vec_array(Vals&&... vals) {
   static_assert(sizeof...(vals), "use Array::CreateVec() instead");
   VecInit init(sizeof...(vals));
   make_array_detail::vec_impl(init, std::forward<Vals>(vals)...);
-  return init.toArray();
-}
-
-/*
- * Helper for creating dicts. TODO(kshaunak): Rename to make_dict.
- * Takes pairs of arguments for the keys and values.
- *
- * Usage:
- *
- *   auto newArray = make_map_array(keyOne, valueOne,
- *                                  otherKey, otherValue);
- *
- * TODO(T58820726): Remove by migrating remaining callers.
- */
-template<class... KVPairs>
-Array make_map_array(KVPairs&&... kvpairs) {
-  static_assert(
-    sizeof...(kvpairs) % 2 == 0, "make_map_array needs key value pairs");
-  ArrayInit init(sizeof...(kvpairs) / 2, ArrayInit::Map{});
-  make_array_detail::map_impl(init, std::forward<KVPairs>(kvpairs)...);
   return init.toArray();
 }
 

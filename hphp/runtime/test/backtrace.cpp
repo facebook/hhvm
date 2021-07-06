@@ -39,7 +39,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 Array mockBacktrace() {
   return make_vec_array(
-    make_map_array(
+    make_dict_array(
       s_file, "filename",
       s_line, "42",
       s_function, "function_name",
@@ -65,7 +65,7 @@ TEST(Backtrace, FunctionNameWithObject) {
   StructuredLogEntry sample;
   {
     auto bt = make_vec_array(
-      make_map_array(
+      make_dict_array(
         s_file, "filename",
         s_line, "42",
         s_function, "function_name",
@@ -86,7 +86,7 @@ TEST(Backtrace, LongFunctionNames) {
   StructuredLogEntry sample;
   {
     auto bt = make_vec_array(
-      make_map_array(
+      make_dict_array(
         s_file, "filenameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
         s_line, "42---------------------------------------------------------------------------------",
         s_function, "function_name--------------------------------------------------------------------",

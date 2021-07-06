@@ -110,6 +110,25 @@ class _HackClassGeneratorTest(unittest.TestCase):
             str(self.obj),
         )
 
+    def test_invoke_single_parameter_in_dummy_method_class(self) -> None:
+        self.obj.add_parameter("C1")
+        self.obj.add_invoke("C1", "foo")
+        self.assertEqual(
+            "class C0   {\npublic function dummy_C0_method(C1 $C1_obj): void{\n$C1_obj->foo();\n}\n}",
+            str(self.obj),
+        )
+
+    def test_invoke_multiple_parameters_in_dummy_method_class(self) -> None:
+        self.obj.add_parameter("C2")
+        self.obj.add_parameter("C1")
+        self.obj.add_invoke("C2", "foo")
+        self.obj.add_invoke("C1", "foo")
+        self.obj.add_invoke("C2", "bar")
+        self.assertEqual(
+            "class C0   {\npublic function dummy_C0_method(C1 $C1_obj, C2 $C2_obj): void{\n$C1_obj->foo();\n\n$C2_obj->bar();\n\n$C2_obj->foo();\n}\n}",
+            str(self.obj),
+        )
+
 
 class HackCodeGeneratorTest(unittest.TestCase):
     def setUp(self) -> None:
@@ -243,4 +262,23 @@ interface I0  {}
         self.obj._add_class("C0")
         self.obj._add_method("C0", "dummy_C0_method")
         self.obj._add_to_parameter_set("C0", "I0")
+
+    def test_class_with_method_passed_as_parameter_to_another_class(self) -> None:
+        exp = """\
+<?hh
+class C1   {
+public function foo(): void{}
+}
+class C0   {
+public function dummy_C0_method(C1 $C1_obj): void{
+$C1_obj->foo();
+}
+}
+
+"""
+        self.obj._add_class("C1")
+        self.obj._add_method("C1", "foo")
+        self.obj._add_class("C0")
+        self.obj._add_to_parameter_set("C0", "C1")
+        self.obj._add_invoke("C0", "C1", "foo")
         self.assertEqual(exp, str(self.obj))

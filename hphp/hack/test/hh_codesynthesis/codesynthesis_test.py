@@ -423,7 +423,9 @@ Type T -> Type A, Type B
 """
         self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
 
-    def test_method_dependency_with_rule_extraction_hack_codegen_override(self) -> None:
+    def test_method_and_extends_dependency_with_rule_extraction_hack_codegen_override(
+        self,
+    ) -> None:
         exp = """\
 <?hh
 class B  implements A {
@@ -450,6 +452,23 @@ public function dummy_B_method(A $A_obj): void;
 """
         deps = """\
 Type A -> Type B
+"""
+        self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
+
+    def test_only_method_dependency_with_rule_extraction_hack_codegen(self) -> None:
+        exp = """\
+<?hh
+class B   {
+public function dummy_B_method(A $A_obj): void{
+$A_obj->foo();
+}
+}
+interface A  {
+public function foo(): void;
+}
+"""
+        deps = """\
+Method A::foo -> Type B
 """
         self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
 

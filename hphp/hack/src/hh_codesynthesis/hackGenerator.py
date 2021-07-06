@@ -17,7 +17,7 @@
 # _HackFunctionGenerator maintains each function definition.
 # HackGenerator extends CodeGenerator combines all _Hack*Generator to
 # emit Hack code on clingo output.
-from typing import Set, Dict, Any
+from typing import Set, Dict, Any, Tuple
 
 import clingo
 from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
@@ -105,12 +105,18 @@ class _HackClassGenerator(_HackBaseGenerator):
         self.extend: str = ""
         # A set of implements relationship in this class.
         self.implements: Set[str] = set()
+        # A set of method to invoke in dummy method.
+        self.invoke_set: Set[Tuple[str, str]] = set()
 
     def set_extend(self, extend_from: str) -> None:
         self.extend = extend_from
 
     def add_implement(self, implement: str) -> None:
         self.implements.add(implement)
+
+    def add_invoke(self, object_type: str, method_name: str) -> None:
+        if object_type in self.parameter_set:
+            self.invoke_set.add((object_type, method_name))
 
     def _print_extend(self) -> str:
         if self.extend == "":
@@ -123,7 +129,11 @@ class _HackClassGenerator(_HackBaseGenerator):
         return "implements {}".format(",".join(sorted(self.implements)))
 
     def _print_dummy_method_body(self) -> str:
-        return "{}"
+        return (
+            "{"
+            + "".join([f"\n${x[0]}_obj->{x[1]}();\n" for x in sorted(self.invoke_set)])
+            + "}"
+        )
 
     def _print_method_body(self) -> str:
         return "{}"
@@ -171,6 +181,10 @@ class HackCodeGenerator(CodeGenerator):
         elif name in self.interface_objs:
             self.interface_objs[name].add_parameter(parameter_type)
 
+    def _add_invoke(self, name: str, object_type: str, method_name: str) -> None:
+        if name in self.class_objs:
+            self.class_objs[name].add_invoke(object_type, method_name)
+
     def __str__(self) -> str:
         return (
             "<?hh\n"
@@ -184,6 +198,7 @@ class HackCodeGenerator(CodeGenerator):
         # Separate into 'class(?)', 'interface(?)', 'implements(?, ?)', 'extends(?, ?)'
         # 'add_method(?, ?)',
         # 'add_method(?, ?)', 'has_method_with_parameter(?, ?)'
+        # 'invokes_in_method(?, ?, ?)'
         predicates = m.symbols(atoms=True)
         node_func = {"class": self._add_class, "interface": self._add_interface}
         edge_func = {
@@ -192,7 +207,10 @@ class HackCodeGenerator(CodeGenerator):
             "add_method": self._add_method,
             "has_method_with_parameter": self._add_to_parameter_set,
         }
-        # Two passes,
+        trip_func = {
+            "invokes_in_method": self._add_invoke,
+        }
+        # Three passes,
         #   First pass creates individual nodes like class, interface.
         for predicate in predicates:
             if predicate.name in node_func:
@@ -204,4 +222,12 @@ class HackCodeGenerator(CodeGenerator):
                 edge_func[predicate.name](
                     predicate.arguments[0].string,
                     predicate.arguments[1].string,
+                )
+        #   Third pass creates relationships between three nodes.
+        for predicate in predicates:
+            if predicate.name in trip_func:
+                trip_func[predicate.name](
+                    predicate.arguments[0].string,
+                    predicate.arguments[1].string,
+                    predicate.arguments[2].string,
                 )

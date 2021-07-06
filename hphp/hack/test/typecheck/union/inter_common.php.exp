@@ -1,0 +1,19 @@
+File "inter_common.php", line 12, characters 5-15:
+  (I1 & C & I2)
+File "inter_common.php", line 15, characters 5-15:
+  (I1 & D & I2)
+File "inter_common.php", line 18, characters 3-13:
+  (int | ((C | D) & I1 & I2))
+File "inter_common.php", line 23, characters 5-15:
+  (I1 & C2 & I2)
+File "inter_common.php", line 26, characters 5-15:
+  (I1 & D & I2)
+File "inter_common.php", line 29, characters 3-13:
+  (int | (I1 & C2 & I2))
+File "inter_common.php", line 34, characters 5-15:
+  (I1 & C2 & I2)
+File "inter_common.php", line 37, characters 5-15:
+  (I1 & D & I3)
+File "inter_common.php", line 40, characters 3-13:
+  (int | (I1 & ((C2 & I2) | (D & I3))))
+No errors

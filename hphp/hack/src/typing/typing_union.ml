@@ -338,6 +338,35 @@ and simplify_union_ env ty1 ty2 r =
     | ((_, Tneg Aast.Tarraykey), (_, Tprim Aast.Tnum))
     | ((_, Tprim Aast.Tnum), (_, Tneg Aast.Tarraykey)) ->
       (env, Some (MakeType.neg r Aast.Tstring))
+    | ((r1, Tintersection tyl1), (r2, Tintersection tyl2)) ->
+      (match Typing_algebra.factorize_common_types tyl1 tyl2 with
+      | ([], _, _) ->
+        (* No common types, fall back to default case *)
+        ty_equiv env ty1 ty2 ~are_ty_param:false
+      | (common_tyl, tyl1', tyl2') ->
+        let (env, union_ty) =
+          match (tyl1', tyl2') with
+          | ([ty1'], [ty2']) ->
+            (* It seems like it is wasteful to simplify with the main union function which checks
+               subtyping. If there was a subtype relationship between these two, there
+               would have been one with the common types in, and we wouldn't get here.
+               However, in some cases, that is not the case. E.g., ?#1 & t <: #1 & t will
+               not pass the initial sub-type check, but will here *)
+            union env ty1' ty2'
+          | _ ->
+            ( env,
+              MakeType.union
+                r
+                [MakeType.intersection r1 tyl1'; MakeType.intersection r2 tyl2']
+            )
+        in
+        (match common_tyl with
+        | [common_ty] ->
+          let (env, inter_ty) =
+            Typing_intersection.intersect env ~r common_ty union_ty
+          in
+          (env, Some inter_ty)
+        | _ -> (env, Some (MakeType.intersection r (union_ty :: common_tyl)))))
     (* TODO with Tclass, union type arguments if covariant *)
     | ( ( _,
           ( Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _ | Tdependent _

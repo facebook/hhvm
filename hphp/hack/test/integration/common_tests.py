@@ -224,7 +224,7 @@ class CommonTestDriver(TestDriver):
                 hh_client,
                 "check",
                 "--retries",
-                "20",
+                "240",
                 "--error-format",
                 "raw",
                 self.repo_dir,

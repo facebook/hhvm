@@ -37,7 +37,7 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
                 hh_client,
                 "check",
                 "--retries",
-                "60",
+                "120",
                 "--no-load",
                 "--error-format",
                 "raw",

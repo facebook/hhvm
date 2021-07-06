@@ -281,7 +281,7 @@
     typing_deps
     typing_check_job
     typing_service_api
-    typing_service_api_stubs
+    typing_service_delegate
     vfs)
   (preprocess (pps ppx_deriving.std)))
 

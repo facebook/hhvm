@@ -91,7 +91,7 @@
 
 
 (library
-  (name typing_service_api_stubs)
+  (name typing_service_delegate_stubs)
   (wrapped false)
   (modules
     typing_service_delegate)

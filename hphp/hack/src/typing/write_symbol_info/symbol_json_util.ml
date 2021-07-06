@@ -144,6 +144,7 @@ let init_progress =
       interfaceDefinition = [];
       methodDeclaration = [];
       methodDefinition = [];
+      methodOverrides = [];
       namespaceDeclaration = [];
       propertyDeclaration = [];
       propertyDefinition = [];
@@ -284,6 +285,11 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         methodDefinition = json :: progress.resultJson.methodDefinition;
+      }
+    | MethodOverrides ->
+      {
+        progress.resultJson with
+        methodOverrides = json :: progress.resultJson.methodOverrides;
       }
     | NamespaceDeclaration ->
       {

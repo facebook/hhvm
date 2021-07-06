@@ -213,6 +213,19 @@ let add_method_defn_fact ctx source_map meth decl_id progress =
   in
   add_fact MethodDefinition json_fact progress
 
+let add_method_overrides_fact
+    meth_name base_cont_name base_cont_type der_cont_name der_cont_type prog =
+  let json_fact =
+    JSON_Object
+      [
+        ( "derived",
+          build_method_decl_nested meth_name der_cont_name der_cont_type );
+        ( "base",
+          build_method_decl_nested meth_name base_cont_name base_cont_type );
+      ]
+  in
+  add_fact MethodOverrides json_fact prog
+
 let add_property_defn_fact ctx source_map prop decl_id progress =
   let base_fields =
     [

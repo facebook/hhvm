@@ -131,59 +131,21 @@ let process_container_decl ctx source_map con (all_decls, progress) =
   let prog = process_doc_comment con.c_doc_comment ref_json prog in
   (all_decls, prog)
 
-let process_xref decl_fun decl_ref_fun symbol_name symbol_pos (xrefs, progress)
-    =
-  let (target_id, prog) = decl_fun symbol_name progress in
+let process_xref decl_fun decl_ref_fun symbol_name symbol_pos (xrefs, prog) =
+  let (target_id, prog) = decl_fun symbol_name prog in
   let xref_json = decl_ref_fun target_id in
   let target_json = build_decl_target_json xref_json in
   let xrefs = add_xref target_json target_id symbol_pos xrefs in
   (xrefs, prog)
 
 let process_container_xref
-    (con_type, decl_pred) symbol_name symbol_pos (xrefs, progress) =
+    (con_type, decl_pred) symbol_name symbol_pos (xrefs, prog) =
   process_xref
     (add_container_decl_fact decl_pred)
     (build_container_decl_json_ref con_type)
     symbol_name
     symbol_pos
-    (xrefs, progress)
-
-let process_attribute_xref ctx attr (xrefs, prog) =
-  (* Ignore built-in attributes *)
-  if String.is_prefix attr.name ~prefix:"__" then
     (xrefs, prog)
-  else
-    try
-      (* Look for a container declaration with the same name as the attribute,
-    which will be where it is defined *)
-      let con_name_with_ns = Utils.add_ns attr.name in
-      match ServerSymbolDefinition.get_class_by_name ctx con_name_with_ns with
-      | None ->
-        Hh_logger.log
-          "WARNING: could not find declaration container %s for reference to attribute %s"
-          con_name_with_ns
-          attr.name;
-        (xrefs, prog)
-      | Some cls ->
-        if phys_equal cls.c_kind Cenum then (
-          Hh_logger.log
-            "WARNING: unexpected enum %s defining attribute %s"
-            con_name_with_ns
-            attr.name;
-          (xrefs, prog)
-        ) else
-          let con_pred_types = parent_decl_predicate (get_parent_kind cls) in
-          process_container_xref
-            con_pred_types
-            con_name_with_ns
-            attr.pos
-            (xrefs, prog)
-    with e ->
-      Hh_logger.log
-        "WARNING: error processing reference to attribute %s\n: %s\n"
-        attr.name
-        (Exn.to_string e);
-      (xrefs, prog)
 
 let process_enum_decl ctx source_map enm (all_decls, progress) =
   let (pos, id) = enm.c_name in
@@ -216,13 +178,13 @@ let process_enum_decl ctx source_map enm (all_decls, progress) =
     let prog = process_doc_comment enm.c_doc_comment enum_decl_ref prog in
     (all_decls @ (enum_decl_ref :: decl_refs), prog)
 
-let process_enum_xref symbol_name pos (xrefs, progress) =
+let process_enum_xref symbol_name pos (xrefs, prog) =
   process_xref
     add_enum_decl_fact
     build_enum_decl_json_ref
     symbol_name
     pos
-    (xrefs, progress)
+    (xrefs, prog)
 
 let process_func_decl ctx source_map fd (all_decls, progress) =
   let elem = fd.fd_fun in
@@ -241,13 +203,13 @@ let process_func_decl ctx source_map fd (all_decls, progress) =
   in
   (all_decls @ [build_func_decl_json_ref decl_id], prog)
 
-let process_function_xref symbol_name pos (xrefs, progress) =
+let process_function_xref symbol_name pos (xrefs, prog) =
   process_xref
     add_func_decl_fact
     build_func_decl_json_ref
     symbol_name
     pos
-    (xrefs, progress)
+    (xrefs, prog)
 
 let process_gconst_decl ctx source_map elem (all_decls, progress) =
   let (pos, id) = elem.cst_name in
@@ -265,13 +227,13 @@ let process_gconst_decl ctx source_map elem (all_decls, progress) =
   in
   (all_decls @ [build_gconst_decl_json_ref decl_id], prog)
 
-let process_gconst_xref symbol_def pos (xrefs, progress) =
+let process_gconst_xref symbol_def pos (xrefs, prog) =
   process_xref
     add_gconst_decl_fact
     build_gconst_decl_json_ref
     symbol_def
     pos
-    (xrefs, progress)
+    (xrefs, prog)
 
 let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
   match Str.split (Str.regexp "::") member.full_name with
@@ -311,6 +273,87 @@ let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
           pos
           (xrefs, prog))
 
+let process_attribute_xref ctx attr opt_info (xrefs, prog) =
+  let get_con_preds_from_name con_name =
+    let con_name_with_ns = Utils.add_ns con_name in
+    match ServerSymbolDefinition.get_class_by_name ctx con_name_with_ns with
+    | None ->
+      Hh_logger.log
+        "WARNING: could not find declaration container %s for attribute reference to %s"
+        con_name_with_ns
+        con_name;
+      None
+    | Some cls ->
+      if phys_equal cls.c_kind Cenum then (
+        Hh_logger.log
+          "WARNING: unexpected enum %s processing attribute reference %s"
+          con_name_with_ns
+          con_name;
+        None
+      ) else
+        Some (parent_decl_predicate (get_parent_kind cls))
+  in
+  (* Process <<__Override>>, for which we write a MethodOverrides fact
+  instead of a cross-reference *)
+  if String.equal attr.name "__Override" then
+    match opt_info with
+    | None ->
+      Hh_logger.log "WARNING: no override info for <<__Override>> instance";
+      (xrefs, prog)
+    | Some info ->
+      (match get_con_preds_from_name info.class_name with
+      | None -> (xrefs, prog)
+      | Some override_con_pred_types ->
+        (match ServerSymbolDefinition.go ctx None attr with
+        | None ->
+          Hh_logger.log
+            "WARNING: could not find source method for <<__Override>> %s::%s"
+            info.class_name
+            info.method_name;
+          (xrefs, prog)
+        | Some sym_def ->
+          (match Str.split (Str.regexp "::") sym_def.full_name with
+          | [] -> (xrefs, prog)
+          | base_con_name :: _mem_name ->
+            (match get_con_preds_from_name base_con_name with
+            | None ->
+              Hh_logger.log
+                "WARNING: could not compute parent container type for override %s::%s"
+                info.class_name
+                info.method_name;
+              (xrefs, prog)
+            | Some base_con_pred_types ->
+              let (_fid, prog) =
+                add_method_overrides_fact
+                  info.method_name
+                  base_con_name
+                  (fst base_con_pred_types)
+                  info.class_name
+                  (fst override_con_pred_types)
+                  prog
+              in
+              (* Cross-references for overrides could be added to FileXRefs by calling
+                'process_member_xref' here with 'sym_def' and 'attr.pos' *)
+              (xrefs, prog)))))
+  (* Ignore other built-in attributes *)
+  else if String.is_prefix attr.name ~prefix:"__" then
+    (xrefs, prog)
+  (* Process user-defined attributes *)
+  else
+    try
+      (* Look for a container declaration with the same name as the attribute,
+      which will be where it is defined *)
+      match get_con_preds_from_name attr.name with
+      | None -> (xrefs, prog)
+      | Some con_pred_types ->
+        process_container_xref con_pred_types attr.name attr.pos (xrefs, prog)
+    with e ->
+      Hh_logger.log
+        "WARNING: error processing reference to attribute %s\n: %s\n"
+        attr.name
+        (Exn.to_string e);
+      (xrefs, prog)
+
 let process_typedef_decl ctx source_map elem (all_decls, progress) =
   let (pos, id) = elem.t_name in
   let (decl_id, prog) =
@@ -327,13 +370,13 @@ let process_typedef_decl ctx source_map elem (all_decls, progress) =
   in
   (all_decls @ [build_typedef_decl_json_ref decl_id], prog)
 
-let process_typedef_xref symbol_name pos (xrefs, progress) =
+let process_typedef_xref symbol_name pos (xrefs, prog) =
   process_xref
     add_typedef_decl_fact
     build_typedef_decl_json_ref
     symbol_name
     pos
-    (xrefs, progress)
+    (xrefs, prog)
 
 let process_decls ctx (files_info : file_info list) =
   let (source_map, progress) =
@@ -377,9 +420,8 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
               (xrefs, prog)
             else
               match occ.type_ with
-              | Attribute _ ->
-                (* Attributes don't have symbolDefinitions *)
-                process_attribute_xref ctx occ (xrefs, prog)
+              | Attribute info ->
+                process_attribute_xref ctx occ info (xrefs, prog)
               | _ ->
                 let symbol_def_res = ServerSymbolDefinition.go ctx None occ in
                 (match symbol_def_res with
@@ -435,6 +477,7 @@ let progress_to_json progress =
       ("src.FileLines.1", progress.resultJson.fileLines);
       ("hack.FileDeclarations.5", progress.resultJson.fileDeclarations);
       ("hack.FileXRefs.5", progress.resultJson.fileXRefs);
+      ("hack.MethodOverrides.5", progress.resultJson.methodOverrides);
       ("hack.MethodDefinition.5", progress.resultJson.methodDefinition);
       ("hack.FunctionDefinition.5", progress.resultJson.functionDefinition);
       ("hack.EnumDefinition.5", progress.resultJson.enumDefinition);

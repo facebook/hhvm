@@ -53,6 +53,20 @@ let build_qname_json_nested qname =
   in
   JSON_Object [("key", JSON_Object fields)]
 
+let build_method_decl_nested meth_name con_name con_type =
+  let cont_decl = JSON_Object [("name", build_qname_json_nested con_name)] in
+  let nested_cont_decl =
+    JSON_Object [(con_type, JSON_Object [("key", cont_decl)])]
+  in
+  let meth_decl =
+    JSON_Object
+      [
+        ("name", build_name_json_nested meth_name);
+        ("container", nested_cont_decl);
+      ]
+  in
+  JSON_Object [("key", meth_decl)]
+
 let build_type_json_nested type_name =
   (* Remove namespace slash from type, if present *)
   let ty = Utils.strip_ns type_name in

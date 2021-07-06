@@ -31,6 +31,7 @@ type predicate =
   | InterfaceDefinition
   | MethodDeclaration
   | MethodDefinition
+  | MethodOverrides
   | NamespaceDeclaration
   | PropertyDeclaration
   | PropertyDefinition
@@ -63,6 +64,7 @@ type glean_json = {
   interfaceDefinition: json list;
   methodDeclaration: json list;
   methodDefinition: json list;
+  methodOverrides: json list;
   namespaceDeclaration: json list;
   propertyDeclaration: json list;
   propertyDefinition: json list;

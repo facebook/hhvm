@@ -908,6 +908,11 @@ function hhvm_cmd_impl(
       // use a fixed path for embedded data
       '-vEval.EmbeddedDataExtractPath='
         .escapeshellarg(bin_root().'/hhvm_%{type}_%{buildid}'),
+
+      // Stick to a single thread for retranslate-all
+      '-vEval.JitWorkerThreads=1',
+      '-vEval.JitWorkerThreadsForSerdes=1',
+
       extra_args($options),
     ];
 

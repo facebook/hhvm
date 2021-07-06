@@ -84,7 +84,7 @@ static TypedValue HHVM_FUNCTION(get_extension_funcs, const String& module_name) 
   if (!extension) return make_tv<KindOfBoolean>(false);
 
   auto const& fns = extension->getExtensionFunctions();
-  VArrayInit result(fns.size());
+  VecInit result(fns.size());
   for (auto const& fn : fns) {
     result.append(Variant(fn));
   }
@@ -138,7 +138,7 @@ static String HHVM_FUNCTION(set_include_path, const Variant& new_include_path) {
 }
 
 static Array HHVM_FUNCTION(get_included_files) {
-  VArrayInit vai{g_context->m_evaledFilesOrder.size()};
+  VecInit vai{g_context->m_evaledFilesOrder.size()};
   for (auto& file : g_context->m_evaledFilesOrder) {
     vai.append(Variant{const_cast<StringData*>(file)});
   }

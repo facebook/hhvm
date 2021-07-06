@@ -143,7 +143,7 @@ TypedValue HHVM_FUNCTION(array_chunk,
   }
 
   const size_t inputSize = getClsMethCompactContainerSize(cellInput);
-  VArrayInit ret((inputSize + chunkSize - 1) / chunkSize);
+  VecInit ret((inputSize + chunkSize - 1) / chunkSize);
   Array chunk;
   int current = 0;
   for (ArrayIter iter(cellInput); iter; ++iter) {
@@ -341,7 +341,7 @@ TypedValue HHVM_FUNCTION(array_fill,
   }
 
   if (start_index == 0) {
-    VArrayInit vai(num);
+    VecInit vai(num);
     for (size_t k = 0; k < num; k++) {
       vai.append(value);
     }
@@ -459,7 +459,7 @@ TypedValue HHVM_FUNCTION(array_keys,
     return make_tv<KindOfNull>();
   }
 
-  VArrayInit ai(getClsMethCompactContainerSize(input));
+  VecInit ai(getClsMethCompactContainerSize(input));
   IterateKV(input, [&](TypedValue k, TypedValue) {
     ai.append(k);
   });
@@ -561,9 +561,9 @@ TypedValue HHVM_FUNCTION(array_map,
       if (len > maxLen) maxLen = len;
     }
   }
-  VArrayInit ret_ai(maxLen);
+  VecInit ret_ai(maxLen);
   for (size_t k = 0; k < maxLen; k++) {
-    VArrayInit params_ai(iters.size());
+    VecInit params_ai(iters.size());
     for (auto& iter : iters) {
       if (iter) {
         params_ai.append(iter.secondValPlus());
@@ -999,14 +999,14 @@ TypedValue HHVM_FUNCTION(array_slice,
   for (; pos < offset && iter; ++pos, ++iter) {}
 
   if (input_is_packed && (offset == 0 || !preserve_keys)) {
-    VArrayInit ret(len);
+    VecInit ret(len);
     for (; pos < (offset + len) && iter; ++pos, ++iter) {
       ret.append(iter.secondValPlus());
     }
     return tvReturn(ret.toVariant());
   }
 
-  // Otherwise VArrayInit can't be used because non-numeric keys are
+  // Otherwise VecInit can't be used because non-numeric keys are
   // preserved even when preserve_keys is false
   Array ret = Array::attach(MixedArray::MakeReserveDict(len));
   auto nextKI = 0; // for appends
@@ -1202,7 +1202,7 @@ TypedValue HHVM_FUNCTION(array_values,
     return tvReturn(input.toVec());
   }
 
-  Optional<VArrayInit> ai;
+  Optional<VecInit> ai;
   auto ok = IterateV(*input.asTypedValue(),
                      [&](ArrayData* adata) {
                        ai.emplace(adata->size());

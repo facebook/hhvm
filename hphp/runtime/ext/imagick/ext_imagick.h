@@ -313,7 +313,7 @@ typename std::enable_if<
   std::is_scalar<typename std::remove_pointer<T>::type>::value,
   Array
 >::type convertArray(size_t num, const T* arr) {
-  VArrayInit ret(num);
+  VecInit ret(num);
   for (size_t i = 0; i < num; ++i) {
     ret.append(arr[i]);
   }

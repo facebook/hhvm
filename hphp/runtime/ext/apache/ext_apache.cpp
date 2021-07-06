@@ -64,7 +64,7 @@ Array HHVM_FUNCTION(apache_request_headers) {
 }
 
 static Array get_raw_headers(const proxygen::HTTPHeaders &headers) {
-  VArrayInit ret(headers.size());
+  VecInit ret(headers.size());
   headers.forEach([&] (const std::string &header, const std::string &val) {
     auto headerValPair = make_vec_array(header.c_str(), val.c_str());
     ret.append(headerValPair);

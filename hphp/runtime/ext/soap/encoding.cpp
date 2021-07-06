@@ -1547,14 +1547,14 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
           if (!trav->next || !get_node(trav->next, propName)) {
             obj->o_set(name, tmpVal);
           } else {
-            VArrayInit arr{1};
+            VecInit arr{1};
             arr.append(tmpVal);
             obj->o_set(name, arr.toArray());
           }
         } else {
           if (!tvIsVec(prop)) {
             /* Convert into array */
-            VArrayInit arr{2};
+            VecInit arr{2};
             arr.append(prop.tv());
             arr.append(tmpVal);
             obj->o_set(name, arr.toArray());

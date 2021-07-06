@@ -163,7 +163,7 @@ Variant StringUtil::Split(const String& str, int64_t split_length /* = 1 */) {
   }
 
   int len = str.size();
-  VArrayInit ret(len / split_length + 1);
+  VecInit ret(len / split_length + 1);
   if (split_length >= len) {
     ret.append(str);
   } else {

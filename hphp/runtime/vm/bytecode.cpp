@@ -860,7 +860,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   assertx(numArgs > numParams || !!iter);
 
   auto const numNewUnpackArgs = numArgs + numUnpackArgs - numParams;
-  VArrayInit ai(numNewUnpackArgs);
+  VecInit ai(numNewUnpackArgs);
   if (UNLIKELY(numArgs > numParams)) {
     // The arguments are pushed in order, so we should start from the bottom.
     auto ptr = stack.indTV(numArgs - numParams);

@@ -212,7 +212,7 @@ Array PageletTransport::getAsyncResults(bool allow_empty) {
     }
   }
 
-  return VArrayInit(3)
+  return VecInit(3)
     .append(results)
     .append(next_event
       ? make_tv<KindOfObject>(next_event->getWaitHandle())

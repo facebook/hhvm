@@ -270,7 +270,7 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
         } while (++i < size);
         return Variant(std::move(vec));
       } else {
-        VArrayInit vai(size);
+        VecInit vai(size);
         if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
           vai.setLegacyArray(true);
         }

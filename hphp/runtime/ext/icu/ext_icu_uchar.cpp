@@ -273,7 +273,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, charAge, const Variant& arg) {
 Array HHVM_STATIC_METHOD(IntlChar, getUnicodeVersion) {
   UVersionInfo version;
   u_getUnicodeVersion(version);
-  VArrayInit ret(U_MAX_VERSION_LENGTH);
+  VecInit ret(U_MAX_VERSION_LENGTH);
   for(int i = 0; i < U_MAX_VERSION_LENGTH; ++i) {
     ret.append(version[i]);
   }

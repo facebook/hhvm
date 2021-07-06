@@ -422,7 +422,7 @@ Variant ini_get(Array& p) {
 }
 
 Variant ini_get(std::set<std::string>& p) {
-  VArrayInit ret(p.size());
+  VecInit ret(p.size());
   for (auto& s : p) {
     ret.append(s);
   }
@@ -430,7 +430,7 @@ Variant ini_get(std::set<std::string>& p) {
 }
 
 Variant ini_get(std::set<std::string, stdltistr>& p) {
-  VArrayInit ret(p.size());
+  VecInit ret(p.size());
   for (auto& s : p) {
     ret.append(s);
   }
@@ -438,7 +438,7 @@ Variant ini_get(std::set<std::string, stdltistr>& p) {
 }
 
 Variant ini_get(boost::container::flat_set<std::string>& p) {
-  VArrayInit ret(p.size());
+  VecInit ret(p.size());
   for (auto& s : p) {
     ret.append(s);
   }
@@ -447,7 +447,7 @@ Variant ini_get(boost::container::flat_set<std::string>& p) {
 
 template<typename T>
 Variant ini_get(std::vector<T>& p) {
-  VArrayInit ret(p.size());
+  VecInit ret(p.size());
   for (auto& s : p) {
     ret.append(s);
   }

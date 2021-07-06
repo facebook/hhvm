@@ -1046,7 +1046,7 @@ struct CompactReader {
         readCollectionEnd();
         return Variant(std::move(vec));
       } else {
-        VArrayInit vai(size);
+        VecInit vai(size);
         if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
           vai.setLegacyArray(true);
         }

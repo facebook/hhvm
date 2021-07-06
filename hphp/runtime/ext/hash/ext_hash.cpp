@@ -216,7 +216,7 @@ static req::ptr<HashContext> get_valid_hash_context_resource(const Resource& con
 // hash functions
 
 Array HHVM_FUNCTION(hash_algos) {
-  VArrayInit ret(HashEngines.size());
+  VecInit ret(HashEngines.size());
   for (auto const& engine : HashEngines) {
     ret.append(String(engine.first));
   }

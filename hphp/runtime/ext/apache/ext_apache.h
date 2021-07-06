@@ -53,7 +53,7 @@ static Array get_headers(const HeaderMap& headers, bool allHeaders = false) {
       if (!allHeaders) {
         ret.set(String(iter.first), String(values.back()));
       } else {
-        VArrayInit dups(size);
+        VecInit dups(size);
         for (auto& dup : values) {
           dups.append(String(dup));
         }

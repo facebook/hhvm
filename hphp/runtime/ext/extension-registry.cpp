@@ -119,7 +119,7 @@ Extension* get(const char* name, bool enabled_only /*= true */) {
 Array getLoaded(bool enabled_only /*= true */) {
   assertx(s_exts);
   // Overestimate.
-  VArrayInit ret(s_exts->size());
+  VecInit ret(s_exts->size());
   for (auto& kv : (*s_exts)) {
     if (!enabled_only || kv.second->moduleEnabled()) {
       ret.append(String(kv.second->getName()));

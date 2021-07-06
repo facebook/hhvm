@@ -283,7 +283,7 @@ Array HHVM_FUNCTION(mcrypt_list_algorithms,
   if (count == 0) {
     raise_warning("No algorithms found in module dir");
   }
-  VArrayInit ret(count);
+  VecInit ret(count);
   for (int i = 0; i < count; i++) {
     ret.append(String(modules[i], CopyString));
   }
@@ -300,7 +300,7 @@ Array HHVM_FUNCTION(mcrypt_list_modes,
   if (count == 0) {
     raise_warning("No modes found in module dir");
   }
-  VArrayInit ret(count);
+  VecInit ret(count);
   for (int i = 0; i < count; i++) {
     ret.append(String(modules[i], CopyString));
   }
@@ -332,7 +332,7 @@ Array HHVM_FUNCTION(mcrypt_module_get_supported_key_sizes,
   int *key_sizes = mcrypt_module_get_algo_supported_key_sizes
     ((char*)algorithm.data(), (char*)dir.data(), &count);
 
-  VArrayInit ret(count);
+  VecInit ret(count);
   for (int i = 0; i < count; i++) {
     ret.append(key_sizes[i]);
   }

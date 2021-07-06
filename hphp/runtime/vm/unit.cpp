@@ -978,7 +978,7 @@ Array getClassesWithAttrInfo(Attr attrs, bool inverse = false) {
     }
   });
   if (builtins.empty()) return non_builtins;
-  auto all = VArrayInit(builtins.size() + non_builtins.size());
+  auto all = VecInit(builtins.size() + non_builtins.size());
   for (auto i = builtins.size(); i > 0; i--) {
     all.append(builtins.lookup(safe_cast<int64_t>(i - 1)));
   }

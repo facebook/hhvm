@@ -3332,7 +3332,7 @@ Variant HHVM_FUNCTION(openssl_get_curve_names) {
     return false;
   }
 
-  VArrayInit ret(len);
+  VecInit ret(len);
   for (size_t i = 0; i < len; ++i) {
     auto const sname = OBJ_nid2sn(curves[i].nid);
     if (sname != nullptr) {

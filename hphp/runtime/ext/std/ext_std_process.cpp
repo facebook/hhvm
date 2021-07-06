@@ -278,7 +278,7 @@ String HHVM_FUNCTION(exec,
     count--; // remove explode()'s last empty line
   }
 
-  VArrayInit pai(count);
+  VecInit pai(count);
   for (int i = 0; i < count; i++) {
     pai.append(HHVM_FN(rtrim)(lines[i].toString(), "\f\n\r\t\x0b\x00 "));
   }

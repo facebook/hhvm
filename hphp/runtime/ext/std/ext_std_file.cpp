@@ -2082,7 +2082,7 @@ HHVM_FUNCTION(scandir, const String& directory, bool descending /* = false */,
     descending ? StringDescending : StringAscending
   );
 
-  VArrayInit ret{names.size()};
+  VecInit ret{names.size()};
   for (auto& name : names) {
     ret.append(name);
   }

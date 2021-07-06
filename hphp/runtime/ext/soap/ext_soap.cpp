@@ -2105,7 +2105,7 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
   } else if (data->m_soap_functions.functions_all) {
     auto funcs1 = Unit::getSystemFunctions();
     auto funcs2 = Unit::getUserFunctions();
-    VArrayInit init(funcs1.size() + funcs2.size());
+    VecInit init(funcs1.size() + funcs2.size());
     IterateV(funcs1.get(), [&](TypedValue tv) { init.append(tv); });
     IterateV(funcs2.get(), [&](TypedValue tv) { init.append(tv); });
     return init.toArray();
@@ -2761,7 +2761,7 @@ Variant HHVM_METHOD(SoapClient, __getFunctions) {
   SoapClientScope ss(this_);
 
   if (data->m_sdl) {
-    VArrayInit ret(data->m_sdl->functionsOrder.size());
+    VecInit ret(data->m_sdl->functionsOrder.size());
     for (const auto& func: data->m_sdl->functionsOrder) {
       StringBuffer sb;
       function_to_string(data->m_sdl->functions[func], sb);
@@ -2777,7 +2777,7 @@ Variant HHVM_METHOD(SoapClient, __getTypes) {
   SoapClientScope ss(this_);
 
   if (data->m_sdl) {
-    VArrayInit ret(data->m_sdl->types.size());
+    VecInit ret(data->m_sdl->types.size());
     for (const auto& type: data->m_sdl->types) {
       StringBuffer sb;
       type_to_string(type.get(), sb, 0);

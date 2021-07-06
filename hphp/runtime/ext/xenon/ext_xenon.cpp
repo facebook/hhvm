@@ -100,7 +100,7 @@ const StaticString
 namespace {
 
 Array parsePhpStack(const Array& bt) {
-  VArrayInit stack(bt->size());
+  VecInit stack(bt->size());
   for (ArrayIter it(bt); it; ++it) {
     const auto& frame = it.second().toArray();
     if (frame.exists(s_function)) {
@@ -271,7 +271,7 @@ XenonRequestLocalData::~XenonRequestLocalData() {
 // Creates an array to respond to the Xenon PHP extension;
 // builds the data into the format neeeded.
 Array XenonRequestLocalData::createResponse() {
-  VArrayInit stacks(m_stackSnapshots.size());
+  VecInit stacks(m_stackSnapshots.size());
   for (ArrayIter it(m_stackSnapshots); it; ++it) {
     const auto& frame = it.second().toArray();
     stacks.append(make_dict_array(

@@ -372,7 +372,7 @@ static Variant call_intercept_handler(
 
   args = hhvm_get_frame_args(ar);
 
-  VArrayInit par{newCallback ? 3u : 5u};
+  VecInit par{newCallback ? 3u : 5u};
   par.append(called);
   par.append(called_on);
   par.append(args);
@@ -418,7 +418,7 @@ static Variant call_intercept_handler_callback(
 
   auto const args = [&]{
     auto const curArgs = hhvm_get_frame_args(ar);
-    VArrayInit args(prepend_this + curArgs.size());
+    VecInit args(prepend_this + curArgs.size());
     if (prepend_this) {
       auto const thiz = [&] {
         if (!origCallee->cls()) return make_tv<KindOfNull>();

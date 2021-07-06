@@ -234,7 +234,7 @@ static Variant HHVM_METHOD(IntlCalendar, getActualMinimum, int64_t field) {
 static Array HHVM_STATIC_METHOD(IntlCalendar, getAvailableLocales) {
   int32_t count;
   const icu::Locale *availLocales = icu::Calendar::getAvailableLocales(count);
-  VArrayInit ret(count);
+  VecInit ret(count);
   for (int i = 0; i < count; ++i) {
     ret.append(String(availLocales[i].getName(), CopyString));
   }

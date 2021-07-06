@@ -1412,7 +1412,7 @@ Array VariableUnserializer::unserializeVArray() {
     auto const index = PackedArray::capacityToSizeIndex(size);
     oomCheck(MemoryManager::sizeIndex2Size(index));
 
-    arr = VArrayInit(size).toArray();
+    arr = VecInit(size).toArray();
     reserveForAdd(size);
 
     for (int64_t i = 0; i < size; i++) {

@@ -731,7 +731,7 @@ static int64_t HHVM_METHOD(ReflectionFunctionAbstract, getNumberOfParameters) {
 ALWAYS_INLINE
 static Array get_function_param_info(const Func* func) {
   const Func::ParamInfoVec& params = func->params();
-  VArrayInit ai(func->numParams());
+  VecInit ai(func->numParams());
 
   for (int i = 0; i < func->numParams(); ++i) {
     Array param = Array::CreateDict();
@@ -869,7 +869,7 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
 namespace {
 
 const Array reified_generics_info_to_array(const ReifiedGenericsInfo& info) {
-  VArrayInit arr(info.m_typeParamInfo.size());
+  VecInit arr(info.m_typeParamInfo.size());
   for (auto tparam : info.m_typeParamInfo) {
     DArrayInit tparamArr(3);
     tparamArr.set(s_is_reified, make_tv<KindOfBoolean>(tparam.m_isReified));
@@ -1252,7 +1252,7 @@ static Array HHVM_METHOD(ReflectionClass, getRequirementNames) {
     return empty_vec_array();
   }
 
-  VArrayInit pai(numReqs);
+  VecInit pai(numReqs);
   for (int i = 0; i < numReqs; ++i) {
     auto const& req = requirements[i];
     pai.append(Variant{const_cast<StringData*>(req->name())});
@@ -1282,7 +1282,7 @@ static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
 static Array HHVM_METHOD(ReflectionClass, getTraitNames) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   auto const& traits = cls->preClass()->usedTraits();
-  VArrayInit ai(traits.size());
+  VecInit ai(traits.size());
   for (const StringData* traitName : traits) {
     ai.append(Variant{const_cast<StringData*>(traitName)});
   }

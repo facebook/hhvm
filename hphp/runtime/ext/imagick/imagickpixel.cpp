@@ -37,7 +37,7 @@ Array createImagickPixelArray(size_t num, PixelWand* wands[], bool owner) {
   if (wands == nullptr) {
     return Array();
   } else {
-    VArrayInit ret(num);
+    VecInit ret(num);
     for (int i = 0; i < num; ++i) {
       ret.append(createImagickPixel(wands[i], owner));
     }

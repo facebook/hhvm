@@ -427,7 +427,7 @@ Variant HHVM_FUNCTION(apc_delete,
 
   if (key.isArray()) {
     auto keys = key.asCArrRef();
-    VArrayInit init(keys.size());
+    VecInit init(keys.size());
     for (ArrayIter iter(keys); iter; ++iter) {
       Variant k = iter.second();
       if (!k.isString()) {
@@ -494,7 +494,7 @@ Variant HHVM_FUNCTION(apc_exists,
   if (!key.isArray()) return apc_store().exists(key.toString());
   bool failed = false;
   auto keys = key.toArray();
-  VArrayInit init(keys.size());
+  VecInit init(keys.size());
   IterateV(keys.get(), [&](TypedValue k) {
     if (!isStringType(type(k))) {
       raise_invalid_argument_warning("apc key: (not a string)");
@@ -561,7 +561,7 @@ Array HHVM_FUNCTION(
   }
   if (!limited) {
     auto const entries = apc_store().getEntriesInfo();
-    VArrayInit ents(entries.size());
+    VecInit ents(entries.size());
     for (auto& entry : entries) {
       DArrayInit ent(kEntryInfoSize);
       ent.add(s_info,

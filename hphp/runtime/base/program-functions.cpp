@@ -251,7 +251,7 @@ static RDS_LOCAL(bool, s_sessionInitialized);
 
 static void process_cmd_arguments(int argc, char **argv) {
   php_global_set(s_argc, Variant(argc));
-  VArrayInit argvArray(argc);
+  VecInit argvArray(argc);
   for (int i = 0; i < argc; i++) {
     argvArray.append(String(argv[i]));
   }

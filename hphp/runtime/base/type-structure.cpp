@@ -426,7 +426,7 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr);
 Array resolveList(TSEnv& env, const TSCtx& ctx, const Array& arr) {
   auto const sz = arr.size();
 
-  VArrayInit newarr(sz);
+  VecInit newarr(sz);
   for (auto i = 0; i < sz; i++) {
     newarr.append(Variant(resolveTS(env, ctx, arr[i].toArray())));
   }

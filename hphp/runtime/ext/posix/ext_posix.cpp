@@ -241,7 +241,7 @@ Variant HHVM_FUNCTION(posix_getgroups) {
     return false;
   }
 
-  VArrayInit ret(result);
+  VecInit ret(result);
   for (int i = 0; i < result; i++) {
     ret.append((int)gidlist[i]);
   }

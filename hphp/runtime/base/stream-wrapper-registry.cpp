@@ -48,7 +48,7 @@ const StaticString
   s_data("data");
 
 Array enumWrappers() {
-  VArrayInit ret{s_wrappers.size()};
+  VecInit ret{s_wrappers.size()};
   for (auto const& e : s_wrappers) {
     ret.append(e.first);
   }

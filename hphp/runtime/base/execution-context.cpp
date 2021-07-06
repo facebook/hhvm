@@ -1690,7 +1690,7 @@ TypedValue ExecutionContext::invokeFuncFew(
 
   // Push variadic arguments.
   if (UNLIKELY(numParams < numArgs)) {
-    VArrayInit ai{numArgs - numParams};
+    VecInit ai{numArgs - numParams};
     for (auto i = numParams; i < numArgs; ++i) ai.append(argv[i]);
     stack.pushArrayLikeNoRc(ai.create());
     numArgs = numParams + 1;
@@ -2061,7 +2061,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     }();
     always_assert(f);
 
-    VArrayInit args{f->numParams()};
+    VecInit args{f->numParams()};
     std::vector<VarAction> actions{f->numParams(), StoreEnv};
     std::vector<Id> frameIds;
     frameIds.resize(f->numParams(), 0);

@@ -416,7 +416,7 @@ static Variant HHVM_FUNCTION(gmp_div_qr,
     return false;
   }
 
-  VArrayInit returnArray(2);
+  VecInit returnArray(2);
   returnArray.append(mpzToGMPObject(gmpReturnQ));
   returnArray.append(mpzToGMPObject(gmpReturnR));
 
@@ -1062,7 +1062,7 @@ static Variant HHVM_FUNCTION(gmp_rootrem,
 
   mpz_rootrem(gmpReturn0, gmpReturn1, gmpData, (uint32_t)root);
 
-  VArrayInit returnArray(2);
+  VecInit returnArray(2);
   returnArray.append(mpzToGMPObject(gmpReturn0));
   returnArray.append(mpzToGMPObject(gmpReturn1));
 
@@ -1204,7 +1204,7 @@ static Variant HHVM_FUNCTION(gmp_sqrtrem,
 
   mpz_sqrtrem(gmpSquareRoot, gmpRemainder, gmpData);
 
-  VArrayInit returnArray(2);
+  VecInit returnArray(2);
   returnArray.append(mpzToGMPObject(gmpSquareRoot));
   returnArray.append(mpzToGMPObject(gmpRemainder));
 

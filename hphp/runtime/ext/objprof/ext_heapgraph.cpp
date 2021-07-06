@@ -553,7 +553,7 @@ Array HHVM_FUNCTION(heapgraph_node_out_edges,
   if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateVec();
   size_t num_edges{0};
   hgptr->hg.eachOutPtr(index, [&](int) { num_edges++; });
-  VArrayInit result(num_edges);
+  VecInit result(num_edges);
   hgptr->hg.eachOutPtr(index, [&](int ptr) {
     result.append(createPhpEdge(hgptr, ptr));
   });
@@ -569,7 +569,7 @@ Array HHVM_FUNCTION(heapgraph_node_in_edges,
   if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateVec();
   size_t num_edges{0};
   hgptr->hg.eachInPtr(index, [&](int) { num_edges++; });
-  VArrayInit result(num_edges);
+  VecInit result(num_edges);
   hgptr->hg.eachInPtr(index, [&](int ptr) {
     result.append(createPhpEdge(hgptr, ptr));
   });

@@ -109,7 +109,7 @@ Array HashCollection::toDArray() {
 }
 
 Array HashCollection::toKeysArray() {
-  VArrayInit ai(m_size);
+  VecInit ai(m_size);
   auto* eLimit = elmLimit();
   for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
     if (e->hasIntKey()) {

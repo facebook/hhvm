@@ -125,7 +125,7 @@ static void mcr_throwOptionException(
     assertx(c_MCRouterOptionException);
   }
 
-  VArrayInit errorArray(errors.size());
+  VecInit errorArray(errors.size());
   for (auto err : errors) {
     auto e = make_dict_array(
       s_option, String(err.requestedName),

@@ -1123,7 +1123,7 @@ private:
         [](auto const& tuple) { return std::get<0>(tuple); });
     VecInit derivedTypeVec{derivedTypeInfo.size()};
     for (auto const& [type, path, kind, flags] : derivedTypeInfo) {
-      VArrayInit derivedTypeTuple{4};
+      VecInit derivedTypeTuple{4};
       derivedTypeTuple.append(make_tv<KindOfPersistentString>(type.get()));
       derivedTypeTuple.append(make_tv<KindOfPersistentString>(path.get()));
       derivedTypeTuple.append(

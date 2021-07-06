@@ -681,7 +681,7 @@ void CompactTraceData::insert(const ActRec* fp, int32_t prevPc) {
 }
 
 Array CompactTraceData::extract() const {
-  VArrayInit aInit(m_frames.size());
+  VecInit aInit(m_frames.size());
   for (int idx = 0; idx < m_frames.size(); ++idx) {
     auto const prev = idx < m_frames.size() - 1 ? &m_frames[idx + 1] : nullptr;
     DArrayInit frame(6);

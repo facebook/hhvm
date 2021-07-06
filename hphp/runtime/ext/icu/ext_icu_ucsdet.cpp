@@ -85,7 +85,7 @@ static Array HHVM_METHOD(EncodingDetector, detectAll) {
     data->throwException("Could not detect all encodings, error %d (%s)",
                          error, u_errorName(error));
   }
-  VArrayInit ret{(uint32_t)count};
+  VecInit ret{(uint32_t)count};
   for (int i = 0; i < count; ++i) {
     ret.append(EncodingMatch::newInstance(matches[i], detector));
   }

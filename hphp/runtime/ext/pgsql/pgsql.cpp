@@ -697,7 +697,7 @@ static Variant HHVM_FUNCTION(pg_connection_pool_stat) {
     return init_null();
   }
 
-  VArrayInit arr(pools.size());
+  VecInit arr(pools.size());
 
 
   for (auto pool : pools) {

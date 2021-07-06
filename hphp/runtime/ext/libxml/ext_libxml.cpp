@@ -668,7 +668,7 @@ Array HHVM_FUNCTION(libxml_get_errors) {
   if (!length) {
     return empty_vec_array();
   }
-  VArrayInit ret(length);
+  VecInit ret(length);
   for (int64_t i = 0; i < length; i++) {
     ret.append(create_libxmlerror(error_list->at(i)));
   }

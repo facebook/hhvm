@@ -213,7 +213,7 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfUninit> {
 
   /*
    * Extension code should avoid using ArrayInit, and instead use DArrayInit
-   * or VArrayInit. If you really want to create a plain PHP array, your only
+   * or VecInit. If you really want to create a plain PHP array, your only
    * option now is to use a mixed array.
    *
    * For large array allocations, consider passing CheckAllocation, which will
@@ -464,6 +464,11 @@ struct PackedArrayInitBase final : ArrayInitBase<TArray, DT> {
     return append(*v.asTypedValue());
   }
 
+  PackedArrayInitBase& setLegacyArray(bool legacy) {
+    this->m_arr->setLegacyArrayInPlace(legacy);
+    return *this;
+  }
+
 };
 
 /*
@@ -472,104 +477,6 @@ struct PackedArrayInitBase final : ArrayInitBase<TArray, DT> {
 using VecInit = PackedArrayInitBase<detail::Vec, KindOfVec>;
 
 ///////////////////////////////////////////////////////////////////////////////
-
-struct VArrayInit {
-  explicit VArrayInit(size_t n)
-    : m_arr(PackedArray::MakeReserveVec(n))
-#ifndef NDEBUG
-    , m_addCount(0)
-    , m_expectedCount(n)
-#endif
-  {
-    assertx(m_arr->hasExactlyOneRef());
-  }
-
-  VArrayInit(VArrayInit&& other) noexcept
-    : m_arr(other.m_arr)
-#ifndef NDEBUG
-    , m_addCount(other.m_addCount)
-    , m_expectedCount(other.m_expectedCount)
-#endif
-  {
-    assertx(!m_arr || m_arr->isVecType());
-    other.m_arr = nullptr;
-#ifndef NDEBUG
-    other.m_expectedCount = 0;
-#endif
-  }
-
-  VArrayInit(const VArrayInit&) = delete;
-  VArrayInit& operator=(const VArrayInit&) = delete;
-
-  ~VArrayInit() {
-    // In case an exception interrupts the initialization.
-    assertx(!m_arr || (m_arr->hasExactlyOneRef() && m_arr->isVecType()));
-    if (m_arr) m_arr->release();
-  }
-
-  VArrayInit& append(TypedValue tv) {
-    performOp([&]{ return PackedArray::AppendInPlace(m_arr, tvToInit(tv)); });
-    return *this;
-  }
-  VArrayInit& append(const Variant& v) {
-    return append(*v.asTypedValue());
-  }
-
-  VArrayInit& setLegacyArray(bool legacy) {
-    m_arr->setLegacyArrayInPlace(legacy);
-    return *this;
-  }
-
-  Variant toVariant() {
-    assertx(m_arr->hasExactlyOneRef());
-    assertx(m_arr->isVecType());
-    auto const ptr = m_arr;
-    m_arr = nullptr;
-#ifndef NDEBUG
-    m_expectedCount = 0; // reset; no more adds allowed
-#endif
-    return Variant(ptr, ptr->toDataType(), Variant::ArrayInitCtor{});
-  }
-
-  Array toArray() {
-    assertx(m_arr->hasExactlyOneRef());
-    assertx(m_arr->isVecType());
-    auto const ptr = m_arr;
-    m_arr = nullptr;
-#ifndef NDEBUG
-    m_expectedCount = 0; // reset; no more adds allowed
-#endif
-    return Array(ptr, Array::ArrayInitCtor::Tag);
-  }
-
-  ArrayData* create() {
-    assertx(m_arr->hasExactlyOneRef());
-    assertx(m_arr->isVecType());
-    auto const ptr = m_arr;
-    m_arr = nullptr;
-#ifndef NDEBUG
-    m_expectedCount = 0; // reset; no more adds allowed
-#endif
-    return ptr;
-  }
-
-private:
-
-  template<class Operation>
-  ALWAYS_INLINE void performOp(Operation oper) {
-    DEBUG_ONLY auto newp = oper();
-    // Array escalation must not happen during these reserved initializations.
-    assertx(newp == m_arr);
-    // You cannot add/set more times than you reserved with ArrayInit.
-    assertx(++m_addCount <= m_expectedCount);
-  }
-
-  ArrayData* m_arr;
-#ifndef NDEBUG
-  size_t m_addCount;
-  size_t m_expectedCount;
-#endif
-};
 
 struct DArrayInit {
   explicit DArrayInit(size_t n)
@@ -807,10 +714,10 @@ struct KeysetInit : ArrayInitBase<SetArray, KindOfKeyset> {
 
 namespace make_array_detail {
 
-  inline void varray_impl(VArrayInit&) {}
+  inline void varray_impl(VecInit&) {}
 
   template<class Val, class... Vals>
-  void varray_impl(VArrayInit& init, Val&& val, Vals&&... vals) {
+  void varray_impl(VecInit& init, Val&& val, Vals&&... vals) {
     init.append(Variant(std::forward<Val>(val)));
     varray_impl(init, std::forward<Vals>(vals)...);
   }

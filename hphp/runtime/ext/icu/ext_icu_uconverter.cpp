@@ -430,7 +430,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, reasonText, int64_t reason) {
 
 static Array HHVM_STATIC_METHOD(UConverter, getAvailable) {
   int32_t i, count = ucnv_countAvailable();
-  VArrayInit ret(count);
+  VecInit ret(count);
 
   for(i = 0; i < count; ++i) {
     ret.append(ucnv_getAvailableName(i));

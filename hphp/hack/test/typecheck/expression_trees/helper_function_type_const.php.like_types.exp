@@ -1,0 +1,12 @@
+File "helper_function_type_const.php", line 24, characters 8-15:
+Can't access a type constant TInner from an unresolved type (Typing[4436])
+  File "helper_function_type_const.php", line 19, characters 13-18:
+  Access happens here
+  File "helper_function_type_const.php", line 24, characters 8-15:
+  Disambiguate the types using explicit type annotations here.
+File "helper_function_type_const.php", line 24, characters 17-21:
+Typing error (Typing[4110])
+  File "helper_function_type_const.php", line 24, characters 17-21:
+  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
+  File "helper_function_type_const.php", line 23, characters 15-57:
+  But got `dynamic` because it is an unenforceable type

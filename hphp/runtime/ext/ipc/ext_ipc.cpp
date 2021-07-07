@@ -299,11 +299,33 @@ bool HHVM_FUNCTION(msg_receive,
     if (flags & k_MSG_IPC_NOWAIT) realflags |= IPC_NOWAIT;
   }
 
-  hhvm_msgbuf *buffer = (hhvm_msgbuf *)calloc(maxsize + sizeof(hhvm_msgbuf), 1);
+  auto bufsize = std::min<size_t>(maxsize, 64*1024);
+
+  hhvm_msgbuf *buffer = (hhvm_msgbuf *)calloc(bufsize + sizeof(hhvm_msgbuf), 1);
+  if (!buffer) {
+    raise_warning("Failed to allocate memory for receive buffer");
+    return false;
+  }
   ScopedMem deleter(buffer);
 
-  int result = msgrcv(q->id, buffer, maxsize, desiredmsgtype, realflags);
-  if (result < 0) {
+  while (true) {
+    int result = msgrcv(
+      q->id, buffer, bufsize, desiredmsgtype,
+      (bufsize < maxsize) ? (realflags & ~MSG_NOERROR) : realflags
+    );
+    if (result >= 0) break;
+
+    if (errno == E2BIG && bufsize < maxsize) {
+      bufsize = std::min<size_t>(bufsize * 2, maxsize);
+      free(buffer);
+      buffer = (hhvm_msgbuf*)(calloc(bufsize + sizeof(hhvm_msgbuf), 1));
+      if (!buffer) {
+        raise_warning("Failed to allocate memory for receive buffer");
+        return false;
+      }
+      continue;
+    }
+
     errorcode = errno;
     return false;
   }

@@ -229,6 +229,10 @@ void HttpServer::onServerShutdown() {
   static std::atomic_flag flag = ATOMIC_FLAG_INIT;
   if (flag.test_and_set()) return;
 
+  SparseHeap::PrepareToStop();
+#ifdef USE_JEMALLOC
+  shutdown_slab_managers();
+#endif
   InitFiniNode::ServerFini();
 
   Eval::Debugger::Stop();
@@ -602,6 +606,10 @@ void HttpServer::PrepareToStop() {
   MarkShutdownStat(ShutdownEvent::SHUTDOWN_PREPARE);
   PrepareToStopTime.store(time(nullptr), std::memory_order_release);
   EvictFileCache();
+  SparseHeap::PrepareToStop();
+#ifdef USE_JEMALLOC
+  shutdown_slab_managers();
+#endif
 }
 
 void HttpServer::createPid() {

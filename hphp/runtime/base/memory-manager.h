@@ -539,6 +539,14 @@ struct SparseHeap {
    */
   MemBlock slab_range() const { return m_slab_range; }
 
+  /*
+   * When the process is going to shutdown soon, try to free the slabs directly
+   * instead of handling them to slab manager.
+   */
+  static void PrepareToStop(bool val = true) {
+    s_shutdown.exchange(val, std::memory_order_release);
+  }
+
  protected:
   struct SlabInfo {
     SlabInfo(void* p, uint16_t v) : ptr(p), version(v) {}
@@ -550,6 +558,9 @@ struct SparseHeap {
   MemBlock m_slab_range;
   int64_t m_hugeBytes{0};               // compare with RequestHugeMaxBytes
   SlabManager* m_slabManager{nullptr};
+  // When the process is shutting down, we try to unmap the slabs directly at
+  // the end of the request.
+  static std::atomic_bool s_shutdown;
 };
 
 using HeapImpl = SparseHeap;
@@ -1127,4 +1138,3 @@ void reset_alloc_sampling();
 }
 
 #include "hphp/runtime/base/memory-manager-inl.h"
-

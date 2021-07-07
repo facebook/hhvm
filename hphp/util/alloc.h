@@ -119,6 +119,7 @@ struct PageSpec {
 void setup_local_arenas(PageSpec, unsigned slabs);
 unsigned get_local_arena(uint32_t node);
 SlabManager* get_local_slab_manager(uint32_t node);
+void shutdown_slab_managers();
 
 void setup_arena0(PageSpec);
 

@@ -19,10 +19,13 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/trace.h"
+#include <folly/portability/SysMman.h>
 
 namespace HPHP {
 
 TRACE_SET_MOD(mm);
+
+std::atomic_bool SparseHeap::s_shutdown = false;
 
 void SparseHeap::threadInit() {
 #ifdef USE_JEMALLOC
@@ -59,10 +62,19 @@ void SparseHeap::reset() {
   };
   TaggedSlabList pooledSlabs;
   void* pooledSlabTail = nullptr;
+  auto const UNUSED isShuttingDown = s_shutdown.load(std::memory_order_acquire);
   for (auto& slab : m_pooled_slabs) {
+    m_bigs.erase(slab.ptr);
+#ifdef __linux__
+    if (isShuttingDown) {
+      // Free the slab by remapping to overwrite it. This may still fail (e.g.,
+      // when the slab comes from weird things such as a 1G page and the kernel
+      // doesn't handle it properly); so check the result.
+      if (SlabManager::UnmapSlab(slab.ptr)) continue;
+    }
+#endif
     if (!pooledSlabTail) pooledSlabTail = slab.ptr;
     pooledSlabs.push_front<true>(slab.ptr, slab.version);
-    m_bigs.erase(slab.ptr);
   }
   if (pooledSlabTail) {
     m_slabManager->merge(std::move(pooledSlabs), pooledSlabTail);

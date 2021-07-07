@@ -22,6 +22,8 @@
 #include <atomic>
 #include <utility>
 
+#include <folly/portability/SysMman.h>
+
 namespace HPHP {
 
 constexpr unsigned kLgSlabSize = 21;
@@ -189,7 +191,33 @@ struct SlabManager : TaggedSlabList {
       }
     } // otherwise currHead is updated with latest value of m_head.
   }
+
+  // Try to unmap the slabs when the server is about to shut down.
+  void shutdown() {
+    // List of slabs that are still in memory after efforts to unmap them.
+    TaggedSlabList failed;
+    void* failedTail = nullptr;
+    while (auto p = tryAlloc()) {
+      auto ptr = p.ptr();
+      auto tag = p.tag();
+      if (!UnmapSlab(ptr)) {
+        failed.push_front<true>(ptr, tag);
+        if (!failedTail) failedTail = ptr;
+      }
+    }
+    if (failedTail) merge(std::move(failed), failedTail);
+  }
+
+  // Return whether unmapping was successful.
+  static bool UnmapSlab(void* ptr) {
+    // The Linux man page for munmap mentions "All pages containing a part of
+    // the indicated range are unmapped", which could mean that the entire 1GB
+    // page could get unmapped when we only intend to unmap a single slab in it.
+    // Thus, we try to create a new mapping (not in RSS) to replace this slab.
+    return mmap(ptr, kSlabSize, PROT_NONE,
+                MAP_FIXED | MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE,
+                -1 , 0) == ptr;
+  }
 };
 
 }
-

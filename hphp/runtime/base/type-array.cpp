@@ -328,7 +328,7 @@ template<typename T> ALWAYS_INLINE
 void Array::setImpl(const T& key, TypedValue v) {
   if (!m_arr) {
     // NOTE: DictInit doesn't support set(TypedValue key, TypedValue val) yet.
-    ArrayInit init(1, ArrayInit::Map{});
+    DArrayInit init(1);
     init.set(key, v);
     m_arr = Ptr::attach(init.toArray().detach());
   } else {

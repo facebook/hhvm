@@ -1236,7 +1236,7 @@ Array VariableUnserializer::unserializeArray() {
   // middle, which breaks references.
   auto arr = m_forceDArrays || type() == Type::Serialize
     ? DArrayInit(size).toArray()
-    : MixedArrayInit(size).toArray();
+    : DictInit(size).toArray();
   reserveForAdd(size);
 
   for (int64_t i = 0; i < size; i++) {

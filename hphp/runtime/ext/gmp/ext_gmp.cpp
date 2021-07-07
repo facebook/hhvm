@@ -600,7 +600,7 @@ static Variant HHVM_FUNCTION(gmp_gcdext,
 
   mpz_gcdext(gmpReturnG, gmpReturnS, gmpReturnT, gmpDataA, gmpDataB);
 
-  ArrayInit returnArray(3, ArrayInit::Map{});
+  DArrayInit returnArray(3);
   returnArray.set(s_GMP_g, mpzToGMPObject(gmpReturnG));
   returnArray.set(s_GMP_s, mpzToGMPObject(gmpReturnS));
   returnArray.set(s_GMP_t, mpzToGMPObject(gmpReturnT));

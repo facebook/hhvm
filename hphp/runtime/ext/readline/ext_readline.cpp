@@ -161,7 +161,7 @@ static Mutex info_lock;
 Variant HHVM_FUNCTION(readline_info, const Variant& varnameMixed /* = null */,
                       const Variant& newvalueMixed /* = null */) {
   if (varnameMixed.isNull()) {
-    ArrayInit ret(12, ArrayInit::Map{});
+    DArrayInit ret(12);
     ret.add(s_line_buffer, convert_null_to_empty(rl_line_buffer));
     ret.add(s_point, rl_point);
     ret.add(s_end, rl_end);

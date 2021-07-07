@@ -195,7 +195,7 @@ TypedValue HHVM_FUNCTION(array_column,
       !array_column_coerce_key(idx, "index")) {
     return make_tv<KindOfBoolean>(false);
   }
-  ArrayInit ret(arr_input.size(), ArrayInit::Map{});
+  DArrayInit ret(arr_input.size());
   int64_t nextKI = 0; // for appends
   for (ArrayIter it(arr_input); it; ++it) {
     Array sub;
@@ -366,7 +366,7 @@ TypedValue HHVM_FUNCTION(array_flip,
     return make_tv<KindOfNull>();
   }
 
-  ArrayInit ret(getClsMethCompactContainerSize(transCell), ArrayInit::Mixed{});
+  DArrayInit ret(getClsMethCompactContainerSize(transCell));
   for (ArrayIter iter(transCell); iter; ++iter) {
     auto const inner = iter.secondValPlus();
     if (isIntType(type(inner)) || isStringType(type(inner))) {
@@ -524,7 +524,7 @@ TypedValue HHVM_FUNCTION(array_map,
         return tvReturn(arr1.toArray());
       }
     }
-    ArrayInit ret(getContainerSize(cell_arr1), ArrayInit::Map{});
+    DArrayInit ret(getContainerSize(cell_arr1));
     bool keyConverted = isArrayLikeType(cell_arr1.m_type);
     if (!keyConverted) {
       auto col_type = cell_arr1.m_data.pobj->collectionType();
@@ -1802,7 +1802,7 @@ TypedValue HHVM_FUNCTION(array_diff_key,
     // If we have more than 2 args, the left input could end up empty
     if (leftSize == 0) return empty_dict_array();
 
-    ArrayInit ret(leftSize, ArrayInit::Map{});
+    DArrayInit ret(leftSize);
     auto setInt = [&](int64_t k, TypedValue v) { ret.set(k, v); };
     auto setStr = [&](StringData* k, TypedValue v) { ret.set(k, v); };
 
@@ -2240,7 +2240,7 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
     auto const leftSize = getContainerSize(left);
     if (leftSize == 0) return empty_dict_array();
 
-    ArrayInit ret(leftSize, ArrayInit::Map{});
+    DArrayInit ret(leftSize);
     auto setInt = [&](int64_t k, TypedValue v) { ret.set(k, v); };
     auto setStr = [&](StringData* k, TypedValue v) { ret.set(k, v); };
 

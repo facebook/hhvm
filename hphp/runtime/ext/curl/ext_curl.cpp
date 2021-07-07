@@ -170,7 +170,7 @@ Variant HHVM_FUNCTION(curl_version, int uversion /* = CURLVERSION_NOW */) {
     return false;
   }
 
-  ArrayInit ret(9, ArrayInit::Map{});
+  DArrayInit ret(9);
   ret.set(s_version_number,     (int)d->version_num);
   ret.set(s_age,                d->age);
   ret.set(s_features,           d->features);

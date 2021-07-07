@@ -860,10 +860,10 @@ ArrayData* ArrayData::toDictIntishCast(bool copy) {
   });
   if (!intish) return base;
 
-  // Create a new, plain PHP array with the casted keys.
-  auto result = MixedArrayInit(base->size());
+  // Create a new dict with the casted keys.
+  auto result = DictInit(base->size());
   IterateKV(base, [&](TypedValue k, TypedValue v) {
-    result.setUnknownKey<IntishCast::Cast>(tvAsCVarRef(&k), tvAsCVarRef(&v));
+    result.setUnknownKeyIntishCast(k, v);
   });
   if (base != this) decRefArr(base);
   auto ad = result.create();

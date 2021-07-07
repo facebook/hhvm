@@ -26,8 +26,6 @@ pub enum Ctx {
     Rx,
 
     // Policied hierarchy
-    PoliciedOfLocal,
-    PoliciedOfShallow,
     PoliciedOf,
     PoliciedLocal,
     PoliciedShallow,
@@ -52,8 +50,6 @@ impl fmt::Display for Ctx {
             Rx => write!(f, "{}", c::RX),
             WriteThisProps => write!(f, "{}", c::WRITE_THIS_PROPS),
             WriteProps => write!(f, "{}", c::WRITE_PROPS),
-            PoliciedOfLocal => write!(f, "{}", c::POLICIED_OF_LOCAL),
-            PoliciedOfShallow => write!(f, "{}", c::POLICIED_OF_SHALLOW),
             PoliciedOf => write!(f, "{}", c::POLICIED_OF),
             PoliciedLocal => write!(f, "{}", c::POLICIED_LOCAL),
             PoliciedShallow => write!(f, "{}", c::POLICIED_SHALLOW),
@@ -156,8 +152,6 @@ impl HhasCoeffects {
                 c::RX => Some(Ctx::Rx),
                 c::WRITE_THIS_PROPS => Some(Ctx::WriteThisProps),
                 c::WRITE_PROPS => Some(Ctx::WriteProps),
-                c::POLICIED_OF_LOCAL => Some(Ctx::PoliciedOfLocal),
-                c::POLICIED_OF_SHALLOW => Some(Ctx::PoliciedOfShallow),
                 c::POLICIED_OF => Some(Ctx::PoliciedOf),
                 c::POLICIED_LOCAL => Some(Ctx::PoliciedLocal),
                 c::POLICIED_SHALLOW => Some(Ctx::PoliciedShallow),
@@ -177,7 +171,6 @@ impl HhasCoeffects {
         for c in coeffects.iter() {
             result.push(match c {
                 RxLocal => RxShallow,
-                PoliciedOfLocal => PoliciedOfShallow,
                 PoliciedLocal => PoliciedShallow,
                 _ => *c,
             })

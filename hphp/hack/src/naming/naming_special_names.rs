@@ -755,10 +755,6 @@ pub mod coeffects {
 
     pub const POLICIED: &str = "policied";
 
-    pub const POLICIED_OF_LOCAL: &str = "policied_of_local";
-
-    pub const POLICIED_OF_SHALLOW: &str = "policied_of_shallow";
-
     pub const POLICIED_OF: &str = "policied_of";
 
     pub const PURE: &str = "pure";

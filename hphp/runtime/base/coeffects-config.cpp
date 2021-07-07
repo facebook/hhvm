@@ -57,8 +57,6 @@ static std::vector<CapabilityCombinator>& getCapabilityCombinator() {
   X(rx)
 
 #define POLICIED_COEFFECTS \
-  X(policied_of_local)     \
-  X(policied_of_shallow)   \
   X(policied_of)           \
   X(policied_local)        \
   X(policied_shallow)      \

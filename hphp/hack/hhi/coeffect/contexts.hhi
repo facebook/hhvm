@@ -115,20 +115,6 @@ namespace HH\Contexts {
     \HH\Capabilities\IO &
     \HH\Capabilities\WriteProperty
   );
-  // type policied_of_shallow<T> = (\HH\Capabilities\ImplicitPolicyOfShallow<T> & policied_of<T>);
-  type policied_of_shallow<T> = (
-    \HH\Capabilities\ImplicitPolicyOfShallow<T> &
-    \HH\Capabilities\ReadGlobals &
-    \HH\Capabilities\IO &
-    \HH\Capabilities\WriteProperty
-  );
-  // type policied_of_local<T> = (\HH\Capabilities\ImplicitPolicyOfLocal<T> & policied_of_shallow<T>);
-  type policied_of_local<T> = (
-    \HH\Capabilities\ImplicitPolicyOfLocal<T> &
-    \HH\Capabilities\ReadGlobals &
-    \HH\Capabilities\IO &
-    \HH\Capabilities\WriteProperty
-  );
 
   type read_globals = \HH\Capabilities\ReadGlobals;
   type globals = \HH\Capabilities\AccessGlobals;

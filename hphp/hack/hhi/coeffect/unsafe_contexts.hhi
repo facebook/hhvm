@@ -35,8 +35,6 @@ namespace HH\Contexts\Unsafe {
   type policied_shallow = \HH\Capabilities\ImplicitPolicyLocal;
   type policied_local = \HH\Contexts\defaults;
   type policied_of<T> = mixed;
-  type policied_of_shallow<T> = \HH\Capabilities\ImplicitPolicyOfLocal<T>;
-  type policied_of_local<T> = \HH\Contexts\defaults;
 
   type codegen = mixed;
   // TODO(coeffects) make this purer later

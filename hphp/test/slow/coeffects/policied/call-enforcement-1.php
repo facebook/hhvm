@@ -16,14 +16,6 @@ function policied($fn)[policied] {
   if ($fn) $fn(null);
 }
 
-function policied_of_local($fn)[policied_of_local] {
-  if ($fn) $fn(null);
-}
-
-function policied_of_shallow($fn)[policied_of_shallow] {
-  if ($fn) $fn(null);
-}
-
 function policied_of($fn)[policied_of] {
   if ($fn) $fn(null);
 }
@@ -53,14 +45,12 @@ function pure($fn)[] {
 }
 
 <<__EntryPoint>>
-function main()[policied_of_local] {
+function main()[policied_of, defaults] {
   $functions = vec[
     'non_policied',
     'policied_local',
     'policied_shallow',
     'policied',
-    'policied_of_local',
-    'policied_of_shallow',
     'policied_of',
     'controlled',
     'globals',

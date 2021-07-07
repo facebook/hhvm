@@ -1723,9 +1723,9 @@ Variant getImageSize(const req::ptr<File>& stream, Array& imageinfo) {
   }
 
   if (result) {
-    DArrayInit ret(7);
-    ret.set(0, (int64_t)result->width);
-    ret.set(1, (int64_t)result->height);
+    DictInit ret(7);
+    ret.set((int64_t)0, (int64_t)result->width);
+    ret.set((int64_t)1, (int64_t)result->height);
     ret.set(2, itype);
     char *temp;
     php_vspprintf(&temp, 0, "width=\"%d\" height=\"%d\"",

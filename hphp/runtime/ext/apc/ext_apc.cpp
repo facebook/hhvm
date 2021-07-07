@@ -325,7 +325,7 @@ Variant HHVM_FUNCTION(apc_add,
     auto valuesArr = key_or_array.asCArrRef();
 
     // errors stores all keys corresponding to entries that could not be cached
-    DArrayInit errors(valuesArr.size());
+    DictInit errors(valuesArr.size());
 
     for (ArrayIter iter(valuesArr); iter; ++iter) {
       Variant key = iter.first();
@@ -346,7 +346,7 @@ Variant HHVM_FUNCTION(apc_add,
       }
 
       if (!apc_store().add(strKey, v, ttl, bump_ttl)) {
-        errors.add(strKey, -1);
+        errors.set(strKey, -1);
       }
     }
     return errors.toVariant();
@@ -546,37 +546,37 @@ Array HHVM_FUNCTION(
   const String& cache_type,
   bool limited /* = false */) {
 
-  DArrayInit info(kCacheInfoSize);
-  info.add(s_start_time, start_time());
+  DictInit info(kCacheInfoSize);
+  info.set(s_start_time, start_time());
   if (cache_type.size() != 0 && !cache_type.same(s_user)) {
     return info.toArray();
   }
 
-  info.add(s_ttl, apcExtension::TTLLimit);
+  info.set(s_ttl, apcExtension::TTLLimit);
 
   std::map<const StringData*, int64_t> stats;
   APCStats::getAPCStats().collectStats(stats);
   for (auto const& stat : stats) {
-    info.add(StrNR{stat.first}, make_tv<KindOfInt64>(stat.second));
+    info.set(StrNR{stat.first}, make_tv<KindOfInt64>(stat.second));
   }
   if (!limited) {
     auto const entries = apc_store().getEntriesInfo();
     VecInit ents(entries.size());
     for (auto& entry : entries) {
-      DArrayInit ent(kEntryInfoSize);
-      ent.add(s_info,
+      DictInit ent(kEntryInfoSize);
+      ent.set(s_info,
               Variant::attach(StringData::Make(entry.key.c_str())));
-      ent.add(s_in_memory, 1);
-      ent.add(s_ttl, entry.ttl);
-      ent.add(s_mem_size, entry.size);
-      ent.add(s_type, static_cast<int64_t>(entry.type));
-      ent.add(s_c_time, entry.c_time);
-      ent.add(s_max_ttl, entry.maxTTL);
-      ent.add(s_bump_ttl, entry.bumpTTL);
-      ent.add(s_in_hotcache, entry.inHotCache);
+      ent.set(s_in_memory, 1);
+      ent.set(s_ttl, entry.ttl);
+      ent.set(s_mem_size, entry.size);
+      ent.set(s_type, static_cast<int64_t>(entry.type));
+      ent.set(s_c_time, entry.c_time);
+      ent.set(s_max_ttl, entry.maxTTL);
+      ent.set(s_bump_ttl, entry.bumpTTL);
+      ent.set(s_in_hotcache, entry.inHotCache);
       ents.append(ent.toArray());
     }
-    info.add(s_cache_list, ents.toArray(), false);
+    info.set(s_cache_list, ents.toArray());
   }
   return info.toArray();
 }

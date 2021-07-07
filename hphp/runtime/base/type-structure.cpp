@@ -706,9 +706,9 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
 
           auto const sz = std::min(static_cast<ssize_t>(typevars.size()),
                                    generic_types.size());
-          DArrayInit newarr(sz);
+          DictInit newarr(sz);
           for (auto i = 0; i < sz; i++) {
-            newarr.add(String(typevars[i]), generic_types[i]);
+            newarr.set(String(typevars[i]), generic_types[i]);
           }
           auto generics = newarr.toArray();
           ts = resolve(generics.get());

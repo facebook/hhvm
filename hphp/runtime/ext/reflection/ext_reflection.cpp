@@ -1496,12 +1496,12 @@ static Array HHVM_STATIC_METHOD(
   addClassConstantNames(cls, st, numConsts);
   assertx(st->size() <= numConsts);
 
-  DArrayInit ai(numConsts);
+  DictInit ai(numConsts);
   IterateV(st->arrayData(), [&](TypedValue k) {
     auto constName = val(k).pstr;
     auto value = cls->clsCnsGet(constName);
     assertx(type(value) != KindOfUninit);
-    ai.add(constName, value);
+    ai.set(constName, value);
   });
   return ai.toArray();
 }

@@ -277,11 +277,11 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
   // Version 1 of this command means we want the names of all variables, but we
   // don't care about their values just yet.
   if (m_version == 1) {
-    DArrayInit ret(m_variables->size());
+    DictInit ret(m_variables->size());
     Variant v;
     for (ArrayIter iter(m_variables); iter; ++iter) {
       assertx(iter.first().isString());
-      ret.add(iter.first().toString(), v);
+      ret.set(iter.first().toString(), v);
     }
     m_variables = ret.toArray();
     m_version = 2;

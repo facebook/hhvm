@@ -208,12 +208,12 @@ static const StaticString s_errors("errors");
 Array HHVM_STATIC_METHOD(DateTime, getLastErrors) {
   Array errors = DateTime::getLastErrors();
   Array warnings = DateTime::getLastWarnings();
-  DArrayInit ret(4);
+  DictInit ret(4);
 
-  ret.add(s_warning_count, warnings.size());
-  ret.add(s_warnings, warnings);
-  ret.add(s_error_count, errors.size());
-  ret.add(s_errors, errors);
+  ret.set(s_warning_count, warnings.size());
+  ret.set(s_warnings, warnings);
+  ret.set(s_error_count, errors.size());
+  ret.set(s_errors, errors);
 
   return ret.toArray();
 }

@@ -731,10 +731,10 @@ ArrayData* loadClsTypeCnsHelper(
   const Class* cls, const StringData* name, bool no_throw_on_undefined
 ) {
   auto const getFake = [&] {
-    DArrayInit arr(2);
-    arr.add(s_kind,
+    DictInit arr(2);
+    arr.set(s_kind,
             Variant(static_cast<uint8_t>(TypeStructure::Kind::T_class)));
-    arr.add(s_classname,
+    arr.set(s_classname,
             Variant(s_type_structure_non_existant_class));
     auto result = arr.create();
     ArrayData::GetScalarArray(&result);

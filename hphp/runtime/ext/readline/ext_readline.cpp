@@ -161,23 +161,23 @@ static Mutex info_lock;
 Variant HHVM_FUNCTION(readline_info, const Variant& varnameMixed /* = null */,
                       const Variant& newvalueMixed /* = null */) {
   if (varnameMixed.isNull()) {
-    DArrayInit ret(12);
-    ret.add(s_line_buffer, convert_null_to_empty(rl_line_buffer));
-    ret.add(s_point, rl_point);
-    ret.add(s_end, rl_end);
+    DictInit ret(12);
+    ret.set(s_line_buffer, convert_null_to_empty(rl_line_buffer));
+    ret.set(s_point, rl_point);
+    ret.set(s_end, rl_end);
 #ifndef USE_EDITLINE
-    ret.add(s_mark, rl_mark);
-    ret.add(s_done, rl_done);
-    ret.add(s_pending_input, rl_pending_input);
-    ret.add(s_prompt, convert_null_to_empty(rl_prompt));
-    ret.add(s_terminal_name, convert_null_to_empty(rl_terminal_name));
+    ret.set(s_mark, rl_mark);
+    ret.set(s_done, rl_done);
+    ret.set(s_pending_input, rl_pending_input);
+    ret.set(s_prompt, convert_null_to_empty(rl_prompt));
+    ret.set(s_terminal_name, convert_null_to_empty(rl_terminal_name));
 #endif
 #if HAVE_ERASE_EMPTY_LINE
-    ret.add(s_erase_empty_line, rl_erase_empty_line);
+    ret.set(s_erase_empty_line, rl_erase_empty_line);
 #endif
-    ret.add(s_library_version, convert_null_to_empty(rl_library_version));
-    ret.add(s_readline_name, convert_null_to_empty(rl_readline_name));
-    ret.add(s_attempted_completion_over, rl_attempted_completion_over);
+    ret.set(s_library_version, convert_null_to_empty(rl_library_version));
+    ret.set(s_readline_name, convert_null_to_empty(rl_readline_name));
+    ret.set(s_attempted_completion_over, rl_attempted_completion_over);
     return ret.toArray();
   } else {
     auto const varname = varnameMixed.toString();

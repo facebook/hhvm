@@ -373,46 +373,46 @@ Variant ini_get(String& p) {
 namespace {
 
 template<typename T>
-void add(DArrayInit& arr, const std::string& key, const T& value) {
+void set(DictInit& arr, const std::string& key, const T& value) {
   auto keyStr = String(key);
   int64_t n;
   if (keyStr.get()->isStrictlyInteger(n)) {
-    arr.add(n, value);
+    arr.set(n, value);
     return;
   }
-  arr.add(keyStr.get(), value);
+  arr.set(keyStr.get(), value);
 }
 
 }
 
 Variant ini_get(std::unordered_map<std::string, int>& p) {
-  DArrayInit ret(p.size());
+  DictInit ret(p.size());
   for (auto& pair : p) {
-    add(ret, pair.first, pair.second);
+    set(ret, pair.first, pair.second);
   }
   return ret.toArray();
 }
 
 Variant ini_get(std::map<std::string, std::string>& p) {
-  DArrayInit ret(p.size());
+  DictInit ret(p.size());
   for (auto& pair : p) {
-    add(ret, pair.first, pair.second);
+    set(ret, pair.first, pair.second);
   }
   return ret.toArray();
 }
 
 Variant ini_get(std::map<std::string, std::string, stdltistr>& p) {
-  DArrayInit ret(p.size());
+  DictInit ret(p.size());
   for (auto& pair : p) {
-    add(ret, pair.first, pair.second);
+    set(ret, pair.first, pair.second);
   }
   return ret.toArray();
 }
 
 Variant ini_get(hphp_string_imap<std::string>& p) {
-  DArrayInit ret(p.size());
+  DictInit ret(p.size());
   for (auto& pair : p) {
-    add(ret, pair.first, pair.second);
+    set(ret, pair.first, pair.second);
   }
   return ret.toArray();
 }

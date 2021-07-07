@@ -49,7 +49,7 @@ void OfflineTransData::loadTCHeader() {
   }
 
   // read header info
-  READ("repo_schema = %s", repoSchema);
+  READ("repo_schema = %40s", repoSchema);
   READ("ahot.base = %p", &ahotBase);
   READ("ahot.frontier = %p", &ahotFrontier);
   READ("a.base = %p", &aBase);
@@ -98,7 +98,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
       READ_EMPTY();
       continue;
     }
-    READ(" src.sha1 = %s", sha1Str);
+    READ(" src.sha1 = %40s", sha1Str);
     tRec.sha1 = SHA1(sha1Str);
     READ(" src.funcName = %s", funcName);
     tRec.funcName = funcName;
@@ -113,7 +113,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
       Offset past = kInvalidOffset;
 
       if (gzgets(file, buf, BUFLEN) == Z_NULL ||
-          sscanf(buf, "%s %d %" PRIu64 " %d", sha1Tmp, &funcSn, &srcKeyIntTmp, &past) != 4) {
+          sscanf(buf, "%40s %d %" PRIu64 " %d", sha1Tmp, &funcSn, &srcKeyIntTmp, &past) != 4) {
         snprintf(buf, BUFLEN,
                  "Error reading bytecode block #%lu at translation %u\n",
                  i, tRec.id);
@@ -189,7 +189,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
       uint64_t srcKeyIntTmp;
 
       if (gzgets(file, buf, BUFLEN) == Z_NULL ||
-          sscanf(buf, "%s %d %" PRIu64 " %p %p %p",
+          sscanf(buf, "%40s %d %" PRIu64 " %p %p %p",
                  sha1Tmp,
                  &funcSn,
                  &srcKeyIntTmp,

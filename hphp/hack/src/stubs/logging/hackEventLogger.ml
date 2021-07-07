@@ -304,10 +304,6 @@ let invariant_violation_bug
     ~typechecking_is_deferring:_ ~path:_ ~pos:_ ~desc:_ _ =
   ()
 
-let naming_invariant_violation_bug
-    ~desc:_ ~name:_ ~file:_ ~canonical:_ ~canonical_file:_ =
-  ()
-
 let type_check_end
     _ ~heap_size:_ ~started_count:_ ~count:_ ~experiments:_ ~start_t:_ =
   ()

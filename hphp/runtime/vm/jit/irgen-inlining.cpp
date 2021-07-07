@@ -243,7 +243,6 @@ void beginInlining(IRGS& env,
   emitCalleeDynamicCallChecks(env, target, callFlags);
   emitCalleeCoeffectChecks(env, target, callFlags, coeffects,
                            numArgsInclUnpack, ctx);
-  emitCalleeImplicitContextChecks(env, target);
   emitCalleeRecordFuncCoverage(env, target);
   emitInitFuncInputs(env, target, numArgsInclUnpack);
 

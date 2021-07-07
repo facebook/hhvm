@@ -50,8 +50,6 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
                               SSATmp* callFlags, SSATmp* providedCoeffects,
                               uint32_t argc, SSATmp* prologueCtx);
 
-void emitCalleeImplicitContextChecks(IRGS& env, const Func* callee);
-
 void emitCalleeRecordFuncCoverage(IRGS& env, const Func* callee);
 
 void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc);

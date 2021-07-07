@@ -73,7 +73,6 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrLateInit,                 P,       "late_init");            \
   X(AttrNoReifiedInit,            C,       "noreifiedinit");        \
   X(AttrIsMethCaller,             F,       "is_meth_caller");       \
-  X(AttrNoContext,                F,       "no_context");           \
   X(AttrEnumClass,                C,       "enum_class");
   /* */
 

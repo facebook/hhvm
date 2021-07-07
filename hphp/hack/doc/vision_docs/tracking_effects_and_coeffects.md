@@ -1130,7 +1130,7 @@ and/or correctness of memoization, unblocking the path to finalize the
 semantics of implicit contexts. E.g.:
 
 ```
-<<__Memoize>>  // no need for <<__NoContext>>
+<<__Memoize>>
 function contextless(): void
 
 <<__Memoize>>  // NOT part of memo. key as it isn't reified

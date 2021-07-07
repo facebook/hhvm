@@ -136,9 +136,6 @@ enum Attr {
   // Set on base classes that do not have any reified classes that extend it.
   AttrNoReifiedInit        = (1u << 23), //    X  |          |         //
                                          //                            //
-  // Set on functions that carry the __NoContext attribute             //
-  AttrNoContext            = (1u << 23), //       |          |    X    //
-                                         //                            //
                                          //       |          |         //
   AttrIsMethCaller         = (1u << 24), //       |          |    X    //
                                          //       |          |         //

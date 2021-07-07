@@ -3127,9 +3127,6 @@ fn print_fun_attrs<W: Write>(
         special_attrs.push("builtin");
         special_attrs.push("is_meth_caller");
     }
-    if has_no_context(user_attrs) {
-        special_attrs.push("no_context");
-    }
     if f.is_interceptable() {
         special_attrs.push("interceptable");
     }

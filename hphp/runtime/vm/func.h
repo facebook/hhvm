@@ -663,11 +663,6 @@ struct Func final {
   bool hasThisInBody() const;
 
   /*
-   * Does this function have the __NoContext attribute?
-   */
-  bool hasNoContextAttr() const;
-
-  /*
    * Is this Func owned by a PreClass?
    *
    * A PreFunc may be "adopted" by a Class when clone() is called, but only the

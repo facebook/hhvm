@@ -502,10 +502,6 @@ inline bool Func::hasThisInBody() const {
   return cls() && !isStatic();
 }
 
-inline bool Func::hasNoContextAttr() const {
-  return m_attrs & AttrNoContext;
-}
-
 inline bool Func::isAbstract() const {
   return m_attrs & AttrAbstract;
 }

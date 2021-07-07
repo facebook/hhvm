@@ -87,11 +87,6 @@ fn is_meth_caller<'arena>(attr: &HhasAttribute<'arena>) -> bool {
 }
 
 #[allow(clippy::needless_lifetimes)]
-fn is_no_context<'arena>(attr: &HhasAttribute<'arena>) -> bool {
-    is("__NoContext", attr)
-}
-
-#[allow(clippy::needless_lifetimes)]
 fn is_provenance_skip_frame<'arena>(attr: &HhasAttribute<'arena>) -> bool {
     is("__ProvenanceSkipFrame", attr)
 }
@@ -154,11 +149,6 @@ pub fn has_const<'arena>(attrs: &[HhasAttribute<'arena>]) -> bool {
 #[allow(clippy::needless_lifetimes)]
 pub fn has_meth_caller<'arena>(attrs: &[HhasAttribute<'arena>]) -> bool {
     has(attrs, is_meth_caller)
-}
-
-#[allow(clippy::needless_lifetimes)]
-pub fn has_no_context<'arena>(attrs: &[HhasAttribute<'arena>]) -> bool {
-    has(attrs, is_no_context)
 }
 
 #[allow(clippy::needless_lifetimes)]

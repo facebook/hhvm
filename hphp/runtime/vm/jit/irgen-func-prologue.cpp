@@ -313,25 +313,6 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
   );
 }
 
-void emitCalleeImplicitContextChecks(IRGS& env, const Func* callee) {
-  if (!RO::EvalEnableImplicitContext || !callee->hasNoContextAttr()) return;
-  ifElse(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckImplicitContextNull, taken);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      auto const str = folly::to<std::string>(
-        "Function ",
-        callee->fullName()->data(),
-        " has implicit context but is marked with __NoContext");
-      auto const msg = cns(env, makeStaticString(str));
-      gen(env, ThrowInvalidOperation, msg);
-    }
-  );
-}
-
 void emitCalleeRecordFuncCoverage(IRGS& env, const Func* callee) {
   if (RO::RepoAuthoritative || !RO::EvalEnableFuncCoverage) return;
   if (callee->isNoInjection() || callee->isMethCaller()) return;
@@ -393,7 +374,6 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
   emitCalleeArgumentArityChecks(env, callee, argc);
   emitCalleeDynamicCallChecks(env, callee, callFlags);
   emitCalleeCoeffectChecks(env, callee, callFlags, nullptr, argc, prologueCtx);
-  emitCalleeImplicitContextChecks(env, callee);
   emitCalleeRecordFuncCoverage(env, callee);
 
   // Emit early stack overflow check if necessary.

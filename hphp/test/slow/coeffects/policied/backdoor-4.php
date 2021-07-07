@@ -27,7 +27,7 @@ function unknown(mixed $arg)[ctx $arg] {
 <<__EntryPoint>>
 function main() {
   defaults_f();
-  HH\Coeffects\enter_policied_of(policied_of_f<>);
+  HH\Coeffects\enter_policied_of_internal(policied_of_f<>);
   unknown(defaults<>);
   unknown(policied_of<>);
 }

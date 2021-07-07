@@ -7,5 +7,5 @@ function policied_of()[policied_of]: void {
 <<__EntryPoint>>
 function main() {
   policied_of();
-  HH\Coeffects\enter_policied_of(policied_of<>);
+  HH\Coeffects\enter_policied_of_internal(policied_of<>);
 }

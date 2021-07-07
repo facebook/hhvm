@@ -1177,8 +1177,9 @@ Variant HHVM_FUNCTION(coeffects_backdoor, const Variant& function) {
                                RuntimeCoeffects::defaults(), true);
 }
 
-Variant HHVM_FUNCTION(enter_policied_of, const Variant& function) {
-  return coeffects_call_helper(function, "HH\\Coeffects\\enter_policied_of",
+Variant HHVM_FUNCTION(enter_policied_of_internal, const Variant& function) {
+  return coeffects_call_helper(function,
+                               "HH\\Coeffects\\enter_policied_of_internal",
                                RuntimeCoeffects::policied_of(), false);
 }
 
@@ -1357,7 +1358,8 @@ static struct HHExtension final : Extension {
 #undef X
 
     HHVM_NAMED_FE(HH\\Coeffects\\backdoor, HHVM_FN(coeffects_backdoor));
-    HHVM_NAMED_FE(HH\\Coeffects\\enter_policied_of, HHVM_FN(enter_policied_of));
+    HHVM_NAMED_FE(HH\\Coeffects\\enter_policied_of_internal,
+                  HHVM_FN(enter_policied_of_internal));
 
     HHVM_NAMED_FE(__SystemLib\\is_dynamically_callable_inst_method,
                   HHVM_FN(is_dynamically_callable_inst_method));

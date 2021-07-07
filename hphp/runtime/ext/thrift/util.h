@@ -33,7 +33,7 @@ enum TError {
 }
 
 inline void set_with_intish_key_cast(
-    DArrayInit& arr,
+    DictInit& arr,
     const Variant& key,
     const Variant& value) {
   if (key.isString()) {

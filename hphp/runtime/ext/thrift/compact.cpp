@@ -1006,9 +1006,9 @@ struct CompactReader {
         readCollectionEnd();
         return Variant(std::move(ret));
       } else {
-        DArrayInit arr(size);
+        DictInit arr(size);
         if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
-          arr.setLegacyArray(true);
+          arr.setLegacyArray();
         }
         for (uint32_t i = 0; i < size; i++) {
           auto key = readField(spec.key(), keyType);
@@ -1079,9 +1079,9 @@ struct CompactReader {
         readCollectionEnd();
         return Variant(std::move(set_ret));
       } else {
-        DArrayInit ainit(size);
+        DictInit ainit(size);
         if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
-          ainit.setLegacyArray(true);
+          ainit.setLegacyArray();
         }
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(spec.val(), valueType);

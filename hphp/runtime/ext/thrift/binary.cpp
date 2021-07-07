@@ -234,9 +234,9 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
         }
         return Variant(std::move(obj));
       } else {
-        DArrayInit arr(size);
+        DictInit arr(size);
         if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
-          arr.setLegacyArray(true);
+          arr.setLegacyArray();
         }
         for (uint32_t i = 0; i < size; i++) {
           auto key = binary_deserialize(
@@ -306,9 +306,9 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
 
         return Variant(std::move(set_ret));
       } else {
-        DArrayInit init(size);
+        DictInit init(size);
         if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
-          init.setLegacyArray(true);
+          init.setLegacyArray();
         }
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(type, transport, val_spec, options);

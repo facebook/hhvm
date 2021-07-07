@@ -267,6 +267,11 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
     }
     return *this;
   }
+
+  DictInit& setLegacyArray() {
+    m_arr->setLegacyArrayInPlace(true);
+    return *this;
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

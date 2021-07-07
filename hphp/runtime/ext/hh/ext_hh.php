@@ -403,7 +403,7 @@ async function gen_without_implicit_context<Tout>(
 abstract class ImplicitContext {
   abstract const type T as nonnull;
 
-  protected static async function genSet<Tout>(
+  protected static async function setAsync<Tout>(
     this::T $context,
     (function (): Awaitable<Tout>) $f
   ): Awaitable<Tout> {

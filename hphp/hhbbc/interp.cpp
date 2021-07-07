@@ -2478,7 +2478,7 @@ void in(ISS& env, const bc::AKExists&) {
 
 const StaticString
   s_implicit_context_set("HH\\ImplicitContext::set"),
-  s_implicit_context_genSet("HH\\ImplicitContext::genSet");
+  s_implicit_context_setAsync("HH\\ImplicitContext::setAsync");
 
 void in(ISS& env, const bc::GetMemoKeyL& op) {
   auto const& func = env.ctx.func;
@@ -2488,7 +2488,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
     func ? func->name->data() : "");
   always_assert(func->isMemoizeWrapper ||
                 name == s_implicit_context_set.get()->toCppString() ||
-                name == s_implicit_context_genSet.get()->toCppString());
+                name == s_implicit_context_setAsync.get()->toCppString());
 
   auto const rclsIMemoizeParam = env.index.builtin_class(s_IMemoizeParam.get());
   auto const tyIMemoizeParam = subObj(rclsIMemoizeParam);

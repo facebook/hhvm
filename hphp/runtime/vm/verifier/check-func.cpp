@@ -1144,7 +1144,7 @@ std::set<int> localIds(Op op, PC pc) {
 
 const StaticString
   s_implicit_context_set("HH\\ImplicitContext::set"),
-  s_implicit_context_genSet("HH\\ImplicitContext::genSet");
+  s_implicit_context_setAsync("HH\\ImplicitContext::setAsync");
 
 bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
   switch (op) {
@@ -1263,7 +1263,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
         m_func && m_func->pce() ? "::" : "",
         m_func ? m_func->name->data() : "");
       if (name != s_implicit_context_set.get()->toCppString() &&
-          name != s_implicit_context_genSet.get()->toCppString() &&
+          name != s_implicit_context_setAsync.get()->toCppString() &&
           !m_func->isMemoizeWrapper) {
         ferror("GetMemoKeyL can only appear within memoize wrappers and"
                " implicit context setters\n");

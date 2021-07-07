@@ -1027,7 +1027,7 @@ void Vgen::emit(const jmpi& i) {
 
 void Vgen::emit(const ldbindretaddr& i) {
   auto const addr = a->frontier();
-  emit(leap{reg::rip[0x8000beef], i.d});
+  emit(leap{reg::rip[(intptr_t)addr], i.d});
   env.ldbindretaddrs.push_back({addr, i.target, i.spOff});
 }
 
@@ -1044,7 +1044,7 @@ void Vgen::emit(const lea& i) {
 
 void Vgen::emit(const leav& i) {
   auto const addr = a->frontier();
-  emit(leap{reg::rip[0x8000beef], i.d});
+  emit(leap{reg::rip[(intptr_t)addr], i.d});
   env.leas.push_back({addr, i.s});
 }
 

@@ -146,3 +146,11 @@ abstract class WithTparamConstraint<T as IAsConstraint>{}
 class WithPropInConstruct<T> {
   public function __construct(public T $x)[] {}
 }
+
+class WithTypeConstant {
+  const type T = string;
+}
+
+class WithTypeConstantParamConstraint<T as WithTypeConstant::T> {
+  public function foo(): void {}
+}

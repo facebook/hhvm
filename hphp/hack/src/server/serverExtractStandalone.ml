@@ -584,6 +584,52 @@ end = struct
     depends_on_any: bool ref;
   }
 
+  let class_names hint =
+    let rec aux acc = function
+      | Aast_defs.Happly ((_, nm), hints) -> auxs (nm :: acc) hints
+      | Aast_defs.(
+          ( Haccess (hint, _)
+          | Hlike hint
+          | Hsoft hint
+          | Hvarray hint
+          | Hoption hint )) ->
+        aux acc @@ snd hint
+      | Aast_defs.Habstr (_, hints)
+      | Aast_defs.Hunion hints
+      | Aast_defs.Hintersection hints
+      | Aast_defs.Htuple hints ->
+        auxs acc hints
+      | Aast_defs.Hdarray (hint_k, hint_v) ->
+        aux (aux acc @@ snd hint_k) @@ snd hint_v
+      | Aast_defs.(
+          Hvarray_or_darray (hint_opt, hint) | Hvec_or_dict (hint_opt, hint)) ->
+        let acc = aux acc @@ snd hint in
+        Option.value_map
+          ~default:acc
+          ~f:(fun hint -> aux acc @@ snd hint)
+          hint_opt
+      | Aast_defs.Hfun hint_fun -> aux_fun acc hint_fun
+      | Aast_defs.Hshape shape_info -> aux_shape acc shape_info
+      | Aast_defs.(
+          ( Hany | Herr | Hmixed | Hnonnull | Hprim _ | Hthis | Hdynamic
+          | Hnothing | Hfun_context _ | Hvar _ )) ->
+        acc
+    and auxs acc = function
+      | [] -> acc
+      | next :: rest -> auxs (aux acc @@ snd next) rest
+    and aux_fun acc Aast_defs.{ hf_param_tys; hf_variadic_ty; hf_return_ty; _ }
+        =
+      let acc = auxs (aux acc @@ snd hf_return_ty) hf_param_tys in
+      Option.value_map
+        ~default:acc
+        ~f:(fun hint -> aux acc @@ snd hint)
+        hf_variadic_ty
+    and aux_shape acc Aast_defs.{ nsi_field_map; _ } =
+      auxs acc
+      @@ List.map nsi_field_map ~f:(fun Aast_defs.{ sfi_hint; _ } -> sfi_hint)
+    in
+    aux [] @@ snd hint
+
   let rec do_add_dep ctx env dep =
     let is_wildcard =
       match dep with
@@ -923,10 +969,12 @@ end = struct
         } =
     add_user_attr_deps ctx env attrs;
     List.iter tparams ~f:(add_tparam_attr_deps ctx env);
-    List.iter cstrs ~f:(function
-        | (_, (_, Aast.Happly ((_, cls_name), _))) ->
-          do_add_dep ctx env (Typing_deps.Dep.Type cls_name)
-        | _ -> ())
+    List.iter
+      ~f:(fun (_, hint) ->
+        let cs = class_names hint in
+        List.iter cs ~f:(fun cls_name ->
+            do_add_dep ctx env (Typing_deps.Dep.Type cls_name)))
+      cstrs
 
   let add_impls ~ctx ~env ~cls acc ancestor_name =
     let open Typing_deps.Dep in

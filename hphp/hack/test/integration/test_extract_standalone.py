@@ -227,6 +227,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_class_name_in_attr",
             "\\with_tparam_constraint",
             "\\with_prop_in_construct",
+            "\\WithTypeConstantParamConstraint::foo",
         ]
 
         for function_name in function_names:

@@ -915,9 +915,9 @@ ALWAYS_INLINE
 static Array get_function_user_attributes(const Func* func) {
   auto userAttrs = func->userAttributes();
 
-  DArrayInit ai(userAttrs.size());
+  DictInit ai(userAttrs.size());
   for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
-    ai.set(VarNR::MakeKey(StrNR(it->first).asString()).tv(), it->second);
+    ai.set(StrNR(it->first).asString(), it->second);
   }
   return ai.toArray();
 }

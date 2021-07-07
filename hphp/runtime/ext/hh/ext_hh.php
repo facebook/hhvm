@@ -371,35 +371,6 @@ final class ImplicitContextConsts {
   const EMPTY_CONTEXT = -1;
 }
 
-/*
- * Runs $f without any context
- */
-function without_implicit_context<Tout>((function (): Tout) $f): Tout {
-  $prev = set_implicit_context_by_index(ImplicitContextConsts::EMPTY_CONTEXT);
-  try {
-    return $f();
-  } finally {
-    set_implicit_context_by_index($prev);
-  }
-}
-
-/*
- * Runs async function $f without any context
- */
-async function gen_without_implicit_context<Tout>(
-  (function (): Awaitable<Tout>) $f
-): Awaitable<Tout> {
-  $prev = set_implicit_context_by_index(ImplicitContextConsts::EMPTY_CONTEXT);
-  try {
-    $result = $f();
-  } finally {
-    set_implicit_context_by_index($prev);
-  }
-  // Needs to be awaited here so that context dependency is established
-  // between parent/child functions
-  return await $result;
-}
-
 abstract class ImplicitContext {
   abstract const type T as nonnull;
 

@@ -272,50 +272,43 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Base initializer for Packed-layout arrays.
+ * Initializer for a Hack vector array.
  */
-template<typename TArray, DataType DT>
-struct PackedArrayInitBase final : ArrayInitBase<TArray, DT> {
-  using ArrayInitBase<TArray, DT>::ArrayInitBase;
 
+struct VecInit final : ArrayInitBase<detail::Vec, KindOfVec> {
+  using ArrayInitBase<detail::Vec, KindOfVec>::ArrayInitBase;
   /*
    * Before allocating, check if the allocation would cause the request to OOM.
    *
    * @throws: RequestMemoryExceededException if allocating would OOM.
    */
-  PackedArrayInitBase(size_t n, CheckAllocation) :
-    ArrayInitBase<TArray, DT>(n, CheckAllocation{})
+  VecInit(size_t n, CheckAllocation) : ArrayInitBase(n, CheckAllocation{})
   {
     auto allocsz = sizeof(ArrayData) + sizeof(TypedValue) * n;
     if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
       check_non_safepoint_surprise();
     }
-    this->m_arr = TArray::MakeReserve(n);
-    assertx(this->m_arr->hasExactlyOneRef());
+    m_arr = detail::Vec::MakeReserve(n);
+    assertx(m_arr->hasExactlyOneRef());
     check_non_safepoint_surprise();
   }
 
-  PackedArrayInitBase& append(TypedValue tv) {
+  VecInit& append(TypedValue tv) {
     this->performOp([&]{
-      return PackedArray::AppendInPlace(this->m_arr, tvToInit(tv));
+      return PackedArray::AppendInPlace(m_arr, tvToInit(tv));
     });
     return *this;
   }
-  PackedArrayInitBase& append(const Variant& v) {
+  VecInit& append(const Variant& v) {
     return append(*v.asTypedValue());
   }
 
-  PackedArrayInitBase& setLegacyArray(bool legacy) {
-    this->m_arr->setLegacyArrayInPlace(legacy);
+  VecInit& setLegacyArray(bool legacy) {
+    m_arr->setLegacyArrayInPlace(legacy);
     return *this;
   }
 
 };
-
-/*
- * Initializer for a Hack vector array.
- */
-using VecInit = PackedArrayInitBase<detail::Vec, KindOfVec>;
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -192,6 +192,9 @@ function error($message) {
 }
 
 function success($message) {
+  if ($message is null) {
+    $message = "";
+  }
   print "$message\n";
   exit(0);
 }

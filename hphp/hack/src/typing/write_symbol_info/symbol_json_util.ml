@@ -49,7 +49,13 @@ let source_at_span source_text pos =
 strip these when present, eg: "\"FOO\"" => "FOO" *)
 let strip_nested_quotes str =
   let len = String.length str in
-  if len >= 2 && Char.equal '"' str.[0] && Char.equal '"' str.[len - 1] then
+  let firstc = str.[0] in
+  let lastc = str.[len - 1] in
+  if
+    len >= 2
+    && ( (Char.equal '"' firstc && Char.equal '"' lastc)
+       || (Char.equal '\'' firstc && Char.equal '\'' lastc) )
+  then
     String.sub str ~pos:1 ~len:(len - 2)
   else
     str

@@ -198,7 +198,7 @@ Variant HHVM_FUNCTION(hphp_get_timers, bool get_as_float /* = true */) {
   const int64_t &nsleep_time_s = transport->getnSleepTimeS();
   const int32_t &nsleep_time_n = transport->getnSleepTimeN();
 
-  DArrayInit ret(7);
+  DictInit ret(7);
   if (get_as_float) {
     ret.set(s_queue,        ts_float(tsQueue));
     ret.set(s_process_wall, ts_float(tsWall));

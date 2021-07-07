@@ -234,7 +234,7 @@ Array TimeZone::GetAbbreviations() {
   Array ret;
   for (const timelib_tz_lookup_table *entry =
          timelib_timezone_abbreviations_list(); entry->name; entry++) {
-    DArrayInit element(3);
+    DictInit element(3);
     element.set(s_dst, (bool)entry->type);
     element.set(s_offset, entry->gmtoffset);
     if (entry->full_tz_name) {
@@ -504,7 +504,7 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
 
 Array TimeZone::getLocation() const {
   if (!m_tzi) return Array{};
-  DArrayInit ret(4);
+  DictInit ret(4);
 
   ret.set(s_country_code, String(m_tzi->location.country_code, CopyString));
   ret.set(s_latitude,     m_tzi->location.latitude);

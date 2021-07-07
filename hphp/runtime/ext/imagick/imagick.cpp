@@ -1223,7 +1223,7 @@ static Array HHVM_METHOD(Imagick, getImageChannelStatistics) {
   auto wand = getMagickWandResource(Object{this_});
   auto stat = MagickGetImageChannelStatistics(wand->getWand());
 
-  DArrayInit ret(sizeof(channels) / sizeof(channels[0]));
+  DictInit ret(sizeof(channels) / sizeof(channels[0]));
   for (auto channel : channels) {
     ret.set(channel, make_dict_array(
         s_mean, stat[channel].mean,
@@ -1492,7 +1492,7 @@ static Variant HHVM_METHOD(Imagick, getImageProfiles,
   }
 
   if (with_values) {
-    DArrayInit ret(count);
+    DictInit ret(count);
     for (size_t i = 0; i < count; ++i) {
       ret.set(
         String(profiles[i]),
@@ -1521,7 +1521,7 @@ static Variant HHVM_METHOD(Imagick, getImageProperties,
   }
 
   if (with_values) {
-    DArrayInit ret(count);
+    DictInit ret(count);
     for (size_t i = 0; i < count; ++i) {
       ret.set(
         String(properties[i]),
@@ -1829,7 +1829,7 @@ static Array HHVM_METHOD(Imagick, identifyImage, bool appendRawOutput) {
   auto wand = getMagickWandResource(Object{this_});
   String identify = convertMagickString(MagickIdentifyImage(wand->getWand()));
   auto parsedIdentify = parseIdentify(identify);
-  DArrayInit ret(parsedIdentify.size() + 6);
+  DictInit ret(parsedIdentify.size() + 6);
 
   ret.set(s_imageName,
     convertMagickString(MagickGetImageFilename(wand->getWand())));
@@ -2410,7 +2410,7 @@ static Array HHVM_METHOD(Imagick, queryFontMetrics,
     static const size_t boundingBoxOffset = 7;
     static const size_t size = 13;
 
-    DArrayInit ret(size - 3);
+    DictInit ret(size - 3);
     for (size_t i = 0; i < size; ++i) {
       if (keys[i] == s_boundingBox) {
         ret.set(s_boundingBox, make_dict_array(

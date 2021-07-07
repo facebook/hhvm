@@ -46,7 +46,7 @@ static Array HHVM_METHOD(Closure, __debugInfo) {
   // Serialize 'use' parameters.
   auto cls = this_->getVMClass();
   if (auto nProps = cls->numDeclProperties()) {
-    DArrayInit useVars(nProps);
+    DictInit useVars(nProps);
 
     auto propsInfos = cls->declProperties();
     auto idx = 0;

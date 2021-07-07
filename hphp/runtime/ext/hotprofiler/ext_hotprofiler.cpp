@@ -393,7 +393,7 @@ template<class phpret, class Name, class Counts>
 void Profiler::returnVals(phpret& ret, const Name& name, const Counts& counts,
                           int flags, int64_t MHz)
 {
-    DArrayInit arr(5);
+    DictInit arr(5);
     arr.set(s_ct,  counts.count);
     arr.set(s_wt,  to_usec(counts.wall_time, MHz));
     if (flags & TrackCPU) {

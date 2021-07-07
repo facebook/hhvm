@@ -794,7 +794,7 @@ static Array get_function_param_info(const Func* func) {
       param.set(s_is_variadic, make_tv<KindOfBoolean>(true));
     }
     {
-      DArrayInit userAttrs(fpi.userAttributes.size());
+      DictInit userAttrs(fpi.userAttributes.size());
       for (auto const& attr : fpi.userAttributes) {
         userAttrs.set(StrNR{attr.first}, attr.second);
       }
@@ -871,7 +871,7 @@ namespace {
 const Array reified_generics_info_to_array(const ReifiedGenericsInfo& info) {
   VecInit arr(info.m_typeParamInfo.size());
   for (auto tparam : info.m_typeParamInfo) {
-    DArrayInit tparamArr(3);
+    DictInit tparamArr(3);
     tparamArr.set(s_is_reified, make_tv<KindOfBoolean>(tparam.m_isReified));
     tparamArr.set(s_is_soft, make_tv<KindOfBoolean>(tparam.m_isSoft));
     tparamArr.set(s_is_warn, make_tv<KindOfBoolean>(tparam.m_isWarn));
@@ -1056,7 +1056,7 @@ static Array HHVM_METHOD(ReflectionFile, getAttributesNamespaced) {
   assertx(unit);
 
   auto fileAttrs = unit->fileAttributes();
-  DArrayInit ai(fileAttrs.size());
+  DictInit ai(fileAttrs.size());
 
   for (auto it = fileAttrs.begin(); it != fileAttrs.end(); ++it) {
     ai.set(StrNR(it->first), tvAsCVarRef(&it->second));
@@ -1293,7 +1293,7 @@ static Array get_trait_alias_info(const Class* cls) {
   auto const& aliases = cls->traitAliases();
 
   if (aliases.size()) {
-    DArrayInit ai(aliases.size());
+    DictInit ai(aliases.size());
 
     for (auto const& namePair : aliases) {
       ai.set(StrNR(namePair.first), VarNR(namePair.second).tv());
@@ -1305,7 +1305,7 @@ static Array get_trait_alias_info(const Class* cls) {
     // on the Class.
     auto const& rules = cls->preClass()->traitAliasRules();
 
-    DArrayInit ai(rules.size());
+    DictInit ai(rules.size());
 
     for (auto const& rule : rules) {
       auto namePair = rule.asNamePair();
@@ -1562,7 +1562,7 @@ static Array HHVM_METHOD(ReflectionClass, getAttributesNamespaced) {
   auto const pcls = cls->preClass();
 
   auto userAttrs = pcls->userAttributes();
-  DArrayInit ai(userAttrs.size());
+  DictInit ai(userAttrs.size());
   for (auto const& attr : userAttrs) {
     ai.set(StrNR(attr.first), attr.second);
   }
@@ -2114,7 +2114,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getAttributesNamespaced) {
   assertx(req);
   auto const userAttrs = req->userAttrs();
 
-  DArrayInit ai(userAttrs.size());
+  DictInit ai(userAttrs.size());
   for (auto& attr : userAttrs) {
     ai.set(StrNR(attr.first), tvAsCVarRef(&attr.second));
   }
@@ -2413,7 +2413,7 @@ Array get_class_info(const String& name) {
   // interfaces
   {
     auto const& allIfaces = cls->allInterfaces();
-    DArrayInit arr(allIfaces.size());
+    DictInit arr(allIfaces.size());
     for (auto const& interface: cls->declInterfaces()) {
       arr.set(interface->nameStr(), make_tv<KindOfInt64>(1));
     }
@@ -2429,7 +2429,7 @@ Array get_class_info(const String& name) {
   // traits
   {
     auto const& traits = cls->preClass()->usedTraits();
-    DArrayInit arr(traits.size());
+    DictInit arr(traits.size());
     for (auto const& traitName : traits) {
       arr.set(StrNR(traitName), make_tv<KindOfInt64>(1));
     }
@@ -2555,7 +2555,7 @@ Array get_class_info(const String& name) {
   {
     size_t numConsts = cls->numConstants();
     const Class::Const* consts = cls->constants();
-    DArrayInit arr(numConsts);
+    DictInit arr(numConsts);
     for (size_t i = 0; i < numConsts; i++) {
       // Note: hphpc doesn't include inherited constants in
       // get_class_constants(), so mimic that behavior
@@ -2580,7 +2580,7 @@ Array get_class_info(const String& name) {
   {
     const PreClass* pcls = cls->preClass();
     auto const& attrs = pcls->userAttributes();
-    DArrayInit arr{attrs.size()};
+    DictInit arr{attrs.size()};
     for (auto const& attr : attrs) {
       arr.set(StrNR(attr.first), attr.second);
     }

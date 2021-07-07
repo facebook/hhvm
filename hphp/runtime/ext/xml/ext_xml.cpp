@@ -450,7 +450,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
         asArrRef(parser->data.asArrRef().lval(parser->ctag))
           .set(s_type, s_complete);
       } else {
-        DArrayInit tag(3);
+        DictInit tag(3);
         _xml_add_to_info(parser, tag_name.substr(parser->toffset));
         tag.set(s_tag, tag_name.substr(parser->toffset));
         tag.set(s_type, s_close);

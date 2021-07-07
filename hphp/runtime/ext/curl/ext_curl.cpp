@@ -130,7 +130,7 @@ Array HHVM_FUNCTION(curl_list_pools) {
   auto size = CurlHandlePool::namedPools.size();
   if (!size) return empty_dict_array();
 
-  DArrayInit ret(size);
+  DictInit ret(size);
   for (auto it: CurlHandlePool::namedPools) {
     auto pool = it.second;
     auto stats = make_dict_array(
@@ -170,7 +170,7 @@ Variant HHVM_FUNCTION(curl_version, int uversion /* = CURLVERSION_NOW */) {
     return false;
   }
 
-  DArrayInit ret(9);
+  DictInit ret(9);
   ret.set(s_version_number,     (int)d->version_num);
   ret.set(s_age,                d->age);
   ret.set(s_features,           d->features);

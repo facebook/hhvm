@@ -919,7 +919,7 @@ Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
   });
 
   // Create response
-  DArrayInit objs(metrics.size());
+  DictInit objs(metrics.size());
   for (auto& it : metrics) {
     if (it.second.dups < min_dup) continue;
 
@@ -988,7 +988,7 @@ Array HHVM_FUNCTION(objprof_get_data,
   });
 
   // Create response
-  DArrayInit objs(histogram.size());
+  DictInit objs(histogram.size());
   for (auto const& it : histogram) {
     auto c = it.first;
     auto cls = c.first;
@@ -1130,11 +1130,11 @@ Array HHVM_FUNCTION(objprof_get_paths,
   });
 
   // Create response
-  DArrayInit objs(histogram.size());
+  DictInit objs(histogram.size());
   for (auto const& it : histogram) {
     auto c = it.first;
     auto clsPaths = pathsToClass[c.first];
-    DArrayInit pathsArr(clsPaths.size());
+    DictInit pathsArr(clsPaths.size());
     for (auto const& pathIt : clsPaths) {
       auto pathStr = pathIt.first;
       auto path_metrics_val = make_dict_array(

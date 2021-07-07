@@ -684,7 +684,7 @@ Array CompactTraceData::extract() const {
   VecInit aInit(m_frames.size());
   for (int idx = 0; idx < m_frames.size(); ++idx) {
     auto const prev = idx < m_frames.size() - 1 ? &m_frames[idx + 1] : nullptr;
-    DArrayInit frame(6);
+    DictInit frame(6);
     if (prev && !prev->func->isBuiltin()) {
       auto const prevFunc = prev->func;
       auto const prevUnit = prevFunc->unit();

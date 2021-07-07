@@ -1235,7 +1235,7 @@ Array VariableUnserializer::unserializeArray() {
   // Pre-allocate an ArrayData of the given size, to avoid escalation in the
   // middle, which breaks references.
   auto arr = m_forceDArrays || type() == Type::Serialize
-    ? DArrayInit(size).toArray()
+    ? DictInit(size).toArray()
     : DictInit(size).toArray();
   reserveForAdd(size);
 
@@ -1400,7 +1400,7 @@ Array VariableUnserializer::unserializeVArray() {
     // Deserialize to vector-ish darray. Use direct calls to MixedArray.
     oomCheck(MixedArray::computeAllocBytesFromMaxElms(size));
 
-    arr = DArrayInit(size).toArray();
+    arr = DictInit(size).toArray();
     reserveForAdd(size);
 
     for (int64_t i = 0; i < size; i++) {
@@ -1448,7 +1448,7 @@ Array VariableUnserializer::unserializeDArray() {
     check_non_safepoint_surprise();
   }
 
-  auto arr = DArrayInit(size).toArray();
+  auto arr = DictInit(size).toArray();
   reserveForAdd(size);
 
   for (int64_t i = 0; i < size; i++) {

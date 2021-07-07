@@ -281,7 +281,7 @@ Variant HHVM_FUNCTION(parse_url, const String& url,
     return init_null();
   }
 
-  DArrayInit ret(resource.port ? 8 : 7);
+  DictInit ret(resource.port ? 8 : 7);
   SET_COMPONENT(scheme);
   SET_COMPONENT(host);
   if (resource.port) {

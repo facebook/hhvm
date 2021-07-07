@@ -107,7 +107,7 @@ Array parsePhpStack(const Array& bt) {
       bool fileline = frame.exists(s_file) && frame.exists(s_line);
       bool metadata = frame.exists(s_metadata);
 
-      DArrayInit element(1 + (fileline ? 2 : 0) + (metadata ? 1 : 0));
+      DictInit element(1 + (fileline ? 2 : 0) + (metadata ? 1 : 0));
 
       if (frame.exists(s_class)) {
         auto func = folly::to<std::string>(

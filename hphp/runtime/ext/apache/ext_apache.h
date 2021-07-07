@@ -46,7 +46,7 @@ struct ApacheExtension final : Extension {
 };
 
 static Array get_headers(const HeaderMap& headers, bool allHeaders = false) {
-  DArrayInit ret(headers.size());
+  DictInit ret(headers.size());
   for (auto& iter : headers) {
     const auto& values = iter.second;
     if (auto size = values.size()) {

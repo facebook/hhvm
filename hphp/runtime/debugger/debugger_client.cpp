@@ -2474,9 +2474,9 @@ void DebuggerClient::loadConfig() {
       return true;
     },
     [this]() {
-      DArrayInit ret(m_macros.size());
+      DictInit ret(m_macros.size());
       for (auto& macro : m_macros) {
-        DArrayInit ret_macro(2);
+        DictInit ret_macro(2);
         ret_macro.set(s_name, macro->m_name);
         VecInit ret_cmds(macro->m_cmds.size());
         for (auto& cmd : macro->m_cmds) {

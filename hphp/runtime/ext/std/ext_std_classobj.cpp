@@ -103,7 +103,7 @@ Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
   auto const cls = get_cls(class_or_object);
   if (!cls) return init_null();
 
-  auto ret = DArrayInit(cls->numMethods()).toArray();
+  auto ret = DictInit(cls->numMethods()).toArray();
   Class::getMethodNames(cls, clsFromCallerSkipBuiltins(), ret);
   return Variant::attach(HHVM_FN(array_values)(ret)).toArray();
 }
@@ -115,7 +115,7 @@ Array HHVM_FUNCTION(get_class_constants, const String& className) {
   }
 
   auto const numConstants = cls->numConstants();
-  DArrayInit arrayInit(numConstants);
+  DictInit arrayInit(numConstants);
 
   auto const consts = cls->constants();
   for (size_t i = 0; i < numConstants; i++) {
@@ -166,7 +166,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
     [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
   );
 
-  DArrayInit arr(numDeclProps + numSProps);
+  DictInit arr(numDeclProps + numSProps);
 
   for (size_t slot = 0; slot < numDeclProps; ++slot) {
     auto index = cls->propSlotToIndex(slot);

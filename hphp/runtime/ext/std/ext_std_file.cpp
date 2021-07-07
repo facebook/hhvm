@@ -265,7 +265,7 @@ const StaticString
   s_blocks("blocks");
 
 Array stat_impl(struct stat *stat_sb) {
-  DArrayInit ret(26);
+  DictInit ret(26);
   ret.append((int64_t)stat_sb->st_dev);
   ret.append((int64_t)stat_sb->st_ino);
   ret.append((int64_t)stat_sb->st_mode);
@@ -1324,7 +1324,7 @@ const StaticString
 Variant HHVM_FUNCTION(pathinfo,
                       const String& path,
                       int opt /* = 15 */) {
-  DArrayInit ret{4};
+  DictInit ret{4};
 
   if (opt == 0) {
     return empty_string_variant();

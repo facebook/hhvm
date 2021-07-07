@@ -386,7 +386,7 @@ TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
   if (key.isArray()) {
     bool tmp = false;
     auto keys = key.asCArrRef();
-    DArrayInit init(keys.size());
+    DictInit init(keys.size());
     for (ArrayIter iter(keys); iter; ++iter) {
       Variant k = iter.second();
       if (!k.isString()) {
@@ -673,7 +673,7 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
       len = strlen(data->name);
       if (len > RFC1867_NAME_MAXLEN) len = RFC1867_NAME_MAXLEN;
       rfc1867ApcData->name = std::string(data->name, len);
-      DArrayInit track(6);
+      DictInit track(6);
       track.set(s_total, rfc1867ApcData->content_length);
       track.set(s_current, rfc1867ApcData->bytes_processed);
       track.set(s_filename, rfc1867ApcData->filename);
@@ -695,7 +695,7 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
         Variant v;
         if (apc_store().get(rfc1867ApcData->tracking_key, v)) {
           if (v.isArray()) {
-            DArrayInit track(6);
+            DictInit track(6);
             track.set(s_total, rfc1867ApcData->content_length);
             track.set(s_current, rfc1867ApcData->bytes_processed);
             track.set(s_filename, rfc1867ApcData->filename);
@@ -718,7 +718,7 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
       rfc1867ApcData->bytes_processed = data->post_bytes_processed;
       rfc1867ApcData->cancel_upload = data->cancel_upload;
       rfc1867ApcData->temp_filename = data->temp_filename;
-      DArrayInit track(8);
+      DictInit track(8);
       track.set(s_total, rfc1867ApcData->content_length);
       track.set(s_current, rfc1867ApcData->bytes_processed);
       track.set(s_filename, rfc1867ApcData->filename);
@@ -742,7 +742,7 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
       } else {
         rfc1867ApcData->rate =
           8.0*rfc1867ApcData->bytes_processed;  /* Too quick */
-        DArrayInit track(8);
+        DictInit track(8);
         track.set(s_total, rfc1867ApcData->content_length);
         track.set(s_current, rfc1867ApcData->bytes_processed);
         track.set(s_rate, rfc1867ApcData->rate);

@@ -182,7 +182,7 @@ Variant HHVM_FUNCTION(class_uses, const Variant& obj,
     return false;
   }
   auto &usedTraits = cls->preClass()->usedTraits();
-  DArrayInit ret(usedTraits.size());
+  DictInit ret(usedTraits.size());
   for (auto const& traitName : usedTraits) {
     ret.set(StrNR(traitName), VarNR(traitName).tv());
   }

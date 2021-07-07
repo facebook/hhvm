@@ -1091,7 +1091,7 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
     case KindOfClass:
     case KindOfLazyClass:
     case KindOfResource: {
-      DArrayInit props(1);
+      DictInit props(1);
       props.set(s_scalar, tv);
       return ObjectData::FromArray(props.create()).detach();
     }

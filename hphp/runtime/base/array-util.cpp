@@ -464,7 +464,7 @@ Variant ArrayUtil::RegularSortUnique(const Array& input) {
     last = current;
   }
 
-  DArrayInit ret(indices.size() - duplicates_count);
+  DictInit ret(indices.size() - duplicates_count);
   int i = 0;
   for (ArrayIter iter(input); iter; ++iter, ++i) {
     if (!duplicates[i]) {

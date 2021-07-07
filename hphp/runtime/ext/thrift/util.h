@@ -33,10 +33,9 @@ enum TError {
 }
 
 inline void set_with_intish_key_cast(
-  DArrayInit& arr,
-  const Variant& key,
-  const Variant& value
-) {
+    DArrayInit& arr,
+    const Variant& key,
+    const Variant& value) {
   if (key.isString()) {
     int64_t intish_key;
     if (key.getStringData()->isStrictlyInteger(intish_key)) {
@@ -52,5 +51,4 @@ inline void set_with_intish_key_cast(
         ERR_INVALID_DATA);
   }
 }
-
 }}

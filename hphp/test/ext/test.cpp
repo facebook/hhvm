@@ -105,7 +105,7 @@ bool Test::logTestResults(std::string name, std::string details, int pass,
     summary += folly::sformat("FAILED ({})", fail);
   }
 
-  DArrayInit data(8);
+  DictInit data(8);
   data.set(String("type"),         "hphp");
   data.set(String("name"),         name);
   data.set(String("contacts"),     null_array);

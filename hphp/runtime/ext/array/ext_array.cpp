@@ -347,7 +347,7 @@ TypedValue HHVM_FUNCTION(array_fill,
     }
     return make_array_like_tv(vai.create());
   } else {
-    DArrayInit ret(num, CheckAllocation{});
+    DictInit ret(num, CheckAllocation{});
     ret.set(start_index, value);
     auto const base = std::max(start_index + 1, 0);
     for (auto i = 1; i < num; i++) {
@@ -1802,7 +1802,7 @@ TypedValue HHVM_FUNCTION(array_diff_key,
     // If we have more than 2 args, the left input could end up empty
     if (leftSize == 0) return empty_dict_array();
 
-    DArrayInit ret(leftSize);
+    DictInit ret(leftSize);
     auto setInt = [&](int64_t k, TypedValue v) { ret.set(k, v); };
     auto setStr = [&](StringData* k, TypedValue v) { ret.set(k, v); };
 
@@ -2240,7 +2240,7 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
     auto const leftSize = getContainerSize(left);
     if (leftSize == 0) return empty_dict_array();
 
-    DArrayInit ret(leftSize);
+    DictInit ret(leftSize);
     auto setInt = [&](int64_t k, TypedValue v) { ret.set(k, v); };
     auto setStr = [&](StringData* k, TypedValue v) { ret.set(k, v); };
 

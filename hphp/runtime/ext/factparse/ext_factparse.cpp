@@ -81,7 +81,7 @@ struct HackCFactsExtractor {
 
   static void merge_result(
     result_type& workerResult,
-    DArrayInit& outResArr,
+    DictInit& outResArr,
     const HPHP::String& path
   ) {
     try {
@@ -157,7 +157,7 @@ void parse_file(
 void facts_parse_sequential(
   const std::string& root,
   const req::vector<StringData*>& pathList,
-  DArrayInit& outResArr,
+  DictInit& outResArr,
   bool allowHipHopSyntax
 ) {
   const auto state = HackCFactsExtractor::init_state();
@@ -226,7 +226,7 @@ private:
 void facts_parse_threaded(
   const std::string& root,
   const req::vector<StringData*>& pathList,
-  DArrayInit& outResArr,
+  DictInit& outResArr,
   bool allowHipHopSyntax
 ) {
   auto numPaths = pathList.size();
@@ -268,7 +268,7 @@ Array HHVM_FUNCTION(
       "HH\\facts_parse not allowed in repo-authoritative mode. See #11153611.");
   }
 
-  DArrayInit outResArr(pathList->size());
+  DictInit outResArr(pathList->size());
 
   if (pathList.isNull() || !pathList->size()) {
     return outResArr.toArray();

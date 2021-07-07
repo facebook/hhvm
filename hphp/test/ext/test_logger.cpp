@@ -45,7 +45,7 @@ bool TestLogger::initializeRun() {
   buf[sizeof(buf) - 1] = '\0';
   std::string hostname = buf;
 
-  DArrayInit data(8);
+  DictInit data(8);
   data.set(String("startedTime"),  time(nullptr));
   data.set(String("stillRunning"), true);
   data.set(String("hostname"),     hostname);

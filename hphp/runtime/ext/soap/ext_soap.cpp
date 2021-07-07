@@ -2122,7 +2122,7 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
   assertx(class_name.get());
   Class* cls = Class::lookup(class_name.get());
   assertx(cls);
-  auto ret = DArrayInit(cls->numMethods()).toArray();
+  auto ret = DictInit(cls->numMethods()).toArray();
   Class::getMethodNames(cls, nullptr, ret);
   return ret.toVec();
 }

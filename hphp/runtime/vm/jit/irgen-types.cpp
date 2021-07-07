@@ -41,7 +41,6 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s_Stringish("Stringish"),
   s_StringishObject("StringishObject"),
   s_Awaitable("HH\\Awaitable");
 

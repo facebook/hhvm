@@ -4,6 +4,7 @@ namespace {
 
 interface XHPChild {}
 
+<<__Sealed(StringishObject::class)>>
 interface Stringish extends XHPChild {}
 
 interface StringishObject extends Stringish {

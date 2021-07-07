@@ -843,7 +843,7 @@ interface XHPChild {}
  * Stringish is a type that matches strings as well as string-convertible
  * objects: that is, objects that provide the __toString method
  */
-
+<<__Sealed(StringishObject::class)>>
 interface Stringish extends XHPChild {}
 
 /**

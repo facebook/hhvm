@@ -847,16 +847,16 @@ void add_stringish(php::Class* cls) {
     if (iface->isame(s_XHPChild.get())) { hasXHP = true; }
   }
 
-  for (auto& func : cls->methods) {
-    if (func->name->isame(s_toString.get())) {
-      FTRACE(2, "Adding Stringish, StringishObject and XHPChild to {}\n", cls->name->data());
-      cls->interfaceNames.push_back(s_StringishObject.get());
-      // leave this here so tests don't diverge. It's not technically necessary
-      cls->interfaceNames.push_back(s_Stringish.get());
-      if (!hasXHP && !cls->name->isame(s_XHPChild.get())) {
-        cls->interfaceNames.push_back(s_XHPChild.get());
-      }
-      return;
+
+  const auto has_toString = std::any_of(
+    begin(cls->methods),
+    end(cls->methods),
+    [](const auto& func) { return func->name->isame(s_toString.get()); });
+  if (has_toString) {
+    FTRACE(2, "Adding Stringish, StringishObject and XHPChild to {}\n", cls->name->data());
+    cls->interfaceNames.push_back(s_StringishObject.get());
+    if (!hasXHP && !cls->name->isame(s_XHPChild.get())) {
+      cls->interfaceNames.push_back(s_XHPChild.get());
     }
   }
 }

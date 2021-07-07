@@ -800,7 +800,7 @@ Array getDefinedVariables(const ActRec* fp) {
   if (UNLIKELY(fp == nullptr || fp->isInlined())) return empty_dict_array();
   auto const func = fp->func();
   auto const numLocals = func->numNamedLocals();
-  DArrayInit ret(numLocals);
+  DictInit ret(numLocals);
   for (Id id = 0; id < numLocals; ++id) {
     auto const local = frame_local(fp, id);
     if (type(local) == KindOfUninit) {
@@ -808,8 +808,9 @@ Array getDefinedVariables(const ActRec* fp) {
     }
     auto const localNameSd = func->localVarName(id);
     if (!localNameSd) continue;
+    // this is basically just a convoluted const_cast :p
     Variant name(localNameSd, Variant::PersistentStrInit{});
-    ret.add(name, Variant{variant_ref{local}});
+    ret.set(name.getStringData(), Variant{variant_ref{local}});
   }
   return ret.toArray();
 }

@@ -135,8 +135,16 @@ let should_report_duplicate
   let (pc, canonical) = canonical_id in
   (* helper, for the various paths below which want to log a bug *)
   let bug ~(desc : string) : unit =
+    let desc = "naming_duplicate_" ^ desc in
+    let () =
+      Hh_logger.log
+        "INVARIANT_VIOLATION_BUG [%s] %s %s"
+        desc
+        name
+        (FileInfo.show_pos p)
+    in
     HackEventLogger.invariant_violation_bug
-      ~desc:("naming_duplicate_" ^ desc)
+      ~desc
       ~typechecking_is_deferring:false
       ~path:(FileInfo.get_pos_filename p)
       ~pos:""

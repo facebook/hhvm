@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include <folly/Format.h>
 #include <folly/dynamic.h>
 
 namespace HPHP {
@@ -140,5 +141,53 @@ struct FileFacts {
   std::string m_sha1hex;
 };
 
+/**
+ * A string from Watchman representing a point in time.
+ */
+struct Clock {
+
+  /**
+   * True iff this represents an initial load, where all files have changed
+   * since this point in time
+   */
+  bool isInitial() const noexcept {
+    return m_clock.empty() && m_mergebase.empty();
+  }
+
+  bool operator==(const Clock& o) const noexcept {
+    return m_clock == o.m_clock && m_mergebase == o.m_mergebase;
+  }
+
+  bool operator!=(const Clock& o) const noexcept {
+    return !operator==(o);
+  }
+
+  /**
+   * Represents a timestamp on the local machine.
+   */
+  std::string m_clock;
+
+  /**
+   * Represents a public commit in the repo.
+   */
+  std::string m_mergebase;
+};
+
 } // namespace Facts
 } // namespace HPHP
+
+namespace folly {
+template <> class FormatValue<HPHP::Facts::Clock> {
+public:
+  explicit FormatValue(HPHP::Facts::Clock v) : m_val(v) {
+  }
+
+  template <typename Callback> void format(FormatArg& arg, Callback& cb) const {
+    format_value::formatString(
+        folly::sformat("\"{}|{}\"", m_val.m_clock, m_val.m_mergebase), arg, cb);
+  }
+
+private:
+  const HPHP::Facts::Clock m_val;
+};
+} // namespace folly

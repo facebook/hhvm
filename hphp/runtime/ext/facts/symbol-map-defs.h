@@ -906,8 +906,8 @@ Optional<SHA1> SymbolMap<S>::getSha1Hash(Path<S> path) const {
 
 template <typename S>
 void SymbolMap<S>::update(
-    const std::string_view since,
-    const std::string_view clock,
+    const Clock& since,
+    const Clock& clock,
     std::vector<folly::fs::path> alteredPaths,
     std::vector<folly::fs::path> deletedPaths,
     std::vector<FileFacts> alteredPathFacts) {
@@ -936,7 +936,7 @@ void SymbolMap<S>::update(
 
   // If we have no clock (meaning this is the map's first update since
   // it was constructed), fill our clock from the DB.
-  if (wlock->m_clock.empty()) {
+  if (wlock->m_clock.isInitial()) {
     wlock->m_clock = db.getClock(txn);
   }
 
@@ -970,7 +970,7 @@ void SymbolMap<S>::update(
     // drop updates on failure. So add a work item to the queue
     // and drain the queue as we complete work items successfully.
     wlock->m_updateDBWork.push(
-        {std::string{since},
+        {since,
          wlock->m_clock,
          std::move(alteredPaths),
          std::move(deletedPaths),
@@ -1032,12 +1032,12 @@ void SymbolMap<S>::update(
   }
 }
 
-template <typename S> std::string SymbolMap<S>::getClock() const noexcept {
+template <typename S> Clock SymbolMap<S>::getClock() const noexcept {
   auto rlock = m_syncedData.rlock();
   return rlock->m_clock;
 }
 
-template <typename S> std::string SymbolMap<S>::dbClock() const {
+template <typename S> Clock SymbolMap<S>::dbClock() const {
   auto& db = getDB();
   auto txn = db.begin();
   return db.getClock(txn);
@@ -1093,8 +1093,8 @@ hphp_hash_map<Path<S>, SHA1> SymbolMap<S>::getAllPathsWithHashes() const {
 
 template <typename S>
 void SymbolMap<S>::updateDB(
-    const std::string_view since,
-    const std::string_view clock,
+    const Clock since,
+    const Clock clock,
     const std::vector<folly::fs::path>& alteredPaths,
     const std::vector<folly::fs::path>& deletedPaths,
     const std::vector<FileFacts>& alteredPathFacts) const {
@@ -1131,7 +1131,7 @@ void SymbolMap<S>::updateDB(
   }
 
   // ANALYZE after initially building the DB
-  if (since.empty()) {
+  if (since.isInitial()) {
     try {
       auto DEBUG_ONLY t0 = std::chrono::steady_clock::now();
       FTRACE_MOD(

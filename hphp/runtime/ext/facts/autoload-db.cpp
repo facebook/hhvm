@@ -1252,21 +1252,24 @@ struct AutoloadDBImpl final : public AutoloadDB {
         }};
   }
 
-  void insertClock(SQLiteTxn& txn, std::string_view clock) override {
+  void insertClock(SQLiteTxn& txn, const Clock& clock) override {
     auto query = txn.query(m_clockStmts.m_insert);
-    query.bindString("@clock", clock);
+    query.bindString("@clock", clock.m_clock);
+    query.bindString("@mergebase", clock.m_mergebase);
     FTRACE(5, "Running {}\n", query.sql());
     query.step();
   }
 
-  std::string getClock(SQLiteTxn& txn) override {
+  Clock getClock(SQLiteTxn& txn) override {
     auto query = txn.query(m_clockStmts.m_get);
     FTRACE(5, "Running {}\n", query.sql());
     query.step();
     if (!query.row()) {
       return {};
     }
-    return std::string{query.getString(0)};
+    return {
+        .m_clock = std::string{query.getString(0)},
+        .m_mergebase = std::string{query.getString(1)}};
   }
 
   SQLite m_db;

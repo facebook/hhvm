@@ -290,8 +290,8 @@ struct AutoloadDB {
   virtual RowIter<SymbolPath> getAllFunctionPaths(SQLiteTxn& txn) = 0;
   virtual RowIter<SymbolPath> getAllConstantPaths(SQLiteTxn& txn) = 0;
 
-  virtual void insertClock(SQLiteTxn& txn, std::string_view clock) = 0;
-  virtual std::string getClock(SQLiteTxn& txn) = 0;
+  virtual void insertClock(SQLiteTxn& txn, const Clock& clock) = 0;
+  virtual Clock getClock(SQLiteTxn& txn) = 0;
 
   template <typename TValue> class RowIter {
 

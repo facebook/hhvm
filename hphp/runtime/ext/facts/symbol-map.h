@@ -49,8 +49,8 @@ namespace HPHP {
 namespace Facts {
 
 struct UpdateDBWorkItem {
-  std::string m_since;
-  std::string m_clock;
+  Clock m_since;
+  Clock m_clock;
   std::vector<folly::fs::path> m_alteredPaths;
   std::vector<folly::fs::path> m_deletedPaths;
   std::vector<FileFacts> m_alteredPathFacts;
@@ -215,8 +215,7 @@ template <typename S> struct SymbolMap {
   /**
    * Return the files with a given attribute
    */
-  std::vector<Path<S>>
-  getFilesWithAttribute(Symbol<S, SymKind::Type> attr);
+  std::vector<Path<S>> getFilesWithAttribute(Symbol<S, SymKind::Type> attr);
   std::vector<Path<S>> getFilesWithAttribute(const S& attr);
 
   /**
@@ -255,10 +254,10 @@ template <typename S> struct SymbolMap {
   std::vector<folly::dynamic>
   getMethodAttributeArgs(const S& type, const S& method, const S& attribute);
 
-  std::vector<folly::dynamic> getFileAttributeArgs(
-      Path<S> path,
-      Symbol<S, SymKind::Type> attribute);
-  std::vector<folly::dynamic> getFileAttributeArgs(Path<S> path, const S& attribute);
+  std::vector<folly::dynamic>
+  getFileAttributeArgs(Path<S> path, Symbol<S, SymKind::Type> attribute);
+  std::vector<folly::dynamic>
+  getFileAttributeArgs(Path<S> path, const S& attribute);
 
   /**
    * Return whether the given type is, for example, a class or interface.
@@ -316,8 +315,8 @@ template <typename S> struct SymbolMap {
    * elements must be in the same order.
    */
   void update(
-      std::string_view since,
-      std::string_view clock,
+      const Clock& since,
+      const Clock& clock,
       std::vector<folly::fs::path> alteredPaths,
       std::vector<folly::fs::path> deletedPaths,
       std::vector<FileFacts> alteredPathFacts); // throws(SQLiteExc)
@@ -327,14 +326,14 @@ template <typename S> struct SymbolMap {
    *
    * This token originated from Watchman.
    */
-  std::string getClock() const noexcept;
+  Clock getClock() const noexcept;
 
   /**
    * Return an opaque token representing how up to date the SQLite DB is.
    *
    * This token originated from Watchman.
    */
-  std::string dbClock() const; // throws(SQLiteExc)
+  Clock dbClock() const; // throws(SQLiteExc)
 
   /**
    * Return the one and only path where `symbol` is defined.
@@ -379,9 +378,9 @@ template <typename S> struct SymbolMap {
     /**
      * A Watchman clock representing how up-to-date this map is.
      *
-     * If this string is empty, then this map has not yet updated.
+     * If its `m_clock` string is empty, then this map has not yet updated.
      */
-    std::string m_clock;
+    Clock m_clock;
 
     /**
      * Maps between symbols and the paths defining them.
@@ -489,8 +488,8 @@ private:
    * in the DB, and we don't catch SQLiteExc from the underlying SQLite layer.
    */
   void updateDB(
-      std::string_view since,
-      std::string_view clock,
+      Clock since,
+      Clock clock,
       const std::vector<folly::fs::path>& alteredPaths,
       const std::vector<folly::fs::path>& deletedPaths,
       const std::vector<FileFacts>& alteredPathFacts) const; // throws

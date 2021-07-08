@@ -20,6 +20,8 @@
 
 #include <folly/experimental/io/FsUtil.h>
 
+#include "hphp/util/optional.h"
+
 namespace HPHP {
 namespace Facts {
 

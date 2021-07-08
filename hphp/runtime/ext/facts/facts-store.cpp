@@ -359,11 +359,45 @@ std::string curthread() {
   return s.str();
 }
 
-folly::dynamic getQuery(folly::dynamic queryExpr) {
+/**
+ * Ensure the given `queryExpr` is requesting the fields we need Watchman to
+ * return.
+ */
+folly::dynamic addFieldsToQuery(folly::dynamic queryExpr) {
   assertx(queryExpr.isObject());
   queryExpr["fields"] =
       folly::dynamic::array("name", "exists", "content.sha1hex");
   return queryExpr;
+}
+
+/**
+ * Augment `query` with a field telling Watchman to give us changes since the
+ * point in time given by `clock`.
+ */
+folly::dynamic addWatchmanSince(folly::dynamic query, Clock clock) {
+  if (clock.isInitial()) {
+    return query;
+  }
+
+  if (clock.m_mergebase.empty() && !clock.m_clock.empty()) {
+    // Filesystem changes since a machine-local time
+    query["since"] = std::move(clock.m_clock);
+  } else if (!clock.m_mergebase.empty() && clock.m_clock.empty()) {
+    // Repo changes since a global commit
+    query["since"] = folly::dynamic::object(
+        "scm",
+        folly::dynamic::object("mergebase-with", std::move(clock.m_mergebase)));
+  } else {
+    // Changes since a machine-local time and global commit
+    query["since"] = folly::dynamic::object("clock", std::move(clock.m_clock))(
+        "scm",
+        folly::dynamic::object("mergebase-with", std::move(clock.m_mergebase)));
+  }
+  // We're using the "since" generator, so clear all other generators
+  query.erase("suffix");
+  query.erase("glob");
+  query.erase("path");
+  return query;
 }
 
 /**
@@ -522,7 +556,7 @@ struct FactsStoreImpl final
       , m_root{std::move(root)}
       , m_map{m_root, std::move(dbData)}
       , m_watchmanData{
-            {.m_queryExpr = getQuery(std::move(queryExpr)),
+            {.m_queryExpr = addFieldsToQuery(std::move(queryExpr)),
              .m_watchmanClient = watchmanClient}} {
   }
 
@@ -785,11 +819,11 @@ struct FactsStoreImpl final
     }
     auto queryExpr = m_watchmanData->m_queryExpr;
     auto since = m_map.getClock();
-    if (since.empty()) {
+    if (since.isInitial()) {
       since = m_map.dbClock();
     }
-    if (!since.empty()) {
-      queryExpr["since"] = std::move(since);
+    if (!since.isInitial()) {
+      queryExpr = addWatchmanSince(std::move(queryExpr), std::move(since));
     }
     m_watchmanData->m_watchmanClient.subscribe(
         queryExpr,
@@ -844,19 +878,12 @@ private:
     if (!m_watchmanData) {
       return folly::makeFuture();
     }
-    folly::dynamic query = m_watchmanData->m_queryExpr;
 
     auto since = m_map.getClock();
-    if (since.empty()) {
+    if (since.isInitial()) {
       since = m_map.dbClock();
     }
-    if (!since.empty()) {
-      // Use the "since" generator and clear all other generators
-      query["since"] = since;
-      query.erase("suffix");
-      query.erase("glob");
-      query.erase("path");
-    }
+    auto query = addWatchmanSince(m_watchmanData->m_queryExpr, since);
 
     FTRACE(3, "Querying watchman ({})\n", folly::toJson(query));
     return m_watchmanData->m_watchmanClient.query(std::move(query))
@@ -872,18 +899,26 @@ private:
           // isFresh means we either didn't pass Watchman a "since" token,
           // or it means that Watchman has restarted after the point in time
           // that our "since" token represents.
-          bool isFresh = [&]() {
+          bool isIncremental = [&]() {
+            if (!since.m_mergebase.empty()) {
+              // If we passed a mergebase to Watchman, our query must be
+              // incremental. Watchman's response will still contain
+              // `{"is_fresh_instance": true}`, but we should ignore it in this
+              // situation.
+              return true;
+            }
             auto const& fresh = result["is_fresh_instance"];
-            return fresh.isBool() && fresh.asBool();
+            return !fresh.isBool() || !fresh.asBool();
           }();
 
           auto [alteredPathsAndHashes, deletedPaths] =
-              isFresh ? getFreshDelta(result) : getIncrementalDelta(result);
+              isIncremental ? getIncrementalDelta(result)
+                            : getFreshDelta(result);
 
           // We need to update the DB if Watchman has restarted or if
           // something's changed on the filesystem. Otherwise, there's no
           // need to update the DB.
-          if (LIKELY(!isFresh) && LIKELY(alteredPathsAndHashes.empty()) &&
+          if (LIKELY(isIncremental) && LIKELY(alteredPathsAndHashes.empty()) &&
               LIKELY(deletedPaths.empty())) {
             return;
           }
@@ -951,7 +986,17 @@ private:
             }
           }
 
-          auto clock = result["clock"].asString();
+          auto clock = [&result]() -> Clock {
+            auto const* fullClock = result.get_ptr("clock");
+            always_assert(fullClock);
+            if (fullClock->isString()) {
+              return {.m_clock = fullClock->asString()};
+            } else {
+              auto const* localClock = fullClock->get_ptr("clock");
+              always_assert(localClock);
+              return {.m_clock = localClock->asString()};
+            }
+          }();
 
           FTRACE(
               3,

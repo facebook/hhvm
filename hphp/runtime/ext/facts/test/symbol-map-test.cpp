@@ -111,6 +111,21 @@ void waitForDB(
   m.waitForDBUpdate();
 }
 
+void update(
+    SymbolMap<std::string>& m,
+    std::string_view since,
+    std::string_view clock,
+    std::vector<folly::fs::path> alteredPaths,
+    std::vector<folly::fs::path> deletedPaths,
+    std::vector<FileFacts> facts) {
+  m.update(
+      Clock{.m_clock = std::string{since}},
+      Clock{.m_clock = std::string{clock}},
+      std::move(alteredPaths),
+      std::move(deletedPaths),
+      std::move(facts));
+}
+
 } // namespace
 
 class SymbolMapTest : public ::testing::Test {
@@ -167,8 +182,8 @@ TEST_F(SymbolMapTest, addPaths) {
 
   // Define symbols in path
   folly::fs::path path1 = {"some/path1.php"};
-  m.update("", "1:2:3", {path1}, {}, {ff});
-  EXPECT_EQ(m.getClock(), "1:2:3");
+  update(m, "", "1:2:3", {path1}, {}, {ff});
+  EXPECT_EQ(m.getClock().m_clock, "1:2:3");
 
   // Symbol -> file
   EXPECT_EQ(m.getTypeFile("SomeClass"), path1.native());
@@ -212,8 +227,8 @@ TEST_F(SymbolMapTest, addPaths) {
   folly::fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
 
-  m.update("1:2:3", "1:2:4", {path2}, {}, {ff});
-  EXPECT_EQ(m.getClock(), "1:2:4");
+  update(m, "1:2:3", "1:2:4", {path2}, {}, {ff});
+  EXPECT_EQ(m.getClock().m_clock, "1:2:4");
   EXPECT_EQ(m.getTypeFile("SomeClass"), nullptr);
   EXPECT_EQ(m.getTypeFile("BaseClass"), nullptr);
   EXPECT_EQ(m.getFunctionFile("some_fn"), nullptr);
@@ -225,8 +240,8 @@ TEST_F(SymbolMapTest, addPaths) {
   EXPECT_TRUE(m.getDerivedTypes("BaseClass", DeriveKind::Extends).empty());
 
   // Remove path1, leaving the symbols defined in path2
-  m.update("1:2:4", "1:2:5", {}, {path1}, {});
-  EXPECT_EQ(m.getClock(), "1:2:5");
+  update(m, "1:2:4", "1:2:5", {}, {path1}, {});
+  EXPECT_EQ(m.getClock().m_clock, "1:2:5");
   EXPECT_EQ(m.getTypeFile("SomeClass"), path2.native());
   EXPECT_EQ(m.getFunctionFile("some_fn"), path2.native());
   EXPECT_EQ(m.getConstantFile("SOME_CONSTANT"), path2.native());
@@ -258,9 +273,9 @@ TEST_F(SymbolMapTest, duplicateSymbols) {
   folly::fs::path path1 = {"some/path1.php"};
   folly::fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
-  m.update("", "1:2:3", {path1, path2}, {}, {ff, ff});
+  update(m, "", "1:2:3", {path1, path2}, {}, {ff, ff});
 
-  EXPECT_EQ(m.getClock(), "1:2:3");
+  EXPECT_EQ(m.getClock().m_clock, "1:2:3");
   EXPECT_EQ(m.getTypeFile("SomeClass"), nullptr);
   EXPECT_EQ(m.getFunctionFile("some_fn"), nullptr);
   EXPECT_EQ(m.getConstantFile("SOME_CONSTANT"), nullptr);
@@ -284,7 +299,7 @@ TEST_F(SymbolMapTest, DBFill) {
 
   folly::fs::path path = {"some/path.php"};
 
-  m1.update("", "1:2:3", {path}, {}, {ff});
+  update(m1, "", "1:2:3", {path}, {}, {ff});
 
   // symbol -> file
   EXPECT_EQ(m1.getTypeFile("SomeClass"), path.native());
@@ -312,7 +327,7 @@ TEST_F(SymbolMapTest, DBFill) {
 
   m1.waitForDBUpdate();
 
-  m2.update("1:2:3", "2:3:4", {}, {}, {});
+  update(m2, "1:2:3", "2:3:4", {}, {}, {});
 
   // file -> symbol
   EXPECT_THAT(
@@ -347,7 +362,7 @@ TEST_F(SymbolMapTest, ChangeSymbolCase) {
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
 
   folly::fs::path path = {"some/path.php"};
-  m.update("", "1:2:3", {path}, {}, {ff});
+  update(m, "", "1:2:3", {path}, {}, {ff});
 
   EXPECT_EQ(m.getTypeName("httpdnsurl")->slice(), "HTTPDNSURL");
   EXPECT_EQ(m.getFileTypes(path).at(0).slice(), "HTTPDNSURL");
@@ -356,7 +371,7 @@ TEST_F(SymbolMapTest, ChangeSymbolCase) {
   // Classes are case-insensitive, but changing the case of a class
   // should change the canonical representation
   ff.m_types.at(0).m_name = "HttpDnsUrl";
-  m.update("1:2:3", "1:2:4", {path}, {}, {ff});
+  update(m, "1:2:3", "1:2:4", {path}, {}, {ff});
   auto types = m.getFileTypes(path);
   EXPECT_EQ(m.getTypeName("httpdnsurl")->slice(), "HttpDnsUrl");
   EXPECT_EQ(types.at(0).slice(), "HttpDnsUrl");
@@ -365,9 +380,10 @@ TEST_F(SymbolMapTest, ChangeSymbolCase) {
   m.waitForDBUpdate();
 
   auto& m2 = make("/var/www");
-  EXPECT_EQ(m2.dbClock(), "1:2:4");
-  m2.update("1:2:4", "1:2:4", {}, {}, {});
-  EXPECT_EQ(m2.getClock(), "1:2:4");
+  EXPECT_EQ(m2.dbClock().m_clock, "1:2:4");
+  EXPECT_TRUE(m2.dbClock().m_mergebase.empty());
+  update(m2, "1:2:4", "1:2:4", {}, {}, {});
+  EXPECT_EQ(m2.getClock().m_clock, "1:2:4");
   auto dbTypes = m2.getFileTypes(path);
   EXPECT_EQ(m.getTypeName("httpdnsurl")->slice(), "HttpDnsUrl");
   EXPECT_EQ(types.at(0).slice(), "HttpDnsUrl");
@@ -388,7 +404,7 @@ TEST_F(SymbolMapTest, ChangeBaseClassSymbolCase) {
 
   folly::fs::path path1 = {"some/path1.php"};
   folly::fs::path path2 = {"some/path2.php"};
-  m.update("", "1:2:3", {path1, path2}, {}, {ff1, ff2});
+  update(m, "", "1:2:3", {path1, path2}, {}, {ff1, ff2});
   EXPECT_THAT(
       m.getBaseTypes("SomeClass", DeriveKind::Extends),
       ElementsAre("baseclass"));
@@ -398,7 +414,7 @@ TEST_F(SymbolMapTest, ChangeBaseClassSymbolCase) {
 
   ff1.m_types.at(0).m_baseTypes.at(0) = "BaseClass";
   ff2.m_types.at(0).m_name = "BaseClass";
-  m.update("1:2:3", "1:2:4", {path1, path2}, {}, {ff1, ff2});
+  update(m, "1:2:3", "1:2:4", {path1, path2}, {}, {ff1, ff2});
   EXPECT_THAT(
       m.getBaseTypes("SomeClass", DeriveKind::Extends),
       ElementsAre("BaseClass"));
@@ -423,7 +439,7 @@ TEST_F(SymbolMapTest, MaintainCorrectCase) {
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
 
   folly::fs::path path = {"some/path.php"};
-  m1.update("", "1:2:3", {path}, {}, {ff});
+  update(m1, "", "1:2:3", {path}, {}, {ff});
   m1.waitForDBUpdate();
 
   auto& m2 = make("/var/www");
@@ -455,14 +471,14 @@ TEST_F(SymbolMapTest, DBUpdateWithDuplicateDeclaration) {
   folly::fs::path path2 = {"some/path2.php"};
   ASSERT_NE(path1, path2);
 
-  m1.update("", "1:2:3", {path1, path2}, {}, {ff, ff});
+  update(m1, "", "1:2:3", {path1, path2}, {}, {ff, ff});
   EXPECT_EQ(m1.getFileTypes(path1).at(0).slice(), "SomeClass");
   EXPECT_EQ(m1.getFileTypes(path2).at(0).slice(), "SomeClass");
   EXPECT_EQ(m1.getTypeFile("SomeClass"), nullptr);
   EXPECT_EQ(m1.getAllPaths().size(), 2);
 
   m1.waitForDBUpdate();
-  m2.update("1:2:3", "1:2:3", {}, {}, {});
+  update(m2, "1:2:3", "1:2:3", {}, {}, {});
 
   EXPECT_EQ(m2.getFileTypes(path1).at(0).slice(), "SomeClass");
   EXPECT_EQ(m2.getFileTypes(path2).at(0).slice(), "SomeClass");
@@ -487,7 +503,7 @@ TEST_F(SymbolMapTest, getAllSymbols) {
 
   folly::fs::path p = {"some/path.php"};
 
-  m.update("", "1", {p}, {}, {ff});
+  update(m, "", "1", {p}, {}, {ff});
 
   auto typePaths = m.getAllTypes();
   EXPECT_EQ(typePaths.size(), 1);
@@ -526,11 +542,11 @@ TEST_F(SymbolMapTest, CopiedFile) {
       .m_constants = {"SomeConstant"},
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
 
-  m1.update("", "1:2:3", {path1}, {}, {ff});
+  update(m1, "", "1:2:3", {path1}, {}, {ff});
   m1.waitForDBUpdate();
 
   auto& m2 = make("/var/www");
-  m2.update("1:2:3", "1:2:4", {path2}, {}, {ff});
+  update(m2, "1:2:3", "1:2:4", {path2}, {}, {ff});
 
   EXPECT_EQ(m2.getTypeFile("SomeClass"), nullptr);
   EXPECT_EQ(m2.getTypeFile("OtherClass"), nullptr);
@@ -563,11 +579,11 @@ TEST_F(SymbolMapTest, ConcurrentCallsToGetTypeFile) {
            {.m_name = "OtherClass", .m_kind = TypeKind::Class}},
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
 
-  m1.update("", "1:2:3", {path1, path2}, {}, {ff, ff});
+  update(m1, "", "1:2:3", {path1, path2}, {}, {ff, ff});
   m1.waitForDBUpdate();
   for (auto i = 0; i < 100; i++) {
     auto& m2 = make("/var/www");
-    m2.update("1:2:3", "1:2:3", {}, {}, {});
+    update(m2, "1:2:3", "1:2:3", {}, {}, {});
 
     // getTypeFile and getFileTypes load from the DB and cache results
     // in memory. We need to make sure they can be called concurrently.
@@ -606,24 +622,24 @@ TEST_F(SymbolMapTest, DoesNotFillDeadPathFromDB) {
       .m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}},
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
 
-  m1.update("", "1:2:3", {path}, {}, {ff});
+  update(m1, "", "1:2:3", {path}, {}, {ff});
   waitForDB(m1, m_exec);
   EXPECT_EQ(m1.getAllPaths().begin()->slice(), path.native());
 
-  m2.update("1:2:3", "1:2:4", {}, {path}, {});
+  update(m2, "1:2:3", "1:2:4", {}, {path}, {});
   waitForDB(m2, m_exec);
   EXPECT_EQ(m2.getTypeFile("SomeClass"), nullptr);
   EXPECT_TRUE(m2.getAllPaths().empty());
 
-  m3.update("1:2:4", "1:2:4", {}, {}, {});
+  update(m3, "1:2:4", "1:2:4", {}, {}, {});
   EXPECT_EQ(m3.getTypeFile("SomeClass"), nullptr);
   EXPECT_TRUE(m3.getAllPaths().empty());
 }
 
 TEST_F(SymbolMapTest, UpdateOnlyIfCorrectSince) {
   auto& m = make("/var/www");
-  m.update("", "1:2:3", {}, {}, {});
-  EXPECT_EQ(m.getClock(), "1:2:3");
+  update(m, "", "1:2:3", {}, {}, {});
+  EXPECT_EQ(m.getClock().m_clock, "1:2:3");
 
   folly::fs::path path = {"some/path.php"};
   FileFacts ff{
@@ -631,8 +647,8 @@ TEST_F(SymbolMapTest, UpdateOnlyIfCorrectSince) {
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
 
   // since token is "4:5:6" but needs to be "1:2:3". It's not, so
-  // `m.update()` throws and we don't change any data in `m`.
-  ASSERT_THROW(m.update("4:5:6", "4:5:7", {path}, {}, {ff}), UpdateExc);
+  // `update()` throws and we don't change any data in `m`.
+  ASSERT_THROW(update(m, "4:5:6", "4:5:7", {path}, {}, {ff}), UpdateExc);
   EXPECT_EQ(m.getTypeFile("SomeClass"), nullptr);
   EXPECT_TRUE(m.getAllPaths().empty());
 }
@@ -652,8 +668,8 @@ TEST_F(SymbolMapTest, DelayedDBUpdateDoesNotMakeResultsIncorrect) {
            {.m_name = "BaseClass", .m_kind = TypeKind::Class}},
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
 
-  m.update("", "1:2:3", {path1, path2}, {}, {ff, ff});
-  EXPECT_EQ(m.getClock(), "1:2:3");
+  update(m, "", "1:2:3", {path1, path2}, {}, {ff, ff});
+  EXPECT_EQ(m.getClock().m_clock, "1:2:3");
 
   // Duplicate declaration
   EXPECT_EQ(m.getKind("SomeClass"), TypeKind::Unknown);
@@ -667,7 +683,7 @@ TEST_F(SymbolMapTest, DelayedDBUpdateDoesNotMakeResultsIncorrect) {
 
   auto& m2 = make("/var/www", m_exec);
 
-  m2.update("1:2:3", "1:2:4", {}, {path2}, {});
+  update(m2, "1:2:3", "1:2:4", {}, {path2}, {});
   // We do not wait for the DB update to complete.
   // m_exec.drive();
   // m2.waitForDBUpdate();
@@ -683,7 +699,7 @@ TEST_F(SymbolMapTest, DelayedDBUpdateDoesNotMakeResultsIncorrect) {
       ElementsAre("SomeClass"));
   EXPECT_TRUE(m2.getFileTypes(path2).empty());
 
-  m2.update("1:2:4", "1:2:5", {}, {path1}, {});
+  update(m2, "1:2:4", "1:2:5", {}, {path1}, {});
   EXPECT_EQ(m2.getKind("SomeClass"), TypeKind::Unknown);
   EXPECT_EQ(m2.getTypeFile("SomeClass"), nullptr);
   EXPECT_EQ(m2.getKind("BaseClass"), TypeKind::Unknown);
@@ -706,7 +722,7 @@ TEST_F(SymbolMapTest, GetKind) {
            {.m_name = "E1", .m_kind = TypeKind::Enum}},
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
 
-  m1.update("", "1:2:3", {p}, {}, {ff});
+  update(m1, "", "1:2:3", {p}, {}, {ff});
 
   EXPECT_EQ(m1.getKind("C1"), TypeKind::Class);
   EXPECT_EQ(m1.getKind("I1"), TypeKind::Interface);
@@ -717,7 +733,7 @@ TEST_F(SymbolMapTest, GetKind) {
   m1.waitForDBUpdate();
 
   auto& m2 = make("/var/www");
-  m2.update("1:2:3", "1:2:3", {}, {}, {});
+  update(m2, "1:2:3", "1:2:3", {}, {}, {});
 
   EXPECT_EQ(m2.getKind("C1"), TypeKind::Class);
   EXPECT_EQ(m2.getKind("I1"), TypeKind::Interface);
@@ -744,7 +760,7 @@ TEST_F(SymbolMapTest, TypeIsAbstractOrFinal) {
   folly::fs::path p = {"some/path1.php"};
 
   auto& m1 = make("/var/www");
-  m1.update("", "1:2:3", {p}, {}, {ff});
+  update(m1, "", "1:2:3", {p}, {}, {ff});
 
   EXPECT_TRUE(m1.isTypeAbstract("Abstract"));
   EXPECT_FALSE(m1.isTypeFinal("Abstract"));
@@ -757,7 +773,7 @@ TEST_F(SymbolMapTest, TypeIsAbstractOrFinal) {
 
   m1.waitForDBUpdate();
   auto& m2 = make("/var/www");
-  m2.update("1:2:3", "1:2:3", {}, {}, {});
+  update(m2, "1:2:3", "1:2:3", {}, {}, {});
 
   EXPECT_TRUE(m2.isTypeAbstract("Abstract"));
   EXPECT_FALSE(m2.isTypeFinal("Abstract"));
@@ -785,19 +801,19 @@ TEST_F(SymbolMapTest, OverwriteKind) {
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"};
 
   // Duplicate declaration
-  m1.update("", "1:2:3", {p1, p2}, {}, {ff1, ff2});
+  update(m1, "", "1:2:3", {p1, p2}, {}, {ff1, ff2});
   EXPECT_EQ(m1.getKind("Foo"), TypeKind::Unknown);
 
   // Remove the interface definition, keep the class definition
-  m1.update("1:2:3", "1:2:4", {}, {p2}, {});
+  update(m1, "1:2:3", "1:2:4", {}, {p2}, {});
   EXPECT_EQ(m1.getKind("Foo"), TypeKind::Class);
 
   // Re-add the interface definition, remove the class definition
-  m1.update("1:2:4", "1:2:5", {p2}, {p1}, {ff2});
+  update(m1, "1:2:4", "1:2:5", {p2}, {p1}, {ff2});
   EXPECT_EQ(m1.getKind("Foo"), TypeKind::Interface);
 
   // Change the interface definition to a class definition
-  m1.update("1:2:5", "1:2:6", {p2}, {}, {ff1});
+  update(m1, "1:2:5", "1:2:6", {p2}, {}, {ff1});
   EXPECT_EQ(m1.getKind("Foo"), TypeKind::Class);
 }
 
@@ -817,8 +833,8 @@ TEST_F(SymbolMapTest, DeriveKinds) {
                .m_requireImplements = {"BaseInterface"}}},
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
 
-  m1.update("", "1:2:3", {path}, {}, {ff});
-  EXPECT_EQ(m1.getClock(), "1:2:3");
+  update(m1, "", "1:2:3", {path}, {}, {ff});
+  EXPECT_EQ(m1.getClock().m_clock, "1:2:3");
   EXPECT_TRUE(m1.getBaseTypes("SomeTrait", DeriveKind::Extends).empty());
   EXPECT_THAT(
     m1.getBaseTypes("SomeTrait", DeriveKind::RequireExtends),
@@ -838,7 +854,7 @@ TEST_F(SymbolMapTest, DeriveKinds) {
   someTraitFacts.m_requireExtends = {};
   someTraitFacts.m_requireImplements = {};
   ff.m_sha1hex[39] = 'b';
-  m1.update("1:2:3", "1:2:4", {path}, {}, {ff});
+  update(m1, "1:2:3", "1:2:4", {path}, {}, {ff});
 }
 
 TEST_F(SymbolMapTest, MultipleRoots) {
@@ -849,18 +865,18 @@ TEST_F(SymbolMapTest, MultipleRoots) {
       .m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}},
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
 
-  m1.update("", "1:2:3", {path}, {}, {ff});
-  EXPECT_EQ(m1.getClock(), "1:2:3");
+  update(m1, "", "1:2:3", {path}, {}, {ff});
+  EXPECT_EQ(m1.getClock().m_clock, "1:2:3");
   EXPECT_EQ(m1.getFileTypes(path).at(0).slice(), "SomeClass");
   EXPECT_EQ(m1.getTypeFile("SomeClass"), path.native());
 
   m1.waitForDBUpdate();
 
   auto& m2 = make("/var/www2");
-  EXPECT_EQ(m2.getClock(), "");
+  EXPECT_EQ(m2.getClock().m_clock, "");
 
-  m2.update("", "1:2:3", {path}, {}, {ff});
-  EXPECT_EQ(m2.getClock(), "1:2:3");
+  update(m2, "", "1:2:3", {path}, {}, {ff});
+  EXPECT_EQ(m2.getClock().m_clock, "1:2:3");
   EXPECT_EQ(m2.getFileTypes(path).at(0).slice(), "SomeClass");
   EXPECT_EQ(m2.getTypeFile("SomeClass"), path.native());
 }
@@ -875,13 +891,13 @@ TEST_F(SymbolMapTest, InterleaveDBUpdates) {
       .m_functions = {"some_fn"},
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
 
-  m1.update("", "1:2:3", {path}, {}, {ff});
-  EXPECT_EQ(m1.getClock(), "1:2:3");
+  update(m1, "", "1:2:3", {path}, {}, {ff});
+  EXPECT_EQ(m1.getClock().m_clock, "1:2:3");
   EXPECT_EQ(m1.getFileFunctions(path).at(0).slice(), "some_fn");
   EXPECT_EQ(m1.getFunctionFile("some_fn"), path.native());
 
-  m2.update("", "1:2:3", {path}, {}, {ff});
-  EXPECT_EQ(m2.getClock(), "1:2:3");
+  update(m2, "", "1:2:3", {path}, {}, {ff});
+  EXPECT_EQ(m2.getClock().m_clock, "1:2:3");
   EXPECT_EQ(m2.getFileFunctions(path).at(0).slice(), "some_fn");
   EXPECT_EQ(m2.getFunctionFile("some_fn"), path.native());
 
@@ -907,7 +923,7 @@ TEST_F(SymbolMapTest, RemoveBaseTypeFromDerivedType) {
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
 
   folly::fs::path path = "some/path1.php";
-  m.update("", "1:2:3", {path}, {}, {ff});
+  update(m, "", "1:2:3", {path}, {}, {ff});
 
   EXPECT_EQ(
       m.getBaseTypes("SomeClass", DeriveKind::Extends).at(0).slice(),
@@ -917,7 +933,7 @@ TEST_F(SymbolMapTest, RemoveBaseTypeFromDerivedType) {
       "SomeClass");
 
   ff.m_types.at(0).m_baseTypes = {};
-  m.update("1:2:3", "1:2:4", {path}, {}, {ff});
+  update(m, "1:2:3", "1:2:4", {path}, {}, {ff});
 
   EXPECT_TRUE(m.getBaseTypes("SomeClass", DeriveKind::Extends).empty());
   EXPECT_TRUE(m.getDerivedTypes("BaseClass", DeriveKind::Extends).empty());
@@ -945,14 +961,14 @@ TEST_F(SymbolMapTest, DuplicateDefineDerivedType) {
   ASSERT_NE(path2, path3);
 
   // BaseClass has one definition, but SomeClass is duplicate-defined
-  m.update("", "1:2:3", {path1, path2, path3}, {}, {ff1, ff1, ff2});
+  update(m, "", "1:2:3", {path1, path2, path3}, {}, {ff1, ff1, ff2});
 
   EXPECT_EQ(m.getTypeFile("SomeClass"), nullptr);
   EXPECT_TRUE(m.getBaseTypes("SomeClass", DeriveKind::Extends).empty());
   EXPECT_TRUE(m.getDerivedTypes("BaseClass", DeriveKind::Extends).empty());
 
   // Delete path2, SomeClass now has one definition
-  m.update("1:2:3", "1:2:4", {}, {path2}, {});
+  update(m, "1:2:3", "1:2:4", {}, {path2}, {});
 
   EXPECT_EQ(m.getTypeFile("SomeClass"), path1.native());
 
@@ -990,7 +1006,7 @@ TEST_F(SymbolMapTest, DBUpdatesOutOfOrder) {
   // m2 only knows about the repo at "1:2:4". m2 then updates the DB
   // before m1 succeeds in updating the DB.
 
-  m1.update("", "1:2:3", {path1}, {}, {ff});
+  update(m1, "", "1:2:3", {path1}, {}, {ff});
   EXPECT_EQ(m1.getTypeFile("SomeClass"), path1.native());
   EXPECT_EQ(
       m1.getBaseTypes("SomeClass", DeriveKind::Extends).at(0).slice(),
@@ -1002,10 +1018,10 @@ TEST_F(SymbolMapTest, DBUpdatesOutOfOrder) {
   EXPECT_TRUE(m1.getDerivedTypes("SomeClass", DeriveKind::Extends).empty());
 
   // m1 hasn't updated the DB yet, so m2 can't do an incremental update.
-  ASSERT_THROW(m2.update("1:2:3", "1:2:4", {path2}, {path1}, {ff}), UpdateExc);
+  ASSERT_THROW(update(m2, "1:2:3", "1:2:4", {path2}, {path1}, {ff}), UpdateExc);
 
   // We do a non-incremental update, passing m2 the full repo
-  m2.update("", "1:2:4", {path2}, {}, {ff});
+  update(m2, "", "1:2:4", {path2}, {}, {ff});
   EXPECT_EQ(m2.getTypeFile("SomeClass"), path2.native());
   EXPECT_EQ(
       m2.getBaseTypes("SomeClass", DeriveKind::Extends).at(0).slice(),
@@ -1027,8 +1043,8 @@ TEST_F(SymbolMapTest, DBUpdatesOutOfOrder) {
   auto& m3 = make("/var/www", m_exec);
   // The DB clock should be 1:2:4, and the DB state should be
   // consistent with the state in m2, not m1.
-  m3.update("1:2:4", "1:2:4", {}, {}, {});
-  EXPECT_EQ(m3.getClock(), "1:2:4");
+  update(m3, "1:2:4", "1:2:4", {}, {}, {});
+  EXPECT_EQ(m3.getClock().m_clock, "1:2:4");
   EXPECT_EQ(m3.getTypeFile("SomeClass"), path2.native());
   EXPECT_EQ(
       m3.getBaseTypes("SomeClass", DeriveKind::Extends).at(0).slice(),
@@ -1051,7 +1067,7 @@ TEST_F(SymbolMapTest, ChangeAndMoveClassAttrs) {
       .m_sha1hex = kSHA};
   folly::fs::path p1{"p1.php"};
 
-  m.update("", "1", {p1}, {}, {ffWithAttr});
+  update(m, "", "1", {p1}, {}, {ffWithAttr});
   EXPECT_THAT(m.getAttributesOfType("C1"), ElementsAre("A1"));
   EXPECT_THAT(m.getTypesAndTypeAliasesWithAttribute("A1"), ElementsAre("C1"));
 
@@ -1061,7 +1077,7 @@ TEST_F(SymbolMapTest, ChangeAndMoveClassAttrs) {
       .m_sha1hex = kSHA};
   folly::fs::path p2{"p2.php"};
 
-  m.update("1", "2", {p1, p2}, {}, {ffEmpty, ffNoAttr});
+  update(m, "1", "2", {p1, p2}, {}, {ffEmpty, ffNoAttr});
   EXPECT_THAT(m.getAttributesOfType("C1"), IsEmpty());
   EXPECT_THAT(m.getTypesAndTypeAliasesWithAttribute("A1"), IsEmpty());
 }
@@ -1077,9 +1093,9 @@ TEST_F(SymbolMapTest, RemovePathFromExistingFile) {
 
   folly::fs::path path1 = {"some/path1.php"};
 
-  m.update("", "1:2:3", {path1}, {}, {ff});
+  update(m, "", "1:2:3", {path1}, {}, {ff});
   EXPECT_EQ(m.getTypeFile("SomeClass"), path1.native());
-  m.update("1:2:3", "1:2:4", {path1}, {}, {emptyFF});
+  update(m, "1:2:3", "1:2:4", {path1}, {}, {emptyFF});
   EXPECT_EQ(m.getTypeFile("SomeClass"), nullptr);
 }
 
@@ -1098,14 +1114,14 @@ TEST_F(SymbolMapTest, MoveAndCopySymbol) {
   folly::fs::path path3 = {"some/path3.php"};
 
   // Initialize m2 as dependent on the DB
-  m1.update("", "1:2:3", {path1}, {}, {ff});
+  update(m1, "", "1:2:3", {path1}, {}, {ff});
   waitForDB(m1, m_exec);
-  m2.update("1:2:3", "1:2:3", {}, {}, {});
+  update(m2, "1:2:3", "1:2:3", {}, {}, {});
   ASSERT_EQ(m2.getTypeFile("SomeClass"), path1.native());
 
   // Delete SomeClass from path1, simultaneously duplicate-define it in path2
   // and path3
-  m2.update("1:2:3", "1:2:4", {path1, path2, path3}, {}, {emptyFF, ff, ff});
+  update(m2, "1:2:3", "1:2:4", {path1, path2, path3}, {}, {emptyFF, ff, ff});
 
   // We should notice the duplicate-declaration. The DB still thinks that
   // SomeClass is defined in path1, but this call should not insert the stale
@@ -1115,7 +1131,7 @@ TEST_F(SymbolMapTest, MoveAndCopySymbol) {
   // waitForDB(m2, m_exec);
 
   // Delete path3.
-  m2.update("1:2:4", "1:2:5", {}, {path3}, {});
+  update(m2, "1:2:4", "1:2:5", {}, {path3}, {});
   // SomeClass should only be defined in path2 now.
   EXPECT_EQ(m2.getTypeFile("SomeClass"), path2.native());
 }
@@ -1143,7 +1159,8 @@ TEST_F(SymbolMapTest, TwoFilesDisagreeOnBaseTypes) {
 
   // SomeClass is defined in two files, both of which agree that SomeClass
   // extends BaseClass
-  m.update(
+  update(
+      m,
       "",
       "1:2:3",
       {pSomeClass1, pSomeClass2, pBaseClass},
@@ -1172,11 +1189,11 @@ TEST_F(SymbolMapTest, TwoFilesDisagreeOnBaseTypes) {
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"};
 
   // pSomeClass1 now believes that SomeClass doesn't extend BaseClass
-  m.update("1:2:3", "1:2:4", {pSomeClass1}, {}, {ffSomeClassDerivesBaseClass});
+  update(m, "1:2:3", "1:2:4", {pSomeClass1}, {}, {ffSomeClassDerivesBaseClass});
   expectSomeClassIsDuplicateDefined();
 
   // Remove pSomeClass1 so pSomeClass2 is the source of truth for SomeClass
-  m.update("1:2:4", "1:2:5", {}, {pSomeClass1}, {});
+  update(m, "1:2:4", "1:2:5", {}, {pSomeClass1}, {});
   expectAlways();
 
   EXPECT_EQ(m.getTypeFile("SomeClass"), pSomeClass2.native());
@@ -1188,12 +1205,12 @@ TEST_F(SymbolMapTest, TwoFilesDisagreeOnBaseTypes) {
       ElementsAre("SomeClass"));
 
   // Add pSomeClass1 back in
-  m.update("1:2:5", "1:2:6", {pSomeClass1}, {}, {ffSomeClassDerivesNobody});
+  update(m, "1:2:5", "1:2:6", {pSomeClass1}, {}, {ffSomeClassDerivesNobody});
   expectSomeClassIsDuplicateDefined();
 
   // Now remove pSomeClass2, so that pSomeClass1 is the source of truth for
   // SomeClass
-  m.update("1:2:6", "1:2:7", {}, {pSomeClass2}, {});
+  update(m, "1:2:6", "1:2:7", {}, {pSomeClass2}, {});
   expectAlways();
 
   EXPECT_EQ(m.getTypeFile("SomeClass"), pSomeClass1.native());
@@ -1211,7 +1228,7 @@ TEST_F(SymbolMapTest, MemoryAndDBDisagreeOnFileHash) {
 
   folly::fs::path path1 = {"some/path1.php"};
 
-  m1.update("", "1:2:3", {path1}, {}, {ff});
+  update(m1, "", "1:2:3", {path1}, {}, {ff});
   waitForDB(m1, m_exec);
   EXPECT_EQ(
       m1.getAllPathsWithHashes().at(Path<std::string>{path1}),
@@ -1219,7 +1236,7 @@ TEST_F(SymbolMapTest, MemoryAndDBDisagreeOnFileHash) {
 
   ff.m_sha1hex = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 
-  m2.update("1:2:3", "1:2:4", {path1}, {}, {ff});
+  update(m2, "1:2:3", "1:2:4", {path1}, {}, {ff});
   EXPECT_EQ(
       m2.getAllPathsWithHashes().at(Path<std::string>{path1}),
       SHA1{"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"});
@@ -1250,11 +1267,11 @@ TEST_F(SymbolMapTest, PartiallyFillDerivedTypeInfo) {
   folly::fs::path p2 = "some/path2.php";
   folly::fs::path p3 = "some/path3.php";
 
-  m1.update("", "1:2:3", {p1, p2, p3}, {}, {ff1, ff2, ff3});
+  update(m1, "", "1:2:3", {p1, p2, p3}, {}, {ff1, ff2, ff3});
   waitForDB(m1, m_exec);
 
   auto& m2 = make("/var/www", m_exec);
-  m2.update("1:2:3", "1:2:3", {}, {}, {});
+  update(m2, "1:2:3", "1:2:3", {}, {}, {});
 
   // Fetch the supertypes of SomeClass from the DB
   EXPECT_THAT(
@@ -1299,14 +1316,14 @@ TEST_F(SymbolMapTest, BaseTypesWithDifferentCases) {
   folly::fs::path p3 = "some/path3.php";
   folly::fs::path p4 = "some/path4.php";
 
-  m.update("", "1:2:3", {p1, p2, p3, p4}, {}, {ff1, ff2, ff3, ff4});
+  update(m, "", "1:2:3", {p1, p2, p3, p4}, {}, {ff1, ff2, ff3, ff4});
   EXPECT_EQ(m.getTypeFile("SomeClass"), nullptr);
   EXPECT_TRUE(m.getBaseTypes("SomeClass", DeriveKind::Extends).empty());
   EXPECT_TRUE(m.getDerivedTypes("BaseClass", DeriveKind::Extends).empty());
   EXPECT_TRUE(m.getDerivedTypes("baseclass", DeriveKind::Extends).empty());
 
   // Remove references to "baseclass", keep references to "BaseClass"
-  m.update("1:2:3", "1:2:4", {}, {p2, p4}, {});
+  update(m, "1:2:3", "1:2:4", {}, {p2, p4}, {});
   EXPECT_EQ(m.getTypeFile("SomeClass"), p1.native());
   EXPECT_THAT(
       m.getBaseTypes("SomeClass", DeriveKind::Extends),
@@ -1332,7 +1349,7 @@ TEST_F(SymbolMapTest, DerivedTypesWithDifferentCases) {
 
   folly::fs::path p1 = "some/path1.php";
 
-  m.update("", "1", {p1}, {}, {ff1});
+  update(m, "", "1", {p1}, {}, {ff1});
   EXPECT_EQ(m.getTypeFile("SomeClass").slice(), p1.native());
   EXPECT_THAT(m.getBaseTypes("SomeClass", DeriveKind::Extends),
       ElementsAre("BaseClass"));
@@ -1347,7 +1364,7 @@ TEST_F(SymbolMapTest, DerivedTypesWithDifferentCases) {
             .m_baseTypes = {"BaseClass"}},
            {.m_name = "BaseClass", .m_kind = TypeKind::Class}},
       .m_sha1hex = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
-  m.update("1", "2", {p1}, {}, {ff2});
+  update(m, "1", "2", {p1}, {}, {ff2});
 
   EXPECT_EQ(m.getTypeFile("SOMECLASS"), p1.native());
   EXPECT_THAT(
@@ -1369,7 +1386,7 @@ TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
 
   folly::fs::path path = {"some/path1.php"};
 
-  m1.update("", "1:2:3", {path}, {}, {ff});
+  update(m1, "", "1:2:3", {path}, {}, {ff});
 
   EXPECT_EQ(m1.getTypeFile("SomeClass"), path.native());
   EXPECT_THAT(
@@ -1380,7 +1397,7 @@ TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
   waitForDB(m1, m_exec);
 
   auto& m2 = make("/var/www");
-  m2.update("1:2:3", "1:2:3", {}, {}, {});
+  update(m2, "1:2:3", "1:2:3", {}, {}, {});
 
   // getTypeFile() and getFileTypes() both fill in-memory maps from the DB.
   // Make sure we never think we know all the types in a given path when we
@@ -1401,13 +1418,13 @@ TEST_F(SymbolMapTest, ErasePathStoredInDB) {
 
   folly::fs::path p = {"some/path.php"};
 
-  m1.update("", "1:2:3", {p}, {}, {ff});
+  update(m1, "", "1:2:3", {p}, {}, {ff});
   EXPECT_EQ(m1.getTypeFile("SomeClass"), p.native());
   waitForDB(m1, m_exec);
 
   auto& m2 = make("/var/www", m_exec);
-  m2.update("1:2:3", "1:2:4", {}, {p}, {});
-  m2.update("1:2:4", "1:2:5", {p}, {}, {ff});
+  update(m2, "1:2:3", "1:2:4", {}, {p}, {});
+  update(m2, "1:2:4", "1:2:5", {p}, {}, {ff});
   EXPECT_EQ(m2.getTypeFile("SomeClass"), p.native());
 }
 
@@ -1435,7 +1452,7 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
 
   folly::fs::path p = {"some/path.php"};
 
-  m1.update("", "1:2:3", {p}, {}, {ff});
+  update(m1, "", "1:2:3", {p}, {}, {ff});
   EXPECT_EQ(m1.getTypeFile("SomeClass"), p.native());
   EXPECT_THAT(
       m1.getTypesAndTypeAliasesWithAttribute("Foo"),
@@ -1457,7 +1474,7 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
   waitForDB(m1, m_exec);
 
   auto& m2 = make("/var/www", m_exec);
-  m2.update("1:2:3", "1:2:3", {}, {}, {});
+  update(m2, "1:2:3", "1:2:3", {}, {}, {});
   EXPECT_THAT(
     m2.getAttributesOfType("SomeClass"),
     UnorderedElementsAre("Bar", "Baz", "Foo"));
@@ -1493,18 +1510,18 @@ TEST_F(SymbolMapTest, getTypesWithAttributeFiltersDuplicateDefs) {
   folly::fs::path p2 = {"some/path2.php"};
   ASSERT_NE(p1.native(), p2.native());
 
-  m1.update("", "1:2:3", {p1, p2}, {}, {ff, ff});
+  update(m1, "", "1:2:3", {p1, p2}, {}, {ff, ff});
   EXPECT_EQ(m1.getTypeFile("SomeClass"), nullptr);
   EXPECT_TRUE(m1.getTypesAndTypeAliasesWithAttribute("Foo").empty());
 
   waitForDB(m1, m_exec);
 
   auto& m2 = make("/var/www", m_exec);
-  m2.update("1:2:3", "1:2:3", {}, {}, {});
+  update(m2, "1:2:3", "1:2:3", {}, {}, {});
   EXPECT_EQ(m2.getTypeFile("SomeClass"), nullptr);
   EXPECT_TRUE(m2.getTypesAndTypeAliasesWithAttribute("Foo").empty());
 
-  m2.update("1:2:3", "1:2:4", {}, {p2}, {});
+  update(m2, "1:2:3", "1:2:4", {}, {p2}, {});
   auto fooTypes = m2.getTypesAndTypeAliasesWithAttribute("Foo");
   EXPECT_THAT(fooTypes, ElementsAre("SomeClass"));
   EXPECT_EQ(m2.getTypeFile("SomeClass"), p1.native());
@@ -1529,7 +1546,7 @@ TEST_F(SymbolMapTest, GetMethodsWithAttribute) {
           },
       .m_sha1hex = kSHA};
   folly::fs::path p1{"some/path1.php"};
-  m1.update("", "1", {p1}, {}, {ff1});
+  update(m1, "", "1", {p1}, {}, {ff1});
 
   auto testMap = [&p1](auto& m) {
     auto methods = m.getMethodsWithAttribute("A1");
@@ -1553,7 +1570,7 @@ TEST_F(SymbolMapTest, GetMethodsWithAttribute) {
 
   m1.waitForDBUpdate();
   auto& m2 = make("/var/www");
-  m2.update("1", "1", {}, {}, {});
+  update(m2, "1", "1", {}, {}, {});
   testMap(m2);
 }
 
@@ -1572,7 +1589,7 @@ TEST_F(SymbolMapTest, GetAttributesOfRenamedMethod) {
               }}},
       .m_sha1hex = kSHA};
   folly::fs::path p1{"some/path1.php"};
-  m1.update("", "1", {p1}, {}, {ff1});
+  update(m1, "", "1", {p1}, {}, {ff1});
 
   {
     auto methods = m1.getMethodsWithAttribute("A1");
@@ -1599,7 +1616,7 @@ TEST_F(SymbolMapTest, GetAttributesOfRenamedMethod) {
               }}},
       .m_sha1hex = kSHA};
 
-  m2.update("1", "2", {p1}, {}, {ff2});
+  update(m2, "1", "2", {p1}, {}, {ff2});
 
   {
     auto methods = m2.getMethodsWithAttribute("A1");
@@ -1615,7 +1632,7 @@ TEST_F(SymbolMapTest, GetFilesWithAttribute) {
   FileFacts ff1{
       .m_attributes = {{.m_name = "A1", .m_args = {1}}}, .m_sha1hex = kSHA};
   folly::fs::path p1{"some/path1.php"};
-  m1.update("", "1", {p1}, {}, {ff1});
+  update(m1, "", "1", {p1}, {}, {ff1});
 
   auto testMap = [&p1](auto& m) {
     auto files = m.getFilesWithAttribute("A1");
@@ -1631,7 +1648,7 @@ TEST_F(SymbolMapTest, GetFilesWithAttribute) {
 
   m1.waitForDBUpdate();
   auto& m2 = make("/var/www");
-  m2.update("1", "1", {}, {}, {});
+  update(m2, "1", "1", {}, {}, {});
   testMap(m2);
 }
 
@@ -1669,7 +1686,7 @@ TEST_F(SymbolMapTest, TransitiveSubtypes) {
 
   folly::fs::path p = {"some/path.php"};
 
-  m1.update("", "1:2:3", {p}, {}, {ff});
+  update(m1, "", "1:2:3", {p}, {}, {ff});
 
   EXPECT_THAT(
     m1.getTransitiveDerivedTypes("C0"),
@@ -1724,10 +1741,10 @@ TEST_F(SymbolMapTest, ConcurrentFillsFromDB) {
   }
 
   // Update the DB with all path information
-  dbUpdater.update("", "1:2:3", std::move(paths), {}, std::move(facts));
+  update(dbUpdater, "", "1:2:3", std::move(paths), {}, std::move(facts));
   waitForDB(dbUpdater, m_exec);
 
-  map.update("1:2:3", "1:2:3", {}, {}, {});
+  update(map, "1:2:3", "1:2:3", {}, {}, {});
 
   // Load symbols concurrently
   size_t const numThreads = 20;

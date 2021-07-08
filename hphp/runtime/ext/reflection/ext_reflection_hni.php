@@ -481,11 +481,11 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
     $this->name = $this->getName();
   }
 
-  <<__Native, __Pure, __Mutable>>
-  private function __initClosure(object $closure): bool;
+  <<__Native>>
+  private function __initClosure(object $closure)[write_this_props]: bool;
 
-  <<__Native, __Pure, __Mutable>>
-  private function __initName(string $name): bool;
+  <<__Native>>
+  private function __initName(string $name)[write_this_props]: bool;
 
   /**
    * (excerpt from

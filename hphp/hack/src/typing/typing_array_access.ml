@@ -157,6 +157,8 @@ let check_arraykey_index_write =
 
 let check_keyset_value = check_arraykey_index Errors.invalid_keyset_value
 
+let check_set_value = check_arraykey_index Errors.invalid_set_value
+
 let rec array_get
     ~array_pos
     ~expr_pos
@@ -587,9 +589,8 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
       match deref ty1 with
       | (_, Tany _) -> (env, ty1, Ok ty2)
       | (_, Terr) -> (env, ty1, Ok ty2)
-      | (_, Tclass ((_, n), _, [tv]))
-        when String.equal n SN.Collections.cVector
-             || String.equal n SN.Collections.cSet ->
+      | (_, Tclass ((_, n), _, [tv])) when String.equal n SN.Collections.cVector
+        ->
         let (env, err_res) =
           Result.fold
             ~ok:(fun env -> (env, Ok ty2))
@@ -599,17 +600,32 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
         (env, ty1, err_res)
       (* Handle the case where Vector or Set was used as a typehint
        without type parameters *)
-      | (_, Tclass ((_, n), _, []))
-        when String.equal n SN.Collections.cVector
-             || String.equal n SN.Collections.cSet ->
+      | (_, Tclass ((_, n), _, [])) when String.equal n SN.Collections.cVector
+        ->
         (env, ty1, Ok ty2)
+      | (r, Tclass (((_, n) as id), e, []))
+        when String.equal n SN.Collections.cKeyset
+             || String.equal n SN.Collections.cSet ->
+        let (env, err_res) =
+          if String.equal n SN.Collections.cKeyset then
+            check_keyset_value env expr_pos ty1 ty2
+          else
+            check_set_value env expr_pos ty1 ty2
+        in
+        (env, mk (r, Tclass (id, e, [ty2])), err_res)
       | (r, Tclass (((_, n) as id), e, [tv]))
         when String.equal n SN.Collections.cVec ->
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, mk (r, Tclass (id, e, [tv'])), Ok ty2)
       | (r, Tclass (((_, n) as id), e, [tv]))
-        when String.equal n SN.Collections.cKeyset ->
-        let (env, err_res) = check_keyset_value env expr_pos ty1 ty2 in
+        when String.equal n SN.Collections.cKeyset
+             || String.equal n SN.Collections.cSet ->
+        let (env, err_res) =
+          if String.equal n SN.Collections.cKeyset then
+            check_keyset_value env expr_pos ty1 ty2
+          else
+            check_set_value env expr_pos ty1 ty2
+        in
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, mk (r, Tclass (id, e, [tv'])), err_res)
       | (r, Tvarray tv) ->

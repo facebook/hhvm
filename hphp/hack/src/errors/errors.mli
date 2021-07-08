@@ -1402,6 +1402,9 @@ val invalid_arraykey_write :
 val invalid_keyset_value :
   Pos.t -> Pos_or_decl.t * string -> Pos_or_decl.t * string -> unit
 
+val invalid_set_value :
+  Pos.t -> Pos_or_decl.t * string -> Pos_or_decl.t * string -> unit
+
 val invalid_arraykey_constraint : Pos.t -> string -> unit
 
 val entrypoint_arguments : Pos.t -> unit

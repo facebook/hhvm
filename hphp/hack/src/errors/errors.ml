@@ -4809,6 +4809,15 @@ let invalid_keyset_value pos (cpos, ctype) (vpos, vtype) =
       (vpos, String.capitalize vtype ^ " is not an arraykey");
     ]
 
+let invalid_set_value pos (cpos, ctype) (vpos, vtype) =
+  add_list
+    (Typing.err_code Typing.InvalidKeysetValue)
+    (pos, "Set values must be arraykeys")
+    [
+      (cpos, "This container is " ^ ctype);
+      (vpos, String.capitalize vtype ^ " is not an arraykey");
+    ]
+
 let invalid_sub_string pos ty =
   add (Typing.err_code Typing.InvalidSubString) pos
   @@ "Expected an object convertible to string but got "

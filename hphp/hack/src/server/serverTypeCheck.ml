@@ -602,6 +602,7 @@ module FullCheckKind : CheckKindType = struct
       old_env with
       errorl;
       needs_phase2_redecl = Relative_path.Set.empty;
+      ServerEnv.remote_execution_files = Relative_path.Set.empty;
       needs_recheck;
       full_check_status;
       remote;
@@ -736,6 +737,7 @@ module LazyCheckKind : CheckKindType = struct
       old_env with
       errorl;
       ide_needs_parsing = Relative_path.Set.empty;
+      ServerEnv.remote_execution_files = Relative_path.Set.empty;
       needs_phase2_redecl;
       needs_recheck;
       full_check_status;
@@ -1224,6 +1226,13 @@ functor
           { env with full_check_status = Full_check_started }
         else
           env
+      in
+      let env =
+        if Relative_path.Set.is_empty env.remote_execution_files then
+          env
+        else
+          (* We always clear past errors in RE mode *)
+          { env with errorl = Errors.empty }
       in
       (* Files in env.needs_decl contain declarations which were not finished.
        * They were only oldified, but we didn't run phase2 redeclarations for them

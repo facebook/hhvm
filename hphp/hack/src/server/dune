@@ -516,6 +516,7 @@
     security_stubs
     server_api
     server_codemod_type_printer
+    recli_stubs
     server_coverage_metric_utils
     server_docblock_at
     server_env

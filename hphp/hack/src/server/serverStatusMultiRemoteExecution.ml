@@ -8,34 +8,39 @@
  *)
 open Hh_prelude
 
-let go (filenames : string list) ctx =
-  let dep_edges = HashSet.create () in
-  let multi_remote_execution_trace root obj =
-    if
-      not
-        (Typing_deps.idep_exists (Provider_context.get_deps_mode ctx) root obj)
-    then
-      HashSet.add dep_edges (root, obj)
+let config = Cas.{ install_dir = Path.make "/tmp"; version = "STABLE" }
+
+let go errors ctx =
+  let session_id = Random_id.short_string () in
+  let dir = Filename.concat Sys_utils.temp_dir_name session_id in
+  Sys_utils.mkdir_p dir;
+  let state_filename = "dep_edges.bin" |> Filename.concat dir in
+  let dep_table_edges_added =
+    Typing_deps.save_discovered_edges
+      (Provider_context.get_deps_mode ctx)
+      ~dest:state_filename
+      ~build_revision:Build_id.build_revision
+      ~reset_state_after_saving:true
   in
-  Typing_deps.add_dependency_callback
-    "multi_remote_execution_trace"
-    multi_remote_execution_trace;
-  (* filter out non-existent files *)
-  let paths =
-    List.filter_map filenames ~f:(fun file ->
-        Sys_utils.realpath file
-        |> Option.map ~f:Relative_path.create_detect_prefix)
-  in
-  let errors =
-    List.fold_left paths ~init:Errors.empty ~f:(fun acc path ->
-        let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-        let { Tast_provider.Compute_tast_and_errors.errors; _ } =
-          Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
-        in
-        Errors.merge acc errors)
+  Hh_logger.log
+    "Saved partial dependency graph (%d edges) at %s"
+    dep_table_edges_added
+    state_filename;
+  let dep_edges =
+    if dep_table_edges_added > 0 then (
+      let result =
+        Cas.upload_directory config ~timeout:3600 ~dir:(Path.make dir)
+      in
+      match result with
+      | Ok { Cas.digest; _ } -> Cas.to_string digest
+      | Error (Cas.Parse_failure error)
+      | Error (Cas.Process_failure error) ->
+        Hh_logger.log "Unexpected error: %s" error;
+        failwith "Uploading dep edges failed"
+    ) else
+      ""
   in
   let errors = Base64.encode_exn ~pad:false (Marshal.to_string errors []) in
-  let dep_edges = HashSet.to_list dep_edges in
   let dep_edges =
     Base64.encode_exn ~pad:false (Marshal.to_string dep_edges [])
   in

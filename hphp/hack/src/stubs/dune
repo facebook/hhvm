@@ -172,6 +172,14 @@
     (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name recli_stubs)
+  (wrapped false)
+  (modules cas)
+  (libraries errors relative_path typing_deps future)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
   (name ci_util_stubs)
   (wrapped false)
   (modules

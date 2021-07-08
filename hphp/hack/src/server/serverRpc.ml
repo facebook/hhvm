@@ -79,9 +79,18 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let errors = ServerStatusRemoteExecution.go env in
     let (error_list, dropped_count) = take_max_errors errors max_errors in
     (env, (error_list, dropped_count))
-  | STATUS_MULTI_REMOTE_EXECUTION fns ->
+  | STATUS_MULTI_REMOTE_EXECUTION _fns ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    let (errors, dep_edges) = ServerStatusMultiRemoteExecution.go fns ctx in
+    let errors = env.errorl in
+    let (errors, dep_edges) = ServerStatusMultiRemoteExecution.go errors ctx in
+    (* Set pause mode to prevent watchman from triggering a full recheck *)
+    let env =
+      {
+        env with
+        full_recheck_on_file_changes =
+          Paused { paused_recheck_id = env.init_env.recheck_id };
+      }
+    in
     (env, (errors, dep_edges))
   | COVERAGE_LEVELS (path, file_input) ->
     let path = Relative_path.create_detect_prefix path in

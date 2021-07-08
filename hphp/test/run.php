@@ -187,14 +187,13 @@ EOT;
 }
 
 function error($message) {
+  $message ??= "";
   print "$message\n";
   exit(1);
 }
 
 function success($message) {
-  if ($message is null) {
-    $message = "";
-  }
+  $message ??= "";
   print "$message\n";
   exit(0);
 }

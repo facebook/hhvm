@@ -44,6 +44,9 @@ namespace HH\Capabilities {
   <<__Sealed()>>
   interface WriteProperty {}
 
+  <<__Sealed()>>
+  interface Codegen {}
+
   <<__Sealed(ImplicitPolicyOf::class, ImplicitPolicyShallow::class)>>
   interface ImplicitPolicy {}
   <<__Sealed(ImplicitPolicyOfShallow::class, ImplicitPolicyLocal::class)>>

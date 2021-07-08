@@ -202,6 +202,7 @@ let default_capability p : locl_ty =
         class_type r rxLocal [];
         class_type r implicitPolicyLocal [];
         class_type r io [];
+        class_type r codegen [];
       ]
 
 let default_capability_unsafe p : locl_ty = mixed (Reason.Rhint p)

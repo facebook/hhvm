@@ -824,6 +824,8 @@ module Capabilities = struct
   let rx = prefix ^ "Rx"
 
   let rxLocal = rx ^ "Local"
+
+  let codegen = prefix ^ "Codegen"
 end
 
 module ExpressionTrees = struct

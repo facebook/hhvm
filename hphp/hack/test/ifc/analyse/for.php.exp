@@ -21,6 +21,8 @@ Analyzing \test_constraints:
       HH\Capabilities\WriteProperty < HH\Capabilities\ImplicitPolicyLocal'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\IO'1,
+      HH\Capabilities\Codegen_lump'1 = HH\Capabilities\WriteProperty_lump,
+      HH\Capabilities\WriteProperty < HH\Capabilities\Codegen'1,
       HH\Capabilities\WriteProperty_lump'2 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\WriteProperty'3,
       HH\Capabilities\AccessGlobals_lump'3 = HH\Capabilities\WriteProperty_lump'2,
@@ -30,7 +32,9 @@ Analyzing \test_constraints:
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
-      HH\Capabilities\WriteProperty'2 < HH\Capabilities\IO'3, $i < $i'1,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\IO'3,
+      HH\Capabilities\Codegen_lump'3 = HH\Capabilities\WriteProperty_lump'2,
+      HH\Capabilities\WriteProperty'2 < HH\Capabilities\Codegen'3, $i < $i'1,
       $i'1 < cmp, lit'1 < cmp,
       HH\Capabilities\WriteProperty_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\AccessGlobals_lump'1 = HH\Capabilities\WriteProperty_lump'1,
@@ -41,6 +45,8 @@ Analyzing \test_constraints:
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\ImplicitPolicyLocal'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\IO'1,
+      HH\Capabilities\Codegen_lump'1 = HH\Capabilities\WriteProperty_lump'1,
+      HH\Capabilities\WriteProperty'1 < HH\Capabilities\Codegen'1,
       HH\Capabilities\WriteProperty_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\AccessGlobals_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\AccessGlobals'3,
@@ -49,7 +55,10 @@ Analyzing \test_constraints:
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\WriteProperty'3 < HH\Capabilities\IO'3, $i'2 < $i'1
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\IO'3,
+      HH\Capabilities\Codegen_lump'3 = HH\Capabilities\WriteProperty_lump'3,
+      HH\Capabilities\WriteProperty'3 < HH\Capabilities\Codegen'3,
+      $i'2 < $i'1
     [6:8-12] cmp < $i'2, $i'1 < $i'2
   Locals:
     { $#capability ->
@@ -61,7 +70,9 @@ Analyzing \test_constraints:
                                     HH\Capabilities\RxLocal_lump'1> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'1> &
-         \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1>);
+         \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1> &
+         \HH\Capabilities\Codegen<HH\Capabilities\Codegen'1,
+                                    HH\Capabilities\Codegen_lump'1>);
       $#local_capability ->
       (\HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
                                         HH\Capabilities\WriteProperty_lump'3> &
@@ -71,6 +82,8 @@ Analyzing \test_constraints:
                                     HH\Capabilities\RxLocal_lump'3> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'3> &
-         \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>);
+         \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3> &
+         \HH\Capabilities\Codegen<HH\Capabilities\Codegen'3,
+                                    HH\Capabilities\Codegen_lump'3>);
       $i -> <$i'1> }
 

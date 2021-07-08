@@ -2,19 +2,19 @@ File "ctx-const-bounds_lower-only_inheritance.php", line 14, characters 3-43:
 Constraints on a context constant requires it to be abstract (Parsing[1002])
 File "ctx-const-bounds_lower-only_inheritance.php", line 14, characters 13-13:
 Unable to satisfy constraint on this type constant (Typing[4110])
-  File "coeffect/contexts.hhi", line 79, characters 5-40:
-  Expected `the capability ImplicitPolicyLocal`
+  File "coeffect/contexts.hhi", line 80, characters 5-28:
+  Expected `the capability Codegen`
   File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 31-37:
   But got `the capability AccessGlobals`
 File "ctx-const-bounds_lower-only_inheritance.php", line 18, characters 13-13:
 Unable to satisfy constraint on this type constant (Typing[4110])
-  File "coeffect/contexts.hhi", line 79, characters 5-40:
-  Expected `the capability ImplicitPolicyLocal`
+  File "coeffect/contexts.hhi", line 80, characters 5-28:
+  Expected `the capability Codegen`
   File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 31-37:
   But got `the capability AccessGlobals`
 File "ctx-const-bounds_lower-only_inheritance.php", line 27, characters 22-22:
 The constraint on this type constant is inconsistent with its parent (Typing[4110])
-  File "coeffect/contexts.hhi", line 79, characters 5-40:
-  Expected `the capability ImplicitPolicyLocal`
+  File "coeffect/contexts.hhi", line 80, characters 5-28:
+  Expected `the capability Codegen`
   File "ctx-const-bounds_lower-only_inheritance.php", line 9, characters 31-37:
   But got `the capability AccessGlobals`

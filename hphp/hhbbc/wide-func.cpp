@@ -34,6 +34,8 @@ TRACE_SET_MOD(hhbbc_mem);
 
 using Buffer = CompactVector<char>;
 
+static_assert(std::is_same<LSString, LowStringPtr>::value);
+
 constexpr int32_t kNoSrcLoc = -1;
 
 constexpr uint8_t k16BitCode = 0xfe;
@@ -43,17 +45,15 @@ constexpr uint8_t k32BitCode = 0xff;
 // bytecode ops, but less than 512. How convenient!
 constexpr uint8_t k9BitOpShift = 0xff;
 
+// Most static strings will have addresses that fit in 4 bytes. We set
+// this flag when encoding a string address that needs the full 8 bytes.
+constexpr uint64_t kStringDataFlag = 0x1;
+
 template <typename>
 struct is_compact_vector : std::false_type {};
 
 template <typename T, typename A>
 struct is_compact_vector<CompactVector<T, A>> : std::true_type {};
-
-template <typename T> constexpr bool copy_as_bytes() {
-  return std::is_trivially_copyable<T>::value ||
-         std::is_same<T, LowStringPtr>::value ||
-         std::is_same<T, SSwitchTabEnt>::value;
-}
 
 std::string name(const std::type_info& type) {
 #ifdef __GNUG__
@@ -72,7 +72,7 @@ std::string name(const std::type_info& type) {
 
 template <typename T>
 T decode_as_bytes(const Buffer& buffer, size_t& pos) {
-  static_assert(copy_as_bytes<T>(), "");
+  static_assert(std::is_trivially_copyable<T>::value);
   alignas(alignof(T)) char data[sizeof(T)];
   memmove(&data[0], &buffer[pos], sizeof(T));
   pos += sizeof(T);
@@ -118,6 +118,16 @@ T decode(const Buffer& buffer, size_t& pos) {
     return T{first, count};
   }
 
+  if constexpr (std::is_same<T, LowStringPtr>::value) {
+    auto const lo = decode_as_bytes<uint32_t>(buffer, pos);
+    if (!(lo & kStringDataFlag)) {
+      return LowStringPtr(reinterpret_cast<const StringData*>(lo));
+    }
+    auto const hi = decode_as_bytes<uint32_t>(buffer, pos);
+    auto const both = (uint64_t(hi) << 32) | (uint64_t(lo) & ~kStringDataFlag);
+    return LowStringPtr(reinterpret_cast<const StringData*>(both));
+  }
+
   if constexpr (std::is_same<T, MKey>::value) {
     auto const mcode = DECODE_MEMBER(mcode);
     switch (mcode) {
@@ -130,10 +140,10 @@ T decode(const Buffer& buffer, size_t& pos) {
         return T(mcode, iva, DECODE_MEMBER(rop));
       }
       case MEL: case MPL: {
-        auto const local = DECODE_MEMBER(local); 
+        auto const local = DECODE_MEMBER(local);
         return T(mcode, local, DECODE_MEMBER(rop));
       }
-      case MW:                      
+      case MW:
         return T();
     }
   }
@@ -143,6 +153,12 @@ T decode(const Buffer& buffer, size_t& pos) {
     auto const name = base + kInvalidLocalName;
     auto const id   = DECODE_MEMBER(id) + NoLocalId;
     return T(name, id);
+  }
+
+  if constexpr (std::is_same<T, SSwitchTabEnt>::value) {
+    auto const first = DECODE_MEMBER(first);
+    auto const second = DECODE_MEMBER(second);
+    return T{first, second};
   }
 
   if constexpr (is_compact_vector<T>::value) {
@@ -168,7 +184,7 @@ T decode(const Buffer& buffer, size_t& pos) {
     return Op(safe_cast<uint16_t>(next) + k9BitOpShift);
   }
 
-  if constexpr (copy_as_bytes<T>()) {
+  if constexpr (std::is_trivially_copyable<T>::value) {
     return decode_as_bytes<T>(buffer, pos);
   }
 }
@@ -179,7 +195,7 @@ T decode(const Buffer& buffer, size_t& pos) {
 
 template <typename T>
 void encode_as_bytes(Buffer& buffer, const T& data) {
-  static_assert(copy_as_bytes<T>(), "");
+  static_assert(std::is_trivially_copyable<T>::value);
   auto const ptr = reinterpret_cast<const char*>(&data);
   buffer.insert(buffer.end(), ptr, ptr + sizeof(T));
 }
@@ -217,6 +233,18 @@ void encode(Buffer& buffer, const T& data) {
     encode(buffer, data.first);
     encode(buffer, data.count);
 
+  } else if constexpr (std::is_same<T, LowStringPtr>::value) {
+    static_assert(alignof(StringData) % 2 == 0);
+    auto const raw = uintptr_t(data.get());
+    if (raw <= std::numeric_limits<uint32_t>::max()) {
+      encode_as_bytes(buffer, safe_cast<uint32_t>(raw));
+    } else {
+      auto const hi = safe_cast<uint32_t>(raw >> 32);
+      auto const lo = safe_cast<uint32_t>(raw & 0xffffffff);
+      encode_as_bytes(buffer, lo | kStringDataFlag);
+      encode_as_bytes(buffer, hi);
+    }
+
   } else if constexpr (std::is_same<T, MKey>::value) {
     encode(buffer, data.mcode);
     switch (data.mcode) {
@@ -232,13 +260,17 @@ void encode(Buffer& buffer, const T& data) {
         encode(buffer, data.local);
         encode(buffer, data.rop);
         break;
-      case MW:                                               
+      case MW:
         break;
     }
 
   } else if constexpr (std::is_same<T, NamedLocal>::value) {
     encode(buffer, safe_cast<uint32_t>(data.name - kInvalidLocalName));
     encode(buffer, data.id - NoLocalId);
+
+  } else if constexpr (std::is_same<T, SSwitchTabEnt>::value) {
+    encode(buffer, data.first);
+    encode(buffer, data.second);
 
   } else if constexpr (is_compact_vector<T>::value) {
     encode(buffer, safe_cast<uint32_t>(data.size()));
@@ -265,7 +297,7 @@ void encode(Buffer& buffer, const T& data) {
       encode_as_bytes(buffer, safe_cast<uint8_t>(raw - k9BitOpShift));
     }
 
-  } else if constexpr (copy_as_bytes<T>()) {
+  } else if constexpr (std::is_trivially_copyable<T>::value) {
     encode_as_bytes(buffer, data);
   }
 }

@@ -160,7 +160,7 @@ let rec wait_for_server_message
     ~(deadline : float option)
     ~(server_specific_files : ServerCommandTypes.server_specific_files)
     ~(progress_callback : (string option -> unit) option)
-    ~(root : Path.t) : 'a ServerCommandTypes.message_type Lwt.t =
+    ~(root : Path.t) : _ ServerCommandTypes.message_type Lwt.t =
   let server_progress_file =
     server_specific_files.ServerCommandTypes.server_progress_file
   in

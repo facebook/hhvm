@@ -32,6 +32,7 @@ module Periodical : sig
 
   val one_week : float
 
+  (** Check if any callback is due and run those. *)
   val check : ServerEnv.env -> ServerEnv.env
 
   (* register_callback X Y

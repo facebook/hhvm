@@ -61,14 +61,14 @@ let on_exception_ref =
   ref (fun (e, stack) -> nested_exception := Some (e, stack))
 
 let multi_threaded_call
-    (type a b c d)
+    (type job_input job_output acc env)
     workers
-    (job : worker_id * c -> a -> b)
-    (merge : worker_id * b -> c -> c)
-    (neutral : c)
-    (next : a Hh_bucket.next)
-    ?(on_cancelled : (unit -> a list) option)
-    (interrupt : d interrupt_config) =
+    (job : worker_id * acc -> job_input -> job_output)
+    (merge : worker_id * job_output -> acc -> acc)
+    (neutral : acc)
+    (next : job_input Hh_bucket.next)
+    ?(on_cancelled : (unit -> job_input list) option)
+    (interrupt : env interrupt_config) : (acc * env) * job_input list =
   incr call_id;
   let call_id = !call_id in
   (* Split workers into those that are free, and those that are still doing

@@ -1122,6 +1122,7 @@ functor
         in
         (errorl, telemetry, env, cancelled)
       in
+
       log_if_diag_subscribe_changed
         "type_checking.go_with_interrupt"
         ~before:diag_subscribe_before
@@ -1577,6 +1578,7 @@ functor
       let telemetry =
         Telemetry.duration telemetry ~key:"prechecked1_start" ~start_time
       in
+
       let (env, prechecked1_telemetry) =
         ServerPrecheckedFiles.update_after_local_changes
           genv
@@ -1584,6 +1586,7 @@ functor
           changed
           ~start_time
       in
+
       let t = Hh_logger.log_duration "Evaluating prechecked changes" t in
       let telemetry =
         telemetry
@@ -1593,9 +1596,11 @@ functor
              ~key:"prechecked1_changed"
              ~value:(Typing_deps.DepSet.cardinal changed)
       in
+
       let (_ : bool) =
         Typing_deps.allow_dependency_table_reads env.deps_mode deptable_unlocked
       in
+
       (* Checking this before starting typechecking because we want to attribtue
        * big rechecks to rebases, even when restarting is disabled *)
       if

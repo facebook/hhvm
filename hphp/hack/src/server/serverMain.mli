@@ -7,20 +7,20 @@
  *
  *)
 
+type params = {
+  informant_managed: bool;
+  state: ServerGlobalState.t;
+  options: ServerArgs.options;
+  monitor_pid: int;
+  priority_in_fd: Unix.file_descr;
+  force_dormant_start_only_in_fd: Unix.file_descr;
+}
+
 (* The in/out channels don't actually take type unit -- we write directly
  * to the underlying file descriptor -- but we have to declare some type for
  * these phantom types because OCaml doesn't allow polymorphic values that
  * are not functions. *)
-val entry :
-  ( bool
-    * ServerGlobalState.t
-    * ServerArgs.options
-    * int
-    * Unix.file_descr
-    * Unix.file_descr,
-    unit,
-    unit )
-  Daemon.entry
+val entry : (params, unit, unit) Daemon.entry
 
 val run_once : ServerArgs.options -> ServerConfig.t -> ServerLocalConfig.t -> 'a
 

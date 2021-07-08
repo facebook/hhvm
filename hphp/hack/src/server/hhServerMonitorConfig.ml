@@ -21,7 +21,11 @@ let pipe_type_to_string = function
   | Priority -> "priority"
   | Force_dormant_start_only -> "force_dormant_start_only"
 
-let start_server_daemon ~informant_managed options log_link daemon_entry =
+let start_server_daemon
+    ~informant_managed
+    options
+    log_link
+    (daemon_entry : (ServerMain.params, _, _) Daemon.entry) =
   let log_fds =
     let in_fd = Daemon.null_fd () in
     if ServerArgs.should_detach options then (
@@ -70,12 +74,14 @@ let start_server_daemon ~informant_managed options log_link daemon_entry =
       ~channel_mode:`socket
       log_fds
       daemon_entry
-      ( informant_managed,
-        state,
-        options,
-        monitor_pid,
-        child_priority_fd,
-        child_force_dormant_start_only_force_fd )
+      {
+        ServerMain.informant_managed;
+        state;
+        options;
+        monitor_pid;
+        priority_in_fd = child_priority_fd;
+        force_dormant_start_only_in_fd = child_force_dormant_start_only_force_fd;
+      }
   in
   Unix.close child_priority_fd;
   Unix.close child_force_dormant_start_only_force_fd;

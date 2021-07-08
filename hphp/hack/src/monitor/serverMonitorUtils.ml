@@ -45,8 +45,8 @@ let watchman_mergebase_to_string
 module type Server_config = sig
   type server_start_options
 
-  (* Start the server. Optionally takes in the exit code of the previously
-   * running server that exited. *)
+  (** Start the server. Optionally takes in the exit code of the previously
+      running server that exited. *)
   val start_server :
     informant_managed:bool ->
     prior_exit_status:int option ->

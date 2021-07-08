@@ -170,6 +170,7 @@ let finalize_init init_env typecheck_telemetry init_telemetry =
 (* The main loop *)
 (*****************************************************************************)
 
+(** Query the notifier of changed files. *)
 let query_notifier genv env query_kind start_time =
   let open ServerNotifierTypes in
   let telemetry =
@@ -487,6 +488,28 @@ let generate_and_update_recheck_id env =
   in
   (env, recheck_id)
 
+let idle_if_no_client env waiting_client =
+  match waiting_client with
+  | ClientProvider.Select_nothing ->
+    let last_stats = env.last_recheck_loop_stats in
+    (* Ugly hack: We want GC_SHAREDMEM_RAN to record the last rechecked
+     * count so that we can figure out if the largest reclamations
+     * correspond to massive rebases. However, the logging call is done in
+     * the SharedMem module, which doesn't know anything about Server stuff.
+     * So we wrap the call here. *)
+    HackEventLogger.with_rechecked_stats
+      (List.length last_stats.per_batch_telemetry)
+      last_stats.rechecked_count
+      last_stats.total_rechecked_count
+      (fun () -> SharedMem.collect `aggressive);
+    let t = Unix.gettimeofday () in
+    if Float.(t -. env.last_idle_job_time > 0.5) then
+      let env = ServerIdle.go env in
+      { env with last_idle_job_time = t }
+    else
+      env
+  | _ -> env
+
 let serve_one_iteration genv env client_provider =
   let (env, recheck_id) = generate_and_update_recheck_id env in
   ServerMonitorUtils.exit_if_parent_dead ();
@@ -546,28 +569,7 @@ let serve_one_iteration genv env client_provider =
       else
         "HackIDE:active"
     | _ -> "working");
-  let env =
-    match selected_client with
-    | ClientProvider.Select_nothing ->
-      let last_stats = env.last_recheck_loop_stats in
-      (* Ugly hack: We want GC_SHAREDMEM_RAN to record the last rechecked
-       * count so that we can figure out if the largest reclamations
-       * correspond to massive rebases. However, the logging call is done in
-       * the SharedMem module, which doesn't know anything about Server stuff.
-       * So we wrap the call here. *)
-      HackEventLogger.with_rechecked_stats
-        (List.length last_stats.per_batch_telemetry)
-        last_stats.rechecked_count
-        last_stats.total_rechecked_count
-        (fun () -> SharedMem.collect `aggressive);
-      let t = Unix.gettimeofday () in
-      if Float.(t -. env.last_idle_job_time > 0.5) then
-        let env = ServerIdle.go env in
-        { env with last_idle_job_time = t }
-      else
-        env
-    | _ -> env
-  in
+  let env = idle_if_no_client env selected_client in
   let stage =
     if Option.is_some env.init_env.why_needed_full_init then
       `Init
@@ -778,6 +780,8 @@ let watchman_interrupt_handler genv : env MultiThreadedCall.interrupt_handler =
   ) else
     (env, MultiThreadedCall.Continue)
 
+(** Handler for events on the priority socket, which is used priority commands which
+    must be served immediately. *)
 let priority_client_interrupt_handler genv client_provider :
     env MultiThreadedCall.interrupt_handler =
  fun env ->
@@ -1420,13 +1424,24 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   CgroupProfiler.print_summary_memory_table ~event:`Init;
   serve genv env in_fds
 
+type params = {
+  informant_managed: bool;
+  state: ServerGlobalState.t;
+  options: ServerArgs.options;
+  monitor_pid: int;
+  priority_in_fd: Unix.file_descr;
+  force_dormant_start_only_in_fd: Unix.file_descr;
+}
+
 let daemon_main
-    ( informant_managed,
-      state,
-      options,
-      monitor_pid,
-      priority_in_fd,
-      force_dormant_start_only_in_fd )
+    {
+      informant_managed;
+      state;
+      options;
+      monitor_pid;
+      priority_in_fd;
+      force_dormant_start_only_in_fd;
+    }
     (default_ic, _default_oc) =
   (* Avoid leaking this fd further *)
   let () = Unix.set_close_on_exec priority_in_fd in

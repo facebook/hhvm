@@ -12,8 +12,16 @@ open ServerCommandTypes
 
 exception Client_went_away
 
-(** default pipe, priority pipe, force formant start only pipe *)
-type t = Unix.file_descr * Unix.file_descr * Unix.file_descr
+type t = {
+  default_in_fd: Unix.file_descr;
+      (** Default pipe. Used for non time sensitive commands and IDE connections. *)
+  priority_in_fd: Unix.file_descr;
+      (** Priority pipe.
+          There's a handler for events happening on this pipe which will interrupt the typing service.
+          In practice this is used for commands that can be served immediately. *)
+  force_dormant_start_only_in_fd: Unix.file_descr;
+      (** Force formant start only pipe, used to perform the --force-dormant-start command. *)
+}
 
 type priority =
   | Priority_high
@@ -67,7 +75,9 @@ end = struct
   let get () = !persistent_client
 end
 
-let provider_from_file_descriptors x = x
+let provider_from_file_descriptors
+    (default_in_fd, priority_in_fd, force_dormant_start_only_in_fd) =
+  { default_in_fd; priority_in_fd; force_dormant_start_only_in_fd }
 
 let provider_for_test () = failwith "for use in tests only"
 
@@ -130,18 +140,19 @@ type select_outcome =
     Select what client to serve next and call
     retrieve channels to client from monitor process. *)
 let sleep_and_check
-    ((default_in_fd, priority_in_fd, force_dormant_start_only) :
-      Unix.file_descr * Unix.file_descr * Unix.file_descr)
+    ({ default_in_fd; priority_in_fd; force_dormant_start_only_in_fd } : t)
     (persistent_client_opt : client option)
     ~(ide_idle : bool)
     ~(idle_gc_slice : int)
     (kind : [< `Any | `Force_dormant_start_only | `Priority ]) : select_outcome
     =
   let t_sleep_and_check = Unix.gettimeofday () in
-  let in_fds = [default_in_fd; priority_in_fd; force_dormant_start_only] in
+  let in_fds =
+    [default_in_fd; priority_in_fd; force_dormant_start_only_in_fd]
+  in
   let fd_l =
     match (kind, persistent_client_opt) with
-    | (`Force_dormant_start_only, _) -> [force_dormant_start_only]
+    | (`Force_dormant_start_only, _) -> [force_dormant_start_only_in_fd]
     | (`Priority, _) -> [priority_in_fd]
     | (`Any, Some (Persistent_client { fd; _ })) ->
       (* If we are not sure that there are no more IDE commands, do not even
@@ -182,11 +193,12 @@ let sleep_and_check
            default_in_fd
            t_sleep_and_check
            t_monitor_fd_ready)
-    else if List.mem ~equal:Poly.( = ) ready_fd_l force_dormant_start_only then
+    else if List.mem ~equal:Poly.( = ) ready_fd_l force_dormant_start_only_in_fd
+    then
       Select_new
         (accept_client
            Priority_dormant
-           force_dormant_start_only
+           force_dormant_start_only_in_fd
            t_sleep_and_check
            t_monitor_fd_ready)
     else if List.is_empty ready_fd_l then
@@ -214,7 +226,7 @@ let has_persistent_connection_request = function
     not (List.is_empty ready)
   | _ -> false
 
-let priority_fd (_, x, _) = Some x
+let priority_fd { priority_in_fd; _ } = Some priority_in_fd
 
 let get_client_fd = function
   | Persistent_client { fd; _ } -> Some fd

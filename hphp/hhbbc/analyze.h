@@ -126,7 +126,7 @@ struct FuncAnalysisResult {
   /*
    * Vector of block updates
    */
-  CompactVector<std::pair<BlockId, BlockUpdateInfo>> blockUpdates;
+  CompactVector<std::pair<BlockId, CompressedBlockUpdate>> blockUpdates;
 };
 
 struct FuncAnalysis : FuncAnalysisResult {

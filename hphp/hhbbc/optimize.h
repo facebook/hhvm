@@ -26,7 +26,7 @@ struct FuncAnalysis;
 struct Bytecode;
 struct BlockUpdateInfo;
 
-using BlockUpdates = CompactVector<std::pair<BlockId, BlockUpdateInfo>>;
+using BlockUpdates = CompactVector<std::pair<BlockId, CompressedBlockUpdate>>;
 
 /*
  * Use information from an analyze call to perform various

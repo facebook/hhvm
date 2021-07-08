@@ -835,7 +835,11 @@ void optimize_func(const Index& index, FuncAnalysis&& ainfo,
 
 void update_bytecode(php::WideFunc& func, BlockUpdates&& blockUpdates,
                      FuncAnalysis* ainfo) {
-  for (auto& ent : blockUpdates) {
+  for (auto& compressed : blockUpdates) {
+    std::pair<BlockId, BlockUpdateInfo> ent;
+    ent.first = compressed.first;
+    compressed.second.expand(ent.second);
+
     auto blk = func.blocks()[ent.first].mutate();
     auto const srcLoc = blk->hhbcs.front().srcLoc;
     if (!ent.second.unchangedBcs) {

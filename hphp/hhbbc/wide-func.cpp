@@ -16,6 +16,7 @@
 #include "hphp/hhbbc/wide-func.h"
 
 #include "hphp/hhbbc/bc.h"
+#include "hphp/hhbbc/interp.h"
 #include "hphp/util/trace.h"
 
 #ifdef __GNUG__
@@ -68,6 +69,9 @@ std::string name(const std::type_info& type) {
 #endif // _GNUG_
 }
 
+BytecodeVec decodeBytecodeVec(const Buffer& buffer, size_t& pos);
+void encodeBytecodeVec(Buffer& buffer, const BytecodeVec& bcs);
+
 //////////////////////////////////////////////////////////////////////
 
 template <typename T>
@@ -86,6 +90,14 @@ T decode(const Buffer& buffer, size_t& pos) {
   assertx(pos < buffer.size());
   ITRACE(5, "at {}: {}\n", pos, name(typeid(T)));
   Trace::Indent _;
+
+  if constexpr (std::is_same<T, BlockUpdateInfo>::value) {
+    T result;
+    result.fallthrough  = DECODE_MEMBER(fallthrough);
+    result.unchangedBcs = DECODE_MEMBER(unchangedBcs);
+    result.replacedBcs  = decodeBytecodeVec(buffer, pos);
+    return result;
+  }
 
   if constexpr (std::is_same<T, FCallArgs>::value) {
     using FCA = FCallArgsBase;
@@ -205,7 +217,12 @@ void encode(Buffer& buffer, const T& data) {
   ITRACE(5, "at {}: {}\n", buffer.size(), name(typeid(T)));
   Trace::Indent _;
 
-  if constexpr (std::is_same<T, FCallArgs>::value) {
+  if constexpr (std::is_same<T, BlockUpdateInfo>::value) {
+    encode(buffer, data.fallthrough);
+    encode(buffer, data.unchangedBcs);
+    encodeBytecodeVec(buffer, data.replacedBcs);
+
+  } else if constexpr (std::is_same<T, FCallArgs>::value) {
     auto base = data.base();
     if (data.enforceInOut()) {
       auto const flags = base.flags | FCallArgsBase::EnforceInOut;
@@ -518,4 +535,24 @@ void WideFunc::release() {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}
+
+//////////////////////////////////////////////////////////////////////
+
+CompressedBlockUpdate::CompressedBlockUpdate(BlockUpdateInfo&& in) {
+  php::encode(raw, in);
+  in = {};
+}
+
+void CompressedBlockUpdate::expand(BlockUpdateInfo& out) {
+  assertx(!raw.empty());
+  auto pos = size_t{0};
+  auto result = php::decode<BlockUpdateInfo>(raw, pos);
+  assertx(pos == raw.size());
+  out = std::move(result);
+  raw.clear();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}}

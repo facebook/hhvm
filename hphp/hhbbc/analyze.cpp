@@ -395,7 +395,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
       if (flags.updateInfo.replacedBcs.size() ||
           flags.updateInfo.unchangedBcs != blk->hhbcs.size() ||
           flags.updateInfo.fallthrough != blk->fallthrough) {
-        blockUpdates[bid] = flags.updateInfo;
+        blockUpdates[bid] = std::move(flags.updateInfo);
       } else {
         blockUpdates.erase(bid);
       }

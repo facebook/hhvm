@@ -7,7 +7,8 @@
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        td_constraint = None;
-       td_type = (Rhint ([3:26-27]), (Tgeneric ("T", []))) }));
+       td_type = (Rhint ([3:26-27]), (Tgeneric ("T", []))); td_is_ctx = false
+       }));
   ("\\:Foo",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;

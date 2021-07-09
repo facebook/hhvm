@@ -58,7 +58,7 @@
     (Shallow_decl_defs.Typedef
        { Typing_defs.td_module = (Some "here"); td_pos = [15:6-12];
          td_vis = Transparent; td_tparams = []; td_constraint = None;
-         td_type = (Rhint ([15:15-18]), (Tprim Tint)) }));
+         td_type = (Rhint ([15:15-18]), (Tprim Tint)); td_is_ctx = false }));
    ("\\E",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -96,5 +96,5 @@
     (Shallow_decl_defs.Typedef
        { Typing_defs.td_module = (Some "here"); td_pos = [23:9-13];
          td_vis = Opaque; td_tparams = []; td_constraint = None;
-         td_type = (Rhint ([23:16-22]), (Tprim Tstring)) }))
+         td_type = (Rhint ([23:16-22]), (Tprim Tstring)); td_is_ctx = false }))
    ]

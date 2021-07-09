@@ -6,8 +6,8 @@
        (Rhint ([3:19-33]),
         (Ttuple
            [(Rhint ([3:20-25]), (Tprim Tfloat));
-             (Rhint ([3:27-32]), (Tprim Tfloat))]))
-       }));
+             (Rhint ([3:27-32]), (Tprim Tfloat))]));
+       td_is_ctx = false }));
   ("\\takes_tuple",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;

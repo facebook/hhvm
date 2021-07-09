@@ -92,7 +92,7 @@
       { Typing_defs.td_module = None; td_pos = [9:9-10]; td_vis = Opaque;
         td_tparams = [];
         td_constraint = (Some (Rhint ([9:14-22]), (Tprim Tarraykey)));
-        td_type = (Rhint ([9:25-28]), (Tprim Tint)) }));
+        td_type = (Rhint ([9:25-28]), (Tprim Tint)); td_is_ctx = false }));
   ("\\D",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;

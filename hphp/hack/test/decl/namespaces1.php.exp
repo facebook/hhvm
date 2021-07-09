@@ -2,7 +2,7 @@
   (Shallow_decl_defs.Typedef
      { Typing_defs.td_module = None; td_pos = [4:8-32]; td_vis = Transparent;
        td_tparams = []; td_constraint = None;
-       td_type = (Rhint ([4:35-41]), (Tprim Tstring)) }));
+       td_type = (Rhint ([4:35-41]), (Tprim Tstring)); td_is_ctx = false }));
   ("\\MyClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -19,7 +19,7 @@
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [9:8-23];
         td_vis = Transparent; td_tparams = []; td_constraint = None;
-        td_type = (Rhint ([9:26-32]), (Tprim Tstring)) }));
+        td_type = (Rhint ([9:26-32]), (Tprim Tstring)); td_is_ctx = false }));
   ("\\MyNamespace\\MyClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;

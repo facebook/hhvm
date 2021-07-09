@@ -2948,11 +2948,68 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             tparams,
             constraint,
             type_: ty,
+            is_ctx: false,
         });
 
         self.add_typedef(name, typedef);
 
         Node::Ignored(SK::AliasDeclaration)
+    }
+
+    fn make_context_alias_declaration(
+        &mut self,
+        attributes: Self::R,
+        _keyword: Self::R,
+        name: Self::R,
+        generic_params: Self::R,
+        constraint: Self::R,
+        _equal: Self::R,
+        ctx_list: Self::R,
+        _semicolon: Self::R,
+    ) -> Self::R {
+        if name.is_ignored() {
+            return Node::Ignored(SK::ContextAliasDeclaration);
+        }
+        let Id(pos, name) = match self.elaborate_defined_id(name) {
+            Some(id) => id,
+            None => return Node::Ignored(SK::ContextAliasDeclaration),
+        };
+        let ty = match self.node_to_ty(ctx_list) {
+            Some(ty) => ty,
+            None => return Node::Ignored(SK::ContextAliasDeclaration),
+        };
+
+        // lowerer ensures there is only one as constraint
+        let mut as_constraint = None;
+        for c in constraint.iter() {
+            if let Node::ContextConstraint(&(kind, hint)) = c {
+                let ty = self.node_to_ty(hint);
+                match kind {
+                    ConstraintKind::ConstraintAs => as_constraint = ty,
+                    _ => {}
+                }
+            }
+        }
+        // Pop the type params stack only after creating all inner types.
+        let tparams = self.pop_type_params(generic_params);
+        let parsed_attributes = self.to_attributes(attributes);
+        let typedef = self.alloc(TypedefType {
+            module: parsed_attributes.module,
+            pos,
+            vis: if parsed_attributes.internal {
+                aast::TypedefVisibility::Tinternal
+            } else {
+                aast::TypedefVisibility::Opaque
+            },
+            tparams,
+            constraint: as_constraint,
+            type_: ty,
+            is_ctx: true,
+        });
+
+        self.add_typedef(name, typedef);
+
+        Node::Ignored(SK::ContextAliasDeclaration)
     }
 
     fn make_type_constraint(&mut self, kind: Self::R, value: Self::R) -> Self::R {
@@ -3240,7 +3297,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                         // "\\HH\\Contexts\\cipp" rather than
                         // "\\HH\\Contexts\\Unsafe\\cipp").
                         let name = match name.trim_end_matches('\\').split('\\').next_back() {
-                            Some(name) => self.concat("\\HH\\Contexts\\", name),
+                            Some(ctxname) => {
+                                if let Some(first_char) = ctxname.chars().nth(0) {
+                                    if first_char.is_lowercase() {
+                                        self.concat("\\HH\\Contexts\\", ctxname)
+                                    } else {
+                                        name
+                                    }
+                                } else {
+                                    name
+                                }
+                            }
                             None => name,
                         };
                         Some(self.alloc(Ty(ty.0, Ty_::Tapply(self.alloc(((pos, name), targs))))))

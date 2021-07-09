@@ -196,7 +196,7 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     t_vis = td_vis;
     t_span = _;
     t_emit_id = _;
-    t_is_ctx = _;
+    t_is_ctx = td_is_ctx;
   } =
     tdef
   in
@@ -215,7 +215,7 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     else
       td_vis
   in
-  { td_module; td_vis; td_tparams; td_constraint; td_type; td_pos }
+  { td_module; td_vis; td_tparams; td_constraint; td_type; td_pos; td_is_ctx }
 
 let typedef_naming_and_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     string * Typing_defs.typedef_type =

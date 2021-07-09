@@ -11,8 +11,8 @@
              (Typing_defs_core.TSFlit_str ([3:39-42], "y")) ->
              { sft_optional = false;
                sft_ty = (Rhint ([3:46-51]), (Tprim Tfloat)) } }
-           )))
-       }));
+           )));
+       td_is_ctx = false }));
   ("\\takes_shape",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -168,8 +168,8 @@
               (Typing_defs_core.TSFlit_str ([20:10-15], "tag")) ->
               { sft_optional = true;
                 sft_ty = (Rhint ([20:19-25]), (Tprim Tstring)) } }
-            )))
-        }))
+            )));
+        td_is_ctx = false }))
   ]
 
 They matched!

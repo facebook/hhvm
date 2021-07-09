@@ -1713,8 +1713,15 @@ end
 
 module PrintTypedef = struct
   let typedef ctx = function
-    | { td_pos; td_module = _; td_vis = _; td_tparams; td_constraint; td_type }
-      ->
+    | {
+        td_pos;
+        td_module = _;
+        td_vis = _;
+        td_tparams;
+        td_constraint;
+        td_type;
+        td_is_ctx;
+      } ->
       let tparaml_s = PrintClass.tparam_list ctx td_tparams in
       let constr_s =
         match td_constraint with
@@ -1723,6 +1730,7 @@ module PrintTypedef = struct
       in
       let ty_s = Full.to_string_decl ctx td_type in
       let pos_s = PrintClass.pos_or_decl td_pos in
+      let is_ctx_s = Bool.to_string td_is_ctx in
       "ty: "
       ^ ty_s
       ^ "\n"
@@ -1734,6 +1742,9 @@ module PrintTypedef = struct
       ^ "\n"
       ^ "pos: "
       ^ pos_s
+      ^ "\n"
+      ^ "is_ctx: "
+      ^ is_ctx_s
       ^ "\n"
       ^ ""
 end

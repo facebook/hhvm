@@ -4,8 +4,8 @@
        td_tparams = []; td_constraint = None;
        td_type =
        (Rhint ([3:20-50]),
-        (Tapply (([3:20-50], "\\HH\\Capabilities\\WriteProperty"), [])))
-       }));
+        (Tapply (([3:20-50], "\\HH\\Capabilities\\WriteProperty"), [])));
+       td_is_ctx = false }));
   ("\\A",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;

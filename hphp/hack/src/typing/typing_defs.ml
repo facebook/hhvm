@@ -218,6 +218,7 @@ type typedef_type = {
   td_tparams: decl_tparam list;
   td_constraint: decl_ty option;
   td_type: decl_ty;
+  td_is_ctx: bool;
 }
 [@@deriving show]
 

@@ -23,8 +23,8 @@
                 (Tapply (([6:15-24], "\\HH\\classname"),
                    [(Rhint ([6:25-26]), (Tapply (([6:25-26], "\\C"), [])))])))
                } }
-           )))
-       }))
+           )));
+       td_is_ctx = false }))
   ]
 
 They matched!

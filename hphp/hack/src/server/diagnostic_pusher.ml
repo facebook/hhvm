@@ -196,19 +196,44 @@ end = struct
       in the IDE does not exceed [error_limit]. This partitions the errors as
       a set of errors we can push now and the remainder of the errors. *)
   let truncate :
-      ErrorMap.t -> errors_in_ide:ErrorMap.t -> ErrorMap.t * ErrorMap.t =
-   fun to_push_candidates ~errors_in_ide ->
+      ErrorMap.t ->
+      errors_in_ide:ErrorMap.t ->
+      priority_files:Relative_path.Set.t option ->
+      ErrorMap.t * ErrorMap.t =
+   fun to_push_candidates ~errors_in_ide ~priority_files ->
     let error_count_in_ide = error_count_in_file_map errors_in_ide in
-    (* First push errors in files which already have errors *)
+    let to_push = FileMap.empty in
+    (* First push errors in prority files, regardless of error limit. *)
+    let (to_push, to_push_candidates, error_count_in_ide) =
+      Relative_path.Set.fold
+        (priority_files |> Option.value ~default:Relative_path.Set.empty)
+        ~init:(to_push, to_push_candidates, error_count_in_ide)
+        ~f:(fun file (to_push, to_push_candidates, error_count_in_ide) ->
+          match FileMap.find_opt to_push_candidates file with
+          | None -> (to_push, to_push_candidates, error_count_in_ide)
+          | Some phase_map ->
+            let to_push = FileMap.add to_push ~key:file ~data:phase_map in
+            let to_push_candidates = FileMap.remove to_push_candidates file in
+            let error_count_in_ide =
+              let error_count = error_count_in_phase_map phase_map in
+              let error_count_before =
+                FileMap.find_opt errors_in_ide file
+                >>| error_count_in_phase_map
+                |> Option.value ~default:0
+              in
+              error_count_in_ide + error_count - error_count_before
+            in
+            (to_push, to_push_candidates, error_count_in_ide))
+    in
+    (* Then push errors in files which already have errors *)
     let (to_push, to_push_candidates, error_count_in_ide) =
       FileMap.fold
         to_push_candidates
-        ~init:(FileMap.empty, FileMap.empty, error_count_in_ide)
+        ~init:(to_push, FileMap.empty, error_count_in_ide)
         ~f:(fun file
                 phase_map
                 (to_push, to_push_candidates, error_count_in_ide)
                 ->
-          let error_count = error_count_in_phase_map phase_map in
           match FileMap.find_opt errors_in_ide file with
           | None ->
             (* Let's consider it again later. *)
@@ -217,6 +242,7 @@ end = struct
             in
             (to_push, to_push_candidates, error_count_in_ide)
           | Some errors_in_ide ->
+            let error_count = error_count_in_phase_map phase_map in
             let error_count_before = error_count_in_phase_map errors_in_ide in
             if
               error_count_in_ide + error_count - error_count_before
@@ -299,7 +325,9 @@ end = struct
     let to_push = erase_errors to_push ~errors_in_ide ~rechecked ~phase in
     (* Separate errors we'll push now vs. errors we won't push yet
      * because they are beyond the error limit *)
-    let (to_push, errors_beyond_limit) = truncate to_push ~errors_in_ide in
+    let (to_push, errors_beyond_limit) =
+      truncate to_push ~errors_in_ide ~priority_files:None
+    in
     let to_push_absolute = to_diagnostic_errors to_push in
     ({ errors_in_ide; to_push; errors_beyond_limit }, to_push_absolute)
 

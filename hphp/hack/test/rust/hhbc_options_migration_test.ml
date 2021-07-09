@@ -61,8 +61,8 @@ let assert_opts_equal caml rust =
     Hhbc_options.(fold_lazy_class_keys caml)
     Hhbc_options.(fold_lazy_class_keys rust);
   assert_equal
-    Hhbc_options.(rx_is_enabled caml)
-    Hhbc_options.(rx_is_enabled rust);
+    Hhbc_options.(enable_implicit_context caml)
+    Hhbc_options.(enable_implicit_context rust);
   assert_equal
     Hhbc_options.(disable_lval_as_an_expression caml)
     Hhbc_options.(disable_lval_as_an_expression rust);
@@ -218,13 +218,13 @@ let test_json_configs_stackable _ =
         "
   {
      \"hhvm.hack.lang.disallow_hash_comments\": { \"global_value\": \"1\" },
-     \"hhvm.rx_is_enabled\": { \"global_value\": \"0\" }
+     \"hhvm.enable_implicit_context\": { \"global_value\": \"0\" }
   }
       ";
         "
   {
      \"hhvm.hack.lang.disable_xhp_element_mangling\": { \"global_value\": \"1\" },
-     \"hhvm.rx_is_enabled\": { \"global_value\": \"1\" }
+     \"hhvm.enable_implicit_context\": { \"global_value\": \"1\" }
   }
       ";
       ]
@@ -238,7 +238,7 @@ let test_json_configs_stackable _ =
   assert_equal true Hhbc_options.(disable_xhp_element_mangling caml_opts);
 
   (* set to 0 in the first JSON, then to 1 in the second JSON; so it's 1 now *)
-  assert_equal true Hhbc_options.(rx_is_enabled caml_opts);
+  assert_equal true Hhbc_options.(enable_implicit_context caml_opts);
 
   (* Verify Rust implementation behind FFI gives the same results *)
   let rust_opts = Hhbc_options.from_configs_rust ~jsons ~args:[] in
@@ -249,8 +249,8 @@ let test_json_configs_stackable _ =
     Hhbc_options.(disable_xhp_element_mangling caml_opts)
     Hhbc_options.(disable_xhp_element_mangling rust_opts);
   assert_equal
-    Hhbc_options.(rx_is_enabled caml_opts)
-    Hhbc_options.(rx_is_enabled rust_opts);
+    Hhbc_options.(enable_implicit_context caml_opts)
+    Hhbc_options.(enable_implicit_context rust_opts);
   ()
 
 let test_no_overrides _ =
@@ -368,7 +368,7 @@ let test_all_overrides_json_only _ =
   \"hhvm.php7.uvs\": {
     \"global_value\": true
   },
-  \"hhvm.rx_is_enabled\": {
+  \"hhvm.enable_implicit_context\": {
     \"global_value\": true
   },
   \"hhvm.server.include_search_paths\": {
@@ -482,7 +482,7 @@ module CliArgOverrides = struct
   let hhvm'hack'lang'disallow_inst_meth =
     "-vhhvm.hack.lang.disallow_inst_meth=true"
 
-  let hhvm'rx_is_enabled = "-vhhvm.rx_is_enabled=2"
+  let hhvm'enable_implicit_context = "-vhhvm.enable_implicit_context=true"
 
   (* let hhvm'server'include_search_paths = "UNSUPPORTED BY CLI" *)
 end
@@ -527,7 +527,7 @@ let test_all_overrides_cli_only _ =
       hhvm'log_extern_compiler_perf;
       hhvm'php7'ltr_assign;
       hhvm'php7'uvs;
-      hhvm'rx_is_enabled;
+      hhvm'enable_implicit_context;
       (* hhvm'server'include_search_paths; *)
       hhvm'hack'lang'const_default_lambda_args;
       hhvm'hack'lang'disallow_hash_comments;

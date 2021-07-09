@@ -1197,7 +1197,6 @@ struct RuntimeOption {
   F(bool, NoticeOnImplicitInvokeToString, false)                        \
   F(bool, FatalOnConvertObjectToString, false)                          \
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \
-  F(bool, RxPretendIsEnabled, false)                                    \
   /* Raise warning when class pointers are used as strings. */          \
   F(bool, RaiseClassConversionWarning, false)                           \
   F(bool, EmitClsMethPointers, true)                                    \
@@ -1284,7 +1283,6 @@ struct RuntimeOption {
    */                                                                   \
   F(int32_t, RxVerifyBody, 0)                                           \
   F(int32_t, PureVerifyBody, 0)                                         \
-  F(bool, RxIsEnabled, EvalRxPretendIsEnabled)                          \
   /*                                                                    \
    * Controls behavior on reflection to default value expressions       \
    * that throw during evaluation                                       \

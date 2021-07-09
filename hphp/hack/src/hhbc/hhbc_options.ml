@@ -32,7 +32,7 @@ type t = {
   option_emit_meth_caller_func_pointers: bool;
   option_emit_class_pointers: int;
   option_fold_lazy_class_keys: bool;
-  option_rx_is_enabled: bool;
+  option_enable_implicit_context: bool;
   option_disable_lval_as_an_expression: bool;
   option_array_provenance: bool;
   option_enable_class_level_where_clauses: bool;
@@ -84,7 +84,7 @@ let default =
     option_emit_meth_caller_func_pointers = true;
     option_emit_class_pointers = 0;
     option_fold_lazy_class_keys = true;
-    option_rx_is_enabled = false;
+    option_enable_implicit_context = false;
     option_disable_lval_as_an_expression = false;
     option_array_provenance = false;
     option_enable_class_level_where_clauses = false;
@@ -152,7 +152,7 @@ let emit_class_pointers o = o.option_emit_class_pointers
 
 let fold_lazy_class_keys o = o.option_fold_lazy_class_keys
 
-let rx_is_enabled o = o.option_rx_is_enabled
+let enable_implicit_context o = o.option_enable_implicit_context
 
 let disable_lval_as_an_expression o = o.option_disable_lval_as_an_expression
 
@@ -248,7 +248,7 @@ let to_string o =
       @@ emit_meth_caller_func_pointers o;
       Printf.sprintf "emit_class_pointers: %d" @@ emit_class_pointers o;
       Printf.sprintf "fold_lazy_class_keys: %B" @@ fold_lazy_class_keys o;
-      Printf.sprintf "rx_is_enabled: %B" @@ rx_is_enabled o;
+      Printf.sprintf "enable_implicit_context: %B" @@ enable_implicit_context o;
       Printf.sprintf "disable_lval_as_an_expression: %B"
       @@ disable_lval_as_an_expression o;
       Printf.sprintf "array_provenance: %B" @@ array_provenance o;
@@ -335,8 +335,8 @@ let set_option options name value =
     { options with option_emit_class_pointers = int_of_string value }
   | "hhvm.fold_lazy_class_keys" ->
     { options with option_fold_lazy_class_keys = as_bool value }
-  | "hhvm.rx_is_enabled" ->
-    { options with option_rx_is_enabled = int_of_string value > 0 }
+  | "hhvm.enable_implicit_context" ->
+    { options with option_enable_implicit_context = as_bool value }
   | "hack.lang.disable_lval_as_an_expression" ->
     { options with option_disable_lval_as_an_expression = as_bool value }
   | "hhvm.array_provenance" ->
@@ -512,8 +512,8 @@ let value_setters =
     @@ fun opts v -> { opts with option_emit_class_pointers = v } );
     ( set_value "hhvm.fold_lazy_class_keys" get_value_from_config_int
     @@ fun opts v -> { opts with option_fold_lazy_class_keys = v = 1 } );
-    ( set_value "hhvm.rx_is_enabled" get_value_from_config_int @@ fun opts v ->
-      { opts with option_rx_is_enabled = v = 1 } );
+    ( set_value "hhvm.enable_implicit_context" get_value_from_config_int
+    @@ fun opts v -> { opts with option_enable_implicit_context = v = 1 } );
     ( set_value "hhvm.array_provenance" get_value_from_config_int
     @@ fun opts v -> { opts with option_array_provenance = v = 1 } );
     ( set_value

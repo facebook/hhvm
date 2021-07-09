@@ -85,7 +85,7 @@ bitflags! {
         // No longer using bit 9.
         const EMIT_CLS_METH_POINTERS=1 << 10;
         const EMIT_METH_CALLER_FUNC_POINTERS=1 << 11;
-        const RX_IS_ENABLED=1 << 12;
+        const ENABLE_IMPLICIT_CONTEXT=1 << 12;
         const ARRAY_PROVENANCE=1 << 13;
         // No longer using bit 14.
         const FOLD_LAZY_CLASS_KEYS=1 << 15;
@@ -165,8 +165,8 @@ impl HHBCFlags {
         if self.contains(HHBCFlags::LOG_EXTERN_COMPILER_PERF) {
             f |= HhvmFlags::LOG_EXTERN_COMPILER_PERF;
         }
-        if self.contains(HHBCFlags::RX_IS_ENABLED) {
-            f |= HhvmFlags::RX_IS_ENABLED;
+        if self.contains(HHBCFlags::ENABLE_IMPLICIT_CONTEXT) {
+            f |= HhvmFlags::ENABLE_IMPLICIT_CONTEXT;
         }
         f
     }

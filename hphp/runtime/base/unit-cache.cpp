@@ -1339,7 +1339,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::RepoDebugInfo ? '1' : '0')
     + std::to_string(RuntimeOption::CheckIntOverflow)
     + (RuntimeOption::DisableNontoplevelDeclarations ? '1' : '0')
-    + (RuntimeOption::EvalRxIsEnabled ? '1' : '0')
+    + (RuntimeOption::EvalEnableImplicitContext ? '1' : '0')
     + (RuntimeOption::EvalEmitClsMethPointers ? '1' : '0')
     + (RuntimeOption::EvalIsVecNotices ? '1' : '0')
     + (RuntimeOption::EvalIsCompatibleClsMethType ? '1' : '0')

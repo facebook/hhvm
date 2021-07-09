@@ -24,14 +24,22 @@ patch you specified.
 
 ```
 THRIFTC=/tmp/scratch/installed/fbthrift/bin/thriftq
-cd third-party/thrift/gen/thrift/lib/thrift
-rm -rf gen-cpp2
-SRC_DIR=../../../../src/thrift/lib/thrift
-$THRIFTC --gen mstch_cpp2:templates,no_metadata -I $SRC_DIR $SRC_DIR/reflection.thrift
-$THRIFTC --gen mstch_cpp2 -I $SRC_DIR $SRC_DIR/metadata.thrift
-$THRIFTC --gen mstch_cpp2 -I $SRC_DIR $SRC_DIR/frozen.thrift
-$THRIFTC --gen mstch_cpp2:json,no_metadata -I $SRC_DIR $SRC_DIR/RpcMetadata.thrift
-$THRIFTC --gen mstch_cpp2:no_metadata -I $SRC_DIR $SRC_DIR/RocketUpgrade.thrift
+cd third-party/thrift/src
+SRC_DIR=thrift/lib/thrift
+OUT_DIR=$(pwd)/../gen/$SRC_DIR
+rm -rf $OUT_DIR
+mkdir -p $OUT_DIR
+cd $SRC_DIR
+$THRIFTC --gen mstch_cpp2:templates,no_metadata -I $SRC_DIR \
+  -o $OUT_DIR reflection.thrift
+$THRIFTC --gen mstch_cpp2 -I $SRC_DIR \
+  -o $OUT_DIR metadata.thrift
+$THRIFTC --gen mstch_cpp2 -I $SRC_DIR \
+  -o $OUT_DIR frozen.thrift
+$THRIFTC --gen mstch_cpp2:json,no_metadata -I $SRC_DIR \
+  -o $OUT_DIR RpcMetadata.thrift
+$THRIFTC --gen mstch_cpp2:no_metadata -I $SRC_DIR \
+  -o $OUT_DIR RocketUpgrade.thrift
 git status # Check the results look reasonable
 ```
 

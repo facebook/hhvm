@@ -17,6 +17,9 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   SOURCE_HASH
   "SHA512=67cc99a8896719fc45493c53c92a1307cb4999aa725f4e9fb8c17f255353dab0fe2c681a045c52995ff3b56b4881a373838408491672a45cde053d3851db69d7"
 )
+
+get_target_property(BOOST_INCLUDE_DIR boost INTERFACE_INCLUDE_DIRECTORIES)
+
 ExternalProject_Add(
   bundled_fbmysqlclient
   ${FB_MYSQL_DOWNLOAD_ARGS}
@@ -34,6 +37,7 @@ ExternalProject_Add(
   -DOPENSSL_LIBRARY=${OPENSSL_SSL_LIBRARY}
   -DCRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}
   -DMYSQL_UNIX_ADDR=${MYSQL_UNIX_SOCK_ADDR}
+  -DBOOST_INCLUDE_DIR=${BOOST_INCLUDE_DIR}
   -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
   -DCMAKE_INSTALL_INCLUDEDIR=include
   -DCMAKE_INSTALL_LIBDIR=lib
@@ -49,7 +53,7 @@ ExternalProject_Add(
 # TODO: re2 is also a dependency, but first it needs to be split into
 # re2 + re2Build -- otherwise putting them here would force
 # them to always be built, instead of using the system ones where available.
-set(DEPS lz4 zstd)
+set(DEPS boost lz4 zstd)
 add_dependencies(bundled_fbmysqlclient ${DEPS})
 
 # This extra indirection is needed because if the fbmysqlclient target links

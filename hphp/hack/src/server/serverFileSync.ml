@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-open File_content
 open Option.Monad_infix
 open ServerEnv
 
@@ -19,6 +18,7 @@ let get_file_content_from_disk path =
   let f () = Sys_utils.cat (Relative_path.to_absolute path) in
   Option.try_with f
 
+(** Get file content from File_provider or from disk. *)
 let get_file_content = function
   | ServerCommandTypes.FileContent s -> s
   | ServerCommandTypes.FileName path ->
@@ -143,16 +143,17 @@ let edit_file ~predeclare env path (edits : File_content.text_edit list) =
       let ctx = Provider_utils.ctx_from_server_env env in
       Decl.make_env ~sh:SharedMem.Uses ctx path );
     ServerBusyStatus.send env ServerCommandTypes.Needs_local_typecheck;
-    let fc =
+    let file_content =
       match File_provider.get path with
-      | Some (File_provider.Ide f) -> f
-      | Some (File_provider.Disk content) -> content
+      | Some (File_provider.Ide content)
+      | Some (File_provider.Disk content) ->
+        content
       | None ->
         (try Sys_utils.cat (Relative_path.to_absolute path) with _ -> "")
     in
-    let edited_fc =
-      match edit_file fc edits with
-      | Ok r -> r
+    let edited_file_content =
+      match File_content.edit_file file_content edits with
+      | Ok new_content -> new_content
       | Error (reason, _stack) ->
         Hh_logger.log "%s" reason;
 
@@ -161,7 +162,7 @@ let edit_file ~predeclare env path (edits : File_content.text_edit list) =
     in
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     File_provider.remove_batch (Relative_path.Set.singleton path);
-    File_provider.provide_file path (File_provider.Ide edited_fc);
+    File_provider.provide_file path (File_provider.Ide edited_file_content);
     let ide_needs_parsing = Relative_path.Set.add env.ide_needs_parsing path in
     let disk_needs_parsing =
       Relative_path.Set.add env.disk_needs_parsing path
@@ -185,6 +186,9 @@ let clear_sync_data env =
   in
   { env with persistent_client = None; diag_subscribe = None }
 
+(** Determine which files are different in the IDE and on disk.
+    This is achieved using File_provider for the IDE content and reading file from disk.
+    Returns a map from filename to a tuple of ide contents and disk contents. *)
 let get_unsaved_changes env =
   Relative_path.Set.fold
     env.editor_open_files

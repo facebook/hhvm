@@ -626,7 +626,11 @@ let possibly_push_new_errors_to_lsp_client :
                       None)
              |> Relative_path.Set.of_list
            in
-           Diagnostic_pusher.push_new_errors diag ~rechecked new_errors)
+           Diagnostic_pusher.push_new_errors
+             diag
+             ~rechecked
+             new_errors
+             ~phase:Errors.Typing)
   else
     diag
 

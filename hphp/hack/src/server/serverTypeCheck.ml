@@ -256,14 +256,44 @@ let get_files_with_stale_errors
 (* Parses the set of modified files *)
 (*****************************************************************************)
 
-let remove_failed_parsing_set fast ~stop_at_errors env failed_parsing =
+let push_errors env ~rechecked ~phase new_errors =
+  {
+    env with
+    diagnostic_pusher =
+      Diagnostic_pusher.push_new_errors
+        env.diagnostic_pusher
+        ~rechecked
+        new_errors
+        ~phase;
+  }
+
+let erase_errors env = push_errors env Errors.empty
+
+let push_and_accumulate_errors (env, errors_acc) ~rechecked new_errors ~phase =
+  let env = push_errors env new_errors ~rechecked ~phase in
+  let errors =
+    Errors.incremental_update ~old:errors_acc ~new_:new_errors ~rechecked phase
+  in
+  (env, errors)
+
+(** Remove files which failed parsing from [fast] files and
+    discard any previous errors they had in [omitted_phases] *)
+let wont_do_failed_parsing
+    fast ~stop_at_errors ~omitted_phases env failed_parsing =
   if stop_at_errors then
-    Relative_path.Set.filter fast ~f:(fun k ->
-        not
-        @@ Relative_path.(
-             Set.mem failed_parsing k && Set.mem env.editor_open_files k))
+    let env =
+      List.fold omitted_phases ~init:env ~f:(fun env phase ->
+          erase_errors env ~rechecked:failed_parsing ~phase)
+    in
+    let fast =
+      Relative_path.Set.filter fast ~f:(fun k ->
+          not
+          @@ Relative_path.(
+               Set.mem failed_parsing k && Set.mem env.editor_open_files k))
+    in
+    (env, fast)
   else
-    fast
+    (env, fast)
 
 let parsing genv env to_check ~stop_at_errors profiling =
   let (ide_files, disk_files) =
@@ -788,28 +818,23 @@ functor
         List.fold info.FileInfo.classes ~init:SSet.empty ~f:(fun acc (_, cid) ->
             SSet.add acc cid)
 
-    let clear_failed_parsing errors failed_parsing =
+    let clear_failed_parsing env errors failed_parsing =
       (* In most cases, set of files processed in a phase is a superset
        * of files from previous phase - i.e if we run decl on file A, we'll also
        * run its typing.
        * In few cases we might choose not to run further stages for files that
        * failed parsing (see ~stop_at_errors). We need to manually clear out
        * error lists for those files. *)
-      Relative_path.Set.fold failed_parsing ~init:errors ~f:(fun path acc ->
+      Relative_path.Set.fold
+        failed_parsing
+        ~init:(env, errors)
+        ~f:(fun path acc ->
           let path = Relative_path.Set.singleton path in
           List.fold_left
             Errors.[Naming; Decl; Typing]
             ~init:acc
-            ~f:
-              begin
-                fun acc phase ->
-                Errors.(
-                  incremental_update_set
-                    ~old:acc
-                    ~new_:empty
-                    ~rechecked:path
-                    phase)
-              end)
+            ~f:(fun acc phase ->
+              push_and_accumulate_errors acc ~rechecked:path Errors.empty ~phase))
 
     type parsing_result = {
       parse_errors: Errors.t;
@@ -820,6 +845,7 @@ functor
     let do_parsing
         (genv : genv)
         (env : env)
+        ~(errors : Errors.t)
         ~(files_to_parse : Relative_path.Set.t)
         ~(stop_at_errors : bool)
         ~(profiling : CgroupProfiler.Profiling.t) :
@@ -827,16 +853,14 @@ functor
       let (env, fast_parsed, errorl, failed_parsing) =
         parsing genv env files_to_parse ~stop_at_errors profiling
       in
-      let errors = env.errorl in
-      let errors =
-        Errors.(
-          incremental_update_set
-            ~old:errors
-            ~new_:errorl
-            ~rechecked:files_to_parse
-            Parsing)
+      let (env, errors) =
+        push_and_accumulate_errors
+          (env, errors)
+          errorl
+          ~rechecked:files_to_parse
+          ~phase:Errors.Parsing
       in
-      let errors = clear_failed_parsing errors failed_parsing in
+      let (env, errors) = clear_failed_parsing env errors failed_parsing in
       (env, { parse_errors = errors; failed_parsing; fast_parsed })
 
     type naming_result = {
@@ -858,13 +882,13 @@ functor
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"naming"
         @@ fun () ->
         let (errorl', failed_naming, fast) = declare_names env fast_parsed in
-        let errors =
-          Errors.(
-            incremental_update_map
-              ~old:errors
-              ~new_:errorl'
-              ~rechecked:fast
-              Naming)
+        let (env, errors) =
+          push_and_accumulate_errors
+            (env, errors)
+            errorl'
+            ~rechecked:
+              (fast |> Relative_path.Map.keys |> Relative_path.Set.of_list)
+            ~phase:Errors.Naming
         in
         (* failed_naming can be a superset of keys in fast - see comment in
          * Naming_global.ndecl_file *)
@@ -974,13 +998,15 @@ functor
           ~previously_oldified_defs:oldified_defs
           ~defs:fast_redecl_phase2_now
       in
-      let errors =
-        Errors.(
-          incremental_update_map
-            ~old:errors
-            ~new_:errorl'
-            ~rechecked:fast_redecl_phase2_now
-            Decl)
+      let (env, errors) =
+        push_and_accumulate_errors
+          (env, errors)
+          errorl'
+          ~rechecked:
+            ( fast_redecl_phase2_now
+            |> Relative_path.Map.keys
+            |> Relative_path.Set.of_list )
+          ~phase:Errors.Decl
       in
       let needs_phase2_redecl =
         diff_set_and_map_keys
@@ -1152,7 +1178,7 @@ functor
       in
       let errors =
         Errors.(
-          incremental_update_set
+          incremental_update
             ~old:errors
             ~new_:errorl'
             ~rechecked:files_to_check
@@ -1284,8 +1310,9 @@ functor
       let telemetry =
         Telemetry.duration telemetry ~key:"parse_start" ~start_time
       in
+      let errors = env.errorl in
       let (env, { parse_errors = errors; failed_parsing; fast_parsed }) =
-        do_parsing genv env ~files_to_parse ~stop_at_errors ~profiling
+        do_parsing genv env ~errors ~files_to_parse ~stop_at_errors ~profiling
       in
       let hs = SharedMem.heap_size () in
       let telemetry =
@@ -1640,10 +1667,11 @@ functor
           (Relative_path.Set.cardinal files_to_check)
           errors
       in
-      let files_to_check =
-        remove_failed_parsing_set
+      let (env, files_to_check) =
+        wont_do_failed_parsing
           files_to_check
           ~stop_at_errors
+          ~omitted_phases:[Errors.Typing]
           env
           failed_parsing
       in

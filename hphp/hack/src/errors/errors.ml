@@ -27,7 +27,23 @@ type phase =
   | Naming
   | Decl
   | Typing
-[@@deriving eq]
+[@@deriving eq, show, enum]
+
+let _ = max_phase
+
+let phases_up_to_excl : phase -> phase list =
+ fun phase ->
+  let range_incl_excl i j =
+    let rec aux n acc =
+      if n < i then
+        acc
+      else
+        aux (n - 1) (n :: acc)
+    in
+    aux (j - 1) []
+  in
+  range_incl_excl min_phase (phase_to_enum phase)
+  |> List.map ~f:(fun enum -> Option.value_exn (phase_of_enum enum))
 
 type severity =
   | Warning
@@ -68,18 +84,24 @@ let ignore_pos_outside_current_span : bool ref = ref false
 
 let allow_errors_in_default_path = ref true
 
-module PhaseMap = Reordered_argument_map (WrappedMap.Make (struct
-  type t = phase
+module PhaseMap = struct
+  include Reordered_argument_map (WrappedMap.Make (struct
+    type t = phase
 
-  let rank = function
-    | Init -> 0
-    | Parsing -> 1
-    | Naming -> 2
-    | Decl -> 3
-    | Typing -> 4
+    let rank = function
+      | Init -> 0
+      | Parsing -> 1
+      | Naming -> 2
+      | Decl -> 3
+      | Typing -> 4
 
-  let compare x y = rank x - rank y
-end))
+    let compare x y = rank x - rank y
+  end))
+
+  let pp pp_data = make_pp pp_phase pp_data
+
+  let show pp_data x = Format.asprintf "%a" (pp pp_data) x
+end
 
 (** Results of single file analysis. *)
 type 'a file_t = 'a list PhaseMap.t [@@deriving eq]
@@ -853,7 +875,18 @@ and incremental_update :
       else
         remove path phase acc)
 
-and incremental_update_set ~old ~new_ ~rechecked phase =
+and is_empty (err, _fixmes) = Relative_path.Map.is_empty err
+
+and count (err, _fixmes) =
+  files_t_fold err ~f:(fun _ _ x acc -> acc + List.length x) ~init:0
+
+and get_error_list (err, _fixmes) = files_t_to_list err
+
+and get_applied_fixmes (_err, fixmes) = files_t_to_list fixmes
+
+and from_error_list err = (list_to_files_t err, Relative_path.Map.empty)
+
+let incremental_update ~old ~new_ ~rechecked phase =
   let fold init g =
     Relative_path.Set.fold
       ~f:
@@ -867,32 +900,7 @@ and incremental_update_set ~old ~new_ ~rechecked phase =
   ( incremental_update (fst old) (fst new_) fold phase,
     incremental_update (snd old) (snd new_) fold phase )
 
-and incremental_update_map ~old ~new_ ~rechecked phase =
-  let fold init g =
-    Relative_path.Map.fold
-      ~f:
-        begin
-          fun path _ acc ->
-          g path acc
-        end
-      ~init
-      rechecked
-  in
-  ( incremental_update (fst old) (fst new_) fold phase,
-    incremental_update (snd old) (snd new_) fold phase )
-
 and empty = (Relative_path.Map.empty, Relative_path.Map.empty)
-
-and is_empty (err, _fixmes) = Relative_path.Map.is_empty err
-
-and count (err, _fixmes) =
-  files_t_fold err ~f:(fun _ _ x acc -> acc + List.length x) ~init:0
-
-and get_error_list (err, _fixmes) = files_t_to_list err
-
-and get_applied_fixmes (_err, fixmes) = files_t_to_list fixmes
-
-and from_error_list err = (list_to_files_t err, Relative_path.Map.empty)
 
 let from_file_error_list : ?phase:phase -> (Relative_path.t * error) list -> t =
  fun ?(phase = Typing) errors ->

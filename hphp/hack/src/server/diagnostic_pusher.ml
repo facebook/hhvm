@@ -7,10 +7,57 @@
  *)
 
 open Hh_prelude
+open Option.Monad_infix
 
 type error = Errors.error [@@deriving show]
 
 module FileMap = Relative_path.Map
+module PhaseMap = Errors.PhaseMap
+
+(** A 2D map from files to phases to errors, with the usual map helpers. *)
+module ErrorMap = struct
+  type errors = error list [@@deriving show]
+
+  let equal_errors err1 err2 =
+    let err1 = Errors.ErrorSet.of_list err1 in
+    let err2 = Errors.ErrorSet.of_list err2 in
+    Errors.ErrorSet.equal err1 err2
+
+  type t = errors PhaseMap.t FileMap.t [@@deriving eq, show]
+
+  let remove map k1 k2 =
+    FileMap.find_opt map k1
+    >>| (fun inner_map -> PhaseMap.remove inner_map k2)
+    |> Option.fold ~init:map ~f:(fun map inner_map ->
+           if PhaseMap.is_empty inner_map then
+             FileMap.remove map k1
+           else
+             FileMap.add map ~key:k1 ~data:inner_map)
+
+  (** Set value in map for given file and phase.
+      If the file is not already present in the map, initialize its phase map
+      with the phase map for that file from [init_phase_map_from] *)
+  let set :
+      t ->
+      Relative_path.t ->
+      Errors.phase ->
+      errors ->
+      init_phase_map_from:t ->
+      t =
+   fun map file phase data ~init_phase_map_from:init_map ->
+    FileMap.find_opt map file
+    |> Option.value
+         ~default:
+           ( FileMap.find_opt init_map file
+           |> Option.value ~default:PhaseMap.empty )
+    |> PhaseMap.add ~key:phase ~data
+    |> fun inner_map -> FileMap.add map ~key:file ~data:inner_map
+
+  let find_opt map k1 k2 =
+    FileMap.find_opt map k1 >>= fun inner_map -> PhaseMap.find_opt inner_map k2
+
+  let mem map k1 k2 = Option.is_some @@ find_opt map k1 k2
+end
 
 (** This keeps track of the set of errors in the current LSP client and
     the set of errors which still need to be pushed. *)
@@ -28,7 +75,8 @@ module ErrorTracker : sig
     t ->
     rechecked:Relative_path.Set.t ->
     new_errors:Errors.t ->
-    t * Errors.finalized_error list SMap.t
+    phase:Errors.phase ->
+    t * ServerCommandTypes.diagnostic_errors
 
   (** Inform the tracker that errors yet to be pushed have been successfully pushed
       to the IDE. *)
@@ -41,27 +89,19 @@ module ErrorTracker : sig
   (** Module to export internal functions for unit testing. Do not use in production code. *)
   module TestExporter : sig
     val make :
-      errors_in_ide:error list FileMap.t ->
-      to_push:error list FileMap.t ->
-      errors_beyond_limit:error list FileMap.t ->
+      errors_in_ide:ErrorMap.t ->
+      to_push:ErrorMap.t ->
+      errors_beyond_limit:ErrorMap.t ->
       t
 
     val with_error_limit : int -> (unit -> 'result) -> 'result
   end
 end = struct
-  type errors = error list [@@deriving show]
-
-  let equal_errors err1 err2 =
-    let err1 = Errors.ErrorSet.of_list err1 in
-    let err2 = Errors.ErrorSet.of_list err2 in
-    Errors.ErrorSet.equal err1 err2
-
   type t = {
-    errors_in_ide: errors FileMap.t;
+    errors_in_ide: ErrorMap.t;
         (** The set of errors currently in the IDE, based on what has been pushed so far. *)
-    to_push: errors FileMap.t;
-        (** The set of errors yet to be pushed to the IDE. *)
-    errors_beyond_limit: errors FileMap.t;
+    to_push: ErrorMap.t;  (** The set of errors yet to be pushed to the IDE. *)
+    errors_beyond_limit: ErrorMap.t;
         (** Errors beyond the limit on the number of errors we want to have in the IDE.
             We may be able to send those later. *)
   }
@@ -80,86 +120,104 @@ end = struct
       errors_beyond_limit = FileMap.empty;
     }
 
-  let error_count_in_file_map : errors FileMap.t -> int =
-    FileMap.fold ~init:0 ~f:(fun _file errors count ->
-        count + List.length errors)
+  let error_count_in_phase_map : error list PhaseMap.t -> int =
+    PhaseMap.fold ~init:0 ~f:(fun _phase errors count ->
+        List.length errors + count)
 
-  (** For each file key from [rechecked], update value in [errors] with value from
-      [new_error], possibly removing entry. *)
+  let error_count_in_file_map : ErrorMap.t -> int =
+    FileMap.fold ~init:0 ~f:(fun _file phase_map count ->
+        error_count_in_phase_map phase_map + count)
+
+  (** For each file key from [rechecked] and for [phase], update value in [to_push] with value from
+      [new_error], possibly removing entry if there are no more errors.
+      [errors_in_ide] is used to possibly initialize other phases for a file in [to_push]. *)
   let merge_errors_to_push :
-      error list FileMap.t ->
+      ErrorMap.t ->
+      errors_in_ide:ErrorMap.t ->
       rechecked:Relative_path.Set.t ->
       new_errors:error list FileMap.t ->
-      error list FileMap.t =
-   fun errors ~rechecked ~new_errors ->
-    let errors =
+      phase:Errors.phase ->
+      ErrorMap.t =
+   fun to_push ~errors_in_ide ~rechecked ~new_errors ~phase ->
+    let to_push =
       Relative_path.Set.fold
         rechecked
-        ~init:errors
-        ~f:(fun rechecked_file errors -> FileMap.remove errors rechecked_file)
+        ~init:to_push
+        ~f:(fun rechecked_file to_push ->
+          ErrorMap.remove to_push rechecked_file phase)
     in
-    let errors =
-      FileMap.fold new_errors ~init:errors ~f:(fun file file_errors errors ->
+    let to_push =
+      FileMap.fold new_errors ~init:to_push ~f:(fun file file_errors to_push ->
           if List.is_empty file_errors then
             (* We'll deal with erasing (which we do by sending the empty list) in erase_errors.
              * This should normally not happen, we're just being defensive here. *)
-            errors
+            to_push
           else
-            FileMap.add errors ~key:file ~data:file_errors)
+            ErrorMap.set
+              to_push
+              file
+              phase
+              file_errors
+              ~init_phase_map_from:errors_in_ide)
     in
-    errors
+    to_push
 
-  (** Add [file -> []] entry in the [to_push] map for each file which used to have
+  (** Add [file -> phase -> []] entry in the [to_push] map for each file which used to have
       errors but doesn't anymore. *)
   let erase_errors :
-      errors_in_ide:error list FileMap.t ->
+      errors_in_ide:ErrorMap.t ->
       rechecked:Relative_path.Set.t ->
-      error list FileMap.t ->
-      error list FileMap.t =
-   fun ~errors_in_ide ~rechecked to_push ->
+      phase:Errors.phase ->
+      ErrorMap.t ->
+      ErrorMap.t =
+   fun ~errors_in_ide ~rechecked ~phase to_push ->
     let rechecked_which_had_errors =
-      Relative_path.Set.filter rechecked ~f:(FileMap.mem errors_in_ide)
+      Relative_path.Set.filter rechecked ~f:(fun file ->
+          ErrorMap.mem errors_in_ide file phase)
     in
     let to_push =
       Relative_path.Set.fold
         rechecked_which_had_errors
         ~init:to_push
         ~f:(fun rechecked_file to_push ->
-          if FileMap.mem to_push rechecked_file then
+          if ErrorMap.mem to_push rechecked_file phase then
             to_push
           else
-            FileMap.add to_push ~key:rechecked_file ~data:[])
+            ErrorMap.set
+              to_push
+              rechecked_file
+              phase
+              []
+              ~init_phase_map_from:errors_in_ide)
     in
     to_push
-
-  let to_absolute_errors errors =
-    FileMap.fold errors ~init:SMap.empty ~f:(fun path el acc ->
-        SMap.add
-          (Relative_path.to_absolute path)
-          (List.map el ~f:Errors.to_absolute)
-          acc)
 
   (** Truncate the list of errors to push so that the total number of errors
       in the IDE does not exceed [error_limit]. This partitions the errors as
       a set of errors we can push now and the remainder of the errors. *)
-  let truncate to_push_candidates ~errors_in_ide =
+  let truncate :
+      ErrorMap.t -> errors_in_ide:ErrorMap.t -> ErrorMap.t * ErrorMap.t =
+   fun to_push_candidates ~errors_in_ide ->
     let error_count_in_ide = error_count_in_file_map errors_in_ide in
     (* First push errors in files which already have errors *)
     let (to_push, to_push_candidates, error_count_in_ide) =
       FileMap.fold
         to_push_candidates
         ~init:(FileMap.empty, FileMap.empty, error_count_in_ide)
-        ~f:(fun file errors (to_push, to_push_candidates, error_count_in_ide) ->
-          let error_count = List.length errors in
+        ~f:(fun file
+                phase_map
+                (to_push, to_push_candidates, error_count_in_ide)
+                ->
+          let error_count = error_count_in_phase_map phase_map in
           match FileMap.find_opt errors_in_ide file with
           | None ->
             (* Let's consider it again later. *)
             let to_push_candidates =
-              FileMap.add to_push_candidates ~key:file ~data:errors
+              FileMap.add to_push_candidates ~key:file ~data:phase_map
             in
             (to_push, to_push_candidates, error_count_in_ide)
           | Some errors_in_ide ->
-            let error_count_before = List.length errors_in_ide in
+            let error_count_before = error_count_in_phase_map errors_in_ide in
             if
               error_count_in_ide + error_count - error_count_before
               <= !error_limit
@@ -167,17 +225,19 @@ end = struct
               let error_count_in_ide =
                 error_count_in_ide + error_count - error_count_before
               in
-              let to_push = FileMap.add to_push ~key:file ~data:errors in
+              let to_push = FileMap.add to_push ~key:file ~data:phase_map in
               (to_push, to_push_candidates, error_count_in_ide)
             else
               (* Erase those errors in the IDE, because for each file we want either all errors or none,
                  and we can't have all errors here because we'd need to go beyond the limit. *)
-              let to_push = FileMap.add to_push ~key:file ~data:[] in
+              let to_push =
+                FileMap.add to_push ~key:file ~data:PhaseMap.empty
+              in
               let error_count_in_ide =
                 error_count_in_ide - error_count_before
               in
               let to_push_candidates =
-                FileMap.add to_push_candidates ~key:file ~data:errors
+                FileMap.add to_push_candidates ~key:file ~data:phase_map
               in
               (to_push, to_push_candidates, error_count_in_ide))
     in
@@ -187,52 +247,82 @@ end = struct
         to_push_candidates
         ~init:(to_push, FileMap.empty, error_count_in_ide)
         ~f:(fun file
-                errors
+                phase_map
                 (to_push, errors_beyond_limit, error_count_in_ide)
                 ->
           (* [to_push_candidates] now only contains files which are not in
              [errors_in_ide] or have been deduced from it. *)
-          let error_count = List.length errors in
+          let error_count = error_count_in_phase_map phase_map in
           if error_count_in_ide + error_count <= !error_limit then
-            let to_push = FileMap.add to_push ~key:file ~data:errors in
+            let to_push = FileMap.add to_push ~key:file ~data:phase_map in
             let error_count_in_ide = error_count_in_ide + error_count in
             (to_push, errors_beyond_limit, error_count_in_ide)
           else
             let errors_beyond_limit =
-              FileMap.add errors_beyond_limit ~key:file ~data:errors
+              FileMap.add errors_beyond_limit ~key:file ~data:phase_map
             in
             (to_push, errors_beyond_limit, error_count_in_ide))
     in
     (to_push, errors_beyond_limit)
 
+  (* Convert all paths to absolute paths and union all phases for each file. *)
+  let to_diagnostic_errors : ErrorMap.t -> ServerCommandTypes.diagnostic_errors
+      =
+   fun errors ->
+    FileMap.fold errors ~init:SMap.empty ~f:(fun path phase_map errors_acc ->
+        let path = Relative_path.to_absolute path in
+        let file_errors =
+          PhaseMap.fold phase_map ~init:[] ~f:(fun _phase -> ( @ ))
+          |> List.map ~f:Errors.to_absolute
+        in
+        SMap.add path file_errors errors_acc)
+
   let get_errors_to_push :
       t ->
       rechecked:Relative_path.Set.t ->
       new_errors:Errors.t ->
-      t * Errors.finalized_error list SMap.t =
-   fun { errors_in_ide; to_push; errors_beyond_limit } ~rechecked ~new_errors ->
+      phase:Errors.phase ->
+      t * ServerCommandTypes.diagnostic_errors =
+   fun { errors_in_ide; to_push; errors_beyond_limit }
+       ~rechecked
+       ~new_errors
+       ~phase ->
     let new_errors : error list FileMap.t = Errors.as_map new_errors in
     (* Merge to_push and errors_beyond_limit to obtain the total
      * set of errors to be pushed. *)
     let to_push = FileMap.union errors_beyond_limit to_push in
     (* Update that set with the new errors. *)
-    let to_push = merge_errors_to_push to_push ~rechecked ~new_errors in
+    let to_push =
+      merge_errors_to_push to_push ~rechecked ~errors_in_ide ~new_errors ~phase
+    in
     (* Clear any old errors that are no longer there. *)
-    let to_push = erase_errors to_push ~errors_in_ide ~rechecked in
+    let to_push = erase_errors to_push ~errors_in_ide ~rechecked ~phase in
     (* Separate errors we'll push now vs. errors we won't push yet
      * because they are beyond the error limit *)
     let (to_push, errors_beyond_limit) = truncate to_push ~errors_in_ide in
-    let to_push_absolute = to_absolute_errors to_push in
+    let to_push_absolute = to_diagnostic_errors to_push in
     ({ errors_in_ide; to_push; errors_beyond_limit }, to_push_absolute)
 
-  let compute_total_errors errors_in_ide to_push =
+  let compute_total_errors : ErrorMap.t -> ErrorMap.t -> ErrorMap.t =
+   fun errors_in_ide to_push ->
     FileMap.fold
       to_push
       ~init:errors_in_ide
-      ~f:(fun file errors errors_in_ide ->
-        match errors with
-        | [] -> FileMap.remove errors_in_ide file
-        | errors -> FileMap.add errors_in_ide ~key:file ~data:errors)
+      ~f:(fun file phase_map errors_in_ide ->
+        let phase_map =
+          PhaseMap.fold
+            phase_map
+            ~init:PhaseMap.empty
+            ~f:(fun phase errors phase_map ->
+              if List.is_empty errors then
+                phase_map
+              else
+                PhaseMap.add phase_map ~key:phase ~data:errors)
+        in
+        if PhaseMap.is_empty phase_map then
+          FileMap.remove errors_in_ide file
+        else
+          FileMap.add errors_in_ide ~key:file ~data:phase_map)
 
   let commit_pushed_errors : t -> t =
    fun { errors_in_ide; to_push; errors_beyond_limit } ->
@@ -265,7 +355,7 @@ type t = {
 let init = { error_tracker = ErrorTracker.init; tracked_client_id = None }
 
 let push_to_client :
-    Errors.finalized_error list SMap.t -> ClientProvider.client -> bool =
+    ServerCommandTypes.diagnostic_errors -> ClientProvider.client -> bool =
  fun errors client ->
   if ClientProvider.client_has_message client then
     false
@@ -312,11 +402,12 @@ let get_client : t -> t * ClientProvider.client option =
   let pusher = possibly_reset_tracker pusher current_client_id in
   (pusher, current_client)
 
-let push_new_errors : t -> rechecked:Relative_path.Set.t -> Errors.t -> t =
- fun pusher ~rechecked new_errors ->
+let push_new_errors :
+    t -> rechecked:Relative_path.Set.t -> Errors.t -> phase:Errors.phase -> t =
+ fun pusher ~rechecked new_errors ~phase ->
   let ({ error_tracker; tracked_client_id }, client) = get_client pusher in
   let (error_tracker, to_push) =
-    ErrorTracker.get_errors_to_push error_tracker ~rechecked ~new_errors
+    ErrorTracker.get_errors_to_push error_tracker ~rechecked ~new_errors ~phase
   in
   let was_pushed =
     match client with

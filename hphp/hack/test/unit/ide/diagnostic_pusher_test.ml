@@ -40,6 +40,8 @@ module Constants = struct
 
   let error3 : Errors.error = Errors.make_error 125 (Pos.none, "error3") []
 
+  let error3_absolute : Errors.finalized_error = Errors.to_absolute error3
+
   let no_errors : Errors.t = Errors.from_file_error_list []
 
   let no_errors_absolute = SMap.empty
@@ -59,6 +61,11 @@ module Constants = struct
 
   let errors12 file : Errors.t =
     Errors.from_file_error_list [(file, error1); (file, error2)]
+
+  let errors_of_list phase list =
+    List.map list ~f:(fun (file, errors) ->
+        (file, Errors.PhaseMap.of_list [(phase, errors)]))
+    |> FileMap.of_list
 end
 
 open Constants
@@ -75,33 +82,42 @@ module ErrorTrackerTest = struct
   let make_no_limit = make ~errors_beyond_limit:FileMap.empty
 
   let test_never_commit _ =
+    let phase = Errors.Typing in
     let tracker = init in
 
     (* Errors are [file1 -> error1] *)
     let (tracker, _errors) =
-      get_errors_to_push tracker ~rechecked:files1 ~new_errors:(errors1 file1)
+      get_errors_to_push
+        ~phase
+        tracker
+        ~rechecked:files1
+        ~new_errors:(errors1 file1)
     in
     let expected_tracker =
       make_no_limit
         ~errors_in_ide:FileMap.empty
-        ~to_push:(FileMap.of_list [(file1, [error1])])
+        ~to_push:(errors_of_list phase [(file1, [error1])])
     in
     assert_equal_trackers expected_tracker tracker;
 
     (* Now errors are [file1 -> error2], and we were not able to push to client. *)
     let (tracker, _errors) =
-      get_errors_to_push tracker ~rechecked:files1 ~new_errors:(errors2 file1)
+      get_errors_to_push
+        ~phase
+        tracker
+        ~rechecked:files1
+        ~new_errors:(errors2 file1)
     in
     let expected_tracker =
       make_no_limit
         ~errors_in_ide:FileMap.empty
-        ~to_push:(FileMap.of_list [(file1, [error2])])
+        ~to_push:(errors_of_list phase [(file1, [error2])])
     in
     assert_equal_trackers expected_tracker tracker;
 
     (* Now there are no more errors, and we were still unable to push to client. *)
     let (tracker, _errors) =
-      get_errors_to_push tracker ~rechecked:files1 ~new_errors:no_errors
+      get_errors_to_push ~phase tracker ~rechecked:files1 ~new_errors:no_errors
     in
     let expected_tracker =
       make_no_limit ~errors_in_ide:FileMap.empty ~to_push:(FileMap.of_list [])
@@ -111,13 +127,18 @@ module ErrorTrackerTest = struct
     ()
 
   let test_push_commit_erase _ =
+    let phase = Errors.Typing in
     let tracker = init in
 
     (* Errors are [file1 -> [error1; error2] *)
     let (tracker, _errors) =
-      get_errors_to_push tracker ~rechecked:files12 ~new_errors:(errors12 file1)
+      get_errors_to_push
+        ~phase
+        tracker
+        ~rechecked:files12
+        ~new_errors:(errors12 file1)
     in
-    let expected_to_push = FileMap.of_list [(file1, [error1; error2])] in
+    let expected_to_push = errors_of_list phase [(file1, [error1; error2])] in
     let expected_tracker =
       make_no_limit ~errors_in_ide:FileMap.empty ~to_push:expected_to_push
     in
@@ -133,9 +154,13 @@ module ErrorTrackerTest = struct
 
     (* Now errors are [file1 -> [error1] *)
     let (tracker, _errors) =
-      get_errors_to_push tracker ~rechecked:files12 ~new_errors:(errors1 file1)
+      get_errors_to_push
+        ~phase
+        tracker
+        ~rechecked:files12
+        ~new_errors:(errors1 file1)
     in
-    let expected_to_push = FileMap.of_list [(file1, [error1])] in
+    let expected_to_push = errors_of_list phase [(file1, [error1])] in
     let expected_tracker =
       make_no_limit
         ~errors_in_ide:expected_errors_in_ide
@@ -153,9 +178,9 @@ module ErrorTrackerTest = struct
 
     (* Now errors are empty *)
     let (tracker, _errors) =
-      get_errors_to_push tracker ~rechecked:files1 ~new_errors:no_errors
+      get_errors_to_push ~phase tracker ~rechecked:files1 ~new_errors:no_errors
     in
-    let expected_to_push = FileMap.of_list [(file1, [])] in
+    let expected_to_push = errors_of_list phase [(file1, [])] in
     let expected_tracker =
       make_no_limit
         ~errors_in_ide:expected_errors_in_ide
@@ -173,14 +198,21 @@ module ErrorTrackerTest = struct
     ()
 end
 
+let connect_persistent () =
+  let (_ : ServerCommandTypes.connection_type) =
+    TestClientProvider.make_and_store_persistent ()
+  in
+  ()
+
 let test_push _ =
+  let phase = Errors.Typing in
   let pusher = Diagnostic_pusher.init in
-  let _ = TestClientProvider.make_and_store_persistent () in
+  connect_persistent ();
 
   let errors = errors1 file1 in
   let errors_absolute = errors1_absolute file1_absolute in
   let pusher =
-    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 errors
+    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 errors ~phase
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
   let expected_pushed_messages =
@@ -191,8 +223,8 @@ let test_push _ =
   in
   assert_equal_messages expected_pushed_messages pushed_messages;
 
-  let _pusher =
-    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 no_errors
+  let pusher =
+    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 no_errors ~phase
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
   (* Check that we've properly erased the errors. *)
@@ -204,28 +236,31 @@ let test_push _ =
   in
   assert_equal_messages expected_pushed_messages pushed_messages;
 
+  let (_ : Diagnostic_pusher.t) = pusher in
   ()
 
 let test_initially_no_client _ =
+  let phase = Errors.Typing in
   let pusher = Diagnostic_pusher.init in
 
   let errors = errors1 file1 in
   let errors1_absolute = errors1_absolute file1_absolute in
   let pusher =
-    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 errors
+    Diagnostic_pusher.push_new_errors ~phase pusher ~rechecked:files1 errors
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
   (* There is no client, so no errors should have been pushed. *)
   assert_equal_messages [] pushed_messages;
 
   (* Connect a persistent client. *)
-  let _ = TestClientProvider.make_and_store_persistent () in
+  connect_persistent ();
 
   (* Add an new batch of new errors. *)
   let errors = errors2 file2 in
   let errors2_absolute = errors2_absolute file2_absolute in
-  let _pusher =
+  let pusher =
     Diagnostic_pusher.push_new_errors
+      ~phase
       pusher
       ~rechecked:Relative_path.Set.empty
       errors
@@ -243,17 +278,19 @@ let test_initially_no_client _ =
   in
   assert_equal_messages expected_pushed_messages pushed_messages;
 
+  let (_ : Diagnostic_pusher.t) = pusher in
   ()
 
 let test_switch_client _ =
+  let phase = Errors.Typing in
   let pusher = Diagnostic_pusher.init in
 
-  let _ = TestClientProvider.make_and_store_persistent () in
+  connect_persistent ();
 
   let errors = errors1 file1 in
   let errors1_absolute = errors1_absolute file1_absolute in
   let pusher =
-    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 errors
+    Diagnostic_pusher.push_new_errors ~phase pusher ~rechecked:files1 errors
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
   let expected_pushed_messages =
@@ -265,13 +302,13 @@ let test_switch_client _ =
   assert_equal_messages expected_pushed_messages pushed_messages;
 
   (* A new client connects and replaces the previous one. *)
-  let _ = TestClientProvider.make_and_store_persistent () in
+  connect_persistent ();
 
   (* Add an new batch of new errors. *)
   let errors = errors2 file2 in
   let errors2_absolute = errors2_absolute file2_absolute in
   let _pusher =
-    Diagnostic_pusher.push_new_errors pusher ~rechecked:files2 errors
+    Diagnostic_pusher.push_new_errors ~phase pusher ~rechecked:files2 errors
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
   (* Both errors should have been pushed. *)
@@ -286,17 +323,19 @@ let test_switch_client _ =
   in
   assert_equal_messages expected_pushed_messages pushed_messages;
 
+  let (_ : Diagnostic_pusher.t) = pusher in
   ()
 
 let test_switch_client_erase _ =
+  let phase = Errors.Typing in
   let pusher = Diagnostic_pusher.init in
 
-  let _ = TestClientProvider.make_and_store_persistent () in
+  connect_persistent ();
 
   let errors = errors1 file1 in
   let errors1_absolute = errors1_absolute file1_absolute in
   let pusher =
-    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 errors
+    Diagnostic_pusher.push_new_errors ~phase pusher ~rechecked:files1 errors
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
   let expected_pushed_messages =
@@ -308,33 +347,43 @@ let test_switch_client_erase _ =
   assert_equal_messages expected_pushed_messages pushed_messages;
 
   (* A new client connects and replaces the previous one. *)
-  let _ = TestClientProvider.make_and_store_persistent () in
+  connect_persistent ();
 
   (* No more errors in file1. *)
   let _pusher =
-    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 no_errors
+    Diagnostic_pusher.push_new_errors ~phase pusher ~rechecked:files1 no_errors
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
   (* There was no need to erase any message. *)
   assert_equal_messages [] pushed_messages;
 
+  let (_ : Diagnostic_pusher.t) = pusher in
   ()
 
 let test_error_limit_one_file _ =
+  let phase = Errors.Typing in
   with_error_limit 1 @@ fun () ->
   let pusher = Diagnostic_pusher.init in
-  let _ = TestClientProvider.make_and_store_persistent () in
+  connect_persistent ();
 
   (* Add 2 errors in the same file file1: nothing should be pushed. *)
   let pusher =
-    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 (errors12 file1)
+    Diagnostic_pusher.push_new_errors
+      ~phase
+      pusher
+      ~rechecked:files1
+      (errors12 file1)
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
   assert_equal_messages [] pushed_messages;
 
   (* Now file1 only has 1 error: it should be pushed. *)
   let pusher =
-    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 (errors1 file1)
+    Diagnostic_pusher.push_new_errors
+      ~phase
+      pusher
+      ~rechecked:files1
+      (errors1 file1)
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
   let expected_pushed_messages =
@@ -351,7 +400,11 @@ let test_error_limit_one_file _ =
   (* Now file1 has 2 errors again: the previous error should be erased
    * because for a given file, we want either all errors or none. *)
   let pusher =
-    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 (errors12 file1)
+    Diagnostic_pusher.push_new_errors
+      ~phase
+      pusher
+      ~rechecked:files1
+      (errors12 file1)
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
   let expected_pushed_messages =
@@ -362,17 +415,22 @@ let test_error_limit_one_file _ =
   in
   assert_equal_messages expected_pushed_messages pushed_messages;
 
-  ignore pusher;
+  let (_ : Diagnostic_pusher.t) = pusher in
   ()
 
 let test_error_limit_two_files _ =
+  let phase = Errors.Typing in
   with_error_limit 2 @@ fun () ->
   let pusher = Diagnostic_pusher.init in
-  let _ = TestClientProvider.make_and_store_persistent () in
+  connect_persistent ();
 
   (* Add 2 errors in file1: they should be pushed *)
   let pusher =
-    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 (errors12 file1)
+    Diagnostic_pusher.push_new_errors
+      ~phase
+      pusher
+      ~rechecked:files1
+      (errors12 file1)
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
   let expected_pushed_messages =
@@ -389,14 +447,22 @@ let test_error_limit_two_files _ =
 
   (* Add 1 error in file2: it should not be pushed *)
   let pusher =
-    Diagnostic_pusher.push_new_errors pusher ~rechecked:files2 (errors2 file2)
+    Diagnostic_pusher.push_new_errors
+      ~phase
+      pusher
+      ~rechecked:files2
+      (errors2 file2)
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
   assert_equal_messages [] pushed_messages;
 
   (* Now file1 only has 1 error: we should push that error and the error in file2. *)
   let pusher =
-    Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 (errors1 file1)
+    Diagnostic_pusher.push_new_errors
+      ~phase
+      pusher
+      ~rechecked:files1
+      (errors1 file1)
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
   let expected_pushed_messages =
@@ -415,7 +481,104 @@ let test_error_limit_two_files _ =
   in
   assert_equal_messages expected_pushed_messages pushed_messages;
 
-  ignore pusher;
+  let (_ : Diagnostic_pusher.t) = pusher in
+  ()
+
+let test_multiple_phases _ =
+  let pusher = Diagnostic_pusher.init in
+  connect_persistent ();
+
+  let phase = Errors.Parsing in
+  let pusher =
+    Diagnostic_pusher.push_new_errors
+      pusher
+      ~phase
+      ~rechecked:files1
+      (Errors.from_file_error_list ~phase [(file1, error1)])
+  in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        {
+          errors = SMap.of_list [(file1_absolute, [error1_absolute])];
+          is_truncated = None;
+        };
+    ]
+  in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  (* Changing phase. Errors from previous phases should be kept around. *)
+  let phase = Errors.Naming in
+  let pusher =
+    Diagnostic_pusher.push_new_errors
+      pusher
+      ~phase
+      ~rechecked:files1
+      (Errors.from_file_error_list ~phase [(file1, error2)])
+  in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        {
+          errors =
+            SMap.of_list [(file1_absolute, [error1_absolute; error2_absolute])];
+          is_truncated = None;
+        };
+    ]
+  in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  (* Changing phase. Errors from previous phases should be kept around. *)
+  let phase = Errors.Typing in
+  let pusher =
+    Diagnostic_pusher.push_new_errors
+      pusher
+      ~phase
+      ~rechecked:files1
+      (Errors.from_file_error_list ~phase [(file1, error3)])
+  in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        {
+          errors =
+            SMap.of_list
+              [
+                ( file1_absolute,
+                  [error1_absolute; error2_absolute; error3_absolute] );
+              ];
+          is_truncated = None;
+        };
+    ]
+  in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  (* Back to previous phase. Error2 is fixed, and errors from other phases should be preserved. *)
+  let phase = Errors.Naming in
+  let pusher =
+    Diagnostic_pusher.push_new_errors
+      pusher
+      ~phase
+      ~rechecked:files1
+      Errors.empty
+  in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        {
+          errors =
+            SMap.of_list [(file1_absolute, [error1_absolute; error3_absolute])];
+          is_truncated = None;
+        };
+    ]
+  in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  let (_ : Diagnostic_pusher.t) = pusher in
   ()
 
 let tear_down () =
@@ -441,5 +604,6 @@ let () =
          >:: with_tear_down test_error_limit_one_file;
          "test_error_limit_two_files"
          >:: with_tear_down test_error_limit_two_files;
+         "test_multiple_phases" >:: with_tear_down test_multiple_phases;
        ]
   |> run_test_tt_main

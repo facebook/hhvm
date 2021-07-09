@@ -288,7 +288,7 @@ let test_incremental_update () =
         ())
   in
   let errors =
-    Errors.incremental_update_set
+    Errors.incremental_update
       ~old:foo_error_a
       ~new_:bar_error_a
       ~rechecked:(Relative_path.Set.singleton a_path)
@@ -304,7 +304,7 @@ let test_incremental_update () =
     "Incremental update should overwrite foo error with bar.";
 
   let errors =
-    Errors.incremental_update_set
+    Errors.incremental_update
       ~old:foo_error_a
       ~new_:baz_error_b
       ~rechecked:(Relative_path.Set.singleton b_path)
@@ -322,7 +322,7 @@ let test_incremental_update () =
     "Incremental update should add baz error and leave foo error unchanged";
 
   let errors =
-    Errors.incremental_update_set
+    Errors.incremental_update
       ~old:foo_error_a
       ~new_:Errors.empty
       ~rechecked:(Relative_path.Set.singleton a_path)

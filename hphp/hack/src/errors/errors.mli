@@ -44,6 +44,16 @@ type phase =
   | Typing
 [@@deriving eq]
 
+module PhaseMap : sig
+  include
+    Reordered_argument_collections.Reordered_argument_map_S
+      with type key = phase
+
+  val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+
+  val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
+end
+
 type severity =
   | Warning
   | Error
@@ -68,6 +78,8 @@ type t [@@deriving eq]
 module ErrorSet : Caml.Set.S with type elt := error
 
 module FinalizedErrorSet : Caml.Set.S with type elt := finalized_error
+
+val phases_up_to_excl : phase -> phase list
 
 (** This will check that the first position of the given reasons is in the
     current decl and if yes use it as primary error position. If no,
@@ -214,11 +226,8 @@ val merge_into_current : t -> unit
 
 val apply_callback_to_errors : t -> error_from_reasons_callback -> unit
 
-val incremental_update_set :
+val incremental_update :
   old:t -> new_:t -> rechecked:Relative_path.Set.t -> phase -> t
-
-val incremental_update_map :
-  old:t -> new_:t -> rechecked:'a Relative_path.Map.t -> phase -> t
 
 val empty : t
 

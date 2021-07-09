@@ -39,7 +39,7 @@ let test_update () =
         ())
   in
   let bar_error_a =
-    Errors.incremental_update_set
+    Errors.incremental_update
       ~old:foo_error_a
       ~new_:bar_error_a
       ~rechecked:(Relative_path.Set.singleton a_path)
@@ -51,14 +51,14 @@ let test_update () =
         ())
   in
   let baz_error_b =
-    Errors.incremental_update_set
+    Errors.incremental_update
       ~old:bar_error_a
       ~new_:baz_error_b
       ~rechecked:(Relative_path.Set.singleton b_path)
       Errors.Parsing
   in
   let bar_error_cleared_a =
-    Errors.incremental_update_set
+    Errors.incremental_update
       ~old:baz_error_b
       ~new_:Errors.empty
       ~rechecked:(Relative_path.Set.singleton a_path)

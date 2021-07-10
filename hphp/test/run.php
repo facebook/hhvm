@@ -2628,7 +2628,7 @@ function generate_diff($wanted, $wanted_re, $output)
       $t = explode("\n", $m[1]);
       $r = varray[];
       $w2 = varray[];
-      for ($i = 0; $i < $m[2]; $i++) {
+      for ($i = 0; $i < (int)$m[2]; $i++) {
         foreach ($t as $v) {
           $r[] = $v;
         }

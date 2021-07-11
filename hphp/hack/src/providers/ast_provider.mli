@@ -108,3 +108,5 @@ val remove_batch : Relative_path.Set.t -> unit
 val has_for_test : Relative_path.t -> bool
 
 val clear_parser_cache : unit -> unit
+
+val clear_local_cache : unit -> unit

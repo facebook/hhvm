@@ -247,7 +247,12 @@ let get_ast_with_error ?(full = false) ctx path =
     in
     (err, ast)
   | (_, Provider_backend.Decl_service _) ->
-    failwith "Ast_provider.get_ast not supported with decl memory provider"
+    (* Decl service based checks are supposed to cache ASTs inside Provider_context.entries. *)
+    (* This entries cache supports IDE scenarios of files locally modified in editor, which *)
+    (* also makes it not performant enough on critical bulk checking path. *)
+    (* Caching current AST locally makes it possible to avoid entries overhead, while not *)
+    (* reparsing the file over and over. *)
+    get_from_local_cache ~full ctx path
 
 let get_ast ?(full = false) ctx path = get_ast_with_error ~full ctx path |> snd
 
@@ -354,3 +359,5 @@ let remove_batch paths = ParserHeap.remove_batch paths
 let has_for_test (path : Relative_path.t) : bool = ParserHeap.mem path
 
 let clear_parser_cache () = ParserHeap.Cache.clear ()
+
+let clear_local_cache () = LocalParserCache.clear ()

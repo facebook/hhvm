@@ -60,7 +60,7 @@ $values = varray[
 // loop through each element of the array for str
 
 foreach($values as $value) {
-      echo "\nArg value $value\n";
+      echo "\nArg value ".(string)$value."\n";
       try { var_dump( urldecode($value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 

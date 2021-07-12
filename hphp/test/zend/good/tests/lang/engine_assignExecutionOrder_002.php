@@ -56,7 +56,7 @@ echo "L=$l M=$m N=$n\n";
 
 // expect $x and $y to be null - this fails on php.net 5.2.1 (invalid opcode) - fixed in 5.2.3
 list($o,$p) = 20;
-echo "O=$o and P=$p\n";
+echo "O=".(string)$o." and P=".(string)$p."\n";
 
 
 // list of lists with blanks and nulls expect 10 20 40 50 60 70 80

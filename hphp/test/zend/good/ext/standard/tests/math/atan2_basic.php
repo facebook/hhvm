@@ -28,7 +28,7 @@ $valuesx = varray[23,
 for ($i = 0; $i < count($valuesy); $i++) {
     for ($j = 0; $j < count($valuesx); $j++) {
         $res = atan2((float)$valuesy[$i], (float)$valuesx[$j]);
-        echo "Y:$valuesy[$i] X:$valuesx[$j] ";
+        echo "Y:".(string)$valuesy[$i]." X:".(string)$valuesx[$j]." ";
         var_dump($res);
     }
 }

@@ -63,7 +63,7 @@ $values = varray[
 // loop through each element of the array for object
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo "\nArg value ".(string)$value." \n";
       var_dump( get_parent_class($value) );
 };
 

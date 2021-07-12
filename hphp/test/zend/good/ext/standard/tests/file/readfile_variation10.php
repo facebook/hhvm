@@ -29,7 +29,7 @@ $names_arr = varray[
 for( $i=0; $i<count($names_arr); $i++ ) {
   $name = $names_arr[$i];
   $text = HH\is_any_array($name) ? 'Array' : $name;
-  echo "-- testing '$text' --\n";
+  echo "-- testing '".(string)$text."' --\n";
   try { readfile($name); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 

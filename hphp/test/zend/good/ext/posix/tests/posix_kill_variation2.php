@@ -55,7 +55,7 @@ function main(): void {
   // loop through each element of the array for sig
 
   foreach ($values as $value) {
-    $text = HH\is_any_array($value) ? 'Array' : $value; echo "\nArg value $text\n";
+    $text = HH\is_any_array($value) ? 'Array' : $value; echo "\nArg value ".(string)$text."\n";
     try {
       var_dump(posix_kill($pid, $value));
     } catch (Exception $e) {

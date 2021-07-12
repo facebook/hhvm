@@ -59,7 +59,7 @@ $values = varray[
 // loop through each element of the array for class
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo "\nArg value ".(string)$value." \n";
       var_dump( get_class_methods($value) );
 };
 

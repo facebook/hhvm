@@ -15,7 +15,7 @@ foreach (array_keys($aTzAbbr) as $sKey) {
 }
 
 foreach ($aTz as $sTz) {
-    $sDate = '2010-05-15 00:00:00 ' . $sTz;
+    $sDate = '2010-05-15 00:00:00 ' . (string)$sTz;
 
     try {
         $oDateTime = new DateTime($sDate);

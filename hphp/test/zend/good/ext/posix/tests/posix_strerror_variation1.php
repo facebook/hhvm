@@ -54,7 +54,7 @@ $values = varray[
 // loop through each element of the array for errno
 
 foreach($values as $value) {
-      $text = HH\is_any_array($value) ? 'Array' : $value; echo "\nArg value $text\n";
+      $text = HH\is_any_array($value) ? 'Array' : $value; echo "\nArg value ".(string)$text."\n";
       try { echo gettype( posix_strerror($value) )."\n"; } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 

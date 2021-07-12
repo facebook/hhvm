@@ -6,6 +6,7 @@
 
 use crate::aast_check;
 use crate::expression_tree_check;
+use crate::readonly_check;
 use bumpalo::Bump;
 use lowerer::{lower, ScourComment};
 use mode_parser::{parse_mode, Language};
@@ -144,6 +145,9 @@ impl<'src> AastParser {
 
             let empty_program = vec![];
             let aast = aast.unwrap_or(&empty_program);
+            if env.parser_options.po_enable_readonly_enforcement {
+                errors.extend(readonly_check::check_program(&aast));
+            }
             errors.extend(aast_check::check_program(&aast));
             errors.extend(expression_tree_check::check_splices(&aast));
 

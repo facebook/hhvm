@@ -115,6 +115,7 @@ type t = {
   po_disallow_hash_comments: bool;
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   po_disallow_inst_meth: bool;
+  po_enable_readonly_enforcement: bool;
   po_escape_brace: bool;
   tco_use_direct_decl_parser: bool;
   tco_ifc_enabled: string list;
@@ -305,6 +306,7 @@ let default =
     po_disallow_hash_comments = false;
     po_disallow_fun_and_cls_meth_pseudo_funcs = false;
     po_disallow_inst_meth = false;
+    po_enable_readonly_enforcement = false;
     po_escape_brace = false;
     tco_use_direct_decl_parser = false;
     tco_ifc_enabled = [];
@@ -450,6 +452,7 @@ let make
     ?(po_disallow_fun_and_cls_meth_pseudo_funcs =
       default.po_disallow_fun_and_cls_meth_pseudo_funcs)
     ?(po_disallow_inst_meth = default.po_disallow_inst_meth)
+    ?(po_enable_readonly_enforcement = default.po_enable_readonly_enforcement)
     ?(po_escape_brace = default.po_escape_brace)
     ?(tco_use_direct_decl_parser = default.tco_use_direct_decl_parser)
     ?(tco_ifc_enabled = default.tco_ifc_enabled)
@@ -582,6 +585,7 @@ let make
     po_disallow_hash_comments;
     po_disallow_fun_and_cls_meth_pseudo_funcs;
     po_disallow_inst_meth;
+    po_enable_readonly_enforcement;
     po_escape_brace;
     tco_use_direct_decl_parser;
     tco_ifc_enabled;
@@ -845,6 +849,8 @@ let po_disallow_fun_and_cls_meth_pseudo_funcs t =
   t.po_disallow_fun_and_cls_meth_pseudo_funcs
 
 let po_disallow_inst_meth t = t.po_disallow_inst_meth
+
+let po_enable_readonly_enforcement t = t.po_enable_readonly_enforcement
 
 let po_escape_brace t = t.po_escape_brace
 

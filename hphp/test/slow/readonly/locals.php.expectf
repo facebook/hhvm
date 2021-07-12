@@ -1,1 +1,1 @@
-Fatal error: check readonlyness fails in %s on line 13
+Fatal error: Cannot modify a member of a readonly variable %s on line 12

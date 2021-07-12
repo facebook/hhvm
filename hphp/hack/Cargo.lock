@@ -2575,14 +2575,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "options_serde"
-version = "0.0.0"
-dependencies = [
- "quote",
- "syn",
-]
-
-[[package]]
 name = "output_vt100"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"

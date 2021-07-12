@@ -311,6 +311,74 @@ let test_initially_no_client _ =
   let (_ : Diagnostic_pusher.t) = pusher in
   ()
 
+let test_disconnects _ =
+  let phase = Errors.Parsing in
+  let pusher = Diagnostic_pusher.init in
+
+  let errors = Errors.from_file_error_list ~phase [(file1, error1)] in
+  let errors1_absolute = errors1_absolute file1_absolute in
+  let pusher =
+    Diagnostic_pusher.push_new_errors ~phase pusher ~rechecked:files1 errors
+  in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  (* There is no client, so no errors should have been pushed. *)
+  assert_equal_messages [] pushed_messages;
+
+  (* Connect a persistent client. *)
+  connect_persistent ();
+
+  (* This time error should be pushed *)
+  let pusher = Diagnostic_pusher.push_whats_left pusher in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        { errors = errors1_absolute; is_truncated = None };
+    ]
+  in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  (* Client reconnect *)
+  Ide_info_store.ide_disconnect ();
+  connect_persistent ();
+
+  (* Errors should be repushed *)
+  let pusher = Diagnostic_pusher.push_whats_left pusher in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        { errors = errors1_absolute; is_truncated = None };
+    ]
+  in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  (* Client disconnect *)
+  Ide_info_store.ide_disconnect ();
+
+  (* No errors pushed *)
+  let pusher = Diagnostic_pusher.push_whats_left pusher in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages = [] in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  (* Client reconnect *)
+  connect_persistent ();
+
+  (* Errors should be repushed *)
+  let pusher = Diagnostic_pusher.push_whats_left pusher in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        { errors = errors1_absolute; is_truncated = None };
+    ]
+  in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  let (_ : Diagnostic_pusher.t) = pusher in
+  ()
+
 let test_switch_client _ =
   let phase = Errors.Typing in
   let pusher = Diagnostic_pusher.init in
@@ -701,6 +769,7 @@ let () =
          >:: with_tear_down ErrorTrackerTest.test_push_commit_erase;
          "test_push" >:: with_tear_down test_push;
          "test_initially_no_client" >:: with_tear_down test_initially_no_client;
+         "test_disconnects" >:: with_tear_down test_disconnects;
          "test_switch_client" >:: with_tear_down test_switch_client;
          "test_switch_client_erase" >:: with_tear_down test_switch_client_erase;
          "test_error_limit_one_file"

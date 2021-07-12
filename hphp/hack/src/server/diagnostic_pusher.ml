@@ -382,6 +382,7 @@ type t = {
   error_tracker: ErrorTracker.t;
   tracked_ide_id: int option;
 }
+[@@deriving show]
 
 let init = { error_tracker = ErrorTracker.init; tracked_ide_id = None }
 
@@ -462,6 +463,14 @@ let push_new_errors :
       error_tracker
   in
   { error_tracker; tracked_ide_id }
+
+let push_whats_left : t -> t =
+ fun pusher ->
+  push_new_errors
+    ~rechecked:Relative_path.Set.empty
+    ~phase:Errors.Typing
+    pusher
+    Errors.empty
 
 module TestExporter = struct
   module FileMap = FileMap

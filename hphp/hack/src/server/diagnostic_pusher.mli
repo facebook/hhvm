@@ -10,7 +10,7 @@
 
 (** This needs to persist for the whole lifetime of the server to properly
     keep track of diagnostics. *)
-type t
+type t [@@deriving show]
 
 val init : t
 
@@ -18,6 +18,10 @@ val init : t
     set of files that have been rechecked to produce this new batch of errors. *)
 val push_new_errors :
   t -> rechecked:Relative_path.Set.t -> Errors.t -> phase:Errors.phase -> t
+
+(** If any error remains to be pushed, for example because the previous push failed or
+    because there was no IDE connected at the time, push them. *)
+val push_whats_left : t -> t
 
 (** Module to export internal functions for unit testing. Do not use in production code. *)
 module TestExporter : sig

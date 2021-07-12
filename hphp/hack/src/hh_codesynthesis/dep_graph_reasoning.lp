@@ -60,49 +60,69 @@ extends(X, Y) :- extends_to(Y, X), class(X), class(Y).
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 % Type Dependency Edge.
 % =============================================================================
-% If X needs "Type" check Y, but no "Extend" relationship presents, therefore
-% the "Type" edge is coming from a parameter X in a Y method call.
-has_method_with_parameter(Y, X) :- type(X, Y), not indirect_extends_to(X, Y).
+% If TypeX needs "Type" check TypeY, but no "Extend" relationship presents, so
+% the "Type" edge is coming from a parameter TypeX in a TypeY method call.
+has_method_with_parameter(TypeY, TypeX) :-
+                    type(TypeX, TypeY), not indirect_extends_to(TypeX, TypeY).
 
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 % Method Dependency Edge.
 % =============================================================================
-% If we see "Method" dependency edge, X must have one method Y.
-add_method(X, Y) :- method(X, Y, _).
+% If we see "Method" dependency edge, TypeX must have one method with MethodName.
+add_method(TypeX, MethodName) :- method(TypeX, MethodName, _).
 
 % Then the "Method" dependency is either coming from
-%   1. overriding X::Y in Z. (except Z is an interface, and X is a class.
-%           See Constraint 2.1.a)
-%   2. invoking X->Y in Z. (except Z is an interface, and it can't invoke.
-%           See Constraint 2.2.a)
+%   1. overriding TypeX::MethodName in TypeZ. (except TypeZ is an interface,
+%           and TypeX is a class. See Constraint 2.1.a)
+%   2. invoking TypeX->MethodName in TypeZ. (except TypeZ is an interface,
+%           and it can't invoke. See Constraint 2.2.a)
 %
-% We say if there is an "Extend" edge and "Method" edge, therefore
-% Z overrides X::Y
-override(Z, X, Y) :- method(X, Y, Z), extends_to(X, Z).
-% We could say if there is no "Extend" edge, but "Method" edge shows up, so
-% Z invokes X->Y in any method of Z::__.
-% invokes_in_method(Z, X, Y) :- method(X, Y, Z), not extends_to(X, Z).
-% However, we give some flexibility to choose from override or invoke a method.
-1 {invokes_in_method(Z, X, Y); override(Z, X, Y)} 1 :- method(X, Y, Z).
+% #############################################################################
+% Using some greedy approach in the model to reduce the usage of "choice rule".
+% Rule 2.1.1: We say if there is an "Extend" edge and "Method" edge, therefore
+% TypeZ overrides TypeX::MethodName
+% override(TypeZ, TypeX, MethodName) :-
+%               method(TypeX, MethodName, TypeZ), extends_to(TypeX, TypeZ).
+% Rule 2.1.2: We could say if there is no "Extend" edge, but "Method" edge
+% shows up, so TypeZ invokes TypeX->MethodName in any method of TypeZ::__.
+% invokes_in_method(TypeZ, TypeX, MethodName) :-
+%               method(TypeX, MethodName, TypeZ), not extends_to(TypeX, TypeZ).
+% #############################################################################
+% Rule 2.1.3: However, we give complete flexibility to choose from override or
+% invoke a method.
+1 {invokes_in_method(TypeZ, TypeX, MethodName);
+    override(TypeZ, TypeX, MethodName)} 1 :- method(TypeX, MethodName, TypeZ).
+%
+% Currently, it's "non-deterministic" for "Method" edges no matter how "Extends"
+% layouts are. If there is a performance issue, feel free to mix up Rule 2.1.1-3
+% The performance impact is depending on the size of intersection of "Method"
+% and "Extends". If we have some overlapping between "Method" <-> "Extends" we
+% deterministically decide "override" using Rule 2.1.1. Therefore, we saved some
+% time. We can also enable Rule 2.1.2, so that we deterministically decide
+% "invoke". And saved more time. Remember, any combination is valid under
+% Declarative Programming.
+
 
 % As a consequence, if we chose 'override' without an "Extend" edge, we need to
 % supplement one "Extend" edge, this ends up the code we synthesized will be a
 % Super Set of the given dependency graph, which is totally fine.
-extends_to(X, Z) :- override(Z, X, _).
-% If Z overrides X::Y, we add a method Y to Z.
-add_method(Z, Y) :- override(Z, _, Y).
+extends_to(TypeX, TypeZ) :- override(TypeZ, TypeX, _).
+% If TypeZ overrides TypeX::MethodName, we add a method Methodname to TypeZ.
+add_method(TypeZ, MethodName) :- override(TypeZ, _, MethodName).
 
-% Or we chose to invoke X->Y in a method of Z, we must pass X in as a parameter.
-has_method_with_parameter(Z, X) :- invokes_in_method(Z, X, Y).
+% Or we chose to invoke TypeX->MethodName in a method of TypeZ, we must pass
+% TypeX in as a parameter.
+has_method_with_parameter(TypeZ, TypeX) :- invokes_in_method(TypeZ, TypeX, _).
 
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 % General Constraints
 % =============================================================================
-% Constraint 2.1.a: Z overrides X::Y, Z can't be an interface to override a class X.
-:- override(Z, X, Y), interface(Z), class(X).
+% Constraint 2.1.a: TypeZ overrides TypeX::_, TypeZ can't be an
+% interface to override a class TypeX.
+:- override(TypeZ, TypeX, _), interface(TypeZ), class(TypeX).
 
-% Constraint 2.2.a: Interface Z can't invoke any method inside.
-:- invokes_in_method(Z, _, _), interface(Z).
+% Constraint 2.2.a: Interface TypeZ can't invoke any method inside.
+:- invokes_in_method(TypeZ, _, _), interface(TypeZ).
 
 
 #show class/1.

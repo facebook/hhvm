@@ -310,7 +310,7 @@ let find_type_with_exact_negation env tyl =
     | [] -> (env, None, acc_tyl)
     | ty :: tyl' ->
       let (env, non_ty) =
-        TUtils.non env (get_reason ty) ty ~approx:TUtils.ApproxDown
+        TUtils.negate_type env (get_reason ty) ty ~approx:TUtils.ApproxDown
       in
       let nothing = MakeType.nothing Reason.none in
       if ty_equal non_ty nothing || is_neg ty || is_neg non_ty then
@@ -1709,18 +1709,22 @@ and simplify_subtype_i
         (match deref lty with
         | (_, Tunapplied_alias n_sub) when String.equal n_sub n_sup -> valid env
         | _ -> default_subtype env))
-    | (r_super, Tneg tprim_super) ->
+    | (r_super, Tneg (Neg_prim tprim_super)) ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType ty_sub ->
         (match deref ty_sub with
-        | (r_sub, Tneg tprim_sub) ->
+        | (r_sub, Tneg (Neg_prim tprim_sub)) ->
           simplify_subtype
             ~subtype_env
             ~this_ty
             (MakeType.prim_type r_super tprim_super)
             (MakeType.prim_type r_sub tprim_sub)
             env
+        | (_, Tneg (Neg_class _)) ->
+          (* not C contains all primitive types, and so can't be a subtype of
+             not p, which doesn't contain primitive type p *)
+          invalid_env env
         | (_, Tprim tprim_sub) ->
           if is_tprim_disjoint tprim_sub tprim_super then
             valid env
@@ -1730,6 +1734,31 @@ and simplify_subtype_i
         | ( _,
             ( Tfun _ | Ttuple _ | Tshape _ | Tvarray _ | Tdarray _
             | Tvarray_or_darray _ | Tobject | Tclass _ ) ) ->
+          valid env
+        | _ -> default_subtype env))
+    | (_, Tneg (Neg_class (_, c_super))) ->
+      (match ety_sub with
+      | ConstraintType _ -> default_subtype env
+      | LoclType ty_sub ->
+        (match deref ty_sub with
+        | (_, Tneg (Neg_class (_, c_sub))) ->
+          if Typing_utils.is_sub_class_refl env c_super c_sub then
+            valid env
+          else
+            invalid_env env
+        | (_, Tneg (Neg_prim _)) ->
+          (* not p, for any primitive type p contains all class types, and so
+             can't be a subtype of not c, which doesn't contain class types c *)
+          invalid_env env
+        | (_, Tclass ((_, c_sub), _, _)) ->
+          if is_class_disjoint env c_sub c_super then
+            valid env
+          else
+            invalid_env env
+        (* All of these are definitely disjoint from class types *)
+        | ( _,
+            ( Tfun _ | Ttuple _ | Tshape _ | Tvarray _ | Tdarray _
+            | Tvarray_or_darray _ | Tobject | Tprim _ ) ) ->
           valid env
         | _ -> default_subtype env))
     | (r_super, Tclass (((_, class_name) as x_super), exact_super, tyl_super))
@@ -3298,6 +3327,8 @@ and try_union env ty tyl =
       | LoclType ty -> ty
       | _ -> failwith "The union of two locl type should always be a locl type.")
 
+(* Determines whether the types are definitely disjoint, or whether they might
+    overlap (i.e., both contain some particular value). *)
 let is_type_disjoint env ty1 ty2 =
   (* visited_tyvars record which type variables we've seen, to cut off cycles. *)
   let rec is_type_disjoint visited_tyvars env ty1 ty2 =
@@ -3390,10 +3421,28 @@ let is_type_disjoint env ty1 ty2 =
       is_sub_type_for_union env ty2 (MakeType.null Reason.Rnone)
     | (_, Tnonnull) ->
       is_sub_type_for_union env ty1 (MakeType.null Reason.Rnone)
-    | (Tneg tp1, _) ->
+    | (Tneg (Neg_prim tp1), _) ->
       is_sub_type_for_union env ty2 (MakeType.prim_type Reason.Rnone tp1)
-    | (_, Tneg tp2) ->
+    | (_, Tneg (Neg_prim tp2)) ->
       is_sub_type_for_union env ty1 (MakeType.prim_type Reason.Rnone tp2)
+    | (Tneg (Neg_class (_, c1)), Tclass ((_, c2), _, _tyl))
+    | (Tclass ((_, c2), _, _tyl), Tneg (Neg_class (_, c1))) ->
+      (* These are disjoint iff for all objects o, o in c2<_tyl> implies that
+        o notin (complement (Union tyl'. c1<tyl'>)), which is just that
+        c2<_tyl> subset Union tyl'. c1<tyl'>. If c2 is a subclass of c1, then
+        whatever _tyl is, we can chase up the hierarchy to find an instantiation
+        for tyl'. If c2 is not a subclass of c1, then no matter what the tyl' are
+        the subset realtionship cannot hold, since either c1 and c2 are disjoint tags,
+        or c1 is a non-equal subclass of c2, and so objects that are exact c2,
+        can't inhabit c1. NB, we aren't allowing abstractness of a class to cause
+        types to be considered disjoint.
+        e.g., in abstract class C {}; class D extends C {}, we wouldn't consider
+        neg D and C to be disjoint.
+        *)
+      Typing_utils.is_sub_class_refl env c2 c1
+    | (Tneg _, _)
+    | (_, Tneg _) ->
+      false
     | (Tprim tp1, Tprim tp2) -> is_tprim_disjoint tp1 tp2
     | (Tprim _, (Tfun _ | Tobject | Tclass _))
     | ((Tfun _ | Tobject | Tclass _), Tprim _) ->

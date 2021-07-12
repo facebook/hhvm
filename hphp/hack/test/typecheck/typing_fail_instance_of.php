@@ -31,7 +31,7 @@ function test(): void {
   }
 }
 
-function test2(dyn $x): void {
+function test2(mixed $x): void {
   if ($x is A) {
     $x->f();
   } else if ($x is B) {

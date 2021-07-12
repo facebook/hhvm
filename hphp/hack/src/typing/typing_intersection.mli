@@ -12,7 +12,8 @@ open Typing_env_types
 module Reason = Typing_reason
 module Utils = Typing_utils
 
-val non : env -> Reason.t -> locl_ty -> approx:Utils.approx -> env * locl_ty
+val negate_type :
+  env -> Reason.t -> locl_ty -> approx:Utils.approx -> env * locl_ty
 
 val intersect : env -> r:Reason.t -> locl_ty -> locl_ty -> env * locl_ty
 

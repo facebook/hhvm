@@ -2543,7 +2543,7 @@ and eif env ~(expected : ExpectedTy.t option) ?in_await p c e1 e2 =
   let (env, te2, ty2) = expr ?expected ?in_await env e2 ~allow_awaitable:true in
   let lenv2 = env.lenv in
   let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
-  let (env, ty) = Union.union env ty1 ty2 in
+  let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
   make_result env p (Aast.Eif (tc, te1, te2)) ty
 
 and exprs
@@ -8024,7 +8024,7 @@ and condition
       in
       let (env, hint_ty) =
         if not tparamet then
-          Inter.non env reason hint_ty ~approx:TUtils.ApproxUp
+          Inter.negate_type env reason hint_ty ~approx:TUtils.ApproxUp
         else
           (env, hint_ty)
       in

@@ -193,6 +193,16 @@ and decl_ty = decl_phase ty
 
 and locl_ty = locl_phase ty
 
+(** Negation types represent the type of values that fail an `is` test
+    for either a primitive type, or a class-ish type C<_> *)
+and neg_type =
+  | Neg_prim of Aast.tprim  (** The negation of a primitive type *)
+  | Neg_class of pos_id
+      (** The negation of a class. If we think of types as denoting sets
+       of values, then (Neg_class C) is complement (Union tyl. C<tyl>), that is
+       all values that are not in C<t1, ..., tn> for any application of C to type
+       arguments. *)
+
 (* A shape may specify whether or not fields are required. For example, consider
    this typedef:
 
@@ -334,7 +344,7 @@ and _ ty_ =
    * If exact=Nonexact, this also includes subclasses
    *)
   | Tclass : pos_id * exact * locl_ty list -> locl_phase ty_
-  | Tneg : Aast.tprim -> locl_phase ty_
+  | Tneg : neg_type -> locl_phase ty_
 
 and 'phase taccess_type = 'phase ty * pos_id
 

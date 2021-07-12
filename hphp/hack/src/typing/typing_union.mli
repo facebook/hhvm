@@ -20,13 +20,18 @@ then
 
 This approximation is necessary to avoid type growing exponentially in size.
 We have seen cases where it would otherwise generate unions involving all
-the subsets of a set of types. *)
-val union : env -> locl_ty -> locl_ty -> env * locl_ty
+the subsets of a set of types.
+
+If approx_cancel_neg is true, then some unions with negations are treated over-approximately:
+C<t> | not C simplifies to mixed. *)
+val union :
+  env -> ?approx_cancel_neg:bool -> locl_ty -> locl_ty -> env * locl_ty
 
 (** Computes the union of a list of types by unioning types two by two.
 This has quadratic complexity, but in practice we benefit from aggressively
 simplified unions. *)
-val union_list : env -> Reason.t -> locl_ty list -> env * locl_ty
+val union_list :
+  env -> ?approx_cancel_neg:bool -> Reason.t -> locl_ty list -> env * locl_ty
 
 (** Simplify the unions within a type.
 Return the result in a flattened, "normalized" form, with options and like types being
@@ -37,9 +42,15 @@ This has quadratic complexity, but in practice we benefit from aggressively
 simplified unions. *)
 val simplify_unions :
   env ->
+  ?approx_cancel_neg:bool ->
   ?on_tyvar:(env -> Reason.t -> Ident.t -> env * locl_ty) ->
   locl_ty ->
   env * locl_ty
 
 val union_i :
-  env -> Typing_reason.t -> internal_type -> locl_ty -> env * internal_type
+  env ->
+  ?approx_cancel_neg:bool ->
+  Typing_reason.t ->
+  internal_type ->
+  locl_ty ->
+  env * internal_type

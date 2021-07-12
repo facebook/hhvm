@@ -19,17 +19,21 @@ module Utils = Typing_utils
 exception Nothing
 
 (** Computes the negation of a type when it is known, which is currently the case
-for null, nonnull, mixed, nothing, otherwise approximate up or down according to
+for null, nonnull, mixed, nothing, primitives, and classes.
+Otherwise approximate up or down according to
 `approx` parameter: If approx is `ApproxUp`, return mixed, else if it is `ApproxDown`,
 return nothing. *)
-let non env r ty ~approx =
+let negate_type env r ty ~approx =
   let (env, ty) = Env.expand_type env ty in
   let neg_ty =
     match get_node ty with
     | Tprim Aast.Tnull -> MkType.nonnull r
-    | Tprim tp -> MkType.neg r tp
-    | Tneg tp -> MkType.prim_type r tp
+    | Tprim tp -> MkType.neg r (Neg_prim tp)
+    | Tneg (Neg_prim tp) -> MkType.prim_type r tp
+    | Tneg (Neg_class (_, c)) when Typing_utils.class_has_no_params env c ->
+      MkType.class_type r c []
     | Tnonnull -> MkType.null r
+    | Tclass (c, Nonexact, _) -> MkType.neg r (Neg_class c)
     | _ ->
       if Utils.equal_approx approx Utils.ApproxUp then
         MkType.mixed r
@@ -184,14 +188,16 @@ let rec intersect env ~r ty1 ty2 =
           | ((_, Tprim Aast.Tnum), (_, Tprim Aast.Tarraykey))
           | ((_, Tprim Aast.Tarraykey), (_, Tprim Aast.Tnum)) ->
             (env, MkType.int r)
-          | ((_, Tneg (Aast.Tint | Aast.Tarraykey)), (_, Tprim Aast.Tnum))
-          | ((_, Tprim Aast.Tnum), (_, Tneg (Aast.Tint | Aast.Tarraykey))) ->
+          | ( (_, Tneg (Neg_prim (Aast.Tint | Aast.Tarraykey))),
+              (_, Tprim Aast.Tnum) )
+          | ( (_, Tprim Aast.Tnum),
+              (_, Tneg (Neg_prim (Aast.Tint | Aast.Tarraykey))) ) ->
             (env, MkType.float r)
-          | ((_, Tneg Aast.Tfloat), (_, Tprim Aast.Tnum))
-          | ((_, Tprim Aast.Tnum), (_, Tneg Aast.Tfloat)) ->
+          | ((_, Tneg (Neg_prim Aast.Tfloat)), (_, Tprim Aast.Tnum))
+          | ((_, Tprim Aast.Tnum), (_, Tneg (Neg_prim Aast.Tfloat))) ->
             (env, MkType.int r)
-          | ((_, Tneg Aast.Tstring), ty_ak)
-          | (ty_ak, (_, Tneg Aast.Tstring)) ->
+          | ((_, Tneg (Neg_prim Aast.Tstring)), ty_ak)
+          | (ty_ak, (_, Tneg (Neg_prim Aast.Tstring))) ->
             if
               (* Ocaml warns about ambiguous or-pattern variables under guard if this is in a when clause*)
               Typing_utils.is_sub_type_for_union
@@ -202,8 +208,8 @@ let rec intersect env ~r ty1 ty2 =
               intersect env ~r (mk ty_ak) (MkType.int r)
             else
               make_intersection env r [ty1; ty2]
-          | ((_, Tneg (Aast.Tint | Aast.Tnum)), ty_ak)
-          | (ty_ak, (_, Tneg (Aast.Tint | Aast.Tnum))) ->
+          | ((_, Tneg (Neg_prim (Aast.Tint | Aast.Tnum))), ty_ak)
+          | (ty_ak, (_, Tneg (Neg_prim (Aast.Tint | Aast.Tnum)))) ->
             if
               Typing_utils.is_sub_type_for_union
                 env
@@ -415,6 +421,6 @@ let rec intersect_i env r ty1 lty2 =
     | LoclType _ -> (env, ty)
     | ConstraintType ty -> Utils.simplify_constraint_type env ty
 
-let () = Utils.non_ref := non
+let () = Utils.negate_type_ref := negate_type
 
 let () = Utils.simplify_intersections_ref := simplify_intersections

@@ -214,6 +214,10 @@ and decl_ty = decl_phase ty
 
 and locl_ty = locl_phase ty
 
+and neg_type =
+  | Neg_prim of Aast.tprim
+  | Neg_class of pos_id
+
 (** A shape may specify whether or not fields are required. For example, consider
  * this typedef:
  *
@@ -366,7 +370,8 @@ and _ ty_ =
        * If exact=Exact, then this represents instances of *exactly* this class
        * If exact=Nonexact, this also includes subclasses
        *)
-  | Tneg : Aast.tprim -> locl_phase ty_
+  | Tneg : neg_type -> locl_phase ty_
+      (** The negation of the type in neg_type *)
 
 and 'phase taccess_type = 'phase ty * pos_id
 
@@ -532,6 +537,18 @@ module Pp = struct
     pp_ty_ fmt a1;
     Format.fprintf fmt "@])"
 
+  and pp_neg_type : Format.formatter -> neg_type -> unit =
+   fun fmt neg_ty ->
+    match neg_ty with
+    | Neg_prim tp ->
+      Format.fprintf fmt "(@[<2>Neg_prim@ ";
+      Aast.pp_tprim fmt tp;
+      Format.fprintf fmt "@])"
+    | Neg_class c ->
+      Format.fprintf fmt "(@[<2>Neg_class ";
+      pp_pos_id fmt c;
+      Format.fprintf fmt "@])"
+
   and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
    fun fmt ty ->
     match ty with
@@ -682,7 +699,7 @@ module Pp = struct
       Format.fprintf fmt "@,))@]"
     | Tneg a0 ->
       Format.fprintf fmt "(@[<2>Tneg@ ";
-      Aast.pp_tprim fmt a0;
+      pp_neg_type fmt a0;
       Format.fprintf fmt "@])"
 
   and pp_ty_list : type a. Format.formatter -> a ty list -> unit =

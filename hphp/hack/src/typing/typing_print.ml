@@ -410,7 +410,8 @@ module Full = struct
         | _ -> Concat [text "?"; k ty]
       end
     | Tprim x -> tprim x
-    | Tneg x -> Concat [text "not "; tprim x]
+    | Tneg (Neg_prim x) -> Concat [text "not "; tprim x]
+    | Tneg (Neg_class c) -> Concat [text "not "; to_doc (snd c)]
     | Tvar n ->
       let (_, ety) = Env.expand_type env (mk (Reason.Rnone, Tvar n)) in
       begin
@@ -818,7 +819,8 @@ module ErrorString = struct
          prints with a different function (namely Full.locl_ty)  *)
       failwith "Tunapplied_alias is not a type"
     | Taccess (_ty, _id) -> "a type constant"
-    | Tneg p -> "not a " ^ tprim p
+    | Tneg (Neg_prim p) -> "anything but a " ^ tprim p
+    | Tneg (Neg_class (_, c)) -> "anything but a " ^ strip_ns c
 
   and inst env tyl =
     if List.is_empty tyl then
@@ -961,7 +963,8 @@ module Json = struct
         | _ -> obj @@ kind p "nullable" @ args [ty]
       end
     | (p, Tprim tp) -> obj @@ kind p "primitive" @ name (prim tp)
-    | (p, Tneg tp) -> obj @@ kind p "negation" @ name (prim tp)
+    | (p, Tneg (Neg_prim tp)) -> obj @@ kind p "negation" @ name (prim tp)
+    | (p, Tneg (Neg_class (_, c))) -> obj @@ kind p "negation" @ name c
     | (p, Tclass ((_, cid), _, tys)) ->
       obj @@ kind p "class" @ name cid @ args tys
     | (p, Tobject) -> obj @@ kind p "object"

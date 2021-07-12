@@ -176,7 +176,8 @@ let (expand_typeconst_ref : expand_typeconst ref) =
 
 let expand_typeconst x = !expand_typeconst_ref x
 
-type union = env -> locl_ty -> locl_ty -> env * locl_ty
+type union =
+  env -> ?approx_cancel_neg:bool -> locl_ty -> locl_ty -> env * locl_ty
 
 let (union_ref : union ref) = ref (not_implemented "union")
 
@@ -195,24 +196,32 @@ let (make_union_ref : make_union ref) = ref (not_implemented "make_union")
 let make_union env = !make_union_ref env
 
 type union_i =
-  env -> Reason.t -> internal_type -> locl_ty -> env * internal_type
+  env ->
+  ?approx_cancel_neg:bool ->
+  Reason.t ->
+  internal_type ->
+  locl_ty ->
+  env * internal_type
 
 let (union_i_ref : union_i ref) = ref (not_implemented "union")
 
 let union_i x = !union_i_ref x
 
-type union_list = env -> Reason.t -> locl_ty list -> env * locl_ty
+type union_list =
+  env -> ?approx_cancel_neg:bool -> Reason.t -> locl_ty list -> env * locl_ty
 
 let (union_list_ref : union_list ref) = ref (not_implemented "union_list")
 
 let union_list x = !union_list_ref x
 
-type fold_union = env -> Reason.t -> locl_ty list -> env * locl_ty
+type fold_union =
+  env -> ?approx_cancel_neg:bool -> Reason.t -> locl_ty list -> env * locl_ty
 
 let (fold_union_ref : fold_union ref) = ref (not_implemented "fold_union")
 
 type simplify_unions =
   env ->
+  ?approx_cancel_neg:bool ->
   ?on_tyvar:(env -> Reason.t -> Ident.t -> env * locl_ty) ->
   locl_ty ->
   env * locl_ty
@@ -227,11 +236,11 @@ type approx =
   | ApproxDown
 [@@deriving eq]
 
-type non = env -> Reason.t -> locl_ty -> approx:approx -> env * locl_ty
+type negate_type = env -> Reason.t -> locl_ty -> approx:approx -> env * locl_ty
 
-let (non_ref : non ref) = ref (not_implemented "non")
+let (negate_type_ref : negate_type ref) = ref (not_implemented "negate_type")
 
-let non x = !non_ref x
+let negate_type x = !negate_type_ref x
 
 type simplify_intersections =
   env ->
@@ -638,3 +647,15 @@ let make_locl_subst_for_class_tparams classdef tyl =
     SMap.empty
   else
     Decl_subst.make_locl (Cls.tparams classdef) tyl
+
+let is_sub_class_refl env c_sub c_super =
+  String.equal c_sub c_super
+  ||
+  match Env.get_class env c_sub with
+  | None -> false
+  | Some cls_sub -> Cls.has_ancestor cls_sub c_super
+
+let class_has_no_params env c =
+  match Env.get_class env c with
+  | Some cls -> List.is_empty (Decl_provider.Class.tparams cls)
+  | None -> false

@@ -68,8 +68,6 @@ class type ['a] decl_type_visitor_type =
 
     method on_taccess :
       'a -> decl_phase Reason.t_ -> decl_phase taccess_type -> 'a
-
-    method on_tneg : 'a -> decl_phase Reason.t_ -> Aast.tprim -> 'a
   end
 
 class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
@@ -143,8 +141,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
     method on_tshape acc _ _ fdm =
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
       TShapeMap.fold f fdm acc
-
-    method on_tneg acc _ _ = acc
 
     method on_type acc ty =
       let (r, x) = deref ty in
@@ -235,7 +231,7 @@ class type ['a] locl_type_visitor_type =
 
     method on_taccess : 'a -> Reason.t -> locl_phase taccess_type -> 'a
 
-    method on_tneg : 'a -> Reason.t -> Aast.tprim -> 'a
+    method on_neg_type : 'a -> Reason.t -> neg_type -> 'a
   end
 
 class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
@@ -316,7 +312,10 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       let acc = this#on_type acc ty1 in
       this#on_type acc ty2
 
-    method on_tneg acc _ _ = acc
+    method on_neg_type acc r neg_ty =
+      match neg_ty with
+      | Neg_prim p -> this#on_tprim acc r p
+      | Neg_class c -> this#on_tclass acc r c Nonexact []
 
     method on_tunapplied_alias acc _ _ = acc
 
@@ -348,7 +347,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict acc r ty1 ty2
       | Tunapplied_alias n -> this#on_tunapplied_alias acc r n
       | Taccess (ty, ids) -> this#on_taccess acc r (ty, ids)
-      | Tneg tp -> this#on_tneg acc r tp
+      | Tneg tneg -> this#on_neg_type acc r tneg
   end
 
 class type ['a] internal_type_visitor_type =

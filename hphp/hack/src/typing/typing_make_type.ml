@@ -17,10 +17,12 @@ let class_type r name tyl =
 
 let prim_type r t = mk (r, Tprim t)
 
-let neg r t =
-  match t with
-  | Nast.Tnull -> mk (r, Tnonnull)
-  | _ -> mk (r, Tneg t)
+(* Make a negation type *)
+let neg r neg_t =
+  match neg_t with
+  (* Represent the negation of Tnull as Tnonnull, instead of Tneg Tnull *)
+  | Neg_prim Nast.Tnull -> mk (r, Tnonnull)
+  | _ -> mk (r, Tneg neg_t)
 
 let traversable r ty = class_type r SN.Collections.cTraversable [ty]
 

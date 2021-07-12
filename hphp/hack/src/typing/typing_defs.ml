@@ -592,6 +592,13 @@ let ty_con_ordinal_ : type a. a ty_ -> int = function
   | Tclass _ -> 204
   | Tneg _ -> 205
 
+let compare_neg_type neg1 neg2 =
+  match (neg1, neg2) with
+  | (Neg_prim tp1, Neg_prim tp2) -> Aast.compare_tprim tp1 tp2
+  | (Neg_class c1, Neg_class c2) -> String.compare (snd c1) (snd c2)
+  | (Neg_prim _, Neg_class _) -> -1
+  | (Neg_class _, Neg_prim _) -> 1
+
 (* Compare two types syntactically, ignoring reason information and other
  * small differences that do not affect type inference behaviour. This
  * comparison function can be used to construct tree-based sets of types,
@@ -691,7 +698,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
         | 0 -> String.compare (snd id1) (snd id2)
         | n -> n
       end
-    | (Tneg ty1, Tneg ty2) -> Aast_defs.compare_tprim ty1 ty2
+    | (Tneg neg1, Tneg neg2) -> compare_neg_type neg1 neg2
     | (Tnonnull, Tnonnull) -> 0
     | (Tdynamic, Tdynamic) -> 0
     | (Tobject, Tobject) -> 0

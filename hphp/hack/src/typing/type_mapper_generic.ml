@@ -78,7 +78,7 @@ class type ['env] type_mapper_type =
 
     method on_taccess : 'env -> Reason.t -> locl_ty -> pos_id -> 'env * locl_ty
 
-    method on_tneg : 'env -> Reason.t -> Aast.tprim -> 'env * locl_ty
+    method on_neg_type : 'env -> Reason.t -> neg_type -> 'env * locl_ty
 
     method on_type : 'env -> locl_ty -> 'env * locl_ty
 
@@ -138,7 +138,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_taccess env r ty id = (env, mk (r, Taccess (ty, id)))
 
-    method on_tneg env r p = (env, mk (r, Tneg p))
+    method on_neg_type env r p = (env, mk (r, Tneg p))
 
     method on_type env ty =
       let (r, ty) = deref ty in
@@ -166,7 +166,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict env r ty1 ty2
       | Tunapplied_alias name -> this#on_tunapplied_alias env r name
       | Taccess (ty, id) -> this#on_taccess env r ty id
-      | Tneg ty -> this#on_tneg env r ty
+      | Tneg ty -> this#on_neg_type env r ty
 
     method on_locl_ty_list env tyl = List.map_env env tyl ~f:this#on_type
   end

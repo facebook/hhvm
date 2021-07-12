@@ -89,8 +89,6 @@ class type ['a] decl_type_visitor_type =
       Typing_reason.decl_t ->
       Typing_defs.decl_phase Typing_defs.taccess_type ->
       'a
-
-    method on_tneg : 'a -> Typing_reason.decl_t -> Aast.tprim -> 'a
   end
 
 class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type
@@ -184,7 +182,7 @@ class type ['a] locl_type_visitor_type =
       Typing_defs.locl_phase Typing_defs.taccess_type ->
       'a
 
-    method on_tneg : 'a -> Typing_reason.t -> Aast.tprim -> 'a
+    method on_neg_type : 'a -> Typing_reason.t -> Typing_defs.neg_type -> 'a
   end
 
 class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type

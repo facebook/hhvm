@@ -323,6 +323,7 @@ val expand_typeconst :
 
 type union =
   Typing_env_types.env ->
+  ?approx_cancel_neg:bool ->
   Typing_defs.locl_ty ->
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty
@@ -331,6 +332,7 @@ val union_ref : union ref
 
 val union :
   Typing_env_types.env ->
+  ?approx_cancel_neg:bool ->
   Typing_defs.locl_ty ->
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty
@@ -355,6 +357,7 @@ val make_union :
 
 type union_i =
   Typing_env_types.env ->
+  ?approx_cancel_neg:bool ->
   Typing_reason.t ->
   Typing_defs.internal_type ->
   Typing_defs.locl_ty ->
@@ -364,6 +367,7 @@ val union_i_ref : union_i ref
 
 val union_i :
   Typing_env_types.env ->
+  ?approx_cancel_neg:bool ->
   Typing_reason.t ->
   Typing_defs.internal_type ->
   Typing_defs.locl_ty ->
@@ -371,6 +375,7 @@ val union_i :
 
 type union_list =
   Typing_env_types.env ->
+  ?approx_cancel_neg:bool ->
   Typing_reason.t ->
   Typing_defs.locl_ty list ->
   Typing_env_types.env * Typing_defs.locl_ty
@@ -379,12 +384,14 @@ val union_list_ref : union_list ref
 
 val union_list :
   Typing_env_types.env ->
+  ?approx_cancel_neg:bool ->
   Typing_reason.t ->
   Typing_defs.locl_ty list ->
   Typing_env_types.env * Typing_defs.locl_ty
 
 type fold_union =
   Typing_env_types.env ->
+  ?approx_cancel_neg:bool ->
   Typing_reason.t ->
   Typing_defs.locl_ty list ->
   Typing_env_types.env * Typing_defs.locl_ty
@@ -393,6 +400,7 @@ val fold_union_ref : fold_union ref
 
 type simplify_unions =
   Typing_env_types.env ->
+  ?approx_cancel_neg:bool ->
   ?on_tyvar:
     (Typing_env_types.env ->
     Typing_reason.t ->
@@ -419,6 +427,7 @@ val get_concrete_supertypes :
 
 val simplify_unions :
   Typing_env_types.env ->
+  ?approx_cancel_neg:bool ->
   ?on_tyvar:
     (Typing_env_types.env ->
     Typing_reason.t ->
@@ -432,16 +441,16 @@ type approx =
   | ApproxDown
 [@@deriving eq]
 
-type non =
+type negate_type =
   Typing_env_types.env ->
   Typing_reason.t ->
   Typing_defs.locl_ty ->
   approx:approx ->
   Typing_env_types.env * Typing_defs.locl_ty
 
-val non_ref : non ref
+val negate_type_ref : negate_type ref
 
-val non :
+val negate_type :
   Typing_env_types.env ->
   Typing_reason.t ->
   Typing_defs.locl_ty ->
@@ -495,3 +504,7 @@ val make_locl_subst_for_class_tparams :
   Decl_provider.Class.t ->
   Typing_defs.locl_ty list ->
   Typing_defs.locl_ty SMap.t
+
+val is_sub_class_refl : Typing_env_types.env -> string -> string -> bool
+
+val class_has_no_params : Typing_env_types.env -> string -> bool

@@ -1,0 +1,19 @@
+File "neg_class_invariant.php", line 19, characters 3-17:
+  (int | (Vector<Tv#1> & ~(T | Vector<int>)) | (not Vector & ~T))
+File "neg_class_invariant.php", line 20, characters 3-13:
+  (int | (Vector<Tv#1> & ~(T | Vector<int>)))
+File "neg_class_invariant.php", line 21, characters 3-13:
+  (int | (Vector<Tv#1> & ~(T | Vector<int>)) | (not Vector & ~T))
+File "neg_class_invariant.php", line 32, characters 3-13:
+  ~T
+File "neg_class_invariant.php", line 33, characters 3-13:
+  (int | (Vector<Tv#1> & ~T))
+File "neg_class_invariant.php", line 34, characters 3-13:
+  ~T
+File "neg_class_invariant.php", line 45, characters 3-13:
+  mixed
+File "neg_class_invariant.php", line 46, characters 3-13:
+  (int | Vector<Tv#1>)
+File "neg_class_invariant.php", line 47, characters 3-13:
+  mixed
+No errors

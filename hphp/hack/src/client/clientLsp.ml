@@ -1186,62 +1186,64 @@ let start_server ~(env : env) (root : Path.t) : unit =
 let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
     server_conn Lwt.t =
   log "connect_client";
-  Exit_status.(
-    (* This basically does the same connection attempt as "hh_client check":  *)
-    (* it makes repeated attempts to connect; it prints useful messages to    *)
-    (* stderr; in case of failure it will raise an exception. Below we're     *)
-    (* catching the main exceptions so we can give a good user-facing error   *)
-    (* text. For other exceptions, they'll end up showing to the user just    *)
-    (* "internal error" with the error code.                                  *)
-    let env_connect =
-      {
-        ClientConnect.root;
-        from = !from;
-        autostart;
-        local_config = get_local_config_exn ();
-        force_dormant_start = false;
-        watchman_debug_logging = false;
-        (* If you want this, start the server manually in terminal. *)
-        deadline = Some (Unix.time () +. 3.);
-        (* limit to 3 seconds *)
-        no_load = false;
-        (* only relevant when autostart=true *)
-        log_inference_constraints = false;
-        (* irrelevant *)
-        profile_log = false;
-        (* irrelevant *)
-        remote = false;
-        (* irrelevant *)
-        ai_mode = None;
-        (* only relevant when autostart=true *)
-        progress_callback = None;
-        (* we're fast! *)
-        do_post_handoff_handshake = false;
-        ignore_hh_version = false;
-        saved_state_ignore_hhconfig = false;
-        mini_state = None;
-        save_64bit = None;
-        (* priority_pipe delivers good experience for hh_server, but has a bug,
+  (* This basically does the same connection attempt as "hh_client check":
+   * it makes repeated attempts to connect; it prints useful messages to
+   * stderr; in case of failure it will raise an exception. Below we're
+   * catching the main exceptions so we can give a good user-facing error
+   * text. For other exceptions, they'll end up showing to the user just
+   * "internal error" with the error code. *)
+  let env_connect =
+    {
+      ClientConnect.root;
+      from = !from;
+      autostart;
+      local_config = get_local_config_exn ();
+      force_dormant_start = false;
+      watchman_debug_logging = false;
+      (* If you want this, start the server manually in terminal. *)
+      deadline = Some (Unix.time () +. 3.);
+      (* limit to 3 seconds *)
+      no_load = false;
+      (* only relevant when autostart=true *)
+      log_inference_constraints = false;
+      (* irrelevant *)
+      profile_log = false;
+      (* irrelevant *)
+      remote = false;
+      (* irrelevant *)
+      ai_mode = None;
+      (* only relevant when autostart=true *)
+      progress_callback = None;
+      (* we're fast! *)
+      do_post_handoff_handshake = false;
+      ignore_hh_version = false;
+      saved_state_ignore_hhconfig = false;
+      mini_state = None;
+      save_64bit = None;
+      (* priority_pipe delivers good experience for hh_server, but has a bug,
         and doesn't provide benefits in serverless-ide. *)
-        use_priority_pipe = not env.use_serverless_ide;
-        prechecked = None;
-        config = env.args.config;
-        custom_telemetry_data = [];
-        allow_non_opt_build = false;
-      }
+      use_priority_pipe = not env.use_serverless_ide;
+      prechecked = None;
+      config = env.args.config;
+      custom_telemetry_data = [];
+      allow_non_opt_build = false;
+    }
+  in
+  try%lwt
+    let%lwt ClientConnect.{ channels = (ic, oc); server_specific_files; _ } =
+      ClientConnect.connect env_connect
     in
-    try%lwt
-      let%lwt ClientConnect.{ channels = (ic, oc); server_specific_files; _ } =
-        ClientConnect.connect env_connect
-      in
-      can_autostart_after_mismatch := false;
-      let pending_messages = Queue.create () in
-      Lwt.return { ic; oc; pending_messages; server_specific_files }
-    with Exit_with Build_id_mismatch when !can_autostart_after_mismatch ->
-      (* Raised when the server was running an old version. We'll retry once.   *)
-      log "connect_client: build_id_mismatch";
-      can_autostart_after_mismatch := false;
-      connect_client ~env root ~autostart:true)
+    can_autostart_after_mismatch := false;
+    let pending_messages = Queue.create () in
+    Lwt.return { ic; oc; pending_messages; server_specific_files }
+  with
+  | Exit_status.Exit_with Exit_status.Build_id_mismatch
+  when !can_autostart_after_mismatch
+  ->
+    (* Raised when the server was running an old version. We'll retry once.   *)
+    log "connect_client: build_id_mismatch";
+    can_autostart_after_mismatch := false;
+    connect_client ~env root ~autostart:true
 
 (** Either connect to the monitor and leave in an
     In_init state waiting for the server hello, or fail to connect and
@@ -4619,8 +4621,8 @@ let handle_server_message
   in
   Lwt.return_none
 
-(* After the server has sent 'hello', it means the persistent connection is   *)
-(* ready, so we can send our backlog of file-edits to the server.             *)
+(** The server sending 'hello' means that it is ready to establish a persistent
+    connection. Establish that connection and send our backlog of file-edits to the server. *)
 let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
     =
   log "connect_after_hello";

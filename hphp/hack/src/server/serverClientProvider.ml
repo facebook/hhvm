@@ -56,25 +56,25 @@ let accept_client
     (parent_in_fd : Unix.file_descr)
     (t_sleep_and_check : float)
     (t_monitor_fd_ready : float) : client =
-  let msg : MonitorRpc.monitor_to_server_handoff_msg =
+  let ({ MonitorRpc.m2s_tracker = tracker; m2s_sequence_number }
+        : MonitorRpc.monitor_to_server_handoff_msg) =
     Marshal_tools.from_fd_with_preamble parent_in_fd
   in
   let t_got_tracker = Unix.gettimeofday () in
-  let tracker = msg.MonitorRpc.m2s_tracker in
   Hh_logger.log
     "[%s] got tracker #%d handoff from monitor"
     (Connection_tracker.log_id tracker)
-    msg.MonitorRpc.m2s_sequence_number;
+    m2s_sequence_number;
   let socket = Libancillary.ancil_recv_fd parent_in_fd in
   let t_got_client_fd = Unix.gettimeofday () in
   MonitorRpc.write_server_receipt_to_monitor_file
     ~server_receipt_to_monitor_file:
       (ServerFiles.server_receipt_to_monitor_file (Unix.getpid ()))
-    ~sequence_number_high_water_mark:msg.MonitorRpc.m2s_sequence_number;
+    ~sequence_number_high_water_mark:m2s_sequence_number;
   Hh_logger.log
     "[%s] got FD#%d handoff from monitor"
     (Connection_tracker.log_id tracker)
-    msg.MonitorRpc.m2s_sequence_number;
+    m2s_sequence_number;
   let tracker =
     let open Connection_tracker in
     tracker
@@ -215,7 +215,8 @@ let say_hello oc =
   in
   ()
 
-let read_connection_type (ic : Timeout.in_channel) : connection_type =
+let read_connection_type_from_channel (ic : Timeout.in_channel) :
+    connection_type =
   Timeout.with_timeout
     ~timeout:1
     ~on_timeout:(fun _ -> raise Read_command_timeout)
@@ -223,9 +224,8 @@ let read_connection_type (ic : Timeout.in_channel) : connection_type =
       let connection_type : connection_type = Timeout.input_value ~timeout ic in
       connection_type)
 
+(* Warning 52 warns about using Sys_error. Here we have no alternative but to depend on Sys_error strings *)
 [@@@warning "-52"]
-
-(* we have no alternative but to depend on Sys_error strings *)
 
 let read_connection_type (client : client) : connection_type =
   match client with
@@ -236,7 +236,7 @@ let read_connection_type (client : client) : connection_type =
         client.tracker <-
           Connection_tracker.(track client.tracker ~key:Server_sent_hello);
         let connection_type : connection_type =
-          read_connection_type client.ic
+          read_connection_type_from_channel client.ic
         in
         client.tracker <-
           Connection_tracker.(
@@ -253,9 +253,8 @@ let read_connection_type (client : client) : connection_type =
      * (via make_persistent). *)
     assert false
 
+(* CARE! scope of warning suppression should be only read_connection_type *)
 [@@@warning "+52"]
-
-(* CARE! scope of suppression should be only read_connection_type *)
 
 let send_response_to_client client response =
   let (fd, tracker) =

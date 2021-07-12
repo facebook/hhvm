@@ -178,13 +178,17 @@ let connect_to_monitor ~tracker ~timeout config =
 
             (* 4. return Ok *)
             match cstate with
+            | Connection_ok
+            | Connection_ok_v2 _ ->
+              finally_close := None;
+              Ok (ic, oc, tracker)
+            | Build_id_mismatch ->
+              wait_on_server_restart ic;
+              Error (Build_id_mismatched None)
             | Build_id_mismatch_ex mismatch_info
             | Build_id_mismatch_v3 (mismatch_info, _) ->
               wait_on_server_restart ic;
-              Error (Build_id_mismatched (Some mismatch_info))
-            | _ ->
-              finally_close := None;
-              Ok (ic, oc, tracker))
+              Error (Build_id_mismatched (Some mismatch_info)))
           ~on_timeout:(fun _timings ->
             Error
               (Connect_to_monitor_failure

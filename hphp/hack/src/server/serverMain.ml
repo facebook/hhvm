@@ -792,6 +792,7 @@ let priority_client_interrupt_handler genv client_provider :
     env MultiThreadedCall.interrupt_handler =
  fun env ->
   let t = Unix.gettimeofday () in
+  Hh_logger.log "Handling message on priority socket.";
   (* For non-persistent clients that don't synchronize file contents, users
    * expect that a query they do immediately after saving a file will reflect
    * this file contents. Async notifications are not always fast enough to
@@ -812,9 +813,10 @@ let priority_client_interrupt_handler genv client_provider :
   ) else
     let idle_gc_slice = genv.local_config.ServerLocalConfig.idle_gc_slice in
     let select_outcome =
-      if ServerRevisionTracker.is_hg_updating () then
+      if ServerRevisionTracker.is_hg_updating () then (
+        Hh_logger.log "Won't handle client message: hg is updating.";
         ClientProvider.Select_nothing
-      else
+      ) else
         ClientProvider.sleep_and_check
           client_provider
           env.persistent_client
@@ -829,6 +831,7 @@ let priority_client_interrupt_handler genv client_provider :
       | ClientProvider.Select_nothing ->
         (* This is possible because client might have gone away during
          * sleep_and_check. *)
+        Hh_logger.log "Client went away or hg is updating.";
         env
       | ClientProvider.Select_new client ->
         (match
@@ -879,6 +882,7 @@ let priority_client_interrupt_handler genv client_provider :
 let persistent_client_interrupt_handler genv :
     env MultiThreadedCall.interrupt_handler =
  fun env ->
+  Hh_logger.info "Handling message on persistent client socket.";
   match env.persistent_client with
   (* Several handlers can become ready simultaneously and one of them can remove
    * the persistent client before we get to it. *)

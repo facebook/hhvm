@@ -35,11 +35,15 @@ let ide_info : t option ref = ref None
 
 let make_persistent_and_track_new_ide client =
   let client = ClientProvider.make_persistent client in
-  ide_info :=
-    Some { id = ClientId.make (); client; open_files = Relative_path.Set.empty };
+  let id = ClientId.make () in
+  Hh_logger.info "[Ide_info_store] New tracked IDE with ID %d." id;
+  ide_info := Some { id; client; open_files = Relative_path.Set.empty };
   client
 
-let ide_disconnect () = ide_info := None
+let ide_disconnect () =
+  Option.iter !ide_info ~f:(fun ide_info ->
+      Hh_logger.info "[Ide_info_store] IDE with ID %d disconnected" ide_info.id);
+  ide_info := None
 
 let with_open_file file ide =
   { ide with open_files = Relative_path.Set.add ide.open_files file }

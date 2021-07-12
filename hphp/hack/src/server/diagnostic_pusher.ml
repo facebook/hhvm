@@ -394,20 +394,44 @@ let push_to_client :
   else if SMap.is_empty errors then
     false
   else
-    let res = ServerCommandTypes.DIAGNOSTIC { errors; is_truncated = None } in
+    let message =
+      ServerCommandTypes.DIAGNOSTIC { errors; is_truncated = None }
+    in
     try
-      ClientProvider.send_push_message_to_client client res;
+      ClientProvider.send_push_message_to_client client message;
       true
     with ClientProvider.Client_went_away -> false
 
 (** Reset the error tracker if the new client ID is different from the tracked one. *)
 let possibly_reset_tracker { error_tracker; tracked_ide_id } new_ide_id =
+  let log_went_away old_id =
+    Hh_logger.info
+      ~category:"clients"
+      "[Diagnostic_pusher] Tracked client with ID %d went away"
+      old_id
+  in
+  let log_new_client new_id =
+    Hh_logger.info
+      ~category:"clients"
+      "[Diagnostic_pusher] New client with ID %d"
+      new_id
+  in
   let client_went_away =
     match (tracked_ide_id, new_ide_id) with
-    | (None, _) -> false
-    | (Some _, None) -> true
+    | (None, None) -> false
+    | (None, Some client_id) ->
+      log_new_client client_id;
+      false
+    | (Some tracked_ide_id, None) ->
+      log_went_away tracked_ide_id;
+      true
     | (Some tracked_ide_id, Some client_id) ->
-      not (Int.equal tracked_ide_id client_id)
+      let went_away = not (Int.equal tracked_ide_id client_id) in
+      if went_away then (
+        log_went_away tracked_ide_id;
+        log_new_client client_id
+      );
+      went_away
   in
   let error_tracker =
     if client_went_away then

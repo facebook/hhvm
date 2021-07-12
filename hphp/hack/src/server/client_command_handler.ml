@@ -143,6 +143,8 @@ end = struct
     match Exception.to_exn e with
     | ClientProvider.Client_went_away
     | ServerCommandTypes.Read_command_timeout ->
+      Hh_logger.log
+        "Client went away or server took too long to read command. Shutting down client socket.";
       ClientProvider.shutdown_client client;
       env
     (* Connection dropped off. Its unforunate that we don't actually know
@@ -154,7 +156,7 @@ end = struct
     | Unix.Unix_error (Unix.EPIPE, _, _)
     | Sys_error "Broken pipe"
     | Sys_error "Connection reset by peer" ->
-      Hh_logger.log "Client channel went bad. Shutting down client connection";
+      Hh_logger.log "Client channel went bad. Shutting down client socket";
       ClientProvider.shutdown_client client;
       env
     | exn ->
@@ -190,6 +192,7 @@ end = struct
     @@ fun () ->
     match ClientProvider.read_connection_type client with
     | ServerCommandTypes.Persistent ->
+      Hh_logger.log "Handling persistent client connection.";
       let handle_persistent_client_connection env =
         let env =
           match env.ServerEnv.persistent_client with
@@ -224,7 +227,9 @@ end = struct
         Option.is_some env.ServerEnv.persistent_client
         (* Cleaning up after existing client (in shutdown_persistent_client)
          * will attempt to write to shared memory *)
-      then
+      then (
+        Hh_logger.log
+          "There is already a persistent client: will handle new connection later.";
         ServerUtils.Needs_writes
           {
             env;
@@ -232,9 +237,11 @@ end = struct
             recheck_restart_is_needed = true;
             reason = "Cleaning up persistent client";
           }
-      else
+      ) else
         ServerUtils.Done (handle_persistent_client_connection env)
-    | ServerCommandTypes.Non_persistent -> ServerCommand.handle genv env client
+    | ServerCommandTypes.Non_persistent ->
+      Hh_logger.log "Handling non-persistent client command.";
+      ServerCommand.handle genv env client
 
   let handle_client_command_or_persistent_connection genv env client =
     handle_client_command_or_persistent_connection_ genv env client
@@ -246,6 +253,11 @@ let handle_client_command_or_persistent_connection genv env client client_kind :
     ServerEnv.env ServerUtils.handle_command_result =
   ServerIdle.stamp_connection ();
   match client_kind with
-  | `Persistent -> Persistent.handle_client_command genv env client
+  | `Persistent ->
+    Hh_logger.log ~category:"clients" "Handling persistent client command";
+    Persistent.handle_client_command genv env client
   | `Non_persistent ->
+    Hh_logger.log
+      ~category:"clients"
+      "Handling non-persistent client command or persistent client connection.";
     NonPersistent.handle_client_command_or_persistent_connection genv env client

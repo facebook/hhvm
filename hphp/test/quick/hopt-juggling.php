@@ -27,7 +27,7 @@ function foo5() {
 
 function foo6() {
   $x = "13";
-  return $x ^ 6;
+  return (int)($x) ^ 6;
 }
 
 function foo7() {

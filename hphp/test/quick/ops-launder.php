@@ -129,13 +129,13 @@ print "5.0 ^ 3.0 --> "; print __hhvm_intrinsics\launder_value(5.0) ^ 3.0; print 
 print "\n";
 
 print "5 << 1 --> "; print __hhvm_intrinsics\launder_value(5) << 1; print "\n";
-print "5 << 1.0 --> "; print __hhvm_intrinsics\launder_value(5) << 1.0; print "\n";
-print "5 << \"hi\" --> "; print __hhvm_intrinsics\launder_value(5) << "hi"; print "\n";
+print "5 << 1.0 --> "; print (int)(__hhvm_intrinsics\launder_value(5)) << (int)(1.0); print "\n";
+print "5 << \"hi\" --> "; print (int)(__hhvm_intrinsics\launder_value(5)) << (int)("hi"); print "\n";
 print "\n";
 
 print "5 >> 1 --> "; print __hhvm_intrinsics\launder_value(5) >> 1; print "\n";
-print "5 >> 1.0 --> "; print __hhvm_intrinsics\launder_value(5) >> 1.0; print "\n";
-print "5 >> \"hi\" --> "; print __hhvm_intrinsics\launder_value(5) >> "hi"; print "\n";
+print "5 >> 1.0 --> "; print (int)(__hhvm_intrinsics\launder_value(5)) >> (int)(1.0); print "\n";
+print "5 >> \"hi\" --> "; print (int)(__hhvm_intrinsics\launder_value(5)) >> (int)("hi"); print "\n";
 print "\n";
 
 print "!0 --> "; print __hhvm_intrinsics\launder_value(!0); print "\n";

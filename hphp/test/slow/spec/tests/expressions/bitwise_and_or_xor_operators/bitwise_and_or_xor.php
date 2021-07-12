@@ -11,7 +11,7 @@ error_reporting(-1);
 // check for even integer values by inspecting the low-order bit
 
 for ($i = -5; $i <= 5; ++$i)
-    echo "$i is ".(($i & 1 == TRUE) ? "odd\n" : "even\n");
+    echo "$i is ".(($i & (int)(1 == TRUE)) ? "odd\n" : "even\n");
 
 $upCaseLetter = 0x41;                   // letter 'A'
 $lowCaseLetter = $upCaseLetter | 0x20;  // set the 6th bit

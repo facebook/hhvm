@@ -1,12 +1,12 @@
 <?hh
 function odd($var)
 {
-   return($var & 1);
+   return((int)($var) & 1);
 }
 
 function even($var)
 {
-   return(!($var & 1));
+   return(!((int)($var) & 1));
 }
 <<__EntryPoint>> function main(): void {
 $array1 = darray["a"=>1, "b"=>2, "c"=>3, "d"=>4, "e"=>5];

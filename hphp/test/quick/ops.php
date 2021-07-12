@@ -129,13 +129,13 @@ print "5.0 ^ 3.0 --> "; print 5.0 ^ 3.0; print "\n";
 print "\n";
 
 print "5 << 1 --> "; print 5 << 1; print "\n";
-print "5 << 1.0 --> "; print 5 << 1.0; print "\n";
-print "5 << \"hi\" --> "; print 5 << "hi"; print "\n";
+print "5 << 1.0 --> "; print 5 << (int)(1.0); print "\n";
+print "5 << \"hi\" --> "; print 5 << (int)("hi"); print "\n";
 print "\n";
 
 print "5 >> 1 --> "; print 5 >> 1; print "\n";
-print "5 >> 1.0 --> "; print 5 >> 1.0; print "\n";
-print "5 >> \"hi\" --> "; print 5 >> "hi"; print "\n";
+print "5 >> 1.0 --> "; print 5 >> (int)(1.0); print "\n";
+print "5 >> \"hi\" --> "; print 5 >> (int)("hi"); print "\n";
 print "\n";
 
 print "!0 --> "; print !0; print "\n";

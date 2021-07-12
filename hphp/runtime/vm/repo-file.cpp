@@ -1053,6 +1053,7 @@ RepoFile::loadUnitEmitter(const StringData* searchPath,
   ue->m_filepath = path;
   ue->m_sn = sn;
   ue->serde(blob.decoder, lazy);
+  ue->finish();
   blob.decoder.assertDone();
   return ue;
 }

@@ -3760,6 +3760,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
     AsmState as{instr};
     as.ue = ue.get();
     parse(as);
+    ue->finish();
   } catch (const FatalUnitError& e) {
     auto const filePath = e.filePath ? e.filePath : sd;
     ue = createFatalUnit(filePath, sha1, e.op, e.msg, e.pos);

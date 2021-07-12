@@ -414,7 +414,7 @@ public:
   folly::Range<Func* const*> funcs() const;
 
   // Return the cached EntryPoint
-  Func* getCachedEntryPoint() const;
+  Func* getEntryPoint() const;
 
   /*
    * Visit all functions and methods in this unit.
@@ -670,11 +670,8 @@ private:
   TypeAliasVec m_typeAliases;
   ConstantVec m_constants;
   CompactVector<PreRecordDescPtr> m_preRecords;
-  /*
-   * Cached the EntryPoint for an unit, since compactMergeInfo() inside of
-   * mergeImpl will drop the original EP.
-   */
-  Func* m_cachedEntryPoint{nullptr};
+
+  Id m_entryPointId{kInvalidId};
 
   /*
    * The remaining fields are cold, and arbitrarily ordered.

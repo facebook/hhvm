@@ -238,6 +238,46 @@ Id UnitEmitter::addConstant(const Constant& c) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// EntryPoint calculation.
+
+const StaticString s___EntryPoint("__EntryPoint");
+
+void UnitEmitter::calculateEntryPointId() {
+  if (m_entryPointIdCalculated) return;
+
+  for (auto& fe : m_fes) {
+    auto hasEntryPointAttr = fe->userAttributes.count(s___EntryPoint.get()) > 0;
+    if (hasEntryPointAttr) {
+      // Hack already enforce that there is only one func marked with entryPoint.
+      always_assert(m_entryPointId == kInvalidId);
+      m_entryPointId = fe->id();
+    }
+  }
+
+  m_entryPointIdCalculated = true;
+}
+
+void UnitEmitter::setEntryPointIdCalculated() {
+  m_entryPointIdCalculated = true;
+  if (!debug) return;
+
+  for (auto& fe : m_fes) {
+    auto isEntryPoint = m_entryPointId == fe->id();
+    auto hasEntryPointAttr = fe->userAttributes.count(s___EntryPoint.get()) > 0;
+    always_assert(isEntryPoint == hasEntryPointAttr);
+  }
+}
+
+Id UnitEmitter::getEntryPointId() const {
+  always_assert(m_entryPointIdCalculated);
+  return m_entryPointId;
+}
+
+void UnitEmitter::finish() {
+  calculateEntryPointId();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Initialization and execution.
 
 ServiceData::ExportedCounter* g_hhbc_size =
@@ -367,6 +407,8 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
     ix++;
   }
 
+  u->m_entryPointId = getEntryPointId();
+
   if (u->m_extended) {
     auto ux = u->getExtended();
     for (auto s : m_litstrs) {
@@ -427,6 +469,7 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
     (m_symbol_refs)
     (m_bcSha1)
     (m_fatalUnit)
+    (m_entryPointId)
     ;
   if (m_fatalUnit) {
     sd(m_fatalLoc)
@@ -439,6 +482,12 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
     assertx(!RO::RepoAuthoritative);
     /* May be different than the unit origin: e.g. for hhas files. */
     sd(m_filepath);
+  }
+
+  if constexpr (SerDe::deserializing) {
+    setEntryPointIdCalculated();
+  } else {
+    assertx(m_entryPointIdCalculated);
   }
 }
 
@@ -636,6 +685,7 @@ createFatalUnit(const StringData* filename, const SHA1& sha1, FatalOp op,
   ue->m_fatalOp = op;
   ue->m_fatalMsg = err;
 
+  ue->finish();
   return ue;
 }
 

@@ -1271,7 +1271,7 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
 
   const_cast<Unit*>(unit)->merge();
 
-  auto it = unit->getCachedEntryPoint();
+  auto it = unit->getEntryPoint();
   if (callByHPHPInvoke && it != nullptr) {
     if (it->isAsync()) {
       invokeFunc(

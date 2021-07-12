@@ -1483,6 +1483,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index, php::Unit& unit) {
     emit_record(*ue, *unit.records[id]);
   }
 
+  ue->finish();
   return ue;
 }
 

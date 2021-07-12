@@ -249,6 +249,18 @@ struct UnitEmitter {
   bool isASystemLib() const;
 
   /////////////////////////////////////////////////////////////////////////////
+  // EntryPoint.
+
+  void finish();
+
+  void setEntryPointIdCalculated();
+
+  Id getEntryPointId() const;
+
+private:
+  void calculateEntryPointId();
+
+  /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
 public:
@@ -320,6 +332,10 @@ private:
   std::vector<RecordEmitter*> m_reVec;
 
   mutable std::mutex m_verifyLock;
+
+  Id m_entryPointId{kInvalidId};
+
+  bool m_entryPointIdCalculated{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -150,6 +150,7 @@ std::unique_ptr<UnitEmitter> cache_hook(
     }
   }
 
+  ue->finish();
   return ue;
 }
 

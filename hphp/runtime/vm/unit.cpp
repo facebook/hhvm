@@ -243,8 +243,11 @@ rds::Handle Unit::coverageDataHandle() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Funcs and PreClasses.
 
-Func* Unit::getCachedEntryPoint() const {
-  return m_cachedEntryPoint;
+Func* Unit::getEntryPoint() const {
+  if (m_entryPointId == kInvalidId) {
+    return nullptr;
+  }
+  return lookupFuncId(m_entryPointId);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -704,34 +707,6 @@ void setGlobal(StringData* name, TypedValue *value) {
   g_context->m_globalNVTable->set(name, value);
 }
 
-/*
- * count the number of the EntryPoint in a file, and return a iterator
- * 1) there is not EntryPoint, return the begin()
- * 2) there are multiple EntryPoints, return the end()
- * 3) there is exact one EntryPoint, return that iterator points to the location
- */
-Func* findEntryPoint(const Unit* unit) {
-  auto it = unit->funcs().begin();
-  auto retIt = it;
-  bool found = false;
-  auto EntryPointTag = makeStaticString("__EntryPoint");
-  for (; it != unit->funcs().end(); it++) {
-    if ((*it)->userAttributes().count(EntryPointTag)) {
-      if (found) {
-        raise_fatal_error(
-          folly::sformat("There are multiple entryPoint in {}",
-                         unit->filepath()->data()).c_str()
-        );
-      }
-      found = true;
-      retIt = it;
-    }
-  }
-  if (found)  return *retIt;
-
-  return nullptr;
-}
-
 bool isEvalName(const StringData* name) {
   return name->empty() || boost::ends_with(name->slice(), EVAL_FILENAME_SUFFIX);
 }
@@ -755,8 +730,6 @@ void Unit::initialMerge() {
       StructuredLog::log("hhvm_first_units", ent);
     }
   }
-
-  this->m_cachedEntryPoint = findEntryPoint(this);
 
   if (RuntimeOption::EvalEnableReverseDataMap) {
     data_map::register_start(this);

@@ -1401,14 +1401,18 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
   auto unitEmitter = match<std::unique_ptr<UnitEmitter>>(
     res,
     [&] (std::unique_ptr<UnitEmitter>& ue) {
+      ue->finish();
       return std::move(ue);
     },
     [&] (std::string& err) {
       switch (mode) {
       case CompileAbortMode::Never:
         break;
-      case CompileAbortMode::AllErrorsNull:
-        return std::unique_ptr<UnitEmitter>{};
+      case CompileAbortMode::AllErrorsNull: {
+        auto ue = std::unique_ptr<UnitEmitter>{};
+        ue->finish();
+        return ue;
+      }
       case CompileAbortMode::OnlyICE:
       case CompileAbortMode::VerifyErrors:
       case CompileAbortMode::AllErrors:

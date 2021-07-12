@@ -153,14 +153,14 @@ struct UnitEmitter {
   /*
    * Create a new FuncEmitter and add it to the FE vector.
    */
-  FuncEmitter* newFuncEmitter(const StringData* name);
+  FuncEmitter* newFuncEmitter(const StringData* name, int64_t sn = -1);
 
   /*
    * Create a new FuncEmitter for the method given by `name' and `pce'.
    *
    * Does /not/ add it to the FE vector.
    */
-  FuncEmitter* newMethodEmitter(const StringData* name, PreClassEmitter* pce);
+  FuncEmitter* newMethodEmitter(const StringData* name, PreClassEmitter* pce, int64_t sn = -1);
 
   /*
    * Create a new function for `fe'.

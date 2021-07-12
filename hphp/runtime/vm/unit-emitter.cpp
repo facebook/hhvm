@@ -160,16 +160,21 @@ Id UnitEmitter::mergeUnitArray(const ArrayData* a) {
 ///////////////////////////////////////////////////////////////////////////////
 // FuncEmitters.
 
-FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* name) {
-  auto fe = std::make_unique<FuncEmitter>(*this, m_nextFuncSn++, m_fes.size(),
-                                          name);
+FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* name, int64_t sn) {
+  if (sn == -1) {
+    sn = m_nextFuncSn++;
+  }
+  auto fe = std::make_unique<FuncEmitter>(*this, sn, m_fes.size(), name);
   m_fes.push_back(std::move(fe));
   return m_fes.back().get();
 }
 
 FuncEmitter* UnitEmitter::newMethodEmitter(const StringData* name,
-                                           PreClassEmitter* pce) {
-  return new FuncEmitter(*this, m_nextFuncSn++, name, pce);
+                                           PreClassEmitter* pce, int64_t sn) {
+  if (sn == -1) {
+    sn = m_nextFuncSn++;
+  }
+  return new FuncEmitter(*this, sn, name, pce);
 }
 
 Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
@@ -505,6 +510,45 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
   // HHBBC array types
   sd(m_arrayTypeTable);
 
+  auto serdeFuncEmitters = [&](auto& funcs, auto create) {
+    seq(
+      funcs,
+      [&] (auto& sd, size_t i) {
+        int sn;
+        LowStringPtr name;
+        sd(sn);
+        sd(name);
+
+        auto fe = create(name, sn, i);
+        fe->serde(sd, lazy);
+        fe->setEHTabIsSorted();
+        fe->finish();
+      },
+      [&] (auto& sd, auto& fe) {
+        sd(fe->sn());
+        sd(fe->name);
+        fe->serde(sd, false);
+      }
+    );
+  };
+
+  serdeFuncEmitters(m_fes,
+    [&](auto& name, auto sn, auto i) {
+      auto fe = newFuncEmitter(name, sn);
+      assertx(fe->id() == i);
+      return fe;
+    });
+
+  auto serdeMethods = [&](PreClassEmitter* pce) {
+    serdeFuncEmitters(pce->methods(),
+      [&](auto& name, auto sn, auto /* i */) {
+        auto fe = newMethodEmitter(name, pce, sn);
+        auto const added UNUSED = pce->addMethod(fe);
+        assertx(added);
+        return fe;
+      });
+  };
+
   // Pre-class emitters
   seq(
     m_pceVec,
@@ -514,11 +558,13 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       auto pce = newPreClassEmitter(name);
       pce->serdeMetaData(sd);
       assertx(pce->id() == i);
+      serdeMethods(pce);
     },
     [&] (auto& sd, PreClassEmitter* pce) {
       auto const nm = StripIdFromAnonymousClassName(pce->name()->slice());
       sd(nm.toString());
       pce->serdeMetaData(sd);
+      serdeMethods(pce);
     }
   );
 
@@ -573,47 +619,6 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       sd(cns);
     }
   );
-
-  // Func emitters (we cannot use seq for these because they come from
-  // both the pre-class emitters and m_fes.
-  if constexpr (SerDe::deserializing) {
-    size_t total;
-    sd(total);
-    for (size_t i = 0; i < total; ++i) {
-      Id pceId;
-      LowStringPtr name;
-      sd(pceId);
-      sd(name);
-
-      FuncEmitter* fe;
-      if (pceId < 0) {
-        fe = newFuncEmitter(name);
-      } else {
-        auto funcPce = pce(pceId);
-        fe = newMethodEmitter(name, funcPce);
-        auto const added UNUSED = funcPce->addMethod(fe);
-        assertx(added);
-      }
-      assertx(fe->sn() == i);
-      fe->serde(sd, lazy);
-      fe->setEHTabIsSorted();
-      fe->finish();
-    }
-  } else {
-    auto total = m_fes.size();
-    for (auto const pce : m_pceVec) total += pce->methods().size();
-    sd(total);
-
-    auto const write = [&] (FuncEmitter* fe, Id pceId) {
-      sd(pceId);
-      sd(fe->name);
-      fe->serde(sd, false);
-    };
-    for (auto const& fe : m_fes) write(fe.get(), -1);
-    for (auto const pce : m_pceVec) {
-      for (auto const fe : pce->methods()) write(fe, pce->id());
-    }
-  }
 }
 
 template void UnitEmitter::serde<>(BlobDecoder&, bool);

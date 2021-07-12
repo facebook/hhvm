@@ -510,6 +510,34 @@ let idle_if_no_client env waiting_client =
       env
   | _ -> env
 
+let push_diagnostics genv env =
+  match env.diag_subscribe with
+  | None -> (env, "no diag subscriptions")
+  | Some sub ->
+    let client = Option.value_exn env.persistent_client in
+    (* Should we hold off sending diagnostics to the client? *)
+    if ClientProvider.client_has_message client then
+      (env, "client has message")
+    else if not @@ Relative_path.Set.is_empty env.ide_needs_parsing then
+      (env, "ide_needs_parsing: processed edits but didn't recheck them yet")
+    else if has_pending_disk_changes genv then
+      (env, "has_pending_disk_changes")
+    else
+      let (sub, errors, is_truncated) =
+        Diagnostic_subscription.pop_errors sub ~global_errors:env.errorl
+      in
+      let env = { env with diag_subscribe = Some sub } in
+      if SMap.is_empty errors then
+        (env, "is_empty errors")
+      else
+        let res = ServerCommandTypes.DIAGNOSTIC { errors; is_truncated } in
+        (try
+           ClientProvider.send_push_message_to_client client res;
+           (env, "sent push message")
+         with ClientProvider.Client_went_away ->
+           (* Leaving cleanup of this condition to handled_connection function *)
+           (env, "Client_went_away"))
+
 let serve_one_iteration genv env client_provider =
   let (env, recheck_id) = generate_and_update_recheck_id env in
   ServerMonitorUtils.exit_if_parent_dead ();
@@ -601,36 +629,7 @@ let serve_one_iteration genv env client_provider =
           env.last_recheck_loop_stats_for_actual_work );
     }
   in
-  (* push diagnostic changes to client, if necessary *)
-  let (env, diag_reason) =
-    match env.diag_subscribe with
-    | None -> (env, "no diag subscriptions")
-    | Some sub ->
-      let client = Utils.unsafe_opt env.persistent_client in
-      (* Should we hold off sending diagnostics to the client? *)
-      if ClientProvider.client_has_message client then
-        (env, "client has message")
-      else if not @@ Relative_path.Set.is_empty env.ide_needs_parsing then
-        (env, "ide_needs_parsing: processed edits but didn't recheck them yet")
-      else if has_pending_disk_changes genv then
-        (env, "has_pending_disk_changes")
-      else
-        let (sub, errors, is_truncated) =
-          Diagnostic_subscription.pop_errors sub ~global_errors:env.errorl
-        in
-        let env = { env with diag_subscribe = Some sub } in
-        let res = ServerCommandTypes.DIAGNOSTIC { errors; is_truncated } in
-        if SMap.is_empty errors then
-          (env, "is_empty errors")
-        else begin
-          try
-            ClientProvider.send_push_message_to_client client res;
-            (env, "sent push message")
-          with ClientProvider.Client_went_away ->
-            (* Leaving cleanup of this condition to handled_connection function *)
-            (env, "Client_went_away")
-        end
-  in
+  let (env, diag_reason) = push_diagnostics genv env in
   let t_sent_diagnostics = Unix.gettimeofday () in
 
   if did_work then begin

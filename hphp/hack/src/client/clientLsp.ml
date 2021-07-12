@@ -128,6 +128,7 @@ module In_init_env = struct
     uris_with_unsaved_changes: UriSet.t;
         (** see comment in get_uris_with_unsaved_changes *)
     hh_server_status_diagnostic: PublishDiagnostics.params option;
+        (** Diagnostic messages warning about server not fully running. *)
   }
 end
 
@@ -140,6 +141,7 @@ module Lost_env = struct
         (** see comment in get_uris_with_unsaved_changes *)
     lock_file: string;
     hh_server_status_diagnostic: PublishDiagnostics.params option;
+        (** Diagnostic messages warning about server not fully running. *)
   }
 
   and params = {
@@ -1760,6 +1762,7 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
         total = None;
       }
 
+(** Makes a diagnostic messages for cases where the server status is not fully running. *)
 let hh_server_status_to_diagnostic
     (uri : documentUri option) (hh_server_status : ShowStatusFB.params) :
     PublishDiagnostics.params option =
@@ -3386,42 +3389,33 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
     Main_loop { menv with hh_server_status }
   | _ -> state
 
-(** Send notifications for all reported diagnostics; also
-    returns an updated "uris_with_diagnostics" set of all files for which
-    our client currently has non-empty diagnostic reports. *)
-let do_diagnostics
-    (uris_with_diagnostics : UriSet.t)
-    (file_reports : Errors.finalized_error list SMap.t)
-    ~(is_truncated : int option) : UriSet.t =
-  (* Hack sometimes reports a diagnostic on an empty file when it can't
-     figure out which file to report. In this case we'll report on the root.
-     Nuclide and VSCode both display this fine, though they obviously don't
-     let you click-to-go-to-file on it. *)
-  let default_path = get_root_exn () |> Path.to_string in
-  let file_reports =
-    match SMap.find_opt "" file_reports with
-    | None -> file_reports
-    | Some errors ->
-      SMap.remove "" file_reports |> SMap.add ~combine:( @ ) default_path errors
-  in
-  let per_file file errors =
-    let params = hack_errors_to_lsp_diagnostic file errors in
-    let notification = PublishDiagnosticsNotification params in
-    notify_jsonrpc ~powered_by:Hh_server notification
-  in
-  SMap.iter per_file file_reports;
+let warn_truncated_diagnostic_list is_truncated =
   Option.iter is_truncated ~f:(fun total_error_count ->
       let msg =
         Printf.sprintf
           "Hack produced %d errors in total. Showing only a limited number to preserve performance."
           total_error_count
       in
-      Lsp_helpers.showMessage_warning to_stdout msg);
+      Lsp_helpers.showMessage_warning to_stdout msg)
 
+(** Hack sometimes reports a diagnostic on an empty file path when it can't
+    figure out which file to report. In this case we'll report on the root.
+    Nuclide and VSCode both display this fine, though they obviously don't
+    let you click-to-go-to-file on it. *)
+let fix_empty_paths_in_error_map errors_per_file =
+  let default_path = get_root_exn () |> Path.to_string in
+  match SMap.find_opt "" errors_per_file with
+  | None -> errors_per_file
+  | Some errors ->
+    SMap.remove "" errors_per_file
+    |> SMap.add ~combine:( @ ) default_path errors
+
+let update_uris_with_diagnostics uris_with_diagnostics errors_per_file =
+  let default_path = get_root_exn () |> Path.to_string in
   let is_error_free _uri errors = List.is_empty errors in
   (* reports_without/reports_with are maps of filename->ErrorList. *)
   let (reports_without, reports_with) =
-    SMap.partition is_error_free file_reports
+    SMap.partition is_error_free errors_per_file
   in
   (* files_without/files_with are sets of filenames *)
   let files_without = SMap.bindings reports_without |> List.map ~f:fst in
@@ -3435,6 +3429,23 @@ let do_diagnostics
   in
   (* this is "(uris_with_diagnostics \ uris_without) U uris_with" *)
   UriSet.union (UriSet.diff uris_with_diagnostics uris_without) uris_with
+
+(** Send notifications for all reported diagnostics.
+    Returns an updated "uris_with_diagnostics" set of all files for which
+    our client currently has non-empty diagnostic reports. *)
+let do_diagnostics
+    (uris_with_diagnostics : UriSet.t)
+    (errors_per_file : Errors.finalized_error list SMap.t)
+    ~(is_truncated : int option) : UriSet.t =
+  let errors_per_file = fix_empty_paths_in_error_map errors_per_file in
+  let send_diagnostic_notification file errors =
+    let params = hack_errors_to_lsp_diagnostic file errors in
+    let notification = PublishDiagnosticsNotification params in
+    notify_jsonrpc ~powered_by:Hh_server notification
+  in
+  SMap.iter send_diagnostic_notification errors_per_file;
+  warn_truncated_diagnostic_list is_truncated;
+  update_uris_with_diagnostics uris_with_diagnostics errors_per_file
 
 let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
   Initialize.
@@ -4536,7 +4547,6 @@ let handle_client_message
 let handle_server_message
     ~(env : env) ~(state : state ref) ~(message : server_message) :
     result_telemetry option Lwt.t =
-  let open Main_env in
   let%lwt () =
     match (!state, message) with
     (* server busy status *)
@@ -4566,9 +4576,9 @@ let handle_server_message
         { push = ServerCommandTypes.DIAGNOSTIC { errors; is_truncated }; _ } )
       ->
       let uris_with_diagnostics =
-        do_diagnostics menv.uris_with_diagnostics errors ~is_truncated
+        do_diagnostics menv.Main_env.uris_with_diagnostics errors ~is_truncated
       in
-      state := Main_loop { menv with uris_with_diagnostics };
+      state := Main_loop { menv with Main_env.uris_with_diagnostics };
       Lwt.return_unit
     (* any server diagnostics that come after we've shut down *)
     | (_, { push = ServerCommandTypes.DIAGNOSTIC _; _ }) -> Lwt.return_unit
@@ -4838,9 +4848,9 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
   let state = ref Pre_init in
   let ref_event = ref None in
   let ref_unblocked_time = ref (Unix.gettimeofday ()) in
-  (* ref_unblocked_time is the time at which we're no longer blocked on either *)
-  (* clientLsp message-loop or hh_server, and can start actually handling.  *)
-  (* Everything that blocks will update this variable.                      *)
+  (* ref_unblocked_time is the time at which we're no longer blocked on either
+   * clientLsp message-loop or hh_server, and can start actually handling.
+   * Everything that blocks will update this variable. *)
   let process_next_event () : unit Lwt.t =
     try%lwt
       let%lwt () =

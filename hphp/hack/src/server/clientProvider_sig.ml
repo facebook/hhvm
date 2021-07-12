@@ -12,8 +12,6 @@ module type S = sig
 
   type client
 
-  type client_id = int
-
   (** Outcome of the POSIX [select] system call. *)
   type select_outcome =
     | Select_persistent
@@ -60,9 +58,7 @@ module type S = sig
 
   val read_client_msg : client -> 'a ServerCommandTypes.command
 
-  val make_and_store_persistent : client -> client
-
-  val get_persistent_client : unit -> (client_id * client) option
+  val make_persistent : client -> client
 
   val is_persistent : client -> bool
 

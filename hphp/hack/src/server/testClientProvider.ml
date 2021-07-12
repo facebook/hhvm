@@ -137,26 +137,9 @@ let push_message x = Refs.push_message x
 
 let get_push_messages = Refs.get_push_messages
 
-module ClientId : sig
-  type t = int
-
-  val make : unit -> t
-end = struct
-  type t = int
-
-  let next_id : t ref = ref 0
-
-  let make () =
-    let id = !next_id in
-    next_id := id + 1;
-    id
-end
-
 type t = unit
 
 type client = connection_type
-
-type client_id = ClientId.t
 
 type select_outcome =
   | Select_persistent
@@ -214,16 +197,7 @@ let is_persistent = function
 
 let priority_to_string (_client : client) : string = "mock"
 
-let persistent_client : (client_id * client) option ref = ref None
-
-let make_and_store_persistent _ =
-  let client = ServerCommandTypes.Persistent in
-  persistent_client := Some (ClientId.make (), client);
-  client
-
-let disconnect_persistent () = persistent_client := None
-
-let get_persistent_client () = !persistent_client
+let make_persistent _ = ServerCommandTypes.Persistent
 
 let shutdown_client _ = ()
 

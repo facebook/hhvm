@@ -76,6 +76,7 @@ module ErrorTracker : sig
     rechecked:Relative_path.Set.t ->
     new_errors:Errors.t ->
     phase:Errors.phase ->
+    priority_files:Relative_path.Set.t option ->
     t * ServerCommandTypes.diagnostic_errors
 
   (** Inform the tracker that errors yet to be pushed have been successfully pushed
@@ -308,11 +309,13 @@ end = struct
       rechecked:Relative_path.Set.t ->
       new_errors:Errors.t ->
       phase:Errors.phase ->
+      priority_files:Relative_path.Set.t option ->
       t * ServerCommandTypes.diagnostic_errors =
    fun { errors_in_ide; to_push; errors_beyond_limit }
        ~rechecked
        ~new_errors
-       ~phase ->
+       ~phase
+       ~priority_files ->
     let new_errors : error list FileMap.t = Errors.as_map new_errors in
     (* Merge to_push and errors_beyond_limit to obtain the total
      * set of errors to be pushed. *)
@@ -326,7 +329,7 @@ end = struct
     (* Separate errors we'll push now vs. errors we won't push yet
      * because they are beyond the error limit *)
     let (to_push, errors_beyond_limit) =
-      truncate to_push ~errors_in_ide ~priority_files:None
+      truncate to_push ~errors_in_ide ~priority_files
     in
     let to_push_absolute = to_diagnostic_errors to_push in
     ({ errors_in_ide; to_push; errors_beyond_limit }, to_push_absolute)
@@ -377,10 +380,10 @@ end
 
 type t = {
   error_tracker: ErrorTracker.t;
-  tracked_client_id: int option;
+  tracked_ide_id: int option;
 }
 
-let init = { error_tracker = ErrorTracker.init; tracked_client_id = None }
+let init = { error_tracker = ErrorTracker.init; tracked_ide_id = None }
 
 let push_to_client :
     ServerCommandTypes.diagnostic_errors -> ClientProvider.client -> bool =
@@ -397,13 +400,13 @@ let push_to_client :
     with ClientProvider.Client_went_away -> false
 
 (** Reset the error tracker if the new client ID is different from the tracked one. *)
-let possibly_reset_tracker { error_tracker; tracked_client_id } new_client_id =
+let possibly_reset_tracker { error_tracker; tracked_ide_id } new_ide_id =
   let client_went_away =
-    match (tracked_client_id, new_client_id) with
+    match (tracked_ide_id, new_ide_id) with
     | (None, _) -> false
     | (Some _, None) -> true
-    | (Some tracked_client_id, Some client_id) ->
-      not (Int.equal tracked_client_id client_id)
+    | (Some tracked_ide_id, Some client_id) ->
+      not (Int.equal tracked_ide_id client_id)
   in
   let error_tracker =
     if client_went_away then
@@ -411,31 +414,41 @@ let possibly_reset_tracker { error_tracker; tracked_client_id } new_client_id =
     else
       error_tracker
   in
-  let tracked_client_id = new_client_id in
-  { error_tracker; tracked_client_id }
+  let tracked_ide_id = new_ide_id in
+  { error_tracker; tracked_ide_id }
 
-let option_of_tuple_to_tuple_of_options :
-    ('a * 'b) option -> 'a option * 'b option = function
-  | None -> (None, None)
-  | Some (a, b) -> (Some a, Some b)
+let break_down_ide_info_option :
+    Ide_info_store.t option ->
+    int option * ClientProvider.client option * Relative_path.Set.t option =
+  function
+  | None -> (None, None, None)
+  | Some { Ide_info_store.id; client; open_files } ->
+    (Some id, Some client, Some open_files)
 
 (** Get client from the client provider and possibly reset the error tracker
     if we've lost the previous client. *)
-let get_client : t -> t * ClientProvider.client option =
+let get_client :
+    t -> t * (ClientProvider.client option * Relative_path.Set.t option) =
  fun pusher ->
-  let (current_client_id, current_client) =
-    ClientProvider.get_persistent_client ()
-    |> option_of_tuple_to_tuple_of_options
+  let (current_ide_id, current_client, current_ide_open_files) =
+    Ide_info_store.get () |> break_down_ide_info_option
   in
-  let pusher = possibly_reset_tracker pusher current_client_id in
-  (pusher, current_client)
+  let pusher = possibly_reset_tracker pusher current_ide_id in
+  (pusher, (current_client, current_ide_open_files))
 
 let push_new_errors :
     t -> rechecked:Relative_path.Set.t -> Errors.t -> phase:Errors.phase -> t =
  fun pusher ~rechecked new_errors ~phase ->
-  let ({ error_tracker; tracked_client_id }, client) = get_client pusher in
+  let ({ error_tracker; tracked_ide_id }, (client, priority_files)) =
+    get_client pusher
+  in
   let (error_tracker, to_push) =
-    ErrorTracker.get_errors_to_push error_tracker ~rechecked ~new_errors ~phase
+    ErrorTracker.get_errors_to_push
+      error_tracker
+      ~rechecked
+      ~new_errors
+      ~phase
+      ~priority_files
   in
   let was_pushed =
     match client with
@@ -448,7 +461,7 @@ let push_new_errors :
     else
       error_tracker
   in
-  { error_tracker; tracked_client_id }
+  { error_tracker; tracked_ide_id }
 
 module TestExporter = struct
   module FileMap = FileMap

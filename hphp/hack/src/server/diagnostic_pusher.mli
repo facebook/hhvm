@@ -33,6 +33,7 @@ module TestExporter : sig
       rechecked:Relative_path.Set.t ->
       new_errors:Errors.t ->
       phase:Errors.phase ->
+      priority_files:Relative_path.Set.t option ->
       t * Errors.finalized_error list SMap.t
 
     val commit_pushed_errors : t -> t

@@ -208,7 +208,7 @@ end = struct
           {
             env with
             ServerEnv.persistent_client =
-              Some (ClientProvider.make_and_store_persistent client);
+              Some (Ide_info_store.make_persistent_and_track_new_ide client);
           }
         in
         (* If the client connected in the middle of recheck, let them know it's

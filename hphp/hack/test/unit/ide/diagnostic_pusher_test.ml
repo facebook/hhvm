@@ -92,6 +92,7 @@ module ErrorTrackerTest = struct
         tracker
         ~rechecked:files1
         ~new_errors:(errors1 file1)
+        ~priority_files:None
     in
     let expected_tracker =
       make_no_limit
@@ -107,6 +108,7 @@ module ErrorTrackerTest = struct
         tracker
         ~rechecked:files1
         ~new_errors:(errors2 file1)
+        ~priority_files:None
     in
     let expected_tracker =
       make_no_limit
@@ -117,7 +119,12 @@ module ErrorTrackerTest = struct
 
     (* Now there are no more errors, and we were still unable to push to client. *)
     let (tracker, _errors) =
-      get_errors_to_push ~phase tracker ~rechecked:files1 ~new_errors:no_errors
+      get_errors_to_push
+        ~phase
+        tracker
+        ~rechecked:files1
+        ~new_errors:no_errors
+        ~priority_files:None
     in
     let expected_tracker =
       make_no_limit ~errors_in_ide:FileMap.empty ~to_push:(FileMap.of_list [])
@@ -137,6 +144,7 @@ module ErrorTrackerTest = struct
         tracker
         ~rechecked:files12
         ~new_errors:(errors12 file1)
+        ~priority_files:None
     in
     let expected_to_push = errors_of_list phase [(file1, [error1; error2])] in
     let expected_tracker =
@@ -159,6 +167,7 @@ module ErrorTrackerTest = struct
         tracker
         ~rechecked:files12
         ~new_errors:(errors1 file1)
+        ~priority_files:None
     in
     let expected_to_push = errors_of_list phase [(file1, [error1])] in
     let expected_tracker =
@@ -178,7 +187,12 @@ module ErrorTrackerTest = struct
 
     (* Now errors are empty *)
     let (tracker, _errors) =
-      get_errors_to_push ~phase tracker ~rechecked:files1 ~new_errors:no_errors
+      get_errors_to_push
+        ~phase
+        tracker
+        ~rechecked:files1
+        ~new_errors:no_errors
+        ~priority_files:None
     in
     let expected_to_push = errors_of_list phase [(file1, [])] in
     let expected_tracker =
@@ -199,8 +213,24 @@ module ErrorTrackerTest = struct
 end
 
 let connect_persistent () =
-  let (_ : ServerCommandTypes.connection_type) =
-    TestClientProvider.make_and_store_persistent ()
+  TestClientProvider.mock_new_client_type ServerCommandTypes.Non_persistent;
+  let client_provider = ClientProvider.provider_for_test () in
+  let client =
+    match
+      ClientProvider.sleep_and_check
+        client_provider
+        None
+        ~ide_idle:true
+        ~idle_gc_slice:0
+        `Any
+    with
+    | ClientProvider.Select_new client -> client
+    | ClientProvider.Select_persistent
+    | ClientProvider.Select_nothing ->
+      assert false
+  in
+  let (_ : ClientProvider.client) =
+    Ide_info_store.make_persistent_and_track_new_ide client
   in
   ()
 
@@ -484,6 +514,78 @@ let test_error_limit_two_files _ =
   let (_ : Diagnostic_pusher.t) = pusher in
   ()
 
+let test_error_limit_two_files_priority _ =
+  let phase = Errors.Typing in
+  with_error_limit 2 @@ fun () ->
+  let pusher = Diagnostic_pusher.init in
+  connect_persistent ();
+
+  (* Add 2 errors in file1: they should be pushed *)
+  let pusher =
+    Diagnostic_pusher.push_new_errors
+      ~phase
+      pusher
+      ~rechecked:files1
+      (errors12 file1)
+  in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        {
+          errors =
+            SMap.of_list [(file1_absolute, [error1_absolute; error2_absolute])];
+          is_truncated = None;
+        };
+    ]
+  in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  Ide_info_store.open_file file2;
+  (* Add 1 error in file2: it should be pushed even if it goes beyond the limit.
+   * The limit will only be exceeded by the number of errors in open files, which should
+   * be small relatively. *)
+  let pusher =
+    Diagnostic_pusher.push_new_errors
+      ~phase
+      pusher
+      ~rechecked:files2
+      (errors12 file2)
+  in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        {
+          errors =
+            SMap.of_list [(file2_absolute, [error1_absolute; error2_absolute])];
+          is_truncated = None;
+        };
+    ]
+  in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  (* Now file1 only has 1 error: we can't push that error because the error count would be beyond
+   * the limit, so we erase errors for file 1. *)
+  let pusher =
+    Diagnostic_pusher.push_new_errors
+      ~phase
+      pusher
+      ~rechecked:files1
+      (errors1 file1)
+  in
+  let pushed_messages = TestClientProvider.get_push_messages () in
+  let expected_pushed_messages =
+    [
+      ServerCommandTypes.DIAGNOSTIC
+        { errors = SMap.of_list [(file1_absolute, [])]; is_truncated = None };
+    ]
+  in
+  assert_equal_messages expected_pushed_messages pushed_messages;
+
+  let (_ : Diagnostic_pusher.t) = pusher in
+  ()
+
 let test_multiple_phases _ =
   let pusher = Diagnostic_pusher.init in
   connect_persistent ();
@@ -582,7 +684,7 @@ let test_multiple_phases _ =
   ()
 
 let tear_down () =
-  TestClientProvider.disconnect_persistent ();
+  Ide_info_store.ide_disconnect ();
   ()
 
 let with_tear_down f ctx =
@@ -600,10 +702,13 @@ let () =
          "test_push" >:: with_tear_down test_push;
          "test_initially_no_client" >:: with_tear_down test_initially_no_client;
          "test_switch_client" >:: with_tear_down test_switch_client;
+         "test_switch_client_erase" >:: with_tear_down test_switch_client_erase;
          "test_error_limit_one_file"
          >:: with_tear_down test_error_limit_one_file;
          "test_error_limit_two_files"
          >:: with_tear_down test_error_limit_two_files;
+         "test_error_limit_two_files_priority"
+         >:: with_tear_down test_error_limit_two_files_priority;
          "test_multiple_phases" >:: with_tear_down test_multiple_phases;
        ]
   |> run_test_tt_main

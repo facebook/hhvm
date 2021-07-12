@@ -88,6 +88,7 @@ let open_file ~predeclare env path content =
         let () = Hh_logger.log "open_file; diag_subscribe remains as it was" in
         (Relative_path.Set.add env.ide_needs_parsing path, env.diag_subscribe)
     in
+    Ide_info_store.open_file path;
     (* Need to re-parse this file during next full check to update
      * global error list positions that refer to it *)
     let disk_needs_parsing =
@@ -120,6 +121,7 @@ let close_relative_path env path =
     | Some c when String.equal c contents -> env.ide_needs_parsing
     | _ -> Relative_path.Set.add env.ide_needs_parsing path
   in
+  Ide_info_store.close_file path;
   let disk_needs_parsing = Relative_path.Set.add env.disk_needs_parsing path in
   let last_command_time = Unix.gettimeofday () in
   {
@@ -184,6 +186,7 @@ let clear_sync_data env =
     Relative_path.Set.fold env.editor_open_files ~init:env ~f:(fun x env ->
         close_relative_path env x)
   in
+  Ide_info_store.ide_disconnect ();
   { env with persistent_client = None; diag_subscribe = None }
 
 (** Determine which files are different in the IDE and on disk.

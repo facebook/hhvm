@@ -270,11 +270,13 @@
   (modules
     clientProvider
     clientProvider_sig
+    ide_info_store
     serverClientProvider
     serverIdleGc
     testClientProvider)
   (libraries
     libancillary
+    relative_path
     server_command_types
     server_utils
     utils_core)

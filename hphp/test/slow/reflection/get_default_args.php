@@ -20,6 +20,6 @@ $refl = new ReflectionClass('Test2');
 $props = $refl->getDefaultProperties();
 for ($i = 1; $i <= 5; ++$i) {
   $key = "var$i";
-  echo "$key => $props[$key]\n";
+  echo "$key => ".(string)$props[$key]."\n";
 }
 }

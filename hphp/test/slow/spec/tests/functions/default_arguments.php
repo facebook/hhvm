@@ -46,7 +46,7 @@ function f4($p1, $p2 = 1.23, $p3 = "abc")
 {
     echo "f4:\n";
     echo "\$p1: ".($p1 == NULL ? "NULL" : $p1).
-        ", \$p2: ".($p2 == NULL ? "NULL" : $p2).
+        ", \$p2: ".($p2 == NULL ? "NULL" : (string)$p2).
         ", \$p3: ".($p3 == NULL ? "NULL" : $p3)."\n";
 }
 //*/

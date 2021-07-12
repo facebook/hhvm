@@ -2,6 +2,7 @@
 
 function test(inout $x, inout $y) {
   $x = false;
+  $y = '';
   $y .= 'hello';
   echo $x;
 }

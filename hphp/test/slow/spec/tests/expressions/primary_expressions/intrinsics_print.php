@@ -14,8 +14,8 @@ function main_entry(): void {
 
   print '>>' . (string)($v1) . '|' . $v2 . "<<\n";
   print ('>>' . (string)($v1) . '|' . $v2 . "<<\n");
-  print (('>>') . ($v1) . ('|') . ($v2) . ("<<\n"));// outer parens are part of optional syntax
-                                                   // inner ones are redundant grouping parens
+  print (('>>') . (string)($v1) . ('|') . (string)($v2) . ("<<\n"));// outer parens are part of optional syntax
+                                                                    // inner ones are redundant grouping parens
   print '>>' . (string)($v3) . '|' . (string)($v4) . '|' . $v5 . '|' . (string)($v6) . "<<\n";
 
   $v3 = "qqq{$v2}zzz";

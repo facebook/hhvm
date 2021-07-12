@@ -45,11 +45,11 @@ foreach ($scalarValueList as $e)
     $text = HH\is_any_array($e) ? 'Array' : $e;
     if ($e)
     {
-        echo ">$text< is TRUE\t"; var_dump($e);
+        echo ">".(string)$text."< is TRUE\t"; var_dump($e);
     }
     else
     {
-        echo ">$text< is FALSE\t"; var_dump($e);
+        echo ">".(string)$text."< is FALSE\t"; var_dump($e);
     }
 }
 

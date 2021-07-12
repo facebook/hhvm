@@ -7,7 +7,7 @@ $a = function ($v) {
  return $v > 2;
  }
 ;
- echo $a(4)."
+ echo (string)$a(4)."
 ";
  echo call_user_func_array($a, varray[4]);
 }

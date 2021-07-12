@@ -57,7 +57,7 @@ $values = varray[
 // loop through each element of the array for url
 
 foreach($values as $value) {
-      echo "\nArg value $value\n";
+      echo "\nArg value ".(string)$value."\n";
       try { var_dump( parse_url($value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 

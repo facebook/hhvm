@@ -57,7 +57,7 @@ $i++ ? f($i) : f(++$i);
 $scalarValueList = varray[10, -100, 0, 1.234, 0.0, TRUE, FALSE, NULL, "123", 'xx', ""];
 foreach ($scalarValueList as $v)
 {
-    echo "\$v = $v, ";
+    echo "\$v = ".(string)$v.", ";
     $a = $v ? 100 : "Hello";
     var_dump($a);
 }

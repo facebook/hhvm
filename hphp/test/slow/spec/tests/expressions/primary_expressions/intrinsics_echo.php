@@ -15,8 +15,8 @@ function main_entry(): void {
   echo '>>' . (string)($v1) . '|' . $v2 . "<<\n";
   echo '>>' , $v1 , '|' , $v2 , "<<\n";
   echo ('>>' . (string)($v1) . '|' . $v2 . "<<\n");
-  echo (('>>') . ($v1) . ('|') . ($v2) . ("<<\n"));// outer parens are part of optional syntax
-                                                   // inner ones are redundant grouping parens
+  echo (('>>') . (string)($v1) . ('|') . (string)($v2) . ("<<\n"));// outer parens are part of optional syntax
+                                                                   // inner ones are redundant grouping parens
   //echo ('>>' , $v1 , '|' , $v2 , "<<\n");   // parens no allowed with commas
 
   echo '>>' . (string)($v3) . '|' . (string)($v4) . '|' . $v5 . '|' . (string)($v6) . "<<\n";

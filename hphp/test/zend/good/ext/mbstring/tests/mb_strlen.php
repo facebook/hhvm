@@ -56,14 +56,14 @@ function entrypoint_mb_strlen(): void {
   // Note: PHP Warning, strlen() expects parameter 1 to be string, array given
   $r = null;
   try { $r = strlen(t_ary()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  echo $r."\n";
+  echo (string)$r."\n";
   // Object
   // Note: PHP Warning, strlen() expects parameter 1 to be string, object given
   $r = null;
   try { $r = strlen(t_obj()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  echo $r."\n";
+  echo (string)$r."\n";
   // Wrong encoding
   mb_internal_encoding('EUC-JP');
   $r = mb_strlen($euc_jp, 'BAD_NAME');
-  echo $r."\n";
+  echo (string)$r."\n";
 }

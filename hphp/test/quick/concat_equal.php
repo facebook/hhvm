@@ -1,6 +1,7 @@
 <?hh
 
 function main($b) {
+  $a = '';
   $a .= (string)($b);
   var_dump($a);
 }

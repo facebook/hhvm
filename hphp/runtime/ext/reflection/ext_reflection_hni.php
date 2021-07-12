@@ -673,7 +673,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
       $arr = explode('::', $args[0], 3);
       if (count($arr) !== 2) {
         $name = $args[0];
-        throw new ReflectionException("$name is not a valid method name");
+        throw new ReflectionException((string)$name." is not a valid method name");
       }
       list($cls, $name) = $arr;
       $classname = $cls;
@@ -689,7 +689,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     $this->originalClass = $classname;
     if (!$this->__init($cls, (string) $name)) {
       throw new ReflectionException(
-        "Method $classname::$name() does not exist");
+        "Method ".(string)$classname."::".(string)$name."() does not exist");
     }
 
     $this->name = $this->getName();

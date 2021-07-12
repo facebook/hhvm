@@ -26,7 +26,8 @@ type command =
 type monitor_to_server_handoff_msg = {
   m2s_tracker: Connection_tracker.t;
   m2s_sequence_number: int;
-      (** serverMonitor stores a counter, and increments it for each handoff it sends *)
+      (** A unique number incremented for each client socket handoff from monitor to server.
+            Useful to correlate monitor and server logs. *)
 }
 
 let (receipt_serialize, receipt_deserialize) =

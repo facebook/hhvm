@@ -12,10 +12,17 @@ module type S = sig
 
   type client
 
+  type handoff = {
+    client: client;
+    m2s_sequence_number: int;
+        (** A unique number incremented for each client socket handoff from monitor to server.
+            Useful to correlate monitor and server logs. *)
+  }
+
   (** Outcome of the POSIX [select] system call. *)
   type select_outcome =
     | Select_persistent
-    | Select_new of client
+    | Select_new of handoff
     | Select_nothing
 
   exception Client_went_away

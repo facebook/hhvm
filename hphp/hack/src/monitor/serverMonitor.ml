@@ -89,6 +89,8 @@ module Sent_fds_collector = struct
     tracker: Connection_tracker.t;
     fd: Unix.file_descr;
     m2s_sequence_number: int;
+        (** A unique number incremented for each client socket handoff from monitor to server.
+            Useful to correlate monitor and server logs. *)
   }
 
   let handed_off_fds_to_close : handed_off_fd_to_close list ref = ref []
@@ -114,17 +116,20 @@ module Sent_fds_collector = struct
           match fd_close_time with
           | Fd_close_immediate ->
             log
-              "closing client FD#%d, though should have been immediate"
+              "closing client socket from handoff #%d, though should have been immediate"
               ~tracker
               m2s_sequence_number;
             true
           | Fd_close_after_time t when Float.(t <= t_now) ->
-            log "closing client FD#%d, after delay" ~tracker m2s_sequence_number;
+            log
+              "closing client socket from handoff #%d, after delay"
+              ~tracker
+              m2s_sequence_number;
             true
           | Fd_close_upon_receipt
             when m2s_sequence_number <= sequence_receipt_high_water_mark ->
             log
-              "closing client FD#%d upon receipt of #%d"
+              "closing client socket from handoff #%d upon receipt of #%d"
               ~tracker
               m2s_sequence_number
               sequence_receipt_high_water_mark;
@@ -347,10 +352,16 @@ struct
     in
     let msg = MonitorRpc.{ m2s_tracker = tracker; m2s_sequence_number } in
     msg_to_channel server_fd msg;
-    log "Handed off tracker #%d to server" ~tracker m2s_sequence_number;
+    log
+      "Handed off tracker to server (client socket handoff #%d)"
+      ~tracker
+      m2s_sequence_number;
     let status = Libancillary.ancil_send_fd server_fd client_fd in
     if status = 0 then begin
-      log "Handed off FD#%d to server" ~tracker m2s_sequence_number;
+      log
+        "Handed off client socket to server (handoff #%d)"
+        ~tracker
+        m2s_sequence_number;
       let fd_close_time =
         if env.monitor_fd_close_delay = 0 then
           (* delay 0 means "close immediately" *)
@@ -369,7 +380,10 @@ struct
         ~m2s_sequence_number
         client_fd
     end else begin
-      log "Failed to handoff FD#%d to server." ~tracker m2s_sequence_number;
+      log
+        "Failed to handoff client socket to server (handoff #%d)"
+        ~tracker
+        m2s_sequence_number;
       raise (Send_fd_failure status)
     end
 

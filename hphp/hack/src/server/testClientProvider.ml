@@ -141,9 +141,14 @@ type t = unit
 
 type client = connection_type
 
+type handoff = {
+  client: client;
+  m2s_sequence_number: int;
+}
+
 type select_outcome =
   | Select_persistent
-  | Select_new of client
+  | Select_new of handoff
   | Select_nothing
 
 exception Client_went_away
@@ -157,7 +162,7 @@ let sleep_and_check _ _ ~ide_idle:_ ~idle_gc_slice:_ _ =
   let is_persistent = Option.is_some (get_mocked_client_request Persistent) in
   match (is_persistent, client_opt) with
   | (true, _) -> Select_persistent
-  | (false, Some client) -> Select_new client
+  | (false, Some client) -> Select_new { client; m2s_sequence_number = 0 }
   | (false, None) -> Select_nothing
 
 let has_persistent_connection_request _ =

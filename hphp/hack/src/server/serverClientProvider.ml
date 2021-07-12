@@ -44,6 +44,18 @@ type client =
   | Persistent_client of persistent_client
       (** In practice this is the IDE. There is only one persistent client. *)
 
+type handoff = {
+  client: client;
+  m2s_sequence_number: int;
+      (** A unique number incremented for each client socket handoff from monitor to server.
+          Useful to correlate monitor and server logs. *)
+}
+
+type select_outcome =
+  | Select_persistent
+  | Select_new of handoff
+  | Select_nothing
+
 let provider_from_file_descriptors
     (default_in_fd, priority_in_fd, force_dormant_start_only_in_fd) =
   { default_in_fd; priority_in_fd; force_dormant_start_only_in_fd }
@@ -55,7 +67,7 @@ let accept_client
     (priority : priority)
     (parent_in_fd : Unix.file_descr)
     (t_sleep_and_check : float)
-    (t_monitor_fd_ready : float) : client =
+    (t_monitor_fd_ready : float) : handoff =
   let ({ MonitorRpc.m2s_tracker = tracker; m2s_sequence_number }
         : MonitorRpc.monitor_to_server_handoff_msg) =
     Marshal_tools.from_fd_with_preamble parent_in_fd
@@ -83,13 +95,17 @@ let accept_client
     |> track ~key:Server_got_tracker ~time:t_got_tracker
     |> track ~key:Server_got_client_fd ~time:t_got_client_fd
   in
-  Non_persistent_client
-    {
-      ic = Timeout.in_channel_of_descr socket;
-      oc = Unix.out_channel_of_descr socket;
-      priority;
-      tracker;
-    }
+  {
+    client =
+      Non_persistent_client
+        {
+          ic = Timeout.in_channel_of_descr socket;
+          oc = Unix.out_channel_of_descr socket;
+          priority;
+          tracker;
+        };
+    m2s_sequence_number;
+  }
 
 let select ~idle_gc_slice fd_list timeout =
   let deadline = Unix.gettimeofday () +. timeout in
@@ -99,11 +115,6 @@ let select ~idle_gc_slice fd_list timeout =
     let (ready_fds, _, _) = Unix.select fd_list [] [] timeout in
     ready_fds
   | ready_fds -> ready_fds
-
-type select_outcome =
-  | Select_persistent
-  | Select_new of client
-  | Select_nothing
 
 (** Waits up to 0.1 seconds and checks for new connection attempts.
     Select what client to serve next and call

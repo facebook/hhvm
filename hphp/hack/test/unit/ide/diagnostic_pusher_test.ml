@@ -224,7 +224,9 @@ let connect_persistent () =
         ~idle_gc_slice:0
         `Any
     with
-    | ClientProvider.Select_new client -> client
+    | ClientProvider.Select_new
+        { ClientProvider.client; m2s_sequence_number = _ } ->
+      client
     | ClientProvider.Select_persistent
     | ClientProvider.Select_nothing ->
       assert false

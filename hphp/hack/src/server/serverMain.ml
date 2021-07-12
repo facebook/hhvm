@@ -662,9 +662,13 @@ let serve_one_iteration genv env client_provider =
     match selected_client with
     | ClientProvider.Select_persistent -> env
     | ClientProvider.Select_nothing -> env
-    | ClientProvider.Select_new client ->
+    | ClientProvider.Select_new { ClientProvider.client; m2s_sequence_number }
+      ->
       begin
         try
+          Hh_logger.log
+            "Serving new client obtained from monitor handoff #%d"
+            m2s_sequence_number;
           (* client here is the new client (not the existing persistent client)
            * whose request we're going to handle. *)
           ClientProvider.track
@@ -833,7 +837,11 @@ let priority_client_interrupt_handler genv client_provider :
          * sleep_and_check. *)
         Hh_logger.log "Client went away or hg is updating.";
         env
-      | ClientProvider.Select_new client ->
+      | ClientProvider.Select_new { ClientProvider.client; m2s_sequence_number }
+        ->
+        Hh_logger.log
+          "Serving new client obtained from monitor handoff #%d"
+          m2s_sequence_number;
         (match
            Client_command_handler.handle_client_command_or_persistent_connection
              genv

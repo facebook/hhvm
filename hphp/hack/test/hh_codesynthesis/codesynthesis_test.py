@@ -472,6 +472,35 @@ Method A::foo -> Type B
 """
         self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
 
+    def test_circular_type_method_dependency_with_rule_extraction_hack_codegen(
+        self,
+    ) -> None:
+        exp = """\
+<?hh
+class C  implements Compare {
+public function dummy_C_method(C $C_obj): void{
+$C_obj->content();
+}
+
+public function content(): void{}
+
+public function eq(): void{}
+}
+interface Compare  {
+public function dummy_Compare_method(C $C_obj): void;
+
+public function eq(): void;
+}
+"""
+        deps = """\
+Extends Compare -> Type C
+Method C::content -> Type C
+Method Compare::eq -> Type C
+Type C -> Type Compare
+Type Compare -> Type C
+"""
+        self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
+
 
 class ReadFromFileTest(unittest.TestCase):
     def test_read(self) -> None:

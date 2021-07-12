@@ -5,13 +5,13 @@ import glob
 import os
 import subprocess
 import tempfile
-from typing import List, Dict
+from typing import List, Dict, Set
 
 
 class DependencyEdges(object):
     """A simple internal representation to categorize DependencyEdges"""
 
-    edge_types = ["Extends"]
+    edge_types = ["Extends", "Type", "Method"]
 
     def __init__(self, lines: List[str]) -> None:
         super(DependencyEdges, self).__init__()
@@ -42,19 +42,15 @@ class DependencyEdges(object):
             if lhs[0] in self.edge_types:
                 self.objs[lhs[0]].append(line)
 
-    def __eq__(self, obj: "DependencyEdges") -> bool:
+    def __le__(self, obj: "DependencyEdges") -> bool:
         for edges in self.edge_types:
-            compare_result(sorted(self.objs[edges]), sorted(obj.objs[edges]))
+            compare_result(set(self.objs[edges]), set(obj.objs[edges]))
         return True
 
 
-def compare_result(lhs: List[str], rhs: List[str]) -> None:
-    if len(lhs) != len(rhs):
-        raise RuntimeError("Unmatched lhs and rhs, has different length.")
-
-    for i in range(len(lhs)):
-        if lhs[i] != rhs[i]:
-            raise RuntimeError("Unmatched lhs and rhs, had different content.")
+def compare_result(lhs: Set[str], rhs: Set[str]) -> None:
+    if not lhs.issubset(rhs):
+        RuntimeError("Unmatched lhs and rhs, expected lhs be a subset of rhs.")
 
 
 def invoke_sub_process(cmd: List[str], std_in: str) -> str:
@@ -118,7 +114,7 @@ def cross_verify(args: argparse.Namespace, file_name: str) -> bool:
 
     dep_output = dep_output.replace(",\n", ",").split("\n")
     generate_extends_edges = DependencyEdges(dep_output)
-    return original_extends_edges == generate_extends_edges
+    return original_extends_edges <= generate_extends_edges
 
 
 # Cross verify the hh_codesynthesis binary produce the Hack code has identical

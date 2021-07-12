@@ -1,0 +1,6 @@
+Extends Compare -> Type C
+Method C::content -> Type C
+Method Compare::eq -> Type C
+Type C -> Type Compare
+Type Compare -> Type C
+Type HH\Capabilities\WriteProperty -> Type C

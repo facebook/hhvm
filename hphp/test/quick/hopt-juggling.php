@@ -32,7 +32,7 @@ function foo6() {
 
 function foo7() {
   $x = "7";
-  return $x & false;
+  return (int)$x & (int)false;
 }
 
 function foo8() {

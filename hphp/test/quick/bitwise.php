@@ -18,10 +18,15 @@ function probe($l, $r) {
   echo "-------\n";
   echo "left: ";  var_dump($l);
   echo "right: "; var_dump($r);
+  $orig_l = $l;
+  if(!($l is string && $r is string)) {
+    $l = (int)$l;
+    $r = (int)$r;
+  }
   $v = ($l & $r); var_dump($v);
   $v = ($l | $r); var_dump($v);
   $v = ($l ^ $r); var_dump($v);
-  $v = (~$l);     var_dump($v);
+  $v = ~($orig_l is string ? $orig_l : (int)$orig_l); var_dump($v);
 }
 
 <<__EntryPoint>>

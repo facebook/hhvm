@@ -7,10 +7,10 @@ echo ($ret === 255 && is_string($a["flags"]) && $a["flags"] == FILTER_FLAG_ALLOW
 $a = (string)FILTER_FLAG_ALLOW_HEX;
 $ret = filter_var("0xff", FILTER_VALIDATE_INT, $a);
 echo ($ret === 255 && is_string($a) && $a == FILTER_FLAG_ALLOW_HEX)?"ok\n":"bug\n";
-$a = darray["test"=>darray["filter"=>(string)FILTER_VALIDATE_INT, "flags"=>(string)FILTER_FLAG_ALLOW_HEX]];
+$a = darray["test"=>darray["filter"=>(string)FILTER_VALIDATE_INT, "flags"=>FILTER_FLAG_ALLOW_HEX]];
 $ret = filter_var_array(darray["test"=>"0xff"], $a);
 echo ($ret["test"] === "0xff" && is_string($a["test"]["filter"]) && $a["test"]["filter"] == FILTER_VALIDATE_INT)?"ok\n":"bug\n";
-echo ($ret["test"] === "0xff" && is_string($a["test"]["flags"]) && $a["test"]["flags"] == FILTER_FLAG_ALLOW_HEX)?"ok\n":"bug\n";
+echo ($ret["test"] === "0xff" && is_int($a["test"]["flags"]) && $a["test"]["flags"] == FILTER_FLAG_ALLOW_HEX)?"ok\n":"bug\n";
 $a = darray["test"=>(string)FILTER_VALIDATE_INT];
 $ret = filter_var_array(darray["test"=>"255"], $a);
 echo ($ret["test"] === "255" && is_string($a["test"]) && $a["test"] == FILTER_VALIDATE_INT)?"ok\n":"bug\n";

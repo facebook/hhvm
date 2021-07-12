@@ -2,7 +2,7 @@
 // Copyright 2004-2015 Facebook. All Rights Reserved.
 
 function foo($a, $b){
-  return $a & $b;
+  return (int)$a & (int)$b;
 }
 
 function test($a, $b) {

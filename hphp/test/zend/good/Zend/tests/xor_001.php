@@ -3,7 +3,7 @@
 $a = varray[1,2,3];
 $b = varray[];
 
-$c = $a ^ $b;
+$c = (int)$a ^ (int)$b;
 var_dump($c);
 
 echo "Done\n";

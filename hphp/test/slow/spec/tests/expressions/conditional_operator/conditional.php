@@ -13,7 +13,7 @@ error_reporting(-1);
 // check for even integer values by inspecting the low-order bit
 
 for ($i = -5; $i <= 5; ++$i)
-    echo "$i is ".(($i & 1 == TRUE) ? "odd\n" : "even\n");
+    echo "$i is ".(($i & 1) === 1 ? "odd\n" : "even\n");
 
 // some simple examples
 

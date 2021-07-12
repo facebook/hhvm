@@ -117,15 +117,15 @@ try {
 print "\n";
 
 print "5 & 3 --> "; print 5 & 3; print "\n";
-print "5.0 & 3.0 --> "; print 5.0 & 3.0; print "\n";
+print "5.0 & 3.0 --> "; print (int)5.0 & (int)3.0; print "\n";
 print "\n";
 
 print "5 | 3 --> "; print 5 | 3; print "\n";
-print "5.0 | 3.0 --> "; print 5.0 | 3.0; print "\n";
+print "5.0 | 3.0 --> "; print (int)5.0 | (int)3.0; print "\n";
 print "\n";
 
 print "5 ^ 3 --> "; print 5 ^ 3; print "\n";
-print "5.0 ^ 3.0 --> "; print 5.0 ^ 3.0; print "\n";
+print "5.0 ^ 3.0 --> "; print (int)5.0 ^ (int)3.0; print "\n";
 print "\n";
 
 print "5 << 1 --> "; print 5 << 1; print "\n";

@@ -1030,9 +1030,9 @@ dependencies = [
  "bumpalo",
  "direct_decl_parser",
  "hhbc_by_ref_compile",
+ "hhbc_by_ref_options",
  "multifile_rust",
  "ocamlrep",
- "options",
  "oxidized",
  "parser_core_types",
  "positioned_by_ref_parser",
@@ -2566,28 +2566,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "options"
-version = "0.0.0"
-dependencies = [
- "bitflags",
- "fnv",
- "itertools 0.10.1",
- "lazy_static",
- "lru",
- "options_serde",
- "pretty_assertions",
- "serde",
- "serde_derive",
- "serde_json",
-]
-
-[[package]]
 name = "options_ffi"
 version = "0.0.0"
 dependencies = [
  "compile_ffi",
+ "hhbc_by_ref_options",
  "ocamlrep_ocamlpool",
- "options",
 ]
 
 [[package]]

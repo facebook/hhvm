@@ -46,7 +46,6 @@ members = [
     "src/heap",
     "src/hhbc/bytecode_printer",
     "src/hhbc/cargo/compile_ffi",
-    "src/hhbc/cargo/options",
     "src/hhbc/cargo/options_ffi",
     "src/hhbc/cargo/options_serde",
     "src/hhbc/hhbc_by_ref/cargo/decl_vars",

@@ -6,8 +6,8 @@
 use crate::utils;
 use ::anyhow::anyhow;
 use hhbc_by_ref_compile::Profile;
+use hhbc_by_ref_options::Options;
 use multifile_rust as multifile;
-use options::Options;
 use oxidized::relative_path::{self, RelativePath};
 use rayon::prelude::*;
 use stack_limit::{StackLimit, KI, MI};

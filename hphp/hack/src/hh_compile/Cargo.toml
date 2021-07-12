@@ -15,9 +15,9 @@ atty = "0.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
 direct_decl_parser = { path = "../parser/api/cargo/direct_decl_parser" }
 hhbc_by_ref_compile = { path = "../hhbc/hhbc_by_ref/cargo/hhbc_by_ref_compile" }
+hhbc_by_ref_options = { path = "../hhbc/hhbc_by_ref/cargo/hhbc_by_ref_options" }
 multifile_rust = { path = "../utils/multifile" }
 ocamlrep = { path = "../ocamlrep" }
-options = { path = "../hhbc/cargo/options" }
 oxidized = { path = "../oxidized" }
 parser_core_types = { path = "../parser/cargo/core_types" }
 positioned_by_ref_parser = { path = "../parser/api/cargo/positioned_by_ref_parser" }

@@ -15,7 +15,7 @@ function entrypoint_oo_getcomment(): void {
   echo $zip->getCommentName('foo') . "\n";
   echo $zip->getCommentIndex($idx);
 
-  echo $zip->getCommentName('') . "\n";
+  echo (string)($zip->getCommentName('')) . "\n";
   try { echo $zip->getCommentName() . "\n"; } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   $zip->close();

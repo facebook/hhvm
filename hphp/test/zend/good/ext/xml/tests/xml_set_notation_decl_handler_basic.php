@@ -12,9 +12,9 @@ class XML_Parser
       {
           echo "unparsed_entity_decl_handler called\n";
          echo "...Entity name=" . $entity_name . "\n";
-         echo "...Base=" . $base . "\n";
+         echo "...Base=" . (string)($base) . "\n";
          echo "...System ID=" . $system_ID . "\n";
-         echo "...Public ID=" . $public_ID . "\n";
+         echo "...Public ID=" . (string)($public_ID) . "\n";
          echo "...Notation name=" . $notation_name . "\n";
       }
 
@@ -22,9 +22,9 @@ class XML_Parser
       {
           echo "notation_decl_handler called\n";
          echo "...Name=" . $name . "\n";
-         echo "...Base=" . $base . "\n";
+         echo "...Base=" . (string)($base) . "\n";
          echo "...System ID=" . $system_ID . "\n";
-         echo "...Public ID=" . $public_ID . "\n";
+         echo "...Public ID=" . (string)($public_ID) . "\n";
       }
 
     function parse($data)

@@ -7,11 +7,20 @@ function run($str, $fmt) {
 <<__EntryPoint>>
 function main() {
   list($a, $b, $c) = run(":59:58","%s:%d:%f");
-  echo "[$a][$b][$c]\n";
+  $a__str = (string)($a);
+  $b__str = (string)($b);
+  $c__str = (string)($c);
+  echo "[$a__str][$b__str][$c__str]\n";
 
   list($a, $b, $c) = run("15:01:58.2","%d:%f:%f");
-  echo "[$a][$b][$c]\n";
+  $a__str = (string)($a);
+  $b__str = (string)($b);
+  $c__str = (string)($c);
+  echo "[$a__str][$b__str][$c__str]\n";
 
   list($a, $b, $c) = run("15.1111::foo","%f:%d:%s");
-  echo "[$a][$b][$c]\n";
+  $a__str = (string)($a);
+  $b__str = (string)($b);
+  $c__str = (string)($c);
+  echo "[$a__str][$b__str][$c__str]\n";
 }

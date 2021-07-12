@@ -28,9 +28,11 @@ $exponents = varray[0,
                -2147483648];
 
 foreach($bases as $base) {
-    echo "\n\nBase = $base";
+    $base__str = (string)($base);
+    echo "\n\nBase = $base__str";
     foreach($exponents as $exponent) {
-        echo "\n..... Exponent = $exponent Result = ";
+        $exponent__str = (string)($exponent);
+        echo "\n..... Exponent = $exponent__str Result = ";
         $res = pow($base, $exponent);
         echo $res;
     }

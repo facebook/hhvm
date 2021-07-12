@@ -21,7 +21,8 @@ $values = varray[0x123abc,
                 null];
 
 foreach($values as $value) {
-    echo "\n-- hexdec $value --\n";
+    $value__str = (string)($value);
+    echo "\n-- hexdec $value__str --\n";
     var_dump(hexdec($value));
 };
 echo "===Done===";

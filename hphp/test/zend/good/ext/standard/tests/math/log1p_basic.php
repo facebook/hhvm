@@ -23,7 +23,8 @@ $values = varray[23,
 echo "\n LOG1p tests\n";
 
 foreach($values as $value) {
-    echo "\n-- log1p $value --\n";
+    $value__str = (string)($value);
+    echo "\n-- log1p $value__str --\n";
     var_dump(log1p((float)$value));
 };
 echo "===Done===";

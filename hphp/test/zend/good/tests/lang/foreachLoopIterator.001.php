@@ -6,12 +6,12 @@ class MealIterator implements Iterator {
     private $myContent=varray["breakfast", "lunch", "dinner"];
 
     public function valid() {
-        echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
+        echo (string)(self::$indent)."--> " . __METHOD__ . " ($this->pos)\n";
         return $this->pos<3;
     }
 
     public function next() {
-      echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
+      echo (string)(self::$indent)."--> " . __METHOD__ . " ($this->pos)\n";
       try {
         return $this->myContent[$this->pos++];
       } catch (Exception $e) { echo $e->getMessage()."\n"; }
@@ -19,19 +19,19 @@ class MealIterator implements Iterator {
 
     public function rewind() {
 
-        echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
+        echo (string)(self::$indent)."--> " . __METHOD__ . " ($this->pos)\n";
         $this->pos=0;
     }
 
     public function current() {
 
-        echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
+        echo (string)(self::$indent)."--> " . __METHOD__ . " ($this->pos)\n";
         return $this->myContent[$this->pos];
     }
 
     public function key() {
 
-        echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
+        echo (string)(self::$indent)."--> " . __METHOD__ . " ($this->pos)\n";
         return "meal " . $this->pos;
     }
 

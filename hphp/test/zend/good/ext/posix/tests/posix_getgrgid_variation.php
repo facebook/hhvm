@@ -48,7 +48,8 @@ function main(): void {
   // loop through each element of the array for gid
 
   foreach ($values as $value) {
-    echo "\nArg value $value\n";
+    $value__str = (string)($value);
+    echo "\nArg value $value__str\n";
     try {
       $result = posix_getgrgid($value);
       if ((is_array($result) && (count($result) == 4)) || ($result === false)) {

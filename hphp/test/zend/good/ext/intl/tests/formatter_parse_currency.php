@@ -12,13 +12,15 @@ function ut_main()
     $pos = 0;
     $currency = '';
     $num = ut_nfmt_parse_currency( $fmt, '$9,988,776.65', inout $currency, inout $pos );
-    $res_str .= "$num $currency\n";
+    $num__str = (string)($num);
+    $res_str .= "$num__str $currency\n";
 
     $fmt = ut_nfmt_create( "en_US", NumberFormatter::CURRENCY );
     $pos = 1;
     $currency = '';
     $num = ut_nfmt_parse_currency( $fmt, ' $123.45', inout $currency, inout $pos );
-    $res_str .=  "$num $currency\n";
+    $num__str = (string)($num);
+    $res_str .=  "$num__str $currency\n";
 
     return $res_str;
 }

@@ -28,7 +28,7 @@ function main_entry(): void {
   }
   asort(inout $list);
   foreach ($list as $item) {
-  	echo $item . "\n";
+  	echo (string)($item) . "\n";
   }
 
   rrmdir(__SystemLib\hphp_test_tmppath($depth0));

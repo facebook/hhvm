@@ -22,7 +22,8 @@ $variations = varray[
 
 /* variations in string and multiplier as an integer */
 foreach($variations as $input) {
-  echo "\n--- str_repeat() of '$input' ---\n" ;
+  $input__str = (string)($input);
+  echo "\n--- str_repeat() of '$input__str' ---\n" ;
   for($n=0; $n<4; $n++) {
     echo "-- after repeating $n times is => ";
     try  { echo str_repeat($input, $n)."\n"; } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -33,9 +34,11 @@ foreach($variations as $input) {
    values are used as string to be repeated as well as multiplier */
 echo "\n\n*** Testing str_repeat() with various strings & multiplier value ***";
 foreach ( $variations as $input ) {
-  echo "\n--- str_repeat() of '$input' ---\n" ;
+  $input__str = (string)($input);
+  echo "\n--- str_repeat() of '$input__str' ---\n" ;
   foreach ( $variations as $multiplier ) {
-    echo "-- after repeating '$multiplier' times is => ";
+    $multiplier__str = (string)($multiplier);
+    echo "-- after repeating '$multiplier__str' times is => ";
     try { var_dump( str_repeat($input, $multiplier) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   }
 }

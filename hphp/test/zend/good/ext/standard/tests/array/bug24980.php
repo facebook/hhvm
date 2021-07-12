@@ -9,7 +9,7 @@ function add_up($running_total, $current_value)
 }
 function foo ($a, $b)
 {
-    return $a . $b;
+    return (string)($a) . (string)($b);
 }
 function rsum($v, $w)
 {

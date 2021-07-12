@@ -21,7 +21,7 @@ $sleeplow = $sleeptime - ($sleeptime * 2 /100);
 $time_end = microtime(true);
 $time = $time_end - $time_start;
 
-echo "Thread slept for " . $time . " seconds\n";
+echo "Thread slept for " . (string)($time) . " seconds\n";
 
 if ($time >= $sleeplow) {
     echo "TEST PASSED\n";

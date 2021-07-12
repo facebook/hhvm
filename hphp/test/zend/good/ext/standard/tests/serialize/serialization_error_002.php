@@ -28,7 +28,7 @@ var_dump($deserialized_garbage);
 $deserialized_false = unserialize($serialized_false);
 var_dump($deserialized_false);
 
-echo "unserialize error and deserialized false are identical? " . (bool) ($deserialized_false == $deserialized_garbage) . "\n";
+echo "unserialize error and deserialized false are identical? " . (string)((bool) ($deserialized_false == $deserialized_garbage)) . "\n";
 
 // Test unserialize error idiom
 var_dump(isSerialized($garbage));

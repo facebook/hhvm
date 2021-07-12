@@ -67,7 +67,8 @@ function ut_main()
     foreach( $locales as $locale )
     {
         $scr = ut_loc_get_region( $locale);
-        $res_str .= "$locale:  region='$scr'";
+        $scr__str = (string)($scr);
+        $res_str .= "$locale:  region='$scr__str'";
         $res_str .= "\n";
     }
 

@@ -15,8 +15,8 @@ $epref = $root->lookupPrefix("http://ns2")."\n";
 
 var_dump($dpref == $epref);
 
-$disdef = $doc->isDefaultNamespace("http://ns")."\n";
-$eisdef = $root->isDefaultNamespace("http://ns")."\n";
+$disdef = (string)($doc->isDefaultNamespace("http://ns"))."\n";
+$eisdef = (string)($root->isDefaultNamespace("http://ns"))."\n";
 
 var_dump($dpref === $epref);
 }

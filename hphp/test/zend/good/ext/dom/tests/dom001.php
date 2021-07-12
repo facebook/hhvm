@@ -56,7 +56,7 @@ function main_entry(): void {
 
   echo "--------- Remove Attribute Node\n";
   $attr = $rootnode->removeAttribute("src");
-  print "Removed " . $attr . " attributes.\n";
+  print "Removed " . (string)($attr) . " attributes.\n";
 
   echo "--------- attributes of rootnode\n";
   $attrs = $rootnode->attributes;

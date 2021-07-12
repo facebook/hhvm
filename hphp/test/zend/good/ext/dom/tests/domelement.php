@@ -65,7 +65,7 @@ function main_entry(): void {
 
   for ($x = 0; $x < $mylen; $x++) {
   	$current = $myelements->item($x);
-  	$current->setAttributeNS('urn::dummyns', 'newns:idatt', 'n'.($x+2))."\n";
+  	(string)($current->setAttributeNS('urn::dummyns', 'newns:idatt', 'n'.($x+2)))."\n";
   	$current->setIDAttributeNS('urn::dummyns', 'idatt', TRUE);
   }
 

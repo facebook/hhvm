@@ -40,12 +40,12 @@ foreach ($iterator as $fileinfo) {
     $fileinfo->getPerms() . "\n";
     $fileinfo->getSize() . "\n";
     $fileinfo->getType() . "\n";
-    $fileinfo->isDir() . "\n";
-    $fileinfo->isDot() . "\n";
-    $fileinfo->isExecutable() . "\n";
-    $fileinfo->isLink() . "\n";
-    $fileinfo->isReadable() . "\n";
-    $fileinfo->isWritable() . "\n";
+    (string)($fileinfo->isDir()) . "\n";
+    (string)($fileinfo->isDot()) . "\n";
+    (string)($fileinfo->isExecutable()) . "\n";
+    (string)($fileinfo->isLink()) . "\n";
+    (string)($fileinfo->isReadable()) . "\n";
+    (string)($fileinfo->isWritable()) . "\n";
     $str .= "END\n";
     $files[$name] = $str;
   }
@@ -77,10 +77,10 @@ foreach ($files as $name => $fileinfo) {
    $fileinfo->getPerms() . "\n";
    $fileinfo->getSize() . "\n";
    $fileinfo->getType() . "\n";
-   $fileinfo->isDir() . "\n";
-   $fileinfo->isExecutable() . "\n";
-   $fileinfo->isLink() . "\n";
-   $fileinfo->isReadable() . "\n";
-   $fileinfo->isWritable() . "\n";
+   (string)($fileinfo->isDir()) . "\n";
+   (string)($fileinfo->isExecutable()) . "\n";
+   (string)($fileinfo->isLink()) . "\n";
+   (string)($fileinfo->isReadable()) . "\n";
+   (string)($fileinfo->isWritable()) . "\n";
 }
 }

@@ -17,7 +17,8 @@
  * ): array;
  */
 function go(bool $ret) {
-  echo "ret = $ret\n\n";
+  $ret__str = (string)($ret);
+  echo "ret = $ret__str\n\n";
 
   $s1 = "hello";
   $s2 = "world";
@@ -89,7 +90,8 @@ function go(bool $ret) {
  * ): array;
  */
 function go2(bool $ret) {
-  echo "ret = $ret\n\n";
+  $ret__str = (string)($ret);
+  echo "ret = $ret__str\n\n";
 
   $s1 = "hello";
   $s2 = "world";

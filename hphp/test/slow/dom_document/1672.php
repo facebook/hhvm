@@ -117,7 +117,7 @@ print_node($attr);
 echo "--------- Remove Attribute Node
 ";
 $attr = $rootnode->removeAttribute("src");
-print "Removed " . $attr . " attributes.
+print "Removed " . (string)($attr) . " attributes.
 ";
 
 echo "--------- attributes of rootnode

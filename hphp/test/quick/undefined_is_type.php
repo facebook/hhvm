@@ -11,7 +11,7 @@ function foo(): void {
   if (\HH\global_isset('f')) $a = false;
   if (\HH\global_isset('g')) $a = null;
 
-  echo "set:     ", isset($a)."\n";
+  echo "set:     ", (string)(isset($a))."\n";
   try {
     echo "nul:     ", is_null($a)."\n";
   } catch (UndefinedVariableException $e) {

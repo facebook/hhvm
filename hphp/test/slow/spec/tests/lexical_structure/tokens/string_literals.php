@@ -56,7 +56,11 @@ $c = FALSE;         var_dump("$c");
 $d = TRUE;          var_dump("$d");
 $e = NULL;          var_dump("$e");
 $f = "blue sky";    var_dump("$f");
-echo ">$a|$b|$c|$d|$e|$f<\n";
+$b__str = (string)($b);
+$c__str = (string)($c);
+$d__str = (string)($d);
+$e__str = (string)($e);
+echo ">$a|$b__str|$c__str|$d__str|$e__str|$f<\n";
 
 $s = sprintf("%d|%G|%s|%s|%s|%s", $a, $b, $c, $d, $e, $f);
 echo ">$s<\n";
@@ -64,7 +68,8 @@ echo ">$s<\n";
 $fpvalues = varray[24.543567891234565, -2345e25, 6E-200, NAN, INF];
 foreach ($fpvalues as $fpval)
 {
-    echo ">$fpval<--- o/p from string substition\n";
+    $fpval__str = (string)($fpval);
+    echo ">$fpval__str<--- o/p from string substition\n";
     $s = sprintf("%.14G", $fpval);
     echo ">$s<--- using o/p from sprintf with hard-coded precision\n";
 //  $s = sprintf("%.*G", 14, $fpval);
@@ -72,7 +77,8 @@ foreach ($fpvalues as $fpval)
 }
 
 $fpval = NAN;
-echo ">$fpval<--- o/p from string substition\n";
+$fpval__str = (string)($fpval);
+echo ">$fpval__str<--- o/p from string substition\n";
 $s = sprintf("%.14F", $fpval);
 echo ">$s<--- using o/p from sprintf with hard-coded precision\n";
 //*/
@@ -106,7 +112,8 @@ try {
   var_dump($e->getMessage());
 }
 try {
-  var_dump("$zzzz+");
+  $zzzz__str = (string)($zzzz);
+  var_dump("$zzzz__str+");
 } catch (UndefinedVariableException $e) {
   var_dump($e->getMessage());
 }
@@ -151,6 +158,8 @@ $myC = new C();
 
 //echo "\$myC = >$myC<\n";  // can't use an object instance
 echo "\$myC->p1 = >$myC->p1<\n";
+$zzz__str = (string)($zzz);
+$zzzz__str = (string)($zzzz);
 //echo "\$myC ->p1 = >$myC ->p1<\n";    // whitespace not permitted
 //echo "\$myC-> p1 = >$myC-> p1<\n";    // whitespace not permitted
 
@@ -162,7 +171,7 @@ echo "\$myC->p1 = >$myC->p1<\n";
 
 // braces can be use around varible names to stop a longer name being formed
 
-echo ">{$z}X|$z X|{$zz}_|$zz _|{$zzz}3|$zzz 3|{$zzzz}+|$zzzz +<\n";
+echo ">{$z}X|$z X|{$zz}_|$zz _|{$zzz__str}3|$zzz__str 3|{$zzzz__str}+|$zzzz__str +<\n";
 //*/
 // braces having no special meaning are used verbatim
 

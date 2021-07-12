@@ -13,7 +13,9 @@ function main() {
       exit;
   }
 
-  echo "Empty Encoding Read: {$dom->encoding}\n";
+  $temp_str_14883 = (string)($dom->encoding);
+
+  echo "Empty Encoding Read: {$temp_str_14883}\n";
 
   $ret = $dom->encoding = 'NYPHP DOMinatrix';
   echo "Adding invalid encoding: $ret\n";

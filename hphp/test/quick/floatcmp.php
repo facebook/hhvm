@@ -25,9 +25,13 @@
 
   foreach ($values as $x) {
     foreach ($values as $y) {
-      echo " ---- $x $y ----\n";
+      $x__str = (string)($x);
+      $y__str = (string)($y);
+      echo " ---- $x__str $y__str ----\n";
       for ($i = 0; $i < sizeof($cmps); $i++) {
-        var_dump("    $x $cmpNames[$i] $y:", (string)($cmps[$i]($x, $y)));
+        $x__str = (string)($x);
+        $y__str = (string)($y);
+        var_dump("    $x__str $cmpNames[$i] $y__str:", (string)($cmps[$i]($x, $y)));
         if ($cmps[$i]($x, $y) !== $cmpJmps[$i]($x, $y)) {
           echo "jmps !== cmps, $cmpNames[$i]\n";
         }

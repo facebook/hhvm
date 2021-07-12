@@ -9,7 +9,8 @@
 (** Perform a number of inheritance checks:
     - check [override] annotations
     - check multiple uses of the same trait
-    - check proper use of the [extends] keyword between two classes or two interfaces
+    - check proper use of the [extends] keyword: must be between two classes or two interfaces,
+      but not between a class and an interface or vice-versa.
     - check if any member of the class was detected to be cyclic
       during linearization *)
 val check_class : Typing_env_types.env -> Pos.t -> Decl_provider.Class.t -> unit

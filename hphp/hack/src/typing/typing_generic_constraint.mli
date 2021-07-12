@@ -6,6 +6,8 @@
  *
  *)
 
+(** Add a constraint to the environment.
+    Raise an error if any inconsistency is detected. *)
 val check_constraint :
   Typing_env_types.env ->
   Ast_defs.constraint_kind ->
@@ -14,6 +16,8 @@ val check_constraint :
   Errors.error_from_reasons_callback ->
   Typing_env_types.env
 
+(** Add an [as] or [super] constraint to the environment.
+    Raise an error if any inconsistency is detected. *)
 val check_tparams_constraint :
   Typing_env_types.env ->
   use_pos:Pos.t ->
@@ -22,6 +26,8 @@ val check_tparams_constraint :
   Typing_defs.locl_ty ->
   Typing_env_types.env
 
+(** Add a [where] constraint to the environment.
+    Raise an error if any inconsistency is detected. *)
 val check_where_constraint :
   in_class:bool ->
   Typing_env_types.env ->

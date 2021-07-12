@@ -45,7 +45,7 @@ val add_decl_errors : Errors.t option -> unit
 val with_timeout :
   Typing_env_types.env ->
   Pos.t * string ->
-  do_:(Typing_env_types.env -> 'b) ->
+  (Typing_env_types.env -> 'b) ->
   'b option
 
 val reify_kind : Aast.reify_kind -> Aast.reify_kind

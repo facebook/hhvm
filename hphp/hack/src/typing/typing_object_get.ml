@@ -247,18 +247,18 @@ let rec this_appears_covariantly ~contra env ty =
   | Tgeneric _ ->
     false
 
-(* We know that the receiver is a concrete class: not a generic with
- * bounds, or a Tunion. *)
+(** We know that the receiver is a concrete class, not a generic with
+    bounds, or a Tunion. *)
 let rec obj_get_concrete_ty
-    ~inst_meth
-    ~meth_caller
-    ~is_method
-    ~coerce_from_ty
+    ~(inst_meth : bool)
+    ~(meth_caller : bool)
+    ~(is_method : bool)
+    ~(coerce_from_ty : (Pos.t * Reason.ureason * locl_ty) option)
     ?(explicit_targs = [])
-    ~this_ty
-    ~this_ty_conjunct
-    ~is_parent_call
-    ~dep_kind
+    ~(this_ty : locl_ty)
+    ~(this_ty_conjunct : locl_ty)
+    ~(is_parent_call : bool)
+    ~(dep_kind : Reason.t * Typing_dependent_type.ExprDepTy.dep)
     env
     concrete_ty
     (id_pos, id_str)

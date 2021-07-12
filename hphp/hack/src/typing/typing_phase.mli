@@ -139,9 +139,13 @@ val localize_targ :
 val sub_type_decl :
   env -> decl_ty -> decl_ty -> Errors.error_from_reasons_callback -> env
 
+(** Add some [as] or [super] constraint to the environment.
+    Raise an error if any inconsistency is detected. *)
 val check_tparams_constraints :
   use_pos:Pos.t -> ety_env:expand_env -> env -> decl_tparam list -> env
 
+(** Add some [where] constraints to the environment.
+    Raise an error if any inconsistency is detected. *)
 val check_where_constraints :
   in_class:bool ->
   use_pos:Pos.t ->

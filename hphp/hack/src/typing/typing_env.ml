@@ -917,7 +917,7 @@ let suggest_static_member is_method class_ mid =
   in
   suggest_member members mid
 
-let get_member is_method env class_ mid =
+let get_member is_method env (class_ : Cls.t) mid =
   let add_dep x =
     let dep =
       if is_method then

@@ -7,11 +7,8 @@
  *
  *)
 
-(*****************************************************************************)
-(* Checks that a class implements an interface, extends a base class, or     *)
-(* uses a trait.                                                             *)
-(*****************************************************************************)
-
+(** Checks that a class implements an interface, extends a base class, or
+    uses a trait. *)
 val check_implements :
   Typing_env_types.env ->
   Typing_defs.decl_ty list ->

@@ -127,7 +127,7 @@ type mro_element = {
       (** Like mro_use_pos, but includes type arguments (if any). *)
   mro_flags: int;
       (** Bitflag which specifies in what contexts that element of the linearization should or
-      should not be used. *)
+          should not be used. *)
   mro_type_args: decl_ty list;
       (** The type arguments with which this ancestor class was instantiated. The
           first class in the linearization (the one which was linearized) will have

@@ -143,7 +143,8 @@ let check_extend_kind
         ~child_name
         ~child_is_enum_class)
 
-(** Check the proper use of the [extends] keyword between two classes or two interfaces. *)
+(** Check that the [extends] keyword is between two classes or two interfaces, but not
+    between a class and an interface or vice-versa. *)
 let check_extend_kinds ctx class_pos shallow_class =
   let class_kind = shallow_class.sc_kind in
   let class_name = snd shallow_class.sc_name in

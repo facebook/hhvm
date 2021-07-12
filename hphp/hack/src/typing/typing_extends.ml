@@ -1076,9 +1076,9 @@ let check_typeconst_override
   | _ -> ());
   env
 
-(* For type constants we need to check that a child respects the
- * constraints specified by its parent, and does not conflict
- * with other inherited type constants *)
+(** For type constants we need to check that a child respects the
+    constraints specified by its parent, and does not conflict
+    with other inherited type constants *)
 let check_typeconsts env implements parent_class class_ on_error =
   let (parent_pos, parent_class, _) = parent_class in
   let (pos, class_, _) = class_ in

@@ -8,7 +8,7 @@ function g() {
 function test1($a) {
   $buf = '';
   foreach ($a as $s) {
-     $buf .= f() . g() . 'h' . f() . 'h' . g();
+     $buf .= (string)(f()) . (string)(g()) . 'h' . (string)(f()) . 'h' . (string)(g());
   }
   foreach ($a as $s) {
     $buf .= ($s . 'h' . $s);
@@ -16,10 +16,10 @@ function test1($a) {
   return $buf;
 }
 function test2() {
-  return f() . g() . f() . g();
+  return (string)(f()) . (string)(g()) . (string)(f()) . (string)(g());
 }
 function test3() {
-  return f() . g() . f() . g() . f() . g() . f() . g() . f();
+  return (string)(f()) . (string)(g()) . (string)(f()) . (string)(g()) . (string)(f()) . (string)(g()) . (string)(f()) . (string)(g()) . (string)(f());
 }
 function test4() {
   $s = f();
@@ -28,10 +28,10 @@ function test4() {
   return $s;
 }
 function test5() {
-  return g().g().g().g();
+  return (string)(g()).(string)(g()).(string)(g()).(string)(g());
 }
 function test6() {
-  return g().f().g();
+  return (string)(g()).(string)(f()).(string)(g());
 }
 
 <<__EntryPoint>>

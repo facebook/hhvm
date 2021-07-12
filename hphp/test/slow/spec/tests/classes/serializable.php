@@ -57,7 +57,7 @@ class ColoredPoint extends Point implements Serializable
 
     public function __toString()
     {
-        return parent::__toString() . $this->color;
+        return (string)(parent::__toString()) . (string)($this->color);
     }
 
     public function serialize()

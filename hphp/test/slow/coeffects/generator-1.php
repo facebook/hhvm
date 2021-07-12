@@ -6,7 +6,7 @@ function f()[rx] {
 }
 
 function pure($gen)[]{
-  echo $gen->next() . "\n";
+  echo (string)($gen->next()) . "\n";
 }
 
 <<__EntryPoint>>

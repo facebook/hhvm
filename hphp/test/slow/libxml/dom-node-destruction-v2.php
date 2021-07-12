@@ -13,7 +13,7 @@ class MyElement extends DOMElement {
   }
 
   function info() {
-    echo "Querying DOMElement #" . $this->id . ": "  . $this->tagName . "\n";
+    echo "Querying DOMElement #" . (string)($this->id) . ": "  . (string)($this->tagName) . "\n";
   }
 }
 

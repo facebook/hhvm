@@ -2,13 +2,13 @@
 
 -- Testing array_chunk() when size = -1 --
 
-Warning: Invalid argument: size: -1 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation5.php on line 27
-NULL
-
 Warning: Invalid argument: size: -1 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation5.php on line 28
 NULL
 
 Warning: Invalid argument: size: -1 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation5.php on line 29
+NULL
+
+Warning: Invalid argument: size: -1 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation5.php on line 30
 NULL
 
 -- Testing array_chunk() when size = 4 --
@@ -45,13 +45,13 @@ vec(1) {
 
 -- Testing array_chunk() when size = 0 --
 
-Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation5.php on line 27
-NULL
-
 Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation5.php on line 28
 NULL
 
 Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation5.php on line 29
+NULL
+
+Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation5.php on line 30
 NULL
 
 -- Testing array_chunk() when size = 1.5 --

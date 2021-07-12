@@ -8,28 +8,28 @@ final class quickUnset {
 function f() {
 
 
-  print ":".isset($x).":\n";
-  print ":".\HH\global_isset('y').":\n";
-  print ":".isset(quickUnset::$y).":\n";
+  print ":".(string)(isset($x)).":\n";
+  print ":".(string)(\HH\global_isset('y')).":\n";
+  print ":".(string)(isset(quickUnset::$y)).":\n";
 
   unset($x);
   \HH\global_unset('y');
   quickUnset::$y = null;
-  print ":".isset($x).":\n";
-  print ":".\HH\global_isset('y').":\n";
-  print ":".isset(quickUnset::$y).":\n";
+  print ":".(string)(isset($x)).":\n";
+  print ":".(string)(\HH\global_isset('y')).":\n";
+  print ":".(string)(isset(quickUnset::$y)).":\n";
 
   $x = 0;
   \HH\global_set('y', 0);
   quickUnset::$y = 0;
-  print ":".isset($x).":\n";
-  print ":".\HH\global_isset('y').":\n";
-  print ":".isset(quickUnset::$y).":\n";
+  print ":".(string)(isset($x)).":\n";
+  print ":".(string)(\HH\global_isset('y')).":\n";
+  print ":".(string)(isset(quickUnset::$y)).":\n";
 
   unset($x);
   \HH\global_unset('y');
   quickUnset::$y = null;
-  print ":".isset($x).":\n";
-  print ":".isset($y).":\n";
-  print ":".isset(quickUnset::$y).":\n";
+  print ":".(string)(isset($x)).":\n";
+  print ":".(string)(isset($y)).":\n";
+  print ":".(string)(isset(quickUnset::$y)).":\n";
 }

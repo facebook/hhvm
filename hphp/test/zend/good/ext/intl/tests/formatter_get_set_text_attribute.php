@@ -38,7 +38,9 @@ function ut_main()
         if( $def_val === false )
             $res_str .= "get_text_attribute() error: " . ut_nfmt_get_error_message( $fmt ) . "\n";
 
-        $res_str .= "Default value: [$def_val]\n";
+        $def_val__str = (string)($def_val);
+
+        $res_str .= "Default value: [$def_val__str]\n";
         $res_str .=  "Formatting number with default value: " . ut_nfmt_format( $fmt, $test_number ) . "\n";
 
         // Set new attribute's value and see if it works out.

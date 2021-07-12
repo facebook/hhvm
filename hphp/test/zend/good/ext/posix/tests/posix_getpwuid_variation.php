@@ -48,7 +48,8 @@ function main(): void {
   // loop through each element of the array for uid
 
   foreach ($values as $value) {
-    echo "\nArg value $value\n";
+    $value__str = (string)($value);
+    echo "\nArg value $value__str\n";
     try {
       $result = posix_getpwuid($value);
       if ((is_array($result) && (count($result) == 7)) || ($result === false)) {

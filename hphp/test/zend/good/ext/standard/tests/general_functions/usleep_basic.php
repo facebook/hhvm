@@ -20,7 +20,7 @@ usleep($sleeptime);
 $time_end = microtime(true);
 $time = ($time_end - $time_start) * 1000 * 1000;
 
-echo "Thread slept for " . $time . " micro-seconds\n";
+echo "Thread slept for " . (string)($time) . " micro-seconds\n";
 
 if ($time >= $sleeplow) {
     echo "TEST PASSED\n";

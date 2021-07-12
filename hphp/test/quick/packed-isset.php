@@ -6,10 +6,10 @@ function foo() {
     $arr[$i] = $i;
   }
   for ($i = 0; $i < 5; $i++) {
-    print(isset($arr[2])."\n");
+    print((string)(isset($arr[2]))."\n");
   }
   for ($i = 0; $i < 5; $i++) {
-    print(isset($arr[$i])."\n");
+    print((string)(isset($arr[$i]))."\n");
   }
 }
 

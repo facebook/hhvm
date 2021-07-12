@@ -212,7 +212,7 @@ function checkServerId($serverPort, $expectedIds) {
     tlog('a server for a different test responded');
     return false;
   }
-  tlog('Server replied: '.$r);
+  tlog('Server replied: '.(string)($r));
   return false;
 }
 
@@ -321,9 +321,13 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
 
   $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
   $test_run_id = ServerUtilServerTests::test_run_id();
-  $cmd = "curl $post --trace-ascii {$LOG_ROOT}_curl$test_run_id.log ".
+  $post__str = (string)($post);
+  $LOG_ROOT__str = (string)($LOG_ROOT);
+  $test_run_id__str = (string)($test_run_id);
+  $headers__str = (string)($headers);
+  $cmd = "curl $post__str --trace-ascii {$LOG_ROOT__str}_curl$test_run_id__str.log ".
     "--silent $curl_opts --connect-timeout $timeout ".
-    "-H 'Host: $host_name' $headers --url \"$url\"";
+    "-H 'Host: $host_name' $headers__str --url \"$url\"";
   tlog("Requesting page with command: $cmd");
   $result = null;
   $return_var = -1;

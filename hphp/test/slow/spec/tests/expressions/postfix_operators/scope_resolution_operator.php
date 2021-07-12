@@ -17,8 +17,8 @@ class M
         echo "static::\$psf returns " . static::psf() . "\n";
         echo "  self::\$psProp is   " . self::$psProp . "\n";
         echo "static::\$psProp is   " . static::$psProp . "\n";
-        echo "  self::\$MYPI is     " . self::MYPI . "\n";
-        echo "static::\$MYPI is     " . static::MYPI . "\n";
+        echo "  self::\$MYPI is     " . (string)(self::MYPI) . "\n";
+        echo "static::\$MYPI is     " . (string)(static::MYPI) . "\n";
 
         echo "  self::\$b2 --- "; self::b2();
         echo "static::\$b2 --- "; static::b2();
@@ -88,12 +88,12 @@ class P extends N
         echo "Accessing self:\n";
         echo "psf returns " . self::psf() . "\n";
         echo "psProp = " . self::$psProp . "\n";
-        echo "MYPI   = " . self::MYPI . "\n";
+        echo "MYPI   = " . (string)(self::MYPI) . "\n";
 
         echo "Accessing parent(s)\n";
         echo "psf returns " . parent::psf() . "\n";
         echo "psProp = " . parent::$psProp . "\n";
-        echo "MYPI   = " . parent::MYPI . "\n";
+        echo "MYPI   = " . (string)(parent::MYPI) . "\n";
     }
 
     public function b2()    // overrides base::b2()

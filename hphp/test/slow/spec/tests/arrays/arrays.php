@@ -116,7 +116,7 @@ $v[4] = 99;         // increases array to 5 elements
 var_dump($v);
 foreach($v as $e)       // now has 5 elements
 {
-    echo $e.',';
+    echo (string)($e).',';
 }
 echo "\n";
 
@@ -157,12 +157,12 @@ $v = darray[2 => TRUE, 0 => 123, 1 => 34.5, -1 => "red"];
 var_dump($v);
 foreach($v as $e)
 {
-    echo $e.',';
+    echo (string)($e).',';
 }
 echo "\n";
 for ($i = -1; $i <= 2; ++$i)
 {
-    echo $v[$i].',';
+    echo (string)($v[$i]).',';
 }
 echo "\n";
 

@@ -33,8 +33,8 @@ const FAILURE2 = TRUE;
 function globalConst()
 {
     echo "Inside " . __FUNCTION__ . "\n";
-    echo "MAX_HEIGHT2 = " . MAX_HEIGHT2 . "\n";
-    echo "COEFFICIENT_2 = " . COEFFICIENT_2 . "\n";
+    echo "MAX_HEIGHT2 = " . (string)(MAX_HEIGHT2) . "\n";
+    echo "COEFFICIENT_2 = " . (string)(COEFFICIENT_2) . "\n";
 }
 
 class Point
@@ -64,7 +64,7 @@ function entrypoint_variable_kinds(): void {
   echo "\$result = {$result}\n";
 
   echo "---------------- Global Constants -------------------\n";
-  echo "MAX_HEIGHT2 = " . MAX_HEIGHT2 . "\n";
+  echo "MAX_HEIGHT2 = " . (string)(MAX_HEIGHT2) . "\n";
 
   globalConst();
 

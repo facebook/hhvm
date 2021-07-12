@@ -15,7 +15,7 @@ function obj_dump($o) {
         print "\\0";
       }
     }
-    print "\" => ".$v."\n";
+    print "\" => ".(string)($v)."\n";
   }
 }
 class C {

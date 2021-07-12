@@ -6,8 +6,8 @@
                "b\000", "\000a", "\000b", "0\000"];
   foreach ($arr as $left) {
     foreach ($arr as $right) {
-      echo "left: " . var_dump($left);
-      echo "right: " . var_dump($right);
+      echo "left: " . (string)(var_dump($left));
+      echo "right: " . (string)(var_dump($right));
       echo "==  "; echo $left == $right ? "true\n" : "false\n";
       echo "!=  "; echo $left != $right ? "true\n" : "false\n";
       echo "=== "; echo $left === $right ? "true\n" : "false\n";

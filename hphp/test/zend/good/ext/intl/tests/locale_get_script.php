@@ -65,7 +65,8 @@ function ut_main()
     foreach( $locales as $locale )
     {
         $scr = ut_loc_get_script( $locale);
-        $res_str .= "$locale:  script='$scr'";
+        $scr__str = (string)($scr);
+        $res_str .= "$locale:  script='$scr__str'";
         $res_str .= "\n";
     }
 

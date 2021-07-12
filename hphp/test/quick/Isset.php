@@ -7,23 +7,23 @@ abstract final class quickIsset {
 function f() {
 
 
-  print ":".isset($x).":\n";
-  print ":".\HH\global_isset('y').":\n";
-  print ":".isset(quickIsset::$y).":\n";
+  print ":".(string)(isset($x)).":\n";
+  print ":".(string)(\HH\global_isset('y')).":\n";
+  print ":".(string)(isset(quickIsset::$y)).":\n";
 
   $x = 0;
   \HH\global_set('y', 0);
   quickIsset::$y = 0;
-  print ":".isset($x).":\n";
-  print ":".\HH\global_isset('y').":\n";
-  print ":".isset(quickIsset::$y).":\n";
+  print ":".(string)(isset($x)).":\n";
+  print ":".(string)(\HH\global_isset('y')).":\n";
+  print ":".(string)(isset(quickIsset::$y)).":\n";
 
   unset($x);
   \HH\global_unset('y');
   quickIsset::$y = null;
-  print ":".isset($x).":\n";
-  print ":".\HH\global_isset('y').":\n";
-  print ":".isset(quickIsset::$y).":\n";
+  print ":".(string)(isset($x)).":\n";
+  print ":".(string)(\HH\global_isset('y')).":\n";
+  print ":".(string)(isset(quickIsset::$y)).":\n";
 
   $a = darray[];
   $a["foo"] = null;

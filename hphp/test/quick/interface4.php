@@ -20,7 +20,10 @@ class C implements I, J, K, L, M {
     $x = HH\is_any_array($x) ? 'Array' : $x;
     $y = HH\is_any_array($y) ? 'Array' : $y;
     $z = HH\is_any_array($z) ? 'Array' : $z;
-    echo "$x $y $z\n";
+    $x__str = (string)($x);
+    $y__str = (string)($y);
+    $z__str = (string)($z);
+    echo "$x__str $y__str $z__str\n";
   }
 }
 <<__EntryPoint>> function main(): void {

@@ -5,7 +5,9 @@ class C {}
 function foo($x, $y) {
   $x = HH\is_any_array($x) ? 'Array' : $x;
   $y = HH\is_any_array($y) ? 'Array' : $y;
-  echo "$x $y\n";
+  $x__str = (string)($x);
+  $y__str = (string)($y);
+  echo "$x__str $y__str\n";
 }
 
 <<__EntryPoint>> function main(): void {

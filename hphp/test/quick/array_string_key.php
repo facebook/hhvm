@@ -13,7 +13,7 @@
 
   // test IssetM
   $a = varray["narf"];
-  echo isset($a["0"]) . "\n";
+  echo (string)(isset($a["0"])) . "\n";
 
   // test UnsetM
   $a = darray[];

@@ -18,7 +18,8 @@ function doswitch($foo) {
 
     case 4:
     case 2:
-      echo "2 or 4: $foo\n";
+      $foo__str = (string)($foo);
+      echo "2 or 4: $foo__str\n";
       break;
 
     case 5:

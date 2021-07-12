@@ -8,7 +8,13 @@ function f1($p1 = 10, $p2 = 1.23, $p3 = TRUE, $p4 = NULL, $p5 = "abc", $p6 = var
     $p3 = HH\is_any_array($p3) ? 'Array' : $p3;
     $p6 = HH\is_any_array($p6) ? 'Array' : $p6;
     echo "f1:\n";
-    echo "\$p1: $p1, \$p2: $p2, \$p3: $p3, \$p4: $p4, \$p5: $p5, \$p6: $p6\n";
+    $p1__str = (string)($p1);
+    $p2__str = (string)($p2);
+    $p3__str = (string)($p3);
+    $p4__str = (string)($p4);
+    $p5__str = (string)($p5);
+    $p6__str = (string)($p6);
+    echo "\$p1: $p1__str, \$p2: $p2__str, \$p3: $p3__str, \$p4: $p4__str, \$p5: $p5__str, \$p6: $p6__str\n";
 }
 //*/
 ///*

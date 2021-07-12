@@ -20,7 +20,7 @@ $rf = new ReflectionFunction('variadic_hinted_scalars');
 $rps = $rf->getParameters();
 $rp = $rps[0];
 
-echo 'is_variadic = ' . $rp->isVariadic() . PHP_EOL;
+echo 'is_variadic = ' . (string)($rp->isVariadic()) . PHP_EOL;
 echo 'name = ' . $rp->getName() . PHP_EOL;
 echo 'type = ' . $rp->getTypeText() . PHP_EOL;
 }

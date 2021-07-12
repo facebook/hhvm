@@ -2,18 +2,23 @@
 
 function f1($b)
 {
-    echo "\tInside function " . __FUNCTION__ . ", \$b is $b\n";
+    $b__str = (string)($b);
+    echo "\tInside function " . __FUNCTION__ . ", \$b is $b__str\n";
 
     $b = STDOUT;
 
-    echo "After '\$b = STDOUT', \$b is $b\n";
+    $b__str = (string)($b);
+
+    echo "After '\$b = STDOUT', \$b is $b__str\n";
 }
 
 function f2()
 {
     $b = STDOUT;
 
-    echo "After '\$b = STDOUT', \$b is $b\n";
+    $b__str = (string)($b);
+
+    echo "After '\$b = STDOUT', \$b is $b__str\n";
 
     return $b;
 }
@@ -28,15 +33,23 @@ function main_entry(): void {
 
   $a = STDIN;
 
-  echo "After '\$a = STDIN', \$a is $a\n";
+  $a__str = (string)($a);
+
+  echo "After '\$a = STDIN', \$a is $a__str\n";
 
   $b = $a;
 
-  echo "After '\$b = \$a', \$b is $b\n";
+  $b__str = (string)($b);
+
+  echo "After '\$b = \$a', \$b is $b__str\n";
 
   $a = STDOUT;
 
-  echo "After '\$a = STDOUT', \$b is $b, and \$a is $a\n";
+  $b__str = (string)($b);
+
+  $a__str = (string)($a);
+
+  echo "After '\$a = STDOUT', \$b is $b__str, and \$a is $a__str\n";
   echo "Done\n";
   //*/
 
@@ -45,11 +58,15 @@ function main_entry(): void {
 
   $a = STDIN;
 
-  echo "After '\$a = STDIN', \$a is $a\n";
+  $a__str = (string)($a);
+
+  echo "After '\$a = STDIN', \$a is $a__str\n";
 
   f1($a);
 
-  echo "After 'f1(\$a)', \$a is $a\n";
+  $a__str = (string)($a);
+
+  echo "After 'f1(\$a)', \$a is $a__str\n";
   echo "Done\n";
   //*/
 
@@ -58,7 +75,9 @@ function main_entry(): void {
 
   $a = f2();
 
-  echo "After '\$a = f2()', \$a is $a\n";
+  $a__str = (string)($a);
+
+  echo "After '\$a = f2()', \$a is $a__str\n";
   echo "Done\n";
   //*/
 }

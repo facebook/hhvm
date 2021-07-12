@@ -12,11 +12,11 @@ class C<reify T> extends D<(T, T)> {
 <<__EntryPoint>>
 function main() {
   $c = new C<int>();
-  echo $c is C<int> . "\n";
+  echo (string)($c is C<int>) . "\n";
   $s = serialize($c);
   var_export($s);
   echo "\n";
   $c2 = unserialize($s);
-  echo $c is C<int> . "\n";
-  echo $c is D<(int, int)> . "\n";
+  echo (string)($c is C<int>) . "\n";
+  echo (string)($c is D<(int, int)>) . "\n";
 }

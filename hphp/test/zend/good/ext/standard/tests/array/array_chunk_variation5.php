@@ -23,7 +23,8 @@ $sizes = varray[-1, count($input_array) + 1, 0, 1.5];
 
 // loop through the array for size argument
 foreach ($sizes as $size){
-  echo "\n-- Testing array_chunk() when size = $size --\n";
+  $size__str = (string)($size);
+  echo "\n-- Testing array_chunk() when size = $size__str --\n";
   var_dump( array_chunk($input_array, (int)$size) );
   var_dump( array_chunk($input_array, (int)$size, true) );
   var_dump( array_chunk($input_array, (int)$size, false) );

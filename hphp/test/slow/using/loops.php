@@ -18,7 +18,8 @@ function main() {
   while (true) {
     using (new Logger()) {
       using (new Logger()) {
-        echo "loop: $loop\n";
+        $loop__str = (string)($loop);
+        echo "loop: $loop__str\n";
         if ($loop) {
           $loop = false;
           continue;

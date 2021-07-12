@@ -17,10 +17,10 @@ function staticNonStatic() {
 
 function manyInits() {
     echo "------------- Call ".State::$counter." --------------\n";
-    echo "Unitialised      : ".State::$a."\n";
+    echo "Unitialised      : ".(string)(State::$a)."\n";
     echo "Initialised to 10: ".State::$b."\n";
     echo "Initialised to 20: ".State::$c."\n";
-    echo "Unitialised      : ".State::$d."\n";
+    echo "Unitialised      : ".(string)(State::$d)."\n";
     echo "Initialised to 30: ".State::$e."\n";
     State::$a++;
     State::$b++;
@@ -45,7 +45,7 @@ manyInits();
 
 echo "\nUsing static keyword at global scope\n";
 for ($i=0; $i<3; $i++) {
-   echo State::$s." ".State::$k."\n";
+   echo (string)(State::$s)." ".(string)(State::$k)."\n";
    State::$s++;
    State::$k++;
 }

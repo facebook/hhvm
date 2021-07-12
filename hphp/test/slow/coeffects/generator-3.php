@@ -11,7 +11,7 @@ function f<reify T>(A $x)[$x::C] {
 }
 
 function pure($gen)[]{
-  echo $gen->next() . "\n";
+  echo (string)($gen->next()) . "\n";
 }
 
 <<__EntryPoint>>

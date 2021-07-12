@@ -14,5 +14,5 @@ function f<T>(HH\MemberOf<E, Box<T>> $elt) : T {
 <<__EntryPoint>>
  function main() {
     $x = "A";
-    echo("Hello " . f($x) . "!\n");
+    echo("Hello " . (string)(f($x)) . "!\n");
 }

@@ -4,7 +4,8 @@ const CON = TRUE;
 
 function f1($b)
 {
-    echo "\tInside function " . __FUNCTION__ . ", \$b is $b\n";
+    $b__str = (string)($b);
+    echo "\tInside function " . __FUNCTION__ . ", \$b is $b__str\n";
 
     $b = "abc";
 

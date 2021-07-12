@@ -8,5 +8,5 @@ class X {
 <<__EntryPoint>>
 function main_167() {
 ;
-echo 'abc' . X::g() . 'efg';
+echo 'abc' . (string)(X::g()) . 'efg';
 }

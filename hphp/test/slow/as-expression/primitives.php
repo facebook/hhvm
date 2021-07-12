@@ -1,7 +1,8 @@
 <?hh
 
 function f(mixed $x) {
-  echo "\$x is $x\n";
+  $x__str = (string)($x);
+  echo "\$x is $x__str\n";
   try {
     $x as string;
   } catch (Exception $e) {

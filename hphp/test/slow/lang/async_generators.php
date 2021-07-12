@@ -92,7 +92,9 @@ async function main($exit_type) {
     if ($res === null) {
       echo "result: EOF\n";
     } else {
-      echo "result: {$res[0]} => {$res[1]}\n";
+      $temp_str_40874 = (string)($res[0]);
+      $temp_str_40888 = (string)($res[1]);
+      echo "result: {$temp_str_40874} => {$temp_str_40888}\n";
     }
     $res = (bool)$res;
     $awaitable = null;

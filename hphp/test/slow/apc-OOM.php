@@ -2,8 +2,11 @@
 // Generate giant string and store it into APC
 function dump($i, $flag): int {
 
-  $keyi = ApcOom::$prefixKey . "{$i}";
-  $valuei = ApcOom::$prefixValue . "{$i}";
+  $i__str = (string)($i);
+
+  $keyi = (string)(ApcOom::$prefixKey) . "{$i__str}";
+  $i__str = (string)($i);
+  $valuei = (string)(ApcOom::$prefixValue) . "{$i__str}";
   apc_store($keyi,$valuei);
   if ($flag == true) gc_collect_cycles();
   apc_delete($keyi);

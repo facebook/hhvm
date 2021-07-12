@@ -737,7 +737,7 @@ let next
     (files_to_process : file_computation BigList.t ref)
     (files_in_progress : file_computation Hash_set.Poly.t)
     (record : Measure.record)
-    (remote_execution : ReEnv.t option) =
+    (remote_execution : ReEnv.t option) : unit -> job_progress Bucket.bucket =
   let max_size =
     match remote_execution with
     | Some _ -> 25000

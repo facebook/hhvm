@@ -931,12 +931,11 @@ let setup_interrupts env client_provider =
             =
           genv.local_config
         in
-        let interrupt_on_watchman =
-          interrupt_on_watchman && env.can_interrupt
-        in
-        let interrupt_on_client = interrupt_on_client && env.can_interrupt in
         let handlers = [] in
         let handlers =
+          let interrupt_on_watchman =
+            interrupt_on_watchman && env.can_interrupt
+          in
           match genv.notifier_async_reader () with
           | Some reader when interrupt_on_watchman ->
             (Buffered_line_reader.get_fd reader, watchman_interrupt_handler genv)
@@ -944,6 +943,7 @@ let setup_interrupts env client_provider =
           | _ -> handlers
         in
         let handlers =
+          let interrupt_on_client = interrupt_on_client && env.can_interrupt in
           match ClientProvider.priority_fd client_provider with
           | Some fd when interrupt_on_client ->
             (fd, priority_client_interrupt_handler genv client_provider)

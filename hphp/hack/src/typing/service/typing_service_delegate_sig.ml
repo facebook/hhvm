@@ -14,7 +14,7 @@ module type Delegate_sig = sig
 
   val default : state
 
-  val create :
+  val make :
     artifact_store_config:ArtifactStore.config ->
     job_runner:(module JobRunner_sig.S) ->
     max_batch_size:int ->

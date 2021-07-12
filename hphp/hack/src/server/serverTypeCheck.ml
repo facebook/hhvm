@@ -1661,7 +1661,7 @@ functor
               .ServerLocalConfig.enable_type_check_filter_files
       in
       let env =
-        start_delegate_if_needed
+        ServerRemoteUtils.start_delegate_if_needed
           env
           genv
           (Relative_path.Set.cardinal files_to_check)

@@ -16,7 +16,7 @@ let show_state = Typing_service_delegate_types.show_state
 
 let default = Typing_service_delegate_types.default
 
-let create = Typing_service_delegate_types.create
+let make = Typing_service_delegate_types.make
 
 let start delegate_env state =
   ignore delegate_env;

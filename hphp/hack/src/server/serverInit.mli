@@ -42,9 +42,8 @@ type init_result =
   (* This option means we didn't even try to load a saved state *)
   | Load_state_declined of string
 
-(* will parse, name, typecheck, the next set of files
- * and refresh the environment and update the many shared heaps
- *)
+(** Parse, name, typecheck the next set of files,
+    refresh the environment and update the many shared heaps *)
 val init :
   init_approach:init_approach ->
   ServerEnv.genv ->

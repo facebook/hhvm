@@ -10,7 +10,7 @@ type state = unit [@@deriving show]
 
 let default = ()
 
-let create
+let make
     ~job_runner
     ~artifact_store_config
     ~max_batch_size

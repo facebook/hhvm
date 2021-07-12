@@ -290,6 +290,7 @@ and dirty_deps = {
           dirty_master_deps. Storing them here to avoid checking it over and over *)
 }
 
+(** Remote typing service. *)
 and typing_service = {
   delegate_state: Typing_service_delegate_types.state; [@opaque]
   enabled: bool;

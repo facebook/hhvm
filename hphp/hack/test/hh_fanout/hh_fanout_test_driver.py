@@ -147,7 +147,6 @@ def run_hh_fanout(
     cursor: Optional[str],
 ) -> Dict[str, object]:
     common_args = []
-    common_args.append("--64bit")
     common_args.extend(("--from", "integration-test"))
     common_args.extend(("--root", env.root_dir))
     common_args.extend(("--detail-level", "high"))
@@ -180,7 +179,6 @@ def run_hh_fanout_calculate_errors(
     env: Env, saved_state_info: SavedStateInfo, cursor: Cursor
 ) -> Dict[str, object]:
     args = []
-    args.append("--64bit")
     args.extend(("--from", "integration-test"))
     args.extend(("--root", env.root_dir))
     args.extend(("--detail-level", "high"))
@@ -198,7 +196,6 @@ def run_hh_fanout_calculate_errors_pretty_print(
     env: Env, saved_state_info: SavedStateInfo, cursor: Cursor
 ) -> str:
     args = []
-    args.append("--64bit")
     args.extend(("--from", "integration-test"))
     args.extend(("--root", env.root_dir))
     args.extend(("--detail-level", "high"))
@@ -216,7 +213,6 @@ def run_hh_fanout_calculate_errors_pretty_print(
 
 def run_hh_fanout_status(env: Env, cursor: Cursor) -> str:
     args = []
-    args.append("--64bit")
     args.extend(("--from", "integration-test"))
     args.extend(("--root", env.root_dir))
     args.extend(("--state-path", os.path.join(env.root_dir, "hh_fanout_state")))

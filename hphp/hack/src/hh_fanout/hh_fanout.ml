@@ -440,7 +440,6 @@ let env
     root
     detail_level
     ignore_hh_version
-    _is_64bit
     naming_table_path
     dep_table_path
     watchman_sockname
@@ -538,10 +537,6 @@ If not provided, defaults to the value for 'from'.
     in
     value & flag & info ["ignore-hh-version"] ~doc
   in
-  let is_64bit =
-    let doc = "[legacy] ignored]" in
-    value & flag & info ["64bit"] ~doc
-  in
   let naming_table_path =
     let doc = "The path to the naming table SQLite saved-state." in
     let docv = "PATH" in
@@ -589,7 +584,6 @@ If not provided, will use the default path for the repository.
     $ root
     $ detail_level
     $ ignore_hh_version
-    $ is_64bit
     $ naming_table_path
     $ dep_table_path
     $ watchman_sockname

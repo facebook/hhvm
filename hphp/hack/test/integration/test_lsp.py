@@ -2010,6 +2010,115 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 powered_by="serverless_ide",
             )
+            .notification(
+                comment="Add '1 is strin'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 37},
+                            },
+                            "text": "1 is strin",
+                        }
+                    ],
+                },
+            )
+            .request(
+                line=line(),
+                comment="autocomplete after '1 is strin'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 10},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "data": {"fullname": "string"},
+                            "detail": "builtin",
+                            "documentation": {
+                                "kind": "markdown",
+                                "value": "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace",
+                            },
+                            "inlineDetail": "builtin",
+                            "insertText": "string",
+                            "insertTextFormat": 1,
+                            "kind": 25,
+                            "label": "string",
+                            "sortText": "string",
+                        },
+                        {
+                            "data": {"fullname": "StringBuffer"},
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "insertText": "StringBuffer",
+                            "insertTextFormat": 1,
+                            "kind": 7,
+                            "label": "StringBuffer",
+                            "sortText": "StringBuffer",
+                        },
+                        {
+                            "data": {"fullname": "Stringish"},
+                            "detail": "interface",
+                            "inlineDetail": "interface",
+                            "insertText": "Stringish",
+                            "insertTextFormat": 1,
+                            "kind": 8,
+                            "label": "Stringish",
+                            "sortText": "Stringish",
+                        },
+                        {
+                            "data": {"fullname": "StringishObject"},
+                            "detail": "interface",
+                            "inlineDetail": "interface",
+                            "insertText": "StringishObject",
+                            "insertTextFormat": 1,
+                            "kind": 8,
+                            "label": "StringishObject",
+                            "sortText": "StringishObject",
+                        },
+                    ],
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="autocomplete resolving after '1 is strin'",
+                method="completionItem/resolve",
+                params={
+                    "data": {"fullname": "string"},
+                    "detail": "builtin",
+                    "documentation": {
+                        "kind": "markdown",
+                        "value": "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace",
+                    },
+                    "inlineDetail": "builtin",
+                    "insertText": "string",
+                    "insertTextFormat": 1,
+                    "kind": 25,
+                    "label": "string",
+                    "sortText": "string",
+                },
+                result={
+                    "data": {"fullname": "string"},
+                    "detail": "builtin",
+                    "documentation": {
+                        "kind": "markdown",
+                        "value": "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace",
+                    },
+                    "inlineDetail": "builtin",
+                    "insertText": "string",
+                    "insertTextFormat": 1,
+                    "kind": 25,
+                    "label": "string",
+                    "sortText": "string",
+                },
+                powered_by="serverless_ide",
+            )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )

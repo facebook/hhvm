@@ -317,31 +317,33 @@ const Func* lookupImmutableCtor(const Class* cls, const Class* ctx) {
 ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
                                         const StringData* name) {
   auto const ne = NamedEntity::get(name);
-  if (auto const f = ne->uniqueFunc()) {
-    // We have an unique function. However, it may be interceptable, which means
-    // we can't use it directly.
-    if (f->isInterceptable()) return {nullptr, true};
+  if (auto const f = ne->getCachedFunc()) {
+    if (f->isUnique()) {
+      // We have an unique function. However, it may be interceptable, which means
+      // we can't use it directly.
+      if (f->isInterceptable()) return {nullptr, true};
 
-    // In non-repo mode while the function must be available in this unit, it
-    // may be de-duplication on load. This may mean that while the func is
-    // available it is not immutable in the current compilation unit. The order
-    // of the de-duplication can also differ between requests.
-    if (f->isMethCaller() && !RO::RepoAuthoritative) return {nullptr, true};
+      // In non-repo mode while the function must be available in this unit, it
+      // may be de-duplication on load. This may mean that while the func is
+      // available it is not immutable in the current compilation unit. The order
+      // of the de-duplication can also differ between requests.
+      if (f->isMethCaller() && !RO::RepoAuthoritative) return {nullptr, true};
 
-    // We can use this function. If its persistent (which means its unit's
-    // pseudo-main is trivial), its safe to use unconditionally. If its defined
-    // in the same unit as the caller, its also safe to use unconditionally. By
-    // virtue of the fact that we're already in the unit, we know its already
-    // defined.
-    if (f->isPersistent() || f->unit() == unit) {
-      if (!RO::EvalJitEnableRenameFunction || f->isMethCaller()) {
-        return {f, false};
+      // We can use this function. If its persistent (which means its unit's
+      // pseudo-main is trivial), its safe to use unconditionally. If its defined
+      // in the same unit as the caller, its also safe to use unconditionally. By
+      // virtue of the fact that we're already in the unit, we know its already
+      // defined.
+      if (f->isPersistent() || f->unit() == unit) {
+        if (!RO::EvalJitEnableRenameFunction || f->isMethCaller()) {
+          return {f, false};
+        }
+      } else if (RO::EvalJitEnableRenameFunction) {
+        return {nullptr, true};
       }
-    } else if (RO::EvalJitEnableRenameFunction) {
-      return {nullptr, true};
+      // Use the function, but ensure its unit is loaded.
+      return {f, true};
     }
-    // Use the function, but ensure its unit is loaded.
-    return {f, true};
   }
 
   // Trust nothing if we can rename functions

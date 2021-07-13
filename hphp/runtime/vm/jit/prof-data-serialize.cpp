@@ -1759,15 +1759,13 @@ Func* read_func(ProfDataDeserializer& ser) {
         auto const unit = read_unit(ser);
         for (auto const f : unit->funcs()) {
           if (f->sn() == id) {
-            Func::bind(f);
-            auto const handle = f->funcHandle();
-            if (!rds::isPersistentHandle(handle) &&
-                (!rds::isHandleInit(handle, rds::NormalTag{}) ||
-                 rds::handleToRef<LowPtr<Func>,
-                                  rds::Mode::Normal>(handle).get() != f)) {
-              rds::uninitHandle(handle);
-              Func::def(f, false);
+            auto const ne = f->getNamedEntity();
+            // If it's not persistent, make sure its NamedEntity is
+            // unbound, ready for DefFunc
+            if (ne->m_cachedFunc.bound() && ne->m_cachedFunc.isNormal()) {
+              ne->m_cachedFunc.markUninit();
             }
+            Func::def(f, false);
             return f;
           }
         }

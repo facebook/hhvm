@@ -735,10 +735,6 @@ void Unit::initialMerge() {
     data_map::register_start(this);
   }
 
-  for (auto& func : funcs()) {
-    Func::bind(func);
-  }
-
   if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
     m_coverage.bind(
       rds::Mode::Normal,
@@ -858,25 +854,7 @@ void Unit::mergeImpl(MergeTypes mergeTypes) {
 
   if (mergeTypes & MergeTypes::Function) {
     for (auto func : funcs()) {
-      if (func->isUnique()) {
-        assertx(func->isPersistent());
-        auto const handle = func->funcHandle();
-        assertx(rds::isPersistentHandle(handle));
-        rds::handleToRef<LowPtr<Func>, rds::Mode::Persistent>(handle) = func;
-
-        auto const ne = func->getNamedEntity();
-        auto const f = ne->uniqueFunc();
-        if (f && f->attrs() & AttrIsMethCaller) {
-          // Skip the duplicated meth_caller
-          continue;
-        }
-        ne->setUniqueFunc(func);
-
-        if (debugger) phpDebuggerDefFuncHook(func);
-      } else {
-        assertx(func->isPersistent() == ((this->isSystemLib() && !RuntimeOption::EvalJitEnableRenameFunction) || RuntimeOption::RepoAuthoritative));
-        Func::def(func, debugger);
-      }
+      Func::def(func, debugger);
     }
   }
 

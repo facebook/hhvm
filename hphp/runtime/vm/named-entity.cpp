@@ -161,13 +161,6 @@ void NamedEntity::removeClass(Class* goner) {
   removeImpl(goner, m_clsList);
 }
 
-void NamedEntity::setUniqueFunc(Func* func) {
-  assertx(func && func->isUnique());
-  auto const DEBUG_ONLY old = m_uniqueFunc;
-  assertx(!old || func == old);
-  m_uniqueFunc = func;
-}
-
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 

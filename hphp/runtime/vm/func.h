@@ -1152,7 +1152,6 @@ struct Func final {
 
   void setAttrs(Attr attrs);
   void setBaseCls(Class* baseCls);
-  void setFuncHandle(rds::Link<LowPtr<Func>, rds::Mode::NonLocal> l);
   void setHasPrivateAncestor(bool b);
   void setMethodSlot(Slot s);
   void setGenerated(bool b);
@@ -1225,12 +1224,6 @@ struct Func final {
    */
   static Func* load(const NamedEntity* ne, const StringData* name);
   static Func* load(const StringData* name);
-
-  /*
-   * bind (or rebind) a func to the NamedEntity corresponding to its
-   * name.
-   */
-  static void bind(Func* func);
 
   /*
    * Lookup the builtin in this request with name `name', or nullptr if none
@@ -1671,7 +1664,6 @@ private:
   int m_magic;
 #endif
   AtomicLowPtr<uint8_t> m_funcBody{nullptr};
-  mutable rds::Link<LowPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
   FuncId m_funcId{FuncId::Invalid};
   mutable AtomicLowPtr<const StringData> m_fullName{nullptr};
   LowStringPtr m_name{nullptr};
@@ -1718,7 +1710,7 @@ private:
   // should not be inherited from.
   AtomicLowPtr<uint8_t> m_prologueTable[1];
 };
-static constexpr size_t kFuncSize = debug ? (use_lowptr ? 88 : 112)
+static constexpr size_t kFuncSize = debug ? (use_lowptr ? 80 : 112)
                                           : (use_lowptr ? 80 : 104);
 static_assert(CheckSize<Func, kFuncSize>(), "");
 

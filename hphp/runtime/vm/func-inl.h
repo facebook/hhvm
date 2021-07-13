@@ -740,10 +740,6 @@ Func::findEH(const Container& ehtab, Offset o) {
 ///////////////////////////////////////////////////////////////////////////////
 // JIT data.
 
-inline rds::Handle Func::funcHandle() const {
-  return m_cachedFunc.handle();
-}
-
 inline unsigned char* Func::getFuncBody() const {
   return m_funcBody;
 }
@@ -776,14 +772,6 @@ inline void Func::setAttrs(Attr attrs) {
 
 inline void Func::setBaseCls(Class* baseCls) {
   m_baseCls = to_low(baseCls);
-}
-
-inline void Func::setFuncHandle(rds::Link<LowPtr<Func>,
-                                          rds::Mode::NonLocal> l) {
-  // TODO(#2950356): This assertion fails for create_function with an existing
-  // declared function named __lambda_func.
-  //assertx(!m_cachedFunc.valid());
-  m_cachedFunc = l;
 }
 
 inline void Func::setHasPrivateAncestor(bool b) {

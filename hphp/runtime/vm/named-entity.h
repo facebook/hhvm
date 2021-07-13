@@ -181,22 +181,6 @@ struct NamedEntity {
   void removeClass(Class* goner);
 
   /////////////////////////////////////////////////////////////////////////////
-  // Unique func.
-
-  /*
-   * Return the unique func corresponding to this name, or nullptr if there is
-   * none registered.
-   */
-  Func* uniqueFunc() const;
-
-  /*
-   * Register the unique func corresponding to this name.
-   *
-   * Precondition: func->isUnique()
-   */
-  void setUniqueFunc(Func* func);
-
-  /////////////////////////////////////////////////////////////////////////////
   // RecordDesc.
   RecordDesc* recordList() const;
   void pushRecordDesc(RecordDesc*);
@@ -256,7 +240,6 @@ public:
                                    std::memory_order_release>;
 private:
   ListType<Class> m_clsList{nullptr};
-  ListType<Func> m_uniqueFunc{nullptr};
   ListType<RecordDesc> m_recordList{nullptr};
 };
 

@@ -65,9 +65,5 @@ inline RecordDesc* NamedEntity::recordList() const {
   return m_recordList;
 }
 
-inline Func* NamedEntity::uniqueFunc() const {
-  return m_uniqueFunc;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

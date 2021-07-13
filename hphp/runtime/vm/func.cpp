@@ -67,6 +67,8 @@ TRACE_SET_MOD(hhbc);
 
 std::atomic<bool> Func::s_treadmill;
 
+Mutex g_funcsMutex;
+
 /*
  * FuncId high water mark and FuncId -> Func* table.
  * We can't start with 0 since that's used for special sentinel value
@@ -222,7 +224,6 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   f->setFullName(numParams);
 
   if (f != this) {
-    f->m_cachedFunc = rds::Link<LowPtr<Func>, rds::Mode::NonLocal>{};
     f->m_maybeIntercepted = -1;
     f->m_isPreFunc = false;
     f->m_registeredInDataMap = false;
@@ -807,42 +808,52 @@ const StaticString s_DebuggerMain("__DebuggerMain");
 
 void Func::def(Func* func, bool debugger) {
   assertx(!func->isMethod());
-  auto const handle = func->funcHandle();
 
   if (UNLIKELY(debugger)) {
     // Don't define the __debugger_main() function
     if (func->userAttributes().count(s_DebuggerMain.get())) return;
   }
 
-  if (rds::isPersistentHandle(handle)) {
-    auto& funcAddr = rds::handleToRef<LowPtr<Func>,
-                                      rds::Mode::Persistent>(handle);
-    auto const oldFunc = funcAddr.get();
-    if (oldFunc == func) return;
-    if (UNLIKELY(oldFunc != nullptr)) {
-      assertx(oldFunc->isBuiltin() && !func->isBuiltin());
-      raise_error(Strings::REDECLARE_BUILTIN, func->name()->data());
-    }
-    funcAddr = func;
-  } else {
-    assertx(rds::isNormalHandle(handle));
-    auto& funcAddr = rds::handleToRef<LowPtr<Func>, rds::Mode::Normal>(handle);
-    if (!rds::isHandleInit(handle, rds::NormalTag{})) {
-      rds::initHandle(handle);
-    } else {
-      if (funcAddr.get() == func) return;
-      if (func->attrs() & AttrIsMethCaller) {
-        // emit the duplicated meth_caller directly
-        return;
+  auto const ne = func->getNamedEntity();
+
+  Func* f = ne->getCachedFunc();
+  if (f == nullptr) {
+    std::unique_lock<Mutex> l(g_funcsMutex);
+    f = ne->getCachedFunc();
+    if (f == nullptr) {
+      auto const persistent = func->isPersistent();
+      assertx(!persistent || (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited));
+
+      if (!ne->m_cachedFunc.bound()) {
+        ne->m_cachedFunc.bind(
+          persistent ? rds::Mode::Persistent : rds::Mode::Normal,
+          rds::LinkName{"Func", func->name()}
+        );
       }
-      raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
+      ne->m_cachedFunc.initWith(func);
+      l.unlock();
+
+      if (debugger) phpDebuggerDefFuncHook(func);
     }
-    funcAddr = func;
   }
 
-  if (func->isUnique()) func->getNamedEntity()->setUniqueFunc(func);
+  // If the function didn't exists before we are good
+  if (f == nullptr) {
+    return;
+  }
 
-  if (UNLIKELY(debugger)) phpDebuggerDefFuncHook(func);
+  // Otherwise check if we match or show the right error message
+  if (f == func) {
+    assertx(!RO::RepoAuthoritative ||
+            (f->isPersistent() && ne->m_cachedFunc.isPersistent()));
+    return;
+  }
+  if (func->attrs() & AttrIsMethCaller) return;
+  if (f->isBuiltin()) {
+    assertx(!func->isBuiltin());
+    raise_error(Strings::REDECLARE_BUILTIN, func->name()->data());
+  }
+  raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
 }
 
 Func* Func::lookup(const NamedEntity* ne) {
@@ -860,8 +871,8 @@ Func* Func::lookupBuiltin(const StringData* name) {
   // enabled). In either case, they're unique, so they should be present in the
   // NamedEntity.
   auto const ne = NamedEntity::get(name);
-  auto const f = ne->uniqueFunc();
-  return (f && f->isBuiltin()) ? f : nullptr;
+  auto const f = ne->getCachedFunc();
+  return (f && f->isUnique() && f->isBuiltin()) ? f : nullptr;
 }
 
 Func* Func::load(const NamedEntity* ne, const StringData* name) {
@@ -891,29 +902,6 @@ Func* Func::load(const StringData* name) {
   return AutoloadHandler::s_instance->autoloadFunc(
     const_cast<StringData*>(name)
   ) ? ne->getCachedFunc() : nullptr;
-}
-
-void Func::bind(Func *func) {
-  assertx(!func->isMethod());
-  auto const ne = func->getNamedEntity();
-
-  auto const persistent = func->isPersistent();
-  assertx(!persistent || (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited));
-
-  auto const init_val = LowPtr<Func>(func);
-
-  ne->m_cachedFunc.bind(
-    persistent ? rds::Mode::Persistent : rds::Mode::Normal,
-    rds::LinkName{"Func", func->name()},
-    &init_val
-  );
-  if (func->isUnique() && func == ne->getCachedFunc()) {
-    // we need to check that we actually were responsible for the bind here
-    // before we set the uniqueFunc on `ne`.  this seems strange, but it's
-    // because meth_caller funcs are unique but can have the same name.
-    ne->setUniqueFunc(func);
-  }
-  func->setFuncHandle(ne->m_cachedFunc);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

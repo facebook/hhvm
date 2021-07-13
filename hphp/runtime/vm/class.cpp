@@ -4615,13 +4615,14 @@ void setupClass(Class* newClass, NamedEntity* nameList) {
     rds::LinkName{"NEClass", newClass->name()}
   );
 
-  if (newClass->isBuiltin()) {
-    assertx(newClass->isUnique());
-    for (auto i = newClass->numMethods(); i--;) {
-      auto const func = newClass->getMethod(i);
-      if (func->isCPPBuiltin() && func->isStatic()) {
-        assertx(func->isUnique());
-        NamedEntity::get(func->fullName())->setUniqueFunc(func);
+  if (debug) {
+    if (newClass->isBuiltin()) {
+      assertx(newClass->isUnique());
+      for (auto i = newClass->numMethods(); i--;) {
+        auto const func = newClass->getMethod(i);
+        if (func->isCPPBuiltin() && func->isStatic()) {
+          assertx(func->isUnique());
+        }
       }
     }
   }

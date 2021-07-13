@@ -1205,7 +1205,7 @@ struct Func final {
   /*
    * Define `func' for this request by initializing its RDS handle.
    */
-  static void def(Func* func, bool debugger);
+  static void def(Func* func);
 
   /*
    * Look up the defined Func in this request with name `name', or with the name

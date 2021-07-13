@@ -1765,7 +1765,7 @@ Func* read_func(ProfDataDeserializer& ser) {
             if (ne->m_cachedFunc.bound() && ne->m_cachedFunc.isNormal()) {
               ne->m_cachedFunc.markUninit();
             }
-            Func::def(f, false);
+            Func::def(f);
             return f;
           }
         }

@@ -806,13 +806,11 @@ void logFunc(const Func* func, StructuredLogEntry& ent) {
 
 const StaticString s_DebuggerMain("__DebuggerMain");
 
-void Func::def(Func* func, bool debugger) {
+void Func::def(Func* func) {
   assertx(!func->isMethod());
 
-  if (UNLIKELY(debugger)) {
-    // Don't define the __debugger_main() function
-    if (func->userAttributes().count(s_DebuggerMain.get())) return;
-  }
+  // Don't define the __debugger_main() function
+  DEBUGGER_ATTACHED_ONLY(if (func->userAttributes().count(s_DebuggerMain.get())) { return; });
 
   auto const ne = func->getNamedEntity();
 
@@ -833,7 +831,7 @@ void Func::def(Func* func, bool debugger) {
       ne->m_cachedFunc.initWith(func);
       l.unlock();
 
-      if (debugger) phpDebuggerDefFuncHook(func);
+      DEBUGGER_ATTACHED_ONLY(phpDebuggerDefFuncHook(func));
     }
   }
 

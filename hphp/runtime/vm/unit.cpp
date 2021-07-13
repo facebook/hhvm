@@ -66,7 +66,6 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/frame-restore.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hh-utils.h"
@@ -764,11 +763,7 @@ void Unit::merge() {
     mergeTypes = MergeTypes::Function;
   }
 
-  if (UNLIKELY(isDebuggerAttached())) {
-    mergeImpl<true>(mergeTypes);
-  } else {
-    mergeImpl<false>(mergeTypes);
-  }
+  mergeImpl(mergeTypes);
 
   if (RuntimeOption::RepoAuthoritative || (!SystemLib::s_inited && !RuntimeOption::EvalJitEnableRenameFunction)) {
     m_mergeState.store(MergeState::Merged, std::memory_order_relaxed);
@@ -836,7 +831,6 @@ static bool defineSymbols(const T& symbols, boost::dynamic_bitset<>& define, boo
   return madeProgress;
 }
 
-template <bool debugger>
 void Unit::mergeImpl(MergeTypes mergeTypes) {
   assertx(m_mergeState.load(std::memory_order_relaxed) >= MergeState::InitialMerged);
   autoTypecheck(this);
@@ -854,7 +848,7 @@ void Unit::mergeImpl(MergeTypes mergeTypes) {
 
   if (mergeTypes & MergeTypes::Function) {
     for (auto func : funcs()) {
-      Func::def(func, debugger);
+      Func::def(func);
     }
   }
 

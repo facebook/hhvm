@@ -643,7 +643,6 @@ public:
 
 private:
   void initialMerge();
-  template<bool debugger>
   void mergeImpl(MergeTypes mergeTypes);
   UnitExtended* getExtended();
   const UnitExtended* getExtended() const;

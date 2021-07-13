@@ -408,22 +408,6 @@ let update_naming_table env fast_parsed profiling =
 (*****************************************************************************)
 
 let declare_names env fast_parsed =
-  (* We need to do naming phase for files that failed naming before, even
-   * if they were not re-parsed in this iteration, so we are extending
-   * fast_parsed with them. *)
-  let fast_parsed =
-    Relative_path.Set.fold env.failed_naming ~init:fast_parsed ~f:(fun k acc ->
-        match Relative_path.Map.find_opt acc k with
-        | Some _ -> acc (* the file was re-parsed already *)
-        | None ->
-          (* The file was not re-parsed, so it's correct to look up its contents
-           * in (old) env. *)
-          (match Naming_table.get_file_info env.naming_table k with
-          | None -> acc
-          (* this should not happen - failed_naming should be
-                         a subset of keys in naming_table *)
-          | Some v -> Relative_path.Map.add acc ~key:k ~data:v))
-  in
   remove_decls env fast_parsed;
   let ctx = Provider_utils.ctx_from_server_env env in
   let (errorl, failed_naming) =
@@ -1268,6 +1252,22 @@ functor
        * heap as we progress with redeclaration *)
       let oldified_defs = get_oldified_defs env in
       let (files_to_parse, stop_at_errors) = CheckKind.get_files_to_parse env in
+      (* We need to do naming phase for files that failed naming in a previous cycle.
+       * "Failed_naming" comes from duplicate name errors; the idea is that a change
+       * deletes one of the duplicates, well, this change should cause us to re-parse
+       * and re-process the remaining duplicate so it can be properly recorded in the
+       * forward and reverse naming tables (even though the remaining duplicate
+       * didn't itself change). *)
+      if not (Relative_path.Set.is_empty env.failed_naming) then
+        Hh_logger.log
+          "Also reparsing these files with failed naming: %s"
+          ( Relative_path.Set.elements env.failed_naming
+          |> List.map ~f:Relative_path.suffix
+          |> String.concat ~sep:" " );
+      let files_to_parse =
+        Relative_path.Set.union files_to_parse env.failed_naming
+      in
+
       let reparse_count = Relative_path.Set.cardinal files_to_parse in
       if reparse_count = 1 then
         files_to_parse

@@ -110,6 +110,7 @@ add_dependencies(bundled_folly ${FOLLY_DEPS})
 add_library(folly_deps INTERFACE)
 target_link_libraries(folly_deps INTERFACE ${FOLLY_DEPS})
 
+
 add_library(folly INTERFACE)
 add_dependencies(folly bundled_folly)
 target_include_directories(
@@ -123,6 +124,10 @@ target_link_libraries(folly
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}folly${CMAKE_STATIC_LIBRARY_SUFFIX}"
   folly_deps
 )
+
+if(APPLE)
+  target_link_libraries(folly INTERFACE "c++abi")
+endif()
 
 if(UNIX AND NOT APPLE)
   # symbolizer implementation details

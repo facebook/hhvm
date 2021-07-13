@@ -602,6 +602,10 @@ module Completion : sig
     items: completionItem list;
   }
 
+  and completionDocumentation =
+    | MarkedStringsDocumentation of markedString list
+    | UnparsedDocumentation of Hh_json.json
+
   and completionItem = {
     label: string;
     (* the label in the UI *)
@@ -613,7 +617,7 @@ module Completion : sig
     (* nuclide-specific, right column *)
     itemType: string option;
     (* nuclide-specific, left column *)
-    documentation: markedString list option;
+    documentation: completionDocumentation option;
     (* human-readable doc-comment *)
     sortText: string option;
     (* used for sorting; if absent, uses label *)

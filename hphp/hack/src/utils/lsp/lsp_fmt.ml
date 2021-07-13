@@ -672,6 +672,11 @@ let parse_completionItem (params : json option) : CompletionItemResolve.params =
       | None -> None
       | c -> Some (parse_command c)
     in
+    let documentation =
+      match Jget.obj_opt params "documentation" with
+      | None -> None
+      | Some json -> Some (UnparsedDocumentation json)
+    in
     {
       label = Jget.string_exn params "label";
       kind =
@@ -679,7 +684,7 @@ let parse_completionItem (params : json option) : CompletionItemResolve.params =
       detail = Jget.string_opt params "detail";
       inlineDetail = Jget.string_opt params "inlineDetail";
       itemType = Jget.string_opt params "itemType";
-      documentation = None;
+      documentation;
       sortText = Jget.string_opt params "sortText";
       filterText = Jget.string_opt params "filterText";
       insertText = Jget.string_opt params "insertText";
@@ -709,15 +714,19 @@ let print_completionItem (item : Completion.completionItem) : json =
         ("inlineDetail", Option.map item.inlineDetail ~f:string_);
         ("itemType", Option.map item.itemType ~f:string_);
         ( "documentation",
-          Option.map item.documentation ~f:(fun doc ->
-              JSON_Object
-                [
-                  ("kind", JSON_String "markdown");
-                  ( "value",
-                    JSON_String
-                      (String.strip
-                         (List.fold doc ~init:"" ~f:string_of_markedString)) );
-                ]) );
+          match item.documentation with
+          | None -> None
+          | Some (UnparsedDocumentation json) -> Some json
+          | Some (MarkedStringsDocumentation doc) ->
+            Some
+              (JSON_Object
+                 [
+                   ("kind", JSON_String "markdown");
+                   ( "value",
+                     JSON_String
+                       (String.strip
+                          (List.fold doc ~init:"" ~f:string_of_markedString)) );
+                 ]) );
         ("sortText", Option.map item.sortText ~f:string_);
         ("filterText", Option.map item.filterText ~f:string_);
         ("insertText", Option.map item.insertText ~f:string_);

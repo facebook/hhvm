@@ -29,6 +29,7 @@ let make_keyword_completion
     res_kind = SearchUtils.SI_Keyword;
     func_details = None;
     ranking_details = None;
+    res_documentation = None;
   }
 
 let handle_empty_autocomplete (pos : File_content.position) file_content =

@@ -2547,7 +2547,9 @@ let make_ide_completion_response
       detail = Some (hack_to_detail completion);
       inlineDetail = Some (hack_to_inline_detail completion);
       itemType = hack_to_itemType completion;
-      documentation = None;
+      documentation =
+        Option.map completion.res_documentation ~f:(fun s ->
+            MarkedStringsDocumentation [MarkedString s]);
       (* This will be filled in by completionItem/resolve. *)
       sortText =
         (match completion.ranking_details with
@@ -2638,16 +2640,19 @@ let do_completion_local
 exception NoLocationFound
 
 let docblock_to_markdown (raw_docblock : DocblockService.result) :
-    markedString list option =
+    Completion.completionDocumentation option =
   match raw_docblock with
   | [] -> None
   | docblock ->
     Some
-      (Core_kernel.List.fold docblock ~init:[] ~f:(fun acc elt ->
-           match elt with
-           | DocblockService.Markdown txt -> MarkedString txt :: acc
-           | DocblockService.HackSnippet txt -> MarkedCode ("hack", txt) :: acc
-           | DocblockService.XhpSnippet txt -> MarkedCode ("html", txt) :: acc))
+      (Completion.MarkedStringsDocumentation
+         (Core_kernel.List.fold docblock ~init:[] ~f:(fun acc elt ->
+              match elt with
+              | DocblockService.Markdown txt -> MarkedString txt :: acc
+              | DocblockService.HackSnippet txt ->
+                MarkedCode ("hack", txt) :: acc
+              | DocblockService.XhpSnippet txt ->
+                MarkedCode ("html", txt) :: acc)))
 
 let docblock_with_ranking_detail
     (raw_docblock : DocblockService.result) (ranking_detail : string option) :
@@ -2668,72 +2673,77 @@ let do_completionItemResolve
     (ref_unblocked_time : float ref)
     (params : CompletionItemResolve.params) : CompletionItemResolve.result Lwt.t
     =
-  (* No matter what, we need the kind *)
-  let raw_kind = params.Completion.kind in
-  let kind = completion_kind_to_si_kind raw_kind in
-  (* First try fetching position data from json *)
-  let%lwt raw_docblock =
-    try
-      match params.Completion.data with
-      | None -> raise NoLocationFound
-      | Some _ as data ->
-        (* Some docblocks are for class methods.  Class methods need to know
-         * file/line/column/base_class to find the docblock. *)
-        let filename = Jget.string_exn data "filename" in
-        let line = Jget.int_exn data "line" in
-        let column = Jget.int_exn data "char" in
-        let base_class = Jget.string_opt data "base_class" in
-        let ranking_detail = Jget.string_opt data "ranking_detail" in
-        let ranking_source = Jget.int_opt data "ranking_source" in
-        (* If not found ... *)
-        if line = 0 && column = 0 then (
-          (* For global symbols such as functions, classes, enums, etc, we
-           * need to know the full name INCLUDING all namespaces.  Once
-           * we know that, we can look up its file/line/column. *)
-          let fullname = Jget.string_exn data "fullname" in
-          if String.equal fullname "" then raise NoLocationFound;
-          let fullname = Utils.add_ns fullname in
-          let command =
-            ServerCommandTypes.DOCBLOCK_FOR_SYMBOL
-              (fullname, resolve_ranking_source kind ranking_source)
-          in
-          let%lwt raw_docblock =
-            rpc conn ref_unblocked_time ~desc:"completion" command
-          in
-          Lwt.return (docblock_with_ranking_detail raw_docblock ranking_detail)
-        ) else
-          (* Okay let's get a docblock for this specific location *)
-          let command =
-            ServerCommandTypes.DOCBLOCK_AT
-              ( filename,
-                line,
-                column,
-                base_class,
-                resolve_ranking_source kind ranking_source )
-          in
-          let%lwt raw_docblock =
-            rpc conn ref_unblocked_time ~desc:"completion" command
-          in
-          Lwt.return (docblock_with_ranking_detail raw_docblock ranking_detail)
-      (* If that failed, fetch docblock using just the symbol name *)
-    with _ ->
-      let symbolname = params.Completion.label in
-      let ranking_source =
-        try Jget.int_opt params.Completion.data "ranking_source"
-        with _ -> None
-      in
-      let command =
-        ServerCommandTypes.DOCBLOCK_FOR_SYMBOL
-          (symbolname, resolve_ranking_source kind ranking_source)
-      in
-      let%lwt raw_docblock =
-        rpc conn ref_unblocked_time ~desc:"completion" command
-      in
-      Lwt.return raw_docblock
-  in
-  (* Convert to markdown and return *)
-  let documentation = docblock_to_markdown raw_docblock in
-  Lwt.return { params with Completion.documentation }
+  if Option.is_some params.Completion.documentation then
+    Lwt.return params
+  else
+    (* No matter what, we need the kind *)
+    let raw_kind = params.Completion.kind in
+    let kind = completion_kind_to_si_kind raw_kind in
+    (* First try fetching position data from json *)
+    let%lwt raw_docblock =
+      try
+        match params.Completion.data with
+        | None -> raise NoLocationFound
+        | Some _ as data ->
+          (* Some docblocks are for class methods.  Class methods need to know
+           * file/line/column/base_class to find the docblock. *)
+          let filename = Jget.string_exn data "filename" in
+          let line = Jget.int_exn data "line" in
+          let column = Jget.int_exn data "char" in
+          let base_class = Jget.string_opt data "base_class" in
+          let ranking_detail = Jget.string_opt data "ranking_detail" in
+          let ranking_source = Jget.int_opt data "ranking_source" in
+          (* If not found ... *)
+          if line = 0 && column = 0 then (
+            (* For global symbols such as functions, classes, enums, etc, we
+             * need to know the full name INCLUDING all namespaces.  Once
+             * we know that, we can look up its file/line/column. *)
+            let fullname = Jget.string_exn data "fullname" in
+            if String.equal fullname "" then raise NoLocationFound;
+            let fullname = Utils.add_ns fullname in
+            let command =
+              ServerCommandTypes.DOCBLOCK_FOR_SYMBOL
+                (fullname, resolve_ranking_source kind ranking_source)
+            in
+            let%lwt raw_docblock =
+              rpc conn ref_unblocked_time ~desc:"completion" command
+            in
+            Lwt.return
+              (docblock_with_ranking_detail raw_docblock ranking_detail)
+          ) else
+            (* Okay let's get a docblock for this specific location *)
+            let command =
+              ServerCommandTypes.DOCBLOCK_AT
+                ( filename,
+                  line,
+                  column,
+                  base_class,
+                  resolve_ranking_source kind ranking_source )
+            in
+            let%lwt raw_docblock =
+              rpc conn ref_unblocked_time ~desc:"completion" command
+            in
+            Lwt.return
+              (docblock_with_ranking_detail raw_docblock ranking_detail)
+        (* If that failed, fetch docblock using just the symbol name *)
+      with _ ->
+        let symbolname = params.Completion.label in
+        let ranking_source =
+          try Jget.int_opt params.Completion.data "ranking_source"
+          with _ -> None
+        in
+        let command =
+          ServerCommandTypes.DOCBLOCK_FOR_SYMBOL
+            (symbolname, resolve_ranking_source kind ranking_source)
+        in
+        let%lwt raw_docblock =
+          rpc conn ref_unblocked_time ~desc:"completion" command
+        in
+        Lwt.return raw_docblock
+    in
+    (* Convert to markdown and return *)
+    let documentation = docblock_to_markdown raw_docblock in
+    Lwt.return { params with Completion.documentation }
 
 (*
  * Note that resolve does not depend on having previously executed completion in
@@ -2753,73 +2763,76 @@ let do_resolve_local
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : CompletionItemResolve.params) : CompletionItemResolve.result Lwt.t
     =
-  let raw_kind = params.Completion.kind in
-  let kind = completion_kind_to_si_kind raw_kind in
-  (* Some docblocks are for class methods.  Class methods need to know
-  * file/line/column/base_class to find the docblock. *)
-  let%lwt result =
-    try
-      match params.Completion.data with
-      | None -> raise NoLocationFound
-      | Some _ as data ->
-        let filename = Jget.string_exn data "filename" in
-        let uri = File_url.create filename |> Lsp.uri_of_string in
-        let file_path = Path.make filename in
-        let line = Jget.int_exn data "line" in
-        let column = Jget.int_exn data "char" in
-        let file_contents = get_document_contents editor_open_files uri in
-        let ranking_detail = Jget.string_opt data "ranking_detail" in
-        let ranking_source = Jget.int_opt data "ranking_source" in
-        if line = 0 && column = 0 then failwith "NoFileLineColumnData";
+  if Option.is_some params.Completion.documentation then
+    Lwt.return params
+  else
+    let raw_kind = params.Completion.kind in
+    let kind = completion_kind_to_si_kind raw_kind in
+    (* Some docblocks are for class methods.  Class methods need to know
+     * file/line/column/base_class to find the docblock. *)
+    let%lwt result =
+      try
+        match params.Completion.data with
+        | None -> raise NoLocationFound
+        | Some _ as data ->
+          let filename = Jget.string_exn data "filename" in
+          let uri = File_url.create filename |> Lsp.uri_of_string in
+          let file_path = Path.make filename in
+          let line = Jget.int_exn data "line" in
+          let column = Jget.int_exn data "char" in
+          let file_contents = get_document_contents editor_open_files uri in
+          let ranking_detail = Jget.string_opt data "ranking_detail" in
+          let ranking_source = Jget.int_opt data "ranking_source" in
+          if line = 0 && column = 0 then failwith "NoFileLineColumnData";
+          let request =
+            ClientIdeMessage.Completion_resolve_location
+              {
+                ClientIdeMessage.Completion_resolve_location.document_location =
+                  {
+                    ClientIdeMessage.file_path;
+                    ClientIdeMessage.file_contents;
+                    ClientIdeMessage.line;
+                    ClientIdeMessage.column;
+                  };
+                kind = resolve_ranking_source kind ranking_source;
+              }
+          in
+          let%lwt raw_docblock =
+            ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
+          in
+          let documentation =
+            docblock_with_ranking_detail raw_docblock ranking_detail
+            |> docblock_to_markdown
+          in
+          Lwt.return { params with Completion.documentation }
+        (* If that fails, next try using symbol *)
+      with _ ->
+        (* The "fullname" value includes the fully qualified namespace, so
+         * we want to use that.  However, if it's missing (it shouldn't be)
+         * let's default to using the label which doesn't include the
+         * namespace. *)
+        let symbolname =
+          try Jget.string_exn params.Completion.data "fullname"
+          with _ -> params.Completion.label
+        in
+        let ranking_source =
+          try Jget.int_opt params.Completion.data "ranking_source"
+          with _ -> None
+        in
         let request =
-          ClientIdeMessage.Completion_resolve_location
+          ClientIdeMessage.Completion_resolve
             {
-              ClientIdeMessage.Completion_resolve_location.document_location =
-                {
-                  ClientIdeMessage.file_path;
-                  ClientIdeMessage.file_contents;
-                  ClientIdeMessage.line;
-                  ClientIdeMessage.column;
-                };
+              ClientIdeMessage.Completion_resolve.symbol = symbolname;
               kind = resolve_ranking_source kind ranking_source;
             }
         in
         let%lwt raw_docblock =
           ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
         in
-        let documentation =
-          docblock_with_ranking_detail raw_docblock ranking_detail
-          |> docblock_to_markdown
-        in
+        let documentation = docblock_to_markdown raw_docblock in
         Lwt.return { params with Completion.documentation }
-      (* If that fails, next try using symbol *)
-    with _ ->
-      (* The "fullname" value includes the fully qualified namespace, so
-       * we want to use that.  However, if it's missing (it shouldn't be)
-       * let's default to using the label which doesn't include the
-       * namespace. *)
-      let symbolname =
-        try Jget.string_exn params.Completion.data "fullname"
-        with _ -> params.Completion.label
-      in
-      let ranking_source =
-        try Jget.int_opt params.Completion.data "ranking_source"
-        with _ -> None
-      in
-      let request =
-        ClientIdeMessage.Completion_resolve
-          {
-            ClientIdeMessage.Completion_resolve.symbol = symbolname;
-            kind = resolve_ranking_source kind ranking_source;
-          }
-      in
-      let%lwt raw_docblock =
-        ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
-      in
-      let documentation = docblock_to_markdown raw_docblock in
-      Lwt.return { params with Completion.documentation }
-  in
-  Lwt.return result
+    in
+    Lwt.return result
 
 let hack_symbol_to_lsp (symbol : SearchUtils.symbol) =
   let open SearchUtils in

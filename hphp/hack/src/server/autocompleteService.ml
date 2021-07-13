@@ -517,6 +517,7 @@ let resolve_ty
     res_kind = x.kind_;
     func_details = get_func_details_for env x.ty;
     ranking_details = None;
+    res_documentation = None;
   }
 
 let autocomplete_typed_member ~is_static env class_ty cid mid =
@@ -1023,6 +1024,7 @@ let find_global_results
             res_kind = r.si_kind;
             func_details;
             ranking_details = None;
+            res_documentation = None;
           }
         in
         add_res (Complete complete));

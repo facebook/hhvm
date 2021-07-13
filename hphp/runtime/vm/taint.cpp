@@ -14,9 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-
-#ifdef HHVM_TAINT
-
 #include "hphp/runtime/vm/taint.h"
 
 #include "hphp/util/trace.h"
@@ -26,16 +23,9 @@ namespace taint {
 
 TRACE_SET_MOD(taint);
 
-#define O(name, imm, in, out, flags) \
-  void iop##name() {                 \
-    FTRACE(1, "taint: {}\n", #name); \
-  }
-
-OPCODES
-
-#undef O
-
-}
+void retC() {
+  FTRACE(1, "taint: RetC\n");
 }
 
-#endif
+} // namespace taint
+} // namespace HPHP

@@ -16,21 +16,20 @@
 
 #pragma once
 
+constexpr bool enable_taint =
 #ifdef HHVM_TAINT
+true
+#else
+false
+#endif
+;
 
 #include "hphp/runtime/vm/hhbc.h"
 
 namespace HPHP {
 namespace taint {
 
-#define O(name, imm, in, out, flags)                                 \
-  void iop##name();
-
-OPCODES
-
-#undef O
+void retC();
 
 }
 }
-
-#endif

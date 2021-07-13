@@ -26,8 +26,20 @@ false
 
 #include "hphp/runtime/vm/hhbc.h"
 
+#include <memory>
+
 namespace HPHP {
 namespace taint {
+
+struct State {
+  static std::shared_ptr<State> get();
+
+  // Dummy data for now. Just to illustrate testing.
+  void reset() {
+    history.clear();
+  }
+  std::vector<int> history;
+};
 
 void retC();
 

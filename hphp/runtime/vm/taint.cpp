@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+
+#include <folly/Singleton.h>
+
 #include "hphp/runtime/vm/taint.h"
 
 #include "hphp/util/trace.h"
@@ -21,10 +24,20 @@
 namespace HPHP {
 namespace taint {
 
+namespace {
+  struct SingletonTag {};
+}
+
+folly::Singleton<State, SingletonTag> singleton{};
+/* static */ std::shared_ptr<State> State::get() {
+  return singleton.try_get();
+}
+
 TRACE_SET_MOD(taint);
 
 void retC() {
   FTRACE(1, "taint: RetC\n");
+  State::get()->history.push_back(1);
 }
 
 } // namespace taint

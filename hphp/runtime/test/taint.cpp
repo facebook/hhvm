@@ -21,12 +21,23 @@
 
 #include "hphp/runtime/vm/taint.h"
 
-
 namespace HPHP {
 namespace taint {
 
-TEST(TAINT, DummyTest) {
-    retC();
+class TaintTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    State::get()->reset();
+  }
+};
+
+TEST(TaintTest, DummyTest) {
+  EXPECT_TRUE(State::get()->history.empty());
+
+  retC();
+
+  EXPECT_EQ(State::get()->history.size(), 1);
+  EXPECT_EQ(State::get()->history[0], 1);
 }
 
 } // namespace taint

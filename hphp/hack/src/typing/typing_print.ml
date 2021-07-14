@@ -22,6 +22,13 @@ module Cls = Decl_provider.Class
 module Nast = Aast
 module ITySet = Internal_type_set
 
+(** For sake of typing_print, either we wish to print a locl_ty in which case we need
+the env to look up the typing environment and constraints and the like, or a decl_ty
+in which case we don't need anything. [penv] stands for "printing env". *)
+type penv =
+  | Loclenv of env
+  | Declenv
+
 let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
 
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
@@ -45,7 +52,10 @@ module Full = struct
 
   let debug_mode = ref false
 
-  let show_verbose env = Env.get_log_level env "show" > 1
+  let show_verbose penv =
+    match penv with
+    | Loclenv env -> Env.get_log_level env "show" > 1
+    | Declenv -> false
 
   let blank_tyvars = ref false
 
@@ -90,8 +100,8 @@ module Full = struct
     let fields = List.sort ~compare (TShapeMap.bindings fdm) in
     List.map fields ~f:f_field
 
-  let rec fun_type ~ty to_doc st env ft =
-    let params = List.map ft.ft_params ~f:(fun_param ~ty to_doc st env) in
+  let rec fun_type ~ty to_doc st penv ft =
+    let params = List.map ft.ft_params ~f:(fun_param ~ty to_doc st penv) in
     let variadic_param =
       match ft.ft_arity with
       | Fstandard -> None
@@ -99,11 +109,11 @@ module Full = struct
         Some
           (Concat
              [
-               (match ty to_doc st env p.fp_type.et_type with
+               (match ty to_doc st penv p.fp_type.et_type with
                | Text ("_", 1) ->
                  (* Handle the case of missing a type by not printing it *)
                  Nothing
-               | _ -> fun_param ~ty to_doc st env p);
+               | _ -> fun_param ~ty to_doc st penv p);
                text "...";
              ])
     in
@@ -121,16 +131,16 @@ module Full = struct
         | (_, FTKtparams) ->
           Nothing
         | (l, FTKinstantiated_targs) ->
-          list "<" (tparam ~ty to_doc st env) l ">");
+          list "<" (tparam ~ty to_doc st penv) l ">");
         list "(" id params "):";
         Space;
-        possibly_enforced_ty ~ty to_doc st env ft.ft_ret;
+        possibly_enforced_ty ~ty to_doc st penv ft.ft_ret;
       ]
 
-  and possibly_enforced_ty ~ty to_doc st env { et_enforced; et_type } =
+  and possibly_enforced_ty ~ty to_doc st penv { et_enforced; et_type } =
     Concat
       [
-        ( if show_verbose env then
+        ( if show_verbose penv then
           match et_enforced with
           | Enforced -> text "enforced" ^^ Space
           | PartiallyEnforced (_, (_, cn)) ->
@@ -138,24 +148,24 @@ module Full = struct
           | Unenforced -> Nothing
         else
           Nothing );
-        ty to_doc st env et_type;
+        ty to_doc st penv et_type;
       ]
 
-  and fun_param ~ty to_doc st env ({ fp_name; fp_type; _ } as fp) =
+  and fun_param ~ty to_doc st penv ({ fp_name; fp_type; _ } as fp) =
     Concat
       [
         (match get_fp_mode fp with
         | FPinout -> text "inout" ^^ Space
         | _ -> Nothing);
-        (match (fp_name, ty to_doc st env fp_type.et_type) with
-        | (None, _) -> possibly_enforced_ty ~ty to_doc st env fp_type
+        (match (fp_name, ty to_doc st penv fp_type.et_type) with
+        | (None, _) -> possibly_enforced_ty ~ty to_doc st penv fp_type
         | (Some param_name, Text ("_", 1)) ->
           (* Handle the case of missing a type by not printing it *)
           text param_name
         | (Some param_name, _) ->
           Concat
             [
-              possibly_enforced_ty ~ty to_doc st env fp_type;
+              possibly_enforced_ty ~ty to_doc st penv fp_type;
               Space;
               text param_name;
             ]);
@@ -183,7 +193,7 @@ module Full = struct
         list_sep ~split:false Space (tparam_constraint ~ty to_doc st env) cstrl;
       ]
 
-  and tparam_constraint ~ty to_doc st env (ck, cty) =
+  and tparam_constraint ~ty to_doc st penv (ck, cty) =
     Concat
       [
         Space;
@@ -193,7 +203,7 @@ module Full = struct
           | Ast_defs.Constraint_super -> "super"
           | Ast_defs.Constraint_eq -> "=");
         Space;
-        ty to_doc st env cty;
+        ty to_doc st penv cty;
       ]
 
   let terr () =
@@ -224,7 +234,7 @@ module Full = struct
 
   let tvarray_or_darray k x y = list "varray_or_darray<" k [x; y] ">"
 
-  let tfun ~ty to_doc st env ft =
+  let tfun ~ty to_doc st penv ft =
     Concat
       [
         text "(";
@@ -233,7 +243,7 @@ module Full = struct
         else
           Nothing );
         text "function";
-        fun_type ~ty to_doc st env ft;
+        fun_type ~ty to_doc st penv ft;
         text ")";
       ]
 
@@ -312,12 +322,12 @@ module Full = struct
     in
     Concat [prefix; list "(" id (e_required @ e_optional @ e_variadic) ")"]
 
-  let rec decl_ty to_doc st env x = decl_ty_ to_doc st env (get_node x)
+  let rec decl_ty to_doc st penv x = decl_ty_ to_doc st penv (get_node x)
 
   and decl_ty_ : _ -> _ -> _ -> decl_phase ty_ -> Doc.t =
-   fun to_doc st env x ->
+   fun to_doc st penv x ->
     let ty = decl_ty in
-    let k x = ty to_doc st env x in
+    let k x = ty to_doc st penv x in
     match x with
     | Tany _ -> text "_"
     | Terr -> terr ()
@@ -336,7 +346,7 @@ module Full = struct
     | Tlike x -> Concat [text "~"; k x]
     | Tprim x -> tprim x
     | Tvar x -> text (Printf.sprintf "#%d" x)
-    | Tfun ft -> tfun ~ty to_doc st env ft
+    | Tfun ft -> tfun ~ty to_doc st penv ft
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
     | Tapply ((_, s), tyl)
@@ -348,8 +358,8 @@ module Full = struct
     | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
 
   (* For a given type parameter, construct a list of its constraints *)
-  let get_constraints_on_tparam env tparam =
-    let kind_opt = Env.get_pos_and_kind_of_generic env tparam in
+  let get_constraints_on_tparam penv tparam =
+    let kind_opt = Env.get_pos_and_kind_of_generic penv tparam in
     match kind_opt with
     | None -> []
     | Some (_pos, kind) ->
@@ -360,9 +370,9 @@ module Full = struct
         List.map param_names ~f:(fun name ->
             Typing_make_type.generic Reason.none name)
       in
-      let lower = Env.get_lower_bounds env tparam params in
-      let upper = Env.get_upper_bounds env tparam params in
-      let equ = Env.get_equal_bounds env tparam params in
+      let lower = Env.get_lower_bounds penv tparam params in
+      let upper = Env.get_upper_bounds penv tparam params in
+      let equ = Env.get_equal_bounds penv tparam params in
       (* If we have an equality we can ignore the other bounds *)
       if not (TySet.is_empty equ) then
         List.map (TySet.elements equ) ~f:(fun ty ->
@@ -374,17 +384,23 @@ module Full = struct
               (tparam, Ast_defs.Constraint_as, ty))
 
   let rec locl_ty : _ -> _ -> _ -> locl_ty -> Doc.t =
-   fun to_doc st env ty ->
+   fun to_doc st penv ty ->
     let (r, x) = deref ty in
-    let d = locl_ty_ to_doc st env x in
+    let d = locl_ty_ to_doc st penv x in
     match r with
     | Typing_reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
     | _ -> d
 
   and locl_ty_ : _ -> _ -> _ -> locl_phase ty_ -> Doc.t =
-   fun to_doc st env x ->
+   fun to_doc st penv x ->
     let ty = locl_ty in
-    let k x = ty to_doc st env x in
+    let verbose = show_verbose penv in
+    let env =
+      match penv with
+      | Declenv -> failwith "must provide a locl-env here"
+      | Loclenv env -> env
+    in
+    let k x = ty to_doc st (Loclenv env) x in
     match x with
     | Tany _ -> text "_"
     | Terr -> terr ()
@@ -430,16 +446,16 @@ module Full = struct
               text "[rec]"
             else if
               (* For hh_show_env we further show the type variable number *)
-              show_verbose env
+              show_verbose penv
             then
               text ("#" ^ string_of_int n)
             else
               Nothing
           in
           let st = ISet.add n st in
-          Concat [prepend; ty to_doc st env ety]
+          Concat [prepend; ty to_doc st penv ety]
       end
-    | Tfun ft -> tfun ~ty to_doc st env ft
+    | Tfun ft -> tfun ~ty to_doc st penv ft
     | Tclass ((_, s), exact, tyl) ->
       let d = to_doc s ^^ list "<" k tyl ">" in
       begin
@@ -461,7 +477,8 @@ module Full = struct
               (* T$x *)
               begin
                 match get_constraints_on_tparam env s with
-                | [(_, Ast_defs.Constraint_as, ty)] -> locl_ty to_doc st env ty
+                | [(_, Ast_defs.Constraint_as, ty)] ->
+                  locl_ty to_doc st (Loclenv env) ty
                 | _ -> (* this case shouldn't occur *) to_doc s
               end
           end
@@ -499,7 +516,7 @@ module Full = struct
         | (false, false, []) -> text "nothing"
         (* type isn't nullable or dynamic *)
         | (false, false, [ty]) ->
-          if show_verbose env then
+          if verbose then
             Concat [text "("; k ty; text ")"]
           else
             k ty
@@ -507,37 +524,37 @@ module Full = struct
           delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
         (* Type only is null *)
         | (false, true, []) ->
-          if show_verbose env then
+          if verbose then
             text "(null)"
           else
             text "null"
         (* Type only is dynamic *)
         | (true, false, []) ->
-          if show_verbose env then
+          if verbose then
             text "(dynamic)"
           else
             text "dynamic"
         (* Type is nullable single type *)
         | (false, true, [ty]) ->
-          if show_verbose env then
+          if verbose then
             Concat [text "(null |"; k ty; text ")"]
           else
             Concat [text "?"; k ty]
         (* Type is like single type *)
         | (true, false, [ty]) ->
-          if show_verbose env then
+          if verbose then
             Concat [text "(dynamic |"; k ty; text ")"]
           else
             Concat [text "~"; k ty]
         (* Type is like null *)
         | (true, true, []) ->
-          if show_verbose env then
+          if verbose then
             text "(dynamic | null)"
           else
             text "~null"
         (* Type is like nullable single type *)
         | (true, true, [ty]) ->
-          if show_verbose env then
+          if verbose then
             Concat [text "(dynamic | null |"; k ty; text ")"]
           else
             Concat [text "~?"; k ty]
@@ -574,7 +591,7 @@ module Full = struct
         match (null, nonnull) with
         (* type isn't nullable *)
         | ([], [ty]) ->
-          if show_verbose env then
+          if verbose then
             Concat [text "("; k ty; text ")"]
           else
             k ty
@@ -582,13 +599,13 @@ module Full = struct
           delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
         (* Type only is null *)
         | (_, []) ->
-          if show_verbose env then
+          if verbose then
             text "(null)"
           else
             text "null"
         (* Type is nullable single type *)
         | (_, [ty]) ->
-          if show_verbose env then
+          if verbose then
             Concat [text "(null |"; k ty; text ")"]
           else
             Concat [text "?"; k ty]
@@ -607,9 +624,9 @@ module Full = struct
     | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
     | Taccess (root_ty, id) -> Concat [k root_ty; text "::"; to_doc (snd id)]
 
-  let rec constraint_type_ to_doc st env x =
-    let k lty = locl_ty to_doc st env lty in
-    let k' cty = constraint_type to_doc st env cty in
+  let rec constraint_type_ to_doc st penv x =
+    let k lty = locl_ty to_doc st penv lty in
+    let k' cty = constraint_type to_doc st penv cty in
     match x with
     | Thas_member hm -> thas_member k hm
     | Tdestructure d -> tdestructure k d
@@ -617,17 +634,17 @@ module Full = struct
     | TCintersection (lty, cty) ->
       Concat [text "("; k lty; text "&"; k' cty; text ")"]
 
-  and constraint_type to_doc st env ty =
+  and constraint_type to_doc st penv ty =
     let (r, x) = deref_constraint_type ty in
-    let d = constraint_type_ to_doc st env x in
+    let d = constraint_type_ to_doc st penv x in
     match r with
     | Typing_reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
     | _ -> d
 
-  let internal_type to_doc st env ty =
+  let internal_type to_doc st penv ty =
     match ty with
-    | LoclType ty -> locl_ty to_doc st env ty
-    | ConstraintType ty -> constraint_type to_doc st env ty
+    | LoclType ty -> locl_ty to_doc st penv ty
+    | ConstraintType ty -> constraint_type to_doc st penv ty
 
   let to_string ~ty to_doc env x =
     ty to_doc ISet.empty env x
@@ -644,11 +661,12 @@ module Full = struct
       List.concat_map tparams ~f:(get_constraints_on_tparam env)
     in
     let (_, typ) = Env.expand_type env typ in
+    let penv = Loclenv env in
     match (get_node typ, constraints) with
     | (_, []) -> Nothing
     | (Tgeneric (tparam, []), [(tparam', ck, typ)])
       when String.equal tparam tparam' ->
-      tparam_constraint ~ty:locl_ty to_doc ISet.empty env (ck, typ)
+      tparam_constraint ~ty:locl_ty to_doc ISet.empty penv (ck, typ)
     | _ ->
       Concat
         [
@@ -668,34 +686,33 @@ module Full = struct
                         ~ty:locl_ty
                         to_doc
                         ISet.empty
-                        env
+                        penv
                         (ck, typ);
                     ]
                 end
                 constraints );
         ]
 
-  let to_string_rec env n x =
-    locl_ty Doc.text (ISet.add n ISet.empty) env x
+  let to_string_rec penv n x =
+    locl_ty Doc.text (ISet.add n ISet.empty) penv x
     |> Libhackfmt.format_doc_unbroken format_env
     |> String.strip
 
   let to_string_strip_ns ~ty env x = to_string ~ty text_strip_ns env x
 
-  let to_string_decl ctx (x : decl_ty) =
+  let to_string_decl _ctx (x : decl_ty) =
     let ty = decl_ty in
-    let env = Typing_env.empty ctx Relative_path.default ~droot:None in
-    to_string ~ty Doc.text env x
+    to_string ~ty Doc.text Declenv x
 
-  let fun_to_string ctx (x : decl_fun_type) =
+  let fun_to_string _ctx (x : decl_fun_type) =
     let ty = decl_ty in
-    let env = Typing_env.empty ctx Relative_path.default ~droot:None in
-    fun_type ~ty Doc.text ISet.empty env x
+    fun_type ~ty Doc.text ISet.empty Declenv x
     |> Libhackfmt.format_doc_unbroken format_env
     |> String.strip
 
   let to_string_with_identity env x occurrence definition_opt =
     let ty = locl_ty in
+    let penv = Loclenv env in
     let prefix =
       SymbolDefinition.(
         let print_mod m = text (string_of_modifier m) ^^ Space in
@@ -724,15 +741,15 @@ module Full = struct
               text "function";
               Space;
               text_strip_ns name;
-              fun_type ~ty text_strip_ns ISet.empty env ft;
+              fun_type ~ty text_strip_ns ISet.empty penv ft;
             ]
         | ({ type_ = Property _; name; _ }, _)
         | ({ type_ = XhpLiteralAttr _; name; _ }, _)
         | ({ type_ = ClassConst _; name; _ }, _)
         | ({ type_ = GConst; name; _ }, _)
         | ({ type_ = EnumClassLabel _; name; _ }, _) ->
-          Concat [ty text_strip_ns ISet.empty env x; Space; text_strip_ns name]
-        | _ -> ty text_strip_ns ISet.empty env x)
+          Concat [ty text_strip_ns ISet.empty penv x; Space; text_strip_ns name]
+        | _ -> ty text_strip_ns ISet.empty penv x)
     in
     let constraints = constraints_for_type text_strip_ns env x in
     Concat [prefix; body; constraints]
@@ -830,7 +847,9 @@ module ErrorString = struct
           "<"
           ^ String.concat
               ~sep:", "
-              (List.map tyl ~f:(Full.to_string_strip_ns ~ty:Full.locl_ty env))
+              (List.map
+                 tyl
+                 ~f:(Full.to_string_strip_ns ~ty:Full.locl_ty (Loclenv env)))
           ^ ">")
 
   and dependent dep =
@@ -1759,18 +1778,21 @@ end
 let error ?(ignore_dynamic = false) env ty =
   ErrorString.to_string ~ignore_dynamic env ty
 
-let full env ty = Full.to_string ~ty:Full.locl_ty Doc.text env ty
+let full env ty = Full.to_string ~ty:Full.locl_ty Doc.text (Loclenv env) ty
 
-let full_i env ty = Full.to_string ~ty:Full.internal_type Doc.text env ty
+let full_i env ty =
+  Full.to_string ~ty:Full.internal_type Doc.text (Loclenv env) ty
 
-let full_rec env n ty = Full.to_string_rec env n ty
+let full_rec env n ty = Full.to_string_rec (Loclenv env) n ty
 
-let full_strip_ns env ty = Full.to_string_strip_ns ~ty:Full.locl_ty env ty
+let full_strip_ns env ty =
+  Full.to_string_strip_ns ~ty:Full.locl_ty (Loclenv env) ty
 
 let full_strip_ns_i env ty =
-  Full.to_string_strip_ns ~ty:Full.internal_type env ty
+  Full.to_string_strip_ns ~ty:Full.internal_type (Loclenv env) ty
 
-let full_strip_ns_decl env ty = Full.to_string_strip_ns ~ty:Full.decl_ty env ty
+let full_strip_ns_decl env ty =
+  Full.to_string_strip_ns ~ty:Full.decl_ty (Loclenv env) ty
 
 let full_with_identity = Full.to_string_with_identity
 
@@ -1838,7 +1860,7 @@ let coeffects env ty =
         Full.to_string
           ~ty:Full.locl_ty
           (fun s -> Doc.text (Utils.strip_all_ns s))
-          env
+          (Loclenv env)
           ty)
   in
   let exception UndesugarableCoeffect of locl_ty in

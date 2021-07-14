@@ -340,12 +340,9 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
   if it were shorter, then the monitor's incoming queue would be entirely full of requests that
   were all stale by the time it got to handle them. *)
   let timeout =
-    match
-      (env.local_config.ServerLocalConfig.monitor_backpressure, env.deadline)
-    with
-    | (false, _) -> 1
-    | (true, None) -> 60
-    | (true, Some deadline) ->
+    match env.deadline with
+    | None -> 60
+    | Some deadline ->
       Int.max 1 (int_of_float (deadline -. Unix.gettimeofday ()))
   in
   log
@@ -425,23 +422,6 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
         }
   | Error e ->
     (match e with
-    | ServerMonitorUtils.(
-        Connect_to_monitor_failure
-          {
-            server_exists = true;
-            failure_phase = Connect_open_socket;
-            failure_reason = Connect_timeout;
-          })
-      when not env.local_config.ServerLocalConfig.monitor_backpressure ->
-      (* If server+monitor are too busy, this is manifest either as timeouts
-      during Connect_open_socket (this case) or receiving SERVER_HUNG_UP in
-      [wait_for_server_message] above. Arbitrarily, we fail fatally in this
-      first case, but we fail with Exit_status.Server_hung_up_should_retry in
-      the second case above causing find_hh.sh to reattempt after exponential
-      backoff. See discussion in T85425990. *)
-      Printf.eprintf
-        "\nError: Hh_server is overloaded with too many concurrent requests. Giving up.\n%!";
-      raise Exit_status.(Exit_with Monitor_connection_failure)
     | ServerMonitorUtils.Server_died
     | ServerMonitorUtils.(
         Connect_to_monitor_failure { server_exists = true; _ }) ->

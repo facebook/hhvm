@@ -421,10 +421,6 @@ type t = {
    * for a server to be started because we don't want this to grow
    * unbounded. *)
   max_purgatory_clients: int;
-  (* Monitor: how many seconds the monitor waits after handoff before closing the FD, or -1 to wait for server receipt *)
-  monitor_fd_close_delay: int;
-  (* Monitor: should ClientConnect respect backpressure from server/monitor? *)
-  monitor_backpressure: bool;
   search_chunk_size: int;
   io_priority: int;
   cpu_priority: int;
@@ -572,12 +568,6 @@ let default =
     lazy_parse = false;
     lazy_init = false;
     max_purgatory_clients = 400;
-    monitor_fd_close_delay =
-      ( if Sys_utils.is_apple_os () then
-        2
-      else
-        0 );
-    monitor_backpressure = false;
     search_chunk_size = 0;
     io_priority = 7;
     cpu_priority = 10;
@@ -798,16 +788,6 @@ let load_ fn ~silent ~current_version overrides =
   in
   let max_purgatory_clients =
     int_ "max_purgatory_clients" ~default:default.max_purgatory_clients config
-  in
-  let monitor_fd_close_delay =
-    int_ "monitor_fd_close_delay" ~default:default.monitor_fd_close_delay config
-  in
-  let monitor_backpressure =
-    bool_if_min_version
-      "monitor_backpressure"
-      ~default:default.monitor_backpressure
-      ~current_version
-      config
   in
   let search_chunk_size =
     int_ "search_chunk_size" ~default:default.search_chunk_size config
@@ -1209,8 +1189,6 @@ let load_ fn ~silent ~current_version overrides =
     load_state_natively;
     load_state_natively_64bit;
     max_purgatory_clients;
-    monitor_fd_close_delay;
-    monitor_backpressure;
     type_decl_bucket_size;
     extend_fast_bucket_size;
     enable_on_nfs;
@@ -1298,8 +1276,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       longlived_workers = options.longlived_workers;
       max_times_to_defer_type_checking =
         options.max_times_to_defer_type_checking;
-      monitor_fd_close_delay = options.monitor_fd_close_delay;
-      monitor_backpressure = options.monitor_backpressure;
       small_buckets_for_dirty_names = options.small_buckets_for_dirty_names;
       symbolindex_search_provider = options.symbolindex_search_provider;
       require_saved_state = options.require_saved_state;

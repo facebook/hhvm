@@ -47,15 +47,7 @@ does recvmsg and reads on the FD and gets an EOF (even though it can write
 on the FD and succeed instead of getting EPIPE); the server subsequently
 closes its FD and a subsequent "select" by the client blocks forever.
 
-This module embodies three possible strategies, controlled by the hh.conf
-flag monitor_fd_close_delay:
-* Fd_close_immediate (monitor_fd_close_delay=0) is the traditional behavior of
-hack; it closes the FD immediately after calling sendmsg
-* Fd_close_after_time (monitor_fd_close_delay>0) is the behavior we implemented
-on MacOs since 2018, where monitor waits for the specified time delay, in seconds,
-after calling sendmsg before it closes the FD
-* Fd_close_upon_receipt (monitor_fd_close_delay=-1) is new behavior in 2021, where
-the monitor waits to close the FD until after the server has read it.
+Therefore, instead, the monitor waits to close the FD until after the server has read it.
 
 We detect that the server has read it by having the server write the highest
 handoff number it has received to a "server_receipt_to_monitor_file", and the
@@ -79,13 +71,7 @@ module Sent_fds_collector = struct
     sequence_number := !sequence_number + 1;
     !sequence_number
 
-  type fd_close_time =
-    | Fd_close_immediate
-    | Fd_close_after_time of float
-    | Fd_close_upon_receipt
-
   type handed_off_fd_to_close = {
-    fd_close_time: fd_close_time;
     tracker: Connection_tracker.t;
     fd: Unix.file_descr;
     m2s_sequence_number: int;
@@ -95,49 +81,31 @@ module Sent_fds_collector = struct
 
   let handed_off_fds_to_close : handed_off_fd_to_close list ref = ref []
 
-  let cleanup_fd ~tracker ~fd_close_time ~m2s_sequence_number fd =
-    (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
-    match fd_close_time with
-    | Fd_close_immediate ->
-      log "closing client fd immediately after handoff" ~tracker;
-      ensure_fd_closed fd
-    | _ ->
-      handed_off_fds_to_close :=
-        { fd_close_time; tracker; fd; m2s_sequence_number }
-        :: !handed_off_fds_to_close
+  let cleanup_fd ~tracker ~m2s_sequence_number fd =
+    handed_off_fds_to_close :=
+      { tracker; fd; m2s_sequence_number } :: !handed_off_fds_to_close
 
   let collect_fds ~sequence_receipt_high_water_mark =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
-    let t_now = Unix.gettimeofday () in
-    let (ready, notready) =
-      List.partition_tf
+
+    (* Note: this code is a filter with a side-effect. The side-effect is to
+    close FDs that have received their read-receipts. The filter will retain
+    the FDs that haven't yet received their read-receipts. *)
+    handed_off_fds_to_close :=
+      List.filter
         !handed_off_fds_to_close
-        ~f:(fun { fd_close_time; tracker; m2s_sequence_number; _ } ->
-          match fd_close_time with
-          | Fd_close_immediate ->
-            log
-              "closing client socket from handoff #%d, though should have been immediate"
-              ~tracker
-              m2s_sequence_number;
+        ~f:(fun { tracker; m2s_sequence_number; fd } ->
+          if m2s_sequence_number > sequence_receipt_high_water_mark then
             true
-          | Fd_close_after_time t when Float.(t <= t_now) ->
-            log
-              "closing client socket from handoff #%d, after delay"
-              ~tracker
-              m2s_sequence_number;
-            true
-          | Fd_close_upon_receipt
-            when m2s_sequence_number <= sequence_receipt_high_water_mark ->
+          else begin
             log
               "closing client socket from handoff #%d upon receipt of #%d"
               ~tracker
               m2s_sequence_number
               sequence_receipt_high_water_mark;
-            true
-          | _ -> false)
-    in
-    List.iter ready ~f:(fun { fd; _ } -> ensure_fd_closed fd);
-    handed_off_fds_to_close := notready;
+            ensure_fd_closed fd;
+            false
+          end);
     ()
 
   (** This must be called in all paths where the server has died, so that the client can
@@ -176,13 +144,6 @@ struct
       Queue.t;
     (* Whether to ignore hh version mismatches *)
     ignore_hh_version: bool;
-    (* After we handoff FD to server, how many seconds to wait before closing?
-     * 0 means "close immediately"
-     * -1 means "wait for server receipt" *)
-    monitor_fd_close_delay: int;
-    (* This flag controls whether ClientConnect responds to monitor backpressure,
-    and ServerMonitor responds to server backpressure *)
-    monitor_backpressure: bool;
   }
 
   type t = env * ServerMonitorUtils.monitor_config * Unix.file_descr
@@ -345,7 +306,7 @@ struct
     else
       Hh_json.JSON_Object [("client_version", Hh_json.JSON_String s)]
 
-  let hand_off_client_connection ~tracker env server_fd client_fd =
+  let hand_off_client_connection ~tracker server_fd client_fd =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     let m2s_sequence_number =
       Sent_fds_collector.get_and_increment_sequence_number ()
@@ -362,23 +323,7 @@ struct
         "Handed off client socket to server (handoff #%d)"
         ~tracker
         m2s_sequence_number;
-      let fd_close_time =
-        if env.monitor_fd_close_delay = 0 then
-          (* delay 0 means "close immediately" *)
-          Sent_fds_collector.Fd_close_immediate
-        else if env.monitor_fd_close_delay = -1 then
-          (* delay -1 means "close upon read receipt" *)
-          Sent_fds_collector.Fd_close_upon_receipt
-        else
-          (* delay >=1 means "close after this time" *)
-          Sent_fds_collector.Fd_close_after_time
-            (Unix.gettimeofday () +. float_of_int env.monitor_fd_close_delay)
-      in
-      Sent_fds_collector.cleanup_fd
-        ~tracker
-        ~fd_close_time
-        ~m2s_sequence_number
-        client_fd
+      Sent_fds_collector.cleanup_fd ~tracker ~m2s_sequence_number client_fd
     end else begin
       log
         "Failed to handoff client socket to server (handoff #%d)"
@@ -404,14 +349,9 @@ struct
   This 30s must be comfortably shorter than the 60s delay in ClientConnect.connect, since
   if not then by the time we in the monitor timeout we'll find that every single item
   in our incoming queue is already stale! *)
-  let hand_off_client_connection_wrapper ~tracker env server_fd client_fd =
+  let hand_off_client_connection_wrapper ~tracker server_fd client_fd =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
-    let timeout =
-      if env.monitor_backpressure then
-        30.0
-      else
-        4.0
-    in
+    let timeout = 30.0 in
     let to_finally_close = ref (Some client_fd) in
     Utils.try_finally
       ~f:(fun () ->
@@ -423,7 +363,7 @@ struct
             timeout
         else
           try
-            hand_off_client_connection ~tracker env server_fd client_fd;
+            hand_off_client_connection ~tracker server_fd client_fd;
             to_finally_close := None
           with
           | Unix.Unix_error (Unix.EPIPE, _, _) ->
@@ -499,7 +439,7 @@ struct
       let tracker =
         Connection_tracker.(track tracker ~key:Monitor_sent_ack_to_client)
       in
-      hand_off_client_connection_wrapper ~tracker env server_fd client_fd;
+      hand_off_client_connection_wrapper ~tracker server_fd client_fd;
       server.last_request_handoff := Unix.time ();
       env
     | Died_unexpectedly (status, was_oom) ->
@@ -934,8 +874,6 @@ struct
       ~current_version
       ~waiting_client
       ~max_purgatory_clients
-      ~monitor_fd_close_delay
-      ~monitor_backpressure
       server_start_options
       informant_init_env
       monitor_config =
@@ -981,8 +919,6 @@ struct
         watchman_retries = 0;
         ignore_hh_version =
           Informant.should_ignore_hh_version informant_init_env;
-        monitor_fd_close_delay;
-        monitor_backpressure;
       }
     in
     (env, monitor_config, socket)
@@ -991,8 +927,6 @@ struct
       ~current_version
       ~waiting_client
       ~max_purgatory_clients
-      ~monitor_fd_close_delay
-      ~monitor_backpressure
       server_start_options
       informant_init_env
       monitor_config =
@@ -1001,8 +935,6 @@ struct
         ~current_version
         ~waiting_client
         ~max_purgatory_clients
-        ~monitor_fd_close_delay
-        ~monitor_backpressure
         server_start_options
         informant_init_env
         monitor_config

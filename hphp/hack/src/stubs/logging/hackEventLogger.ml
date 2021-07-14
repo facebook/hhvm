@@ -15,8 +15,6 @@ type rollout_flags = {
   use_direct_decl_parser: bool;
   longlived_workers: bool;
   max_times_to_defer_type_checking: int option;
-  monitor_fd_close_delay: int;
-  monitor_backpressure: bool;
   small_buckets_for_dirty_names: bool;
   symbolindex_search_provider: string;
   require_saved_state: bool;

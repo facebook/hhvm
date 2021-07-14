@@ -117,9 +117,6 @@ let monitor_daemon_main
       ~waiting_client
       ~max_purgatory_clients:
         local_config.ServerLocalConfig.max_purgatory_clients
-      ~monitor_fd_close_delay:
-        local_config.ServerLocalConfig.monitor_fd_close_delay
-      ~monitor_backpressure:local_config.ServerLocalConfig.monitor_backpressure
       options
       informant_options
       ServerMonitorUtils.

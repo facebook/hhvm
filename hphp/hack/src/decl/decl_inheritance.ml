@@ -293,7 +293,7 @@ let consts ~target ctx child_class_name get_typeconst get_ancestor lin =
                        subst)
            in
            (* Each concrete type constant implicitly defines a class constant of the
-         same name with that type's TypeStructure. *)
+              same name with that type's TypeStructure. *)
            let typeconst_structures =
              cls.sc_typeconsts
              |> filter_target ~target ~f:(fun { stc_name = (_, n); _ } -> n)
@@ -378,16 +378,16 @@ let make_typeconst_cache class_name lin =
          *)
         | (TCAbstract _, (TCConcrete _ | TCPartiallyAbstract _)) -> ancestor_tc
         (* NB: The following comment (written in D1825740) claims that this arm is
-         necessary to cover the example it describes. But this example does not
-         exercise this arm--the interface appears earlier in the linearization
-         than the abstract class, so the descendant typeconst is the concrete
-         one. Furthermore, returning [descendant_tc] rather than [ancestor_tc]
-         from this arm does not cause any of our typecheck tests to fail.
+           necessary to cover the example it describes. But this example does not
+           exercise this arm--the interface appears earlier in the linearization
+           than the abstract class, so the descendant typeconst is the concrete
+           one. Furthermore, returning [descendant_tc] rather than [ancestor_tc]
+           from this arm does not cause any of our typecheck tests to fail.
 
-         I have left it to avoid possibly introducing a subtle behavioral change
-         compared to eager decl. We are planning to remove partially-abstract
-         type constants in any case, so this arm will be removed soon.
-      *)
+           I have left it to avoid possibly introducing a subtle behavioral change
+           compared to eager decl. We are planning to remove partially-abstract
+           type constants in any case, so this arm will be removed soon.
+        *)
         (* This covers the following case:
          *
          * abstract class P { const type T as arraykey = arraykey; }

@@ -77,7 +77,7 @@ let visitor =
            but not in subexpressions:
 
              Code`() ==> { $x = void_func(); }`
-         *)
+        *)
         super#on_expr env et_virtualized_expr;
 
         this#on_expr env et_runtime_expr

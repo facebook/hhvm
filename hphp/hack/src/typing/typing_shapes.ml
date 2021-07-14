@@ -139,7 +139,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
         (env, mk (r, Tshape (shape_kind, ftm)))
       | _ ->
         (* This should be an error, but it is already raised when
-      typechecking the call to Shapes::idx *)
+           typechecking the call to Shapes::idx *)
         (env, shape_ty)
     in
     (match deref shape_ty with

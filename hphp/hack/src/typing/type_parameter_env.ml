@@ -85,7 +85,7 @@ let get_lower_bounds tpenv name tyargs =
      Eventually, we need to instantiate the parameters with the provided args.
      We must support the case here that the number of provided tyargs does not
      match the number of expected arguments for the named type parameter. In this
-     case, chop off superfluous argumnents and fill in Tany for missing ones.  *)
+     case, chop off superfluous argumnents and fill in Tany for missing ones. *)
   match (get name tpenv, tyargs) with
   | (_, _ :: _)
   | (None, _) ->
@@ -312,7 +312,7 @@ let remove_lower_bound tpenv name bound =
 
 let remove tpenv name =
   (* TODO(T70068435) Revisit this function when implementing bounds on HK generic vars,
-    in particular, look at the two Tgeneric below. *)
+     in particular, look at the two Tgeneric below. *)
   let tparam = mk (Typing_reason.Rnone, Tgeneric (name, [])) in
   let lower_bounds = get_lower_bounds tpenv name [] in
   let remove_from_upper_bounds_of ty tpenv =

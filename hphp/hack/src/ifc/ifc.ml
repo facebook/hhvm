@@ -553,9 +553,9 @@ let class_ pos msg ty =
     | Tclass class_ -> Some class_
     | Tdynamic pol ->
       (* While it is sound to set the class's lump policy to be the dynamic's
-       (invariant) policy, we do not know if the property we are looking for
-       is policied, therefore we guess that it has the lump policy and emit an
-       error in case we are wrong *)
+         (invariant) policy, we do not know if the property we are looking for
+         is policied, therefore we guess that it has the lump policy and emit an
+         error in case we are wrong *)
       Errors.unknown_information_flow pos "dynamic";
       Some { c_name = "<dynamic>"; c_self = pol; c_lump = pol }
     | Tinter tys -> List.find_map ~f:find_class tys
@@ -676,7 +676,7 @@ let call_regular ~pos renv env call_type name that_pty_opt args_pty ret_pty =
       let scheme = Decl.make_callable_scheme renv policy fp fd_args in
       let prop =
         (* because cipp_scheme is created after fp they cannot
-        mismatch and call_constraint will not fail *)
+           mismatch and call_constraint will not fail *)
         Option.value_exn (Solver.call_constraint ~subtype ~pos fp scheme)
       in
       (env, prop)
@@ -698,7 +698,7 @@ let call_regular ~pos renv env call_type name that_pty_opt args_pty ret_pty =
     (env, ret_pty)
   | Cconstructor callable_name ->
     (* We don't have the function type on the TAST with constructors, so grab it from
-      decl heap. *)
+       decl heap. *)
     let fp = { fp_name = name; fp_this = that_pty_opt; fp_type = hole_ty } in
     let (env, call_constraint) =
       match Decl.get_callable_decl renv.re_ctx callable_name with
@@ -929,7 +929,7 @@ let rec assign
           match Option.(ix_opt >>= shape_field_name renv) with
           | Some key ->
             (* The key can only be a literal (int, string) or class const, so
-              it is always public *)
+               it is always public *)
             let p = Env.new_policy_var renv "field" in
             let pc = Env.get_lpc env |> PSet.elements in
             let env =
@@ -1747,7 +1747,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
             (* TODO(T80403715): Ensure during class definition that Iterable
                instances behave sensibly. Otherwise, this treatment is unsound. *)
             (* Value is, in effect, a field access, hence governed by the
-            lump policy of the class. *)
+               lump policy of the class. *)
             let value_pty = Lift.ty ~lump:class_.c_lump renv value_ty in
             (* Length, key, and value are governed by the self policy if the
                class is in fact a Hack array and by the lump policy otherwise. *)
@@ -1772,7 +1772,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
             (* TODO(T80403715): Ensure during class definition that Iterable
                instances behave sensibly. Otherwise, this treatment is unsound. *)
             (* Key and value are, in effect, a field accesses, hence governed
-            by the lump policy of the class. *)
+               by the lump policy of the class. *)
             let key_pty = Lift.ty ~lump:class_.c_lump renv key_ty in
             let value_pty = Lift.ty ~lump:class_.c_lump renv value_ty in
             (* Length, key, and value are governed by the self policy if the

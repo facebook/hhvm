@@ -35,11 +35,11 @@ let go_quarantined
         | (`Single c, Some c2) when String.equal c c2 -> `Single c
         | (`Single _, Some _) ->
           (* Symbol occurrences for methods/properties that only exist in a base
-         class still have the derived class as their enclosing class, even
-         though it doesn't explicitly override that member. Because of that, if
-         we hit this case then we know that we're dealing with a union type. In
-         that case, it's not really possible to do the rest of this filtration,
-         since it would have to be decided on a per-class basis. *)
+             class still have the derived class as their enclosing class, even
+             though it doesn't explicitly override that member. Because of that, if
+             we hit this case then we know that we're dealing with a union type. In
+             that case, it's not really possible to do the rest of this filtration,
+             since it would have to be decided on a per-class basis. *)
           `Multiple
         | (class_opt, _) -> class_opt)
   in
@@ -73,9 +73,9 @@ let go_quarantined
         let has_constructor = List.exists results ~f:is_result_constructor in
         let has_class = List.exists results ~f:(fun (occ, _) -> is_class occ) in
         (* If we have a constructor but it's derived, then we'd like to show both
-         the class and the constructor. If the constructor is explicitly
-         defined, though, we'd like to filter the class out and only show the
-         constructor. *)
+           the class and the constructor. If the constructor is explicitly
+           defined, though, we'd like to filter the class out and only show the
+           constructor. *)
         if has_constructor && has_class && has_explicit_constructor then
           List.filter results ~f:is_result_constructor
         else

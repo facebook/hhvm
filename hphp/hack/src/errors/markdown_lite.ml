@@ -64,7 +64,7 @@ let format_markdown
     in
     let styles =
       (* Second condition: if we're supposed to bold the message anyway
-        (e.g. in the main message), then add italics to it (and add bold later below) *)
+         (e.g. in the main message), then add italics to it (and add bold later below) *)
       if
         DelimiterSet.mem Asterisk delimiters
         || (DelimiterSet.mem DoubleAsterisk delimiters && add_bold)

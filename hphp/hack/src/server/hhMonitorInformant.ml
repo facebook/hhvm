@@ -233,8 +233,8 @@ module Revision_tracker = struct
       match (significant, transition, server_state) with
       | (_, State_leave _, Server_not_yet_started) ->
         (* This is reachable when server stopped in the middle of rebase. Instead
-      * of restarting immediately, we go back to Server_not_yet_started, and want
-      * to restart only when hg.update state is vacated *)
+           * of restarting immediately, we go back to Server_not_yet_started, and want
+           * to restart only when hg.update state is vacated *)
         Restart_server
       | (_, State_leave _, Server_dead) ->
         (* Regardless of whether we had a significant change or not, when the

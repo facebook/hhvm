@@ -96,11 +96,11 @@ Returns a set of substitutions mapping each type parameter name to the type
 to which it is equal if found, otherwise to itself. *)
 let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
   (* TODO(T70068435)
-    TODO(T70087549)
-    This currently assumes that [tparams] only contains non-HK type paramters.
-    (as seen in the Tgenerics created within and their arguments ignored)
-    Once Type_parameter_env know about kinds, we can at least check here
-    that this precondition is satisfied. *)
+     TODO(T70087549)
+     This currently assumes that [tparams] only contains non-HK type paramters.
+     (as seen in the Tgenerics created within and their arguments ignored)
+     Once Type_parameter_env know about kinds, we can at least check here
+     that this precondition is satisfied. *)
   let old_env = env in
   let tpenv = Env.get_tpenv env in
   (* For each tparam, "solve" it if it falls in any of those categories:

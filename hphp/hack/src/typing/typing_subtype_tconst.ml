@@ -40,8 +40,8 @@ let make_type_const_equal
       | (_, TCunion (lty, cty))
       | (_, TCintersection (lty, cty)) ->
         (* This not quite correct but works for now since no constraint type has any
-        type constant. The proper way to do it would be to have Utils.expand_typeconst
-        work on constraint types directly. *)
+           type constant. The proper way to do it would be to have Utils.expand_typeconst
+           work on constraint types directly. *)
         let env = make_equal env (LoclType lty) in
         let env = make_equal env (ConstraintType cty) in
         env)

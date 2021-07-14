@@ -130,8 +130,8 @@ let should_run_ifc tcopt file =
   with
   | (true, false) -> true
   (* If inferflows is allowed, IFC tast check won't work properly
-    since there can be global inference. We're in IFC mode anyways,
-    so don't run it here. *)
+     since there can be global inference. We're in IFC mode anyways,
+     so don't run it here. *)
   | (true, true) -> false
   | _ -> false
 

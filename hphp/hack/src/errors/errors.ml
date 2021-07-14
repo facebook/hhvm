@@ -393,8 +393,8 @@ let sort : error list -> error list =
         comparison
     in
     (* Finally, if the message text is also the same, then continue comparing
-    the reason messages (which indicate the reason why Hack believes
-    there is an error reported in the claim message) *)
+       the reason messages (which indicate the reason why Hack believes
+       there is an error reported in the claim message) *)
     if comparison = 0 then
       compare_reasons x_messages y_messages
     else
@@ -4112,7 +4112,7 @@ let wrong_extend_kind
         "Enum classes can only extend other enum classes."
       else
         (* This case should never happen, as the type checker will have already caught
-          it with EnumTypeBad. But just in case, report this error here too. *)
+           it with EnumTypeBad. But just in case, report this error here too. *)
         "Enums can only extend int, string, or arraykey."
     | Ast_defs.Ctrait ->
       (* This case should never happen, as the parser will have caught it before

@@ -88,7 +88,7 @@ let member_not_found
     in
     match (method_suggestion, static_suggestion) with
     (* Prefer suggesting a different method, unless there's a
-      static method whose name matches exactly. *)
+       static method whose name matches exactly. *)
     | (Some _, Some (def_pos, v)) when String.equal v member_name ->
       error (`closest (def_pos, v))
     | (Some (def_pos, v), _) -> error (`did_you_mean (def_pos, v))

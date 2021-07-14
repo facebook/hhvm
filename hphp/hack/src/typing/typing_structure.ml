@@ -91,8 +91,8 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
         in
         let transform_shape_field field { sft_ty; _ } (env, shape) =
           (* Accumulates the provided type for this iteration of the fold, adding
-           it to the accumulation ShapeMap for the current field. Since the
-           field must have been explicitly set, we set sft_optional to true. *)
+             it to the accumulation ShapeMap for the current field. Since the
+             field must have been explicitly set, we set sft_optional to true. *)
           let acc_field_with_type sft_ty =
             TShapeMap.add field { sft_optional = false; sft_ty } shape
           in

@@ -19,13 +19,13 @@ let visitor line char =
     method private zero = None
 
     (* A node with position P is not always a parent of every other node with
-    * a position contained by P. Some desugaring can cause nodes to be
-    * rearranged so that this is no longer the case (e.g., `invariant`).
-    *
-    * Since we are finding `Hole`s based on their exact starting position,
-    * we _shouldn't_ encounter the case of two simultaneous `Hole`s with
-    * different parents but the logic to handle this is retained - we simply
-    * take the smaller node. *)
+       * a position contained by P. Some desugaring can cause nodes to be
+       * rearranged so that this is no longer the case (e.g., `invariant`).
+       *
+       * Since we are finding `Hole`s based on their exact starting position,
+       * we _shouldn't_ encounter the case of two simultaneous `Hole`s with
+       * different parents but the logic to handle this is retained - we simply
+       * take the smaller node. *)
     method private plus lhs rhs =
       Option.merge
         lhs

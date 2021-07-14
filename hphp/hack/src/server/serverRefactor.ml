@@ -45,7 +45,7 @@ let find_def_filename current_filename definition =
     if Relative_path.equal (Pos.filename definition.pos) Relative_path.default
     then
       (* When the definition is in an IDE buffer with local changes, the filename
-       in the definition will be empty. *)
+         in the definition will be empty. *)
       current_filename
     else
       Pos.filename definition.pos)
@@ -188,16 +188,16 @@ let get_call_signature_for_wrap (func_decl : Full_fidelity_positioned_syntax.t)
                 in
                 match syntax param with
                 (* NOTE:
-               `ParameterDeclaration` includes regular params like "$x" and
-                _named_ variadic parameters like "...$nums". For the latter case,
-                calling `text parameter_name` will return the entire "...$nums"
-                string, including the ellipsis.
+                    `ParameterDeclaration` includes regular params like "$x" and
+                     _named_ variadic parameters like "...$nums". For the latter case,
+                     calling `text parameter_name` will return the entire "...$nums"
+                     string, including the ellipsis.
 
-              `VariadicParameter` addresses the unnamed variadic parameter
-                "...". In this case, we provide as a parameter a function call
-                that outputs only the variadic params (and dropping the
-                non-variadic ones).
-            *)
+                   `VariadicParameter` addresses the unnamed variadic parameter
+                     "...". In this case, we provide as a parameter a function call
+                     that outputs only the variadic params (and dropping the
+                     non-variadic ones).
+                *)
                 | ParameterDeclaration { parameter_name = name; _ } -> text name
                 | VariadicParameter _ -> "...$args"
                 | _ -> failwith "Expected some parameter type")
@@ -309,14 +309,14 @@ let get_deprecated_wrapper_patch ~filename ~definition ~ctx new_name =
         let definition = SymbolDefinition.to_relative definition in
 
         (* We need the number of spaces that the function declaration is offsetted so that we can
-      format our wrapper properly with the correct indent (i.e. we need 0-indexed columns).
+           format our wrapper properly with the correct indent (i.e. we need 0-indexed columns).
 
-      However, even though column offsets are already indexed accordingly when
-      stored in positions, `destruct_range` adds 1 in order to
-      return an [inclusive, exclusive) span.
+           However, even though column offsets are already indexed accordingly when
+           stored in positions, `destruct_range` adds 1 in order to
+           return an [inclusive, exclusive) span.
 
-      Thus, we subtract 1.
-  *)
+           Thus, we subtract 1.
+        *)
         let (_, col_start_plus1, _, _) = Pos.destruct_range definition.span in
         let col_start = col_start_plus1 - 1 in
         let (_ctx, entry) =

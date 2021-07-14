@@ -46,7 +46,7 @@ let merge_lenvs left right =
      because the typechecker has smarter flow analysis than the readonly analysis (including
      terminality checks). Therefore, we should take the readonlyness from the branch that has
      a value, in case it's readonly.
-   *)
+  *)
   SMap.merge (fun _key -> Option.merge ~f:meet) left right
 
 let pp_rty fmt rty = Format.fprintf fmt "%s" (rty_to_str rty)
@@ -107,7 +107,7 @@ let check_readonly_return_call pos caller_ty is_readonly =
 let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
   let open Typing_defs in
   (* Given a list of types, find recurse on the first type that
-  has the property and return the result *)
+     has the property and return the result *)
   let find_first_in_list ~seen tyl =
     List.find_map
       ~f:(fun ty ->
@@ -131,21 +131,21 @@ let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
       Option.to_list prop
     | None -> [])
   (* Accessing a property off of an intersection type
-    should involve exactly one kind of readonlyness, since for
-    the intersection type to exist, the property must be related
-    by some subtyping relationship anyways, and property readonlyness
-    is invariant. Thus we just grab the first one from the list where the prop exists. *)
+     should involve exactly one kind of readonlyness, since for
+     the intersection type to exist, the property must be related
+     by some subtyping relationship anyways, and property readonlyness
+     is invariant. Thus we just grab the first one from the list where the prop exists. *)
   | Tintersection [] -> []
   | Tintersection tyl ->
     find_first_in_list ~seen tyl |> Option.value ~default:[]
   (* A union type is more interesting, where we must return all possible cases
-  and be conservative in our use case. *)
+     and be conservative in our use case. *)
   | Tunion tyl ->
     List.concat_map
       ~f:(fun ty -> grab_class_elts_from_ty ~static ~seen env ty prop_id)
       tyl
   (* Generic types can be treated similarly to an intersection type
-    where we find the first prop that works from the upper bounds *)
+     where we find the first prop that works from the upper bounds *)
   | Tgeneric (name, tyargs) ->
     (* Avoid circular generics with a set *)
     if SSet.mem name seen then
@@ -206,13 +206,13 @@ let check =
       self#run_with_lenv (fun () -> self#on_block env b) old_lenv
 
     (* f_loop is a function that executes analysis on a single loop iteration
-      Handle loop will iterate f_loop a maximum of X times, where X is the number of
-      mutable variables in the lenv. Each loop, we check if the lenv has changed at
-      all; if not, we can return early. Since each iteration of the loop must naturally
-      make a mutable variable readonly, we only need to iterate a maximum X times to reach
-      a fixed point.
-      TODO: This may need to change once we have more than just two types, but with a constant
-      number of types, it should generally be pretty scalable.
+       Handle loop will iterate f_loop a maximum of X times, where X is the number of
+       mutable variables in the lenv. Each loop, we check if the lenv has changed at
+       all; if not, we can return early. Since each iteration of the loop must naturally
+       make a mutable variable readonly, we only need to iterate a maximum X times to reach
+       a fixed point.
+       TODO: This may need to change once we have more than just two types, but with a constant
+       number of types, it should generally be pretty scalable.
     *)
     method handle_loop f_loop =
       let rec iter_fixed_point lenv =
@@ -221,8 +221,8 @@ let check =
         let new_lenv = merge_lenvs lenv iter_lenv in
         (* If the merged lenv is equivalent to the old one we can stop  *)
         (* Note, this is O(m*f), where m is the number of vars and f is the cost of f_loop
-          which can lead to exponential behavior in the case of a huge number of nested loops.
-          TODO: break early if we're iterating too much here and throw an error.
+           which can lead to exponential behavior in the case of a huge number of nested loops.
+           TODO: break early if we're iterating too much here and throw an error.
         *)
         if lenv_eq new_lenv lenv then
           new_lenv
@@ -230,7 +230,7 @@ let check =
           iter_fixed_point new_lenv
       in
       (* We need to run the f_loop first at least once,
-      to find any mutable variables created within the loop *)
+         to find any mutable variables created within the loop *)
       let (_, loop_lenv) = self#run_with_lenv f_loop ctx.lenv in
       let lenv = merge_lenvs ctx.lenv loop_lenv in
       (* Then, iterate at most X more times to reach a fixed point *)
@@ -248,9 +248,9 @@ let check =
         let varname = Local_id.to_string lid in
         get_local ctx.lenv varname
       (* If you have a bunch of property accesses in a row, i.e. $x->foo->bar->baz,
-        ty_expr will take linear time, and the full check may take O(n^2) time
-        if we recurse on expressions in the visitor. We expect this to generally
-        be quite small, though. *)
+         ty_expr will take linear time, and the full check may take O(n^2) time
+         if we recurse on expressions in the visitor. We expect this to generally
+         be quite small, though. *)
       | Obj_get (e1, e2, _, _) ->
         (match self#ty_expr env e1 with
         | Readonly -> Readonly
@@ -463,8 +463,8 @@ let check =
       | _ -> ()
 
     (* Checks related to calling a function or method
-      is_readonly is true when the call is allowed to return readonly
-      TODO: handle inout
+       is_readonly is true when the call is allowed to return readonly
+       TODO: handle inout
     *)
     method call
         ~is_readonly
@@ -537,7 +537,7 @@ let check =
       check_args caller_ty args unpacked_arg
 
     (* Check if type is safe to convert from readonly to mut
-    TODO(readonly): Update to include more complex types. *)
+       TODO(readonly): Update to include more complex types. *)
     method is_safe_mut_ty env ty =
       let env = Tast_env.tast_env_as_typing_env env in
       let primitive_types =
@@ -639,9 +639,9 @@ let check =
 
     method! on_Foreach env e as_e b =
       (* foreach ($vec as $x)
-        The as expression always has the same readonlyness
-        as the collection in question. If it is readonly,
-        then the as expression's lvals are each assigned to readonly.
+         The as expression always has the same readonlyness
+         as the collection in question. If it is readonly,
+         then the as expression's lvals are each assigned to readonly.
       *)
       let f () =
         (match as_e with
@@ -669,7 +669,7 @@ let check =
 
     method! on_Try env try_ clist finally =
       (* Each of the catch blocks and the try blocks should be merged together,
-        with each running without knowledge of each other. *)
+         with each running without knowledge of each other. *)
       let old_lenv = ctx.lenv in
       let (_, try_lenv) = self#handle_single_block env try_ old_lenv in
       (* Starting with the try_lenv, run every catch lenv and merge them into a single lenv *)
@@ -888,7 +888,7 @@ let handler =
     method! at_Call env caller _tal _el _unpacked_element =
       let tcopt = Tast_env.get_tcopt env in
       (* this check is already handled by the readonly analysis,
-        which handles cases when there's a readonly keyword *)
+         which handles cases when there's a readonly keyword *)
       if TypecheckerOptions.readonly tcopt then
         ()
       else
@@ -899,7 +899,7 @@ let handler =
     method! at_expr env e =
       let tcopt = Tast_env.get_tcopt env in
       (* this check is already handled by the readonly analysis,
-      which handles cases when there's a readonly keyword *)
+         which handles cases when there's a readonly keyword *)
       let check =
         if TypecheckerOptions.readonly tcopt then
           fun _e ->

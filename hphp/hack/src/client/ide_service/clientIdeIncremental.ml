@@ -25,20 +25,20 @@ let log_file_info_change
     | (None, Some _) -> "added"
     | (None, None) ->
       (* May or may not indicate a bug in either the language client or the
-      language server.
+         language server.
 
-      - Could happen if the language client sends spurious notifications.
-      - Could happen if the editor writes files in a certain way, such as if
-        they delete the file before moving a new one into place.
-      - Could happen if the language server was not able to read the file,
-        despite it existing on disk (e.g. due to permissions). In this case,
-        we would fail to generate its [FileInfo.t] and assume that it was
-        deleted. This is correct from a certain point of view.
-      - Could happen due to a benign race condition where we process
-        file-change notifications more slowly than they happen. If a file is
-        quickly created, then deleted before we process the create event,
-        we'll think it was deleted twice. This is the correct way to handle
-        the race condition.
+         - Could happen if the language client sends spurious notifications.
+         - Could happen if the editor writes files in a certain way, such as if
+           they delete the file before moving a new one into place.
+         - Could happen if the language server was not able to read the file,
+           despite it existing on disk (e.g. due to permissions). In this case,
+           we would fail to generate its [FileInfo.t] and assume that it was
+           deleted. This is correct from a certain point of view.
+         - Could happen due to a benign race condition where we process
+           file-change notifications more slowly than they happen. If a file is
+           quickly created, then deleted before we process the create event,
+           we'll think it was deleted twice. This is the correct way to handle
+           the race condition.
       *)
       "spuriously updated"
   in
@@ -52,11 +52,11 @@ let compute_fileinfo_for_path
   match contents with
   | None -> (None, None)
   (* The file couldn't be read from disk. Assume it's been deleted or is
-    otherwise inaccessible. Our caller will delete the entries from the
-    naming and reverse naming table; there's nothing for us to do here. *)
+     otherwise inaccessible. Our caller will delete the entries from the
+     naming and reverse naming table; there's nothing for us to do here. *)
   | Some contents ->
     (* We don't want our symbols to be mangled for export.  Mangling would
-      * convert :xhp:myclass to __xhp_myclass, which would fail name lookup *)
+       * convert :xhp:myclass to __xhp_myclass, which would fail name lookup *)
     Facts_parser.mangle_xhp_mode := false;
     let facts =
       Facts_parser.from_text
@@ -88,9 +88,9 @@ let compute_fileinfo_for_path
         in
         let funs = facts.Facts.functions |> to_ids FileInfo.Fun in
         (* Classes and typedefs are both stored under `types`. There's also a
-        `typeAliases` field which only stores typedefs that we could use if we
-        wanted, but we write out the pattern-matches here for
-        exhaustivity-checking. *)
+           `typeAliases` field which only stores typedefs that we could use if we
+           wanted, but we write out the pattern-matches here for
+           exhaustivity-checking. *)
         let classes =
           facts.Facts.types
           |> Facts.InvSMap.filter (fun _k v ->

@@ -31,9 +31,9 @@ let map (length, list) ~f = (length, List.map list ~f)
 
 let append x (length, list) =
   (* List.append has several constant-factor performance tricks up its sleeve,
-  which I don't want to replicate here. That's why I'm calling both List.length
-  and List.append here, rather than doing only a single traversal of x.
-  In any case, by assumption, x isn't a big list so it doesn't matter. *)
+     which I don't want to replicate here. That's why I'm calling both List.length
+     and List.append here, rather than doing only a single traversal of x.
+     In any case, by assumption, x isn't a big list so it doesn't matter. *)
   (length + List.length x, List.append x list)
 
 let rev_append x (length, list) =
@@ -58,7 +58,7 @@ let filter t ~f = rev (rev_filter t ~f)
 
 let split_n (length, list) n =
   (* Could be more efficient if we copy the implementation of List.split_n, to avoid
-  iterating over [split] twice, but by assumption n is small so it doesn't matter. *)
+     iterating over [split] twice, but by assumption n is small so it doesn't matter. *)
   let (split, rest) = List.split_n list n in
   (split, (length - List.length split, rest))
 

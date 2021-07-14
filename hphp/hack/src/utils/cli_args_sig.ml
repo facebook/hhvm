@@ -22,9 +22,9 @@ module Types = struct
   [@@deriving show]
 
   (* The idea of a file range necessarily means that the hypothetical list
-    of them is sorted in some way. It is valid to have None as either endpoint
-    because that simply makes it open-ended. For example, a range of files
-    { None - "/some/path" } includes all files with path less than /some/path *)
+     of them is sorted in some way. It is valid to have None as either endpoint
+     because that simply makes it open-ended. For example, a range of files
+     { None - "/some/path" } includes all files with path less than /some/path *)
   type files_to_check_range = {
     from_prefix_incl: Relative_path.t option;
     to_prefix_excl: Relative_path.t option;

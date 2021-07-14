@@ -836,9 +836,9 @@ let () =
       ()
     else
       (* On windows, setting 'binary mode' avoids to output CRLF on
-       stdout.  The 'text mode' would not hurt the user in general, but
-       it breaks the testsuite where the output is compared to the
-       expected one (i.e. in given file without CRLF). *)
+         stdout.  The 'text mode' would not hurt the user in general, but
+         it breaks the testsuite where the output is compared to the
+         expected one (i.e. in given file without CRLF). *)
       Caml.set_binary_mode_out Caml.stdout true;
     let handle = SharedMem.init ~num_workers:0 SharedMem.empty_config in
     ignore (handle : SharedMem.handle);

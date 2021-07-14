@@ -54,7 +54,7 @@ let process_parse_result
   if Option.is_some file_mode then (
     let (funs, classes, record_defs, typedefs, consts) = Nast.get_defs ast in
     (* If this file was parsed from a tmp directory,
-      save it to the main directory instead *)
+       save it to the main directory instead *)
     let fn =
       match Relative_path.prefix fn with
       | Relative_path.Tmp -> Relative_path.to_root fn
@@ -154,10 +154,10 @@ let parse_sequential ctx ~quick ~show_all_errors ~trace fn content acc popt =
     let res =
       Errors.do_with_context fn Errors.Parsing (fun () ->
           (* DISGUSTING: so far, parser was used only for text files from disk, and
-      * those files are (or our reading primitives make them?) terminated with
-      * newline. Files that come from memory don't have this guarantee, and it
-      * breaks the parser in few places. Appending a sentinel newline doesn't
-      * change the parse tree, and is much easier than debugging the parser. *)
+             * those files are (or our reading primitives make them?) terminated with
+             * newline. Files that come from memory don't have this guarantee, and it
+             * breaks the parser in few places. Appending a sentinel newline doesn't
+             * change the parse tree, and is much easier than debugging the parser. *)
           let length = String.length content in
           let content =
             if length > 0 && not (Char.equal content.[length - 1] '\n') then

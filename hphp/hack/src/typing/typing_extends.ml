@@ -454,7 +454,7 @@ let check_const_override
   in
   let const_interface_member_not_unique =
     (* Similar to should_check_member_unique, we check if there are multiple
-      concrete implementations of class constants with no override.
+       concrete implementations of class constants with no override.
     *)
     conflict_with_declared_interface
       env
@@ -468,8 +468,8 @@ let check_const_override
   in
   let is_bad_interface_const_override =
     (* HHVM does not support one specific case of overriding constants:
-     If the original constant was defined as non-abstract in an interface,
-     it cannot be overridden when implementing or extending that interface. *)
+       If the original constant was defined as non-abstract in an interface,
+       it cannot be overridden when implementing or extending that interface. *)
     match Cls.kind parent_class with
     | Ast_defs.Cinterface ->
       both_are_non_synthetic_and_concrete

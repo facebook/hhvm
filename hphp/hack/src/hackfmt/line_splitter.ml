@@ -70,10 +70,10 @@ let solve_chunk_group env ?range ?source_text chunk_group =
       let (rules_in_range, rules_out_of_range) =
         List.partition_map chunk_group.Chunk_group.chunks ~f:(fun chunk ->
             (* Each chunk is preceded by a split, and contains the ID of the rule
-             governing that split. *)
+               governing that split. *)
             let rule = chunk.Chunk.rule in
             (* We consider that split to be within the range when the range
-             contains the first character in the chunk. *)
+               contains the first character in the chunk. *)
             if Interval.contains range chunk.Chunk.start_char then
               First rule
             else

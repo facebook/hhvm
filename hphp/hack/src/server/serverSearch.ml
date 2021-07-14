@@ -60,7 +60,7 @@ let go ctx query_text ~(kind_filter : string) (sienv : SearchUtils.si_env) :
             method_query
         | None ->
           (* When we can't find a class with a name similar to the given one,
-           just return no search results. *)
+             just return no search results. *)
           []
       end
     | _ ->

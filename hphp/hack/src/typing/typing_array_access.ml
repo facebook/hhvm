@@ -197,9 +197,9 @@ let rec array_get
         if
           lhs_of_null_coalesce
           (* Normally, we would not allow indexing into a nullable container,
-         however, because the pattern shows up so frequently, we are allowing
-         indexing into a nullable container as long as it is on the lhs of a
-         null coalesce *)
+             however, because the pattern shows up so frequently, we are allowing
+             indexing into a nullable container as long as it is on the lhs of a
+             null coalesce *)
         then
           array_get
             ~array_pos
@@ -413,11 +413,11 @@ let rec array_get
       | Tshape (_, fdm) ->
         if is_lvalue || lhs_of_null_coalesce then
           (* The expression $s['x'] ?? $y is semantically equivalent to
-           Shapes::idx ($s, 'x') ?? $y.  I.e., if $s['x'] occurs on
-           the left of a coalesce operator, then for type checking it
-           can be treated as if it evaluated to null instead of
-           throwing an exception if the field 'x' doesn't exist in $s.
-         *)
+             Shapes::idx ($s, 'x') ?? $y.  I.e., if $s['x'] occurs on
+             the left of a coalesce operator, then for type checking it
+             can be treated as if it evaluated to null instead of
+             throwing an exception if the field 'x' doesn't exist in $s.
+          *)
           let (env, ty) =
             Typing_shapes.idx
               env
@@ -435,7 +435,7 @@ let rec array_get
             match TUtils.shape_field_name env e2 with
             | None ->
               (* there was already an error in shape_field name,
-               don't report another one for a missing field *)
+                 don't report another one for a missing field *)
               (env, err_witness env p, Ok ty2)
             | Some field ->
               let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
@@ -599,7 +599,7 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
         in
         (env, ty1, err_res)
       (* Handle the case where Vector or Set was used as a typehint
-       without type parameters *)
+         without type parameters *)
       | (_, Tclass ((_, n), _, [])) when String.equal n SN.Collections.cVector
         ->
         (env, ty1, Ok ty2)

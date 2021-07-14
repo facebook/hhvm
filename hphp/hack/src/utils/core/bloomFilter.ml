@@ -80,7 +80,7 @@ let create ~(capacity : int) : t =
       64
     else
       (* see: https://en.wikipedia.org/wiki/Bloom_filter#Optimal_number_of_hash_functions
-        number of bits = -n * ln error_rate / (ln 2)^2
+         number of bits = -n * ln error_rate / (ln 2)^2
       *)
       let cap = float_of_int capacity in
       let error_rate = 0.01 in

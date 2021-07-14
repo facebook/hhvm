@@ -16,7 +16,7 @@ let go_quarantined ~(ctx : Provider_context.t) ~(entry : Provider_context.entry)
   | Ok levels -> levels
   | Error () ->
     (* The "Fixme Provider" will return an error if the file cannot be found.
-    Let's convert that error to a plain result. *)
+       Let's convert that error to a plain result. *)
     ( [],
       {
         Coverage_level_defs.checked = 0;

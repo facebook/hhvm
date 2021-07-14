@@ -74,7 +74,7 @@ let get_patches ctx file =
   let nast = Ast_provider.get_ast ~full:true ctx file in
   let tast =
     (* We don't need an accurate list of typing errors, so we can skip TAST
-    checks. *)
+       checks. *)
     Typing_toplevel.nast_to_tast
       ~do_tast_checks:false
       ctx

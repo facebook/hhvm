@@ -205,7 +205,7 @@ let log_debug s = Hh_logger.debug ("[ide-daemon] " ^^ s)
 
 let set_up_hh_logger_for_client_ide_service (root : Path.t) : unit =
   (* Log to a file on disk. Note that calls to `Hh_logger` will always write to
-  `stderr`; this is in addition to that. *)
+     `stderr`; this is in addition to that. *)
   let client_ide_log_fn = ServerFiles.client_ide_log root in
   begin
     try Sys.rename client_ide_log_fn (client_ide_log_fn ^ ".old")
@@ -243,8 +243,8 @@ let load_saved_state
               Lwt.return_unit
           in
           (* Assume that there are no changed files on disk if we're getting
-          passed the path to the saved-state directly, and that the saved-state
-          corresponds to the current state of the world. *)
+             passed the path to the saved-state directly, and that the saved-state
+             corresponds to the current state of the world. *)
           let changed_files = [] in
           (* Test hook, for tests that want to get messages in before init *)
           Lwt.return_ok
@@ -288,7 +288,7 @@ let load_saved_state
         Lwt.return_ok (naming_table, changed_files)
       | Error load_error ->
         (* We'll turn that load_error into a user-facing [reason], and a
-        programmatic error [e] for future telemetry *)
+           programmatic error [e] for future telemetry *)
         let reason =
           ClientIdeMessage.
             {
@@ -337,8 +337,8 @@ let restore_hhi_root_if_necessary (istate : istate) : istate =
     istate
   else
     (* Some processes may clean up the temporary HHI directory we're using.
-    Assume that such a process has deleted the directory, and re-write the HHI
-    files to disk. *)
+       Assume that such a process has deleted the directory, and re-write the HHI
+       files to disk. *)
     let hhi_root = Hhi.get_hhi_root ~force_write:true () in
     log
       "Old hhi root %s no longer exists. Creating a new hhi root at %s"
@@ -413,7 +413,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   in
 
   (* We need shallow class declarations so that we can invalidate individual
-  members in a class hierarchy. *)
+     members in a class hierarchy. *)
   let tcopt = { tcopt with GlobalOptions.tco_shallow_class_decl = true } in
 
   let start_time = log_startup_time "basic_startup" start_time in
@@ -439,11 +439,11 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   if param.use_ranked_autocomplete then AutocompleteRankService.initialize ();
   let start_time = log_startup_time "symbol_index" start_time in
   (* We only ever serve requests on files that are open. That's why our caller
-  passes an initial list of open files, the ones already open in the editor
-  at the time we were launched. We don't actually care about their contents
-  at this stage, since updated contents will be delivered upon each request.
-  (and indeed it's pointless to waste time reading existing contents off disk).
-  All we care is that every open file is listed in 'open_files'. *)
+     passes an initial list of open files, the ones already open in the editor
+     at the time we were launched. We don't actually care about their contents
+     at this stage, since updated contents will be delivered upon each request.
+     (and indeed it's pointless to waste time reading existing contents off disk).
+     All we care is that every open file is listed in 'open_files'. *)
   let open_files =
     param.open_files
     |> List.map ~f:(fun path ->
@@ -572,8 +572,8 @@ let change_file (files : open_files_state) (path : Relative_path.t) :
     files
   else
     (* We'll now mark the file as opened. We'll provide empty contents for now;
-    this doesn't matter since every actual future request for the file will provide
-    actual contents. *)
+       this doesn't matter since every actual future request for the file will provide
+       actual contents. *)
     let () = log_missing_open_file_BUG path in
     open_file files path ""
 
@@ -685,13 +685,13 @@ let handle_request :
   (***********************************************************)
   | (Pending_init, Initialize_from_saved_state param) ->
     (* Invariant: no message will be sent to us prior to this request,
-    and we must send no message until we've sent this response. *)
+       and we must send no message until we've sent this response. *)
     let open Initialize_from_saved_state in
     begin
       try
         let dstate = initialize1 param in
         (* We're going to kick off the asynchronous part of initializing now.
-        Once it's done, it will appear as a LoadedState message on the queue. *)
+           Once it's done, it will appear as a LoadedState message on the queue. *)
         Lwt.async (fun () ->
             (* following method never throws *)
             (* TODO(hverr): Figure out how to support 64-bit *)
@@ -707,7 +707,7 @@ let handle_request :
                 ~naming_table_load_info:param.naming_table_load_info
             in
             (* if the following push fails, that must be because the queues
-            have been shut down, in which case there's nothing to do. *)
+               have been shut down, in which case there's nothing to do. *)
             let (_succeeded : bool) =
               Lwt_message_queue.push message_queue (LoadedState result)
             in
@@ -717,7 +717,7 @@ let handle_request :
         let exn = Exception.wrap exn in
         let e = ClientIdeUtils.make_bug_error "initialize1" ~exn in
         (* Our caller has an exception handler. But we must handle this ourselves
-        to change state to Failed_init; our caller's handler doesn't change state. *)
+           to change state to Failed_init; our caller's handler doesn't change state. *)
         (* TODO: remove_hhi *)
         Lwt.return (Failed_init e, Error e)
     end
@@ -843,9 +843,9 @@ let handle_request :
   (* Autocomplete docblock resolve *)
   | (Initialized istate, Completion_resolve_location param) ->
     (* We're given a location but it often won't be an opened file.
-    We will only serve autocomplete docblocks as of truth on disk.
-    Hence, we construct temporary entry to reflect the file which
-    contained the target of the resolve. *)
+       We will only serve autocomplete docblocks as of truth on disk.
+       Hence, we construct temporary entry to reflect the file which
+       contained the target of the resolve. *)
     let open ClientIdeMessage.Completion_resolve_location in
     let path =
       param.document_location.ClientIdeMessage.file_path
@@ -931,9 +931,9 @@ let handle_request :
   (* Workspace Symbol *)
   | (Initialized istate, Workspace_symbol query) ->
     (* Note: needs reverse-naming-table, hence only works in initialized
-    state: for top-level queries it needs reverse-naming-table to look
-    up positions; for member queries "Foo::bar" it needs it to fetch the
-    decl for Foo. *)
+       state: for top-level queries it needs reverse-naming-table to look
+       up positions; for member queries "Foo::bar" it needs it to fetch the
+       decl for Foo. *)
     (* Note: we intentionally don't give results from unsaved files *)
     let ctx = make_empty_ctx istate in
     let result =
@@ -1036,14 +1036,14 @@ let handle_one_message_exn
     ~(message_queue : message_queue)
     ~(state : state) : state option Lwt.t =
   (* The precise order of operations is to help us be responsive
-  to requests, to never to await if there are pending changes to process,
-  but also to await for the next thing to do:
-  (1) If there's a message in [message_queue] then handle it;
-  (2) Otherwise if there's a message in [in_fd] then await until it
-  gets pumped into [message_queue] and then handle it;
-  (3) Otherwise if there are pending file-changes then process them;
-  (4) otherwise await until the next client request arrives in [in_fd]
-  and gets pumped into [message_queue] and then handle it. *)
+     to requests, to never to await if there are pending changes to process,
+     but also to await for the next thing to do:
+     (1) If there's a message in [message_queue] then handle it;
+     (2) Otherwise if there's a message in [in_fd] then await until it
+     gets pumped into [message_queue] and then handle it;
+     (3) Otherwise if there are pending file-changes then process them;
+     (4) otherwise await until the next client request arrives in [in_fd]
+     and gets pumped into [message_queue] and then handle it. *)
   match state with
   | Initialized istate
     when should_process_file_change in_fd message_queue istate ->
@@ -1069,8 +1069,8 @@ let handle_one_message_exn
           Lwt.return (s, r)
         with exn ->
           (* Our caller has an exception handler which logs the exception.
-          But we instead must fulfil our contract of responding to the client,
-          even if we have an exception. Hence we need our own handler here. *)
+             But we instead must fulfil our contract of responding to the client,
+             even if we have an exception. Hence we need our own handler here. *)
           let exn = Exception.wrap exn in
           let e = ClientIdeUtils.make_bug_error "handle_request" ~exn in
           Lwt.return (state, Error e)

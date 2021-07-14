@@ -397,12 +397,12 @@ let process_files
 
   let rec process_or_exit errors progress tally max_heap_mb =
     (* If the major heap has exceeded the bounds, we
-      (1) first try and bring the size back down by flushing the parser cache and doing a major GC;
-      (2) if this fails, we decline to typecheck the remaining files.
-    We use [quick_stat] instead of [stat] in get_heap_size in order to avoid walking the major heap,
-    and we don't change the minor heap because it's small and fixed-size.
-    The start-remaining test is to make sure we make at least one file of progress
-    even in case of a crazy low memory cap. *)
+         (1) first try and bring the size back down by flushing the parser cache and doing a major GC;
+         (2) if this fails, we decline to typecheck the remaining files.
+       We use [quick_stat] instead of [stat] in get_heap_size in order to avoid walking the major heap,
+       and we don't change the minor heap because it's small and fixed-size.
+       The start-remaining test is to make sure we make at least one file of progress
+       even in case of a crazy low memory cap. *)
     let heap_mb = get_heap_size () in
     let max_heap_mb = Int.max heap_mb max_heap_mb in
     let cap = Option.value memory_cap ~default:Int.max_value in
@@ -535,7 +535,7 @@ let process_files
   (* Gather up our various forms of telemetry... *)
   let (_end_counter_time, end_counters) = read_counters () in
   (* Note: the 'add' operation (performed here, and also later in case of
-  MultiWorker.merge) will strip all non-numbers from telemetry. *)
+     MultiWorker.merge) will strip all non-numbers from telemetry. *)
   let telemetry =
     Telemetry.add
       telemetry
@@ -678,12 +678,12 @@ let merge
       !files_to_process;
 
   (* If workers can steal work from each other, then it's possible that
-    some of the files that the current worker completed checking have already
-    been removed from the in-progress set. Thus, we should keep track of
-    how many type check computations we actually remove from the in-progress
-    set. Note that we also skip counting Declare and Prefetch computations,
-    since they are not relevant for computing how many files we've type
-    checked. *)
+     some of the files that the current worker completed checking have already
+     been removed from the in-progress set. Thus, we should keep track of
+     how many type check computations we actually remove from the in-progress
+     set. Note that we also skip counting Declare and Prefetch computations,
+     since they are not relevant for computing how many files we've type
+     checked. *)
   let completed_check_count =
     List.fold
       ~init:0
@@ -700,9 +700,9 @@ let merge
   in
 
   (* Deferred type check computations should be subtracted from completed
-    in order to produce an accurate count because they we requeued them, yet
-    they were also included in the completed list.
-    *)
+     in order to produce an accurate count because they we requeued them, yet
+     they were also included in the completed list.
+  *)
   let is_check file =
     match file with
     | Check _ -> true
@@ -771,15 +771,15 @@ let next
 
     let (stolen, state) = Typing_service_delegate.steal state max_size in
     (* If a delegate job is returned, then that means that it should be done
-      by the next MultiWorker worker (the one for whom we're creating a job
-      in this function). If delegate job is None, then the regular (local
-      type checking) logic applies. *)
+       by the next MultiWorker worker (the one for whom we're creating a job
+       in this function). If delegate job is None, then the regular (local
+       type checking) logic applies. *)
     match delegate_job with
     | Some { current_bucket; remaining_jobs; job } ->
       return_bucket_job (DelegateProgress job) ~current_bucket ~remaining_jobs
     | None ->
       (* WARNING: the following List.length is costly - for a full init, files_to_process starts
-      out as the size of the entire repo, and we're traversing the entire list. *)
+         out as the size of the entire repo, and we're traversing the entire list. *)
       let files_to_process_length = BigList.length !files_to_process in
       (match (files_to_process_length, stolen) with
       | (0, []) when Hash_set.Poly.is_empty files_in_progress -> Bucket.Done
@@ -1041,7 +1041,7 @@ module Mocking =
 let should_process_sequentially
     (opts : TypecheckerOptions.t) (fnl : file_computation BigList.t) : bool =
   (* If decls can be deferred, then we should process in parallel, since
-    we are likely to have more computations than there are files to type check. *)
+     we are likely to have more computations than there are files to type check. *)
   let defer_threshold =
     TypecheckerOptions.defer_class_declaration_threshold opts
   in

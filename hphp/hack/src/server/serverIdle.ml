@@ -132,8 +132,8 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
           begin
             try
               (* We'll cycle the client-log if it gets bigger than 1Mb.
-              We do this cycling here in the server (rather than in the client)
-              to avoid races when multiple concurrent clients try to cycle it. *)
+                 We do this cycling here in the server (rather than in the client)
+                 to avoid races when multiple concurrent clients try to cycle it. *)
               let client_log_fn = ServerFiles.client_log root in
               let stat = Unix.stat client_log_fn in
               if stat.Unix.st_size > 1024 * 1024 then

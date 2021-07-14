@@ -112,22 +112,22 @@ let rec consume_prehandoff_messages
 
 let connect_to_monitor ~tracker ~timeout config =
   (* There are some pathological scenarios concerned with high volumes of requests.
-  1. There's a finite unix pipe between monitor and server, used for handoff. When
-  that pipe gets full (~30 requests), the monitor will freeze for 4s before closing
-  the client request.
-  2. In ClientConnect.connect we allow the monitor only 1s to respond before we
-  abandon our connection attempt and try again, repeated up to --timeout times (by
-  default infinite). If the monitor takes >1s to work through its queue, then every
-  item placed there will be expired before the monitor gets to handle it, and we'll
-  never recover.
-  3. The monitor's finite incoming queue will become full too, disallowing clients from
-  even connecting.
-  4. Aside from those concerns, just practically, the commonest mode of failure I've observed
-  is that the monitor actually just gets stuck -- sometimes stuck on a "read" call to
-  read requests parameters where it should make progress or get an EOF but just sits there
-  indefinitely, sometimes stuck on a "select" call to see if there's a request on the queue
-  where I know there are outstanding requests but again it doesn't see them. I have no
-  explanation for these phemona. *)
+     1. There's a finite unix pipe between monitor and server, used for handoff. When
+     that pipe gets full (~30 requests), the monitor will freeze for 4s before closing
+     the client request.
+     2. In ClientConnect.connect we allow the monitor only 1s to respond before we
+     abandon our connection attempt and try again, repeated up to --timeout times (by
+     default infinite). If the monitor takes >1s to work through its queue, then every
+     item placed there will be expired before the monitor gets to handle it, and we'll
+     never recover.
+     3. The monitor's finite incoming queue will become full too, disallowing clients from
+     even connecting.
+     4. Aside from those concerns, just practically, the commonest mode of failure I've observed
+     is that the monitor actually just gets stuck -- sometimes stuck on a "read" call to
+     read requests parameters where it should make progress or get an EOF but just sits there
+     indefinitely, sometimes stuck on a "select" call to see if there's a request on the queue
+     where I know there are outstanding requests but again it doesn't see them. I have no
+     explanation for these phemona. *)
   let open Connection_tracker in
   let phase = ref ServerMonitorUtils.Connect_open_socket in
   let finally_close : Timeout.in_channel option ref = ref None in
@@ -135,7 +135,7 @@ let connect_to_monitor ~tracker ~timeout config =
     ~f:(fun () ->
       try
         (* Note: Timeout.with_timeout is accomplished internally by an exception;
-        hence, our "try/with exn ->" catch-all must be outside with_timeout. *)
+           hence, our "try/with exn ->" catch-all must be outside with_timeout. *)
         Timeout.with_timeout
           ~timeout
           ~do_:(fun timeout ->

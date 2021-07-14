@@ -309,7 +309,7 @@ let main (env : env) : Exit_status.t Lwt.t =
   (* above. In both cases the LSP client will see problem reports.            *)
   (*                                                                          *)
   (* The root problem is that should_start assumes an invariant that "if      *)
-  (* hh_server monitor is busy then it has failed and should be shut down."   *)
+     (* hh_server monitor is busy then it has failed and should be shut down." *)
   (* This invariant isn't true. Note that the reason we call should_start,    *)
   (* rather than just using the default ClientConnect.autorestart which calls *)
   (* into ClientStart.start_server, is because we do like its ability to kill *)

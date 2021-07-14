@@ -84,9 +84,9 @@ let base_visitor line char =
     method! on_class_id env cid =
       match cid with
       (* Don't use the resolved class type (the expr_annotation on the class_id
-       type) when hovering over a CIexpr--we will want to show the type the
-       expression is annotated with (e.g., classname<C>) and it will not have a
-       smaller position. *)
+         type) when hovering over a CIexpr--we will want to show the type the
+         expression is annotated with (e.g., classname<C>) and it will not have a
+         smaller position. *)
       | (_, Aast.CIexpr e) -> self#on_expr env e
       | _ -> super#on_class_id env cid
   end

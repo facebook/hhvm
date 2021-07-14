@@ -198,7 +198,7 @@ let tco_migration_flags_all =
 let default =
   {
     (* Default all features for testing. Actual options are set by reading
-  * from hhconfig, which defaults to empty. *)
+       * from hhconfig, which defaults to empty. *)
     tco_experimental_features = tco_experimental_all;
     tco_migration_flags = SSet.empty;
     tco_dynamic_view = false;

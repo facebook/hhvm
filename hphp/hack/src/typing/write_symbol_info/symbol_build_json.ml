@@ -24,7 +24,7 @@ let build_file_json_nested filepath =
 
 let build_name_json_nested name =
   (* Remove leading slash, if present, so names such as
-  Exception and \Exception are captured by the same fact *)
+     Exception and \Exception are captured by the same fact *)
   let basename = Utils.strip_ns name in
   JSON_Object [("key", JSON_String basename)]
 

@@ -75,7 +75,7 @@ let coerce_type_impl
       (* If the type is enforced, then we also allow dynamic.
          For example, if a function takes an int, then it's ok to pass it
          an int or something of type dynamic.
-       *)
+      *)
       let (env, tunion) =
         Typing_union.union env ty_expect.et_type (MakeType.dynamic Reason.Rnone)
       in
@@ -105,7 +105,7 @@ let coerce_type_impl
          with coercion to dynamic enabled.
          The computation of the enforcement takes care that top-level dynamic
          and ?dynamic are not considered Enforced.
-         *)
+      *)
       Typing_utils.sub_type_res ~coerce:None env ty_have tunion on_error
     | Unenforced ->
       Typing_utils.sub_type_res

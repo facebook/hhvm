@@ -154,11 +154,11 @@ let make_union env r tyl reason_nullable_opt reason_dyn_opt =
     | tyl -> MakeType.union r tyl
   in
   (* Given that unions with null are encoded specially in the type system - as options -
-  we still need to simplify unions of null and nonnull here.
-  For example, we may have to construct ?(nonnull | any) which should result in mixed.
-  For something more complex like ?(A | (B & nonnull)), one can
-  distribute the option to give (?A | (?B & ?nonnull)) which then simplifies to ?(A | B).
-  This function performs those simplifications. *)
+     we still need to simplify unions of null and nonnull here.
+     For example, we may have to construct ?(nonnull | any) which should result in mixed.
+     For something more complex like ?(A | (B & nonnull)), one can
+     distribute the option to give (?A | (?B & ?nonnull)) which then simplifies to ?(A | B).
+     This function performs those simplifications. *)
   let simplify_nonnull env ty =
     let is_nonnull ty = ty_equal ty (MakeType.nonnull r) in
     let rec simplify env ty =
@@ -429,8 +429,7 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
     | ( ( _,
           ( Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _ | Tdependent _
           | Tclass _ | Ttuple _ | Tfun _ | Tobject | Tshape _ | Terr | Tvar _
-          | Tvarray _ | Tdarray _ | Tvarray_or_darray _
-          | Tvec_or_dict _
+          | Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _
           (* If T cannot be null, `union T nonnull = nonnull`. However, it's hard
            * to say whether a given T can be null - e.g. opaque newtypes, dependent
            * types, etc. - so for now we leave it here.
@@ -779,9 +778,9 @@ let rec union_i env ?(approx_cancel_neg = false) r ty1 lty2 =
           (env, ConstraintType (mk_constraint_type (r, TCunion (lty, cty1))))
         | (r', TCintersection (lty1, cty1)) ->
           (* Distribute union over intersection.
-          At the moment local types in TCintersection can only be
-          unions or intersections involving only null and nonnull,
-          so applying distributivity allows for simplifying the types. *)
+             At the moment local types in TCintersection can only be
+             unions or intersections involving only null and nonnull,
+             so applying distributivity allows for simplifying the types. *)
           let (env, lty) = union ~approx_cancel_neg env lty1 lty2 in
           let (env, ty) =
             union_i ~approx_cancel_neg env r (ConstraintType cty1) lty2

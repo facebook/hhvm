@@ -401,17 +401,17 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         || is_sub_dynamic env ty2
       in
       (* Allow value-equating types A, B such that:
-      - [(A <: B and B <: A) or (A and/or B is dynamic)]
-      - AND (A and B are dynamic/primitive)
-      We also allow the basic value container types `vec`, `keyset`, and `dict` to be compared. *)
+         - [(A <: B and B <: A) or (A and/or B is dynamic)]
+         - AND (A and B are dynamic/primitive)
+         We also allow the basic value container types `vec`, `keyset`, and `dict` to be compared. *)
       let rec strict_equatable env ty1 ty2 =
         strict_allowable_types ty1
         && strict_allowable_types ty2
         && ( same_type env ty1 ty2
            ||
            (* Cover the case where the containers have a dynamic parameter,
-           since `same_type` would evaluate to false.
-           E.g. `vec<dynamic> == vec<int>` should be allowed. *)
+              since `same_type` would evaluate to false.
+              E.g. `vec<dynamic> == vec<int>` should be allowed. *)
            match (get_node ty1, get_node ty2) with
            | ( Tclass ((_, name1), _, container_tys1),
                Tclass ((_, name2), _, container_tys2) )

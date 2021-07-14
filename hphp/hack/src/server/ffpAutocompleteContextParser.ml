@@ -684,7 +684,7 @@ let make_context
               { acc with closest_parent_container = FunctionCallArgumentList }
             | (AnonymousFunction _ | LambdaExpression _) as lambda ->
               (* If we see a lambda, almost all context is reset, so each field should
-      get consideration on if its context flows into the lambda *)
+                 get consideration on if its context flows into the lambda *)
               {
                 closest_parent_container = LambdaBodyExpression;
                 predecessor;
@@ -747,9 +747,9 @@ let get_context_and_stub (positioned_tree : PositionedSyntax.t) (off : int) :
     context * string =
   PositionedSyntax.(
     (* If the offset is the same as the width of the whole tree, then the cursor is at the end of
-  file, so we move our position to before the last character of the file so that our cursor is
-  considered to be in the leading trivia of the end of file character. This guarantees our parentage
-  is not empty. *)
+       file, so we move our position to before the last character of the file so that our cursor is
+       considered to be in the leading trivia of the end of file character. This guarantees our parentage
+       is not empty. *)
     let new_offset =
       if off >= full_width positioned_tree then
         full_width positioned_tree - 1

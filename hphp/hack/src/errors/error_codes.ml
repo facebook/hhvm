@@ -110,9 +110,9 @@ module Naming = struct
     | IllegalMemberVariableClass [@value 2070]
     | TooFewTypeArguments [@value 2071]
     (* | GotoLabelAlreadyDefinedDEPRECATED [@value 2072]
-    | GotoLabelUndefinedDEPRECATED [@value 2073]
-    | GotoLabelDefinedInFinallyDEPRECATED [@value 2074]
-    | GotoInvokedInFinallyDEPRECATED [@value 2075] *)
+       | GotoLabelUndefinedDEPRECATED [@value 2073]
+       | GotoLabelDefinedInFinallyDEPRECATED [@value 2074]
+       | GotoInvokedInFinallyDEPRECATED [@value 2075] *)
     (* | DynamicClassPropertyNameInStrictModeDEPRECATED [@value 2076] *)
     | ThisAsLexicalVariable [@value 2077]
     | DynamicClassNameInStrictMode [@value 2078]

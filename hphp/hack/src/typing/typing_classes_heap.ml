@@ -512,7 +512,7 @@ module ApiEager = struct
     Decl_counters.count_subdecl decl Decl_counters.All_ancestor_req_names
     @@ fun () ->
     (* The two below will traverse ancestors in different orders.
-    But if the typechecker discovers errors in different order, no matter. *)
+       But if the typechecker discovers errors in different order, no matter. *)
     match t with
     | Lazy (_sc, lc) ->
       LSTable.to_list (Lazy.force lc).req_ancestor_names |> List.map ~f:fst

@@ -88,7 +88,7 @@ let validator =
           match tyl with
           | [] -> acc
           (* this case should really be handled by the fold2,
-        but we still allow class hints without args in certain places *)
+             but we still allow class hints without args in certain places *)
           | targs ->
             List.Or_unequal_lengths.(
               begin
@@ -200,7 +200,7 @@ let validator =
 
     method check_generic acc r name =
       (* No need to look at type arguments of generic var, as higher-kinded type params
-        cannot be enforcable *)
+         cannot be enforcable *)
       (* TODO(T70069116) implement enforcability check *)
       match
         ( Env.get_reified acc.Type_validator.env name,

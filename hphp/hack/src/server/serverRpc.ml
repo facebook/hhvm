@@ -158,7 +158,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, ServerSignatureHelp.go_quarantined ~ctx ~entry ~line ~column)
   | COMMANDLINE_AUTOCOMPLETE contents ->
     (* For command line autocomplete, we assume the AUTO332 text has
-    already been inserted, and we fake the rest of this information. *)
+       already been inserted, and we fake the rest of this information. *)
     let autocomplete_context =
       {
         AutocompleteTypes.is_manually_invoked = false;

@@ -93,11 +93,11 @@ let validate_state fun_kind env s =
   in
 
   (* Property 2  There are several exceptions:
-    - We do not complain if the function is annotated with Tany or Awaitable<Tany>
-      (e.g., using one of its aliases in using one of its aliases in HH_FIXME)
-    - We only actually report an error if the return type hint of the function is a
-      proper supertype of void (other than Tany, see first exception). Otherwise you get a normal
-      type error already anyway.
+     - We do not complain if the function is annotated with Tany or Awaitable<Tany>
+       (e.g., using one of its aliases in using one of its aliases in HH_FIXME)
+     - We only actually report an error if the return type hint of the function is a
+       proper supertype of void (other than Tany, see first exception). Otherwise you get a normal
+       type error already anyway.
   *)
   let (property_2_ok, raise_error_2) =
     match (s.prev_no_value_return, ret_type_hint_locl_opt, is_generator) with
@@ -107,12 +107,12 @@ let validate_state fun_kind env s =
   in
 
   (* Property 3: Again, there are several exceptions:
-    - If the function is async, it is allowed to have a (implicit or explicit) no-value return and
-      also a "return foo;", where the type of foo is void-typed (e.g., a call to a void-returning
-      function or an wait of an Awaitable<void>).
-    - If the function is annotated with return type TAny (e.g., using one of its aliases in
-      HH_FIXME), we do not complain.
-    - return await foo.
+     - If the function is async, it is allowed to have a (implicit or explicit) no-value return and
+       also a "return foo;", where the type of foo is void-typed (e.g., a call to a void-returning
+       function or an wait of an Awaitable<void>).
+     - If the function is annotated with return type TAny (e.g., using one of its aliases in
+       HH_FIXME), we do not complain.
+     - return await foo.
   *)
   let (property_3_ok, raise_error_3) =
     (* We must accommodate the slightly inconsistent rule that "return await foo;" is allowed in an

@@ -257,15 +257,15 @@ let get_dep_set_files
         ~init:Relative_path.Set.empty
         ~f:(fun dep acc ->
           (* NOTE: currently, we issue three queries per dependency hash. If
-          there are a lot of dependency hashes, it may be necessary to
-          optimize this so that we issue larger bulk queries, with conditions
-          like
+             there are a lot of dependency hashes, it may be necessary to
+             optimize this so that we issue larger bulk queries, with conditions
+             like
 
-            SELECT * FROM NAMING_FUNS
-            WHERE
-              HASH BETWEEN A AND B OR
-              HASH BETWEEN C AND D OR
-              HASH BETWEEN E AND F ...
+               SELECT * FROM NAMING_FUNS
+               WHERE
+                 HASH BETWEEN A AND B OR
+                 HASH BETWEEN C AND D OR
+                 HASH BETWEEN E AND F ...
           *)
           let consts = Naming_sqlite.get_const_paths_by_dep_hash db_path dep in
           let funs = Naming_sqlite.get_fun_paths_by_dep_hash db_path dep in
@@ -295,8 +295,8 @@ let get_dep_set_files
             Relative_path.Set.add acc path
           else
             (* If this file happened to be present in the base changes, it
-            would be permissible to include it since we can return an
-            overestimate, but we may as well remove it. *)
+               would be permissible to include it since we can return an
+               overestimate, but we may as well remove it. *)
             Relative_path.Set.remove acc path)
 
 let has_file a key =
@@ -416,11 +416,11 @@ let save naming_table db_name =
   | Unbacked naming_table ->
     let t = Unix.gettimeofday () in
     (* Ideally, we would have a commit hash, which would result in the same
-      content version given the same version of source files. However,
-      using a unique version every time we save the naming table from scratch
-      is good enough to enable us to check that the local changes diff
-      provided as an argument to load_from_sqlite_with_changes_since_baseline
-      is compatible with the underlying SQLite table. *)
+       content version given the same version of source files. However,
+       using a unique version every time we save the naming table from scratch
+       is good enough to enable us to check that the local changes diff
+       provided as an argument to load_from_sqlite_with_changes_since_baseline
+       is compatible with the underlying SQLite table. *)
     let base_content_version =
       Printf.sprintf "%d-%s" (int_of_float t) (Random_id.short_string ())
     in

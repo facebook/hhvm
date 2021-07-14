@@ -71,9 +71,9 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
 
     let process_errors errors =
       (* We've got the lexical errors and the parser errors together, both
-  with lexically later errors earlier in the list. We want to reverse the
-  list so that later errors come later, and then do a stable sort to put the
-  lexical and parser errors together. *)
+         with lexically later errors earlier in the list. We want to reverse the
+         list so that later errors come later, and then do a stable sort to put the
+         lexical and parser errors together. *)
       let errors = List.rev errors in
       let errors = List.stable_sort ~compare:SyntaxError.compare errors in
       remove_duplicates errors SyntaxError.exactly_equal
@@ -123,7 +123,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       List.filter ~f:not_in_body tree.errors
 
     (* By default we strip out (1) all cascading errors, and (2) in decl mode,
-all errors that happen in a body. *)
+       all errors that happen in a body. *)
 
     let errors tree =
       let e =

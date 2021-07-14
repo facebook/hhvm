@@ -371,7 +371,7 @@ module Initialize = struct
     | Verbose
 
   (* These hack-specific options they're all optional in initialize request,
-    and we pick a default if necessary while parsing. *)
+     and we pick a default if necessary while parsing. *)
   and initializationOptions = {
     useTextEditAutocomplete: bool;
     liveSyntaxErrors: bool;
@@ -730,7 +730,7 @@ end
 
 module CodeAction = struct
   (* A code action represents a change that can be performed in code, e.g. to fix a problem or
-    to refactor code. *)
+     to refactor code. *)
   type t = {
     (* A short, human-readable, title for this code action. *)
     title: string;
@@ -1171,7 +1171,7 @@ module RegisterCapability = struct
   let make_registration (registerOptions : lsp_registration_options) :
       registration =
     (* The ID field is arbitrary but unique per type of capability (for future
-    deregistering, which we don't do). *)
+       deregistering, which we don't do). *)
     let (id, method_) =
       match registerOptions with
       | DidChangeWatchedFilesRegistrationOptions _ ->

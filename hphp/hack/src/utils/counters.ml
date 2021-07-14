@@ -72,15 +72,15 @@ let get_time (category : Category.t) : unit -> time_in_sec =
   match category with
   | Category.Disk_cat ->
     (* Wall-clock time, implemented in C:
-      let t = gettimeofday() in t.tv_sec + t.tv_usec / 1e6 *)
+       let t = gettimeofday() in t.tv_sec + t.tv_usec / 1e6 *)
     Unix.gettimeofday
   | Category.Typecheck
   | Category.Decling
   | Category.Get_ast ->
     (* CPU time, excluding I/O, implemented in C in one of three ways depending on ocaml compilation flags:
-      1. let r = getrusage(RUSAGE_SELF) in r.ru_utime.tv_sec + r.ru_utime.tv_usec / 1e6
-      2. let t = times() in t.tms_utime + t.tms_stime
-      3. clock() / CLOCKS_PER_SPEC *)
+       1. let r = getrusage(RUSAGE_SELF) in r.ru_utime.tv_sec + r.ru_utime.tv_usec / 1e6
+       2. let t = times() in t.tms_utime + t.tms_stime
+       3. clock() / CLOCKS_PER_SPEC *)
     Sys.time
 
 let count (category : Category.t) (f : unit -> 'a) : 'a =

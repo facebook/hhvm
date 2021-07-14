@@ -90,7 +90,7 @@ let test_eviction_oversized _test_ctxt =
   let cache = Cache.make ~max_size:2 in
   Cache.add cache ~key:(Int_key 1) ~value:1;
   (* The value "ab" has size 2, so we should overflow max cache size. We should
-  evict the first key. *)
+     evict the first key. *)
   Cache.add cache ~key:(String_key "foo") ~value:"ab";
   String_asserter.assert_option_equals
     (Some "ab")

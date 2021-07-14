@@ -140,7 +140,7 @@ let parse_extern_types_file filename =
   |> List.fold ~init:SMap.empty ~f:(fun map name ->
          try
            (* Map the name with the crate prefix stripped (since we do not expect to see
-           the crate name in our OCaml source) to the fully-qualified name. *)
+              the crate name in our OCaml source) to the fully-qualified name. *)
            let coloncolon_idx = String.substr_index_exn name ~pattern:"::" in
            let after_coloncolon_idx = coloncolon_idx + 2 in
            assert (Char.(name.[after_coloncolon_idx] <> ':'));

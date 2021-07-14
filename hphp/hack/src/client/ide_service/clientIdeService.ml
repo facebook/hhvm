@@ -202,7 +202,7 @@ let rpc
         failwith "Could not send message (queue was closed)";
 
       (* If any rpc takes too long, we'll ask clientLsp to refresh status
-      a short time in, and then again when it's done. *)
+         a short time in, and then again when it's done. *)
       t.active_rpc_count <- t.active_rpc_count + 1;
       let (pingPromise : unit Lwt.t) =
         let%lwt () = Lwt_unix.sleep 0.2 in
@@ -217,27 +217,27 @@ let rpc
       if t.active_rpc_count = 0 then progress ();
 
       (* when might t.active_rpc_count <> 0? well, if the caller did
-      Lwt.pick [rpc t message1, rpc t message2], then active_rpc_count will
-      reach a peak of 2, then when the first rpc has finished it will go dowwn
-      to 1, then when the second rpc has finished it will go down to 0. *)
+         Lwt.pick [rpc t message1, rpc t message2], then active_rpc_count will
+         reach a peak of 2, then when the first rpc has finished it will go dowwn
+         to 1, then when the second rpc has finished it will go down to 0. *)
 
       (* Discussion about why the following is safe, even if multiple people call rpc:
-      Imagine `let%lwt x = rpc(X) and y = rpc(Y)`.
-      We will therefore push X onto the [messages_to_send] queue, then
-      await [Lwt_message_queue.pop] on [response_emitter] for a response to X,
-      then we'll push Y onto the queue, then await pop for a response to Y.
-      The [messages_to_send] queue will necessarily send them in order X,Y.
-      The daemon will receive X,Y in order.
-      The daemon will handle X first (the daemon only handles a single message
-      at a time) and send it response, then handle Y next and send its response.
-      Our [serve] will read the responses to X,Y in order and put them onto
-      [response_emitter].
-      Why will "pop x" wake up and pick an element before "pop y" even though
-      they're both waiting? The crucial fact is that "pop x" was called
-      before "pop y". And [Lwt_message_queue.pop] is built upon
-      [Lwt_condition.wait], which in turn is built upon [Lwt_sequence.t]:
-      It maintains an ordered queue of callers who are awaiting on pop,
-      and when a new item arrives then it wakes up the first one. *)
+         Imagine `let%lwt x = rpc(X) and y = rpc(Y)`.
+         We will therefore push X onto the [messages_to_send] queue, then
+         await [Lwt_message_queue.pop] on [response_emitter] for a response to X,
+         then we'll push Y onto the queue, then await pop for a response to Y.
+         The [messages_to_send] queue will necessarily send them in order X,Y.
+         The daemon will receive X,Y in order.
+         The daemon will handle X first (the daemon only handles a single message
+         at a time) and send it response, then handle Y next and send its response.
+         Our [serve] will read the responses to X,Y in order and put them onto
+         [response_emitter].
+         Why will "pop x" wake up and pick an element before "pop y" even though
+         they're both waiting? The crucial fact is that "pop x" was called
+         before "pop y". And [Lwt_message_queue.pop] is built upon
+         [Lwt_condition.wait], which in turn is built upon [Lwt_sequence.t]:
+         It maintains an ordered queue of callers who are awaiting on pop,
+         and when a new item arrives then it wakes up the first one. *)
       (match response with
       | Some (Response_wrapper timed_response)
         when String.equal
@@ -248,7 +248,7 @@ let rpc
           Result.map ~f:Obj.magic timed_response.ClientIdeMessage.response
         in
         (* Obj.magic cast is safe because if we pushed an 'a request
-        then the daemon guarantees to return an 'a. *)
+           then the daemon guarantees to return an 'a. *)
         Lwt.return response
       | Some _ ->
         (* as discussed above, this case will never be hit. *)
@@ -275,8 +275,8 @@ let initialize_from_saved_state
 
   try%lwt
     (* We must be the first function called after [make].
-    This satisfies the invariant that Initialize_from_saved_state
-    is the first message sent to the daemon. *)
+       This satisfies the invariant that Initialize_from_saved_state
+       is the first message sent to the daemon. *)
     begin
       match t.state with
       | Uninitialized -> ()
@@ -299,9 +299,9 @@ let initialize_from_saved_state
     in
 
     (* Can't use [rpc] here, since that depends on the [serve] event loop,
-    which is called only after we return. We rely on the invariant
-    that daemon will send us no messages until after it has responded
-    to this first message. *)
+       which is called only after we return. We rely on the invariant
+       that daemon will send us no messages until after it has responded
+       to this first message. *)
     log_debug "-> %s [init]" (tracked_t_to_string message);
     let%lwt (_ : int) =
       Marshal_tools_lwt.to_fd_with_preamble t.out_fd message
@@ -320,7 +320,7 @@ let initialize_from_saved_state
            ~data:e.Lsp.Error.data)
     | _ ->
       (* What we got back wasn't the 'init' response we expected:
-      the clientIdeDaemon has violated its contract. *)
+         the clientIdeDaemon has violated its contract. *)
       failwith ("desync: " ^ message_from_daemon_to_string response)
   with exn ->
     let exn = Exception.wrap exn in
@@ -407,11 +407,11 @@ let stop
     ~(stop_reason : Stop_reason.t)
     ~(exn : Exception.t option) : unit Lwt.t =
   (* we store both a user-facing reason here, and a programmatic error
-  for use in subsequent telemetry *)
+     for use in subsequent telemetry *)
   let reason = ClientIdeUtils.make_bug_reason "stop" in
   let e = ClientIdeUtils.make_bug_error "stop" ?exn in
   (* We'll stick the stop_reason into that programmatic error, so that subsequent
-  telemetry can pick it up. (It never affects the user-facing message.) *)
+     telemetry can pick it up. (It never affects the user-facing message.) *)
   let items =
     match e.Lsp.Error.data with
     | None -> []
@@ -426,30 +426,30 @@ let stop
 
   let%lwt () = destroy t ~tracking_id in
   (* Correctness here is very subtle... During the course of that call to
-  'destroy', we do let%lwt on an rpc call to shutdown the daemon.
-  Either that will return in 5s, or it won't; either way, we will
-  synchronously force quit the daemon handle and close the message queue.
-  The interleaving we have to worry about is: what will other code
-  do while the state is still "Initialized", after we've sent the shutdown
-  message to the daemon, and we're let%lwt awaiting for a responnse?
-  Will anything go wrong?
-  Well, the daemon has responded to 'shutdown' by deleting its hhi dir
-  but leaving itself in its "Initialized" state.
-  Meantime, some of our code uses the state "Stopped" as a signal to not
-  do work, and some uses a closed message-queue as a signal to not do work
-  and neither is met. We might indeed receive further requests from
-  clientLsp and dutifully pass them on to the daemon and have it fail
-  weirdly because of the lack of hhi.
-  Luckily we're saved from that because clientLsp never makes rpc requests
-  to us after it has called 'stop'. *)
+     'destroy', we do let%lwt on an rpc call to shutdown the daemon.
+     Either that will return in 5s, or it won't; either way, we will
+     synchronously force quit the daemon handle and close the message queue.
+     The interleaving we have to worry about is: what will other code
+     do while the state is still "Initialized", after we've sent the shutdown
+     message to the daemon, and we're let%lwt awaiting for a responnse?
+     Will anything go wrong?
+     Well, the daemon has responded to 'shutdown' by deleting its hhi dir
+     but leaving itself in its "Initialized" state.
+     Meantime, some of our code uses the state "Stopped" as a signal to not
+     do work, and some uses a closed message-queue as a signal to not do work
+     and neither is met. We might indeed receive further requests from
+     clientLsp and dutifully pass them on to the daemon and have it fail
+     weirdly because of the lack of hhi.
+     Luckily we're saved from that because clientLsp never makes rpc requests
+     to us after it has called 'stop'. *)
   set_state t (Stopped (reason, e));
   Lwt.return_unit
 
 let cleanup_upon_shutdown_or_exn (t : t) ~(exn : Exception.t option) :
     unit Lwt.t =
   (* We are invoked with e=None when one of the message-queues has said that
-  it's closed. This indicates an orderly shutdown has been performed by 'stop'.
-  We are invoked with e=Some when we had an exception in our main serve loop. *)
+     it's closed. This indicates an orderly shutdown has been performed by 'stop'.
+     We are invoked with e=Some when we had an exception in our main serve loop. *)
   let stop_reason =
     match exn with
     | None ->
@@ -469,12 +469,12 @@ let cleanup_upon_shutdown_or_exn (t : t) ~(exn : Exception.t option) :
 
 let rec serve (t : t) : unit Lwt.t =
   (* Behavior of 'serve' is (1) take items from `messages_to_send` and send
-  then over the wire to the daemon, (2) take items from the wire from the
-  daemon and put them onto `notification_emitter` or `response_emitter` queues,
-  (3) keep doing this until we discover that a queue has been closed, which
-  is the "cancellation" signal for us to stop our loop.
-  The code looks a bit funny because the only way to tell if a queue is closed
-  is when we attemept to awaitingly-read or synchronously-write to it. *)
+     then over the wire to the daemon, (2) take items from the wire from the
+     daemon and put them onto `notification_emitter` or `response_emitter` queues,
+     (3) keep doing this until we discover that a queue has been closed, which
+     is the "cancellation" signal for us to stop our loop.
+     The code looks a bit funny because the only way to tell if a queue is closed
+     is when we attemept to awaitingly-read or synchronously-write to it. *)
   try%lwt
     (* We mutate the data in `t` which is why we don't return a new `t` here. *)
     let%lwt next_action =

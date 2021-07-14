@@ -21,32 +21,32 @@ type t = {
   (* Whether to treat Tany as Tdynamic *)
   tco_dynamic_view: bool;
   (* If set to 0, only the type check delegate's logic will be used.
-    If the delegate fails to type check, the typing check service as a whole
-    will fail. *)
+     If the delegate fails to type check, the typing check service as a whole
+     will fail. *)
   tco_num_local_workers: int option;
   (* If the number of files to type check is fewer than this value, the files
-    will be type checked sequentially (in the master process). Otherwise,
-    the files will be type checked in parallel (in MultiWorker workers). *)
+     will be type checked sequentially (in the master process). Otherwise,
+     the files will be type checked in parallel (in MultiWorker workers). *)
   tco_parallel_type_checking_threshold: int;
   (* If set, typechecker workers will quit after they exceed this limit *)
   tco_max_typechecker_worker_memory_mb: int option;
   (* If set, defers class declarations after N lazy declarations; if not set,
-    always lazily declares classes not already in cache. *)
+     always lazily declares classes not already in cache. *)
   tco_defer_class_declaration_threshold: int option;
   (* If set, defers class declarations if worker memory exceeds threshold.
-    This prevents OOMs due to a single file fetching a lot of decls, which would
-    not be prevented by [tco_max_typechecker_worker_memory_mb] which is checked
-    only after each file. It doesn't make sense to set this higher
-    than [tco_max_typechecker_worker_memory_mb]. *)
+     This prevents OOMs due to a single file fetching a lot of decls, which would
+     not be prevented by [tco_max_typechecker_worker_memory_mb] which is checked
+     only after each file. It doesn't make sense to set this higher
+     than [tco_max_typechecker_worker_memory_mb]. *)
   tco_defer_class_memory_mb_threshold: int option;
   (* If set, prevents type checking of files from being deferred more than
-    the number of times greater than or equal to the threshold. If not set,
-    defers class declarations indefinitely. *)
+     the number of times greater than or equal to the threshold. If not set,
+     defers class declarations indefinitely. *)
   tco_max_times_to_defer_type_checking: int option;
   (* Whether the Eden prefetch hook should be invoked *)
   tco_prefetch_deferred_files: bool;
   (* If set, distributes type checking to remote workers if the number of files to
-   type check exceeds the threshold. If not set, then always checks everything locally. *)
+     type check exceeds the threshold. If not set, then always checks everything locally. *)
   tco_remote_type_check_threshold: int option;
   (* Turns on remote type checking *)
   tco_remote_type_check: bool;
@@ -282,8 +282,8 @@ type t = {
   (* Enable use of the direct decl parser for parsing type signatures. *)
   tco_use_direct_decl_parser: bool;
   (* Enable ifc on the specified list of path prefixes
-    (a list containing the empty string would denote all files,
-    an empty list denotes no files) *)
+     (a list containing the empty string would denote all files,
+     an empty list denotes no files) *)
   tco_ifc_enabled: string list;
   (* Enables the enum supertyping extension *)
   po_enable_enum_supertyping: bool;
@@ -302,10 +302,10 @@ type t = {
   (* Allowed expression tree visitors when not enabled via unstable features flag *)
   tco_allowed_expression_tree_visitors: string list;
   (* Use a new error code for math operations: addition, subtraction,
-  division, multiplication, exponentiation *)
+     division, multiplication, exponentiation *)
   tco_math_new_code: bool;
   (* Raise an error when a concrete type constant is overridden by a concrete type constant
-    in a child class. *)
+     in a child class. *)
   tco_typeconst_concrete_concrete_error: bool;
   (* meth_caller can only reference public methods *)
   tco_meth_caller_only_public_visibility: bool;

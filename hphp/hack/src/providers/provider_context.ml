@@ -128,14 +128,14 @@ let read_file_contents_exn (entry : entry) : string =
        contents
      with e ->
        (* Be sure to capture the exception and mark the entry contents as
-       [Read_contents_from_disk_failed]. Otherwise, reading the contents may
-       not be idempotent:
+          [Read_contents_from_disk_failed]. Otherwise, reading the contents may
+          not be idempotent:
 
-        1) We attempt to read the file from disk, but it doesn't exist, so we
-        raise an exception.
-        2) The file is created on disk.
-        3) We attempt to read the file from disk again. Now it exists, and we
-        return a different value.
+           1) We attempt to read the file from disk, but it doesn't exist, so we
+           raise an exception.
+           2) The file is created on disk.
+           3) We attempt to read the file from disk again. Now it exists, and we
+           return a different value.
        *)
        let e = Exception.wrap e in
        entry.contents <- Read_contents_from_disk_failed e;
@@ -212,8 +212,8 @@ let get_telemetry (t : t) : Telemetry.t =
          ~value:(t.backend |> Provider_backend.t_to_string)
     |> Telemetry.object_ ~key:"SharedMem" ~value:(SharedMem.get_telemetry ())
     (* We get SharedMem telemetry for all providers, not just the SharedMem
-  provider, just in case there are code paths which use SharedMem despite
-  it not being the intended provider. *)
+       provider, just in case there are code paths which use SharedMem despite
+       it not being the intended provider. *)
   in
   match t.backend with
   | Provider_backend.Local_memory lmem ->

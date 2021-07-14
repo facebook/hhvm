@@ -87,9 +87,9 @@ let rec info_pos p =
     let end_offset = File_pos_small.offset pos_end in
     let end_ = end_offset - bol in
     (* To represent the empty interval, pos_start and pos_end are equal because
-      end_offset is exclusive. Here, it's best for error messages to the user if
-      we print characters N to N (highlighting a single character) rather than characters
-      N to (N-1), which is very unintuitive.
+       end_offset is exclusive. Here, it's best for error messages to the user if
+       we print characters N to N (highlighting a single character) rather than characters
+       N to (N-1), which is very unintuitive.
     *)
     let end_ =
       if start = end_ + 1 then
@@ -104,9 +104,9 @@ let rec info_pos p =
     let end_offset = File_pos_large.offset pos_end in
     let end_ = end_offset - bol in
     (* To represent the empty interval, pos_start and pos_end are equal because
-      end_offset is exclusive. Here, it's best for error messages to the user if
-      we print characters N to N (highlighting a single character) rather than characters
-      N to (N-1), which is very unintuitive.
+       end_offset is exclusive. Here, it's best for error messages to the user if
+       we print characters N to N (highlighting a single character) rather than characters
+       N to (N-1), which is very unintuitive.
     *)
     let end_ =
       if start = end_ + 1 then

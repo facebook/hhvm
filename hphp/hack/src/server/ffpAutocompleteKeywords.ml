@@ -173,7 +173,7 @@ let function_keyword =
         fun context ->
         (* Class Method *)
         (* "function" is not valid without a visibility modifier, but we still suggest it here since a
-       user may wish to write the function before adding the modifier. *)
+           user may wish to write the function before adding the modifier. *)
         is_class_body_declaration_valid context
         || is_interface_body_declaration_valid context
         || is_trait_body_declaration_valid context

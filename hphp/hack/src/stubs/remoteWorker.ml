@@ -21,9 +21,9 @@ module type RemoteServerApi = sig
     (naming_table, string) result
 
   (* Called by the worker to type check a list of files.
-    The state filename is where the type checker should save its state that
-    changed as a result of type checking the files
-    (i.e., the dependency graph) *)
+     The state filename is where the type checker should save its state that
+     changed as a result of type checking the files
+     (i.e., the dependency graph) *)
   val type_check :
     Provider_context.t ->
     init_id:string ->

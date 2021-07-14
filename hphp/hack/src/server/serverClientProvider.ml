@@ -331,7 +331,7 @@ let make_persistent client =
     Persistent_client { fd = Timeout.descr_of_in_channel ic; tracker }
   | Persistent_client _ ->
     (* See comment on read_connection_type. Non_persistent_client can be
-    * turned into Persistent_client, but not the other way *)
+       * turned into Persistent_client, but not the other way *)
     assert false
 
 let is_persistent = function

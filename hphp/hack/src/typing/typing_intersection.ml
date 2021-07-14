@@ -289,8 +289,8 @@ and try_intersect env r ty1 ty2 =
 
 and intersect_unions env r (r1, tyl1) (r2, tyl2) =
   (* The order matters. (A | B | C) & (A | B) gets simplified to (A | B)
-  while (A | B) & (A | B | C) would become A | B | ((A | B) & C), so we
-  put the longest union first as a heuristic. *)
+     while (A | B) & (A | B | C) would become A | B | ((A | B) & C), so we
+     put the longest union first as a heuristic. *)
   let ((r1, tyl1), (r2, tyl2)) =
     if List.length tyl1 >= List.length tyl2 then
       ((r1, tyl1), (r2, tyl2))
@@ -330,7 +330,7 @@ and intersect_ty_union env r (ty1 : locl_ty) (r_union, tyl2) =
 
 let intersect_list env r tyl =
   (* We need to match tyl here because we'd mess the reason if tyl was just
-  [mixed] *)
+     [mixed] *)
   match tyl with
   | [] -> (env, MkType.mixed r)
   | ty :: tyl -> List.fold_left_env env tyl ~init:ty ~f:(intersect ~r)
@@ -400,9 +400,9 @@ let rec intersect_i env r ty1 lty2 =
           )
         | (r, TCunion (lty1, cty1)) ->
           (* Distribute intersection over union.
-          At the moment local types in TCunion can only be
-          unions or intersections involving only null and nonnull,
-          so applying distributivity allows for simplifying the types. *)
+             At the moment local types in TCunion can only be
+             unions or intersections involving only null and nonnull,
+             so applying distributivity allows for simplifying the types. *)
           let (env, lty) = intersect env ~r lty1 lty2 in
           let (env, ty) = intersect_i env r (ConstraintType cty1) lty2 in
           (match ty with

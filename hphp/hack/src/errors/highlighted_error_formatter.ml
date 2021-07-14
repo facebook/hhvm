@@ -115,11 +115,11 @@ let pos_contains (pos : Pos.absolute) ?(col_num : int option) (line_num : int) :
     is_col_okay ~f:(fun cn -> first_col <= cn)
   else if line_num = last_line then
     (* When only checking for a line's inclusion in a position
-      (i.e. when col_num = None), special care must be taken when
-      the line we're checking is the last line of the position:
-      since the end_column is exclusive, the end_column's value
-      must be non-zero signifying there is at least one character
-      on it to be highlighted. *)
+       (i.e. when col_num = None), special care must be taken when
+       the line we're checking is the last line of the position:
+       since the end_column is exclusive, the end_column's value
+       must be non-zero signifying there is at least one character
+       on it to be highlighted. *)
     last_col > 0 && is_col_okay ~f:(fun cn -> cn < last_col)
   else
     first_line < line_num && line_num < last_line
@@ -167,11 +167,11 @@ let markers_string
 
 let line_margin_highlighted position_group line_num col_width_raw : string =
   (* Separate the margin into several sections:
-    |markers|space(s)|line_num|space|vertical_bar|
-    i.e.
-    [1,2]  9 |
-    [3]   10 |
-    We need to do this because each has its own color and length
+     |markers|space(s)|line_num|space|vertical_bar|
+     i.e.
+     [1,2]  9 |
+     [3]   10 |
+     We need to do this because each has its own color and length
   *)
   let nspaces =
     let markers_raw_len =
@@ -206,8 +206,8 @@ let line_highlighted position_group ~(line_num : int) ~(line : string option) =
       in
       let color_column ms c =
         (* Prefer shorter smaller positions so the boundaries between overlapping
-          positions are visible. Take the lowest-number (presumably more important)
-          to break ties. *)
+           positions are visible. Take the lowest-number (presumably more important)
+           to break ties. *)
         let ((_, color), _) =
           List.stable_sort ms ~compare:(fun ((m1, _), p1) ((m2, _), p2) ->
               match Int.compare (Pos.length p1) (Pos.length p2) with
@@ -225,7 +225,7 @@ let line_highlighted position_group ~(line_num : int) ~(line : string option) =
             | ms -> color_column ms (Char.to_string c))
       in
       (* Add extra column when position spans multiple lines and we're on the last line. Handles
-        the case where a position exists for after file but there is no character to highlight *)
+         the case where a position exists for after file but there is no character to highlight *)
       let extra_column =
         let (end_line, end_col) =
           Pos.end_line_column position_group.aggregate_position
@@ -374,31 +374,31 @@ let position_groups_by_file marker_and_msgs : position_group list list =
     let line2_begin = Pos.line curr_pos in
 
     (* Example:
-      line1_end = 10:
-      [3] 10 |   $z = 3 * $x;
-          11 |   if ($z is int) {
-          12 |     echo 'int';
+       line1_end = 10:
+       [3] 10 |   $z = 3 * $x;
+           11 |   if ($z is int) {
+           12 |     echo 'int';
 
-      line2_begin = 16
-          14 |     echo 'not int';
-          15 |   }
-      [1] 16 |   return $z;
+       line2_begin = 16
+           14 |     echo 'not int';
+           15 |   }
+       [1] 16 |   return $z;
 
-      Then they should be conjoined as such:
-      [3] 10 |   $z = 3 * $x;
-          11 |   if ($z is int) {
-          12 |     echo 'int';
-          13 |   } else
-          14 |     echo 'not int';
-          15 |   }
-      [1] 16 |   return $z;
+       Then they should be conjoined as such:
+       [3] 10 |   $z = 3 * $x;
+           11 |   if ($z is int) {
+           12 |     echo 'int';
+           13 |   } else
+           14 |     echo 'not int';
+           15 |   }
+       [1] 16 |   return $z;
 
-      If they were any farther away, the line
-          13 |   } else
-      would be replaced with
-             :
-      to signify more than one interposing line.
-     *)
+       If they were any farther away, the line
+           13 |   } else
+       would be replaced with
+              :
+       to signify more than one interposing line.
+    *)
     line1_end + n_extra_lines_hl + 2 >= line2_begin - n_extra_lines_hl
   in
   (* Group marked messages that are sufficiently close. *)
@@ -565,8 +565,8 @@ let mark_messages
 let to_string (error : Errors.finalized_error) : string =
   let error_code = Errors.get_code error in
   (* Assign messages markers according to order of original error list
-    and then sort these marked messages such that messages in the same
-    file are together. Does not reorder the files or messages within a file. *)
+     and then sort these marked messages such that messages in the same
+     file are together. Does not reorder the files or messages within a file. *)
   let marked_messages =
     Errors.get_messages error
     |> mark_messages error_code

@@ -370,13 +370,13 @@ module NamingHash = struct
   the range DDDD0000 to DDDD1111. *)
   let combine_hashes ~(dep_hash : int64) ~(naming_hash : int64) : int64 =
     (* We use a 64-bit integer with OCaml/SQLite, but for clarity with
-    debugging, we limit the hash size to 63 bits, so that we can convert it
-    to an OCaml integer. Then we set the top bit to 0 to ensure that it's
-    positive, leaving 62 bits. The dependency hash is 31 bits, so we can add
-    an additional 31 bits from the naming hash.
+       debugging, we limit the hash size to 63 bits, so that we can convert it
+       to an OCaml integer. Then we set the top bit to 0 to ensure that it's
+       positive, leaving 62 bits. The dependency hash is 31 bits, so we can add
+       an additional 31 bits from the naming hash.
 
-    We make sure we only have have 31 bits to begin with (this is not the case
-    when in the new 64-bit hash world) *)
+       We make sure we only have have 31 bits to begin with (this is not the case
+       when in the new 64-bit hash world) *)
     let dep_hash =
       Int64.bit_and dep_hash 0b01111111_11111111_11111111_11111111L
     in
@@ -469,10 +469,10 @@ module SQLiteGraph = struct
 
   let get_ideps_from_hash x =
     (* FIXME: It shouldn't be necessary to add x to the result set here. We do so
-     because historically, we added self-referential edges to the dependency
-     graph (e.g., Class "\Foo" -> Class "\Foo"). We no longer do this in order
-     to save memory, but we aren't yet confident that these edges were not
-     relied upon anywhere. *)
+       because historically, we added self-referential edges to the dependency
+       graph (e.g., Class "\Foo" -> Class "\Foo"). We no longer do this in order
+       to save memory, but we aren't yet confident that these edges were not
+       relied upon anywhere. *)
     SQLiteDepSet.add (get x) x
 
   let add_idep_directly_to_graph ~(dependent : Dep.t) ~(dependency : Dep.t) :

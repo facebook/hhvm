@@ -99,7 +99,7 @@ let auto_complete_all_completion_types
     FfpAutocompleteContextParser.get_context_and_stub positioned_tree offset
   in
   (* If we are running a test, filter the keywords and local variables based on
-  the token we are completing. *)
+     the token we are completing. *)
   let stub =
     if not (String.equal old_contents new_contents) then
       String_utils.rstrip stub empty_autocomplete_token
@@ -150,7 +150,7 @@ let auto_complete
     ~(filter_by_token : bool)
     ~(sienv : SearchUtils.si_env) : result =
   (* Some code paths require the empty autocomplete token to be present, and
-  some require that it isn't, so make a separate entry for each scenario. *)
+     some require that it isn't, so make a separate entry for each scenario. *)
   let old_file_content = Provider_context.read_file_contents_exn entry in
   let (old_ctx, old_entry) =
     Provider_context.add_or_overwrite_entry_contents

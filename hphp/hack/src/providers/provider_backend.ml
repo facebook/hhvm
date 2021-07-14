@@ -11,15 +11,15 @@ open Hh_prelude
 
 module Decl_cache_entry = struct
   (* NOTE: we can't simply use a string as a key. In the case of a name
-  conflict, we may put e.g. a function named 'foo' into the cache whose value is
-  one type, and then later try to withdraw a class named 'foo' whose value is
-  another type.
+     conflict, we may put e.g. a function named 'foo' into the cache whose value is
+     one type, and then later try to withdraw a class named 'foo' whose value is
+     another type.
 
-  The actual value type for [Class_decl] is a [Typing_classes_heap.Classes.t],
-  but that module depends on this module, so we can't write it down or else we
-  will cause a circular dependency. (It could probably be refactored to break
-  the dependency.) We just use [Obj.t] instead, which is better than using
-  [Obj.t] for all of the cases here.
+     The actual value type for [Class_decl] is a [Typing_classes_heap.Classes.t],
+     but that module depends on this module, so we can't write it down or else we
+     will cause a circular dependency. (It could probably be refactored to break
+     the dependency.) We just use [Obj.t] instead, which is better than using
+     [Obj.t] for all of the cases here.
   *)
   type _ t =
     | Fun_decl : string -> Typing_defs.fun_elt t
@@ -228,7 +228,7 @@ let set_local_memory_backend
 
 let set_local_memory_backend_with_defaults () : unit =
   (* Shallow decls: some files read ~5k shallow decls, at about 16k / shallow dec,
-  fitting into 73Mb. Hence we guess at 140Mb. *)
+     fitting into 73Mb. Hence we guess at 140Mb. *)
   let max_bytes_shallow_decls = 140 * 1024 * 1024 in
   (* Linearizations: such files will pick up ~6k linearizations. *)
   let max_num_linearizations = 10000 in

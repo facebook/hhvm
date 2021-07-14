@@ -287,7 +287,7 @@ let log_error s = Hh_logger.error ("[client-lsp] " ^^ s)
 
 let set_up_hh_logger_for_client_lsp (root : Path.t) : unit =
   (* Log to a file on disk. Note that calls to `Hh_logger` will always write to
-  `stderr`; this is in addition to that. *)
+     `stderr`; this is in addition to that. *)
   let client_lsp_log_fn = ServerFiles.client_lsp_log root in
   begin
     try Sys.rename client_lsp_log_fn (client_lsp_log_fn ^ ".old")
@@ -837,9 +837,9 @@ let respond_to_error (event : event option) (e : Lsp.Error.t) : unit =
     respond_jsonrpc ~powered_by:Language_server id result
   | _ ->
     (* We want to report LSP error 'e' over jsonrpc. But jsonrpc only allows
-    errors to be reported in response to requests. So we'll stick the information
-    in a telemetry/event. The format of this event isn't defined. We're going to
-    roll our own, using ad-hoc json fields to emit all the data out of 'e' *)
+       errors to be reported in response to requests. So we'll stick the information
+       in a telemetry/event. The format of this event isn't defined. We're going to
+       roll our own, using ad-hoc json fields to emit all the data out of 'e' *)
     let open Lsp.Error in
     let extras =
       ("code", e.code |> Error.show_code |> Hh_json.string_)
@@ -859,8 +859,8 @@ let request_showStatusFB
     ()
   else
     (* We try not to send duplicate statuses.
-    That means: if you call request_showStatus but your message is the same as
-    what's already up, then you won't be shown, and your callbacks won't be shown. *)
+       That means: if you call request_showStatus but your message is the same as
+       what's already up, then you won't be shown, and your callbacks won't be shown. *)
     let msg = params.ShowStatusFB.request.ShowMessageRequest.message in
     if String.equal msg !showStatus_outstanding then
       ()
@@ -1221,7 +1221,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
       mini_state = None;
       save_64bit = None;
       (* priority_pipe delivers good experience for hh_server, but has a bug,
-        and doesn't provide benefits in serverless-ide. *)
+         and doesn't provide benefits in serverless-ide. *)
       use_priority_pipe = not env.use_serverless_ide;
       prechecked = None;
       config = env.args.config;
@@ -1615,8 +1615,8 @@ let on_status_restart_action
     log "Restarting IDE service";
 
     (* It's possible that [destroy] takes a while to finish, so make
-    sure to assign the new IDE service to the [ref] before attempting
-    to do an asynchronous operation with the old one. *)
+       sure to assign the new IDE service to the [ref] before attempting
+       to do an asynchronous operation with the old one. *)
     let ide_args =
       {
         ClientIdeMessage.init_id = env.init_id;
@@ -1628,8 +1628,8 @@ let on_status_restart_action
     let old_ide_service = !ide_service in
     ide_service := new_ide_service;
     (* Note: the env.verbose passed on init controls verbosity for stderr
-    and is only ever controlled by --verbose command line, stored in env.
-    But verbosity-to-file can be altered dynamically by the user. *)
+       and is only ever controlled by --verbose command line, stored in env.
+       But verbosity-to-file can be altered dynamically by the user. *)
     let (promise : unit Lwt.t) =
       run_ide_service
         env
@@ -1642,7 +1642,7 @@ let on_status_restart_action
       ~desc:"run-ide-after-restart"
       ~terminate_on_failure:true;
     (* Invariant: at all times after InitializeRequest, ide_service has
-    already been sent an "initialize" message. *)
+       already been sent an "initialize" message. *)
     let%lwt () =
       stop_ide_service
         old_ide_service
@@ -1721,10 +1721,10 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
       | _ -> ("connecting", None)
     in
     (* [progress] comes from ServerProgress.ml, sent to the monitor, and now we've fetched
-    it from the monitor. It's a string "op X/Y units (%)" e.g. "typechecking 5/16 files (78%)",
-    or "connecting", if there is no relevant progress to show.
-    [warning] comes from the same place, and if pressent is a human-readable string
-    that warns about saved-state-init failure. *)
+       it from the monitor. It's a string "op X/Y units (%)" e.g. "typechecking 5/16 files (78%)",
+       or "connecting", if there is no relevant progress to show.
+       [warning] comes from the same place, and if pressent is a human-readable string
+       that warns about saved-state-init failure. *)
     let warning =
       if Option.is_some warning then
         " (saved-state not found - will take a while)"
@@ -1747,8 +1747,8 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
       }
   | Main_loop { Main_env.hh_server_status; _ } ->
     (* This shows whether the connected hh_server is busy or ready.
-    It's produced in clientLsp.do_server_busy upon receipt of a status
-    enum from the server. See comments on hh_server_status for invariants. *)
+       It's produced in clientLsp.do_server_busy upon receipt of a status
+       enum from the server. See comments on hh_server_status for invariants. *)
     Some hh_server_status
   | Lost_server { Lost_env.p; _ } ->
     Some
@@ -1860,11 +1860,11 @@ let publish_hh_server_status_diagnostic
   in
   let open PublishDiagnostics in
   (* The following match emboodies these rules:
-  (1) we only publish hh_server_status diagnostics in In_init and Lost_server states,
-  (2) we'll remove the old PublishDiagnostic if necessary and add a new one if necessary
-  (3) to avoid extra LSP messages, if the diagnostic hasn't changed then we won't send anything
-  (4) to avoid flicker, if the diagnostic has changed but is still in the same file, then
-  we refrain from sending an "erase old" message and it will be implied by sending "new". *)
+     (1) we only publish hh_server_status diagnostics in In_init and Lost_server states,
+     (2) we'll remove the old PublishDiagnostic if necessary and add a new one if necessary
+     (3) to avoid extra LSP messages, if the diagnostic hasn't changed then we won't send anything
+     (4) to avoid flicker, if the diagnostic has changed but is still in the same file, then
+     we refrain from sending an "erase old" message and it will be implied by sending "new". *)
   match (get_existing_diagnostic state, desired_diagnostic, state) with
   | (_, _, Main_loop _)
   | (_, _, Pre_init)
@@ -1908,13 +1908,13 @@ let merge_statuses
     ~(hh_server_status : ShowStatusFB.params option) :
     ShowStatusFB.params option =
   (* The correctness of the following match is a bit subtle. This is how to think of it.
-  From the spec in the docblock, (1) if there's no client_ide_service, then the result
-  of this function is simply the same as hh_server_status, since that's how it was constructed
-  by get_hh_server_status (for In_init and Lost_server) and do_server_busy; (2) if there
-  is a client_ide_service then the result is almost always simply the same as ide_service
-  since that's how it was constructed by get_client_ide_status; (3) the only exception to
-  rule 2 is that, if client_ide_status would have shown "[ok] Hack" and hh_server_status
-  would have been a spinner, then we change to "[spin] Hack". *)
+     From the spec in the docblock, (1) if there's no client_ide_service, then the result
+     of this function is simply the same as hh_server_status, since that's how it was constructed
+     by get_hh_server_status (for In_init and Lost_server) and do_server_busy; (2) if there
+     is a client_ide_service then the result is almost always simply the same as ide_service
+     since that's how it was constructed by get_client_ide_status; (3) the only exception to
+     rule 2 is that, if client_ide_status would have shown "[ok] Hack" and hh_server_status
+     would have been a spinner, then we change to "[spin] Hack". *)
   match (client_ide_status, hh_server_status) with
   | (None, None) -> None
   | (None, Some _) -> hh_server_status
@@ -2837,9 +2837,9 @@ let do_resolve_local
 let hack_symbol_to_lsp (symbol : SearchUtils.symbol) =
   let open SearchUtils in
   (* Hack sometimes gives us back items with an empty path, by which it
-  intends "whichever path you asked me about". That would be meaningless
-  here. If it does, then it'll pick up our default path (also empty),
-  which will throw and go into our telemetry. That's the best we can do. *)
+     intends "whichever path you asked me about". That would be meaningless
+     here. If it does, then it'll pick up our default path (also empty),
+     which will throw and go into our telemetry. That's the best we can do. *)
   let hack_to_lsp_kind = function
     | SearchUtils.SI_Class -> SymbolInformation.Class
     | SearchUtils.SI_Interface -> SymbolInformation.Interface
@@ -3509,8 +3509,8 @@ let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
 
 let do_didChangeWatchedFiles_registerCapability () : Lsp.lsp_request =
   (* We want a glob-pattern like "**/*.{php,phpt,hack,hackpartial,hck,hh,hhi,xhp}".
-  I'm constructing it from FindUtils.extensions so our glob-pattern doesn't get out
-  of sync with FindUtils.file_filter. *)
+     I'm constructing it from FindUtils.extensions so our glob-pattern doesn't get out
+     of sync with FindUtils.file_filter. *)
   let extensions =
     List.map FindUtils.extensions ~f:(fun s -> String_utils.lstrip s ".")
   in
@@ -3802,7 +3802,7 @@ let handle_editor_buffer_message
 
   (* send to ide_service as necessary *)
   (* For now 'ide_service_promise' is immediately fulfilled, but in future it will
-  be fulfilled only when the ide_service has finished processing the message. *)
+     be fulfilled only when the ide_service has finished processing the message. *)
   let (ide_service_promise : unit Lwt.t) =
     match (ide_service, message) with
     | (Some ide_service, NotificationMessage (DidOpenNotification params)) ->
@@ -3811,7 +3811,7 @@ let handle_editor_buffer_message
       in
       let file_contents = params.DidOpen.textDocument.TextDocumentItem.text in
       (* The ClientIdeDaemon only delivers answers for open files, which is why it's vital
-      never to let is miss a DidOpen. *)
+         never to let is miss a DidOpen. *)
       let%lwt () =
         ide_rpc
           ide_service
@@ -3850,15 +3850,15 @@ let handle_editor_buffer_message
       Lwt.return_unit
     | _ ->
       (* Don't handle other events for now. When we show typechecking errors for
-    the open file, we'll start handling them. *)
+         the open file, we'll start handling them. *)
       Lwt.return_unit
   in
 
   (* Our asynchrony deal is (1) we want to kick off notifications to
-  hh_server and ide_service at the same time, (2) we want to wait until
-  both are done, (3) an exception in one shouldn't jeapordize the other,
-  (4) our failure model only allows us to record at most one exception
-  so we'll pick one arbitrarily. *)
+     hh_server and ide_service at the same time, (2) we want to wait until
+     both are done, (3) an exception in one shouldn't jeapordize the other,
+     (4) our failure model only allows us to record at most one exception
+     so we'll pick one arbitrarily. *)
   let%lwt (hh_server_e : Exception.t option) =
     try%lwt
       let%lwt () = hh_server_promise in
@@ -3996,15 +3996,15 @@ let handle_client_message
       initialize_params_ref := Some initialize_params;
 
       (* There's a lot of global-mutable-variable initialization we can only do after
-      we get root, here in the handler of the initialize request. The function
-      [get_root_exn] becomes available after we've set up initialize_params_ref, above. *)
+         we get root, here in the handler of the initialize request. The function
+         [get_root_exn] becomes available after we've set up initialize_params_ref, above. *)
       let root = get_root_exn () in
       Relative_path.set_path_prefix Relative_path.Root root;
       set_up_hh_logger_for_client_lsp root;
 
       (* Following is a hack. Atom incorrectly passes '--from vscode', rendering us
-      unable to distinguish Atom from VSCode. But Atom is now frozen at vscode client
-      v3.14. So by looking at the version, we can at least distinguish that it's old. *)
+         unable to distinguish Atom from VSCode. But Atom is now frozen at vscode client
+         v3.14. So by looking at the version, we can at least distinguish that it's old. *)
       if
         (not
            initialize_params.client_capabilities.textDocument.declaration
@@ -4035,7 +4035,7 @@ let handle_client_message
       let%lwt new_state = connect ~env !state in
       state := new_state;
       (* If editor sent 'trace: on' then that will turn on verbose_to_file. But we won't turn off
-      verbose here, since the command-line argument --verbose trumps initialization params. *)
+         verbose here, since the command-line argument --verbose trumps initialization params. *)
       begin
         match initialize_params.Initialize.trace with
         | Initialize.Off -> ()
@@ -4058,7 +4058,7 @@ let handle_client_message
             ~desc:"run-ide-after-init"
             ~terminate_on_failure:true;
           (* Invariant: at all times after InitializeRequest, ide_service has
-          already been sent an "initialize" message. *)
+             already been sent an "initialize" message. *)
           let id = NumberId (Jsonrpc.get_next_request_id ()) in
           let request = do_didChangeWatchedFiles_registerCapability () in
           to_stdout (print_lsp_request id request);
@@ -4567,8 +4567,8 @@ let handle_server_message
     (* server busy status *)
     | (_, { push = ServerCommandTypes.BUSY_STATUS status; _ }) ->
       (* if we're connected to hh_server, that can only be because
-      we know its root, which can only be because we received initializeParams.
-      So the following call won't fail! *)
+         we know its root, which can only be because we received initializeParams.
+         So the following call won't fail! *)
       let p = initialize_params_exc () in
       let should_send_status =
         Lsp.Initialize.(p.initializationOptions.sendServerStatusEvents)
@@ -4718,12 +4718,12 @@ let handle_client_ide_notification
     ~(notification : ClientIdeMessage.notification) :
     result_telemetry option Lwt.t =
   (* In response to ide_service notifications we have three goals:
-  (1) in case of Done_init, we might have to announce the failure to the user
-  (2) in a few other cases, we send telemetry events so that test harnesses
-  get insight into the internal state of the ide_service
-  (3) after every single event, includinng client_ide_notification events,
-  our caller queries the ide_service for what status it wants to display to
-  the user, so these notifications have the goal of triggering that refresh. *)
+     (1) in case of Done_init, we might have to announce the failure to the user
+     (2) in a few other cases, we send telemetry events so that test harnesses
+     get insight into the internal state of the ide_service
+     (3) after every single event, includinng client_ide_notification events,
+     our caller queries the ide_service for what status it wants to display to
+     the user, so these notifications have the goal of triggering that refresh. *)
   match notification with
   | ClientIdeMessage.Done_init (Ok p) ->
     Lsp_helpers.telemetry_log to_stdout "[client-ide] Finished init: ok";
@@ -4740,7 +4740,7 @@ let handle_client_ide_notification
     Lwt.return_none
   | ClientIdeMessage.Processing_files _ ->
     (* used solely for triggering a refresh of status by our caller; nothing
-    for us to do here. *)
+       for us to do here. *)
     Lwt.return_none
   | ClientIdeMessage.Done_processing ->
     Lsp_helpers.telemetry_log
@@ -4754,7 +4754,7 @@ let handle_tick
   EventLogger.recheck_disk_files ();
   HackEventLogger.Memory.profile_if_needed ();
   (* Update the hh_server_status global variable, either by asking the monitor
-  during In_init, or reading it from Main_env: *)
+     during In_init, or reading it from Main_env: *)
   latest_hh_server_status := get_hh_server_status !state;
   let%lwt () =
     match !state with
@@ -4810,9 +4810,9 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
   HackEventLogger.set_from !from;
 
   (* The hh.conf can't fully be loaded without root, since it has flags like "foo=^4.53" that
-  depend on the version= line we read from root/.hhconfig. But nevertheless we need right now
-  a few hh.conf flags that control clientLsp and which aren't done that way. So we'll read
-  those flags right now. *)
+     depend on the version= line we read from root/.hhconfig. But nevertheless we need right now
+     a few hh.conf flags that control clientLsp and which aren't done that way. So we'll read
+     those flags right now. *)
   let versionless_local_config =
     ServerLocalConfig.load
       ~silent:true
@@ -4840,10 +4840,10 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
     Hh_logger.Level.set_min_level_file Hh_logger.Level.Info
   end;
   (* The --verbose flag in env.verbose is the only thing that controls verbosity
-  to stderr. Meanwhile, verbosity-to-file can be altered dynamically by the user.
-  Why are they different? because we should write to stderr under a test harness,
-  but we should never write to stderr when invoked by VSCode - it's not even guaranteed
-  to drain the stderr pipe. *)
+     to stderr. Meanwhile, verbosity-to-file can be altered dynamically by the user.
+     Why are they different? because we should write to stderr under a test harness,
+     but we should never write to stderr when invoked by VSCode - it's not even guaranteed
+     to drain the stderr pipe. *)
   let ide_service =
     if env.use_serverless_ide then
       Some
@@ -4926,8 +4926,8 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
         | Tick -> handle_tick ~env ~state ~ref_unblocked_time
       in
       (* for LSP requests and notifications, we keep a log of what+when we responded.
-      INVARIANT: every LSP request gets either a response logged here,
-      or an error logged by one of the handlers below. *)
+         INVARIANT: every LSP request gets either a response logged here,
+         or an error logged by one of the handlers below. *)
       log_response_if_necessary
         env
         event

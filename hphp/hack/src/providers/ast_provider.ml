@@ -211,12 +211,12 @@ let get_ast_with_error ?(full = false) ctx path =
   match (entry_opt, Provider_context.get_backend ctx) with
   | (Some entry, _) ->
     (* See documentation on `entry` for its invariants.
-      The compute_ast function will use the cached (full) AST if present,
-      and otherwise will compute a full AST and cache it and return it.
-      It's okay for get_ast to return a full AST even if only asked for
-      a partial one. Our principle is that an ctx entry always indicates that
-      the file is open in the IDE, and so will benefit from a full AST at
-      some time, so we might as well get it now. *)
+       The compute_ast function will use the cached (full) AST if present,
+       and otherwise will compute a full AST and cache it and return it.
+       It's okay for get_ast to return a full AST even if only asked for
+       a partial one. Our principle is that an ctx entry always indicates that
+       the file is open in the IDE, and so will benefit from a full AST at
+       some time, so we might as well get it now. *)
     compute_ast_with_error ~popt:(Provider_context.get_popt ctx) ~entry
   | (_, (Provider_backend.Analysis | Provider_backend.Shared_memory)) ->
     begin

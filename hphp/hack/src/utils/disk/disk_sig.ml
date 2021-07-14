@@ -36,7 +36,7 @@ module type S = sig
   val mkdir : string -> int -> unit
 
   (* Equivalent to `mkdir -p` - creates subdirectories recursively if they
-    don't exist. *)
+     don't exist. *)
   val mkdir_p : string -> unit
 
   (* Return the paths of all the regular files present in the given directory

@@ -831,7 +831,7 @@ let doc_block_fallback_cases =
         };
       ] );
     (* When falling back, if any class/trait ancestors have a doc block don't show
-     any doc blocks from interface ancestors. *)
+       any doc blocks from interface ancestors. *)
     ( ("doc_block_fallback.php", 13, 7),
       [
         {

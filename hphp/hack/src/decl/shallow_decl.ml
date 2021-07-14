@@ -33,8 +33,8 @@ let gather_constants =
           CCRSet.add (From from, name) refs
         | Class_const ((_, CIself), (_, name)) -> CCRSet.add (Self, name) refs
         (* Following two cases are for function-pointers "const mixed X = S::i<>".
-        These shouldn't really be counted as refs for our purposes. But we're including
-        them solely for reason of parity with the direct-decl-parser, which does count them. *)
+           These shouldn't really be counted as refs for our purposes. But we're including
+           them solely for reason of parity with the direct-decl-parser, which does count them. *)
         | FunctionPointer (FP_class_const ((_, CI (_, from)), (_, name)), _targs)
           ->
           CCRSet.add (From from, name) refs
@@ -46,10 +46,10 @@ let gather_constants =
 
     method! on_SFclass_const acc (_, class_id) (_, name) =
       (* TODO: recognize "self::F"... The shape key "shape(self::F => 1)" is
-      represented by SFclass_const with class_id just the string literal "self".
-      However, by the time this visitor is called, it has already been resolved
-      into a class-name. Therefore this place in the code is unable to properly
-      reconstruct "self::F" shape keys. *)
+         represented by SFclass_const with class_id just the string literal "self".
+         However, by the time this visitor is called, it has already been resolved
+         into a class-name. Therefore this place in the code is unable to properly
+         reconstruct "self::F" shape keys. *)
       let ref = (From class_id, name) in
       CCRSet.add ref acc
   end

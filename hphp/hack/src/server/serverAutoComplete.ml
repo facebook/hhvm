@@ -126,7 +126,7 @@ let go_ctx
     ~(column : int) : AutocompleteTypes.ide_result =
   let open File_content in
   (* We have to edit the file content to add the text AUTO332.
-    TODO: Switch to FFP Autocomplete to avoid doing this file edit *)
+     TODO: Switch to FFP Autocomplete to avoid doing this file edit *)
   let file_content = Provider_context.read_file_contents_exn entry in
   let pos = { line; column } in
   let edits =

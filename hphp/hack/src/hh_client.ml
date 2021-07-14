@@ -67,8 +67,8 @@ let () =
       let client_log_fn = ServerFiles.client_log root in
       (try
          (* For irritating reasons T67177821 we might not have permissions
-         to write to the file. Pending a fix, let's only set up Hh_logger
-         to write to the file if we can indeed safely write to it. *)
+            to write to the file. Pending a fix, let's only set up Hh_logger
+            to write to the file if we can indeed safely write to it. *)
          Sys_utils.touch
            (Sys_utils.Touch_existing_or_create_new
               { mkdir_if_new = false; perm_if_new = 0o666 })
@@ -90,9 +90,9 @@ let () =
     | None -> None
     | Some root ->
       (* The code to load hh.conf (ServerLocalConfig) is a bit weirdly factored.
-      It requires a ServerArgs structure, solely to pick out --config options. We
-      dont have ServerArgs (we only have client args!) but we do parse --config
-      options and will patch them onto a fake ServerArgs. *)
+         It requires a ServerArgs structure, solely to pick out --config options. We
+         dont have ServerArgs (we only have client args!) but we do parse --config
+         options and will patch them onto a fake ServerArgs. *)
       let fake_server_args =
         ServerArgs.default_options_with_check_mode ~root:(Path.to_string root)
       in
@@ -131,8 +131,8 @@ let () =
   with exn ->
     let e = Exception.wrap exn in
     (* We trust that if someone raised Exit_with then they had the decency to print
-    out a user-facing message; we will only print out a user-facing message here
-    for uncaught exceptions: lvl=Error gets sent to stderr, but lvl=Info doesn't. *)
+       out a user-facing message; we will only print out a user-facing message here
+       for uncaught exceptions: lvl=Error gets sent to stderr, but lvl=Info doesn't. *)
     let (es, lvl) =
       match exn with
       | Exit_status.Exit_with es -> (es, Hh_logger.Level.Info)

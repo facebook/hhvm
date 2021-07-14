@@ -225,14 +225,14 @@ let parse_name_and_decl ctx files_contents =
       (* parse_and_name has side effect of reporting errors *)
       let (parsed_files, files_info) = parse_and_name ctx files_contents in
       (* ndecl_file has side effect of updating the global reverse naming-table,
-      and reporting errors. *)
+         and reporting errors. *)
       Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
           let (errors, _failed_naming_fns) =
             Naming_global.ndecl_file_error_if_already_bound ctx fn fileinfo
           in
           Errors.merge_into_current errors);
       (* Decl.make_env has the side effect of updating the decl heap, and
-      reporting errors. *)
+         reporting errors. *)
       Relative_path.Map.iter parsed_files ~f:(fun fn _ ->
           Errors.run_in_context fn Errors.Decl (fun () ->
               Decl.make_env ~sh:SharedMem.Uses ctx fn));
@@ -432,10 +432,10 @@ let decl_and_run_mode
       ~deps_mode:Typing_deps_mode.SQLiteMode
   in
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
-  so it will look in the sqlite database for names it doesn't know.
-  This function returns the forward naming table, but we don't care about that;
-  it's only needed for tools that process file changes, to know in the event
-  of a file-change which old symbols used to be defined in the file. *)
+     so it will look in the sqlite database for names it doesn't know.
+     This function returns the forward naming table, but we don't care about that;
+     it's only needed for tools that process file changes, to know in the event
+     of a file-change which old symbols used to be defined in the file. *)
   let _naming_table_for_root : Naming_table.t option =
     Option.map naming_table_path ~f:(fun path ->
         Naming_table.load_from_sqlite ctx path)

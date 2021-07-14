@@ -185,11 +185,11 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
     let intersection = SSet.inter tparams_in_ty tparams_of_typedef in
     if SSet.is_empty intersection then
       (* Just violated constraints inside the typedef that do not involve
-      the type parameters of the typedef we are looking at. Nothing to report at this point *)
+         the type parameters of the typedef we are looking at. Nothing to report at this point *)
       ()
     else
       (* We choose an arbitrary element. If a constraint violation were to contain multiple
-      tparams of the typedef, we can live with only showing the user one of them. *)
+         tparams of the typedef, we can live with only showing the user one of them. *)
       let typedef_tparam_name = SSet.min_elt intersection in
       let (used_class_in_def_pos, used_class_in_def_name) = used_class in
       let typedef_pos = typedef_info.td_pos in
@@ -272,8 +272,8 @@ let report_kind_error ~use_pos ~def_pos ~tparam_name ~expected ~actual =
 
 module Simple = struct
   (* TODO(T70068435) Once we support constraints on higher-kinded types, this should only be used
-  during the localization of declaration site types, everything else should be doing full
-  kind-checking (including constraints) *)
+     during the localization of declaration site types, everything else should be doing full
+     kind-checking (including constraints) *)
 
   let is_subkind _env ~(sub : Simple.kind) ~(sup : Simple.kind) =
     let rec is_subk subk superk =
@@ -284,7 +284,7 @@ module Simple = struct
           ~init:true
           ~f:(fun ok (_, param_sub) (_, param_sup) ->
             (* Treating parameters contravariantly here. For simple subkinding, it doesn't make
-             a difference, though *)
+               a difference, though *)
             ok && is_subk param_sup param_sub)
       in
       let open List.Or_unequal_lengths in
@@ -388,7 +388,7 @@ module Simple = struct
       List.iter tyl ~f:check
     | Taccess (ty, _) ->
       (* Because type constants cannot depend on type parameters,
-       we allow Foo::the_type even if Foo has type parameters *)
+         we allow Foo::the_type even if Foo has type parameters *)
       check_well_kinded_type ~allow_missing_targs:true ~in_signature env ty
     | Tshape (_, map) -> TShapeMap.iter (fun _ sft -> check sft.sft_ty) map
     | Tfun ft ->

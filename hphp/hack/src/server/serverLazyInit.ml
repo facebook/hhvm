@@ -423,7 +423,7 @@ let naming_from_saved_state
     match naming_table_fallback_fn with
     | Some _ ->
       (* Set the SQLite fallback path for the reverse naming table, then block out all entries in
-      any dirty files to make sure we properly handle file deletes. *)
+         any dirty files to make sure we properly handle file deletes. *)
       Relative_path.Set.iter parsing_files ~f:(fun k ->
           match Naming_table.get_file_info old_naming_table k with
           | None ->
@@ -449,8 +449,8 @@ let naming_from_saved_state
               (v.FileInfo.consts |> List.map ~f:snd))
     | None ->
       (* Name all the files from the old naming-table (except the new ones we parsed since
-    they'll be named by our caller, next). We assume the old naming-table came from a clean
-    state, which is why we skip checking for "already bound" conditions. *)
+         they'll be named by our caller, next). We assume the old naming-table came from a clean
+         state, which is why we skip checking for "already bound" conditions. *)
       let old_hack_names =
         Naming_table.filter old_naming_table ~f:(fun k _v ->
             not (Relative_path.Set.mem parsing_files k))
@@ -714,9 +714,9 @@ let type_check_dirty
   let files_to_check = Relative_path.Map.keys fast in
 
   (* HACK: dump the fanout that we calculated and exit. This is for
-  `hh_fanout`'s regression testing vs. `hh_server`. This can be deleted once
-  we no longer worry about `hh_fanout` regressing vs. `hh_server`. Deletion
-  is tracked at T65464119. *)
+     `hh_fanout`'s regression testing vs. `hh_server`. This can be deleted once
+     we no longer worry about `hh_fanout` regressing vs. `hh_server`. Deletion
+     is tracked at T65464119. *)
   if ServerArgs.dump_fanout genv.options then (
     Hh_json.json_to_multiline_output
       stdout
@@ -731,8 +731,8 @@ let type_check_dirty
     exit 0
   ) else
     (* In case we saw that any hot decls had become invalid, we have to remove them.
-  Note: we don't need to do a full "redecl" of them since their fanout has
-  already been encompassed by to_recheck. *)
+       Note: we don't need to do a full "redecl" of them since their fanout has
+       already been encompassed by to_recheck. *)
     let names_to_undecl =
       Relative_path.Set.fold
         to_undecl

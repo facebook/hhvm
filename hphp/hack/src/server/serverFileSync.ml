@@ -210,8 +210,8 @@ let get_unsaved_changes env =
           | Some _ -> acc
           | None ->
             (* If one creates a new file, then there will not be corresponding
-          * disk contents, and we should consider there to be unsaved changes in
-          * the editor. *)
+               * disk contents, and we should consider there to be unsaved changes in
+               * the editor. *)
             Relative_path.Map.add acc ~key:path ~data:(ide_contents, "")
         end
       | _ -> acc)

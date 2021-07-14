@@ -669,7 +669,7 @@ end
 
 let protected_read_exn (filename : string) : string =
   (* We can't use the standard Disk.cat because we need to read from an existing (locked)
-  fd for the file; not open the file a second time and read from that. *)
+     fd for the file; not open the file a second time and read from that. *)
   let cat_from_fd (fd : Unix.file_descr) : string =
     let total = Unix.lseek fd 0 Unix.SEEK_END in
     let _0 = Unix.lseek fd 0 Unix.SEEK_SET in
@@ -686,10 +686,10 @@ let protected_read_exn (filename : string) : string =
     Bytes.to_string buf
   in
   (* Unix has no way to atomically create a file and lock it; fnctl inherently
-  only works on an existing file. There's therefore a race where the writer
-  might create the file before locking it, but we get our read lock in first.
-  We'll work around this with a hacky sleep+retry. Other solutions would be
-  to have the file always exist, or to use a separate .lock file. *)
+     only works on an existing file. There's therefore a race where the writer
+     might create the file before locking it, but we get our read lock in first.
+     We'll work around this with a hacky sleep+retry. Other solutions would be
+     to have the file always exist, or to use a separate .lock file. *)
   let rec retry_if_empty () =
     let fd = Unix.openfile filename [Unix.O_RDONLY] 0o666 in
     let content =
@@ -726,18 +726,18 @@ let redirect_stdout_and_stderr_to_file (filename : string) : unit =
   Utils.try_finally
     ~finally:(fun () ->
       (* Those two old_* handles must be closed so as not to have dangling FDs.
-      Neither success nor failure path holds onto them: the success path ignores
-      then, and the failure path dups them. That's why we can close them here. *)
+         Neither success nor failure path holds onto them: the success path ignores
+         then, and the failure path dups them. That's why we can close them here. *)
       (try Unix.close old_stdout with _ -> ());
       (try Unix.close old_stderr with _ -> ());
       ())
     ~f:(fun () ->
       try
         (* We want both stdout and stderr to be redirected to the same file.
-        Do not attempt to open a file that's already open:
-        https://wiki.sei.cmu.edu/confluence/display/c/FIO24-C.+Do+not+open+a+file+that+is+already+open
-        Use dup for this scenario instead:
-        https://stackoverflow.com/questions/15155314/redirect-stdout-and-stderr-to-the-same-file-and-restore-it *)
+           Do not attempt to open a file that's already open:
+           https://wiki.sei.cmu.edu/confluence/display/c/FIO24-C.+Do+not+open+a+file+that+is+already+open
+           Use dup for this scenario instead:
+           https://stackoverflow.com/questions/15155314/redirect-stdout-and-stderr-to-the-same-file-and-restore-it *)
         freopen filename "w" Unix.stdout;
         Unix.dup2 Unix.stdout Unix.stderr;
         ()

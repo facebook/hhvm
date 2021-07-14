@@ -493,9 +493,9 @@ let test_all_overrides_cli_only _ =
     [
       hack'compiler'relabel;
       (* Note: generated from the above by:
-       grep -o '^  \\"\([^"]*\)\\"' THIS_FILE | sed -e 's:[\\" ]::g' \
-         -e "s:\\.:':g" -e 's/.*/  &;/'
-    *)
+         grep -o '^  \\"\([^"]*\)\\"' THIS_FILE | sed -e 's:[\\" ]::g' \
+           -e "s:\\.:':g" -e 's/.*/  &;/'
+      *)
       (* doc_root; *)
       hack'compiler'constant_folding;
       hack'compiler'optimize_null_checks;

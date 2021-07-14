@@ -65,7 +65,7 @@ let accumulate_job_output
     (produced_by_job : typing_result) (accumulated_so_far : typing_result) :
     typing_result =
   (* The Measure API is mutating, but we want to be functional, so we'll serialize+deserialize
-  This might sound expensive, but the actual implementation makes it cheap. *)
+     This might sound expensive, but the actual implementation makes it cheap. *)
   let acc_finished_to_end =
     Measure.deserialize
       (Measure.serialize accumulated_so_far.jobs_finished_to_end)
@@ -144,25 +144,25 @@ type delegate_next_result = {
  *)
 module type LocalServerApi = sig
   (* Called by the controller to update clients with its
-    current phase of execution *)
+     current phase of execution *)
   val send_progress : string -> unit
 
   (* The state filename contains the state that should be updated.
-    This function is called by the controller after it receives a response
-    from a worker that contains such state.
-    It may be called many times during execution.
-    *)
+     This function is called by the controller after it receives a response
+     from a worker that contains such state.
+     It may be called many times during execution.
+  *)
   val update_state : state_filename:string -> check_id:string option -> unit
 
   (* Tells the server to save the naming table state to a given
-    destination path.
-    *)
+     destination path.
+  *)
   val snapshot_naming_table_base : destination_path:string -> unit Future.t
 
   (* Tells the server to save just the portion of the naming table that
-    changed since the loaded naming table base. If there were no base, then
-    the snapshot should be the entire naming table.
-    *)
+     changed since the loaded naming table base. If there were no base, then
+     the snapshot should be the entire naming table.
+  *)
   val snapshot_naming_table_diff : destination_path:string -> unit
 
   (* Begins getting dirty files given a mergebase.
@@ -188,14 +188,14 @@ type delegate_env = {
   tcopt: TypecheckerOptions.t;
   hash_mode: Typing_deps_mode.hash_mode;
   (* This module exposes to the controller the limited set of operations that
-    it needs, without exposing the underlying types or implementation details.
-    It is also helpful in simplifying the isolation of the controller
-    for unit testing. *)
+     it needs, without exposing the underlying types or implementation details.
+     It is also helpful in simplifying the isolation of the controller
+     for unit testing. *)
   server: (module LocalServerApi);
   (* Represents the version of hh_server that the remote hosts should install,
-    if it's not the default that they would be otherwise using. This field
-    is only useful in development and should not be set in the normal course
-    of business during type checking user's code. *)
+     if it's not the default that they would be otherwise using. This field
+     is only useful in development and should not be set in the normal course
+     of business during type checking user's code. *)
   version_specifier: string option;
   (* The minimum log level workers should be logging at *)
   worker_min_log_level: Hh_logger.Level.t;

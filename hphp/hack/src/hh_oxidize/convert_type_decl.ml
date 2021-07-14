@@ -633,9 +633,9 @@ let type_declaration name td =
       raise (Skip_type_decl "polymorphic variants not supported")
     | Ptyp_constr ({ txt = Lident "t"; _ }, []) ->
       (* In the case of `type t = prefix * string ;; type relative_path = t`, we
-       have already defined a RelativePath type because we renamed t in the
-       first declaration to the name of the module. We can just skip the second
-       declaration introducing the alias. *)
+         have already defined a RelativePath type because we renamed t in the
+         first declaration to the name of the module. We can just skip the second
+         declaration introducing the alias. *)
       let mod_name_as_type = convert_type_name (curr_module_name ()) in
       if String.equal name mod_name_as_type then
         raise

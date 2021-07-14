@@ -259,8 +259,8 @@ let count_subdecl
   match decl with
   | None ->
     (* CARE! This path must be highly performant. It's called tens of thousands of times
-    per file. The earlier function count_decl had used "decl=None" to signal that no logging
-    is needed for subdecl accesses, and here we're (cheaply) picking up that fact. *)
+       per file. The earlier function count_decl had used "decl=None" to signal that no logging
+       is needed for subdecl accesses, and here we're (cheaply) picking up that fact. *)
     f ()
   | Some decl ->
     let start_time = Unix.gettimeofday () in

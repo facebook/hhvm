@@ -19,9 +19,9 @@ let invalidate_local_decl_caches_for_file
   let open FileInfo in
   let open Provider_backend in
   (* Consideration: would it have been better to decl-diff, detect
-  when the shallow-decls are unchanged if so then avoid invalidating all
-  the folded-decls and TASTs? Maybe. That would be better in the case of
-  one file change, but worse in the case of 5000 file changes. *)
+     when the shallow-decls are unchanged if so then avoid invalidating all
+     the folded-decls and TASTs? Maybe. That would be better in the case of
+     one file change, but worse in the case of 5000 file changes. *)
 
   (* Shallow decl cache: we only need clear the ones affected *)
   List.iter file_info.classes ~f:(fun (_, name) ->
@@ -30,20 +30,20 @@ let invalidate_local_decl_caches_for_file
         ~key:(Shallow_decl_cache_entry.Shallow_class_decl name));
 
   (* Decl and linearization cache: we don't track fine-grained
-  dependencies, and therefore we should be evicting everything.
+     dependencies, and therefore we should be evicting everything.
 
-  It might be possible to do decl-diffing on shallow-decls and if
-  they're unchanged, then avoid invalidating the folded decls and
-  linearizations. That would be better in the case of just one
-  disk file change notification, but worse in the case of 5000
-  since it'd require getting shallow-decls on all of them just
-  to compare, even if they weren't actually needed.
+     It might be possible to do decl-diffing on shallow-decls and if
+     they're unchanged, then avoid invalidating the folded decls and
+     linearizations. That would be better in the case of just one
+     disk file change notification, but worse in the case of 5000
+     since it'd require getting shallow-decls on all of them just
+     to compare, even if they weren't actually needed.
 
-  I tried evicting everything but it was far too slow. That will
-  need to be fixed. But for now, let's settle for evicting
-  decls and linearizations which we know are affected. This way
-  at least the user has a fallback of opening relevant files in the
-  IDE to get their relevant decls+linearizations correct. *)
+     I tried evicting everything but it was far too slow. That will
+     need to be fixed. But for now, let's settle for evicting
+     decls and linearizations which we know are affected. This way
+     at least the user has a fallback of opening relevant files in the
+     IDE to get their relevant decls+linearizations correct. *)
   let open Provider_backend.Decl_cache_entry in
   List.iter file_info.consts ~f:(fun (_, name) ->
       Decl_cache.remove local_memory.decl_cache ~key:(Gconst_decl name));
@@ -99,9 +99,9 @@ let respect_but_quarantine_unsaved_changes
   let backend_pushed = ref false in
   let quarantine_set = ref false in
   (* This function will (1) enter quarantine, (2) do the callback "f",
-  (3) leave quarantine. If an exception arises during step (1,2) then nevertheless
-  we guarantee that quarantine is safely left. If an exception arises during
-  step (3) then we'll raise an exception but the program state has become unstable... *)
+     (3) leave quarantine. If an exception arises during step (1,2) then nevertheless
+     we guarantee that quarantine is safely left. If an exception arises during
+     step (3) then we'll raise an exception but the program state has become unstable... *)
   let enter_quarantine_exn () =
     begin
       match Provider_context.get_backend ctx with

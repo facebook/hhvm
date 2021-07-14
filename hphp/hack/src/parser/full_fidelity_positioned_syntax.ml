@@ -142,8 +142,8 @@ module PositionedValueBuilder = struct
   let value_from_syntax syntax =
     let module PSV = PositionedSyntaxValue in
     (* We need to find the first and last nodes that are represented by tokens.
-      If there are no such nodes then we can simply use the first and last nodes, period,
-      since they will have an offset and source text we can use. *)
+       If there are no such nodes then we can simply use the first and last nodes, period,
+       since they will have an offset and source text we can use. *)
     let f (first, first_not_zero, last_not_zero, _last) node =
       match (first, first_not_zero, value node) with
       | (None, None, (PSV.TokenValue _ | PSV.TokenSpan _)) ->
@@ -152,15 +152,15 @@ module PositionedValueBuilder = struct
         (Some node, Some node, Some node, Some node)
       | (None, None, _) ->
         (* first iteration - first node is missing -
-          record it as first and last *)
+           record it as first and last *)
         (Some node, None, None, Some node)
       | (Some _, None, (PSV.TokenValue _ | PSV.TokenSpan _)) ->
         (* in progress, found first node that include tokens -
-          record it as first_non_zero, last and last_non_zero  *)
+           record it as first_non_zero, last and last_non_zero *)
         (first, Some node, Some node, Some node)
       | (Some _, Some _, (PSV.TokenValue _ | PSV.TokenSpan _)) ->
         (* in progress found some node that include tokens -
-          record it as last_non_zero and last *)
+           record it as last_non_zero and last *)
         (first, first_not_zero, Some node, Some node)
       | _ ->
         (* in progress, stepped on missing node -

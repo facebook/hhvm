@@ -211,7 +211,7 @@ let diff ~(all : bool) ?(suffix_keys = true) (telemetry : t) ~(prev : t) : t =
     | (JSON_Null, JSON_Null) -> acc_if all (key, JSON_Null) acc
     | (JSON_Number c, JSON_Number p) ->
       (* JSON_Numbers are strings - maybe ints, maybe floats, maybe we
-    can't parse them or they're outside ocaml maximum range *)
+         can't parse them or they're outside ocaml maximum range *)
       begin
         try
           let (c, p) = (int_of_string c, int_of_string p) in

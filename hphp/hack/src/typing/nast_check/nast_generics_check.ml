@@ -104,7 +104,7 @@ and check_tparams ~nested (seen : tparam_info) tparams =
       seen
     else
       (* Using a dummy value for the higher-kindedness, we don't care once
-       it's out of scope *)
+         it's out of scope *)
       SMap.add name (pos, false, false) seen
   in
 

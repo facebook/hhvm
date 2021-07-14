@@ -144,7 +144,7 @@ let run_naming_table_test f =
           ~deps_mode
       in
       (* load_from_sqlite will call set_naming_db_path for the ctx it's given, but
-      here is a fresh ctx with a fresh backend so we have to set it again. *)
+         here is a fresh ctx with a fresh backend so we have to set it again. *)
       Db_path_provider.set_naming_db_path
         (Provider_context.get_backend ctx)
         (Some (Naming_sqlite.Db_path db_name));
@@ -202,8 +202,8 @@ let test_get_canon_name () =
   run_naming_table_test
     (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
       (* Since we're parsing but not naming, the canon heap must fall back to the
-       files on disk, which is the situation we'd be in when loading from a
-       saved state. *)
+         files on disk, which is the situation we'd be in when loading from a
+         saved state. *)
       Asserter.String_asserter.assert_option_equals
         (Some "\\Foo")
         (Naming_provider.get_type_canon_name ctx "\\foo")
@@ -389,14 +389,14 @@ let test_context_changes_funs () =
         "New function in context should be accessible by canon name";
 
       (* NB: under shared-memory provider, the following two tests aren't
-      useful. Sharedmem doesn't suppress canonical lookup results that
-      have been overridden by the context. (That's because sharedmem only
-      gives us back the canonical name, not the path where that canonical
-      name was defined, and without paths we can't tell whether it's been
-      overridden by context). For the sharedmem case, the caller is expected
-      to manually remove any old reverse-naming-table entries before calling
-      into the naming provider -- something that this test doesn't do.
-      Hence why it gives incorrect answers. *)
+         useful. Sharedmem doesn't suppress canonical lookup results that
+         have been overridden by the context. (That's because sharedmem only
+         gives us back the canonical name, not the path where that canonical
+         name was defined, and without paths we can't tell whether it's been
+         overridden by context). For the sharedmem case, the caller is expected
+         to manually remove any old reverse-naming-table entries before calling
+         into the naming provider -- something that this test doesn't do.
+         Hence why it gives incorrect answers. *)
       let expected =
         match Provider_context.get_backend ctx with
         | Provider_backend.Shared_memory ->
@@ -452,14 +452,14 @@ let test_context_changes_classes () =
         "New class in context should be accessible by canon name";
 
       (* NB: under shared-memory provider, the following two tests aren't
-      useful. Sharedmem doesn't suppress canonical lookup results that
-      have been overridden by the context. (That's because sharedmem only
-      gives us back the canonical name, not the path where that canonical
-      name was defined, and without paths we can't tell whether it's been
-      overridden by context). For the sharedmem case, the caller is expected
-      to manually remove any old reverse-naming-table entries before calling
-      into the naming provider -- something that this test doesn't do.
-      Hence why it gives incorrect answers. *)
+         useful. Sharedmem doesn't suppress canonical lookup results that
+         have been overridden by the context. (That's because sharedmem only
+         gives us back the canonical name, not the path where that canonical
+         name was defined, and without paths we can't tell whether it's been
+         overridden by context). For the sharedmem case, the caller is expected
+         to manually remove any old reverse-naming-table entries before calling
+         into the naming provider -- something that this test doesn't do.
+         Hence why it gives incorrect answers. *)
       let expected =
         match Provider_context.get_backend ctx with
         | Provider_backend.Shared_memory ->
@@ -515,14 +515,14 @@ let test_context_changes_typedefs () =
         "New typedef in context should be accessible by canon name";
 
       (* NB: under shared-memory provider, the following two tests aren't
-      useful. Sharedmem doesn't suppress canonical lookup results that
-      have been overridden by the context. (That's because sharedmem only
-      gives us back the canonical name, not the path where that canonical
-      name was defined, and without paths we can't tell whether it's been
-      overridden by context). For the sharedmem case, the caller is expected
-      to manually remove any old reverse-naming-table entries before calling
-      into the naming provider -- something that this test doesn't do.
-      Hence why it gives incorrect answers. *)
+         useful. Sharedmem doesn't suppress canonical lookup results that
+         have been overridden by the context. (That's because sharedmem only
+         gives us back the canonical name, not the path where that canonical
+         name was defined, and without paths we can't tell whether it's been
+         overridden by context). For the sharedmem case, the caller is expected
+         to manually remove any old reverse-naming-table entries before calling
+         into the naming provider -- something that this test doesn't do.
+         Hence why it gives incorrect answers. *)
       let expected =
         match Provider_context.get_backend ctx with
         | Provider_backend.Shared_memory ->
@@ -613,7 +613,7 @@ let test_naming_table_hash () =
 let test_ensure_hashing_outputs_31_bits () =
   let dep_with_thirty_first_bit_set_to_1 =
     (* This name selected by trying a bunch of names and finding one that has
-    the 31st bit set to 1. *)
+       the 31st bit set to 1. *)
     Typing_deps.Dep.Type "\\Abcd"
     |> Typing_deps.ForTest.compute_dep_hash hash_mode
   in

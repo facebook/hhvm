@@ -176,7 +176,7 @@ let trait_use_route tgenv type_name trait_name : string list =
       (* Find all the ancestors that use this trait. *)
       let ancestors = find_ancestors_using tgenv type_name trait_name in
       (* Choose the ancestor closest to [type_name] by taking the ancestor
-     that has the most ancestors itself. *)
+         that has the most ancestors itself. *)
       let sorted_ancestors = List.rev (sort_by_num_ancestors tgenv ancestors) in
       match sorted_ancestors with
       | [] -> []

@@ -54,14 +54,14 @@ let setup ~(sqlite : bool) (tcopt : GlobalOptions.t) : setup =
     (Path.make @@ in_fake_dir "root/");
 
   (* We'll need to parse these files in order to create a naming table, which
-    will be used for look up of symbols in type checking. *)
+     will be used for look up of symbols in type checking. *)
   Disk.write_file ~file:(in_fake_dir "root/Foo.php") ~contents:foo_contents;
   Disk.write_file ~file:(in_fake_dir "root/Bar.php") ~contents:bar_contents;
   let foo_path = Relative_path.from_root ~suffix:"Foo.php" in
   let bar_path = Relative_path.from_root ~suffix:"Bar.php" in
   let nonexistent_path = Relative_path.from_root ~suffix:"Nonexistent.php" in
   (* Parsing produces the file infos that the naming table module can use
-    to construct the forward naming table (files-to-symbols) *)
+     to construct the forward naming table (files-to-symbols) *)
   let popt = ParserOptions.default in
   let deps_mode = Typing_deps_mode.SQLiteMode in
   let ctx =
@@ -92,7 +92,7 @@ let setup ~(sqlite : bool) (tcopt : GlobalOptions.t) : setup =
         Naming_table.save naming_table db_name
       in
       (* Now, I want a fresh ctx with no reverse-naming entries in it,
-      and I want it to be backed by a sqlite naming database. *)
+         and I want it to be backed by a sqlite naming database. *)
       Provider_backend.set_local_memory_backend_with_defaults ();
       let sqlite_ctx =
         Provider_context.empty_for_tool

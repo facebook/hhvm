@@ -92,10 +92,10 @@ let add_minor_change_fanout
     SMap.fold consts ~init:acc ~f:(fun name change acc ->
         let acc =
           (* If a const has been added or removed in an enum type, we must recheck
-         all switch statements which need to have a case for each variant
-         (exhaustive switch statements add an AllMembers dependency).
-         We don't bother to test whether the class is an enum type because
-         non-enum classes will have no AllMembers dependents anyway. *)
+             all switch statements which need to have a case for each variant
+             (exhaustive switch statements add an AllMembers dependency).
+             We don't bother to test whether the class is an enum type because
+             non-enum classes will have no AllMembers dependents anyway. *)
           match change with
           | Added
           | Removed ->

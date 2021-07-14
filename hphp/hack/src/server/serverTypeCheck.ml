@@ -348,7 +348,7 @@ let parsing genv env to_check ~stop_at_errors profiling =
     ~source:SearchUtils.TypeChecker;
 
   (* During integration tests, we want to pretend that search is run
-    synchronously *)
+     synchronously *)
   let ctx = Provider_utils.ctx_from_server_env env in
   let env =
     {
@@ -445,13 +445,13 @@ let get_interrupt_config genv env =
 
 module type CheckKindType = sig
   (* Parsing treats files open in IDE and files coming from disk differently:
-  *
-  * - for IDE files, we need to look up their contents in the map in env,
-  *     instead of reading from disk (duh)
-  * - we parse IDE files in master process (to avoid passing env to the
-  *     workers)
-  * - to make the IDE more responsive, we try to shortcut the typechecking at
-  *   the parsing level if there were parsing errors
+     *
+     * - for IDE files, we need to look up their contents in the map in env,
+     *     instead of reading from disk (duh)
+     * - we parse IDE files in master process (to avoid passing env to the
+     *     workers)
+     * - to make the IDE more responsive, we try to shortcut the typechecking at
+     *   the parsing level if there were parsing errors
   *)
   val get_files_to_parse : ServerEnv.env -> Relative_path.Set.t * bool
 
@@ -673,7 +673,7 @@ module LazyCheckKind : CheckKindType = struct
      * if they are open in the editor *)
     if Typing_deps.DepSet.cardinal to_redecl_phase2_deps > 1000 then
       (* inspecting tons of dependencies would take more time that just
-      * rechecking all relevant files. *)
+         * rechecking all relevant files. *)
       Relative_path.Set.union env.editor_open_files (ide_diagnosed_files env)
     else
       Typing_deps.DepSet.fold
@@ -1335,8 +1335,8 @@ functor
       (* Hold on to the original environment; it's used by do_type_checking. *)
       let old_env = env in
       (* Update the naming_table, which is a map from filename to the names of
-       toplevel symbols declared in that file. Also, update Typing_deps' table,
-       which is a map from toplevel symbol hash (Dep.t) to filename. *)
+         toplevel symbols declared in that file. Also, update Typing_deps' table,
+         which is a map from toplevel symbol hash (Dep.t) to filename. *)
       let naming_table = update_naming_table env fast_parsed profiling in
       HackEventLogger.updating_deps_end ~count:reparse_count t;
       let t = Hh_logger.log_duration logstring t in
@@ -1359,11 +1359,11 @@ functor
       in
       let ctx = Provider_utils.ctx_from_server_env env in
       (* Run Naming_global, updating the reverse naming table (which maps the names
-       of toplevel symbols to the files in which they were declared) in shared
-       memory. Does not run Naming itself (which converts an AST to a NAST by
-       assigning unique identifiers to locals, among other things). The Naming
-       module is something of a historical artifact and is slated for removal,
-       but for now, it is run immediately before typechecking. *)
+         of toplevel symbols to the files in which they were declared) in shared
+         memory. Does not run Naming itself (which converts an AST to a NAST by
+         assigning unique identifiers to locals, among other things). The Naming
+         module is something of a historical artifact and is slated for removal,
+         but for now, it is run immediately before typechecking. *)
       let { errors_after_naming = errors; failed_naming; fast } =
         do_naming
           genv
@@ -1404,15 +1404,15 @@ functor
       debug_print_fast_keys genv "to_redecl_phase1" fast;
 
       (* Do phase 1 of redeclaration. Here we compare the old and new versions of
-       the declarations defined in all changed files, and collect the set of
-       files which need to be re-typechecked as a consequence of those changes,
-       as well as the set of files whose folded class declarations must be
-       recomputed as a consequence of those changes (in phase 2).
+         the declarations defined in all changed files, and collect the set of
+         files which need to be re-typechecked as a consequence of those changes,
+         as well as the set of files whose folded class declarations must be
+         recomputed as a consequence of those changes (in phase 2).
 
-       When shallow_class_decl is enabled, there is no need to do phase 2--the
-       only source of class information needing recomputing is linearizations.
-       These are invalidated by Decl_redecl_service.redo_type_decl in phase 1,
-       and are lazily recomputed as needed. *)
+         When shallow_class_decl is enabled, there is no need to do phase 2--the
+         only source of class information needing recomputing is linearizations.
+         These are invalidated by Decl_redecl_service.redo_type_decl in phase 1,
+         and are lazily recomputed as needed. *)
       let {
         changed;
         oldified_defs;
@@ -1448,13 +1448,13 @@ functor
       (* REDECL PHASE 2 ********************************************************)
 
       (* For a full typecheck, we want to redeclare everything that needs
-       redeclaration (either because it was invalidated in phase 1, or because
-       it was invalidated by a previous lazy check). For a lazy check, we only
-       want to redeclare files open in the IDE, leaving everything else to be
-       lazily redeclared later. In either case, there's no need to attempt to
-       redeclare definitions in files with parse errors.
+         redeclaration (either because it was invalidated in phase 1, or because
+         it was invalidated by a previous lazy check). For a lazy check, we only
+         want to redeclare files open in the IDE, leaving everything else to be
+         lazily redeclared later. In either case, there's no need to attempt to
+         redeclare definitions in files with parse errors.
 
-       When shallow_class_decl is enabled, there is no need to do phase 2. *)
+         When shallow_class_decl is enabled, there is no need to do phase 2. *)
       let telemetry =
         Telemetry.duration telemetry ~key:"redecl2_now_start" ~start_time
       in
@@ -1510,13 +1510,13 @@ functor
       debug_print_fast_keys genv "lazy_decl_later" lazy_decl_later;
 
       (* Redeclare the set of files whose folded class decls needed to be
-       recomputed as a result of phase 1. Collect the set of files which need to
-       be re-typechecked because of changes between the old and new
-       declarations. We need not collect a set of files to redeclare (again)
-       because our to_redecl set from phase 1 included the transitive children
-       of changed classes.
+         recomputed as a result of phase 1. Collect the set of files which need to
+         be re-typechecked because of changes between the old and new
+         declarations. We need not collect a set of files to redeclare (again)
+         because our to_redecl set from phase 1 included the transitive children
+         of changed classes.
 
-       When shallow_class_decl is enabled, there is no need to do phase 2. *)
+         When shallow_class_decl is enabled, there is no need to do phase 2. *)
       let (errors, needs_phase2_redecl, to_recheck2, to_recheck2_deps) =
         if shallow_decl_enabled ctx then
           ( errors,
@@ -1646,9 +1646,9 @@ functor
       let type_check_start_t = Unix.gettimeofday () in
 
       (* For a full check, typecheck everything which may be affected by the
-       changes. For a lazy check, typecheck only the affected files which are
-       open in the IDE, leaving other affected files to be lazily checked later.
-       In either case, don't attempt to typecheck files with parse errors. *)
+         changes. For a lazy check, typecheck only the affected files which are
+         open in the IDE, leaving other affected files to be lazily checked later.
+         In either case, don't attempt to typecheck files with parse errors. *)
       let (files_to_check, lazy_check_later) =
         CheckKind.get_defs_to_recheck
           ~reparsed:files_to_parse
@@ -1703,8 +1703,8 @@ functor
       in
 
       (* Typecheck all of the files we determined might need rechecking as a
-       consequence of the changes (or, in a lazy check, the subset of those
-       files which are open in an IDE buffer). *)
+         consequence of the changes (or, in a lazy check, the subset of those
+         files which are open in an IDE buffer). *)
       let {
         env;
         diag_subscribe;
@@ -1974,8 +1974,8 @@ let type_check_unsafe genv env kind start_time profiling =
            ~key:"diag_subscribe"
            ~value:(Option.is_some env.ServerEnv.diag_subscribe)
       (* If an IDE client is connected [env.diag_subscribe], let's log telemetry about
-        this fact. This way we can look at all recheck telemetry and determine how often
-        it's done with an IDE connected, hence presumably how long users wait in the IDE. *)
+         this fact. This way we can look at all recheck telemetry and determine how often
+         it's done with an IDE connected, hence presumably how long users wait in the IDE. *)
     in
     (env, res, telemetry)
 

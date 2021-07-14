@@ -130,7 +130,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
     | None ->
       let drop_exact ty =
         (* Legacy behavior is to preserve exactness only on `this` and not
-       through `this::T` *)
+           through `this::T` *)
         map_ty ty ~f:(function
             | Tclass (cid, _, tyl) -> Tclass (cid, Nonexact, tyl)
             | ty -> ty)
@@ -262,7 +262,7 @@ let rec intersect_results err rl =
           upper_bounds = TySet.union upperl1 upperl2;
         }
     (* Exact type overrides abstract type: the bound on abstract type will be checked
-    * against the exact type at implementation site. *)
+       * against the exact type at implementation site. *)
     | (Abstract _, Exact ty)
     | (Exact ty, Abstract _) ->
       Exact ty)

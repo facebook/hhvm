@@ -158,9 +158,9 @@ let local_variables acc node =
 
 let filter_parents parents =
   (* We want all the parents that are relevant to computing outer variables.
-  Since outer variables are indicated in a "use" clause of an anonymous
-  function, we can stop looking when we encounter one.  Otherwise, we just
-  filter out anything that is not a lambda, function or method.
+     Since outer variables are indicated in a "use" clause of an anonymous
+     function, we can stop looking when we encounter one.  Otherwise, we just
+     filter out anything that is not a lambda, function or method.
   *)
   let rec aux acc parents =
     match parents with

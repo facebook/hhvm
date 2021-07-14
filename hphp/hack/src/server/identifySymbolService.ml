@@ -312,18 +312,18 @@ let visitor =
       match cid with
       | Aast.CIexpr expr ->
         (* We want to special case this because we want to get the type of the
-         inner expression, which will have a type like `classname<Foo>`, rather
-         than the resolved type of the class ID, which will have a type like
-         `Foo`. Since the class ID and the inner expression have the same span,
-         it is not easy to distinguish them later. *)
+           inner expression, which will have a type like `classname<Foo>`, rather
+           than the resolved type of the class ID, which will have a type like
+           `Foo`. Since the class ID and the inner expression have the same span,
+           it is not easy to distinguish them later. *)
         self#on_expr env expr
       | Aast.CIparent
       | Aast.CIself
       | Aast.CIstatic ->
         (* We want to special case these because we want to keep track of the
-         original class id type. This information is useful in some cases, for
-         instance when refactoring class names, because we want to avoid
-         refactoring `self`, `static`, and `parent` class ids. *)
+           original class id type. This information is useful in some cases, for
+           instance when refactoring class names, because we want to avoid
+           refactoring `self`, `static`, and `parent` class ids. *)
         typed_class_id ~class_id_type:Other env ty p
       | Aast.CI _ -> typed_class_id env ty p
 

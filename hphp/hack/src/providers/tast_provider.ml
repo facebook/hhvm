@@ -67,12 +67,12 @@ let compute_tast_and_errors_unquarantined_internal
         ~entry
     in
     (* Note: this only picks up errors during Naming.program.
-    It doesn't pick up "this name is already bound" errors.
-    How do other parts of the code pick them up? - during ServerTypeCheck.declare_names,
-    during the course of updating the reverse naming table.
-    There isn't a clean way to do the same here, and indeed
-    most consumers of Tast_provider such as serverHover don't
-    even care for such errors. *)
+       It doesn't pick up "this name is already bound" errors.
+       How do other parts of the code pick them up? - during ServerTypeCheck.declare_names,
+       during the course of updating the reverse naming table.
+       There isn't a clean way to do the same here, and indeed
+       most consumers of Tast_provider such as serverHover don't
+       even care for such errors. *)
     let (naming_errors, nast) =
       Errors.do_with_context
         entry.Provider_context.path

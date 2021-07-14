@@ -532,8 +532,8 @@ end = struct
         | Typing_deps.Dep.Fun g -> String.equal f g
         | _ -> false)
       (* We have to collect dependencies of the entire class because dependency collection is
-      coarse-grained: if cls's member depends on D, we get a dependency edge cls --> D,
-      not (cls, member) --> D *)
+         coarse-grained: if cls's member depends on D, we get a dependency edge cls --> D,
+         not (cls, member) --> D *)
       | Method (cls, _) ->
         Option.equal String.equal (get_class_name dep) (Some cls))
 end
@@ -666,8 +666,8 @@ end = struct
           do_add_dep ctx env dep;
 
           (* If we have a constant of a generic type, it can only be an
-           array type, e.g., vec<A>, for which don't need values of A
-           to generate an initializer. *)
+             array type, e.g., vec<A>, for which don't need values of A
+             to generate an initializer. *)
           List.iter tyl ~f:(add_dep ctx env ~this)
 
         method! on_tshape _ _ _ fdm =
@@ -708,8 +708,8 @@ end = struct
             match tconsts with
             | [] -> raise UnexpectedDependency
             (* Expand Class::TConst1::TConst2[::...]: get TConst1 in
-             Class, get its type or upper bound T, continue adding
-             dependencies of T::TConst2[::...] *)
+               Class, get its type or upper bound T, continue adding
+               dependencies of T::TConst2[::...] *)
             | (_, tconst) :: tconsts ->
               do_add_dep ctx env (Typing_deps.Dep.Const (class_name, tconst));
               let cls = Decl.get_class_exn ctx class_name in
@@ -1948,7 +1948,7 @@ end = struct
         param_callconv
         (pp_type_hint ~is_ret_type:false)
         (* Type hint for parameter $f used for contextful function must be a
-        function type hint whose context is exactly [_] *)
+           function type hint whose context is exactly [_] *)
         (update_fun_context ~name:param_name param_type_hint)
         pp_fun_param_name
         (param_is_variadic, param_name)

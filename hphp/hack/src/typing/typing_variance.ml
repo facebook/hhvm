@@ -860,7 +860,7 @@ let class_method : Env.t -> Nast.class_ -> Nast.method_ -> unit =
     match m_visibility with
     | Aast.Private ->
       (* Final methods can't be overridden, so it's ok to use covariant
-       and contravariant type parameters in any position in the type *)
+         and contravariant type parameters in any position in the type *)
       ()
     | Aast.Public
     | Aast.Protected

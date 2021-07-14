@@ -198,10 +198,10 @@ let simplify_occurrences env v =
       ISet.fold
         (fun v' (env, seen_tyvars) ->
           (* This type variable is now solved and does not contain any unsolved
-          type variable, so we can remove it from its occurrences. *)
+             type variable, so we can remove it from its occurrences. *)
           let env = make_tyvar_no_more_occur_in_tyvar env v ~no_more_in:v' in
           (* Only simplify when the type of v' does not contain any more
-          unsolved type variables. *)
+             unsolved type variables. *)
           if not @@ Inf.contains_unsolved_tyvars env.inference_env v' then
             simplify_type_of_var env v' ~seen_tyvars
           else
@@ -220,15 +220,15 @@ let simplify_occurrences env v =
       | None -> failwith "Can only simplify type of bounded variables"
       | Some ty ->
         (* Only simplify the type of variables which are bound directly to a
-      concrete type to preserve the variable aliasings and save some memory. *)
+           concrete type to preserve the variable aliasings and save some memory. *)
         let env =
           match get_node ty with
           | Tvar _ -> env
           | _ ->
             let (env, ty) = simplify_unions env ty in
             (* we only call this function when v does not recursively contain unsolved
-          type variables, so ty here should not contain unsolved type variables and
-          it is safe to simply bind it without reupdating the type var occurrences. *)
+               type variables, so ty here should not contain unsolved type variables and
+               it is safe to simply bind it without reupdating the type var occurrences. *)
             let env = bind env v ty in
             env
         in
@@ -695,11 +695,11 @@ let print_size _kind _name obj =
   match obj with
   | None -> obj
   | Some _r ->
-    (*    Printf.printf
-      "%s %s: %d\n"
-      kind
-      name
-      (Obj.reachable_words (Obj.repr r) * (Sys.word_size / 8));*)
+    (* Printf.printf
+       "%s %s: %d\n"
+       kind
+       name
+       (Obj.reachable_words (Obj.repr r) * (Sys.word_size / 8));*)
     obj
 
 let get_typedef env x =
@@ -1207,7 +1207,7 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
   match ctx_opt with
   | None ->
     (* If the continuation is absent, we are in dead code so the variable should
-    have type nothing. *)
+       have type nothing. *)
     Some (Typing_make_type.nothing Reason.Rnone, Pos.none, 0)
   | Some ctx ->
     let lcl = LID.Map.find_opt x ctx.LEnvC.local_types in
@@ -1532,7 +1532,7 @@ and get_tyvars_i env (ty : internal_type) =
     | Tdependent (_, ty) -> get_tyvars env ty
     | Tgeneric (_, tyl) ->
       (* TODO(T69931993) Once implementing variance support for HK types, query
-        tyvar env here for list of variances *)
+         tyvar env here for list of variances *)
       let variancel =
         List.replicate ~num:(List.length tyl) Ast_defs.Invariant
       in

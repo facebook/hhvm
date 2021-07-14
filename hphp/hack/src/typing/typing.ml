@@ -743,7 +743,7 @@ let stash_conts_for_closure env p is_anon captured f =
 
 let type_capability env ctxs unsafe_ctxs default_pos =
   (* No need to repeat the following check (saves time) for unsafe_ctx
-    because it's synthetic and well-kinded by construction *)
+     because it's synthetic and well-kinded by construction *)
   Option.iter ctxs ~f:(fun (_pos, hl) ->
       List.iter
         hl
@@ -1528,7 +1528,7 @@ let rec rewrite_expr_tree_maketree env expr f =
              $0splice1 = "whatever";
              return MyVisitor::makeTree(...);
           })()
-        *)
+      *)
       let map_stmt env s =
         match s with
         | (pos, Return (Some expr)) ->
@@ -1776,7 +1776,7 @@ and fun_ ?(abstract = false) ?(disable = false) env return pos named_body f_kind
 and block env stl =
   Typing_env.with_origin env Decl_counters.Body @@ fun env ->
   (* To insert an `AssertEnv`, `stmt` might return a `Block`. We eliminate it here
-  to keep ASTs `Block`-free. *)
+     to keep ASTs `Block`-free. *)
   let (env, stl) =
     List.fold ~init:(env, []) stl ~f:(fun (env, stl) st ->
         let (env, st) = stmt env st in
@@ -2037,7 +2037,7 @@ and stmt_ env pos st =
   | Do (b, e) ->
     (* NOTE: leaks scope as currently implemented; this matches
        the behavior in naming (cf. `do_stmt` in naming/naming.ml).
-     *)
+    *)
     let (env, (tb, te)) =
       LEnv.stash_and_do env [C.Continue; C.Break; C.Do] (fun env ->
           let env = LEnv.save_and_merge_next_in_cont env C.Do in
@@ -2136,8 +2136,8 @@ and stmt_ env pos st =
     let (env, (te1, te2, te3, tb, refinement_map)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
           (* For loops leak their initalizer, but nothing that's defined in the
-           body
-         *)
+             body
+          *)
           let (env, te1, _) = exprs env e1 in
           (* initializer *)
           let env = LEnv.save_and_merge_next_in_cont env C.Continue in
@@ -2267,21 +2267,21 @@ and finally env fb =
   | _ ->
     let parent_locals = LEnv.get_all_locals env in
     (* First typecheck the finally block against all continuations merged
-    * together.
-    * During this phase, record errors found in the finally block, but discard
-    * the resulting environment. *)
+       * together.
+       * During this phase, record errors found in the finally block, but discard
+       * the resulting environment. *)
     let all_conts = Env.all_continuations env in
     let env = LEnv.update_next_from_conts env all_conts in
     let (env, tfb) = block env fb in
     let env = LEnv.restore_conts_from env parent_locals all_conts in
     (* Second, typecheck the finally block once against each continuation. This
-    * helps be more clever about what each continuation will be after the
-    * finally block.
-    * We don't want to record errors during this phase, because certain types
-    * of errors will fire wrongly. For example, if $x is nullable in some
-    * continuations but not in others, then we must use `?->` on $x, but an
-    * error will fire when typechecking the finally block againts continuations
-    * where $x is non-null.  *)
+       * helps be more clever about what each continuation will be after the
+       * finally block.
+       * We don't want to record errors during this phase, because certain types
+       * of errors will fire wrongly. For example, if $x is nullable in some
+       * continuations but not in others, then we must use `?->` on $x, but an
+       * error will fire when typechecking the finally block againts continuations
+       * where $x is non-null. *)
     let finally_cont env _key = finally_cont fb env in
     let (env, locals_map) =
       Errors.ignore_ (fun () -> CMap.map_env finally_cont env parent_locals)
@@ -2691,7 +2691,7 @@ and expr_
   in
   let check_collection_tparams env name tys =
     (* varrays and darrays are not classes but they share the same
-    constraints with vec and dict respectively *)
+       constraints with vec and dict respectively *)
     let name =
       if String.equal name SN.Typehints.varray then
         SN.Collections.cVec
@@ -2701,7 +2701,7 @@ and expr_
         name
     in
     (* Class retrieval always succeeds because we're fetching a
-    collection decl from an HHI file. *)
+       collection decl from an HHI file. *)
     match Env.get_class env name with
     | Some class_ ->
       let ety_env =
@@ -2728,7 +2728,7 @@ and expr_
              ~desc
              ~report_to_user:false );
       (* Continue typechecking without performing the check on a best effort
-      basis. *)
+         basis. *)
       env
   in
   match e with
@@ -3636,7 +3636,7 @@ and expr_
               ppos
               env
               (* This msg only appears if we have access to ReadStaticVariables,
-              since otherwise we would have errored in the first function *)
+                 since otherwise we would have errored in the first function *)
               ~msg:"Please enclose the static in a readonly expression")
     in
     make_result env p (Aast.Class_get (te, Aast.CGstring mid, in_parens)) ty
@@ -3664,7 +3664,7 @@ and expr_
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let env = might_throw env in
     (* We typecheck Obj_get by checking whether it is a subtype of
-    Thas_member(m, #1) where #1 is a fresh type variable. *)
+       Thas_member(m, #1) where #1 is a fresh type variable. *)
     let (env, mem_ty) = Env.fresh_type env p in
     let r = Reason.Rwitness (fst e1) in
     let has_member_ty =
@@ -3691,7 +3691,7 @@ and expr_
         (env, mem_ty)
       | Some _ ->
         (* In that case ty1 is a subtype of ?Thas_member(m, #1)
-        and the result is ?#1 if ty1 is nullable. *)
+           and the result is ?#1 if ty1 is nullable. *)
         let r = Reason.Rnullsafe_op p in
         let null_ty = MakeType.null r in
         let (env, null_has_mem_ty) =
@@ -4070,8 +4070,8 @@ and expr_
               replace_non_declared_types declared_ft_params expected_ft_params
             in
             (* If the type parameter did not have a type hint, it is Tany and
-            we use the expected type instead. Otherwise, declared type takes
-            precedence. *)
+               we use the expected type instead. Otherwise, declared type takes
+               precedence. *)
             let resolved_ft_param =
               if TUtils.is_any env declared_ft_param.fp_type.et_type then
                 { declared_ft_param with fp_type = expected_ft_param.fp_type }
@@ -4081,8 +4081,8 @@ and expr_
             resolved_ft_param :: rest
           | (_, []) ->
             (* Morally, this case should match on ([],[]) because we already
-            check arity mismatch between declared and expected types. We
-            handle it more generally here to be graceful. *)
+               check arity mismatch between declared and expected types. We
+               handle it more generally here to be graceful. *)
             declared_ft_params
           | ([], _) ->
             (* This means the expected_ft params list can have more parameters
@@ -4251,8 +4251,8 @@ and expr_
                 Env.set_tyvar_variance env (mk (Reason.Rnone, Tfun declared_ft))
               in
               (* TODO(jjwu): the declared_ft here is set to public,
-                but is actually inferred from the surrounding context
-                (don't think this matters in practice, since we check lambdas separately) *)
+                 but is actually inferred from the surrounding context
+                 (don't think this matters in practice, since we check lambdas separately) *)
               check_body_under_known_params
                 env
                 ~ret_ty:declared_ft.ft_ret.et_type
@@ -4266,7 +4266,7 @@ and expr_
       class_id_for_new ~exact:Nonexact p env cid []
     in
     (* OK to ignore rest of list; class_info only used for errors, and
-    * cid = CI sid cannot produce a union of classes anyhow *)
+       * cid = CI sid cannot produce a union of classes anyhow *)
     let class_info =
       List.find_map classes ~f:(function
           | `Dynamic -> None
@@ -4303,7 +4303,7 @@ and expr_
         children
       | _ ->
         (* We end up in this case when the cosntructed new expression does
-        not typecheck. *)
+           not typecheck. *)
         []
     in
     let (env, typed_attrs) = xhp_attribute_exprs env class_info attrl sid obj in
@@ -4844,7 +4844,7 @@ and expression_tree env p et =
        $0splice0 = foo();
        return MyVisitor::intType()->__plus($0splice0);
      }
-   *)
+  *)
   let (env, t_virtualized_expr, ty_virtual) =
     Typing_env.with_in_expr_tree env true (fun env ->
         expr env et.et_virtualized_expr ~allow_awaitable:false)
@@ -4852,13 +4852,13 @@ and expression_tree env p et =
 
   (* Given the runtime expression:
 
-     MyVisitor::makeTree(...)
+      MyVisitor::makeTree(...)
 
-     add the inferred type as a type parameter:
+      add the inferred type as a type parameter:
 
-     MyVisitor::makeTree<MyVisitorInt>(...)
+      MyVisitor::makeTree<MyVisitorInt>(...)
 
-    and then typecheck. *)
+     and then typecheck. *)
   let (env, runtime_expr) =
     maketree_with_type_param env p et.et_runtime_expr ty_virtual
   in
@@ -5245,8 +5245,8 @@ and assign_with_subtype_err_ p ur env e1 pos2 ty2 =
       | (_, Lvar (_, x)) ->
         Env.forget_prefixed_members env x Reason.(Blame (p, BSassignment))
       (* If we ever extend fake members from $x->a to more complicated lvalues
-      such as $x->a->b, we would need to call forget_prefixed_members on
-      other lvalues as well. *)
+         such as $x->a->b, we would need to call forget_prefixed_members on
+         other lvalues as well. *)
       | (_, Obj_get (_, (_, Id (_, property)), _, _)) ->
         Env.forget_suffixed_members
           env
@@ -5763,7 +5763,7 @@ and dispatch_call
               call ~expected p env fty el unpacked_element
             in
             (* construct the `Hole` using default value and type arguments
-             if necessary *)
+               if necessary *)
             let dflt_ty = MakeType.err Reason.none in
             let el =
               Option.value
@@ -6170,8 +6170,8 @@ and dispatch_call
             | [shape; field] ->
               let (env, _te, shape_ty) = expr env shape in
               (* try accessing the field, to verify existence, but ignore
-            * the returned type and keep the one coming from function
-            * return type hint *)
+                 * the returned type and keep the one coming from function
+                 * return type hint *)
               let (env, _) =
                 Typing_shapes.idx
                   env
@@ -6317,10 +6317,10 @@ and dispatch_call
   (* Call instance method using new method call inference *)
   | Obj_get (receiver, (pos_id, Id meth), nullflavor, false) ->
     (*****
-      Typecheck `Obj_get` by enforcing that:
-      - `<instance_type>` <: `Thas_member(m, #1)`
-      where #1 is a fresh type variable.
-    *****)
+        Typecheck `Obj_get` by enforcing that:
+        - `<instance_type>` <: `Thas_member(m, #1)`
+        where #1 is a fresh type variable.
+      *****)
     let (env, typed_receiver, receiver_ty) =
       expr ~accept_using_var:true env receiver
     in
@@ -7624,7 +7624,7 @@ and call
       in
       let should_forget_fakes =
         (* If the function doesn't have write priveleges to properties, fake
-        members cannot be reassigned, so their refinements stand. *)
+           members cannot be reassigned, so their refinements stand. *)
         let capability =
           Typing_coeffects.get_type ft.ft_implicit_params.capability
         in
@@ -7971,8 +7971,8 @@ and condition
           (* ... Or cond1 is false and therefore cond2 must be true *)
           let (env, _lset) = condition env (not tparamet) e1 in
           (* Similarly to the conjunction case, there might be an assignment in
-          cond2 which we must account for. Again we redo what has been undone in
-          the `Binop (Ampamp|Barbar)` case of `expr` *)
+             cond2 which we must account for. Again we redo what has been undone in
+             the `Binop (Ampamp|Barbar)` case of `expr` *)
           let (env, _, _) =
             expr env (Tast.to_nast_expr e2) ~allow_awaitable:(*?*) false
           in

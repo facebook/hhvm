@@ -50,8 +50,8 @@ let convert_facts ~(path : Relative_path.t) ~(facts : Facts.facts) : si_capture
         let (kind, is_abstract, is_final) = get_details_from_info info_opt in
         {
           (* We need to strip away the preceding backslash for hack classes
-            * but leave intact the : for xhp classes. The preceding : symbol
-            * is needed to distinguish which type of a class you want. *)
+             * but leave intact the : for xhp classes. The preceding : symbol
+             * is needed to distinguish which type of a class you want. *)
           sif_name = Utils.strip_ns key;
           sif_kind = kind;
           sif_filepath = relative_path_str;
@@ -274,7 +274,7 @@ let go (ctxt : index_builder_context) (workers : MultiWorker.worker list option)
     let hhconfig_path = Path.concat (Path.make ctxt.repo_folder) ".hhconfig" in
     let files =
       (* Sanity test.  If the folder does not have an .hhconfig file, this is probably
-        * an integration test that's using a fake repository.  Don't do anything! *)
+         * an integration test that's using a fake repository.  Don't do anything! *)
       if Disk.file_exists (Path.to_string hhconfig_path) then
         measure_time
           ~silent:ctxt.silent

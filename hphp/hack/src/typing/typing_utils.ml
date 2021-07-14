@@ -475,7 +475,7 @@ let rec get_base_type env ty =
     ->
     ty
   (* If we have an expression dependent type and it only has one super
-    type, we can treat it similarly to AKdependent _, Some ty  *)
+     type, we can treat it similarly to AKdependent _, Some ty *)
   | Tgeneric (n, targs) when DependentKind.is_generic_dep_ty n ->
     begin
       match TySet.elements (Env.get_upper_bounds env n targs) with

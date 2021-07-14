@@ -43,19 +43,19 @@ let all_requirements ~lin_members =
 
 let is_disposable ~lin_members =
   (* Precisely which ancestors need we traverse to see if they're disposable?
-  * We need to look at things via req_extends and req_impl; they're present
-  in the member linearization but not the ancestor linearization.
-  * It doesn't matter whether we travese the implicit "stringish" interface
-  that is implicitly on classes that implement toString, since stringish
-  isn't disposable; this is present on ancestor but not member linearization.
-  * It doesn't matter whether we traverse enum include ancestors which are
-  present in member but not ancestor lienarization, since they only relate
-  to enums and don't factor into disposability.
-  * We must not look at use_xhp_attr ancestors because using XHP attrs only
-  brings in the attrs from a class, not its disposability; xhp_attrs ancestors
-  are present in the member linearization but not the ancestor linearization.
-  * Summary: the member linearization is the most complete thing to work off,
-  and is suitable so long as we filter out xhp-attrs.
+     * We need to look at things via req_extends and req_impl; they're present
+     in the member linearization but not the ancestor linearization.
+     * It doesn't matter whether we travese the implicit "stringish" interface
+     that is implicitly on classes that implement toString, since stringish
+     isn't disposable; this is present on ancestor but not member linearization.
+     * It doesn't matter whether we traverse enum include ancestors which are
+     present in member but not ancestor lienarization, since they only relate
+     to enums and don't factor into disposability.
+     * We must not look at use_xhp_attr ancestors because using XHP attrs only
+     brings in the attrs from a class, not its disposability; xhp_attrs ancestors
+     are present in the member linearization but not the ancestor linearization.
+     * Summary: the member linearization is the most complete thing to work off,
+     and is suitable so long as we filter out xhp-attrs.
   *)
   lazy
     (Sequence.exists lin_members ~f:(fun mro ->

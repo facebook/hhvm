@@ -78,9 +78,9 @@ module Cache (Entry : Entry) = struct
 
   let trim_to_memory_limit (t : t) : unit =
     (* Do a linear search and evict the least-recent entry, and repeat until
-    we're below the size threshold. NOTE: We could make this more efficient by
-    using a linked hash map instead, which would let you access the next entry
-    to be evicted in O(1) time. *)
+       we're below the size threshold. NOTE: We could make this more efficient by
+       using a linked hash map instead, which would let you access the next entry
+       to be evicted in O(1) time. *)
     while t.total_size > t.max_size do
       let oldest_entry =
         Hashtbl.fold t.entries ~init:None ~f:(fun ~key ~data acc ->
@@ -156,15 +156,15 @@ module Cache (Entry : Entry) = struct
     | None -> None
     | Some { value = Value_wrapper value; _ } ->
       (* OCaml [Hashtbl.t] isn't a heterogeneous map. There's no way to indicate
-      that the key and the value type have some relation. Consequently, the
-      [value] we've just retrieved from the hash table has type
-      [$Value_wrapper_'a] but we need one of type ['a], and there's no good way
-      to convince the OCaml compiler that these two types are equivalent.
+         that the key and the value type have some relation. Consequently, the
+         [value] we've just retrieved from the hash table has type
+         [$Value_wrapper_'a] but we need one of type ['a], and there's no good way
+         to convince the OCaml compiler that these two types are equivalent.
 
-      We hope to reduce the danger of this using this cache as a heterogeneous
-      map by having this be the only call to unsafe [Obj] functions, as opposed
-      to having every caller call into [Obj]. (The alternative is to implement a
-      heterogeneous map from scratch, or import a library for one.) *)
+         We hope to reduce the danger of this using this cache as a heterogeneous
+         map by having this be the only call to unsafe [Obj] functions, as opposed
+         to having every caller call into [Obj]. (The alternative is to implement a
+         heterogeneous map from scratch, or import a library for one.) *)
       let value = (Obj.magic value : a Entry.value) in
       Some value
 

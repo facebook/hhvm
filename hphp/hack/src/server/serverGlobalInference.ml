@@ -34,7 +34,7 @@ let is_not_acceptable ~is_return ty =
         | _ -> acc
 
       (* We consider both dynamic and nothing to be non acceptable as
-      they are "too narrow" and imprecise *)
+         they are "too narrow" and imprecise *)
       method! on_tdynamic _ _ = true
 
       method! on_tnonnull _ _ = true
@@ -43,9 +43,9 @@ let is_not_acceptable ~is_return ty =
       method! on_tunion _ _ _ = true
 
       (* mixed, even though we could infer it and add it, might lead to further
-      problems and doesn't gives us a lot of information. More conceptually
-      adding mixed annotations says "it is fine to add mixed types everywhere"
-      which is not really fine. *)
+         problems and doesn't gives us a lot of information. More conceptually
+         adding mixed annotations says "it is fine to add mixed types everywhere"
+         which is not really fine. *)
       method! on_toption acc _ ty =
         match Typing_defs.get_node ty with
         | Typing_defs.Tnonnull -> true

@@ -259,7 +259,7 @@ let rec search_node ~(env : env) ~(pattern : pattern) ~(node : Syntax.t) :
             | Some patterns -> search_and ~env ~patterns
             | None ->
               (* We tried to match a pattern for the child at at index N, but the syntax
-        list didn't have an Nth element. *)
+                 list didn't have an Nth element. *)
               (env, None)
           end)
     end
@@ -402,9 +402,9 @@ let compile_pattern (ctx : Provider_context.t) (json : Hh_json.json) :
             (child_keytrace : Hh_json.Access.keytrace) (child_name : string) :
             (child_type, string) Result.t =
           (* We're given a field name like `binary_right_operand`, but the field
-      names in the schema are things like `right_operand`, and you have to
-      affix the prefix yourself. For consistency with other tooling, we want
-      to use `binary_right_operand` instead of just `right_operand`. *)
+             names in the schema are things like `right_operand`, and you have to
+             affix the prefix yourself. For consistency with other tooling, we want
+             to use `binary_right_operand` instead of just `right_operand`. *)
           let get_prefixed_field_name field_name =
             kind_info.prefix ^ "_" ^ field_name
           in
@@ -599,7 +599,7 @@ let go
         Some (path, pattern)
       else
         (* We may not have the file information for a file such as one that we
-          ignore in `.hhconfig`. *)
+           ignore in `.hhconfig`. *)
         None
     in
     match files_to_search with

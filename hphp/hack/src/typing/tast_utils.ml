@@ -130,8 +130,8 @@ let rec truthiness env ty =
       Always_truthy
     else (
       (* Classes which implement Traversable but not Container will always be
-       truthy when empty. If this Tclass is instead an interface type like
-       KeyedTraversable, the value may or may not be truthy when empty. *)
+         truthy when empty. If this Tclass is instead an interface type like
+         KeyedTraversable, the value may or may not be truthy when empty. *)
       match Decl_provider.get_class (Env.get_ctx env) cid with
       | None -> Unknown
       | Some cls ->

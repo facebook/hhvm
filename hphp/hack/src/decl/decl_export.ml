@@ -228,7 +228,7 @@ let class_naming_and_decl ctx c =
 let collect_shallow_decls ctx workers classnames =
   let classnames = SSet.elements classnames in
   (* We're only going to fetch the shallow-decls that were explicitly listed;
-  we won't look for ancestors. *)
+     we won't look for ancestors. *)
   let job (init : 'a SMap.t) (classnames : string list) : 'a SMap.t =
     List.fold classnames ~init ~f:(fun acc cid ->
         let ast_opt =
@@ -245,7 +245,7 @@ let collect_shallow_decls ctx workers classnames =
           SMap.add acc ~key:cid ~data)
   in
   (* The 'classnames' came from a SSet, and therefore all elements are unique.
-  So we can safely assume there will be no merge collisions. *)
+     So we can safely assume there will be no merge collisions. *)
   let classes =
     MultiWorker.call
       workers

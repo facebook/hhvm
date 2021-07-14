@@ -1669,11 +1669,11 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           embedded_braced_expression_right_brace = right_b;
         } ->
       (* TODO: Consider finding a way to avoid treating these expressions as
-    opportunities for line breaks in long strings:
+         opportunities for line breaks in long strings:
 
-    $sql = "DELETE FROM `foo` WHERE `left` BETWEEN {$res->left} AND {$res
-      ->right} ORDER BY `level` DESC";
-    *)
+         $sql = "DELETE FROM `foo` WHERE `left` BETWEEN {$res->left} AND {$res
+           ->right} ORDER BY `level` DESC";
+      *)
       Concat [t env left_b; Nest [t env expr]; t env right_b]
     | Syntax.ListExpression
         {
@@ -2005,22 +2005,22 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         | Syntax.Missing -> when_present close split
         | Syntax.SyntaxList xs ->
           (* Trivia is lexed differently within an XHP body because whitespace is
-           semantically significant in an XHP body when it is adjacent to an
-           XHPBody token. Any number of whitespaces or newlines adjacent to an
-           XHPBody token will be rendered as a single space. In order to make it
-           easier to determine whether a space character should be rendered next
-           to an XHPBody token, all trailing trivia in an XHP body is lexed as
-           leading trivia for the next token (except on XHPBody tokens, where
-           trailing trivia is lexed normally). This ensures that any time
-           semantically-significant whitespace is present, at least some of it
-           occurs in the leading or trailing trivia list of an adjacent XHPBody
-           token.
+             semantically significant in an XHP body when it is adjacent to an
+             XHPBody token. Any number of whitespaces or newlines adjacent to an
+             XHPBody token will be rendered as a single space. In order to make it
+             easier to determine whether a space character should be rendered next
+             to an XHPBody token, all trailing trivia in an XHP body is lexed as
+             leading trivia for the next token (except on XHPBody tokens, where
+             trailing trivia is lexed normally). This ensures that any time
+             semantically-significant whitespace is present, at least some of it
+             occurs in the leading or trailing trivia list of an adjacent XHPBody
+             token.
 
-           To deal with this, we keep track of whether the last token we
-           transformed was one that trailing trivia is scanned for. If it
-           wasn't, we handle the next token's leading trivia list using
-           transform_xhp_leading_trivia, which treats all trivia up to the first
-           newline as trailing trivia. *)
+             To deal with this, we keep track of whether the last token we
+             transformed was one that trailing trivia is scanned for. If it
+             wasn't, we handle the next token's leading trivia list using
+             transform_xhp_leading_trivia, which treats all trivia up to the first
+             newline as trailing trivia. *)
           let prev_token_was_xhpbody = ref false in
           let transformed_body =
             Concat
@@ -2032,15 +2032,15 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                    in
 
                    (* Here, we preserve newlines after XHPBody tokens and don't otherwise
-             add splits between them. This means that we don't reflow paragraphs
-             in XHP to fit in the desired line length. It would be nice to do
-             so, but this is not possible with the current set of Rule types.
+                      add splits between them. This means that we don't reflow paragraphs
+                      in XHP to fit in the desired line length. It would be nice to do
+                      so, but this is not possible with the current set of Rule types.
 
-             If we were to add a split between each XHPBody token instead of
-             splitting only where newlines were already present, we'd need a new
-             Rule type to govern word-wrap style splitting, since using
-             independent splits (e.g. SplitWith Cost.Base) between every token
-             would make solving too expensive. *)
+                      If we were to add a split between each XHPBody token instead of
+                      splitting only where newlines were already present, we'd need a new
+                      Rule type to govern word-wrap style splitting, since using
+                      independent splits (e.g. SplitWith Cost.Base) between every token
+                      would make solving too expensive. *)
                    let preserve_xhpbody_whitespace trivia =
                      if node_is_xhpbody then
                        if has_newline trivia then
@@ -2058,8 +2058,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                      Concat
                        [
                          (* Whitespace in an XHP body is *only* significant when adjacent to
-               an XHPBody token, so we are free to add splits between other
-               nodes (like XHPExpressions and BracedExpressions). *)
+                            an XHPBody token, so we are free to add splits between other
+                            nodes (like XHPExpressions and BracedExpressions). *)
                          ( if
                            (not !prev_token_was_xhpbody) && not node_is_xhpbody
                          then
@@ -2067,9 +2067,9 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                          else
                            Nothing );
                          (* If the previous token was an XHPBody token, the lexer will have
-               scanned trailing trivia for it, so we can handle the leading
-               trivia for this node normally. Otherwise, handle the trivia up to
-               the first newline as trailing trivia. *)
+                            scanned trailing trivia for it, so we can handle the leading
+                            trivia for this node normally. Otherwise, handle the trivia up to
+                            the first newline as trailing trivia. *)
                          ( if !prev_token_was_xhpbody then
                            transform_leading_trivia leading
                          else
@@ -2092,10 +2092,10 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                 Nothing
               else if
               (* Don't collapse XHPExpressions onto a single line if they were
-               intentionally split across multiple lines in the original source.
-               If there is a newline in the body's leading trivia, we consider
-               that a signal that this expression was intended to be split
-               across multiple lines. *)
+                 intentionally split across multiple lines in the original source.
+                 If there is a newline in the body's leading trivia, we consider
+                 that a signal that this expression was intended to be split
+                 across multiple lines. *)
               has_newline (Syntax.leading_trivia body)
             then
                 Newline
@@ -3038,7 +3038,7 @@ and transform_argish
      map($vec, $element ==> {
        // ...
      });
-   *)
+  *)
   let split_when_children_split =
     if spaces then
       true
@@ -3066,7 +3066,7 @@ and transform_argish
           true
         else (
           (* When there are multiple arguments, opt into this behavior only when we
-         have no splits in any of the arguments except the last. *)
+             have no splits in any of the arguments except the last. *)
           match List.rev items with
           | [] -> assert false
           | last :: rest ->
@@ -3630,9 +3630,9 @@ and transform_trivia ~is_leading trivia =
             aux 0
           in
           (* If we're dealing with trailing trivia, then we don't have a good
-           signal for the indent level, so we just cut all leading spaces.
-           Otherwise, we cut a number of spaces equal to the indent before
-           the delimited comment opener. *)
+             signal for the indent level, so we just cut all leading spaces.
+             Otherwise, we cut a number of spaces equal to the indent before
+             the delimited comment opener. *)
           let start_index =
             if is_leading then
               min !indent (prefix_space_count str)

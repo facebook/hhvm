@@ -57,8 +57,8 @@ let make_genv options config local_config workers =
     || Option.is_some (ServerArgs.save_with_spec options);
 
   (* The number of workers is set both in hh.conf and as an optional server argument.
-    if the two numbers given in argument and in hh.conf are different, we always take the minimum
-    of the two.
+     if the two numbers given in argument and in hh.conf are different, we always take the minimum
+     of the two.
   *)
   let SLC.Watchman.
         { enabled; sockname; subscribe; init_timeout; debug_logging; _ } =

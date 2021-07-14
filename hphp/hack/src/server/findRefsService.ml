@@ -258,8 +258,8 @@ let find_refs
     |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast ctx target)
   in
   (* [files] can legitimately refer to non-existent files, e.g.
-  if they've been deleted since the depgraph was created.
-  This is how we'll filter them out. *)
+     if they've been deleted since the depgraph was created.
+     This is how we'll filter them out. *)
   let is_entry_valid entry =
     entry |> Provider_context.get_file_contents_if_present |> Option.is_some
   in

@@ -11,11 +11,11 @@ module TySet = Typing_set
 
 let factorize_common_types tyl1 tyl2 =
   (* Factorize common types, for example
-    (A | B) & (A | C) = A | (B & C)
-    and
-    (A | B | C1 | D1) & (A | B | C2 | D2) = A | B | ((C1 | D1) & (C2 | D2))
+     (A | B) & (A | C) = A | (B & C)
+     and
+     (A | B | C1 | D1) & (A | B | C2 | D2) = A | B | ((C1 | D1) & (C2 | D2))
 
-    return the common types, followed by the unique types from each input list
+     return the common types, followed by the unique types from each input list
   *)
   let tys1 = TySet.of_list tyl1 in
   let tys2 = TySet.of_list tyl2 in

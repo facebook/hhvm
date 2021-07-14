@@ -22,8 +22,8 @@ module type S = sig
   type status [@@deriving show]
 
   (* Note on the nonce parameter: it is up to the caller to specify a nonce that
-    results in the desired behavior, such as grouping multiple commands together.
-    It can be used later in `begin_cancel` to cancel a group of commands, for example. *)
+     results in the desired behavior, such as grouping multiple commands together.
+     It can be used later in `begin_cancel` to cancel a group of commands, for example. *)
   val create_command :
     nonce:string ->
     key:string ->

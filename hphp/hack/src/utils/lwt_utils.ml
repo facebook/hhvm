@@ -29,9 +29,9 @@ let select
       Lwt.return (Ok actionable_fds)
     with _ ->
       (* Although we gather a list of exceptional file descriptors here, it
-      happens that no call site of `Unix.select` in the codebase has checked
-      this list, so we could in theory just return any list (or not return any
-      exceptional file descriptors at all). *)
+         happens that no call site of `Unix.select` in the codebase has checked
+         this list, so we could in theory just return any list (or not return any
+         exceptional file descriptors at all). *)
       let exceptional_fds =
         List.filter exn_fds ~f:(fun fd -> List.mem ~equal:Poly.( = ) fds fd)
       in

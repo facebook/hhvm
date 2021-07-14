@@ -152,7 +152,7 @@ class local_types =
 
     method add id ty =
       (* If we already have a type for this identifier, don't overwrite it with
-       results from after the cursor position. *)
+         results from after the cursor position. *)
       if not (Local_id.Map.mem id results && after_cursor) then
         results <- Local_id.Map.add id ty results
 
@@ -175,7 +175,7 @@ class local_types =
           self#add id ty
       | Aast.Binop (Ast_defs.Eq _, e1, e2) ->
         (* Process the rvalue before the lvalue, since the lvalue is annotated
-         with its type after the assignment. *)
+           with its type after the assignment. *)
         self#on_expr env e2;
         self#on_expr env e1
       | _ -> super#on_expr env e

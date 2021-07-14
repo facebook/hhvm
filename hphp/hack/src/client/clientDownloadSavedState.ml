@@ -199,7 +199,7 @@ let make_replay_token
   | (false, (Some _ | None)) -> Lwt.return_none
   | (true, Some replay_token) ->
     (* No need to generate a new replay token in this case, as it would
-    contain the same data as we already have. *)
+       contain the same data as we already have. *)
     Lwt.return_some replay_token
   | (true, None) ->
     let json =

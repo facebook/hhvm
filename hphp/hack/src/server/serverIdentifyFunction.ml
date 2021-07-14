@@ -23,7 +23,7 @@ let rec take_best_suggestions l =
   match l with
   | first :: rest ->
     (* Check if we should stop finding suggestions. For example, in
-     "foo($bar)" it's not useful to look outside the local variable "$bar". *)
+       "foo($bar)" it's not useful to look outside the local variable "$bar". *)
     let stop =
       match first.SymbolOccurrence.type_ with
       | SymbolOccurrence.LocalVar -> true

@@ -425,7 +425,7 @@ let tests =
     ("test_from_error_list", test_from_error_list);
     ("test_phases", test_phases);
     (* TODO T44055462 please amend test to maintain new invariants of error API
-  "test_incremental_update", test_incremental_update; *)
+       "test_incremental_update", test_incremental_update; *)
     ("test_merge_into_current", test_merge_into_current);
     ("test_performance", test_performance);
   ]

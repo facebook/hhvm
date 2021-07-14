@@ -319,12 +319,12 @@ let rec ancestor_linearization
       {
         c with
         (* Fill in the type arguments applied to the ancestor and the position
-         where it was included into the linearization of the child class. *)
+           where it was included into the linearization of the child class. *)
         mro_type_args = type_args;
         mro_use_pos = use_pos;
         mro_ty_pos = ty_pos;
         (* If this is the mro_element representing an ancestor which directly
-         appeared in a require extends clause, tag it as a requirement. *)
+           appeared in a require extends clause, tag it as a requirement. *)
         mro_required_at =
           ( if is_requirement source then
             Some use_pos
@@ -342,11 +342,11 @@ let rec ancestor_linearization
           {
             c with
             (* Instantiate the remainder of this ancestor's linearization with the
-           type arguments applied to it. *)
+               type arguments applied to it. *)
             mro_type_args =
               List.map c.mro_type_args ~f:(Decl_instantiate.instantiate subst);
             (* Update positions of requirements in the remainder of the
-           linearization to reflect their immediate provenance as well. *)
+               linearization to reflect their immediate provenance as well. *)
             mro_required_at = Option.map c.mro_required_at ~f:(fun _ -> use_pos);
           })
     in
@@ -436,9 +436,9 @@ and next_state
       match lin with
       | [] -> Sequence.Step.Skip (Next_ancestor { ancestors; synths })
       (* Lazy.Undefined occurs if we attempt to include a linearization within
-       itself. This will only happen when we have a class dependency cycle (and
-       only in some particular circumstances), so it will not arise in legal
-       programs. *)
+         itself. This will only happen when we have a class dependency cycle (and
+         only in some particular circumstances), so it will not arise in legal
+         programs. *)
       | exception Lazy.Undefined ->
         let next =
           {
@@ -461,10 +461,10 @@ and next_state
             && is_trait next.mro_name
           then
             (* When the disallow_trait_reuse feature is enabled, we want to report
-             an error for reused traits. Instead of skipping trait
-             mro_elements when they are already present in the
-             linearization, we emit an element with the trait_reuse flag
-             set so that we can error later. *)
+               an error for reused traits. Instead of skipping trait
+               mro_elements when they are already present in the
+               linearization, we emit an element with the trait_reuse flag
+               set so that we can error later. *)
             if name_was_emitted next then
               Some { next with mro_trait_reuse = Some name }
             else
@@ -481,10 +481,10 @@ and next_state
               let synths =
                 match (next.mro_required_at, child_class_kind) with
                 (* Always aggregate synthesized ancestors for traits and
-                 interfaces (necessary for typechecking) *)
+                   interfaces (necessary for typechecking) *)
                 | (_, Ast_defs.(Ctrait | Cinterface))
                 (* Otherwise, keep them only if they represent a requirement that
-                 we will need to validate later. *)
+                   we will need to validate later. *)
                 | (Some _, Ast_defs.(Cnormal | Cabstract | Cenum)) ->
                   next :: synths
                 | (None, _) -> synths
@@ -495,9 +495,9 @@ and next_state
               (next, synths)
           | Ancestor_types ->
             (* For ancestor types, we don't care about require-extends or
-             require-implements relationships, except for the fact that we want
-             StringishObject as an ancestor if we have some ancestor which requires
-             it. *)
+               require-implements relationships, except for the fact that we want
+               StringishObject as an ancestor if we have some ancestor which requires
+               it. *)
             let should_skip =
               ( is_set mro_via_req_extends next.mro_flags
               || is_set mro_via_req_impl next.mro_flags )
@@ -564,15 +564,15 @@ and get_linearization (env : env) (class_name : string) : mro_element list =
         result lin
       | None ->
         (* There is no known definition for the class with the given name. This
-          is always an "Unbound name" error, and we will emit one wherever this
-          class was specified as an ancestor. In order to suppress downstream
-          errors (and, historically, to support the now-removed assume_php
-          feature), we include this fake mro_element with the
-          mro_class_not_found flag set. This logic is largely here to ensure
-          that the behavior of shallow_class_decl is equivalent to legacy decl,
-          and we should look into removing it (along with
-          Typing_classes_heap.members_fully_known) after we have removed legacy
-          decl. *)
+           is always an "Unbound name" error, and we will emit one wherever this
+           class was specified as an ancestor. In order to suppress downstream
+           errors (and, historically, to support the now-removed assume_php
+           feature), we include this fake mro_element with the
+           mro_class_not_found flag set. This logic is largely here to ensure
+           that the behavior of shallow_class_decl is equivalent to legacy decl,
+           and we should look into removing it (along with
+           Typing_classes_heap.members_fully_known) after we have removed legacy
+           decl. *)
         let mro_flags =
           set_bit mro_class_not_found true empty_mro_element.mro_flags
         in

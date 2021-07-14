@@ -101,7 +101,7 @@ class ['self] endo_defs_base =
         : 'a 'b. ('env -> 'a -> 'b) -> 'env -> 'a SM.t -> 'b SM.t =
       fun f env x ->
         (* FIXME: Should be possible to write a true (more efficient) endo
-         implementation rather than copying map *)
+           implementation rather than copying map *)
         let map_entry key data acc =
           let key = self#on_shape_field_name env key in
           let data = f env data in

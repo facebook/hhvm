@@ -1174,7 +1174,7 @@ and type_param ~forbid_this (genv, lenv) t =
     Errors.tparam_with_tparam pos name );
 
   (* Bring all type parameters into scope at once before traversing nested tparams,
-    as per the note above *)
+     as per the note above *)
   let env = (extend_tparams genv t.Aast.tp_parameters, lenv) in
   let tp_parameters =
     if hk_types_enabled then

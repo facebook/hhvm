@@ -348,10 +348,10 @@ let decl_and_run_mode
       ~deps_mode:Typing_deps_mode.SQLiteMode
   in
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
-  so it will look in the sqlite database for names it doesn't know.
-  This function returns the forward naming table, but we don't care about that;
-  it's only needed for tools that process file changes, to know in the event
-  of a file-change which old symbols used to be defined in the file. *)
+     so it will look in the sqlite database for names it doesn't know.
+     This function returns the forward naming table, but we don't care about that;
+     it's only needed for tools that process file changes, to know in the event
+     of a file-change which old symbols used to be defined in the file. *)
   let _naming_table_for_root : Naming_table.t option =
     Option.map naming_table_path ~f:(fun path ->
         Naming_table.load_from_sqlite ctx path)

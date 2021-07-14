@@ -85,7 +85,7 @@ let rec freshen_inside_ty env ty =
       default ()
     else
       (* TODO(T69931993) Replace Invariant here once we support arbitrary variances
-        on HK generics *)
+         on HK generics *)
       let variancel =
         List.replicate ~num:(List.length tyl) Ast_defs.Invariant
       in
@@ -287,12 +287,12 @@ let bind_to_upper_bound env r var upper_bounds =
     let upper_bounds = Utils.filter_locl_types upper_bounds in
     let (env, ty) = Inter.intersect_list env r (TySet.elements upper_bounds) in
     (* If ty is a variable (in future, if any of the types in the list are variables),
-    * then remove var from their lower bounds. Why? Because if we construct
-    *   var <: v1 , ... , vn , t
-    * for type variables v1 , ... , vn and non-type variable t
-    * then necessarily we must have var as a lower bound on each of vi
-    * so after binding var we end up with redundant bounds
-    *   v1 & ... & vn & t <: vi
+       * then remove var from their lower bounds. Why? Because if we construct
+       *   var <: v1 , ... , vn , t
+       * for type variables v1 , ... , vn and non-type variable t
+       * then necessarily we must have var as a lower bound on each of vi
+       * so after binding var we end up with redundant bounds
+       *   v1 & ... & vn & t <: vi
     *)
     let (env, ty) = Env.expand_type env ty in
     let env =
@@ -679,8 +679,8 @@ let expand_type_and_narrow
   let has_tyvar = ref false in
   let seen_tyvars = ref ISet.empty in
   (* Simplify unions in ty, but when we encounter a type variable in the process,
-  recursively replace it with the union of its lower bounds, effectively getting
-  rid of all unsolved type variables in the union. *)
+     recursively replace it with the union of its lower bounds, effectively getting
+     rid of all unsolved type variables in the union. *)
   let (env, concretized_ty) =
     Typing_union.simplify_unions env ty ~on_tyvar:(fun env r v ->
         has_tyvar := true;
@@ -749,8 +749,8 @@ let is_sub_type env ty1 ty2 =
  *)
 let rec non_null env pos ty =
   (* This is to mimic the previous behaviour of non_null on Tabstract, but
-  is hacky. We basically non_nullify the concrete supertypes of abstract
-  types. *)
+     is hacky. We basically non_nullify the concrete supertypes of abstract
+     types. *)
   let make_concrete_super_types_nonnull =
     object
       inherit Type_mapper.union_inter_type_mapper as super

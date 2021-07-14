@@ -72,8 +72,8 @@ val call_with_worker_id :
 val call_with_interrupt :
   ?on_cancelled:
     ((* [on_cancelled] should be specified if your [next] function ever returns
-     [Hh_bucket.Wait], and it should return the list of all jobs that haven't
-     finished or started yet. *)
+        [Hh_bucket.Wait], and it should return the list of all jobs that haven't
+        finished or started yet. *)
      unit ->
     'a list) ->
   worker list option ->

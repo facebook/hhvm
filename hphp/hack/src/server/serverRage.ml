@@ -13,7 +13,7 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
   let open ServerRageTypes in
   let open ServerEnv in
   (* Gather up the contents of all files that hh_server believes are in the
-    IDE different from what's on disk *)
+     IDE different from what's on disk *)
   let unsaved_items =
     ServerFileSync.get_unsaved_changes env
     |> Relative_path.Map.map ~f:fst

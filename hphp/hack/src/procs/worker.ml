@@ -195,24 +195,24 @@ let read_and_process_job ic oc : job_outcome =
       end
   | End_of_file ->
     (* This happens in the expected graceful shutdown path of our unit tests:
-    the controller shuts down its end of the pipe, and therefore when we
-    call [from_fd_with_preamble] above to get the next work-item, we get End_of_file.
-    We're catching it here, rather than solely around [from_fd_with_preamble],
-    because it's easier. This is fine because workers do no reading other than from
-    the server. *)
+       the controller shuts down its end of the pipe, and therefore when we
+       call [from_fd_with_preamble] above to get the next work-item, we get End_of_file.
+       We're catching it here, rather than solely around [from_fd_with_preamble],
+       because it's easier. This is fine because workers do no reading other than from
+       the server. *)
     `Controller_has_died
   | Unix.Unix_error (Unix.EPIPE, _, _) ->
     (* This happens in the expected abrupt shutdown path of hh_server:
-    the controller process shuts down, and therefore when we finish our batch
-    of work and try to write the answer in [send_result] above, we get EPIPE.
-    We're catching it here, rather than solely around [send_result], because
-    it's easier. This is fine because workers have no other pipes other than
-    to the server. We do log to the server-log, though, which is fair since
-    it was an abrupt shutdown. *)
+       the controller process shuts down, and therefore when we finish our batch
+       of work and try to write the answer in [send_result] above, we get EPIPE.
+       We're catching it here, rather than solely around [send_result], because
+       it's easier. This is fine because workers have no other pipes other than
+       to the server. We do log to the server-log, though, which is fair since
+       it was an abrupt shutdown. *)
     (* Note: there are other manifestations of server shutdown, e.g.
-    Marshal_tools.Reading_Preamble_Exception. I'm not confident I know all
-    of them, nor can tell which ones are expected vs unexpected, so I'll
-    leave them all to the catch-all handler below. *)
+       Marshal_tools.Reading_Preamble_Exception. I'm not confident I know all
+       of them, nor can tell which ones are expected vs unexpected, so I'll
+       leave them all to the catch-all handler below. *)
     Hh_logger.log "Worker got EPIPE due to server shutdown";
     `Controller_has_died
   | exn ->
@@ -223,10 +223,10 @@ let read_and_process_job ic oc : job_outcome =
     EventLogger.log_if_initialized (fun () ->
         HackEventLogger.worker_exception e);
     (* What exit code should we emit for an uncaught exception?
-    The ocaml runtime emits exit code 2 for uncaught exceptions.
-    We should really pick our own different code here, but (history) we don't.
-    How can we convey exit code 2? By unfortunate accident, Exit_status.Type_error
-    gets turned into "2". So that's how we're going to return exit code 2. Yuck. *)
+       The ocaml runtime emits exit code 2 for uncaught exceptions.
+       We should really pick our own different code here, but (history) we don't.
+       How can we convey exit code 2? By unfortunate accident, Exit_status.Type_error
+       gets turned into "2". So that's how we're going to return exit code 2. Yuck. *)
     `Error Exit_status.Type_error
 
 (*****************************************************************************

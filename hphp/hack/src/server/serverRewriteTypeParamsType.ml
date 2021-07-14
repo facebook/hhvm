@@ -28,12 +28,12 @@ let parameter_type_collector =
     method plus = Pos.AbsolutePosMap.union ~combine:(fun _ a b -> Some (a @ b))
 
     (* Here we want to rewrite some type hints to a more "complete" version.
-    To do that we proceed in several steps:
-    1) Find type parameters with some type hints
-    2) Compare the localized type hint with the the inferred hint. If they
-     are the same then we didn't rewrote it so we leave the annotation as
-     if. Otherwise we replace the annotations
-  *)
+       To do that we proceed in several steps:
+       1) Find type parameters with some type hints
+       2) Compare the localized type hint with the the inferred hint. If they
+        are the same then we didn't rewrote it so we leave the annotation as
+        if. Otherwise we replace the annotations
+    *)
     method! on_fun_param env fun_param =
       let tenv = Tast_env.tast_env_as_typing_env env in
       let inferred_hint =
@@ -71,7 +71,7 @@ let is_not_acceptable ty =
         | _ -> acc
 
       (* We consider both dynamic and nothing to be non acceptable as
-      they are "too narrow" and imprecise *)
+         they are "too narrow" and imprecise *)
       method! on_tdynamic _ _ = true
     end
   in
@@ -118,7 +118,7 @@ let get_patches ctx file =
   in
   let tast =
     (* [Infer_params] is not implemented with a TAST check, so we can skip TAST
-    checks safely. *)
+       checks safely. *)
     Typing_toplevel.nast_to_tast
       ~do_tast_checks:false
       ctx

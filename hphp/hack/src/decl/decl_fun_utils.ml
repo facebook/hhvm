@@ -239,11 +239,11 @@ let where_constraint env (ty1, ck, ty2) =
 
 let check_params paraml =
   (* We wish to give an error on the first non-default parameter
-  after a default parameter. That is:
-  function foo(int $x, ?int $y = null, int $z)
-  is an error on $z. *)
+     after a default parameter. That is:
+     function foo(int $x, ?int $y = null, int $z)
+     is an error on $z. *)
   (* TODO: This check doesn't need to be done at type checking time; it is
-  entirely syntactic. When we switch over to the FFP, remove this code. *)
+     entirely syntactic. When we switch over to the FFP, remove this code. *)
   let rec loop seen_default paraml =
     match paraml with
     | [] -> ()

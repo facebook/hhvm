@@ -172,7 +172,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
       | ([], Some repl_ty, None) -> (env, mk (r, repl_ty))
       | (_ :: _, _, None) ->
         (* No kinding info, but type arguments given. We don't know the kinds of the arguments,
-          so we can't localize them. Not much we can do. *)
+           so we can't localize them. Not much we can do. *)
         (env, mk (Reason.none, Terr))
     in
     begin
@@ -242,7 +242,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     (env, ty)
   | Taccess (root_ty, id) ->
     (* Sometimes, Tthis and Tgeneric are not expanded to Tabstract, so we need
-    to allow accessing abstract type constants here. *)
+       to allow accessing abstract type constants here. *)
     let rec allow_abstract_tconst ty =
       match get_node ty with
       | Tthis
@@ -301,9 +301,9 @@ and localize_targs_by_kind
     List.map2_env (env, ety_env) tyargs nkinds ~f:localize_targ_by_kind
   in
   (* Note that we removed superfluous type arguments, because we don't have a kind to localize
-    them against.
-    It would also be useful to fill in Terr for missing type arguments, but this breaks some
-    checks on built-in collections that check the number of type arguments *after* localization. *)
+     them against.
+     It would also be useful to fill in Terr for missing type arguments, but this breaks some
+     checks on built-in collections that check the number of type arguments *after* localization. *)
   (env, tyl)
 
 and localize_targ_by_kind (env, ety_env) ty (nkind : KindDefs.Simple.named_kind)
@@ -506,7 +506,7 @@ and localize_with_kind
             (env, mk (Reason.none, Terr))
         | None ->
           (* FIXME: Ideally, we would like to fail here, but sometimes we see type
-            parameters without an entry in the environment. *)
+             parameters without an entry in the environment. *)
           (env, mk (r, Tgeneric (name, [])))
       end
     | Tgeneric (_, _targs)
@@ -576,9 +576,9 @@ and localize_ft
    fun ~nested env t ->
     let (env, cstrl) =
       (* TODO(T70068435)
-        For nested type parameters (i.e., type parameters of type parameters),
-        we do not support constraints, yet. If nested type parameters do have
-        constraints, this is reported earlier. We just throw them away here. *)
+         For nested type parameters (i.e., type parameters of type parameters),
+         we do not support constraints, yet. If nested type parameters do have
+         constraints, this is reported earlier. We just throw them away here. *)
       if nested then
         (env, [])
       else
@@ -586,9 +586,9 @@ and localize_ft
             let (env, ty) = localize_cstr_ty ~ety_env env ty t.tp_name in
             let name_str = snd t.tp_name in
             (* In order to access type constants on generics on where clauses,
-             we need to add the constraints from the type parameters into the
-             environment before localizing the where clauses with them. Temporarily
-             add them to the environment here, and reset the environment later. *)
+               we need to add the constraints from the type parameters into the
+               environment before localizing the where clauses with them. Temporarily
+               add them to the environment here, and reset the environment later. *)
             let env =
               match ck with
               | Ast_defs.Constraint_as -> Env.add_upper_bound env name_str ty
@@ -1048,7 +1048,7 @@ let localize_generic_parameters_with_bounds
   let localize_bound
       env ({ tp_name = (pos, name); tp_constraints = cstrl; _ } : decl_tparam) =
     (* TODO(T70068435) This may have to be touched when adding support for constraints on HK
-      types *)
+       types *)
     let tparam_ty = mk (Reason.Rwitness_from_decl pos, Tgeneric (name, [])) in
     List.map_env env cstrl ~f:(fun env (ck, cstr) ->
         let (env, ty) = localize env cstr ~ety_env in

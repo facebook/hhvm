@@ -293,9 +293,9 @@ let is_class_disjoint env c1 c2 =
         not (Cls.has_ancestor c2_def c1)
       else
         (* Given two non-final classes, if either is an interface or trait, then
-         there could be a c3, and so we consider the classes to not be disjoint.
-         However, if they are both classes, then c3 must be either c1 or c2 since
-         we don't have multiple inheritance. *)
+           there could be a c3, and so we consider the classes to not be disjoint.
+           However, if they are both classes, then c3 must be either c1 or c2 since
+           we don't have multiple inheritance. *)
         (not (is_interface_or_trait c1_def))
         && (not (is_interface_or_trait c2_def))
         && (not (Cls.has_ancestor c2_def c1))
@@ -422,8 +422,8 @@ let describe_ty_default env ty =
 
 let describe_ty ~is_coeffect : env -> internal_type -> string =
   (* Optimization: specialize on partial application, i.e.
-  *    let describe_ty_sub = describe_ty ~is_coeffect in
-  *  will check the flag only once, not every time the function is called *)
+     *    let describe_ty_sub = describe_ty ~is_coeffect in
+     *  will check the flag only once, not every time the function is called *)
   if not is_coeffect then
     describe_ty_default
   else
@@ -646,7 +646,7 @@ and default_subtype
             | Some new_visited ->
               let subtype_env = { subtype_env with visited = new_visited } in
               (* If the generic is actually an expression dependent type,
-                we need to update this_ty
+                 we need to update this_ty
               *)
               let this_ty =
                 if
@@ -658,17 +658,17 @@ and default_subtype
                   this_ty
               in
               (* Otherwise, we collect all the upper bounds ("as" constraints) on
-                the generic parameter, and check each of these in turn against
-                ty_super until one of them succeeds
+                 the generic parameter, and check each of these in turn against
+                 ty_super until one of them succeeds
               *)
               let rec try_bounds tyl env =
                 match tyl with
                 | [] ->
                   (* Try an implicit mixed = ?nonnull bound before giving up.
-                    This can be useful when checking T <: t, where type t is
-                    equivalent to but syntactically different from ?nonnull.
-                    E.g., if t is a generic type parameter T with nonnull as
-                    a lower bound.
+                     This can be useful when checking T <: t, where type t is
+                     equivalent to but syntactically different from ?nonnull.
+                     E.g., if t is a generic type parameter T with nonnull as
+                     a lower bound.
                   *)
                   let r =
                     Reason.Rimplicit_upper_bound (get_pos lty_sub, "?nonnull")
@@ -911,7 +911,7 @@ and simplify_subtype_i
           match (d_kind, d_required, d_variadic) with
           | (SplatUnpack, _ :: _, _) ->
             (* return the env so as not to discard the type variable that might
-            have been created for the Traversable type created below. *)
+               have been created for the Traversable type created below. *)
             invalid_env_with env (fun () ->
                 Errors.unpack_array_required_argument
                   (Reason.to_pos r_super)
@@ -1208,17 +1208,17 @@ and simplify_subtype_i
                 res ||| simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super)
           in
           (* Heuristicky logic to decide whether to "break" the intersection
-          or the union first, based on observing that the following cases often occur:
-            - A & B <: (A & B) | C
-              In which case we want to "break" the union on the right first
-              in order to have the following recursive calls :
-                  A & B <: A & B
-                  A & B <: C
-            - A & (B | C) <: B | C
-              In which case we want to "break" the intersection on the left first
-              in order to have the following recursive calls:
-                  A <: B | C
-                  B | C <: B | C
+             or the union first, based on observing that the following cases often occur:
+               - A & B <: (A & B) | C
+                 In which case we want to "break" the union on the right first
+                 in order to have the following recursive calls :
+                     A & B <: A & B
+                     A & B <: C
+               - A & (B | C) <: B | C
+                 In which case we want to "break" the intersection on the left first
+                 in order to have the following recursive calls:
+                     A <: B | C
+                     B | C <: B | C
           *)
           if List.exists tyl_super ~f:(Typing_utils.is_tintersection env) then
             simplify_sub_union env ty_sub tyl_super
@@ -1242,8 +1242,8 @@ and simplify_subtype_i
             when String.equal name_sup name_sub ->
             simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env
           (* A <: ?B iif A & nonnull <: B
-      Only apply if B is a type variable or an intersection, to avoid oscillating
-      forever between this case and the previous one. *)
+             Only apply if B is a type variable or an intersection, to avoid oscillating
+             forever between this case and the previous one. *)
           | ((_, Tintersection tyl), (Tintersection _ | Tvar _))
             when let (_, non_ty_opt, _) =
                    find_type_with_exact_negation env tyl
@@ -1296,7 +1296,7 @@ and simplify_subtype_i
             simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env
           (* This is treating the option as a union, and using the sound, but incomplete,
              t <: t1 | t2 to (t <: t1) || (t <: t2) reduction
-              *)
+          *)
           | ((_, Tneg _), _) ->
             simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env)
       )
@@ -1580,7 +1580,7 @@ and simplify_subtype_i
             which might become
               D <: Tany
             if say C is covariant.
-            *)
+        *)
         | _ ->
           let ty_super = anyfy env r_super ty_sub in
           simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env))
@@ -2303,8 +2303,8 @@ and simplify_subtype_has_member
         (r, has_member_ty)
         env
     (* TODO
-    | (_, Tdependent _) ->
-    | (_, Tgeneric _) ->
+       | (_, Tdependent _) ->
+       | (_, Tgeneric _) ->
     *)
     | _ ->
       let explicit_targs =
@@ -2346,24 +2346,23 @@ and simplify_subtype_variance
  fun env ->
   let simplify_subtype reify_kind =
     (* When doing coercions from dynamic we treat dynamic as a bottom type. This is generally
-      correct, except for the case when the generic isn't erased. When a generic is
-      reified it is enforced as if it is it's own separate class in the runtime. i.e.
-      In the code:
+       correct, except for the case when the generic isn't erased. When a generic is
+       reified it is enforced as if it is it's own separate class in the runtime. i.e.
+       In the code:
 
-        class Box<reify T> {}
-        function box_int(): Box<int> { return new Box<~int>(); }
+         class Box<reify T> {}
+         function box_int(): Box<int> { return new Box<~int>(); }
 
-      If is enforced like:
-        class Box<reify T> {}
-        class Box_int extends Box<int> {}
-        class Box_like_int extends Box<~int> {}
+       If is enforced like:
+         class Box<reify T> {}
+         class Box_int extends Box<int> {}
+         class Box_like_int extends Box<~int> {}
 
-        function box_int(): Box_int { return new Box_like_int(); }
+         function box_int(): Box_int { return new Box_like_int(); }
 
-      Thus we cannot push the like type to the outside of generic like we can
-      we erased generics.
-
-     *)
+       Thus we cannot push the like type to the outside of generic like we can
+       we erased generics.
+    *)
     let subtype_env =
       if
         (not Aast.(equal_reify_kind reify_kind Erased))
@@ -2423,29 +2422,29 @@ and simplify_subtype_params
   in
   match (subl, superl) with
   (* When either list runs out, we still have to typecheck that
-  the remaining portion sub/super types with the other's variadic.
-  For example, if
-  ChildClass {
-    public function a(int $x = 0, string ... $args) // superl = [int], super_var = string
-  }
-  overrides
-  ParentClass {
-    public function a(string ... $args) // subl = [], sub_var = string
-  }
-  , there should be an error because the first argument will be checked against
-  int, not string that is, ChildClass::a("hello") would crash,
-  but ParentClass::a("hello") wouldn't.
+     the remaining portion sub/super types with the other's variadic.
+     For example, if
+     ChildClass {
+       public function a(int $x = 0, string ... $args) // superl = [int], super_var = string
+     }
+     overrides
+     ParentClass {
+       public function a(string ... $args) // subl = [], sub_var = string
+     }
+     , there should be an error because the first argument will be checked against
+     int, not string that is, ChildClass::a("hello") would crash,
+     but ParentClass::a("hello") wouldn't.
 
-  Similarly, if the other list is longer, aka
-  ChildClass  extends ParentClass {
-    public function a(mixed ... $args) // superl = [], super_var = mixed
-  }
-  overrides
-  ParentClass {
-    //subl = [string], sub_var = string
-    public function a(string $x = 0, string ... $args)
-  }
-  It should also check that string is a subtype of mixed.
+     Similarly, if the other list is longer, aka
+     ChildClass  extends ParentClass {
+       public function a(mixed ... $args) // superl = [], super_var = mixed
+     }
+     overrides
+     ParentClass {
+       //subl = [string], sub_var = string
+       public function a(string $x = 0, string ... $args)
+     }
+     It should also check that string is a subtype of mixed.
   *)
   | ([], _) ->
     (match variadic_super_ty with
@@ -2595,7 +2594,7 @@ and simplify_param_ifc ~subtype_env sub super env =
 
 and simplify_param_readonly ~subtype_env sub super env =
   (* The sub param here (as with all simplify_param_* functions)
-  is actually the parameter on ft_super, since params are contravariant *)
+     is actually the parameter on ft_super, since params are contravariant *)
   (* Thus we check readonly subtyping covariantly *)
   let { fp_pos = pos1; _ } = sub in
   let { fp_pos = pos2; _ } = super in
@@ -2809,9 +2808,9 @@ and simplify_subtype_funs
   &&& begin
         (* If both fun policies are IFC public, there's no need to check for inheritance issues *)
         (* There is the chance that the super function has an <<__External>> argument and the sub function does not,
-          but <<__External>> on a public policied function literally just means the argument must be governed by the public policy,
-          so should be an error in any case.
-          *)
+           but <<__External>> on a public policied function literally just means the argument must be governed by the public policy,
+           so should be an error in any case.
+        *)
         let check_params_ifc =
           non_public_ifc ft_super.ft_ifc_decl
           || non_public_ifc ft_sub.ft_ifc_decl
@@ -3345,11 +3344,11 @@ let is_type_disjoint env ty1 ty2 =
       false
     | ((Tshape _ | Tdarray _), _) ->
       (* Treat shapes as dict<arraykey, mixed> because that implementation detail
-       leaks through when doing is dict<_, _> on them, and they are also
-       Traversable, KeyedContainer, etc. (along with darrays).
-       We could translate darray to a more precise dict type with the same
-       type arguments, but it doesn't matter since disjointness doesn't ever
-       look at them. *)
+         leaks through when doing is dict<_, _> on them, and they are also
+         Traversable, KeyedContainer, etc. (along with darrays).
+         We could translate darray to a more precise dict type with the same
+         type arguments, but it doesn't matter since disjointness doesn't ever
+         look at them. *)
       let r = get_reason ty1 in
       is_type_disjoint
         visited_tyvars
@@ -3371,11 +3370,11 @@ let is_type_disjoint env ty1 ty2 =
       | List.Or_unequal_lengths.Unequal_lengths -> true)
     | ((Ttuple _ | Tvarray _), _) ->
       (* Treat tuples as vec<mixed> because that implementation detail
-       leaks through when doing is vec<_> on them, and they are also
-       Traversable, Container, etc. along with varrays.
-       We could translate varray to a more precise vec type with the same
-       type argument, but it doesn't matter since disjointness doesn't ever
-       look at it. *)
+         leaks through when doing is vec<_> on them, and they are also
+         Traversable, Container, etc. along with varrays.
+         We could translate varray to a more precise vec type with the same
+         type argument, but it doesn't matter since disjointness doesn't ever
+         look at it. *)
       let r = get_reason ty1 in
       is_type_disjoint visited_tyvars env MakeType.(vec r (mixed r)) ty2
     | (_, (Ttuple _ | Tvarray _)) ->
@@ -3428,17 +3427,17 @@ let is_type_disjoint env ty1 ty2 =
     | (Tneg (Neg_class (_, c1)), Tclass ((_, c2), _, _tyl))
     | (Tclass ((_, c2), _, _tyl), Tneg (Neg_class (_, c1))) ->
       (* These are disjoint iff for all objects o, o in c2<_tyl> implies that
-        o notin (complement (Union tyl'. c1<tyl'>)), which is just that
-        c2<_tyl> subset Union tyl'. c1<tyl'>. If c2 is a subclass of c1, then
-        whatever _tyl is, we can chase up the hierarchy to find an instantiation
-        for tyl'. If c2 is not a subclass of c1, then no matter what the tyl' are
-        the subset realtionship cannot hold, since either c1 and c2 are disjoint tags,
-        or c1 is a non-equal subclass of c2, and so objects that are exact c2,
-        can't inhabit c1. NB, we aren't allowing abstractness of a class to cause
-        types to be considered disjoint.
-        e.g., in abstract class C {}; class D extends C {}, we wouldn't consider
-        neg D and C to be disjoint.
-        *)
+         o notin (complement (Union tyl'. c1<tyl'>)), which is just that
+         c2<_tyl> subset Union tyl'. c1<tyl'>. If c2 is a subclass of c1, then
+         whatever _tyl is, we can chase up the hierarchy to find an instantiation
+         for tyl'. If c2 is not a subclass of c1, then no matter what the tyl' are
+         the subset realtionship cannot hold, since either c1 and c2 are disjoint tags,
+         or c1 is a non-equal subclass of c2, and so objects that are exact c2,
+         can't inhabit c1. NB, we aren't allowing abstractness of a class to cause
+         types to be considered disjoint.
+         e.g., in abstract class C {}; class D extends C {}, we wouldn't consider
+         neg D and C to be disjoint.
+      *)
       Typing_utils.is_sub_class_refl env c2 c1
     | (Tneg _, _)
     | (_, Tneg _) ->
@@ -3489,7 +3488,7 @@ let decompose_subtype_add_bound
   (* name_sub <: ty_super so add an upper bound on name_sub *)
   | (Tgeneric (name_sub, targs), _) when not (phys_equal ty_sub ty_super) ->
     (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
-      but the add_upper_bound call must be adapted *)
+       but the add_upper_bound call must be adapted *)
     log_subtype
       ~level:2
       ~this_ty:None
@@ -3506,7 +3505,7 @@ let decompose_subtype_add_bound
   (* ty_sub <: name_super so add a lower bound on name_super *)
   | (_, Tgeneric (name_super, targs)) when not (phys_equal ty_sub ty_super) ->
     (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
-      but the add_lower_bound call must be adapted *)
+       but the add_lower_bound call must be adapted *)
     log_subtype
       ~level:2
       ~this_ty:None

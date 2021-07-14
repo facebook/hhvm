@@ -136,7 +136,7 @@ let col_widths (msgs : Pos.absolute Errors.message list) :
  *)
 let format_error (error : Errors.finalized_error) : string =
   (* Sort messages such that messages in the same file are together.
-    Does not reorder the files or messages within a file. *)
+     Does not reorder the files or messages within a file. *)
   let msgs =
     Errors.get_messages error
     |> Errors.combining_sort ~f:(fun msg ->

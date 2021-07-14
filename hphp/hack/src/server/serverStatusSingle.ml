@@ -28,7 +28,7 @@ let go file_input ctx =
       in
       let { Tast_provider.Compute_tast_and_errors.errors; _ } =
         (* Explicitly put the contents of `ctx` in a quarantine, since they
-        may overwrite naming table entries. *)
+           may overwrite naming table entries. *)
         Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
             Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry)
       in

@@ -123,9 +123,9 @@ let go ctx ast result =
                cls
                method_name)
       (* It'd be nice to take the "earliest" method in the linearization,
-      whatever that is. But alas order of all_ancestor_names isn't
-      specified (in practice is alphabetical). So we'll just pick an
-      arbitrary one. *)
+         whatever that is. But alas order of all_ancestor_names isn't
+         specified (in practice is alphabetical). So we'll just pick an
+         arbitrary one. *)
       |> List.hd
     in
     (match matching_method with

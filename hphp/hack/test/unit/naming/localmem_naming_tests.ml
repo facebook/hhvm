@@ -222,10 +222,10 @@ let test_dupe_setup ~(sqlite : bool) =
   let ctx = setup.Common_setup.ctx in
 
   (* In the common_setup, 'foo.php' defines symbols Foo,f1,f2.
-  Let's make another file 'nonexistent.php' define duplicates,
-  but with different capitalization for Foo.
-  It gets written to disk because canon-name-lookups have
-  to read from disk to resolve canon names. *)
+     Let's make another file 'nonexistent.php' define duplicates,
+     but with different capitalization for Foo.
+     It gets written to disk because canon-name-lookups have
+     to read from disk to resolve canon names. *)
   let contents =
     Str.global_replace
       (Str.regexp "class Foo")

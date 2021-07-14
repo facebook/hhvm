@@ -235,8 +235,8 @@ class cursor ~client_id ~cursor_state =
         match cursor_state with
         | Typecheck_result _ ->
           (* Don't need to typecheck any previous cursors. The fanout of
-            the files that have changed before this typecheck have already
-            been processed. Stop recursion here. *)
+             the files that have changed before this typecheck have already
+             been processed. Stop recursion here. *)
           acc
         | Saved_state { dep_table_errors_saved_state_path; _ } ->
           let errors : SaveStateServiceTypes.saved_state_errors =
@@ -324,7 +324,7 @@ class cursor ~client_id ~cursor_state =
         (errors, None)
       | (Saved_state _ | Saved_state_delta _) as current_cursor ->
         (* The global reverse naming table is updated by calling this
-        function. We can discard the forward naming table returned to us. *)
+           function. We can discard the forward naming table returned to us. *)
         let (_naming_table : Naming_table.t) = self#load_naming_table ctx in
 
         let files_to_typecheck = self#get_files_to_typecheck in
@@ -442,7 +442,7 @@ let init_state_dir (state_dir : Path.t) ~(populate_dir : Path.t -> unit) : unit
         | Disk.Rename_target_already_exists _
         | Disk.Rename_target_dir_not_empty _ ->
           (* Assume that the directory was initialized by another process
-          before us, so we don't need to do anything further. *)
+             before us, so we don't need to do anything further. *)
           ())
 
 let make_reference_implementation (state_dir : Path.t) : state =

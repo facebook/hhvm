@@ -461,7 +461,7 @@ let builder =
             this#start_rule_kind ~rule_kind:Rule.Parental
           in
           (* If we have a pending split which is not a hard split, replace it with a
-         Parental rule, which will break if the body breaks. *)
+             Parental rule, which will break if the body breaks. *)
           let override_independent_split =
             match next_split_rule with
             | RuleKind Rule.Always -> false
@@ -469,11 +469,11 @@ let builder =
             | _ -> false
           in
           (* Starting a new rule will override the independent split, controlling
-         that split with the new Parental rule instead. *)
+             that split with the new Parental rule instead. *)
           if override_independent_split then start_parental_rule ();
 
           (* Regardless of whether we intend to override the preceding split, start
-         a new Parental rule to govern the contents of the body. *)
+             a new Parental rule to govern the contents of the body. *)
           after_next_string <- Some start_parental_rule;
           this#consume_doc body;
           this#end_rule ();

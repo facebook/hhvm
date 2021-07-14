@@ -561,7 +561,7 @@ let int_ n = JSON_Number (string_of_int n)
 let float_ n =
   if Float.is_infinite n || Float.is_nan n then
     (* nan/infinite isn't a valid value in json and will result in something unparseable;
-    null is the best we can do. *)
+       null is the best we can do. *)
     JSON_Null
   else
     let s = string_of_float n in

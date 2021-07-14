@@ -221,8 +221,8 @@ let autocomplete_member ~is_static env class_ cid id =
       List.sort ~compare:(fun (a, _) (b, _) -> String.compare a b) list
     in
     (* There's no reason for us to sort -- we can expect our client to do its
-    own sorting of our results -- but having a sorted list here makes our tests
-    more stable. *)
+       own sorting of our results -- but having a sorted list here makes our tests
+       more stable. *)
     if is_static || match_both_static_and_instance then (
       List.iter
         (get_class_elt_types env class_ cid (Cls.smethods class_ |> sort))
@@ -759,16 +759,16 @@ let visitor =
 
     method! on_Xml env sid attrs el =
       (* In the case where we're autocompleting an open XHP bracket but haven't
-       typed anything beyond that yet:
+         typed anything beyond that yet:
 
-          $x = <
+            $x = <
 
-       we'll end up with the following AST:
+         we'll end up with the following AST:
 
-          (Xml () () (:AUTO332))
+            (Xml () () (:AUTO332))
 
-       In order to handle this, we strip off the leading `:` if one exists and
-       use that as the search term. *)
+         In order to handle this, we strip off the leading `:` if one exists and
+         use that as the search term. *)
       let trimmed_sid = (fst sid, snd sid |> Utils.strip_both_ns) in
       autocomplete_id trimmed_sid env;
       let cid = Aast.CI sid in
@@ -781,7 +781,7 @@ let visitor =
                    | (_, Aast.Id id_id) ->
                      (* This handles the situation
                           <foo:bar my-attribute={AUTO332}
-                        *)
+                     *)
                      autocomplete_xhp_enum_attribute_value
                        (snd id)
                        ty
@@ -807,7 +807,7 @@ let visitor =
           | _ -> ());
 
       (* If we don't clear out c_uses we'll end up overwriting the trait
-       completion as soon as we get to on_Happly. *)
+         completion as soon as we get to on_Happly. *)
       super#on_class_ env { cls with Aast.c_uses = [] }
   end
 
@@ -841,7 +841,7 @@ class local_types =
 
     method add id ty =
       (* If we already have a type for this identifier, don't overwrite it with
-       results from after the cursor position. *)
+         results from after the cursor position. *)
       if not (Local_id.Map.mem id results && after_cursor) then
         results <- Local_id.Map.add id ty results
 
@@ -864,7 +864,7 @@ class local_types =
           self#add id ty
       | Aast.Binop (Ast_defs.Eq _, e1, e2) ->
         (* Process the rvalue before the lvalue, since the lvalue is annotated
-         with its type after the assignment. *)
+           with its type after the assignment. *)
         self#on_expr env e2;
         self#on_expr env e1
       | _ -> super#on_expr env e
@@ -972,13 +972,13 @@ let find_global_results
     ()
   else if ctx.is_open_curly_without_equals then
     (* In the case that we trigger autocompletion with an open curly brace,
-    we only want to perform autocompletion if it is preceded by an equal sign.
+       we only want to perform autocompletion if it is preceded by an equal sign.
 
-    i.e. if (true) {
-      --> Do not autocomplete
+       i.e. if (true) {
+         --> Do not autocomplete
 
-    i.e. <foo:bar my-attribute={
-      --> Allow autocompletion
+       i.e. <foo:bar my-attribute={
+         --> Allow autocompletion
     *)
     ()
   else (

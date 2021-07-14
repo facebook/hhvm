@@ -310,9 +310,9 @@ let get_files_in_path ~args path =
       match args.parser with
       | LOWERER ->
         (* TODO(shiqicao): parser_massive_add_exp.php and parser_massive_concat_exp.php crashs
-          Ocaml with SYNTAX ERROR: Expression recursion limit reached. Rust doesn't crash,
-          but we still need to set a limit for Rust lowerer.
-         *)
+           Ocaml with SYNTAX ERROR: Expression recursion limit reached. Rust doesn't crash,
+           but we still need to set a limit for Rust lowerer.
+        *)
         (not @@ String_utils.string_ends_with f "parser_massive_add_exp.php")
         && not
            @@ String_utils.string_ends_with f "parser_massive_concat_exp.php"

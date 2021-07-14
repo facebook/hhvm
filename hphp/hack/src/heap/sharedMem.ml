@@ -145,8 +145,8 @@ let get_telemetry_list = ref []
 
 let get_telemetry () : Telemetry.t =
   (* This function gets called by compute_tast, even in places which
-  deliberately don't initialize shared memory. In these places, no-op,
-  since otherwise reading from hh_log_level would segfault. *)
+     deliberately don't initialize shared memory. In these places, no-op,
+     since otherwise reading from hh_log_level would segfault. *)
   if not !ref_has_done_init then
     Telemetry.create ()
   else
@@ -960,9 +960,9 @@ functor
         in
         let (actions, depth) = rec_actions_and_depth 0 0 !stack in
         (* We count reachable words of the entire stack, to avoid double-
-        counting in cases where a value appears in multiple stack frames.
-        If instead we added up reachable words from each frame separately,
-        then an item reachable from two frames would be double-counted. *)
+           counting in cases where a value appears in multiple stack frames.
+           If instead we added up reachable words from each frame separately,
+           then an item reachable from two frames would be double-counted. *)
         let bytes =
           if hh_log_level () > 0 then
             Some (Obj.reachable_words (Obj.repr !stack) * (Sys.word_size / 8))
@@ -1560,9 +1560,9 @@ struct
 
   let get_telemetry (telemetry : Telemetry.t) : Telemetry.t =
     (* Many items are stored in both L1 (ordered) and L2 (freq) caches.
-    We don't want to double-count them.
-    So: we'll figure out the reachable words of the (L1,L2) tuple,
-    and we'll figure out the set union of keys in both of them. *)
+       We don't want to double-count them.
+       So: we'll figure out the reachable words of the (L1,L2) tuple,
+       and we'll figure out the set union of keys in both of them. *)
     let (obj1, keys1) = L1.get_telemetry_items_and_keys () in
     let (obj2, keys2) = L2.get_telemetry_items_and_keys () in
     let count =

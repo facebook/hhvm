@@ -81,7 +81,7 @@ let find_symbol_in_context_with_suppression
     (match fallback () with
     | Some (pos, name_type) ->
       (* If fallback said it thought the symbol was in ctx, but we definitively
-      know that it isn't, then the answer is None. *)
+         know that it isn't, then the answer is None. *)
       if is_pos_in_ctx ~ctx pos then
         None
       else
@@ -237,11 +237,11 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
     | Provider_backend.Analysis
     | Provider_backend.Shared_memory ->
       (* NB: as written, this code may return a canon name even when the
-        given symbol has been deleted in a context entry. We're relying on
-        the caller to have called `remove_fun_batch` on any deleted symbols
-        before having called this function. `get_fun_canon_name` is only
-        called in some functions in `Naming_global`, which expects the caller
-        to have called `Naming_global.remove_decls` already. *)
+         given symbol has been deleted in a context entry. We're relying on
+         the caller to have called `remove_fun_batch` on any deleted symbols
+         before having called this function. `get_fun_canon_name` is only
+         called in some functions in `Naming_global`, which expects the caller
+         to have called `Naming_global.remove_decls` already. *)
       Naming_heap.Funs.get_canon_name ctx name
     | Provider_backend.Local_memory
         { Provider_backend.reverse_naming_table_delta; _ } ->
@@ -255,7 +255,7 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
           |> Option.map ~f:(fun path -> (FileInfo.Fun, path)))
       >>= fun (_name_type, path) ->
       (* If reverse_naming_table_delta thought the symbol was in ctx, but we definitively
-      know that it isn't, then it isn't. *)
+         know that it isn't, then it isn't. *)
       if is_path_in_ctx ~ctx path then
         None
       else
@@ -462,11 +462,11 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     | Provider_backend.Analysis
     | Provider_backend.Shared_memory ->
       (* NB: as written, this code may return a canon name even when the
-      given symbol has been deleted in a context entry. We're relying on
-      the caller to have called `remove_fun_batch` on any deleted symbols
-      before having called this function. `get_type_canon_name` is only
-      called in some functions in `Naming_global`, which expects the caller
-      to have called `Naming_global.remove_decls` already. *)
+         given symbol has been deleted in a context entry. We're relying on
+         the caller to have called `remove_fun_batch` on any deleted symbols
+         before having called this function. `get_type_canon_name` is only
+         called in some functions in `Naming_global`, which expects the caller
+         to have called `Naming_global.remove_decls` already. *)
       Naming_heap.Types.get_canon_name ctx name
     | Provider_backend.Local_memory
         { Provider_backend.reverse_naming_table_delta; _ } ->
@@ -481,7 +481,7 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
           |> Option.map ~f:(fun (path, kind) -> (kind_to_name_type kind, path)))
       >>= fun (name_type, path) ->
       (* If reverse_naming_table_delta thought the symbol was in ctx, but we definitively
-      know that it isn't, then it isn't. *)
+         know that it isn't, then it isn't. *)
       if is_path_in_ctx ~ctx path then
         None
       else
@@ -629,9 +629,9 @@ let remove
   match SMap.find_opt delta name with
   | None ->
     (* We've never yet read/cached from sqlite. Presumably the caller is removing
-    the name->path mapping that we assume is present in sqlite. We could read
-    from sqlite right now solely to verify that the user-supplied path matches
-    the one that's in sqlite, but that'd be costly and doesn't seem worth it. *)
+       the name->path mapping that we assume is present in sqlite. We could read
+       from sqlite right now solely to verify that the user-supplied path matches
+       the one that's in sqlite, but that'd be costly and doesn't seem worth it. *)
     SMap.add delta ~key:name ~data:Deleted
   | Some Deleted -> failwith "removing symbol that's already removed"
   | Some (Pos ((_name_type, old_path), [])) ->
@@ -736,9 +736,9 @@ let update
         remove_fun_batch backend (strip_positions old_file_info.funs);
         remove_const_batch backend (strip_positions old_file_info.consts));
     (* Add new entries. Note: the caller is expected to have a solution
-    for duplicate names. Note: can't use [Naming_global.ndecl_file_skip_if_already_bound]
-    because it attempts to look up the symbol by doing a file parse, but
-    we have to use the file_info we're given to avoid races. *)
+       for duplicate names. Note: can't use [Naming_global.ndecl_file_skip_if_already_bound]
+       because it attempts to look up the symbol by doing a file parse, but
+       we have to use the file_info we're given to avoid races. *)
     Option.iter new_file_info ~f:(fun new_file_info ->
         List.iter new_file_info.funs ~f:(fun (pos, name) ->
             add_fun backend name pos);
@@ -761,16 +761,16 @@ let update
     (* helper*)
     let update ?(case_insensitive = false) olds news delta name_type =
       (* The following code has a bug.
-      Given "olds/news", it calculates "added/removed" based on case-sensitive comparison.
-      That's straightforwardly correct for our case-sensitives maps.
-      But how does it work for our case-insensitive maps? e.g. olds={Aa,aA}, news={aa}.
-      Therefore added={aa}, removed={Aa,aA} because we calculated these case-sensitively.
-      (1) it removes the lowercase version of "Aa"
-      (2) it removes the lowercase version of "aA"  <-- failwith
-      (3) it adds the lowercase version of "aa"
-      Correctness requires that removal is idempotent, and that we do adds
-      after removes. Unfortunately removal currently isn't idempotent;
-      if fails if you try to remove the same thing twice. *)
+         Given "olds/news", it calculates "added/removed" based on case-sensitive comparison.
+         That's straightforwardly correct for our case-sensitives maps.
+         But how does it work for our case-insensitive maps? e.g. olds={Aa,aA}, news={aa}.
+         Therefore added={aa}, removed={Aa,aA} because we calculated these case-sensitively.
+         (1) it removes the lowercase version of "Aa"
+         (2) it removes the lowercase version of "aA"  <-- failwith
+         (3) it adds the lowercase version of "aa"
+         Correctness requires that removal is idempotent, and that we do adds
+         after removes. Unfortunately removal currently isn't idempotent;
+         if fails if you try to remove the same thing twice. *)
       let olds = strip_positions olds in
       let news = strip_positions news in
       let olds_s = SSet.of_list olds in

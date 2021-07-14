@@ -71,9 +71,9 @@ let parsing
   Stats.(stats.init_parsing_heap_size <- hs);
 
   (* The true count of how many files we parsed is wrapped up in the get_next closure.
-  But our caller provides us 'count' option in cases where it knows the number in
-  advance, e.g. during init. We'll log that for now. In future it'd be nice to
-  log the actual number parsed. *)
+     But our caller provides us 'count' option in cases where it knows the number in
+     advance, e.g. during init. We'll log that for now. In future it'd be nice to
+     log the actual number parsed. *)
   HackEventLogger.parsing_end_for_init t hs ~parsed_count:count;
   let env =
     { env with naming_table; errorl = Errors.merge errorl env.errorl }

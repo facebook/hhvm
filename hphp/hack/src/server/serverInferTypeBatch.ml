@@ -107,8 +107,8 @@ let parallel_helper
     |> Relative_path.Map.values
   in
   (* pos_by_file is a list-of-lists [[posA1;posA2;...];[posB1;...];...]
-  where each inner list [posA1;posA2;...] is all for the same file.
-  This is so that a given file is only ever processed by a single worker. *)
+     where each inner list [posA1;posA2;...] is all for the same file.
+     This is so that a given file is only ever processed by a single worker. *)
   MultiWorker.call
     workers
     ~job:(fun acc pos_by_file -> helper ctx acc (List.concat pos_by_file))

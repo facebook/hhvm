@@ -147,22 +147,22 @@ let go_ide
     |> convert_to_ide_result ~range
   | Position position ->
     (* `get_offset` returns a zero-based index, and `--at-char` takes a
- zero-based index. *)
+       zero-based index. *)
     let fc_position = Ide_api_types.ide_pos_to_fc position in
     let offset = get_offset content fc_position in
     let args = ["--at-char"; string_of_int offset] in
     let args = args @ formatting_options_to_args options in
     go_hackfmt ~filename_for_logging ~content args >>= fun lines ->
     (* `hackfmt --at-char` returns the range that was formatted, as well as the
- contents of that range. For example, it might return
+       contents of that range. For example, it might return
 
-     10 12
-     }
+           10 12
+           }
 
- signifying that we should replace the character under the cursor with the
- following content, starting at index 10. We need to extract the range
- from the first line and forward it to the client so that it knows where
- to apply the edit. *)
+       signifying that we should replace the character under the cursor with the
+       following content, starting at index 10. We need to extract the range
+       from the first line and forward it to the client so that it knows where
+       to apply the edit. *)
     begin
       match lines with
       | range_line :: lines -> Ok (range_line, lines)
@@ -170,8 +170,8 @@ let go_ide
     end
     >>= fun (range_line, lines) ->
     (* Extract the offsets in the first line that form the range.
- NOTE: `Str.string_match` sets global state to be consumed immediately
- afterwards by `Str.matched_group`. *)
+       NOTE: `Str.string_match` sets global state to be consumed immediately
+       afterwards by `Str.matched_group`. *)
     let does_range_match = Str.string_match range_regexp range_line 0 in
     if not does_range_match then
       Error "Range not found on first line of --at-char output"

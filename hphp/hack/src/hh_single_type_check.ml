@@ -1959,7 +1959,7 @@ let handle_mode
     ClientHighlightRefs.go results ~output_json:false
   | Errors when batch_mode ->
     (* For each file in our batch, run typechecking serially.
-      Reset the heaps every time in between. *)
+       Reset the heaps every time in between. *)
     iter_over_files (fun filename ->
         let oc =
           Out_channel.create (Relative_path.to_absolute filename ^ out_extension)
@@ -1992,7 +1992,7 @@ let handle_mode
         ))
   | Decl_compare when batch_mode ->
     (* For each file in our batch, run typechecking serially.
-      Reset the heaps every time in between. *)
+       Reset the heaps every time in between. *)
     iter_over_files (fun filename ->
         let oc =
           Out_channel.create (Relative_path.to_absolute filename ^ ".decl_out")
@@ -2364,8 +2364,8 @@ let decl_and_run_mode
   (match mode with
   | Dump_deps ->
     (* In addition to actually recording the dependencies in shared memory,
-     we build a non-hashed respresentation of the dependency graph
-     for printing. *)
+       we build a non-hashed respresentation of the dependency graph
+       for printing. *)
     let get_debug_trace root obj =
       let root = Typing_deps.Dep.variant_to_string root in
       let obj = Typing_deps.Dep.variant_to_string obj in
@@ -2382,8 +2382,8 @@ let decl_and_run_mode
   (match mode with
   | Dump_glean_deps ->
     (* In addition to actually recording the dependencies in shared memory,
-     we build a non-hashed respresentation of the dependency graph
-     for printing. In the callback we receive this as dep_right uses dep_left. *)
+       we build a non-hashed respresentation of the dependency graph
+       for printing. In the callback we receive this as dep_right uses dep_left. *)
     let get_debug_trace dep_right dep_left =
       HashSet.add dbg_glean_deps (dep_left, dep_right)
     in
@@ -2397,10 +2397,10 @@ let decl_and_run_mode
       ~deps_mode:Typing_deps_mode.SQLiteMode
   in
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
-  so it will look in the sqlite database for names it doesn't know.
-  This function returns the forward naming table, but we don't care about that;
-  it's only needed for tools that process file changes, to know in the event
-  of a file-change which old symbols used to be defined in the file. *)
+     so it will look in the sqlite database for names it doesn't know.
+     This function returns the forward naming table, but we don't care about that;
+     it's only needed for tools that process file changes, to know in the event
+     of a file-change which old symbols used to be defined in the file. *)
   let _naming_table_for_root : Naming_table.t option =
     Option.map naming_table_path ~f:(fun path ->
         Naming_table.load_from_sqlite ctx path)

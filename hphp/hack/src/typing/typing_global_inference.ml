@@ -274,8 +274,8 @@ module StateConstraintGraph = struct
       (type_map, env, errors)
     else
       (* Collect each global tyvar and map it to a global environment in
-      * which it lives. Give preference to the global environment which also
-      * has positional information for this type variable *)
+         * which it lives. Give preference to the global environment which also
+         * has positional information for this type variable *)
       let initial_tyvar_sources : (Pos_or_decl.t * Inf.t_global) IMap.t =
         List.fold subgraphs ~init:IMap.empty ~f:(fun m (_, genv) ->
             List.fold (Inf.get_vars_g genv) ~init:m ~f:(fun m var ->
@@ -315,7 +315,7 @@ module StateSolvedGraph = struct
   let from_constraint_graph ((type_map, env, errors) : StateConstraintGraph.t) :
       t =
     (* For any errors seen during the last step (that is graph merging), we bind
-    the corresponding tyvar to Terr *)
+       the corresponding tyvar to Terr *)
     let vars = Env.get_all_tyvars env in
     let env =
       List.fold vars ~init:env ~f:(fun env var ->

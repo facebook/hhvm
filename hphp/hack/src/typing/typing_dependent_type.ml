@@ -103,8 +103,8 @@ module ExprDepTy = struct
       | (_, Tclass (((_, x) as c), Nonexact, tyl)) ->
         let class_ = Env.get_class env x in
         (* If a class is both final and variant, we must treat it as non-final
-        * since we can't statically guarantee what the runtime type
-        * will be.
+           * since we can't statically guarantee what the runtime type
+           * will be.
         *)
         if
           Option.value_map class_ ~default:false ~f:(fun class_ty ->

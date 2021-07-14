@@ -73,10 +73,10 @@ let diff_naming_table args =
     get_test_control_pair args naming_table_filename
   in
   (* - By default the tool is run on saved-state of the form
-       "devinfra_saved_state/tree/hack/<hash>" which saves the
-       naming table in ocaml-blob format.
-    - The saved state "devinfra_saved_state/tree/hack/naming/<hash>"
-      would have naming table in the sqlite format.
+        "devinfra_saved_state/tree/hack/<hash>" which saves the
+        naming table in ocaml-blob format.
+     - The saved state "devinfra_saved_state/tree/hack/naming/<hash>"
+       would have naming table in the sqlite format.
   *)
   let is_sqlite = false in
   DiffNamingTable.diff

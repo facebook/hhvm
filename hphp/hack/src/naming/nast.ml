@@ -343,9 +343,9 @@ let remove_pos_and_docblock ast =
 (* Given an AST, generate a unique hash for its decl tree. *)
 let generate_ast_decl_hash ast =
   (* Why we marshal it into a string first: regular Hashtbl.hash will
-    collide improperly because it doesn't compare ADTs with strings correctly.
-    Using Marshal, we guarantee that the two ASTs are represented by a single
-    primitive type, which we hash.
+     collide improperly because it doesn't compare ADTs with strings correctly.
+     Using Marshal, we guarantee that the two ASTs are represented by a single
+     primitive type, which we hash.
   *)
   let str = Marshal.to_string (remove_pos_and_docblock ast) [] in
   OpaqueDigest.string str

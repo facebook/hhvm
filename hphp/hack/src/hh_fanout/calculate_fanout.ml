@@ -179,7 +179,7 @@ let calculate_dep_set_for_path
   in
 
   (* NB: could be optimized by constructing sets or by not using polymorphic
-  equality. *)
+     equality. *)
   let (modified_symbols, removed_symbols) =
     List.partition_tf old_symbols ~f:(fun old_symbol ->
         List.exists new_symbols ~f:(fun new_symbol ->
@@ -238,7 +238,7 @@ let go
   in
 
   (* We have the dependencies -- now traverse the dependency graph to get
-  their dependents. *)
+     their dependents. *)
   let fanout_dependents =
     Typing_deps.add_all_deps deps_mode fanout_dependencies
   in

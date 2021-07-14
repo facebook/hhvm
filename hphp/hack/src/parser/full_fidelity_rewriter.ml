@@ -47,10 +47,10 @@ module WithSyntax (Syntax : RewritableType) = struct
      node.
 
      The function itself returns (acc, node)
-     *)
+  *)
   let parented_aggregating_rewrite_post f node init_acc =
     (* aux takes parents node accumulator and returns
-      (acc, node result)  *)
+       (acc, node result) *)
     let rec aux parents node acc =
       (* Start by rewriting all the children.
          We begin by obtaining a node list, and then from it producing

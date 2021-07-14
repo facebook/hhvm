@@ -294,7 +294,7 @@ let process_attribute_xref ctx attr opt_info (xrefs, prog) =
         Some (parent_decl_predicate (get_parent_kind cls))
   in
   (* Process <<__Override>>, for which we write a MethodOverrides fact
-  instead of a cross-reference *)
+     instead of a cross-reference *)
   if String.equal attr.name "__Override" then
     match opt_info with
     | None ->
@@ -333,7 +333,7 @@ let process_attribute_xref ctx attr opt_info (xrefs, prog) =
                   prog
               in
               (* Cross-references for overrides could be added to FileXRefs by calling
-                'process_member_xref' here with 'sym_def' and 'attr.pos' *)
+                 'process_member_xref' here with 'sym_def' and 'attr.pos' *)
               (xrefs, prog)))))
   (* Ignore other built-in attributes *)
   else if String.is_prefix attr.name ~prefix:"__" then
@@ -342,7 +342,7 @@ let process_attribute_xref ctx attr opt_info (xrefs, prog) =
   else
     try
       (* Look for a container declaration with the same name as the attribute,
-      which will be where it is defined *)
+         which will be where it is defined *)
       match get_con_preds_from_name attr.name with
       | None -> (xrefs, prog)
       | Some con_pred_types ->
@@ -471,8 +471,8 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
 let progress_to_json progress =
   let preds =
     (* The order is the reverse of how these items appear in the JSON,
-    which is significant because later entries can refer to earlier ones
-    by id only *)
+       which is significant because later entries can refer to earlier ones
+       by id only *)
     [
       ("src.FileLines.1", progress.resultJson.fileLines);
       ("hack.FileDeclarations.5", progress.resultJson.fileDeclarations);

@@ -50,10 +50,10 @@ let check_enum_exhaustiveness pos tc caselist coming_from_unresolved =
   match (all_cases_handled, has_default, coming_from_unresolved) with
   | (false, false, _) ->
     (* In what order should we list the unhandled ones?
-    Some people might prefer an alphabetical order.
-    Some people might prefer to see the list in order of declaration.
-    It honestly doesn't matter. I'm picking this because I
-    like errors to be deterministic. *)
+       Some people might prefer an alphabetical order.
+       Some people might prefer to see the list in order of declaration.
+       It honestly doesn't matter. I'm picking this because I
+       like errors to be deterministic. *)
     Errors.enum_switch_nonexhaustive
       pos
       (unhandled |> List.sort ~compare:String.compare)

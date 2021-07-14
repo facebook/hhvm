@@ -359,7 +359,6 @@ namespace {
 Func* setupNullClsMethod(Func* f, Class* cls, StringData* name) {
   assertx(f && f->isPhpLeafFn());
   auto clone = f->clone(cls, name);
-  clone->setNewFuncId();
   clone->setAttrs(static_cast<Attr>(
                     AttrPublic | AttrNoInjection | AttrDynamicallyCallable));
   clone->setRequiredCoeffects(RuntimeCoeffects::pure());

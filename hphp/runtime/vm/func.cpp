@@ -153,27 +153,31 @@ void* Func::allocFuncMem(int numParams) {
 }
 
 void Func::destroy(Func* func) {
-  if (!func->m_funcId.isInvalid()) {
-    if (jit::mcgen::initialized() && RuntimeOption::EvalEnableReusableTC) {
-      // Free TC-space associated with func
-      jit::tc::reclaimFunction(func);
-    }
+  if (jit::mcgen::initialized() && RuntimeOption::EvalEnableReusableTC) {
+    // Free TC-space associated with func
+    jit::tc::reclaimFunction(func);
+  }
+
+  if (func->m_registeredInDataMap) {
+    func->deregisterInDataMap();
+  }
 
 #ifndef USE_LOWPTR
+  if (!func->m_funcId.isInvalid()) {
     assertx(s_funcVec.get(func->m_funcId.toInt()) == func);
     s_funcVec.set(func->m_funcId.toInt(), nullptr);
+    func->m_funcId = {FuncId::Invalid};
+  }
 #endif
 
-    if (func->m_registeredInDataMap) {
-      func->deregisterInDataMap();
-    }
-    func->m_funcId = FuncId::Invalid;
-
-    if (s_treadmill.load(std::memory_order_acquire)) {
-      Treadmill::enqueue([func](){ destroy(func); });
-      return;
-    }
+  if (s_treadmill.load(std::memory_order_acquire)) {
+    Treadmill::enqueue([func](){
+      func->~Func();
+      lower_free(func);
+    });
+    return;
   }
+
   func->~Func();
   lower_free(func);
 }
@@ -187,16 +191,17 @@ void Func::freeClone() {
     jit::tc::reclaimFunction(this);
   }
 
-  if (!m_funcId.isInvalid()) {
+  if (m_registeredInDataMap) {
+    deregisterInDataMap();
+  }
+
 #ifndef USE_LOWPTR
+  if (!m_funcId.isInvalid()) {
     assertx(s_funcVec.get(m_funcId.toInt()) == this);
     s_funcVec.set(m_funcId.toInt(), nullptr);
-#endif
-    if (m_registeredInDataMap) {
-      deregisterInDataMap();
-    }
-    m_funcId = FuncId::Invalid;
+    m_funcId = {FuncId::Invalid};
   }
+#endif
 
   m_cloned.flag.clear();
 }
@@ -218,7 +223,6 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   f->m_cloned.flag.test_and_set();
   f->initPrologues(numParams);
   f->m_funcBody = nullptr;
-  f->m_funcId = FuncId::Invalid;
   if (name) f->m_name = name;
   f->m_u.setCls(cls);
   f->setFullName(numParams);
@@ -229,6 +233,10 @@ Func* Func::clone(Class* cls, const StringData* name) const {
     f->m_registeredInDataMap = false;
   }
 
+#ifndef USE_LOWPTR
+  f->m_funcId = {FuncId::Invalid};
+#endif
+  f->setNewFuncId();
   return f;
 }
 
@@ -346,8 +354,10 @@ void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
 }
 
 void Func::registerInDataMap() {
-  assertx(!m_funcId.isInvalid() &&
-          (!m_isPreFunc || m_cloned.flag.test_and_set()));
+#ifndef USE_LOWPTR
+  assertx(!m_funcId.isInvalid());
+#endif
+  assertx((!m_isPreFunc || m_cloned.flag.test_and_set()));
   assertx(!m_registeredInDataMap);
   assertx(mallocEnd());
   data_map::register_start(this);
@@ -356,8 +366,10 @@ void Func::registerInDataMap() {
 
 void Func::deregisterInDataMap() {
   assertx(m_registeredInDataMap);
-  assertx(!m_funcId.isInvalid() &&
-          (!m_isPreFunc || m_cloned.flag.test_and_set()));
+  assertx((!m_isPreFunc || m_cloned.flag.test_and_set()));
+#ifndef USE_LOWPTR
+  assertx(!m_funcId.isInvalid());
+#endif
   data_map::deregister(this);
   m_registeredInDataMap = false;
 }
@@ -392,8 +404,6 @@ FuncId::Int Func::maxFuncIdNum() {
 
 #ifdef USE_LOWPTR
 void Func::setNewFuncId() {
-  assertx(m_funcId.isInvalid());
-  m_funcId = {this};
   s_nextFuncId.fetch_add(1, std::memory_order_relaxed);
 }
 

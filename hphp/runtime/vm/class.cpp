@@ -1856,7 +1856,6 @@ static Func* findSpecialMethod(Class* cls, const StringData* name) {
   if (!cls->preClass()->hasMethod(name)) return nullptr;
   Func* f = cls->preClass()->lookupMethod(name);
   f = f->clone(cls);
-  f->setNewFuncId();
   f->setBaseCls(cls);
   f->setHasPrivateAncestor(false);
   return f;
@@ -2167,7 +2166,6 @@ void Class::setMethods() {
       methodOverrideCheck(parentMethod, method);
       // Overlay.
       Func* f = method->clone(this);
-      f->setNewFuncId();
       Class* baseClass;
       assertx(!(f->attrs() & AttrPrivate) ||
              (parentMethod->attrs() & AttrPrivate));
@@ -2186,7 +2184,6 @@ void Class::setMethods() {
       Class* baseClass = this;
       // Append.
       Func* f = method->clone(this);
-      f->setNewFuncId();
       f->setBaseCls(baseClass);
       f->setHasPrivateAncestor(false);
       builder.add(method->name(), f);
@@ -3442,7 +3439,6 @@ void Class::addTraitPropInitializers(std::vector<const Func*>& thisInitVec,
       // This allows 86[psl]init to determine the property offset for the
       // initializer array corectly.
       Func *f = traitInitVec[m]->clone(this);
-      f->setNewFuncId();
       f->setBaseCls(this);
       f->setHasPrivateAncestor(false);
       thisInitVec.push_back(f);
@@ -3487,7 +3483,6 @@ void Class::setInitializers() {
     // current class.
     for (const auto& linit : m_parent->m_linitVec) {
       Func *f = linit->clone(this);
-      f->setNewFuncId();
       f->setBaseCls(this);
       f->setHasPrivateAncestor(false);
       linits.push_back(f);
@@ -4550,7 +4545,6 @@ void importTraitMethod(Class* cls,
     parentMethod = existingMethod;
   }
   Func* f = method->clone(cls, mdata.name);
-  f->setNewFuncId();
   f->setAttrs(modifiers | AttrTrait);
   if (!parentMethod) {
     // New method

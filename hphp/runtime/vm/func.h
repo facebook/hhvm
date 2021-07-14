@@ -252,12 +252,14 @@ struct Func final {
    */
   FuncId getFuncId() const;
 
+private:
   /*
    * Reserve the next available FuncId for `this', and add `this' to the
    * function table.
    */
   void setNewFuncId();
 
+public:
   /*
    * The max FuncId num.
    */
@@ -1664,7 +1666,9 @@ private:
   int m_magic;
 #endif
   AtomicLowPtr<uint8_t> m_funcBody{nullptr};
+#ifndef USE_LOWPTR
   FuncId m_funcId{FuncId::Invalid};
+#endif
   mutable AtomicLowPtr<const StringData> m_fullName{nullptr};
   LowStringPtr m_name{nullptr};
 
@@ -1695,7 +1699,7 @@ private:
   bool m_shouldSampleJit : 1;
   bool m_hasForeignThis : 1;
   bool m_registeredInDataMap : 1;
-  // 2 free bits
+  // 3 free bits
   RuntimeCoeffects m_requiredCoeffects{RuntimeCoeffects::none()};
   int16_t m_maxStackCells{0};
   uint64_t m_inoutBitVal{0};
@@ -1711,7 +1715,7 @@ private:
   AtomicLowPtr<uint8_t> m_prologueTable[1];
 };
 static constexpr size_t kFuncSize = debug ? (use_lowptr ? 80 : 112)
-                                          : (use_lowptr ? 80 : 104);
+                                          : (use_lowptr ? 72 : 104);
 static_assert(CheckSize<Func, kFuncSize>(), "");
 
 ///////////////////////////////////////////////////////////////////////////////

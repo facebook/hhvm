@@ -264,7 +264,7 @@ let parse_check_args cmd =
         "<raw|context|highlighted> Error formatting style" );
       ( "--extract-standalone",
         Arg.String (fun name -> set_mode (MODE_EXTRACT_STANDALONE name)),
-        " extract a given function / method together with its dependencies as a standalone file"
+        " extract a given function / method together with its dependencies as a standalone file. Usage: --extract-standalone Classname::methodName or function_name"
       );
       ( "--concatenate-all",
         Arg.Unit (fun () -> set_mode MODE_CONCATENATE_ALL),

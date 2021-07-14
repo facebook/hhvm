@@ -54,10 +54,16 @@ end)
 
 let parse_function_or_method_id ~func_action ~meth_action name =
   let pieces = Str.split (Str.regexp "::") name in
+  let default_namespace str =
+    match Str.first_chars str 1 with
+    | "\\" -> str
+    | _ -> "\\" ^ str
+  in
   try
     match pieces with
-    | class_name :: method_name :: _ -> meth_action class_name method_name
-    | fun_name :: _ -> func_action fun_name
+    | class_name :: method_name :: _ ->
+      meth_action (default_namespace class_name) method_name
+    | fun_name :: _ -> func_action (default_namespace fun_name)
     | _ -> raise Exit
   with _ ->
     Printf.eprintf "Invalid input\n";

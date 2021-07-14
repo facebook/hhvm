@@ -21,8 +21,9 @@
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/hash-table.h"
 #include "hphp/runtime/base/mixed-array-keys.h"
-#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/tv-layout.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include <folly/portability/Constexpr.h>
@@ -139,6 +140,13 @@ struct MixedArrayElm {
 
   ALWAYS_INLINE bool isInvalid() const {
     return isTombstone();
+  }
+
+  ALWAYS_INLINE void erase() {
+    if (hasStrKey()) {
+      decRefStr(skey);
+    }
+    tvDecRefGen(data);
   }
 
   // Elm's data.m_type == kInvalidDataType for deleted slots.
@@ -489,13 +497,6 @@ private:
 
   void updateNextKI(int64_t removedKey, bool updateNext);
   void eraseNoCompact(RemovePos pos);
-  void erase(RemovePos pos) {
-    eraseNoCompact(pos);
-    if (m_size <= m_used / 2) {
-      // Compact in order to keep elms from being overly sparse.
-      compact(false);
-    }
-  }
 
   MixedArray* moveVal(TypedValue& tv, TypedValue v);
 
@@ -525,7 +526,7 @@ private:
    * for elements. compact() rebuilds the hash table and compacts the
    * elements into the slots with lower addresses.
    */
-  void compact(bool renumber);
+  void compact(bool renumber = false);
 
   bool isZombie() const { return m_used + 1 == 0; }
   void setZombie() { m_used = -uint32_t{1}; }

@@ -307,25 +307,6 @@ void SetArray::insert(StringData* k, strhash_t h) {
 template <bool Move>
 void SetArray::insert(StringData* k) { return insert<Move>(k, k->hash()); }
 
-void SetArray::erase(RemovePos pos) {
-  assertx(pos.valid() && pos.elmIdx < m_used);
-  hashTab()[pos.probeIdx] = Tombstone;
-
-  auto const elms = data();
-  auto& elm = elms[pos.elmIdx];
-  assertx(!elm.isInvalid());
-  tvDecRefGen(&elm.tv);
-  elm.setTombstone();
-  --m_size;
-
-  if (m_size <= m_used / 2) {
-    /*
-     * Compact the array when the load become <=.5.
-     */
-    compact();
-  }
-}
-
 //////////////////////////////////////////////////////////////////////
 
 TypedValue SetArray::getElm(ssize_t ei) const {
@@ -550,6 +531,10 @@ ArrayData* SetArray::SetIntMove(ArrayData*, int64_t, TypedValue) {
 
 ArrayData* SetArray::SetStrMove(ArrayData*, StringData*, TypedValue) {
   throwInvalidKeysetOperation();
+}
+
+void SetArray::eraseNoCompact(RemovePos pos) {
+  HashTable::eraseNoCompact(pos);
 }
 
 template<class K> ArrayData*

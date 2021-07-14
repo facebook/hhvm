@@ -1005,24 +1005,8 @@ void MixedArray::updateNextKI(int64_t removedKi, bool updateNext) {
 }
 
 void MixedArray::eraseNoCompact(RemovePos pos) {
-  assertx(pos.valid());
-  hashTab()[pos.probeIdx] = Tombstone;
-
-  Elm* elms = data();
-  auto& e = elms[pos.elmIdx];
-  auto const oldTV = e.data;
-  if (e.hasStrKey()) {
-    decRefStr(e.skey);
-  }
-  e.setTombstone();
+  HashTable::eraseNoCompact(pos);
   mutableKeyTypes()->recordTombstone();
-
-  --m_size;
-  // Mark the hash entry as "deleted".
-  assertx(m_used <= capacity());
-
-  // Finally, decref the old value
-  tvDecRefGen(oldTV);
 }
 
 ArrayData* MixedArray::RemoveInt(ArrayData* ad, int64_t k) {

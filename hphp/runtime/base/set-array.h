@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-common.h"
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/hash-table.h"
-#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include <folly/portability/Constexpr.h>
@@ -129,6 +129,10 @@ struct SetArrayElm {
     return tv.m_type == kEmpty || isTombstone();
   }
 
+  ALWAYS_INLINE void erase() {
+    tvDecRefGen(&tv);
+  }
+
   static constexpr ptrdiff_t keyOff() {
     return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_data.pstr);
   }
@@ -212,6 +216,8 @@ private:
 
   static ArrayData* ToDArrayImpl(const SetArray*);
 
+  void eraseNoCompact(RemovePos pos);
+
 private:
   SetArray() = delete;
   SetArray(const SetArray&) = delete;
@@ -272,8 +278,6 @@ private:
   void insert(StringData* k, strhash_t h);
   template <bool Move>
   void insert(StringData* k);
-
-  void erase(RemovePos);
 
   /*
    * Append idx at the end of the linked list containing the set
@@ -422,4 +426,3 @@ HASH_TABLE_CHECK_OFFSETS(SetArray, SetArrayElm)
 //////////////////////////////////////////////////////////////////////
 
 }
-

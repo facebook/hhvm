@@ -253,6 +253,28 @@ struct HashTable : HashTableCommon {
   // Return the key at the given element, without any refcount ops.
   static TypedValue GetPosKey(const ArrayData* ad, ssize_t pos);
 
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Erase
+  /////////////////////////////////////////////////////////////////////////////
+  void eraseNoCompact(RemovePos pos) {
+    assertx(pos.valid());
+    hashTab()[pos.probeIdx] = Tombstone;
+
+    ElmType* elms = data();
+    auto& e = elms[pos.elmIdx];
+    e.ElmType::erase();
+    e.setTombstone();
+
+    --array()->m_size;
+    assertx(m_used <= capacity());
+  }
+
+  ALWAYS_INLINE void erase(RemovePos pos) {
+    array()->ArrayType::eraseNoCompact(pos);
+    if (array()->m_size <= m_used / 2) array()->compact();
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // findForNewInsertImpl
   /////////////////////////////////////////////////////////////////////////////
@@ -488,4 +510,3 @@ private:
 }  // namespace HPHP
 
 #include "hphp/runtime/base/hash-table-inl.h"
-

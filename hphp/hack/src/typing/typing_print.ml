@@ -700,11 +700,11 @@ module Full = struct
 
   let to_string_strip_ns ~ty env x = to_string ~ty text_strip_ns env x
 
-  let to_string_decl _ctx (x : decl_ty) =
+  let to_string_decl (x : decl_ty) =
     let ty = decl_ty in
     to_string ~ty Doc.text Declenv x
 
-  let fun_to_string _ctx (x : decl_fun_type) =
+  let fun_to_string (x : decl_fun_type) =
     let ty = decl_ty in
     fun_type ~ty Doc.text ISet.empty Declenv x
     |> Libhackfmt.format_doc_unbroken format_env
@@ -1477,10 +1477,10 @@ module PrintClass = struct
     | Ast_defs.Ctrait -> "Ctrait"
     | Ast_defs.Cenum -> "Cenum"
 
-  let constraint_ty ctx = function
-    | (Ast_defs.Constraint_as, ty) -> "as " ^ Full.to_string_decl ctx ty
-    | (Ast_defs.Constraint_eq, ty) -> "= " ^ Full.to_string_decl ctx ty
-    | (Ast_defs.Constraint_super, ty) -> "super " ^ Full.to_string_decl ctx ty
+  let constraint_ty = function
+    | (Ast_defs.Constraint_as, ty) -> "as " ^ Full.to_string_decl ty
+    | (Ast_defs.Constraint_eq, ty) -> "= " ^ Full.to_string_decl ty
+    | (Ast_defs.Constraint_super, ty) -> "super " ^ Full.to_string_decl ty
 
   let variance = function
     | Ast_defs.Covariant -> "+"
@@ -1488,7 +1488,6 @@ module PrintClass = struct
     | Ast_defs.Invariant -> ""
 
   let rec tparam
-      ctx
       {
         tp_variance = var;
         tp_name = (position, name);
@@ -1501,7 +1500,7 @@ module PrintClass = struct
       if List.is_empty params then
         ""
       else
-        "<" ^ tparam_list ctx params ^ ">"
+        "<" ^ tparam_list params ^ ">"
     in
     variance var
     ^ pos_or_decl position
@@ -1511,7 +1510,7 @@ module PrintClass = struct
     ^ " "
     ^ List.fold_right
         cstrl
-        ~f:(fun x acc -> constraint_ty ctx x ^ " " ^ acc)
+        ~f:(fun x acc -> constraint_ty x ^ " " ^ acc)
         ~init:""
     ^
     match reified with
@@ -1519,10 +1518,10 @@ module PrintClass = struct
     | Nast.SoftReified -> " soft reified"
     | Nast.Reified -> " reified"
 
-  and tparam_list ctx l =
-    List.fold_right l ~f:(fun x acc -> tparam ctx x ^ ", " ^ acc) ~init:""
+  and tparam_list l =
+    List.fold_right l ~f:(fun x acc -> tparam x ^ ", " ^ acc) ~init:""
 
-  let class_elt ctx ({ ce_visibility; ce_type = (lazy ty); _ } as ce) =
+  let class_elt ({ ce_visibility; ce_type = (lazy ty); _ } as ce) =
     let vis =
       match ce_visibility with
       | Vpublic -> "public"
@@ -1536,18 +1535,18 @@ module PrintClass = struct
       else
         ""
     in
-    let type_ = Full.to_string_decl ctx ty in
+    let type_ = Full.to_string_decl ty in
     synth ^ vis ^ " " ^ type_
 
-  let class_elts ctx m =
+  let class_elts m =
     List.fold m ~init:"" ~f:(fun acc (field, v) ->
-        "(" ^ field ^ ": " ^ class_elt ctx v ^ ") " ^ acc)
+        "(" ^ field ^ ": " ^ class_elt v ^ ") " ^ acc)
 
-  let class_elts_with_breaks ctx m =
+  let class_elts_with_breaks m =
     List.fold m ~init:"" ~f:(fun acc (field, v) ->
-        "\n" ^ indent ^ field ^ ": " ^ class_elt ctx v ^ acc)
+        "\n" ^ indent ^ field ^ ": " ^ class_elt v ^ acc)
 
-  let class_consts ctx m =
+  let class_consts m =
     List.fold m ~init:"" ~f:(fun acc (field, cc) ->
         let synth =
           if cc.cc_synthesized then
@@ -1555,16 +1554,9 @@ module PrintClass = struct
           else
             ""
         in
-        "("
-        ^ field
-        ^ ": "
-        ^ synth
-        ^ Full.to_string_decl ctx cc.cc_type
-        ^ ") "
-        ^ acc)
+        "(" ^ field ^ ": " ^ synth ^ Full.to_string_decl cc.cc_type ^ ") " ^ acc)
 
   let typeconst
-      ctx
       {
         ttc_synthesized = synthetic;
         ttc_name = tc_name;
@@ -1576,7 +1568,7 @@ module PrintClass = struct
         ttc_is_ctx = _;
       } =
     let name = snd tc_name in
-    let ty x = Full.to_string_decl ctx x in
+    let ty x = Full.to_string_decl x in
     let type_info =
       match kind with
       | TCConcrete { tc_type = t } -> Printf.sprintf " = %s" (ty t)
@@ -1610,9 +1602,8 @@ module PrintClass = struct
     else
       ""
 
-  let typeconsts ctx m =
-    List.fold m ~init:"" ~f:(fun acc (_, v) ->
-        "\n(" ^ typeconst ctx v ^ ")" ^ acc)
+  let typeconsts m =
+    List.fold m ~init:"" ~f:(fun acc (_, v) -> "\n(" ^ typeconst v ^ ")" ^ acc)
 
   let ancestors ctx m =
     (* Format is as follows:
@@ -1633,21 +1624,21 @@ module PrintClass = struct
                 "~" ),
               " (" ^ class_kind (Cls.kind cls) ^ ")" )
         in
-        let ty_str = Full.to_string_decl ctx v in
+        let ty_str = Full.to_string_decl v in
         "\n" ^ indent ^ sigil ^ " " ^ ty_str ^ kind ^ acc)
 
-  let constructor ctx (ce_opt, (consist : consistent_kind)) =
+  let constructor (ce_opt, (consist : consistent_kind)) =
     let consist_str = Format.asprintf "(%a)" pp_consistent_kind consist in
     let ce_str =
       match ce_opt with
       | None -> ""
-      | Some ce -> class_elt ctx ce
+      | Some ce -> class_elt ce
     in
     ce_str ^ consist_str
 
-  let req_ancestors ctx xs =
+  let req_ancestors xs =
     List.fold xs ~init:"" ~f:(fun acc (_p, x) ->
-        acc ^ Full.to_string_decl ctx x ^ ", ")
+        acc ^ Full.to_string_decl x ^ ", ")
 
   let class_type ctx c =
     let tenv = Typing_env.empty ctx Relative_path.default ~droot:None in
@@ -1666,16 +1657,16 @@ module PrintClass = struct
     in
     let tc_kind = class_kind (Cls.kind c) in
     let tc_name = Cls.name c in
-    let tc_tparams = tparam_list ctx (Cls.tparams c) in
-    let tc_consts = class_consts ctx (Cls.consts c) in
-    let tc_typeconsts = typeconsts ctx (Cls.typeconsts c) in
-    let tc_props = class_elts ctx (Cls.props c) in
-    let tc_sprops = class_elts ctx (Cls.sprops c) in
-    let tc_methods = class_elts_with_breaks ctx (Cls.methods c) in
-    let tc_smethods = class_elts_with_breaks ctx (Cls.smethods c) in
-    let tc_construct = constructor ctx (Cls.construct c) in
+    let tc_tparams = tparam_list (Cls.tparams c) in
+    let tc_consts = class_consts (Cls.consts c) in
+    let tc_typeconsts = typeconsts (Cls.typeconsts c) in
+    let tc_props = class_elts (Cls.props c) in
+    let tc_sprops = class_elts (Cls.sprops c) in
+    let tc_methods = class_elts_with_breaks (Cls.methods c) in
+    let tc_smethods = class_elts_with_breaks (Cls.smethods c) in
+    let tc_construct = constructor (Cls.construct c) in
     let tc_ancestors = ancestors ctx (Cls.all_ancestors c) in
-    let tc_req_ancestors = req_ancestors ctx (Cls.all_ancestor_reqs c) in
+    let tc_req_ancestors = req_ancestors (Cls.all_ancestor_reqs c) in
     let tc_req_ancestors_extends =
       String.concat ~sep:" " (Cls.all_ancestor_req_names c)
     in
@@ -1734,7 +1725,7 @@ module PrintClass = struct
 end
 
 module PrintTypedef = struct
-  let typedef ctx = function
+  let typedef = function
     | {
         td_pos;
         td_module = _;
@@ -1744,13 +1735,13 @@ module PrintTypedef = struct
         td_type;
         td_is_ctx;
       } ->
-      let tparaml_s = PrintClass.tparam_list ctx td_tparams in
+      let tparaml_s = PrintClass.tparam_list td_tparams in
       let constr_s =
         match td_constraint with
         | None -> "[None]"
-        | Some constr -> Full.to_string_decl ctx constr
+        | Some constr -> Full.to_string_decl constr
       in
-      let ty_s = Full.to_string_decl ctx td_type in
+      let ty_s = Full.to_string_decl td_type in
       let pos_s = PrintClass.pos_or_decl td_pos in
       let is_ctx_s = Bool.to_string td_is_ctx in
       "ty: "
@@ -1818,13 +1809,13 @@ let debug_i env ty =
 
 let class_ ctx c = PrintClass.class_type ctx c
 
-let gconst ctx gc = Full.to_string_decl ctx gc.cd_type
+let gconst gc = Full.to_string_decl gc.cd_type
 
-let fun_ ctx { fe_type; _ } = Full.to_string_decl ctx fe_type
+let fun_ { fe_type; _ } = Full.to_string_decl fe_type
 
-let fun_type ctx f = Full.fun_to_string ctx f
+let fun_type f = Full.fun_to_string f
 
-let typedef ctx td = PrintTypedef.typedef ctx td
+let typedef td = PrintTypedef.typedef td
 
 let constraints_for_type env ty =
   Full.constraints_for_type Full.text_strip_ns env ty

@@ -362,20 +362,22 @@ void optimizeJmps(Vunit& unit, MaybeVinstrId clobber) {
 
           if (isOnly(unit, taken, Vinstr::jmpi)) {
             // Replace jcc with jcci if the taken branch is just a jmpi
-            FTRACE(
-              4, "vasm-jumps: Rewriting jcc ({}) -> jmpi ({}) as jcci\n",
-              b, taken
-            );
             auto const& jmpi = unit.blocks[taken].code[0].jmpi_;
             if (jmpi.args.empty()) {
+              FTRACE(
+                4, "vasm-jumps: Rewriting jcc ({}) -> jmpi ({}) as jcci\n",
+                b, taken
+              );
               // We don't have a way to provide the jmpi's args in a jcci, so
               // only perform the optimization if there's none.
               auto const jcc_irctx = code.back().irctx();
               code.pop_back();
               code.emplace_back(
-                jcci{jcc_i.cc, jcc_i.sf, jcc_i.targets[0], jmpi.target},
+                jcci{jcc_i.cc, jcc_i.sf, jmpi.target},
                 jcc_irctx
               );
+              code.emplace_back(jmp{jcc_i.targets[0]}, jcc_irctx);
+
               --npreds[taken];
 
               changed = true;

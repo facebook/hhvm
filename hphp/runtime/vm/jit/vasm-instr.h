@@ -313,7 +313,7 @@ struct Vunit;
   O(storesd, Inone, U(s) UW(m), Dn)\
   /* branches */\
   O(jcc, I(cc), U(sf), Dn)\
-  O(jcci, I(cc), U(sf), Dn)\
+  O(jcci, I(cc) I(taken), U(sf), Dn)\
   O(jmp, Inone, Un, Dn)\
   O(jmps, I(jmp_addr) I(taken_addr), Un, Dn)\
   O(jmpr, Inone, U(target) U(args), Dn)\
@@ -1183,7 +1183,7 @@ struct storesd { VregDbl s; Vptr64 m; };
  * In vasm, targets are always ordered {next, taken}.
  */
 struct jcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; StringTag tag; };
-struct jcci { ConditionCode cc; VregSF sf; Vlabel target; TCA taken; };
+struct jcci { ConditionCode cc; VregSF sf; TCA taken; };
 struct jmp { Vlabel target; };
 // jmps{} is a smashable jump to target[0].  It admits a second target which
 // represents an in-Vunit smash target.  All possible such targets need to be
@@ -1438,4 +1438,3 @@ void updateIndirectFixupBySpill(Vinstr&, size_t);
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

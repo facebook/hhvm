@@ -906,7 +906,6 @@ void Vgen<X64Asm>::emit(const jcc& i) {
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const jcci& i) {
   a.jcc(i.cc, i.taken);
-  emit(jmp{i.target});
 }
 
 template<class X64Asm>

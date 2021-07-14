@@ -11855,11 +11855,7 @@ bool split_side_exits(State& state) {
           }
         );
       } else if (inst.op == Vinstr::jcci) {
-        auto const target = inst.jcci_.target;
-        auto const ctx = inst.irctx();
         makeExitBlock(jmpi{inst.jcci_.taken});
-        unit.blocks[b].code.emplace_back(jmp{target});
-        unit.blocks[b].code.back().set_irctx(ctx);
       }
     }
   }

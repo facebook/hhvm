@@ -842,11 +842,8 @@ TCA emitInterpOneCFHelper(CodeBlock& cb, DataBlock& data, Op op,
     v << call{handler, arg_regs(3)};
 
     auto const sf = v.makeReg();
-    auto const next = v.makeBlock();
-
     v << testq{rret(), rret(), sf};
-    v << jcci{CC_NZ, sf, next, rh.reenterTC};
-    v = next;
+    v << jcci{CC_NZ, sf, rh.reenterTC};
     v << jmpi{rh.resumeHelper};
   });
 }
@@ -1076,13 +1073,9 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << call{TCA(tc_unwind_resume), arg_regs(2)};
     v << copy{rret(1), rvmfp()};
 
-    auto const done = v.makeBlock();
     auto const sf = v.makeReg();
-
     v << testq{rret(0), rret(0), sf};
-    v << jcci{CC_Z, sf, done, us.resumeCPPUnwind};
-    v = done;
-
+    v << jcci{CC_Z, sf, us.resumeCPPUnwind};
     v << jmpr{rret(0), vm_regs_with_sp()};
   });
 
@@ -1126,13 +1119,9 @@ TCA emitEndCatchStublogueHelpers(CodeBlock& cb, DataBlock& data,
     v << call{TCA(tc_unwind_resume_stublogue), arg_regs(2)};
     v << copy{rret(1), rvmfp()};
 
-    auto const done = v.makeBlock();
     auto const sf = v.makeReg();
-
     v << testq{rret(0), rret(0), sf};
-    v << jcci{CC_Z, sf, done, us.resumeCPPUnwind};
-    v = done;
-
+    v << jcci{CC_Z, sf, us.resumeCPPUnwind};
     v << jmpr{rret(0), vm_regs_no_sp()};
   });
 

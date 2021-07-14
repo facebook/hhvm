@@ -34,7 +34,6 @@ folly::Range<Vlabel*> succs(Vinstr& inst) {
   switch (inst.op) {
     case Vinstr::contenter:   return {inst.contenter_.targets, 2};
     case Vinstr::jcc:         return {inst.jcc_.targets, 2};
-    case Vinstr::jcci:        return {&inst.jcci_.target, 1};
     case Vinstr::jmp:         return {&inst.jmp_.target, 1};
     case Vinstr::jmps:        return {inst.jmps_.targets, 2};
     case Vinstr::phijmp:      return {&inst.phijmp_.target, 1};

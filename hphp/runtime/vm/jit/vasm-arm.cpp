@@ -988,7 +988,6 @@ void Vgen::emit(const jcci& i) {
   a->B(&skip, vixl::InvertCondition(C(i.cc)));
   emit(jmpi{i.taken});
   a->bind(&skip);
-  emit(jmp{i.target});
 }
 
 void Vgen::emit(const jmp& i) {

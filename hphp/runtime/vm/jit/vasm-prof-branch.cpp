@@ -346,18 +346,6 @@ BranchID branch_id_for(Env& env, const Inst& from, Vlabel b) {
   };
 }
 
-BranchID branch_id_for(Env& env, const jcci& from, Vlabel b) {
-  auto& blocks = env.unit.blocks;
-  auto const next  = from.target;
-  auto const taken = from.taken;
-
-  return BranchID {
-    vasm_id_for(env, blocks[b].code.back(), b),
-    vasm_id_for(env, blocks[next].code.front(), next),
-    taken
-  };
-}
-
 /*
  * Call the profiling routine to log `branch' belonging to `func'.
  *
@@ -469,31 +457,6 @@ void profile(Env& env, jcc& inst, Vlabel b) {
   for (auto& s : inst.targets) {
     insert_profiling_header(env, branch.take(s == taken), s);
   };
-}
-
-void profile(Env& env, jcci& inst, Vlabel b) {
-  auto& unit = env.unit;
-
-  auto branch = branch_id_for(env, inst, b);
-
-  // Profile the `next' branch.
-  insert_profiling_header(env, branch.take(false), inst.target);
-
-  // Profile the `taken' branch...
-  auto v = vheader(unit, b);
-  auto vc = vheader(unit, b, AreaIndex::Cold);
-  auto const header = Vlabel(v);
-
-  auto const sf = check_counter(v);
-  unlikelyIfThen(v, vc, CC_LE, sf, [&] (Vout& v) {
-    auto const& vinstr = env.unit.blocks[b].code.back();
-    sample_branch(v, env, branch.take(true), vinstr.origin->func(), b);
-  });
-  v << jmpi{inst.taken};
-
-  // ...then replace the jcci{} with a jcc{}.
-  auto& from = unit.blocks[b].code.back();
-  from = jcc{inst.cc, inst.sf, {inst.target, header}};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

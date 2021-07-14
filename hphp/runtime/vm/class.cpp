@@ -282,6 +282,7 @@ template struct assert_sizeof_class<sizeof_Class>;
  */
 ReadWriteMutex s_scope_cache_mutex;
 
+Mutex s_priority_serialize_mutex;
 std::set<std::pair<int64_t, Class*>> s_priority_serialize;
 
 }
@@ -4759,27 +4760,32 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
       FrameRestore fr(preClass);
       newClass = Class::newClass(const_cast<PreClass*>(preClass), parent);
     }
-    Lock l(g_classesMutex);
 
-    if (UNLIKELY(top != nameList->clsList())) {
-      top = nameList->clsList();
-      continue;
+    {
+      Lock l(g_classesMutex);
+
+      if (UNLIKELY(top != nameList->clsList())) {
+        top = nameList->clsList();
+        continue;
+      }
+
+      setupClass(newClass.get(), nameList);
+
+      /*
+      * call setCached after adding to the class list, otherwise the
+      * target-cache short circuit at the top could return a class
+      * which is not yet on the clsList().
+      */
+      newClass.get()->setCached();
     }
 
-    setupClass(newClass.get(), nameList);
-
-    /*
-     * call setCached after adding to the class list, otherwise the
-     * target-cache short circuit at the top could return a class
-     * which is not yet on the clsList().
-     */
-    newClass.get()->setCached();
     DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(newClass.get()));
     assertx(!RO::RepoAuthoritative ||
             (newClass.get()->isPersistent() &&
              classHasPersistentRDS(newClass.get())));
 
     if (UNLIKELY(RO::EnableIntrinsicsExtension)) {
+      Lock l(s_priority_serialize_mutex);
       auto const it =
         preClass->userAttributes().find(s__JitSerdesPriority.get());
       if (it != preClass->userAttributes().end()) {
@@ -4851,6 +4857,7 @@ bool Class::exists(const StringData* name, bool autoload, ClassKind kind) {
 
 std::vector<Class*> prioritySerializeClasses() {
   assertx(RO::EnableIntrinsicsExtension);
+  Lock l(s_priority_serialize_mutex);
   std::vector<Class*> ret;
   for (auto [_p, c] : s_priority_serialize) ret.emplace_back(c);
   return ret;

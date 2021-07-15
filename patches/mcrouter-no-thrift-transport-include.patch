@@ -1,11 +1,13 @@
-Index: hhvm-nightly-2019.09.20/third-party/mcrouter/mcrouter/lib/network/gen/MemcacheRouterInfo.h
-===================================================================
---- hhvm-nightly-2019.09.20.orig/third-party/mcrouter/mcrouter/lib/network/gen/MemcacheRouterInfo.h
-+++ hhvm-nightly-2019.09.20/third-party/mcrouter/mcrouter/lib/network/gen/MemcacheRouterInfo.h
-@@ -105,5 +105,3 @@ struct MemcacheRouterInfo {
- };
+diff --git a/mcrouter/lib/network/gen/MemcacheRouterInfo.h b/mcrouter/lib/network/gen/MemcacheRouterInfo.h
+index 908ca1e3..167e04fa 100644
+--- a/mcrouter/lib/network/gen/MemcacheRouterInfo.h
++++ b/mcrouter/lib/network/gen/MemcacheRouterInfo.h
+@@ -124,8 +124,6 @@ struct MemcacheRouterInfo {
  } // namespace memcache
  } // namespace facebook
--
+ 
 -#include "mcrouter/lib/network/gen/MemcacheThriftTransport.h"
-\ No newline at end of file
+-
+ #include <cstddef>
+ #include <memory>
+ #include <vector>

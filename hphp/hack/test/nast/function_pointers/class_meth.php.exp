@@ -43,14 +43,14 @@
          { fb_ast =
            [([11:3-21],
              (Expr
-                ([11:3-20], [11:3-20],
-                 (Binop ((Eq None), ([11:3-5], [11:3-5], (Lvar ([11:3-5], $x))),
-                    ([11:8-20], [11:8-20], (FunctionPointer ((FP_class_const (([11:8-12], [11:8-12], (CI ([11:8-12], "\\Foo\\Bar\\Fizz"))), ([11:14-18], "buzz"))), []))))))));
+                ((), [11:3-20],
+                 (Binop ((Eq None), ((), [11:3-5], (Lvar ([11:3-5], $x))),
+                    ((), [11:8-20], (FunctionPointer ((FP_class_const (((), [11:8-12], (CI ([11:8-12], "\\Foo\\Bar\\Fizz"))), ([11:14-18], "buzz"))), []))))))));
              ([14:3-28],
               (Expr
-                 ([14:3-27], [14:3-27],
-                  (Binop ((Eq None), ([14:3-5], [14:3-5], (Lvar ([14:3-5], $x))),
-                     ([14:8-27], [14:8-27], (FunctionPointer ((FP_class_const (([14:8-14], [14:8-14], (CI ([14:8-14], "\\HH\\Vector"))), ([14:16-25], "fromItems"))), []))))))))
+                 ((), [14:3-27],
+                  (Binop ((Eq None), ((), [14:3-5], (Lvar ([14:3-5], $x))),
+                     ((), [14:8-27], (FunctionPointer ((FP_class_const (((), [14:8-14], (CI ([14:8-14], "\\HH\\Vector"))), ([14:16-25], "fromItems"))), []))))))))
              ];
            fb_annotation = Named };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

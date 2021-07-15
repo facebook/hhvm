@@ -246,7 +246,7 @@ let rec array_get
       in
       match ety1_ with
       | Tvarray ty ->
-        let (p2, _, _) = e2 in
+        let (_, p2, _) = e2 in
         let ty1 = MakeType.enforced (MakeType.int (Reason.Ridx (p2, r))) in
         let (env, err_res) =
           type_index env expr_pos ty2 ty1 Reason.index_array
@@ -262,7 +262,7 @@ let rec array_get
             arity_error id;
             err_witness env expr_pos
         in
-        let (p2, _, _) = e2 in
+        let (_, p2, _) = e2 in
         let ty1 = MakeType.enforced (MakeType.int (Reason.Ridx_vector p2)) in
         let (env, err_res) =
           type_index env expr_pos ty2 ty1 (Reason.index_class cn)
@@ -348,7 +348,7 @@ let rec array_get
             arity_error id;
             err_witness env expr_pos
         in
-        let (p2, _, _) = e2 in
+        let (_, p2, _) = e2 in
         let ty1 = MakeType.enforced (MakeType.int (Reason.Ridx (p2, r))) in
         let (env, err_res) =
           type_index env expr_pos ty2 ty1 (Reason.index_class cn)
@@ -370,7 +370,7 @@ let rec array_get
       | Tany _ -> (env, TUtils.mk_tany env expr_pos, Ok ty2)
       | Tprim Tstring ->
         let ty = MakeType.string (Reason.Rwitness expr_pos) in
-        let (p2, _, _) = e2 in
+        let (_, p2, _) = e2 in
         let ty1 = MakeType.enforced (MakeType.int (Reason.Ridx (p2, r))) in
         let (env, err_res) =
           type_index env expr_pos ty2 ty1 Reason.index_array
@@ -379,14 +379,14 @@ let rec array_get
       | Ttuple tyl ->
         (* requires integer literal *)
         (match e2 with
-        | (p, _, Int n) ->
+        | (_, p, Int n) ->
           let idx = int_of_string_opt n in
           (match Option.bind idx ~f:(List.nth tyl) with
           | Some nth -> (env, nth, Ok ty2)
           | None ->
             Errors.typing_error p (Reason.string_of_ureason Reason.index_tuple);
             (env, err_witness env p, Ok ty2))
-        | (p, _, _) ->
+        | (_, p, _) ->
           Errors.typing_error p (Reason.string_of_ureason Reason.URtuple_access);
           (env, err_witness env p, Error (ty2, MakeType.int Reason.none)))
       | Tclass (((_, cn) as id), _, argl)
@@ -401,7 +401,7 @@ let rec array_get
         in
         (* requires integer literal *)
         (match e2 with
-        | (p, _, Int n) ->
+        | (_, p, Int n) ->
           let idx = int_of_string_opt n in
           (match Option.bind ~f:(List.nth [ty1; ty2]) idx with
           | Some nth -> (env, nth, Ok ty2)
@@ -409,7 +409,7 @@ let rec array_get
             Errors.typing_error p
             @@ Reason.string_of_ureason (Reason.index_class cn);
             (env, err_witness env p, Ok ty2))
-        | (p, _, _) ->
+        | (_, p, _) ->
           Errors.typing_error p (Reason.string_of_ureason Reason.URpair_access);
           (env, err_witness env p, Error (ty2, MakeType.int Reason.none)))
       | Tshape (_, fdm) ->
@@ -432,7 +432,7 @@ let rec array_get
           in
           (env, ty, Ok ty2)
         else
-          let (p, _, _) = e2 in
+          let (_, p, _) = e2 in
           begin
             match TUtils.shape_field_name env e2 with
             | None ->
@@ -733,7 +733,7 @@ let assign_array_get_with_err
       let error = (env, ety1, Ok tkey, Ok ty2) in
       match ety1_ with
       | Tvarray tv ->
-        let (p, _, _) = key in
+        let (_, p, _) = key in
         let tk = MakeType.enforced (MakeType.int (Reason.Ridx (p, r))) in
         let (env, idx_err) =
           type_index env expr_pos tkey tk Reason.index_array
@@ -749,7 +749,7 @@ let assign_array_get_with_err
             arity_error id;
             err_witness env expr_pos
         in
-        let (p, _, _) = key in
+        let (_, p, _) = key in
         let tk = MakeType.enforced (MakeType.int (Reason.Ridx_vector p)) in
         let (env, idx_err) =
           type_index env expr_pos tkey tk (Reason.index_class cn)
@@ -770,7 +770,7 @@ let assign_array_get_with_err
             arity_error id;
             err_witness env expr_pos
         in
-        let (p, _, _) = key in
+        let (_, p, _) = key in
         let tk = MakeType.enforced (MakeType.int (Reason.Ridx_vector p)) in
         let (env, idx_err) =
           type_index env expr_pos tkey tk (Reason.index_class cn)
@@ -801,7 +801,7 @@ let assign_array_get_with_err
                   (ArraykeyStyle, (Pos_or_decl.of_raw_pos expr_pos, "arraykey"));
             }
           else
-            let (p, _, _) = key in
+            let (_, p, _) = key in
             let ak_t = MakeType.arraykey (Reason.Ridx_vector p) in
             if Typing_utils.is_sub_type_for_union env ak_t tk then
               (* hhvm will enforce that the key is an arraykey, so if
@@ -887,7 +887,7 @@ let assign_array_get_with_err
       | Tdynamic -> (env, ety1, Ok tkey, Ok ty2)
       | Tany _ -> (env, ety1, Ok tkey, Ok ty2)
       | Tprim Tstring ->
-        let (p, _, _) = key in
+        let (_, p, _) = key in
         let tk = MakeType.enforced (MakeType.int (Reason.Ridx (p, r))) in
         let tv = MakeType.string (Reason.Rwitness expr_pos) in
         let (env, idx_err) =
@@ -902,7 +902,7 @@ let assign_array_get_with_err
         (env, ety1, idx_err, err_res)
       | Ttuple tyl ->
         let fail key_err reason =
-          let (p, _, _) = key in
+          let (_, p, _) = key in
           Errors.typing_error p (Reason.string_of_ureason reason);
           (env, ety1, key_err, Ok ty2)
         in

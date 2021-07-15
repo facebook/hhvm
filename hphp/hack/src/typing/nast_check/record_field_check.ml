@@ -11,7 +11,7 @@ open Hh_prelude
 open Aast
 
 let id_if_string expr : 'a option =
-  let (pos, _, expr_) = expr in
+  let (_, pos, expr_) = expr in
   match expr_ with
   | String s -> Some (pos, s)
   | _ -> None

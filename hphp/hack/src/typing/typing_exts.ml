@@ -167,14 +167,14 @@ let rec const_string_of (env : env) (e : Nast.expr) :
   | (_, _, String s) -> (env, Right s)
   (* It's an invariant that this is going to fail, but look for the best
    * evidence *)
-  | (p, _, String2 xs) ->
+  | (_, p, String2 xs) ->
     let (env, xs) = mapM const_string_of env (List.rev xs) in
     (env, List.fold_right ~f:glue xs ~init:(Left p))
   | (_, _, Binop (Ast_defs.Dot, a, b)) ->
     let (env, stra) = const_string_of env a in
     let (env, strb) = const_string_of env b in
     (env, glue stra strb)
-  | (p, _, _) -> (env, Left p)
+  | (_, p, _) -> (env, Left p)
 
 let get_format_string_type_arg t =
   match get_node t with
@@ -207,7 +207,7 @@ let retype_magic_func (env : env) (ft : locl_fun_type) (el : Nast.expr list) :
         | Some type_arg ->
           (match const_string_of env arg with
           | (env, Right str) ->
-            let (pos, _, _) = arg in
+            let (_, pos, _) = arg in
             let (env, argl) = parse_printf_string env str pos type_arg in
             ( env,
               Some

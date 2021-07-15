@@ -59,7 +59,7 @@ let handler =
                 env.class_name
                 meth_name
         | Aast.FunctionPointer
-            (Aast.FP_class_const ((p, _, Aast.CIparent), (_, meth_name)), _) ->
+            (Aast.FP_class_const ((_, p, Aast.CIparent), (_, meth_name)), _) ->
           Errors.parent_in_function_pointer p env.parent_name meth_name
         | _ -> ()
       in

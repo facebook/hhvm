@@ -114,7 +114,7 @@ let check_param : env -> Nast.fun_param -> unit =
               ~explicit_targs:[]
               ~class_id:
                 (CIexpr
-                   ( param_pos,
+                   ( (),
                      param_pos,
                      Lvar (param_pos, Local_id.make_unscoped param_name) ))
               ~member_id:(pos, SN.Members.mGetInstanceKey)

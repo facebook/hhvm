@@ -895,7 +895,7 @@ let props_from_constructors : Nast.method_ list -> Nast.class_var list =
                param_is_variadic;
                param_pos;
                param_name;
-               param_annotation;
+               param_annotation = ();
                param_expr;
                param_readonly;
                param_callconv = _;
@@ -919,7 +919,7 @@ let props_from_constructors : Nast.method_ list -> Nast.class_var list =
                  cv_doc_comment = None;
                  cv_is_promoted_variadic = param_is_variadic;
                  cv_is_static = false;
-                 cv_span = param_annotation;
+                 cv_span = param_pos;
                })))
   |> List.concat
 

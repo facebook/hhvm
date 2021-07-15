@@ -36,7 +36,7 @@ let check_param _env params p user_attributes name =
       Errors.inout_params_memoize p param.param_pos
   | _ -> ()
 
-let check_callconv_expr ((p, _, _) as e) =
+let check_callconv_expr ((_, p, _) as e) =
   let rec check_callconv_expr_helper (_, _, expr_) =
     match expr_ with
     | Lvar (_, x)

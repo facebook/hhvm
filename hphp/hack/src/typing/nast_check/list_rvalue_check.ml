@@ -15,7 +15,7 @@ let visitor =
   object (self)
     inherit [_] Aast.iter as super
 
-    method! on_expr env ((p, _, expr_) as e) =
+    method! on_expr env ((_, p, expr_) as e) =
       match expr_ with
       | Binop (Ast_defs.Eq None, e1, e2) ->
         (* Allow list($foo) = $bar; *)

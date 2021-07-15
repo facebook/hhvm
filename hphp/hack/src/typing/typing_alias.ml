@@ -102,12 +102,12 @@ end = struct
 
       method! on_expr acc ((_, _, e_) as e) =
         match e_ with
-        | Binop (Ast_defs.Eq _, (p, _, List el), x2) ->
+        | Binop (Ast_defs.Eq _, (_, p, List el), x2) ->
           List.fold_left
             ~f:
               begin
                 fun acc e ->
-                this#on_expr acc (p, p, Binop (Ast_defs.Eq None, e, x2))
+                this#on_expr acc ((), p, Binop (Ast_defs.Eq None, e, x2))
               end
             ~init:acc
             el

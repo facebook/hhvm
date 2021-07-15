@@ -64,7 +64,7 @@ let should_surface_errors env =
 
 type aast_result = {
   fi_mode: FileInfo.mode;
-  ast: (Pos.t, unit, unit, unit) Aast.program;
+  ast: (unit, unit, unit, unit) Aast.program;
   content: string;
   file: Relative_path.t;
   comments: Scoured_comments.t;
@@ -178,7 +178,7 @@ let from_file (env : env) : aast_result =
 
 type aast_to_nast_env = { mutable last_pos: Pos.t }
 
-let aast_to_nast aast =
+let aast_to_nast aast : Nast.program =
   let i _ x = x in
   let endo =
     object (self)
@@ -198,7 +198,7 @@ let aast_to_nast aast =
 
       method on_'fb _ _ = Nast.NamedWithUnsafeBlocks
 
-      method on_'ex = self#check_pos
+      method on_'ex = i
 
       method on_'hi = i
 

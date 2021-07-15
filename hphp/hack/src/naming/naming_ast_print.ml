@@ -15,7 +15,7 @@ let print_nast_internal pp_ex nast =
   Aast.pp_program pp_ex Nast.pp_func_body_ann pp_unit pp_unit formatter nast;
   Format.pp_print_newline formatter ()
 
-let print_nast nast = print_nast_internal Pos.pp nast
+let print_nast nast = print_nast_internal pp_unit nast
 
 let print_nast_without_position nast =
   let remove_pos =

@@ -271,12 +271,12 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         let targs = List.map targs ~f:(self#on_targ env) in
         FunctionPointer (FP_id fn, targs)
       | FunctionPointer
-          (FP_class_const ((_, p1, CIexpr (ty, p2, Id x1)), meth_name), targs)
+          (FP_class_const (((), p1, CIexpr ((), p2, Id x1)), meth_name), targs)
         ->
         let name = elaborate_type_name env x1 in
         let targs = List.map targs ~f:(self#on_targ env) in
         FunctionPointer
-          (FP_class_const ((p1, p1, CIexpr (ty, p2, Id name)), meth_name), targs)
+          (FP_class_const (((), p1, CIexpr ((), p2, Id name)), meth_name), targs)
       | Obj_get (e1, (ty, p, Id x), null_safe, in_parens) ->
         Obj_get (self#on_expr env e1, (ty, p, Id x), null_safe, in_parens)
       | Id ((_, name) as sid) ->
@@ -286,10 +286,10 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
           expr
         else
           Id (NS.elaborate_id env.namespace NS.ElaborateConst sid)
-      | New ((_, p1, CIexpr (ty, p2, Id x)), tal, el, unpacked_element, ex) ->
+      | New (((), p1, CIexpr (ty, p2, Id x)), tal, el, unpacked_element, ex) ->
         let x = elaborate_type_name env x in
         New
-          ( (p1, p1, CIexpr (ty, p2, Id x)),
+          ( ((), p1, CIexpr (ty, p2, Id x)),
             List.map tal ~f:(self#on_targ env),
             List.map el ~f:(self#on_expr env),
             Option.map unpacked_element ~f:(self#on_expr env),
@@ -303,11 +303,11 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         Record (id, l)
       | Class_const ((_, p1, CIexpr (ty, p2, Id x1)), pstr) ->
         let name = elaborate_type_name env x1 in
-        Class_const ((p1, p1, CIexpr (ty, p2, Id name)), pstr)
+        Class_const (((), p1, CIexpr (ty, p2, Id name)), pstr)
       | Class_get ((_, p1, CIexpr (ty, p2, Id x1)), cge, in_parens) ->
         let x1 = elaborate_type_name env x1 in
         Class_get
-          ( (p1, p1, CIexpr (ty, p2, Id x1)),
+          ( ((), p1, CIexpr (ty, p2, Id x1)),
             self#on_class_get_expr env cge,
             in_parens )
       | Xml (id, al, el) ->

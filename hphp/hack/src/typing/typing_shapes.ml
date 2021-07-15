@@ -177,7 +177,7 @@ let idx
     ~fun_pos
     ~shape_pos
     shape_ty
-    ((field_p, _, _) as field)
+    ((_, field_p, _) as field)
     default =
   let (env, shape_ty) = Env.expand_type env shape_ty in
   let (env, res) = Env.fresh_type env expr_pos in
@@ -232,7 +232,7 @@ let idx
   in
   Typing_enforceability.make_locl_like_type env res
 
-let at env ~expr_pos ~shape_pos shape_ty ((field_p, _, _) as field) =
+let at env ~expr_pos ~shape_pos shape_ty ((_, field_p, _) as field) =
   let (env, shape_ty) = Env.expand_type env shape_ty in
   let (env, res) = Env.fresh_type env expr_pos in
   let (env, res) =
@@ -260,7 +260,7 @@ let at env ~expr_pos ~shape_pos shape_ty ((field_p, _, _) as field) =
   in
   Typing_enforceability.make_locl_like_type env res
 
-let remove_key p env shape_ty ((field_p, _, _) as field) =
+let remove_key p env shape_ty ((_, field_p, _) as field) =
   match TUtils.shape_field_name env field with
   | None -> (env, TUtils.mk_tany env field_p)
   | Some field_name ->

@@ -153,7 +153,7 @@ let nast_converter =
   object
     inherit [_] Aast.map
 
-    method on_'ex _ (p, _ex) = p
+    method on_'ex _ _ = ()
 
     method on_'fb _ _fb = Nast.Named
 

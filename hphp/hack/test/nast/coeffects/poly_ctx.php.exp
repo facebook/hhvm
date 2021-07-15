@@ -17,7 +17,7 @@
           { tp_variance = Invariant; tp_name = ([5:23-24], "Tctx$nf"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
         f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = [4:29-31];
+        [{ param_annotation = ();
            param_type_hint =
            ((),
             (Some ([4:3-28],
@@ -29,7 +29,7 @@
            param_is_variadic = false; param_pos = [4:29-31]; param_name = "$f"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None };
-          { param_annotation = [5:33-36];
+          { param_annotation = ();
             param_type_hint =
             ((),
              (Some ([5:3-32],

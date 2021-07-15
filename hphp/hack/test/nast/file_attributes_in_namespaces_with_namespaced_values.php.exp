@@ -24,7 +24,7 @@
          m_name = ([5:21-32], "__construct"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = [5:47-58]; param_type_hint = ((), (Some ([5:40-46], (Hprim Tstring)))); 
+         [{ param_annotation = (); param_type_hint = ((), (Some ([5:40-46], (Hprim Tstring)))); 
             param_is_variadic = false; param_pos = [5:47-58]; param_name = "$attr_value"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = (Some Public) }
@@ -34,9 +34,9 @@
          { fb_ast =
            [([5:47-58],
              (Expr
-                ([5:47-58], [5:47-58],
-                 (Binop ((Eq None), ([5:47-58], [5:47-58], (Obj_get (([5:47-58], [5:47-58], This), ([5:47-58], [5:47-58], (Id ([5:47-58], "attr_value"))), OG_nullthrows, false))),
-                    ([5:47-58], [5:47-58], (Lvar ([5:47-58], $attr_value))))))));
+                ((), [5:47-58],
+                 (Binop ((Eq None), ((), [5:47-58], (Obj_get (((), [5:47-58], This), ((), [5:47-58], (Id ([5:47-58], "attr_value"))), OG_nullthrows, false))),
+                    ((), [5:47-58], (Lvar ([5:47-58], $attr_value))))))));
              ([Pos.none], Noop)];
            fb_annotation = Named };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -51,8 +51,7 @@
       c_user_attributes = [];
       c_file_attributes =
       [{ fa_user_attributes =
-         [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
-            ua_params = [([12:33-56], [12:33-56], (Class_const (([12:33-40], [12:33-40], (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))] }
+         [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute"); ua_params = [((), [12:33-56], (Class_const (((), [12:33-40], (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))] }
            ];
          fa_namespace =
          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -70,8 +69,7 @@
        c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false; 
        c_where_constraints = [];
        c_consts =
-       [{ cc_type = (Some ([9:11-17], (Hprim Tstring))); cc_id = ([9:18-32], "MY_CLASS_CONST"); cc_kind = (CCConcrete ([9:35-57], [9:35-57], (String "my class const value"))); cc_doc_comment = None }
-         ];
+       [{ cc_type = (Some ([9:11-17], (Hprim Tstring))); cc_id = ([9:18-32], "MY_CLASS_CONST"); cc_kind = (CCConcrete ((), [9:35-57], (String "my class const value"))); cc_doc_comment = None }];
        c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = []; 
        c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
@@ -82,8 +80,8 @@
        c_user_attributes = [];
        c_file_attributes =
        [{ fa_user_attributes =
-          [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
-             ua_params = [([12:33-56], [12:33-56], (Class_const (([12:33-40], [12:33-40], (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))] }
+          [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute"); ua_params = [((), [12:33-56], (Class_const (((), [12:33-40], (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))]
+             }
             ];
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -109,8 +107,8 @@
        c_user_attributes = [];
        c_file_attributes =
        [{ fa_user_attributes =
-          [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
-             ua_params = [([12:33-56], [12:33-56], (Class_const (([12:33-40], [12:33-40], (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))] }
+          [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute"); ua_params = [((), [12:33-56], (Class_const (((), [12:33-40], (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))]
+             }
             ];
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

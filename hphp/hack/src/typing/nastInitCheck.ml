@@ -487,7 +487,7 @@ and check_all_init p env acc =
 
 and exprl env acc l = List.fold_left ~f:(expr env) ~init:acc l
 
-and expr env acc (p, _, e) = expr_ env acc p e
+and expr env acc (_, p, e) = expr_ env acc p e
 
 and expr_ env acc p e =
   let expr = expr env in
@@ -534,7 +534,7 @@ and expr_ env acc p e =
   | Class_get _ ->
     acc
   | Call
-      ( (p, _, Obj_get ((_, _, This), (_, _, Id (_, f)), _, false)),
+      ( (_, p, Obj_get ((_, _, This), (_, _, Id (_, f)), _, false)),
         _,
         el,
         unpacked_element ) ->

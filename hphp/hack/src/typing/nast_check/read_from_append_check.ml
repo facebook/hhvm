@@ -16,7 +16,7 @@ let handler =
 
     method! at_expr env (_, _, e) =
       match e with
-      | Array_get ((p, _, _), None) when not env.array_append_allowed ->
+      | Array_get ((_, p, _), None) when not env.array_append_allowed ->
         Errors.reading_from_append p
       | _ -> ()
   end

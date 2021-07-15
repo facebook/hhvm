@@ -246,7 +246,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
 
     fn accumulate_const_ref(
         &mut self,
-        class_id: &'a aast::ClassId<&Pos, nast::FuncBodyAnn, (), ()>,
+        class_id: &'a aast::ClassId<(), nast::FuncBodyAnn, (), ()>,
         value_id: &Id<'a>,
     ) {
         // The decl for a class constant stores a list of all the scope-resolution expressions
@@ -1114,7 +1114,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             _ => return None,
         };
         let pos = self.get_pos(node);
-        Some(self.alloc(aast::Expr(pos, pos, expr_)))
+        Some(self.alloc(aast::Expr((), pos, expr_)))
     }
 
     fn node_to_non_ret_ty(&self, node: Node<'a>) -> Option<&'a Ty<'a>> {
@@ -1161,7 +1161,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     }
                 }
                 Some(self.alloc(Ty(
-                    self.alloc(Reason::witness_from_decl(expr.0)),
+                    self.alloc(Reason::witness_from_decl(expr.1)),
                     expr_to_ty(self.arena, expr)?,
                 )))
             }
@@ -2702,7 +2702,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             None => return Node::Ignored(SK::PrefixUnaryExpression),
         };
         Node::Expr(self.alloc(aast::Expr(
-            pos,
+            (),
             pos,
             aast::Expr_::Unop(self.alloc((op, value))),
         )))
@@ -2720,7 +2720,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             None => return Node::Ignored(SK::PostfixUnaryExpression),
         };
         Node::Expr(self.alloc(aast::Expr(
-            pos,
+            (),
             pos,
             aast::Expr_::Unop(self.alloc((op, value))),
         )))
@@ -2769,7 +2769,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         };
 
         Node::Expr(self.alloc(aast::Expr(
-            pos,
+            (),
             pos,
             aast::Expr_::Binop(self.alloc((op, lhs, rhs))),
         )))
@@ -4553,7 +4553,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             None => return Node::Ignored(SK::ScopeResolutionExpression),
         };
         let class_id = self.alloc(aast::ClassId(
-            class_name_pos,
+            (),
             class_name_pos,
             match class_name {
                 Node::Name(("self", _)) => aast::ClassId_::CIself,
@@ -4566,7 +4566,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         };
         self.accumulate_const_ref(class_id, &value_id);
         Node::Expr(self.alloc(aast::Expr(
-            pos,
+            (),
             pos,
             nast::Expr_::ClassConst(self.alloc((class_id, self.alloc((value_id.0, value_id.1))))),
         )))

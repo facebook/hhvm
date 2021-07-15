@@ -45,6 +45,6 @@ val is_xhp_child : env -> Pos.t -> Typing_defs.locl_ty -> bool
 val rewrite_xml_into_new :
   Pos.t ->
   sid ->
-  (Pos.t, 'b, 'c, 'd) xhp_attribute list ->
-  (Pos.t, 'b, 'c, 'd) expr list ->
-  (Pos.t, 'b, 'c, 'd) expr
+  (unit, 'b, 'c, 'd) xhp_attribute list ->
+  (unit, 'b, 'c, 'd) expr list ->
+  (unit, 'b, 'c, 'd) expr

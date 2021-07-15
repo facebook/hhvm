@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8761a95cde0c0033cacdf77269b27e50>>
+// @generated SignedSource<<3ced1d10eb95bc437ed02e46e70d3fa1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -46,61 +46,61 @@ pub enum FuncBodyAnn {
     Unnamed(namespace_env::Env),
 }
 
-pub type Program = aast::Program<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Program = aast::Program<(), FuncBodyAnn, (), ()>;
 
-pub type Def = aast::Def<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Def = aast::Def<(), FuncBodyAnn, (), ()>;
 
-pub type Expr = aast::Expr<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Expr = aast::Expr<(), FuncBodyAnn, (), ()>;
 
-pub type Expr_ = aast::Expr_<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Expr_ = aast::Expr_<(), FuncBodyAnn, (), ()>;
 
-pub type Stmt = aast::Stmt<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Stmt = aast::Stmt<(), FuncBodyAnn, (), ()>;
 
-pub type Block = aast::Block<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Block = aast::Block<(), FuncBodyAnn, (), ()>;
 
-pub type UserAttribute = aast::UserAttribute<pos::Pos, FuncBodyAnn, (), ()>;
+pub type UserAttribute = aast::UserAttribute<(), FuncBodyAnn, (), ()>;
 
-pub type ClassId_ = aast::ClassId_<pos::Pos, FuncBodyAnn, (), ()>;
+pub type ClassId_ = aast::ClassId_<(), FuncBodyAnn, (), ()>;
 
-pub type Class_ = aast::Class_<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Class_ = aast::Class_<(), FuncBodyAnn, (), ()>;
 
-pub type ClassVar = aast::ClassVar<pos::Pos, FuncBodyAnn, (), ()>;
+pub type ClassVar = aast::ClassVar<(), FuncBodyAnn, (), ()>;
 
-pub type Method_ = aast::Method_<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Method_ = aast::Method_<(), FuncBodyAnn, (), ()>;
 
-pub type FileAttribute = aast::FileAttribute<pos::Pos, FuncBodyAnn, (), ()>;
+pub type FileAttribute = aast::FileAttribute<(), FuncBodyAnn, (), ()>;
 
-pub type Fun_ = aast::Fun_<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Fun_ = aast::Fun_<(), FuncBodyAnn, (), ()>;
 
-pub type FunDef = aast::FunDef<pos::Pos, FuncBodyAnn, (), ()>;
+pub type FunDef = aast::FunDef<(), FuncBodyAnn, (), ()>;
 
-pub type FuncBody = aast::FuncBody<pos::Pos, FuncBodyAnn, (), ()>;
+pub type FuncBody = aast::FuncBody<(), FuncBodyAnn, (), ()>;
 
-pub type FunParam = aast::FunParam<pos::Pos, FuncBodyAnn, (), ()>;
+pub type FunParam = aast::FunParam<(), FuncBodyAnn, (), ()>;
 
-pub type FunVariadicity = aast::FunVariadicity<pos::Pos, FuncBodyAnn, (), ()>;
+pub type FunVariadicity = aast::FunVariadicity<(), FuncBodyAnn, (), ()>;
 
-pub type Typedef = aast::Typedef<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Typedef = aast::Typedef<(), FuncBodyAnn, (), ()>;
 
-pub type RecordDef = aast::RecordDef<pos::Pos, FuncBodyAnn, (), ()>;
+pub type RecordDef = aast::RecordDef<(), FuncBodyAnn, (), ()>;
 
-pub type Tparam = aast::Tparam<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Tparam = aast::Tparam<(), FuncBodyAnn, (), ()>;
 
-pub type Gconst = aast::Gconst<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Gconst = aast::Gconst<(), FuncBodyAnn, (), ()>;
 
-pub type ClassConst = aast::ClassConst<pos::Pos, FuncBodyAnn, (), ()>;
+pub type ClassConst = aast::ClassConst<(), FuncBodyAnn, (), ()>;
 
-pub type ClassId = aast::ClassId<pos::Pos, FuncBodyAnn, (), ()>;
+pub type ClassId = aast::ClassId<(), FuncBodyAnn, (), ()>;
 
-pub type Catch = aast::Catch<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Catch = aast::Catch<(), FuncBodyAnn, (), ()>;
 
-pub type Case = aast::Case<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Case = aast::Case<(), FuncBodyAnn, (), ()>;
 
-pub type Field = aast::Field<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Field = aast::Field<(), FuncBodyAnn, (), ()>;
 
-pub type Afield = aast::Afield<pos::Pos, FuncBodyAnn, (), ()>;
+pub type Afield = aast::Afield<(), FuncBodyAnn, (), ()>;
 
-pub type ExpressionTree = aast::ExpressionTree<pos::Pos, FuncBodyAnn, (), ()>;
+pub type ExpressionTree = aast::ExpressionTree<(), FuncBodyAnn, (), ()>;
 
 pub type Targ = aast::Targ<()>;
 

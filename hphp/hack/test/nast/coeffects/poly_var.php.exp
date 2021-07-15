@@ -20,7 +20,7 @@
         f_where_constraints = [(([5:3-8], (Habstr ("T$f@C", []))), Constraint_eq, ([5:3-8], (Haccess (([4:5-7], (Habstr ("T$f", []))), [([5:7-8], "C")]))))]; 
         f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = [4:5-7]; param_type_hint = ((), (Some ([4:5-7], (Habstr ("T$f", []))))); 
+        [{ param_annotation = (); param_type_hint = ((), (Some ([4:5-7], (Habstr ("T$f", []))))); 
            param_is_variadic = false; param_pos = [4:5-7]; param_name = "$f"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }

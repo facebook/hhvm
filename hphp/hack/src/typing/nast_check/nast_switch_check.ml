@@ -21,7 +21,7 @@ let check_multiple_default casel =
 let check_non_terminal_default casel =
   let raise_if_non_terminal (has_default, already_raised) = function
     | Default _ -> (true, already_raised)
-    | Case ((pos, _, _), _) when has_default && not already_raised ->
+    | Case ((_, pos, _), _) when has_default && not already_raised ->
       Errors.switch_non_terminal_default pos;
       (has_default, true)
     | _ -> (has_default, already_raised)

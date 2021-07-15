@@ -33,19 +33,19 @@
           (([8:46-59], (Habstr ("T$nremain@Co4", []))), Constraint_eq, ([8:46-59], (Haccess (([7:4-13], (Habstr ("Texplicit", []))), [([8:56-59], "Co4")]))))];
         f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = [4:5-12]; param_type_hint = ((), (Some ([4:5-12], (Habstr ("T$change", []))))); 
+        [{ param_annotation = (); param_type_hint = ((), (Some ([4:5-12], (Habstr ("T$change", []))))); 
            param_is_variadic = false; param_pos = [4:5-12]; param_name = "$change"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None };
-          { param_annotation = [5:6-14]; param_type_hint = ((), (Some ([5:3-5], (Hoption ([5:6-14], (Habstr ("T$nchange", []))))))); 
+          { param_annotation = (); param_type_hint = ((), (Some ([5:3-5], (Hoption ([5:6-14], (Habstr ("T$nchange", []))))))); 
             param_is_variadic = false; param_pos = [5:6-14]; param_name = "$nchange"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None };
-          { param_annotation = [6:13-20]; param_type_hint = ((), (Some ([6:3-12], (Habstr ("Texplicit", []))))); 
+          { param_annotation = (); param_type_hint = ((), (Some ([6:3-12], (Habstr ("Texplicit", []))))); 
             param_is_variadic = false; param_pos = [6:13-20]; param_name = "$remain"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None };
-          { param_annotation = [7:14-22]; param_type_hint = ((), (Some ([7:3-13], (Hoption ([7:4-13], (Habstr ("Texplicit", []))))))); 
+          { param_annotation = (); param_type_hint = ((), (Some ([7:3-13], (Hoption ([7:4-13], (Habstr ("Texplicit", []))))))); 
             param_is_variadic = false; param_pos = [7:14-22]; param_name = "$nremain"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }

@@ -14,7 +14,7 @@ let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_expr env (pos, _, expr) =
+    method! at_expr env (_, pos, expr) =
       if TypecheckerOptions.error_php_lambdas (get_tcopt env) then
         match expr with
         | Efun _ -> Errors.php_lambda_disallowed pos

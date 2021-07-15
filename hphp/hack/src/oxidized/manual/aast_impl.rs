@@ -47,13 +47,13 @@ impl<Ex, Fb, En, Hi> Expr<Ex, Fb, En, Hi> {
     }
 }
 
-impl<Fb, En, Hi> Expr<Pos, Fb, En, Hi> {
+impl<Fb, En, Hi> Expr<(), Fb, En, Hi> {
     pub fn pos(&self) -> &Pos {
-        &self.0
+        &self.1
     }
     pub fn mk_lvar(p: &Pos, n: &str) -> Self {
         Self::new(
-            p.clone(),
+            (),
             p.clone(),
             Expr_::Lvar(Box::new(Lid(p.clone(), (0, String::from(n))))),
         )
@@ -62,14 +62,14 @@ impl<Fb, En, Hi> Expr<Pos, Fb, En, Hi> {
     pub fn as_class_get(
         &self,
     ) -> Option<(
-        &ClassId<Pos, Fb, En, Hi>,
-        &ClassGetExpr<Pos, Fb, En, Hi>,
+        &ClassId<(), Fb, En, Hi>,
+        &ClassGetExpr<(), Fb, En, Hi>,
         &bool,
     )> {
         self.2.as_class_get()
     }
 
-    pub fn as_class_const(&self) -> Option<(&ClassId<Pos, Fb, En, Hi>, &Pstring)> {
+    pub fn as_class_const(&self) -> Option<(&ClassId<(), Fb, En, Hi>, &Pstring)> {
         self.2.as_class_const()
     }
 

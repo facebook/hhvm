@@ -6,7 +6,6 @@
 use crate::aast;
 use crate::aast_defs;
 use crate::ast_defs;
-use crate::pos::Pos;
 
 pub use aast::*;
 pub use aast_defs::*;
@@ -36,7 +35,7 @@ impl<CA: ClonableAnnot> Annot for CA {
 pub struct AstAnnot;
 
 impl ClonableAnnot for AstAnnot {
-    type Ex = Pos;
+    type Ex = ();
     type Fb = ();
     type En = ();
     type Hi = ();

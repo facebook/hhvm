@@ -735,8 +735,7 @@ fn emit_import<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         ImportFlavor::RequireOnce => {
             match inc.into_doc_root_relative(e.options().hhvm.include_roots.get()) {
                 IncludePath::DocRootRelative(path) => {
-                    let expr =
-                        tast::Expr(pos.clone(), pos.clone(), tast::Expr_::String(path.into()));
+                    let expr = tast::Expr((), pos.clone(), tast::Expr_::String(path.into()));
                     (emit_expr(e, env, &expr)?, instr::reqdoc(alloc))
                 }
                 _ => (emit_expr(e, env, expr)?, instr::reqonce(alloc)),
@@ -771,7 +770,7 @@ fn emit_string2<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         Ok(InstrSeq::gather(
             alloc,
             vec![
-                emit_two_exprs(e, env, &es[0].0, &es[0], &es[1])?,
+                emit_two_exprs(e, env, &es[0].1, &es[0], &es[1])?,
                 emit_pos(alloc, pos),
                 instr::concat(alloc),
                 InstrSeq::gather(
@@ -1050,21 +1049,21 @@ fn emit_shape<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     ));
                 } else {
                     tast::Expr_::mk_class_const(
-                        tast::ClassId(pos.clone(), pos.clone(), tast::ClassId_::CI(id.clone())),
+                        tast::ClassId((), pos.clone(), tast::ClassId_::CI(id.clone())),
                         p.clone(),
                     )
                 }
             }
         })
     }
-    let pos = &expr.0;
+    let pos = &expr.1;
     // TODO(hrust): avoid clone
     let fl = fl
         .iter()
         .map(|(f, e)| {
             Ok((
                 tast::Expr(
-                    pos.clone(),
+                    (),
                     pos.clone(),
                     extract_shape_field_name_pstring(env, pos, f)?,
                 ),
@@ -1075,7 +1074,7 @@ fn emit_shape<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emit_expr(
         emitter,
         env,
-        &tast::Expr(pos.clone(), pos.clone(), tast::Expr_::mk_darray(None, fl)),
+        &tast::Expr((), pos.clone(), tast::Expr_::mk_darray(None, fl)),
     )
 }
 
@@ -1209,7 +1208,7 @@ fn emit_collection<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     transform_to_collection: Option<CollectionType>,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let pos = &expr.0;
+    let pos = &expr.1;
     match ast_constant_folder::expr_to_typed_value_(
         alloc, e, expr, true,  /*allow_map*/
         false, /*force_class_const*/
@@ -1260,7 +1259,7 @@ fn expr_and_new<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         )),
         tast::Afield::AFkvalue(k, v) => Ok(InstrSeq::gather(
             alloc,
-            vec![emit_two_exprs(e, env, &k.0, k, v)?, instr_to_add],
+            vec![emit_two_exprs(e, env, &k.1, k, v)?, instr_to_add],
         )),
     }
 }
@@ -1492,7 +1491,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     fields: &[tast::Afield],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let pos = &expr.0;
+    let pos = &expr.1;
     let count = fields.len();
     let emit_dict = |e: &mut Emitter<'arena, 'decl, D>| {
         if is_struct_init(e, env, fields, true)? {
@@ -1664,7 +1663,7 @@ fn emit_call_isset_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     expr: &tast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let pos = &expr.0;
+    let pos = &expr.1;
     if let Some((base_expr, opt_elem_expr)) = expr.2.as_array_get() {
         return Ok(emit_array_get(
             e,
@@ -2105,7 +2104,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             if o.as_ref().3 {
                 // Case ($x->foo)(...).
                 let expr = E(
-                    pos.clone(),
+                    (),
                     pos.clone(),
                     E_::ObjGet(Box::new((o.0.clone(), o.1.clone(), o.2.clone(), false))),
                 );
@@ -2338,7 +2337,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             if c.as_ref().2 {
                 // Case (Foo::$bar)(...).
                 let expr = E(
-                    pos.clone(),
+                    (),
                     pos.clone(),
                     E_::ClassGet(Box::new((c.0.clone(), c.1.clone(), false))),
                 );
@@ -2582,7 +2581,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         let array_get_result = emit_array_get_(
                             e,
                             env,
-                            &(cc.1).0,
+                            &(cc.1).1,
                             None,
                             QueryOp::InOut,
                             &ag.0,
@@ -2597,7 +2596,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                 let setter_base = emit_array_get(
                                     e,
                                     env,
-                                    &(cc.1).0,
+                                    &(cc.1).1,
                                     Some(MemberOpMode::Define),
                                     QueryOp::InOut,
                                     &ag.0,
@@ -2762,7 +2761,7 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         ("HH\\invariant", args) if args.len() >= 2 => {
             let l = e.label_gen_mut().next_regular();
             let expr_id = tast::Expr(
-                pos.clone(),
+                (),
                 pos.clone(),
                 tast::Expr_::mk_id(ast_defs::Id(
                     pos.clone(),
@@ -2770,7 +2769,7 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 )),
             );
             let call = tast::Expr(
-                pos.clone(),
+                (),
                 pos.clone(),
                 tast::Expr_::mk_call(expr_id, vec![], args[1..].to_owned(), uarg.cloned()),
             );
@@ -3155,7 +3154,7 @@ fn emit_class_meth<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         };
         if let Some((cid, (_, id))) = cls.2.as_class_const() {
             if string_utils::is_class(id) {
-                return emit_class_meth_native(e, env, &cls.0, cid, method_id, &[]);
+                return emit_class_meth_native(e, env, &cls.1, cid, method_id, &[]);
             }
         }
         if let Some(ast_defs::Id(_, s)) = cls.2.as_id() {
@@ -3529,7 +3528,7 @@ fn emit_call_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             // Rewrite __systemlib_reified_generics() to $0ReifiedGenerics,
             // but only in systemlib functions that take a reified generic.
             let lvar = E::new(
-                pos.clone(),
+                (),
                 pos.clone(),
                 E_::Lvar(Box::new(tast::Lid(
                     pos.clone(),
@@ -3704,7 +3703,7 @@ fn emit_new<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         Vec<tast::Targ>,
         Vec<tast::Expr>,
         Option<tast::Expr>,
-        Pos,
+        (),
     ),
     is_reflection_class_builtin: bool,
 ) -> Result<InstrSeq<'arena>> {
@@ -3994,7 +3993,7 @@ fn emit_prop_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             if nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe) =>
         {
             return Err(emit_fatal::raise_fatal_parse(
-                &prop.0,
+                &prop.1,
                 "?-> can only be used with scalar property names",
             ));
         }
@@ -4019,12 +4018,12 @@ fn emit_xhp_obj_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     use tast::Expr as E;
     use tast::Expr_ as E_;
     let f = E(
-        pos.clone(),
+        (),
         pos.clone(),
         E_::mk_obj_get(
             expr.clone(),
             E(
-                pos.clone(),
+                (),
                 pos.clone(),
                 E_::mk_id(ast_defs::Id(pos.clone(), "getAttribute".into())),
             ),
@@ -4033,7 +4032,7 @@ fn emit_xhp_obj_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         ),
     );
     let args = vec![E(
-        pos.clone(),
+        (),
         pos.clone(),
         E_::mk_string(string_utils::clean(s).into()),
     )];
@@ -5252,7 +5251,7 @@ pub fn emit_unset_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emit_lval_op_nonlist(
         e,
         env,
-        &expr.0,
+        &expr.1,
         LValOp::Unset,
         expr,
         instr::empty(alloc),
@@ -5479,7 +5478,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     inout_param_info: Option<(usize, &inout_locals::AliasInfoMap)>,
 ) -> Result<ArrayGetBase<'arena>> {
     let alloc = env.arena;
-    let pos = &expr.0;
+    let pos = &expr.1;
     let expr_ = &expr.2;
     let base_mode = if mode == MemberOpMode::InOut {
         MemberOpMode::Warn
@@ -6268,7 +6267,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, InstrSeq<'arena>)> {
     let f = |alloc: &'arena bumpalo::Bump, env: &mut Env<'a, 'arena>| {
         use tast::Expr_ as E_;
-        let pos = &expr.0;
+        let pos = &expr.1;
         Ok(match &expr.2 {
             E_::Lvar(v) if superglobals::is_any_global(local_id::get_name(&v.1)) => (
                 emit_pos_then(

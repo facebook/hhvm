@@ -7,7 +7,6 @@
 use oxidized::{
     aast::{Expr, Expr_, Program},
     aast_visitor::{visit, AstParams, Node, Visitor},
-    pos::Pos,
 };
 use parser_core_types::syntax_error::SyntaxError;
 
@@ -22,12 +21,12 @@ impl<'ast> Visitor<'ast> for Checker {
         self
     }
 
-    fn visit_expr(&mut self, c: &mut (), e: &Expr<Pos, (), (), ()>) -> Result<(), ()> {
+    fn visit_expr(&mut self, c: &mut (), e: &Expr<(), (), (), ()>) -> Result<(), ()> {
         match &e.2 {
             Expr_::ExpressionTree(_) => {}
             Expr_::ETSplice(_) => {
                 let msg = "Splice syntax ${...} can only occur inside expression trees Foo``...``.";
-                let p = e.0.clone();
+                let p = e.1.clone();
                 let (start_offset, end_offset) = p.info_raw();
                 self.errors
                     .push(SyntaxError::make(start_offset, end_offset, msg.into()));
@@ -44,7 +43,7 @@ impl<'ast> Visitor<'ast> for Checker {
 
 /// Check for splice syntax ${...} outside of an expression tree literal.
 #[allow(clippy::ptr_arg)] // we can't use a slice because Visitor requires a &Program.
-pub fn check_splices(program: &Program<Pos, (), (), ()>) -> Vec<SyntaxError> {
+pub fn check_splices(program: &Program<(), (), (), ()>) -> Vec<SyntaxError> {
     let mut checker = Checker { errors: vec![] };
     visit(&mut checker, &mut (), program).expect("Unexpected error when checking nested splices");
     checker.errors

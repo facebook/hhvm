@@ -1326,9 +1326,9 @@ where
 
                 let inner_pos = Self::p_pos(&c.expression, env);
                 let inner_expr_ = Self::p_expr_impl_(location, &c.expression, env, parent_pos)?;
-                let inner_expr = ast::Expr::new(inner_pos.clone(), inner_pos, inner_expr_);
+                let inner_expr = ast::Expr::new((), inner_pos, inner_expr_);
                 Ok(ast::Expr::new(
-                    pos.clone(),
+                    (),
                     pos,
                     ast::Expr_::ETSplice(Box::new(inner_expr)),
                 ))
@@ -1336,7 +1336,7 @@ where
             _ => {
                 let pos = Self::p_pos(node, env);
                 let expr_ = Self::p_expr_impl_(location, node, env, parent_pos)?;
-                Ok(ast::Expr::new(pos.clone(), pos, expr_))
+                Ok(ast::Expr::new((), pos, expr_))
             }
         }
     }
@@ -1495,7 +1495,7 @@ where
         };
         let mk_lvar =
             |name: S<'a, T, V>, env: &mut Env<'a, TF>| Ok(E_::mk_lvar(mk_name_lid(name, env)?));
-        let mk_id_expr = |name: ast::Sid| E::new(name.0.clone(), name.0.clone(), E_::mk_id(name));
+        let mk_id_expr = |name: ast::Sid| E::new((), name.0.clone(), E_::mk_id(name));
         let p_intri_expr = |kw, ty, v, e: &mut Env<'a, TF>| {
             let hints = Self::expand_type_args(ty, e)?;
             let hints = Self::check_intrinsic_type_arg_varity(node, e, hints);
@@ -1519,16 +1519,16 @@ where
                 (E_::ObjGet(t), Some(ref _p)) => {
                     let (a, b, c, _false) = &**t;
                     E::new(
-                        recv.0.clone(),
-                        recv.0.clone(),
+                        (),
+                        recv.1.clone(),
                         E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
                     )
                 }
                 (E_::ClassGet(c), Some(ref _p)) => {
                     let (a, b, _false) = &**c;
                     E::new(
-                        recv.0.clone(),
-                        recv.0.clone(),
+                        (),
+                        recv.1.clone(),
                         E_::mk_class_get(a.clone(), b.clone(), true),
                     )
                 }
@@ -1578,7 +1578,7 @@ where
                         let ast::Id(p, n) = Self::pos_name(&c.signature, env)?;
                         (
                             vec![ast::FunParam {
-                                annotation: p.clone(),
+                                annotation: (),
                                 type_hint: ast::TypeHint((), None),
                                 is_variadic: false,
                                 pos: p,
@@ -1691,7 +1691,7 @@ where
                 let p_binder_or_ignore =
                     |n: S<'a, T, V>, e: &mut Env<'a, TF>| -> Result<ast::Expr, Error> {
                         match &n.children {
-                            Missing => Ok(E::new(e.mk_none_pos(), e.mk_none_pos(), E_::Omitted)),
+                            Missing => Ok(E::new((), e.mk_none_pos(), E_::Omitted)),
                             _ => Self::p_expr(n, e),
                         }
                     };
@@ -1732,11 +1732,7 @@ where
                         Ok(E_::mk_call(
                             Self::p_expr(recv, env)?,
                             vec![],
-                            vec![E::new(
-                                literal_expression_pos.clone(),
-                                literal_expression_pos,
-                                E_::String(s.into()),
-                            )],
+                            vec![E::new((), literal_expression_pos, E_::String(s.into()))],
                             None,
                         ))
                     }
@@ -1764,16 +1760,16 @@ where
                             (E_::ObjGet(t), Some(ref _p)) => {
                                 let (a, b, c, _false) = &**t;
                                 E::new(
-                                    recv.0.clone(),
-                                    recv.0.clone(),
+                                    (),
+                                    recv.1.clone(),
                                     E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
                                 )
                             }
                             (E_::ClassGet(c), Some(ref _p)) => {
                                 let (a, b, _false) = &**c;
                                 E::new(
-                                    recv.0.clone(),
-                                    recv.0.clone(),
+                                    (),
+                                    recv.1.clone(),
                                     E_::mk_class_get(a.clone(), b.clone(), true),
                                 )
                             }
@@ -1790,7 +1786,7 @@ where
                             );
                             let pos = Self::p_pos(&c.enum_class_label, env);
                             let enum_class_label = ast::Expr::new(
-                                pos.clone(),
+                                (),
                                 pos,
                                 E_::mk_enum_class_label(
                                     None,
@@ -1913,7 +1909,7 @@ where
                         Some(TK::Clone) => Ok(E_::mk_clone(expr)),
                         Some(TK::Print) => Ok(E_::mk_call(
                             E::new(
-                                pos.clone(),
+                                (),
                                 pos.clone(),
                                 E_::mk_id(ast::Id(pos, special_functions::ECHO.into())),
                             ),
@@ -1989,7 +1985,7 @@ where
                 }
                 if c.operand.is_missing() {
                     Ok(E_::mk_yield(ast::Afield::AFvalue(E::new(
-                        pos.clone(),
+                        (),
                         pos,
                         E_::Null,
                     ))))
@@ -2006,16 +2002,16 @@ where
                     Token(token) if token.kind() == TK::Variable => {
                         let ast::Id(p, name) = Self::pos_name(&c.name, env)?;
                         Ok(E_::mk_class_get(
-                            ast::ClassId(pos.clone(), pos, ast::ClassId_::CIexpr(qual)),
+                            ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                             ast::ClassGetExpr::CGstring((p, name)),
                             false,
                         ))
                     }
                     _ => {
-                        let E(p, _, expr_) = Self::p_expr(&c.name, env)?;
+                        let E(_, p, expr_) = Self::p_expr(&c.name, env)?;
                         match expr_ {
                             E_::String(id) => Ok(E_::mk_class_const(
-                                ast::ClassId(pos.clone(), pos, ast::ClassId_::CIexpr(qual)),
+                                ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                                 (
                                     p,
                                     String::from_utf8(id.into())
@@ -2025,21 +2021,21 @@ where
                             E_::Id(id) => {
                                 let ast::Id(p, n) = *id;
                                 Ok(E_::mk_class_const(
-                                    ast::ClassId(pos.clone(), pos, ast::ClassId_::CIexpr(qual)),
+                                    ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                                     (p, n),
                                 ))
                             }
                             E_::Lvar(id) => {
                                 let ast::Lid(p, (_, n)) = *id;
                                 Ok(E_::mk_class_get(
-                                    ast::ClassId(pos.clone(), pos, ast::ClassId_::CIexpr(qual)),
+                                    ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                                     ast::ClassGetExpr::CGstring((p, n)),
                                     false,
                                 ))
                             }
                             _ => Ok(E_::mk_class_get(
-                                ast::ClassId(pos.clone(), pos, ast::ClassId_::CIexpr(qual)),
-                                ast::ClassGetExpr::CGexpr(E(p.clone(), p, expr_)),
+                                ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
+                                ast::ClassGetExpr::CGexpr(E((), p, expr_)),
                                 false,
                             )),
                         }
@@ -2115,11 +2111,11 @@ where
                     Self::fail_if_invalid_class_creation(node, env, &name.1);
                 }
                 Ok(E_::mk_new(
-                    ast::ClassId(pos.clone(), pos.clone(), ast::ClassId_::CIexpr(e)),
+                    ast::ClassId((), pos.clone(), ast::ClassId_::CIexpr(e)),
                     hl,
                     args,
                     varargs,
-                    pos,
+                    (),
                 ))
             }
             GenericTypeSpecifier(c) => {
@@ -2246,7 +2242,7 @@ where
                     doc_comment: None,
                 };
                 Ok(E_::mk_call(
-                    E::new(pos.clone(), pos, E_::mk_lfun(body, vec![])),
+                    E::new((), pos, E_::mk_lfun(body, vec![])),
                     vec![],
                     vec![],
                     None,
@@ -2294,8 +2290,7 @@ where
                     match recv {
                         Ok(recv) => {
                             let enum_class_label = E_::mk_enum_class_label(None, label_name);
-                            let enum_class_label =
-                                ast::Expr::new(label_pos.clone(), label_pos, enum_class_label);
+                            let enum_class_label = ast::Expr::new((), label_pos, enum_class_label);
                             Ok(E_::mk_call(recv, vec![], vec![enum_class_label], None))
                         }
                         Err(err) => Err(err),
@@ -2306,7 +2301,7 @@ where
         }
     }
 
-    fn check_lvalue(ast::Expr(p, _, expr_): &ast::Expr, env: &mut Env<'a, TF>) {
+    fn check_lvalue(ast::Expr(_, p, expr_): &ast::Expr, env: &mut Env<'a, TF>) {
         use aast::Expr_::*;
         let mut raise = |s| Self::raise_parsing_error_pos(p, env, s);
         match expr_ {
@@ -2360,17 +2355,17 @@ where
                 let text = html_entities::decode(&Self::get_quoted_content(
                     node.full_text(env.source_text()),
                 ));
-                Ok(ast::Expr::new(p.clone(), p, E_::make_string(text)))
+                Ok(ast::Expr::new((), p, E_::make_string(text)))
             } else if env.codegen() && TK::XHPBody == kind {
                 let p = Self::p_pos(node, env);
                 /* for XHP body - only decode HTML entities */
                 let text =
                     html_entities::decode(&Self::unesc_xhp(node.full_text(env.source_text())));
-                Ok(ast::Expr::new(p.clone(), p, E_::make_string(text)))
+                Ok(ast::Expr::new((), p, E_::make_string(text)))
             } else {
                 let p = Self::p_pos(node, env);
                 let s = escaper(node.full_text(env.source_text()));
-                Ok(ast::Expr::new(p.clone(), p, E_::make_string(s)))
+                Ok(ast::Expr::new((), p, E_::make_string(s)))
             }
         } else {
             Self::p_expr(node, env)
@@ -2387,7 +2382,7 @@ where
                     && env.file_mode() == file_info::Mode::Mhhi
                     && !env.codegen()
                 {
-                    ast::Expr::new(env.mk_none_pos(), env.mk_none_pos(), E_::Null)
+                    ast::Expr::new((), env.mk_none_pos(), E_::Null)
                 } else {
                     Self::p_xhp_embedded(Self::unesc_xhp_attr, attr_expr, env)?
                 };
@@ -2631,13 +2626,13 @@ where
 
     fn process_lifted_awaits(mut awaits: LiftedAwaits) -> Result<LiftedAwaitExprs, Error> {
         for await_ in awaits.awaits.iter() {
-            if (await_.1).0.is_none() {
+            if (await_.1).1.is_none() {
                 return Self::failwith("none pos in lifted awaits");
             }
         }
         awaits
             .awaits
-            .sort_unstable_by(|a1, a2| Pos::cmp(&(a1.1).0, &(a2.1).0));
+            .sort_unstable_by(|a1, a2| Pos::cmp(&(a1.1).1, &(a2.1).1));
         Ok(awaits.awaits)
     }
 
@@ -2723,7 +2718,7 @@ where
                 if location != AsStatement {
                     let name = env.make_tmp_var_name();
                     let lid = ast::Lid::new(parent_pos, name.clone());
-                    let await_lid = ast::Lid::new(expr.0.clone(), name);
+                    let await_lid = ast::Lid::new(expr.1.clone(), name);
                     let await_ = (Some(await_lid), expr);
                     env.lifted_awaits.as_mut().map(|aw| aw.awaits.push(await_));
                     Ok(E_::mk_lvar(lid))
@@ -2973,7 +2968,7 @@ where
                     let echo = match &c.keyword.children {
                         QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
                             let name = Self::pos_name(&c.keyword, e)?;
-                            ast::Expr::new(name.0.clone(), name.0.clone(), E_::mk_id(name))
+                            ast::Expr::new((), name.0.clone(), E_::mk_id(name))
                         }
                         _ => Self::missing_syntax("id", &c.keyword, e)?,
                     };
@@ -2981,7 +2976,7 @@ where
                     Ok(new(
                         pos.clone(),
                         S_::mk_expr(ast::Expr::new(
-                            pos.clone(),
+                            (),
                             pos,
                             E_::mk_call(echo, vec![], args, None),
                         )),
@@ -2999,14 +2994,14 @@ where
                     let unset = match &c.keyword.children {
                         QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
                             let name = Self::pos_name(&c.keyword, e)?;
-                            ast::Expr::new(name.0.clone(), name.0.clone(), E_::mk_id(name))
+                            ast::Expr::new((), name.0.clone(), E_::mk_id(name))
                         }
                         _ => Self::missing_syntax("id", &c.keyword, e)?,
                     };
                     Ok(new(
                         pos.clone(),
                         S_::mk_expr(ast::Expr::new(
-                            pos.clone(),
+                            (),
                             pos,
                             E_::mk_call(unset, vec![], args, None),
                         )),
@@ -3041,14 +3036,14 @@ where
 
                             if let Some(tv) = tmp_vars.next() {
                                 if let Stmt(p1, S_::Expr(expr)) = n {
-                                    if let E(p2, _, E_::Binop(bop)) = *expr {
+                                    if let E(_, p2, E_::Binop(bop)) = *expr {
                                         if let (Eq(op), e1, e2) = *bop {
-                                            let tmp_n = E::mk_lvar(&e2.0, &(tv.1));
+                                            let tmp_n = E::mk_lvar(&e2.1, &(tv.1));
                                             if tmp_n.lvar_name() != e2.lvar_name() {
                                                 let new_n = new(
                                                     p1.clone(),
                                                     S_::mk_expr(E::new(
-                                                        p2.clone(),
+                                                        (),
                                                         p2.clone(),
                                                         E_::mk_binop(
                                                             Eq(None),
@@ -3062,7 +3057,7 @@ where
                                             let assign_stmt = new(
                                                 p1,
                                                 S_::mk_expr(E::new(
-                                                    p2.clone(),
+                                                    (),
                                                     p2,
                                                     E_::mk_binop(Eq(op), e1, tmp_n),
                                                 )),
@@ -3513,7 +3508,7 @@ where
     fn param_template(node: S<'a, T, V>, env: &Env<TF>) -> ast::FunParam {
         let pos = Self::p_pos(node, env);
         ast::FunParam {
-            annotation: pos.clone(),
+            annotation: (),
             type_hint: ast::TypeHint((), None),
             is_variadic: false,
             pos,
@@ -3571,7 +3566,7 @@ where
                     );
                 }
                 Ok(ast::FunParam {
-                    annotation: pos.clone(),
+                    annotation: (),
                     type_hint: ast::TypeHint((), hint),
                     user_attributes,
                     is_variadic,
@@ -3928,7 +3923,7 @@ where
                     let f = |e: &mut Env<'a, TF>| {
                         let expr = Self::p_expr(node, e)?;
                         Ok(ast::Stmt::new(
-                            expr.0.clone(),
+                            expr.1.clone(),
                             ast::Stmt_::mk_return(Some(expr)),
                         ))
                     };
@@ -4483,14 +4478,13 @@ where
                     let cvname = Self::drop_prefix(&param.name, '$');
                     let p = &param.pos;
                     let span = match &param.expr {
-                        Some(ast::Expr(pos_end, _, _)) => {
+                        Some(ast::Expr(_, pos_end, _)) => {
                             Pos::btw(p, pos_end).unwrap_or_else(|_| p.clone())
                         }
                         _ => p.clone(),
                     };
-                    let e = |expr_: ast::Expr_| -> ast::Expr {
-                        ast::Expr::new(p.clone(), p.clone(), expr_)
-                    };
+                    let e =
+                        |expr_: ast::Expr_| -> ast::Expr { ast::Expr::new((), p.clone(), expr_) };
                     let lid = |s: &str| -> ast::Lid { ast::Lid(p.clone(), (0, s.to_string())) };
                     (
                         ast::Stmt::new(
@@ -4936,7 +4930,7 @@ where
 
     fn check_effect_memoized(
         contexts: &Option<ast::Contexts>,
-        user_attributes: &[aast::UserAttribute<Pos, (), (), ()>],
+        user_attributes: &[aast::UserAttribute<(), (), (), ()>],
         kind: &str,
         env: &mut Env<'a, TF>,
     ) {

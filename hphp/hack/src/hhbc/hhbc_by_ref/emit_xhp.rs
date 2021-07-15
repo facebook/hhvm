@@ -21,7 +21,7 @@ pub fn properties_for_cache<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     class: &'a Class_,
     class_is_const: bool,
 ) -> Result<Option<HhasProperty<'arena>>> {
-    let initial_value = Some(Expr(Pos::make_none(), Pos::make_none(), Expr_::mk_null()));
+    let initial_value = Some(Expr((), Pos::make_none(), Expr_::mk_null()));
     let property = emit_property::from_ast(
         alloc,
         emitter,
@@ -61,7 +61,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let mk_cache = || {
         let self_ = mk_expr(id_from_str("self"));
         mk_expr(Expr_::mk_class_get(
-            ClassId(Pos::make_none(), Pos::make_none(), ClassId_::CIexpr(self_)),
+            ClassId((), Pos::make_none(), ClassId_::CIexpr(self_)),
             ClassGetExpr::CGstring((Pos::make_none(), "$__xhpAttributeDeclarationCache".into())),
             false,
         ))
@@ -87,7 +87,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let mut args = vec![mk_expr(Expr_::mk_call(
         mk_expr(Expr_::mk_class_const(
             ClassId(
-                Pos::make_none(),
+                (),
                 Pos::make_none(),
                 ClassId_::CIexpr(mk_expr(id_from_str("parent"))),
             ),
@@ -104,7 +104,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 let arg = mk_expr(Expr_::mk_call(
                     mk_expr(Expr_::mk_class_const(
                         ClassId(
-                            Pos::make_none(),
+                            (),
                             Pos::make_none(),
                             ClassId_::CIexpr(mk_expr(Expr_::mk_id(ast_defs::Id(
                                 Pos::make_none(),
@@ -476,7 +476,7 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl, D: DeclProvider<'dec
 }
 
 fn mk_expr(expr_: Expr_) -> Expr {
-    Expr(Pos::make_none(), Pos::make_none(), expr_)
+    Expr((), Pos::make_none(), expr_)
 }
 
 fn mk_stmt(stmt_: Stmt_) -> Stmt {

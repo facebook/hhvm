@@ -92,7 +92,7 @@ pub fn emit_stmt<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         a::Stmt_::Expr(e_) => match &e_.2 {
             a::Expr_::Await(a) => Ok(InstrSeq::gather(
                 alloc,
-                vec![emit_await(e, env, &e_.0, a)?, instr::popc(alloc)],
+                vec![emit_await(e, env, &e_.1, a)?, instr::popc(alloc)],
             )),
             a::Expr_::Call(c) => {
                 if let (a::Expr(_, _, a::Expr_::Id(sid)), _, exprs, None) = c.as_ref() {
@@ -116,7 +116,7 @@ pub fn emit_stmt<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                     emit_expr::emit_set_range_expr(
                                         e,
                                         env,
-                                        &e_.0,
+                                        &e_.1,
                                         fname,
                                         kind,
                                         &args[..],
@@ -125,14 +125,14 @@ pub fn emit_stmt<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                 _ => emit_expr::emit_set_range_expr(
                                     e,
                                     env,
-                                    &e_.0,
+                                    &e_.1,
                                     fname,
                                     kind,
                                     &exprs[..],
                                 ),
                             }
                         } else {
-                            emit_expr::emit_ignored_expr(e, env, &e_.0, e_)
+                            emit_expr::emit_ignored_expr(e, env, &e_.1, e_)
                         }
                     }
                 } else {
@@ -142,7 +142,7 @@ pub fn emit_stmt<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             a::Expr_::Binop(bop) => {
                 if let (ast_defs::Bop::Eq(None), e_lhs, e_rhs) = bop.as_ref() {
                     if let Some(e_await) = e_rhs.2.as_await() {
-                        let await_pos = &e_rhs.0;
+                        let await_pos = &e_rhs.1;
                         if let Some(l) = e_lhs.2.as_list() {
                             let awaited_instrs = emit_await(e, env, await_pos, e_await)?;
                             let has_elements = l.iter().any(|e| !e.2.is_omitted());
@@ -191,7 +191,7 @@ pub fn emit_stmt<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             Some(r) => {
                 let ret = emit_return(e, env)?;
                 let expr_instr = if let Some(e_) = r.2.as_await() {
-                    emit_await(e, env, &r.0, e_)?
+                    emit_await(e, env, &r.1, e_)?
                 } else {
                     emit_expr(e, env, &r)?
                 };
@@ -277,7 +277,7 @@ fn emit_check_case<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         InstrSeq::gather(
             alloc,
             vec![
-                emit_expr::emit_two_exprs(e, env, &case_expr.0, scrutinee_expr, &case_expr)?,
+                emit_expr::emit_two_exprs(e, env, &case_expr.1, scrutinee_expr, &case_expr)?,
                 instr::eq(alloc),
                 instr::jmpnz(alloc, case_handler_label),
             ],
@@ -289,7 +289,7 @@ fn emit_check_case<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             vec![
                 instr::dup(alloc),
                 emit_expr::emit_expr(e, env, &case_expr)?,
-                emit_pos(alloc, &case_expr.0),
+                emit_pos(alloc, &case_expr.1),
                 instr::eq(alloc),
                 instr::jmpz(alloc, next_case_label),
                 instr::popc(alloc),
@@ -438,11 +438,11 @@ fn emit_using<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 .rev()
                 .fold(using.block.clone(), |block, expr| {
                     vec![tast::Stmt(
-                        expr.0.clone(),
+                        expr.1.clone(),
                         tast::Stmt_::mk_using(tast::UsingStmt {
                             has_await: using.has_await,
                             is_block_scoped: using.is_block_scoped,
-                            exprs: (expr.0.clone(), vec![expr.clone()]),
+                            exprs: (expr.1.clone(), vec![expr.clone()]),
                             block,
                         }),
                     )]
@@ -523,7 +523,7 @@ fn emit_using<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             let jump_instrs = tfr::JumpInstructions::collect(&body, &mut env.jump_targets_gen);
             let jump_instrs_is_empty = jump_instrs.is_empty();
             let finally_epilogue =
-                tfr::emit_finally_epilogue(e, env, &using.exprs.1[0].0, jump_instrs, finally_end)?;
+                tfr::emit_finally_epilogue(e, env, &using.exprs.1[0].1, jump_instrs, finally_end)?;
             let try_instrs = if jump_instrs_is_empty {
                 body
             } else {
@@ -599,7 +599,7 @@ fn emit_using<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     vec![
                         emit_pos(alloc, &block_pos),
                         make_finally_catch(alloc, e, exn_local, finally_instrs),
-                        emit_pos(alloc, &using.exprs.1[0].0),
+                        emit_pos(alloc, &using.exprs.1[0].1),
                     ],
                 );
                 InstrSeq::create_try_catch(
@@ -1105,7 +1105,7 @@ fn emit_foreach_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             alloc,
             vec![
                 collection_instrs,
-                emit_pos(alloc, &collection.0),
+                emit_pos(alloc, &collection.1),
                 instr::iterinit(alloc, iter_args.clone(), loop_break_label),
             ],
         );
@@ -1314,7 +1314,7 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let alloc = env.arena;
     match &lvalue.2 {
         tast::Expr_::Call(_) => Err(emit_fatal::raise_fatal_parse(
-            &lvalue.0,
+            &lvalue.1,
             "Can't use return value in write context",
         )),
         tast::Expr_::List(es) => {
@@ -1334,7 +1334,7 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             let (lhs, rhs, set_op) = emit_expr::emit_lval_op_nonlist_steps(
                 e,
                 env,
-                &lvalue.0,
+                &lvalue.1,
                 LValOp::Set,
                 lvalue,
                 instr::cgetl(alloc, local),
@@ -1435,7 +1435,7 @@ fn emit_load_list_element<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             let set_instrs = emit_expr::emit_lval_op_nonlist(
                 e,
                 env,
-                &elem.0,
+                &elem.1,
                 LValOp::Set,
                 elem,
                 query_value(path),
@@ -1495,7 +1495,7 @@ fn emit_foreach_await_lvalue_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 emit_expr::emit_lval_op_list(
                     e,
                     env,
-                    &lvalue.0,
+                    &lvalue.1,
                     Some(&local),
                     indices,
                     lvalue,
@@ -1731,11 +1731,11 @@ pub fn emit_markup<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let alloc = env.arena;
     let mut emit_ignored_call_expr = |fname: String, expr: tast::Expr| {
         let call_expr = tast::Expr(
-            Pos::make_none(),
+            (),
             Pos::make_none(),
             tast::Expr_::mk_call(
                 tast::Expr(
-                    Pos::make_none(),
+                    (),
                     Pos::make_none(),
                     tast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), fname)),
                 ),
@@ -1753,7 +1753,7 @@ pub fn emit_markup<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             emit_ignored_call_expr(
                 fname,
                 tast::Expr(
-                    Pos::make_none(),
+                    (),
                     Pos::make_none(),
                     tast::Expr_::mk_string(expr_str.into()),
                 ),

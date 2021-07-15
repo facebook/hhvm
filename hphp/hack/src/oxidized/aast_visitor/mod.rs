@@ -33,7 +33,7 @@ mod type_params_defaults {
         type Hi = Hi;
     }
 
-    pub type AstParams<Context, Error> = P<Context, Error, crate::pos::Pos, (), (), ()>;
+    pub type AstParams<Context, Error> = P<Context, Error, (), (), (), ()>;
 }
 
 #[cfg(test)]

@@ -34,7 +34,7 @@ impl<'ast> Visitor<'ast> for ExprTreeLiteralExtractor {
         use aast::Expr_::*;
         match &e.2 {
             ExpressionTree(et) => {
-                self.literals.push((e.0.clone(), (&**et).clone()));
+                self.literals.push((e.1.clone(), (&**et).clone()));
             }
             _ => e.recurse(env, self)?,
         }

@@ -78,7 +78,7 @@ fn rewrite_xml_<'arena, 'decl, D: DeclProvider<'decl>>(
                     XhpAttribute::XhpSpread(expr) => {
                         attrs.push((
                             SF::SFlitStr((
-                                expr.0.clone(),
+                                expr.1.clone(),
                                 format!("...${}", spread_id.to_string()).into(),
                             )),
                             expr,
@@ -88,21 +88,21 @@ fn rewrite_xml_<'arena, 'decl, D: DeclProvider<'decl>>(
                 }
                 (spread_id, attrs)
             });
-    let attribute_map = E(pos.clone(), pos.clone(), E_::mk_shape(attributes));
-    let children_vec = E(pos.clone(), pos.clone(), E_::mk_varray(None, children));
+    let attribute_map = E((), pos.clone(), E_::mk_shape(attributes));
+    let children_vec = E((), pos.clone(), E_::mk_varray(None, children));
     let filename = E(
-        pos.clone(),
+        (),
         pos.clone(),
         E_::mk_id(Id(pos.clone(), pseudo_consts::G__FILE__.into())),
     );
     let line = E(
-        pos.clone(),
+        (),
         pos.clone(),
         E_::mk_id(Id(pos.clone(), pseudo_consts::G__LINE__.into())),
     );
     let renamed_id = class::Type::from_ast_name_and_mangle(alloc, &id.1);
     let cid = ClassId(
-        pos.clone(),
+        (),
         pos.clone(),
         ClassId_::CI(Id(id.0.clone(), renamed_id.to_raw_string().into())),
     );
@@ -110,14 +110,14 @@ fn rewrite_xml_<'arena, 'decl, D: DeclProvider<'decl>>(
     emit_symbol_refs::add_class(alloc, e, renamed_id);
 
     Ok(E(
-        pos.clone(),
+        (),
         pos.clone(),
         E_::New(Box::new((
             cid,
             vec![],
             vec![attribute_map, children_vec, filename, line],
             None,
-            pos.clone(),
+            (),
         ))),
     ))
 }

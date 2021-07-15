@@ -66,7 +66,7 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
 
     let extracted_splices = extract_and_replace_splices(&mut e)?;
     let splice_count = extracted_splices.len();
-    let et_literal_pos = e.0.clone();
+    let et_literal_pos = e.1.clone();
 
     let metadata = maketree_metadata(
         &et_literal_pos,
@@ -82,11 +82,11 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
         .enumerate()
         .map(|(i, expr)| {
             Stmt::new(
-                expr.0.clone(),
+                expr.1.clone(),
                 Stmt_::Expr(Box::new(Expr::new(
-                    expr.0.clone(),
-                    expr.0.clone(),
-                    Expr_::Binop(Box::new((Bop::Eq(None), temp_lvar(&expr.0, i), expr))),
+                    (),
+                    expr.1.clone(),
+                    Expr_::Binop(Box::new((Bop::Eq(None), temp_lvar(&expr.1, i), expr))),
                 ))),
             )
         })
@@ -101,7 +101,7 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
         annotation: (),
     };
     let param = ast::FunParam {
-        annotation: hint.0.clone(),
+        annotation: (),
         type_hint: ast::TypeHint((), Some(hint.clone())),
         is_variadic: false,
         pos: hint.0.clone(),
@@ -114,7 +114,7 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
     };
     let visitor_fun_ = wrap_fun_(visitor_body, vec![param], et_literal_pos.clone());
     let visitor_lambda = Expr::new(
-        et_literal_pos.clone(),
+        (),
         et_literal_pos.clone(),
         Expr_::mk_lfun(visitor_fun_, vec![]),
     );
@@ -132,11 +132,11 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
             .map(|i| ast::Lid(et_literal_pos.clone(), (0, temp_lvar_string(i))))
             .collect();
         Expr::new(
-            et_literal_pos.clone(),
+            (),
             et_literal_pos.clone(),
             Expr_::Call(Box::new((
                 Expr::new(
-                    et_literal_pos.clone(),
+                    (),
                     et_literal_pos.clone(),
                     Expr_::mk_efun(typing_fun_, spliced_vars),
                 ),
@@ -163,7 +163,7 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
     };
 
     Ok(Expr::new(
-        et_literal_pos.clone(),
+        (),
         et_literal_pos,
         Expr_::mk_expression_tree(ast::ExpressionTree {
             hint: hint.clone(),
@@ -213,7 +213,7 @@ impl<'ast> Visitor<'ast> for VoidReturnCheck {
         self
     }
 
-    fn visit_expr(&mut self, env: &mut (), e: &aast::Expr<Pos, (), (), ()>) -> Result<(), ()> {
+    fn visit_expr(&mut self, env: &mut (), e: &aast::Expr<(), (), (), ()>) -> Result<(), ()> {
         use aast::Expr_::*;
 
         match &e.2 {
@@ -224,7 +224,7 @@ impl<'ast> Visitor<'ast> for VoidReturnCheck {
         }
     }
 
-    fn visit_stmt(&mut self, env: &mut (), s: &'ast aast::Stmt<Pos, (), (), ()>) -> Result<(), ()> {
+    fn visit_stmt(&mut self, env: &mut (), s: &'ast aast::Stmt<(), (), (), ()>) -> Result<(), ()> {
         use aast::Stmt_::*;
 
         match &s.1 {
@@ -248,19 +248,19 @@ fn only_void_return(lfun_body: &ast::Block) -> bool {
 }
 
 fn null_literal(pos: Pos) -> Expr {
-    Expr::new(pos.clone(), pos, Expr_::Null)
+    Expr::new((), pos, Expr_::Null)
 }
 
 fn string_literal(pos: Pos, s: &str) -> Expr {
-    Expr::new(pos.clone(), pos, Expr_::String(BString::from(s)))
+    Expr::new((), pos, Expr_::String(BString::from(s)))
 }
 
 fn int_literal(pos: Pos, i: usize) -> Expr {
-    Expr::new(pos.clone(), pos, Expr_::Int(i.to_string()))
+    Expr::new((), pos, Expr_::Int(i.to_string()))
 }
 
 fn vec_literal(items: Vec<Expr>) -> Expr {
-    let positions: Vec<_> = items.iter().map(|x| &x.0).collect();
+    let positions: Vec<_> = items.iter().map(|x| &x.1).collect();
     let position = merge_positions(&positions);
     vec_literal_with_pos(&position, items)
 }
@@ -268,7 +268,7 @@ fn vec_literal(items: Vec<Expr>) -> Expr {
 fn vec_literal_with_pos(pos: &Pos, items: Vec<Expr>) -> Expr {
     let fields: Vec<_> = items.into_iter().map(|e| ast::Afield::AFvalue(e)).collect();
     Expr::new(
-        pos.clone(),
+        (),
         pos.clone(),
         Expr_::Collection(Box::new((make_id(pos.clone(), "vec"), None, fields))),
     )
@@ -280,7 +280,7 @@ fn dict_literal(pos: &Pos, key_value_pairs: Vec<(Expr, Expr)>) -> Expr {
         .map(|(k, v)| ast::Afield::AFkvalue(k, v))
         .collect();
     Expr::new(
-        pos.clone(),
+        (),
         pos.clone(),
         Expr_::Collection(Box::new((make_id(pos.clone(), "dict"), None, fields))),
     )
@@ -298,14 +298,14 @@ fn visitor_variable() -> String {
 fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
     let receiver = Expr::mk_lvar(pos, &visitor_variable());
     let meth = Expr::new(
-        pos.clone(),
+        (),
         pos.clone(),
         Expr_::Id(Box::new(ast::Id(pos.clone(), meth_name.into()))),
     );
 
     let c = Expr_::Call(Box::new((
         Expr::new(
-            pos.clone(),
+            (),
             pos.clone(),
             Expr_::ObjGet(Box::new((
                 receiver,
@@ -318,19 +318,19 @@ fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
         args,
         None,
     )));
-    Expr::new(pos.clone(), pos.clone(), c)
+    Expr::new((), pos.clone(), c)
 }
 
 fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
     let meth = Expr::new(
-        pos.clone(),
+        (),
         pos.clone(),
         Expr_::Id(Box::new(ast::Id(pos.clone(), meth_name.into()))),
     );
 
     let c = Expr_::Call(Box::new((
         Expr::new(
-            pos.clone(),
+            (),
             pos.clone(),
             Expr_::ObjGet(Box::new((
                 receiver,
@@ -343,20 +343,20 @@ fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Exp
         args,
         None,
     )));
-    Expr::new(pos.clone(), pos.clone(), c)
+    Expr::new((), pos.clone(), c)
 }
 
 fn static_meth_call(classname: &str, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
     let callee = Expr::new(
-        pos.clone(),
+        (),
         pos.clone(),
         Expr_::ClassConst(Box::new((
             // TODO: Refactor ClassId creation with new_obj
             ClassId(
-                pos.clone(),
+                (),
                 pos.clone(),
                 ClassId_::CIexpr(Expr::new(
-                    pos.clone(),
+                    (),
                     pos.clone(),
                     Expr_::Id(Box::new(Id(pos.clone(), classname.to_string()))),
                 )),
@@ -365,7 +365,7 @@ fn static_meth_call(classname: &str, meth_name: &str, args: Vec<Expr>, pos: &Pos
         ))),
     );
     Expr::new(
-        pos.clone(),
+        (),
         pos.clone(),
         Expr_::Call(Box::new((callee, vec![], args, None))),
     )
@@ -417,7 +417,7 @@ impl<'ast> VisitorMut<'ast> for SpliceExtractor {
             ETSplice(ref mut ex) => {
                 if *in_splice {
                     return Err((
-                        e.0.clone(),
+                        e.1.clone(),
                         "Splice syntax `${...}` cannot be nested.".into(),
                     ));
                 } else {
@@ -429,7 +429,7 @@ impl<'ast> VisitorMut<'ast> for SpliceExtractor {
                     // Extract this expression.
                     let len = self.extracted_splices.len();
                     self.extracted_splices.push((**ex).clone());
-                    (*e).2 = ETSplice(Box::new(temp_lvar(&ex.0, len)));
+                    (*e).2 = ETSplice(Box::new(temp_lvar(&ex.1, len)));
                 }
             }
             _ => e.recurse(in_splice, self.object())?,
@@ -486,7 +486,7 @@ impl<'ast> Visitor<'ast> for CallExtractor {
                     }
                     ClassConst(cc) => {
                         let (ref cid, ref s) = **cc;
-                        self.static_methods.push(static_meth_ptr(&recv.0, cid, s));
+                        self.static_methods.push(static_meth_ptr(&recv.1, cid, s));
                     }
                     _ => {}
                 }
@@ -529,7 +529,7 @@ fn exprpos(pos: &Pos) -> Expr {
             (
                 "path",
                 Expr::new(
-                    pos.clone(),
+                    (),
                     pos.clone(),
                     Expr_::Id(Box::new(make_id(pos.clone(), "__FILE__"))),
                 ),
@@ -556,11 +556,11 @@ fn shape_literal(pos: &Pos, fields: Vec<(&str, Expr)>) -> Expr {
             (field_name, value)
         })
         .collect();
-    Expr::new(pos.clone(), pos.clone(), Expr_::Shape(shape_fields))
+    Expr::new((), pos.clone(), Expr_::Shape(shape_fields))
 }
 
 fn boolify(receiver: Expr) -> Expr {
-    let pos = receiver.0.clone();
+    let pos = receiver.1.clone();
     meth_call(receiver, "__bool", vec![], &pos)
 }
 
@@ -573,7 +573,7 @@ fn rewrite_expr<TF>(
 ) -> Result<(Expr, Expr), (Pos, String)> {
     use aast::Expr_::*;
 
-    let Expr(pos, _, expr_) = e;
+    let Expr(_, pos, expr_) = e;
     let pos_expr = exprpos(&pos);
     let (virtual_expr, desugar_expr) = match expr_ {
         // Source: MyDsl`1`
@@ -583,7 +583,7 @@ fn rewrite_expr<TF>(
             let virtual_expr = static_meth_call(visitor_name, et::INT_TYPE, vec![], &pos);
             let desugar_expr = v_meth_call(
                 et::VISIT_INT,
-                vec![pos_expr, Expr(pos.clone(), pos.clone(), expr_)],
+                vec![pos_expr, Expr((), pos.clone(), expr_)],
                 &pos,
             );
             (virtual_expr, desugar_expr)
@@ -595,7 +595,7 @@ fn rewrite_expr<TF>(
             let virtual_expr = static_meth_call(visitor_name, et::FLOAT_TYPE, vec![], &pos);
             let desugar_expr = v_meth_call(
                 et::VISIT_FLOAT,
-                vec![pos_expr, Expr(pos.clone(), pos.clone(), expr_)],
+                vec![pos_expr, Expr((), pos.clone(), expr_)],
                 &pos,
             );
             (virtual_expr, desugar_expr)
@@ -607,7 +607,7 @@ fn rewrite_expr<TF>(
             let virtual_expr = static_meth_call(visitor_name, et::STRING_TYPE, vec![], &pos);
             let desugar_expr = v_meth_call(
                 et::VISIT_STRING,
-                vec![pos_expr, Expr(pos.clone(), pos.clone(), expr_)],
+                vec![pos_expr, Expr((), pos.clone(), expr_)],
                 &pos,
             );
             (virtual_expr, desugar_expr)
@@ -619,7 +619,7 @@ fn rewrite_expr<TF>(
             let virtual_expr = static_meth_call(visitor_name, et::BOOL_TYPE, vec![], &pos);
             let desugar_expr = v_meth_call(
                 et::VISIT_BOOL,
-                vec![pos_expr, Expr(pos.clone(), pos.clone(), expr_)],
+                vec![pos_expr, Expr((), pos.clone(), expr_)],
                 &pos,
             );
             (virtual_expr, desugar_expr)
@@ -641,7 +641,7 @@ fn rewrite_expr<TF>(
                 vec![pos_expr, string_literal(lid.0.clone(), &((lid.1).1))],
                 &pos,
             );
-            let virtual_expr = Expr(pos.clone(), pos, Lvar(lid));
+            let virtual_expr = Expr((), pos, Lvar(lid));
             (virtual_expr, desugar_expr)
         }
         Binop(bop) => {
@@ -657,11 +657,7 @@ fn rewrite_expr<TF>(
                     vec![pos_expr, desugar_lhs, desugar_rhs],
                     &pos,
                 );
-                let virtual_expr = Expr(
-                    pos.clone(),
-                    pos,
-                    Binop(Box::new((op, virtual_lhs, virtual_rhs))),
-                );
+                let virtual_expr = Expr((), pos, Binop(Box::new((op, virtual_lhs, virtual_rhs))));
                 (virtual_expr, desugar_expr)
             } else {
                 // Source: MyDsl`... + ...`
@@ -812,7 +808,7 @@ fn rewrite_expr<TF>(
                 &pos,
             );
             let virtual_expr = Expr(
-                pos.clone(),
+                (),
                 pos,
                 Eif(Box::new((
                     boolify(virtual_e1),
@@ -843,7 +839,7 @@ fn rewrite_expr<TF>(
                 // Don't transform calls to `hh_show`.
                 Id(sid) if is_typechecker_fun_name(&sid.1) => {
                     let call_e = Expr::new(
-                        pos.clone(),
+                        (),
                         pos.clone(),
                         Call(Box::new((recv, targs, args, variadic))),
                     );
@@ -871,7 +867,7 @@ fn rewrite_expr<TF>(
                         &pos,
                     );
                     let virtual_expr = Expr(
-                        pos.clone(),
+                        (),
                         pos,
                         Call(Box::new((callee, vec![], virtual_args, None))),
                     );
@@ -911,7 +907,7 @@ fn rewrite_expr<TF>(
                         &pos,
                     );
                     let virtual_expr = Expr(
-                        pos.clone(),
+                        (),
                         pos,
                         Call(Box::new((callee, vec![], virtual_args, None))),
                     );
@@ -919,14 +915,14 @@ fn rewrite_expr<TF>(
                 }
                 _ => {
                     let (virtual_recv, desugar_recv) =
-                        rewrite_expr(env, Expr(recv.0.clone(), recv.0, recv.2), visitor_name)?;
+                        rewrite_expr(env, Expr((), recv.1, recv.2), visitor_name)?;
                     let desugar_expr = v_meth_call(
                         et::VISIT_CALL,
                         vec![pos_expr, desugar_recv, vec_literal(desugar_args)],
                         &pos,
                     );
                     let virtual_expr = Expr(
-                        pos.clone(),
+                        (),
                         pos,
                         Call(Box::new((virtual_recv, vec![], virtual_args, None))),
                     );
@@ -980,7 +976,7 @@ fn rewrite_expr<TF>(
                 &pos,
             );
             fun_.body.ast = virtual_body_stmts;
-            let virtual_expr = Expr(pos.clone(), pos, Lfun(Box::new((fun_, vec![]))));
+            let virtual_expr = Expr((), pos, Lfun(Box::new((fun_, vec![]))));
             (virtual_expr, desugar_expr)
         }
         // Source: MyDsl`${ ... }`
@@ -995,7 +991,7 @@ fn rewrite_expr<TF>(
                 return Err((pos, "Please report a bug".into()));
             };
             let desugar_expr = v_meth_call(et::SPLICE, vec![pos_expr, s, *e.clone()], &pos);
-            let virtual_expr = Expr(pos.clone(), pos, ETSplice(e));
+            let virtual_expr = Expr((), pos, ETSplice(e));
             (virtual_expr, desugar_expr)
         }
         ExpressionTree(_) => {
@@ -1211,10 +1207,10 @@ fn immediately_invoked_lambda(pos: &Pos, stmts: Vec<Stmt>) -> Expr {
         annotation: (),
     };
     let fun_ = wrap_fun_(func_body, vec![], pos.clone());
-    let lambda_expr = Expr::new(pos.clone(), pos.clone(), Expr_::mk_lfun(fun_, vec![]));
+    let lambda_expr = Expr::new((), pos.clone(), Expr_::mk_lfun(fun_, vec![]));
 
     Expr::new(
-        pos.clone(),
+        (),
         pos.clone(),
         Expr_::Call(Box::new((lambda_expr, vec![], vec![], None))),
     )
@@ -1259,11 +1255,11 @@ fn maketree_metadata(
         .enumerate()
         .map(|(i, expr)| {
             let key = Expr::new(
-                expr.0.clone(),
-                expr.0.clone(),
+                (),
+                expr.1.clone(),
                 Expr_::String(BString::from(temp_lvar_string(i))),
             );
-            let value = temp_lvar(&expr.0, i);
+            let value = temp_lvar(&expr.1, i);
             (key, value)
         })
         .collect();
@@ -1282,7 +1278,7 @@ fn maketree_metadata(
 fn global_func_ptr(sid: &Sid) -> Expr {
     let pos = sid.0.clone();
     Expr::new(
-        pos.clone(),
+        (),
         pos.clone(),
         Expr_::FunctionPointer(Box::new((ast::FunctionPtrId::FPId(sid.clone()), vec![]))),
     )
@@ -1290,7 +1286,7 @@ fn global_func_ptr(sid: &Sid) -> Expr {
 
 fn static_meth_ptr(pos: &Pos, cid: &ClassId, meth: &Pstring) -> Expr {
     Expr::new(
-        pos.clone(),
+        (),
         pos.clone(),
         Expr_::FunctionPointer(Box::new((
             aast::FunctionPtrId::FPClassConst(cid.clone(), meth.clone()),

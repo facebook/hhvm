@@ -31,7 +31,6 @@ use oxidized::{
     aast_defs,
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
     ast::*,
-    ast_defs::*,
     file_info::Mode,
     local_id, namespace_env,
     relative_path::{Prefix, RelativePath},
@@ -798,7 +797,7 @@ fn convert_lambda<'a>(
 
 fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool) -> FunParam {
     FunParam {
-        annotation: pos.clone(),
+        annotation: (),
         type_hint: TypeHint((), None),
         is_variadic,
         pos,
@@ -848,7 +847,7 @@ fn convert_meth_caller_to_func_ptr(
     // TODO: Move dummy variable to tasl.rs once it exists.
     let dummy_saved_env = ();
     let pos = || pos.clone();
-    let expr_id = |name: String| Expr(pos(), pos(), Expr_::mk_id(Id(pos(), name)));
+    let expr_id = |name: String| Expr((), pos(), Expr_::mk_id(Id(pos(), name)));
     let cname = match env.scope.get_class() {
         Some(cd) => &cd.get_name().1,
         None => "",
@@ -858,7 +857,7 @@ fn convert_meth_caller_to_func_ptr(
         expr_id("\\__systemlib\\meth_caller".into()),
         vec![],
         vec![Expr(
-            pos(),
+            (),
             pos(),
             Expr_::mk_string(mangle_name.clone().into()),
         )],
@@ -869,29 +868,29 @@ fn convert_meth_caller_to_func_ptr(
     }
     // AST for: invariant(is_a($o, <cls>), 'object must be an instance of <cls>');
     let obj_var = Box::new(Lid(pos(), local_id::make_unscoped("$o")));
-    let obj_lvar = Expr(pos(), pos(), Expr_::Lvar(obj_var.clone()));
+    let obj_lvar = Expr((), pos(), Expr_::Lvar(obj_var.clone()));
     let assert_invariant = Expr(
-        pos(),
+        (),
         pos(),
         Expr_::mk_call(
             expr_id("\\HH\\invariant".into()),
             vec![],
             vec![
                 Expr(
-                    pos(),
+                    (),
                     pos(),
                     Expr_::mk_call(
                         expr_id("\\is_a".into()),
                         vec![],
                         vec![
                             obj_lvar.clone(),
-                            Expr(pc.clone(), pc.clone(), Expr_::String(cls.into())),
+                            Expr((), pc.clone(), Expr_::String(cls.into())),
                         ],
                         None,
                     ),
                 ),
                 Expr(
-                    pos(),
+                    (),
                     pos(),
                     Expr_::String(format!("object must be an instance of ({})", cls).into()),
                 ),
@@ -903,22 +902,22 @@ fn convert_meth_caller_to_func_ptr(
     let args_var = Box::new(Lid(pos(), local_id::make_unscoped("$args")));
     let variadic_param = make_fn_param(pos(), &args_var.1, true, false);
     let meth_caller_handle = Expr(
-        pos(),
+        (),
         pos(),
         Expr_::mk_call(
             Expr(
-                pos(),
+                (),
                 pos(),
                 Expr_::ObjGet(Box::new((
                     obj_lvar,
-                    Expr(pos(), pos(), Expr_::mk_id(Id(pf.clone(), fname.to_owned()))),
+                    Expr((), pos(), Expr_::mk_id(Id(pf.clone(), fname.to_owned()))),
                     OgNullFlavor::OGNullthrows,
                     false,
                 ))),
             ),
             vec![],
             vec![],
-            Some(Expr(pos(), pos(), Expr_::Lvar(args_var))),
+            Some(Expr((), pos(), Expr_::Lvar(args_var))),
         ),
     );
 
@@ -948,7 +947,7 @@ fn convert_meth_caller_to_func_ptr(
         fun_kind: FunKind::FSync,
         user_attributes: vec![UserAttribute {
             name: Id(pos(), "__MethCaller".into()),
-            params: vec![Expr(pos(), pos(), Expr_::String(cname.into()))],
+            params: vec![Expr((), pos(), Expr_::String(cname.into()))],
         }],
         external: false,
         doc_comment: None,
@@ -969,17 +968,17 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
     let pos = || pos.clone();
     let obj_var = Box::new(Lid(pos(), local_id::make_unscoped("$o")));
     let meth_var = Box::new(Lid(pos(), local_id::make_unscoped("$m")));
-    let obj_lvar = Expr(pos(), pos(), Expr_::Lvar(obj_var.clone()));
-    let meth_lvar = Expr(pos(), pos(), Expr_::Lvar(meth_var.clone()));
+    let obj_lvar = Expr((), pos(), Expr_::Lvar(obj_var.clone()));
+    let meth_lvar = Expr((), pos(), Expr_::Lvar(meth_var.clone()));
     // AST for: return $o-><func>(...$args);
     let args_var = Box::new(Lid(pos(), local_id::make_unscoped("$args")));
     let variadic_param = make_fn_param(pos(), &args_var.1, true, false);
     let invoke_method = Expr(
-        pos(),
+        (),
         pos(),
         Expr_::mk_call(
             Expr(
-                pos(),
+                (),
                 pos(),
                 Expr_::ObjGet(Box::new((
                     obj_lvar,
@@ -990,7 +989,7 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
             ),
             vec![],
             vec![],
-            Some(Expr(pos(), pos(), Expr_::Lvar(args_var))),
+            Some(Expr((), pos(), Expr_::Lvar(args_var))),
         ),
     );
     let attrs = if force {
@@ -1028,7 +1027,7 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
         external: false,
         doc_comment: None,
     };
-    let expr_id = |name: String| Expr(pos(), pos(), Expr_::mk_id(Id(pos(), name)));
+    let expr_id = |name: String| Expr((), pos(), Expr_::mk_id(Id(pos(), name)));
     let force_val = if force { Expr_::True } else { Expr_::False };
     let fun_handle: Expr_ = Expr_::mk_call(
         expr_id("\\__systemlib\\dynamic_meth_caller".into()),
@@ -1036,8 +1035,8 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
         vec![
             cexpr.clone(),
             fexpr.clone(),
-            Expr(pos(), pos(), Expr_::mk_efun(fd, vec![])),
-            Expr(pos(), pos(), force_val),
+            Expr((), pos(), Expr_::mk_efun(fd, vec![])),
+            Expr((), pos(), force_val),
         ],
         None,
     );
@@ -1505,7 +1504,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
             Expr_::As(x) if (x.1).is_hlike() => {
                 let mut res = x.0;
                 res.recurse(env, self.object())?;
-                *pos = res.0;
+                *pos = res.1;
                 res.2
             }
             Expr_::As(x)
@@ -1519,7 +1518,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
             {
                 let mut res = x.0;
                 res.recurse(env, self.object())?;
-                *pos = res.0;
+                *pos = res.1;
                 res.2
             }
             Expr_::ClassGet(mut x) => {
@@ -1594,10 +1593,10 @@ fn extract_debugger_main(
             stmts
         };
     let p = || Pos::make_none();
-    let id = |n: &str| Expr(p(), p(), Expr_::mk_id(Id(p(), n.into())));
+    let id = |n: &str| Expr((), p(), Expr_::mk_id(Id(p(), n.into())));
     let lv = |n: &String| {
         Expr(
-            p(),
+            (),
             p(),
             Expr_::mk_lvar(Lid(p(), local_id::make_unscoped(n))),
         )
@@ -1608,7 +1607,7 @@ fn extract_debugger_main(
             let unset = Stmt(
                 p(),
                 Stmt_::mk_expr(Expr(
-                    p(),
+                    (),
                     p(),
                     Expr_::mk_call(id("unset"), vec![], vec![lv(&name)], None),
                 )),
@@ -1617,7 +1616,7 @@ fn extract_debugger_main(
                 p(),
                 Stmt_::mk_if(
                     Expr(
-                        p(),
+                        (),
                         p(),
                         Expr_::mk_is(
                             lv(&name),
@@ -1638,25 +1637,25 @@ fn extract_debugger_main(
         .map(|name| {
             let checkfunc = id("\\__systemlib\\__debugger_is_uninit");
             let isuninit = Expr(
-                p(),
+                (),
                 p(),
                 Expr_::mk_call(checkfunc, vec![], vec![lv(name)], None),
             );
             let obj = Expr(
-                p(),
+                (),
                 p(),
                 Expr_::mk_new(
-                    ClassId(p(), p(), ClassId_::CI(Id(p(), "__uninitSentinel".into()))),
+                    ClassId((), p(), ClassId_::CI(Id(p(), "__uninitSentinel".into()))),
                     vec![],
                     vec![],
                     None,
-                    p(),
+                    (),
                 ),
             );
             let set = Stmt(
                 p(),
                 Stmt_::mk_expr(Expr(
-                    p(),
+                    (),
                     p(),
                     Expr_::mk_binop(Bop::mk_eq(None), lv(name), obj),
                 )),

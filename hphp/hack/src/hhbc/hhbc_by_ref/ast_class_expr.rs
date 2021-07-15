@@ -152,7 +152,7 @@ impl<'arena> ClassExpr<'arena> {
         let ClassId(_, annot, cid_) = cid;
         let expr = match cid_ {
             ClassId_::CIexpr(e) => e.clone(),
-            ClassId_::CI(sid) => Expr(annot.clone(), annot.clone(), Expr_::mk_id(sid.clone())),
+            ClassId_::CI(sid) => Expr((), annot.clone(), Expr_::mk_id(sid.clone())),
             ClassId_::CIparent => return Self::Special(SpecialClsRef::Parent),
             ClassId_::CIstatic => return Self::Special(SpecialClsRef::Static),
             ClassId_::CIself => return Self::Special(SpecialClsRef::Self_),

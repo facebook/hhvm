@@ -6,14 +6,13 @@
 use crate::aast;
 use crate::aast_defs;
 use crate::ast_defs;
-use crate::pos::Pos;
 
 pub use aast::*;
 pub use aast_defs::*;
 pub use ast_defs::*;
 
-// Expressions are annotated with their associated position.
-type Ex = Pos;
+// Expressions have no type annotation.
+type Ex = ();
 
 // Function bodies have no annotation.
 type Fb = ();

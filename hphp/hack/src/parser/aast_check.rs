@@ -87,7 +87,7 @@ impl<'ast> Visitor<'ast> for Checker {
     fn visit_class_(
         &mut self,
         c: &mut Context,
-        p: &aast::Class_<Pos, (), (), ()>,
+        p: &aast::Class_<(), (), (), ()>,
     ) -> Result<(), ()> {
         p.recurse(
             &mut Context {
@@ -101,7 +101,7 @@ impl<'ast> Visitor<'ast> for Checker {
     fn visit_method_(
         &mut self,
         c: &mut Context,
-        m: &aast::Method_<Pos, (), (), ()>,
+        m: &aast::Method_<(), (), (), ()>,
     ) -> Result<(), ()> {
         if m.fun_kind == ast::FunKind::FAsync {
             self.check_async_ret_hint(&m.ret);
@@ -116,7 +116,7 @@ impl<'ast> Visitor<'ast> for Checker {
         )
     }
 
-    fn visit_fun_(&mut self, c: &mut Context, f: &aast::Fun_<Pos, (), (), ()>) -> Result<(), ()> {
+    fn visit_fun_(&mut self, c: &mut Context, f: &aast::Fun_<(), (), (), ()>) -> Result<(), ()> {
         if f.fun_kind == ast::FunKind::FAsync {
             self.check_async_ret_hint(&f.ret);
         }
@@ -130,15 +130,15 @@ impl<'ast> Visitor<'ast> for Checker {
         )
     }
 
-    fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<Pos, (), (), ()>) -> Result<(), ()> {
+    fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), (), (), ()>) -> Result<(), ()> {
         use aast::{ClassId, ClassId_::*, Expr, Expr_::*, Lid};
 
         if let Await(_) = p.2 {
             if !c.in_methodish {
-                self.add_error(&p.0, syntax_error::toplevel_await_use);
+                self.add_error(&p.1, syntax_error::toplevel_await_use);
             }
         } else if let Some((Expr(_, _, f), ..)) = p.2.as_call() {
-            if let Some((ClassId(_, _, CIexpr(Expr(pos, _, Id(id)))), ..)) = f.as_class_const() {
+            if let Some((ClassId(_, _, CIexpr(Expr(_, pos, Id(id)))), ..)) = f.as_class_const() {
                 if Self::name_eq_this_and_in_static_method(c, &id.1) {
                     self.add_error(&pos, syntax_error::this_in_static);
                 }
@@ -152,7 +152,7 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 }
 
-pub fn check_program(program: &aast::Program<Pos, (), (), ()>) -> Vec<SyntaxError> {
+pub fn check_program(program: &aast::Program<(), (), (), ()>) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
     let mut context = Context {
         in_methodish: false,

@@ -146,7 +146,7 @@ impl<'ast> Visitor<'ast> for Checker {
     fn visit_method_(
         &mut self,
         _context: &mut Context,
-        m: &aast::Method_<Pos, (), (), ()>,
+        m: &aast::Method_<(), (), (), ()>,
     ) -> Result<(), ()> {
         m.recurse(&mut Context::new(), self)
     }
@@ -154,7 +154,7 @@ impl<'ast> Visitor<'ast> for Checker {
     fn visit_fun_(
         &mut self,
         _context: &mut Context,
-        f: &aast::Fun_<Pos, (), (), ()>,
+        f: &aast::Fun_<(), (), (), ()>,
     ) -> Result<(), ()> {
         f.recurse(&mut Context::new(), self)
     }
@@ -162,7 +162,7 @@ impl<'ast> Visitor<'ast> for Checker {
     fn visit_expr(
         &mut self,
         context: &mut Context,
-        p: &aast::Expr<Pos, (), (), ()>,
+        p: &aast::Expr<(), (), (), ()>,
     ) -> Result<(), ()> {
         if let aast::Expr_::Binop(x) = &p.2 {
             x.recurse(context, self.object())?;
@@ -176,7 +176,7 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 }
 
-pub fn check_program(program: &aast::Program<Pos, (), (), ()>) -> Vec<SyntaxError> {
+pub fn check_program(program: &aast::Program<(), (), (), ()>) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
     let mut context = Context::new();
     visit(&mut checker, &mut context, program).unwrap();

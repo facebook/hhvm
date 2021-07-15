@@ -17,7 +17,6 @@ type env = {
   silent: bool;
   exit_on_failure: bool;
   ai_mode: string option;
-  debug_port: Unix.file_descr option;
   ignore_hh_version: bool;
   save_64bit: string option;
   saved_state_ignore_hhconfig: bool;

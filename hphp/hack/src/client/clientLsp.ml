@@ -1168,7 +1168,6 @@ let start_server ~(env : env) (root : Path.t) : unit =
       ai_mode = None;
       silent = true;
       exit_on_failure = false;
-      debug_port = None;
       ignore_hh_version = false;
       saved_state_ignore_hhconfig = false;
       mini_state = None;

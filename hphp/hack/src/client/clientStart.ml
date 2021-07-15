@@ -34,7 +34,6 @@ type env = {
   silent: bool;
   exit_on_failure: bool;
   ai_mode: string option;
-  debug_port: Unix.file_descr option;
   ignore_hh_version: bool;
   save_64bit: string option;
   saved_state_ignore_hhconfig: bool;
@@ -87,7 +86,6 @@ let start_server (env : env) =
     silent;
     exit_on_failure;
     ai_mode;
-    debug_port;
     ignore_hh_version;
     save_64bit;
     saved_state_ignore_hhconfig;
@@ -182,10 +180,6 @@ let start_server (env : env) =
           [| "--allow-non-opt-build" |]
         else
           [||] );
-        (match debug_port with
-        | None -> [||]
-        | Some fd ->
-          [| "--debug-client"; string_of_int @@ Handle.get_handle fd |]);
       ]
   in
   let (stdin, stdout, stderr) =

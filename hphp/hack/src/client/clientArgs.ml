@@ -914,7 +914,6 @@ let parse_start_env command =
     ClientStart.ai_mode = !ai_mode;
     config = !config;
     custom_telemetry_data = !custom_telemetry_data;
-    debug_port = None;
     dynamic_view = false;
     exit_on_failure = true;
     from = !from;

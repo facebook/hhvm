@@ -472,7 +472,6 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
               silent = false;
               exit_on_failure = false;
               ai_mode;
-              debug_port = None;
               ignore_hh_version;
               save_64bit;
               saved_state_ignore_hhconfig;

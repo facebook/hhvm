@@ -131,17 +131,20 @@ let is_method member_source =
     true
   | _ -> false
 
-let check_final_method parent_class_elt class_elt on_error =
-  let is_override =
+(** Checks that we're not overriding a final method. *)
+let check_override_final_method parent_class_elt class_elt on_error =
+  let is_override_of_final_method =
     get_ce_final parent_class_elt
     && String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
   in
-  if is_override && not (get_ce_synthesized class_elt) then
+  if is_override_of_final_method && not (get_ce_synthesized class_elt) then
     (* we have a final method being overridden by a user-declared method *)
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
     Errors.override_final ~parent:parent_pos ~child:pos ~on_error
 
+(** Checks that methods annotated with __DynamicallyCallable are only overridden with
+    dynamically callable method. *)
 let check_dynamically_callable member_name parent_class_elt class_elt on_error =
   if
     get_ce_dynamicallycallable parent_class_elt
@@ -157,6 +160,7 @@ let check_dynamically_callable member_name parent_class_elt class_elt on_error =
     in
     Errors.bad_method_override pos member_name errorl on_error
 
+(** Check that we are not overriding an __LSB property *)
 let check_lsb_overrides
     member_source member_name parent_class_elt class_elt on_error =
   let is_sprop =
@@ -171,6 +175,7 @@ let check_lsb_overrides
     let (lazy pos) = class_elt.ce_pos in
     Errors.override_lsb ~member_name ~parent:parent_pos ~child:pos on_error
 
+(** Check that __LateInit annotation on members are consistent between parents and children. *)
 let check_lateinit parent_class_elt class_elt on_error =
   let lateinit_diff =
     Bool.( <> ) (get_ce_lateinit parent_class_elt) (get_ce_lateinit class_elt)
@@ -262,10 +267,10 @@ let check_override
 
   if is_method mem_source then begin
     (* We first verify that we aren't overriding a final method *)
-    (* we only check for final overrides on methods, not properties *)
+    (* We only check for final overrides on methods, not properties *)
     (* we don't check constructors, as they are already checked
      * in the decl phase *)
-    check_final_method parent_class_elt class_elt on_error;
+    check_override_final_method parent_class_elt class_elt on_error;
     check_dynamically_callable member_name parent_class_elt class_elt on_error
   end;
 
@@ -756,7 +761,7 @@ let check_constructors env parent_class class_ psubst subst on_error =
       match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
       | (Some parent_cstr, _) when get_ce_synthesized parent_cstr -> ()
       | (Some parent_cstr, Some child_cstr) ->
-        check_final_method parent_cstr child_cstr on_error;
+        check_override_final_method parent_cstr child_cstr on_error;
         check_class_elt_visibility parent_cstr child_cstr on_error
       | (_, _) -> ()
     end;

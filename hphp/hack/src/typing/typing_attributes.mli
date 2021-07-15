@@ -6,6 +6,14 @@
  *
  *)
 
+type attribute_interface_name = string
+
+(** Checks a list of user attributes:
+    - checks that the attributes are on the proper kind of element,
+      by checking subtyping of the attribute class with the provided attribute interface
+      (e.g. FileAttribute, MethodAttribute, see Naming_special_names for a full list)
+    - checks for unbound attribute names
+    - runs the provided function, which checks creating an instance of the attribute class. *)
 val check_def :
   Typing_env_types.env ->
   (expected:'a option ->
@@ -19,6 +27,6 @@ val check_def :
   Nast.expr list ->
   'c option ->
   Typing_env_types.env * 'l * 'm * 'n * 'o * 'p * 'q * 'r) ->
-  string ->
+  attribute_interface_name ->
   Nast.user_attribute list ->
   Typing_env_types.env

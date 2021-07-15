@@ -735,7 +735,7 @@ module Full = struct
         | ({ type_ = Function; name; _ }, Tfun ft)
         | ({ type_ = Method (_, name); _ }, Tfun ft) ->
           (* Use short names for function types since they display a lot more
-           information to the user. *)
+             information to the user. *)
           Concat
             [
               text "function";
@@ -833,7 +833,7 @@ module ErrorString = struct
       (* FIXME it seems like this function is only for
          fully-applied types? Tunapplied_alias should only appear
          in a type argument position then, which inst below
-         prints with a different function (namely Full.locl_ty)  *)
+         prints with a different function (namely Full.locl_ty) *)
       failwith "Tunapplied_alias is not a type"
     | Taccess (_ty, _id) -> "a type constant"
     | Tneg (Neg_prim p) -> "anything but a " ^ tprim p

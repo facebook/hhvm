@@ -89,8 +89,8 @@ module Sent_fds_collector = struct
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
 
     (* Note: this code is a filter with a side-effect. The side-effect is to
-    close FDs that have received their read-receipts. The filter will retain
-    the FDs that haven't yet received their read-receipts. *)
+       close FDs that have received their read-receipts. The filter will retain
+       the FDs that haven't yet received their read-receipts. *)
     handed_off_fds_to_close :=
       List.filter
         !handed_off_fds_to_close
@@ -248,7 +248,7 @@ struct
    * state transitions. *)
   let kill_and_maybe_restart_server env exit_status =
     (* We're going to collect all FDs right here and now. This will be done again below,
-    in [kill_server_with_check], but Informant.reinit might take too long or might throw. *)
+       in [kill_server_with_check], but Informant.reinit might take too long or might throw. *)
     Sent_fds_collector.collect_all_fds ();
     (* Iff we just restart and keep going, we risk
      * Changed_merge_base eventually arriving and restarting the already started server
@@ -299,7 +299,7 @@ struct
     if not (String.equal (Bytes.to_string newline_byte) "\n") then
       raise (Malformed_build_id "missing newline after version");
     (* Newer clients send version in a json object.
-    Older clients sent just a client_version string *)
+       Older clients sent just a client_version string *)
     if String_utils.string_starts_with s "{" then
       try Hh_json.json_of_string s
       with e -> raise (Malformed_build_id (Exn.to_string e))

@@ -221,7 +221,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
     Exit_status.t Lwt.t =
   ref_local_config := Some local_config;
   (* That's a hack, just to avoid having to pass local_config into loads of callsites
-  in this module. *)
+     in this module. *)
   let mode_s = ClientEnv.mode_to_string args.mode in
   HackEventLogger.set_from args.from;
   HackEventLogger.client_set_mode mode_s;
@@ -900,7 +900,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       Lwt.return (Exit_status.No_error, telemetry)
     | MODE_FULL_FIDELITY_PARSE file ->
       (* We can cheaply do this on the client today, but we might want to
-      do it on the server and cache the results in the future. *)
+         do it on the server and cache the results in the future. *)
       let do_it_on_server = false in
       let%lwt (results, telemetry) =
         if do_it_on_server then

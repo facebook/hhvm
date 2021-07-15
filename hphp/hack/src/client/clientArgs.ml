@@ -707,14 +707,14 @@ let parse_check_args cmd =
     ]
   in
   (* If the user typed an option like "--type-at-pos" which set a mode which triggered
-  a command, we want to be able to show "hh_server is busy [--type-at-pos]" to show that
-  hh_server is currently busy with something that the user typed. The string
-  description that appears inside the square brackets must go into args.desc.
-  Unfortunately this isn't well supported by the Arg library, so we have to hack it up
-  ourselves: (1) For any option that takes say Arg.Unit(callback), we'll change it into
-  Arg.Unit(modified_callback) where modified_callback sets 'current_option' to the
-  option string being handled and then calls the original callback. (2) If the original
-  callback calls set_mode, then set_mode will take the opportunity to do desc := current_option.
+     a command, we want to be able to show "hh_server is busy [--type-at-pos]" to show that
+     hh_server is currently busy with something that the user typed. The string
+     description that appears inside the square brackets must go into args.desc.
+     Unfortunately this isn't well supported by the Arg library, so we have to hack it up
+     ourselves: (1) For any option that takes say Arg.Unit(callback), we'll change it into
+     Arg.Unit(modified_callback) where modified_callback sets 'current_option' to the
+     option string being handled and then calls the original callback. (2) If the original
+     callback calls set_mode, then set_mode will take the opportunity to do desc := current_option.
   *)
   let modify_callback : type a. string -> (a -> unit) -> a -> unit =
    fun option callback value ->
@@ -1031,7 +1031,7 @@ let parse_rage_args () =
       exit 2
   in
   (* hh_client normally handles Ctrl+C by printing an exception-stack.
-  But for us, in an interactive prompt, Ctrl+C is an unexceptional way to quit. *)
+     But for us, in an interactive prompt, Ctrl+C is an unexceptional way to quit. *)
   Sys_utils.set_signal Sys.sigint Sys.Signal_default;
 
   let desc =

@@ -134,8 +134,8 @@ let show_progress
       "]"
   in
   (* We always show progress, even if there were no changes, just so the user
-  can see the spinner keep turning around. It looks better that way for things
-  like "loading saved-state" which would otherwise look stuck for 30s. *)
+     can see the spinner keep turning around. It looks better that way for things
+     like "loading saved-state" which would otherwise look stuck for 30s. *)
   progress_callback (Some ("[" ^ progress ^ final_suffix));
   ()
 
@@ -263,8 +263,8 @@ let rec wait_for_server_message
       (* spinner *)
       Option.iter progress_callback ~f:(fun callback -> callback None);
       (* exception, caught by hh_client.ml and logged.
-      In most cases we report that find_hh.sh should simply retry the failed command.
-      There are only two cases where we say it shouldn't. *)
+         In most cases we report that find_hh.sh should simply retry the failed command.
+         There are only two cases where we say it shouldn't. *)
       let underlying_exit_status =
         Option.map finale_data ~f:(fun d -> d.Exit.exit_status)
       in
@@ -327,18 +327,18 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
   let tracker = Connection_tracker.create () in
   let connection_log_id = Connection_tracker.log_id tracker in
   (* We'll attempt to connect, with timeout up to [env.deadline]. Effectively, the
-  unix process list will be where we store our (unbounded) queue of incoming client requests,
-  each of them waiting for the monitor's incoming socket to become available; if there's a backlog
-  in the monitor->server pipe and the monitor's incoming queue is full, then the monitor's incoming
-  socket will become only available after the server has finished a request, and the monitor gets to
-  send its next handoff, and take the next item off its incoming queue.
-  If the deadline is infinite, I arbitrarily picked 60s as the timeout coupled with "will retry..."
-  if it timed out. That's because I distrust infinite timeouts, just in case something got stuck for
-  unknown causes, and maybe retrying the connection attempt will get it unstuck? -- a sort of
-  "try turning it off then on again". This timeout must be comfortably longer than the monitor's
-  own 30s timeout in serverMonitor.hand_off_client_connection_wrapper to handoff to the server;
-  if it were shorter, then the monitor's incoming queue would be entirely full of requests that
-  were all stale by the time it got to handle them. *)
+     unix process list will be where we store our (unbounded) queue of incoming client requests,
+     each of them waiting for the monitor's incoming socket to become available; if there's a backlog
+     in the monitor->server pipe and the monitor's incoming queue is full, then the monitor's incoming
+     socket will become only available after the server has finished a request, and the monitor gets to
+     send its next handoff, and take the next item off its incoming queue.
+     If the deadline is infinite, I arbitrarily picked 60s as the timeout coupled with "will retry..."
+     if it timed out. That's because I distrust infinite timeouts, just in case something got stuck for
+     unknown causes, and maybe retrying the connection attempt will get it unstuck? -- a sort of
+     "try turning it off then on again". This timeout must be comfortably longer than the monitor's
+     own 30s timeout in serverMonitor.hand_off_client_connection_wrapper to handoff to the server;
+     if it were shorter, then the monitor's incoming queue would be entirely full of requests that
+     were all stale by the time it got to handle them. *)
   let timeout =
     match env.deadline with
     | None -> 60
@@ -602,7 +602,7 @@ let rpc :
       |> track ~key:Client_sent_cmd ~time:t_sent_cmd
       |> track ~key:Client_received_response
       (* now we can fill in missing information in tracker, which we couldn't fill in earlier
-      because we'd already transferred ownership of the tracker to the monitor... *)
+         because we'd already transferred ownership of the tracker to the monitor... *)
       |> track ~key:Client_connected_to_monitor ~time:t_connected_to_monitor
       |> track ~key:Client_received_hello ~time:t_received_hello
       |> track ~key:Client_sent_connection_type ~time:t_sent_connection_type

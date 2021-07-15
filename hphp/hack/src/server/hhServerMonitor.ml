@@ -37,18 +37,18 @@ let monitor_daemon_main
   let www_root = ServerArgs.root options in
 
   (* Check mode: --check means we'll start up the server and it will do a typecheck
-  and then terminate; in the absence of that flag, (1) if a monitor was already running
-  then we will exit immediately, and avoid side-effects like cycling the logfile;
-  (2) otherwise we'll start up the server and it will continue to run
-  and handle requests. *)
+     and then terminate; in the absence of that flag, (1) if a monitor was already running
+     then we will exit immediately, and avoid side-effects like cycling the logfile;
+     (2) otherwise we'll start up the server and it will continue to run
+     and handle requests. *)
   ( if not (ServerArgs.check_mode options) then
     let lock_file = ServerFiles.lock_file www_root in
     if not (Lock.grab lock_file) then Exit.exit Exit_status.No_error );
 
   (* Daemon mode (should_detach): --daemon means the caller already spawned
-  us in a new process, and it's now our responsibility to establish a logfile
-  and redirect stdout/err to it; in the absence of that flag, we'll just continue
-  to write to stdout/err as normal. *)
+     us in a new process, and it's now our responsibility to establish a logfile
+     and redirect stdout/err to it; in the absence of that flag, we'll just continue
+     to write to stdout/err as normal. *)
   if ServerArgs.should_detach options then begin
     let log_link = ServerFiles.monitor_log_link www_root in
     (try Sys.rename log_link (log_link ^ ".old") with _ -> ());

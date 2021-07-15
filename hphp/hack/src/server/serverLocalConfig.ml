@@ -113,11 +113,11 @@ module RemoteTypeCheck = struct
         (see `declaration_threshold`) *)
     prefetch_deferred_files: bool;
     (* If set, distributes type checking to remote workers if the number of files to
-    type check exceeds the threshold. If not set, then always checks everything locally. *)
+       type check exceeds the threshold. If not set, then always checks everything locally. *)
     recheck_threshold: int option;
     worker_min_log_level: Hh_logger.Level.t;
     (* Indicates the size of the job below which a virtual file system should
-    be used by the remote worker *)
+       be used by the remote worker *)
     worker_vfs_checkout_threshold: int;
     (* File system mode used by ArtifactStore *)
     file_system_mode: ArtifactStore.file_system_mode;
@@ -126,8 +126,8 @@ module RemoteTypeCheck = struct
     (* Max artifact size to inline into transport channel *)
     max_artifact_inline_bytes: int;
     (* [0.0 - 1.0] ratio that specifies how much portion of the total payload
-    should be used in remote workers initial payload. Default is 0.0 which means
-    one bucket and no special bundling for initial payload *)
+       should be used in remote workers initial payload. Default is 0.0 which means
+       one bucket and no special bundling for initial payload *)
     remote_initial_payload_ratio: float;
   }
 
@@ -476,21 +476,21 @@ type t = {
      computing folded declarations representing the entire class type. *)
   shallow_class_decl: bool;
   (* If false, only the type check delegate's logic will be used.
-    If the delegate fails to type check, the typing check service as a whole
-    will fail. *)
+     If the delegate fails to type check, the typing check service as a whole
+     will fail. *)
   num_local_workers: int option;
   (* If the number of files to type check is fewer than this value, the files
-    will be type checked sequentially (in the master process). Otherwise,
-    the files will be type checked in parallel (in MultiWorker workers). *)
+     will be type checked sequentially (in the master process). Otherwise,
+     the files will be type checked in parallel (in MultiWorker workers). *)
   parallel_type_checking_threshold: int;
   (* If set, defers class declarations after N lazy declarations; if not set,
-    always lazily declares classes not already in cache. *)
+     always lazily declares classes not already in cache. *)
   defer_class_declaration_threshold: int option;
   (* If set, defers class declaration if worker memory exceeds threshold. *)
   defer_class_memory_mb_threshold: int option;
   (* If set, prevents type checking of files from being deferred more than
-    the number of times greater than or equal to the threshold. If not set,
-    defers class declarations indefinitely. *)
+     the number of times greater than or equal to the threshold. If not set,
+     defers class declarations indefinitely. *)
   max_times_to_defer_type_checking: int option;
   (* The whether to use the hook that prefetches files on an Eden checkout *)
   prefetch_deferred_files: bool;
@@ -620,7 +620,7 @@ let default =
     enable_naming_table_fallback = false;
     symbolindex_search_provider = "SqliteIndex";
     (* the code actually doesn't use this default for ide_symbolindex_search_provider;
-    it defaults to whatever was computed for symbolindex_search_provider. *)
+       it defaults to whatever was computed for symbolindex_search_provider. *)
     ide_symbolindex_search_provider = "SqliteIndex";
     symbolindex_quiet = false;
     symbolindex_file = None;
@@ -650,8 +650,8 @@ let path =
 
 let apply_overrides ~silent ~current_version ~config ~overrides =
   (* First of all, apply the CLI overrides so the settings below could be specified
-    altered via the CLI, even though the CLI overrides take precedence
-    over the experiments overrides *)
+     altered via the CLI, even though the CLI overrides take precedence
+     over the experiments overrides *)
   let config = Config_file.apply_overrides ~silent ~config ~overrides in
   let prefix = Some "experiments_config" in
   let enabled =

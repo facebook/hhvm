@@ -70,10 +70,6 @@ let rpc_persistent :
     Lwt.return response
   with e -> Lwt.return (Error (state, stack, e))
 
-let connect_debug oc =
-  Marshal.to_channel oc Debug [];
-  Out_channel.flush oc
-
 let send_connection_type oc t =
   Marshal.to_channel oc t [];
   Out_channel.flush oc

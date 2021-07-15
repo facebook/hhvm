@@ -47,7 +47,6 @@ let () =
     | ClientCommand.CStop _ -> "Stop"
     | ClientCommand.CRestart _ -> "Restart"
     | ClientCommand.CLsp _ -> "Lsp"
-    | ClientCommand.CDebug _ -> "Debug"
     | ClientCommand.CDownloadSavedState _ -> "DownloadSavedState"
     | ClientCommand.CRage _ -> "Rage"
   in
@@ -121,8 +120,6 @@ let () =
       | ClientCommand.CStop env -> Lwt_main.run (ClientStop.main env)
       | ClientCommand.CRestart env -> Lwt_main.run (ClientRestart.main env)
       | ClientCommand.CLsp args -> Lwt_main.run (ClientLsp.main args ~init_id)
-      | ClientCommand.CDebug env ->
-        Lwt_main.run (ClientDebug.main env (Option.value_exn local_config))
       | ClientCommand.CRage env -> Lwt_main.run (ClientRage.main env)
       | ClientCommand.CDownloadSavedState env ->
         Lwt_main.run (ClientDownloadSavedState.main env)

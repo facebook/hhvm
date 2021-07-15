@@ -105,7 +105,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
 
 let command_needs_full_check = function
   | Rpc (_metadata, x) -> rpc_command_needs_full_check x
-  | Debug -> false
+  | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
 
 let is_edit : type a. a command -> bool = function
   | Rpc (_metadata, EDIT_FILE _) -> true
@@ -121,7 +121,7 @@ let rpc_command_needs_writes : type a. a t -> bool = function
 
 let commands_needs_writes = function
   | Rpc (_metadata, x) -> rpc_command_needs_writes x
-  | Debug -> false
+  | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
 
 let full_recheck_if_needed' genv env reason profiling =
   if
@@ -307,11 +307,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     then
       ClientProvider.shutdown_client client;
     new_env
-  | Debug ->
-    let (ic, oc) = ClientProvider.get_channels client in
-    genv.ServerEnv.debug_channels <- Some (ic, oc);
-    ServerDebug.say_hello genv;
-    env
+  | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
 
 let handle
     (genv : ServerEnv.genv)

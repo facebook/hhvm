@@ -470,7 +470,6 @@
     serverColorFile
     serverCoverageMetric
     serverConcatenateAll
-    serverDebug
     serverDynamicView
     serverError
     serverExtractStandalone

@@ -77,7 +77,6 @@ let parse_command () =
     | "stop" -> CKStop
     | "restart" -> CKRestart
     | "lsp" -> CKLsp
-    | "debug" -> CKDebug
     | "download-saved-state" -> CKDownloadSavedState
     | "rage" -> CKRage
     | _ -> CKNone
@@ -163,7 +162,6 @@ let parse_check_args cmd =
         ^^ "\tstop\t\tStops a Hack server\n"
         ^^ "\trestart\t\tRestarts a Hack server\n"
         ^^ "\tlsp\t\tRuns a persistent language service\n"
-        ^^ "\tdebug\t\tDebug mode\n"
         ^^ "\trage\t\tReport a bug\n"
         ^^ "\nDefault values if unspecified:\n"
         ^^ "\tCOMMAND\t\tcheck\n"
@@ -987,23 +985,6 @@ let parse_lsp_args () =
     Printf.printf "%s\n" usage;
     exit 2
 
-let parse_debug_args () =
-  let usage =
-    Printf.sprintf "Usage: %s debug [OPTION]... [WWW-ROOT]\n" Sys.argv.(0)
-  in
-  let from = ref "" in
-  let options = [Common_argspecs.from from] in
-  let args = parse_without_command options usage "debug" in
-  let root =
-    match args with
-    | [] -> Wwwroot.get None
-    | [x] -> Wwwroot.get (Some x)
-    | _ ->
-      Printf.printf "%s\n" usage;
-      exit 2
-  in
-  CDebug { ClientDebug.root; from = !from }
-
 let parse_rage_args () =
   let usage =
     Printf.sprintf "Usage: %s rage [OPTION]... [WWW-ROOT]\n" Sys.argv.(0)
@@ -1191,7 +1172,6 @@ let parse_args () : command =
   | CKStart -> parse_start_args ()
   | CKStop -> parse_stop_args ()
   | CKRestart -> parse_restart_args ()
-  | CKDebug -> parse_debug_args ()
   | CKLsp -> parse_lsp_args ()
   | CKRage -> parse_rage_args ()
   | CKDownloadSavedState -> parse_download_saved_state_args ()
@@ -1201,7 +1181,6 @@ let root = function
   | CStart { ClientStart.root; _ }
   | CRestart { ClientStart.root; _ }
   | CStop { ClientStop.root; _ }
-  | CDebug { ClientDebug.root; _ }
   | CRage { ClientRage.root; _ }
   | CDownloadSavedState { ClientDownloadSavedState.root; _ } ->
     Some root
@@ -1214,7 +1193,6 @@ let config = function
   | CLsp { ClientLsp.config; _ } ->
     Some config
   | CStop _
-  | CDebug _
   | CDownloadSavedState _
   | CRage _ ->
     None

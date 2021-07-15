@@ -45,7 +45,7 @@ c_ResumableWaitHandle* GetResumedWaitHandle() {
       if (fp->func()->isGenerator()) {
         // async generator
         auto generator = frame_async_generator(fp);
-        if (!generator->isEagerlyExecuted()) {
+        if (generator->isRunning() && !generator->isEagerlyExecuted()) {
           ret = generator->getWaitHandle();
           return true;
         }

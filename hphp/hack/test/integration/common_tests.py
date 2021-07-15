@@ -15,35 +15,6 @@ from typing import ClassVar, List, Mapping, Optional, Tuple
 
 from hh_paths import hackfmt, hh_client, hh_merge_deps, hh_server
 from test_case import TestCase, TestDriver
-from utils import Json, JsonObject
-
-
-class DebugSubscription(object):
-    """
-    Wraps `hh_client debug`.
-    """
-
-    # pyre-fixme[24]: Generic type `subprocess.Popen` expects 1 type parameter.
-    def __init__(self, proc: subprocess.Popen) -> None:
-        self.proc = proc
-        hello = self.read_msg()
-        assert hello["data"] == "hello"
-
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-    def read_msg(self) -> Json:
-        # pyre-fixme[16]: `Optional` has no attribute `readline`.
-        line = self.proc.stdout.readline()
-        return json.loads(line)
-
-    # pyre-fixme[11]: Annotation `JsonObject` is not defined as a type.
-    def get_incremental_logs(self) -> JsonObject:
-        msgs = {}
-        while True:
-            msg = self.read_msg()
-            if msg["type"] == "info" and msg["data"] == "incremental_done":
-                break
-            msgs[msg["name"]] = msg
-        return msgs
 
 
 class CommonTestDriver(TestDriver):
@@ -294,10 +265,6 @@ class CommonTestDriver(TestDriver):
         self.check_cmd(expected_json, stdin, options + ["--json"])
         self.check_cmd(expected_output, stdin, options)
 
-    def subscribe_debug(self) -> DebugSubscription:
-        proc = self.proc_create([hh_client, "debug", self.repo_dir], env={})
-        return DebugSubscription(proc)
-
     def start_hh_loop_forever_assert_timeout(self) -> None:
         # create a file with 10 dependencies. Only "big" jobs, that use
         # workers can be interrupted at the moment.
@@ -505,15 +472,8 @@ class CommonTests(BarebonesTests):
         """
         self.test_driver.start_hh_server()
         self.test_driver.check_cmd(["No errors!"])
-        debug_sub = self.test_driver.subscribe_debug()
 
         os.remove(os.path.join(self.test_driver.repo_dir, "foo_2.php"))
-        msgs = debug_sub.get_incremental_logs()
-        self.assertEqual(msgs["to_redecl_phase1"]["files"], ["foo_2.php"])
-        self.assertEqual(msgs["to_redecl_phase2"]["files"], ["foo_2.php"])
-        self.assertEqual(
-            set(msgs["to_recheck"]["files"]), set(["foo_1.php", "foo_2.php"])
-        )
         self.test_driver.check_cmd(
             [
                 "{root}foo_1.php:4:20,20: Unbound name: `g` (a global function) (Naming[2049])"

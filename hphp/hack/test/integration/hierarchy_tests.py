@@ -1,8 +1,6 @@
 #! /usr/bin/env python3
 # pyre-strict
 
-import os
-
 from common_tests import CommonTestDriver
 from test_case import TestCase
 
@@ -70,39 +68,4 @@ class HierarchyTests(TestCase[CommonTestDriver]):
                 '    inherited from File "{root}filter.php", line 12, characters 19-31: TFilter::tfilterMethod',
             ],
             options=["--inheritance-ancestor-traits", "Filter"],
-        )
-
-    def test_method_signature_change(self) -> None:
-        with open(os.path.join(self.test_driver.repo_dir, "qux.php"), "w") as f:
-            f.write(
-                """<?hh //partial
-class Qux {
-  public function f() {
-    $x = new Foo();
-    $x->f();
-  }
-}
-"""
-            )
-        self.test_driver.start_hh_server(changed_files=["qux.php"])
-        self.test_driver.check_cmd(["No errors!"])
-        debug_sub = self.test_driver.subscribe_debug()
-        with open(os.path.join(self.test_driver.repo_dir, "foo.php"), "w") as f:
-            f.write(
-                """<?hh //partial
-class Foo {
-  public function f(): void {}
-  public final function g() {}
-}
-"""
-            )
-        msgs = debug_sub.get_incremental_logs()
-        self.assertEqual(set(msgs["to_redecl_phase1"]["files"]), set(["foo.php"]))
-        self.assertEqual(
-            set(msgs["to_redecl_phase2"]["files"]),
-            set(["foo.php", "bar.php", "baz.php"]),
-        )
-        self.assertEqual(
-            set(msgs["to_recheck"]["files"]),
-            set(["foo.php", "bar.php", "baz.php", "qux.php"]),
         )

@@ -95,56 +95,6 @@ let print_fast fast =
   Out_channel.flush stdout;
   ()
 
-let debug_print_path_set genv name set =
-  ServerDebug.log genv (fun () ->
-      Hh_json.(
-        let files =
-          Relative_path.Set.fold set ~init:[] ~f:(fun k acc ->
-              JSON_String (Relative_path.suffix k) :: acc)
-        in
-        JSON_Object
-          [
-            ("type", JSON_String "incremental_files");
-            ("name", JSON_String name);
-            ("files", JSON_Array files);
-          ]))
-
-let debug_print_fast_keys genv name fast =
-  ServerDebug.log genv (fun () ->
-      Hh_json.(
-        let files =
-          Relative_path.Map.fold fast ~init:[] ~f:(fun k _v acc ->
-              JSON_String (Relative_path.suffix k) :: acc)
-        in
-        let decls =
-          Relative_path.Map.fold fast ~init:[] ~f:(fun _k v acc ->
-              let {
-                FileInfo.n_funs;
-                n_classes;
-                n_record_defs;
-                n_types;
-                n_consts;
-              } =
-                v
-              in
-              let prepend_json_strings decls acc =
-                SSet.fold decls ~init:acc ~f:(fun n acc -> JSON_String n :: acc)
-              in
-              let acc = prepend_json_strings n_funs acc in
-              let acc = prepend_json_strings n_classes acc in
-              let acc = prepend_json_strings n_record_defs acc in
-              let acc = prepend_json_strings n_types acc in
-              let acc = prepend_json_strings n_consts acc in
-              acc)
-        in
-        JSON_Object
-          [
-            ("type", JSON_String "incremental_files");
-            ("name", JSON_String name);
-            ("files", JSON_Array files);
-            ("decls", JSON_Array decls);
-          ]))
-
 (*****************************************************************************)
 (* We want add all the declarations that were present in a file *before* the
  * current modification. The scenario:
@@ -1295,8 +1245,6 @@ functor
       in
 
       (* PARSING ***************************************************************)
-      debug_print_path_set genv "files_to_parse" files_to_parse;
-
       ServerProgress.send_progress
         ~include_in_logs:false
         "parsing %d files"
@@ -1401,8 +1349,6 @@ functor
         |> Telemetry.int_ ~key:"redecl1_file_count" ~value:count
       in
 
-      debug_print_fast_keys genv "to_redecl_phase1" fast;
-
       (* Do phase 1 of redeclaration. Here we compare the old and new versions of
          the declarations defined in all changed files, and collect the set of
          files which need to be re-typechecked as a consequence of those changes,
@@ -1505,9 +1451,6 @@ functor
           "Invalidating (but not recomputing) declarations in %d files"
           (Relative_path.Map.cardinal lazy_decl_later)
       );
-
-      debug_print_fast_keys genv "to_redecl_phase2" fast_redecl_phase2_now;
-      debug_print_fast_keys genv "lazy_decl_later" lazy_decl_later;
 
       (* Redeclare the set of files whose folded class decls needed to be
          recomputed as a result of phase 1. Collect the set of files which need to
@@ -1693,9 +1636,6 @@ functor
       let logstring = Printf.sprintf "typechecking %d files" in
       Hh_logger.log "Begin %s" (logstring to_recheck_count);
 
-      debug_print_path_set genv "to_recheck" files_to_check;
-      debug_print_path_set genv "lazy_check_later" lazy_check_later;
-
       ServerCheckpoint.process_updates files_to_check;
 
       let telemetry =
@@ -1828,7 +1768,6 @@ functor
         else
           telemetry
       in
-      ServerDebug.info genv "incremental_done";
 
       (* HANDLE PRECHECKED FILES AFTER RECHECK *********************************)
       let telemetry =

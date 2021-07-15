@@ -145,8 +145,8 @@ let as_log_value ledger =
 let make_id obj_name member_name =
   let obj_name =
     match obj_name with
-    | (_, Aast.This) -> Typing_defs.this
-    | (_, Aast.Lvar (_, x)) -> x
+    | (_, _, Aast.This) -> Typing_defs.this
+    | (_, _, Aast.Lvar (_, x)) -> x
     | _ -> assert false
   in
   Local_id.make_unscoped (Local_id.to_string obj_name ^ "->" ^ member_name)

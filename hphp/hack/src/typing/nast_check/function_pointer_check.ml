@@ -45,9 +45,9 @@ let handler =
         is_trait;
       }
 
-    method! at_expr env e =
+    method! at_expr env (_, _, e) =
       let () =
-        match snd e with
+        match e with
         | Aast.FunctionPointer
             (Aast.FP_class_const ((p, Aast.CIself), (_, meth_name)), _) ->
           if not env.in_final_class then

@@ -73,22 +73,28 @@
          { fb_ast =
            [([13:3-9],
              (Expr
-                (([13:3-8], void),
-                 (Call ((([13:3-4], (function(Iterable<int> $m): void)), (Id ([13:3-4], "\\m"))), 
-                    [], [(([13:5-7], <expr#1> as Iterable<float>), (Hole ((([13:5-7], Iterable<float>), (Lvar ([13:5-7], $m))), (<expr#1> as Iterable<float>), (Iterable<int>), Typing)))], None)))));
+                (([13:3-8], void), [13:3-8],
+                 (Call ((([13:3-4], (function(Iterable<int> $m): void)), [13:3-4], (Id ([13:3-4], "\\m"))), 
+                    [],
+                    [(([13:5-7], <expr#1> as Iterable<float>), [13:5-7],
+                      (Hole ((([13:5-7], Iterable<float>), [13:5-7], (Lvar ([13:5-7], $m))), (<expr#1> as Iterable<float>), (Iterable<int>), Typing)))],
+                    None)))));
              ([15:3-29],
               (Expr
-                 (([15:3-28], TestIterable),
-                  (Binop ((Eq None), (([15:3-7], TestIterable), (Lvar ([15:3-7], $foo))),
-                     (([15:10-28], TestIterable), (New ((([15:14-26], TestIterable), (CI ([15:14-26], "\\TestIterable"))), [], [], None, ([15:14-26], _)))))))));
+                 (([15:3-28], TestIterable), [15:3-28],
+                  (Binop ((Eq None), (([15:3-7], TestIterable), [15:3-7], (Lvar ([15:3-7], $foo))),
+                     (([15:10-28], TestIterable), [15:10-28], (New ((([15:14-26], TestIterable), (CI ([15:14-26], "\\TestIterable"))), [], [], None, ([15:14-26], _)))))))));
              ([18:3-15],
               (Expr
-                 (([18:3-14], void),
+                 (([18:3-14], void), [18:3-14],
                   (Call (
-                     (([18:3-10], (function(Iterable<int> $m): void)),
-                      (Obj_get ((([18:3-7], TestIterable), (Lvar ([18:3-7], $foo))), (([18:9-10], (function(Iterable<int> $m): void)), (Id ([18:9-10], "m"))), OG_nullthrows, false))),
-                     [], [(([18:11-13], <expr#1> as Iterable<float>), (Hole ((([18:11-13], Iterable<float>), (Lvar ([18:11-13], $m))), (<expr#1> as Iterable<float>), (Iterable<int>), Typing)))], None
-                     )))))
+                     (([18:3-10], (function(Iterable<int> $m): void)), [18:3-10],
+                      (Obj_get ((([18:3-7], TestIterable), [18:3-7], (Lvar ([18:3-7], $foo))), (
+                         ([18:9-10], (function(Iterable<int> $m): void)), [18:9-10], (Id ([18:9-10], "m"))), OG_nullthrows, false))),
+                     [],
+                     [(([18:11-13], <expr#1> as Iterable<float>), [18:11-13],
+                       (Hole ((([18:11-13], Iterable<float>), [18:11-13], (Lvar ([18:11-13], $m))), (<expr#1> as Iterable<float>), (Iterable<int>), Typing)))],
+                     None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -117,21 +123,24 @@
          { fb_ast =
            [([25:3-63],
              (Expr
-                (([25:3-62], void),
-                 (Call ((([25:3-4], (function(Iterable<int> $m): void)), (Id ([25:3-4], "\\m"))), 
-                    [], [(([25:5-61], Iterable<int>), (Hole ((([25:58-60], Iterable<float>), (Lvar ([25:58-60], $m))), (Iterable<float>), (Iterable<int>), UnsafeCast)))], None)))));
+                (([25:3-62], void), [25:3-62],
+                 (Call ((([25:3-4], (function(Iterable<int> $m): void)), [25:3-4], (Id ([25:3-4], "\\m"))), 
+                    [], [(([25:5-61], Iterable<int>), [25:5-61], (Hole ((([25:58-60], Iterable<float>), [25:58-60], (Lvar ([25:58-60], $m))), (Iterable<float>), (Iterable<int>), UnsafeCast)))], None
+                    )))));
              ([27:3-29],
               (Expr
-                 (([27:3-28], TestIterable),
-                  (Binop ((Eq None), (([27:3-7], TestIterable), (Lvar ([27:3-7], $foo))),
-                     (([27:10-28], TestIterable), (New ((([27:14-26], TestIterable), (CI ([27:14-26], "\\TestIterable"))), [], [], None, ([27:14-26], _)))))))));
+                 (([27:3-28], TestIterable), [27:3-28],
+                  (Binop ((Eq None), (([27:3-7], TestIterable), [27:3-7], (Lvar ([27:3-7], $foo))),
+                     (([27:10-28], TestIterable), [27:10-28], (New ((([27:14-26], TestIterable), (CI ([27:14-26], "\\TestIterable"))), [], [], None, ([27:14-26], _)))))))));
              ([30:3-69],
               (Expr
-                 (([30:3-68], void),
+                 (([30:3-68], void), [30:3-68],
                   (Call (
-                     (([30:3-10], (function(Iterable<int> $m): void)),
-                      (Obj_get ((([30:3-7], TestIterable), (Lvar ([30:3-7], $foo))), (([30:9-10], (function(Iterable<int> $m): void)), (Id ([30:9-10], "m"))), OG_nullthrows, false))),
-                     [], [(([30:11-67], Iterable<int>), (Hole ((([30:64-66], Iterable<float>), (Lvar ([30:64-66], $m))), (Iterable<float>), (Iterable<int>), UnsafeCast)))], None)))))
+                     (([30:3-10], (function(Iterable<int> $m): void)), [30:3-10],
+                      (Obj_get ((([30:3-7], TestIterable), [30:3-7], (Lvar ([30:3-7], $foo))), (
+                         ([30:9-10], (function(Iterable<int> $m): void)), [30:9-10], (Id ([30:9-10], "m"))), OG_nullthrows, false))),
+                     [], [(([30:11-67], Iterable<int>), [30:11-67], (Hole ((([30:64-66], Iterable<float>), [30:64-66], (Lvar ([30:64-66], $m))), (Iterable<float>), (Iterable<int>), UnsafeCast)))],
+                     None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

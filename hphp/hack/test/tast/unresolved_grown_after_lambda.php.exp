@@ -28,13 +28,14 @@ Errors:
         { fb_ast =
           [([4:3-26],
             (Expr
-               (([4:3-25], Vector<int>),
-                (Binop ((Eq None), (([4:3-9], Vector<int>), (Lvar ([4:3-9], $items))), (([4:12-25], Vector<int>), (ValCollection (Vector, None, [(([4:21-23], int), (Lvar ([4:21-23], $i)))]))))))));
+               (([4:3-25], Vector<int>), [4:3-25],
+                (Binop ((Eq None), (([4:3-9], Vector<int>), [4:3-9], (Lvar ([4:3-9], $items))),
+                   (([4:12-25], Vector<int>), [4:12-25], (ValCollection (Vector, None, [(([4:21-23], int), [4:21-23], (Lvar ([4:21-23], $i)))]))))))));
             ([5:3-12:5],
              (Expr
-                (([5:3-12:4], (function(): int)),
-                 (Binop ((Eq None), (([5:3-5], (function(): int)), (Lvar ([5:3-5], $f))),
-                    (([5:8-12:4], (function(): int)),
+                (([5:3-12:4], (function(): int)), [5:3-12:4],
+                 (Binop ((Eq None), (([5:3-5], (function(): int)), [5:3-5], (Lvar ([5:3-5], $f))),
+                    (([5:8-12:4], (function(): int)), [5:8-12:4],
                      (Lfun (
                         { f_span = [5:8-12:4]; f_readonly_this = None; 
                           f_annotation = (); f_readonly_ret = None; f_ret = ((int), (Some ([5:12-15], (Hprim Tint)))); 
@@ -45,10 +46,12 @@ Errors:
                           { fb_ast =
                             [([10:5-23],
                               (Expr
-                                 (([10:5-22], int),
-                                  (Binop ((Eq None), (([10:5-10], int), (Lvar ([10:5-10], $item))),
-                                     (([10:13-22], int), (Array_get ((([10:13-19], Vector<int>), (Lvar ([10:13-19], $items))), (Some (([10:20-21], int), (Int "1")))))))))));
-                              ([11:5-18], (Return (Some (([11:12-17], int), (Lvar ([11:12-17], $item))))))];
+                                 (([10:5-22], int), [10:5-22],
+                                  (Binop ((Eq None), (([10:5-10], int), [10:5-10], (Lvar ([10:5-10], $item))),
+                                     (([10:13-22], int), [10:13-22],
+                                      (Array_get ((([10:13-19], Vector<int>), [10:13-19], (Lvar ([10:13-19], $items))), (Some (([10:20-21], int), [10:20-21], (Int "1"))))))
+                                     )))));
+                              ([11:5-18], (Return (Some (([11:12-17], int), [11:12-17], (Lvar ([11:12-17], $item))))))];
                             fb_annotation = () };
                           f_fun_kind = FSync; f_user_attributes = []; 
                           f_external = false; f_doc_comment = None },
@@ -56,10 +59,10 @@ Errors:
                     )))));
             ([13:3-17],
              (Expr
-                (([13:3-16], string),
-                 (Binop ((Eq None), (([13:3-11], string), (Array_get ((([13:3-9], Vector<int>), (Lvar ([13:3-9], $items))), None))),
-                    (([13:14-16], string), (Hole ((([13:14-16], string), (Lvar ([13:14-16], $s))), (string), (int), Typing))))))));
-            ([14:3-15], (Return (Some (([14:10-14], int), (Call ((([14:10-12], (function(): int)), (Lvar ([14:10-12], $f))), [], [], None))))))];
+                (([13:3-16], string), [13:3-16],
+                 (Binop ((Eq None), (([13:3-11], string), [13:3-11], (Array_get ((([13:3-9], Vector<int>), [13:3-9], (Lvar ([13:3-9], $items))), None))),
+                    (([13:14-16], string), [13:14-16], (Hole ((([13:14-16], string), [13:14-16], (Lvar ([13:14-16], $s))), (string), (int), Typing))))))));
+            ([14:3-15], (Return (Some (([14:10-14], int), [14:10-14], (Call ((([14:10-12], (function(): int)), [14:10-12], (Lvar ([14:10-12], $f))), [], [], None))))))];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }

@@ -76,27 +76,27 @@
          { fb_ast =
            [([13:3-9],
              (Expr
-                (([13:3-8], void),
-                 (Call ((([13:3-4], (function(vec_or_dict<arraykey, int> $d): void)), (Id ([13:3-4], "\\d"))), 
+                (([13:3-8], void), [13:3-8],
+                 (Call ((([13:3-4], (function(vec_or_dict<arraykey, int> $d): void)), [13:3-4], (Id ([13:3-4], "\\d"))), 
                     [],
-                    [(([13:5-7], vec_or_dict<arraykey, float>),
-                      (Hole ((([13:5-7], vec_or_dict<arraykey, float>), (Lvar ([13:5-7], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), Typing)))],
+                    [(([13:5-7], vec_or_dict<arraykey, float>), [13:5-7],
+                      (Hole ((([13:5-7], vec_or_dict<arraykey, float>), [13:5-7], (Lvar ([13:5-7], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), Typing)))],
                     None)))));
              ([15:3-35],
               (Expr
-                 (([15:3-34], TestVarrayOrDarray),
-                  (Binop ((Eq None), (([15:3-7], TestVarrayOrDarray), (Lvar ([15:3-7], $foo))),
-                     (([15:10-34], TestVarrayOrDarray), (New ((([15:14-32], TestVarrayOrDarray), (CI ([15:14-32], "\\TestVarrayOrDarray"))), [], [], None, ([15:14-32], _)))))))));
+                 (([15:3-34], TestVarrayOrDarray), [15:3-34],
+                  (Binop ((Eq None), (([15:3-7], TestVarrayOrDarray), [15:3-7], (Lvar ([15:3-7], $foo))),
+                     (([15:10-34], TestVarrayOrDarray), [15:10-34], (New ((([15:14-32], TestVarrayOrDarray), (CI ([15:14-32], "\\TestVarrayOrDarray"))), [], [], None, ([15:14-32], _)))))))));
              ([18:3-15],
               (Expr
-                 (([18:3-14], void),
+                 (([18:3-14], void), [18:3-14],
                   (Call (
-                     (([18:3-10], (function(vec_or_dict<arraykey, int> $d): void)),
-                      (Obj_get ((([18:3-7], TestVarrayOrDarray), (Lvar ([18:3-7], $foo))), (
-                         ([18:9-10], (function(vec_or_dict<arraykey, int> $d): void)), (Id ([18:9-10], "d"))), OG_nullthrows, false))),
+                     (([18:3-10], (function(vec_or_dict<arraykey, int> $d): void)), [18:3-10],
+                      (Obj_get ((([18:3-7], TestVarrayOrDarray), [18:3-7], (Lvar ([18:3-7], $foo))), (
+                         ([18:9-10], (function(vec_or_dict<arraykey, int> $d): void)), [18:9-10], (Id ([18:9-10], "d"))), OG_nullthrows, false))),
                      [],
-                     [(([18:11-13], vec_or_dict<arraykey, float>),
-                       (Hole ((([18:11-13], vec_or_dict<arraykey, float>), (Lvar ([18:11-13], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), Typing)))],
+                     [(([18:11-13], vec_or_dict<arraykey, float>), [18:11-13],
+                       (Hole ((([18:11-13], vec_or_dict<arraykey, float>), [18:11-13], (Lvar ([18:11-13], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), Typing)))],
                      None)))))
              ];
            fb_annotation = () };
@@ -127,27 +127,27 @@
          { fb_ast =
            [([25:3-79],
              (Expr
-                (([25:3-78], void),
-                 (Call ((([25:3-4], (function(vec_or_dict<arraykey, int> $d): void)), (Id ([25:3-4], "\\d"))), 
+                (([25:3-78], void), [25:3-78],
+                 (Call ((([25:3-4], (function(vec_or_dict<arraykey, int> $d): void)), [25:3-4], (Id ([25:3-4], "\\d"))), 
                     [],
-                    [(([25:5-77], vec_or_dict<arraykey, int>),
-                      (Hole ((([25:74-76], vec_or_dict<arraykey, float>), (Lvar ([25:74-76], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), UnsafeCast)))],
+                    [(([25:5-77], vec_or_dict<arraykey, int>), [25:5-77],
+                      (Hole ((([25:74-76], vec_or_dict<arraykey, float>), [25:74-76], (Lvar ([25:74-76], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), UnsafeCast)))],
                     None)))));
              ([27:3-35],
               (Expr
-                 (([27:3-34], TestVarrayOrDarray),
-                  (Binop ((Eq None), (([27:3-7], TestVarrayOrDarray), (Lvar ([27:3-7], $foo))),
-                     (([27:10-34], TestVarrayOrDarray), (New ((([27:14-32], TestVarrayOrDarray), (CI ([27:14-32], "\\TestVarrayOrDarray"))), [], [], None, ([27:14-32], _)))))))));
+                 (([27:3-34], TestVarrayOrDarray), [27:3-34],
+                  (Binop ((Eq None), (([27:3-7], TestVarrayOrDarray), [27:3-7], (Lvar ([27:3-7], $foo))),
+                     (([27:10-34], TestVarrayOrDarray), [27:10-34], (New ((([27:14-32], TestVarrayOrDarray), (CI ([27:14-32], "\\TestVarrayOrDarray"))), [], [], None, ([27:14-32], _)))))))));
              ([30:3-85],
               (Expr
-                 (([30:3-84], void),
+                 (([30:3-84], void), [30:3-84],
                   (Call (
-                     (([30:3-10], (function(vec_or_dict<arraykey, int> $d): void)),
-                      (Obj_get ((([30:3-7], TestVarrayOrDarray), (Lvar ([30:3-7], $foo))), (
-                         ([30:9-10], (function(vec_or_dict<arraykey, int> $d): void)), (Id ([30:9-10], "d"))), OG_nullthrows, false))),
+                     (([30:3-10], (function(vec_or_dict<arraykey, int> $d): void)), [30:3-10],
+                      (Obj_get ((([30:3-7], TestVarrayOrDarray), [30:3-7], (Lvar ([30:3-7], $foo))), (
+                         ([30:9-10], (function(vec_or_dict<arraykey, int> $d): void)), [30:9-10], (Id ([30:9-10], "d"))), OG_nullthrows, false))),
                      [],
-                     [(([30:11-83], vec_or_dict<arraykey, int>),
-                       (Hole ((([30:80-82], vec_or_dict<arraykey, float>), (Lvar ([30:80-82], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), UnsafeCast)))],
+                     [(([30:11-83], vec_or_dict<arraykey, int>), [30:11-83],
+                       (Hole ((([30:80-82], vec_or_dict<arraykey, float>), [30:80-82], (Lvar ([30:80-82], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), UnsafeCast)))],
                      None)))))
              ];
            fb_annotation = () };

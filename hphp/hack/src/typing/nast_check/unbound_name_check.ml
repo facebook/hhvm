@@ -248,10 +248,10 @@ let handler ctx =
     method! at_xhp_attr_hint env _ = { env with hint_allow_typedef = false }
 
     (* Below are the methods where we check for unbound names *)
-    method! at_expr env e =
-      match snd e with
+    method! at_expr env (_, _, e) =
+      match e with
       | Aast.FunctionPointer (Aast.FP_id ((p, name) as id), _)
-      | Aast.Call ((_, Aast.Id ((p, name) as id)), _, _, _) ->
+      | Aast.Call ((_, _, Aast.Id ((p, name) as id)), _, _, _) ->
         let () = check_fun_name env id in
         { env with seen_names = SMap.add name p env.seen_names }
       | Aast.Id ((p, name) as id) ->
@@ -288,7 +288,7 @@ let handler ctx =
         env
       | Aast.Class_const ((_, Aast.CI _), (_, s)) when String.equal s "class" ->
         { env with class_id_allow_typedef = true }
-      | Aast.Obj_get (_, (_, Aast.Id (p, name)), _, _) ->
+      | Aast.Obj_get (_, (_, _, Aast.Id (p, name)), _, _) ->
         { env with seen_names = SMap.add name p env.seen_names }
       | Aast.EnumClassLabel (Some cname, _) ->
         let allow_typedef = (* we might reconsider this ? *) false in

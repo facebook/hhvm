@@ -102,7 +102,7 @@ pub fn from_ast<'ast, 'arena, 'decl, D: DeclProvider<'decl>>(
             ));
         }
         Some(e) => {
-            let is_collection_map = match e.1.as_collection() {
+            let is_collection_map = match e.2.as_collection() {
                 Some(c) if (c.0).1 == "Map" || (c.0).1 == "ImmMap" => true,
                 _ => false,
             };
@@ -210,7 +210,7 @@ fn expr_requires_deep_init_(expr: &tast::Expr) -> bool {
 fn expr_requires_deep_init(expr: &tast::Expr, force_class_init: bool) -> bool {
     use ast_defs::Uop::*;
     use tast::Expr_;
-    match &expr.1 {
+    match &expr.2 {
         Expr_::Unop(e) if e.0 == Uplus || e.0 == Uminus => expr_requires_deep_init_(&e.1),
         Expr_::Binop(e) => expr_requires_deep_init_(&e.1) || expr_requires_deep_init_(&e.2),
         Expr_::Lvar(_)
@@ -228,7 +228,7 @@ fn expr_requires_deep_init(expr: &tast::Expr, force_class_init: bool) -> bool {
         Expr_::Id(e) if e.1 == pseudo_consts::G__FILE__ || e.1 == pseudo_consts::G__DIR__ => false,
         Expr_::Shape(sfs) => sfs.iter().any(shape_field_requires_deep_init),
         Expr_::ClassConst(e) if (!force_class_init) => match e.0.as_ciexpr() {
-            Some(ci_expr) => match (ci_expr.1).as_id() {
+            Some(ci_expr) => match (ci_expr.2).as_id() {
                 Some(ast_defs::Id(_, s)) => {
                     class_const_requires_deep_init(&s.as_str(), &(e.1).1.as_str())
                 }

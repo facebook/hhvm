@@ -7,7 +7,12 @@
  *
  *)
 
+[@@@warning "-33"]
+
 open Hh_prelude
+
+[@@@warning "+33"]
+
 open Common
 open Typing_defs
 module Env = Typing_env
@@ -104,8 +109,8 @@ let rec shrink_shape pos field_name env shape =
  * elsewhere when typechecking the call to Shapes::idx. This allows for more
  * useful typechecking of incomplete code (code in the process of being
  * written). *)
-let shapes_idx_not_null env shape_ty (p, field) =
-  match TUtils.shape_field_name env (p, field) with
+let shapes_idx_not_null env shape_ty (ty, p, field) =
+  match TUtils.shape_field_name env (ty, p, field) with
   | None -> (env, shape_ty)
   | Some field ->
     let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
@@ -166,12 +171,19 @@ let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
  *     Shapes::idx(e1, sfn, e2) : t
  *
  *)
-let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
+let idx
+    env
+    ~expr_pos
+    ~fun_pos
+    ~shape_pos
+    shape_ty
+    ((field_p, _, _) as field)
+    default =
   let (env, shape_ty) = Env.expand_type env shape_ty in
   let (env, res) = Env.fresh_type env expr_pos in
   let (env, res) =
     match TUtils.shape_field_name env field with
-    | None -> (env, TUtils.mk_tany env (fst field))
+    | None -> (env, TUtils.mk_tany env field_p)
     | Some field_name ->
       let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
       let fake_super_shape_ty =
@@ -220,12 +232,12 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
   in
   Typing_enforceability.make_locl_like_type env res
 
-let at env ~expr_pos ~shape_pos shape_ty field =
+let at env ~expr_pos ~shape_pos shape_ty ((field_p, _, _) as field) =
   let (env, shape_ty) = Env.expand_type env shape_ty in
   let (env, res) = Env.fresh_type env expr_pos in
   let (env, res) =
     match TUtils.shape_field_name env field with
-    | None -> (env, TUtils.mk_tany env (fst field))
+    | None -> (env, TUtils.mk_tany env field_p)
     | Some field_name ->
       let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
       let fake_super_shape_ty =
@@ -248,9 +260,9 @@ let at env ~expr_pos ~shape_pos shape_ty field =
   in
   Typing_enforceability.make_locl_like_type env res
 
-let remove_key p env shape_ty field =
+let remove_key p env shape_ty ((field_p, _, _) as field) =
   match TUtils.shape_field_name env field with
-  | None -> (env, TUtils.mk_tany env (fst field))
+  | None -> (env, TUtils.mk_tany env field_p)
   | Some field_name ->
     let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
     shrink_shape p field_name env shape_ty

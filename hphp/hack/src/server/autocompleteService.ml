@@ -595,8 +595,8 @@ let shape_string_keys (sm : 'a TShapeMap.t) : string list =
       | TSFlit_str (_, s) -> Some s
       | _ -> None)
 
-let unwrap_holes (e : Tast.expr) : Tast.expr =
-  match snd e with
+let unwrap_holes ((_, _, e_) as e : Tast.expr) : Tast.expr =
+  match e_ with
   | Aast.Hole (e, _, _, _) -> e
   | _ -> e
 
@@ -633,7 +633,7 @@ let autocomplete_shape_literal_in_call
   List.iter
     ~f:(fun (arg, expected_ty) ->
       match arg with
-      | ((pos, _), Aast.Shape kvs) ->
+      | (_, pos, Aast.Shape kvs) ->
         (* We're passing a shape literal as this function argument. *)
         List.iter kvs ~f:(fun (name, _val) ->
             match shape_field_autocomplete_prefix name with
@@ -665,8 +665,8 @@ let visitor =
 
     method! on_Call env f targs args unpack_arg =
       (match args with
-      | ((p, _), Aast.EnumClassLabel (_, n)) :: _ when is_auto_complete n ->
-        let (_, fty) = fst f in
+      | (_, p, Aast.EnumClassLabel (_, n)) :: _ when is_auto_complete n ->
+        let ((_, fty), _, _) = f in
         autocomplete_enum_class_label_call env fty (p, n)
       | _ -> ());
 
@@ -699,14 +699,14 @@ let visitor =
 
     method! on_Obj_get env obj mid ognf =
       (match mid with
-      | (_, Aast.Id mid) ->
+      | (_, _, Aast.Id mid) ->
         autocomplete_typed_member ~is_static:false env (get_type obj) None mid
       | _ -> ());
       super#on_Obj_get env obj mid ognf
 
     method! on_expr env expr =
       (match expr with
-      | (_, Aast.Array_get (arr, Some ((pos, _), key))) ->
+      | (_, _, Aast.Array_get (arr, Some (_, pos, key))) ->
         let ty = get_type arr in
         let (_, ty) = Tast_env.expand_type env ty in
         begin
@@ -746,13 +746,12 @@ let visitor =
             | _ -> ())
           | _ -> ()
         end
-      | (_, Aast.Call (((_, recv_ty), _), _, args, _)) ->
+      | (_, _, Aast.Call (((_, recv_ty), _, _), _, args, _)) ->
         (match deref recv_ty with
         | (_r, Tfun ft) -> autocomplete_shape_literal_in_call env ft args
         | _ -> ())
       (* Autocomplete is using ...#AUTO332 so is parsed as an EnumClassLabel *)
-      | ((p, _), Aast.EnumClassLabel (Some (_, id), n)) when is_auto_complete n
-        ->
+      | (_, p, Aast.EnumClassLabel (Some (_, id), n)) when is_auto_complete n ->
         autocomplete_enum_class_label_id env id (p, n)
       | _ -> ());
       super#on_expr env expr
@@ -778,7 +777,7 @@ let visitor =
                  | Aast.Xhp_simple
                      { Aast.xs_name = id; xs_expr = value; xs_type = ty } ->
                    (match value with
-                   | (_, Aast.Id id_id) ->
+                   | (_, _, Aast.Id id_id) ->
                      (* This handles the situation
                           <foo:bar my-attribute={AUTO332}
                      *)
@@ -855,7 +854,7 @@ class local_types =
       )
 
     method! on_expr env e =
-      let ((_, ty), e_) = e in
+      let ((_, ty), _, e_) = e in
       match e_ with
       | Aast.Lvar (_, id) ->
         if matches_auto_complete_suffix (Local_id.get_name id) then

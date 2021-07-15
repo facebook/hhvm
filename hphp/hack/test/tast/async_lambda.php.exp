@@ -15,7 +15,7 @@
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
           ];
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:58-68], (Return (Some (([3:65-67], string), (Lvar ([3:65-67], $s))))))]; fb_annotation = () }; 
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:58-68], (Return (Some (([3:65-67], string), [3:65-67], (Lvar ([3:65-67], $s))))))]; fb_annotation = () }; 
         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -35,9 +35,9 @@
          { fb_ast =
            [([6:3-8:5],
              (Expr
-                (([6:3-8:4], (function(): Awaitable<void>)),
-                 (Binop ((Eq None), (([6:3-6], (function(): Awaitable<void>)), (Lvar ([6:3-6], $f0))),
-                    (([6:9-8:4], (function(): Awaitable<void>)),
+                (([6:3-8:4], (function(): Awaitable<void>)), [6:3-8:4],
+                 (Binop ((Eq None), (([6:3-6], (function(): Awaitable<void>)), [6:3-6], (Lvar ([6:3-6], $f0))),
+                    (([6:9-8:4], (function(): Awaitable<void>)), [6:9-8:4],
                      (Lfun (
                         { f_span = [6:9-8:4]; f_readonly_this = None; 
                           f_annotation = (); f_readonly_ret = None; f_ret = ((Awaitable<void>), None); 
@@ -48,12 +48,13 @@
                           { fb_ast =
                             [([7:5-35],
                               (Expr
-                                 (([7:5-34], string),
-                                  (Binop ((Eq None), (([7:5-9], string), (Lvar ([7:5-9], $str))),
-                                     (([7:12-34], string),
+                                 (([7:5-34], string), [7:5-34],
+                                  (Binop ((Eq None), (([7:5-9], string), [7:5-9], (Lvar ([7:5-9], $str))),
+                                     (([7:12-34], string), [7:12-34],
                                       (Await
-                                         (([7:18-34], Awaitable<string>),
-                                          (Call ((([7:18-27], (function(string $s): Awaitable<string>)), (Id ([7:18-27], "\\genString"))), [], [(([7:28-33], string), (String "foo"))], None)))))
+                                         (([7:18-34], Awaitable<string>), [7:18-34],
+                                          (Call ((([7:18-27], (function(string $s): Awaitable<string>)), [7:18-27], (Id ([7:18-27], "\\genString"))), 
+                                             [], [(([7:28-33], string), [7:28-33], (String "foo"))], None)))))
                                      )))))
                               ];
                             fb_annotation = () };
@@ -63,9 +64,9 @@
                     )))));
              ([9:3-11:5],
               (Expr
-                 (([9:3-11:4], (function(string $x): Awaitable<void>)),
-                  (Binop ((Eq None), (([9:3-6], (function(string $x): Awaitable<void>)), (Lvar ([9:3-6], $f1))),
-                     (([9:9-11:4], (function(string $x): Awaitable<void>)),
+                 (([9:3-11:4], (function(string $x): Awaitable<void>)), [9:3-11:4],
+                  (Binop ((Eq None), (([9:3-6], (function(string $x): Awaitable<void>)), [9:3-6], (Lvar ([9:3-6], $f1))),
+                     (([9:9-11:4], (function(string $x): Awaitable<void>)), [9:9-11:4],
                       (Lfun (
                          { f_span = [9:9-11:4]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
@@ -85,13 +86,13 @@
                            { fb_ast =
                              [([10:5-32],
                                (Expr
-                                  (([10:5-31], string),
-                                   (Binop ((Eq None), (([10:5-9], string), (Lvar ([10:5-9], $str))),
-                                      (([10:12-31], string),
+                                  (([10:5-31], string), [10:5-31],
+                                   (Binop ((Eq None), (([10:5-9], string), [10:5-9], (Lvar ([10:5-9], $str))),
+                                      (([10:12-31], string), [10:12-31],
                                        (Await
-                                          (([10:18-31], Awaitable<string>),
-                                           (Call ((([10:18-27], (function(string $s): Awaitable<string>)), (Id ([10:18-27], "\\genString"))), 
-                                              [], [(([10:28-30], string), (Lvar ([10:28-30], $x)))], None)))))
+                                          (([10:18-31], Awaitable<string>), [10:18-31],
+                                           (Call ((([10:18-27], (function(string $s): Awaitable<string>)), [10:18-27], (Id ([10:18-27], "\\genString"))), 
+                                              [], [(([10:28-30], string), [10:28-30], (Lvar ([10:28-30], $x)))], None)))))
                                       )))))
                                ];
                              fb_annotation = () };

@@ -237,7 +237,7 @@ let const_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
     cst_namespace = _;
     cst_span;
     cst_type;
-    cst_value = (value_pos, value);
+    cst_value = (_, value_pos, value);
   } =
     cst
   in

@@ -18,8 +18,10 @@
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([4:5-13], (Expr (([4:5-12], int), (Binop ((Eq None), (([4:5-7], int), (Lvar ([4:5-7], $y))), (([4:10-12], int), (Lvar ([4:10-12], $x))))))));
-            ([5:5-13], (Expr (([5:5-12], void), (Call ((([5:5-8], (function(int $_): void)), (Id ([5:5-8], "\\bar"))), [], [(([5:9-11], int), (Lvar ([5:9-11], $y)))], None)))))];
+          [([4:5-13], (Expr (([4:5-12], int), [4:5-12], (Binop ((Eq None), (([4:5-7], int), [4:5-7], (Lvar ([4:5-7], $y))), (([4:10-12], int), [4:10-12], (Lvar ([4:10-12], $x))))))));
+            ([5:5-13],
+             (Expr (([5:5-12], void), [5:5-12], (Call ((([5:5-8], (function(int $_): void)), [5:5-8], (Id ([5:5-8], "\\bar"))), [], [(([5:9-11], int), [5:9-11], (Lvar ([5:9-11], $y)))], None)))))
+            ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }

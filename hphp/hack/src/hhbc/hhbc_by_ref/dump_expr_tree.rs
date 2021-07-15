@@ -32,7 +32,7 @@ impl<'ast> Visitor<'ast> for ExprTreeLiteralExtractor {
 
     fn visit_expr(&mut self, env: &mut (), e: &ast::Expr) -> Result<(), ()> {
         use aast::Expr_::*;
-        match &e.1 {
+        match &e.2 {
             ExpressionTree(et) => {
                 self.literals.push((e.0.clone(), (&**et).clone()));
             }

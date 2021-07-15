@@ -11,12 +11,12 @@
         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([3:3-14], (Expr (([3:3-13], string), (Binop ((Eq None), (([3:3-5], string), (Lvar ([3:3-5], $s))), (([3:8-13], string), (String "foo")))))));
+          [([3:3-14], (Expr (([3:3-13], string), [3:3-13], (Binop ((Eq None), (([3:3-5], string), [3:3-5], (Lvar ([3:3-5], $s))), (([3:8-13], string), [3:8-13], (String "foo")))))));
             ([4:3-42],
              (Expr
-                (([4:3-41], (function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)),
-                 (Binop ((Eq None), (([4:3-5], (function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), (Lvar ([4:3-5], $f))),
-                    (([4:8-41], (function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)),
+                (([4:3-41], (function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [4:3-41],
+                 (Binop ((Eq None), (([4:3-5], (function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [4:3-5], (Lvar ([4:3-5], $f))),
+                    (([4:8-41], (function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [4:8-41],
                      (Lfun (
                         { f_span = [4:8-41]; f_readonly_this = None; 
                           f_annotation = (); f_readonly_ret = None; f_ret = ((string), None); 
@@ -35,12 +35,12 @@
                           { fb_ast =
                             [([4:17-39],
                               (Return
-                                 (Some (([4:24-38], string),
+                                 (Some (([4:24-38], string), [4:24-38],
                                         (Binop (Dot,
-                                           (([4:24-31], string),
-                                            (Binop (Dot, (([4:24-26], (dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>))), (Lvar ([4:24-26], $n))),
-                                               (([4:29-31], string), (Lvar ([4:29-31], $s)))))),
-                                           (([4:34-38], string), (String "\\n"))))))))
+                                           (([4:24-31], string), [4:24-31],
+                                            (Binop (Dot, (([4:24-26], (dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>))), [4:24-26], (Lvar ([4:24-26], $n))),
+                                               (([4:29-31], string), [4:29-31], (Lvar ([4:29-31], $s)))))),
+                                           (([4:34-38], string), [4:34-38], (String "\\n"))))))))
                               ];
                             fb_annotation = () };
                           f_fun_kind = FSync; f_user_attributes = []; 
@@ -49,19 +49,19 @@
                     )))));
             ([5:3-14],
              (Expr
-                (([5:3-13], string),
-                 (Binop ((Eq None), (([5:3-5], string), (Lvar ([5:3-5], $x))),
-                    (([5:8-13], string),
-                     (Call ((([5:8-10], (function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), (Lvar ([5:8-10], $f))), 
-                        [], [(([5:11-12], int), (Int "4"))], None)))
+                (([5:3-13], string), [5:3-13],
+                 (Binop ((Eq None), (([5:3-5], string), [5:3-5], (Lvar ([5:3-5], $x))),
+                    (([5:8-13], string), [5:8-13],
+                     (Call ((([5:8-10], (function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [5:8-10], (Lvar ([5:8-10], $f))), 
+                        [], [(([5:11-12], int), [5:11-12], (Int "4"))], None)))
                     )))));
             ([6:3-18],
              (Expr
-                (([6:3-17], string),
-                 (Binop ((Eq None), (([6:3-5], string), (Lvar ([6:3-5], $y))),
-                    (([6:8-17], string),
-                     (Call ((([6:8-10], (function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), (Lvar ([6:8-10], $f))), 
-                        [], [(([6:11-16], string), (String "bar"))], None)))
+                (([6:3-17], string), [6:3-17],
+                 (Binop ((Eq None), (([6:3-5], string), [6:3-5], (Lvar ([6:3-5], $y))),
+                    (([6:8-17], string), [6:8-17],
+                     (Call ((([6:8-10], (function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [6:8-10], (Lvar ([6:8-10], $f))), 
+                        [], [(([6:11-16], string), [6:11-16], (String "bar"))], None)))
                     )))))
             ];
           fb_annotation = () };

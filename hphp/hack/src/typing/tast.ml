@@ -141,13 +141,13 @@ let make_expr_annotation p ty : Pos.t * ty = (p, ty)
  * some abstraction in so that we can change the representation (e.g. put
  * further annotations on the expression) as we see fit.
  *)
-let make_typed_expr p ty te : expr = (make_expr_annotation p ty, te)
+let make_typed_expr p ty te : expr = (make_expr_annotation p ty, p, te)
 
 (* Get the position of an expression *)
-let get_position (((p, _), _) : expr) = p
+let get_position ((_, p, _) : expr) = p
 
 (* Get the type of an expression *)
-let get_type (((_, ty), _) : expr) = ty
+let get_type (((_, ty), _, _) : expr) = ty
 
 let nast_converter =
   object

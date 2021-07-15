@@ -14,7 +14,7 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_expr env ((pos, _), e) =
+    method! at_expr env ((pos, _), _, e) =
       match e with
       | ExpressionTree et ->
         let tcopt = Tast_env.get_tcopt env in

@@ -50,7 +50,7 @@ let collect_attrs env attrs =
   let collect_attr set attr =
     match attr with
     | Xhp_simple { xs_name = (_, n); _ } -> SSet.add (":" ^ n) set
-    | Xhp_spread ((_, ty), _) -> collect_attrs_from_ty env set ty
+    | Xhp_spread ((_, ty), _, _) -> collect_attrs_from_ty env set ty
   in
   List.fold attrs ~init:SSet.empty ~f:collect_attr
 
@@ -84,7 +84,8 @@ let make_handler ctx =
 
       method! at_expr env =
         function
-        | ((pos, _), Xml ((_, sid), attrs, _)) -> check_attrs pos env sid attrs
+        | ((pos, _), _, Xml ((_, sid), attrs, _)) ->
+          check_attrs pos env sid attrs
         | _ -> ()
     end
   in

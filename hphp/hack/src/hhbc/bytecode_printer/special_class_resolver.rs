@@ -26,6 +26,7 @@ impl<'arena, 'decl, D: DeclProvider<'decl>> SpecialClassResolver for Emitter<'ar
                 None,
                 ast::Expr(
                     Pos::make_none(),
+                    Pos::make_none(),
                     ast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), id.into())),
                 ),
             ),
@@ -39,6 +40,7 @@ impl<'arena, 'decl, D: DeclProvider<'decl>> SpecialClassResolver for Emitter<'ar
                     .map(|(k, s)| (k.clone(), s.as_str())),
                 body_env.parent_name.clone(),
                 ast::Expr(
+                    Pos::make_none(),
                     Pos::make_none(),
                     ast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), id.into())),
                 ),

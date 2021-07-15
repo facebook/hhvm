@@ -73,21 +73,21 @@
          { fb_ast =
            [([13:3-9],
              (Expr
-                (([13:3-8], void),
-                 (Call ((([13:3-4], (function(vec<int> $e): void)), (Id ([13:3-4], "\\e"))), 
-                    [], [(([13:5-7], vec<float>), (Hole ((([13:5-7], vec<float>), (Lvar ([13:5-7], $e))), (vec<float>), (vec<int>), Typing)))], None)))));
+                (([13:3-8], void), [13:3-8],
+                 (Call ((([13:3-4], (function(vec<int> $e): void)), [13:3-4], (Id ([13:3-4], "\\e"))), 
+                    [], [(([13:5-7], vec<float>), [13:5-7], (Hole ((([13:5-7], vec<float>), [13:5-7], (Lvar ([13:5-7], $e))), (vec<float>), (vec<int>), Typing)))], None)))));
              ([15:3-24],
               (Expr
-                 (([15:3-23], TestVec),
-                  (Binop ((Eq None), (([15:3-7], TestVec), (Lvar ([15:3-7], $foo))),
-                     (([15:10-23], TestVec), (New ((([15:14-21], TestVec), (CI ([15:14-21], "\\TestVec"))), [], [], None, ([15:14-21], _)))))))));
+                 (([15:3-23], TestVec), [15:3-23],
+                  (Binop ((Eq None), (([15:3-7], TestVec), [15:3-7], (Lvar ([15:3-7], $foo))),
+                     (([15:10-23], TestVec), [15:10-23], (New ((([15:14-21], TestVec), (CI ([15:14-21], "\\TestVec"))), [], [], None, ([15:14-21], _)))))))));
              ([18:3-15],
               (Expr
-                 (([18:3-14], void),
+                 (([18:3-14], void), [18:3-14],
                   (Call (
-                     (([18:3-10], (function(vec<int> $e): void)),
-                      (Obj_get ((([18:3-7], TestVec), (Lvar ([18:3-7], $foo))), (([18:9-10], (function(vec<int> $e): void)), (Id ([18:9-10], "e"))), OG_nullthrows, false))),
-                     [], [(([18:11-13], vec<float>), (Hole ((([18:11-13], vec<float>), (Lvar ([18:11-13], $e))), (vec<float>), (vec<int>), Typing)))], None)))))
+                     (([18:3-10], (function(vec<int> $e): void)), [18:3-10],
+                      (Obj_get ((([18:3-7], TestVec), [18:3-7], (Lvar ([18:3-7], $foo))), (([18:9-10], (function(vec<int> $e): void)), [18:9-10], (Id ([18:9-10], "e"))), OG_nullthrows, false))),
+                     [], [(([18:11-13], vec<float>), [18:11-13], (Hole ((([18:11-13], vec<float>), [18:11-13], (Lvar ([18:11-13], $e))), (vec<float>), (vec<int>), Typing)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -116,21 +116,21 @@
          { fb_ast =
            [([25:3-53],
              (Expr
-                (([25:3-52], void),
-                 (Call ((([25:3-4], (function(vec<int> $e): void)), (Id ([25:3-4], "\\e"))), 
-                    [], [(([25:5-51], vec<int>), (Hole ((([25:48-50], vec<float>), (Lvar ([25:48-50], $e))), (vec<float>), (vec<int>), UnsafeCast)))], None)))));
+                (([25:3-52], void), [25:3-52],
+                 (Call ((([25:3-4], (function(vec<int> $e): void)), [25:3-4], (Id ([25:3-4], "\\e"))), 
+                    [], [(([25:5-51], vec<int>), [25:5-51], (Hole ((([25:48-50], vec<float>), [25:48-50], (Lvar ([25:48-50], $e))), (vec<float>), (vec<int>), UnsafeCast)))], None)))));
              ([27:3-24],
               (Expr
-                 (([27:3-23], TestVec),
-                  (Binop ((Eq None), (([27:3-7], TestVec), (Lvar ([27:3-7], $foo))),
-                     (([27:10-23], TestVec), (New ((([27:14-21], TestVec), (CI ([27:14-21], "\\TestVec"))), [], [], None, ([27:14-21], _)))))))));
+                 (([27:3-23], TestVec), [27:3-23],
+                  (Binop ((Eq None), (([27:3-7], TestVec), [27:3-7], (Lvar ([27:3-7], $foo))),
+                     (([27:10-23], TestVec), [27:10-23], (New ((([27:14-21], TestVec), (CI ([27:14-21], "\\TestVec"))), [], [], None, ([27:14-21], _)))))))));
              ([30:3-59],
               (Expr
-                 (([30:3-58], void),
+                 (([30:3-58], void), [30:3-58],
                   (Call (
-                     (([30:3-10], (function(vec<int> $e): void)),
-                      (Obj_get ((([30:3-7], TestVec), (Lvar ([30:3-7], $foo))), (([30:9-10], (function(vec<int> $e): void)), (Id ([30:9-10], "e"))), OG_nullthrows, false))),
-                     [], [(([30:11-57], vec<int>), (Hole ((([30:54-56], vec<float>), (Lvar ([30:54-56], $e))), (vec<float>), (vec<int>), UnsafeCast)))], None)))))
+                     (([30:3-10], (function(vec<int> $e): void)), [30:3-10],
+                      (Obj_get ((([30:3-7], TestVec), [30:3-7], (Lvar ([30:3-7], $foo))), (([30:9-10], (function(vec<int> $e): void)), [30:9-10], (Id ([30:9-10], "e"))), OG_nullthrows, false))),
+                     [], [(([30:11-57], vec<int>), [30:11-57], (Hole ((([30:54-56], vec<float>), [30:54-56], (Lvar ([30:54-56], $e))), (vec<float>), (vec<int>), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -68,7 +68,7 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 name: ast_defs::Id(_, ref s),
                 params,
             }] if s == "__MethCaller" => match &params[..] {
-                [tast::Expr(_, tast::Expr_::String(ref ctx))] if !ctx.is_empty() => Some(
+                [tast::Expr(_, _, tast::Expr_::String(ref ctx))] if !ctx.is_empty() => Some(
                     hhbc_id::class::Type::from_ast_name(
                         alloc,
                         // FIXME: This is not safe--string literals are binary strings.

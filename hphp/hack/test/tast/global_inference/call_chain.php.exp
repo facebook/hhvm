@@ -15,7 +15,9 @@
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
-        f_body = { fb_ast = [([4:3-17], (Return (Some (([4:10-16], int), (Binop (Plus, (([4:10-12], num), (Lvar ([4:10-12], $x))), (([4:15-16], int), (Int "0"))))))))]; fb_annotation = () };
+        f_body =
+        { fb_ast = [([4:3-17], (Return (Some (([4:10-16], int), [4:10-16], (Binop (Plus, (([4:10-12], num), [4:10-12], (Lvar ([4:10-12], $x))), (([4:15-16], int), [4:15-16], (Int "0"))))))))];
+          fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })[(Fun
@@ -36,7 +38,12 @@
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
-        { fb_ast = [([4:3-17], (Return (Some (([4:10-16], int), (Call ((([4:10-12], (function(num $x): int)), (Id ([4:10-12], "\\f1"))), [], [(([4:13-15], num), (Lvar ([4:13-15], $x)))], None))))))];
+        { fb_ast =
+          [([4:3-17],
+            (Return
+               (Some (([4:10-16], int), [4:10-16],
+                      (Call ((([4:10-12], (function(num $x): int)), [4:10-12], (Id ([4:10-12], "\\f1"))), [], [(([4:13-15], num), [4:13-15], (Lvar ([4:13-15], $x)))], None))))))
+            ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
@@ -58,7 +65,12 @@
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
-        { fb_ast = [([4:3-17], (Return (Some (([4:10-16], int), (Call ((([4:10-12], (function(num $x): int)), (Id ([4:10-12], "\\f2"))), [], [(([4:13-15], num), (Lvar ([4:13-15], $x)))], None))))))];
+        { fb_ast =
+          [([4:3-17],
+            (Return
+               (Some (([4:10-16], int), [4:10-16],
+                      (Call ((([4:10-12], (function(num $x): int)), [4:10-12], (Id ([4:10-12], "\\f2"))), [], [(([4:13-15], num), [4:13-15], (Lvar ([4:13-15], $x)))], None))))))
+            ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }

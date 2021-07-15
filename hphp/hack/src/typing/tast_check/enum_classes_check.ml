@@ -18,8 +18,8 @@ let handler =
 
     method! at_expr env expr =
       let _ctx = Env.get_ctx env in
-      let (pos, ty) = fst expr in
-      match (snd expr, get_node ty) with
+      let ((pos, ty), _, expr_) = expr in
+      match (expr_, get_node ty) with
       | (FunctionPointer _, Tfun fun_ty) ->
         let params = fun_ty.ft_params in
         (match

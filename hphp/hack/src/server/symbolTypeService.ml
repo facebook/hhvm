@@ -26,7 +26,7 @@ let visitor =
 
     method plus = Result_set.union
 
-    method! on_expr env (((pos, ty), expr_) as expr) =
+    method! on_expr env (((pos, ty), _, expr_) as expr) =
       let acc =
         match expr_ with
         | Lvar (_, id)

@@ -15,8 +15,8 @@ let visitor =
   object (self)
     inherit [_] Aast.iter as super
 
-    method! on_expr env e =
-      match snd e with
+    method! on_expr env ((p, _, expr_) as e) =
+      match expr_ with
       | Binop (Ast_defs.Eq None, e1, e2) ->
         (* Allow list($foo) = $bar; *)
         self#on_expr { in_lvalue = true } e1;
@@ -27,7 +27,7 @@ let visitor =
           super#on_expr env e
         else
           (* Ban list() in rvalue positions, e.g. foo(list($bar)) *)
-          Errors.list_rvalue (fst e)
+          Errors.list_rvalue p
       | _ -> super#on_expr { in_lvalue = false } e
 
     method! on_stmt env s =

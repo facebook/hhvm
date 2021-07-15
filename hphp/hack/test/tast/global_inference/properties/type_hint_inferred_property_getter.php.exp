@@ -27,9 +27,9 @@
          { fb_ast =
            [([7:5-19],
              (Expr
-                (([7:5-18], int),
-                 (Binop ((Eq None), (([7:5-13], int), (Obj_get ((([7:5-10], this), This), (([7:12-13], int), (Id ([7:12-13], "x"))), OG_nullthrows, false))),
-                    (([7:16-18], int), (Lvar ([7:16-18], $x))))))))
+                (([7:5-18], int), [7:5-18],
+                 (Binop ((Eq None), (([7:5-13], int), [7:5-13], (Obj_get ((([7:5-10], this), [7:5-10], This), (([7:12-13], int), [7:12-13], (Id ([7:12-13], "x"))), OG_nullthrows, false))),
+                    (([7:16-18], int), [7:16-18], (Lvar ([7:16-18], $x))))))))
              ];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -43,10 +43,10 @@
           { fb_ast =
             [([11:5-19],
               (Expr
-                 (([11:5-18], int),
-                  (Binop ((Eq None), (([11:5-7], int), (Lvar ([11:5-7], $y))),
-                     (([11:10-18], int), (Obj_get ((([11:10-15], this), This), (([11:17-18], int), (Id ([11:17-18], "x"))), OG_nullthrows, false))))))));
-              ([12:5-15], (Return (Some (([12:12-14], int), (Lvar ([12:12-14], $y))))))];
+                 (([11:5-18], int), [11:5-18],
+                  (Binop ((Eq None), (([11:5-7], int), [11:5-7], (Lvar ([11:5-7], $y))),
+                     (([11:10-18], int), [11:10-18], (Obj_get ((([11:10-15], this), [11:10-15], This), (([11:17-18], int), [11:17-18], (Id ([11:17-18], "x"))), OG_nullthrows, false))))))));
+              ([12:5-15], (Return (Some (([12:12-14], int), [12:12-14], (Lvar ([12:12-14], $y))))))];
             fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((int), None); m_external = false; m_doc_comment = None }
@@ -74,16 +74,18 @@
          { fb_ast =
            [([17:3-17],
              (Expr
-                (([17:3-16], A),
-                 (Binop ((Eq None), (([17:3-5], A), (Lvar ([17:3-5], $a))),
-                    (([17:8-16], A), (New ((([17:12-13], A), (CI ([17:12-13], "\\A"))), [], [(([17:14-15], int), (Int "1"))], None, ([17:12-13], (function(int $x): void))))))))));
+                (([17:3-16], A), [17:3-16],
+                 (Binop ((Eq None), (([17:3-5], A), [17:3-5], (Lvar ([17:3-5], $a))),
+                    (([17:8-16], A), [17:8-16], (New ((([17:12-13], A), (CI ([17:12-13], "\\A"))), [], [(([17:14-15], int), [17:14-15], (Int "1"))], None, ([17:12-13], (function(int $x): void))))))))));
              ([18:3-18],
               (Expr
-                 (([18:3-17], void),
-                  (Call ((([18:3-6], (function(int $_): void)), (Id ([18:3-6], "\\bar"))), 
+                 (([18:3-17], void), [18:3-17],
+                  (Call ((([18:3-6], (function(int $_): void)), [18:3-6], (Id ([18:3-6], "\\bar"))), 
                      [],
-                     [(([18:7-16], int),
-                       (Call ((([18:7-14], (function(): int)), (Obj_get ((([18:7-9], A), (Lvar ([18:7-9], $a))), (([18:11-14], (function(): int)), (Id ([18:11-14], "get"))), OG_nullthrows, false))),
+                     [(([18:7-16], int), [18:7-16],
+                       (Call (
+                          (([18:7-14], (function(): int)), [18:7-14],
+                           (Obj_get ((([18:7-9], A), [18:7-9], (Lvar ([18:7-9], $a))), (([18:11-14], (function(): int)), [18:11-14], (Id ([18:11-14], "get"))), OG_nullthrows, false))),
                           [], [], None)))
                        ],
                      None)))))

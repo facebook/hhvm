@@ -21,7 +21,7 @@ pub fn properties_for_cache<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     class: &'a Class_,
     class_is_const: bool,
 ) -> Result<Option<HhasProperty<'arena>>> {
-    let initial_value = Some(Expr(Pos::make_none(), Expr_::mk_null()));
+    let initial_value = Some(Expr(Pos::make_none(), Pos::make_none(), Expr_::mk_null()));
     let property = emit_property::from_ast(
         alloc,
         emitter,
@@ -474,7 +474,7 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl, D: DeclProvider<'dec
 }
 
 fn mk_expr(expr_: Expr_) -> Expr {
-    Expr(Pos::make_none(), expr_)
+    Expr(Pos::make_none(), Pos::make_none(), expr_)
 }
 
 fn mk_stmt(stmt_: Stmt_) -> Stmt {

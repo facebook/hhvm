@@ -166,7 +166,7 @@ class local_types =
       )
 
     method! on_expr env e =
-      let ((_, ty), e_) = e in
+      let ((_, ty), _, e_) = e in
       match e_ with
       | Aast.Lvar (_, id) ->
         if matches_auto_complete_suffix (Local_id.get_name id) then
@@ -401,7 +401,7 @@ class visitor ~ctx ~entry ~filename ~source_text =
     method! on_Obj_get env obj mid ognf =
       let res = super#on_Obj_get env obj mid ognf in
       (match mid with
-      | (_, Aast.Id mid) ->
+      | (_, _, Aast.Id mid) ->
         self#autocomplete_typed_member ~is_static:false env (get_type obj) None;
         self#add_entry SearchUtils.Acclass_get (fst mid) (snd mid)
       | _ -> ());

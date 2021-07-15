@@ -108,7 +108,7 @@ impl<'arena> ClassExpr<'arena> {
         opt_parent_name: Option<String>,
         expr: ast::Expr,
     ) -> Self {
-        match expr.1 {
+        match expr.2 {
             Expr_::Id(x) => {
                 let ast_defs::Id(pos, id) = *x;
                 if string_utils::is_static(&id) {
@@ -152,7 +152,7 @@ impl<'arena> ClassExpr<'arena> {
         let ClassId(annot, cid_) = cid;
         let expr = match cid_ {
             ClassId_::CIexpr(e) => e.clone(),
-            ClassId_::CI(sid) => Expr(annot.clone(), Expr_::mk_id(sid.clone())),
+            ClassId_::CI(sid) => Expr(annot.clone(), annot.clone(), Expr_::mk_id(sid.clone())),
             ClassId_::CIparent => return Self::Special(SpecialClsRef::Parent),
             ClassId_::CIstatic => return Self::Special(SpecialClsRef::Static),
             ClassId_::CIself => return Self::Special(SpecialClsRef::Self_),

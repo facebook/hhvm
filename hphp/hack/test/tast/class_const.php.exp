@@ -9,8 +9,9 @@
       [{ cc_type = None; cc_id = ([5:9-12], "FOO");
          cc_kind =
          (CCConcrete
-            (([5:15-8:4], dict<string, int>),
-             (KeyValCollection (Dict, None, [((([6:5-8], string), (String "a")), (([6:12-13], int), (Int "1"))); ((([7:5-8], string), (String "b")), (([7:12-13], int), (Int "2")))]))));
+            (([5:15-8:4], dict<string, int>), [5:15-8:4],
+             (KeyValCollection (Dict, None,
+                [((([6:5-8], string), [6:5-8], (String "a")), (([6:12-13], int), [6:12-13], (Int "1"))); ((([7:5-8], string), [7:5-8], (String "b")), (([7:12-13], int), [7:12-13], (Int "2")))]))));
          cc_doc_comment = None }
         ];
       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = []; 

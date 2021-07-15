@@ -518,8 +518,8 @@ let shape_field_name_ this field =
     | _ -> Error `Invalid_shape_field_name)
 
 let shape_field_name :
-    env -> Pos.t * Nast.expr_ -> Ast_defs.shape_field_name option =
- fun env (p, field) ->
+    env -> Pos.t * Pos.t * Nast.expr_ -> Ast_defs.shape_field_name option =
+ fun env (p, _, field) ->
   let this =
     lazy
       (match Env.get_self_ty env with

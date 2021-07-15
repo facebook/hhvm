@@ -259,7 +259,7 @@ and ('ex, 'fb, 'en, 'hi) class_id_ =
           Foo::$prop = 1;
           new Foo(); *)
 
-and ('ex, 'fb, 'en, 'hi) expr = 'ex * ('ex, 'fb, 'en, 'hi) expr_
+and ('ex, 'fb, 'en, 'hi) expr = 'ex * pos * ('ex, 'fb, 'en, 'hi) expr_
 
 and 'hi collection_targ =
   | CollectionTV of 'hi targ

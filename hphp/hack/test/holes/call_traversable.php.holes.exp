@@ -74,24 +74,27 @@
          { fb_ast =
            [([13:3-9],
              (Expr
-                (([13:3-8], void),
-                 (Call ((([13:3-4], (function(Traversable<int> $i): void)), (Id ([13:3-4], "\\i"))), 
-                    [], [(([13:5-7], <expr#1> as Traversable<float>), (Hole ((([13:5-7], Traversable<float>), (Lvar ([13:5-7], $i))), (<expr#1> as Traversable<float>), (Traversable<int>), Typing)))],
+                (([13:3-8], void), [13:3-8],
+                 (Call ((([13:3-4], (function(Traversable<int> $i): void)), [13:3-4], (Id ([13:3-4], "\\i"))), 
+                    [],
+                    [(([13:5-7], <expr#1> as Traversable<float>), [13:5-7],
+                      (Hole ((([13:5-7], Traversable<float>), [13:5-7], (Lvar ([13:5-7], $i))), (<expr#1> as Traversable<float>), (Traversable<int>), Typing)))],
                     None)))));
              ([15:3-32],
               (Expr
-                 (([15:3-31], TestTraversable),
-                  (Binop ((Eq None), (([15:3-7], TestTraversable), (Lvar ([15:3-7], $foo))),
-                     (([15:10-31], TestTraversable), (New ((([15:14-29], TestTraversable), (CI ([15:14-29], "\\TestTraversable"))), [], [], None, ([15:14-29], _)))))))));
+                 (([15:3-31], TestTraversable), [15:3-31],
+                  (Binop ((Eq None), (([15:3-7], TestTraversable), [15:3-7], (Lvar ([15:3-7], $foo))),
+                     (([15:10-31], TestTraversable), [15:10-31], (New ((([15:14-29], TestTraversable), (CI ([15:14-29], "\\TestTraversable"))), [], [], None, ([15:14-29], _)))))))));
              ([18:3-15],
               (Expr
-                 (([18:3-14], void),
+                 (([18:3-14], void), [18:3-14],
                   (Call (
-                     (([18:3-10], (function(Traversable<int> $i): void)),
-                      (Obj_get ((([18:3-7], TestTraversable), (Lvar ([18:3-7], $foo))), (([18:9-10], (function(Traversable<int> $i): void)), (Id ([18:9-10], "i"))), OG_nullthrows, false))),
+                     (([18:3-10], (function(Traversable<int> $i): void)), [18:3-10],
+                      (Obj_get ((([18:3-7], TestTraversable), [18:3-7], (Lvar ([18:3-7], $foo))), (
+                         ([18:9-10], (function(Traversable<int> $i): void)), [18:9-10], (Id ([18:9-10], "i"))), OG_nullthrows, false))),
                      [],
-                     [(([18:11-13], <expr#1> as Traversable<float>), (Hole ((([18:11-13], Traversable<float>), (Lvar ([18:11-13], $i))), (<expr#1> as Traversable<float>), (Traversable<int>), Typing)))
-                       ],
+                     [(([18:11-13], <expr#1> as Traversable<float>), [18:11-13],
+                       (Hole ((([18:11-13], Traversable<float>), [18:11-13], (Lvar ([18:11-13], $i))), (<expr#1> as Traversable<float>), (Traversable<int>), Typing)))],
                      None)))))
              ];
            fb_annotation = () };
@@ -122,21 +125,28 @@
          { fb_ast =
            [([25:3-69],
              (Expr
-                (([25:3-68], void),
-                 (Call ((([25:3-4], (function(Traversable<int> $i): void)), (Id ([25:3-4], "\\i"))), 
-                    [], [(([25:5-67], Traversable<int>), (Hole ((([25:64-66], Traversable<float>), (Lvar ([25:64-66], $i))), (Traversable<float>), (Traversable<int>), UnsafeCast)))], None)))));
+                (([25:3-68], void), [25:3-68],
+                 (Call ((([25:3-4], (function(Traversable<int> $i): void)), [25:3-4], (Id ([25:3-4], "\\i"))), 
+                    [],
+                    [(([25:5-67], Traversable<int>), [25:5-67], (Hole ((([25:64-66], Traversable<float>), [25:64-66], (Lvar ([25:64-66], $i))), (Traversable<float>), (Traversable<int>), UnsafeCast)))
+                      ],
+                    None)))));
              ([27:3-32],
               (Expr
-                 (([27:3-31], TestTraversable),
-                  (Binop ((Eq None), (([27:3-7], TestTraversable), (Lvar ([27:3-7], $foo))),
-                     (([27:10-31], TestTraversable), (New ((([27:14-29], TestTraversable), (CI ([27:14-29], "\\TestTraversable"))), [], [], None, ([27:14-29], _)))))))));
+                 (([27:3-31], TestTraversable), [27:3-31],
+                  (Binop ((Eq None), (([27:3-7], TestTraversable), [27:3-7], (Lvar ([27:3-7], $foo))),
+                     (([27:10-31], TestTraversable), [27:10-31], (New ((([27:14-29], TestTraversable), (CI ([27:14-29], "\\TestTraversable"))), [], [], None, ([27:14-29], _)))))))));
              ([30:3-75],
               (Expr
-                 (([30:3-74], void),
+                 (([30:3-74], void), [30:3-74],
                   (Call (
-                     (([30:3-10], (function(Traversable<int> $i): void)),
-                      (Obj_get ((([30:3-7], TestTraversable), (Lvar ([30:3-7], $foo))), (([30:9-10], (function(Traversable<int> $i): void)), (Id ([30:9-10], "i"))), OG_nullthrows, false))),
-                     [], [(([30:11-73], Traversable<int>), (Hole ((([30:70-72], Traversable<float>), (Lvar ([30:70-72], $i))), (Traversable<float>), (Traversable<int>), UnsafeCast)))], None)))))
+                     (([30:3-10], (function(Traversable<int> $i): void)), [30:3-10],
+                      (Obj_get ((([30:3-7], TestTraversable), [30:3-7], (Lvar ([30:3-7], $foo))), (
+                         ([30:9-10], (function(Traversable<int> $i): void)), [30:9-10], (Id ([30:9-10], "i"))), OG_nullthrows, false))),
+                     [],
+                     [(([30:11-73], Traversable<int>), [30:11-73],
+                       (Hole ((([30:70-72], Traversable<float>), [30:70-72], (Lvar ([30:70-72], $i))), (Traversable<float>), (Traversable<int>), UnsafeCast)))],
+                     None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

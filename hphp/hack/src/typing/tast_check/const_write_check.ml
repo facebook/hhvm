@@ -44,7 +44,7 @@ let check_prop env c pid cty_opt =
         | None ->
           check_static_const_prop (Env.tast_env_as_typing_env env) class_ pid)
 
-let rec check_expr env (_, e) =
+let rec check_expr env (_, _, e) =
   match e with
   | Class_get (((_, cty), _), CGstring pid, _) ->
     let (env, cty) = Env.expand_type env cty in
@@ -67,7 +67,7 @@ let rec check_expr env (_, e) =
         Typing_set.iter check_class upper_bounds
       | _ -> ()
     end
-  | Obj_get (((_, cty), _), (_, Id id), _, _) ->
+  | Obj_get (((_, cty), _, _), (_, _, Id id), _, _) ->
     let (env, cty) = Env.expand_type env cty in
     begin
       match get_node cty with
@@ -89,11 +89,11 @@ let rec check_expr env (_, e) =
         Typing_set.iter check_class upper_bounds
       | _ -> ()
     end
-  | Call ((_, Id (_, f)), _, el, None)
+  | Call ((_, _, Id (_, f)), _, el, None)
     when String.equal f SN.PseudoFunctions.unset ->
     let rec check_unset_exp e =
       match e with
-      | (_, Array_get (e, Some _)) -> check_unset_exp e
+      | (_, _, Array_get (e, Some _)) -> check_unset_exp e
       | _ -> check_expr (Env.set_val_kind env Typing_defs.Lval) e
     in
     List.iter el ~f:check_unset_exp

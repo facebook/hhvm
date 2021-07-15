@@ -11,7 +11,7 @@ open Hh_prelude
 open Aast
 
 let id_if_string expr : 'a option =
-  let (pos, expr_) = expr in
+  let (pos, _, expr_) = expr in
   match expr_ with
   | String s -> Some (pos, s)
   | _ -> None
@@ -40,12 +40,12 @@ let handler =
       check_duplicates field_names
 
     (* Ban duplicate fields in instantiations: Foo['x' => 1, 'x' => 2]; *)
-    method! at_expr env (pos, e) =
+    method! at_expr env (ty, pos, e) =
       match e with
       | Aast.Record (_, fields) ->
         let field_names =
           List.map fields ~f:(fun (id, _) -> id_if_string id) |> List.filter_opt
         in
         check_duplicates field_names
-      | _ -> super#at_expr env (pos, e)
+      | _ -> super#at_expr env (ty, pos, e)
   end

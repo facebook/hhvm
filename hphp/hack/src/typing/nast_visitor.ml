@@ -67,7 +67,7 @@ class virtual iter =
 
     method! on_func_body env fb =
       match fb.fb_ast with
-      | [(_, If (((_, Id (_, _)) as id), then_stmt, else_stmt))] ->
+      | [(_, If (((_, _, Id (_, _)) as id), then_stmt, else_stmt))] ->
         super#on_expr env id;
         self#on_block env then_stmt;
         self#on_block env else_stmt
@@ -75,9 +75,9 @@ class virtual iter =
 
     method! on_expr env e =
       match e with
-      | (_, Call (e1, ta, el, unpacked_element)) ->
+      | (_, _, Call (e1, ta, el, unpacked_element)) ->
         self#on_Call env e1 ta el unpacked_element
-      | (_, Binop (Ast_defs.Eq None, e1, rhs)) ->
+      | (_, _, Binop (Ast_defs.Eq None, e1, rhs)) ->
         self#on_Binop env (Ast_defs.Eq None) e1 rhs
       | _ -> super#on_expr env e
   end

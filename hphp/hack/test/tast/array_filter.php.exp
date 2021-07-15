@@ -45,54 +45,54 @@
         { fb_ast =
           [([11:3-52],
             (Expr
-               (([11:3-51], Container<?string>),
-                (Binop ((Eq None), (([11:3-14], Container<?string>), (Lvar ([11:3-14], $unresolved))),
-                   (([11:17-51], Container<?string>),
-                    (Eif ((([11:17-19], bool), (Lvar ([11:17-19], $b))), (Some (
-                       ([11:22-32], Container<?string>), (Lvar ([11:22-32], $container)))), (
-                       ([11:35-51], KeyedContainer<int, ?string>), (Lvar ([11:35-51], $keyed_container))))))
+               (([11:3-51], Container<?string>), [11:3-51],
+                (Binop ((Eq None), (([11:3-14], Container<?string>), [11:3-14], (Lvar ([11:3-14], $unresolved))),
+                   (([11:17-51], Container<?string>), [11:17-51],
+                    (Eif ((([11:17-19], bool), [11:17-19], (Lvar ([11:17-19], $b))), (Some (
+                       ([11:22-32], Container<?string>), [11:22-32], (Lvar ([11:22-32], $container)))), (
+                       ([11:35-51], KeyedContainer<int, ?string>), [11:35-51], (Lvar ([11:35-51], $keyed_container))))))
                    )))));
             ([13:3-32],
              (Expr
-                (([13:3-31], dict<arraykey, (_ & nonnull)>),
-                 (Call ((([13:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback=_): dict<arraykey, (_ & nonnull)>)), (Id ([13:3-15], "\\array_filter"))),
+                (([13:3-31], dict<arraykey, (_ & nonnull)>), [13:3-31],
+                 (Call ((([13:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback=_): dict<arraykey, (_ & nonnull)>)), [13:3-15], (Id ([13:3-15], "\\array_filter"))),
                     [((_), ([13:3-15], (Happly (([Pos.none], "_"), []))))], 
-                    [(([13:16-30], vec_or_dict<arraykey, _>), (Lvar ([13:16-30], $untyped_array)))], None)))));
+                    [(([13:16-30], vec_or_dict<arraykey, _>), [13:16-30], (Lvar ([13:16-30], $untyped_array)))], None)))));
             ([14:3-31],
              (Expr
-                (([14:3-30], dict<int, string>),
-                 (Call ((([14:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<int, string>)), (Id ([14:3-15], "\\array_filter"))),
+                (([14:3-30], dict<int, string>), [14:3-30],
+                 (Call ((([14:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<int, string>)), [14:3-15], (Id ([14:3-15], "\\array_filter"))),
                     [((?string), ([14:3-15], (Happly (([Pos.none], "_"), []))))], 
-                    [(([14:16-29], vec<?string>), (Lvar ([14:16-29], $vector_array)))], None)))));
+                    [(([14:16-29], vec<?string>), [14:16-29], (Lvar ([14:16-29], $vector_array)))], None)))));
             ([15:3-28],
              (Expr
-                (([15:3-27], dict<arraykey, string>),
-                 (Call ((([15:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<arraykey, string>)), (Id ([15:3-15], "\\array_filter"))),
+                (([15:3-27], dict<arraykey, string>), [15:3-27],
+                 (Call ((([15:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<arraykey, string>)), [15:3-15], (Id ([15:3-15], "\\array_filter"))),
                     [((?string), ([15:3-15], (Happly (([Pos.none], "_"), []))))], 
-                    [(([15:16-26], Container<?string>), (Lvar ([15:16-26], $container)))], None)))));
+                    [(([15:16-26], Container<?string>), [15:16-26], (Lvar ([15:16-26], $container)))], None)))));
             ([16:3-34],
              (Expr
-                (([16:3-33], dict<int, string>),
-                 (Call ((([16:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<int, string>)), (Id ([16:3-15], "\\array_filter"))),
+                (([16:3-33], dict<int, string>), [16:3-33],
+                 (Call ((([16:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<int, string>)), [16:3-15], (Id ([16:3-15], "\\array_filter"))),
                     [((?string), ([16:3-15], (Happly (([Pos.none], "_"), []))))], 
-                    [(([16:16-32], KeyedContainer<int, ?string>), (Lvar ([16:16-32], $keyed_container)))], None)))));
+                    [(([16:16-32], KeyedContainer<int, ?string>), [16:16-32], (Lvar ([16:16-32], $keyed_container)))], None)))));
             ([17:3-26],
              (Expr
-                (([17:3-25], _),
-                 (Call ((([17:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback=_): _)), (Id ([17:3-15], "\\array_filter"))),
+                (([17:3-25], _), [17:3-25],
+                 (Call ((([17:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback=_): _)), [17:3-15], (Id ([17:3-15], "\\array_filter"))),
                     [((_), ([17:3-15], (Happly (([Pos.none], "_"), []))))], 
-                    [(([17:16-24], _), (Lvar ([17:16-24], $untyped)))], None)))));
+                    [(([17:16-24], _), [17:16-24], (Lvar ([17:16-24], $untyped)))], None)))));
             ([18:3-29],
              (Expr
-                (([18:3-28], dict<arraykey, string>),
-                 (Call ((([18:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<arraykey, string>)), (Id ([18:3-15], "\\array_filter"))),
+                (([18:3-28], dict<arraykey, string>), [18:3-28],
+                 (Call ((([18:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<arraykey, string>)), [18:3-15], (Id ([18:3-15], "\\array_filter"))),
                     [((?string), ([18:3-15], (Happly (([Pos.none], "_"), []))))], 
-                    [(([18:16-27], Container<?string>), (Lvar ([18:16-27], $unresolved)))], None)))));
+                    [(([18:16-27], Container<?string>), [18:16-27], (Lvar ([18:16-27], $unresolved)))], None)))));
             ([20:3-36],
              (Expr
-                (([20:3-35], (function(?string $x): bool)),
-                 (Binop ((Eq None), (([20:3-5], (function(?string $x): bool)), (Lvar ([20:3-5], $f))),
-                    (([20:8-35], (function(?string $x): bool)),
+                (([20:3-35], (function(?string $x): bool)), [20:3-35],
+                 (Binop ((Eq None), (([20:3-5], (function(?string $x): bool)), [20:3-5], (Lvar ([20:3-5], $f))),
+                    (([20:8-35], (function(?string $x): bool)), [20:8-35],
                      (Lfun (
                         { f_span = [20:8-35]; f_readonly_this = None; 
                           f_annotation = (); f_readonly_ret = None; f_ret = ((bool), (Some ([20:22-26], (Hprim Tbool)))); 
@@ -106,47 +106,50 @@
                              param_callconv = None; param_user_attributes = []; 
                              param_visibility = None }
                             ];
-                          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([20:31-35], (Return (Some (([20:31-35], bool), True))))]; fb_annotation = () }; 
+                          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([20:31-35], (Return (Some (([20:31-35], bool), [20:31-35], True))))]; fb_annotation = () }; 
                           f_fun_kind = FSync; f_user_attributes = []; 
                           f_external = false; f_doc_comment = None },
                         [])))
                     )))));
             ([22:3-36],
              (Expr
-                (([22:3-35], dict<arraykey, _>),
-                 (Call ((([22:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback=_): dict<arraykey, _>)), (Id ([22:3-15], "\\array_filter"))),
+                (([22:3-35], dict<arraykey, _>), [22:3-35],
+                 (Call ((([22:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback=_): dict<arraykey, _>)), [22:3-15], (Id ([22:3-15], "\\array_filter"))),
                     [((_), ([22:3-15], (Happly (([Pos.none], "_"), []))))],
-                    [(([22:16-30], vec_or_dict<arraykey, _>), (Lvar ([22:16-30], $untyped_array))); (([22:32-34], (function(?string $x): bool)), (Lvar ([22:32-34], $f)))], None)))));
+                    [(([22:16-30], vec_or_dict<arraykey, _>), [22:16-30], (Lvar ([22:16-30], $untyped_array))); (([22:32-34], (function(?string $x): bool)), [22:32-34], (Lvar ([22:32-34], $f)))],
+                    None)))));
             ([23:3-35],
              (Expr
-                (([23:3-34], dict<int, ?string>),
-                 (Call ((([23:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<int, ?string>)), (Id ([23:3-15], "\\array_filter"))),
+                (([23:3-34], dict<int, ?string>), [23:3-34],
+                 (Call ((([23:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<int, ?string>)), [23:3-15], (Id ([23:3-15], "\\array_filter"))),
                     [((?string), ([23:3-15], (Happly (([Pos.none], "_"), []))))],
-                    [(([23:16-29], vec<?string>), (Lvar ([23:16-29], $vector_array))); (([23:31-33], (function(?string $x): bool)), (Lvar ([23:31-33], $f)))], None)))));
+                    [(([23:16-29], vec<?string>), [23:16-29], (Lvar ([23:16-29], $vector_array))); (([23:31-33], (function(?string $x): bool)), [23:31-33], (Lvar ([23:31-33], $f)))], None)))));
             ([24:3-32],
              (Expr
-                (([24:3-31], dict<arraykey, ?string>),
-                 (Call ((([24:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<arraykey, ?string>)), (Id ([24:3-15], "\\array_filter"))),
+                (([24:3-31], dict<arraykey, ?string>), [24:3-31],
+                 (Call ((([24:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<arraykey, ?string>)), [24:3-15], (Id ([24:3-15], "\\array_filter"))),
                     [((?string), ([24:3-15], (Happly (([Pos.none], "_"), []))))],
-                    [(([24:16-26], Container<?string>), (Lvar ([24:16-26], $container))); (([24:28-30], (function(?string $x): bool)), (Lvar ([24:28-30], $f)))], None)))));
+                    [(([24:16-26], Container<?string>), [24:16-26], (Lvar ([24:16-26], $container))); (([24:28-30], (function(?string $x): bool)), [24:28-30], (Lvar ([24:28-30], $f)))], None)))));
             ([25:3-38],
              (Expr
-                (([25:3-37], dict<int, ?string>),
-                 (Call ((([25:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<int, ?string>)), (Id ([25:3-15], "\\array_filter"))),
+                (([25:3-37], dict<int, ?string>), [25:3-37],
+                 (Call ((([25:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<int, ?string>)), [25:3-15], (Id ([25:3-15], "\\array_filter"))),
                     [((?string), ([25:3-15], (Happly (([Pos.none], "_"), []))))],
-                    [(([25:16-32], KeyedContainer<int, ?string>), (Lvar ([25:16-32], $keyed_container))); (([25:34-36], (function(?string $x): bool)), (Lvar ([25:34-36], $f)))], None)))));
+                    [(([25:16-32], KeyedContainer<int, ?string>), [25:16-32], (Lvar ([25:16-32], $keyed_container))); (
+                      ([25:34-36], (function(?string $x): bool)), [25:34-36], (Lvar ([25:34-36], $f)))],
+                    None)))));
             ([26:3-30],
              (Expr
-                (([26:3-29], _),
-                 (Call ((([26:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback=_): _)), (Id ([26:3-15], "\\array_filter"))),
-                    [((_), ([26:3-15], (Happly (([Pos.none], "_"), []))))], 
-                    [(([26:16-24], _), (Lvar ([26:16-24], $untyped))); (([26:26-28], (function(?string $x): bool)), (Lvar ([26:26-28], $f)))], None)))));
+                (([26:3-29], _), [26:3-29],
+                 (Call ((([26:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback=_): _)), [26:3-15], (Id ([26:3-15], "\\array_filter"))),
+                    [((_), ([26:3-15], (Happly (([Pos.none], "_"), []))))],
+                    [(([26:16-24], _), [26:16-24], (Lvar ([26:16-24], $untyped))); (([26:26-28], (function(?string $x): bool)), [26:26-28], (Lvar ([26:26-28], $f)))], None)))));
             ([27:3-33],
              (Expr
-                (([27:3-32], dict<arraykey, ?string>),
-                 (Call ((([27:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<arraykey, ?string>)), (Id ([27:3-15], "\\array_filter"))),
+                (([27:3-32], dict<arraykey, ?string>), [27:3-32],
+                 (Call ((([27:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<arraykey, ?string>)), [27:3-15], (Id ([27:3-15], "\\array_filter"))),
                     [((?string), ([27:3-15], (Happly (([Pos.none], "_"), []))))],
-                    [(([27:16-27], Container<?string>), (Lvar ([27:16-27], $unresolved))); (([27:29-31], (function(?string $x): bool)), (Lvar ([27:29-31], $f)))], None)))))
+                    [(([27:16-27], Container<?string>), [27:16-27], (Lvar ([27:16-27], $unresolved))); (([27:29-31], (function(?string $x): bool)), [27:29-31], (Lvar ([27:29-31], $f)))], None)))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

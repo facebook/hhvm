@@ -283,73 +283,76 @@
          { fb_ast =
            [([26:3-19],
              (Expr
-                (([26:3-18], void),
-                 (Call ((([26:3-11], (function(int $x, int $xs...): void)), (Id ([26:3-11], "\\unpack_a"))), 
-                    [], [], (Some (([26:15-17], Pair<int, float>), (Hole ((([26:15-17], Pair<int, float>), (Lvar ([26:15-17], $a))), (Pair<int, float>), (Pair<int, int>), Typing)))))))));
+                (([26:3-18], void), [26:3-18],
+                 (Call ((([26:3-11], (function(int $x, int $xs...): void)), [26:3-11], (Id ([26:3-11], "\\unpack_a"))), 
+                    [], [],
+                    (Some (([26:15-17], Pair<int, float>), [26:15-17], (Hole ((([26:15-17], Pair<int, float>), [26:15-17], (Lvar ([26:15-17], $a))), (Pair<int, float>), (Pair<int, int>), Typing)))))))));
              ([28:3-19],
               (Expr
-                 (([28:3-18], void),
-                  (Call ((([28:3-11], (function(int $x, int $xs...): void)), (Id ([28:3-11], "\\unpack_a"))), 
+                 (([28:3-18], void), [28:3-18],
+                  (Call ((([28:3-11], (function(int $x, int $xs...): void)), [28:3-11], (Id ([28:3-11], "\\unpack_a"))), 
                      [], [],
-                     (Some (([28:15-17], (int, float, int, float, int, float)),
-                            (Hole ((([28:15-17], (int, float, int, float, int, float)), (Lvar ([28:15-17], $b))), ((int, float, int, float, int, float)), ((int, int, int, int, int, int)), Typing))))
+                     (Some (([28:15-17], (int, float, int, float, int, float)), [28:15-17],
+                            (Hole ((([28:15-17], (int, float, int, float, int, float)), [28:15-17], (Lvar ([28:15-17], $b))), ((int, float, int, float, int, float)), ((int, int, int, int, int, int)),
+                               Typing))))
                      )))));
              ([30:3-19],
               (Expr
-                 (([30:3-18], void),
-                  (Call ((([30:3-11], (function(float $x, vec<int> $y, int $ys...): void)), (Id ([30:3-11], "\\unpack_b"))), 
+                 (([30:3-18], void), [30:3-18],
+                  (Call ((([30:3-11], (function(float $x, vec<int> $y, int $ys...): void)), [30:3-11], (Id ([30:3-11], "\\unpack_b"))), 
                      [], [],
-                     (Some (([30:15-17], (float, vec<float>, float)),
-                            (Hole ((([30:15-17], (float, vec<float>, float)), (Lvar ([30:15-17], $c))), ((float, vec<float>, float)), ((float, vec<int>, int)), Typing))))
+                     (Some (([30:15-17], (float, vec<float>, float)), [30:15-17],
+                            (Hole ((([30:15-17], (float, vec<float>, float)), [30:15-17], (Lvar ([30:15-17], $c))), ((float, vec<float>, float)), ((float, vec<int>, int)), Typing))))
                      )))));
              ([32:3-19],
               (Expr
-                 (([32:3-18], void),
-                  (Call ((([32:3-11], (function(float $x, vec<int> $y, int $ys...): void)), (Id ([32:3-11], "\\unpack_b"))), 
+                 (([32:3-18], void), [32:3-18],
+                  (Call ((([32:3-11], (function(float $x, vec<int> $y, int $ys...): void)), [32:3-11], (Id ([32:3-11], "\\unpack_b"))), 
                      [], [],
-                     (Some (([32:15-17], (float, vec<int>, float, int)),
-                            (Hole ((([32:15-17], (float, vec<int>, float, int)), (Lvar ([32:15-17], $d))), ((float, vec<int>, float, int)), ((float, vec<int>, int, int)), Typing))))
+                     (Some (([32:15-17], (float, vec<int>, float, int)), [32:15-17],
+                            (Hole ((([32:15-17], (float, vec<int>, float, int)), [32:15-17], (Lvar ([32:15-17], $d))), ((float, vec<int>, float, int)), ((float, vec<int>, int, int)), Typing))))
                      )))));
              ([34:3-19],
               (Expr
-                 (([34:3-18], void),
-                  (Call ((([34:3-11], (function(float $x, vec<int> $y, int $ys...): void)), (Id ([34:3-11], "\\unpack_b"))), 
+                 (([34:3-18], void), [34:3-18],
+                  (Call ((([34:3-11], (function(float $x, vec<int> $y, int $ys...): void)), [34:3-11], (Id ([34:3-11], "\\unpack_b"))), 
                      [], [],
-                     (Some (([34:15-17], (float, int, float, float)),
-                            (Hole ((([34:15-17], (float, int, float, float)), (Lvar ([34:15-17], $e))), ((float, int, float, float)), ((float, vec<int>, int, int)), Typing))))
+                     (Some (([34:15-17], (float, int, float, float)), [34:15-17],
+                            (Hole ((([34:15-17], (float, int, float, float)), [34:15-17], (Lvar ([34:15-17], $e))), ((float, int, float, float)), ((float, vec<int>, int, int)), Typing))))
                      )))));
              ([36:3-19],
               (Expr
-                 (([36:3-18], void),
-                  (Call ((([36:3-11], (function(float $x, vec<int> $y, int $ys...): void)), (Id ([36:3-11], "\\unpack_b"))), 
+                 (([36:3-18], void), [36:3-18],
+                  (Call ((([36:3-11], (function(float $x, vec<int> $y, int $ys...): void)), [36:3-11], (Id ([36:3-11], "\\unpack_b"))), 
                      [], [],
-                     (Some (([36:15-17], shape('a' => float, 'b' => int, 'c' => int)),
-                            (Hole ((([36:15-17], shape('a' => float, 'b' => int, 'c' => int)), (Lvar ([36:15-17], $f))), (shape('a' => float, 'b' => int, 'c' => int)), ({suggest:nothing}), Typing))))
+                     (Some (([36:15-17], shape('a' => float, 'b' => int, 'c' => int)), [36:15-17],
+                            (Hole ((([36:15-17], shape('a' => float, 'b' => int, 'c' => int)), [36:15-17], (Lvar ([36:15-17], $f))), (shape('a' => float, 'b' => int, 'c' => int)),
+                               ({suggest:nothing}), Typing))))
                      )))));
              ([38:3-19],
               (Expr
-                 (([38:3-18], void),
-                  (Call ((([38:3-11], (function(float $x, (float, int) $y, int $ys...): void)), (Id ([38:3-11], "\\unpack_c"))), 
+                 (([38:3-18], void), [38:3-18],
+                  (Call ((([38:3-11], (function(float $x, (float, int) $y, int $ys...): void)), [38:3-11], (Id ([38:3-11], "\\unpack_c"))), 
                      [], [],
-                     (Some (([38:15-17], (float, (float, float), int)),
-                            (Hole ((([38:15-17], (float, (float, float), int)), (Lvar ([38:15-17], $g))), ((float, (float, float), int)), ((float, (float, int), int)), Typing))))
+                     (Some (([38:15-17], (float, (float, float), int)), [38:15-17],
+                            (Hole ((([38:15-17], (float, (float, float), int)), [38:15-17], (Lvar ([38:15-17], $g))), ((float, (float, float), int)), ((float, (float, int), int)), Typing))))
                      )))));
              ([40:3-19],
               (Expr
-                 (([40:3-18], void),
-                  (Call ((([40:3-11], (function(int $x, shape('u' => bool, 'v' => bool) $y): void)), (Id ([40:3-11], "\\unpack_d"))), 
+                 (([40:3-18], void), [40:3-18],
+                  (Call ((([40:3-11], (function(int $x, shape('u' => bool, 'v' => bool) $y): void)), [40:3-11], (Id ([40:3-11], "\\unpack_d"))), 
                      [], [],
-                     (Some (([40:15-17], (int, shape('u' => float, 'v' => int))),
-                            (Hole ((([40:15-17], (int, shape('u' => float, 'v' => int))), (Lvar ([40:15-17], $h))), ((int, shape('u' => float, 'v' => int))), ((int, shape('u' => bool, 'v' => bool))),
-                               Typing))))
+                     (Some (([40:15-17], (int, shape('u' => float, 'v' => int))), [40:15-17],
+                            (Hole ((([40:15-17], (int, shape('u' => float, 'v' => int))), [40:15-17], (Lvar ([40:15-17], $h))), ((int, shape('u' => float, 'v' => int))),
+                               ((int, shape('u' => bool, 'v' => bool))), Typing))))
                      )))));
              ([42:3-19],
               (Expr
-                 (([42:3-18], void),
-                  (Call ((([42:3-11], (function(float $x, (function(int, float): bool) $f, int $y): void)), (Id ([42:3-11], "\\unpack_e"))), 
+                 (([42:3-18], void), [42:3-18],
+                  (Call ((([42:3-11], (function(float $x, (function(int, float): bool) $f, int $y): void)), [42:3-11], (Id ([42:3-11], "\\unpack_e"))), 
                      [], [],
-                     (Some (([42:15-17], (float, (function(float, int): int), int)),
-                            (Hole ((([42:15-17], (float, (function(float, int): int), int)), (Lvar ([42:15-17], $i))), ((float, (function(float, int): int), int)),
+                     (Some (([42:15-17], (float, (function(float, int): int), int)), [42:15-17],
+                            (Hole ((([42:15-17], (float, (function(float, int): int), int)), [42:15-17], (Lvar ([42:15-17], $i))), ((float, (function(float, int): int), int)),
                                ((float, (function(int, float): bool), int)), Typing))))
                      )))))
              ];

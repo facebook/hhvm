@@ -192,7 +192,7 @@ class level_getter fixme_map =
        * typed subexpression. The count is then always incremented.
        *)
       let (pmap, cmap) = super#on_expr env expr in
-      let ((pos, ty), _) = expr in
+      let ((pos, ty), _, _) = expr in
       let (_env, lvl) = level_of_type env fixme_map (pos, ty) in
       let should_update_pmap =
         match lvl with

@@ -28,7 +28,7 @@ let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_expr env (p, e) =
+    method! at_expr env (p, _, e) =
       match e with
       | Await _ when is_sync env -> Errors.await_in_sync_function p
       | _ -> ()

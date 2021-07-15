@@ -133,7 +133,7 @@ let expand_type_and_narrow_to_int env p ty =
     p
     ty
 
-let hole_on_err (((pos, _), _) as expr) err_opt =
+let hole_on_err (((pos, _), _, _) as expr) err_opt =
   Option.value_map err_opt ~default:expr ~f:(fun (ty_have, ty_expect) ->
       Tast.make_typed_expr pos ty_have
       @@ Aast.(Hole (expr, ty_have, ty_expect, Typing)))

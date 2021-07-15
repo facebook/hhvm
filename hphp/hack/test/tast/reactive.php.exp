@@ -28,7 +28,7 @@ Errors:
         { fb_ast =
           [([5:3-25],
             (Throw
-               (([5:9-24], Exception),
+               (([5:9-24], Exception), [5:9-24],
                 (New ((([5:13-22], Exception), (CI ([5:13-22], "\\Exception"))), [], [], None, ([5:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
             ];
           fb_annotation = () };

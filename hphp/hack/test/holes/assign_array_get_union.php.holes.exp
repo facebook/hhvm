@@ -25,9 +25,9 @@
         { fb_ast =
           [([5:3-15],
             (Expr
-               (([5:3-14], (int | string)),
-                (Binop ((Eq None), (([5:3-9], (int | string)), (Array_get ((([5:3-6], Vector<(int | bool)>), (Lvar ([5:3-6], $xs))), (Some (([5:7-8], int), (Int "0")))))),
-                   (([5:12-14], (int | string)), (Hole ((([5:12-14], (int | string)), (Lvar ([5:12-14], $x))), ((int | string)), ((int | bool)), Typing))))))))
+               (([5:3-14], (int | string)), [5:3-14],
+                (Binop ((Eq None), (([5:3-9], (int | string)), [5:3-9], (Array_get ((([5:3-6], Vector<(int | bool)>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some (([5:7-8], int), [5:7-8], (Int "0")))))),
+                   (([5:12-14], (int | string)), [5:12-14], (Hole ((([5:12-14], (int | string)), [5:12-14], (Lvar ([5:12-14], $x))), ((int | string)), ((int | bool)), Typing))))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

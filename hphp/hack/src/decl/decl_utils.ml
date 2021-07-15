@@ -82,8 +82,8 @@ let infer_const expr_ =
   | Int _ -> Some Tint
   | Float _ -> Some Tfloat
   | Null -> Some Tnull
-  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, Int _)) -> Some Tint
-  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, Float _)) -> Some Tfloat
+  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, _, Int _)) -> Some Tint
+  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, _, Float _)) -> Some Tfloat
   | _ ->
     (* We can't infer the type of everything here. Notably, if you
      * define a const in terms of another const, we need an annotation,

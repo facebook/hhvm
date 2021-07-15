@@ -2406,7 +2406,7 @@ fn print_expr<W: Write>(
     ctx: &mut Context,
     w: &mut W,
     env: &ExprEnv,
-    ast::Expr(_, expr): &ast::Expr,
+    ast::Expr(_, _, expr): &ast::Expr,
 ) -> Result<(), W::Error> {
     fn adjust_id<'a>(env: &ExprEnv, id: &'a str) -> Cow<'a, str> {
         let s: Cow<'a, str> = match env.codegen_env {
@@ -2483,7 +2483,7 @@ fn print_expr<W: Write>(
     ) -> Result<Option<()>, W::Error> {
         match e_.as_class_const() {
             Some((
-                ast::ClassId(_, ast::ClassId_::CIexpr(ast::Expr(_, ast::Expr_::Id(id)))),
+                ast::ClassId(_, ast::ClassId_::CIexpr(ast::Expr(_, _, ast::Expr_::Id(id)))),
                 (_, s2),
             )) if is_class(&s2) && !(is_self(&id.1) || is_parent(&id.1) || is_static(&id.1)) => {
                 Ok(Some({
@@ -2599,7 +2599,7 @@ fn print_expr<W: Write>(
             match cid.1.as_ciexpr() {
                 Some(ci_expr) => {
                     w.write("new ")?;
-                    match ci_expr.1.as_id() {
+                    match ci_expr.2.as_id() {
                         Some(ast_defs::Id(_, cname)) => w.write(lstrip(
                             &adjust_id(
                                 env,
@@ -2665,7 +2665,7 @@ fn print_expr<W: Write>(
                 handle_possible_colon_colon_class_expr(ctx, w, env, false, expr)?.map_or_else(
                     || {
                         let s2 = &(cc.1).1;
-                        match e1.1.as_id() {
+                        match e1.2.as_id() {
                             Some(ast_defs::Id(_, s1)) => {
                                 let s1 =
                                     get_class_name_from_id(ctx, env.codegen_env, true, true, s1);
@@ -2714,7 +2714,7 @@ fn print_expr<W: Write>(
             print_expr(ctx, w, env, &ag.0)?;
             square(w, |w| {
                 option(w, &ag.1, |w, e: &ast::Expr| {
-                    handle_possible_colon_colon_class_expr(ctx, w, env, true, &e.1)
+                    handle_possible_colon_colon_class_expr(ctx, w, env, true, &e.2)
                         .transpose()
                         .unwrap_or_else(|| print_expr(ctx, w, env, e))
                 })
@@ -2877,7 +2877,7 @@ fn print_xml<W: Write>(
         Err(syntax_error(w))
     } else {
         match (&es[0], &es[1]) {
-            (E(_, E_::Shape(attrs)), E(_, E_::Varray(children))) => Ok((attrs, &children.1)),
+            (E(_, _, E_::Shape(attrs)), E(_, _, E_::Varray(children))) => Ok((attrs, &children.1)),
             _ => Err(syntax_error(w)),
         }
     }?;

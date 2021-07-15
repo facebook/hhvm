@@ -105,11 +105,11 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
         match e {
             ObjGet(x) if !x.as_ref().3 => {
                 let (receiver_e, prop_e) = (&x.0, &x.1);
-                match &receiver_e.1 {
+                match &receiver_e.2 {
                     Lvar(id) if id.name() == "$this" => {}
                     _ => receiver_e.recurse(env, self.object())?,
                 }
-                match &prop_e.1 {
+                match &prop_e.2 {
                     Lvar(id) => self.add_local(id.name()),
                     _ => prop_e.recurse(env, self.object())?,
                 }
@@ -118,7 +118,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
 
             Binop(x) => {
                 let (binop, e1, e2) = (&x.0, &x.1, &x.2);
-                match (binop, &e2.1) {
+                match (binop, &e2.2) {
                     (Bop::Eq(_), Await(_)) | (Bop::Eq(_), Yield(_)) => {
                         // Visit e2 before e1. The ordering of declvars in async
                         // expressions matters to HHVM. See D5674623.
@@ -163,18 +163,18 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
             }
             Call(x) => {
                 let (func_e, pos_args, unpacked_arg) = (&x.0, &x.2, &x.3);
-                if let Id(x) = &func_e.1 {
+                if let Id(x) = &func_e.2 {
                     let call_name = &x.1;
                     if call_name == emitter_special_functions::SET_FRAME_METADATA {
                         self.add_local("$86metadata");
                     }
                 }
-                let on_arg = |self_: &mut Self, env: &mut (), x: &Expr| match &x.1 {
+                let on_arg = |self_: &mut Self, env: &mut (), x: &Expr| match &x.2 {
                     // Only add $this to locals if it's bare
                     Lvar(id) if &(id.1).1 == "$this" => Ok(()),
                     _ => self_.visit_expr(env, x),
                 };
-                match &func_e.1 {
+                match &func_e.2 {
                     ClassGet(x) if !x.as_ref().2 => {
                         let (id, prop) = (&x.0, &x.1);
                         self.on_class_get(id, prop, true)?
@@ -192,7 +192,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
             New(x) => {
                 let (exprs1, expr2) = (&x.2, &x.3);
 
-                let add_bare_expr = |self_: &mut Self, env: &mut (), expr: &Expr| match &expr.1 {
+                let add_bare_expr = |self_: &mut Self, env: &mut (), expr: &Expr| match &expr.2 {
                     Lvar(x) if &(x.1).1 == "$this" => Ok(()),
                     _ => self_.visit_expr(env, expr),
                 };

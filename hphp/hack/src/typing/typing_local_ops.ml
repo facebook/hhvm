@@ -140,19 +140,19 @@ let rec is_byval_collection_or_string_or_any_type env ty =
   in
   List.for_all tl ~f:check
 
-let mutating_this_in_ctor env e : bool =
-  match snd e with
+let mutating_this_in_ctor env (_, _, e) : bool =
+  match e with
   | Aast.This when Typing_env.fun_is_constructor env -> true
   | _ -> false
 
 let rec is_valid_mutable_subscript_expression_target env v =
   let open Aast in
   match v with
-  | ((_, ty), Lvar _) -> is_byval_collection_or_string_or_any_type env ty
-  | ((_, ty), Array_get (e, _)) ->
+  | ((_, ty), _, Lvar _) -> is_byval_collection_or_string_or_any_type env ty
+  | ((_, ty), _, Array_get (e, _)) ->
     is_byval_collection_or_string_or_any_type env ty
     && is_valid_mutable_subscript_expression_target env e
-  | ((_, ty), Obj_get (e, _, _, _)) ->
+  | ((_, ty), _, Obj_get (e, _, _, _)) ->
     is_byval_collection_or_string_or_any_type env ty
     && ( is_valid_mutable_subscript_expression_target env e
        || mutating_this_in_ctor env e )
@@ -187,11 +187,11 @@ let check_assignment_or_unset_target
       ~required:(Typing_coeffects.pretty env capability_required)
       ~err_code:(Error_codes.Typing.err_code Error_codes.Typing.OpCoeffects)
   in
-  let ((p, _), _) = te1 in
+  let ((p, _), _, expr_) = te1 in
   let open Aast in
-  match snd te1 with
+  match expr_ with
   | Obj_get (e1, _, _, _) when mutating_this_in_ctor env e1 -> ()
-  | Array_get (((_, ty1), _), i)
+  | Array_get (((_, ty1), _, _), i)
     when is_assignment && not (is_valid_append_target env ty1) ->
     let is_append = Option.is_none i in
     let msg_prefix =
@@ -219,14 +219,14 @@ let check_assignment_or_unset_target
 
 (* END logic from Typed AST check in basic_reactivity_check *)
 
-let check_assignment env ((append_pos_opt, _), te_) =
+let check_assignment env ((append_pos_opt, _), _, te_) =
   let open Ast_defs in
   match te_ with
   | Aast.Unop ((Uincr | Udecr | Upincr | Updecr), te1)
   | Aast.Binop (Eq _, te1, _) ->
     let env =
       match te1 with
-      | (_, Aast.Class_get _) ->
+      | (_, _, Aast.Class_get _) ->
         (* Assigning static properties requires specific caps *)
         enforce_local_capability
           Capabilities.(mk accessGlobals)

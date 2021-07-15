@@ -68,25 +68,30 @@
          { fb_ast =
            [([8:38-49],
              (Expr
-                (([8:38-49], dict<string, dynamic>),
+                (([8:38-49], dict<string, dynamic>), [8:38-49],
                  (Binop ((Eq None),
-                    (([8:38-49], dict<string, dynamic>), (Obj_get ((([8:38-49], this), This), (([8:38-49], dict<string, dynamic>), (Id ([8:38-49], "attributes"))), OG_nullthrows, false))),
-                    (([8:38-49], dict<string, dynamic>), (Lvar ([8:38-49], $attributes))))))));
+                    (([8:38-49], dict<string, dynamic>), [8:38-49],
+                     (Obj_get ((([8:38-49], this), [8:38-49], This), (([8:38-49], dict<string, dynamic>), [8:38-49], (Id ([8:38-49], "attributes"))), OG_nullthrows, false))),
+                    (([8:38-49], dict<string, dynamic>), [8:38-49], (Lvar ([8:38-49], $attributes))))))));
              ([9:30-39],
               (Expr
-                 (([9:30-39], vec<dynamic>),
-                  (Binop ((Eq None), (([9:30-39], vec<dynamic>), (Obj_get ((([9:30-39], this), This), (([9:30-39], vec<dynamic>), (Id ([9:30-39], "children"))), OG_nullthrows, false))),
-                     (([9:30-39], vec<dynamic>), (Lvar ([9:30-39], $children))))))));
+                 (([9:30-39], vec<dynamic>), [9:30-39],
+                  (Binop ((Eq None),
+                     (([9:30-39], vec<dynamic>), [9:30-39],
+                      (Obj_get ((([9:30-39], this), [9:30-39], This), (([9:30-39], vec<dynamic>), [9:30-39], (Id ([9:30-39], "children"))), OG_nullthrows, false))),
+                     (([9:30-39], vec<dynamic>), [9:30-39], (Lvar ([9:30-39], $children))))))));
              ([10:21-26],
               (Expr
-                 (([10:21-26], string),
-                  (Binop ((Eq None), (([10:21-26], string), (Obj_get ((([10:21-26], this), This), (([10:21-26], string), (Id ([10:21-26], "file"))), OG_nullthrows, false))),
-                     (([10:21-26], string), (Lvar ([10:21-26], $file))))))));
+                 (([10:21-26], string), [10:21-26],
+                  (Binop ((Eq None),
+                     (([10:21-26], string), [10:21-26], (Obj_get ((([10:21-26], this), [10:21-26], This), (([10:21-26], string), [10:21-26], (Id ([10:21-26], "file"))), OG_nullthrows, false))),
+                     (([10:21-26], string), [10:21-26], (Lvar ([10:21-26], $file))))))));
              ([11:18-23],
               (Expr
-                 (([11:18-23], int),
-                  (Binop ((Eq None), (([11:18-23], int), (Obj_get ((([11:18-23], this), This), (([11:18-23], int), (Id ([11:18-23], "line"))), OG_nullthrows, false))),
-                     (([11:18-23], int), (Lvar ([11:18-23], $line))))))));
+                 (([11:18-23], int), [11:18-23],
+                  (Binop ((Eq None),
+                     (([11:18-23], int), [11:18-23], (Obj_get ((([11:18-23], this), [11:18-23], This), (([11:18-23], int), [11:18-23], (Id ([11:18-23], "line"))), OG_nullthrows, false))),
+                     (([11:18-23], int), [11:18-23], (Lvar ([11:18-23], $line))))))));
              ([Pos.none], Noop)];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -173,25 +178,30 @@
           { fb_ast =
             [([18:38-49],
               (Expr
-                 (([18:38-49], dict<string, dynamic>),
+                 (([18:38-49], dict<string, dynamic>), [18:38-49],
                   (Binop ((Eq None),
-                     (([18:38-49], dict<string, dynamic>), (Obj_get ((([18:38-49], this), This), (([18:38-49], dict<string, dynamic>), (Id ([18:38-49], "attributes"))), OG_nullthrows, false))),
-                     (([18:38-49], dict<string, dynamic>), (Lvar ([18:38-49], $attributes))))))));
+                     (([18:38-49], dict<string, dynamic>), [18:38-49],
+                      (Obj_get ((([18:38-49], this), [18:38-49], This), (([18:38-49], dict<string, dynamic>), [18:38-49], (Id ([18:38-49], "attributes"))), OG_nullthrows, false))),
+                     (([18:38-49], dict<string, dynamic>), [18:38-49], (Lvar ([18:38-49], $attributes))))))));
               ([19:30-39],
                (Expr
-                  (([19:30-39], vec<dynamic>),
-                   (Binop ((Eq None), (([19:30-39], vec<dynamic>), (Obj_get ((([19:30-39], this), This), (([19:30-39], vec<dynamic>), (Id ([19:30-39], "children"))), OG_nullthrows, false))),
-                      (([19:30-39], vec<dynamic>), (Lvar ([19:30-39], $children))))))));
+                  (([19:30-39], vec<dynamic>), [19:30-39],
+                   (Binop ((Eq None),
+                      (([19:30-39], vec<dynamic>), [19:30-39],
+                       (Obj_get ((([19:30-39], this), [19:30-39], This), (([19:30-39], vec<dynamic>), [19:30-39], (Id ([19:30-39], "children"))), OG_nullthrows, false))),
+                      (([19:30-39], vec<dynamic>), [19:30-39], (Lvar ([19:30-39], $children))))))));
               ([20:21-26],
                (Expr
-                  (([20:21-26], string),
-                   (Binop ((Eq None), (([20:21-26], string), (Obj_get ((([20:21-26], this), This), (([20:21-26], string), (Id ([20:21-26], "file"))), OG_nullthrows, false))),
-                      (([20:21-26], string), (Lvar ([20:21-26], $file))))))));
+                  (([20:21-26], string), [20:21-26],
+                   (Binop ((Eq None),
+                      (([20:21-26], string), [20:21-26], (Obj_get ((([20:21-26], this), [20:21-26], This), (([20:21-26], string), [20:21-26], (Id ([20:21-26], "file"))), OG_nullthrows, false))),
+                      (([20:21-26], string), [20:21-26], (Lvar ([20:21-26], $file))))))));
               ([21:18-23],
                (Expr
-                  (([21:18-23], int),
-                   (Binop ((Eq None), (([21:18-23], int), (Obj_get ((([21:18-23], this), This), (([21:18-23], int), (Id ([21:18-23], "line"))), OG_nullthrows, false))),
-                      (([21:18-23], int), (Lvar ([21:18-23], $line))))))));
+                  (([21:18-23], int), [21:18-23],
+                   (Binop ((Eq None),
+                      (([21:18-23], int), [21:18-23], (Obj_get ((([21:18-23], this), [21:18-23], This), (([21:18-23], int), [21:18-23], (Id ([21:18-23], "line"))), OG_nullthrows, false))),
+                      (([21:18-23], int), [21:18-23], (Lvar ([21:18-23], $line))))))));
               ([Pos.none], Noop)];
             fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -229,11 +239,14 @@
          { fb_ast =
            [([27:5-37],
              (Expr
-                (([27:5-36], XhpSpread\:element),
-                 (Binop ((Eq None), (([27:5-10], XhpSpread\:element), (Lvar ([27:5-10], $elem))),
-                    (([27:13-36], XhpSpread\:element),
+                (([27:5-36], XhpSpread\:element), [27:5-36],
+                 (Binop ((Eq None), (([27:5-10], XhpSpread\:element), [27:5-10], (Lvar ([27:5-10], $elem))),
+                    (([27:13-36], XhpSpread\:element), [27:13-36],
                      (Xml (([27:14-21], "\\XhpSpread\\:element"),
-                        [(Xhp_spread (([27:26-32], XhpSpread\:element2), (Hole ((([27:26-32], XhpSpread\:element2), (Lvar ([27:26-32], $props))), (XhpSpread\:element2), (nothing), Typing))))], 
+                        [(Xhp_spread
+                            (([27:26-32], XhpSpread\:element2), [27:26-32],
+                             (Hole ((([27:26-32], XhpSpread\:element2), [27:26-32], (Lvar ([27:26-32], $props))), (XhpSpread\:element2), (nothing), Typing))))
+                          ],
                         [])))
                     )))))
              ];

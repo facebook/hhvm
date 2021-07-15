@@ -111,7 +111,7 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_expr env ((p, ty), _) =
+    method! at_expr env ((p, ty), _, _) =
       try
         let ty = Tast_expand.expand_ty env ~pos:p ty in
         let serialized_ty = Tast_env.ty_to_json env ty in

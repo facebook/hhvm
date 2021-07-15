@@ -69,7 +69,7 @@ fn get_readonlyness(context: &mut Context, expr: &Expr_) -> VariableKind {
         aast::Expr_::ReadonlyExpr(_) => VariableKind::Readonly,
         aast::Expr_::ObjGet(og) => {
             let (obj, _member_name, _null_flavor, _reffiness) = &**og;
-            get_readonlyness(context, &obj.1)
+            get_readonlyness(context, &obj.2)
         }
         aast::Expr_::Lvar(id_orig) => {
             let var_name = local_id::get_name(&id_orig.1);
@@ -93,13 +93,13 @@ fn check_assignment_validity(
     lhs: &Expr,
     rhs: &Expr,
 ) {
-    match &lhs.1 {
+    match &lhs.2 {
         aast::Expr_::Lvar(id_orig) => {
             let var_name = local_id::get_name(&id_orig.1).to_string();
             // TODO(alnash) we need to handle $this separately because the readonlyness
             // comes from the function for this and not by the name
             if var_name != special_idents::THIS {
-                let is_readonly = VariableKind::Readonly == get_readonlyness(context, &rhs.1);
+                let is_readonly = VariableKind::Readonly == get_readonlyness(context, &rhs.2);
                 if context.is_new_local(&var_name) {
                     context.add_local(&var_name, is_readonly);
                 } else if context.is_readonly(&var_name) != is_readonly {
@@ -110,7 +110,7 @@ fn check_assignment_validity(
                 }
             }
         }
-        aast::Expr_::ObjGet(_) => match get_readonlyness(context, &lhs.1) {
+        aast::Expr_::ObjGet(_) => match get_readonlyness(context, &lhs.2) {
             VariableKind::Readonly => {
                 checker.add_error(&pos, syntax_error::assignment_to_readonly);
             }
@@ -164,11 +164,11 @@ impl<'ast> Visitor<'ast> for Checker {
         context: &mut Context,
         p: &aast::Expr<Pos, (), (), ()>,
     ) -> Result<(), ()> {
-        if let aast::Expr_::Binop(x) = &p.1 {
+        if let aast::Expr_::Binop(x) = &p.2 {
             x.recurse(context, self.object())?;
             let (bop, e_lhs, e_rhs) = x.as_ref();
             if let Bop::Eq(None) = bop {
-                check_assignment_validity(context, self, &p.0, e_lhs, e_rhs);
+                check_assignment_validity(context, self, &p.1, e_lhs, e_rhs);
             }
         }
 

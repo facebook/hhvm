@@ -13,10 +13,11 @@
         { fb_ast =
           [([5:3-24],
             (Expr
-               (([5:3-23], keyset<(int | bool)>),
-                (Binop ((Eq None), (([5:3-5], keyset<(int | bool)>), (Lvar ([5:3-5], $x))),
-                   (([5:8-23], keyset<(int | bool)>),
-                    (ValCollection (Keyset, None, [(([5:15-16], int), (Int "1")); (([5:18-22], bool), (Hole ((([5:18-22], bool), True), (bool), (arraykey), Typing)))])))
+               (([5:3-23], keyset<(int | bool)>), [5:3-23],
+                (Binop ((Eq None), (([5:3-5], keyset<(int | bool)>), [5:3-5], (Lvar ([5:3-5], $x))),
+                   (([5:8-23], keyset<(int | bool)>), [5:8-23],
+                    (ValCollection (Keyset, None, [(([5:15-16], int), [5:15-16], (Int "1")); (([5:18-22], bool), [5:18-22], (Hole ((([5:18-22], bool), [5:18-22], True), (bool), (arraykey), Typing)))]
+                       )))
                    )))))
             ];
           fb_annotation = () };

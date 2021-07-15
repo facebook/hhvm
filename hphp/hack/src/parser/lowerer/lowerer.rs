@@ -1023,10 +1023,10 @@ where
     fn process_readonly_expr(mut e: ast::Expr) -> ast::Expr_ {
         use aast::Expr_::*;
         match &mut e {
-            ast::Expr(_, Efun(ref mut e)) => {
+            ast::Expr(_, _, Efun(ref mut e)) => {
                 e.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
             }
-            ast::Expr(_, Lfun(ref mut l)) => {
+            ast::Expr(_, _, Lfun(ref mut l)) => {
                 l.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
             }
             _ => {}
@@ -1326,8 +1326,9 @@ where
 
                 let inner_pos = Self::p_pos(&c.expression, env);
                 let inner_expr_ = Self::p_expr_impl_(location, &c.expression, env, parent_pos)?;
-                let inner_expr = ast::Expr::new(inner_pos, inner_expr_);
+                let inner_expr = ast::Expr::new(inner_pos.clone(), inner_pos, inner_expr_);
                 Ok(ast::Expr::new(
+                    pos.clone(),
                     pos,
                     ast::Expr_::ETSplice(Box::new(inner_expr)),
                 ))
@@ -1335,7 +1336,7 @@ where
             _ => {
                 let pos = Self::p_pos(node, env);
                 let expr_ = Self::p_expr_impl_(location, node, env, parent_pos)?;
-                Ok(ast::Expr::new(pos, expr_))
+                Ok(ast::Expr::new(pos.clone(), pos, expr_))
             }
         }
     }
@@ -1494,7 +1495,7 @@ where
         };
         let mk_lvar =
             |name: S<'a, T, V>, env: &mut Env<'a, TF>| Ok(E_::mk_lvar(mk_name_lid(name, env)?));
-        let mk_id_expr = |name: ast::Sid| E::new(name.0.clone(), E_::mk_id(name));
+        let mk_id_expr = |name: ast::Sid| E::new(name.0.clone(), name.0.clone(), E_::mk_id(name));
         let p_intri_expr = |kw, ty, v, e: &mut Env<'a, TF>| {
             let hints = Self::expand_type_args(ty, e)?;
             let hints = Self::check_intrinsic_type_arg_varity(node, e, hints);
@@ -1514,17 +1515,22 @@ where
                 _ => None,
             };
             let recv = Self::p_expr(recv, e)?;
-            let recv = match (&recv.1, pos_if_has_parens) {
+            let recv = match (&recv.2, pos_if_has_parens) {
                 (E_::ObjGet(t), Some(ref _p)) => {
                     let (a, b, c, _false) = &**t;
                     E::new(
+                        recv.0.clone(),
                         recv.0.clone(),
                         E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
                     )
                 }
                 (E_::ClassGet(c), Some(ref _p)) => {
                     let (a, b, _false) = &**c;
-                    E::new(recv.0.clone(), E_::mk_class_get(a.clone(), b.clone(), true))
+                    E::new(
+                        recv.0.clone(),
+                        recv.0.clone(),
+                        E_::mk_class_get(a.clone(), b.clone(), true),
+                    )
                 }
                 _ => recv,
             };
@@ -1685,7 +1691,7 @@ where
                 let p_binder_or_ignore =
                     |n: S<'a, T, V>, e: &mut Env<'a, TF>| -> Result<ast::Expr, Error> {
                         match &n.children {
-                            Missing => Ok(E::new(e.mk_none_pos(), E_::Omitted)),
+                            Missing => Ok(E::new(e.mk_none_pos(), e.mk_none_pos(), E_::Omitted)),
                             _ => Self::p_expr(n, e),
                         }
                     };
@@ -1726,7 +1732,11 @@ where
                         Ok(E_::mk_call(
                             Self::p_expr(recv, env)?,
                             vec![],
-                            vec![E::new(literal_expression_pos, E_::String(s.into()))],
+                            vec![E::new(
+                                literal_expression_pos.clone(),
+                                literal_expression_pos,
+                                E_::String(s.into()),
+                            )],
                             None,
                         ))
                     }
@@ -1750,17 +1760,22 @@ where
                             _ => None,
                         };
                         let recv = Self::p_expr(recv, env)?;
-                        let recv = match (&recv.1, pos_if_has_parens) {
+                        let recv = match (&recv.2, pos_if_has_parens) {
                             (E_::ObjGet(t), Some(ref _p)) => {
                                 let (a, b, c, _false) = &**t;
                                 E::new(
+                                    recv.0.clone(),
                                     recv.0.clone(),
                                     E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
                                 )
                             }
                             (E_::ClassGet(c), Some(ref _p)) => {
                                 let (a, b, _false) = &**c;
-                                E::new(recv.0.clone(), E_::mk_class_get(a.clone(), b.clone(), true))
+                                E::new(
+                                    recv.0.clone(),
+                                    recv.0.clone(),
+                                    E_::mk_class_get(a.clone(), b.clone(), true),
+                                )
                             }
                             _ => recv,
                         };
@@ -1773,8 +1788,10 @@ where
                                 e.qualifier.is_missing(),
                                 "Parser error: function call with enum class labels"
                             );
+                            let pos = Self::p_pos(&c.enum_class_label, env);
                             let enum_class_label = ast::Expr::new(
-                                Self::p_pos(&c.enum_class_label, env),
+                                pos.clone(),
+                                pos,
                                 E_::mk_enum_class_label(
                                     None,
                                     Self::pos_name(&e.expression, env)?.1,
@@ -1795,13 +1812,15 @@ where
 
                 let recv = Self::p_expr(&c.receiver, env)?;
 
-                match &recv.1 {
+                match &recv.2 {
                     aast::Expr_::Id(id) => Ok(E_::mk_function_pointer(
                         aast::FunctionPtrId::FPId(*(id.to_owned())),
                         targs,
                     )),
                     aast::Expr_::ClassConst(c) => {
-                        if let aast::ClassId_::CIexpr(aast::Expr(_, aast::Expr_::Id(_))) = (c.0).1 {
+                        if let aast::ClassId_::CIexpr(aast::Expr(_, _, aast::Expr_::Id(_))) =
+                            (c.0).1
+                        {
                             Ok(E_::mk_function_pointer(
                                 aast::FunctionPtrId::FPClassConst(c.0.to_owned(), c.1.to_owned()),
                                 targs,
@@ -1875,7 +1894,7 @@ where
                     } else {
                         let expr =
                             Self::p_expr_impl(ExprLocation::TopLevel, operand, env, Some(pos))?;
-                        Ok(expr.1)
+                        Ok(expr.2)
                     }
                 } else {
                     let expr = Self::p_expr(operand, env)?;
@@ -1894,6 +1913,7 @@ where
                         Some(TK::Clone) => Ok(E_::mk_clone(expr)),
                         Some(TK::Print) => Ok(E_::mk_call(
                             E::new(
+                                pos.clone(),
                                 pos.clone(),
                                 E_::mk_id(ast::Id(pos, special_functions::ECHO.into())),
                             ),
@@ -1968,14 +1988,18 @@ where
                     Self::raise_parsing_error(node, env, &syntax_error::invalid_yield);
                 }
                 if c.operand.is_missing() {
-                    Ok(E_::mk_yield(ast::Afield::AFvalue(E::new(pos, E_::Null))))
+                    Ok(E_::mk_yield(ast::Afield::AFvalue(E::new(
+                        pos.clone(),
+                        pos,
+                        E_::Null,
+                    ))))
                 } else {
                     Ok(E_::mk_yield(Self::p_afield(&c.operand, env)?))
                 }
             }
             ScopeResolutionExpression(c) => {
                 let qual = Self::p_expr(&c.qualifier, env)?;
-                if let E_::Id(id) = &qual.1 {
+                if let E_::Id(id) = &qual.2 {
                     Self::fail_if_invalid_reified_generic(node, env, &id.1);
                 }
                 match &c.name.children {
@@ -1988,7 +2012,7 @@ where
                         ))
                     }
                     _ => {
-                        let E(p, expr_) = Self::p_expr(&c.name, env)?;
+                        let E(p, _, expr_) = Self::p_expr(&c.name, env)?;
                         match expr_ {
                             E_::String(id) => Ok(E_::mk_class_const(
                                 ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
@@ -2015,7 +2039,7 @@ where
                             }
                             _ => Ok(E_::mk_class_get(
                                 ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
-                                ast::ClassGetExpr::CGexpr(E(p, expr_)),
+                                ast::ClassGetExpr::CGexpr(E(p.clone(), p, expr_)),
                                 false,
                             )),
                         }
@@ -2041,7 +2065,7 @@ where
                     }
                 };
 
-                Ok(et.1)
+                Ok(et.2)
             }
             ConditionalExpression(c) => {
                 let alter = Self::p_expr(&c.alternative, env)?;
@@ -2086,7 +2110,7 @@ where
                     }
                     _ => (Self::p_expr(&c.type_, env)?, vec![]),
                 };
-                if let E_::Id(name) = &e.1 {
+                if let E_::Id(name) = &e.2 {
                     Self::fail_if_invalid_reified_generic(node, env, &name.1);
                     Self::fail_if_invalid_class_creation(node, env, &name.1);
                 }
@@ -2222,7 +2246,7 @@ where
                     doc_comment: None,
                 };
                 Ok(E_::mk_call(
-                    E::new(pos, E_::mk_lfun(body, vec![])),
+                    E::new(pos.clone(), pos, E_::mk_lfun(body, vec![])),
                     vec![],
                     vec![],
                     None,
@@ -2270,7 +2294,8 @@ where
                     match recv {
                         Ok(recv) => {
                             let enum_class_label = E_::mk_enum_class_label(None, label_name);
-                            let enum_class_label = ast::Expr::new(label_pos, enum_class_label);
+                            let enum_class_label =
+                                ast::Expr::new(label_pos.clone(), label_pos, enum_class_label);
                             Ok(E_::mk_call(recv, vec![], vec![enum_class_label], None))
                         }
                         Err(err) => Err(err),
@@ -2281,7 +2306,7 @@ where
         }
     }
 
-    fn check_lvalue(ast::Expr(p, expr_): &ast::Expr, env: &mut Env<'a, TF>) {
+    fn check_lvalue(ast::Expr(p, _, expr_): &ast::Expr, env: &mut Env<'a, TF>) {
         use aast::Expr_::*;
         let mut raise = |s| Self::raise_parsing_error_pos(p, env, s);
         match expr_ {
@@ -2290,10 +2315,10 @@ where
                     raise("Invalid lvalue")
                 } else {
                     match og.as_ref() {
-                        (_, ast::Expr(_, Id(_)), ast::OgNullFlavor::OGNullsafe, _) => {
+                        (_, ast::Expr(_, _, Id(_)), ast::OgNullFlavor::OGNullsafe, _) => {
                             raise("?-> syntax is not supported for lvalues")
                         }
-                        (_, ast::Expr(_, Id(sid)), _, _) if sid.1.as_bytes()[0] == b':' => {
+                        (_, ast::Expr(_, _, Id(sid)), _, _) if sid.1.as_bytes()[0] == b':' => {
                             raise("->: syntax is not supported for lvalues")
                         }
                         _ => {}
@@ -2301,7 +2326,7 @@ where
                 }
             }
             ArrayGet(ag) => {
-                if let ClassConst(_) = (ag.0).1 {
+                if let ClassConst(_) = (ag.0).2 {
                     raise("Array-like class consts are not valid lvalues");
                 }
             }
@@ -2335,17 +2360,17 @@ where
                 let text = html_entities::decode(&Self::get_quoted_content(
                     node.full_text(env.source_text()),
                 ));
-                Ok(ast::Expr::new(p, E_::make_string(text)))
+                Ok(ast::Expr::new(p.clone(), p, E_::make_string(text)))
             } else if env.codegen() && TK::XHPBody == kind {
                 let p = Self::p_pos(node, env);
                 /* for XHP body - only decode HTML entities */
                 let text =
                     html_entities::decode(&Self::unesc_xhp(node.full_text(env.source_text())));
-                Ok(ast::Expr::new(p, E_::make_string(text)))
+                Ok(ast::Expr::new(p.clone(), p, E_::make_string(text)))
             } else {
                 let p = Self::p_pos(node, env);
                 let s = escaper(node.full_text(env.source_text()));
-                Ok(ast::Expr::new(p, E_::make_string(s)))
+                Ok(ast::Expr::new(p.clone(), p, E_::make_string(s)))
             }
         } else {
             Self::p_expr(node, env)
@@ -2362,7 +2387,7 @@ where
                     && env.file_mode() == file_info::Mode::Mhhi
                     && !env.codegen()
                 {
-                    ast::Expr::new(env.mk_none_pos(), E_::Null)
+                    ast::Expr::new(env.mk_none_pos(), env.mk_none_pos(), E_::Null)
                 } else {
                     Self::p_xhp_embedded(Self::unesc_xhp_attr, attr_expr, env)?
                 };
@@ -2948,14 +2973,18 @@ where
                     let echo = match &c.keyword.children {
                         QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
                             let name = Self::pos_name(&c.keyword, e)?;
-                            ast::Expr::new(name.0.clone(), E_::mk_id(name))
+                            ast::Expr::new(name.0.clone(), name.0.clone(), E_::mk_id(name))
                         }
                         _ => Self::missing_syntax("id", &c.keyword, e)?,
                     };
                     let args = Self::could_map(Self::p_expr, &c.expressions, e)?;
                     Ok(new(
                         pos.clone(),
-                        S_::mk_expr(ast::Expr::new(pos, E_::mk_call(echo, vec![], args, None))),
+                        S_::mk_expr(ast::Expr::new(
+                            pos.clone(),
+                            pos,
+                            E_::mk_call(echo, vec![], args, None),
+                        )),
                     ))
                 };
                 Self::lift_awaits_in_statement(f, node, env)
@@ -2970,13 +2999,17 @@ where
                     let unset = match &c.keyword.children {
                         QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
                             let name = Self::pos_name(&c.keyword, e)?;
-                            ast::Expr::new(name.0.clone(), E_::mk_id(name))
+                            ast::Expr::new(name.0.clone(), name.0.clone(), E_::mk_id(name))
                         }
                         _ => Self::missing_syntax("id", &c.keyword, e)?,
                     };
                     Ok(new(
                         pos.clone(),
-                        S_::mk_expr(ast::Expr::new(pos, E_::mk_call(unset, vec![], args, None))),
+                        S_::mk_expr(ast::Expr::new(
+                            pos.clone(),
+                            pos,
+                            E_::mk_call(unset, vec![], args, None),
+                        )),
                     ))
                 };
                 Self::lift_awaits_in_statement(f, node, env)
@@ -3008,13 +3041,14 @@ where
 
                             if let Some(tv) = tmp_vars.next() {
                                 if let Stmt(p1, S_::Expr(expr)) = n {
-                                    if let E(p2, E_::Binop(bop)) = *expr {
+                                    if let E(p2, _, E_::Binop(bop)) = *expr {
                                         if let (Eq(op), e1, e2) = *bop {
                                             let tmp_n = E::mk_lvar(&e2.0, &(tv.1));
                                             if tmp_n.lvar_name() != e2.lvar_name() {
                                                 let new_n = new(
                                                     p1.clone(),
                                                     S_::mk_expr(E::new(
+                                                        p2.clone(),
                                                         p2.clone(),
                                                         E_::mk_binop(
                                                             Eq(None),
@@ -3028,6 +3062,7 @@ where
                                             let assign_stmt = new(
                                                 p1,
                                                 S_::mk_expr(E::new(
+                                                    p2.clone(),
                                                     p2,
                                                     E_::mk_binop(Eq(op), e1, tmp_n),
                                                 )),
@@ -3065,7 +3100,7 @@ where
         }
     }
     fn check_mutate_class_const(e: &ast::Expr, node: S<'a, T, V>, env: &mut Env<'a, TF>) {
-        match &e.1 {
+        match &e.2 {
             E_::ArrayGet(c) if c.1.is_some() => Self::check_mutate_class_const(&c.0, node, env),
             E_::ClassConst(_) => {
                 Self::raise_parsing_error(node, env, &syntax_error::const_mutation)
@@ -4448,12 +4483,14 @@ where
                     let cvname = Self::drop_prefix(&param.name, '$');
                     let p = &param.pos;
                     let span = match &param.expr {
-                        Some(ast::Expr(pos_end, _)) => {
+                        Some(ast::Expr(pos_end, _, _)) => {
                             Pos::btw(p, pos_end).unwrap_or_else(|_| p.clone())
                         }
                         _ => p.clone(),
                     };
-                    let e = |expr_: ast::Expr_| -> ast::Expr { ast::Expr::new(p.clone(), expr_) };
+                    let e = |expr_: ast::Expr_| -> ast::Expr {
+                        ast::Expr::new(p.clone(), p.clone(), expr_)
+                    };
                     let lid = |s: &str| -> ast::Lid { ast::Lid(p.clone(), (0, s.to_string())) };
                     (
                         ast::Stmt::new(
@@ -4678,10 +4715,10 @@ where
                                     let mut enum_vals = vec![];
                                     for val in vals.clone() {
                                         match val {
-                                            ast::Expr(_, E_::String(xev)) => enum_vals.push(
+                                            ast::Expr(_, _, E_::String(xev)) => enum_vals.push(
                                                 ast::XhpEnumValue::XEVString(xev.to_string()),
                                             ),
-                                            ast::Expr(_, E_::Int(xev)) => match xev.parse() {
+                                            ast::Expr(_, _, E_::Int(xev)) => match xev.parse() {
                                                 Ok(n) => {
                                                     enum_vals.push(ast::XhpEnumValue::XEVInt(n))
                                                 }

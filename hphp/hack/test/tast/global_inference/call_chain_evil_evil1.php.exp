@@ -16,7 +16,7 @@
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
            ];
-         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([5:5-15], (Return (Some (([5:12-14], string), (Lvar ([5:12-14], $x))))))]; fb_annotation = () }; 
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([5:5-15], (Return (Some (([5:12-14], string), [5:12-14], (Lvar ([5:12-14], $x))))))]; fb_annotation = () }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((string), None); m_external = false; m_doc_comment = None }
         ];
@@ -49,8 +49,9 @@
          { fb_ast =
            [([5:5-26],
              (Return
-                (Some (([5:12-25], string),
-                       (Call ((([5:12-21], (function(string $x): string)), (Class_const ((([5:12-18], A), CIparent), ([5:20-21], "f")))), [], [(([5:22-24], string), (Lvar ([5:22-24], $x)))], None))))))
+                (Some (([5:12-25], string), [5:12-25],
+                       (Call ((([5:12-21], (function(string $x): string)), [5:12-21], (Class_const ((([5:12-18], A), CIparent), ([5:20-21], "f")))), 
+                          [], [(([5:22-24], string), [5:22-24], (Lvar ([5:22-24], $x)))], None))))))
              ];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -87,16 +88,16 @@
         { fb_ast =
           [([4:3-27],
             (Return
-               (Some (([4:10-26], string),
+               (Some (([4:10-26], string), [4:10-26],
                       (Call (
-                         (([4:10-15], (function(string $x): string)),
-                          (Obj_get ((([4:10-12], B), (Lvar ([4:10-12], $b))), (([4:14-15], (function(string $x): string)), (Id ([4:14-15], "f"))), OG_nullthrows, false))),
+                         (([4:10-15], (function(string $x): string)), [4:10-15],
+                          (Obj_get ((([4:10-12], B), [4:10-12], (Lvar ([4:10-12], $b))), (([4:14-15], (function(string $x): string)), [4:14-15], (Id ([4:14-15], "f"))), OG_nullthrows, false))),
                          [],
-                         [(([4:16-25], string),
+                         [(([4:16-25], string), [4:16-25],
                            (Call (
-                              (([4:16-21], (function(string $x): string)),
-                               (Obj_get ((([4:16-18], A), (Lvar ([4:16-18], $a))), (([4:20-21], (function(string $x): string)), (Id ([4:20-21], "f"))), OG_nullthrows, false))),
-                              [], [(([4:22-24], string), (String ""))], None)))
+                              (([4:16-21], (function(string $x): string)), [4:16-21],
+                               (Obj_get ((([4:16-18], A), [4:16-18], (Lvar ([4:16-18], $a))), (([4:20-21], (function(string $x): string)), [4:20-21], (Id ([4:20-21], "f"))), OG_nullthrows, false))),
+                              [], [(([4:22-24], string), [4:22-24], (String ""))], None)))
                            ],
                          None))))))
             ];

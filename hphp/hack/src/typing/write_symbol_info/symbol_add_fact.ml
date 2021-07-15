@@ -252,8 +252,8 @@ let add_class_const_defn_fact ctx source_map const decl_id progress =
   let json_fields =
     match const.cc_kind with
     | CCAbstract None -> base_fields
-    | CCAbstract (Some ((expr_pos, _), _))
-    | CCConcrete ((expr_pos, _), _) ->
+    | CCAbstract (Some (_, expr_pos, _))
+    | CCConcrete (_, expr_pos, _) ->
       let fp = Relative_path.to_absolute (Pos.filename expr_pos) in
       let value =
         match SMap.find_opt fp source_map with
@@ -395,7 +395,7 @@ let add_gconst_decl_fact name progress =
 let add_gconst_defn_fact ctx source_map elem decl_id progress =
   let prog = add_namespace_decl_fact elem.cst_namespace progress in
   let value =
-    let ((expr_pos, _), _) = elem.cst_value in
+    let (_, expr_pos, _) = elem.cst_value in
     let fp = Relative_path.to_absolute (Pos.filename expr_pos) in
     match SMap.find_opt fp source_map with
     | Some st -> source_at_span st expr_pos

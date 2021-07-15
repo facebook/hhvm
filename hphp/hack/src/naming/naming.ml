@@ -322,7 +322,7 @@ let convert_shape_name env = function
 
 let arg_unpack_unexpected = function
   | None -> ()
-  | Some (pos, _) ->
+  | Some (_, pos, _) ->
     Errors.naming_too_few_arguments pos;
     ()
 
@@ -802,15 +802,17 @@ let invalid_expr_ (p : Pos.t) : Nast.expr_ =
     ( p,
       Aast.Throw
         ( p,
+          p,
           Aast.New
             ( (p, Aast.CI (p, "\\Exception")),
               [],
-              [(p, Aast.String "invalid expression")],
+              [(p, p, Aast.String "invalid expression")],
               None,
               p ) ) )
   in
   Aast.Call
     ( ( p,
+        p,
         Aast.Lfun
           ( {
               Aast.f_span = p;
@@ -836,7 +838,7 @@ let invalid_expr_ (p : Pos.t) : Nast.expr_ =
       [],
       None )
 
-let invalid_expr p : Nast.expr = (p, invalid_expr_ p)
+let invalid_expr p : Nast.expr = (p, p, invalid_expr_ p)
 
 let ignored_expr_ p : Nast.expr_ = invalid_expr_ p
 
@@ -861,8 +863,8 @@ let interface c constructor methods smethods =
 
 let ensure_name_not_dynamic env e =
   match e with
-  | (_, (Aast.Id _ | Aast.Lvar _)) -> ()
-  | (p, _) ->
+  | (_, _, (Aast.Id _ | Aast.Lvar _)) -> ()
+  | (p, _, _) ->
     if Partial.should_check_error (fst env).in_mode 2078 then
       Errors.dynamic_class_name_in_strict_mode p
 
@@ -1035,14 +1037,14 @@ and xhp_attribute_decl env (h, cv, tag, maybe_enum) =
     | Some (pos, items) ->
       let is_int item =
         match item with
-        | (_, Aast.Int _) -> true
+        | (_, _, Aast.Int _) -> true
         | _ -> false
       in
       let contains_int = List.exists ~f:is_int items in
       let is_string item =
         match item with
-        | (_, Aast.String _)
-        | (_, Aast.String2 _) ->
+        | (_, _, Aast.String _)
+        | (_, _, Aast.String2 _) ->
           true
         | _ -> false
       in
@@ -1065,7 +1067,7 @@ and xhp_attribute_decl env (h, cv, tag, maybe_enum) =
       let has_default =
         match default with
         | None
-        | Some (_, Aast.Null) ->
+        | Some (_, _, Aast.Null) ->
           false
         | _ -> true
       in
@@ -1209,7 +1211,8 @@ and class_prop_expr_is_xhp env cv =
     if
       FileInfo.equal_mode (fst env).in_mode FileInfo.Mhhi && Option.is_none expr
     then
-      Some (fst cv.Aast.cv_id, ignored_expr_ (fst cv.Aast.cv_id))
+      let pos = fst cv.Aast.cv_id in
+      Some (pos, pos, ignored_expr_ (fst cv.Aast.cv_id))
     else
       expr
   in
@@ -1277,13 +1280,14 @@ and class_prop_non_static env ?(const = None) cv =
     N.cv_span = cv.Aast.cv_span;
   }
 
-and check_constant_expression env ~in_enum_class (pos, e) =
+and check_constant_expression env ~in_enum_class (ty, pos, e) =
   if not in_enum_class then
-    check_constant_expr env (pos, e)
+    check_constant_expr env (ty, pos, e)
   else
     true
 
-and check_constant_expr env (pos, e) =
+and check_constant_expr env expr =
+  let (pos, _, e) = expr in
   match e with
   | Aast.Id _
   | Aast.Null
@@ -1293,7 +1297,7 @@ and check_constant_expr env (pos, e) =
   | Aast.Float _
   | Aast.String _ ->
     true
-  | Aast.Class_const ((_, Aast.CIexpr (_, cls)), _)
+  | Aast.Class_const ((_, Aast.CIexpr (_, _, cls)), _)
     when match cls with
          | Aast.Id (_, "static") -> false
          | _ -> true ->
@@ -1322,7 +1326,7 @@ and check_constant_expr env (pos, e) =
   | Aast.Shape fdl ->
     (* Only check the values because shape field names are always legal *)
     List.for_all fdl ~f:(fun (_, e) -> check_constant_expr env e)
-  | Aast.Call ((_, Aast.Id (_, cn)), _, el, unpacked_element)
+  | Aast.Call ((_, _, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.fun_
          || String.equal cn SN.AutoimportedFunctions.class_meth
          || String.equal cn SN.StdlibFunctions.array_mark_legacy ->
@@ -1369,7 +1373,8 @@ and constant_expr env ~in_enum_class e =
   if valid_constant_expression then
     expr env e
   else
-    invalid_expr (fst e)
+    let (_, p, _) = e in
+    invalid_expr p
 
 and class_const_kind env ~in_enum_class kind =
   match kind with
@@ -1612,10 +1617,10 @@ and fun_ genv f =
   named_fun
 
 and get_using_vars es =
-  List.concat_map es ~f:(fun (_, e) ->
+  List.concat_map es ~f:(fun (_, _, e) ->
       match e with
       (* Simple assignment to local of form `$lvar = e` *)
-      | Aast.Binop (Ast_defs.Eq None, (_, Aast.Lvar (p, lid)), _) ->
+      | Aast.Binop (Ast_defs.Eq None, (_, _, Aast.Lvar (p, lid)), _) ->
         [(p, Local_id.get_name lid)]
       (* Arbitrary expression. This will be assigned to a temporary *)
       | _ -> [])
@@ -1643,7 +1648,8 @@ and stmt env (pos, st) =
     | Aast.Switch (e, cl) -> switch_stmt env e cl
     | Aast.Foreach (e, ae, b) -> foreach_stmt env e ae b
     | Aast.Try (b, cl, fb) -> try_stmt env b cl fb
-    | Aast.Expr (cp, Aast.Call ((p, Aast.Id (fp, fn)), hl, el, unpacked_element))
+    | Aast.Expr
+        (_, cp, Aast.Call ((_, p, Aast.Id (fp, fn)), hl, el, unpacked_element))
       when String.equal fn SN.AutoimportedFunctions.invariant ->
       (* invariant is subject to a source-code transform in the HHVM
        * runtime: the arguments to invariant are lazily evaluated only in
@@ -1663,11 +1669,15 @@ and stmt env (pos, st) =
         | [_] ->
           Errors.naming_too_few_arguments p;
           N.Expr (invalid_expr p)
-        | (cond_p, cond) :: el ->
+        | (_, cond_p, cond) :: el ->
           let violation =
             ( cp,
+              cp,
               Aast.Call
-                ( (p, Aast.Id (fp, SN.AutoimportedFunctions.invariant_violation)),
+                ( ( p,
+                    p,
+                    Aast.Id (fp, SN.AutoimportedFunctions.invariant_violation)
+                  ),
                   hl,
                   el,
                   unpacked_element ) )
@@ -1680,7 +1690,9 @@ and stmt env (pos, st) =
             let (b1, b2) =
               ([(cp, Aast.Expr violation)], [(Pos.none, Aast.Noop)])
             in
-            let cond = (cond_p, Aast.Unop (Ast_defs.Unot, (cond_p, cond))) in
+            let cond =
+              (cond_p, cond_p, Aast.Unop (Ast_defs.Unot, (cond_p, cond_p, cond)))
+            in
             if_stmt env cond b1 b2)
       end
     | Aast.Expr e -> N.Expr (expr env e)
@@ -1740,7 +1752,7 @@ and foreach_stmt env e ae b =
       let b = block env b in
       N.Foreach (e, ae, b))
 
-and get_lvalues (acc : Pos.t SMap.t) (p, e) : Pos.t SMap.t =
+and get_lvalues (acc : Pos.t SMap.t) (_, p, e) : Pos.t SMap.t =
   match e with
   | Aast.List lv -> List.fold_left ~init:acc ~f:get_lvalues lv
   | Aast.Lvar (_, lid) -> SMap.add (Local_id.to_string lid) p acc
@@ -1749,9 +1761,9 @@ and get_lvalues (acc : Pos.t SMap.t) (p, e) : Pos.t SMap.t =
 and as_expr env ae =
   let handle_v ev =
     match ev with
-    | (p, Aast.Id _) ->
+    | (_, p, Aast.Id _) ->
       Errors.expected_variable p;
-      (p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")))
+      (p, p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")))
     | ev ->
       let vars = get_lvalues SMap.empty ev in
       SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
@@ -1759,12 +1771,12 @@ and as_expr env ae =
   in
   let handle_k ek =
     match ek with
-    | (_, Aast.Lvar (p, lid)) ->
+    | (_, _, Aast.Lvar (p, lid)) ->
       let x = (p, Local_id.get_name lid) in
-      (p, N.Lvar (Env.new_lvar env x))
-    | (p, _) ->
+      (p, p, N.Lvar (Env.new_lvar env x))
+    | (_, p, _) ->
       Errors.expected_variable p;
-      (p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")))
+      (p, p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")))
   in
   match ae with
   | Aast.As_v ev ->
@@ -1817,7 +1829,7 @@ and awaitall_stmt env el b =
         let e1 =
           match e1 with
           | Some lid ->
-            let e = (Pos.none, Aast.Lvar lid) in
+            let e = (Pos.none, Pos.none, Aast.Lvar lid) in
             let vars = get_lvalues SMap.empty e in
             SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
             e1
@@ -1831,14 +1843,14 @@ and awaitall_stmt env el b =
 
 and expr_obj_get_name env expr_ =
   match expr_ with
-  | (p, Aast.Id x) -> (p, N.Id x)
-  | (p, e) -> expr env (p, e)
+  | (_, p, Aast.Id x) -> (p, p, N.Id x)
+  | (_, p, e) -> expr env (p, p, e)
 
 and exprl env l = List.map ~f:(expr env) l
 
 and oexpr env e = Option.map e ~f:(expr env)
 
-and expr env (p, e) = (p, expr_ env p e)
+and expr env (ty, p, e) = (ty, p, expr_ env p e)
 
 and expr_ env p (e : Nast.expr_) =
   match e with
@@ -1927,16 +1939,17 @@ and expr_ env p (e : Nast.expr_) =
        is being used for instance property access; see the case below for
        handling nullsafe instance method calls to see how this works *)
     N.Obj_get (expr env e1, expr_obj_get_name env e2, nullsafe, in_parens)
-  | Aast.Array_get ((p, Aast.Lvar x), None) ->
+  | Aast.Array_get ((_, p, Aast.Lvar x), None) ->
     let x = (fst x, Local_id.to_string @@ snd x) in
-    let id = (p, N.Lvar (Env.lvar env x)) in
+    let id = (p, p, N.Lvar (Env.lvar env x)) in
     N.Array_get (id, None)
   | Aast.Array_get (e1, e2) -> N.Array_get (expr env e1, oexpr env e2)
   | Aast.Class_get
-      ((_, Aast.CIexpr (_, Aast.Id x1)), Aast.CGstring x2, in_parens) ->
+      ((_, Aast.CIexpr (_, _, Aast.Id x1)), Aast.CGstring x2, in_parens) ->
     N.Class_get (make_class_id env x1, N.CGstring x2, in_parens)
   | Aast.Class_get
-      ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), Aast.CGstring x2, in_parens) ->
+      ((_, Aast.CIexpr (_, _, Aast.Lvar (p, lid))), Aast.CGstring x2, in_parens)
+    ->
     let x1 = (p, Local_id.to_string lid) in
     N.Class_get (make_class_id env x1, N.CGstring x2, in_parens)
   | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGstring _, _) ->
@@ -1947,21 +1960,21 @@ and expr_ env p (e : Nast.expr_) =
     ensure_name_not_dynamic env x2;
     ignored_expr_ p
   | Aast.Class_get _ -> failwith "Error in Ast_to_nast module for Class_get"
-  | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Id x1)), ((_, str) as x2))
+  | Aast.Class_const ((_, Aast.CIexpr (_, _, Aast.Id x1)), ((_, str) as x2))
     when String.equal str "class" ->
     N.Class_const (make_class_id env x1, x2)
-  | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Id x1)), x2) ->
+  | Aast.Class_const ((_, Aast.CIexpr (_, _, Aast.Id x1)), x2) ->
     N.Class_const (make_class_id env x1, x2)
-  | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), x2) ->
+  | Aast.Class_const ((_, Aast.CIexpr (_, _, Aast.Lvar (p, lid))), x2) ->
     let x1 = (p, Local_id.to_string lid) in
     N.Class_const (make_class_id env x1, x2)
   | Aast.Class_const _ ->
     (* TODO: report error in strict mode *) ignored_expr_ p
-  | Aast.Call ((_, Aast.Id (p, pseudo_func)), tal, el, unpacked_element)
+  | Aast.Call ((_, _, Aast.Id (p, pseudo_func)), tal, el, unpacked_element)
     when String.equal pseudo_func SN.SpecialFunctions.echo ->
     arg_unpack_unexpected unpacked_element;
-    N.Call ((p, N.Id (p, pseudo_func)), targl env p tal, exprl env el, None)
-  | Aast.Call ((p, Aast.Id (_, cn)), tal, el, _)
+    N.Call ((p, p, N.Id (p, pseudo_func)), targl env p tal, exprl env el, None)
+  | Aast.Call ((_, p, Aast.Id (_, cn)), tal, el, _)
     when String.equal cn SN.StdlibFunctions.call_user_func ->
     Errors.deprecated_use
       p
@@ -1975,7 +1988,7 @@ and expr_ env p (e : Nast.expr_) =
         invalid_expr_ p
       | f :: el -> N.Call (expr env f, targl env p tal, exprl env el, None)
     end
-  | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
+  | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.fun_ ->
     arg_unpack_unexpected unpacked_element;
     begin
@@ -1983,15 +1996,15 @@ and expr_ env p (e : Nast.expr_) =
       | [] ->
         Errors.naming_too_few_arguments p;
         invalid_expr_ p
-      | [(p, Aast.String x)] -> N.Fun_id (p, x)
-      | [(p, _)] ->
+      | [(_, p, Aast.String x)] -> N.Fun_id (p, x)
+      | [(_, p, _)] ->
         Errors.illegal_fun p;
         invalid_expr_ p
       | _ ->
         Errors.naming_too_many_arguments p;
         invalid_expr_ p
     end
-  | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
+  | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.inst_meth ->
     arg_unpack_unexpected unpacked_element;
     begin
@@ -2000,16 +2013,16 @@ and expr_ env p (e : Nast.expr_) =
       | [_] ->
         Errors.naming_too_few_arguments p;
         invalid_expr_ p
-      | [instance; (p, Aast.String meth)] ->
+      | [instance; (_, p, Aast.String meth)] ->
         N.Method_id (expr env instance, (p, meth))
-      | [(p, _); _] ->
+      | [(_, p, _); _] ->
         Errors.illegal_inst_meth p;
         invalid_expr_ p
       | _ ->
         Errors.naming_too_many_arguments p;
         invalid_expr_ p
     end
-  | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
+  | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.meth_caller ->
     arg_unpack_unexpected unpacked_element;
     begin
@@ -2021,14 +2034,15 @@ and expr_ env p (e : Nast.expr_) =
       | [e1; e2] ->
         begin
           match (expr env e1, expr env e2) with
-          | ((pc, N.String cl), (pm, N.String meth)) ->
+          | ((pc, _, N.String cl), (pm, _, N.String meth)) ->
             let () = check_name (pc, cl) in
             N.Method_caller ((pc, cl), (pm, meth))
-          | ((_, N.Class_const ((_, N.CI cl), (_, mem))), (pm, N.String meth))
+          | ( (_, _, N.Class_const ((_, N.CI cl), (_, mem))),
+              (pm, _, N.String meth) )
             when String.equal mem SN.Members.mClass ->
             let () = check_name cl in
             N.Method_caller (cl, (pm, meth))
-          | ((p, _), _) ->
+          | ((_, p, _), _) ->
             Errors.illegal_meth_caller p;
             invalid_expr_ p
         end
@@ -2036,7 +2050,7 @@ and expr_ env p (e : Nast.expr_) =
         Errors.naming_too_many_arguments p;
         invalid_expr_ p
     end
-  | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
+  | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.class_meth ->
     arg_unpack_unexpected unpacked_element;
     begin
@@ -2048,11 +2062,11 @@ and expr_ env p (e : Nast.expr_) =
       | [e1; e2] ->
         begin
           match (expr env e1, expr env e2) with
-          | ((pc, N.String cl), (pm, N.String meth)) ->
+          | ((pc, _, N.String cl), (pm, _, N.String meth)) ->
             let () = check_name (pc, cl) in
             let cid = N.CI (pc, cl) in
             N.Smethod_id ((pc, cid), (pm, meth))
-          | ((_, N.Id (pc, const)), (pm, N.String meth))
+          | ((_, _, N.Id (pc, const)), (pm, _, N.String meth))
             when String.equal const SN.PseudoConsts.g__CLASS__ ->
             (* All of these that use current_cls aren't quite correct
              * inside a trait, as the class should be the using class.
@@ -2071,12 +2085,14 @@ and expr_ env p (e : Nast.expr_) =
             | None ->
               Errors.illegal_class_meth p;
               invalid_expr_ p)
-          | ((_, N.Class_const ((pc, N.CI cl), (_, mem))), (pm, N.String meth))
+          | ( (_, _, N.Class_const ((pc, N.CI cl), (_, mem))),
+              (pm, _, N.String meth) )
             when String.equal mem SN.Members.mClass ->
             let () = check_name cl in
             let cid = N.CI cl in
             N.Smethod_id ((pc, cid), (pm, meth))
-          | ((p, N.Class_const ((pc, N.CIself), (_, mem))), (pm, N.String meth))
+          | ( (_, p, N.Class_const ((pc, N.CIself), (_, mem))),
+              (pm, _, N.String meth) )
             when String.equal mem SN.Members.mClass ->
             (match (fst env).current_cls with
             | Some (_cid, _, true) -> N.Smethod_id ((pc, N.CIself), (pm, meth))
@@ -2086,15 +2102,15 @@ and expr_ env p (e : Nast.expr_) =
             | None ->
               Errors.illegal_class_meth p;
               invalid_expr_ p)
-          | ( (p, N.Class_const ((pc, N.CIstatic), (_, mem))),
-              (pm, N.String meth) )
+          | ( (_, p, N.Class_const ((pc, N.CIstatic), (_, mem))),
+              (pm, _, N.String meth) )
             when String.equal mem SN.Members.mClass ->
             (match (fst env).current_cls with
             | Some (_cid, _, _) -> N.Smethod_id ((pc, N.CIstatic), (pm, meth))
             | None ->
               Errors.illegal_class_meth p;
               invalid_expr_ p)
-          | ((p, _), _) ->
+          | ((_, p, _), _) ->
             Errors.illegal_class_meth p;
             invalid_expr_ p
         end
@@ -2108,21 +2124,22 @@ and expr_ env p (e : Nast.expr_) =
       Errors.naming_too_few_arguments p;
       invalid_expr_ p
     | el -> N.Tuple (exprl env el))
-  | Aast.Call ((p, Aast.Id f), tal, el, unpacked_element) ->
+  | Aast.Call ((_, p, Aast.Id f), tal, el, unpacked_element) ->
     N.Call
-      ((p, N.Id f), targl env p tal, exprl env el, oexpr env unpacked_element)
+      ((p, p, N.Id f), targl env p tal, exprl env el, oexpr env unpacked_element)
   (* match *)
   (* Handle nullsafe instance method calls here. Because Obj_get is used
      for both instance property access and instance method calls, we need
      to match the entire "Call(Obj_get(..), ..)" pattern here so that we
      only match instance method calls *)
   | Aast.Call
-      ( (p, Aast.Obj_get (e1, e2, Aast.OG_nullsafe, in_parens)),
+      ( (_, p, Aast.Obj_get (e1, e2, Aast.OG_nullsafe, in_parens)),
         tal,
         el,
         unpacked_element ) ->
     N.Call
       ( ( p,
+          p,
           N.Obj_get
             (expr env e1, expr_obj_get_name env e2, N.OG_nullsafe, in_parens) ),
         targl env p tal,
@@ -2135,12 +2152,12 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.FunctionPointer (Aast.FP_id fid, targs) ->
     N.FunctionPointer (N.FP_id fid, targl env p targs)
   | Aast.FunctionPointer
-      (Aast.FP_class_const ((_, Aast.CIexpr (_, Aast.Id x1)), x2), targs) ->
+      (Aast.FP_class_const ((_, Aast.CIexpr (_, _, Aast.Id x1)), x2), targs) ->
     N.FunctionPointer
       (N.FP_class_const (make_class_id env x1, x2), targl env p targs)
   | Aast.FunctionPointer
-      (Aast.FP_class_const ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), x2), targs)
-    ->
+      ( Aast.FP_class_const ((_, Aast.CIexpr (_, _, Aast.Lvar (p, lid))), x2),
+        targs ) ->
     let x1 = (p, Local_id.to_string lid) in
     N.FunctionPointer
       (N.FP_class_const (make_class_id env x1, x2), targl env p targs)
@@ -2208,7 +2225,8 @@ and expr_ env p (e : Nast.expr_) =
       ( expr env e,
         hint ~allow_wildcard:true ~allow_like:true ~ignore_hack_arr:true env h,
         b )
-  | Aast.New ((_, Aast.CIexpr (p, Aast.Id x)), tal, el, unpacked_element, _) ->
+  | Aast.New ((_, Aast.CIexpr (_, p, Aast.Id x)), tal, el, unpacked_element, _)
+    ->
     N.New
       ( make_class_id env x,
         targl env p tal,
@@ -2216,7 +2234,7 @@ and expr_ env p (e : Nast.expr_) =
         oexpr env unpacked_element,
         p )
   | Aast.New
-      ((_, Aast.CIexpr (_, Aast.Lvar (pos, x))), tal, el, unpacked_element, p)
+      ((_, Aast.CIexpr (_, _, Aast.Lvar (pos, x))), tal, el, unpacked_element, p)
     ->
     N.New
       ( make_class_id env (pos, Local_id.to_string x),
@@ -2224,7 +2242,7 @@ and expr_ env p (e : Nast.expr_) =
         exprl env el,
         oexpr env unpacked_element,
         p )
-  | Aast.New ((_, Aast.CIexpr (p, _e)), tal, el, unpacked_element, _) ->
+  | Aast.New ((_, Aast.CIexpr (_, p, _e)), tal, el, unpacked_element, _) ->
     if Partial.should_check_error (fst env).in_mode 2060 then
       Errors.dynamic_new_in_strict_mode p;
     N.New
@@ -2360,7 +2378,7 @@ and make_class_id env ((p, x) as cid) =
         N.CI (p, SN.Classes.cUnknown)
       else
         N.CIstatic
-    | x when String.equal x SN.SpecialIdents.this -> N.CIexpr (p, N.This)
+    | x when String.equal x SN.SpecialIdents.this -> N.CIexpr (p, p, N.This)
     | x when String.equal x SN.SpecialIdents.dollardollar ->
       (* We won't reach here for "new $$" because the parser creates a
        * proper Ast_defs.Dollardollar node, so make_class_id won't be called with
@@ -2369,8 +2387,8 @@ and make_class_id env ((p, x) as cid) =
        * static member access. So, we only reach here for things
        * like "$$::someMethod()". *)
       N.CIexpr
-        (p, N.Lvar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar))
-    | x when Char.equal x.[0] '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
+        (p, p, N.Lvar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar))
+    | x when Char.equal x.[0] '$' -> N.CIexpr (p, p, N.Lvar (Env.lvar env cid))
     | _ ->
       let () = check_name cid in
       N.CI cid )
@@ -2405,19 +2423,18 @@ and afield env field =
 and afield_value env cname field =
   match field with
   | Aast.AFvalue e -> expr env e
-  | Aast.AFkvalue (e1, _e2) ->
-    Errors.unexpected_arrow (fst e1) cname;
+  | Aast.AFkvalue (((_, p, _) as e1), _e2) ->
+    Errors.unexpected_arrow p cname;
     expr env e1
 
 and afield_kvalue env cname field =
   match field with
-  | Aast.AFvalue e ->
-    Errors.missing_arrow (fst e) cname;
+  | Aast.AFvalue ((_, p, _) as e) ->
+    Errors.missing_arrow p cname;
     ( expr env e,
       expr
         env
-        ( fst e,
-          Aast.Lvar (fst e, Local_id.make_unscoped "__internal_placeholder") )
+        (p, p, Aast.Lvar (p, Local_id.make_unscoped "__internal_placeholder"))
     )
   | Aast.AFkvalue (e1, e2) -> (expr env e1, expr env e2)
 

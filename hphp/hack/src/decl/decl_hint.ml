@@ -29,7 +29,7 @@ and aast_user_attribute_to_decl_user_attribute env { ua_name; ua_params } =
     Typing_defs.ua_name = Decl_env.make_decl_posed env ua_name;
     ua_classname_params =
       List.filter_map ua_params ~f:(function
-          | (_, Class_const ((_, CI (_, cls)), (_, name)))
+          | (_, _, Class_const ((_, CI (_, cls)), (_, name)))
             when String.equal name SN.Members.mClass ->
             Some cls
           | _ -> None);

@@ -19,14 +19,14 @@
         f_body =
         { fb_ast =
           [([4:3-29],
-            (If ((([4:7-18], bool), (Binop (Eqeqeq, (([4:7-9], ?int), (Lvar ([4:7-9], $x))), (([4:14-18], null), Null)))),
-               [([4:3-29], (AssertEnv (Refinement, {$x}))); ([4:20-29], (Return (Some (([4:27-28], int), (Int "1")))))], 
+            (If ((([4:7-18], bool), [4:7-18], (Binop (Eqeqeq, (([4:7-9], ?int), [4:7-9], (Lvar ([4:7-9], $x))), (([4:14-18], null), [4:14-18], Null)))),
+               [([4:3-29], (AssertEnv (Refinement, {$x}))); ([4:20-29], (Return (Some (([4:27-28], int), [4:27-28], (Int "1")))))], 
                [([4:3-29], (AssertEnv (Refinement, {$x}))); ([Pos.none], Noop)])));
             ([5:3-29],
-             (If ((([5:7-18], bool), (Binop (Eqeqeq, (([5:7-11], null), Null), (([5:16-18], int), (Lvar ([5:16-18], $x)))))),
-                [([5:3-29], (AssertEnv (Refinement, {$x}))); ([5:20-29], (Return (Some (([5:27-28], int), (Int "2")))))], 
+             (If ((([5:7-18], bool), [5:7-18], (Binop (Eqeqeq, (([5:7-11], null), [5:7-11], Null), (([5:16-18], int), [5:16-18], (Lvar ([5:16-18], $x)))))),
+                [([5:3-29], (AssertEnv (Refinement, {$x}))); ([5:20-29], (Return (Some (([5:27-28], int), [5:27-28], (Int "2")))))], 
                 [([5:3-29], (AssertEnv (Refinement, {$x}))); ([Pos.none], Noop)])));
-            ([6:3-12], (Return (Some (([6:10-11], int), (Int "0")))))];
+            ([6:3-12], (Return (Some (([6:10-11], int), [6:10-11], (Int "0")))))];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }

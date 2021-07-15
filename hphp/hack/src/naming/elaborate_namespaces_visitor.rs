@@ -81,29 +81,35 @@ impl Env {
             Expr_::Call(c) => {
                 let (func, args) = (&c.0, &mut c.2);
                 match func {
-                    Expr(_, Expr_::Id(id))
+                    Expr(_, _, Expr_::Id(id))
                         if id.1 == sn::autoimported_functions::FUN_ && args.len() == 1 =>
                     {
                         match &args[0] {
-                            Expr(p, Expr_::String(fn_name)) => {
+                            Expr(_, p, Expr_::String(fn_name)) => {
                                 let fn_name = core_utils::add_ns_bstr(&fn_name);
-                                args[0] =
-                                    Expr(p.clone(), Expr_::String(fn_name.into_owned().into()));
+                                args[0] = Expr(
+                                    p.clone(),
+                                    p.clone(),
+                                    Expr_::String(fn_name.into_owned().into()),
+                                );
                             }
                             _ => {}
                         }
                     }
-                    Expr(_, Expr_::Id(id))
+                    Expr(_, _, Expr_::Id(id))
                         if (id.1 == sn::autoimported_functions::METH_CALLER
                             || id.1 == sn::autoimported_functions::CLASS_METH)
                             && args.len() == 2
                             && !self.in_codegen() =>
                     {
                         match &args[0] {
-                            Expr(p, Expr_::String(cl_name)) => {
+                            Expr(_, p, Expr_::String(cl_name)) => {
                                 let cl_name = core_utils::add_ns_bstr(&cl_name);
-                                args[0] =
-                                    Expr(p.clone(), Expr_::String(cl_name.into_owned().into()));
+                                args[0] = Expr(
+                                    p.clone(),
+                                    p.clone(),
+                                    Expr_::String(cl_name.into_owned().into()),
+                                );
                             }
                             _ => {}
                         }
@@ -226,7 +232,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 args.accept(env, self.object())?;
                 uargs.accept(env, self.object())?;
 
-                if let Some(sid) = func.1.as_id_mut() {
+                if let Some(sid) = func.2.as_id_mut() {
                     if !sn::special_functions::is_special_function(&sid.1) {
                         sid.1 = namespaces::elaborate_id(
                             &env.namespace,
@@ -252,7 +258,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 } else if let Some(cc) = fpid.as_fpclass_const_mut() {
                     let type_ = cc.0;
                     if let Some(e) = type_.1.as_ciexpr_mut() {
-                        if let Some(sid) = e.1.as_id_mut() {
+                        if let Some(sid) = e.2.as_id_mut() {
                             env.elaborate_type_name(sid);
                         } else {
                             e.accept(env, self.object())?;
@@ -265,7 +271,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             }
             Expr_::ObjGet(og) => {
                 let (obj, expr, nullsafe) = (&mut og.0, &mut og.1, &mut og.2);
-                if let Expr_::Id(..) = expr.1 {
+                if let Expr_::Id(..) = expr.2 {
                 } else {
                     expr.accept(env, self.object())?;
                 }
@@ -281,7 +287,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             Expr_::New(n) => {
                 let (class_id, targs, args, unpacked_el) = (&mut n.0, &mut n.1, &mut n.2, &mut n.3);
                 if let Some(e) = class_id.1.as_ciexpr_mut() {
-                    if let Some(sid) = e.1.as_id_mut() {
+                    if let Some(sid) = e.2.as_id_mut() {
                         env.elaborate_type_name(sid);
                     } else {
                         e.accept(env, self.object())?;
@@ -300,7 +306,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             Expr_::ClassConst(cc) => {
                 let type_ = &mut cc.0;
                 if let Some(e) = type_.1.as_ciexpr_mut() {
-                    if let Some(sid) = e.1.as_id_mut() {
+                    if let Some(sid) = e.2.as_id_mut() {
                         env.elaborate_type_name(sid);
                     } else {
                         e.accept(env, self.object())?;
@@ -312,7 +318,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             Expr_::ClassGet(cg) => {
                 let (class_id, class_get_expr) = (&mut cg.0, &mut cg.1);
                 if let Some(e) = class_id.1.as_ciexpr_mut() {
-                    if let Some(sid) = e.1.as_id_mut() {
+                    if let Some(sid) = e.2.as_id_mut() {
                         env.elaborate_type_name(sid);
                     } else {
                         e.accept(env, self.object())?;

@@ -18,7 +18,9 @@
            ];
          m_ctxs = None; m_unsafe_ctxs = None;
          m_body =
-         { fb_ast = [([5:5-13], (Expr (([5:5-12], void), (Call ((([5:5-8], (function(int $x): void)), (Id ([5:5-8], "\\foo"))), [], [(([5:9-11], int), (Lvar ([5:9-11], $x)))], None)))))];
+         { fb_ast =
+           [([5:5-13],
+             (Expr (([5:5-12], void), [5:5-12], (Call ((([5:5-8], (function(int $x): void)), [5:5-8], (Id ([5:5-8], "\\foo"))), [], [(([5:9-11], int), [5:9-11], (Lvar ([5:9-11], $x)))], None)))))];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([4:19-30], (Hprim Tvoid)))); m_external = false; 

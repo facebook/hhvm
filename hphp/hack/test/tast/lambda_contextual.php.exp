@@ -43,10 +43,10 @@
          { fb_ast =
            [([6:3-24],
              (Expr
-                (([6:3-23], void),
-                 (Call ((([6:3-12], (function((function(int): num) $f): void)), (Id ([6:3-12], "\\takes_fun"))), 
+                (([6:3-23], void), [6:3-23],
+                 (Call ((([6:3-12], (function((function(int): num) $f): void)), [6:3-12], (Id ([6:3-12], "\\takes_fun"))), 
                     [],
-                    [(([6:13-22], (function(int $x): num)),
+                    [(([6:13-22], (function(int $x): num)), [6:13-22],
                       (Lfun (
                          { f_span = [6:13-22]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
@@ -60,7 +60,7 @@
                               param_callconv = None; param_user_attributes = []; 
                               param_visibility = None }
                              ];
-                           f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:20-22], (Return (Some (([6:20-22], int), (Lvar ([6:20-22], $x))))))]; fb_annotation = () };
+                           f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:20-22], (Return (Some (([6:20-22], int), [6:20-22], (Lvar ([6:20-22], $x))))))]; fb_annotation = () };
                            f_fun_kind = FSync; f_user_attributes = []; 
                            f_external = false; f_doc_comment = None },
                          [])))

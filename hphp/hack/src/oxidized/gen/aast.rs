@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<373d9681bc6df5fe72827123e58e3ea7>>
+// @generated SignedSource<<34c2182810a1ebb307a72cbe3a06f0a8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -369,7 +369,7 @@ pub enum ClassId_<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct Expr<Ex, Fb, En, Hi>(pub Ex, pub Expr_<Ex, Fb, En, Hi>);
+pub struct Expr<Ex, Fb, En, Hi>(pub Ex, pub Pos, pub Expr_<Ex, Fb, En, Hi>);
 
 #[derive(
     Clone,

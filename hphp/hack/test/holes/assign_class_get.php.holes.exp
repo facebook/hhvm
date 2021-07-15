@@ -8,22 +8,23 @@
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
          cv_visibility = Private; cv_type = ((int), (Some ([4:18-21], (Hprim Tint)))); 
-         cv_id = ([4:22-27], "prop"); cv_expr = (Some (([4:30-31], int), (Int "0"))); 
+         cv_id = ([4:22-27], "prop"); cv_expr = (Some (([4:30-31], int), [4:30-31], (Int "0"))); 
          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
          cv_is_static = true; cv_span = [4:22-31] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Private; cv_type = ((?int), (Some ([5:18-22], (Hoption ([5:19-22], (Hprim Tint)))))); 
-          cv_id = ([5:23-37], "nullable_prop"); cv_expr = (Some (([5:40-44], null), Null)); 
+          cv_id = ([5:23-37], "nullable_prop"); cv_expr = (Some (([5:40-44], null), [5:40-44], Null)); 
           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
           cv_is_static = true; cv_span = [5:23-44] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Private; cv_type = (((int, string)), (Some ([6:18-31], (Htuple [([6:19-22], (Hprim Tint)); ([6:24-30], (Hprim Tstring))]))));
-          cv_id = ([6:32-42], "pair_prop"); cv_expr = (Some (([6:45-57], (int, string)), (Tuple [(([6:51-52], int), (Int "0")); (([6:54-56], string), (String ""))]))); 
+          cv_id = ([6:32-42], "pair_prop");
+          cv_expr = (Some (([6:45-57], (int, string)), [6:45-57], (Tuple [(([6:51-52], int), [6:51-52], (Int "0")); (([6:54-56], string), [6:54-56], (String ""))]))); 
           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
           cv_is_static = true; cv_span = [6:32-57] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Private; cv_type = ((Vector<string>), (Some ([7:18-32], (Happly (([7:18-24], "\\HH\\Vector"), [([7:25-31], (Hprim Tstring))])))));
-          cv_id = ([7:33-42], "vec_prop"); cv_expr = (Some (([7:45-54], Vector<string>), (ValCollection (Vector, None, [])))); 
+          cv_id = ([7:33-42], "vec_prop"); cv_expr = (Some (([7:45-54], Vector<string>), [7:45-54], (ValCollection (Vector, None, [])))); 
           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
           cv_is_static = true; cv_span = [7:33-54] }
         ];
@@ -43,9 +44,9 @@
          { fb_ast =
            [([11:5-22],
              (Expr
-                (([11:5-21], string),
-                 (Binop ((Eq None), (([11:5-16], int), (Class_get ((([11:5-9], C), CIself), (CGstring ([11:11-16], "$prop")), false))),
-                    (([11:19-21], string), (Hole ((([11:19-21], string), (Lvar ([11:19-21], $x))), (string), (int), Typing))))))))
+                (([11:5-21], string), [11:5-21],
+                 (Binop ((Eq None), (([11:5-16], int), [11:5-16], (Class_get ((([11:5-9], C), CIself), (CGstring ([11:11-16], "$prop")), false))),
+                    (([11:19-21], string), [11:19-21], (Hole ((([11:19-21], string), [11:19-21], (Lvar ([11:19-21], $x))), (string), (int), Typing))))))))
              ];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -66,8 +67,9 @@
           { fb_ast =
             [([16:5-31],
               (Expr
-                 (([16:5-30], nothing),
-                  (Binop ((Eq None), (([16:5-25], ?int), (Class_get ((([16:5-9], C), CIself), (CGstring ([16:11-25], "$nullable_prop")), false))), (([16:28-30], nothing), (Lvar ([16:28-30], $x))))))))
+                 (([16:5-30], nothing), [16:5-30],
+                  (Binop ((Eq None), (([16:5-25], ?int), [16:5-25], (Class_get ((([16:5-9], C), CIself), (CGstring ([16:11-25], "$nullable_prop")), false))),
+                     (([16:28-30], nothing), [16:28-30], (Lvar ([16:28-30], $x))))))))
               ];
             fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -88,9 +90,9 @@
           { fb_ast =
             [([21:5-22],
               (Expr
-                 (([21:5-21], (int | string)),
-                  (Binop ((Eq None), (([21:5-16], int), (Class_get ((([21:5-9], C), CIself), (CGstring ([21:11-16], "$prop")), false))),
-                     (([21:19-21], (int | string)), (Hole ((([21:19-21], (int | string)), (Lvar ([21:19-21], $x))), ((int | string)), (int), Typing))))))))
+                 (([21:5-21], (int | string)), [21:5-21],
+                  (Binop ((Eq None), (([21:5-16], int), [21:5-16], (Class_get ((([21:5-9], C), CIself), (CGstring ([21:11-16], "$prop")), false))),
+                     (([21:19-21], (int | string)), [21:19-21], (Hole ((([21:19-21], (int | string)), [21:19-21], (Lvar ([21:19-21], $x))), ((int | string)), (int), Typing))))))))
               ];
             fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -111,9 +113,9 @@
           { fb_ast =
             [([25:5-27],
               (Expr
-                 (([25:5-26], (int, bool)),
-                  (Binop ((Eq None), (([25:5-21], (int, string)), (Class_get ((([25:5-9], C), CIself), (CGstring ([25:11-21], "$pair_prop")), false))),
-                     (([25:24-26], (int, bool)), (Hole ((([25:24-26], (int, bool)), (Lvar ([25:24-26], $x))), ((int, bool)), ((int, string)), Typing))))))))
+                 (([25:5-26], (int, bool)), [25:5-26],
+                  (Binop ((Eq None), (([25:5-21], (int, string)), [25:5-21], (Class_get ((([25:5-9], C), CIself), (CGstring ([25:11-21], "$pair_prop")), false))),
+                     (([25:24-26], (int, bool)), [25:24-26], (Hole ((([25:24-26], (int, bool)), [25:24-26], (Lvar ([25:24-26], $x))), ((int, bool)), ((int, string)), Typing))))))))
               ];
             fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -134,9 +136,10 @@
           { fb_ast =
             [([30:5-28],
               (Expr
-                 (([30:5-27], bool),
-                  (Binop ((Eq None), (([30:5-22], bool), (Array_get ((([30:5-20], Vector<string>), (Class_get ((([30:5-9], C), CIself), (CGstring ([30:11-20], "$vec_prop")), false))), None))),
-                     (([30:25-27], bool), (Hole ((([30:25-27], bool), (Lvar ([30:25-27], $x))), (bool), (string), Typing))))))))
+                 (([30:5-27], bool), [30:5-27],
+                  (Binop ((Eq None),
+                     (([30:5-22], bool), [30:5-22], (Array_get ((([30:5-20], Vector<string>), [30:5-20], (Class_get ((([30:5-9], C), CIself), (CGstring ([30:11-20], "$vec_prop")), false))), None))),
+                     (([30:25-27], bool), [30:25-27], (Hole ((([30:25-27], bool), [30:25-27], (Lvar ([30:25-27], $x))), (bool), (string), Typing))))))))
               ];
             fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -157,11 +160,12 @@
           { fb_ast =
             [([35:5-30],
               (Expr
-                 (([35:5-29], bool),
+                 (([35:5-29], bool), [35:5-29],
                   (Binop ((Eq None),
-                     (([35:5-24], bool),
-                      (Array_get ((([35:5-21], (int, string)), (Class_get ((([35:5-9], C), CIself), (CGstring ([35:11-21], "$pair_prop")), false))), (Some (([35:22-23], int), (Int "0")))))),
-                     (([35:27-29], bool), (Lvar ([35:27-29], $x))))))))
+                     (([35:5-24], bool), [35:5-24],
+                      (Array_get ((([35:5-21], (int, string)), [35:5-21], (Class_get ((([35:5-9], C), CIself), (CGstring ([35:11-21], "$pair_prop")), false))),
+                         (Some (([35:22-23], int), [35:22-23], (Int "0")))))),
+                     (([35:27-29], bool), [35:27-29], (Lvar ([35:27-29], $x))))))))
               ];
             fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -182,11 +186,12 @@
           { fb_ast =
             [([40:5-30],
               (Expr
-                 (([40:5-29], bool),
+                 (([40:5-29], bool), [40:5-29],
                   (Binop ((Eq None),
-                     (([40:5-24], bool),
-                      (Array_get ((([40:5-21], (int, string)), (Class_get ((([40:5-9], C), CIself), (CGstring ([40:11-21], "$pair_prop")), false))), (Some (([40:22-23], int), (Int "1")))))),
-                     (([40:27-29], bool), (Lvar ([40:27-29], $x))))))))
+                     (([40:5-24], bool), [40:5-24],
+                      (Array_get ((([40:5-21], (int, string)), [40:5-21], (Class_get ((([40:5-9], C), CIself), (CGstring ([40:11-21], "$pair_prop")), false))),
+                         (Some (([40:22-23], int), [40:22-23], (Int "1")))))),
+                     (([40:27-29], bool), [40:27-29], (Lvar ([40:27-29], $x))))))))
               ];
             fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

@@ -836,12 +836,14 @@ impl<'a> smart_constructors::NodeType for Node<'a> {
         matches!(self, Node::QualifiedName(..)) || matches!(self, Node::Ignored(SK::QualifiedName))
     }
     fn is_prefix_unary_expression(&self) -> bool {
-        matches!(self, Node::Expr(aast::Expr(_, aast::Expr_::Unop(..))))
+        matches!(self, Node::Expr(aast::Expr(_, _, aast::Expr_::Unop(..))))
             || matches!(self, Node::Ignored(SK::PrefixUnaryExpression))
     }
     fn is_scope_resolution_expression(&self) -> bool {
-        matches!(self, Node::Expr(aast::Expr(_, aast::Expr_::ClassConst(..))))
-            || matches!(self, Node::Ignored(SK::ScopeResolutionExpression))
+        matches!(
+            self,
+            Node::Expr(aast::Expr(_, _, aast::Expr_::ClassConst(..)))
+        ) || matches!(self, Node::Ignored(SK::ScopeResolutionExpression))
     }
     fn is_missing(&self) -> bool {
         matches!(self, Node::Ignored(SK::Missing))
@@ -1077,7 +1079,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 first_pos,
                 self.merge(self.pos_from_slice(inner_list), second_pos),
             ),
-            Node::Expr(&aast::Expr(pos, _)) => pos,
+            Node::Expr(&aast::Expr(_, pos, _)) => pos,
             Node::Token(token) => self.token_pos(token),
             _ => return None,
         };
@@ -1112,7 +1114,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             _ => return None,
         };
         let pos = self.get_pos(node);
-        Some(self.alloc(aast::Expr(pos, expr_)))
+        Some(self.alloc(aast::Expr(pos, pos, expr_)))
     }
 
     fn node_to_non_ret_ty(&self, node: Node<'a>) -> Option<&'a Ty<'a>> {
@@ -1135,7 +1137,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             Node::Expr(expr) => {
                 fn expr_to_ty<'a>(arena: &'a Bump, expr: &'a nast::Expr<'a>) -> Option<Ty_<'a>> {
                     use aast::Expr_::*;
-                    match expr.1 {
+                    match expr.2 {
                         Null => Some(Ty_::Tprim(arena.alloc(aast::Tprim::Tnull))),
                         This => Some(Ty_::Tthis),
                         True | False => Some(Ty_::Tprim(arena.alloc(aast::Tprim::Tbool))),
@@ -1373,9 +1375,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             | Node::BooleanLiteral(_)
             | Node::IntLiteral(_)
             | Node::FloatingLiteral(_)
-            | Node::Expr(aast::Expr(_, aast::Expr_::Unop(&(Uop::Uminus, _))))
-            | Node::Expr(aast::Expr(_, aast::Expr_::Unop(&(Uop::Uplus, _))))
-            | Node::Expr(aast::Expr(_, aast::Expr_::String(..))) => self.node_to_ty(node),
+            | Node::Expr(aast::Expr(_, _, aast::Expr_::Unop(&(Uop::Uminus, _))))
+            | Node::Expr(aast::Expr(_, _, aast::Expr_::Unop(&(Uop::Uplus, _))))
+            | Node::Expr(aast::Expr(_, _, aast::Expr_::String(..))) => self.node_to_ty(node),
             Node::Token(t) if t.kind() == TokenKind::NullLiteral => {
                 let pos = self.token_pos(t);
                 Some(self.alloc(Ty(
@@ -1691,12 +1693,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             Node::IntLiteral(&(s, pos)) => ShapeFieldName::SFlitStr(self.alloc((pos, s.into()))),
             Node::Expr(aast::Expr(
                 _,
+                _,
                 aast::Expr_::ClassConst(&(
                     aast::ClassId(_, aast::ClassId_::CI(&class_name)),
                     const_name,
                 )),
             )) => ShapeFieldName::SFclassConst(self.alloc((class_name, const_name))),
             Node::Expr(aast::Expr(
+                _,
                 _,
                 aast::Expr_::ClassConst(&(aast::ClassId(pos, aast::ClassId_::CIself), const_name)),
             )) => ShapeFieldName::SFclassConst(self.alloc((
@@ -2694,7 +2698,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             Some(value) => value,
             None => return Node::Ignored(SK::PrefixUnaryExpression),
         };
-        Node::Expr(self.alloc(aast::Expr(pos, aast::Expr_::Unop(self.alloc((op, value))))))
+        Node::Expr(self.alloc(aast::Expr(
+            pos,
+            pos,
+            aast::Expr_::Unop(self.alloc((op, value))),
+        )))
     }
 
     fn make_postfix_unary_expression(&mut self, value: Self::R, op: Self::R) -> Self::R {
@@ -2708,7 +2716,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             Some(value) => value,
             None => return Node::Ignored(SK::PostfixUnaryExpression),
         };
-        Node::Expr(self.alloc(aast::Expr(pos, aast::Expr_::Unop(self.alloc((op, value))))))
+        Node::Expr(self.alloc(aast::Expr(
+            pos,
+            pos,
+            aast::Expr_::Unop(self.alloc((op, value))),
+        )))
     }
 
     fn make_binary_expression(&mut self, lhs: Self::R, op_node: Self::R, rhs: Self::R) -> Self::R {
@@ -2754,6 +2766,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         };
 
         Node::Expr(self.alloc(aast::Expr(
+            pos,
             pos,
             aast::Expr_::Binop(self.alloc((op, lhs, rhs))),
         )))
@@ -4550,6 +4563,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         self.accumulate_const_ref(class_id, &value_id);
         Node::Expr(self.alloc(aast::Expr(
             pos,
+            pos,
             nast::Expr_::ClassConst(self.alloc((class_id, self.alloc((value_id.0, value_id.1))))),
         )))
     }
@@ -4664,6 +4678,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         };
         let classname_params = self.slice(args.iter().filter_map(|node| match node {
             Node::Expr(aast::Expr(
+                _,
                 full_pos,
                 aast::Expr_::ClassConst(&(
                     aast::ClassId(_, aast::ClassId_::CI(&Id(pos, class_name))),
@@ -4682,8 +4697,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         } {
             fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut Vec<'a, u8>) {
                 match expr {
-                    &aast::Expr(_, aast::Expr_::String(val)) => acc.extend_from_slice(val),
-                    &aast::Expr(_, aast::Expr_::Binop(&(Bop::Dot, e1, e2))) => {
+                    &aast::Expr(_, _, aast::Expr_::String(val)) => acc.extend_from_slice(val),
+                    &aast::Expr(_, _, aast::Expr_::Binop(&(Bop::Dot, e1, e2))) => {
                         fold_string_concat(&e1, acc);
                         fold_string_concat(&e2, acc);
                     }
@@ -4693,7 +4708,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
             self.slice(args.iter().filter_map(|expr| match expr {
                 Node::StringLiteral((x, _)) => Some(*x),
-                Node::Expr(e @ aast::Expr(_, aast::Expr_::Binop(_))) => {
+                Node::Expr(e @ aast::Expr(_, _, aast::Expr_::Binop(_))) => {
                     let mut acc = Vec::new_in(self.arena);
                     fold_string_concat(e, &mut acc);
                     Some(acc.into_bump_slice().into())

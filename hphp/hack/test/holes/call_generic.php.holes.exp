@@ -52,10 +52,12 @@
          { fb_ast =
            [([7:3-27],
              (Expr
-                (([7:3-26], void),
-                 (Call ((([7:3-18], (function<T as num>(int $x, int $y): void)), (Id ([7:3-18], "\\generic_bounded"))), 
+                (([7:3-26], void), [7:3-26],
+                 (Call ((([7:3-18], (function<T as num>(int $x, int $y): void)), [7:3-18], (Id ([7:3-18], "\\generic_bounded"))), 
                     [((int), ([7:3-18], (Happly (([Pos.none], "_"), []))))],
-                    [(([7:19-21], int), (Lvar ([7:19-21], $x))); (([7:23-25], string), (Hole ((([7:23-25], string), (Lvar ([7:23-25], $y))), (string), (int), Typing)))], None)))))
+                    [(([7:19-21], int), [7:19-21], (Lvar ([7:19-21], $x)));
+                      (([7:23-25], string), [7:23-25], (Hole ((([7:23-25], string), [7:23-25], (Lvar ([7:23-25], $y))), (string), (int), Typing)))],
+                    None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -88,10 +90,12 @@
          { fb_ast =
            [([12:3-64],
              (Expr
-                (([12:3-63], void),
-                 (Call ((([12:3-18], (function<T as num>(num $x, num $y): void)), (Id ([12:3-18], "\\generic_bounded"))), 
+                (([12:3-63], void), [12:3-63],
+                 (Call ((([12:3-18], (function<T as num>(num $x, num $y): void)), [12:3-18], (Id ([12:3-18], "\\generic_bounded"))), 
                     [((num), ([12:3-18], (Happly (([Pos.none], "_"), []))))],
-                    [(([12:19-21], int), (Lvar ([12:19-21], $x))); (([12:23-62], float), (Hole ((([12:59-61], string), (Lvar ([12:59-61], $y))), (string), (float), UnsafeCast)))], None)))))
+                    [(([12:19-21], int), [12:19-21], (Lvar ([12:19-21], $x)));
+                      (([12:23-62], float), [12:23-62], (Hole ((([12:59-61], string), [12:59-61], (Lvar ([12:59-61], $y))), (string), (float), UnsafeCast)))],
+                    None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

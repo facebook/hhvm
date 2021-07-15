@@ -164,17 +164,17 @@ let rec const_string_of (env : env) (e : Nast.expr) :
     | (_, Left p) -> Left p
   in
   match e with
-  | (_, String s) -> (env, Right s)
+  | (_, _, String s) -> (env, Right s)
   (* It's an invariant that this is going to fail, but look for the best
    * evidence *)
-  | (p, String2 xs) ->
+  | (p, _, String2 xs) ->
     let (env, xs) = mapM const_string_of env (List.rev xs) in
     (env, List.fold_right ~f:glue xs ~init:(Left p))
-  | (_, Binop (Ast_defs.Dot, a, b)) ->
+  | (_, _, Binop (Ast_defs.Dot, a, b)) ->
     let (env, stra) = const_string_of env a in
     let (env, strb) = const_string_of env b in
     (env, glue stra strb)
-  | (p, _) -> (env, Left p)
+  | (p, _, _) -> (env, Left p)
 
 let get_format_string_type_arg t =
   match get_node t with
@@ -195,18 +195,20 @@ let get_possibly_like_format_string_type_arg t =
 (* Specialize a function type using whatever we can tell about the args *)
 let retype_magic_func (env : env) (ft : locl_fun_type) (el : Nast.expr list) :
     env * locl_fun_type =
-  let rec f env param_types args : env * locl_fun_params option =
+  let rec f env param_types (args : Nast.expr list) :
+      env * locl_fun_params option =
     match (param_types, args) with
-    | ([{ fp_type = { et_type; _ }; _ }], [(_, Null)])
+    | ([{ fp_type = { et_type; _ }; _ }], [(_, _, Null)])
       when is_some (get_opt_format_string_type_arg et_type) ->
       (env, None)
-    | ([({ fp_type = { et_type; _ }; _ } as fp)], arg :: _) ->
+    | ([({ fp_type = { et_type; _ }; _ } as fp)], (arg : Nast.expr) :: _) ->
       begin
         match get_possibly_like_format_string_type_arg et_type with
         | Some type_arg ->
           (match const_string_of env arg with
           | (env, Right str) ->
-            let (env, argl) = parse_printf_string env str (fst arg) type_arg in
+            let (pos, _, _) = arg in
+            let (env, argl) = parse_printf_string env str pos type_arg in
             ( env,
               Some
                 ( {

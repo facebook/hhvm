@@ -13,10 +13,12 @@
         { fb_ast =
           [([4:3-25],
             (Expr
-               (([4:3-24], Pair<int, string>),
-                (Binop ((Eq None), (([4:3-5], Pair<int, string>), (Lvar ([4:3-5], $x))),
-                   (([4:8-24], Pair<int, string>), (Pair (None, (([4:14-15], int), (Int "2")), (([4:17-23], string), (String "true"))))))))));
-            ([6:3-13], (Return (Some (([6:10-12], Pair<int, string>), (Hole ((([6:10-12], Pair<int, string>), (Lvar ([6:10-12], $x))), (Pair<int, string>), (Pair<int, bool>), Typing))))))];
+               (([4:3-24], Pair<int, string>), [4:3-24],
+                (Binop ((Eq None), (([4:3-5], Pair<int, string>), [4:3-5], (Lvar ([4:3-5], $x))),
+                   (([4:8-24], Pair<int, string>), [4:8-24], (Pair (None, (([4:14-15], int), [4:14-15], (Int "2")), (([4:17-23], string), [4:17-23], (String "true"))))))))));
+            ([6:3-13],
+             (Return (Some (([6:10-12], Pair<int, string>), [6:10-12], (Hole ((([6:10-12], Pair<int, string>), [6:10-12], (Lvar ([6:10-12], $x))), (Pair<int, string>), (Pair<int, bool>), Typing))))))
+            ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }

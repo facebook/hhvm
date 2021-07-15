@@ -598,7 +598,7 @@ let shape_field_name : ptype renv_ -> _ -> Typing_defs.tshape_field_name option
  fun renv ix ->
   let ix =
     (* The utility function does not expect a TAST *)
-    let ((p, _), e) = ix in
+    let (_, p, e) = ix in
     (p, e)
   in
   (* TODO(T72024862): This does not support late static binding *)
@@ -789,7 +789,7 @@ let cow_array ~pos renv ty =
 
 (* Deals with an assignment to a local variable or an object property *)
 let assign_helper
-    ?(use_pc = true) ~expr ~pos renv env ((_, lhs_ty), lhs_exp) rhs_pty =
+    ?(use_pc = true) ~expr ~pos renv env ((_, lhs_ty), _, lhs_exp) rhs_pty =
   match lhs_exp with
   | A.Lvar (_, lid) ->
     let prefix = Local_id.to_string lid in
@@ -804,7 +804,7 @@ let assign_helper
     in
     let env = Env.acc env (subtype ~pos rhs_pty lhs_pty) in
     env
-  | A.Obj_get (obj, (_, A.Id (_, property)), _, _) ->
+  | A.Obj_get (obj, (_, _, A.Id (_, property)), _, _) ->
     let (env, obj_pty) = expr env obj in
     let obj_pol = (receiver_of_obj_get pos obj_pty property).c_self in
     let lhs_pty = property_ptype pos renv obj_pty property lhs_ty in
@@ -836,7 +836,7 @@ let may_throw_out_of_bounds_exn ~pos renv env length_pol ix_pty =
 
 let int_of_exp ix_exp =
   match ix_exp with
-  | (_, A.Int i) -> int_of_string i
+  | (_, _, A.Int i) -> int_of_string i
   | _ -> fail "expected an integer literal while indexing a tuple"
 
 let nth_tuple_pty ptys ix_exp =
@@ -861,9 +861,15 @@ let overwrite_nth_pty tuple_pty ix_exp pty =
    does not mutate an array cell, but the property p of
    the object $x instead.  *)
 let rec assign
-    ?(use_pc = true) ~expr ~pos renv env (((_, lhs_ty), _) as lhs) rhs_pty =
-  match snd lhs with
-  | A.Array_get ((((_, arry_ty), _) as arry_exp), ix_opt) ->
+    ?(use_pc = true)
+    ~expr
+    ~pos
+    renv
+    env
+    (((_, lhs_ty), _, lhs_expr_) as lhs)
+    rhs_pty =
+  match lhs_expr_ with
+  | A.Array_get ((((_, arry_ty), _, _) as arry_exp), ix_opt) ->
     let handle_collection
         env ~should_skip_exn old_array new_array key value length =
       (* TODO(T68269878): track flows due to length changes *)
@@ -994,7 +1000,7 @@ let seq ~run (env, out) x =
     (env, Env.merge_out out_exceptional out)
 
 (* Generate flow constraints for an expression *)
-let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
+let rec expr ~pos renv (env : Env.expr_env) (((_, ety), epos, e) : Tast.expr) =
   let expr = expr ~pos renv in
   let expr_with_deps env deps e =
     Env.expr_with_pc_deps env deps (fun env -> expr env e)
@@ -1109,7 +1115,9 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
     expr
       env
       ( (epos, ety),
-        A.Binop (Ast_defs.Eq None, e1, ((epos, ety), A.Binop (op, e1, e2))) )
+        epos,
+        A.Binop (Ast_defs.Eq None, e1, ((epos, ety), epos, A.Binop (op, e1, e2)))
+      )
   | A.Binop (Ast_defs.QuestionQuestion, e1, e2)
   | A.Eif (e1, None, e2) ->
     let (env, ty1) = expr env e1 in
@@ -1217,7 +1225,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
         expr env e
     end
   | A.Lvar (_pos, lid) -> refresh_local_type ~pos renv env lid ety
-  | A.Obj_get (obj, (_, A.Id (_, property)), _, _) ->
+  | A.Obj_get (obj, (_, _, A.Id (_, property)), _, _) ->
     let (env, obj_ptype) = expr env obj in
     let prop_pty = property_ptype pos renv obj_ptype property ety in
     let prefix = "." ^ property in
@@ -1246,11 +1254,11 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
     begin
       match e with
       (* Generally a function call *)
-      | (_, A.Id (_, name)) ->
+      | (_, _, A.Id (_, name)) ->
         let call_id = Decl.make_callable_name ~is_static:false None name in
         call env (Cglobal (call_id, fty)) None
       (* Regular method call *)
-      | (_, A.Obj_get (obj, (_, A.Id (_, meth_name)), _, _)) ->
+      | (_, _, A.Obj_get (obj, (_, _, A.Id (_, meth_name)), _, _)) ->
         let (env, obj_pty) = expr env obj in
         begin
           match obj_pty with
@@ -1262,7 +1270,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((epos, ety), e) : Tast.expr) =
           | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty
         end
       (* Static method call*)
-      | (_, A.Class_const (((_, ty), cid), (_, meth_name))) ->
+      | (_, _, A.Class_const (((_, ty), cid), (_, meth_name))) ->
         let env =
           match cid with
           | A.CIexpr e -> fst @@ expr env e
@@ -1613,7 +1621,9 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
           let (env, ety) = expr (Env.prep_expr env) e in
           let env =
             match lvar with
-            | Some lid -> assign ~expr ~pos renv env (fst e, A.Lvar lid) ety
+            | Some lid ->
+              let (pty, p, _) = e in
+              assign ~expr ~pos renv env (pty, p, A.Lvar lid) ety
             | None -> env
           in
           let (env, ethrow) = Env.close_expr env in
@@ -1626,7 +1636,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     let (env, _ety, ethrow) = expr renv env e in
     Env.close_stmt ~merge:ethrow env K.Next
   | A.If (cond, b1, b2) ->
-    let pos = fst (fst cond) in
+    let ((pos, _), _, _) = cond in
     let (env, cty, cthrow) = expr ~pos renv env cond in
     (* use object_policy to account for both booleans
        and null checks *)
@@ -1639,7 +1649,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     let out = clear_pc_deps out in
     (env, out)
   | A.While (cond, (_, A.AssertEnv (A.Join, tymap)) :: blk) ->
-    let pos = fst (fst cond) in
+    let ((pos, _), _, _) = cond in
     let env = refresh_with_tymap ~pos renv env tymap in
     let beg_locals = Env.get_locals env in
     (* TODO: pc_pols should also flow into cty because the condition is evaluated
@@ -1664,7 +1674,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     (env, out)
   | A.For (inits, cond_opt, incrs, (_, A.AssertEnv (A.Join, tymap)) :: blk) ->
     (* Helper that evaluates an expression, but discards its type *)
-    let discarding_expr env (((pos, _), _) as exp) =
+    let discarding_expr env ((_, pos, _) as exp) =
       let (env, _, out_exceptional) = expr ~pos renv env exp in
       Env.close_stmt ~merge:out_exceptional env K.Next
     in
@@ -1678,7 +1688,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
        otherwise. *)
     let pos =
       match cond_opt with
-      | Some ((cond_pos, _), _) -> cond_pos
+      | Some ((cond_pos, _), _, _) -> cond_pos
       | None -> pos
     in
 
@@ -1716,7 +1726,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     let out = clear_pc_deps out in
     (env, out)
   | A.Foreach (collection, as_exp, (_, A.AssertEnv (A.Join, tymap)) :: blk) ->
-    let pos = fst (fst collection) in
+    let (_, pos, _) = collection in
     let env = refresh_with_tymap ~pos renv env tymap in
     let beg_locals = Env.get_locals env in
 
@@ -1738,8 +1748,8 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     let expr = expr_ ~pos renv in
     let (env, pc_policies) =
       match as_exp with
-      | Aast.As_v (((_, value_ty), _) as value)
-      | Aast.Await_as_v (_, (((_, value_ty), _) as value)) ->
+      | Aast.As_v (((_, value_ty), _, _) as value)
+      | Aast.Await_as_v (_, (((_, value_ty), _, _) as value)) ->
         let (env, value_pty, pc_policies) =
           match collection_pty with
           | Tcow_array arry -> (env, arry.a_value, PSet.singleton arry.a_length)
@@ -1761,9 +1771,10 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
         in
         let env = assign_helper ~expr ~pos renv env value value_pty in
         (env, pc_policies)
-      | Aast.As_kv ((((_, key_ty), _) as key), (((_, value_ty), _) as value))
+      | Aast.As_kv
+          ((((_, key_ty), _, _) as key), (((_, value_ty), _, _) as value))
       | Aast.Await_as_kv
-          (_, (((_, key_ty), _) as key), (((_, value_ty), _) as value)) ->
+          (_, (((_, key_ty), _, _) as key), (((_, value_ty), _, _) as value)) ->
         let (env, key_pty, value_pty, pc_policies) =
           match collection_pty with
           | Tcow_array arry ->
@@ -1901,7 +1912,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
       out_try_catch
       (env, KMap.empty)
   | A.Switch (e, cl) ->
-    let pos = fst (fst e) in
+    let ((pos, _), _, _) = e in
     let (env, ety, ethrow) = expr ~pos renv env e in
     let (env, out_cond) = Env.close_stmt ~merge:ethrow env K.Fallthrough in
     let case (env, (out, deps)) c =
@@ -1914,7 +1925,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
         match c with
         | A.Default (_, b) -> (env, out, PSet.empty, b)
         | A.Case (e, b) ->
-          let pos = fst (fst e) in
+          let ((pos, _), _, _) = e in
           let (env, ety, ethrow) = expr ~pos renv env e in
           let out = Env.merge_out out ethrow in
           (env, out, object_policy ety, b)

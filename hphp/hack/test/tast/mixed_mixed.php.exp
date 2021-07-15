@@ -46,12 +46,14 @@
          { fb_ast =
            [([7:3-12:5],
              (Expr
-                (([7:3-12:4], void),
-                 (Call ((([7:3-15], (function(mixed $_): void)), (Id ([7:3-15], "\\expect_mixed"))), 
+                (([7:3-12:4], void), [7:3-12:4],
+                 (Call ((([7:3-15], (function(mixed $_): void)), [7:3-15], (Id ([7:3-15], "\\expect_mixed"))), 
                     [],
-                    [(([8:5-11:6], dict<arraykey, mixed>),
+                    [(([8:5-11:6], dict<arraykey, mixed>), [8:5-11:6],
                       (KeyValCollection (Dict, None,
-                         [((([9:7-10], string), (String "a")), (([9:14-16], int), (Lvar ([9:14-16], $a)))); ((([10:7-10], string), (String "b")), (([10:14-16], string), (Lvar ([10:14-16], $b))))])))
+                         [((([9:7-10], string), [9:7-10], (String "a")), (([9:14-16], int), [9:14-16], (Lvar ([9:14-16], $a))));
+                           ((([10:7-10], string), [10:7-10], (String "b")), (([10:14-16], string), [10:14-16], (Lvar ([10:14-16], $b))))]
+                         )))
                       ],
                     None)))))
              ];

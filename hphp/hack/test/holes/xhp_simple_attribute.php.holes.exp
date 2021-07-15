@@ -61,25 +61,30 @@
          { fb_ast =
            [([7:38-49],
              (Expr
-                (([7:38-49], dict<string, dynamic>),
+                (([7:38-49], dict<string, dynamic>), [7:38-49],
                  (Binop ((Eq None),
-                    (([7:38-49], dict<string, dynamic>), (Obj_get ((([7:38-49], this), This), (([7:38-49], dict<string, dynamic>), (Id ([7:38-49], "attributes"))), OG_nullthrows, false))),
-                    (([7:38-49], dict<string, dynamic>), (Lvar ([7:38-49], $attributes))))))));
+                    (([7:38-49], dict<string, dynamic>), [7:38-49],
+                     (Obj_get ((([7:38-49], this), [7:38-49], This), (([7:38-49], dict<string, dynamic>), [7:38-49], (Id ([7:38-49], "attributes"))), OG_nullthrows, false))),
+                    (([7:38-49], dict<string, dynamic>), [7:38-49], (Lvar ([7:38-49], $attributes))))))));
              ([8:30-39],
               (Expr
-                 (([8:30-39], vec<dynamic>),
-                  (Binop ((Eq None), (([8:30-39], vec<dynamic>), (Obj_get ((([8:30-39], this), This), (([8:30-39], vec<dynamic>), (Id ([8:30-39], "children"))), OG_nullthrows, false))),
-                     (([8:30-39], vec<dynamic>), (Lvar ([8:30-39], $children))))))));
+                 (([8:30-39], vec<dynamic>), [8:30-39],
+                  (Binop ((Eq None),
+                     (([8:30-39], vec<dynamic>), [8:30-39],
+                      (Obj_get ((([8:30-39], this), [8:30-39], This), (([8:30-39], vec<dynamic>), [8:30-39], (Id ([8:30-39], "children"))), OG_nullthrows, false))),
+                     (([8:30-39], vec<dynamic>), [8:30-39], (Lvar ([8:30-39], $children))))))));
              ([9:21-26],
               (Expr
-                 (([9:21-26], string),
-                  (Binop ((Eq None), (([9:21-26], string), (Obj_get ((([9:21-26], this), This), (([9:21-26], string), (Id ([9:21-26], "file"))), OG_nullthrows, false))),
-                     (([9:21-26], string), (Lvar ([9:21-26], $file))))))));
+                 (([9:21-26], string), [9:21-26],
+                  (Binop ((Eq None),
+                     (([9:21-26], string), [9:21-26], (Obj_get ((([9:21-26], this), [9:21-26], This), (([9:21-26], string), [9:21-26], (Id ([9:21-26], "file"))), OG_nullthrows, false))),
+                     (([9:21-26], string), [9:21-26], (Lvar ([9:21-26], $file))))))));
              ([10:18-23],
               (Expr
-                 (([10:18-23], int),
-                  (Binop ((Eq None), (([10:18-23], int), (Obj_get ((([10:18-23], this), This), (([10:18-23], int), (Id ([10:18-23], "line"))), OG_nullthrows, false))),
-                     (([10:18-23], int), (Lvar ([10:18-23], $line))))))));
+                 (([10:18-23], int), [10:18-23],
+                  (Binop ((Eq None),
+                     (([10:18-23], int), [10:18-23], (Obj_get ((([10:18-23], this), [10:18-23], This), (([10:18-23], int), [10:18-23], (Id ([10:18-23], "line"))), OG_nullthrows, false))),
+                     (([10:18-23], int), [10:18-23], (Lvar ([10:18-23], $line))))))));
              ([Pos.none], Noop)];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -117,12 +122,13 @@
          { fb_ast =
            [([16:5-38],
              (Expr
-                (([16:5-37], XhpSimple\:element),
-                 (Binop ((Eq None), (([16:5-10], XhpSimple\:element), (Lvar ([16:5-10], $elem))),
-                    (([16:13-37], XhpSimple\:element),
+                (([16:5-37], XhpSimple\:element), [16:5-37],
+                 (Binop ((Eq None), (([16:5-10], XhpSimple\:element), [16:5-10], (Lvar ([16:5-10], $elem))),
+                    (([16:13-37], XhpSimple\:element), [16:13-37],
                      (Xml (([16:14-21], "\\XhpSimple\\:element"),
                         [(Xhp_simple
-                            { xs_name = ([16:22-26], "prop"); xs_type = (int); xs_expr = (([16:28-33], string), (Hole ((([16:28-33], string), (Lvar ([16:28-33], $prop))), (string), (int), Typing))) })
+                            { xs_name = ([16:22-26], "prop"); xs_type = (int);
+                              xs_expr = (([16:28-33], string), [16:28-33], (Hole ((([16:28-33], string), [16:28-33], (Lvar ([16:28-33], $prop))), (string), (int), Typing))) })
                           ],
                         [])))
                     )))))

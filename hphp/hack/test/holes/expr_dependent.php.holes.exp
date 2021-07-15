@@ -70,10 +70,10 @@
          { fb_ast =
            [([11:3-23],
              (Return
-                (Some (([11:10-22], T::TX),
+                (Some (([11:10-22], T::TX), [11:10-22],
                        (Call (
-                          (([11:10-20], (function(): T::TX)),
-                           (Obj_get ((([11:10-15], T), (Lvar ([11:10-15], $left))), (([11:17-20], (function(): T::TX)), (Id ([11:17-20], "gen"))), OG_nullthrows, false))),
+                          (([11:10-20], (function(): T::TX)), [11:10-20],
+                           (Obj_get ((([11:10-15], T), [11:10-15], (Lvar ([11:10-15], $left))), (([11:17-20], (function(): T::TX)), [11:17-20], (Id ([11:17-20], "gen"))), OG_nullthrows, false))),
                           [], [], None))))))
              ];
            fb_annotation = () };
@@ -117,7 +117,7 @@
          { fb_ast =
            [([17:3-39],
              (Return
-                (Some (([17:10-38], (function(TR $x): void)),
+                (Some (([17:10-38], (function(TR $x): void)), [17:10-38],
                        (Lfun (
                           { f_span = [17:10-38]; f_readonly_this = None; 
                             f_annotation = (); f_readonly_ret = None; 
@@ -136,11 +136,12 @@
                             { fb_ast =
                               [([17:23-37],
                                 (Return
-                                   (Some (([17:23-37], void),
+                                   (Some (([17:23-37], void), [17:23-37],
                                           (Call (
-                                             (([17:23-33], (function(T::TX $x): void)),
-                                              (Obj_get ((([17:23-28], T), (Lvar ([17:23-28], $left))), (([17:30-33], (function(T::TX $x): void)), (Id ([17:30-33], "log"))), OG_nullthrows, false))),
-                                             [], [(([17:34-36], TR), (Lvar ([17:34-36], $x)))], None))))))
+                                             (([17:23-33], (function(T::TX $x): void)), [17:23-33],
+                                              (Obj_get ((([17:23-28], T), [17:23-28], (Lvar ([17:23-28], $left))), (
+                                                 ([17:30-33], (function(T::TX $x): void)), [17:30-33], (Id ([17:30-33], "log"))), OG_nullthrows, false))),
+                                             [], [(([17:34-36], TR), [17:34-36], (Lvar ([17:34-36], $x)))], None))))))
                                 ];
                               fb_annotation = () };
                             f_fun_kind = FSync; f_user_attributes = []; 
@@ -178,27 +179,27 @@
          { fb_ast =
            [([21:3-21],
              (Expr
-                (([21:3-20], <expr#1>::TX),
-                 (Binop ((Eq None), (([21:3-7], <expr#1>::TX), (Lvar ([21:3-7], $gen))),
-                    (([21:10-20], <expr#1>::TX),
-                     (Call ((([21:10-16], (function<T as WithTypeConstant, TR>(<expr#1> as WithTypeConstant $left): <expr#1>::TX)), (Id ([21:10-16], "\\my_gen"))),
+                (([21:3-20], <expr#1>::TX), [21:3-20],
+                 (Binop ((Eq None), (([21:3-7], <expr#1>::TX), [21:3-7], (Lvar ([21:3-7], $gen))),
+                    (([21:10-20], <expr#1>::TX), [21:10-20],
+                     (Call ((([21:10-16], (function<T as WithTypeConstant, TR>(<expr#1> as WithTypeConstant $left): <expr#1>::TX)), [21:10-16], (Id ([21:10-16], "\\my_gen"))),
                         [((<expr#1> as WithTypeConstant), ([21:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#1>::TX), ([21:10-16], (Happly (([Pos.none], "_"), []))))],
-                        [(([21:17-19], WithTypeConstant), (Lvar ([21:17-19], $x)))], None)))
+                        [(([21:17-19], WithTypeConstant), [21:17-19], (Lvar ([21:17-19], $x)))], None)))
                     )))));
              ([22:3-21],
               (Expr
-                 (([22:3-20], (function(<expr#2>::TX): void)),
-                  (Binop ((Eq None), (([22:3-7], (function(<expr#2>::TX): void)), (Lvar ([22:3-7], $log))),
-                     (([22:10-20], (function(<expr#2>::TX): void)),
-                      (Call ((([22:10-16], (function<T as WithTypeConstant, TR>(<expr#2> as WithTypeConstant $left): (function(<expr#2>::TX): void))), (Id ([22:10-16], "\\my_log"))),
+                 (([22:3-20], (function(<expr#2>::TX): void)), [22:3-20],
+                  (Binop ((Eq None), (([22:3-7], (function(<expr#2>::TX): void)), [22:3-7], (Lvar ([22:3-7], $log))),
+                     (([22:10-20], (function(<expr#2>::TX): void)), [22:10-20],
+                      (Call ((([22:10-16], (function<T as WithTypeConstant, TR>(<expr#2> as WithTypeConstant $left): (function(<expr#2>::TX): void))), [22:10-16], (Id ([22:10-16], "\\my_log"))),
                          [((<expr#2> as WithTypeConstant), ([22:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#2>::TX), ([22:10-16], (Happly (([Pos.none], "_"), []))))],
-                         [(([22:17-19], WithTypeConstant), (Lvar ([22:17-19], $y)))], None)))
+                         [(([22:17-19], WithTypeConstant), [22:17-19], (Lvar ([22:17-19], $y)))], None)))
                      )))));
              ([26:3-14],
               (Expr
-                 (([26:3-13], void),
-                  (Call ((([26:3-7], (function(<expr#2>::TX): void)), (Lvar ([26:3-7], $log))), 
-                     [], [(([26:8-12], <expr#1>::TX), (Hole ((([26:8-12], <expr#1>::TX), (Lvar ([26:8-12], $gen))), (<expr#1>::TX), (<expr#2>::TX), Typing)))], None)))))
+                 (([26:3-13], void), [26:3-13],
+                  (Call ((([26:3-7], (function(<expr#2>::TX): void)), [26:3-7], (Lvar ([26:3-7], $log))), 
+                     [], [(([26:8-12], <expr#1>::TX), [26:8-12], (Hole ((([26:8-12], <expr#1>::TX), [26:8-12], (Lvar ([26:8-12], $gen))), (<expr#1>::TX), (<expr#2>::TX), Typing)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -23,14 +23,16 @@ Errors:
         { fb_ast =
           [([4:3-18],
             (Expr
-               (([4:3-17], int),
-                (Binop ((Eq None), (([4:3-12], int), (Array_get ((([4:3-5], Map<string, (int | string)>), (Lvar ([4:3-5], $x))), (Some (([4:6-11], string), (String "int")))))),
-                   (([4:15-17], int), (Int "42")))))));
+               (([4:3-17], int), [4:3-17],
+                (Binop ((Eq None),
+                   (([4:3-12], int), [4:3-12], (Array_get ((([4:3-5], Map<string, (int | string)>), [4:3-5], (Lvar ([4:3-5], $x))), (Some (([4:6-11], string), [4:6-11], (String "int")))))),
+                   (([4:15-17], int), [4:15-17], (Int "42")))))));
             ([5:3-20],
              (Expr
-                (([5:3-19], string),
-                 (Binop ((Eq None), (([5:3-12], string), (Array_get ((([5:3-5], Map<string, (int | string)>), (Lvar ([5:3-5], $x))), (Some (([5:6-11], string), (String "foo")))))),
-                    (([5:15-19], string), (String "23")))))))
+                (([5:3-19], string), [5:3-19],
+                 (Binop ((Eq None),
+                    (([5:3-12], string), [5:3-12], (Array_get ((([5:3-5], Map<string, (int | string)>), [5:3-5], (Lvar ([5:3-5], $x))), (Some (([5:6-11], string), [5:6-11], (String "foo")))))),
+                    (([5:15-19], string), [5:15-19], (String "23")))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

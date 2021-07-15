@@ -19,9 +19,12 @@
         { fb_ast =
           [([6:3-18],
             (Expr
-               (([6:3-17], int),
-                (Binop ((Eq None), (([6:3-12], int), (Array_get ((([6:3-5], Map<string, int>), (Lvar ([6:3-5], $m))), (Some (([6:6-11], string), (String "hey")))))), (([6:15-17], int), (Int "40")))))));
-            ([8:3-19], (Return (Some (([8:10-18], int), (Array_get ((([8:10-12], Map<string, int>), (Lvar ([8:10-12], $m))), (Some (([8:13-17], string), (String "ho")))))))))];
+               (([6:3-17], int), [6:3-17],
+                (Binop ((Eq None), (([6:3-12], int), [6:3-12], (Array_get ((([6:3-5], Map<string, int>), [6:3-5], (Lvar ([6:3-5], $m))), (Some (([6:6-11], string), [6:6-11], (String "hey")))))),
+                   (([6:15-17], int), [6:15-17], (Int "40")))))));
+            ([8:3-19],
+             (Return (Some (([8:10-18], int), [8:10-18], (Array_get ((([8:10-12], Map<string, int>), [8:10-12], (Lvar ([8:10-12], $m))), (Some (([8:13-17], string), [8:13-17], (String "ho")))))))))
+            ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }

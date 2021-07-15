@@ -14,9 +14,9 @@
         { fb_ast =
           [([4:3-24],
             (Expr
-               (([4:3-23], (function(mixed $i): void)),
-                (Binop ((Eq None), (([4:3-5], (function(mixed $i): void)), (Lvar ([4:3-5], $x))),
-                   (([4:8-23], (function(mixed $i): void)),
+               (([4:3-23], (function(mixed $i): void)), [4:3-23],
+                (Binop ((Eq None), (([4:3-5], (function(mixed $i): void)), [4:3-5], (Lvar ([4:3-5], $x))),
+                   (([4:8-23], (function(mixed $i): void)), [4:8-23],
                     (Lfun (
                        { f_span = [4:8-23]; f_readonly_this = None; f_annotation = (); 
                          f_readonly_ret = None; f_ret = ((void), None); 

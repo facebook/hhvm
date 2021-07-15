@@ -27,8 +27,9 @@ let gather_constants =
 
     method! on_expr acc expr =
       let refs = super#on_expr acc expr in
+      let (_, _, expr_) = expr in
       let refs =
-        match snd expr with
+        match expr_ with
         | Class_const ((_, CI (_, from)), (_, name)) ->
           CCRSet.add (From from, name) refs
         | Class_const ((_, CIself), (_, name)) -> CCRSet.add (Self, name) refs
@@ -74,8 +75,8 @@ let class_const env (cc : Nast.class_const) =
     | None ->
       (* Error recovery for when a type hint is missing on a constant *)
       (match k with
-      | CCAbstract (Some (e_pos, e_))
-      | CCConcrete (e_pos, e_) ->
+      | CCAbstract (Some (_, e_pos, e_))
+      | CCConcrete (_, e_pos, e_) ->
         begin
           match Decl_utils.infer_const e_ with
           | Some tprim ->

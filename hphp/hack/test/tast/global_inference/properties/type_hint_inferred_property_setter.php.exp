@@ -27,9 +27,9 @@
          { fb_ast =
            [([7:5-19],
              (Expr
-                (([7:5-18], int),
-                 (Binop ((Eq None), (([7:5-13], int), (Obj_get ((([7:5-10], this), This), (([7:12-13], int), (Id ([7:12-13], "x"))), OG_nullthrows, false))),
-                    (([7:16-18], int), (Lvar ([7:16-18], $x))))))))
+                (([7:5-18], int), [7:5-18],
+                 (Binop ((Eq None), (([7:5-13], int), [7:5-13], (Obj_get ((([7:5-10], this), [7:5-10], This), (([7:12-13], int), [7:12-13], (Id ([7:12-13], "x"))), OG_nullthrows, false))),
+                    (([7:16-18], int), [7:16-18], (Lvar ([7:16-18], $x))))))))
              ];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -40,7 +40,9 @@
           m_name = ([12:19-23], "getX"); m_tparams = []; m_where_constraints = []; 
           m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None;
           m_body =
-          { fb_ast = [([13:5-21], (Return (Some (([13:12-20], int), (Obj_get ((([13:12-17], this), This), (([13:19-20], int), (Id ([13:19-20], "x"))), OG_nullthrows, false))))))]; 
+          { fb_ast =
+            [([13:5-21],
+              (Return (Some (([13:12-20], int), [13:12-20], (Obj_get ((([13:12-17], this), [13:12-17], This), (([13:19-20], int), [13:19-20], (Id ([13:19-20], "x"))), OG_nullthrows, false))))))];
             fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((int), None); m_external = false; m_doc_comment = None }
@@ -68,9 +70,9 @@
          { fb_ast =
            [([18:3-17],
              (Expr
-                (([18:3-16], void),
-                 (Binop ((Eq None), (([18:3-5], void), (Lplaceholder [18:3-5])),
-                    (([18:8-16], A), (New ((([18:12-13], A), (CI ([18:12-13], "\\A"))), [], [(([18:14-15], int), (Int "1"))], None, ([18:12-13], (function(int $x): void))))))))))
+                (([18:3-16], void), [18:3-16],
+                 (Binop ((Eq None), (([18:3-5], void), [18:3-5], (Lplaceholder [18:3-5])),
+                    (([18:8-16], A), [18:8-16], (New ((([18:12-13], A), (CI ([18:12-13], "\\A"))), [], [(([18:14-15], int), [18:14-15], (Int "1"))], None, ([18:12-13], (function(int $x): void))))))))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

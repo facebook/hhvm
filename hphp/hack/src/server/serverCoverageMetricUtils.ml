@@ -25,7 +25,7 @@ class count_getter fixme_map =
 
     method! on_expr env expr =
       let acc = super#on_expr env expr in
-      let ((pos, ty), e) = expr in
+      let ((pos, ty), _, e) = expr in
       let expr_kind_opt =
         match e with
         | Aast.Array_get _ -> Some "array_get"

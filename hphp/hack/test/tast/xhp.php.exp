@@ -36,20 +36,22 @@
          f_body =
          { fb_ast =
            [([9:3-22],
-             (Expr (([9:3-21], :foo), (Xml (([9:4-7], "\\:foo"), [(Xhp_simple { xs_name = ([9:8-11], "bar"); xs_type = (?string); xs_expr = (([9:12-18], string), (String "herp")) })], [])))));
-             ([10:3-18], (Expr (([10:3-17], string), (Binop ((Eq None), (([10:3-8], string), (Lvar ([10:3-8], $derp))), (([10:11-17], string), (String "derp")))))));
+             (Expr
+                (([9:3-21], :foo), [9:3-21],
+                 (Xml (([9:4-7], "\\:foo"), [(Xhp_simple { xs_name = ([9:8-11], "bar"); xs_type = (?string); xs_expr = (([9:12-18], string), [9:12-18], (String "herp")) })], [])))));
+             ([10:3-18], (Expr (([10:3-17], string), [10:3-17], (Binop ((Eq None), (([10:3-8], string), [10:3-8], (Lvar ([10:3-8], $derp))), (([10:11-17], string), [10:11-17], (String "derp")))))));
              ([11:3-23],
               (Expr
-                 (([11:3-22], :foo),
-                  (Xml (([11:4-7], "\\:foo"), [(Xhp_simple { xs_name = ([11:8-11], "bar"); xs_type = (?string); xs_expr = (([11:13-18], string), (Lvar ([11:13-18], $derp))) })], [])))));
+                 (([11:3-22], :foo), [11:3-22],
+                  (Xml (([11:4-7], "\\:foo"), [(Xhp_simple { xs_name = ([11:8-11], "bar"); xs_type = (?string); xs_expr = (([11:13-18], string), [11:13-18], (Lvar ([11:13-18], $derp))) })], [])))));
              ([14:3-18:10],
               (Expr
-                 (([14:3-18:9], :foo),
-                  (Xml (([14:4-7], "\\:foo"), [(Xhp_simple { xs_name = ([14:8-11], "bar"); xs_type = (?string); xs_expr = (([14:12-18], string), (String "herp")) })],
-                     [(([15:5-17:11], :foo),
-                       (Xml (([15:6-9], "\\:foo"), [(Xhp_simple { xs_name = ([15:10-13], "bar"); xs_type = (?string); xs_expr = (([15:14-20], string), (String "derp")) })],
-                          [(([16:7-25], :foo),
-                            (Xml (([16:8-11], "\\:foo"), [(Xhp_simple { xs_name = ([16:12-15], "bar"); xs_type = (?string); xs_expr = (([16:16-22], string), (String "herp")) })], [])))]
+                 (([14:3-18:9], :foo), [14:3-18:9],
+                  (Xml (([14:4-7], "\\:foo"), [(Xhp_simple { xs_name = ([14:8-11], "bar"); xs_type = (?string); xs_expr = (([14:12-18], string), [14:12-18], (String "herp")) })],
+                     [(([15:5-17:11], :foo), [15:5-17:11],
+                       (Xml (([15:6-9], "\\:foo"), [(Xhp_simple { xs_name = ([15:10-13], "bar"); xs_type = (?string); xs_expr = (([15:14-20], string), [15:14-20], (String "derp")) })],
+                          [(([16:7-25], :foo), [16:7-25],
+                            (Xml (([16:8-11], "\\:foo"), [(Xhp_simple { xs_name = ([16:12-15], "bar"); xs_type = (?string); xs_expr = (([16:16-22], string), [16:16-22], (String "herp")) })], [])))]
                           )))
                        ]
                      )))))

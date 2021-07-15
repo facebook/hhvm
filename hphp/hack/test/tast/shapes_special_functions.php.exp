@@ -39,33 +39,37 @@
          { fb_ast =
            [([6:3-24],
              (Expr
-                (([6:3-23], ?int),
-                 (Call ((([6:3-14], (function(?shape(...) $shape, arraykey $index, $default=_): ?int)), (Class_const ((([6:3-9], Shapes), (CI ([6:3-9], "\\HH\\Shapes"))), ([6:11-14], "idx")))), 
-                    [], [(([6:15-17], shape('x' => int, ?'y' => int)), (Lvar ([6:15-17], $p))); (([6:19-22], string), (String "x"))], None)))));
+                (([6:3-23], ?int), [6:3-23],
+                 (Call (
+                    (([6:3-14], (function(?shape(...) $shape, arraykey $index, $default=_): ?int)), [6:3-14], (Class_const ((([6:3-9], Shapes), (CI ([6:3-9], "\\HH\\Shapes"))), ([6:11-14], "idx")))),
+                    [], [(([6:15-17], shape('x' => int, ?'y' => int)), [6:15-17], (Lvar ([6:15-17], $p))); (([6:19-22], string), [6:19-22], (String "x"))], None)))));
              ([7:3-27],
               (Expr
-                 (([7:3-26], int),
-                  (Call ((([7:3-14], (function(?shape(...) $shape, arraykey $index, $default=_): int)), (Class_const ((([7:3-9], Shapes), (CI ([7:3-9], "\\HH\\Shapes"))), ([7:11-14], "idx")))), 
-                     [], [(([7:15-17], shape('x' => int, ?'y' => int)), (Lvar ([7:15-17], $p))); (([7:19-22], string), (String "x")); (([7:24-25], int), (Int "3"))], None)))));
+                 (([7:3-26], int), [7:3-26],
+                  (Call (
+                     (([7:3-14], (function(?shape(...) $shape, arraykey $index, $default=_): int)), [7:3-14], (Class_const ((([7:3-9], Shapes), (CI ([7:3-9], "\\HH\\Shapes"))), ([7:11-14], "idx")))),
+                     [], [(([7:15-17], shape('x' => int, ?'y' => int)), [7:15-17], (Lvar ([7:15-17], $p))); (([7:19-22], string), [7:19-22], (String "x")); (([7:24-25], int), [7:24-25], (Int "3"))],
+                     None)))));
              ([8:3-30],
               (Expr
-                 (([8:3-29], bool),
-                  (Call ((([8:3-20], (function(shape(...) $shape, arraykey $index): bool)), (Class_const ((([8:3-9], Shapes), (CI ([8:3-9], "\\HH\\Shapes"))), ([8:11-20], "keyExists")))), 
-                     [], [(([8:21-23], shape('x' => int, ?'y' => int)), (Lvar ([8:21-23], $p))); (([8:25-28], string), (String "y"))], None)))));
+                 (([8:3-29], bool), [8:3-29],
+                  (Call ((([8:3-20], (function(shape(...) $shape, arraykey $index): bool)), [8:3-20], (Class_const ((([8:3-9], Shapes), (CI ([8:3-9], "\\HH\\Shapes"))), ([8:11-20], "keyExists")))),
+                     [], [(([8:21-23], shape('x' => int, ?'y' => int)), [8:21-23], (Lvar ([8:21-23], $p))); (([8:25-28], string), [8:25-28], (String "y"))], None)))));
              ([9:3-36],
               (Expr
-                 (([9:3-35], void),
+                 (([9:3-35], void), [9:3-35],
                   (Call (
-                     (([9:3-20], (function<T as shape(...)>(inout shape('x' => int, ?'y' => int) $shape, arraykey $index): void)),
+                     (([9:3-20], (function<T as shape(...)>(inout shape('x' => int, ?'y' => int) $shape, arraykey $index): void)), [9:3-20],
                       (Class_const ((([9:3-9], Shapes), (CI ([9:3-9], "\\HH\\Shapes"))), ([9:11-20], "removeKey")))),
                      [((shape('x' => int, ?'y' => int)), ([9:11-20], (Happly (([Pos.none], "_"), []))))],
-                     [(([9:21-29], shape('x' => int, ?'y' => int)), (Callconv (Pinout, (([9:27-29], shape('x' => int, ?'y' => int)), (Lvar ([9:27-29], $p)))))); (([9:31-34], string), (String "y"))],
+                     [(([9:21-29], shape('x' => int, ?'y' => int)), [9:21-29], (Callconv (Pinout, (([9:27-29], shape('x' => int, ?'y' => int)), [9:27-29], (Lvar ([9:27-29], $p))))));
+                       (([9:31-34], string), [9:31-34], (String "y"))],
                      None)))));
              ([10:3-23],
               (Expr
-                 (([10:3-22], dict<string, int>),
-                  (Call ((([10:3-18], (function(shape(...) $shape): dict<string, int>)), (Class_const ((([10:3-9], Shapes), (CI ([10:3-9], "\\HH\\Shapes"))), ([10:11-18], "toArray")))), 
-                     [], [(([10:19-21], shape('x' => int)), (Lvar ([10:19-21], $p)))], None)))))
+                 (([10:3-22], dict<string, int>), [10:3-22],
+                  (Call ((([10:3-18], (function(shape(...) $shape): dict<string, int>)), [10:3-18], (Class_const ((([10:3-9], Shapes), (CI ([10:3-9], "\\HH\\Shapes"))), ([10:11-18], "toArray")))),
+                     [], [(([10:19-21], shape('x' => int)), [10:19-21], (Lvar ([10:19-21], $p)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

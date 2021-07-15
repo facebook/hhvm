@@ -23,7 +23,7 @@ Errors:
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
           ];
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some (([4:10-12], Tu), (Lvar ([4:10-12], $f))))))]; fb_annotation = () }; 
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some (([4:10-12], Tu), [4:10-12], (Lvar ([4:10-12], $f))))))]; fb_annotation = () }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -43,10 +43,10 @@ Errors:
          { fb_ast =
            [([8:3-22],
              (Expr
-                (([8:3-21], string),
-                 (Call ((([8:3-4], (function<reify T, Tu>(string $f): string)), (Id ([8:3-4], "\\f"))), 
-                    [((int), ([8:5-8], (Hprim Tint))); ((string), ([8:10-16], (Hprim Tstring)))], 
-                    [(([8:18-20], int), (Hole ((([8:18-20], int), (Int "42")), (int), (string), Typing)))], None)))))
+                (([8:3-21], string), [8:3-21],
+                 (Call ((([8:3-4], (function<reify T, Tu>(string $f): string)), [8:3-4], (Id ([8:3-4], "\\f"))), 
+                    [((int), ([8:5-8], (Hprim Tint))); ((string), ([8:10-16], (Hprim Tstring)))],
+                    [(([8:18-20], int), [8:18-20], (Hole ((([8:18-20], int), [8:18-20], (Int "42")), (int), (string), Typing)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

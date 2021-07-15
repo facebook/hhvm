@@ -21,7 +21,11 @@ Errors:
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([4:3-18], (Return (Some (([4:10-17], nothing), (Obj_get ((([4:10-12], nothing), (Lvar ([4:10-12], $x))), (([4:14-17], nothing), (Id ([4:14-17], "foo"))), OG_nullthrows, false))))))];
+          [([4:3-18],
+            (Return
+               (Some (([4:10-17], nothing), [4:10-17],
+                      (Obj_get ((([4:10-12], nothing), [4:10-12], (Lvar ([4:10-12], $x))), (([4:14-17], nothing), [4:14-17], (Id ([4:14-17], "foo"))), OG_nullthrows, false))))))
+            ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
@@ -52,7 +56,10 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([8:3-17], (Return (Some (([8:10-16], nothing), (Array_get ((([8:10-12], KeyedContainer<mixed, nothing>), (Lvar ([8:10-12], $x))), (Some (([8:13-15], mixed), (Lvar ([8:13-15], $i))))))))))
+           [([8:3-17],
+             (Return
+                (Some (([8:10-16], nothing), [8:10-16],
+                       (Array_get ((([8:10-12], KeyedContainer<mixed, nothing>), [8:10-12], (Lvar ([8:10-12], $x))), (Some (([8:13-15], mixed), [8:13-15], (Lvar ([8:13-15], $i))))))))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -85,9 +92,10 @@ Errors:
          { fb_ast =
            [([12:3-16],
              (Expr
-                (([12:3-15], mixed),
-                 (Binop ((Eq None), (([12:3-10], _), (Obj_get ((([12:3-5], mixed), (Lvar ([12:3-5], $x))), (([12:7-10], _), (Id ([12:7-10], "foo"))), OG_nullthrows, false))),
-                    (([12:13-15], mixed), (Lvar ([12:13-15], $w))))))))
+                (([12:3-15], mixed), [12:3-15],
+                 (Binop ((Eq None),
+                    (([12:3-10], _), [12:3-10], (Obj_get ((([12:3-5], mixed), [12:3-5], (Lvar ([12:3-5], $x))), (([12:7-10], _), [12:7-10], (Id ([12:7-10], "foo"))), OG_nullthrows, false))),
+                    (([12:13-15], mixed), [12:13-15], (Lvar ([12:13-15], $w))))))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -124,9 +132,10 @@ Errors:
          { fb_ast =
            [([16:3-15],
              (Expr
-                (([16:3-14], mixed),
-                 (Binop ((Eq None), (([16:3-9], mixed), (Array_get ((([16:3-5], vec<(mixed | int)>), (Lvar ([16:3-5], $x))), (Some (([16:6-8], int), (Lvar ([16:6-8], $i))))))),
-                    (([16:12-14], mixed), (Lvar ([16:12-14], $w))))))))
+                (([16:3-14], mixed), [16:3-14],
+                 (Binop ((Eq None),
+                    (([16:3-9], mixed), [16:3-9], (Array_get ((([16:3-5], vec<(mixed | int)>), [16:3-5], (Lvar ([16:3-5], $x))), (Some (([16:6-8], int), [16:6-8], (Lvar ([16:6-8], $i))))))),
+                    (([16:12-14], mixed), [16:12-14], (Lvar ([16:12-14], $w))))))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -21,7 +21,11 @@ Errors:
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
-        { fb_ast = [([4:3-25], (Return (Some (([4:10-24], (int, int, int)), (Tuple [(([4:16-17], int), (Int "1")); (([4:19-20], int), (Int "1")); (([4:22-23], int), (Int "1"))])))))];
+        { fb_ast =
+          [([4:3-25],
+            (Return
+               (Some (([4:10-24], (int, int, int)), [4:10-24], (Tuple [(([4:16-17], int), [4:16-17], (Int "1")); (([4:19-20], int), [4:19-20], (Int "1")); (([4:22-23], int), [4:22-23], (Int "1"))])))))
+            ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
@@ -45,7 +49,9 @@ Errors:
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([8:3-22], (Return (Some (([8:10-21], (int, int)), (Tuple [(([8:16-17], int), (Int "1")); (([8:19-20], int), (Int "1"))])))))]; fb_annotation = () }; 
+         f_body =
+         { fb_ast = [([8:3-22], (Return (Some (([8:10-21], (int, int)), [8:10-21], (Tuple [(([8:16-17], int), [8:16-17], (Int "1")); (([8:19-20], int), [8:19-20], (Int "1"))])))))];
+           fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -72,11 +78,13 @@ Errors:
          { fb_ast =
            [([12:3-43],
              (Expr
-                (([12:3-42], (int, int, int)),
+                (([12:3-42], (int, int, int)), [12:3-42],
                  (Binop ((Eq None),
-                    (([12:3-19], (int, int, int)), (List [(([12:8-10], int), (Lvar ([12:8-10], $u))); (([12:12-14], int), (Lvar ([12:12-14], $v))); (([12:16-18], int), (Lvar ([12:16-18], $w)))])),
-                    (([12:22-42], (int, int, int)),
-                     (Call ((([12:22-38], (function(bool $x): (int, int, int))), (Id ([12:22-38], "\\__return_3_tuple"))), [], [(([12:39-41], bool), (Lvar ([12:39-41], $x)))], None)))
+                    (([12:3-19], (int, int, int)), [12:3-19],
+                     (List [(([12:8-10], int), [12:8-10], (Lvar ([12:8-10], $u))); (([12:12-14], int), [12:12-14], (Lvar ([12:12-14], $v))); (([12:16-18], int), [12:16-18], (Lvar ([12:16-18], $w)))])),
+                    (([12:22-42], (int, int, int)), [12:22-42],
+                     (Call ((([12:22-38], (function(bool $x): (int, int, int))), [12:22-38], (Id ([12:22-38], "\\__return_3_tuple"))), 
+                        [], [(([12:39-41], bool), [12:39-41], (Lvar ([12:39-41], $x)))], None)))
                     )))))
              ];
            fb_annotation = () };
@@ -106,14 +114,18 @@ Errors:
          { fb_ast =
            [([17:3-43],
              (Expr
-                (([17:3-42], (int, int)),
+                (([17:3-42], (int, int)), [17:3-42],
                  (Binop ((Eq None),
-                    (([17:3-19], (int, int)),
-                     (List [(([17:8-10], nothing), (Lvar ([17:8-10], $u))); (([17:12-14], nothing), (Lvar ([17:12-14], $v))); (([17:16-18], nothing), (Lvar ([17:16-18], $w)))])),
-                    (([17:22-42], (int, int)),
+                    (([17:3-19], (int, int)), [17:3-19],
+                     (List
+                        [(([17:8-10], nothing), [17:8-10], (Lvar ([17:8-10], $u))); (
+                          ([17:12-14], nothing), [17:12-14], (Lvar ([17:12-14], $v))); (
+                          ([17:16-18], nothing), [17:16-18], (Lvar ([17:16-18], $w)))])),
+                    (([17:22-42], (int, int)), [17:22-42],
                      (Hole (
-                        (([17:22-42], (int, int)),
-                         (Call ((([17:22-38], (function(bool $x): (int, int))), (Id ([17:22-38], "\\__return_2_tuple"))), [], [(([17:39-41], bool), (Lvar ([17:39-41], $x)))], None))),
+                        (([17:22-42], (int, int)), [17:22-42],
+                         (Call ((([17:22-38], (function(bool $x): (int, int))), [17:22-38], (Id ([17:22-38], "\\__return_2_tuple"))), 
+                            [], [(([17:39-41], bool), [17:39-41], (Lvar ([17:39-41], $x)))], None))),
                         ((int, int)), ({suggest:nothing}), Typing)))
                     )))))
              ];

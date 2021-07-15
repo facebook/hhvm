@@ -60,7 +60,7 @@ mod tests {
             }
         }
 
-        let expr = Expr((), Expr_::Null);
+        let expr = Expr((), crate::pos::Pos::make_none(), Expr_::Null);
         let mut v: usize = 0;
         v.visit_expr(&mut (), &expr).unwrap();
         assert_eq!(v, 1);
@@ -84,18 +84,18 @@ mod tests {
             }
         }
 
-        let mut expr = Expr((), Expr_::True);
+        let mut expr = Expr((), crate::pos::Pos::make_none(), Expr_::True);
         let mut v = ();
         v.visit_expr(&mut (), &mut expr).unwrap();
-        match expr.1 {
+        match expr.2 {
             Expr_::Null => {}
             e => assert!(false, "Expect Expr_::Null, but got {:?}", e),
         }
 
-        let mut expr = Expr((), Expr_::True);
+        let mut expr = Expr((), crate::pos::Pos::make_none(), Expr_::True);
         let mut v = ();
         visitor_mut::visit(&mut v, &mut (), &mut expr).unwrap();
-        match expr.1 {
+        match expr.2 {
             Expr_::Null => {}
             e => assert!(false, "Expect Expr_::Null, but got {:?}", e),
         }

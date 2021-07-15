@@ -24,8 +24,9 @@
         { fb_ast =
           [([5:3-13],
             (Expr
-               (([5:3-12], int),
-                (Array_get ((([5:3-6], ImmVector<int>), (Lvar ([5:3-6], $xs))), (Some (([5:7-11], mixed), (Hole ((([5:7-11], mixed), (Lvar ([5:7-11], $idx))), (mixed), (int), Typing)))))))))
+               (([5:3-12], int), [5:3-12],
+                (Array_get ((([5:3-6], ImmVector<int>), [5:3-6], (Lvar ([5:3-6], $xs))),
+                   (Some (([5:7-11], mixed), [5:7-11], (Hole ((([5:7-11], mixed), [5:7-11], (Lvar ([5:7-11], $idx))), (mixed), (int), Typing)))))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

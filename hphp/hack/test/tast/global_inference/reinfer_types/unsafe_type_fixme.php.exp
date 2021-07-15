@@ -25,8 +25,8 @@
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((string), (Some ([3:15-35], (Happly (([3:15-35], "\\UNSAFE_TYPE_HH_FIXME"), []))))); 
         f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
-        f_body = { fb_ast = [([4:3-16], (Return (Some (([4:10-15], string), (String "foo")))))]; fb_annotation = () }; 
+        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_body = { fb_ast = [([4:3-16], (Return (Some (([4:10-15], string), [4:10-15], (String "foo")))))]; fb_annotation = () }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })[(Class
@@ -58,8 +58,8 @@
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((int), (Some ([3:15-37], (Haccess (([3:15-23], (Happly (([3:15-23], "\\HH_FIXME"), []))), [([3:25-37], "MISSING_TYPE")]))))); 
         f_name = ([3:10-11], "\\g"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
-        f_body = { fb_ast = [([4:3-12], (Return (Some (([4:10-11], int), (Int "0")))))]; fb_annotation = () }; 
+        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_body = { fb_ast = [([4:3-12], (Return (Some (([4:10-11], int), [4:10-11], (Int "0")))))]; fb_annotation = () }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

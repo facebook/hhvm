@@ -11,7 +11,7 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_expr env ((p, ty), _) =
+    method! at_expr env ((p, ty), _, _) =
       if
         TypecheckerOptions.disallow_unresolved_type_variables
           (Tast_env.get_tcopt env)

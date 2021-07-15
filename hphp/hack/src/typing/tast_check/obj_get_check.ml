@@ -17,11 +17,11 @@ let handler =
 
     method! at_expr env =
       function
-      | (_, Obj_get (_, ((p, _), This), _, _)) ->
+      | (_, _, Obj_get (_, ((p, _), _, This), _, _)) ->
         Errors.nonsense_member_selection p "$this"
-      | (_, Obj_get (_, ((p, _), Lplaceholder _), _, _)) ->
+      | (_, _, Obj_get (_, ((p, _), _, Lplaceholder _), _, _)) ->
         Errors.nonsense_member_selection p "$_"
-      | (_, Obj_get (((_, ty), _), _, _, _))
+      | (_, _, Obj_get (((_, ty), _, _), _, _, _))
         when Tast_env.is_sub_type_for_union
                env
                ty
@@ -33,6 +33,7 @@ let handler =
              || Tast_env.is_sub_type_for_union env ty (MakeType.err Reason.none)
         ->
         ()
-      | (_, Obj_get (_, ((p, _), Lvar _), _, _)) -> Errors.lvar_in_obj_get p
+      | (_, _, Obj_get (_, ((p, _), _, Lvar _), _, _)) ->
+        Errors.lvar_in_obj_get p
       | _ -> ()
   end

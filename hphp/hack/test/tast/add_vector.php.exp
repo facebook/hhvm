@@ -23,9 +23,10 @@
          { fb_ast =
            [([16:5-26],
              (Expr
-                (([16:5-25], Vector<T>),
-                 (Binop ((Eq None), (([16:5-13], Vector<T>), (Obj_get ((([16:5-10], this), This), (([16:12-13], Vector<T>), (Id ([16:12-13], "x"))), OG_nullthrows, false))),
-                    (([16:16-25], Vector<T>), (ValCollection (Vector, None, []))))))))
+                (([16:5-25], Vector<T>), [16:5-25],
+                 (Binop ((Eq None),
+                    (([16:5-13], Vector<T>), [16:5-13], (Obj_get ((([16:5-10], this), [16:5-10], This), (([16:12-13], Vector<T>), [16:12-13], (Id ([16:12-13], "x"))), OG_nullthrows, false))),
+                    (([16:16-25], Vector<T>), [16:16-25], (ValCollection (Vector, None, []))))))))
              ];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -46,10 +47,13 @@
           { fb_ast =
             [([20:5-21],
               (Expr
-                 (([20:5-20], T),
+                 (([20:5-20], T), [20:5-20],
                   (Binop ((Eq None),
-                     (([20:5-15], T), (Array_get ((([20:5-13], Vector<T>), (Obj_get ((([20:5-10], this), This), (([20:12-13], Vector<T>), (Id ([20:12-13], "x"))), OG_nullthrows, false))), None))),
-                     (([20:18-20], T), (Lvar ([20:18-20], $x))))))))
+                     (([20:5-15], T), [20:5-15],
+                      (Array_get (
+                         (([20:5-13], Vector<T>), [20:5-13], (Obj_get ((([20:5-10], this), [20:5-10], This), (([20:12-13], Vector<T>), [20:12-13], (Id ([20:12-13], "x"))), OG_nullthrows, false))),
+                         None))),
+                     (([20:18-20], T), [20:18-20], (Lvar ([20:18-20], $x))))))))
               ];
             fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -70,9 +74,11 @@
           { fb_ast =
             [([24:5-24],
               (Return
-                 (Some (([24:12-23], T),
-                        (Array_get ((([24:12-20], Vector<T>), (Obj_get ((([24:12-17], this), This), (([24:19-20], Vector<T>), (Id ([24:19-20], "x"))), OG_nullthrows, false))),
-                           (Some (([24:21-22], int), (Int "0")))))))))
+                 (Some (([24:12-23], T), [24:12-23],
+                        (Array_get (
+                           (([24:12-20], Vector<T>), [24:12-20],
+                            (Obj_get ((([24:12-17], this), [24:12-17], This), (([24:19-20], Vector<T>), [24:19-20], (Id ([24:19-20], "x"))), OG_nullthrows, false))),
+                           (Some (([24:21-22], int), [24:21-22], (Int "0")))))))))
               ];
             fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -158,29 +164,31 @@
          { fb_ast =
            [([33:3-28],
              (Expr
-                (([33:3-27], MyPhonyVector<X>),
-                 (Binop ((Eq None), (([33:3-5], MyPhonyVector<X>), (Lvar ([33:3-5], $x))),
-                    (([33:8-27], MyPhonyVector<X>),
+                (([33:3-27], MyPhonyVector<X>), [33:3-27],
+                 (Binop ((Eq None), (([33:3-5], MyPhonyVector<X>), [33:3-5], (Lvar ([33:3-5], $x))),
+                    (([33:8-27], MyPhonyVector<X>), [33:8-27],
                      (New ((([33:12-25], MyPhonyVector<X>), (CI ([33:12-25], "\\MyPhonyVector"))), 
                         [((X), ([33:12-25], (Happly (([Pos.none], "_"), []))))], 
                         [], None, ([33:12-25], (function(): void)))))
                     )))));
              ([34:3-20],
               (Expr
-                 (([34:3-19], void),
+                 (([34:3-19], void), [34:3-19],
                   (Call (
-                     (([34:3-10], (function(X $x): void)),
-                      (Obj_get ((([34:3-5], MyPhonyVector<X>), (Lvar ([34:3-5], $x))), (([34:7-10], (function(X $x): void)), (Id ([34:7-10], "add"))), OG_nullthrows, false))),
-                     [], [(([34:11-18], B), (New ((([34:15-16], B), (CI ([34:15-16], "\\B"))), [], [], None, ([34:15-16], _))))], None)))));
+                     (([34:3-10], (function(X $x): void)), [34:3-10],
+                      (Obj_get ((([34:3-5], MyPhonyVector<X>), [34:3-5], (Lvar ([34:3-5], $x))), (([34:7-10], (function(X $x): void)), [34:7-10], (Id ([34:7-10], "add"))), OG_nullthrows, false))),
+                     [], [(([34:11-18], B), [34:11-18], (New ((([34:15-16], B), (CI ([34:15-16], "\\B"))), [], [], None, ([34:15-16], _))))], None)))));
              ([35:3-20],
               (Expr
-                 (([35:3-19], void),
+                 (([35:3-19], void), [35:3-19],
                   (Call (
-                     (([35:3-10], (function(X $x): void)),
-                      (Obj_get ((([35:3-5], MyPhonyVector<X>), (Lvar ([35:3-5], $x))), (([35:7-10], (function(X $x): void)), (Id ([35:7-10], "add"))), OG_nullthrows, false))),
-                     [], [(([35:11-18], A), (New ((([35:15-16], A), (CI ([35:15-16], "\\A"))), [], [], None, ([35:15-16], _))))], None)))));
+                     (([35:3-10], (function(X $x): void)), [35:3-10],
+                      (Obj_get ((([35:3-5], MyPhonyVector<X>), [35:3-5], (Lvar ([35:3-5], $x))), (([35:7-10], (function(X $x): void)), [35:7-10], (Id ([35:7-10], "add"))), OG_nullthrows, false))),
+                     [], [(([35:11-18], A), [35:11-18], (New ((([35:15-16], A), (CI ([35:15-16], "\\A"))), [], [], None, ([35:15-16], _))))], None)))));
              ([36:3-12],
-              (Expr (([36:3-11], void), (Call ((([36:3-7], (function(MyPhonyVector<X> $v): void)), (Id ([36:3-7], "\\test"))), [], [(([36:8-10], MyPhonyVector<X>), (Lvar ([36:8-10], $x)))], None)))))
+              (Expr
+                 (([36:3-11], void), [36:3-11],
+                  (Call ((([36:3-7], (function(MyPhonyVector<X> $v): void)), [36:3-7], (Id ([36:3-7], "\\test"))), [], [(([36:8-10], MyPhonyVector<X>), [36:8-10], (Lvar ([36:8-10], $x)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

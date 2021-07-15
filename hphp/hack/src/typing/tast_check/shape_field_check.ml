@@ -48,7 +48,7 @@ let shapes_key_exists env shape field_name =
     | _ -> (`Unknown, true))
   | _ -> (`Unknown, false)
 
-let trivial_shapes_key_exists_check pos1 env ((_, shape), _) field_name =
+let trivial_shapes_key_exists_check pos1 env ((_, shape), _, _) field_name =
   let (status, optional) =
     shapes_key_exists env shape (TSFlit_str field_name)
   in
@@ -64,7 +64,7 @@ let trivial_shapes_key_exists_check pos1 env ((_, shape), _) field_name =
     | `Unknown -> ()
 
 let shapes_method_access_with_non_existent_field
-    pos1 env method_name ((_, shape), _) field_name =
+    pos1 env method_name ((_, shape), _, _) field_name =
   let (status, optional_shape) =
     shapes_key_exists env shape (TSFlit_str field_name)
   in
@@ -86,7 +86,8 @@ let shapes_method_access_with_non_existent_field
   | (`Unknown, _) ->
     ()
 
-let shape_access_with_non_existent_field pos1 env ((_, shape), _) field_name =
+let shape_access_with_non_existent_field pos1 env ((_, shape), _, _) field_name
+    =
   let (status, optional) =
     shapes_key_exists env shape (TSFlit_str field_name)
   in
@@ -109,10 +110,11 @@ let handler =
     method! at_expr env =
       function
       | ( (p, _),
+          _,
           Call
-            ( (_, Class_const ((_, CI (_, class_name)), (_, method_name))),
+            ( (_, _, Class_const ((_, CI (_, class_name)), (_, method_name))),
               _,
-              [shape; ((pos, _), String field_name)],
+              [shape; ((pos, _), _, String field_name)],
               None ) )
         when String.equal class_name SN.Shapes.cShapes
              && String.equal method_name SN.Shapes.keyExists ->
@@ -122,16 +124,18 @@ let handler =
           shape
           (Pos_or_decl.of_raw_pos pos, field_name)
       | ( (p, _),
+          _,
           Call
-            ( (_, Class_const ((_, CI (_, class_name)), (_, method_name))),
+            ( (_, _, Class_const ((_, CI (_, class_name)), (_, method_name))),
               _,
-              [shape; ((pos, _), String field_name); _],
+              [shape; ((pos, _), _, String field_name); _],
               None ) )
       | ( (p, _),
+          _,
           Call
-            ( (_, Class_const ((_, CI (_, class_name)), (_, method_name))),
+            ( (_, _, Class_const ((_, CI (_, class_name)), (_, method_name))),
               _,
-              [shape; ((pos, _), String field_name)],
+              [shape; ((pos, _), _, String field_name)],
               None ) )
         when String.equal class_name SN.Shapes.cShapes
              && ( String.equal method_name SN.Shapes.idx
@@ -143,9 +147,10 @@ let handler =
           shape
           (Pos_or_decl.of_raw_pos pos, field_name)
       | ( (p, _),
+          _,
           Binop
             ( Ast_defs.QuestionQuestion,
-              (_, Array_get (shape, Some ((pos, _), String field_name))),
+              (_, _, Array_get (shape, Some ((pos, _), _, String field_name))),
               _ ) ) ->
         shape_access_with_non_existent_field
           p

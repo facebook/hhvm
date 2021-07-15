@@ -886,8 +886,8 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum =
   match List.find c.c_user_attributes ~f:is_sealed with
   | None -> ()
   | Some sealed_attr ->
-    let iter_item (param : Nast.expr) =
-      match snd param with
+    let iter_item ((_, pos, expr_) : Nast.expr) =
+      match expr_ with
       | Class_const (cid, _) ->
         let klass_name = Nast.class_id_to_str (snd cid) in
         let klass = Decl_provider.get_class ctx klass_name in
@@ -909,7 +909,7 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum =
               Cls.has_ancestor decl parent_name
           in
           if not includes_ancestor then
-            let parent_pos = fst param in
+            let parent_pos = pos in
             let child_pos = Cls.pos decl in
             let child_name = Cls.name decl in
             let (child_kind, verb) =
@@ -1403,8 +1403,8 @@ let typeconst_def
 (* This should agree with the set of expressions whose type can be inferred in
  * Decl_utils.infer_const
  *)
-let is_literal_expr e =
-  match snd e with
+let is_literal_expr (_, _, e) =
+  match e with
   | String _
   | True
   | False
@@ -1412,7 +1412,7 @@ let is_literal_expr e =
   | Float _
   | Null ->
     true
-  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, (Int _ | Float _))) -> true
+  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, _, (Int _ | Float _))) -> true
   | _ -> false
 
 let class_const_def ~in_enum_class c env cc =
@@ -1478,7 +1478,7 @@ let class_const_def ~in_enum_class c env cc =
   in
   let (env, kind, ty) =
     match k with
-    | CCConcrete ((e_pos, _) as e) when in_enum_class ->
+    | CCConcrete ((_, e_pos, _) as e) when in_enum_class ->
       let (env, cap, unsafe_cap) =
         (* Enum class constant initializers are restricted to be `write_props` *)
         let make_hint pos s = (pos, Aast.Happly ((pos, s), [])) in
@@ -1497,8 +1497,8 @@ let class_const_def ~in_enum_class c env cc =
         | (r, Tnewtype (memberof, [enum_name; _], _))
           when String.equal memberof SN.Classes.cMemberOf ->
           let lift r ty = mk (r, Tnewtype (memberof, [enum_name; ty], ty)) in
-          let ((p, te_ty), te) = te in
-          let te = ((p, lift (get_reason te_ty) te_ty), te) in
+          let ((_, te_ty), p, te) = te in
+          let te = ((p, lift (get_reason te_ty) te_ty), p, te) in
           let ty' = lift r ty' in
           (te, ty')
         | _ -> (te, ty')

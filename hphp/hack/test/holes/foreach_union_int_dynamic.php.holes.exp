@@ -19,8 +19,9 @@
         f_body =
         { fb_ast =
           [([5:3-6:4],
-            (Foreach ((([5:12-15], (dynamic | int)), (Hole ((([5:12-15], (dynamic | int)), (Lvar ([5:12-15], $xs))), ((dynamic | int)), ((dynamic | Traversable<dynamic>)), Typing))),
-               (As_v (([5:19-21], dynamic), (Lvar ([5:19-21], $x)))), 
+            (Foreach (
+               (([5:12-15], (dynamic | int)), [5:12-15], (Hole ((([5:12-15], (dynamic | int)), [5:12-15], (Lvar ([5:12-15], $xs))), ((dynamic | int)), ((dynamic | Traversable<dynamic>)), Typing))),
+               (As_v (([5:19-21], dynamic), [5:19-21], (Lvar ([5:19-21], $x)))), 
                [([5:3-6:4], (AssertEnv (Join, {$#capability $#local_capability $xs})))])))
             ];
           fb_annotation = () };

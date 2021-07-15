@@ -33,7 +33,7 @@ impl<'ast, 'arena, 'emitter, 'decl, D: DeclProvider<'decl> + 'emitter> VisitorMu
         c: &mut Ctx<'emitter, 'arena, 'decl, D>,
         e: &'ast mut tast::Expr,
     ) -> Result<()> {
-        let tast::Expr(pos, expr) = e;
+        let tast::Expr(_, pos, expr) = e;
         let alloc = &c.alloc;
         let emitter = &mut c.emitter;
         if let tast::Expr_::Xml(cs) = expr {
@@ -88,13 +88,15 @@ fn rewrite_xml_<'arena, 'decl, D: DeclProvider<'decl>>(
                 }
                 (spread_id, attrs)
             });
-    let attribute_map = E(pos.clone(), E_::mk_shape(attributes));
-    let children_vec = E(pos.clone(), E_::mk_varray(None, children));
+    let attribute_map = E(pos.clone(), pos.clone(), E_::mk_shape(attributes));
+    let children_vec = E(pos.clone(), pos.clone(), E_::mk_varray(None, children));
     let filename = E(
+        pos.clone(),
         pos.clone(),
         E_::mk_id(Id(pos.clone(), pseudo_consts::G__FILE__.into())),
     );
     let line = E(
+        pos.clone(),
         pos.clone(),
         E_::mk_id(Id(pos.clone(), pseudo_consts::G__LINE__.into())),
     );
@@ -107,6 +109,7 @@ fn rewrite_xml_<'arena, 'decl, D: DeclProvider<'decl>>(
     emit_symbol_refs::add_class(alloc, e, renamed_id);
 
     Ok(E(
+        pos.clone(),
         pos.clone(),
         E_::New(Box::new((
             cid,

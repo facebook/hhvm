@@ -712,6 +712,7 @@ fn atom_instrs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                                             env,
                                                             &(tast::Expr(
                                                                 Pos::make_none(),
+                                                                Pos::make_none(),
                                                                 aast::Expr_::String(
                                                                     bstr::BString::from(
                                                                         tag.to_owned(),
@@ -723,6 +724,7 @@ fn atom_instrs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                                             emitter,
                                                             env,
                                                             &(tast::Expr(
+                                                                Pos::make_none(),
                                                                 Pos::make_none(),
                                                                 aast::Expr_::True,
                                                             )),
@@ -739,6 +741,7 @@ fn atom_instrs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                                             emitter,
                                                             env,
                                                             &(tast::Expr(
+                                                                Pos::make_none(),
                                                                 Pos::make_none(),
                                                                 aast::Expr_::String(
                                                                     bstr::BString::from(

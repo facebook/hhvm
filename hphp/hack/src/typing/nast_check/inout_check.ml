@@ -36,9 +36,9 @@ let check_param _env params p user_attributes name =
       Errors.inout_params_memoize p param.param_pos
   | _ -> ()
 
-let check_callconv_expr e =
-  let rec check_callconv_expr_helper e1 =
-    match snd e1 with
+let check_callconv_expr ((p, _, _) as e) =
+  let rec check_callconv_expr_helper (_, _, expr_) =
+    match expr_ with
     | Lvar (_, x)
       when not
              ( String.equal (Local_id.to_string x) SN.SpecialIdents.this
@@ -47,7 +47,7 @@ let check_callconv_expr e =
                   SN.SpecialIdents.dollardollar ) ->
       ()
     | Array_get (e2, Some _) -> check_callconv_expr_helper e2
-    | _ -> Errors.inout_argument_bad_expr (fst e)
+    | _ -> Errors.inout_argument_bad_expr p
   in
   check_callconv_expr_helper e
 
@@ -63,7 +63,7 @@ let handler =
       let (p, name) = m.m_name in
       check_param env m.m_params p m.m_user_attributes name
 
-    method! at_expr _ (_, e) =
+    method! at_expr _ (_, _, e) =
       match e with
       | Callconv (_, e) -> check_callconv_expr e
       | _ -> ()

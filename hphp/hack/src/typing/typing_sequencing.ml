@@ -73,13 +73,13 @@ let use_local env id =
  * the "atomic" lvals that are being assigned to. *)
 let unpack_lvals e =
   let rec unpack acc = function
-    | (_, List es) -> List.fold_left ~f:unpack ~init:acc es
+    | (_, _, List es) -> List.fold_left ~f:unpack ~init:acc es
     | e -> e :: acc
   in
   List.rev (unpack [] e)
 
 let get_lvar = function
-  | (_, Lvar id) -> First id
+  | (_, _, Lvar id) -> First id
   | e -> Second e
 
 (* Pass that just collects all the variables used (and not just written to)
@@ -96,7 +96,7 @@ let used_variables_visitor =
     (* We have to handle expressions just enough to avoid counting
      * assignments as uses of variables.
      * (We do still count operator-assignments) *)
-    method! on_expr acc ((_, e_) as e) =
+    method! on_expr acc ((_, _, e_) as e) =
       match e_ with
       | Binop (Ast_defs.Eq None, e1, e2) ->
         let (_, not_vars) = List.partition_map (unpack_lvals e1) ~f:get_lvar in
@@ -183,12 +183,12 @@ let sequence_visitor ~require_used used_vars =
       let env2 = this#on_expr tracking_env e2 in
       merge_unsequenced env env1 env2
 
-    method! on_expr env ((_, e_) as e) =
+    method! on_expr env ((_, _, e_) as e) =
       match e_ with
       | Lvar id -> use_local env id
       | Unop
           ( (Ast_defs.Uincr | Ast_defs.Udecr | Ast_defs.Upincr | Ast_defs.Updecr),
-            (_, Lvar id) ) ->
+            (_, _, Lvar id) ) ->
         assign_local env id
       (* Assignment. This is pretty hairy because of list(...)
        * destructuring and the treatment necessary to allow

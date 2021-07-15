@@ -121,13 +121,13 @@ let visitor =
   object (this)
     inherit [_] Tast_visitor.iter_with_state as super
 
-    method! on_expr (env, ctx) (((p, ty), e) as te) =
+    method! on_expr (env, ctx) (((p, ty), _, e) as te) =
       match e with
       | Unop (Ast_defs.Unot, e)
-      | Binop (Ast_defs.Eqeqeq, e, (_, Null))
-      | Binop (Ast_defs.Eqeqeq, (_, Null), e)
-      | Binop (Ast_defs.Diff2, e, (_, Null))
-      | Binop (Ast_defs.Diff2, (_, Null), e) ->
+      | Binop (Ast_defs.Eqeqeq, e, (_, _, Null))
+      | Binop (Ast_defs.Eqeqeq, (_, _, Null), e)
+      | Binop (Ast_defs.Diff2, e, (_, _, Null))
+      | Binop (Ast_defs.Diff2, (_, _, Null), e) ->
         this#on_expr (env, disallow_due_to_cast_with_explicit_nullcheck) e
       | Binop (Ast_defs.(Eqeq | Eqeqeq | Diff | Diff2 | Barbar | Ampamp), e1, e2)
         ->
@@ -179,7 +179,7 @@ let visitor =
 
     method! on_stmt (env, ctx) stmt =
       match snd stmt with
-      | Expr ((_, Binop (Ast_defs.Eq _, _, _)) as e) ->
+      | Expr ((_, _, Binop (Ast_defs.Eq _, _, _)) as e) ->
         this#on_expr (env, allow_awaitable) e
       | Expr e -> this#on_expr (env, disallow_awaitable) e
       | If (e, b1, b2) ->

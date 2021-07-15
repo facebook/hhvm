@@ -32,6 +32,6 @@ let handler =
 
     method! at_expr _ expr =
       match expr with
-      | (_, Shape fdl) -> error_if_duplicate_names fdl
+      | (_, _, Shape fdl) -> error_if_duplicate_names fdl
       | _ -> ()
   end

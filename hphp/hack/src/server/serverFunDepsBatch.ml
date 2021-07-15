@@ -58,11 +58,11 @@ let collect_in_decl =
 
     method plus a b = Results.union a b
 
-    method! on_Call env e h el unpacked_element =
+    method! on_Call env ((_, _, expr_) as e) h el unpacked_element =
       let ( + ) = self#plus in
       let acc =
-        match snd e with
-        | T.Obj_get (((_, ty), _), (_, T.Id mid), _, _) ->
+        match expr_ with
+        | T.Obj_get (((_, ty), _, _), (_, _, T.Id mid), _, _) ->
           process_method env ty mid
         | T.Id id -> process_function id
         | T.Class_const (((_, ty), _), mid) -> process_method env ty mid
@@ -77,12 +77,12 @@ let collect_in_decl =
       let acc = process_method env ty (p, SN.Members.__construct) in
       acc + super#on_New env c targs el unpacked_element ctor_annot
 
-    method! on_expr env expr =
+    method! on_expr env (((pos, _), _, expr_) as expr) =
       let ( + ) = self#plus in
       let acc =
-        match snd expr with
+        match expr_ with
         | T.Fun_id id ->
-          process_function (fst (fst expr), SN.AutoimportedFunctions.fun_)
+          process_function (pos, SN.AutoimportedFunctions.fun_)
           + process_function id
         | T.Method_caller ((p, cid), mid) ->
           process_function (p, SN.AutoimportedFunctions.meth_caller)
@@ -90,7 +90,7 @@ let collect_in_decl =
         | T.Smethod_id (((p, ty), _), mid) ->
           process_function (p, SN.AutoimportedFunctions.class_meth)
           + process_method env ty mid
-        | T.Method_id (((p, ty), _), mid) ->
+        | T.Method_id (((p, ty), _, _), mid) ->
           process_function (p, SN.AutoimportedFunctions.inst_meth)
           + process_method env ty mid
         | T.FunctionPointer (T.FP_id id, _targs) -> process_function id

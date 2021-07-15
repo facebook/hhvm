@@ -16,7 +16,7 @@ val array_get :
   is_variadic ->
   Typing_env_types.env ->
   locl_ty ->
-  pos * Nast.expr_ ->
+  Nast.expr ->
   locl_ty ->
   Typing_env_types.env * locl_ty * (locl_ty * locl_ty) option
 
@@ -35,7 +35,7 @@ val assign_array_get_with_err :
   Reason.ureason ->
   Typing_env_types.env ->
   locl_ty ->
-  pos * (pos, Nast.func_body_ann, unit, unit) expr_ ->
+  Nast.expr ->
   locl_ty ->
   locl_ty ->
   Typing_env_types.env

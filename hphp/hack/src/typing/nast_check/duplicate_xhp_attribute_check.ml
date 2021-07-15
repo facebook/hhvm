@@ -39,7 +39,7 @@ let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_expr _ (_, e) =
+    method! at_expr _ (_, _, e) =
       (match e with
       | Aast.Xml (_, attribs, _) -> error_if_repeated_attribute attribs
       | _ -> ());

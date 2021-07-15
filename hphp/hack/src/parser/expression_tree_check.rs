@@ -23,7 +23,7 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 
     fn visit_expr(&mut self, c: &mut (), e: &Expr<Pos, (), (), ()>) -> Result<(), ()> {
-        match &e.1 {
+        match &e.2 {
             Expr_::ExpressionTree(_) => {}
             Expr_::ETSplice(_) => {
                 let msg = "Splice syntax ${...} can only occur inside expression trees Foo``...``.";

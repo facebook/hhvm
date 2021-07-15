@@ -17,14 +17,14 @@
         { fb_ast =
           [([4:3-43],
             (Expr
-               ([4:3-42],
+               ([4:3-42], [4:3-42],
                 (ExpressionTree
                    { et_hint = ([4:3-7], (Happly (([4:3-7], "\\Code"), []))); 
                      et_splices = [];
                      et_virtualized_expr =
-                     ([4:8-41],
+                     ([4:8-41], [4:8-41],
                       (Call (
-                         ([4:8-41],
+                         ([4:8-41], [4:8-41],
                           (Efun (
                              { f_span = [4:8-41]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
@@ -36,7 +36,7 @@
                                { fb_ast =
                                  [([4:8-41],
                                    (Return
-                                      (Some ([4:8-41],
+                                      (Some ([4:8-41], [4:8-41],
                                              (Lfun (
                                                 { f_span = [4:8-41]; 
                                                   f_readonly_this = None; 
@@ -52,28 +52,31 @@
                                                   { fb_ast =
                                                     [([4:17-39],
                                                       (While (
-                                                         ([4:23-27],
+                                                         ([4:23-27], [4:23-27],
                                                           (Call (
-                                                             ([4:23-27],
+                                                             ([4:23-27], [4:23-27],
                                                               (Obj_get (
-                                                                 ([4:23-27], (Call (([4:23-27], (Class_const (([4:23-27], (CI ([4:23-27], "\\Code"))), ([4:23-27], "boolType")))), [], [], None))),
-                                                                 ([4:23-27], (Id ([4:23-27], "__bool"))), OG_nullthrows, false))),
+                                                                 ([4:23-27], [4:23-27],
+                                                                  (Call (([4:23-27], [4:23-27], (Class_const (([4:23-27], (CI ([4:23-27], "\\Code"))), ([4:23-27], "boolType")))), [], [], None))),
+                                                                 ([4:23-27], [4:23-27], (Id ([4:23-27], "__bool"))), OG_nullthrows, false))),
                                                              [], [], None))),
                                                          [([4:31-37],
                                                            (Expr
-                                                              ([4:31-36],
+                                                              ([4:31-36], [4:31-36],
                                                                (Call (
-                                                                  ([4:31-36],
+                                                                  ([4:31-36], [4:31-36],
                                                                    (Call ((
-                                                                    [4:31-36], (Class_const (([4:31-36], (CI ([4:31-36], "\\Code"))), ([4:31-36], "symbolType")))), 
+                                                                    [4:31-36], [4:31-36], (Class_const (([4:31-36], (CI ([4:31-36], "\\Code"))), ([4:31-36], "symbolType")))), 
                                                                     [], 
-                                                                    [([4:31-34], (FunctionPointer ((FP_id ([4:31-34], "\\foo")), [])))], None))),
+                                                                    [([4:31-34], [4:31-34], (FunctionPointer ((FP_id ([4:31-34], "\\foo")), [])))], None))),
                                                                   [], 
                                                                   [], None)))))
                                                            ]
                                                          )));
                                                       ([4:8-41],
-                                                       (Return (Some ([4:8-41], (Call (([4:8-41], (Class_const (([4:8-41], (CI ([4:8-41], "\\Code"))), ([4:8-41], "voidType")))), [], [], None))))))
+                                                       (Return
+                                                          (Some ([4:8-41], [4:8-41],
+                                                                 (Call (([4:8-41], [4:8-41], (Class_const (([4:8-41], (CI ([4:8-41], "\\Code"))), ([4:8-41], "voidType")))), [], [], None))))))
                                                       ];
                                                     fb_annotation = Named };
                                                   f_fun_kind = FSync; 
@@ -88,22 +91,23 @@
                              []))),
                          [], [], None)));
                      et_runtime_expr =
-                     ([4:8-41],
-                      (Call (([4:8-41], (Class_const (([4:8-41], (CI ([4:8-41], "\\Code"))), ([4:8-41], "makeTree")))), 
+                     ([4:8-41], [4:8-41],
+                      (Call (([4:8-41], [4:8-41], (Class_const (([4:8-41], (CI ([4:8-41], "\\Code"))), ([4:8-41], "makeTree")))), 
                          [],
-                         [([4:8-41],
+                         [([4:8-41], [4:8-41],
                            (Shape
-                              [((SFlit_str ([4:8-41], "path")), ([4:8-41], (Id ([4:8-41], "\\__FILE__")))); (
-                                (SFlit_str ([4:8-41], "start_line")), ([4:8-41], (Int "4"))); (
-                                (SFlit_str ([4:8-41], "end_line")), ([4:8-41], (Int "4"))); (
-                                (SFlit_str ([4:8-41], "start_column")), ([4:8-41], (Int "7"))); (
-                                (SFlit_str ([4:8-41], "end_column")), ([4:8-41], (Int "40")))]));
-                           ([4:8-41],
+                              [((SFlit_str ([4:8-41], "path")), ([4:8-41], [4:8-41], (Id ([4:8-41], "\\__FILE__")))); (
+                                (SFlit_str ([4:8-41], "start_line")), ([4:8-41], [4:8-41], (Int "4"))); (
+                                (SFlit_str ([4:8-41], "end_line")), ([4:8-41], [4:8-41], (Int "4"))); (
+                                (SFlit_str ([4:8-41], "start_column")), ([4:8-41], [4:8-41], (Int "7"))); (
+                                (SFlit_str ([4:8-41], "end_column")), ([4:8-41], [4:8-41], (Int "40")))]));
+                           ([4:8-41], [4:8-41],
                             (Shape
-                               [((SFlit_str ([4:8-41], "splices")), ([4:8-41], (KeyValCollection (Dict, None, []))));
-                                 ((SFlit_str ([4:8-41], "functions")), ([4:8-41], (ValCollection (Vec, None, [([4:31-34], (FunctionPointer ((FP_id ([4:31-34], "\\foo")), [])))]))));
-                                 ((SFlit_str ([4:8-41], "static_methods")), ([4:8-41], (ValCollection (Vec, None, []))))]));
-                           ([4:8-41],
+                               [((SFlit_str ([4:8-41], "splices")), ([4:8-41], [4:8-41], (KeyValCollection (Dict, None, []))));
+                                 ((SFlit_str ([4:8-41], "functions")),
+                                  ([4:8-41], [4:8-41], (ValCollection (Vec, None, [([4:31-34], [4:31-34], (FunctionPointer ((FP_id ([4:31-34], "\\foo")), [])))]))));
+                                 ((SFlit_str ([4:8-41], "static_methods")), ([4:8-41], [4:8-41], (ValCollection (Vec, None, []))))]));
+                           ([4:8-41], [4:8-41],
                             (Lfun (
                                { f_span = [4:8-41]; f_readonly_this = None; 
                                  f_annotation = (); f_readonly_ret = None; 
@@ -122,70 +126,86 @@
                                  { fb_ast =
                                    [([4:8-41],
                                      (Return
-                                        (Some ([4:8-41],
-                                               (Call (([4:8-41], (Obj_get (([4:8-41], (Lvar ([4:8-41], $0v))), ([4:8-41], (Id ([4:8-41], "visitLambda"))), OG_nullthrows, false))), 
+                                        (Some ([4:8-41], [4:8-41],
+                                               (Call (
+                                                  ([4:8-41], [4:8-41],
+                                                   (Obj_get (([4:8-41], [4:8-41], (Lvar ([4:8-41], $0v))), ([4:8-41], [4:8-41], (Id ([4:8-41], "visitLambda"))), OG_nullthrows, false))),
                                                   [],
-                                                  [([4:8-41],
+                                                  [([4:8-41], [4:8-41],
                                                     (Shape
-                                                       [((SFlit_str ([4:8-41], "path")), ([4:8-41], (Id ([4:8-41], "\\__FILE__")))); (
-                                                         (SFlit_str ([4:8-41], "start_line")), ([4:8-41], (Int "4"))); (
-                                                         (SFlit_str ([4:8-41], "end_line")), ([4:8-41], (Int "4"))); (
-                                                         (SFlit_str ([4:8-41], "start_column")), ([4:8-41], (Int "7"))); (
-                                                         (SFlit_str ([4:8-41], "end_column")), ([4:8-41], (Int "40")))]));
-                                                    ([Pos.none], (ValCollection (Vec, None, [])));
-                                                    ([4:17-39],
+                                                       [((SFlit_str ([4:8-41], "path")), ([4:8-41], [4:8-41], (Id ([4:8-41], "\\__FILE__"))));
+                                                         ((SFlit_str ([4:8-41], "start_line")), ([4:8-41], [4:8-41], (Int "4")));
+                                                         ((SFlit_str ([4:8-41], "end_line")), ([4:8-41], [4:8-41], (Int "4")));
+                                                         ((SFlit_str ([4:8-41], "start_column")), ([4:8-41], [4:8-41], (Int "7")));
+                                                         ((SFlit_str ([4:8-41], "end_column")), ([4:8-41], [4:8-41], (Int "40")))]));
+                                                    ([Pos.none], [Pos.none], (ValCollection (Vec, None, [])));
+                                                    ([4:17-39], [4:17-39],
                                                      (ValCollection (Vec, None,
-                                                        [([4:17-39],
-                                                          (Call (([4:17-39], (Obj_get (([4:17-39], (Lvar ([4:17-39], $0v))), ([4:17-39], (Id ([4:17-39], "visitWhile"))), OG_nullthrows, false))), 
+                                                        [([4:17-39], [4:17-39],
+                                                          (Call (
+                                                             ([4:17-39], [4:17-39],
+                                                              (Obj_get (([4:17-39], [4:17-39], (Lvar ([4:17-39], $0v))), ([4:17-39], [4:17-39], (Id ([4:17-39], "visitWhile"))), OG_nullthrows, false))),
                                                              [],
-                                                             [([4:17-39],
+                                                             [([4:17-39], [4:17-39],
                                                                (Shape
-                                                                  [((SFlit_str ([4:17-39], "path")), ([4:17-39], (Id ([4:17-39], "\\__FILE__"))));
+                                                                  [((SFlit_str ([4:17-39], "path")), ([4:17-39], [4:17-39], (Id ([4:17-39], "\\__FILE__"))));
                                                                     (
-                                                                    (SFlit_str ([4:17-39], "start_line")), ([4:17-39], (Int "4"))); (
-                                                                    (SFlit_str ([4:17-39], "end_line")), ([4:17-39], (Int "4"))); (
-                                                                    (SFlit_str ([4:17-39], "start_column")), ([4:17-39], (Int "16"))); (
-                                                                    (SFlit_str ([4:17-39], "end_column")), ([4:17-39], (Int "38")))]));
-                                                               ([4:23-27],
-                                                                (Call ((
-                                                                   [4:23-27], (Obj_get (([4:23-27], (Lvar ([4:23-27], $0v))), ([4:23-27], (Id ([4:23-27], "visitBool"))), OG_nullthrows, false))), 
+                                                                    (SFlit_str ([4:17-39], "start_line")), ([4:17-39], [4:17-39], (Int "4")));
+                                                                    (
+                                                                    (SFlit_str ([4:17-39], "end_line")), ([4:17-39], [4:17-39], (Int "4")));
+                                                                    (
+                                                                    (SFlit_str ([4:17-39], "start_column")), ([4:17-39], [4:17-39], (Int "16")));
+                                                                    (
+                                                                    (SFlit_str ([4:17-39], "end_column")), ([4:17-39], [4:17-39], (Int "38")))]));
+                                                               ([4:23-27], [4:23-27],
+                                                                (Call (
+                                                                   ([4:23-27], [4:23-27],
+                                                                    (
+                                                                    Obj_get ((
+                                                                    [4:23-27], [4:23-27], (Lvar ([4:23-27], $0v))), (
+                                                                    [4:23-27], [4:23-27], (Id ([4:23-27], "visitBool"))), OG_nullthrows, false))),
                                                                    [],
-                                                                   [([4:23-27],
+                                                                   [([4:23-27], [4:23-27],
                                                                     (Shape
-                                                                    [((SFlit_str ([4:23-27], "path")), ([4:23-27], (Id ([4:23-27], "\\__FILE__"))));
-                                                                    ((SFlit_str ([4:23-27], "start_line")), ([4:23-27], (Int "4"))); (
-                                                                    (SFlit_str ([4:23-27], "end_line")), ([4:23-27], (Int "4"))); (
-                                                                    (SFlit_str ([4:23-27], "start_column")), ([4:23-27], (Int "22"))); (
-                                                                    (SFlit_str ([4:23-27], "end_column")), ([4:23-27], (Int "26")))])); (
-                                                                    [4:23-27], True)],
+                                                                    [((SFlit_str ([4:23-27], "path")), ([4:23-27], [4:23-27], (Id ([4:23-27], "\\__FILE__"))));
+                                                                    ((SFlit_str ([4:23-27], "start_line")), ([4:23-27], [4:23-27], (Int "4")));
+                                                                    ((SFlit_str ([4:23-27], "end_line")), ([4:23-27], [4:23-27], (Int "4")));
+                                                                    ((SFlit_str ([4:23-27], "start_column")), ([4:23-27], [4:23-27], (Int "22")));
+                                                                    ((SFlit_str ([4:23-27], "end_column")), ([4:23-27], [4:23-27], (Int "26")))])); (
+                                                                    [4:23-27], [4:23-27], True)],
                                                                    None)));
-                                                               ([4:31-36],
+                                                               ([4:31-36], [4:31-36],
                                                                 (ValCollection (Vec, None,
-                                                                   [([4:31-36],
+                                                                   [([4:31-36], [4:31-36],
                                                                     (Call (
-                                                                    ([4:31-36], (Obj_get (([4:31-36], (Lvar ([4:31-36], $0v))), ([4:31-36], (Id ([4:31-36], "visitCall"))), OG_nullthrows, false))),
+                                                                    ([4:31-36], [4:31-36],
+                                                                    (Obj_get ((
+                                                                    [4:31-36], [4:31-36], (Lvar ([4:31-36], $0v))), (
+                                                                    [4:31-36], [4:31-36], (Id ([4:31-36], "visitCall"))), OG_nullthrows, false))), 
                                                                     [],
-                                                                    [([4:31-36],
+                                                                    [([4:31-36], [4:31-36],
                                                                     (Shape
-                                                                    [((SFlit_str ([4:31-36], "path")), ([4:31-36], (Id ([4:31-36], "\\__FILE__"))));
-                                                                    ((SFlit_str ([4:31-36], "start_line")), ([4:31-36], (Int "4"))); (
-                                                                    (SFlit_str ([4:31-36], "end_line")), ([4:31-36], (Int "4"))); (
-                                                                    (SFlit_str ([4:31-36], "start_column")), ([4:31-36], (Int "30"))); (
-                                                                    (SFlit_str ([4:31-36], "end_column")), ([4:31-36], (Int "35")))]));
-                                                                    ([4:31-36],
+                                                                    [((SFlit_str ([4:31-36], "path")), ([4:31-36], [4:31-36], (Id ([4:31-36], "\\__FILE__"))));
+                                                                    ((SFlit_str ([4:31-36], "start_line")), ([4:31-36], [4:31-36], (Int "4")));
+                                                                    ((SFlit_str ([4:31-36], "end_line")), ([4:31-36], [4:31-36], (Int "4")));
+                                                                    ((SFlit_str ([4:31-36], "start_column")), ([4:31-36], [4:31-36], (Int "30")));
+                                                                    ((SFlit_str ([4:31-36], "end_column")), ([4:31-36], [4:31-36], (Int "35")))]));
+                                                                    ([4:31-36], [4:31-36],
                                                                     (Call (
-                                                                    ([4:31-36],
-                                                                    (Obj_get (([4:31-36], (Lvar ([4:31-36], $0v))), ([4:31-36], (Id ([4:31-36], "visitGlobalFunction"))), OG_nullthrows, false))), 
+                                                                    ([4:31-36], [4:31-36],
+                                                                    (Obj_get ((
+                                                                    [4:31-36], [4:31-36], (Lvar ([4:31-36], $0v))), (
+                                                                    [4:31-36], [4:31-36], (Id ([4:31-36], "visitGlobalFunction"))), OG_nullthrows, false))), 
                                                                     [],
-                                                                    [([4:31-36],
+                                                                    [([4:31-36], [4:31-36],
                                                                     (Shape
-                                                                    [((SFlit_str ([4:31-36], "path")), ([4:31-36], (Id ([4:31-36], "\\__FILE__"))));
-                                                                    ((SFlit_str ([4:31-36], "start_line")), ([4:31-36], (Int "4"))); (
-                                                                    (SFlit_str ([4:31-36], "end_line")), ([4:31-36], (Int "4"))); (
-                                                                    (SFlit_str ([4:31-36], "start_column")), ([4:31-36], (Int "30"))); (
-                                                                    (SFlit_str ([4:31-36], "end_column")), ([4:31-36], (Int "35")))]));
-                                                                    ([4:31-34], (FunctionPointer ((FP_id ([4:31-34], "\\foo")), [])))], None))); (
-                                                                    [Pos.none], (ValCollection (Vec, None, [])))], None)))]
+                                                                    [((SFlit_str ([4:31-36], "path")), ([4:31-36], [4:31-36], (Id ([4:31-36], "\\__FILE__"))));
+                                                                    ((SFlit_str ([4:31-36], "start_line")), ([4:31-36], [4:31-36], (Int "4")));
+                                                                    ((SFlit_str ([4:31-36], "end_line")), ([4:31-36], [4:31-36], (Int "4")));
+                                                                    ((SFlit_str ([4:31-36], "start_column")), ([4:31-36], [4:31-36], (Int "30")));
+                                                                    ((SFlit_str ([4:31-36], "end_column")), ([4:31-36], [4:31-36], (Int "35")))]));
+                                                                    ([4:31-34], [4:31-34], (FunctionPointer ((FP_id ([4:31-34], "\\foo")), [])))], None)));
+                                                                    ([Pos.none], [Pos.none], (ValCollection (Vec, None, [])))], None)))]
                                                                    )))
                                                                ],
                                                              None)))

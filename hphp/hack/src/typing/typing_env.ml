@@ -1363,8 +1363,8 @@ module FakeMembers = struct
 
   let is_valid env obj member_name =
     match obj with
-    | (_, This)
-    | (_, Lvar _) ->
+    | (_, _, This)
+    | (_, _, Lvar _) ->
       let fake_members = get_fake_members env in
       let id = Fake.make_id obj member_name in
       Fake.is_valid fake_members id
@@ -1384,8 +1384,8 @@ module FakeMembers = struct
 
   let check_instance_invalid env obj member_name ty =
     match obj with
-    | (_, This)
-    | (_, Lvar _) ->
+    | (_, _, This)
+    | (_, _, Lvar _) ->
       let fake_members = get_fake_members env in
       let fake_id = Fake.make_id obj member_name in
       begin

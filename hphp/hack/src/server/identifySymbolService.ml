@@ -204,12 +204,12 @@ let visitor =
     method plus = Result_set.union
 
     method! on_expr env expr =
-      let pos = fst (fst expr) in
+      let ((pos, _), _, expr_) = expr in
       let ( + ) = self#plus in
       let acc =
-        match snd expr with
+        match expr_ with
         | Aast.New (((p, ty), _), _, _, _, _) -> typed_constructor env ty p
-        | Aast.Obj_get (((_, ty), _), (_, Aast.Id mid), _, _) ->
+        | Aast.Obj_get (((_, ty), _, _), (_, _, Aast.Id mid), _, _) ->
           typed_property env ty mid
         | Aast.Class_const (((_, ty), _), mid) -> typed_const env ty mid
         | Aast.Class_get (((_, ty), _), Aast.CGstring mid, _) ->
@@ -225,7 +225,7 @@ let visitor =
         | Aast.FunctionPointer
             (Aast.FP_class_const (((_pos, ty), _cid), mid), _targs) ->
           typed_method env ty mid
-        | Aast.Method_id (((_, ty), _), mid) ->
+        | Aast.Method_id (((_, ty), _, _), mid) ->
           process_fun_id (pos, SN.AutoimportedFunctions.inst_meth)
           + typed_method env ty (remove_apostrophes_from_function_eval mid)
         | Aast.Smethod_id (((_, ty), _), mid) ->
@@ -246,7 +246,8 @@ let visitor =
           begin
             match enum_name with
             | None ->
-              let ty = Typing_defs_core.get_node (snd (fst expr)) in
+              let ((_, ety), _, _) = expr in
+              let ty = Typing_defs_core.get_node ety in
               (match ty with
               | Tnewtype (_, [ty_enum_class; _], _) ->
                 (match get_node ty_enum_class with
@@ -285,10 +286,12 @@ let visitor =
          update the environment. *)
       let env = Tast_env.set_in_expr_tree env true in
 
+      let (_, _, virtualized_expr_) = et_virtualized_expr in
       let e =
-        match snd et_virtualized_expr with
+        match virtualized_expr_ with
         | Aast.Call
             ( ( _,
+                _,
                 Aast.Efun
                   ( {
                       Aast.f_body =
@@ -327,7 +330,7 @@ let visitor =
         typed_class_id ~class_id_type:Other env ty p
       | Aast.CI _ -> typed_class_id env ty p
 
-    method! on_Call env e tal el unpacked_element =
+    method! on_Call env ((_, _, expr_) as e) tal el unpacked_element =
       (* For Id, Obj_get (with an Id member), and Class_const, we don't want to
        * use the result of `self#on_expr env e`, since it would record a
        * property, class const, or global const access instead of a method call.
@@ -335,14 +338,14 @@ let visitor =
        * `self#on_expr env e` when necessary. *)
       let ( + ) = self#plus in
       let ea =
-        match snd e with
-        | Aast.Call ((_, Aast.Class_const (_, (_, methName))), _, [arg], _)
+        match expr_ with
+        | Aast.Call ((_, _, Aast.Class_const (_, (_, methName))), _, [arg], _)
           when Tast_env.is_in_expr_tree env
                && String.equal methName SN.ExpressionTrees.symbolType ->
           (* Treat MyVisitor::symbolType(foo<>) as just foo(). *)
           self#on_expr env arg
         | Aast.Id id -> process_fun_id id
-        | Aast.Obj_get ((((_, ty), _) as obj), (_, Aast.Id mid), _, _) ->
+        | Aast.Obj_get ((((_, ty), _, _) as obj), (_, _, Aast.Id mid), _, _) ->
           self#on_expr env obj + typed_method env ty mid
         | Aast.Class_const ((((_, ty), _) as cid), mid) ->
           self#on_class_id env cid + typed_method env ty mid
@@ -506,8 +509,8 @@ let visitor =
       let acc = process_global_const id in
       self#plus acc (super#on_Id env id)
 
-    method! on_Obj_get env obj member ognf in_parens =
-      match snd member with
+    method! on_Obj_get env obj ((_, _, expr_) as member) ognf in_parens =
+      match expr_ with
       | Aast.Id _ ->
         (* Don't visit this Id, since we would record it as a gconst access. *)
         let obja = self#on_expr env obj in

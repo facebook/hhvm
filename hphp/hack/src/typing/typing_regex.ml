@@ -168,7 +168,7 @@ let check_and_strip_delimiters s =
     else
       raise Missing_delimiter
 
-let type_pattern (p, e_) =
+let type_pattern (p, _, e_) =
   match e_ with
   | String s ->
     let (s, flags) = check_and_strip_delimiters s in

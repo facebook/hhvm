@@ -22,11 +22,11 @@
             (Do (
                [([5:5-40],
                  (Throw
-                    (([5:11-39], Exception),
+                    (([5:11-39], Exception), [5:11-39],
                      (New ((([5:15-24], Exception), (CI ([5:15-24], "\\Exception"))), 
-                        [], [(([5:25-38], string), (String "DoWhileBody"))], None, ([5:15-24], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
+                        [], [(([5:25-38], string), [5:25-38], (String "DoWhileBody"))], None, ([5:15-24], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
                  ],
-               (([6:12-17], nothing), (Lvar ([6:12-17], $cond))))))
+               (([6:12-17], nothing), [6:12-17], (Lvar ([6:12-17], $cond))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

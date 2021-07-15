@@ -52,7 +52,7 @@ fn emit_native_opcode_impl<'arena>(
     if let [ua] = user_attrs {
         if ua.name.1 == "__NativeData" {
             if let [p] = ua.params.as_slice() {
-                match p.1.as_string() {
+                match p.2.as_string() {
                     Some(s) if s == "HH\\AsyncGenerator" || s == "Generator" => {
                         return emit_generator_method(alloc, name, params);
                     }

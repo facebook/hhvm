@@ -13,8 +13,9 @@
         { fb_ast =
           [([5:3-30],
             (Return
-               (Some (([5:10-29], Pair<int, string>),
-                      (Pair (None, (([5:15-20], string), (Hole ((([5:15-20], string), (String "bad")), (string), (int), Typing))), (([5:22-28], string), (String "good"))))))))
+               (Some (([5:10-29], Pair<int, string>), [5:10-29],
+                      (Pair (None, (([5:15-20], string), [5:15-20], (Hole ((([5:15-20], string), [5:15-20], (String "bad")), (string), (int), Typing))),
+                         (([5:22-28], string), [5:22-28], (String "good"))))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

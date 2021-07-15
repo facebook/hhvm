@@ -391,7 +391,7 @@ pub fn halves_of_is_enabled_body<Ex, Fb, En, Hi>(
 ) -> Option<(&a::Block<Ex, Fb, En, Hi>, &a::Block<Ex, Fb, En, Hi>)> {
     use a::*;
     if let [Stmt(_, Stmt_::If(if_))] = body.ast.as_slice() {
-        if let (Expr(_, Expr_::Id(sid)), enabled, disabled) = &**if_ {
+        if let (Expr(_, _, Expr_::Id(sid)), enabled, disabled) = &**if_ {
             let Id(_, name) = &**sid;
             return if name != sn::rx::IS_ENABLED {
                 None

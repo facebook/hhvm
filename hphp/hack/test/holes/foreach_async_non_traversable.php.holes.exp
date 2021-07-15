@@ -19,8 +19,8 @@
         f_body =
         { fb_ast =
           [([5:3-6:4],
-            (Foreach ((([5:12-15], int), (Hole ((([5:12-15], int), (Lvar ([5:12-15], $xs))), (int), (AsyncIterator<nothing>), Typing))),
-               (Await_as_v ([5:16-21], (([5:25-27], nothing), (Lvar ([5:25-27], $x))))), 
+            (Foreach ((([5:12-15], int), [5:12-15], (Hole ((([5:12-15], int), [5:12-15], (Lvar ([5:12-15], $xs))), (int), (AsyncIterator<nothing>), Typing))),
+               (Await_as_v ([5:16-21], (([5:25-27], nothing), [5:25-27], (Lvar ([5:25-27], $x))))), 
                [([5:3-6:4], (AssertEnv (Join, {$#capability $#local_capability $xs})))])))
             ];
           fb_annotation = () };

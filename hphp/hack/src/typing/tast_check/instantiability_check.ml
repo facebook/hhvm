@@ -165,7 +165,7 @@ let handler =
 
     method! at_gconst env cst = Option.iter cst.cst_type ~f:(check_hint env)
 
-    method! at_expr env (_, e) =
+    method! at_expr env (_, _, e) =
       match e with
       | Is (_, h) -> check_hint env h
       | As (_, h, _) -> check_hint env h

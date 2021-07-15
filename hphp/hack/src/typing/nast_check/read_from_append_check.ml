@@ -14,9 +14,9 @@ let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_expr env s =
-      match snd s with
-      | Array_get ((p, _), None) when not env.array_append_allowed ->
+    method! at_expr env (_, _, e) =
+      match e with
+      | Array_get ((p, _, _), None) when not env.array_append_allowed ->
         Errors.reading_from_append p
       | _ -> ()
   end

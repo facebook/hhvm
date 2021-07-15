@@ -89,13 +89,13 @@ pub fn emit_stmt<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             alloc,
             vec![instr::null(alloc), emit_return(e, env)?],
         )),
-        a::Stmt_::Expr(e_) => match &e_.1 {
+        a::Stmt_::Expr(e_) => match &e_.2 {
             a::Expr_::Await(a) => Ok(InstrSeq::gather(
                 alloc,
                 vec![emit_await(e, env, &e_.0, a)?, instr::popc(alloc)],
             )),
             a::Expr_::Call(c) => {
-                if let (a::Expr(_, a::Expr_::Id(sid)), _, exprs, None) = c.as_ref() {
+                if let (a::Expr(_, _, a::Expr_::Id(sid)), _, exprs, None) = c.as_ref() {
                     let ft = hhbc_id::function::Type::from_ast_name(alloc, &sid.1);
                     let fname = ft.to_raw_string();
                     if fname.eq_ignore_ascii_case("unset") {
@@ -110,7 +110,7 @@ pub fn emit_stmt<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         if let Some(kind) = set_bytes_kind(fname) {
                             let exprs = exprs.iter().collect::<Vec<&tast::Expr>>();
                             match exprs.first() {
-                                Some(a::Expr(_, a::Expr_::Callconv(cc))) if cc.0.is_pinout() => {
+                                Some(a::Expr(_, _, a::Expr_::Callconv(cc))) if cc.0.is_pinout() => {
                                     let mut args = vec![&cc.1];
                                     args.extend_from_slice(&exprs[1..exprs.len()]);
                                     emit_expr::emit_set_range_expr(
@@ -141,11 +141,11 @@ pub fn emit_stmt<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             }
             a::Expr_::Binop(bop) => {
                 if let (ast_defs::Bop::Eq(None), e_lhs, e_rhs) = bop.as_ref() {
-                    if let Some(e_await) = e_rhs.1.as_await() {
+                    if let Some(e_await) = e_rhs.2.as_await() {
                         let await_pos = &e_rhs.0;
-                        if let Some(l) = e_lhs.1.as_list() {
+                        if let Some(l) = e_lhs.2.as_list() {
                             let awaited_instrs = emit_await(e, env, await_pos, e_await)?;
-                            let has_elements = l.iter().any(|e| !e.1.is_omitted());
+                            let has_elements = l.iter().any(|e| !e.2.is_omitted());
                             if has_elements {
                                 scope::with_unnamed_local(alloc, e, |alloc, e, temp| {
                                     Ok((
@@ -190,7 +190,7 @@ pub fn emit_stmt<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         a::Stmt_::Return(r_opt) => match r_opt.as_ref() {
             Some(r) => {
                 let ret = emit_return(e, env)?;
-                let expr_instr = if let Some(e_) = r.1.as_await() {
+                let expr_instr = if let Some(e_) = r.2.as_await() {
                     emit_await(e, env, &r.0, e_)?
                 } else {
                     emit_expr(e, env, &r)?
@@ -273,7 +273,7 @@ fn emit_check_case<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     (case_expr, case_handler_label): (&tast::Expr, Label),
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    Ok(if scrutinee_expr.1.is_lvar() {
+    Ok(if scrutinee_expr.2.is_lvar() {
         InstrSeq::gather(
             alloc,
             vec![
@@ -451,8 +451,8 @@ fn emit_using<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         )
     } else {
         e.local_scope(|e| {
-            let (local, preamble) = match &(using.exprs.1[0].1) {
-                tast::Expr_::Binop(x) => match (&x.0, (x.1).1.as_lvar()) {
+            let (local, preamble) = match &(using.exprs.1[0].2) {
+                tast::Expr_::Binop(x) => match (&x.0, (x.1).2.as_lvar()) {
                     (ast_defs::Bop::Eq(None), Some(tast::Lid(_, id))) => (
                         local::Type::Named(
                             bumpalo::collections::String::from_str_in(
@@ -749,7 +749,7 @@ fn emit_switch<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     cl: &Vec<tast::Case>,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let (instr_init, instr_free) = if scrutinee_expr.1.is_lvar() {
+    let (instr_init, instr_free) = if scrutinee_expr.2.is_lvar() {
         (instr::empty(alloc), instr::empty(alloc))
     } else {
         (
@@ -1239,8 +1239,8 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     match iterator {
         A::AsKv(k, v) => Ok(
             match (
-                get_id_of_simple_lvar_opt(&k.1)?,
-                get_id_of_simple_lvar_opt(&v.1)?,
+                get_id_of_simple_lvar_opt(&k.2)?,
+                get_id_of_simple_lvar_opt(&v.2)?,
             ) {
                 (Some(key_id), Some(val_id)) => (
                     Some(local::Type::Named(alloc.alloc_str(key_id))),
@@ -1256,7 +1256,7 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         emit_iterator_lvalue_storage(e, env, v, val_local)?;
                     // HHVM prepends code to initialize non-plain, non-list foreach-key
                     // to the value preamble - do the same to minimize diffs
-                    if !(k.1).is_list() {
+                    if !(k.2).is_list() {
                         key_preamble.extend(val_preamble);
                         val_preamble = key_preamble;
                         key_preamble = vec![];
@@ -1277,7 +1277,7 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 }
             },
         ),
-        A::AsV(v) => Ok(match get_id_of_simple_lvar_opt(&v.1)? {
+        A::AsV(v) => Ok(match get_id_of_simple_lvar_opt(&v.2)? {
             Some(val_id) => (
                 None,
                 local::Type::Named(alloc.alloc_str(val_id)),
@@ -1312,7 +1312,7 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     local: local::Type<'arena>,
 ) -> Result<(Vec<InstrSeq<'arena>>, Vec<InstrSeq<'arena>>)> {
     let alloc = env.arena;
-    match &lvalue.1 {
+    match &lvalue.2 {
         tast::Expr_::Call(_) => Err(emit_fatal::raise_fatal_parse(
             &lvalue.0,
             "Can't use return value in write context",
@@ -1401,7 +1401,7 @@ fn emit_load_list_element<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             ],
         )
     };
-    Ok(match &elem.1 {
+    Ok(match &elem.2 {
         tast::Expr_::Lvar(lid) => {
             let load_value = InstrSeq::gather(
                 alloc,
@@ -1732,8 +1732,10 @@ pub fn emit_markup<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let mut emit_ignored_call_expr = |fname: String, expr: tast::Expr| {
         let call_expr = tast::Expr(
             Pos::make_none(),
+            Pos::make_none(),
             tast::Expr_::mk_call(
                 tast::Expr(
+                    Pos::make_none(),
                     Pos::make_none(),
                     tast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), fname)),
                 ),
@@ -1750,7 +1752,11 @@ pub fn emit_markup<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         } else {
             emit_ignored_call_expr(
                 fname,
-                tast::Expr(Pos::make_none(), tast::Expr_::mk_string(expr_str.into())),
+                tast::Expr(
+                    Pos::make_none(),
+                    Pos::make_none(),
+                    tast::Expr_::mk_string(expr_str.into()),
+                ),
             )
         }
     };
@@ -1801,7 +1807,7 @@ fn emit_await_assignment<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     r: &tast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    match lval.1.as_lvar() {
+    match lval.2.as_lvar() {
         Some(tast::Lid(_, id)) if !emit_expr::is_local_this(env, &id) => Ok(InstrSeq::gather(
             alloc,
             vec![

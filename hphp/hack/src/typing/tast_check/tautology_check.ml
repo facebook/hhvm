@@ -18,11 +18,12 @@ open Aast
 open Tast
 
 let trivial_equality_check
-    p bop env (((_, ty1), _) as te1 : expr) (((_, ty2), _) as te2 : expr) =
+    p bop env (((_, ty1), _, _) as te1 : expr) (((_, ty2), _, _) as te2 : expr)
+    =
   begin
     match (te1, te2) with
-    | ((_, Null), ((_, ty), _))
-    | (((_, ty), _), (_, Null)) ->
+    | ((_, _, Null), ((_, ty), _, _))
+    | (((_, ty), _, _), (_, _, Null)) ->
       Tast_env.assert_nullable p bop env ty
     | _ -> ()
   end;
@@ -34,7 +35,7 @@ let handler =
 
     method! at_expr env =
       function
-      | ((p, _), Binop (((Eqeqeq | Diff2) as bop), te1, te2)) ->
+      | ((p, _), _, Binop (((Eqeqeq | Diff2) as bop), te1, te2)) ->
         trivial_equality_check p bop env te1 te2
       | _ -> ()
   end

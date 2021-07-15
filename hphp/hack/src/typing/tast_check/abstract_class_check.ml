@@ -13,7 +13,7 @@ module Env = Tast_env
 module Cls = Decl_provider.Class
 module SN = Naming_special_names
 
-let check_expr env (pos, e) =
+let check_expr env (pos, _, e) =
   match e with
   | Class_const ((_, CIparent), (_, construct))
     when String.equal construct SN.Members.__construct ->

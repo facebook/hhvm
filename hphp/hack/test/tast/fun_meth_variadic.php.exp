@@ -40,11 +40,13 @@
          f_body =
          { fb_ast =
            [([6:3-8:4],
-             (Foreach ((([6:12-17], vec<string>), (Lvar ([6:12-17], $args))), (
-                As_v (([6:21-25], string), (Lvar ([6:21-25], $arg)))),
+             (Foreach ((([6:12-17], vec<string>), [6:12-17], (Lvar ([6:12-17], $args))), (
+                As_v (([6:21-25], string), [6:21-25], (Lvar ([6:21-25], $arg)))),
                 [([6:3-8:4], (AssertEnv (Join, {$#capability $#local_capability $args})));
                   ([7:5-24],
-                   (Expr (([7:5-23], void), (Call ((([7:5-17], (function(string $s): void)), (Id ([7:5-17], "\\takes_string"))), [], [(([7:18-22], string), (Lvar ([7:18-22], $arg)))], None)))))
+                   (Expr
+                      (([7:5-23], void), [7:5-23],
+                       (Call ((([7:5-17], (function(string $s): void)), [7:5-17], (Id ([7:5-17], "\\takes_string"))), [], [(([7:18-22], string), [7:18-22], (Lvar ([7:18-22], $arg)))], None)))))
                   ]
                 )))
              ];

@@ -86,7 +86,7 @@ let build_attributes_json_nested source_map attrs =
     List.map attrs ~f:(fun attr ->
         let (_, name) = attr.ua_name in
         let params =
-          List.fold_right attr.ua_params ~init:[] ~f:(fun ((pos, _), _) acc ->
+          List.fold_right attr.ua_params ~init:[] ~f:(fun (_, pos, _) acc ->
               let fp = Relative_path.to_absolute (Pos.filename pos) in
               match SMap.find_opt fp source_map with
               | Some st ->
@@ -197,7 +197,7 @@ let build_signature_json ctx source_map params vararg ret_ty =
     let def_value =
       match p.param_expr with
       | None -> None
-      | Some ((expr_pos, _), _) ->
+      | Some (_, expr_pos, _) ->
         let fp = Relative_path.to_absolute (Pos.filename expr_pos) in
         (match SMap.find_opt fp source_map with
         | Some st -> Some (source_at_span st expr_pos)

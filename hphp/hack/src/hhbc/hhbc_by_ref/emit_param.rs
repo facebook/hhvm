@@ -101,7 +101,7 @@ fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let nullable = param
         .expr
         .as_ref()
-        .map_or(false, |a::Expr(_, e)| e.is_null());
+        .map_or(false, |a::Expr(_, _, e)| e.is_null());
     let type_info = {
         let param_type_hint = if param.is_variadic {
             Some(Hint(
@@ -320,7 +320,7 @@ fn match_default_and_hint(hint_type: &str, param_expr: &Option<a::Expr>) -> Opti
     }
     match &param_expr.as_ref() {
         None => None,
-        Some(e) => match e.1 {
+        Some(e) => match e.2 {
             a::Expr_::True | a::Expr_::False => match hint_type {
                 "bool" => None,
                 _ => Some("Boolean"),

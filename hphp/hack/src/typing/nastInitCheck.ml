@@ -387,8 +387,9 @@ and assign _env acc x = S.add x acc
 
 and assign_expr env acc e1 =
   match e1 with
-  | (_, Obj_get ((_, This), (_, Id (_, y)), _, false)) -> assign env acc y
-  | (_, List el) -> List.fold_left ~f:(assign_expr env) ~init:acc el
+  | (_, _, Obj_get ((_, _, This), (_, _, Id (_, y)), _, false)) ->
+    assign env acc y
+  | (_, _, List el) -> List.fold_left ~f:(assign_expr env) ~init:acc el
   | _ -> acc
 
 and stmt env acc st =
@@ -397,7 +398,7 @@ and stmt env acc st =
   let catch = catch env in
   let case = case env in
   match snd st with
-  | Expr (_, Call ((_, Class_const ((_, CIparent), (_, m))), _, el, _uel))
+  | Expr (_, _, Call ((_, _, Class_const ((_, CIparent), (_, m))), _, el, _uel))
     when String.equal m SN.Members.__construct ->
     let acc = List.fold_left ~f:expr ~init:acc el in
     assign env acc DeferredMembers.parent_init_prop
@@ -485,7 +486,7 @@ and check_all_init p env acc =
 
 and exprl env acc l = List.fold_left ~f:(expr env) ~init:acc l
 
-and expr env acc (p, e) = expr_ env acc p e
+and expr env acc (p, _, e) = expr_ env acc p e
 
 and expr_ env acc p e =
   let expr = expr env in
@@ -512,7 +513,7 @@ and expr_ env acc p e =
   | Lplaceholder _
   | Dollardollar _ ->
     acc
-  | Obj_get ((_, This), (_, Id ((_, vx) as v)), _, false) ->
+  | Obj_get ((_, _, This), (_, _, Id ((_, vx) as v)), _, false) ->
     if SMap.mem vx env.props && not (S.mem vx acc) then (
       Errors.read_before_write v;
       acc
@@ -532,7 +533,7 @@ and expr_ env acc p e =
   | Class_get _ ->
     acc
   | Call
-      ( (p, Obj_get ((_, This), (_, Id (_, f)), _, false)),
+      ( (p, _, Obj_get ((_, _, This), (_, _, Id (_, f)), _, false)),
         _,
         el,
         unpacked_element ) ->
@@ -558,9 +559,9 @@ and expr_ env acc p e =
   | Call (e, _, el, unpacked_element) ->
     let el =
       match e with
-      | (_, Id (_, fun_name)) when is_whitelisted fun_name ->
+      | (_, _, Id (_, fun_name)) when is_whitelisted fun_name ->
         List.filter el ~f:(function
-            | (_, This) -> false
+            | (_, _, This) -> false
             | _ -> true)
       | _ -> el
     in

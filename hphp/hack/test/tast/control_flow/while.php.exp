@@ -23,12 +23,12 @@
         f_body =
         { fb_ast =
           [([4:3-7:4],
-            (While ((([4:10-12], bool), (Lvar ([4:10-12], $b))),
+            (While ((([4:10-12], bool), [4:10-12], (Lvar ([4:10-12], $b))),
                [([4:3-7:4], (AssertEnv (Join, {$#capability $#local_capability $a $b}))); (
-                 [5:5-8], (Expr (([5:5-7], (int | string)), (Lvar ([5:5-7], $a)))));
-                 ([6:5-13], (Expr (([6:5-12], string), (Binop ((Eq None), (([6:5-7], string), (Lvar ([6:5-7], $a))), (([6:10-12], string), (String "")))))))]
+                 [5:5-8], (Expr (([5:5-7], (int | string)), [5:5-7], (Lvar ([5:5-7], $a)))));
+                 ([6:5-13], (Expr (([6:5-12], string), [6:5-12], (Binop ((Eq None), (([6:5-7], string), [6:5-7], (Lvar ([6:5-7], $a))), (([6:10-12], string), [6:10-12], (String "")))))))]
                )));
-            ([8:3-6], (Expr (([8:3-5], (int | string)), (Lvar ([8:3-5], $a)))))];
+            ([8:3-6], (Expr (([8:3-5], (int | string)), [8:3-5], (Lvar ([8:3-5], $a)))))];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }

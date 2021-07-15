@@ -345,7 +345,7 @@ pub fn expr_to_typed_value_<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>
 ) -> Result<TypedValue<'local_arena>, Error> {
     use aast::Expr_::*;
     // TODO: ML equivalent has this as an implicit parameter that defaults to false.
-    match &expr.1 {
+    match &expr.2 {
         Int(s) => int_expr_to_typed_value(s),
         tast::Expr_::True => Ok(TypedValue::Bool(true)),
         False => Ok(TypedValue::Bool(false)),
@@ -384,7 +384,7 @@ pub fn expr_to_typed_value_<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>
                 .map_or(false, |x| x.1 == special_functions::HHAS_ADATA) =>
         {
             match id.2[..] {
-                [tast::Expr(_, tast::Expr_::String(ref data))] => {
+                [tast::Expr(_, _, tast::Expr_::String(ref data))] => {
                     // FIXME: This is not safe--string literals are binary strings.
                     // There's no guarantee that they're valid UTF-8.
                     Ok(TypedValue::HhasAdata(

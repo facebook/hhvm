@@ -29,7 +29,7 @@ let expect_ty_equal
     let expected_ty = Typing_print.debug env expected_ty in
     Errors.unexpected_ty_in_tast pos ~actual_ty ~expected_ty
 
-let refine ((_p, cond_ty), cond_expr) _cond_is_true gamma =
+let refine ((_p, cond_ty), _, cond_expr) _cond_is_true gamma =
   let cond_ty_ = get_node cond_ty in
   let is_refinement_fun fun_name =
     match fun_name with
@@ -46,11 +46,13 @@ let refine ((_p, cond_ty), cond_expr) _cond_is_true gamma =
     | _ -> false
   in
   match cond_expr with
-  | Call ((_, Id (_, id)), [], _, None) when is_refinement_fun id ->
+  | Call ((_, _, Id (_, id)), [], _, None) when is_refinement_fun id ->
     raise Not_implemented
   | Call
-      ((_, Class_const ((_, CI (_, "\\HH\\Shapes")), (_, "keyExists"))), _, _, _)
-    ->
+      ( (_, _, Class_const ((_, CI (_, "\\HH\\Shapes")), (_, "keyExists"))),
+        _,
+        _,
+        _ ) ->
     raise Not_implemented
   | Is _
   | As _
@@ -62,7 +64,7 @@ let refine ((_p, cond_ty), cond_expr) _cond_is_true gamma =
   | _ when equal_locl_ty_ cond_ty_ (Tprim Nast.Tbool) -> gamma
   | _ -> raise Not_implemented
 
-let check_assign (_lty, lvalue) ty gamma =
+let check_assign (_lty, _, lvalue) ty gamma =
   match lvalue with
   | Lvar (_, lid) ->
     let gamma_updates = add_to_gamma lid ty empty_gamma in
@@ -89,7 +91,7 @@ let check_expr env (expr : ETast.expr) (gamma : gamma) : gamma =
 
       method gamma () = gamma
 
-      method! on_expr env ((ty, expr) as texpr) =
+      method! on_expr env ((ty, _, expr) as texpr) =
         match expr with
         | True
         | False ->
@@ -106,7 +108,7 @@ let check_expr env (expr : ETast.expr) (gamma : gamma) : gamma =
           expect_ty_equal ty expected_ty
         | _ -> (* TODO *) super#on_expr env texpr
 
-      method! on_Binop env bop expr1 ((ty2, _) as expr2) =
+      method! on_Binop env bop expr1 ((ty2, _, _) as expr2) =
         match bop with
         | Ast_defs.Eq None ->
           let (gamma_, updates) = check_assign expr1 ty2 gamma in

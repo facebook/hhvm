@@ -9,8 +9,8 @@
       [{ m_span = [5:3-7:4]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([5:19-22], "foo"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
-         m_body = { fb_ast = [([6:5-14], (Return (Some (([6:12-13], int), (Int "5")))))]; fb_annotation = () }; 
+         m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None;
+         m_body = { fb_ast = [([6:5-14], (Return (Some (([6:12-13], int), [6:12-13], (Int "5")))))]; fb_annotation = () }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((int), (Some ([5:26-29], (Hprim Tint)))); m_external = false; 
          m_doc_comment = None }
@@ -34,7 +34,7 @@
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([11:19-22], "foo"); m_tparams = []; m_where_constraints = []; 
           m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None;
-          m_body = { fb_ast = [([12:5-16], (Return (Some (([12:12-15], string), (String "s")))))]; fb_annotation = () }; 
+          m_body = { fb_ast = [([12:5-16], (Return (Some (([12:12-15], string), [12:12-15], (String "s")))))]; fb_annotation = () }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((string), (Some ([11:26-32], (Hprim Tstring)))); m_external = false; 
           m_doc_comment = None }
@@ -78,16 +78,20 @@
          { fb_ast =
            [([17:3-26],
              (Expr
-                (([17:3-25], (C1 | C2)),
-                 (Binop ((Eq None), (([17:3-5], (C1 | C2)), (Lvar ([17:3-5], $x))),
-                    (([17:8-25], (C1 | C2)), (Eif ((([17:8-13], bool), (Lvar ([17:8-13], $cond))), (Some (([17:16-19], C1), (Lvar ([17:16-19], $c1)))), (([17:22-25], C2), (Lvar ([17:22-25], $c2))))))
+                (([17:3-25], (C1 | C2)), [17:3-25],
+                 (Binop ((Eq None), (([17:3-5], (C1 | C2)), [17:3-5], (Lvar ([17:3-5], $x))),
+                    (([17:8-25], (C1 | C2)), [17:8-25],
+                     (Eif ((([17:8-13], bool), [17:8-13], (Lvar ([17:8-13], $cond))), (Some (
+                        ([17:16-19], C1), [17:16-19], (Lvar ([17:16-19], $c1)))), (
+                        ([17:22-25], C2), [17:22-25], (Lvar ([17:22-25], $c2))))))
                     )))));
              ([18:3-20],
               (Return
-                 (Some (([18:10-19], (int | string)),
+                 (Some (([18:10-19], (int | string)), [18:10-19],
                         (Call (
-                           (([18:10-17], (function(): (int | string))),
-                            (Obj_get ((([18:10-12], (C1 | C2)), (Lvar ([18:10-12], $x))), (([18:14-17], (function(): (int | string))), (Id ([18:14-17], "foo"))), OG_nullthrows, false))),
+                           (([18:10-17], (function(): (int | string))), [18:10-17],
+                            (Obj_get ((([18:10-12], (C1 | C2)), [18:10-12], (Lvar ([18:10-12], $x))), (
+                               ([18:14-17], (function(): (int | string))), [18:14-17], (Id ([18:14-17], "foo"))), OG_nullthrows, false))),
                            [], [], None))))))
              ];
            fb_annotation = () };

@@ -142,8 +142,8 @@ let class_id_to_str = function
   | CIparent -> SN.Classes.cParent
   | CIself -> SN.Classes.cSelf
   | CIstatic -> SN.Classes.cStatic
-  | CIexpr (_, This) -> SN.SpecialIdents.this
-  | CIexpr (_, Lvar (_, x)) -> "$" ^ Local_id.to_string x
+  | CIexpr (_, _, This) -> SN.SpecialIdents.this
+  | CIexpr (_, _, Lvar (_, x)) -> "$" ^ Local_id.to_string x
   | CIexpr _ -> assert false
   | CI (_, x) -> x
 
@@ -776,7 +776,7 @@ module Visitor_DEPRECATED = struct
         | Markup s -> this#on_markup acc s
         | AssertEnv _ -> this#on_noop acc
 
-      method on_expr acc (_, e) = this#on_expr_ acc e
+      method on_expr acc (_, _, e) = this#on_expr_ acc e
 
       method on_expr_ acc e =
         match e with

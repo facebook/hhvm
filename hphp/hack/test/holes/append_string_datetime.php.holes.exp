@@ -24,10 +24,10 @@
         { fb_ast =
           [([5:3-16],
             (Return
-               (Some (([5:10-15], string),
-                      (Binop (Dot, (([5:10-12], string), (Lvar ([5:10-12], $x))),
-                         (([5:13-15], DateTime),
-                          (Hole ((([5:13-15], DateTime), (Lvar ([5:13-15], $y))), (DateTime), (?(dynamic | bool | float | resource | arraykey | HH\FormatString<nothing>)), Typing)))
+               (Some (([5:10-15], string), [5:10-15],
+                      (Binop (Dot, (([5:10-12], string), [5:10-12], (Lvar ([5:10-12], $x))),
+                         (([5:13-15], DateTime), [5:13-15],
+                          (Hole ((([5:13-15], DateTime), [5:13-15], (Lvar ([5:13-15], $y))), (DateTime), (?(dynamic | bool | float | resource | arraykey | HH\FormatString<nothing>)), Typing)))
                          ))))))
             ];
           fb_annotation = () };

@@ -206,7 +206,7 @@ let mk_policied_prop
     | None -> `No_policy
     | Some attr ->
       (match attr.A.ua_params with
-      | [(_, A.String purpose)] -> `Policy purpose
+      | [(_, _, A.String purpose)] -> `Policy purpose
       | _ -> fail "expected a string literal as a purpose argument")
   in
   match find_policy attrs with

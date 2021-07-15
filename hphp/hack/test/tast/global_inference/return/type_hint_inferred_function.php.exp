@@ -15,7 +15,9 @@
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
-        f_body = { fb_ast = [([4:3-17], (Return (Some (([4:10-16], int), (Binop (Star, (([4:10-12], int), (Lvar ([4:10-12], $x))), (([4:15-16], int), (Int "2"))))))))]; fb_annotation = () };
+        f_body =
+        { fb_ast = [([4:3-17], (Return (Some (([4:10-16], int), [4:10-16], (Binop (Star, (([4:10-12], int), [4:10-12], (Lvar ([4:10-12], $x))), (([4:15-16], int), [4:15-16], (Int "2"))))))))];
+          fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

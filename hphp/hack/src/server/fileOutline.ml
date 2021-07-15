@@ -84,8 +84,8 @@ let summarize_const class_name cc =
   let (pos, name) = cc.cc_id in
   let (span, modifiers) =
     match cc.cc_kind with
-    | CCConcrete (p, _) -> (Pos.btw pos p, [])
-    | CCAbstract (Some (p_default, _)) -> (Pos.btw pos p_default, [Abstract])
+    | CCConcrete (_, p, _) -> (Pos.btw pos p, [])
+    | CCAbstract (Some (_, p_default, _)) -> (Pos.btw pos p_default, [Abstract])
     | CCAbstract None -> (pos, [Abstract])
   in
   let kind = Const in
@@ -146,7 +146,9 @@ let summarize_param param =
       ~f:fst
       ~default:pos
   in
-  let param_end = Option.value_map param.param_expr ~f:fst ~default:pos in
+  let param_end =
+    Option.value_map param.param_expr ~f:(fun (p, _, _) -> p) ~default:pos
+  in
   let modifiers = modifier_of_param_kind [] param.param_callconv in
   let modifiers =
     match param.param_visibility with
@@ -374,7 +376,7 @@ let summarize_fun fd =
 let summarize_gconst cst =
   let pos = fst cst.cst_name in
   let gconst_start = Option.value_map cst.cst_type ~f:fst ~default:pos in
-  let gconst_end = fst cst.cst_value in
+  let (gconst_end, _, _) = cst.cst_value in
   let kind = Const in
   let name = Utils.strip_ns (snd cst.cst_name) in
   let id = get_symbol_id kind None name in

@@ -25,7 +25,9 @@
         { fb_ast =
           [([5:3-14],
             (Expr
-               (([5:3-13], nothing), (Binop ((Eq None), (([5:3-8], nothing), (Array_get ((([5:3-6], Vector<nothing>), (Lvar ([5:3-6], $xs))), None))), (([5:11-13], nothing), (Lvar ([5:11-13], $x))))))))
+               (([5:3-13], nothing), [5:3-13],
+                (Binop ((Eq None), (([5:3-8], nothing), [5:3-8], (Array_get ((([5:3-6], Vector<nothing>), [5:3-6], (Lvar ([5:3-6], $xs))), None))),
+                   (([5:11-13], nothing), [5:11-13], (Lvar ([5:11-13], $x))))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

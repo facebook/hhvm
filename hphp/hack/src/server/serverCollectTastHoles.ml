@@ -37,7 +37,7 @@ let visitor hole_filter =
 
     method private plus t1 t2 = TastHolesService.Set.union t1 t2
 
-    method! on_Hole env (((pos, _), _) as expr) from_ty to_ty src =
+    method! on_Hole env (((pos, _), _, _) as expr) from_ty to_ty src =
       let acc = super#on_Hole env expr from_ty to_ty src in
       if filter_source hole_filter src then
         self#plus acc (mk_result env pos from_ty to_ty)

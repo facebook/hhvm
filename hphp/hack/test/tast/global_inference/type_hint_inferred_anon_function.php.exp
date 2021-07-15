@@ -20,7 +20,7 @@
         { fb_ast =
           [([4:3-40],
             (Expr
-               (([4:3-39], (function(int $x): int)),
+               (([4:3-39], (function(int $x): int)), [4:3-39],
                 (Efun (
                    { f_span = [4:3-39]; f_readonly_this = None; f_annotation = (); 
                      f_readonly_ret = None; f_ret = ((int), None); f_name = ([4:3-39], ";anonymous"); 
@@ -34,7 +34,9 @@
                        ];
                      f_ctxs = None; f_unsafe_ctxs = None;
                      f_body =
-                     { fb_ast = [([4:23-37], (Return (Some (([4:30-36], int), (Binop (Plus, (([4:30-32], int), (Lvar ([4:30-32], $x))), (([4:35-36], int), (Int "1"))))))))]; fb_annotation = () };
+                     { fb_ast =
+                       [([4:23-37], (Return (Some (([4:30-36], int), [4:30-36], (Binop (Plus, (([4:30-32], int), [4:30-32], (Lvar ([4:30-32], $x))), (([4:35-36], int), [4:35-36], (Int "1"))))))))];
+                       fb_annotation = () };
                      f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
                      f_doc_comment = None },
                    [])))))

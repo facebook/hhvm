@@ -19,18 +19,20 @@
         { fb_ast =
           [([5:3-22],
             (Expr
-               (([5:3-21], void),
+               (([5:3-21], void), [5:3-21],
                 (Call (
-                   (([5:3-10], (function(string $x, int $y): void)),
-                    (Obj_get ((([5:3-5], MyMap<string, int>), (Lvar ([5:3-5], $m))), (([5:7-10], (function(string $x, int $y): void)), (Id ([5:7-10], "add"))), OG_nullthrows, false))),
-                   [], [(([5:11-16], string), (String "hey")); (([5:18-20], int), (Int "40"))], None)))));
+                   (([5:3-10], (function(string $x, int $y): void)), [5:3-10],
+                    (Obj_get ((([5:3-5], MyMap<string, int>), [5:3-5], (Lvar ([5:3-5], $m))), (
+                       ([5:7-10], (function(string $x, int $y): void)), [5:7-10], (Id ([5:7-10], "add"))), OG_nullthrows, false))),
+                   [], [(([5:11-16], string), [5:11-16], (String "hey")); (([5:18-20], int), [5:18-20], (Int "40"))], None)))));
             ([6:3-24],
              (Return
-                (Some (([6:10-23], ?int),
+                (Some (([6:10-23], ?int), [6:10-23],
                        (Call (
-                          (([6:10-17], (function(string $x): ?int)),
-                           (Obj_get ((([6:10-12], MyMap<string, int>), (Lvar ([6:10-12], $m))), (([6:14-17], (function(string $x): ?int)), (Id ([6:14-17], "get"))), OG_nullthrows, false))),
-                          [], [(([6:18-22], string), (String "ho"))], None))))))
+                          (([6:10-17], (function(string $x): ?int)), [6:10-17],
+                           (Obj_get ((([6:10-12], MyMap<string, int>), [6:10-12], (Lvar ([6:10-12], $m))), (
+                              ([6:14-17], (function(string $x): ?int)), [6:14-17], (Id ([6:14-17], "get"))), OG_nullthrows, false))),
+                          [], [(([6:18-22], string), [6:18-22], (String "ho"))], None))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -75,7 +77,7 @@
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None }
             ];
-          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([6:5-17], (Return (Some (([6:12-16], null), Null))))]; fb_annotation = () }; 
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([6:5-17], (Return (Some (([6:12-16], null), [6:12-16], Null))))]; fb_annotation = () }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((?Tv), (Some ([5:31-34], (Hoption ([5:32-34], (Habstr ("Tv", []))))))); 
           m_external = false; m_doc_comment = None }

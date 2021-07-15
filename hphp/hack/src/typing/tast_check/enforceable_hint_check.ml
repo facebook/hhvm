@@ -7,21 +7,26 @@
  *
  *)
 
+[@@@warning "-33"]
+
 open Hh_prelude
+
+[@@@warning "+33"]
+
 open Aast
 
 let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_expr env e =
+    method! at_expr env (_, _, e) =
       let validate hint op =
         Typing_enforceable_hint.validate_hint
           env
           hint
           (Errors.invalid_is_as_expression_hint op)
       in
-      match snd e with
+      match e with
       | Is (_, hint) -> validate hint "is"
       | As (_, hint, _) -> validate hint "as"
       | _ -> ()

@@ -32,8 +32,9 @@ Errors:
          { fb_ast =
            [([6:5-19],
              (Expr
-                (([6:5-18], T),
-                 (Binop ((Eq None), (([6:5-13], T), (Obj_get ((([6:5-10], this), This), (([6:12-13], T), (Id ([6:12-13], "y"))), OG_nullthrows, false))), (([6:16-18], T), (Lvar ([6:16-18], $x))))))))
+                (([6:5-18], T), [6:5-18],
+                 (Binop ((Eq None), (([6:5-13], T), [6:5-13], (Obj_get ((([6:5-10], this), [6:5-10], This), (([6:12-13], T), [6:12-13], (Id ([6:12-13], "y"))), OG_nullthrows, false))),
+                    (([6:16-18], T), [6:16-18], (Lvar ([6:16-18], $x))))))))
              ];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -69,9 +70,10 @@ Errors:
          { fb_ast =
            [([11:3-13],
              (Expr
-                (([11:3-12], int),
-                 (Binop ((Eq None), (([11:3-8], int), (Obj_get ((([11:3-5], C<int>), (Lvar ([11:3-5], $x))), (([11:7-8], int), (Id ([11:7-8], "y"))), OG_nullthrows, false))),
-                    (([11:11-12], int), (Int "4")))))))
+                (([11:3-12], int), [11:3-12],
+                 (Binop ((Eq None),
+                    (([11:3-8], int), [11:3-8], (Obj_get ((([11:3-5], C<int>), [11:3-5], (Lvar ([11:3-5], $x))), (([11:7-8], int), [11:7-8], (Id ([11:7-8], "y"))), OG_nullthrows, false))),
+                    (([11:11-12], int), [11:11-12], (Int "4")))))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

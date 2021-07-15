@@ -908,8 +908,8 @@ end = struct
           do_add_dep ctx env @@ Typing_deps.Dep.Cstr cls
         );
         List.iter exprs ~f:(function
-            | (_, Aast.(Class_get ((_, CI (_, cls)), _, _)))
-            | (_, Aast.(Class_const ((_, CI (_, cls)), _))) ->
+            | (_, _, Aast.(Class_get ((_, CI (_, cls)), _, _)))
+            | (_, _, Aast.(Class_const ((_, CI (_, cls)), _))) ->
               do_add_dep ctx env @@ Typing_deps.Dep.Type cls
             | _ -> ()))
 
@@ -1529,7 +1529,7 @@ end = struct
     | Aast_defs.Map -> Fmt.string ppf "Map"
     | Aast_defs.ImmMap -> Fmt.string ppf "ImmMap"
 
-  let rec pp_expr ppf (_, expr_) = pp_expr_ ppf expr_
+  let rec pp_expr ppf (_, _, expr_) = pp_expr_ ppf expr_
 
   and pp_expr_ ppf = function
     | Aast.Darray (kv_ty_opt, kvs) ->
@@ -2277,8 +2277,8 @@ end = struct
       let (type_, init_val) =
         match (cc_type, cc_kind) with
         | (Some hint, _) -> (Some hint, Some (init_value ctx hint))
-        | (_, CCAbstract (Some (e_pos, e_)))
-        | (_, CCConcrete (e_pos, e_)) ->
+        | (_, CCAbstract (Some (_, e_pos, e_)))
+        | (_, CCConcrete (_, e_pos, e_)) ->
           (match Decl_utils.infer_const e_ with
           | Some tprim ->
             let hint = (e_pos, Aast.Hprim tprim) in

@@ -173,7 +173,7 @@ let get_static_prop_elts env class_id get =
 let get_prop_elts env obj get =
   let ty = Tast.get_type obj in
   match get with
-  | (_, Id prop_id) -> grab_class_elts_from_ty ~static:false env ty prop_id
+  | (_, _, Id prop_id) -> grab_class_elts_from_ty ~static:false env ty prop_id
   (* TODO: Handle more complex  cases *)
   | _ -> []
 
@@ -237,8 +237,8 @@ let check =
       let new_lenv = iter_fixed_point lenv in
       new_lenv
 
-    method ty_expr env (e : Tast.expr) : rty =
-      match snd e with
+    method ty_expr env ((_, _, expr_) : Tast.expr) : rty =
+      match expr_ with
       | ReadonlyExpr _ -> Readonly
       | This ->
         (match ctx.this_ty with
@@ -392,7 +392,7 @@ let check =
         | _ -> ()
       in
       match lval with
-      | (_, Array_get (array, _)) ->
+      | (_, _, Array_get (array, _)) ->
         begin
           match (self#ty_expr env array, self#ty_expr env rval) with
           | (Readonly, _)
@@ -415,10 +415,10 @@ let check =
           | (Readonly, _) -> Errors.readonly_modified (Tast.get_position array)
           | (Mut, Mut) -> ()
         end
-      | (_, Class_get (id, expr, _)) ->
+      | (_, _, Class_get (id, expr, _)) ->
         let prop_elts = get_static_prop_elts env id expr in
         check_prop_assignment prop_elts rval
-      | (_, Obj_get (obj, get, _, _)) ->
+      | (_, _, Obj_get (obj, get, _, _)) ->
         begin
           match self#ty_expr env obj with
           | Readonly -> Errors.readonly_modified (Tast.get_position obj)
@@ -427,11 +427,11 @@ let check =
         let prop_elts = get_prop_elts env obj get in
         (* If there's a mutable prop, then there's a chance we're assigning to one *)
         check_prop_assignment prop_elts rval
-      | (_, Lvar (_, lid)) ->
+      | (_, _, Lvar (_, lid)) ->
         let r = self#ty_expr env rval in
         let new_lenv = SMap.add (Local_id.to_string lid) r ctx.lenv in
         ctx <- { ctx with lenv = new_lenv }
-      | (_, List el) ->
+      | (_, _, List el) ->
         (* List expressions require all of their lvals assigned to the readonlyness of the rval *)
         List.iter el ~f:(fun list_lval -> self#assign env list_lval rval)
       (* TODO: make this exhaustive *)
@@ -442,7 +442,7 @@ let check =
       let open Typing_defs in
       match caller with
       (* Method call checks *)
-      | ((_, ty), Obj_get (e1, _, _, (* is_prop_call *) false)) ->
+      | ((_, ty), _, Obj_get (e1, _, _, (* is_prop_call *) false)) ->
         let receiver_rty = self#ty_expr env e1 in
         (match (receiver_rty, get_node ty) with
         | (Readonly, Tfun fty) when not (get_ft_readonly_this fty) ->
@@ -452,7 +452,7 @@ let check =
 
     method check_special_function env caller args =
       match (caller, args) with
-      | ((_, Id (pos, x)), [arg])
+      | ((_, _, Id (pos, x)), [arg])
         when String.equal (Utils.strip_ns x) (Utils.strip_ns SN.Readonly.as_mut)
         ->
         let arg_ty = Tast.get_type arg in
@@ -688,9 +688,10 @@ let check =
       match e with
       (* Property assignment *)
       | ( _,
+          _,
           Binop
             ( (Ast_defs.Eq _ as bop),
-              ((_, Obj_get (obj, get, nullable, is_prop_call)) as lval),
+              ((_, _, Obj_get (obj, get, nullable, is_prop_call)) as lval),
               rval ) ) ->
         self#assign env lval rval;
         self#on_bop env bop;
@@ -698,11 +699,11 @@ let check =
         self#on_Obj_get env obj get nullable is_prop_call;
         self#on_expr env rval
       (* All other assignment *)
-      | (_, Binop (Ast_defs.Eq _, lval, rval)) ->
+      | (_, _, Binop (Ast_defs.Eq _, lval, rval)) ->
         self#assign env lval rval;
         super#on_expr env e
       (* Readonly calls *)
-      | (_, ReadonlyExpr (_, Call (caller, targs, args, unpacked_arg))) ->
+      | (_, _, ReadonlyExpr (_, _, Call (caller, targs, args, unpacked_arg))) ->
         self#call
           ~is_readonly:true
           env
@@ -716,7 +717,7 @@ let check =
         (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
         self#on_Call env caller targs args unpacked_arg
       (* Non readonly calls *)
-      | (_, Call (caller, _, args, unpacked_arg)) ->
+      | (_, _, Call (caller, _, args, unpacked_arg)) ->
         self#call
           env
           ~is_readonly:false
@@ -728,13 +729,14 @@ let check =
         self#check_special_function env caller args;
         self#method_call env caller;
         super#on_expr env e
-      | (_, ReadonlyExpr (_, Obj_get (obj, get, nullable, is_prop_call))) ->
+      | (_, _, ReadonlyExpr (_, _, Obj_get (obj, get, nullable, is_prop_call)))
+        ->
         (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
         self#on_Obj_get env obj get nullable is_prop_call
-      | (_, Obj_get (obj, get, _nullable, _is_prop_call)) ->
+      | (_, _, Obj_get (obj, get, _nullable, _is_prop_call)) ->
         check_readonly_property env obj get (self#ty_expr env obj);
         super#on_expr env e
-      | (_, New (_, _, args, unpacked_arg, (pos, constructor_fty))) ->
+      | (_, _, New (_, _, args, unpacked_arg, (pos, constructor_fty))) ->
         (* Constructors never return readonly, so that specific check is irrelevant *)
         self#call
           ~is_readonly:false
@@ -744,59 +746,59 @@ let check =
           Mut
           args
           unpacked_arg
-      | (_, This)
-      | (_, ValCollection (_, _, _))
-      | (_, KeyValCollection (_, _, _))
-      | (_, Lvar _)
-      | (_, Clone _)
-      | (_, Array_get (_, _))
-      | (_, Class_get (_, _, _))
-      | (_, Yield _)
-      | (_, Await _)
-      | (_, Tuple _)
-      | (_, List _)
-      | (_, Cast (_, _))
-      | (_, Unop (_, _))
-      | (_, Pipe (_, _, _))
-      | (_, Eif (_, _, _))
-      | (_, Is (_, _))
-      | (_, As (_, _, _))
-      | (_, Callconv (_, _))
-      | (_, Import (_, _))
-      | (_, Lplaceholder _)
-      | (_, Pair (_, _, _))
-      | (_, ReadonlyExpr _)
-      | (_, Binop _)
-      | (_, ExpressionTree _)
-      | (_, Xml _)
-      | (_, Efun _)
+      | (_, _, This)
+      | (_, _, ValCollection (_, _, _))
+      | (_, _, KeyValCollection (_, _, _))
+      | (_, _, Lvar _)
+      | (_, _, Clone _)
+      | (_, _, Array_get (_, _))
+      | (_, _, Class_get (_, _, _))
+      | (_, _, Yield _)
+      | (_, _, Await _)
+      | (_, _, Tuple _)
+      | (_, _, List _)
+      | (_, _, Cast (_, _))
+      | (_, _, Unop (_, _))
+      | (_, _, Pipe (_, _, _))
+      | (_, _, Eif (_, _, _))
+      | (_, _, Is (_, _))
+      | (_, _, As (_, _, _))
+      | (_, _, Callconv (_, _))
+      | (_, _, Import (_, _))
+      | (_, _, Lplaceholder _)
+      | (_, _, Pair (_, _, _))
+      | (_, _, ReadonlyExpr _)
+      | (_, _, Binop _)
+      | (_, _, ExpressionTree _)
+      | (_, _, Xml _)
+      | (_, _, Efun _)
       (* Neither this nor any of the *_id expressions call the function *)
-      | (_, Method_caller (_, _))
-      | (_, Smethod_id (_, _))
-      | (_, Fun_id _)
-      | (_, Method_id _)
-      | (_, FunctionPointer _)
-      | (_, Lfun _)
-      | (_, Record _)
-      | (_, Null)
-      | (_, True)
-      | (_, False)
-      | (_, Omitted)
-      | (_, Id _)
-      | (_, Shape _)
-      | (_, EnumClassLabel _)
-      | (_, ET_Splice _)
-      | (_, Darray _)
-      | (_, Varray _)
-      | (_, Int _)
-      | (_, Dollardollar _)
-      | (_, String _)
-      | (_, String2 _)
-      | (_, Collection (_, _, _))
-      | (_, Class_const _)
-      | (_, Float _)
-      | (_, PrefixedString _)
-      | (_, Hole _) ->
+      | (_, _, Method_caller (_, _))
+      | (_, _, Smethod_id (_, _))
+      | (_, _, Fun_id _)
+      | (_, _, Method_id _)
+      | (_, _, FunctionPointer _)
+      | (_, _, Lfun _)
+      | (_, _, Record _)
+      | (_, _, Null)
+      | (_, _, True)
+      | (_, _, False)
+      | (_, _, Omitted)
+      | (_, _, Id _)
+      | (_, _, Shape _)
+      | (_, _, EnumClassLabel _)
+      | (_, _, ET_Splice _)
+      | (_, _, Darray _)
+      | (_, _, Varray _)
+      | (_, _, Int _)
+      | (_, _, Dollardollar _)
+      | (_, _, String _)
+      | (_, _, String2 _)
+      | (_, _, Collection (_, _, _))
+      | (_, _, Class_const _)
+      | (_, _, Float _)
+      | (_, _, PrefixedString _)
+      | (_, _, Hole _) ->
         super#on_expr env e
 
     method! on_If env condition b1 b2 =
@@ -909,7 +911,7 @@ let handler =
         match e with
         (* Assume obj is mutable here since you can't have a readonly thing
             without readonly keyword/analysis *)
-        | (_, Obj_get (obj, get, _, _)) ->
+        | (_, _, Obj_get (obj, get, _, _)) ->
           check_readonly_property env obj get Mut
         | _ -> ()
       in

@@ -89,7 +89,7 @@ class visitor =
       cur_caller <- None;
       acc
 
-    method! on_expr env (((pos, ty), expr_) as expr) =
+    method! on_expr env (((pos, ty), _, expr_) as expr) =
       let acc =
         match expr_ with
         | Aast.New _ ->
@@ -99,7 +99,7 @@ class visitor =
           |> List.fold ~init:self#zero ~f:self#plus
         | Aast.Fun_id (pos, name) -> self#fun_call env Function name pos
         | Aast.Smethod_id (((_, ty), _), mid)
-        | Aast.Method_id (((_, ty), _), mid) ->
+        | Aast.Method_id (((_, ty), _, _), mid) ->
           Tast_env.get_class_ids env ty
           |> List.map ~f:(fun cid -> self#method_call env Method cid mid)
           |> List.fold ~init:self#zero ~f:self#plus
@@ -120,12 +120,12 @@ class visitor =
       let ( + ) = self#plus in
       special_fun_acc + acc + super#on_expr env expr
 
-    method! on_Call env e hl el unpacked_element =
+    method! on_Call env ((_, _, expr_) as e) hl el unpacked_element =
       let acc =
-        match snd e with
+        match expr_ with
         | Aast.Id (pos, name) -> self#fun_call env Function name pos
         | Aast.Class_const (((_, ty), _), mid)
-        | Aast.Obj_get (((_, ty), _), (_, Aast.Id mid), _, _) ->
+        | Aast.Obj_get (((_, ty), _, _), (_, _, Aast.Id mid), _, _) ->
           let target_type =
             if String.equal (snd mid) SN.Members.__construct then
               Constructor

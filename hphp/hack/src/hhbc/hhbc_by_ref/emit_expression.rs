@@ -185,9 +185,9 @@ mod inout_locals {
         acc: &mut AliasInfoMap<'ast>,
     ) {
         use tast::{Expr, Expr_};
-        let Expr(_, e) = arg;
+        let Expr(_, _, e) = arg;
         // inout $v
-        if let Some((ast_defs::ParamKind::Pinout, Expr(_, Expr_::Lvar(lid)))) = e.as_callconv() {
+        if let Some((ast_defs::ParamKind::Pinout, Expr(_, _, Expr_::Lvar(lid)))) = e.as_callconv() {
             let Lid(_, lid) = &**lid;
             if !is_local_this(env, &lid) {
                 add_use(&lid.1, acc);
@@ -271,7 +271,7 @@ mod inout_locals {
 
     // collect lvars on the left hand side of '=' operator
     fn collect_lvars_hs<'r, 'ast, 'arena>(ctx: &mut Ctx<'r, 'ast, 'arena>, expr: &'ast tast::Expr) {
-        let tast::Expr(_, e) = expr;
+        let tast::Expr(_, _, e) = expr;
         match &*e {
             tast::Expr_::Lvar(lid) => {
                 let Lid(_, lid) = &**lid;
@@ -385,7 +385,7 @@ pub fn emit_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     use aast_defs::Lid;
     use tast::Expr_;
     let alloc = env.arena;
-    let tast::Expr(pos, expr) = expression;
+    let tast::Expr(_, pos, expr) = expression;
     match expr {
         Expr_::Float(_)
         | Expr_::EnumClassLabel(_)
@@ -654,7 +654,7 @@ fn parse_include(e: &tast::Expr) -> IncludePath {
         }
     }
     fn split_var_lit(e: &tast::Expr) -> (String, String) {
-        match &e.1 {
+        match &e.2 {
             tast::Expr_::Binop(x) if x.0.is_dot() => {
                 let (v, l) = split_var_lit(&x.2);
                 if v.is_empty() {
@@ -686,11 +686,11 @@ fn parse_include(e: &tast::Expr) -> IncludePath {
 }
 
 fn text_of_expr(e: &tast::Expr) -> String {
-    match &e.1 {
+    match &e.2 {
         tast::Expr_::String(s) => format!("\'{}\'", s),
         tast::Expr_::Id(id) => id.1.to_string(),
         tast::Expr_::Lvar(lid) => local_id::get_name(&lid.1).to_string(),
-        tast::Expr_::ArrayGet(x) => match ((x.0).1.as_lvar(), x.1.as_ref()) {
+        tast::Expr_::ArrayGet(x) => match ((x.0).2.as_lvar(), x.1.as_ref()) {
             (Some(tast::Lid(_, id)), Some(e_)) => {
                 format!("{}[{}]", local_id::get_name(&id), text_of_expr(e_))
             }
@@ -735,7 +735,8 @@ fn emit_import<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         ImportFlavor::RequireOnce => {
             match inc.into_doc_root_relative(e.options().hhvm.include_roots.get()) {
                 IncludePath::DocRootRelative(path) => {
-                    let expr = tast::Expr(pos.clone(), tast::Expr_::String(path.into()));
+                    let expr =
+                        tast::Expr(pos.clone(), pos.clone(), tast::Expr_::String(path.into()));
                     (emit_expr(e, env, &expr)?, instr::reqdoc(alloc))
                 }
                 _ => (emit_expr(e, env, expr)?, instr::reqonce(alloc)),
@@ -869,7 +870,7 @@ pub fn emit_await<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     pos: &Pos,
     expr: &tast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let tast::Expr(_, e) = expr;
+    let tast::Expr(_, _, e) = expr;
     let alloc = env.arena;
     let cant_inline_gen_functions = !emitter
         .options()
@@ -877,7 +878,7 @@ pub fn emit_await<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .flags
         .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
     match e.as_call() {
-        Some((tast::Expr(_, tast::Expr_::Id(id)), _, args, None))
+        Some((tast::Expr(_, _, tast::Expr_::Id(id)), _, args, None))
             if (cant_inline_gen_functions
                 && args.len() == 1
                 && string_utils::strip_global_ns(&(*id.1)) == "gena") =>
@@ -1062,7 +1063,11 @@ fn emit_shape<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .iter()
         .map(|(f, e)| {
             Ok((
-                tast::Expr(pos.clone(), extract_shape_field_name_pstring(env, pos, f)?),
+                tast::Expr(
+                    pos.clone(),
+                    pos.clone(),
+                    extract_shape_field_name_pstring(env, pos, f)?,
+                ),
                 e.clone(),
             ))
         })
@@ -1070,7 +1075,7 @@ fn emit_shape<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emit_expr(
         emitter,
         env,
-        &tast::Expr(pos.clone(), tast::Expr_::mk_darray(None, fl)),
+        &tast::Expr(pos.clone(), pos.clone(), tast::Expr_::mk_darray(None, fl)),
     )
 }
 
@@ -1392,7 +1397,7 @@ fn is_struct_init<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             let mut key = key.clone();
             ast_constant_folder::fold_expr(&mut key, alloc, e)
                 .map_err(|e| unrecoverable(format!("{}", e)))?;
-            if let tast::Expr(_, tast::Expr_::String(s)) = key {
+            if let tast::Expr(_, _, tast::Expr_::String(s)) = key {
                 are_all_keys_non_numeric_strings = are_all_keys_non_numeric_strings
                     && non_numeric(
                         // FIXME: This is not safe--string literals are binary strings.
@@ -1438,7 +1443,7 @@ fn emit_struct_array<
         .iter()
         .map(|f| match f {
             tast::Afield::AFkvalue(k, v) => match k {
-                E(_, E_::String(s)) => Ok((
+                E(_, _, E_::String(s)) => Ok((
                     // FIXME: This is not safe--string literals are binary strings.
                     // There's no guarantee that they're valid UTF-8.
                     unsafe { String::from_utf8_unchecked(s.clone().into()) },
@@ -1449,7 +1454,7 @@ fn emit_struct_array<
                     ast_constant_folder::fold_expr(&mut k, alloc, e)
                         .map_err(|e| unrecoverable(format!("{}", e)))?;
                     match k {
-                        E(_, E_::String(s)) => Ok((
+                        E(_, _, E_::String(s)) => Ok((
                             // FIXME: This is not safe--string literals are binary strings.
                             // There's no guarantee that they're valid UTF-8.
                             unsafe { String::from_utf8_unchecked(s.into()) },
@@ -1517,7 +1522,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         }
     };
     use tast::Expr_ as E_;
-    match &expr.1 {
+    match &expr.2 {
         E_::ValCollection(v) if v.0 == tast::VcKind::Vec => {
             emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec)
         }
@@ -1660,7 +1665,7 @@ fn emit_call_isset_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let pos = &expr.0;
-    if let Some((base_expr, opt_elem_expr)) = expr.1.as_array_get() {
+    if let Some((base_expr, opt_elem_expr)) = expr.2.as_array_get() {
         return Ok(emit_array_get(
             e,
             env,
@@ -1674,13 +1679,13 @@ fn emit_call_isset_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         )?
         .0);
     }
-    if let Some((cid, id, _)) = expr.1.as_class_get() {
+    if let Some((cid, id, _)) = expr.2.as_class_get() {
         return emit_class_get(e, env, QueryOp::Isset, cid, id);
     }
-    if let Some((expr_, prop, nullflavor, _)) = expr.1.as_obj_get() {
+    if let Some((expr_, prop, nullflavor, _)) = expr.2.as_obj_get() {
         return Ok(emit_obj_get(e, env, pos, QueryOp::Isset, expr_, prop, nullflavor, false)?.0);
     }
-    if let Some(lid) = expr.1.as_lvar() {
+    if let Some(lid) = expr.2.as_lvar() {
         let name = local_id::get_name(&lid.1);
         return Ok(if superglobals::is_any_global(&name) {
             InstrSeq::gather(
@@ -1863,7 +1868,7 @@ fn emit_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         env.call_context.clone(),
         false,
     );
-    match expr.1.as_id() {
+    match expr.2.as_id() {
         None => emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args),
         Some(ast_defs::Id(_, id)) => {
             let fq = function::Type::<'arena>::from_ast_name(alloc, id);
@@ -2032,7 +2037,7 @@ fn emit_object_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     expr: &tast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    match &expr.1 {
+    match &expr.2 {
         tast::Expr_::Lvar(x) if is_local_this(env, &x.1) => Ok(instr::this(alloc)),
         _ => emit_expr(e, env, expr),
     }
@@ -2045,7 +2050,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     mut fcall_args: FcallArgs<'arena>,
     targs: &[tast::Targ],
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
-    let tast::Expr(pos, expr_) = expr;
+    let tast::Expr(_, pos, expr_) = expr;
     use tast::{Expr as E, Expr_ as E_};
     let alloc = env.arena;
     let emit_generics =
@@ -2101,6 +2106,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 // Case ($x->foo)(...).
                 let expr = E(
                     pos.clone(),
+                    pos.clone(),
                     E_::ObjGet(Box::new((o.0.clone(), o.1.clone(), o.2.clone(), false))),
                 );
                 emit_fcall_func(e, env, &expr, fcall_args)
@@ -2130,7 +2136,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     ))
                 };
                 match o.as_ref() {
-                    (obj, E(_, E_::String(id)), null_flavor, _) => {
+                    (obj, E(_, _, E_::String(id)), null_flavor, _) => {
                         emit_id(
                             e,
                             obj,
@@ -2141,7 +2147,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             fcall_args,
                         )
                     }
-                    (E(pos, E_::New(new_exp)), E(_, E_::Id(id)), null_flavor, _)
+                    (E(_, pos, E_::New(new_exp)), E(_, _, E_::Id(id)), null_flavor, _)
                         if fcall_args.1 == 0 =>
                     {
                         let cexpr = ClassExpr::class_id_to_class_expr(
@@ -2202,7 +2208,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             _ => emit_id(e, &o.as_ref().0, &id.1, null_flavor, fcall_args),
                         }
                     }
-                    (obj, E(_, E_::Id(id)), null_flavor, _) => {
+                    (obj, E(_, _, E_::Id(id)), null_flavor, _) => {
                         emit_id(e, obj, &id.1, null_flavor, fcall_args)
                     }
                     (obj, method_expr, null_flavor, _) => {
@@ -2332,6 +2338,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             if c.as_ref().2 {
                 // Case (Foo::$bar)(...).
                 let expr = E(
+                    pos.clone(),
                     pos.clone(),
                     E_::ClassGet(Box::new((c.0.clone(), c.1.clone(), false))),
                 );
@@ -2549,9 +2556,9 @@ fn emit_args_inout_setters<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
         use tast::Expr_ as E_;
         let alloc = env.arena;
-        match &arg.1 {
+        match &arg.2 {
             E_::Callconv(cc) if (cc.0).is_pinout() => {
-                match &(cc.1).1 {
+                match &(cc.1).2 {
                     // inout $var
                     E_::Lvar(l) => {
                         let local = get_local(e, env, &l.0, local_id::get_name(&l.1))?;
@@ -2696,7 +2703,7 @@ fn get_fcall_args<'arena>(
 }
 
 fn is_inout_arg(e: &tast::Expr) -> bool {
-    e.1.as_callconv().map_or(false, |cc| cc.0.is_pinout())
+    e.2.as_callconv().map_or(false, |cc| cc.0.is_pinout())
 }
 
 fn has_inout_arg(es: &[tast::Expr]) -> bool {
@@ -2756,12 +2763,14 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             let l = e.label_gen_mut().next_regular();
             let expr_id = tast::Expr(
                 pos.clone(),
+                pos.clone(),
                 tast::Expr_::mk_id(ast_defs::Id(
                     pos.clone(),
                     "\\hh\\invariant_violation".into(),
                 )),
             );
             let call = tast::Expr(
+                pos.clone(),
                 pos.clone(),
                 tast::Expr_::mk_call(expr_id, vec![], args[1..].to_owned(), uarg.cloned()),
             );
@@ -2830,7 +2839,7 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         ("HH\\fun", _) => {
             if fun_and_clsmeth_disabled {
                 match args {
-                    [tast::Expr(_, tast::Expr_::String(func_name))] => {
+                    [tast::Expr(_, _, tast::Expr_::String(func_name))] => {
                         Err(emit_fatal::raise_fatal_parse(
                             pos,
                             format!(
@@ -2854,7 +2863,7 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 ))
             } else {
                 match args {
-                    [tast::Expr(_, tast::Expr_::String(func_name))] => {
+                    [tast::Expr(_, _, tast::Expr_::String(func_name))] => {
                         Ok(Some(emit_hh_fun(
                             e,
                             env,
@@ -2884,7 +2893,7 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 ));
             }
             match args {
-                [E(_, E_::String(ref func_name))] => Ok(Some(instr::resolve_meth_caller(
+                [E(_, _, E_::String(ref func_name))] => Ok(Some(instr::resolve_meth_caller(
                     alloc,
                     (
                         alloc,
@@ -2913,7 +2922,7 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 ))
             } else {
                 match args {
-                    [E(_, E_::Lvar(id))] => Ok(Some(instr::isunsetl(
+                    [E(_, _, E_::Lvar(id))] => Ok(Some(instr::isunsetl(
                         alloc,
                         get_local(e, env, pos, id.name())?,
                     ))),
@@ -2926,7 +2935,7 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         }
         ("__SystemLib\\get_enum_member_by_label", _) if e.systemlib() => {
             let local = match args {
-                [E(_, E_::Lvar(id))] => get_local(e, env, pos, id.name()),
+                [E(_, _, E_::Lvar(id))] => get_local(e, env, pos, id.name()),
                 _ => Err(emit_fatal::raise_fatal_runtime(
                     pos,
                     "Argument must be the label argument",
@@ -2952,14 +2961,14 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             "`class_meth()` is disabled; switch to first-class references like `C::bar<>`",
         )),
         ("HH\\class_meth", &[ref cls, ref meth, ..]) if nargs == 2 => {
-            if meth.1.is_string() {
-                if cls.1.is_string()
+            if meth.2.is_string() {
+                if cls.2.is_string()
                     || cls
-                        .1
+                        .2
                         .as_class_const()
                         .map_or(false, |(_, (_, id))| string_utils::is_class(id))
                     || cls
-                        .1
+                        .2
                         .as_id()
                         .map_or(false, |ast_defs::Id(_, id)| id == pseudo_consts::G__CLASS__)
                 {
@@ -3020,7 +3029,7 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 ),
             )),
         },
-        ("__hhvm_internal_whresult", &[E(_, E_::Lvar(ref param))]) if e.systemlib() => {
+        ("__hhvm_internal_whresult", &[E(_, _, E_::Lvar(ref param))]) if e.systemlib() => {
             Ok(Some(InstrSeq::gather(
                 alloc,
                 vec![
@@ -3032,7 +3041,7 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 ],
             )))
         }
-        ("__hhvm_internal_getmemokeyl", &[E(_, E_::Lvar(ref param))]) if e.systemlib() => {
+        ("__hhvm_internal_getmemokeyl", &[E(_, _, E_::Lvar(ref param))]) if e.systemlib() => {
             Ok(Some(instr::getmemokeyl(
                 alloc,
                 local::Type::Named(alloc.alloc_str(local_id::get_name(&param.1))),
@@ -3056,7 +3065,7 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         vec![emit_expr(e, env, &arg_expr)?, is_expr],
                     ))
                 }
-                (&[E(_, E_::Lvar(ref arg_id))], Some(i), _)
+                (&[E(_, _, E_::Lvar(ref arg_id))], Some(i), _)
                     if superglobals::is_any_global(arg_id.name()) =>
                 {
                     Some(InstrSeq::gather(
@@ -3068,7 +3077,9 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         ],
                     ))
                 }
-                (&[E(_, E_::Lvar(ref arg_id))], Some(i), _) if !is_local_this(env, &arg_id.1) => {
+                (&[E(_, _, E_::Lvar(ref arg_id))], Some(i), _)
+                    if !is_local_this(env, &arg_id.1) =>
+                {
                     Some(instr::istypel(
                         alloc,
                         get_local(e, env, &arg_id.0, &(arg_id.1).1)?,
@@ -3138,16 +3149,16 @@ fn emit_class_meth<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .flags
         .contains(HhvmFlags::EMIT_CLS_METH_POINTERS)
     {
-        let method_id = match &meth.1 {
+        let method_id = match &meth.2 {
             E_::String(method_name) => (alloc, method_name.to_string().as_str()).into(),
             _ => return Err(unrecoverable("emit_class_meth: unhandled method")),
         };
-        if let Some((cid, (_, id))) = cls.1.as_class_const() {
+        if let Some((cid, (_, id))) = cls.2.as_class_const() {
             if string_utils::is_class(id) {
                 return emit_class_meth_native(e, env, &cls.0, cid, method_id, &[]);
             }
         }
-        if let Some(ast_defs::Id(_, s)) = cls.1.as_id() {
+        if let Some(ast_defs::Id(_, s)) = cls.2.as_id() {
             if s == pseudo_consts::G__CLASS__ {
                 return Ok(instr::resolveclsmethods(
                     alloc,
@@ -3156,7 +3167,7 @@ fn emit_class_meth<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 ));
             }
         }
-        if let Some(class_name) = cls.1.as_string() {
+        if let Some(class_name) = cls.2.as_string() {
             return Ok(instr::resolveclsmethodd(
                 alloc,
                 (
@@ -3459,8 +3470,10 @@ fn emit_call_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .flags
         .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
     use {tast::Expr as E, tast::Expr_ as E_};
-    match (&expr.1, &args[..], uarg) {
-        (E_::Id(id), [E(_, E_::String(data))], None) if id.1 == special_functions::HHAS_ADATA => {
+    match (&expr.2, &args[..], uarg) {
+        (E_::Id(id), [E(_, _, E_::String(data))], None)
+            if id.1 == special_functions::HHAS_ADATA =>
+        {
             // FIXME: This is not safe--string literals are binary strings.
             // There's no guarantee that they're valid UTF-8.
             let v = TypedValue::HhasAdata(
@@ -3516,6 +3529,7 @@ fn emit_call_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             // Rewrite __systemlib_reified_generics() to $0ReifiedGenerics,
             // but only in systemlib functions that take a reified generic.
             let lvar = E::new(
+                pos.clone(),
                 pos.clone(),
                 E_::Lvar(Box::new(tast::Lid(
                     pos.clone(),
@@ -3847,7 +3861,7 @@ fn emit_obj_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     null_coalesce_assignment: bool,
 ) -> Result<(InstrSeq<'arena>, Option<NumParams>)> {
     let alloc = env.arena;
-    if let Some(tast::Lid(pos, id)) = expr.1.as_lvar() {
+    if let Some(tast::Lid(pos, id)) = expr.2.as_lvar() {
         if local_id::get_name(&id) == special_idents::THIS
             && nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe)
         {
@@ -3857,7 +3871,7 @@ fn emit_obj_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             ));
         }
     }
-    if let Some(ast_defs::Id(_, s)) = prop.1.as_id() {
+    if let Some(ast_defs::Id(_, s)) = prop.2.as_id() {
         if string_utils::is_xhp(s) {
             return Ok((emit_xhp_obj_get(e, env, pos, &expr, s, nullflavor)?, None));
         }
@@ -3933,7 +3947,7 @@ fn emit_prop_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     null_coalesce_assignment: bool,
 ) -> Result<(MemberKey<'arena>, InstrSeq<'arena>, StackIndex)> {
     let alloc = env.arena;
-    let mk = match &prop.1 {
+    let mk = match &prop.2 {
         tast::Expr_::Id(id) => {
             let ast_defs::Id(pos, name) = &**id;
             if name.starts_with('$') {
@@ -4006,9 +4020,11 @@ fn emit_xhp_obj_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     use tast::Expr_ as E_;
     let f = E(
         pos.clone(),
+        pos.clone(),
         E_::mk_obj_get(
             expr.clone(),
             E(
+                pos.clone(),
                 pos.clone(),
                 E_::mk_id(ast_defs::Id(pos.clone(), "getAttribute".into())),
             ),
@@ -4016,7 +4032,11 @@ fn emit_xhp_obj_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             false,
         ),
     );
-    let args = vec![E(pos.clone(), E_::mk_string(string_utils::clean(s).into()))];
+    let args = vec![E(
+        pos.clone(),
+        pos.clone(),
+        E_::mk_string(string_utils::clean(s).into()),
+    )];
     emit_call(e, env, pos, &f, &[], &args[..], None, None)
 }
 
@@ -4064,7 +4084,7 @@ fn emit_array_get_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     use tast::Expr as E;
     let alloc = env.arena;
     match (base_expr, elem) {
-        (E(pos, _), None)
+        (E(_, pos, _), None)
             if !env
                 .flags
                 .contains(hhbc_by_ref_env::Flags::ALLOWS_ARRAY_APPEND) =>
@@ -4282,7 +4302,7 @@ fn emit_array_get_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
 fn is_special_class_constant_accessed_with_class_id(cname: &tast::ClassId_, id: &str) -> bool {
     let is_self_parent_or_static = match cname {
-        tast::ClassId_::CIexpr(tast::Expr(_, tast::Expr_::Id(id))) => {
+        tast::ClassId_::CIexpr(tast::Expr(_, _, tast::Expr_::Id(id))) => {
             string_utils::is_self(&id.1)
                 || string_utils::is_parent(&id.1)
                 || string_utils::is_static(&id.1)
@@ -4302,8 +4322,8 @@ fn emit_elem<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let alloc = env.arena;
     Ok(match elem {
         None => (instr::empty(alloc), 0),
-        Some(expr) if expr.1.is_int() || expr.1.is_string() => (instr::empty(alloc), 0),
-        Some(expr) => match &expr.1 {
+        Some(expr) if expr.2.is_int() || expr.2.is_string() => (instr::empty(alloc), 0),
+        Some(expr) => match &expr.2 {
             tast::Expr_::Lvar(x) if !is_local_this(env, &x.1) => {
                 if local_temp_kind.is_some() {
                     (
@@ -4346,7 +4366,7 @@ fn get_elem_member_key<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     match elem {
         // ELement missing (so it's array append)
         None => Ok((MemberKey::W, instr::empty(alloc))),
-        Some(elem_expr) => match &elem_expr.1 {
+        Some(elem_expr) => match &elem_expr.2 {
             // Special case for local
             E_::Lvar(x) if !is_local_this(env, &x.1) => Ok((
                 {
@@ -4380,16 +4400,17 @@ fn get_elem_member_key<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             E_::ClassConst(x)
                 if is_special_class_constant_accessed_with_class_id(&(x.0).1, &(x.1).1) =>
             {
-                let cname =
-                    match (&(x.0).1, env.scope.get_class()) {
-                        (CI_::CIself, Some(cd)) => string_utils::strip_global_ns(cd.get_name_str()),
-                        (CI_::CIexpr(E(_, E_::Id(id))), _) => string_utils::strip_global_ns(&id.1),
-                        (CI_::CI(id), _) => string_utils::strip_global_ns(&id.1),
-                        _ => return Err(Unrecoverable(
+                let cname = match (&(x.0).1, env.scope.get_class()) {
+                    (CI_::CIself, Some(cd)) => string_utils::strip_global_ns(cd.get_name_str()),
+                    (CI_::CIexpr(E(_, _, E_::Id(id))), _) => string_utils::strip_global_ns(&id.1),
+                    (CI_::CI(id), _) => string_utils::strip_global_ns(&id.1),
+                    _ => {
+                        return Err(Unrecoverable(
                             "Unreachable due to is_special_class_constant_accessed_with_class_id"
                                 .into(),
-                        )),
-                    };
+                        ));
+                    }
+                };
                 let fq_id = class::Type::<'arena>::from_ast_name(alloc, &cname).to_raw_string();
                 if e.options().emit_class_pointers() > 0 {
                     Ok((
@@ -4854,7 +4875,7 @@ fn emit_first_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     expr: &tast::Expr,
 ) -> Result<(InstrSeq<'arena>, bool)> {
     let alloc = env.arena;
-    Ok(match &expr.1 {
+    Ok(match &expr.2 {
         tast::Expr_::Lvar(l)
             if !((is_local_this(env, &l.1) && !env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS))
                 || superglobals::is_any_global(local_id::get_name(&l.1))) =>
@@ -4878,7 +4899,7 @@ pub fn emit_two_exprs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let alloc = env.arena;
     let (instrs1, is_under_top) = emit_first_expr(e, env, e1)?;
     let instrs2 = emit_expr(e, env, e2)?;
-    let instrs2_is_var = e2.1.is_lvar();
+    let instrs2_is_var = e2.2.is_lvar();
     Ok(InstrSeq::gather(
         alloc,
         if is_under_top {
@@ -4903,7 +4924,7 @@ fn emit_quiet_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     null_coalesce_assignment: bool,
 ) -> Result<(InstrSeq<'arena>, Option<NumParams>)> {
     let alloc = env.arena;
-    match &expr.1 {
+    match &expr.2 {
         tast::Expr_::Lvar(lid) if !is_local_this(env, &lid.1) => Ok((
             instr::cgetquietl(alloc, get_local(e, env, pos, local_id::get_name(&lid.1))?),
             None,
@@ -5041,7 +5062,7 @@ fn emit_binop<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     expr: &tast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let (op, e1, e2) = expr.1.as_binop().unwrap();
+    let (op, e1, e2) = expr.2.as_binop().unwrap();
     use ast_defs::Bop as B;
     match op {
         B::Ampamp | B::Barbar => emit_short_circuit_op(e, env, pos, &expr),
@@ -5082,13 +5103,13 @@ fn emit_binop<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             };
             if optimize_null_checks(e) {
                 match op {
-                    B::Eqeqeq if e2.1.is_null() => emit_is_null(e, env, e1),
-                    B::Eqeqeq if e1.1.is_null() => emit_is_null(e, env, e2),
-                    B::Diff2 if e2.1.is_null() => Ok(InstrSeq::gather(
+                    B::Eqeqeq if e2.2.is_null() => emit_is_null(e, env, e1),
+                    B::Eqeqeq if e1.2.is_null() => emit_is_null(e, env, e2),
+                    B::Diff2 if e2.2.is_null() => Ok(InstrSeq::gather(
                         alloc,
                         vec![emit_is_null(e, env, e1)?, instr::not(alloc)],
                     )),
-                    B::Diff2 if e1.1.is_null() => Ok(InstrSeq::gather(
+                    B::Diff2 if e1.2.is_null() => Ok(InstrSeq::gather(
                         alloc,
                         vec![emit_is_null(e, env, e2)?, instr::not(alloc)],
                     )),
@@ -5407,7 +5428,7 @@ fn emit_base<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
 fn is_trivial(env: &Env, is_base: bool, expr: &tast::Expr) -> bool {
     use tast::Expr_ as E_;
-    match &expr.1 {
+    match &expr.2 {
         E_::Int(_) | E_::String(_) => true,
         E_::Lvar(x) => !is_local_this(env, &x.1) || env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS),
         E_::ArrayGet(_) if !is_base => false,
@@ -5429,7 +5450,7 @@ fn get_local_temp_kind<'a, 'arena>(
 ) -> Option<StoredValueKind> {
     match (expr, inout_param_info) {
         (_, None) => None,
-        (Some(tast::Expr(_, tast::Expr_::Lvar(id))), Some((i, aliases)))
+        (Some(tast::Expr(_, _, tast::Expr_::Lvar(id))), Some((i, aliases)))
             if inout_locals::should_save_local_value(id.name(), i, aliases) =>
         {
             Some(StoredValueKind::Local)
@@ -5459,7 +5480,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 ) -> Result<ArrayGetBase<'arena>> {
     let alloc = env.arena;
     let pos = &expr.0;
-    let expr_ = &expr.1;
+    let expr_ = &expr.2;
     let base_mode = if mode == MemberOpMode::InOut {
         MemberOpMode::Warn
     } else {
@@ -5734,7 +5755,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 emit_expr_default(e, env, expr)
             } else {
                 let (base_expr, prop_expr, null_flavor, _) = &**x;
-                Ok(match prop_expr.1.as_id() {
+                Ok(match prop_expr.2.as_id() {
                     Some(ast_defs::Id(_, s)) if string_utils::is_xhp(&s) => {
                         let base_instrs =
                             emit_xhp_obj_get(e, env, pos, base_expr, &s, null_flavor)?;
@@ -5864,15 +5885,15 @@ pub fn emit_lval_op<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     null_coalesce_assignment: bool,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    match (op, &expr1.1, expr2) {
+    match (op, &expr1.2, expr2) {
         (LValOp::Set, tast::Expr_::List(l), Some(expr2)) => {
             let instr_rhs = emit_expr(e, env, expr2)?;
-            let has_elements = l.iter().any(|e| !e.1.is_omitted());
+            let has_elements = l.iter().any(|e| !e.2.is_omitted());
             if !has_elements {
                 Ok(instr_rhs)
             } else {
                 scope::with_unnamed_local(alloc, e, |alloc, e, local| {
-                    let loc = if can_use_as_rhs_in_list_assignment(&expr2.1)? {
+                    let loc = if can_use_as_rhs_in_list_assignment(&expr2.2)? {
                         Some(&local)
                     } else {
                         None
@@ -5893,7 +5914,7 @@ pub fn emit_lval_op<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         _ => e.local_scope(|e| {
             let (rhs_instrs, rhs_stack_size) = match expr2 {
                 None => (instr::empty(alloc), 0),
-                Some(tast::Expr(_, tast::Expr_::Yield(af))) => {
+                Some(tast::Expr(_, _, tast::Expr_::Yield(af))) => {
                     let temp = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(
@@ -5928,7 +5949,7 @@ fn can_use_as_rhs_in_list_assignment(expr: &tast::Expr_) -> Result<bool> {
     use aast::Expr_ as E_;
     Ok(match expr {
         E_::Call(c)
-            if ((c.0).1)
+            if ((c.0).2)
                 .as_id()
                 .map_or(false, |id| id.1 == special_functions::ECHO) =>
         {
@@ -5955,11 +5976,11 @@ fn can_use_as_rhs_in_list_assignment(expr: &tast::Expr_) -> Result<bool> {
         | E_::Await(_)
         | E_::ReadonlyExpr(_)
         | E_::ClassConst(_) => true,
-        E_::Pipe(p) => can_use_as_rhs_in_list_assignment(&(p.2).1)?,
+        E_::Pipe(p) => can_use_as_rhs_in_list_assignment(&(p.2).2)?,
         E_::Binop(b) => {
             if let ast_defs::Bop::Eq(None) = &b.0 {
-                if (b.1).1.is_list() {
-                    return can_use_as_rhs_in_list_assignment(&(b.2).1);
+                if (b.1).2.is_list() {
+                    return can_use_as_rhs_in_list_assignment(&(b.2).2);
                 }
             }
             b.0.is_plus() || b.0.is_question_question() || b.0.is_any_eq()
@@ -6037,17 +6058,17 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     use tast::Expr_ as E_;
     let alloc = env.arena;
     let is_ltr = e.options().php7_flags.contains(Php7Flags::LTR_ASSIGN);
-    match &expr.1 {
+    match &expr.2 {
         E_::List(exprs) => {
             let last_non_omitted = if last_usage {
                 // last usage of the local will happen when processing last non-omitted
                 // element in the list - find it
                 if is_ltr {
-                    exprs.iter().rposition(|v| !v.1.is_omitted())
+                    exprs.iter().rposition(|v| !v.2.is_omitted())
                 } else {
                     // in right-to-left case result list will be reversed
                     // so we need to find first non-omitted expression
-                    exprs.iter().rev().rposition(|v| !v.1.is_omitted())
+                    exprs.iter().rev().rposition(|v| !v.2.is_omitted())
                 }
             } else {
                 None
@@ -6218,7 +6239,7 @@ fn emit_final_static_op<'arena, 'decl, D: DeclProvider<'decl>>(
         L::Unset => {
             let pos = match prop {
                 tast::ClassGetExpr::CGstring((pos, _))
-                | tast::ClassGetExpr::CGexpr(tast::Expr(pos, _)) => pos,
+                | tast::ClassGetExpr::CGexpr(tast::Expr(_, pos, _)) => pos,
             };
             let cid = text_of_class_id(cid);
             let id = text_of_prop(prop);
@@ -6248,7 +6269,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let f = |alloc: &'arena bumpalo::Bump, env: &mut Env<'a, 'arena>| {
         use tast::Expr_ as E_;
         let pos = &expr.0;
-        Ok(match &expr.1 {
+        Ok(match &expr.2 {
             E_::Lvar(v) if superglobals::is_any_global(local_id::get_name(&v.1)) => (
                 emit_pos_then(
                     alloc,
@@ -6472,11 +6493,11 @@ fn emit_class_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let alloc = env.arena;
     Ok(match &cexpr {
         ClassExpr::Expr(expr)
-            if expr.1.is_call()
-                || expr.1.is_binop()
-                || expr.1.is_class_get()
+            if expr.2.is_call()
+                || expr.2.is_binop()
+                || expr.2.is_class_get()
                 || expr
-                    .1
+                    .2
                     .as_lvar()
                     .map_or(false, |tast::Lid(_, id)| local_id::get_name(id) == "$this") =>
         {
@@ -6496,7 +6517,7 @@ fn emit_class_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         _ => {
             let pos = match prop {
                 tast::ClassGetExpr::CGstring((pos, _))
-                | tast::ClassGetExpr::CGexpr(tast::Expr(pos, _)) => pos,
+                | tast::ClassGetExpr::CGexpr(tast::Expr(_, pos, _)) => pos,
             };
             (
                 load_prop(alloc, e)?,
@@ -6727,7 +6748,7 @@ pub fn emit_is_null<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     expr: &tast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    if let Some(tast::Lid(pos, id)) = expr.1.as_lvar() {
+    if let Some(tast::Lid(pos, id)) = expr.2.as_lvar() {
         if !is_local_this(env, id) {
             return Ok(instr::istypel(
                 alloc,
@@ -6753,7 +6774,7 @@ pub fn emit_jmpnz<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     label: Label,
 ) -> Result<EmitJmpResult<'arena>> {
     let alloc: &'arena bumpalo::Bump = env.arena;
-    let tast::Expr(pos, expr_) = expr;
+    let tast::Expr(_, pos, expr_) = expr;
     let opt = optimize_null_checks(e);
     Ok(
         match ast_constant_folder::expr_to_typed_value(alloc, e, expr) {
@@ -6839,11 +6860,11 @@ pub fn emit_jmpnz<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     }
                     E::Binop(bo)
                         if bo.0.is_eqeqeq()
-                            && ((bo.1).1.is_null() || (bo.2).1.is_null())
+                            && ((bo.1).2.is_null() || (bo.2).2.is_null())
                             && opt =>
                     {
                         let is_null =
-                            emit_is_null(e, env, if (bo.1).1.is_null() { &bo.2 } else { &bo.1 })?;
+                            emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 alloc,
@@ -6855,10 +6876,10 @@ pub fn emit_jmpnz<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         }
                     }
                     E::Binop(bo)
-                        if bo.0.is_diff2() && ((bo.1).1.is_null() || (bo.2).1.is_null()) && opt =>
+                        if bo.0.is_diff2() && ((bo.1).2.is_null() || (bo.2).2.is_null()) && opt =>
                     {
                         let is_null =
-                            emit_is_null(e, env, if (bo.1).1.is_null() { &bo.2 } else { &bo.1 })?;
+                            emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 alloc,
@@ -6894,7 +6915,7 @@ pub fn emit_jmpz<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     label: Label,
 ) -> std::result::Result<EmitJmpResult<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     let alloc: &'arena bumpalo::Bump = env.arena;
-    let tast::Expr(pos, expr_) = expr;
+    let tast::Expr(_, pos, expr_) = expr;
     let opt = optimize_null_checks(e);
     Ok(
         match ast_constant_folder::expr_to_typed_value(alloc, e, expr) {
@@ -6985,11 +7006,11 @@ pub fn emit_jmpz<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     }
                     E::Binop(bo)
                         if bo.0.is_eqeqeq()
-                            && ((bo.1).1.is_null() || (bo.2).1.is_null())
+                            && ((bo.1).2.is_null() || (bo.2).2.is_null())
                             && opt =>
                     {
                         let is_null =
-                            emit_is_null(e, env, if (bo.1).1.is_null() { &bo.2 } else { &bo.1 })?;
+                            emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 alloc,
@@ -7001,10 +7022,10 @@ pub fn emit_jmpz<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         }
                     }
                     E::Binop(bo)
-                        if bo.0.is_diff2() && ((bo.1).1.is_null() || (bo.2).1.is_null()) && opt =>
+                        if bo.0.is_diff2() && ((bo.1).2.is_null() || (bo.2).2.is_null()) && opt =>
                     {
                         let is_null =
-                            emit_is_null(e, env, if (bo.1).1.is_null() { &bo.2 } else { &bo.1 })?;
+                            emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 alloc,

@@ -14,8 +14,9 @@
         { fb_ast =
           [([5:4-32],
             (Return
-               (Some (([5:11-31], keyset<int>),
-                      (ValCollection (Keyset, None, [(([5:20-25], string), (Hole ((([5:20-25], string), (String "bad")), (string), (int), Typing))); (([5:28-29], int), (Int "1"))]))))))
+               (Some (([5:11-31], keyset<int>), [5:11-31],
+                      (ValCollection (Keyset, None,
+                         [(([5:20-25], string), [5:20-25], (Hole ((([5:20-25], string), [5:20-25], (String "bad")), (string), (int), Typing))); (([5:28-29], int), [5:28-29], (Int "1"))]))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

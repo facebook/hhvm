@@ -84,18 +84,21 @@ let extend_tparams env tparaml =
  *)
 let handle_special_calls env call =
   match call with
-  | Call (((_, Id (_, cn)) as id), targs, [(p, String fn)], uargs)
+  | Call (((_, _, Id (_, cn)) as id), targs, [(ty, p, String fn)], uargs)
     when String.equal cn SN.AutoimportedFunctions.fun_ ->
     (* Functions referenced by fun() are always fully-qualified *)
     let fn = Utils.add_ns fn in
-    Call (id, targs, [(p, String fn)], uargs)
+    Call (id, targs, [(ty, p, String fn)], uargs)
   | Call
-      (((_, Id (_, cn)) as id), targs, [(p1, String cl); meth], unpacked_element)
+      ( ((_, _, Id (_, cn)) as id),
+        targs,
+        [(ty, p1, String cl); meth],
+        unpacked_element )
     when ( String.equal cn SN.AutoimportedFunctions.meth_caller
          || String.equal cn SN.AutoimportedFunctions.class_meth )
          && (not @@ in_codegen env) ->
     let cl = Utils.add_ns cl in
-    Call (id, targs, [(p1, String cl); meth], unpacked_element)
+    Call (id, targs, [(ty, p1, String cl); meth], unpacked_element)
   | _ -> call
 
 let contexts_ns =
@@ -246,18 +249,18 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
     (* The function that actually rewrites names *)
     method! on_expr_ env expr =
       match expr with
-      | Call ((p, Id (p2, cn)), targs, el, uarg)
+      | Call ((ty, p, Id (p2, cn)), targs, el, uarg)
         when SN.SpecialFunctions.is_special_function cn ->
         Call
-          ( (p, Id (p2, cn)),
+          ( (ty, p, Id (p2, cn)),
             List.map targs ~f:(self#on_targ env),
             List.map el ~f:(self#on_expr env),
             Option.map uarg ~f:(self#on_expr env) )
-      | Call ((p, Aast.Id id), tal, el, unpacked_element) ->
+      | Call ((ty, p, Aast.Id id), tal, el, unpacked_element) ->
         let new_id = NS.elaborate_id env.namespace NS.ElaborateFun id in
         let renamed_call =
           Call
-            ( (p, Id new_id),
+            ( (ty, p, Id new_id),
               List.map tal ~f:(self#on_targ env),
               List.map el ~f:(self#on_expr env),
               Option.map unpacked_element ~f:(self#on_expr env) )
@@ -268,13 +271,13 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         let targs = List.map targs ~f:(self#on_targ env) in
         FunctionPointer (FP_id fn, targs)
       | FunctionPointer
-          (FP_class_const ((p1, CIexpr (p2, Id x1)), meth_name), targs) ->
+          (FP_class_const ((p1, CIexpr (ty, p2, Id x1)), meth_name), targs) ->
         let name = elaborate_type_name env x1 in
         let targs = List.map targs ~f:(self#on_targ env) in
         FunctionPointer
-          (FP_class_const ((p1, CIexpr (p2, Id name)), meth_name), targs)
-      | Obj_get (e1, (p, Id x), null_safe, in_parens) ->
-        Obj_get (self#on_expr env e1, (p, Id x), null_safe, in_parens)
+          (FP_class_const ((p1, CIexpr (ty, p2, Id name)), meth_name), targs)
+      | Obj_get (e1, (ty, p, Id x), null_safe, in_parens) ->
+        Obj_get (self#on_expr env e1, (ty, p, Id x), null_safe, in_parens)
       | Id ((_, name) as sid) ->
         if
           (String.equal name "NAN" || String.equal name "INF") && in_codegen env
@@ -282,10 +285,10 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
           expr
         else
           Id (NS.elaborate_id env.namespace NS.ElaborateConst sid)
-      | New ((p1, CIexpr (p2, Id x)), tal, el, unpacked_element, ex) ->
+      | New ((p1, CIexpr (ty, p2, Id x)), tal, el, unpacked_element, ex) ->
         let x = elaborate_type_name env x in
         New
-          ( (p1, CIexpr (p2, Id x)),
+          ( (p1, CIexpr (ty, p2, Id x)),
             List.map tal ~f:(self#on_targ env),
             List.map el ~f:(self#on_expr env),
             Option.map unpacked_element ~f:(self#on_expr env),
@@ -297,13 +300,15 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
               (self#on_expr env e1, self#on_expr env e2))
         in
         Record (id, l)
-      | Class_const ((p1, CIexpr (p2, Id x1)), pstr) ->
+      | Class_const ((p1, CIexpr (ty, p2, Id x1)), pstr) ->
         let name = elaborate_type_name env x1 in
-        Class_const ((p1, CIexpr (p2, Id name)), pstr)
-      | Class_get ((p1, CIexpr (p2, Id x1)), cge, in_parens) ->
+        Class_const ((p1, CIexpr (ty, p2, Id name)), pstr)
+      | Class_get ((p1, CIexpr (ty, p2, Id x1)), cge, in_parens) ->
         let x1 = elaborate_type_name env x1 in
         Class_get
-          ((p1, CIexpr (p2, Id x1)), self#on_class_get_expr env cge, in_parens)
+          ( (p1, CIexpr (ty, p2, Id x1)),
+            self#on_class_get_expr env cge,
+            in_parens )
       | Xml (id, al, el) ->
         let id =
           (* if XHP element mangling is disabled, namespaces are supported *)

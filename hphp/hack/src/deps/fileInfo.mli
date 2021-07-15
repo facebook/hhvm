@@ -112,8 +112,6 @@ val simplify : t -> names
 
 val merge_names : names -> names -> names
 
-val print_names : names -> unit
-
 val to_saved : t -> saved
 
 val from_saved : Relative_path.t -> saved -> t

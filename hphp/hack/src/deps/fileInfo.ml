@@ -258,19 +258,6 @@ let merge_names t_names1 t_names2 =
     n_consts = SSet.union n_consts t_names2.n_consts;
   }
 
-let print_names name =
-  Printf.printf "Funs:\n";
-  SSet.iter (Printf.printf "\t%s\n") name.n_funs;
-  Printf.printf "Classes:\n";
-  SSet.iter (Printf.printf "\t%s\n") name.n_classes;
-  Printf.printf "Types:\n";
-  SSet.iter (Printf.printf "\t%s\n") name.n_types;
-  Printf.printf "Consts:\n";
-  SSet.iter (Printf.printf "\t%s\n") name.n_consts;
-  Printf.printf "\n";
-  Out_channel.flush stdout;
-  ()
-
 let to_string fast =
   [
     ("funs", fast.funs);

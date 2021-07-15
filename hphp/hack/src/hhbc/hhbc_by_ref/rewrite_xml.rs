@@ -103,6 +103,7 @@ fn rewrite_xml_<'arena, 'decl, D: DeclProvider<'decl>>(
     let renamed_id = class::Type::from_ast_name_and_mangle(alloc, &id.1);
     let cid = ClassId(
         pos.clone(),
+        pos.clone(),
         ClassId_::CI(Id(id.0.clone(), renamed_id.to_raw_string().into())),
     );
 

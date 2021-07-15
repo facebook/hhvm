@@ -52,7 +52,7 @@ Errors:
       c_file_attributes =
       [{ fa_user_attributes =
          [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
-            ua_params = [(([12:33-56], string), [12:33-56], (Class_const ((([12:33-40], A\MyClass), (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))] }
+            ua_params = [(([12:33-56], string), [12:33-56], (Class_const ((([12:33-40], A\MyClass), [12:33-40], (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))] }
            ];
          fa_namespace =
          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -85,7 +85,7 @@ Errors:
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
-             ua_params = [(([12:33-56], string), [12:33-56], (Class_const ((([12:33-40], A\MyClass), (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))] }
+             ua_params = [(([12:33-56], string), [12:33-56], (Class_const ((([12:33-40], A\MyClass), [12:33-40], (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))] }
             ];
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -112,7 +112,7 @@ Errors:
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
-             ua_params = [(([12:33-56], string), [12:33-56], (Class_const ((([12:33-40], A\MyClass), (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))] }
+             ua_params = [(([12:33-56], string), [12:33-56], (Class_const ((([12:33-40], A\MyClass), [12:33-40], (CI ([12:33-40], "\\A\\MyClass"))), ([12:42-56], "MY_CLASS_CONST"))))] }
             ];
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

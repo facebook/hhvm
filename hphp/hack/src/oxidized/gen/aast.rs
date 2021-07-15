@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<34c2182810a1ebb307a72cbe3a06f0a8>>
+// @generated SignedSource<<1fb14546eb9a6181090005640794359b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -293,7 +293,7 @@ pub type Block<Ex, Fb, En, Hi> = Vec<Stmt<Ex, Fb, En, Hi>>;
     Serialize,
     ToOcamlRep
 )]
-pub struct ClassId<Ex, Fb, En, Hi>(pub Ex, pub ClassId_<Ex, Fb, En, Hi>);
+pub struct ClassId<Ex, Fb, En, Hi>(pub Ex, pub Pos, pub ClassId_<Ex, Fb, En, Hi>);
 
 /// Class ID, used in things like instantiation and static property access.
 #[derive(

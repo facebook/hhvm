@@ -1124,7 +1124,7 @@ let bad_call env p ty = Errors.bad_call p (Typing_print.error env ty)
 
 let rec make_a_local_of env e =
   match e with
-  | (p, _, Class_get ((_, cname), CGstring (_, member_name), _)) ->
+  | (p, _, Class_get ((_, _, cname), CGstring (_, member_name), _)) ->
     let (env, local) = Env.FakeMembers.make_static env cname member_name p in
     (env, Some (p, local))
   | ( p,
@@ -1175,7 +1175,7 @@ let rec condition_nullity ~nonnull (env : env) te =
   | ( _,
       _,
       Aast.Call
-        ( (_, _, Aast.Class_const ((_, Aast.CI (_, shapes)), (_, idx))),
+        ( (_, _, Aast.Class_const ((_, _, Aast.CI (_, shapes)), (_, idx))),
           _,
           [shape; field],
           _ ) )
@@ -1369,7 +1369,7 @@ let rec is_instance_var = function
   | _ -> false
 
 let rec get_instance_var env = function
-  | (p, _, Class_get ((_, cname), CGstring (_, member_name), _)) ->
+  | (p, _, Class_get ((_, _, cname), CGstring (_, member_name), _)) ->
     let (env, local) = Env.FakeMembers.make_static env cname member_name p in
     (env, (p, local))
   | ( p,
@@ -2408,7 +2408,7 @@ and catch catchctx env (sid, exn_lvar, b) =
   let cid = CI sid in
   let ety_p = fst sid in
   let (env, _, _, _) = instantiable_cid ety_p env cid [] in
-  let (env, _tal, _te, ety) = class_expr env [] (ety_p, cid) in
+  let (env, _tal, _te, ety) = class_expr env [] (ety_p, ety_p, cid) in
   let env = coerce_to_throwable ety_p env ety in
   let (p, x) = exn_lvar in
   let env = set_valid_rvalue p env x ety in
@@ -3152,7 +3152,7 @@ and expr_
       p
       (Aast.FunctionPointer (FP_class_const (ce, meth), tal))
       fpty
-  | Smethod_id (((pc, cid_) as cid), meth) ->
+  | Smethod_id (((_, pc, cid_) as cid), meth) ->
     (* Smethod_id is used when creating a "method pointer" using the magic
      * class_meth function.
      *
@@ -3573,7 +3573,7 @@ and expr_
     let env = Typing_local_ops.check_assignment env te in
     (env, tuop, ty)
   | Eif (c, e1, e2) -> eif env ~expected ?in_await p c e1 e2
-  | Class_const ((p, CI sid), pstr)
+  | Class_const ((p, _, CI sid), pstr)
     when String.equal (snd pstr) "class" && Env.is_typedef env (snd sid) ->
     begin
       match Env.get_typedef env (snd sid) with
@@ -3615,20 +3615,20 @@ and expr_
           Phase.check_tparams_constraints ~use_pos:p ~ety_env env tparaml
         in
         let (env, ty) = Phase.localize ~ety_env env typename in
-        make_result env p (Class_const (((p, ty), CI sid), pstr)) ty
+        make_result env p (Class_const (((p, ty), p, CI sid), pstr)) ty
       | None ->
         (* Should not expect None as we've checked whether the sid is a typedef *)
         expr_error env (Reason.Rwitness p) outer
     end
   | Class_const (cid, mid) -> class_const env p (cid, mid)
-  | Class_get (cid, CGstring mid, in_parens)
-    when Env.FakeMembers.is_valid_static env (snd cid) (snd mid) ->
-    let (env, local) = Env.FakeMembers.make_static env (snd cid) (snd mid) p in
+  | Class_get (((_, _, cid_) as cid), CGstring mid, in_parens)
+    when Env.FakeMembers.is_valid_static env cid_ (snd mid) ->
+    let (env, local) = Env.FakeMembers.make_static env cid_ (snd mid) p in
     let local = (p, p, Lvar (p, local)) in
     let (env, _, ty) = expr env local in
     let (env, _tal, te, _) = class_expr env [] cid in
     make_result env p (Aast.Class_get (te, Aast.CGstring mid, in_parens)) ty
-  | Class_get (cid, CGstring ((ppos, _) as mid), in_parens) ->
+  | Class_get (((_, _, cid_) as cid), CGstring ((ppos, _) as mid), in_parens) ->
     let (env, _tal, te, cty) = class_expr env [] cid in
     let env = might_throw env in
     let (env, (ty, _tal)) =
@@ -3642,7 +3642,7 @@ and expr_
         cid
     in
     let (env, ty) =
-      Env.FakeMembers.check_static_invalid env (snd cid) (snd mid) ty
+      Env.FakeMembers.check_static_invalid env cid_ (snd mid) ty
     in
     let env =
       Errors.try_if_no_errors
@@ -3829,7 +3829,7 @@ and expr_
   | ReadonlyExpr e ->
     let (env, te, rty) = expr ~is_using_clause ~in_readonly_expr:true env e in
     make_result env p (Aast.ReadonlyExpr te) rty
-  | New ((pos, c), explicit_targs, el, unpacked_element, p1) ->
+  | New ((_, pos, c), explicit_targs, el, unpacked_element, p1) ->
     let env = might_throw env in
     let ( env,
           tc,
@@ -4940,7 +4940,7 @@ and new_object
   in
   let allow_abstract_bound_generic =
     match tcid with
-    | ((_, ty), Aast.CI (_, tn)) -> is_generic_equal_to tn ty
+    | ((_, ty), _, Aast.CI (_, tn)) -> is_generic_equal_to tn ty
     | _ -> false
   in
   let gather
@@ -5000,7 +5000,7 @@ and new_object
       | _ -> obj_ty
     in
     let (env, new_ty) =
-      let ((_, cid_ty), _) = tcid in
+      let ((_, cid_ty), _, _) = tcid in
       let (env, cid_ty) = Env.expand_type env cid_ty in
       if is_generic cid_ty then
         (env, cid_ty)
@@ -5107,7 +5107,7 @@ and new_object
       (env, tel, typed_unpack_element, mk (r, Tunion tyl), mk (r, Tunion ctyl))
   in
   let (env, new_ty) =
-    let ((_, cid_ty), _) = tcid in
+    let ((_, cid_ty), _, _) = tcid in
     let (env, cid_ty) = Env.expand_type env cid_ty in
     if is_generic cid_ty then
       (env, cid_ty)
@@ -5194,7 +5194,7 @@ and check_shape_keys_validity :
         Errors.invalid_shape_field_name_empty key_pos;
       (env, key_pos, None)
     | Ast_defs.SFclass_const (((p, cls) as x), y) ->
-      let (env, _te, ty) = class_const env pos ((p, CI x), y) in
+      let (env, _te, ty) = class_const env pos ((p, p, CI x), y) in
       let r = Reason.Rwitness key_pos in
       let env =
         Type.sub_type
@@ -5424,7 +5424,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       (env, te1, ty2, err_opt)
     | (_, _, Class_get (_, CGexpr _, _)) ->
       failwith "AST should not have any CGexprs after naming"
-    | (_, _, Class_get (((_, x) as cid), CGstring (pos_member, y), _)) ->
+    | (_, _, Class_get (((_, _, x) as cid), CGstring (pos_member, y), _)) ->
       let lenv = env.lenv in
       let no_fakes = LEnv.env_with_empty_fakes env in
       let (env, te1, _) = lvalue no_fakes e1 in
@@ -5694,7 +5694,7 @@ and dispatch_call
     in
     (result, should_forget_fakes)
   in
-  let dispatch_class_const env ((pos, e1_) as e1) m =
+  let dispatch_class_const env ((_, pos, e1_) as e1) m =
     let (env, _tal, tcid, ty1) = class_expr env [] e1 in
     let this_ty = MakeType.this (Reason.Rwitness fpos) in
     (* In static context, you can only call parent::foo() on static methods.
@@ -5994,7 +5994,7 @@ and dispatch_call
                 cid
               | _ ->
                 let (p1, _, _) = e1 in
-                (p1, CIexpr e1)
+                (p1, p1, CIexpr e1)
             in
             let result = class_const ~incl_tc:true env p (cid, (p, cst)) in
             (result, should_forget_fakes)
@@ -6134,7 +6134,7 @@ and dispatch_call
       | _ -> dispatch_id env id
     end
   (* Special Shapes:: function *)
-  | Class_const (((_, CI (_, shapes)) as class_id), ((_, x) as method_id))
+  | Class_const (((_, _, CI (_, shapes)) as class_id), ((_, x) as method_id))
     when String.equal shapes SN.Shapes.cShapes ->
     begin
       match x with
@@ -6285,7 +6285,7 @@ and dispatch_call
       | _ -> dispatch_class_const env class_id method_id
     end
   (* Special function `parent::__construct` *)
-  | Class_const ((pos, CIparent), ((_, construct) as id))
+  | Class_const ((_, pos, CIparent), ((_, construct) as id))
     when String.equal construct SN.Members.__construct ->
     let (env, tel, typed_unpack_element, ty, pty, ctor_fty, should_forget_fakes)
         =
@@ -6297,7 +6297,7 @@ and dispatch_call
         (Tast.make_typed_expr
            fpos
            ctor_fty
-           (Aast.Class_const (((pos, pty), Aast.CIparent), id)))
+           (Aast.Class_const (((pos, pty), pos, Aast.CIparent), id)))
         [] (* tal: no type arguments to constructor *)
         tel
         typed_unpack_element
@@ -6598,7 +6598,7 @@ and class_get_inner
     ?(incl_tc = false)
     ?(is_function_pointer = false)
     env
-    ((cid_pos, cid_) as cid)
+    ((_, cid_pos, cid_) as cid)
     cty
     (p, mid) =
   let dflt_err = Option.map ~f:(fun (_, _, ty) -> Ok ty) coerce_from_ty in
@@ -6924,7 +6924,7 @@ and class_id_for_new
       ~exact
       env
       explicit_targs
-      (p, cid)
+      (p, p, cid)
   in
   (* Need to deal with union case *)
   let rec get_info res tyl =
@@ -6950,7 +6950,7 @@ and class_id_for_new
             (* When computing the classes for a new T() where T is a generic,
              * the class must be consistent (final, final constructor, or
              * <<__ConsistentConstruct>>) for its constructor to be considered *)
-            | ((_, Aast.CI (_, c)), ty) when is_generic_equal_to c ty ->
+            | ((_, _, Aast.CI (_, c)), ty) when is_generic_equal_to c ty ->
               (* Only have this choosing behavior for new T(), not all generic types
                * i.e. new classname<T>, TODO: T41190512 *)
               if Tast_utils.valid_newable_class class_info then
@@ -6985,12 +6985,12 @@ and class_id_for_new
  *  Thus C::get() will return a type C, while $c::get() will return the same
  *  type as $c.
  *)
-and this_for_method env (p, cid) default_ty =
+and this_for_method env (_, p, cid) default_ty =
   match cid with
   | CIparent
   | CIself
   | CIstatic ->
-    let (env, _tal, _te, ty) = class_expr env [] (p, CIstatic) in
+    let (env, _tal, _te, ty) = class_expr env [] (p, p, CIstatic) in
     ExprDepTy.make env ~cid:CIstatic ty
   | _ -> (env, default_ty)
 
@@ -7007,8 +7007,9 @@ and class_expr
     ?(check_explicit_targs = false)
     (env : env)
     (tal : Nast.targ list)
-    (p, cid_) : env * Tast.targ list * Tast.class_id * locl_ty =
-  let make_result env tal te ty = (env, tal, ((p, ty), te), ty) in
+    ((_, p, cid_) : ('a, 'b, 'c, 'd) Aast.class_id) :
+    env * Tast.targ list * Tast.class_id * locl_ty =
+  let make_result env tal te ty = (env, tal, ((p, ty), p, te), ty) in
   match cid_ with
   | CIparent ->
     (match Env.get_self_id env with
@@ -8036,7 +8037,10 @@ and condition
     when tparamet && String.equal f SN.StdlibFunctions.is_php_array ->
     safely_refine_is_array env `PHPArray p f lv
   | Aast.Call
-      ( (_, _, Aast.Class_const ((_, Aast.CI (_, class_name)), (_, method_name))),
+      ( ( _,
+          _,
+          Aast.Class_const ((_, _, Aast.CI (_, class_name)), (_, method_name))
+        ),
         _,
         [shape; field],
         None )

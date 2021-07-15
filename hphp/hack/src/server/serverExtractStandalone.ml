@@ -908,8 +908,8 @@ end = struct
           do_add_dep ctx env @@ Typing_deps.Dep.Cstr cls
         );
         List.iter exprs ~f:(function
-            | (_, _, Aast.(Class_get ((_, CI (_, cls)), _, _)))
-            | (_, _, Aast.(Class_const ((_, CI (_, cls)), _))) ->
+            | (_, _, Aast.(Class_get ((_, _, CI (_, cls)), _, _)))
+            | (_, _, Aast.(Class_const ((_, _, CI (_, cls)), _))) ->
               do_add_dep ctx env @@ Typing_deps.Dep.Type cls
             | _ -> ()))
 
@@ -1763,7 +1763,7 @@ end = struct
     | Aast.AFkvalue (key_expr, val_expr) ->
       Fmt.(pair ~sep:fat_arrow pp_expr pp_expr) ppf (key_expr, val_expr)
 
-  and pp_class_id ppf (_, class_id_) =
+  and pp_class_id ppf (_, _, class_id_) =
     match class_id_ with
     | Aast.CIparent -> Fmt.string ppf "parent"
     | Aast.CIstatic -> Fmt.string ppf "static"

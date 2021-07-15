@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3b5a358aa2454538d2848e457879be84>>
+// @generated SignedSource<<076092f5aff0ef2b5ef1955834de76bb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -358,6 +358,7 @@ impl<P: Params> Node<P> for ClassId<P::Ex, P::Fb, P::En, P::Hi> {
     ) -> Result<(), P::Error> {
         v.visit_ex(c, &self.0)?;
         self.1.accept(c, v)?;
+        self.2.accept(c, v)?;
         Ok(())
     }
 }

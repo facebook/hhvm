@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6001fea3f61bd37366dbe30d28967b64>>
+// @generated SignedSource<<624f59d3756733168422fcdc58406dd7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -242,11 +242,14 @@ impl<'a> Node<'a> for ClassId<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBody
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            ClassId(ref __binding_0, ref __binding_1) => {
+            ClassId(ref __binding_0, ref __binding_1, ref __binding_2) => {
                 {
                     __binding_0.accept(v)
                 }
-                { __binding_1.accept(v) }
+                {
+                    __binding_1.accept(v)
+                }
+                { __binding_2.accept(v) }
             }
         }
     }

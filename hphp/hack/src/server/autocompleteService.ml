@@ -528,7 +528,7 @@ let autocomplete_typed_member ~is_static env class_ty cid mid =
                 let cid = Option.map cid ~f:to_nast_class_id_ in
                 autocomplete_member ~is_static env class_ cid mid))
 
-let autocomplete_static_member env ((_, ty), cid) mid =
+let autocomplete_static_member env ((_, ty), _, cid) mid =
   autocomplete_typed_member ~is_static:true env ty (Some cid) mid
 
 let autocomplete_enum_class_label_call env fty pos_labelname =
@@ -676,8 +676,8 @@ let visitor =
       autocomplete_id id env;
       super#on_Fun_id env id
 
-    method! on_New env cid el unpacked_element =
-      autocomplete_new (to_nast_class_id_ (snd cid)) env;
+    method! on_New env ((_, _, cid_) as cid) el unpacked_element =
+      autocomplete_new (to_nast_class_id_ cid_) env;
       super#on_New env cid el unpacked_element
 
     method! on_Happly env sid hl =

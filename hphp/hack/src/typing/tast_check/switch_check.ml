@@ -18,7 +18,7 @@ module SN = Naming_special_names
 
 let get_constant tc (seen, has_default) = function
   | Default _ -> (seen, true)
-  | Case (((pos, _), _, Class_const ((_, CI (_, cls)), (_, const))), _) ->
+  | Case (((pos, _), _, Class_const ((_, _, CI (_, cls)), (_, const))), _) ->
     if String.( <> ) cls (Cls.name tc) then (
       Errors.enum_switch_wrong_class pos (strip_ns (Cls.name tc)) (strip_ns cls);
       (seen, has_default)

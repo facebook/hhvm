@@ -138,7 +138,7 @@ impl<'ast> Visitor<'ast> for Checker {
                 self.add_error(&p.0, syntax_error::toplevel_await_use);
             }
         } else if let Some((Expr(_, _, f), ..)) = p.2.as_call() {
-            if let Some((ClassId(_, CIexpr(Expr(pos, _, Id(id)))), ..)) = f.as_class_const() {
+            if let Some((ClassId(_, _, CIexpr(Expr(pos, _, Id(id)))), ..)) = f.as_class_const() {
                 if Self::name_eq_this_and_in_static_method(c, &id.1) {
                     self.add_error(&pos, syntax_error::this_in_static);
                 }

@@ -49,7 +49,7 @@ let refine ((_p, cond_ty), _, cond_expr) _cond_is_true gamma =
   | Call ((_, _, Id (_, id)), [], _, None) when is_refinement_fun id ->
     raise Not_implemented
   | Call
-      ( (_, _, Class_const ((_, CI (_, "\\HH\\Shapes")), (_, "keyExists"))),
+      ( (_, _, Class_const ((_, _, CI (_, "\\HH\\Shapes")), (_, "keyExists"))),
         _,
         _,
         _ ) ->
@@ -131,7 +131,7 @@ let check_expr env (expr : ETast.expr) (gamma : gamma) : gamma =
 
       method! on_Class_const env class_id const_name =
         match (class_id, const_name) with
-        | ((_, CI (_, "\\HH\\Shapes")), (_, "removeKey")) ->
+        | ((_, _, CI (_, "\\HH\\Shapes")), (_, "removeKey")) ->
           raise Not_implemented
         | _ -> super#on_Class_const env class_id const_name
 

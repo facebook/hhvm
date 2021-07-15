@@ -45,7 +45,8 @@
             [([8:5-18],
               (Expr
                  (([8:5-17], void), [8:5-17],
-                  (Call ((([8:5-14], (function(int $i): void)), [8:5-14], (Class_const ((([8:5-11], C), CIparent), ([8:13-14], "f")))), [], [(([8:15-16], int), [8:15-16], (Int "3"))], None)))))
+                  (Call ((([8:5-14], (function(int $i): void)), [8:5-14], (Class_const ((([8:5-11], C), [8:5-11], CIparent), ([8:13-14], "f")))), 
+                     [], [(([8:15-16], int), [8:15-16], (Int "3"))], None)))))
               ];
             fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

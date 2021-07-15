@@ -354,6 +354,7 @@ fn static_meth_call(classname: &str, meth_name: &str, args: Vec<Expr>, pos: &Pos
             // TODO: Refactor ClassId creation with new_obj
             ClassId(
                 pos.clone(),
+                pos.clone(),
                 ClassId_::CIexpr(Expr::new(
                     pos.clone(),
                     pos.clone(),
@@ -881,7 +882,7 @@ fn rewrite_expr<TF>(
                 // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitStaticMethod(new ExprPos(...), Foo::bar<>), vec[])
                 ClassConst(cc) => {
                     let (cid, s) = *cc;
-                    if let ClassId_::CIexpr(Expr(_, _, Id(sid))) = &cid.1 {
+                    if let ClassId_::CIexpr(Expr(_, _, Id(sid))) = &cid.2 {
                         if sid.1 == classes::PARENT
                             || sid.1 == classes::SELF
                             || sid.1 == classes::STATIC

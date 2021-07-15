@@ -510,8 +510,8 @@ let shape_field_name_ this field =
     match field with
     | (p, Int name) -> Ok (Ast_defs.SFlit_int (p, name))
     | (p, String name) -> Ok (Ast_defs.SFlit_str (p, name))
-    | (_, Class_const ((_, CI x), y)) -> Ok (Ast_defs.SFclass_const (x, y))
-    | (_, Class_const ((_, CIself), y)) ->
+    | (_, Class_const ((_, _, CI x), y)) -> Ok (Ast_defs.SFclass_const (x, y))
+    | (_, Class_const ((_, _, CIself), y)) ->
       (match force this with
       | Some sid -> Ok (Ast_defs.SFclass_const (sid, y))
       | None -> Error `Expected_class)

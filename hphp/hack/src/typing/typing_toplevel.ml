@@ -888,8 +888,8 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum =
   | Some sealed_attr ->
     let iter_item ((_, pos, expr_) : Nast.expr) =
       match expr_ with
-      | Class_const (cid, _) ->
-        let klass_name = Nast.class_id_to_str (snd cid) in
+      | Class_const ((_, _, cid), _) ->
+        let klass_name = Nast.class_id_to_str cid in
         let klass = Decl_provider.get_class ctx klass_name in
         (match klass with
         | None -> ()

@@ -2483,7 +2483,7 @@ fn print_expr<W: Write>(
     ) -> Result<Option<()>, W::Error> {
         match e_.as_class_const() {
             Some((
-                ast::ClassId(_, ast::ClassId_::CIexpr(ast::Expr(_, _, ast::Expr_::Id(id)))),
+                ast::ClassId(_, _, ast::ClassId_::CIexpr(ast::Expr(_, _, ast::Expr_::Id(id)))),
                 (_, s2),
             )) if is_class(&s2) && !(is_self(&id.1) || is_parent(&id.1) || is_static(&id.1)) => {
                 Ok(Some({
@@ -2596,7 +2596,7 @@ fn print_expr<W: Write>(
         }
         E_::New(x) => {
             let (cid, _, es, unpacked_element, _) = &**x;
-            match cid.1.as_ciexpr() {
+            match cid.2.as_ciexpr() {
                 Some(ci_expr) => {
                     w.write("new ")?;
                     match ci_expr.2.as_id() {
@@ -2625,7 +2625,7 @@ fn print_expr<W: Write>(
                     })
                 }
                 None => {
-                    match cid.1.as_ci() {
+                    match cid.2.as_ci() {
                         Some(id) => {
                             // Xml exprs rewritten as New exprs come
                             // through here.
@@ -2641,7 +2641,7 @@ fn print_expr<W: Write>(
             print_key_values(ctx, w, env, &r.1)
         }
         E_::ClassGet(cg) => {
-            match &(cg.0).1 {
+            match &(cg.0).2 {
                 ast::ClassId_::CIexpr(e) => match e.as_id() {
                     Some(id) => w.write(&get_class_name_from_id(
                         ctx,
@@ -2661,7 +2661,7 @@ fn print_expr<W: Write>(
             }
         }
         E_::ClassConst(cc) => {
-            if let Some(e1) = (cc.0).1.as_ciexpr() {
+            if let Some(e1) = (cc.0).2.as_ciexpr() {
                 handle_possible_colon_colon_class_expr(ctx, w, env, false, expr)?.map_or_else(
                     || {
                         let s2 = &(cc.1).1;
@@ -2784,7 +2784,7 @@ fn print_expr<W: Write>(
                 ast::FunctionPtrId::FPId(ast::Id(_, sid)) => {
                     w.write(lstrip(adjust_id(env, &sid).as_ref(), "\\\\"))?
                 }
-                ast::FunctionPtrId::FPClassConst(ast::ClassId(_, class_id), (_, meth_name)) => {
+                ast::FunctionPtrId::FPClassConst(ast::ClassId(_, _, class_id), (_, meth_name)) => {
                     match class_id {
                         ast::ClassId_::CIexpr(e) => match e.as_id() {
                             Some(id) => w.write(&get_class_name_from_id(

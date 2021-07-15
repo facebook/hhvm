@@ -98,7 +98,7 @@ class visitor =
           |> List.map ~f:(fun cid -> self#method_call env Constructor cid mid)
           |> List.fold ~init:self#zero ~f:self#plus
         | Aast.Fun_id (pos, name) -> self#fun_call env Function name pos
-        | Aast.Smethod_id (((_, ty), _), mid)
+        | Aast.Smethod_id (((_, ty), _, _), mid)
         | Aast.Method_id (((_, ty), _, _), mid) ->
           Tast_env.get_class_ids env ty
           |> List.map ~f:(fun cid -> self#method_call env Method cid mid)
@@ -124,7 +124,7 @@ class visitor =
       let acc =
         match expr_ with
         | Aast.Id (pos, name) -> self#fun_call env Function name pos
-        | Aast.Class_const (((_, ty), _), mid)
+        | Aast.Class_const (((_, ty), _, _), mid)
         | Aast.Obj_get (((_, ty), _, _), (_, _, Aast.Id mid), _, _) ->
           let target_type =
             if String.equal (snd mid) SN.Members.__construct then

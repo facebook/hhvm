@@ -84,7 +84,7 @@
               (Expr
                  (([15:3-31], TestTraversable), [15:3-31],
                   (Binop ((Eq None), (([15:3-7], TestTraversable), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     (([15:10-31], TestTraversable), [15:10-31], (New ((([15:14-29], TestTraversable), (CI ([15:14-29], "\\TestTraversable"))), [], [], None, ([15:14-29], _)))))))));
+                     (([15:10-31], TestTraversable), [15:10-31], (New ((([15:14-29], TestTraversable), [15:14-29], (CI ([15:14-29], "\\TestTraversable"))), [], [], None, ([15:14-29], _)))))))));
              ([18:3-15],
               (Expr
                  (([18:3-14], void), [18:3-14],
@@ -135,7 +135,7 @@
               (Expr
                  (([27:3-31], TestTraversable), [27:3-31],
                   (Binop ((Eq None), (([27:3-7], TestTraversable), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     (([27:10-31], TestTraversable), [27:10-31], (New ((([27:14-29], TestTraversable), (CI ([27:14-29], "\\TestTraversable"))), [], [], None, ([27:14-29], _)))))))));
+                     (([27:10-31], TestTraversable), [27:10-31], (New ((([27:14-29], TestTraversable), [27:14-29], (CI ([27:14-29], "\\TestTraversable"))), [], [], None, ([27:14-29], _)))))))));
              ([30:3-75],
               (Expr
                  (([30:3-74], void), [30:3-74],

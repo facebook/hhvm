@@ -208,11 +208,11 @@ let visitor =
       let ( + ) = self#plus in
       let acc =
         match expr_ with
-        | Aast.New (((p, ty), _), _, _, _, _) -> typed_constructor env ty p
+        | Aast.New (((p, ty), _, _), _, _, _, _) -> typed_constructor env ty p
         | Aast.Obj_get (((_, ty), _, _), (_, _, Aast.Id mid), _, _) ->
           typed_property env ty mid
-        | Aast.Class_const (((_, ty), _), mid) -> typed_const env ty mid
-        | Aast.Class_get (((_, ty), _), Aast.CGstring mid, _) ->
+        | Aast.Class_const (((_, ty), _, _), mid) -> typed_const env ty mid
+        | Aast.Class_get (((_, ty), _, _), Aast.CGstring mid, _) ->
           typed_property env ty mid
         | Aast.Xml (cid, attrs, _) ->
           let class_id = process_class_id cid in
@@ -223,12 +223,12 @@ let visitor =
           + process_fun_id (remove_apostrophes_from_function_eval id)
         | Aast.FunctionPointer (Aast.FP_id id, _targs) -> process_fun_id id
         | Aast.FunctionPointer
-            (Aast.FP_class_const (((_pos, ty), _cid), mid), _targs) ->
+            (Aast.FP_class_const (((_pos, ty), _, _cid), mid), _targs) ->
           typed_method env ty mid
         | Aast.Method_id (((_, ty), _, _), mid) ->
           process_fun_id (pos, SN.AutoimportedFunctions.inst_meth)
           + typed_method env ty (remove_apostrophes_from_function_eval mid)
-        | Aast.Smethod_id (((_, ty), _), mid) ->
+        | Aast.Smethod_id (((_, ty), _, _), mid) ->
           process_fun_id (pos, SN.AutoimportedFunctions.class_meth)
           + typed_method env ty (remove_apostrophes_from_function_eval mid)
         | Aast.Method_caller (((_, cid) as pcid), mid) ->
@@ -311,7 +311,7 @@ let visitor =
       in
       self#plus acc (self#on_expr env e)
 
-    method! on_class_id env ((p, ty), cid) =
+    method! on_class_id env ((_, ty), p, cid) =
       match cid with
       | Aast.CIexpr expr ->
         (* We want to special case this because we want to get the type of the
@@ -347,7 +347,7 @@ let visitor =
         | Aast.Id id -> process_fun_id id
         | Aast.Obj_get ((((_, ty), _, _) as obj), (_, _, Aast.Id mid), _, _) ->
           self#on_expr env obj + typed_method env ty mid
-        | Aast.Class_const ((((_, ty), _) as cid), mid) ->
+        | Aast.Class_const ((((_, ty), _, _) as cid), mid) ->
           self#on_class_id env cid + typed_method env ty mid
         | _ -> self#on_expr env e
       in

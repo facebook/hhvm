@@ -30,16 +30,18 @@ let gather_constants =
       let (_, _, expr_) = expr in
       let refs =
         match expr_ with
-        | Class_const ((_, CI (_, from)), (_, name)) ->
+        | Class_const ((_, _, CI (_, from)), (_, name)) ->
           CCRSet.add (From from, name) refs
-        | Class_const ((_, CIself), (_, name)) -> CCRSet.add (Self, name) refs
+        | Class_const ((_, _, CIself), (_, name)) ->
+          CCRSet.add (Self, name) refs
         (* Following two cases are for function-pointers "const mixed X = S::i<>".
            These shouldn't really be counted as refs for our purposes. But we're including
            them solely for reason of parity with the direct-decl-parser, which does count them. *)
-        | FunctionPointer (FP_class_const ((_, CI (_, from)), (_, name)), _targs)
-          ->
+        | FunctionPointer
+            (FP_class_const ((_, _, CI (_, from)), (_, name)), _targs) ->
           CCRSet.add (From from, name) refs
-        | FunctionPointer (FP_class_const ((_, CIself), (_, name)), _targs) ->
+        | FunctionPointer (FP_class_const ((_, _, CIself), (_, name)), _targs)
+          ->
           CCRSet.add (Self, name) refs
         | _ -> refs
       in

@@ -69,7 +69,7 @@
            [([9:3-26],
              (Throw
                 (([9:9-25], Exception), [9:9-25],
-                 (New ((([9:13-23], Exception), (CI ([9:13-23], "\\Exception"))), [], [], None, ([9:13-23], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
+                 (New ((([9:13-23], Exception), [9:13-23], (CI ([9:13-23], "\\Exception"))), [], [], None, ([9:13-23], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

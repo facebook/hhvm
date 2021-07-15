@@ -41,8 +41,10 @@
           cv_expr =
           (Some (([8:23-11:4], dict<string, classname<(A | B)>>), [8:23-11:4],
                  (KeyValCollection (Dict, None,
-                    [((([9:5-8], string), [9:5-8], (String "a")), (([9:12-20], classname<A>), [9:12-20], (Class_const ((([9:12-13], A), (CI ([9:12-13], "\\A"))), ([9:15-20], "class")))));
-                      ((([10:5-8], string), [10:5-8], (String "b")), (([10:12-20], classname<B>), [10:12-20], (Class_const ((([10:12-13], B), (CI ([10:12-13], "\\B"))), ([10:15-20], "class")))))]
+                    [((([9:5-8], string), [9:5-8], (String "a")), (([9:12-20], classname<A>), [9:12-20], (Class_const ((([9:12-13], A), [9:12-13], (CI ([9:12-13], "\\A"))), ([9:15-20], "class")))));
+                      ((([10:5-8], string), [10:5-8], (String "b")),
+                       (([10:12-20], classname<B>), [10:12-20], (Class_const ((([10:12-13], B), [10:12-13], (CI ([10:12-13], "\\B"))), ([10:15-20], "class")))))
+                      ]
                     ))));
           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
           cv_is_static = true; cv_span = [8:18-11:4] };

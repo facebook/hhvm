@@ -112,7 +112,7 @@ let handler =
       | ( (p, _),
           _,
           Call
-            ( (_, _, Class_const ((_, CI (_, class_name)), (_, method_name))),
+            ( (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name))),
               _,
               [shape; ((pos, _), _, String field_name)],
               None ) )
@@ -126,14 +126,14 @@ let handler =
       | ( (p, _),
           _,
           Call
-            ( (_, _, Class_const ((_, CI (_, class_name)), (_, method_name))),
+            ( (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name))),
               _,
               [shape; ((pos, _), _, String field_name); _],
               None ) )
       | ( (p, _),
           _,
           Call
-            ( (_, _, Class_const ((_, CI (_, class_name)), (_, method_name))),
+            ( (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name))),
               _,
               [shape; ((pos, _), _, String field_name)],
               None ) )

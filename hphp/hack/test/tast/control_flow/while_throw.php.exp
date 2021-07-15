@@ -24,7 +24,7 @@
                  ([5:5-40],
                   (Throw
                      (([5:11-39], Exception), [5:11-39],
-                      (New ((([5:15-24], Exception), (CI ([5:15-24], "\\Exception"))), 
+                      (New ((([5:15-24], Exception), [5:15-24], (CI ([5:15-24], "\\Exception"))), 
                          [], [(([5:25-38], string), [5:25-38], (String "DoWhileBody"))], None, ([5:15-24], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
                  ]
                )))

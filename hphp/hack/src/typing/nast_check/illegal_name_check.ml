@@ -56,7 +56,7 @@ let handler =
                   (Some Ast_defs.Ctrait))
         then
           Errors.illegal_TRAIT pos
-      | Class_const ((_, CIexpr (_, _, Id (_, "parent"))), (_, m_name))
+      | Class_const ((_, _, CIexpr (_, _, Id (_, "parent"))), (_, m_name))
         when Option.equal String.equal env.function_name (Some m_name) ->
         ()
       | Class_const (_, ((_, m_name) as mid))

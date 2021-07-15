@@ -290,7 +290,7 @@ class visitor ~ctx ~entry ~filename ~source_text =
                     let cid = Option.map cid ~f:to_nast_class_id_ in
                     self#autocomplete_member ~is_static env class_ cid))
 
-    method autocomplete_static_member env ((_, ty), cid) =
+    method autocomplete_static_member env ((_, ty), _, cid) =
       self#autocomplete_typed_member ~is_static:true env ty (Some cid)
 
     method compute_complete_local (p : Pos.t) (target : string) =

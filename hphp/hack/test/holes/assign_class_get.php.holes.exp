@@ -45,7 +45,7 @@
            [([11:5-22],
              (Expr
                 (([11:5-21], string), [11:5-21],
-                 (Binop ((Eq None), (([11:5-16], int), [11:5-16], (Class_get ((([11:5-9], C), CIself), (CGstring ([11:11-16], "$prop")), false))),
+                 (Binop ((Eq None), (([11:5-16], int), [11:5-16], (Class_get ((([11:5-9], C), [11:5-9], CIself), (CGstring ([11:11-16], "$prop")), false))),
                     (([11:19-21], string), [11:19-21], (Hole ((([11:19-21], string), [11:19-21], (Lvar ([11:19-21], $x))), (string), (int), Typing))))))))
              ];
            fb_annotation = () };
@@ -68,7 +68,7 @@
             [([16:5-31],
               (Expr
                  (([16:5-30], nothing), [16:5-30],
-                  (Binop ((Eq None), (([16:5-25], ?int), [16:5-25], (Class_get ((([16:5-9], C), CIself), (CGstring ([16:11-25], "$nullable_prop")), false))),
+                  (Binop ((Eq None), (([16:5-25], ?int), [16:5-25], (Class_get ((([16:5-9], C), [16:5-9], CIself), (CGstring ([16:11-25], "$nullable_prop")), false))),
                      (([16:28-30], nothing), [16:28-30], (Lvar ([16:28-30], $x))))))))
               ];
             fb_annotation = () };
@@ -91,7 +91,7 @@
             [([21:5-22],
               (Expr
                  (([21:5-21], (int | string)), [21:5-21],
-                  (Binop ((Eq None), (([21:5-16], int), [21:5-16], (Class_get ((([21:5-9], C), CIself), (CGstring ([21:11-16], "$prop")), false))),
+                  (Binop ((Eq None), (([21:5-16], int), [21:5-16], (Class_get ((([21:5-9], C), [21:5-9], CIself), (CGstring ([21:11-16], "$prop")), false))),
                      (([21:19-21], (int | string)), [21:19-21], (Hole ((([21:19-21], (int | string)), [21:19-21], (Lvar ([21:19-21], $x))), ((int | string)), (int), Typing))))))))
               ];
             fb_annotation = () };
@@ -114,7 +114,7 @@
             [([25:5-27],
               (Expr
                  (([25:5-26], (int, bool)), [25:5-26],
-                  (Binop ((Eq None), (([25:5-21], (int, string)), [25:5-21], (Class_get ((([25:5-9], C), CIself), (CGstring ([25:11-21], "$pair_prop")), false))),
+                  (Binop ((Eq None), (([25:5-21], (int, string)), [25:5-21], (Class_get ((([25:5-9], C), [25:5-9], CIself), (CGstring ([25:11-21], "$pair_prop")), false))),
                      (([25:24-26], (int, bool)), [25:24-26], (Hole ((([25:24-26], (int, bool)), [25:24-26], (Lvar ([25:24-26], $x))), ((int, bool)), ((int, string)), Typing))))))))
               ];
             fb_annotation = () };
@@ -138,7 +138,8 @@
               (Expr
                  (([30:5-27], bool), [30:5-27],
                   (Binop ((Eq None),
-                     (([30:5-22], bool), [30:5-22], (Array_get ((([30:5-20], Vector<string>), [30:5-20], (Class_get ((([30:5-9], C), CIself), (CGstring ([30:11-20], "$vec_prop")), false))), None))),
+                     (([30:5-22], bool), [30:5-22],
+                      (Array_get ((([30:5-20], Vector<string>), [30:5-20], (Class_get ((([30:5-9], C), [30:5-9], CIself), (CGstring ([30:11-20], "$vec_prop")), false))), None))),
                      (([30:25-27], bool), [30:25-27], (Hole ((([30:25-27], bool), [30:25-27], (Lvar ([30:25-27], $x))), (bool), (string), Typing))))))))
               ];
             fb_annotation = () };
@@ -163,7 +164,7 @@
                  (([35:5-29], bool), [35:5-29],
                   (Binop ((Eq None),
                      (([35:5-24], bool), [35:5-24],
-                      (Array_get ((([35:5-21], (int, string)), [35:5-21], (Class_get ((([35:5-9], C), CIself), (CGstring ([35:11-21], "$pair_prop")), false))),
+                      (Array_get ((([35:5-21], (int, string)), [35:5-21], (Class_get ((([35:5-9], C), [35:5-9], CIself), (CGstring ([35:11-21], "$pair_prop")), false))),
                          (Some (([35:22-23], int), [35:22-23], (Int "0")))))),
                      (([35:27-29], bool), [35:27-29], (Lvar ([35:27-29], $x))))))))
               ];
@@ -189,7 +190,7 @@
                  (([40:5-29], bool), [40:5-29],
                   (Binop ((Eq None),
                      (([40:5-24], bool), [40:5-24],
-                      (Array_get ((([40:5-21], (int, string)), [40:5-21], (Class_get ((([40:5-9], C), CIself), (CGstring ([40:11-21], "$pair_prop")), false))),
+                      (Array_get ((([40:5-21], (int, string)), [40:5-21], (Class_get ((([40:5-9], C), [40:5-9], CIself), (CGstring ([40:11-21], "$pair_prop")), false))),
                          (Some (([40:22-23], int), [40:22-23], (Int "1")))))),
                      (([40:27-29], bool), [40:27-29], (Lvar ([40:27-29], $x))))))))
               ];

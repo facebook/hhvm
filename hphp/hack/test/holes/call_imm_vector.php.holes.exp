@@ -80,7 +80,7 @@
               (Expr
                  (([15:3-29], TestImmVector), [15:3-29],
                   (Binop ((Eq None), (([15:3-7], TestImmVector), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     (([15:10-29], TestImmVector), [15:10-29], (New ((([15:14-27], TestImmVector), (CI ([15:14-27], "\\TestImmVector"))), [], [], None, ([15:14-27], _)))))))));
+                     (([15:10-29], TestImmVector), [15:10-29], (New ((([15:14-27], TestImmVector), [15:14-27], (CI ([15:14-27], "\\TestImmVector"))), [], [], None, ([15:14-27], _)))))))));
              ([18:3-15],
               (Expr
                  (([18:3-14], void), [18:3-14],
@@ -126,7 +126,7 @@
               (Expr
                  (([27:3-29], TestImmVector), [27:3-29],
                   (Binop ((Eq None), (([27:3-7], TestImmVector), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     (([27:10-29], TestImmVector), [27:10-29], (New ((([27:14-27], TestImmVector), (CI ([27:14-27], "\\TestImmVector"))), [], [], None, ([27:14-27], _)))))))));
+                     (([27:10-29], TestImmVector), [27:10-29], (New ((([27:14-27], TestImmVector), [27:14-27], (CI ([27:14-27], "\\TestImmVector"))), [], [], None, ([27:14-27], _)))))))));
              ([30:3-71],
               (Expr
                  (([30:3-70], void), [30:3-70],

@@ -294,7 +294,11 @@ fn shape_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
                         class_const_to_typed_value(
                             alloc,
                             emitter,
-                            &tast::ClassId(Pos::make_none(), tast::ClassId_::CI(class_id.clone())),
+                            &tast::ClassId(
+                                Pos::make_none(),
+                                Pos::make_none(),
+                                tast::ClassId_::CI(class_id.clone()),
+                            ),
                             id,
                         )?
                     }

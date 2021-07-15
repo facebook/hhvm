@@ -86,7 +86,7 @@
               (Expr
                  (([15:3-34], TestVarrayOrDarray), [15:3-34],
                   (Binop ((Eq None), (([15:3-7], TestVarrayOrDarray), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     (([15:10-34], TestVarrayOrDarray), [15:10-34], (New ((([15:14-32], TestVarrayOrDarray), (CI ([15:14-32], "\\TestVarrayOrDarray"))), [], [], None, ([15:14-32], _)))))))));
+                     (([15:10-34], TestVarrayOrDarray), [15:10-34], (New ((([15:14-32], TestVarrayOrDarray), [15:14-32], (CI ([15:14-32], "\\TestVarrayOrDarray"))), [], [], None, ([15:14-32], _)))))))));
              ([18:3-15],
               (Expr
                  (([18:3-14], void), [18:3-14],
@@ -137,7 +137,7 @@
               (Expr
                  (([27:3-34], TestVarrayOrDarray), [27:3-34],
                   (Binop ((Eq None), (([27:3-7], TestVarrayOrDarray), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     (([27:10-34], TestVarrayOrDarray), [27:10-34], (New ((([27:14-32], TestVarrayOrDarray), (CI ([27:14-32], "\\TestVarrayOrDarray"))), [], [], None, ([27:14-32], _)))))))));
+                     (([27:10-34], TestVarrayOrDarray), [27:10-34], (New ((([27:14-32], TestVarrayOrDarray), [27:14-32], (CI ([27:14-32], "\\TestVarrayOrDarray"))), [], [], None, ([27:14-32], _)))))))));
              ([30:3-85],
               (Expr
                  (([30:3-84], void), [30:3-84],

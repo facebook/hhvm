@@ -49,7 +49,7 @@ let handler =
       let () =
         match e with
         | Aast.FunctionPointer
-            (Aast.FP_class_const ((p, Aast.CIself), (_, meth_name)), _) ->
+            (Aast.FP_class_const ((_, p, Aast.CIself), (_, meth_name)), _) ->
           if not env.in_final_class then
             if env.is_trait then
               Errors.self_in_non_final_function_pointer p None meth_name
@@ -59,7 +59,7 @@ let handler =
                 env.class_name
                 meth_name
         | Aast.FunctionPointer
-            (Aast.FP_class_const ((p, Aast.CIparent), (_, meth_name)), _) ->
+            (Aast.FP_class_const ((p, _, Aast.CIparent), (_, meth_name)), _) ->
           Errors.parent_in_function_pointer p env.parent_name meth_name
         | _ -> ()
       in

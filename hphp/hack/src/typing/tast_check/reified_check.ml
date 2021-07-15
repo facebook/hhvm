@@ -119,7 +119,7 @@ let handler =
     method! at_expr env x =
       (* only considering functions where one or more params are reified *)
       match x with
-      | ((call_pos, _), _, Class_get ((_, CI (_, t)), _, _)) ->
+      | ((call_pos, _), _, Class_get ((_, _, CI (_, t)), _, _)) ->
         if equal_reify_kind (Env.get_reified env t) Reified then
           Errors.class_get_reified call_pos
       | ((pos, fun_ty), _, Method_caller _)
@@ -135,7 +135,7 @@ let handler =
         end
       | ( (pos, _),
           _,
-          FunctionPointer (FP_class_const (((_, ty), CI (_, class_id)), _), _)
+          FunctionPointer (FP_class_const (((_, ty), _, CI (_, class_id)), _), _)
         )
         when Env.is_in_expr_tree env ->
         let (_env, ty) = Env.expand_type env ty in
@@ -160,7 +160,7 @@ let handler =
           when not @@ get_ft_is_function_pointer ty ->
           verify_call_targs env pos (get_pos efun_ty) ft_tparams targs
         | _ -> ())
-      | ((pos, _), _, New (((_, ty), CI (_, class_id)), targs, _, _, _)) ->
+      | ((pos, _), _, New (((_, ty), _, CI (_, class_id)), targs, _, _, _)) ->
         let (env, ty) = Env.expand_type env ty in
         (match get_node ty with
         | Tgeneric (ci, _tyargs) when String.equal ci class_id ->
@@ -183,7 +183,7 @@ let handler =
           | None -> ()))
       | ( (pos, _),
           _,
-          New ((_, ((CIstatic | CIself | CIparent) as cid)), _, _, _, _) ) ->
+          New ((_, _, ((CIstatic | CIself | CIparent) as cid)), _, _, _, _) ) ->
         Option.(
           let t =
             Env.get_self_id env
@@ -201,7 +201,7 @@ let handler =
                   | _ -> failwith "Unexpected match"
                 in
                 Errors.new_class_reified pos class_type suggested_class))
-      | ((pos, _), _, New (((_, ty), _), targs, _, _, _)) ->
+      | ((pos, _), _, New (((_, ty), _, _), targs, _, _, _)) ->
         let (env, ty) = Env.expand_type env ty in
         begin
           match get_node ty with

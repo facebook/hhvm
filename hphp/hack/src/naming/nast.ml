@@ -1024,7 +1024,7 @@ module Visitor_DEPRECATED = struct
 
       method on_as acc e _ _ = this#on_expr acc e
 
-      method on_class_id acc (_, cid) = this#on_class_id_ acc cid
+      method on_class_id acc (_, _, cid) = this#on_class_id_ acc cid
 
       method on_class_id_ acc =
         function

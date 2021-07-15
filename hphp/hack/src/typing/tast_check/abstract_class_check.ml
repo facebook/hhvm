@@ -15,7 +15,7 @@ module SN = Naming_special_names
 
 let check_expr env (pos, _, e) =
   match e with
-  | Class_const ((_, CIparent), (_, construct))
+  | Class_const ((_, _, CIparent), (_, construct))
     when String.equal construct SN.Members.__construct ->
     let tenv = Env.tast_env_as_typing_env env in
     (match Typing_env.get_parent_class tenv with

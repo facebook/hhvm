@@ -89,10 +89,10 @@ impl<Ex, Fb, En, Hi> ClassId<Ex, Fb, En, Hi> {
         &self.0
     }
     pub fn get(&self) -> &ClassId_<Ex, Fb, En, Hi> {
-        &self.1
+        &self.2
     }
     pub fn as_ciexpr(&self) -> Option<&Expr<Ex, Fb, En, Hi>> {
-        self.1.as_ciexpr()
+        self.2.as_ciexpr()
     }
 }
 

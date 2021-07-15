@@ -149,7 +149,7 @@ impl<'arena> ClassExpr<'arena> {
         scope: &Scope<'a>,
         cid: &ast::ClassId,
     ) -> Self {
-        let ClassId(annot, cid_) = cid;
+        let ClassId(_, annot, cid_) = cid;
         let expr = match cid_ {
             ClassId_::CIexpr(e) => e.clone(),
             ClassId_::CI(sid) => Expr(annot.clone(), annot.clone(), Expr_::mk_id(sid.clone())),

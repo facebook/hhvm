@@ -24,7 +24,7 @@ let type_collector =
         (Pos.to_absolute p)
         [(env, Typing_defs.LoclTy ty)]
 
-    method! on_class_id env ((_, ty), cid) =
+    method! on_class_id env ((_, ty), _, cid) =
       match cid with
       | Aast.CI (p, _) ->
         Pos.AbsolutePosMap.singleton

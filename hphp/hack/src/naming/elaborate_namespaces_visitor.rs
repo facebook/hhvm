@@ -257,7 +257,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                     .1;
                 } else if let Some(cc) = fpid.as_fpclass_const_mut() {
                     let type_ = cc.0;
-                    if let Some(e) = type_.1.as_ciexpr_mut() {
+                    if let Some(e) = type_.2.as_ciexpr_mut() {
                         if let Some(sid) = e.2.as_id_mut() {
                             env.elaborate_type_name(sid);
                         } else {
@@ -286,7 +286,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             }
             Expr_::New(n) => {
                 let (class_id, targs, args, unpacked_el) = (&mut n.0, &mut n.1, &mut n.2, &mut n.3);
-                if let Some(e) = class_id.1.as_ciexpr_mut() {
+                if let Some(e) = class_id.2.as_ciexpr_mut() {
                     if let Some(sid) = e.2.as_id_mut() {
                         env.elaborate_type_name(sid);
                     } else {
@@ -305,7 +305,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             }
             Expr_::ClassConst(cc) => {
                 let type_ = &mut cc.0;
-                if let Some(e) = type_.1.as_ciexpr_mut() {
+                if let Some(e) = type_.2.as_ciexpr_mut() {
                     if let Some(sid) = e.2.as_id_mut() {
                         env.elaborate_type_name(sid);
                     } else {
@@ -317,7 +317,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             }
             Expr_::ClassGet(cg) => {
                 let (class_id, class_get_expr) = (&mut cg.0, &mut cg.1);
-                if let Some(e) = class_id.1.as_ciexpr_mut() {
+                if let Some(e) = class_id.2.as_ciexpr_mut() {
                     if let Some(sid) = e.2.as_id_mut() {
                         env.elaborate_type_name(sid);
                     } else {

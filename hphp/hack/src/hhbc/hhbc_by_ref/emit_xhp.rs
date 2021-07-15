@@ -61,7 +61,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let mk_cache = || {
         let self_ = mk_expr(id_from_str("self"));
         mk_expr(Expr_::mk_class_get(
-            ClassId(Pos::make_none(), ClassId_::CIexpr(self_)),
+            ClassId(Pos::make_none(), Pos::make_none(), ClassId_::CIexpr(self_)),
             ClassGetExpr::CGstring((Pos::make_none(), "$__xhpAttributeDeclarationCache".into())),
             false,
         ))
@@ -88,6 +88,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         mk_expr(Expr_::mk_class_const(
             ClassId(
                 Pos::make_none(),
+                Pos::make_none(),
                 ClassId_::CIexpr(mk_expr(id_from_str("parent"))),
             ),
             (Pos::make_none(), "__xhpAttributeDeclaration".into()),
@@ -103,6 +104,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 let arg = mk_expr(Expr_::mk_call(
                     mk_expr(Expr_::mk_class_const(
                         ClassId(
+                            Pos::make_none(),
                             Pos::make_none(),
                             ClassId_::CIexpr(mk_expr(Expr_::mk_id(ast_defs::Id(
                                 Pos::make_none(),

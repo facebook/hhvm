@@ -286,7 +286,8 @@ let handler ctx =
             id
         in
         env
-      | Aast.Class_const ((_, Aast.CI _), (_, s)) when String.equal s "class" ->
+      | Aast.Class_const ((_, _, Aast.CI _), (_, s)) when String.equal s "class"
+        ->
         { env with class_id_allow_typedef = true }
       | Aast.Obj_get (_, (_, _, Aast.Id (p, name)), _, _) ->
         { env with seen_names = SMap.add name p env.seen_names }
@@ -330,8 +331,8 @@ let handler ctx =
       in
       env
 
-    method! at_class_id env ci =
-      match snd ci with
+    method! at_class_id env (_, _, ci) =
+      match ci with
       | Aast.CI id ->
         let () =
           check_type_name

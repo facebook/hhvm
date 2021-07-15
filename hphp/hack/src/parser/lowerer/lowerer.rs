@@ -1819,7 +1819,7 @@ where
                     )),
                     aast::Expr_::ClassConst(c) => {
                         if let aast::ClassId_::CIexpr(aast::Expr(_, _, aast::Expr_::Id(_))) =
-                            (c.0).1
+                            (c.0).2
                         {
                             Ok(E_::mk_function_pointer(
                                 aast::FunctionPtrId::FPClassConst(c.0.to_owned(), c.1.to_owned()),
@@ -2006,7 +2006,7 @@ where
                     Token(token) if token.kind() == TK::Variable => {
                         let ast::Id(p, name) = Self::pos_name(&c.name, env)?;
                         Ok(E_::mk_class_get(
-                            ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
+                            ast::ClassId(pos.clone(), pos, ast::ClassId_::CIexpr(qual)),
                             ast::ClassGetExpr::CGstring((p, name)),
                             false,
                         ))
@@ -2015,7 +2015,7 @@ where
                         let E(p, _, expr_) = Self::p_expr(&c.name, env)?;
                         match expr_ {
                             E_::String(id) => Ok(E_::mk_class_const(
-                                ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
+                                ast::ClassId(pos.clone(), pos, ast::ClassId_::CIexpr(qual)),
                                 (
                                     p,
                                     String::from_utf8(id.into())
@@ -2025,20 +2025,20 @@ where
                             E_::Id(id) => {
                                 let ast::Id(p, n) = *id;
                                 Ok(E_::mk_class_const(
-                                    ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
+                                    ast::ClassId(pos.clone(), pos, ast::ClassId_::CIexpr(qual)),
                                     (p, n),
                                 ))
                             }
                             E_::Lvar(id) => {
                                 let ast::Lid(p, (_, n)) = *id;
                                 Ok(E_::mk_class_get(
-                                    ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
+                                    ast::ClassId(pos.clone(), pos, ast::ClassId_::CIexpr(qual)),
                                     ast::ClassGetExpr::CGstring((p, n)),
                                     false,
                                 ))
                             }
                             _ => Ok(E_::mk_class_get(
-                                ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
+                                ast::ClassId(pos.clone(), pos, ast::ClassId_::CIexpr(qual)),
                                 ast::ClassGetExpr::CGexpr(E(p.clone(), p, expr_)),
                                 false,
                             )),
@@ -2115,7 +2115,7 @@ where
                     Self::fail_if_invalid_class_creation(node, env, &name.1);
                 }
                 Ok(E_::mk_new(
-                    ast::ClassId(pos.clone(), ast::ClassId_::CIexpr(e)),
+                    ast::ClassId(pos.clone(), pos.clone(), ast::ClassId_::CIexpr(e)),
                     hl,
                     args,
                     varargs,

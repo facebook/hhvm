@@ -83,7 +83,7 @@ Errors:
            [([19:3-25],
              (Throw
                 (([19:9-24], Exception), [19:9-24],
-                 (New ((([19:13-22], Exception), (CI ([19:13-22], "\\Exception"))), [], [], None, ([19:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
+                 (New ((([19:13-22], Exception), [19:13-22], (CI ([19:13-22], "\\Exception"))), [], [], None, ([19:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

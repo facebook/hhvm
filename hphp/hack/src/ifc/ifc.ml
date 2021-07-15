@@ -1270,7 +1270,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((_, ety), epos, e) : Tast.expr) =
           | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty
         end
       (* Static method call*)
-      | (_, _, A.Class_const (((_, ty), cid), (_, meth_name))) ->
+      | (_, _, A.Class_const (((_, ty), _, cid), (_, meth_name))) ->
         let env =
           match cid with
           | A.CIexpr e -> fst @@ expr env e
@@ -1411,7 +1411,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((_, ety), epos, e) : Tast.expr) =
         (env, value_pty)
       | _ -> fail "the default type for array access is not handled"
     end
-  | A.New (((_, lty), cid), _targs, args, _extra_args, _) ->
+  | A.New (((_, lty), _, cid), _targs, args, _extra_args, _) ->
     (* TODO(T70139741): support variadic functions and constructors
      * TODO(T70139893): support classes with type parameters
      *)

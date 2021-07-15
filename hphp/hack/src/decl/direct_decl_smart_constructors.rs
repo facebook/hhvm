@@ -256,7 +256,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         // and because it's a cross-body problem). The right place to do it is in a linter. All this should be
         // removed from here and put into a linter.
         if let Some(const_refs) = self.const_refs {
-            match class_id.1 {
+            match class_id.2 {
                 nast::ClassId_::CI(sid) => {
                     self.const_refs = Some(const_refs.add(
                         self.arena,
@@ -1695,14 +1695,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 _,
                 _,
                 aast::Expr_::ClassConst(&(
-                    aast::ClassId(_, aast::ClassId_::CI(&class_name)),
+                    aast::ClassId(_, _, aast::ClassId_::CI(&class_name)),
                     const_name,
                 )),
             )) => ShapeFieldName::SFclassConst(self.alloc((class_name, const_name))),
             Node::Expr(aast::Expr(
                 _,
                 _,
-                aast::Expr_::ClassConst(&(aast::ClassId(pos, aast::ClassId_::CIself), const_name)),
+                aast::Expr_::ClassConst(&(
+                    aast::ClassId(_, pos, aast::ClassId_::CIself),
+                    const_name,
+                )),
             )) => ShapeFieldName::SFclassConst(self.alloc((
                 Id(
                     pos,
@@ -4551,6 +4554,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         };
         let class_id = self.alloc(aast::ClassId(
             class_name_pos,
+            class_name_pos,
             match class_name {
                 Node::Name(("self", _)) => aast::ClassId_::CIself,
                 _ => aast::ClassId_::CI(self.alloc(Id(class_name_pos, class_name_str))),
@@ -4681,7 +4685,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 _,
                 full_pos,
                 aast::Expr_::ClassConst(&(
-                    aast::ClassId(_, aast::ClassId_::CI(&Id(pos, class_name))),
+                    aast::ClassId(_, _, aast::ClassId_::CI(&Id(pos, class_name))),
                     (_, "class"),
                 )),
             )) => {

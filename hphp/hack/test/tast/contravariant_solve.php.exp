@@ -57,7 +57,7 @@
            [([9:3-25],
              (Throw
                 (([9:9-24], Exception), [9:9-24],
-                 (New ((([9:13-22], Exception), (CI ([9:13-22], "\\Exception"))), [], [], None, ([9:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
+                 (New ((([9:13-22], Exception), [9:13-22], (CI ([9:13-22], "\\Exception"))), [], [], None, ([9:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -87,7 +87,7 @@
            [([13:3-25],
              (Throw
                 (([13:9-24], Exception), [13:9-24],
-                 (New ((([13:13-22], Exception), (CI ([13:13-22], "\\Exception"))), [], [], None, ([13:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
+                 (New ((([13:13-22], Exception), [13:13-22], (CI ([13:13-22], "\\Exception"))), [], [], None, ([13:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

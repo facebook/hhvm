@@ -66,7 +66,7 @@ module Dep = struct
         | Lvar (_, x) -> add local x acc
         | Obj_get (((_, _, (This | Lvar _)) as x), (_, _, Id (_, y)), _, _) ->
           add local (Fake.make_id x y) acc
-        | Class_get ((_, x), CGstring (_, y), _) ->
+        | Class_get ((_, _, x), CGstring (_, y), _) ->
           add local (Fake.make_static_id x y) acc
         | Class_get _ ->
           failwith "Dynamic Class_get should never occur after naming"
@@ -91,7 +91,7 @@ end = struct
     | Lvar (_, x) -> Some (Local_id.to_string x)
     | Obj_get (((_, _, (This | Lvar _)) as x), (_, _, Id (_, y)), _, _) ->
       Some (Local_id.to_string (Fake.make_id x y))
-    | Class_get ((_, x), CGstring (_, y), _) ->
+    | Class_get ((_, _, x), CGstring (_, y), _) ->
       Some (Local_id.to_string (Fake.make_static_id x y))
     | Class_get _ -> failwith "This case should never occur after naming"
     | _ -> None

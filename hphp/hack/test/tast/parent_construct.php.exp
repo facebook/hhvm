@@ -52,7 +52,7 @@
             [([8:5-29],
               (Expr
                  (([8:5-28], void), [8:5-28],
-                  (Call ((([8:5-24], (function(num $x): void)), [8:5-24], (Class_const ((([8:5-11], B), CIparent), ([8:13-24], "__construct")))), 
+                  (Call ((([8:5-24], (function(num $x): void)), [8:5-24], (Class_const ((([8:5-11], B), [8:5-11], CIparent), ([8:13-24], "__construct")))), 
                      [], [(([8:25-27], int), [8:25-27], (Lvar ([8:25-27], $x)))], None)))))
               ];
             fb_annotation = () };

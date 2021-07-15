@@ -50,7 +50,7 @@
            [([5:5-26],
              (Return
                 (Some (([5:12-25], string), [5:12-25],
-                       (Call ((([5:12-21], (function(string $x): string)), [5:12-21], (Class_const ((([5:12-18], A), CIparent), ([5:20-21], "f")))), 
+                       (Call ((([5:12-21], (function(string $x): string)), [5:12-21], (Class_const ((([5:12-18], A), [5:12-18], CIparent), ([5:20-21], "f")))), 
                           [], [(([5:22-24], string), [5:22-24], (Lvar ([5:22-24], $x)))], None))))))
              ];
            fb_annotation = () };

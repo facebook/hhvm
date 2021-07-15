@@ -212,7 +212,7 @@ and ('ex, 'fb, 'en, 'hi) as_expr =
 
 and ('ex, 'fb, 'en, 'hi) block = ('ex, 'fb, 'en, 'hi) stmt list
 
-and ('ex, 'fb, 'en, 'hi) class_id = 'ex * ('ex, 'fb, 'en, 'hi) class_id_
+and ('ex, 'fb, 'en, 'hi) class_id = 'ex * pos * ('ex, 'fb, 'en, 'hi) class_id_
 
 (** Class ID, used in things like instantiation and static property access. *)
 and ('ex, 'fb, 'en, 'hi) class_id_ =

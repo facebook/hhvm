@@ -55,7 +55,7 @@ impl<'a> DeclvarVisitor<'a> {
         is_call_target: bool,
     ) -> Result<(), String> {
         use aast::ClassId_::*;
-        match &cid.1 {
+        match &cid.2 {
             CIparent | CIself | CIstatic | CI(_) => {
                 Err("Expects CIexpr as class_id on aast where expr was on ast".into())
             }

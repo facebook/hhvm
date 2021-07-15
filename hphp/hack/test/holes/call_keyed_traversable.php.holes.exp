@@ -100,7 +100,9 @@
               (Expr
                  (([18:3-36], TestKeyedTraversable), [18:3-36],
                   (Binop ((Eq None), (([18:3-7], TestKeyedTraversable), [18:3-7], (Lvar ([18:3-7], $foo))),
-                     (([18:10-36], TestKeyedTraversable), [18:10-36], (New ((([18:14-34], TestKeyedTraversable), (CI ([18:14-34], "\\TestKeyedTraversable"))), [], [], None, ([18:14-34], _)))))))));
+                     (([18:10-36], TestKeyedTraversable), [18:10-36],
+                      (New ((([18:14-34], TestKeyedTraversable), [18:14-34], (CI ([18:14-34], "\\TestKeyedTraversable"))), [], [], None, ([18:14-34], _))))
+                     )))));
              ([21:3-16],
               (Expr
                  (([21:3-15], void), [21:3-15],
@@ -177,7 +179,9 @@
               (Expr
                  (([35:3-36], TestKeyedTraversable), [35:3-36],
                   (Binop ((Eq None), (([35:3-7], TestKeyedTraversable), [35:3-7], (Lvar ([35:3-7], $foo))),
-                     (([35:10-36], TestKeyedTraversable), [35:10-36], (New ((([35:14-34], TestKeyedTraversable), (CI ([35:14-34], "\\TestKeyedTraversable"))), [], [], None, ([35:14-34], _)))))))));
+                     (([35:10-36], TestKeyedTraversable), [35:10-36],
+                      (New ((([35:14-34], TestKeyedTraversable), [35:14-34], (CI ([35:14-34], "\\TestKeyedTraversable"))), [], [], None, ([35:14-34], _))))
+                     )))));
              ([38:3-95],
               (Expr
                  (([38:3-94], void), [38:3-94],

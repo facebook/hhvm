@@ -606,7 +606,7 @@ fn visit_class_id<'a>(
     self_: &mut ClosureConvertVisitor<'a>,
     cid: &mut ClassId,
 ) -> Result<()> {
-    Ok(if let ClassId(_, ClassId_::CIexpr(e)) = cid {
+    Ok(if let ClassId(_, _, ClassId_::CIexpr(e)) = cid {
         self_.visit_expr(env, e)?;
     })
 }
@@ -1317,7 +1317,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                             };
                             use hhbc_id::Id;
                             visit_class_id(env, self, cid)?;
-                            match &cid.1 {
+                            match &cid.2 {
                                 cid if cid.as_ciexpr().and_then(|x| x.as_id()).map_or(
                                     false,
                                     |id| {
@@ -1646,7 +1646,7 @@ fn extract_debugger_main(
                 p(),
                 p(),
                 Expr_::mk_new(
-                    ClassId(p(), ClassId_::CI(Id(p(), "__uninitSentinel".into()))),
+                    ClassId(p(), p(), ClassId_::CI(Id(p(), "__uninitSentinel".into()))),
                     vec![],
                     vec![],
                     None,

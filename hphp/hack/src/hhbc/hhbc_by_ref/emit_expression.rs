@@ -701,7 +701,7 @@ fn text_of_expr(e: &tast::Expr) -> String {
 }
 
 fn text_of_class_id(cid: &tast::ClassId) -> String {
-    match &cid.1 {
+    match &cid.2 {
         tast::ClassId_::CIparent => "parent".into(),
         tast::ClassId_::CIself => "self".into(),
         tast::ClassId_::CIstatic => "static".into(),
@@ -1050,7 +1050,7 @@ fn emit_shape<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     ));
                 } else {
                     tast::Expr_::mk_class_const(
-                        tast::ClassId(pos.clone(), tast::ClassId_::CI(id.clone())),
+                        tast::ClassId(pos.clone(), pos.clone(), tast::ClassId_::CI(id.clone())),
                         p.clone(),
                     )
                 }
@@ -3712,7 +3712,7 @@ fn emit_new<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     if has_inout_arg(args) {
         return Err(unrecoverable("Unexpected inout arg in new expr"));
     }
-    let resolve_self = match &cid.1.as_ciexpr() {
+    let resolve_self = match &cid.2.as_ciexpr() {
         Some(ci_expr) => match ci_expr.as_id() {
             Some(ast_defs::Id(_, n)) if string_utils::is_self(n) => env
                 .scope
@@ -4343,7 +4343,7 @@ fn emit_elem<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 }
             }
             tast::Expr_::ClassConst(x)
-                if is_special_class_constant_accessed_with_class_id(&(x.0).1, &(x.1).1) =>
+                if is_special_class_constant_accessed_with_class_id(&(x.0).2, &(x.1).1) =>
             {
                 (instr::empty(alloc), 0)
             }
@@ -4398,9 +4398,9 @@ fn get_elem_member_key<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             }
             // Special case for class name
             E_::ClassConst(x)
-                if is_special_class_constant_accessed_with_class_id(&(x.0).1, &(x.1).1) =>
+                if is_special_class_constant_accessed_with_class_id(&(x.0).2, &(x.1).1) =>
             {
-                let cname = match (&(x.0).1, env.scope.get_class()) {
+                let cname = match (&(x.0).2, env.scope.get_class()) {
                     (CI_::CIself, Some(cd)) => string_utils::strip_global_ns(cd.get_name_str()),
                     (CI_::CIexpr(E(_, _, E_::Id(id))), _) => string_utils::strip_global_ns(&id.1),
                     (CI_::CI(id), _) => string_utils::strip_global_ns(&id.1),

@@ -184,4 +184,4 @@ let rewrite_xml_into_new pos sid attributes children =
   let line = (pos, pos, Int "1") in
   let args = [attributes; children; file; line] in
   let sid_ann = fst sid in
-  (sid_ann, sid_ann, New ((sid_ann, cid), [], args, None, sid_ann))
+  (sid_ann, sid_ann, New ((sid_ann, sid_ann, cid), [], args, None, sid_ann))

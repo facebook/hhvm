@@ -941,6 +941,12 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
   return true;
 }
 
+const StaticString
+  s_HH_AsyncGenerator("HH\\AsyncGenerator"),
+  s_next("next"),
+  s_send("send"),
+  s_rewind("rewind");
+
 bool breaksRegion(SrcKey sk) {
   switch (sk.op()) {
     case Op::SSwitch:
@@ -964,6 +970,22 @@ bool breaksRegion(SrcKey sk) {
       // duplicating the translation of the resumed SrcKey after the
       // Await.
       return sk.resumeMode() == ResumeMode::Async;
+
+    case Op::FCallObjMethodD: {
+      // AsyncGenerators executing in Async mode will resume after a side exit.
+      // As a result, we should break the translation here to avoid needing a
+      // live translation for the resume point.
+      auto const cls  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 1).u_SA);
+      auto const func = sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA);
+      if (sk.resumeMode() == ResumeMode::Async &&
+          cls->isame(s_HH_AsyncGenerator.get()) &&
+          (func->isame(s_send.get()) || func->isame(s_next.get()) ||
+           func->isame(s_rewind.get()))) {
+        return true;
+      }
+
+      return false;
+    }
 
     default:
       return false;

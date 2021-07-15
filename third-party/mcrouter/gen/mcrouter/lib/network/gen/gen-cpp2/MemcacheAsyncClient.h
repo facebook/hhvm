@@ -45,6 +45,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McAddReply> semifuture_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McAddReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McAddReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcAdd(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAddRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McAddReply>> sync_complete_mcAdd(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McAddRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -127,6 +129,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McAppendReply> semifuture_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McAppendReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McAppendReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcAppend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McAppendRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McAppendReply>> sync_complete_mcAppend(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McAppendRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -209,6 +213,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McCasReply> semifuture_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McCasReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McCasReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcCas(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McCasRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McCasReply>> sync_complete_mcCas(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McCasRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -291,6 +297,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McDecrReply> semifuture_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McDecrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McDecrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcDecr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDecrRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McDecrReply>> sync_complete_mcDecr(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McDecrRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -373,6 +381,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McDeleteReply> semifuture_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McDeleteReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McDeleteReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcDelete(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McDeleteRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McDeleteReply>> sync_complete_mcDelete(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McDeleteRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -455,6 +465,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McFlushAllReply> semifuture_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McFlushAllReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McFlushAllReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcFlushAll(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushAllRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McFlushAllReply>> sync_complete_mcFlushAll(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McFlushAllRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -537,6 +549,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McFlushReReply> semifuture_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McFlushReReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McFlushReReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcFlushRe(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McFlushReRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McFlushReReply>> sync_complete_mcFlushRe(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McFlushReRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -619,6 +633,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McGatReply> semifuture_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McGatReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McGatReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcGat(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McGatReply>> sync_complete_mcGat(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McGatRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -701,6 +717,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McGatsReply> semifuture_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McGatsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McGatsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcGats(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGatsRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McGatsReply>> sync_complete_mcGats(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McGatsRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -783,6 +801,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McGetReply> semifuture_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McGetReply>> sync_complete_mcGet(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McGetRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -865,6 +885,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McGetsReply> semifuture_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McGetsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McGetsReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcGets(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McGetsRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McGetsReply>> sync_complete_mcGets(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McGetsRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -947,6 +969,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McIncrReply> semifuture_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McIncrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McIncrReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcIncr(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McIncrRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McIncrReply>> sync_complete_mcIncr(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McIncrRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -1029,6 +1053,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McLeaseGetReply> semifuture_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McLeaseGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McLeaseGetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseGetRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McLeaseGetReply>> sync_complete_mcLeaseGet(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McLeaseGetRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -1111,6 +1137,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McLeaseSetReply> semifuture_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McLeaseSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McLeaseSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McLeaseSetRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McLeaseSetReply>> sync_complete_mcLeaseSet(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McLeaseSetRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -1193,6 +1221,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McMetagetReply> semifuture_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McMetagetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McMetagetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcMetaget(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McMetagetRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McMetagetReply>> sync_complete_mcMetaget(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McMetagetRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -1275,6 +1305,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McPrependReply> semifuture_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McPrependReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McPrependReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcPrepend(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McPrependRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McPrependReply>> sync_complete_mcPrepend(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McPrependRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -1357,6 +1389,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McReplaceReply> semifuture_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McReplaceReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McReplaceReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcReplace(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McReplaceRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McReplaceReply>> sync_complete_mcReplace(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McReplaceRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -1439,6 +1473,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McSetReply> semifuture_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McSetReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcSet(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McSetRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McSetReply>> sync_complete_mcSet(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McSetRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -1521,6 +1557,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McTouchReply> semifuture_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McTouchReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McTouchReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcTouch(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McTouchRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McTouchReply>> sync_complete_mcTouch(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McTouchRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
@@ -1603,6 +1641,8 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
   virtual folly::SemiFuture<facebook::memcache::McVersionReply> semifuture_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& p_request);
   virtual folly::Future<std::pair<facebook::memcache::McVersionReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& p_request);
   virtual folly::SemiFuture<std::pair<facebook::memcache::McVersionReply, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_mcVersion(apache::thrift::RpcOptions& rpcOptions, const facebook::memcache::McVersionRequest& p_request);
+  FOLLY_NODISCARD [[deprecated("To be replaced by new API soon")]] virtual folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McVersionReply>> sync_complete_mcVersion(
+      apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McVersionRequest& p_request);
 
 #if FOLLY_HAS_COROUTINES
   template <int = 0>

@@ -11,7 +11,7 @@ rm -rf $OUT_DIR
 mkdir -p $OUT_DIR
 cd $SRC_DIR
 for FILE in carbon.thrift carbon_result.thrift; do
-  $THRIFTC --gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/carbon/ \
+  $THRIFTC --gen mstch_cpp2:stack_arguments,sync_methods_return_try,include_prefix=mcrouter/lib/carbon/ \
     -o $OUT_DIR -I $SRC_DIR \
     $FILE
 done
@@ -24,9 +24,12 @@ mkdir -p $OUT_DIR
 cd $SRC_DIR
 for FILE in Common.thrift Memcache.thrift MemcacheService.thrift; do
   $THRIFTC \
-    --gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ \
+    --gen mstch_cpp2:stack_arguments,sync_methods_return_try,terse_writes,include_prefix=mcrouter/lib/network/gen/ \
     -o $OUT_DIR -I . -I ../../../.. \
     $FILE
 done
 git status # Check the results look reasonable
 ```
+
+If compilation fails with these, check for updated flags in the `Makefile.am` files
+in the same directory as the .thrift files.

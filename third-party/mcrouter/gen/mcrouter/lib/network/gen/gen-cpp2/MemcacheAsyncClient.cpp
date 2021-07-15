@@ -459,6 +459,49 @@ void MemcacheAsyncClient::sync_mcAdd(apache::thrift::RpcOptions& rpcOptions, fac
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McAddReply>>
+MemcacheAsyncClient::sync_complete_mcAdd(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McAddRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcAddCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcAddImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McAddReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcAdd(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McAddReply> MemcacheAsyncClient::future_mcAdd(const facebook::memcache::McAddRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -636,6 +679,49 @@ void MemcacheAsyncClient::sync_mcAppend(apache::thrift::RpcOptions& rpcOptions, 
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McAppendReply>>
+MemcacheAsyncClient::sync_complete_mcAppend(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McAppendRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcAppendCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcAppendImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McAppendReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcAppend(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McAppendReply> MemcacheAsyncClient::future_mcAppend(const facebook::memcache::McAppendRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -813,6 +899,49 @@ void MemcacheAsyncClient::sync_mcCas(apache::thrift::RpcOptions& rpcOptions, fac
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McCasReply>>
+MemcacheAsyncClient::sync_complete_mcCas(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McCasRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcCasCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcCasImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McCasReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcCas(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McCasReply> MemcacheAsyncClient::future_mcCas(const facebook::memcache::McCasRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -990,6 +1119,49 @@ void MemcacheAsyncClient::sync_mcDecr(apache::thrift::RpcOptions& rpcOptions, fa
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McDecrReply>>
+MemcacheAsyncClient::sync_complete_mcDecr(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McDecrRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcDecrCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcDecrImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McDecrReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcDecr(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McDecrReply> MemcacheAsyncClient::future_mcDecr(const facebook::memcache::McDecrRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -1167,6 +1339,49 @@ void MemcacheAsyncClient::sync_mcDelete(apache::thrift::RpcOptions& rpcOptions, 
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McDeleteReply>>
+MemcacheAsyncClient::sync_complete_mcDelete(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McDeleteRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcDeleteCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcDeleteImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McDeleteReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcDelete(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McDeleteReply> MemcacheAsyncClient::future_mcDelete(const facebook::memcache::McDeleteRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -1344,6 +1559,49 @@ void MemcacheAsyncClient::sync_mcFlushAll(apache::thrift::RpcOptions& rpcOptions
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McFlushAllReply>>
+MemcacheAsyncClient::sync_complete_mcFlushAll(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McFlushAllRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcFlushAllCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcFlushAllImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McFlushAllReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcFlushAll(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McFlushAllReply> MemcacheAsyncClient::future_mcFlushAll(const facebook::memcache::McFlushAllRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -1521,6 +1779,49 @@ void MemcacheAsyncClient::sync_mcFlushRe(apache::thrift::RpcOptions& rpcOptions,
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McFlushReReply>>
+MemcacheAsyncClient::sync_complete_mcFlushRe(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McFlushReRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcFlushReCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcFlushReImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McFlushReReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcFlushRe(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McFlushReReply> MemcacheAsyncClient::future_mcFlushRe(const facebook::memcache::McFlushReRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -1698,6 +1999,49 @@ void MemcacheAsyncClient::sync_mcGat(apache::thrift::RpcOptions& rpcOptions, fac
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McGatReply>>
+MemcacheAsyncClient::sync_complete_mcGat(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McGatRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcGatCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcGatImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McGatReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcGat(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McGatReply> MemcacheAsyncClient::future_mcGat(const facebook::memcache::McGatRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -1875,6 +2219,49 @@ void MemcacheAsyncClient::sync_mcGats(apache::thrift::RpcOptions& rpcOptions, fa
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McGatsReply>>
+MemcacheAsyncClient::sync_complete_mcGats(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McGatsRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcGatsCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcGatsImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McGatsReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcGats(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McGatsReply> MemcacheAsyncClient::future_mcGats(const facebook::memcache::McGatsRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -2052,6 +2439,49 @@ void MemcacheAsyncClient::sync_mcGet(apache::thrift::RpcOptions& rpcOptions, fac
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McGetReply>>
+MemcacheAsyncClient::sync_complete_mcGet(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McGetRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcGetCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcGetImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McGetReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcGet(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McGetReply> MemcacheAsyncClient::future_mcGet(const facebook::memcache::McGetRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -2229,6 +2659,49 @@ void MemcacheAsyncClient::sync_mcGets(apache::thrift::RpcOptions& rpcOptions, fa
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McGetsReply>>
+MemcacheAsyncClient::sync_complete_mcGets(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McGetsRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcGetsCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcGetsImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McGetsReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcGets(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McGetsReply> MemcacheAsyncClient::future_mcGets(const facebook::memcache::McGetsRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -2406,6 +2879,49 @@ void MemcacheAsyncClient::sync_mcIncr(apache::thrift::RpcOptions& rpcOptions, fa
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McIncrReply>>
+MemcacheAsyncClient::sync_complete_mcIncr(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McIncrRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcIncrCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcIncrImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McIncrReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcIncr(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McIncrReply> MemcacheAsyncClient::future_mcIncr(const facebook::memcache::McIncrRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -2583,6 +3099,49 @@ void MemcacheAsyncClient::sync_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McLeaseGetReply>>
+MemcacheAsyncClient::sync_complete_mcLeaseGet(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McLeaseGetRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcLeaseGetCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcLeaseGetImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McLeaseGetReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcLeaseGet(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McLeaseGetReply> MemcacheAsyncClient::future_mcLeaseGet(const facebook::memcache::McLeaseGetRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -2760,6 +3319,49 @@ void MemcacheAsyncClient::sync_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McLeaseSetReply>>
+MemcacheAsyncClient::sync_complete_mcLeaseSet(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McLeaseSetRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcLeaseSetCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcLeaseSetImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McLeaseSetReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcLeaseSet(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McLeaseSetReply> MemcacheAsyncClient::future_mcLeaseSet(const facebook::memcache::McLeaseSetRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -2937,6 +3539,49 @@ void MemcacheAsyncClient::sync_mcMetaget(apache::thrift::RpcOptions& rpcOptions,
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McMetagetReply>>
+MemcacheAsyncClient::sync_complete_mcMetaget(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McMetagetRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcMetagetCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcMetagetImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McMetagetReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcMetaget(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McMetagetReply> MemcacheAsyncClient::future_mcMetaget(const facebook::memcache::McMetagetRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -3114,6 +3759,49 @@ void MemcacheAsyncClient::sync_mcPrepend(apache::thrift::RpcOptions& rpcOptions,
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McPrependReply>>
+MemcacheAsyncClient::sync_complete_mcPrepend(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McPrependRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcPrependCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcPrependImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McPrependReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcPrepend(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McPrependReply> MemcacheAsyncClient::future_mcPrepend(const facebook::memcache::McPrependRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -3291,6 +3979,49 @@ void MemcacheAsyncClient::sync_mcReplace(apache::thrift::RpcOptions& rpcOptions,
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McReplaceReply>>
+MemcacheAsyncClient::sync_complete_mcReplace(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McReplaceRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcReplaceCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcReplaceImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McReplaceReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcReplace(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McReplaceReply> MemcacheAsyncClient::future_mcReplace(const facebook::memcache::McReplaceRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -3468,6 +4199,49 @@ void MemcacheAsyncClient::sync_mcSet(apache::thrift::RpcOptions& rpcOptions, fac
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McSetReply>>
+MemcacheAsyncClient::sync_complete_mcSet(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McSetRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcSetCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcSetImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McSetReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcSet(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McSetReply> MemcacheAsyncClient::future_mcSet(const facebook::memcache::McSetRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -3645,6 +4419,49 @@ void MemcacheAsyncClient::sync_mcTouch(apache::thrift::RpcOptions& rpcOptions, f
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McTouchReply>>
+MemcacheAsyncClient::sync_complete_mcTouch(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McTouchRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcTouchCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcTouchImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McTouchReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcTouch(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McTouchReply> MemcacheAsyncClient::future_mcTouch(const facebook::memcache::McTouchRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -3822,6 +4639,49 @@ void MemcacheAsyncClient::sync_mcVersion(apache::thrift::RpcOptions& rpcOptions,
   });
 }
 
+folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McVersionReply>>
+MemcacheAsyncClient::sync_complete_mcVersion(
+    apache::thrift::RpcOptions& rpcOptions,  const facebook::memcache::McVersionRequest& p_request) {
+  apache::thrift::ClientReceiveState returnState;
+  auto [ctx, header] = mcVersionCtx(&rpcOptions);
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcVersionImpl(rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_request);
+
+  callback.waitUntilDone(evb);
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctx));
+
+  folly::Try<apache::thrift::RpcResponseComplete<facebook::memcache::McVersionReply>> tryResponse;
+  if (auto* header = returnState.header()) {
+    rpcOptions.setRoutingData(header->releaseRoutingData());
+  }
+  if (!returnState.hasResponseBuffer()) {
+    assert(returnState.isException());
+  	tryResponse.emplaceException(std::move(returnState.exception()));
+  } else {
+    tryResponse.emplace();
+    tryResponse->responseContext.rpcSizeStats = returnState.getRpcSizeStats();
+    if (auto* header = returnState.header()) {
+      if (!header->getHeaders().empty()) {
+  	    tryResponse->responseContext.headers = header->releaseHeaders();
+      }
+      if (auto load = header->getServerLoad()) {
+        tryResponse->responseContext.serverLoad = *load;
+      }
+    }
+    tryResponse->response.emplace();
+    auto ew = folly::fibers::runInMainContext([&] {
+      return recv_wrapped_mcVersion(tryResponse->response.value(), returnState);
+    });
+    if (ew) {
+      tryResponse->response.emplaceException(std::move(ew));
+    }
+  }
+  return tryResponse;
+}
 
 folly::Future<facebook::memcache::McVersionReply> MemcacheAsyncClient::future_mcVersion(const facebook::memcache::McVersionRequest& p_request) {
   ::apache::thrift::RpcOptions rpcOptions;

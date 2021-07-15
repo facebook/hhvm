@@ -256,10 +256,10 @@ void encode(Buffer& buffer, const T& data) {
     if (raw <= std::numeric_limits<uint32_t>::max()) {
       encode_as_bytes(buffer, safe_cast<uint32_t>(raw));
     } else {
-      auto const hi = safe_cast<uint32_t>(raw >> 32);
-      auto const lo = safe_cast<uint32_t>(raw & 0xffffffff);
-      encode_as_bytes(buffer, lo | kStringDataFlag);
-      encode_as_bytes(buffer, hi);
+      auto const hi = raw >> 32;
+      auto const lo = (raw & 0xffffffff) | kStringDataFlag;
+      encode_as_bytes(buffer, safe_cast<uint32_t>(lo));
+      encode_as_bytes(buffer, safe_cast<uint32_t>(hi));
     }
 
   } else if constexpr (std::is_same<T, MKey>::value) {

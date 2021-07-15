@@ -17,6 +17,7 @@
 # Currently, we are synthesising Hack code only, we will support more
 # languages like C#, Java later on.
 import argparse
+import logging
 import os
 import sys
 from typing import List, Optional, Union
@@ -143,6 +144,13 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
         # And split get
         # lhs = "Extends A"
         # rhs = "Type B, Type C, Type D"
+
+        # T94428437 Temporary skipping all built-in functions for now.
+        # T92593014 We do not support namespace at this moment.
+        # HH\ PHP\ FB\Vec namespace\class etc.
+        if "\\" in line:
+            continue
+
         line = line.strip().split("->")
         if len(line) != 2:
             # ToDo: Add logging if we needed to track wrong format on missing "->".
@@ -159,10 +167,6 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
         if lhs[0] not in handlers:
             continue
         handler = handlers[lhs[0]]
-
-        # T94428437 Temporary skipping all built-in functions for now.
-        if lhs[1].startswith("HH\\"):
-            continue
 
         lhs_tokens = handler.parse(lhs[1])
         # Collecting symbols.
@@ -201,6 +205,7 @@ def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> No
     ctl.add("base", [], "\n".join(additional_programs))
 
     ctl.ground([("base", [])], context=ClingoContext())
+    logging.info("Finished grounding.")
     result: Union[clingo.solving.SolveHandle, clingo.solving.SolveResult] = ctl.solve(
         on_model=generator.on_model
     )
@@ -248,7 +253,17 @@ def main() -> int:
     parser.add_argument("--min_interfaces", type=int)
     parser.add_argument("--lower_bound", type=int)
     parser.add_argument("--higher_bound", type=int)
+    parser.add_argument("--log", type=str)
     args: argparse.Namespace = parser.parse_args()
+
+    # Setup log level and mark the start of our program.
+    log_level = getattr(logging, args.log.upper(), logging.WARN)
+    logging.basicConfig(
+        format="%(asctime)s %(message)s",
+        datefmt="%Y/%m/%d %I:%M:%S %p",
+        level=log_level,
+    )
+    logging.info("Started.")
 
     # Set graph generating parameters. (If any)
     ClingoContext.number_of_nodes = args.n or 0
@@ -273,7 +288,11 @@ def main() -> int:
 
     combined_rules = generate_logic_rules() + extract_logic_rules(graph)
 
+    logging.info("Extracted all rules.")
+    logging.info(f"Number of depedency edges extracted: {len(combined_rules)}")
+
     do_reasoning(combined_rules, generator)
+    logging.info("Finished reasoning.")
     return output_to_file_or_stdout(generator=generator, filename=args.output_file)
 
 

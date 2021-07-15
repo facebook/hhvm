@@ -7668,7 +7668,7 @@ module WithToken (Token : TokenType) = struct
         from_children text offset SyntaxKind.Missing []
 
       (* An empty list is represented by Missing; everything else is a
-        SyntaxList, even if the list has only one item. *)
+         SyntaxList, even if the list has only one item. *)
       let make_list text offset items =
         match items with
         | [] -> make_missing text offset

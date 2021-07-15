@@ -16,8 +16,6 @@ specially-packaged version:
 
 # Using the thrift compiler to update the codegen
 
-TODO.
-
 The thrift compiler is `installed/fbthrift/bin/thrift1` inside the scratch
 patch you specified.
 

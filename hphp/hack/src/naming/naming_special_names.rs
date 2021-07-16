@@ -224,6 +224,8 @@ pub mod user_attributes {
 
     pub const POLICY_SHARDED_MEMOIZE: &str = "__PolicyShardedMemoize";
 
+    pub const POLICY_SHARDED_MEMOIZE_LSB: &str = "__PolicyShardedMemoizeLSB";
+
     pub const PHP_STD_LIB: &str = "__PHPStdLib";
 
     pub const ACCEPT_DISPOSABLE: &str = "__AcceptDisposable";
@@ -285,6 +287,8 @@ pub mod user_attributes {
             ENTRY_POINT,
             MEMOIZE,
             MEMOIZE_LSB,
+            POLICY_SHARDED_MEMOIZE,
+            POLICY_SHARDED_MEMOIZE_LSB,
             PHP_STD_LIB,
             ACCEPT_DISPOSABLE,
             RETURN_DISPOSABLE,
@@ -316,7 +320,10 @@ pub mod user_attributes {
     }
 
     pub fn is_memoized(name: &str) -> bool {
-        name == MEMOIZE || name == MEMOIZE_LSB || name == POLICY_SHARDED_MEMOIZE
+        name == MEMOIZE
+            || name == MEMOIZE_LSB
+            || name == POLICY_SHARDED_MEMOIZE
+            || name == POLICY_SHARDED_MEMOIZE_LSB
     }
 
     // TODO(hrust) these should probably be added to the above map/fields, too

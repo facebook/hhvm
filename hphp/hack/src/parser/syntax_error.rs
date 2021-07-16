@@ -371,10 +371,12 @@ pub const instanceof_disabled: Error = Cow::Borrowed(
 );
 pub const abstract_instance_property: Error =
     Cow::Borrowed("Instance property may not be abstract.");
-pub const memoize_lsb_on_non_static: Error =
-    Cow::Borrowed("`<<__MemoizeLSB>>` can only be applied to static methods");
-pub const memoize_lsb_on_non_method: Error =
-    Cow::Borrowed("`<<__MemoizeLSB>>` can only be applied to methods");
+pub const memoize_lsb_on_non_static: Error = Cow::Borrowed(
+    "`<<__MemoizeLSB>>` and `<<__PolicyShardedMemoizeLSB>>` can only be applied to static methods",
+);
+pub const memoize_lsb_on_non_method: Error = Cow::Borrowed(
+    "`<<__MemoizeLSB>>` and `<<__PolicyShardedMemoizeLSB>>` can only be applied to methods",
+);
 pub const expression_as_attribute_arguments: Error =
     Cow::Borrowed("Attribute arguments must be literals");
 pub const instanceof_invalid_scope_resolution: Error = Cow::Borrowed(concat!(
@@ -988,7 +990,7 @@ pub fn effect_polymorphic_memoized(kind: &str) -> Error {
 
 pub fn effect_policied_memoized(kind: &str) -> Error {
     Cow::Owned(format!(
-        "This {} can only be memoized using __PolicyShardedMemoize because it has policied context",
+        "This {} can only be memoized using __PolicyShardedMemoize or __PolicyShardedMemoizeLSB because it has policied context",
         kind
     ))
 }

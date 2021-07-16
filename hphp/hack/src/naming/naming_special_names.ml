@@ -257,6 +257,8 @@ module UserAttributes = struct
 
   let uaPolicyShardedMemoize = "__PolicyShardedMemoize"
 
+  let uaPolicyShardedMemoizeLSB = "__PolicyShardedMemoizeLSB"
+
   let uaPHPStdLib = "__PHPStdLib"
 
   let uaAcceptDisposable = "__AcceptDisposable"
@@ -337,6 +339,7 @@ module UserAttributes = struct
           (uaMemoize, [fn; mthd]);
           (uaMemoizeLSB, [mthd]);
           (uaPolicyShardedMemoize, [fn; mthd]);
+          (uaPolicyShardedMemoizeLSB, [mthd]);
           (uaPHPStdLib, [cls; fn; mthd]);
           (uaAcceptDisposable, [parameter]);
           (uaReturnDisposable, [fn; mthd; lambda]);

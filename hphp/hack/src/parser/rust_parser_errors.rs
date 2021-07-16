@@ -1504,7 +1504,11 @@ where
     }
 
     fn methodish_memoize_lsb_on_non_static(&mut self, node: S<'a, Token, Value>) {
-        if self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE_LSB)
+        if (self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE_LSB)
+            || self.methodish_contains_attribute(
+                node,
+                sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB,
+            ))
             && !Self::has_modifier_static(node)
         {
             self.errors.push(Self::make_error_from_node(
@@ -1566,6 +1570,10 @@ where
         ) {
             // a function, not a method
             if self.function_declaration_contains_attribute(node, sn::user_attributes::MEMOIZE_LSB)
+                || self.function_declaration_contains_attribute(
+                    node,
+                    sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB,
+                )
             {
                 self.errors.push(Self::make_error_from_node(
                     node,
@@ -2070,6 +2078,8 @@ where
                         .first_parent_function_attributes_contains(sn::user_attributes::MEMOIZE);
                     let in_memoize_lsb = self.first_parent_function_attributes_contains(
                         sn::user_attributes::MEMOIZE_LSB,
+                    ) || self.first_parent_function_attributes_contains(
+                        sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB,
                     );
 
                     if (in_memoize || in_memoize_lsb) && !self.is_immediately_in_lambda() {
@@ -2505,13 +2515,9 @@ where
             OldAttributeSpecification(_) | AttributeSpecification(_) => {
                 for node in Self::attr_spec_to_node_list(node) {
                     match self.attr_name(node) {
-                        Some(n)
-                            if n == sn::user_attributes::MEMOIZE
-                                || n == sn::user_attributes::MEMOIZE_LSB =>
-                        {
-                            self.errors
-                                .push(Self::make_error_from_node(node, errors::memoize_on_lambda))
-                        }
+                        Some(n) if sn::user_attributes::is_memoized(n) => self
+                            .errors
+                            .push(Self::make_error_from_node(node, errors::memoize_on_lambda)),
 
                         _ => {}
                     }

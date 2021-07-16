@@ -51,7 +51,7 @@ fn is_memoize_lsb(method: &T::Method_) -> bool {
     method
         .user_attributes
         .iter()
-        .any(|a| ua::MEMOIZE_LSB == a.name.1)
+        .any(|a| ua::MEMOIZE_LSB == a.name.1 || ua::POLICY_SHARDED_MEMOIZE_LSB == a.name.1)
 }
 
 pub fn make_info<'arena>(

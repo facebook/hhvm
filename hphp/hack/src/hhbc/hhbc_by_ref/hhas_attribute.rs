@@ -108,12 +108,12 @@ fn is_enum_class<'arena>(attr: &HhasAttribute<'arena>) -> bool {
 
 #[allow(clippy::needless_lifetimes)]
 fn is_memoize<'arena>(attr: &HhasAttribute<'arena>) -> bool {
-    attr.name == ua::MEMOIZE || attr.name == ua::MEMOIZE_LSB
+    ua::is_memoized(&attr.name)
 }
 
 #[allow(clippy::needless_lifetimes)]
 fn is_memoize_lsb<'arena>(attr: &HhasAttribute<'arena>) -> bool {
-    attr.name == ua::MEMOIZE_LSB
+    attr.name == ua::MEMOIZE_LSB || attr.name == ua::POLICY_SHARDED_MEMOIZE_LSB
 }
 
 #[allow(clippy::needless_lifetimes)]

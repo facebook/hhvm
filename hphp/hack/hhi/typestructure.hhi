@@ -77,6 +77,7 @@ newtype TypeStructure<T> as shape(
   'value' => ?darray,
   'typevars' => ?string,
   'alias' => ?string,
+  ?'opaque' => bool,
   ?'exact' => bool,
   ?'like' => bool,
 ) = shape(
@@ -112,6 +113,9 @@ newtype TypeStructure<T> as shape(
   'typevars' => ?string,
   // for type aliases
   'alias' => ?string,
+  // When a newtype is passed, opaque will be true.
+  // Both `newtype A = int` and `newtype B as int = int` will be true.
+  ?'opaque' => bool,
   // if the type is exact (i.e., not a subtype)
   ?'exact' => bool,
   // if the type is a like-type

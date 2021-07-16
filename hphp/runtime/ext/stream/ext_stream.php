@@ -259,7 +259,7 @@ function stream_resolve_include_path(string $filename,
  *   interrupted by an incoming signal).
  *
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function stream_select(inout mixed $read,
                        inout mixed $write,
                        inout mixed $except,

@@ -67,7 +67,7 @@ function pagelet_server_task_status(resource $task): int;
  * @return string - HTTP response from the pagelet.
  *
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function pagelet_server_task_result(
   resource $task,
   <<__OutOnly('varray')>>

@@ -1769,6 +1769,13 @@ functor
           telemetry
       in
 
+      let telemetry =
+        Telemetry.object_
+          telemetry
+          ~key:"errors"
+          ~value:(Errors.as_telemetry env.errorl)
+      in
+
       (* HANDLE PRECHECKED FILES AFTER RECHECK *********************************)
       let telemetry =
         Telemetry.duration telemetry ~key:"prechecked2_start" ~start_time
@@ -1889,9 +1896,11 @@ let type_check_unsafe genv env kind start_time profiling =
     let telemetry =
       Telemetry.duration telemetry ~key:"core_start" ~start_time
     in
+
     let (env, res, core_telemetry) =
       FC.type_check_core genv env start_time profiling
     in
+
     let telemetry =
       telemetry
       |> Telemetry.duration ~key:"core_end" ~start_time
@@ -1918,7 +1927,14 @@ let type_check_unsafe genv env kind start_time profiling =
     in
     (env, res, telemetry)
 
-let type_check genv env kind start_time profiling =
+let type_check :
+    genv ->
+    env ->
+    check_kind ->
+    seconds ->
+    CgroupProfiler.Profiling.t ->
+    env * check_results * Telemetry.t =
+ fun genv env kind start_time profiling ->
   ServerUtils.with_exit_on_exception @@ fun () ->
   let type_check_result =
     type_check_unsafe genv env kind start_time profiling

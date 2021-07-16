@@ -172,6 +172,24 @@ let filter_filenames_by_spec
   Hh_logger.log "Filtered filenames to %d" (List.length filtered_filenames);
   filtered_filenames
 
+let log_type_check_end
+    env genv ~start_t ~count ~init_telemetry ~typecheck_telemetry =
+  let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
+  let telemetry =
+    Telemetry.create ()
+    |> Telemetry.object_ ~key:"init" ~value:init_telemetry
+    |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
+    |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
+    |> Telemetry.object_ ~key:"errors" ~value:(Errors.as_telemetry env.errorl)
+  in
+  HackEventLogger.type_check_end
+    (Some telemetry)
+    ~heap_size:(SharedMem.heap_size ())
+    ~started_count:count
+    ~count
+    ~experiments:genv.local_config.ServerLocalConfig.experiments
+    ~start_t
+
 let type_check
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
@@ -179,7 +197,8 @@ let type_check
     (init_telemetry : Telemetry.t)
     (t : float)
     ~(profile_label : string)
-    ~(profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
+    ~(profiling : CgroupProfiler.Profiling.t) :
+    ServerEnv.env * float =
   (* No type checking in AI mode *)
   if Option.is_some (ServerArgs.ai_mode genv.options) then
     (env, t)
@@ -235,20 +254,6 @@ let type_check
         ~check_info:(ServerCheckUtils.get_check_info genv env)
     in
     hh_log_heap ();
-    let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
-    let telemetry =
-      Telemetry.create ()
-      |> Telemetry.object_ ~key:"init" ~value:init_telemetry
-      |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
-      |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
-    in
-    HackEventLogger.type_check_end
-      (Some telemetry)
-      ~heap_size:(SharedMem.heap_size ())
-      ~started_count:count
-      ~count
-      ~experiments:genv.local_config.ServerLocalConfig.experiments
-      ~start_t:t;
     let env =
       {
         env with
@@ -256,6 +261,13 @@ let type_check
         errorl = Errors.merge errorl env.errorl;
       }
     in
+    log_type_check_end
+      env
+      genv
+      ~start_t:t
+      ~count
+      ~init_telemetry
+      ~typecheck_telemetry;
     (env, Hh_logger.log_duration logstring t)
   ) else
     let needs_recheck =

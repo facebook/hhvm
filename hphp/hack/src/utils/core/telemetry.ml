@@ -83,6 +83,19 @@ let int_opt ~(key : string) ~(value : int option) (telemetry : t) : t =
   | None -> (key, Hh_json.JSON_Null) :: telemetry
   | Some value -> int_ telemetry ~key ~value
 
+let int_list
+    ?(truncate_elems : int option)
+    ~(key : string)
+    ~(value : int list)
+    (telemetry : t) : t =
+  let value =
+    match truncate_elems with
+    | None -> value
+    | Some truncate_elems -> List.take value truncate_elems
+  in
+  let value = List.map ~f:(fun i -> Hh_json.int_ i) value in
+  (key, Hh_json.JSON_Array value) :: telemetry
+
 let object_ ~(key : string) ~(value : t) (telemetry : t) : t =
   (key, Hh_json.JSON_Object (List.rev value)) :: telemetry
 

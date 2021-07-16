@@ -30,7 +30,6 @@
 open Hh_prelude
 open SearchServiceRunner
 open ServerEnv
-open ServerInitCommon
 open ServerInitTypes
 module SLC = ServerLocalConfig
 
@@ -62,7 +61,7 @@ let init
     |> Telemetry.string_ ~key:"reason" ~value:"eager_init"
   in
   (* We don't support a saved state for eager init. *)
-  let (get_next, t) = indexing genv in
+  let (get_next, t) = ServerInitCommon.indexing genv in
   let lazy_parse =
     match lazy_level with
     | Parse -> true
@@ -71,7 +70,7 @@ let init
   (* Parsing entire repo, too many files to trace *)
   let trace = false in
   let (env, t) =
-    parsing
+    ServerInitCommon.parsing
       ~lazy_parse
       genv
       env
@@ -87,7 +86,7 @@ let init
       ~source:SearchUtils.Init;
   let ctx = Provider_utils.ctx_from_server_env env in
   let t =
-    update_files
+    ServerInitCommon.update_files
       genv
       env.naming_table
       ctx
@@ -95,7 +94,9 @@ let init
       ~profile_label:"update file deps"
       ~profiling
   in
-  let (env, t) = naming env t ~profile_label:"naming" ~profiling in
+  let (env, t) =
+    ServerInitCommon.naming env t ~profile_label:"naming" ~profiling
+  in
   let fast = Naming_table.to_fast env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
   let fast =
@@ -111,7 +112,7 @@ let init
   in
   (* Type-checking everything *)
   SharedMem.cleanup_sqlite ();
-  type_check
+  ServerInitCommon.type_check
     genv
     env
     (Relative_path.Map.keys fast)

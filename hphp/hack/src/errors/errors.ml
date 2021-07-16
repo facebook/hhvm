@@ -993,7 +993,7 @@ let apply_callback_to_errors : t -> error_from_reasons_callback -> unit =
 (* Accessors. (All methods delegated to the parameterized module.) *)
 (*****************************************************************************)
 
-let errors_in_file : t -> Relative_path.t -> _ =
+let errors_in_file : t -> Relative_path.t -> error list =
  fun (errors, _) file ->
   Relative_path.Map.find_opt errors file
   |> Option.value ~default:PhaseMap.empty
@@ -1041,6 +1041,40 @@ let get_failed_files err phase =
         acc
       else
         Relative_path.Set.add acc source)
+
+let error_count : t -> int =
+ fun (errors, _fixmes) ->
+  Relative_path.Map.fold errors ~init:0 ~f:(fun _path errors count ->
+      count + per_file_error_count errors)
+
+exception Done of ISet.t
+
+let first_5_distinct_error_codes : t -> error_code list =
+ fun ((errors : _ files_t), _fixmes) ->
+  let codes =
+    try
+      Relative_path.Map.fold
+        errors
+        ~init:ISet.empty
+        ~f:(fun _path errors codes ->
+          PhaseMap.fold errors ~init:codes ~f:(fun _phase errors codes ->
+              List.fold errors ~init:codes ~f:(fun codes { code; _ } ->
+                  let codes = ISet.add code codes in
+                  if ISet.cardinal codes >= 5 then
+                    raise (Done codes)
+                  else
+                    codes)))
+    with Done codes -> codes
+  in
+  ISet.elements codes
+
+let as_telemetry : t -> Telemetry.t =
+ fun errors ->
+  Telemetry.create ()
+  |> Telemetry.int_ ~key:"count" ~value:(error_count errors)
+  |> Telemetry.int_list
+       ~key:"first_5_distinct_error_codes"
+       ~value:(first_5_distinct_error_codes errors)
 
 (*****************************************************************************)
 (* Error code printing. *)

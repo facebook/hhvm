@@ -9,7 +9,7 @@ module Types = struct
         (** Disable the informant - use the dummy instead. *)
     use_dummy: bool;
         (** Don't trigger a server restart if the distance between two
-     * revisions we are moving between is less than this. *)
+            revisions we are moving between is less than this. *)
     min_distance_restart: int;
     watchman_debug_logging: bool;
         (** Informant should ignore the hh_version when doing version checks. *)

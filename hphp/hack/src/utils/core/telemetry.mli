@@ -44,6 +44,8 @@ val int_ : key:string -> value:int -> t -> t
 
 val int_opt : key:string -> value:int option -> t -> t
 
+val int_list : ?truncate_elems:int -> key:string -> value:int list -> t -> t
+
 val object_ : key:string -> value:t -> t -> t
 
 val object_opt : key:string -> value:t option -> t -> t

@@ -109,6 +109,12 @@ enable_if_lval_t<T&&, void> tvWriteNull(T&& to) {
   type(to) = KindOfNull;
 }
 
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T&&, void> tvWriteConstValMissing(T&& to) {
+  type(to) = KindOfUninit;
+  val(to).num = kConstValMissing;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /*
  * Move and set operations.
@@ -261,4 +267,3 @@ ALWAYS_INLINE void tvDebugTrash(tv_lval lval) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

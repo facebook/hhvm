@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/lazy-class.h"
 #include "hphp/util/type-scan.h"
@@ -170,6 +171,12 @@ static_assert((sizeof(TypedValue) & (kTypedValueAlignMask)) == 0,
 static_assert(sizeof(TypedValue) <= 16, "Don't add big things to AuxUnion");
 
 /*
+ * Used to set m_data when a PreClassEmitter::Const's valOption() is none
+ * to distinguish from constants that have an 86cinit. See tvWriteConstValMissing
+ */
+constexpr int64_t kConstValMissing = -1;
+
+/*
  * Subclass of TypedValue which exposes m_aux accessors.
  */
 struct TypedValueAux : TypedValue {
@@ -178,6 +185,8 @@ struct TypedValueAux : TypedValue {
 
   const int32_t& hash() const { return m_aux.u_hash; }
         int32_t& hash()       { return m_aux.u_hash; }
+
+  bool is_const_val_missing() const { return m_data.num == kConstValMissing; }
 
   const ConstModifiers& constModifiers() const {
     return m_aux.u_constModifiers;

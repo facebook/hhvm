@@ -409,13 +409,13 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
       if (!const_.coeffects().empty()) {
         tvCopy(make_tv<KindOfInt64>(0), tvaux); // dummy value for m_data
       } else {
-        tvWriteUninit(tvaux);
+        tvWriteConstValMissing(tvaux);
       }
     } else {
       if (const_.valOption()) {
         tvCopy(const_.val(), tvaux);
       } else {
-        tvWriteUninit(tvaux);
+        tvWriteConstValMissing(tvaux);
       }
     }
 

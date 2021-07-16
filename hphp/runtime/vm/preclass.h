@@ -133,7 +133,9 @@ struct PreClass : AtomicCountable {
     const StringData* phpCode()  const { return m_phpCode; }
     bool isFromTrait()     const { return m_fromTrait; }
     bool isAbstractAndUninit()   const {
-      return m_val.constModifiers().isAbstract() && !m_val.is_init();
+      return (m_val.constModifiers().isAbstract() &&
+              !m_val.is_init() &&
+              m_val.is_const_val_missing());
     }
     bool isAbstract()            const {
       return m_val.constModifiers().isAbstract();

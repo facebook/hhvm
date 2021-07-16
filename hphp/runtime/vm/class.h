@@ -229,7 +229,7 @@ struct Class : AtomicCountable {
 #endif
 
     bool isAbstractAndUninit() const {
-      return val.constModifiers().isAbstract() && !val.is_init();
+      return val.constModifiers().isAbstract() && !val.is_init() && val.is_const_val_missing();
     }
     bool isAbstract() const {
       return val.constModifiers().isAbstract();

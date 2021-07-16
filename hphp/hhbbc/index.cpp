@@ -1634,10 +1634,22 @@ struct PreResolveUpdates {
 using RecPreResolveUpdates = PreResolveUpdates<RecordInfo>;
 using ClsPreResolveUpdates = PreResolveUpdates<ClassInfo>;
 
+using ClonedClosureMap = hphp_hash_map<
+  php::Class*,
+  std::pair<std::unique_ptr<php::Class>, uint32_t>
+>;
+std::unique_ptr<php::Func> clone_meth(php::Unit* unit,
+                                      php::Class* newContext,
+                                      const php::Func* origMeth,
+                                      SString name,
+                                      Attr attrs,
+                                      std::atomic<uint32_t>& nextFuncId,
+                                      ClsPreResolveUpdates& updates,
+                                      ClonedClosureMap& clonedClosures);
 /*
  * Make a flattened table of the constants on this class.
  */
-bool build_class_constants(ClassInfo* cinfo, ClsPreResolveUpdates& updates) {
+bool build_class_constants(const php::Program* program, ClassInfo* cinfo, ClsPreResolveUpdates& updates) {
   auto const removeNoOverride = [&] (ClassInfo::ConstIndex cns) {
     // During hhbbc/parse, all constants are pre-set to NoOverride
     ITRACE(2, "Removing NoOverride on {}::{}\n", cns->cls->name, cns->name);
@@ -1816,11 +1828,41 @@ bool build_class_constants(ClassInfo* cinfo, ClsPreResolveUpdates& updates) {
   }
 
   if (!(cinfo->cls->attrs & (AttrAbstract | AttrInterface | AttrTrait))) {
-    // If we are in a concrete class, concretize the defaults of inherited abstract type constants
+    // If we are in a concrete class, concretize the defaults of inherited abstract constants
     auto const cls = const_cast<php::Class*>(cinfo->cls);
     for (auto t : cinfo->clsConstants) {
       auto const& cns = *t.second;
       if (cns.isAbstract && cns.val) {
+        if (cns.val.value().m_type == KindOfUninit) {
+          // We need to copy the constant's initializer into this class
+          auto const& cns_86cinit = cns.cls->methods.back().get();
+          assertx(cns_86cinit->name == s_86cinit.get());
+
+          std::unique_ptr<php::Func> empty;
+          auto& current_86cinit = [&] () -> std::unique_ptr<php::Func>& {
+            for (auto& m : cls->methods) {
+              if (m->name == cns_86cinit->name) return m;
+            }
+            return empty;
+          }();
+
+          if (!current_86cinit) {
+            ClonedClosureMap clonedClosures;
+            auto& nextFuncId = const_cast<php::Program*>(program)->nextFuncId;
+            current_86cinit = clone_meth(cls->unit, cls, cns_86cinit, cns_86cinit->name,
+                                         cns_86cinit->attrs, nextFuncId, updates, clonedClosures);
+            assertx(!clonedClosures.size());
+            DEBUG_ONLY auto res = cinfo->methods.emplace(
+              current_86cinit->name,
+              MethTabEntry { current_86cinit.get(), current_86cinit->attrs, false, true }
+            );
+            assertx(res.second);
+            cls->methods.push_back(std::move(current_86cinit));
+          } else {
+            append_86cinit(current_86cinit.get(), *cns_86cinit);
+          }
+
+        }
         auto concretizedCns = cns;
         concretizedCns.cls = cls;
         concretizedCns.isAbstract = false;
@@ -2187,7 +2229,8 @@ bool enforce_in_maybe_sealed_parent_whitelist(
  * This function return false if instantiating the cinfo would be a
  * fatal at runtime.
  */
-bool build_cls_info(const IndexData& index,
+bool build_cls_info(const php::Program* program,
+                    const IndexData& index,
                     ClassInfo* cinfo,
                     ClsPreResolveUpdates& updates) {
   if (!enforce_in_maybe_sealed_parent_whitelist(cinfo, cinfo->parent)) {
@@ -2210,7 +2253,7 @@ bool build_cls_info(const IndexData& index,
     }
   }
 
-  if (!build_class_constants(cinfo, updates)) return false;
+  if (!build_class_constants(program, cinfo, updates)) return false;
   if (!build_class_impl_interfaces(cinfo)) return false;
   if (!build_class_properties(cinfo)) return false;
   if (!build_class_methods(index, cinfo, updates)) return false;
@@ -2431,12 +2474,6 @@ void PhpTypeHelper<php::Record>::assert_bases(const IndexData& index,
     assertx(index.recordInfo.count(rec->parentName));
   }
 }
-
-using ClonedClosureMap = hphp_hash_map<
-  php::Class*,
-  std::pair<std::unique_ptr<php::Class>, uint32_t>
->;
-
 
 std::unique_ptr<php::Func> clone_meth_helper(
   php::Unit* unit,
@@ -2871,7 +2908,8 @@ void flatten_traits(const php::Program* program,
  * Given a static representation of a Hack record, find a possible resolution
  * of the record along with all records in its hierarchy.
  */
-RecordInfo* resolve_combinations(const IndexData& index,
+RecordInfo* resolve_combinations(const php::Program* program,
+                                 const IndexData& index,
                                  const php::Record* rec,
                                  RecPreResolveUpdates& updates) {
   auto rinfo = std::make_unique<RecordInfo>();
@@ -2902,7 +2940,8 @@ RecordInfo* resolve_combinations(const IndexData& index,
  * Returns the resultant ClassInfo, or nullptr if the Hack class
  * cannot be instantiated at runtime.
  */
-ClassInfo* resolve_combinations(const IndexData& index,
+ClassInfo* resolve_combinations(const php::Program* program,
+                                const IndexData& index,
                                 const php::Class* cls,
                                 ClsPreResolveUpdates& updates) {
   auto cinfo = std::make_unique<ClassInfo>();
@@ -2960,7 +2999,7 @@ ClassInfo* resolve_combinations(const IndexData& index,
   }
 
   cinfo->preResolveState = std::make_unique<ClassInfo::PreResolveState>();
-  if (!build_cls_info(index, cinfo.get(), updates)) return nullptr;
+  if (!build_cls_info(program, index, cinfo.get(), updates)) return nullptr;
 
   ITRACE(2, "  resolved: {}\n", cls->name);
   if (Trace::moduleEnabled(Trace::hhbbc_index, 3)) {
@@ -3010,7 +3049,7 @@ void preresolve(const php::Program* program,
     if (debug) {
       PhpTypeHelper<T>::assert_bases(index, type);
     }
-    return resolve_combinations(index, type, updates);
+    return resolve_combinations(program, index, type, updates);
   }();
 
   ITRACE(3, "preresolve: {}:{} ({} resolutions)\n",

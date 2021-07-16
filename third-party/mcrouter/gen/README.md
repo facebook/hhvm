@@ -1,23 +1,35 @@
 1. Follow the instructions in third-party/thrift/gen/thrift/lib/README.md to get
-   a docker container containing a working fbthrift compiler
-2. run `docker commit $CONTAINER_ID` and save the hash; this gets you a new docker
-   image that can be used to run commands with that thrift compiler. Keep that hash
+   a working fbthrift compiler, and set the `THRIFTC` variable as described there
    as `$IMAGE_ID`
-3. run commands below:
+2. run the commands below:
 
 ```
-cd third-party/mcrouter/src/mcrouter/lib/carbon
-rm -rf ../../../../gen/mcrouter/lib/carbon
-mkdir -p ../../../../gen/mcrouter/lib/carbon
-docker run --rm -w $(pwd) -v $(pwd):$(pwd) -v $(realpath ../../../../gen/mcrouter/lib/carbon):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/carbon/ -o outdir carbon.thrift
-docker run --rm -w $(pwd) -v $(pwd):$(pwd) -v $(realpath ../../../../gen/mcrouter/lib/carbon):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/carbon/ -o outdir carbon_result.thrift
+cd third-party/mcrouter/src
+SRC_DIR=mcrouter/lib/carbon
+OUT_DIR=$(pwd)/../gen/$SRC_DIR
+rm -rf $OUT_DIR
+mkdir -p $OUT_DIR
+cd $SRC_DIR
+for FILE in carbon.thrift carbon_result.thrift; do
+  $THRIFTC --gen mstch_cpp2:stack_arguments,sync_methods_return_try,include_prefix=mcrouter/lib/carbon/ \
+    -o $OUT_DIR -I $SRC_DIR \
+    $FILE
+done
+
+cd ../../..
+SRC_DIR=mcrouter/lib/network/gen
+OUT_DIR=$(pwd)/../gen/$SRC_DIR
+rm -rf $OUT_DIR
+mkdir -p $OUT_DIR
+cd $SRC_DIR
+for FILE in Common.thrift Memcache.thrift MemcacheService.thrift; do
+  $THRIFTC \
+    --gen mstch_cpp2:stack_arguments,sync_methods_return_try,terse_writes,include_prefix=mcrouter/lib/network/gen/ \
+    -o $OUT_DIR -I . -I ../../../.. \
+    $FILE
+done
+git status # Check the results look reasonable
 ```
 
-```
-cd third-party/mcrouter/src/mcrouter/lib/network/gen
-rm -rf ../../../../../gen/mcrouter/lib/network/gen
-mkdir -p ../../../../../gen/mcrouter/lib/network/gen
-docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -I ../../../../ -o outdir Common.thrift
-docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -I ../../../../ -o outdir Memcache.thrift
-docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -I ../../../../ -o outdir MemcacheService.thrift
-```
+If compilation fails with these, check for updated flags in the `Makefile.am` files
+in the same directory as the .thrift files.

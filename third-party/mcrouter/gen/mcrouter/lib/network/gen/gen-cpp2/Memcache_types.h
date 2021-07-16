@@ -750,6 +750,13 @@ class McGatsReply;
 // END hash_and_equal_to
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McGetRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -768,7 +775,8 @@ class McGetRequest  {
  public:
 
   McGetRequest() :
-      flags(0) {}
+      flags(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McGetRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg, uint64_t flags__arg);
@@ -790,30 +798,17 @@ class McGetRequest  {
  private:
   uint64_t flags;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
     bool flags;
   } __isset = {};
-  bool operator==(const McGetRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McGetRequest& __x, const McGetRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McGetRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McGetRequest& __x, const McGetRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McGetRequest& __x, const McGetRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McGetRequest& __x, const McGetRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McGetRequest&) const;
+  bool operator<(const McGetRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -864,6 +859,7 @@ class McGetRequest  {
   }
 
   template <typename T_McGetRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McGetRequest_key_struct_setter&& key_) {
     key = std::forward<T_McGetRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -874,6 +870,7 @@ class McGetRequest  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -906,7 +903,7 @@ class McGetRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McGetRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McGetRequest>;
   friend void swap(McGetRequest& a, McGetRequest& b);
 };
 
@@ -919,6 +916,13 @@ uint32_t McGetRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McGetReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -965,7 +969,7 @@ class McGetReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
@@ -974,24 +978,11 @@ class McGetReply  {
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McGetReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McGetReply& __x, const McGetReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McGetReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McGetReply& __x, const McGetReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McGetReply& __x, const McGetReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McGetReply& __x, const McGetReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McGetReply&) const;
+  bool operator<(const McGetReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -1097,6 +1088,7 @@ class McGetReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -1113,6 +1105,7 @@ class McGetReply  {
   folly::IOBuf* get_value() && = delete;
 
   template <typename T_McGetReply_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McGetReply_value_struct_setter&& value_) {
     value = std::forward<T_McGetReply_value_struct_setter>(value_);
     __isset.value = true;
@@ -1123,6 +1116,7 @@ class McGetReply  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -1138,6 +1132,7 @@ class McGetReply  {
   }
 
   template <typename T_McGetReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McGetReply_message_struct_setter&& message_) {
     message = std::forward<T_McGetReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -1148,6 +1143,7 @@ class McGetReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -1180,7 +1176,7 @@ class McGetReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McGetReply >;
+  friend class ::apache::thrift::Cpp2Ops<McGetReply>;
   friend void swap(McGetReply& a, McGetReply& b);
 };
 
@@ -1193,6 +1189,13 @@ uint32_t McGetReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McSetRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1212,7 +1215,8 @@ class McSetRequest  {
 
   McSetRequest() :
       exptime(0),
-      flags(0) {}
+      flags(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McSetRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg, ::std::int32_t exptime__arg, uint64_t flags__arg, folly::IOBuf value__arg);
@@ -1238,7 +1242,7 @@ class McSetRequest  {
  private:
   folly::IOBuf value;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
@@ -1246,24 +1250,11 @@ class McSetRequest  {
     bool flags;
     bool value;
   } __isset = {};
-  bool operator==(const McSetRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McSetRequest& __x, const McSetRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McSetRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McSetRequest& __x, const McSetRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McSetRequest& __x, const McSetRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McSetRequest& __x, const McSetRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McSetRequest&) const;
+  bool operator<(const McSetRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -1354,6 +1345,7 @@ class McSetRequest  {
   }
 
   template <typename T_McSetRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McSetRequest_key_struct_setter&& key_) {
     key = std::forward<T_McSetRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -1364,6 +1356,7 @@ class McSetRequest  {
     return exptime;
   }
 
+  [[deprecated("Use `FOO.exptime_ref() = BAR;` instead of `FOO.set_exptime(BAR);`")]]
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
     __isset.exptime = true;
@@ -1374,6 +1367,7 @@ class McSetRequest  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -1389,6 +1383,7 @@ class McSetRequest  {
   }
 
   template <typename T_McSetRequest_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McSetRequest_value_struct_setter&& value_) {
     value = std::forward<T_McSetRequest_value_struct_setter>(value_);
     __isset.value = true;
@@ -1421,7 +1416,7 @@ class McSetRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McSetRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McSetRequest>;
   friend void swap(McSetRequest& a, McSetRequest& b);
 };
 
@@ -1434,6 +1429,13 @@ uint32_t McSetRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McSetReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1480,7 +1482,7 @@ class McSetReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
@@ -1489,24 +1491,11 @@ class McSetReply  {
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McSetReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McSetReply& __x, const McSetReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McSetReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McSetReply& __x, const McSetReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McSetReply& __x, const McSetReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McSetReply& __x, const McSetReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McSetReply&) const;
+  bool operator<(const McSetReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -1612,6 +1601,7 @@ class McSetReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -1622,6 +1612,7 @@ class McSetReply  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -1637,6 +1628,7 @@ class McSetReply  {
   }
 
   template <typename T_McSetReply_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McSetReply_value_struct_setter&& value_) {
     value = std::forward<T_McSetReply_value_struct_setter>(value_);
     __isset.value = true;
@@ -1652,6 +1644,7 @@ class McSetReply  {
   }
 
   template <typename T_McSetReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McSetReply_message_struct_setter&& message_) {
     message = std::forward<T_McSetReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -1662,6 +1655,7 @@ class McSetReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -1694,7 +1688,7 @@ class McSetReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McSetReply >;
+  friend class ::apache::thrift::Cpp2Ops<McSetReply>;
   friend void swap(McSetReply& a, McSetReply& b);
 };
 
@@ -1707,6 +1701,13 @@ uint32_t McSetReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McDeleteRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1753,7 +1754,7 @@ class McDeleteRequest  {
  private:
   std::unordered_map<std::string, uint64_t> attributes;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
@@ -1762,24 +1763,11 @@ class McDeleteRequest  {
     bool value;
     bool attributes;
   } __isset = {};
-  bool operator==(const McDeleteRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McDeleteRequest& __x, const McDeleteRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McDeleteRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McDeleteRequest& __x, const McDeleteRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McDeleteRequest& __x, const McDeleteRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McDeleteRequest& __x, const McDeleteRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McDeleteRequest&) const;
+  bool operator<(const McDeleteRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -1890,6 +1878,7 @@ class McDeleteRequest  {
   }
 
   template <typename T_McDeleteRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McDeleteRequest_key_struct_setter&& key_) {
     key = std::forward<T_McDeleteRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -1900,6 +1889,7 @@ class McDeleteRequest  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -1910,6 +1900,7 @@ class McDeleteRequest  {
     return exptime;
   }
 
+  [[deprecated("Use `FOO.exptime_ref() = BAR;` instead of `FOO.set_exptime(BAR);`")]]
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
     __isset.exptime = true;
@@ -1925,6 +1916,7 @@ class McDeleteRequest  {
   }
 
   template <typename T_McDeleteRequest_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McDeleteRequest_value_struct_setter&& value_) {
     value = std::forward<T_McDeleteRequest_value_struct_setter>(value_);
     __isset.value = true;
@@ -1934,6 +1926,7 @@ class McDeleteRequest  {
   std::unordered_map<std::string, uint64_t> get_attributes() &&;
 
   template <typename T_McDeleteRequest_attributes_struct_setter = std::unordered_map<std::string, uint64_t>>
+  [[deprecated("Use `FOO.attributes_ref() = BAR;` instead of `FOO.set_attributes(BAR);`")]]
   std::unordered_map<std::string, uint64_t>& set_attributes(T_McDeleteRequest_attributes_struct_setter&& attributes_) {
     attributes = std::forward<T_McDeleteRequest_attributes_struct_setter>(attributes_);
     __isset.attributes = true;
@@ -1966,7 +1959,7 @@ class McDeleteRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McDeleteRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McDeleteRequest>;
   friend void swap(McDeleteRequest& a, McDeleteRequest& b);
 };
 
@@ -1979,6 +1972,13 @@ uint32_t McDeleteRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McDeleteReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2025,7 +2025,7 @@ class McDeleteReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
@@ -2034,24 +2034,11 @@ class McDeleteReply  {
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McDeleteReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McDeleteReply& __x, const McDeleteReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McDeleteReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McDeleteReply& __x, const McDeleteReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McDeleteReply& __x, const McDeleteReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McDeleteReply& __x, const McDeleteReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McDeleteReply&) const;
+  bool operator<(const McDeleteReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -2157,6 +2144,7 @@ class McDeleteReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -2167,6 +2155,7 @@ class McDeleteReply  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -2182,6 +2171,7 @@ class McDeleteReply  {
   }
 
   template <typename T_McDeleteReply_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McDeleteReply_value_struct_setter&& value_) {
     value = std::forward<T_McDeleteReply_value_struct_setter>(value_);
     __isset.value = true;
@@ -2197,6 +2187,7 @@ class McDeleteReply  {
   }
 
   template <typename T_McDeleteReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McDeleteReply_message_struct_setter&& message_) {
     message = std::forward<T_McDeleteReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -2207,6 +2198,7 @@ class McDeleteReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -2239,7 +2231,7 @@ class McDeleteReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McDeleteReply >;
+  friend class ::apache::thrift::Cpp2Ops<McDeleteReply>;
   friend void swap(McDeleteReply& a, McDeleteReply& b);
 };
 
@@ -2252,6 +2244,13 @@ uint32_t McDeleteReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McLeaseGetRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2270,7 +2269,8 @@ class McLeaseGetRequest  {
  public:
 
   McLeaseGetRequest() :
-      flags(0) {}
+      flags(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McLeaseGetRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg, uint64_t flags__arg);
@@ -2292,30 +2292,17 @@ class McLeaseGetRequest  {
  private:
   uint64_t flags;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
     bool flags;
   } __isset = {};
-  bool operator==(const McLeaseGetRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McLeaseGetRequest& __x, const McLeaseGetRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McLeaseGetRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McLeaseGetRequest& __x, const McLeaseGetRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McLeaseGetRequest& __x, const McLeaseGetRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McLeaseGetRequest& __x, const McLeaseGetRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McLeaseGetRequest&) const;
+  bool operator<(const McLeaseGetRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -2366,6 +2353,7 @@ class McLeaseGetRequest  {
   }
 
   template <typename T_McLeaseGetRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McLeaseGetRequest_key_struct_setter&& key_) {
     key = std::forward<T_McLeaseGetRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -2376,6 +2364,7 @@ class McLeaseGetRequest  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -2408,7 +2397,7 @@ class McLeaseGetRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McLeaseGetRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McLeaseGetRequest>;
   friend void swap(McLeaseGetRequest& a, McLeaseGetRequest& b);
 };
 
@@ -2421,6 +2410,13 @@ uint32_t McLeaseGetRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McLeaseGetReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2469,7 +2465,7 @@ class McLeaseGetReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
@@ -2479,24 +2475,11 @@ class McLeaseGetReply  {
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McLeaseGetReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McLeaseGetReply& __x, const McLeaseGetReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McLeaseGetReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McLeaseGetReply& __x, const McLeaseGetReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McLeaseGetReply& __x, const McLeaseGetReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McLeaseGetReply& __x, const McLeaseGetReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McLeaseGetReply&) const;
+  bool operator<(const McLeaseGetReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -2622,6 +2605,7 @@ class McLeaseGetReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -2632,6 +2616,7 @@ class McLeaseGetReply  {
     return leaseToken;
   }
 
+  [[deprecated("Use `FOO.leaseToken_ref() = BAR;` instead of `FOO.set_leaseToken(BAR);`")]]
   ::std::int64_t& set_leaseToken(::std::int64_t leaseToken_) {
     leaseToken = leaseToken_;
     __isset.leaseToken = true;
@@ -2648,6 +2633,7 @@ class McLeaseGetReply  {
   folly::IOBuf* get_value() && = delete;
 
   template <typename T_McLeaseGetReply_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McLeaseGetReply_value_struct_setter&& value_) {
     value = std::forward<T_McLeaseGetReply_value_struct_setter>(value_);
     __isset.value = true;
@@ -2658,6 +2644,7 @@ class McLeaseGetReply  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -2673,6 +2660,7 @@ class McLeaseGetReply  {
   }
 
   template <typename T_McLeaseGetReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McLeaseGetReply_message_struct_setter&& message_) {
     message = std::forward<T_McLeaseGetReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -2683,6 +2671,7 @@ class McLeaseGetReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -2715,7 +2704,7 @@ class McLeaseGetReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McLeaseGetReply >;
+  friend class ::apache::thrift::Cpp2Ops<McLeaseGetReply>;
   friend void swap(McLeaseGetReply& a, McLeaseGetReply& b);
 };
 
@@ -2728,6 +2717,13 @@ uint32_t McLeaseGetReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McLeaseSetRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -2774,7 +2770,7 @@ class McLeaseSetRequest  {
  private:
   ::std::int64_t leaseToken;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
@@ -2783,24 +2779,11 @@ class McLeaseSetRequest  {
     bool value;
     bool leaseToken;
   } __isset = {};
-  bool operator==(const McLeaseSetRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McLeaseSetRequest& __x, const McLeaseSetRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McLeaseSetRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McLeaseSetRequest& __x, const McLeaseSetRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McLeaseSetRequest& __x, const McLeaseSetRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McLeaseSetRequest& __x, const McLeaseSetRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McLeaseSetRequest&) const;
+  bool operator<(const McLeaseSetRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -2911,6 +2894,7 @@ class McLeaseSetRequest  {
   }
 
   template <typename T_McLeaseSetRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McLeaseSetRequest_key_struct_setter&& key_) {
     key = std::forward<T_McLeaseSetRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -2921,6 +2905,7 @@ class McLeaseSetRequest  {
     return exptime;
   }
 
+  [[deprecated("Use `FOO.exptime_ref() = BAR;` instead of `FOO.set_exptime(BAR);`")]]
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
     __isset.exptime = true;
@@ -2931,6 +2916,7 @@ class McLeaseSetRequest  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -2946,6 +2932,7 @@ class McLeaseSetRequest  {
   }
 
   template <typename T_McLeaseSetRequest_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McLeaseSetRequest_value_struct_setter&& value_) {
     value = std::forward<T_McLeaseSetRequest_value_struct_setter>(value_);
     __isset.value = true;
@@ -2956,6 +2943,7 @@ class McLeaseSetRequest  {
     return leaseToken;
   }
 
+  [[deprecated("Use `FOO.leaseToken_ref() = BAR;` instead of `FOO.set_leaseToken(BAR);`")]]
   ::std::int64_t& set_leaseToken(::std::int64_t leaseToken_) {
     leaseToken = leaseToken_;
     __isset.leaseToken = true;
@@ -2988,7 +2976,7 @@ class McLeaseSetRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McLeaseSetRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McLeaseSetRequest>;
   friend void swap(McLeaseSetRequest& a, McLeaseSetRequest& b);
 };
 
@@ -3001,6 +2989,13 @@ uint32_t McLeaseSetRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McLeaseSetReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3020,7 +3015,8 @@ class McLeaseSetReply  {
 
   McLeaseSetReply() :
       result( ::carbon::Result::UNKNOWN),
-      appSpecificErrorCode(0) {}
+      appSpecificErrorCode(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McLeaseSetReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
@@ -3044,31 +3040,18 @@ class McLeaseSetReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McLeaseSetReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McLeaseSetReply& __x, const McLeaseSetReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McLeaseSetReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McLeaseSetReply& __x, const McLeaseSetReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McLeaseSetReply& __x, const McLeaseSetReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McLeaseSetReply& __x, const McLeaseSetReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McLeaseSetReply&) const;
+  bool operator<(const McLeaseSetReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -3134,6 +3117,7 @@ class McLeaseSetReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -3149,6 +3133,7 @@ class McLeaseSetReply  {
   }
 
   template <typename T_McLeaseSetReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McLeaseSetReply_message_struct_setter&& message_) {
     message = std::forward<T_McLeaseSetReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -3159,6 +3144,7 @@ class McLeaseSetReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -3191,7 +3177,7 @@ class McLeaseSetReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McLeaseSetReply >;
+  friend class ::apache::thrift::Cpp2Ops<McLeaseSetReply>;
   friend void swap(McLeaseSetReply& a, McLeaseSetReply& b);
 };
 
@@ -3204,6 +3190,13 @@ uint32_t McLeaseSetReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McAddRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3223,7 +3216,8 @@ class McAddRequest  {
 
   McAddRequest() :
       exptime(0),
-      flags(0) {}
+      flags(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McAddRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg, ::std::int32_t exptime__arg, uint64_t flags__arg, folly::IOBuf value__arg);
@@ -3249,7 +3243,7 @@ class McAddRequest  {
  private:
   folly::IOBuf value;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
@@ -3257,24 +3251,11 @@ class McAddRequest  {
     bool flags;
     bool value;
   } __isset = {};
-  bool operator==(const McAddRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McAddRequest& __x, const McAddRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McAddRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McAddRequest& __x, const McAddRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McAddRequest& __x, const McAddRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McAddRequest& __x, const McAddRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McAddRequest&) const;
+  bool operator<(const McAddRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -3365,6 +3346,7 @@ class McAddRequest  {
   }
 
   template <typename T_McAddRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McAddRequest_key_struct_setter&& key_) {
     key = std::forward<T_McAddRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -3375,6 +3357,7 @@ class McAddRequest  {
     return exptime;
   }
 
+  [[deprecated("Use `FOO.exptime_ref() = BAR;` instead of `FOO.set_exptime(BAR);`")]]
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
     __isset.exptime = true;
@@ -3385,6 +3368,7 @@ class McAddRequest  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -3400,6 +3384,7 @@ class McAddRequest  {
   }
 
   template <typename T_McAddRequest_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McAddRequest_value_struct_setter&& value_) {
     value = std::forward<T_McAddRequest_value_struct_setter>(value_);
     __isset.value = true;
@@ -3432,7 +3417,7 @@ class McAddRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McAddRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McAddRequest>;
   friend void swap(McAddRequest& a, McAddRequest& b);
 };
 
@@ -3445,6 +3430,13 @@ uint32_t McAddRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McAddReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3464,7 +3456,8 @@ class McAddReply  {
 
   McAddReply() :
       result( ::carbon::Result::UNKNOWN),
-      appSpecificErrorCode(0) {}
+      appSpecificErrorCode(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McAddReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
@@ -3488,31 +3481,18 @@ class McAddReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McAddReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McAddReply& __x, const McAddReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McAddReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McAddReply& __x, const McAddReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McAddReply& __x, const McAddReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McAddReply& __x, const McAddReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McAddReply&) const;
+  bool operator<(const McAddReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -3578,6 +3558,7 @@ class McAddReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -3593,6 +3574,7 @@ class McAddReply  {
   }
 
   template <typename T_McAddReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McAddReply_message_struct_setter&& message_) {
     message = std::forward<T_McAddReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -3603,6 +3585,7 @@ class McAddReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -3635,7 +3618,7 @@ class McAddReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McAddReply >;
+  friend class ::apache::thrift::Cpp2Ops<McAddReply>;
   friend void swap(McAddReply& a, McAddReply& b);
 };
 
@@ -3648,6 +3631,13 @@ uint32_t McAddReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McReplaceRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3667,7 +3657,8 @@ class McReplaceRequest  {
 
   McReplaceRequest() :
       exptime(0),
-      flags(0) {}
+      flags(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McReplaceRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg, ::std::int32_t exptime__arg, uint64_t flags__arg, folly::IOBuf value__arg);
@@ -3693,7 +3684,7 @@ class McReplaceRequest  {
  private:
   folly::IOBuf value;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
@@ -3701,24 +3692,11 @@ class McReplaceRequest  {
     bool flags;
     bool value;
   } __isset = {};
-  bool operator==(const McReplaceRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McReplaceRequest& __x, const McReplaceRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McReplaceRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McReplaceRequest& __x, const McReplaceRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McReplaceRequest& __x, const McReplaceRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McReplaceRequest& __x, const McReplaceRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McReplaceRequest&) const;
+  bool operator<(const McReplaceRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -3809,6 +3787,7 @@ class McReplaceRequest  {
   }
 
   template <typename T_McReplaceRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McReplaceRequest_key_struct_setter&& key_) {
     key = std::forward<T_McReplaceRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -3819,6 +3798,7 @@ class McReplaceRequest  {
     return exptime;
   }
 
+  [[deprecated("Use `FOO.exptime_ref() = BAR;` instead of `FOO.set_exptime(BAR);`")]]
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
     __isset.exptime = true;
@@ -3829,6 +3809,7 @@ class McReplaceRequest  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -3844,6 +3825,7 @@ class McReplaceRequest  {
   }
 
   template <typename T_McReplaceRequest_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McReplaceRequest_value_struct_setter&& value_) {
     value = std::forward<T_McReplaceRequest_value_struct_setter>(value_);
     __isset.value = true;
@@ -3876,7 +3858,7 @@ class McReplaceRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McReplaceRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McReplaceRequest>;
   friend void swap(McReplaceRequest& a, McReplaceRequest& b);
 };
 
@@ -3889,6 +3871,13 @@ uint32_t McReplaceRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McReplaceReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -3908,7 +3897,8 @@ class McReplaceReply  {
 
   McReplaceReply() :
       result( ::carbon::Result::UNKNOWN),
-      appSpecificErrorCode(0) {}
+      appSpecificErrorCode(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McReplaceReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
@@ -3932,31 +3922,18 @@ class McReplaceReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McReplaceReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McReplaceReply& __x, const McReplaceReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McReplaceReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McReplaceReply& __x, const McReplaceReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McReplaceReply& __x, const McReplaceReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McReplaceReply& __x, const McReplaceReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McReplaceReply&) const;
+  bool operator<(const McReplaceReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -4022,6 +3999,7 @@ class McReplaceReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -4037,6 +4015,7 @@ class McReplaceReply  {
   }
 
   template <typename T_McReplaceReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McReplaceReply_message_struct_setter&& message_) {
     message = std::forward<T_McReplaceReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -4047,6 +4026,7 @@ class McReplaceReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -4079,7 +4059,7 @@ class McReplaceReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McReplaceReply >;
+  friend class ::apache::thrift::Cpp2Ops<McReplaceReply>;
   friend void swap(McReplaceReply& a, McReplaceReply& b);
 };
 
@@ -4092,6 +4072,13 @@ uint32_t McReplaceReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McGetsRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4110,7 +4097,8 @@ class McGetsRequest  {
  public:
 
   McGetsRequest() :
-      flags(0) {}
+      flags(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McGetsRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg, uint64_t flags__arg);
@@ -4132,30 +4120,17 @@ class McGetsRequest  {
  private:
   uint64_t flags;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
     bool flags;
   } __isset = {};
-  bool operator==(const McGetsRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McGetsRequest& __x, const McGetsRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McGetsRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McGetsRequest& __x, const McGetsRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McGetsRequest& __x, const McGetsRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McGetsRequest& __x, const McGetsRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McGetsRequest&) const;
+  bool operator<(const McGetsRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -4206,6 +4181,7 @@ class McGetsRequest  {
   }
 
   template <typename T_McGetsRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McGetsRequest_key_struct_setter&& key_) {
     key = std::forward<T_McGetsRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -4216,6 +4192,7 @@ class McGetsRequest  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -4248,7 +4225,7 @@ class McGetsRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McGetsRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McGetsRequest>;
   friend void swap(McGetsRequest& a, McGetsRequest& b);
 };
 
@@ -4261,6 +4238,13 @@ uint32_t McGetsRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McGetsReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4309,7 +4293,7 @@ class McGetsReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
@@ -4319,24 +4303,11 @@ class McGetsReply  {
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McGetsReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McGetsReply& __x, const McGetsReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McGetsReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McGetsReply& __x, const McGetsReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McGetsReply& __x, const McGetsReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McGetsReply& __x, const McGetsReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McGetsReply&) const;
+  bool operator<(const McGetsReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -4462,6 +4433,7 @@ class McGetsReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -4472,6 +4444,7 @@ class McGetsReply  {
     return casToken;
   }
 
+  [[deprecated("Use `FOO.casToken_ref() = BAR;` instead of `FOO.set_casToken(BAR);`")]]
   uint64_t& set_casToken(uint64_t casToken_) {
     casToken = casToken_;
     __isset.casToken = true;
@@ -4488,6 +4461,7 @@ class McGetsReply  {
   folly::IOBuf* get_value() && = delete;
 
   template <typename T_McGetsReply_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McGetsReply_value_struct_setter&& value_) {
     value = std::forward<T_McGetsReply_value_struct_setter>(value_);
     __isset.value = true;
@@ -4498,6 +4472,7 @@ class McGetsReply  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -4513,6 +4488,7 @@ class McGetsReply  {
   }
 
   template <typename T_McGetsReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McGetsReply_message_struct_setter&& message_) {
     message = std::forward<T_McGetsReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -4523,6 +4499,7 @@ class McGetsReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -4555,7 +4532,7 @@ class McGetsReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McGetsReply >;
+  friend class ::apache::thrift::Cpp2Ops<McGetsReply>;
   friend void swap(McGetsReply& a, McGetsReply& b);
 };
 
@@ -4568,6 +4545,13 @@ uint32_t McGetsReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McCasRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4614,7 +4598,7 @@ class McCasRequest  {
  private:
   uint64_t casToken;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
@@ -4623,24 +4607,11 @@ class McCasRequest  {
     bool value;
     bool casToken;
   } __isset = {};
-  bool operator==(const McCasRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McCasRequest& __x, const McCasRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McCasRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McCasRequest& __x, const McCasRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McCasRequest& __x, const McCasRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McCasRequest& __x, const McCasRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McCasRequest&) const;
+  bool operator<(const McCasRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -4751,6 +4722,7 @@ class McCasRequest  {
   }
 
   template <typename T_McCasRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McCasRequest_key_struct_setter&& key_) {
     key = std::forward<T_McCasRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -4761,6 +4733,7 @@ class McCasRequest  {
     return exptime;
   }
 
+  [[deprecated("Use `FOO.exptime_ref() = BAR;` instead of `FOO.set_exptime(BAR);`")]]
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
     __isset.exptime = true;
@@ -4771,6 +4744,7 @@ class McCasRequest  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -4786,6 +4760,7 @@ class McCasRequest  {
   }
 
   template <typename T_McCasRequest_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McCasRequest_value_struct_setter&& value_) {
     value = std::forward<T_McCasRequest_value_struct_setter>(value_);
     __isset.value = true;
@@ -4796,6 +4771,7 @@ class McCasRequest  {
     return casToken;
   }
 
+  [[deprecated("Use `FOO.casToken_ref() = BAR;` instead of `FOO.set_casToken(BAR);`")]]
   uint64_t& set_casToken(uint64_t casToken_) {
     casToken = casToken_;
     __isset.casToken = true;
@@ -4828,7 +4804,7 @@ class McCasRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McCasRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McCasRequest>;
   friend void swap(McCasRequest& a, McCasRequest& b);
 };
 
@@ -4841,6 +4817,13 @@ uint32_t McCasRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McCasReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4860,7 +4843,8 @@ class McCasReply  {
 
   McCasReply() :
       result( ::carbon::Result::UNKNOWN),
-      appSpecificErrorCode(0) {}
+      appSpecificErrorCode(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McCasReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
@@ -4884,31 +4868,18 @@ class McCasReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McCasReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McCasReply& __x, const McCasReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McCasReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McCasReply& __x, const McCasReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McCasReply& __x, const McCasReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McCasReply& __x, const McCasReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McCasReply&) const;
+  bool operator<(const McCasReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -4974,6 +4945,7 @@ class McCasReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -4989,6 +4961,7 @@ class McCasReply  {
   }
 
   template <typename T_McCasReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McCasReply_message_struct_setter&& message_) {
     message = std::forward<T_McCasReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -4999,6 +4972,7 @@ class McCasReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -5031,7 +5005,7 @@ class McCasReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McCasReply >;
+  friend class ::apache::thrift::Cpp2Ops<McCasReply>;
   friend void swap(McCasReply& a, McCasReply& b);
 };
 
@@ -5044,6 +5018,13 @@ uint32_t McCasReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McIncrRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5062,7 +5043,8 @@ class McIncrRequest  {
  public:
 
   McIncrRequest() :
-      delta(0) {}
+      delta(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McIncrRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg, ::std::int64_t delta__arg);
@@ -5084,30 +5066,17 @@ class McIncrRequest  {
  private:
   ::std::int64_t delta;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
     bool delta;
   } __isset = {};
-  bool operator==(const McIncrRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McIncrRequest& __x, const McIncrRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McIncrRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McIncrRequest& __x, const McIncrRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McIncrRequest& __x, const McIncrRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McIncrRequest& __x, const McIncrRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McIncrRequest&) const;
+  bool operator<(const McIncrRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -5158,6 +5127,7 @@ class McIncrRequest  {
   }
 
   template <typename T_McIncrRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McIncrRequest_key_struct_setter&& key_) {
     key = std::forward<T_McIncrRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -5168,6 +5138,7 @@ class McIncrRequest  {
     return delta;
   }
 
+  [[deprecated("Use `FOO.delta_ref() = BAR;` instead of `FOO.set_delta(BAR);`")]]
   ::std::int64_t& set_delta(::std::int64_t delta_) {
     delta = delta_;
     __isset.delta = true;
@@ -5200,7 +5171,7 @@ class McIncrRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McIncrRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McIncrRequest>;
   friend void swap(McIncrRequest& a, McIncrRequest& b);
 };
 
@@ -5213,6 +5184,13 @@ uint32_t McIncrRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McIncrReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5233,7 +5211,8 @@ class McIncrReply  {
   McIncrReply() :
       result( ::carbon::Result::UNKNOWN),
       delta(0),
-      appSpecificErrorCode(0) {}
+      appSpecificErrorCode(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McIncrReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::int64_t delta__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
@@ -5259,7 +5238,7 @@ class McIncrReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
@@ -5267,24 +5246,11 @@ class McIncrReply  {
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McIncrReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McIncrReply& __x, const McIncrReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McIncrReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McIncrReply& __x, const McIncrReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McIncrReply& __x, const McIncrReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McIncrReply& __x, const McIncrReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McIncrReply&) const;
+  bool operator<(const McIncrReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -5370,6 +5336,7 @@ class McIncrReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -5380,6 +5347,7 @@ class McIncrReply  {
     return delta;
   }
 
+  [[deprecated("Use `FOO.delta_ref() = BAR;` instead of `FOO.set_delta(BAR);`")]]
   ::std::int64_t& set_delta(::std::int64_t delta_) {
     delta = delta_;
     __isset.delta = true;
@@ -5395,6 +5363,7 @@ class McIncrReply  {
   }
 
   template <typename T_McIncrReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McIncrReply_message_struct_setter&& message_) {
     message = std::forward<T_McIncrReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -5405,6 +5374,7 @@ class McIncrReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -5437,7 +5407,7 @@ class McIncrReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McIncrReply >;
+  friend class ::apache::thrift::Cpp2Ops<McIncrReply>;
   friend void swap(McIncrReply& a, McIncrReply& b);
 };
 
@@ -5450,6 +5420,13 @@ uint32_t McIncrReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McDecrRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5468,7 +5445,8 @@ class McDecrRequest  {
  public:
 
   McDecrRequest() :
-      delta(0) {}
+      delta(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McDecrRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg, ::std::int64_t delta__arg);
@@ -5490,30 +5468,17 @@ class McDecrRequest  {
  private:
   ::std::int64_t delta;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
     bool delta;
   } __isset = {};
-  bool operator==(const McDecrRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McDecrRequest& __x, const McDecrRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McDecrRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McDecrRequest& __x, const McDecrRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McDecrRequest& __x, const McDecrRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McDecrRequest& __x, const McDecrRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McDecrRequest&) const;
+  bool operator<(const McDecrRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -5564,6 +5529,7 @@ class McDecrRequest  {
   }
 
   template <typename T_McDecrRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McDecrRequest_key_struct_setter&& key_) {
     key = std::forward<T_McDecrRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -5574,6 +5540,7 @@ class McDecrRequest  {
     return delta;
   }
 
+  [[deprecated("Use `FOO.delta_ref() = BAR;` instead of `FOO.set_delta(BAR);`")]]
   ::std::int64_t& set_delta(::std::int64_t delta_) {
     delta = delta_;
     __isset.delta = true;
@@ -5606,7 +5573,7 @@ class McDecrRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McDecrRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McDecrRequest>;
   friend void swap(McDecrRequest& a, McDecrRequest& b);
 };
 
@@ -5619,6 +5586,13 @@ uint32_t McDecrRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McDecrReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5639,7 +5613,8 @@ class McDecrReply  {
   McDecrReply() :
       result( ::carbon::Result::UNKNOWN),
       delta(0),
-      appSpecificErrorCode(0) {}
+      appSpecificErrorCode(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McDecrReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::int64_t delta__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
@@ -5665,7 +5640,7 @@ class McDecrReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
@@ -5673,24 +5648,11 @@ class McDecrReply  {
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McDecrReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McDecrReply& __x, const McDecrReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McDecrReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McDecrReply& __x, const McDecrReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McDecrReply& __x, const McDecrReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McDecrReply& __x, const McDecrReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McDecrReply&) const;
+  bool operator<(const McDecrReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -5776,6 +5738,7 @@ class McDecrReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -5786,6 +5749,7 @@ class McDecrReply  {
     return delta;
   }
 
+  [[deprecated("Use `FOO.delta_ref() = BAR;` instead of `FOO.set_delta(BAR);`")]]
   ::std::int64_t& set_delta(::std::int64_t delta_) {
     delta = delta_;
     __isset.delta = true;
@@ -5801,6 +5765,7 @@ class McDecrReply  {
   }
 
   template <typename T_McDecrReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McDecrReply_message_struct_setter&& message_) {
     message = std::forward<T_McDecrReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -5811,6 +5776,7 @@ class McDecrReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -5843,7 +5809,7 @@ class McDecrReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McDecrReply >;
+  friend class ::apache::thrift::Cpp2Ops<McDecrReply>;
   friend void swap(McDecrReply& a, McDecrReply& b);
 };
 
@@ -5856,6 +5822,13 @@ uint32_t McDecrReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McMetagetRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -5873,7 +5846,8 @@ class McMetagetRequest  {
 
  public:
 
-  McMetagetRequest() {}
+  McMetagetRequest() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McMetagetRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg);
@@ -5893,29 +5867,16 @@ class McMetagetRequest  {
  private:
   ::carbon::thrift::IOBufKey key;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
   } __isset = {};
-  bool operator==(const McMetagetRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McMetagetRequest& __x, const McMetagetRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McMetagetRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McMetagetRequest& __x, const McMetagetRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McMetagetRequest& __x, const McMetagetRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McMetagetRequest& __x, const McMetagetRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McMetagetRequest&) const;
+  bool operator<(const McMetagetRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -5946,6 +5907,7 @@ class McMetagetRequest  {
   }
 
   template <typename T_McMetagetRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McMetagetRequest_key_struct_setter&& key_) {
     key = std::forward<T_McMetagetRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -5978,7 +5940,7 @@ class McMetagetRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McMetagetRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McMetagetRequest>;
   friend void swap(McMetagetRequest& a, McMetagetRequest& b);
 };
 
@@ -5991,6 +5953,13 @@ uint32_t McMetagetRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McMetagetReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -6041,7 +6010,7 @@ class McMetagetReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
@@ -6052,24 +6021,11 @@ class McMetagetReply  {
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McMetagetReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McMetagetReply& __x, const McMetagetReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McMetagetReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McMetagetReply& __x, const McMetagetReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McMetagetReply& __x, const McMetagetReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McMetagetReply& __x, const McMetagetReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McMetagetReply&) const;
+  bool operator<(const McMetagetReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -6215,6 +6171,7 @@ class McMetagetReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -6225,6 +6182,7 @@ class McMetagetReply  {
     return age;
   }
 
+  [[deprecated("Use `FOO.age_ref() = BAR;` instead of `FOO.set_age(BAR);`")]]
   ::std::int32_t& set_age(::std::int32_t age_) {
     age = age_;
     __isset.age = true;
@@ -6235,6 +6193,7 @@ class McMetagetReply  {
     return exptime;
   }
 
+  [[deprecated("Use `FOO.exptime_ref() = BAR;` instead of `FOO.set_exptime(BAR);`")]]
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
     __isset.exptime = true;
@@ -6245,6 +6204,7 @@ class McMetagetReply  {
     return ipv;
   }
 
+  [[deprecated("Use `FOO.ipv_ref() = BAR;` instead of `FOO.set_ipv(BAR);`")]]
   ::std::int16_t& set_ipv(::std::int16_t ipv_) {
     ipv = ipv_;
     __isset.ipv = true;
@@ -6260,6 +6220,7 @@ class McMetagetReply  {
   }
 
   template <typename T_McMetagetReply_ipAddress_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.ipAddress_ref() = BAR;` instead of `FOO.set_ipAddress(BAR);`")]]
   ::std::string& set_ipAddress(T_McMetagetReply_ipAddress_struct_setter&& ipAddress_) {
     ipAddress = std::forward<T_McMetagetReply_ipAddress_struct_setter>(ipAddress_);
     __isset.ipAddress = true;
@@ -6275,6 +6236,7 @@ class McMetagetReply  {
   }
 
   template <typename T_McMetagetReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McMetagetReply_message_struct_setter&& message_) {
     message = std::forward<T_McMetagetReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -6285,6 +6247,7 @@ class McMetagetReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -6317,7 +6280,7 @@ class McMetagetReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McMetagetReply >;
+  friend class ::apache::thrift::Cpp2Ops<McMetagetReply>;
   friend void swap(McMetagetReply& a, McMetagetReply& b);
 };
 
@@ -6330,6 +6293,13 @@ uint32_t McMetagetReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McAppendRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -6349,7 +6319,8 @@ class McAppendRequest  {
 
   McAppendRequest() :
       exptime(0),
-      flags(0) {}
+      flags(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McAppendRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg, ::std::int32_t exptime__arg, uint64_t flags__arg, folly::IOBuf value__arg);
@@ -6375,7 +6346,7 @@ class McAppendRequest  {
  private:
   folly::IOBuf value;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
@@ -6383,24 +6354,11 @@ class McAppendRequest  {
     bool flags;
     bool value;
   } __isset = {};
-  bool operator==(const McAppendRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McAppendRequest& __x, const McAppendRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McAppendRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McAppendRequest& __x, const McAppendRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McAppendRequest& __x, const McAppendRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McAppendRequest& __x, const McAppendRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McAppendRequest&) const;
+  bool operator<(const McAppendRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -6491,6 +6449,7 @@ class McAppendRequest  {
   }
 
   template <typename T_McAppendRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McAppendRequest_key_struct_setter&& key_) {
     key = std::forward<T_McAppendRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -6501,6 +6460,7 @@ class McAppendRequest  {
     return exptime;
   }
 
+  [[deprecated("Use `FOO.exptime_ref() = BAR;` instead of `FOO.set_exptime(BAR);`")]]
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
     __isset.exptime = true;
@@ -6511,6 +6471,7 @@ class McAppendRequest  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -6526,6 +6487,7 @@ class McAppendRequest  {
   }
 
   template <typename T_McAppendRequest_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McAppendRequest_value_struct_setter&& value_) {
     value = std::forward<T_McAppendRequest_value_struct_setter>(value_);
     __isset.value = true;
@@ -6558,7 +6520,7 @@ class McAppendRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McAppendRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McAppendRequest>;
   friend void swap(McAppendRequest& a, McAppendRequest& b);
 };
 
@@ -6571,6 +6533,13 @@ uint32_t McAppendRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McAppendReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -6590,7 +6559,8 @@ class McAppendReply  {
 
   McAppendReply() :
       result( ::carbon::Result::UNKNOWN),
-      appSpecificErrorCode(0) {}
+      appSpecificErrorCode(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McAppendReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
@@ -6614,31 +6584,18 @@ class McAppendReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McAppendReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McAppendReply& __x, const McAppendReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McAppendReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McAppendReply& __x, const McAppendReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McAppendReply& __x, const McAppendReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McAppendReply& __x, const McAppendReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McAppendReply&) const;
+  bool operator<(const McAppendReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -6704,6 +6661,7 @@ class McAppendReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -6719,6 +6677,7 @@ class McAppendReply  {
   }
 
   template <typename T_McAppendReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McAppendReply_message_struct_setter&& message_) {
     message = std::forward<T_McAppendReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -6729,6 +6688,7 @@ class McAppendReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -6761,7 +6721,7 @@ class McAppendReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McAppendReply >;
+  friend class ::apache::thrift::Cpp2Ops<McAppendReply>;
   friend void swap(McAppendReply& a, McAppendReply& b);
 };
 
@@ -6774,6 +6734,13 @@ uint32_t McAppendReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McPrependRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -6793,7 +6760,8 @@ class McPrependRequest  {
 
   McPrependRequest() :
       exptime(0),
-      flags(0) {}
+      flags(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McPrependRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg, ::std::int32_t exptime__arg, uint64_t flags__arg, folly::IOBuf value__arg);
@@ -6819,7 +6787,7 @@ class McPrependRequest  {
  private:
   folly::IOBuf value;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
@@ -6827,24 +6795,11 @@ class McPrependRequest  {
     bool flags;
     bool value;
   } __isset = {};
-  bool operator==(const McPrependRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McPrependRequest& __x, const McPrependRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McPrependRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McPrependRequest& __x, const McPrependRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McPrependRequest& __x, const McPrependRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McPrependRequest& __x, const McPrependRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McPrependRequest&) const;
+  bool operator<(const McPrependRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -6935,6 +6890,7 @@ class McPrependRequest  {
   }
 
   template <typename T_McPrependRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McPrependRequest_key_struct_setter&& key_) {
     key = std::forward<T_McPrependRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -6945,6 +6901,7 @@ class McPrependRequest  {
     return exptime;
   }
 
+  [[deprecated("Use `FOO.exptime_ref() = BAR;` instead of `FOO.set_exptime(BAR);`")]]
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
     __isset.exptime = true;
@@ -6955,6 +6912,7 @@ class McPrependRequest  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -6970,6 +6928,7 @@ class McPrependRequest  {
   }
 
   template <typename T_McPrependRequest_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McPrependRequest_value_struct_setter&& value_) {
     value = std::forward<T_McPrependRequest_value_struct_setter>(value_);
     __isset.value = true;
@@ -7002,7 +6961,7 @@ class McPrependRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McPrependRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McPrependRequest>;
   friend void swap(McPrependRequest& a, McPrependRequest& b);
 };
 
@@ -7015,6 +6974,13 @@ uint32_t McPrependRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McPrependReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7034,7 +7000,8 @@ class McPrependReply  {
 
   McPrependReply() :
       result( ::carbon::Result::UNKNOWN),
-      appSpecificErrorCode(0) {}
+      appSpecificErrorCode(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McPrependReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
@@ -7058,31 +7025,18 @@ class McPrependReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McPrependReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McPrependReply& __x, const McPrependReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McPrependReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McPrependReply& __x, const McPrependReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McPrependReply& __x, const McPrependReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McPrependReply& __x, const McPrependReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McPrependReply&) const;
+  bool operator<(const McPrependReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -7148,6 +7102,7 @@ class McPrependReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -7163,6 +7118,7 @@ class McPrependReply  {
   }
 
   template <typename T_McPrependReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McPrependReply_message_struct_setter&& message_) {
     message = std::forward<T_McPrependReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -7173,6 +7129,7 @@ class McPrependReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -7205,7 +7162,7 @@ class McPrependReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McPrependReply >;
+  friend class ::apache::thrift::Cpp2Ops<McPrependReply>;
   friend void swap(McPrependReply& a, McPrependReply& b);
 };
 
@@ -7218,6 +7175,13 @@ uint32_t McPrependReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McTouchRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7236,7 +7200,8 @@ class McTouchRequest  {
  public:
 
   McTouchRequest() :
-      exptime(0) {}
+      exptime(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McTouchRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg, ::std::int32_t exptime__arg);
@@ -7258,30 +7223,17 @@ class McTouchRequest  {
  private:
   ::std::int32_t exptime;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
     bool exptime;
   } __isset = {};
-  bool operator==(const McTouchRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McTouchRequest& __x, const McTouchRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McTouchRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McTouchRequest& __x, const McTouchRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McTouchRequest& __x, const McTouchRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McTouchRequest& __x, const McTouchRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McTouchRequest&) const;
+  bool operator<(const McTouchRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -7332,6 +7284,7 @@ class McTouchRequest  {
   }
 
   template <typename T_McTouchRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McTouchRequest_key_struct_setter&& key_) {
     key = std::forward<T_McTouchRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -7342,6 +7295,7 @@ class McTouchRequest  {
     return exptime;
   }
 
+  [[deprecated("Use `FOO.exptime_ref() = BAR;` instead of `FOO.set_exptime(BAR);`")]]
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
     __isset.exptime = true;
@@ -7374,7 +7328,7 @@ class McTouchRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McTouchRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McTouchRequest>;
   friend void swap(McTouchRequest& a, McTouchRequest& b);
 };
 
@@ -7387,6 +7341,13 @@ uint32_t McTouchRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McTouchReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7406,7 +7367,8 @@ class McTouchReply  {
 
   McTouchReply() :
       result( ::carbon::Result::UNKNOWN),
-      appSpecificErrorCode(0) {}
+      appSpecificErrorCode(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McTouchReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
@@ -7430,31 +7392,18 @@ class McTouchReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McTouchReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McTouchReply& __x, const McTouchReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McTouchReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McTouchReply& __x, const McTouchReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McTouchReply& __x, const McTouchReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McTouchReply& __x, const McTouchReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McTouchReply&) const;
+  bool operator<(const McTouchReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -7520,6 +7469,7 @@ class McTouchReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -7535,6 +7485,7 @@ class McTouchReply  {
   }
 
   template <typename T_McTouchReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McTouchReply_message_struct_setter&& message_) {
     message = std::forward<T_McTouchReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -7545,6 +7496,7 @@ class McTouchReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -7577,7 +7529,7 @@ class McTouchReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McTouchReply >;
+  friend class ::apache::thrift::Cpp2Ops<McTouchReply>;
   friend void swap(McTouchReply& a, McTouchReply& b);
 };
 
@@ -7590,6 +7542,13 @@ uint32_t McTouchReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McFlushReRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7607,7 +7566,8 @@ class McFlushReRequest  {
 
  public:
 
-  McFlushReRequest() {}
+  McFlushReRequest() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McFlushReRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg);
@@ -7627,29 +7587,16 @@ class McFlushReRequest  {
  private:
   ::carbon::thrift::IOBufKey key;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
   } __isset = {};
-  bool operator==(const McFlushReRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McFlushReRequest& __x, const McFlushReRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McFlushReRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McFlushReRequest& __x, const McFlushReRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McFlushReRequest& __x, const McFlushReRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McFlushReRequest& __x, const McFlushReRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McFlushReRequest&) const;
+  bool operator<(const McFlushReRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -7680,6 +7627,7 @@ class McFlushReRequest  {
   }
 
   template <typename T_McFlushReRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McFlushReRequest_key_struct_setter&& key_) {
     key = std::forward<T_McFlushReRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -7712,7 +7660,7 @@ class McFlushReRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McFlushReRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McFlushReRequest>;
   friend void swap(McFlushReRequest& a, McFlushReRequest& b);
 };
 
@@ -7725,6 +7673,13 @@ uint32_t McFlushReRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McFlushReReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7744,7 +7699,8 @@ class McFlushReReply  {
 
   McFlushReReply() :
       result( ::carbon::Result::UNKNOWN),
-      appSpecificErrorCode(0) {}
+      appSpecificErrorCode(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McFlushReReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
@@ -7768,31 +7724,18 @@ class McFlushReReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McFlushReReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McFlushReReply& __x, const McFlushReReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McFlushReReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McFlushReReply& __x, const McFlushReReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McFlushReReply& __x, const McFlushReReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McFlushReReply& __x, const McFlushReReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McFlushReReply&) const;
+  bool operator<(const McFlushReReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -7858,6 +7801,7 @@ class McFlushReReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -7873,6 +7817,7 @@ class McFlushReReply  {
   }
 
   template <typename T_McFlushReReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McFlushReReply_message_struct_setter&& message_) {
     message = std::forward<T_McFlushReReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -7883,6 +7828,7 @@ class McFlushReReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -7915,7 +7861,7 @@ class McFlushReReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McFlushReReply >;
+  friend class ::apache::thrift::Cpp2Ops<McFlushReReply>;
   friend void swap(McFlushReReply& a, McFlushReReply& b);
 };
 
@@ -7928,6 +7874,13 @@ uint32_t McFlushReReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McFlushAllRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -7946,7 +7899,8 @@ class McFlushAllRequest  {
  public:
 
   McFlushAllRequest() :
-      delay(0) {}
+      delay(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McFlushAllRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg, ::std::int32_t delay__arg);
@@ -7968,30 +7922,17 @@ class McFlushAllRequest  {
  private:
   ::std::int32_t delay;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
     bool delay;
   } __isset = {};
-  bool operator==(const McFlushAllRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McFlushAllRequest& __x, const McFlushAllRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McFlushAllRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McFlushAllRequest& __x, const McFlushAllRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McFlushAllRequest& __x, const McFlushAllRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McFlushAllRequest& __x, const McFlushAllRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McFlushAllRequest&) const;
+  bool operator<(const McFlushAllRequest&) const;
 
   template <typename..., typename T = ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
@@ -8042,6 +7983,7 @@ class McFlushAllRequest  {
   }
 
   template <typename T_McFlushAllRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McFlushAllRequest_key_struct_setter&& key_) {
     key = std::forward<T_McFlushAllRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -8052,6 +7994,7 @@ class McFlushAllRequest  {
     return delay;
   }
 
+  [[deprecated("Use `FOO.delay_ref() = BAR;` instead of `FOO.set_delay(BAR);`")]]
   ::std::int32_t& set_delay(::std::int32_t delay_) {
     delay = delay_;
     __isset.delay = true;
@@ -8084,7 +8027,7 @@ class McFlushAllRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McFlushAllRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McFlushAllRequest>;
   friend void swap(McFlushAllRequest& a, McFlushAllRequest& b);
 };
 
@@ -8097,6 +8040,13 @@ uint32_t McFlushAllRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McFlushAllReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -8116,7 +8066,8 @@ class McFlushAllReply  {
 
   McFlushAllReply() :
       result( ::carbon::Result::UNKNOWN),
-      appSpecificErrorCode(0) {}
+      appSpecificErrorCode(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McFlushAllReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg);
@@ -8140,31 +8091,18 @@ class McFlushAllReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McFlushAllReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McFlushAllReply& __x, const McFlushAllReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McFlushAllReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McFlushAllReply& __x, const McFlushAllReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McFlushAllReply& __x, const McFlushAllReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McFlushAllReply& __x, const McFlushAllReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McFlushAllReply&) const;
+  bool operator<(const McFlushAllReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -8230,6 +8168,7 @@ class McFlushAllReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -8245,6 +8184,7 @@ class McFlushAllReply  {
   }
 
   template <typename T_McFlushAllReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McFlushAllReply_message_struct_setter&& message_) {
     message = std::forward<T_McFlushAllReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -8255,6 +8195,7 @@ class McFlushAllReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -8287,7 +8228,7 @@ class McFlushAllReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McFlushAllReply >;
+  friend class ::apache::thrift::Cpp2Ops<McFlushAllReply>;
   friend void swap(McFlushAllReply& a, McFlushAllReply& b);
 };
 
@@ -8300,6 +8241,13 @@ uint32_t McFlushAllReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McGatRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -8318,7 +8266,8 @@ class McGatRequest  {
  public:
 
   McGatRequest() :
-      exptime(0) {}
+      exptime(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McGatRequest(apache::thrift::FragileConstructor, ::std::int32_t exptime__arg, ::carbon::thrift::IOBufKey key__arg);
@@ -8340,30 +8289,17 @@ class McGatRequest  {
  private:
   ::carbon::thrift::IOBufKey key;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool exptime;
     bool key;
   } __isset = {};
-  bool operator==(const McGatRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McGatRequest& __x, const McGatRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McGatRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McGatRequest& __x, const McGatRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McGatRequest& __x, const McGatRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McGatRequest& __x, const McGatRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McGatRequest&) const;
+  bool operator<(const McGatRequest&) const;
 
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exptime_ref() const& {
@@ -8409,6 +8345,7 @@ class McGatRequest  {
     return exptime;
   }
 
+  [[deprecated("Use `FOO.exptime_ref() = BAR;` instead of `FOO.set_exptime(BAR);`")]]
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
     __isset.exptime = true;
@@ -8424,6 +8361,7 @@ class McGatRequest  {
   }
 
   template <typename T_McGatRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McGatRequest_key_struct_setter&& key_) {
     key = std::forward<T_McGatRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -8456,7 +8394,7 @@ class McGatRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McGatRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McGatRequest>;
   friend void swap(McGatRequest& a, McGatRequest& b);
 };
 
@@ -8469,6 +8407,13 @@ uint32_t McGatRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McGatReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -8515,7 +8460,7 @@ class McGatReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
@@ -8524,24 +8469,11 @@ class McGatReply  {
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McGatReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McGatReply& __x, const McGatReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McGatReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McGatReply& __x, const McGatReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McGatReply& __x, const McGatReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McGatReply& __x, const McGatReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McGatReply&) const;
+  bool operator<(const McGatReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -8647,6 +8579,7 @@ class McGatReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -8663,6 +8596,7 @@ class McGatReply  {
   folly::IOBuf* get_value() && = delete;
 
   template <typename T_McGatReply_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McGatReply_value_struct_setter&& value_) {
     value = std::forward<T_McGatReply_value_struct_setter>(value_);
     __isset.value = true;
@@ -8673,6 +8607,7 @@ class McGatReply  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -8688,6 +8623,7 @@ class McGatReply  {
   }
 
   template <typename T_McGatReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McGatReply_message_struct_setter&& message_) {
     message = std::forward<T_McGatReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -8698,6 +8634,7 @@ class McGatReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -8730,7 +8667,7 @@ class McGatReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McGatReply >;
+  friend class ::apache::thrift::Cpp2Ops<McGatReply>;
   friend void swap(McGatReply& a, McGatReply& b);
 };
 
@@ -8743,6 +8680,13 @@ uint32_t McGatReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McGatsRequest  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -8761,7 +8705,8 @@ class McGatsRequest  {
  public:
 
   McGatsRequest() :
-      exptime(0) {}
+      exptime(0) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McGatsRequest(apache::thrift::FragileConstructor, ::std::int32_t exptime__arg, ::carbon::thrift::IOBufKey key__arg);
@@ -8783,30 +8728,17 @@ class McGatsRequest  {
  private:
   ::carbon::thrift::IOBufKey key;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool exptime;
     bool key;
   } __isset = {};
-  bool operator==(const McGatsRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McGatsRequest& __x, const McGatsRequest& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McGatsRequest& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McGatsRequest& __x, const McGatsRequest& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McGatsRequest& __x, const McGatsRequest& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McGatsRequest& __x, const McGatsRequest& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McGatsRequest&) const;
+  bool operator<(const McGatsRequest&) const;
 
   template <typename..., typename T = ::std::int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> exptime_ref() const& {
@@ -8852,6 +8784,7 @@ class McGatsRequest  {
     return exptime;
   }
 
+  [[deprecated("Use `FOO.exptime_ref() = BAR;` instead of `FOO.set_exptime(BAR);`")]]
   ::std::int32_t& set_exptime(::std::int32_t exptime_) {
     exptime = exptime_;
     __isset.exptime = true;
@@ -8867,6 +8800,7 @@ class McGatsRequest  {
   }
 
   template <typename T_McGatsRequest_key_struct_setter = ::carbon::thrift::IOBufKey>
+  [[deprecated("Use `FOO.key_ref() = BAR;` instead of `FOO.set_key(BAR);`")]]
   ::carbon::thrift::IOBufKey& set_key(T_McGatsRequest_key_struct_setter&& key_) {
     key = std::forward<T_McGatsRequest_key_struct_setter>(key_);
     __isset.key = true;
@@ -8899,7 +8833,7 @@ class McGatsRequest  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McGatsRequest >;
+  friend class ::apache::thrift::Cpp2Ops<McGatsRequest>;
   friend void swap(McGatsRequest& a, McGatsRequest& b);
 };
 
@@ -8912,6 +8846,13 @@ uint32_t McGatsRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
+#ifndef SWIG
+using ::apache::thrift::detail::operator!=;
+using ::apache::thrift::detail::operator>;
+using ::apache::thrift::detail::operator<=;
+using ::apache::thrift::detail::operator>=;
+#endif
+
 class McGatsReply  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -8960,7 +8901,7 @@ class McGatsReply  {
  private:
   ::std::int16_t appSpecificErrorCode;
 
- public:
+ private:
   [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
@@ -8970,24 +8911,11 @@ class McGatsReply  {
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
-  bool operator==(const McGatsReply& rhs) const;
-#ifndef SWIG
-  friend bool operator!=(const McGatsReply& __x, const McGatsReply& __y) {
-    return !(__x == __y);
-  }
-#endif
-  bool operator<(const McGatsReply& rhs) const;
-#ifndef SWIG
-  friend bool operator>(const McGatsReply& __x, const McGatsReply& __y) {
-    return __y < __x;
-  }
-  friend bool operator<=(const McGatsReply& __x, const McGatsReply& __y) {
-    return !(__y < __x);
-  }
-  friend bool operator>=(const McGatsReply& __x, const McGatsReply& __y) {
-    return !(__x < __y);
-  }
-#endif
+
+ public:
+
+  bool operator==(const McGatsReply&) const;
+  bool operator<(const McGatsReply&) const;
 
   template <typename..., typename T = ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
@@ -9113,6 +9041,7 @@ class McGatsReply  {
     return result;
   }
 
+  [[deprecated("Use `FOO.result_ref() = BAR;` instead of `FOO.set_result(BAR);`")]]
   ::carbon::Result& set_result(::carbon::Result result_) {
     result = result_;
     __isset.result = true;
@@ -9123,6 +9052,7 @@ class McGatsReply  {
     return casToken;
   }
 
+  [[deprecated("Use `FOO.casToken_ref() = BAR;` instead of `FOO.set_casToken(BAR);`")]]
   uint64_t& set_casToken(uint64_t casToken_) {
     casToken = casToken_;
     __isset.casToken = true;
@@ -9139,6 +9069,7 @@ class McGatsReply  {
   folly::IOBuf* get_value() && = delete;
 
   template <typename T_McGatsReply_value_struct_setter = folly::IOBuf>
+  [[deprecated("Use `FOO.value_ref() = BAR;` instead of `FOO.set_value(BAR);`")]]
   folly::IOBuf& set_value(T_McGatsReply_value_struct_setter&& value_) {
     value = std::forward<T_McGatsReply_value_struct_setter>(value_);
     __isset.value = true;
@@ -9149,6 +9080,7 @@ class McGatsReply  {
     return flags;
   }
 
+  [[deprecated("Use `FOO.flags_ref() = BAR;` instead of `FOO.set_flags(BAR);`")]]
   uint64_t& set_flags(uint64_t flags_) {
     flags = flags_;
     __isset.flags = true;
@@ -9164,6 +9096,7 @@ class McGatsReply  {
   }
 
   template <typename T_McGatsReply_message_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.message_ref() = BAR;` instead of `FOO.set_message(BAR);`")]]
   ::std::string& set_message(T_McGatsReply_message_struct_setter&& message_) {
     message = std::forward<T_McGatsReply_message_struct_setter>(message_);
     __isset.message = true;
@@ -9174,6 +9107,7 @@ class McGatsReply  {
     return appSpecificErrorCode;
   }
 
+  [[deprecated("Use `FOO.appSpecificErrorCode_ref() = BAR;` instead of `FOO.set_appSpecificErrorCode(BAR);`")]]
   ::std::int16_t& set_appSpecificErrorCode(::std::int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
     __isset.appSpecificErrorCode = true;
@@ -9206,7 +9140,7 @@ class McGatsReply  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops< McGatsReply >;
+  friend class ::apache::thrift::Cpp2Ops<McGatsReply>;
   friend void swap(McGatsReply& a, McGatsReply& b);
 };
 

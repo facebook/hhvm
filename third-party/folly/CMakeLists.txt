@@ -3,10 +3,11 @@ include(HPHPFunctions)
 
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   FOLLY_SOURCE_ARGS
+  FILENAME_PREFIX "folly-"
   SOURCE_URL
-  "https://github.com/facebook/folly/releases/download/v2021.03.22.00/folly-v2021.03.22.00.tar.gz"
+  "https://github.com/facebook/folly/archive/refs/tags/v2021.06.28.00.tar.gz"
   SOURCE_HASH
-  "SHA256=1e1ee0fa1dd61763f4ea87bad76362f39cdbc0ecb599893693b3013e7d43ed87"
+  "SHA256=0d33e580cf701559e82f30a9c0caad90c2012f6e28f740f5c44d6b43a78a4494"
 )
 
 get_target_property(BOOST_INCLUDE_DIR boost INTERFACE_INCLUDE_DIRECTORIES)
@@ -109,6 +110,7 @@ add_dependencies(bundled_folly ${FOLLY_DEPS})
 add_library(folly_deps INTERFACE)
 target_link_libraries(folly_deps INTERFACE ${FOLLY_DEPS})
 
+
 add_library(folly INTERFACE)
 add_dependencies(folly bundled_folly)
 target_include_directories(
@@ -122,6 +124,10 @@ target_link_libraries(folly
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}folly${CMAKE_STATIC_LIBRARY_SUFFIX}"
   folly_deps
 )
+
+if(APPLE)
+  target_link_libraries(folly INTERFACE "c++abi")
+endif()
 
 if(UNIX AND NOT APPLE)
   # symbolizer implementation details

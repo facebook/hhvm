@@ -47,6 +47,9 @@ namespace HH\Capabilities {
   <<__Sealed()>>
   interface Codegen {}
 
+  <<__Sealed()>>
+  interface System {}
+
   <<__Sealed(ImplicitPolicyOf::class, ImplicitPolicyShallow::class)>>
   interface ImplicitPolicy {}
   <<__Sealed(ImplicitPolicyOfShallow::class, ImplicitPolicyLocal::class)>>

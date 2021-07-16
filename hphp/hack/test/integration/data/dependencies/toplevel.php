@@ -157,8 +157,8 @@ function with_argument_dependent_context_callee(
   $f();
 }
 
-function with_argument_dependent_context()[ policied_local, rx]: void {
-  with_argument_dependent_context_callee(()[policied_local] ==> {
+function with_argument_dependent_context()[ defaults, policied]: void {
+  with_argument_dependent_context_callee(()[defaults] ==> {
     echo "write";
   });
 }
@@ -172,7 +172,7 @@ class Contextual {
 }
 
 class WithContextConstant {
-  const ctx C = [policied_shallow];
+  const ctx C = [defaults];
   public function has_io()[self::C]: void {
     echo "I have IO!";
   }

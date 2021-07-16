@@ -1,7 +1,7 @@
 File "policied_static_prop.php", line 11, characters 12-13:
 Creating mutable references to static properties requires the capability AccessGlobals, which is not provided by the context. (Typing[4401])
   File "policied_static_prop.php", line 8, characters 25-32:
-  The local (enclosing) context provides the capability set {IO, ImplicitPolicy, ReadGlobals, WriteProperty}
+  The local (enclosing) context provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
   File "policied_static_prop.php", line 11, characters 12-13:
   Please enclose the static in a readonly expression
   File "coeffect/contexts.hhi", line 28, characters 1-23:
@@ -9,6 +9,6 @@ Creating mutable references to static properties requires the capability AccessG
 File "policied_static_prop.php", line 13, characters 3-20:
 Modifying static properties requires the capability AccessGlobals, which is not provided by the context. (Typing[4401])
   File "policied_static_prop.php", line 8, characters 25-32:
-  The local (enclosing) context provides the capability set {IO, ImplicitPolicy, ReadGlobals, WriteProperty}
+  The local (enclosing) context provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

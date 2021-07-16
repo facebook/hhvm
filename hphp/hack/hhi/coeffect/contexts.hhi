@@ -76,9 +76,10 @@ namespace HH\Contexts {
     \HH\Capabilities\WriteProperty &
     \HH\Capabilities\AccessGlobals &
     \HH\Capabilities\RxLocal &
+    \HH\Capabilities\System &
     \HH\Capabilities\ImplicitPolicyLocal &
     \HH\Capabilities\Codegen &
-    \HH\Capabilities\IO
+    \HH\Capabilities\IO &
   );
 
   /**
@@ -89,32 +90,38 @@ namespace HH\Contexts {
 
   // TODO(cipp): deal with not giving it WriteProperty (or some other mechanism of turning on IFC)
 
-  type policied = (
-    \HH\Capabilities\ImplicitPolicy &
+  type controlled = (
+    \HH\Capabilities\WriteProperty &
     \HH\Capabilities\ReadGlobals &
-    \HH\Capabilities\IO &
-    \HH\Capabilities\WriteProperty
+    \HH\Capabilities\System &
+  );
+
+  type policied = (
+    \HH\Capabilities\WriteProperty &
+    \HH\Capabilities\ReadGlobals &
+    \HH\Capabilities\ImplicitPolicy &
+    \HH\Capabilities\System &
   );
   // type policied_shallow = (\HH\Capabilities\ImplicitPolicyShallow & policied);
   type policied_shallow = (
-    \HH\Capabilities\ImplicitPolicyShallow &
+    \HH\Capabilities\WriteProperty &
     \HH\Capabilities\ReadGlobals &
-    \HH\Capabilities\IO &
-    \HH\Capabilities\WriteProperty
+    \HH\Capabilities\ImplicitPolicyShallow &
+    \HH\Capabilities\System &
   );
   // type policied_local = (\HH\Capabilities\ImplicitPolicyLocal & policied_shallow);
   type policied_local = (
-    \HH\Capabilities\ImplicitPolicyLocal &
+    \HH\Capabilities\WriteProperty &
     \HH\Capabilities\ReadGlobals &
-    \HH\Capabilities\IO &
-    \HH\Capabilities\WriteProperty
+    \HH\Capabilities\ImplicitPolicyLocal &
+    \HH\Capabilities\System &
   );
   // type policied_of<T> = (\HH\Capabilities\ImplicitPolicyOf<T> & policied);
   type policied_of<T> = (
-    \HH\Capabilities\ImplicitPolicyOf<T> &
+    \HH\Capabilities\WriteProperty &
     \HH\Capabilities\ReadGlobals &
-    \HH\Capabilities\IO &
-    \HH\Capabilities\WriteProperty
+    \HH\Capabilities\ImplicitPolicyOf<T> &
+    \HH\Capabilities\System &
   );
 
   type read_globals = \HH\Capabilities\ReadGlobals;
@@ -123,7 +130,7 @@ namespace HH\Contexts {
   type codegen = (
     // maybe: ( \HH\Capabilities\ReadGlobals & ... )
     \HH\Capabilities\WriteProperty &
-    \HH\Capabilities\Codegen
+    \HH\Capabilities\Codegen &
   );
   type codegen_unsafe = codegen;
 

@@ -27,6 +27,6 @@ Memoizing object parameters requires the capability AccessGlobals, which is not 
 File "memoize_obj_policied.php", line 32, characters 26-33:
 Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
   File "memoize_obj_policied.php", line 32, characters 39-46:
-  The local (enclosing) context provides the capability set {IO, ImplicitPolicy, ReadGlobals, WriteProperty}
+  The local (enclosing) context provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

@@ -6,8 +6,8 @@ function with_argument_dependent_context_callee(
   throw new \Exception();
 }
 
-function with_argument_dependent_context()[policied_local, rx]: void {
-  with_argument_dependent_context_callee(()[policied_local] ==> {
+function with_argument_dependent_context()[defaults, policied]: void {
+  with_argument_dependent_context_callee(()[defaults] ==> {
     echo "write";
   });
 }

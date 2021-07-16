@@ -31,6 +31,8 @@ namespace HH\Contexts\Unsafe {
   type read_globals = mixed;
   type globals = mixed;
 
+  type controlled = mixed;
+
   type policied = mixed;
   type policied_shallow = \HH\Capabilities\ImplicitPolicyLocal;
   type policied_local = \HH\Contexts\defaults;

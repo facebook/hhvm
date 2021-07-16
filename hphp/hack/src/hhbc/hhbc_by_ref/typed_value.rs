@@ -140,6 +140,27 @@ impl<'arena> std::convert::TryFrom<TypedValue<'arena>> for std::string::String {
     }
 }
 
+struct WithBump<'arena, T>(&'arena bumpalo::Bump, T);
+
+impl<'arena> std::convert::TryFrom<WithBump<'arena, TypedValue<'arena>>> for &'arena str {
+    type Error = CastError;
+    fn try_from(
+        x: WithBump<'arena, TypedValue<'arena>>,
+    ) -> std::result::Result<&'arena str, Self::Error> {
+        let alloc = x.0;
+        match x.1 {
+            TypedValue::Uninit => Err(()), // Should not happen
+            TypedValue::Bool(false) => Ok(""),
+            TypedValue::Bool(true) => Ok("1"),
+            TypedValue::Null => Ok(""),
+            TypedValue::Int(i) => Ok(alloc.alloc_str(i.to_string().as_str())),
+            TypedValue::String(s) => Ok(s),
+            TypedValue::LazyClass(s) => Ok(s),
+            _ => Err(()),
+        }
+    }
+}
+
 impl<'arena> TypedValue<'arena> {
     // Integer operations. For now, we don't attempt to implement the
     // overflow-to-float semantics
@@ -284,11 +305,7 @@ impl<'arena> TypedValue<'arena> {
 
     pub fn cast_to_string(self, alloc: &'arena bumpalo::Bump) -> Option<Self> {
         use std::convert::TryInto;
-        self.try_into().ok().map(|x: std::string::String| {
-            Self::String(
-                bumpalo::collections::String::from_str_in(x.as_str(), alloc).into_bump_str(),
-            )
-        })
+        WithBump(alloc, self).try_into().ok().map(Self::String)
     }
 
     pub fn cast_to_int(self) -> Option<Self> {

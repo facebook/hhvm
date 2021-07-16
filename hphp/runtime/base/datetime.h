@@ -245,11 +245,7 @@ public:
   int minute() const { return m_time->i;}
   int second() const { return m_time->s;}
   double fraction() const {
-#if TIMELIB_VERSION >= TIMELIB_MODERN
-      return m_time->us / 1000000.0;
-#else
-      return m_time->f;
-#endif
+    return m_time->us / 1000000.0;
   }
   int zoneType() const { return m_time->zone_type;}
   int beat() const;    // Swatch Beat a.k.a. Internet Time

@@ -29,13 +29,10 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/text-util.h"
 
-
 // The opaque "struct _ttinfo" moved into a private header file.
-#if TIMELIB_VERSION >= TIMELIB_MODERN
 extern "C" {
 #include <timelib_private.h>
 }
-#endif
 
 namespace HPHP {
 
@@ -124,32 +121,19 @@ const timelib_tzdb *TimeZone::GetDatabase() {
   return Database;
 }
 
-#if TIMELIB_VERSION >= TIMELIB_MODERN
 timelib_tzinfo* TimeZone::GetTimeZoneInfoRaw(const char* name,
                                              const timelib_tzdb* db,
                                              int* error_code)
-#else
-timelib_tzinfo* TimeZone::GetTimeZoneInfoRaw(char* name,
-                                             const timelib_tzdb* db)
-#endif
 {
   auto const it = s_tzCache->find(name);
   if (it != s_tzCache->end()) {
     return it->second;
   }
-#if TIMELIB_VERSION >= TIMELIB_MODERN
   auto tzi = timelib_parse_tzfile(name, db, error_code);
-#else
-  auto tzi = timelib_parse_tzfile(name, db);
-#endif
   if (!tzi) {
     char* tzid = timelib_timezone_id_from_abbr(name, -1, 0);
     if (tzid) {
-#if TIMELIB_VERSION >= TIMELIB_MODERN
       tzi = timelib_parse_tzfile(tzid, db, error_code);
-#else
-      tzi = timelib_parse_tzfile(tzid, db);
-#endif
     }
   }
 
@@ -280,21 +264,13 @@ TimeZone::TimeZone(const String& name) {
    * - `GMT+0` is usually (tzdb-dependent) a ZONETYPE_ID
    * - `CET` quirk below
    */
-#if TIMELIB_VERSION >= TIMELIB_MODERN
   const char* tzname = name.data();
-#else
-  char* tzname = (char*) name.data();
-#endif
   // Try an ID lookup first, so that `CET` is interpreted as an ID, not an
   // abbreviation. It's valid as either. PHP 5.5+ considers it an abbreviation,
   // HHVM currently intentionally considers it an ID for backwards
   // compatibility (which matches PHP <= 5.4)
-#if TIMELIB_VERSION >= TIMELIB_MODERN
   int error_code = TIMELIB_ERROR_NO_ERROR;
   m_tzi = GetTimeZoneInfoRaw(tzname, GetDatabase(), &error_code);
-#else
-  m_tzi = GetTimeZoneInfoRaw(tzname, GetDatabase());
-#endif
   if (m_tzi) {
     m_tztype = TIMELIB_ZONETYPE_ID;
     return;
@@ -358,8 +334,6 @@ String TimeZone::name() const {
       return String(m_abbr, CopyString);
     case TIMELIB_ZONETYPE_OFFSET: {
       char buf[sizeof("+00:00")];
-
-#if TIMELIB_VERSION >= TIMELIB_MODERN
       snprintf(
         buf,
         sizeof("+00:00"),
@@ -368,16 +342,6 @@ String TimeZone::name() const {
         abs(m_offset / 3600) % 100, // % 100 to convince compiler we have 2 digits
         abs((m_offset % 3600) / 60)
       );
-#else
-      snprintf(
-        buf,
-        sizeof("+00:00"),
-        "%c%02d:%02d",
-        (m_offset > 0 ? '-' : '+'),
-        abs(m_offset / 60) % 100, // % 100 to convince compiler we have 2 digits
-        abs(m_offset % 60)
-      );
-#endif
       return String(buf, sizeof("+00:00") - 1, CopyString);
     }
   }

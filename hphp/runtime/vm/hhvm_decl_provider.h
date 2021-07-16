@@ -22,6 +22,7 @@
 
 #include <map>
 #include <memory>
+#include <utility>
 
 namespace HPHP {
 
@@ -34,7 +35,7 @@ struct HhvmDeclProvider {
   hackc::decl::decls const* getDecl(HPHP::AutoloadMap::KindOf kind, char const* symbol);
 
  private:
-  std::map<std::string, hackc::decl::decl_result> m_cache;
+  std::map<std::string, std::pair<hackc::decl::decl_result, hackc::decl::bump_allocator const*>> m_cache;
 };
 
 hackc::decl::decls const* hhvm_decl_provider_get_decl(void* provider, char const* symbol);

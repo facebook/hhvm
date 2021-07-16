@@ -17,6 +17,12 @@
 
 namespace HPHP { namespace hackc { namespace decl {
 
+/*
+  These are PODs to support Rust FFI interop. Accordingly,
+  we are satisfied here with default copy-assign-move semantics.
+  They do not assume any ownership of resources. It is intended
+  that users of these types are responsible for any deallocations
+*/
 struct bytes {
     std::uint8_t const* data;
     std::size_t len;

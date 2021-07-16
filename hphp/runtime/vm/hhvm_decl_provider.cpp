@@ -29,7 +29,7 @@ hackc::decl::decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf kind, ch
     auto result = m_cache.find(filename.data());
 
     if (result != m_cache.end()) {
-      return result->second.decl_list;
+      return result->second.first.decl_list;
     }
 
     hackc::decl::bump_allocator const* arena = hackc_create_arena();
@@ -42,7 +42,7 @@ hackc::decl::decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf kind, ch
 
     hackc::decl::decl_result decl_result = hackc_direct_decl_parse(opts, filename.data(), text.data(), arena);
 
-    m_cache.insert({filename.data(), decl_result});
+    m_cache.insert({filename.data(), std::make_pair(decl_result, arena)});
     return decl_result.decl_list;
   } else {
     return nullptr;
@@ -50,7 +50,10 @@ hackc::decl::decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf kind, ch
 }
 
 HhvmDeclProvider::~HhvmDeclProvider() {
-  // TODO:
+  for (auto it: m_cache) {
+    hackc_free_decl_result(it.second.first);
+    hackc_free_arena(it.second.second);
+  }
 }
 
 hackc::decl::decls const*

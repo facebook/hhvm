@@ -35,4 +35,6 @@ bool hackc_verify_deserialization(
     HPHP::hackc::decl::decls const* expected
 );
 
+void hackc_free_decl_result(HPHP::hackc::decl::decl_result decl_result);
+
 }

@@ -13,12 +13,40 @@ use oxidized_by_ref::{decl_parser_options::DeclParserOptions, direct_decl_parser
 use libc::c_char;
 use std::os::unix::ffi::OsStrExt;
 
-#[repr(C)]
-pub struct DeclResult<'a> {
-    hash: u64,
-    serialized: ffi::Bytes,
-    decls: *mut oxidized_by_ref::direct_decl_parser::Decls<'a>,
+mod internal {
+    #[repr(C)]
+    pub(crate) struct DeclResult<'a> {
+        hash: u64,
+        serialized: ffi::Bytes,
+        decls: *mut oxidized_by_ref::direct_decl_parser::Decls<'a>,
+    }
+
+    impl<'a> DeclResult<'a> {
+        pub fn new(
+            hash: u64,
+            serialized: ffi::Bytes,
+            decls: oxidized_by_ref::direct_decl_parser::Decls<'a>,
+        ) -> Self {
+            Self {
+                hash,
+                serialized,
+                decls: Box::into_raw(Box::new(decls)),
+            }
+        }
+
+        pub unsafe fn into_parts(
+            self,
+        ) -> (
+            u64,
+            ffi::Bytes,
+            Box<oxidized_by_ref::direct_decl_parser::Decls<'a>>,
+        ) {
+            (self.hash, self.serialized, Box::from_raw(self.decls))
+        }
+    }
 }
+
+use internal::DeclResult;
 
 #[no_mangle]
 unsafe extern "C" fn hackc_create_arena() -> *mut bumpalo::Bump {
@@ -72,11 +100,7 @@ unsafe extern "C" fn hackc_direct_decl_parse<'a>(
         .map_err(|e| format!("failed to serialize, error: {}", e))
         .unwrap();
 
-    DeclResult {
-        hash: position_insensitive_hash(&decls),
-        decls: Box::into_raw(Box::new(decls)),
-        serialized: data.into(),
-    }
+    DeclResult::new(position_insensitive_hash(&decls), data.into(), decls)
 }
 
 #[no_mangle]
@@ -102,4 +126,9 @@ unsafe extern "C" fn hackc_verify_deserialization(
         .unwrap();
 
     decls == *expected
+}
+
+#[no_mangle]
+unsafe extern "C" fn hackc_free_decl_result<'a>(decl_result: DeclResult<'a>) {
+    let _ = decl_result.into_parts();
 }

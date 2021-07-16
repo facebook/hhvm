@@ -332,10 +332,10 @@ let class_ ctx c =
     let class_dep = Dep.Type cls_name in
     let env = { Decl_env.mode = c.c_mode; droot = Some class_dep; ctx } in
     let hint = Decl_hint.hint env in
-    let (req_extends, req_implements) = split_reqs c in
-    let (static_vars, vars) = split_vars c in
+    let (req_extends, req_implements) = split_reqs c.c_reqs in
+    let (static_vars, vars) = split_vars c.c_vars in
     let sc_xhp_enum_values = xhp_enum_values vars in
-    let (constructor, statics, rest) = split_methods c in
+    let (constructor, statics, rest) = split_methods c.c_methods in
     let sc_extends = List.map ~f:hint c.c_extends in
     let sc_uses = List.map ~f:hint c.c_uses in
     let sc_req_extends = List.map ~f:hint req_extends in

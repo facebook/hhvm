@@ -31,7 +31,7 @@ let handler =
     inherit Tast_visitor.handler_base
 
     method! at_class_ _env c =
-      let (_, static_methods, _) = split_methods c in
+      let (_, static_methods, _) = split_methods c.c_methods in
       if
         not
           (Pos.filename c.c_span |> Relative_path.prefix |> Relative_path.is_hhi)

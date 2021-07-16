@@ -1857,7 +1857,7 @@ let class_def_ env c tc =
   );
   check_enum_includes env c;
   let (pc, c_name) = c.c_name in
-  let (req_extends, req_implements) = split_reqs c in
+  let (req_extends, req_implements) = split_reqs c.c_reqs in
   let hints_and_decl_tys hints =
     List.map hints ~f:(fun hint -> (hint, Decl_hint.hint env.decl_env hint))
   in
@@ -1933,12 +1933,12 @@ let class_def_ env c tc =
   check_extend_abstract (pc, tc);
   if Cls.const tc then
     List.iter c.c_uses ~f:(check_non_const_trait_members pc env);
-  let (static_vars, vars) = split_vars c in
+  let (static_vars, vars) = split_vars c.c_vars in
   List.iter static_vars ~f:(fun { cv_id = (p, id); _ } ->
       check_static_class_element (Cls.get_prop tc) ~elt_type:`Property id p);
   List.iter vars ~f:(fun { cv_id = (p, id); _ } ->
       check_dynamic_class_element (Cls.get_sprop tc) ~elt_type:`Property id p);
-  let (constructor, static_methods, methods) = split_methods c in
+  let (constructor, static_methods, methods) = split_methods c.c_methods in
   List.iter static_methods ~f:(fun { m_name = (p, id); _ } ->
       check_static_class_element (Cls.get_method tc) ~elt_type:`Method id p);
   List.iter methods ~f:(fun { m_name = (p, id); _ } ->
@@ -2081,6 +2081,7 @@ let gconst_def ctx cst =
   Errors.run_with_span cst.cst_span @@ fun () ->
   let env = EnvFromDef.gconst_env ~origin:Decl_counters.TopLevel ctx cst in
   let env = Env.set_env_pessimize env in
+  Typing_type_wellformedness.global_constant env cst;
   let (typed_cst_value, env) =
     let value = cst.cst_value in
     match cst.cst_type with
@@ -2197,6 +2198,7 @@ let check_record_inheritance_cycle env ((rd_pos, rd_name) : Aast.sid) : unit =
 let record_def_def ctx rd =
   Counters.count Counters.Category.Typecheck @@ fun () ->
   let env = EnvFromDef.record_def_env ~origin:Decl_counters.TopLevel ctx rd in
+  Typing_type_wellformedness.record_def env rd;
   (match rd.rd_extends with
   | Some parent -> record_def_parent env rd parent
   | None -> ());

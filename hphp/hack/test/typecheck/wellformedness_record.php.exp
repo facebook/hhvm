@@ -1,0 +1,10 @@
+File "wellformedness_record.php", line 6, characters 3-9:
+Some type arguments violate their constraints (Typing[4323])
+  File "wellformedness_record.php", line 3, characters 9-9:
+  `T` is a constrained type parameter
+  File "wellformedness_record.php", line 3, characters 14-21:
+  This type constraint is violated
+  File "wellformedness_record.php", line 3, characters 14-21:
+  Expected `arraykey`
+  File "wellformedness_record.php", line 6, characters 5-8:
+  But got `bool`

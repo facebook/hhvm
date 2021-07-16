@@ -880,9 +880,9 @@ let rec class_ ctx c =
     type_where_constraints env c.Aast.c_where_constraints
   in
   let name = c.Aast.c_name in
-  let (constructor, smethods, methods) = Aast.split_methods c in
+  let (constructor, smethods, methods) = Aast.split_methods c.Aast.c_methods in
   let smethods = List.map ~f:(method_ (fst env)) smethods in
-  let (sprops, props) = Aast.split_vars c in
+  let (sprops, props) = Aast.split_vars c.Aast.c_vars in
   let sprops = List.map ~f:(class_prop_static env) sprops in
   let attrs = user_attributes env c.Aast.c_user_attributes in
   let const = Naming_attributes.find SN.UserAttributes.uaConst attrs in
@@ -916,7 +916,7 @@ let rec class_ ctx c =
   let methods = List.map ~f:(method_ (fst env)) methods in
   let uses = List.map ~f:(hint env) c.Aast.c_uses in
   let xhp_attr_uses = List.map ~f:(hint env) c.Aast.c_xhp_attr_uses in
-  let (c_req_extends, c_req_implements) = Aast.split_reqs c in
+  let (c_req_extends, c_req_implements) = Aast.split_reqs c.Aast.c_reqs in
   if
     (not (List.is_empty c_req_implements))
     && not (Ast_defs.is_c_trait c.Aast.c_kind)

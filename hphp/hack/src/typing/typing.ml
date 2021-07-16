@@ -3935,11 +3935,11 @@ and expr_
     make_result env p (Aast.Cast (hint, te)) ty
   | ExpressionTree et -> expression_tree env p et
   | Is (e, hint) ->
-    Typing_kinding.Simple.check_well_kinded_hint ~in_signature:false env hint;
+    Typing_type_wellformedness.hint env hint;
     let (env, te, _) = expr env e in
     make_result env p (Aast.Is (te, hint)) (MakeType.bool (Reason.Rwitness p))
   | As (e, hint, is_nullable) ->
-    Typing_kinding.Simple.check_well_kinded_hint ~in_signature:false env hint;
+    Typing_type_wellformedness.hint env hint;
     let refine_type env lpos lty rty =
       let reason = Reason.Ras lpos in
       let (env, rty) = Env.expand_type env rty in
@@ -4857,13 +4857,15 @@ and closure_make
 (* Expression trees *)
 (*****************************************************************************)
 and expression_tree env p et =
+  let { et_hint; et_splices; et_virtualized_expr; et_runtime_expr } = et in
+  Typing_type_wellformedness.hint env et_hint;
   (* Given the expression tree literal:
 
      MyVisitor`1 + ${ foo() }`
 
      First, type check the expressions that are spliced in, so foo() in
      this example. *)
-  let (env, t_splices) = block env et.et_splices in
+  let (env, t_splices) = block env et_splices in
 
   (* Type check the virtualized expression, which will look
      roughly like this:
@@ -4875,7 +4877,7 @@ and expression_tree env p et =
   *)
   let (env, t_virtualized_expr, ty_virtual) =
     Typing_env.with_in_expr_tree env true (fun env ->
-        expr env et.et_virtualized_expr ~allow_awaitable:false)
+        expr env et_virtualized_expr ~allow_awaitable:false)
   in
 
   (* Given the runtime expression:
@@ -4888,7 +4890,7 @@ and expression_tree env p et =
 
      and then typecheck. *)
   let (env, runtime_expr) =
-    maketree_with_type_param env p et.et_runtime_expr ty_virtual
+    maketree_with_type_param env p et_runtime_expr ty_virtual
   in
   let (env, t_runtime_expr, ty_runtime_expr) =
     expr env runtime_expr ~allow_awaitable:false
@@ -4899,7 +4901,7 @@ and expression_tree env p et =
     p
     (Aast.ExpressionTree
        {
-         et_hint = et.et_hint;
+         et_hint;
          et_splices = t_splices;
          et_virtualized_expr = t_virtualized_expr;
          et_runtime_expr = t_runtime_expr;

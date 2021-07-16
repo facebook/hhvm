@@ -136,7 +136,7 @@ module Env = struct
 
   let rec make tenv c =
     let ctx = Typing_env.get_ctx tenv in
-    let (_, _, methods) = split_methods c in
+    let (_, _, methods) = split_methods c.c_methods in
     let methods = List.fold_left ~f:method_ ~init:SMap.empty methods in
     let sc = Shallow_decl.class_ ctx c in
 
@@ -279,7 +279,7 @@ let rec class_ tenv c =
           else
             Errors.missing_assign (fst cv.cv_id)
         | _ -> ());
-  let (c_constructor, _, _) = split_methods c in
+  let (c_constructor, _, _) = split_methods c.c_methods in
   match c_constructor with
   | _ when Ast_defs.(equal_class_kind c.c_kind Cinterface) -> ()
   | Some { m_body = { fb_annotation = Nast.NamedWithUnsafeBlocks; _ }; _ } -> ()

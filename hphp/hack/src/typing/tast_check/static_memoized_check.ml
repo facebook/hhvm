@@ -44,7 +44,7 @@ let handler =
           (Tast_env.get_tcopt env)
           TypecheckerOptions.experimental_disallow_static_memoized
       in
-      let (constructor, static_methods, _) = split_methods c in
+      let (constructor, static_methods, _) = split_methods c.c_methods in
       if disallow_static_memoized && not c.c_final then (
         List.iter static_methods ~f:static_memoized_check;
         Option.iter constructor ~f:static_memoized_check

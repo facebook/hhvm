@@ -36,11 +36,11 @@ let check_class _ c =
     let err m =
       Errors.nonstatic_method_in_abstract_final_class (fst m.m_name)
     in
-    let (c_constructor, _, c_methods) = split_methods c in
+    let (c_constructor, _, c_methods) = split_methods c.c_methods in
     List.iter c_methods ~f:err;
     Option.iter c_constructor ~f:err;
 
-    let (_, c_instance_vars) = split_vars c in
+    let (_, c_instance_vars) = split_vars c.c_vars in
     c_instance_vars
     |> List.filter ~f:(fun var -> Option.is_none var.cv_xhp_attr)
     |> List.iter ~f:(fun var ->

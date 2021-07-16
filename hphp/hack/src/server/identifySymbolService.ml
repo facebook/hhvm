@@ -101,7 +101,9 @@ let process_typeconst ?(is_declaration = false) (class_name, tconst_name, pos) =
 let process_class class_ =
   let acc = process_class_id ~is_declaration:true class_.Aast.c_name in
   let c_name = snd class_.Aast.c_name in
-  let (constructor, static_methods, methods) = Aast.split_methods class_ in
+  let (constructor, static_methods, methods) =
+    Aast.split_methods class_.Aast.c_methods
+  in
   let all_methods = static_methods @ methods in
   let acc =
     List.fold all_methods ~init:acc ~f:(fun acc method_ ->

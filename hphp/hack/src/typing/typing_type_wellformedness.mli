@@ -25,3 +25,9 @@ val fun_ : Typing_env_types.env -> Nast.fun_ -> unit
 val class_ : Typing_env_types.env -> Nast.class_ -> unit
 
 val typedef : Typing_env_types.env -> Nast.typedef -> unit
+
+val global_constant : Typing_env_types.env -> Nast.gconst -> unit
+
+val record_def : Typing_env_types.env -> Nast.record_def -> unit
+
+val hint : Typing_env_types.env -> Aast.hint -> unit

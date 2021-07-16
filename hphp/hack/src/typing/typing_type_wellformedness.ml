@@ -26,10 +26,6 @@ type env = {
   tenv: Typing_env_types.env;
 }
 
-let check_hint_wellkindedness ~in_signature env hint =
-  let decl_ty = Decl_hint.hint env.decl_env hint in
-  Typing_kinding.Simple.check_well_kinded_type ~in_signature env decl_ty
-
 (* Check if the __ViaLabel attributes is on the parameter. If that's the case,
  * we check that it is only involving an enum class or a generic
  *)
@@ -132,7 +128,7 @@ let check_happly ?(via_label = false) unchecked_tparams env h =
 
 let rec hint ?(via_label = false) ?(in_signature = true) env (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
-  check_hint_wellkindedness ~in_signature env.tenv (p, h);
+  Typing_kinding.Simple.check_well_kinded_hint ~in_signature env.tenv (p, h);
   hint_ ~via_label ~in_signature env p h
 
 and hint_ ~via_label ~in_signature env p h_ =
@@ -223,13 +219,16 @@ and hint_ ~via_label ~in_signature env p h_ =
 
 and contexts env (_, hl) = List.iter ~f:(hint env) hl
 
+let type_hint ?via_label env th =
+  maybe (hint ?via_label) env (hint_of_type_hint th)
+
 let fun_param env param =
   let via_label =
     Naming_attributes.mem
       SN.UserAttributes.uaViaLabel
       param.param_user_attributes
   in
-  maybe (hint ~via_label) env (hint_of_type_hint param.param_type_hint)
+  type_hint ~via_label env param.param_type_hint
 
 let variadic_param env vparam =
   match vparam with
@@ -255,7 +254,7 @@ let fun_ tenv f =
       f.f_where_constraints
   in
   let env = { env with tenv } in
-  maybe hint env (hint_of_type_hint f.f_ret);
+  type_hint env f.f_ret;
 
   List.iter f.f_tparams ~f:(tparam env);
   List.iter f.f_params ~f:(fun_param env);
@@ -285,7 +284,7 @@ let class_var env cv =
       (Naming_attributes.mem SN.UserAttributes.uaInternal cv.cv_user_attributes)
   in
   let env = { env with tenv } in
-  maybe hint env (hint_of_type_hint cv.cv_type)
+  type_hint env cv.cv_type
 
 let method_ env m =
   (* Add method type parameters to environment and localize the bounds
@@ -307,40 +306,88 @@ let method_ env m =
   variadic_param env m.m_variadic;
   List.iter m.m_tparams ~f:(tparam env);
   List.iter m.m_where_constraints ~f:(where_constr env);
-  maybe hint env (hint_of_type_hint m.m_ret)
+  type_hint env m.m_ret
 
 let hint_no_kind_check env (p, h) =
   hint_ ~via_label:false ~in_signature:true env p h
 
+let class_attr env = function
+  | CA_name _ -> ()
+  | CA_field { ca_type; ca_id = _; ca_value = _; ca_required = _ } ->
+    (match ca_type with
+    | CA_hint h -> hint env h
+    | CA_enum _ -> ())
+
 let class_ tenv c =
   let env = { typedef_tparams = []; tenv } in
+  let {
+    c_span = _;
+    c_annotation = _;
+    c_mode = _;
+    c_final = _;
+    c_is_xhp = _;
+    c_has_xhp_keyword = _;
+    c_kind;
+    c_name = _;
+    c_tparams;
+    c_extends;
+    c_uses;
+    c_use_as_alias = _;
+    c_insteadof_alias = _;
+    c_xhp_category = _;
+    (* TODO: c_reqs should be checked too. Problem: that causes errors in un-fixmeable places. *)
+    c_reqs = _;
+    c_implements;
+    c_support_dynamic_type = _;
+    c_where_constraints;
+    c_consts;
+    c_typeconsts;
+    c_vars;
+    c_methods;
+    c_attributes;
+    c_xhp_children = _;
+    (* c_xhp_attrs and c_xhp_attr_uses should probably be checked too, but
+     * they have weird generics rules, e.g. not providing type arguments seems allowed. *)
+    c_xhp_attrs = _;
+    c_xhp_attr_uses = _;
+    c_namespace = _;
+    c_user_attributes = _;
+    c_file_attributes = _;
+    c_enum;
+    c_doc_comment = _;
+    c_emit_id = _;
+  } =
+    c
+  in
   (* Add type parameters to typing environment and localize the bounds *)
   let tenv =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       tenv
       ~ignore_errors:true
-      c.c_tparams
-      c.c_where_constraints
+      c_tparams
+      c_where_constraints
   in
   let env = { env with tenv } in
-  let (c_constructor, c_statics, c_methods) = split_methods c in
-  let (c_static_vars, c_vars) = split_vars c in
-  if not Ast_defs.(equal_class_kind c.c_kind Cinterface) then
+  let (c_constructor, c_statics, c_methods) = split_methods c_methods in
+  let (c_static_vars, c_vars) = split_vars c_vars in
+  if not Ast_defs.(equal_class_kind c_kind Cinterface) then
     maybe method_ env c_constructor;
-  List.iter c.c_tparams ~f:(tparam env);
-  List.iter c.c_where_constraints ~f:(where_constr env);
-  List.iter c.c_extends ~f:(hint env);
-  List.iter c.c_implements ~f:(hint env);
+  List.iter c_tparams ~f:(tparam env);
+  List.iter c_where_constraints ~f:(where_constr env);
+  List.iter c_extends ~f:(hint env);
+  List.iter c_implements ~f:(hint env);
   (* Use is not a signature from the point of view of modules because the trait
      being use'd does not need to be seen by users of the class *)
-  List.iter c.c_uses ~f:(hint env ~in_signature:false);
-  List.iter c.c_typeconsts ~f:(typeconst (env, c.c_tparams));
+  List.iter c_uses ~f:(hint env ~in_signature:false);
+  List.iter c_typeconsts ~f:(typeconst (env, c_tparams));
   List.iter c_static_vars ~f:(class_var env);
   List.iter c_vars ~f:(class_var env);
-  List.iter c.c_consts ~f:(const env);
+  List.iter c_consts ~f:(const env);
   List.iter c_statics ~f:(method_ env);
   List.iter c_methods ~f:(method_ env);
-  maybe enum env c.c_enum
+  List.iter c_attributes ~f:(class_attr env);
+  maybe enum env c_enum;
+  ()
 
 let typedef tenv t =
   let {
@@ -374,10 +421,13 @@ let typedef tenv t =
      kinds of typedefs separately, because check_happly replaces all the generic
      parameters of typedefs by Tany, which makes the kind check moot *)
   maybe
-    (check_hint_wellkindedness ~in_signature:true)
+    (Typing_kinding.Simple.check_well_kinded_hint ~in_signature:true)
     tenv_with_typedef_tparams
     t_constraint;
-  check_hint_wellkindedness ~in_signature:true tenv_with_typedef_tparams t_kind;
+  Typing_kinding.Simple.check_well_kinded_hint
+    ~in_signature:true
+    tenv_with_typedef_tparams
+    t_kind;
   let env =
     {
       typedef_tparams =
@@ -396,3 +446,44 @@ let typedef tenv t =
   (* We checked the kinds already above.  *)
   maybe hint_no_kind_check env t.t_constraint;
   hint_no_kind_check env t_kind
+
+let global_constant tenv gconst =
+  let env = { typedef_tparams = []; tenv } in
+  let {
+    cst_annotation = _;
+    cst_mode = _;
+    cst_name = _;
+    cst_type;
+    cst_value = _;
+    cst_namespace = _;
+    cst_span = _;
+    cst_emit_id = _;
+  } =
+    gconst
+  in
+  maybe hint env cst_type;
+  ()
+
+let record_def tenv record =
+  let env = { typedef_tparams = []; tenv } in
+  let {
+    rd_annotation = _;
+    rd_name = _;
+    rd_extends;
+    rd_abstract = _;
+    rd_fields;
+    rd_user_attributes = _;
+    rd_namespace = _;
+    rd_span = _;
+    rd_doc_comment = _;
+    rd_emit_id = _;
+  } =
+    record
+  in
+  maybe hint env rd_extends;
+  List.iter rd_fields ~f:(fun (_id, h, _expr) -> hint env h);
+  ()
+
+let hint tenv h =
+  let env = { typedef_tparams = []; tenv } in
+  hint ~via_label:false ~in_signature:false env h

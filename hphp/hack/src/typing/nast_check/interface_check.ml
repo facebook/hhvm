@@ -18,7 +18,7 @@ let enforce_no_body m =
 let check_interface c =
   List.iter c.c_uses ~f:(fun (p, _) -> Errors.interface_use_trait p);
 
-  let (statics, vars) = split_vars c in
+  let (statics, vars) = split_vars c.c_vars in
   begin
     match vars with
     | hd :: _ ->

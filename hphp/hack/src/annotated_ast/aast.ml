@@ -1073,7 +1073,7 @@ let is_soft_reified = function
  * Methods, properties, and requirements are order dependent in bytecode
  * emission, which is observable in user code via `ReflectionClass`.
  *)
-let split_methods class_ =
+let split_methods c_methods =
   let (constr, statics, res) =
     List.fold_left
       (fun (constr, statics, rest) m ->
@@ -1084,12 +1084,12 @@ let split_methods class_ =
         else
           (constr, statics, m :: rest))
       (None, [], [])
-      class_.c_methods
+      c_methods
   in
   (constr, List.rev statics, List.rev res)
 
 (* Splits class properties into statics, dynamics *)
-let split_vars class_ =
+let split_vars c_vars =
   let (statics, res) =
     List.fold_left
       (fun (statics, rest) v ->
@@ -1098,12 +1098,12 @@ let split_vars class_ =
         else
           (statics, v :: rest))
       ([], [])
-      class_.c_vars
+      c_vars
   in
   (List.rev statics, List.rev res)
 
 (* Splits `require`s into extends, implements *)
-let split_reqs class_ =
+let split_reqs c_reqs =
   let (extends, implements) =
     List.fold_left
       (fun (extends, implements) (h, is_extends) ->
@@ -1112,7 +1112,7 @@ let split_reqs class_ =
         else
           (extends, h :: implements))
       ([], [])
-      class_.c_reqs
+      c_reqs
   in
   (List.rev extends, List.rev implements)
 

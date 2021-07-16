@@ -1,0 +1,10 @@
+File "wellformedness_gconst.php", line 5, characters 7-13:
+Some type arguments violate their constraints (Typing[4323])
+  File "wellformedness_gconst.php", line 3, characters 11-11:
+  `T` is a constrained type parameter
+  File "wellformedness_gconst.php", line 3, characters 16-23:
+  This type constraint is violated
+  File "wellformedness_gconst.php", line 3, characters 16-23:
+  Expected `arraykey`
+  File "wellformedness_gconst.php", line 5, characters 9-12:
+  But got `bool`

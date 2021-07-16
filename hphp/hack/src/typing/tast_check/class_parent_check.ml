@@ -93,7 +93,7 @@ let handler =
     inherit Tast_visitor.handler_base
 
     method! at_class_ env c =
-      let (req_extends, req_implements) = split_reqs c in
+      let (req_extends, req_implements) = split_reqs c.c_reqs in
       List.iter c.c_uses ~f:(check_is_trait env);
       duplicated_used_traits c;
       List.iter req_extends ~f:(check_is_class env);

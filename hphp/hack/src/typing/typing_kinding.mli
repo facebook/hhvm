@@ -25,7 +25,9 @@ module Simple : sig
     KindDefs.Simple.named_kind ->
     unit
 
-  (** Runs check_well_kinded_type after translating hint to decl type *)
+  (** Runs check_well_kinded_type after translating hint to decl type
+      Check that classes mentioned in hints are accessible from the current
+      module, and accessible also from outside if in_signature=true. *)
   val check_well_kinded_hint :
     in_signature:bool -> Typing_env_types.env -> Aast.hint -> unit
 

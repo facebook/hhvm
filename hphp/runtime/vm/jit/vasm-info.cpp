@@ -302,8 +302,6 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::defvmrettype:
     case Vinstr::defvmsp:
     case Vinstr::defvmfp:
-    case Vinstr::pushvmfp:
-    case Vinstr::popvmfp:
     case Vinstr::leap:
     case Vinstr::leav:
     case Vinstr::load:
@@ -403,13 +401,15 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::popm:
     case Vinstr::popp:
     case Vinstr::poppm:
+    case Vinstr::popvmfp:
+    case Vinstr::prefetch:
     case Vinstr::push:
     case Vinstr::pushf:
     case Vinstr::pushframe:
     case Vinstr::pushm:
     case Vinstr::pushp:
     case Vinstr::pushpm:
-    case Vinstr::prefetch:
+    case Vinstr::pushvmfp:
     case Vinstr::recordbasenativesp:
     case Vinstr::unrecordbasenativesp:
     case Vinstr::recordstack:

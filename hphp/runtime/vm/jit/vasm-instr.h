@@ -122,7 +122,7 @@ struct Vunit;
   /* php function abi */\
   O(defvmsp, Inone, Un, D(d))\
   O(defvmfp, Inone, Un, D(d))\
-  O(pushvmfp, Inone, U(s), Dn)\
+  O(pushvmfp, I(offset), U(s), Dn)\
   O(popvmfp, Inone, U(s), Dn)\
   O(syncvmsp, Inone, U(s), Dn)\
   O(defvmretdata, Inone, Un, D(data))\

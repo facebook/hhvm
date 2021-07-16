@@ -376,8 +376,8 @@ let builder =
       this#hard_split ();
       if not (List.is_empty chunks) then
         failwith
-          ( "The impossible happened: Chunk_builder attempted to end "
-          ^ "when not at a chunk group boundary" );
+          ("The impossible happened: Chunk_builder attempted to end "
+          ^ "when not at a chunk group boundary");
       List.rev chunk_groups
 
     method private advance n = seen_chars <- seen_chars + n

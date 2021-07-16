@@ -83,8 +83,10 @@ let get_autocomplete_context
     let is_after_quote = Str.string_match context_after_quote leading_text 0 in
     (* Detect what comes next *)
     let char_at_pos =
-      try file_content.[offset + AutocompleteTypes.autocomplete_token_length]
-      with _ -> ' '
+      try
+        file_content.[offset + AutocompleteTypes.autocomplete_token_length]
+      with
+      | _ -> ' '
     in
     let is_before_apostrophe = Char.equal char_at_pos '\'' in
     let is_open_curly_without_equals =

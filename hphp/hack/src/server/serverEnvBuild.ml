@@ -79,10 +79,10 @@ let make_genv options config local_config workers =
             Watchman.init_timeout =
               Watchman.Explicit_timeout (float init_timeout);
             subscribe_mode =
-              ( if subscribe then
+              (if subscribe then
                 Some Watchman.Defer_changes
               else
-                None );
+                None);
             expression_terms = watchman_expression_terms;
             debug_logging =
               ServerArgs.watchman_debug_logging options || debug_logging;
@@ -207,7 +207,8 @@ let make_genv options config local_config workers =
               ~on_timeout:(fun (_ : Timeout.timings) ->
                 Exit.exit Exit_status.Dfind_unresponsive)
               ~do_:(fun t -> DfindLib.get_changes ~timeout:t dfind)
-          with _ -> Exit.exit Exit_status.Dfind_died
+          with
+          | _ -> Exit.exit Exit_status.Dfind_died
         in
         set
       in

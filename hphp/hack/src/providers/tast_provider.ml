@@ -128,8 +128,8 @@ let compute_tast_and_errors_unquarantined_internal
            ~key:"filesize"
            ~value:
              (String.length
-                ( Provider_context.get_file_contents_if_present entry
-                |> Option.value ~default:"" ))
+                (Provider_context.get_file_contents_if_present entry
+                |> Option.value ~default:""))
     in
 
     Hh_logger.debug

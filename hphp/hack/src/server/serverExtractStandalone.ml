@@ -1415,8 +1415,8 @@ end = struct
         parens
         @@ pair
              ~sep:colon
-             ( prefix (const string "function")
-             @@ pair ~sep:nop pp_fun_params (option pp_contexts) )
+             (prefix (const string "function")
+             @@ pair ~sep:nop pp_fun_params (option pp_contexts))
         @@ pp_hint ~is_ctx:false)
         ppf
         ((all_params, hf_ctxs), hf_return_ty)
@@ -2250,11 +2250,11 @@ end = struct
     let method_props = function
       | EltMethod (_, _, Aast.{ m_params; _ }) ->
         Some
-          ( SSet.of_list
+          (SSet.of_list
           @@ List.filter_map
                m_params
                ~f:(fun Aast.{ param_name; param_visibility; _ } ->
-                 Option.map ~f:(fun _ -> param_name) param_visibility) )
+                 Option.map ~f:(fun _ -> param_name) param_visibility))
       | _ -> None
 
     let prop_name = function
@@ -2752,10 +2752,10 @@ end = struct
             value_or_not_found (cls_nm ^ "::" ^ nm)
             @@ Option.(
                  first_some
-                   ( map ~f:Class_elt.mk_tyconst
-                   @@ Nast_helper.get_typeconst ctx cls_nm nm )
-                   ( map ~f:Class_elt.(mk_const ctx)
-                   @@ Nast_helper.get_const ctx cls_nm nm )) )
+                   (map ~f:Class_elt.mk_tyconst
+                   @@ Nast_helper.get_typeconst ctx cls_nm nm)
+                   (map ~f:Class_elt.(mk_const ctx)
+                   @@ Nast_helper.get_const ctx cls_nm nm)) )
       | Method (cls_nm, nm) when String.(cls_nm = Dep.get_origin ctx cls_nm dep)
         ->
         of_method ctx cls_nm nm
@@ -2913,16 +2913,17 @@ end = struct
     Tuple2.map_snd ~f:SMap.elements
     @@ List.fold
          ~init:([], SMap.empty)
-         ~f:(fun (toplvl, nested) -> function
-           | ([], dep) -> (dep :: toplvl, nested)
-           | (ns :: nss, dep) ->
-             ( toplvl,
-               SMap.update
-                 ns
-                 (function
-                   | Some deps -> Some ((nss, dep) :: deps)
-                   | _ -> Some [(nss, dep)])
-                 nested ))
+         ~f:
+           (fun (toplvl, nested) -> function
+             | ([], dep) -> (dep :: toplvl, nested)
+             | (ns :: nss, dep) ->
+               ( toplvl,
+                 SMap.update
+                   ns
+                   (function
+                     | Some deps -> Some ((nss, dep) :: deps)
+                     | _ -> Some [(nss, dep)])
+                   nested ))
          deps
 
   let unfold deps =
@@ -2940,7 +2941,7 @@ end = struct
       | [] -> k []
       | (ns, next) :: rest ->
         auxs rest ~k:(fun rest' ->
-            aux next ~k:(fun next' -> k @@ ((ns, next') :: rest')))
+            aux next ~k:(fun next' -> k @@ (ns, next') :: rest'))
     in
     aux ~k:Fn.id @@ List.map ~f:(fun dep -> (namespace_of dep, dep)) deps
 end
@@ -2975,8 +2976,8 @@ end = struct
     Str.global_replace re ":"
 
   let format text =
-    try Libhackfmt.format_tree @@ tree_from_string @@ tidy_xhp text
-    with Hackfmt_error.InvalidSyntax -> text
+    try Libhackfmt.format_tree @@ tree_from_string @@ tidy_xhp text with
+    | Hackfmt_error.InvalidSyntax -> text
 end
 
 (* -- Per-file grouped dependencies ----------------------------------------- *)
@@ -3029,10 +3030,10 @@ end = struct
         Namespaced.unfold
         @@ Grouped.of_deps
              ctx
-             ( if is_target then
+             (if is_target then
                Some target
              else
-               None )
+               None)
              deps;
     }
 

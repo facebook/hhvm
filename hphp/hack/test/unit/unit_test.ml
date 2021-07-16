@@ -19,7 +19,8 @@ let expect_throws e f x =
     let _ = f x in
     Printf.eprintf "Error. Did not throw expected: %s\n" (Exn.to_string e);
     false
-  with err ->
+  with
+  | err ->
     if Poly.(e <> err) then
       let () =
         Printf.eprintf
@@ -34,8 +35,8 @@ let expect_throws e f x =
 let run (name, f) =
   Printf.printf "Running %s ... %!" name;
   let result =
-    try f ()
-    with e ->
+    try f () with
+    | e ->
       let e = Exception.wrap e in
       let () = Printf.printf "Exception %s\n" (Exception.to_string e) in
       let () =
@@ -56,10 +57,10 @@ let for_all_non_shortcircuit tests f =
 let run_all (tests : (string * (unit -> bool)) list) =
   Printexc.record_backtrace true;
   exit
-    ( if for_all_non_shortcircuit tests run then
+    (if for_all_non_shortcircuit tests run then
       0
     else
-      1 )
+      1)
 
 let run_only tests names =
   let f =

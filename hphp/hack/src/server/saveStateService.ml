@@ -80,7 +80,8 @@ let load_class_decls
     in
     HackEventLogger.load_decls_end start_t;
     ignore @@ Hh_logger.log_duration msg start_t
-  with exn ->
+  with
+  | exn ->
     let stack = Printexc.get_backtrace () in
     HackEventLogger.load_decls_failure exn stack;
     Hh_logger.exc exn ~stack ~prefix:"Failed to load class declarations: "
@@ -179,7 +180,8 @@ let dump_class_decls genv env ~base_filename =
     in
     HackEventLogger.save_decls_end start_t telemetry;
     Hh_logger.log "Saved class declarations: %s" (Telemetry.to_string telemetry)
-  with e ->
+  with
+  | e ->
     let e = Exception.wrap e in
     HackEventLogger.save_decls_failure e;
     Hh_logger.error
@@ -208,7 +210,7 @@ let dump_naming_errors_decls
     Hh_logger.log "Saved file infos to '%s'" output_filename;
 
   (* Let's not write empty error files. *)
-  ( if Errors.is_empty errors then
+  (if Errors.is_empty errors then
     ()
   else
     let errors_in_phases =
@@ -216,7 +218,7 @@ let dump_naming_errors_decls
         ~f:(fun phase -> (phase, Errors.get_failed_files errors phase))
         [Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing]
     in
-    save_contents (get_errors_filename output_filename) errors_in_phases );
+    save_contents (get_errors_filename output_filename) errors_in_phases);
 
   if save_decls then dump_class_decls genv env ~base_filename:output_filename
 

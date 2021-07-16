@@ -66,7 +66,8 @@ let diff_hot_decls args =
       DiffHotDecls.diff control_shallow_decls test_shallow_decls
     in
     legacy_decls_dff || shallow_decls_dff
-  with Failure msg -> die msg
+  with
+  | Failure msg -> die msg
 
 let diff_naming_table args =
   let (control_naming_table, test_naming_table) =

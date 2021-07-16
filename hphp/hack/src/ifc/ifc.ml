@@ -56,10 +56,10 @@ let rec policy_occurrences pty =
       (cnt, inv, cov)
     in
     on_list
-      ( (pol f_self, emp, pol f_pc)
-      :: policy_occurrences f_ret
-      :: policy_occurrences f_exn
-      :: List.map ~f:swap_policy_occurrences f_args )
+      ((pol f_self, emp, pol f_pc)
+       ::
+       policy_occurrences f_ret
+       :: policy_occurrences f_exn :: List.map ~f:swap_policy_occurrences f_args)
   | Tcow_array { a_key; a_value; a_length; _ } ->
     on_list
       [
@@ -89,7 +89,8 @@ let rec subtype ~pos t1 t2 acc =
     | [] -> err msg
     | x :: l ->
       begin
-        try f x with SubtypeFailure (msg, _, _) -> first_ok ~f msg l
+        try f x with
+        | SubtypeFailure (msg, _, _) -> first_ok ~f msg l
       end
   in
   match (t1, t2) with
@@ -226,8 +227,8 @@ let rec subtype ~pos t1 t2 acc =
    exception *)
 let subtype =
   let wrap f ~pos t1 t2 acc =
-    try f ~pos t1 t2 acc
-    with SubtypeFailure (msg, tsub, tsup) ->
+    try f ~pos t1 t2 acc with
+    | SubtypeFailure (msg, tsub, tsup) ->
       fail "subtype: %s (%a <: %a)" msg Pp.ptype tsub Pp.ptype tsup
   in
   wrap subtype
@@ -506,9 +507,9 @@ let get_local_type ~pos env lid =
   match Env.get_local_type env lid with
   | None ->
     let name = Local_id.get_name lid in
-    ( if not (is_special_var name) then
+    (if not (is_special_var name) then
       let msg = "local " ^ name ^ " missing from env" in
-      Errors.unknown_information_flow pos msg );
+      Errors.unknown_information_flow pos msg);
     None
   | pty_opt -> pty_opt
 
@@ -849,7 +850,7 @@ let overwrite_nth_pty tuple_pty ix_exp pty =
   let ix = int_of_exp ix_exp in
   match tuple_pty with
   | Ttuple ptys ->
-    let ptys = List.take ptys ix @ (pty :: List.drop ptys (ix + 1)) in
+    let ptys = List.take ptys ix @ pty :: List.drop ptys (ix + 1) in
     Ttuple ptys
   | _ -> fail "policy type overwrite expected a tuple"
 
@@ -1157,9 +1158,9 @@ let rec expr ~pos renv (env : Env.expr_env) (((_, ety), epos, e) : Tast.expr) =
     let env = Env.acc env (subtype ~pos ty2 ty) in
     (env, ty)
   | A.Binop
-      ( ( Ast_defs.(
-            ( Eqeqeq | Diff2 | Barbar | Ampamp | Eqeq | Diff | Lt | Lte | Gt
-            | Gte | Cmp )) as op ),
+      ( (Ast_defs.(
+           ( Eqeqeq | Diff2 | Barbar | Ampamp | Eqeq | Diff | Lt | Lte | Gt
+           | Gte | Cmp )) as op),
         e1,
         e2 ) ->
     let (env, ty1) = expr env e1 in
@@ -2108,7 +2109,8 @@ let analyse_callable
       }
     in
     Some res
-  with IFCError (FlowInference s) ->
+  with
+  | IFCError (FlowInference s) ->
     if should_print ~user_mode:opts.opt_mode ~phase:Manalyse then
       Format.printf "Analyzing %s:@.  Failure: %s@.@." name s;
     None

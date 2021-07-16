@@ -34,15 +34,16 @@ let schema_map =
        aggregates = [Expression; Name];
        fields = [];
      }
-     :: {
-          kind_name = "error";
-          type_name = "error";
-          func_name = "error";
-          description = "error";
-          prefix = "error";
-          aggregates = [];
-          fields = [];
-        }
+     ::
+     {
+       kind_name = "error";
+       type_name = "error";
+       func_name = "error";
+       description = "error";
+       prefix = "error";
+       aggregates = [];
+       fields = [];
+     }
      :: schema
 
 type trivia_node = {

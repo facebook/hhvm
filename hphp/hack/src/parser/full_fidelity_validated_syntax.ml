@@ -80,8 +80,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       | _ -> validation_fail (Some SyntaxKind.ListItem) i
     in
     let validate_list l =
-      try Syntactic (List.map validate_item l)
-      with Validation_failure (Some SyntaxKind.ListItem, _) ->
+      try Syntactic (List.map validate_item l) with
+      | Validation_failure (Some SyntaxKind.ListItem, _) ->
         NonSyntactic (List.map validate l)
     in
     let result =

@@ -219,9 +219,9 @@ let get_ast_with_error ?(full = false) ctx path =
        some time, so we might as well get it now. *)
     compute_ast_with_error ~popt:(Provider_context.get_popt ctx) ~entry
   | (_, (Provider_backend.Analysis | Provider_backend.Shared_memory)) ->
+    (* Note that we might be looking up the shared ParserHeap directly, *)
+    (* or maybe into a local-change-stack due to quarantine. *)
     begin
-      (* Note that we might be looking up the shared ParserHeap directly, *)
-      (* or maybe into a local-change-stack due to quarantine. *)
       match (ParserHeap.get path, full) with
       | (None, true)
       | (Some (_, Decl), true) ->

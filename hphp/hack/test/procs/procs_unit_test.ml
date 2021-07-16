@@ -129,7 +129,8 @@ let multi_worker_with_failure_handler _workers () =
         in
         Printf.eprintf "Expected MultiWorker.call to throw, but it didn't!\n";
         false
-      with Coalesced_failures failures ->
+      with
+      | Coalesced_failures failures ->
         (* The first 5 buckets all failed; Last 5 buckets are still sleeping. *)
         Printf.eprintf "Got %d failed jobs. Expecting 5." (List.length failures);
         assert (List.length failures = 5);

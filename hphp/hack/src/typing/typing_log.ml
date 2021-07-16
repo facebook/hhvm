@@ -38,8 +38,8 @@ let lnewline () =
     cprint
       ~out_channel:!out_channel
       ~color_mode:Color_Auto
-      ( (Normal White, String.make (2 * !indentLevel) ' ')
-      :: List.rev ((Normal White, "\n") :: !logBuffer) );
+      ((Normal White, String.make (2 * !indentLevel) ' ')
+       :: List.rev ((Normal White, "\n") :: !logBuffer));
     Out_channel.flush !out_channel;
     accumulatedLength := 0;
     logBuffer := []
@@ -204,10 +204,10 @@ let rec log_value env value =
     lprintf
       (Normal Green)
       "%s"
-      ( if b then
+      (if b then
         "true"
       else
-        "false" )
+        "false")
   | List [] -> lprintf (Normal Green) "[]"
   | List (v :: vs) ->
     lprintf (Normal Green) "[";
@@ -292,11 +292,11 @@ let decl_type_as_value env ty = Atom (Typing_print.debug_decl env ty)
 
 let possibly_enforced_type_as_value env et =
   Atom
-    ( (match et.et_enforced with
-      | Enforced -> "enforced "
-      | PartiallyEnforced _ -> "partially enforced "
-      | Unenforced -> "")
-    ^ Typing_print.debug env et.et_type )
+    ((match et.et_enforced with
+     | Enforced -> "enforced "
+     | PartiallyEnforced _ -> "partially enforced "
+     | Unenforced -> "")
+    ^ Typing_print.debug env et.et_type)
 
 let return_info_as_value env return_info =
   let Typing_env_return_info.
@@ -425,15 +425,15 @@ let log_position p ?function_name f =
   else
     indentEnv
       ~color:(Bold Yellow)
-      ( (Pos.string @@ Pos.to_absolute p)
-      ^ ( if Int.equal n 1 then
+      ((Pos.string @@ Pos.to_absolute p)
+      ^ (if Int.equal n 1 then
           ""
         else
-          "[" ^ string_of_int n ^ "]" )
+          "[" ^ string_of_int n ^ "]")
       ^
       match function_name with
       | None -> ""
-      | Some n -> " {" ^ n ^ "}" )
+      | Some n -> " {" ^ n ^ "}")
       f
 
 let log_pos_or_decl p ?function_name f =
@@ -453,15 +453,15 @@ let log_pos_or_decl p ?function_name f =
   else
     indentEnv
       ~color:(Bold Yellow)
-      ( Pos_or_decl.show_as_absolute_file_line_characters p
-      ^ ( if Int.equal n 1 then
+      (Pos_or_decl.show_as_absolute_file_line_characters p
+      ^ (if Int.equal n 1 then
           ""
         else
-          "[" ^ string_of_int n ^ "]" )
+          "[" ^ string_of_int n ^ "]")
       ^
       match function_name with
       | None -> ""
-      | Some n -> " {" ^ n ^ "}" )
+      | Some n -> " {" ^ n ^ "}")
       f
 
 let log_subtype_prop env message prop =
@@ -515,17 +515,17 @@ let genv_as_value env genv =
     genv
   in
   make_map
-    ( [
-        ("return", return_info_as_value env return);
-        ("params", local_id_map_as_value (param_as_value env) params);
-        ( "condition_types",
-          smap_as_value (decl_type_as_value env) condition_types );
-        ("static", bool_as_value static);
-        ("val_kind", string_as_value (val_kind_to_string val_kind));
-        ("fun_kind", string_as_value (fun_kind_to_string fun_kind));
-        ("fun_is_ctor", bool_as_value fun_is_ctor);
-        ("this_internal", bool_as_value this_internal);
-      ]
+    ([
+       ("return", return_info_as_value env return);
+       ("params", local_id_map_as_value (param_as_value env) params);
+       ( "condition_types",
+         smap_as_value (decl_type_as_value env) condition_types );
+       ("static", bool_as_value static);
+       ("val_kind", string_as_value (val_kind_to_string val_kind));
+       ("fun_kind", string_as_value (fun_kind_to_string fun_kind));
+       ("fun_is_ctor", bool_as_value fun_is_ctor);
+       ("this_internal", bool_as_value this_internal);
+     ]
     @ (match this_module with
       | Some this_module -> [("this_module", string_as_value this_module)]
       | None -> [])
@@ -543,7 +543,7 @@ let genv_as_value env genv =
         ("self_id", string_as_value self_id);
         ("self_ty", type_as_value env self_ty);
       ]
-    | None -> [] )
+    | None -> [])
 
 let fun_tast_info_as_map = function
   | None -> make_map []

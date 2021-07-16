@@ -182,9 +182,9 @@ let type_facts_to_json name tf =
   in
   let members =
     ("name", J.JSON_String name)
-    :: ("kindOf", J.JSON_String (type_kind_to_string tf.kind))
-    :: ("flags", J.JSON_Number (string_of_int tf.flags))
-    :: members
+    ::
+    ("kindOf", J.JSON_String (type_kind_to_string tf.kind))
+    :: ("flags", J.JSON_Number (string_of_int tf.flags)) :: members
   in
   J.JSON_Object members
 
@@ -256,10 +256,11 @@ let facts_from_json : Hh_json.json -> facts option =
                 attributes =
                   List.fold_left
                     ~init:InvSMap.empty
-                    ~f:(fun acc -> function
-                      | (k, JSON_Array attrs_json) ->
-                        InvSMap.add k (list_from_jstr_array attrs_json) acc
-                      | _ -> acc)
+                    ~f:
+                      (fun acc -> function
+                        | (k, JSON_Array attrs_json) ->
+                          InvSMap.add k (list_from_jstr_array attrs_json) acc
+                        | _ -> acc)
                     key_values;
               }
             | _ -> acc)

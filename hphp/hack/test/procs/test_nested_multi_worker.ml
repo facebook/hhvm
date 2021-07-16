@@ -49,11 +49,11 @@ let multi_worker_nested workers ?(fail_inner = false) () =
   let interrupt_handler fd () =
     let () = read_exclamation_mark fd in
     if !counter > 100 then (
-      (try multi_worker_inner workers ~fail_inner
-       with _ ->
-         (* Try to ignore the exception that will be thrown when fail_inner is
-          * true - it should be re-raised for the main job anyway *)
-         ());
+      (try multi_worker_inner workers ~fail_inner with
+      | _ ->
+        (* Try to ignore the exception that will be thrown when fail_inner is
+         * true - it should be re-raised for the main job anyway *)
+        ());
       finish_at := Some (!counter + 100)
     );
     ((), MultiThreadedCall.Continue)
@@ -87,8 +87,8 @@ let multi_worker_nested workers ?(fail_inner = false) () =
 
 let multi_worker_nested_exn workers () =
   let did_throw = ref false in
-  (try assert (multi_worker_nested workers ~fail_inner:true ())
-   with MultiWorkerException -> did_throw := true);
+  (try assert (multi_worker_nested workers ~fail_inner:true ()) with
+  | MultiWorkerException -> did_throw := true);
   !did_throw
 
 let multi_worker_nested = multi_worker_nested ~fail_inner:false

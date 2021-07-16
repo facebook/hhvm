@@ -307,7 +307,7 @@ let rec class_ tenv c =
           if not (SMap.is_empty class_uninit_props) then
             Errors.not_initialized
               (p, snd c.c_name)
-              ( SMap.bindings class_uninit_props
+              (SMap.bindings class_uninit_props
               |> List.map ~f:(fun (name, _) ->
                      let pos =
                        class_prop_pos
@@ -315,7 +315,7 @@ let rec class_ tenv c =
                          name
                          (Typing_env.get_ctx tenv)
                      in
-                     (pos, name)) )
+                     (pos, name)))
     in
     let check_throws_or_init_all inits =
       match inits with
@@ -465,12 +465,13 @@ and stmt env acc st =
   | AssertEnv _ -> acc
 
 and toplevel env acc l =
-  (try List.fold_left ~f:(stmt env) ~init:acc l with InitReturn acc -> acc)
+  try List.fold_left ~f:(stmt env) ~init:acc l with
+  | InitReturn acc -> acc
 
 and block env acc l =
   let acc_before_block = acc in
-  try List.fold_left ~f:(stmt env) ~init:acc l
-  with InitReturn _ ->
+  try List.fold_left ~f:(stmt env) ~init:acc l with
+  | InitReturn _ ->
     (* The block has a return statement, forget what was initialized in it *)
     raise (InitReturn acc_before_block)
 

@@ -106,7 +106,8 @@ let profile_longer_than run ?(min_runs = 1) ?(retry = true) min_time =
       try
         run ();
         1
-      with e ->
+      with
+      | e ->
         if retry then
           0
         (* distinguish failures by letting run count stay 0 *)

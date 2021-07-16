@@ -421,8 +421,8 @@ let compile_pattern (ctx : Provider_context.t) (json : Hh_json.json) :
             error_at_keytrace
               ~keytrace:child_keytrace
               (Printf.sprintf
-                 ( "Unknown child type '%s'; "
-                 ^^ "valid child types for a node of kind '%s' are: %s" )
+                 ("Unknown child type '%s'; "
+                 ^^ "valid child types for a node of kind '%s' are: %s")
                  child_name
                  kind
                  (String.concat ~sep:", " valid_types))
@@ -627,7 +627,8 @@ let go
           match search ctx entry pattern with
           | Some result -> (path, result) :: acc
           | None -> acc
-        with e ->
+        with
+        | e ->
           let stack = Printexc.get_backtrace () in
           let prefix =
             Printf.sprintf

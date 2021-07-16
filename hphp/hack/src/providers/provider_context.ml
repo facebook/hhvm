@@ -126,20 +126,21 @@ let read_file_contents_exn (entry : entry) : string =
        let contents = Sys_utils.cat (Relative_path.to_absolute entry.path) in
        entry.contents <- Contents_from_disk contents;
        contents
-     with e ->
-       (* Be sure to capture the exception and mark the entry contents as
-          [Read_contents_from_disk_failed]. Otherwise, reading the contents may
-          not be idempotent:
+     with
+    | e ->
+      (* Be sure to capture the exception and mark the entry contents as
+         [Read_contents_from_disk_failed]. Otherwise, reading the contents may
+         not be idempotent:
 
-           1) We attempt to read the file from disk, but it doesn't exist, so we
-           raise an exception.
-           2) The file is created on disk.
-           3) We attempt to read the file from disk again. Now it exists, and we
-           return a different value.
-       *)
-       let e = Exception.wrap e in
-       entry.contents <- Read_contents_from_disk_failed e;
-       Exception.reraise e)
+          1) We attempt to read the file from disk, but it doesn't exist, so we
+          raise an exception.
+          2) The file is created on disk.
+          3) We attempt to read the file from disk again. Now it exists, and we
+          return a different value.
+      *)
+      let e = Exception.wrap e in
+      entry.contents <- Read_contents_from_disk_failed e;
+      Exception.reraise e)
   | Raise_exn_on_attempt_to_read ->
     failwith
       (Printf.sprintf
@@ -148,7 +149,8 @@ let read_file_contents_exn (entry : entry) : string =
   | Read_contents_from_disk_failed e -> Exception.reraise e
 
 let read_file_contents (entry : entry) : string option =
-  (try Some (read_file_contents_exn entry) with _ -> None)
+  try Some (read_file_contents_exn entry) with
+  | _ -> None
 
 let get_file_contents_if_present (entry : entry) : string option =
   match entry.contents with
@@ -182,8 +184,8 @@ let unset_is_quarantined_internal () : unit =
       (false, Utils.Callstack (Exception.get_current_callstack_string 99))
   | (false, Utils.Callstack stack) ->
     failwith
-      ( "unset_is_quarantined: but quarantine had already been released at\n"
-      ^ stack )
+      ("unset_is_quarantined: but quarantine had already been released at\n"
+      ^ stack)
 
 let get_telemetry (t : t) : Telemetry.t =
   let telemetry =
@@ -191,7 +193,7 @@ let get_telemetry (t : t) : Telemetry.t =
     |> Telemetry.object_
          ~key:"entries"
          ~value:
-           ( Telemetry.create ()
+           (Telemetry.create ()
            |> Telemetry.int_
                 ~key:"count"
                 ~value:(Relative_path.Map.cardinal t.entries)
@@ -206,7 +208,7 @@ let get_telemetry (t : t) : Telemetry.t =
                          get_file_contents_if_present entry
                          |> Option.value ~default:""
                        in
-                       acc + String.length contents)) )
+                       acc + String.length contents)))
     |> Telemetry.string_
          ~key:"backend"
          ~value:(t.backend |> Provider_backend.t_to_string)

@@ -273,13 +273,13 @@ let test_apple () =
   assert (
     match get_apple () with
     | Apple -> true
-    | _ -> false )
+    | _ -> false)
 
 let test_kiwi () =
   assert (
     match get_kiwi () with
     | Kiwi -> true
-    | _ -> false )
+    | _ -> false)
 
 let test_orange () =
   match get_orange () with
@@ -457,13 +457,13 @@ let test_convert_apple () =
   assert (
     match convert_to_ocamlrep Apple with
     | Apple -> true
-    | _ -> false )
+    | _ -> false)
 
 let test_convert_kiwi () =
   assert (
     match convert_to_ocamlrep Kiwi with
     | Kiwi -> true
-    | _ -> false )
+    | _ -> false)
 
 let test_convert_orange () =
   match convert_to_ocamlrep (Orange 39) with
@@ -643,13 +643,13 @@ let test_realloc_apple () =
   assert (
     match realloc_in_ocaml_heap Apple with
     | Apple -> true
-    | _ -> false )
+    | _ -> false)
 
 let test_realloc_kiwi () =
   assert (
     match realloc_in_ocaml_heap Kiwi with
     | Kiwi -> true
-    | _ -> false )
+    | _ -> false)
 
 let test_realloc_orange () =
   match realloc_in_ocaml_heap (Orange 39) with

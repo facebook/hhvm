@@ -79,8 +79,8 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
     in
     walk_list_and_gather_xhp env pos tyl
   | Tclass ((_, c), _, tyl) ->
+    (* Here's where we actually check the declaration *)
     begin
-      (* Here's where we actually check the declaration *)
       match Env.get_class env c with
       | Some class_ when Cls.is_xhp class_ -> (env, [(cty, tyl, class_)], [])
       | _ -> (env, [], [cty])

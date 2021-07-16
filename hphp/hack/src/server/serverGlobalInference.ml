@@ -179,10 +179,10 @@ module Mode_export_json = struct
     List.iter
       ~f:(fun var ->
         let key =
-          ( if !is_start then
+          (if !is_start then
             ","
           else
-            "" )
+            "")
           ^ Printf.sprintf "\n\"#%d\": %s" var (tyvar_to_json env var)
         in
         is_start := true;
@@ -495,14 +495,14 @@ let get_patches
           in
           modifier >>= fun modifier ->
           declarator_and_has_multiple >>= fun (declarator, has_multiple) ->
-          ( if has_multiple then begin
+          (if has_multiple then begin
             Hh_logger.log
               "%s"
-              ( "warning: generate patch: can't generate patch for"
-              ^ " class property with multiple declarators." );
+              ("warning: generate patch: can't generate patch for"
+              ^ " class property with multiple declarators.");
             None
           end else
-            Some () )
+            Some ())
           >>= fun () ->
           Option.first_some
             (match syntax declarator with
@@ -521,7 +521,7 @@ let get_patches
                type_map
                property_type)
           >>= fun type_str ->
-          ( if is_missing property_attribute_spec then
+          (if is_missing property_attribute_spec then
             position file modifier >>| fun pos ->
             [
               ServerRefactorTypes.(
@@ -530,10 +530,10 @@ let get_patches
           else (
             Hh_logger.log
               "%s"
-              ( "warning: generate patch: can't generate patch for"
-              ^ " class property that already has property attributes." );
+              ("warning: generate patch: can't generate patch for"
+              ^ " class property that already has property attributes.");
             None
-          ) )
+          ))
           >>= fun soft_patch ->
           position_exclusive file property_type >>| fun pos ->
           let patch =

@@ -75,8 +75,8 @@ let test_redirect_stdout_and_stderr_to_file_failure () =
           Printf.printf "out.%!";
           Printf.eprintf "err.%!";
           begin
-            try Sys_utils.redirect_stdout_and_stderr_to_file "."
-            with _ -> Printf.eprintf "exn.%!"
+            try Sys_utils.redirect_stdout_and_stderr_to_file "." with
+            | _ -> Printf.eprintf "exn.%!"
           end;
           Printf.printf "there.%!";
           Printf.eprintf "world.%!";

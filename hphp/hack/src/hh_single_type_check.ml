@@ -827,10 +827,10 @@ let parse_options () =
         !disallow_fun_and_cls_meth_pseudo_funcs
       ~po_disallow_inst_meth:!disallow_inst_meth
       ~tco_ifc_enabled:
-        ( if is_ifc_mode then
+        (if is_ifc_mode then
           ["/"]
         else
-          [] )
+          [])
       ~tco_use_direct_decl_parser:!use_direct_decl_parser
       ~po_enable_enum_classes:(not !disable_enum_classes)
       ~po_enable_enum_supertyping:!enable_enum_supertyping
@@ -1209,9 +1209,9 @@ let get_decls defs =
 let fail_comparison s =
   raise
     (Failure
-       ( Printf.sprintf "Comparing %s failed!\n" s
+       (Printf.sprintf "Comparing %s failed!\n" s
        ^ "It's likely that you added new positions to decl types "
-       ^ "without updating Decl_pos_utils.NormalizeSig\n" ))
+       ^ "without updating Decl_pos_utils.NormalizeSig\n"))
 
 let compare_typedefs t1 t2 =
   let t1 = Decl_pos_utils.NormalizeSig.typedef t1 in
@@ -1304,8 +1304,8 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
 (* Returns a list of Tast defs, along with associated type environments. *)
 let compute_tasts ctx files_info interesting_files :
     Errors.t
-    * ( Tast.program Relative_path.Map.t
-      * Typing_inference_env.t_global_with_pos list ) =
+    * (Tast.program Relative_path.Map.t
+      * Typing_inference_env.t_global_with_pos list) =
   let _f _k nast x =
     match (nast, x) with
     | (Some nast, Some _) -> Some nast
@@ -1467,8 +1467,8 @@ let dump_debug_deps dbg_deps =
 
 let dump_debug_glean_deps
     (deps :
-      ( Typing_deps.Dep.dependency Typing_deps.Dep.variant
-      * Typing_deps.Dep.dependent Typing_deps.Dep.variant )
+      (Typing_deps.Dep.dependency Typing_deps.Dep.variant
+      * Typing_deps.Dep.dependent Typing_deps.Dep.variant)
       HashSet.t) =
   let json_opt = Glean_dependency_graph_convert.convert_deps_to_json ~deps in
   match json_opt with
@@ -1601,15 +1601,16 @@ let handle_mode
         try
           let ifc_errors = time @@ lazy (Ifc_main.do_ ifc_opts file_info ctx) in
           if not (List.is_empty ifc_errors) then print_errors ifc_errors
-        with exc ->
+        with
+        | exc ->
           (* get the backtrace before doing anything else to be sure
              to get the one corresponding to exc *)
           let backtrace = Stdlib.Printexc.get_backtrace () in
           Stdlib.Printexc.register_printer (function
               | Ifc_types.IFCError err ->
                 Some
-                  ( Printf.sprintf "IFCError(%s)"
-                  @@ Ifc_types.show_ifc_error_ty err )
+                  (Printf.sprintf "IFCError(%s)"
+                  @@ Ifc_types.show_ifc_error_ty err)
               | _ -> None);
           Printf.printf
             "Uncaught exception: %s\n%s"
@@ -1836,8 +1837,8 @@ let handle_mode
     (match gi_solved with
     | None ->
       prerr_endline
-        ( "error: no patches generated as global"
-        ^ " inference is turend off (use --global-inference)" );
+        ("error: no patches generated as global"
+        ^ " inference is turend off (use --global-inference)");
       exit 1
     | Some gi_solved ->
       let patches =
@@ -2013,7 +2014,8 @@ let handle_mode
                 files_contents
                 individual_file_info;
               Out_channel.output_string oc ""
-            with e ->
+            with
+            | e ->
               let msg = Exn.to_string e in
               Out_channel.output_string oc msg);
         Out_channel.close oc)
@@ -2184,32 +2186,32 @@ let handle_mode
               Decl_defs.(
                 let modifiers =
                   [
-                    ( if Option.is_some mro.mro_required_at then
+                    (if Option.is_some mro.mro_required_at then
                       Some "requirement"
                     else if
                     is_set mro_via_req_extends mro.mro_flags
                     || is_set mro_via_req_impl mro.mro_flags
-                  then
+                   then
                       Some "synthesized"
                     else
-                      None );
-                    ( if is_set mro_xhp_attrs_only mro.mro_flags then
+                      None);
+                    (if is_set mro_xhp_attrs_only mro.mro_flags then
                       Some "xhp_attrs_only"
                     else
-                      None );
-                    ( if is_set mro_consts_only mro.mro_flags then
+                      None);
+                    (if is_set mro_consts_only mro.mro_flags then
                       Some "consts_only"
                     else
-                      None );
-                    ( if is_set mro_copy_private_members mro.mro_flags then
+                      None);
+                    (if is_set mro_copy_private_members mro.mro_flags then
                       Some "copy_private_members"
                     else
-                      None );
-                    ( if is_set mro_passthrough_abstract_typeconst mro.mro_flags
+                      None);
+                    (if is_set mro_passthrough_abstract_typeconst mro.mro_flags
                     then
                       Some "PAT"
                     else
-                      None );
+                      None);
                     Option.map mro.mro_trait_reuse ~f:(fun c ->
                         "trait reuse via " ^ c);
                   ]
@@ -2220,10 +2222,10 @@ let handle_mode
                   "%s%s%s"
                   name
                   targs
-                  ( if String.equal modifiers "" then
+                  (if String.equal modifiers "" then
                     ""
                   else
-                    Printf.sprintf " (%s)" modifiers ))
+                    Printf.sprintf " (%s)" modifiers))
             in
             let member_linearization =
               Sequence.map lin_members ~f:display |> Sequence.to_list

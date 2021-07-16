@@ -184,8 +184,8 @@ let compute_deps ctx fast (filel : Relative_path.t list) =
 (*****************************************************************************)
 
 let load_and_on_the_fly_decl_files ctx _ filel =
-  try on_the_fly_decl_files ctx filel
-  with e ->
+  try on_the_fly_decl_files ctx filel with
+  | e ->
     Printf.printf "Error: %s\n" (Exn.to_string e);
     Out_channel.flush stdout;
     raise e
@@ -196,7 +196,8 @@ let load_and_compute_deps ctx _acc (filel : Relative_path.t list) :
     let fast = OnTheFlyStore.load () in
     let (changed, to_redecl, to_recheck) = compute_deps ctx fast filel in
     (changed, to_redecl, to_recheck, List.length filel)
-  with e ->
+  with
+  | e ->
     Printf.printf "Error: %s\n" (Exn.to_string e);
     Out_channel.flush stdout;
     raise e
@@ -290,7 +291,8 @@ let parallel_on_the_fly_decl
     in
     OnTheFlyStore.clear ();
     (errors, changed, to_redecl, to_recheck)
-  with e ->
+  with
+  | e ->
     if SharedMem.is_heap_overflow () then
       Exit.exit Exit_status.Redecl_heap_overflow
     else

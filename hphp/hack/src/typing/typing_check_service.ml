@@ -228,9 +228,9 @@ let process_file
 let get_mem_telemetry () : Telemetry.t option =
   if SharedMem.hh_log_level () > 0 then
     Some
-      ( Telemetry.create ()
+      (Telemetry.create ()
       |> Telemetry.object_ ~key:"gc" ~value:(Telemetry.quick_gc_stat ())
-      |> Telemetry.object_ ~key:"shmem" ~value:(SharedMem.get_telemetry ()) )
+      |> Telemetry.object_ ~key:"shmem" ~value:(SharedMem.get_telemetry ()))
   else
     None
 
@@ -266,8 +266,10 @@ let profile_log
           Telemetry.diff ~all:false ~prev:end_counters counters)
     in
     let filesize_opt =
-      try Some (Relative_path.to_absolute file.path |> Unix.stat).Unix.st_size
-      with Unix.Unix_error _ -> None
+      try
+        Some (Relative_path.to_absolute file.path |> Unix.stat).Unix.st_size
+      with
+      | Unix.Unix_error _ -> None
     in
     let deferment_telemetry =
       Telemetry.create ()
@@ -298,17 +300,17 @@ let profile_log
     Hh_logger.log
       "%s [%s] %fs %dMiB->%dMiB%s"
       (Relative_path.suffix file.path)
-      ( if List.is_empty result.deferred_decls then
+      (if List.is_empty result.deferred_decls then
         "type-check"
       else
-        "discover-decl-deps" )
+        "discover-decl-deps")
       (Option.value duration_second_run ~default:duration)
       start_heap_mb
       end_heap_mb
-      ( if SharedMem.hh_log_level () > 0 then
+      (if SharedMem.hh_log_level () > 0 then
         "\n" ^ Telemetry.to_string telemetry
       else
-        "" )
+        "")
   end
 
 let read_counters () : Counters.time_in_sec * Telemetry.t =
@@ -513,7 +515,7 @@ let process_files
       in
       let progress =
         {
-          completed = (fn :: check_fns) @ progress.completed;
+          completed = fn :: check_fns @ progress.completed;
           remaining = fns;
           deferred = List.concat [deferred; progress.deferred];
         }
@@ -1033,10 +1035,10 @@ module TestMocking = struct
 end
 
 module Mocking =
-( val if Injector_config.use_test_stubbing then
-        (module TestMocking : Mocking_sig)
-      else
-        (module NoMocking : Mocking_sig) )
+(val if Injector_config.use_test_stubbing then
+       (module TestMocking : Mocking_sig)
+     else
+       (module NoMocking : Mocking_sig))
 
 let should_process_sequentially
     (opts : TypecheckerOptions.t) (fnl : file_computation BigList.t) : bool =

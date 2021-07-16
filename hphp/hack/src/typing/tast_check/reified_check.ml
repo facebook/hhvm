@@ -76,13 +76,13 @@ let verify_targ_valid env reification tparam targ =
   (* There is some subtlety here. If a type *parameter* is declared reified,
    * even if it is soft, we require that the argument be concrete or reified, not soft
    * reified or erased *)
-  ( if is_reified tparam then
+  (if is_reified tparam then
     match tparam.tp_reified with
     | Nast.Reified
     | Nast.SoftReified ->
       let emit_error = Errors.invalid_reified_argument tparam.tp_name in
       validator#validate_hint env (snd targ) ~reification emit_error
-    | Nast.Erased -> () );
+    | Nast.Erased -> ());
 
   if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
     Typing_enforceable_hint.validate_hint
@@ -94,7 +94,7 @@ let verify_targ_valid env reification tparam targ =
     valid_newable_hint env tparam.tp_name (snd targ)
 
 let verify_call_targs env expr_pos decl_pos tparams targs =
-  ( if tparams_has_reified tparams then
+  (if tparams_has_reified tparams then
     let tparams_length = List.length tparams in
     let targs_length = List.length targs in
     if Int.( <> ) tparams_length targs_length then
@@ -103,7 +103,7 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
       else
         (* mismatches with targs_length > 0 are not specific to reification and handled
                   elsewhere *)
-        () );
+        ());
   let all_wildcards = List.for_all ~f:is_wildcard targs in
   if all_wildcards && tparams_has_reified tparams then
     Errors.require_args_reify decl_pos expr_pos

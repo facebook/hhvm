@@ -33,7 +33,8 @@ when we hand off responsibility for closing the FD. Therefore: we call this
 method to ensure an FD is closed, and we just silently gobble up the EBADF
 if someone else already closed it. *)
 let ensure_fd_closed (fd : Unix.file_descr) : unit =
-  (try Unix.close fd with Unix.Unix_error (Unix.EBADF, _, _) -> ())
+  try Unix.close fd with
+  | Unix.Unix_error (Unix.EBADF, _, _) -> ()
 
 (** This module is to help using Unix "sendmsg" to handoff the client FD
 to the server. It's not entirely clear whether it's safe for us in the
@@ -176,7 +177,8 @@ struct
           Exit.exit Exit_status.Interrupted
         end
         [Sys.sigint; Sys.sigquit; Sys.sigterm; Sys.sighup]
-    with _ -> Hh_logger.log "Failed to set signal handler"
+    with
+    | _ -> Hh_logger.log "Failed to set signal handler"
 
   let sleep_and_check socket =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
@@ -201,8 +203,8 @@ struct
         None
     ) else (
       Hh_logger.log
-        ( "Not starting first server. "
-        ^^ "Starting will be triggered by informant later." );
+        ("Not starting first server. "
+        ^^ "Starting will be triggered by informant later.");
       Not_yet_started
     )
 
@@ -301,8 +303,8 @@ struct
     (* Newer clients send version in a json object.
        Older clients sent just a client_version string *)
     if String_utils.string_starts_with s "{" then
-      try Hh_json.json_of_string s
-      with e -> raise (Malformed_build_id (Exn.to_string e))
+      try Hh_json.json_of_string s with
+      | e -> raise (Malformed_build_id (Exn.to_string e))
     else
       Hh_json.JSON_Object [("client_version", Hh_json.JSON_String s)]
 
@@ -404,11 +406,11 @@ struct
     let kill_signal_time = Unix.gettimeofday () in
     (* If we detect out of date client, should always kill server and exit
      * monitor, even if messaging to channel or event logger fails. *)
-    (try client_out_of_date_ client_fd mismatch_info
-     with e ->
-       Hh_logger.log
-         "Handling client_out_of_date threw with: %s"
-         (Exn.to_string e));
+    (try client_out_of_date_ client_fd mismatch_info with
+    | e ->
+      Hh_logger.log
+        "Handling client_out_of_date threw with: %s"
+        (Exn.to_string e));
     wait_for_server_exit_with_check env.server kill_signal_time;
     Exit.exit Exit_status.Build_id_mismatch
 
@@ -466,8 +468,8 @@ struct
         | Died_config_changed
         | Not_yet_started ->
           Hh_logger.log
-            ( "Unreachable state. Server should be alive after trying a restart"
-            ^^ " from Died_config_changed state" );
+            ("Unreachable state. Server should be alive after trying a restart"
+            ^^ " from Died_config_changed state");
           failwith
             "Failed starting server transitioning off Died_config_changed state"
       ) else (
@@ -559,7 +561,8 @@ struct
         msg_to_channel client_fd Connection_ok;
         handle_monitor_rpc env client_fd
       )
-    with Malformed_build_id _ as exn ->
+    with
+    | Malformed_build_id _ as exn ->
       let e = Exception.wrap exn in
       HackEventLogger.malformed_build_id e;
       Hh_logger.log "Malformed Build ID - %s" (Exception.to_string e);

@@ -42,7 +42,8 @@ let is_signed data =
   try
     let (_ : int) = Str.search_forward signing_regexp data 0 in
     true
-  with Not_found -> false
+  with
+  | Not_found -> false
 
 type sign_check_response =
   | Sign_ok

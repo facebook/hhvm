@@ -59,8 +59,8 @@ let child_1_process socket_fd =
   (* Receive the fd from parent process which will be used to get messages
    * from child 2. *)
   let upward_fd_2 =
-    try Libancillary.ancil_recv_fd socket_fd
-    with Libancillary.Receiving_Fd_Exception err ->
+    try Libancillary.ancil_recv_fd socket_fd with
+    | Libancillary.Receiving_Fd_Exception err ->
       Printf.eprintf "Child 1: Failed to receive fd: %s. Exiting.\n" err;
       exit 1
   in
@@ -130,7 +130,8 @@ let test_err () =
     let _upward : Unix.file_descr = Libancillary.ancil_recv_fd upward_fd_1 in
     Printf.eprintf "Expected an exception to be thrown: exiting\n";
     exit 1
-  with Libancillary.Receiving_Fd_Exception err ->
+  with
+  | Libancillary.Receiving_Fd_Exception err ->
     Printf.eprintf "Failed to receive fd: %s; as expected.\n" err;
     ()
 

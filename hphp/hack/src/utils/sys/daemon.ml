@@ -148,8 +148,8 @@ end = struct
    * Might raise {!Context_not_found} *)
   let get_context () =
     let entry =
-      try Unix.getenv "HH_SERVER_DAEMON"
-      with Caml.Not_found -> raise Context_not_found
+      try Unix.getenv "HH_SERVER_DAEMON" with
+      | Caml.Not_found -> raise Context_not_found
     in
     if String.equal entry "" then raise Context_not_found;
     let (in_handle, out_handle, param) =
@@ -161,7 +161,8 @@ end = struct
         Sys_utils.close_in_no_fail "Daemon.get_context" ic;
         Sys.remove file;
         res
-      with exn ->
+      with
+      | exn ->
         failwith ("Can't find daemon parameters: " ^ Printexc.to_string exn)
     in
     ( entry,
@@ -192,7 +193,8 @@ let exec entry param ic oc =
   try
     f param (ic, oc);
     exit 0
-  with e ->
+  with
+  | e ->
     prerr_endline (Printexc.to_string e);
     Printexc.print_backtrace stderr;
     exit 2
@@ -260,10 +262,11 @@ let fork
          Unix.close log_stderr;
        f param (child_in, child_out);
        exit 0
-     with e ->
-       prerr_endline (Printexc.to_string e);
-       Printexc.print_backtrace stderr;
-       exit 1)
+     with
+    | e ->
+      prerr_endline (Printexc.to_string e);
+      Printexc.print_backtrace stderr;
+      exit 1)
   | pid ->
     (* parent *)
     Timeout.close_in child_in;
@@ -288,7 +291,8 @@ let spawn
   Unix.close child_in;
   Unix.close child_out;
   let close_if_open fd =
-    (try Unix.close fd with Unix.Unix_error (Unix.EBADF, _, _) -> ())
+    try Unix.close fd with
+    | Unix.Unix_error (Unix.EBADF, _, _) -> ()
   in
   if stdin <> Unix.stdin then close_if_open stdin;
   if stdout <> Unix.stdout then close_if_open stdout;
@@ -325,7 +329,8 @@ let check_entry_point () =
     let (entry, param, (ic, oc)) = Entry.get_context () in
     Entry.clear_context ();
     exec entry param ic oc
-  with Entry.Context_not_found -> ()
+  with
+  | Entry.Context_not_found -> ()
 
 let close { channels = (ic, oc); _ } =
   Timeout.close_in ic;

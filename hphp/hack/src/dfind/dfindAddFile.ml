@@ -44,7 +44,8 @@ let get_files path dir_handle =
         paths := SSet.add path !paths
     done;
     assert false
-  with _ -> !paths
+  with
+  | _ -> !paths
 
 (* Gets rid of the '/' or '\' at the end of a directory name *)
 let normalize path =
@@ -93,7 +94,8 @@ let is_blacklisted path =
         else
           ());
     false
-  with Exit -> true
+  with
+  | Exit -> true
 
 let rec add_file links env path =
   let path = normalize path in
@@ -128,7 +130,8 @@ and add_new_file links env path =
       call (wrap Unix.opendir) path >>= fun dir_handle ->
       let files = get_files path dir_handle in
       SSet.iter (fun x -> ignore (add_file links env x)) files;
-      (try Unix.closedir dir_handle with _ -> ());
+      (try Unix.closedir dir_handle with
+      | _ -> ());
       let prev_files =
         match SMap.find_opt path env.dirs with
         | Some files -> files

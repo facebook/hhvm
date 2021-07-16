@@ -159,9 +159,9 @@ let lazy_saved_state_init genv env root load_state_approach profiling =
   | Ok (res, ({ state_distance; _ }, _)) ->
     (post_init genv res, Load_state_succeeded state_distance)
   | Error err ->
-    let ( ServerInitTypes.
-            { message; auto_retry; stack = Utils.Callstack stack; environment }
-        as verbose_error ) =
+    let (ServerInitTypes.
+           { message; auto_retry; stack = Utils.Callstack stack; environment }
+        as verbose_error) =
       load_state_error_to_verbose_string err
     in
     let (next_step_descr, next_step) =

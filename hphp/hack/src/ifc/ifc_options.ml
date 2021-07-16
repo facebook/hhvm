@@ -30,7 +30,7 @@ let parse ~mode ~lattice =
   with
   | Lattice.Invalid_security_lattice ->
     Error
-      ( "option error: lattice specification should be basic flux "
-      ^ "constraints, e.g., `A < B` separated by `;`" )
+      ("option error: lattice specification should be basic flux "
+      ^ "constraints, e.g., `A < B` separated by `;`")
   | Invalid_ifc_mode mode ->
     Error (Printf.sprintf "option error: %s is not a recognised mode" mode)

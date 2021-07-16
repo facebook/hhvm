@@ -40,21 +40,22 @@ module Filter = struct
 end
 
 module MemberFilters = struct
-  include SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Filter)
-            (FilterCapacity)
+  include
+    SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Filter)
+      (FilterCapacity)
 
   let add
-      ( {
-          sc_name = (_, cls_name);
-          sc_consts;
-          sc_typeconsts;
-          sc_props;
-          sc_sprops;
-          sc_constructor;
-          sc_static_methods;
-          sc_methods;
-          _;
-        } as cls ) =
+      ({
+         sc_name = (_, cls_name);
+         sc_consts;
+         sc_typeconsts;
+         sc_props;
+         sc_sprops;
+         sc_constructor;
+         sc_static_methods;
+         sc_methods;
+         _;
+       } as cls) =
     (* We add the name of all (type) constants, properties and methods in
      * order to de-dupe names. This will ensure we have an accurate count
      * when determining the capacity of the bloom filter we need. *)

@@ -90,7 +90,8 @@ type env = {
 }
 
 let ignore_unix_epipe f x =
-  (try f x with Unix.Unix_error (Unix.EPIPE, _, _) -> ())
+  try f x with
+  | Unix.Unix_error (Unix.EPIPE, _, _) -> ()
 
 (**
  * This allows the repo itself to turn on-or-off this Watchman Event
@@ -233,7 +234,8 @@ let get_new_clients socket =
         try
           let (fd, _) = Unix.accept socket in
           fd :: acc
-        with Unix.Unix_error _ -> acc
+        with
+        | Unix.Unix_error _ -> acc
       in
       get_all_clients_nonblocking socket acc
   in
@@ -258,7 +260,8 @@ let process_client_ env client =
   env
 
 let process_client env client =
-  (try process_client_ env client with Unix.Unix_error _ -> env)
+  try process_client_ env client with
+  | Unix.Unix_error _ -> env
 
 let check_new_connections env =
   let new_clients = get_new_clients env.socket in
@@ -313,8 +316,8 @@ let init root =
         }
 
 let to_channel_no_exn oc data =
-  try Daemon.to_channel oc ~flush:true data
-  with e ->
+  try Daemon.to_channel oc ~flush:true data with
+  | e ->
     let stack = Printexc.get_backtrace () in
     Hh_logger.exc ~prefix:"Warning: writing to channel failed" ~stack e
 
@@ -324,8 +327,8 @@ let main root =
   match result with
   | Ok env ->
     begin
-      try serve env
-      with e ->
+      try serve env with
+      | e ->
         let raw_stack = Caml.Printexc.get_raw_backtrace () in
         let stack = Caml.Printexc.raw_backtrace_to_string raw_stack in
         let () =
@@ -342,7 +345,8 @@ let main root =
 
 let log_file root =
   let log_link = WatchmanEventWatcherConfig.log_link root in
-  (try Sys.rename log_link (log_link ^ ".old") with _ -> ());
+  (try Sys.rename log_link (log_link ^ ".old") with
+  | _ -> ());
   Sys_utils.make_link_of_timestamped log_link
 
 let daemon_main_ root oc =
@@ -361,8 +365,8 @@ let daemon_main_ root oc =
 
 let daemon_main root (_ic, oc) =
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
-  try daemon_main_ root oc
-  with exn ->
+  try daemon_main_ root oc with
+  | exn ->
     let e = Exception.wrap exn in
     HackEventLogger.watchman_uncaught_exception e
 

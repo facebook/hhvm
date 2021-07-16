@@ -33,7 +33,8 @@ let unix_socket sock_name =
             close_out oc
         in
         sock)
-  with Unix.Unix_error (err, _, _) ->
+  with
+  | Unix.Unix_error (err, _, _) ->
     Printf.eprintf "%s\n" (Unix.error_message err);
     Exit.exit Exit_status.Socket_error
 

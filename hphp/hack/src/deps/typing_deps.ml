@@ -388,8 +388,8 @@ module NamingHash = struct
 
   let unsupported (variant : 'a Dep.variant) =
     failwith
-      ( "Unsupported dependency variant type for naming table hash: "
-      ^ Dep.variant_to_string variant )
+      ("Unsupported dependency variant type for naming table hash: "
+      ^ Dep.variant_to_string variant)
 
   let get_dep_variant_name : type a. a Dep.variant -> string =
     let open Dep in

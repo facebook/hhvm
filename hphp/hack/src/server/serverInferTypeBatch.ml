@@ -40,7 +40,7 @@ let result_to_string result (fn, line, char, range_end) =
         [
           ( "position",
             JSON_Object
-              ( [("file", JSON_String (Relative_path.to_absolute fn))]
+              ([("file", JSON_String (Relative_path.to_absolute fn))]
               @
               match range_end with
               | None -> [("line", int_ line); ("character", int_ char)]
@@ -48,7 +48,7 @@ let result_to_string result (fn, line, char, range_end) =
                 let pos l c =
                   JSON_Object [("line", int_ l); ("character", int_ c)]
                 in
-                [("start", pos line char); ("end", pos end_line end_char)] ) );
+                [("start", pos line char); ("end", pos end_line end_char)]) );
           (match result with
           | Ok ty -> ("type", Option.value ty ~default:JSON_Null)
           | Error e -> ("error", JSON_String e));

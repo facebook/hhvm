@@ -428,8 +428,8 @@ let describe_ty ~is_coeffect : env -> internal_type -> string =
     describe_ty_default
   else
     fun env -> function
-  | LoclType ty -> Typing_coeffects.pretty env ty
-  | ty -> describe_ty_default env ty
+     | LoclType ty -> Typing_coeffects.pretty env ty
+     | ty -> describe_ty_default env ty
 
 let rec describe_ty_super ~is_coeffect env ty =
   let describe_ty_super = describe_ty_super ~is_coeffect in
@@ -461,8 +461,8 @@ let rec describe_ty_super ~is_coeffect env ty =
           | [] -> ""
           | tyl ->
             "of type "
-            ^ ( String.concat ~sep:" & " (List.map tyl ~f:print)
-              |> Markdown_lite.md_codify )
+            ^ (String.concat ~sep:" & " (List.map tyl ~f:print)
+              |> Markdown_lite.md_codify)
         in
         let cstr_descr =
           String.concat
@@ -630,7 +630,7 @@ and default_subtype
         | (_, Tgeneric (name_sub, tyargs)) ->
           (* TODO(T69551141) handle type arguments. right now, just passin tyargs to
              Env.get_upper_bounds *)
-          ( if subtype_env.ignore_generic_params then
+          (if subtype_env.ignore_generic_params then
             default env
           else
             (* If we've seen this type parameter before then we must have gone
@@ -695,7 +695,7 @@ and default_subtype
               env
               |> try_bounds
                    (Typing_set.elements
-                      (Env.get_upper_bounds env name_sub tyargs)) )
+                      (Env.get_upper_bounds env name_sub tyargs)))
           |> (* Turn error into a generic error about the type parameter *)
           if_unsat (invalid ~fail)
         | (_, Tdynamic) when coercing_from_dynamic subtype_env -> valid env
@@ -1498,7 +1498,7 @@ and simplify_subtype_i
                          SN.UserAttributes.uaNoRequireDynamic
                          tp.tp_user_attributes)
                   in
-                  ( if require_dynamic then
+                  (if require_dynamic then
                     let upper_bounds =
                       List.filter_map tp.tp_constraints ~f:(fun (c, ty) ->
                           match c with
@@ -1511,7 +1511,7 @@ and simplify_subtype_i
                     in
                     MakeType.intersection r_dynamic (ty_super :: upper_bounds)
                   else
-                    tyarg )
+                    tyarg)
                   :: replaceArgs tparams tyargs env
               in
               (* If the class is marked <<__SupportDynamicType>> then for any
@@ -3095,7 +3095,7 @@ and sub_type_inner
     ~level:1
     ~this_ty
     ~function_name:
-      ( "sub_type_inner"
+      ("sub_type_inner"
       ^
       match subtype_env.coerce with
       | Some TL.CoerceToDynamic -> " (dynamic aware)"
@@ -3108,7 +3108,7 @@ and sub_type_inner
         " (treat dynamic as " ^ cn ^ ")"
       | Some (TL.PartialCoerceFromDynamic (ArraykeyStyle, _)) ->
         " (treat dynamic as arraykey)"
-      | None -> "" )
+      | None -> "")
     env
     ty_sub
     ty_super;

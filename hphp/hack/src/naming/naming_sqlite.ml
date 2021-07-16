@@ -32,8 +32,8 @@ let empty_save_result = { files_added = 0; symbols_added = 0; errors = [] }
 
 let insert_safe ~name ~kind_of_type ~hash ~canon_hash f :
     (unit, insertion_error) result =
-  try Ok (f ())
-  with e ->
+  try Ok (f ()) with
+  | e ->
     let origin_exception = Exception.wrap e in
     Error { canon_hash; hash; kind_of_type; name; origin_exception }
 
@@ -889,7 +889,8 @@ let save_file_infos db_name file_info_map ~base_content_version =
     if not @@ Sqlite3.db_close db then
       failwith @@ Printf.sprintf "Could not close database at %s" db_name;
     save_result
-  with e ->
+  with
+  | e ->
     Sqlite3.exec db "END TRANSACTION;" |> check_rc db;
     raise e
 
@@ -971,8 +972,8 @@ let get_file_info (db_path : db_path) path =
 (* Same as `get_db_and_stmt_cache` but with logging for when opening the
 database fails. *)
 let sqlite_exn_wrapped_get_db_and_stmt_cache ~case_insensitive db_path name =
-  try get_db_and_stmt_cache db_path
-  with Sqlite3.Error _ as exn ->
+  try get_db_and_stmt_cache db_path with
+  | Sqlite3.Error _ as exn ->
     Hh_logger.info
       "Sqlite_db_open_bug: couldn't open the DB at `%s` while getting the position of `%s` with case insensitivity `%b`\n"
       (show_db_path db_path)

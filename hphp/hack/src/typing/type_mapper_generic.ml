@@ -231,9 +231,9 @@ class virtual ['env] tvar_substituting_type_mapper =
           * ('env -> Reason.t -> int -> 'env * locl_ty)
           * ('env -> int -> locl_ty -> 'env) ->
           locl_ty ->
-          ( 'env
+          ('env
           * ('env -> Reason.t -> int -> 'env * locl_ty)
-          * ('env -> int -> locl_ty -> 'env) )
+          * ('env -> int -> locl_ty -> 'env))
           * locl_ty
   end
 

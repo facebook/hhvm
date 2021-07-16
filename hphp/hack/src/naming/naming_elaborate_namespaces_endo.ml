@@ -94,8 +94,8 @@ let handle_special_calls env call =
         targs,
         [(ty, p1, String cl); meth],
         unpacked_element )
-    when ( String.equal cn SN.AutoimportedFunctions.meth_caller
-         || String.equal cn SN.AutoimportedFunctions.class_meth )
+    when (String.equal cn SN.AutoimportedFunctions.meth_caller
+         || String.equal cn SN.AutoimportedFunctions.class_meth)
          && (not @@ in_codegen env) ->
     let cl = Utils.add_ns cl in
     Call (id, targs, [(ty, p1, String cl); meth], unpacked_element)

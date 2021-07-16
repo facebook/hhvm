@@ -320,8 +320,8 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) =
               | [_; row; column] ->
                 { line = int_of_string row; column = int_of_string column }
               | _ -> failwith "Invalid test file: no flags found"
-            with Caml.Not_found ->
-              failwith "Invalid test file: no flags found"
+            with
+            | Caml.Not_found -> failwith "Invalid test file: no flags found"
           in
           let result =
             FfpAutocompleteService.auto_complete

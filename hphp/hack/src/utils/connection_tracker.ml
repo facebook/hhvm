@@ -77,8 +77,8 @@ let track ~(key : key) ?(time : float option) (t : t) : t =
     "[%s] Connection_tracker.%s%s"
     (log_id t)
     key
-    ( if String.equal (Utils.timestring tnow) (Utils.timestring time) then
+    (if String.equal (Utils.timestring tnow) (Utils.timestring time) then
       ""
     else
-      ", was at " ^ Utils.timestring time );
+      ", was at " ^ Utils.timestring time);
   { t with telemetry = Telemetry.float_ t.telemetry ~key ~value:time }

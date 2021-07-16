@@ -77,8 +77,8 @@ let rec reinfer_type_to_string_exn ty =
   | _ -> raise Gi_reinfer_type_not_supported
 
 let reinfer_type_to_string_opt ty =
-  try Some (reinfer_type_to_string_exn ty)
-  with Gi_reinfer_type_not_supported -> None
+  try Some (reinfer_type_to_string_exn ty) with
+  | Gi_reinfer_type_not_supported -> None
 
 let must_reinfer_type tcopt (ty : decl_phase ty_) =
   let reinfer_types = GlobalOptions.tco_gi_reinfer_types tcopt in

@@ -214,12 +214,12 @@ let go
           | Some delta -> delta
           | None ->
             failwith
-              ( "Input path %s was not in the map of `file_deltas`. "
+              ("Input path %s was not in the map of `file_deltas`. "
               ^ "This is an internal invariant failure -- please report it. "
               ^ "This means that we can't process it, "
               ^ "as we haven't calculated its `FileInfo.t`. "
               ^ "The caller should have included any elements in `input_files` "
-              ^ "when performing the calculation of `file_deltas`." )
+              ^ "when performing the calculation of `file_deltas`.")
         in
         let (file_deps, explanation) =
           calculate_dep_set_for_path

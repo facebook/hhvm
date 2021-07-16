@@ -220,7 +220,8 @@ let rec intersect env ~r ty1 ty2 =
             else
               make_intersection env r [ty1; ty2]
           | _ -> make_intersection env r [ty1; ty2]
-        with Nothing -> (env, MkType.nothing r)
+        with
+        | Nothing -> (env, MkType.nothing r)
       in
       Typing_log.log_intersection ~level:2 env r ty1 ty2 ~inter_ty;
       (env, inter_ty)

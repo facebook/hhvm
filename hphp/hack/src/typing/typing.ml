@@ -1759,9 +1759,9 @@ and fun_ ?(abstract = false) ?(disable = false) env return pos named_body f_kind
           let () =
             Errors.internal_error
               pos
-              ( "Type inference for this function has been disabled by the "
+              ("Type inference for this function has been disabled by the "
               ^ SN.UserAttributes.uaDisableTypecheckerInternal
-              ^ " attribute" )
+              ^ " attribute")
           in
           block env []
         else
@@ -2477,7 +2477,8 @@ and expr
       ~allow_awaitable
       env
       e
-  with Inf.InconsistentTypeVarState _ as e ->
+  with
+  | Inf.InconsistentTypeVarState _ as e ->
     (* we don't want to catch unwanted exceptions here, eg Timeouts *)
     let typechecking_is_deferring = Deferred_decl.is_deferring () in
     Errors.exception_occurred ~typechecking_is_deferring p (Exception.wrap e);
@@ -2739,14 +2740,14 @@ and expr_
         (Cls.tparams class_)
     | None ->
       let typechecking_is_deferring = Deferred_decl.is_deferring () in
-      ( if not typechecking_is_deferring then
+      (if not typechecking_is_deferring then
         let desc = "Missing collection decl during type parameter check" in
         Telemetry.(create () |> string_ ~key:"class name" ~value:name)
         |> Errors.invariant_violation
              p
              ~typechecking_is_deferring
              ~desc
-             ~report_to_user:false );
+             ~report_to_user:false);
       (* Continue typechecking without performing the check on a best effort
          basis. *)
       env
@@ -4059,10 +4060,10 @@ and expr_
               {
                 ft with
                 ft_ret =
-                  ( if is_explicit_ret then
+                  (if is_explicit_ret then
                     declared_ft.ft_ret
                   else
-                    MakeType.unenforced ty );
+                    MakeType.unenforced ty);
               } )
       in
       (env, tefun, inferred_ty)
@@ -4165,10 +4166,10 @@ and expr_
         if all_explicit_params && explicit_variadic_param_or_non_variadic then (
           Typing_log.increment_feature_count
             env
-            ( if List.is_empty f.f_params then
+            (if List.is_empty f.f_params then
               FL.Lambda.no_params
             else
-              FL.Lambda.explicit_params );
+              FL.Lambda.explicit_params);
           check_body_under_known_params env declared_ft
         ) else (
           match expected with
@@ -4838,10 +4839,10 @@ and closure_make
     Tast.make_typed_expr
       lambda_pos
       ty
-      ( if is_anon then
+      (if is_anon then
         Aast.Efun (tfun_, idl)
       else
-        Aast.Lfun (tfun_, idl) )
+        Aast.Lfun (tfun_, idl))
   in
   let env = Env.set_tyvar_variance env ty in
   (env, (te, hret, ft))
@@ -5021,11 +5022,11 @@ and new_object
     let should_forget_fakes_acc =
       should_forget_fakes_acc || should_forget_fakes
     in
-    ( if equal_consistent_kind (snd (Cls.construct class_info)) Inconsistent then
+    (if equal_consistent_kind (snd (Cls.construct class_info)) Inconsistent then
       match cid with
       | CIstatic -> Errors.new_inconsistent_construct p cname `static
       | CIexpr _ -> Errors.new_inconsistent_construct p cname `classname
-      | _ -> () );
+      | _ -> ());
     match cid with
     | CIparent ->
       let (env, ctor_fty) =
@@ -5068,8 +5069,7 @@ and new_object
         (c_ty, ctor_fty) )
   in
   let (had_dynamic, classes) =
-    List.fold classes ~init:(false, []) ~f:(fun (seen_dynamic, classes) ->
-      function
+    List.fold classes ~init:(false, []) ~f:(fun (seen_dynamic, classes) -> function
       | `Dynamic -> (true, classes)
       | `Class (cname, class_info, c_ty) ->
         (seen_dynamic, (cname, class_info, c_ty) :: classes))
@@ -5232,8 +5232,8 @@ and check_shape_keys_validity :
           (strip_ns cls1);
       if
         not
-          ( Typing_solver.is_sub_type env ty1 ty2
-          && Typing_solver.is_sub_type env ty2 ty1 )
+          (Typing_solver.is_sub_type env ty1 ty2
+          && Typing_solver.is_sub_type env ty2 ty1)
       then
         Errors.shape_field_type_mismatch
           key_pos
@@ -5861,8 +5861,8 @@ and dispatch_call
                 checked_unset_error
                   p
                   (Reason.to_string
-                     ( "This is "
-                     ^ Typing_print.error ~ignore_dynamic:true env ty )
+                     ("This is "
+                     ^ Typing_print.error ~ignore_dynamic:true env ty)
                      (get_reason ty)))
           | _ ->
             checked_unset_error p [];
@@ -6802,12 +6802,12 @@ and class_get_inner
             Errors.unify_error;
           (env, (TUtils.terr env Reason.Rnone, []), dflt_err)
         | Some
-            ( {
-                ce_visibility = vis;
-                ce_type = (lazy member_decl_ty);
-                ce_deprecated;
-                _;
-              } as ce ) ->
+            ({
+               ce_visibility = vis;
+               ce_type = (lazy member_decl_ty);
+               ce_deprecated;
+               _;
+             } as ce) ->
           let def_pos = get_pos member_decl_ty in
           TVis.check_class_access
             ~use_pos:p
@@ -6851,8 +6851,8 @@ and class_get_inner
               let fty =
                 Typing_dynamic.relax_method_type
                   env
-                  ( Cls.get_support_dynamic_type class_
-                  || get_ce_support_dynamic_type ce )
+                  (Cls.get_support_dynamic_type class_
+                  || get_ce_support_dynamic_type ce)
                   r
                   ft
               in

@@ -412,14 +412,14 @@ let rec obj_get_concrete_ty
             member_not_found env id_pos ~is_method class_info id_str r on_error;
             default ()
           | Some
-              ( {
-                  ce_visibility = vis;
-                  ce_type = (lazy member_);
-                  ce_deprecated;
-                  _;
-                } as member_ce ) ->
+              ({
+                 ce_visibility = vis;
+                 ce_type = (lazy member_);
+                 ce_deprecated;
+                 _;
+               } as member_ce) ->
             let mem_pos = get_pos member_ in
-            ( if shadowed then
+            (if shadowed then
               match old_member_info with
               | Some
                   {
@@ -437,7 +437,7 @@ let rec obj_get_concrete_ty
                     (get_pos old_member)
                     self_id
                     (snd x)
-              | _ -> () );
+              | _ -> ());
             TVis.check_obj_access ~use_pos:id_pos ~def_pos:mem_pos env vis;
             TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos ce_deprecated;
             if is_parent_call && get_ce_abstract member_ce then
@@ -485,8 +485,8 @@ let rec obj_get_concrete_ty
                 let ft_ty1 =
                   Typing_dynamic.relax_method_type
                     env
-                    ( Cls.get_support_dynamic_type class_info
-                    || get_ce_support_dynamic_type member_ce )
+                    (Cls.get_support_dynamic_type class_info
+                    || get_ce_support_dynamic_type member_ce)
                     r
                     ft1
                 in
@@ -580,7 +580,7 @@ let rec obj_get_concrete_ty
     end
   (* match Env.get_class env (snd x) *)
   | (_, Tdynamic) ->
-    ( if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+    (if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
       (* Any access to a *private* member through dynamic might potentially
        * be unsound, if the receiver is an instance of a class that implements dynamic,
        * as we do no checks on enforceability or subtype-dynamic at the definition site
@@ -593,7 +593,7 @@ let rec obj_get_concrete_ty
         (match Env.get_member is_method env self_class id_str with
         | Some { ce_visibility = Vprivate _; ce_type = (lazy ty); _ }
           when not is_method ->
-          ( if read_context then
+          (if read_context then
             let (env, locl_ty) =
               Phase.localize_no_subst ~ignore_errors:true env ty
             in
@@ -602,7 +602,7 @@ let rec obj_get_concrete_ty
               env
               (Cls.name self_class)
               (id_pos, id_str)
-              locl_ty );
+              locl_ty);
           if not read_context then
             Typing_dynamic.check_property_sound_for_dynamic_write
               ~on_error:Errors.private_property_is_not_enforceable
@@ -611,7 +611,7 @@ let rec obj_get_concrete_ty
               (id_pos, id_str)
               ty
         | _ -> ())
-      | _ -> () );
+      | _ -> ());
     let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in
     (env, (ty, []), None)
   | (_, Tobject)
@@ -642,10 +642,10 @@ let rec obj_get_concrete_ty
     in
     err
       ~kind:
-        ( if is_method then
+        (if is_method then
           `method_
         else
-          `property )
+          `property)
       id_str
       id_pos
       (Typing_print.error env concrete_ty)
@@ -971,10 +971,10 @@ and obj_get_inner
       in
       err
         ~kind:
-          ( if is_method then
+          (if is_method then
             `method_
           else
-            `property )
+            `property)
         id_str
         id_pos
         (Typing_print.error env ety1)

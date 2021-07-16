@@ -211,15 +211,15 @@ let retype_magic_func (env : env) (ft : locl_fun_type) (el : Nast.expr list) :
             let (env, argl) = parse_printf_string env str pos type_arg in
             ( env,
               Some
-                ( {
-                    fp with
-                    fp_type =
-                      {
-                        et_type = mk (get_reason et_type, Tprim Tstring);
-                        et_enforced = Unenforced;
-                      };
-                  }
-                :: argl ) )
+                ({
+                   fp with
+                   fp_type =
+                     {
+                       et_type = mk (get_reason et_type, Tprim Tstring);
+                       et_enforced = Unenforced;
+                     };
+                 }
+                 :: argl) )
           | (env, Left pos) ->
             if Partial.should_check_error (Env.get_mode env) 4027 then
               Errors.expected_literal_format_string pos;

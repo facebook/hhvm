@@ -41,6 +41,8 @@ let exit
     { exit_status; msg; stack = Utils.Callstack stack }
   in
   List.iter
-    (fun hook -> (try hook server_finale_data with _ -> ()))
+    (fun hook ->
+      try hook server_finale_data with
+      | _ -> ())
     !hook_upon_clean_exit;
   Stdlib.exit (Exit_status.exit_code exit_status)

@@ -30,9 +30,9 @@ let rec is_copy ty =
     let (ty, targs) = type_name_and_params ty in
     Configuration.is_known (Configuration.copy_type ty) true
     || is_primitive ty targs
-    || ( String.equal ty "Option"
+    || (String.equal ty "Option"
        || String.equal ty "std::cell::Cell"
-       || String.equal ty "std::cell::RefCell" )
+       || String.equal ty "std::cell::RefCell")
        && is_copy (List.hd_exn targs)
 
 (* A list of (<module>, <ty1>, <ty2>) tuples where we need to add indirection.
@@ -75,11 +75,11 @@ let should_add_indirection ~seen_indirection (ty : Rust_type.t) =
   | Configuration.ByBox ->
     let (ty, _) = type_name_and_params ty in
     (not seen_indirection)
-    && ( String.equal (self ()) ty
+    && (String.equal (self ()) ty
        || List.mem
             (add_indirection_between ())
             (curr_module_name (), self (), ty)
-            ~equal:equal_s3 )
+            ~equal:equal_s3)
 
 let add_rcoc_between = [("file_info", "Pos", "relative_path::RelativePath")]
 

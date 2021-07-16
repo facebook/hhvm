@@ -31,8 +31,8 @@ type tyvar_constraints = {
   lower_bounds: ITySet.t;
   upper_bounds: ITySet.t;
   type_constants:
-    ( pos_id (* id of the type constant "T", containing its position. *)
-    * locl_ty )
+    (pos_id (* id of the type constant "T", containing its position. *)
+    * locl_ty)
     SMap.t;
       (** Map associating a type to each type constant id of this variable.
           Whenever we localize "T1::T" in a constraint, we add a fresh type variable
@@ -1033,10 +1033,10 @@ let merge_tyvar_infos tvinfo1 tvinfo2 =
   in
   {
     tyvar_pos =
-      ( if Pos.equal pos1 Pos.none then
+      (if Pos.equal pos1 Pos.none then
         pos2
       else
-        pos1 );
+        pos1);
     global_reason;
     eager_solve_failed = esf1 || esf2;
     solving_info = merge_solving_infos sinfo1 sinfo2;
@@ -1118,15 +1118,15 @@ let simple_merge env1 env2 =
           let tvinfo =
             {
               tyvar_pos =
-                ( if Pos.equal tyvar_pos1 Pos.none then
+                (if Pos.equal tyvar_pos1 Pos.none then
                   tyvar_pos2
                 else
-                  tyvar_pos1 );
+                  tyvar_pos1);
               global_reason =
-                ( if Option.is_some global_reason1 then
+                (if Option.is_some global_reason1 then
                   global_reason1
                 else
-                  global_reason2 );
+                  global_reason2);
               eager_solve_failed = eager_solve_failed1 || eager_solve_failed2;
               solving_info =
                 (match (sinfo1, sinfo2) with
@@ -1339,8 +1339,7 @@ let split_undirected_tyvar_graph (graph : ISet.t IMap.t) : ISet.t list =
     assert (
       Int.equal
         (IMap.cardinal graph)
-        (List.fold components ~init:0 ~f:(fun acc c -> acc + ISet.cardinal c))
-    )
+        (List.fold components ~init:0 ~f:(fun acc c -> acc + ISet.cardinal c)))
   in
   (* sanity check: check whether components are really disconnected *)
   let (_ : ISet.t) =

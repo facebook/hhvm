@@ -16,7 +16,8 @@ let record_one_jsonfile
     string =
   (* Ensure path exists *)
   begin
-    try Unix.mkdir path 0o777 with _ -> ()
+    try Unix.mkdir path 0o777 with
+    | _ -> ()
   end;
 
   (* Open the file *)

@@ -65,7 +65,8 @@ let parse_function_or_method_id ~func_action ~meth_action name =
       meth_action (default_namespace class_name) method_name
     | fun_name :: _ -> func_action (default_namespace fun_name)
     | _ -> raise Exit
-  with _ ->
+  with
+  | _ ->
     Printf.eprintf "Invalid input\n";
     raise Exit_status.(Exit_with Input_error)
 
@@ -74,7 +75,8 @@ let print_all ic =
     while true do
       Printf.printf "%s\n" (Timeout.input_line ic)
     done
-  with End_of_file -> ()
+  with
+  | End_of_file -> ()
 
 let expand_path file =
   let path = Path.make file in
@@ -96,7 +98,8 @@ let parse_position_string arg =
     match tpos with
     | [line; char] -> (int_of_string line, int_of_string char)
     | _ -> raise Exit
-  with _ ->
+  with
+  | _ ->
     Printf.eprintf "Invalid position\n";
     raise Exit_status.(Exit_with Input_error)
 
@@ -204,7 +207,8 @@ let parse_positions positions =
         | [filename; line; char] ->
           (expand_path filename, int_of_string line, int_of_string char)
         | _ -> raise Exit
-      with _ ->
+      with
+      | _ ->
         Printf.eprintf "Invalid position\n";
         raise Exit_status.(Exit_with Input_error))
 
@@ -357,7 +361,8 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
             let filename = expand_path filename in
             (filename, int_of_string line, int_of_string char, new_name)
           | _ -> raise Exit
-        with _ ->
+        with
+        | _ ->
           Printf.eprintf "Invalid input\n";
           raise Exit_status.(Exit_with Input_error)
       in
@@ -446,7 +451,8 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
               int_of_string line,
               int_of_string char )
           | _ -> raise Exit
-        with _ ->
+        with
+        | _ ->
           Printf.eprintf "Invalid position\n";
           raise Exit_status.(Exit_with Input_error)
       in
@@ -473,7 +479,8 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
                 let end_char = int_of_string end_char in
                 (filename, start_line, start_char, Some (end_line, end_char))
               | _ -> raise Exit
-            with _ ->
+            with
+            | _ ->
               Printf.eprintf "Invalid position\n";
               raise Exit_status.(Exit_with Input_error))
       in
@@ -498,7 +505,8 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
               int_of_string line,
               int_of_string char )
           | _ -> raise Exit
-        with _ ->
+        with
+        | _ ->
           Printf.eprintf
             "Invalid position; expected an argument of the form [filename]:[line]:[column] or [line]:[column]\n";
           raise Exit_status.(Exit_with Input_error)
@@ -818,7 +826,8 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
             in
             ClientLint.go results args.output_json args.error_format;
             Lwt.return (Exit_status.No_error, telemetry)
-        with Exit -> Lwt.return (Exit_status.Input_error, Telemetry.create ())
+        with
+        | Exit -> Lwt.return (Exit_status.Input_error, Telemetry.create ())
       end
     | MODE_CREATE_CHECKPOINT x ->
       let%lwt ((), telemetry) = rpc args @@ Rpc.CREATE_CHECKPOINT x in
@@ -951,8 +960,8 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
     | MODE_BIGCODE arg ->
       let filename = arg in
       let fn =
-        try expand_path filename
-        with _ ->
+        try expand_path filename with
+        | _ ->
           Printf.eprintf "Invalid filename: %s\n" filename;
           raise Exit_status.(Exit_with Input_error)
       in

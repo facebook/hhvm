@@ -40,7 +40,7 @@ let result_to_json result : Hh_json.json =
     (List.map result ~f:(fun { hash; paths } ->
          ( Typing_deps.Dep.to_debug_string hash,
            Hh_json.JSON_Array
-             ( paths
+             (paths
              |> Relative_path.Set.elements
              |> List.map ~f:(fun path ->
-                    Hh_json.JSON_String (Relative_path.to_absolute path)) ) )))
+                    Hh_json.JSON_String (Relative_path.to_absolute path))) )))

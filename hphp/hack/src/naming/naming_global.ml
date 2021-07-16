@@ -69,8 +69,8 @@ module GEnv = struct
     match Naming_provider.get_type_pos_and_kind ctx name with
     | Some
         ( pos,
-          ( ( Naming_types.TClass | Naming_types.TTypedef
-            | Naming_types.TRecordDef ) as kind ) ) ->
+          (( Naming_types.TClass | Naming_types.TTypedef
+           | Naming_types.TRecordDef ) as kind) ) ->
       let (p, _) = get_type_full_pos ctx (pos, name) in
       Some (p, kind)
     | None -> None
@@ -148,12 +148,12 @@ let should_report_duplicate
       ~typechecking_is_deferring:false
       ~path:(FileInfo.get_pos_filename p)
       ~pos:""
-      ( Telemetry.create ()
+      (Telemetry.create ()
       |> Telemetry.string_ ~key:"name" ~value:name
       |> Telemetry.string_ ~key:"canonical_name" ~value:canonical
       |> Telemetry.string_
            ~key:"canonical_path"
-           ~value:(FileInfo.get_pos_filename pc |> Relative_path.to_absolute) )
+           ~value:(FileInfo.get_pos_filename pc |> Relative_path.to_absolute))
   in
   (* Detect anomaly where we're given a file-only [id] *)
   begin
@@ -248,7 +248,7 @@ module Env = struct
           current_file_symbols_acc
           ~id
           ~canonical_id:(pc, canonical)
-      then
+       then
           let (p, name) = GEnv.get_fun_full_pos ctx (p, name) in
           let (pc, canonical) = GEnv.get_fun_full_pos ctx (pc, canonical) in
           Errors.error_name_already_bound name canonical p pc
@@ -280,7 +280,7 @@ module Env = struct
             current_file_symbols_acc
             ~id
             ~canonical_id:(pc, canonical)
-        then
+         then
             let (p, name) = GEnv.get_type_full_pos ctx (p, name) in
             let (pc, canonical) = GEnv.get_type_full_pos ctx (pc, canonical) in
             Errors.error_name_already_bound name canonical p pc
@@ -305,7 +305,7 @@ module Env = struct
           current_file_symbols_acc
           ~id
           ~canonical_id:(pc, name)
-      then
+       then
           let (p, name) = GEnv.get_const_full_pos ctx (p, name) in
           let (pc, name) = GEnv.get_const_full_pos ctx (pc, name) in
           Errors.error_name_already_bound name name p pc

@@ -53,8 +53,8 @@ let strip_nested_quotes str =
   let lastc = str.[len - 1] in
   if
     len >= 2
-    && ( (Char.equal '"' firstc && Char.equal '"' lastc)
-       || (Char.equal '\'' firstc && Char.equal '\'' lastc) )
+    && ((Char.equal '"' firstc && Char.equal '"' lastc)
+       || (Char.equal '\'' firstc && Char.equal '\'' lastc))
   then
     String.sub str ~pos:1 ~len:(len - 2)
   else
@@ -355,14 +355,14 @@ let add_fact predicate json_key progress =
       {
         resultJson = progress.resultJson;
         factIds =
-          ( if should_cache predicate then
+          (if should_cache predicate then
             JMap.add
               json_key
               [(predicate, newFactId)]
               progress.factIds
               ~combine:List.append
           else
-            progress.factIds );
+            progress.factIds);
       }
     in
     (newFactId, true, progress)

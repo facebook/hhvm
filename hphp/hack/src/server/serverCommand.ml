@@ -224,8 +224,8 @@ let with_dependency_table_reads mode full_recheck_needed f =
   try_finally ~f ~finally:(fun () ->
       Option.iter deptable_unlocked ~f:(fun deptable_unlocked ->
           ignore
-            ( Typing_deps.allow_dependency_table_reads mode deptable_unlocked
-              : bool )))
+            (Typing_deps.allow_dependency_table_reads mode deptable_unlocked
+              : bool)))
 
 (* Construct a continuation that will finish handling the command and update
  * the environment. Server can execute the continuation immediately, or store it
@@ -238,7 +238,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
   Errors.ignore_ @@ fun () ->
   assert (
     (not full_recheck_needed)
-    || ServerEnv.(is_full_check_done env.full_check_status) );
+    || ServerEnv.(is_full_check_done env.full_check_status));
 
   (* There might be additional rechecking required when there are unsaved IDE
    * changes and we asked for an answer that requires ignoring those.
@@ -263,8 +263,8 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     Full_fidelity_parser_profiling.start_profiling ();
 
     let (new_env, response) =
-      try ServerRpc.handle ~is_stale genv env cmd
-      with exn ->
+      try ServerRpc.handle ~is_stale genv env cmd with
+      | exn ->
         let e = Exception.wrap exn in
         if ServerCommandTypes.is_critical_rpc cmd then
           Exception.reraise e

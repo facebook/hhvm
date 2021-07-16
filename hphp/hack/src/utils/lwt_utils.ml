@@ -27,7 +27,8 @@ let select
         fds |> List.filter ~f:condition |> List.map ~f:Lwt_unix.unix_file_descr
       in
       Lwt.return (Ok actionable_fds)
-    with _ ->
+    with
+    | _ ->
       (* Although we gather a list of exceptional file descriptors here, it
          happens that no call site of `Unix.select` in the codebase has checked
          this list, so we could in theory just return any list (or not return any
@@ -126,10 +127,10 @@ module Process_failure = struct
           "WSIGNALLED %d (%s)%s"
           exit_code
           (PrintSignal.string_of_signal exit_code)
-          ( if exit_code = Sys.sigkill then
+          (if exit_code = Sys.sigkill then
             " - this often indicates a timeout"
           else
-            "" )
+            "")
       | Unix.WSTOPPED exit_code ->
         Printf.sprintf
           "WSTOPPED %d (%s)"
@@ -142,12 +143,12 @@ module Process_failure = struct
       | stderr -> stderr
     in
     Printf.sprintf
-      ( "Process '%s' failed with\n"
+      ("Process '%s' failed with\n"
       ^^ "Exit code: %s\n"
       ^^ "%s -- %s\n"
       ^^ "Exception: %s\n"
       ^^ "Stderr: %s\n"
-      ^^ "Stdout: %s" )
+      ^^ "Stdout: %s")
       process_failure.command_line
       exit_code
       (Utils.timestring process_failure.start_time)
@@ -199,7 +200,8 @@ let exec_checked
            Lwt.return_unit
          in
          Lwt.return_unit
-       with e ->
+       with
+       | e ->
          exn := Some e;
          Lwt.return_unit
      in
@@ -232,7 +234,8 @@ let try_finally ~(f : unit -> 'a Lwt.t) ~(finally : unit -> unit Lwt.t) :
     try%lwt
       let%lwt result = f () in
       Lwt.return result
-    with e ->
+    with
+    | e ->
       let%lwt () = finally () in
       raise e
   in
@@ -254,7 +257,8 @@ let read_all (path : string) : (string, string) Lwt_result.t =
           Lwt.return contents)
     in
     Lwt.return (Ok contents)
-  with _ ->
+  with
+  | _ ->
     Lwt.return
       (Error
          (Printf.sprintf

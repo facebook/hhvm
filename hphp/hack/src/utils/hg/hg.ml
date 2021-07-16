@@ -275,7 +275,8 @@ module Hg_mock = struct
     Future.of_value ()
 end
 
-include ( val if Injector_config.use_test_stubbing then
-                (module Hg_mock : Hg_sig.S)
-              else
-                (module Hg_actual : Hg_sig.S) )
+include
+  (val if Injector_config.use_test_stubbing then
+         (module Hg_mock : Hg_sig.S)
+       else
+         (module Hg_actual : Hg_sig.S))

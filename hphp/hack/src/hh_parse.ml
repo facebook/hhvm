@@ -577,17 +577,17 @@ let handle_existing_file args filename =
   let syntax_tree = SyntaxTree.make ~env source_text in
   let editable = SyntaxTransforms.editable_from_positioned syntax_tree in
   if args.show_file_name then Printf.printf "%s\n" filename;
-  ( if args.program_text then
+  (if args.program_text then
     let text = Full_fidelity_editable_syntax.text editable in
-    Printf.printf "%s\n" text );
-  ( if args.pretty_print then
+    Printf.printf "%s\n" text);
+  (if args.pretty_print then
     let pretty = Libhackfmt.format_tree syntax_tree in
-    Printf.printf "%s\n" pretty );
-  ( if args.generate_hhi then
+    Printf.printf "%s\n" pretty);
+  (if args.generate_hhi then
     let hhi = Generate_hhi.go editable in
-    Printf.printf "%s\n" hhi );
+    Printf.printf "%s\n" hhi);
 
-  ( if print_errors then
+  (if print_errors then
     let level =
       if args.full_fidelity_errors_all then
         ParserErrors.Maximum
@@ -609,7 +609,7 @@ let handle_existing_file args filename =
         ~parser_options:popt
     in
     let errors = ParserErrors.parse_errors error_env in
-    List.iter (print_full_fidelity_error source_text) errors );
+    List.iter (print_full_fidelity_error source_text) errors);
   begin
     let dump_needed = args.full_fidelity_ast_s_expr in
     let lowered =
@@ -632,7 +632,8 @@ let handle_existing_file args filename =
           in
           if print_errors then print_ast_check_errors errors;
           Some res
-        with _ when print_errors -> None
+        with
+        | _ when print_errors -> None
       else
         None
     in
@@ -644,27 +645,27 @@ let handle_existing_file args filename =
         Printf.printf "%s\n" str
     | None -> ()
   end;
-  ( if args.full_fidelity_json_parse_tree then
+  (if args.full_fidelity_json_parse_tree then
     let json =
       SyntaxTree.parse_tree_to_json
         ~ignore_missing:args.ignore_missing_json
         syntax_tree
     in
     let str = Hh_json.json_to_string json ~pretty:args.pretty_print_json in
-    Printf.printf "%s\n" str );
-  ( if args.full_fidelity_json then
+    Printf.printf "%s\n" str);
+  (if args.full_fidelity_json then
     let json =
       SyntaxTree.to_json ~ignore_missing:args.ignore_missing_json syntax_tree
     in
     let str = Hh_json.json_to_string json ~pretty:args.pretty_print_json in
-    Printf.printf "%s\n" str );
-  ( if args.full_fidelity_text_json then
+    Printf.printf "%s\n" str);
+  (if args.full_fidelity_text_json then
     let json = Full_fidelity_editable_syntax.to_json editable in
     let str = Hh_json.json_to_string json in
-    Printf.printf "%s\n" str );
-  ( if args.full_fidelity_dot then
+    Printf.printf "%s\n" str);
+  (if args.full_fidelity_dot then
     let dot = Full_fidelity_editable_syntax.to_dot editable false in
-    Printf.printf "%s\n" dot );
+    Printf.printf "%s\n" dot);
   if args.full_fidelity_dot_edges then
     let dot = Full_fidelity_editable_syntax.to_dot editable true in
     Printf.printf "%s\n" dot
@@ -676,9 +677,9 @@ let handle_file args filename =
     Printf.printf "File %s does not exist.\n" filename
 
 let rec main args files =
-  ( if args.schema then
+  (if args.schema then
     let schema = Schema.schema_as_json () in
-    Printf.printf "%s\n" schema );
+    Printf.printf "%s\n" schema);
   match files with
   | [] -> ()
   | file :: tail ->

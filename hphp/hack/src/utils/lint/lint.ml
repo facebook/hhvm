@@ -47,10 +47,10 @@ let use_collection_literal pos coll =
     (Codes.to_enum Codes.UseCollectionLiteral)
     Lint_warning
     pos
-    ( "Use "
+    ("Use "
     ^ Markdown_lite.md_codify (coll ^ " {...}")
     ^ " instead of "
-    ^ Markdown_lite.md_codify ("new " ^ coll ^ "(...)") )
+    ^ Markdown_lite.md_codify ("new " ^ coll ^ "(...)"))
 
 let static_string ?(no_consts = false) pos =
   add
@@ -70,10 +70,10 @@ let shape_idx_access_required_field field_pos name =
     (Codes.to_enum Codes.ShapeIdxRequiredField)
     Lint_warning
     field_pos
-    ( "The field "
+    ("The field "
     ^ Markdown_lite.md_codify name
     ^ " is required to exist in the shape. Consider using a subscript-expression instead, such as "
-    ^ Markdown_lite.md_codify ("$myshape['" ^ name ^ "']") )
+    ^ Markdown_lite.md_codify ("$myshape['" ^ name ^ "']"))
 
 let opt_closed_shape_idx_missing_field method_name field_pos =
   let msg =

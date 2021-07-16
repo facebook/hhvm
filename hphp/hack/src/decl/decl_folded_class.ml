@@ -728,8 +728,8 @@ and prop_decl
       elt_deprecated = None;
     }
   in
-  ( if write_shmem then
-    Decl_store.((get ()).add_prop (elt.elt_origin, sp_name) ty) );
+  (if write_shmem then
+    Decl_store.((get ()).add_prop (elt.elt_origin, sp_name) ty));
   let acc = SMap.add sp_name (elt, Some ty) acc in
   acc
 
@@ -766,8 +766,8 @@ and static_prop_decl
       elt_deprecated = None;
     }
   in
-  ( if write_shmem then
-    Decl_store.((get ()).add_static_prop (elt.elt_origin, sp_name) ty) );
+  (if write_shmem then
+    Decl_store.((get ()).add_static_prop (elt.elt_origin, sp_name) ty));
   let acc = SMap.add sp_name (elt, Some ty) acc in
   acc
 
@@ -911,11 +911,11 @@ and method_decl_acc
       fe_support_dynamic_type = support_dynamic_type;
     }
   in
-  ( if write_shmem then
+  (if write_shmem then
     if is_static then
       Decl_store.((get ()).add_static_method (elt.elt_origin, id) fe)
     else
-      Decl_store.((get ()).add_method (elt.elt_origin, id) fe) );
+      Decl_store.((get ()).add_method (elt.elt_origin, id) fe));
   let acc = SMap.add id (elt, Some fe) acc in
   (acc, condition_types)
 

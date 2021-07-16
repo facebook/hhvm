@@ -83,14 +83,14 @@ let set_env_log_function f = env_log_function := f
 let log_env_change_ :
     type res. string -> ?level:int -> env -> env * res -> env * res =
  fun name ?(level = 1) old_env (new_env, res) ->
-  ( if get_log_level new_env name >= 1 || get_log_level new_env "env" >= level
+  (if get_log_level new_env name >= 1 || get_log_level new_env "env" >= level
   then
     let pos =
       Option.value
         (Inf.get_current_pos_from_tyvar_stack old_env.inference_env)
         ~default:old_env.function_pos
     in
-    !env_log_function pos name old_env new_env );
+    !env_log_function pos name old_env new_env);
   (new_env, res)
 
 let log_env_change name ?(level = 1) old_env new_env =

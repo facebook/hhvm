@@ -60,5 +60,5 @@ let is_disposable ~lin_members =
   lazy
     (Sequence.exists lin_members ~f:(fun mro ->
          (not (Decl_defs.is_set Decl_defs.mro_xhp_attrs_only mro.mro_flags))
-         && ( String.equal mro.mro_name SN.Classes.cIDisposable
-            || String.equal mro.mro_name SN.Classes.cIAsyncDisposable )))
+         && (String.equal mro.mro_name SN.Classes.cIDisposable
+            || String.equal mro.mro_name SN.Classes.cIAsyncDisposable)))

@@ -45,7 +45,8 @@ end = struct
         ServerCommandTypes.NONFATAL_EXCEPTION remote_e
     in
     begin
-      try ClientProvider.send_push_message_to_client client push with _ -> ()
+      try ClientProvider.send_push_message_to_client client push with
+      | _ -> ()
     end;
     HackEventLogger.handle_persistent_connection_exception "inner" ~is_fatal e;
     Hh_logger.error

@@ -16,7 +16,7 @@ let make_local_server_api
     ~(init_id : string)
     ~(ignore_hh_version : bool)
     ~(deps_mode : Typing_deps_mode.t) : (module LocalServerApi) =
-  ( module struct
+  (module struct
     let send_progress (message : string) : unit =
       ServerProgress.send_progress "%s" message
 
@@ -103,12 +103,12 @@ let make_local_server_api
       let chan = Stdlib.open_out_bin destination_path in
       Marshal.to_channel chan changed_files [];
       Stdlib.close_out chan
-  end : LocalServerApi )
+  end : LocalServerApi)
 
 let make_remote_server_api
     (ctx : Provider_context.t) (workers : MultiWorker.worker list option) :
     (module RemoteServerApi with type naming_table = Naming_table.t option) =
-  ( module struct
+  (module struct
     type naming_table = Naming_table.t option
 
     let load_naming_table_base ~(naming_table_base : Path.t option) :
@@ -197,7 +197,8 @@ let make_remote_server_api
                  Hh_logger.log_duration "Loaded naming table from SQLite" t
                in
                Ok (Some naming_table)
-             with e -> Error (Exn.to_string e))
+             with
+            | e -> Error (Exn.to_string e))
         end
 
     let type_check ctx ~init_id ~check_id files_to_check ~state_filename =
@@ -246,4 +247,4 @@ let make_remote_server_api
       in
       errors
   end : RemoteServerApi
-    with type naming_table = Naming_table.t option )
+    with type naming_table = Naming_table.t option)

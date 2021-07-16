@@ -26,7 +26,7 @@ let output_json oc el =
 let output_text oc el format =
   (* Essentially the same as type error output, except that we only have one
    * message per error, and no additional 'typing reasons' *)
-  ( if List.is_empty el then
+  (if List.is_empty el then
     Out_channel.output_string oc "No lint errors!\n"
   else
     let f =
@@ -36,5 +36,5 @@ let output_text oc el format =
       | Errors.Highlighted -> Lint.to_highlighted_string
     in
     let sl = List.map el ~f in
-    List.iter sl ~f:(fun s -> Printf.fprintf oc "%s\n%!" s) );
+    List.iter sl ~f:(fun s -> Printf.fprintf oc "%s\n%!" s));
   Out_channel.flush oc

@@ -683,7 +683,8 @@ let apply_config_overrides_statelessly config_list config_jsons =
           from_configs_rust ~jsons:config_jsons ~args:config_list
         in
         not (equal rust_result result)
-      with _ -> true
+      with
+      | _ -> true
     in
     M.trim lru;
     M.add key result lru;

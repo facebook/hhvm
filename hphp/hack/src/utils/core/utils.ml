@@ -85,8 +85,8 @@ let unsafe_opt_note note = function
 let unsafe_opt x = unsafe_opt_note "unsafe_opt got None" x
 
 let try_with_stack (f : unit -> 'a) : ('a, exn * callstack) result =
-  try Ok (f ())
-  with exn ->
+  try Ok (f ()) with
+  | exn ->
     let stack = Callstack (Printexc.get_backtrace ()) in
     Error (exn, stack)
 
@@ -188,8 +188,8 @@ end
 
 let try_finally ~f ~(finally : unit -> unit) =
   let res =
-    try f ()
-    with e ->
+    try f () with
+    | e ->
       finally ();
       raise e
   in
@@ -200,8 +200,8 @@ let with_context
     ~(enter : unit -> unit) ~(exit : unit -> unit) ~(do_ : unit -> 'a) : 'a =
   enter ();
   let result =
-    try do_ ()
-    with e ->
+    try do_ () with
+    | e ->
       let stack = Printexc.get_raw_backtrace () in
       exit ();
       Printexc.raise_with_backtrace e stack

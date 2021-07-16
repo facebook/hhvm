@@ -142,10 +142,10 @@ let structure_item (env : Env.t) (si : structure_item) : Env.t =
     else
       add_alias
         mod_name
-        ( if is_enum_module_import id.txt then
+        (if is_enum_module_import id.txt then
           alias
         else
-          convert_module_name alias );
+          convert_module_name alias);
     env
   (* Convert `include Foo` to explicit re-exports (`pub use`) for every type
      exported by Foo (see {!Stringify.get_includes}). *)

@@ -249,10 +249,10 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           t env eq_kw;
           Space;
-          ( if has_split value then
+          (if has_split value then
             SplitWith Cost.Base
           else
-            Nothing );
+            Nothing);
           Nest [value];
           t env semi;
           Newline;
@@ -669,10 +669,10 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                                   Span
                                     [
                                       Space;
-                                      ( if list_length extends = 1 then
+                                      (if list_length extends = 1 then
                                         SplitWith Cost.Base
                                       else
-                                        Split );
+                                        Split);
                                       Nest
                                         [
                                           handle_possible_list
@@ -696,10 +696,10 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                                   Span
                                     [
                                       Space;
-                                      ( if list_length impls = 1 then
+                                      (if list_length impls = 1 then
                                         SplitWith Cost.Base
                                       else
-                                        Split );
+                                        Split);
                                       Nest
                                         [
                                           handle_possible_list
@@ -820,10 +820,10 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           t env kind;
           Space;
-          ( if has_split name then
+          (if has_split name then
             SplitWith Cost.High
           else
-            Nothing );
+            Nothing);
           Nest [name; t env semi];
           Newline;
         ]
@@ -938,14 +938,14 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env readonly;
           when_present readonly space;
           t env param_type;
-          ( if
-            Syntax.is_missing visibility
-            && Syntax.is_missing callconv
-            && Syntax.is_missing param_type
+          (if
+           Syntax.is_missing visibility
+           && Syntax.is_missing callconv
+           && Syntax.is_missing param_type
           then
             t env name
           else
-            Concat [Space; SplitWith Cost.Moderate; Nest [t env name]] );
+            Concat [Space; SplitWith Cost.Moderate; Nest [t env name]]);
           t env default;
         ]
     | Syntax.VariadicParameter
@@ -1334,23 +1334,23 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       in
       Concat
         [
-          ( if List.is_empty upto_fallthrough then
+          (if List.is_empty upto_fallthrough then
             transform_leading_trivia after_fallthrough
           else
             Concat
               [
                 BlockNest [transform_leading_trivia upto_fallthrough; Newline];
                 transform_trailing_trivia after_fallthrough;
-              ] );
+              ]);
           handle_list env labels ~after_each:(fun is_last_label ->
               if is_last_label && is_scoped_section then
                 Nothing
               else
                 Newline);
-          ( if is_scoped_section then
+          (if is_scoped_section then
             handle_list env statements
           else
-            BlockNest [handle_list env statements] );
+            BlockNest [handle_list env statements]);
           t env fallthrough;
         ]
     | Syntax.CaseLabel
@@ -1574,21 +1574,21 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                   Concat
                     [
                       Space;
-                      ( if env.Env.indent_width = 2 then
+                      (if env.Env.indent_width = 2 then
                         Nest [t env true_expr]
                       else
-                        t env true_expr );
+                        t env true_expr);
                       Space;
                       Split;
                     ]);
               t env c_kw;
               Space;
-              ( if
-                (not (Syntax.is_missing true_expr)) && env.Env.indent_width = 2
+              (if
+               (not (Syntax.is_missing true_expr)) && env.Env.indent_width = 2
               then
                 Nest [t env false_expr]
               else
-                t env false_expr );
+                t env false_expr);
             ] )
     | Syntax.FunctionCallExpression _ -> handle_possible_chaining env node
     | Syntax.FunctionPointerExpression _ -> transform_simple env node
@@ -2060,20 +2060,20 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                          (* Whitespace in an XHP body is *only* significant when adjacent to
                             an XHPBody token, so we are free to add splits between other
                             nodes (like XHPExpressions and BracedExpressions). *)
-                         ( if
-                           (not !prev_token_was_xhpbody) && not node_is_xhpbody
+                         (if
+                          (not !prev_token_was_xhpbody) && not node_is_xhpbody
                          then
                            Split
                          else
-                           Nothing );
+                           Nothing);
                          (* If the previous token was an XHPBody token, the lexer will have
                             scanned trailing trivia for it, so we can handle the leading
                             trivia for this node normally. Otherwise, handle the trivia up to
                             the first newline as trailing trivia. *)
-                         ( if !prev_token_was_xhpbody then
+                         (if !prev_token_was_xhpbody then
                            transform_leading_trivia leading
                          else
-                           transform_xhp_leading_trivia leading );
+                           transform_xhp_leading_trivia leading);
                        ]
                    in
                    prev_token_was_xhpbody := node_is_xhpbody;
@@ -2088,7 +2088,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Concat
             [
               transformed_body;
-              ( if !prev_token_was_xhpbody then
+              (if !prev_token_was_xhpbody then
                 Nothing
               else if
               (* Don't collapse XHPExpressions onto a single line if they were
@@ -2097,10 +2097,10 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                  that a signal that this expression was intended to be split
                  across multiple lines. *)
               has_newline (Syntax.leading_trivia body)
-            then
+             then
                 Newline
               else
-                Split );
+                Split);
             ]
         | _ -> failwith "Expected SyntaxList"
       in
@@ -2507,10 +2507,10 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                           Span
                             [
                               Space;
-                              ( if list_length extends_list = 1 then
+                              (if list_length extends_list = 1 then
                                 SplitWith Cost.Base
                               else
-                                Split );
+                                Split);
                               Nest
                                 [
                                   handle_possible_list
@@ -2671,10 +2671,10 @@ and handle_possible_compound_statement
           compound_left_brace
           compound_statements
           compound_right_brace;
-        ( if space then
+        (if space then
           Space
         else
-          Nothing );
+          Nothing);
       ]
   | Syntax.Token _ -> t env node
   | _ -> Concat [Newline; BlockNest [t env node]]
@@ -2757,10 +2757,10 @@ and handle_xhp_open_right_angle_token env attrs node =
   | Syntax.Token token ->
     Concat
       [
-        ( if String.equal (Token.text token) "/>" then
+        (if String.equal (Token.text token) "/>" then
           Concat [Space; when_present attrs split]
         else
-          Nothing );
+          Nothing);
         t env node;
       ]
   | _ -> failwith "expected xhp_open right_angle token"
@@ -2823,8 +2823,8 @@ and handle_possible_chaining env node =
       ()
     | kind ->
       failwith
-        ( "Unexpected SyntaxKind in handle_possible_chaining: "
-        ^ SyntaxKind.show kind )
+        ("Unexpected SyntaxKind in handle_possible_chaining: "
+        ^ SyntaxKind.show kind)
   in
   (* Flatten nested member selection expressions into the first receiver and a
      list of member selections.
@@ -2870,10 +2870,10 @@ and handle_possible_chaining env node =
     Concat
       [
         Span [transform_first_receiver first_receiver];
-        ( if first_receiver_has_trailing_newline then
+        (if first_receiver_has_trailing_newline then
           Newline
         else
-          SplitWith Cost.High );
+          SplitWith Cost.High);
         Nest [transform_chain hd];
       ]
   | hd :: tl ->
@@ -2913,10 +2913,10 @@ and handle_possible_chaining env node =
             Concat
               [
                 transform_first_receiver first_receiver;
-                ( if first_receiver_has_trailing_newline then
+                (if first_receiver_has_trailing_newline then
                   Newline
                 else
-                  SplitWith Cost.Base );
+                  SplitWith Cost.Base);
               ],
             Concat
               [
@@ -3048,8 +3048,8 @@ and transform_argish
       | Syntax.SyntaxList [x] ->
         let has_surrounding_whitespace =
           not
-            ( List.is_empty (Syntax.trailing_trivia left_p)
-            && List.is_empty (Syntax.trailing_trivia arg_list) )
+            (List.is_empty (Syntax.trailing_trivia left_p)
+            && List.is_empty (Syntax.trailing_trivia arg_list))
         in
         if has_surrounding_whitespace then
           true
@@ -3059,8 +3059,8 @@ and transform_argish
         let last = List.last_exn items in
         let has_surrounding_whitespace =
           not
-            ( List.is_empty (Syntax.leading_trivia last)
-            && List.is_empty (Syntax.trailing_trivia last) )
+            (List.is_empty (Syntax.leading_trivia last)
+            && List.is_empty (Syntax.trailing_trivia last))
         in
         if has_surrounding_whitespace then
           true
@@ -3171,10 +3171,10 @@ and transform_trailing_comma env ~allow_trailing item comma =
       [
         transform_argish_item env item;
         transform_leading_trivia (Token.leading tok);
-        ( if allow_trailing then
+        (if allow_trailing then
           TrailingComma true
         else
-          Nothing );
+          Nothing);
         Ignore (Token.text tok, Token.width tok);
         transform_trailing_trivia (Token.trailing tok);
       ]
@@ -3183,10 +3183,10 @@ and transform_trailing_comma env ~allow_trailing item comma =
     Concat
       [
         transform_argish_item env item;
-        ( if allow_trailing then
+        (if allow_trailing then
           TrailingComma false
         else
-          Nothing );
+          Nothing);
         transform_trailing_trivia item_trailing;
       ]
   | _ -> failwith "Expected Token"
@@ -3241,10 +3241,10 @@ and transform_container_literal
     [
       t env kw;
       ty;
-      ( if space then
+      (if space then
         Space
       else
-        Nothing );
+        Nothing);
       transform_argish
         env
         ~force_newlines
@@ -3395,7 +3395,7 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
                Full_fidelity_operator.precedence penv operator_t
              in
              if op_precedence = precedence then
-               flatten_expression left @ (operator :: flatten_expression right)
+               flatten_expression left @ operator :: flatten_expression right
              else
                [expr]
            | _ -> [expr]
@@ -3434,7 +3434,7 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
                        in
                        Concat
                          [
-                           ( if newline_before_op then
+                           (if newline_before_op then
                              Newline
                            else if op_is_leading then
                              if op_has_spaces then
@@ -3444,11 +3444,11 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
                            else if op_has_spaces then
                              Space
                            else
-                             Nothing );
-                           ( if is_concat op then
+                             Nothing);
+                           (if is_concat op then
                              ConcatOperator (t env op)
                            else
-                             t env op );
+                             t env op);
                          ]
                      ) else
                        let operand = x in
@@ -3459,7 +3459,7 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
                        let op_is_leading = operator_is_leading !last_op in
                        Concat
                          [
-                           ( if op_is_leading then
+                           (if op_is_leading then
                              if op_has_spaces then
                                Space
                              else
@@ -3467,7 +3467,7 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
                            else if op_has_spaces then
                              space_split ()
                            else
-                             Split );
+                             Split);
                            transform_operand operand;
                          ])
                in
@@ -3516,16 +3516,16 @@ and transform_node_if_ignored node =
               Error-suppression comments are different--they are specially
               handled by the lexer to ensure that they always appear in leading
               trivia. *)
-           ( if is_fixme then
+           (if is_fixme then
              Nothing
            else
-             Newline );
+             Newline);
            make_string (Syntax.text node) (Syntax.width node);
            transform_trailing_trivia trailing_trivia;
-           ( if has_newline trailing_trivia then
+           (if has_newline trailing_trivia then
              Newline
            else
-             Nothing );
+             Nothing);
          ])
 
 and ignore_re = Str.regexp_string "hackfmt-ignore"
@@ -3535,8 +3535,8 @@ and is_ignore_comment trivia =
   (* We don't format the node after a comment containing "hackfmt-ignore". *)
   | TriviaKind.(DelimitedComment | SingleLineComment) ->
     begin
-      try Str.search_forward ignore_re (Trivia.text trivia) 0 >= 0
-      with Caml.Not_found -> false
+      try Str.search_forward ignore_re (Trivia.text trivia) 0 >= 0 with
+      | Caml.Not_found -> false
     end
   | _ -> false
 
@@ -3591,13 +3591,13 @@ and transform_trivia ~is_leading trivia =
           transform_leading_invisibles (List.rev !leading_invisibles);
           Option.value !last_comment ~default:Nothing;
           ignore_trailing_invisibles (List.rev !trailing_invisibles);
-          ( if !last_comment_was_delimited && !whitespace_followed_last_comment
+          (if !last_comment_was_delimited && !whitespace_followed_last_comment
           then
             Space
           else if !newline_followed_last_comment then
             Newline
           else
-            Nothing );
+            Nothing);
         ]
       :: !comments;
     last_comment := None;
@@ -3666,12 +3666,12 @@ and transform_trivia ~is_leading trivia =
           Some
             (Concat
                [
-                 ( if should_break then
+                 (if should_break then
                    Newline
                  else if preceded_by_whitespace then
                    Space
                  else
-                   Nothing );
+                   Nothing);
                  Concat (hd :: List.map tl ~f:map_tail);
                ]);
         last_comment_was_delimited := true;
@@ -3683,10 +3683,10 @@ and transform_trivia ~is_leading trivia =
           Some
             (Concat
                [
-                 ( if !currently_leading then
+                 (if !currently_leading then
                    Newline
                  else
-                   Space );
+                   Space);
                  SingleLineComment (Trivia.text triv, Trivia.width triv);
                ]);
         last_comment_was_delimited := false;
@@ -3729,10 +3729,10 @@ and transform_leading_invisibles triv =
            Concat
              [
                ignored;
-               ( if !newlines <= _MAX_CONSECUTIVE_BLANK_LINES then
+               (if !newlines <= _MAX_CONSECUTIVE_BLANK_LINES then
                  BlankLine
                else
-                 Nothing );
+                 Nothing);
              ]
          | _ -> ignored))
 
@@ -3766,11 +3766,10 @@ and transform_consequence
     Concat
       [
         Space;
-        ( if has_newline (Syntax.trailing_trivia node_newline) then
+        (if has_newline (Syntax.trailing_trivia node_newline) then
           Concat [Newline; Nest [t env node_body]]
         else
-          WithRule (Rule.Parental, Nest [Span [Space; Split; t env node_body]])
-        );
+          WithRule (Rule.Parental, Nest [Span [Space; Split; t env node_body]]));
       ]
 
 let transform (env : Env.t) (node : Syntax.t) : Doc.t = t env node

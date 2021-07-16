@@ -27,7 +27,10 @@ let () =
   in
   List.iter
     (fun offset ->
-      let ch = (try str.[offset] with _ -> '_') in
+      let ch =
+        try str.[offset] with
+        | _ -> '_'
+      in
       let (line, column) = offset_to_position m offset in
       let line_start = offset_to_line_start_offset m offset in
       let regen_offset = position_to_offset m (line, column) in

@@ -305,7 +305,7 @@ let mode_calculate
     Option.value_exn
       calculate_fanout_result
       ~message:
-        ( "Internal invariant failure -- "
+        ("Internal invariant failure -- "
         ^ "produced cursor did not have an associated `Calculate_fanout.result`"
         )
   in
@@ -336,10 +336,10 @@ let mode_calculate
       [
         ( "files",
           Hh_json.JSON_Array
-            ( fanout_files
+            (fanout_files
             |> Relative_path.Set.elements
             |> List.map ~f:Relative_path.to_absolute
-            |> List.map ~f:Hh_json.string_ ) );
+            |> List.map ~f:Hh_json.string_) );
         ( "explanations",
           Hh_json.JSON_Object
             (Relative_path.Map.fold explanations ~init:[] ~f:(fun k v acc ->
@@ -385,9 +385,9 @@ let mode_calculate_errors
         Option.value_exn
           cursor_id
           ~message:
-            ( "Internal invariant failure -- "
+            ("Internal invariant failure -- "
             ^ "expected a new cursor to be generated, "
-            ^ "given that no cursor was passed in." )
+            ^ "given that no cursor was passed in.")
       in
       Incremental.Cursor_id cursor_id
   in
@@ -395,7 +395,7 @@ let mode_calculate_errors
   let error_list =
     errors |> Errors.get_sorted_error_list |> List.map ~f:Errors.to_absolute
   in
-  ( if pretty_print then
+  (if pretty_print then
     ServerError.print_error_list
       stdout
       ~error_list
@@ -424,7 +424,7 @@ let mode_calculate_errors
         Hh_json.JSON_Object props
       | _ -> failwith "Expected error JSON to be an object"
     in
-    Hh_json.json_to_multiline_output Out_channel.stdout json );
+    Hh_json.json_to_multiline_output Out_channel.stdout json);
   Lwt.return_unit
 
 let detail_level_arg =
@@ -672,8 +672,8 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
     match cursor_id with
     | Some _ ->
       Hh_logger.warn
-        ( "A cursor ID was passed to `debug`, "
-        ^^ "but loading from a previous cursor is not yet implemented." );
+        ("A cursor ID was passed to `debug`, "
+        ^^ "but loading from a previous cursor is not yet implemented.");
       Cursor_reference_from_saved_state saved_state_result
     | None -> Cursor_reference_from_saved_state saved_state_result
   in

@@ -64,22 +64,22 @@ let get_finale_data (server_finale_file : string) : Exit.finale_data option =
     let contents : Exit.finale_data = Marshal.from_channel ic in
     Stdlib.close_in ic;
     Some contents
-  with _ -> None
+  with
+  | _ -> None
 
 let tty_progress_reporter () =
   let angery_reaccs_only =
     Tty.supports_emoji () && ClientMessages.angery_reaccs_only ()
   in
-  fun (status : string option) ->
-    ( if Tty.spinner_used () then Tty.print_clear_line stderr;
-      match status with
-      | None -> ()
-      | Some s ->
-        Tty.eprintf
-          "hh_server is busy: %s %s%!"
-          s
-          (Tty.spinner ~angery_reaccs_only ())
-      : unit )
+  fun (status : string option) : unit ->
+    if Tty.spinner_used () then Tty.print_clear_line stderr;
+    match status with
+    | None -> ()
+    | Some s ->
+      Tty.eprintf
+        "hh_server is busy: %s %s%!"
+        s
+        (Tty.spinner ~angery_reaccs_only ())
 
 (** What is the latest progress message written by the server into a file?
 We store this in a mutable variable, so we can know whether it's changed and hence whether
@@ -316,12 +316,12 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
       MonitorRpc.force_dormant_start = env.force_dormant_start;
       pipe_name =
         HhServerMonitorConfig.pipe_type_to_string
-          ( if env.force_dormant_start then
+          (if env.force_dormant_start then
             HhServerMonitorConfig.Force_dormant_start_only
           else if env.use_priority_pipe then
             HhServerMonitorConfig.Priority
           else
-            HhServerMonitorConfig.Default );
+            HhServerMonitorConfig.Default);
     }
   in
   let tracker = Connection_tracker.create () in
@@ -399,7 +399,8 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
       Printf.eprintf
         "Server connection took over %.1f seconds. Refreshing...\n"
         threshold;
-      (try Timeout.shutdown_connection ic with _ -> ());
+      (try Timeout.shutdown_connection ic with
+      | _ -> ());
       Timeout.close_in_noerr ic;
       Stdlib.close_out_noerr oc;
 
@@ -485,23 +486,22 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
         connect env start_time
       ) else (
         Printf.eprintf
-          ( "Error: no hh_server running. Either start hh_server"
-          ^^ " yourself or run hh_client without --autostart-server false\n%!"
-          );
+          ("Error: no hh_server running. Either start hh_server"
+          ^^ " yourself or run hh_client without --autostart-server false\n%!");
         raise Exit_status.(Exit_with No_server_running_should_retry)
       )
     | ServerMonitorUtils.Server_dormant_out_of_retries ->
       Printf.eprintf
-        ( "Ran out of retries while waiting for Mercurial to finish rebase. Starting "
+        ("Ran out of retries while waiting for Mercurial to finish rebase. Starting "
         ^^ "the server in the middle of rebase is strongly not recommended and you should "
         ^^ "first finish the rebase before retrying. If you really "
-        ^^ "know what you're doing, maybe try --force-dormant-start\n%!" );
+        ^^ "know what you're doing, maybe try --force-dormant-start\n%!");
       raise Exit_status.(Exit_with Out_of_retries)
     | ServerMonitorUtils.Server_dormant ->
       Printf.eprintf
-        ( "Error: No server running and connection limit reached for waiting"
+        ("Error: No server running and connection limit reached for waiting"
         ^^ " on next server to be started. Please wait patiently. If you really"
-        ^^ " know what you're doing, maybe try --force-dormant-start\n%!" );
+        ^^ " know what you're doing, maybe try --force-dormant-start\n%!");
       raise Exit_status.(Exit_with No_server_running_should_retry)
     | ServerMonitorUtils.Build_id_mismatched mismatch_info_opt ->
       ServerMonitorUtils.(
@@ -553,7 +553,8 @@ let connect (env : env) : conn Lwt.t =
     if env.do_post_handoff_handshake then
       ServerCommandLwt.send_connection_type oc ServerCommandTypes.Non_persistent;
     Lwt.return { conn with t_sent_connection_type = Unix.gettimeofday () }
-  with e ->
+  with
+  | e ->
     (* we'll log this exception, then re-raise the exception, but using the *)
     (* original backtrace of "e" rather than generating a new backtrace.    *)
     let backtrace = Caml.Printexc.get_raw_backtrace () in

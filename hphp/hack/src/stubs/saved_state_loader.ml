@@ -67,8 +67,8 @@ type _ saved_state_type =
   | Naming_and_dep_table : {
       is_64bit: bool;
     }
-      -> ( Naming_and_dep_table_info.main_artifacts
-         * Naming_and_dep_table_info.additional_info )
+      -> (Naming_and_dep_table_info.main_artifacts
+         * Naming_and_dep_table_info.additional_info)
          saved_state_type
   | Naming_table
       : (Naming_table_info.main_artifacts * Naming_table_info.additional_info)

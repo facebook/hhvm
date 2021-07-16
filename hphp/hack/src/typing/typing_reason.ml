@@ -457,8 +457,8 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   | Rtype_access (r, (r_hd, tconst) :: tail) ->
     to_string prefix r
     @ to_string
-        ( "  resulting from expanding the type constant "
-        ^ Markdown_lite.md_codify tconst )
+        ("  resulting from expanding the type constant "
+        ^ Markdown_lite.md_codify tconst)
         r_hd
     @ List.concat_map tail ~f:(fun (r, s) ->
           to_string

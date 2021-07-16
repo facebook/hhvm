@@ -48,8 +48,8 @@ module ErrorMap = struct
     FileMap.find_opt map file
     |> Option.value
          ~default:
-           ( FileMap.find_opt init_map file
-           |> Option.value ~default:PhaseMap.empty )
+           (FileMap.find_opt init_map file
+           |> Option.value ~default:PhaseMap.empty)
     |> PhaseMap.add ~key:phase ~data
     |> fun inner_map -> FileMap.add map ~key:file ~data:inner_map
 
@@ -231,10 +231,8 @@ end = struct
       FileMap.fold
         to_push_candidates
         ~init:(to_push, FileMap.empty, error_count_in_ide)
-        ~f:(fun file
-                phase_map
-                (to_push, to_push_candidates, error_count_in_ide)
-                ->
+        ~f:(fun file phase_map (to_push, to_push_candidates, error_count_in_ide)
+           ->
           match FileMap.find_opt errors_in_ide file with
           | None ->
             (* Let's consider it again later. *)
@@ -273,10 +271,8 @@ end = struct
       FileMap.fold
         to_push_candidates
         ~init:(to_push, FileMap.empty, error_count_in_ide)
-        ~f:(fun file
-                phase_map
-                (to_push, errors_beyond_limit, error_count_in_ide)
-                ->
+        ~f:(fun file phase_map (to_push, errors_beyond_limit, error_count_in_ide)
+           ->
           (* [to_push_candidates] now only contains files which are not in
              [errors_in_ide] or have been deduced from it. *)
           let error_count = error_count_in_phase_map phase_map in
@@ -400,7 +396,8 @@ let push_to_client :
     try
       ClientProvider.send_push_message_to_client client message;
       true
-    with ClientProvider.Client_went_away -> false
+    with
+    | ClientProvider.Client_went_away -> false
 
 (** Reset the error tracker if the new client ID is different from the tracked one. *)
 let possibly_reset_tracker { error_tracker; tracked_ide_id } new_ide_id =

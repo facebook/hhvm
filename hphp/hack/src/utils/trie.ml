@@ -39,7 +39,8 @@ let with_return (type t) (f : _ -> t) =
     exception Return of t
   end in
   let return = { return = (fun x -> raise (Capture.Return x)) } in
-  (try f return with Capture.Return x -> x)
+  try f return with
+  | Capture.Return x -> x
 
 (* Trie implementation *)
 

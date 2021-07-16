@@ -93,10 +93,10 @@ let status_describe_cmd : type a. a command -> string =
  fun cmd ->
   match cmd with
   | Rpc ({ ServerCommandTypes.from; desc }, _rpc) ->
-    ( if String.equal from "" then
+    (if String.equal from "" then
       ""
     else
-      from ^ ":" )
+      from ^ ":")
     ^ desc
   | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
 
@@ -140,8 +140,8 @@ let write_progress_file
       ]
     |> json_to_multiline
   in
-  try Sys_utils.protected_write_exn server_progress_file content
-  with exn ->
+  try Sys_utils.protected_write_exn server_progress_file content with
+  | exn ->
     let e = Exception.wrap exn in
     Hh_logger.log
       "SERVER_PROGRESS_EXCEPTION(write) %s\n%s"
@@ -165,7 +165,8 @@ let read_progress_file ~(server_progress_file : string) :
     let server_warning = Hh_json_helpers.Jget.string_opt json "warning" in
     let server_timestamp = Hh_json_helpers.Jget.float_exn json "timestamp" in
     ServerCommandTypes.{ server_progress; server_warning; server_timestamp }
-  with exn ->
+  with
+  | exn ->
     let e = Exception.wrap exn in
     Hh_logger.log
       "SERVER_PROGRESS_EXCEPTION(read) %s\n%s\n%s"

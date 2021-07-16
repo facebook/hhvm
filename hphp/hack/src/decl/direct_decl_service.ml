@@ -21,8 +21,8 @@ let decls_to_fileinfo
         acc with
         FileInfo.classes =
           ( FileInfo.Full
-              ( fst c.Shallow_decl_defs.sc_name
-              |> Pos_or_decl.fill_in_filename fn ),
+              (fst c.Shallow_decl_defs.sc_name
+              |> Pos_or_decl.fill_in_filename fn),
             name )
           :: acc.FileInfo.classes;
       }

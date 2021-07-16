@@ -141,10 +141,10 @@ let get_class_requirements env class_cache shallow_class =
     List.fold_left
       ~f:(flatten_parent_class_reqs env class_cache shallow_class)
       ~init:acc
-      ( if Ast_defs.(equal_class_kind shallow_class.sc_kind Cinterface) then
+      (if Ast_defs.(equal_class_kind shallow_class.sc_kind Cinterface) then
         shallow_class.sc_extends
       else
-        shallow_class.sc_implements )
+        shallow_class.sc_implements)
   in
   let (req_extends, req_ancestors_extends) = acc in
   let req_extends = naive_dedup req_extends in

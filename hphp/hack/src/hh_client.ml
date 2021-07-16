@@ -73,7 +73,8 @@ let () =
               { mkdir_if_new = false; perm_if_new = 0o666 })
            client_log_fn;
          Hh_logger.set_log client_log_fn
-       with _ -> ())
+       with
+      | _ -> ())
   end;
   Hh_logger.log
     "[hh_client] %s"
@@ -125,7 +126,8 @@ let () =
         Lwt_main.run (ClientDownloadSavedState.main env)
     in
     Exit.exit exit_status
-  with exn ->
+  with
+  | exn ->
     let e = Exception.wrap exn in
     (* We trust that if someone raised Exit_with then they had the decency to print
        out a user-facing message; we will only print out a user-facing message here

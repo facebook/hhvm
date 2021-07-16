@@ -23,7 +23,8 @@ let call_external_formatter
         while true do
           lines := Timeout.input_line ~timeout ic :: !lines
         done
-      with End_of_file -> ()
+      with
+      | End_of_file -> ()
     end;
     match Timeout.close_process_in ic with
     | Unix.WEXITED 0 -> Ok (List.rev !lines)

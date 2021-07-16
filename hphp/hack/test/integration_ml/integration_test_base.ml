@@ -50,9 +50,9 @@ let real_hhi_files () = Hhi.get_raw_hhi_contents () |> Array.to_list
 let test_init_common ?(hhi_files = []) () =
   if !did_init then
     failwith
-      ( "Initializing the server twice in same process. There is no guarantee of global state "
+      ("Initializing the server twice in same process. There is no guarantee of global state "
       ^ "cleanup between them. Split your test in multiple separate tests, or run individual test "
-      ^ "cases in separate processes using Test.in_daemon." )
+      ^ "cases in separate processes using Test.in_daemon.")
   else
     did_init := true;
 
@@ -624,10 +624,10 @@ let load_state
           predeclare_ide = true;
           load_decls_from_saved_state;
           naming_sqlite_path =
-            ( if enable_naming_table_fallback then
+            (if enable_naming_table_fallback then
               Some (saved_state_dir ^ "/" ^ saved_naming_filename)
             else
-              None );
+              None);
           enable_naming_table_fallback;
         };
       ServerEnv.config =

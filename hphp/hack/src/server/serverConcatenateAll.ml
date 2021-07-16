@@ -210,7 +210,7 @@ let go (genv : ServerEnv.genv) (env : ServerEnv.env) (prefixes : string list) =
             Relative_path.Set.is_empty pending_deps
           | None -> true)
     in
-    ( if Relative_path.Set.is_empty files_without_deps then
+    (if Relative_path.Set.is_empty files_without_deps then
       (* everything has an unsatisifed dependency, so error out *)
       let visited_pretty =
         List.map ~f:Relative_path.to_absolute visited |> String.concat ~sep:", "
@@ -231,10 +231,10 @@ let go (genv : ServerEnv.genv) (env : ServerEnv.env) (prefixes : string list) =
       in
       raise
         (CircularDependency
-           ( "circular dependency detected:\nvisited: "
+           ("circular dependency detected:\nvisited: "
            ^ visited_pretty
            ^ "\nrest: "
-           ^ rest_pretty )) );
+           ^ rest_pretty)));
     let rest = Relative_path.Set.diff rest files_without_deps in
     let visited = visited @ Relative_path.Set.elements files_without_deps in
     if Relative_path.Set.is_empty rest then

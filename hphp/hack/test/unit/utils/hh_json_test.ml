@@ -14,7 +14,8 @@ let throws f =
   try
     let _ = f () in
     false
-  with _ -> true
+  with
+  | _ -> true
 
 let test_escape_unescape_data =
   [
@@ -39,7 +40,8 @@ let test_empty_string () =
   try
     ignore (Hh_json.json_of_string "");
     false
-  with Hh_json.Syntax_error _ -> true
+  with
+  | Hh_json.Syntax_error _ -> true
 
 let test_whitespace_string () =
   match Hh_json.json_of_string "\" \"" with
@@ -275,11 +277,11 @@ type fbz_record = {
 let test_access_3_keys_one_object () =
   let json =
     Hh_json.json_of_string
-      ( "{\n"
+      ("{\n"
       ^ "  \"foo\" : true,\n"
       ^ "  \"bar\" : \"hello\",\n"
       ^ "  \"baz\" : 5\n"
-      ^ "}" )
+      ^ "}")
   in
   Hh_json.Access.(
     let accessor = return json in
@@ -306,11 +308,11 @@ let test_access_3_keys_one_object () =
 let test_access_3_keys_one_object_wrong_type_middle () =
   let json =
     Hh_json.json_of_string
-      ( "{\n"
+      ("{\n"
       ^ "  \"foo\" : true,\n"
       ^ "  \"bar\" : [],\n"
       ^ "  \"baz\" : 5\n"
-      ^ "}" )
+      ^ "}")
   in
   Hh_json.Access.(
     let accessor = return json in

@@ -119,7 +119,8 @@ let match_substring_at s offset ss =
         if s.[i + offset] <> ss.[i] then raise Exit
       done;
       true
-    with Exit -> false
+    with
+    | Exit -> false
   else
     false
 
@@ -326,7 +327,10 @@ let string_of_file filename =
   let ic = open_in filename in
   let buf = Buffer.create 5096 in
   let rec loop () =
-    match (try Some (input_line ic) with _ -> None) with
+    match
+      try Some (input_line ic) with
+      | _ -> None
+    with
     | None -> Buffer.contents buf
     | Some l ->
       Buffer.add_string buf l;
@@ -433,10 +437,10 @@ module Make_streamer (Out : Output_stream_intf) = struct
     | JSON_Bool b ->
       Out.add_string
         buf
-        ( if b then
+        (if b then
           "true"
         else
-          "false" )
+          "false")
     | JSON_Null -> Out.add_string buf "null"
 
   and add_assoc ~sort_keys (buf : Out.t) (k, v) =
@@ -529,10 +533,10 @@ let rec json_to_multiline_output oc (json : json) : unit =
   | JSON_Bool b ->
     output_string
       oc
-      ( if b then
+      (if b then
         "true"
       else
-        "false" )
+        "false")
   | JSON_Null -> output_string oc "null"
 
 let output_json_endline ~pretty (oc : out_channel) (json : json) =
@@ -736,7 +740,8 @@ module Access = struct
       match candidate with
       | None -> Error (Missing_key_error (k, keytrace))
       | Some obj -> Ok (obj, k :: keytrace)
-    with Assert_failure _ -> Error (Not_an_object keytrace)
+    with
+    | Assert_failure _ -> Error (Not_an_object keytrace)
 
   let make_object_json v = JSON_Object (get_object_exn v)
 

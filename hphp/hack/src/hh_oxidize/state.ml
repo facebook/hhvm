@@ -20,7 +20,8 @@ let with_module_name s f =
     let res = f () in
     curr_module_name_ref := None;
     res
-  with exn ->
+  with
+  | exn ->
     curr_module_name_ref := None;
     raise exn
 
@@ -36,6 +37,7 @@ let with_self s f =
     let res = f () in
     self_ref := None;
     res
-  with exn ->
+  with
+  | exn ->
     self_ref := None;
     raise exn

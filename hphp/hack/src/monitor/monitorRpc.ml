@@ -50,8 +50,8 @@ let write_server_receipt_to_monitor_file
     receipt_serialize sequence_number_high_water_mark
     |> Hh_json.json_to_multiline
   in
-  try Sys_utils.protected_write_exn server_receipt_to_monitor_file json
-  with exn ->
+  try Sys_utils.protected_write_exn server_receipt_to_monitor_file json with
+  | exn ->
     let e = Exception.wrap exn in
     Hh_logger.log
       "SERVER_RECEIPT_TO_MONITOR(write) %s\n%s"

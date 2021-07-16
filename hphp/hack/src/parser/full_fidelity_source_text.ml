@@ -100,7 +100,8 @@ let line_text (source_text : t) (line_number : int) : string =
     in
     sub source_text offset_start (offset_end - offset_start)
     (* If the line was outside the boundaries of the file, just return a blank string *)
-  with _ -> ""
+  with
+  | _ -> ""
 
 (* Take a zero-based offset, produce a one-based (line, char) pair. *)
 let offset_to_position source_text offset =

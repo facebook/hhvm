@@ -40,7 +40,7 @@ end
  * passed into the unit test so it is fresh for each test. *)
 let make_test test =
   let mock_server_config =
-    ( module struct
+    (module struct
       type server_start_options = unit
 
       let null_fd = Unix.openfile Sys_utils.null_path [Unix.O_RDWR] 0o666
@@ -79,16 +79,17 @@ let make_test test =
       let wait_pid _ = (0, Unix.WEXITED 0)
 
       let is_saved_state_precomputed _ = false
-    end : Mock_server_config_sig )
+    end : Mock_server_config_sig)
   in
   Tools.set_hg_to_global_rev_map ();
   fun () ->
     Tempfile.with_tempdir (fun temp_dir ->
-        (try test mock_server_config temp_dir with e -> raise e))
+        try test mock_server_config temp_dir with
+        | e -> raise e)
 
 let test_no_event mock_server_config temp_dir =
-  let module Mock_server_config = ( val mock_server_config
-                                      : Mock_server_config_sig )
+  let module Mock_server_config = (val mock_server_config
+                                     : Mock_server_config_sig)
   in
   let module Test_monitor =
     ServerMonitor.Make_monitor (Mock_server_config) (HhMonitorInformant)
@@ -114,8 +115,8 @@ let test_no_event mock_server_config temp_dir =
   true
 
 let test_restart_server_with_target_saved_state mock_server_config temp_dir =
-  let module Mock_server_config = ( val mock_server_config
-                                      : Mock_server_config_sig )
+  let module Mock_server_config = (val mock_server_config
+                                     : Mock_server_config_sig)
   in
   let module Test_monitor =
     ServerMonitor.Make_monitor (Mock_server_config) (HhMonitorInformant)
@@ -162,8 +163,8 @@ let test_server_restart_suppressed_on_hhconfig_version_change
    * Can't reuse code because of First Class Modules :( *)
   (* ---- Start of copy-pasta from test_restart_server_with_target_saved_state -------- *)
   (* ------------------------ This sets up an Informant-directed restart -------------- *)
-  let module Mock_server_config = ( val mock_server_config
-                                      : Mock_server_config_sig )
+  let module Mock_server_config = (val mock_server_config
+                                     : Mock_server_config_sig)
   in
   let module Test_monitor =
     ServerMonitor.Make_monitor (Mock_server_config) (HhMonitorInformant)

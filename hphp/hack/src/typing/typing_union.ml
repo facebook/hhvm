@@ -438,7 +438,8 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
           | Taccess _ | Tneg _ ) ),
         (_, _) ) ->
       ty_equiv env ty1 ty2 ~are_ty_param:false
-  with Dont_simplify -> (env, None)
+  with
+  | Dont_simplify -> (env, None)
 
 (* Recognise a pattern t1 | t2 | t3 | (t4 & t5 & t6) which happens frequently
    at control flow join points, and check for types that drop out of the intersection
@@ -603,8 +604,8 @@ and union_tylists_w_variances ~approx_cancel_neg env tparams tyl1 tyl2 =
       | None -> raise Dont_simplify)
   in
   let (env, tyl) =
-    try List.map3_env env tyl1 tyl2 variances ~f:merge_ty_params
-    with Invalid_argument _ -> raise Dont_simplify
+    try List.map3_env env tyl1 tyl2 variances ~f:merge_ty_params with
+    | Invalid_argument _ -> raise Dont_simplify
   in
   (env, tyl)
 
@@ -725,7 +726,7 @@ let union_list_2_by_2 ~approx_cancel_neg env r tyl =
             in
             (match union_opt with
             | None -> union_ty_w_tyl env ty tyl (ty' :: tyl_acc)
-            | Some union -> (env, tyl @ (union :: tyl_acc)))
+            | Some union -> (env, tyl @ union :: tyl_acc))
         in
         union_ty_w_tyl env ty res_tyl [])
   in

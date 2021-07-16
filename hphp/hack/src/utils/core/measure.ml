@@ -142,8 +142,8 @@ let get_record = function
     | Some record -> record
     | None ->
       failwith
-        ( "No global record available! "
-        ^ "Did you forget to call Measure.push_global?" ))
+        ("No global record available! "
+        ^ "Did you forget to call Measure.push_global?"))
 
 (* Measure can track how the values are distributed by creating buckets and
  * keeping track of how many samples fall into each buckets. It will not track

@@ -193,7 +193,8 @@ let multi_threaded_call
                   acc
               in
               (acc, failures)
-            with WorkerController.Worker_failed (_, failure) ->
+            with
+            | WorkerController.Worker_failed (_, failure) ->
               (acc, failure :: failures)
           end
         ~init:(acc, [])
@@ -215,7 +216,8 @@ let multi_threaded_call
       (Some workers)
       handles
       (neutral, interrupt.env, interrupt.handlers interrupt.env)
-  with e ->
+  with
+  | e ->
     let stack = Utils.Callstack (Printexc.get_backtrace ()) in
     !on_exception_ref (e, stack);
     raise e
@@ -242,7 +244,7 @@ let call_with_interrupt workers job merge neutral next ?on_cancelled interrupt =
   (* Interrupting of nested jobs is not implemented *)
   assert (
     List.for_all workers ~f:(fun x ->
-        Option.is_none @@ WorkerController.get_handle_UNSAFE x) );
+        Option.is_none @@ WorkerController.get_handle_UNSAFE x));
   let job (_id, a) b = job a b in
   let merge (_id, a) b = merge a b in
   let ((res, interrupt_env), unfinished) =

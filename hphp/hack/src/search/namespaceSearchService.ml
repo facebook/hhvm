@@ -27,10 +27,10 @@ let register_namespace ~(sienv : si_env) ~(namespace : string) : unit =
               {
                 nss_name = leaf_name;
                 nss_full_namespace =
-                  ( if current_node.nss_full_namespace = "\\" then
+                  (if current_node.nss_full_namespace = "\\" then
                     "\\" ^ leaf_name
                   else
-                    current_node.nss_full_namespace ^ "\\" ^ leaf_name );
+                    current_node.nss_full_namespace ^ "\\" ^ leaf_name);
                 nss_children = Hashtbl.create 0;
               }
             in
@@ -148,7 +148,8 @@ let register_alias ~(sienv : si_env) ~(alias : string) ~(target : string) : unit
       }
     in
     Hashtbl.add source.nss_children (String.lowercase_ascii name) new_node
-  with Match_not_found ->
+  with
+  | Match_not_found ->
     Hh_logger.log
       "Unable to register namespace map for [%s] -> [%s]"
       alias

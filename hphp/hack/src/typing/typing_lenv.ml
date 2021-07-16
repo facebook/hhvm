@@ -36,12 +36,12 @@ let union env local1 local2 =
   let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
   ( env,
     ( ty,
-      ( if phys_equal ty ty1 || Pos.equal Pos.none pos2 then
+      (if phys_equal ty ty1 || Pos.equal Pos.none pos2 then
         pos1
       else if phys_equal ty ty2 || Pos.equal Pos.none pos1 then
         pos2
       else
-        Pos.none ),
+        Pos.none),
       eid ) )
 
 let get_cont_option env cont =

@@ -107,10 +107,10 @@ and print_fun_param_exn param =
 and print_shape_field_exn (name, { sft_optional; sft_ty; _ }) =
   Printf.sprintf
     "%s%s => %s"
-    ( if sft_optional then
+    (if sft_optional then
       "?"
     else
-      "" )
+      "")
     (print_shape_field_name name)
     (print_ty_exn sft_ty)
 
@@ -121,4 +121,5 @@ and print_shape_field_name name =
   | _ -> s
 
 let print ?(allow_nothing = false) ty =
-  (try Some (print_ty_exn ~allow_nothing ty) with Non_denotable -> None)
+  try Some (print_ty_exn ~allow_nothing ty) with
+  | Non_denotable -> None

@@ -69,8 +69,8 @@ let write_format_and_sign env filename contents =
     failwith ("Could not format Rust output in " ^ filename);
   let contents = read filename in
   let contents =
-    try Signed_source.sign_file contents
-    with Signed_source.Token_not_found -> contents
+    try Signed_source.sign_file contents with
+    | Signed_source.Token_not_found -> contents
   in
   write filename contents
 
@@ -113,7 +113,8 @@ let parse_types_file filename =
        lines := Caml.input_line ic :: !lines
      done;
      Caml.close_in ic
-   with End_of_file -> Caml.close_in ic);
+   with
+  | End_of_file -> Caml.close_in ic);
   List.filter_map !lines ~f:(fun name ->
       (* Ignore comments beginning with '#' *)
       let name =
@@ -148,7 +149,8 @@ let parse_extern_types_file filename =
              String.subo name ~pos:after_coloncolon_idx
            in
            SMap.add map ~key:name_without_crate ~data:name
-         with _ ->
+         with
+         | _ ->
            if String.(name <> "") then
              failwith
                (Printf.sprintf

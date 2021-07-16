@@ -32,8 +32,8 @@ let result_to_json ~(deps_mode : Typing_deps_mode.t) (result : result) :
         ("variant", Hh_json.JSON_String (Typing_deps.Dep.variant_to_string dep));
         ( "hash",
           Hh_json.JSON_String
-            ( Typing_deps.(Dep.make (hash_mode deps_mode) dep)
-            |> Typing_deps.Dep.to_debug_string ) );
+            (Typing_deps.(Dep.make (hash_mode deps_mode) dep)
+            |> Typing_deps.Dep.to_debug_string) );
       ]
   in
   let dep_edge_to_json { dependent; dependency } =
@@ -49,10 +49,10 @@ let result_to_json ~(deps_mode : Typing_deps_mode.t) (result : result) :
       ("dependencies", Hh_json.JSON_Array (List.map dependencies ~f:dep_to_json));
       ( "fanout_dependents",
         Hh_json.JSON_Array
-          ( fanout_dependents
+          (fanout_dependents
           |> Typing_deps.DepSet.elements
           |> List.map ~f:(fun dep ->
-                 Hh_json.JSON_String (Typing_deps.Dep.to_debug_string dep)) ) );
+                 Hh_json.JSON_String (Typing_deps.Dep.to_debug_string dep))) );
       ( "relevant_dep_edges",
         Hh_json.JSON_Array (List.map relevant_dep_edges ~f:dep_edge_to_json) );
     ]

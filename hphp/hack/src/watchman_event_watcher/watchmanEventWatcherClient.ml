@@ -43,7 +43,9 @@ module Client_actual = struct
 
   type t = t_ option
 
-  let ignore_unix_error f x = (try f x with Unix.Unix_error _ -> ())
+  let ignore_unix_error f x =
+    try f x with
+    | Unix.Unix_error _ -> ()
 
   let init root =
     let socket_file = Config.socket_file root in
@@ -125,7 +127,8 @@ module Client_mock = struct
   let get_status _ = !Mocking.status
 end
 
-include ( val if Injector_config.use_test_stubbing then
-                (module Client_mock : WatchmanEventWatcherClient_sig.S)
-              else
-                (module Client_actual : WatchmanEventWatcherClient_sig.S) )
+include
+  (val if Injector_config.use_test_stubbing then
+         (module Client_mock : WatchmanEventWatcherClient_sig.S)
+       else
+         (module Client_actual : WatchmanEventWatcherClient_sig.S))

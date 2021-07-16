@@ -149,7 +149,8 @@ let check_configs (pair_json_str : string) : bool =
               interact_suffix;
             true
           end
-        with _ ->
+        with
+        | _ ->
           Out_channel.flush stderr;
           Printf.eprintf "RUST CRASHED #%d\n" !check_cnt;
           (* Record the inputs for easy inspection with less *)
@@ -181,7 +182,7 @@ let () =
   in
   Printf.eprintf "PASSED %d/%d\n" pass_cnt total_cnt;
   exit
-    ( if pass_cnt = total_cnt then
+    (if pass_cnt = total_cnt then
       0
     else
-      1 )
+      1)

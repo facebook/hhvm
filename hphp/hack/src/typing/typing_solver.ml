@@ -29,13 +29,13 @@ let log_remaining_prop env =
     let prop =
       Typing_inference_env.get_nongraph_subtype_prop env.inference_env
     in
-    ( if TypecheckerOptions.log_inference_constraints (Env.get_tcopt env) then
+    (if TypecheckerOptions.log_inference_constraints (Env.get_tcopt env) then
       let p_as_string = Typing_print.subtype_prop env prop in
       let pos = Pos.string (Pos.to_absolute env.function_pos) in
       let size = TL.size prop in
       let n_disj = TL.n_disj prop in
       let n_conj = TL.n_conj prop in
-      TypingLogger.InferenceCnstr.log p_as_string ~pos ~size ~n_disj ~n_conj );
+      TypingLogger.InferenceCnstr.log p_as_string ~pos ~size ~n_disj ~n_conj);
     if (not (Errors.currently_has_errors ())) && not (TL.is_valid prop) then
       Typing_log.log_prop
         1
@@ -210,12 +210,12 @@ let bind env var (ty : locl_ty) =
   (* Make sure we don't project from this variable if it is bound to
    * nothing, as it will lead to type holes.
    *)
-  ( if Typing_utils.is_nothing env ty && not (SMap.is_empty tconsts) then
+  (if Typing_utils.is_nothing env ty && not (SMap.is_empty tconsts) then
     let (_, ((proj_pos, name), _)) = SMap.choose tconsts in
     Errors.unresolved_type_variable_projection
       (Env.get_tyvar_pos env var)
       name
-      ~proj_pos );
+      ~proj_pos);
   env
 
 (* Solve type variable var by assigning it to the union of its lower bounds.

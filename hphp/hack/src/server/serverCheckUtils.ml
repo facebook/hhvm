@@ -31,7 +31,8 @@ let extend_fast_sequential fast naming_table additional_files =
            let info = Naming_table.get_file_info_unsafe naming_table x in
            let info_names = FileInfo.simplify info in
            Relative_path.Map.add acc ~key:x ~data:info_names
-         with Naming_table.File_info_not_found -> acc)
+         with
+        | Naming_table.File_info_not_found -> acc)
       | Some _ -> acc)
 
 let extend_fast_batch genv fast naming_table additional_files bucket_size =
@@ -42,7 +43,8 @@ let extend_fast_batch genv fast naming_table additional_files bucket_size =
       let info = Naming_table.get_file_info_unsafe naming_table x in
       let info_names = FileInfo.simplify info in
       Relative_path.Map.add acc ~key:x ~data:info_names
-    with Naming_table.File_info_not_found -> acc
+    with
+    | Naming_table.File_info_not_found -> acc
   in
   let job (acc : FileInfo.names Relative_path.Map.t) additional_files =
     Core_kernel.(
@@ -117,8 +119,8 @@ let user_filter_of_json (json : Hh_json.json) : user_filter =
   let regexes = Jget.string_array_exn json "regexes" in
   let regexes =
     List.map regexes ~f:(fun re ->
-        try Str.regexp re
-        with Failure explanation ->
+        try Str.regexp re with
+        | Failure explanation ->
           raise
           @@ Failure
                (Printf.sprintf
@@ -138,7 +140,8 @@ let user_filter_should_type_check
   let suffix = Relative_path.suffix path in
   let matches_any regexes =
     List.exists regexes ~f:(fun re ->
-        (try Str.search_forward re suffix 0 >= 0 with Caml.Not_found -> false))
+        try Str.search_forward re suffix 0 >= 0 with
+        | Caml.Not_found -> false)
   in
   match user_filter with
   | UserFilterInclude regexes -> matches_any regexes
@@ -161,8 +164,8 @@ let user_filter_type_check_files ~to_recheck ~reparsed ~is_ide_file =
   in
   let rec read_config_file () : user_filter list =
     Hh_logger.log "Reading in config file at %s" config_file_path;
-    try read_config_file_once ()
-    with e ->
+    try read_config_file_once () with
+    | e ->
       ServerProgress.send_progress
         ~include_in_logs:false
         "error while applying user file filter, see logs to continue";

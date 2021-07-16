@@ -464,13 +464,14 @@ let make_reference_implementation (state_dir : Path.t) : state =
         ~binary:true
         (Path.to_string state_path)
         ~f:(fun ic -> Marshal.from_channel ic)
-    with e ->
+    with
+    | e ->
       let e = Exception.wrap e in
       Hh_logger.warn
-        ( "HINT: An error occurred while loading hh_fanout state. "
+        ("HINT: An error occurred while loading hh_fanout state. "
         ^^ "If it is corrupted, "
         ^^ "try running `hh_fanout clean` to delete the state, "
-        ^^ "then try your query again." );
+        ^^ "then try your query again.");
       Exception.reraise e
   in
   let state = new state ~state_path ~persistent_state in

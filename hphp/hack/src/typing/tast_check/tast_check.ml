@@ -19,7 +19,7 @@ let visitor ctx =
   in
   let handlers = List.map makers ~f:(( |> ) ctx) |> List.filter_opt in
   Tast_visitor.iter_with
-    ( handlers
+    (handlers
     @ [
         Shape_field_check.handler;
         String_cast_check.handler;
@@ -59,7 +59,7 @@ let visitor ctx =
         Expression_tree_check.handler;
         Class_const_origin_check.handler;
         Enum_classes_check.handler;
-      ] )
+      ])
 
 let program ctx = (visitor ctx)#go ctx
 

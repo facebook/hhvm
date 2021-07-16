@@ -38,7 +38,8 @@ let parse_version (version : string option) =
         let minor = int_of_string (Str.matched_group 2 version) in
         let build = int_of_string (Str.matched_group 3 version) in
         Version_components { major; minor; build }
-      with _ ->
+      with
+      | _ ->
         Hh_logger.log
           "Failed to parse server version '%s', treating it as an opaque string"
           version;

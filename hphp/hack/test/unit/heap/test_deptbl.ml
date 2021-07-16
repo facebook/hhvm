@@ -151,7 +151,8 @@ let test_ignore_hh_version () =
     print_endline
       "Should not have been able to load this deptable with hh version checking.";
     exit 1
-  with _ ->
+  with
+  | _ ->
     load_dep_table_sqlite deptable_name true;
     List.iter (List.append data data_empty) ~f:(fun (key, values) ->
         expect_equals_list key (get_sqlite key) values);

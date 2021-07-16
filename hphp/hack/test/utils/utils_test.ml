@@ -75,7 +75,8 @@ let assert_throws : 'a 'b. ('b -> 'a) -> 'b -> string -> string -> unit =
     try
       let _ = f arg in
       "[no exception]"
-    with e -> Printexc.to_string e
+    with
+    | e -> Printexc.to_string e
   in
   if not (String_utils.is_substring exp e) then begin
     Printf.eprintf "%s.\nExpected it to throw '%s' but got '%s'\n" message exp e;
@@ -199,18 +200,18 @@ let test_telemetry_diff () =
     |> Telemetry.object_
          ~key:"o"
          ~value:
-           ( Telemetry.create ()
+           (Telemetry.create ()
            |> Telemetry.int_ ~key:"a" ~value:1
-           |> Telemetry.int_ ~key:"b" ~value:1 )
+           |> Telemetry.int_ ~key:"b" ~value:1)
   in
   let prev3 =
     Telemetry.create ()
     |> Telemetry.object_
          ~key:"o"
          ~value:
-           ( Telemetry.create ()
+           (Telemetry.create ()
            |> Telemetry.int_ ~key:"a" ~value:2
-           |> Telemetry.int_ ~key:"b" ~value:1 )
+           |> Telemetry.int_ ~key:"b" ~value:1)
   in
   begin
     let diff3 = Telemetry.diff ~all:true current3 ~prev:prev3 in

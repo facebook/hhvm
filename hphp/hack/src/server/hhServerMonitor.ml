@@ -41,9 +41,9 @@ let monitor_daemon_main
      then we will exit immediately, and avoid side-effects like cycling the logfile;
      (2) otherwise we'll start up the server and it will continue to run
      and handle requests. *)
-  ( if not (ServerArgs.check_mode options) then
+  (if not (ServerArgs.check_mode options) then
     let lock_file = ServerFiles.lock_file www_root in
-    if not (Lock.grab lock_file) then Exit.exit Exit_status.No_error );
+    if not (Lock.grab lock_file) then Exit.exit Exit_status.No_error);
 
   (* Daemon mode (should_detach): --daemon means the caller already spawned
      us in a new process, and it's now our responsibility to establish a logfile
@@ -51,10 +51,11 @@ let monitor_daemon_main
      to write to stdout/err as normal. *)
   if ServerArgs.should_detach options then begin
     let log_link = ServerFiles.monitor_log_link www_root in
-    (try Sys.rename log_link (log_link ^ ".old") with _ -> ());
+    (try Sys.rename log_link (log_link ^ ".old") with
+    | _ -> ());
     let log_file_path = Sys_utils.make_link_of_timestamped log_link in
-    try Sys_utils.redirect_stdout_and_stderr_to_file log_file_path
-    with e ->
+    try Sys_utils.redirect_stdout_and_stderr_to_file log_file_path with
+    | e ->
       Printf.eprintf "Can't write to logfile: %s\n%!" (Printexc.to_string e)
   end;
 
@@ -130,9 +131,8 @@ let monitor_daemon_main
 let daemon_entry =
   Daemon.register_entry_point
     "monitor_daemon_main"
-    (fun ((options, proc_stack) : ServerArgs.options * string list)
-         (_ic, _oc)
-         -> monitor_daemon_main options ~proc_stack)
+    (fun ((options, proc_stack) : ServerArgs.options * string list) (_ic, _oc)
+    -> monitor_daemon_main options ~proc_stack)
 
 (** Either starts a monitor daemon (which will spawn a typechecker daemon),
     or just runs the typechecker if detachment not enabled. *)
@@ -163,5 +163,5 @@ let start () =
       Exit.exit Exit_status.No_error
     end else
       monitor_daemon_main options ~proc_stack
-  with SharedMem.Out_of_shared_memory ->
-    Exit.exit Exit_status.Out_of_shared_memory
+  with
+  | SharedMem.Out_of_shared_memory -> Exit.exit Exit_status.Out_of_shared_memory

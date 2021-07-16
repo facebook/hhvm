@@ -82,10 +82,10 @@ let derive_copy ty = Convert_type.is_copy (Rust_type.rust_simple_type ty)
 let is_by_box () = not (is_by_ref ())
 
 let additional_derives ty : (string option * string) list =
-  ( if derive_copy ty then
+  (if derive_copy ty then
     [(None, "Copy")]
   else
-    [] )
+    [])
   @
   match ty with
   | "aast::EmitId" when is_by_box () ->
@@ -478,10 +478,10 @@ let variant_constructor_declaration ?(box_fields = false) cd =
       doc
       (rust_de_field_attr tys)
       name
-      ( if List.is_empty tys then
+      (if List.is_empty tys then
         ""
       else
-        map_and_concat ~sep:"," ~f:rust_type_to_string tys |> sprintf "(%s)" )
+        map_and_concat ~sep:"," ~f:rust_type_to_string tys |> sprintf "(%s)")
       discriminant
   | Pcstr_record labels ->
     sprintf
@@ -640,8 +640,8 @@ let type_declaration name td =
       if String.equal name mod_name_as_type then
         raise
           (Skip_type_decl
-             ( "it is an alias to type t, which was already renamed to "
-             ^ mod_name_as_type ))
+             ("it is an alias to type t, which was already renamed to "
+             ^ mod_name_as_type))
       else
         sprintf
           "%spub type %s = %s;"
@@ -765,6 +765,8 @@ let type_declaration td =
       log "Not converting type %s::%s: re-exporting instead" mod_name name;
       add_decl name (sprintf "pub use %s;" extern_type)
     | None ->
-      (try with_self name (fun () -> add_decl name (type_declaration name td))
-       with Skip_type_decl reason ->
-         log "Not converting type %s::%s: %s" mod_name name reason)
+      (try
+         with_self name (fun () -> add_decl name (type_declaration name td))
+       with
+      | Skip_type_decl reason ->
+        log "Not converting type %s::%s: %s" mod_name name reason)

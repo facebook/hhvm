@@ -138,7 +138,8 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
               let stat = Unix.stat client_log_fn in
               if stat.Unix.st_size > 1024 * 1024 then
                 Sys.rename client_log_fn (client_log_fn ^ ".old")
-            with _ -> ()
+            with
+            | _ -> ()
           end;
           env );
       ( Periodical.one_hour *. 3.,
@@ -180,7 +181,8 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
                 fun fn ->
                 let fn = Filename.concat GlobalConfig.tmp_dir fn in
                 if
-                  (try Sys.is_directory fn with _ -> false)
+                  (try Sys.is_directory fn with
+                  | _ -> false)
                   (* We don't want to touch things like .watchman_failed *)
                   || string_starts_with fn "."
                   || not (ServerFiles.is_of_root root fn)

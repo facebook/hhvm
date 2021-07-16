@@ -450,11 +450,11 @@ let tfun_to_func_details (env : Tast_env.t) (ft : Typing_defs.locl_fun_type) :
     return_ty = Tast_env.print_ty env ft.ft_ret.et_type;
     min_arity = arity_min ft;
     params =
-      ( List.map ft.ft_params ~f:param_to_record
+      (List.map ft.ft_params ~f:param_to_record
       @
       match ft.ft_arity with
       | Fvariadic p -> [param_to_record ~is_variadic:true p]
-      | Fstandard -> [] );
+      | Fstandard -> []);
   }
 
 (* Convert a `ty` into a func details structure *)
@@ -961,9 +961,9 @@ let find_global_results
   if
     (not ctx.is_manually_invoked)
     && (not have_user_prefix)
-    && ( ctx.is_after_single_colon
+    && (ctx.is_after_single_colon
        || ctx.is_after_open_square_bracket
-       || ctx.is_after_quote )
+       || ctx.is_after_quote)
   then
     ()
   else if ctx.is_after_double_right_angle_bracket then
@@ -1140,8 +1140,8 @@ let go_ctx
 
       if completion_type = Some Acprop then compute_complete_local ctx tast;
       let replace_pos =
-        try get_replace_pos_exn ()
-        with _ -> Pos.none |> Pos.to_absolute |> Ide_api_types.pos_to_range
+        try get_replace_pos_exn () with
+        | _ -> Pos.none |> Pos.to_absolute |> Ide_api_types.pos_to_range
       in
       let resolve (result : autocomplete_result) : complete_autocomplete_result
           =
@@ -1157,7 +1157,7 @@ let go_ctx
         {
           With_complete_flag.is_complete = !autocomplete_is_complete;
           value =
-            ( if sienv.use_ranked_autocomplete then (
+            (if sienv.use_ranked_autocomplete then (
               let ranking_start_time = Unix.gettimeofday () in
               let ranked_results =
                 AutocompleteRankService.rank_autocomplete_result
@@ -1179,7 +1179,7 @@ let go_ctx
                 ~start_time:ranking_start_time;
               ranked_results
             ) else
-              complete_autocomplete_results );
+              complete_autocomplete_results);
         }
       in
       SymbolIndexCore.log_symbol_index_search

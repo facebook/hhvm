@@ -130,8 +130,8 @@ let handler =
                  (Tast_env.print_ty env ty)
                  (Tast_env.print_ty env deserialized_ty)
                  (Tast_env.ty_to_json env ty |> Hh_json.json_to_string)
-                 ( Tast_env.ty_to_json env deserialized_ty
-                 |> Hh_json.json_to_string ))
+                 (Tast_env.ty_to_json env deserialized_ty
+                 |> Hh_json.json_to_string))
         | Error (Not_supported _) -> ()
         | Error (Wrong_phase message) ->
           Errors.unserializable_type
@@ -149,7 +149,8 @@ let handler =
                message
                (Tast_env.print_ty env ty)
                (Tast_env.ty_to_json env ty |> Hh_json.json_to_string))
-      with e ->
+      with
+      | e ->
         Errors.unserializable_type
           p
           (Printf.sprintf "exception: %s" (Exn.to_string e))

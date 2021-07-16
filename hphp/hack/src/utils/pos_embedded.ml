@@ -199,8 +199,8 @@ let string t =
   let path = filename t in
 
   let hhi_path =
-    try Relative_path.path_of_prefix Relative_path.Hhi
-    with Invalid_argument _ ->
+    try Relative_path.path_of_prefix Relative_path.Hhi with
+    | Invalid_argument _ ->
       (* .hhi path hasn't been set (e.g. when running tests). *)
       ""
   in

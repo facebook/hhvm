@@ -295,8 +295,8 @@ let check_name (p, name) =
   (* We perform this check here because currently, naming edits the AST to add
    * a parent node of this class to enums during the AST transform *)
   if
-    ( String.equal name SN.Classes.cHH_BuiltinEnum
-    || String.equal name SN.Classes.cHH_BuiltinEnumClass )
+    (String.equal name SN.Classes.cHH_BuiltinEnum
+    || String.equal name SN.Classes.cHH_BuiltinEnumClass)
     && not (string_ends_with (Relative_path.suffix (Pos.filename p)) ".hhi")
   then
     Errors.using_internal_class p (strip_ns name)
@@ -952,7 +952,7 @@ let rec class_ ctx c =
   let methods =
     match constructor with
     | None -> smethods @ methods
-    | Some c -> (c :: smethods) @ methods
+    | Some c -> c :: smethods @ methods
   in
   {
     N.c_annotation = ();
@@ -1150,7 +1150,7 @@ and type_param ~forbid_this (genv, lenv) t =
     TypecheckerOptions.experimental_feature_enabled
       (Provider_context.get_tcopt genv.ctx)
       TypecheckerOptions.experimental_type_param_shadowing
-  then
+   then
       (* Treat type params as inline class declarations that don't go into the naming heap *)
       let (pos, name) =
         NS.elaborate_id genv.namespace NS.ElaborateClass t.Aast.tp_name
@@ -1171,9 +1171,9 @@ and type_param ~forbid_this (genv, lenv) t =
   let hk_types_enabled =
     TypecheckerOptions.higher_kinded_types (Provider_context.get_tcopt genv.ctx)
   in
-  ( if (not hk_types_enabled) && (not @@ List.is_empty t.Aast.tp_parameters) then
+  (if (not hk_types_enabled) && (not @@ List.is_empty t.Aast.tp_parameters) then
     let (pos, name) = t.Aast.tp_name in
-    Errors.tparam_with_tparam pos name );
+    Errors.tparam_with_tparam pos name);
 
   (* Bring all type parameters into scope at once before traversing nested tparams,
      as per the note above *)
@@ -1217,8 +1217,8 @@ and class_prop_expr_is_xhp env cv =
       expr
   in
   let is_xhp =
-    try String.(sub (snd cv.Aast.cv_id) ~pos:0 ~len:1 = ":")
-    with Invalid_argument _ -> false
+    try String.(sub (snd cv.Aast.cv_id) ~pos:0 ~len:1 = ":") with
+    | Invalid_argument _ -> false
   in
   (expr, is_xhp)
 
@@ -1979,9 +1979,9 @@ and expr_ env p (e : Nast.expr_) =
     when String.equal cn SN.StdlibFunctions.call_user_func ->
     Errors.deprecated_use
       p
-      ( "The builtin "
+      ("The builtin "
       ^ Markdown_lite.md_codify (Utils.strip_ns cn)
-      ^ " is deprecated." );
+      ^ " is deprecated.");
     begin
       match el with
       | [] ->

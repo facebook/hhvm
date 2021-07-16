@@ -21,14 +21,16 @@ let string_starts_with long short =
   try
     let long = String.sub long 0 (String.length short) in
     long = short
-  with Invalid_argument _ -> false
+  with
+  | Invalid_argument _ -> false
 
 let string_ends_with long short =
   try
     let len = String.length short in
     let long = String.sub long (String.length long - len) len in
     long = short
-  with Invalid_argument _ -> false
+  with
+  | Invalid_argument _ -> false
 
 (* Returns the index of the first occurrence of string `needle` in string
    `haystack`. If not found, returns -1.

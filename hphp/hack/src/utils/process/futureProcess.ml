@@ -129,8 +129,8 @@ let make
       match Process.read_and_wait_pid ~timeout process with
       | Ok { Process_types.stdout; _ } ->
         begin
-          try Ok (transformer stdout)
-          with e ->
+          try Ok (transformer stdout) with
+          | e ->
             let e = Exception.wrap e in
             Error (info, Transformer_raised e)
         end

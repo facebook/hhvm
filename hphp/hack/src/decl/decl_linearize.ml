@@ -326,10 +326,10 @@ let rec ancestor_linearization
         (* If this is the mro_element representing an ancestor which directly
            appeared in a require extends clause, tag it as a requirement. *)
         mro_required_at =
-          ( if is_requirement source then
+          (if is_requirement source then
             Some use_pos
           else
-            None );
+            None);
       }
     in
     let tparams =
@@ -499,8 +499,8 @@ and next_state
                StringishObject as an ancestor if we have some ancestor which requires
                it. *)
             let should_skip =
-              ( is_set mro_via_req_extends next.mro_flags
-              || is_set mro_via_req_impl next.mro_flags )
+              (is_set mro_via_req_extends next.mro_flags
+              || is_set mro_via_req_impl next.mro_flags)
               && String.( <> ) next.mro_name SN.Classes.cStringish
               && String.( <> ) next.mro_name SN.Classes.cStringishObject
             in

@@ -38,9 +38,9 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
       | ServerEnv.Not_paused -> "hh"
       | ServerEnv.Paused _ -> "hh --pause"
       | ServerEnv.Resumed -> "hh --resume")
-      ( Relative_path.Set.elements env.ServerEnv.disk_needs_parsing
+      (Relative_path.Set.elements env.ServerEnv.disk_needs_parsing
       |> List.map ~f:Relative_path.to_absolute
-      |> String.concat ~sep:"\n" )
+      |> String.concat ~sep:"\n")
   in
 
   (* include current state of diagnostics on client, as we know it *)
@@ -57,9 +57,9 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
         Diagnostic_subscription.pop_errors sub ~global_errors:env.errorl
       in
       Printf.sprintf
-        ( "client_has_message: %b\nide_needs_parsing: %b\n"
+        ("client_has_message: %b\nide_needs_parsing: %b\n"
         ^^ "error_count: %d\nerrors_in_client: %d\nis_truncated: %b\n"
-        ^^ "error_files_to_push: %s\n" )
+        ^^ "error_files_to_push: %s\n")
         (ClientProvider.client_has_message client)
         (not (Relative_path.Set.is_empty env.ide_needs_parsing))
         (Errors.count env.errorl)
@@ -75,7 +75,7 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
       pids_data
       paused_data
       subscription_data
-      ( List.map unsaved_items ~f:(fun item -> item.title)
-      |> String.concat ~sep:"\n" )
+      (List.map unsaved_items ~f:(fun item -> item.title)
+      |> String.concat ~sep:"\n")
   in
   { title = "status"; data } :: unsaved_items

@@ -104,11 +104,11 @@ let equal (_f : 'a -> 'a -> bool) (x : 'a t) (y : 'a t) = Poly.equal x y
 let default_timeout = 30
 
 let create_error_instance (type a) (module E : Error with type config = a) err =
-  ( module struct
+  (module struct
     module Error = E
 
     let this = E.create err
-  end : Error_instance )
+  end : Error_instance)
 
 (* Provide a default error implementation *)
 module DefaultError = struct
@@ -161,8 +161,8 @@ let of_value (value : 'value) : 'value t =
   (ref @@ Complete value, Unix.gettimeofday ())
 
 let of_error (e : string) =
-  try failwith e
-  with e ->
+  try failwith e with
+  | e ->
     ( ref
       @@ Complete_but_failed (Internal_Continuation_raised (Exception.wrap e)),
       Unix.gettimeofday () )
@@ -244,7 +244,8 @@ let rec get : 'value. ?timeout:int -> 'value t -> ('value, error) result =
         let (next_promise, _t) = next_future in
         promise := !next_promise;
         next_result
-      with e ->
+      with
+      | e ->
         let e = Exception.wrap e in
         promise := Complete_but_failed (Internal_Continuation_raised e);
         Error (Internal_Continuation_raised e)
@@ -293,7 +294,8 @@ let rec is_ready : 'value. 'value t -> bool =
         let (next_promise, _t) = next_future in
         promise := !next_promise;
         is_next_ready
-      with e ->
+      with
+      | e ->
         let e = Exception.wrap e in
         promise := Complete_but_failed (Internal_Continuation_raised e);
         true

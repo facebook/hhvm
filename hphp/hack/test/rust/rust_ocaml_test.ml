@@ -109,8 +109,8 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
           | OCAML
           | COMPARE ->
             Printf.printf "CAML: %s\n" path;
-            (try (true, Some (TreeBuilder.make ~env:ocaml_env source_text))
-             with _ -> (false, None))
+            (try (true, Some (TreeBuilder.make ~env:ocaml_env source_text)) with
+            | _ -> (false, None))
           | RUST -> (true, None)
         in
         let (ok_rust, from_rust) =
@@ -121,8 +121,8 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
             flush stdout;
 
             (* make sure OCaml output is shown before Rust output *)
-            (try (true, Some (TreeBuilder.make ~env:rust_env source_text))
-             with _ -> (false, None))
+            (try (true, Some (TreeBuilder.make ~env:rust_env source_text)) with
+            | _ -> (false, None))
           | OCAML -> (true, None)
         in
         flush stdout;
@@ -145,7 +145,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
           in
           let rust_reachable_words = reachable syntax_from_rust in
           let ocaml_reachable_words = reachable syntax_from_ocaml in
-          ( if args.check_printed_tree then
+          (if args.check_printed_tree then
             match
               Syntax.
                 (extract_text syntax_from_ocaml, extract_text syntax_from_rust)
@@ -164,7 +164,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
             | _ ->
               Printf.printf
                 "Tree to source transformation is not supported for this syntax type\n";
-              failed := true );
+              failed := true);
           if not @@ args.no_tree_compare then (
             if syntax_from_rust <> syntax_from_ocaml then (
               let syntax_from_rust_as_json = to_json syntax_from_rust in
@@ -246,10 +246,10 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         if is_compare || !crashed <> 0 then
           Printf.printf
             "%s/%d (crashed=%d)\n"
-            ( if is_compare then
+            (if is_compare then
               string_of_int !correct
             else
-              "?" )
+              "?")
             !total
             !crashed;
         if !failed && not args.keep_going then exit 1
@@ -297,14 +297,16 @@ let get_files_in_path ~args path =
   let filter_re = Str.regexp args.filter in
   let matches_filter f =
     args.filter = ""
-    || (try Str.search_forward filter_re f 0 >= 0 with Not_found -> false)
+    ||
+    try Str.search_forward filter_re f 0 >= 0 with
+    | Not_found -> false
   in
   List.filter
     ~f:(fun f ->
       (not (Sys.is_directory f))
-      && ( String_utils.string_ends_with f ".php"
+      && (String_utils.string_ends_with f ".php"
          || String_utils.string_ends_with f ".hhi"
-         || String_utils.string_ends_with f ".hack" )
+         || String_utils.string_ends_with f ".hack")
       && matches_filter f
       &&
       match args.parser with
@@ -416,7 +418,7 @@ module LowererTest_ = struct
   let print_lid ~skip_lid fmt lid =
     Format.pp_print_string
       fmt
-      ( if skip_lid then
+      (if skip_lid then
         let name = Local_id.get_name lid in
         let name =
           if Naming_special_names.SpecialIdents.is_tmp_var name then
@@ -426,8 +428,7 @@ module LowererTest_ = struct
         in
         Format.asprintf "([id], %s)" name
       else
-        Format.asprintf "(%d, %s)" (Local_id.to_int lid) (Local_id.get_name lid)
-      )
+        Format.asprintf "(%d, %s)" (Local_id.to_int lid) (Local_id.get_name lid))
 
   let print_pos pos = Format.asprintf "(%a)" Pos.pp pos
 
@@ -486,8 +487,8 @@ module LowererTest_ = struct
         ~elaborate_namespaces:true
         ~parser_options:popt
     in
-    try Tree (lower lower_env source_text)
-    with e -> Crash (Caml.Printexc.to_string e)
+    try Tree (lower lower_env source_text) with
+    | e -> Crash (Caml.Printexc.to_string e)
 
   let test args ~ocaml_env ~rust_env file contents =
     let source_text = SourceText.make file contents in
@@ -530,10 +531,10 @@ module LowererTest_ = struct
             Printf.printf
               ":%s_%sEQUAL: "
               s
-              ( if r then
+              (if r then
                 ""
               else
-                "NOT_" )
+                "NOT_")
           in
           Printf.printf ":NOT_EQUAL: ";
           print "Tree" tree;

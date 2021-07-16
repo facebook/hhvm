@@ -83,8 +83,8 @@ let lock_and_load_deptable
           raise
           @@ Failure
                (Printf.sprintf
-                  ( "Saved-state build mismatch, this saved-state was built "
-                  ^^ " for version '%s', but we expected '%s'" )
+                  ("Saved-state build mismatch, this saved-state was built "
+                  ^^ " for version '%s', but we expected '%s'")
                   build_revision
                   Build_id.build_revision)
     in
@@ -724,9 +724,9 @@ let type_check_dirty
          [
            ( "recheck_files",
              Hh_json.JSON_Array
-               ( files_to_check
+               (files_to_check
                |> List.map ~f:Relative_path.to_absolute
-               |> List.map ~f:Hh_json.string_ ) );
+               |> List.map ~f:Hh_json.string_) );
          ]);
     exit 0
   ) else
@@ -839,10 +839,10 @@ let get_updates_exn ~(genv : ServerEnv.genv) ~(root : Path.t) :
         |> Relative_path.relativize_set Relative_path.Root)
   in
   ignore
-    ( Hh_logger.log_duration
-        "Finished getting files changed while parsing"
-        start_t
-      : float );
+    (Hh_logger.log_duration
+       "Finished getting files changed while parsing"
+       start_t
+      : float);
   HackEventLogger.changed_while_parsing_end start_t;
   files_changed_while_parsing
 
@@ -973,7 +973,8 @@ let write_symbol_info_init
           true
         else
           Array.length (Sys.readdir out_dir) > 0
-      with _ ->
+      with
+      | _ ->
         Sys_utils.mkdir_p out_dir;
         false
     in
@@ -1151,14 +1152,14 @@ let post_saved_state_initialization
           naming_table_manifold_path;
         };
       deps_mode =
-        ( if deptable_is_64bit then
+        (if deptable_is_64bit then
           match ServerArgs.save_64bit genv.options with
           | Some new_edges_dir ->
             Typing_deps_mode.SaveCustomMode
               { graph = Some deptable_fn; new_edges_dir }
           | None -> Typing_deps_mode.CustomMode (Some deptable_fn)
         else
-          Typing_deps_mode.SQLiteMode );
+          Typing_deps_mode.SQLiteMode);
     }
   in
 
@@ -1386,7 +1387,8 @@ let saved_state_init
       | Ok loaded_info ->
         let changed_while_parsing = get_updates_exn ~genv ~root in
         Ok (loaded_info, changed_while_parsing)
-    with exn ->
+    with
+    | exn ->
       let stack = Utils.Callstack (Printexc.get_backtrace ()) in
       Error (Load_state_unhandled_exception { exn; stack })
   in

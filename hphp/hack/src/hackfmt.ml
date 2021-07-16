@@ -377,12 +377,13 @@ let read_stdin () =
     while true do
       Buffer.add_string
         buf
-        ( Out_channel.(flush stdout);
-          In_channel.(input_line_exn stdin) );
+        (Out_channel.(flush stdout);
+         In_channel.(input_line_exn stdin));
       Buffer.add_char buf '\n'
     done;
     assert false
-  with End_of_file -> Buffer.contents buf
+  with
+  | End_of_file -> Buffer.contents buf
 
 let print_error source_text error =
   let text =
@@ -440,8 +441,8 @@ let expand_or_convert_range ?ranges source_text range =
     in
     let st = max st 1 in
     let ed = min ed (Array.length line_boundaries) in
-    (try line_interval_to_offset_range line_boundaries (st, ed)
-     with Invalid_argument msg -> raise (InvalidCliArg msg))
+    (try line_interval_to_offset_range line_boundaries (st, ed) with
+    | Invalid_argument msg -> raise (InvalidCliArg msg))
 
 let format ?config ?range ?ranges env tree =
   let source_text = SyntaxTree.text tree in
@@ -482,7 +483,8 @@ let format_diff_intervals ?config env intervals tree =
   try
     logging_time_taken env Logger.format_intervals_end (fun () ->
         format_intervals ?config intervals tree)
-  with Invalid_argument s -> raise (InvalidDiff s)
+  with
+  | Invalid_argument s -> raise (InvalidDiff s)
 
 let debug_print ?range ?config text_source =
   let tree = parse ~parser_env:Full_fidelity_parser_env.default text_source in
@@ -522,7 +524,8 @@ let main
       try
         logging_time_taken env Logger.format_at_offset_end (fun () ->
             format_at_offset ~config tree pos)
-      with Invalid_argument s -> raise (InvalidCliArg s)
+      with
+      | Invalid_argument s -> raise (InvalidCliArg s)
     in
     if env.Env.debug then debug_print text_source ~range:(Byte range) ~config;
     Printf.printf "%d %d\n" (fst range) (snd range);
@@ -599,7 +602,8 @@ let () =
       let options = validate_options env options in
       main env options parser_env;
       (None, 0)
-    with exn ->
+    with
+    | exn ->
       let exit_code = get_exception_exit_value exn in
       if exit_code = 255 then Printexc.print_backtrace stderr;
       let err_str = get_error_string_from_exn exn in
@@ -613,7 +617,7 @@ let () =
       in
       (Some err_msg, exit_code)
   in
-  ( if not env.Env.test then
+  (if not env.Env.test then
     let time_taken = Unix.gettimeofday () -. start_time in
     Logger.exit
       ~time_taken
@@ -621,7 +625,7 @@ let () =
       ~exit_code:(Some exit_code)
       ~mode:env.Env.mode
       ~file:(text_source_to_filename env.Env.text_source)
-      ~root:env.Env.root );
+      ~root:env.Env.root);
 
   Option.iter err_msg ~f:(eprintf "%s\n");
   exit exit_code

@@ -90,10 +90,10 @@ let format_substring_underline
     underline_padding
     (Tty.apply_color
        color
-       ( if is_first then
+       (if is_first then
          underline
        else
-         underline ^ " " ^ msg ))
+         underline ^ " " ^ msg))
 
 (* Format the line of code associated with this message, and the message itself. *)
 let format_message (msg : string) (pos : Pos.absolute) ~is_first ~col_width :
@@ -210,10 +210,10 @@ let to_string
             (Tty.Bold color)
             (Errors.error_code_to_string error_code))
          (Tty.apply_color (Tty.Bold Tty.Default) msg)));
-  (try Buffer.add_string buf (format_error error)
-   with _ ->
-     Buffer.add_string
-       buf
-       "Error could not be pretty-printed. Please file a bug.");
+  (try Buffer.add_string buf (format_error error) with
+  | _ ->
+    Buffer.add_string
+      buf
+      "Error could not be pretty-printed. Please file a bug.");
   Buffer.add_string buf "\n";
   Buffer.contents buf

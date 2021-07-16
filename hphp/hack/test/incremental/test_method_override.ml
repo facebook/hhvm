@@ -103,9 +103,9 @@ let () =
   let incremental_errors = Errors.get_sorted_error_list env.errorl in
   if incremental_errors <> expected_errors then
     Test.fail
-      ( "Incremental mode gave different errors than a full type check.\n\n"
+      ("Incremental mode gave different errors than a full type check.\n\n"
       ^ "Full Type Check Errors:\n"
       ^ errors_to_string expected_errors
       ^ "\n"
       ^ "Incremental Mode Errors:\n"
-      ^ errors_to_string incremental_errors )
+      ^ errors_to_string incremental_errors)

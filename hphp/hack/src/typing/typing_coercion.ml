@@ -137,8 +137,8 @@ let coerce_type_impl
         ty_expect.et_type
         on_error
     | _
-      when ( ((not is_expected_enforced) && env.Typing_env_types.pessimize)
-           || Typing_utils.is_dynamic env ety_expect )
+      when (((not is_expected_enforced) && env.Typing_env_types.pessimize)
+           || Typing_utils.is_dynamic env ety_expect)
            && complex_coercion ->
       Typing_utils.sub_type_with_dynamic_as_bottom_res
         env
@@ -177,7 +177,7 @@ let try_coerce env ty_have ty_expect =
     Errors.try_
       (fun () ->
         Some
-          ( result ~on_ok:Fn.id ~on_err:Fn.id
+          (result ~on_ok:Fn.id ~on_err:Fn.id
           @@ coerce_type_impl env ty_have ty_expect (Errors.unify_error_at pos)
           ))
       (fun _ -> None)

@@ -160,10 +160,10 @@ let process_lowerer_result
         fi_mode = r.file_mode;
         ast = aast;
         content =
-          ( if env.codegen then
+          (if env.codegen then
             ""
           else
-            SourceText.text source_text );
+            SourceText.text source_text);
         comments = r.scoured_comments;
         file = env.file;
         lowpri_errors_ = ref r.lowpri_errors;
@@ -259,7 +259,8 @@ let defensive_program
         fn
     in
     legacy @@ from_text env source
-  with e ->
+  with
+  | e ->
     Rust_pointer.free_leaked_pointer ();
 
     (* If we fail to lower, try to just make a source text and get the file mode *)
@@ -268,7 +269,8 @@ let defensive_program
       try
         let source = Full_fidelity_source_text.make fn content in
         Full_fidelity_parser.parse_mode source
-      with _ -> None
+      with
+      | _ -> None
     in
     let err = Exn.to_string e in
     let fn = Relative_path.suffix fn in
@@ -285,6 +287,7 @@ let defensive_program
 
 let defensive_from_file ?quick ?show_all_errors popt fn =
   let content =
-    (try Sys_utils.cat (Relative_path.to_absolute fn) with _ -> "")
+    try Sys_utils.cat (Relative_path.to_absolute fn) with
+    | _ -> ""
   in
   defensive_program ?quick ?show_all_errors popt fn content

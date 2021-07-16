@@ -214,9 +214,9 @@ class virtual ['env] tvar_substituting_type_mapper :
       * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty)
       * ('env -> int -> Typing_defs.locl_ty -> 'env) ->
       Typing_defs.locl_ty ->
-      ( 'env
+      ('env
       * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty)
-      * ('env -> int -> Typing_defs.locl_ty -> 'env) )
+      * ('env -> int -> Typing_defs.locl_ty -> 'env))
       * Typing_defs.locl_ty
   end
 

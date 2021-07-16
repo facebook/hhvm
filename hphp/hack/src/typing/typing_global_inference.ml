@@ -54,7 +54,8 @@ let catch_exc
     in
     List.iter (Errors.get_error_list other_errors) ~f:on_error;
     v
-  with Inf.InconsistentTypeVarState _ as e ->
+  with
+  | Inf.InconsistentTypeVarState _ as e ->
     if verbose then (
       let stack = Caml.Printexc.get_raw_backtrace () in
       prerr_endline (Caml.Printexc.to_string e);

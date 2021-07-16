@@ -208,8 +208,8 @@ let set_up_hh_logger_for_client_ide_service (root : Path.t) : unit =
      `stderr`; this is in addition to that. *)
   let client_ide_log_fn = ServerFiles.client_ide_log root in
   begin
-    try Sys.rename client_ide_log_fn (client_ide_log_fn ^ ".old")
-    with _e -> ()
+    try Sys.rename client_ide_log_fn (client_ide_log_fn ^ ".old") with
+    | _e -> ()
   end;
   Hh_logger.set_log client_ide_log_fn;
   log "Starting client IDE service at %s" client_ide_log_fn
@@ -220,7 +220,8 @@ let write_message
   try%lwt
     let%lwt (_ : int) = Marshal_tools_lwt.to_fd_with_preamble out_fd message in
     Lwt.return_unit
-  with Unix.Unix_error (Unix.EPIPE, _, _) -> raise Outfd_write_error
+  with
+  | Unix.Unix_error (Unix.EPIPE, _, _) -> raise Outfd_write_error
 
 let load_saved_state
     (ctx : Provider_context.t)
@@ -317,7 +318,8 @@ let load_saved_state
           }
         in
         Lwt.return_error (reason, e)
-    with exn ->
+    with
+    | exn ->
       let exn = Exception.wrap exn in
       ClientIdeUtils.log_bug "load_exn" ~exn ~telemetry:false;
       (* We need both a user-facing "reason" and an internal error "e" *)
@@ -357,10 +359,10 @@ let remove_hhi (state : state) : unit =
   | Initialized { icommon = { hhi_root; _ }; _ } ->
     let hhi_root = Path.to_string hhi_root in
     log "Removing hhi directory %s..." hhi_root;
-    (try Sys_utils.rm_dir_tree hhi_root
-     with exn ->
-       let exn = Exception.wrap exn in
-       ClientIdeUtils.log_bug "remove_hhi" ~exn ~telemetry:true)
+    (try Sys_utils.rm_dir_tree hhi_root with
+    | exn ->
+      let exn = Exception.wrap exn in
+      ClientIdeUtils.log_bug "remove_hhi" ~exn ~telemetry:true)
 
 (** initialize1 is called by handle_request upon receipt of an "init"
 message from the client. It is synchronous. It sets up global variables and
@@ -713,7 +715,8 @@ let handle_request :
             in
             Lwt.return_unit);
         Lwt.return (During_init dstate, Ok ())
-      with exn ->
+      with
+      | exn ->
         let exn = Exception.wrap exn in
         let e = ClientIdeUtils.make_bug_error "initialize1" ~exn in
         (* Our caller has an exception handler. But we must handle this ourselves
@@ -1067,7 +1070,8 @@ let handle_one_message_exn
             handle_request message_queue state tracking_id message
           in
           Lwt.return (s, r)
-        with exn ->
+        with
+        | exn ->
           (* Our caller has an exception handler which logs the exception.
              But we instead must fulfil our contract of responding to the client,
              even if we have an exception. Hence we need our own handler here. *)
@@ -1107,7 +1111,8 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       | ClientIdeMessage.Shutdown () -> Lwt.return_unit
       | _ when not is_queue_open -> Lwt.return_unit
       | _ -> pump_stdin message_queue
-    with e ->
+    with
+    | e ->
       let e = Exception.wrap e in
       Lwt_message_queue.close message_queue;
       Exception.reraise e
@@ -1119,7 +1124,8 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
           handle_one_message_exn ~in_fd ~out_fd ~message_queue ~state
         in
         Lwt.return state
-      with exn ->
+      with
+      | exn ->
         let exn = Exception.wrap exn in
         ClientIdeUtils.log_bug "handle_one_message" ~exn ~telemetry:true;
         if is_outfd_write_error exn then exit 1;
@@ -1137,7 +1143,8 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     and () = pump_stdin message_queue in
     Lwt.cancel flusher_promise;
     Lwt.return_unit
-  with exn ->
+  with
+  | exn ->
     let exn = Exception.wrap exn in
     ClientIdeUtils.log_bug "fatal clientIdeDaemon" ~exn ~telemetry:true;
     Lwt.return_unit

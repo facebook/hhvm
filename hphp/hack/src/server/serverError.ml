@@ -76,7 +76,7 @@ let print_error_list
     ~(error_list : Errors.finalized_error list)
     ~(save_state_result : SaveStateServiceTypes.save_state_result option)
     ~(recheck_stats : Telemetry.t option) =
-  ( if output_json then
+  (if output_json then
     print_error_list_json oc error_list save_state_result recheck_stats
   else if List.is_empty error_list then
     Out_channel.output_string oc "No errors!\n"
@@ -90,6 +90,6 @@ let print_error_list
           Out_channel.output_string oc s;
           Out_channel.output_string oc "\n"
         end
-      sl );
+      sl);
   Option.iter stale_msg ~f:(fun msg -> Out_channel.output_string oc msg);
   Out_channel.flush oc

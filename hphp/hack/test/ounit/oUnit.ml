@@ -35,7 +35,8 @@ let bracket set_up f tear_down () =
   try
     f fixture;
     tear_down fixture
-  with e ->
+  with
+  | e ->
     tear_down fixture;
     raise e
 
@@ -77,7 +78,8 @@ let raises f =
   try
     f ();
     None
-  with e -> Some e
+  with
+  | e -> Some e
 
 let assert_raises ?msg exn (f : unit -> 'a) =
   let pexn = Printexc.to_string in
@@ -469,9 +471,9 @@ let run_test_tt_main suite =
       | Some tst -> tst
       | None ->
         failwith
-          ( "Filtering test "
+          ("Filtering test "
           ^ String.concat ", " !only_test
-          ^ " lead to no test" )
+          ^ " lead to no test")
   in
   let result = run_test_tt ~verbose:!verbose nsuite in
   if not (was_successful result) then

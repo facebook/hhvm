@@ -156,7 +156,7 @@ let parse_check_args cmd =
         Sys.argv.(0)
     | CKNone ->
       Printf.sprintf
-        ( "Usage: %s [COMMAND] [OPTION]... [WWW-ROOT]\n\nValid values for COMMAND:\n"
+        ("Usage: %s [COMMAND] [OPTION]... [WWW-ROOT]\n\nValid values for COMMAND:\n"
         ^^ "\tcheck\t\tShows current Hack errors\n"
         ^^ "\tstart\t\tStarts a Hack server\n"
         ^^ "\tstop\t\tStops a Hack server\n"
@@ -165,7 +165,7 @@ let parse_check_args cmd =
         ^^ "\trage\t\tReport a bug\n"
         ^^ "\nDefault values if unspecified:\n"
         ^^ "\tCOMMAND\t\tcheck\n"
-        ^^ "\tWWW-ROOT\tCurrent directory\n\nCheck command options:\n" )
+        ^^ "\tWWW-ROOT\tCurrent directory\n\nCheck command options:\n")
         Sys.argv.(0)
     | _ -> failwith "No other keywords should make it here"
   in
@@ -177,8 +177,8 @@ let parse_check_args cmd =
           (fun s ->
             ai_mode :=
               Some
-                ( ignore (Ai_options.prepare ~server:true s);
-                  s )),
+                (ignore (Ai_options.prepare ~server:true s);
+                 s)),
         " run AI module with provided options" );
       ( "--ai-query",
         Arg.String (fun x -> set_mode (MODE_AI_QUERY x)),
@@ -821,11 +821,11 @@ let parse_check_args cmd =
       max_errors = !max_errors;
       mode;
       no_load =
-        ( !no_load
+        (!no_load
         ||
         match mode with
         | MODE_REMOVE_DEAD_FIXMES _ -> true
-        | _ -> false );
+        | _ -> false);
       save_64bit = !save_64bit;
       output_json = !output_json;
       prechecked = !prechecked;
@@ -1019,7 +1019,7 @@ let parse_rage_args () =
     | Some desc -> desc
     | None ->
       Printf.printf
-        ( "Sorry that hh isn't working. What's wrong?\n"
+        ("Sorry that hh isn't working. What's wrong?\n"
         ^^ "1. hh_server takes ages to initialize\n"
         ^^ "2. hh is stuck in an infinite loop\n"
         ^^ "3. hh gives some error message about the monitor\n"
@@ -1029,7 +1029,7 @@ let parse_rage_args () =
         ^^ "7. hh says something about unsaved changes from an editor even after I've quit my editor\n"
         ^^ "8. something's wrong with hack VS Code or other editor\n"
         ^^ "[other] Please type either one of the above numbers, or a freeform description\n"
-        ^^ "\nrage> %!" );
+        ^^ "\nrage> %!");
       let response = In_channel.input_line_exn In_channel.stdin in
       let (response, info) =
         if String.equal response "1" then
@@ -1050,9 +1050,9 @@ let parse_rage_args () =
         else if String.equal response "6" then
           let () =
             Printf.printf
-              ( "Please ask in the appropriate support groups for advice on coding in Hack; "
+              ("Please ask in the appropriate support groups for advice on coding in Hack; "
               ^^ "`hh rage` is solely for reporting bugs in the tooling, not for reporting typechecker or "
-              ^^ "language issues." )
+              ^^ "language issues.")
           in
           exit 0
         else if String.equal response "7" then
@@ -1060,7 +1060,7 @@ let parse_rage_args () =
         else if String.equal response "8" then
           let () =
             Printf.printf
-              ( "Please file the bug from within your editor to capture the right logs. "
+              ("Please file the bug from within your editor to capture the right logs. "
               ^^ "Note: you can do Preferences > Settings > Hack > Verbose, then `pkill hh_client`, "
               ^^ "then reproduce the error, then file the bug. This way we'll get even richer logs.\n%!"
               )
@@ -1074,7 +1074,7 @@ let parse_rage_args () =
         | `No_info -> ()
         | `Verbose_hh_start ->
           Printf.printf
-            ( "\nPOWER USERS ONLY: Sometimes the normal logging from hh_server isn't "
+            ("\nPOWER USERS ONLY: Sometimes the normal logging from hh_server isn't "
             ^^ "enough to diagnose an issue, and we'll ask you to switch hh_server to "
             ^^ "write verbose logs, then have you repro the issue, then use `hh rage` to "
             ^^ "gather up those now-verbose logs. To restart hh_server with verbose logs, "

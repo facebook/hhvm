@@ -508,8 +508,9 @@ let go ~ctx ~entry ~line ~char =
     let results_list = go_from_ast ~ast ~line ~char in
     List.map results_list ~f:(fun pos ->
         Pos.set_file entry.Provider_context.path pos)
-  with Failure error ->
+  with
+  | Failure error ->
     let contents = Provider_context.read_file_contents_exn entry in
     failwith
-      ( Printf.sprintf "Find locals service failed with error %s:\n" error
-      ^ Printf.sprintf "line %d char %d\ncontent: \n%s\n" line char contents )
+      (Printf.sprintf "Find locals service failed with error %s:\n" error
+      ^ Printf.sprintf "line %d char %d\ncontent: \n%s\n" line char contents)

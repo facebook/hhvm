@@ -18,7 +18,9 @@ external is_apple_os : unit -> bool = "hh_sysinfo_is_apple_os"
 
 external freopen : string -> string -> Unix.file_descr -> unit = "hh_freopen"
 
-let get_env name = (try Some (Sys.getenv name) with Caml.Not_found -> None)
+let get_env name =
+  try Some (Sys.getenv name) with
+  | Caml.Not_found -> None
 
 let getenv_user () =
   let user_var =
@@ -70,15 +72,15 @@ let getenv_path () =
   get_env path_var
 
 let open_in_no_fail fn =
-  try In_channel.create fn
-  with e ->
+  try In_channel.create fn with
+  | e ->
     let e = Printexc.to_string e in
     Printf.fprintf stderr "Could not In_channel.create: '%s' (%s)\n" fn e;
     exit 3
 
 let open_in_bin_no_fail fn =
-  try In_channel.create ~binary:true fn
-  with e ->
+  try In_channel.create ~binary:true fn with
+  | e ->
     let e = Printexc.to_string e in
     Printf.fprintf
       stderr
@@ -88,22 +90,22 @@ let open_in_bin_no_fail fn =
     exit 3
 
 let close_in_no_fail fn ic =
-  try In_channel.close ic
-  with e ->
+  try In_channel.close ic with
+  | e ->
     let e = Printexc.to_string e in
     Printf.fprintf stderr "Could not close: '%s' (%s)\n" fn e;
     exit 3
 
 let open_out_no_fail fn =
-  try Out_channel.create fn
-  with e ->
+  try Out_channel.create fn with
+  | e ->
     let e = Printexc.to_string e in
     Printf.fprintf stderr "Could not Out_channel.create: '%s' (%s)\n" fn e;
     exit 3
 
 let open_out_bin_no_fail fn =
-  try Out_channel.create ~binary:true fn
-  with e ->
+  try Out_channel.create ~binary:true fn with
+  | e ->
     let e = Printexc.to_string e in
     Printf.fprintf
       stderr
@@ -113,8 +115,8 @@ let open_out_bin_no_fail fn =
     exit 3
 
 let close_out_no_fail fn oc =
-  try Out_channel.close oc
-  with e ->
+  try Out_channel.close oc with
+  | e ->
     let e = Printexc.to_string e in
     Printf.fprintf stderr "Could not close: '%s' (%s)\n" fn e;
     exit 3
@@ -146,7 +148,8 @@ let split_lines = Str.split nl_regexp
 let string_contains str substring =
   (* regexp_string matches only this string and nothing else. *)
   let re = Str.regexp_string substring in
-  (try Str.search_forward re str 0 >= 0 with Caml.Not_found -> false)
+  try Str.search_forward re str 0 >= 0 with
+  | Caml.Not_found -> false
 
 let exec_read cmd =
   let ic = Unix.open_process_in cmd in
@@ -163,7 +166,8 @@ let exec_read_lines ?(reverse = false) cmd =
        | Some line -> result := line :: !result
        | None -> raise End_of_file
      done
-   with End_of_file -> ());
+   with
+  | End_of_file -> ());
   assert (Poly.(Unix.close_process_in ic = Unix.WEXITED 0));
   if not reverse then
     List.rev !result
@@ -216,10 +220,10 @@ let logname_impl () =
       | (Some _, Unix.WEXITED 0) -> out
       | _ -> None
     in
-    (try Utils.unsafe_opt (exec_try_read "logname")
-     with Invalid_argument _ ->
-       (try Utils.unsafe_opt (exec_try_read "id -un")
-        with Invalid_argument _ -> "[unknown]"))
+    (try Utils.unsafe_opt (exec_try_read "logname") with
+    | Invalid_argument _ ->
+      (try Utils.unsafe_opt (exec_try_read "id -un") with
+      | Invalid_argument _ -> "[unknown]"))
 
 let logname_lazy = lazy (logname_impl ())
 
@@ -263,7 +267,8 @@ let read_stdin_to_string () =
       | None -> raise End_of_file
     done;
     assert false
-  with End_of_file -> Buffer.contents buf
+  with
+  | End_of_file -> Buffer.contents buf
 
 let read_all ?(buf_size = 4096) ic =
   let buf = Buffer.create buf_size in
@@ -274,7 +279,8 @@ let read_all ?(buf_size = 4096) ic =
        if bytes_read = 0 then raise Exit;
        Buffer.add_subbytes buf data ~pos:0 ~len:bytes_read
      done
-   with Exit -> ());
+   with
+  | Exit -> ());
   Buffer.contents buf
 
 let expanduser path =
@@ -290,8 +296,8 @@ let expanduser path =
           | Some home -> home
         end
       | unixname ->
-        (try (Unix.getpwnam unixname).Unix.pw_dir
-         with Caml.Not_found -> Str.matched_string s)
+        (try (Unix.getpwnam unixname).Unix.pw_dir with
+        | Caml.Not_found -> Str.matched_string s)
     end
     path
 
@@ -350,7 +356,8 @@ let lines_of_file filename =
     let result = lines_of_in_channel ic in
     let () = In_channel.close ic in
     result
-  with _ ->
+  with
+  | _ ->
     In_channel.close ic;
     []
 
@@ -388,16 +395,19 @@ let mkdir_no_fail dir =
   with_umask 0 (fun () ->
       (* Don't set sticky bit since the socket opening code wants to remove any
        * old sockets it finds, which may be owned by a different user. *)
-      try Unix.mkdir dir 0o777 with Unix.Unix_error (Unix.EEXIST, _, _) -> ())
+      try Unix.mkdir dir 0o777 with
+      | Unix.Unix_error (Unix.EEXIST, _, _) -> ())
 
 let unlink_no_fail fn =
-  (try Unix.unlink fn with Unix.Unix_error (Unix.ENOENT, _, _) -> ())
+  try Unix.unlink fn with
+  | Unix.Unix_error (Unix.ENOENT, _, _) -> ()
 
 let readlink_no_fail fn =
   if Sys.win32 && Sys.file_exists fn then
     cat fn
   else
-    try Unix.readlink fn with _ -> fn
+    try Unix.readlink fn with
+    | _ -> fn
 
 let filemtime file = (Unix.stat file).Unix.st_mtime
 
@@ -423,7 +433,9 @@ let touch mode file =
         in
         Out_channel.close oc)
 
-let try_touch mode file = (try touch mode file with _ -> ())
+let try_touch mode file =
+  try touch mode file with
+  | _ -> ()
 
 let splitext filename =
   let root = Filename.chop_extension filename in
@@ -588,8 +600,8 @@ external processor_info : unit -> processor_info = "hh_processor_info"
 
 let rec select_non_intr read write exn timeout =
   let start_time = Unix.gettimeofday () in
-  try Unix.select read write exn timeout
-  with Unix.Unix_error (Unix.EINTR, _, _) ->
+  try Unix.select read write exn timeout with
+  | Unix.Unix_error (Unix.EINTR, _, _) ->
     (* Negative timeouts mean no timeout *)
     let timeout =
       if Float.(timeout < 0.0) then
@@ -601,8 +613,8 @@ let rec select_non_intr read write exn timeout =
     select_non_intr read write exn timeout
 
 let rec waitpid_non_intr flags pid =
-  try Unix.waitpid flags pid
-  with Unix.Unix_error (Unix.EINTR, _, _) -> waitpid_non_intr flags pid
+  try Unix.waitpid flags pid with
+  | Unix.Unix_error (Unix.EINTR, _, _) -> waitpid_non_intr flags pid
 
 let find_oom_in_dmesg_output pid name lines =
   (* oomd: "Memory cgroup out of memory: Killed process 4083583 (hh_server)" (https://facebookmicrosites.github.io/oomd/)
@@ -619,7 +631,8 @@ let find_oom_in_dmesg_output pid name lines =
         ignore @@ Str.search_forward re line 0;
         let pid_s = Str.matched_group 2 line in
         String.equal pid_s pid
-      with Caml.Not_found -> false)
+      with
+      | Caml.Not_found -> false)
 
 let check_dmesg_for_oom pid name =
   let dmesg = exec_read_lines ~reverse:true "dmesg" in
@@ -728,8 +741,10 @@ let redirect_stdout_and_stderr_to_file (filename : string) : unit =
       (* Those two old_* handles must be closed so as not to have dangling FDs.
          Neither success nor failure path holds onto them: the success path ignores
          then, and the failure path dups them. That's why we can close them here. *)
-      (try Unix.close old_stdout with _ -> ());
-      (try Unix.close old_stderr with _ -> ());
+      (try Unix.close old_stdout with
+      | _ -> ());
+      (try Unix.close old_stderr with
+      | _ -> ());
       ())
     ~f:(fun () ->
       try
@@ -741,8 +756,11 @@ let redirect_stdout_and_stderr_to_file (filename : string) : unit =
         freopen filename "w" Unix.stdout;
         Unix.dup2 Unix.stdout Unix.stderr;
         ()
-      with exn ->
+      with
+      | exn ->
         let e = Exception.wrap exn in
-        (try Unix.dup2 old_stdout Unix.stdout with _ -> ());
-        (try Unix.dup2 old_stderr Unix.stderr with _ -> ());
+        (try Unix.dup2 old_stdout Unix.stdout with
+        | _ -> ());
+        (try Unix.dup2 old_stderr Unix.stderr with
+        | _ -> ());
         Exception.reraise e)

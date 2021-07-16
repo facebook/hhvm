@@ -20,8 +20,8 @@ let parse_id (json : json) : lsp_id =
   match json with
   | JSON_Number s ->
     begin
-      try NumberId (int_of_string s)
-      with Failure _ ->
+      try NumberId (int_of_string s) with
+      | Failure _ ->
         raise
           (Error.LspException
              {
@@ -465,8 +465,8 @@ let parse_diagnostic (j : json option) : PublishDiagnostics.diagnostic =
       | Some (JSON_String s) -> StringCode s
       | Some (JSON_Number s) ->
         begin
-          try IntCode (int_of_string s)
-          with Failure _ ->
+          try IntCode (int_of_string s) with
+          | Failure _ ->
             raise
               (Error.LspException
                  {
@@ -573,9 +573,8 @@ let print_telemetryNotification
     (r : LogMessage.params) (extras : (string * Hh_json.json) list) : json =
   (* LSP allows "any" for the format of telemetry notifications. It's up to us! *)
   JSON_Object
-    ( ("type", int_ (MessageType.to_enum r.LogMessage.type_))
-    :: ("message", JSON_String r.LogMessage.message)
-    :: extras )
+    (("type", int_ (MessageType.to_enum r.LogMessage.type_))
+     :: ("message", JSON_String r.LogMessage.message) :: extras)
 
 (************************************************************************)
 
@@ -1183,8 +1182,7 @@ let print_error (e : Error.t) : json =
   in
   let entries =
     ("code", int_ (Error.code_to_enum e.Error.code))
-    :: ("message", string_ e.Error.message)
-    :: data
+    :: ("message", string_ e.Error.message) :: data
   in
   JSON_Object entries
 

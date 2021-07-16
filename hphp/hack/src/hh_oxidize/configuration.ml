@@ -65,7 +65,7 @@ let copy_type type_name =
   | None -> `Unknown
   | Some copy_types ->
     `Known
-      ( "" :: State.curr_module_name () :: Output.glob_uses ()
+      ("" :: State.curr_module_name () :: Output.glob_uses ()
       |> List.exists ~f:(fun mod_name ->
              let maybe_qualified_type =
                if String.equal mod_name "" then
@@ -73,7 +73,7 @@ let copy_type type_name =
                else
                  mod_name ^ "::" ^ type_name
              in
-             SSet.mem copy_types maybe_qualified_type) )
+             SSet.mem copy_types maybe_qualified_type))
 
 let is_known v b =
   match v with

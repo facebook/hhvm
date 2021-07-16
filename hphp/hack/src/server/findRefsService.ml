@@ -127,7 +127,8 @@ let find_child_classes ctx target_class_name naming_table files =
         in
         List.fold_left classes ~init:acc ~f:(fun acc cid ->
             add_if_extends_class ctx target_class_name (snd cid) acc)
-      with Naming_table.File_info_not_found -> acc)
+      with
+      | Naming_table.File_info_not_found -> acc)
 
 let get_origin_class_name ctx class_name member =
   let origin =
@@ -272,7 +273,8 @@ let find_refs
             Tast_provider.compute_tast_unquarantined ~ctx ~entry
           in
           Some (path, tast)
-        with _ when not (is_entry_valid entry) -> None)
+        with
+        | _ when not (is_entry_valid entry) -> None)
   in
   Hh_logger.debug "find_refs.target: %s" (action_internal_to_string target);
   if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then

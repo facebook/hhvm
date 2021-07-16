@@ -142,8 +142,8 @@ let print_edit b edit =
 
 let edit_file content (edits : text_edit list) :
     (string, string * Utils.callstack) result =
-  try Ok (List.fold ~init:content ~f:apply_edit edits)
-  with e ->
+  try Ok (List.fold ~init:content ~f:apply_edit edits) with
+  | e ->
     let stack = Printexc.get_backtrace () in
     let b = Buffer.create 1024 in
     Printf.bprintf b "Invalid edit: %s\n" (Stdlib.Printexc.to_string e);

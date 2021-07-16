@@ -70,8 +70,9 @@ module Funs =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Fun) (Capacity)
 
 module Classes = struct
-  include SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
-            (Capacity)
+  include
+    SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
+      (Capacity)
 
   let add class_name decl =
     if Provider_backend.(get () = Analysis) then

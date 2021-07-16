@@ -94,7 +94,7 @@ let result_to_json (result : result) : Hh_json.json =
                  Hh_json.JSON_String (Typing_deps.Dep.to_debug_string dep) );
                ( "paths",
                  Hh_json.JSON_Array
-                   ( paths
+                   (paths
                    |> Relative_path.Set.elements
                    |> List.map ~f:(fun path ->
                           Hh_json.JSON_String (Relative_path.to_absolute path))

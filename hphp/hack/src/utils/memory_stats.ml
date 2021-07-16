@@ -9,8 +9,8 @@ open Hh_prelude
 open Base.Option.Monad_infix
 
 let lines path =
-  try Some (Str.split (Str.regexp_string "\n") (Path.cat (Path.make path)))
-  with _ -> None
+  try Some (Str.split (Str.regexp_string "\n") (Path.cat (Path.make path))) with
+  | _ -> None
 
 let read_status pid_str =
   let colon = Str.regexp_string ":" in

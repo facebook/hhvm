@@ -300,9 +300,9 @@ end = struct
     (exps, has_cycle)
 
   let as_list { report_cycle; expansions } =
-    ( report_cycle
+    (report_cycle
     |> Option.map ~f:(Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos)
-    |> Option.to_list )
+    |> Option.to_list)
     @ List.rev expansions
 
   let ids exps = as_list exps |> List.map ~f:snd
@@ -1225,10 +1225,10 @@ let xhp_attr_to_ce_flags xa =
   | None -> 0x0
   | Some { xa_tag; xa_has_default; _ } ->
     Int.bit_or
-      ( if xa_has_default then
+      (if xa_has_default then
         ce_flags_xa_has_default
       else
-        0x0 )
+        0x0)
     @@
     (match xa_tag with
     | None -> ce_flags_xa_tag_none
@@ -1244,12 +1244,12 @@ let flags_to_xhp_attr flags =
       {
         xa_has_default = is_set ce_flags_xa_has_default flags;
         xa_tag =
-          ( if Int.equal tag_flags ce_flags_xa_tag_none then
+          (if Int.equal tag_flags ce_flags_xa_tag_none then
             None
           else if Int.equal tag_flags ce_flags_xa_tag_required then
             Some Required
           else
-            Some Lateinit );
+            Some Lateinit);
       }
 
 let get_ce_xhp_attr ce = flags_to_xhp_attr ce.ce_flags

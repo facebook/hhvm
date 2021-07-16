@@ -184,9 +184,9 @@ val unwrap_class_type :
 
 val try_unwrap_class_type :
   Typing_defs.decl_phase Typing_defs.ty ->
-  ( Typing_defs.decl_phase Typing_defs.Reason.t_
+  (Typing_defs.decl_phase Typing_defs.Reason.t_
   * Typing_defs.pos_id
-  * Typing_defs.decl_ty list )
+  * Typing_defs.decl_ty list)
   option
 
 val class_is_final_and_not_contravariant : Decl_provider.Class.t -> bool

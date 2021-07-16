@@ -83,10 +83,10 @@ let handler =
         | tparam :: _ -> Errors.entrypoint_generics (fst tparam.tp_name)
       end;
       (* Ban variadic arguments on memoized functions. *)
-      ( if has_attribute "__Memoize" f.f_user_attributes then
+      (if has_attribute "__Memoize" f.f_user_attributes then
         match variadic_pos f.f_variadic with
         | Some p -> Errors.variadic_memoize p
-        | None -> () );
+        | None -> ());
       check_attribute_arity f.f_user_attributes SN.UserAttributes.uaPolicied 0 1;
       check_attribute_arity
         f.f_user_attributes

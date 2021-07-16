@@ -57,7 +57,8 @@ let can_run_systemd () =
       try
         Unix.open_process_in "which systemd-run 2> /dev/null"
         |> In_channel.input_line
-      with _ -> None
+      with
+      | _ -> None
     in
     if is_none systemd_binary then
       false
@@ -120,29 +121,29 @@ let start_server (env : env) =
     Array.concat
       [
         [| hh_server; "-d"; Path.to_string root |];
-        ( if String.equal from "" then
+        (if String.equal from "" then
           [||]
         else
-          [| "--from"; from |] );
+          [| "--from"; from |]);
         (match mini_state with
         | None -> [||]
         | Some state -> [| "--with-mini-state"; state |]);
-        ( if no_load then
+        (if no_load then
           [| "--no-load" |]
         else
-          [||] );
-        ( if watchman_debug_logging then
+          [||]);
+        (if watchman_debug_logging then
           [| "--watchman-debug-logging" |]
         else
-          [||] );
-        ( if log_inference_constraints then
+          [||]);
+        (if log_inference_constraints then
           [| "--log-inference-constraints" |]
         else
-          [||] );
-        ( if profile_log then
+          [||]);
+        (if profile_log then
           [| "--profile-log" |]
         else
-          [||] );
+          [||]);
         ai_options;
         (* If the client starts up a server monitor process, the output of that
          * bootup is passed to this FD - so this FD needs to be threaded
@@ -151,21 +152,21 @@ let start_server (env : env) =
          * Note: Yes, the FD is available in the monitor process as well, but
          * it doesn't, and shouldn't, use it. *)
         [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |];
-        ( if ignore_hh_version then
+        (if ignore_hh_version then
           [| "--ignore-hh-version" |]
         else
-          [||] );
-        ( if saved_state_ignore_hhconfig then
+          [||]);
+        (if saved_state_ignore_hhconfig then
           [| "--saved-state-ignore-hhconfig" |]
         else
-          [||] );
+          [||]);
         (match save_64bit with
         | None -> [||]
         | Some dest -> [| "--save-64bit"; dest |]);
-        ( if dynamic_view then
+        (if dynamic_view then
           [| "--dynamic-view" |]
         else
-          [||] );
+          [||]);
         (match prechecked with
         | Some true -> [| "--prechecked" |]
         | _ -> [||]);
@@ -176,10 +177,10 @@ let start_server (env : env) =
         serialize_key_value_options
           "--custom-telemetry-data"
           custom_telemetry_data;
-        ( if allow_non_opt_build then
+        (if allow_non_opt_build then
           [| "--allow-non-opt-build" |]
         else
-          [||] );
+          [||]);
       ]
   in
   let (stdin, stdout, stderr) =
@@ -232,7 +233,8 @@ let start_server (env : env) =
     | _ ->
       if not silent then Printf.eprintf "Could not start hh_server!\n";
       if exit_on_failure then exit 77
-  with _ ->
+  with
+  | _ ->
     if not silent then Printf.eprintf "Could not start hh_server!\n";
     if exit_on_failure then exit 77
 

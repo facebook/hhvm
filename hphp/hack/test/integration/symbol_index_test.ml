@@ -33,14 +33,14 @@ let assert_ns_matches (expected_ns : string) (actual : SearchUtils.si_results) :
     List.fold actual ~init:false ~f:(fun acc item ->
         String.equal item.si_name expected_ns || acc)
   in
-  ( if not found then
+  (if not found then
     let results_str =
       List.fold actual ~init:"" ~f:(fun acc item -> acc ^ ";" ^ item.si_name)
     in
     let msg =
       Printf.sprintf "Did not find [%s] in [%s]" expected_ns results_str
     in
-    IA.assert_equals 0 1 msg );
+    IA.assert_equals 0 1 msg);
   ()
 
 let assert_autocomplete

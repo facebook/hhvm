@@ -112,10 +112,10 @@ let expect_gentle_collect expected =
     ~msg:
       (Printf.sprintf
          "Expected gentle collection to be %sneeded"
-         ( if expected then
+         (if expected then
            ""
          else
-           "not " ))
+           "not "))
     (SharedMem.should_collect `gentle = expected)
 
 let expect_aggressive_collect expected =
@@ -123,10 +123,10 @@ let expect_aggressive_collect expected =
     ~msg:
       (Printf.sprintf
          "Expected aggressive collection to be %sneeded"
-         ( if expected then
+         (if expected then
            ""
          else
-           "not " ))
+           "not "))
     (SharedMem.should_collect `aggressive = expected)
 
 let test_ops () =
@@ -166,7 +166,8 @@ let test_hashtbl_full_hh_add () =
   try
     add "8" "";
     expect ~msg:"Expected the hash table to be full" false
-  with SharedMem.Hash_table_full -> ()
+  with
+  | SharedMem.Hash_table_full -> ()
 
 let test_hashtbl_full_hh_move () =
   expect_stats ~nonempty:0 ~used:0;
@@ -185,7 +186,8 @@ let test_hashtbl_full_hh_move () =
   try
     move "7" "8";
     expect ~msg:"Expected the hash table to be full" false
-  with SharedMem.Hash_table_full -> ()
+  with
+  | SharedMem.Hash_table_full -> ()
 
 (**
  * An important property to remember about the shared hash table is if a key

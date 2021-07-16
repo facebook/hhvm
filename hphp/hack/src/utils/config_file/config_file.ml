@@ -18,8 +18,8 @@ let file_path_relative_to_repo_root =
 let apply_overrides = Config_file_common.apply_overrides
 
 let parse_hhconfig ~silent (fn : string) : string * string SMap.t =
-  try Config_file_common.parse ~silent fn
-  with e ->
+  try Config_file_common.parse ~silent fn with
+  | e ->
     let stack = Printexc.get_backtrace () in
     Hh_logger.exc ~prefix:".hhconfig deleted: " ~stack e;
     Exit.exit Exit_status.Hhconfig_deleted

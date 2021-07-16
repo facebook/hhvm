@@ -71,7 +71,8 @@ let parse_local_config ~silent (fn : string) : string SMap.t =
   try
     let (_hash, config) = parse ~silent fn in
     config
-  with e ->
+  with
+  | e ->
     Hh_logger.log "Loading config exception: %s" (Exn.to_string e);
     Hh_logger.log "Could not load config at %s" fn;
     SMap.empty

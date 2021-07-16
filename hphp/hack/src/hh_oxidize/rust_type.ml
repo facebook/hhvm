@@ -71,10 +71,10 @@ and type_params_to_string
   sprintf
     "<%s%s%s>"
     lts
-    ( if String.is_empty lts || String.is_empty ps then
+    (if String.is_empty lts || String.is_empty ps then
       ""
     else
-      "," )
+      ",")
     ps
 
 let deref (ty : t) : t =

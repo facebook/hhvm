@@ -148,7 +148,8 @@ let parse_batch
       try
         let res = (parse_file ctxt) file in
         List.append res acc
-      with exn ->
+      with
+      | exn ->
         error_count := !error_count + 1;
         Hh_logger.log
           "IndexBuilder exception: %s. Failed to parse [%s]"

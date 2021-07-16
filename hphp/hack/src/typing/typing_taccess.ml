@@ -142,12 +142,12 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
         }
       in
       let abstract_or_exact env ~lower_bounds ~upper_bounds =
-        ( if not ctx.allow_abstract then
+        (if not ctx.allow_abstract then
           let tc_pos = fst typeconst.ttc_name in
           Errors.abstract_tconst_not_allowed
             id_pos
             (tc_pos, id_name)
-            ctx.ety_env.on_error );
+            ctx.ety_env.on_error);
         (* TODO(T59448452): this treatment of abstract type constants is unsound *)
         abstract_or_exact
           env
@@ -503,7 +503,8 @@ let referenced_typeconsts env ety_env (root, ids) =
                   ( Typing_env.get_class env class_name >>= fun class_ ->
                     Typing_env.get_typeconst env class_ tconst
                     >>= fun typeconst ->
-                    Some ((typeconst.Typing_defs.ttc_origin, tconst, pos) :: acc)
+                    Some
+                      ((typeconst.Typing_defs.ttc_origin, tconst, pos) :: acc)
                   )
               | _ -> acc)
         in

@@ -42,8 +42,8 @@ let rec keys_aux p top names_numbers acc =
       p
       (number - 1)
       t
-      ( TSFlit_str (Pos_or_decl.of_raw_pos p, name)
-      :: (int_keys p top number [] @ acc) )
+      (TSFlit_str (Pos_or_decl.of_raw_pos p, name)
+       :: (int_keys p top number [] @ acc))
 
 (*
  *  Any shape keys for our match type except 0. For re"Hel(\D)(?'o'\D)", this is
@@ -55,18 +55,18 @@ let keys p s ~flags =
   let pattern = Pcre.regexp s ~flags in
   (* For re"Hel(\D)(?'o'\D)", this is 2. *)
   let count =
-    try Pcre.capturecount pattern
-    with Pcre.Error (Pcre.InternalError s) -> internal_error s
+    try Pcre.capturecount pattern with
+    | Pcre.Error (Pcre.InternalError s) -> internal_error s
   in
   (* For re"Hel(\D)(?'o'\D)", this is ['o']. *)
   let names =
-    try Array.to_list (Pcre.names pattern)
-    with Pcre.Error (Pcre.InternalError s) -> internal_error s
+    try Array.to_list (Pcre.names pattern) with
+    | Pcre.Error (Pcre.InternalError s) -> internal_error s
   in
   (*  For re"Hel(\D)(?'o'\D)", this is [2] *)
   let numbers =
-    try List.map ~f:(Pcre.get_stringnumber pattern) names
-    with Invalid_argument s -> internal_error s
+    try List.map ~f:(Pcre.get_stringnumber pattern) names with
+    | Invalid_argument s -> internal_error s
   in
   let names_numbers = List.zip_exn names numbers in
   let names_numbers_sorted =

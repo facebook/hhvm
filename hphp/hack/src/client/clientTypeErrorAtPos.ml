@@ -14,14 +14,15 @@ let print_json result =
     @@ Option.value_map
          result
          ~default:(None, None, None, None)
-         ~f:(fun InferErrorAtPosService.
-                   {
-                     actual_ty_string;
-                     expected_ty_string;
-                     actual_ty_json;
-                     expected_ty_json;
-                   }
-                 ->
+         ~f:(fun
+              InferErrorAtPosService.
+                {
+                  actual_ty_string;
+                  expected_ty_string;
+                  actual_ty_json;
+                  expected_ty_json;
+                }
+            ->
            ( Some actual_ty_string,
              Some actual_ty_json,
              Some expected_ty_string,
@@ -32,9 +33,9 @@ let print_string result =
   @@ Option.value_map
        result
        ~default:"(unknown)"
-       ~f:(fun InferErrorAtPosService.
-                 { actual_ty_string; expected_ty_string; _ }
-               ->
+       ~f:(fun
+            InferErrorAtPosService.{ actual_ty_string; expected_ty_string; _ }
+          ->
          Format.sprintf
            {|actual: %s, expected: %s|}
            actual_ty_string

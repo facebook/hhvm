@@ -574,10 +574,10 @@ let to_string
   let config_str =
     Printf.sprintf
       "[%s]"
-      ( String.concat ~sep:", "
+      (String.concat ~sep:", "
       @@ List.map
            ~f:(fun (key, value) -> Printf.sprintf "%s=%s" key value)
-           config )
+           config)
   in
   let enable_ifc_str =
     Printf.sprintf "[%s]" (String.concat ~sep:"," enable_ifc)

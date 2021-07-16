@@ -333,7 +333,7 @@ class visitor ~ctx ~entry ~filename ~source_text =
       let (line, column) = Pos.line_column p in
       let column = column + 1 in
       let pos_str = Printf.sprintf "%d-%d" line column in
-      ( if not (SSet.exists (fun key -> String.equal key pos_str) !positions)
+      (if not (SSet.exists (fun key -> String.equal key pos_str) !positions)
       then
         match context with
         | Some tokens ->
@@ -347,7 +347,7 @@ class visitor ~ctx ~entry ~filename ~source_text =
             }
           in
           entries <- entry :: entries
-        | None -> () );
+        | None -> ());
       positions := SSet.add pos_str !positions
 
     (* Add the completion token and wrap up the context and candidate list *)
@@ -361,7 +361,7 @@ class visitor ~ctx ~entry ~filename ~source_text =
       let (line, column) = Pos.line_column p in
       let column = column + 1 in
       let pos_str = Printf.sprintf "%d-%d" line column in
-      ( if not (SSet.exists (fun key -> String.equal key pos_str) !positions)
+      (if not (SSet.exists (fun key -> String.equal key pos_str) !positions)
       then
         match context with
         | Some tokens ->
@@ -375,7 +375,7 @@ class visitor ~ctx ~entry ~filename ~source_text =
             }
           in
           entries <- entry :: entries
-        | None -> () );
+        | None -> ());
       positions := SSet.add pos_str !positions
 
     method! on_Lvar env lid =

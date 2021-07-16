@@ -26,11 +26,11 @@ let should_not_happen = JSON_Object [("this_should", JSON_String "not_happen")]
 
 let infer_type_response_to_json (type_string, type_json) =
   Hh_json.JSON_Object
-    ( [("type", opt_string_to_json type_string); ("pos", deprecated_pos_field)]
+    ([("type", opt_string_to_json type_string); ("pos", deprecated_pos_field)]
     @
     match type_json with
     | Some json -> [("full_type", json_of_string json)]
-    | _ -> [] )
+    | _ -> [])
 
 let infer_type_error_response_to_json
     ( actual_type_string,
@@ -132,17 +132,17 @@ let rec definition_to_json def =
           JSON_String x)
     in
     JSON_Object
-      ( [
-          ("kind", JSON_String (string_of_kind def.kind));
-          ("name", JSON_String def.name);
-          ("id", opt_string_to_json def.id);
-          ("position", Pos.json def.pos);
-          ("span", Pos.multiline_json def.span);
-          ("modifiers", modifiers);
-        ]
+      ([
+         ("kind", JSON_String (string_of_kind def.kind));
+         ("name", JSON_String def.name);
+         ("id", opt_string_to_json def.id);
+         ("position", Pos.json def.pos);
+         ("span", Pos.multiline_json def.span);
+         ("modifiers", modifiers);
+       ]
       @ children
       @ params
-      @ docblock ))
+      @ docblock))
 
 and outline_response_to_json x =
   Hh_json.JSON_Array (List.map x ~f:definition_to_json)

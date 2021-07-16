@@ -173,8 +173,8 @@ let unenforced_hhi pos_or_decl =
     &&
     let suffix = Relative_path.suffix path in
     not
-      ( String.is_prefix suffix ~prefix:"hsl_generated/"
-      || String.is_prefix suffix ~prefix:"hsl/" )
+      (String.is_prefix suffix ~prefix:"hsl_generated/"
+      || String.is_prefix suffix ~prefix:"hsl/")
 
 let get_enforced env ~explicitly_untrusted ty =
   if explicitly_untrusted || unenforced_hhi (get_pos ty) then

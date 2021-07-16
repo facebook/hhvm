@@ -11,9 +11,9 @@ open Hh_prelude
 open Ifc_types
 
 let do_ opts files_info ctx =
-  ( if Ifc.should_print ~user_mode:opts.opt_mode ~phase:Mlattice then
+  (if Ifc.should_print ~user_mode:opts.opt_mode ~phase:Mlattice then
     let lattice = opts.opt_security_lattice in
-    Format.printf "@[Lattice:@. %a@]\n\n" Ifc_pretty.security_lattice lattice );
+    Format.printf "@[Lattice:@. %a@]\n\n" Ifc_pretty.security_lattice lattice);
 
   let handle_file path info errors =
     match info.FileInfo.file_mode with

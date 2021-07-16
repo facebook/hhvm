@@ -138,8 +138,8 @@ let handler =
               [shape; ((pos, _), _, String field_name)],
               None ) )
         when String.equal class_name SN.Shapes.cShapes
-             && ( String.equal method_name SN.Shapes.idx
-                || String.equal method_name SN.Shapes.at ) ->
+             && (String.equal method_name SN.Shapes.idx
+                || String.equal method_name SN.Shapes.at) ->
         shapes_method_access_with_non_existent_field
           p
           env

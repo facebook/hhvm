@@ -13,7 +13,8 @@ let with_in_channel filename f =
     let res = f ic in
     close_in ic;
     res
-  with exn ->
+  with
+  | exn ->
     close_in ic;
     raise exn
 

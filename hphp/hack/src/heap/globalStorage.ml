@@ -54,7 +54,7 @@ functor
 
     let store (x : Value.t) = hh_shared_store (Marshal.to_string x [])
 
-    let load () = (Marshal.from_string (hh_shared_load ()) 0 : Value.t)
+    let load () : Value.t = Marshal.from_string (hh_shared_load ()) 0
 
     let clear () = hh_shared_clear ()
   end

@@ -42,7 +42,8 @@ let test_exception_stack () =
   try
     foo ();
     failwith "Expected foo to throw an exception"
-  with e ->
+  with
+  | e ->
     let e = Exception.wrap e in
     let stack = Exception.get_backtrace_string e |> Exception.clean_stack in
     expect "test/unit/utils/exception_test_b.ml" stack;

@@ -140,14 +140,14 @@ module Full = struct
   and possibly_enforced_ty ~ty to_doc st penv { et_enforced; et_type } =
     Concat
       [
-        ( if show_verbose penv then
+        (if show_verbose penv then
           match et_enforced with
           | Enforced -> text "enforced" ^^ Space
           | PartiallyEnforced (_, (_, cn)) ->
             text ("partially enforced " ^ cn) ^^ Space
           | Unenforced -> Nothing
         else
-          Nothing );
+          Nothing);
         ty to_doc st penv et_type;
       ]
 
@@ -169,10 +169,10 @@ module Full = struct
               Space;
               text param_name;
             ]);
-        ( if get_fp_has_default fp then
+        (if get_fp_has_default fp then
           text "=_"
         else
-          Nothing );
+          Nothing);
       ]
 
   and tparam
@@ -208,10 +208,10 @@ module Full = struct
 
   let terr () =
     text
-      ( if !debug_mode then
+      (if !debug_mode then
         "err"
       else
-        "_" )
+        "_")
 
   let tprim x =
     text
@@ -238,10 +238,10 @@ module Full = struct
     Concat
       [
         text "(";
-        ( if get_ft_readonly_this ft then
+        (if get_ft_readonly_this ft then
           text "readonly "
         else
-          Nothing );
+          Nothing);
         text "function";
         fun_type ~ty to_doc st penv ft;
         text ")";
@@ -259,10 +259,10 @@ module Full = struct
         in
         Concat
           [
-            ( if sft_optional then
+            (if sft_optional then
               text "?"
             else
-              Nothing );
+              Nothing);
             key_delim;
             to_doc (Env.get_shape_field_name shape_map_key);
             key_delim;
@@ -464,8 +464,8 @@ module Full = struct
         | _ -> d
       end
     | Tgeneric (s, []) when String.contains s '$' ->
+      (* Saves a call to is_prefix then chop_prefix_exn *)
       begin
-        (* Saves a call to is_prefix then chop_prefix_exn *)
         match String.chop_prefix ~prefix:"Tctx" s with
         | Some var -> (* Tctx$f *) to_doc ("ctx " ^ var)
         | None ->
@@ -1440,8 +1440,8 @@ module Json = struct
         | Error access_failure ->
           deserialization_error
             ~message:
-              ( "Invalid as-constraint: "
-              ^ Hh_json.Access.access_failure_to_string access_failure )
+              ("Invalid as-constraint: "
+              ^ Hh_json.Access.access_failure_to_string access_failure)
             ~keytrace)
     in
     aux json ~keytrace
@@ -1588,14 +1588,14 @@ module PrintClass = struct
     ^ " (origin:"
     ^ origin
     ^ ")"
-    ^ ( if synthetic then
+    ^ (if synthetic then
         " (synthetic)"
       else
-        "" )
-    ^ ( if enforceable then
+        "")
+    ^ (if enforceable then
         " (enforceable)"
       else
-        "" )
+        "")
     ^
     if Option.is_some reifiable then
       " (reifiable)"
@@ -1618,10 +1618,10 @@ module PrintClass = struct
           match Decl_provider.get_class ctx field with
           | None -> ("!", "")
           | Some cls ->
-            ( ( if Cls.members_fully_known cls then
+            ( (if Cls.members_fully_known cls then
                 " "
               else
-                "~" ),
+                "~"),
               " (" ^ class_kind (Cls.kind cls) ^ ")" )
         in
         let ty_str = Full.to_string_decl v in
@@ -1910,8 +1910,9 @@ let coeffects env ty =
     | [cap] -> "the capability " ^ cap
     | caps ->
       "the capability set {"
-      ^ ( caps
+      ^ (caps
         |> List.dedup_and_sort ~compare:String.compare
-        |> String.concat ~sep:", " )
+        |> String.concat ~sep:", ")
       ^ "}"
-  with UndesugarableCoeffect _ -> to_string ty
+  with
+  | UndesugarableCoeffect _ -> to_string ty

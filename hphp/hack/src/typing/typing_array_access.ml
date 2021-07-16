@@ -339,8 +339,8 @@ let rec array_get
           (env, v, err_res)
       | Tclass (((_, cn) as id), _, argl)
         when (not is_lvalue)
-             && ( String.equal cn SN.Collections.cConstVector
-                || String.equal cn SN.Collections.cImmVector ) ->
+             && (String.equal cn SN.Collections.cConstVector
+                || String.equal cn SN.Collections.cImmVector) ->
         let ty =
           match argl with
           | [ty] -> ty
@@ -356,8 +356,8 @@ let rec array_get
         (env, ty, err_res)
       | Tclass ((_, cn), _, _)
         when is_lvalue
-             && ( String.equal cn SN.Collections.cConstVector
-                || String.equal cn SN.Collections.cImmVector ) ->
+             && (String.equal cn SN.Collections.cConstVector
+                || String.equal cn SN.Collections.cImmVector) ->
         let (env, ty1) = error_const_mutation env expr_pos ty1 in
         (env, ty1, Ok ty2)
       | Tdarray (_k, v)
@@ -912,7 +912,7 @@ let assign_array_get_with_err
             let idx = int_of_string_opt n in
             (match Option.map ~f:(List.split_n tyl) idx with
             | Some (tyl', _ :: tyl'') ->
-              (env, MakeType.tuple r (tyl' @ (ty2 :: tyl'')), Ok tkey, Ok ty2)
+              (env, MakeType.tuple r (tyl' @ ty2 :: tyl''), Ok tkey, Ok ty2)
             | _ -> fail (Ok tkey) Reason.index_tuple)
           | _ ->
             fail (Error (tkey, MakeType.int Reason.none)) Reason.URtuple_access

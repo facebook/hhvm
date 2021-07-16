@@ -26,7 +26,9 @@ let rec wait_until_ready handle =
 
 (** If "f x" throws, we exit the program with a custom exit code. *)
 let catch_exception_and_custom_exit_wrapper : 'x 'b. ('x -> 'b) -> 'x -> 'b =
- (fun f x -> (try f x with _ -> exit 17))
+ fun f x ->
+  try f x with
+  | _ -> exit 17
 
 let call_and_verify_result worker f x expected =
   let result =
@@ -59,10 +61,9 @@ let test_wrapped_worker_with_custom_exit use_clones heap_handle () =
          ()
          "dummy"
      with
-     | WorkerController.Worker_failed
-         (_, WorkerController.Worker_quit (Unix.WEXITED i))
-     ->
-       i = 17)
+    | WorkerController.Worker_failed
+        (_, WorkerController.Worker_quit (Unix.WEXITED i)) ->
+      i = 17)
 
 let test_worker_uncaught_exception_exits_with_2 use_clones heap_handle () =
   let workers = make_worker ~longlived_workers:use_clones heap_handle in
@@ -78,10 +79,9 @@ let test_worker_uncaught_exception_exits_with_2 use_clones heap_handle () =
          ()
          "dummy"
      with
-     | WorkerController.Worker_failed
-         (_, WorkerController.Worker_quit (Unix.WEXITED i))
-     ->
-       i = 2)
+    | WorkerController.Worker_failed
+        (_, WorkerController.Worker_quit (Unix.WEXITED i)) ->
+      i = 2)
 
 let test_simple_worker_spawn use_clones heap_handle () =
   let workers = make_worker ~longlived_workers:use_clones heap_handle in

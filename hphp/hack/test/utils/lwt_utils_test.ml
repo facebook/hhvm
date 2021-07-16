@@ -131,8 +131,8 @@ let test_lwt_message_queue_length () : bool Lwt.t =
   Int_asserter.assert_equals
     closed_length
     0
-    ( "the length once the queue is closed should be reset to 0, "
-    ^ "regardless of the number of previously-present items" );
+    ("the length once the queue is closed should be reset to 0, "
+    ^ "regardless of the number of previously-present items");
   Lwt.return true
 
 let wrap_lwt_test (test : string * (unit -> bool Lwt.t)) :

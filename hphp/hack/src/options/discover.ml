@@ -11,4 +11,5 @@ let () =
             "let system_config_path = \"" ^ sysconfdir ^ "\"";
             "let default_hackfmt_path = \"" ^ bindir ^ "/hackfmt\"";
           ]
-      with Not_found -> C.Flags.write_lines "generated_buildOptions.ml" [])
+      with
+      | Not_found -> C.Flags.write_lines "generated_buildOptions.ml" [])

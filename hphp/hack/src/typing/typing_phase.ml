@@ -679,10 +679,10 @@ and localize_ft
   let ft =
     set_ft_ftk
       ft
-      ( if Option.is_some instantiation then
+      (if Option.is_some instantiation then
         FTKinstantiated_targs
       else
-        FTKtparams )
+        FTKtparams)
   in
   ( env,
     {
@@ -977,10 +977,10 @@ let localize_hint_no_subst env ~ignore_errors ?report_cycle h =
   localize_no_subst_
     env
     ~on_error:
-      ( if ignore_errors then
+      (if ignore_errors then
         Errors.ignore_error
       else
-        Errors.invalid_type_hint pos )
+        Errors.invalid_type_hint pos)
     ?report_cycle
     h
 
@@ -988,11 +988,10 @@ let localize_no_subst env ~ignore_errors ty =
   localize_no_subst_
     env
     ~on_error:
-      ( if ignore_errors then
+      (if ignore_errors then
         Errors.ignore_error
       else
-        Errors.invalid_type_hint (Pos_or_decl.unsafe_to_raw_pos @@ get_pos ty)
-      )
+        Errors.invalid_type_hint (Pos_or_decl.unsafe_to_raw_pos @@ get_pos ty))
     ty
 
 let localize_possibly_enforced_no_subst env ~ignore_errors ety =
@@ -1092,10 +1091,10 @@ let localize_and_add_ast_generic_parameters_and_where_constraints
   in
   let ety_env =
     empty_expand_env_with_on_error
-      ( if ignore_errors then
+      (if ignore_errors then
         Errors.ignore_error
       else
-        Env.invalid_type_hint_assert_primary_pos_in_current_decl env )
+        Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
   in
   let env = localize_and_add_generic_parameters ~ety_env env tparams in
   let env = localize_and_add_where_constraints ~ety_env env where_constraints in

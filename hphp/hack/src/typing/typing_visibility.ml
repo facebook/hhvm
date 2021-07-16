@@ -73,8 +73,8 @@ let is_protected_visible env origin_id self_id =
         None
       else
         Some
-          ( "Cannot access this protected member, you don't extend "
-          ^ strip_ns origin_id )
+          ("Cannot access this protected member, you don't extend "
+          ^ strip_ns origin_id)
 
 let is_private_visible_for_class env x self_id cid class_ =
   match cid with

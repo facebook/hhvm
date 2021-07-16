@@ -31,7 +31,8 @@ let rec wait_for_rpc_response stack fd state callback =
              Failure
                "unexpected monitor_failed_to_handoff on persistent connection"
            ))
-  with e -> Lwt.return (Error (state, stack, e))
+  with
+  | e -> Lwt.return (Error (state, stack, e))
 
 (** Sends a message over the given `out_channel`, then listens for incoming
     messages - either an exception which it raises, or a push which it dispatches
@@ -68,7 +69,8 @@ let rpc_persistent :
         callback
     in
     Lwt.return response
-  with e -> Lwt.return (Error (state, stack, e))
+  with
+  | e -> Lwt.return (Error (state, stack, e))
 
 let send_connection_type oc t =
   Marshal.to_channel oc t [];

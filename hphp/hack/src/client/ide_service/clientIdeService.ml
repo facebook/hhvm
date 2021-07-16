@@ -256,7 +256,8 @@ let rpc
       | None ->
         (* queue closure is part of normal shutdown *)
         failwith "Could not read response: queue was closed")
-  with exn ->
+  with
+  | exn ->
     let exn = Exception.wrap exn in
     Lwt.return_error (ClientIdeUtils.make_bug_error "rpc" ~exn)
 
@@ -322,7 +323,8 @@ let initialize_from_saved_state
       (* What we got back wasn't the 'init' response we expected:
          the clientIdeDaemon has violated its contract. *)
       failwith ("desync: " ^ message_from_daemon_to_string response)
-  with exn ->
+  with
+  | exn ->
     let exn = Exception.wrap exn in
     let reason = ClientIdeUtils.make_bug_reason "init_failed" ~exn in
     set_state t (Failed_to_initialize reason);
@@ -382,7 +384,8 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
                Lwt.return_error
                  { code = InternalError; message = "timeout"; data = None });
             ]
-        with exn ->
+        with
+        | exn ->
           let exn = Exception.wrap exn in
           Lwt.return_error (ClientIdeUtils.make_bug_error "destroy" ~exn)
       in
@@ -517,7 +520,8 @@ let rec serve (t : t) : unit Lwt.t =
       else
         let%lwt () = cleanup_upon_shutdown_or_exn t ~exn:None in
         Lwt.return_unit
-  with exn ->
+  with
+  | exn ->
     let exn = Exception.wrap exn in
     (* cleanup function below will log the exception *)
     let%lwt () = cleanup_upon_shutdown_or_exn t ~exn:(Some exn) in

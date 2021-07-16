@@ -108,7 +108,8 @@ let update_file
           contents
       else
         convert_fileinfo_to_contents ~ctx ~sienv ~info ~filepath
-    with _ -> convert_fileinfo_to_contents ~ctx ~sienv ~info ~filepath
+    with
+    | _ -> convert_fileinfo_to_contents ~ctx ~sienv ~info ~filepath
   in
   {
     sienv with
@@ -213,7 +214,8 @@ let search_local_symbols
           List.append acc matches)
     in
     acc
-  with BreakOutOfScan acc -> acc
+  with
+  | BreakOutOfScan acc -> acc
 
 (* Filter the results to extract any dead objects *)
 let extract_dead_results

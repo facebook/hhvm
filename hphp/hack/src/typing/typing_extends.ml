@@ -249,11 +249,11 @@ let check_override
     if
       TypecheckerOptions.enable_sound_dynamic
         (Provider_context.get_tcopt (Env.get_ctx env))
-      && ( Cls.get_support_dynamic_type parent_class
-         || get_ce_support_dynamic_type parent_class_elt )
+      && (Cls.get_support_dynamic_type parent_class
+         || get_ce_support_dynamic_type parent_class_elt)
       && not
-           ( Cls.get_support_dynamic_type class_
-           || get_ce_support_dynamic_type class_elt )
+           (Cls.get_support_dynamic_type class_
+           || get_ce_support_dynamic_type class_elt)
     then
       let (lazy pos) = class_elt.ce_pos in
       let (lazy parent_pos) = parent_class_elt.ce_pos in
@@ -307,17 +307,17 @@ let check_override
     Errors.abstract_concrete_override
       pos
       parent_pos
-      ( if is_method then
+      (if is_method then
         `method_
       else
-        `property )
+        `property)
       ~current_decl_and_file:(Env.get_current_decl_and_file env);
   if check_params then (
     let on_error ?code:_ reasons =
-      ( if is_method then
+      (if is_method then
         Errors.bad_method_override
       else
-        Errors.bad_prop_override )
+        Errors.bad_prop_override)
         pos
         member_name
         reasons
@@ -594,12 +594,12 @@ let check_members
           on_error
       | _ ->
         (* if class implements dynamic, all inherited methods should be dynamically callable *)
-        ( if
-          TypecheckerOptions.enable_sound_dynamic
-            (Provider_context.get_tcopt (Env.get_ctx env))
-          && Cls.get_support_dynamic_type class_
-          && not (Cls.get_support_dynamic_type parent_class)
-          (* TODO: ideally refactor so the last test is not systematically performed on all methods *)
+        (if
+         TypecheckerOptions.enable_sound_dynamic
+           (Provider_context.get_tcopt (Env.get_ctx env))
+         && Cls.get_support_dynamic_type class_
+         && not (Cls.get_support_dynamic_type parent_class)
+         (* TODO: ideally refactor so the last test is not systematically performed on all methods *)
         then
           match Cls.kind parent_class with
           | Ast_defs.Cabstract
@@ -640,7 +640,7 @@ let check_members
             end
           | Ast_defs.Cinterface
           | Ast_defs.Cenum ->
-            () );
+            ());
         env)
 
 (*****************************************************************************)
@@ -922,7 +922,7 @@ let tconst_subsumption
 
     (* Don't recheck inherited type constants: errors will
      * have been emitted already for the parent *)
-    ( if inherited then
+    (if inherited then
       ()
     else
       match (child_typeconst.ttc_kind, parent_tconst_enforceable) with
@@ -946,8 +946,7 @@ let tconst_subsumption
         | None -> ()
         | Some pos ->
           let tast_env = Tast_env.typing_env_as_tast_env env in
-          Typing_const_reifiable.check_reifiable tast_env child_typeconst pos)
-    );
+          Typing_const_reifiable.check_reifiable tast_env child_typeconst pos));
 
     (* If the parent cannot be overridden, we unify the types otherwise we ensure
      * the child's assigned type is compatible with the parent's

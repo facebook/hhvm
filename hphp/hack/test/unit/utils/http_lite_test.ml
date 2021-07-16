@@ -101,7 +101,8 @@ let test_read_request () =
      let msg3 = Printf.sprintf "\r\n%s" body in
      let _ = read_message_tester msg3 in
      failwith "missing content-length"
-   with Http_lite.Malformed _ -> ());
+   with
+  | Http_lite.Malformed _ -> ());
 
   (* explicit charset *)
   let msg4 =
@@ -122,7 +123,8 @@ let test_read_request () =
      in
      let _ = read_message_tester msg5 in
      failwith "non-utf8"
-   with Http_lite.Malformed _ -> ());
+   with
+  | Http_lite.Malformed _ -> ());
   true
 
 let tests =

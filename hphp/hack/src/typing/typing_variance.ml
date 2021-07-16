@@ -122,10 +122,10 @@ let reason_stack_to_string variance reason_stack =
        ~init:"")
 
 let reason_to_string ~sign (_, descr, variance) =
-  ( if sign then
+  (if sign then
     variance_to_sign variance ^ " "
   else
-    "" )
+    "")
   ^
   match descr with
   | Rtypedef -> "Aliased types are covariant"
@@ -158,8 +158,9 @@ let detailed_message variance pos stack =
   | [((p, _, _) as r)] -> [(p, reason_to_string ~sign:false r)]
   | _ ->
     (pos, reason_stack_to_string variance stack)
-    :: List.map stack ~f:(fun ((p, _, _) as r) ->
-           (p, reason_to_string ~sign:true r))
+    ::
+    List.map stack ~f:(fun ((p, _, _) as r) ->
+        (p, reason_to_string ~sign:true r))
 
 (*****************************************************************************)
 (* Converts an annotation (+/-) to a type. *)

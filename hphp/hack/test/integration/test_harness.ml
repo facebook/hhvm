@@ -52,12 +52,10 @@ let get_server_logs harness =
   match Process.read_and_wait_pid ~timeout:5 process with
   | Ok { Process_types.stdout; _ } ->
     let log_path = Path.make (String.strip stdout) in
-    (try Some (Sys_utils.cat (Path.to_string log_path))
-     with
-     | Sys_error m
-     when Sys_utils.string_contains m "No such file or directory"
-     ->
-       None)
+    (try Some (Sys_utils.cat (Path.to_string log_path)) with
+    | Sys_error m when Sys_utils.string_contains m "No such file or directory"
+      ->
+      None)
   | Error failure -> raise @@ Process_failed failure
 
 let wait_until_lock_free lock_file _harness =
@@ -66,9 +64,9 @@ let wait_until_lock_free lock_file _harness =
 let get_recording_path harness =
   let recording_re =
     Str.regexp
-      ( "^.+ About to spawn recorder daemon\\. "
+      ("^.+ About to spawn recorder daemon\\. "
       ^ "Output will go to \\(.+\\)\\. Logs to \\(.+\\)\\. "
-      ^ "Lock_file to \\(.+\\)\\.$" )
+      ^ "Lock_file to \\(.+\\)\\.$")
   in
   Option.(
     let logs = get_server_logs harness in
@@ -78,7 +76,8 @@ let get_recording_path harness =
       Some
         ( Path.make (Str.matched_group 1 logs),
           Path.make (Str.matched_group 2 logs) )
-    with Caml.Not_found ->
+    with
+    | Caml.Not_found ->
       Printf.eprintf "recorder path or lock file not found\n%!";
       Printf.eprintf "See also server logs: %s\n%!" logs;
       None)
@@ -176,11 +175,9 @@ let run_test ?(stop_server_in_teardown = true) config test_case =
     in
     let with_exception_printing test_case harness =
       let result =
-        try test_case harness
-        with
+        try test_case harness with
         | Process_failed (Process_types.Abnormal_exit { status; stderr; _ }) as
-          e
-        ->
+          e ->
           Printf.eprintf
             "Process exited abnormally (%s). See also Stderr: %s\n"
             (Process.status_to_string status)

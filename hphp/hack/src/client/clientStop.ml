@@ -28,7 +28,8 @@ let wait_for_death root secs =
         raise Exit
     done;
     true
-  with Exit -> false
+  with
+  | Exit -> false
 
 let nice_kill env =
   let root_s = Path.to_string env.root in
@@ -57,7 +58,8 @@ let nice_kill env =
     | Error _ ->
       Printf.eprintf "Failed to kill server nicely for %s\n%!" root_s;
       raise FailedToKill
-  with _ ->
+  with
+  | _ ->
     Printf.eprintf "Failed to kill server nicely for %s\n%!" root_s;
     raise FailedToKill
 
@@ -65,8 +67,8 @@ let mean_kill env =
   let root_s = Path.to_string env.root in
   Printf.eprintf "Attempting to meanly kill server for %s\n%!" root_s;
   let pids =
-    try PidLog.get_pids (ServerFiles.pids_file env.root)
-    with PidLog.FailedToGetPids ->
+    try PidLog.get_pids (ServerFiles.pids_file env.root) with
+    | PidLog.FailedToGetPids ->
       Printf.eprintf
         "Unable to figure out pids of running Hack server. Try manually killing it with `pkill hh_server`\n%!";
       raise FailedToKill
@@ -74,12 +76,13 @@ let mean_kill env =
   let success =
     try
       List.iter pids ~f:(fun (pid, _reason) ->
-          try Sys_utils.terminate_process pid
-          with Unix.Unix_error (Unix.ESRCH, "kill", _) ->
+          try Sys_utils.terminate_process pid with
+          | Unix.Unix_error (Unix.ESRCH, "kill", _) ->
             (* no such process *)
             ());
       wait_for_death env.root 3
-    with e ->
+    with
+    | e ->
       print_endline (Exn.to_string e);
       false
   in
@@ -92,10 +95,10 @@ let mean_kill env =
     Printf.eprintf "Successfully killed server for %s\n%!" root_s
 
 let do_kill env =
-  try nice_kill env
-  with FailedToKill ->
-    (try mean_kill env
-     with FailedToKill -> raise Exit_status.(Exit_with Kill_error))
+  try nice_kill env with
+  | FailedToKill ->
+    (try mean_kill env with
+    | FailedToKill -> raise Exit_status.(Exit_with Kill_error))
 
 let main (env : env) : Exit_status.t Lwt.t =
   HackEventLogger.set_from env.from;

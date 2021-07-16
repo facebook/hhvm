@@ -42,9 +42,10 @@ let init_with_options () =
               !debug_config with
               chunk_ids =
                 Some
-                  (try List.map (Str.split (Str.regexp ",") s) ~f:int_of_string
-                   with Failure _ ->
-                     raise (Failure "Invalid id list specification"));
+                  (try
+                     List.map (Str.split (Str.regexp ",") s) ~f:int_of_string
+                   with
+                  | Failure _ -> raise (Failure "Invalid id list specification"));
             }),
       " Comma separate list of chunk ids to inspect (default is all)" );
     ( "--nesting",

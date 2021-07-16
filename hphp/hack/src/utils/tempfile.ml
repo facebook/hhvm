@@ -10,7 +10,8 @@ let rec mkdtemp ~(dir : Path.t) ~(skip_mocking : bool) ~(retries : int) : Path.t
     try
       let () = Sys_utils.mkdir_p (Path.to_string tmp_dir) ~skip_mocking in
       tmp_dir
-    with Unix.Unix_error _ -> mkdtemp ~dir ~skip_mocking ~retries:(retries - 1)
+    with
+    | Unix.Unix_error _ -> mkdtemp ~dir ~skip_mocking ~retries:(retries - 1)
 
 let mkdtemp_with_dir (dir : Path.t) =
   mkdtemp ~dir ~skip_mocking:false ~retries:30

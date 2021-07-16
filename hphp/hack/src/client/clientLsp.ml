@@ -290,8 +290,8 @@ let set_up_hh_logger_for_client_lsp (root : Path.t) : unit =
      `stderr`; this is in addition to that. *)
   let client_lsp_log_fn = ServerFiles.client_lsp_log root in
   begin
-    try Sys.rename client_lsp_log_fn (client_lsp_log_fn ^ ".old")
-    with _e -> ()
+    try Sys.rename client_lsp_log_fn (client_lsp_log_fn ^ ".old") with
+    | _e -> ()
   end;
   Hh_logger.set_log client_lsp_log_fn;
   log "Starting clientLsp at %s" client_lsp_log_fn
@@ -433,7 +433,8 @@ let ignore_promise_but_handle_failure
       try%lwt
         let%lwt () = promise in
         Lwt.return_unit
-      with exn ->
+      with
+      | exn ->
         let open Hh_json in
         let exn = Exception.wrap exn in
         let message = "Unhandled exception: " ^ Exception.get_ctor_string exn in
@@ -737,7 +738,8 @@ let read_message_from_server (server : server_conn) : event Lwt.t =
     | Ping -> failwith "unexpected ping on persistent connection"
     | Monitor_failed_to_handoff ->
       failwith "unexpected monitor_failed_to_handoff on persistent connection"
-  with e ->
+  with
+  | e ->
     let message = Exn.to_string e in
     let stack = Printexc.get_backtrace () in
     raise (Server_fatal_connection_exception { Marshal_tools.message; stack })
@@ -771,7 +773,8 @@ let get_next_event
             | _ -> rnd
           in
           Lwt.return (Client_message ({ tracking_id; timestamp }, message))
-        with e ->
+        with
+        | e ->
           let e = Exception.wrap e in
           let edata =
             {
@@ -1237,8 +1240,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
     Lwt.return { ic; oc; pending_messages; server_specific_files }
   with
   | Exit_status.Exit_with Exit_status.Build_id_mismatch
-  when !can_autostart_after_mismatch
-  ->
+    when !can_autostart_after_mismatch ->
     (* Raised when the server was running an old version. We'll retry once.   *)
     log "connect_client: build_id_mismatch";
     can_autostart_after_mismatch := false;
@@ -1257,7 +1259,8 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
         try
           Timeout.shutdown_connection conn.ic;
           Timeout.close_in_noerr conn.ic
-        with _ -> ()
+        with
+        | _ -> ()
       end
     | Pre_init
     | Lost_server _ ->
@@ -1289,7 +1292,8 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
              uris_with_unsaved_changes = get_uris_with_unsaved_changes state;
              hh_server_status_diagnostic = None;
            })
-  with exn ->
+  with
+  | exn ->
     let exn = Exception.wrap exn in
     (* Exit_with Out_of_retries, Exit_with Out_of_time: raised when we        *)
     (*   couldn't complete the handshake up to handoff within 3 attempts over *)
@@ -2095,12 +2099,12 @@ let state_to_rage (state : state) : string =
     | Main_loop menv ->
       let open Main_env in
       Printf.sprintf
-        ( "needs_idle: %b\n"
+        ("needs_idle: %b\n"
         ^^ "editor_open_files: %s\n"
         ^^ "uris_with_diagnostics: %s\n"
         ^^ "uris_with_unsaved_changes: %s\n"
         ^^ "hh_server_status.message: %s\n"
-        ^^ "hh_server_status.shortMessage: %s\n" )
+        ^^ "hh_server_status.shortMessage: %s\n")
         menv.needs_idle
         (menv.editor_open_files |> UriMap.keys |> uris_to_string)
         (menv.uris_with_diagnostics |> UriSet.elements |> uris_to_string)
@@ -2112,10 +2116,10 @@ let state_to_rage (state : state) : string =
     | In_init ienv ->
       let open In_init_env in
       Printf.sprintf
-        ( "first_start_time: %f\n"
+        ("first_start_time: %f\n"
         ^^ "most_recent_sstart_time: %f\n"
         ^^ "editor_open_files: %s\n"
-        ^^ "uris_with_unsaved_changes: %s\n" )
+        ^^ "uris_with_unsaved_changes: %s\n")
         ienv.first_start_time
         ienv.most_recent_start_time
         (ienv.editor_open_files |> UriMap.keys |> uris_to_string)
@@ -2123,14 +2127,14 @@ let state_to_rage (state : state) : string =
     | Lost_server lenv ->
       let open Lost_env in
       Printf.sprintf
-        ( "editor_open_files: %s\n"
+        ("editor_open_files: %s\n"
         ^^ "uris_with_unsaved_changes: %s\n"
         ^^ "lock_file: %s\n"
         ^^ "explanation: %s\n"
         ^^ "new_hh_server_state: %s\n"
         ^^ "start_on_click: %b\n"
         ^^ "trigger_on_lsp: %b\n"
-        ^^ "trigger_on_lock_file: %b\n" )
+        ^^ "trigger_on_lock_file: %b\n")
         (lenv.editor_open_files |> UriMap.keys |> uris_to_string)
         (lenv.uris_with_unsaved_changes |> UriSet.elements |> uris_to_string)
         lenv.lock_file
@@ -2168,10 +2172,10 @@ let do_rageFB (state : state) : RageFB.result Lwt.t =
   (* that's it! *)
   let data =
     Printf.sprintf
-      ( "%s\n\n"
+      ("%s\n\n"
       ^^ "version previously read from .hhconfig and switch: %s\n"
       ^^ "version in .hhconfig and switch: %s\n\n"
-      ^^ "clientLsp belief of hh_server_state:\n%s\n" )
+      ^^ "clientLsp belief of hh_server_state:\n%s\n")
       (state_to_rage state)
       !hhconfig_version_and_switch
       current_version_and_switch
@@ -2492,27 +2496,27 @@ let make_ide_completion_response
       if Int.equal line 0 && Int.equal start 0 then
         Some
           (Hh_json.JSON_Object
-             ( [("fullname", Hh_json.JSON_String completion.res_fullname)]
+             ([("fullname", Hh_json.JSON_String completion.res_fullname)]
              @ base_class
-             @ ranking_detail ))
+             @ ranking_detail))
       else
         Some
           (Hh_json.JSON_Object
-             ( [
-                 (* Fullname is needed for namespaces.  We often trim namespaces to make
-                  * the results more readable, such as showing "ad__breaks" instead of
-                  * "Thrift\Packages\cf\ad__breaks".
-                  *)
-                 ("fullname", Hh_json.JSON_String completion.res_fullname);
-                 (* Filename/line/char/base_class are used to handle class methods.
-                  * We could unify this with fullname in the future.
-                  *)
-                 ("filename", Hh_json.JSON_String filename);
-                 ("line", Hh_json.int_ line);
-                 ("char", Hh_json.int_ start);
-               ]
+             ([
+                (* Fullname is needed for namespaces.  We often trim namespaces to make
+                 * the results more readable, such as showing "ad__breaks" instead of
+                 * "Thrift\Packages\cf\ad__breaks".
+                 *)
+                ("fullname", Hh_json.JSON_String completion.res_fullname);
+                (* Filename/line/char/base_class are used to handle class methods.
+                 * We could unify this with fullname in the future.
+                 *)
+                ("filename", Hh_json.JSON_String filename);
+                ("line", Hh_json.int_ line);
+                ("char", Hh_json.int_ start);
+              ]
              @ base_class
-             @ ranking_detail ))
+             @ ranking_detail))
     in
     let hack_to_sort_text (completion : complete_autocomplete_result) :
         string option =
@@ -2530,14 +2534,14 @@ let make_ide_completion_response
     in
     {
       label =
-        ( completion.res_name
+        (completion.res_name
         ^
         if
           SearchUtils.equal_si_kind completion.res_kind SearchUtils.SI_Namespace
         then
           "\\"
         else
-          "" );
+          "");
       kind =
         (match completion.ranking_details with
         | Some _ -> Some Completion.Event
@@ -2725,11 +2729,12 @@ let do_completionItemResolve
             Lwt.return
               (docblock_with_ranking_detail raw_docblock ranking_detail)
         (* If that failed, fetch docblock using just the symbol name *)
-      with _ ->
+      with
+      | _ ->
         let symbolname = params.Completion.label in
         let ranking_source =
-          try Jget.int_opt params.Completion.data "ranking_source"
-          with _ -> None
+          try Jget.int_opt params.Completion.data "ranking_source" with
+          | _ -> None
         in
         let command =
           ServerCommandTypes.DOCBLOCK_FOR_SYMBOL
@@ -2805,18 +2810,19 @@ let do_resolve_local
           in
           Lwt.return { params with Completion.documentation }
         (* If that fails, next try using symbol *)
-      with _ ->
+      with
+      | _ ->
         (* The "fullname" value includes the fully qualified namespace, so
          * we want to use that.  However, if it's missing (it shouldn't be)
          * let's default to using the label which doesn't include the
          * namespace. *)
         let symbolname =
-          try Jget.string_exn params.Completion.data "fullname"
-          with _ -> params.Completion.label
+          try Jget.string_exn params.Completion.data "fullname" with
+          | _ -> params.Completion.label
         in
         let ranking_source =
-          try Jget.int_opt params.Completion.data "ranking_source"
-          with _ -> None
+          try Jget.int_opt params.Completion.data "ranking_source" with
+          | _ -> None
         in
         let request =
           ClientIdeMessage.Completion_resolve
@@ -3627,8 +3633,9 @@ let get_filename_in_message_for_logging (message : lsp_message) :
     (try
        let path = Lsp_helpers.lsp_uri_to_path uri in
        Some (Relative_path.create_detect_prefix path)
-     with _ ->
-       Some (Relative_path.create Relative_path.Dummy (Lsp.string_of_uri uri)))
+     with
+    | _ ->
+      Some (Relative_path.create Relative_path.Dummy (Lsp.string_of_uri uri)))
 
 (* Historical quirk: we log kind and method-name a bit idiosyncratically... *)
 let get_message_kind_and_method_for_logging (message : lsp_message) :
@@ -3669,8 +3676,8 @@ let log_response_if_necessary
       ~tracking_id:metadata.tracking_id
       ~start_queue_time:metadata.timestamp
       ~start_hh_server_state:
-        ( get_older_hh_server_state metadata.timestamp
-        |> hh_server_state_to_string )
+        (get_older_hh_server_state metadata.timestamp
+        |> hh_server_state_to_string)
       ~start_handle_time:unblocked_time
       ~serverless_ide_flag:env.use_serverless_ide
   | _ -> ()
@@ -3862,12 +3869,14 @@ let handle_editor_buffer_message
     try%lwt
       let%lwt () = hh_server_promise in
       Lwt.return_none
-    with e -> Lwt.return_some (Exception.wrap e)
+    with
+    | e -> Lwt.return_some (Exception.wrap e)
   and (ide_service_e : Exception.t option) =
     try%lwt
       let%lwt () = ide_service_promise in
       Lwt.return_none
-    with e -> Lwt.return_some (Exception.wrap e)
+    with
+    | e -> Lwt.return_some (Exception.wrap e)
   in
   ref_unblocked_time := Float.max !ref_hh_unblocked_time !ref_ide_unblocked_time;
   match (hh_server_e, ide_service_e) with
@@ -4260,8 +4269,8 @@ let handle_client_message
       let result_extra_telemetry =
         Option.some_if
           has_xhp_attribute
-          ( Telemetry.create ()
-          |> Telemetry.bool_ ~key:"has_xhp_attribute" ~value:true )
+          (Telemetry.create ()
+          |> Telemetry.bool_ ~key:"has_xhp_attribute" ~value:true)
       in
       respond_jsonrpc ~powered_by:Serverless_ide id (DefinitionResult result);
       Lwt.return_some
@@ -4402,8 +4411,8 @@ let handle_client_message
       let result_extra_telemetry =
         Option.some_if
           has_xhp_attribute
-          ( Telemetry.create ()
-          |> Telemetry.bool_ ~key:"has_xhp_attribute" ~value:true )
+          (Telemetry.create ()
+          |> Telemetry.bool_ ~key:"has_xhp_attribute" ~value:true)
       in
       respond_jsonrpc ~powered_by:Hh_server id (DefinitionResult result);
       Lwt.return_some
@@ -4572,7 +4581,7 @@ let handle_server_message
       let should_send_status =
         Lsp.Initialize.(p.initializationOptions.sendServerStatusEvents)
       in
-      ( if should_send_status then
+      (if should_send_status then
         let status_message =
           let open ServerCommandTypes in
           match status with
@@ -4582,7 +4591,7 @@ let handle_server_message
           | Doing_global_typecheck _ -> "doing_global_typecheck"
           | Done_global_typecheck _ -> "done_global_typecheck"
         in
-        Lsp_helpers.telemetry_log to_stdout status_message );
+        Lsp_helpers.telemetry_log to_stdout status_message);
       state := do_server_busy !state status;
       Lwt.return_unit
     (* textDocument/publishDiagnostics notification *)
@@ -4688,7 +4697,8 @@ let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
           editor_open_files
       in
       Lwt.return_unit
-    with e ->
+    with
+    | e ->
       let message = Exn.to_string e in
       let stack = Printexc.get_backtrace () in
       log "connect_after_hello exception %s\n%s" message stack;
@@ -4767,9 +4777,9 @@ let handle_tick
           Lwt.return_unit
         else
           (* terminate + retry the connection *)
-            let%lwt new_state = connect ~env !state in
-            state := new_state;
-            Lwt.return_unit
+          let%lwt new_state = connect ~env !state in
+          state := new_state;
+          Lwt.return_unit
       in
       Lwt.return_unit
     (* Tick when we're connected to the server *)

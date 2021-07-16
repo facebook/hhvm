@@ -69,7 +69,6 @@ type stats = {
   (* The total physical memory for the cgroup *)
   total_swap: int;
   (* The total amount of anonymous memory paged out to swap *)
-
   (* anon, file, and shmem are disjoint. If you add in the memory that the kernel uses, they should
    * sum roughly to `total` *)
   anon: int;

@@ -657,10 +657,10 @@ let method_dynamically_callable
           pos
           (snd m.m_name)
           (Cls.name cls)
-          ( Naming_attributes.mem
-              SN.UserAttributes.uaSupportDynamicType
-              m.m_user_attributes
-          || Cls.get_support_dynamic_type cls )
+          (Naming_attributes.mem
+             SN.UserAttributes.uaSupportDynamicType
+             m.m_user_attributes
+          || Cls.get_support_dynamic_type cls)
           None
           (Some error))
   in
@@ -820,11 +820,11 @@ let method_def env cls m =
    * <<__SupportDynamicType>>, check that the method is dynamically callable *)
   let check_support_dynamic_type =
     (not env.inside_constructor)
-    && ( Cls.get_support_dynamic_type cls
-         && not (Aast.equal_visibility m.m_visibility Private)
+    && (Cls.get_support_dynamic_type cls
+        && not (Aast.equal_visibility m.m_visibility Private)
        || Naming_attributes.mem
             SN.UserAttributes.uaSupportDynamicType
-            m.m_user_attributes )
+            m.m_user_attributes)
   in
   if
     TypecheckerOptions.enable_sound_dynamic
@@ -1087,7 +1087,7 @@ let check_enum_includes env cls =
         | Some cls -> check_consistent_enum_inclusion ie_cls (ie_pos, cls));
         (* 2. Check for duplicates *)
         List.iter (Cls.consts ie_cls) ~f:(fun (const_name, class_const) ->
-            ( if String.equal const_name "class" then
+            (if String.equal const_name "class" then
               ()
             else if SMap.mem const_name !enum_constant_map then
               (* distinguish between multiple inherit and redeclare *)
@@ -1110,7 +1110,7 @@ let check_enum_includes env cls =
                   ie_pos
                   src_class_name
                   origin_class_name
-                  const_name );
+                  const_name);
             enum_constant_map :=
               SMap.add
                 const_name
@@ -1238,7 +1238,8 @@ let contains_generic : Typing_defs.decl_ty -> Pos_or_decl.t option =
   try
     visitor#on_type () ty;
     None
-  with Found p -> Some p
+  with
+  | Found p -> Some p
 
 (** Check whether the type of a static property (class variable) contains
     any generic type parameters. Outside of traits, this is illegal as static
@@ -1920,13 +1921,13 @@ let class_def_ env c tc =
   let env = check_class_parents_where_constraints env pc impl in
   check_parent env c tc;
   check_parents_sealed env c tc;
-  ( if TypecheckerOptions.enforce_sealed_subclasses (Env.get_tcopt env) then
+  (if TypecheckerOptions.enforce_sealed_subclasses (Env.get_tcopt env) then
     match c.c_kind with
     | Ast_defs.Cenum
       when TypecheckerOptions.enable_enum_supertyping (Env.get_tcopt env) ->
       sealed_subtype ctx c ~is_enum:true
     | Ast_defs.Cenum -> ()
-    | _ -> sealed_subtype ctx c ~is_enum:false );
+    | _ -> sealed_subtype ctx c ~is_enum:false);
   let (_ : env) =
     check_generic_class_with_SupportDynamicType env c (extends @ implements)
   in
@@ -1984,7 +1985,7 @@ let class_def_ env c tc =
     match typed_constructor with
     | None -> (typed_static_methods @ typed_methods, [])
     | Some (m, global_inference_env) ->
-      ((m :: typed_static_methods) @ typed_methods, [global_inference_env])
+      (m :: typed_static_methods @ typed_methods, [global_inference_env])
   in
   let (env, tparams) = class_type_param env c.c_tparams in
   let (env, user_attributes) =
@@ -2153,12 +2154,12 @@ let record_def_parent env rd parent_hint =
     (match Decl_provider.get_record_def (Env.get_ctx env) parent_name with
     | Some parent_rd ->
       (* We can only inherit from abstract records. *)
-      ( if not parent_rd.rdt_abstract then
+      (if not parent_rd.rdt_abstract then
         let (parent_pos, parent_name) = parent_rd.rdt_name in
         Errors.extend_non_abstract_record
           parent_name
           (fst rd.rd_name)
-          parent_pos );
+          parent_pos);
 
       (* Ensure we aren't defining fields that overlap with
          inherited fields. *)

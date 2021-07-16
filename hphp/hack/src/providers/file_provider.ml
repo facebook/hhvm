@@ -35,7 +35,8 @@ module FileHeap =
     end)
 
 let read_file_contents_from_disk (fn : Relative_path.t) : string option =
-  (try Some (Sys_utils.cat (Relative_path.to_absolute fn)) with _ -> None)
+  try Some (Sys_utils.cat (Relative_path.to_absolute fn)) with
+  | _ -> None
 
 let get fn =
   match Provider_backend.get () with
@@ -90,8 +91,8 @@ let get_ide_contents_unsafe fn =
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
-      ( "File_provider.get_ide_contents_unsafe not supported "
-      ^ "with local/decl memory provider" )
+      ("File_provider.get_ide_contents_unsafe not supported "
+      ^ "with local/decl memory provider")
 
 let provide_file fn contents =
   match Provider_backend.get () with
@@ -131,8 +132,8 @@ let local_changes_commit_batch paths =
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
-      ( "File_provider.local_changes_commit_batch not supported "
-      ^ "with local/decl memory provider" )
+      ("File_provider.local_changes_commit_batch not supported "
+      ^ "with local/decl memory provider")
 
 let local_changes_revert_batch paths =
   match Provider_backend.get () with
@@ -141,5 +142,5 @@ let local_changes_revert_batch paths =
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
-      ( "File_provider.local_changes_revert_batch not supported "
-      ^ "with local/decl memory provider" )
+      ("File_provider.local_changes_revert_batch not supported "
+      ^ "with local/decl memory provider")

@@ -111,10 +111,10 @@ module Done_or_retry = struct
    * If this ends up throwing, it's a bug in hh_server. *)
   let rec call ~(f : unit -> 'a t Lwt.t) ~(depth : int) : _ Lwt.t =
     Lwt.Infix.(
-      ( if depth = 2 then
+      (if depth = 2 then
         Lwt.fail Two_retries_in_a_row
       else
-        Lwt.return_unit )
+        Lwt.return_unit)
       >>= fun () ->
       f () >>= fun result ->
       match result with

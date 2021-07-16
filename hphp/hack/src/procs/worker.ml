@@ -132,10 +132,10 @@ let read_and_process_job ic oc : job_outcome =
         in
         if len > 30 * 1024 * 1024 (* 30 MiB *) then (
           Hh_logger.log
-            ( "WARNING: you are sending quite a lot of data (%d bytes), "
+            ("WARNING: you are sending quite a lot of data (%d bytes), "
             ^^ "which may have an adverse performance impact. "
             ^^ "If you are sending closures, double-check to ensure that "
-            ^^ "they have not captured large values in their environment." )
+            ^^ "they have not captured large values in their environment.")
             len;
           Printf.eprintf
             "%s"

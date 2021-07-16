@@ -64,10 +64,10 @@ let do_work (acc : int) (jobs : int list) : int =
      after second ping (so all the workers beside 2 and 7 should finish) *)
   if job = 3 || job = 7 then (
     Unix.sleep
-      ( if job = 3 then
+      (if job = 3 then
         2
       else
-        4 );
+        4);
     let fd = Unix.openfile !pipe_path [Unix.O_WRONLY] 0o640 in
     let written = Unix.write fd (Bytes.of_string "!") 0 1 in
     assert (written = 1);

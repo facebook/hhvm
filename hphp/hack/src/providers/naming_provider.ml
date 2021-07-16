@@ -544,8 +544,8 @@ let get_const_full_pos ctx (pos, name) =
   match pos with
   | FileInfo.Full p -> Some p
   | FileInfo.File (FileInfo.Const, fn) ->
+    (* This should really be part of the decl_provider, but it's tangled in circular dependencies *)
     begin
-      (* This should really be part of the decl_provider, but it's tangled in circular dependencies *)
       match Provider_context.get_backend ctx with
       | Provider_backend.Decl_service { decl = decl_service; _ } ->
         Decl_service_client.rpc_get_gconst decl_service name
@@ -561,8 +561,8 @@ let get_fun_full_pos ctx (pos, name) =
   match pos with
   | FileInfo.Full p -> Some p
   | FileInfo.File (FileInfo.Fun, fn) ->
+    (* This should really be part of the decl_provider, but it's tangled in circular dependencies *)
     begin
-      (* This should really be part of the decl_provider, but it's tangled in circular dependencies *)
       match Provider_context.get_backend ctx with
       | Provider_backend.Decl_service { decl = decl_service; _ } ->
         Decl_service_client.rpc_get_fun decl_service name

@@ -45,7 +45,8 @@ let shutdown_client (_ic, oc) =
   try
     Unix.shutdown cli Unix.SHUTDOWN_ALL;
     Out_channel.close oc
-  with _ -> ()
+  with
+  | _ -> ()
 
 let log_and_get_sharedmem_load_telemetry () : Telemetry.t =
   let telemetry = Telemetry.create () in
@@ -186,8 +187,8 @@ let exit_on_exception (exn : exn) ~(stack : Utils.callstack) =
     Exit.exit Exit_status.Uncaught_exception
 
 let with_exit_on_exception f =
-  try f ()
-  with exn ->
+  try f () with
+  | exn ->
     let stack = Utils.Callstack (Printexc.get_backtrace ()) in
     exit_on_exception exn ~stack
 

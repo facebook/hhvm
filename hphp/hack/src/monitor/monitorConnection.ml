@@ -92,8 +92,8 @@ let rec consume_prehandoff_messages
     consume_prehandoff_messages ~timeout ic oc
   | PH.Server_died_config_change ->
     Printf.eprintf
-      ( "Last server exited due to config change. Please re-run client"
-      ^^ " to force discovery of the correct version of the client." );
+      ("Last server exited due to config change. Please re-run client"
+      ^^ " to force discovery of the correct version of the client.");
     Error Server_died
   | PH.Server_died { PH.status; PH.was_oom } ->
     (match (was_oom, status) with
@@ -197,7 +197,8 @@ let connect_to_monitor ~tracker ~timeout config =
                    failure_phase = !phase;
                    failure_reason = Connect_timeout;
                  }))
-      with exn ->
+      with
+      | exn ->
         let e = Exception.wrap exn in
         Error
           (Connect_to_monitor_failure

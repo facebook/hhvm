@@ -53,10 +53,10 @@ let open_file ~predeclare env path content =
     (* Before making any changes, pre-load (into Decl_heap) currently existing
      * declarations so there is always a previous version to compare against,
      * which makes incremental mode perform better. *)
-    ( if predeclare && not (Relative_path.Set.mem env.editor_open_files path)
+    (if predeclare && not (Relative_path.Set.mem env.editor_open_files path)
     then
       let ctx = Provider_utils.ctx_from_server_env env in
-      Decl.make_env ~sh:SharedMem.Uses ctx path );
+      Decl.make_env ~sh:SharedMem.Uses ctx path);
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     File_provider.remove_batch (Relative_path.Set.singleton path);
     File_provider.provide_file path (File_provider.Ide content);
@@ -140,10 +140,10 @@ let edit_file ~predeclare env path (edits : File_content.text_edit list) =
   let new_env =
     try_relativize_path path >>= fun path ->
     (* See similar predeclare in open_file function *)
-    ( if predeclare && not (Relative_path.Set.mem env.editor_open_files path)
+    (if predeclare && not (Relative_path.Set.mem env.editor_open_files path)
     then
       let ctx = Provider_utils.ctx_from_server_env env in
-      Decl.make_env ~sh:SharedMem.Uses ctx path );
+      Decl.make_env ~sh:SharedMem.Uses ctx path);
     ServerBusyStatus.send env ServerCommandTypes.Needs_local_typecheck;
     let file_content =
       match File_provider.get path with
@@ -151,7 +151,8 @@ let edit_file ~predeclare env path (edits : File_content.text_edit list) =
       | Some (File_provider.Disk content) ->
         content
       | None ->
-        (try Sys_utils.cat (Relative_path.to_absolute path) with _ -> "")
+        (try Sys_utils.cat (Relative_path.to_absolute path) with
+        | _ -> "")
     in
     let edited_file_content =
       match File_content.edit_file file_content edits with

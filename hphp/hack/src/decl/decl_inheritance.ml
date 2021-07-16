@@ -94,10 +94,10 @@ let filter_target ~target ~f list =
 let methods ~target ~static child_class_name lin =
   lin
   |> Sequence.map ~f:(fun (mro, cls, subst) ->
-         ( if static then
+         (if static then
            cls.sc_static_methods
          else
-           cls.sc_methods )
+           cls.sc_methods)
          |> filter_target ~target ~f:(fun { sm_name = (_, n); _ } -> n)
          |> Sequence.of_list
          |> Sequence.map
@@ -114,10 +114,10 @@ let methods ~target ~static child_class_name lin =
 let props ~target ~static child_class_name lin =
   lin
   |> Sequence.map ~f:(fun (mro, cls, subst) ->
-         ( if static then
+         (if static then
            cls.sc_sprops
          else
-           cls.sc_props )
+           cls.sc_props)
          |> filter_target ~target ~f:(fun { sp_name = (_, n); _ } -> n)
          |> Sequence.of_list
          |> Sequence.map
@@ -447,8 +447,8 @@ let make_typeconst_enforceability_cache lin =
     |> Sequence.map ~f:(fun (_name, ttc) -> ttc.ttc_enforceable)
   in
   LSTable.make
-    ( lin AllMembers
-    |> Sequence.map ~f:(fun (name, ttc) -> (name, ttc.ttc_enforceable)) )
+    (lin AllMembers
+    |> Sequence.map ~f:(fun (name, ttc) -> (name, ttc.ttc_enforceable)))
     ~get_single_seq
     ~is_canonical:(fun (_pos, enforceable) -> enforceable)
     ~merge:(fun ~earlier ~later ->
@@ -515,7 +515,7 @@ let get_all_typeconsts ctx class_name lin target =
 
 let construct ctx class_name lin =
   lazy
-    ( lin
+    (lin
     |> filter_for_method_lookup
     |> get_shallow_classes_and_substs
          ~target:(SingleMember SN.Members.__construct)
@@ -523,7 +523,7 @@ let construct ctx class_name lin =
     |> Sequence.map ~f:(constructor_elt class_name)
     |> Sequence.fold
          ~init:(None, Inconsistent)
-         ~f:(fold_constructors class_name) )
+         ~f:(fold_constructors class_name))
 
 let make ctx class_name lin get_ancestor =
   let all_methods = get_all_methods ctx class_name lin ~static:false in

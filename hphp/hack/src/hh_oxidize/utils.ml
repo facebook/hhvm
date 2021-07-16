@@ -27,7 +27,8 @@ let with_log_indent f =
     let result = f () in
     log_indent := old_indent;
     result
-  with exn ->
+  with
+  | exn ->
     log_indent := old_indent;
     raise exn
 
@@ -38,8 +39,10 @@ let with_tempfile f =
   try
     f temp_file;
     Unix.unlink temp_file
-  with exn ->
-    (try Unix.unlink temp_file with _ -> ());
+  with
+  | exn ->
+    (try Unix.unlink temp_file with
+    | _ -> ());
     raise exn
 
 let rust_keywords =

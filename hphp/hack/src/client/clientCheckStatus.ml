@@ -22,8 +22,8 @@ let is_stale_msg liveness =
   match liveness with
   | Stale_status ->
     Some
-      ( "(but this may be stale, probably due to"
-      ^ " watchman being unresponsive)\n" )
+      ("(but this may be stale, probably due to"
+      ^ " watchman being unresponsive)\n")
   | Live_status -> None
 
 let warn_unsaved_changes () =
@@ -46,7 +46,7 @@ let go status output_json from error_format max_errors =
     status
   in
   let stale_msg = is_stale_msg liveness in
-  ( if output_json || (not (String.equal from "")) || List.is_empty error_list
+  (if output_json || (not (String.equal from "")) || List.is_empty error_list
   then
     (* this should really go to stdout but we need to adapt the various
      * IDE plugins first *)
@@ -75,7 +75,7 @@ let go status output_json from error_format max_errors =
       (Errors.format_summary error_format error_list dropped_count max_errors)
       ~f:(fun msg -> Printf.printf "%s" msg);
     Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);
-    if has_unsaved_changes then warn_unsaved_changes () );
+    if has_unsaved_changes then warn_unsaved_changes ());
 
   (* don't indicate errors in exit code for warnings; warnings shouldn't break
    * CI *)

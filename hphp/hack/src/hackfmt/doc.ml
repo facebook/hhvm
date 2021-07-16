@@ -50,9 +50,7 @@ type t =
    * the lazy rule applies. The first Doc is for content before the lazy rule
    * becomes active, while the second is for content the lazy rule applies
    * to. *)
-  | WithLazyRule of Rule.kind * t * t
-  (*** Special cases ***)
-
+  | WithLazyRule of Rule.kind * t * t (*** Special cases ***)
   (* Tokens representing part of a string literal spanning multiple lines are
    * split on newlines and passed as a MultilineString. These strings are not
    * indented (since indenting would insert whitespace into the literal). *)
@@ -215,13 +213,13 @@ let dump ?(ignored = false) node =
       | Split -> print "Split"
       | SplitWith cost ->
         print
-          ( "SplitWith "
+          ("SplitWith "
           ^
           match cost with
           | Cost.NoCost -> "Cost.NoCost"
           | Cost.Base -> "Cost.Base"
           | Cost.Moderate -> "Cost.Moderate"
-          | Cost.High -> "Cost.High" )
+          | Cost.High -> "Cost.High")
       | Newline -> print "Newline"
       | BlankLine -> print "BlankLine"
       | Space -> print "Space"
@@ -246,10 +244,10 @@ let dump ?(ignored = false) node =
     and print s = eprintf "%s%s\n" (String.make !indent ' ') s
     and dump_list name nodes =
       print
-        ( if String.equal name "" then
+        (if String.equal name "" then
           "["
         else
-          name ^ " [" );
+          name ^ " [");
       dump_list_items nodes;
       print "]"
     and dump_list_items nodes =

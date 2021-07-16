@@ -92,10 +92,10 @@ let finalize chunk rule ra space comma end_char =
       chunk.rule
   in
   let atom_length atom =
-    ( if atom.leading_space then
+    (if atom.leading_space then
       1
     else
-      0 )
+      0)
     + String.length atom.text
   in
   let length =

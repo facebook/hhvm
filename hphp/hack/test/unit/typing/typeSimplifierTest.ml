@@ -66,10 +66,10 @@ end = struct
       Printf.sprintf
         "Type var %d should %scontain type var %d"
         tv2
-        ( if negate then
+        (if negate then
           "not "
         else
-          "" )
+          "")
         tv1
     in
     assert_bool

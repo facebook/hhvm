@@ -36,14 +36,14 @@ let handler =
                 name
             | _ -> ()
           end;
-          ( if
-            TypecheckerOptions.disallow_partially_abstract_typeconst_definitions
-              (Tast_env.get_tcopt env)
+          (if
+           TypecheckerOptions.disallow_partially_abstract_typeconst_definitions
+             (Tast_env.get_tcopt env)
           then
             match c_tconst_kind with
             | TCPartiallyAbstract _ ->
               Errors.partially_abstract_typeconst_definition p
-            | _ -> () );
+            | _ -> ());
           begin
             match Cls.get_typeconst cls name with
             | None -> ()

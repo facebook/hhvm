@@ -175,9 +175,9 @@ let rec shm_dir_init config ~num_workers = function
     raise Out_of_shared_memory
   | shm_dir :: shm_dirs ->
     let shm_min_avail = config.shm_min_avail in
+    (* For some reason statvfs is segfaulting when the directory doesn't
+     * exist, instead of returning -1 and an errno *)
     begin
-      (* For some reason statvfs is segfaulting when the directory doesn't
-       * exist, instead of returning -1 and an errno *)
       try
         if not (Sys.file_exists shm_dir) then
           raise (Failed_to_use_shm_dir "shm_dir does not exist");
@@ -221,8 +221,8 @@ let rec shm_dir_init config ~num_workers = function
 
 let init config ~num_workers =
   ref_has_done_init := true;
-  try anonymous_init config ~num_workers
-  with Failed_anonymous_memfd_init ->
+  try anonymous_init config ~num_workers with
+  | Failed_anonymous_memfd_init ->
     EventLogger.(
       log_if_initialized (fun () -> sharedmem_failed_anonymous_memfd_init ()));
     Hh_logger.log "Failed to use anonymous memfd init";
@@ -668,9 +668,9 @@ end = struct
         Telemetry.object_
           ~key
           ~value:
-            ( Telemetry.create ()
+            (Telemetry.create ()
             |> Telemetry.int_ ~key:"count" ~value:count_val
-            |> Telemetry.int_ ~key:"bytes" ~value:bytes_val )
+            |> Telemetry.int_ ~key:"bytes" ~value:bytes_val)
           t
       in
       let value = List.fold ~f:make_obj ~init:(Telemetry.create ()) metrics in
@@ -976,10 +976,10 @@ functor
           |> Telemetry.object_
                ~key:(Value.description ^ "__stack")
                ~value:
-                 ( Telemetry.create ()
+                 (Telemetry.create ()
                  |> Telemetry.int_ ~key:"actions" ~value:actions
                  |> Telemetry.int_opt ~key:"bytes" ~value:bytes
-                 |> Telemetry.int_ ~key:"depth" ~value:depth )
+                 |> Telemetry.int_ ~key:"depth" ~value:depth)
 
       let () =
         get_telemetry_list := get_telemetry :: !get_telemetry_list;
@@ -1476,13 +1476,13 @@ struct
     ()
 
   let add x y =
-    ( if !size >= LocalHashtblConfig.capacity then
+    (if !size >= LocalHashtblConfig.capacity then
       (* Remove oldest element - if it's still around. *)
       let elt = Queue.pop queue in
       if Hashtbl.mem cache elt then (
         decr size;
         Hashtbl.remove cache elt
-      ) );
+      ));
 
     (* Add the new element, but bump the size only if it's a new addition. *)
     Queue.push x queue;
@@ -1584,9 +1584,9 @@ struct
       |> Telemetry.object_
            ~key:(Value.description ^ "__local")
            ~value:
-             ( Telemetry.create ()
+             (Telemetry.create ()
              |> Telemetry.int_ ~key:"count" ~value:count
-             |> Telemetry.int_opt ~key:"bytes" ~value:bytes )
+             |> Telemetry.int_opt ~key:"bytes" ~value:bytes)
 
   let () =
     get_telemetry_list := get_telemetry :: !get_telemetry_list;
@@ -1643,16 +1643,16 @@ struct
   let log_hit_rate ~hit =
     Measure.sample
       (Value.description ^ " (cache hit rate)")
-      ( if hit then
+      (if hit then
         1.
       else
-        0. );
+        0.);
     Measure.sample
       "(ALL cache hit rate)"
-      ( if hit then
+      (if hit then
         1.
       else
-        0. )
+        0.)
 
   let get x =
     match Cache.get x with

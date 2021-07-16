@@ -233,7 +233,8 @@ let test_offsets () =
   try
     check ~offset:15 { line = 0; column = 0 };
     false
-  with Failure _ -> true
+  with
+  | Failure _ -> true
 
 let test_large () =
   let len = 100000000 in

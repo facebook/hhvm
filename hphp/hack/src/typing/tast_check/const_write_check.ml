@@ -26,9 +26,9 @@ let check_const_prop env tenv class_ (pos, id) cty =
       if get_ce_const ce then
         if
           not
-            ( Env.get_inside_constructor env
+            (Env.get_inside_constructor env
             && (* expensive call behind short circuiting && *)
-            Tast_env.is_sub_type env (Env.get_self_ty_exn env) cty )
+            Tast_env.is_sub_type env (Env.get_self_ty_exn env) cty)
         then
           Errors.mutating_const_property pos)
 

@@ -96,10 +96,10 @@ let map_constructor dc_substs dc_construct =
   | (Some elt, consistent) ->
     let pty =
       lazy
-        ( elt.elt_origin
+        (elt.elt_origin
         |> find_constructor
         |> fun_elt_to_ty
-        |> apply_substs dc_substs elt.elt_origin )
+        |> apply_substs dc_substs elt.elt_origin)
     in
     let class_elt = element_to_class_elt pty elt in
     (Some class_elt, consistent)

@@ -643,8 +643,8 @@ let default =
 
 let path =
   let dir =
-    try Sys.getenv "HH_LOCALCONF_PATH"
-    with _ -> BuildOptions.system_config_path
+    try Sys.getenv "HH_LOCALCONF_PATH" with
+    | _ -> BuildOptions.system_config_path
   in
   Filename.concat dir "hh.conf"
 

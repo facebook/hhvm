@@ -154,8 +154,8 @@ let rec is_valid_mutable_subscript_expression_target env v =
     && is_valid_mutable_subscript_expression_target env e
   | ((_, ty), _, Obj_get (e, _, _, _)) ->
     is_byval_collection_or_string_or_any_type env ty
-    && ( is_valid_mutable_subscript_expression_target env e
-       || mutating_this_in_ctor env e )
+    && (is_valid_mutable_subscript_expression_target env e
+       || mutating_this_in_ctor env e)
   | _ -> false
 
 let is_valid_append_target _env ty =
@@ -210,8 +210,8 @@ let check_assignment_or_unset_target
   | Array_get _ ->
     if is_assignment then
       fail
-        ( "This object's property is being mutated (used as an lvalue)"
-        ^ "\nSetting non-mutable object properties" )
+        ("This object's property is being mutated (used as an lvalue)"
+        ^ "\nSetting non-mutable object properties")
         p
     else
       fail "Non-mutable argument for `unset`" p

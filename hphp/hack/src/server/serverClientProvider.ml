@@ -291,7 +291,8 @@ let send_push_message_to_client client response =
          Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Push response)
        in
        ()
-     with Unix.Unix_error (Unix.EPIPE, "write", "") -> raise Client_went_away)
+     with
+    | Unix.Unix_error (Unix.EPIPE, "write", "") -> raise Client_went_away)
 
 let read_client_msg ic =
   try
@@ -299,7 +300,8 @@ let read_client_msg ic =
       ~timeout:1
       ~on_timeout:(fun _ -> raise Read_command_timeout)
       ~do_:(fun timeout -> Timeout.input_value ~timeout ic)
-  with End_of_file -> raise Client_went_away
+  with
+  | End_of_file -> raise Client_went_away
 
 let client_has_message = function
   | Non_persistent_client _ -> true
@@ -358,8 +360,8 @@ let ping = function
   | Non_persistent_client { oc; _ } ->
     let fd = Unix.descr_of_out_channel oc in
     let (_ : int) =
-      try Marshal_tools.to_fd_with_preamble fd ServerCommandTypes.Ping
-      with _ -> raise Client_went_away
+      try Marshal_tools.to_fd_with_preamble fd ServerCommandTypes.Ping with
+      | _ -> raise Client_went_away
     in
     ()
   | Persistent_client _ -> ()

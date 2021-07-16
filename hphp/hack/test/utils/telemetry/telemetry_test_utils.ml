@@ -58,4 +58,5 @@ let is_absent (telemetry : Telemetry.t) (path : string) : bool =
   try
     let (_ : Hh_json.json) = value_exn telemetry path in
     false
-  with _ -> true
+  with
+  | _ -> true

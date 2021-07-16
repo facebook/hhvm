@@ -39,14 +39,15 @@ let start_server_daemon
          let old = log_link ^ ".old" in
          if Sys.file_exists old then Sys.rename old (old_log_name 1);
          if Sys.file_exists log_link then Sys.rename log_link old
-       with _ -> ());
+       with
+      | _ -> ());
       let log_file = Sys_utils.make_link_of_timestamped log_link in
       Hh_logger.log
         "About to spawn typechecker daemon. Logs will go to %s\n%!"
-        ( if Sys.win32 then
+        (if Sys.win32 then
           log_file
         else
-          log_link );
+          log_link);
       let fd = Daemon.fd_of_path log_file in
       (in_fd, fd, fd)
     ) else (
@@ -148,17 +149,17 @@ module HhServerConfig = struct
     | _ -> start_hh_server ~informant_managed options
 
   let kill_server process =
-    try Unix.kill process.ServerProcess.pid Sys.sigusr2
-    with _ ->
+    try Unix.kill process.ServerProcess.pid Sys.sigusr2 with
+    | _ ->
       Hh_logger.log
         "Failed to send sigusr2 signal to server process. Trying violently";
-      (try Unix.kill process.ServerProcess.pid Sys.sigkill
-       with e ->
-         let stack = Printexc.get_backtrace () in
-         Hh_logger.exc
-           ~prefix:"Failed to violently kill server process: "
-           ~stack
-           e)
+      (try Unix.kill process.ServerProcess.pid Sys.sigkill with
+      | e ->
+        let stack = Printexc.get_backtrace () in
+        Hh_logger.exc
+          ~prefix:"Failed to violently kill server process: "
+          ~stack
+          e)
 
   let rec wait_for_server_exit process start_t =
     let exit_status =

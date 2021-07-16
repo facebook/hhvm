@@ -41,10 +41,10 @@ let check_callconv_expr ((_, p, _) as e) =
     match expr_ with
     | Lvar (_, x)
       when not
-             ( String.equal (Local_id.to_string x) SN.SpecialIdents.this
+             (String.equal (Local_id.to_string x) SN.SpecialIdents.this
              || String.equal
                   (Local_id.to_string x)
-                  SN.SpecialIdents.dollardollar ) ->
+                  SN.SpecialIdents.dollardollar) ->
       ()
     | Array_get (e2, Some _) -> check_callconv_expr_helper e2
     | _ -> Errors.inout_argument_bad_expr p

@@ -23,4 +23,5 @@ let rec static_string_exn = function
   | (_, p, _) -> raise (Not_static_exn p)
 
 let static_string (expr : Nast.expr) =
-  (try Ok (static_string_exn expr) with Not_static_exn p -> Error p)
+  try Ok (static_string_exn expr) with
+  | Not_static_exn p -> Error p

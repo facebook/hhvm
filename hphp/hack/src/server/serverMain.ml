@@ -109,10 +109,10 @@ module Program = struct
       && Option.is_some (ServerArgs.save_filename genv.options)
     in
     exit
-      ( if has_errors && not is_saving_state_and_ignoring_errors then
+      (if has_errors && not is_saving_state_and_ignoring_errors then
         1
       else
-        0 )
+        0)
 
   (* filter and relativize updated file paths *)
   let process_updates genv updates =
@@ -128,7 +128,7 @@ module Program = struct
     let config_in_updates =
       Relative_path.Set.mem updates ServerConfig.filename
     in
-    ( if config_in_updates then
+    (if config_in_updates then
       let (new_config, _) =
         ServerConfig.(load ~silent:false filename genv.options)
       in
@@ -140,7 +140,7 @@ module Program = struct
 
         (* TODO: Notify the server monitor directly about this. *)
         Exit.exit Exit_status.Hhconfig_changed
-      ) );
+      ));
     to_recheck
 end
 
@@ -181,8 +181,8 @@ let query_notifier genv env query_kind start_time =
     | `Sync ->
       ( env,
         begin
-          try Notifier_synchronous_changes (genv.notifier ())
-          with Watchman.Timeout -> Notifier_unavailable
+          try Notifier_synchronous_changes (genv.notifier ()) with
+          | Watchman.Timeout -> Notifier_unavailable
         end )
     | `Async ->
       ( { env with last_notifier_check_time = start_time },
@@ -309,7 +309,8 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
         try
           ClientProvider.ping client;
           true
-        with ClientProvider.Client_went_away -> false
+        with
+        | ClientProvider.Client_went_away -> false
       in
       if still_there then (
         Hh_logger.log "Restarting full check due to %s" reason;
@@ -338,10 +339,10 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
   let full_check =
     ServerEnv.is_full_check_started env.full_check_status
     (* Prioritize building search index over full rechecks. *)
-    && ( Queue.is_empty SearchServiceRunner.SearchServiceRunner.queue
+    && (Queue.is_empty SearchServiceRunner.SearchServiceRunner.queue
        (* Unless there is something actively waiting for this *)
        || Option.is_some
-            env.nonpersistent_client_pending_command_needs_full_check )
+            env.nonpersistent_client_pending_command_needs_full_check)
   in
   let lazy_check =
     (not @@ Relative_path.Set.is_empty env.ide_needs_parsing) && is_idle
@@ -445,7 +446,7 @@ let main_loop_command_handler client_kind client result =
         (* We should not accept any new clients until this is cleared *)
         assert (
           Option.is_none
-            env.nonpersistent_client_pending_command_needs_full_check );
+            env.nonpersistent_client_pending_command_needs_full_check);
         {
           env with
           nonpersistent_client_pending_command_needs_full_check =
@@ -455,8 +456,7 @@ let main_loop_command_handler client_kind client result =
         (* Persistent client will not send any further commands until previous one
          * is handled. *)
         assert (
-          Option.is_none env.persistent_client_pending_command_needs_full_check
-        );
+          Option.is_none env.persistent_client_pending_command_needs_full_check);
         {
           env with
           persistent_client_pending_command_needs_full_check =
@@ -541,9 +541,10 @@ let push_diagnostics genv env =
           (try
              ClientProvider.send_push_message_to_client client res;
              (env, "sent push message")
-           with ClientProvider.Client_went_away ->
-             (* Leaving cleanup of this condition to handled_connection function *)
-             (env, "Client_went_away"))
+           with
+          | ClientProvider.Client_went_away ->
+            (* Leaving cleanup of this condition to handled_connection function *)
+            (env, "Client_went_away"))
 
 let serve_one_iteration genv env client_provider =
   let (env, recheck_id) = generate_and_update_recheck_id env in
@@ -630,10 +631,10 @@ let serve_one_iteration genv env client_provider =
       env with
       last_recheck_loop_stats = stats;
       last_recheck_loop_stats_for_actual_work =
-        ( if did_work then
+        (if did_work then
           Some stats
         else
-          env.last_recheck_loop_stats_for_actual_work );
+          env.last_recheck_loop_stats_for_actual_work);
     }
   in
   let (env, diag_reason) = push_diagnostics genv env in
@@ -694,7 +695,8 @@ let serve_one_iteration genv env client_provider =
           in
           HackEventLogger.handled_connection t_start_recheck;
           env
-        with exn ->
+        with
+        | exn ->
           let e = Exception.wrap exn in
           HackEventLogger.handle_connection_exception "outer" e;
           Hh_logger.log
@@ -734,7 +736,8 @@ let serve_one_iteration genv env client_provider =
         in
         HackEventLogger.handled_persistent_connection t_start_recheck;
         env
-      with exn ->
+      with
+      | exn ->
         let e = Exception.wrap exn in
         HackEventLogger.handle_persistent_connection_exception
           "outer"
@@ -851,8 +854,8 @@ let priority_client_interrupt_handler genv client_provider :
          with
         | ServerUtils.Needs_full_recheck { reason; _ } ->
           failwith
-            ( "unexpected command needing full recheck in priority channel: "
-            ^ reason )
+            ("unexpected command needing full recheck in priority channel: "
+            ^ reason)
         | ServerUtils.Needs_writes { reason; _ } ->
           failwith
             ("unexpected command needing writes in priority channel: " ^ reason)
@@ -907,7 +910,7 @@ let persistent_client_interrupt_handler genv :
       (* This should not be possible, because persistent client will not send
        * the next command before receiving results from the previous one. *)
       assert (
-        Option.is_none env.persistent_client_pending_command_needs_full_check );
+        Option.is_none env.persistent_client_pending_command_needs_full_check);
       ( {
           env with
           persistent_client_pending_command_needs_full_check =
@@ -1145,8 +1148,8 @@ let num_workers options local_config =
           a
         else (
           Hh_logger.log
-            ( "Warning: both an argument --max-procs and a local config "
-            ^^ "for max workers are given. Choosing minimum of the two." );
+            ("Warning: both an argument --max-procs and a local config "
+            ^^ "for max workers are given. Choosing minimum of the two.");
           min a b
         ))
       (ServerArgs.max_procs options)
@@ -1203,8 +1206,10 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   let server_receipt_to_monitor_file =
     ServerFiles.server_receipt_to_monitor_file pid
   in
-  (try Unix.unlink server_finale_file with _ -> ());
-  (try Unix.unlink server_receipt_to_monitor_file with _ -> ());
+  (try Unix.unlink server_finale_file with
+  | _ -> ());
+  (try Unix.unlink server_receipt_to_monitor_file with
+  | _ -> ());
   ServerCommandTypesUtils.write_progress_file
     ~server_progress_file
     ~server_progress:
@@ -1215,7 +1220,8 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       };
   Exit.add_hook_upon_clean_exit (fun finale_data ->
       begin
-        try Unix.unlink server_receipt_to_monitor_file with _ -> ()
+        try Unix.unlink server_receipt_to_monitor_file with
+        | _ -> ()
       end;
       begin
         try
@@ -1223,7 +1229,8 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
               let oc = Stdlib.open_out_bin server_finale_file in
               Marshal.to_channel oc finale_data [];
               Stdlib.close_out oc)
-        with _ -> ()
+        with
+        | _ -> ()
       end;
       begin
         try
@@ -1235,7 +1242,8 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
                 server_progress = "shutting down";
                 server_timestamp = Unix.gettimeofday ();
               }
-        with _ -> ()
+        with
+        | _ -> ()
       end;
       ());
 

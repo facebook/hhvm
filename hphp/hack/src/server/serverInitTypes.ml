@@ -63,9 +63,9 @@ let load_state_error_to_verbose_string (err : load_state_error) :
     {
       message =
         Printf.sprintf
-          ( "Could not load saved-state from DevX infrastructure. "
+          ("Could not load saved-state from DevX infrastructure. "
           ^^ "The underlying error message was: %s\n\n"
-          ^^ "The accompanying debug details are: %s" )
+          ^^ "The accompanying debug details are: %s")
           (Saved_state_loader.long_user_message_of_error err)
           (Saved_state_loader.debug_details_of_error err);
       auto_retry = false;

@@ -262,7 +262,8 @@ let rec dispatch_loop handlers =
         try
           Caml.really_input Caml.stdin body 0 bytes;
           (header, Bytes.to_string body, file)
-        with exc ->
+        with
+        | exc ->
           fail_daemon
             file
             ("Exception reading message body: " ^ Caml.Printexc.to_string exc)
@@ -286,15 +287,15 @@ let rec dispatch_loop handlers =
       | "facts" -> handlers.facts header body
       | "parse" -> handlers.parse header body
       | _ -> fail_daemon None ("Unhandled message type '" ^ msg_type ^ "'"));
-      (try if log_hackc_mem_stats then log_peak_mem file msg_type
-       with exc ->
-         let stack = Caml.Printexc.get_backtrace () in
-         Printf.eprintf "%s\n" stack;
-         fail_daemon
-           file
-           ( "Exception reading message body: "
-           ^ Caml.Printexc.to_string exc
-           ^ stack ));
+      (try if log_hackc_mem_stats then log_peak_mem file msg_type with
+      | exc ->
+        let stack = Caml.Printexc.get_backtrace () in
+        Printf.eprintf "%s\n" stack;
+        fail_daemon
+          file
+          ("Exception reading message body: "
+          ^ Caml.Printexc.to_string exc
+          ^ stack));
       dispatch_loop handlers))
 
 let print_debug_time_info filename debug_time =
@@ -376,9 +377,9 @@ let print_output
           Hh_json.int_ @@ int_of_float @@ (t *. 1000000.0)
         in
         ("parsing_time", json_microsec !(debug_time.parsing_t))
-        :: ("codegen_time", json_microsec !(debug_time.codegen_t))
-        :: ("printing_time", json_microsec !(debug_time.printing_t))
-        :: msg
+        ::
+        ("codegen_time", json_microsec !(debug_time.codegen_t))
+        :: ("printing_time", json_microsec !(debug_time.printing_t)) :: msg
       | None -> msg
     in
     write Hh_json.[json_to_string @@ JSON_Object msg];
@@ -402,27 +403,27 @@ let do_compile
         re_config_jsons = List.rev config_jsons;
         re_config_list = compiler_options.config_list;
         re_flags =
-          ( ( if is_systemlib then
-              1
-            else
-              0 )
-          lor ( if is_file_path_for_evaled_code filename then
+          ((if is_systemlib then
+             1
+           else
+             0)
+          lor (if is_file_path_for_evaled_code filename then
                 2
               else
-                0 )
-          lor ( if compiler_options.for_debugger_eval then
+                0)
+          lor (if compiler_options.for_debugger_eval then
                 4
               else
-                0 )
-          lor ( if compiler_options.dump_symbol_refs then
+                0)
+          lor (if compiler_options.dump_symbol_refs then
                 8
               else
-                0 )
+                0)
           lor
           if compiler_options.disable_toplevel_elaboration then
             16
           else
-            0 );
+            0);
       }
   in
   match Compile_ffi.rust_from_text_ffi env rust_output_config source_text with
@@ -521,7 +522,8 @@ let process_single_source_unit
         rust_output_config
         filename
         (Full_fidelity_source_text.make filename source_text)
-  with exc ->
+  with
+  | exc ->
     let stack = Caml.Printexc.get_backtrace () in
     if compiler_options.log_stats then
       log_fail compiler_options filename exc ~stack;
@@ -537,23 +539,23 @@ let desugar_and_print_expr_trees
         re_config_jsons = List.rev config_jsons;
         re_config_list = compiler_options.config_list;
         re_flags =
-          ( ( if is_file_path_for_evaled_code rel_path then
-              2
-            else
-              0 )
-          lor ( if compiler_options.for_debugger_eval then
+          ((if is_file_path_for_evaled_code rel_path then
+             2
+           else
+             0)
+          lor (if compiler_options.for_debugger_eval then
                 4
               else
-                0 )
-          lor ( if compiler_options.dump_symbol_refs then
+                0)
+          lor (if compiler_options.dump_symbol_refs then
                 8
               else
-                0 )
+                0)
           lor
           if compiler_options.disable_toplevel_elaboration then
             16
           else
-            0 );
+            0);
       }
   in
   Compile_ffi.desugar_and_print_expr_trees env
@@ -575,7 +577,9 @@ let decl_and_run_mode compiler_options =
       let get_config_jsons () = List.filter_map ~f:(fun x -> x) !config_jsons in
       let ini_config_json : string option =
         Option.map
-          ~f:(fun path -> (try Sys_utils.cat path with _ -> ""))
+          ~f:(fun path ->
+            try Sys_utils.cat path with
+            | _ -> "")
           compiler_options.config_file
       in
       add_config ini_config_json;
@@ -623,10 +627,10 @@ let decl_and_run_mode compiler_options =
             output
             Compile_ffi.{ include_header = true; output_file = None }
             filename
-            ( if Hhbc_options.log_extern_compiler_perf hhbc_options then
+            (if Hhbc_options.log_extern_compiler_perf hhbc_options then
               Some debug_time
             else
-              None )
+              None)
             log_config_json
             (get_config_jsons ())
             compiler_options.config_list
@@ -800,11 +804,11 @@ let decl_and_run_mode compiler_options =
         if compiler_options.dump_config then
           Printf.printf
             "===CONFIG===\n%s\n\n%!"
-            ( Hhbc_options.apply_config_overrides_statelessly
-                compiler_options.config_list
-                (get_config_jsons ())
+            (Hhbc_options.apply_config_overrides_statelessly
+               compiler_options.config_list
+               (get_config_jsons ())
             |> fst
-            |> Hhbc_options.to_string );
+            |> Hhbc_options.to_string);
         if
           (not (String.is_empty compiler_options.filename))
           && Sys.is_directory compiler_options.filename
@@ -844,7 +848,8 @@ let () =
     ignore (handle : SharedMem.handle);
     let options = parse_options () in
     main_hack options
-  with exc ->
+  with
+  | exc ->
     let stack = Caml.Printexc.get_backtrace () in
     prerr_endline stack;
     die (Caml.Printexc.to_string exc)

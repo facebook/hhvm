@@ -135,7 +135,8 @@ let get
       make_lazy_class_type ctx class_name
     else
       make_eager_class_type ctx class_name declare_folded_class_in_file
-  with Deferred_decl.Defer d ->
+  with
+  | Deferred_decl.Defer d ->
     Deferred_decl.add_deferment ~d;
     None
 

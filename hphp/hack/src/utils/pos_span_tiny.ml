@@ -172,12 +172,12 @@ let make : pos_start:File_pos_large.t -> pos_end:File_pos_large.t -> t option =
         None
       else
         Some
-          ( (start_bol lsl start_beginning_of_line_offset)
+          ((start_bol lsl start_beginning_of_line_offset)
           lor (start_line lsl start_line_number_offset)
           lor (start_col lsl start_column_number_offset)
           lor (bol_increment lsl beginning_of_line_increment_offset)
           lor (line_increment lsl line_number_increment_offset)
-          lor (width lsl width_offset) )
+          lor (width lsl width_offset))
 
 let as_large_span : t -> File_pos_large.t * File_pos_large.t =
  fun span ->

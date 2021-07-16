@@ -82,7 +82,8 @@ let internal_run_daemon' (oc : queue_message Daemon.out_channel) : unit =
             let timestamped_json = internal_read_message reader in
             Queue.push timestamped_json messages_to_send;
             true
-          with e ->
+          with
+          | e ->
             let message = Printexc.to_string e in
             let stack = Printexc.get_backtrace () in
             let edata = { Marshal_tools.message; stack } in
@@ -113,8 +114,8 @@ let internal_run_daemon' (oc : queue_message Daemon.out_channel) : unit =
 let internal_run_daemon
     (_dummy_param : unit) (_ic, (oc : queue_message Daemon.out_channel)) =
   Printexc.record_backtrace true;
-  try internal_run_daemon' oc
-  with e ->
+  try internal_run_daemon' oc with
+  | e ->
     (* An exception that's gotten here is not simply a parse error, but
        something else, so we should terminate the daemon at this point. *)
     let message = Printexc.to_string e in
@@ -125,10 +126,11 @@ let internal_run_daemon
          out_fd
          (Fatal_exception { Marshal_tools.message; stack })
        |> ignore
-     with _ ->
-       (* There may be a broken pipe, for example. We should just give up on
-          reporting the error. *)
-       ())
+     with
+    | _ ->
+      (* There may be a broken pipe, for example. We should just give up on
+         reporting the error. *)
+      ())
 
 let internal_entry_point : (unit, unit, queue_message) Daemon.entry =
   Daemon.register_entry_point "Jsonrpc" internal_run_daemon
@@ -182,16 +184,16 @@ let rec read_messages_into_queue_no_wait (message_queue : queue) : unit Lwt.t =
     if is_readable then
       (* We're expecting this not to block because we just checked
          to make sure that there's something there. *)
-        let%lwt message = read_single_message_into_queue_wait message_queue in
-        (* Now read any more messages that might be queued up. Only try to read more
-           messages if the daemon is still available to read from. Otherwise, we may
-           infinite loop as a result of `Unix.select` returning that a file
-           descriptor is available to read on. *)
-        match message with
-        | Fatal_exception _ -> Lwt.return_unit
-        | _ ->
-          let%lwt () = read_messages_into_queue_no_wait message_queue in
-          Lwt.return_unit
+      let%lwt message = read_single_message_into_queue_wait message_queue in
+      (* Now read any more messages that might be queued up. Only try to read more
+         messages if the daemon is still available to read from. Otherwise, we may
+         infinite loop as a result of `Unix.select` returning that a file
+         descriptor is available to read on. *)
+      match message with
+      | Fatal_exception _ -> Lwt.return_unit
+      | _ ->
+        let%lwt () = read_messages_into_queue_no_wait message_queue in
+        Lwt.return_unit
     else
       Lwt.return_unit
   in

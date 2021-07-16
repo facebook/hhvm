@@ -119,7 +119,8 @@ let is_directory x =
     match get_file x root with
     | Directory _ -> true
     | Actual_file_with_contents _ -> false
-  with No_such_file_or_directory _ -> false
+  with
+  | No_such_file_or_directory _ -> false
 
 let cat x = Counters.count Counters.Category.Disk_cat @@ fun () -> get x
 
@@ -129,7 +130,8 @@ let file_exists x =
     | Actual_file_with_contents _
     | Directory _ ->
       true
-  with No_such_file_or_directory _ -> false
+  with
+  | No_such_file_or_directory _ -> false
 
 let write_file ~file ~contents = set ~create_parent_dirs:false file contents
 
@@ -146,7 +148,8 @@ let rm_dir_tree path =
     try
       let dir = get_dir (Filename.dirname path) root in
       Hashtbl.remove dir (Filename.basename path)
-    with No_such_file_or_directory _ ->
+    with
+    | No_such_file_or_directory _ ->
       (* File already doesn't exist; ignore. *)
       ()
 

@@ -56,7 +56,7 @@ let to_string (error : Errors.finalized_error) : string =
       let indent = (Tty.Normal Tty.Default, "  ") in
       List.concat_map
         ~f:(fun msg ->
-          (indent :: format_msg (Tty.Normal Tty.Red) (Tty.Normal Tty.Green) msg)
+          indent :: format_msg (Tty.Normal Tty.Red) (Tty.Normal Tty.Green) msg
           @ [newline])
         msgl
     in

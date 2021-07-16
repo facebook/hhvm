@@ -116,10 +116,10 @@ let go ctx ast result =
       |> List.filter_map ~f:(Decl_provider.get_class ctx)
       (* Find all inherited methods with the same name. *)
       |> List.filter_map ~f:(fun cls ->
-             ( if is_static then
+             (if is_static then
                Cls.get_smethod
              else
-               Cls.get_method )
+               Cls.get_method)
                cls
                method_name)
       (* It'd be nice to take the "earliest" method in the linearization,
@@ -223,7 +223,8 @@ let get_definition_cst_node_from_pos ctx entry kind pos =
         | (SymbolDefinition.Typedef, SyntaxKind.SimpleTypeSpecifier) ->
           true
         | _ -> false)
-  with _ -> None
+  with
+  | _ -> None
 
 let get_definition_cst_node_ctx
     ~(ctx : Provider_context.t)

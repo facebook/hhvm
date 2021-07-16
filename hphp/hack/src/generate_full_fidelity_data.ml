@@ -613,8 +613,8 @@ where
     Full_fidelity_schema.make_template_file
       ~transformations:[{ pattern = "MATCH_ARMS"; func = match_arm }]
       ~filename:
-        ( full_fidelity_path_prefix
-        ^ "syntax_by_ref/syntax_serialize_generated.rs" )
+        (full_fidelity_path_prefix
+        ^ "syntax_by_ref/syntax_serialize_generated.rs")
       ~template
       ()
 end
@@ -744,8 +744,8 @@ ITER_CHILDREN
     Full_fidelity_schema.make_template_file
       ~transformations:[{ pattern = "ITER_CHILDREN"; func = to_iter_children }]
       ~filename:
-        ( full_fidelity_path_prefix
-        ^ "syntax_by_ref/syntax_children_iterator_generated.rs" )
+        (full_fidelity_path_prefix
+        ^ "syntax_by_ref/syntax_children_iterator_generated.rs")
       ~template:full_fidelity_syntax_template
       ()
 end
@@ -796,8 +796,8 @@ SYNTAX_CONSTRUCTORS }
       ~transformations:
         [{ pattern = "SYNTAX_CONSTRUCTORS"; func = to_syntax_constructors }]
       ~filename:
-        ( full_fidelity_path_prefix
-        ^ "syntax_by_ref/syntax_type_impl_generated.rs" )
+        (full_fidelity_path_prefix
+        ^ "syntax_by_ref/syntax_type_impl_generated.rs")
       ~template:full_fidelity_syntax_template
       ()
 end
@@ -1608,8 +1608,8 @@ end
     Full_fidelity_schema.make_template_file
       ~transformations:[]
       ~filename:
-        ( full_fidelity_path_prefix
-        ^ "smart_constructors/syntaxSmartConstructors.ml" )
+        (full_fidelity_path_prefix
+        ^ "smart_constructors/syntaxSmartConstructors.ml")
       ~template:full_fidelity_syntax_smart_constructors_template
       ()
 end
@@ -1909,8 +1909,8 @@ CONSTRUCTOR_METHODS}
       ~transformations:
         [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
       ~filename:
-        ( full_fidelity_path_prefix
-        ^ "../facts/facts_smart_constructors_generated.rs" )
+        (full_fidelity_path_prefix
+        ^ "../facts/facts_smart_constructors_generated.rs")
       ~template:facts_smart_constructors_template
       ()
 end
@@ -1998,8 +1998,8 @@ CONSTRUCTOR_METHODS}
       ~transformations:
         [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
       ~filename:
-        ( full_fidelity_path_prefix
-        ^ "../decl/direct_decl_smart_constructors_generated.rs" )
+        (full_fidelity_path_prefix
+        ^ "../decl/direct_decl_smart_constructors_generated.rs")
       ~template:direct_decl_smart_constructors_template
       ()
 end
@@ -2055,8 +2055,8 @@ end
     Full_fidelity_schema.make_template_file
       ~transformations:[]
       ~filename:
-        ( full_fidelity_path_prefix
-        ^ "smart_constructors/smartConstructorsWrappers.ml" )
+        (full_fidelity_path_prefix
+        ^ "smart_constructors/smartConstructorsWrappers.ml")
       ~template:full_fidelity_smart_constructors_wrappers_template
       ()
 end
@@ -2800,7 +2800,10 @@ module GenerateFFTokenKind = struct
     let pad str = String.make (String.length str) ' ' in
     let is_only_spaces str = String.equal str (pad str) in
     let make_same_length str1 str2 =
-      let blanks n = (try String.make n ' ' with Invalid_argument _ -> "") in
+      let blanks n =
+        try String.make n ' ' with
+        | Invalid_argument _ -> ""
+      in
       let (len1, len2) = (String.length str1, String.length str2) in
       let str1 = str1 ^ blanks (len2 - len1) in
       let str2 = str2 ^ blanks (len1 - len2) in

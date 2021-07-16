@@ -176,7 +176,7 @@ let process_enum_decl ctx source_map enm (all_decls, progress) =
       add_enum_defn_fact ctx source_map enm enum_id enum_data enumerators prog
     in
     let prog = process_doc_comment enm.c_doc_comment enum_decl_ref prog in
-    (all_decls @ (enum_decl_ref :: decl_refs), prog)
+    (all_decls @ enum_decl_ref :: decl_refs, prog)
 
 let process_enum_xref symbol_name pos (xrefs, prog) =
   process_xref
@@ -347,7 +347,8 @@ let process_attribute_xref ctx attr opt_info (xrefs, prog) =
       | None -> (xrefs, prog)
       | Some con_pred_types ->
         process_container_xref con_pred_types attr.name attr.pos (xrefs, prog)
-    with e ->
+    with
+    | e ->
       Hh_logger.log
         "WARNING: error processing reference to attribute %s\n: %s\n"
         attr.name

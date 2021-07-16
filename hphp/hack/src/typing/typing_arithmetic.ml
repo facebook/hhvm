@@ -407,7 +407,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       let rec strict_equatable env ty1 ty2 =
         strict_allowable_types ty1
         && strict_allowable_types ty2
-        && ( same_type env ty1 ty2
+        && (same_type env ty1 ty2
            ||
            (* Cover the case where the containers have a dynamic parameter,
               since `same_type` would evaluate to false.
@@ -424,7 +424,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
               with
              | List.Or_unequal_lengths.Ok all_true -> all_true
              | _ -> false)
-           | _ -> false )
+           | _ -> false)
       in
       if
         TypecheckerOptions.strict_value_equality (Env.get_tcopt env)
@@ -474,19 +474,17 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
      * num | string | DateTime | DateTimeImmutable | dynamic. Better union
      * handling would be an improvement.
      *)
-    ( if
-      (not contains_any)
-      && not
-           ( both_sub
-               (Typing_make_type.union (Reason.Rcomp p) [ty_num; ty_dynamic])
-           || both_sub
-                (Typing_make_type.union
-                   (Reason.Rcomp p)
-                   [ty_string; ty_dynamic])
-           || both_sub
-                (Typing_make_type.union
-                   (Reason.Rcomp p)
-                   [ty_datetime; ty_datetimeimmutable; ty_dynamic]) )
+    (if
+     (not contains_any)
+     && not
+          (both_sub
+             (Typing_make_type.union (Reason.Rcomp p) [ty_num; ty_dynamic])
+          || both_sub
+               (Typing_make_type.union (Reason.Rcomp p) [ty_string; ty_dynamic])
+          || both_sub
+               (Typing_make_type.union
+                  (Reason.Rcomp p)
+                  [ty_datetime; ty_datetimeimmutable; ty_dynamic]))
     then
       let ty1 = Typing_expand.fully_expand env ty1 in
       let ty2 = Typing_expand.fully_expand env ty2 in
@@ -495,7 +493,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       Errors.comparison_invalid_types
         p
         (Reason.to_string ("This is " ^ tys1) (get_reason ty1))
-        (Reason.to_string ("This is " ^ tys2) (get_reason ty2)) );
+        (Reason.to_string ("This is " ^ tys2) (get_reason ty2)));
     make_result env te1 None te2 None ty_result
   | Ast_defs.Dot ->
     (* A bit weird, this one:

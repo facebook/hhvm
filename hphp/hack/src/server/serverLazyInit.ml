@@ -29,7 +29,6 @@ open Reordered_argument_collections
 open SearchServiceRunner
 open ServerCheckUtils
 open ServerEnv
-open ServerInitCommon
 open ServerInitTypes
 open String_utils
 module SLC = ServerLocalConfig
@@ -457,7 +456,7 @@ let naming_from_saved_state
       in
       Naming_table.fold old_hack_names ~init:() ~f:(fun k info () ->
           Naming_global.ndecl_file_skip_if_already_bound ctx k info);
-      hh_log_heap ()
+      ServerInitCommon.hh_log_heap ()
   end;
   HackEventLogger.naming_from_saved_state_end t;
   Hh_logger.log_duration "NAMING_FROM_SAVED_STATE_END" t
@@ -800,7 +799,7 @@ let type_check_dirty
            ~value:(Relative_path.Set.cardinal to_recheck)
     in
     let result =
-      type_check
+      ServerInitCommon.type_check
         genv
         env
         files_to_check
@@ -862,7 +861,7 @@ let initialize_naming_table
         Some (List.length fnl),
         Unix.gettimeofday () )
     | None ->
-      let (get_next, t) = indexing genv in
+      let (get_next, t) = ServerInitCommon.indexing genv in
       (get_next, None, t)
   in
   (* The full_fidelity_parser currently works better in both memory and time
@@ -871,7 +870,7 @@ let initialize_naming_table
   (* full init - too many files to trace all of them *)
   let trace = false in
   let (env, t) =
-    parsing
+    ServerInitCommon.parsing
       ~lazy_parse
       genv
       env
@@ -887,7 +886,7 @@ let initialize_naming_table
   else
     let ctx = Provider_utils.ctx_from_server_env env in
     let t =
-      update_files
+      ServerInitCommon.update_files
         genv
         env.naming_table
         ctx
@@ -895,7 +894,7 @@ let initialize_naming_table
         ~profile_label:"update file deps"
         ~profiling
     in
-    naming env t ~profile_label:"naming" ~profiling
+    ServerInitCommon.naming env t ~profile_label:"naming" ~profiling
 
 let write_symbol_info_init
     (genv : ServerEnv.genv)
@@ -910,7 +909,7 @@ let write_symbol_info_init
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   let t =
-    update_files
+    ServerInitCommon.update_files
       genv
       env.naming_table
       ctx
@@ -918,7 +917,9 @@ let write_symbol_info_init
       ~profile_label:"update file deps"
       ~profiling
   in
-  let (env, t) = naming env t ~profile_label:"naming" ~profiling in
+  let (env, t) =
+    ServerInitCommon.naming env t ~profile_label:"naming" ~profiling
+  in
   let index_paths = env.swriteopt.symbol_write_index_paths in
   let index_paths_file = env.swriteopt.symbol_write_index_paths_file in
   let files =
@@ -1029,7 +1030,7 @@ let full_init
       else
         env
     in
-    type_check
+    ServerInitCommon.type_check
       genv
       env
       fnl
@@ -1041,13 +1042,18 @@ let full_init
   let run_experiment () =
     let ctx = Provider_utils.ctx_from_server_env env in
     let t_full_init = Unix.gettimeofday () in
-    let fast = Direct_decl_service.go ctx genv.workers (fst (indexing genv)) in
+    let fast =
+      Direct_decl_service.go
+        ctx
+        genv.workers
+        (fst (ServerInitCommon.indexing genv))
+    in
     let t = Hh_logger.log_duration "parsing decl" t_full_init in
     let naming_table = Naming_table.update_many env.naming_table fast in
     let t = Hh_logger.log_duration "updating naming table" t in
     let env = { env with naming_table } in
     let t =
-      update_files
+      ServerInitCommon.update_files
         genv
         env.naming_table
         ctx
@@ -1055,14 +1061,16 @@ let full_init
         ~profile_label:"update files"
         ~profiling
     in
-    let (env, t) = naming env t ~profile_label:"naming" ~profiling in
+    let (env, t) =
+      ServerInitCommon.naming env t ~profile_label:"naming" ~profiling
+    in
     let fnl = Relative_path.Map.keys fast in
     if not is_check_mode then
       SearchServiceRunner.update_fileinfo_map
         env.naming_table
         ~source:SearchUtils.Init;
     let type_check_result =
-      type_check
+      ServerInitCommon.type_check
         genv
         env
         fnl
@@ -1220,7 +1228,7 @@ let post_saved_state_initialization
   in
   let next = MultiWorker.next genv.workers parsing_files_list ?max_size in
   let (env, t) =
-    parsing
+    ServerInitCommon.parsing
       genv
       env
       ~lazy_parse:true
@@ -1236,7 +1244,7 @@ let post_saved_state_initialization
     ~source:SearchUtils.TypeChecker;
   let ctx = Provider_utils.ctx_from_server_env env in
   let t =
-    update_files
+    ServerInitCommon.update_files
       genv
       env.naming_table
       ctx
@@ -1254,7 +1262,9 @@ let post_saved_state_initialization
       ~profiling
   in
   (* Do global naming on all dirty files *)
-  let (env, t) = naming env t ~profile_label:"naming dirty files" ~profiling in
+  let (env, t) =
+    ServerInitCommon.naming env t ~profile_label:"naming dirty files" ~profiling
+  in
 
   (* Add all files from fast to the files_info object *)
   let fast = Naming_table.to_fast env.naming_table in
@@ -1310,7 +1320,7 @@ let post_saved_state_initialization
   in
   (* Update the fileinfo object's dependencies now that we have full fast *)
   let t =
-    update_files
+    ServerInitCommon.update_files
       genv
       env.naming_table
       ctx

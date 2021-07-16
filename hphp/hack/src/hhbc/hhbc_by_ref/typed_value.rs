@@ -56,21 +56,6 @@ pub enum TypedValue<'arena> {
     Dict(&'arena [(TypedValue<'arena>, TypedValue<'arena>)]),
 }
 
-mod string_ops {
-    #[allow(clippy::identity_op)]
-    pub fn bitwise_not(s: &str) -> String {
-        let s = s.as_bytes();
-        let len = s.len();
-        let mut res = vec![0; len];
-        for i in 0..len {
-            // keep only last byte
-            res[i] = (!s[i]) & 0xFF;
-        }
-        // The "~" operator in Hack will create invalid utf-8 strings
-        unsafe { String::from_utf8_unchecked(res) }
-    }
-}
-
 /// Cast to a boolean: the (bool) operator in PHP
 impl<'arena> std::convert::From<TypedValue<'arena>> for bool {
     fn from(x: TypedValue<'arena>) -> bool {
@@ -284,16 +269,9 @@ impl<'arena> TypedValue<'arena> {
     }
 
     // Bitwise operations.
-    pub fn bitwise_not(&self, alloc: &'arena bumpalo::Bump) -> Option<Self> {
+    pub fn bitwise_not(&self, _alloc: &'arena bumpalo::Bump) -> Option<Self> {
         match self {
             Self::Int(i) => Some(Self::Int(!i)),
-            Self::String(s) => Some(Self::String(
-                bumpalo::collections::String::from_str_in(
-                    string_ops::bitwise_not(s).as_str(),
-                    alloc,
-                )
-                .into_bump_str(),
-            )),
             _ => None,
         }
     }

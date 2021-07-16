@@ -21,6 +21,8 @@ module Subst = Decl_subst
 module TUtils = Typing_utils
 module Cls = Decl_provider.Class
 
+(** This module checks well-formedness of type hints. See .mli file for more. *)
+
 type env = {
   typedef_tparams: Nast.tparam list;
   tenv: Typing_env_types.env;
@@ -487,3 +489,91 @@ let record_def tenv record =
 let hint tenv h =
   let env = { typedef_tparams = []; tenv } in
   hint ~via_label:false ~in_signature:false env h
+
+(** Check well-formedness of type hints. See .mli file for more. *)
+let expr : Typing_env_types.env -> Nast.expr -> unit =
+ fun tenv ((), _p, e) ->
+  (* We don't recurse on expressions here because this is called by Typing.expr *)
+  match e with
+  | ExpressionTree
+      {
+        et_hint = h;
+        et_splices = _;
+        et_virtualized_expr = _;
+        et_runtime_expr = _;
+      }
+  | Is (_, h)
+  | As (_, h, _)
+  | Cast (h, _) ->
+    hint tenv h
+  | Lfun (f, _)
+  | Efun (f, _) ->
+    fun_ tenv f
+  | Darray _
+  | Varray _
+  | Shape _
+  | ValCollection _
+  | KeyValCollection _
+  | Null
+  | This
+  | True
+  | False
+  | Omitted
+  | Id _
+  | Lvar _
+  | Dollardollar _
+  | Clone _
+  | Array_get _
+  | Obj_get _
+  | Class_get _
+  | Class_const _
+  | Call _
+  | FunctionPointer _
+  | Int _
+  | Float _
+  | String _
+  | String2 _
+  | PrefixedString _
+  | Yield _
+  | Await _
+  | ReadonlyExpr _
+  | Tuple _
+  | List _
+  | Unop _
+  | Binop _
+  | Pipe _
+  | Eif _
+  | New _
+  | Record _
+  | Xml _
+  | Callconv _
+  | Import _
+  | Collection _
+  | Lplaceholder _
+  | Fun_id _
+  | Method_id _
+  | Method_caller _
+  | Smethod_id _
+  | Pair _
+  | EnumClassLabel _
+  | ET_Splice _
+  | Hole _ ->
+    ()
+
+(** Check well-formedness of type hints. See .mli file for more. *)
+let _toplevel_def tenv = function
+  (* This function is not used but ensures we don't forget to
+   * extend this module for future top-level definitions we may add. *)
+  | Fun f ->
+    let { fd_namespace = _; fd_mode = _; fd_file_attributes = _; fd_fun } = f in
+    fun_ tenv fd_fun
+  | Constant gc -> global_constant tenv gc
+  | Typedef td -> typedef tenv td
+  | Class c -> class_ tenv c
+  | RecordDef rd -> record_def tenv rd
+  | Stmt _
+  | Namespace _
+  | NamespaceUse _
+  | SetNamespaceEnv _
+  | FileAttributes _ ->
+    ()

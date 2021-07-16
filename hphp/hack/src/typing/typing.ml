@@ -2751,6 +2751,7 @@ and expr_
          basis. *)
       env
   in
+  Typing_type_wellformedness.expr env outer;
   match e with
   | Import _
   | Collection _ ->
@@ -3935,11 +3936,9 @@ and expr_
     make_result env p (Aast.Cast (hint, te)) ty
   | ExpressionTree et -> expression_tree env p et
   | Is (e, hint) ->
-    Typing_type_wellformedness.hint env hint;
     let (env, te, _) = expr env e in
     make_result env p (Aast.Is (te, hint)) (MakeType.bool (Reason.Rwitness p))
   | As (e, hint, is_nullable) ->
-    Typing_type_wellformedness.hint env hint;
     let refine_type env lpos lty rty =
       let reason = Reason.Ras lpos in
       let (env, rty) = Env.expand_type env rty in
@@ -3999,8 +3998,6 @@ and expr_
       | Lfun _ -> false
       | _ -> assert false
     in
-    (* Check type annotations on the lambda *)
-    Typing_type_wellformedness.fun_ env f;
     (* Check attributes on the lambda *)
     let env =
       attributes_check_def env SN.AttributeKinds.lambda f.f_user_attributes
@@ -4858,7 +4855,7 @@ and closure_make
 (*****************************************************************************)
 and expression_tree env p et =
   let { et_hint; et_splices; et_virtualized_expr; et_runtime_expr } = et in
-  Typing_type_wellformedness.hint env et_hint;
+
   (* Given the expression tree literal:
 
      MyVisitor`1 + ${ foo() }`

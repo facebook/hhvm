@@ -77,7 +77,28 @@ impl<'a, T> Slice<'a, T> {
             marker: std::marker::PhantomData,
         }
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+
+    pub fn len(&self) -> usize {
+        self.len
+    }
 }
+
+impl<'a, T> std::convert::From<&'a [T]> for Slice<'a, T> {
+    fn from(x: &'a [T]) -> Self {
+        Self::new(x)
+    }
+}
+
+impl<'a, T> std::convert::From<&'a mut [T]> for Slice<'a, T> {
+    fn from(x: &'a mut [T]) -> Self {
+        Self::new(x)
+    }
+}
+
 impl<'a, T: PartialEq> PartialEq for Slice<'a, T> {
     fn eq(&self, other: &Self) -> bool {
         //Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
@@ -141,6 +162,18 @@ impl<'a> Str<'a> {
 impl<'a> AsRef<str> for Str<'a> {
     fn as_ref(&self) -> &str {
         self.as_str()
+    }
+}
+
+impl<'a> std::convert::From<&'a str> for Slice<'a, u8> {
+    fn from(s: &'a str) -> Self {
+        Self::new(s.as_bytes())
+    }
+}
+
+impl<'a> std::convert::From<&'a mut str> for Slice<'a, u8> {
+    fn from(s: &'a mut str) -> Self {
+        Self::new(s.as_bytes())
     }
 }
 

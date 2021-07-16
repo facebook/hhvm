@@ -37,10 +37,10 @@ fn rewrite_typed_value<'arena, 'decl, D: DeclProvider<'decl>>(
             TypedValue::Bool(true) => InstructLitConst::True,
             TypedValue::Bool(false) => InstructLitConst::False,
             TypedValue::Int(i) => InstructLitConst::Int(*i),
-            TypedValue::String(s) => InstructLitConst::String(s),
+            TypedValue::String(s) => InstructLitConst::String(s.as_str()),
             TypedValue::LazyClass(s) => {
                 let classid: hhbc_by_ref_hhbc_ast::ClassId<'arena> =
-                    hhbc_by_ref_hhbc_id::class::Type::from_ast_name_and_mangle(alloc, *s);
+                    hhbc_by_ref_hhbc_id::class::Type::from_ast_name_and_mangle(alloc, s.as_str());
                 InstructLitConst::LazyClass(classid)
             }
             TypedValue::Float(f) => {
@@ -68,6 +68,7 @@ fn rewrite_typed_value<'arena, 'decl, D: DeclProvider<'decl>>(
             }
             TypedValue::HhasAdata(d) => {
                 let arrayid = get_array_identifier(alloc, e, tv);
+                let d = d.as_str();
                 match &d[..1] {
                     VARRAY_PREFIX | VEC_PREFIX => InstructLitConst::Vec(arrayid),
                     DARRAY_PREFIX | DICT_PREFIX => InstructLitConst::Dict(arrayid),
@@ -75,7 +76,7 @@ fn rewrite_typed_value<'arena, 'decl, D: DeclProvider<'decl>>(
                     _ => {
                         return Err(Error::Unrecoverable(format!(
                             "Unknown HhasAdata data: {}",
-                            d
+                            d,
                         )));
                     }
                 }
@@ -112,13 +113,13 @@ fn next_adata_id<'arena, 'decl, D: DeclProvider<'decl>>(
     value: &TypedValue<'arena>,
 ) -> &'arena str {
     let mut state = e.emit_adata_state_mut(alloc);
-    let id = format!("A_{}", state.array_identifier_counter);
+    let id: &str = alloc.alloc_str(format!("A_{}", state.array_identifier_counter).as_str());
     state.array_identifier_counter += 1;
     state.adata.push(HhasAdata {
-        id: id.clone(),
+        id: id.into(),
         value: value.clone(),
     });
-    bumpalo::collections::String::from_str_in(id.as_str(), alloc).into_bump_str()
+    id
 }
 
 pub fn take<'arena, 'decl, D: DeclProvider<'decl>>(

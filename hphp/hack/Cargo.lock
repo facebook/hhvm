@@ -232,6 +232,7 @@ dependencies = [
  "core_utils_rust",
  "decl_provider",
  "escaper",
+ "ffi",
  "hhbc_by_ref_ast_class_expr",
  "hhbc_by_ref_emit_type_hint",
  "hhbc_by_ref_env",
@@ -1118,6 +1119,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "decl_provider",
+ "ffi",
  "hhbc_by_ref_ast_class_expr",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_env",
@@ -1650,6 +1652,7 @@ name = "hhbc_by_ref_emit_type_constant"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "ffi",
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_instruction_sequence",
@@ -1756,6 +1759,7 @@ dependencies = [
 name = "hhbc_by_ref_hhas_adata"
 version = "0.0.0"
 dependencies = [
+ "ffi",
  "hhbc_by_ref_runtime",
 ]
 
@@ -2075,6 +2079,7 @@ name = "hhbc_by_ref_runtime"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "ffi",
 ]
 
 [[package]]

@@ -990,7 +990,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                 + (if args.is_empty() {
                     "deprecated function"
                 } else if let TypedValue::String(s) = &args[0] {
-                    s
+                    s.as_str()
                 } else {
                     return Err(Error::Unrecoverable(
                         "deprecated attribute first argument is not a string".into(),

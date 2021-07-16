@@ -8,6 +8,7 @@ edition = "2018"
 path = "../../hhas_adata.rs"
 
 [dependencies]
+ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
 
 [profile.release]

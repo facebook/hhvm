@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::Pair;
 use hhbc_by_ref_hhbc_id::{class, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{unrecoverable, Result};
@@ -115,30 +116,30 @@ fn shape_field_to_pair<'arena>(
     targ_map: &BTreeMap<&str, i64>,
     sfi: &ShapeFieldInfo,
 ) -> std::result::Result<
-    (TypedValue<'arena>, TypedValue<'arena>),
+    Pair<TypedValue<'arena>, TypedValue<'arena>>,
     hhbc_by_ref_instruction_sequence::Error,
 > {
     let (name, is_class_const) = shape_field_name(alloc, &sfi.name);
     let mut r = bumpalo::vec![in alloc;];
     if is_class_const {
-        r.push((
+        r.push(Pair(
             TypedValue::string("is_cls_cns", alloc),
             TypedValue::Bool(true),
         ));
     };
     if sfi.optional {
-        r.push((
+        r.push(Pair(
             TypedValue::string("optional_shape_field", alloc),
             TypedValue::Bool(true),
         ));
     };
-    r.push((
+    r.push(Pair(
         TypedValue::string("value", alloc),
         hint_to_type_constant(alloc, opts, tparams, targ_map, &sfi.hint, false, false)?,
     ));
-    Ok((
+    Ok(Pair(
         TypedValue::string(name, alloc),
-        TypedValue::Dict(r.into_bump_slice()),
+        TypedValue::mk_dict(r.into_bump_slice()),
     ))
 }
 
@@ -154,17 +155,17 @@ fn shape_info_to_typed_value<'arena>(
         .iter()
         .map(|sfi| shape_field_to_pair(alloc, opts, tparams, targ_map, &sfi))
         .collect::<Result<Vec<_>>>()?;
-    Ok(TypedValue::Dict(
-        bumpalo::collections::Vec::from_iter_in(info.into_iter(), alloc).into_bump_slice(),
+    Ok(TypedValue::mk_dict(
+        alloc.alloc_slice_fill_iter(info.into_iter()),
     ))
 }
 
 fn shape_allows_unknown_fields<'arena>(
     alloc: &'arena bumpalo::Bump,
     si: &NastShapeInfo,
-) -> Option<(TypedValue<'arena>, TypedValue<'arena>)> {
+) -> Option<Pair<TypedValue<'arena>, TypedValue<'arena>>> {
     if si.allows_unknown_fields {
-        Some((
+        Some(Pair(
             TypedValue::string("allows_unknown_fields", alloc),
             TypedValue::Bool(true),
         ))
@@ -177,20 +178,18 @@ fn type_constant_access_list<'arena>(
     alloc: &'arena bumpalo::Bump,
     sl: &[aast::Sid],
 ) -> TypedValue<'arena> {
-    let sl_ = bumpalo::collections::Vec::from_iter_in(
+    let sl_ = alloc.alloc_slice_fill_iter(
         sl.iter()
             .map(|ast_defs::Id(_, s)| TypedValue::string(s, alloc)),
-        alloc,
-    )
-    .into_bump_slice();
-    TypedValue::Vec(sl_)
+    );
+    TypedValue::mk_vec(sl_)
 }
 
 fn resolve_classname<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     mut s: String,
-) -> (Option<(TypedValue<'arena>, TypedValue<'arena>)>, String) {
+) -> (Option<Pair<TypedValue<'arena>, TypedValue<'arena>>>, String) {
     let is_tparam = s == "_" || tparams.contains(&s.as_str());
     if !is_tparam {
         s = class::Type::from_ast_name(alloc, s.as_str()).into()
@@ -200,7 +199,7 @@ fn resolve_classname<'arena>(
     } else {
         let id = if is_tparam { "name" } else { "classname" };
         (
-            Some((
+            Some(Pair(
                 TypedValue::string(id, alloc),
                 TypedValue::string(s.as_str(), alloc),
             )),
@@ -216,13 +215,13 @@ fn get_generic_types<'arena>(
     targ_map: &BTreeMap<&str, i64>,
     hints: &[Hint],
 ) -> std::result::Result<
-    bumpalo::collections::vec::Vec<'arena, (TypedValue<'arena>, TypedValue<'arena>)>,
+    bumpalo::collections::vec::Vec<'arena, Pair<TypedValue<'arena>, TypedValue<'arena>>>,
     hhbc_by_ref_instruction_sequence::Error,
 > {
     Ok(if hints.is_empty() {
         bumpalo::vec![in alloc;]
     } else {
-        bumpalo::vec![in alloc; (
+        bumpalo::vec![in alloc; Pair(
             TypedValue::string("generic_types", alloc),
             hints_to_type_constant(alloc, opts, tparams, targ_map, hints)?,
         )]
@@ -233,8 +232,8 @@ fn get_kind<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     s: &str,
-) -> bumpalo::collections::vec::Vec<'arena, (TypedValue<'arena>, TypedValue<'arena>)> {
-    bumpalo::vec![in alloc; (
+) -> bumpalo::collections::vec::Vec<'arena, Pair<TypedValue<'arena>, TypedValue<'arena>>> {
+    bumpalo::vec![in alloc; Pair(
         TypedValue::string("kind", alloc),
         TypedValue::Int(get_kind_num(tparams, s)),
     )]
@@ -252,14 +251,14 @@ fn root_to_string<'arena>(alloc: &'arena bumpalo::Bump, s: &str) -> String {
 fn get_typevars<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
-) -> bumpalo::collections::Vec<'arena, (TypedValue<'arena>, TypedValue<'arena>)> {
+) -> bumpalo::collections::Vec<'arena, Pair<TypedValue<'arena>, TypedValue<'arena>>> {
     if tparams.is_empty() {
         bumpalo::vec![in alloc;]
     } else {
         bumpalo::vec![in alloc; (
             TypedValue::string("typevars", alloc),
             TypedValue::string(tparams.join(","), alloc),
-        )]
+        ).into()]
     }
 }
 
@@ -270,7 +269,7 @@ fn hint_to_type_constant_list<'arena>(
     targ_map: &BTreeMap<&str, i64>,
     hint: &Hint,
 ) -> std::result::Result<
-    bumpalo::collections::vec::Vec<'arena, (TypedValue<'arena>, TypedValue<'arena>)>,
+    bumpalo::collections::Vec<'arena, Pair<TypedValue<'arena>, TypedValue<'arena>>>,
     hhbc_by_ref_instruction_sequence::Error,
 > {
     use aast_defs::Hint_::*;
@@ -281,7 +280,7 @@ fn hint_to_type_constant_list<'arena>(
             if hints.is_empty() {
                 if let Some(id) = targ_map.get(name.as_str()) {
                     let mut r = get_kind(alloc, tparams, "$$internal$$reifiedtype");
-                    r.push((TypedValue::string("id", alloc), TypedValue::Int(*id)));
+                    r.push(Pair(TypedValue::string("id", alloc), TypedValue::Int(*id)));
                     return Ok(r);
                 }
             }
@@ -310,7 +309,7 @@ fn hint_to_type_constant_list<'arena>(
                 r.push(v);
             }
             r.append(&mut get_kind(alloc, tparams, "shape"));
-            r.push((
+            r.push(Pair(
                 TypedValue::string("fields", alloc),
                 shape_info_to_typed_value(alloc, opts, tparams, targ_map, si)?,
             ));
@@ -319,11 +318,11 @@ fn hint_to_type_constant_list<'arena>(
         Haccess(Hint(_, h), ids) => match h.as_happly() {
             Some((root_id, hs)) if hs.is_empty() => {
                 let mut r = get_kind(alloc, tparams, "$$internal$$typeaccess");
-                r.push((
+                r.push(Pair(
                     TypedValue::string("root_name", alloc),
                     TypedValue::string(root_to_string(alloc, &root_id.1).as_str(), alloc),
                 ));
-                r.push((
+                r.push(Pair(
                     TypedValue::string("access_list", alloc),
                     type_constant_access_list(alloc, ids),
                 ));
@@ -339,14 +338,14 @@ fn hint_to_type_constant_list<'arena>(
             let mut kind = get_kind(alloc, tparams, "$$internal$$fun");
             let single_hint = |name: &str, h| {
                 hint_to_type_constant(alloc, opts, tparams, targ_map, h, false, false)
-                    .map(|tc| (bumpalo::vec![in alloc; (TypedValue::string(name, alloc), tc)]))
+                    .map(|tc| (bumpalo::vec![in alloc; Pair(TypedValue::string(name, alloc), tc)]))
             };
             let mut return_type = single_hint("return_type", &hf.return_ty)?;
             let mut variadic_type = hf.variadic_ty.as_ref().map_or_else(
                 || Ok(bumpalo::vec![in alloc;]),
                 |h| single_hint("variadic_type", &h),
             )?;
-            let mut param_types = bumpalo::vec![in alloc; (
+            let mut param_types = bumpalo::vec![in alloc; Pair(
                 TypedValue::string("param_types", alloc),
                 hints_to_type_constant(alloc, opts, tparams, targ_map, &hf.param_tys)?,
             )];
@@ -357,7 +356,7 @@ fn hint_to_type_constant_list<'arena>(
         }
         Htuple(hints) => {
             let mut kind = get_kind(alloc, tparams, "tuple");
-            let mut elem_types = bumpalo::vec![in alloc; (
+            let mut elem_types = bumpalo::vec![in alloc; Pair(
                 TypedValue::string("elem_types", alloc),
                 hints_to_type_constant(alloc, opts, tparams, targ_map, hints)?,
             )];
@@ -365,21 +364,21 @@ fn hint_to_type_constant_list<'arena>(
             kind
         }
         Hoption(h) => {
-            let mut r = bumpalo::vec![in alloc; (TypedValue::string("nullable", alloc), TypedValue::Bool(true))];
+            let mut r = bumpalo::vec![in alloc; Pair(TypedValue::string("nullable", alloc), TypedValue::Bool(true))];
             r.append(&mut hint_to_type_constant_list(
                 alloc, opts, tparams, targ_map, h,
             )?);
             r
         }
         Hsoft(h) => {
-            let mut r = bumpalo::vec![in alloc; (TypedValue::string("soft", alloc), TypedValue::Bool(true))];
+            let mut r = bumpalo::vec![in alloc; Pair(TypedValue::string("soft", alloc), TypedValue::Bool(true))];
             r.append(&mut hint_to_type_constant_list(
                 alloc, opts, tparams, targ_map, h,
             )?);
             r
         }
         Hlike(h) => {
-            let mut r = bumpalo::vec![in alloc; (TypedValue::string("like", alloc), TypedValue::Bool(true))];
+            let mut r = bumpalo::vec![in alloc; Pair(TypedValue::string("like", alloc), TypedValue::Bool(true))];
             r.append(&mut hint_to_type_constant_list(
                 alloc, opts, tparams, targ_map, h,
             )?);
@@ -389,7 +388,7 @@ fn hint_to_type_constant_list<'arena>(
         Hintersection(_) => bumpalo::vec![in alloc; (
             TypedValue::string("kind", alloc),
             TypedValue::Int(get_kind_num(tparams, "HH\\mixed")),
-        )],
+        ).into()],
         _ => return Err(unrecoverable("Hints not available on the original AST")),
     })
 }
@@ -405,12 +404,12 @@ pub fn hint_to_type_constant<'arena>(
 ) -> std::result::Result<TypedValue<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     let mut tconsts = hint_to_type_constant_list(alloc, opts, tparams, targ_map, &hint)?;
     if is_typedef {
-        tconsts.extend_from_slice(get_typevars(alloc, tparams).as_slice());
+        tconsts.append(&mut get_typevars(alloc, tparams));
     };
     if is_opaque {
-        tconsts.extend_from_slice(&[(TypedValue::string("opaque", alloc), TypedValue::Bool(true))])
+        tconsts.push((TypedValue::string("opaque", alloc), TypedValue::Bool(true)).into())
     };
-    Ok(TypedValue::Dict(tconsts.into_bump_slice()))
+    Ok(TypedValue::mk_dict(tconsts.into_bump_slice()))
 }
 
 fn hints_to_type_constant<'arena>(
@@ -420,13 +419,9 @@ fn hints_to_type_constant<'arena>(
     targ_map: &BTreeMap<&str, i64>,
     hints: &[Hint],
 ) -> std::result::Result<TypedValue<'arena>, hhbc_by_ref_instruction_sequence::Error> {
-    let hints = hints
+    hints
         .iter()
         .map(|h| hint_to_type_constant(alloc, opts, tparams, targ_map, h, false, false))
-        .collect::<Result<Vec<_>>>();
-    hints.map(|hs| {
-        TypedValue::Vec(
-            bumpalo::collections::vec::Vec::from_iter_in(hs.into_iter(), alloc).into_bump_slice(),
-        )
-    })
+        .collect::<Result<Vec<_>>>()
+        .map(|hs| TypedValue::mk_vec(alloc.alloc_slice_fill_iter(hs.into_iter())))
 }

@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use ffi::Str;
 use hhbc_by_ref_runtime::TypedValue;
 
 pub const VARRAY_PREFIX: &str = "y";
@@ -12,6 +13,6 @@ pub const KEYSET_PREFIX: &str = "k";
 
 #[derive(Debug)]
 pub struct HhasAdata<'arena> {
-    pub id: String,
+    pub id: Str<'arena>,
     pub value: TypedValue<'arena>,
 }

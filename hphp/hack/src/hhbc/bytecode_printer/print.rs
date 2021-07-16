@@ -14,6 +14,7 @@ use itertools::Itertools;
 
 use core_utils_rust::add_ns;
 use escaper::{escape, escape_by, is_lit_printable};
+use ffi::Pair;
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
 use hhbc_by_ref_hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX};
 use hhbc_by_ref_hhas_attribute::{self as hhas_attribute, HhasAttribute};
@@ -927,9 +928,9 @@ fn print_adata_dict_collection_argument<W: Write>(
     w: &mut W,
     col_type: &str,
     loc: &Option<ast_defs::Pos>,
-    pairs: &[(TypedValue, TypedValue)],
+    pairs: &[Pair<TypedValue, TypedValue>],
 ) -> Result<(), W::Error> {
-    print_adata_mapped_argument(ctx, w, col_type, loc, pairs, |ctx, w, (v1, v2)| {
+    print_adata_mapped_argument(ctx, w, col_type, loc, pairs, |ctx, w, Pair(v1, v2)| {
         print_adata(ctx, w, v1)?;
         print_adata(ctx, w, v2)
     })
@@ -939,23 +940,27 @@ fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Resul
     match tv {
         TypedValue::Uninit => w.write("uninit"),
         TypedValue::Null => w.write("N;"),
-        TypedValue::String(s) => write!(w, "s:{}:{};", s.len(), quote_string_with_escape(s)),
-        TypedValue::LazyClass(s) => write!(w, "l:{}:{};", s.len(), quote_string_with_escape(s)),
+        TypedValue::String(s) => {
+            write!(w, "s:{}:{};", s.len(), quote_string_with_escape(s.as_str()))
+        }
+        TypedValue::LazyClass(s) => {
+            write!(w, "l:{}:{};", s.len(), quote_string_with_escape(s.as_str()))
+        }
         TypedValue::Float(f) => write!(w, "d:{};", float::to_string(*f)),
         TypedValue::Int(i) => write!(w, "i:{};", i),
         // TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why?
         TypedValue::Bool(false) => w.write("b:0;"),
         TypedValue::Bool(true) => w.write("b:1;"),
         TypedValue::Vec(values) => {
-            print_adata_collection_argument(ctx, w, VEC_PREFIX, &None, values)
+            print_adata_collection_argument(ctx, w, VEC_PREFIX, &None, values.as_ref())
         }
         TypedValue::Dict(pairs) => {
-            print_adata_dict_collection_argument(ctx, w, DICT_PREFIX, &None, pairs)
+            print_adata_dict_collection_argument(ctx, w, DICT_PREFIX, &None, pairs.as_ref())
         }
         TypedValue::Keyset(values) => {
-            print_adata_collection_argument(ctx, w, KEYSET_PREFIX, &None, values)
+            print_adata_collection_argument(ctx, w, KEYSET_PREFIX, &None, values.as_ref())
         }
-        TypedValue::HhasAdata(s) => w.write(escaped(s)),
+        TypedValue::HhasAdata(s) => w.write(escaped(s.as_str())),
     }
 }
 

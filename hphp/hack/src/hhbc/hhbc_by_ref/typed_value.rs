@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::{Pair, Slice, Str};
+
 mod float {
     #[derive(Clone, Copy, Debug, Hash, PartialOrd, Ord, PartialEq, Eq)]
     pub struct F64([u8; 8]);
@@ -45,15 +47,15 @@ pub enum TypedValue<'arena> {
     Bool(bool),
     /// Both Hack/PHP and Caml floats are IEEE754 64-bit
     Float(float::F64),
-    String(&'arena str),
-    LazyClass(&'arena str),
+    String(Str<'arena>),
+    LazyClass(Str<'arena>),
     Null,
     // Classic PHP arrays with explicit (key,value) entries
-    HhasAdata(&'arena str),
+    HhasAdata(Str<'arena>),
     // Hack arrays: vectors, keysets, and dictionaries
-    Vec(&'arena [TypedValue<'arena>]),
-    Keyset(&'arena [TypedValue<'arena>]),
-    Dict(&'arena [(TypedValue<'arena>, TypedValue<'arena>)]),
+    Vec(Slice<'arena, TypedValue<'arena>>),
+    Keyset(Slice<'arena, TypedValue<'arena>>),
+    Dict(Slice<'arena, Pair<TypedValue<'arena>, TypedValue<'arena>>>),
 }
 
 /// Cast to a boolean: the (bool) operator in PHP
@@ -63,7 +65,7 @@ impl<'arena> std::convert::From<TypedValue<'arena>> for bool {
             TypedValue::Uninit => false, // Should not happen
             TypedValue::Bool(b) => b,
             TypedValue::Null => false,
-            TypedValue::String(s) => !s.is_empty() && s != "0",
+            TypedValue::String(s) => !s.is_empty() && s.as_str() != "0",
             TypedValue::LazyClass(_) => true,
             TypedValue::Int(i) => i != 0,
             TypedValue::Float(f) => f.to_f64() != 0.0,
@@ -133,8 +135,8 @@ impl<'arena> std::convert::TryFrom<TypedValue<'arena>> for std::string::String {
             TypedValue::Bool(true) => Ok("1".into()),
             TypedValue::Null => Ok("".into()),
             TypedValue::Int(i) => Ok(i.to_string()),
-            TypedValue::String(s) => Ok(s.into()),
-            TypedValue::LazyClass(s) => Ok(s.into()),
+            TypedValue::String(s) => Ok(s.as_str().into()),
+            TypedValue::LazyClass(s) => Ok(s.as_str().into()),
             _ => Err(()),
         }
     }
@@ -142,18 +144,18 @@ impl<'arena> std::convert::TryFrom<TypedValue<'arena>> for std::string::String {
 
 struct WithBump<'arena, T>(&'arena bumpalo::Bump, T);
 
-impl<'arena> std::convert::TryFrom<WithBump<'arena, TypedValue<'arena>>> for &'arena str {
+impl<'arena> std::convert::TryFrom<WithBump<'arena, TypedValue<'arena>>> for Str<'arena> {
     type Error = CastError;
     fn try_from(
         x: WithBump<'arena, TypedValue<'arena>>,
-    ) -> std::result::Result<&'arena str, Self::Error> {
+    ) -> std::result::Result<Str<'arena>, Self::Error> {
         let alloc = x.0;
         match x.1 {
             TypedValue::Uninit => Err(()), // Should not happen
-            TypedValue::Bool(false) => Ok(""),
-            TypedValue::Bool(true) => Ok("1"),
-            TypedValue::Null => Ok(""),
-            TypedValue::Int(i) => Ok(alloc.alloc_str(i.to_string().as_str())),
+            TypedValue::Bool(false) => Ok("".into()),
+            TypedValue::Bool(true) => Ok("1".into()),
+            TypedValue::Null => Ok("".into()),
+            TypedValue::Int(i) => Ok(alloc.alloc_str(i.to_string().as_str()).into()),
             TypedValue::String(s) => Ok(s),
             TypedValue::LazyClass(s) => Ok(s),
             _ => Err(()),
@@ -162,6 +164,28 @@ impl<'arena> std::convert::TryFrom<WithBump<'arena, TypedValue<'arena>>> for &'a
 }
 
 impl<'arena> TypedValue<'arena> {
+    pub fn mk_string(x: impl Into<Str<'arena>>) -> Self {
+        Self::String(x.into())
+    }
+
+    pub fn mk_hhas_adata(x: impl Into<Str<'arena>>) -> Self {
+        Self::HhasAdata(x.into())
+    }
+
+    pub fn mk_vec(x: impl Into<Slice<'arena, TypedValue<'arena>>>) -> Self {
+        Self::Vec(x.into())
+    }
+
+    pub fn mk_keyset(x: impl Into<Slice<'arena, TypedValue<'arena>>>) -> Self {
+        Self::Keyset(x.into())
+    }
+
+    pub fn mk_dict(
+        x: impl Into<Slice<'arena, Pair<TypedValue<'arena>, TypedValue<'arena>>>>,
+    ) -> Self {
+        Self::Dict(x.into())
+    }
+
     // Integer operations. For now, we don't attempt to implement the
     // overflow-to-float semantics
     fn add_int(i1: i64, i2: i64) -> Option<Self> {
@@ -284,7 +308,7 @@ impl<'arena> TypedValue<'arena> {
         let s1: Option<std::string::String> = self.try_into().ok();
         let s2: Option<std::string::String> = v2.try_into().ok();
         match (s1, s2) {
-            (Some(l), Some(r)) => Some(Self::String(alloc.alloc_str((l + &r).as_str()))),
+            (Some(l), Some(r)) => Some(Self::String((alloc.alloc_str(&(l + &r)) as &str).into())),
             _ => None,
         }
     }
@@ -322,22 +346,8 @@ impl<'arena> TypedValue<'arena> {
         self.try_into().ok().map(Self::float)
     }
 
-    pub fn cast_to_arraykey(self, alloc: &'arena bumpalo::Bump) -> Option<Self> {
-        match self {
-            TypedValue::String(s) => Some(Self::String(s)),
-            TypedValue::Null => Some(Self::String(
-                bumpalo::collections::String::from_str_in("", alloc).into_bump_str(),
-            )),
-            TypedValue::Uninit
-            | TypedValue::Vec(_)
-            | TypedValue::Keyset(_)
-            | TypedValue::Dict(_) => None,
-            _ => Self::cast_to_int(self),
-        }
-    }
-
     pub fn string(s: impl AsRef<str>, alloc: &'arena bumpalo::Bump) -> Self {
-        Self::String(alloc.alloc_str(s.as_ref()))
+        Self::String((alloc.alloc_str(s.as_ref()) as &str).into())
     }
 
     pub fn float(f: f64) -> Self {
@@ -353,11 +363,9 @@ mod typed_value_tests {
     #[test]
     fn non_numeric_string_to_int() {
         let alloc = bumpalo::Bump::new();
-        let res: Option<i64> = TypedValue::String(
-            bumpalo::collections::String::from_str_in("foo", &alloc).into_bump_str(),
-        )
-        .try_into()
-        .ok();
+        let res: Option<i64> = TypedValue::mk_string(alloc.alloc_str("foo"))
+            .try_into()
+            .ok();
         assert!(res.is_none());
     }
 

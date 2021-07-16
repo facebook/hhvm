@@ -6,6 +6,7 @@ use indexmap::IndexMap;
 use std::{collections::hash_map::RandomState, fmt};
 
 use decl_provider::DeclProvider;
+use ffi::Pair;
 use hhbc_by_ref_ast_class_expr as ast_class_expr;
 use hhbc_by_ref_ast_scope as ast_scope;
 use hhbc_by_ref_env::emitter::Emitter;
@@ -110,11 +111,11 @@ fn class_const_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl
             if emitter.options().emit_class_pointers() == 2 {
                 let classid =
                     hhbc_by_ref_hhbc_id::class::Type::from_ast_name_and_mangle(alloc, &cname)
-                        .to_raw_string();
+                        .to_raw_ffi_str();
                 return Ok(TypedValue::LazyClass(classid));
             } else {
                 let classid =
-                    hhbc_by_ref_hhbc_id::class::Type::from_ast_name(alloc, &cname).to_raw_string();
+                    hhbc_by_ref_hhbc_id::class::Type::from_ast_name(alloc, &cname).to_raw_ffi_str();
                 return Ok(TypedValue::String(classid));
             }
         }
@@ -127,16 +128,14 @@ fn varray_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &Emitter<'arena, 'decl, D>,
     fields: &[tast::Expr],
 ) -> Result<TypedValue<'local_arena>, Error> {
-    let tv_fields = bumpalo::collections::vec::Vec::from_iter_in(
+    let tv_fields = alloc.alloc_slice_fill_iter(
         fields
             .iter()
             .map(|x| expr_to_typed_value(alloc, emitter, x))
             .collect::<Result<Vec<_>, _>>()?
             .into_iter(),
-        alloc,
-    )
-    .into_bump_slice();
-    Ok(TypedValue::Vec(tv_fields))
+    );
+    Ok(TypedValue::mk_vec(tv_fields))
 }
 
 fn darray_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
@@ -155,10 +154,9 @@ fn darray_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
             ))
         })
         .collect::<Result<_, Error>>()?;
-    let tv_fields_ = update_duplicates_in_map(tv_fields);
-    let fields =
-        bumpalo::collections::Vec::from_iter_in(tv_fields_.into_iter(), alloc).into_bump_slice();
-    Ok(TypedValue::Dict(fields))
+    Ok(TypedValue::mk_dict(alloc.alloc_slice_fill_iter(
+        update_duplicates_in_map(tv_fields),
+    )))
 }
 
 fn set_afield_to_typed_value_pair<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
@@ -262,7 +260,7 @@ fn shape_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &Emitter<'arena, 'decl, D>,
     fields: &[(tast::ShapeFieldName, tast::Expr)],
 ) -> Result<TypedValue<'local_arena>, Error> {
-    let a = bumpalo::collections::vec::Vec::from_iter_in(
+    let a = alloc.alloc_slice_fill_iter(
         fields
             .iter()
             .map(|(sf, expr)| {
@@ -282,12 +280,8 @@ fn shape_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
                     ast_defs::ShapeFieldName::SFlitStr(id) => {
                         // FIXME: This is not safe--string literals are binary
                         // strings. There's no guarantee that they're valid UTF-8.
-                        TypedValue::String(
-                            bumpalo::collections::String::from_str_in(
-                                unsafe { std::str::from_utf8_unchecked(&id.1) },
-                                alloc,
-                            )
-                            .into_bump_str(),
+                        TypedValue::mk_string(
+                            alloc.alloc_str(unsafe { std::str::from_utf8_unchecked(&id.1) }),
                         )
                     }
                     ast_defs::ShapeFieldName::SFclassConst(class_id, id) => {
@@ -303,14 +297,12 @@ fn shape_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
                         )?
                     }
                 };
-                Ok((key, expr_to_typed_value(alloc, emitter, expr)?))
+                Ok((key, expr_to_typed_value(alloc, emitter, expr)?).into())
             })
-            .collect::<Result<Vec<(_, _)>, _>>()?
+            .collect::<Result<Vec<Pair<_, _>>, _>>()?
             .into_iter(),
-        alloc,
-    )
-    .into_bump_slice();
-    Ok(TypedValue::Dict(a))
+    );
+    Ok(TypedValue::mk_dict(a))
 }
 
 pub fn vec_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
@@ -324,9 +316,8 @@ pub fn vec_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
         .iter()
         .map(|f| value_afield_to_typed_value(alloc, e, f))
         .collect();
-    let fields =
-        bumpalo::collections::Vec::from_iter_in(tv_fields?.into_iter(), alloc).into_bump_slice();
-    Ok(TypedValue::Vec(fields))
+    let fields = alloc.alloc_slice_fill_iter(tv_fields?.into_iter());
+    Ok(TypedValue::mk_vec(fields))
 }
 
 pub fn expr_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
@@ -357,17 +348,11 @@ pub fn expr_to_typed_value_<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>
         String(s) => {
             // FIXME: This is not safe--string literals are binary strings.
             // There's no guarantee that they're valid UTF-8.
-            Ok(TypedValue::String(
-                bumpalo::collections::String::from_str_in(
-                    unsafe { std::str::from_utf8_unchecked(s) },
-                    alloc,
-                )
-                .into_bump_str(),
+            Ok(TypedValue::mk_string(
+                alloc.alloc_str(unsafe { std::str::from_utf8_unchecked(s) }),
             ))
         }
-        EnumClassLabel(expr) => Ok(TypedValue::String(
-            bumpalo::collections::String::from_str_in(&expr.1, alloc).into_bump_str(),
-        )),
+        EnumClassLabel(expr) => Ok(TypedValue::mk_string(alloc.alloc_str(&expr.1))),
         Float(s) => {
             if s == math::INF {
                 Ok(TypedValue::float(std::f64::INFINITY))
@@ -391,12 +376,8 @@ pub fn expr_to_typed_value_<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>
                 [tast::Expr(_, _, tast::Expr_::String(ref data))] => {
                     // FIXME: This is not safe--string literals are binary strings.
                     // There's no guarantee that they're valid UTF-8.
-                    Ok(TypedValue::HhasAdata(
-                        bumpalo::collections::string::String::from_str_in(
-                            unsafe { std::str::from_utf8_unchecked(data) },
-                            alloc,
-                        )
-                        .into_bump_str(),
+                    Ok(TypedValue::mk_hhas_adata(
+                        alloc.alloc_str(unsafe { std::str::from_utf8_unchecked(data) }),
                     ))
                 }
                 _ => Err(Error::NotLiteral),
@@ -412,16 +393,16 @@ pub fn expr_to_typed_value_<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>
 
         Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(alloc, emitter, &x.2),
         Collection(x) if x.0.name().eq("keyset") => {
-            let keys = bumpalo::collections::Vec::from_iter_in(
+            let keys = alloc.alloc_slice_fill_iter(
                 x.2.iter()
                     .map(|x| keyset_value_afield_to_typed_value(alloc, emitter, x))
                     .collect::<Result<Vec<_>, _>>()?
                     .into_iter()
-                    .unique(),
-                alloc,
-            )
-            .into_bump_slice();
-            Ok(TypedValue::Keyset(keys))
+                    .unique()
+                    .collect::<Vec<_>>()
+                    .into_iter(),
+            );
+            Ok(TypedValue::mk_keyset(keys))
         }
         Collection(x)
             if x.0.name().eq("dict")
@@ -429,55 +410,45 @@ pub fn expr_to_typed_value_<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>
                     && (string_utils::cmp(&(x.0).1, "Map", false, true)
                         || string_utils::cmp(&(x.0).1, "ImmMap", false, true)) =>
         {
-            let values = bumpalo::collections::Vec::from_iter_in(
-                update_duplicates_in_map(
-                    x.2.iter()
-                        .map(|x| afield_to_typed_value_pair(alloc, emitter, x))
-                        .collect::<Result<_, _>>()?,
-                )
-                .into_iter(),
-                alloc,
-            )
-            .into_bump_slice();
-            Ok(TypedValue::Dict(values))
+            let values = alloc.alloc_slice_fill_iter(update_duplicates_in_map(
+                x.2.iter()
+                    .map(|x| afield_to_typed_value_pair(alloc, emitter, x))
+                    .collect::<Result<_, _>>()?,
+            ));
+            Ok(TypedValue::mk_dict(values))
         }
         Collection(x)
             if allow_maps
                 && (string_utils::cmp(&(x.0).1, "Set", false, true)
                     || string_utils::cmp(&(x.0).1, "ImmSet", false, true)) =>
         {
-            let values = bumpalo::collections::Vec::from_iter_in(
-                update_duplicates_in_map(
-                    x.2.iter()
-                        .map(|x| set_afield_to_typed_value_pair(alloc, emitter, x))
-                        .collect::<Result<_, _>>()?,
-                )
-                .into_iter(),
-                alloc,
-            )
-            .into_bump_slice();
-            Ok(TypedValue::Dict(values))
+            let values = alloc.alloc_slice_fill_iter(update_duplicates_in_map(
+                x.2.iter()
+                    .map(|x| set_afield_to_typed_value_pair(alloc, emitter, x))
+                    .collect::<Result<_, _>>()?,
+            ));
+            Ok(TypedValue::mk_dict(values))
         }
         Tuple(x) => {
             let v: Vec<_> = x
                 .iter()
                 .map(|e| expr_to_typed_value(alloc, emitter, e))
                 .collect::<Result<_, _>>()?;
-            let values =
-                bumpalo::collections::Vec::from_iter_in(v.into_iter(), alloc).into_bump_slice();
-            Ok(TypedValue::Vec(values))
+            Ok(TypedValue::mk_vec(
+                alloc.alloc_slice_fill_iter(v.into_iter()),
+            ))
         }
         ValCollection(x) if x.0 == tast::VcKind::Vec || x.0 == tast::VcKind::Vector => {
             let v: Vec<_> =
                 x.2.iter()
                     .map(|e| expr_to_typed_value(alloc, emitter, e))
                     .collect::<Result<_, _>>()?;
-            let values =
-                bumpalo::collections::Vec::from_iter_in(v.into_iter(), alloc).into_bump_slice();
-            Ok(TypedValue::Vec(values))
+            Ok(TypedValue::mk_vec(
+                alloc.alloc_slice_fill_iter(v.into_iter()),
+            ))
         }
         ValCollection(x) if x.0 == tast::VcKind::Keyset => {
-            let keys = bumpalo::collections::Vec::from_iter_in(
+            let keys = alloc.alloc_slice_fill_iter(
                 x.2.iter()
                     .map(|e| {
                         expr_to_typed_value(alloc, emitter, e).and_then(|tv| match tv {
@@ -496,37 +467,27 @@ pub fn expr_to_typed_value_<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>
                     })
                     .collect::<Result<Vec<_>, _>>()?
                     .into_iter()
-                    .unique(),
-                alloc,
-            )
-            .into_bump_slice();
-            Ok(TypedValue::Keyset(keys))
+                    .unique()
+                    .collect::<Vec<_>>()
+                    .into_iter(),
+            );
+            Ok(TypedValue::mk_keyset(keys))
         }
         ValCollection(x) if x.0 == tast::VcKind::Set || x.0 == tast::VcKind::ImmSet => {
-            let values = bumpalo::collections::vec::Vec::from_iter_in(
-                update_duplicates_in_map(
-                    x.2.iter()
-                        .map(|e| set_afield_value_to_typed_value_pair(alloc, emitter, e))
-                        .collect::<Result<Vec<_>, _>>()?,
-                )
-                .into_iter(),
-                alloc,
-            )
-            .into_bump_slice();
-            Ok(TypedValue::Dict(values))
+            let values = alloc.alloc_slice_fill_iter(update_duplicates_in_map(
+                x.2.iter()
+                    .map(|e| set_afield_value_to_typed_value_pair(alloc, emitter, e))
+                    .collect::<Result<Vec<_>, _>>()?,
+            ));
+            Ok(TypedValue::mk_dict(values))
         }
         KeyValCollection(x) => {
-            let values = bumpalo::collections::vec::Vec::from_iter_in(
-                update_duplicates_in_map(
-                    x.2.iter()
-                        .map(|e| kv_to_typed_value_pair(alloc, emitter, &e.0, &e.1))
-                        .collect::<Result<Vec<_>, _>>()?,
-                )
-                .into_iter(),
-                alloc,
-            )
-            .into_bump_slice();
-            Ok(TypedValue::Dict(values))
+            let values = alloc.alloc_slice_fill_iter(update_duplicates_in_map(
+                x.2.iter()
+                    .map(|e| kv_to_typed_value_pair(alloc, emitter, &e.0, &e.1))
+                    .collect::<Result<Vec<_>, _>>()?,
+            ));
+            Ok(TypedValue::mk_dict(values))
         }
         Shape(fields) => shape_to_typed_value(alloc, emitter, fields),
         ClassConst(x) => {
@@ -552,11 +513,14 @@ fn int_expr_to_typed_value<'local_arena>(s: &str) -> Result<TypedValue<'local_ar
 
 fn update_duplicates_in_map<'local_arena>(
     kvs: Vec<(TypedValue<'local_arena>, TypedValue<'local_arena>)>,
-) -> Vec<(TypedValue<'local_arena>, TypedValue<'local_arena>)> {
+) -> impl IntoIterator<
+    Item = Pair<TypedValue<'local_arena>, TypedValue<'local_arena>>,
+    IntoIter = impl ExactSizeIterator + 'local_arena,
+> + 'local_arena {
     kvs.into_iter()
         .collect::<IndexMap<_, _, RandomState>>()
         .into_iter()
-        .collect()
+        .map(std::convert::Into::into)
 }
 
 fn cast_value<'local_arena>(
@@ -627,7 +591,7 @@ fn value_to_expr_<'local_arena>(v: TypedValue<'local_arena>) -> Result<tast::Exp
         Float(i) => Expr_::Float(hhbc_by_ref_hhbc_string_utils::float::to_string(i)),
         Bool(false) => Expr_::False,
         Bool(true) => Expr_::True,
-        String(s) => Expr_::String(s.into()),
+        String(s) => Expr_::String(s.as_str().into()),
         LazyClass(_) => return Err(Error::unrecoverable("value_to_expr: lazyclass NYI")),
         Null => Expr_::Null,
         Uninit => return Err(Error::unrecoverable("value_to_expr: uninit value")),

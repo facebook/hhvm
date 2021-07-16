@@ -55,7 +55,7 @@ fn is_native_arg<'arena>(s: &str, attrs: impl AsRef<[HhasAttribute<'arena>]>) ->
     attrs.as_ref().iter().any(|attr| {
         attr.is(ua::is_native)
             && attr.arguments.iter().any(|tv| match *tv {
-                TypedValue::String(s0) => s0 == s,
+                TypedValue::String(s0) => s0.as_str() == s,
                 _ => false,
             })
     })

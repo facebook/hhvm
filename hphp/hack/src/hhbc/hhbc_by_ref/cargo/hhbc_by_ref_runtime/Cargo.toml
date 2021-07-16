@@ -9,6 +9,7 @@ path = "../../typed_value.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
+ffi = { path = "../../../../utils/ffi" }
 
 [profile.release]
 incremental = false

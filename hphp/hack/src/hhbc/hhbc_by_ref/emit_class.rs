@@ -389,7 +389,7 @@ fn emit_reified_extends_params<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         },
         _ => {}
     }
-    let tv = TypedValue::Vec(&[]);
+    let tv = TypedValue::Vec(Slice::new(&[]));
     Ok(instr::typedvalue(alloc, tv))
 }
 

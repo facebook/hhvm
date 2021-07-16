@@ -12,6 +12,7 @@ bumpalo = { version = "3.2.1", features = ["collections"] }
 core_utils_rust = { path = "../../utils/core" }
 decl_provider = { path = "../decl_provider" }
 escaper = { path = "../../utils/escaper" }
+ffi = { path = "../../utils/ffi" }
 hhbc_by_ref_ast_class_expr = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_ast_class_expr" }
 hhbc_by_ref_emit_type_hint = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_emit_type_hint" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_env" }

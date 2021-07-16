@@ -8,6 +8,8 @@ pub trait Id<'arena>: Sized {
 
     fn to_raw_string(&self) -> &'arena str;
 
+    fn to_raw_ffi_str(&self) -> ffi::Str<'arena>;
+
     fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Self;
 
     fn to_unmangled_str(&self) -> std::borrow::Cow<'arena, str> {
@@ -41,6 +43,10 @@ macro_rules! impl_id {
 
             fn to_raw_string(&self) -> &'arena str {
                 self.0.as_str()
+            }
+
+            fn to_raw_ffi_str(&self) -> ffi::Str<'arena> {
+                self.0
             }
 
             $( $trait_impl )*

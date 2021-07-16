@@ -3475,12 +3475,8 @@ fn emit_call_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         {
             // FIXME: This is not safe--string literals are binary strings.
             // There's no guarantee that they're valid UTF-8.
-            let v = TypedValue::HhasAdata(
-                bumpalo::collections::String::from_str_in(
-                    unsafe { String::from_utf8_unchecked(data.clone().into()) }.as_str(),
-                    alloc,
-                )
-                .into_bump_str(),
+            let v = TypedValue::mk_hhas_adata(
+                alloc.alloc_str(unsafe { std::str::from_utf8_unchecked(data.as_ref()) }),
             );
             Ok(emit_pos_then(alloc, pos, instr::typedvalue(alloc, v)))
         }

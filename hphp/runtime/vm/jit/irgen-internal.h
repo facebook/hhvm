@@ -99,13 +99,12 @@ inline SSATmp* curRequiredCoeffects(IRGS& env) {
 
 inline SSATmp* curCoeffects(IRGS& env) {
   auto const coeffects = curRequiredCoeffects(env);
-  auto const mask = [&] {
-    auto const shallows = curFunc(env)->shallowCoeffectsWithLocals();
-    auto const mask = ~(shallows.value());
-    if (curSrcKey(env).op() != Op::FCallCtor) return mask;
-    return mask & RuntimeCoeffects::write_this_props().value();
+  auto const mask = [&]() -> RuntimeCoeffects::storage_t {
+    auto const escapes = curFunc(env)->coeffectEscapes();
+    if (curSrcKey(env).op() != Op::FCallCtor) return escapes.value();
+    return escapes.value() | RuntimeCoeffects::write_this_props().value();
   }();
-  return gen(env, AndInt, coeffects, cns(env, mask));
+  return gen(env, OrInt, coeffects, cns(env, mask));
 }
 
 //////////////////////////////////////////////////////////////////////

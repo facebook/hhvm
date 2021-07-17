@@ -1479,7 +1479,7 @@ Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
       // TODO: Once coeffect migration is done, convert this back to raise_error
       raise_warning("Context constant %s does not exist", name->data());
     }
-    return RuntimeCoeffects::full();
+    return RuntimeCoeffects::none();
   }
   auto const& cns = m_constants[slot];
   if (cns.kind() != ConstModifiers::Kind::Context) {
@@ -1493,7 +1493,7 @@ Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
       // TODO: Once coeffect migration is done, convert this back to raise_error
       raise_warning("Context constant %s is abstract", name->data());
     }
-    return RuntimeCoeffects::full();
+    return RuntimeCoeffects::none();
   }
 
   return cns.val.constModifiers().getCoeffects().toRequired();

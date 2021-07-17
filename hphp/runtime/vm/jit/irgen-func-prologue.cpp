@@ -279,7 +279,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     for (auto const& rule : callee->getCoeffectRules()) {
       if (auto const coeffect = rule.emitJit(env, callee, argc, prologueCtx,
                                              providedCoeffects)) {
-        required = gen(env, AndInt, required, coeffect);
+        required = gen(env, OrInt, required, coeffect);
       }
     }
     if (callee->hasCoeffectsLocal()) {
@@ -293,16 +293,16 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
   ifThen(
     env,
     [&] (Block* taken) {
-      // providedCoeffects & (~requiredCoeffects) == 0
+      // (~providedCoeffects) & requiredCoeffects == 0
 
-      // The unused higher order bits of requiredCoeffects will be 0
+      // The unused higher order bits of providedCoeffects will be 0
       // We want to flip the used lower order bits
       auto const mask = (1 << CoeffectsConfig::numUsedBits()) - 1;
-      auto const requiredCoeffectsFlipped =
-        gen(env, XorInt, requiredCoeffects, cns(env, mask));
+      auto const providedCoeffectsFlipped =
+        gen(env, XorInt, providedCoeffects, cns(env, mask));
 
       auto const cond =
-        gen(env, AndInt, providedCoeffects, requiredCoeffectsFlipped);
+        gen(env, AndInt, providedCoeffectsFlipped, requiredCoeffects);
       gen(env, JmpNZero, taken, cond);
     },
     [&] {

@@ -270,20 +270,24 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   auto const uait = userAttributes.find(s___Reified.get());
   auto const hasReifiedGenerics = uait != userAttributes.end();
 
-  auto const coeffects = [&] {
-    if (staticCoeffects.empty()) return StaticCoeffects::defaults();
-    auto coeffects =
-      CoeffectsConfig::fromName(staticCoeffects[0]->toCppString());
+  // Returns (static coeffects, escapes)
+  auto const coeffectsInfo = [&]() -> std::pair<StaticCoeffects,
+                                               RuntimeCoeffects> {
+    if (staticCoeffects.empty()) {
+      return {StaticCoeffects::defaults(), RuntimeCoeffects::none()};
+    }
+    auto coeffects = StaticCoeffects::none();
+    auto escapes = RuntimeCoeffects::none();
     for (auto const& name : staticCoeffects) {
-      coeffects &= CoeffectsConfig::fromName(name->toCppString());
+      coeffects |= CoeffectsConfig::fromName(name->toCppString());
+      escapes |= CoeffectsConfig::escapesTo(name->toCppString());
     }
     if (preClass && name == s_construct.get()) {
-      coeffects &= StaticCoeffects::write_this_props();
+      coeffects |= StaticCoeffects::write_this_props();
     }
-    return coeffects;
+    return {coeffects, escapes};
   }();
-  auto const shallowCoeffectsWithLocals = coeffects.toShallowWithLocals();
-  f->m_requiredCoeffects = coeffects.toRequired();
+  f->m_requiredCoeffects = coeffectsInfo.first.toRequired();
 
   bool const needsExtendedSharedData =
     isNative ||
@@ -295,7 +299,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     hasParamsWithMultiUBs ||
     hasReturnWithMultiUBs ||
     dynCallSampleRate ||
-    shallowCoeffectsWithLocals.value() != 0 ||
+    coeffectsInfo.second.value() != 0 ||
     !coeffectRules.empty() ||
     (docComment && !docComment->empty());
 
@@ -322,7 +326,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_allFlags.m_isMemoizeWrapperLSB = false;
 
     if (!coeffectRules.empty()) ex->m_coeffectRules = coeffectRules;
-    ex->m_shallowCoeffectsWithLocals = shallowCoeffectsWithLocals;
+    ex->m_coeffectEscapes = coeffectsInfo.second;
     ex->m_docComment = docComment;
   }
 

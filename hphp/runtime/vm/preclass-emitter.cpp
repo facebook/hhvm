@@ -401,7 +401,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
         auto coeffects =
           CoeffectsConfig::fromName(const_.coeffects()[0]->toCppString());
         for (auto const& coeffect : const_.coeffects()) {
-          coeffects &= CoeffectsConfig::fromName(coeffect->toCppString());
+          coeffects |= CoeffectsConfig::fromName(coeffect->toCppString());
         }
         return coeffects;
       }();

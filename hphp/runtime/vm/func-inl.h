@@ -595,8 +595,8 @@ inline RuntimeCoeffects Func::requiredCoeffects() const {
   return m_requiredCoeffects;
 }
 
-inline RuntimeCoeffects Func::shallowCoeffectsWithLocals() const {
-  return extShared() ? extShared()->m_shallowCoeffectsWithLocals
+inline RuntimeCoeffects Func::coeffectEscapes() const {
+  return extShared() ? extShared()->m_coeffectEscapes
                      : RuntimeCoeffects::none();
 }
 

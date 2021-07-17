@@ -58,7 +58,7 @@ SSATmp* emitCCParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
       return gen(env, LookupClsCtxCns, cls, cns(env, name));
     },
     [&] (Block* taken) { return gen(env, CheckType, TNull, taken, tv); },
-    [&] (SSATmp*) { return cns(env, RuntimeCoeffects::full().value()); },
+    [&] (SSATmp*) { return cns(env, RuntimeCoeffects::none().value()); },
     [&] {
       hint(env, Block::Hint::Unlikely);
       auto const msg =
@@ -154,7 +154,7 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
     hint(env, Block::Hint::Unlikely);
     auto const data = ParamData { static_cast<int32_t>(paramIdx) };
     gen(env, RaiseCoeffectsFunParamTypeViolation, data, tv);
-    return cns(env, RuntimeCoeffects::full().value());
+    return cns(env, RuntimeCoeffects::none().value());
   };
 
   auto const handleFunc = [&](SSATmp* func) {
@@ -173,7 +173,7 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
         // Rules
         hint(env, Block::Hint::Unlikely);
         gen(env, RaiseCoeffectsFunParamCoeffectRulesViolation, func);
-        return cns(env, RuntimeCoeffects::full().value());
+        return cns(env, RuntimeCoeffects::none().value());
       }
     );
   };
@@ -288,7 +288,7 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
   return cond(
     env,
     [&] (Block* taken) { return gen(env, CheckType, TNull, taken, tv); },
-    [&] (SSATmp*)      { return cns(env, RuntimeCoeffects::full().value()); },
+    [&] (SSATmp*)      { return cns(env, RuntimeCoeffects::none().value()); },
     [&] (Block* taken) { return gen(env, CheckType, TObj, taken, tv); },
     objSuccess,
     fnPtrs
@@ -347,7 +347,7 @@ SSATmp* emitGeneratorThis(IRGS& env, const Func* f, SSATmp* prologueCtx) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      return cns(env, RuntimeCoeffects::full().value());
+      return cns(env, RuntimeCoeffects::none().value());
     }
   );
 }

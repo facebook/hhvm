@@ -1,4 +1,4 @@
-Warning: Call to main() requires [defaults] coeffects but [vm-entry]() provided [defaults]
+Warning: Call to main() requires [defaults, policied_of] coeffects but [vm-entry]() provided [defaults]
 non_policied -> non_policied: ok
 non_policied -> policied_local: ok
 non_policied -> policied_shallow: ok

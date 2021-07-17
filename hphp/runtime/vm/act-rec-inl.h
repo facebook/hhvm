@@ -168,15 +168,14 @@ inline RuntimeCoeffects ActRec::requiredCoeffects() const {
 }
 
 inline RuntimeCoeffects ActRec::coeffects() const {
-  auto const shallows = func()->shallowCoeffectsWithLocals();
-  auto const mask = ~(shallows.value());
-  return RuntimeCoeffects::fromValue(requiredCoeffects().value() & mask);
+  auto const escapes = func()->coeffectEscapes();
+  return RuntimeCoeffects::fromValue(requiredCoeffects().value() | escapes.value());
 }
 
 inline RuntimeCoeffects ActRec::providedCoeffectsForCall(bool isCtor) const {
   if (!isCtor) return coeffects();
   auto const mask = RuntimeCoeffects::write_this_props().value();
-  return RuntimeCoeffects::fromValue(coeffects().value() & mask);
+  return RuntimeCoeffects::fromValue(coeffects().value() | mask);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

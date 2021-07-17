@@ -43,7 +43,7 @@ StaticCoeffects StaticCoeffects::write_this_props() {
 }
 
 RuntimeCoeffects RuntimeCoeffects::defaults() {
-  return StaticCoeffects::defaults().toAmbient();
+  return StaticCoeffects::defaults().toRequired();
 }
 
 #define COEFFECTS     \
@@ -53,7 +53,10 @@ RuntimeCoeffects RuntimeCoeffects::defaults() {
 
 #define X(x)                                                             \
 RuntimeCoeffects RuntimeCoeffects::x() {                                 \
-  static RuntimeCoeffects c = CoeffectsConfig::fromName(#x).toAmbient(); \
+  static RuntimeCoeffects c = RuntimeCoeffects::fromValue(               \
+    CoeffectsConfig::fromName(#x).toRequired().value() |                 \
+    CoeffectsConfig::escapesTo(#x).value()                               \
+  );                                                                     \
   return c;                                                              \
 }
   COEFFECTS
@@ -66,47 +69,33 @@ const std::string RuntimeCoeffects::toString() const {
   // subset of StaticCoeffects
   auto const data = StaticCoeffects::fromValue(m_data);
   auto const list = CoeffectsConfig::toStringList(data);
-  if (list.empty()) return "defaults";
-  if (list.size() == 1 && list[0] == "pure") return "";
+  if (list.empty()) return ""; // pure
   return folly::join(", ", list);
 }
 
 bool RuntimeCoeffects::canCallWithWarning(const RuntimeCoeffects o) const {
   auto const promoted =
-    RuntimeCoeffects::fromValue(o.m_data | CoeffectsConfig::warningMask());
+    RuntimeCoeffects::fromValue(o.m_data & (~CoeffectsConfig::warningMask()));
   return canCall(promoted);
 }
 
 const std::string StaticCoeffects::toString() const {
   auto const list = CoeffectsConfig::toStringList(*this);
-  if (list.empty()) return "defaults";
+  if (list.empty()) return "pure";
   return folly::join(" ", list);
 }
 
-RuntimeCoeffects StaticCoeffects::toAmbient() const {
-  auto const val = m_data - locals();
-  return RuntimeCoeffects::fromValue(val);
-}
-
 RuntimeCoeffects StaticCoeffects::toRequired() const {
-  // This converts the 01 (local) pattern to 10 (shallow) pattern
-  // (m_data | (locals << 1)) & (~locals)
-  // => m_data - locals + 2 * locals
-  // => m_data + locals
-  auto const val = m_data + locals();
-  return RuntimeCoeffects::fromValue(val);
+  // This converts the 01 (local) pattern to 11 (shallow) pattern
+  return RuntimeCoeffects::fromValue(m_data | (locals() << 1));
 }
 
-RuntimeCoeffects StaticCoeffects::toShallowWithLocals() const {
-  return RuntimeCoeffects::fromValue(locals() << 1);
-}
-
-RuntimeCoeffects& RuntimeCoeffects::operator&=(const RuntimeCoeffects o) {
-  m_data &= o.m_data;
+RuntimeCoeffects& RuntimeCoeffects::operator|=(const RuntimeCoeffects o) {
+  m_data |= o.m_data;
   return *this;
 }
 
-StaticCoeffects& StaticCoeffects::operator&=(const StaticCoeffects o) {
+StaticCoeffects& StaticCoeffects::operator|=(const StaticCoeffects o) {
   return (*this = CoeffectsConfig::combine(*this, o));
 }
 
@@ -165,11 +154,11 @@ RuntimeCoeffects emitCCParam(const Func* f,
                              uint32_t numArgsInclUnpack,
                              uint32_t paramIdx,
                              const StringData* name) {
-  if (paramIdx >= numArgsInclUnpack) return RuntimeCoeffects::full();
+  if (paramIdx >= numArgsInclUnpack) return RuntimeCoeffects::none();
   auto const index =
     numArgsInclUnpack - 1 - paramIdx + (f->hasReifiedGenerics() ? 1 : 0);
   auto const tv = vmStack().indC(index);
-  if (tvIsNull(tv)) return RuntimeCoeffects::full();
+  if (tvIsNull(tv)) return RuntimeCoeffects::none();
   if (!tvIsObject(tv)) {
     raise_error(folly::sformat("Coeffect rule requires parameter at "
                                "position {} to be an object or null",
@@ -235,22 +224,22 @@ RuntimeCoeffects emitCCReified(const Func* f,
 
 RuntimeCoeffects emitFunParam(const Func* f, uint32_t numArgsInclUnpack,
                               uint32_t paramIdx) {
-  if (paramIdx >= numArgsInclUnpack) return RuntimeCoeffects::full();
+  if (paramIdx >= numArgsInclUnpack) return RuntimeCoeffects::none();
   auto const index =
     numArgsInclUnpack - 1 - paramIdx + (f->hasReifiedGenerics() ? 1 : 0);
   auto const tv = vmStack().indC(index);
   auto const handleFunc = [&](const Func* func) {
     if (func->hasCoeffectRules()) {
       raiseCoeffectsFunParamCoeffectRulesViolation(func);
-      return RuntimeCoeffects::full();
+      return RuntimeCoeffects::none();
     }
     return func->requiredCoeffects();
   };
   auto const error = [&]{
     raiseCoeffectsFunParamTypeViolation(*tv, paramIdx);
-    return RuntimeCoeffects::full();
+    return RuntimeCoeffects::none();
   };
-  if (tvIsNull(tv))     return RuntimeCoeffects::full();
+  if (tvIsNull(tv))     return RuntimeCoeffects::none();
   if (tvIsFunc(tv)) {
     auto const func = tv->m_data.pfunc->isMethCaller()
       ? getFuncFromMethCallerFunc(tv->m_data.pfunc) : tv->m_data.pfunc;
@@ -299,7 +288,7 @@ RuntimeCoeffects emitGeneratorThis(const Func* f, void* prologueCtx) {
     : static_cast<BaseGenerator*>(Generator::fromObject(obj));
   if (gen->getState() == BaseGenerator::State::Done) {
     // We need to make sure coeffects check passes
-    return RuntimeCoeffects::full();
+    return RuntimeCoeffects::none();
   }
   return gen->actRec()->requiredCoeffects();
 }

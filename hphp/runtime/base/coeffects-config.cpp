@@ -136,9 +136,9 @@ static CapabilityGraphs& getCapabilityGraphs() {
 
 template <typename T>
 T addEdges(T src, T dst) {
-  FTRACE(5, "Adding edge {} -> {}\n", src->name, dst->name);
-  src->children.push_back(dst);
-  dst->parents.push_back(src);
+  FTRACE(5, "Adding edge {} -> {}\n", dst->name, src->name);
+  dst->children.push_back(src);
+  src->parents.push_back(dst);
   return src;
 }
 
@@ -159,15 +159,15 @@ CapabilityNode* createNode(const std::string& name,
 }
 
 void initCapabilityGraphs() {
-  auto rx_pure = createNode(Cap::s_rx_pure);
-  addEdges(createNode(Cap::s_rx_defaults, false, true),
+  auto rx_pure = createNode(Cap::s_rx_pure, false, true);
+  addEdges(createNode(Cap::s_rx_defaults),
            addEdges(createNode(Cap::s_rx, true),
                     rx_pure));
 
   auto policied = createNode(Cap::s_policied, true);
   auto read_globals = createNode(Cap::s_read_globals);
-  auto policied_maybe = createNode(Cap::s_policied_maybe);
-  addEdges(createNode(Cap::s_policied_unreachable, false, true),
+  auto policied_maybe = createNode(Cap::s_policied_maybe, false, true);
+  addEdges(createNode(Cap::s_policied_unreachable),
            addEdges(createNode(Cap::s_policied_defaults),
                     addEdges(createNode(Cap::s_globals),
                              read_globals),
@@ -217,11 +217,11 @@ void CoeffectsConfig::initCapabilities() {
     FTRACE(1, "{:<21}: {:016b}\n", name, value);
   };
 
-  for (auto cap_defaults : getCapabilityGraphs().entries) {
-    add(cap_defaults->name, 0);
+  for (auto cap_parents : getCapabilityGraphs().entries) {
+    add(cap_parents->name, 0);
 
     std::queue<CapabilityNode*> queue;
-    for (auto child : cap_defaults->children) queue.push(child);
+    for (auto child : cap_parents->children) queue.push(child);
     while (!queue.empty()) {
       auto cap = queue.front();
       queue.pop();
@@ -239,7 +239,6 @@ void CoeffectsConfig::initCapabilities() {
       for (auto parent : cap->parents) {
         auto const it = getCapabilityMap().find(parent->name);
         if (it != getCapabilityMap().end()) {
-          bits |= it->second;
           if (parent->escape) {
             auto const it_shallow =
               getCapabilityMap().find(folly::to<std::string>(parent->name,
@@ -251,9 +250,11 @@ void CoeffectsConfig::initCapabilities() {
                                                              "_local"));
             assertx(it_local != getCapabilityMap().end());
             bits_local |= it_local->second;
+            bits |= (cap->escape ? it->second : bits_shallow);
           } else {
             bits_shallow |= it->second;
             bits_local |= it->second;
+            bits |= it->second;
           }
         } else {
           again = true;
@@ -270,19 +271,22 @@ void CoeffectsConfig::initCapabilities() {
 
       if (cap->escape) {
         always_assert(nextBit + 1 < std::numeric_limits<storage_t>::digits);
-        // Set local
+        // Set local (01)
         add(folly::to<std::string>(cap->name, "_local"),
             bits_local | (1 << nextBit));
         escapeMask |= (1 << nextBit);
 
-        // Set shallow
-        add(folly::to<std::string>(cap->name, "_shallow"),
-            bits_shallow | (1 << (nextBit + 1)));
+        // Set full (10)
+        add(cap->name, bits | (1 << (nextBit + 1)));
 
-        bits |= (1 << nextBit++);
+        // Set shallow (11)
+        add(folly::to<std::string>(cap->name, "_shallow"),
+            bits_shallow | (3 << nextBit));
+
+        nextBit += 2;
+      } else {
+        add(cap->name, bits | (1 << nextBit++));
       }
-      bits |= (1 << nextBit++);
-      add(cap->name, bits);
       for (auto child : cap->children) queue.push(child);
     }
   }
@@ -294,15 +298,15 @@ void CoeffectsConfig::initCapabilities() {
   storage_t warningMask = 0;
 
   if (CoeffectsConfig::enabled()) {
-    storage_t rxPure = getCapabilityMap().find(Cap::s_rx_pure)->second;
-    storage_t policiedMaybe =
-      getCapabilityMap().find(Cap::s_policied_maybe)->second;
+    storage_t rxMask = getCapabilityMap().find(Cap::s_rx_defaults)->second;
+    storage_t policiedMask =
+      getCapabilityMap().find(Cap::s_policied_unreachable)->second;
     if (CoeffectsConfig::pureEnforcementLevel() == 1) {
-      warningMask = (rxPure | policiedMaybe);
-    } else {
-      if (CoeffectsConfig::policiedEnforcementLevel() == 1) {
-        warningMask |= policiedMaybe;
-      }
+      warningMask = (rxMask | policiedMask);
+    } else if (CoeffectsConfig::rxEnforcementLevel() == 1) {
+        warningMask |= rxMask;
+    } else if (CoeffectsConfig::policiedEnforcementLevel() == 1) {
+        warningMask |= policiedMask;
     }
   }
 
@@ -359,36 +363,49 @@ StaticCoeffects CoeffectsConfig::fromName(const std::string& coeffect) {
   return StaticCoeffects::fromValue(result);
 }
 
+RuntimeCoeffects CoeffectsConfig::escapesTo(const std::string& coeffect) {
+  if (CoeffectsConfig::rxEnforcementLevel()) {
+    if (coeffect == C::s_rx_local) return RuntimeCoeffects::defaults();
+  }
+  if (CoeffectsConfig::policiedEnforcementLevel()) {
+    if (coeffect == C::s_policied_local) return RuntimeCoeffects::defaults();
+  }
+  return RuntimeCoeffects::none();
+}
+
 StaticCoeffects CoeffectsConfig::combine(const StaticCoeffects a,
                                          const StaticCoeffects b) {
   storage_t result = 0;
   for (auto entry : getCapabilityCombinator()) {
     auto const mask = ((1 << entry.size) - 1) << entry.pos;
-    result |= std::min(a.value() & mask, b.value() & mask);
+    result |= std::max(a.value() & mask, b.value() & mask);
   }
   return StaticCoeffects::fromValue(result);
 }
 
 std::vector<std::string>
-CoeffectsConfig::toStringList(const StaticCoeffects data) {
+CoeffectsConfig::toStringList(const StaticCoeffects input) {
   hphp_fast_set<std::string> capabilities;
-  storage_t current = data.value();
+  storage_t current = 0;
   for (auto it = getCapabilityVector().rbegin();
        it != getCapabilityVector().rend();
        it++) {
-    if ((current & it->second) == it->second) {
+    // if capability is entirely covered by the input, and
+    // it adds a new bit to current
+    if ((input.value() & it->second) == it->second &&
+        (current | it->second) != current) {
       capabilities.insert(it->first);
-      current &= (~it->second);
+      current |= it->second;
     }
+    if (current == input.value()) break;
   }
 
-  // Printing of multiple coeffects is currently broken
-  // [write_props, read_globals] will lead to this assert firing,
-  // always_assert(current == 0);
+  assert_flog(current == input.value(),
+              "Trying to find a context for {:016b}, only found {:016b}",
+              input.value(), current);
 
   std::vector<std::string> result;
   for (auto const& [name, caps] : s_coeffects_to_capabilities) {
-    if (name == C::s_defaults) continue;
     if (std::all_of(caps.begin(),
                     caps.end(),
                     [&] (const std::string& s) {

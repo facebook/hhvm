@@ -38,10 +38,6 @@ struct RuntimeCoeffects {
     return RuntimeCoeffects::fromValue(0);
   }
 
-  static RuntimeCoeffects full() {
-    return RuntimeCoeffects::fromValue(std::numeric_limits<storage_t>::max());
-  }
-
   static RuntimeCoeffects defaults();
   static RuntimeCoeffects pure();
   static RuntimeCoeffects policied_of();
@@ -61,15 +57,15 @@ struct RuntimeCoeffects {
   // Checks whether provided coeffects in `this` can call
   // required coeffects in `o`
   bool canCall(const RuntimeCoeffects o) const {
-    // a & b == a
-    // a & ~b == 0
-    return (m_data & (~o.m_data)) == 0;
+    // a & b == b
+    // ~a & b == 0
+    return ((~m_data) & o.m_data) == 0;
   }
 
   bool canCallWithWarning(const RuntimeCoeffects) const;
 
-  // This operator is equivalent to | of [coeffectA | coeffectB]
-  RuntimeCoeffects& operator&=(const RuntimeCoeffects);
+  // This operator is equivalent to & of [coeffectA & coeffectB]
+  RuntimeCoeffects& operator|=(const RuntimeCoeffects);
 
 private:
   explicit RuntimeCoeffects(uint16_t data) : m_data(data) {}
@@ -81,11 +77,7 @@ struct StaticCoeffects {
 
   const std::string toString() const;
 
-  RuntimeCoeffects toAmbient() const;
   RuntimeCoeffects toRequired() const;
-
-  // Returns the corresponding shallow bits for coeffects that are local
-  RuntimeCoeffects toShallowWithLocals() const;
 
   static StaticCoeffects fromValue(uint16_t value) {
     return StaticCoeffects{value};
@@ -100,8 +92,8 @@ struct StaticCoeffects {
   static StaticCoeffects defaults();
   static StaticCoeffects write_this_props();
 
-  // This operator is equivalent to | of [coeffectA | coeffectB]
-  StaticCoeffects& operator&=(const StaticCoeffects);
+  // This operator is equivalent to & of [coeffectA & coeffectB]
+  StaticCoeffects& operator|=(const StaticCoeffects);
 
   template<class SerDe>
   void serde(SerDe& sd) {

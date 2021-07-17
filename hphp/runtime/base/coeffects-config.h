@@ -64,6 +64,7 @@ struct CoeffectsConfig {
   static bool isAnyRx(const StringData*);
   static StaticCoeffects fromName(const std::string&);
   static StaticCoeffects combine(const StaticCoeffects, const StaticCoeffects);
+  static RuntimeCoeffects escapesTo(const std::string&);
   static std::vector<std::string> toStringList(const StaticCoeffects data);
   static std::string mangle();
 

@@ -811,7 +811,7 @@ public:
    * Returns the runtime representation of coeffects
    */
   RuntimeCoeffects requiredCoeffects() const;
-  RuntimeCoeffects shallowCoeffectsWithLocals() const;
+  RuntimeCoeffects coeffectEscapes() const;
 
   /*
    * Sets required coeffects
@@ -1369,7 +1369,7 @@ private:
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
     int m_sn;       // Only read if SharedData::m_sn is kSmallDeltaLimit
     MaybeDataType m_hniReturnType;
-    RuntimeCoeffects m_shallowCoeffectsWithLocals{RuntimeCoeffects::none()};
+    RuntimeCoeffects m_coeffectEscapes{RuntimeCoeffects::none()};
     int64_t m_dynCallSampleRate;
     // Bits 64 and up of the inout-ness guards (the first 64 bits are in
     // Func::m_inoutBitVal for faster access).

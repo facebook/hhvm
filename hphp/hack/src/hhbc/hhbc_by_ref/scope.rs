@@ -9,6 +9,7 @@ pub mod scope {
     use hhbc_by_ref_iterator as iterator;
     use hhbc_by_ref_label as label;
     use hhbc_by_ref_local as local;
+    use hhbc_by_ref_local::Local;
 
     /// Run emit () in a new unnamed local scope, which produces three instruction
     /// blocks -- before, inner, after. If emit () registered any unnamed locals, the
@@ -97,7 +98,7 @@ pub mod scope {
         F: FnOnce(
             &'arena bumpalo::Bump,
             &mut Emitter<'arena, 'decl, D>,
-            local::Type<'arena>,
+            Local<'arena>,
         ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, InstrSeq<'arena>)>,
     {
         with_unnamed_locals(alloc, e, |alloc, e| {
@@ -137,7 +138,7 @@ pub mod scope {
             alloc,
             (start..end)
                 .into_iter()
-                .map(|id| instr::unsetl(alloc, local::Type::Unnamed(id)))
+                .map(|id| instr::unsetl(alloc, Local::Unnamed(id)))
                 .collect(),
         )
     }

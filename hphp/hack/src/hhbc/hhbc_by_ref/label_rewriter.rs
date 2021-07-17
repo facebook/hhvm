@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
+use ffi::Maybe::Just;
 use hash::{HashMap, HashSet};
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_param::HhasParam;
@@ -46,15 +47,15 @@ fn get_regular_labels<'arena>(instr: &'arena Instruct<'arena>) -> Vec<&'arena La
         | IContFlow(JmpNS(l))
         | IContFlow(JmpZ(l))
         | IContFlow(JmpNZ(l))
-        | ICall(FCall(FcallArgs(_, _, _, _, Some(l), _)))
-        | ICall(FCallClsMethod(FcallArgs(_, _, _, _, Some(l), _), _))
-        | ICall(FCallClsMethodD(FcallArgs(_, _, _, _, Some(l), _), _, _))
-        | ICall(FCallClsMethodS(FcallArgs(_, _, _, _, Some(l), _), _))
-        | ICall(FCallClsMethodSD(FcallArgs(_, _, _, _, Some(l), _), _, _))
-        | ICall(FCallFunc(FcallArgs(_, _, _, _, Some(l), _)))
-        | ICall(FCallFuncD(FcallArgs(_, _, _, _, Some(l), _), _))
-        | ICall(FCallObjMethod(FcallArgs(_, _, _, _, Some(l), _), _))
-        | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, Some(l), _), _, _)) => vec![l],
+        | ICall(FCall(FcallArgs(_, _, _, _, Just(l), _)))
+        | ICall(FCallClsMethod(FcallArgs(_, _, _, _, Just(l), _), _))
+        | ICall(FCallClsMethodD(FcallArgs(_, _, _, _, Just(l), _), _, _))
+        | ICall(FCallClsMethodS(FcallArgs(_, _, _, _, Just(l), _), _))
+        | ICall(FCallClsMethodSD(FcallArgs(_, _, _, _, Just(l), _), _, _))
+        | ICall(FCallFunc(FcallArgs(_, _, _, _, Just(l), _)))
+        | ICall(FCallFuncD(FcallArgs(_, _, _, _, Just(l), _), _))
+        | ICall(FCallObjMethod(FcallArgs(_, _, _, _, Just(l), _), _))
+        | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, Just(l), _), _, _)) => vec![l],
         IContFlow(Switch(_, _, ls)) => ls.iter().collect::<Vec<_>>(),
         IContFlow(SSwitch(pairs)) => pairs.iter().map(|x| &x.1).collect::<Vec<_>>(),
         IMisc(MemoGetEager(l1, l2, _)) => vec![l1, l2],
@@ -113,15 +114,15 @@ where
     match instr {
         IIterator(IterInit(_, l))
         | IIterator(IterNext(_, l))
-        | ICall(FCall(FcallArgs(_, _, _, _, Some(l), _)))
-        | ICall(FCallClsMethod(FcallArgs(_, _, _, _, Some(l), _), _))
-        | ICall(FCallClsMethodD(FcallArgs(_, _, _, _, Some(l), _), _, _))
-        | ICall(FCallClsMethodS(FcallArgs(_, _, _, _, Some(l), _), _))
-        | ICall(FCallClsMethodSD(FcallArgs(_, _, _, _, Some(l), _), _, _))
-        | ICall(FCallFunc(FcallArgs(_, _, _, _, Some(l), _)))
-        | ICall(FCallFuncD(FcallArgs(_, _, _, _, Some(l), _), _))
-        | ICall(FCallObjMethod(FcallArgs(_, _, _, _, Some(l), _), _))
-        | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, Some(l), _), _, _))
+        | ICall(FCall(FcallArgs(_, _, _, _, Just(l), _)))
+        | ICall(FCallClsMethod(FcallArgs(_, _, _, _, Just(l), _), _))
+        | ICall(FCallClsMethodD(FcallArgs(_, _, _, _, Just(l), _), _, _))
+        | ICall(FCallClsMethodS(FcallArgs(_, _, _, _, Just(l), _), _))
+        | ICall(FCallClsMethodSD(FcallArgs(_, _, _, _, Just(l), _), _, _))
+        | ICall(FCallFunc(FcallArgs(_, _, _, _, Just(l), _)))
+        | ICall(FCallFuncD(FcallArgs(_, _, _, _, Just(l), _), _))
+        | ICall(FCallObjMethod(FcallArgs(_, _, _, _, Just(l), _), _))
+        | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, Just(l), _), _, _))
         | IContFlow(Jmp(l))
         | IContFlow(JmpNS(l))
         | IContFlow(JmpZ(l))

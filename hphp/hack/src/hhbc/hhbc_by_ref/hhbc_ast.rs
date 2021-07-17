@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{Slice, Str};
-use hhbc_by_ref_local as local;
+use ffi::{Maybe, Slice, Str};
+use hhbc_by_ref_local::Local;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
@@ -61,13 +61,14 @@ impl Default for FcallFlags {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub struct FcallArgs<'arena>(
     pub FcallFlags,
     pub NumParams,
     pub NumParams,
     pub ByRefs<'arena>,
-    pub Option<hhbc_by_ref_label::Label>,
-    pub Option<&'arena str>,
+    pub Maybe<hhbc_by_ref_label::Label>,
+    pub Maybe<Str<'arena>>,
 );
 
 impl<'arena> FcallArgs<'arena> {
@@ -87,8 +88,11 @@ impl<'arena> FcallArgs<'arena> {
             num_args,
             num_rets,
             inouts,
-            async_eager_label,
-            context,
+            Maybe::from(async_eager_label),
+            match context {
+                Some(s) => Maybe::Just(Slice::new(s.as_bytes())),
+                None => Maybe::Nothing,
+            },
         )
     }
 }
@@ -96,8 +100,8 @@ impl<'arena> FcallArgs<'arena> {
 #[derive(Clone, Debug)]
 pub struct IterArgs<'arena> {
     pub iter_id: hhbc_by_ref_iterator::Id,
-    pub key_id: Option<local::Type<'arena>>,
-    pub val_id: local::Type<'arena>,
+    pub key_id: Option<Local<'arena>>,
+    pub val_id: Local<'arena>,
 }
 
 pub type ClassrefId = isize;
@@ -154,11 +158,11 @@ pub enum FatalOp {
 #[derive(Clone, Copy, Debug)]
 pub enum MemberKey<'arena> {
     EC(StackIndex, ReadOnlyOp),
-    EL(local::Type<'arena>, ReadOnlyOp),
+    EL(Local<'arena>, ReadOnlyOp),
     ET(&'arena str, ReadOnlyOp),
     EI(i64, ReadOnlyOp),
     PC(StackIndex, ReadOnlyOp),
-    PL(local::Type<'arena>, ReadOnlyOp),
+    PL(Local<'arena>, ReadOnlyOp),
     PT(PropId<'arena>, ReadOnlyOp),
     QT(PropId<'arena>, ReadOnlyOp),
     W,
@@ -230,7 +234,7 @@ pub enum InstructLitConst<'arena> {
     CnsE(ConstId<'arena>),
     ClsCns(ConstId<'arena>),
     ClsCnsD(ConstId<'arena>, ClassId<'arena>),
-    ClsCnsL(local::Type<'arena>),
+    ClsCnsL(Local<'arena>),
     File,
     Dir,
     Method,
@@ -331,11 +335,11 @@ pub enum InstructSpecialFlow<'arena> {
 
 #[derive(Clone, Debug)]
 pub enum InstructGet<'arena> {
-    CGetL(local::Type<'arena>),
-    CGetQuietL(local::Type<'arena>),
-    CGetL2(local::Type<'arena>),
-    CUGetL(local::Type<'arena>),
-    PushL(local::Type<'arena>),
+    CGetL(Local<'arena>),
+    CGetQuietL(Local<'arena>),
+    CGetL2(Local<'arena>),
+    CUGetL(Local<'arena>),
+    PushL(Local<'arena>),
     CGetG,
     CGetS(ReadOnlyOp),
     ClassGetC,
@@ -367,12 +371,12 @@ pub enum IstypeOp {
 #[derive(Clone, Debug)]
 pub enum InstructIsset<'arena> {
     IssetC,
-    IssetL(local::Type<'arena>),
+    IssetL(Local<'arena>),
     IssetG,
     IssetS,
-    IsUnsetL(local::Type<'arena>),
+    IsUnsetL(Local<'arena>),
     IsTypeC(IstypeOp),
-    IsTypeL(local::Type<'arena>, IstypeOp),
+    IsTypeL(Local<'arena>, IstypeOp),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -420,18 +424,18 @@ pub enum InitpropOp {
 
 #[derive(Clone, Debug)]
 pub enum InstructMutator<'arena> {
-    SetL(local::Type<'arena>),
+    SetL(Local<'arena>),
     /// PopL is put in mutators since it behaves as SetL + PopC
-    PopL(local::Type<'arena>),
+    PopL(Local<'arena>),
     SetG,
     SetS(ReadOnlyOp),
-    SetOpL(local::Type<'arena>, EqOp),
+    SetOpL(Local<'arena>, EqOp),
     SetOpG(EqOp),
     SetOpS(EqOp),
-    IncDecL(local::Type<'arena>, IncdecOp),
+    IncDecL(Local<'arena>, IncdecOp),
     IncDecG(IncdecOp),
     IncDecS(IncdecOp),
-    UnsetL(local::Type<'arena>),
+    UnsetL(Local<'arena>),
     UnsetG,
     CheckProp(PropId<'arena>),
     InitProp(PropId<'arena>, InitpropOp),
@@ -465,9 +469,9 @@ pub enum InstructCall<'arena> {
 #[derive(Clone, Debug)]
 pub enum InstructBase<'arena> {
     BaseGC(StackIndex, MemberOpMode),
-    BaseGL(local::Type<'arena>, MemberOpMode),
+    BaseGL(Local<'arena>, MemberOpMode),
     BaseSC(StackIndex, StackIndex, MemberOpMode, ReadOnlyOp),
-    BaseL(local::Type<'arena>, MemberOpMode),
+    BaseL(Local<'arena>, MemberOpMode),
     BaseC(StackIndex, MemberOpMode),
     BaseH,
     Dim(MemberOpMode, MemberKey<'arena>),
@@ -547,24 +551,21 @@ pub enum InstructMisc<'arena> {
     ArrayIdx,
     ArrayMarkLegacy,
     ArrayUnmarkLegacy,
-    AssertRATL(local::Type<'arena>, RepoAuthType<'arena>),
+    AssertRATL(Local<'arena>, RepoAuthType<'arena>),
     AssertRATStk(StackIndex, RepoAuthType<'arena>),
     BreakTraceHint,
-    Silence(local::Type<'arena>, OpSilence),
-    GetMemoKeyL(local::Type<'arena>),
+    Silence(Local<'arena>, OpSilence),
+    GetMemoKeyL(Local<'arena>),
     CGetCUNop,
     UGetCUNop,
-    MemoGet(
-        hhbc_by_ref_label::Label,
-        Option<(local::Type<'arena>, isize)>,
-    ),
+    MemoGet(hhbc_by_ref_label::Label, Option<(Local<'arena>, isize)>),
     MemoGetEager(
         hhbc_by_ref_label::Label,
         hhbc_by_ref_label::Label,
-        Option<(local::Type<'arena>, isize)>,
+        Option<(Local<'arena>, isize)>,
     ),
-    MemoSet(Option<(local::Type<'arena>, isize)>),
-    MemoSetEager(Option<(local::Type<'arena>, isize)>),
+    MemoSet(Option<(Local<'arena>, isize)>),
+    MemoSetEager(Option<(Local<'arena>, isize)>),
     LockObj,
     ThrowNonExhaustiveSwitch,
     RaiseClassStringConversionWarning,
@@ -588,7 +589,7 @@ pub enum GenCreationExecution {
 pub enum AsyncFunctions<'arena> {
     WHResult,
     Await,
-    AwaitAll(Option<(local::Type<'arena>, isize)>),
+    AwaitAll(Option<(Local<'arena>, isize)>),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -630,15 +631,23 @@ pub enum Instruct<'arena> {
     IIncludeEvalDefine(InstructIncludeEvalDefine),
 }
 
-#[repr(C)]
-pub struct Dummy<'a>(pub Slice<'a, i32>);
-
 #[no_mangle]
-pub unsafe extern "C" fn hhbc_ast_07<'a, 'arena>(
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhbc_ast<'a, 'arena>(
     _: CheckStarted,
     _: FreeIterator,
     _: FcallFlags,
-    _: Dummy,
+    _: ParamNum,
+    _: StackIndex,
+    _: RecordNum,
+    _: TypedefNum,
+    _: ClassNum,
+    _: ConstNum,
+    _: ClassId<'arena>,
+    _: FunctionId<'arena>,
+    _: MethodId<'arena>,
+    _: ConstId<'arena>,
+    _: PropId<'arena>,
+    _: FcallArgs<'arena>,
 ) {
     unimplemented!()
 }

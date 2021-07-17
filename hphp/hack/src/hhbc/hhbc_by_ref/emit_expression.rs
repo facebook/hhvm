@@ -23,7 +23,7 @@ use hhbc_by_ref_instruction_sequence::{
     InstrSeq, Result,
 };
 use hhbc_by_ref_label::Label;
-use hhbc_by_ref_local as local;
+use hhbc_by_ref_local::Local;
 use hhbc_by_ref_options::{CompilerFlags, HhvmFlags, LangFlags, Options};
 use hhbc_by_ref_runtime::TypedValue;
 use hhbc_by_ref_scope::scope;
@@ -155,14 +155,14 @@ mod inout_locals {
     }
 
     pub(super) fn should_move_local_value<'arena>(
-        local: &local::Type<'arena>,
+        local: &Local<'arena>,
         aliases: &AliasInfoMap,
     ) -> bool {
         match local {
-            local::Type::Named(name) => aliases
-                .get(&**name)
+            Local::Named(name) => aliases
+                .get(name.as_str())
                 .map_or(true, |alias| alias.has_single_ref()),
-            local::Type::Unnamed(_) => false,
+            Local::Unnamed(_) => false,
         }
     }
 
@@ -337,10 +337,7 @@ pub enum StoredValueKind {
 ///      throw
 ///    }
 ///    unsetl l
-type InstrSeqWithLocals<'arena> = Vec<(
-    InstrSeq<'arena>,
-    Option<(local::Type<'arena>, StoredValueKind)>,
-)>;
+type InstrSeqWithLocals<'arena> = Vec<(InstrSeq<'arena>, Option<(Local<'arena>, StoredValueKind)>)>;
 
 /// result of emit_array_get
 enum ArrayGetInstr<'arena> {
@@ -831,11 +828,11 @@ fn emit_lambda<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         match string_utils::reified::is_captured_generic(local_id::get_name(id)) {
                             Some((is_fun, i)) => {
                                 if is_in_lambda {
-                                    Ok(instr::cgetl(alloc, local::Type::Named(
-                                    bumpalo::collections::String::from_str_in(
+                                    Ok(instr::cgetl(alloc, Local::Named(
+                                    Slice::new(bumpalo::collections::String::from_str_in(
                                     string_utils::reified::reified_generic_captured_name(
                                         is_fun, i as usize,
-                                    ).as_str(), alloc).into_bump_str(),
+                                    ).as_str(), alloc).into_bump_str().as_bytes()),
                                 )))
                                 } else {
                                     emit_reified_generic_instrs(
@@ -979,7 +976,7 @@ fn emit_iter<
     'arena,
     'decl,
     D: DeclProvider<'decl>,
-    F: FnOnce(&'arena bumpalo::Bump, local::Type<'arena>, local::Type<'arena>) -> InstrSeq<'arena>,
+    F: FnOnce(&'arena bumpalo::Bump, Local<'arena>, Local<'arena>) -> InstrSeq<'arena>,
 >(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
@@ -1951,13 +1948,14 @@ pub fn emit_reified_targs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     Ok(if !is_in_lambda && same_as_targs(&current_fun_tparams) {
         instr::cgetl(
             alloc,
-            local::Type::Named(
+            Local::Named(Slice::new(
                 bumpalo::collections::String::from_str_in(
                     string_utils::reified::GENERICS_LOCAL_NAME,
                     alloc,
                 )
-                .into_bump_str(),
-            ),
+                .into_bump_str()
+                .as_bytes(),
+            )),
         )
     } else if !is_in_lambda && same_as_targs(&current_cls_tparams[..]) {
         InstrSeq::gather(
@@ -2355,7 +2353,10 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     tast::ClassGetExpr::CGstring((pos, id)) => Ok(emit_pos_then(
                         alloc,
                         pos,
-                        instr::cgetl(alloc, local::Type::Named(alloc.alloc_str(id.as_str()))),
+                        instr::cgetl(
+                            alloc,
+                            Local::Named(Slice::new(alloc.alloc_str(id.as_str()).as_bytes())),
+                        ),
                     )),
                     tast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
                 };
@@ -3034,7 +3035,9 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 vec![
                     instr::cgetl(
                         alloc,
-                        local::Type::Named(alloc.alloc_str(local_id::get_name(&param.1))),
+                        Local::Named(Slice::new(
+                            alloc.alloc_str(local_id::get_name(&param.1)).as_bytes(),
+                        )),
                     ),
                     instr::whresult(alloc),
                 ],
@@ -3043,7 +3046,9 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         ("__hhvm_internal_getmemokeyl", &[E(_, _, E_::Lvar(ref param))]) if e.systemlib() => {
             Ok(Some(instr::getmemokeyl(
                 alloc,
-                local::Type::Named(alloc.alloc_str(local_id::get_name(&param.1))),
+                Local::Named(Slice::new(
+                    alloc.alloc_str(local_id::get_name(&param.1)).as_bytes(),
+                )),
             )))
         }
         ("HH\\array_mark_legacy", _) if args.len() == 1 || args.len() == 2 => {
@@ -3499,7 +3504,7 @@ fn emit_call_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 vec![
                     emit_expr(e, env, arg1)?,
                     emit_pos(alloc, pos),
-                    instr::popl(alloc, local::Type::Named("$86metadata")),
+                    instr::popl(alloc, Local::Named(Slice::new("$86metadata".as_bytes()))),
                     instr::null(alloc),
                 ],
             ))
@@ -3558,7 +3563,11 @@ pub fn emit_reified_generic_instrs<'arena>(
     let base = if is_fun {
         instr::basel(
             alloc,
-            local::Type::Named(alloc.alloc_str(string_utils::reified::GENERICS_LOCAL_NAME)),
+            Local::Named(Slice::new(
+                alloc
+                    .alloc_str(string_utils::reified::GENERICS_LOCAL_NAME)
+                    .as_bytes(),
+            )),
             MemberOpMode::Warn,
         )
     } else {
@@ -3612,13 +3621,14 @@ fn emit_reified_type_opt<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let cget_instr = |is_fun, i| {
         instr::cgetl(
             env.arena,
-            local::Type::Named(
+            Local::Named(Slice::new(
                 bumpalo::collections::String::from_str_in(
                     string_utils::reified::reified_generic_captured_name(is_fun, i).as_str(),
                     alloc,
                 )
-                .into_bump_str(),
-            ),
+                .into_bump_str()
+                .as_bytes(),
+            )),
         )
     };
     let check = |is_soft| -> Result<()> {
@@ -4433,7 +4443,7 @@ fn emit_store_for_simple_base<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     pos: &Pos,
     elem_stack_size: isize,
     base: &tast::Expr,
-    local: local::Type<'arena>,
+    local: Local<'arena>,
     is_base: bool,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
@@ -5993,7 +6003,7 @@ fn can_use_as_rhs_in_list_assignment(expr: &tast::Expr_) -> Result<bool> {
 fn emit_array_get_fixed<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     last_usage: bool,
-    local: local::Type<'arena>,
+    local: Local<'arena>,
     indices: &[isize],
 ) -> InstrSeq<'arena> {
     let (base, stack_count) = if last_usage {
@@ -6044,7 +6054,7 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     e: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
     outer_pos: &Pos,
-    local: Option<&local::Type<'arena>>,
+    local: Option<&Local<'arena>>,
     indices: &[isize],
     expr: &tast::Expr,
     last_usage: bool,
@@ -6190,7 +6200,7 @@ pub fn emit_final_local_op<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     pos: &Pos,
     op: LValOp,
-    lid: local::Type<'arena>,
+    lid: Local<'arena>,
 ) -> InstrSeq<'arena> {
     use LValOp as L;
     emit_pos_then(
@@ -6718,7 +6728,7 @@ pub fn get_local<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     s: &str,
-) -> std::result::Result<local::Type<'arena>, hhbc_by_ref_instruction_sequence::Error> {
+) -> std::result::Result<Local<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     let alloc: &'arena bumpalo::Bump = env.arena;
     if s == special_idents::DOLLAR_DOLLAR {
         match &env.pipe_var {
@@ -6731,9 +6741,11 @@ pub fn get_local<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     } else if special_idents::is_tmp_var(s) {
         Ok(*e.local_gen().get_unnamed_for_tempname(s))
     } else {
-        Ok(local::Type::Named(
-            bumpalo::collections::String::from_str_in(s, alloc).into_bump_str(),
-        ))
+        Ok(Local::Named(Slice::new(
+            bumpalo::collections::String::from_str_in(s, alloc)
+                .into_bump_str()
+                .as_bytes(),
+        )))
     }
 }
 

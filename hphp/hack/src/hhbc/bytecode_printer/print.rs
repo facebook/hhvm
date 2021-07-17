@@ -9,6 +9,8 @@ mod write;
 pub use context::Context;
 pub use write::{Error, IoWrite, Result, Write};
 
+use ffi::{Maybe::Just, Maybe::Nothing};
+
 use indexmap::IndexSet;
 use itertools::Itertools;
 
@@ -42,7 +44,7 @@ use hhbc_by_ref_hhbc_string_utils::{
 use hhbc_by_ref_instruction_sequence::{Error::Unrecoverable, InstrSeq};
 use hhbc_by_ref_iterator::Id as IterId;
 use hhbc_by_ref_label::Label;
-use hhbc_by_ref_local::Type as Local;
+use hhbc_by_ref_local::Local;
 use hhbc_by_ref_runtime::TypedValue;
 use lazy_static::lazy_static;
 use naming_special_names_rust::classes;
@@ -1125,11 +1127,11 @@ fn print_fcall_args<W: Write>(
         concat_by(w, "", inouts, |w, i| w.write(if *i { "1" } else { "0" }))
     })?;
     w.write(" ")?;
-    option_or(w, async_eager_label, print_label, "-")?;
+    option_or(w, async_eager_label.as_ref(), print_label, "-")?;
     w.write(" ")?;
     match context {
-        Some(s) => quotes(w, |w| w.write(s)),
-        None => w.write("\"\""),
+        Just(s) => quotes(w, |w| w.write(s)),
+        Nothing => w.write("\"\""),
     }
 }
 

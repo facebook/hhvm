@@ -37,6 +37,7 @@ use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{instr, unrecoverable, Error, InstrSeq, Result};
 use hhbc_by_ref_label::Label;
 use hhbc_by_ref_label_rewriter as label_rewriter;
+use hhbc_by_ref_local::Local;
 use hhbc_by_ref_options::{CompilerFlags, LangFlags};
 use hhbc_by_ref_runtime::TypedValue;
 use hhbc_by_ref_statement_state::StatementState;
@@ -597,7 +598,7 @@ mod atom_helpers {
     use aast_defs::ReifyKind::Erased;
     use ast_defs::Id;
     use hhbc_by_ref_instruction_sequence::{instr, unrecoverable, InstrSeq, Result};
-    use hhbc_by_ref_local::Type::Named;
+    use hhbc_by_ref_local::Local::Named;
     use tast::Tparam;
 
     fn strip_ns(name: &str) -> &str {
@@ -640,8 +641,11 @@ mod atom_helpers {
         label_done: Label,
     ) -> Result<InstrSeq<'arena>> {
         let param_name = &param.name;
-        let loc =
-            Named(bumpalo::collections::String::from_str_in(param_name, alloc).into_bump_str());
+        let loc = Named(Slice::new(
+            bumpalo::collections::String::from_str_in(param_name, alloc)
+                .into_bump_str()
+                .as_bytes(),
+        ));
         Ok(InstrSeq::gather(
             alloc,
             vec![
@@ -897,7 +901,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         (L::Definitely, Some(h)) => {
                             let check = instr::istypel(
                                 alloc,
-                                hhbc_by_ref_local::Type::Named(bumpalo::collections::String::from_str_in(param.name.as_str(), alloc).into_bump_str()),
+                                Local::Named(Slice::new(bumpalo::collections::String::from_str_in(param.name.as_str(), alloc).into_bump_str().as_bytes())),
                                 IstypeOp::OpNull,
                             );
                             let verify_instr = instr::verify_param_type_ts(alloc, param_name());
@@ -1109,10 +1113,11 @@ fn emit_verify_out<'arena>(
                     vec![
                         instr::cgetl(
                             alloc,
-                            hhbc_by_ref_local::Type::Named(
+                            Local::Named(Slice::new(
                                 bumpalo::collections::String::from_str_in(p.name.as_str(), alloc)
-                                    .into_bump_str(),
-                            ),
+                                    .into_bump_str()
+                                    .as_bytes(),
+                            )),
                         ),
                         match p.type_info.as_ref() {
                             Some(HhasTypeInfo { user_type, .. })

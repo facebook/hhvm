@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
+use ffi::Slice;
 use hhbc_by_ref_ast_scope::Scope;
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_expression as emit_expression;
@@ -15,6 +16,7 @@ use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhas_type::Info;
 use hhbc_by_ref_hhbc_string_utils::locals::strip_dollar;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
+use hhbc_by_ref_local::Local;
 use hhbc_by_ref_options::LangFlags;
 use oxidized::{
     aast_defs::{Hint, Hint_},
@@ -203,10 +205,11 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl, D: DeclProvider<'decl>
                     emit_pos::emit_pos(alloc, pos),
                     instr::setl(
                         alloc,
-                        hhbc_by_ref_local::Type::Named(
+                        Local::Named(Slice::new(
                             bumpalo::collections::String::from_str_in(param.name.as_str(), alloc)
-                                .into_bump_str(),
-                        ),
+                                .into_bump_str()
+                                .as_bytes(),
+                        )),
                     ),
                     instr::popc(alloc),
                 ],

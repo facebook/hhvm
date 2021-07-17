@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use decl_provider::DeclProvider;
+use ffi::Slice;
 use hhbc_by_ref_ast_scope::Scope;
 use hhbc_by_ref_emit_body as emit_body;
 use hhbc_by_ref_emit_fatal as emit_fatal;
@@ -11,6 +12,7 @@ use hhbc_by_ref_emit_param as emit_param;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_body::HhasBody;
 use hhbc_by_ref_instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
+use hhbc_by_ref_local::Local;
 use oxidized::{aast, ast as tast, pos::Pos};
 
 pub fn emit_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
@@ -74,8 +76,9 @@ fn emit_generator_method<'arena>(
 ) -> Result<InstrSeq<'arena>> {
     let instrs = match name {
         "send" => {
-            let local =
-                hhbc_by_ref_local::Type::Named(alloc.alloc_str(get_first_param_name(params)?));
+            let local = Local::Named(Slice::new(
+                alloc.alloc_str(get_first_param_name(params)?).as_bytes(),
+            ));
             InstrSeq::gather(
                 alloc,
                 vec![
@@ -86,8 +89,9 @@ fn emit_generator_method<'arena>(
             )
         }
         "raise" | "throw" => {
-            let local =
-                hhbc_by_ref_local::Type::Named(alloc.alloc_str(get_first_param_name(params)?));
+            let local = Local::Named(Slice::new(
+                alloc.alloc_str(get_first_param_name(params)?).as_bytes(),
+            ));
             InstrSeq::gather(
                 alloc,
                 vec![

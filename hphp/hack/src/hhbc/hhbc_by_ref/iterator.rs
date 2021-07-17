@@ -6,6 +6,7 @@
 use std::fmt;
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(C)]
 pub struct Id(pub usize);
 
 impl fmt::Display for Id {

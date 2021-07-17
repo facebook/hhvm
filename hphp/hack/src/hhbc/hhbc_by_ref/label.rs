@@ -6,6 +6,7 @@
 pub type Id = usize;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, std::cmp::Ord, std::cmp::PartialOrd)]
+#[repr(C)]
 pub enum Label {
     Regular(Id),
     DefaultArg(Id),
@@ -67,3 +68,7 @@ impl Gen {
         self.next_id = 0;
     }
 }
+
+#[clippy::allow(extra_unused_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhbc_label<'a, 'arena>(_: Label) {}

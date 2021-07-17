@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::Str;
+
 pub type Id = usize;
 
 /// Type of locals as they appear in instructions. Named variables are
@@ -10,16 +12,17 @@ pub type Id = usize;
 /// referenced by number (0 to n-1), but we use Unnamed only for
 /// variables n and above not appearing in .declvars
 #[derive(Copy, Debug)]
-pub enum Type<'arena> {
+#[repr(C)]
+pub enum Local<'arena> {
     Unnamed(Id),
     /// Named local, necessarily starting with `$`
-    Named(&'arena str),
+    Named(Str<'arena>),
 }
-impl<'arena> Clone for Type<'arena> {
-    fn clone(&self) -> Type<'arena> {
+impl<'arena> Clone for Local<'arena> {
+    fn clone(&self) -> Local<'arena> {
         match self {
-            Type::Unnamed(u) => Type::Unnamed(u.clone()),
-            Type::Named(r) => Type::Named(r),
+            Local::Unnamed(u) => Local::Unnamed(u.clone()),
+            Local::Named(r) => Local::Named(r.clone()),
         }
     }
 }
@@ -31,11 +34,11 @@ pub struct Gen<'arena> {
 }
 
 impl<'arena> Gen<'arena> {
-    pub fn get_unnamed(&mut self) -> Type<'arena> {
-        Type::Unnamed(self.counter.get_unnamed_id(&self.dedicated))
+    pub fn get_unnamed(&mut self) -> Local<'arena> {
+        Local::Unnamed(self.counter.get_unnamed_id(&self.dedicated))
     }
 
-    pub fn get_unnamed_for_tempname(&self, s: &str) -> &Type<'arena> {
+    pub fn get_unnamed_for_tempname(&self, s: &str) -> &Local<'arena> {
         naming_special_names_rust::special_idents::assert_tmp_var(s);
         self.dedicated
             .temp_map
@@ -43,7 +46,7 @@ impl<'arena> Gen<'arena> {
             .expect("Unnamed local never init'ed")
     }
 
-    pub fn init_unnamed_for_tempname(&mut self, s: &str) -> &Type<'arena> {
+    pub fn init_unnamed_for_tempname(&mut self, s: &str) -> &Local<'arena> {
         naming_special_names_rust::special_idents::assert_tmp_var(s);
         let new_local = self.get_unnamed();
         if self.dedicated.temp_map.insert(s, new_local).is_some() {
@@ -52,19 +55,19 @@ impl<'arena> Gen<'arena> {
         self.dedicated.temp_map.get(s).unwrap()
     }
 
-    pub fn get_label(&mut self) -> &Type<'arena> {
+    pub fn get_label(&mut self) -> &Local<'arena> {
         let mut counter = self.counter;
         let mut new_counter = self.counter;
         let new_id = new_counter.get_unnamed_id(&self.dedicated);
         let ret = self.dedicated.label.get_or_insert_with(|| {
             counter = new_counter;
-            Type::Unnamed(new_id)
+            Local::Unnamed(new_id)
         });
         self.counter = counter;
         ret
     }
 
-    pub fn get_retval(&mut self) -> &Type<'arena> {
+    pub fn get_retval(&mut self) -> &Local<'arena> {
         // This and above body cannot be factored out because of nasty
         // aliasing of `&self.dedicated` and `&mut
         // self.dedicated.field`.
@@ -73,7 +76,7 @@ impl<'arena> Gen<'arena> {
         let new_id = new_counter.get_unnamed_id(&self.dedicated);
         let ret = self.dedicated.retval.get_or_insert_with(|| {
             counter = new_counter;
-            Type::Unnamed(new_id)
+            Local::Unnamed(new_id)
         });
         self.counter = counter;
         ret
@@ -95,15 +98,19 @@ impl<'arena> Gen<'arena> {
 #[derive(Debug, Default)]
 pub struct TempMap<'arena> {
     stack: std::vec::Vec<usize>,
-    map: indexmap::IndexMap<String, Type<'arena>>,
+    map: indexmap::IndexMap<String, Local<'arena>>,
 }
 
 impl<'arena> TempMap<'arena> {
-    pub fn get(&self, temp: impl AsRef<str>) -> Option<&Type<'arena>> {
+    pub fn get(&self, temp: impl AsRef<str>) -> Option<&Local<'arena>> {
         self.map.get(temp.as_ref())
     }
 
-    pub fn insert(&mut self, temp: impl Into<String>, local: Type<'arena>) -> Option<Type<'arena>> {
+    pub fn insert(
+        &mut self,
+        temp: impl Into<String>,
+        local: Local<'arena>,
+    ) -> Option<Local<'arena>> {
         self.map.insert(temp.into(), local)
     }
 
@@ -123,8 +130,8 @@ impl<'arena> TempMap<'arena> {
 
 #[derive(Default, Debug)]
 pub struct Dedicated<'arena> {
-    label: Option<Type<'arena>>,
-    retval: Option<Type<'arena>>,
+    label: Option<Local<'arena>>,
+    retval: Option<Local<'arena>>,
     pub temp_map: TempMap<'arena>,
 }
 
@@ -138,11 +145,14 @@ impl Counter {
 
         // make sure that newly allocated local don't stomp on dedicated locals
         match (*dedicated).label {
-            Some(Type::Unnamed(v)) if curr == v => self.get_unnamed_id(dedicated),
+            Some(Local::Unnamed(v)) if curr == v => self.get_unnamed_id(dedicated),
             _ => match dedicated.retval {
-                Some(Type::Unnamed(v)) if curr == v => self.get_unnamed_id(dedicated),
+                Some(Local::Unnamed(v)) if curr == v => self.get_unnamed_id(dedicated),
                 _ => curr,
             },
         }
     }
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhbc_local<'a, 'arena>(_: Local<'arena>) {}

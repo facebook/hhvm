@@ -34,6 +34,7 @@ use hhbc_by_ref_hhbc_id::{self as hhbc_id, class, method, prop, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
 use hhbc_by_ref_label as label;
+use hhbc_by_ref_local::Local;
 use hhbc_by_ref_runtime::TypedValue;
 use naming_special_names_rust as special_names;
 use oxidized::{
@@ -405,7 +406,10 @@ fn emit_reified_init_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let check_length = InstrSeq::gather(
         alloc,
         vec![
-            instr::cgetl(alloc, hhbc_by_ref_local::Type::Named(INIT_METH_PARAM_NAME)),
+            instr::cgetl(
+                alloc,
+                Local::Named(Slice::new(INIT_METH_PARAM_NAME.as_bytes())),
+            ),
             instr::check_reified_generic_mismatch(alloc),
         ],
     );
@@ -417,7 +421,10 @@ fn emit_reified_init_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             vec![
                 check_length,
                 instr::checkthis(alloc),
-                instr::cgetl(alloc, hhbc_by_ref_local::Type::Named(INIT_METH_PARAM_NAME)),
+                instr::cgetl(
+                    alloc,
+                    Local::Named(Slice::new(INIT_METH_PARAM_NAME.as_bytes())),
+                ),
                 instr::baseh(alloc),
                 instr::setm_pt(
                     alloc,
@@ -766,7 +773,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         instr::label(alloc, default_label),
                         emit_pos::emit_pos(alloc, pos),
                         instr::string(alloc, "Could not find initializer for "),
-                        instr::cgetl(alloc, hhbc_by_ref_local::Type::Named("$constName")),
+                        instr::cgetl(alloc, Local::Named(Slice::new("$constName".as_bytes()))),
                         instr::string(alloc, " in 86cinit"),
                         instr::concatn(alloc, 3),
                         instr::fatal(alloc, FatalOp::Runtime),
@@ -797,7 +804,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             InstrSeq::gather(
                 alloc,
                 vec![
-                    instr::cgetl(alloc, hhbc_by_ref_local::Type::Named("$constName")),
+                    instr::cgetl(alloc, Local::Named(Slice::new("$constName".as_bytes()))),
                     instr::sswitch(alloc, cases),
                     make_cinit_instrs(
                         alloc,

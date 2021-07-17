@@ -8,6 +8,7 @@ edition = "2018"
 path = "../../local.rs"
 
 [dependencies]
+ffi = { path = "../../../../utils/ffi" }
 indexmap = { version = "1.6", features = ["rayon", "serde-1"] }
 naming_special_names_rust = { path = "../../../../naming" }
 

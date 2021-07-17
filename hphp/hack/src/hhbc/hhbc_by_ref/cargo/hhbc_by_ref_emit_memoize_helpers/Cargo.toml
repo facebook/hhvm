@@ -9,6 +9,7 @@ path = "../../emit_memoize_helpers.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
+ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_emit_fatal = { path = "../hhbc_by_ref_emit_fatal" }
 hhbc_by_ref_hhas_param = { path = "../hhbc_by_ref_hhas_param" }
 hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }

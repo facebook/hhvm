@@ -3,9 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::Slice;
 use hhbc_by_ref_emit_fatal::raise_fatal_runtime;
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
+use hhbc_by_ref_local::Local;
 use oxidized::{aast::FunParam, pos::Pos};
 
 pub const MEMOIZE_SUFFIX: &str = "$memoize_impl";
@@ -19,9 +21,9 @@ pub fn get_memo_key_list<'arena>(
     vec![
         instr::getmemokeyl(
             alloc,
-            hhbc_by_ref_local::Type::Named(alloc.alloc_str(name.as_ref())),
+            Local::Named(Slice::new(alloc.alloc_str(name.as_ref()).as_bytes())),
         ),
-        instr::setl(alloc, hhbc_by_ref_local::Type::Unnamed(local + index)),
+        instr::setl(alloc, Local::Unnamed(local + index)),
         instr::popc(alloc),
     ]
 }
@@ -53,7 +55,7 @@ pub fn param_code_gets<'arena>(
             .map(|param| {
                 instr::cgetl(
                     alloc,
-                    hhbc_by_ref_local::Type::Named(alloc.alloc_str(param.name.as_ref())),
+                    Local::Named(Slice::new(alloc.alloc_str(param.name.as_ref()).as_bytes())),
                 )
             })
             .collect(),

@@ -32,6 +32,31 @@ impl<T: Clone> Clone for Maybe<T> {
         }
     }
 }
+impl<U> Maybe<U> {
+    pub const fn as_ref(&self) -> Maybe<&U> {
+        match *self {
+            Just(ref x) => Just(x),
+            Nothing => Nothing,
+        }
+    }
+}
+
+impl<U> std::convert::From<Option<U>> for Maybe<U> {
+    fn from(o: Option<U>) -> Self {
+        match o {
+            Some(x) => Just(x),
+            None => Nothing,
+        }
+    }
+}
+impl<U> std::convert::From<Maybe<U>> for Option<U> {
+    fn from(o: Maybe<U>) -> Self {
+        match o {
+            Just(x) => Some(x),
+            Nothing => None,
+        }
+    }
+}
 
 #[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
 #[repr(C)]
@@ -283,6 +308,9 @@ mod tests {
 // For cbindgen
 #[allow(clippy::needless_lifetimes)]
 #[no_mangle]
-pub unsafe extern "C" fn ffi_07<'arena>(_: Str<'arena>) {
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_ffi<'arena>(
+    _: Str<'arena>,
+    _: Maybe<i32>,
+) {
     unimplemented!()
 }

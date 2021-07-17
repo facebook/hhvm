@@ -21,6 +21,7 @@ use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags};
 use hhbc_by_ref_hhbc_id::function;
 use hhbc_by_ref_hhbc_string_utils::{coeffects, reified};
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
+use hhbc_by_ref_local::Local;
 use hhbc_by_ref_options::{HhvmFlags, Options, RepoFlags};
 use hhbc_by_ref_runtime::TypedValue;
 use ocamlrep::rc::RcOc;
@@ -155,7 +156,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
     // The local that contains the reified generics is the first non parameter local,
     // so the first local is parameter count + 1 when there are reified = generics
     let add_refied = usize::from(is_reified);
-    let first_local = hhbc_by_ref_local::Type::Unnamed(param_count + add_refied);
+    let first_local = Local::Unnamed(param_count + add_refied);
     let deprecation_body =
         emit_body::emit_deprecation_info(alloc, &env.scope, deprecation_info, e.systemlib())?;
     let (begin_label, default_value_setters) =
@@ -179,7 +180,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
         (
             instr::cgetl(
                 alloc,
-                hhbc_by_ref_local::Type::Named(reified::GENERICS_LOCAL_NAME),
+                Local::Named(Slice::new(reified::GENERICS_LOCAL_NAME.as_bytes())),
             ),
             InstrSeq::gather(
                 alloc,

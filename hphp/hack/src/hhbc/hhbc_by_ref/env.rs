@@ -12,6 +12,7 @@ use emitter::Emitter;
 use hhbc_by_ref_ast_body::AstBody;
 use hhbc_by_ref_ast_scope::{self as ast_scope, Scope, ScopeItem};
 use hhbc_by_ref_label::Label;
+use hhbc_by_ref_local::Local;
 use ocamlrep::rc::RcOc;
 use oxidized::{ast as tast, namespace_env::Env as NamespaceEnv};
 
@@ -34,7 +35,7 @@ pub struct Env<'a, 'arena> {
     pub scope: Scope<'a>,
     pub namespace: RcOc<NamespaceEnv>,
     pub call_context: Option<String>,
-    pub pipe_var: Option<hhbc_by_ref_local::Type<'arena>>,
+    pub pipe_var: Option<Local<'arena>>,
 }
 
 impl<'a, 'arena> Env<'a, 'arena> {
@@ -67,7 +68,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
         }
     }
 
-    pub fn with_pipe_var(&mut self, local: hhbc_by_ref_local::Type<'arena>) {
+    pub fn with_pipe_var(&mut self, local: Local<'arena>) {
         self.pipe_var = Some(local);
     }
 

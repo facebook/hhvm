@@ -14,7 +14,7 @@ use hhbc_by_ref_hhbc_id::{self as hhbc_id, Id};
 use hhbc_by_ref_instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use hhbc_by_ref_label::Label;
 use hhbc_by_ref_label_rewriter as label_rewriter;
-use hhbc_by_ref_local as local;
+use hhbc_by_ref_local::Local;
 use hhbc_by_ref_scope::scope;
 use hhbc_by_ref_statement_state::StatementState;
 
@@ -358,7 +358,7 @@ fn emit_awaitall_multi<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         }
         let load_args = InstrSeq::gather(alloc, instrs);
 
-        let mut locals: Vec<local::Type> = vec![];
+        let mut locals: Vec<Local> = vec![];
         for (lvar, _) in el.iter() {
             locals.push(match lvar {
                 None => e.local_gen_mut().get_unnamed(),
@@ -454,13 +454,14 @@ fn emit_using<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             let (local, preamble) = match &(using.exprs.1[0].2) {
                 tast::Expr_::Binop(x) => match (&x.0, (x.1).2.as_lvar()) {
                     (ast_defs::Bop::Eq(None), Some(tast::Lid(_, id))) => (
-                        local::Type::Named(
+                        Local::Named(Slice::new(
                             bumpalo::collections::String::from_str_in(
                                 local_id::get_name(&id).as_str(),
                                 alloc,
                             )
-                            .into_bump_str(),
-                        ),
+                            .into_bump_str()
+                            .as_bytes(),
+                        )),
                         InstrSeq::gather(
                             alloc,
                             vec![
@@ -486,13 +487,14 @@ fn emit_using<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     }
                 },
                 tast::Expr_::Lvar(lid) => (
-                    local::Type::Named(
+                    Local::Named(Slice::new(
                         bumpalo::collections::String::from_str_in(
                             local_id::get_name(&lid.1).as_str(),
                             alloc,
                         )
-                        .into_bump_str(),
-                    ),
+                        .into_bump_str()
+                        .as_bytes(),
+                    )),
                     InstrSeq::gather(
                         alloc,
                         vec![
@@ -532,7 +534,7 @@ fn emit_using<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
             let emit_finally = |
                 e: &mut Emitter<'arena, 'decl, D>,
-                local: local::Type<'arena>,
+                local: Local<'arena>,
                 has_await: bool,
                 is_block_scoped: bool,
             | -> InstrSeq<'arena> {
@@ -947,7 +949,7 @@ fn emit_try_finally_<
 fn make_finally_catch<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
-    exn_local: local::Type<'arena>,
+    exn_local: Local<'arena>,
     finally_body: InstrSeq<'arena>,
 ) -> InstrSeq<'arena> {
     let l2 = instr::unsetl(alloc, *e.local_gen_mut().get_retval());
@@ -1041,10 +1043,11 @@ fn emit_catch<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             instr::jmpz(alloc, next_catch),
             instr::setl(
                 alloc,
-                local::Type::Named(
+                Local::Named(Slice::new(
                     bumpalo::collections::String::from_str_in(&((catch.1).1).1, alloc)
-                        .into_bump_str(),
-                ),
+                        .into_bump_str()
+                        .as_bytes(),
+                )),
             ),
             instr::popc(alloc),
             emit_stmts(e, env, &catch.2)?,
@@ -1215,11 +1218,7 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     e: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     iterator: &tast::AsExpr,
-) -> Result<(
-    Option<local::Type<'arena>>,
-    local::Type<'arena>,
-    InstrSeq<'arena>,
-)> {
+) -> Result<(Option<Local<'arena>>, Local<'arena>, InstrSeq<'arena>)> {
     use tast::AsExpr as A;
     let alloc = env.arena;
     fn get_id_of_simple_lvar_opt(lvar: &tast::Expr_) -> Result<Option<&str>> {
@@ -1243,8 +1242,8 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 get_id_of_simple_lvar_opt(&v.2)?,
             ) {
                 (Some(key_id), Some(val_id)) => (
-                    Some(local::Type::Named(alloc.alloc_str(key_id))),
-                    local::Type::Named(alloc.alloc_str(val_id)),
+                    Some(Local::Named(Slice::new(alloc.alloc_str(key_id).as_bytes()))),
+                    Local::Named(Slice::new(alloc.alloc_str(val_id).as_bytes())),
                     instr::empty(alloc),
                 ),
                 _ => {
@@ -1280,7 +1279,7 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         A::AsV(v) => Ok(match get_id_of_simple_lvar_opt(&v.2)? {
             Some(val_id) => (
                 None,
-                local::Type::Named(alloc.alloc_str(val_id)),
+                Local::Named(Slice::new(alloc.alloc_str(val_id).as_bytes())),
                 instr::empty(alloc),
             ),
             None => {
@@ -1309,7 +1308,7 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     e: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     lvalue: &tast::Expr,
-    local: local::Type<'arena>,
+    local: Local<'arena>,
 ) -> Result<(Vec<InstrSeq<'arena>>, Vec<InstrSeq<'arena>>)> {
     let alloc = env.arena;
     match &lvalue.2 {
@@ -1409,13 +1408,14 @@ fn emit_load_list_element<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     query_value(path),
                     instr::setl(
                         alloc,
-                        local::Type::Named(
+                        Local::Named(Slice::new(
                             bumpalo::collections::String::from_str_in(
                                 local_id::get_name(&lid.1),
                                 alloc,
                             )
-                            .into_bump_str(),
-                        ),
+                            .into_bump_str()
+                            .as_bytes(),
+                        )),
                     ),
                     instr::popc(alloc),
                 ],

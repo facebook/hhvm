@@ -19,13 +19,7 @@ namespace = "HPHP"
 namespaces = ["hackc", "hhbc", "ast"]
 using_namespaces = []
 sys_includes = []
-includes = [
-  "hphp/hack/src/utils/ffi/ffi.h",
-  "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_id.h",
-  # "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_iterator.h",
-  "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_label.h",
-  "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_local.h",
-]
+includes = []
 no_includes = false
 after_includes = ""
 #cpp_compat=true

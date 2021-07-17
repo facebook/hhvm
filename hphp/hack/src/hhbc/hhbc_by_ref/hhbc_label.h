@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the \"hack\" directory of this source tree.
 //
-// @generated SignedSource<<7c7255fa918aab88dbd426b566052d47>>
+// @generated <<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>
 
 
 #pragma once
@@ -20,41 +20,40 @@
 
 namespace HPHP {
 namespace hackc {
+namespace hhbc {
+namespace ast {
 
-/// A type to substitute for `&'a[T]`.
-template<typename T>
-struct Slice {
-  const T *data;
-  size_t len;
-};
+using Id = size_t;
 
-/// An alias for a type that substitutes for `&'str`.
-using Str = Slice<uint8_t>;
-
-/// Like `std::option`.
-template<typename T>
-struct Maybe {
+struct Label {
   enum class Tag {
-    Just,
-    Nothing,
+    Regular,
+    DefaultArg,
   };
 
-  struct Just_Body {
-    T _0;
+  struct Regular_Body {
+    Id _0;
+  };
+
+  struct DefaultArg_Body {
+    Id _0;
   };
 
   Tag tag;
   union {
-    Just_Body just;
+    Regular_Body regular;
+    DefaultArg_Body default_arg;
   };
 };
 
 
 extern "C" {
 
-void no_call_compile_only_USED_TYPES_ffi(Str, Maybe<int32_t>);
+void no_call_compile_only_USED_TYPES_hhbc_label(Label);
 
 } // extern "C"
 
+} // namespace ast
+} // namespace hhbc
 } // namespace hackc
 } // namespace HPHP

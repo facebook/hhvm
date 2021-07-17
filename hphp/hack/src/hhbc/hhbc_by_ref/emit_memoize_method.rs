@@ -23,6 +23,7 @@ use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags, SpecialClsRef};
 use hhbc_by_ref_hhbc_id::{class, method, Id};
 use hhbc_by_ref_hhbc_string_utils::{coeffects, reified};
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
+use hhbc_by_ref_local::Local;
 use hhbc_by_ref_options::{HhvmFlags, Options};
 use hhbc_by_ref_runtime::TypedValue;
 use naming_special_names_rust::{members, user_attributes as ua};
@@ -247,7 +248,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
     // The local that contains the reified generics is the first non parameter local,
     // so the first local is parameter count + 1 when there are reified = generics
     let add_refied = usize::from(args.flags.contains(Flags::IS_REFIED));
-    let first_local = hhbc_by_ref_local::Type::Unnamed(param_count + add_refied);
+    let first_local = Local::Unnamed(param_count + add_refied);
     let deprecation_body = emit_body::emit_deprecation_info(
         alloc,
         args.scope,
@@ -281,7 +282,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
         (
             instr::cgetl(
                 alloc,
-                hhbc_by_ref_local::Type::Named(reified::GENERICS_LOCAL_NAME),
+                Local::Named(Slice::new(reified::GENERICS_LOCAL_NAME.as_bytes())),
             ),
             InstrSeq::gather(
                 alloc,

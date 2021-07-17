@@ -25,7 +25,31 @@ set -x
               --crate ffi \
               --output "$top/hphp/hack/src/utils/ffi/ffi.h")
 
-# hhbc_ast.h (includes ffi.h)
+#  hhbc_id.h
+(cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhbc_id && \
+     cbindgen --config ../../cbindgen_hhbc_id.toml \
+              --crate hhbc_by_ref_hhbc_id \
+              --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_id.h")
+
+#  hhbc_label.h
+(cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_label && \
+     cbindgen --config ../../cbindgen_hhbc_label.toml \
+              --crate hhbc_by_ref_label \
+              --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_label.h")
+
+#  hhbc_local.h
+(cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_local && \
+     cbindgen --config ../../cbindgen_hhbc_local.toml \
+              --crate hhbc_by_ref_local \
+              --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_local.h")
+
+# #  hhbc_iterator.h
+# (cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_iterator && \
+#      cbindgen --config ../../cbindgen_hhbc_iterator.toml \
+#               --crate hhbc_by_ref_iterator \
+#               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_iterator.h")
+
+# hhbc_ast.h
 (cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhbc_ast && \
      cbindgen --config ../../cbindgen_hhbc_ast.toml \
               --crate hhbc_by_ref_hhbc_ast \

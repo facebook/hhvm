@@ -44,7 +44,10 @@ function any<T>(
  * Time complexity: O(n) (O(1) for keysets)
  * Space complexity: O(1)
  */
-function contains<T1, T2>(
+function contains<
+  <<__NonDisjoint>> T1,
+  <<__NonDisjoint>> T2
+>(
   Traversable<T1> $traversable,
   T2 $value,
 )[]: bool {
@@ -65,7 +68,11 @@ function contains<T1, T2>(
  * Time complexity: O(1)
  * Space complexity: O(1)
  */
-function contains_key<Tk1 as arraykey, Tk2 as arraykey, Tv>(
+function contains_key<
+  <<__NonDisjoint>> Tk1 as arraykey,
+  <<__NonDisjoint>> Tk2 as arraykey,
+  Tv
+>(
   KeyedContainer<Tk1, Tv> $container,
   Tk2 $key,
 )[]: bool {

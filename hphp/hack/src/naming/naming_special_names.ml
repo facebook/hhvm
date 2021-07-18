@@ -277,6 +277,8 @@ module UserAttributes = struct
 
   let uaExplicit = "__Explicit"
 
+  let uaNonDisjoint = "__NonDisjoint"
+
   let uaSoft = "__Soft"
 
   let uaWarn = "__Warn"
@@ -349,6 +351,7 @@ module UserAttributes = struct
           (uaNewable, [typeparam]);
           (uaEnforceable, [typeconst; typeparam]);
           (uaExplicit, [typeparam]);
+          (uaNonDisjoint, [typeparam]);
           (uaSoft, [instProperty; parameter; staticProperty; typeparam]);
           (uaWarn, [typeparam]);
           (uaMockClass, [cls]);

@@ -15,7 +15,7 @@
 
 open Hh_prelude
 
-let deps_mode = Typing_deps_mode.SQLiteMode
+let deps_mode = Typing_deps_mode.CustomMode None
 
 let hash_mode = Typing_deps_mode.hash_mode deps_mode
 
@@ -111,7 +111,6 @@ let run_naming_table_test f =
       in
       let popt = ParserOptions.default in
       let tcopt = TypecheckerOptions.default in
-      let deps_mode = Typing_deps_mode.SQLiteMode in
       let ctx =
         Provider_context.empty_for_tool
           ~popt
@@ -544,69 +543,26 @@ let test_context_changes_typedefs () =
       ())
 
 let test_naming_table_hash () =
-  (* Dep hash is 31 bits. *)
-  let dep_hash = 0b111_1000_1000_1000_1000_1000_1000_1000L in
-  (* Naming hash is 64 bits, but we only take the bottom 31. *)
-  let naming_hash =
-    0b0100_0100_0100_0100_0100_0100_0100_0100_1____110_1110_1110_1110_1110_1110_1110_1110L
-  in
-  (* Note that the sign bit (63rd bit) should remain zero. *)
-  let expected =
-    0b0____111_1000_1000_1000_1000_1000_1000_1000____110_1110_1110_1110_1110_1110_1110_1110
-  in
-  let actual = Typing_deps.ForTest.combine_hashes ~dep_hash ~naming_hash in
-  Asserter.Int_asserter.assert_equals
-    expected
-    (Int64.to_int_exn actual)
-    "Expected to move dep hash to upper 31 bits";
+  List.iter [0; -1; 1; 200; -200; Int.max_value; Int.min_value] ~f:(fun i ->
+      let dep = Typing_deps.Dep.of_debug_string (string_of_int i) in
+      let hash =
+        Typing_deps.NamingHash.make_from_dep dep
+        |> Typing_deps.NamingHash.to_int64
+      in
+      (* "%16x" on a negative integer will produce a hex version as if it were unsigned, e.g. -2 is printed as 7ffffffffffffffe rather than -0000000000000002. *)
+      let i_str = Printf.sprintf "0x%016x" i in
+      let hash_str = Caml.Int64.format "0x%016x" hash in
+      Asserter.String_asserter.assert_equals
+        i_str
+        hash_str
+        "Expected 64bit hash to be same as int hash");
 
   let foo_dep = Typing_deps.Dep.Type "\\Foo" in
   let foo_dep_hash = Typing_deps.ForTest.compute_dep_hash hash_mode foo_dep in
   Asserter.Int_asserter.assert_equals
-    0b011_1101_0111_1011_0110_1111_1110_1011
+    0b0100_1100_1101_0001_0111_1111_0111_1100_0011_1101_0111_1011_0110_1111_1110_1011
     foo_dep_hash
     "Expected foo dep hash to be correct (this test must be updated if the hashing logic changes)";
-
-  let foo_naming_hash = Typing_deps.NamingHash.make foo_dep in
-  let hash_to_int (hash : Typing_deps.NamingHash.t) : int =
-    hash |> Typing_deps.NamingHash.to_int64 |> Int64.to_int_exn
-  in
-
-  let foo_lower_bound =
-    Typing_deps.NamingHash.make_lower_bound
-      (Typing_deps.Dep.make hash_mode foo_dep)
-  in
-  Asserter.Int_asserter.assert_equals
-    0b011_1101_0111_1011_0110_1111_1110_1011____000_0000_0000_0000_0000_0000_0000_0000
-    (hash_to_int foo_lower_bound)
-    "Expected foo lower bound to be correct (this test must be updated if the hashing logic changes)";
-  Asserter.Bool_asserter.assert_equals
-    true
-    Int64.(
-      Typing_deps.NamingHash.to_int64 foo_lower_bound
-      <= Typing_deps.NamingHash.to_int64 foo_naming_hash)
-    (Printf.sprintf
-       "sanity check: foo_lower_bound (%d) <= foo_naming_hash (%d)"
-       (hash_to_int foo_lower_bound)
-       (hash_to_int foo_naming_hash));
-
-  let foo_upper_bound =
-    Typing_deps.NamingHash.make_upper_bound
-      (Typing_deps.Dep.make hash_mode foo_dep)
-  in
-  Asserter.Int_asserter.assert_equals
-    0b011_1101_0111_1011_0110_1111_1110_1011____111_1111_1111_1111_1111_1111_1111_1111
-    (hash_to_int foo_upper_bound)
-    "Expected foo upper bound to be correct";
-  Asserter.Bool_asserter.assert_equals
-    true
-    Int64.(
-      Typing_deps.NamingHash.to_int64 foo_naming_hash
-      <= Typing_deps.NamingHash.to_int64 foo_upper_bound)
-    (Printf.sprintf
-       "sanity check: foo_naming_hash (%d) <= foo_upper_bound (%d)"
-       (hash_to_int foo_naming_hash)
-       (hash_to_int foo_upper_bound));
 
   true
 

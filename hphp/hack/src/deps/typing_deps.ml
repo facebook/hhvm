@@ -348,94 +348,33 @@ end
 module NamingHash = struct
   type t = int64
 
-  (** NOTE: MUST KEEP IN SYNC with the implementation in `typing_deps_hash.rs`.
-
-  In [Dep.make], we produce a 31-bit hash. In the naming table saved-state,
-  we want to use a hash to identify entries, but to avoid collisions, we want
-  to preserve as many bits as possible of the hash. This can be done by
-  combining it with a larger hash to set the other bits.
-
-  When it comes time to query the naming table, we can get an conservative
-  overestimate of the symbols corresponding to dependency hashes by arranging
-  the bits so that we can do a range query (which can make use of the SQLite
-  index).
-
-  Given a dependency hash with bits in the form DDDD and the additional
-  naming table hash bits in the form NNNN, we want to produce a large hash of
-  the form
-
-    DDDDNNNN
-
-  Then later we can query the naming table SQLite database for all rows in
-  the range DDDD0000 to DDDD1111. *)
-  let combine_hashes ~(dep_hash : int64) ~(naming_hash : int64) : int64 =
-    (* We use a 64-bit integer with OCaml/SQLite, but for clarity with
-       debugging, we limit the hash size to 63 bits, so that we can convert it
-       to an OCaml integer. Then we set the top bit to 0 to ensure that it's
-       positive, leaving 62 bits. The dependency hash is 31 bits, so we can add
-       an additional 31 bits from the naming hash.
-
-       We make sure we only have have 31 bits to begin with (this is not the case
-       when in the new 64-bit hash world) *)
-    let dep_hash =
-      Int64.bit_and dep_hash 0b01111111_11111111_11111111_11111111L
-    in
-    let upper_31_bits = Int64.shift_left dep_hash 31 in
-    let lower_31_bits =
-      Int64.bit_and naming_hash 0b01111111_11111111_11111111_11111111L
-    in
-    Int64.bit_or upper_31_bits lower_31_bits
-
-  let unsupported (variant : 'a Dep.variant) =
-    failwith
-      ("Unsupported dependency variant type for naming table hash: "
-      ^ Dep.variant_to_string variant)
-
-  let get_dep_variant_name : type a. a Dep.variant -> string =
-    let open Dep in
-    function
-    | Type name -> name
-    | Fun name -> name
-    | GConst name -> name
-    | GConstName _ as variant -> unsupported variant
-    | Const _ as variant -> unsupported variant
-    | AllMembers _ as variant -> unsupported variant
-    | Prop _ as variant -> unsupported variant
-    | SProp _ as variant -> unsupported variant
-    | Method _ as variant -> unsupported variant
-    | SMethod _ as variant -> unsupported variant
-    | Cstr _ as variant -> unsupported variant
-    | Extends _ as variant -> unsupported variant
+  let make_from_dep (dep : Dep.t) : t =
+    (* The Dep.t is leading bit 0 followed by 63 bits of data.
+       Since we're storing it in Dep.t, an ocaml int stored in two's complement, the first
+       of those 63 bits is considered a sign bit. The preceding leading bit 0 is because
+       ocaml reserves the leading bit 0 to indicate that it's stored locally,
+       not a reference. *)
+    let a = Int64.of_int dep in
+    (* [a] is an Int64 version of that int, which unlike the built-in int is always stored
+       as a reference on the heap and hence does not need to reserve a leading bit and hence
+       uses all 64bits. The way two's complement works, when promoting from 63bit to 64bit,
+       is that the extra new leading bit becomes a copy of the previous leading bit.
+       e.g. decimal=-3, 7bit=111_1101, 8bit=1111_1101
+       e.g. decimal=+3, 7bit=000_0011, 8bit=0000_0011
+       If that's confusing, think of counting down from 2^bits, e.g.
+       -1 is 2^7 - 1 = 111_1111, or equivalently 2^8 - 1 = 1111_1111
+       -2 is 2^7 - 2 = 111_1110, or equivalently 2^8 - 1 = 1111_1110 *)
+    let b = Int64.shift_right_logical (Int64.shift_left a 1) 1 in
+    (* [b] has the top bit reset to 0. Thus, it's still the exact same leading
+       bit 0 followed by 63 bits of data as the original Dep.t we started with.
+       But whereas ocaml int and Dep.t might render this bit-pattern as a
+       negative number, the Int64 will always render it a positive number.
+       In particular, if we write this Int64 to a Sqlite.INT column then sqlite
+       will show it as a positive integer. *)
+    b
 
   let make (variant : 'a Dep.variant) : t =
-    (* Here we still use 32-bit hashes, because we are going to use
-     * only 31-bits anyways when we combine the hashes.
-     *
-     * Note that a 32-bit hash is just the LSBs of the 64-bit hash. *)
-    let dep_hash = variant |> Dep.make Hash32Bit |> Int64.of_int in
-    let naming_hash =
-      variant |> get_dep_variant_name |> SharedMemHash.hash_string
-    in
-    combine_hashes ~dep_hash ~naming_hash
-
-  let naming_table_hash_lower_bound_mask =
-    let lower_31_bits_set_to_1 = (1 lsl 31) - 1 in
-    let upper_31_bits_set_to_1 = ~-lower_31_bits_set_to_1 in
-    Int64.of_int upper_31_bits_set_to_1
-
-  let make_lower_bound (hash : Dep.t) : t =
-    let hash = hash land 0b01111111_11111111_11111111_11111111 in
-    let hash = hash lsl 31 |> Int64.of_int in
-    Int64.bit_and hash naming_table_hash_lower_bound_mask
-
-  let naming_table_hash_upper_bound_mask =
-    let lower_31_bits_set_to_1 = (1 lsl 31) - 1 in
-    Int64.of_int lower_31_bits_set_to_1
-
-  let make_upper_bound (hash : Dep.t) : t =
-    let hash = hash land 0b01111111_11111111_11111111_11111111 in
-    let upper_31_bits = hash lsl 31 |> Int64.of_int in
-    Int64.bit_or upper_31_bits naming_table_hash_upper_bound_mask
+    variant |> Dep.make Hash64Bit |> make_from_dep
 
   let to_int64 (t : t) : int64 = t
 end
@@ -822,8 +761,6 @@ end
 
 module ForTest = struct
   let compute_dep_hash = Dep.make
-
-  let combine_hashes = NamingHash.combine_hashes
 end
 
 module Telemetry = struct

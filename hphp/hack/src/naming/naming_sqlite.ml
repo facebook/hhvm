@@ -112,19 +112,13 @@ let fold_sqlite stmt ~f ~init =
 
 module Common = struct
   let get_paths_by_dep_hash db stmt_cache ~stmt ~hash =
-    let lower_bound =
+    let hash =
       hash
-      |> Typing_deps.NamingHash.make_lower_bound
-      |> Typing_deps.NamingHash.to_int64
-    in
-    let upper_bound =
-      hash
-      |> Typing_deps.NamingHash.make_upper_bound
+      |> Typing_deps.NamingHash.make_from_dep
       |> Typing_deps.NamingHash.to_int64
     in
     let stmt = StatementCache.make_stmt stmt_cache stmt in
-    Sqlite3.bind stmt 1 (Sqlite3.Data.INT lower_bound) |> check_rc db;
-    Sqlite3.bind stmt 2 (Sqlite3.Data.INT upper_bound) |> check_rc db;
+    Sqlite3.bind stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     fold_sqlite stmt ~init:Relative_path.Set.empty ~f:(fun stmt acc ->
         let prefix_type = column_int64 stmt 0 in
         let suffix = column_str stmt 1 in
@@ -503,7 +497,7 @@ module TypesTable = struct
         FROM {table_name}
         LEFT JOIN NAMING_FILE_INFO ON
           {table_name}.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
-        WHERE {table_name}.HASH BETWEEN ? AND ?
+        WHERE {table_name}.HASH = ?
       "
 
   let insert db stmt_cache ~name ~flags ~file_info_id :
@@ -632,7 +626,7 @@ module FunsTable = struct
         FROM {table_name}
         LEFT JOIN NAMING_FILE_INFO ON
           {table_name}.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
-        WHERE {table_name}.HASH BETWEEN ? AND ?
+        WHERE {table_name}.HASH = ?
       "
 
   let insert db stmt_cache ~name ~file_info_id : (unit, insertion_error) result
@@ -725,7 +719,7 @@ module ConstsTable = struct
         FROM {table_name}
         LEFT JOIN NAMING_FILE_INFO ON
           {table_name}.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
-        WHERE {table_name}.HASH BETWEEN ? AND ?
+        WHERE {table_name}.HASH = ?
       "
 
   let insert db stmt_cache ~name ~file_info_id : (unit, insertion_error) result

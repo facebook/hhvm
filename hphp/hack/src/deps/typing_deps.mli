@@ -126,31 +126,13 @@ module VisitedSet : sig
 end
 
 module NamingHash : sig
-  (** A naming hash is like a dependency hash, but bigger. For technical
-  reasons, dependency hashes are <32 bits, and they have some collisions in
-  practice. Naming table hashes must uniquely identify symbols, so they have
-  to be as close to 64 bits as possible to avoid collisions.
-
-  We store these large naming table hashes directly in the naming table
-  SQLite database. Then, when we calculate fanout from dependencies, we can
-  use range queries with [make_lower_bound] and [make_upper_bound] to recover
-  the naming table symbol from the dependency hash for a given symbol
-  (possibly overestimating and including extra symbols, which is acceptable
-  for fanout calculation). *)
+  (** A naming hash is the same as a dependency hash. *)
   type t
 
   (** Create a naming table hash for the given symbol. *)
   val make : 'a Dep.variant -> t
 
-  (** Produce a value such that [make_lower_bound (Dep.make x) <= make x] for
-  all [x]. This can be used to query the naming table for symbols when you
-  only have a dependency hash. *)
-  val make_lower_bound : Dep.t -> t
-
-  (** Produce a value such that [make x <= make_upper_bound (Dep.make x)] for
-  all [x]. This can be used to query the naming table for symbols when you
-  only have a dependency hash. *)
-  val make_upper_bound : Dep.t -> t
+  val make_from_dep : Dep.t -> t
 
   (** Convert the naming table hash into a value which can be stored into the
   naming table SQLite database. *)
@@ -262,6 +244,4 @@ end
 
 module ForTest : sig
   val compute_dep_hash : Mode.hash_mode -> 'a Dep.variant -> int
-
-  val combine_hashes : dep_hash:int64 -> naming_hash:int64 -> int64
 end

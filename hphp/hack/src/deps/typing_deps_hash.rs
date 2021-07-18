@@ -122,11 +122,3 @@ pub fn hash2(mode: HashMode, dep_type: DepType, name1: &[u8], name2: &[u8]) -> u
     hasher.write(name2);
     postprocess_hash(mode, dep_type, hasher.finish())
 }
-
-/// Rust implementation of `Typing_deps.NamingHash.combine_hashes`.
-pub fn combine_hashes(dep_hash: u64, naming_hash: i64) -> i64 {
-    let dep_hash = dep_hash & ((1 << 31) - 1);
-    let upper_31_bits = (dep_hash as i64) << 31;
-    let lower_31_bits = naming_hash & 0b01111111_11111111_11111111_11111111;
-    upper_31_bits | lower_31_bits
-}

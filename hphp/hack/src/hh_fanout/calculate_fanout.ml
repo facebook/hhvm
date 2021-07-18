@@ -140,7 +140,7 @@ let file_info_to_dep_set
               Some (Typing_deps.DepSet.cardinal outgoing_edges);
             outgoing_files =
               Some
-                (Naming_table.get_dep_set_files
+                (Naming_table.get_64bit_dep_set_files
                    naming_table
                    deps_mode
                    outgoing_edges);
@@ -250,7 +250,10 @@ let go
   let calculate_fanout_telemetry = Telemetry.create () in
   let start_time = Unix.gettimeofday () in
   let fanout_files =
-    Naming_table.get_dep_set_files new_naming_table deps_mode fanout_dependents
+    Naming_table.get_64bit_dep_set_files
+      new_naming_table
+      deps_mode
+      fanout_dependents
   in
 
   let calculate_fanout_telemetry =

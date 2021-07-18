@@ -243,37 +243,41 @@ let get_file_info_unsafe a key =
   | Some info -> info
   | None -> raise File_info_not_found
 
-let get_dep_set_files
+let get_64bit_dep_set_files
     (naming_table : t) (mode : Typing_deps_mode.t) (deps : Typing_deps.DepSet.t)
     : Relative_path.Set.t =
-  match naming_table with
-  | Unbacked _ ->
+  match (naming_table, Typing_deps_mode.hash_mode mode) with
+  | (Unbacked _, _) ->
     failwith
-      "get_dep_set_files not supported for unbacked naming tables. Use Typing_deps.get_ifiles instead."
-  | Backed (local_changes, db_path) ->
+      "get_64bit_dep_set_files not supported for unbacked naming tables. Use Typing_deps.get_ifiles instead."
+  | (_, Typing_deps.Mode.Hash32Bit) ->
+    failwith "get_64bit_dep_set_files not supported for 32bit deps."
+  | (Backed (local_changes, db_path), Typing_deps.Mode.Hash64Bit) ->
     let base_results =
       Typing_deps.DepSet.fold
         deps
         ~init:Relative_path.Set.empty
         ~f:(fun dep acc ->
-          (* NOTE: currently, we issue three queries per dependency hash. If
-             there are a lot of dependency hashes, it may be necessary to
-             optimize this so that we issue larger bulk queries, with conditions
-             like
-
-               SELECT * FROM NAMING_FUNS
-               WHERE
-                 HASH BETWEEN A AND B OR
-                 HASH BETWEEN C AND D OR
-                 HASH BETWEEN E AND F ...
-          *)
-          let consts = Naming_sqlite.get_const_paths_by_dep_hash db_path dep in
-          let funs = Naming_sqlite.get_fun_paths_by_dep_hash db_path dep in
-          let types = Naming_sqlite.get_type_paths_by_dep_hash db_path dep in
-          acc
-          |> Relative_path.Set.union consts
-          |> Relative_path.Set.union funs
-          |> Relative_path.Set.union types)
+          (* NOTE: This is done with three separate SQL queries into three separate tables. *)
+          let acc =
+            Option.fold
+              (Naming_sqlite.get_const_path_by_64bit_dep db_path dep)
+              ~init:acc
+              ~f:Relative_path.Set.add
+          in
+          let acc =
+            Option.fold
+              (Naming_sqlite.get_fun_path_by_64bit_dep db_path dep)
+              ~init:acc
+              ~f:Relative_path.Set.add
+          in
+          let acc =
+            Option.fold
+              (Naming_sqlite.get_type_path_by_64bit_dep db_path dep)
+              ~init:acc
+              ~f:(fun acc (path, _kind) -> Relative_path.Set.add acc path)
+          in
+          acc)
     in
 
     Relative_path.Map.fold

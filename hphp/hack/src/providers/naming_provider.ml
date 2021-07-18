@@ -130,7 +130,7 @@ let get_const_pos (ctx : Provider_context.t) (name : string) :
           ~name
           ~cache:reverse_naming_table_delta.consts
           ~fallback:(fun db_path ->
-            Naming_sqlite.get_const_pos db_path name
+            Naming_sqlite.get_const_path_by_name db_path name
             |> Option.map ~f:(fun path -> (FileInfo.Const, path)))
         >>| attach_name_type_to_tuple
       | Provider_backend.Decl_service { decl; _ } ->
@@ -198,7 +198,7 @@ let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
           ~name
           ~cache:reverse_naming_table_delta.funs
           ~fallback:(fun db_path ->
-            Naming_sqlite.get_fun_pos db_path name
+            Naming_sqlite.get_fun_path_by_name db_path name
             |> Option.map ~f:(fun path -> (FileInfo.Fun, path)))
         >>| attach_name_type_to_tuple
       | Provider_backend.Decl_service { decl; _ } ->
@@ -251,7 +251,7 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
         ~name
         ~cache:reverse_naming_table_delta.funs_canon_key
         ~fallback:(fun db_path ->
-          Naming_sqlite.get_ifun_pos db_path name
+          Naming_sqlite.get_ifun_path_by_name db_path name
           |> Option.map ~f:(fun path -> (FileInfo.Fun, path)))
       >>= fun (_name_type, path) ->
       (* If reverse_naming_table_delta thought the symbol was in ctx, but we definitively
@@ -391,7 +391,7 @@ let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
           ~name
           ~cache:reverse_naming_table_delta.types
           ~fallback:(fun db_path ->
-            Naming_sqlite.get_type_pos db_path name
+            Naming_sqlite.get_type_path_by_name db_path name
             |> Option.map ~f:(fun (path, kind) ->
                    (kind_to_name_type kind, path)))
         >>| fun (name_type, path) -> (FileInfo.File (name_type, path), name_type)
@@ -477,7 +477,7 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
         ~name
         ~cache:reverse_naming_table_delta.types_canon_key
         ~fallback:(fun db_path ->
-          Naming_sqlite.get_itype_pos db_path name
+          Naming_sqlite.get_itype_path_by_name db_path name
           |> Option.map ~f:(fun (path, kind) -> (kind_to_name_type kind, path)))
       >>= fun (name_type, path) ->
       (* If reverse_naming_table_delta thought the symbol was in ctx, but we definitively
@@ -685,14 +685,14 @@ let add
       match name_type with
       | FileInfo.Const ->
         Option.map
-          (Naming_sqlite.get_const_pos db_path name)
+          (Naming_sqlite.get_const_path_by_name db_path name)
           ~f:(fun sqlite_path -> (FileInfo.Const, sqlite_path))
       | FileInfo.Fun ->
         let pos =
           if case_insensitive then
-            Naming_sqlite.get_ifun_pos db_path name
+            Naming_sqlite.get_ifun_path_by_name db_path name
           else
-            Naming_sqlite.get_fun_pos db_path name
+            Naming_sqlite.get_fun_path_by_name db_path name
         in
         Option.map pos ~f:(fun sqlite_path -> (FileInfo.Fun, sqlite_path))
       | FileInfo.RecordDef
@@ -700,9 +700,9 @@ let add
       | FileInfo.Typedef ->
         let pos =
           if case_insensitive then
-            Naming_sqlite.get_itype_pos db_path name
+            Naming_sqlite.get_itype_path_by_name db_path name
           else
-            Naming_sqlite.get_type_pos db_path name
+            Naming_sqlite.get_type_path_by_name db_path name
         in
         Option.map pos ~f:(fun (sqlite_path, sqlite_kind) ->
             (kind_to_name_type sqlite_kind, sqlite_path))

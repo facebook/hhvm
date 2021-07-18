@@ -874,20 +874,18 @@ let get_file_info (db_path : db_path) path =
 
 (* Same as `get_db_and_stmt_cache` but with logging for when opening the
 database fails. *)
-let sqlite_exn_wrapped_get_db_and_stmt_cache ~case_insensitive db_path name =
+let sqlite_exn_wrapped_get_db_and_stmt_cache db_path name =
   try get_db_and_stmt_cache db_path with
   | Sqlite3.Error _ as exn ->
     Hh_logger.info
-      "Sqlite_db_open_bug: couldn't open the DB at `%s` while getting the position of `%s` with case insensitivity `%b`\n"
+      "Sqlite_db_open_bug: couldn't open the DB at `%s` while getting the position of `%s`"
       (show_db_path db_path)
-      name
-      case_insensitive;
+      name;
     raise exn
 
-let get_type_pos (db_path : db_path) name =
-  let case_insensitive = false in
+let get_type_path_by_name (db_path : db_path) name =
   let (db, stmt_cache) =
-    sqlite_exn_wrapped_get_db_and_stmt_cache ~case_insensitive db_path name
+    sqlite_exn_wrapped_get_db_and_stmt_cache db_path name
   in
   TypesTable.get
     db
@@ -896,10 +894,9 @@ let get_type_pos (db_path : db_path) name =
     |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
     TypesTable.get_sqlite
 
-let get_itype_pos (db_path : db_path) name =
-  let case_insensitive = true in
+let get_itype_path_by_name (db_path : db_path) name =
   let (db, stmt_cache) =
-    sqlite_exn_wrapped_get_db_and_stmt_cache ~case_insensitive db_path name
+    sqlite_exn_wrapped_get_db_and_stmt_cache db_path name
   in
   TypesTable.get
     db
@@ -908,16 +905,12 @@ let get_itype_pos (db_path : db_path) name =
     |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
     TypesTable.get_sqlite_case_insensitive
 
-let get_type_paths_by_dep_hash (db_path : db_path) (dep : Typing_deps.Dep.t) :
-    Relative_path.Set.t =
+let get_type_path_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) :
+    (Relative_path.t * Naming_types.kind_of_type) option =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
   TypesTable.get db stmt_cache dep TypesTable.get_sqlite
-  |> Option.map ~f:fst
-  |> Option.value_map
-       ~default:Relative_path.Set.empty
-       ~f:Relative_path.Set.singleton
 
-let get_fun_pos (db_path : db_path) name =
+let get_fun_path_by_name (db_path : db_path) name =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
   FunsTable.get
     db
@@ -925,7 +918,7 @@ let get_fun_pos (db_path : db_path) name =
     (Typing_deps.Dep.Fun name |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
     FunsTable.get_sqlite
 
-let get_ifun_pos (db_path : db_path) name =
+let get_ifun_path_by_name (db_path : db_path) name =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
   FunsTable.get
     db
@@ -934,15 +927,11 @@ let get_ifun_pos (db_path : db_path) name =
     |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
     FunsTable.get_sqlite_case_insensitive
 
-let get_fun_paths_by_dep_hash (db_path : db_path) (dep : Typing_deps.Dep.t) :
-    Relative_path.Set.t =
+let get_fun_path_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
   FunsTable.get db stmt_cache dep FunsTable.get_sqlite
-  |> Option.value_map
-       ~default:Relative_path.Set.empty
-       ~f:Relative_path.Set.singleton
 
-let get_const_pos (db_path : db_path) name =
+let get_const_path_by_name (db_path : db_path) name =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
   ConstsTable.get
     db
@@ -951,10 +940,6 @@ let get_const_pos (db_path : db_path) name =
     |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
     ConstsTable.get_sqlite
 
-let get_const_paths_by_dep_hash (db_path : db_path) (dep : Typing_deps.Dep.t) :
-    Relative_path.Set.t =
+let get_const_path_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
   ConstsTable.get db stmt_cache dep ConstsTable.get_sqlite
-  |> Option.value_map
-       ~default:Relative_path.Set.empty
-       ~f:Relative_path.Set.singleton

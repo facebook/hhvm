@@ -83,6 +83,31 @@ module Dep = struct
 
   type t = int
 
+  let to_int64 (t : t) : int64 =
+    (* The [t] is leading bit 0 followed by 63 bits of data.
+       Since we're storing it in Dep.t, an ocaml int stored in two's complement, the first
+       of those 63 bits is considered a sign bit. The preceding leading bit 0 is because
+       ocaml reserves the leading bit 0 to indicate that it's stored locally,
+       not a reference. *)
+    let a = Int64.of_int t in
+    (* [a] is an Int64 version of that int, which unlike the built-in int is always stored
+       as a reference on the heap and hence does not need to reserve a leading bit and hence
+       uses all 64bits. The way two's complement works, when promoting from 63bit to 64bit,
+       is that the extra new leading bit becomes a copy of the previous leading bit.
+       e.g. decimal=-3, 7bit=111_1101, 8bit=1111_1101
+       e.g. decimal=+3, 7bit=000_0011, 8bit=0000_0011
+       If that's confusing, think of counting down from 2^bits, e.g.
+       -1 is 2^7 - 1 = 111_1111, or equivalently 2^8 - 1 = 1111_1111
+       -2 is 2^7 - 2 = 111_1110, or equivalently 2^8 - 1 = 1111_1110 *)
+    let b = Int64.shift_right_logical (Int64.shift_left a 1) 1 in
+    (* [b] has the top bit reset to 0. Thus, it's still the exact same leading
+       bit 0 followed by 63 bits of data as the original Dep.t we started with.
+       But whereas ocaml int and Dep.t might render this bit-pattern as a
+       negative number, the Int64 will always render it a positive number.
+       In particular, if we write this Int64 to a Sqlite.INT column then sqlite
+       will show it as a positive integer. *)
+    b
+
   (* Keep in sync with the tags for `DepType` in `typing_deps_hash.rs`. *)
   let make : type a. Mode.hash_mode -> a variant -> t =
    fun mode -> function
@@ -343,40 +368,6 @@ module VisitedSet = struct
     | CustomMode _
     | SaveCustomMode _ ->
       CustomVisitedSet (hh_visited_set_make ())
-end
-
-module NamingHash = struct
-  type t = int64
-
-  let make_from_dep (dep : Dep.t) : t =
-    (* The Dep.t is leading bit 0 followed by 63 bits of data.
-       Since we're storing it in Dep.t, an ocaml int stored in two's complement, the first
-       of those 63 bits is considered a sign bit. The preceding leading bit 0 is because
-       ocaml reserves the leading bit 0 to indicate that it's stored locally,
-       not a reference. *)
-    let a = Int64.of_int dep in
-    (* [a] is an Int64 version of that int, which unlike the built-in int is always stored
-       as a reference on the heap and hence does not need to reserve a leading bit and hence
-       uses all 64bits. The way two's complement works, when promoting from 63bit to 64bit,
-       is that the extra new leading bit becomes a copy of the previous leading bit.
-       e.g. decimal=-3, 7bit=111_1101, 8bit=1111_1101
-       e.g. decimal=+3, 7bit=000_0011, 8bit=0000_0011
-       If that's confusing, think of counting down from 2^bits, e.g.
-       -1 is 2^7 - 1 = 111_1111, or equivalently 2^8 - 1 = 1111_1111
-       -2 is 2^7 - 2 = 111_1110, or equivalently 2^8 - 1 = 1111_1110 *)
-    let b = Int64.shift_right_logical (Int64.shift_left a 1) 1 in
-    (* [b] has the top bit reset to 0. Thus, it's still the exact same leading
-       bit 0 followed by 63 bits of data as the original Dep.t we started with.
-       But whereas ocaml int and Dep.t might render this bit-pattern as a
-       negative number, the Int64 will always render it a positive number.
-       In particular, if we write this Int64 to a Sqlite.INT column then sqlite
-       will show it as a positive integer. *)
-    b
-
-  let make (variant : 'a Dep.variant) : t =
-    variant |> Dep.make Hash64Bit |> make_from_dep
-
-  let to_int64 (t : t) : int64 = t
 end
 
 (** Graph management in the legacy SQLite system.
@@ -757,10 +748,6 @@ module Files = struct
           | None -> Relative_path.Set.empty
         in
         Hashtbl.replace !ifiles def (Relative_path.Set.add previous filename))
-end
-
-module ForTest = struct
-  let compute_dep_hash = Dep.make
 end
 
 module Telemetry = struct

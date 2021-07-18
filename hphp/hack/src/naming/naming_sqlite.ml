@@ -111,12 +111,8 @@ let fold_sqlite stmt ~f ~init =
   helper init
 
 module Common = struct
-  let get_paths_by_dep_hash db stmt_cache ~stmt ~hash =
-    let hash =
-      hash
-      |> Typing_deps.NamingHash.make_from_dep
-      |> Typing_deps.NamingHash.to_int64
-    in
+  let get_paths_by_dep_hash db stmt_cache ~stmt ~(hash : Typing_deps.Dep.t) =
+    let hash = hash |> Typing_deps.Dep.to_int64 in
     let stmt = StatementCache.make_stmt stmt_cache stmt in
     Sqlite3.bind stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     fold_sqlite stmt ~init:Relative_path.Set.empty ~f:(fun stmt acc ->
@@ -504,13 +500,13 @@ module TypesTable = struct
       (unit, insertion_error) result =
     let hash =
       Typing_deps.Dep.Type name
-      |> Typing_deps.NamingHash.make
-      |> Typing_deps.NamingHash.to_int64
+      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+      |> Typing_deps.Dep.to_int64
     in
     let canon_hash =
       Typing_deps.Dep.Type (to_canon_name_key name)
-      |> Typing_deps.NamingHash.make
-      |> Typing_deps.NamingHash.to_int64
+      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+      |> Typing_deps.Dep.to_int64
     in
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
@@ -537,7 +533,9 @@ module TypesTable = struct
 
   let get db stmt_cache ~dep ~case_insensitive =
     let hash =
-      dep |> Typing_deps.NamingHash.make |> Typing_deps.NamingHash.to_int64
+      dep
+      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+      |> Typing_deps.Dep.to_int64
     in
     let get_sqlite =
       if case_insensitive then
@@ -633,13 +631,13 @@ module FunsTable = struct
       =
     let hash =
       Typing_deps.Dep.Fun name
-      |> Typing_deps.NamingHash.make
-      |> Typing_deps.NamingHash.to_int64
+      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+      |> Typing_deps.Dep.to_int64
     in
     let canon_hash =
       Typing_deps.Dep.Fun (to_canon_name_key name)
-      |> Typing_deps.NamingHash.make
-      |> Typing_deps.NamingHash.to_int64
+      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+      |> Typing_deps.Dep.to_int64
     in
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
@@ -650,8 +648,11 @@ module FunsTable = struct
 
   let get db stmt_cache ~dep ~case_insensitive =
     let hash =
-      dep |> Typing_deps.NamingHash.make |> Typing_deps.NamingHash.to_int64
+      dep
+      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+      |> Typing_deps.Dep.to_int64
     in
+
     let get_sqlite =
       if case_insensitive then
         get_sqlite_case_insensitive
@@ -726,8 +727,8 @@ module ConstsTable = struct
       =
     let hash =
       Typing_deps.Dep.GConst name
-      |> Typing_deps.NamingHash.make
-      |> Typing_deps.NamingHash.to_int64
+      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+      |> Typing_deps.Dep.to_int64
     in
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
@@ -737,8 +738,11 @@ module ConstsTable = struct
 
   let get db stmt_cache ~dep =
     let hash =
-      dep |> Typing_deps.NamingHash.make |> Typing_deps.NamingHash.to_int64
+      dep
+      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+      |> Typing_deps.Dep.to_int64
     in
+
     let get_stmt = StatementCache.make_stmt stmt_cache get_sqlite in
     Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     match Sqlite3.step get_stmt with

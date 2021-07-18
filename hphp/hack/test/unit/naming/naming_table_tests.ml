@@ -545,10 +545,7 @@ let test_context_changes_typedefs () =
 let test_naming_table_hash () =
   List.iter [0; -1; 1; 200; -200; Int.max_value; Int.min_value] ~f:(fun i ->
       let dep = Typing_deps.Dep.of_debug_string (string_of_int i) in
-      let hash =
-        Typing_deps.NamingHash.make_from_dep dep
-        |> Typing_deps.NamingHash.to_int64
-      in
+      let hash = Typing_deps.Dep.to_int64 dep in
       (* "%16x" on a negative integer will produce a hex version as if it were unsigned, e.g. -2 is printed as 7ffffffffffffffe rather than -0000000000000002. *)
       let i_str = Printf.sprintf "0x%016x" i in
       let hash_str = Caml.Int64.format "0x%016x" hash in
@@ -558,27 +555,14 @@ let test_naming_table_hash () =
         "Expected 64bit hash to be same as int hash");
 
   let foo_dep = Typing_deps.Dep.Type "\\Foo" in
-  let foo_dep_hash = Typing_deps.ForTest.compute_dep_hash hash_mode foo_dep in
-  Asserter.Int_asserter.assert_equals
-    0b0100_1100_1101_0001_0111_1111_0111_1100_0011_1101_0111_1011_0110_1111_1110_1011
+  let foo_dep_hash =
+    Typing_deps.Dep.make hash_mode foo_dep |> Typing_deps.Dep.to_hex_string
+  in
+  Asserter.String_asserter.assert_equals
+    "0x4cd17f7c3d7b6feb"
     foo_dep_hash
     "Expected foo dep hash to be correct (this test must be updated if the hashing logic changes)";
 
-  true
-
-let test_ensure_hashing_outputs_31_bits () =
-  let dep_with_thirty_first_bit_set_to_1 =
-    (* This name selected by trying a bunch of names and finding one that has
-       the 31st bit set to 1. *)
-    Typing_deps.Dep.Type "\\Abcd"
-    |> Typing_deps.ForTest.compute_dep_hash hash_mode
-  in
-  let thirty_first_bit = 0b01000000_00000000_00000000_00000000 in
-  Asserter.Int_asserter.assert_equals
-    thirty_first_bit
-    (dep_with_thirty_first_bit_set_to_1 land thirty_first_bit)
-    ("Expected there to be a symbol such that, when hashed, the 31st bit is set to 1 "
-    ^ "(this test must be updated if the hashing logic changes)");
   true
 
 let test_naming_table_query_by_dep_hash () =
@@ -765,8 +749,6 @@ let () =
       ("test_context_changes_classes", test_context_changes_classes);
       ("test_context_changes_typedefs", test_context_changes_typedefs);
       ("test_naming_table_hash", test_naming_table_hash);
-      ( "test_ensure_hashing_outputs_31_bits",
-        test_ensure_hashing_outputs_31_bits );
       ( "test_naming_table_query_by_dep_hash",
         test_naming_table_query_by_dep_hash );
     ]

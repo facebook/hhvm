@@ -60,9 +60,13 @@ module Dep : sig
         (** Like [GConst], but used only in conservative redecl. May not be
         necessary anymore. *)
 
+  (** either 31bit or 63bit hash, depending on the mode *)
   type t
 
   val make : Mode.hash_mode -> 'a variant -> t
+
+  (** a 64bit representation of the 31bit/63bit hash, padded with leading 0 bits *)
+  val to_int64 : t -> int64
 
   val is_class : t -> bool
 
@@ -123,20 +127,6 @@ module VisitedSet : sig
   type t
 
   val make : Mode.t -> t
-end
-
-module NamingHash : sig
-  (** A naming hash is the same as a dependency hash. *)
-  type t
-
-  (** Create a naming table hash for the given symbol. *)
-  val make : 'a Dep.variant -> t
-
-  val make_from_dep : Dep.t -> t
-
-  (** Convert the naming table hash into a value which can be stored into the
-  naming table SQLite database. *)
-  val to_int64 : t -> int64
 end
 
 module Files : sig
@@ -240,8 +230,4 @@ val add_all_deps : Mode.t -> DepSet.t -> DepSet.t
 
 module Telemetry : sig
   val depgraph_delta_num_edges : Mode.t -> int option
-end
-
-module ForTest : sig
-  val compute_dep_hash : Mode.hash_mode -> 'a Dep.variant -> int
 end

@@ -548,8 +548,7 @@ bool MonotypeDict<Key>::checkInvariants() const {
   static_assert(kElmSize == sizeof(Elm));
   static_assert(kIndexSize == sizeof(Index));
 
-#if defined(__SSE4_2__) && defined(NO_M_DATA) && !defined(NO_HWCRC) && \
-    !defined(_MSC_VER)
+#ifdef USE_X86_STRING_HELPERS
   static_assert(HeapObject::aux_offset() + 1 == MD_SIZE_CLASS_OFFSET);
   static_assert(sizeof(StringDict) == MD_DATA);
   static_assert(kMinSizeIndex == MD_MIN_SIZE_CLASS);
@@ -633,8 +632,7 @@ MonotypeDict<Key>::findForGet(Key key, strhash_t hash) const {
   return mad->template find<Get>(key, hash).elm;
 }
 
-#if defined(__SSE4_2__) && defined(NO_M_DATA) && !defined(NO_HWCRC) && \
-    !defined(_MSC_VER)
+#ifdef USE_X86_STRING_HELPERS
 template <>
 TypedValue MonotypeDict<StringData*>::getImpl(StringData* key) const;
 #endif

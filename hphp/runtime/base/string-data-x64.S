@@ -1,8 +1,7 @@
 #include "hphp/runtime/base/string-data-macros.h"
 #include "hphp/util/etch-helpers.h"
 
-#if defined(__SSE4_2__) && !defined(NO_HWCRC) && defined(NO_M_DATA) && \
-    !defined(_MSC_VER)
+#ifdef USE_X86_STRING_HELPERS
 
         .file     "hphp/runtime/base/string-data-x64.S"
 

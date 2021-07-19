@@ -19,8 +19,7 @@
 #include "hphp/runtime/base/bespoke/monotype-dict-x64.h"
 #include "hphp/util/etch-helpers.h"
 
-#if defined(__SSE4_2__) && defined(NO_M_DATA) && !defined(NO_HWCRC) && \
-    !defined(_MSC_VER)
+#ifdef USE_X86_STRING_HELPERS
 
         .file     "hphp/runtime/base/bespoke/monotype-dict-x64.S"
 

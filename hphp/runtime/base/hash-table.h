@@ -24,8 +24,7 @@
 // are defined for various offsets in hash-table-x64.h
 // Types inheriting from HashTable should add this macro to statically verify
 // the offsets are correct.
-#if defined(__SSE4_2__) && defined(NO_M_DATA) && !defined(NO_HWCRC) && \
-    !defined(_MSC_VER)
+#ifdef USE_X86_STRING_HELPERS
 
 #define HASH_TABLE_CHECK_OFFSETS(ArrayType, ElmType) \
   static_assert(ArrayType::dataOff() == ArrayType ## _DATA, ""); \

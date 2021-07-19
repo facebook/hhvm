@@ -219,8 +219,7 @@ TypedValue HashTable<ArrayType, ElmType>::NvGetInt(const ArrayData* ad,
   return LIKELY(validPos(i)) ? *a->data()[i].datatv() : make_tv<KindOfUninit>();
 }
 
-#if !defined(__SSE4_2__) || defined(NO_HWCRC) || !defined(NO_M_DATA) || \
-  defined(_MSC_VER)
+#ifndef USE_X86_STRING_HELPERS
 // This function is implemented directly in ASM in hash-table-x64.S otherwise.
 template<typename ArrayType, typename ElmType>
 TypedValue HashTable<ArrayType, ElmType>::NvGetStr(const ArrayData* ad,

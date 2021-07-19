@@ -29,3 +29,15 @@
 #define SD_HASH   12
 #endif
 
+// Under certain conditions, we implement both StringData::hash and certain
+// hash table lookup methods in x86 assembly.
+#if defined(__SSE4_2__) && defined(NO_M_DATA) && \
+    !defined(NO_HWCRC) && !defined(_MSC_VER)
+#define USE_X86_STRING_HELPERS
+#endif
+
+// Under certain conditions, we implement StringData::hash in ARM assembly.
+#if defined(ENABLE_AARCH64_CRC) && defined(NO_M_DATA) && \
+    !defined(NO_HWCRC) && !defined(_MSC_VER)
+#define USE_ARM_STRING_HELPERS
+#endif

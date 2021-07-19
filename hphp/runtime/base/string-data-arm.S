@@ -2,8 +2,7 @@
 #include "hphp/util/etch-helpers.h"
 #include "hphp/util/hphp-config.h"
 
-#if defined(ENABLE_AARCH64_CRC) && !defined(NO_HWCRC) && defined(NO_M_DATA) && \
-    !defined(_MSC_VER)
+#ifdef USE_ARM_STRING_HELPERS
 
         .file     "hphp/runtime/base/string-data-arm.S"
 

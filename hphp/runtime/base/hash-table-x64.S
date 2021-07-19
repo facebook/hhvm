@@ -19,8 +19,7 @@
 #include "hphp/runtime/base/string-data-macros.h"
 #include "hphp/util/etch-helpers.h"
 
-#if defined(__SSE4_2__) && defined(NO_M_DATA) && !defined(NO_HWCRC) && \
-    !defined(_MSC_VER)
+#ifdef USE_X86_STRING_HELPERS
 
         .file     "hphp/runtime/base/hash-table-x64.S"
 .macro implement_nvgetstr MANGLED_NAME SCALE DATA ELM_HASH ELM_KEY ELM_DATA ELM_TYPE ELM_QUADWORDS

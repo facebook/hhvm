@@ -319,11 +319,16 @@ pub mod user_attributes {
         .collect();
     }
 
+    pub fn is_memoized_regular(name: &str) -> bool {
+        name == MEMOIZE || name == MEMOIZE_LSB
+    }
+
+    pub fn is_memoized_policy_sharded(name: &str) -> bool {
+        name == POLICY_SHARDED_MEMOIZE || name == POLICY_SHARDED_MEMOIZE_LSB
+    }
+
     pub fn is_memoized(name: &str) -> bool {
-        name == MEMOIZE
-            || name == MEMOIZE_LSB
-            || name == POLICY_SHARDED_MEMOIZE
-            || name == POLICY_SHARDED_MEMOIZE_LSB
+        is_memoized_regular(name) || is_memoized_policy_sharded(name)
     }
 
     // TODO(hrust) these should probably be added to the above map/fields, too

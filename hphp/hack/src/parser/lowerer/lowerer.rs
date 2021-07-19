@@ -4946,15 +4946,26 @@ where
                 )
             }
         }
-        if Self::has_any_policied_context(contexts) {
+        let has_policied = Self::has_any_policied_context(contexts);
+        if has_policied {
             if let Some(u) = user_attributes.iter().find(|u| {
-                u.name.1 == naming_special_names_rust::user_attributes::MEMOIZE
-                    || u.name.1 == naming_special_names_rust::user_attributes::MEMOIZE_LSB
+                naming_special_names_rust::user_attributes::is_memoized_regular(&u.name.1)
             }) {
                 Self::raise_parsing_error_pos(
                     &u.name.0,
                     env,
                     &syntax_error::effect_policied_memoized(kind),
+                )
+            }
+        }
+        if let Some(u) = user_attributes.iter().find(|u| {
+            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(&u.name.1)
+        }) {
+            if !has_policied {
+                Self::raise_parsing_error_pos(
+                    &u.name.0,
+                    env,
+                    &syntax_error::policy_sharded_memoized_without_policied(kind),
                 )
             }
         }

@@ -937,9 +937,9 @@ functor
           (env, errors)
           errorl'
           ~rechecked:
-            ( fast_redecl_phase2_now
+            (fast_redecl_phase2_now
             |> Relative_path.Map.keys
-            |> Relative_path.Set.of_list )
+            |> Relative_path.Set.of_list)
           ~phase:Errors.Decl
       in
       let needs_phase2_redecl =
@@ -1211,9 +1211,9 @@ functor
       if not (Relative_path.Set.is_empty env.failed_naming) then
         Hh_logger.log
           "Also reparsing these files with failed naming: %s"
-          ( Relative_path.Set.elements env.failed_naming
+          (Relative_path.Set.elements env.failed_naming
           |> List.map ~f:Relative_path.suffix
-          |> String.concat ~sep:" " );
+          |> String.concat ~sep:" ");
       let files_to_parse =
         Relative_path.Set.union files_to_parse env.failed_naming
       in
@@ -1906,7 +1906,7 @@ let type_check_unsafe genv env kind start_time profiling =
       |> Telemetry.duration ~key:"core_end" ~start_time
       |> Telemetry.object_ ~key:"core" ~value:core_telemetry
     in
-    ( if is_full_check_done env.full_check_status then
+    (if is_full_check_done env.full_check_status then
       let (is_truncated, shown) =
         match env.ServerEnv.diag_subscribe with
         | None -> (None, 0)
@@ -1914,7 +1914,7 @@ let type_check_unsafe genv env kind start_time profiling =
       in
       let total = Option.value is_truncated ~default:shown in
       let msg = ServerCommandTypes.Done_global_typecheck { shown; total } in
-      ServerBusyStatus.send env msg );
+      ServerBusyStatus.send env msg);
     let telemetry =
       telemetry
       |> Telemetry.duration ~key:"sent_done" ~start_time

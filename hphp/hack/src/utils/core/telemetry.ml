@@ -229,13 +229,15 @@ let diff ~(all : bool) ?(suffix_keys = true) (telemetry : t) ~(prev : t) : t =
         try
           let (c, p) = (int_of_string c, int_of_string p) in
           (key ^ diff_suffix, int_ (c - p)) :: acc_if all (key, int_ c) acc
-        with _ ->
+        with
+        | _ ->
           begin
             try
               let (c, p) = (float_of_string c, float_of_string p) in
               (key ^ diff_suffix, float_ (c -. p))
               :: acc_if all (key, float_ c) acc
-            with _ ->
+            with
+            | _ ->
               (key, JSON_Number c) :: (key ^ prev_suffix, JSON_Number p) :: acc
           end
       end
@@ -292,10 +294,11 @@ and add_elems
        let n1 = int_of_string n1 in
        let n2 = int_of_string n2 in
        (key, int_ (n1 + n2)) :: acc
-     with _ ->
-       let n1 = float_of_string n1 in
-       let n2 = float_of_string n2 in
-       (key, float_ (n1 +. n2)) :: acc)
+     with
+    | _ ->
+      let n1 = float_of_string n1 in
+      let n2 = float_of_string n2 in
+      (key, float_ (n1 +. n2)) :: acc)
   | (JSON_Object elems1, JSON_Object elems2) ->
     let elems = add elems1 elems2 in
     if not @@ List.is_empty elems then

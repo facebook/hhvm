@@ -88,7 +88,8 @@ let ensure_threshold ~(threshold : int) ~(limit : int) ~(expected : int) : unit
     try
       Deferred_decl.raise_if_should_defer ~deferment:(relative_path, "\\Foo");
       Deferred_decl.increment_counter ()
-    with Deferred_decl.Defer (d, _) ->
+    with
+    | Deferred_decl.Defer (d, _) ->
       Asserter.Bool_asserter.assert_equals
         (i >= threshold)
         true
@@ -287,7 +288,8 @@ let test_quarantine () =
     try
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           "ok")
-    with e -> e |> Exception.wrap |> Exception.to_string
+    with
+    | e -> e |> Exception.wrap |> Exception.to_string
   in
   Asserter.String_asserter.assert_equals
     "ok"
@@ -299,7 +301,8 @@ let test_quarantine () =
     try
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           "ok")
-    with e -> e |> Exception.wrap |> Exception.to_string
+    with
+    | e -> e |> Exception.wrap |> Exception.to_string
   in
   Asserter.String_asserter.assert_equals
     "ok"
@@ -318,7 +321,8 @@ let test_quarantine () =
       Provider_utils.respect_but_quarantine_unsaved_changes
         ~ctx:ctx2
         ~f:(fun () -> "ok")
-    with e -> e |> Exception.wrap |> Exception.to_string
+    with
+    | e -> e |> Exception.wrap |> Exception.to_string
   in
   Asserter.String_asserter.assert_equals
     "ok"
@@ -330,7 +334,8 @@ let test_quarantine () =
     try
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           "ok")
-    with e -> e |> Exception.wrap |> Exception.to_string
+    with
+    | e -> e |> Exception.wrap |> Exception.to_string
   in
   Asserter.String_asserter.assert_equals
     "ok"

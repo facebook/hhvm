@@ -20,7 +20,6 @@ type t = {
   version: Config_file.version; [@printer (fun fmt _ -> fprintf fmt "version")]
   load_script_timeout: int;
   (* in seconds *)
-
   (* Configures only the workers. Workers can have more relaxed GC configs as
    * they are short-lived processes *)
   gc_control: Gc.control; [@printer (fun fmt _ -> fprintf fmt "control")]
@@ -202,8 +201,8 @@ let process_untrusted_mode config =
       in
       if not (List.is_empty invalid_keys) then
         failwith
-          ( "option not permitted in untrusted_mode: "
-          ^ String.concat ~sep:", " invalid_keys )
+          ("option not permitted in untrusted_mode: "
+          ^ String.concat ~sep:", " invalid_keys)
       else
         failwith "untrusted_mode can only be enabled, not disabled"
   | _ -> ()

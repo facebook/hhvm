@@ -197,8 +197,7 @@ let type_check
     (init_telemetry : Telemetry.t)
     (t : float)
     ~(profile_label : string)
-    ~(profiling : CgroupProfiler.Profiling.t) :
-    ServerEnv.env * float =
+    ~(profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   (* No type checking in AI mode *)
   if Option.is_some (ServerArgs.ai_mode genv.options) then
     (env, t)
@@ -212,7 +211,7 @@ let type_check
     assert (
       match env.prechecked_files with
       | Prechecked_files_disabled -> true
-      | _ -> false );
+      | _ -> false);
 
     let count = List.length files_to_check in
     let logstring = Printf.sprintf "Filter %d files" count in

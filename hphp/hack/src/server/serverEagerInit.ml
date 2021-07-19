@@ -61,7 +61,9 @@ let init
     |> Telemetry.string_ ~key:"reason" ~value:"eager_init"
   in
   (* We don't support a saved state for eager init. *)
-  let (get_next, t) = ServerInitCommon.indexing genv in
+  let (get_next, t) =
+    ServerInitCommon.indexing ~profile_label:"eager.init.indexing" genv
+  in
   let lazy_parse =
     match lazy_level with
     | Parse -> true
@@ -77,7 +79,7 @@ let init
       ~get_next
       t
       ~trace
-      ~profile_label:"parsing"
+      ~profile_label:"eager.init.parsing"
       ~profiling
   in
   if not (ServerArgs.check_mode genv.options) then
@@ -91,11 +93,11 @@ let init
       env.naming_table
       ctx
       t
-      ~profile_label:"update file deps"
+      ~profile_label:"eager.init.update"
       ~profiling
   in
   let (env, t) =
-    ServerInitCommon.naming env t ~profile_label:"naming" ~profiling
+    ServerInitCommon.naming env t ~profile_label:"eager.init.naming" ~profiling
   in
   let fast = Naming_table.to_fast env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
@@ -118,5 +120,5 @@ let init
     (Relative_path.Map.keys fast)
     init_telemetry
     t
-    ~profile_label:"type_check"
+    ~profile_label:"eager.init.type_check"
     ~profiling

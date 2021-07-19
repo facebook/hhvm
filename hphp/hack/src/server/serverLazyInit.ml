@@ -805,7 +805,7 @@ let type_check_dirty
         files_to_check
         init_telemetry
         t
-        ~profile_label:"type check dirty files"
+        ~profile_label:"type_check_dirty"
         ~profiling
     in
     HackEventLogger.type_check_dirty
@@ -861,7 +861,9 @@ let initialize_naming_table
         Some (List.length fnl),
         Unix.gettimeofday () )
     | None ->
-      let (get_next, t) = ServerInitCommon.indexing genv in
+      let (get_next, t) =
+        ServerInitCommon.indexing ~profile_label:"lazy.nt.indexing" genv
+      in
       (get_next, None, t)
   in
   (* The full_fidelity_parser currently works better in both memory and time
@@ -878,7 +880,7 @@ let initialize_naming_table
       ?count
       t
       ~trace
-      ~profile_label:"parsing"
+      ~profile_label:"lazy.nt.parsing"
       ~profiling
   in
   if not do_naming then
@@ -891,10 +893,14 @@ let initialize_naming_table
         env.naming_table
         ctx
         t
-        ~profile_label:"update file deps"
+        ~profile_label:"lazy.nt.do_naming.update"
         ~profiling
     in
-    ServerInitCommon.naming env t ~profile_label:"naming" ~profiling
+    ServerInitCommon.naming
+      env
+      t
+      ~profile_label:"lazy.nt.do_naming.naming"
+      ~profiling
 
 let write_symbol_info_init
     (genv : ServerEnv.genv)
@@ -914,11 +920,15 @@ let write_symbol_info_init
       env.naming_table
       ctx
       t
-      ~profile_label:"update file deps"
+      ~profile_label:"write_symbol_info.update"
       ~profiling
   in
   let (env, t) =
-    ServerInitCommon.naming env t ~profile_label:"naming" ~profiling
+    ServerInitCommon.naming
+      env
+      t
+      ~profile_label:"write_symbol_info.naming"
+      ~profiling
   in
   let index_paths = env.swriteopt.symbol_write_index_paths in
   let index_paths_file = env.swriteopt.symbol_write_index_paths_file in
@@ -1036,7 +1046,7 @@ let full_init
       fnl
       init_telemetry
       t
-      ~profile_label:"type check"
+      ~profile_label:"lazy.full.type_check"
       ~profiling
   in
   let run_experiment () =
@@ -1046,7 +1056,10 @@ let full_init
       Direct_decl_service.go
         ctx
         genv.workers
-        (fst (ServerInitCommon.indexing genv))
+        (fst
+           (ServerInitCommon.indexing
+              ~profile_label:"lazy.full.experiment.indexing"
+              genv))
     in
     let t = Hh_logger.log_duration "parsing decl" t_full_init in
     let naming_table = Naming_table.update_many env.naming_table fast in
@@ -1058,11 +1071,15 @@ let full_init
         env.naming_table
         ctx
         t
-        ~profile_label:"update files"
+        ~profile_label:"lazy.full.experiment.update"
         ~profiling
     in
     let (env, t) =
-      ServerInitCommon.naming env t ~profile_label:"naming" ~profiling
+      ServerInitCommon.naming
+        env
+        t
+        ~profile_label:"lazy.full.experiment.naming"
+        ~profiling
     in
     let fnl = Relative_path.Map.keys fast in
     if not is_check_mode then
@@ -1076,7 +1093,7 @@ let full_init
         fnl
         init_telemetry
         t
-        ~profile_label:"type check"
+        ~profile_label:"lazy.full.experiment.type_check"
         ~profiling
     in
     Hh_logger.log_duration "full init" t_full_init |> ignore;
@@ -1236,7 +1253,7 @@ let post_saved_state_initialization
       ~count:(List.length parsing_files_list)
       t
       ~trace
-      ~profile_label:"parse dirty files"
+      ~profile_label:"post_ss1.parsing"
       ~profiling
   in
   SearchServiceRunner.update_fileinfo_map
@@ -1249,7 +1266,7 @@ let post_saved_state_initialization
       env.naming_table
       ctx
       t
-      ~profile_label:"update file deps"
+      ~profile_label:"post_ss1.update"
       ~profiling
   in
   let t =
@@ -1263,7 +1280,7 @@ let post_saved_state_initialization
   in
   (* Do global naming on all dirty files *)
   let (env, t) =
-    ServerInitCommon.naming env t ~profile_label:"naming dirty files" ~profiling
+    ServerInitCommon.naming env t ~profile_label:"post_ss1.naming" ~profiling
   in
 
   (* Add all files from fast to the files_info object *)
@@ -1325,7 +1342,7 @@ let post_saved_state_initialization
       env.naming_table
       ctx
       t
-      ~profile_label:"update files again"
+      ~profile_label:"post_ss2.update"
       ~profiling
   in
   type_check_dirty

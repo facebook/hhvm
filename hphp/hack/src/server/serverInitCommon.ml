@@ -21,7 +21,7 @@ let no_incremental_check (options : ServerArgs.options) : bool =
   let full_init = Option.is_none (SharedMem.loaded_dep_table_filename ()) in
   in_check_mode && full_init
 
-let indexing ?hhi_filter (genv : ServerEnv.genv) :
+let indexing ?hhi_filter ~(profile_label : string) (genv : ServerEnv.genv) :
     Relative_path.t list Bucket.next * float =
   ServerProgress.send_progress "indexing";
   let t = Unix.gettimeofday () in
@@ -31,8 +31,8 @@ let indexing ?hhi_filter (genv : ServerEnv.genv) :
       ~indexer:(genv.indexer FindUtils.file_filter)
       ~extra_roots:(ServerConfig.extra_paths genv.config)
   in
-  HackEventLogger.indexing_end t;
-  let t = Hh_logger.log_duration "indexing" t in
+  HackEventLogger.indexing_end ~desc:profile_label t;
+  let t = Hh_logger.log_duration ("indexing " ^ profile_label) t in
   (get_next, t)
 
 let parsing
@@ -74,11 +74,15 @@ let parsing
      But our caller provides us 'count' option in cases where it knows the number in
      advance, e.g. during init. We'll log that for now. In future it'd be nice to
      log the actual number parsed. *)
-  HackEventLogger.parsing_end_for_init t hs ~parsed_count:count;
+  HackEventLogger.parsing_end_for_init
+    t
+    hs
+    ~parsed_count:count
+    ~desc:profile_label;
   let env =
     { env with naming_table; errorl = Errors.merge errorl env.errorl }
   in
-  (env, Hh_logger.log_duration "Parsing" t)
+  (env, Hh_logger.log_duration ("Parsing " ^ profile_label) t)
 
 let update_files
     (genv : ServerEnv.genv)
@@ -90,13 +94,19 @@ let update_files
   if no_incremental_check genv.options then
     t
   else (
-    Hh_logger.log "Updating file dependencies...";
+    Hh_logger.log "Updating dep->filename [%s]... " profile_label;
+    let deps_mode = Provider_context.get_deps_mode ctx in
+    let count = ref 0 in
     CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
     @@ fun () ->
-    (let deps_mode = Provider_context.get_deps_mode ctx in
-     Naming_table.iter naming_table ~f:(Typing_deps.Files.update_file deps_mode));
-    HackEventLogger.updating_deps_end t;
-    Hh_logger.log_duration "Updated file dependencies" t
+    Naming_table.iter naming_table ~f:(fun path fi ->
+        Typing_deps.Files.update_file deps_mode path fi;
+        count := !count + 1);
+    HackEventLogger.updating_deps_end
+      ~count:!count
+      ~desc:profile_label
+      ~start_t:t;
+    Hh_logger.log_duration "Updated dep->filename" t
   )
 
 let naming
@@ -108,27 +118,30 @@ let naming
   @@ fun () ->
   ServerProgress.send_progress "resolving symbol references";
   let ctx = Provider_utils.ctx_from_server_env env in
+  let count = ref 0 in
   let env =
     Naming_table.fold
       env.naming_table
-      ~f:
-        begin
-          fun k v env ->
-          let (errorl, failed_naming) =
-            Naming_global.ndecl_file_error_if_already_bound ctx k v
-          in
-          {
-            env with
-            errorl = Errors.merge errorl env.errorl;
-            failed_naming =
-              Relative_path.Set.union env.failed_naming failed_naming;
-          }
-        end
+      ~f:(fun k v env ->
+        count := !count + 1;
+        let (errorl, failed_naming) =
+          Naming_global.ndecl_file_error_if_already_bound ctx k v
+        in
+        {
+          env with
+          errorl = Errors.merge errorl env.errorl;
+          failed_naming =
+            Relative_path.Set.union env.failed_naming failed_naming;
+        })
       ~init:env
   in
   hh_log_heap ();
-  HackEventLogger.global_naming_end t (SharedMem.heap_size ());
-  (env, Hh_logger.log_duration "Naming" t)
+  HackEventLogger.global_naming_end
+    ~count:!count
+    ~desc:profile_label
+    ~heap_size:(SharedMem.heap_size ())
+    ~start_t:t;
+  (env, Hh_logger.log_duration ("Naming " ^ profile_label) t)
 
 let is_path_in_range (path : string) (range : ServerArgs.files_to_check_range) :
     bool =
@@ -173,7 +186,7 @@ let filter_filenames_by_spec
   filtered_filenames
 
 let log_type_check_end
-    env genv ~start_t ~count ~init_telemetry ~typecheck_telemetry =
+    env genv ~start_t ~count ~desc ~init_telemetry ~typecheck_telemetry =
   let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
   let telemetry =
     Telemetry.create ()
@@ -187,6 +200,7 @@ let log_type_check_end
     ~heap_size:(SharedMem.heap_size ())
     ~started_count:count
     ~count
+    ~desc
     ~experiments:genv.local_config.ServerLocalConfig.experiments
     ~start_t
 
@@ -214,7 +228,7 @@ let type_check
       | _ -> false);
 
     let count = List.length files_to_check in
-    let logstring = Printf.sprintf "Filter %d files" count in
+    let logstring = Printf.sprintf "Filter %d files [%s]" count profile_label in
     Hh_logger.log "Begin %s" logstring;
 
     let (files_to_check : Relative_path.t list) =
@@ -265,6 +279,7 @@ let type_check
       genv
       ~start_t:t
       ~count
+      ~desc:profile_label
       ~init_telemetry
       ~typecheck_telemetry;
     (env, Hh_logger.log_duration logstring t)

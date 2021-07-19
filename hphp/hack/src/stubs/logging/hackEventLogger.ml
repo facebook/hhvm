@@ -266,19 +266,19 @@ let remote_worker_load_naming_end _ = ()
 
 let recheck_end _ _ _ _ _ = ()
 
-let indexing_end _ = ()
+let indexing_end ~desc:_ _ = ()
 
 let parsing_end _ _ ~parsed_count:_ = ()
 
-let parsing_end_for_init _ _ ~parsed_count:_ = ()
+let parsing_end_for_init _ _ ~parsed_count:_ ~desc:_ = ()
 
 let parsing_end_for_typecheck _ _ ~parsed_count:_ = ()
 
-let updating_deps_end ?count:_ _ = ()
+let updating_deps_end ~count:_ ~desc:_ ~start_t:_ = ()
 
 let naming_end ~count:_ _ _ = ()
 
-let global_naming_end _ _ = ()
+let global_naming_end ~count:_ ~desc:_ ~heap_size:_ ~start_t:_ = ()
 
 let run_search_end _ = ()
 
@@ -303,7 +303,7 @@ let invariant_violation_bug
   ()
 
 let type_check_end
-    _ ~heap_size:_ ~started_count:_ ~count:_ ~experiments:_ ~start_t:_ =
+    _ ~heap_size:_ ~started_count:_ ~count:_ ~desc:_ ~experiments:_ ~start_t:_ =
   ()
 
 let notifier_returned _ _ = ()

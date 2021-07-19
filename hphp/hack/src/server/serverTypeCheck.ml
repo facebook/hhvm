@@ -1286,7 +1286,10 @@ functor
          toplevel symbols declared in that file. Also, update Typing_deps' table,
          which is a map from toplevel symbol hash (Dep.t) to filename. *)
       let naming_table = update_naming_table env fast_parsed profiling in
-      HackEventLogger.updating_deps_end ~count:reparse_count t;
+      HackEventLogger.updating_deps_end
+        ~count:reparse_count
+        ~desc:"serverTypeCheck"
+        ~start_t:t;
       let t = Hh_logger.log_duration logstring t in
       let telemetry =
         Telemetry.duration telemetry ~key:"naming_update_end" ~start_time
@@ -1831,6 +1834,7 @@ functor
         ~started_count:to_recheck_count
         ~count:total_rechecked_count
         ~experiments:genv.local_config.ServerLocalConfig.experiments
+        ~desc:"serverTypeCheck"
         ~start_t:type_check_start_t;
 
       (env, { reparse_count; total_rechecked_count }, telemetry)

@@ -11,6 +11,7 @@ val hh_log_heap : unit -> unit
 
 val indexing :
   ?hhi_filter:(string -> bool) ->
+  profile_label:string ->
   ServerEnv.genv ->
   Relative_path.t list Bucket.next * float
 

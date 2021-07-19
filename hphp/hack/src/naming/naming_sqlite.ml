@@ -813,6 +813,7 @@ let get_local_changes (db_path : db_path) : local_changes =
   LocalChanges.get stmt_cache
 
 let fold ~(db_path : db_path) ~init ~f ~file_deltas =
+  let start_t = Unix.gettimeofday () in
   (* We depend on [Relative_path.Map.bindings] returning results in increasing
    * order here. *)
   let sorted_changes = Relative_path.Map.bindings file_deltas in
@@ -857,16 +858,23 @@ let fold ~(db_path : db_path) ~init ~f ~file_deltas =
       ~init:(sorted_changes, init)
       ~f:consume_sorted_changes
   in
-  List.fold_left
-    ~f:
-      begin
-        fun acc (path, delta) ->
-        match delta with
-        | Modified fi -> f path fi acc
-        | Deleted -> (* This probably shouldn't happen? *) acc
-      end
-    ~init:acc
-    remaining_changes
+  let acc =
+    List.fold_left
+      ~f:
+        begin
+          fun acc (path, delta) ->
+          match delta with
+          | Modified fi -> f path fi acc
+          | Deleted -> (* This probably shouldn't happen? *) acc
+        end
+      ~init:acc
+      remaining_changes
+  in
+  Hh_logger.log
+    "NAMING_COSTLY_ITER\n%s"
+    (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
+  HackEventLogger.naming_costly_iter ~start_t;
+  acc
 
 let get_file_info (db_path : db_path) path =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in

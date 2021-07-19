@@ -179,6 +179,7 @@ let filter a ~f =
           local_changes with
           Naming_sqlite.file_deltas =
             Naming_sqlite.fold
+              ~warn_on_naming_costly_iter:true
               ~db_path
               ~init:file_deltas
               ~f:
@@ -201,6 +202,7 @@ let fold a ~init ~f =
   | Unbacked a -> Relative_path.Map.fold a ~init ~f
   | Backed (local_changes, db_path) ->
     Naming_sqlite.fold
+      ~warn_on_naming_costly_iter:true
       ~db_path
       ~init
       ~f
@@ -212,6 +214,7 @@ let get_files a =
   | Backed (local_changes, db_path) ->
     (* Reverse at the end to preserve ascending sort order. *)
     Naming_sqlite.fold
+      ~warn_on_naming_costly_iter:true
       ~db_path
       ~init:[]
       ~f:(fun path _ acc -> path :: acc)
@@ -308,11 +311,12 @@ let has_file a key =
   | Some _ -> true
   | None -> false
 
-let iter a ~f =
+let iter ?(warn_on_naming_costly_iter = true) a ~f =
   match a with
   | Unbacked a -> Relative_path.Map.iter a ~f
   | Backed (local_changes, db_path) ->
     Naming_sqlite.fold
+      ~warn_on_naming_costly_iter
       ~db_path
       ~init:()
       ~f:(fun path fi () -> f path fi)

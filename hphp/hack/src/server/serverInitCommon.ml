@@ -85,6 +85,7 @@ let parsing
   (env, Hh_logger.log_duration ("Parsing " ^ profile_label) t)
 
 let update_files
+    ?(warn_on_naming_costly_iter : bool option)
     (genv : ServerEnv.genv)
     (naming_table : Naming_table.t)
     (ctx : Provider_context.t)
@@ -99,7 +100,10 @@ let update_files
     let count = ref 0 in
     CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
     @@ fun () ->
-    Naming_table.iter naming_table ~f:(fun path fi ->
+    Naming_table.iter
+      ?warn_on_naming_costly_iter
+      naming_table
+      ~f:(fun path fi ->
         Typing_deps.Files.update_file deps_mode path fi;
         count := !count + 1);
     HackEventLogger.updating_deps_end

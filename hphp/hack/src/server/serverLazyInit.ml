@@ -1336,12 +1336,16 @@ let post_saved_state_initialization
     }
   in
   (* Update the fileinfo object's dependencies now that we have full fast *)
+  (* TODO(ljw): We're temporarily suppressing "warn_on_naming_costly_iter" because this
+     is the only known place that does a naming_costly_iter, and we know about it
+     and are trying to solve it, so there's no use logging it. *)
   let t =
     ServerInitCommon.update_files
       genv
       env.naming_table
       ctx
       t
+      ~warn_on_naming_costly_iter:false
       ~profile_label:"post_ss2.update"
       ~profiling
   in

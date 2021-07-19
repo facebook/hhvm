@@ -56,6 +56,7 @@ val copy_and_update :
 val get_local_changes : db_path -> local_changes
 
 val fold :
+  warn_on_naming_costly_iter:bool ->
   db_path:db_path ->
   init:'a ->
   f:(Relative_path.t -> FileInfo.t -> 'a -> 'a) ->

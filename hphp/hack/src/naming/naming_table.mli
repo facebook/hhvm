@@ -56,7 +56,11 @@ val get_64bit_dep_set_files :
 
 val has_file : t -> Relative_path.t -> bool
 
-val iter : t -> f:(Relative_path.t -> FileInfo.t -> unit) -> unit
+val iter :
+  ?warn_on_naming_costly_iter:bool ->
+  t ->
+  f:(Relative_path.t -> FileInfo.t -> unit) ->
+  unit
 
 val remove : t -> Relative_path.t -> t
 

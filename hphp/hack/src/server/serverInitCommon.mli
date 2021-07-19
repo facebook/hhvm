@@ -28,6 +28,7 @@ val parsing :
   ServerEnv.env * float
 
 val update_files :
+  ?warn_on_naming_costly_iter:bool ->
   ServerEnv.genv ->
   Naming_table.t ->
   Provider_context.t ->

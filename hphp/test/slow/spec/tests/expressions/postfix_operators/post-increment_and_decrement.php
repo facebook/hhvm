@@ -9,32 +9,32 @@
 function incdec($a)
 {
     echo "--------------------------------------- start incdec ---\n";
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
     $a--;
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
     $a++;
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
-    echo '$a = '.$a++."\n";
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a++)."\n";
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
     echo "--------------------------------------- end incdec ---\n";
 }
 
 function incdecrev($a)
 {
     echo "--------------------------------------- start incdecrev ---\n";
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
     $a++;
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
     $a--;
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
-    echo '$a = '.$a--."\n";
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a--)."\n";
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
     echo "--------------------------------------- end incdecrev ---\n";
 }
 <<__EntryPoint>> function main(): void {

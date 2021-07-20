@@ -30,9 +30,9 @@ async function test(string $prefix, int $times): Awaitable<vec<(string, string)>
       await SleepWaitHandle::create(1000000);
       break;
     case 9:
-      $results[] = $prefix.'add: '.apc_fetch_null($prefix.'add');
-      $results[] = $prefix.'store: '.apc_fetch_null($prefix.'store');
-      $results[] = $prefix.'extend: '.apc_fetch_null($prefix.'extend');
+      $results[] = $prefix.'add: '.(string)(apc_fetch_null($prefix.'add'));
+      $results[] = $prefix.'store: '.(string)(apc_fetch_null($prefix.'store'));
+      $results[] = $prefix.'extend: '.(string)(apc_fetch_null($prefix.'extend'));
       break;
     default:
       if ($times < 9) {

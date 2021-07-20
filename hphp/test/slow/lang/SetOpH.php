@@ -32,7 +32,7 @@ foreach ($lefts as $left) {
 
     echo "  . ";
     $a = $left;
-    var_dump($a .= $right);
+    var_dump($a .= (string)($right));
     var_dump($a);
 
     echo "  / ";

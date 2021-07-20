@@ -22,7 +22,8 @@ function f1(...$argList)
     foreach ($argList as $k => $e)
     {
         $t = HH\is_any_array($e) ? 'Array' : $e;
-        echo "\targ[$k] = >$t<\n";
+        $t__str = (string)($t);
+        echo "\targ[$k] = >$t__str<\n";
     }
 }
 

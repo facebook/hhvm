@@ -32,12 +32,12 @@ async function test(string $prefix, int $times): Awaitable<vec<(string, string)>
       await SleepWaitHandle::create(3000000);
       break;
     case 3:
-      $results[] = $prefix.'bazbaz: '.apc_fetch_null($prefix.'bazbaz');
+      $results[] = $prefix.'bazbaz: '.(string)(apc_fetch_null($prefix.'bazbaz'));
       await SleepWaitHandle::create(3000000);
       break;
     case 4:
       $results[] = $prefix.'foofoo: '.apc_fetch_null($prefix.'foofoo');
-      $results[] = $prefix.'barbar: '.apc_fetch_null($prefix.'barbar');
+      $results[] = $prefix.'barbar: '.(string)(apc_fetch_null($prefix.'barbar'));
       break;
     default:
       throw new Exception('To big times '.$times);

@@ -50,10 +50,10 @@ function main_trusted_autoload(): void {
     }
   }
 
-  print "Overriding: ".HH\autoload_set_paths(
+  print "Overriding: ".(string)(HH\autoload_set_paths(
     darray['class' => darray[]],
     __DIR__,
-  )."\n";
+  ))."\n";
 
   print_enabled_stats();
 }

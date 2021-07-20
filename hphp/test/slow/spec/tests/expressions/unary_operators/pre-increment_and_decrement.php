@@ -11,26 +11,26 @@ function incdec($a)
 {
     echo "--------------------------------------- start incdec ---\n";
     $b = $a;
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
     --$a;
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
     $b -= 1;
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
     --$a;
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
     $b -= 1;
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
     ++$a;
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
     $b += 1;
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
-    echo '$a = '.++$a."\n";
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)(++$a)."\n";
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
     echo "--------------------------------------- end incdec ---\n";
 }
 
@@ -39,26 +39,26 @@ function incdecrev($a)
 {
     echo "--------------------------------------- start incdecrev ---\n";
     $b = $a;
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
     ++$a;
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
     $b += 1;
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
     ++$a;
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
     $b += 1;
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
     --$a;
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
     $b -= 1;
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
-    echo '$a = '.++$a."\n";
-    echo '$a = '.$a." <---> "; var_dump($a);
+    echo '$a = '.(string)(++$a)."\n";
+    echo '$a = '.(string)($a)." <---> "; var_dump($a);
     echo "--------------------------------------- end incdecrev ---\n";
 }
 <<__EntryPoint>> function main(): void {

@@ -278,7 +278,7 @@ fn print_typedef_attributes<W: Write>(
     if ctx.is_system_lib() {
         specials.push("persistent");
     }
-    print_special_and_user_attrs(ctx, w, &specials[..], td.attributes.as_slice())
+    print_special_and_user_attrs(ctx, w, &specials[..], td.attributes.as_ref())
 }
 
 fn handle_not_impl<E: std::fmt::Debug, F: FnOnce() -> Result<(), E>>(f: F) -> Result<(), E> {

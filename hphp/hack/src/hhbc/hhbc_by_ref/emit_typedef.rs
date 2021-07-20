@@ -58,7 +58,7 @@ fn emit_typedef<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         type_info_res.and_then(|type_info| {
             type_structure_res.map(|type_structure| Typedef {
                 name,
-                attributes,
+                attributes: alloc.alloc_slice_fill_iter(attributes.into_iter()).into(),
                 type_info,
                 type_structure,
                 span,

@@ -1041,6 +1041,15 @@ pub fn user_ctx_should_be_caps(ctx_name: &str) -> Error {
 pub const assignment_to_readonly: Error =
     Cow::Borrowed("Cannot modify a member of a readonly variable");
 
+pub fn invalid_readonly(r1: &str, r2: &str, reason: &str) -> Error {
+    Cow::Owned(format!(
+        "This expression is {}, but we expected a {} value because {}",
+        r1.to_string(),
+        r2.to_string(),
+        reason.to_string()
+    ))
+}
+
 pub fn redefined_assignment_different_mutability(var_name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot change variable mutability of `{}` after it has been initially defined",

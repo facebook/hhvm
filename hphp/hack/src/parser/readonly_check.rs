@@ -26,12 +26,14 @@ pub enum Rty {
 
 struct Context {
     locals: HashMap<String, bool>,
+    readonly_return: Rty,
 }
 
 impl Context {
-    fn new() -> Self {
+    fn new(readonly_ret: Rty) -> Self {
         Self {
             locals: HashMap::new(),
+            readonly_return: readonly_ret,
         }
     }
 
@@ -39,7 +41,7 @@ impl Context {
         match self.locals.get(var_name) {
             Some(_) => {
                 // per @jjwu, "...once a variable is assigned a value, it
-                // can only be assigned a value of the same readonlyness
+                // can only be assigned a value of the same Rty
                 // for the rest of the function." See D29320968 for more context.
             }
             None => {
@@ -93,7 +95,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         }
         aast::Expr_::Lvar(id_orig) => {
             let var_name = local_id::get_name(&id_orig.1);
-            // TODO(alnash) we need to handle $this separately because the readonlyness
+            // TODO(alnash) we need to handle $this separately because the Rty
             // comes from the function for this and not by the name
             let is_this = var_name == special_idents::THIS;
             if !is_this && context.is_readonly(var_name) {
@@ -151,7 +153,7 @@ fn check_assignment_validity(
     match &lhs.2 {
         aast::Expr_::Lvar(id_orig) => {
             let var_name = local_id::get_name(&id_orig.1).to_string();
-            // TODO(alnash) we need to handle $this separately because the readonlyness
+            // TODO(alnash) we need to handle $this separately because the Rty
             // comes from the function for this and not by the name
             if var_name != special_idents::THIS {
                 let is_readonly = Rty::Readonly == rty_expr(context, &rhs);
@@ -189,6 +191,17 @@ impl Checker {
         self.errors
             .push(SyntaxError::make(start_offset, end_offset, msg));
     }
+
+    fn subtype(&mut self, pos: &Pos, r_sub: &Rty, r_sup: &Rty, reason: &str) {
+        use Rty::*;
+        match (r_sub, r_sup) {
+            (Readonly, Mutable) => self.add_error(
+                &pos,
+                syntax_error::invalid_readonly("readonly", "mutable", &reason),
+            ),
+            _ => {}
+        }
+    }
 }
 
 impl<'ast> Visitor<'ast> for Checker {
@@ -203,7 +216,12 @@ impl<'ast> Visitor<'ast> for Checker {
         _context: &mut Context,
         m: &aast::Method_<(), (), (), ()>,
     ) -> Result<(), ()> {
-        m.recurse(&mut Context::new(), self)
+        let readonly_return = if let Some(_) = m.readonly_ret {
+            Rty::Readonly
+        } else {
+            Rty::Mutable
+        };
+        m.recurse(&mut Context::new(readonly_return), self)
     }
 
     fn visit_fun_(
@@ -211,7 +229,12 @@ impl<'ast> Visitor<'ast> for Checker {
         _context: &mut Context,
         f: &aast::Fun_<(), (), (), ()>,
     ) -> Result<(), ()> {
-        f.recurse(&mut Context::new(), self)
+        let readonly_return = if let Some(_) = f.readonly_ret {
+            Rty::Readonly
+        } else {
+            Rty::Mutable
+        };
+        f.recurse(&mut Context::new(readonly_return), self)
     }
 
     fn visit_expr(
@@ -229,11 +252,25 @@ impl<'ast> Visitor<'ast> for Checker {
 
         p.recurse(context, self)
     }
+
+    fn visit_stmt(
+        &mut self,
+        context: &mut Context,
+        s: &aast::Stmt<(), (), (), ()>,
+    ) -> std::result::Result<(), ()> {
+        if let aast::Stmt_::Return(r) = &s.1 {
+            r.recurse(context, self.object())?;
+            if let Some(expr) = r.as_ref() {
+                self.subtype(&expr.1, &rty_expr(context, &expr), &context.readonly_return, "this function does not return readonly. Please mark it to return readonly if needed.")
+            }
+        }
+        s.recurse(context, self)
+    }
 }
 
 pub fn check_program(program: &aast::Program<(), (), (), ()>) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
-    let mut context = Context::new();
+    let mut context = Context::new(Rty::Mutable);
     visit(&mut checker, &mut context, program).unwrap();
     checker.errors
 }

@@ -1337,6 +1337,8 @@ void UniqueStubs::add(const char* name,
                         folly::sformat("HHVM::{}", name));
     }
 
+    registerNativeFunctionName(start, folly::sformat("HHVM::{}", name));
+
     auto const newStub = StubRange{name, start, end};
     auto lower = std::lower_bound(m_ranges.begin(), m_ranges.end(), newStub);
 

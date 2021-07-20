@@ -22,7 +22,6 @@
 #include <memory>
 #include <mutex>
 #include <string>
-#include <unordered_map>
 
 #ifdef _MSC_VER
 # include <windows.h>
@@ -37,6 +36,7 @@
 
 #include "hphp/util/functional.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/hash-map.h"
 
 #ifdef FACEBOOK
 #include <folly/experimental/symbolizer/Symbolizer.h>
@@ -50,11 +50,16 @@ namespace {
 
 typedef std::lock_guard<std::mutex> G;
 std::mutex nameCacheLock;
-std::unordered_map<void*, std::string, pointer_hash<void>> nameCache;
+hphp_fast_map<void*, std::string, pointer_hash<void>> nameCache;
 
 }
 
 //////////////////////////////////////////////////////////////////////
+
+void registerNativeFunctionName(void* codeAddr, const std::string& name) {
+  G g(nameCacheLock);
+  nameCache[codeAddr] = name;
+}
 
 std::string getNativeFunctionName(void* codeAddr) {
   {

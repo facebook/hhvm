@@ -34,6 +34,8 @@ inline std::string getNativeFunctionName(Ret (*ptr)(Args...)) {
   return getNativeFunctionName(reinterpret_cast<void*>(ptr));
 }
 
+void registerNativeFunctionName(void* codeAddr, const std::string& name);
+
 /**
  * Get the vtable offset corresponding to a method pointer. NB: only works
  * for single inheritance. For no inheritance at all, use
@@ -63,5 +65,3 @@ constexpr void* getMethodPtr(MethodPtr meth) {
 //////////////////////////////////////////////////////////////////////
 
 }
-
-

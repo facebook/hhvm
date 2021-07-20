@@ -138,6 +138,11 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
         "Type": TypeEdgeHandler(),
         "Method": MethodEdgeHandler(),
     }
+    collectors = {
+        "Extends": symbols,
+        "Type": symbols,
+        "Method": symbols,
+    }
 
     for line in lines:
         # Required input formatting to get "Extends A -> Type B, Type C, Type D".
@@ -169,8 +174,9 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
         handler = handlers[lhs[0]]
 
         lhs_tokens = handler.parse(lhs[1])
-        # Collecting symbols.
-        symbols.add(f'"{lhs_tokens[0]}"')
+        # Updating collections.
+        collector = collectors.get(lhs[0], symbols)
+        collector.add(f'"{lhs_tokens[0]}"')
         # Processing each deps ["Type B", "Type C", "Type D"]
         for dep in rhs.rstrip("\n").split(","):
             # dep = "Type X"
@@ -179,7 +185,8 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
                 # ToDo: Add logging if we needed to track wrong format on rhs.
                 continue
             (dep_type, dep_symbol) = dep
-            symbols.add(f'"{dep_symbol}"')
+            collector = collectors.get(dep_type, symbols)
+            collector.add(f'"{dep_symbol}"')
             rules.append(handler.rule_writer(lhs_tokens, dep_symbol))
 
     rules.append("symbols({}).".format(";".join(sorted(symbols))))

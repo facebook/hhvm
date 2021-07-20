@@ -58,15 +58,17 @@ extends(X, Y) :- extends_to(Y, X), class(X), class(Y).
 % symbols("B"; "C").
 
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-% Type Dependency Edge.
+% Type Dependency Edge <Type, Type>.
 % =============================================================================
 % If TypeX needs "Type" check TypeY, but no "Extend" relationship presents, so
 % the "Type" edge is coming from a parameter TypeX in a TypeY method call.
 has_method_with_parameter(TypeY, TypeX) :-
-                    type(TypeX, TypeY), not indirect_extends_to(TypeX, TypeY).
+    type(TypeX, TypeY),
+    not indirect_extends_to(TypeX, TypeY),
+    symbols(TypeY).
 
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-% Method Dependency Edge.
+% Method Dependency Edge <Method, Type>.
 % =============================================================================
 % If we see "Method" dependency edge, TypeX must have one method with MethodName.
 add_method(TypeX, MethodName) :- method(TypeX, MethodName, _).
@@ -91,7 +93,8 @@ add_method(TypeX, MethodName) :- method(TypeX, MethodName, _).
 % Rule 2.1.3: However, we give complete flexibility to choose from override or
 % invoke a method.
 1 {invokes_in_method(TypeZ, TypeX, MethodName);
-    override(TypeZ, TypeX, MethodName)} 1 :- method(TypeX, MethodName, TypeZ).
+    override(TypeZ, TypeX, MethodName)} 1 :-
+        method(TypeX, MethodName, TypeZ), symbols(TypeZ).
 %
 % Currently, it's "non-deterministic" for "Method" edges no matter how "Extends"
 % layouts are. If there is a performance issue, feel free to mix up Rule 2.1.1-3

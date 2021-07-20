@@ -279,15 +279,6 @@ Type HH\Contexts\Unsafe\globals -> Type A"""
 
 
 class DoReasoningTest(unittest.TestCase):
-    def extract_run_and_compare(
-        self, deps: str, exp: str, generator: hh_codesynthesis.CodeGenerator
-    ) -> None:
-        additional_programs = hh_codesynthesis.extract_logic_rules(deps.split("\n"))
-        hh_codesynthesis.do_reasoning(
-            additional_programs=additional_programs, generator=generator
-        )
-        self.assertEqual(str(generator), exp)
-
     def test_clingo_exception(self) -> None:
         deps = ["rule_without_period(symbol1, symbol2)"]
         raw_codegen = hh_codesynthesis.CodeGenerator()
@@ -386,6 +377,17 @@ Type T -> Type A, Type B
             additional_programs=additional_programs, generator=raw_codegen
         )
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
+
+
+class CodeEmittingTest(unittest.TestCase):
+    def extract_run_and_compare(
+        self, deps: str, exp: str, generator: hh_codesynthesis.CodeGenerator
+    ) -> None:
+        additional_programs = hh_codesynthesis.extract_logic_rules(deps.split("\n"))
+        hh_codesynthesis.do_reasoning(
+            additional_programs=additional_programs, generator=generator
+        )
+        self.assertEqual(str(generator), exp)
 
     def test_extends_dependency_hack_codegen(self) -> None:
         exp = """\

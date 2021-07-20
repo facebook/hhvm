@@ -14,6 +14,10 @@ std::unique_ptr<apache::thrift::AsyncProcessor> MemcacheSvIf::getProcessor() {
   return std::make_unique<MemcacheAsyncProcessor>(this);
 }
 
+MemcacheSvIf::CreateMethodMetadataResult MemcacheSvIf::createMethodMetadata() {
+  return ::apache::thrift::detail::ap::createMethodMetadataMap<MemcacheAsyncProcessor>();
+}
+
 
 void MemcacheSvIf::async_eb_mcAdd(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McAddReply>> callback, const facebook::memcache::McAddRequest& /*request*/) {
   callback->exception(apache::thrift::TApplicationException("Function mcAdd is unimplemented"));
@@ -109,62 +113,35 @@ void MemcacheAsyncProcessor::processSerializedCompressedRequest(apache::thrift::
   apache::thrift::detail::ap::process(this, std::move(req), std::move(serializedRequest), protType, context, eb, tm);
 }
 
-std::shared_ptr<folly::RequestContext> MemcacheAsyncProcessor::getBaseContextForRequest() {
-  return iface_->getBaseContextForRequest();
+void MemcacheAsyncProcessor::processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  apache::thrift::detail::ap::process(this, std::move(req), std::move(serializedRequest), methodMetadata, protType, context, eb, tm);
 }
 
-const MemcacheAsyncProcessor::ProcessMap& MemcacheAsyncProcessor::getBinaryProtocolProcessMap() {
-  return binaryProcessMap_;
+const MemcacheAsyncProcessor::ProcessMap& MemcacheAsyncProcessor::getOwnProcessMap() {
+  return kOwnProcessMap_;
 }
 
-const MemcacheAsyncProcessor::ProcessMap MemcacheAsyncProcessor::binaryProcessMap_ {
-  {"mcAdd", &MemcacheAsyncProcessor::setUpAndProcess_mcAdd<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcAppend", &MemcacheAsyncProcessor::setUpAndProcess_mcAppend<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcCas", &MemcacheAsyncProcessor::setUpAndProcess_mcCas<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcDecr", &MemcacheAsyncProcessor::setUpAndProcess_mcDecr<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcDelete", &MemcacheAsyncProcessor::setUpAndProcess_mcDelete<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcFlushAll", &MemcacheAsyncProcessor::setUpAndProcess_mcFlushAll<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcFlushRe", &MemcacheAsyncProcessor::setUpAndProcess_mcFlushRe<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcGat", &MemcacheAsyncProcessor::setUpAndProcess_mcGat<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcGats", &MemcacheAsyncProcessor::setUpAndProcess_mcGats<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcGet", &MemcacheAsyncProcessor::setUpAndProcess_mcGet<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcGets", &MemcacheAsyncProcessor::setUpAndProcess_mcGets<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcIncr", &MemcacheAsyncProcessor::setUpAndProcess_mcIncr<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcLeaseGet", &MemcacheAsyncProcessor::setUpAndProcess_mcLeaseGet<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcLeaseSet", &MemcacheAsyncProcessor::setUpAndProcess_mcLeaseSet<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcMetaget", &MemcacheAsyncProcessor::setUpAndProcess_mcMetaget<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcPrepend", &MemcacheAsyncProcessor::setUpAndProcess_mcPrepend<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcReplace", &MemcacheAsyncProcessor::setUpAndProcess_mcReplace<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcSet", &MemcacheAsyncProcessor::setUpAndProcess_mcSet<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcTouch", &MemcacheAsyncProcessor::setUpAndProcess_mcTouch<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-  {"mcVersion", &MemcacheAsyncProcessor::setUpAndProcess_mcVersion<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>},
-};
-
-const MemcacheAsyncProcessor::ProcessMap& MemcacheAsyncProcessor::getCompactProtocolProcessMap() {
-  return compactProcessMap_;
-}
-
-const MemcacheAsyncProcessor::ProcessMap MemcacheAsyncProcessor::compactProcessMap_ {
-  {"mcAdd", &MemcacheAsyncProcessor::setUpAndProcess_mcAdd<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcAppend", &MemcacheAsyncProcessor::setUpAndProcess_mcAppend<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcCas", &MemcacheAsyncProcessor::setUpAndProcess_mcCas<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcDecr", &MemcacheAsyncProcessor::setUpAndProcess_mcDecr<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcDelete", &MemcacheAsyncProcessor::setUpAndProcess_mcDelete<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcFlushAll", &MemcacheAsyncProcessor::setUpAndProcess_mcFlushAll<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcFlushRe", &MemcacheAsyncProcessor::setUpAndProcess_mcFlushRe<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcGat", &MemcacheAsyncProcessor::setUpAndProcess_mcGat<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcGats", &MemcacheAsyncProcessor::setUpAndProcess_mcGats<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcGet", &MemcacheAsyncProcessor::setUpAndProcess_mcGet<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcGets", &MemcacheAsyncProcessor::setUpAndProcess_mcGets<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcIncr", &MemcacheAsyncProcessor::setUpAndProcess_mcIncr<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcLeaseGet", &MemcacheAsyncProcessor::setUpAndProcess_mcLeaseGet<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcLeaseSet", &MemcacheAsyncProcessor::setUpAndProcess_mcLeaseSet<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcMetaget", &MemcacheAsyncProcessor::setUpAndProcess_mcMetaget<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcPrepend", &MemcacheAsyncProcessor::setUpAndProcess_mcPrepend<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcReplace", &MemcacheAsyncProcessor::setUpAndProcess_mcReplace<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcSet", &MemcacheAsyncProcessor::setUpAndProcess_mcSet<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcTouch", &MemcacheAsyncProcessor::setUpAndProcess_mcTouch<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
-  {"mcVersion", &MemcacheAsyncProcessor::setUpAndProcess_mcVersion<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>},
+const MemcacheAsyncProcessor::ProcessMap MemcacheAsyncProcessor::kOwnProcessMap_ {
+  {"mcAdd", {&MemcacheAsyncProcessor::setUpAndProcess_mcAdd<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcAdd<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcAppend", {&MemcacheAsyncProcessor::setUpAndProcess_mcAppend<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcAppend<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcCas", {&MemcacheAsyncProcessor::setUpAndProcess_mcCas<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcCas<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcDecr", {&MemcacheAsyncProcessor::setUpAndProcess_mcDecr<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcDecr<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcDelete", {&MemcacheAsyncProcessor::setUpAndProcess_mcDelete<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcDelete<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcFlushAll", {&MemcacheAsyncProcessor::setUpAndProcess_mcFlushAll<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcFlushAll<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcFlushRe", {&MemcacheAsyncProcessor::setUpAndProcess_mcFlushRe<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcFlushRe<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcGat", {&MemcacheAsyncProcessor::setUpAndProcess_mcGat<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcGat<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcGats", {&MemcacheAsyncProcessor::setUpAndProcess_mcGats<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcGats<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcGet", {&MemcacheAsyncProcessor::setUpAndProcess_mcGet<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcGet<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcGets", {&MemcacheAsyncProcessor::setUpAndProcess_mcGets<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcGets<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcIncr", {&MemcacheAsyncProcessor::setUpAndProcess_mcIncr<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcIncr<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcLeaseGet", {&MemcacheAsyncProcessor::setUpAndProcess_mcLeaseGet<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcLeaseGet<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcLeaseSet", {&MemcacheAsyncProcessor::setUpAndProcess_mcLeaseSet<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcLeaseSet<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcMetaget", {&MemcacheAsyncProcessor::setUpAndProcess_mcMetaget<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcMetaget<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcPrepend", {&MemcacheAsyncProcessor::setUpAndProcess_mcPrepend<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcPrepend<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcReplace", {&MemcacheAsyncProcessor::setUpAndProcess_mcReplace<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcReplace<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcSet", {&MemcacheAsyncProcessor::setUpAndProcess_mcSet<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcSet<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcTouch", {&MemcacheAsyncProcessor::setUpAndProcess_mcTouch<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcTouch<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"mcVersion", {&MemcacheAsyncProcessor::setUpAndProcess_mcVersion<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &MemcacheAsyncProcessor::setUpAndProcess_mcVersion<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
 };
 
 }}} // facebook::memcache::thrift

@@ -58,6 +58,7 @@ class MemcacheSvIf : public MemcacheSvAsyncIf, public apache::thrift::ServerInte
  public:
   typedef MemcacheAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
+  CreateMethodMetadataResult createMethodMetadata() override;
 
 
   void async_eb_mcAdd(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McAddReply>> callback, const facebook::memcache::McAddRequest& p_request) override;
@@ -80,6 +81,7 @@ class MemcacheSvIf : public MemcacheSvAsyncIf, public apache::thrift::ServerInte
   void async_eb_mcSet(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McSetReply>> callback, const facebook::memcache::McSetRequest& p_request) override;
   void async_eb_mcTouch(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McTouchReply>> callback, const facebook::memcache::McTouchRequest& p_request) override;
   void async_eb_mcVersion(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McVersionReply>> callback, const facebook::memcache::McVersionRequest& p_request) override;
+ private:
 };
 
 class MemcacheSvNull : public MemcacheSvIf {
@@ -95,23 +97,20 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   MemcacheSvIf* iface_;
  public:
   void processSerializedCompressedRequest(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
- protected:
-  std::shared_ptr<folly::RequestContext> getBaseContextForRequest() override;
+  void processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) override;
  public:
-  using ProcessFunc = GeneratedAsyncProcessor::ProcessFunc<MemcacheAsyncProcessor>;
-  using ProcessMap = GeneratedAsyncProcessor::ProcessMap<ProcessFunc>;
-  static const MemcacheAsyncProcessor::ProcessMap& getBinaryProtocolProcessMap();
-  static const MemcacheAsyncProcessor::ProcessMap& getCompactProtocolProcessMap();
+  using ProcessFuncs = GeneratedAsyncProcessor::ProcessFuncs<MemcacheAsyncProcessor>;
+  using ProcessMap = GeneratedAsyncProcessor::ProcessMap<ProcessFuncs>;
+  static const MemcacheAsyncProcessor::ProcessMap& getOwnProcessMap();
  private:
-  static const MemcacheAsyncProcessor::ProcessMap binaryProcessMap_;
-  static const MemcacheAsyncProcessor::ProcessMap compactProcessMap_;
+  static const MemcacheAsyncProcessor::ProcessMap kOwnProcessMap_;
  private:
   template <typename ProtocolIn_, typename ProtocolOut_>
   void setUpAndProcess_mcAdd(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcAdd(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcAdd(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McAddReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcAdd(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McAddReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcAdd(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -119,7 +118,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcAppend(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcAppend(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McAppendReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcAppend(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McAppendReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcAppend(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -127,7 +126,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcCas(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcCas(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McCasReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcCas(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McCasReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcCas(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -135,7 +134,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcDecr(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcDecr(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McDecrReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcDecr(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McDecrReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcDecr(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -143,7 +142,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcDelete(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcDelete(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McDeleteReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcDelete(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McDeleteReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcDelete(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -151,7 +150,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcFlushAll(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcFlushAll(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McFlushAllReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcFlushAll(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McFlushAllReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcFlushAll(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -159,7 +158,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcFlushRe(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcFlushRe(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McFlushReReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcFlushRe(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McFlushReReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcFlushRe(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -167,7 +166,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcGat(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcGat(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McGatReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcGat(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McGatReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcGat(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -175,7 +174,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcGats(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcGats(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McGatsReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcGats(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McGatsReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcGats(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -183,7 +182,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcGet(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcGet(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McGetReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcGet(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McGetReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcGet(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -191,7 +190,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcGets(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcGets(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McGetsReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcGets(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McGetsReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcGets(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -199,7 +198,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcIncr(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcIncr(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McIncrReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcIncr(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McIncrReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcIncr(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -207,7 +206,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcLeaseGet(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcLeaseGet(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McLeaseGetReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcLeaseGet(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McLeaseGetReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcLeaseGet(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -215,7 +214,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcLeaseSet(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcLeaseSet(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McLeaseSetReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcLeaseSet(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McLeaseSetReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcLeaseSet(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -223,7 +222,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcMetaget(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcMetaget(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McMetagetReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcMetaget(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McMetagetReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcMetaget(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -231,7 +230,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcPrepend(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcPrepend(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McPrependReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcPrepend(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McPrependReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcPrepend(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -239,7 +238,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcReplace(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcReplace(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McReplaceReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcReplace(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McReplaceReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcReplace(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -247,7 +246,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcSet(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcSet(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McSetReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcSet(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McSetReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcSet(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -255,7 +254,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcTouch(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcTouch(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McTouchReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcTouch(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McTouchReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcTouch(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -263,7 +262,7 @@ class MemcacheAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor 
   template <typename ProtocolIn_, typename ProtocolOut_>
   void process_mcVersion(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx,folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <class ProtocolIn_, class ProtocolOut_>
-  static folly::IOBufQueue return_mcVersion(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McVersionReply const& _return);
+  static apache::thrift::LegacySerializedResponse return_mcVersion(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McVersionReply const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_mcVersion(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
  public:

@@ -35,15 +35,17 @@ void TccStructTraits<::facebook::memcache::thrift::McVersionRequest>::translateF
 
 namespace facebook { namespace memcache { namespace thrift {
 
+
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McVersionRequest::McVersionRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg) :
     key(std::move(key__arg)) {
   __isset.key = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
+
 void McVersionRequest::__clear() {
   // clear all fields
-  ::apache::thrift::apply_indirection(key) = apache::thrift::StringTraits< ::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::fromStringLiteral("");
+  ::apache::thrift::apply_indirection(this->key) = apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::fromStringLiteral("");
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -114,6 +116,7 @@ void TccStructTraits<::facebook::memcache::thrift::McVersionReply>::translateFie
 
 namespace facebook { namespace memcache { namespace thrift {
 
+
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McVersionReply::McVersionReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, folly::IOBuf value__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
@@ -126,12 +129,13 @@ McVersionReply::McVersionReply(apache::thrift::FragileConstructor, ::carbon::Res
   __isset.appSpecificErrorCode = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
+
 void McVersionReply::__clear() {
   // clear all fields
-  result =  ::carbon::Result::UNKNOWN;
-  value = apache::thrift::StringTraits< folly::IOBuf>::fromStringLiteral("");
-  message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
-  appSpecificErrorCode = 0;
+  this->result =  ::carbon::Result::UNKNOWN;
+  this->value = apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("");
+  this->message = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->appSpecificErrorCode = 0;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -223,15 +227,17 @@ void TccStructTraits<::facebook::memcache::thrift::McStatsRequest>::translateFie
 
 namespace facebook { namespace memcache { namespace thrift {
 
+
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McStatsRequest::McStatsRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg) :
     key(std::move(key__arg)) {
   __isset.key = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
+
 void McStatsRequest::__clear() {
   // clear all fields
-  ::apache::thrift::apply_indirection(key) = apache::thrift::StringTraits< ::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::fromStringLiteral("");
+  ::apache::thrift::apply_indirection(this->key) = apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::fromStringLiteral("");
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -302,6 +308,7 @@ void TccStructTraits<::facebook::memcache::thrift::McStatsReply>::translateField
 
 namespace facebook { namespace memcache { namespace thrift {
 
+
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McStatsReply::McStatsReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::vector<::std::string> stats__arg, ::std::int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
@@ -314,12 +321,13 @@ McStatsReply::McStatsReply(apache::thrift::FragileConstructor, ::carbon::Result 
   __isset.appSpecificErrorCode = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
+
 void McStatsReply::__clear() {
   // clear all fields
-  result =  ::carbon::Result::UNKNOWN;
-  message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
-  stats.clear();
-  appSpecificErrorCode = 0;
+  this->result =  ::carbon::Result::UNKNOWN;
+  this->message = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->stats.clear();
+  this->appSpecificErrorCode = 0;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -419,15 +427,17 @@ void TccStructTraits<::facebook::memcache::thrift::McShutdownRequest>::translate
 
 namespace facebook { namespace memcache { namespace thrift {
 
+
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McShutdownRequest::McShutdownRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg) :
     key(std::move(key__arg)) {
   __isset.key = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
+
 void McShutdownRequest::__clear() {
   // clear all fields
-  ::apache::thrift::apply_indirection(key) = apache::thrift::StringTraits< ::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::fromStringLiteral("");
+  ::apache::thrift::apply_indirection(this->key) = apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::fromStringLiteral("");
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -498,6 +508,7 @@ void TccStructTraits<::facebook::memcache::thrift::McShutdownReply>::translateFi
 
 namespace facebook { namespace memcache { namespace thrift {
 
+
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McShutdownReply::McShutdownReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
@@ -508,11 +519,12 @@ McShutdownReply::McShutdownReply(apache::thrift::FragileConstructor, ::carbon::R
   __isset.appSpecificErrorCode = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
+
 void McShutdownReply::__clear() {
   // clear all fields
-  result =  ::carbon::Result::UNKNOWN;
-  message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
-  appSpecificErrorCode = 0;
+  this->result =  ::carbon::Result::UNKNOWN;
+  this->message = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->appSpecificErrorCode = 0;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -597,15 +609,17 @@ void TccStructTraits<::facebook::memcache::thrift::McQuitRequest>::translateFiel
 
 namespace facebook { namespace memcache { namespace thrift {
 
+
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McQuitRequest::McQuitRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg) :
     key(std::move(key__arg)) {
   __isset.key = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
+
 void McQuitRequest::__clear() {
   // clear all fields
-  ::apache::thrift::apply_indirection(key) = apache::thrift::StringTraits< ::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::fromStringLiteral("");
+  ::apache::thrift::apply_indirection(this->key) = apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::fromStringLiteral("");
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -676,6 +690,7 @@ void TccStructTraits<::facebook::memcache::thrift::McQuitReply>::translateFieldN
 
 namespace facebook { namespace memcache { namespace thrift {
 
+
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McQuitReply::McQuitReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
@@ -686,11 +701,12 @@ McQuitReply::McQuitReply(apache::thrift::FragileConstructor, ::carbon::Result re
   __isset.appSpecificErrorCode = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
+
 void McQuitReply::__clear() {
   // clear all fields
-  result =  ::carbon::Result::UNKNOWN;
-  message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
-  appSpecificErrorCode = 0;
+  this->result =  ::carbon::Result::UNKNOWN;
+  this->message = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->appSpecificErrorCode = 0;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -775,15 +791,17 @@ void TccStructTraits<::facebook::memcache::thrift::McExecRequest>::translateFiel
 
 namespace facebook { namespace memcache { namespace thrift {
 
+
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McExecRequest::McExecRequest(apache::thrift::FragileConstructor, ::carbon::thrift::IOBufKey key__arg) :
     key(std::move(key__arg)) {
   __isset.key = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
+
 void McExecRequest::__clear() {
   // clear all fields
-  ::apache::thrift::apply_indirection(key) = apache::thrift::StringTraits< ::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::fromStringLiteral("");
+  ::apache::thrift::apply_indirection(this->key) = apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::fromStringLiteral("");
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -854,6 +872,7 @@ void TccStructTraits<::facebook::memcache::thrift::McExecReply>::translateFieldN
 
 namespace facebook { namespace memcache { namespace thrift {
 
+
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McExecReply::McExecReply(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string response__arg, ::std::string message__arg, ::std::int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
@@ -866,12 +885,13 @@ McExecReply::McExecReply(apache::thrift::FragileConstructor, ::carbon::Result re
   __isset.appSpecificErrorCode = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
+
 void McExecReply::__clear() {
   // clear all fields
-  result =  ::carbon::Result::UNKNOWN;
-  response = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
-  message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
-  appSpecificErrorCode = 0;
+  this->result =  ::carbon::Result::UNKNOWN;
+  this->response = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->message = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->appSpecificErrorCode = 0;
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -963,9 +983,11 @@ void TccStructTraits<::facebook::memcache::thrift::GoAwayAcknowledgement>::trans
 
 namespace facebook { namespace memcache { namespace thrift {
 
+
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 GoAwayAcknowledgement::GoAwayAcknowledgement(apache::thrift::FragileConstructor) {}
 THRIFT_IGNORE_ISSET_USE_WARNING_END
+
 void GoAwayAcknowledgement::__clear() {
   // clear all fields
 }
@@ -1027,6 +1049,7 @@ void TccStructTraits<::facebook::memcache::thrift::GoAwayRequest>::translateFiel
 
 namespace facebook { namespace memcache { namespace thrift {
 
+
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 GoAwayRequest::GoAwayRequest(apache::thrift::FragileConstructor, ::carbon::Result result__arg, ::std::string reason__arg) :
     result(std::move(result__arg)),
@@ -1035,10 +1058,11 @@ GoAwayRequest::GoAwayRequest(apache::thrift::FragileConstructor, ::carbon::Resul
   __isset.reason = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
+
 void GoAwayRequest::__clear() {
   // clear all fields
-  result =  ::carbon::Result::UNKNOWN;
-  reason = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  this->result =  ::carbon::Result::UNKNOWN;
+  this->reason = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
 THRIFT_IGNORE_ISSET_USE_WARNING_END

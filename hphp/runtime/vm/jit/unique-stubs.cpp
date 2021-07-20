@@ -843,8 +843,11 @@ TCA emitInterpOneCFHelper(CodeBlock& cb, DataBlock& data, Op op,
 
     auto const sf = v.makeReg();
     v << testq{rret(), rret(), sf};
-    v << jcci{CC_NZ, sf, rh.reenterTC};
-    v << jmpi{rh.resumeHelper};
+    ifThenElse(
+      v, CC_NZ, sf,
+      [&] (Vout& v) { v << jmpi{rh.reenterTC}; },
+      [&] (Vout& v) { v << jmpi{rh.resumeHelper}; }
+    );
   });
 }
 
@@ -1075,8 +1078,11 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
     auto const sf = v.makeReg();
     v << testq{rret(0), rret(0), sf};
-    v << jcci{CC_Z, sf, us.resumeCPPUnwind};
-    v << jmpr{rret(0), vm_regs_with_sp()};
+    ifThenElse(
+      v, CC_Z, sf,
+      [&] (Vout& v) { v << jmpi{us.resumeCPPUnwind}; },
+      [&] (Vout& v) { v << jmpr{rret(0), vm_regs_with_sp()}; }
+    );
   });
 
   us.endCatchTeardownThisHelper = vwrap(cb, data, meta, [&] (Vout& v) {
@@ -1121,8 +1127,11 @@ TCA emitEndCatchStublogueHelpers(CodeBlock& cb, DataBlock& data,
 
     auto const sf = v.makeReg();
     v << testq{rret(0), rret(0), sf};
-    v << jcci{CC_Z, sf, us.resumeCPPUnwind};
-    v << jmpr{rret(0), vm_regs_no_sp()};
+    ifThenElse(
+      v, CC_Z, sf,
+      [&] (Vout& v) { v << jmpi{us.resumeCPPUnwind}; },
+      [&] (Vout& v) { v << jmpr{rret(0), vm_regs_no_sp()}; }
+    );
   });
 
   // Unused.

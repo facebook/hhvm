@@ -113,6 +113,17 @@ bool checkWidths(Vunit& unit);
 bool checkBlockEnd(const Vunit& v, Vlabel b);
 
 /*
+ * Assert that the unit contains no instructions which can leave the
+ * unit implicitly (IE, jcci, fallbackcc, or bindjcc).
+ */
+bool checkNoSideExits(const Vunit& unit);
+
+/*
+ * Assert that the unit does not contain any critical edges.
+ */
+bool checkNoCriticalEdges(const Vunit& unit);
+
+/*
  * Passes.
  */
 void allocateRegistersWithXLS(Vunit&, const Abi&);
@@ -120,10 +131,10 @@ void allocateRegistersWithGraphColor(Vunit&, const Abi&);
 void annotateSFUses(Vunit&);
 void fuseBranches(Vunit&);
 void optimizeCopies(Vunit&, const Abi&);
-void optimizeExits(Vunit&, MaybeVinstrId = {});
-void optimizeJmps(Vunit&, MaybeVinstrId = {});
+void optimizeExits(Vunit&);
+void optimizeJmps(Vunit&, bool makeSideExits);
 void optimizePhis(Vunit&);
-void removeDeadCode(Vunit&, MaybeVinstrId = {});
+void removeDeadCode(Vunit&);
 void removeTrivialNops(Vunit&);
 void reuseImmq(Vunit&);
 template<typename Folder> void foldImms(Vunit&);

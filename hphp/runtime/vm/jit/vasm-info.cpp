@@ -363,6 +363,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::declm:
     case Vinstr::decqm:
     case Vinstr::decqmlock:
+    case Vinstr::decqmlocknosf:
     case Vinstr::fallback:
     case Vinstr::fallbackcc:
     case Vinstr::fallthru:

@@ -759,24 +759,11 @@ struct SSAConverter {
 
   void operator()() {
     if (targets.none()) return;
-    assertx(!hasCriticalEdge());
+    assertx(checkNoCriticalEdges(unit));
     firstPass();
     secondPass();
     materializePhis();
     assertx(check(unit));
-  }
-
-  // Sanity check that no critical edges exist in the unit.
-  bool hasCriticalEdge() const {
-    for (auto const label : rpo) {
-      auto const& block = unit.blocks[label];
-      auto const successors = succs(block);
-      if (successors.size() < 2) continue;
-      for (auto const succ : successors) {
-        if (predecessors[succ].size() > 1) return true;
-      }
-    }
-    return false;
   }
 
   // We only need to run the second pass under certain
@@ -969,68 +956,6 @@ void rename_sf_regs(Vunit& unit, const jit::fast_set<unsigned>& sf_renames) {
       visitOperands(inst, visitor);
     }
   }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-jit::vector<LiveSet> computeLiveness(const Vunit& unit,
-                                     const Abi& abi,
-                                     const jit::vector<Vlabel>& blocks) {
-  auto livein = jit::vector<LiveSet>{unit.blocks.size()};
-  auto const preds = computePreds(unit);
-
-  auto blockPO = jit::vector<uint32_t>(unit.blocks.size());
-  auto revBlocks = blocks;
-  std::reverse(begin(revBlocks), end(revBlocks));
-
-  auto wl = dataflow_worklist<uint32_t>(revBlocks.size());
-
-  for (unsigned po = 0; po < revBlocks.size(); po++) {
-    wl.push(po);
-    blockPO[revBlocks[po]] = po;
-  }
-
-  while (!wl.empty()) {
-    auto b = revBlocks[wl.pop()];
-    auto& block = unit.blocks[b];
-
-    // start with the union of the successor blocks
-    LiveSet live(unit.next_vr);
-    for (auto s : succs(block)) {
-      if (!livein[s].empty()) live |= livein[s];
-    }
-
-    // and now go through the instructions in the block in reverse order
-    for (auto const& inst : boost::adaptors::reverse(block.code)) {
-      RegSet implicit_uses, implicit_across, implicit_defs;
-      getEffects(abi, inst, implicit_uses, implicit_across, implicit_defs);
-
-      auto const vsf = Vreg{RegSF{0}};
-
-      auto const dvisit = [&] (Vreg r, Width w) {
-        live.reset(w == Width::Flags ? vsf : r);
-      };
-      auto const uvisit = [&] (Vreg r, Width w) {
-        live.set(w == Width::Flags ? vsf : r);
-      };
-
-      visitDefs(unit, inst, dvisit);
-      visit(unit, implicit_defs, dvisit);
-
-      visitUses(unit, inst, uvisit);
-      visit(unit, implicit_uses, uvisit);
-      visit(unit, implicit_across, uvisit);
-    }
-
-    if (live != livein[b]) {
-      livein[b] = live;
-      for (auto p : preds[b]) {
-        wl.push(blockPO[p]);
-      }
-    }
-  }
-
-  return livein;
 }
 
 //////////////////////////////////////////////////////////////////////

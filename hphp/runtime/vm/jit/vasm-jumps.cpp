@@ -193,8 +193,7 @@ bool isOnly(Vunit& unit, Vlabel b, Vinstr::Opcode op) {
  */
 bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
                      jit::vector<Vinstr>& code,
-                     jit::vector<int>& npreds,
-                     MaybeVinstrId clobber) {
+                     jit::vector<int>& npreds) {
   auto const next = jcc_i.targets[0];
   auto const taken = jcc_i.targets[1];
   if (!isOnly(unit, next, Vinstr::phijmp)) return false;
@@ -269,12 +268,10 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
   ++npreds[join];
   if (!--npreds[next]) {
     unit.blocks[next].code[0] = trap{TRAP_REASON};
-    if (clobber) unit.blocks[next].code[0].id = *clobber;
     --npreds[join];
   }
   if (!--npreds[taken]) {
     unit.blocks[taken].code[0] = trap{TRAP_REASON};
-    if (clobber) unit.blocks[taken].code[0].id = *clobber;
     --npreds[join];
   }
 
@@ -288,7 +285,7 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
 
 }
 
-void optimizeJmps(Vunit& unit, MaybeVinstrId clobber) {
+void optimizeJmps(Vunit& unit, bool makeSideExits) {
   Timer timer(Timer::vasm_jumps);
 
   bool changed = false;
@@ -323,7 +320,6 @@ void optimizeJmps(Vunit& unit, MaybeVinstrId clobber) {
         if (ss[0] == ss[1]) {
           // both edges have same target, change to jmp
           code.back() = jmp{ss[0]};
-          if (clobber) code.back().id = *clobber;
           --npreds[ss[0]];
           changed = true;
         } else {
@@ -332,12 +328,11 @@ void optimizeJmps(Vunit& unit, MaybeVinstrId clobber) {
               isOnly(unit, jcc_i.targets[0], Vinstr::jmpi)) {
             jcc_i = jcc{ccNegate(jcc_i.cc), jcc_i.sf,
                         {jcc_i.targets[1], jcc_i.targets[0]}};
-            if (clobber) code.back().id = *clobber;
           }
 
           auto const taken = jcc_i.targets[1];
 
-          if (isOnly(unit, taken, Vinstr::fallback)) {
+          if (makeSideExits && isOnly(unit, taken, Vinstr::fallback)) {
             // replace jcc with fallbackcc and jmp
             FTRACE(
               4, "vasm-jumps: Rewriting jcc ({}) -> fallback ({}) "
@@ -360,7 +355,7 @@ void optimizeJmps(Vunit& unit, MaybeVinstrId clobber) {
             changed = true;
           }
 
-          if (isOnly(unit, taken, Vinstr::jmpi)) {
+          if (makeSideExits && isOnly(unit, taken, Vinstr::jmpi)) {
             // Replace jcc with jcci if the taken branch is just a jmpi
             auto const& jmpi = unit.blocks[taken].code[0].jmpi_;
             if (jmpi.args.empty()) {
@@ -384,7 +379,7 @@ void optimizeJmps(Vunit& unit, MaybeVinstrId clobber) {
             }
           }
 
-          changed |= diamondIntoCmov(unit, jcc_i, code, npreds, clobber);
+          changed |= diamondIntoCmov(unit, jcc_i, code, npreds);
         }
       }
 
@@ -426,7 +421,6 @@ void optimizeJmps(Vunit& unit, MaybeVinstrId clobber) {
           code.emplace_back(jmp{target}, irctx);
 
           unit.blocks[target].code[0] = nop{};
-          if (clobber) unit.blocks[target].code[0].id = *clobber;
 
           --npreds[target];
           changed = true;

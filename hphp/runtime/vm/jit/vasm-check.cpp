@@ -490,4 +490,52 @@ bool checkBlockEnd(const Vunit& unit, Vlabel b) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+bool checkNoSideExits(const Vunit& unit) {
+  auto const DEBUG_ONLY isSideExit = [] (const Vinstr& inst) {
+    return
+      inst.op == Vinstr::jcci ||
+      inst.op == Vinstr::fallbackcc ||
+      inst.op == Vinstr::bindjcc;
+  };
+
+  auto const blocks = sortBlocks(unit);
+  for (auto const b : blocks) {
+    for (DEBUG_ONLY auto const& inst : unit.blocks[b].code) {
+      assert_flog(
+        !isSideExit(inst),
+        "Disallowed side-exiting instruction {} in {}\n{}",
+        show(unit, inst),
+        b,
+        show(unit)
+      );
+    }
+  }
+
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool checkNoCriticalEdges(const Vunit& unit) {
+  auto const blocks = sortBlocks(unit);
+  auto const DEBUG_ONLY preds = computePreds(unit);
+  for (auto const b : blocks) {
+    auto const& block = unit.blocks[b];
+    auto const successors = succs(block);
+    if (successors.size() < 2) continue;
+    for (auto const DEBUG_ONLY succ : successors) {
+      assert_flog(
+        preds[succ].size() <= 1,
+        "Disallowed critical edge from {} to {}\n{}",
+        b, succ,
+        show(unit)
+      );
+    }
+  }
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}

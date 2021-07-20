@@ -1932,8 +1932,7 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
   removeTrivialNops(unit);
   optimizePhis(unit);
   fuseBranches(unit);
-  optimizeJmps(unit);
-  optimizeExits(unit);
+  optimizeJmps(unit, false);
 
   assertx(checkWidths(unit));
 
@@ -1955,6 +1954,8 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
   if (unit.needsRegAlloc()) {
     removeDeadCode(unit);
     if (regalloc) {
+      splitCriticalEdges(unit);
+
       if (RuntimeOption::EvalUseGraphColor &&
           unit.context &&
           (unit.context->kind == TransKind::Optimize ||
@@ -1965,9 +1966,9 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
       }
     }
   }
-  if (unit.blocks.size() > 1) {
-    optimizeJmps(unit);
-  }
+
+  optimizeExits(unit);
+  optimizeJmps(unit, true);
 }
 
 void emitARM(Vunit& unit, Vtext& text, CGMeta& fixups,

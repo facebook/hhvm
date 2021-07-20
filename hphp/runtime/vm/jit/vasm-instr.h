@@ -177,6 +177,7 @@ struct Vunit;
   O(decq, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(decqm, I(fl), UM(m), D(sf))\
   O(decqmlock, I(fl), UM(m), D(sf))\
+  O(decqmlocknosf, I(fl), UM(m), Dn)\
   O(incw, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(incwm, I(fl), UM(m), D(sf))\
   O(incl, I(fl), UH(s,d), DH(d,s) D(sf))\
@@ -1003,6 +1004,8 @@ struct declm { Vptr32 m; VregSF sf; Vflags fl; };
 struct decq { Vreg64 s, d; VregSF sf; Vflags fl; };
 struct decqm { Vptr64 m; VregSF sf; Vflags fl; };
 struct decqmlock { Vptr m; VregSF sf; Vflags fl; };
+// Like decqmlock, but doesn't clobber flags
+struct decqmlocknosf { Vptr m; Vflags fl; };
 // inc: {s|m} + 1 => {d|m}, sf
 struct incw { Vreg16 s, d; VregSF sf; Vflags fl; };
 struct incwm { Vptr16 m; VregSF sf; Vflags fl; };

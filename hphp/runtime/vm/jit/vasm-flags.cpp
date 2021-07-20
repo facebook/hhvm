@@ -315,6 +315,13 @@ void sfPeepholes(Vunit& unit, const Abi& abi) {
           }
           break;
         }
+        case Vinstr::decqmlocknosf: {
+          // Okay to clobber sf if it's not actually live
+          auto const m = inst.decqmlocknosf_.m;
+          inst.decqmlock_ = decqmlock{m, sf};
+          inst.op = Vinstr::decqmlock;
+          break;
+        }
         default:
           break;
       }

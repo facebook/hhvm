@@ -176,6 +176,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
       block->hint() == Block::Hint::Unused ? vasm.frozen() : vasm.cold();
 
     if (block == unit.entry() && kind == CodeKind::Trace) {
+      v.setOrigin(&block->instrs().front());
       v << recordbasenativesp{};
     }
     genBlock(env, v, vcold, *block);

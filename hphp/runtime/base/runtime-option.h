@@ -850,8 +850,6 @@ struct RuntimeOption {
   F(bool,     JitPGOLayoutSplitHotCold, pgoLayoutSplitHotColdDefault()) \
   F(bool,     JitPGOVasmBlockCounters, true)                            \
   F(bool,     JitPGOVasmBlockCountersOptPrologue, true)                 \
-  F(bool,     JitPGOVasmBlockCountersForceSaveSF, false)                \
-  F(bool,     JitPGOVasmBlockCountersForceSaveGP, false)                \
   F(uint32_t, JitPGOVasmBlockCountersMaxOpMismatches, 12)               \
   F(uint32_t, JitPGOVasmBlockCountersMinEntryValue,                     \
                                        ServerExecutionMode() ? 200 : 0) \
@@ -946,7 +944,6 @@ struct RuntimeOption {
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
   F(bool, HHIRAllocSIMDRegs,           true)                            \
-  F(bool, JitStressTestLiveness,       false)                           \
   /* Region compiler flags */                                           \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
   F(bool,     JitPGO,                  pgoDefault())                    \

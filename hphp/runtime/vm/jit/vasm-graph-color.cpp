@@ -1308,10 +1308,9 @@ size_t block_loop_depth(const State& state, Vlabel b) {
 // Return "weight" of a block, an approximation of how many times it will be
 // executed.
 int64_t block_weight(const State& state, Vlabel b) {
-  // Force the weight to always be greater than 0. To minimize
-  // distortions in the proportionality between blocks, multiply the
-  // actual value by 100.
-  return std::max<int64_t>(state.unit.blocks[b].weight * 100, 1);
+  // Weight cannot be zero, as that means doing anything in it is
+  // "free" (leads to nonesense decisions).
+  return std::max<int64_t>(state.unit.blocks[b].weight, 1);
 }
 
 State make_state(Vunit& unit, const Abi& abi) {
@@ -11773,106 +11772,6 @@ void insert_sp_adjustments(State& state, size_t spillSpace) {
   }
 }
 
-// Look in the given block for any jccs which aren't at the end and have an
-// invalid next label. If so, split the block into two at the jcc.
-void split_block(State& state, Vlabel block) {
-  auto& unit = state.unit;
-
-  jit::vector<Vinstr> orig;
-  orig.swap(unit.blocks[block].code);
-
-  for (auto const& inst : orig) {
-    unit.blocks[block].code.emplace_back(inst);
-
-    // If the jcc has an invalid next label, that means it marks a place where
-    // the block should be split.
-    if (inst.op == Vinstr::jcc && !inst.jcc_.targets[0].isValid()) {
-      auto const newBlock = unit.makeBlock(
-        unit.blocks[block].area_idx,
-        unit.blocks[block].weight
-      );
-      unit.blocks[block].code.back().jcc_.targets[0] = newBlock;
-      block = newBlock;
-    }
-  }
-}
-
-// Split side exit instructions into a more explicit form. A side exit
-// instruction is something like fallbackcc or bindjcc, which conditionally
-// exits the unit (without any explicit control flow). We might have to insert
-// stack pointer adjustment code when we exit the unit, so we need a place to
-// insert the adjustments. Change these instructions into a conditional jump to
-// a block which uses their unconditional version. After inserting adjustment
-// code, we may have not inserted anything, and we can re-collapse them. Return
-// true if we made any changes.
-bool split_side_exits(State& state) {
-  auto& unit = state.unit;
-
-  jit::vector<Vlabel> blocksToSplit;
-  for (auto const b : state.rpo) {
-    for (size_t i = 0; i < unit.blocks[b].code.size(); ++i) {
-      auto const makeExitBlock = [&] (const Vinstr& exit) {
-        assertx(isBlockEnd(exit));
-
-        // Make a new exit block and populate it with the exit instruction
-        auto const target = unit.makeBlock(AreaIndex::Cold, 0);
-        auto& inst = unit.blocks[b].code[i];
-        auto& code = unit.blocks[target].code;
-        code.emplace_back(exit);
-        code.back().set_irctx(inst.irctx());
-
-        // Change the side-exit instruction to be a conditional jump to the
-        // block (or fall through). Note that this breaks vasm invariants, as we
-        // might have a jcc in the middle of a block now. This will be fixed up
-        // afterwards. We set the next label as invalid as the marker to
-        // split_block() that the block should be split here.
-        inst.jcc_ = jcc{
-          getConditionCode(inst),
-          getSFUseReg(inst),
-          {Vlabel{}, target}
-        };
-        inst.op = Vinstr::jcc;
-        invalidate_cached_operands(inst);
-        // Mark this block as needing splitting at jccs.
-        blocksToSplit.emplace_back(b);
-      };
-
-      auto const& inst = unit.blocks[b].code[i];
-      if (inst.op == Vinstr::fallbackcc) {
-        makeExitBlock(
-          fallback{
-            inst.fallbackcc_.target,
-            inst.fallbackcc_.spOff,
-            inst.fallbackcc_.args
-          }
-        );
-      } else if (inst.op == Vinstr::bindjcc) {
-        makeExitBlock(
-          bindjmp{
-            inst.bindjcc_.target,
-            inst.bindjcc_.spOff,
-            inst.bindjcc_.args
-          }
-        );
-      } else if (inst.op == Vinstr::jcci) {
-        makeExitBlock(jmpi{inst.jcci_.taken});
-      }
-    }
-  }
-
-  // Split any block which now has embedded jccs. This is a rare case where
-  // we've changed the CFG, so we need to recalculate RPO and predecessor
-  // information.
-  if (!blocksToSplit.empty()) {
-    for (auto const b : blocksToSplit) split_block(state, b);
-    compute_rpo(state);
-    state.preds = computePreds(unit);
-    return true;
-  }
-
-  return false;
-}
-
 // Turn spills into load/store instructions, adjusting the stack pointer where
 // appropriate.
 void lower_spills(State& state) {
@@ -11887,26 +11786,10 @@ void lower_spills(State& state) {
   // Common case, no spills.
   if (spillSpace == 0) return;
 
-  // We need to split side exit instructions (which implicitly leave the unit
-  // intra-block) into explicit jumps to exit blocks. We might have to insert
-  // stack pointer adjustment code in those side-exits.
-  auto const split = split_side_exits(state);
   // Insert any stack pointer adjustments
   insert_sp_adjustments(state, spillSpace);
   // Actually transform the spills
   materialize_spills(state, spillSpace);
-
-  // If we split any side exits, try to unsplit any that we can
-  // again. If we didn't insert any adjustment code, they can be
-  // transformed back. This can change the CFG again, but nothing
-  // after this needs any of the pre-calculated information. The
-  // exception is if we're in debug builds and we're going to call
-  // calculate_sp_offsets() below.
-  if (split) {
-    optimizeExits(state.unit, 0);
-    optimizeJmps(state.unit, 0);
-    if (debug) compute_rpo(state);
-  }
 
   // Do a second stack pointer offset calculation which will check if the
   // adjustment code kept the stack pointer in a consistent state.
@@ -12052,8 +11935,14 @@ void allocateRegistersWithGraphColor(Vunit& unit, const Abi& abi) {
     printUnit(0, "before vasm-graph-color", unit);
   }
 
-  splitCriticalEdges(unit);
   assertx(check(unit));
+  // We don't want to mutate the cfg at all (it can interfere with
+  // vasm-block-counts), so we assert that the unit has had critical
+  // edges pre-split, and that we don't have side exiting
+  // instructions. No side exiting instructions means that any place
+  // we leave the unit, there's an explicit exit block.
+  assertx(checkNoCriticalEdges(unit));
+  assertx(checkNoSideExits(unit));
 
   auto state = make_state(unit, abi);
   SCOPE_ASSERT_DETAIL("Graph color state") { return show(state); };

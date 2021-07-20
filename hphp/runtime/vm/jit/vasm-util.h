@@ -204,16 +204,6 @@ std::vector<Vreg> compute_sf_livein(const Vunit& unit,
  */
 void rename_sf_regs(Vunit& unit, const jit::fast_set<unsigned>& sf_renames);
 
-/*
- * Compute livein set for each block, using an iterative data-flow analysis.
- */
-using LiveSet = boost::dynamic_bitset<>; // Bitset of Vreg numbers.
-
-jit::vector<LiveSet> computeLiveness(const Vunit& unit,
-                                     const Abi& abi,
-                                     const jit::vector<Vlabel>& blocks);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

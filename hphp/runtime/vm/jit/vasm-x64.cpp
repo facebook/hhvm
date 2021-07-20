@@ -187,6 +187,7 @@ struct Vgen {
   void emit(decq i) { unary(i); a.decq(i.d); }
   void emit(const decqm& i) { a.prefix(i.m.mr()).decq(i.m); }
   void emit(const decqmlock& i) { a.prefix(i.m.mr()).decqlock(i.m); }
+  void emit(const decqmlocknosf&);
   void emit(divsd i) { noncommute(i); a.divsd(i.s0, i.d); }
   void emit(imul i) { commuteSF(i); a.imul(i.s0, i.d); }
   void emit(const idiv& i) { a.idiv(i.s); }
@@ -1055,6 +1056,13 @@ void Vgen<X64Asm>::emit(const crc32q& i) {
   a.crc32q(i.s0, i.d);
 }
 
+template<typename X64Asm>
+void Vgen<X64Asm>::emit(const decqmlocknosf& i) {
+  a.pushf();
+  a.prefix(i.m.mr()).decqlock(i.m);
+  a.popf();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename Lower>
@@ -1215,37 +1223,6 @@ void lowerForX64(Vunit& unit) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void stressTestLiveness(Vunit& unit) {
-  auto const blocks = sortBlocks(unit);
-  auto const livein = computeLiveness(unit, x64::abi(), blocks);
-  auto const gp_regs = x64::abi().gpUnreserved;
-
-  for (auto b : blocks) {
-    auto& block = unit.blocks[b];
-    auto const& live_set = livein[b];
-    jit::vector<Vinstr> new_insts;
-    const uint64_t trash = 0xbad;
-    gp_regs.forEach([&](PhysReg r) {
-                      if (!live_set[Vreg(r)]) {
-                        new_insts.insert(new_insts.end(), ldimmq{trash, r});
-                      }
-                    });
-
-    // set irctx for the newly added instructions
-    auto const irctx = block.code.front().irctx();
-    for (auto& ni : new_insts) {
-      ni.set_irctx(irctx);
-    }
-
-    // insert new instructions in the beginning of the block, but after any
-    // existing phidef
-    auto insertPt = block.code.begin();
-    while (insertPt->op == Vinstr::phidef) insertPt++;
-    block.code.insert(insertPt, new_insts.begin(), new_insts.end());
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 }
 
 void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
@@ -1264,8 +1241,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   doPass("VOPT_NOP",    removeTrivialNops);
   doPass("VOPT_PHI",    optimizePhis);
   doPass("VOPT_BRANCH", fuseBranches);
-  doPass("VOPT_JMP",    [] (Vunit& u) { optimizeJmps(u); });
-  doPass("VOPT_EXIT",   [] (Vunit& u) { optimizeExits(u); });
+  doPass("VOPT_JMP",    [] (Vunit& u) { optimizeJmps(u, false); });
 
   assertx(checkWidths(unit));
 
@@ -1289,10 +1265,17 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   doPass("VOPT_COPY", [&] (Vunit& u) { optimizeCopies(u, abi); });
 
   if (unit.needsRegAlloc()) {
-    doPass("VOPT_DCE", [] (Vunit& u) { removeDeadCode(u); });
-    doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u); });
-    doPass("VOPT_DCE", [] (Vunit& u) { removeDeadCode(u); });
+    doPass("VOPT_DCE", removeDeadCode);
+    doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, false); });
+    doPass("VOPT_DCE", removeDeadCode);
+
     if (regalloc) {
+      // vasm-block-counts and register allocation require edges to
+      // be pre-split.
+      splitCriticalEdges(unit);
+
+      doPass("VOPT_BLOCK_WEIGHTS", VasmBlockCounters::profileGuidedUpdate);
+
       if (RuntimeOption::EvalUseGraphColor &&
           unit.context &&
           (unit.context->kind == TransKind::Optimize ||
@@ -1307,19 +1290,10 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
       doPass("VOPT_POST_RA_SIMPLIFY", postRASimplify);
     }
   }
-  if (unit.needsRegAlloc() && regalloc) {
-    if (RuntimeOption::EvalJitStressTestLiveness && unit.context &&
-        (unit.context->kind == TransKind::Live ||
-         unit.context->kind == TransKind::Profile ||
-         unit.context->kind == TransKind::Optimize)) {
-      doPass("STRESS_TEST_LIVENESS", stressTestLiveness);
-    }
-    doPass("VOPT_BLOCK_WEIGHTS",
-           [] (Vunit& u) { VasmBlockCounters::profileGuidedUpdate(u); });
-  }
-  if (unit.blocks.size() > 1) {
-    doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u); });
-  }
+
+  // We can add side-exiting instructions now
+  doPass("VOPT_EXIT", optimizeExits);
+  doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, true); });
 }
 
 void emitX64(Vunit& unit, Vtext& text, CGMeta& fixups,

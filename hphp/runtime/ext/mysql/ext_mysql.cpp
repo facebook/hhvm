@@ -629,6 +629,24 @@ static bool HHVM_FUNCTION(mysql_free_result, const Resource& result) {
 ///////////////////////////////////////////////////////////////////////////////
 // field info
 
+namespace {
+
+StaticString
+  s_name("name"),
+  s_table("table"),
+  s_def("def"),
+  s_max_length("max_length"),
+  s_not_null("not_null"),
+  s_primary_key("primary_key"),
+  s_multiple_key("multiple_key"),
+  s_unique_key("unique_key"),
+  s_numeric("numeric"),
+  s_blob("blob"),
+  s_type("type"),
+  s_unsigned("unsigned"),
+  s_zerofill("zerofill");
+}
+
 static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
                                          int field /* = -1 */) {
   auto res = php_mysql_extract_result(result);
@@ -640,20 +658,20 @@ static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
   MySQLFieldInfo *info;
   if (!(info = res->fetchFieldInfo())) return false;
 
-  DArrayInit props(13);
-  props.set("name",         info->name);
-  props.set("table",        info->table);
-  props.set("def",          info->def);
-  props.set("max_length",   (int)info->max_length);
-  props.set("not_null",     IS_NOT_NULL(info->flags)? 1 : 0);
-  props.set("primary_key",  IS_PRI_KEY(info->flags)? 1 : 0);
-  props.set("multiple_key", info->flags & MULTIPLE_KEY_FLAG? 1 : 0);
-  props.set("unique_key",   info->flags & UNIQUE_KEY_FLAG? 1 : 0);
-  props.set("numeric",      IS_NUM(info->type)? 1 : 0);
-  props.set("blob",         IS_BLOB(info->flags)? 1 : 0);
-  props.set("type",         php_mysql_get_field_name(info->type));
-  props.set("unsigned",     info->flags & UNSIGNED_FLAG? 1 : 0);
-  props.set("zerofill",     info->flags & ZEROFILL_FLAG? 1 : 0);
+  DictInit props(13);
+  props.set(s_name,         info->name);
+  props.set(s_table,        info->table);
+  props.set(s_def,          info->def);
+  props.set(s_max_length,   (int)info->max_length);
+  props.set(s_not_null,     IS_NOT_NULL(info->flags)? 1 : 0);
+  props.set(s_primary_key,  IS_PRI_KEY(info->flags)? 1 : 0);
+  props.set(s_multiple_key, info->flags & MULTIPLE_KEY_FLAG? 1 : 0);
+  props.set(s_unique_key,   info->flags & UNIQUE_KEY_FLAG? 1 : 0);
+  props.set(s_numeric,      IS_NUM(info->type)? 1 : 0);
+  props.set(s_blob,         IS_BLOB(info->flags)? 1 : 0);
+  props.set(s_type,         php_mysql_get_field_name(info->type));
+  props.set(s_unsigned,     info->flags & UNSIGNED_FLAG? 1 : 0);
+  props.set(s_zerofill,     info->flags & ZEROFILL_FLAG? 1 : 0);
   return ObjectData::FromArray(props.create());
 }
 

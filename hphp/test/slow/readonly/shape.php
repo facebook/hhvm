@@ -8,6 +8,8 @@ class P {
 
 <<__EntryPoint>>
 function main() {
-  $p = readonly new P(1);
-  $p->i = 10;
+  $ro = readonly new P(1);
+  $mut = new P(1);
+  $p = shape("a" => $ro, "b" => $mut);
+  $mut = $p; // error, assigning readonly value to mutable
 }

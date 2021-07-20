@@ -1440,8 +1440,7 @@ bool setOpLSideEffects(const bc::SetOpL& op, const Type& lhs, const Type& rhs) {
 
   switch (op.subop2) {
     case SetOpOp::ConcatEqual:
-      return RuntimeOption::EvalNoticeOnCoerceForStrConcat > 0 &&
-        (!lhs.subtypeOf(BArrKey) || !rhs.subtypeOf(BArrKey));
+      return !lhs.subtypeOf(BArrKey) || !rhs.subtypeOf(BArrKey);
 
     case SetOpOp::AndEqual:
     case SetOpOp::OrEqual:

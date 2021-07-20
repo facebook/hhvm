@@ -1182,14 +1182,7 @@ void concatHelper(ISS& env, uint32_t n) {
       auto const t = topC(env, i);
       auto const v = tv(t);
       if (!v) return nullptr;
-      if (!isStringType(v->m_type) && v->m_type != KindOfInt64) {
-        if (RuntimeOption::EvalNoticeOnCoerceForStrConcat > 0) return nullptr;
-        if (v->m_type != KindOfNull    &&
-            v->m_type != KindOfBoolean &&
-            v->m_type != KindOfDouble) {
-          return nullptr;
-        }
-      }
+      if (!isStringType(v->m_type) && !isIntType(v->m_type)) return nullptr;
       auto const cell = eval_cell_value(
         [&] {
           auto const s = makeStaticString(
@@ -1219,11 +1212,7 @@ void concatHelper(ISS& env, uint32_t n) {
     };
 
     for (auto i = 0; i < n; i++) {
-      auto bad_types = BObj | BArrLike | BRes;
-      if (RuntimeOption::EvalNoticeOnCoerceForStrConcat > 0) {
-        bad_types |= BNull | BBool | BDbl;
-      }
-      if (topC(env, i).couldBe(bad_types)) {
+      if (!topC(env, i).subtypeOf(BArrKey)) {
         side_effects = true;
         break;
       }
@@ -1258,12 +1247,9 @@ void concatHelper(ISS& env, uint32_t n) {
         litstr(result, i) : nullptr;
       if (next == staticEmptyString()) {
         if (n == 1) break;
-        if (RuntimeOption::EvalNoticeOnCoerceForStrConcat > 0) {
-          // don't fold away empty strings if they would elide the notices
-          const auto bad_types = BObj | BArrLike | BRes | BNull | BBool | BDbl;
-          if (i == 0 && topC(env, 1).couldBe(bad_types)) break;
-          if (n == 2 && i == 1 && topC(env, 0).couldBe(bad_types)) break;
-        }
+        // don't fold away empty strings if the concat could trigger exceptions
+        if (i == 0 && !topC(env, 1).subtypeOf(BArrKey)) break;
+        if (n == 2 && i == 1 && !topC(env, 0).subtypeOf(BArrKey)) break;
         assertx(nlit == 0);
         fold(i, 1, next);
         n--;

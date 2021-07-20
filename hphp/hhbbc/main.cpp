@@ -333,8 +333,6 @@ RepoGlobalData get_global_data() {
   gd.RaiseClsMethConversionWarning =
     RuntimeOption::EvalRaiseClsMethConversionWarning;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
-  gd.NoticeOnCoerceForStrConcat =
-    RuntimeOption::EvalNoticeOnCoerceForStrConcat;
   gd.NoticeOnCoerceForBitOp =
     RuntimeOption::EvalNoticeOnCoerceForBitOp;
   gd.TraitConstantInterfaceBehavior =
@@ -517,7 +515,6 @@ int main(int argc, char** argv) try {
   RO::EvalClassPassesClassname                  = gd.ClassPassesClassname;
   RO::EvalClassnameNotices                      = gd.ClassnameNotices;
   RO::EvalRaiseClsMethConversionWarning         = gd.RaiseClsMethConversionWarning;
-  RO::EvalNoticeOnCoerceForStrConcat            = gd.NoticeOnCoerceForStrConcat;
   RO::EvalNoticeOnCoerceForBitOp                = gd.NoticeOnCoerceForBitOp;
   RO::StrictArrayFillKeys                       = gd.StrictArrayFillKeys;
   RO::EvalEnforceGenericsUB                     = gd.HardGenericsUB ? 2 : 1;

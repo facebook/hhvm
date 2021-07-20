@@ -178,8 +178,6 @@ RepoGlobalData getGlobalData() {
   gd.RaiseClsMethConversionWarning =
     RuntimeOption::EvalRaiseClsMethConversionWarning;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
-  gd.NoticeOnCoerceForStrConcat =
-    RuntimeOption::EvalNoticeOnCoerceForStrConcat;
   gd.NoticeOnCoerceForBitOp =
     RuntimeOption::EvalNoticeOnCoerceForBitOp;
   gd.TraitConstantInterfaceBehavior =

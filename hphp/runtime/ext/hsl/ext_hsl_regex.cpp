@@ -58,13 +58,13 @@ namespace {
     // match
     assertx(status.asInt64Val() == 1);
     assertx(matches.isArray());
-    auto matches_out = DArrayInit(matches.asCArrRef().size());
+    auto matches_out = DictInit(matches.asCArrRef().size());
     IterateKV(
       matches.asCArrRef().get(),
       [&](TypedValue k, TypedValue v) {
         assertx(isArrayLikeType(type(v)));
         assertx(val(v).parr->exists(int64_t(0)));
-        matches_out.set(k, val(v).parr->at(int64_t(0)));
+        matches_out.setValidKey(k, val(v).parr->at(int64_t(0)));
       }
     );
     assertx(matches.asCArrRef().exists(0));

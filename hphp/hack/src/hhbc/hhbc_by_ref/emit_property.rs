@@ -44,10 +44,10 @@ pub fn from_ast<'ast, 'arena, 'decl, D: DeclProvider<'decl>>(
     let pid: prop::Type<'arena> = prop::Type::from_ast_name(alloc, cv_name);
     let attributes = emit_attribute::from_asts(alloc, emitter, args.user_attributes)?;
 
-    let is_const =
-        (!args.is_static && class_is_const) || attributes.iter().any(|a| a.name == ua::CONST);
-    let is_lsb = attributes.iter().any(|a| a.name == ua::LSB);
-    let is_late_init = attributes.iter().any(|a| a.name == ua::LATE_INIT);
+    let is_const = (!args.is_static && class_is_const)
+        || attributes.iter().any(|a| a.name.as_str() == ua::CONST);
+    let is_lsb = attributes.iter().any(|a| a.name.as_str() == ua::LSB);
+    let is_late_init = attributes.iter().any(|a| a.name.as_str() == ua::LATE_INIT);
 
     if !args.is_static && class.final_ && class.kind.is_cabstract() {
         return Err(emit_fatal::raise_fatal_parse(

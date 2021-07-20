@@ -1235,6 +1235,7 @@ dependencies = [
  "bumpalo",
  "decl_provider",
  "escaper",
+ "ffi",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_expression",
  "hhbc_by_ref_emit_fatal",
@@ -1772,6 +1773,7 @@ dependencies = [
 name = "hhbc_by_ref_hhas_attribute"
 version = "0.0.0"
 dependencies = [
+ "ffi",
  "hhbc_by_ref_runtime",
  "naming_special_names_rust",
 ]

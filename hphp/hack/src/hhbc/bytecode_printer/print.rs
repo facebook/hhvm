@@ -974,7 +974,7 @@ fn print_attribute<W: Write>(
     write!(
         w,
         "\"{}\"(\"\"\"{}:{}:{{",
-        a.name,
+        a.name.as_str(),
         VEC_PREFIX,
         a.arguments.len()
     )?;
@@ -991,7 +991,7 @@ fn print_attributes<'a, W: Write>(
     let al: Vec<&HhasAttribute> = al
         .as_ref()
         .iter()
-        .sorted_by_key(|a| (!a.name.starts_with("__"), &a.name))
+        .sorted_by_key(|a| (!a.name.as_str().starts_with("__"), a.name.as_str()))
         .collect();
     concat_by(w, " ", &al, |w, a| print_attribute(ctx, w, a))
 }

@@ -42,16 +42,20 @@ pub fn from_ast<'arena, 'decl, D: DeclProvider<'decl>>(
         );
         emit_fatal::raise_fatal_parse(&attr.name.0, "Attribute arguments must be literals")
     })?;
-    let fully_qualified_id = if attr.name.1.starts_with("__") {
+    let fully_qualified_id: &'arena str = if attr.name.1.starts_with("__") {
         // don't do anything to builtin attributes
-        attr.name.1.to_owned()
+        alloc.alloc_str(&attr.name.1)
     } else {
-        escaper::escape(hhbc_id::class::Type::from_ast_name(alloc, &attr.name.1).to_raw_string())
-            .into()
+        match escaper::escape(
+            hhbc_id::class::Type::from_ast_name(alloc, &attr.name.1).to_raw_string(),
+        ) {
+            std::borrow::Cow::Borrowed(s) => s,
+            std::borrow::Cow::Owned(s) => alloc.alloc_str(s.as_str()),
+        }
     };
     Ok(HhasAttribute {
-        name: fully_qualified_id,
-        arguments,
+        name: fully_qualified_id.into(),
+        arguments: alloc.alloc_slice_fill_iter(arguments.into_iter()).into(),
     })
 }
 
@@ -59,7 +63,10 @@ pub fn from_ast<'arena, 'decl, D: DeclProvider<'decl>>(
 /// parameters. The arguments to __Reified are number of type parameters
 /// followed by the indicies of these reified type parameters and whether they
 /// are soft reified or not
-pub fn add_reified_attribute<'arena>(tparams: &[a::Tparam]) -> Option<HhasAttribute<'arena>> {
+pub fn add_reified_attribute<'arena>(
+    alloc: &'arena bumpalo::Bump,
+    tparams: &[a::Tparam],
+) -> Option<HhasAttribute<'arena>> {
     let reified_data: Vec<(usize, bool, bool)> = tparams
         .iter()
         .enumerate()
@@ -77,17 +84,21 @@ pub fn add_reified_attribute<'arena>(tparams: &[a::Tparam]) -> Option<HhasAttrib
         return None;
     }
 
-    let name = "__Reified".to_owned();
+    let name = "__Reified".into();
     let bool2i64 = |b| b as i64;
     // NOTE(hrust) hopefully faster than .into_iter().flat_map(...).collect()
-    let mut arguments = Vec::with_capacity(reified_data.len() * 3 + 1);
+    let mut arguments =
+        bumpalo::collections::vec::Vec::with_capacity_in(reified_data.len() * 3 + 1, alloc);
     arguments.push(TypedValue::Int(tparams.len() as i64));
     for (i, soft, warn) in reified_data.into_iter() {
         arguments.push(TypedValue::Int(i as i64));
         arguments.push(TypedValue::Int(bool2i64(soft)));
         arguments.push(TypedValue::Int(bool2i64(warn)));
     }
-    Some(HhasAttribute { name, arguments })
+    Some(HhasAttribute {
+        name,
+        arguments: arguments.into_bump_slice().into(),
+    })
 }
 
 pub fn add_reified_parent_attribute<'a, 'arena>(
@@ -98,7 +109,7 @@ pub fn add_reified_parent_attribute<'a, 'arena>(
         if emit_expression::has_non_tparam_generics(env, hl) {
             return Some(HhasAttribute {
                 name: "__HasReifiedParent".into(),
-                arguments: vec![],
+                arguments: ffi::Slice::new(&[]),
             });
         }
     }

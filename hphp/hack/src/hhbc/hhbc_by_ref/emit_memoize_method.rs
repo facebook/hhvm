@@ -130,7 +130,10 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         ],
     };
     let mut attributes = emit_attribute::from_asts(alloc, emitter, &method.user_attributes)?;
-    attributes.extend(emit_attribute::add_reified_attribute(&method.tparams));
+    attributes.extend(emit_attribute::add_reified_attribute(
+        alloc,
+        &method.tparams,
+    ));
     let is_async = method.fun_kind.is_fasync();
     // __Memoize is not allowed on lambdas, so we never need to inherit the rx
     // level from the declaring scope when we're in a Memoize wrapper

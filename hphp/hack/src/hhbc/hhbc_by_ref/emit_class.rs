@@ -568,7 +568,8 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
     let mut attributes = emit_attribute::from_asts(alloc, emitter, &ast_class.user_attributes)?;
     if !is_closure {
-        attributes.extend(emit_attribute::add_reified_attribute(&ast_class.tparams).into_iter());
+        attributes
+            .extend(emit_attribute::add_reified_attribute(alloc, &ast_class.tparams).into_iter());
         attributes.extend(
             emit_attribute::add_reified_parent_attribute(&env, &ast_class.extends).into_iter(),
         )

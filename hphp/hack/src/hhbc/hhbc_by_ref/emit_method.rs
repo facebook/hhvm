@@ -53,7 +53,10 @@ pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let is_closure_body = &method.name.1 == "__invoke" && (class.name.1).starts_with("Closure$");
     let mut attributes = emit_attribute::from_asts(alloc, emitter, &method.user_attributes)?;
     if !is_closure_body {
-        attributes.extend(emit_attribute::add_reified_attribute(&method.tparams[..]));
+        attributes.extend(emit_attribute::add_reified_attribute(
+            alloc,
+            &method.tparams[..],
+        ));
     };
     let call_context = if is_closure_body {
         match &method.user_attributes[..] {

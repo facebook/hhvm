@@ -5624,6 +5624,8 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
   } else if (testTy.is(BArrLike | BClsMeth)) {
     assertx(RO::EvalIsCompatibleClsMethType);
     return mayLogClsMeth;
+  } else if (testTy.is(BObj)) {
+    return RO::EvalBuildMayNoticeOnMethCallerHelperIsObject;
   }
   return false;
 }

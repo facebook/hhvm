@@ -1918,10 +1918,20 @@ void nativeImplInlined(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
+const StaticString s_isObjectMethCaller("is_object() called on MethCaller");
+
 SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
+  auto notice = [&] (StringData* sd) {
+    gen(env, RaiseNotice, cns(env, sd));
+  };
   if (src->isA(TObj) && src->type().clsSpec()) {
     auto const cls = src->type().clsSpec().cls();
     if (!env.irb->constrainValue(src, GuardConstraint(cls).setWeak())) {
+      if (RO::EvalNoticeOnMethCallerHelperIsObject) {
+        if (cls == SystemLib::s_MethCallerHelperClass) {
+          notice(s_isObjectMethCaller.get());
+        }
+      }
       // If we know the class without having to specialize a guard
       // any further, use it.
       return cns(env, cls != SystemLib::s___PHP_Incomplete_ClassClass);
@@ -1934,6 +1944,18 @@ SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
 
   auto checkClass = [&] (SSATmp* obj) {
     auto cls = gen(env, LdObjClass, obj);
+
+    if (RO::EvalNoticeOnMethCallerHelperIsObject) {
+      auto const c = SystemLib::s_MethCallerHelperClass;
+      ifThen(
+        env,
+        [&] (Block* taken) {
+          gen(env, JmpNZero, taken, gen(env, EqCls, cls, cns(env, c)));
+        },
+        [&] { notice(s_isObjectMethCaller.get()); }
+      );
+    }
+
     auto testCls = SystemLib::s___PHP_Incomplete_ClassClass;
     auto eq = gen(env, EqCls, cls, cns(env, testCls));
     return gen(env, XorBool, eq, cns(env, true));

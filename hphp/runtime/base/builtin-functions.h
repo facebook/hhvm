@@ -138,8 +138,14 @@ inline bool is_keyset(const TypedValue* c) {
 
 inline bool is_object(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
-  return tvIsObject(c) &&
-    c->m_data.pobj->getVMClass() != SystemLib::s___PHP_Incomplete_ClassClass;
+  if (!tvIsObject(c)) return false;
+  auto const cls = val(c).pobj->getVMClass();
+  if (RO::EvalNoticeOnMethCallerHelperIsObject) {
+    if (cls == SystemLib::s_MethCallerHelperClass) {
+      raise_notice("is_object() called on MethCaller");
+    }
+  }
+  return cls != SystemLib::s___PHP_Incomplete_ClassClass;
 }
 
 inline bool is_clsmeth(const TypedValue* c) {

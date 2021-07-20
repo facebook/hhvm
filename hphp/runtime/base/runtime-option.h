@@ -1234,6 +1234,16 @@ struct RuntimeOption {
    */                                                                   \
   F(int32_t, ForbidMethCallerAPCSerialize, 0)                           \
   F(int32_t, ForbidMethCallerHelperSerialize, 0)                        \
+  /*                                                                    \
+   * When Eval.NoticeOnMethCallerHelperIsObject is set calling is_object\
+   * on instance of MethCallerHelper will raise notices.                \
+   *                                                                    \
+   * In Repo.Authoritative mode, Eval.NoticeOnMethCallerHelperIsObject  \
+   * can only be set if the repo was built with the option              \
+   * Eval.BuildMayNoticeOnMethCallerHelperIsObject set to true.         \
+   */                                                                   \
+  F(bool, BuildMayNoticeOnMethCallerHelperIsObject, false)              \
+  F(bool, NoticeOnMethCallerHelperIsObject, false)                      \
   F(bool, NoticeOnCollectionToBool, false)                              \
   F(bool, NoticeOnSimpleXMLBehavior, false)                             \
   /* Enables Hack records. */                                           \

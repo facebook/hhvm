@@ -184,6 +184,8 @@ RepoGlobalData getGlobalData() {
     RuntimeOption::EvalNoticeOnCoerceForBitOp;
   gd.TraitConstantInterfaceBehavior =
     RuntimeOption::EvalTraitConstantInterfaceBehavior;
+  gd.BuildMayNoticeOnMethCallerHelperIsObject =
+    RO::EvalBuildMayNoticeOnMethCallerHelperIsObject;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));

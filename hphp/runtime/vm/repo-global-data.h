@@ -165,6 +165,8 @@ struct RepoGlobalData {
 
   std::vector<std::pair<std::string,std::string>> ConstantFunctions;
 
+  bool BuildMayNoticeOnMethCallerHelperIsObject = false;
+
   // Load the appropriate options into their matching
   // RuntimeOptions. If `loadConstantFuncs' is true, also deserialize
   // ConstantFunctions and store it in RuntimeOptions (this can only
@@ -209,6 +211,7 @@ struct RepoGlobalData {
       (NoticeOnCoerceForBitOp)
       (TraitConstantInterfaceBehavior)
       (ConstantFunctions)
+      (BuildMayNoticeOnMethCallerHelperIsObject)
       ;
   }
 };

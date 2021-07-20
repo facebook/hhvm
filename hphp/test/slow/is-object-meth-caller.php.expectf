@@ -1,0 +1,24 @@
+
+Notice: is_object() called on MethCaller in %s/is-object-meth-caller.php on line 16
+bool(true)
+
+Notice: is_object() called on MethCaller in %s/is-object-meth-caller.php on line 17
+bool(true)
+bool(true)
+bool(true)
+
+Notice: is_object() called on MethCaller in %s/is-object-meth-caller.php on line 21
+bool(true)
+
+Notice: is_object() called on MethCaller in %s/is-object-meth-caller.php on line 22
+bool(true)
+bool(true)
+bool(true)
+
+Notice: is_object() called on MethCaller in %s/is-object-meth-caller.php on line 26
+bool(true)
+
+Notice: is_object() called on MethCaller in %s/is-object-meth-caller.php on line 27
+bool(true)
+bool(true)
+bool(true)

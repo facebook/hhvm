@@ -65,6 +65,7 @@ namespace HPHP { namespace HHBBC {
 
 namespace {
 
+const StaticString s_MethCallerHelper("__SystemLib\\MethCallerHelper");
 const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
 const StaticString s_IMemoizeParam("HH\\IMemoizeParam");
 const StaticString s_getInstanceKey("getInstanceKey");
@@ -2766,6 +2767,11 @@ void isTypeObj(ISS& env, const Type& ty) {
   if (ty.subtypeOf(BObj)) {
     auto const incompl = objExact(
       env.index.builtin_class(s_PHP_Incomplete_Class.get()));
+    if (RO::EvalBuildMayNoticeOnMethCallerHelperIsObject) {
+      auto const c =
+        objExact(env.index.builtin_class(s_MethCallerHelper.get()));
+      if (ty.couldBe(c)) return push(env, TBool);
+    }
     if (!ty.couldBe(incompl))  return push(env, TTrue);
     if (ty.subtypeOf(incompl)) return push(env, TFalse);
   }

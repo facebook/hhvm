@@ -65,6 +65,14 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .tparams
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
+    let should_emit_implicit_context = emitter
+        .options()
+        .hhvm
+        .flags
+        .contains(HhvmFlags::ENABLE_IMPLICIT_CONTEXT)
+        && attributes.iter().any(|a| {
+            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(a.name.as_str())
+        });
     let mut env = Env::default(alloc, RcOc::clone(&fd.namespace)).with_scope(scope);
     let body_instrs = make_memoize_function_code(
         alloc,
@@ -77,6 +85,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         *renamed_id,
         f.fun_kind.is_fasync(),
         is_reified,
+        should_emit_implicit_context,
     )?;
     let coeffects = HhasCoeffects::from_ast(&f.ctxs, &f.params, &f.tparams, vec![]);
     let has_coeffects_local = coeffects.has_coeffects_local();
@@ -117,8 +126,9 @@ fn make_memoize_function_code<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     renamed_id: function::Type<'arena>,
     is_async: bool,
     is_reified: bool,
+    should_emit_implicit_context: bool,
 ) -> Result<InstrSeq<'arena>> {
-    let fun = if hhas_params.is_empty() && !is_reified {
+    let fun = if hhas_params.is_empty() && !is_reified && !should_emit_implicit_context {
         make_memoize_function_no_params_code(alloc, e, env, deprecation_info, renamed_id, is_async)
     } else {
         make_memoize_function_with_params_code(
@@ -132,6 +142,7 @@ fn make_memoize_function_code<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             renamed_id,
             is_async,
             is_reified,
+            should_emit_implicit_context,
         )
     }?;
     Ok(emit_pos_then(alloc, pos, fun))
@@ -148,6 +159,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
     renamed_id: function::Type<'arena>,
     is_async: bool,
     is_reified: bool,
+    _should_emit_implicit_context: bool,
 ) -> Result<InstrSeq<'arena>> {
     let param_count = hhas_params.len();
     let notfound = e.label_gen_mut().next_regular();

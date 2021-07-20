@@ -147,10 +147,22 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .tparams
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
+    let should_emit_implicit_context = emitter
+        .options()
+        .hhvm
+        .flags
+        .contains(HhvmFlags::ENABLE_IMPLICIT_CONTEXT)
+        && attributes.iter().any(|a| {
+            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(a.name.as_str())
+        });
     let is_interceptable = is_method_interceptable(emitter.options());
     let mut arg_flags = Flags::empty();
     arg_flags.set(Flags::IS_ASYNC, is_async);
     arg_flags.set(Flags::IS_REFIED, is_reified);
+    arg_flags.set(
+        Flags::SHOULD_EMIT_IMPLICIT_CONTEXT,
+        should_emit_implicit_context,
+    );
     arg_flags.set(Flags::HAS_COEFFECTS_LOCAL, coeffects.has_coeffects_local());
     let mut args = Args {
         info,
@@ -228,7 +240,10 @@ fn make_memoize_method_code<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     hhas_params: &[HhasParam<'arena>],
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<InstrSeq<'arena>> {
-    if args.params.is_empty() && !args.flags.contains(Flags::IS_REFIED) {
+    if args.params.is_empty()
+        && !args.flags.contains(Flags::IS_REFIED)
+        && !args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT)
+    {
         make_memoize_method_no_params_code(env.arena, emitter, args)
     } else {
         make_memoize_method_with_params_code(emitter, env, pos, hhas_params, args)
@@ -541,5 +556,6 @@ bitflags! {
         const IS_REFIED = 1 << 2;
         const WITH_LSB = 1 << 3;
         const IS_ASYNC = 1 << 4;
+        const SHOULD_EMIT_IMPLICIT_CONTEXT = 1 << 5;
     }
 }

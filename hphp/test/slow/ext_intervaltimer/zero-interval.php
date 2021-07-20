@@ -1,6 +1,6 @@
 <?hh
 
-abstract final class zeroInterval { public static $x; }
+abstract final class zeroInterval { public static $x = 0; }
 <<__EntryPoint>>
 function entrypoint_zerointerval(): void {
 

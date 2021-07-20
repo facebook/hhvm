@@ -1,8 +1,8 @@
 <?hh
 
 class Foo {
-  static $x;
-  static $y;
+  static $x = 0;
+  static $y = 0;
 
   function x() {
     self::$x++;

@@ -2,7 +2,7 @@
 
 class X {
 
-  private static $genX;
+  private static $genX = 0;
   public static function gen() {
     yield ++self::$genX;
     yield 2;

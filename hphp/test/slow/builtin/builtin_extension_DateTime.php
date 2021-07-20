@@ -1,7 +1,7 @@
 <?hh
 
 class A_DateTime extends DateTime {
-  public $___x;
+  public $___x = 0;
   public function __clone() {
     $this->___x++;
   }

@@ -44,6 +44,6 @@ HH\Asio\join($k);
 }
 
 abstract final class AsyncSuspendHookThrow {
-  public static $counter;
+  public static $counter = 0;
   public static $z;
 }

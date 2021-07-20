@@ -26,5 +26,5 @@ for ($i = 0; $i < 3; ++$i) {
 }
 
 abstract final class YieldYieldSuspendHook {
-  public static $counter;
+  public static $counter = 0;
 }

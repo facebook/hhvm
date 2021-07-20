@@ -1,7 +1,7 @@
 <?hh
 
 abstract final class CallbackStatics {
-  public static $callback_invocations;
+  public static $callback_invocations = 0;
 }
 function callback($string) {
     CallbackStatics::$callback_invocations++;

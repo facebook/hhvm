@@ -11,5 +11,5 @@ var_dump((bool)f(),(int)f(),(float)f(),(string)f());
 }
 
 abstract final class Compilation1317 {
-  public static $g;
+  public static $g = 0;
 }

@@ -708,6 +708,11 @@ public:
   static const StringData* genMemoizeImplName(const StringData*);
 
   /*
+   * Returns the number of local slots used for the memoization key calculation.
+   */
+  size_t numKeysForMemoize() const;
+
+  /*
    * Given a meth_caller, return the class name or method name
    */
    static std::pair<const StringData*, const StringData*> getMethCallerNames(

@@ -528,6 +528,10 @@ inline const StringData* Func::memoizeImplName() const {
   return genMemoizeImplName(name());
 }
 
+inline size_t Func::numKeysForMemoize() const {
+  return numParams() + (hasReifiedGenerics() ? 1 : 0);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Builtins.
 

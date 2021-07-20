@@ -4027,10 +4027,6 @@ void Class::setInstanceMemoCacheInfo() {
     }
   };
 
-  auto const numKeys = [](const Func* f) {
-    return f->numParams() + (f->hasReifiedGenerics() ? 1 : 0);
-  };
-
   auto const addNonShared = [&](const Func* f) {
     allocExtraData();
     auto extra = m_extra.raw();
@@ -4048,7 +4044,7 @@ void Class::setInstanceMemoCacheInfo() {
     // kMemoCacheMaxSpecializedKeys, since they'll all be generic caches
     // anyways. Cap the count at that.
     auto const keyCount =
-      std::min<size_t>(numKeys(f), kMemoCacheMaxSpecializedKeys + 1);
+      std::min<size_t>(f->numKeysForMemoize(), kMemoCacheMaxSpecializedKeys + 1);
     auto const it = extra->m_sharedMemoSlots.find(keyCount);
     if (it != extra->m_sharedMemoSlots.end()) {
       extra->m_memoMappings.emplace(
@@ -4070,7 +4066,7 @@ void Class::setInstanceMemoCacheInfo() {
   size_t methWithKeys = 0;
   forEachMeth(
     [&](const Func* f) {
-      if (numKeys(f) == 0) {
+      if (f->numKeysForMemoize() == 0) {
         ++methNoKeys;
       } else {
         ++methWithKeys;
@@ -4100,7 +4096,7 @@ void Class::setInstanceMemoCacheInfo() {
   if (methNoKeys > 0) {
     forEachMeth(
       [&](const Func* f) {
-        if (numKeys(f) == 0) {
+        if (f->numKeysForMemoize() == 0) {
           (methNoKeys <= slotsLeft) ? addNonShared(f) : addShared(f);
         }
       }
@@ -4111,7 +4107,7 @@ void Class::setInstanceMemoCacheInfo() {
   if (methWithKeys > 0) {
     forEachMeth(
       [&](const Func* f) {
-        if (numKeys(f) > 0) {
+        if (f->numKeysForMemoize() > 0) {
           (methWithKeys <= slotsLeft) ? addNonShared(f) : addShared(f);
         }
       }

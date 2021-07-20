@@ -1773,10 +1773,13 @@ functor
       in
 
       let telemetry =
-        Telemetry.object_
-          telemetry
-          ~key:"errors"
-          ~value:(Errors.as_telemetry env.errorl)
+        telemetry
+        |> Telemetry.object_
+             ~key:"errors"
+             ~value:(Errors.as_telemetry env.errorl)
+        |> Telemetry.object_
+             ~key:"repo_states"
+             ~value:(Watchman.RepoStates.get_as_telemetry ())
       in
 
       (* HANDLE PRECHECKED FILES AFTER RECHECK *********************************)

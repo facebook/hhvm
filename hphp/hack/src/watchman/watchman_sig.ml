@@ -176,6 +176,10 @@ module type S = sig
     on_dead:(dead_env -> 'a result) ->
     'a result
 
+  module RepoStates : sig
+    val get_as_telemetry : unit -> Telemetry.t
+  end
+
   (* Expose some things for testing. *)
   module Testing : sig
     val get_test_env : unit -> env result

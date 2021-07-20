@@ -902,11 +902,66 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
         extract_file_names env response)
       ~catch:(fun _ -> raise Exit_status.(Exit_with Watchman_failed))
 
+  module RepoStates : sig
+    type state = string
+
+    val enter : state -> unit
+
+    val leave : state -> unit
+
+    val get_as_telemetry : unit -> Telemetry.t
+  end = struct
+    type state = string
+
+    type t = {
+      past_states: SSet.t;
+      current_states: state list;
+    }
+
+    let init : t = { past_states = SSet.empty; current_states = [] }
+
+    let states : t ref = ref init
+
+    let enter : state -> unit =
+     fun state ->
+      states :=
+        { !states with current_states = state :: !states.current_states }
+
+    let rec remove_first : string list -> string -> string list =
+     fun list elt ->
+      match list with
+      | [] -> []
+      | hd :: list ->
+        if String.equal hd elt then
+          list
+        else
+          hd :: remove_first list elt
+
+    let leave : state -> unit =
+     fun state ->
+      let { current_states; past_states } = !states in
+      let current_states = remove_first current_states state in
+      let past_states = SSet.add state past_states in
+      states := { current_states; past_states }
+
+    let get_as_telemetry () =
+      let { current_states; past_states } = !states in
+      Telemetry.create ()
+      |> Telemetry.string_list ~key:"current_states" ~value:current_states
+      |> Telemetry.string_list
+           ~key:"past_states"
+           ~value:(SSet.elements past_states)
+  end
+
   let make_state_change_response state name data =
     let metadata = J.try_get_val "metadata" data in
     match state with
-    | `Enter -> State_enter (name, metadata)
-    | `Leave -> State_leave (name, metadata)
+    | `Enter ->
+      RepoStates.enter name;
+      State_enter (name, metadata)
+    | `Leave ->
+      RepoStates.leave name;
+      State_leave (name, metadata)
 
   let extract_mergebase data =
     Hh_json.Access.(
@@ -1181,6 +1236,10 @@ module Watchman_mock = struct
 
     let transform_asynchronous_get_changes_response _ _ =
       raise Not_available_in_mocking
+  end
+
+  module RepoStates = struct
+    let get_as_telemetry () = Telemetry.create ()
   end
 
   let init ?since_clockspec:_ _ () = !Mocking.init

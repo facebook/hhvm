@@ -198,6 +198,9 @@ let log_type_check_end
     |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
     |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
     |> Telemetry.object_ ~key:"errors" ~value:(Errors.as_telemetry env.errorl)
+    |> Telemetry.object_
+         ~key:"repo_states"
+         ~value:(Watchman.RepoStates.get_as_telemetry ())
   in
   HackEventLogger.type_check_end
     (Some telemetry)

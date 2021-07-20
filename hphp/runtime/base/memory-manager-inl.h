@@ -415,10 +415,6 @@ inline void MemoryManager::setExiting() {
   if (tl_heap) tl_heap->m_exiting = true;
 }
 
-inline StringDataNode& MemoryManager::getStringList() {
-  return m_strings;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace req {

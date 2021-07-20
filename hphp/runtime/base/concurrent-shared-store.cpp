@@ -121,8 +121,6 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
       return EntryInfo::Type::Uncounted;
     case APCKind::UncountedString:
       return EntryInfo::Type::UncountedString;
-    case APCKind::SharedString:
-      return EntryInfo::Type::APCString;
     case APCKind::UncountedArray:
     case APCKind::UncountedBespoke:
       switch (handle->type()) {

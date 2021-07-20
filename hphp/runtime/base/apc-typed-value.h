@@ -140,6 +140,9 @@ struct APCTypedValue {
   static APCTypedValue* tvTrue();
   static APCTypedValue* tvFalse();
 
+  static void FreeHazardPointers();
+  static bool UseHazardPointers();
+
   void deleteUncounted();
 
   static APCHandle::Pair HandlePersistent(ArrayData* data) {

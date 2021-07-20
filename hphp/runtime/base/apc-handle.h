@@ -47,7 +47,6 @@ enum class APCKind: uint8_t {
   StaticArray,
   StaticBespoke,
   StaticString,
-  SharedString,
   SharedVec, SharedLegacyVec,
   SharedDict, SharedLegacyDict,
   SharedKeyset,
@@ -111,7 +110,6 @@ enum class APCKind: uint8_t {
  *  UncountedArray    APCTypedValue   (a persistent array type)
  *  UncountedBespoke  APCTypedValue   (a persistent array type)
  *  UncountedString   APCTypedValue   KindOfPersistentString
- *  SharedString      APCString       kInvalidDataType
  *  SharedVec         APCArray        kInvalidDataType
  *  SharedLegacyVec   APCArray        kInvalidDataType
  *  SharedDict        APCArray        kInvalidDataType

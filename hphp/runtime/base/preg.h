@@ -113,11 +113,6 @@ void pcre_init();
 void pcre_reinit();
 
 /*
- * Clean up thread-local PCREs.
- */
-void pcre_session_exit();
-
-/*
  * Dump the contents of the PCRE cache to the given file.
  */
 void pcre_dump_cache(folly::File& file);

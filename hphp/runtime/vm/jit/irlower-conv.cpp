@@ -88,13 +88,7 @@ void cgConvStrToBool(IRLS& env, const IRInstruction* inst) {
       // the string is equal to '0'.
       auto const dst = v.makeReg();
       auto const sf = v.makeReg();
-#ifdef NO_M_DATA
       v << cmpbim{'0', src[sizeof(StringData)], sf};
-#else
-      auto const sd = v.makeReg();
-      v << load{src[StringData::dataOff()], sd};
-      v << cmpbim{'0', sd[0], sf};
-#endif
       v << setcc{CC_NE, sf, dst};
       return dst;
     },

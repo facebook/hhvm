@@ -497,10 +497,6 @@ NEVER_INLINE void Collector::sweep() {
     return need_reinit_free = !h || !marked(h);
   });
 
-  mm.sweepApcStrings([&](StringData* s) {
-    return !marked(s);
-  });
-
   mm.reinitFree();
 
   heap_.iterate(

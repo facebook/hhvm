@@ -6,8 +6,8 @@
         .file     "hphp/runtime/base/string-data-x64.S"
 
 /*
- * HPHP::StringData::hashHelper() is defined here only when SSE4.2 is explicitly
- * specified, and NO_M_DATA is used in StringData.
+ * HPHP::StringData::hashHelper() is defined here only when SSE4.2 is
+ * explicitly specified via __SSE4_2__.
  */
 
 ETCH_SECTION(_ZNK4HPHP10StringData10hashHelperEv)

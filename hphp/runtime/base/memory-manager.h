@@ -403,12 +403,6 @@ static_assert(RefCountMaxRealistic < (kMallocFreeWord >> 4), "");
 
 //////////////////////////////////////////////////////////////////////
 
-// Header MemoryManager uses for StringDatas that wrap APCHandle
-struct StringDataNode {
-  StringDataNode* next;
-  StringDataNode* prev;
-};
-
 static_assert(std::numeric_limits<type_scan::Index>::max() <=
               std::numeric_limits<uint16_t>::max(),
               "type_scan::Index must be no greater than 16-bits "
@@ -914,7 +908,6 @@ struct MemoryManager {
   void addNativeObject(NativeNode*);
   void removeNativeObject(NativeNode*);
   void addSweepable(Sweepable*);
-  template<class Fn> void sweepApcStrings(Fn fn);
 
   /////////////////////////////////////////////////////////////////////////////
   // Request profiling.
@@ -961,12 +954,6 @@ struct MemoryManager {
 
   /////////////////////////////////////////////////////////////////////////////
   // Garbage collection.
-
-  /*
-   * Returns ptr to head node of m_strings linked list. This used by
-   * StringData during a reset, enlist, and delist
-   */
-  StringDataNode& getStringList();
 
   /*
    * Run the experimental collector.
@@ -1063,7 +1050,6 @@ private:
   void* m_front{nullptr};
   void* m_limit{nullptr};
   FreelistArray m_freelists;
-  StringDataNode m_strings; // in-place node is head of circular list
   int64_t m_nextGC{kNoNextGC}; // request gc when heap usage reaches this size
   int64_t m_nextSample{kNoNextSample};
   int64_t m_usageLimit; // OOM when m_stats.usage() > m_usageLimit

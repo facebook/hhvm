@@ -112,8 +112,6 @@ MemoryManager::MemoryManager() {
   resetAllStats();
   setMemoryLimit(std::numeric_limits<int64_t>::max());
   resetGC(); // so each thread has unique req_num at startup
-  // make the circular-lists empty.
-  m_strings.next = m_strings.prev = &m_strings;
   m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
   m_req_start_micros = HPHP::Timer::GetThreadCPUTimeNanos() / 1000;
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "zend.enable_gc",
@@ -365,9 +363,6 @@ void MemoryManager::sweep() {
 
 void MemoryManager::resetAllocator() {
   assertx(m_natives.empty() && m_sweepables.empty() && tl_sweeping);
-  // decref apc strings referenced by this request
-  DEBUG_ONLY auto nstrings = StringData::sweepAll();
-  FTRACE(1, "heap-id {} resetAllocator: strings {}\n", tl_heap_id, nstrings);
 
   // free the heap
   m_heap.reset();
@@ -507,7 +502,7 @@ void MemoryManager::endQuarantine(FreelistArray&& list) {
 void MemoryManager::checkHeap(const char* phase) {
   size_t bytes=0;
   std::vector<HeapObject*> hdrs;
-  PtrMap<HeapObject*> free_blocks, apc_arrays, apc_strings;
+  PtrMap<HeapObject*> free_blocks;
   size_t counts[NumHeaderKinds];
   for (unsigned i=0; i < NumHeaderKinds; i++) counts[i] = 0;
   forEachHeapObject([&](HeapObject* h, size_t alloc_size) {
@@ -519,15 +514,11 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::Free:
         free_blocks.insert(h, alloc_size);
         break;
-      case HeaderKind::String:
-        if (static_cast<StringData*>(h)->isProxy()) {
-          apc_strings.insert(h, alloc_size);
-        }
-        break;
       case HeaderKind::Vec:
       case HeaderKind::Dict:
       case HeaderKind::Keyset:
       case HeaderKind::Object:
+      case HeaderKind::String:
       case HeaderKind::NativeObject:
       case HeaderKind::WaitHandle:
       case HeaderKind::AsyncFuncWH:
@@ -573,18 +564,6 @@ void MemoryManager::checkHeap(const char* phase) {
     }
   }
   assertx(num_free_blocks == free_blocks.size());
-
-  // check the apc string list
-  size_t num_apc_strings = 0;
-  apc_strings.prepare();
-  for (StringDataNode *next, *n = m_strings.next; n != &m_strings; n = next) {
-    next = n->next;
-    UNUSED auto const s = StringData::node2str(n);
-    assertx(s->isProxy());
-    assertx(apc_strings.isStart(s));
-    ++num_apc_strings;
-  }
-  assertx(num_apc_strings == apc_strings.size());
 
   // heap check is done. If we are not exiting, check pointers using HeapGraph
   if (Trace::moduleEnabled(Trace::heapreport)) {

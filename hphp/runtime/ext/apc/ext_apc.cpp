@@ -144,13 +144,8 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(HotLoadFactor, ini, config, "Server.APC.HotLoadFactor", 0.5);
   Config::Bind(HotKeyAllocLow, ini, config, "Server.APC.HotKeyAllocLow", false);
   Config::Bind(HotMapAllocLow, ini, config, "Server.APC.HotMapAllocLow", false);
-
-#ifdef NO_M_DATA
-  Config::Bind(UseUncounted, ini, config, "Server.APC.MemModelTreadmill", true);
-#else
   Config::Bind(UseUncounted, ini, config, "Server.APC.MemModelTreadmill",
-               RuntimeOption::ServerExecutionMode());
-#endif
+               use_lowptr || RuntimeOption::ServerExecutionMode());
   Config::Bind(ShareUncounted, ini, config, "Server.APC.ShareUncounted", true);
   if (!UseUncounted && ShareUncounted) ShareUncounted = false;
 
@@ -164,12 +159,10 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
 }
 
 void apcExtension::moduleInit() {
-#ifdef NO_M_DATA
-  if (!UseUncounted) {
+  if (use_lowptr && !UseUncounted) {
     Logger::Error("Server.APC.MemModelTreadmill=false ignored in lowptr build");
     UseUncounted = true;
   }
-#endif // NO_M_DATA
   apc_store().init();
 
   HHVM_RC_INT(APC_ITER_TYPE, 0x1);
@@ -244,11 +237,7 @@ std::vector<std::string> apcExtension::HotPrefix;
 std::vector<std::string> apcExtension::SerializePrefix;
 bool apcExtension::HotKeyAllocLow = false;
 bool apcExtension::HotMapAllocLow = false;
-#ifdef NO_M_DATA
-bool apcExtension::UseUncounted = true;
-#else
-bool apcExtension::UseUncounted = false;
-#endif
+bool apcExtension::UseUncounted = use_lowptr;
 bool apcExtension::ShareUncounted = true;
 bool apcExtension::Stat = true;
 // Different from zend default but matches what we've been returning for years

@@ -21,6 +21,29 @@
 
 namespace HPHP {
 
+//////////////////////////////////////////////////////////////////////
+
+struct HazardPointer {
+  StringData* raw;
+  TYPE_SCAN_IGNORE_ALL;
+};
+
+RDS_LOCAL(std::vector<HazardPointer>, s_hazard_pointers);
+
+void APCTypedValue::FreeHazardPointers() {
+  if (!UseHazardPointers()) return;
+  for (auto const hp : *s_hazard_pointers) {
+    DecRefUncountedString(hp.raw);
+  }
+  s_hazard_pointers->clear();
+}
+
+bool APCTypedValue::UseHazardPointers() {
+  return !use_lowptr && !apcExtension::UseUncounted;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 APCTypedValue* APCTypedValue::ForArray(ArrayData* ad) {
   assertx(!ad->isRefCounted());
   auto const dt = ad->toPersistentDataType();
@@ -112,7 +135,6 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::ClsMeth:
     case APCKind::RFunc:
     case APCKind::RClsMeth:
-    case APCKind::SharedString:
     case APCKind::SharedObject:
     case APCKind::SharedCollection:
     case APCKind::SharedVec:
@@ -177,7 +199,12 @@ TypedValue APCTypedValue::toTypedValue() const {
   assertx(m_handle.isTypedValue());
   TypedValue tv;
   tv.m_type = m_handle.type();
-  if (m_handle.kind() == APCKind::UncountedBespoke) {
+  auto const kind = m_handle.kind();
+  if (UseHazardPointers() && kind == APCKind::UncountedString) {
+    s_hazard_pointers->push_back({m_data.str});
+    m_data.str->uncountedIncRef();
+    tv.m_data.pstr = m_data.str;
+  } else if (kind == APCKind::UncountedBespoke) {
     tv.m_data.parr = readAPCBespoke(this);
   } else {
     tv.m_data.num = m_data.num;

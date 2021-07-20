@@ -105,17 +105,13 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       if (auto const value = APCTypedValue::HandlePersistent(s)) {
         return value;
       }
-      auto const st = lookupStaticString(s);
-      if (st) {
+      if (auto const st = lookupStaticString(s)) {
         auto const value = new APCTypedValue(APCTypedValue::StaticStr{}, st);
         return {value->getHandle(), sizeof(APCTypedValue)};
       }
-      if (apcExtension::UseUncounted) {
-        auto const st = StringData::MakeUncounted(s->slice());
-        auto const value = new APCTypedValue(APCTypedValue::UncountedStr{}, st);
-        return {value->getHandle(), st->size() + sizeof(APCTypedValue)};
-      }
-      return APCString::MakeSharedString(s);
+      auto const st = StringData::MakeUncounted(s->slice());
+      auto const value = new APCTypedValue(APCTypedValue::UncountedStr{}, st);
+      return {value->getHandle(), st->size() + sizeof(APCTypedValue)};
     }
 
     case KindOfPersistentVec:
@@ -205,10 +201,6 @@ Variant APCHandle::toLocalHelper() const {
     case APCKind::ClsMeth:
       return APCClsMeth::fromHandle(this)->getEntityOrNull();
 
-    case APCKind::SharedString:
-      return Variant::attach(
-        StringData::MakeProxy(APCString::fromHandle(this))
-      );
     case APCKind::SerializedVec: {
       auto const serVec = APCString::fromHandle(this)->getStringData();
       auto const v = apc_unserialize(serVec->data(), serVec->size());
@@ -293,7 +285,6 @@ void APCHandle::deleteShared() {
       delete APCNamedEntity::fromHandle(this);
       return;
 
-    case APCKind::SharedString:
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:
     case APCKind::SerializedKeyset:
@@ -384,7 +375,6 @@ bool APCHandle::checkInvariants() const {
     case APCKind::ClsMeth:
     case APCKind::RFunc:
     case APCKind::RClsMeth:
-    case APCKind::SharedString:
     case APCKind::SharedVec:
     case APCKind::SharedLegacyVec:
     case APCKind::SharedDict:
@@ -401,6 +391,17 @@ bool APCHandle::checkInvariants() const {
   }
   not_reached();
   return false;
+}
+
+void APCHandle::unreferenceRoot(size_t size) {
+  assertx(isSingletonKind() || m_unref_root_count++ == 0);
+  if (!isUncounted()) {
+    atomicDecRef();
+  } else if (APCTypedValue::UseHazardPointers()) {
+    APCTypedValue::fromHandle(this)->deleteUncounted();
+  } else {
+    g_context->enqueueAPCHandle(this, size);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

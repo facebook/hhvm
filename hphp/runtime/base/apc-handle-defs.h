@@ -33,18 +33,9 @@ inline void APCHandle::unreferenceNonRoot() const {
   }
 }
 
-inline void APCHandle::unreferenceRoot(size_t size) {
-  assertx(isSingletonKind() || m_unref_root_count++ == 0);
-  if (!isUncounted()) {
-    atomicDecRef();
-  } else {
-    g_context->enqueueAPCHandle(this, size);
-  }
-}
-
 inline bool APCHandle::isAtomicCounted() const {
-  assertx(m_kind < APCKind::SharedString || m_type == kInvalidDataType);
-  return m_kind >= APCKind::SharedString;
+  assertx(m_kind < APCKind::SharedVec || m_type == kInvalidDataType);
+  return m_kind >= APCKind::SharedVec;
 }
 
 inline void APCHandle::atomicIncRef() const {

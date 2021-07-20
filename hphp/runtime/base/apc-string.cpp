@@ -18,17 +18,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-APCHandle::Pair
-APCString::MakeSharedString(APCKind kind, StringData* data) {
+APCHandle::Pair APCString::MakeSharedString(APCKind kind, StringData* data) {
   auto const len    = static_cast<uint32_t>(data->size());
   auto const size   = len + 1 + sizeof(APCString);
   auto const mem    = uncounted_malloc(size);
   auto apcStr       = new (mem) APCString(kind);
 
   auto const chars  = reinterpret_cast<char*>(apcStr + 1);
-#ifndef NO_M_DATA
-  apcStr->m_str.m_data = chars;
-#endif
   apcStr->m_str.initHeader(HeaderKind::String, UncountedValue);
   apcStr->m_str.m_len         = len; // don't store hash
 
@@ -42,7 +38,6 @@ APCString::MakeSharedString(APCKind kind, StringData* data) {
   assertx(apcStr->m_str.m_hash != 0);
   assertx(apcStr->m_str.data()[len] == 0);
   assertx(apcStr->m_str.isUncounted());
-  assertx(apcStr->m_str.isFlat());
   assertx(apcStr->m_str.checkSane());
   return {&apcStr->m_handle, size};
 }

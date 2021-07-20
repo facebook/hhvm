@@ -55,19 +55,18 @@ inline folly::StringPiece StringData::slice() const {
 }
 
 inline folly::MutableStringPiece StringData::bufferSlice() {
-  assertx(!isImmutable());
+  assertx(isRefCounted());
   return folly::MutableStringPiece{mutableData(), capacity()};
 }
 
 inline void StringData::invalidateHash() {
-  assertx(!isImmutable());
   assertx(!hasMultipleRefs());
   m_hash = 0;
   assertx(checkSane());
 }
 
 inline void StringData::setSize(int64_t len) {
-  assertx(!isImmutable() && !hasMultipleRefs());
+  assertx(!hasMultipleRefs());
   assertx(len >= 0 && len <= capacity());
   mutableData()[len] = 0;
   m_lenAndHash = len;
@@ -82,15 +81,11 @@ inline void StringData::checkStack() const {
 inline const char* StringData::data() const {
   // TODO: t1800106: re-enable this assert
   // assertx(data()[size()] == 0); // all strings must be null-terminated
-#ifdef NO_M_DATA
   return reinterpret_cast<const char*>(this + 1);
-#else
-  return m_data;
-#endif
 }
 
 inline char* StringData::mutableData() const {
-  assertx(!isImmutable());
+  assertx(isRefCounted());
   return const_cast<char*>(data());
 }
 
@@ -102,11 +97,9 @@ inline uint32_t StringData::capacity() const {
 }
 
 inline size_t StringData::heapSize() const {
-  return isFlat()
-    ? isRefCounted()
-      ? MemoryManager::sizeIndex2Size(m_aux16)
-      : size() + kStringOverhead
-    : sizeof(StringData) + sizeof(Proxy);
+  return isRefCounted()
+    ? MemoryManager::sizeIndex2Size(m_aux16)
+    : size() + kStringOverhead;
 }
 
 inline size_t StringData::estimateCap(size_t size) {
@@ -135,11 +128,9 @@ inline bool StringData::isZero() const  {
 inline StringData* StringData::modifyChar(int offset, char c) {
   assertx(offset >= 0 && offset < size());
   assertx(!hasMultipleRefs());
-
-  auto const sd = isProxy() ? escalate(size()) : this;
-  sd->mutableData()[offset] = c;
-  sd->m_hash = 0;
-  return sd;
+  mutableData()[offset] = c;
+  m_hash = 0;
+  return this;
 }
 
 inline strhash_t StringData::hash_unsafe(const char* s, size_t len) {
@@ -177,27 +168,6 @@ inline bool StringData::isame(const StringData* s) const {
   if (this == s) return true;
   if (m_len != s->m_len) return false;
   return bstrcaseeq(data(), s->data(), m_len);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-inline const void* StringData::payload() const { return this + 1; }
-inline void* StringData::payload() { return this + 1; }
-
-inline const StringData::Proxy* StringData::proxy() const {
-  return static_cast<const Proxy*>(payload());
-}
-inline StringData::Proxy* StringData::proxy() {
-  return static_cast<Proxy*>(payload());
-}
-
-#ifndef NO_M_DATA
-inline bool StringData::isFlat() const { return m_data == payload(); }
-inline bool StringData::isProxy() const { return m_data != payload(); }
-#endif
-
-inline bool StringData::isImmutable() const {
-  return !isRefCounted() || isProxy();
 }
 
 //////////////////////////////////////////////////////////////////////

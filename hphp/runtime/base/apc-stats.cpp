@@ -88,8 +88,6 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::UncountedString:
       return sizeof(APCTypedValue) +
              getMemSize(APCTypedValue::fromHandle(handle)->getStringData());
-    case APCKind::SharedString:
-      return getMemSize(APCString::fromHandle(handle));
 
     case APCKind::SerializedVec:
     case APCKind::SerializedDict:
@@ -569,9 +567,6 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
 
     case APCKind::UncountedString:
       return m_uncString;
-
-    case APCKind::SharedString:
-      return m_apcString;
 
     case APCKind::UncountedArray:
     case APCKind::UncountedBespoke: {

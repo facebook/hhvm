@@ -30,10 +30,6 @@ namespace HPHP {
  */
 struct APCString {
 
-  static APCHandle::Pair MakeSharedString(StringData* str) {
-    return MakeSharedString(APCKind::SharedString, str);
-  }
-
   static APCHandle::Pair MakeSerializedVec(StringData* str) {
     return MakeSharedString(APCKind::SerializedVec, str);
   }
@@ -58,11 +54,10 @@ struct APCString {
 
   static APCString* fromHandle(APCHandle* handle) {
     assertx(handle->checkInvariants());
-    assertx(handle->kind() == APCKind::SharedString ||
-           handle->kind() == APCKind::SerializedVec ||
-           handle->kind() == APCKind::SerializedDict ||
-           handle->kind() == APCKind::SerializedKeyset ||
-           handle->kind() == APCKind::SerializedObject);
+    assertx(handle->kind() == APCKind::SerializedVec ||
+            handle->kind() == APCKind::SerializedDict ||
+            handle->kind() == APCKind::SerializedKeyset ||
+            handle->kind() == APCKind::SerializedObject);
     static_assert(
       offsetof(APCString, m_handle) == 0,
       "m_handle must appear first in APCString"
@@ -72,11 +67,10 @@ struct APCString {
 
   static const APCString* fromHandle(const APCHandle* handle) {
     assertx(handle->checkInvariants());
-    assertx(handle->kind() == APCKind::SharedString ||
-           handle->kind() == APCKind::SerializedVec ||
-           handle->kind() == APCKind::SerializedDict ||
-           handle->kind() == APCKind::SerializedKeyset ||
-           handle->kind() == APCKind::SerializedObject);
+    assertx(handle->kind() == APCKind::SerializedVec ||
+            handle->kind() == APCKind::SerializedDict ||
+            handle->kind() == APCKind::SerializedKeyset ||
+            handle->kind() == APCKind::SerializedObject);
     static_assert(
       offsetof(APCString, m_handle) == 0,
       "m_handle must appear first in APCString"
@@ -84,9 +78,10 @@ struct APCString {
     return reinterpret_cast<const APCString*>(handle);
   }
 
-  // Used when creating/destroying a local proxy (see StringData).
-  void reference() const { m_handle.referenceNonRoot(); }
-  void unreference() const { m_handle.unreferenceNonRoot(); }
+  // When a request references a shared APCString, we enqueue it in a
+  // request-local list; when the request is over, unreference them all.
+  void reference() const;
+  static void cleanup();
 
   StringData* getStringData() {
     return &m_str;

@@ -913,7 +913,7 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
           "is deprecated. Please use the CURLFile class instead"
         );
 
-        if (val.get()->isImmutable()) {
+        if (val.get()->hasMultipleRefs()) {
           val = String::attach(
             StringData::Make(val.data(), val.size(), CopyString));
         }

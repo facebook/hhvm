@@ -361,7 +361,7 @@ inline size_t allocSize(const HeapObject* h) {
       size = static_cast<const BespokeArray*>(h)->heapSize();
       break;
     case HeaderKind::String:
-      // size = isFlat ? isRefCounted ? table[aux16] : m_size+C : proxy_size;
+      // size = isRefCounted ? table[aux16] : m_size+C
       size = static_cast<const StringData*>(h)->heapSize();
       break;
     case HeaderKind::Resource:
@@ -598,19 +598,6 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   });
   for (auto ptr : ptrs) {
     fn(ptr);
-  }
-}
-
-template<class Fn> void MemoryManager::sweepApcStrings(Fn fn) {
-  auto& head = getStringList();
-  for (StringDataNode *next, *n = head.next; n != &head; n = next) {
-    next = n->next;
-    assertx(next && uintptr_t(next) != kSmallFreeWord);
-    assertx(next && uintptr_t(next) != kMallocFreeWord);
-    auto const s = StringData::node2str(n);
-    if (fn(s)) {
-      s->unProxy();
-    }
   }
 }
 

@@ -241,12 +241,9 @@ void APCArray::add(APCHandle *key, APCHandle *val) {
   auto kind = key->kind();
   if (kind == APCKind::Int) {
     hash_pos = APCTypedValue::fromHandle(key)->getInt64();
-  } else if (kind == APCKind::StaticString ||
-             kind == APCKind::UncountedString) {
-    hash_pos = APCTypedValue::fromHandle(key)->getStringData()->hash();
   } else {
-    assertx(kind == APCKind::SharedString);
-    hash_pos = APCString::fromHandle(key)->getStringData()->hash();
+    assertx(kind == APCKind::StaticString || kind == APCKind::UncountedString);
+    hash_pos = APCTypedValue::fromHandle(key)->getStringData()->hash();
   }
   // NOTE: no check on duplication because we assume the original array has no
   // duplication
@@ -267,11 +264,6 @@ ssize_t APCArray::indexOf(const StringData* key) const {
     auto kind = b[bucket].key->kind();
     if (kind == APCKind::StaticString || kind == APCKind::UncountedString) {
       auto const k = APCTypedValue::fromHandle(b[bucket].key);
-      if (key->same(k->getStringData())) {
-        return bucket;
-      }
-    } else if (kind == APCKind::SharedString) {
-      auto const k = APCString::fromHandle(b[bucket].key);
       if (key->same(k->getStringData())) {
         return bucket;
       }

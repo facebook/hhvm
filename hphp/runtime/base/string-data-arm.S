@@ -8,7 +8,7 @@
 
 /*
  * HPHP::StringData::hashHelper() is defined here only when ENABLE_AARCH64_CRC
- * is explicitly specified, and NO_M_DATA is used in StringData.
+ * is explicitly specified.
  */
 
 ETCH_SECTION(_ZNK4HPHP10StringData10hashHelperEv)

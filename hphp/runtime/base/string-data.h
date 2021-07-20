@@ -52,23 +52,15 @@ enum CopyStringMode { CopyString };
 /*
  * Runtime representation of PHP strings.
  *
- * StringData's have two different modes, not all of which we want to
- * keep forever.  The main mode is Flat, which means StringData is a
- * header in a contiguous allocation with the character array for the
- * string.  The other (Proxy) is for APCString-backed StringDatas.
+ * All StringData have the same layout: a 16-byte header containing a
+ * HeapObject header, a length, and a hash, followed by a co-allocated,
+ * \0-terminated array of characters. (Note that \0 can be a character
+ * within the array, as well.)
  *
  * StringDatas can also be allocated in multiple ways.  Normally, they
  * are created through one of the Make overloads, which drops them in
  * the request-local heap.  They can also be low-malloced (for static
  * strings), or uncounted-malloced for APC shared or uncounted strings.
- *
- * Here's a breakdown of string modes, and which configurations are
- * allowed in which allocation mode:
- *
- *          | Static | Malloced | Normal (request local)
- *          +--------+----------+-----------------------
- *   Flat   |   X    |     X    |    X
- *   Proxy  |        |          |    X
  */
 struct StringData final : MaybeCountable,
                           type_scan::MarkCollectable<StringData> {
@@ -81,11 +73,7 @@ struct StringData final : MaybeCountable,
    * This is smaller than MAX_INT, and it plus StringData overhead should
    * exactly equal a size class.
    */
-#ifdef NO_M_DATA
   static constexpr uint32_t MaxSize = 0x80000000U - 16 - 1;
-#else
-  static constexpr uint32_t MaxSize = 0x80000000U - 24 - 1;
-#endif
 
   /*
    * Creates an empty request-local string with an unspecified amount of
@@ -137,12 +125,6 @@ struct StringData final : MaybeCountable,
   static StringData* Make(size_t reserve);
 
   /*
-   * Create a request-local "Proxy" StringData that wraps an APCString.
-   * Ref-count is pre-initialized to 1.
-   */
-  static StringData* MakeProxy(const APCString* apcstr);
-
-  /*
    * Initialize a static string on a pre-allocated range of memory. This is
    * useful when we need to create static strings at designated addresses when
    * optimizing locality.
@@ -181,18 +163,8 @@ struct StringData final : MaybeCountable,
   /*
    * Offset accessors for the JIT compiler.
    */
-#ifndef NO_M_DATA
-  static constexpr ptrdiff_t dataOff() { return offsetof(StringData, m_data); }
-#endif
   static constexpr ptrdiff_t sizeOff() { return offsetof(StringData, m_len); }
   static constexpr ptrdiff_t hashOff() { return offsetof(StringData, m_hash); }
-
-  /*
-   * Proxy StringData's have a sweep list running through them for
-   * decrefing the APCString they are fronting.  This function
-   * must be called at request cleanup time to handle this.
-   */
-  static unsigned sweepAll();
 
   /*
    * Called to return a StringData to the request allocator.  This is
@@ -526,29 +498,7 @@ struct StringData final : MaybeCountable,
    */
   void dump() const;
 
-  static StringData* node2str(StringDataNode* node) {
-    return reinterpret_cast<StringData*>(
-      uintptr_t(node) - offsetof(Proxy, node)
-                   - sizeof(StringData)
-    );
-  }
-#ifdef NO_M_DATA
-  static constexpr bool isProxy() { return false; }
-#else
-  bool isProxy() const;
-#endif
-
-  bool isImmutable() const;
-
   bool checkSane() const;
-
-  void unProxy();
-
-private:
-  struct Proxy {
-    StringDataNode node;
-    const APCString* apcstr;
-  };
 
 private:
   template<bool trueStatic>
@@ -561,22 +511,7 @@ private:
   ~StringData() = delete;
 
 private:
-  const void* payload() const;
-  void* payload();
-  const Proxy* proxy() const;
-  Proxy* proxy();
-
-#ifdef NO_M_DATA
-  static constexpr bool isFlat() { return true; }
-#else
-  bool isFlat() const;
-#endif
-
-  void releaseProxy();
   int numericCompare(const StringData *v2, bool eq) const;
-  StringData* escalate(size_t cap);
-  void enlist();
-  void delist();
   void incrementHelper();
   void preCompute();
 
@@ -584,10 +519,6 @@ private:
   // StringData initialization can do fewer stores to initialize the
   // fields.  (gcc does not combine the stores itself.)
 private:
-#ifndef NO_M_DATA
-  // TODO(5601154): Add KindOfApcString and remove StringData m_data field.
-  char* m_data;
-#endif
   union {
     struct {
       uint32_t m_len;

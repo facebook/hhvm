@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/program-functions.h"
 
+#include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/bespoke-array.h"
@@ -2929,6 +2930,8 @@ void hphp_memory_cleanup() {
   weakref_cleanup();
   mm.resetAllocator();
   mm.resetCouldOOM();
+
+  APCTypedValue::FreeHazardPointers();
 }
 
 void hphp_session_exit(Transport* transport) {

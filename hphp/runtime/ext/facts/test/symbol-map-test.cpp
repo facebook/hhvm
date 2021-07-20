@@ -1630,19 +1630,28 @@ TEST_F(SymbolMapTest, GetFilesWithAttribute) {
   auto& m1 = make("/var/www");
 
   FileFacts ff1{
-      .m_attributes = {{.m_name = "A1", .m_args = {1}}}, .m_sha1hex = kSHA};
+      .m_attributes =
+          {Attribute{.m_name = "A1", .m_args = {1}},
+           Attribute{.m_name = "A2", .m_args = {}}},
+      .m_sha1hex = kSHA};
   folly::fs::path p1{"some/path1.php"};
   update(m1, "", "1", {p1}, {}, {ff1});
 
   auto testMap = [&p1](auto& m) {
-    auto files = m.getFilesWithAttribute("A1");
-    EXPECT_THAT(files, ElementsAre(p1.native()));
+    auto a1files = m.getFilesWithAttribute("A1");
+    EXPECT_THAT(a1files, ElementsAre(p1.native()));
+
+    auto a2files = m.getFilesWithAttribute("A2");
+    EXPECT_THAT(a1files, ElementsAre(p1.native()));
 
     auto attrs = m.getAttributesOfFile(Path{p1.native()});
-    EXPECT_THAT(attrs, ElementsAre("A1"));
+    EXPECT_THAT(attrs, UnorderedElementsAre("A1", "A2"));
 
-    auto args = m.getFileAttributeArgs(Path{p1.native()}, "A1");
-    EXPECT_THAT(args, ElementsAre(1));
+    auto a1args = m.getFileAttributeArgs(Path{p1.native()}, "A1");
+    EXPECT_THAT(a1args, ElementsAre(1));
+
+    auto a2args = m.getFileAttributeArgs(Path{p1.native()}, "A2");
+    EXPECT_THAT(a2args, ElementsAre());
   };
   testMap(m1);
 

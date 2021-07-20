@@ -189,7 +189,7 @@ void createSchema(SQLiteTxn& txn) {
 
   txn.exec(
       "CREATE TABLE IF NOT EXISTS file_attributes ("
-      " pathid INTEGER NOT NULL UNIQUE REFERENCES all_paths ON DELETE CASCADE,"
+      " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
       " attribute_name TEXT NOT NULL,"
       " attribute_position INTEGER NULL,"
       " attribute_value TEXT NULL,"

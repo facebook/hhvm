@@ -19,7 +19,7 @@ use parser_core_types::{
 use std::collections::HashMap;
 
 #[derive(PartialEq)]
-pub enum VariableKind {
+pub enum Rty {
     Readonly,
     Mutable,
 }
@@ -64,35 +64,32 @@ impl Context {
     }
 }
 
-fn ro_expr_list(context: &mut Context, exprs: &Vec<Expr>) -> VariableKind {
-    if exprs
-        .iter()
-        .any(|e| get_readonlyness(context, &e) == VariableKind::Readonly)
-    {
-        VariableKind::Readonly
+fn ro_expr_list(context: &mut Context, exprs: &Vec<Expr>) -> Rty {
+    if exprs.iter().any(|e| rty_expr(context, &e) == Rty::Readonly) {
+        Rty::Readonly
     } else {
-        VariableKind::Mutable
+        Rty::Mutable
     }
 }
 
-fn ro_expr_list2<T>(context: &mut Context, exprs: &Vec<(T, Expr)>) -> VariableKind {
+fn ro_expr_list2<T>(context: &mut Context, exprs: &Vec<(T, Expr)>) -> Rty {
     if exprs
         .iter()
-        .any(|e| get_readonlyness(context, &e.1) == VariableKind::Readonly)
+        .any(|e| rty_expr(context, &e.1) == Rty::Readonly)
     {
-        VariableKind::Readonly
+        Rty::Readonly
     } else {
-        VariableKind::Mutable
+        Rty::Mutable
     }
 }
 
-fn get_readonlyness(context: &mut Context, expr: &Expr) -> VariableKind {
+fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
     let aast::Expr(_, _, exp) = &*expr;
     match exp {
-        aast::Expr_::ReadonlyExpr(_) => VariableKind::Readonly,
+        aast::Expr_::ReadonlyExpr(_) => Rty::Readonly,
         aast::Expr_::ObjGet(og) => {
             let (obj, _member_name, _null_flavor, _reffiness) = &**og;
-            get_readonlyness(context, &obj)
+            rty_expr(context, &obj)
         }
         aast::Expr_::Lvar(id_orig) => {
             let var_name = local_id::get_name(&id_orig.1);
@@ -100,9 +97,9 @@ fn get_readonlyness(context: &mut Context, expr: &Expr) -> VariableKind {
             // comes from the function for this and not by the name
             let is_this = var_name == special_idents::THIS;
             if !is_this && context.is_readonly(var_name) {
-                VariableKind::Readonly
+                Rty::Readonly
             } else {
-                VariableKind::Mutable
+                Rty::Mutable
             }
         }
         aast::Expr_::Darray(d) => {
@@ -122,27 +119,25 @@ fn get_readonlyness(context: &mut Context, expr: &Expr) -> VariableKind {
             let (_, _, fields) = &**kv;
             if fields
                 .iter()
-                .any(|f| get_readonlyness(context, &f.1) == VariableKind::Readonly)
+                .any(|f| rty_expr(context, &f.1) == Rty::Readonly)
             {
-                VariableKind::Readonly
+                Rty::Readonly
             } else {
-                VariableKind::Mutable
+                Rty::Mutable
             }
         }
         aast::Expr_::Collection(c) => {
             let (_, _, fields) = &**c;
             if fields.iter().any(|f| match f {
-                aast::Afield::AFvalue(e) => get_readonlyness(context, &e) == VariableKind::Readonly,
-                aast::Afield::AFkvalue(_, e) => {
-                    get_readonlyness(context, &e) == VariableKind::Readonly
-                }
+                aast::Afield::AFvalue(e) => rty_expr(context, &e) == Rty::Readonly,
+                aast::Afield::AFkvalue(_, e) => rty_expr(context, &e) == Rty::Readonly,
             }) {
-                VariableKind::Readonly
+                Rty::Readonly
             } else {
-                VariableKind::Mutable
+                Rty::Mutable
             }
         }
-        _ => VariableKind::Mutable,
+        _ => Rty::Mutable,
     }
 }
 
@@ -159,7 +154,7 @@ fn check_assignment_validity(
             // TODO(alnash) we need to handle $this separately because the readonlyness
             // comes from the function for this and not by the name
             if var_name != special_idents::THIS {
-                let is_readonly = VariableKind::Readonly == get_readonlyness(context, &rhs);
+                let is_readonly = Rty::Readonly == rty_expr(context, &rhs);
                 if context.is_new_local(&var_name) {
                     context.add_local(&var_name, is_readonly);
                 } else if context.is_readonly(&var_name) != is_readonly {
@@ -170,8 +165,8 @@ fn check_assignment_validity(
                 }
             }
         }
-        aast::Expr_::ObjGet(_) => match get_readonlyness(context, &lhs) {
-            VariableKind::Readonly => {
+        aast::Expr_::ObjGet(_) => match rty_expr(context, &lhs) {
+            Rty::Readonly => {
                 checker.add_error(&pos, syntax_error::assignment_to_readonly);
             }
             _ => {}

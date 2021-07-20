@@ -112,16 +112,17 @@ void PrologueTranslator::setCachedForProcessFail() {
 
 void PrologueTranslator::smashBackup() {
   if (kind == TransKind::OptPrologue) {
-    assertx(transId != kInvalidTransID);
-    auto const rec = profData()->transRec(transId);
+    assertx(proflogueTransId != kInvalidTransID);
+    auto const rec = profData()->transRec(proflogueTransId);
     smashFuncCallers(jit::tc::ustubs().fcallHelperThunk, rec);
   }
 }
 
 void PrologueTranslator::gen() {
-  if (transId != kInvalidTransID && isProfiling(kind)) {
-      profData()->addTransProfPrologue(transId, sk, paramIndex(),
-        0 /* asmSize: updated below after machine code is generated */);
+  if (profData() && isProfiling(kind)) {
+    assertx(transId != kInvalidTransID);
+    profData()->addTransProfPrologue(transId, sk, paramIndex(),
+      0 /* asmSize: updated below after machine code is generated */);
   }
   auto const context = TransContext{
     transId == kInvalidTransID ? TransIDSet{} : TransIDSet{transId},
@@ -156,7 +157,7 @@ void PrologueTranslator::gen() {
 
 void PrologueTranslator::publishMetaImpl() {
   // Update the profiling prologue size now that we generated it.
-  if (transId != kInvalidTransID) {
+  if (isProfiling(kind)) {
     profData()->transRec(transId)->setAsmSize(
       transMeta->range.loc().mainSize());
   }
@@ -169,7 +170,8 @@ void PrologueTranslator::publishMetaImpl() {
 
   auto const& loc = transMeta->range.loc();
   TransRec tr{sk, transId, kind, loc.mainStart(), loc.mainSize(),
-      loc.coldStart(), loc.coldSize(), loc.frozenStart(), loc.frozenSize()};
+              loc.coldStart(), loc.coldSize(), loc.frozenStart(),
+              loc.frozenSize()};
   transdb::addTranslation(tr);
   FuncOrder::recordTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
@@ -197,10 +199,10 @@ void PrologueTranslator::publishCodeImpl() {
         func->fullName()->data(), nPassed, start);
   func->setPrologue(paramIndex(), start);
 
-  // If we are optimizing smash the callers of the proflogue.
+  // If we are optimizing, smash the callers of the proflogue.
   if (kind == TransKind::OptPrologue) {
-    assertx(transId != kInvalidTransID);
-    auto const rec = profData()->transRec(transId);
+    assertx(proflogueTransId != kInvalidTransID);
+    auto const rec = profData()->transRec(proflogueTransId);
     smashFuncCallers(start, rec);
   }
 }

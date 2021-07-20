@@ -96,7 +96,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
       func, nArgs, TransKind::OptPrologue
     );
     auto& translator = *translatorPtr;
-    translator.transId = prologueTransId;
+    translator.proflogueTransId = prologueTransId;
     translator.resetCached();
 
     // We don't acquire requisite paperwork etc. here since we are assuming that
@@ -118,12 +118,10 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
     }
   }
 
-  // If this prologue has a DV funclet, then invalidate it and return its SrcKey
-  // and TransID
+  // If this prologue has a DV funclet, then regenerate it in Optimize mode.
   if (nArgs < func->numNonVariadicParams()) {
     auto paramInfo = func->params()[nArgs];
     if (paramInfo.hasDefaultValue()) {
-      bool ret = false;
       SrcKey funcletSK(func, paramInfo.funcletOff, ResumeMode::None);
       if (!profData()->optimized(funcletSK)) {
         auto funcletTransId = profData()->dvFuncletTransId(funcletSK);
@@ -131,7 +129,6 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
           auto translator = std::make_unique<tc::RegionTranslator>(
             funcletSK, TransKind::Optimize
           );
-          translator->transId = funcletTransId;
           auto const region = selectHotRegion(funcletTransId);
           translator->region = region;
           auto const spOff = region->entry()->initialSpOffset();
@@ -143,12 +140,11 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
             // Flag that this translation has been retranslated, so that
             // it's not retranslated again along with the function body.
             profData()->setOptimized(funcletSK);
-            ret = true;
             info.add(std::move(translator));
+            return true;
           }
         }
       }
-      if (ret) return true;
     }
   }
 

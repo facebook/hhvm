@@ -574,7 +574,10 @@ TranslationResult::Scope Translator::shouldTranslate(bool noSizeLimit) {
 
 Optional<TranslationResult>
 Translator::translate(Optional<CodeCache::View> view) {
-  if (isProfiling(kind)) {
+  // If the TransDB is enabled, we allocate TransIDs for all translations in
+  // ProfData to keep each translation's ID the same in both ProfData and
+  // TransDB.
+  if (profData() && (isProfiling(kind) || transdb::enabled())) {
     transId = profData()->allocTransID();
   }
 

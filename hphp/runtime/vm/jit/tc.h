@@ -107,7 +107,14 @@ struct Translator {
   // The following members are the inputs to the translation pipeline.
   SrcKey sk;
   TransKind kind;
+  // The TransID for this translation.  This is always set for Profile and
+  // ProfPrologue translations, and holds their ID in ProfData.  For other
+  // translations, this is only valid if the TransDB is enabled, and it's their
+  // ID in the TransDB.
   TransID transId{kInvalidTransID};
+  // For OptPrologues, this holds the corresponding ProfPrologue's ID.  This is
+  // used to smash the callers of the ProfPrologue.
+  TransID proflogueTransId{kInvalidTransID};
   explicit Translator(SrcKey sk, TransKind kind = TransKind::Invalid);
   virtual ~Translator();
 

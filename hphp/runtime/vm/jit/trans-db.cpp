@@ -89,6 +89,10 @@ void addTranslation(const TransRec& transRec) {
   folly::SharedMutex::WriteHolder guard(s_lock);
   if (transRecPtr->id == kInvalidTransID) {
     transRecPtr->id = s_translations.size();
+  } else {
+    // If we pre-assigned and ID to a translation, make sure that it is unique.
+    assertx(transRecPtr->id >= s_translations.size() ||
+            s_translations[transRecPtr->id] == nullptr);
   }
   TransID id = transRecPtr->id;
   assert_flog(transRecPtr->isConsistent(), "{}", transRecPtr->print());

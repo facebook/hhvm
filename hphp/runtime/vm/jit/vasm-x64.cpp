@@ -1238,7 +1238,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
     fun(unit);
   };
 
-  doPass("VOPT_NOP",    removeTrivialNops);
+  doPass("VOPT_DCE",    removeDeadCode);
   doPass("VOPT_PHI",    optimizePhis);
   doPass("VOPT_BRANCH", fuseBranches);
   doPass("VOPT_JMP",    [] (Vunit& u) { optimizeJmps(u, false); });
@@ -1262,10 +1262,11 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
     doPass("VOPT_FOLD_IMM", foldImms<x64::ImmFolder>);
   }
 
-  doPass("VOPT_COPY", [&] (Vunit& u) { optimizeCopies(u, abi); });
+  doPass("VOPT_COPY",   [&] (Vunit& u) { optimizeCopies(u, abi); });
+  doPass("VOPT_DCE",    removeDeadCode);
+  doPass("VOPT_BRANCH", fuseBranches);
 
   if (unit.needsRegAlloc()) {
-    doPass("VOPT_DCE", removeDeadCode);
     doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, false); });
     doPass("VOPT_DCE", removeDeadCode);
 

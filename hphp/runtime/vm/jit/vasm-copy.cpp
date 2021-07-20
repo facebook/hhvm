@@ -82,12 +82,15 @@ struct PhysExpr {
  */
 struct DefInfo {
   bool operator==(const DefInfo& o) const {
-    return base == o.base && disp == o.disp && expr == o.expr;
+    return base == o.base && disp == o.disp && expr == o.expr && copy == o.copy;
   }
   bool operator!=(const DefInfo& o) const { return !(*this == o); }
 
   Vreg base;
   int32_t disp;
+  Vreg copy; // This Vreg is identical to "copy" (which might be
+             // different from "base" if the displacement is
+             // non-zero).
   PhysExpr expr;
 };
 
@@ -170,8 +173,14 @@ DEBUG_ONLY std::string show(PhysExpr x) {
   return folly::sformat("{} + {}", show(x.base), x.disp);
 }
 
-DEBUG_ONLY std::string show(DefInfo x) {
-  return folly::sformat("{} + {}", show(x.base), x.disp);
+DEBUG_ONLY std::string show(const DefInfo& x) {
+  return folly::sformat(
+    "{} + {}{}{}{}",
+    show(x.base), x.disp,
+    x.copy.isValid() ? " [" : "",
+    x.copy.isValid() ? show(x.copy) : "",
+    x.copy.isValid() ? "]" : ""
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -411,7 +420,7 @@ void merge_def_info(Env& env, RegState& state, Vreg d, const DefInfo& src) {
  */
 void analyze_virt_copy(Env& env, RegState& state, Vreg d, Vreg s) {
   if (!d.isVirt()) return;
-  merge_def_info(env, state, d, DefInfo { s, 0 });
+  merge_def_info(env, state, d, DefInfo { s, 0, s.isVirt() ? s : Vreg{} });
 }
 void analyze_virt_disp(Env& env, RegState& state,
                        Vreg d, Vreg s, int32_t disp) {
@@ -433,6 +442,16 @@ void analyze_inst_virtual(Env& env, RegState& state, const Vinstr& inst) {
   switch (inst.op) {
     case Vinstr::copy:
       return analyze_virt_copy(env, state, inst.copy_.d, inst.copy_.s);
+
+    case Vinstr::copyargs: {
+      auto const& s = env.unit.tuples[inst.copyargs_.s];
+      auto const& d = env.unit.tuples[inst.copyargs_.d];
+      assertx(s.size() == d.size());
+      for (size_t i = 0; i < s.size(); ++i) {
+        analyze_virt_copy(env, state, d[i], s[i]);
+      }
+      return;
+    }
 
     case Vinstr::lea:
     {
@@ -554,6 +573,15 @@ void flatten_impl(Env& env, DefInfo& def) {
 
   auto& src = env.defs[s];
   flatten_impl(env, src);
+
+  if (def.copy.isValid()) {
+    assertx(def.copy.isVirt());
+    while (true) {
+      auto const& other = env.defs[def.copy];
+      if (!other.copy.isValid() || other.copy.isPhys()) break;
+      def.copy = other.copy;
+    }
+  }
 
   if (!src.base.isVirt()) return;
   def.base = src.base;
@@ -713,9 +741,13 @@ struct OptVisit {
   >::type use(T& reg) {
     // Rewrite to another register if it's just a copy.
     if_rewritable(env, state, reg, [&] (const DefInfo& def) {
-      if (def.disp != 0) return;
-      FTRACE(2, "      rewrite: {} => {}\n", show(reg), show(def.base));
-      reg = def.base;
+      // If the displacement is zero, just use the base
+      // register. Otherwise, we might a copy (which isn't necessarily
+      // as good as base). Use that instead.
+      auto const d = (def.disp != 0) ? def.copy : def.base;
+      if (!d.isValid()) return;
+      FTRACE(2, "      rewrite: {} => {}\n", show(reg), show(d));
+      reg = d;
     });
   }
 };

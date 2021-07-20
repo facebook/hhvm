@@ -177,7 +177,7 @@ bool collapseDiamond(IRUnit& unit, Block* block) {
 
   // Is this block the head of a suitable diamond?
 
-  if (!term.is(JmpZero, JmpNZero)) return false;
+  if (!term.is(JmpZero, JmpNZero, CheckType, CheckTypeMem)) return false;
 
   auto const next = block->next();
   auto const taken = block->taken();
@@ -198,16 +198,40 @@ bool collapseDiamond(IRUnit& unit, Block* block) {
   assertx(join->begin()->is(DefLabel));
   assertx(join->begin()->numDsts() == nextJmp->numSrcs());
 
-  // For every value forwarded to the join point, generate a Select at the head
-  // of the diamond. Each Select chooses between the value provided on the left
-  // or right side of the diamond.
   std::vector<SSATmp*> newSrcs{nextJmp->numSrcs()};
-  for (uint32_t i = 0; i < nextJmp->numSrcs(); ++i) {
-    auto const t = term.is(JmpZero) ? nextJmp->src(i) : takenJmp->src(i);
-    auto const f = term.is(JmpZero) ? takenJmp->src(i) : nextJmp->src(i);
-    auto select = unit.gen(Select, term.bcctx(), term.src(0), t, f);
-    block->insert(block->backIter(), select);
-    newSrcs[i] = select->dst();
+  if (term.is(CheckType, CheckTypeMem)) {
+    // We cannot turn CheckTypes into Selects, but in the special case
+    // where one branch forwards a true, and one branch forwards a
+    // false, we can turn it into the equivalent IsType instruction.
+    if (nextJmp->numSrcs() != 1) return false;
+    if (!nextJmp->src(0)->hasConstVal(TBool) ||
+        !takenJmp->src(0)->hasConstVal(TBool)) {
+      return false;
+    }
+    if (nextJmp->src(0)->boolVal() == takenJmp->src(0)->boolVal()) return false;
+
+    auto const op = [&] {
+      if (term.is(CheckType)) {
+        return nextJmp->src(0)->boolVal() ? IsType : IsNType;
+      }
+      assertx(term.is(CheckTypeMem));
+      return nextJmp->src(0)->boolVal() ? IsTypeMem : IsNTypeMem;
+    }();
+    auto const check =
+      unit.gen(op, term.bcctx(), term.typeParam(), term.src(0));
+    block->insert(block->backIter(), check);
+    newSrcs[0] = check->dst();
+  } else {
+    // For every value forwarded to the join point, generate a Select
+    // at the head of the diamond. Each Select chooses between the
+    // value provided on the left or right side of the diamond.
+    for (uint32_t i = 0; i < nextJmp->numSrcs(); ++i) {
+      auto const t = term.is(JmpZero) ? nextJmp->src(i) : takenJmp->src(i);
+      auto const f = term.is(JmpZero) ? takenJmp->src(i) : nextJmp->src(i);
+      auto select = unit.gen(Select, term.bcctx(), term.src(0), t, f);
+      block->insert(block->backIter(), select);
+      newSrcs[i] = select->dst();
+    }
   }
 
   // Instead of conditionally jumping into either branch in the diamond, now

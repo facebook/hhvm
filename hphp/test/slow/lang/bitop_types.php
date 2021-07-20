@@ -7,7 +7,6 @@ class c {
 }
 
 function test_uninit() {
-  if (false) {}
   $a = 'string';
   try {
     $x = $a & $b;
@@ -25,29 +24,46 @@ function test_uninit() {
   }
 }
 
+function dump($a, $b, $bitop_str, $bitop) {
+  $res = $bitop($a, $b);
+  printf(
+    "%s(%s) %s %s(%s) = %s(%s)\n",
+    gettype($a),
+    HH\is_any_array($a) ? 'Array' : $a,
+    $bitop_str,
+    gettype($b),
+    HH\is_any_array($b) ? 'Array' : $b,
+    gettype($res),
+    $res,
+  );
+}
+
+function cast(inout $a, inout $b) {
+  if ($a is string && $b is string) return;
+  $a = (int)$a;
+  $b = (int)$b;
+}
+
+function and($a, $b) {
+  cast(inout $a, inout $b);
+  return $a & $b;
+}
+
+function xor($a, $b) {
+  cast(inout $a, inout $b);
+  return $a ^ $b;
+}
+
+function or($a, $b) {
+  cast(inout $a, inout $b);
+  return $a | $b;
+}
+
 <<__EntryPoint>>
 function main_bitop_types() {
-  $func = ($a, $b, $bitop_str, $bitop) ==> {
-    $res = $bitop($a, $b);
-    printf(
-      "%s(%s) %s %s(%s) = %s(%s)\n",
-      gettype($a),
-      HH\is_any_array($a) ? 'Array' : $a,
-      $bitop_str,
-      gettype($b),
-      HH\is_any_array($b) ? 'Array' : $b,
-      gettype($res),
-      $res,
-    );
-  };
+  $ops = vec[tuple('&', and<>), tuple('^', xor<>), tuple('|', or<>)];
 
-  $ops = varray[
-    tuple('&', ($a, $b) ==> $a & $b),
-    tuple('^', ($a, $b) ==> $a ^ $b),
-    tuple('|', ($a, $b) ==> $a | $b),
-  ];
-
-  $values = varray[
+  $values = vec[
     true,
     42,
     24.1987,
@@ -57,12 +73,11 @@ function main_bitop_types() {
     null,
   ];
 
-  for ($o = 0; $o < count($ops); ++$o) {
-    for ($i = 0; $i < count($values); ++$i) {
-      for ($j = 0; $j < count($values); ++$j) {
-        list($op_str, $op_lambda) = $ops[$o];
+  foreach ($ops as list($op_str, $op_lambda)) {
+    foreach ($values as $i) {
+      foreach ($values as $j) {
         try {
-          $func($values[$i], $values[$j], $op_str, $op_lambda);
+          dump($i, $j, $op_str, $op_lambda);
         } catch (TypecastException $e) {
           var_dump($e->getMessage());
         }

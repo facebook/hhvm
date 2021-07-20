@@ -70,7 +70,7 @@
   //if (include('return_with_value.php') == 987) ;
   if ((include('return_with_value.php')) == 987) ;
   //if (include('return_with_value.php') | 987) ;
-  if ((include('return_with_value.php')) | 987) ;
+  if ((int)(include('return_with_value.php')) | 987) ;
   //if (include('return_with_value.php') && 987) ;
   if ((include('return_with_value.php')) && 987) ;
 

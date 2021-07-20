@@ -70,7 +70,7 @@
   //if (require('return_with_value.php') == 987) ;
   if ((require('return_with_value.php')) == 987) ;
   //if (require('return_with_value.php') | 987) ;
-  if ((require('return_with_value.php')) | 987) ;
+  if ((int)(require('return_with_value.php')) | 987) ;
   //if (require('return_with_value.php') && 987) ;
   if ((require('return_with_value.php')) && 987) ;
 

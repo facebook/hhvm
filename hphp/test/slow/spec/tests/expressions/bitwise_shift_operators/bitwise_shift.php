@@ -28,7 +28,7 @@ printShiftRange($v, 0, $NumBitsPerInt - 1);
 $scalarValueList = varray[10, -100, 0, 1.234, 0.0, TRUE, FALSE, NULL, "123", 'xx', ""];
 foreach ($scalarValueList as $v)
 {
-    printf("%d(%08X): >> %2d = %08X\t<< %2d = %08X\n", $v, $v, 3, $v >> 3, 5, $v << 5);
+    printf("%d(%08X): >> %2d = %08X\t<< %2d = %08X\n", $v, $v, 3, (int)$v >> 3, 5, (int)$v << 5);
 }
 
 // Figure out the algorithm the implementations use for negative and too-large shift counts

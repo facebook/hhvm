@@ -651,8 +651,22 @@ void VariableSerializer::write(const String& v) {
   }
 }
 
+const StaticString
+  s_invalidMethCallerAPC("Cannot store meth_caller in APC"),
+  s_invalidMethCallerSerde("Cannot serialize meth_caller");
+
 void VariableSerializer::write(const Object& v) {
   if (!v.isNull() && m_type == Type::JSON) {
+    if (RO::EvalForbidMethCallerHelperSerialize &&
+        v.get()->getVMClass() == SystemLib::s_MethCallerHelperClass) {
+      if (RO::EvalForbidMethCallerHelperSerialize == 1) {
+        raise_warning("Serializing MethCallerHelper");
+      } else {
+        SystemLib::throwInvalidOperationExceptionObject(
+          VarNR{s_invalidMethCallerSerde.get()}
+        );
+      }
+    }
 
     if (v.instanceof(s_JsonSerializable)) {
       assertx(!v->isCollection());
@@ -1494,8 +1508,6 @@ void VariableSerializer::serializeRFunc(const RFuncData* rfunc) {
   }
 }
 
-const StaticString s_invalidMethCaller("Cannot store meth_caller in APC");
-
 void VariableSerializer::serializeFunc(const Func* func) {
   auto const name = func->fullName();
   switch (getType()) {
@@ -1522,17 +1534,27 @@ void VariableSerializer::serializeFunc(const Func* func) {
       m_buf->append(')');
       break;
     case Type::JSON:
+      if (func->isMethCaller()) {
+        SystemLib::throwInvalidOperationExceptionObject(
+          VarNR{s_invalidMethCallerSerde.get()}
+        );
+      }
       write(func->nameStr());
       break;
     case Type::APCSerialize:
       if (func->isMethCaller()) {
         SystemLib::throwInvalidOperationExceptionObject(
-          VarNR{s_invalidMethCaller.get()}
+          VarNR{s_invalidMethCallerAPC.get()}
         );
       }
     case Type::Serialize:
     case Type::Internal:
     case Type::DebuggerSerialize:
+      if (func->isMethCaller()) {
+        SystemLib::throwInvalidOperationExceptionObject(
+          VarNR{s_invalidMethCallerSerde.get()}
+        );
+      }
       invalidFuncConversion("string");
       break;
   }
@@ -2087,6 +2109,19 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
     return;
   }
 
+  if (RO::EvalForbidMethCallerHelperSerialize &&
+      (type == Type::Serialize || type == Type::Internal ||
+       type == Type::DebuggerSerialize || type == Type::JSON) &&
+      obj->getVMClass() == SystemLib::s_MethCallerHelperClass) {
+    if (RO::EvalForbidMethCallerHelperSerialize == 1) {
+      raise_warning("Serializing MethCallerHelper");
+    } else {
+      SystemLib::throwInvalidOperationExceptionObject(
+        VarNR{s_invalidMethCallerSerde.get()}
+      );
+    }
+  }
+
   if (LIKELY(type == VariableSerializer::Type::Serialize ||
              type == VariableSerializer::Type::Internal ||
              type == VariableSerializer::Type::APCSerialize)) {
@@ -2123,12 +2158,12 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
           raise_warning("Storing meth_caller in APC");
         } else if (RO::EvalForbidMethCallerAPCSerialize > 1) {
           SystemLib::throwInvalidOperationExceptionObject(
-            VarNR{s_invalidMethCaller.get()}
+            VarNR{s_invalidMethCallerAPC.get()}
           );
         }
       } else if (cls == SystemLib::s_DynMethCallerHelperClass) {
         SystemLib::throwInvalidOperationExceptionObject(
-          VarNR{s_invalidMethCaller.get()}
+          VarNR{s_invalidMethCallerAPC.get()}
         );
       }
     }

@@ -1233,6 +1233,7 @@ struct RuntimeOption {
    * 2 - Throw exception if meth_caller is apc serialized               \
    */                                                                   \
   F(int32_t, ForbidMethCallerAPCSerialize, 0)                           \
+  F(int32_t, ForbidMethCallerHelperSerialize, 0)                        \
   F(bool, NoticeOnCollectionToBool, false)                              \
   F(bool, NoticeOnSimpleXMLBehavior, false)                             \
   /* Enables Hack records. */                                           \

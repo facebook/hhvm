@@ -29,6 +29,10 @@ struct SerializeError : std::runtime_error {
   }
 };
 
+struct MethCallerSerializeError : SerializeError {
+  MethCallerSerializeError() : SerializeError{""} {}
+};
+
 struct HackArraySerializeError : SerializeError {
   HackArraySerializeError() : SerializeError{""} {}
 };

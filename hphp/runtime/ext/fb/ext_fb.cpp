@@ -109,6 +109,8 @@ enum TType {
 /* Return the smallest (supported) unsigned length that can store the value */
 #define LEN_SIZE(x) ((((unsigned)x) == ((uint8_t)x)) ? 1 : 4)
 
+const StaticString s_invalidMethCallerSerde("Cannot serialize meth_caller");
+
 Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
   try {
     if (options & k_FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION) {
@@ -169,6 +171,10 @@ Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS "
       "option to be provided"
+    );
+  } catch (const HPHP::serialize::MethCallerSerializeError&) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      VarNR{s_invalidMethCallerSerde.get()}
     );
   } catch (const HPHP::serialize::SerializeError&) {
     return init_null();
@@ -532,9 +538,14 @@ static int fb_compact_serialize_variant(
       return 0;
     }
 
+    case KindOfFunc:
+      if (var.toFuncVal()->isMethCaller()) {
+        SystemLib::throwInvalidOperationExceptionObject(
+          VarNR{s_invalidMethCallerSerde.get()}
+        );
+      }
     case KindOfPersistentString:
     case KindOfString:
-    case KindOfFunc:
     case KindOfClass:
     case KindOfLazyClass:
       fb_compact_serialize_string(sb, var.toString());
@@ -577,6 +588,19 @@ static int fb_compact_serialize_variant(
     }
 
     case KindOfObject:
+      if (RO::EvalForbidMethCallerHelperSerialize &&
+          var.asCObjRef().get()->getVMClass() ==
+            SystemLib::s_MethCallerHelperClass) {
+        if (RO::EvalForbidMethCallerHelperSerialize == 1) {
+          fb_compact_serialize_code(sb, FB_CS_NULL);
+          raise_warning("Serializing MethCallerHelper");
+        } else {
+          SystemLib::throwInvalidOperationExceptionObject(
+            VarNR{s_invalidMethCallerSerde.get()}
+          );
+        }
+        break;
+      }
     case KindOfResource:
     case KindOfRecord: // TODO(T41025646)
       fb_compact_serialize_code(sb, FB_CS_NULL);

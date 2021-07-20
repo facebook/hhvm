@@ -86,17 +86,24 @@ struct VariantControllerImpl {
       case KindOfDouble:     return HPHP::serialize::Type::DOUBLE;
       case KindOfInt64:      return HPHP::serialize::Type::INT64;
       case KindOfFunc:
+        if (obj.toFuncVal()->isMethCaller()) {
+          throw HPHP::serialize::MethCallerSerializeError();
+        }
       case KindOfClass:
       case KindOfLazyClass:
       case KindOfPersistentString:
       case KindOfString:     return HPHP::serialize::Type::STRING;
-      case KindOfObject:     return HPHP::serialize::Type::OBJECT;
-        if (HackArraysMode == VariantControllerHackArraysMode::MIGRATORY) {
-          return obj.asCArrRef().isVec()
-            ? HPHP::serialize::Type::LIST
-            : HPHP::serialize::Type::MAP;
+      case KindOfObject:
+        if (RO::EvalForbidMethCallerHelperSerialize &&
+            obj.asCObjRef().get()->getVMClass() ==
+              SystemLib::s_MethCallerHelperClass) {
+          if (RO::EvalForbidMethCallerHelperSerialize == 1) {
+            raise_warning("Serializing MethCallerHelper");
+          } else {
+            throw HPHP::serialize::MethCallerSerializeError();
+          }
         }
-        return HPHP::serialize::Type::MAP;
+        return HPHP::serialize::Type::OBJECT;
 
       case KindOfPersistentDict:
       case KindOfDict: {

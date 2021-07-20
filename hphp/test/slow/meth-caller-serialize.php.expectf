@@ -1,0 +1,48 @@
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 10
+string(143) "%s"
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 11
+string(143) "%s"
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 13
+NULL
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 14
+NULL
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 16
+NULL
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 17
+NULL
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 19
+string(2) "{}"
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 20
+string(2) "{}"
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 25
+string(149) "%s"
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 26
+string(149) "%s"
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 28
+NULL
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 29
+NULL
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 31
+string(3) "%s"
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 32
+string(3) "%s"
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 34
+string(4) "[{}]"
+
+Warning: Serializing MethCallerHelper in %s/meth-caller-serialize.php on line 35
+string(4) "[{}]"

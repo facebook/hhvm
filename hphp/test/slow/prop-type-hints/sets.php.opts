@@ -1,2 +1,3 @@
 -vEval.CheckPropTypeHints=1
 -vEval.NoticeOnCoerceForIncDec=0
+-vEval.NoticeOnCoerceForMath=0

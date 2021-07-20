@@ -1,1 +1,2 @@
 -vEval.IsCompatibleClsMethType=1
+-vEval.NoticeOnCoerceForMath=0

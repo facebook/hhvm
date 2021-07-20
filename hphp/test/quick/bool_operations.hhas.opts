@@ -1,1 +1,2 @@
 -vEval.NoticeOnCoerceForBitOp=0
+-vEval.NoticeOnCoerceForMath=0

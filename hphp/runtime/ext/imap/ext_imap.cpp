@@ -226,9 +226,9 @@ static char *_php_rfc822_write_address(ADDRESS *addresslist) {
 }
 
 #define ARR_SET_ENTRY(arr, obj, name, entry) \
-  if (obj->entry) arr.set(name, String((const char*)obj->entry, CopyString));
+  if (obj->entry) arr.set(LAZY_STATIC_STRING(name), String((const char*)obj->entry, CopyString));
 
-static void set_address(DArrayInit &ai, const char *prop, ADDRESS *addr) {
+static void set_address(DictInit &ai, const char *prop, ADDRESS *addr) {
   if (!addr) return;
 
   auto const fulladdress = _php_rfc822_write_address(addr);
@@ -238,18 +238,18 @@ static void set_address(DArrayInit &ai, const char *prop, ADDRESS *addr) {
 
   auto paddress = Array::CreateVec();
   do {
-    DArrayInit props(4);
+    DictInit props(4);
     ARR_SET_ENTRY(props, addr, "personal", personal);
     ARR_SET_ENTRY(props, addr, "adl",      adl);
     ARR_SET_ENTRY(props, addr, "mailbox",  mailbox);
     ARR_SET_ENTRY(props, addr, "host",     host);
     paddress.append(ObjectData::FromArray(props.create()));
   } while ((addr = addr->next));
-  ai.set(prop, paddress);
+  ai.set(String(prop), paddress);
 }
 
 static Array _php_make_header_props(ENVELOPE *en) {
-  DArrayInit ai(24);
+  DictInit ai(24);
 
   ARR_SET_ENTRY(ai, en, "remail",      remail);
   ARR_SET_ENTRY(ai, en, "date",        date);
@@ -274,83 +274,83 @@ static Array _php_make_header_props(ENVELOPE *en) {
 }
 
 static Object _php_imap_body(BODY *body, bool do_multipart) {
-  DArrayInit props(17);
+  DictInit props(17);
 
   if (body->type <= TYPEMAX) {
-   props.set("type", body->type);
+   props.set(LAZY_STATIC_STRING("type"), body->type);
   }
 
   if (body->encoding <= ENCMAX) {
-    props.set("encoding", body->encoding);
+    props.set(LAZY_STATIC_STRING("encoding"), body->encoding);
   }
 
   if (body->subtype) {
-    props.set("ifsubtype", 1);
-    props.set("subtype", String((const char*)body->subtype, CopyString));
+    props.set(LAZY_STATIC_STRING("ifsubtype"), 1);
+    props.set(LAZY_STATIC_STRING("subtype"), String((const char*)body->subtype, CopyString));
   } else {
-    props.set("ifsubtype", 0);
+    props.set(LAZY_STATIC_STRING("ifsubtype"), 0);
   }
 
   if (body->description) {
-    props.set("ifdescription", 1);
-    props.set("description",
+    props.set(LAZY_STATIC_STRING("ifdescription"), 1);
+    props.set(LAZY_STATIC_STRING("description"),
       String((const char*)body->description, CopyString));
   } else {
-    props.set("ifdescription", 0);
+    props.set(LAZY_STATIC_STRING("ifdescription"), 0);
   }
 
   if (body->id) {
-    props.set("ifid", 1);
-    props.set("id", String((const char*)body->id, CopyString));
+    props.set(LAZY_STATIC_STRING("ifid"), 1);
+    props.set(LAZY_STATIC_STRING("id"), String((const char*)body->id, CopyString));
   } else {
-    props.set("ifid", 0);
+    props.set(LAZY_STATIC_STRING("ifid"), 0);
   }
 
 
   if (body->size.lines) {
-    props.set("lines", (int64_t)body->size.lines);
+    props.set(LAZY_STATIC_STRING("lines"), (int64_t)body->size.lines);
   }
 
   if (body->size.bytes) {
-    props.set("bytes", (int64_t)body->size.bytes);
+    props.set(LAZY_STATIC_STRING("bytes"), (int64_t)body->size.bytes);
   }
 
   if (body->disposition.type) {
-    props.set("ifdisposition", 1);
-    props.set("disposition",
+    props.set(LAZY_STATIC_STRING("ifdisposition"), 1);
+    props.set(LAZY_STATIC_STRING("disposition"),
       String((const char*)body->disposition.type, CopyString));
   } else {
-    props.set("ifdisposition", 0);
+    props.set(LAZY_STATIC_STRING("ifdisposition"), 0);
   }
 
   if (body->disposition.parameter) {
-    props.set("ifdparameters", 1);
+    props.set(LAZY_STATIC_STRING("ifdparameters"), 1);
 
     auto dparams = Array::CreateVec();
     for (auto dpar = body->disposition.parameter; dpar; dpar = dpar->next) {
-      DArrayInit dparam(2);
-      dparam.set("attribute", String((const char*)dpar->attribute, CopyString));
-      dparam.set("value", String((const char*)dpar->value, CopyString));
+      DictInit dparam(2);
+      dparam.set(LAZY_STATIC_STRING("attribute"), String((const char*)dpar->attribute, CopyString));
+      dparam.set(LAZY_STATIC_STRING("value"), String((const char*)dpar->value, CopyString));
       dparams.append(ObjectData::FromArray(dparam.create()));
     }
-    props.set("dparameters", dparams);
+    props.set(LAZY_STATIC_STRING("dparameters"), dparams);
   } else {
-    props.set("ifdparameters", 0);
+    props.set(LAZY_STATIC_STRING("ifdparameters"), 0);
   }
 
   if (body->parameter) {
-    props.set("ifparameters", 1);
+    props.set(LAZY_STATIC_STRING("ifparameters"), 1);
 
     auto params = Array::CreateVec();
     for (auto par = body->parameter; par; par = par->next) {
-      DArrayInit param(2);
+      DictInit param(2);
       ARR_SET_ENTRY(param, par, "attribute", attribute);
       ARR_SET_ENTRY(param, par, "value", value);
       params.append(ObjectData::FromArray(param.create()));
     }
-    props.set("parameters", std::move(params));
+    props.set(LAZY_STATIC_STRING("parameters"), std::move(params));
   } else {
-    props.set("ifparameters", 0);
+    props.set(LAZY_STATIC_STRING("ifparameters"), 0);
   }
 
   if (do_multipart) {
@@ -360,14 +360,14 @@ static Object _php_imap_body(BODY *body, bool do_multipart) {
       for (auto part = body->nested.part; part; part = part->next) {
         parts.append(_php_imap_body(&part->body, do_multipart));
       }
-      props.set("parts", std::move(parts));
+      props.set(LAZY_STATIC_STRING("parts"), std::move(parts));
     }
 
     /* encapsulated message ? */
     if ((body->type == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
       auto parts = Array::CreateVec();
       parts.append(_php_imap_body(body->nested.msg->body, do_multipart));
-      props.set("parts", parts);
+      props.set(LAZY_STATIC_STRING("parts"), parts);
     }
   }
 
@@ -796,14 +796,14 @@ static Variant HHVM_FUNCTION(imap_check, const Resource& imap_stream) {
     return false;
   }
   if (obj->m_stream && obj->m_stream->mailbox) {
-    DArrayInit props(5);
+    DictInit props(5);
     char date[100];
     rfc822_date(date);
-    props.set("Date", String(date, CopyString));
-    props.set("Driver", String(obj->m_stream->dtb->name, CopyString));
-    props.set("Mailbox", String(obj->m_stream->mailbox, CopyString));
-    props.set("Nmsgs", (int64_t)obj->m_stream->nmsgs);
-    props.set("Recent", (int64_t)obj->m_stream->recent);
+    props.set(LAZY_STATIC_STRING("Date"), String(date, CopyString));
+    props.set(LAZY_STATIC_STRING("Driver"), String(obj->m_stream->dtb->name, CopyString));
+    props.set(LAZY_STATIC_STRING("Mailbox"), String(obj->m_stream->mailbox, CopyString));
+    props.set(LAZY_STATIC_STRING("Nmsgs"), (int64_t)obj->m_stream->nmsgs);
+    props.set(LAZY_STATIC_STRING("Recent"), (int64_t)obj->m_stream->recent);
     return ObjectData::FromArray(props.create());
   }
   return false;
@@ -906,21 +906,21 @@ static Variant HHVM_FUNCTION(imap_fetch_overview, const Resource& imap_stream,
       if (((elt = mail_elt(obj->m_stream, i))->sequence) &&
           (env = mail_fetch_structure(obj->m_stream, i, NIL, NIL))) {
 
-        DArrayInit props(16);
+        DictInit props(16);
         ARR_SET_ENTRY(props, env, "subject", subject);
 
         if (env->from) {
           env->from->next = NULL;
           char *address = _php_rfc822_write_address(env->from);
           if (address) {
-            props.set("from", String(address, AttachString));
+            props.set(LAZY_STATIC_STRING("from"), String(address, AttachString));
           }
         }
         if (env->to) {
           env->to->next = NULL;
           char *address = _php_rfc822_write_address(env->to);
           if (address) {
-            props.set("to", String(address, AttachString));
+            props.set(LAZY_STATIC_STRING("to"), String(address, AttachString));
           }
         }
 
@@ -929,15 +929,15 @@ static Variant HHVM_FUNCTION(imap_fetch_overview, const Resource& imap_stream,
         ARR_SET_ENTRY(props, env, "references",  references);
         ARR_SET_ENTRY(props, env, "in_reply_to", in_reply_to);
 
-        props.set("size",     (int64_t)elt->rfc822_size);
-        props.set("uid",      (int64_t)mail_uid(obj->m_stream, i));
-        props.set("msgno",    (int64_t)i);
-        props.set("recent",   (int64_t)elt->recent);
-        props.set("flagged",  (int64_t)elt->flagged);
-        props.set("answered", (int64_t)elt->answered);
-        props.set("deleted",  (int64_t)elt->deleted);
-        props.set("seen",     (int64_t)elt->seen);
-        props.set("draft",    (int64_t)elt->draft);
+        props.set(LAZY_STATIC_STRING("size"),     (int64_t)elt->rfc822_size);
+        props.set(LAZY_STATIC_STRING("uid"),      (int64_t)mail_uid(obj->m_stream, i));
+        props.set(LAZY_STATIC_STRING("msgno"),    (int64_t)i);
+        props.set(LAZY_STATIC_STRING("recent"),   (int64_t)elt->recent);
+        props.set(LAZY_STATIC_STRING("flagged"),  (int64_t)elt->flagged);
+        props.set(LAZY_STATIC_STRING("answered"), (int64_t)elt->answered);
+        props.set(LAZY_STATIC_STRING("deleted"),  (int64_t)elt->deleted);
+        props.set(LAZY_STATIC_STRING("seen"),     (int64_t)elt->seen);
+        props.set(LAZY_STATIC_STRING("draft"),    (int64_t)elt->draft);
 
         ret.append(ObjectData::FromArray(props.create()));
       }
@@ -1262,15 +1262,15 @@ static Variant HHVM_FUNCTION(imap_mailboxmsginfo, const Resource& imap_stream) {
   char date[100];
   rfc822_date(date);
 
-  DArrayInit props(8);
-  props.set("Unread", (int64_t)unreadmsg);
-  props.set("Deleted", (int64_t)deletedmsg);
-  props.set("Nmsgs", (int64_t)obj->m_stream->nmsgs);
-  props.set("Size", (int64_t)msize);
-  props.set("Date", String(date, CopyString));
-  props.set("Driver", String(obj->m_stream->dtb->name, CopyString));
-  props.set("Mailbox", String(obj->m_stream->mailbox, CopyString));
-  props.set("Recent", (int64_t)msize);
+  DictInit props(8);
+  props.set(LAZY_STATIC_STRING("Unread"), (int64_t)unreadmsg);
+  props.set(LAZY_STATIC_STRING("Deleted"), (int64_t)deletedmsg);
+  props.set(LAZY_STATIC_STRING("Nmsgs"), (int64_t)obj->m_stream->nmsgs);
+  props.set(LAZY_STATIC_STRING("Size"), (int64_t)msize);
+  props.set(LAZY_STATIC_STRING("Date"), String(date, CopyString));
+  props.set(LAZY_STATIC_STRING("Driver"), String(obj->m_stream->dtb->name, CopyString));
+  props.set(LAZY_STATIC_STRING("Mailbox"), String(obj->m_stream->mailbox, CopyString));
+  props.set(LAZY_STATIC_STRING("Recent"), (int64_t)msize);
   return ObjectData::FromArray(props.create());
 }
 
@@ -1435,22 +1435,22 @@ static Variant HHVM_FUNCTION(imap_status, const Resource& imap_stream,
     return false;
   }
 
-  DArrayInit props(6);
-  props.set("flags", (int64_t)IMAPG(status_flags));
+  DictInit props(6);
+  props.set(LAZY_STATIC_STRING("flags"), (int64_t)IMAPG(status_flags));
   if (IMAPG(status_flags) & SA_MESSAGES) {
-    props.set("messages", (int64_t)IMAPG(status_messages));
+    props.set(LAZY_STATIC_STRING("messages"), (int64_t)IMAPG(status_messages));
   }
   if (IMAPG(status_flags) & SA_RECENT) {
-    props.set("recent", (int64_t)IMAPG(status_recent));
+    props.set(LAZY_STATIC_STRING("recent"), (int64_t)IMAPG(status_recent));
   }
   if (IMAPG(status_flags) & SA_UNSEEN) {
-    props.set("unseen", (int64_t)IMAPG(status_unseen));
+    props.set(LAZY_STATIC_STRING("unseen"), (int64_t)IMAPG(status_unseen));
   }
   if (IMAPG(status_flags) & SA_UIDNEXT) {
-    props.set("uidnext", (int64_t)IMAPG(status_uidnext));
+    props.set(LAZY_STATIC_STRING("uidnext"), (int64_t)IMAPG(status_uidnext));
   }
   if (IMAPG(status_flags) & SA_UIDVALIDITY) {
-    props.set("uidvalidity", (int64_t)IMAPG(status_uidvalidity));
+    props.set(LAZY_STATIC_STRING("uidvalidity"), (int64_t)IMAPG(status_uidvalidity));
   }
   return ObjectData::FromArray(props.create());
 }

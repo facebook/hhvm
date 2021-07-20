@@ -74,6 +74,12 @@ StringData* makeStaticString(const String& str);
 StringData* makeStaticString(const char* str, size_t len);
 StringData* makeStaticString(const char* str);
 
+#define LAZY_STATIC_STRING(x) \
+  []{ \
+    static StaticString result(x); \
+    return result.get(); \
+  }()
+
 /*
  * Insert an already initialized static StringData into the static string table.
  * If the same string is already present, invoke the deleter to take appropriate
@@ -160,4 +166,3 @@ void refineStaticStringTableSize();
 //////////////////////////////////////////////////////////////////////
 
 }
-

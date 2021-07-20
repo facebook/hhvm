@@ -137,7 +137,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
       $return_var = -1;
       tlog(exec($cmd, inout $output, inout $return_var));
     }
-    $repoConfig .=
+    $repoConfig =
       " -vRepo.Path=".ServerUtilServerTests::$repo_builds[$repoKey]."/hhvm.hhbc".
       " -vRepo.Authoritative=true";
   } else {

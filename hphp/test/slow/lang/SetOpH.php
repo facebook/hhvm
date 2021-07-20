@@ -31,7 +31,7 @@ foreach ($lefts as $left) {
     var_dump($a);
 
     echo "  . ";
-    $a = $left;
+    $a = (string)$left;
     var_dump($a .= (string)($right));
     var_dump($a);
 

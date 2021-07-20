@@ -31,10 +31,10 @@ $oper2 = varray[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", varray[], var
 
 foreach ($oper1 as $e1)
 {
-    $t1 = HH\is_any_array($e1) ? 'Array' : $e1;
+    $t1 = HH\is_any_array($e1) ? 'Array' : (string)$e1;
     foreach ($oper2 as $e2)
     {
-        $t2 = HH\is_any_array($e2) ? 'Array' : $e2;
+        $t2 = HH\is_any_array($e2) ? 'Array' : (string)$e2;
         echo "{$t1} ==   {$t2}  result: "; var_dump($e1 == $e2);
         echo "{$t1} !=   {$t2}  result: "; var_dump($e1 != $e2);
         echo "{$t1} ===  {$t2}  result: "; var_dump($e1 === $e2);
@@ -77,10 +77,10 @@ $oper2 = varray[0, 100, -3.4, TRUE, FALSE, NULL, "", "123", "abc", varray[], var
 
 foreach ($oper1 as $e1)
 {
-    $t1 = HH\is_any_array($e1) ? 'Array' : $e1;
+    $t1 = HH\is_any_array($e1) ? 'Array' : (string)$e1;
     foreach ($oper2 as $e2)
     {
-        $t2 = HH\is_any_array($e2) ? 'Array' : $e2;
+        $t2 = HH\is_any_array($e2) ? 'Array' : (string)$e2;
         echo "{$t1} ==   {$t2}  result: "; var_dump($e1 == $e2);
         echo "{$t1} !=   {$t2}  result: "; var_dump($e1 != $e2);
         echo "{$t1} ===  {$t2}  result: "; var_dump($e1 === $e2);
@@ -100,10 +100,10 @@ $oper2 = varray[0, 10, -3.4, TRUE, FALSE, NULL, "", "123", "abc", varray[], varr
 
 foreach ($oper1 as $e1)
 {
-    $t1 = HH\is_any_array($e1) ? 'Array' : $e1;
+    $t1 = HH\is_any_array($e1) ? 'Array' : (string)$e1;
     foreach ($oper2 as $e2)
     {
-        $t2 = HH\is_any_array($e2) ? 'Array' : $e2;
+        $t2 = HH\is_any_array($e2) ? 'Array' : (string)$e2;
         echo "{$t1} ==   {$t2}  result: "; var_dump($e1 == $e2);
         echo "{$t1} !=   {$t2}  result: "; var_dump($e1 != $e2);
         echo "{$t1} ===  {$t2}  result: "; var_dump($e1 === $e2);
@@ -123,10 +123,10 @@ $oper2 = varray[varray[10,20.0], varray[10,20,30], darray["red"=>0,"green"=>0], 
 
 foreach ($oper1 as $e1)
 {
-    $t1 = HH\is_any_array($e1) ? 'Array' : $e1;
+    $t1 = HH\is_any_array($e1) ? 'Array' : (string)$e1;
     foreach ($oper2 as $e2)
     {
-        $t2 = HH\is_any_array($e2) ? 'Array' : $e2;
+        $t2 = HH\is_any_array($e2) ? 'Array' : (string)$e2;
         echo "{$t1} ==   {$t2}  result: "; var_dump($e1 == $e2);
         echo "{$t1} !=   {$t2}  result: "; var_dump($e1 != $e2);
         echo "{$t1} ===  {$t2}  result: "; var_dump($e1 === $e2);

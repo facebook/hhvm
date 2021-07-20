@@ -35,6 +35,8 @@ foreach ($oper as $e1)
 {
     foreach ($oper as $e2)
     {
+        $e1 = (string)$e1;
+        $e2 = (string)$e2;
         echo ">$e1< . >$e2<, result: "; var_dump($e1 . $e2);
     }
     echo "-------------------------------------\n";

@@ -15,8 +15,8 @@ print class_exists('test2')
 false
 <?hh
 class test2 {
-  public $a;
-  private $b;
+  public $a = 0;
+  private $b = 0;
   public function ab() {
     return $this->a . ":" . $this->b;
   }
@@ -42,7 +42,7 @@ Hit fatal : Cannot access protected property
     #2 include(), called at [:0]
 
 print $eval2->ab()
-"3:"
+"3:0"
 set bac on
 BypassAccessCheck(bac) set to on.
 All code executed from debugger is bypassing access check!

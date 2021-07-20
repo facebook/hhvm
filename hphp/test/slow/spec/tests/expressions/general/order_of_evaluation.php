@@ -129,7 +129,7 @@ function main_entry(): void {
   echo '  finally, $i = '.$i."\n";
   foreach ($values as $a)
   {
-      echo "$a ";
+      echo (string)$a." ";
   }
   echo "\n";
 
@@ -148,7 +148,7 @@ function main_entry(): void {
   echo 'f(10, 12) + g(15) = '.(f(10, 12) + g(15))."\n";
   echo 'f(10, 12) - g(15) = '.(f(10, 12) - g(15))."\n";
   echo 'f(10, 12) * g(15) = '.(f(10, 12) * g(15))."\n";
-  echo 'f(10, 12) / g(15) = '.(f(10, 12) / g(15))."\n";
+  echo 'f(10, 12) / g(15) = '.(string)(f(10, 12) / g(15))."\n";
 
   $values = varray[0, 1, 2, 3, 4, 5, 6];
   var_dump($values);

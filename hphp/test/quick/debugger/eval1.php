@@ -1,8 +1,8 @@
 <?hh
 
 class cls {
-  public $pub;
-  private $pri;
+  public $pub = 0;
+  private $pri = 0;
   public function __construct() {
     $this->pub = 11;
     $this->pri = 12;

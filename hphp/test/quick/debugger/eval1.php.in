@@ -7,8 +7,8 @@ print $eval1
 print class_exists('test2')
 <?hh
 class test2 {
-  public $a;
-  private $b;
+  public $a = 0;
+  private $b = 0;
   public function ab() {
     return $this->a . ":" . $this->b;
   }

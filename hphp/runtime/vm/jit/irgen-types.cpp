@@ -287,7 +287,7 @@ void verifyTypeImpl(IRGS& env,
       return;
     case AnnotAction::RecordCheck: {
       assertx(valType <= TRecord);
-      auto const rec = Unit::lookupUniqueRecDesc(tc.typeName());
+      auto const rec = RecordDesc::lookupUnique(tc.typeName());
       auto const isPersistent = recordHasPersistentRDS(rec);
       auto const checkRecDesc = isPersistent ?
         cns(env, rec) : ldRecDescSafe(env, tc.typeName());

@@ -456,8 +456,8 @@ Array getAlias(TSEnv& env, const String& aliasName) {
 
   auto persistentTA = true;
   auto typeAlias = env.allow_partial
-    ? Unit::lookupTypeAlias(aliasName.get(), &persistentTA)
-    : Unit::loadTypeAlias(aliasName.get(), &persistentTA);
+    ? TypeAlias::lookup(aliasName.get(), &persistentTA)
+    : TypeAlias::load(aliasName.get(), &persistentTA);
   if (!typeAlias) {
     env.partial = true;
     return Array::CreateDict();

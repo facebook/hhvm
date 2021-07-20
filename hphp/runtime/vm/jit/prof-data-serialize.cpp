@@ -587,7 +587,7 @@ RecordDesc* read_record_internal(ProfDataDeserializer& ser) {
     ne->m_cachedRecordDesc.markUninit();
   }
 
-  auto const rec = Unit::defRecordDesc(preRec, true);
+  auto const rec = RecordDesc::def(preRec, true);
   return rec;
 }
 
@@ -603,7 +603,7 @@ const TypeAlias* read_typealias_internal(ProfDataDeserializer& ser) {
     read_record(ser);
   }
   auto const td = unit->lookupTypeAliasId(id);
-  return unit->defTypeAlias(td);
+  return TypeAlias::def(td);
 }
 
 /*

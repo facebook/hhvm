@@ -208,6 +208,51 @@ struct RecordDesc : AtomicCountable {
    * phase changes before that (see destroy()).
    */
   static RecordDesc* newRecordDesc(PreRecordDesc* preRec, RecordDesc* parent);
+
+  /*
+   * Define a new RecordDesc from `record' for this request.
+   *
+   * Raises a fatal error in various conditions (e.g., RecordDesc already
+   * defined, etc.) if `failIsFatal' is set).
+   *
+   * Also always fatals if a type alias already exists in this request with the
+   * same name as that of `record', regardless of the value of `failIsFatal'.
+   */
+  static RecordDesc* def(PreRecordDesc* preRecord, bool failIsFatal = true);
+
+  /*
+   * Look up the RecordDesc in this request with name `name', or with the name
+   * mapped to the NamedEntity `ne'.
+   *
+   * Return nullptr if the record is not yet defined in this request.
+   */
+  static RecordDesc* lookup(const NamedEntity* ne);
+  static RecordDesc* lookup(const StringData* name);
+
+  /*
+   * Finds a record which is guaranteed to be unique.
+   * The record has not necessarily been loaded in the current request.
+   *
+   * Return nullptr if there is no such record.
+   */
+  static const RecordDesc* lookupUnique(const StringData* name);
+
+  /*
+   * Autoload the RecordDesc with name `name' and bind it `ne' in this request.
+   *
+   * @requires: NamedEntity::get(name) == ne
+   */
+  static RecordDesc* loadMissing(const NamedEntity* ne,
+                                           const StringData* name);
+
+  /*
+   * Same as lookup(), but if `tryAutoload' is set, call and return loadMissing().
+   */
+  static RecordDesc* get(const NamedEntity* ne,
+                         const StringData* name,
+                         bool tryAutoload);
+  static RecordDesc* get(const StringData* name, bool tryAutoload);
+
   void destroy();
   /*
    * Called when the (atomic) refcount hits zero.
@@ -263,3 +308,7 @@ extern Mutex g_recordsMutex;
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#define incl_HPHP_VM_RECORD_INL_H_
+#include "hphp/runtime/vm/record-inl.h"
+#undef incl_HPHP_VM_RECORD_INL_H_

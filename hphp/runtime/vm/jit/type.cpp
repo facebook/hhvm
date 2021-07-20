@@ -1147,7 +1147,7 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::OptExactRecord: {
       auto base = TRecord;
 
-      if (auto const rec = Unit::lookupUniqueRecDesc(ty.recordName())) {
+      if (auto const rec = RecordDesc::lookupUnique(ty.recordName())) {
         if (ty.tag() == T::ExactRecord || ty.tag() == T::OptExactRecord) {
           base = Type::ExactRecord(rec);
         } else {
@@ -1226,7 +1226,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
     };
 
     bool persistent = false;
-    if (auto const alias = Unit::lookupTypeAlias(tc.typeName(), &persistent)) {
+    if (auto const alias = TypeAlias::lookup(tc.typeName(), &persistent)) {
       if (persistent && !alias->invalid) {
         auto ty = [&]{
           if (alias->klass) return handleCls(alias->klass);

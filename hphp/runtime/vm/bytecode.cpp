@@ -1246,7 +1246,7 @@ template<typename CreatorFn, typename PushFn>
 void newRecordImpl(const StringData* s,
                    const imm_array<int32_t>& ids,
                    CreatorFn creatorFn, PushFn pushFn) {
-  auto rec = Unit::getRecordDesc(s, true);
+  auto rec = RecordDesc::get(s, true);
   if (!rec) {
     raise_error(Strings::UNKNOWN_RECORD, s->data());
   }

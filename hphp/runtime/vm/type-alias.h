@@ -62,6 +62,10 @@ struct PreTypeAlias {
   std::pair<int,int> getLocation() const {
     return std::make_pair(line0, line1);
   }
+
+  bool isPersistent() const {
+    return attrs & AttrPersistent;
+  }
 };
 
 
@@ -112,6 +116,35 @@ struct TypeAlias {
   const Unit* unit() const { return m_preTypeAlias->unit; }
   UserAttributeMap userAttrs() const { return m_preTypeAlias->userAttrs; }
   Array typeStructure() const { return m_preTypeAlias->typeStructure; }
+
+  /*
+   * Define the type alias given by `id', binding it to the appropriate
+   * NamedEntity for this request.
+   *
+   * Raises a fatal error if type alias already defined or cannot be defined
+   * unless failIsFatal is unset
+   */
+  static const TypeAlias* def(const PreTypeAlias* thisType, bool failIsFatal = true);
+
+  /*
+   * Look up without autoloading a type alias named `name'. Returns nullptr
+   * if one cannot be found.
+   *
+   * If the type alias is found and `persistent' is provided, it will be set to
+   * whether or not the TypeAlias's RDS handle is persistent.
+   */
+  static const TypeAlias* lookup(const StringData* name,
+                                 bool* persistent = nullptr);
+
+  /*
+   * Look up or attempt to autoload a type alias named `name'. Returns nullptr
+   * if one cannot be found or autoloaded.
+   *
+   * If the type alias is found and `persistent' is provided, it will be set to
+   * whether or not the TypeAlias's RDS handle is persistent.
+   */
+  static const TypeAlias* load(const StringData* name,
+                               bool* persistent = nullptr);
 
 private:
   const PreTypeAlias* m_preTypeAlias{nullptr};

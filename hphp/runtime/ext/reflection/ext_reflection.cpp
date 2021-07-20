@@ -568,7 +568,7 @@ Array implTypeStructure(const Variant& cls_or_obj,
   if (!cns_sd) {
     auto name = cls_or_obj.toString();
 
-    auto const typeAlias = Unit::loadTypeAlias(name.get());
+    auto const typeAlias = TypeAlias::load(name.get());
 
     if (!typeAlias) {
       raise_error("Non-existent type alias %s", name.get()->data());
@@ -2080,7 +2080,7 @@ const StaticString s_ReflectionTypeAliasHandle("ReflectionTypeAliasHandle");
 // helper for __construct:
 // caller throws exception when return value is false
 static String HHVM_METHOD(ReflectionTypeAlias, __init, const String& name) {
-  auto const typeAlias = Unit::loadTypeAlias(name.get());
+  auto const typeAlias = TypeAlias::load(name.get());
 
   if (!typeAlias) {
     return empty_string();

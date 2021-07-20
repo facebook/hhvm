@@ -341,24 +341,6 @@ inline const UserAttributeMap& Unit::fileAttributes() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// RecordDesc lookup.
-
-inline RecordDesc* Unit::lookupRecordDesc(const NamedEntity* ne) {
-  return ne->getCachedRecordDesc();
-}
-
-inline RecordDesc* Unit::lookupRecordDesc(const StringData* name) {
-  return lookupRecordDesc(NamedEntity::get(name));
-}
-
-inline const RecordDesc* Unit::lookupUniqueRecDesc(const StringData* name) {
-  auto ne = NamedEntity::get(name);
-  auto rec = ne->recordList();
-  if (LIKELY(rec && (rec->attrs() & AttrUnique))) return rec;
-  return nullptr;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Merge.
 
 inline bool Unit::isEmpty() const {

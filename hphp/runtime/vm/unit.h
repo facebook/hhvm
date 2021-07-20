@@ -422,55 +422,6 @@ public:
   template<class Fn> void forEachFunc(Fn fn) const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // RecordDesc lookup.                                               [static]
-
-  /*
-   * Define a new RecordDesc from `record' for this request.
-   *
-   * Raises a fatal error in various conditions (e.g., RecordDesc already
-   * defined, etc.) if `failIsFatal' is set).
-   *
-   * Also always fatals if a type alias already exists in this request with the
-   * same name as that of `record', regardless of the value of `failIsFatal'.
-   */
-  static RecordDesc* defRecordDesc(PreRecordDesc* record,
-                                   bool failIsFatal = true);
-
-  /*
-   * Look up the RecordDesc in this request with name `name', or with the name
-   * mapped to the NamedEntity `ne'.
-   *
-   * Return nullptr if the record is not yet defined in this request.
-   */
-  static RecordDesc* lookupRecordDesc(const NamedEntity* ne);
-  static RecordDesc* lookupRecordDesc(const StringData* name);
-
-  /*
-   * Finds a record which is guaranteed to be unique.
-   * The record has not necessarily been loaded in the current request.
-   *
-   * Return nullptr if there is no such record.
-   */
-  static const RecordDesc* lookupUniqueRecDesc(const StringData* name);
-
-  /*
-   * Autoload the RecordDesc with name `name' and bind it `ne' in this request.
-   *
-   * @requires: NamedEntity::get(name) == ne
-   */
-  static RecordDesc* loadMissingRecordDesc(const NamedEntity* ne,
-                                           const StringData* name);
-
-  /*
-   * Same as lookupRecordDesc(), but if `tryAutoload' is set, call and return
-   * loadMissingRecordDesc().
-   */
-  static RecordDesc* getRecordDesc(const NamedEntity* ne,
-                                   const StringData* name,
-                                   bool tryAutoload);
-  static RecordDesc* getRecordDesc(const StringData* name, bool tryAutoload);
-
-  /////////////////////////////////////////////////////////////////////////////
   // Constants.
 
   folly::Range<Constant*> constants();
@@ -523,37 +474,6 @@ public:
   folly::Range<PreTypeAlias*> typeAliases();
   folly::Range<const PreTypeAlias*> typeAliases() const;
 
-  /*
-   * Look up without autoloading a type alias named `name'. Returns nullptr
-   * if one cannot be found.
-   *
-   * If the type alias is found and `persistent' is provided, it will be set to
-   * whether or not the TypeAlias's RDS handle is persistent.
-   */
-  static const TypeAlias* lookupTypeAlias(const StringData* name,
-                                          bool* persistent = nullptr);
-
-  /*
-   * Look up or attempt to autoload a type alias named `name'. Returns nullptr
-   * if one cannot be found or autoloaded.
-   *
-   * If the type alias is found and `persistent' is provided, it will be set to
-   * whether or not the TypeAlias's RDS handle is persistent.
-   */
-  static const TypeAlias* loadTypeAlias(const StringData* name,
-                                        bool* persistent = nullptr);
-
-  /*
-   * Define the type alias given by `id', binding it to the appropriate
-   * NamedEntity for this request.
-   *
-   * Raises a fatal error if type alias already defined or cannot be defined
-   * unless failIsFatal is unset
-   *
-   * Returns:
-   *   true if we succeeded otherwise false
-   */
-  const TypeAlias* defTypeAlias(const PreTypeAlias* typeAlias, bool failIsFatal = true);
 
   /////////////////////////////////////////////////////////////////////////////
   // File attributes.

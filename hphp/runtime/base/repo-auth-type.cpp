@@ -432,7 +432,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     // fallthrough
   case T::SubRecord:
     {
-      auto const rec = Unit::lookupRecordDesc(ty.recordName());
+      auto const rec = RecordDesc::lookup(ty.recordName());
       if (!rec) return false;
       return tv.m_type == KindOfRecord &&
              tv.m_data.prec->record()->recordDescOf(rec);
@@ -443,7 +443,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     // fallthrough
   case T::ExactRecord:
     {
-      auto const rec = Unit::lookupRecordDesc(ty.recordName());
+      auto const rec = RecordDesc::lookup(ty.recordName());
       if (!rec) return false;
       return tv.m_type == KindOfRecord && tv.m_data.prec->record() == rec;
     }

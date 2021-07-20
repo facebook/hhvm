@@ -225,7 +225,7 @@ getNamedTypeWithAutoload(const NamedEntity* ne,
   if (auto def = ne->getCachedTypeAlias()) {
     return def;
   }
-  if (auto rec = Unit::lookupRecordDesc(ne)) {
+  if (auto rec = RecordDesc::lookup(ne)) {
     return rec;
   }
   Class *klass = nullptr;
@@ -238,7 +238,7 @@ getNamedTypeWithAutoload(const NamedEntity* ne,
       if (auto def = ne->getCachedTypeAlias()) {
         return def;
       }
-      if (auto rec = Unit::lookupRecordDesc(ne)) {
+      if (auto rec = RecordDesc::lookup(ne)) {
         return rec;
       }
       klass = Class::lookup(ne);
@@ -441,7 +441,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
     if (auto const def = m_namedEntity->getCachedTypeAlias()) {
       return def;
     }
-    if (auto const rec = Unit::lookupRecordDesc(m_namedEntity)) {
+    if (auto const rec = RecordDesc::lookup(m_namedEntity)) {
       return rec;
     }
     return Class::lookup(m_namedEntity);

@@ -499,7 +499,7 @@ void emitNewPair(IRGS& env) {
 void emitNewRecordImpl(IRGS& env, const StringData* name,
                        const ImmVector& immVec,
                        Opcode newRecordOp) {
-  auto const recDesc = Unit::lookupUniqueRecDesc(name);
+  auto const recDesc = RecordDesc::lookupUnique(name);
   auto const isPersistent = recordHasPersistentRDS(recDesc);
   auto const cachedRec = isPersistent ?
     cns(env, recDesc) : gen(env, LdRecDescCached, RecNameData{name});

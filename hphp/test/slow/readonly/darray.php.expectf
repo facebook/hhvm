@@ -1,1 +1,1 @@
-Fatal error: Cannot change variable mutability of `$mut` after it has been initially defined in %s on line 14
+Fatal error: This expression is readonly, its members cannot be modified in %s on line 15

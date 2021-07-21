@@ -1,1 +1,1 @@
-Fatal error: Cannot modify a member of a readonly variable in %s on line 6
+Fatal error: This expression is readonly, its members cannot be modified in %s on line 6

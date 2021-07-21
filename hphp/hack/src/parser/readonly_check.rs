@@ -154,6 +154,14 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         // FWIW, this does not appear on the aast at this stage(it only appears after naming in typechecker),
         // but we can handle it for future in case that changes
         This => context.this_ty,
+        ArrayGet(ag) => {
+            let (expr, _) = &**ag;
+            rty_expr(context, &expr)
+        }
+        Await(expr) => {
+            let expr = &**expr;
+            rty_expr(context, &expr)
+        }
         // Primitive types are mutable
         Null | True | False | Omitted => Rty::Mutable,
         Int(_) | Float(_) | String(_) | String2(_) | PrefixedString(_) => Rty::Mutable,

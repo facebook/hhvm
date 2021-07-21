@@ -11,5 +11,5 @@ function main() {
   $ro = readonly new P(1);
   $mut = new P(1);
   $p = Vector {$ro, $mut};
-  $mut = $p; // error, assigning readonly value to mutable
+  $p[1]->i = 4; // error, $p[1] is readonly because $p is readonly
 }

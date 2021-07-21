@@ -1039,7 +1039,7 @@ pub fn user_ctx_should_be_caps(ctx_name: &str) -> Error {
     ))
 }
 pub const assignment_to_readonly: Error =
-    Cow::Borrowed("Cannot modify a member of a readonly variable");
+    Cow::Borrowed("This expression is readonly, its members cannot be modified");
 
 pub fn invalid_readonly(r1: &str, r2: &str, reason: &str) -> Error {
     Cow::Owned(format!(

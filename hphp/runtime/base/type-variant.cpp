@@ -92,6 +92,37 @@ Variant::Variant(const_variant_ref v) noexcept {
   implCopyConstruct(*v.rval(), *this);
 }
 
+Variant Variant::fromDynamic(const folly::dynamic& dy) {
+  if (dy.isNull()) {
+    return Variant{Variant::NullInit{}};
+  } else if (dy.isInt()) {
+    return {dy.getInt()};
+  } else if (dy.isDouble()) {
+    return {dy.getDouble()};
+  } else if (dy.isString()) {
+    return {dy.getString()};
+  } else if (dy.isBool()) {
+    return {dy.getBool()};
+  } else if (dy.isArray()) {
+    VecInit ret{dy.size()};
+    for (auto const& v : dy) {
+      ret.append(Variant::fromDynamic(v));
+    }
+    return ret.toVariant();
+  } else {
+    always_assert(dy.isObject());
+    DictInit ret{dy.size()};
+    for (auto const& [k, v] : dy.items()) {
+      if (k.isString()) {
+        ret.set(String{k.getString()}, Variant::fromDynamic(v));
+      } else if (k.isInt()) {
+        ret.set(k.getInt(), Variant::fromDynamic(v));
+      }
+    }
+    return ret.toVariant();
+  }
+}
+
 namespace {
 
 void vecReleaseWrapper(ArrayData* ad) noexcept {

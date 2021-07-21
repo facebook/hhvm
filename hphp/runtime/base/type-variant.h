@@ -34,6 +34,8 @@
 #include <algorithm>
 #include <type_traits>
 
+#include <folly/dynamic.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -604,6 +606,11 @@ struct Variant : private TypedValue {
   void setNull() noexcept {
     tvSetNull(*asTypedValue());
   }
+
+  /**
+   * Create from a JSON-like dynamic object
+   */
+  static Variant fromDynamic(const folly::dynamic& dy);
 
   static Variant attach(TypedValue tv) noexcept {
     return Variant{tv, Attach{}};

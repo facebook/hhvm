@@ -293,4 +293,45 @@ function all_functions(): dict<string, string>;
 function all_constants(): dict<string, string>;
 function all_type_aliases(): dict<string, string>;
 
+type AttributeData = shape(
+  'name' => string,
+  'args' => vec<?arraykey>,
+);
+
+type MethodData = shape(
+  'name' => string,
+  'attributes' => vec<AttributeData>,
+);
+
+type TypeData = shape(
+  'name' => string,
+  'kind' => TypeKind,
+  'flags' => int,
+  'baseTypes' => vec<string>,
+  'requireExtends' => vec<string>,
+  'requireImplements' => vec<string>,
+  'attributes' => vec<AttributeData>,
+  'methods' => vec<MethodData>,
+);
+
+type FileData = shape(
+  'types' => vec<TypeData>,
+  'functions' => vec<string>,
+  'constants' => vec<string>,
+  'attributes' => vec<AttributeData>,
+  'sha1sum' => string,
+);
+
+/**
+ * For each path/hash pair in `$pathsAndHashes`, parse the file on the
+ * filesystem, or lookup the file with the given SHA1 hash, and return a dict
+ * mapping each path to its contents.
+ *
+ * Each given path should be relative to the given `$root`.
+ */
+function extract(
+  vec<(string, ?string)> $pathsAndHashes,
+  ?string $root = null,
+): dict<string, ?FileData>;
+
 } // namespace HH\Facts

@@ -33,6 +33,7 @@
 
 #include <watchman/cppclient/WatchmanClient.h>
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -40,16 +41,19 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/ext_facts.h"
+#include "hphp/runtime/ext/facts/fact-extractor.h"
 #include "hphp/runtime/ext/facts/facts-store.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/watchman.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/hash-map.h"
@@ -248,6 +252,119 @@ struct WatchmanAutoloadMapKey {
   DBData m_dbData;
 };
 
+// Code to coerce a FileFacts into a userspace shape.
+
+#define X(str) const StaticString s_##str{#str};
+// Attribute
+X(name)
+X(args)
+
+// MethodDetails
+X(attributes)
+
+// TypeDetails
+X(kind)
+X(flags)
+X(baseTypes)
+X(requireExtends)
+X(requireImplements)
+X(methods)
+
+// FileFacts
+X(types)
+X(functions)
+X(constants)
+X(sha1sum)
+#undef X
+
+template <typename T> Array makeVec(const std::vector<T>& types) {
+  VecInit ret{types.size()};
+  for (auto const& type : types) {
+    ret.append(type);
+  }
+  return ret.toArray();
+}
+
+Array makeVec(const std::vector<folly::dynamic>& args) {
+  VecInit ret{args.size()};
+  for (auto const& arg : args) {
+    ret.append(Variant::fromDynamic(arg));
+  }
+  return ret.toArray();
+}
+
+Array makeShape(const Attribute& attr) {
+  return make_dict_array(
+      StrNR{s_name},
+      String{std::string_view{attr.m_name}},
+      StrNR{s_args},
+      makeVec(attr.m_args));
+}
+
+Array makeVec(const std::vector<Attribute>& attrs) {
+  VecInit ret{attrs.size()};
+  for (auto const& attr : attrs) {
+    ret.append(makeShape(attr));
+  }
+  return ret.toArray();
+}
+
+Array makeShape(const MethodDetails& method) {
+  size_t retSize = 2;
+  DictInit ret{retSize};
+  ret.set(StrNR{s_name}, method.m_name);
+  ret.set(StrNR{s_attributes}, makeVec(method.m_attributes));
+  return ret.toArray();
+}
+
+Array makeVec(const std::vector<MethodDetails>& methods) {
+  VecInit ret{methods.size()};
+  for (auto const& method : methods) {
+    ret.append(makeShape(method));
+  }
+  return ret.toArray();
+}
+
+Array makeShape(const TypeDetails& type) {
+  size_t retSize = 8;
+  DictInit ret{retSize};
+  ret.set(StrNR{s_name}, type.m_name);
+  ret.set(StrNR{s_kind}, String{toString(type.m_kind)});
+  ret.set(StrNR{s_flags}, type.m_flags);
+  ret.set(StrNR{s_baseTypes}, makeVec(type.m_baseTypes));
+  ret.set(StrNR{s_attributes}, makeVec(type.m_attributes));
+  ret.set(StrNR{s_requireExtends}, makeVec(type.m_requireExtends));
+  ret.set(StrNR{s_requireImplements}, makeVec(type.m_requireImplements));
+  ret.set(StrNR{s_methods}, makeVec(type.m_methods));
+  return ret.toArray();
+}
+
+Array makeVec(const std::vector<TypeDetails>& types) {
+  VecInit ret{types.size()};
+  for (auto const& type : types) {
+    ret.append(makeShape(type));
+  }
+  return ret.toArray();
+}
+
+Array makeShape(const FileFacts& facts) {
+  return make_dict_array(
+      StrNR{s_types},
+      makeVec(facts.m_types),
+
+      StrNR{s_functions},
+      makeVec(facts.m_functions),
+
+      StrNR{s_constants},
+      makeVec(facts.m_constants),
+
+      StrNR{s_attributes},
+      makeVec(facts.m_attributes),
+
+      StrNR{s_sha1sum},
+      String{facts.m_sha1hex});
+}
+
 } // namespace
 } // namespace Facts
 } // namespace HPHP
@@ -408,6 +525,7 @@ struct Facts final : Extension {
     HHVM_NAMED_FE(HH\\Facts\\all_functions, HHVM_FN(facts_all_functions));
     HHVM_NAMED_FE(HH\\Facts\\all_constants, HHVM_FN(facts_all_constants));
     HHVM_NAMED_FE(HH\\Facts\\all_type_aliases, HHVM_FN(facts_all_type_aliases));
+    HHVM_NAMED_FE(HH\\Facts\\extract, HHVM_FN(facts_extract));
     loadSystemlib();
 
     if (!RuntimeOption::AutoloadEnabled) {
@@ -843,6 +961,74 @@ Array HHVM_FUNCTION(facts_all_constants) {
 }
 Array HHVM_FUNCTION(facts_all_type_aliases) {
   return Facts::getFactsOrThrow().getAllTypeAliases();
+}
+
+Array HHVM_FUNCTION(
+    facts_extract,
+    const Array& alteredPathsAndHashesArr,
+    const Variant& maybeRoot) {
+  // Get the root of the repository
+  auto root = [&]() -> folly::fs::path {
+    if (maybeRoot.isString()) {
+      return {std::string{maybeRoot.toStrNR().get()->slice()}};
+    }
+    auto* repoOptions = g_context->getRepoOptionsForRequest();
+    if (!repoOptions) {
+      SystemLib::throwInvalidOperationExceptionObject(
+          "Could not find a root directory for the current request");
+    }
+    return Facts::getRepoRoot(*repoOptions);
+  }();
+
+  // Coerce the given vec<(string, string)> into C++ paths and hashes
+  std::vector<Facts::PathAndHash> alteredPathsAndHashes;
+  alteredPathsAndHashes.reserve(alteredPathsAndHashesArr.size());
+  std::vector<String> alteredPathStrs;
+  alteredPathStrs.reserve(alteredPathsAndHashesArr.size());
+  IterateV(alteredPathsAndHashesArr.get(), [&](TypedValue v) {
+    Facts::PathAndHash pathAndHash;
+    if (UNLIKELY(!tvIsArrayLike(v))) {
+      SystemLib::throwTypeAssertionExceptionObject(
+          "HH\\Facts\\extract expects vec<(string, ?string)>");
+    }
+    size_t i = 0;
+    IterateV(v.m_data.parr, [&](TypedValue pathOrHash) {
+      if (i == 0) {
+        if (UNLIKELY(!tvIsString(pathOrHash))) {
+          SystemLib::throwTypeAssertionExceptionObject(
+              "HH\\Facts\\extract expects vec<(string, ?string)>");
+        }
+        alteredPathStrs.push_back(String::attach(pathOrHash.m_data.pstr));
+        pathAndHash.m_path = {std::string{pathOrHash.m_data.pstr->slice()}};
+      } else if (i == 1) {
+        if (tvIsString(pathOrHash)) {
+          pathAndHash.m_hash = {std::string{pathOrHash.m_data.pstr->slice()}};
+        } else if (!tvIsNull(pathOrHash)) {
+          SystemLib::throwTypeAssertionExceptionObject(
+              "HH\\Facts\\extract expects vec<(string, ?string)>");
+        }
+      }
+      ++i;
+    });
+    alteredPathsAndHashes.push_back(std::move(pathAndHash));
+  });
+
+  // Extract facts
+  auto alteredPathFacts = Facts::facts_from_paths(root, alteredPathsAndHashes);
+
+  // Convert extracted Facts to HHVM userspace objects
+  DictInit factsArr{alteredPathsAndHashes.size()};
+  for (int64_t i = 0; i < alteredPathFacts.size(); ++i) {
+    auto const& facts = alteredPathFacts[i];
+    if (LIKELY(facts.hasValue())) {
+      factsArr.set(
+          std::move(alteredPathStrs[i]), tvReturn(Facts::makeShape(*facts)));
+    } else {
+      // Set the path's facts to null on failure. This is likely a parse error.
+      factsArr.set(std::move(alteredPathStrs[i]), Variant{});
+    }
+  }
+  return factsArr.toArray();
 }
 
 } // namespace HPHP

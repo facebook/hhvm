@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "hphp/util/optional.h"
+
 #include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/util/optional.h"

@@ -52,4 +52,9 @@ Array HHVM_FUNCTION(facts_all_functions);
 Array HHVM_FUNCTION(facts_all_constants);
 Array HHVM_FUNCTION(facts_all_type_aliases);
 
+Array HHVM_FUNCTION(
+    facts_extract,
+    const Array& alteredPathsAndHashesArr,
+    const Variant& maybeRoot);
+
 } // namespace HPHP

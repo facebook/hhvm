@@ -20,6 +20,7 @@
 
 #include <folly/dynamic.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
+#include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
 
 #include "hphp/runtime/base/program-functions.h"
@@ -223,36 +224,35 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
   for (auto const& pathAndHash : pathsAndHashes) {
     assertx(pathAndHash.m_path.is_relative());
     PathAndHash absPathAndHash{root / pathAndHash.m_path, pathAndHash.m_hash};
-    auto factsFromCacheFuture =
-        [&exec, &extractor, absPathAndHash]() -> folly::Future<folly::dynamic> {
-      if (UNLIKELY(!absPathAndHash.m_hash)) {
-        // We don't know the file's hash yet, so we don't know which key to use
-        // to query memcache. We'll try to extract facts from disk instead.
-        throw FactsExtractionExc{"No hash provided"};
-      }
-      return extractor->get(absPathAndHash)
-          .via(&exec)
-          .thenValue(
-              [absPathAndHash](std::string&& factsJson) -> folly::dynamic {
-                auto facts = parse_json(factsJson);
-                auto const& hash = *absPathAndHash.m_hash;
-                if (UNLIKELY(facts.at("sha1sum").getString() != hash)) {
-                  // The hash we got out of memcache doesn't match the hash
-                  // we expected. We'll try to extract facts from disk
-                  // instead.
-                  throw FactsExtractionExc{folly::sformat(
-                      "Error extracting {} from memcache: hash '{}' != '{}'",
-                      absPathAndHash.m_path.native(),
-                      facts.at("sha1sum").getString(),
-                      hash)};
-                }
-                return facts;
-              });
-    }();
-    factsFutures.emplace_back(
-        std::move(factsFromCacheFuture)
-            .thenTry([absPathAndHash = std::move(absPathAndHash)](
-                         folly::Try<folly::dynamic>&& facts) {
+    factsFutures.push_back(
+        folly::via(
+            &exec,
+            [&extractor, absPathAndHash]() {
+              if (UNLIKELY(!absPathAndHash.m_hash)) {
+                // We don't know the file's hash yet, so we don't know
+                // which key to use to query memcache. We'll try to extract
+                // facts from disk instead.
+                throw FactsExtractionExc{"No hash provided"};
+              }
+              return extractor->get(absPathAndHash);
+            })
+            .thenValue(
+                [absPathAndHash](std::string&& factsJson) -> folly::dynamic {
+                  auto facts = parse_json(factsJson);
+                  auto const& hash = *absPathAndHash.m_hash;
+                  if (UNLIKELY(facts.at("sha1sum").getString() != hash)) {
+                    // The hash we got out of memcache doesn't match the hash
+                    // we expected. We'll try to extract facts from disk
+                    // instead.
+                    throw FactsExtractionExc{folly::sformat(
+                        "Error extracting {} from memcache: hash '{}' != '{}'",
+                        absPathAndHash.m_path.native(),
+                        facts.at("sha1sum").getString(),
+                        hash)};
+                  }
+                  return facts;
+                })
+            .thenTry([absPathAndHash](folly::Try<folly::dynamic>&& facts) {
               if (facts.hasValue()) {
                 return *std::move(facts);
               } else {

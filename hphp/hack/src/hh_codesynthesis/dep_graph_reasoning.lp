@@ -176,6 +176,18 @@ invokes_static_method(TypeX, ClassName, MethodName) :-
 % If TypeX is an interface, it can't invoke a static method.
 :- static_method(_, _, TypeX), interface(TypeX).
 
+% $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+% Fun Dependency Edge <Fun, Type>, <Fun, Fun>.
+% =============================================================================
+% TypeX could be either a function or a class to invoke FnName.
+invokes_function(TypeX, FnName) :- invoked_by(FnName, TypeX).
+
+% $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+% Fun Constraints
+% =============================================================================
+% If TypeX is an interface, it can't invoke a function.
+:- invoked_by(_, TypeX), interface(TypeX).
+
 
 #show class/1.
 #show interface/1.
@@ -185,6 +197,8 @@ invokes_static_method(TypeX, ClassName, MethodName) :-
 #show implements/2.
 
 #show has_method_with_parameter/2.
+#show invokes_function/2.
+
 #show add_method/2.
 #show add_static_method/2.
 

@@ -425,6 +425,51 @@ class DoReasoningTest(unittest.TestCase):
         hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
+    def test_fun_type_dependencies(self) -> None:
+        # This one covered the 'invokes_function' with 'Type'.
+        exp = [
+            'class("A")',
+            'funcs("Fn")',
+            'interface("B")',
+            'invokes_function("A","Fn")',
+        ]
+        rules = ['invoked_by("Fn", "A").' 'symbols("A"; "B").' 'funcs("Fn").']
+        raw_codegen = hh_codesynthesis.CodeGenerator()
+        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        self.assertListEqual(sorted(str(raw_codegen).split()), exp)
+
+    def test_fun_fun_dependencies(self) -> None:
+        # This one covered the 'invokes_function' with 'Fun'.
+        exp = [
+            'class("A")',
+            'funcs("FnA")',
+            'funcs("FnB")',
+            'interface("B")',
+            'invokes_function("FnA","FnB")',
+        ]
+        rules = [
+            'invoked_by("FnB", "FnA").' 'symbols("A"; "B").' 'funcs("FnA"; "FnB").'
+        ]
+        raw_codegen = hh_codesynthesis.CodeGenerator()
+        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        self.assertListEqual(sorted(str(raw_codegen).split()), exp)
+
+    def test_fun_dependency_exception(self) -> None:
+        # This one covered the unsatifiable part, that we can't find an answer.
+        # Here we are forcing symbol("A") to get interface("A").
+        rules = [
+            'class("B").',
+            'invoked_by("Fn", "A").',
+            'interface("A").',
+            'symbols("A"; "B").',
+            'funcs("Fn").',
+        ]
+        raw_codegen = hh_codesynthesis.CodeGenerator()
+        with self.assertRaises(expected_exception=RuntimeError, msg="Unsatisfiable."):
+            hh_codesynthesis.do_reasoning(
+                additional_programs=rules, generator=raw_codegen
+            )
+
     def test_extends_dependency_with_rule_extraction(self) -> None:
         exp = [
             'add_method("A","foo")',

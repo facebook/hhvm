@@ -221,7 +221,16 @@ impl<'ast> Visitor<'ast> for Checker {
         } else {
             Rty::Mutable
         };
-        m.recurse(&mut Context::new(readonly_return), self)
+        let mut context = Context::new(readonly_return);
+
+        for p in m.params.iter() {
+            if let Some(_) = p.readonly {
+                context.add_local(&p.name, true)
+            } else {
+                context.add_local(&p.name, false)
+            }
+        }
+        m.recurse(&mut context, self)
     }
 
     fn visit_fun_(
@@ -234,7 +243,16 @@ impl<'ast> Visitor<'ast> for Checker {
         } else {
             Rty::Mutable
         };
-        f.recurse(&mut Context::new(readonly_return), self)
+        let mut context = Context::new(readonly_return);
+
+        for p in f.params.iter() {
+            if let Some(_) = p.readonly {
+                context.add_local(&p.name, true)
+            } else {
+                context.add_local(&p.name, false)
+            }
+        }
+        f.recurse(&mut context, self)
     }
 
     fn visit_expr(

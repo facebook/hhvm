@@ -322,7 +322,6 @@ RepoGlobalData get_global_data() {
   gd.EmitClassPointers = RuntimeOption::EvalEmitClassPointers;
   gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;
   gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
-  gd.IsCompatibleClsMethType = RuntimeOption::EvalIsCompatibleClsMethType;
   gd.RaiseClassConversionWarning =
     RuntimeOption::EvalRaiseClassConversionWarning;
   gd.ClassPassesClassname =
@@ -330,8 +329,6 @@ RepoGlobalData get_global_data() {
   gd.ClassnameNotices =
     RuntimeOption::EvalClassnameNotices;
   gd.ClassIsStringNotices = RuntimeOption::EvalClassIsStringNotices;
-  gd.RaiseClsMethConversionWarning =
-    RuntimeOption::EvalRaiseClsMethConversionWarning;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
   gd.NoticeOnCoerceForBitOp =
     RuntimeOption::EvalNoticeOnCoerceForBitOp;
@@ -510,11 +507,9 @@ int main(int argc, char** argv) try {
   RO::EvalEmitClassPointers                     = gd.EmitClassPointers;
   RO::EvalEmitClsMethPointers                   = gd.EmitClsMethPointers;
   RO::EvalIsVecNotices                          = gd.IsVecNotices;
-  RO::EvalIsCompatibleClsMethType               = gd.IsCompatibleClsMethType;
   RO::EvalRaiseClassConversionWarning           = gd.RaiseClassConversionWarning;
   RO::EvalClassPassesClassname                  = gd.ClassPassesClassname;
   RO::EvalClassnameNotices                      = gd.ClassnameNotices;
-  RO::EvalRaiseClsMethConversionWarning         = gd.RaiseClsMethConversionWarning;
   RO::EvalNoticeOnCoerceForBitOp                = gd.NoticeOnCoerceForBitOp;
   RO::StrictArrayFillKeys                       = gd.StrictArrayFillKeys;
   RO::EvalEnforceGenericsUB                     = gd.HardGenericsUB ? 2 : 1;

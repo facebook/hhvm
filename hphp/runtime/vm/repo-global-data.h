@@ -131,9 +131,6 @@ struct RepoGlobalData {
    */
   bool IsVecNotices = false;
 
-  /* Skip ClsMeth type refinement when this is true. */
-  bool IsCompatibleClsMethType = false;
-
   /* Whether implicit class conversions can raise a warning */
   bool RaiseClassConversionWarning = false;
 
@@ -145,9 +142,6 @@ struct RepoGlobalData {
 
   /* Whether checking is string on (lazy) classes can raise a notice */
   bool ClassIsStringNotices = false;
-
-  /* Whether implicit class meth conversions can raise a warning */
-  bool RaiseClsMethConversionWarning = false;
 
   /* Whether implicit coercions for concat/interp trigger logs/exceptions */
   int32_t NoticeOnCoerceForStrConcat = 0;
@@ -200,12 +194,10 @@ struct RepoGlobalData {
       (EmitClassPointers)
       (EmitClsMethPointers)
       (IsVecNotices)
-      (IsCompatibleClsMethType)
       (RaiseClassConversionWarning)
       (ClassPassesClassname)
       (ClassnameNotices)
       (ClassIsStringNotices)
-      (RaiseClsMethConversionWarning)
       (StrictArrayFillKeys)
       (NoticeOnCoerceForStrConcat)
       (NoticeOnCoerceForBitOp)

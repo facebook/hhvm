@@ -169,14 +169,11 @@ RepoGlobalData getGlobalData() {
   gd.EmitClassPointers = RuntimeOption::EvalEmitClassPointers;
   gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;
   gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
-  gd.IsCompatibleClsMethType = RuntimeOption::EvalIsCompatibleClsMethType;
   gd.RaiseClassConversionWarning =
     RuntimeOption::EvalRaiseClassConversionWarning;
   gd.ClassPassesClassname = RuntimeOption::EvalClassPassesClassname;
   gd.ClassnameNotices = RuntimeOption::EvalClassnameNotices;
   gd.ClassIsStringNotices = RuntimeOption::EvalClassIsStringNotices;
-  gd.RaiseClsMethConversionWarning =
-    RuntimeOption::EvalRaiseClsMethConversionWarning;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
   gd.NoticeOnCoerceForBitOp =
     RuntimeOption::EvalNoticeOnCoerceForBitOp;

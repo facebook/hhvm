@@ -1212,12 +1212,6 @@ struct RuntimeOption {
   /* When this flag is on, gettype for
    * classes and lazy classes outputs string. */                        \
   F(bool, ClassAsStringGetType, true)                                   \
-  /* false to skip type refinement for ClsMeth type at HHBBC. */        \
-  F(bool, IsCompatibleClsMethType, false)                               \
-  /* Raise warning if a ClsMeth type is compared to other types. */     \
-  F(bool, RaiseClsMethComparisonWarning, false)                         \
-  /* Raise warning when ClsMethDataRef is used as varray/vec. */        \
-  F(bool, RaiseClsMethConversionWarning, false)                         \
   /* Raise warning when strings are used as classes. */                 \
   F(bool, RaiseStrToClsConversionWarning, false)                        \
   F(bool, EmitMethCallerFuncPointers, false)                            \

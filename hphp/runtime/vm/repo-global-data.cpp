@@ -34,7 +34,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EnableArgsInBacktraces                    = EnableArgsInBacktraces;
   RO::EvalAbortBuildOnVerifyError               = AbortBuildOnVerifyError;
   RO::StrictArrayFillKeys                       = StrictArrayFillKeys;
-  RO::EvalIsCompatibleClsMethType               = IsCompatibleClsMethType;
   RO::EvalEmitClassPointers                     = EmitClassPointers;
   RO::EvalEmitClsMethPointers                   = EmitClsMethPointers;
   RO::EvalForbidDynamicCallsWithAttr            = ForbidDynamicCallsWithAttr;
@@ -42,7 +41,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalClassPassesClassname                  = ClassPassesClassname;
   RO::EvalClassnameNotices                      = ClassnameNotices;
   RO::EvalClassIsStringNotices                  = ClassIsStringNotices;
-  RO::EvalRaiseClsMethConversionWarning         = RaiseClsMethConversionWarning;
   RO::EvalNoticeOnCoerceForBitOp                = NoticeOnCoerceForBitOp;
   RO::EvalTraitConstantInterfaceBehavior        = TraitConstantInterfaceBehavior;
   RO::EvalBuildMayNoticeOnMethCallerHelperIsObject =
@@ -96,12 +94,10 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(EmitClassPointers);
   SHOW(EmitClsMethPointers);
   SHOW(IsVecNotices);
-  SHOW(IsCompatibleClsMethType);
   SHOW(RaiseClassConversionWarning);
   SHOW(ClassPassesClassname);
   SHOW(ClassnameNotices);
   SHOW(ClassIsStringNotices);
-  SHOW(RaiseClsMethConversionWarning);
   SHOW(StrictArrayFillKeys);
   SHOW(NoticeOnCoerceForBitOp);
   SHOW(TraitConstantInterfaceBehavior);

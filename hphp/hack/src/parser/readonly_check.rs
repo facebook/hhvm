@@ -18,7 +18,7 @@ use parser_core_types::{
 };
 use std::collections::HashMap;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 pub enum Rty {
     Readonly,
     Mutable,
@@ -27,13 +27,15 @@ pub enum Rty {
 struct Context {
     locals: HashMap<String, bool>,
     readonly_return: Rty,
+    this_ty: Rty,
 }
 
 impl Context {
-    fn new(readonly_ret: Rty) -> Self {
+    fn new(readonly_ret: Rty, this_ty: Rty) -> Self {
         Self {
             locals: HashMap::new(),
             readonly_return: readonly_ret,
+            this_ty,
         }
     }
 
@@ -85,6 +87,13 @@ fn ro_expr_list2<T>(context: &mut Context, exprs: &Vec<(T, Expr)>) -> Rty {
     }
 }
 
+fn ro_kind_to_rty(ro: Option<oxidized::ast_defs::ReadonlyKind>) -> Rty {
+    match ro {
+        Some(oxidized::ast_defs::ReadonlyKind::Readonly) => Rty::Readonly,
+        _ => Rty::Mutable,
+    }
+}
+
 fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
     let aast::Expr(_, _, exp) = &*expr;
     match exp {
@@ -95,13 +104,15 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         }
         aast::Expr_::Lvar(id_orig) => {
             let var_name = local_id::get_name(&id_orig.1);
-            // TODO(alnash) we need to handle $this separately because the Rty
-            // comes from the function for this and not by the name
             let is_this = var_name == special_idents::THIS;
-            if !is_this && context.is_readonly(var_name) {
-                Rty::Readonly
+            if is_this {
+                context.this_ty
             } else {
-                Rty::Mutable
+                if context.is_readonly(var_name) {
+                    Rty::Readonly
+                } else {
+                    Rty::Mutable
+                }
             }
         }
         aast::Expr_::Darray(d) => {
@@ -139,6 +150,9 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
                 Rty::Mutable
             }
         }
+        // FWIW, this does not appear on the aast at this stage(it only appears after naming in typechecker),
+        // but we can handle it for future in case that changes
+        aast::Expr_::This => context.this_ty,
         _ => Rty::Mutable,
     }
 }
@@ -153,18 +167,14 @@ fn check_assignment_validity(
     match &lhs.2 {
         aast::Expr_::Lvar(id_orig) => {
             let var_name = local_id::get_name(&id_orig.1).to_string();
-            // TODO(alnash) we need to handle $this separately because the Rty
-            // comes from the function for this and not by the name
-            if var_name != special_idents::THIS {
-                let is_readonly = Rty::Readonly == rty_expr(context, &rhs);
-                if context.is_new_local(&var_name) {
-                    context.add_local(&var_name, is_readonly);
-                } else if context.is_readonly(&var_name) != is_readonly {
-                    checker.add_error(
-                        &pos,
-                        syntax_error::redefined_assignment_different_mutability(&var_name),
-                    );
-                }
+            let is_readonly = Rty::Readonly == rty_expr(context, &rhs);
+            if context.is_new_local(&var_name) {
+                context.add_local(&var_name, is_readonly);
+            } else if context.is_readonly(&var_name) != is_readonly {
+                checker.add_error(
+                    &pos,
+                    syntax_error::redefined_assignment_different_mutability(&var_name),
+                );
             }
         }
         aast::Expr_::ObjGet(_) => match rty_expr(context, &lhs) {
@@ -216,12 +226,13 @@ impl<'ast> Visitor<'ast> for Checker {
         _context: &mut Context,
         m: &aast::Method_<(), (), (), ()>,
     ) -> Result<(), ()> {
-        let readonly_return = if let Some(_) = m.readonly_ret {
+        let readonly_return = ro_kind_to_rty(m.readonly_ret);
+        let readonly_this = if m.readonly_this {
             Rty::Readonly
         } else {
             Rty::Mutable
         };
-        let mut context = Context::new(readonly_return);
+        let mut context = Context::new(readonly_return, readonly_this);
 
         for p in m.params.iter() {
             if let Some(_) = p.readonly {
@@ -238,12 +249,9 @@ impl<'ast> Visitor<'ast> for Checker {
         _context: &mut Context,
         f: &aast::Fun_<(), (), (), ()>,
     ) -> Result<(), ()> {
-        let readonly_return = if let Some(_) = f.readonly_ret {
-            Rty::Readonly
-        } else {
-            Rty::Mutable
-        };
-        let mut context = Context::new(readonly_return);
+        let readonly_return = ro_kind_to_rty(f.readonly_ret);
+        let readonly_this = ro_kind_to_rty(f.readonly_this);
+        let mut context = Context::new(readonly_return, readonly_this);
 
         for p in f.params.iter() {
             if let Some(_) = p.readonly {
@@ -288,7 +296,7 @@ impl<'ast> Visitor<'ast> for Checker {
 
 pub fn check_program(program: &aast::Program<(), (), (), ()>) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
-    let mut context = Context::new(Rty::Mutable);
+    let mut context = Context::new(Rty::Mutable, Rty::Mutable);
     visit(&mut checker, &mut context, program).unwrap();
     checker.errors
 }

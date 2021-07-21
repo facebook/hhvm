@@ -106,6 +106,14 @@ class SMethodEdgeHandler(DependencyEdgeHandler):
         return f'static_method("{lhs[0]}", "{lhs[1]}", "{rhs}").'
 
 
+class FunEdgeHandler(DependencyEdgeHandler):
+    def parse(self, lhs: str) -> List[str]:
+        return self.lhs_parser(lhs, None)
+
+    def rule_writer(self, lhs: List[str], rhs: str) -> str:
+        return f'invoked_by("{lhs[0]}", "{rhs}").'
+
+
 # Generate logic rules based on given parameters.
 def generate_logic_rules() -> List[str]:
     rules: List[str] = []
@@ -147,6 +155,7 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
         "Type": TypeEdgeHandler(),
         "Method": MethodEdgeHandler(),
         "SMethod": SMethodEdgeHandler(),
+        "Fun": FunEdgeHandler(),
     }
     collectors = {
         "Extends": symbols,

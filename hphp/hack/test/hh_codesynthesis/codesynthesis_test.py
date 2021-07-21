@@ -293,6 +293,27 @@ Type I -> Type A"""
             exp, hh_codesynthesis.extract_logic_rules(deps.split("\n"))
         )
 
+    def test_extends_type_fun_dependency(self) -> None:
+        exp = [
+            'extends_to("I", "A").',
+            'method("I", "bar", "A").',
+            'invoked_by("F", "A").',
+            'type("A", "B").',
+            'type("A", "T").',
+            'type("I", "A").',
+            'symbols("A";"B";"I";"T").',
+            'funcs("F").',
+        ]
+        deps = """\
+Extends I -> Type A
+Method I::bar -> Type A
+Fun F -> Type A
+Type A -> Type B, Type T
+Type I -> Type A"""
+        self.assertListEqual(
+            exp, hh_codesynthesis.extract_logic_rules(deps.split("\n"))
+        )
+
     def test_unsupported_type_dependency(self) -> None:
         # T94428437 Temporary skipping all built-in functions for now.
         exp = [
@@ -660,6 +681,7 @@ class ReadFromFileTest(unittest.TestCase):
             'method("A", "foo", "B").',
             'static_method("A", "bar", "B").',
             'static_method("A", "bar", "F").',
+            'invoked_by("F", "A").',
             'type("A", "B").',
             'type("I", "B").',
             'type("T", "A").',
@@ -673,6 +695,7 @@ Extends I -> Type B
 Extends T -> Type A
 Method A::foo -> Type B
 SMethod A::bar -> Type B, Fun F
+Fun F -> Type A
 Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B

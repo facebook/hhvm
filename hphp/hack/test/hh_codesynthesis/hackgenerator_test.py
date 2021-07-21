@@ -10,6 +10,7 @@ import unittest
 from hphp.hack.src.hh_codesynthesis.hackGenerator import (
     _HackInterfaceGenerator,
     _HackClassGenerator,
+    _HackFunctionGenerator,
     HackCodeGenerator,
 )
 
@@ -95,6 +96,20 @@ class _HackClassGeneratorTest(unittest.TestCase):
             str(self.obj),
         )
 
+    def test_single_static_method_class(self) -> None:
+        self.obj.add_static_method("bar")
+        self.assertEqual(
+            "class C0   {\npublic static function bar(): void{}\n}", str(self.obj)
+        )
+
+    def test_multiple_static_methods_class(self) -> None:
+        self.obj.add_static_method("bar")
+        self.obj.add_static_method("foo")
+        self.assertEqual(
+            "class C0   {\npublic static function bar(): void{}\n\npublic static function foo(): void{}\n}",
+            str(self.obj),
+        )
+
     def test_single_parameter_dummy_method_class(self) -> None:
         self.obj.add_parameter("C1")
         self.assertEqual(
@@ -118,6 +133,15 @@ class _HackClassGeneratorTest(unittest.TestCase):
             str(self.obj),
         )
 
+    def test_invoke_static_method_in_dummy_method_class(self) -> None:
+        # T95861944 Beautify the syntheisized code by removing "C1" from the parameter
+        self.obj.add_parameter("C1")
+        self.obj.add_invoke_static_method("C1", "foo")
+        self.assertEqual(
+            "class C0   {\npublic function dummy_C0_method(C1 $C1_obj): void{\nC1::foo();\n}\n}",
+            str(self.obj),
+        )
+
     def test_invoke_multiple_parameters_in_dummy_method_class(self) -> None:
         self.obj.add_parameter("C2")
         self.obj.add_parameter("C1")
@@ -126,6 +150,18 @@ class _HackClassGeneratorTest(unittest.TestCase):
         self.obj.add_invoke("C2", "bar")
         self.assertEqual(
             "class C0   {\npublic function dummy_C0_method(C1 $C1_obj, C2 $C2_obj): void{\n$C1_obj->foo();\n\n$C2_obj->bar();\n\n$C2_obj->foo();\n}\n}",
+            str(self.obj),
+        )
+
+
+class _HackFunctionGeneratorTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.obj = _HackFunctionGenerator("F0")
+
+    def test_invoke_static_method(self) -> None:
+        self.obj.add_invoke_static_method("C0", "foo")
+        self.assertEqual(
+            "function F0(): void {\nC0::foo();\n}",
             str(self.obj),
         )
 
@@ -262,6 +298,7 @@ interface I0  {}
         self.obj._add_class("C0")
         self.obj._add_method("C0", "dummy_C0_method")
         self.obj._add_to_parameter_set("C0", "I0")
+        self.assertEqual(exp, str(self.obj))
 
     def test_class_with_method_passed_as_parameter_to_another_class(self) -> None:
         exp = """\
@@ -281,4 +318,31 @@ $C1_obj->foo();
         self.obj._add_class("C0")
         self.obj._add_to_parameter_set("C0", "C1")
         self.obj._add_invoke("C0", "C1", "foo")
+        self.assertEqual(exp, str(self.obj))
+
+    def test_class_with_static_method_invoked_by_another_class_and_function(
+        self,
+    ) -> None:
+        exp = """\
+<?hh
+class C1   {
+public static function foo(): void{}
+}
+class C0   {
+public function dummy_C0_method(C1 $C1_obj): void{
+C1::foo();
+}
+}
+
+function F0(): void {
+C1::foo();
+}
+"""
+        self.obj._add_class("C1")
+        self.obj._add_static_method("C1", "foo")
+        self.obj._add_class("C0")
+        self.obj._add_to_parameter_set("C0", "C1")
+        self.obj._add_invoke_static_method("C0", "C1", "foo")
+        self.obj._add_function("F0")
+        self.obj._add_invoke_static_method("F0", "C1", "foo")
         self.assertEqual(exp, str(self.obj))

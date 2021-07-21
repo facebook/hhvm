@@ -64,14 +64,23 @@ class _HackBaseGenerator(object):
     def _print_method_body(self) -> str:
         return ";"
 
-    def _print_method(self, method_name: str) -> str:
-        return f"\npublic function {method_name}(): void{self._print_method_body()}\n"
+    def _print_method(self, method_name: str, static_keyword: str = " ") -> str:
+        return f"\npublic{static_keyword}function {method_name}(): void{self._print_method_body()}\n"
 
     def _print_methods(self) -> str:
         return "".join(list(map(self._print_method, sorted(self.methods))))
 
+    def _print_static_methods(self) -> str:
+        return ""
+
     def _print_body(self) -> str:
-        return "{" + self._print_dummy_method() + self._print_methods() + "}"
+        return (
+            "{"
+            + self._print_static_methods()
+            + self._print_dummy_method()
+            + self._print_methods()
+            + "}"
+        )
 
 
 class _HackInterfaceGenerator(_HackBaseGenerator):
@@ -105,8 +114,12 @@ class _HackClassGenerator(_HackBaseGenerator):
         self.extend: str = ""
         # A set of implements relationship in this class.
         self.implements: Set[str] = set()
-        # A set of method to invoke in dummy method.
+        # A set of static methods in this class.
+        self.static_methods: Set[str] = set()
+        # A set of methods to invoke in dummy method.
         self.invoke_set: Set[Tuple[str, str]] = set()
+        # A set of static methods to invoke in dummy method.
+        self.invoke_static_set: Set[Tuple[str, str]] = set()
 
     def set_extend(self, extend_from: str) -> None:
         self.extend = extend_from
@@ -114,9 +127,15 @@ class _HackClassGenerator(_HackBaseGenerator):
     def add_implement(self, implement: str) -> None:
         self.implements.add(implement)
 
+    def add_static_method(self, method_name: str) -> None:
+        self.static_methods.add(method_name)
+
     def add_invoke(self, object_type: str, method_name: str) -> None:
         if object_type in self.parameter_set:
             self.invoke_set.add((object_type, method_name))
+
+    def add_invoke_static_method(self, class_name: str, method_name: str) -> None:
+        self.invoke_static_set.add((class_name, method_name))
 
     def _print_extend(self) -> str:
         if self.extend == "":
@@ -128,10 +147,18 @@ class _HackClassGenerator(_HackBaseGenerator):
             return ""
         return "implements {}".format(",".join(sorted(self.implements)))
 
+    def _print_static_methods(self) -> str:
+        return "".join(
+            [self._print_method(x, " static ") for x in sorted(self.static_methods)]
+        )
+
     def _print_dummy_method_body(self) -> str:
         return (
             "{"
             + "".join([f"\n${x[0]}_obj->{x[1]}();\n" for x in sorted(self.invoke_set)])
+            + "".join(
+                [f"\n{x[0]}::{x[1]}();\n" for x in sorted(self.invoke_static_set)]
+            )
             + "}"
         )
 
@@ -145,6 +172,30 @@ class _HackClassGenerator(_HackBaseGenerator):
         )
 
 
+class _HackFunctionGenerator:
+    """A generator to emit Hack Function definition."""
+
+    def __init__(self, name: str, **kwargs: Dict[str, Any]) -> None:
+        self.name = name
+        # A set of static methods to invoke in the function.
+        self.invoke_static_set: Set[Tuple[str, str]] = set()
+
+    def add_invoke_static_method(self, class_name: str, method_name: str) -> None:
+        self.invoke_static_set.add((class_name, method_name))
+
+    def _print_body(self) -> str:
+        return (
+            "{"
+            + "".join(
+                [f"\n{x[0]}::{x[1]}();\n" for x in sorted(self.invoke_static_set)]
+            )
+            + "}"
+        )
+
+    def __str__(self) -> str:
+        return f"function {self.name}(): void {self._print_body()}"
+
+
 class HackCodeGenerator(CodeGenerator):
     """A wrapper generator encapsulates each _Hack*Generator to emit Hack Code"""
 
@@ -152,12 +203,16 @@ class HackCodeGenerator(CodeGenerator):
         super(HackCodeGenerator, self).__init__()
         self.class_objs: Dict[str, _HackClassGenerator] = {}
         self.interface_objs: Dict[str, _HackInterfaceGenerator] = {}
+        self.function_objs: Dict[str, _HackFunctionGenerator] = {}
 
     def _add_class(self, name: str) -> None:
         self.class_objs[name] = _HackClassGenerator(name)
 
     def _add_interface(self, name: str) -> None:
         self.interface_objs[name] = _HackInterfaceGenerator(name)
+
+    def _add_function(self, name: str) -> None:
+        self.function_objs[name] = _HackFunctionGenerator(name)
 
     def _add_extend(self, name: str, extend: str) -> None:
         if name in self.class_objs:
@@ -175,6 +230,10 @@ class HackCodeGenerator(CodeGenerator):
         if name in self.interface_objs:
             self.interface_objs[name].add_method(method_name)
 
+    def _add_static_method(self, name: str, method_name: str) -> None:
+        if name in self.class_objs:
+            self.class_objs[name].add_static_method(method_name)
+
     def _add_to_parameter_set(self, name: str, parameter_type: str) -> None:
         if name in self.class_objs:
             self.class_objs[name].add_parameter(parameter_type)
@@ -185,6 +244,14 @@ class HackCodeGenerator(CodeGenerator):
         if name in self.class_objs:
             self.class_objs[name].add_invoke(object_type, method_name)
 
+    def _add_invoke_static_method(
+        self, name: str, class_name: str, method_name: str
+    ) -> None:
+        if name in self.class_objs:
+            self.class_objs[name].add_invoke_static_method(class_name, method_name)
+        if name in self.function_objs:
+            self.function_objs[name].add_invoke_static_method(class_name, method_name)
+
     def __str__(self) -> str:
         return (
             "<?hh\n"
@@ -192,26 +259,33 @@ class HackCodeGenerator(CodeGenerator):
             + "\n"
             + "\n".join(str(x) for x in self.interface_objs.values())
             + "\n"
+            + "".join([str(x) + "\n" for x in self.function_objs.values()])
         )
 
     def on_model(self, m: clingo.Model) -> None:
-        # Separate into 'class(?)', 'interface(?)', 'implements(?, ?)', 'extends(?, ?)'
-        # 'add_method(?, ?)',
-        # 'add_method(?, ?)', 'has_method_with_parameter(?, ?)'
-        # 'invokes_in_method(?, ?, ?)'
+        # Separate into 'class(?)', 'interface(?)', 'funcs(?)',
+        # 'implements(?, ?)', 'extends(?, ?)', 'add_method(?, ?)',
+        # 'add_static_method(?, ?)', 'has_method_with_parameter(?, ?)'
+        # 'invokes_in_method(?, ?, ?)', 'invokes_static_method(?, ?, ?)'
         predicates = m.symbols(atoms=True)
-        node_func = {"class": self._add_class, "interface": self._add_interface}
+        node_func = {
+            "class": self._add_class,
+            "interface": self._add_interface,
+            "funcs": self._add_function,
+        }
         edge_func = {
             "extends": self._add_extend,
             "implements": self._add_implement,
             "add_method": self._add_method,
+            "add_static_method": self._add_static_method,
             "has_method_with_parameter": self._add_to_parameter_set,
         }
         trip_func = {
             "invokes_in_method": self._add_invoke,
+            "invokes_static_method": self._add_invoke_static_method,
         }
         # Three passes,
-        #   First pass creates individual nodes like class, interface.
+        #   First pass creates individual nodes like class, interface, function.
         for predicate in predicates:
             if predicate.name in node_func:
                 node_func[predicate.name](predicate.arguments[0].string)

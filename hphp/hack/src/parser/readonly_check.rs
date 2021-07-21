@@ -96,13 +96,14 @@ fn ro_kind_to_rty(ro: Option<oxidized::ast_defs::ReadonlyKind>) -> Rty {
 
 fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
     let aast::Expr(_, _, exp) = &*expr;
+    use aast::Expr_::*;
     match exp {
-        aast::Expr_::ReadonlyExpr(_) => Rty::Readonly,
-        aast::Expr_::ObjGet(og) => {
+        ReadonlyExpr(_) => Rty::Readonly,
+        ObjGet(og) => {
             let (obj, _member_name, _null_flavor, _reffiness) = &**og;
             rty_expr(context, &obj)
         }
-        aast::Expr_::Lvar(id_orig) => {
+        Lvar(id_orig) => {
             let var_name = local_id::get_name(&id_orig.1);
             let is_this = var_name == special_idents::THIS;
             if is_this {
@@ -115,20 +116,20 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
                 }
             }
         }
-        aast::Expr_::Darray(d) => {
+        Darray(d) => {
             let (_, exprs) = &**d;
             ro_expr_list2(context, exprs)
         }
-        aast::Expr_::Varray(v) => {
+        Varray(v) => {
             let (_, exprs) = &**v;
             ro_expr_list(context, exprs)
         }
-        aast::Expr_::Shape(fields) => ro_expr_list2(context, fields),
-        aast::Expr_::ValCollection(v) => {
+        Shape(fields) => ro_expr_list2(context, fields),
+        ValCollection(v) => {
             let (_, _, exprs) = &**v;
             ro_expr_list(context, exprs)
         }
-        aast::Expr_::KeyValCollection(kv) => {
+        KeyValCollection(kv) => {
             let (_, _, fields) = &**kv;
             if fields
                 .iter()
@@ -139,7 +140,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
                 Rty::Mutable
             }
         }
-        aast::Expr_::Collection(c) => {
+        Collection(c) => {
             let (_, _, fields) = &**c;
             if fields.iter().any(|f| match f {
                 aast::Afield::AFvalue(e) => rty_expr(context, &e) == Rty::Readonly,
@@ -152,7 +153,24 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         }
         // FWIW, this does not appear on the aast at this stage(it only appears after naming in typechecker),
         // but we can handle it for future in case that changes
-        aast::Expr_::This => context.this_ty,
+        This => context.this_ty,
+        // Primitive types are mutable
+        Null | True | False | Omitted => Rty::Mutable,
+        Int(_) | Float(_) | String(_) | String2(_) | PrefixedString(_) => Rty::Mutable,
+        Id(_) => Rty::Mutable,
+        // TODO: Need to handle dollardollar with pipe expressions correctly
+        Dollardollar(_) => Rty::Mutable,
+        Clone(_) => Rty::Mutable,
+        // Mutable unless wrapped in a readonly expression
+        Call(_) | ClassGet(_) | ClassConst(_) => Rty::Mutable,
+        FunctionPointer(_) => Rty::Mutable,
+        // This is really just a statement, does not have a value
+        Yield(_) => Rty::Mutable,
+        // Operators are all primitive in result
+        Unop(_) | Binop(_) => Rty::Mutable,
+        // TODO: track the left side of pipe expressions' readonlyness for $$
+        Pipe(_) => Rty::Mutable,
+        ExpressionTree(_) | Record(_) | EnumClassLabel(_) | ETSplice(_) => Rty::Mutable,
         _ => Rty::Mutable,
     }
 }

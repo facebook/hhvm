@@ -158,7 +158,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let is_interceptable = is_method_interceptable(emitter.options());
     let mut arg_flags = Flags::empty();
     arg_flags.set(Flags::IS_ASYNC, is_async);
-    arg_flags.set(Flags::IS_REFIED, is_reified);
+    arg_flags.set(Flags::IS_REIFIED, is_reified);
     arg_flags.set(
         Flags::SHOULD_EMIT_IMPLICIT_CONTEXT,
         should_emit_implicit_context,
@@ -241,7 +241,7 @@ fn make_memoize_method_code<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<InstrSeq<'arena>> {
     if args.params.is_empty()
-        && !args.flags.contains(Flags::IS_REFIED)
+        && !args.flags.contains(Flags::IS_REIFIED)
         && !args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT)
     {
         make_memoize_method_no_params_code(env.arena, emitter, args)
@@ -265,8 +265,8 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
     let eager_set = emitter.label_gen_mut().next_regular();
     // The local that contains the reified generics is the first non parameter local,
     // so the first local is parameter count + 1 when there are reified = generics
-    let add_refied = usize::from(args.flags.contains(Flags::IS_REFIED));
-    let first_local = Local::Unnamed(param_count + add_refied);
+    let add_reified = usize::from(args.flags.contains(Flags::IS_REIFIED));
+    let first_local = Local::Unnamed(param_count + add_reified);
     let deprecation_body = emit_body::emit_deprecation_info(
         alloc,
         args.scope,
@@ -278,7 +278,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
         emit_param::emit_param_default_value_setter(emitter, env, pos, hhas_params)?;
     let fcall_args = {
         let mut fcall_flags = FcallFlags::default();
-        if args.flags.contains(Flags::IS_REFIED) {
+        if args.flags.contains(Flags::IS_REIFIED) {
             fcall_flags |= FcallFlags::HAS_GENERICS;
         };
         if args.flags.contains(Flags::IS_ASYNC) {
@@ -294,7 +294,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
             FcallArgs::new(fcall_flags, 1, Slice::new(&[]), None, param_count, None)
         }
     };
-    let (reified_get, reified_memokeym) = if !args.flags.contains(Flags::IS_REFIED) {
+    let (reified_get, reified_memokeym) = if !args.flags.contains(Flags::IS_REIFIED) {
         (instr::empty(alloc), instr::empty(alloc))
     } else {
         (
@@ -307,13 +307,13 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
                 emit_memoize_helpers::get_memo_key_list(
                     alloc,
                     param_count,
-                    param_count + add_refied,
+                    param_count + add_reified,
                     reified::GENERICS_LOCAL_NAME,
                 ),
             ),
         )
     };
-    param_count += add_refied;
+    param_count += add_reified;
     Ok(InstrSeq::gather(
         alloc,
         vec![
@@ -494,7 +494,7 @@ fn make_wrapper<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 ) -> Result<HhasBody<'arena>> {
     let alloc = env.arena;
     let mut decl_vars = vec![];
-    if args.flags.contains(Flags::IS_REFIED) {
+    if args.flags.contains(Flags::IS_REIFIED) {
         decl_vars.push(reified::GENERICS_LOCAL_NAME.into());
     }
     if args.flags.contains(Flags::HAS_COEFFECTS_LOCAL) {
@@ -553,7 +553,7 @@ bitflags! {
     pub struct Flags: u8 {
         const HAS_COEFFECTS_LOCAL = 1 << 0;
         const IS_STATIC = 1 << 1;
-        const IS_REFIED = 1 << 2;
+        const IS_REIFIED = 1 << 2;
         const WITH_LSB = 1 << 3;
         const IS_ASYNC = 1 << 4;
         const SHOULD_EMIT_IMPLICIT_CONTEXT = 1 << 5;

@@ -167,8 +167,8 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
     let eager_set = e.label_gen_mut().next_regular();
     // The local that contains the reified generics is the first non parameter local,
     // so the first local is parameter count + 1 when there are reified = generics
-    let add_refied = usize::from(is_reified);
-    let first_local = Local::Unnamed(param_count + add_refied);
+    let add_reified = usize::from(is_reified);
+    let first_local = Local::Unnamed(param_count + add_reified);
     let deprecation_body =
         emit_body::emit_deprecation_info(alloc, &env.scope, deprecation_info, e.systemlib())?;
     let (begin_label, default_value_setters) =
@@ -199,13 +199,13 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
                 emit_memoize_helpers::get_memo_key_list(
                     alloc,
                     param_count,
-                    param_count + add_refied,
+                    param_count + add_reified,
                     reified::GENERICS_LOCAL_NAME,
                 ),
             ),
         )
     };
-    let param_count = (param_count + add_refied) as isize;
+    let param_count = (param_count + add_reified) as isize;
     Ok(InstrSeq::gather(
         alloc,
         vec![

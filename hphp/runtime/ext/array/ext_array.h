@@ -242,16 +242,11 @@ inline int64_t countHelper(TypedValue tv) {
 
 #define getCheckedArrayRet(input, fail)                                        \
   auto const cell_##input = static_cast<const Variant&>(input).asTypedValue(); \
-  if (UNLIKELY(!isArrayLikeType(cell_##input->m_type) &&                       \
-    (!RO::EvalIsCompatibleClsMethType ||                                       \
-     !isClsMethType(cell_##input->m_type)))) {                                 \
+  if (UNLIKELY(!isArrayLikeType(cell_##input->m_type))) {                      \
     raise_expected_array_warning();                                            \
     return fail;                                                               \
   }                                                                            \
-  if (isClsMethType(cell_##input->m_type)) raiseClsMethToVecWarningHelper();   \
-  ArrNR arrNR_##input{isClsMethType(cell_##input->m_type) ?                    \
-    clsMethToVecHelper(cell_##input->m_data.pclsmeth).detach() :               \
-    cell_##input->m_data.parr};                                                \
+  ArrNR arrNR_##input{cell_##input->m_data.parr};                              \
   const Array& arr_##input = arrNR_##input.asArray();
 
 #define getCheckedContainer(input)                                             \

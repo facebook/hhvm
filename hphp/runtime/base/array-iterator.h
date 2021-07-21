@@ -287,17 +287,10 @@ bool IterateV(const TypedValue& it,
     adata = it.m_data.parr;
    do_array:
     adata->incRefCount();
-   do_array_no_incref:
     SCOPE_EXIT { decRefArr(adata); };
     if (ArrayData::call_helper(preArrFn, adata)) return true;
     IterateV(adata, arrFn);
     return true;
-  }
-  if (RO::EvalIsCompatibleClsMethType && isClsMethType(it.m_type)) {
-    raiseClsMethToVecWarningHelper();
-    adata = clsMethToVecHelper(it.m_data.pclsmeth).detach();
-    if (adata) goto do_array_no_incref;
-    return false;
   }
   if (it.m_type != KindOfObject) return false;
   auto odata = it.m_data.pobj;
@@ -370,17 +363,10 @@ bool IterateKV(const TypedValue& it,
     adata = it.m_data.parr;
    do_array:
     adata->incRefCount();
-   do_array_no_incref:
     SCOPE_EXIT { decRefArr(adata); };
     if (ArrayData::call_helper(preArrFn, adata)) return true;
     IterateKV(adata, arrFn);
     return true;
-  }
-  if (RO::EvalIsCompatibleClsMethType && isClsMethType(it.m_type)) {
-    raiseClsMethToVecWarningHelper();
-    adata = clsMethToVecHelper(it.m_data.pclsmeth).detach();
-    if (adata) goto do_array_no_incref;
-    return false;
   }
   if (it.m_type != KindOfObject) return false;
   auto odata = it.m_data.pobj;

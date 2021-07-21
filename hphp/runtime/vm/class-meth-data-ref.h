@@ -54,12 +54,8 @@ private:
 
 void checkClsMethFuncHelper(const Func* f);
 
-void raiseClsMethToVecWarningHelper(const char* fn = nullptr);
-void raiseClsMethConvertWarningHelper(const char* toType);
 void raiseClsMethClsMethRelCompareWarning();
 
 [[noreturn]] void throwInvalidClsMethToType(const char* ty);
-
-Array clsMethToVecHelper(ClsMethDataRef clsMeth);
 
 } // namespace HPHP

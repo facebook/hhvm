@@ -22,7 +22,7 @@ Passing vec to varray: []
 Passing vec to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be dict, vec given
 Passing dict to varray: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, dict given
 Passing dict to darray: {}
-Passing clsmeth to varray: ["ClsMethTest","fn"]
+Passing clsmeth to varray: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, clsmeth given
 Passing clsmeth to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be dict, clsmeth given
 
 =====================================
@@ -192,7 +192,8 @@ Catchable fatal error: Argument 1 passed to takes_darray() must be an instance o
 
 Catchable fatal error: Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\dict given in %s/specialization.php on line %d
 "darray to darray: OK!"
-"varray to varray: OK!"
+
+Catchable fatal error: Argument 1 passed to takes_varray() must be an instance of HH\varray, clsmeth given in %s/specialization.php on line %d
 
 Catchable fatal error: Argument 1 passed to takes_darray() must be an instance of HH\darray, clsmeth given in %s/specialization.php on line %d
 []
@@ -201,7 +202,8 @@ Catchable fatal error: Value returned from function returns_darray() must be of 
 
 Catchable fatal error: Value returned from function returns_varray() must be of type HH\varray, HH\dict given in %s/specialization.php on line %d
 {}
-["ClsMethTest","fn"]
+
+Catchable fatal error: Value returned from function returns_varray() must be of type HH\varray, clsmeth given in %s/specialization.php on line %d
 
 Catchable fatal error: Value returned from function returns_darray() must be of type HH\darray, clsmeth given in %s/specialization.php on line %d
 []
@@ -210,7 +212,8 @@ Catchable fatal error: Property 'C::d' declared as type ?HH\darray, HH\vec assig
 
 Catchable fatal error: Property 'C::v' declared as type ?HH\varray, HH\dict assigned in %s/specialization.php on line %d
 {}
-["ClsMethTest","fn"]
+
+Catchable fatal error: Property 'C::v' declared as type ?HH\varray, clsmeth assigned in %s/specialization.php on line %d
 
 Catchable fatal error: Property 'C::d' declared as type ?HH\darray, clsmeth assigned in %s/specialization.php on line %d
 

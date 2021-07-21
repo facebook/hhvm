@@ -384,8 +384,6 @@ To vec conversions:
 
 | ConvArrLikeToVec,             D(Vec), S(ArrLike),                  PRc|CRc|LP
 
-| ConvClsMethToVec,             D(Vec), S(ClsMeth),                  PRc
-
 | ConvObjToVec,                 D(Vec), S(Obj),                      PRc|CRc
 
 
@@ -393,16 +391,12 @@ To dict conversions:
 
 | ConvArrLikeToDict,            D(Dict), S(ArrLike),                 PRc|CRc|LP
 
-| ConvClsMethToDict,            D(Dict), S(ClsMeth),                 PRc
-
 | ConvObjToDict,                D(Dict), S(Obj),                     PRc|CRc
 
 
 To keyset conversions:
 
 | ConvArrLikeToKeyset,          D(Keyset), S(ArrLike),               PRc|CRc|LP
-
-| ConvClsMethToKeyset,          D(Keyset), S(ClsMeth),               PRc
 
 | ConvObjToKeyset,              D(Keyset), S(Obj),                   PRc|CRc
 
@@ -2074,13 +2068,6 @@ To string conversions:
 
   Raises a catchable type hint error if the reified generics of S0 does not
   match the type structure given on S1.
-
-| RaiseClsMethPropConvertNotice<tc,isSProp>, ND, S(Cls) S(Str), NF
-
-  Raise a notice that a class_meth was implicitly converted after being stored
-  into a property with name S1 expecting type tc on class S0. Once support for
-  coercing class_meth types is removed this ir instruction can also be removed
-  (T61738946).
 
 | ThrowUninitLoc<localId>, ND, S(Str), T
 

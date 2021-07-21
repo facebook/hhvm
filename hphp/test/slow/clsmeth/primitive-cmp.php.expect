@@ -2,7 +2,7 @@
 +------------+------+------+------+------+------+------+------+
 | VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
 +============+======+======+======+======+======+======+======+
-| $cm        | F    | T    | F    | T    | T    | T    | 0    |
+| $cm        | EXN  | EXN  | EXN  | EXN  | T    | T    | EXN  |
 | $nv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $tv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $bv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -11,10 +11,10 @@
 | $sv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $rv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $ov        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| $va        | F    | T    | F    | T    | T    | T    | 0    |
-| $cp        | F    | T    | F    | T    | T    | T    | 0    |
+| $va        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| $cp        | EXN  | EXN  | EXN  | EXN  | T    | T    | EXN  |
 | $ep        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| $lp        | T    | T    | F    | F    | F    | F    | -1   |
+| $lp        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $qp        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($nv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($tv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -24,10 +24,10 @@
 | WRAPA($sv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($rv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($ov) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPA($va) | F    | T    | F    | T    | T    | T    | 0    |
-| WRAPA($cp) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($va) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| WRAPA($cp) | EXN  | EXN  | EXN  | EXN  | T    | T    | EXN  |
 | WRAPA($ep) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPA($lp) | T    | T    | F    | F    | F    | F    | -1   |
+| WRAPA($lp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($qp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($nv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($tv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -37,10 +37,10 @@
 | WRAPO($sv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($rv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($ov) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPO($va) | F    | T    | F    | T    | T    | F    | 0    |
-| WRAPO($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($va) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| WRAPO($cp) | EXN  | EXN  | EXN  | EXN  | T    | F    | EXN  |
 | WRAPO($ep) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPO($lp) | T    | T    | F    | F    | F    | F    | -1   |
+| WRAPO($lp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($qp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($nv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($tv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -50,10 +50,10 @@
 | WRAPD($sv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($rv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($ov) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPD($va) | F    | T    | F    | T    | T    | F    | 0    |
-| WRAPD($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($va) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| WRAPD($cp) | EXN  | EXN  | EXN  | EXN  | T    | F    | EXN  |
 | WRAPD($ep) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPD($lp) | T    | T    | F    | F    | F    | F    | -1   |
+| WRAPD($lp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($qp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 +------------+------+------+------+------+------+------+------+
 
@@ -61,7 +61,7 @@
 +------------+------+------+------+------+------+------+------+
 | VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
 +============+======+======+======+======+======+======+======+
-| $cm        | F    | T    | F    | T    | T    | T    | 0    |
+| $cm        | EXN  | EXN  | EXN  | EXN  | T    | T    | EXN  |
 | $nv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $tv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $bv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -70,10 +70,10 @@
 | $sv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $rv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $ov        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| $va        | F    | T    | F    | T    | T    | T    | 0    |
-| $cp        | F    | T    | F    | T    | T    | T    | 0    |
+| $va        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| $cp        | EXN  | EXN  | EXN  | EXN  | T    | T    | EXN  |
 | $ep        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| $lp        | F    | F    | T    | T    | F    | F    | 1    |
+| $lp        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $qp        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($nv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($tv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -83,10 +83,10 @@
 | WRAPA($sv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($rv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($ov) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPA($va) | F    | T    | F    | T    | T    | T    | 0    |
-| WRAPA($cp) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($va) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| WRAPA($cp) | EXN  | EXN  | EXN  | EXN  | T    | T    | EXN  |
 | WRAPA($ep) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPA($lp) | F    | F    | T    | T    | F    | F    | 1    |
+| WRAPA($lp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($qp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($nv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($tv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -96,10 +96,10 @@
 | WRAPO($sv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($rv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($ov) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPO($va) | F    | T    | F    | T    | T    | F    | 0    |
-| WRAPO($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($va) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| WRAPO($cp) | EXN  | EXN  | EXN  | EXN  | T    | F    | EXN  |
 | WRAPO($ep) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPO($lp) | F    | F    | T    | T    | F    | F    | 1    |
+| WRAPO($lp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($qp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($nv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($tv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -109,10 +109,10 @@
 | WRAPD($sv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($rv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($ov) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPD($va) | F    | T    | F    | T    | T    | F    | 0    |
-| WRAPD($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($va) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| WRAPD($cp) | EXN  | EXN  | EXN  | EXN  | T    | F    | EXN  |
 | WRAPD($ep) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPD($lp) | F    | F    | T    | T    | F    | F    | 1    |
+| WRAPD($lp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($qp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 +------------+------+------+------+------+------+------+------+
 
@@ -120,7 +120,7 @@
 +------------+------+------+------+------+------+------+------+
 | VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
 +============+======+======+======+======+======+======+======+
-| $cm        | F    | T    | F    | T    | T    | T    | 0    |
+| $cm        | EXN  | EXN  | EXN  | EXN  | T    | T    | EXN  |
 | $nv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $tv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $bv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -129,10 +129,10 @@
 | $sv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $rv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $ov        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| $va        | F    | T    | F    | T    | T    | T    | 0    |
-| $cp        | F    | T    | F    | T    | T    | T    | 0    |
+| $va        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| $cp        | EXN  | EXN  | EXN  | EXN  | T    | T    | EXN  |
 | $ep        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| $lp        | T    | T    | F    | F    | F    | F    | -1   |
+| $lp        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $qp        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($nv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($tv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -142,10 +142,10 @@
 | WRAPA($sv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($rv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($ov) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPA($va) | F    | T    | F    | T    | T    | T    | 0    |
-| WRAPA($cp) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($va) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| WRAPA($cp) | EXN  | EXN  | EXN  | EXN  | T    | T    | EXN  |
 | WRAPA($ep) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPA($lp) | T    | T    | F    | F    | F    | F    | -1   |
+| WRAPA($lp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($qp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($nv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($tv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -155,10 +155,10 @@
 | WRAPO($sv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($rv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($ov) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPO($va) | F    | T    | F    | T    | T    | F    | 0    |
-| WRAPO($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($va) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| WRAPO($cp) | EXN  | EXN  | EXN  | EXN  | T    | F    | EXN  |
 | WRAPO($ep) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPO($lp) | T    | T    | F    | F    | F    | F    | -1   |
+| WRAPO($lp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($qp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($nv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($tv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -168,10 +168,10 @@
 | WRAPD($sv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($rv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($ov) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPD($va) | F    | T    | F    | T    | T    | F    | 0    |
-| WRAPD($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($va) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| WRAPD($cp) | EXN  | EXN  | EXN  | EXN  | T    | F    | EXN  |
 | WRAPD($ep) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPD($lp) | T    | T    | F    | F    | F    | F    | -1   |
+| WRAPD($lp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($qp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 +------------+------+------+------+------+------+------+------+
 
@@ -179,7 +179,7 @@
 +------------+------+------+------+------+------+------+------+
 | VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
 +============+======+======+======+======+======+======+======+
-| $cm        | F    | T    | F    | T    | T    | T    | 0    |
+| $cm        | EXN  | EXN  | EXN  | EXN  | T    | T    | EXN  |
 | $nv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $tv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $bv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -188,10 +188,10 @@
 | $sv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $rv        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $ov        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| $va        | F    | T    | F    | T    | T    | T    | 0    |
-| $cp        | F    | T    | F    | T    | T    | T    | 0    |
+| $va        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| $cp        | EXN  | EXN  | EXN  | EXN  | T    | T    | EXN  |
 | $ep        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| $lp        | F    | F    | T    | T    | F    | F    | 1    |
+| $lp        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | $qp        | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($nv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($tv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -201,10 +201,10 @@
 | WRAPA($sv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($rv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($ov) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPA($va) | F    | T    | F    | T    | T    | T    | 0    |
-| WRAPA($cp) | F    | T    | F    | T    | T    | T    | 0    |
+| WRAPA($va) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| WRAPA($cp) | EXN  | EXN  | EXN  | EXN  | T    | T    | EXN  |
 | WRAPA($ep) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPA($lp) | F    | F    | T    | T    | F    | F    | 1    |
+| WRAPA($lp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPA($qp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($nv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($tv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -214,10 +214,10 @@
 | WRAPO($sv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($rv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($ov) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPO($va) | F    | T    | F    | T    | T    | F    | 0    |
-| WRAPO($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPO($va) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| WRAPO($cp) | EXN  | EXN  | EXN  | EXN  | T    | F    | EXN  |
 | WRAPO($ep) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPO($lp) | F    | F    | T    | T    | F    | F    | 1    |
+| WRAPO($lp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPO($qp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($nv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($tv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
@@ -227,9 +227,9 @@
 | WRAPD($sv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($rv) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($ov) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPD($va) | F    | T    | F    | T    | T    | F    | 0    |
-| WRAPD($cp) | F    | T    | F    | T    | T    | F    | 0    |
+| WRAPD($va) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
+| WRAPD($cp) | EXN  | EXN  | EXN  | EXN  | T    | F    | EXN  |
 | WRAPD($ep) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
-| WRAPD($lp) | F    | F    | T    | T    | F    | F    | 1    |
+| WRAPD($lp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 | WRAPD($qp) | EXN  | EXN  | EXN  | EXN  | F    | F    | EXN  |
 +------------+------+------+------+------+------+------+------+

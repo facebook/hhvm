@@ -9,5 +9,4 @@ function main() {
 
   (new ReflectionFunction('t'))->invoke();
   var_dump(__hhvm_intrinsics\create_class_pointer(__hhvm_intrinsics\create_class_pointer('X')));
-  var_dump(__hhvm_intrinsics\dummy_varray_builtin(class_meth('X', 'y')));
 }

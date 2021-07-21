@@ -167,10 +167,6 @@ bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {
 }
 
 bool HHVM_FUNCTION(HH_is_list_like, const Variant& val) {
-  if (val.isClsMeth() && RO::EvalIsCompatibleClsMethType) {
-    raiseClsMethToVecWarningHelper();
-    return true;
-  }
   auto const& ty = val.getType();
   if (!isArrayLikeType(ty)) return false;
   if (isVecType(ty)) return true;

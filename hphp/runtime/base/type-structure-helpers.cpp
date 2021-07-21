@@ -48,6 +48,7 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
     case KindOfResource:
     case KindOfRecord:
     case KindOfRFunc:
+    case KindOfClsMeth:
     case KindOfRClsMeth:
       return false;
 
@@ -96,19 +97,6 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
     case KindOfObject: {
       auto const cls = lookupClass();
       return cls && tv->m_data.pobj->instanceof(cls);
-    }
-
-    case KindOfClsMeth: {
-      auto const cls = lookupClass();
-      if (cls && interface_supports_arrlike(cls->name()) &&
-          RO::EvalIsCompatibleClsMethType) {
-        if (RO::EvalIsVecNotices) {
-          raise_notice("Implicit clsmeth to %s conversion",
-                       cls->name()->data());
-        }
-        return true;
-      }
-      return false;
     }
   }
   not_reached();
@@ -625,12 +613,6 @@ bool checkTypeStructureMatchesTVImpl(
       return is_keyset(&c1);
 
     case TypeStructure::Kind::T_any_array:
-      if (isClsMethType(type) && RO::EvalIsCompatibleClsMethType) {
-        if (RuntimeOption::EvalIsVecNotices) {
-          raise_notice(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
-        }
-        return true;
-      }
       return isArrayLikeType(type);
 
     case TypeStructure::Kind::T_enum: {
@@ -659,24 +641,6 @@ bool checkTypeStructureMatchesTVImpl(
     }
 
     case TypeStructure::Kind::T_tuple: {
-      if (RO::EvalIsCompatibleClsMethType) {
-        if (isClsMethType(type)) {
-          if (RO::EvalIsVecNotices) {
-            raise_notice(Strings::CLSMETH_COMPAT_IS_TUPLE);
-          }
-          auto const arr = clsMethToVecHelper(data.pclsmeth);
-          return checkTypeStructureMatchesTVImpl<gen_error>(
-            ts,
-            make_array_like_tv(arr.get()),
-            givenType,
-            expectedType,
-            errorKey,
-            warn,
-            isOrAsOp
-          );
-        }
-      }
-
       if (!isVecType(type)) return false;
       if (!isOrAsOp) return true;
 

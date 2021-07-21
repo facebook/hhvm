@@ -487,11 +487,7 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfLazyClass:
       return lazyClassToStringHelper(m_data.plazyclass)->toInt64();
     case KindOfClsMeth:
-      if (!RO::EvalIsCompatibleClsMethType) {
-        throwInvalidClsMethToType("int");
-      }
-      raiseClsMethConvertWarningHelper("int");
-      return 1;
+      throwInvalidClsMethToType("int");
     case KindOfRClsMeth:
       SystemLib::throwInvalidOperationExceptionObject(
         "RClsMeth to Int64 conversion");
@@ -538,12 +534,8 @@ Array Variant::toPHPArrayHelper() const {
       return make_dict_array(0, Variant{str, PersistentStrInit{}});
     }
     case KindOfClsMeth:
-      if (!RO::EvalIsCompatibleClsMethType) {
-        throwInvalidClsMethToType("array");
-      }
-      raiseClsMethConvertWarningHelper("array");
-      return make_dict_array(0, m_data.pclsmeth->getClsStr(),
-                             1, m_data.pclsmeth->getFuncStr());
+      throwInvalidClsMethToType("array");
+      return empty_dict_array();
     case KindOfRClsMeth:
       SystemLib::throwInvalidOperationExceptionObject(
         "RClsMeth to PHPArray conversion");
@@ -672,15 +664,7 @@ void Variant::setEvalScalar() {
       raise_error(Strings::RCLS_METH_NOT_SUPPORTED);
 
     case KindOfClsMeth:
-      if (!RO::EvalIsCompatibleClsMethType) {
-        raise_error(Strings::CLS_METH_NOT_SUPPORTED);
-      }
-      raiseClsMethToVecWarningHelper();
-      auto const clsMeth = m_data.pclsmeth;
-      m_data.parr = clsMethToVecHelper(clsMeth).detach();
-      m_type = KindOfPersistentVec;
-      do_array();
-      return;
+      raise_error(Strings::CLS_METH_NOT_SUPPORTED);
   }
   not_reached();
 }

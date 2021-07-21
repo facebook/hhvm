@@ -3,30 +3,11 @@ Exception: Func to vec conversion
 Exception: Func to dict conversion
 Exception: Func to vec conversion
 Exception: Func to keyset conversion
-dict(2) {
-  [0]=>
-  string(1) "A"
-  [1]=>
-  string(4) "meth"
-}
-vec(2) {
-  string(1) "A"
-  string(4) "meth"
-}
-dict(2) {
-  [0]=>
-  string(1) "A"
-  [1]=>
-  string(4) "meth"
-}
-vec(2) {
-  string(1) "A"
-  string(4) "meth"
-}
-keyset(2) {
-  string(1) "A"
-  string(4) "meth"
-}
+Exception: ClsMeth to dict conversion
+Exception: ClsMeth to vec conversion
+Exception: ClsMeth to dict conversion
+Exception: ClsMeth to vec conversion
+Exception: ClsMeth to keyset conversion
 
 Fatal error: Cannot convert record to dict in %s/arrayish-casts.php on line 19
 

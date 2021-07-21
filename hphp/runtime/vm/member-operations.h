@@ -172,14 +172,6 @@ inline void raiseEmptyObject() {
     SystemLib::throwExceptionObject(Strings::SET_PROP_NON_OBJECT);
   }
 }
-
-ALWAYS_INLINE void promoteClsMeth(tv_lval base) {
-  assertx(RO::EvalIsCompatibleClsMethType);
-  raiseClsMethToVecWarningHelper();
-  val(base).parr = clsMethToVecHelper(val(base).pclsmeth).detach();
-  type(base) = val(base).parr->toDataType();
-}
-
 }
 
 /**
@@ -494,11 +486,8 @@ NEVER_INLINE TypedValue ElemSlow(tv_rval base, key_type<keyType> key) {
     case KindOfObject:
       return ElemObject<mode, keyType>(base.val().pobj, key);
 
-    case KindOfClsMeth: {
-      if (!RO::EvalIsCompatibleClsMethType) return ElemScalar();
-      raiseClsMethToVecWarningHelper();
-      return ElemClsMeth<mode, keyType>(base.val().pclsmeth, key);
-    }
+    case KindOfClsMeth:
+      return ElemScalar();
 
     case KindOfRecord:
       return ElemRecord<keyType>(base.val().prec, key);
@@ -817,9 +806,7 @@ tv_lval ElemD(tv_lval base, key_type<keyType> key, bool roProp) {
     case KindOfObject:
       return ElemDObject<keyType>(base, key);
     case KindOfClsMeth:
-      if (!RO::EvalIsCompatibleClsMethType) return ElemDScalar();
-      detail::promoteClsMeth(base);
-      return ElemDVec<keyType>(base, key);
+      return ElemDScalar();
     case KindOfRecord:
       return ElemDRecord<keyType>(base, key);
   }
@@ -1047,11 +1034,7 @@ tv_lval ElemU(tv_lval base, key_type<keyType> key, bool roProp) {
       raise_error(Strings::OP_NOT_SUPPORTED_STRING);
       return nullptr;
     case KindOfClsMeth:
-      if (!RO::EvalIsCompatibleClsMethType) {
-        raise_error(Strings::CLS_METH_NOT_SUPPORTED);
-      }
-      detail::promoteClsMeth(base);
-      return ElemUVec<keyType>(base, key);
+      raise_error(Strings::CLS_METH_NOT_SUPPORTED);
     case KindOfRClsMeth:
       raise_error(Strings::RCLS_METH_NOT_SUPPORTED);
       return nullptr;
@@ -1475,12 +1458,7 @@ StringData* SetElemSlow(tv_lval base, key_type<keyType> key,
       SetElemObject<keyType>(base, key, value);
       return nullptr;
     case KindOfClsMeth:
-      if (!RO::EvalIsCompatibleClsMethType) {
-        SetElemScalar<setResult>(value);
-        return nullptr;
-      }
-      detail::promoteClsMeth(base);
-      SetElemVec<keyType>(base, key, value);
+      SetElemScalar<setResult>(value);
       return nullptr;
     case KindOfRecord:
       SetElemRecord<keyType>(base, key, value);
@@ -1658,12 +1636,7 @@ inline void SetNewElem(tv_lval base, TypedValue* value) {
     case KindOfObject:
       return SetNewElemObject(base, value);
     case KindOfClsMeth:
-      if (!RO::EvalIsCompatibleClsMethType) {
-        return SetNewElemScalar<setResult>(value);
-      }
-      detail::promoteClsMeth(base);
-      tvIncRefGen(*value);
-      return SetNewElemVec(base, value);
+      return SetNewElemScalar<setResult>(value);
     case KindOfRecord:
       raise_error(Strings::OP_NOT_SUPPORTED_RECORD);
   }
@@ -1785,11 +1758,7 @@ inline TypedValue SetOpElem(SetOpOp op, tv_lval base,
     }
 
     case KindOfClsMeth:
-      if (!RO::EvalIsCompatibleClsMethType) {
-        return SetOpElemScalar();
-      }
-      detail::promoteClsMeth(base);
-      return handleVec();
+      return SetOpElemScalar();
 
     case KindOfRecord: {
       auto const result = ElemDRecord<KeyType::Any>(base, key);
@@ -1964,11 +1933,7 @@ inline TypedValue IncDecElem(IncDecOp op, tv_lval base, TypedValue key) {
     }
 
     case KindOfClsMeth:
-      if (!RO::EvalIsCompatibleClsMethType) {
-        return IncDecElemScalar();
-      }
-      detail::promoteClsMeth(base);
-      return IncDecBody(op, ElemDVec<KeyType::Any>(base, key));
+      return IncDecElemScalar();
 
     case KindOfRecord:
       return IncDecBody(op, ElemDRecord<KeyType::Any>(base, key));
@@ -2230,13 +2195,7 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
     }
 
     case KindOfClsMeth:
-      if (!RO::EvalIsCompatibleClsMethType) {
-        raise_error("Cannot unset a class method pointer");
-        return;
-      }
-      detail::promoteClsMeth(base);
-      UnsetElemVec<keyType>(base, key);
-      return;
+      raise_error("Cannot unset a class method pointer");
 
     case KindOfRecord:
       raise_error("Cannot unset a record field");
@@ -2411,11 +2370,8 @@ NEVER_INLINE bool IssetElemSlow(tv_rval base, key_type<keyType> key) {
     case KindOfObject:
       return IssetElemObj<keyType>(val(base).pobj, key);
 
-    case KindOfClsMeth: {
-      if (!RO::EvalIsCompatibleClsMethType) return false;
-      raiseClsMethToVecWarningHelper();
-      return IssetElemClsMeth<keyType>(val(base).pclsmeth, key);
-    }
+    case KindOfClsMeth:
+      return false;
 
     case KindOfRecord:
       return IssetElemRecord<keyType>(val(base).prec, key);

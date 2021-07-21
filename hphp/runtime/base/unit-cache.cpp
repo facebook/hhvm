@@ -1342,7 +1342,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalEnableImplicitContext ? '1' : '0')
     + (RuntimeOption::EvalEmitClsMethPointers ? '1' : '0')
     + (RuntimeOption::EvalIsVecNotices ? '1' : '0')
-    + (RuntimeOption::EvalIsCompatibleClsMethType ? '1' : '0')
     + (RuntimeOption::EvalHackRecords ? '1' : '0')
     + (RuntimeOption::EvalAllowHhas ? '1' : '0')
     + std::to_string(RuntimeOption::EvalEnforceGenericsUB)

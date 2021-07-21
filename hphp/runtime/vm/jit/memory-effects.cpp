@@ -1899,7 +1899,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Clone:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
-  case RaiseClsMethPropConvertNotice:
   case ThrowUninitLoc:
   case RaiseUndefProp:
   case RaiseTooManyArg:
@@ -2003,9 +2002,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvArrLikeToVec:
   case ConvArrLikeToDict:
   case ConvArrLikeToKeyset: // Decrefs input values
-  case ConvClsMethToDict:
-  case ConvClsMethToKeyset:
-  case ConvClsMethToVec:
     return may_load_store(AElemAny, AEmpty);
 
   // debug_backtrace() traverses stack and WaitHandles on the heap.

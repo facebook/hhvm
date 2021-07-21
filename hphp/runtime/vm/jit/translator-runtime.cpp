@@ -150,26 +150,6 @@ ArrayData* convObjToKeysetHelper(ObjectData* obj) {
   return a;
 }
 
-ArrayData* convClsMethToVecHelper(ClsMethDataRef clsmeth) {
-  assertx(RO::EvalIsCompatibleClsMethType);
-  raiseClsMethConvertWarningHelper("vec");
-  return make_vec_array(clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
-}
-
-ArrayData* convClsMethToDictHelper(ClsMethDataRef clsmeth) {
-  assertx(RO::EvalIsCompatibleClsMethType);
-  raiseClsMethConvertWarningHelper("dict");
-  return make_dict_array(
-    0, clsmeth->getClsStr(), 1, clsmeth->getFuncStr()).detach();
-}
-
-ArrayData* convClsMethToKeysetHelper(ClsMethDataRef clsmeth) {
-  assertx(RO::EvalIsCompatibleClsMethType);
-  raiseClsMethConvertWarningHelper("keyset");
-  return make_keyset_array(
-      clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
-}
-
 double convObjToDblHelper(const ObjectData* o) {
   return o->toDouble();
 }
@@ -202,21 +182,6 @@ StringData* convObjToStrHelper(ObjectData* o) {
 
 void raiseUndefProp(ObjectData* base, const StringData* name) {
   base->raiseUndefProp(name);
-}
-
-void raiseClsMethPropConvertNotice(const TypeConstraint* tc,
-                                   bool isSProp,
-                                   const Class* cls,
-                                   const StringData* name) {
-  assertx(RO::EvalIsCompatibleClsMethType);
-  raise_notice(
-    "class_meth Compat: %s '%s::%s' declared as type %s, clsmeth "
-    "assigned",
-    isSProp ? "Static property" : "Property",
-    cls->name()->data(),
-    name->data(),
-    tc->displayName().c_str()
-  );
 }
 
 void throwUndefVariable(StringData* nm) {

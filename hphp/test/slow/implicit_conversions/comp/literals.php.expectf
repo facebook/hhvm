@@ -57,9 +57,9 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) with reifi
 class_meth < 42
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 class_meth < vec['foo', 'bar']
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 class_meth < vec['Bar', 42]
-
-Notice: Comparing int and string using a relational operator in %s/literals.php on line 147
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 rclass_meth < 42
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
 vec[99] < vec['foo']
@@ -141,9 +141,9 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) with reifi
 class_meth <= 42
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 class_meth <= vec['foo', 'bar']
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 class_meth <= vec['Bar', 42]
-
-Notice: Comparing int and string using a relational operator in %s/literals.php on line 238
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 rclass_meth <= 42
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
 vec[99] <= vec['foo']
@@ -225,9 +225,9 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) with reifi
 class_meth > 42
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 class_meth > vec['foo', 'bar']
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 class_meth > vec['Bar', 42]
-
-Notice: Comparing int and string using a relational operator in %s/literals.php on line 329
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 rclass_meth > 42
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
 vec[99] > vec['foo']
@@ -309,9 +309,9 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) with reifi
 class_meth >= 42
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 class_meth >= vec['foo', 'bar']
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 class_meth >= vec['Bar', 42]
-
-Notice: Comparing int and string using a relational operator in %s/literals.php on line 420
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 rclass_meth >= 42
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
 vec[99] >= vec['foo']
@@ -393,9 +393,9 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) with reifi
 class_meth <=> 42
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 class_meth <=> vec['foo', 'bar']
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 class_meth <=> vec['Bar', 42]
-
-Notice: Comparing int and string using a relational operator in %s/literals.php on line 512
+Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
 rclass_meth <=> 42
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
 vec[99] <=> vec['foo']

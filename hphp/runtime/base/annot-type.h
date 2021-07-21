@@ -121,7 +121,6 @@ enum class AnnotAction {
   ConvertClass,
   WarnLazyClass,
   ConvertLazyClass,
-  ClsMethCheck,
   RecordCheck,
   WarnClassname,
 };

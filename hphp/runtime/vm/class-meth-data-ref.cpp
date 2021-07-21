@@ -65,23 +65,6 @@ void raiseClsMethClsMethRelCompareWarning() {
   raise_notice("Comparing clsmeth with clsmeth relationally");
 }
 
-void raiseClsMethToVecWarningHelper(const char* fn /* =nullptr */) {
-  if (!RuntimeOption::EvalRaiseClsMethConversionWarning) return;
-  if (!fn) raise_notice("Implicit clsmeth to vec conversion");
-  else raise_notice("Implicit clsmeth to vec conversion for %s()", fn);
-}
-
-void raiseClsMethConvertWarningHelper(const char* toType) {
-  if (!RuntimeOption::EvalRaiseClsMethConversionWarning) return;
-  raise_notice("Implicit clsmeth to %s conversion", toType);
-}
-
-Array clsMethToVecHelper(ClsMethDataRef clsMeth) {
-  assertx(RO::EvalIsCompatibleClsMethType);
-
-  return make_vec_array(clsMeth->getClsStr(), clsMeth->getFuncStr());
-}
-
 void throwInvalidClsMethToType(const char* ty) {
   SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
     "Cannot convert clsmeth to {}", ty

@@ -251,16 +251,10 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
               isRFuncType(dt) || isRClsMethType(dt))
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
     case AnnotMetaType::VecOrDict:
-      if (isClsMethType(dt) && RO::EvalIsCompatibleClsMethType) {
-        return AnnotAction::ClsMethCheck;
-      }
       return (isVecType(dt) || isDictType(dt))
         ? AnnotAction::Pass
         : AnnotAction::Fail;
     case AnnotMetaType::ArrayLike:
-      if (isClsMethType(dt) && RO::EvalIsCompatibleClsMethType) {
-        return AnnotAction::ClsMethCheck;
-      }
       return isArrayLikeType(dt) ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::Classname:
       if (isStringType(dt)) return AnnotAction::Pass;
@@ -284,13 +278,6 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
   if (at == AnnotType::String && dt == KindOfLazyClass) {
     return RuntimeOption::EvalClassStringHintNotices
       ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
-  }
-  if (isClsMethType(dt) && RO::EvalIsCompatibleClsMethType) {
-    auto const resolve = [] (bool okay) {
-      return okay ? AnnotAction::ClsMethCheck : AnnotAction::Fail;
-    };
-    if (at == AnnotType::Vec)       return resolve(true);
-    if (at == AnnotType::ArrayLike) return resolve(true);
   }
 
   if (at == AnnotType::Record) {
@@ -340,9 +327,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         }
         return AnnotAction::Fail;
       case KindOfClsMeth:
-        return RO::EvalIsCompatibleClsMethType &&
-               interface_supports_arrlike(annotClsName) ?
-          AnnotAction::ClsMethCheck : AnnotAction::Fail;
+        return AnnotAction::Fail;
       case KindOfFunc:
       case KindOfRClsMeth:
       case KindOfRFunc:

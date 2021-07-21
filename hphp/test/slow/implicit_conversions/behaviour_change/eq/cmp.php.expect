@@ -4919,7 +4919,7 @@ Err     Err     Err     Err     Err
 array arr1 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 array arr1 cmp clsmeth:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 array arr1 cmp rclsmeth:
 Err     Err     Err     Err     Err
 array arr2 cmp null:
@@ -5133,7 +5133,7 @@ Err     Err     Err     Err     Err
 array arr2 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 array arr2 cmp clsmeth:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 array arr2 cmp rclsmeth:
 Err     Err     Err     Err     Err
 array arr3 cmp null:
@@ -5347,7 +5347,7 @@ Err     Err     Err     Err     Err
 array arr3 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 array arr3 cmp clsmeth:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 array arr3 cmp rclsmeth:
 Err     Err     Err     Err     Err
 array arr4 cmp null:
@@ -5561,7 +5561,7 @@ Err     Err     Err     Err     Err
 array arr4 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 array arr4 cmp clsmeth:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 array arr4 cmp rclsmeth:
 Err     Err     Err     Err     Err
 array arr5 cmp null:
@@ -5775,7 +5775,7 @@ Err     Err     Err     Err     Err
 array arr5 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 array arr5 cmp clsmeth:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 array arr5 cmp rclsmeth:
 Err     Err     Err     Err     Err
 array arr6 cmp null:
@@ -5989,7 +5989,7 @@ Err     Err     Err     Err     Err
 array arr6 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 array arr6 cmp clsmeth:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 array arr6 cmp rclsmeth:
 Err     Err     Err     Err     Err
 array arr7 cmp null:
@@ -6203,7 +6203,7 @@ Err     Err     Err     Err     Err
 array arr7 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 array arr7 cmp clsmeth:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 array arr7 cmp rclsmeth:
 Err     Err     Err     Err     Err
 array arr8 cmp null:
@@ -6417,7 +6417,7 @@ Err     Err     Err     Err     Err
 array arr8 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 array arr8 cmp clsmeth:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 array arr8 cmp rclsmeth:
 Err     Err     Err     Err     Err
 array arr9 cmp null:
@@ -6631,7 +6631,7 @@ Err     Err     Err     Err     Err
 array arr9 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 array arr9 cmp clsmeth:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 array arr9 cmp rclsmeth:
 Err     Err     Err     Err     Err
 array arr12 cmp null:
@@ -8771,7 +8771,7 @@ Err     Err     Err     Err     Err
 array arr21 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 array arr21 cmp clsmeth:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 array arr21 cmp rclsmeth:
 Err     Err     Err     Err     Err
 vec vec1 cmp null:
@@ -8985,7 +8985,7 @@ Err     Err     Err     Err     Err
 vec vec1 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 vec vec1 cmp clsmeth:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 vec vec1 cmp rclsmeth:
 Err     Err     Err     Err     Err
 vec vec2 cmp null:
@@ -9199,7 +9199,7 @@ Err     Err     Err     Err     Err
 vec vec2 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 vec vec2 cmp clsmeth:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 vec vec2 cmp rclsmeth:
 Err     Err     Err     Err     Err
 vec vec3 cmp null:
@@ -9413,7 +9413,7 @@ Err     Err     Err     Err     Err
 vec vec3 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 vec vec3 cmp clsmeth:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 vec vec3 cmp rclsmeth:
 Err     Err     Err     Err     Err
 vec vec4 cmp null:
@@ -9627,7 +9627,7 @@ Err     Err     Err     Err     Err
 vec vec4 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 vec vec4 cmp clsmeth:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 vec vec4 cmp rclsmeth:
 Err     Err     Err     Err     Err
 vec vec7 cmp null:
@@ -9841,7 +9841,7 @@ Err     Err     Err     Err     Err
 vec vec7 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 vec vec7 cmp clsmeth:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 vec vec7 cmp rclsmeth:
 Err     Err     Err     Err     Err
 vec vec8 cmp null:
@@ -10055,7 +10055,7 @@ Err     Err     Err     Err     Err
 vec vec8 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 vec vec8 cmp clsmeth:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 vec vec8 cmp rclsmeth:
 Err     Err     Err     Err     Err
 vec vec9 cmp null:
@@ -10269,7 +10269,7 @@ Err     Err     Err     Err     Err
 vec vec9 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 vec vec9 cmp clsmeth:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 vec vec9 cmp rclsmeth:
 Err     Err     Err     Err     Err
 vec vec10 cmp null:
@@ -10483,7 +10483,7 @@ Err     Err     Err     Err     Err
 vec vec10 cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 vec vec10 cmp clsmeth:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 vec vec10 cmp rclsmeth:
 Err     Err     Err     Err     Err
 dict dict1 cmp null:
@@ -22515,23 +22515,23 @@ Err     Err     Err     Err     Err
 clsmeth cmp "BAZ":
 Err     Err     Err     Err     Err
 clsmeth cmp array arr1:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 clsmeth cmp array arr2:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 clsmeth cmp array arr3:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 clsmeth cmp array arr4:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 clsmeth cmp array arr5:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 clsmeth cmp array arr6:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 clsmeth cmp array arr7:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 clsmeth cmp array arr8:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 clsmeth cmp array arr9:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 clsmeth cmp array arr12:
 Err     Err     Err     Err     Err
 clsmeth cmp array arr13:
@@ -22551,23 +22551,23 @@ Err     Err     Err     Err     Err
 clsmeth cmp array arr20:
 Err     Err     Err     Err     Err
 clsmeth cmp array arr21:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 clsmeth cmp vec vec1:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 clsmeth cmp vec vec2:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 clsmeth cmp vec vec3:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 clsmeth cmp vec vec4:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 clsmeth cmp vec vec7:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 clsmeth cmp vec vec8:
-F       F       T       T       1
+Err     Err     Err     Err     Err
 clsmeth cmp vec vec9:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 clsmeth cmp vec vec10:
-T       T       F       F       -1
+Err     Err     Err     Err     Err
 clsmeth cmp dict dict1:
 Err     Err     Err     Err     Err
 clsmeth cmp dict dict2:
@@ -22681,7 +22681,7 @@ Err     Err     Err     Err     Err
 clsmeth cmp rfunc_ptr:
 Err     Err     Err     Err     Err
 clsmeth cmp clsmeth:
-F       T       T       F       0
+Err     Err     Err     Err     Err
 clsmeth cmp rclsmeth:
 Err     Err     Err     Err     Err
 rclsmeth cmp null:

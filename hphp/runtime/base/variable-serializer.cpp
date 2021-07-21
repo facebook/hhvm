@@ -1712,15 +1712,9 @@ void VariableSerializer::serializeClsMeth(
     case Type::Internal:
     case Type::APCSerialize:
     case Type::DebuggerSerialize: {
-      if (!RO::EvalIsCompatibleClsMethType) {
-        SystemLib::throwInvalidOperationExceptionObject(
-          "Unable to serialize class meth pointer"
-        );
-      }
-      raiseClsMethToVecWarningHelper();
-      auto const vec = clsMethToVecHelper(clsMeth);
-      serializeArray(vec.get(), skipNestCheck);
-      break;
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Unable to serialize class meth pointer"
+      );
     }
   }
 }

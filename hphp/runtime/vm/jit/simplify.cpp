@@ -2050,45 +2050,6 @@ SSATmp* simplifyConvArrLikeToKeyset(State& env, const IRInstruction* inst) {
   );
 }
 
-SSATmp* simplifyConvClsMethToVec(State& env, const IRInstruction* inst) {
-  assertx(RO::EvalIsCompatibleClsMethType);
-  if (RO::EvalRaiseClsMethConversionWarning) return nullptr;
-  auto const src = inst->src(0);
-  if (src->hasConstVal()) {
-    auto const clsmeth = src->clsmethVal();
-    auto arr = make_vec_array(clsmeth->getClsStr(), clsmeth->getFuncStr());
-    return cns(env, ArrayData::GetScalarArray(std::move(arr)));
-  }
-  return nullptr;
-}
-
-SSATmp* simplifyConvClsMethToDict(State& env, const IRInstruction* inst) {
-  assertx(RO::EvalIsCompatibleClsMethType);
-  if (RO::EvalRaiseClsMethConversionWarning) return nullptr;
-  auto const src = inst->src(0);
-  if (src->hasConstVal()) {
-    auto const clsmeth = src->clsmethVal();
-    auto arr = make_dict_array(
-      0, clsmeth->getClsStr(), 1, clsmeth->getFuncStr());
-    return cns(env, ArrayData::GetScalarArray(std::move(arr)));
-  }
-  return nullptr;
-}
-
-SSATmp* simplifyConvClsMethToKeyset(State& env, const IRInstruction* inst) {
-  assertx(RO::EvalIsCompatibleClsMethType);
-  if (RO::EvalRaiseClsMethConversionWarning) return nullptr;
-  auto const src = inst->src(0);
-  if (src->hasConstVal()) {
-    auto const clsmeth = src->clsmethVal();
-    auto arr = make_keyset_array(
-      const_cast<StringData*>(clsmeth->getCls()->name()),
-      const_cast<StringData*>(clsmeth->getFunc()->name()));
-    return cns(env, ArrayData::GetScalarArray(std::move(arr)));
-  }
-  return nullptr;
-}
-
 SSATmp* simplifyConvDblToBool(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
@@ -2332,15 +2293,9 @@ SSATmp* simplifyConvTVToInt(State& env, const IRInstruction* inst) {
   if (srcType <= TObj)  return gen(env, ConvObjToInt, *notice_data, catchTrace, src);
   if (srcType <= TRes)  return genWithConvNoticePrim(ConvResToInt, "resource");
   if (srcType <= TClsMeth) {
-    if (!RO::EvalIsCompatibleClsMethType) {
-      gen(env, ThrowInvalidOperation, catchTrace,
-          cns(env, s_msgClsMethToInt.get()));
-      return cns(env, TBottom);
-    }
-    if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
-      gen(env, RaiseNotice, catchTrace, cns(env, s_msgClsMethToIntImpl.get()));
-    }
-    return cns(env, 1);
+    gen(env, ThrowInvalidOperation, catchTrace,
+        cns(env, s_msgClsMethToInt.get()));
+    return cns(env, TBottom);
   }
   return nullptr;
 }
@@ -2370,15 +2325,9 @@ SSATmp* simplifyConvTVToDbl(State& env, const IRInstruction* inst) {
   if (srcType <= TObj)  return gen(env, ConvObjToDbl, inst->taken(), src);
   if (srcType <= TRes)  return gen(env, ConvResToDbl, src);
   if (srcType <= TClsMeth) {
-    if (!RO::EvalIsCompatibleClsMethType) {
-      gen(env, ThrowInvalidOperation, catchTrace,
-          cns(env, s_msgClsMethToDbl.get()));
-      return cns(env, TBottom);
-    }
-    if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
-      gen(env, RaiseNotice, catchTrace, cns(env, s_msgClsMethToDblImpl.get()));
-    }
-    return cns(env, 1.0);
+    gen(env, ThrowInvalidOperation, catchTrace,
+        cns(env, s_msgClsMethToDbl.get()));
+    return cns(env, TBottom);
   }
 
   return nullptr;
@@ -3836,9 +3785,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(ConvIntToDbl)
       X(ConvIntToStr)
       X(ConvObjToBool)
-      X(ConvClsMethToVec)
-      X(ConvClsMethToDict)
-      X(ConvClsMethToKeyset)
       X(ConvStrToBool)
       X(ConvStrToDbl)
       X(ConvStrToInt)

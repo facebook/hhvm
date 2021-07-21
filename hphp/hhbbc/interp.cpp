@@ -2419,13 +2419,11 @@ void in(ISS& env, const bc::ClassGetTS& op) {
 }
 
 void in(ISS& env, const bc::AKExists&) {
-  auto const [base, promotion1] = promote_clsmeth_to_vecish(popC(env));
-  auto const [key, promotion2] = promote_classlike_to_key(popC(env));
+  auto const base = popC(env);
+  auto const [key, promotion] = promote_classlike_to_key(popC(env));
 
   auto result = TBottom;
-  auto effectFree =
-    promotion1 != Promotion::YesMightThrow &&
-    promotion2 != Promotion::YesMightThrow;
+  auto effectFree = promotion != Promotion::YesMightThrow;
 
   if (!base.subtypeOf(BObj | BArrLike)) {
     effectFree = false;
@@ -4914,14 +4912,6 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
       dont_reduce = true;
     }
 
-    // VerifyRetType will convert TClsMeth to TVec implicitly
-    if (stackT.couldBe(BClsMeth) && RO::EvalIsCompatibleClsMethType) {
-      if (tcT.couldBe(BVec)) {
-        stackT |= TVec;
-        dont_reduce = true;
-      }
-    }
-
     // If the constraint is soft, then there are no optimizations we can safely
     // do here, so just leave the top of stack as is.
     if (constraint->isSoft() ||
@@ -5205,14 +5195,12 @@ void in(ISS& env, const bc::Idx&) {
 
 void in(ISS& env, const bc::ArrayIdx&) {
   auto def = popC(env);
-  auto const [key, promotion1] = promote_classlike_to_key(popC(env));
-  auto const [base, promotion2] = promote_clsmeth_to_vecish(popC(env));
+  auto const [key, promotion] = promote_classlike_to_key(popC(env));
+  auto const base = popC(env);
 
   assertx(!def.is(BBottom));
 
-  auto effectFree =
-    promotion1 != Promotion::YesMightThrow &&
-    promotion2 != Promotion::YesMightThrow;
+  auto effectFree = promotion != Promotion::YesMightThrow;
   auto result = TBottom;
 
   auto const finish = [&] {

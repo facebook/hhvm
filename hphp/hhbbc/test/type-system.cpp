@@ -6411,10 +6411,6 @@ TEST(Type, LoosenLikeness) {
   auto const program = make_test_program();
   Index index{ program.get() };
 
-  auto old = RO::EvalIsCompatibleClsMethType;
-  RO::EvalIsCompatibleClsMethType = true;
-  SCOPE_EXIT { RO::EvalIsCompatibleClsMethType = old; };
-
   auto const& all = allCases(index);
   for (auto const& t : all) {
     if (!t.couldBe(BCls | BLazyCls | BClsMeth)) {
@@ -6422,13 +6418,12 @@ TEST(Type, LoosenLikeness) {
     } else {
       auto u = BBottom;
       if (t.couldBe(BCls | BLazyCls)) u |= BSStr;
-      if (t.couldBe(BClsMeth)) u |= BVecN;
       EXPECT_EQ(loosen_likeness(t), union_of(t, Type{u}));
     }
   }
 
   std::vector<std::pair<Type, Type>> tests{
-    { TClsMeth, Type{BClsMeth|BVecN} },
+    { TClsMeth, Type{BClsMeth} },
     { TCls, Type{BCls|BSStr} },
     { TLazyCls, Type{BLazyCls|BSStr} },
     { lazyclsval(s_A), Type{BLazyCls|BSStr} },
@@ -6444,10 +6439,6 @@ TEST(Type, LoosenLikeness) {
 TEST(Type, LoosenLikenessRecursively) {
   auto const program = make_test_program();
   Index index{ program.get() };
-
-  auto old = RO::EvalIsCompatibleClsMethType;
-  RO::EvalIsCompatibleClsMethType = true;
-  SCOPE_EXIT { RO::EvalIsCompatibleClsMethType = old; };
 
   auto const test = [&] (const Type& t) {
     if (!t.subtypeOf(BInitCell)) return;
@@ -6475,18 +6466,13 @@ TEST(Type, LoosenLikenessRecursively) {
 
     if (t.couldBe(BArrLikeN | BObj)) return;
 
-    if (!t.couldBe(BCls | BLazyCls | BClsMeth)) {
-      EXPECT_EQ(loosen_likeness_recursively(t), loosen_array_staticness(t));
-    } else {
-      auto u = BBottom;
-      if (t.couldBe(BCls | BLazyCls)) u |= BSStr;
-      if (t.couldBe(BClsMeth)) u |= BVecN;
-      EXPECT_EQ(loosen_likeness_recursively(t), union_of(t, Type{u}));
-    }
+    auto u = BBottom;
+    if (t.couldBe(BCls | BLazyCls)) u |= BSStr;
+    EXPECT_EQ(loosen_likeness_recursively(t), union_of(t, Type{u}));
   };
 
   auto const almostAll1 = Type{BInitCell & ~BSStr};
-  auto const almostAll2 = Type{BInitCell & ~BVecN};
+  auto const almostAll2 = Type{BInitCell};
 
   auto const& all = allCases(index);
   for (auto const& t : all) test(t);
@@ -6494,32 +6480,29 @@ TEST(Type, LoosenLikenessRecursively) {
   test(almostAll2);
 
   std::vector<std::pair<Type, Type>> tests{
-    { TClsMeth, Type{BClsMeth|BVecN} },
+    { TClsMeth, Type{BClsMeth} },
     { TCls, Type{BCls|BSStr} },
     { TLazyCls, Type{BLazyCls|BSStr} },
     { TInt, TInt },
     { Type{BInt|BCls}, Type{BCls|BSStr|BInt} },
     { wait_handle(index, TInt), wait_handle(index, TInt) },
     { wait_handle(index, TCls), wait_handle(index, Type{BCls|BSStr}) },
-    { wait_handle(index, TClsMeth), wait_handle(index, Type{BClsMeth|BVecN}) },
-    { dict_val(static_dict(s_A, 100, s_B, 200)),
-      dict_map({map_elem(s_A, ival(100)), map_elem(s_B, ival(200))}) },
+    { wait_handle(index, TClsMeth), wait_handle(index, Type{BClsMeth}) },
     { vec_n(TInt), vec_n(TInt) },
     { vec_n(TCls), vec_n(Type{BCls|BSStr}) },
-    { vec_n(TClsMeth), vec_n(Type{BClsMeth|BVecN}) },
+    { vec_n(TClsMeth), vec_n(Type{BClsMeth}) },
     { vec({TInt}), vec({TInt}) },
     { vec({TCls}), vec({Type{BCls|BSStr}}) },
-    { vec({TClsMeth}), vec({Type{BClsMeth|BVecN}}) },
+    { vec({TClsMeth}), vec({Type{BClsMeth}}) },
     { dict_n(TArrKey, TInt), dict_n(TArrKey, TInt) },
     { dict_n(TArrKey, TCls), dict_n(TArrKey, Type{BCls|BSStr}) },
-    { dict_n(TArrKey, TClsMeth), dict_n(TArrKey, Type{BClsMeth|BVecN}) },
+    { dict_n(TArrKey, TClsMeth), dict_n(TArrKey, Type{BClsMeth}) },
     { dict_map({map_elem(s_A, TInt)}, TArrKey, TInt),
       dict_map({map_elem(s_A, TInt)}, TArrKey, TInt) },
     { dict_map({map_elem(s_A, TCls)}, TArrKey, TCls),
       dict_map({map_elem(s_A, Type{BCls|BSStr})}, TArrKey, Type{BCls|BSStr}) },
     { dict_map({map_elem(s_A, TClsMeth)}, TArrKey, TClsMeth),
-      dict_map({map_elem(s_A, Type{BClsMeth|BVecN})},
-               TArrKey, Type{BClsMeth|BVecN}) },
+      dict_map({map_elem(s_A, Type{BClsMeth})}, TArrKey, Type{BClsMeth}) },
     { vec_n(almostAll1), TVecN },
     { vec_n(almostAll2), TVecN },
     { dict_n(TArrKey, almostAll1), TDictN },

@@ -219,12 +219,7 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
         continue;
 
       case KindOfClsMeth:
-        if (!RO::EvalIsCompatibleClsMethType) {
-          throwInvalidClsMethToType("double");
-        }
-        raiseClsMethConvertWarningHelper("double");
-        d = 1.0;
-        continue;
+        throwInvalidClsMethToType("double");
 
       case KindOfRClsMeth:
         raise_convert_rcls_meth_to_type("double");
@@ -310,12 +305,7 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         continue;
 
       case KindOfClsMeth:
-        if (!RO::EvalIsCompatibleClsMethType) {
-          throwInvalidClsMethToType("int");
-        }
-        raiseClsMethConvertWarningHelper("int");
-        i = 1;
-        continue;
+        throwInvalidClsMethToType("int");
 
       case KindOfRClsMeth:
         raise_convert_rcls_meth_to_type("int");
@@ -382,11 +372,7 @@ double tvCastToDouble(TypedValue tv) {
       return lazyClassToStringHelper(tv.m_data.plazyclass)->toDouble();
 
     case KindOfClsMeth:
-      if (!RO::EvalIsCompatibleClsMethType) {
-        throwInvalidClsMethToType("double");
-      }
-      raiseClsMethConvertWarningHelper("double");
-      return 1.0;
+      throwInvalidClsMethToType("double");
 
     case KindOfRClsMeth:
       raise_convert_rcls_meth_to_type("double");
@@ -634,11 +620,7 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     }
 
     case KindOfClsMeth:
-      if (!RO::EvalIsCompatibleClsMethType) {
-        throwInvalidClsMethToType("array");
-      }
-      raiseClsMethToVecWarningHelper();
-      return clsMethToVecHelper(tv.m_data.pclsmeth).detach();
+      throwInvalidClsMethToType("array");
 
     case KindOfRClsMeth:
       raise_convert_rcls_meth_to_type("array");
@@ -730,17 +712,8 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         a = makeSingletonDict(*tv);
         continue;
 
-      case KindOfClsMeth: {
-        if (!RO::EvalIsCompatibleClsMethType) {
-          throwInvalidClsMethToType("array");
-        }
-        raiseClsMethConvertWarningHelper("array");
-        a = make_dict_array(
-            0, val(tv).pclsmeth->getClsStr(),
-            1, val(tv).pclsmeth->getFuncStr()
-        ).detach();
-        continue;
-      }
+      case KindOfClsMeth:
+        throwInvalidClsMethToType("array");
 
       case KindOfRClsMeth:
         raise_convert_rcls_meth_to_type("array");
@@ -837,18 +810,10 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
           "Lazy class to vec conversion"
         );
 
-      case KindOfClsMeth: {
-        if (!RO::EvalIsCompatibleClsMethType) {
-          SystemLib::throwInvalidOperationExceptionObject(
-            "ClsMeth to vec conversion"
-          );
-        }
-        raiseClsMethConvertWarningHelper("vec");
-        a = make_vec_array(
-          val(tv).pclsmeth->getClsStr(), val(tv).pclsmeth->getFuncStr()
-        ).detach();
-        continue;
-      }
+      case KindOfClsMeth:
+        SystemLib::throwInvalidOperationExceptionObject(
+          "ClsMeth to vec conversion"
+        );
 
       case KindOfRClsMeth:
         raise_convert_rcls_meth_to_type("vec");
@@ -943,16 +908,9 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         );
 
       case KindOfClsMeth: {
-        if (!RO::EvalIsCompatibleClsMethType) {
-          SystemLib::throwInvalidOperationExceptionObject(
-            "ClsMeth to dict conversion"
-          );
-        }
-        raiseClsMethConvertWarningHelper("dict");
-        a = make_dict_array(
-          0, val(tv).pclsmeth->getClsStr(),
-          1, val(tv).pclsmeth->getFuncStr()).detach();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "ClsMeth to dict conversion"
+        );
       }
 
       case KindOfRClsMeth:
@@ -1048,17 +1006,9 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
         );
 
       case KindOfClsMeth: {
-        if (!RO::EvalIsCompatibleClsMethType) {
-          SystemLib::throwInvalidOperationExceptionObject(
-            "ClsMeth to keyset conversion"
-          );
-        }
-        raiseClsMethConvertWarningHelper("keyset");
-        a = make_keyset_array(
-          const_cast<StringData*>(val(tv).pclsmeth->getCls()->name()),
-          const_cast<StringData*>(val(tv).pclsmeth->getFunc()->name())
-        ).detach();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "ClsMeth to keyset conversion"
+        );
       }
 
       case KindOfRClsMeth:
@@ -1108,15 +1058,8 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
       tv.m_data.pobj->incRefCount();
       return tv.m_data.pobj;
 
-    case KindOfClsMeth: {
-      if (!RO::EvalIsCompatibleClsMethType) {
-        throwInvalidClsMethToType("object");
-      }
-      raiseClsMethConvertWarningHelper("object");
-      auto const arr = make_dict_array(0, val(tv).pclsmeth->getClsStr(),
-                                   1, val(tv).pclsmeth->getFuncStr());
-      return ObjectData::FromArray(arr.get()).detach();
-    }
+    case KindOfClsMeth:
+      throwInvalidClsMethToType("object");
 
     case KindOfRClsMeth:
       raise_convert_rcls_meth_to_type("object");

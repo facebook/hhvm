@@ -188,28 +188,11 @@ SSATmp* opt_method_exists(IRGS& env, const ParamPrep& params) {
 
 const StaticString s_conv_clsmeth_to_vec("Implicit clsmeth to vec conversion");
 
-void raiseClsMethToVecWarningHelper(IRGS& env, const ParamPrep& params) {
-  assertx(RO::EvalIsCompatibleClsMethType);
-  if (RO::EvalRaiseClsMethConversionWarning) {
-    gen(
-      env,
-      RaiseNotice,
-      make_opt_catch(env, params),
-      cns(env, s_conv_clsmeth_to_vec.get())
-    );
-  }
-}
-
 SSATmp* opt_count(IRGS& env, const ParamPrep& params) {
   if (params.size() != 2) return nullptr;
 
   auto const mode = params[1].value;
   auto const val = params[0].value;
-
-  if (val->isA(TClsMeth) && RO::EvalIsCompatibleClsMethType) {
-    raiseClsMethToVecWarningHelper(env, params);
-    return cns(env, 2);
-  }
 
   // Bail if we're trying to do a recursive count()
   if (!mode->hasConstVal(0)) return nullptr;
@@ -616,10 +599,6 @@ SSATmp* opt_type_structure_classname(IRGS& env, const ParamPrep& params) {
 SSATmp* opt_is_list_like(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const type = params[0].value->type();
-  if (type <= TClsMeth && RO::EvalIsCompatibleClsMethType) {
-    raiseClsMethToVecWarningHelper(env, params);
-    return cns(env, true);
-  }
   if (!type.maybe(TArrLike)) return cns(env, false);
   if (type <= TVec) return cns(env, true);
   return nullptr;
@@ -631,19 +610,6 @@ SSATmp* opt_is_vec_or_varray(IRGS& env, const ParamPrep& params) {
 
   if (type <= TVec) {
     return cns(env, true);
-  }
-
-  if (type <= TClsMeth && RO::EvalIsCompatibleClsMethType) {
-    if (RO::EvalIsVecNotices) {
-      auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC);
-      gen(env, RaiseNotice, make_opt_catch(env, params), cns(env, msg));
-    }
-    return cns(env, true);
-  }
-
-  if (!type.maybe(TVec) &&
-      !(type.maybe(TClsMeth) && RO::EvalIsCompatibleClsMethType)) {
-    return cns(env, false);
   }
 
   return nullptr;
@@ -1547,29 +1513,6 @@ SSATmp* maybeCoerceValue(
       hint(env, Block::Hint::Unlikely);
       return bail();
     });
-  }
-
-  if ((target <= TVec) && RO::EvalIsCompatibleClsMethType) {
-    if (!val->type().maybe(TClsMeth)) return bail();
-    auto const& tc = func->params()[id].typeConstraint;
-    if (!tc.convertClsMethToArrLike()) return bail();
-
-    return cond(
-      env,
-      [&] (Block* f) { return gen(env, CheckType, TClsMeth, f, val); },
-      [&] (SSATmp* methVal) {
-        if (RuntimeOption::EvalVecHintNotices) {
-          raiseClsmethCompatTypeHint(env, id, func, tc);
-        }
-        auto const ret = update(convertClsMethToVec(env, methVal));
-        decRef(env, methVal);
-        return ret;
-      },
-      [&] {
-        hint(env, Block::Hint::Unlikely);
-        return bail();
-      }
-    );
   }
 
   return bail();

@@ -548,33 +548,6 @@ SSATmp* emitMixedClsMethCmp(IRGS& env, Op op) {
   }
 }
 
-namespace {
-
-void raiseClsMethCompareWarningHelper(IRGS& env, Op op) {
-  assertx(RO::EvalIsCompatibleClsMethType);
-  if (!RuntimeOption::EvalRaiseClsMethComparisonWarning) return;
-  switch (op) {
-    case Op::Gt:
-    case Op::Gte:
-    case Op::Lt:
-    case Op::Lte:
-    case Op::Cmp:
-      gen(
-        env,
-        RaiseNotice,
-        cns(env, makeStaticString(Strings::CLSMETH_COMPAT_NON_CLSMETH_REL_CMP))
-      );
-      return;
-    case Op::Same:
-    case Op::Eq:
-    case Op::NSame:
-    case Op::Neq: return;
-    default: always_assert(false);
-  }
-}
-
-}
-
 SSATmp* implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   assertx(left->type() <= TNull);
   auto const rightTy = right->type();
@@ -793,16 +766,6 @@ SSATmp* equalClsMeth(IRGS& env, SSATmp* left, SSATmp* right) {
     );
 }
 
-void raiseClsMethToVecWarningHelper(IRGS& env) {
-  assertx(RO::EvalIsCompatibleClsMethType);
-  if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
-    gen(
-      env,
-      RaiseNotice,
-      cns(env, makeStaticString("Implicit clsmeth to vec conversion")));
-  }
-}
-
 }
 
 SSATmp* implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
@@ -814,12 +777,6 @@ SSATmp* implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     return emitHackArrBoolCmp(env, op, left, gen(env, ConvTVToBool, right));
   } else if (rightTy <= TVec) {
     return gen(env, toArrLikeCmpOpcode(op), left, right);
-  } else if (rightTy <= TClsMeth && RO::EvalIsCompatibleClsMethType) {
-    raiseClsMethToVecWarningHelper(env);
-    auto const arr = convertClsMethToVec(env, right);
-    const auto ret = gen(env, toArrLikeCmpOpcode(op), left, arr);
-    decRef(env, arr);
-    return ret;
   } else if (rightTy <= TClsMeth) {
     return emitMixedClsMethCmp(env, op);
   } else if (rightTy <= TFunc) {
@@ -1231,14 +1188,7 @@ SSATmp* implClsMethCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     PUNT(ClsMeth-ClsMeth-cmp);
   }
 
-  // Left (TClsMeth) is compatible with vec
-  if (rightTy <= TVec && RO::EvalIsCompatibleClsMethType) {
-    raiseClsMethToVecWarningHelper(env);
-    auto const arr = convertClsMethToVec(env, left);
-    const auto ret = implVecCmp(env, op, arr, right);
-    decRef(env, arr);
-    return ret;
-  } else if (rightTy <= TRFunc) {
+  if (rightTy <= TRFunc) {
     PUNT(RFunc-cmp);
   } else if (rightTy <= TRClsMeth) {
     PUNT(RClsMeth-cmp);
@@ -1326,13 +1276,7 @@ void implCmp(IRGS& env, Op op) {
       (isStringType(leftTy.toDataType()) &&
         isClassType(rightTy.toDataType())) ||
       (isStringType(leftTy.toDataType()) &&
-        isLazyClassType(rightTy.toDataType())) ||
-      (isClsMethType(leftTy.toDataType()) &&
-        isArrayLikeType(rightTy.toDataType()) &&
-        RO::EvalIsCompatibleClsMethType) ||
-      (isArrayLikeType(leftTy.toDataType()) &&
-        isClsMethType(rightTy.toDataType()) &&
-        RO::EvalIsCompatibleClsMethType);
+        isLazyClassType(rightTy.toDataType()));
   };
 
   // If it's a same-ish comparison and the types don't match (taking into

@@ -317,9 +317,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvTVToDbl:
   case ConvTVToInt:
   case ConvTVToStr:
-  case ConvClsMethToDict:
-  case ConvClsMethToKeyset:
-  case ConvClsMethToVec:
   case ConvObjToBool:
   case ConvObjToDbl:
   case ConvObjToDict:
@@ -414,7 +411,6 @@ bool opcodeMayRaise(Opcode opc) {
   case PropTypeRedefineCheck:
   case PropX:
   case RaiseBadComparisonViolation:
-  case RaiseClsMethPropConvertNotice:
   case RaiseCoeffectsCallViolation:
   case RaiseCoeffectsFunParamCoeffectRulesViolation:
   case RaiseCoeffectsFunParamTypeViolation:

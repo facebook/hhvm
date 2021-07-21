@@ -281,15 +281,12 @@ IMPL_OPCODE_CALL(ConvClsMethToVArr);
 IMPL_OPCODE_CALL(ConvClsMethToDArr);
 
 IMPL_OPCODE_CALL(ConvArrLikeToVec);
-IMPL_OPCODE_CALL(ConvClsMethToVec);
 IMPL_OPCODE_CALL(ConvObjToVec);
 
 IMPL_OPCODE_CALL(ConvArrLikeToDict);
-IMPL_OPCODE_CALL(ConvClsMethToDict);
 IMPL_OPCODE_CALL(ConvObjToDict);
 
 IMPL_OPCODE_CALL(ConvArrLikeToKeyset);
-IMPL_OPCODE_CALL(ConvClsMethToKeyset);
 IMPL_OPCODE_CALL(ConvObjToKeyset);
 
 ///////////////////////////////////////////////////////////////////////////////

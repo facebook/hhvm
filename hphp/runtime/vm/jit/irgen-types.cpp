@@ -190,7 +190,6 @@ template <typename GetVal,
           typename FuncToStr,
           typename ClassToStr,
           typename LazyClassToStr,
-          typename ClsMethToVec,
           typename Fail,
           typename Callable,
           typename VerifyCls,
@@ -204,7 +203,6 @@ void verifyTypeImpl(IRGS& env,
                     FuncToStr funcToStr,
                     ClassToStr classToStr,
                     LazyClassToStr lazyClassToStr,
-                    ClsMethToVec clsMethToVec,
                     Fail fail,
                     Callable callable,
                     VerifyCls verifyCls,
@@ -279,11 +277,6 @@ void verifyTypeImpl(IRGS& env,
     case AnnotAction::ConvertLazyClass:
       assertx(valType <= TLazyCls);
       if (!lazyClassToStr(val)) return genFail();
-      return;
-    case AnnotAction::ClsMethCheck:
-      assertx(RO::EvalIsCompatibleClsMethType);
-      assertx(valType <= TClsMeth);
-      if (!clsMethToVec(val)) return genFail();
       return;
     case AnnotAction::RecordCheck: {
       assertx(valType <= TRecord);
@@ -499,16 +492,6 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
     return cns(env, true);
   });
 
-  if (RO::EvalIsCompatibleClsMethType) {
-    mc.ifTypeThen(src, TClsMeth, [&](SSATmp* src) {
-      if (RO::EvalIsVecNotices) {
-        gen(env, RaiseNotice,
-            cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
-      }
-      return cns(env, true);
-    });
-  }
-
   return mc.elseDo([&]{ return cns(env, false); });
 }
 
@@ -524,18 +507,6 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
 
 SSATmp* isArrLikeImpl(IRGS& env, SSATmp* src) {
   MultiCond mc{env};
-
-  // We eventually want ClsMeth to be its own DataType, so we must log.
-  if (RO::EvalIsCompatibleClsMethType) {
-    mc.ifTypeThen(src, TClsMeth, [&](SSATmp* src) {
-      if (RO::EvalIsVecNotices) {
-        auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
-        gen(env, RaiseNotice, cns(env, msg));
-      }
-      return cns(env, true);
-    });
-  }
-
   return mc.elseDo([&]{ return gen(env, IsType, TArrLike, src); });
 }
 
@@ -574,27 +545,6 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
           cns(env, s_CLASS_IS_STRING.get())
         );
       }
-      return cns(env, true);
-    }
-
-    if (RO::EvalIsCompatibleClsMethType && src->isA(TClsMeth)) {
-      if (!interface_supports_arrlike(className)) {
-        return cns(env, false);
-      }
-
-      if (RO::EvalIsVecNotices) {
-        gen(
-          env,
-          RaiseNotice,
-          cns(
-            env,
-            makeStaticString(folly::sformat(
-              "Implicit clsmeth to {} conversion", className->data()
-            ))
-          )
-        );
-      }
-
       return cns(env, true);
     }
 
@@ -937,32 +887,9 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
       return unionOf(TInt, TStr, TLazyCls, TCls);
     }
     case TypeStructure::Kind::T_any_array:
-      if (RO::EvalIsCompatibleClsMethType && t->type().maybe(TClsMeth)) {
-        if (t->isA(TClsMeth)) {
-          if (RuntimeOption::EvalIsVecNotices) {
-            gen(env, RaiseNotice,
-              cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR)));
-          }
-          return success();
-        } else {
-          PUNT(TypeStructC-MaybeClsMeth);
-        }
-      }
       return unionOf(TVec, TDict, TKeyset);
     case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_varray_or_darray:
-      if (RO::EvalIsCompatibleClsMethType && t->type().maybe(TClsMeth)) {
-        if (t->isA(TClsMeth)) {
-          if (RuntimeOption::EvalIsVecNotices) {
-            gen(env, RaiseNotice,
-              cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
-          }
-          return success();
-        } else {
-          PUNT(TypeStructC-MaybeClsMeth);
-        }
-      }
-      // fallthrough
     case TypeStructure::Kind::T_dict:
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_darray:
@@ -1226,17 +1153,6 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
         env.irb->exceptionStackBoundary();
         return true;
       },
-      [&] (SSATmp* val) { // clsmeth to varray/vec conversions
-        assertx(RO::EvalIsCompatibleClsMethType);
-        if (RuntimeOption::EvalVecHintNotices) {
-          raiseClsmethCompatTypeHint(env, id, func, tc);
-        }
-        auto clsMethArr = convertClsMethToVec(env, val);
-        discard(env, 1);
-        push(env, clsMethArr);
-        decRef(env, val);
-        return true;
-      },
       [&] (Type, bool hard) { // Check failure
         updateMarker(env);
         env.irb->exceptionStackBoundary();
@@ -1331,16 +1247,6 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       [&] (SSATmp* val) { // lazy class to string conversions
         auto const str = gen(env, LdLazyClsName, val);
         stLocRaw(env, id, fp(env), str);
-        return true;
-      },
-      [&] (SSATmp* val) { // clsmeth to varray/vec conversions
-        assertx(RO::EvalIsCompatibleClsMethType);
-        if (RuntimeOption::EvalVecHintNotices) {
-          raiseClsmethCompatTypeHint(env, id, func, tc);
-        }
-        auto clsMethArr = convertClsMethToVec(env, val);
-        stLocRaw(env, id, fp(env), clsMethArr);
-        decRef(env, val);
         return true;
       },
       [&] (Type valType, bool hard) { // Check failure
@@ -1442,36 +1348,6 @@ void verifyPropType(IRGS& env,
         *coerce = gen(env, LdLazyClsName, val);
         return true;
       },
-      [&] (SSATmp* val) {
-        assertx(RO::EvalIsCompatibleClsMethType);
-        if (!coerce) return false;
-        // If we're not hard enforcing property type mismatches don't coerce
-        if (RO::EvalCheckPropTypeHints < 3) return false;
-        if (tc->isUpperBound() && RO::EvalEnforceGenericsUB < 2) return false;
-        if (RuntimeOption::EvalVecHintNotices) {
-          if (cls->hasConstVal(TCls) && name->hasConstVal(TStr)) {
-            auto const msg = makeStaticString(folly::sformat(
-              "class_meth Compat: {} '{}::{}' declared as type {}, clsmeth "
-              "assigned",
-              isSProp ? "Static property" : "Property",
-              cls->clsVal()->name()->data(),
-              name->strVal()->data(),
-              tc->displayName().c_str()
-            ));
-            gen(env, RaiseNotice, cns(env, msg));
-          } else {
-            gen(
-              env,
-              RaiseClsMethPropConvertNotice,
-              RaiseClsMethPropConvertNoticeData{tc, isSProp},
-              cls,
-              name
-            );
-          }
-        }
-        *coerce = convertClsMethToVec(env, val);
-        return true;
-      },
       [&] (Type, bool hard) { // Check failure
         auto const failHard =
           hard && RuntimeOption::EvalCheckPropTypeHints >= 3 &&
@@ -1519,8 +1395,7 @@ void verifyPropType(IRGS& env,
         // verifyPropType without us worrying about it punting the whole set op.
         // This check is fragile - which type constraints coerce?
 
-        if (coerce && (tc->convertClsMethToArrLike() || tc->isString() ||
-                       (tc->isObject() && !tc->isResolved()))) {
+        if (coerce && (tc->isString() || (tc->isObject() && !tc->isResolved()))) {
           *coerce = gen(
             env,
             VerifyPropCoerce,

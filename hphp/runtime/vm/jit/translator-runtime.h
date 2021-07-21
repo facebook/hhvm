@@ -63,9 +63,6 @@ ArrayData* convArrLikeToDictHelper(ArrayData* a);
 ArrayData* convObjToDictHelper(ObjectData* o);
 ArrayData* convArrLikeToKeysetHelper(ArrayData* a);
 ArrayData* convObjToKeysetHelper(ObjectData* o);
-ArrayData* convClsMethToVecHelper(ClsMethDataRef clsmeth);
-ArrayData* convClsMethToDictHelper(ClsMethDataRef clsmeth);
-ArrayData* convClsMethToKeysetHelper(ClsMethDataRef clsmeth);
 double convObjToDblHelper(const ObjectData* o);
 double convArrToDblHelper(ArrayData* a);
 double convStrToDblHelper(const StringData* s);
@@ -105,9 +102,6 @@ void VerifyRetRecDescImpl(int32_t id,
                           TypedValue val);
 
 void raise_error_sd(const StringData* sd);
-
-void raiseClsMethPropConvertNotice(
-  const TypeConstraint*, bool, const Class*, const StringData*);
 
 TypedValue dictIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue dictIdxS(ArrayData*, StringData*, TypedValue);

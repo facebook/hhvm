@@ -397,10 +397,6 @@ bool HHVM_FUNCTION(array_key_exists,
       return false;
     }
     return HHVM_FN(array_key_exists)(key, obj->toArray(false, true));
-  } else if (isClsMethType(searchCell->m_type) &&
-             RO::EvalIsCompatibleClsMethType) {
-    raiseClsMethToVecWarningHelper(__FUNCTION__+2);
-    ad = clsMethToVecHelper(searchCell->m_data.pclsmeth).detach();
   } else {
     raise_bad_type_warning("array_key_exists expects an array or an object; "
                              "false returned.");
@@ -739,7 +735,7 @@ TypedValue HHVM_FUNCTION(array_pad,
 
 TypedValue HHVM_FUNCTION(array_pop,
                          Variant& containerRef) {
-  auto* container = castClsmethToContainerInplace(containerRef.asTypedValue());
+  auto* container = containerRef.asTypedValue();
   if (UNLIKELY(!isMutableContainer(*container))) {
     raise_warning("array_pop() expects parameter 1 to be an "
                   "array or mutable collection");
@@ -842,7 +838,6 @@ TypedValue HHVM_FUNCTION(array_push,
                          Variant& container,
                          const Variant& var,
                          const Array& args /* = null array */) {
-  castClsmethToContainerInplace(container.asTypedValue());
   if (LIKELY(container.isArray())) {
     /*
      * Important note: this *must* cast the parr in the inner cell to
@@ -912,7 +907,7 @@ TypedValue HHVM_FUNCTION(array_reverse,
 
 TypedValue HHVM_FUNCTION(array_shift,
                          Variant& array) {
-  auto* cell_array = castClsmethToContainerInplace(array.asTypedValue());
+  auto* cell_array = array.asTypedValue();
   if (UNLIKELY(!isMutableContainer(*cell_array))) {
     raise_warning("array_shift() expects parameter 1 to be an "
                   "array or mutable collection");
@@ -987,10 +982,6 @@ TypedValue HHVM_FUNCTION(array_slice,
   if (offset == 0 && len == num_in && input_is_packed) {
     if (tvIsArrayLike(cell_input)) {
       return tvReturn(ArrNR{val(cell_input).parr}.asArray().toVec());
-    }
-    if (tvIsClsMeth(cell_input) && RO::EvalIsCompatibleClsMethType) {
-      raiseClsMethToVecWarningHelper(__FUNCTION__+2);
-      return tvReturn(clsMethToVecHelper(val(cell_input).pclsmeth));
     }
     return tvReturn(val(cell_input).pobj->toArray());
   }
@@ -1126,7 +1117,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
                          Variant& array,
                          const Variant& var,
                          const Array& args /* = null array */) {
-  auto* cell_array = castClsmethToContainerInplace(array.asTypedValue());
+  auto* cell_array = array.asTypedValue();
   if (UNLIKELY(!isContainer(*cell_array))) {
     raise_warning("%s() expects parameter 1 to be an array, Vector, or Set",
                   __FUNCTION__+2 /* remove the "f_" prefix */);
@@ -1295,12 +1286,7 @@ int64_t HHVM_FUNCTION(count,
       return var.getArrayData()->size();
 
     case KindOfClsMeth:
-      if (!RO::EvalIsCompatibleClsMethType) {
-        return 1;
-      }
-      raiseClsMethToVecWarningHelper();
-      return 2;
-
+      return 1;
     case KindOfObject:
       {
         Object obj = var.toObject();

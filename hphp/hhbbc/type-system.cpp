@@ -3811,24 +3811,20 @@ Type scalarize(Type t) {
 
 Type type_of_istype(IsTypeOp op) {
   switch (op) {
-  case IsTypeOp::Null:   return TNull;
-  case IsTypeOp::Bool:   return TBool;
-  case IsTypeOp::Int:    return TInt;
-  case IsTypeOp::Dbl:    return TDbl;
-  case IsTypeOp::Str:    return union_of(TStr, TCls, TLazyCls);
-  case IsTypeOp::Res:    return TRes;
-
-  case IsTypeOp::Vec:
-    return RO::EvalIsCompatibleClsMethType ? union_of(TVec, TClsMeth) : TVec;
-  case IsTypeOp::Dict:   return TDict;
-  case IsTypeOp::Keyset: return TKeyset;
-  case IsTypeOp::Obj:    return TObj;
+  case IsTypeOp::Null:    return TNull;
+  case IsTypeOp::Bool:    return TBool;
+  case IsTypeOp::Int:     return TInt;
+  case IsTypeOp::Dbl:     return TDbl;
+  case IsTypeOp::Str:     return union_of(TStr, TCls, TLazyCls);
+  case IsTypeOp::Res:     return TRes;
+  case IsTypeOp::Vec:     return TVec;
+  case IsTypeOp::Dict:    return TDict;
+  case IsTypeOp::Keyset:  return TKeyset;
+  case IsTypeOp::Obj:     return TObj;
   case IsTypeOp::ClsMeth: return TClsMeth;
-  case IsTypeOp::Class: return union_of(TCls, TLazyCls);
-  case IsTypeOp::Func: return TFunc;
-  case IsTypeOp::ArrLike:
-    return RO::EvalIsCompatibleClsMethType
-      ? union_of(TArrLike, TClsMeth) : TArrLike;
+  case IsTypeOp::Class:   return union_of(TCls, TLazyCls);
+  case IsTypeOp::Func:    return TFunc;
+  case IsTypeOp::ArrLike: return TArrLike;
   case IsTypeOp::Scalar: always_assert(false);
   case IsTypeOp::LegacyArrLike: always_assert(false);
   }
@@ -3866,11 +3862,7 @@ Optional<Type> type_of_type_structure(const Index& index,
       case TypeStructure::Kind::T_num:      return TNum;
       case TypeStructure::Kind::T_arraykey: return TArrKey;
       case TypeStructure::Kind::T_dict:     return TDict;
-      case TypeStructure::Kind::T_vec:
-        if (RO::EvalIsCompatibleClsMethType) {
-          return union_of(TVec, TClsMeth);
-        }
-        return TVec;
+      case TypeStructure::Kind::T_vec:      return TVec;
       case TypeStructure::Kind::T_keyset:   return TKeyset;
       case TypeStructure::Kind::T_void:
       case TypeStructure::Kind::T_null:     return TNull;
@@ -5023,15 +5015,12 @@ Type loosen_emptiness(Type t) {
 }
 
 Type loosen_likeness(Type t) {
-  if (RuntimeOption::EvalIsCompatibleClsMethType && t.couldBe(BClsMeth)) {
-    t |= TVecN;
-  }
   if (t.couldBe(BCls | BLazyCls)) t |= TSStr;
   return t;
 }
 
 Type loosen_likeness_recursively(Type t) {
-  t = loosen_likeness(loosen_array_staticness(std::move(t)));
+  t = loosen_likeness(std::move(t));
 
   switch (t.m_dataTag) {
   case DataTag::None:
@@ -5607,9 +5596,8 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
     (testTy.is(BVec | BClsMeth) ||
      testTy.is(BArrLike | BClsMeth));
 
-  assertx(!RO::EvalIsCompatibleClsMethType || !testTy.is(BVec));
-  assertx(RO::EvalIsCompatibleClsMethType || !testTy.is(BVec | BClsMeth));
-  assertx(!mayLogClsMeth || RO::EvalIsCompatibleClsMethType);
+  assertx(!testTy.is(BVec | BClsMeth));
+  assertx(!mayLogClsMeth);
 
   if (testTy.couldBe(BInitNull) && !testTy.subtypeOf(BInitNull)) {
     return is_type_might_raise(unopt(testTy), valTy);
@@ -5621,11 +5609,6 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
     return mayLogClsMeth;
   } else if (testTy.is(BDict)) {
     return false;
-  } else if (testTy.is(BArrLike | BClsMeth)) {
-    assertx(RO::EvalIsCompatibleClsMethType);
-    return mayLogClsMeth;
-  } else if (testTy.is(BObj)) {
-    return RO::EvalBuildMayNoticeOnMethCallerHelperIsObject;
   }
   return false;
 }
@@ -6712,26 +6695,6 @@ std::pair<Type, bool> array_like_newelem_impl(Type arr, const Type& val) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-std::pair<Type, Promotion> promote_clsmeth_to_vecish(Type ty) {
-  // If it's not a ClsMeth, or if ClsMeth conversions aren't enabled,
-  // no promotion happens
-  if (!RO::EvalIsCompatibleClsMethType || !ty.couldBe(BClsMeth)) {
-    return std::make_pair(std::move(ty), Promotion::No);
-  }
-
-  // ClsMeths promote into a vec or varray with two elements, both
-  // static strings.
-  ty.m_bits &= ~BClsMeth;
-  ty |= vec({TSStr, TSStr});
-
-  return std::make_pair(
-    std::move(ty),
-    RO::EvalRaiseClsMethConversionWarning
-      ? Promotion::YesMightThrow
-      : Promotion::Yes
-  );
-}
 
 std::pair<Type, Promotion> promote_classlike_to_key(Type ty) {
   // Cls and LazyCls promotes to the name of the class it represents

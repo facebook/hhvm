@@ -598,7 +598,6 @@ private:
   friend Type remove_uninit(Type t);
   friend Type to_cell(Type t);
   friend bool inner_types_might_raise(const Type& t1, const Type& t2);
-  friend std::pair<Type, Promotion> promote_clsmeth_to_vecish(Type);
   friend std::pair<Type, Promotion> promote_classlike_to_key(Type);
 
   friend Type set_trep_for_testing(Type, trep);
@@ -1295,17 +1294,13 @@ Type loosen_emptiness(Type t);
 
 /*
  * Force any type which includes TCls or TLazyCls to also include
- * TSStr, and all TClsMeth to include TVecN.
+ * TSStr.
  */
 Type loosen_likeness(Type t);
 
 /*
  * Like loosen_likeness, but operates recursively on any specialized
- * data present. This is usually not what you want. Note that
- * loosen_likeness can transform a TClsMeth into an array. If TClsMeth
- * is uncounted, this can result in a non-static type inside a static
- * array. As a result, loosen_likeness_recursively will also loosen
- * array staticness.
+ * data present. This is usually not what you want.
  */
 Type loosen_likeness_recursively(Type t);
 
@@ -1446,14 +1441,6 @@ bool is_type_might_raise(IsTypeOp testOp, const Type& valTy);
  * Returns true iff a compare of two types might raise a HAC notice
  */
 bool compare_might_raise(const Type& t1, const Type& t2);
-
-/*
- * Model the potential promotion of TClsMeth in varray/vec as a
- * side-effect of certain member instructions. Returns the best known
- * post-promotion type, and whether the promotion happens with
- * potential throwing.
- */
-std::pair<Type, Promotion> promote_clsmeth_to_vecish(Type);
 
 /*
  * Model potential promotion of TClsLike into a key for array

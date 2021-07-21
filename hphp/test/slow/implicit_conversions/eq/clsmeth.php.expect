@@ -7,5 +7,5 @@ clsmeth != arry5
 clsmeth != arry1
 clsmeth != arry2
 clsmeth != arry3
-clsmeth == arry4
-Comparing int and string using equality
+clsmeth != arry4
+clsmeth != arry5

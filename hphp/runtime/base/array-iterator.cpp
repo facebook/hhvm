@@ -130,9 +130,6 @@ void ArrayIter::tvInit(const TypedValue c) {
     arrInit(c.m_data.parr);
   } else if (LIKELY(c.m_type == KindOfObject)) {
     objInit<true>(c.m_data.pobj);
-  } else if (RO::EvalIsCompatibleClsMethType && isClsMethType(c.m_type)) {
-    raiseClsMethToVecWarningHelper();
-    arrInit<false>(clsMethToVecHelper(c.m_data.pclsmeth).detach());
   } else {
     arrInit(nullptr);
   }

@@ -2365,32 +2365,6 @@ struct TypeConstraintData : IRExtraData {
   const TypeConstraint* tc;
 };
 
-struct RaiseClsMethPropConvertNoticeData : IRExtraData {
-  RaiseClsMethPropConvertNoticeData(const TypeConstraint* tc, bool isSProp)
-    : tc(tc)
-    , isSProp(isSProp)
-  {}
-
-  std::string show() const {
-    return folly::to<std::string>(tc->displayName(), ",", isSProp);
-  }
-
-  size_t stableHash() const {
-    return folly::hash::hash_combine(
-      std::hash<bool>()(isSProp),
-      std::hash<std::string>()(tc->fullName())  // Not great but hey its easy.
-    );
-  }
-
-  bool equals(const RaiseClsMethPropConvertNoticeData& o) const {
-    return isSProp == o.isSProp &&
-           *tc == *o.tc;
-  }
-
-  union { const TypeConstraint* tc; int64_t tcIntVal; };
-  bool isSProp;
-};
-
 struct ArrayGetExceptionData : IRExtraData {
   explicit ArrayGetExceptionData(bool isInOut) : isInOut(isInOut) {}
 
@@ -2752,7 +2726,6 @@ X(LookupFuncCached,             FuncNameData);
 X(LdObjMethodS,                 FuncNameData);
 X(LdObjMethodD,                 OptClassData);
 X(ThrowMissingArg,              FuncArgData);
-X(RaiseClsMethPropConvertNotice,RaiseClsMethPropConvertNoticeData);
 X(RaiseTooManyArg,              FuncData);
 X(RaiseCoeffectsCallViolation,  FuncData);
 X(RaiseCoeffectsFunParamTypeViolation, ParamData);

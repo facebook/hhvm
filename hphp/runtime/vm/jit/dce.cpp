@@ -317,9 +317,6 @@ bool canDCE(IRInstruction* inst) {
   case ConvObjToDict:
   case ConvArrLikeToKeyset:
   case ConvObjToKeyset:
-  case ConvClsMethToDict:
-  case ConvClsMethToKeyset:
-  case ConvClsMethToVec:
   case LdOutAddr:
     return !opcodeMayRaise(inst->op()) &&
       (!inst->consumesReferences() || inst->producesReference());
@@ -503,7 +500,6 @@ bool canDCE(IRInstruction* inst) {
   case VerifyParamRecDesc:
   case VerifyRetRecDesc:
   case VerifyPropRecDesc:
-  case RaiseClsMethPropConvertNotice:
   case ThrowUninitLoc:
   case RaiseUndefProp:
   case RaiseTooManyArg:

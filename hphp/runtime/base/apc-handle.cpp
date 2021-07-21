@@ -147,7 +147,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
     case KindOfResource:
       return APCArray::MakeSharedEmptyVec();
 
-    case KindOfClsMeth: {
+    case KindOfClsMeth:
       if (RO::EvalAPCSerializeClsMeth) {
         auto const meth = val(cell).pclsmeth;
         if (meth->getCls()->isPersistent()) {
@@ -157,11 +157,6 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
         auto const value = new APCClsMeth(meth->getCls(), meth->getFunc());
         return {value->getHandle(), sizeof(APCClsMeth)};
       }
-      raiseClsMethToVecWarningHelper();
-      auto arr = clsMethToVecHelper(val(cell).pclsmeth);
-      assertx(arr->isVecType());
-      return APCArray::MakeSharedVec(arr.detach(), level, unserializeObj);
-    }
 
     case KindOfRClsMeth:
       return APCRClsMeth::Construct(val(cell).prclsmeth);

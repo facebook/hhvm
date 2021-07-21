@@ -71,11 +71,6 @@ void handleConvNotice(const std::string& lhs, const std::string& rhs) {
  */
 bool equivDataTypesIncludingMigrations(DataType t1, DataType t2) {
   if (equivDataTypes(t1, t2)) return true;
-  if (RO::EvalIsCompatibleClsMethType &&
-      ((t1 == KindOfClsMeth && equivDataTypes(t2, KindOfVec)) ||
-        (equivDataTypes(t1, KindOfVec) && t2 == KindOfClsMeth))) {
-    return true;
-  }
 
   if (!RO::EvalRaiseClassConversionWarning) {
     const auto isStringOrClassish = [](DataType t) {
@@ -529,11 +524,6 @@ typename Op::RetType tvRelOpVec(Op op, TypedValue cell, const ArrayData* a) {
   assertx(tvIsPlausible(cell));
   assertx(a->isVecType());
 
-  if (isClsMethType(cell.m_type) && RO::EvalIsCompatibleClsMethType) {
-    raiseClsMethToVecWarningHelper();
-    return op.vec(clsMethToVecHelper(cell.m_data.pclsmeth).get(), a);
-  }
-
   if (UNLIKELY(!isVecType(cell.m_type))) {
     if (cell.m_type == KindOfBoolean) return op(!!cell.m_data.num, a);
     if (cell.m_type == KindOfNull) return op(false, a);
@@ -606,14 +596,8 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, ClsMethDataRef clsMeth) {
     case KindOfClsMeth:  return op(cell.m_data.pclsmeth, clsMeth);
 
     case KindOfPersistentVec:
-    case KindOfVec: {
-      if (!RO::EvalIsCompatibleClsMethType) {
-        return op.clsmethVsNonClsMeth();
-      } else {
-        raiseClsMethToVecWarningHelper();
-        return op.vec(cell.m_data.parr, clsMethToVecHelper(clsMeth).get());
-      }
-    }
+    case KindOfVec:
+      return op.clsmethVsNonClsMeth();
 
     case KindOfRClsMeth:
       return op.rclsMethVsNonRClsMeth();
@@ -1124,21 +1108,7 @@ struct CompareBase {
   }
 
   RetType operator()(ClsMethDataRef c1, ClsMethDataRef c2) const {
-    if (!RO::EvalIsCompatibleClsMethType) {
-      throw_clsmeth_compare_exception();
-    }
-    if (RO::EvalRaiseClsMethComparisonWarning) {
-      raiseClsMethClsMethRelCompareWarning();
-    }
-    auto const cls1 = c1->getClsStr().get();
-    auto const cls2 = c2->getClsStr().get();
-    auto const cmp = cls1->compare(cls2);
-    if (cmp != 0) {
-      return operator()(cmp, 0);
-    }
-    auto const func1 = c1->getFuncStr().get();
-    auto const func2 = c2->getFuncStr().get();
-    return operator()(func1, func2);
+    throw_clsmeth_compare_exception();
   }
 
   RetType operator()(const RecordData*, const RecordData*) const {
@@ -1329,11 +1299,6 @@ bool tvSame(TypedValue c1, TypedValue c2) {
 
     case KindOfPersistentVec:
     case KindOfVec:
-      if (isClsMethType(c2.m_type) && RO::EvalIsCompatibleClsMethType) {
-        raiseClsMethToVecWarningHelper();
-        return vecSameHelper(
-          c1.m_data.parr, clsMethToVecHelper(c2.m_data.pclsmeth).get());
-      }
       if (!isVecType(c2.m_type)) {
         return false;
       }
@@ -1372,11 +1337,6 @@ bool tvSame(TypedValue c1, TypedValue c2) {
         c1.m_data.pres == c2.m_data.pres;
 
     case KindOfClsMeth:
-      if (RO::EvalIsCompatibleClsMethType && tvIsVec(c2)) {
-        raiseClsMethToVecWarningHelper();
-        return vecSameHelper(
-          clsMethToVecHelper(c1.m_data.pclsmeth).get(), c2.m_data.parr);
-      }
       if (!isClsMethType(c2.m_type)) {
         return false;
       }

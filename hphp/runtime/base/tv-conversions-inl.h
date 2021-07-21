@@ -31,8 +31,6 @@ namespace HPHP {
 // We want to avoid potential include cycle with func.h/class.h, so putting
 // forward declarations here is more feasible and simpler.
 const StringData* classToStringHelper(const Class* cls);
-Array clsMethToVecHelper(const ClsMethDataRef clsMeth);
-void raiseClsMethConvertWarningHelper(const char* toType);
 [[noreturn]] void invalidFuncConversion(const char*);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,11 +118,7 @@ inline int64_t tvToInt(
     case KindOfLazyClass:
       return lazyClassToStringHelper(cell.m_data.plazyclass)->toInt64();
     case KindOfClsMeth:
-      if (!RO::EvalIsCompatibleClsMethType) {
-        throwInvalidClsMethToType("int");
-      }
-      raiseClsMethConvertWarningHelper("int");
-      return 1;
+      throwInvalidClsMethToType("int");
     case KindOfRClsMeth:      raise_convert_rcls_meth_to_type("int"); break;
   }
   not_reached();

@@ -2976,12 +2976,6 @@ void RuntimeOption::Load(
   bespoke::setLoggingEnabled(enable_logging);
   specializeVanillaDestructors();
 
-  // Hack Array Compats
-
-  if (!RuntimeOption::EvalEmitClsMethPointers) {
-    RuntimeOption::EvalIsCompatibleClsMethType = false;
-  }
-
   // Coeffects
   CoeffectsConfig::init(RO::EvalCoeffectEnforcementLevels);
   RuntimeOption::EvalPureVerifyBody = std::max(

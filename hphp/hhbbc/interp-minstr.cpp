@@ -596,18 +596,6 @@ LocalId key_local(ISS& env, Op op) {
 
 //////////////////////////////////////////////////////////////////////
 
-// Handle the promotions that can happen to the base for ElemU or
-// ElemD operations (including mutating final operations). Return
-// whether any promotion happened.
-Promotion handleElemUDBasePromos(ISS& env) {
-  auto& base = env.collect.mInstrState.base.type;
-  Promotion promotion;
-  std::tie(base, promotion) = promote_clsmeth_to_vecish(std::move(base));
-  return promotion;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 // Helper function for ending the base when we know this member
 // instruction will always throw.
 Effects endUnreachableBase(ISS& env, Promotion basePromo,
@@ -673,8 +661,7 @@ std::pair<Type, Effects> elemHelper(ISS& env, MOpMode mode, Type key) {
   }
 
   auto const warnsWithNull =
-    BTrue | BNum | BRes | BFunc | BRFunc | BRClsMeth |
-    (!RO::EvalIsCompatibleClsMethType ? BClsMeth : BBottom);
+    BTrue | BNum | BRes | BFunc | BRFunc | BRClsMeth | BClsMeth;
   auto const justNull = BNull | BFalse;
   auto const DEBUG_ONLY handled =
     warnsWithNull | justNull | BClsMeth |
@@ -715,20 +702,6 @@ std::pair<Type, Effects> elemHelper(ISS& env, MOpMode mode, Type key) {
       isNoThrow ? Effects::None : Effects::Throws
     );
     ty |= TSStr;
-  }
-  // With the right setting, ClsMeth will behave like an equivalent
-  // varray/vec (but will not actually promote). This is the same as a
-  // 2 element vec/varray containing static strings.
-  if (RO::EvalIsCompatibleClsMethType && base.couldBe(BClsMeth)) {
-    auto const isNoThrow =
-      !inOutFail &&
-      mode == MOpMode::None &&
-      !RuntimeOption::EvalRaiseClsMethConversionWarning;
-    effects = unionEffects(
-      effects,
-      isNoThrow ? Effects::None : Effects::Throws
-    );
-    ty |= TOptSStr;
   }
   // These can throw and push anything.
   if (base.couldBe(BObj | BRecord)) {
@@ -779,8 +752,6 @@ std::pair<Type, Effects> elemHelper(ISS& env, MOpMode mode, Type key) {
 template <typename F>
 Effects setOpElemHelper(ISS& env, int32_t nDiscard, const Type& key,
                         LocalId keyLoc, F op) {
-  // Before anything else, the base might promote to a different type
-  auto const promo = handleElemUDBasePromos(env);
 
   auto& base = env.collect.mInstrState.base.type;
   assertx(!base.is(BBottom));
@@ -896,7 +867,7 @@ Effects setOpElemHelper(ISS& env, int32_t nDiscard, const Type& key,
   }
 
   return endBaseWithEffects(
-    env, *effects, update, promo,
+    env, *effects, update, Promotion::No,
     [&] {
       discard(env, nDiscard);
       push(env, std::move(pushed));
@@ -1072,10 +1043,6 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
     return effects;
   }
 
-  // ElemD or ElemU. The base might mutate here. First handle any base
-  // promotions.
-  auto const promo = handleElemUDBasePromos(env);
-
   auto& base = env.collect.mInstrState.base.type;
   assertx(!base.is(BBottom));
 
@@ -1083,15 +1050,14 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
   // extends the array chain instead.
   auto const move = [&] (Type ty, bool update, Effects effects) {
     if (effects == Effects::AlwaysThrows) {
-      return endUnreachableBase(env, promo, keyLoc);
+      return endUnreachableBase(env, Promotion::No, keyLoc);
     }
     auto const effectFree = moveBase(
       env,
       Base { std::move(ty), BaseLoc::Elem },
-      update || promo != Promotion::No,
+      update,
       keyLoc
     );
-    if (promo == Promotion::YesMightThrow) return Effects::Throws;
     if (!effectFree && effects == Effects::None) return Effects::SideEffect;
     return effects;
   };
@@ -1104,7 +1070,6 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
     }
     auto const effectFree =
       extendArrChain(env, std::move(key), base, std::move(ty), keyLoc);
-    if (promo == Promotion::YesMightThrow) return Effects::Throws;
     if (!effectFree && effects == Effects::None) return Effects::SideEffect;
     return effects;
   };
@@ -1128,7 +1093,7 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
       auto elem = array_do_elem(env, key, true);
       if (elem.throws == TriBool::Yes) {
         // We'll always throw
-        return endUnreachableBase(env, promo, keyLoc);
+        return endUnreachableBase(env, Promotion::No, keyLoc);
       }
       if (!elem.present) elem.elem |= TInitNull;
       auto const maybeAlwaysThrows = base.couldBe(alwaysThrows);
@@ -1225,7 +1190,7 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
       auto elem = array_do_elem(env, key, true);
       if (elem.elem.is(BBottom) || elem.throws == TriBool::Yes) {
         // We'll always throw
-        return endUnreachableBase(env, promo, keyLoc);
+        return endUnreachableBase(env, Promotion::No, keyLoc);
       }
       auto const maybeAlwaysThrows = base.couldBe(alwaysThrows);
       // Keysets will throw, so we can assume the base does not
@@ -1630,8 +1595,7 @@ Effects miFinalIssetElem(ISS& env,
   assertx(!base.is(BBottom));
 
   auto const pushesFalse =
-    BNull | BBool | BNum | BRes | BFunc | BRFunc | BRClsMeth |
-   (!RO::EvalIsCompatibleClsMethType ? BClsMeth : BBottom);
+    BNull | BBool | BNum | BRes | BFunc | BRFunc | BRClsMeth | BClsMeth;
   auto const handled = pushesFalse | BArrLike;
 
   OptEffects effects;
@@ -1679,9 +1643,6 @@ Effects miFinalSetElem(ISS& env,
                        const Type& key,
                        LocalId keyLoc) {
   auto const rhs = popC(env);
-
-  // First handle base promotions
-  auto const promo = handleElemUDBasePromos(env);
 
   auto& base = env.collect.mInstrState.base.type;
   assertx(!base.is(BBottom));
@@ -1766,7 +1727,7 @@ Effects miFinalSetElem(ISS& env,
   assertx(effects.has_value());
 
   return endBaseWithEffects(
-    env, *effects, update, promo,
+    env, *effects, update, Promotion::No,
     [&] {
       discard(env, nDiscard);
       push(env, std::move(pushed));
@@ -1805,8 +1766,6 @@ Effects miFinalIncDecElem(ISS& env, int32_t nDiscard,
 }
 
 Effects miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type& key) {
-  // First handle base promotions
-  auto const promo = handleElemUDBasePromos(env);
 
   auto& base = env.collect.mInstrState.base.type;
   assertx(!base.is(BBottom));
@@ -1868,7 +1827,7 @@ Effects miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type& key) {
   assertx(effects.has_value());
 
   return endBaseWithEffects(
-    env, *effects, update, promo,
+    env, *effects, update, Promotion::No,
     [&] { discard(env, nDiscard); }
   );
 }
@@ -1878,9 +1837,6 @@ Effects miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type& key) {
 
 Effects miFinalSetNewElem(ISS& env, int32_t nDiscard) {
   auto const rhs = popC(env);
-
-  // First handle base promotions
-  auto const promo = handleElemUDBasePromos(env);
 
   auto& base = env.collect.mInstrState.base.type;
   assertx(!base.is(BBottom));
@@ -1940,7 +1896,7 @@ Effects miFinalSetNewElem(ISS& env, int32_t nDiscard) {
   assertx(effects.has_value());
 
   return endBaseWithEffects(
-    env, *effects, update, promo,
+    env, *effects, update, Promotion::No,
     [&] {
       discard(env, nDiscard);
       push(env, std::move(pushed));

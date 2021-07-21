@@ -475,8 +475,6 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
       case AnnotAction::WarnLazyClass:
       case AnnotAction::ConvertLazyClass:
         return false; // verifyFail will deal with the conversion/warning
-      case AnnotAction::ClsMethCheck:
-        return false;
       case AnnotAction::RecordCheck:
         assertx(result == AnnotAction::RecordCheck);
         rec = td->rec;
@@ -704,8 +702,6 @@ bool TypeConstraint::checkImpl(tv_rval val,
     case AnnotAction::WarnLazyClass:
     case AnnotAction::ConvertLazyClass:
       return false; // verifyFail will handle the conversion/warning
-    case AnnotAction::ClsMethCheck:
-      return false;
     case AnnotAction::RecordCheck:
       assertx(isRecord());
       return !isPasses && checkNamedTypeNonObj<isAssert, isProp>(val);
@@ -766,7 +762,6 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
       case AnnotAction::ConvertClass:
       case AnnotAction::WarnLazyClass:
       case AnnotAction::ConvertLazyClass:
-      case AnnotAction::ClsMethCheck:
       case AnnotAction::RecordCheck:
       case AnnotAction::WarnClassname:
         // Can't get these with objects
@@ -817,7 +812,6 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
     case AnnotAction::ConvertClass:
     case AnnotAction::WarnLazyClass:
     case AnnotAction::ConvertLazyClass:
-    case AnnotAction::ClsMethCheck:
     case AnnotAction::RecordCheck:
     case AnnotAction::WarnClassname:
       return false;
@@ -965,11 +959,6 @@ bool TypeConstraint::checkStringCompatible() const {
   return false;
 }
 
-bool TypeConstraint::convertClsMethToArrLike() const {
-  auto const result = annotCompat(KindOfClsMeth, type(), typeName());
-  return result == AnnotAction::ClsMethCheck;
-}
-
 void TypeConstraint::verifyParamFail(const Func* func, tv_lval val,
                                      int paramNums) const {
   verifyFail(func, val, paramNums);
@@ -1008,15 +997,6 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
       const_cast<StringData*>(c->m_data.pclass->name()) :
       const_cast<StringData*>(c->m_data.plazyclass.name());
     c->m_type = KindOfPersistentString;
-    return;
-  }
-
-  if (isClsMethType(c->m_type) && convertClsMethToArrLike()) {
-    if (RuntimeOption::EvalVecHintNotices) {
-      raise_clsmeth_compat_type_hint_outparam_notice(
-        func, displayName(func->cls()), paramNum);
-    }
-    castClsMeth(c, make_vec_array<String,String>);
     return;
   }
 
@@ -1081,18 +1061,6 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
     return;
   }
 
-  if (isClsMethType(val.type()) && convertClsMethToArrLike()) {
-    if (RuntimeOption::EvalVecHintNotices) {
-      raise_clsmeth_compat_type_hint_property_notice(
-        declCls, propName, displayName(nullptr), isStatic);
-    }
-    // Only trigger coercion logic if property type hints are soft
-    if ((RO::EvalCheckPropTypeHints != 3) ||
-        (isUpperBound() && RO::EvalEnforceGenericsUB < 2)) return;
-    castClsMeth(val, make_vec_array<String,String>);
-    return;
-  }
-
   raise_property_typehint_error(
     folly::sformat(
       "{} '{}::{}' {} type {}, {} assigned",
@@ -1132,15 +1100,6 @@ void TypeConstraint::verifyFail(const Func* func, tv_lval c,
       const_cast<StringData*>(val(c).pclass->name()) : // TODO (T61651936)
       const_cast<StringData*>(val(c).plazyclass.name());
     c.type() = KindOfPersistentString;
-    return;
-  }
-
-  if (isClsMethType(c.type()) && convertClsMethToArrLike()) {
-    if (RuntimeOption::EvalVecHintNotices) {
-      auto const i = id == ReturnId ? std::nullopt : make_optional(id);
-      raise_clsmeth_compat_type_hint(func, name, i);
-    }
-    castClsMeth(c, make_vec_array<String,String>);
     return;
   }
 

@@ -101,29 +101,12 @@ inline bool is_string(const TypedValue* c) {
 
 inline bool is_any_array(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
-  if (tvIsClsMeth(c) && RO::EvalIsCompatibleClsMethType) {
-    if (RO::EvalIsVecNotices) {
-      raise_notice(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
-    }
-    return true;
-  }
   return tvIsArrayLike(c);
 }
 
 inline bool is_vec(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
-
-  if (tvIsVec(c)) return true;
-
-  if (tvIsClsMeth(c)) {
-    if (RO::EvalIsCompatibleClsMethType) {
-      if (RO::EvalIsVecNotices) raise_notice(Strings::CLSMETH_COMPAT_IS_VEC);
-      return true;
-    }
-    return false;
-  }
-
-  return false;
+  return tvIsVec(c);
 }
 
 inline bool is_dict(const TypedValue* c) {

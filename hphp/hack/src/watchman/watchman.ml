@@ -467,16 +467,16 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       match mode with
       | All_changes -> (Hh_json.JSON_String env.clockspec, [])
       | Defer_changes ->
-        (Hh_json.JSON_String env.clockspec, [("defer", J.strlist ["hg.update"])])
-      | Drop_changes ->
-        (Hh_json.JSON_String env.clockspec, [("drop", J.strlist ["hg.update"])])
+        ( Hh_json.JSON_String env.clockspec,
+          [("defer", J.strlist ["hg.update"; "meerkat-build"])] )
       | Scm_aware ->
         Hh_logger.log "Making Scm_aware subscription";
         let scm =
           Hh_json.JSON_Object [("mergebase-with", Hh_json.JSON_String "master")]
         in
         let since =
-          Hh_json.JSON_Object [("scm", scm); ("drop", J.strlist ["hg.update"])]
+          Hh_json.JSON_Object
+            [("scm", scm); ("drop", J.strlist ["hg.update"; "meerkat-build"])]
         in
         (since, [])
     in

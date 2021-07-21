@@ -26,7 +26,7 @@ let visitor =
 
     method plus = Result_set.union
 
-    method! on_expr env (((pos, ty), _, expr_) as expr) =
+    method! on_expr env ((ty, pos, expr_) as expr) =
       let acc =
         match expr_ with
         | Lvar (_, id)
@@ -43,10 +43,10 @@ let visitor =
 
     method! on_fun_param env param =
       let acc =
-        let (pos, ty) = param.param_annotation in
+        let ty = param.param_annotation in
         Result_set.singleton
           {
-            pos = Pos.to_relative_string pos;
+            pos = Pos.to_relative_string param.param_pos;
             type_ = Tast_env.print_ty env ty;
             ident_ = Local_id.to_int (Local_id.make_unscoped param.param_name);
           }

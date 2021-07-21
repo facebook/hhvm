@@ -10,11 +10,11 @@
         f_name = ([3:10-29], "\\array_get_index_vec"); f_tparams = []; 
         f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([3:39-42], vec<int>); param_type_hint = ((vec<int>), (Some ([3:30-38], (Happly (([3:30-33], "\\HH\\vec"), [([3:34-37], (Hprim Tint))]))))); 
+        [{ param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([3:30-38], (Happly (([3:30-33], "\\HH\\vec"), [([3:34-37], (Hprim Tint))]))))); 
            param_is_variadic = false; param_pos = [3:39-42]; param_name = "$xs"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None };
-          { param_annotation = ([3:50-54], mixed); param_type_hint = ((mixed), (Some ([3:44-49], Hmixed))); 
+          { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:44-49], Hmixed))); 
             param_is_variadic = false; param_pos = [3:50-54]; param_name = "$idx"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -24,9 +24,7 @@
         { fb_ast =
           [([5:3-13],
             (Expr
-               (([5:3-12], int), [5:3-12],
-                (Array_get ((([5:3-6], vec<int>), [5:3-6], (Lvar ([5:3-6], $xs))),
-                   (Some (([5:7-11], mixed), [5:7-11], (Hole ((([5:7-11], mixed), [5:7-11], (Lvar ([5:7-11], $idx))), (mixed), (int), Typing)))))))))
+               ((int), [5:3-12], (Array_get (((vec<int>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((mixed), [5:7-11], (Hole (((mixed), [5:7-11], (Lvar ([5:7-11], $idx))), (mixed), (int), Typing)))))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

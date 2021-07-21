@@ -9,7 +9,8 @@
         f_readonly_ret = None; f_ret = ((int), None); f_name = ([4:10-13], "\\foo"); 
         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([4:18-20], Map<string, int>); param_type_hint = ((Map<string, int>), (Some ([4:14-17], (Happly (([4:14-17], "\\HH\\Map"), []))))); 
+        [{ param_annotation = (Map<#100000464899130, #100000920544122>); 
+           param_type_hint = ((Map<string, int>), (Some ([4:14-17], (Happly (([4:14-17], "\\HH\\Map"), []))))); 
            param_is_variadic = false; param_pos = [4:18-20]; param_name = "$m"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -19,12 +20,9 @@
         { fb_ast =
           [([6:3-18],
             (Expr
-               (([6:3-17], int), [6:3-17],
-                (Binop ((Eq None), (([6:3-12], int), [6:3-12], (Array_get ((([6:3-5], Map<string, int>), [6:3-5], (Lvar ([6:3-5], $m))), (Some (([6:6-11], string), [6:6-11], (String "hey")))))),
-                   (([6:15-17], int), [6:15-17], (Int "40")))))));
-            ([8:3-19],
-             (Return (Some (([8:10-18], int), [8:10-18], (Array_get ((([8:10-12], Map<string, int>), [8:10-12], (Lvar ([8:10-12], $m))), (Some (([8:13-17], string), [8:13-17], (String "ho")))))))))
-            ];
+               ((int), [6:3-17],
+                (Binop ((Eq None), ((int), [6:3-12], (Array_get (((Map<string, int>), [6:3-5], (Lvar ([6:3-5], $m))), (Some ((string), [6:6-11], (String "hey")))))), ((int), [6:15-17], (Int "40")))))));
+            ([8:3-19], (Return (Some ((int), [8:10-18], (Array_get (((Map<string, int>), [8:10-12], (Lvar ([8:10-12], $m))), (Some ((string), [8:13-17], (String "ho")))))))))];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }

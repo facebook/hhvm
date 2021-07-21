@@ -14,10 +14,10 @@
         { fb_ast =
           [([5:4-38],
             (Return
-               (Some (([5:11-37], dict<int, int>), [5:11-37],
+               (Some ((dict<int, int>), [5:11-37],
                       (KeyValCollection (Dict, None,
-                         [((([5:18-23], string), [5:18-23], (Hole ((([5:18-23], string), [5:18-23], (String "bad")), (string), (int), Typing))), (([5:27-28], int), [5:27-28], (Int "1")));
-                           ((([5:30-31], int), [5:30-31], (Int "1")), (([5:35-36], int), [5:35-36], (Int "2")))]
+                         [(((string), [5:18-23], (Hole (((string), [5:18-23], (String "bad")), (string), (int), Typing))), ((int), [5:27-28], (Int "1")));
+                           (((int), [5:30-31], (Int "1")), ((int), [5:35-36], (Int "2")))]
                          ))))))
             ];
           fb_annotation = () };

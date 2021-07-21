@@ -62,22 +62,21 @@ let collect_in_decl =
       let ( + ) = self#plus in
       let acc =
         match expr_ with
-        | T.Obj_get (((_, ty), _, _), (_, _, T.Id mid), _, _) ->
+        | T.Obj_get ((ty, _, _), (_, _, T.Id mid), _, _) ->
           process_method env ty mid
         | T.Id id -> process_function id
-        | T.Class_const (((_, ty), _, _), mid) -> process_method env ty mid
+        | T.Class_const ((ty, _, _), mid) -> process_method env ty mid
         | T.Lvar (pos, id) -> process_local (pos, Local_id.get_name id)
         | _ -> self#zero
       in
       acc + super#on_Call env e h el unpacked_element
 
-    method! on_New
-        env (((_, ty), p, _) as c) targs el unpacked_element ctor_annot =
+    method! on_New env ((ty, p, _) as c) targs el unpacked_element ctor_annot =
       let ( + ) = self#plus in
       let acc = process_method env ty (p, SN.Members.__construct) in
       acc + super#on_New env c targs el unpacked_element ctor_annot
 
-    method! on_expr env (((pos, _), _, expr_) as expr) =
+    method! on_expr env ((_, pos, expr_) as expr) =
       let ( + ) = self#plus in
       let acc =
         match expr_ with
@@ -87,15 +86,14 @@ let collect_in_decl =
         | T.Method_caller ((p, cid), mid) ->
           process_function (p, SN.AutoimportedFunctions.meth_caller)
           + process_method_cid mid cid
-        | T.Smethod_id (((_, ty), p, _), mid) ->
+        | T.Smethod_id ((ty, p, _), mid) ->
           process_function (p, SN.AutoimportedFunctions.class_meth)
           + process_method env ty mid
-        | T.Method_id (((p, ty), _, _), mid) ->
+        | T.Method_id ((ty, p, _), mid) ->
           process_function (p, SN.AutoimportedFunctions.inst_meth)
           + process_method env ty mid
         | T.FunctionPointer (T.FP_id id, _targs) -> process_function id
-        | T.FunctionPointer
-            (T.FP_class_const (((_pos, ty), _, _cid), mid), _targs) ->
+        | T.FunctionPointer (T.FP_class_const ((ty, _, _cid), mid), _targs) ->
           process_method env ty mid
         | _ -> self#zero
       in

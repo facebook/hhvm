@@ -10,12 +10,12 @@
         f_name = ([3:10-30], "\\array_get_index_pair"); f_tparams = []; 
         f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([3:49-52], Pair<string, int>);
+        [{ param_annotation = (Pair<string, int>);
            param_type_hint = ((Pair<string, int>), (Some ([3:31-48], (Happly (([3:31-35], "\\HH\\Pair"), [([3:36-42], (Hprim Tstring)); ([3:44-47], (Hprim Tint))]))))); 
            param_is_variadic = false; param_pos = [3:49-52]; param_name = "$xs"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None };
-          { param_annotation = ([3:60-64], mixed); param_type_hint = ((mixed), (Some ([3:54-59], Hmixed))); 
+          { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:54-59], Hmixed))); 
             param_is_variadic = false; param_pos = [3:60-64]; param_name = "$idx"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -25,9 +25,8 @@
         { fb_ast =
           [([5:3-13],
             (Expr
-               (([5:3-12], _), [5:3-12],
-                (Array_get ((([5:3-6], Pair<string, int>), [5:3-6], (Lvar ([5:3-6], $xs))),
-                   (Some (([5:7-11], int), [5:7-11], (Hole ((([5:7-11], mixed), [5:7-11], (Lvar ([5:7-11], $idx))), (int), (int), Typing)))))))))
+               ((_), [5:3-12],
+                (Array_get (((Pair<string, int>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((int), [5:7-11], (Hole (((mixed), [5:7-11], (Lvar ([5:7-11], $idx))), (int), (int), Typing)))))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

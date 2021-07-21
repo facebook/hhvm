@@ -58,58 +58,59 @@ type saved_env = {
 }
 [@@deriving show]
 
-type program = (Pos.t * ty, unit, saved_env, ty) Aast.program [@@deriving show]
+type program = (ty, unit, saved_env, ty) Aast.program [@@deriving show]
 
-type def = (Pos.t * ty, unit, saved_env, ty) Aast.def
+type def = (ty, unit, saved_env, ty) Aast.def
 
-type expr = (Pos.t * ty, unit, saved_env, ty) Aast.expr
+type expr = (ty, unit, saved_env, ty) Aast.expr
 
-type expr_ = (Pos.t * ty, unit, saved_env, ty) Aast.expr_
+type expr_ = (ty, unit, saved_env, ty) Aast.expr_
 
-type stmt = (Pos.t * ty, unit, saved_env, ty) Aast.stmt
+type stmt = (ty, unit, saved_env, ty) Aast.stmt
 
-type block = (Pos.t * ty, unit, saved_env, ty) Aast.block
+type stmt_ = (ty, unit, saved_env, ty) Aast.stmt_
 
-type class_ = (Pos.t * ty, unit, saved_env, ty) Aast.class_
+type block = (ty, unit, saved_env, ty) Aast.block
 
-type class_id = (Pos.t * ty, unit, saved_env, ty) Aast.class_id
+type class_ = (ty, unit, saved_env, ty) Aast.class_
+
+type class_id = (ty, unit, saved_env, ty) Aast.class_id
 
 type type_hint = ty Aast.type_hint
 
 type targ = ty Aast.targ
 
-type class_get_expr = (Pos.t * ty, unit, saved_env, ty) Aast.class_get_expr
+type class_get_expr = (ty, unit, saved_env, ty) Aast.class_get_expr
 
-type class_typeconst_def =
-  (Pos.t * ty, unit, saved_env, ty) Aast.class_typeconst_def
+type class_typeconst_def = (ty, unit, saved_env, ty) Aast.class_typeconst_def
 
-type user_attribute = (Pos.t * ty, unit, saved_env, ty) Aast.user_attribute
+type user_attribute = (ty, unit, saved_env, ty) Aast.user_attribute
 
-type fun_ = (Pos.t * ty, unit, saved_env, ty) Aast.fun_
+type fun_ = (ty, unit, saved_env, ty) Aast.fun_
 
-type file_attribute = (Pos.t * ty, unit, saved_env, ty) Aast.file_attribute
+type file_attribute = (ty, unit, saved_env, ty) Aast.file_attribute
 
-type fun_def = (Pos.t * ty, unit, saved_env, ty) Aast.fun_def
+type fun_def = (ty, unit, saved_env, ty) Aast.fun_def
 
-type fun_param = (Pos.t * ty, unit, saved_env, ty) Aast.fun_param
+type fun_param = (ty, unit, saved_env, ty) Aast.fun_param
 
-type fun_variadicity = (Pos.t * ty, unit, saved_env, ty) Aast.fun_variadicity
+type fun_variadicity = (ty, unit, saved_env, ty) Aast.fun_variadicity
 
-type func_body = (Pos.t * ty, unit, saved_env, ty) Aast.func_body
+type func_body = (ty, unit, saved_env, ty) Aast.func_body
 
-type method_ = (Pos.t * ty, unit, saved_env, ty) Aast.method_
+type method_ = (ty, unit, saved_env, ty) Aast.method_
 
-type class_var = (Pos.t * ty, unit, saved_env, ty) Aast.class_var
+type class_var = (ty, unit, saved_env, ty) Aast.class_var
 
-type class_const = (Pos.t * ty, unit, saved_env, ty) Aast.class_const
+type class_const = (ty, unit, saved_env, ty) Aast.class_const
 
-type tparam = (Pos.t * ty, unit, saved_env, ty) Aast.tparam
+type tparam = (ty, unit, saved_env, ty) Aast.tparam
 
-type typedef = (Pos.t * ty, unit, saved_env, ty) Aast.typedef
+type typedef = (ty, unit, saved_env, ty) Aast.typedef
 
-type record_def = (Pos.t * ty, unit, saved_env, ty) Aast.record_def
+type record_def = (ty, unit, saved_env, ty) Aast.record_def
 
-type gconst = (Pos.t * ty, unit, saved_env, ty) Aast.gconst
+type gconst = (ty, unit, saved_env, ty) Aast.gconst
 
 let empty_saved_env tcopt : saved_env =
   {
@@ -134,7 +135,7 @@ let dummy_type_hint (hint : hint option) : ty * hint option =
  * some abstraction in so that we can change the representation (e.g. put
  * further annotations on the expression) as we see fit.
  *)
-let make_expr_annotation p ty : Pos.t * ty = (p, ty)
+let make_expr_annotation _p ty : ty = ty
 
 (* Helper function to create a typed and positioned expression.
  * Do not construct this triple directly - at some point we will build
@@ -147,7 +148,7 @@ let make_typed_expr p ty te : expr = (make_expr_annotation p ty, p, te)
 let get_position ((_, p, _) : expr) = p
 
 (* Get the type of an expression *)
-let get_type (((_, ty), _, _) : expr) = ty
+let get_type ((ty, _, _) : expr) = ty
 
 let nast_converter =
   object

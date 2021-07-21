@@ -119,13 +119,13 @@ let handler =
     method! at_expr env x =
       (* only considering functions where one or more params are reified *)
       match x with
-      | ((call_pos, _), _, Class_get ((_, _, CI (_, t)), _, _)) ->
+      | (_, call_pos, Class_get ((_, _, CI (_, t)), _, _)) ->
         if equal_reify_kind (Env.get_reified env t) Reified then
           Errors.class_get_reified call_pos
-      | ((pos, fun_ty), _, Method_caller _)
-      | ((pos, fun_ty), _, Fun_id _)
-      | ((pos, fun_ty), _, Method_id _)
-      | ((pos, fun_ty), _, Smethod_id _) ->
+      | (fun_ty, pos, Method_caller _)
+      | (fun_ty, pos, Fun_id _)
+      | (fun_ty, pos, Method_id _)
+      | (fun_ty, pos, Smethod_id _) ->
         begin
           match get_node fun_ty with
           | Tfun { ft_tparams; _ } ->
@@ -133,10 +133,9 @@ let handler =
               Errors.reified_function_reference pos
           | _ -> ()
         end
-      | ( (pos, _),
-          _,
-          FunctionPointer (FP_class_const (((_, ty), _, CI (_, class_id)), _), _)
-        )
+      | ( _,
+          pos,
+          FunctionPointer (FP_class_const ((ty, _, CI (_, class_id)), _), _) )
         when Env.is_in_expr_tree env ->
         let (_env, ty) = Env.expand_type env ty in
         begin
@@ -146,21 +145,21 @@ let handler =
             Errors.reified_static_method_in_expr_tree pos
           | _ -> ()
         end
-      | ((pos, fun_ty), _, FunctionPointer (_, targs)) ->
+      | (fun_ty, pos, FunctionPointer (_, targs)) ->
         begin
           match get_node fun_ty with
           | Tfun { ft_tparams; _ } ->
             verify_call_targs env pos (get_pos fun_ty) ft_tparams targs
           | _ -> ()
         end
-      | ((pos, _), _, Call (((_, fun_ty), _, _), targs, _, _)) ->
+      | (_, pos, Call ((fun_ty, _, _), targs, _, _)) ->
         let (env, efun_ty) = Env.expand_type env fun_ty in
         (match get_node efun_ty with
         | Tfun ({ ft_tparams; _ } as ty)
           when not @@ get_ft_is_function_pointer ty ->
           verify_call_targs env pos (get_pos efun_ty) ft_tparams targs
         | _ -> ())
-      | ((pos, _), _, New (((_, ty), _, CI (_, class_id)), targs, _, _, _)) ->
+      | (_, pos, New ((ty, _, CI (_, class_id)), targs, _, _, _)) ->
         let (env, ty) = Env.expand_type env ty in
         (match get_node ty with
         | Tgeneric (ci, _tyargs) when String.equal ci class_id ->
@@ -181,8 +180,8 @@ let handler =
             let class_pos = Cls.pos cls in
             verify_call_targs env pos class_pos tparams targs
           | None -> ()))
-      | ( (pos, _),
-          _,
+      | ( _,
+          pos,
           New ((_, _, ((CIstatic | CIself | CIparent) as cid)), _, _, _, _) ) ->
         Option.(
           let t =
@@ -201,7 +200,7 @@ let handler =
                   | _ -> failwith "Unexpected match"
                 in
                 Errors.new_class_reified pos class_type suggested_class))
-      | ((pos, _), _, New (((_, ty), _, _), targs, _, _, _)) ->
+      | (_, pos, New ((ty, _, _), targs, _, _, _)) ->
         let (env, ty) = Env.expand_type env ty in
         begin
           match get_node ty with

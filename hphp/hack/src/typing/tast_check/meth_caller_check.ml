@@ -45,6 +45,6 @@ let handler =
 
     method! at_expr _env e =
       match e with
-      | ((pos, ft), _, Method_caller _) -> check_parameters pos ft
+      | (ft, pos, Method_caller _) -> check_parameters pos ft
       | _ -> ()
   end

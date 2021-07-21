@@ -66,10 +66,10 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_expr env ((p, _), _, expr) =
+    method! at_expr env (_, p, expr) =
       match expr with
       | Cast ((_, Hprim Tstring), te) ->
-        let ((_, ty), _, _) = te in
+        let (ty, _, _) = te in
         if not (is_stringish env ty) then
           Errors.string_cast p (Env.print_ty env ty)
       | _ -> ()

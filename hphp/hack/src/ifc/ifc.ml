@@ -296,7 +296,7 @@ let free_pvars pty =
    the form (X < pcls) in Cif, we'd have had to replace pcls with bot
    in those.
 *)
-let refine renv tyori (pos, ltyref) =
+let refine renv tyori pos ltyref =
   let ref_scope = Scope.alloc () in
   let tyref = Lift.ty { renv with re_scope = ref_scope } ltyref in
   let acc = subtype ~pos tyref tyori [] in
@@ -790,7 +790,7 @@ let cow_array ~pos renv ty =
 
 (* Deals with an assignment to a local variable or an object property *)
 let assign_helper
-    ?(use_pc = true) ~expr ~pos renv env ((_, lhs_ty), _, lhs_exp) rhs_pty =
+    ?(use_pc = true) ~expr ~pos renv env (lhs_ty, _, lhs_exp) rhs_pty =
   match lhs_exp with
   | A.Lvar (_, lid) ->
     let prefix = Local_id.to_string lid in
@@ -862,15 +862,10 @@ let overwrite_nth_pty tuple_pty ix_exp pty =
    does not mutate an array cell, but the property p of
    the object $x instead.  *)
 let rec assign
-    ?(use_pc = true)
-    ~expr
-    ~pos
-    renv
-    env
-    (((_, lhs_ty), _, lhs_expr_) as lhs)
-    rhs_pty =
+    ?(use_pc = true) ~expr ~pos renv env ((lhs_ty, _, lhs_expr_) as lhs) rhs_pty
+    =
   match lhs_expr_ with
-  | A.Array_get ((((_, arry_ty), _, _) as arry_exp), ix_opt) ->
+  | A.Array_get (((arry_ty, _, _) as arry_exp), ix_opt) ->
     let handle_collection
         env ~should_skip_exn old_array new_array key value length =
       (* TODO(T68269878): track flows due to length changes *)
@@ -1001,7 +996,7 @@ let seq ~run (env, out) x =
     (env, Env.merge_out out_exceptional out)
 
 (* Generate flow constraints for an expression *)
-let rec expr ~pos renv (env : Env.expr_env) (((_, ety), epos, e) : Tast.expr) =
+let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
   let expr = expr ~pos renv in
   let expr_with_deps env deps e =
     Env.expr_with_pc_deps env deps (fun env -> expr env e)
@@ -1115,10 +1110,9 @@ let rec expr ~pos renv (env : Env.expr_env) (((_, ety), epos, e) : Tast.expr) =
        make sure all operations (e.g., ??) are handled correctly *)
     expr
       env
-      ( (epos, ety),
+      ( ety,
         epos,
-        A.Binop (Ast_defs.Eq None, e1, ((epos, ety), epos, A.Binop (op, e1, e2)))
-      )
+        A.Binop (Ast_defs.Eq None, e1, (ety, epos, A.Binop (op, e1, e2))) )
   | A.Binop (Ast_defs.QuestionQuestion, e1, e2)
   | A.Eif (e1, None, e2) ->
     let (env, ty1) = expr env e1 in
@@ -1271,7 +1265,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((_, ety), epos, e) : Tast.expr) =
           | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty
         end
       (* Static method call*)
-      | (_, _, A.Class_const (((_, ty), _, cid), (_, meth_name))) ->
+      | (_, _, A.Class_const ((ty, _, cid), (_, meth_name))) ->
         let env =
           match cid with
           | A.CIexpr e -> fst @@ expr env e
@@ -1412,7 +1406,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((_, ety), epos, e) : Tast.expr) =
         (env, value_pty)
       | _ -> fail "the default type for array access is not handled"
     end
-  | A.New (((_, lty), _, cid), _targs, args, _extra_args, _) ->
+  | A.New ((lty, _, cid), _targs, args, _extra_args, _) ->
     (* TODO(T70139741): support variadic functions and constructors
      * TODO(T70139893): support classes with type parameters
      *)
@@ -1546,7 +1540,7 @@ let rec expr ~pos renv (env : Env.expr_env) (((_, ety), epos, e) : Tast.expr) =
         let env = may_throw ~pos renv env tag_policies exn in
         (env, ty)
     in
-    (env, refine renv tag_test_ty (pos, ety))
+    (env, refine renv tag_test_ty pos ety)
   (* --- A valid AST does not contain these nodes *)
   | A.Import _
   | A.Collection _ ->
@@ -1605,11 +1599,11 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
        refined types *)
     let env =
       Local_id.Map.fold
-        (fun var hint env ->
+        (fun var (_, hint) env ->
           match get_local_type ~pos env var with
           | None -> env
           | Some pty ->
-            let new_pty = refine renv pty hint in
+            let new_pty = refine renv pty pos hint in
             Env.set_local_type env var new_pty)
         tymap
         env
@@ -1637,7 +1631,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     let (env, _ety, ethrow) = expr renv env e in
     Env.close_stmt ~merge:ethrow env K.Next
   | A.If (cond, b1, b2) ->
-    let ((pos, _), _, _) = cond in
+    let (_, pos, _) = cond in
     let (env, cty, cthrow) = expr ~pos renv env cond in
     (* use object_policy to account for both booleans
        and null checks *)
@@ -1650,7 +1644,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     let out = clear_pc_deps out in
     (env, out)
   | A.While (cond, (_, A.AssertEnv (A.Join, tymap)) :: blk) ->
-    let ((pos, _), _, _) = cond in
+    let (_, pos, _) = cond in
     let env = refresh_with_tymap ~pos renv env tymap in
     let beg_locals = Env.get_locals env in
     (* TODO: pc_pols should also flow into cty because the condition is evaluated
@@ -1689,7 +1683,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
        otherwise. *)
     let pos =
       match cond_opt with
-      | Some ((cond_pos, _), _, _) -> cond_pos
+      | Some (_, cond_pos, _) -> cond_pos
       | None -> pos
     in
 
@@ -1749,8 +1743,8 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     let expr = expr_ ~pos renv in
     let (env, pc_policies) =
       match as_exp with
-      | Aast.As_v (((_, value_ty), _, _) as value)
-      | Aast.Await_as_v (_, (((_, value_ty), _, _) as value)) ->
+      | Aast.As_v ((value_ty, _, _) as value)
+      | Aast.Await_as_v (_, ((value_ty, _, _) as value)) ->
         let (env, value_pty, pc_policies) =
           match collection_pty with
           | Tcow_array arry -> (env, arry.a_value, PSet.singleton arry.a_length)
@@ -1772,10 +1766,9 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
         in
         let env = assign_helper ~expr ~pos renv env value value_pty in
         (env, pc_policies)
-      | Aast.As_kv
-          ((((_, key_ty), _, _) as key), (((_, value_ty), _, _) as value))
+      | Aast.As_kv (((key_ty, _, _) as key), ((value_ty, _, _) as value))
       | Aast.Await_as_kv
-          (_, (((_, key_ty), _, _) as key), (((_, value_ty), _, _) as value)) ->
+          (_, ((key_ty, _, _) as key), ((value_ty, _, _) as value)) ->
         let (env, key_pty, value_pty, pc_policies) =
           match collection_pty with
           | Tcow_array arry ->
@@ -1913,7 +1906,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
       out_try_catch
       (env, KMap.empty)
   | A.Switch (e, cl) ->
-    let ((pos, _), _, _) = e in
+    let (_, pos, _) = e in
     let (env, ety, ethrow) = expr ~pos renv env e in
     let (env, out_cond) = Env.close_stmt ~merge:ethrow env K.Fallthrough in
     let case (env, (out, deps)) c =
@@ -1926,7 +1919,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
         match c with
         | A.Default (_, b) -> (env, out, PSet.empty, b)
         | A.Case (e, b) ->
-          let ((pos, _), _, _) = e in
+          let (_, pos, _) = e in
           let (env, ety, ethrow) = expr ~pos renv env e in
           let out = Env.merge_out out ethrow in
           (env, out, object_policy ety, b)

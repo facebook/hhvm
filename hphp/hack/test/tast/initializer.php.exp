@@ -39,18 +39,16 @@
           cv_readonly = false; cv_visibility = Private; cv_type = ((dynamic), None); 
           cv_id = ([8:18-20], "d");
           cv_expr =
-          (Some (([8:23-11:4], dict<string, classname<(A | B)>>), [8:23-11:4],
+          (Some ((dict<string, classname<(A | B)>>), [8:23-11:4],
                  (KeyValCollection (Dict, None,
-                    [((([9:5-8], string), [9:5-8], (String "a")), (([9:12-20], classname<A>), [9:12-20], (Class_const ((([9:12-13], A), [9:12-13], (CI ([9:12-13], "\\A"))), ([9:15-20], "class")))));
-                      ((([10:5-8], string), [10:5-8], (String "b")),
-                       (([10:12-20], classname<B>), [10:12-20], (Class_const ((([10:12-13], B), [10:12-13], (CI ([10:12-13], "\\B"))), ([10:15-20], "class")))))
-                      ]
+                    [(((string), [9:5-8], (String "a")), ((classname<A>), [9:12-20], (Class_const (((A), [9:12-13], (CI ([9:12-13], "\\A"))), ([9:15-20], "class")))));
+                      (((string), [10:5-8], (String "b")), ((classname<B>), [10:12-20], (Class_const (((B), [10:12-13], (CI ([10:12-13], "\\B"))), ([10:15-20], "class")))))]
                     ))));
           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
           cv_is_static = true; cv_span = [8:18-11:4] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
            cv_readonly = false; cv_visibility = Private; cv_type = ((dynamic), None); 
-           cv_id = ([12:18-20], "s"); cv_expr = (Some (([12:23-34], Set<string>), [12:23-34], (ValCollection (Set, None, [(([12:28-33], string), [12:28-33], (String "foo"))]))));
+           cv_id = ([12:18-20], "s"); cv_expr = (Some ((Set<string>), [12:23-34], (ValCollection (Set, None, [((string), [12:28-33], (String "foo"))])))); 
            cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
            cv_is_static = true; cv_span = [12:18-34] }
          ];

@@ -25,8 +25,7 @@ let handler =
     method! at_expr env =
       function
       | (_, _, Xml (_, _, tel)) ->
-        List.iter tel ~f:(fun ((pos, ty), _, _) ->
-            check_xhp_children env pos ty)
+        List.iter tel ~f:(fun (ty, pos, _) -> check_xhp_children env pos ty)
       | _ -> ()
 
     method! at_xhp_child env child =

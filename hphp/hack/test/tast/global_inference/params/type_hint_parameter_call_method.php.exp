@@ -11,16 +11,14 @@
          m_name = ([4:19-22], "foo"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = ([4:23-25], int); param_type_hint = ((int), None); 
+         [{ param_annotation = (#100000778013088); param_type_hint = ((int), None); 
             param_is_variadic = false; param_pos = [4:23-25]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None;
          m_body =
-         { fb_ast =
-           [([5:5-13],
-             (Expr (([5:5-12], void), [5:5-12], (Call ((([5:5-8], (function(int $_): void)), [5:5-8], (Id ([5:5-8], "\\bar"))), [], [(([5:9-11], int), [5:9-11], (Lvar ([5:9-11], $x)))], None)))))];
+         { fb_ast = [([5:5-13], (Expr ((void), [5:5-12], (Call ((((function(int $_): void)), [5:5-8], (Id ([5:5-8], "\\bar"))), [], [((int), [5:9-11], (Lvar ([5:9-11], $x)))], None)))))];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([4:28-32], (Hprim Tvoid)))); m_external = false; 
@@ -46,7 +44,7 @@
          f_name = ([9:10-13], "\\bar"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([9:18-20], int); param_type_hint = ((int), (Some ([9:14-17], (Hprim Tint)))); 
+         [{ param_annotation = (int); param_type_hint = ((int), (Some ([9:14-17], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [9:18-20]; param_name = "$_"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }

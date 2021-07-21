@@ -163,7 +163,7 @@ let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
 
 (* Return a list of possible static prop elts given a class_get expression *)
 let get_static_prop_elts env class_id get =
-  let ((_, ty), _, _) = class_id in
+  let (ty, _, _) = class_id in
   match get with
   | CGstring prop_id -> grab_class_elts_from_ty ~static:true env ty prop_id
   (* An expression is dynamic, so there's no way to tell the type generally *)
@@ -442,7 +442,7 @@ let check =
       let open Typing_defs in
       match caller with
       (* Method call checks *)
-      | ((_, ty), _, Obj_get (e1, _, _, (* is_prop_call *) false)) ->
+      | (ty, _, Obj_get (e1, _, _, (* is_prop_call *) false)) ->
         let receiver_rty = self#ty_expr env e1 in
         (match (receiver_rty, get_node ty) with
         | (Readonly, Tfun fty) when not (get_ft_readonly_this fty) ->
@@ -736,7 +736,7 @@ let check =
       | (_, _, Obj_get (obj, get, _nullable, _is_prop_call)) ->
         check_readonly_property env obj get (self#ty_expr env obj);
         super#on_expr env e
-      | (_, _, New (_, _, args, unpacked_arg, (pos, constructor_fty))) ->
+      | (_, pos, New (_, _, args, unpacked_arg, constructor_fty)) ->
         (* Constructors never return readonly, so that specific check is irrelevant *)
         self#call
           ~is_readonly:false

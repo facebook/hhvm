@@ -10,12 +10,7 @@ val should_print : user_mode:Ifc_types.mode -> phase:Ifc_types.mode -> bool
 
 val check :
   Ifc_types.options ->
-  ( Aast.pos * Typing_defs.locl_ty,
-    unit,
-    Tast.saved_env,
-    Typing_defs.locl_ty )
-  Aast.def
-  list ->
+  (Typing_defs.locl_ty, unit, Tast.saved_env, Typing_defs.locl_ty) Aast.def list ->
   Provider_context.t ->
   unit
 
@@ -43,13 +38,13 @@ val analyse_callable :
   saved_env:Tast.saved_env ->
   ctx:Provider_context.t ->
   Ifc_types.purpose ->
-  ( Aast.pos * Typing_defs.locl_ty,
+  ( Typing_defs.locl_ty,
     unit,
     Tast.saved_env,
     Typing_defs.locl_ty )
   Aast.fun_param
   list ->
-  ( Aast.pos * Typing_defs.locl_ty,
+  ( Typing_defs.locl_ty,
     unit,
     Tast.saved_env,
     Typing_defs.locl_ty )

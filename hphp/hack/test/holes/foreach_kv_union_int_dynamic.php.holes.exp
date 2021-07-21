@@ -10,7 +10,7 @@
         f_name = ([3:10-38], "\\foreach_kv_union_int_dynamic"); f_tparams = []; 
         f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([3:53-56], (dynamic | int)); param_type_hint = (((dynamic | int)), (Some ([3:39-52], (Hunion [([3:40-43], (Hprim Tint)); ([3:44-51], Hdynamic)]))));
+        [{ param_annotation = ((dynamic | int)); param_type_hint = (((dynamic | int)), (Some ([3:39-52], (Hunion [([3:40-43], (Hprim Tint)); ([3:44-51], Hdynamic)])))); 
            param_is_variadic = false; param_pos = [3:53-56]; param_name = "$xs"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -19,10 +19,8 @@
         f_body =
         { fb_ast =
           [([5:3-6:4],
-            (Foreach (
-               (([5:12-15], (dynamic | int)), [5:12-15],
-                (Hole ((([5:12-15], (dynamic | int)), [5:12-15], (Lvar ([5:12-15], $xs))), ((dynamic | int)), ((dynamic | KeyedTraversable<dynamic, dynamic>)), Typing))),
-               (As_kv ((([5:19-21], dynamic), [5:19-21], (Lvar ([5:19-21], $k))), (([5:25-27], dynamic), [5:25-27], (Lvar ([5:25-27], $v))))),
+            (Foreach ((((dynamic | int)), [5:12-15], (Hole ((((dynamic | int)), [5:12-15], (Lvar ([5:12-15], $xs))), ((dynamic | int)), ((dynamic | KeyedTraversable<dynamic, dynamic>)), Typing))),
+               (As_kv (((dynamic), [5:19-21], (Lvar ([5:19-21], $k))), ((dynamic), [5:25-27], (Lvar ([5:25-27], $v))))), 
                [([5:3-6:4], (AssertEnv (Join, {$#capability $#local_capability $xs})))])))
             ];
           fb_annotation = () };

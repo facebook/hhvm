@@ -33,7 +33,8 @@ Errors:
          f_name = ([4:10-11], "\\g"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([4:14-16], D<nothing, string>); param_type_hint = ((D<nothing, string>), (Some ([4:12-13], (Happly (([4:12-13], "\\D"), []))))); 
+         [{ param_annotation = (D<#100000166599985, #100000289676902>); 
+            param_type_hint = ((D<nothing, string>), (Some ([4:12-13], (Happly (([4:12-13], "\\D"), []))))); 
             param_is_variadic = false; param_pos = [4:14-16]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }

@@ -11,7 +11,7 @@
          m_name = ([4:19-20], "c"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = ([4:33-35], vec<int>); param_type_hint = ((vec<int>), (Some ([4:21-32], (Happly (([4:21-27], "\\HH\\vec"), [([4:28-31], (Hprim Tint))]))))); 
+         [{ param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([4:21-32], (Happly (([4:21-27], "\\HH\\vec"), [([4:28-31], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [4:33-35]; param_name = "$c"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -41,7 +41,7 @@
          f_name = ([7:10-11], "\\c"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([7:24-26], vec<int>); param_type_hint = ((vec<int>), (Some ([7:12-23], (Happly (([7:12-18], "\\HH\\vec"), [([7:19-22], (Hprim Tint))]))))); 
+         [{ param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([7:12-23], (Happly (([7:12-18], "\\HH\\vec"), [([7:19-22], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [7:24-26]; param_name = "$c"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -63,7 +63,7 @@
          f_name = ([9:10-21], "\\call_varray"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([10:17-19], vec<float>); param_type_hint = ((vec<float>), (Some ([10:3-16], (Happly (([10:3-9], "\\HH\\vec"), [([10:10-15], (Hprim Tfloat))])))));
+         [{ param_annotation = (vec<float>); param_type_hint = ((vec<float>), (Some ([10:3-16], (Happly (([10:3-9], "\\HH\\vec"), [([10:10-15], (Hprim Tfloat))]))))); 
             param_is_variadic = false; param_pos = [10:17-19]; param_name = "$c"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -73,21 +73,21 @@
          { fb_ast =
            [([13:3-9],
              (Expr
-                (([13:3-8], void), [13:3-8],
-                 (Call ((([13:3-4], (function(vec<int> $c): void)), [13:3-4], (Id ([13:3-4], "\\c"))), 
-                    [], [(([13:5-7], vec<float>), [13:5-7], (Hole ((([13:5-7], vec<float>), [13:5-7], (Lvar ([13:5-7], $c))), (vec<float>), (vec<int>), Typing)))], None)))));
+                ((void), [13:3-8],
+                 (Call ((((function(vec<int> $c): void)), [13:3-4], (Id ([13:3-4], "\\c"))), 
+                    [], [((vec<float>), [13:5-7], (Hole (((vec<float>), [13:5-7], (Lvar ([13:5-7], $c))), (vec<float>), (vec<int>), Typing)))], None)))));
              ([15:3-27],
               (Expr
-                 (([15:3-26], TestVarray), [15:3-26],
-                  (Binop ((Eq None), (([15:3-7], TestVarray), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     (([15:10-26], TestVarray), [15:10-26], (New ((([15:14-24], TestVarray), [15:14-24], (CI ([15:14-24], "\\TestVarray"))), [], [], None, ([15:14-24], _)))))))));
+                 ((TestVarray), [15:3-26],
+                  (Binop ((Eq None), ((TestVarray), [15:3-7], (Lvar ([15:3-7], $foo))),
+                     ((TestVarray), [15:10-26], (New (((TestVarray), [15:14-24], (CI ([15:14-24], "\\TestVarray"))), [], [], None, (_)))))))));
              ([18:3-15],
               (Expr
-                 (([18:3-14], void), [18:3-14],
+                 ((void), [18:3-14],
                   (Call (
-                     (([18:3-10], (function(vec<int> $c): void)), [18:3-10],
-                      (Obj_get ((([18:3-7], TestVarray), [18:3-7], (Lvar ([18:3-7], $foo))), (([18:9-10], (function(vec<int> $c): void)), [18:9-10], (Id ([18:9-10], "c"))), OG_nullthrows, false))),
-                     [], [(([18:11-13], vec<float>), [18:11-13], (Hole ((([18:11-13], vec<float>), [18:11-13], (Lvar ([18:11-13], $c))), (vec<float>), (vec<int>), Typing)))], None)))))
+                     (((function(vec<int> $c): void)), [18:3-10],
+                      (Obj_get (((TestVarray), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(vec<int> $c): void)), [18:9-10], (Id ([18:9-10], "c"))), OG_nullthrows, false))),
+                     [], [((vec<float>), [18:11-13], (Hole (((vec<float>), [18:11-13], (Lvar ([18:11-13], $c))), (vec<float>), (vec<int>), Typing)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -106,7 +106,7 @@
          f_name = ([21:10-26], "\\call_varray_cast"); f_tparams = []; 
          f_where_constraints = []; f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([22:17-19], vec<float>); param_type_hint = ((vec<float>), (Some ([22:3-16], (Happly (([22:3-9], "\\HH\\vec"), [([22:10-15], (Hprim Tfloat))])))));
+         [{ param_annotation = (vec<float>); param_type_hint = ((vec<float>), (Some ([22:3-16], (Happly (([22:3-9], "\\HH\\vec"), [([22:10-15], (Hprim Tfloat))]))))); 
             param_is_variadic = false; param_pos = [22:17-19]; param_name = "$c"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -116,21 +116,21 @@
          { fb_ast =
            [([25:3-59],
              (Expr
-                (([25:3-58], void), [25:3-58],
-                 (Call ((([25:3-4], (function(vec<int> $c): void)), [25:3-4], (Id ([25:3-4], "\\c"))), 
-                    [], [(([25:5-57], vec<int>), [25:5-57], (Hole ((([25:54-56], vec<float>), [25:54-56], (Lvar ([25:54-56], $c))), (vec<float>), (vec<int>), UnsafeCast)))], None)))));
+                ((void), [25:3-58],
+                 (Call ((((function(vec<int> $c): void)), [25:3-4], (Id ([25:3-4], "\\c"))), 
+                    [], [((vec<int>), [25:5-57], (Hole (((vec<float>), [25:54-56], (Lvar ([25:54-56], $c))), (vec<float>), (vec<int>), UnsafeCast)))], None)))));
              ([27:3-27],
               (Expr
-                 (([27:3-26], TestVarray), [27:3-26],
-                  (Binop ((Eq None), (([27:3-7], TestVarray), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     (([27:10-26], TestVarray), [27:10-26], (New ((([27:14-24], TestVarray), [27:14-24], (CI ([27:14-24], "\\TestVarray"))), [], [], None, ([27:14-24], _)))))))));
+                 ((TestVarray), [27:3-26],
+                  (Binop ((Eq None), ((TestVarray), [27:3-7], (Lvar ([27:3-7], $foo))),
+                     ((TestVarray), [27:10-26], (New (((TestVarray), [27:14-24], (CI ([27:14-24], "\\TestVarray"))), [], [], None, (_)))))))));
              ([30:3-65],
               (Expr
-                 (([30:3-64], void), [30:3-64],
+                 ((void), [30:3-64],
                   (Call (
-                     (([30:3-10], (function(vec<int> $c): void)), [30:3-10],
-                      (Obj_get ((([30:3-7], TestVarray), [30:3-7], (Lvar ([30:3-7], $foo))), (([30:9-10], (function(vec<int> $c): void)), [30:9-10], (Id ([30:9-10], "c"))), OG_nullthrows, false))),
-                     [], [(([30:11-63], vec<int>), [30:11-63], (Hole ((([30:60-62], vec<float>), [30:60-62], (Lvar ([30:60-62], $c))), (vec<float>), (vec<int>), UnsafeCast)))], None)))))
+                     (((function(vec<int> $c): void)), [30:3-10],
+                      (Obj_get (((TestVarray), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(vec<int> $c): void)), [30:9-10], (Id ([30:9-10], "c"))), OG_nullthrows, false))),
+                     [], [((vec<int>), [30:11-63], (Hole (((vec<float>), [30:60-62], (Lvar ([30:60-62], $c))), (vec<float>), (vec<int>), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

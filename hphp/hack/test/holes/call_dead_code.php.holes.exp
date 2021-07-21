@@ -10,7 +10,7 @@
         f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
         f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([3:18-20], int); param_type_hint = ((int), (Some ([3:14-17], (Hprim Tint)))); 
+        [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:14-17], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:18-20]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -33,23 +33,18 @@
          f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([6:3-10], (Expr (([6:3-9], int), [6:3-9], (Binop ((Eq None), (([6:3-5], int), [6:3-5], (Lvar ([6:3-5], $x))), (([6:8-9], int), [6:8-9], (Int "1")))))));
+           [([6:3-10], (Expr ((int), [6:3-9], (Binop ((Eq None), ((int), [6:3-5], (Lvar ([6:3-5], $x))), ((int), [6:8-9], (Int "1")))))));
              ([7:3-14:4],
-              (If ((([7:7-11], bool), [7:7-11], True),
-                 [([8:5-19], (Expr (([8:5-18], string), [8:5-18], (Binop ((Eq None), (([8:5-7], string), [8:5-7], (Lvar ([8:5-7], $x))), (([8:10-18], string), [8:10-18], (String "string")))))));
+              (If (((bool), [7:7-11], True),
+                 [([8:5-19], (Expr ((string), [8:5-18], (Binop ((Eq None), ((string), [8:5-7], (Lvar ([8:5-7], $x))), ((string), [8:10-18], (String "string")))))));
                    ([10:5-13],
                     (Expr
-                       (([10:5-12], void), [10:5-12],
-                        (Call ((([10:5-8], (function(int $x): void)), [10:5-8], (Id ([10:5-8], "\\foo"))), 
-                           [], [(([10:9-11], string), [10:9-11], (Hole ((([10:9-11], string), [10:9-11], (Lvar ([10:9-11], $x))), (string), (int), Typing)))], None)))))
+                       ((void), [10:5-12],
+                        (Call ((((function(int $x): void)), [10:5-8], (Id ([10:5-8], "\\foo"))), 
+                           [], [((string), [10:9-11], (Hole (((string), [10:9-11], (Lvar ([10:9-11], $x))), (string), (int), Typing)))], None)))))
                    ],
-                 [([12:5-19],
-                   (Expr (([12:5-18], string), [12:5-18], (Binop ((Eq None), (([12:5-7], string), [12:5-7], (Lvar ([12:5-7], $x))), (([12:10-18], string), [12:10-18], (String "string")))))));
-                   ([13:5-13],
-                    (Expr
-                       (([13:5-12], void), [13:5-12],
-                        (Call ((([13:5-8], (function(int $x): void)), [13:5-8], (Id ([13:5-8], "\\foo"))), [], [(([13:9-11], nothing), [13:9-11], (Lvar ([13:9-11], $x)))], None)))))
-                   ]
+                 [([12:5-19], (Expr ((string), [12:5-18], (Binop ((Eq None), ((string), [12:5-7], (Lvar ([12:5-7], $x))), ((string), [12:10-18], (String "string")))))));
+                   ([13:5-13], (Expr ((void), [13:5-12], (Call ((((function(int $x): void)), [13:5-8], (Id ([13:5-8], "\\foo"))), [], [((nothing), [13:9-11], (Lvar ([13:9-11], $x)))], None)))))]
                  )))
              ];
            fb_annotation = () };
@@ -71,24 +66,18 @@
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([18:3-10], (Expr (([18:3-9], int), [18:3-9], (Binop ((Eq None), (([18:3-5], int), [18:3-5], (Lvar ([18:3-5], $x))), (([18:8-9], int), [18:8-9], (Int "1")))))));
+           [([18:3-10], (Expr ((int), [18:3-9], (Binop ((Eq None), ((int), [18:3-5], (Lvar ([18:3-5], $x))), ((int), [18:8-9], (Int "1")))))));
              ([19:3-26:4],
-              (If ((([19:7-11], bool), [19:7-11], True),
-                 [([20:5-19],
-                   (Expr (([20:5-18], string), [20:5-18], (Binop ((Eq None), (([20:5-7], string), [20:5-7], (Lvar ([20:5-7], $x))), (([20:10-18], string), [20:10-18], (String "string")))))));
+              (If (((bool), [19:7-11], True),
+                 [([20:5-19], (Expr ((string), [20:5-18], (Binop ((Eq None), ((string), [20:5-7], (Lvar ([20:5-7], $x))), ((string), [20:10-18], (String "string")))))));
                    ([22:5-48],
                     (Expr
-                       (([22:5-47], void), [22:5-47],
-                        (Call ((([22:5-8], (function(int $x): void)), [22:5-8], (Id ([22:5-8], "\\foo"))), 
-                           [], [(([22:9-46], int), [22:9-46], (Hole ((([22:43-45], string), [22:43-45], (Lvar ([22:43-45], $x))), (string), (int), UnsafeCast)))], None)))))
+                       ((void), [22:5-47],
+                        (Call ((((function(int $x): void)), [22:5-8], (Id ([22:5-8], "\\foo"))), 
+                           [], [((int), [22:9-46], (Hole (((string), [22:43-45], (Lvar ([22:43-45], $x))), (string), (int), UnsafeCast)))], None)))))
                    ],
-                 [([24:5-19],
-                   (Expr (([24:5-18], string), [24:5-18], (Binop ((Eq None), (([24:5-7], string), [24:5-7], (Lvar ([24:5-7], $x))), (([24:10-18], string), [24:10-18], (String "string")))))));
-                   ([25:5-13],
-                    (Expr
-                       (([25:5-12], void), [25:5-12],
-                        (Call ((([25:5-8], (function(int $x): void)), [25:5-8], (Id ([25:5-8], "\\foo"))), [], [(([25:9-11], nothing), [25:9-11], (Lvar ([25:9-11], $x)))], None)))))
-                   ]
+                 [([24:5-19], (Expr ((string), [24:5-18], (Binop ((Eq None), ((string), [24:5-7], (Lvar ([24:5-7], $x))), ((string), [24:10-18], (String "string")))))));
+                   ([25:5-13], (Expr ((void), [25:5-12], (Call ((((function(int $x): void)), [25:5-8], (Id ([25:5-8], "\\foo"))), [], [((nothing), [25:9-11], (Lvar ([25:9-11], $x)))], None)))))]
                  )))
              ];
            fb_annotation = () };

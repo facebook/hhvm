@@ -206,15 +206,15 @@ let visitor =
     method plus = Result_set.union
 
     method! on_expr env expr =
-      let ((pos, _), _, expr_) = expr in
+      let (_, pos, expr_) = expr in
       let ( + ) = self#plus in
       let acc =
         match expr_ with
-        | Aast.New (((p, ty), _, _), _, _, _, _) -> typed_constructor env ty p
-        | Aast.Obj_get (((_, ty), _, _), (_, _, Aast.Id mid), _, _) ->
+        | Aast.New ((ty, p, _), _, _, _, _) -> typed_constructor env ty p
+        | Aast.Obj_get ((ty, _, _), (_, _, Aast.Id mid), _, _) ->
           typed_property env ty mid
-        | Aast.Class_const (((_, ty), _, _), mid) -> typed_const env ty mid
-        | Aast.Class_get (((_, ty), _, _), Aast.CGstring mid, _) ->
+        | Aast.Class_const ((ty, _, _), mid) -> typed_const env ty mid
+        | Aast.Class_get ((ty, _, _), Aast.CGstring mid, _) ->
           typed_property env ty mid
         | Aast.Xml (cid, attrs, _) ->
           let class_id = process_class_id cid in
@@ -224,13 +224,13 @@ let visitor =
           process_fun_id (pos, SN.AutoimportedFunctions.fun_)
           + process_fun_id (remove_apostrophes_from_function_eval id)
         | Aast.FunctionPointer (Aast.FP_id id, _targs) -> process_fun_id id
-        | Aast.FunctionPointer
-            (Aast.FP_class_const (((_pos, ty), _, _cid), mid), _targs) ->
+        | Aast.FunctionPointer (Aast.FP_class_const ((ty, _, _cid), mid), _targs)
+          ->
           typed_method env ty mid
-        | Aast.Method_id (((_, ty), _, _), mid) ->
+        | Aast.Method_id ((ty, _, _), mid) ->
           process_fun_id (pos, SN.AutoimportedFunctions.inst_meth)
           + typed_method env ty (remove_apostrophes_from_function_eval mid)
-        | Aast.Smethod_id (((_, ty), _, _), mid) ->
+        | Aast.Smethod_id ((ty, _, _), mid) ->
           process_fun_id (pos, SN.AutoimportedFunctions.class_meth)
           + typed_method env ty (remove_apostrophes_from_function_eval mid)
         | Aast.Method_caller (((_, cid) as pcid), mid) ->
@@ -248,7 +248,7 @@ let visitor =
           begin
             match enum_name with
             | None ->
-              let ((_, ety), _, _) = expr in
+              let (ety, _, _) = expr in
               let ty = Typing_defs_core.get_node ety in
               (match ty with
               | Tnewtype (_, [ty_enum_class; _], _) ->
@@ -313,7 +313,7 @@ let visitor =
       in
       self#plus acc (self#on_expr env e)
 
-    method! on_class_id env ((_, ty), p, cid) =
+    method! on_class_id env (ty, p, cid) =
       match cid with
       | Aast.CIexpr expr ->
         (* We want to special case this because we want to get the type of the
@@ -347,9 +347,9 @@ let visitor =
           (* Treat MyVisitor::symbolType(foo<>) as just foo(). *)
           self#on_expr env arg
         | Aast.Id id -> process_fun_id id
-        | Aast.Obj_get ((((_, ty), _, _) as obj), (_, _, Aast.Id mid), _, _) ->
+        | Aast.Obj_get (((ty, _, _) as obj), (_, _, Aast.Id mid), _, _) ->
           self#on_expr env obj + typed_method env ty mid
-        | Aast.Class_const ((((_, ty), _, _) as cid), mid) ->
+        | Aast.Class_const (((ty, _, _) as cid), mid) ->
           self#on_class_id env cid + typed_method env ty mid
         | _ -> self#on_expr env e
       in

@@ -189,7 +189,7 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
           TODO: this really belongs in def.
 
           <?hh *)
-  | AssertEnv of env_annot * 'ex local_id_map
+  | AssertEnv of env_annot * (pos * 'ex) local_id_map
       (** Used in IFC to track type inference environments. Not user
           denotable. *)
 

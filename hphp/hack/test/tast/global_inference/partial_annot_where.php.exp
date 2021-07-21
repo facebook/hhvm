@@ -9,7 +9,7 @@
         f_readonly_ret = None; f_ret = ((?arraykey), None); f_name = ([4:10-13], "\\foo"); 
         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([4:16-18], A<arraykey>); param_type_hint = ((A<arraykey>), (Some ([4:14-15], (Happly (([4:14-15], "\\A"), []))))); 
+        [{ param_annotation = (A<#100000245570850>); param_type_hint = ((A<arraykey>), (Some ([4:14-15], (Happly (([4:14-15], "\\A"), []))))); 
            param_is_variadic = false; param_pos = [4:16-18]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -19,10 +19,10 @@
         { fb_ast =
           [([5:3-20],
             (Return
-               (Some (([5:10-19], ?arraykey), [5:10-19],
+               (Some ((?arraykey), [5:10-19],
                       (Call (
-                         (([5:10-17], (function(): ?arraykey)), [5:10-17],
-                          (Obj_get ((([5:10-12], A<arraykey>), [5:10-12], (Lvar ([5:10-12], $x))), (([5:14-17], (function(): ?arraykey)), [5:14-17], (Id ([5:14-17], "get"))), OG_nullthrows, false))),
+                         (((function(): ?arraykey)), [5:10-17],
+                          (Obj_get (((A<arraykey>), [5:10-12], (Lvar ([5:10-12], $x))), (((function(): ?arraykey)), [5:14-17], (Id ([5:14-17], "get"))), OG_nullthrows, false))),
                          [], [], None))))))
             ];
           fb_annotation = () };
@@ -43,7 +43,7 @@
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([4:19-22], "get"); m_tparams = []; m_where_constraints = [(([4:35-36], (Habstr ("T", []))), Constraint_super, ([4:43-51], (Hprim Tarraykey)))]; 
          m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
-         m_body = { fb_ast = [([5:5-17], (Return (Some (([5:12-16], null), [5:12-16], Null))))]; fb_annotation = () }; 
+         m_body = { fb_ast = [([5:5-17], (Return (Some ((null), [5:12-16], Null))))]; fb_annotation = () }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((?T), (Some ([4:26-28], (Hoption ([4:27-28], (Habstr ("T", []))))))); 
          m_external = false; m_doc_comment = None }

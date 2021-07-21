@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4b50a3363fe9f8b98afc2502e04907a8>>
+// @generated SignedSource<<d56e98d819396f451d2d445a40be5bae>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -89,7 +89,7 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
     pub fn mk_markup(p0: Pstring) -> Self {
         Stmt_::Markup(Box::new(p0))
     }
-    pub fn mk_assert_env(p0: EnvAnnot, p1: LocalIdMap<Ex>) -> Self {
+    pub fn mk_assert_env(p0: EnvAnnot, p1: LocalIdMap<(Pos, Ex)>) -> Self {
         Stmt_::AssertEnv(Box::new((p0, p1)))
     }
     pub fn is_fallthrough(&self) -> bool {
@@ -326,7 +326,7 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_assert_env(&self) -> Option<(&EnvAnnot, &LocalIdMap<Ex>)> {
+    pub fn as_assert_env(&self) -> Option<(&EnvAnnot, &LocalIdMap<(Pos, Ex)>)> {
         match self {
             Stmt_::AssertEnv(p0) => Some((&p0.0, &p0.1)),
             _ => None,
@@ -450,7 +450,7 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_assert_env_mut(&mut self) -> Option<(&mut EnvAnnot, &mut LocalIdMap<Ex>)> {
+    pub fn as_assert_env_mut(&mut self) -> Option<(&mut EnvAnnot, &mut LocalIdMap<(Pos, Ex)>)> {
         match self {
             Stmt_::AssertEnv(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -570,7 +570,7 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_assert_env_into(self) -> Option<(EnvAnnot, LocalIdMap<Ex>)> {
+    pub fn as_assert_env_into(self) -> Option<(EnvAnnot, LocalIdMap<(Pos, Ex)>)> {
         match self {
             Stmt_::AssertEnv(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,

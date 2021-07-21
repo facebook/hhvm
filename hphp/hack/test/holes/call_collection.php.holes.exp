@@ -11,7 +11,7 @@
          m_name = ([4:19-20], "l"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = ([4:37-39], Collection<int>); param_type_hint = ((Collection<int>), (Some ([4:21-36], (Happly (([4:21-31], "\\HH\\Collection"), [([4:32-35], (Hprim Tint))])))));
+         [{ param_annotation = (Collection<int>); param_type_hint = ((Collection<int>), (Some ([4:21-36], (Happly (([4:21-31], "\\HH\\Collection"), [([4:32-35], (Hprim Tint))])))));
             param_is_variadic = false; param_pos = [4:37-39]; param_name = "$l"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -41,7 +41,7 @@
          f_name = ([7:10-11], "\\l"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([7:28-30], Collection<int>); param_type_hint = ((Collection<int>), (Some ([7:12-27], (Happly (([7:12-22], "\\HH\\Collection"), [([7:23-26], (Hprim Tint))])))));
+         [{ param_annotation = (Collection<int>); param_type_hint = ((Collection<int>), (Some ([7:12-27], (Happly (([7:12-22], "\\HH\\Collection"), [([7:23-26], (Hprim Tint))])))));
             param_is_variadic = false; param_pos = [7:28-30]; param_name = "$l"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -63,8 +63,7 @@
          f_name = ([9:10-25], "\\call_collection"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([10:22-24], Collection<string>);
-            param_type_hint = ((Collection<string>), (Some ([10:3-21], (Happly (([10:3-13], "\\HH\\Collection"), [([10:14-20], (Hprim Tstring))]))))); 
+         [{ param_annotation = (Collection<string>); param_type_hint = ((Collection<string>), (Some ([10:3-21], (Happly (([10:3-13], "\\HH\\Collection"), [([10:14-20], (Hprim Tstring))])))));
             param_is_variadic = false; param_pos = [10:22-24]; param_name = "$l"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -74,27 +73,24 @@
          { fb_ast =
            [([13:3-9],
              (Expr
-                (([13:3-8], void), [13:3-8],
-                 (Call ((([13:3-4], (function(Collection<int> $l): void)), [13:3-4], (Id ([13:3-4], "\\l"))), 
-                    [],
-                    [(([13:5-7], <expr#1> as Collection<string>), [13:5-7],
-                      (Hole ((([13:5-7], Collection<string>), [13:5-7], (Lvar ([13:5-7], $l))), (<expr#1> as Collection<string>), (Collection<int>), Typing)))],
+                ((void), [13:3-8],
+                 (Call ((((function(Collection<int> $l): void)), [13:3-4], (Id ([13:3-4], "\\l"))), 
+                    [], [((<expr#1> as Collection<string>), [13:5-7], (Hole (((Collection<string>), [13:5-7], (Lvar ([13:5-7], $l))), (<expr#1> as Collection<string>), (Collection<int>), Typing)))],
                     None)))));
              ([15:3-31],
               (Expr
-                 (([15:3-30], TestCollection), [15:3-30],
-                  (Binop ((Eq None), (([15:3-7], TestCollection), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     (([15:10-30], TestCollection), [15:10-30], (New ((([15:14-28], TestCollection), [15:14-28], (CI ([15:14-28], "\\TestCollection"))), [], [], None, ([15:14-28], _)))))))));
+                 ((TestCollection), [15:3-30],
+                  (Binop ((Eq None), ((TestCollection), [15:3-7], (Lvar ([15:3-7], $foo))),
+                     ((TestCollection), [15:10-30], (New (((TestCollection), [15:14-28], (CI ([15:14-28], "\\TestCollection"))), [], [], None, (_)))))))));
              ([18:3-15],
               (Expr
-                 (([18:3-14], void), [18:3-14],
+                 ((void), [18:3-14],
                   (Call (
-                     (([18:3-10], (function(Collection<int> $l): void)), [18:3-10],
-                      (Obj_get ((([18:3-7], TestCollection), [18:3-7], (Lvar ([18:3-7], $foo))), (
-                         ([18:9-10], (function(Collection<int> $l): void)), [18:9-10], (Id ([18:9-10], "l"))), OG_nullthrows, false))),
+                     (((function(Collection<int> $l): void)), [18:3-10],
+                      (Obj_get (((TestCollection), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Collection<int> $l): void)), [18:9-10], (Id ([18:9-10], "l"))), OG_nullthrows, false))),
                      [],
-                     [(([18:11-13], <expr#1> as Collection<string>), [18:11-13],
-                       (Hole ((([18:11-13], Collection<string>), [18:11-13], (Lvar ([18:11-13], $l))), (<expr#1> as Collection<string>), (Collection<int>), Typing)))],
+                     [((<expr#1> as Collection<string>), [18:11-13], (Hole (((Collection<string>), [18:11-13], (Lvar ([18:11-13], $l))), (<expr#1> as Collection<string>), (Collection<int>), Typing)))
+                       ],
                      None)))))
              ];
            fb_annotation = () };
@@ -114,8 +110,7 @@
          f_name = ([21:10-30], "\\call_collection_cast"); f_tparams = []; 
          f_where_constraints = []; f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([22:22-24], Collection<string>);
-            param_type_hint = ((Collection<string>), (Some ([22:3-21], (Happly (([22:3-13], "\\HH\\Collection"), [([22:14-20], (Hprim Tstring))]))))); 
+         [{ param_annotation = (Collection<string>); param_type_hint = ((Collection<string>), (Some ([22:3-21], (Happly (([22:3-13], "\\HH\\Collection"), [([22:14-20], (Hprim Tstring))])))));
             param_is_variadic = false; param_pos = [22:22-24]; param_name = "$l"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -125,27 +120,21 @@
          { fb_ast =
            [([25:3-68],
              (Expr
-                (([25:3-67], void), [25:3-67],
-                 (Call ((([25:3-4], (function(Collection<int> $l): void)), [25:3-4], (Id ([25:3-4], "\\l"))), 
-                    [],
-                    [(([25:5-66], Collection<int>), [25:5-66], (Hole ((([25:63-65], Collection<string>), [25:63-65], (Lvar ([25:63-65], $l))), (Collection<string>), (Collection<int>), UnsafeCast)))],
-                    None)))));
+                ((void), [25:3-67],
+                 (Call ((((function(Collection<int> $l): void)), [25:3-4], (Id ([25:3-4], "\\l"))), 
+                    [], [((Collection<int>), [25:5-66], (Hole (((Collection<string>), [25:63-65], (Lvar ([25:63-65], $l))), (Collection<string>), (Collection<int>), UnsafeCast)))], None)))));
              ([27:3-31],
               (Expr
-                 (([27:3-30], TestCollection), [27:3-30],
-                  (Binop ((Eq None), (([27:3-7], TestCollection), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     (([27:10-30], TestCollection), [27:10-30], (New ((([27:14-28], TestCollection), [27:14-28], (CI ([27:14-28], "\\TestCollection"))), [], [], None, ([27:14-28], _)))))))));
+                 ((TestCollection), [27:3-30],
+                  (Binop ((Eq None), ((TestCollection), [27:3-7], (Lvar ([27:3-7], $foo))),
+                     ((TestCollection), [27:10-30], (New (((TestCollection), [27:14-28], (CI ([27:14-28], "\\TestCollection"))), [], [], None, (_)))))))));
              ([30:3-74],
               (Expr
-                 (([30:3-73], void), [30:3-73],
+                 ((void), [30:3-73],
                   (Call (
-                     (([30:3-10], (function(Collection<int> $l): void)), [30:3-10],
-                      (Obj_get ((([30:3-7], TestCollection), [30:3-7], (Lvar ([30:3-7], $foo))), (
-                         ([30:9-10], (function(Collection<int> $l): void)), [30:9-10], (Id ([30:9-10], "l"))), OG_nullthrows, false))),
-                     [],
-                     [(([30:11-72], Collection<int>), [30:11-72], (Hole ((([30:69-71], Collection<string>), [30:69-71], (Lvar ([30:69-71], $l))), (Collection<string>), (Collection<int>), UnsafeCast)))
-                       ],
-                     None)))))
+                     (((function(Collection<int> $l): void)), [30:3-10],
+                      (Obj_get (((TestCollection), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Collection<int> $l): void)), [30:9-10], (Id ([30:9-10], "l"))), OG_nullthrows, false))),
+                     [], [((Collection<int>), [30:11-72], (Hole (((Collection<string>), [30:69-71], (Lvar ([30:69-71], $l))), (Collection<string>), (Collection<int>), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

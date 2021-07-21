@@ -10,7 +10,7 @@
         f_name = ([3:10-30], "\\compound_assign_plus"); f_tparams = []; 
         f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([3:43-46], Vector<int>); param_type_hint = ((Vector<int>), (Some ([3:31-42], (Happly (([3:31-37], "\\HH\\Vector"), [([3:38-41], (Hprim Tint))])))));
+        [{ param_annotation = (Vector<int>); param_type_hint = ((Vector<int>), (Some ([3:31-42], (Happly (([3:31-37], "\\HH\\Vector"), [([3:38-41], (Hprim Tint))]))))); 
            param_is_variadic = false; param_pos = [3:43-46]; param_name = "$xs"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -20,9 +20,9 @@
         { fb_ast =
           [([5:3-17],
             (Expr
-               (([5:3-16], float), [5:3-16],
-                (Binop ((Eq (Some Plus)), (([5:3-9], float), [5:3-9], (Array_get ((([5:3-6], Vector<int>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some (([5:7-8], int), [5:7-8], (Int "0")))))),
-                   (([5:13-16], float), [5:13-16], (Hole ((([5:13-16], float), [5:13-16], (Float "1.0")), (float), (int), Typing))))))))
+               ((float), [5:3-16],
+                (Binop ((Eq (Some Plus)), ((float), [5:3-9], (Array_get (((Vector<int>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((int), [5:7-8], (Int "0")))))),
+                   ((float), [5:13-16], (Hole (((float), [5:13-16], (Float "1.0")), (float), (int), Typing))))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

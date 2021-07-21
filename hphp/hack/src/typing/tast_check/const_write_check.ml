@@ -44,9 +44,9 @@ let check_prop env c pid cty_opt =
         | None ->
           check_static_const_prop (Env.tast_env_as_typing_env env) class_ pid)
 
-let rec check_expr env (_, _, e) =
+let rec check_expr env ((_, _, e) : Tast.expr) =
   match e with
-  | Class_get (((_, cty), _, _), CGstring pid, _) ->
+  | Class_get ((cty, _, _), CGstring pid, _) ->
     let (env, cty) = Env.expand_type env cty in
     begin
       match get_node cty with
@@ -67,7 +67,7 @@ let rec check_expr env (_, _, e) =
         Typing_set.iter check_class upper_bounds
       | _ -> ()
     end
-  | Obj_get (((_, cty), _, _), (_, _, Id id), _, _) ->
+  | Obj_get ((cty, _, _), (_, _, Id id), _, _) ->
     let (env, cty) = Env.expand_type env cty in
     begin
       match get_node cty with

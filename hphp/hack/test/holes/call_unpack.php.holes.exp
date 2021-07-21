@@ -10,12 +10,12 @@
         f_name = ([3:10-18], "\\unpack_a"); f_tparams = []; f_where_constraints = [];
         f_variadic =
         (FVvariadicArg
-           { param_annotation = ([3:34-37], vec<int>); param_type_hint = ((vec<int>), (Some ([3:27-30], (Hprim Tint)))); 
+           { param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([3:27-30], (Hprim Tint)))); 
              param_is_variadic = true; param_pos = [3:34-37]; param_name = "$xs"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None });
         f_params =
-        [{ param_annotation = ([3:23-25], int); param_type_hint = ((int), (Some ([3:19-22], (Hprim Tint)))); 
+        [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:19-22], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:23-25]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -37,16 +37,16 @@
          f_name = ([4:10-18], "\\unpack_b"); f_tparams = []; f_where_constraints = [];
          f_variadic =
          (FVvariadicArg
-            { param_annotation = ([4:52-55], vec<int>); param_type_hint = ((vec<int>), (Some ([4:45-48], (Hprim Tint)))); 
+            { param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([4:45-48], (Hprim Tint)))); 
               param_is_variadic = true; param_pos = [4:52-55]; param_name = "$ys"; 
               param_expr = None; param_readonly = None; param_callconv = None; 
               param_user_attributes = []; param_visibility = None });
          f_params =
-         [{ param_annotation = ([4:25-27], float); param_type_hint = ((float), (Some ([4:19-24], (Hprim Tfloat)))); 
+         [{ param_annotation = (float); param_type_hint = ((float), (Some ([4:19-24], (Hprim Tfloat)))); 
             param_is_variadic = false; param_pos = [4:25-27]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([4:41-43], vec<int>); param_type_hint = ((vec<int>), (Some ([4:29-40], (Happly (([4:29-35], "\\HH\\vec"), [([4:36-39], (Hprim Tint))]))))); 
+           { param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([4:29-40], (Happly (([4:29-35], "\\HH\\vec"), [([4:36-39], (Hprim Tint))]))))); 
              param_is_variadic = false; param_pos = [4:41-43]; param_name = "$y"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None }
@@ -68,16 +68,16 @@
          f_name = ([5:10-18], "\\unpack_c"); f_tparams = []; f_where_constraints = [];
          f_variadic =
          (FVvariadicArg
-            { param_annotation = ([5:53-56], vec<int>); param_type_hint = ((vec<int>), (Some ([5:46-49], (Hprim Tint)))); 
+            { param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([5:46-49], (Hprim Tint)))); 
               param_is_variadic = true; param_pos = [5:53-56]; param_name = "$ys"; 
               param_expr = None; param_readonly = None; param_callconv = None; 
               param_user_attributes = []; param_visibility = None });
          f_params =
-         [{ param_annotation = ([5:25-27], float); param_type_hint = ((float), (Some ([5:19-24], (Hprim Tfloat)))); 
+         [{ param_annotation = (float); param_type_hint = ((float), (Some ([5:19-24], (Hprim Tfloat)))); 
             param_is_variadic = false; param_pos = [5:25-27]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([5:42-44], (float, int)); param_type_hint = (((float, int)), (Some ([5:29-41], (Htuple [([5:30-35], (Hprim Tfloat)); ([5:37-40], (Hprim Tint))]))));
+           { param_annotation = ((float, int)); param_type_hint = (((float, int)), (Some ([5:29-41], (Htuple [([5:30-35], (Hprim Tfloat)); ([5:37-40], (Hprim Tint))])))); 
              param_is_variadic = false; param_pos = [5:42-44]; param_name = "$y"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None }
@@ -99,11 +99,11 @@
          f_name = ([6:10-18], "\\unpack_d"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([6:23-25], int); param_type_hint = ((int), (Some ([6:19-22], (Hprim Tint)))); 
+         [{ param_annotation = (int); param_type_hint = ((int), (Some ([6:19-22], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [6:23-25]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([6:59-61], shape('u' => bool, 'v' => bool));
+           { param_annotation = (shape('u' => bool, 'v' => bool));
              param_type_hint =
              ((shape('u' => bool, 'v' => bool)),
               (Some ([6:27-58],
@@ -134,11 +134,11 @@
          f_name = ([7:10-18], "\\unpack_e"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([8:7-9], float); param_type_hint = ((float), (Some ([8:1-6], (Hprim Tfloat)))); 
+         [{ param_annotation = (float); param_type_hint = ((float), (Some ([8:1-6], (Hprim Tfloat)))); 
             param_is_variadic = false; param_pos = [8:7-9]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([9:30-32], (function(int, float): bool));
+           { param_annotation = ((function(int, float): bool));
              param_type_hint =
              (((function(int, float): bool)),
               (Some ([9:1-29],
@@ -150,7 +150,7 @@
              param_is_variadic = false; param_pos = [9:30-32]; param_name = "$f"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([10:5-7], int); param_type_hint = ((int), (Some ([10:1-4], (Hprim Tint)))); 
+           { param_annotation = (int); param_type_hint = ((int), (Some ([10:1-4], (Hprim Tint)))); 
              param_is_variadic = false; param_pos = [10:5-7]; param_name = "$y"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None }
@@ -172,12 +172,12 @@
          f_name = ([13:10-21], "\\call_unpack"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([14:18-20], Pair<int, float>);
+         [{ param_annotation = (Pair<int, float>);
             param_type_hint = ((Pair<int, float>), (Some ([14:1-17], (Happly (([14:1-5], "\\HH\\Pair"), [([14:6-9], (Hprim Tint)); ([14:11-16], (Hprim Tfloat))]))))); 
             param_is_variadic = false; param_pos = [14:18-20]; param_name = "$a"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([15:38-40], (int, float, int, float, int, float));
+           { param_annotation = ((int, float, int, float, int, float));
              param_type_hint =
              (((int, float, int, float, int, float)),
               (Some ([15:1-37],
@@ -186,14 +186,14 @@
              param_is_variadic = false; param_pos = [15:38-40]; param_name = "$b"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([16:31-33], (float, vec<float>, float));
+           { param_annotation = ((float, vec<float>, float));
              param_type_hint =
              (((float, vec<float>, float)),
               (Some ([16:1-30], (Htuple [([16:2-7], (Hprim Tfloat)); ([16:9-22], (Happly (([16:9-15], "\\HH\\vec"), [([16:16-21], (Hprim Tfloat))]))); ([16:24-29], (Hprim Tfloat))]))));
              param_is_variadic = false; param_pos = [16:31-33]; param_name = "$c"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([17:34-36], (float, vec<int>, float, int));
+           { param_annotation = ((float, vec<int>, float, int));
              param_type_hint =
              (((float, vec<int>, float, int)),
               (Some ([17:1-33],
@@ -201,13 +201,13 @@
              param_is_variadic = false; param_pos = [17:34-36]; param_name = "$d"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([18:28-30], (float, int, float, float));
+           { param_annotation = ((float, int, float, float));
              param_type_hint =
              (((float, int, float, float)), (Some ([18:1-27], (Htuple [([18:2-7], (Hprim Tfloat)); ([18:9-12], (Hprim Tint)); ([18:14-19], (Hprim Tfloat)); ([18:21-26], (Hprim Tfloat))]))));
              param_is_variadic = false; param_pos = [18:28-30]; param_name = "$e"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([19:45-47], shape('a' => float, 'b' => int, 'c' => int));
+           { param_annotation = (shape('a' => float, 'b' => int, 'c' => int));
              param_type_hint =
              ((shape('a' => float, 'b' => int, 'c' => int)),
               (Some ([19:1-44],
@@ -221,14 +221,14 @@
              param_is_variadic = false; param_pos = [19:45-47]; param_name = "$f"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([20:30-32], (float, (float, float), int));
+           { param_annotation = ((float, (float, float), int));
              param_type_hint =
              (((float, (float, float), int)),
               (Some ([20:1-29], (Htuple [([20:2-7], (Hprim Tfloat)); ([20:9-23], (Htuple [([20:10-15], (Hprim Tfloat)); ([20:17-22], (Hprim Tfloat))])); ([20:25-28], (Hprim Tint))]))));
              param_is_variadic = false; param_pos = [20:30-32]; param_name = "$g"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([21:40-42], (int, shape('u' => float, 'v' => int)));
+           { param_annotation = ((int, shape('u' => float, 'v' => int)));
              param_type_hint =
              (((int, shape('u' => float, 'v' => int))),
               (Some ([21:1-39],
@@ -245,7 +245,7 @@
              param_is_variadic = false; param_pos = [21:40-42]; param_name = "$h"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([22:43-45], (float, (function(float, int): int), int));
+           { param_annotation = ((float, (function(float, int): int), int));
              param_type_hint =
              (((float, (function(float, int): int), int)),
               (Some ([22:1-42],
@@ -261,7 +261,7 @@
              param_is_variadic = false; param_pos = [22:43-45]; param_name = "$i"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([23:44-46], (float, (function(int, float): bool), int));
+           { param_annotation = ((float, (function(int, float): bool), int));
              param_type_hint =
              (((float, (function(int, float): bool), int)),
               (Some ([23:1-43],
@@ -283,76 +283,73 @@
          { fb_ast =
            [([26:3-19],
              (Expr
-                (([26:3-18], void), [26:3-18],
-                 (Call ((([26:3-11], (function(int $x, int $xs...): void)), [26:3-11], (Id ([26:3-11], "\\unpack_a"))), 
-                    [], [],
-                    (Some (([26:15-17], Pair<int, float>), [26:15-17], (Hole ((([26:15-17], Pair<int, float>), [26:15-17], (Lvar ([26:15-17], $a))), (Pair<int, float>), (Pair<int, int>), Typing)))))))));
+                ((void), [26:3-18],
+                 (Call ((((function(int $x, int $xs...): void)), [26:3-11], (Id ([26:3-11], "\\unpack_a"))), 
+                    [], [], (Some ((Pair<int, float>), [26:15-17], (Hole (((Pair<int, float>), [26:15-17], (Lvar ([26:15-17], $a))), (Pair<int, float>), (Pair<int, int>), Typing)))))))));
              ([28:3-19],
               (Expr
-                 (([28:3-18], void), [28:3-18],
-                  (Call ((([28:3-11], (function(int $x, int $xs...): void)), [28:3-11], (Id ([28:3-11], "\\unpack_a"))), 
+                 ((void), [28:3-18],
+                  (Call ((((function(int $x, int $xs...): void)), [28:3-11], (Id ([28:3-11], "\\unpack_a"))), 
                      [], [],
-                     (Some (([28:15-17], (int, float, int, float, int, float)), [28:15-17],
-                            (Hole ((([28:15-17], (int, float, int, float, int, float)), [28:15-17], (Lvar ([28:15-17], $b))), ((int, float, int, float, int, float)), ((int, int, int, int, int, int)),
-                               Typing))))
+                     (Some (((int, float, int, float, int, float)), [28:15-17],
+                            (Hole ((((int, float, int, float, int, float)), [28:15-17], (Lvar ([28:15-17], $b))), ((int, float, int, float, int, float)), ((int, int, int, int, int, int)), Typing))))
                      )))));
              ([30:3-19],
               (Expr
-                 (([30:3-18], void), [30:3-18],
-                  (Call ((([30:3-11], (function(float $x, vec<int> $y, int $ys...): void)), [30:3-11], (Id ([30:3-11], "\\unpack_b"))), 
+                 ((void), [30:3-18],
+                  (Call ((((function(float $x, vec<int> $y, int $ys...): void)), [30:3-11], (Id ([30:3-11], "\\unpack_b"))), 
                      [], [],
-                     (Some (([30:15-17], (float, vec<float>, float)), [30:15-17],
-                            (Hole ((([30:15-17], (float, vec<float>, float)), [30:15-17], (Lvar ([30:15-17], $c))), ((float, vec<float>, float)), ((float, vec<int>, int)), Typing))))
+                     (Some (((float, vec<float>, float)), [30:15-17],
+                            (Hole ((((float, vec<float>, float)), [30:15-17], (Lvar ([30:15-17], $c))), ((float, vec<float>, float)), ((float, vec<int>, int)), Typing))))
                      )))));
              ([32:3-19],
               (Expr
-                 (([32:3-18], void), [32:3-18],
-                  (Call ((([32:3-11], (function(float $x, vec<int> $y, int $ys...): void)), [32:3-11], (Id ([32:3-11], "\\unpack_b"))), 
+                 ((void), [32:3-18],
+                  (Call ((((function(float $x, vec<int> $y, int $ys...): void)), [32:3-11], (Id ([32:3-11], "\\unpack_b"))), 
                      [], [],
-                     (Some (([32:15-17], (float, vec<int>, float, int)), [32:15-17],
-                            (Hole ((([32:15-17], (float, vec<int>, float, int)), [32:15-17], (Lvar ([32:15-17], $d))), ((float, vec<int>, float, int)), ((float, vec<int>, int, int)), Typing))))
+                     (Some (((float, vec<int>, float, int)), [32:15-17],
+                            (Hole ((((float, vec<int>, float, int)), [32:15-17], (Lvar ([32:15-17], $d))), ((float, vec<int>, float, int)), ((float, vec<int>, int, int)), Typing))))
                      )))));
              ([34:3-19],
               (Expr
-                 (([34:3-18], void), [34:3-18],
-                  (Call ((([34:3-11], (function(float $x, vec<int> $y, int $ys...): void)), [34:3-11], (Id ([34:3-11], "\\unpack_b"))), 
+                 ((void), [34:3-18],
+                  (Call ((((function(float $x, vec<int> $y, int $ys...): void)), [34:3-11], (Id ([34:3-11], "\\unpack_b"))), 
                      [], [],
-                     (Some (([34:15-17], (float, int, float, float)), [34:15-17],
-                            (Hole ((([34:15-17], (float, int, float, float)), [34:15-17], (Lvar ([34:15-17], $e))), ((float, int, float, float)), ((float, vec<int>, int, int)), Typing))))
+                     (Some (((float, int, float, float)), [34:15-17],
+                            (Hole ((((float, int, float, float)), [34:15-17], (Lvar ([34:15-17], $e))), ((float, int, float, float)), ((float, vec<int>, int, int)), Typing))))
                      )))));
              ([36:3-19],
               (Expr
-                 (([36:3-18], void), [36:3-18],
-                  (Call ((([36:3-11], (function(float $x, vec<int> $y, int $ys...): void)), [36:3-11], (Id ([36:3-11], "\\unpack_b"))), 
+                 ((void), [36:3-18],
+                  (Call ((((function(float $x, vec<int> $y, int $ys...): void)), [36:3-11], (Id ([36:3-11], "\\unpack_b"))), 
                      [], [],
-                     (Some (([36:15-17], shape('a' => float, 'b' => int, 'c' => int)), [36:15-17],
-                            (Hole ((([36:15-17], shape('a' => float, 'b' => int, 'c' => int)), [36:15-17], (Lvar ([36:15-17], $f))), (shape('a' => float, 'b' => int, 'c' => int)),
-                               ({suggest:nothing}), Typing))))
+                     (Some ((shape('a' => float, 'b' => int, 'c' => int)), [36:15-17],
+                            (Hole (((shape('a' => float, 'b' => int, 'c' => int)), [36:15-17], (Lvar ([36:15-17], $f))), (shape('a' => float, 'b' => int, 'c' => int)), ({suggest:nothing}), Typing))))
                      )))));
              ([38:3-19],
               (Expr
-                 (([38:3-18], void), [38:3-18],
-                  (Call ((([38:3-11], (function(float $x, (float, int) $y, int $ys...): void)), [38:3-11], (Id ([38:3-11], "\\unpack_c"))), 
+                 ((void), [38:3-18],
+                  (Call ((((function(float $x, (float, int) $y, int $ys...): void)), [38:3-11], (Id ([38:3-11], "\\unpack_c"))), 
                      [], [],
-                     (Some (([38:15-17], (float, (float, float), int)), [38:15-17],
-                            (Hole ((([38:15-17], (float, (float, float), int)), [38:15-17], (Lvar ([38:15-17], $g))), ((float, (float, float), int)), ((float, (float, int), int)), Typing))))
+                     (Some (((float, (float, float), int)), [38:15-17],
+                            (Hole ((((float, (float, float), int)), [38:15-17], (Lvar ([38:15-17], $g))), ((float, (float, float), int)), ((float, (float, int), int)), Typing))))
                      )))));
              ([40:3-19],
               (Expr
-                 (([40:3-18], void), [40:3-18],
-                  (Call ((([40:3-11], (function(int $x, shape('u' => bool, 'v' => bool) $y): void)), [40:3-11], (Id ([40:3-11], "\\unpack_d"))), 
+                 ((void), [40:3-18],
+                  (Call ((((function(int $x, shape('u' => bool, 'v' => bool) $y): void)), [40:3-11], (Id ([40:3-11], "\\unpack_d"))), 
                      [], [],
-                     (Some (([40:15-17], (int, shape('u' => float, 'v' => int))), [40:15-17],
-                            (Hole ((([40:15-17], (int, shape('u' => float, 'v' => int))), [40:15-17], (Lvar ([40:15-17], $h))), ((int, shape('u' => float, 'v' => int))),
-                               ((int, shape('u' => bool, 'v' => bool))), Typing))))
+                     (Some (((int, shape('u' => float, 'v' => int))), [40:15-17],
+                            (Hole ((((int, shape('u' => float, 'v' => int))), [40:15-17], (Lvar ([40:15-17], $h))), ((int, shape('u' => float, 'v' => int))), ((int, shape('u' => bool, 'v' => bool))),
+                               Typing))))
                      )))));
              ([42:3-19],
               (Expr
-                 (([42:3-18], void), [42:3-18],
-                  (Call ((([42:3-11], (function(float $x, (function(int, float): bool) $f, int $y): void)), [42:3-11], (Id ([42:3-11], "\\unpack_e"))), 
+                 ((void), [42:3-18],
+                  (Call ((((function(float $x, (function(int, float): bool) $f, int $y): void)), [42:3-11], (Id ([42:3-11], "\\unpack_e"))), 
                      [], [],
-                     (Some (([42:15-17], (float, (function(float, int): int), int)), [42:15-17],
-                            (Hole ((([42:15-17], (float, (function(float, int): int), int)), [42:15-17], (Lvar ([42:15-17], $i))), ((float, (function(float, int): int), int)),
+                     (Some (((float, (function(float, int): int), int)), [42:15-17],
+                            (Hole ((((float, (function(float, int): int), int)), [42:15-17], (Lvar ([42:15-17], $i))), ((float, (function(float, int): int), int)),
                                ((float, (function(int, float): bool), int)), Typing))))
                      )))))
              ];

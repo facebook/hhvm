@@ -119,10 +119,10 @@ mod tests {
             }
         }
 
-        let mut map: BTreeMap<LocalId, u8> = BTreeMap::new();
-        map.insert((0, "".into()), 1);
-        map.insert((1, "".into()), 3);
-        map.insert((2, "".into()), 5);
+        let mut map: BTreeMap<LocalId, (Pos, u8)> = BTreeMap::new();
+        map.insert((0, "".into()), (Pos::make_none(), 1));
+        map.insert((1, "".into()), (Pos::make_none(), 3));
+        map.insert((2, "".into()), (Pos::make_none(), 5));
         let stmt_: Stmt_<u8, (), (), ()> =
             Stmt_::AssertEnv(Box::new((EnvAnnot::Join, LocalIdMap(map))));
         let mut s = 0u8;

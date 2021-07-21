@@ -11,7 +11,7 @@
          m_name = ([4:19-20], "n"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = ([4:36-38], dict<int, int>);
+         [{ param_annotation = (dict<int, int>);
             param_type_hint = ((dict<int, int>), (Some ([4:21-35], (Happly (([4:21-25], "\\HH\\dict"), [([4:26-29], (Hprim Tint)); ([4:31-34], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [4:36-38]; param_name = "$n"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
@@ -42,7 +42,7 @@
          f_name = ([7:10-11], "\\n"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([7:27-29], dict<int, int>);
+         [{ param_annotation = (dict<int, int>);
             param_type_hint = ((dict<int, int>), (Some ([7:12-26], (Happly (([7:12-16], "\\HH\\dict"), [([7:17-20], (Hprim Tint)); ([7:22-25], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [7:27-29]; param_name = "$n"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
@@ -65,12 +65,12 @@
          f_name = ([9:10-19], "\\call_dict"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([10:21-24], dict<string, int>);
+         [{ param_annotation = (dict<string, int>);
             param_type_hint = ((dict<string, int>), (Some ([10:3-20], (Happly (([10:3-7], "\\HH\\dict"), [([10:8-14], (Hprim Tstring)); ([10:16-19], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [10:21-24]; param_name = "$n1"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([11:21-24], dict<int, string>);
+           { param_annotation = (dict<int, string>);
              param_type_hint = ((dict<int, string>), (Some ([11:3-20], (Happly (([11:3-7], "\\HH\\dict"), [([11:8-11], (Hprim Tint)); ([11:13-19], (Hprim Tstring))]))))); 
              param_is_variadic = false; param_pos = [11:21-24]; param_name = "$n2"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
@@ -81,37 +81,32 @@
          { fb_ast =
            [([14:3-10],
              (Expr
-                (([14:3-9], void), [14:3-9],
-                 (Call ((([14:3-4], (function(dict<int, int> $n): void)), [14:3-4], (Id ([14:3-4], "\\n"))), 
-                    [], [(([14:5-8], dict<string, int>), [14:5-8], (Hole ((([14:5-8], dict<string, int>), [14:5-8], (Lvar ([14:5-8], $n1))), (dict<string, int>), (dict<int, int>), Typing)))], None)))));
+                ((void), [14:3-9],
+                 (Call ((((function(dict<int, int> $n): void)), [14:3-4], (Id ([14:3-4], "\\n"))), 
+                    [], [((dict<string, int>), [14:5-8], (Hole (((dict<string, int>), [14:5-8], (Lvar ([14:5-8], $n1))), (dict<string, int>), (dict<int, int>), Typing)))], None)))));
              ([16:3-10],
               (Expr
-                 (([16:3-9], void), [16:3-9],
-                  (Call ((([16:3-4], (function(dict<int, int> $n): void)), [16:3-4], (Id ([16:3-4], "\\n"))), 
-                     [], [(([16:5-8], dict<int, string>), [16:5-8], (Hole ((([16:5-8], dict<int, string>), [16:5-8], (Lvar ([16:5-8], $n2))), (dict<int, string>), (dict<int, int>), Typing)))], None)))));
+                 ((void), [16:3-9],
+                  (Call ((((function(dict<int, int> $n): void)), [16:3-4], (Id ([16:3-4], "\\n"))), 
+                     [], [((dict<int, string>), [16:5-8], (Hole (((dict<int, string>), [16:5-8], (Lvar ([16:5-8], $n2))), (dict<int, string>), (dict<int, int>), Typing)))], None)))));
              ([18:3-25],
               (Expr
-                 (([18:3-24], TestDict), [18:3-24],
-                  (Binop ((Eq None), (([18:3-7], TestDict), [18:3-7], (Lvar ([18:3-7], $foo))),
-                     (([18:10-24], TestDict), [18:10-24], (New ((([18:14-22], TestDict), [18:14-22], (CI ([18:14-22], "\\TestDict"))), [], [], None, ([18:14-22], _)))))))));
+                 ((TestDict), [18:3-24],
+                  (Binop ((Eq None), ((TestDict), [18:3-7], (Lvar ([18:3-7], $foo))), ((TestDict), [18:10-24], (New (((TestDict), [18:14-22], (CI ([18:14-22], "\\TestDict"))), [], [], None, (_)))))))));
              ([21:3-16],
               (Expr
-                 (([21:3-15], void), [21:3-15],
+                 ((void), [21:3-15],
                   (Call (
-                     (([21:3-10], (function(dict<int, int> $n): void)), [21:3-10],
-                      (Obj_get ((([21:3-7], TestDict), [21:3-7], (Lvar ([21:3-7], $foo))), (([21:9-10], (function(dict<int, int> $n): void)), [21:9-10], (Id ([21:9-10], "n"))), OG_nullthrows, false))),
-                     [],
-                     [(([21:11-14], dict<string, int>), [21:11-14], (Hole ((([21:11-14], dict<string, int>), [21:11-14], (Lvar ([21:11-14], $n1))), (dict<string, int>), (dict<int, int>), Typing)))],
-                     None)))));
+                     (((function(dict<int, int> $n): void)), [21:3-10],
+                      (Obj_get (((TestDict), [21:3-7], (Lvar ([21:3-7], $foo))), (((function(dict<int, int> $n): void)), [21:9-10], (Id ([21:9-10], "n"))), OG_nullthrows, false))),
+                     [], [((dict<string, int>), [21:11-14], (Hole (((dict<string, int>), [21:11-14], (Lvar ([21:11-14], $n1))), (dict<string, int>), (dict<int, int>), Typing)))], None)))));
              ([23:3-16],
               (Expr
-                 (([23:3-15], void), [23:3-15],
+                 ((void), [23:3-15],
                   (Call (
-                     (([23:3-10], (function(dict<int, int> $n): void)), [23:3-10],
-                      (Obj_get ((([23:3-7], TestDict), [23:3-7], (Lvar ([23:3-7], $foo))), (([23:9-10], (function(dict<int, int> $n): void)), [23:9-10], (Id ([23:9-10], "n"))), OG_nullthrows, false))),
-                     [],
-                     [(([23:11-14], dict<int, string>), [23:11-14], (Hole ((([23:11-14], dict<int, string>), [23:11-14], (Lvar ([23:11-14], $n2))), (dict<int, string>), (dict<int, int>), Typing)))],
-                     None)))))
+                     (((function(dict<int, int> $n): void)), [23:3-10],
+                      (Obj_get (((TestDict), [23:3-7], (Lvar ([23:3-7], $foo))), (((function(dict<int, int> $n): void)), [23:9-10], (Id ([23:9-10], "n"))), OG_nullthrows, false))),
+                     [], [((dict<int, string>), [23:11-14], (Hole (((dict<int, string>), [23:11-14], (Lvar ([23:11-14], $n2))), (dict<int, string>), (dict<int, int>), Typing)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -130,12 +125,12 @@
          f_name = ([26:10-24], "\\call_dict_cast"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([27:21-24], dict<string, int>);
+         [{ param_annotation = (dict<string, int>);
             param_type_hint = ((dict<string, int>), (Some ([27:3-20], (Happly (([27:3-7], "\\HH\\dict"), [([27:8-14], (Hprim Tstring)); ([27:16-19], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [27:21-24]; param_name = "$n1"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([28:21-24], dict<int, string>);
+           { param_annotation = (dict<int, string>);
              param_type_hint = ((dict<int, string>), (Some ([28:3-20], (Happly (([28:3-7], "\\HH\\dict"), [([28:8-11], (Hprim Tint)); ([28:13-19], (Hprim Tstring))]))))); 
              param_is_variadic = false; param_pos = [28:21-24]; param_name = "$n2"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
@@ -146,41 +141,32 @@
          { fb_ast =
            [([31:3-65],
              (Expr
-                (([31:3-64], void), [31:3-64],
-                 (Call ((([31:3-4], (function(dict<int, int> $n): void)), [31:3-4], (Id ([31:3-4], "\\n"))), 
-                    [],
-                    [(([31:5-63], dict<int, int>), [31:5-63], (Hole ((([31:59-62], dict<string, int>), [31:59-62], (Lvar ([31:59-62], $n1))), (dict<string, int>), (dict<int, int>), UnsafeCast)))],
-                    None)))));
+                ((void), [31:3-64],
+                 (Call ((((function(dict<int, int> $n): void)), [31:3-4], (Id ([31:3-4], "\\n"))), 
+                    [], [((dict<int, int>), [31:5-63], (Hole (((dict<string, int>), [31:59-62], (Lvar ([31:59-62], $n1))), (dict<string, int>), (dict<int, int>), UnsafeCast)))], None)))));
              ([33:3-65],
               (Expr
-                 (([33:3-64], void), [33:3-64],
-                  (Call ((([33:3-4], (function(dict<int, int> $n): void)), [33:3-4], (Id ([33:3-4], "\\n"))), 
-                     [],
-                     [(([33:5-63], dict<int, int>), [33:5-63], (Hole ((([33:59-62], dict<int, string>), [33:59-62], (Lvar ([33:59-62], $n2))), (dict<int, string>), (dict<int, int>), UnsafeCast)))],
-                     None)))));
+                 ((void), [33:3-64],
+                  (Call ((((function(dict<int, int> $n): void)), [33:3-4], (Id ([33:3-4], "\\n"))), 
+                     [], [((dict<int, int>), [33:5-63], (Hole (((dict<int, string>), [33:59-62], (Lvar ([33:59-62], $n2))), (dict<int, string>), (dict<int, int>), UnsafeCast)))], None)))));
              ([35:3-25],
               (Expr
-                 (([35:3-24], TestDict), [35:3-24],
-                  (Binop ((Eq None), (([35:3-7], TestDict), [35:3-7], (Lvar ([35:3-7], $foo))),
-                     (([35:10-24], TestDict), [35:10-24], (New ((([35:14-22], TestDict), [35:14-22], (CI ([35:14-22], "\\TestDict"))), [], [], None, ([35:14-22], _)))))))));
+                 ((TestDict), [35:3-24],
+                  (Binop ((Eq None), ((TestDict), [35:3-7], (Lvar ([35:3-7], $foo))), ((TestDict), [35:10-24], (New (((TestDict), [35:14-22], (CI ([35:14-22], "\\TestDict"))), [], [], None, (_)))))))));
              ([38:3-71],
               (Expr
-                 (([38:3-70], void), [38:3-70],
+                 ((void), [38:3-70],
                   (Call (
-                     (([38:3-10], (function(dict<int, int> $n): void)), [38:3-10],
-                      (Obj_get ((([38:3-7], TestDict), [38:3-7], (Lvar ([38:3-7], $foo))), (([38:9-10], (function(dict<int, int> $n): void)), [38:9-10], (Id ([38:9-10], "n"))), OG_nullthrows, false))),
-                     [],
-                     [(([38:11-69], dict<int, int>), [38:11-69], (Hole ((([38:65-68], dict<string, int>), [38:65-68], (Lvar ([38:65-68], $n1))), (dict<string, int>), (dict<int, int>), UnsafeCast)))],
-                     None)))));
+                     (((function(dict<int, int> $n): void)), [38:3-10],
+                      (Obj_get (((TestDict), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(dict<int, int> $n): void)), [38:9-10], (Id ([38:9-10], "n"))), OG_nullthrows, false))),
+                     [], [((dict<int, int>), [38:11-69], (Hole (((dict<string, int>), [38:65-68], (Lvar ([38:65-68], $n1))), (dict<string, int>), (dict<int, int>), UnsafeCast)))], None)))));
              ([40:3-71],
               (Expr
-                 (([40:3-70], void), [40:3-70],
+                 ((void), [40:3-70],
                   (Call (
-                     (([40:3-10], (function(dict<int, int> $n): void)), [40:3-10],
-                      (Obj_get ((([40:3-7], TestDict), [40:3-7], (Lvar ([40:3-7], $foo))), (([40:9-10], (function(dict<int, int> $n): void)), [40:9-10], (Id ([40:9-10], "n"))), OG_nullthrows, false))),
-                     [],
-                     [(([40:11-69], dict<int, int>), [40:11-69], (Hole ((([40:65-68], dict<int, string>), [40:65-68], (Lvar ([40:65-68], $n2))), (dict<int, string>), (dict<int, int>), UnsafeCast)))],
-                     None)))))
+                     (((function(dict<int, int> $n): void)), [40:3-10],
+                      (Obj_get (((TestDict), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(dict<int, int> $n): void)), [40:9-10], (Id ([40:9-10], "n"))), OG_nullthrows, false))),
+                     [], [((dict<int, int>), [40:11-69], (Hole (((dict<int, string>), [40:65-68], (Lvar ([40:65-68], $n2))), (dict<int, string>), (dict<int, int>), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

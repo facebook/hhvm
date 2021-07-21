@@ -11,7 +11,7 @@
          m_name = ([4:19-20], "b"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = ([4:36-38], Pair<int, int>);
+         [{ param_annotation = (Pair<int, int>);
             param_type_hint = ((Pair<int, int>), (Some ([4:21-35], (Happly (([4:21-25], "\\HH\\Pair"), [([4:26-29], (Hprim Tint)); ([4:31-34], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [4:36-38]; param_name = "$b"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
@@ -42,7 +42,7 @@
          f_name = ([7:10-11], "\\b"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([7:27-29], Pair<int, int>);
+         [{ param_annotation = (Pair<int, int>);
             param_type_hint = ((Pair<int, int>), (Some ([7:12-26], (Happly (([7:12-16], "\\HH\\Pair"), [([7:17-20], (Hprim Tint)); ([7:22-25], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [7:27-29]; param_name = "$b"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
@@ -65,12 +65,12 @@
          f_name = ([9:10-19], "\\call_pair"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([10:19-22], Pair<bool, int>);
+         [{ param_annotation = (Pair<bool, int>);
             param_type_hint = ((Pair<bool, int>), (Some ([10:3-18], (Happly (([10:3-7], "\\HH\\Pair"), [([10:8-12], (Hprim Tbool)); ([10:14-17], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [10:19-22]; param_name = "$b1"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([11:19-22], Pair<int, bool>);
+           { param_annotation = (Pair<int, bool>);
              param_type_hint = ((Pair<int, bool>), (Some ([11:3-18], (Happly (([11:3-7], "\\HH\\Pair"), [([11:8-11], (Hprim Tint)); ([11:13-17], (Hprim Tbool))]))))); 
              param_is_variadic = false; param_pos = [11:19-22]; param_name = "$b2"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
@@ -81,35 +81,32 @@
          { fb_ast =
            [([14:3-10],
              (Expr
-                (([14:3-9], void), [14:3-9],
-                 (Call ((([14:3-4], (function(Pair<int, int> $b): void)), [14:3-4], (Id ([14:3-4], "\\b"))), 
-                    [], [(([14:5-8], Pair<bool, int>), [14:5-8], (Hole ((([14:5-8], Pair<bool, int>), [14:5-8], (Lvar ([14:5-8], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing)))], None)))));
+                ((void), [14:3-9],
+                 (Call ((((function(Pair<int, int> $b): void)), [14:3-4], (Id ([14:3-4], "\\b"))), 
+                    [], [((Pair<bool, int>), [14:5-8], (Hole (((Pair<bool, int>), [14:5-8], (Lvar ([14:5-8], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing)))], None)))));
              ([16:3-10],
               (Expr
-                 (([16:3-9], void), [16:3-9],
-                  (Call ((([16:3-4], (function(Pair<int, int> $b): void)), [16:3-4], (Id ([16:3-4], "\\b"))), 
-                     [], [(([16:5-8], Pair<int, bool>), [16:5-8], (Hole ((([16:5-8], Pair<int, bool>), [16:5-8], (Lvar ([16:5-8], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing)))], None)))));
+                 ((void), [16:3-9],
+                  (Call ((((function(Pair<int, int> $b): void)), [16:3-4], (Id ([16:3-4], "\\b"))), 
+                     [], [((Pair<int, bool>), [16:5-8], (Hole (((Pair<int, bool>), [16:5-8], (Lvar ([16:5-8], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing)))], None)))));
              ([18:3-25],
               (Expr
-                 (([18:3-24], TestPair), [18:3-24],
-                  (Binop ((Eq None), (([18:3-7], TestPair), [18:3-7], (Lvar ([18:3-7], $foo))),
-                     (([18:10-24], TestPair), [18:10-24], (New ((([18:14-22], TestPair), [18:14-22], (CI ([18:14-22], "\\TestPair"))), [], [], None, ([18:14-22], _)))))))));
+                 ((TestPair), [18:3-24],
+                  (Binop ((Eq None), ((TestPair), [18:3-7], (Lvar ([18:3-7], $foo))), ((TestPair), [18:10-24], (New (((TestPair), [18:14-22], (CI ([18:14-22], "\\TestPair"))), [], [], None, (_)))))))));
              ([21:3-16],
               (Expr
-                 (([21:3-15], void), [21:3-15],
+                 ((void), [21:3-15],
                   (Call (
-                     (([21:3-10], (function(Pair<int, int> $b): void)), [21:3-10],
-                      (Obj_get ((([21:3-7], TestPair), [21:3-7], (Lvar ([21:3-7], $foo))), (([21:9-10], (function(Pair<int, int> $b): void)), [21:9-10], (Id ([21:9-10], "b"))), OG_nullthrows, false))),
-                     [], [(([21:11-14], Pair<bool, int>), [21:11-14], (Hole ((([21:11-14], Pair<bool, int>), [21:11-14], (Lvar ([21:11-14], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing)))],
-                     None)))));
+                     (((function(Pair<int, int> $b): void)), [21:3-10],
+                      (Obj_get (((TestPair), [21:3-7], (Lvar ([21:3-7], $foo))), (((function(Pair<int, int> $b): void)), [21:9-10], (Id ([21:9-10], "b"))), OG_nullthrows, false))),
+                     [], [((Pair<bool, int>), [21:11-14], (Hole (((Pair<bool, int>), [21:11-14], (Lvar ([21:11-14], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing)))], None)))));
              ([23:3-16],
               (Expr
-                 (([23:3-15], void), [23:3-15],
+                 ((void), [23:3-15],
                   (Call (
-                     (([23:3-10], (function(Pair<int, int> $b): void)), [23:3-10],
-                      (Obj_get ((([23:3-7], TestPair), [23:3-7], (Lvar ([23:3-7], $foo))), (([23:9-10], (function(Pair<int, int> $b): void)), [23:9-10], (Id ([23:9-10], "b"))), OG_nullthrows, false))),
-                     [], [(([23:11-14], Pair<int, bool>), [23:11-14], (Hole ((([23:11-14], Pair<int, bool>), [23:11-14], (Lvar ([23:11-14], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing)))],
-                     None)))))
+                     (((function(Pair<int, int> $b): void)), [23:3-10],
+                      (Obj_get (((TestPair), [23:3-7], (Lvar ([23:3-7], $foo))), (((function(Pair<int, int> $b): void)), [23:9-10], (Id ([23:9-10], "b"))), OG_nullthrows, false))),
+                     [], [((Pair<int, bool>), [23:11-14], (Hole (((Pair<int, bool>), [23:11-14], (Lvar ([23:11-14], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -128,12 +125,12 @@
          f_name = ([26:10-24], "\\call_pair_cast"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([27:19-22], Pair<bool, int>);
+         [{ param_annotation = (Pair<bool, int>);
             param_type_hint = ((Pair<bool, int>), (Some ([27:3-18], (Happly (([27:3-7], "\\HH\\Pair"), [([27:8-12], (Hprim Tbool)); ([27:14-17], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [27:19-22]; param_name = "$b1"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([28:19-22], Pair<int, bool>);
+           { param_annotation = (Pair<int, bool>);
              param_type_hint = ((Pair<int, bool>), (Some ([28:3-18], (Happly (([28:3-7], "\\HH\\Pair"), [([28:8-11], (Hprim Tint)); ([28:13-17], (Hprim Tbool))]))))); 
              param_is_variadic = false; param_pos = [28:19-22]; param_name = "$b2"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
@@ -144,37 +141,32 @@
          { fb_ast =
            [([31:3-63],
              (Expr
-                (([31:3-62], void), [31:3-62],
-                 (Call ((([31:3-4], (function(Pair<int, int> $b): void)), [31:3-4], (Id ([31:3-4], "\\b"))), 
-                    [], [(([31:5-61], Pair<int, int>), [31:5-61], (Hole ((([31:57-60], Pair<bool, int>), [31:57-60], (Lvar ([31:57-60], $b1))), (Pair<bool, int>), (Pair<int, int>), UnsafeCast)))],
-                    None)))));
+                ((void), [31:3-62],
+                 (Call ((((function(Pair<int, int> $b): void)), [31:3-4], (Id ([31:3-4], "\\b"))), 
+                    [], [((Pair<int, int>), [31:5-61], (Hole (((Pair<bool, int>), [31:57-60], (Lvar ([31:57-60], $b1))), (Pair<bool, int>), (Pair<int, int>), UnsafeCast)))], None)))));
              ([33:3-63],
               (Expr
-                 (([33:3-62], void), [33:3-62],
-                  (Call ((([33:3-4], (function(Pair<int, int> $b): void)), [33:3-4], (Id ([33:3-4], "\\b"))), 
-                     [], [(([33:5-61], Pair<int, int>), [33:5-61], (Hole ((([33:57-60], Pair<int, bool>), [33:57-60], (Lvar ([33:57-60], $b2))), (Pair<int, bool>), (Pair<int, int>), UnsafeCast)))],
-                     None)))));
+                 ((void), [33:3-62],
+                  (Call ((((function(Pair<int, int> $b): void)), [33:3-4], (Id ([33:3-4], "\\b"))), 
+                     [], [((Pair<int, int>), [33:5-61], (Hole (((Pair<int, bool>), [33:57-60], (Lvar ([33:57-60], $b2))), (Pair<int, bool>), (Pair<int, int>), UnsafeCast)))], None)))));
              ([35:3-25],
               (Expr
-                 (([35:3-24], TestPair), [35:3-24],
-                  (Binop ((Eq None), (([35:3-7], TestPair), [35:3-7], (Lvar ([35:3-7], $foo))),
-                     (([35:10-24], TestPair), [35:10-24], (New ((([35:14-22], TestPair), [35:14-22], (CI ([35:14-22], "\\TestPair"))), [], [], None, ([35:14-22], _)))))))));
+                 ((TestPair), [35:3-24],
+                  (Binop ((Eq None), ((TestPair), [35:3-7], (Lvar ([35:3-7], $foo))), ((TestPair), [35:10-24], (New (((TestPair), [35:14-22], (CI ([35:14-22], "\\TestPair"))), [], [], None, (_)))))))));
              ([38:3-69],
               (Expr
-                 (([38:3-68], void), [38:3-68],
+                 ((void), [38:3-68],
                   (Call (
-                     (([38:3-10], (function(Pair<int, int> $b): void)), [38:3-10],
-                      (Obj_get ((([38:3-7], TestPair), [38:3-7], (Lvar ([38:3-7], $foo))), (([38:9-10], (function(Pair<int, int> $b): void)), [38:9-10], (Id ([38:9-10], "b"))), OG_nullthrows, false))),
-                     [], [(([38:11-67], Pair<int, int>), [38:11-67], (Hole ((([38:63-66], Pair<bool, int>), [38:63-66], (Lvar ([38:63-66], $b1))), (Pair<bool, int>), (Pair<int, int>), UnsafeCast)))],
-                     None)))));
+                     (((function(Pair<int, int> $b): void)), [38:3-10],
+                      (Obj_get (((TestPair), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(Pair<int, int> $b): void)), [38:9-10], (Id ([38:9-10], "b"))), OG_nullthrows, false))),
+                     [], [((Pair<int, int>), [38:11-67], (Hole (((Pair<bool, int>), [38:63-66], (Lvar ([38:63-66], $b1))), (Pair<bool, int>), (Pair<int, int>), UnsafeCast)))], None)))));
              ([40:3-69],
               (Expr
-                 (([40:3-68], void), [40:3-68],
+                 ((void), [40:3-68],
                   (Call (
-                     (([40:3-10], (function(Pair<int, int> $b): void)), [40:3-10],
-                      (Obj_get ((([40:3-7], TestPair), [40:3-7], (Lvar ([40:3-7], $foo))), (([40:9-10], (function(Pair<int, int> $b): void)), [40:9-10], (Id ([40:9-10], "b"))), OG_nullthrows, false))),
-                     [], [(([40:11-67], Pair<int, int>), [40:11-67], (Hole ((([40:63-66], Pair<int, bool>), [40:63-66], (Lvar ([40:63-66], $b2))), (Pair<int, bool>), (Pair<int, int>), UnsafeCast)))],
-                     None)))))
+                     (((function(Pair<int, int> $b): void)), [40:3-10],
+                      (Obj_get (((TestPair), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(Pair<int, int> $b): void)), [40:9-10], (Id ([40:9-10], "b"))), OG_nullthrows, false))),
+                     [], [((Pair<int, int>), [40:11-67], (Hole (((Pair<int, bool>), [40:63-66], (Lvar ([40:63-66], $b2))), (Pair<int, bool>), (Pair<int, int>), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

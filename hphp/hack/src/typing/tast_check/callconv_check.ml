@@ -13,10 +13,10 @@ open Typing_defs
 module Env = Tast_env
 module SN = Naming_special_names
 
-let check_types env ((p, _), _, te) =
+let check_types env (_, p, te) =
   let rec check_types_helper = function
     | Lvar _ -> ()
-    | Array_get (((_, ty1), _, te1), Some _) ->
+    | Array_get ((ty1, _, te1), Some _) ->
       let rec iter ty1 =
         let (_, ety1) = Env.expand_type env ty1 in
         match get_node ety1 with

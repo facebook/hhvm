@@ -1498,8 +1498,8 @@ let class_const_def ~in_enum_class c env cc =
         | (r, Tnewtype (memberof, [enum_name; _], _))
           when String.equal memberof SN.Classes.cMemberOf ->
           let lift r ty = mk (r, Tnewtype (memberof, [enum_name; ty], ty)) in
-          let ((_, te_ty), p, te) = te in
-          let te = ((p, lift (get_reason te_ty) te_ty), p, te) in
+          let (te_ty, p, te) = te in
+          let te = (lift (get_reason te_ty) te_ty, p, te) in
           let ty' = lift r ty' in
           (te, ty')
         | _ -> (te, ty')

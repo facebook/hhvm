@@ -109,10 +109,14 @@ let expand_ty ?var_hook ?pos env ty =
   exp_ty ty
 
 let expander =
-  object
+  object (self)
     inherit Tast_visitor.endo
 
-    method! on_'ex env (pos, ty) = (pos, expand_ty ~pos env ty)
+    method! on_expr env (ty, pos, expr_) =
+      (expand_ty ~pos env ty, pos, self#on_expr_ env expr_)
+
+    method! on_class_id env (ty, pos, cid_) =
+      (expand_ty ~pos env ty, pos, self#on_class_id_ env cid_)
 
     method! on_'hi env ty = expand_ty env ty
   end

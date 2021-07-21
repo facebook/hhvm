@@ -41,7 +41,7 @@ let visitor line char =
        recursion *)
     method! on_Hole env expr from_ty to_ty hole_source =
       match (expr, hole_source) with
-      | (((pos, _), _, _), Aast.Typing) when starts_at pos line char ->
+      | ((_, pos, _), Aast.Typing) when starts_at pos line char ->
         Some (pos, env, from_ty, to_ty)
       | _ -> super#on_Hole env expr from_ty to_ty hole_source
   end

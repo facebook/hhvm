@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1fb14546eb9a6181090005640794359b>>
+// @generated SignedSource<<d5664e86ef961cc985d4ca8c57a3c085>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -209,7 +209,7 @@ pub enum Stmt_<Ex, Fb, En, Hi> {
     Markup(Box<Pstring>),
     /// Used in IFC to track type inference environments. Not user
     /// denotable.
-    AssertEnv(Box<(EnvAnnot, LocalIdMap<Ex>)>),
+    AssertEnv(Box<(EnvAnnot, LocalIdMap<(Pos, Ex)>)>),
 }
 
 #[derive(

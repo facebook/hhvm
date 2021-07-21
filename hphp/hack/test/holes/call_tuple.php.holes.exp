@@ -11,7 +11,7 @@
          m_name = ([4:19-20], "a"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = ([4:32-34], (int, int)); param_type_hint = (((int, int)), (Some ([4:21-31], (Htuple [([4:22-25], (Hprim Tint)); ([4:27-30], (Hprim Tint))]))));
+         [{ param_annotation = ((int, int)); param_type_hint = (((int, int)), (Some ([4:21-31], (Htuple [([4:22-25], (Hprim Tint)); ([4:27-30], (Hprim Tint))])))); 
             param_is_variadic = false; param_pos = [4:32-34]; param_name = "$a"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -41,7 +41,7 @@
          f_name = ([7:10-11], "\\a"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([7:23-25], (int, int)); param_type_hint = (((int, int)), (Some ([7:12-22], (Htuple [([7:13-16], (Hprim Tint)); ([7:18-21], (Hprim Tint))]))));
+         [{ param_annotation = ((int, int)); param_type_hint = (((int, int)), (Some ([7:12-22], (Htuple [([7:13-16], (Hprim Tint)); ([7:18-21], (Hprim Tint))])))); 
             param_is_variadic = false; param_pos = [7:23-25]; param_name = "$a"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -63,11 +63,11 @@
          f_name = ([9:10-20], "\\call_tuple"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([10:15-18], (int, bool)); param_type_hint = (((int, bool)), (Some ([10:3-14], (Htuple [([10:4-7], (Hprim Tint)); ([10:9-13], (Hprim Tbool))]))));
+         [{ param_annotation = ((int, bool)); param_type_hint = (((int, bool)), (Some ([10:3-14], (Htuple [([10:4-7], (Hprim Tint)); ([10:9-13], (Hprim Tbool))])))); 
             param_is_variadic = false; param_pos = [10:15-18]; param_name = "$a1"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([11:15-18], (bool, int)); param_type_hint = (((bool, int)), (Some ([11:3-14], (Htuple [([11:4-8], (Hprim Tbool)); ([11:10-13], (Hprim Tint))]))));
+           { param_annotation = ((bool, int)); param_type_hint = (((bool, int)), (Some ([11:3-14], (Htuple [([11:4-8], (Hprim Tbool)); ([11:10-13], (Hprim Tint))])))); 
              param_is_variadic = false; param_pos = [11:15-18]; param_name = "$a2"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None }
@@ -77,33 +77,33 @@
          { fb_ast =
            [([14:3-10],
              (Expr
-                (([14:3-9], void), [14:3-9],
-                 (Call ((([14:3-4], (function((int, int) $a): void)), [14:3-4], (Id ([14:3-4], "\\a"))), 
-                    [], [(([14:5-8], (int, bool)), [14:5-8], (Hole ((([14:5-8], (int, bool)), [14:5-8], (Lvar ([14:5-8], $a1))), ((int, bool)), ((int, int)), Typing)))], None)))));
+                ((void), [14:3-9],
+                 (Call ((((function((int, int) $a): void)), [14:3-4], (Id ([14:3-4], "\\a"))), 
+                    [], [(((int, bool)), [14:5-8], (Hole ((((int, bool)), [14:5-8], (Lvar ([14:5-8], $a1))), ((int, bool)), ((int, int)), Typing)))], None)))));
              ([16:3-10],
               (Expr
-                 (([16:3-9], void), [16:3-9],
-                  (Call ((([16:3-4], (function((int, int) $a): void)), [16:3-4], (Id ([16:3-4], "\\a"))), 
-                     [], [(([16:5-8], (bool, int)), [16:5-8], (Hole ((([16:5-8], (bool, int)), [16:5-8], (Lvar ([16:5-8], $a2))), ((bool, int)), ((int, int)), Typing)))], None)))));
+                 ((void), [16:3-9],
+                  (Call ((((function((int, int) $a): void)), [16:3-4], (Id ([16:3-4], "\\a"))), 
+                     [], [(((bool, int)), [16:5-8], (Hole ((((bool, int)), [16:5-8], (Lvar ([16:5-8], $a2))), ((bool, int)), ((int, int)), Typing)))], None)))));
              ([18:3-26],
               (Expr
-                 (([18:3-25], TestTuple), [18:3-25],
-                  (Binop ((Eq None), (([18:3-7], TestTuple), [18:3-7], (Lvar ([18:3-7], $foo))),
-                     (([18:10-25], TestTuple), [18:10-25], (New ((([18:14-23], TestTuple), [18:14-23], (CI ([18:14-23], "\\TestTuple"))), [], [], None, ([18:14-23], _)))))))));
+                 ((TestTuple), [18:3-25],
+                  (Binop ((Eq None), ((TestTuple), [18:3-7], (Lvar ([18:3-7], $foo))),
+                     ((TestTuple), [18:10-25], (New (((TestTuple), [18:14-23], (CI ([18:14-23], "\\TestTuple"))), [], [], None, (_)))))))));
              ([21:3-16],
               (Expr
-                 (([21:3-15], void), [21:3-15],
+                 ((void), [21:3-15],
                   (Call (
-                     (([21:3-10], (function((int, int) $a): void)), [21:3-10],
-                      (Obj_get ((([21:3-7], TestTuple), [21:3-7], (Lvar ([21:3-7], $foo))), (([21:9-10], (function((int, int) $a): void)), [21:9-10], (Id ([21:9-10], "a"))), OG_nullthrows, false))),
-                     [], [(([21:11-14], (int, bool)), [21:11-14], (Hole ((([21:11-14], (int, bool)), [21:11-14], (Lvar ([21:11-14], $a1))), ((int, bool)), ((int, int)), Typing)))], None)))));
+                     (((function((int, int) $a): void)), [21:3-10],
+                      (Obj_get (((TestTuple), [21:3-7], (Lvar ([21:3-7], $foo))), (((function((int, int) $a): void)), [21:9-10], (Id ([21:9-10], "a"))), OG_nullthrows, false))),
+                     [], [(((int, bool)), [21:11-14], (Hole ((((int, bool)), [21:11-14], (Lvar ([21:11-14], $a1))), ((int, bool)), ((int, int)), Typing)))], None)))));
              ([23:3-16],
               (Expr
-                 (([23:3-15], void), [23:3-15],
+                 ((void), [23:3-15],
                   (Call (
-                     (([23:3-10], (function((int, int) $a): void)), [23:3-10],
-                      (Obj_get ((([23:3-7], TestTuple), [23:3-7], (Lvar ([23:3-7], $foo))), (([23:9-10], (function((int, int) $a): void)), [23:9-10], (Id ([23:9-10], "a"))), OG_nullthrows, false))),
-                     [], [(([23:11-14], (bool, int)), [23:11-14], (Hole ((([23:11-14], (bool, int)), [23:11-14], (Lvar ([23:11-14], $a2))), ((bool, int)), ((int, int)), Typing)))], None)))))
+                     (((function((int, int) $a): void)), [23:3-10],
+                      (Obj_get (((TestTuple), [23:3-7], (Lvar ([23:3-7], $foo))), (((function((int, int) $a): void)), [23:9-10], (Id ([23:9-10], "a"))), OG_nullthrows, false))),
+                     [], [(((bool, int)), [23:11-14], (Hole ((((bool, int)), [23:11-14], (Lvar ([23:11-14], $a2))), ((bool, int)), ((int, int)), Typing)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -122,11 +122,11 @@
          f_name = ([26:10-25], "\\call_tuple_cast"); f_tparams = []; 
          f_where_constraints = []; f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([27:15-18], (int, bool)); param_type_hint = (((int, bool)), (Some ([27:3-14], (Htuple [([27:4-7], (Hprim Tint)); ([27:9-13], (Hprim Tbool))]))));
+         [{ param_annotation = ((int, bool)); param_type_hint = (((int, bool)), (Some ([27:3-14], (Htuple [([27:4-7], (Hprim Tint)); ([27:9-13], (Hprim Tbool))])))); 
             param_is_variadic = false; param_pos = [27:15-18]; param_name = "$a1"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None };
-           { param_annotation = ([28:15-18], (bool, int)); param_type_hint = (((bool, int)), (Some ([28:3-14], (Htuple [([28:4-8], (Hprim Tbool)); ([28:10-13], (Hprim Tint))]))));
+           { param_annotation = ((bool, int)); param_type_hint = (((bool, int)), (Some ([28:3-14], (Htuple [([28:4-8], (Hprim Tbool)); ([28:10-13], (Hprim Tint))])))); 
              param_is_variadic = false; param_pos = [28:15-18]; param_name = "$a2"; 
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None }
@@ -136,33 +136,33 @@
          { fb_ast =
            [([31:3-55],
              (Expr
-                (([31:3-54], void), [31:3-54],
-                 (Call ((([31:3-4], (function((int, int) $a): void)), [31:3-4], (Id ([31:3-4], "\\a"))), 
-                    [], [(([31:5-53], (int, int)), [31:5-53], (Hole ((([31:49-52], (int, bool)), [31:49-52], (Lvar ([31:49-52], $a1))), ((int, bool)), ((int, int)), UnsafeCast)))], None)))));
+                ((void), [31:3-54],
+                 (Call ((((function((int, int) $a): void)), [31:3-4], (Id ([31:3-4], "\\a"))), 
+                    [], [(((int, int)), [31:5-53], (Hole ((((int, bool)), [31:49-52], (Lvar ([31:49-52], $a1))), ((int, bool)), ((int, int)), UnsafeCast)))], None)))));
              ([33:3-55],
               (Expr
-                 (([33:3-54], void), [33:3-54],
-                  (Call ((([33:3-4], (function((int, int) $a): void)), [33:3-4], (Id ([33:3-4], "\\a"))), 
-                     [], [(([33:5-53], (int, int)), [33:5-53], (Hole ((([33:49-52], (bool, int)), [33:49-52], (Lvar ([33:49-52], $a2))), ((bool, int)), ((int, int)), UnsafeCast)))], None)))));
+                 ((void), [33:3-54],
+                  (Call ((((function((int, int) $a): void)), [33:3-4], (Id ([33:3-4], "\\a"))), 
+                     [], [(((int, int)), [33:5-53], (Hole ((((bool, int)), [33:49-52], (Lvar ([33:49-52], $a2))), ((bool, int)), ((int, int)), UnsafeCast)))], None)))));
              ([35:3-26],
               (Expr
-                 (([35:3-25], TestTuple), [35:3-25],
-                  (Binop ((Eq None), (([35:3-7], TestTuple), [35:3-7], (Lvar ([35:3-7], $foo))),
-                     (([35:10-25], TestTuple), [35:10-25], (New ((([35:14-23], TestTuple), [35:14-23], (CI ([35:14-23], "\\TestTuple"))), [], [], None, ([35:14-23], _)))))))));
+                 ((TestTuple), [35:3-25],
+                  (Binop ((Eq None), ((TestTuple), [35:3-7], (Lvar ([35:3-7], $foo))),
+                     ((TestTuple), [35:10-25], (New (((TestTuple), [35:14-23], (CI ([35:14-23], "\\TestTuple"))), [], [], None, (_)))))))));
              ([38:3-61],
               (Expr
-                 (([38:3-60], void), [38:3-60],
+                 ((void), [38:3-60],
                   (Call (
-                     (([38:3-10], (function((int, int) $a): void)), [38:3-10],
-                      (Obj_get ((([38:3-7], TestTuple), [38:3-7], (Lvar ([38:3-7], $foo))), (([38:9-10], (function((int, int) $a): void)), [38:9-10], (Id ([38:9-10], "a"))), OG_nullthrows, false))),
-                     [], [(([38:11-59], (int, int)), [38:11-59], (Hole ((([38:55-58], (int, bool)), [38:55-58], (Lvar ([38:55-58], $a1))), ((int, bool)), ((int, int)), UnsafeCast)))], None)))));
+                     (((function((int, int) $a): void)), [38:3-10],
+                      (Obj_get (((TestTuple), [38:3-7], (Lvar ([38:3-7], $foo))), (((function((int, int) $a): void)), [38:9-10], (Id ([38:9-10], "a"))), OG_nullthrows, false))),
+                     [], [(((int, int)), [38:11-59], (Hole ((((int, bool)), [38:55-58], (Lvar ([38:55-58], $a1))), ((int, bool)), ((int, int)), UnsafeCast)))], None)))));
              ([40:3-61],
               (Expr
-                 (([40:3-60], void), [40:3-60],
+                 ((void), [40:3-60],
                   (Call (
-                     (([40:3-10], (function((int, int) $a): void)), [40:3-10],
-                      (Obj_get ((([40:3-7], TestTuple), [40:3-7], (Lvar ([40:3-7], $foo))), (([40:9-10], (function((int, int) $a): void)), [40:9-10], (Id ([40:9-10], "a"))), OG_nullthrows, false))),
-                     [], [(([40:11-59], (int, int)), [40:11-59], (Hole ((([40:55-58], (bool, int)), [40:55-58], (Lvar ([40:55-58], $a2))), ((bool, int)), ((int, int)), UnsafeCast)))], None)))))
+                     (((function((int, int) $a): void)), [40:3-10],
+                      (Obj_get (((TestTuple), [40:3-7], (Lvar ([40:3-7], $foo))), (((function((int, int) $a): void)), [40:9-10], (Id ([40:9-10], "a"))), OG_nullthrows, false))),
+                     [], [(((int, int)), [40:11-59], (Hole ((((bool, int)), [40:55-58], (Lvar ([40:55-58], $a2))), ((bool, int)), ((int, int)), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

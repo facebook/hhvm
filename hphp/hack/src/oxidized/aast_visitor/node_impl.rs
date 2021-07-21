@@ -6,6 +6,7 @@
 use super::{
     node::Node, node_mut::NodeMut, type_params::Params, visitor::Visitor, visitor_mut::VisitorMut,
 };
+use crate::pos::Pos;
 use itertools::Either;
 use ocamlrep::rc::RcOc;
 use std::collections::BTreeMap;
@@ -376,7 +377,7 @@ where
     }
 }
 
-impl<P: Params> Node<P> for crate::LocalIdMap<P::Ex> {
+impl<P: Params> Node<P> for crate::LocalIdMap<(Pos, P::Ex)> {
     fn recurse<'node>(
         &'node self,
         c: &mut P::Context,
@@ -384,7 +385,7 @@ impl<P: Params> Node<P> for crate::LocalIdMap<P::Ex> {
     ) -> Result<(), P::Error> {
         Ok(for (key, value) in self.0.iter() {
             key.accept(c, v)?;
-            v.visit_ex(c, value)?;
+            v.visit_ex(c, &value.1)?;
         })
     }
 }
@@ -393,14 +394,14 @@ impl<P: Params> Node<P> for crate::LocalIdMap<P::Ex> {
 /// mutating key requires re-constructing the underlaying map.
 /// There will be extra perf cost even keys are not mutated.
 /// Overriding its parent visit method can mutate keys economically.
-impl<P: Params> NodeMut<P> for crate::LocalIdMap<P::Ex> {
+impl<P: Params> NodeMut<P> for crate::LocalIdMap<(Pos, P::Ex)> {
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
         v: &mut dyn VisitorMut<'node, P = P>,
     ) -> Result<(), P::Error> {
         Ok(for value in self.0.values_mut() {
-            v.visit_ex(c, value)?
+            v.visit_ex(c, &mut value.1)?
         })
     }
 }

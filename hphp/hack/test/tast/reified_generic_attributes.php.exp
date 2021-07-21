@@ -126,7 +126,7 @@ Errors:
          f_readonly_ret = None; f_ret = ((_), None); f_name = ([11:10-12], "\\ff");
          f_tparams =
          [{ tp_variance = Invariant; tp_name = ([11:22-23], "T"); tp_parameters = []; 
-            tp_constraints = []; tp_reified = Erased; tp_user_attributes = [{ ua_name = ([11:15-16], "\\A"); ua_params = [(([11:17-18], int), [11:17-18], (Int "1"))] }] }
+            tp_constraints = []; tp_reified = Erased; tp_user_attributes = [{ ua_name = ([11:15-16], "\\A"); ua_params = [((int), [11:17-18], (Int "1"))] }] }
            ];
          f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 

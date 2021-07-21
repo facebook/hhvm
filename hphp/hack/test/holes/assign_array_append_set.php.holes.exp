@@ -10,7 +10,7 @@
         f_name = ([3:10-33], "\\assign_array_append_set"); f_tparams = []; 
         f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([3:48-51], Set<arraykey>); param_type_hint = ((Set<arraykey>), (Some ([3:34-47], (Happly (([3:34-37], "\\HH\\Set"), [([3:38-46], (Hprim Tarraykey))])))));
+        [{ param_annotation = (Set<arraykey>); param_type_hint = ((Set<arraykey>), (Some ([3:34-47], (Happly (([3:34-37], "\\HH\\Set"), [([3:38-46], (Hprim Tarraykey))])))));
            param_is_variadic = false; param_pos = [3:48-51]; param_name = "$xs"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -20,9 +20,9 @@
         { fb_ast =
           [([5:3-17],
             (Expr
-               (([5:3-16], bool), [5:3-16],
-                (Binop ((Eq None), (([5:3-8], bool), [5:3-8], (Array_get ((([5:3-6], Set<arraykey>), [5:3-6], (Lvar ([5:3-6], $xs))), None))),
-                   (([5:11-16], bool), [5:11-16], (Hole ((([5:11-16], bool), [5:11-16], False), (bool), (arraykey), Typing))))))))
+               ((bool), [5:3-16],
+                (Binop ((Eq None), ((bool), [5:3-8], (Array_get (((Set<arraykey>), [5:3-6], (Lvar ([5:3-6], $xs))), None))),
+                   ((bool), [5:11-16], (Hole (((bool), [5:11-16], False), (bool), (arraykey), Typing))))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -121,7 +121,7 @@ let visitor =
   object (this)
     inherit [_] Tast_visitor.iter_with_state as super
 
-    method! on_expr (env, ctx) (((p, ty), _, e) as te) =
+    method! on_expr (env, ctx) ((ty, p, e) as te) =
       match e with
       | Unop (Ast_defs.Unot, e)
       | Binop (Ast_defs.Eqeqeq, e, (_, _, Null))

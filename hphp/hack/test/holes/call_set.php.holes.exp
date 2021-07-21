@@ -11,7 +11,7 @@
          m_name = ([4:19-20], "h"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = ([4:30-32], Set<int>); param_type_hint = ((Set<int>), (Some ([4:21-29], (Happly (([4:21-24], "\\HH\\Set"), [([4:25-28], (Hprim Tint))]))))); 
+         [{ param_annotation = (Set<int>); param_type_hint = ((Set<int>), (Some ([4:21-29], (Happly (([4:21-24], "\\HH\\Set"), [([4:25-28], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [4:30-32]; param_name = "$h"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -41,7 +41,7 @@
          f_name = ([7:10-11], "\\h"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([7:21-23], Set<int>); param_type_hint = ((Set<int>), (Some ([7:12-20], (Happly (([7:12-15], "\\HH\\Set"), [([7:16-19], (Hprim Tint))]))))); 
+         [{ param_annotation = (Set<int>); param_type_hint = ((Set<int>), (Some ([7:12-20], (Happly (([7:12-15], "\\HH\\Set"), [([7:16-19], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [7:21-23]; param_name = "$h"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -63,7 +63,7 @@
          f_name = ([9:10-18], "\\call_set"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([10:15-17], Set<string>); param_type_hint = ((Set<string>), (Some ([10:3-14], (Happly (([10:3-6], "\\HH\\Set"), [([10:7-13], (Hprim Tstring))])))));
+         [{ param_annotation = (Set<string>); param_type_hint = ((Set<string>), (Some ([10:3-14], (Happly (([10:3-6], "\\HH\\Set"), [([10:7-13], (Hprim Tstring))]))))); 
             param_is_variadic = false; param_pos = [10:15-17]; param_name = "$h"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -73,21 +73,20 @@
          { fb_ast =
            [([13:3-9],
              (Expr
-                (([13:3-8], void), [13:3-8],
-                 (Call ((([13:3-4], (function(Set<int> $h): void)), [13:3-4], (Id ([13:3-4], "\\h"))), 
-                    [], [(([13:5-7], Set<string>), [13:5-7], (Hole ((([13:5-7], Set<string>), [13:5-7], (Lvar ([13:5-7], $h))), (Set<string>), (Set<int>), Typing)))], None)))));
+                ((void), [13:3-8],
+                 (Call ((((function(Set<int> $h): void)), [13:3-4], (Id ([13:3-4], "\\h"))), 
+                    [], [((Set<string>), [13:5-7], (Hole (((Set<string>), [13:5-7], (Lvar ([13:5-7], $h))), (Set<string>), (Set<int>), Typing)))], None)))));
              ([15:3-24],
               (Expr
-                 (([15:3-23], TestSet), [15:3-23],
-                  (Binop ((Eq None), (([15:3-7], TestSet), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     (([15:10-23], TestSet), [15:10-23], (New ((([15:14-21], TestSet), [15:14-21], (CI ([15:14-21], "\\TestSet"))), [], [], None, ([15:14-21], _)))))))));
+                 ((TestSet), [15:3-23],
+                  (Binop ((Eq None), ((TestSet), [15:3-7], (Lvar ([15:3-7], $foo))), ((TestSet), [15:10-23], (New (((TestSet), [15:14-21], (CI ([15:14-21], "\\TestSet"))), [], [], None, (_)))))))));
              ([18:3-15],
               (Expr
-                 (([18:3-14], void), [18:3-14],
+                 ((void), [18:3-14],
                   (Call (
-                     (([18:3-10], (function(Set<int> $h): void)), [18:3-10],
-                      (Obj_get ((([18:3-7], TestSet), [18:3-7], (Lvar ([18:3-7], $foo))), (([18:9-10], (function(Set<int> $h): void)), [18:9-10], (Id ([18:9-10], "h"))), OG_nullthrows, false))),
-                     [], [(([18:11-13], Set<string>), [18:11-13], (Hole ((([18:11-13], Set<string>), [18:11-13], (Lvar ([18:11-13], $h))), (Set<string>), (Set<int>), Typing)))], None)))))
+                     (((function(Set<int> $h): void)), [18:3-10],
+                      (Obj_get (((TestSet), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Set<int> $h): void)), [18:9-10], (Id ([18:9-10], "h"))), OG_nullthrows, false))),
+                     [], [((Set<string>), [18:11-13], (Hole (((Set<string>), [18:11-13], (Lvar ([18:11-13], $h))), (Set<string>), (Set<int>), Typing)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -106,7 +105,7 @@
          f_name = ([21:10-23], "\\call_set_cast"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([22:15-17], Set<string>); param_type_hint = ((Set<string>), (Some ([22:3-14], (Happly (([22:3-6], "\\HH\\Set"), [([22:7-13], (Hprim Tstring))])))));
+         [{ param_annotation = (Set<string>); param_type_hint = ((Set<string>), (Some ([22:3-14], (Happly (([22:3-6], "\\HH\\Set"), [([22:7-13], (Hprim Tstring))]))))); 
             param_is_variadic = false; param_pos = [22:15-17]; param_name = "$h"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -116,21 +115,20 @@
          { fb_ast =
            [([25:3-54],
              (Expr
-                (([25:3-53], void), [25:3-53],
-                 (Call ((([25:3-4], (function(Set<int> $h): void)), [25:3-4], (Id ([25:3-4], "\\h"))), 
-                    [], [(([25:5-52], Set<int>), [25:5-52], (Hole ((([25:49-51], Set<string>), [25:49-51], (Lvar ([25:49-51], $h))), (Set<string>), (Set<int>), UnsafeCast)))], None)))));
+                ((void), [25:3-53],
+                 (Call ((((function(Set<int> $h): void)), [25:3-4], (Id ([25:3-4], "\\h"))), 
+                    [], [((Set<int>), [25:5-52], (Hole (((Set<string>), [25:49-51], (Lvar ([25:49-51], $h))), (Set<string>), (Set<int>), UnsafeCast)))], None)))));
              ([27:3-24],
               (Expr
-                 (([27:3-23], TestSet), [27:3-23],
-                  (Binop ((Eq None), (([27:3-7], TestSet), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     (([27:10-23], TestSet), [27:10-23], (New ((([27:14-21], TestSet), [27:14-21], (CI ([27:14-21], "\\TestSet"))), [], [], None, ([27:14-21], _)))))))));
+                 ((TestSet), [27:3-23],
+                  (Binop ((Eq None), ((TestSet), [27:3-7], (Lvar ([27:3-7], $foo))), ((TestSet), [27:10-23], (New (((TestSet), [27:14-21], (CI ([27:14-21], "\\TestSet"))), [], [], None, (_)))))))));
              ([30:3-60],
               (Expr
-                 (([30:3-59], void), [30:3-59],
+                 ((void), [30:3-59],
                   (Call (
-                     (([30:3-10], (function(Set<int> $h): void)), [30:3-10],
-                      (Obj_get ((([30:3-7], TestSet), [30:3-7], (Lvar ([30:3-7], $foo))), (([30:9-10], (function(Set<int> $h): void)), [30:9-10], (Id ([30:9-10], "h"))), OG_nullthrows, false))),
-                     [], [(([30:11-58], Set<int>), [30:11-58], (Hole ((([30:55-57], Set<string>), [30:55-57], (Lvar ([30:55-57], $h))), (Set<string>), (Set<int>), UnsafeCast)))], None)))))
+                     (((function(Set<int> $h): void)), [30:3-10],
+                      (Obj_get (((TestSet), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Set<int> $h): void)), [30:9-10], (Id ([30:9-10], "h"))), OG_nullthrows, false))),
+                     [], [((Set<int>), [30:11-58], (Hole (((Set<string>), [30:55-57], (Lvar ([30:55-57], $h))), (Set<string>), (Set<int>), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

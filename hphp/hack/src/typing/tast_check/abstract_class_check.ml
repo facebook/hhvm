@@ -13,7 +13,7 @@ module Env = Tast_env
 module Cls = Decl_provider.Class
 module SN = Naming_special_names
 
-let check_expr env (pos, _, e) =
+let check_expr env (_, pos, e) =
   match e with
   | Class_const ((_, _, CIparent), (_, construct))
     when String.equal construct SN.Members.__construct ->
@@ -22,7 +22,7 @@ let check_expr env (pos, _, e) =
     | Some parent_class
       when Ast_defs.(equal_class_kind (Cls.kind parent_class) Cabstract)
            && Option.is_none (fst (Cls.construct parent_class)) ->
-      Errors.parent_abstract_call construct (fst pos) (Cls.pos parent_class)
+      Errors.parent_abstract_call construct pos (Cls.pos parent_class)
     | _ -> ())
   | _ -> ()
 

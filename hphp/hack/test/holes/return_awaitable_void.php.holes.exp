@@ -10,7 +10,7 @@
         f_name = ([2:16-19], "\\err"); f_tparams = []; f_where_constraints = []; 
         f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([2:27-29], string); param_type_hint = ((string), (Some ([2:20-26], (Hprim Tstring)))); 
+        [{ param_annotation = (string); param_type_hint = ((string), (Some ([2:20-26], (Hprim Tstring)))); 
            param_is_variadic = false; param_pos = [2:27-29]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -30,8 +30,8 @@
        { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([3:21-35], (Happly (([3:21-30], "\\HH\\Awaitable"), [([3:31-34], (Hprim Tint))]))))); 
          f_name = ([3:16-17], "\\f"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([4:3-12], (Return (Some (([4:10-11], int), [4:10-11], (Int "1")))))]; fb_annotation = () }; 
+         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
+         f_body = { fb_ast = [([4:3-12], (Return (Some ((int), [4:10-11], (Int "1")))))]; fb_annotation = () }; 
          f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -48,7 +48,7 @@
          f_name = ([6:16-17], "\\g"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([6:26-28], ?string); param_type_hint = ((?string), (Some ([6:18-25], (Hoption ([6:19-25], (Hprim Tstring)))))); 
+         [{ param_annotation = (?string); param_type_hint = ((?string), (Some ([6:18-25], (Hoption ([6:19-25], (Hprim Tstring)))))); 
             param_is_variadic = false; param_pos = [6:26-28]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -57,23 +57,18 @@
          f_body =
          { fb_ast =
            [([7:3-9:4],
-             (If ((([7:7-18], bool), [7:7-18], (Binop (Eqeqeq, (([7:7-9], ?string), [7:7-9], (Lvar ([7:7-9], $x))), (([7:14-18], null), [7:14-18], Null)))),
+             (If (((bool), [7:7-18], (Binop (Eqeqeq, ((?string), [7:7-9], (Lvar ([7:7-9], $x))), ((null), [7:14-18], Null)))),
                 [([7:3-9:4], (AssertEnv (Refinement, {$x})));
-                  ([8:5-22],
-                   (Return
-                      (Some (([8:12-21], int), [8:12-21],
-                             (Await (([8:18-21], Awaitable<int>), [8:18-21], (Call ((([8:18-19], (function(): Awaitable<int>)), [8:18-19], (Id ([8:18-19], "\\f"))), [], [], None))))))))
-                  ],
+                  ([8:5-22], (Return (Some ((int), [8:12-21], (Await ((Awaitable<int>), [8:18-21], (Call ((((function(): Awaitable<int>)), [8:18-19], (Id ([8:18-19], "\\f"))), [], [], None))))))))],
                 [([7:3-9:4], (AssertEnv (Refinement, {$x}))); ([Pos.none], Noop)])));
              ([11:3-24],
               (Return
-                 (Some (([11:10-23], void), [11:10-23],
+                 (Some ((void), [11:10-23],
                         (Hole (
-                           (([11:10-23], void), [11:10-23],
+                           ((void), [11:10-23],
                             (Await
-                               (([11:16-23], Awaitable<void>), [11:16-23],
-                                (Call ((([11:16-19], (function(string $x): Awaitable<void>)), [11:16-19], (Id ([11:16-19], "\\err"))), 
-                                   [], [(([11:20-22], string), [11:20-22], (Lvar ([11:20-22], $x)))], None))))),
+                               ((Awaitable<void>), [11:16-23],
+                                (Call ((((function(string $x): Awaitable<void>)), [11:16-19], (Id ([11:16-19], "\\err"))), [], [((string), [11:20-22], (Lvar ([11:20-22], $x)))], None))))),
                            (void), (int), Typing))))))
              ];
            fb_annotation = () };

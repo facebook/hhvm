@@ -12,25 +12,34 @@ open Hh_prelude
 type collected_type = Tast_env.env * Typing_defs.phase_ty [@@deriving show]
 
 let type_collector =
-  object
-    inherit [_] Tast_visitor.reduce
+  object (self)
+    inherit [_] Tast_visitor.reduce as super
 
     method zero = Pos.AbsolutePosMap.empty
 
     method plus = Pos.AbsolutePosMap.union ~combine:(fun _ a b -> Some (a @ b))
 
-    method! on_'ex env (p, ty) =
-      Pos.AbsolutePosMap.singleton
-        (Pos.to_absolute p)
-        [(env, Typing_defs.LoclTy ty)]
+    method! on_expr env (ty, p, expr_) =
+      self#plus
+        (Pos.AbsolutePosMap.singleton
+           (Pos.to_absolute p)
+           [(env, Typing_defs.LoclTy ty)])
+        (super#on_expr env (ty, p, expr_))
 
-    method! on_class_id env ((_, ty), _, cid) =
+    method! on_class_id env (ty, _, cid) =
       match cid with
       | Aast.CI (p, _) ->
         Pos.AbsolutePosMap.singleton
           (Pos.to_absolute p)
           [(env, Typing_defs.LoclTy ty)]
       | _ -> Pos.AbsolutePosMap.empty
+
+    method! on_fun_param env fp =
+      self#plus
+        (Pos.AbsolutePosMap.singleton
+           (Pos.to_absolute fp.Aast.param_pos)
+           [(env, Typing_defs.LoclTy fp.Aast.param_annotation)])
+        (super#on_fun_param env fp)
 
     method! on_hint (env : Tast_env.t) hint =
       let (pos, _) = hint in

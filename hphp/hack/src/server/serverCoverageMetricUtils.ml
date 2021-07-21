@@ -25,7 +25,7 @@ class count_getter fixme_map =
 
     method! on_expr env expr =
       let acc = super#on_expr env expr in
-      let ((pos, ty), _, e) = expr in
+      let (ty, (pos : Aast.pos), e) = expr in
       let expr_kind_opt =
         match e with
         | Aast.Array_get _ -> Some "array_get"
@@ -48,13 +48,16 @@ class count_getter fixme_map =
           | None -> empty_counter
         in
         let ctx = Tast_env.get_ctx env in
-        SMap.add acc ~key:kind ~data:(incr_counter ctx lvl (r, pos, counter))
+        SMap.add
+          acc
+          ~key:kind
+          ~data:(incr_counter ctx lvl (r, (pos : Aast.pos), counter))
   end
 
 (* This should likely take in tasts made with type checker options that were
  * made permissive using TypecheckerOptions.make_permissive
  *)
-let accumulate_types ctx tast check =
+let accumulate_types ctx (tast : Tast.def list) check =
   let fixmes =
     Fixme_provider.get_hh_fixmes check |> Option.value ~default:IMap.empty
   in

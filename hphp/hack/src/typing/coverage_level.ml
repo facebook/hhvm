@@ -85,7 +85,7 @@ let incr_reason_stats (ctx : Provider_context.t) r p reason_stats =
       (Pos.Map.add reason_pos pos_stats pos_stats_map)
       reason_stats
 
-let incr_counter (ctx : Provider_context.t) k (r, p, c) =
+let incr_counter (ctx : Provider_context.t) k (r, (p : Aast.pos), c) =
   let v = CLMap.find k c in
   CLMap.add
     k
@@ -142,7 +142,7 @@ let rec is_tany env ty =
     | _ -> (env, None))
   | _ -> (env, None)
 
-let level_of_type env fixme_map (pos, ty) =
+let level_of_type env fixme_map ((pos : Aast.pos), ty) =
   let (env, ty) = Tast_env.expand_type env ty in
   match get_node ty with
   | Tobject -> (env, Partial)
@@ -192,7 +192,7 @@ class level_getter fixme_map =
        * typed subexpression. The count is then always incremented.
        *)
       let (pmap, cmap) = super#on_expr env expr in
-      let ((pos, ty), _, _) = expr in
+      let (ty, pos, _) = expr in
       let (_env, lvl) = level_of_type env fixme_map (pos, ty) in
       let should_update_pmap =
         match lvl with

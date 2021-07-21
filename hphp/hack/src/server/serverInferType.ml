@@ -68,11 +68,26 @@ let base_visitor line char =
       else
         rhs
 
-    method! on_'ex env (pos, ty) =
+    method private merge_opt lhs rhs =
+      match (lhs, rhs) with
+      | (Some lhs, Some rhs) -> Some (self#merge lhs rhs)
+      | (Some lhs, None) -> Some lhs
+      | (None, Some rhs) -> Some rhs
+      | (None, None) -> None
+
+    method! on_expr env ((ty, pos, _) as expr) =
       if Pos.inside pos line char then
-        Some (pos, env, ty)
+        self#merge_opt (Some (pos, env, ty)) (super#on_expr env expr)
       else
-        None
+        super#on_expr env expr
+
+    method! on_fun_param env fp =
+      if Pos.inside fp.Aast.param_pos line char then
+        self#merge_opt
+          (Some (fp.Aast.param_pos, env, fp.Aast.param_annotation))
+          (super#on_fun_param env fp)
+      else
+        super#on_fun_param env fp
 
     method! on_xhp_simple env attribute =
       let (pos, _) = attribute.Aast.xs_name in
@@ -81,14 +96,18 @@ let base_visitor line char =
       else
         super#on_xhp_simple env attribute
 
-    method! on_class_id env cid =
+    method! on_class_id env ((ty, pos, _) as cid) =
       match cid with
       (* Don't use the resolved class type (the expr_annotation on the class_id
          type) when hovering over a CIexpr--we will want to show the type the
          expression is annotated with (e.g., classname<C>) and it will not have a
          smaller position. *)
       | (_, _, Aast.CIexpr e) -> self#on_expr env e
-      | _ -> super#on_class_id env cid
+      | _ ->
+        if Pos.inside pos line char then
+          self#merge_opt (Some (pos, env, ty)) (super#on_class_id env cid)
+        else
+          super#on_class_id env cid
   end
 
 (** Return the type of the node associated with exactly the given range.
@@ -98,13 +117,13 @@ let base_visitor line char =
 *)
 let range_visitor startl startc endl endc =
   object
-    inherit [_] Tast_visitor.reduce
+    inherit [_] Tast_visitor.reduce as super
 
     inherit [_] Ast_defs.option_monoid
 
     method merge x _ = x
 
-    method! on_'ex env (pos, ty) =
+    method! on_expr env ((ty, pos, _) as expr) =
       if
         Pos.exactly_matches_range
           pos
@@ -115,7 +134,33 @@ let range_visitor startl startc endl endc =
       then
         Some (env, ty)
       else
-        None
+        super#on_expr env expr
+
+    method! on_fun_param env fp =
+      if
+        Pos.exactly_matches_range
+          fp.Aast.param_pos
+          ~start_line:startl
+          ~start_col:startc
+          ~end_line:endl
+          ~end_col:endc
+      then
+        Some (env, fp.Aast.param_annotation)
+      else
+        super#on_fun_param env fp
+
+    method! on_class_id env ((ty, pos, _) as cid) =
+      if
+        Pos.exactly_matches_range
+          pos
+          ~start_line:startl
+          ~start_col:startc
+          ~end_line:endl
+          ~end_col:endc
+      then
+        Some (env, ty)
+      else
+        super#on_class_id env cid
   end
 
 let type_at_pos

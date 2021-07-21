@@ -18,7 +18,7 @@ module SN = Naming_special_names
 
 let get_constant tc (seen, has_default) = function
   | Default _ -> (seen, true)
-  | Case (((pos, _), _, Class_const ((_, _, CI (_, cls)), (_, const))), _) ->
+  | Case ((_, pos, Class_const ((_, _, CI (_, cls)), (_, const))), _) ->
     if String.( <> ) cls (Cls.name tc) then (
       Errors.enum_switch_wrong_class pos (strip_ns (Cls.name tc)) (strip_ns cls);
       (seen, has_default)
@@ -29,7 +29,7 @@ let get_constant tc (seen, has_default) = function
         Errors.enum_switch_redundant const old_pos pos;
         (seen, has_default)
     )
-  | Case (((pos, _), _, _), _) ->
+  | Case ((_, pos, _), _) ->
     Errors.enum_switch_not_const pos;
     (seen, has_default)
 
@@ -177,7 +177,7 @@ let ensure_valid_switch_case_value_types env scrutinee_ty casel errorf =
   in
   let ensure_valid_switch_case_value_type = function
     | Default _ -> ()
-    | Case (((case_value_p, case_value_ty), _, _), _) ->
+    | Case ((case_value_ty, case_value_p, _), _) ->
       if not (compatible_types case_value_ty scrutinee_ty) then
         errorf
           (Env.get_tcopt env)
@@ -193,7 +193,7 @@ let handler errorf =
 
     method! at_stmt env x =
       match snd x with
-      | Switch (((scrutinee_pos, scrutinee_ty), _, _), casel) ->
+      | Switch ((scrutinee_ty, scrutinee_pos, _), casel) ->
         check_exhaustiveness env scrutinee_pos scrutinee_ty casel;
         ensure_valid_switch_case_value_types env scrutinee_ty casel errorf
       | _ -> ()

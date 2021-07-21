@@ -105,9 +105,9 @@ let index_visitor =
      * We want to check rvalue e.g. $y = $x[3], or $z[$x[3]] = 5
      * But not lvalue e.g. $x[3] = 5 or list ($x[3], $w) = e;
      *)
-    method! on_expr (env, is_lvalue) (((p, _), _, expr) as e) =
+    method! on_expr (env, is_lvalue) ((_, p, expr) as e) =
       match expr with
-      | Array_get ((((p1, ty1), _, _) as e1), Some (((p2, ty2), _, _) as e2)) ->
+      | Array_get (((ty1, p1, _) as e1), Some ((ty2, p2, _) as e2)) ->
         if not is_lvalue then
           array_get ~array_pos:p1 ~expr_pos:p ~index_pos:p2 env ty1 ty2;
         this#on_expr (env, false) e1;

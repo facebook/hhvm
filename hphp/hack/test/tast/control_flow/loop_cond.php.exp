@@ -24,8 +24,7 @@
          f_readonly_ret = None; f_ret = ((?A), (Some ([5:23-25], (Hoption ([5:24-25], (Happly (([5:24-25], "\\A"), []))))))); 
          f_name = ([5:10-19], "\\get_A_opt"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-         f_body =
-         { fb_ast = [([6:3-18], (Return (Some (([6:10-17], A), [6:10-17], (New ((([6:14-15], A), [6:14-15], (CI ([6:14-15], "\\A"))), [], [], None, ([6:14-15], _)))))))]; fb_annotation = () };
+         f_body = { fb_ast = [([6:3-18], (Return (Some ((A), [6:10-17], (New (((A), [6:14-15], (CI ([6:14-15], "\\A"))), [], [], None, (_)))))))]; fb_annotation = () }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -43,20 +42,15 @@
          f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([10:3-16],
-             (Expr
-                (([10:3-15], A), [10:3-15],
-                 (Binop ((Eq None), (([10:3-5], A), [10:3-5], (Lvar ([10:3-5], $x))),
-                    (([10:8-15], A), [10:8-15], (New ((([10:12-13], A), [10:12-13], (CI ([10:12-13], "\\A"))), [], [], None, ([10:12-13], _)))))))));
+           [([10:3-16], (Expr ((A), [10:3-15], (Binop ((Eq None), ((A), [10:3-5], (Lvar ([10:3-5], $x))), ((A), [10:8-15], (New (((A), [10:12-13], (CI ([10:12-13], "\\A"))), [], [], None, (_)))))))));
              ([11:3-13:4],
-              (While ((([11:10-12], ?A), [11:10-12], (Lvar ([11:10-12], $x))),
+              (While (((?A), [11:10-12], (Lvar ([11:10-12], $x))),
                  [([11:3-13:4], (AssertEnv (Join, {$#capability $#local_capability $x}))); (
                    [11:3-13:4], (AssertEnv (Refinement, {$x})));
                    ([12:5-22],
                     (Expr
-                       (([12:5-21], ?A), [12:5-21],
-                        (Binop ((Eq None), (([12:5-7], ?A), [12:5-7], (Lvar ([12:5-7], $x))),
-                           (([12:10-21], ?A), [12:10-21], (Call ((([12:10-19], (function(): ?A)), [12:10-19], (Id ([12:10-19], "\\get_A_opt"))), [], [], None))))))))
+                       ((?A), [12:5-21],
+                        (Binop ((Eq None), ((?A), [12:5-7], (Lvar ([12:5-7], $x))), ((?A), [12:10-21], (Call ((((function(): ?A)), [12:10-19], (Id ([12:10-19], "\\get_A_opt"))), [], [], None))))))))
                    ]
                  )));
              ([11:3-13:4], (AssertEnv (Refinement, {$x})))];
@@ -79,16 +73,10 @@
          f_body =
          { fb_ast =
            [([17:3-18:4],
-             (For (
-                [(([17:8-20], A), [17:8-20],
-                  (Binop ((Eq None), (([17:8-10], A), [17:8-10], (Lvar ([17:8-10], $x))),
-                     (([17:13-20], A), [17:13-20], (New ((([17:17-18], A), [17:17-18], (CI ([17:17-18], "\\A"))), [], [], None, ([17:17-18], _)))))))
-                  ],
-                (Some (([17:22-24], ?A), [17:22-24], (Lvar ([17:22-24], $x)))),
-                [(([17:26-42], ?A), [17:26-42],
-                  (Binop ((Eq None), (([17:26-28], ?A), [17:26-28], (Lvar ([17:26-28], $x))),
-                     (([17:31-42], ?A), [17:31-42], (Call ((([17:31-40], (function(): ?A)), [17:31-40], (Id ([17:31-40], "\\get_A_opt"))), [], [], None))))))
-                  ],
+             (For ([((A), [17:8-20], (Binop ((Eq None), ((A), [17:8-10], (Lvar ([17:8-10], $x))), ((A), [17:13-20], (New (((A), [17:17-18], (CI ([17:17-18], "\\A"))), [], [], None, (_)))))))],
+                (Some ((?A), [17:22-24], (Lvar ([17:22-24], $x)))),
+                [((?A), [17:26-42],
+                  (Binop ((Eq None), ((?A), [17:26-28], (Lvar ([17:26-28], $x))), ((?A), [17:31-42], (Call ((((function(): ?A)), [17:31-40], (Id ([17:31-40], "\\get_A_opt"))), [], [], None))))))],
                 [([17:3-18:4], (AssertEnv (Join, {$#capability $#local_capability $x}))); ([17:3-18:4], (AssertEnv (Refinement, {$x})))])));
              ([17:3-18:4], (AssertEnv (Refinement, {$x})))];
            fb_annotation = () };

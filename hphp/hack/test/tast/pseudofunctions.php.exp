@@ -43,7 +43,7 @@
          f_name = ([8:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([8:17-19], C); param_type_hint = ((C), (Some ([8:15-16], (Happly (([8:15-16], "\\C"), []))))); 
+         [{ param_annotation = (C); param_type_hint = ((C), (Some ([8:15-16], (Happly (([8:15-16], "\\C"), []))))); 
             param_is_variadic = false; param_pos = [8:17-19]; param_name = "$c"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -51,30 +51,28 @@
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([9:3-15], (Expr (([9:3-15], void), [9:3-15], (Call ((([9:3-7], _), [9:3-7], (Id ([9:3-7], "echo"))), [], [(([9:8-13], string), [9:8-13], (String "foo"))], None)))));
-             ([10:3-16], (Expr (([10:3-15], void), [10:3-15], (Call ((([10:3-15], _), [10:3-15], (Id ([10:3-15], "echo"))), [], [(([10:9-14], string), [10:9-14], (String "foo"))], None)))));
-             ([12:3-15], (Expr (([12:3-14], (function(C $c): void)), [12:3-14], (Fun_id ([12:7-13], "\\test")))));
-             ([13:3-37], (Expr (([13:3-36], (function(): void)), [13:3-36], (Smethod_id ((([13:14-15], C), [13:14-15], (CI ([13:14-15], "\\C"))), ([13:24-35], "staticFoo"))))));
-             ([14:3-32], (Expr (([14:3-31], (function(): void)), [14:3-31], (Method_id ((([14:13-15], C), [14:13-15], (Lvar ([14:13-15], $c))), ([14:17-30], "instanceFoo"))))));
-             ([15:3-40], (Expr (([15:3-39], (function(C): void)), [15:3-39], (Method_caller (([15:15-16], "\\C"), ([15:25-38], "instanceFoo"))))));
-             ([17:3-13],
-              (Expr (([17:3-12], bool), [17:3-12], (Call ((([17:3-8], (function($x): bool)), [17:3-8], (Id ([17:3-8], "\\isset"))), [], [(([17:9-11], C), [17:9-11], (Lvar ([17:9-11], $c)))], None)))));
-             ([18:3-13],
-              (Expr (([18:3-13], void), [18:3-13], (Call ((([18:3-8], (function($x): void)), [18:3-8], (Id ([18:3-8], "\\unset"))), [], [(([18:9-11], C), [18:9-11], (Lvar ([18:9-11], $c)))], None)))));
+           [([9:3-15], (Expr ((void), [9:3-15], (Call (((_), [9:3-7], (Id ([9:3-7], "echo"))), [], [((string), [9:8-13], (String "foo"))], None)))));
+             ([10:3-16], (Expr ((void), [10:3-15], (Call (((_), [10:3-15], (Id ([10:3-15], "echo"))), [], [((string), [10:9-14], (String "foo"))], None)))));
+             ([12:3-15], (Expr (((function(C $c): void)), [12:3-14], (Fun_id ([12:7-13], "\\test")))));
+             ([13:3-37], (Expr (((function(): void)), [13:3-36], (Smethod_id (((C), [13:14-15], (CI ([13:14-15], "\\C"))), ([13:24-35], "staticFoo"))))));
+             ([14:3-32], (Expr (((function(): void)), [14:3-31], (Method_id (((C), [14:13-15], (Lvar ([14:13-15], $c))), ([14:17-30], "instanceFoo"))))));
+             ([15:3-40], (Expr (((function(C): void)), [15:3-39], (Method_caller (([15:15-16], "\\C"), ([15:25-38], "instanceFoo"))))));
+             ([17:3-13], (Expr ((bool), [17:3-12], (Call ((((function($x): bool)), [17:3-8], (Id ([17:3-8], "\\isset"))), [], [((C), [17:9-11], (Lvar ([17:9-11], $c)))], None)))));
+             ([18:3-13], (Expr ((void), [18:3-13], (Call ((((function($x): void)), [18:3-8], (Id ([18:3-8], "\\unset"))), [], [((C), [18:9-11], (Lvar ([18:9-11], $c)))], None)))));
              ([20:3-26],
-              (If ((([20:13-17], bool), [20:13-17], (Unop (Unot, (([20:13-17], bool), [20:13-17], True)))),
+              (If (((bool), [20:13-17], (Unop (Unot, ((bool), [20:13-17], True)))),
                  [([20:3-25],
                    (Expr
-                      (([20:3-25], noreturn), [20:3-25],
-                       (Call ((([20:3-12], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)), [20:3-12], (Id ([20:3-12], "\\HH\\invariant_violation"))), 
-                          [], [(([20:19-24], string), [20:19-24], (String "foo"))], None)))))
+                      ((noreturn), [20:3-25],
+                       (Call ((((function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)), [20:3-12], (Id ([20:3-12], "\\HH\\invariant_violation"))), 
+                          [], [((string), [20:19-24], (String "foo"))], None)))))
                    ],
                  [([Pos.none], Noop)])));
              ([21:3-30],
               (Expr
-                 (([21:3-29], noreturn), [21:3-29],
-                  (Call ((([21:3-22], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)), [21:3-22], (Id ([21:3-22], "\\HH\\invariant_violation"))), 
-                     [], [(([21:23-28], string), [21:23-28], (String "foo"))], None)))))
+                 ((noreturn), [21:3-29],
+                  (Call ((((function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)), [21:3-22], (Id ([21:3-22], "\\HH\\invariant_violation"))), 
+                     [], [((string), [21:23-28], (String "foo"))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

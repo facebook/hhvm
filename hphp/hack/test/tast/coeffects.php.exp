@@ -14,16 +14,16 @@
         { fb_ast =
           [([4:3-24],
             (Expr
-               (([4:3-23], (function(mixed $i): void)), [4:3-23],
-                (Binop ((Eq None), (([4:3-5], (function(mixed $i): void)), [4:3-5], (Lvar ([4:3-5], $x))),
-                   (([4:8-23], (function(mixed $i): void)), [4:8-23],
+               (((function(mixed $i): void)), [4:3-23],
+                (Binop ((Eq None), (((function(mixed $i): void)), [4:3-5], (Lvar ([4:3-5], $x))),
+                   (((function(mixed $i): void)), [4:8-23],
                     (Lfun (
                        { f_span = [4:8-23]; f_readonly_this = None; f_annotation = (); 
                          f_readonly_ret = None; f_ret = ((void), None); 
                          f_name = ([4:8-23], ";anonymous"); f_tparams = []; 
                          f_where_constraints = []; f_variadic = FVnonVariadic;
                          f_params =
-                         [{ param_annotation = ([4:9-11], mixed); param_type_hint = ((mixed), None); 
+                         [{ param_annotation = (#2051); param_type_hint = ((mixed), None); 
                             param_is_variadic = false; param_pos = [4:9-11]; 
                             param_name = "$i"; param_expr = None; param_readonly = None; 
                             param_callconv = None; param_user_attributes = []; 

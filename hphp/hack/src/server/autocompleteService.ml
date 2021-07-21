@@ -528,7 +528,7 @@ let autocomplete_typed_member ~is_static env class_ty cid mid =
                 let cid = Option.map cid ~f:to_nast_class_id_ in
                 autocomplete_member ~is_static env class_ cid mid))
 
-let autocomplete_static_member env ((_, ty), _, cid) mid =
+let autocomplete_static_member env (ty, _, cid) mid =
   autocomplete_typed_member ~is_static:true env ty (Some cid) mid
 
 let autocomplete_enum_class_label_call env fty pos_labelname =
@@ -666,7 +666,7 @@ let visitor =
     method! on_Call env f targs args unpack_arg =
       (match args with
       | (_, p, Aast.EnumClassLabel (_, n)) :: _ when is_auto_complete n ->
-        let ((_, fty), _, _) = f in
+        let (fty, _, _) = f in
         autocomplete_enum_class_label_call env fty (p, n)
       | _ -> ());
 
@@ -746,7 +746,7 @@ let visitor =
             | _ -> ())
           | _ -> ()
         end
-      | (_, _, Aast.Call (((_, recv_ty), _, _), _, args, _)) ->
+      | (_, _, Aast.Call ((recv_ty, _, _), _, args, _)) ->
         (match deref recv_ty with
         | (_r, Tfun ft) -> autocomplete_shape_literal_in_call env ft args
         | _ -> ())
@@ -854,7 +854,7 @@ class local_types =
       )
 
     method! on_expr env e =
-      let ((_, ty), _, e_) = e in
+      let (ty, _, e_) = e in
       match e_ with
       | Aast.Lvar (_, id) ->
         if matches_auto_complete_suffix (Local_id.get_name id) then
@@ -870,7 +870,7 @@ class local_types =
 
     method! on_fun_param _ fp =
       let id = Local_id.make_unscoped fp.Aast.param_name in
-      let (_, ty) = fp.Aast.param_annotation in
+      let ty = fp.Aast.param_annotation in
       self#add id ty
   end
 

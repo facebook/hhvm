@@ -11,12 +11,12 @@
          m_name = ([4:19-20], "f"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = ([4:21-23], string); param_type_hint = ((string), None); 
+         [{ param_annotation = (#100000192560935); param_type_hint = ((string), None); 
             param_is_variadic = false; param_pos = [4:21-23]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
            ];
-         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([5:5-15], (Return (Some (([5:12-14], string), [5:12-14], (Lvar ([5:12-14], $x))))))]; fb_annotation = () }; 
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([5:5-15], (Return (Some ((string), [5:12-14], (Lvar ([5:12-14], $x))))))]; fb_annotation = () }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((string), None); m_external = false; m_doc_comment = None }
         ];
@@ -39,7 +39,7 @@
          m_name = ([4:19-20], "f"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = ([4:21-23], string); param_type_hint = ((string), None); 
+         [{ param_annotation = (#100000407908081); param_type_hint = ((string), None); 
             param_is_variadic = false; param_pos = [4:21-23]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -49,9 +49,8 @@
          { fb_ast =
            [([5:5-26],
              (Return
-                (Some (([5:12-25], string), [5:12-25],
-                       (Call ((([5:12-21], (function(string $x): string)), [5:12-21], (Class_const ((([5:12-18], A), [5:12-18], CIparent), ([5:20-21], "f")))), 
-                          [], [(([5:22-24], string), [5:22-24], (Lvar ([5:22-24], $x)))], None))))))
+                (Some ((string), [5:12-25],
+                       (Call ((((function(string $x): string)), [5:12-21], (Class_const (((A), [5:12-18], CIparent), ([5:20-21], "f")))), [], [((string), [5:22-24], (Lvar ([5:22-24], $x)))], None))))))
              ];
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -74,11 +73,11 @@
         f_readonly_ret = None; f_ret = ((string), None); f_name = ([3:10-11], "\\f"); 
         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([3:14-16], A); param_type_hint = ((A), (Some ([3:12-13], (Happly (([3:12-13], "\\A"), []))))); 
+        [{ param_annotation = (A); param_type_hint = ((A), (Some ([3:12-13], (Happly (([3:12-13], "\\A"), []))))); 
            param_is_variadic = false; param_pos = [3:14-16]; param_name = "$a"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None };
-          { param_annotation = ([3:20-22], B); param_type_hint = ((B), (Some ([3:18-19], (Happly (([3:18-19], "\\B"), []))))); 
+          { param_annotation = (B); param_type_hint = ((B), (Some ([3:18-19], (Happly (([3:18-19], "\\B"), []))))); 
             param_is_variadic = false; param_pos = [3:20-22]; param_name = "$b"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -88,16 +87,16 @@
         { fb_ast =
           [([4:3-27],
             (Return
-               (Some (([4:10-26], string), [4:10-26],
+               (Some ((string), [4:10-26],
                       (Call (
-                         (([4:10-15], (function(string $x): string)), [4:10-15],
-                          (Obj_get ((([4:10-12], B), [4:10-12], (Lvar ([4:10-12], $b))), (([4:14-15], (function(string $x): string)), [4:14-15], (Id ([4:14-15], "f"))), OG_nullthrows, false))),
+                         (((function(string $x): string)), [4:10-15],
+                          (Obj_get (((B), [4:10-12], (Lvar ([4:10-12], $b))), (((function(string $x): string)), [4:14-15], (Id ([4:14-15], "f"))), OG_nullthrows, false))),
                          [],
-                         [(([4:16-25], string), [4:16-25],
+                         [((string), [4:16-25],
                            (Call (
-                              (([4:16-21], (function(string $x): string)), [4:16-21],
-                               (Obj_get ((([4:16-18], A), [4:16-18], (Lvar ([4:16-18], $a))), (([4:20-21], (function(string $x): string)), [4:20-21], (Id ([4:20-21], "f"))), OG_nullthrows, false))),
-                              [], [(([4:22-24], string), [4:22-24], (String ""))], None)))
+                              (((function(string $x): string)), [4:16-21],
+                               (Obj_get (((A), [4:16-18], (Lvar ([4:16-18], $a))), (((function(string $x): string)), [4:20-21], (Id ([4:20-21], "f"))), OG_nullthrows, false))),
+                              [], [((string), [4:22-24], (String ""))], None)))
                            ],
                          None))))))
             ];

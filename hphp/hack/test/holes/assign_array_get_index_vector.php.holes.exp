@@ -10,11 +10,11 @@
         f_name = ([3:10-39], "\\assign_array_get_index_vector"); f_tparams = []; 
         f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([3:52-55], Vector<int>); param_type_hint = ((Vector<int>), (Some ([3:40-51], (Happly (([3:40-46], "\\HH\\Vector"), [([3:47-50], (Hprim Tint))])))));
+        [{ param_annotation = (Vector<int>); param_type_hint = ((Vector<int>), (Some ([3:40-51], (Happly (([3:40-46], "\\HH\\Vector"), [([3:47-50], (Hprim Tint))]))))); 
            param_is_variadic = false; param_pos = [3:52-55]; param_name = "$xs"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None };
-          { param_annotation = ([3:63-67], mixed); param_type_hint = ((mixed), (Some ([3:57-62], Hmixed))); 
+          { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:57-62], Hmixed))); 
             param_is_variadic = false; param_pos = [3:63-67]; param_name = "$idx"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -24,12 +24,11 @@
         { fb_ast =
           [([5:3-17],
             (Expr
-               (([5:3-16], int), [5:3-16],
+               ((int), [5:3-16],
                 (Binop ((Eq None),
-                   (([5:3-12], int), [5:3-12],
-                    (Array_get ((([5:3-6], Vector<int>), [5:3-6], (Lvar ([5:3-6], $xs))),
-                       (Some (([5:7-11], mixed), [5:7-11], (Hole ((([5:7-11], mixed), [5:7-11], (Lvar ([5:7-11], $idx))), (mixed), (int), Typing))))))),
-                   (([5:15-16], int), [5:15-16], (Int "1")))))))
+                   ((int), [5:3-12],
+                    (Array_get (((Vector<int>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((mixed), [5:7-11], (Hole (((mixed), [5:7-11], (Lvar ([5:7-11], $idx))), (mixed), (int), Typing))))))),
+                   ((int), [5:15-16], (Int "1")))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -10,7 +10,7 @@
         f_name = ([3:10-30], "\\throwFromDoWhileLoop"); f_tparams = []; 
         f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([3:36-41], bool); param_type_hint = ((bool), (Some ([3:31-35], (Hprim Tbool)))); 
+        [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:31-35], (Hprim Tbool)))); 
            param_is_variadic = false; param_pos = [3:36-41]; param_name = "$cond"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -19,13 +19,13 @@
         f_body =
         { fb_ast =
           [([4:3-6:4],
-            (While ((([4:10-15], bool), [4:10-15], (Lvar ([4:10-15], $cond))),
+            (While (((bool), [4:10-15], (Lvar ([4:10-15], $cond))),
                [([4:3-6:4], (AssertEnv (Join, {$#capability $#local_capability $cond})));
                  ([5:5-40],
                   (Throw
-                     (([5:11-39], Exception), [5:11-39],
-                      (New ((([5:15-24], Exception), [5:15-24], (CI ([5:15-24], "\\Exception"))), 
-                         [], [(([5:25-38], string), [5:25-38], (String "DoWhileBody"))], None, ([5:15-24], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
+                     ((Exception), [5:11-39],
+                      (New (((Exception), [5:15-24], (CI ([5:15-24], "\\Exception"))), 
+                         [], [((string), [5:25-38], (String "DoWhileBody"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
                  ]
                )))
             ];

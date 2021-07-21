@@ -22,14 +22,14 @@ exception Cant_check
 exception Not_implemented
 
 let expect_ty_equal
-    env ((pos, ty) : Pos.t * locl_ty) (expected_ty : locl_phase ty_) =
+    env (pos : Pos.t) (ty : locl_ty) (expected_ty : locl_phase ty_) =
   let expected_ty = mk (Reason.none, expected_ty) in
   if not @@ ty_equal ~normalize_lists:true ty expected_ty then
     let actual_ty = Typing_print.debug env ty in
     let expected_ty = Typing_print.debug env expected_ty in
     Errors.unexpected_ty_in_tast pos ~actual_ty ~expected_ty
 
-let refine ((_p, cond_ty), _, cond_expr) _cond_is_true gamma =
+let refine (cond_ty, _, cond_expr) _cond_is_true gamma =
   let cond_ty_ = get_node cond_ty in
   let is_refinement_fun fun_name =
     match fun_name with
@@ -64,10 +64,10 @@ let refine ((_p, cond_ty), _, cond_expr) _cond_is_true gamma =
   | _ when equal_locl_ty_ cond_ty_ (Tprim Nast.Tbool) -> gamma
   | _ -> raise Not_implemented
 
-let check_assign (_lty, _, lvalue) ty gamma =
+let check_assign (_lty, _, lvalue) p ty gamma =
   match lvalue with
   | Lvar (_, lid) ->
-    let gamma_updates = add_to_gamma lid ty empty_gamma in
+    let gamma_updates = add_to_gamma lid p ty empty_gamma in
     (gamma, gamma_updates)
   | _ -> raise Not_implemented
 
@@ -81,8 +81,8 @@ let check_assign (_lty, _, lvalue) ty gamma =
  * TODO write a proper accumulator visitor `accum` inheriting from iter and
  * using an `acc` mutable variable, then here inherit from `accum` instead of
  * `iter`. *)
-let check_expr env (expr : ETast.expr) (gamma : gamma) : gamma =
-  let expect_ty_equal = expect_ty_equal env in
+let check_expr env ((_, p, _) as expr : ETast.expr) (gamma : gamma) : gamma =
+  let expect_ty_equal = expect_ty_equal env p in
   let expr_checker =
     object (self)
       inherit [_] Aast.iter as super
@@ -108,10 +108,10 @@ let check_expr env (expr : ETast.expr) (gamma : gamma) : gamma =
           expect_ty_equal ty expected_ty
         | _ -> (* TODO *) super#on_expr env texpr
 
-      method! on_Binop env bop expr1 ((ty2, _, _) as expr2) =
+      method! on_Binop env bop expr1 ((ty2, p2, _) as expr2) =
         match bop with
         | Ast_defs.Eq None ->
-          let (gamma_, updates) = check_assign expr1 ty2 gamma in
+          let (gamma_, updates) = check_assign expr1 p2 ty2 gamma in
           gamma <- gamma_;
           self#on_expr env expr2;
           gamma <- update_gamma gamma updates
@@ -230,8 +230,8 @@ let gamma_from_params env (params : ETast.fun_param list) =
     if not (List.is_empty param.param_user_attributes) then
       raise Not_implemented;
     let name = make_local_id param.param_name in
-    let ty = localize env @@ hint_of_type_hint param.param_type_hint in
-    add_to_gamma name ty gamma
+    let (pos, ty) = localize env @@ hint_of_type_hint param.param_type_hint in
+    add_to_gamma name pos ty gamma
   in
   List.fold ~init:empty_gamma ~f:add_param_to_gamma params
 

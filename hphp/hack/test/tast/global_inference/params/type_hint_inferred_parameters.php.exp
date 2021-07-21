@@ -10,7 +10,7 @@
         f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
         f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([3:14-16], mixed); param_type_hint = ((mixed), None); 
+        [{ param_annotation = (#100000046348575); param_type_hint = ((mixed), None); 
            param_is_variadic = false; param_pos = [3:14-16]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -19,10 +19,10 @@
         f_body =
         { fb_ast =
           [([4:3-6:4],
-            (If ((([4:7-16], bool), [4:7-16], (Is ((([4:7-9], mixed), [4:7-9], (Lvar ([4:7-9], $x))), ([4:13-16], (Hprim Tint))))),
-               [([4:3-6:4], (AssertEnv (Refinement, {$x}))); ([5:5-15], (Return (Some (([5:12-14], (mixed & int)), [5:12-14], (Lvar ([5:12-14], $x))))))],
+            (If (((bool), [4:7-16], (Is (((mixed), [4:7-9], (Lvar ([4:7-9], $x))), ([4:13-16], (Hprim Tint))))),
+               [([4:3-6:4], (AssertEnv (Refinement, {$x}))); ([5:5-15], (Return (Some (((mixed & int)), [5:12-14], (Lvar ([5:12-14], $x))))))],
                [([4:3-6:4], (AssertEnv (Refinement, {$x}))); ([Pos.none], Noop)])));
-            ([7:3-19], (Return (Some (([7:10-18], int), [7:10-18], (Cast (([7:11-14], (Hprim Tint)), (([7:16-18], (mixed & not int)), [7:16-18], (Lvar ([7:16-18], $x)))))))))];
+            ([7:3-19], (Return (Some ((int), [7:10-18], (Cast (([7:11-14], (Hprim Tint)), (((mixed & not int)), [7:16-18], (Lvar ([7:16-18], $x)))))))))];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
@@ -40,16 +40,13 @@
          f_name = ([10:10-13], "\\bar"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([10:14-16], num); param_type_hint = ((num), None); 
+         [{ param_annotation = (#100000657740766); param_type_hint = ((num), None); 
             param_is_variadic = false; param_pos = [10:14-16]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
-         f_body =
-         { fb_ast =
-           [([11:3-17], (Return (Some (([11:10-16], int), [11:10-16], (Binop (Plus, (([11:10-12], num), [11:10-12], (Lvar ([11:10-12], $x))), (([11:15-16], int), [11:15-16], (Int "4"))))))))];
-           fb_annotation = () };
+         f_body = { fb_ast = [([11:3-17], (Return (Some ((int), [11:10-16], (Binop (Plus, ((num), [11:10-12], (Lvar ([11:10-12], $x))), ((int), [11:15-16], (Int "4"))))))))]; fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

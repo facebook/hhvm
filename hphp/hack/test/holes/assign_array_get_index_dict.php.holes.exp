@@ -10,7 +10,7 @@
         f_name = ([3:10-37], "\\assign_array_get_index_dict"); f_tparams = []; 
         f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([3:44-48], mixed); param_type_hint = ((mixed), (Some ([3:38-43], Hmixed))); 
+        [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:38-43], Hmixed))); 
            param_is_variadic = false; param_pos = [3:44-48]; param_name = "$idx"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -20,16 +20,15 @@
         { fb_ast =
           [([4:3-16],
             (Expr
-               (([4:3-15], dict<nothing, nothing>), [4:3-15],
-                (Binop ((Eq None), (([4:3-6], dict<nothing, nothing>), [4:3-6], (Lvar ([4:3-6], $xs))), (([4:9-15], dict<nothing, nothing>), [4:9-15], (KeyValCollection (Dict, None, []))))))));
+               ((dict<nothing, nothing>), [4:3-15],
+                (Binop ((Eq None), ((dict<nothing, nothing>), [4:3-6], (Lvar ([4:3-6], $xs))), ((dict<nothing, nothing>), [4:9-15], (KeyValCollection (Dict, None, []))))))));
             ([6:3-17],
              (Expr
-                (([6:3-16], int), [6:3-16],
+                ((int), [6:3-16],
                  (Binop ((Eq None),
-                    (([6:3-12], int), [6:3-12],
-                     (Array_get ((([6:3-6], dict<mixed, int>), [6:3-6], (Lvar ([6:3-6], $xs))),
-                        (Some (([6:7-11], mixed), [6:7-11], (Hole ((([6:7-11], mixed), [6:7-11], (Lvar ([6:7-11], $idx))), (mixed), (arraykey), Typing))))))),
-                    (([6:15-16], int), [6:15-16], (Int "1")))))))
+                    ((int), [6:3-12],
+                     (Array_get (((dict<mixed, int>), [6:3-6], (Lvar ([6:3-6], $xs))), (Some ((mixed), [6:7-11], (Hole (((mixed), [6:7-11], (Lvar ([6:7-11], $idx))), (mixed), (arraykey), Typing))))))),
+                    ((int), [6:15-16], (Int "1")))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

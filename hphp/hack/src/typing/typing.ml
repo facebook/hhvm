@@ -87,7 +87,7 @@ let mk_hole ?(source = Aast.Typing) (expr : Tast.expr) ~ty_have ~ty_expect =
       ty_expect
   in
   match expr with
-  | ((_, ty), pos, Aast.Callconv (param_kind, expr)) ->
+  | (ty, pos, Aast.Callconv (param_kind, expr)) ->
     (* push the hole inside the `Callconv` constructor *)
     let expr' =
       make_typed_expr pos ty_hole @@ Aast.Hole (expr, ty_have, ty_expect, source)
@@ -230,9 +230,9 @@ let with_type ty env (e : Nast.expr) : Tast.expr =
     object (self)
       inherit [_] Aast.map
 
-      method! on_expr env ((), p, expr_) = ((p, ty), p, self#on_expr_ env expr_)
+      method! on_expr env ((), p, expr_) = (ty, p, self#on_expr_ env expr_)
 
-      method on_'ex _ () = (Pos.none, ty)
+      method on_'ex _ () = ty
 
       method on_'fb _ _ = ()
 
@@ -1157,7 +1157,7 @@ let rec make_a_local_of env e =
  * refined. This set is used to construct AssertEnv statmements in
  * the typed AST.
  *)
-let refine_lvalue_type env (((_p, ty), _, _) as te) ~refine =
+let refine_lvalue_type env ((ty, _, _) as te) ~refine =
   let (env, ty) = refine env ty in
   let e = Tast.to_nast_expr te in
   let (env, localopt) = make_a_local_of env e in
@@ -1630,7 +1630,7 @@ module EnumClassLabelOps = struct
           | _ -> dty
         in
         let (env, lty) = Phase.localize_no_subst env ~ignore_errors:true dty in
-        let hi = (pos, lty) in
+        let hi = lty in
         let qualifier =
           if full then
             Some (pos, enum_name)
@@ -1643,7 +1643,7 @@ module EnumClassLabelOps = struct
         Errors.enum_class_label_unknown pos label_name enum_name;
         let r = Reason.Rwitness pos in
         let ty = Typing_utils.terr env r in
-        let te = ((pos, ty), pos, EnumClassLabel (None, label_name)) in
+        let te = (ty, pos, EnumClassLabel (None, label_name)) in
         (env, LabelNotFound (te, ty)))
     | None -> (env, ClassNotFound)
 end
@@ -3619,7 +3619,7 @@ and expr_
           Phase.check_tparams_constraints ~use_pos:p ~ety_env env tparaml
         in
         let (env, ty) = Phase.localize ~ety_env env typename in
-        make_result env p (Class_const (((p, ty), p, CI sid), pstr)) ty
+        make_result env p (Class_const ((ty, p, CI sid), pstr)) ty
       | None ->
         (* Should not expect None as we've checked whether the sid is a typedef *)
         expr_error env (Reason.Rwitness p) outer
@@ -3758,7 +3758,7 @@ and expr_
       else
         Typing_utils.mk_tany env p
     in
-    let ((pos, _), _, te2) = te2 in
+    let (_, pos, te2) = te2 in
     let env = might_throw env in
     let te2 = Tast.make_typed_expr pos ty te2 in
     make_result env p (Aast.Obj_get (te1, te2, nullflavor, in_parens)) ty
@@ -3864,7 +3864,7 @@ and expr_
     make_result
       env
       p
-      (Aast.New (tc, tal, tel, typed_unpack_element, (pos, ctor_fty)))
+      (Aast.New (tc, tal, tel, typed_unpack_element, ctor_fty))
       ty
   | Record ((pos, id), field_values) ->
     (match Decl_provider.get_record_def (Env.get_ctx env) id with
@@ -4942,7 +4942,7 @@ and new_object
   in
   let allow_abstract_bound_generic =
     match tcid with
-    | ((_, ty), _, Aast.CI (_, tn)) -> is_generic_equal_to tn ty
+    | (ty, _, Aast.CI (_, tn)) -> is_generic_equal_to tn ty
     | _ -> false
   in
   let gather
@@ -5002,7 +5002,7 @@ and new_object
       | _ -> obj_ty
     in
     let (env, new_ty) =
-      let ((_, cid_ty), _, _) = tcid in
+      let (cid_ty, _, _) = tcid in
       let (env, cid_ty) = Env.expand_type env cid_ty in
       if is_generic cid_ty then
         (env, cid_ty)
@@ -5108,7 +5108,7 @@ and new_object
       (env, tel, typed_unpack_element, mk (r, Tunion tyl), mk (r, Tunion ctyl))
   in
   let (env, new_ty) =
-    let ((_, cid_ty), _, _) = tcid in
+    let (cid_ty, _, _) = tcid in
     let (env, cid_ty) = Env.expand_type env cid_ty in
     if is_generic cid_ty then
       (env, cid_ty)
@@ -5497,7 +5497,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
           (env, te1)
       in
       ( env,
-        ( (pos, ty2),
+        ( ty2,
           pos,
           Aast.Array_get (te1, Some (hole_on_err ~err_opt:key_err_opt te)) ),
         ty2,
@@ -5767,7 +5767,7 @@ and dispatch_call
         let (env, tel, _) = exprs ~accept_using_var:true env el in
         let arraykey_ty = MakeType.arraykey (Reason.Rwitness pos) in
         let env =
-          List.fold tel ~init:env ~f:(fun env ((_, ty), pos, _) ->
+          List.fold tel ~init:env ~f:(fun env (ty, pos, _) ->
               SubType.sub_type
                 env
                 ty
@@ -6298,7 +6298,7 @@ and dispatch_call
         (Tast.make_typed_expr
            fpos
            ctor_fty
-           (Aast.Class_const (((pos, pty), pos, Aast.CIparent), id)))
+           (Aast.Class_const ((pty, pos, Aast.CIparent), id)))
         [] (* tal: no type arguments to constructor *)
         tel
         typed_unpack_element
@@ -7010,7 +7010,7 @@ and class_expr
     (tal : Nast.targ list)
     ((_, p, cid_) : (unit, 'b, 'c, 'd) Aast.class_id) :
     env * Tast.targ list * Tast.class_id * locl_ty =
-  let make_result env tal te ty = (env, tal, ((p, ty), p, te), ty) in
+  let make_result env tal te ty = (env, tal, (ty, p, te), ty) in
   match cid_ with
   | CIparent ->
     (match Env.get_self_id env with
@@ -7934,11 +7934,8 @@ and call_untyped_unpack env f_pos unpacked_element =
  * Build an environment for the true or false branch of
  * conditional statements.
  *)
-and condition
-    ?lhs_of_null_coalesce
-    env
-    tparamet
-    ((((p, ty) as pty), _, e) as te : Tast.expr) =
+and condition ?lhs_of_null_coalesce env tparamet ((ty, p, e) as te : Tast.expr)
+    =
   let condition = condition ?lhs_of_null_coalesce in
   match e with
   | Aast.Hole (e, _, _, _) -> condition env tparamet e
@@ -7971,7 +7968,7 @@ and condition
       else
         Ast_defs.Eqeqeq
     in
-    condition env (not tparamet) (pty, fst pty, Aast.Binop (op, e1, e2))
+    condition env (not tparamet) (ty, p, Aast.Binop (op, e1, e2))
   | Aast.Id (p, s) when String.equal s SN.Rx.is_enabled ->
     (* when Rx\IS_ENABLED is false - switch env to non-reactive *)
     let env =
@@ -8053,7 +8050,7 @@ and condition
   | Aast.Is (ivar, h) ->
     let reason = Reason.Ris (fst h) in
     let refine_type env hint_ty =
-      let ((ivar_pos, ivar_ty), _, _) = ivar in
+      let (ivar_ty, ivar_pos, _) = ivar in
       let (env, ivar) = get_instance_var env (Tast.to_nast_expr ivar) in
       let (env, hint_ty) =
         class_for_refinement env p reason ivar_pos ivar_ty hint_ty

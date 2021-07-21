@@ -166,7 +166,7 @@ class local_types =
       )
 
     method! on_expr env e =
-      let ((_, ty), _, e_) = e in
+      let (ty, _, e_) = e in
       match e_ with
       | Aast.Lvar (_, id) ->
         if matches_auto_complete_suffix (Local_id.get_name id) then
@@ -182,7 +182,7 @@ class local_types =
 
     method! on_fun_param _ fp =
       let id = Local_id.make_unscoped fp.Aast.param_name in
-      let (_, ty) = fp.Aast.param_annotation in
+      let ty = fp.Aast.param_annotation in
       self#add id ty
   end
 
@@ -290,7 +290,7 @@ class visitor ~ctx ~entry ~filename ~source_text =
                     let cid = Option.map cid ~f:to_nast_class_id_ in
                     self#autocomplete_member ~is_static env class_ cid))
 
-    method autocomplete_static_member env ((_, ty), _, cid) =
+    method autocomplete_static_member env (ty, _, cid) =
       self#autocomplete_typed_member ~is_static:true env ty (Some cid)
 
     method compute_complete_local (p : Pos.t) (target : string) =

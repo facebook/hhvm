@@ -16,7 +16,7 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_expr env ((p, _), _, x) =
+    method! at_expr env (_, p, x) =
       if Partial.should_check_error (Env.get_mode env) 4016 then
         match x with
         (* isset($var) *)

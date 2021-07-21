@@ -24,8 +24,8 @@ let print_tast_internal apply_to_ex_ty print_ex ctx tast =
   Aast.pp_program pp_ex pp_fb pp_en pp_hi formatter tast
 
 let print_tast ctx tast =
-  let apply_to_ex_ty f (pos, ty) = (pos, f ty) in
-  let print_pos_and_ty (pos, ty) = Format.asprintf "(%a, %s)" Pos.pp pos ty in
+  let apply_to_ex_ty f ty = f ty in
+  let print_pos_and_ty ty = Format.asprintf "(%s)" ty in
   print_tast_internal apply_to_ex_ty print_pos_and_ty ctx tast
 
 let print_tast_without_position ctx tast =
@@ -37,7 +37,7 @@ let print_tast_without_position ctx tast =
 
       method on_'fb _ fb = fb
 
-      method on_'ex _ (_pos, ty) = ty
+      method on_'ex _ ty = ty
 
       method on_'en _ en = en
 

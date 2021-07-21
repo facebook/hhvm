@@ -63,7 +63,7 @@ let static_meth_is_noreturn env ci meth_id =
       (get_static_meth (Typing_env.get_ctx env) class_name (snd meth_id))
   | None -> false
 
-let typed_expression_exits ((_, ty), _, _e) = is_type_no_return (get_node ty)
+let typed_expression_exits (ty, _, _e) = is_type_no_return (get_node ty)
 
 let expression_exits env (_, _, e) =
   match e with

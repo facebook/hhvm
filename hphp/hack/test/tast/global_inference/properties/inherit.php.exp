@@ -8,7 +8,7 @@
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
          cv_visibility = Public; cv_type = (((int | string)), None); 
-         cv_id = ([4:10-12], "x"); cv_expr = (Some (([4:15-16], int), [4:15-16], (Int "1"))); 
+         cv_id = ([4:10-12], "x"); cv_expr = (Some ((int), [4:15-16], (Int "1"))); 
          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
          cv_is_static = false; cv_span = [4:10-16] }
         ];
@@ -29,7 +29,7 @@
        c_vars =
        [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Public; cv_type = (((int | string)), None); 
-          cv_id = ([8:10-12], "x"); cv_expr = (Some (([8:15-17], string), [8:15-17], (String ""))); 
+          cv_id = ([8:10-12], "x"); cv_expr = (Some ((string), [8:15-17], (String ""))); 
           cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
           cv_is_static = false; cv_span = [8:10-17] }
          ];

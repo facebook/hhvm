@@ -10,11 +10,11 @@
         f_name = ([3:10-35], "\\assign_array_append_union"); f_tparams = []; 
         f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([3:49-51], (int | string)); param_type_hint = (((int | string)), (Some ([3:36-48], (Hunion [([3:37-40], (Hprim Tint)); ([3:41-47], (Hprim Tstring))]))));
+        [{ param_annotation = ((int | string)); param_type_hint = (((int | string)), (Some ([3:36-48], (Hunion [([3:37-40], (Hprim Tint)); ([3:41-47], (Hprim Tstring))]))));
            param_is_variadic = false; param_pos = [3:49-51]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None };
-          { param_annotation = ([3:72-75], Vector<(int | bool)>);
+          { param_annotation = (Vector<(int | bool)>);
             param_type_hint = ((Vector<(int | bool)>), (Some ([3:53-71], (Happly (([3:53-59], "\\HH\\Vector"), [([3:60-70], (Hunion [([3:61-64], (Hprim Tint)); ([3:65-69], (Hprim Tbool))]))])))));
             param_is_variadic = false; param_pos = [3:72-75]; param_name = "$xs"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
@@ -25,9 +25,9 @@
         { fb_ast =
           [([5:3-14],
             (Expr
-               (([5:3-13], (int | string)), [5:3-13],
-                (Binop ((Eq None), (([5:3-8], (int | string)), [5:3-8], (Array_get ((([5:3-6], Vector<(int | bool)>), [5:3-6], (Lvar ([5:3-6], $xs))), None))),
-                   (([5:11-13], (int | string)), [5:11-13], (Hole ((([5:11-13], (int | string)), [5:11-13], (Lvar ([5:11-13], $x))), ((int | string)), ((int | bool)), Typing))))))))
+               (((int | string)), [5:3-13],
+                (Binop ((Eq None), (((int | string)), [5:3-8], (Array_get (((Vector<(int | bool)>), [5:3-6], (Lvar ([5:3-6], $xs))), None))),
+                   (((int | string)), [5:11-13], (Hole ((((int | string)), [5:11-13], (Lvar ([5:11-13], $x))), ((int | string)), ((int | bool)), Typing))))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -15,12 +15,12 @@
           { tp_variance = Invariant; tp_name = ([2:35-37], "Tv"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
         f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = ([2:47-51], T); param_type_hint = ((T), (Some ([2:45-46], (Habstr ("T", []))))); 
+        [{ param_annotation = (T); param_type_hint = ((T), (Some ([2:45-46], (Habstr ("T", []))))); 
            param_is_variadic = false; param_pos = [2:47-51]; param_name = "$arr"; 
            param_expr = None; param_readonly = None; param_callconv = (Some Pinout); 
            param_user_attributes = []; param_visibility = None }
           ];
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:3-16], (Return (Some (([3:10-15], bool), [3:10-15], False))))]; fb_annotation = () }; 
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:3-16], (Return (Some ((bool), [3:10-15], False))))]; fb_annotation = () }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -36,7 +36,7 @@
          f_readonly_ret = None; f_ret = ((dynamic), (Some ([5:17-24], Hdynamic))); 
          f_name = ([5:10-13], "\\bar"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([6:3-19], (Return (Some (([6:10-18], vec<nothing>), [6:10-18], (ValCollection (Vec, None, []))))))]; fb_annotation = () }; 
+         f_body = { fb_ast = [([6:3-19], (Return (Some ((vec<nothing>), [6:10-18], (ValCollection (Vec, None, []))))))]; fb_annotation = () }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -58,7 +58,7 @@
            { tp_variance = Invariant; tp_name = ([8:35-37], "Tv"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
          f_where_constraints = []; f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([8:41-45], T); param_type_hint = ((T), (Some ([8:39-40], (Habstr ("T", []))))); 
+         [{ param_annotation = (T); param_type_hint = ((T), (Some ([8:39-40], (Habstr ("T", []))))); 
             param_is_variadic = false; param_pos = [8:41-45]; param_name = "$arr"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -68,8 +68,7 @@
          { fb_ast =
            [([9:3-26],
              (Throw
-                (([9:9-25], Exception), [9:9-25],
-                 (New ((([9:13-23], Exception), [9:13-23], (CI ([9:13-23], "\\Exception"))), [], [], None, ([9:13-23], (function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
+                ((Exception), [9:9-25], (New (((Exception), [9:13-23], (CI ([9:13-23], "\\Exception"))), [], [], None, ((function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -92,26 +91,23 @@
          { fb_ast =
            [([13:3-16],
              (Expr
-                (([13:3-15], dynamic), [13:3-15],
-                 (Binop ((Eq None), (([13:3-7], dynamic), [13:3-7], (Lvar ([13:3-7], $arr))),
-                    (([13:10-15], dynamic), [13:10-15], (Call ((([13:10-13], (function(): dynamic)), [13:10-13], (Id ([13:10-13], "\\bar"))), [], [], None))))))));
+                ((dynamic), [13:3-15],
+                 (Binop ((Eq None), ((dynamic), [13:3-7], (Lvar ([13:3-7], $arr))), ((dynamic), [13:10-15], (Call ((((function(): dynamic)), [13:10-13], (Id ([13:10-13], "\\bar"))), [], [], None))))))));
              ([15:3-17:4],
               (If (
-                 (([15:7-22], dynamic), [15:7-22],
-                  (Call ((([15:7-10], (function<T as ?Container<nothing>, Tv>(inout nothing $arr): dynamic)), [15:7-10], (Id ([15:7-10], "\\foo"))),
+                 ((dynamic), [15:7-22],
+                  (Call ((((function<T as ?Container<nothing>, Tv>(inout nothing $arr): dynamic)), [15:7-10], (Id ([15:7-10], "\\foo"))),
                      [((nothing), ([15:7-10], (Happly (([Pos.none], "_"), [])))); ((nothing), ([15:7-10], (Happly (([Pos.none], "_"), []))))],
-                     [(([15:11-21], dynamic), [15:11-21],
-                       (Callconv (Pinout, (([15:11-21], dynamic), [15:11-21], (Hole ((([15:17-21], dynamic), [15:17-21], (Lvar ([15:17-21], $arr))), (dynamic), (nothing), Typing))))))],
-                     None))),
+                     [((dynamic), [15:11-21], (Callconv (Pinout, ((dynamic), [15:11-21], (Hole (((dynamic), [15:17-21], (Lvar ([15:17-21], $arr))), (dynamic), (nothing), Typing))))))], None))),
                  [([16:5-12], (Return None))], [([Pos.none], Noop)])));
              ([18:3-25],
               (Expr
-                 (([18:3-24], nothing), [18:3-24],
-                  (Binop ((Eq None), (([18:3-12], nothing), [18:3-12], (Lvar ([18:3-12], $whatever))),
-                     (([18:15-24], nothing), [18:15-24],
-                      (Call ((([18:15-18], (function<T as ?Container<nothing>, Tv>(nothing $arr): nothing)), [18:15-18], (Id ([18:15-18], "\\qux"))),
+                 ((nothing), [18:3-24],
+                  (Binop ((Eq None), ((nothing), [18:3-12], (Lvar ([18:3-12], $whatever))),
+                     ((nothing), [18:15-24],
+                      (Call ((((function<T as ?Container<nothing>, Tv>(nothing $arr): nothing)), [18:15-18], (Id ([18:15-18], "\\qux"))),
                          [((nothing), ([18:15-18], (Happly (([Pos.none], "_"), [])))); ((nothing), ([18:15-18], (Happly (([Pos.none], "_"), []))))],
-                         [(([18:19-23], nothing), [18:19-23], (Lvar ([18:19-23], $arr)))], None)))
+                         [((nothing), [18:19-23], (Lvar ([18:19-23], $arr)))], None)))
                      )))))
              ];
            fb_annotation = () };

@@ -11,7 +11,7 @@
          m_name = ([4:19-20], "g"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = ([4:33-35], Vector<int>); param_type_hint = ((Vector<int>), (Some ([4:21-32], (Happly (([4:21-27], "\\HH\\Vector"), [([4:28-31], (Hprim Tint))])))));
+         [{ param_annotation = (Vector<int>); param_type_hint = ((Vector<int>), (Some ([4:21-32], (Happly (([4:21-27], "\\HH\\Vector"), [([4:28-31], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [4:33-35]; param_name = "$g"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -41,7 +41,7 @@
          f_name = ([7:10-11], "\\g"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([7:24-26], Vector<int>); param_type_hint = ((Vector<int>), (Some ([7:12-23], (Happly (([7:12-18], "\\HH\\Vector"), [([7:19-22], (Hprim Tint))])))));
+         [{ param_annotation = (Vector<int>); param_type_hint = ((Vector<int>), (Some ([7:12-23], (Happly (([7:12-18], "\\HH\\Vector"), [([7:19-22], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [7:24-26]; param_name = "$g"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -63,7 +63,7 @@
          f_name = ([9:10-21], "\\call_vector"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([10:17-19], Vector<float>); param_type_hint = ((Vector<float>), (Some ([10:3-16], (Happly (([10:3-9], "\\HH\\Vector"), [([10:10-15], (Hprim Tfloat))])))));
+         [{ param_annotation = (Vector<float>); param_type_hint = ((Vector<float>), (Some ([10:3-16], (Happly (([10:3-9], "\\HH\\Vector"), [([10:10-15], (Hprim Tfloat))])))));
             param_is_variadic = false; param_pos = [10:17-19]; param_name = "$g"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -73,21 +73,21 @@
          { fb_ast =
            [([13:3-9],
              (Expr
-                (([13:3-8], void), [13:3-8],
-                 (Call ((([13:3-4], (function(Vector<int> $g): void)), [13:3-4], (Id ([13:3-4], "\\g"))), 
-                    [], [(([13:5-7], Vector<float>), [13:5-7], (Hole ((([13:5-7], Vector<float>), [13:5-7], (Lvar ([13:5-7], $g))), (Vector<float>), (Vector<int>), Typing)))], None)))));
+                ((void), [13:3-8],
+                 (Call ((((function(Vector<int> $g): void)), [13:3-4], (Id ([13:3-4], "\\g"))), 
+                    [], [((Vector<float>), [13:5-7], (Hole (((Vector<float>), [13:5-7], (Lvar ([13:5-7], $g))), (Vector<float>), (Vector<int>), Typing)))], None)))));
              ([15:3-27],
               (Expr
-                 (([15:3-26], TestVector), [15:3-26],
-                  (Binop ((Eq None), (([15:3-7], TestVector), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     (([15:10-26], TestVector), [15:10-26], (New ((([15:14-24], TestVector), [15:14-24], (CI ([15:14-24], "\\TestVector"))), [], [], None, ([15:14-24], _)))))))));
+                 ((TestVector), [15:3-26],
+                  (Binop ((Eq None), ((TestVector), [15:3-7], (Lvar ([15:3-7], $foo))),
+                     ((TestVector), [15:10-26], (New (((TestVector), [15:14-24], (CI ([15:14-24], "\\TestVector"))), [], [], None, (_)))))))));
              ([18:3-15],
               (Expr
-                 (([18:3-14], void), [18:3-14],
+                 ((void), [18:3-14],
                   (Call (
-                     (([18:3-10], (function(Vector<int> $g): void)), [18:3-10],
-                      (Obj_get ((([18:3-7], TestVector), [18:3-7], (Lvar ([18:3-7], $foo))), (([18:9-10], (function(Vector<int> $g): void)), [18:9-10], (Id ([18:9-10], "g"))), OG_nullthrows, false))),
-                     [], [(([18:11-13], Vector<float>), [18:11-13], (Hole ((([18:11-13], Vector<float>), [18:11-13], (Lvar ([18:11-13], $g))), (Vector<float>), (Vector<int>), Typing)))], None)))))
+                     (((function(Vector<int> $g): void)), [18:3-10],
+                      (Obj_get (((TestVector), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Vector<int> $g): void)), [18:9-10], (Id ([18:9-10], "g"))), OG_nullthrows, false))),
+                     [], [((Vector<float>), [18:11-13], (Hole (((Vector<float>), [18:11-13], (Lvar ([18:11-13], $g))), (Vector<float>), (Vector<int>), Typing)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -106,7 +106,7 @@
          f_name = ([21:10-26], "\\call_vector_cast"); f_tparams = []; 
          f_where_constraints = []; f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = ([22:17-19], Vector<float>); param_type_hint = ((Vector<float>), (Some ([22:3-16], (Happly (([22:3-9], "\\HH\\Vector"), [([22:10-15], (Hprim Tfloat))])))));
+         [{ param_annotation = (Vector<float>); param_type_hint = ((Vector<float>), (Some ([22:3-16], (Happly (([22:3-9], "\\HH\\Vector"), [([22:10-15], (Hprim Tfloat))])))));
             param_is_variadic = false; param_pos = [22:17-19]; param_name = "$g"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -116,21 +116,21 @@
          { fb_ast =
            [([25:3-59],
              (Expr
-                (([25:3-58], void), [25:3-58],
-                 (Call ((([25:3-4], (function(Vector<int> $g): void)), [25:3-4], (Id ([25:3-4], "\\g"))), 
-                    [], [(([25:5-57], Vector<int>), [25:5-57], (Hole ((([25:54-56], Vector<float>), [25:54-56], (Lvar ([25:54-56], $g))), (Vector<float>), (Vector<int>), UnsafeCast)))], None)))));
+                ((void), [25:3-58],
+                 (Call ((((function(Vector<int> $g): void)), [25:3-4], (Id ([25:3-4], "\\g"))), 
+                    [], [((Vector<int>), [25:5-57], (Hole (((Vector<float>), [25:54-56], (Lvar ([25:54-56], $g))), (Vector<float>), (Vector<int>), UnsafeCast)))], None)))));
              ([27:3-27],
               (Expr
-                 (([27:3-26], TestVector), [27:3-26],
-                  (Binop ((Eq None), (([27:3-7], TestVector), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     (([27:10-26], TestVector), [27:10-26], (New ((([27:14-24], TestVector), [27:14-24], (CI ([27:14-24], "\\TestVector"))), [], [], None, ([27:14-24], _)))))))));
+                 ((TestVector), [27:3-26],
+                  (Binop ((Eq None), ((TestVector), [27:3-7], (Lvar ([27:3-7], $foo))),
+                     ((TestVector), [27:10-26], (New (((TestVector), [27:14-24], (CI ([27:14-24], "\\TestVector"))), [], [], None, (_)))))))));
              ([30:3-65],
               (Expr
-                 (([30:3-64], void), [30:3-64],
+                 ((void), [30:3-64],
                   (Call (
-                     (([30:3-10], (function(Vector<int> $g): void)), [30:3-10],
-                      (Obj_get ((([30:3-7], TestVector), [30:3-7], (Lvar ([30:3-7], $foo))), (([30:9-10], (function(Vector<int> $g): void)), [30:9-10], (Id ([30:9-10], "g"))), OG_nullthrows, false))),
-                     [], [(([30:11-63], Vector<int>), [30:11-63], (Hole ((([30:60-62], Vector<float>), [30:60-62], (Lvar ([30:60-62], $g))), (Vector<float>), (Vector<int>), UnsafeCast)))], None)))))
+                     (((function(Vector<int> $g): void)), [30:3-10],
+                      (Obj_get (((TestVector), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Vector<int> $g): void)), [30:9-10], (Id ([30:9-10], "g"))), OG_nullthrows, false))),
+                     [], [((Vector<int>), [30:11-63], (Hole (((Vector<float>), [30:60-62], (Lvar ([30:60-62], $g))), (Vector<float>), (Vector<int>), UnsafeCast)))], None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

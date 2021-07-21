@@ -13,14 +13,15 @@ function callback_impl(
   string $_socket_path,
 ): void {
   // echo "Entered callback\n";
+  $seed = get_seed();
   chdir($path);
   $data = json_decode($data_json, true);
   if ($data['is_fresh_instance'] ?? false) {
-    if (!file_exists(TEST_FILE_GOT_FRESH)) {
-      file_put_contents(TEST_FILE_GOT_FRESH, $data_json);
+    if (!file_exists($seed.TEST_FILE_GOT_FRESH)) {
+      file_put_contents($seed.TEST_FILE_GOT_FRESH, $data_json);
     }
-  } else if (!file_exists(TEST_FILE_GOT_UPDATE)) {
-    file_put_contents(TEST_FILE_GOT_UPDATE, $data_json);
+  } else if (!file_exists($seed.TEST_FILE_GOT_UPDATE)) {
+    file_put_contents($seed.TEST_FILE_GOT_UPDATE, $data_json);
   }
   // echo "Leaving callback\n";
 }
@@ -29,7 +30,8 @@ async function wait_for(
   string $file,
   WatchmanInstance $wminst,
 ): Awaitable<void> {
-  HH\watchman_check_sub(SUB_NAME);
+  $seed = get_seed();
+  HH\watchman_check_sub($seed.SUB_NAME);
   // echo "Waiting for $file\n";
   $timeout = 2;
   while ($timeout && !file_exists($file)) {
@@ -39,7 +41,7 @@ async function wait_for(
   if (file_exists($file)) {
     // echo "Found $file\n";
   } else {
-    HH\watchman_check_sub(SUB_NAME);
+    HH\watchman_check_sub($seed.SUB_NAME);
     // $wminst->dumpLog();
     throw new Exception("timed out on $file");
   }
@@ -51,6 +53,7 @@ async function gen_usleep(int $usecs): Awaitable<void> {
 
 async function run_tests(): Awaitable<void> {
   require_once realpath(__DIR__.'/../ext_watchman/wminst.inc');
+  $seed = get_seed();
   $tmpdir = tempnam(sys_get_temp_dir(), 'wmt');
   @unlink($tmpdir);
   if (!mkdir($tmpdir)) {
@@ -64,20 +67,20 @@ async function run_tests(): Awaitable<void> {
     $wminst = new WatchmanInstance($tmpdir);
     $sock = $wminst->getFullSockName();
     echo "Testing subscription\n";
-    file_put_contents(TEST_FILE_INITIAL, '');
+    file_put_contents($seed.TEST_FILE_INITIAL, '');
     await HH\watchman_subscribe(
       '{"fields": ["name"], "expression": ["exists"]}',
       $wminst->getRepoRoot(),
-      SUB_NAME,
+      $seed.SUB_NAME,
       'callback',
       $sock,
     );
     // echo "Subscribed\n";
-    await wait_for(TEST_FILE_GOT_FRESH, $wminst);
-    await wait_for(TEST_FILE_GOT_UPDATE, $wminst);
+    await wait_for($seed.TEST_FILE_GOT_FRESH, $wminst);
+    await wait_for($seed.TEST_FILE_GOT_UPDATE, $wminst);
     echo "Unsubscribing\n";
-    await HH\watchman_unsubscribe(SUB_NAME);
-    if (HH\watchman_check_sub(SUB_NAME)) {
+    await HH\watchman_unsubscribe($seed.SUB_NAME);
+    if (HH\watchman_check_sub($seed.SUB_NAME)) {
       throw new Exception('still reporting subscribed');
     }
     echo "PASS\n";

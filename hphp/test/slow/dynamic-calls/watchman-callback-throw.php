@@ -11,6 +11,10 @@ function callback(
   callback_impl($path, $query, $name, $data_json, $socket_path);
 }
 
+function get_seed(): string {
+  return 'bY1tuwKF_';
+}
+
 <<__EntryPoint>>
 async function main(): Awaitable<void> {
   require_once 'watchman_shared.inc';

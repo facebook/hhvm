@@ -1,7 +1,7 @@
 Testing subscription
 FAIL
 
-Caught: Problem(s) on subscription named 'X'. Connection IS alive.
+Caught: Problem(s) on subscription named '%s'. Connection IS alive.
 First error:
 exception 'InvalidOperationException' with message ''callback' called dynamically but is not __DynamicallyCallable' in :0
 Stack trace:

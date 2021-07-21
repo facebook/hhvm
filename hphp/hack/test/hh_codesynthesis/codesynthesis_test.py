@@ -163,6 +163,16 @@ Type T -> Type A, Type B"""
             exp, hh_codesynthesis.extract_logic_rules(deps.split("\n"))
         )
 
+    def test_unexpected_rhs(self) -> None:
+        deps = """\
+Type A -> SMethod B::foo
+"""
+        with self.assertRaises(
+            expected_exception=NotImplementedError,
+            msg="Not supported SMethod on the right hand side.",
+        ):
+            hh_codesynthesis.extract_logic_rules(deps.split("\n"))
+
     def test_multiple_lines(self) -> None:
         exp = [
             'extends_to("I1", "C1").',
@@ -257,6 +267,28 @@ Method A::foo -> Type B
 Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B"""
+        self.assertListEqual(
+            exp, hh_codesynthesis.extract_logic_rules(deps.split("\n"))
+        )
+
+    def test_extends_type_smethod_dependency(self) -> None:
+        exp = [
+            'extends_to("I", "A").',
+            'method("I", "bar", "A").',
+            'static_method("A", "foo", "B").',
+            'static_method("A", "foo", "T").',
+            'type("A", "B").',
+            'type("A", "T").',
+            'type("I", "A").',
+            'symbols("A";"I";"T").',
+            'funcs("B").',
+        ]
+        deps = """\
+Extends I -> Type A
+Method I::bar -> Type A
+SMethod A::foo -> Fun B, Type T
+Type A -> Fun B, Type T
+Type I -> Type A"""
         self.assertListEqual(
             exp, hh_codesynthesis.extract_logic_rules(deps.split("\n"))
         )
@@ -554,17 +586,21 @@ class ReadFromFileTest(unittest.TestCase):
             'extends_to("I", "B").',
             'extends_to("T", "A").',
             'method("A", "foo", "B").',
+            'static_method("A", "bar", "B").',
+            'static_method("A", "bar", "F").',
             'type("A", "B").',
             'type("I", "B").',
             'type("T", "A").',
             'type("T", "B").',
             'symbols("A";"B";"I";"T").',
+            'funcs("F").',
         ]
         deps = """\
 Extends A -> Type B
 Extends I -> Type B
 Extends T -> Type A
 Method A::foo -> Type B
+SMethod A::bar -> Type B, Fun F
 Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B

@@ -98,6 +98,14 @@ class MethodEdgeHandler(DependencyEdgeHandler):
         return f'method("{lhs[0]}", "{lhs[1]}", "{rhs}").'
 
 
+class SMethodEdgeHandler(DependencyEdgeHandler):
+    def parse(self, lhs: str) -> List[str]:
+        return self.lhs_parser(lhs, "::")
+
+    def rule_writer(self, lhs: List[str], rhs: str) -> str:
+        return f'static_method("{lhs[0]}", "{lhs[1]}", "{rhs}").'
+
+
 # Generate logic rules based on given parameters.
 def generate_logic_rules() -> List[str]:
     rules: List[str] = []
@@ -133,15 +141,19 @@ def generate_logic_rules() -> List[str]:
 def extract_logic_rules(lines: List[str]) -> List[str]:
     rules = []
     symbols = set()
+    funcs = set()
     handlers = {
         "Extends": ExtendEdgeHandler(),
         "Type": TypeEdgeHandler(),
         "Method": MethodEdgeHandler(),
+        "SMethod": SMethodEdgeHandler(),
     }
     collectors = {
         "Extends": symbols,
         "Type": symbols,
         "Method": symbols,
+        "SMethod": symbols,
+        "Fun": funcs,
     }
 
     for line in lines:
@@ -177,19 +189,27 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
         # Updating collections.
         collector = collectors.get(lhs[0], symbols)
         collector.add(f'"{lhs_tokens[0]}"')
-        # Processing each deps ["Type B", "Type C", "Type D"]
+        # Processing each deps ["Type B", "Type C", "Type D", "Fun E"].
         for dep in rhs.rstrip("\n").split(","):
-            # dep = "Type X"
+            # dep = "Type X" / "Fun X".
             dep = dep.split()
             if len(dep) != 2:
                 # ToDo: Add logging if we needed to track wrong format on rhs.
                 continue
             (dep_type, dep_symbol) = dep
+            # Right hand side could only be "Type"/"Fun".
+            if dep_type not in ["Type", "Fun"]:
+                raise NotImplementedError(
+                    f"Not supported {dep_type} on the right hand side."
+                )
             collector = collectors.get(dep_type, symbols)
             collector.add(f'"{dep_symbol}"')
             rules.append(handler.rule_writer(lhs_tokens, dep_symbol))
 
     rules.append("symbols({}).".format(";".join(sorted(symbols))))
+    if len(funcs) != 0:
+        rules.append("funcs({}).".format(";".join(sorted(funcs))))
+
     return rules
 
 

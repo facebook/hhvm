@@ -3,7 +3,7 @@
 
 version: 2.1
 
-jobs:
+jobs: circle
   build:
 
     macos:
@@ -20,4 +20,4 @@ jobs:
           path: test_output
       - store_artifacts:
           path: test_output
-          destination: scan-output
+          destination: scan-outp

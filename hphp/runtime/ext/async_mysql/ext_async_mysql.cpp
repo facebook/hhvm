@@ -368,6 +368,24 @@ HHVM_METHOD(AsyncMysqlConnectionOptions, setSniServerName, const String& sniServ
   data->m_conn_opts.setSniServerName(static_cast<std::string>(sniServername));
 }
 
+static void
+HHVM_METHOD(AsyncMysqlConnectionOptions, enableResetConnBeforeClose) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  data->m_conn_opts.enableResetConnBeforeClose();
+}
+
+static void
+HHVM_METHOD(AsyncMysqlConnectionOptions, enableDelayedResetConn) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  data->m_conn_opts.enableDelayedResetConn();
+}
+
+static void
+HHVM_METHOD(AsyncMysqlConnectionOptions, enableChangeUser) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  data->m_conn_opts.enableChangeUser();
+}
+
 static int64_t getQueryTimeout(int64_t timeout_micros) {
   if (timeout_micros < 0) {
     return mysqlExtension::ReadTimeout * 1000;
@@ -1886,7 +1904,7 @@ static struct AsyncMysqlExtension final : Extension {
   // bump the version number and use a version guard in www:
   //   $ext = new ReflectionExtension("async_mysql");
   //   $version = (float) $ext->getVersion();
-  AsyncMysqlExtension() : Extension("async_mysql", "3.0") {}
+  AsyncMysqlExtension() : Extension("async_mysql", "4.0") {}
   void moduleInit() override {
     // expose the mysql flags
     HHVM_RC_INT_SAME(NOT_NULL_FLAG);
@@ -2071,6 +2089,10 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlConnectionOptions, setConnectionAttributes);
     HHVM_ME(AsyncMysqlConnectionOptions, setSSLOptionsProvider);
     HHVM_ME(AsyncMysqlConnectionOptions, setSniServerName);
+    HHVM_ME(AsyncMysqlConnectionOptions, enableResetConnBeforeClose);
+    HHVM_ME(AsyncMysqlConnectionOptions, enableDelayedResetConn);
+    HHVM_ME(AsyncMysqlConnectionOptions, enableChangeUser);
+
     Native::registerNativeDataInfo<AsyncMysqlConnectionOptions>(
         AsyncMysqlConnectionOptions::s_className.get());
 

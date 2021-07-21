@@ -124,6 +124,9 @@ class AsyncMysqlConnectionOptions {
   public function setConnectionAttributes(darray<string, string> $val): void { }
   public function setSSLOptionsProvider(?MySSLContextProvider $ssl_context): void { }
   public function setSniServerName(string $sni_server_name) : void { }
+  public function enableResetConnBeforeClose() : void { }
+  public function enableDelayedResetConn() : void { }
+  public function enableChangeUser() : void { }
 }
 
 class AsyncMysqlClientStats {

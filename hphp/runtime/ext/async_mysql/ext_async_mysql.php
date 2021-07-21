@@ -688,6 +688,18 @@ class AsyncMysqlConnectionOptions {
   // SNI hostname to use when connecting via SSL
   <<__Native>>
   public function setSniServerName(string $sni_server_name) : void;
+
+  // Enable reset conn before pooled conn is returned to pool
+  <<__Native>>
+  public function enableResetConnBeforeClose(): void;
+
+  // Enable delayed reset conn before pooled conn is returned to pool
+  <<__Native>>
+  public function enableDelayedResetConn(): void;
+
+  // Enable change_user feature in connection pool
+  <<__Native>>
+  public function enableChangeUser(): void;
 }
 /**
  * Provides timing statistics about the MySQL client.

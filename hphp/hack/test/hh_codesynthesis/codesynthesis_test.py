@@ -642,6 +642,49 @@ Type I -> Type A
 """
         self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
 
+    def test_function_with_rule_extraction_hack_codegen(self) -> None:
+        exp = """\
+<?hh
+class A  implements I {
+public static function foo(): void{}
+
+public function dummy_A_method(): void{
+F0();
+}
+
+public function bar(): void{}
+}
+class B   {
+public function dummy_B_method(A $A_obj): void{
+F1();
+}
+}
+class T   {
+public function dummy_T_method(A $A_obj): void{
+A::foo();
+}
+}
+interface I  {
+public function bar(): void;
+}
+function F0(): void {
+A::foo();
+}
+function F1(): void {
+F0();
+}
+"""
+        deps = """\
+Extends I -> Type A
+SMethod A::foo -> Fun F0, Type T
+Method I::bar -> Type A
+Fun F0 -> Fun F1, Type A
+Fun F1 -> Type B
+Type A -> Type B, Type T
+Type I -> Type A
+"""
+        self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
+
     def test_circular_type_method_dependency_with_rule_extraction_hack_codegen(
         self,
     ) -> None:

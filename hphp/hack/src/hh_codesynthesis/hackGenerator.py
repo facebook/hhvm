@@ -37,6 +37,8 @@ class _HackBaseGenerator(object):
         self.methods: Set[str] = set()
         # A set of parameters invoked in dummy method.
         self.parameter_set: Set[str] = set()
+        # A set of functions to invoke in dummy method.
+        self.invoke_funcs_set: Set["_HackFunctionGenerator"] = set()
 
     def add_method(self, method_name: str) -> None:
         self.methods.add(method_name)
@@ -51,7 +53,7 @@ class _HackBaseGenerator(object):
         parameter_list = ", ".join(
             (map(lambda x: f"{x} ${x}_obj", sorted(self.parameter_set)))
         )
-        if parameter_list == "":
+        if parameter_list == "" and len(self.invoke_funcs_set) == 0:
             return ""
         dummy_name = f"dummy_{self.name}_method"
 
@@ -137,6 +139,9 @@ class _HackClassGenerator(_HackBaseGenerator):
     def add_invoke_static_method(self, class_name: str, method_name: str) -> None:
         self.invoke_static_set.add((class_name, method_name))
 
+    def add_invoke_function(self, fn_obj: "_HackFunctionGenerator") -> None:
+        self.invoke_funcs_set.add(fn_obj)
+
     def _print_extend(self) -> str:
         if self.extend == "":
             return ""
@@ -159,6 +164,12 @@ class _HackClassGenerator(_HackBaseGenerator):
             + "".join(
                 [f"\n{x[0]}::{x[1]}();\n" for x in sorted(self.invoke_static_set)]
             )
+            + "".join(
+                [
+                    f"\n{x._print_callee()}\n"
+                    for x in sorted(self.invoke_funcs_set, key=lambda x: x.name)
+                ]
+            )
             + "}"
         )
 
@@ -179,9 +190,14 @@ class _HackFunctionGenerator:
         self.name = name
         # A set of static methods to invoke in the function.
         self.invoke_static_set: Set[Tuple[str, str]] = set()
+        # A set of functions to invoke in the function.
+        self.invoke_funcs_set: Set["_HackFunctionGenerator"] = set()
 
     def add_invoke_static_method(self, class_name: str, method_name: str) -> None:
         self.invoke_static_set.add((class_name, method_name))
+
+    def add_invoke_function(self, fn_obj: "_HackFunctionGenerator") -> None:
+        self.invoke_funcs_set.add(fn_obj)
 
     def _print_body(self) -> str:
         return (
@@ -189,8 +205,17 @@ class _HackFunctionGenerator:
             + "".join(
                 [f"\n{x[0]}::{x[1]}();\n" for x in sorted(self.invoke_static_set)]
             )
+            + "".join(
+                [
+                    f"\n{x._print_callee()}\n"
+                    for x in sorted(self.invoke_funcs_set, key=lambda x: x.name)
+                ]
+            )
             + "}"
         )
+
+    def _print_callee(self) -> str:
+        return f"{self.name}();"
 
     def __str__(self) -> str:
         return f"function {self.name}(): void {self._print_body()}"
@@ -240,6 +265,21 @@ class HackCodeGenerator(CodeGenerator):
         elif name in self.interface_objs:
             self.interface_objs[name].add_parameter(parameter_type)
 
+    def _add_invoke_function(self, name: str, function_name: str) -> None:
+        # The function didn't purely pass as a name, we are passing a reference
+        # to the function object. The reason is the function is going to have
+        # parameter inside, so keep a reference to the function object make
+        # code synthesis easier later.
+        if function_name not in self.function_objs:
+            return
+
+        if name in self.class_objs:
+            self.class_objs[name].add_invoke_function(self.function_objs[function_name])
+        if name in self.function_objs:
+            self.function_objs[name].add_invoke_function(
+                self.function_objs[function_name]
+            )
+
     def _add_invoke(self, name: str, object_type: str, method_name: str) -> None:
         if name in self.class_objs:
             self.class_objs[name].add_invoke(object_type, method_name)
@@ -266,6 +306,7 @@ class HackCodeGenerator(CodeGenerator):
         # Separate into 'class(?)', 'interface(?)', 'funcs(?)',
         # 'implements(?, ?)', 'extends(?, ?)', 'add_method(?, ?)',
         # 'add_static_method(?, ?)', 'has_method_with_parameter(?, ?)'
+        # 'invokes_function(?, ?)'
         # 'invokes_in_method(?, ?, ?)', 'invokes_static_method(?, ?, ?)'
         predicates = m.symbols(atoms=True)
         node_func = {
@@ -279,6 +320,7 @@ class HackCodeGenerator(CodeGenerator):
             "add_method": self._add_method,
             "add_static_method": self._add_static_method,
             "has_method_with_parameter": self._add_to_parameter_set,
+            "invokes_function": self._add_invoke_function,
         }
         trip_func = {
             "invokes_in_method": self._add_invoke,

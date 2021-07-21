@@ -142,6 +142,24 @@ class _HackClassGeneratorTest(unittest.TestCase):
             str(self.obj),
         )
 
+    def test_invoke_single_function_in_dummy_method_class(self) -> None:
+        fn_obj = _HackFunctionGenerator("F0")
+        self.obj.add_invoke_function(fn_obj)
+        self.assertEqual(
+            "class C0   {\npublic function dummy_C0_method(): void{\nF0();\n}\n}",
+            str(self.obj),
+        )
+
+    def test_invoke_multiple_functions_in_dummy_method_class(self) -> None:
+        fn_obj0 = _HackFunctionGenerator("F0")
+        fn_obj1 = _HackFunctionGenerator("F1")
+        self.obj.add_invoke_function(fn_obj1)
+        self.obj.add_invoke_function(fn_obj0)
+        self.assertEqual(
+            "class C0   {\npublic function dummy_C0_method(): void{\nF0();\n\nF1();\n}\n}",
+            str(self.obj),
+        )
+
     def test_invoke_multiple_parameters_in_dummy_method_class(self) -> None:
         self.obj.add_parameter("C2")
         self.obj.add_parameter("C1")
@@ -162,6 +180,14 @@ class _HackFunctionGeneratorTest(unittest.TestCase):
         self.obj.add_invoke_static_method("C0", "foo")
         self.assertEqual(
             "function F0(): void {\nC0::foo();\n}",
+            str(self.obj),
+        )
+
+    def test_invoke_function(self) -> None:
+        fn_obj = _HackFunctionGenerator("F1")
+        self.obj.add_invoke_function(fn_obj)
+        self.assertEqual(
+            "function F0(): void {\nF1();\n}",
             str(self.obj),
         )
 
@@ -345,4 +371,27 @@ C1::foo();
         self.obj._add_invoke_static_method("C0", "C1", "foo")
         self.obj._add_function("F0")
         self.obj._add_invoke_static_method("F0", "C1", "foo")
+        self.assertEqual(exp, str(self.obj))
+
+    def test_class_with_function_invoked_by_another_class_and_function(
+        self,
+    ) -> None:
+        exp = """\
+<?hh
+class C0   {
+public function dummy_C0_method(): void{
+F0();
+}
+}
+
+function F0(): void {}
+function F1(): void {
+F0();
+}
+"""
+        self.obj._add_function("F0")
+        self.obj._add_function("F1")
+        self.obj._add_class("C0")
+        self.obj._add_invoke_function("C0", "F0")
+        self.obj._add_invoke_function("F1", "F0")
         self.assertEqual(exp, str(self.obj))

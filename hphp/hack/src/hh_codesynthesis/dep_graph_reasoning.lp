@@ -23,6 +23,10 @@ indirect_extends_to(X, Y) :- extends_to(X, Z), indirect_extends_to(Z, Y).
 % An symbol could be either class or interface.
 1 {class(X); interface(X)} 1 :- symbols(X).
 
+% A symbol is unique, can't be a class/interface name and a function name
+% at the same time.
+:- symbols(X), funcs(X).
+
 % Later on, we can adjust these parameters to balance number of the classes
 % and number of interfaces we expect to synthesis.
 #const min_classes = @c().
@@ -127,14 +131,62 @@ has_method_with_parameter(TypeZ, TypeX) :- invokes_in_method(TypeZ, TypeX, _).
 % Constraint 2.2.a: Interface TypeZ can't invoke any method inside.
 :- invokes_in_method(TypeZ, _, _), interface(TypeZ).
 
+%%%%%%%%
+% Milestone 3.
+%%%%%%%%
+% We represent "FUN" and "SMethod" as logic rules in Python interface.
+%
+% Or we can construct sample input.lp like:
+% extends_to("A", "B").
+% method("A", "foo", "B").
+% type("A", "B").
+% type("B", "C").
+% type("C", "B").
+%
+% invoked_by("fn_bar", "B").
+% invoked_by("fn_foo", "B").
+% method("C", "call", "fn_foo").
+% method("B", "foo", "fn_bar").
+% static_method("B", "Bar", "fn_bar").
+% static_method("B", "Bar", "C").
+%
+% type("B", "fn_bar").
+% type("C", "fn_foo").
+%
+% funcs("fn_foo"; "fn_bar").
+% symbols("A"; "B"; "C").
+
+% $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+% SMethod Dependency Edge <SMethod, Type>, <SMethod, Fun>.
+% =============================================================================
+% If TypeX has a static method, TypeX must be a class.
+class(TypeX) :- static_method(TypeX, _, _).
+
+% Let's add a static method to the class.
+add_static_method(ClassName, MethodName) :- static_method(ClassName, MethodName, _).
+
+% If TypeX is a class or function, and we see a static method edge, then TypeX
+% invokes ClassName::MethodName.
+invokes_static_method(TypeX, ClassName, MethodName) :-
+                static_method(ClassName, MethodName, TypeX).
+
+% $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+% SMethod Constraints
+% =============================================================================
+% If TypeX is an interface, it can't invoke a static method.
+:- static_method(_, _, TypeX), interface(TypeX).
+
 
 #show class/1.
 #show interface/1.
+#show funcs/1.
 
 #show extends/2.
 #show implements/2.
 
 #show has_method_with_parameter/2.
 #show add_method/2.
+#show add_static_method/2.
 
 #show invokes_in_method/3.
+#show invokes_static_method/3.

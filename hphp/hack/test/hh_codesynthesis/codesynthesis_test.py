@@ -320,29 +320,72 @@ class DoReasoningTest(unittest.TestCase):
         # 'has_method_with_parameter', since we need to pass the object as parameter,
         # then invoke its method.
         exp = [
-            'add_method("B","Foo")',
+            'add_method("B","foo")',
             'class("C")',
             'has_method_with_parameter("C","B")',
             'interface("B")',
-            'invokes_in_method("C","B","Foo")',
+            'invokes_in_method("C","B","foo")',
         ]
-        rules = ['method("B", "Foo", "C").' 'symbols("B"; "C").']
+        rules = ['method("B", "foo", "C").' 'symbols("B"; "C").']
         raw_codegen = hh_codesynthesis.CodeGenerator()
         hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
+    def test_smethod_type_dependencies(self) -> None:
+        # This one covered the 'invokes_static_method' with 'Type', and we don't need to
+        # pass the object as parameter, so that we directly invoke the static method.
+        exp = [
+            'add_static_method("B","foo")',
+            'class("B")',
+            'class("C")',
+            'interface("A")',
+            'invokes_static_method("C","B","foo")',
+        ]
+        rules = ['static_method("B", "foo", "C").' 'symbols("A"; "B"; "C").']
+        raw_codegen = hh_codesynthesis.CodeGenerator()
+        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        self.assertListEqual(sorted(str(raw_codegen).split()), exp)
+
+    def test_smethod_fun_dependencies(self) -> None:
+        # This one covered the 'invokes_static_method' with 'Fun', and we don't need to
+        # pass the object as parameter, so that we directly invoke the static method.
+        exp = [
+            'add_static_method("B","foo")',
+            'class("B")',
+            'funcs("C")',
+            'interface("A")',
+            'invokes_static_method("C","B","foo")',
+        ]
+        rules = ['static_method("B", "foo", "C").' 'symbols("A"; "B").' 'funcs("C").']
+        raw_codegen = hh_codesynthesis.CodeGenerator()
+        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        self.assertListEqual(sorted(str(raw_codegen).split()), exp)
+
+    def test_smethod_dependency_exception(self) -> None:
+        # This one covered the unsatifiable part, that we can't find an answer.
+        # Here we are forcing symbol("B") to get interface("B").
+        rules = [
+            'static_method("A", "foo", "B").',
+            'interface("B").' 'symbols("A"; "B").',
+        ]
+        raw_codegen = hh_codesynthesis.CodeGenerator()
+        with self.assertRaises(expected_exception=RuntimeError, msg="Unsatisfiable."):
+            hh_codesynthesis.do_reasoning(
+                additional_programs=rules, generator=raw_codegen
+            )
+
     def test_method_type_extends_dependencies(self) -> None:
         # This one covered the 'override' in the "Extend" and "Method" edge.
         exp = [
-            'add_method("B","Foo")',
-            'add_method("C","Foo")',
+            'add_method("B","foo")',
+            'add_method("C","foo")',
             'class("C")',
             'implements("C","B")',
             'interface("B")',
         ]
         rules = [
             'extends_to("B", "C").',
-            'method("B", "Foo", "C").',
+            'method("B", "foo", "C").',
             'type("B", "C").',
             'symbols("B"; "C").',
         ]

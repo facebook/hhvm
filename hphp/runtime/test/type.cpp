@@ -641,14 +641,14 @@ TEST(Type, ArrayFitsSpec) {
   auto const vec2 = ArrayData::GetScalarArray(make_vec_array(2, ""));
   auto const vec3 = ArrayData::GetScalarArray(make_vec_array(2, 3, 5));
 
-  DArrayInit dict_init1{2};
-  dict_init1.set(make_tv<KindOfInt64>(0), 2);
-  dict_init1.set(make_tv<KindOfInt64>(1), 3);
+  DictInit dict_init1{2};
+  dict_init1.set((int64_t)0, 2);
+  dict_init1.set((int64_t)1, 3);
   auto const dict1 = ArrayData::GetScalarArray(dict_init1.toArray());
 
-  DArrayInit dict_init2{2};
-  dict_init2.set(make_tv<KindOfInt64>(17), 2);
-  dict_init2.set(make_tv<KindOfInt64>(19), 3);
+  DictInit dict_init2{2};
+  dict_init2.set(17, 2);
+  dict_init2.set(19, 3);
   auto const dict2 = ArrayData::GetScalarArray(dict_init2.toArray());
 
   EXPECT_FALSE(Type::cns(staticEmptyVec()) <= ratType1);
@@ -1326,8 +1326,8 @@ TEST(Type, PtrKinds) {
 TEST(Type, ConstantPtrTypes) {
   std::vector<TypedValue> dicts;
   for (auto const key : {"foo", "bar"}) {
-    DArrayInit dinit{1};
-    dinit.set(key, make_tv<KindOfBoolean>(true));
+    DictInit dinit{1};
+    dinit.set(StringData::Make(key), make_tv<KindOfBoolean>(true));
     auto const dict = dinit.toArray();
     MixedArray::asMixed(dict.get())->onSetEvalScalar();
     auto const static_dict = MixedArray::CopyStatic(dict.get());

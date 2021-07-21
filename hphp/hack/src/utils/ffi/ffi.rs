@@ -6,7 +6,6 @@
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::slice::from_raw_parts;
-use std::slice::from_raw_parts_mut;
 
 #[derive(Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
 #[repr(C)]
@@ -209,10 +208,11 @@ impl<'a> std::convert::From<&'a mut str> for Slice<'a, u8> {
 /// `Clone` support).
 // Safety: Initialize from an `&'arena [T]` where the memory is owned
 // by `alloc`. Use `BumpSliceMut<'a, T>::new()`.
-pub struct BumpSliceMut<'arena, T> {
+pub struct BumpSliceMut<'a, T> {
     pub data: *mut T,
     pub len: usize,
-    pub alloc: &'arena bumpalo::Bump,
+    pub alloc: usize, // *const bumpalo::Bump,
+    pub marker: std::marker::PhantomData<&'a ()>,
 }
 impl<'a, T> BumpSliceMut<'a, T> {
     // Safety: `t` must be owned by `alloc`.
@@ -220,27 +220,41 @@ impl<'a, T> BumpSliceMut<'a, T> {
         BumpSliceMut {
             data: t.as_mut_ptr(),
             len: t.len(),
-            alloc,
+            alloc: alloc as *const bumpalo::Bump as usize,
+            marker: std::marker::PhantomData,
         }
     }
+
+    pub fn as_inner_mut(&mut self) -> &'a mut [T] {
+        // Safety: Assumes `self` has been constructed via
+        // `BumpSliceMut<'a, T>::new()` from some `&'a[T]` and so the
+        // call to `from_raw_parts_mut` is a valid.
+        unsafe { std::slice::from_raw_parts_mut(self.data, self.len) }
+    }
 }
-impl<'arena, T: Clone> Clone for BumpSliceMut<'arena, T> {
+impl<'a, T> AsRef<[T]> for BumpSliceMut<'a, T> {
+    fn as_ref(&self) -> &[T] {
+        // Safety: Assumes `self` has been constructed via
+        // `BumpSliceMut<'a, T>::new()` from some `&'a[T]` and so the
+        // call to `from_raw_parts` is a valid.
+        unsafe { std::slice::from_raw_parts(self.data, self.len) }
+    }
+}
+impl<'a, T> AsMut<[T]> for BumpSliceMut<'a, T> {
+    fn as_mut(&mut self) -> &mut [T] {
+        // Safety: Assumes `self` has been constructed via
+        // `BumpSliceMut<'a, T>::new()` from some `&'a[T]` and so the
+        // call to `from_raw_parts_mut` is a valid.
+        unsafe { std::slice::from_raw_parts_mut(self.data, self.len) }
+    }
+}
+impl<'arena, T: 'arena + Clone> Clone for BumpSliceMut<'arena, T> {
     fn clone(&self) -> Self {
         //Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
         // safety].
-        unsafe {
-            let alloc: &'arena bumpalo::Bump = self.alloc;
-            let mut vec = bumpalo::collections::Vec::from_iter_in(
-                from_raw_parts_mut(self.data, self.len).iter().cloned(),
-                alloc,
-            );
-            let slice = vec.as_mut_slice();
-            BumpSliceMut {
-                data: slice.as_mut_ptr(),
-                len: slice.len(),
-                alloc: self.alloc,
-            }
-        }
+        let alloc: &'arena bumpalo::Bump =
+            unsafe { (self.alloc as *const bumpalo::Bump).as_ref().unwrap() };
+        BumpSliceMut::new(alloc, alloc.alloc_slice_clone(self.as_ref()))
     }
 }
 
@@ -311,6 +325,8 @@ mod tests {
 pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_ffi<'arena>(
     _: Str<'arena>,
     _: Maybe<i32>,
+    _: Pair<i32, i32>,
+    _: BumpSliceMut<'arena, i32>,
 ) {
     unimplemented!()
 }

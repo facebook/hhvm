@@ -50,7 +50,7 @@ use oxidized::{
     aast, aast_defs, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos,
 };
 
-use ffi::Slice;
+use ffi::{Slice, Str};
 
 use bitflags::bitflags;
 use indexmap::IndexSet;
@@ -828,7 +828,7 @@ fn atom_instrs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                                         )?,
                                                         instr::combine_and_resolve_type_struct(alloc, 1),
                                                         instr::basec(alloc, 0, MemberOpMode::ModeNone),
-                                                        instr::querym(alloc, 1, QueryOp::CGetQuiet, MemberKey::ET("classname", ReadOnlyOp::Any)),
+                                                        instr::querym(alloc, 1, QueryOp::CGetQuiet, MemberKey::ET(Str::from("classname"), ReadOnlyOp::Any)),
                                                         instr::dup(alloc),
                                                         instr::istypec(alloc, IstypeOp::OpNull),
                                                         instr::jmpnz(alloc, label_not_a_class.clone()),

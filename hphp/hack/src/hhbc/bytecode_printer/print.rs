@@ -9,14 +9,13 @@ mod write;
 pub use context::Context;
 pub use write::{Error, IoWrite, Result, Write};
 
-use ffi::{Maybe::Just, Maybe::Nothing};
+use ffi::{Maybe::Just, Maybe::Nothing, Pair};
 
 use indexmap::IndexSet;
 use itertools::Itertools;
 
 use core_utils_rust::add_ns;
 use escaper::{escape, escape_by, is_lit_printable};
-use ffi::Pair;
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
 use hhbc_by_ref_hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX};
 use hhbc_by_ref_hhas_attribute::{self as hhas_attribute, HhasAttribute};
@@ -893,7 +892,7 @@ fn print_prop_id<W: Write>(w: &mut W, id: &PropId) -> Result<(), W::Error> {
 }
 
 fn print_adata_id<W: Write>(w: &mut W, id: &AdataId) -> Result<(), W::Error> {
-    concat_str(w, ["@", id])
+    concat_str(w, ["@", id.as_str()])
 }
 
 fn print_adata_mapped_argument<W: Write, F, V>(
@@ -1387,7 +1386,7 @@ fn print_member_key<W: Write>(w: &mut W, mk: &MemberKey) -> Result<(), W::Error>
         }
         M::ET(s, op) => {
             w.write("ET:")?;
-            quotes(w, |w| w.write(escape(*s)))?;
+            quotes(w, |w| w.write(escape(s.as_str())))?;
             w.write(" ")?;
             print_readonly_op(w, op)
         }
@@ -1450,8 +1449,8 @@ fn print_iter_args<W: Write>(w: &mut W, iter_args: &IterArgs) -> Result<(), W::E
     print_iterator_id(w, &iter_args.iter_id)?;
     w.write(" ")?;
     match &iter_args.key_id {
-        None => w.write("NK")?,
-        Some(k) => {
+        Nothing => w.write("NK")?,
+        Just(k) => {
             w.write("K:")?;
             print_local(w, &k)?;
         }
@@ -1897,18 +1896,18 @@ fn print_control_flow<W: Write>(w: &mut W, cf: &InstructControlFlow) -> Result<(
         CF::RetCSuspended => w.write("RetCSuspended"),
         CF::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
         CF::Throw => w.write("Throw"),
-        CF::Switch(kind, base, labels) => print_switch(w, kind, base, labels),
-        CF::SSwitch(cases) => match &cases[..] {
+        CF::Switch(kind, base, labels) => print_switch(w, kind, base, labels.as_ref()),
+        CF::SSwitch(cases) => match cases.as_ref() {
             [] => Err(Error::fail("sswitch should have at least one case")),
-            [rest @ .., (_, lastlabel)] => {
+            [rest @ .., Pair(_, lastlabel)] => {
                 w.write("SSwitch ")?;
                 angle(w, |w| {
-                    concat_by(w, " ", rest, |w, (s, l)| {
-                        concat_str(w, [quote_string(s).as_str(), ":"])?;
+                    concat_by(w, " ", rest, |w, Pair(s, l)| {
+                        concat_str(w, [quote_string(s.as_ref()).as_str(), ":"])?;
                         print_label(w, l)
                     })?;
                     w.write(" -:")?;
-                    print_label(w, lastlabel)
+                    print_label(w, &lastlabel)
                 })
             }
         },
@@ -1938,7 +1937,7 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
         LC::Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
         LC::String(s) => {
             w.write("String ")?;
-            quotes(w, |w| w.write(escape(*s)))
+            quotes(w, |w| w.write(escape(s.as_str())))
         }
         LC::LazyClass(id) => {
             w.write("LazyClass ")?;
@@ -1946,7 +1945,7 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
         }
         LC::True => w.write("True"),
         LC::False => w.write("False"),
-        LC::Double(d) => concat_str_by(w, " ", ["Double", d]),
+        LC::Double(d) => concat_str_by(w, " ", ["Double", d.as_str()]),
         LC::AddElemC => w.write("AddElemC"),
         LC::AddNewElemC => w.write("AddNewElemC"),
         LC::NewPair => w.write("NewPair"),
@@ -1970,14 +1969,16 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
         LC::NewVec(i) => concat_str_by(w, " ", ["NewVec", i.to_string().as_str()]),
         LC::NewKeysetArray(i) => concat_str_by(w, " ", ["NewKeysetArray", i.to_string().as_str()]),
         LC::NewStructDict(l) => {
+            let ls: Vec<&str> = l.as_ref().into_iter().map(|s| s.as_str()).collect();
             w.write("NewStructDict ")?;
-            angle(w, |w| print_shape_fields(w, l))
+            angle(w, |w| print_shape_fields(w, &ls[0..]))
         }
         LC::NewRecord(cid, l) => {
+            let ls: Vec<&str> = l.as_ref().into_iter().map(|s| s.as_str()).collect();
             w.write("NewRecord ")?;
             print_class_id(w, cid)?;
             w.write(" ")?;
-            angle(w, |w| print_shape_fields(w, l))
+            angle(w, |w| print_shape_fields(w, &ls[0..]))
         }
         LC::CnsE(id) => {
             w.write("CnsE ")?;

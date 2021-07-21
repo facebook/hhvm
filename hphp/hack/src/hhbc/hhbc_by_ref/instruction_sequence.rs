@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::{BumpSliceMut, Maybe::Just, Pair, Slice, Str};
 use hhbc_by_ref_hhbc_ast::*;
 use hhbc_by_ref_iterator::Id as IterId;
 use hhbc_by_ref_label::Label;
@@ -231,7 +232,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         let args = IterArgs {
             iter_id: id,
-            key_id: Some(key),
+            key_id: Just(key),
             val_id: value,
         };
         instr(
@@ -505,19 +506,19 @@ pub mod instr {
     pub fn double<'a>(alloc: &'a bumpalo::Bump, litstr: &str) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::Double(
+            Instruct::ILitConst(InstructLitConst::Double(Str::from(
                 bumpalo::collections::String::from_str_in(litstr, alloc).into_bump_str(),
-            )),
+            ))),
         )
     }
 
     pub fn string<'a>(alloc: &'a bumpalo::Bump, litstr: impl Into<String>) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::String(
+            Instruct::ILitConst(InstructLitConst::String(Str::from(
                 bumpalo::collections::String::from_str_in(litstr.into().as_str(), alloc)
                     .into_bump_str(),
-            )),
+            ))),
         )
     }
 
@@ -786,7 +787,7 @@ pub mod instr {
             Instruct::IContFlow(InstructControlFlow::Switch(
                 Switchkind::Unbounded,
                 0,
-                labels,
+                BumpSliceMut::new(alloc, labels.into_bump_slice_mut()),
             )),
         )
     }
@@ -799,9 +800,13 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         cases: bumpalo::collections::Vec<'a, (&'a str, Label)>,
     ) -> InstrSeq<'a> {
+        let cases_ = BumpSliceMut::new(
+            alloc,
+            alloc.alloc_slice_fill_iter(cases.into_iter().map(|p| Pair(Str::from(p.0), p.1))),
+        );
         instr(
             alloc,
-            Instruct::IContFlow(InstructControlFlow::SSwitch(cases)),
+            Instruct::IContFlow(InstructControlFlow::SSwitch(cases_)),
         )
     }
 
@@ -834,16 +839,20 @@ pub mod instr {
         id: ClassId<'a>,
         keys: &'a [&'a str],
     ) -> InstrSeq<'a> {
+        let keys_ =
+            Slice::new(alloc.alloc_slice_fill_iter(keys.into_iter().map(|s| Str::from(*s))));
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::NewRecord(id, keys)),
+            Instruct::ILitConst(InstructLitConst::NewRecord(id, keys_)),
         )
     }
 
     pub fn newstructdict<'a>(alloc: &'a bumpalo::Bump, keys: &'a [&'a str]) -> InstrSeq<'a> {
+        let keys_ =
+            Slice::new(alloc.alloc_slice_fill_iter(keys.into_iter().map(|s| Str::from(*s))));
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::NewStructDict(keys)),
+            Instruct::ILitConst(InstructLitConst::NewStructDict(keys_)),
         )
     }
 

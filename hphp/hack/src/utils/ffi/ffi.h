@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the \"hack\" directory of this source tree.
 //
-// @generated SignedSource<<7c7255fa918aab88dbd426b566052d47>>
+// @generated SignedSource<<89eebc4b18d334e9c8c8afdd55527156>>
 
 
 #pragma once
@@ -49,10 +49,30 @@ struct Maybe {
   };
 };
 
+/// A tuple of two elements.
+template<typename U, typename V>
+struct Pair {
+  U _0;
+  V _1;
+};
+
+/// A type for an arena backed `&'a mut[T]`. Similar to `Slice<'a, T>`
+/// but with mutable contents and an allocator reference (enabling
+/// `Clone` support).
+template<typename T>
+struct BumpSliceMut {
+  T *data;
+  size_t len;
+  size_t alloc;
+};
+
 
 extern "C" {
 
-void no_call_compile_only_USED_TYPES_ffi(Str, Maybe<int32_t>);
+void no_call_compile_only_USED_TYPES_ffi(Str,
+                                         Maybe<int32_t>,
+                                         Pair<int32_t, int32_t>,
+                                         BumpSliceMut<int32_t>);
 
 } // extern "C"
 

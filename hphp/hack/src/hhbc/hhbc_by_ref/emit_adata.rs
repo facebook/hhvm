@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
+use ffi::Str;
 use hhbc_by_ref_adata_state::AdataState;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_adata::{
@@ -37,7 +38,7 @@ fn rewrite_typed_value<'arena, 'decl, D: DeclProvider<'decl>>(
             TypedValue::Bool(true) => InstructLitConst::True,
             TypedValue::Bool(false) => InstructLitConst::False,
             TypedValue::Int(i) => InstructLitConst::Int(*i),
-            TypedValue::String(s) => InstructLitConst::String(s.as_str()),
+            TypedValue::String(s) => InstructLitConst::String(*s),
             TypedValue::LazyClass(s) => {
                 let classid: hhbc_by_ref_hhbc_ast::ClassId<'arena> =
                     hhbc_by_ref_hhbc_id::class::Type::from_ast_name_and_mangle(alloc, s.as_str());
@@ -49,25 +50,25 @@ fn rewrite_typed_value<'arena, 'decl, D: DeclProvider<'decl>>(
                     alloc,
                 )
                 .into_bump_str();
-                InstructLitConst::Double(fstr)
+                InstructLitConst::Double(Str::from(fstr))
             }
             TypedValue::Keyset(_) => {
-                let arrayid = get_array_identifier(alloc, e, tv);
+                let arrayid = Str::from(get_array_identifier(alloc, e, tv));
                 InstructLitConst::Keyset(arrayid)
             }
             TypedValue::Vec(_) => {
-                let arrayid = get_array_identifier(alloc, e, tv);
+                let arrayid = Str::from(get_array_identifier(alloc, e, tv));
                 InstructLitConst::Vec(arrayid)
             }
             TypedValue::Dict(_) => {
-                let arrayid = get_array_identifier(alloc, e, tv);
+                let arrayid = Str::from(get_array_identifier(alloc, e, tv));
                 InstructLitConst::Dict(arrayid)
             }
             TypedValue::HhasAdata(d) if d.is_empty() => {
                 return Err(Error::Unrecoverable("HhasAdata may not be empty".into()));
             }
             TypedValue::HhasAdata(d) => {
-                let arrayid = get_array_identifier(alloc, e, tv);
+                let arrayid = Str::from(get_array_identifier(alloc, e, tv));
                 let d = d.as_str();
                 match &d[..1] {
                     VARRAY_PREFIX | VEC_PREFIX => InstructLitConst::Vec(arrayid),

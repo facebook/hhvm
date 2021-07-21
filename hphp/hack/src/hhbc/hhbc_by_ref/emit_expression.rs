@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
-use ffi::Slice;
+use ffi::{Maybe::Just, Slice, Str};
 use hhbc_by_ref_ast_class_expr::ClassExpr;
 use hhbc_by_ref_ast_constant_folder as ast_constant_folder;
 use hhbc_by_ref_emit_adata as emit_adata;
@@ -307,7 +307,7 @@ pub fn get_type_structure_for_hint<'arena, 'decl, D: DeclProvider<'decl>>(
         false,
         false,
     )?;
-    let i: &'arena str = emit_adata::get_array_identifier(alloc, e, &tv);
+    let i = Str::from(emit_adata::get_array_identifier(alloc, e, &tv));
     Ok(instr::lit_const(alloc, InstructLitConst::Dict(i)))
 }
 
@@ -991,7 +991,7 @@ fn emit_iter<
         let loop_next = e.label_gen_mut().next_regular();
         let iter_args = IterArgs {
             iter_id,
-            key_id: Some(key_id),
+            key_id: Just(key_id),
             val_id,
         };
         let iter_init = InstrSeq::gather(
@@ -2529,7 +2529,7 @@ fn get_reified_var_cexpr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     alloc,
                     1,
                     QueryOp::CGet,
-                    MemberKey::ET("classname", ReadOnlyOp::Any),
+                    MemberKey::ET(Str::from("classname"), ReadOnlyOp::Any),
                 ),
             ],
         ))
@@ -4399,7 +4399,10 @@ fn get_elem_member_key<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 // There's no guarantee that they're valid UTF-8.
                 let s = unsafe { std::str::from_utf8_unchecked(s.as_slice()) };
                 let s = bumpalo::collections::String::from_str_in(s, alloc).into_bump_str();
-                Ok((MemberKey::ET(s, ReadOnlyOp::Any), instr::empty(alloc)))
+                Ok((
+                    MemberKey::ET(Str::from(s), ReadOnlyOp::Any),
+                    instr::empty(alloc),
+                ))
             }
             // Special case for class name
             E_::ClassConst(x)
@@ -4419,11 +4422,14 @@ fn get_elem_member_key<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 let fq_id = class::Type::<'arena>::from_ast_name(alloc, &cname).to_raw_string();
                 if e.options().emit_class_pointers() > 0 {
                     Ok((
-                        MemberKey::ET(fq_id, ReadOnlyOp::Any),
+                        MemberKey::ET(Str::from(fq_id), ReadOnlyOp::Any),
                         instr::raise_class_string_conversion_warning(alloc),
                     ))
                 } else {
-                    Ok((MemberKey::ET(fq_id, ReadOnlyOp::Any), instr::empty(alloc)))
+                    Ok((
+                        MemberKey::ET(Str::from(fq_id), ReadOnlyOp::Any),
+                        instr::empty(alloc),
+                    ))
                 }
             }
             _ => {

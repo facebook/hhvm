@@ -18,7 +18,7 @@ use hhbc_by_ref_local::Local;
 use hhbc_by_ref_scope::scope;
 use hhbc_by_ref_statement_state::StatementState;
 
-use ffi::Slice;
+use ffi::{Maybe, Slice};
 use lazy_static::lazy_static;
 use naming_special_names_rust::{special_functions, special_idents, superglobals};
 use oxidized::{aast as a, ast as tast, ast_defs, local_id, pos::Pos};
@@ -1093,7 +1093,7 @@ fn emit_foreach_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         let (key_id, val_id, preamble) = emit_iterator_key_value_storage(e, env, iterator)?;
         let iter_args = IterArgs {
             iter_id,
-            key_id,
+            key_id: Maybe::from(key_id),
             val_id,
         };
         let body = env.do_in_loop_body(

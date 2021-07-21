@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
-use ffi::Maybe::Just;
+use ffi::{Maybe::Just, Pair};
 use hash::{HashMap, HashSet};
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_param::HhasParam;
@@ -33,7 +33,7 @@ fn lookup_def<'h>(l: &Id, defs: &'h HashMap<Id, usize>) -> &'h usize {
     }
 }
 
-fn get_regular_labels<'arena>(instr: &'arena Instruct<'arena>) -> Vec<&'arena Label> {
+fn get_regular_labels<'arena>(instr: &Instruct<'arena>) -> Vec<Label> {
     use Instruct::*;
     use InstructCall::*;
     use InstructControlFlow::*;
@@ -55,10 +55,13 @@ fn get_regular_labels<'arena>(instr: &'arena Instruct<'arena>) -> Vec<&'arena La
         | ICall(FCallFunc(FcallArgs(_, _, _, _, Just(l), _)))
         | ICall(FCallFuncD(FcallArgs(_, _, _, _, Just(l), _), _))
         | ICall(FCallObjMethod(FcallArgs(_, _, _, _, Just(l), _), _))
-        | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, Just(l), _), _, _)) => vec![l],
-        IContFlow(Switch(_, _, ls)) => ls.iter().collect::<Vec<_>>(),
-        IContFlow(SSwitch(pairs)) => pairs.iter().map(|x| &x.1).collect::<Vec<_>>(),
-        IMisc(MemoGetEager(l1, l2, _)) => vec![l1, l2],
+        | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, Just(l), _), _, _)) => vec![*l],
+        IContFlow(Switch(_, _, ls)) => {
+            let labels = ls.as_ref().iter().map(|x| *x).collect::<Vec<_>>();
+            labels
+        }
+        IContFlow(SSwitch(pairs)) => pairs.as_ref().iter().map(|x| x.1).collect::<Vec<_>>(),
+        IMisc(MemoGetEager(l1, l2, _)) => vec![*l1, *l2],
         _ => vec![],
     }
 }
@@ -69,7 +72,7 @@ fn create_label_ref_map<'arena>(
     body: &InstrSeq<'arena>,
 ) -> (HashSet<Id>, HashMap<Id, usize>) {
     let process_ref =
-        |(mut n, (mut used, mut refs)): (usize, (HashSet<Id>, HashMap<Id, usize>)), l: &Label| {
+        |(mut n, (mut used, mut refs)): (usize, (HashSet<Id>, HashMap<Id, usize>)), l: Label| {
             let id = l.id();
             let offset = lookup_def(id, defs);
             if !refs.contains_key(offset) {
@@ -96,7 +99,7 @@ fn create_label_ref_map<'arena>(
             .default_value
         {
             None => acc,
-            Some((l, _)) => process_ref(acc, &l),
+            Some((l, _)) => process_ref(acc, *l),
         },
     );
     map
@@ -129,8 +132,11 @@ where
         | IContFlow(JmpNZ(l))
         | IMisc(MemoGet(l, _))
         | ILabel(l) => relabel(l),
-        IContFlow(Switch(_, _, ll)) => ll.iter_mut().for_each(|l| relabel(l)),
-        IContFlow(SSwitch(pairs)) => pairs.iter_mut().for_each(|(_, l)| relabel(l)),
+        IContFlow(Switch(_, _, ll)) => ll.as_mut().iter_mut().for_each(|l| relabel(l)),
+        IContFlow(SSwitch(pairs)) => pairs
+            .as_inner_mut()
+            .iter_mut()
+            .for_each(|Pair(_, l)| relabel(l)),
         IMisc(MemoGetEager(l1, l2, _)) => {
             relabel(l1);
             relabel(l2);
@@ -180,7 +186,7 @@ pub fn relabel_function<'arena>(
     body: &mut InstrSeq<'arena>,
 ) {
     let defs = create_label_to_offset_map(body);
-    let (used, refs) = create_label_ref_map(&defs, &params, body);
+    let (used, refs) = create_label_ref_map(&defs, params.as_slice(), body);
     rewrite_params_and_body(alloc, &defs, &used, &refs, params, body)
 }
 

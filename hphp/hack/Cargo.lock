@@ -1217,6 +1217,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "decl_provider",
+ "ffi",
  "hhbc_by_ref_adata_state",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhas_adata",
@@ -1952,7 +1953,6 @@ name = "hhbc_by_ref_hhbc_ast"
 version = "0.0.0"
 dependencies = [
  "bitflags",
- "bumpalo",
  "ffi",
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_iterator",
@@ -1988,6 +1988,7 @@ name = "hhbc_by_ref_instruction_sequence"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "ffi",
  "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_iterator",
  "hhbc_by_ref_label",

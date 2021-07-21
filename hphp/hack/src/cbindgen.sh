@@ -43,11 +43,11 @@ set -x
               --crate hhbc_by_ref_local \
               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_local.h")
 
-# #  hhbc_iterator.h
-# (cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_iterator && \
-#      cbindgen --config ../../cbindgen_hhbc_iterator.toml \
-#               --crate hhbc_by_ref_iterator \
-#               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_iterator.h")
+#  hhbc_local.h
+(cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_runtime && \
+     cbindgen --config ../../cbindgen_hhbc_runtime.toml \
+              --crate hhbc_by_ref_runtime \
+              --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_runtime.h")
 
 # hhbc_ast.h
 (cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhbc_ast && \

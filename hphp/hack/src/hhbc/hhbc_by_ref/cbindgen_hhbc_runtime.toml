@@ -21,10 +21,6 @@ using_namespaces = []
 sys_includes = []
 includes = [
   "hphp/hack/src/utils/ffi/ffi.h",
-  "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_id.h",
-  "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_label.h",
-  "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_local.h",
-  "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_runtime.h",
 ]
 no_includes = false
 after_includes = ""

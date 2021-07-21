@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{Maybe, Slice, Str};
+use ffi::{BumpSliceMut, Maybe, Pair, Slice, Str};
+use hhbc_by_ref_label::Label;
 use hhbc_by_ref_local::Local;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -67,7 +68,7 @@ pub struct FcallArgs<'arena>(
     pub NumParams,
     pub NumParams,
     pub ByRefs<'arena>,
-    pub Maybe<hhbc_by_ref_label::Label>,
+    pub Maybe<Label>,
     pub Maybe<Str<'arena>>,
 );
 
@@ -76,7 +77,7 @@ impl<'arena> FcallArgs<'arena> {
         flags: FcallFlags,
         num_rets: usize,
         inouts: Slice<'arena, bool>,
-        async_eager_label: Option<hhbc_by_ref_label::Label>,
+        async_eager_label: Option<Label>,
         num_args: usize,
         context: Option<&'arena str>,
     ) -> FcallArgs<'arena> {
@@ -98,18 +99,20 @@ impl<'arena> FcallArgs<'arena> {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub struct IterArgs<'arena> {
     pub iter_id: hhbc_by_ref_iterator::Id,
-    pub key_id: Option<Local<'arena>>,
+    pub key_id: Maybe<Local<'arena>>,
     pub val_id: Local<'arena>,
 }
 
 pub type ClassrefId = isize;
 /// Conventionally this is "A_" followed by an integer
-pub type AdataId<'arena> = &'arena str;
-pub type ParamLocations<'arena> = &'arena [isize];
+pub type AdataId<'arena> = Str<'arena>;
+pub type ParamLocations<'arena> = Slice<'arena, isize>;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum SpecialClsRef {
     Static,
     Self_,
@@ -117,6 +120,7 @@ pub enum SpecialClsRef {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum MemberOpMode {
     ModeNone,
     Warn,
@@ -126,6 +130,7 @@ pub enum MemberOpMode {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum QueryOp {
     CGet,
     CGetQuiet,
@@ -134,6 +139,7 @@ pub enum QueryOp {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum CollectionType {
     Vector,
     Map,
@@ -149,6 +155,7 @@ pub enum CollectionType {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum FatalOp {
     Parse,
     Runtime,
@@ -156,10 +163,11 @@ pub enum FatalOp {
 }
 
 #[derive(Clone, Copy, Debug)]
+#[repr(C)]
 pub enum MemberKey<'arena> {
     EC(StackIndex, ReadOnlyOp),
     EL(Local<'arena>, ReadOnlyOp),
-    ET(&'arena str, ReadOnlyOp),
+    ET(Str<'arena>, ReadOnlyOp),
     EI(i64, ReadOnlyOp),
     PC(StackIndex, ReadOnlyOp),
     PL(Local<'arena>, ReadOnlyOp),
@@ -169,6 +177,7 @@ pub enum MemberKey<'arena> {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum InstructBasic {
     Nop,
     EntryNop,
@@ -178,12 +187,14 @@ pub enum InstructBasic {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum TypestructResolveOp {
     Resolve,
     DontResolve,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum ReadOnlyOp {
     ReadOnly,
     Mutable,
@@ -192,6 +203,7 @@ pub enum ReadOnlyOp {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum HasGenericsOp {
     NoGenerics,
     MaybeGenerics,
@@ -199,20 +211,22 @@ pub enum HasGenericsOp {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum IsLogAsDynamicCallOp {
     LogAsDynamicCall,
     DontLogAsDynamicCall,
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum InstructLitConst<'arena> {
     Null,
     True,
     False,
     NullUninit,
     Int(i64),
-    Double(&'arena str),
-    String(&'arena str),
+    Double(Str<'arena>),
+    String(Str<'arena>),
     LazyClass(ClassId<'arena>),
     /// Pseudo instruction that will get translated into appropraite literal
     /// bytecode, with possible reference to .adata *)
@@ -222,11 +236,11 @@ pub enum InstructLitConst<'arena> {
     Keyset(AdataId<'arena>),
     /// capacity hint
     NewDictArray(isize),
-    NewStructDict(&'arena [&'arena str]),
+    NewStructDict(Slice<'arena, Str<'arena>>),
     NewVec(isize),
     NewKeysetArray(isize),
     NewPair,
-    NewRecord(ClassId<'arena>, &'arena [&'arena str]),
+    NewRecord(ClassId<'arena>, Slice<'arena, Str<'arena>>),
     AddElemC,
     AddNewElemC,
     NewCol(CollectionType),
@@ -242,6 +256,7 @@ pub enum InstructLitConst<'arena> {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum InstructOperator<'arena> {
     Concat,
     ConcatN(isize),
@@ -301,25 +316,23 @@ pub enum InstructOperator<'arena> {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum Switchkind {
     Bounded,
     Unbounded,
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum InstructControlFlow<'arena> {
-    Jmp(hhbc_by_ref_label::Label),
-    JmpNS(hhbc_by_ref_label::Label),
-    JmpZ(hhbc_by_ref_label::Label),
-    JmpNZ(hhbc_by_ref_label::Label),
+    Jmp(Label),
+    JmpNS(Label),
+    JmpZ(Label),
+    JmpNZ(Label),
     /// bounded, base, offset vector
-    Switch(
-        Switchkind,
-        isize,
-        bumpalo::collections::Vec<'arena, hhbc_by_ref_label::Label>,
-    ),
+    Switch(Switchkind, isize, BumpSliceMut<'arena, Label>),
     /// litstr id / offset vector
-    SSwitch(bumpalo::collections::Vec<'arena, (&'arena str, hhbc_by_ref_label::Label)>),
+    SSwitch(BumpSliceMut<'arena, Pair<Str<'arena>, Label>>),
     RetC,
     RetCSuspended,
     RetM(NumParams),
@@ -489,8 +502,8 @@ pub enum InstructFinal<'arena> {
 
 #[derive(Clone, Debug)]
 pub enum InstructIterator<'arena> {
-    IterInit(IterArgs<'arena>, hhbc_by_ref_label::Label),
-    IterNext(IterArgs<'arena>, hhbc_by_ref_label::Label),
+    IterInit(IterArgs<'arena>, Label),
+    IterNext(IterArgs<'arena>, Label),
     IterFree(hhbc_by_ref_iterator::Id),
 }
 
@@ -558,12 +571,8 @@ pub enum InstructMisc<'arena> {
     GetMemoKeyL(Local<'arena>),
     CGetCUNop,
     UGetCUNop,
-    MemoGet(hhbc_by_ref_label::Label, Option<(Local<'arena>, isize)>),
-    MemoGetEager(
-        hhbc_by_ref_label::Label,
-        hhbc_by_ref_label::Label,
-        Option<(Local<'arena>, isize)>,
-    ),
+    MemoGet(Label, Option<(Local<'arena>, isize)>),
+    MemoGetEager(Label, Label, Option<(Local<'arena>, isize)>),
     MemoSet(Option<(Local<'arena>, isize)>),
     MemoSetEager(Option<(Local<'arena>, isize)>),
     LockObj,
@@ -622,7 +631,7 @@ pub enum Instruct<'arena> {
     IIsset(InstructIsset<'arena>),
     IBase(InstructBase<'arena>),
     IFinal(InstructFinal<'arena>),
-    ILabel(hhbc_by_ref_label::Label),
+    ILabel(Label),
     ITry(InstructTry),
     IComment(&'arena str),
     ISrcLoc(Srcloc),
@@ -648,6 +657,24 @@ pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhbc_ast<'a, 'arena>(
     _: ConstId<'arena>,
     _: PropId<'arena>,
     _: FcallArgs<'arena>,
+    _: IterArgs<'arena>,
+    _: AdataId<'arena>,
+    _: ParamLocations<'arena>,
+    _: SpecialClsRef,
+    _: MemberOpMode,
+    _: QueryOp,
+    _: CollectionType,
+    _: FatalOp,
+    _: MemberKey<'arena>,
+    _: InstructBasic,
+    _: TypestructResolveOp,
+    _: ReadOnlyOp,
+    _: HasGenericsOp,
+    _: IsLogAsDynamicCallOp,
+    _: InstructLitConst<'arena>,
+    _: InstructOperator<'arena>,
+    _: Switchkind,
+    _: InstructControlFlow<'arena>,
 ) {
     unimplemented!()
 }

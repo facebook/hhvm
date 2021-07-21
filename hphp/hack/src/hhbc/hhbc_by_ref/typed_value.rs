@@ -7,6 +7,7 @@ use ffi::{Pair, Slice, Str};
 
 mod float {
     #[derive(Clone, Copy, Debug, Hash, PartialOrd, Ord, PartialEq, Eq)]
+    #[repr(C)]
     pub struct F64([u8; 8]);
 
     impl F64 {
@@ -39,6 +40,7 @@ mod float {
 /// future) on a compiler intermediate language. HHVM takes a similar
 /// approach: see runtime/base/typed-value.h
 #[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
+#[repr(C)]
 pub enum TypedValue<'arena> {
     /// Used for fields that are initialized in the 86pinit method
     Uninit,
@@ -374,4 +376,11 @@ mod typed_value_tests {
         let res: i64 = TypedValue::float(std::f64::NAN).try_into().unwrap();
         assert_eq!(res, std::i64::MIN);
     }
+}
+
+#[allow(clippy::needless_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhbc_runtime<'arena>(
+    _: TypedValue<'arena>,
+) {
 }

@@ -525,7 +525,7 @@ TypedValue HHVM_FUNCTION(array_map,
         return tvReturn(arr1.toArray());
       }
     }
-    DArrayInit ret(getContainerSize(cell_arr1));
+    DictInit ret(getContainerSize(cell_arr1));
     bool keyConverted = isArrayLikeType(cell_arr1.m_type);
     if (!keyConverted) {
       auto col_type = cell_arr1.m_data.pobj->collectionType();
@@ -534,12 +534,12 @@ TypedValue HHVM_FUNCTION(array_map,
     for (ArrayIter iter(arr1); iter; ++iter) {
       auto const arg = iter.secondValPlus();
       auto result =
-        Variant::attach(g_context->invokeFuncFew(ctx, 1, &arg,
-                                                 RuntimeCoeffects::fixme()));
+        g_context->invokeFuncFew(ctx, 1, &arg, RuntimeCoeffects::fixme());
       // if keyConverted is false, it's possible that ret will have fewer
       // elements than cell_arr1; keys int(1) and string('1') may both be
       // present
-      ret.add(iter.first(), result, keyConverted);
+      ret.setUnknownKey<IntishCast::None>(
+        *iter.first().asTypedValue(), Variant::attach(result));
     }
     return tvReturn(ret.toVariant());
   }

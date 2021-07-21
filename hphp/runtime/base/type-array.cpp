@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/type-array.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -327,9 +328,18 @@ void Array::removeImpl(const T& key) {
 template<typename T> ALWAYS_INLINE
 void Array::setImpl(const T& key, TypedValue v) {
   if (!m_arr) {
-    // NOTE: DictInit doesn't support set(TypedValue key, TypedValue val) yet.
-    DArrayInit init(1);
-    init.set(key, v);
+    DictInit init(1);
+    if constexpr (std::is_same_v<T, TypedValue> ) {
+      if (tvIsInt(key)) {
+        init.set(key.val().num, v);
+      } else if (tvIsString(key)) {
+        init.set(key.val().pstr, v);
+      } else {
+        throwInvalidArrayKeyException(&key, staticEmptyDictArray());
+      }
+    } else {
+      init.set(key, v);
+    }
     m_arr = Ptr::attach(init.toArray().detach());
   } else {
     m_arr.mutateInPlace([&](ArrayData* ad) {

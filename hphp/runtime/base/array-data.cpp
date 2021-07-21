@@ -863,7 +863,7 @@ ArrayData* ArrayData::toDictIntishCast(bool copy) {
   // Create a new dict with the casted keys.
   auto result = DictInit(base->size());
   IterateKV(base, [&](TypedValue k, TypedValue v) {
-    result.setUnknownKeyIntishCast(k, v);
+    result.setUnknownKey<IntishCast::Cast>(k, tvAsCVarRef(&v));
   });
   if (base != this) decRefArr(base);
   auto ad = result.create();

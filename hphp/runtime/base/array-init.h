@@ -260,11 +260,11 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
     return setValidKey(*name.asTypedValue(), *v.asTypedValue());
   }
 
-  DictInit& setUnknownKeyIntishCast(TypedValue name, TypedValue v) {
-    auto const k = tvToKey<IntishCast::Cast>(name, m_arr);
-    if (LIKELY(!isNullType(k.m_type))) {
-      performOp([&]{ return arr_init::SetInPlace(m_arr, k, v); });
-    }
+  template <IntishCast IC>
+  DictInit& setUnknownKey(TypedValue name, const Variant& v) {
+    auto const k = tvToKey<IC>(name, m_arr);
+    if (UNLIKELY(tvIsNull(k))) return *this;
+    performOp([&]{ return arr_init::SetInPlace(m_arr, k, v.asInitTVTmp()); });
     return *this;
   }
 

@@ -183,14 +183,14 @@ struct VariantControllerImpl {
   static MapType createMap() {
     return Array::CreateDict();
   }
-  static MapType createMap(DArrayInit&& map) {
+  static MapType createMap(DictInit&& map) {
     return map.toArray();
   }
   static MapType createMap(StructDictInit&& map) {
     return map.toArray();
   }
-  static DArrayInit reserveMap(size_t n) {
-    DArrayInit res(n, CheckAllocation{});
+  static DictInit reserveMap(size_t n) {
+    DictInit res(n, CheckAllocation{});
     return res;
   }
   static StructDictInit reserveMap(StructHandle handle, size_t n) {
@@ -227,10 +227,14 @@ struct VariantControllerImpl {
     map.set(k, std::move(v));
   }
 
-  template <typename Key>
-  static void mapSet(DArrayInit& map, Key&& k, VariantType&& v) {
-    map.setUnknownKey<IntishCast::Cast>(std::move(k), std::move(v));
+  static void mapSet(DictInit& map, const StringType& k, VariantType&& v) {
+    map.setUnknownKey<IntishCast::Cast>(k.asTypedValue(), std::move(v));
   }
+
+  static void mapSet(DictInit& map, int64_t k, VariantType&& v) {
+    map.setUnknownKey<IntishCast::Cast>(make_tv<KindOfInt64>(k), std::move(v));
+  }
+
   static void mapSet(StructDictInit& map, size_t idx, const StringType& k,
                      VariantType&& v) {
     map.setIntishCast(idx, k, std::move(v));

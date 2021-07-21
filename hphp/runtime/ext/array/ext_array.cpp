@@ -195,7 +195,7 @@ TypedValue HHVM_FUNCTION(array_column,
       !array_column_coerce_key(idx, "index")) {
     return make_tv<KindOfBoolean>(false);
   }
-  DArrayInit ret(arr_input.size());
+  DictInit ret(arr_input.size());
   int64_t nextKI = 0; // for appends
   for (ArrayIter it(arr_input); it; ++it) {
     Array sub;
@@ -236,7 +236,7 @@ TypedValue HHVM_FUNCTION(array_column,
         if (tvIsInt(converted) && converted.val().num >= nextKI) {
           nextKI = int64_t(size_t(converted.val().num) + 1);
         }
-        ret.setUnknownKey(tvAsCVarRef(converted), elem);
+        ret.setUnknownKey<IntishCast::None>(converted, elem);
       }
     }
   }
@@ -296,7 +296,7 @@ TypedValue HHVM_FUNCTION(array_count_values,
 Array HHVM_FUNCTION(array_fill_keys,
                     const Variant& keys,
                     const Variant& value) {
-  Optional<DArrayInit> ai;
+  Optional<DictInit> ai;
   auto ok = IterateV(
     *keys.asTypedValue(),
     [&](ArrayData* adata) {
@@ -304,12 +304,13 @@ Array HHVM_FUNCTION(array_fill_keys,
     },
     [&](TypedValue v) {
       if (isIntType(v.m_type) || isStringType(v.m_type)) {
-        ai->setUnknownKey<IntishCast::Cast>(VarNR(v), value);
+        ai->setUnknownKey<IntishCast::Cast>(v, value);
       } else {
         raise_hack_strict(RuntimeOption::StrictArrayFillKeys,
                           "strict_array_fill_keys",
                           "keys must be ints or strings");
-        ai->setUnknownKey<IntishCast::Cast>(tvCastToString(v), value);
+        ai->setUnknownKey<IntishCast::Cast>(
+          tvCastToString(v).asTypedValue(), value);
       }
     },
     [&](ObjectData* coll) {
@@ -366,11 +367,11 @@ TypedValue HHVM_FUNCTION(array_flip,
     return make_tv<KindOfNull>();
   }
 
-  DArrayInit ret(getClsMethCompactContainerSize(transCell));
+  DictInit ret(getClsMethCompactContainerSize(transCell));
   for (ArrayIter iter(transCell); iter; ++iter) {
     auto const inner = iter.secondValPlus();
     if (isIntType(type(inner)) || isStringType(type(inner))) {
-      ret.setUnknownKey<IntishCast::Cast>(VarNR(inner), iter.first());
+      ret.setUnknownKey<IntishCast::Cast>(inner, iter.first());
     } else if (isLazyClassType(type(inner)) || isClassType(type(inner))) {
       ret.setValidKey(tvAsCVarRef(tvClassToString(inner)), iter.first());
     } else {

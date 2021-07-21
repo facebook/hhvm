@@ -176,22 +176,12 @@ protected:
  */
 namespace detail {
 
-struct VArray {
-  static constexpr auto MakeReserve = &PackedArray::MakeReserveVec;
-  static constexpr auto Release = PackedArray::Release;
-};
-
-struct DArray {
-  static constexpr auto MakeReserve = &MixedArray::MakeReserveDict;
-  static constexpr auto Release = MixedArray::Release;
-};
-
 struct Vec {
   static constexpr auto MakeReserve = &PackedArray::MakeReserveVec;
   static constexpr auto Release = PackedArray::Release;
 };
 
-struct DictArray {
+struct Dict {
   static constexpr auto MakeReserve = &MixedArray::MakeReserveDict;
   static constexpr auto Release = MixedArray::Release;
 };
@@ -201,8 +191,8 @@ struct DictArray {
 ///////////////////////////////////////////////////////////////////////////////
 
 
-struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
-  using ArrayInitBase<detail::DictArray, KindOfDict>::ArrayInitBase;
+struct DictInit : ArrayInitBase<detail::Dict, KindOfDict> {
+  using ArrayInitBase<detail::Dict, KindOfDict>::ArrayInitBase;
 
   /*
    * For large array allocations, consider passing CheckAllocation, which will
@@ -352,14 +342,6 @@ struct KeysetInit : ArrayInitBase<SetArray, KindOfKeyset> {
 
 namespace make_array_detail {
 
-  inline void varray_impl(VecInit&) {}
-
-  template<class Val, class... Vals>
-  void varray_impl(VecInit& init, Val&& val, Vals&&... vals) {
-    init.append(Variant(std::forward<Val>(val)));
-    varray_impl(init, std::forward<Vals>(vals)...);
-  }
-
   inline void vec_impl(VecInit&) {}
 
   template<class Val, class... Vals>
@@ -373,12 +355,6 @@ namespace make_array_detail {
   inline int64_t init_key(int64_t k) { return k; }
   inline const String& init_key(const String& k) { return k; }
   inline const String init_key(StringData* k) { return String{k}; }
-
-  inline String darray_init_key(const char* s) { return String(s); }
-  inline int64_t darray_init_key(int k) { return k; }
-  inline int64_t darray_init_key(int64_t k) { return k; }
-  inline const String& darray_init_key(const String& k) { return k; }
-  inline const String darray_init_key(StringData* k) { return String{k}; }
 
   inline String dict_init_key(const char* s) { return String(s); }
   inline int64_t dict_init_key(int k) { return k; }

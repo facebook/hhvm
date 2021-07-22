@@ -175,8 +175,6 @@ RepoGlobalData getGlobalData() {
   gd.ClassnameNotices = RuntimeOption::EvalClassnameNotices;
   gd.ClassIsStringNotices = RuntimeOption::EvalClassIsStringNotices;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
-  gd.NoticeOnCoerceForBitOp =
-    RuntimeOption::EvalNoticeOnCoerceForBitOp;
   gd.TraitConstantInterfaceBehavior =
     RuntimeOption::EvalTraitConstantInterfaceBehavior;
   gd.BuildMayNoticeOnMethCallerHelperIsObject =

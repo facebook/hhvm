@@ -244,9 +244,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   // Temporary, during file-cache migration.
   Config::Bind(FileCache::UseNewCache, ini, config, "UseNewCache", false);
 
-  Config::Bind(RuntimeOption::EvalNoticeOnCoerceForBitOp, ini, config,
-               "NoticeOnCoerceForBitOp",
-               RuntimeOption::EvalNoticeOnCoerceForBitOp);
 }
 
 void Option::Load() {

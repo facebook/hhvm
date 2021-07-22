@@ -41,7 +41,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalClassPassesClassname                  = ClassPassesClassname;
   RO::EvalClassnameNotices                      = ClassnameNotices;
   RO::EvalClassIsStringNotices                  = ClassIsStringNotices;
-  RO::EvalNoticeOnCoerceForBitOp                = NoticeOnCoerceForBitOp;
   RO::EvalTraitConstantInterfaceBehavior        = TraitConstantInterfaceBehavior;
   RO::EvalBuildMayNoticeOnMethCallerHelperIsObject =
     BuildMayNoticeOnMethCallerHelperIsObject;
@@ -99,7 +98,6 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(ClassnameNotices);
   SHOW(ClassIsStringNotices);
   SHOW(StrictArrayFillKeys);
-  SHOW(NoticeOnCoerceForBitOp);
   SHOW(TraitConstantInterfaceBehavior);
   SHOW(BuildMayNoticeOnMethCallerHelperIsObject);
 #undef SHOW

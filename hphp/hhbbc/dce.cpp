@@ -1447,9 +1447,7 @@ bool setOpLSideEffects(const bc::SetOpL& op, const Type& lhs, const Type& rhs) {
     case SetOpOp::XorEqual:
     case SetOpOp::SlEqual:
     case SetOpOp::SrEqual:
-      if (RuntimeOption::EvalNoticeOnCoerceForBitOp > 0) {
-        return !lhs.subtypeOf(BInt) || !rhs.subtypeOf(BInt);
-      }
+      return !lhs.subtypeOf(BInt) || !rhs.subtypeOf(BInt);
 
     case SetOpOp::PlusEqual:
     case SetOpOp::PlusEqualO:

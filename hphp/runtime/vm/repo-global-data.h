@@ -146,9 +146,6 @@ struct RepoGlobalData {
   /* Whether implicit coercions for concat/interp trigger logs/exceptions */
   int32_t NoticeOnCoerceForStrConcat = 0;
 
-  /* Whether implicit coercions for bit ops trigger logs/exceptions */
-  int32_t NoticeOnCoerceForBitOp = 0;
-
   /* Constants from traits behave like constants from interfaces (error on conflict) */
   bool TraitConstantInterfaceBehavior = false;
 
@@ -200,7 +197,6 @@ struct RepoGlobalData {
       (ClassIsStringNotices)
       (StrictArrayFillKeys)
       (NoticeOnCoerceForStrConcat)
-      (NoticeOnCoerceForBitOp)
       (TraitConstantInterfaceBehavior)
       (ConstantFunctions)
       (BuildMayNoticeOnMethCallerHelperIsObject)

@@ -15,9 +15,6 @@ namespace HH\Lib\Legacy_FIXME;
  * Specially handles
  *   1. incrementing null
  *   2. inc/dec on empty and numeric strings
- *
- * If you're seeing this in your code, it was added due to an implicit
- * conversion that either is or will soon be banned.
  */
 function increment(mixed $value)[]: dynamic {
   if ($value is null) {
@@ -52,4 +49,39 @@ function decrement(mixed $value)[]: dynamic {
   $value as dynamic;
   --$value;
   return $value;
+}
+
+/**
+ * Does the PHP style behaviour for casting when doing a mathematical operation.
+ * That happens under the following situations
+ *   1. null converts to 0
+ *   2. bool converts to 0/1
+ *   3. numeric string converts to an int or double based on how the string looks.
+ *   4. non-numeric string gets converted to 0
+ *   5. resources get casted to int
+ */
+function cast_for_arithmetic(mixed $value)[]: dynamic {
+  if ($value is null) {
+    return 0;
+  }
+  if ($value is bool || $value is resource) {
+    return (int)$value;
+  }
+  return $value is string ? \HH\str_to_numeric($value) ?? 0 : $value;
+}
+
+/**
+ * Does the PHP style behaviour for casting when doing an exponentiation.
+ * That happens under the following situations
+ *   1. function pointers, and arrays get converted to 0
+ *   2. see castForArithmatic
+ */
+function cast_for_exponent(mixed $value)[]: dynamic {
+  if (\HH\is_class_meth($value)) {
+    return $value;
+  }
+  if (\HH\is_fun($value) || $value is AnyArray<_, _>) {
+    return 0;
+  }
+  return cast_for_arithmetic($value);
 }

@@ -1016,6 +1016,7 @@ void freeProfileData() {
   if (shouldTestBespokeArrayLikes()) return;
   eachSource([](auto& x) { x.releaseData(); });
   eachSink([](auto& x) { x.releaseData(); });
+  Treadmill::enqueue([] { KeyOrder::ReleaseProfilingKeyOrders(); });
 }
 }
 

@@ -30,7 +30,7 @@ namespace {
 const StaticString s_extraKey("...");
 
 struct KeyCollectionHash {
-  size_t operator()(const KeyOrder::KeyOrderData& ko) const {
+  size_t operator()(const KeyOrderData& ko) const {
     size_t seed = 0;
     for (auto const key : ko) {
       seed = folly::hash::hash_combine(seed, key->hash());
@@ -40,11 +40,11 @@ struct KeyCollectionHash {
 };
 
 using KeyOrderSet =
-  std::unordered_set<KeyOrder::KeyOrderData, KeyCollectionHash>;
+  std::unordered_set<KeyOrderData, KeyCollectionHash>;
 
-KeyOrderSet s_keyOrderSet;
+KeyOrderSet s_profilingKeyOrders;
+KeyOrderSet s_persistentKeyOrders;
 folly::SharedMutex s_keyOrderLock;
-
 }
 
 KeyOrder KeyOrder::insert(const StringData* k) const {
@@ -76,12 +76,12 @@ KeyOrder KeyOrder::Make(const KeyOrderData& ko) {
   auto trimmedKeyOrder = trimKeyOrder(ko);
   {
     folly::SharedMutex::ReadHolder rlock{s_keyOrderLock};
-    auto it = s_keyOrderSet.find(trimmedKeyOrder);
-    if (it != s_keyOrderSet.end()) return KeyOrder{&*it};
+    auto it = s_profilingKeyOrders.find(trimmedKeyOrder);
+    if (it != s_profilingKeyOrders.end()) return KeyOrder{&*it};
   }
 
   folly::SharedMutex::WriteHolder wlock{s_keyOrderLock};
-  auto const ret = s_keyOrderSet.insert(std::move(trimmedKeyOrder));
+  auto const ret = s_profilingKeyOrders.insert(std::move(trimmedKeyOrder));
   return KeyOrder{&*ret.first};
 }
 
@@ -89,7 +89,7 @@ KeyOrder::KeyOrder(const KeyOrderData* keys)
   : m_keys(keys)
 {}
 
-KeyOrder::KeyOrderData KeyOrder::trimKeyOrder(const KeyOrderData& ko) {
+KeyOrderData KeyOrder::trimKeyOrder(const KeyOrderData& ko) {
   KeyOrderData res{ko};
   if (res.size() > RO::EvalBespokeMaxTrackedKeys) {
     res.resize(RO::EvalBespokeMaxTrackedKeys);
@@ -166,6 +166,10 @@ KeyOrder::const_iterator KeyOrder::end() const {
   return m_keys->end();
 }
 
+void KeyOrder::ReleaseProfilingKeyOrders() {
+  s_profilingKeyOrders.clear();
+}
+
 KeyOrder collectKeyOrder(const KeyOrderMap& keyOrderMap) {
   std::unordered_set<const StringData*> keys;
   uint64_t weightedSizeSum = 0;
@@ -191,7 +195,7 @@ KeyOrder collectKeyOrder(const KeyOrderMap& keyOrderMap) {
     return KeyOrder::MakeInvalid();
   }
 
-  KeyOrder::KeyOrderData sorted;
+  KeyOrderData sorted;
   for (auto const key : keys) {
     sorted.push_back(key);
   }
@@ -209,6 +213,37 @@ void mergeKeyOrderMap(KeyOrderMap& dst, const KeyOrderMap& src) {
       iter->second = iter->second + count;
     }
   }
+}
+
+PersistentKeyOrder::PersistentKeyOrder(const KeyOrderData* data)
+  : KeyOrder(data)
+{}
+
+PersistentKeyOrder PersistentKeyOrder::From(const KeyOrder& ko) {
+  return Make(*ko.m_keys);
+}
+
+PersistentKeyOrder PersistentKeyOrder::Make(const KeyOrderData& keyOrderData) {
+  if (auto const existing = GetExisting(keyOrderData)) return *existing;
+
+  folly::SharedMutex::WriteHolder wlock{s_keyOrderLock};
+  auto const ret = s_persistentKeyOrders.insert(keyOrderData);
+  return PersistentKeyOrder{&*ret.first};
+}
+
+folly::Optional<PersistentKeyOrder> PersistentKeyOrder::GetExisting(
+    const KeyOrder& keyOrder) {
+  return GetExisting(*keyOrder.m_keys);
+}
+
+folly::Optional<PersistentKeyOrder> PersistentKeyOrder::GetExisting(
+    const KeyOrderData& keyOrderData) {
+  folly::SharedMutex::ReadHolder rlock{s_keyOrderLock};
+  auto it = s_persistentKeyOrders.find(keyOrderData);
+  if (it != s_persistentKeyOrders.end()) {
+    return PersistentKeyOrder{&*it};
+  }
+  return folly::none;
 }
 
 }}

@@ -34,7 +34,12 @@ namespace {
 static constexpr size_t kMaxNumStructLayouts = 1 << 14;
 size_t s_numStructLayouts = 0;
 folly::SharedMutex s_keySetLock;
-std::unordered_map<KeyOrder, LayoutIndex, KeyOrderHash> s_keySetToIdx;
+
+using PersistentKeyOrderMap =
+  folly::F14FastMap<PersistentKeyOrder, LayoutIndex, PersistentKeyOrderHash,
+                    PersistentKeyOrderEqual>;
+
+PersistentKeyOrderMap s_keySetToIdx;
 
 const LayoutFunctions* structDictVtable() {
   static auto const result = fromArray<StructDict>();
@@ -45,7 +50,7 @@ uint16_t packSizeIndexAndAuxBits(uint8_t idx, uint8_t aux) {
   return (static_cast<uint16_t>(idx) << 8) | aux;
 }
 
-std::string describeStructLayout(const KeyOrder& ko) {
+std::string describeStructLayout(const PersistentKeyOrder& ko) {
   auto const base = ko.toString();
   return folly::sformat("StructDict<{}>", base.substr(1, base.size() - 2));
 }
@@ -122,14 +127,18 @@ const StructLayout* StructLayout::GetLayout(const KeyOrder& ko, bool create) {
   if (ko.empty() || !ko.valid()) return nullptr;
   {
     folly::SharedMutex::ReadHolder rlock{s_keySetLock};
-    auto const it = s_keySetToIdx.find(ko);
-    if (it != s_keySetToIdx.end()) return As(FromIndex(it->second));
+    if (auto const pko = PersistentKeyOrder::GetExisting(ko)) {
+      auto const it = s_keySetToIdx.find(*pko);
+      if (it != s_keySetToIdx.end()) return As(FromIndex(it->second));
+    }
   }
   if (!create) return nullptr;
 
   folly::SharedMutex::WriteHolder wlock{s_keySetLock};
-  auto const it = s_keySetToIdx.find(ko);
-  if (it != s_keySetToIdx.end()) return As(FromIndex(it->second));
+  if (auto const pko = PersistentKeyOrder::GetExisting(ko)) {
+    auto const it = s_keySetToIdx.find(*pko);
+    if (it != s_keySetToIdx.end()) return As(FromIndex(it->second));
+  }
 
   if (s_numStructLayouts == kMaxNumStructLayouts) return nullptr;
 
@@ -142,20 +151,21 @@ const StructLayout* StructLayout::GetLayout(const KeyOrder& ko, bool create) {
 
   auto const index = Index(safe_cast<uint16_t>(s_numStructLayouts++));
   auto const bytes = sizeof(StructLayout) + sizeof(Field) * (ko.size() - 1);
-  auto const result = new (malloc(bytes)) StructLayout(index, ko);
-  s_keySetToIdx.emplace(ko, index);
+  auto const pko = PersistentKeyOrder::From(ko);
+  auto const result = new (malloc(bytes)) StructLayout(index, pko);
+  s_keySetToIdx.emplace(pko, index);
   return result;
 }
 
 const StructLayout* StructLayout::Deserialize(
-    LayoutIndex index, const KeyOrder& ko) {
+    LayoutIndex index, const PersistentKeyOrder& ko) {
   auto const layout = GetLayout(ko, true);
   always_assert(layout != nullptr);
   always_assert(layout->index() == index);
   return layout;
 }
 
-StructLayout::StructLayout(LayoutIndex index, const KeyOrder& ko)
+StructLayout::StructLayout(LayoutIndex index, const PersistentKeyOrder& ko)
   : ConcreteLayout(index, describeStructLayout(ko),
                    {TopStructLayout::Index()}, structDictVtable())
   , m_key_order(ko)

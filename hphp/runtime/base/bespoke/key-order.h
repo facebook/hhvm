@@ -28,9 +28,13 @@ struct ArrayData;
 
 namespace bespoke {
 
-// KeyOrder represents insertion order of static string keys.
+using KeyOrderData = std::vector<LowStringPtr>;
+
+// KeyOrder represents insertion order of static string keys. It is used during
+// profiling, and all associated data is dropped after layout selection has
+// completed. For KeyOrders that must persist after profiling, use
+// PersistentKeyOrder.
 struct KeyOrder {
-  using KeyOrderData = std::vector<LowStringPtr>;
   using const_iterator = KeyOrderData::const_iterator;
 
   KeyOrder insert(const StringData*) const;
@@ -54,11 +58,13 @@ struct KeyOrder {
   static KeyOrder Make(const KeyOrderData&);
   static KeyOrder MakeInvalid();
 
-private:
-  friend struct KeyOrderHash;
-  friend struct KeyOrderDataHash;
+  static void ReleaseProfilingKeyOrders();
 
-  // A default KeyOrder is "invalid", for arrayswith non-static-string keys.
+protected:
+  friend struct KeyOrderHash;
+  friend struct PersistentKeyOrder;
+
+  // A default KeyOrder is "invalid", for arrays with non-static-string keys.
   KeyOrder() = default;
   explicit KeyOrder(const KeyOrderData*);
 
@@ -68,9 +74,35 @@ private:
   const KeyOrderData* m_keys = nullptr;
 };
 
+struct PersistentKeyOrder : KeyOrder {
+  static PersistentKeyOrder From(const KeyOrder&);
+  static PersistentKeyOrder Make(const KeyOrderData&);
+  static folly::Optional<PersistentKeyOrder> GetExisting(const KeyOrderData&);
+  static folly::Optional<PersistentKeyOrder> GetExisting(const KeyOrder&);
+
+private:
+  friend struct PersistentKeyOrderHash;
+  friend struct PersistentKeyOrderEqual;
+
+  explicit PersistentKeyOrder(const KeyOrderData*);
+};
+
 struct KeyOrderHash {
   size_t operator()(const KeyOrder& ko) const {
-    return std::hash<const KeyOrder::KeyOrderData*>{}(ko.m_keys);
+    return std::hash<const KeyOrderData*>{}(ko.m_keys);
+  }
+};
+
+struct PersistentKeyOrderHash {
+  size_t operator()(const PersistentKeyOrder& pko) const {
+    return std::hash<const KeyOrderData*>{}(pko.m_keys);
+  }
+};
+
+struct PersistentKeyOrderEqual {
+  size_t operator()(
+      const PersistentKeyOrder& a, const PersistentKeyOrder& b) const {
+    return a.m_keys == b.m_keys;
   }
 };
 

@@ -110,8 +110,9 @@ struct StructLayout : public ConcreteLayout {
   static bool IsStructLayout(LayoutIndex index);
 
   static const StructLayout* As(const Layout*);
-  static const StructLayout* GetLayout(const KeyOrder&, bool create);
-  static const StructLayout* Deserialize(LayoutIndex index, const KeyOrder&);
+  static const StructLayout* GetLayout(const KeyOrder& ko, bool create);
+  static const StructLayout* Deserialize(
+      LayoutIndex index, const PersistentKeyOrder&);
 
   size_t numFields() const;
   size_t sizeIndex() const;
@@ -125,7 +126,7 @@ struct StructLayout : public ConcreteLayout {
 
   const Field& field(Slot slot) const;
 
-  KeyOrder keyOrder() const { return m_key_order; }
+  PersistentKeyOrder keyOrder() const { return m_key_order; }
   size_t typeOffset() const { return typeOffsetForSlot(0); }
   size_t valueOffset() const { return valueOffsetForSlot(0); }
   size_t positionOffset() const;
@@ -180,9 +181,9 @@ private:
     }
   };
 
-  StructLayout(LayoutIndex index, const KeyOrder&);
+  StructLayout(LayoutIndex index, const PersistentKeyOrder&);
 
-  KeyOrder m_key_order;
+  PersistentKeyOrder m_key_order;
 
   // Fields used to initialize a new StructDict. The "m_extra_initializer" is
   // computed when we create the layout and used to initialize three fields in

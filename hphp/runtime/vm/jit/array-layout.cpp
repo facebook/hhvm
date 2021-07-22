@@ -267,27 +267,26 @@ Type ArrayLayout::iterPosType(Type pos, bool isKey) const {
 //////////////////////////////////////////////////////////////////////////////
 
 namespace {
-using bespoke::KeyOrder;
+using bespoke::PersistentKeyOrder;
+using bespoke::KeyOrderData;
 using bespoke::LoggingProfileKey;
 using bespoke::SinkProfileKey;
 using bespoke::StructLayout;
 
-void write_key_order(ProfDataSerializer& ser, const KeyOrder& ko) {
-  assertx(ko.valid());
+void write_key_order(ProfDataSerializer& ser, const PersistentKeyOrder& ko) {
   write_raw(ser, ko.size());
   for (auto const key : ko) {
     write_string(ser, key);
   }
 }
 
-KeyOrder read_key_order(ProfDataDeserializer& des) {
-  auto data = KeyOrder::KeyOrderData{};
+PersistentKeyOrder read_key_order(ProfDataDeserializer& des) {
+  auto data = KeyOrderData{};
   auto const keys = read_raw<size_t>(des);
   for (auto i = 0; i < keys; i++) {
     data.push_back(read_string(des));
   }
-  auto const result = KeyOrder::Make(data);
-  assertx(result.valid());
+  auto const result = PersistentKeyOrder::Make(data);
   return result;
 }
 

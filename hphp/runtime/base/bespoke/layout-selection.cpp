@@ -183,7 +183,7 @@ KeyOrder sortKeyOrder(const KeyOrder& ko, const KeyFrequencies& keys) {
     auto const it = keys.find(key.get());
     return it == keys.end() ? 0 : it->second;
   };
-  KeyOrder::KeyOrderData sorted;
+  KeyOrderData sorted;
   for (auto const key : ko) {
     sorted.push_back(key);
   }

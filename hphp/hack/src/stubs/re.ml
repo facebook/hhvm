@@ -6,7 +6,8 @@
  *
  *)
 
-let initialize_lease ~acquire_new_lease:_ = failwith "not implemented"
+let initialize_lease ?num_re_workers_opt:_ ~acquire_new_lease:_ =
+  failwith "not implemented"
 
 let process_files
     (_ : ReEnv.t)

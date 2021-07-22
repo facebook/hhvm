@@ -934,13 +934,16 @@ let write_symbol_info_init
   let index_paths_file = env.swriteopt.symbol_write_index_paths_file in
   let files =
     if List.length index_paths > 0 || Option.is_some index_paths_file then
+      let relative_path_exists r =
+        Sys.file_exists (Relative_path.to_absolute r)
+      in
       List.concat
         [
           Option.value_map index_paths_file ~default:[] ~f:In_channel.read_lines
           |> List.map ~f:Relative_path.storage_of_string;
           index_paths
-          |> List.filter ~f:Sys.file_exists
-          |> List.map ~f:(fun path -> Relative_path.from_root ~suffix:path);
+          |> List.map ~f:(fun path -> Relative_path.from_root ~suffix:path)
+          |> List.filter ~f:relative_path_exists;
         ]
     else
       let fast = Naming_table.to_fast env.naming_table in
@@ -991,6 +994,7 @@ let write_symbol_info_init
     in
     if is_invalid then failwith "JSON write directory is invalid or non-empty";
 
+    Hh_logger.log "Indexing: %d files" (List.length files);
     Hh_logger.log "Writing JSON to: %s" out_dir;
 
     let ctx = Provider_utils.ctx_from_server_env env in

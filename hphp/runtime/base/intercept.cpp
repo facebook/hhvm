@@ -41,14 +41,12 @@ struct InterceptRequestData final : RequestEventHandler {
   InterceptRequestData() {}
 
   void clear() {
-    m_global_handler.releaseForSweep();
     m_intercept_handlers.reset();
   }
 
   void requestInit() override { clear(); }
   void requestShutdown() override { clear(); }
 
-  Variant& global_handler() { return m_global_handler; }
   req::StringIMap<Variant>& intercept_handlers() {
     if (!m_intercept_handlers) m_intercept_handlers.emplace();
     return *m_intercept_handlers;
@@ -57,12 +55,8 @@ struct InterceptRequestData final : RequestEventHandler {
     return !m_intercept_handlers.has_value() ||
             m_intercept_handlers->empty();
   }
-  void clearHandlers() {
-    m_intercept_handlers.reset();
-  }
 
 private:
-  Variant m_global_handler;
   // get_intercept_handler() returns Variant* pointing into this map,
   // so we need reference stability.
   req::Optional<req::StringIMap<Variant>> m_intercept_handlers;
@@ -96,25 +90,19 @@ bool register_intercept(const String& name, const Variant& callback) {
   };
 
   if (!callback.toBoolean()) {
-    if (name.empty()) {
-      s_intercept_data->global_handler().unset();
-      s_intercept_data->clear();
-    } else {
-      if (!s_intercept_data->empty()) {
-        auto& handlers = s_intercept_data->intercept_handlers();
-        auto it = handlers.find(name);
-        if (it != handlers.end()) {
-          // erase the map entry before destroying the value
-          auto tmp = it->second;
-          handlers.erase(it);
-        }
+    if (!s_intercept_data->empty()) {
+      auto& handlers = s_intercept_data->intercept_handlers();
+      auto it = handlers.find(name);
+      if (it != handlers.end()) {
+        // erase the map entry before destroying the value
+        auto tmp = it->second;
+        handlers.erase(it);
       }
     }
 
     // We've cleared out all the intercepts, so we don't need to pay the
     // surprise flag cost anymore
-    if (s_intercept_data->empty() &&
-        s_intercept_data->global_handler().isNull()) {
+    if (s_intercept_data->empty()) {
       EventHook::DisableIntercept();
     }
 
@@ -123,25 +111,14 @@ bool register_intercept(const String& name, const Variant& callback) {
 
   EventHook::EnableIntercept();
 
-  if (name.empty()) {
-    s_intercept_data->global_handler() = callback;
-    s_intercept_data->clearHandlers();
-  } else {
-    auto& handlers = s_intercept_data->intercept_handlers();
-    handlers[name] = callback;
-  }
+  auto& handlers = s_intercept_data->intercept_handlers();
+  handlers[name] = callback;
 
   Lock lock(s_mutex);
-  if (name.empty()) {
-    for (auto& entry : s_registered_flags) {
-      flag_maybe_intercepted(entry.second.second);
-    }
-  } else {
-    auto sd = makeStaticString(name.get());
-    auto &entry = s_registered_flags[StrNR(sd)];
-    entry.first = true;
-    flag_maybe_intercepted(entry.second);
-  }
+  auto sd = makeStaticString(name.get());
+  auto &entry = s_registered_flags[StrNR(sd)];
+  entry.first = true;
+  flag_maybe_intercepted(entry.second);
 
   return true;
 }
@@ -154,11 +131,7 @@ static Variant *get_enabled_intercept_handler(const String& name) {
       return &iter->second;
     }
   }
-  auto handler = &s_intercept_data->global_handler();
-  if (handler->isNull()) {
-    return nullptr;
-  }
-  return handler;
+  return nullptr;
 }
 
 Variant *get_intercept_handler(const String& name, int8_t* flag) {

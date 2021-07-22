@@ -121,7 +121,9 @@ function test_methods() {
   frap('claptrap');
 
   // Reset all
-  fb_intercept2('', null);
+  fb_intercept2('frap', null);
+  fb_intercept2('Blark::sfrap', null);
+  fb_intercept2('Blark::frap', null);
   frap('claptrap');
   Blark::sfrap();
   $b->frap();

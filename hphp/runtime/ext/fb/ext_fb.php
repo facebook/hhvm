@@ -96,10 +96,7 @@ function fb_compact_unserialize(mixed $thing,
  * regular error mechanism will raise an error/throw an exception accordingly.
  * Note that built-in functions are not interceptable.
  * @param string $name - The function or class method name to intercept. Use
- * "class::method" for method name. If empty, all functions will be
- * intercepted by the specified handler and registered individual handlers
- * will be replaced. To make sure individual handlers not affected by such a
- * call, call fb_intercept2() with individual names afterwards.
+ * "class::method" for method name.
  * @param mixed $handler - Callback to handle the interception. Use null,
  * false or empty string to unregister a previously registered handler. If
  * name is empty, all previously registered handlers, including those that are

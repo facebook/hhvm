@@ -1768,8 +1768,9 @@ value hh_serialize_raw(value data) {
   // If the data is an Ocaml string it is more efficient to copy its contents
   // directly instead of serializing it.
   if (Is_block(data) && Tag_val(data) == String_tag) {
-    data_value = String_val(data);
     size = caml_string_length(data);
+    data_value = malloc(size);
+    memcpy(data_value, String_val(data), size);
     kind = KIND_STRING;
   } else {
     intnat serialized_size;
@@ -1832,9 +1833,7 @@ value hh_serialize_raw(value data) {
   // We temporarily allocate memory using malloc to serialize the Ocaml object.
   // When we have finished copying the serialized data we need to free the
   // memory we allocated to avoid a leak.
-  if (kind == KIND_SERIALIZED) {
-    free(data_value);
-  }
+  free(data_value);
 
   CAMLreturn(result);
 }
@@ -1859,8 +1858,9 @@ static heap_entry_t* hh_store_ocaml(
   // If the data is an Ocaml string it is more efficient to copy its contents
   // directly in our heap instead of serializing it.
   if (Is_block(data) && Tag_val(data) == String_tag) {
-    data_value = String_val(data);
     size = caml_string_length(data);
+    data_value = malloc(size);
+    memcpy(data_value, String_val(data), size);
     kind = KIND_STRING;
   } else {
     intnat serialized_size;
@@ -1924,9 +1924,7 @@ static heap_entry_t* hh_store_ocaml(
   // We temporarily allocate memory using malloc to serialize the Ocaml object.
   // When we have finished copying the serialized data into our heap we need
   // to free the memory we allocated to avoid a leak.
-  if (kind == KIND_SERIALIZED) {
-    free(data_value);
-  }
+  free(data_value);
 
   return addr;
 }

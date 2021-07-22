@@ -3,7 +3,6 @@ vec(3) {
   bool(true)
   string(1) "c"
 }
-bool(true)
 int(1)
 string(5) "green"
 string(4) "blue"
@@ -12,7 +11,6 @@ vec(3) {
   bool(true)
   string(1) "c"
 }
-bool(true)
 string(3) "red"
 bool(true)
 string(4) "blue"

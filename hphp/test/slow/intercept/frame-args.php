@@ -1,8 +1,8 @@
 <?hh
 
-function handler($name, $obj, inout $args, $data, inout $done) {
-  $done = false;
+function handler($name, $obj, inout $args) {
   var_dump($args);
+  return shape();
 }
 
 <<__NEVER_INLINE>>
@@ -20,9 +20,9 @@ function h(int $x, int $y = 20, ...$z) {
 
 <<__EntryPoint>>
 function main() {
-  fb_intercept('f', 'handler');
-  fb_intercept('g', 'handler');
-  fb_intercept('h', 'handler');
+  fb_intercept2('f', 'handler');
+  fb_intercept2('g', 'handler');
+  fb_intercept2('h', 'handler');
   echo "Regular with default args\n";
   f(1);
   f(1, 2);

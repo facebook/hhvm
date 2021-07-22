@@ -12,21 +12,19 @@ vec(4) {
     ["type"]=>
     string(2) "::"
     ["args"]=>
-    vec(5) {
+    vec(3) {
       string(9) "Cls::func"
       object(Cls) (0) {
       }
       vec(0) {
       }
-      NULL
-      bool(true)
     }
   }
   dict(7) {
     ["file"]=>
     string(%d) "%s/test/slow/intercept/prolog.php"
     ["line"]=>
-    int(19)
+    int(23)
     ["function"]=>
     string(4) "func"
     ["class"]=>
@@ -44,7 +42,7 @@ vec(4) {
     ["file"]=>
     string(%d) "%s/test/slow/intercept/prolog.php"
     ["line"]=>
-    int(27)
+    int(31)
     ["function"]=>
     string(4) "test"
     ["args"]=>

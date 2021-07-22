@@ -15,8 +15,9 @@ class B extends A {
 
 <<__EntryPoint>>
 function main_1201() {
-fb_intercept('A::foo', function($_1, $called_on, inout $_3, $_4, inout $_5) {
+fb_intercept2('A::foo', function($_1, $called_on, inout $_3) {
   var_dump($called_on);
+  return shape('value' => null);
 }
 );
 

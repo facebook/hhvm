@@ -1,33 +1,33 @@
 <?hh
 
-function handler1($name, $target, inout $args, $ctx, inout $done) {
-  $done = true;
+function handler1($name, $target, inout $args) {
   $args[0] = 'handler1';
+  return shape('value' => null);
 }
 
 class W {
-  static function handler2($name, $target, inout $args, $ctx, inout $done) {
-    $done = true;
+  static function handler2($name, $target, inout $args) {
     $args[0] = 'handler2';
+    return shape('value' => null);
   }
 
-  function handler3($name, $target, inout $args, $ctx, inout $done) {
-    $done = true;
+  function handler3($name, $target, inout $args) {
     $args[0] = 'handler3';
+    return shape('value' => null);
   }
 
   function make_closure() {
-    return ($name, $target, inout $args, $ctx, inout $done) ==> {
+    return ($name, $target, inout $args) ==> {
       spl_object_hash($this);
-      $done = true;
       $args[0] = 'handler4';
+      return shape('value' => null);
     };
   }
 
   static function make_static_closure() {
-    return ($name, $target, inout $args, $ctx, inout $done) ==> {
-      $done = true;
+    return ($name, $target, inout $args) ==> {
       $args[0] = 'handler5';
+      return shape('value' => null);
     };
   }
 }
@@ -41,16 +41,16 @@ class W {
 
 <<__EntryPoint>>
 function main() {
-  $handler6 = ($name, $target, inout $args, $ctx, inout $done) ==> {
-    $done = true;
+  $handler6 = ($name, $target, inout $args) ==> {
     $args[0] = 'handler6';
+    return shape('value' => null);
   };
-  fb_intercept('foo', 'handler1');
-  fb_intercept('bar', 'W::handler2');
-  fb_intercept('fiz', varray[new W, 'handler3']);
-  fb_intercept('buz', (new W)->make_closure());
-  fb_intercept('biz', W::make_static_closure());
-  fb_intercept('far', $handler6);
+  fb_intercept2('foo', 'handler1');
+  fb_intercept2('bar', 'W::handler2');
+  fb_intercept2('fiz', varray[new W, 'handler3']);
+  fb_intercept2('buz', (new W)->make_closure());
+  fb_intercept2('biz', W::make_static_closure());
+  fb_intercept2('far', $handler6);
 
   $x = 'fail'; foo(inout $x); echo "foo: $x\n";
   $x = 'fail'; bar(inout $x); echo "bar: $x\n";

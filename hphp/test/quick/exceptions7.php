@@ -1,16 +1,15 @@
 <?hh
 
-function handler($name, $obj, inout $args, $data, inout $done) {
+function handler($name, $obj, inout $args) {
   echo "----HANDLER----\n";
-  var_dump($name, $obj, $args, $data, $done);
+  var_dump($name, $obj, $args);
   echo "---------------\n";
   throw new Exception;
 }
 
-function passthrough_handler($name, $obj, inout $args, $data, inout $done) {
+function another_handler($name, $obj, inout $args) {
   echo "----HANDLER----\n";
-  var_dump($name, $obj, $args, $data, $done);
-  $done = false;
+  var_dump($name, $obj, $args);
   echo "---------------\n";
   throw new Exception;
 }
@@ -31,25 +30,18 @@ class Blark {
 function main_entry(): void {
 
   // Intercept a function
-  fb_intercept('frap', 'handler', 'data');
+  fb_intercept2('frap', 'handler');
   try {
     call_user_func(frap<>, 'callfunc');
   } catch (Exception $e) {
     echo "caught call user func 1\n";
   }
 
-  fb_intercept('frap', 'passthrough_handler');
-  try {
-    call_user_func(frap<>, 'callfunc');
-  } catch (Exception $e) {
-    echo "caught call user func 2\n";
-  }
-
   // Replace with closure
-  fb_intercept('frap', function ($_1, $_2, inout $_3, $_4, inout $_5) {
-                         echo "Closure! wooooo\n";
-                         throw new Exception;
-                       });
+  fb_intercept2('frap', ($_1, $_2, inout $_3) ==> {
+    echo "Closure! wooooo\n";
+    throw new Exception;
+  });
   try {
     call_user_func(frap<>, 'claptrap');
   } catch (Exception $e) {
@@ -57,39 +49,25 @@ function main_entry(): void {
   }
 
   // Intercept static method
-  fb_intercept('Blark::sfrap', 'handler');
+  fb_intercept2('Blark::sfrap', 'handler');
   try {
     call_user_func(varray['Blark', 'sfrap']);
   } catch (Exception $e) {
     echo "caught static call 1\n";
   }
 
-  fb_intercept('Blark::sfrap', 'passthrough_handler');
-  try {
-    call_user_func(varray['Blark', 'sfrap']);
-  } catch (Exception $e) {
-    echo "caught static call 2\n";
-  }
-
   // Intercept non-static method
   $b = new Blark();
-  fb_intercept('Blark::frap', 'handler');
+  fb_intercept2('Blark::frap', 'handler');
   try {
     call_user_func(varray[$b, 'frap']);
   } catch (Exception $e) {
     echo "caught non-static call 1\n";
   }
 
-  fb_intercept('Blark::frap', 'passthrough_handler');
-  try {
-    call_user_func(varray[$b, 'frap']);
-  } catch (Exception $e) {
-    echo "caught non-static call 2\n";
-  }
-
   // MULTI-INTERCEPT!
-  fb_intercept('frap', 'handler');
-  fb_intercept('handler', 'passthrough_handler');
+  fb_intercept2('frap', 'handler');
+  fb_intercept2('handler', 'another_handler');
   try {
     call_user_func(frap<>, 'claptrap');
   } catch (Exception $e) {

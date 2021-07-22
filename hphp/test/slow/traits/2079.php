@@ -2,27 +2,27 @@
 
 trait T {
   public static function m() {
- echo "original
-";
- }
+    echo "original\n";
+  }
 }
+
 class A {
- use T;
- }
+  use T;
+}
+
 class B {
- use T;
- }
+  use T;
+}
 
 <<__EntryPoint>>
 function main_2079() {
-T::m();
-A::m();
-fb_intercept("T::m", function($_1, $_2, inout $_3, $_4, inout $_5) {
- echo "new
-";
- }
-);
-A::m();
-B::m();
-T::m();
+  T::m();
+  A::m();
+  fb_intercept2("T::m", function($_1, $_2, inout $_3) {
+    echo "new\n";
+    return shape('value' => null);
+  });
+  A::m();
+  B::m();
+  T::m();
 }

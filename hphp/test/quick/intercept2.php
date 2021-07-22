@@ -9,8 +9,9 @@ function foo() {
   var_dump(__METHOD__);
 }
 
-function bar($_1, $_2, inout $_3, $_4, inout $_5) {
+function bar($_1, $_2, inout $_3) {
   var_dump(__METHOD__);
+  return shape('value' => null);
 }
 
 function test() {
@@ -24,9 +25,9 @@ class C {
 }
 
 
-function swizzle($name, $obj, inout $args, $data, inout $done) {
-  var_dump($name, $obj, $args, $data, $done);
-  $done = false;
+function swizzle($name, $obj, inout $args) {
+  var_dump($name, $obj, $args);
+  return shape();
 }
 
 <<__EntryPoint>> function main(): void {
@@ -36,8 +37,8 @@ function swizzle($name, $obj, inout $args, $data, inout $done) {
     foo();
     $c->snoot();
     if ($i == 1) {
-      fb_intercept('foo', 'bar', false);
-      fb_intercept('C::snoot', 'swizzle');
+      fb_intercept2('foo', 'bar');
+      fb_intercept2('C::snoot', 'swizzle');
     }
   }
 }

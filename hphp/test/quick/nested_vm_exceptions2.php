@@ -8,10 +8,11 @@ function error_handler() {
   throw new Exception("unhandled exception");
 }
 
-function unary_function($_1, $_2, inout $_3, $_4, inout $_5) {
+function unary_function($_1, $_2, inout $_3) {
   // Raise a warning and throw from
   // the user error handler.
   trigger_error("raise a notice", E_USER_NOTICE);
+  return shape('value' => null);
 }
 
 function binary_function(string $x, $y) {}
@@ -19,7 +20,7 @@ function binary_function(string $x, $y) {}
 function entrypoint_nested_vm_exceptions2(): void {
   set_error_handler(error_handler<>);
 
-  fb_intercept('binary_function', 'unary_function', 'unary_function');
+  fb_intercept2('binary_function', 'unary_function');
 
   try {
     call_user_func_array(binary_function<>, varray[12, 12]);

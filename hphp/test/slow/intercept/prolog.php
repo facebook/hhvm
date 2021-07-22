@@ -3,18 +3,22 @@
 
 class Cls {
   function func() { echo "func called\n"; }
-  static function intercept1($_1, $_2, inout $_3, $_4, inout $_5) { return false; }
-  static function intercept2($_1, $_2, inout $_3, $_4, inout $_5) {
-    var_dump(debug_backtrace());
-    return false;
+  static function intercept1($_1, $_2, inout $_3) {
+    return shape('value' => null);
   }
-  static function intercept3($_1, $_2, inout $_3, $_4, inout $_5) { throw new Exception("intercept3"); }
+  static function intercept2($_1, $_2, inout $_3) {
+    var_dump(debug_backtrace());
+    return shape('value' => null);
+  }
+  static function intercept3($_1, $_2, inout $_3) {
+    throw new Exception("intercept3");
+  }
 }
 
 function getCls() { return new Cls; }
 
 function test($s) {
-  fb_intercept('Cls::func', "Cls::$s");
+  fb_intercept2('Cls::func', "Cls::$s");
   try {
     getCls()->func();
   } catch (Exception $e) {

@@ -9,10 +9,10 @@ class A {
 
 class lol {}
 class B {
-  public static function bar($_1, $_2, inout $_3, $_4, inout $_5) {
-    var_dump(varray[$_1, $_2, $_3, $_4, $_5]);
+  public static function bar($_1, $_2, inout $_3) {
+    var_dump(varray[$_1, $_2, $_3]);
     $x = new lol();
-    return $x;
+    return shape('value' => $x);
   }
 }
 
@@ -25,7 +25,7 @@ function main() {
 
 <<__EntryPoint>>
 function main_member_fn_intercept() {
-fb_intercept('A::foo', 'B::bar', "hello");
+fb_intercept2('A::foo', 'B::bar');
 
 main();
 echo "done\n";

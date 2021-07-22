@@ -6,10 +6,10 @@ function foo(...$args) {
 }
 
 class lol {}
-function bar($_1, $_2, inout $_3, $_4, inout $_5) {
-  var_dump(varray[$_1, $_2, $_3, $_4, $_5]);
+function bar($_1, $_2, inout $_3) {
+  var_dump(varray[$_1, $_2, $_3]);
   $x = new lol();
-  return $x;
+  return shape('value' => $x);
 }
 
 function main() {
@@ -21,7 +21,7 @@ function main() {
 
 <<__EntryPoint>>
 function main_extra_args() {
-fb_intercept('foo', 'bar', "hello");
+fb_intercept2('foo', 'bar');
 
 main();
 echo "done\n";

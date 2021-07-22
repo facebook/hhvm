@@ -8,15 +8,14 @@ class A {
 function main(A $a) {
   var_dump($a->foo());
 }
-function handler($name, $obj, inout $args, $data, inout $done) {
-  $done = true;
-  return "string!";
+function handler($name, $obj, inout $args) {
+  return shape('value' => "string!");
 }
 
 
 <<__EntryPoint>>
 function main_intercept_methods() {
 main(new A);
-fb_intercept('A::foo', handler<>);
+fb_intercept2('A::foo', handler<>);
 main(new A);
 }

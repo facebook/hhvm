@@ -16,15 +16,15 @@ function meep(inout $f, $g, inout $r) {
   return $g;
 }
 
-function io_intercept($name, $obj_or_cls, inout $args, $ctx, inout $done) {
+function io_intercept($name, $obj_or_cls, inout $args) {
   var_dump($name);
   var_dump($args);
-  $done = false;
+  return shape();
 }
 
 function main() {
-  fb_intercept('meep', 'io_intercept', true);
-  fb_intercept('Foo::bar', 'io_intercept', true);
+  fb_intercept2('meep', 'io_intercept');
+  fb_intercept2('Foo::bar', 'io_intercept');
   $a = 1; $b = true; $c = 'c';
   Foo::bar($a, inout $b, inout $c);
 

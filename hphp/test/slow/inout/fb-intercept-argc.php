@@ -14,27 +14,27 @@ function meep(inout $f, $g, inout $r) {
   return $g;
 }
 
-function too_many($name, $obj_or_cls, inout $args, $ctx, inout $done) {
-  var_dump($args, $done);
+function too_many($name, $obj_or_cls, inout $args) {
+  var_dump($args);
   $args = varray['red', 'green', 'blue', 'apple', 'bannana', 'pear'];
-  $done = $ctx;
+  return shape('value' => null);
 }
 
-function too_few($name, $obj_or_cls, inout $args, $ctx, inout $done) {
-  var_dump($args, $done);
+function too_few($name, $obj_or_cls, inout $args) {
+  var_dump($args);
   $args = varray['foo'];
-  $done = $ctx;
+  return shape('value' => null);
 }
 
-function wrong_type($name, $obj_or_cls, inout $args, $ctx, inout $done) {
-  var_dump($args, $done);
+function wrong_type($name, $obj_or_cls, inout $args) {
+  var_dump($args);
   $args = new stdClass;
-  $done = $ctx;
+  return shape('value' => null);
 }
 
 function main() {
-  fb_intercept('meep', 'too_many', true);
-  fb_intercept('Foo::bar', 'too_few', true);
+  fb_intercept2('meep', 'too_many');
+  fb_intercept2('Foo::bar', 'too_few');
   $a = 1; $b = true; $c = 'c';
   Foo::bar($a, inout $b, inout $c);
   var_dump($a, $b, $c);
@@ -43,7 +43,7 @@ function main() {
   meep(inout $a, $b, inout $c);
   var_dump($a, $b, $c);
 
-  fb_intercept('meep', 'wrong_type', true);
+  fb_intercept2('meep', 'wrong_type');
   $a = 1; $b = true; $c = 'c';
   meep(inout $a, $b, inout $c);
   var_dump($a, $b, $c);

@@ -7,19 +7,17 @@ function meep($a, $b) {
 
 class Interceptor {
   private static $recurse = false;
-  public static function io_intercept($name, $obj_or_cls, inout $args,
-                                      $ctx, inout $done) {
+  public static function io_intercept($name, $obj_or_cls, inout $args) {
     if (self::$recurse) {
-      $done = false;
-      return;
+      return shape();
     }
     self::$recurse = true;
-    return meep(...$args);
+    return shape('callback' => 'meep');
   }
 }
 
 <<__EntryPoint>> function main(): void {
-  fb_intercept('meep', 'Interceptor::io_intercept', true);
+  fb_intercept2('meep', 'Interceptor::io_intercept');
   try {
     meep(1, 2);
   } catch (Exception $e) {

@@ -1,16 +1,17 @@
 <?hh
-function mkh($c) { return ($_1, $_2, inout $_3, $_4, inout $_5) ==> $c(); }
-function handler($name, $obj, inout $args, $data, inout $done) {
+function mkh($c) { return ($_1, $_2, inout $_3) ==> shape('value' => $c()); }
+function handler($name, $obj, inout $args) {
   echo "----HANDLER----\n";
-  var_dump($name, $obj, $args, $data, $done);
+  var_dump($name, $obj, $args);
   echo "---------------\n";
+  return shape('value' => null);
 }
 
-function passthrough_handler($name, $obj, inout $args, $data, inout $done) {
+function passthrough_handler($name, $obj, inout $args) {
   echo "----HANDLER----\n";
-  var_dump($name, $obj, $args, $data, $done);
-  $done = false;
+  var_dump($name, $obj, $args);
   echo "---------------\n";
+  return shape();
 }
 
 function frap($arg) {
@@ -23,20 +24,20 @@ function test_standard_function() {
   frap('claptrap');
 
   // Intercept a function
-  fb_intercept('frap', 'handler', 'data');
+  fb_intercept2('frap', 'handler');
   frap('claptrap');
   call_user_func(frap<>, 'callfunc');
 
-  fb_intercept('frap', 'passthrough_handler');
+  fb_intercept2('frap', 'passthrough_handler');
   frap('claptrap');
   call_user_func(frap<>, 'callfunc');
 
   // Replace with closure
-  fb_intercept('frap', mkh(function () { echo "Closure! wooooo\n"; }));
+  fb_intercept2('frap', mkh(function () { echo "Closure! wooooo\n"; }));
   frap('claptrap');
 
   // Reset
-  fb_intercept('frap', null);
+  fb_intercept2('frap', null);
   frap('claptrap');
 }
 
@@ -51,20 +52,20 @@ function test_variadic_function() {
   var_frap('claptrap', 'blah');
 
   // Intercept a function
-  fb_intercept('var_frap', 'handler', 'data');
+  fb_intercept2('var_frap', 'handler');
   var_frap('claptrap', 'blah');
   call_user_func(var_frap<>, 'callfunc');
 
-  fb_intercept('var_frap', 'passthrough_handler');
+  fb_intercept2('var_frap', 'passthrough_handler');
   var_frap('claptrap', 'blah');
   call_user_func(var_frap<>, 'callfunc');
 
   // Replace with closure
-  fb_intercept('var_frap', mkh(function () { echo "Closure! wooooo\n"; }));
+  fb_intercept2('var_frap', mkh(function () { echo "Closure! wooooo\n"; }));
   var_frap('claptrap', 'blah');
 
   // Reset
-  fb_intercept('var_frap', null);
+  fb_intercept2('var_frap', null);
   var_frap('claptrap', 'blah');
 }
 
@@ -84,7 +85,7 @@ function test_methods() {
   echo '---------- ', __FUNCTION__, ' ----------', "\n";
 
   // Intercept static method
-  fb_intercept('SubBlark2::sfrap', 'handler');
+  fb_intercept2('SubBlark2::sfrap', 'handler');
   Blark::sfrap();
   call_user_func(varray['Blark', 'sfrap']);
   SubBlark::sfrap();
@@ -92,7 +93,7 @@ function test_methods() {
   SubBlark2::sfrap();
   call_user_func(varray['SubBlark2', 'sfrap']);
 
-  fb_intercept('Blark::sfrap', 'handler');
+  fb_intercept2('Blark::sfrap', 'handler');
   Blark::sfrap();
   call_user_func(varray['Blark', 'sfrap']);
   SubBlark::sfrap();
@@ -100,27 +101,27 @@ function test_methods() {
   SubBlark2::sfrap();
   call_user_func(varray['SubBlark2', 'sfrap']);
 
-  fb_intercept('Blark::sfrap', 'passthrough_handler');
+  fb_intercept2('Blark::sfrap', 'passthrough_handler');
   Blark::sfrap();
   call_user_func(varray['Blark', 'sfrap']);
 
   // Intercept non-static method
   $b = new Blark();
-  fb_intercept('Blark::frap', 'handler');
+  fb_intercept2('Blark::frap', 'handler');
   $b->frap();
   call_user_func(varray[$b, 'frap']);
 
-  fb_intercept('Blark::frap', 'passthrough_handler');
+  fb_intercept2('Blark::frap', 'passthrough_handler');
   $b->frap();
   call_user_func(varray[$b, 'frap']);
 
   // MULTI-INTERCEPT!
-  fb_intercept('frap', 'handler');
-  fb_intercept('handler', 'passthrough_handler');
+  fb_intercept2('frap', 'handler');
+  fb_intercept2('handler', 'passthrough_handler');
   frap('claptrap');
 
   // Reset all
-  fb_intercept('', null);
+  fb_intercept2('', null);
   frap('claptrap');
   Blark::sfrap();
   $b->frap();

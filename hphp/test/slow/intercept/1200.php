@@ -6,12 +6,13 @@ class X {
  return self::$g;
  }
 }
-function bar($_1, $_2, inout $_3, $_4, inout $_5) {
+function bar($_1, $_2, inout $_3) {
   var_dump('Intercepted');
+  return shape('value' => null);
 }
 function test() {
   X::foo();
-  fb_intercept('X::foo', bar<>, bar<>);
+  fb_intercept2('X::foo', bar<>);
   X::foo();
 }
 

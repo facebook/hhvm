@@ -106,9 +106,8 @@ bool HHVM_FUNCTION(hphp_debug_break, bool condition /* = true */) {
 
 // Quickly determine if a debugger is attached to the current thread.
 bool HHVM_FUNCTION(hphp_debugger_attached) {
-  if (RuntimeOption::EnableHphpdDebugger && (Debugger::GetProxy() != nullptr)) {
-    return true;
-  }
+  if (RO::RepoAuthoritative) return false;
+  if (RO::EnableHphpdDebugger && (Debugger::GetProxy() != nullptr)) return true;
 
   auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
   return (debugger != nullptr && debugger->clientConnected());

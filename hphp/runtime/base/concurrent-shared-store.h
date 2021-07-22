@@ -324,59 +324,30 @@ struct ConcurrentTableSharedStore {
   std::vector<EntryInfo> getEntriesInfo();
 
 private:
-  // Fake a StringData as a char* with the high bit set.  charHashCompare below
-  // will properly handle the value and reuse the hash value of the StringData.
-
-  static char* tagStringData(StringData* s) {
-    return reinterpret_cast<char*>(-reinterpret_cast<intptr_t>(s));
-  }
-
-  static StringData* getStringData(const char* s) {
-    assertx(reinterpret_cast<intptr_t>(s) < 0);
-    return reinterpret_cast<StringData*>(-reinterpret_cast<intptr_t>(s));
-  }
-
-  inline static bool isTaggedStringData(const char* s) {
-    return reinterpret_cast<intptr_t>(s) < 0;
-  }
-
-private:
-  struct CharHashCompare {
-    bool equal(const char* s1, const char* s2) const {
-      assertx(s1 && s2);
-      // tbb implementation call equal with the second pointer being the
-      // value in the table and thus not a StringData*. We are asserting
-      // to make sure that is the case
-      assertx(!isTaggedStringData(s2));
-      if (isTaggedStringData(s1)) {
-        s1 = getStringData(s1)->data();
-      }
-      return strcmp(s1, s2) == 0;
+  // Slightly differs from StringDataHashCompare: for performance, we check
+  // for pointer equality before calling same().
+  struct APCStringDataHashCompare {
+    bool equal(const StringData* s1, const StringData* s2) const {
+      return s1 == s2 || s1->same(s2);
     }
-    size_t hash(const char* s) const {
-      assertx(s);
-      return isTaggedStringData(s) ? getStringData(s)->hash() :
-             StringData::hash(s, strlen(s));
+    size_t hash(const StringData* sd) const {
+      return sd->hash();
     }
   };
 
-private:
-  template<typename Key, typename T, typename HashCompare>
-  struct APCMap :
-      tbb::concurrent_hash_map<Key,T,HashCompare,APCAllocator<char>> {
+  struct Map : tbb::concurrent_hash_map<
+      const StringData*, StoreValue,
+      APCStringDataHashCompare, APCAllocator<char>> {
     // Append a random entry to 'entries'. The map must be non-empty and not
     // concurrently accessed. Returns false if this operation is not supported.
     bool getRandomAPCEntry(std::vector<EntryInfo>& entries);
 
-    using node = typename tbb::concurrent_hash_map<Key,T,HashCompare,
-                                                   APCAllocator<char>>::node;
     static_assert(sizeof(node) == 64, "Node should be cache-line sized");
   };
 
-  using Map = APCMap<const char*,StoreValue,CharHashCompare>;
-  using ExpirationPair = std::pair<intptr_t,time_t>;
   enum class ExpNil {};
-  using ExpSet = tbb::concurrent_hash_map<intptr_t,ExpNil>;
+  using ExpSet = tbb::concurrent_hash_map<const StringData*, ExpNil>;
+  using ExpirationPair = std::pair<const StringData*, time_t>;
 
   struct ExpirationCompare {
     bool operator()(const ExpirationPair& p1, const ExpirationPair& p2) const {
@@ -386,11 +357,12 @@ private:
 
 private:
   bool checkExpire(const String& keyStr, Map::const_accessor& acc);
-  bool eraseImpl(const char*, bool, int64_t, ExpSet::accessor* expAcc);
-  bool storeImpl(const String&, const Variant&, int64_t, int64_t, bool);
+  bool eraseImpl(const StringData*, bool, int64_t, ExpSet::accessor* expAcc);
+  bool storeImpl(const StringData*, const Variant&, int64_t, int64_t, bool);
   bool handlePromoteObj(const String&, APCHandle*, const Variant&);
   void dumpKeyAndValue(std::ostream&);
-  static EntryInfo makeEntryInfo(const char*, StoreValue*, int64_t curr_time);
+  static EntryInfo makeEntryInfo(
+      const StringData*, StoreValue*, int64_t curr_time);
 
 private:
   Map m_vars;

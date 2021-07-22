@@ -97,9 +97,9 @@ enum Attr {
   // (and therefore requires no runtime check).
   AttrNoBadRedeclare       = (1u << 10), //       |    X     |         //
   // Indicates that a function can be used with fb_rename_function---even if
-  // JitEnableRenameFunction is false --- and can be used with fb_intercept.
+  // JitEnableRenameFunction is false --- and can be used with fb_intercept2.
   // (Note: we could split this into two bits, since you can technically
-  // pessimize less for fb_intercept than you need to for fb_rename_function,
+  // pessimize less for fb_intercept2 than you need to for fb_rename_function,
   //  but we haven't done so at this point.)      |          |         //
   AttrInterceptable        = (1u << 11), //       |          |    X    //
                                          //       |          |         //

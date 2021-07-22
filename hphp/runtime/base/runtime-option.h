@@ -871,7 +871,7 @@ struct RuntimeOption {
   F(bool, JitKeepDbgFiles,             false)                           \
   /* despite the unfortunate name, this enables function renaming and
    * interception in the interpreter as well as the jit, and also
-   * implies all functions may be used with fb_intercept */             \
+   * implies all functions may be used with fb_intercept2 */            \
   F(bool, JitEnableRenameFunction,     EvalJitEnableRenameFunction)     \
   F(bool, JitUseVtuneAPI,              false)                           \
   F(bool, TraceCommandLineRequest,     true)                            \

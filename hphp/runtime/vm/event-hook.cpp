@@ -344,10 +344,7 @@ static Variant call_intercept_handler(
   const Variant& called,
   const Variant& called_on,
   Array& args,
-  const Variant& ctx,
-  Variant& done,
-  ActRec* ar,
-  bool newCallback
+  ActRec* ar
 ) {
   CallCtx callCtx;
   vm_decode_function(function, callCtx);
@@ -355,31 +352,23 @@ static Variant call_intercept_handler(
   if (!f) return uninit_null();
 
   auto const okay = [&] {
-    if (f->numInOutParams() != (newCallback ? 1 : 2)) return false;
-    if (newCallback) return f->params().size() >= 3 && f->isInOut(2);
-    return
-      f->params().size() >= 5 && f->isInOut(2) && f->isInOut(4);
+    if (f->numInOutParams() != 1) return false;
+    return f->params().size() >= 3 && f->isInOut(2);
   }();
 
   if (!okay) {
     raise_error(
-      "fb_intercept%s used with an inout handler with a bad signature "
-      "(expected parameter%s to be inout)",
-      newCallback ? "2" : "",
-      newCallback ? " three" : "s three and five"
+      "fb_intercept2 used with an inout handler with a bad signature "
+      "(expected parameter three to be inout)"
     );
   }
 
   args = hhvm_get_frame_args(ar);
 
-  VecInit par{newCallback ? 3u : 5u};
+  VecInit par{3u};
   par.append(called);
   par.append(called_on);
   par.append(args);
-  if (!newCallback) {
-    par.append(ctx);
-    par.append(done);
-  }
 
   auto ret = Variant::attach(
     g_context->invokeFunc(f, par.toVariant(), callCtx.this_, callCtx.cls,
@@ -388,7 +377,6 @@ static Variant call_intercept_handler(
 
   auto& arr = ret.asCArrRef();
   if (arr[1].isArray()) args = arr[1].toArray();
-  if (!newCallback && arr[2].isBoolean()) done = arr[2].toBoolean();
   return arr[0];
 }
 
@@ -468,7 +456,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   if (RuntimeOption::RepoAuthoritative &&
       !RuntimeOption::EvalJitEnableRenameFunction) {
     if (!(func->attrs() & AttrInterceptable)) {
-      raise_error("fb_intercept was used on a non-interceptable function (%s) "
+      raise_error("fb_intercept2 was used on a non-interceptable function (%s) "
                   "in RepoAuthoritative mode", func->fullName()->data());
     }
   }
@@ -477,7 +465,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
 
   PC savePc = vmpc();
 
-  Variant doneFlag = true;
+  auto done = true;
   Variant called_on = [&] {
     if (func->cls()) {
       if (ar->hasThis()) {
@@ -492,36 +480,30 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   Array args;
   VarNR called(ar->func()->fullName());
 
-  auto const& hArr = h->asCArrRef();
-  auto const newCallback = hArr[2].toBoolean();
-  Variant ret = call_intercept_handler(
-    hArr[0], called, called_on, args, hArr[1], doneFlag, ar, newCallback
-  );
+  Variant ret = call_intercept_handler(*h, called, called_on, args, ar);
 
-  if (newCallback) {
-    if (!ret.isArray()) {
-      SystemLib::throwRuntimeExceptionObject(
-        Variant("fb_intercept2 requires a darray to be returned"));
-    }
-    assertx(ret.isArray());
-    auto const retArr = ret.toDict();
-    if (retArr.exists(s_value)) {
-      ret = retArr[s_value];
-    } else if (retArr.exists(s_callback)) {
-      bool prepend_this = retArr.exists(s_prepend_this) ?
-        retArr[s_prepend_this].toBoolean() : false;
-      ret = call_intercept_handler_callback(
-        ar,
-        retArr[s_callback],
-        prepend_this
-      );
-    } else {
-      // neither value or callback are present, call the original function
-      doneFlag = false;
-    }
+  if (!ret.isArray()) {
+    SystemLib::throwRuntimeExceptionObject(
+      Variant("fb_intercept2 requires a darray to be returned"));
+  }
+  assertx(ret.isArray());
+  auto const retArr = ret.toDict();
+  if (retArr.exists(s_value)) {
+    ret = retArr[s_value];
+  } else if (retArr.exists(s_callback)) {
+    bool prepend_this = retArr.exists(s_prepend_this) ?
+      retArr[s_prepend_this].toBoolean() : false;
+    ret = call_intercept_handler_callback(
+      ar,
+      retArr[s_callback],
+      prepend_this
+    );
+  } else {
+    // neither value or callback are present, call the original function
+    done = false;
   }
 
-  if (doneFlag.toBoolean()) {
+  if (done) {
     auto const sfp = ar->sfp();
     auto const callOff = ar->callOffset();
 

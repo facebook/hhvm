@@ -72,45 +72,24 @@ function fb_compact_unserialize(mixed $thing,
                                 <<__OutOnly>>
                                 inout mixed $errcode): mixed;
 
-/** Invokes a user handler upon calling a function or a class method. If this
- * handler returns FALSE, code will continue with original function.
- * Otherwise, it will return what handler tells. The handler function looks
- * like "intercept_handler($name, $obj, $params, $data, &$done)", where $name
- * is original function's fully-qualified name ('Class::method'), $obj is $this
- * for an instance method call or null for static method call or function calls,
- * and $params are original call's parameters. $data is what's passed to
- * fb_intercept() and set $done to false to indicate function should continue its
- * execution with old function as if interception did not happen. By default $done
- * is true so it will return handler's return immediately without executing old
- * function's code. Note that built-in functions are not interceptable.
- * @param string $name - The function or class method name to intercept. Use
- * "class::method" for method name. If empty, all functions will be
- * intercepted by the specified handler and registered individual handlers
- * will be replaced. To make sure individual handlers not affected by such a
- * call, call fb_intercept() with individual names afterwards.
- * @param mixed $handler - Callback to handle the interception. Use null,
- * false or empty string to unregister a previously registered handler. If
- * name is empty, all previously registered handlers, including those that are
- * set by individual function names, will be removed.
- * @param mixed $data - Extra data to pass to the handler when intercepting
- * @return bool - TRUE if successful, FALSE otherwise
- */
-<<__Native>>
-function fb_intercept(string $name,
-                      mixed $handler,
-                      mixed $data = null): bool;
-
 /**
- * As a replacement for fb_intercept, invokes a user handler upon calling a
- * function or a class method. This handler is expected to have signature
- * similar to "intercept_handler($name, $obj, $params)" where each
- * argument is same as fb_intercept. This handler is expected to return a shape
- * where if the shape contains 'value' field, then this value is returned
- * as the result of the original function, if the shape contains 'callback'
- * field, then the callback is called as the result of the original function,
- * if the shape contains 'prepend_this' field, then 'this' or lsb class
- * is prepended as the first argument to the callback, if neither value nor
- * callback is given, then the original function is executed.
+ * Invokes a user handler upon calling a function or a class method. This
+ * handler is expected to have signature similar to:
+ *
+ *   function intercept_handler($name, $obj, $params)
+ *
+ * Where $name is original function's fully-qualified name ('Class::method'),
+ * $obj is $this for an instance method call or null for static method call or
+ * function calls and $params are original call's parameters.
+ *
+ * This handler is expected to return a shape where if the shape contains
+ * 'value' field, then this value is returned as the result of the original
+ * function, if the shape contains 'callback' field, then the callback is
+ * called as the result of the original function, if the shape contains
+ * 'prepend_this' field, then 'this' or lsb class is prepended as the first
+ * argument to the callback, if neither value nor callback is given, then the
+ * original function is executed.
+ *
  * If the function does not return a shape, then a runtime exception is raised.
  * Signature of the callback and the original function are required to be the
  * same including the arity and parity of reified arguments, otherwise, the

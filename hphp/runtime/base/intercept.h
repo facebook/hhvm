@@ -24,16 +24,14 @@ struct String;
 struct Variant;
 
 ///////////////////////////////////////////////////////////////////////////////
-// fb_intercept()
+// fb_intercept2()
 
 /**
  * When an interceptable point is hit, invoke handler with all parameters
  * instead. If it returns FALSE, continues execution. Otherwise, return its
  * return.
  */
-bool register_intercept(const String& name, const Variant& callback,
-                        const Variant& data, bool checkForDebugger,
-                        bool newCallback);
+bool register_intercept(const String& name, const Variant& callback);
 
 /**
  * Check to see if it is actually intercepted for current request.

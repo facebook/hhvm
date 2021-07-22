@@ -1122,13 +1122,8 @@ String HHVM_FUNCTION(fb_utf8_substr, const String& str, int64_t start,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
-                                 const Variant& data /* = uninit_variant */) {
-  return register_intercept(name, handler, data, true, false);
-}
-
 bool HHVM_FUNCTION(fb_intercept2, const String& name, const Variant& handler) {
-  return register_intercept(name, handler, uninit_variant, true, true);
+  return register_intercept(name, handler);
 }
 
 bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
@@ -1353,7 +1348,6 @@ struct FBExtension : Extension {
     HHVM_FE(fb_utf8_strlen);
     HHVM_FE(fb_utf8_strlen_deprecated);
     HHVM_FE(fb_utf8_substr);
-    HHVM_FE(fb_intercept);
     HHVM_FE(fb_intercept2);
     HHVM_FE(fb_rename_function);
     HHVM_FE(fb_get_code_coverage);

@@ -43,8 +43,6 @@ function fb_compact_serialize($thing, int $options = 0)[];
 <<__PHPStdLib>>
 function fb_compact_unserialize($thing, inout $success, inout $errcode);
 <<__PHPStdLib>>
-function fb_intercept(string $name, $handler, $data = null);
-<<__PHPStdLib>>
 function fb_intercept2(string $name, $handler);
 <<__PHPStdLib>>
 function fb_rename_function(string $orig_func_name, string $new_func_name);

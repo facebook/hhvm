@@ -46,7 +46,6 @@ testing and some alternative PHP implementation.
 
 - fb_serialize
 - fb_unserialize
-- fb_intercept
 - fb_rename_function
 - fb_get_code_coverage
 - fb_utf8ize

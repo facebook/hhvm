@@ -243,7 +243,7 @@ bool fcallHelper(CallFlags callFlags, Func* func,
     }
 
     // If doFCall() returns false, we've been asked to skip the function body
-    // due to fb_intercept, so indicate that via the return value.
+    // due to fb_intercept2, so indicate that via the return value.
     return doFCall(callFlags, func, numArgsInclUnpack, ctx, savedRip);
   });
 }
@@ -526,7 +526,7 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
     v << copy{rsp(), rvmfp()};
 
     // When we call the event hook, it might tell us to skip the callee
-    // (because of fb_intercept).  If that happens, we need to return to the
+    // (because of fb_intercept2).  If that happens, we need to return to the
     // caller, but the handler will have already popped the callee's frame.
     // So, we need to save these values for later.
     v << pushpm{ar[AROFF(m_savedRip)], ar[AROFF(m_sfp)]};

@@ -72,7 +72,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(InterceptRequestData, s_intercept_data);
 static Mutex s_mutex;
 
 /*
- * The bool indicates whether fb_intercept has ever been called
+ * The bool indicates whether fb_intercept2 has ever been called
  * on a function with this name.
  * The vector contains a list of maybeIntercepted flags for functions
  * with this name.
@@ -90,14 +90,9 @@ static void flag_maybe_intercepted(std::vector<int8_t*> &flags) {
   }
 }
 
-bool register_intercept(const String& name, const Variant& callback,
-                        const Variant& data, bool checkForDebugger,
-                        bool newCallback) {
-
+bool register_intercept(const String& name, const Variant& callback) {
   SCOPE_EXIT {
-    if (checkForDebugger) {
-      DEBUGGER_ATTACHED_ONLY(phpDebuggerInterceptRegisterHook(name));
-    }
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerInterceptRegisterHook(name));
   };
 
   if (!callback.toBoolean()) {
@@ -128,14 +123,12 @@ bool register_intercept(const String& name, const Variant& callback,
 
   EventHook::EnableIntercept();
 
-  Array handler = make_vec_array(callback, data, newCallback);
-
   if (name.empty()) {
-    s_intercept_data->global_handler() = handler;
+    s_intercept_data->global_handler() = callback;
     s_intercept_data->clearHandlers();
   } else {
     auto& handlers = s_intercept_data->intercept_handlers();
-    handlers[name] = handler;
+    handlers[name] = callback;
   }
 
   Lock lock(s_mutex);

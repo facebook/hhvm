@@ -10,7 +10,7 @@
         f_name = ([3:10-12], "\\f1"); f_tparams = []; f_where_constraints = []; 
         f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = (#100000221856590); param_type_hint = ((string), (Some ([3:13-18], Hmixed))); 
+        [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:13-18], Hmixed))); 
            param_is_variadic = false; param_pos = [3:19-21]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -30,7 +30,7 @@
         f_name = ([3:10-12], "\\f2"); f_tparams = []; f_where_constraints = []; 
         f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = (#100000358011700); param_type_hint = ((string), (Some ([3:13-20], Hdynamic))); 
+        [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:13-20], Hdynamic))); 
            param_is_variadic = false; param_pos = [3:21-23]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -55,7 +55,7 @@
         f_name = ([3:10-12], "\\f3"); f_tparams = []; f_where_constraints = []; 
         f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = (#100000334057680); param_type_hint = ((string), (Some ([3:13-18], Hmixed))); 
+        [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:13-18], Hmixed))); 
            param_is_variadic = false; param_pos = [3:19-21]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }

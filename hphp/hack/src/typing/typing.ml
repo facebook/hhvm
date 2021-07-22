@@ -237,8 +237,6 @@ let with_type ty env (e : Nast.expr) : Tast.expr =
       method on_'fb _ _ = ()
 
       method on_'en _ _ = env
-
-      method on_'hi _ _ = ty
     end
   in
   visitor#on_expr () e
@@ -7008,7 +7006,7 @@ and class_expr
     ?(check_explicit_targs = false)
     (env : env)
     (tal : Nast.targ list)
-    ((_, p, cid_) : (unit, 'b, 'c, 'd) Aast.class_id) :
+    ((_, p, cid_) : Nast.class_id) :
     env * Tast.targ list * Tast.class_id * locl_ty =
   let make_result env tal te ty = (env, tal, (ty, p, te), ty) in
   match cid_ with

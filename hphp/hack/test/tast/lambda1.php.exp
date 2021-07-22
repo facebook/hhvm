@@ -23,7 +23,8 @@
                           f_name = ([4:8-41], ";anonymous"); f_tparams = []; 
                           f_where_constraints = []; f_variadic = FVnonVariadic;
                           f_params =
-                          [{ param_annotation = (#2053); param_type_hint = (((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>))), None); 
+                          [{ param_annotation = ((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)));
+                             param_type_hint = (((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>))), None); 
                              param_is_variadic = false; param_pos = [4:8-10]; 
                              param_name = "$n"; param_expr = None; param_readonly = None; 
                              param_callconv = None; param_user_attributes = []; 

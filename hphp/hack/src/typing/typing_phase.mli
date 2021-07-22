@@ -172,6 +172,6 @@ val localize_and_add_generic_parameters :
 val localize_and_add_ast_generic_parameters_and_where_constraints :
   env ->
   ignore_errors:bool ->
-  (unit, Nast.func_body_ann, unit, unit) Aast.tparam list ->
+  Nast.tparam list ->
   (Aast.hint * Ast_defs.constraint_kind * Aast.hint) list ->
   env

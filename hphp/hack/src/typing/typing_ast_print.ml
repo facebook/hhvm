@@ -15,13 +15,9 @@ let print_tast_internal apply_to_ex_ty print_ex ctx tast =
   let pp_fb fmt _ = Format.pp_print_string fmt "()" in
   let pp_en fmt _ = Format.pp_print_string fmt "()" in
   let pp_ex fmt ex = Format.pp_print_string fmt (print_ex ex) in
-  let pp_hi fmt ty =
-    Format.asprintf "(%s)" (Typing_print.full_strip_ns env ty)
-    |> Format.pp_print_string fmt
-  in
   let formatter = Format.formatter_of_out_channel Stdlib.stdout in
   Format.pp_set_margin formatter 200;
-  Aast.pp_program pp_ex pp_fb pp_en pp_hi formatter tast
+  Aast.pp_program pp_ex pp_fb pp_en formatter tast
 
 let print_tast ctx tast =
   let apply_to_ex_ty f ty = f ty in
@@ -40,8 +36,6 @@ let print_tast_without_position ctx tast =
       method on_'ex _ ty = ty
 
       method on_'en _ en = en
-
-      method on_'hi _ hi = hi
     end
   in
   let tast = remove_pos#on_program () tast in

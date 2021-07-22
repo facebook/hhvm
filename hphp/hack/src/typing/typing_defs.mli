@@ -329,13 +329,13 @@ val compare_decl_ty : ?normalize_lists:bool -> decl_ty -> decl_ty -> int
 
 val tyl_equal : 'a ty list -> 'a ty list -> bool
 
-val class_id_con_ordinal : ('a, 'b, 'c, 'd) Aast.class_id_ -> int
+val class_id_con_ordinal : ('a, 'b, 'c) Aast.class_id_ -> int
 
 val class_id_compare :
-  ('a, 'b, 'c, 'd) Aast.class_id_ -> ('e, 'f, 'g, 'h) Aast.class_id_ -> int
+  ('a, 'b, 'c) Aast.class_id_ -> ('d, 'e, 'f) Aast.class_id_ -> int
 
 val class_id_equal :
-  ('a, 'b, 'c, 'd) Aast.class_id_ -> ('e, 'f, 'g, 'h) Aast.class_id_ -> bool
+  ('a, 'b, 'c) Aast.class_id_ -> ('d, 'e, 'f) Aast.class_id_ -> bool
 
 val has_member_compare :
   normalize_lists:bool -> has_member -> has_member -> Ppx_deriving_runtime.int

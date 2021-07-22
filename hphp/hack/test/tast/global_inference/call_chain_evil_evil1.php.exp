@@ -11,7 +11,7 @@
          m_name = ([4:19-20], "f"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = (#100000192560935); param_type_hint = ((string), None); 
+         [{ param_annotation = (string); param_type_hint = ((string), None); 
             param_is_variadic = false; param_pos = [4:21-23]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -39,7 +39,7 @@
          m_name = ([4:19-20], "f"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = (#100000407908081); param_type_hint = ((string), None); 
+         [{ param_annotation = (string); param_type_hint = ((string), None); 
             param_is_variadic = false; param_pos = [4:21-23]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }

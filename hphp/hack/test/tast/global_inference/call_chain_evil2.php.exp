@@ -9,7 +9,7 @@
         f_readonly_ret = None; f_ret = ((string), None); f_name = ([3:10-12], "\\f1"); 
         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = (#100000035413372); param_type_hint = ((string), None); 
+        [{ param_annotation = (string); param_type_hint = ((string), None); 
            param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -28,7 +28,7 @@
         f_readonly_ret = None; f_ret = ((string), None); f_name = ([3:10-12], "\\f2"); 
         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = (#100000984148128); param_type_hint = ((string), None); 
+        [{ param_annotation = (string); param_type_hint = ((string), None); 
            param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -52,7 +52,7 @@
         f_readonly_ret = None; f_ret = ((string), None); f_name = ([3:10-12], "\\f3"); 
         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = (#100000737118078); param_type_hint = ((string), None); 
+        [{ param_annotation = (string); param_type_hint = ((string), None); 
            param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }

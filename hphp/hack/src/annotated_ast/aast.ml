@@ -17,10 +17,8 @@ include Aast_defs
  ex: Expression annotation type (when typechecking, the inferred type)
  fb: Function body tag (e.g. has naming occurred)
  en: Environment (tracking state inside functions and classes)
- hi: Hint annotation (when typechecking it will be the localized type hint or the
-     inferred missing type if the hint is missing)
  *)
-type ('ex, 'fb, 'en, 'hi) program = ('ex, 'fb, 'en, 'hi) def list
+type ('ex, 'fb, 'en) program = ('ex, 'fb, 'en) def list
 [@@deriving
   show { with_path = false },
     eq,
@@ -53,14 +51,14 @@ type ('ex, 'fb, 'en, 'hi) program = ('ex, 'fb, 'en, 'hi) def list
         ancestors = ["endo_defs"];
       }]
 
-and ('ex, 'fb, 'en, 'hi) stmt = pos * ('ex, 'fb, 'en, 'hi) stmt_
+and ('ex, 'fb, 'en) stmt = pos * ('ex, 'fb, 'en) stmt_
 
-and ('ex, 'fb, 'en, 'hi) stmt_ =
+and ('ex, 'fb, 'en) stmt_ =
   | Fallthrough
       (** Marker for a switch statement that falls through.
 
           // FALLTHROUGH *)
-  | Expr of ('ex, 'fb, 'en, 'hi) expr
+  | Expr of ('ex, 'fb, 'en) expr
       (** Standalone expression.
 
           1 + 2; *)
@@ -72,11 +70,11 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
       (** Continue inside a loop or switch statement.
 
           continue; *)
-  | Throw of ('ex, 'fb, 'en, 'hi) expr
+  | Throw of ('ex, 'fb, 'en) expr
       (** Throw an exception.
 
           throw $foo; *)
-  | Return of ('ex, 'fb, 'en, 'hi) expr option
+  | Return of ('ex, 'fb, 'en) expr option
       (** Return, with an optional value.
 
           return;
@@ -89,9 +87,9 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
           yield break; *)
   | Awaitall of
       (* Temporaries assigned when running awaits. *)
-      (lid option * ('ex, 'fb, 'en, 'hi) expr) list
+      (lid option * ('ex, 'fb, 'en) expr) list
       * (* Block assigning temporary to relevant locals. *)
-      ('ex, 'fb, 'en, 'hi) block
+      ('ex, 'fb, 'en) block
       (** Concurrent block. All the await expressions are awaited at the
           same time, similar to genva().
 
@@ -105,42 +103,39 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
             $bar = await g();
             await h();
           } *)
-  | If of
-      ('ex, 'fb, 'en, 'hi) expr
-      * ('ex, 'fb, 'en, 'hi) block
-      * ('ex, 'fb, 'en, 'hi) block
+  | If of ('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) block * ('ex, 'fb, 'en) block
       (** If statement.
 
           if ($foo) { ... } else { ... } *)
-  | Do of ('ex, 'fb, 'en, 'hi) block * ('ex, 'fb, 'en, 'hi) expr
+  | Do of ('ex, 'fb, 'en) block * ('ex, 'fb, 'en) expr
       (** Do-while loop.
 
           do {
             bar();
           } while($foo) *)
-  | While of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) block
+  | While of ('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) block
       (** While loop.
 
           while ($foo) {
             bar();
           } *)
-  | Using of ('ex, 'fb, 'en, 'hi) using_stmt
+  | Using of ('ex, 'fb, 'en) using_stmt
       (** Initialize a value that is automatically disposed of.
 
           using $foo = bar(); // disposed at the end of the function
           using ($foo = bar(), $baz = quux()) {} // disposed after the block *)
   | For of
-      ('ex, 'fb, 'en, 'hi) expr list
-      * ('ex, 'fb, 'en, 'hi) expr option
-      * ('ex, 'fb, 'en, 'hi) expr list
-      * ('ex, 'fb, 'en, 'hi) block
+      ('ex, 'fb, 'en) expr list
+      * ('ex, 'fb, 'en) expr option
+      * ('ex, 'fb, 'en) expr list
+      * ('ex, 'fb, 'en) block
       (** For loop. The initializer and increment parts can include
           multiple comma-separated statements. The termination condition is
           optional.
 
           for ($i = 0; $i < 100; $i++) { ... }
           for ($x = 0, $y = 0; ; $x++, $y++) { ... } *)
-  | Switch of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) case list
+  | Switch of ('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) case list
       (** Switch statement.
 
           switch ($foo) {
@@ -152,9 +147,7 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
               break;
           } *)
   | Foreach of
-      ('ex, 'fb, 'en, 'hi) expr
-      * ('ex, 'fb, 'en, 'hi) as_expr
-      * ('ex, 'fb, 'en, 'hi) block
+      ('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) as_expr * ('ex, 'fb, 'en) block
       (** For-each loop.
 
           foreach ($items as $item) { ... }
@@ -162,9 +155,7 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
           foreach ($items await as $item) { ... } // AsyncIterator<_>
           foreach ($items await as $key => value) { ... } // AsyncKeyedIterator<_> *)
   | Try of
-      ('ex, 'fb, 'en, 'hi) block
-      * ('ex, 'fb, 'en, 'hi) catch list
-      * ('ex, 'fb, 'en, 'hi) block
+      ('ex, 'fb, 'en) block * ('ex, 'fb, 'en) catch list * ('ex, 'fb, 'en) block
       (** Try statement, with catch blocks and a finally block.
 
           try {
@@ -180,7 +171,7 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
           {}
           while (true) ;
           if ($foo) {} // the else is Noop here *)
-  | Block of ('ex, 'fb, 'en, 'hi) block
+  | Block of ('ex, 'fb, 'en) block
       (** Block, a list of statements in curly braces.
 
           { $foo = 42; } *)
@@ -197,25 +188,25 @@ and env_annot =
   | Join
   | Refinement
 
-and ('ex, 'fb, 'en, 'hi) using_stmt = {
+and ('ex, 'fb, 'en) using_stmt = {
   us_is_block_scoped: bool;
   us_has_await: bool;
-  us_exprs: pos * ('ex, 'fb, 'en, 'hi) expr list;
-  us_block: ('ex, 'fb, 'en, 'hi) block;
+  us_exprs: pos * ('ex, 'fb, 'en) expr list;
+  us_block: ('ex, 'fb, 'en) block;
 }
 
-and ('ex, 'fb, 'en, 'hi) as_expr =
-  | As_v of ('ex, 'fb, 'en, 'hi) expr
-  | As_kv of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
-  | Await_as_v of pos * ('ex, 'fb, 'en, 'hi) expr
-  | Await_as_kv of pos * ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
+and ('ex, 'fb, 'en) as_expr =
+  | As_v of ('ex, 'fb, 'en) expr
+  | As_kv of ('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) expr
+  | Await_as_v of pos * ('ex, 'fb, 'en) expr
+  | Await_as_kv of pos * ('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) expr
 
-and ('ex, 'fb, 'en, 'hi) block = ('ex, 'fb, 'en, 'hi) stmt list
+and ('ex, 'fb, 'en) block = ('ex, 'fb, 'en) stmt list
 
-and ('ex, 'fb, 'en, 'hi) class_id = 'ex * pos * ('ex, 'fb, 'en, 'hi) class_id_
+and ('ex, 'fb, 'en) class_id = 'ex * pos * ('ex, 'fb, 'en) class_id_
 
 (** Class ID, used in things like instantiation and static property access. *)
-and ('ex, 'fb, 'en, 'hi) class_id_ =
+and ('ex, 'fb, 'en) class_id_ =
   | CIparent
       (** The class ID of the parent of the lexically scoped class.
 
@@ -242,7 +233,7 @@ and ('ex, 'fb, 'en, 'hi) class_id_ =
           static::some_meth()
           static::$prop = 1;
           new static(); *)
-  | CIexpr of ('ex, 'fb, 'en, 'hi) expr
+  | CIexpr of ('ex, 'fb, 'en) expr
       (** Dynamic class name.
 
           TODO: Syntactically this can only be an Lvar/This/Lplacehodller.
@@ -259,41 +250,41 @@ and ('ex, 'fb, 'en, 'hi) class_id_ =
           Foo::$prop = 1;
           new Foo(); *)
 
-and ('ex, 'fb, 'en, 'hi) expr = 'ex * pos * ('ex, 'fb, 'en, 'hi) expr_
+and ('ex, 'fb, 'en) expr = 'ex * pos * ('ex, 'fb, 'en) expr_
 
-and 'hi collection_targ =
-  | CollectionTV of 'hi targ
-  | CollectionTKV of 'hi targ * 'hi targ
+and 'ex collection_targ =
+  | CollectionTV of 'ex targ
+  | CollectionTKV of 'ex targ * 'ex targ
 
-and ('ex, 'fb, 'en, 'hi) function_ptr_id =
+and ('ex, 'fb, 'en) function_ptr_id =
   | FP_id of sid
-  | FP_class_const of ('ex, 'fb, 'en, 'hi) class_id * pstring
+  | FP_class_const of ('ex, 'fb, 'en) class_id * pstring
 
-and ('ex, 'fb, 'en, 'hi) expression_tree = {
+and ('ex, 'fb, 'en) expression_tree = {
   et_hint: hint;
-  et_splices: ('ex, 'fb, 'en, 'hi) block;
-  et_virtualized_expr: ('ex, 'fb, 'en, 'hi) expr;
-  et_runtime_expr: ('ex, 'fb, 'en, 'hi) expr;
+  et_splices: ('ex, 'fb, 'en) block;
+  et_virtualized_expr: ('ex, 'fb, 'en) expr;
+  et_runtime_expr: ('ex, 'fb, 'en) expr;
 }
 
-and ('ex, 'fb, 'en, 'hi) expr_ =
+and ('ex, 'fb, 'en) expr_ =
   | Darray of
-      ('hi targ * 'hi targ) option
-      * (('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr) list
+      ('ex targ * 'ex targ) option
+      * (('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) expr) list
       (** darray literal.
 
           darray['x' => 0, 'y' => 1]
           darray<string, int>['x' => 0, 'y' => 1] *)
-  | Varray of 'hi targ option * ('ex, 'fb, 'en, 'hi) expr list
+  | Varray of 'ex targ option * ('ex, 'fb, 'en) expr list
       (** varray literal.
 
           varray['hello', 'world']
           varray<string>['hello', 'world'] *)
-  | Shape of (Ast_defs.shape_field_name * ('ex, 'fb, 'en, 'hi) expr) list
+  | Shape of (Ast_defs.shape_field_name * ('ex, 'fb, 'en) expr) list
       (** Shape literal.
 
           shape('x' => 1, 'y' => 2) *)
-  | ValCollection of vc_kind * 'hi targ option * ('ex, 'fb, 'en, 'hi) expr list
+  | ValCollection of vc_kind * 'ex targ option * ('ex, 'fb, 'en) expr list
       (** Collection literal for indexable structures.
 
            Vector {1, 2}
@@ -302,7 +293,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
            vec[1, 2]
            keyset[] *)
   | KeyValCollection of
-      kvc_kind * ('hi targ * 'hi targ) option * ('ex, 'fb, 'en, 'hi) field list
+      kvc_kind * ('ex targ * 'ex targ) option * ('ex, 'fb, 'en) field list
       (** Collection literal for key-value structures.
 
           dict['x' => 1, 'y' => 2]
@@ -341,18 +332,18 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       (** The extra variable in a pipe expression.
 
           $$ *)
-  | Clone of ('ex, 'fb, 'en, 'hi) expr
+  | Clone of ('ex, 'fb, 'en) expr
       (** Clone expression.
 
           clone $foo *)
-  | Array_get of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr option
+  | Array_get of ('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) expr option
       (** Array indexing.
 
           $foo[]
           $foo[$bar] *)
   | Obj_get of
-      ('ex, 'fb, 'en, 'hi) expr
-      * ('ex, 'fb, 'en, 'hi) expr
+      ('ex, 'fb, 'en) expr
+      * ('ex, 'fb, 'en) expr
       * og_null_flavor
       * (* is_prop_call *) bool
       (** Instance property or method access.  is_prop_call is always
@@ -363,15 +354,15 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           ($foo->bar)() // (Call (Obj_get true)) call lambda stored in property
           $foo?->bar // nullsafe access *)
   | Class_get of
-      ('ex, 'fb, 'en, 'hi) class_id
-      * ('ex, 'fb, 'en, 'hi) class_get_expr
+      ('ex, 'fb, 'en) class_id
+      * ('ex, 'fb, 'en) class_get_expr
       * (* is_prop_call *) bool
       (** Static property access.
 
           Foo::$bar
           $some_classname::$bar
           Foo::${$bar} // only in partial mode *)
-  | Class_const of ('ex, 'fb, 'en, 'hi) class_id * pstring
+  | Class_const of ('ex, 'fb, 'en) class_id * pstring
       (** Class constant or static method call. As a standalone expression,
           this is a class constant. Inside a Call node, this is a static
           method call.
@@ -389,13 +380,13 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           parent::someInstanceMeth() *)
   | Call of
       (* function *)
-      ('ex, 'fb, 'en, 'hi) expr
+      ('ex, 'fb, 'en) expr
       * (* explicit type annotations *)
-      'hi targ list
+      'ex targ list
       * (* positional args *)
-      ('ex, 'fb, 'en, 'hi) expr list
+      ('ex, 'fb, 'en) expr list
       * (* unpacked arg *)
-      ('ex, 'fb, 'en, 'hi) expr option
+      ('ex, 'fb, 'en) expr option
       (** Function or method call.
 
           foo()
@@ -406,7 +397,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           async { return 1; }
           // lowered to:
           (async () ==> { return 1; })() *)
-  | FunctionPointer of ('ex, 'fb, 'en, 'hi) function_ptr_id * 'hi targ list
+  | FunctionPointer of ('ex, 'fb, 'en) function_ptr_id * 'ex targ list
       (** A reference to a function or method.
 
           foo_fun<>
@@ -437,7 +428,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           <<<'DOC'
           foo
           DOC *)
-  | String2 of ('ex, 'fb, 'en, 'hi) expr list
+  | String2 of ('ex, 'fb, 'en) expr list
       (** Interpolated string literal.
 
           "hello $foo $bar"
@@ -445,29 +436,29 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           <<<DOC
           hello $foo $bar
           DOC *)
-  | PrefixedString of string * ('ex, 'fb, 'en, 'hi) expr
+  | PrefixedString of string * ('ex, 'fb, 'en) expr
       (** Prefixed string literal. Only used for regular expressions.
 
           re"foo" *)
-  | Yield of ('ex, 'fb, 'en, 'hi) afield
+  | Yield of ('ex, 'fb, 'en) afield
       (** Yield expression. The enclosing function should have an Iterator
           return type.
 
           yield $foo // enclosing function returns an Iterator
           yield $foo => $bar // enclosing function returns a KeyedIterator *)
-  | Await of ('ex, 'fb, 'en, 'hi) expr
+  | Await of ('ex, 'fb, 'en) expr
       (** Await expression.
 
           await $foo *)
-  | ReadonlyExpr of ('ex, 'fb, 'en, 'hi) expr
+  | ReadonlyExpr of ('ex, 'fb, 'en) expr
       (** Readonly expression.
 
           readonly $foo *)
-  | Tuple of ('ex, 'fb, 'en, 'hi) expr list
+  | Tuple of ('ex, 'fb, 'en) expr list
       (** Tuple expression.
 
           tuple("a", 1, $foo) *)
-  | List of ('ex, 'fb, 'en, 'hi) expr list
+  | List of ('ex, 'fb, 'en) expr list
       (** List expression, only used in destructuring. Allows any arbitrary
           lvalue as a subexpression. May also nest.
 
@@ -475,24 +466,23 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           list(, $y) = vec[1, 2]; // skipping items
           list(list($x)) = vec[vec[1]]; // nesting
           list($v[0], $x[], $y->foo) = $blah; *)
-  | Cast of hint * ('ex, 'fb, 'en, 'hi) expr
+  | Cast of hint * ('ex, 'fb, 'en) expr
       (** Cast expression, converting a value to a different type. Only
           primitive types are supported in the hint position.
 
           (int)$foo
           (string)$foo *)
-  | Unop of Ast_defs.uop * ('ex, 'fb, 'en, 'hi) expr
+  | Unop of Ast_defs.uop * ('ex, 'fb, 'en) expr
       (** Unary operator.
 
           !$foo
           -$foo
           +$foo *)
-  | Binop of
-      Ast_defs.bop * ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
+  | Binop of Ast_defs.bop * ('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) expr
       (** Binary operator.
 
           $foo + $bar *)
-  | Pipe of lid * ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
+  | Pipe of lid * ('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) expr
       (** Pipe expression. The lid is the ID of the $$ that is implicitly
           declared by this pipe.
 
@@ -501,27 +491,25 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           $foo |> bar() // equivalent: bar($foo)
           $foo |> bar(1, $$) // equivalent: bar(1, $foo) *)
   | Eif of
-      ('ex, 'fb, 'en, 'hi) expr
-      * ('ex, 'fb, 'en, 'hi) expr option
-      * ('ex, 'fb, 'en, 'hi) expr
+      ('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) expr option * ('ex, 'fb, 'en) expr
       (** Ternary operator, or elvis operator.
 
           $foo ? $bar : $baz // ternary
           $foo ?: $baz // elvis *)
-  | Is of ('ex, 'fb, 'en, 'hi) expr * hint
+  | Is of ('ex, 'fb, 'en) expr * hint
       (** Is operator.
 
           $foo is SomeType *)
-  | As of ('ex, 'fb, 'en, 'hi) expr * hint * (* is nullable *) bool
+  | As of ('ex, 'fb, 'en) expr * hint * (* is nullable *) bool
       (** As operator.
 
           $foo as int
           $foo ?as int *)
   | New of
-      ('ex, 'fb, 'en, 'hi) class_id
-      * 'hi targ list
-      * ('ex, 'fb, 'en, 'hi) expr list
-      * ('ex, 'fb, 'en, 'hi) expr option
+      ('ex, 'fb, 'en) class_id
+      * 'ex targ list
+      * ('ex, 'fb, 'en) expr list
+      * ('ex, 'fb, 'en) expr option
       * (* constructor *)
       'ex
       (** Instantiation.
@@ -529,11 +517,11 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           new Foo(1, 2);
           new Foo<int, T>();
           new Foo('blah', ...$rest); *)
-  | Record of sid * (('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr) list
+  | Record of sid * (('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) expr) list
       (** Record literal.
 
           MyRecord['x' => $foo, 'y' => $bar] *)
-  | Efun of ('ex, 'fb, 'en, 'hi) fun_ * lid list
+  | Efun of ('ex, 'fb, 'en) fun_ * lid list
       (** PHP-style lambda. Does not capture variables unless explicitly
           specified.
 
@@ -543,40 +531,36 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           function(int $x): int { return $x; }
           function($x) use ($y) { return $y; }
           function($x): int use ($y, $z) { return $x + $y + $z; } *)
-  | Lfun of ('ex, 'fb, 'en, 'hi) fun_ * lid list
+  | Lfun of ('ex, 'fb, 'en) fun_ * lid list
       (** Hack lambda. Captures variables automatically.
 
           $x ==> $x
           (int $x): int ==> $x + $other
           ($x, $y) ==> { return $x + $y; } *)
-  | Xml of
-      sid
-      * ('ex, 'fb, 'en, 'hi) xhp_attribute list
-      * ('ex, 'fb, 'en, 'hi) expr list
+  | Xml of sid * ('ex, 'fb, 'en) xhp_attribute list * ('ex, 'fb, 'en) expr list
       (** XHP expression. May contain interpolated expressions.
 
           <foo x="hello" y={$foo}>hello {$bar}</foo> *)
-  | Callconv of Ast_defs.param_kind * ('ex, 'fb, 'en, 'hi) expr
+  | Callconv of Ast_defs.param_kind * ('ex, 'fb, 'en) expr
       (** Explicit calling convention, used for inout. Inout supports any lvalue.
 
           TODO: This could be a flag on parameters in Call.
 
           foo(inout $x[0]) *)
-  | Import of import_flavor * ('ex, 'fb, 'en, 'hi) expr
+  | Import of import_flavor * ('ex, 'fb, 'en) expr
       (** Include or require expression.
 
           require('foo.php')
           require_once('foo.php')
           include('foo.php')
           include_once('foo.php') *)
-  | Collection of
-      sid * 'hi collection_targ option * ('ex, 'fb, 'en, 'hi) afield list
+  | Collection of sid * 'ex collection_targ option * ('ex, 'fb, 'en) afield list
       (** Collection literal.
 
           TODO: T38184446 this is redundant with ValCollection/KeyValCollection.
 
           Vector {} *)
-  | ExpressionTree of ('ex, 'fb, 'en, 'hi) expression_tree
+  | ExpressionTree of ('ex, 'fb, 'en) expression_tree
       (** Expression tree literal. Expression trees are not evaluated at
           runtime, but desugared to an expression representing the code.
 
@@ -590,7 +574,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       (** Global function reference.
 
           fun('foo') *)
-  | Method_id of ('ex, 'fb, 'en, 'hi) expr * pstring
+  | Method_id of ('ex, 'fb, 'en) expr * pstring
       (** Instance method reference on a specific instance.
 
           TODO: This is only created in naming, and ought to happen in
@@ -606,19 +590,17 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           These examples are equivalent to:
 
           (FooClass $f, ...$args) ==> $f->some_meth(...$args) *)
-  | Smethod_id of ('ex, 'fb, 'en, 'hi) class_id * pstring
+  | Smethod_id of ('ex, 'fb, 'en) class_id * pstring
       (** Static method reference.
 
           class_meth('FooClass', 'some_static_meth')
           // equivalent: FooClass::some_static_meth<> *)
   | Pair of
-      ('hi targ * 'hi targ) option
-      * ('ex, 'fb, 'en, 'hi) expr
-      * ('ex, 'fb, 'en, 'hi) expr
+      ('ex targ * 'ex targ) option * ('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) expr
       (** Pair literal.
 
           Pair {$foo, $bar} *)
-  | ET_Splice of ('ex, 'fb, 'en, 'hi) expr
+  | ET_Splice of ('ex, 'fb, 'en) expr
       (** Expression tree splice expression. Only valid inside an
           expression tree literal (backticks).
 
@@ -627,7 +609,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       (** Label used for enum classes.
 
           enum_name#label_name or #label_name *)
-  | Hole of ('ex, 'fb, 'en, 'hi) expr * 'hi * 'hi * hole_source
+  | Hole of ('ex, 'fb, 'en) expr * 'ex * 'ex * hole_source
       (** Annotation used to record failure in subtyping or coercion of an
           expression and calls to [unsafe_cast] or [enforced_cast].
 
@@ -662,51 +644,50 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
           ```
       *)
 
-and ('ex, 'fb, 'en, 'hi) class_get_expr =
+and ('ex, 'fb, 'en) class_get_expr =
   | CGstring of pstring
-  | CGexpr of ('ex, 'fb, 'en, 'hi) expr
+  | CGexpr of ('ex, 'fb, 'en) expr
 
-and ('ex, 'fb, 'en, 'hi) case =
-  | Default of pos * ('ex, 'fb, 'en, 'hi) block
-  | Case of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) block
+and ('ex, 'fb, 'en) case =
+  | Default of pos * ('ex, 'fb, 'en) block
+  | Case of ('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) block
 
-and ('ex, 'fb, 'en, 'hi) catch = sid * lid * ('ex, 'fb, 'en, 'hi) block
+and ('ex, 'fb, 'en) catch = sid * lid * ('ex, 'fb, 'en) block
 
-and ('ex, 'fb, 'en, 'hi) field =
-  ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
+and ('ex, 'fb, 'en) field = ('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) expr
 
-and ('ex, 'fb, 'en, 'hi) afield =
-  | AFvalue of ('ex, 'fb, 'en, 'hi) expr
-  | AFkvalue of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
+and ('ex, 'fb, 'en) afield =
+  | AFvalue of ('ex, 'fb, 'en) expr
+  | AFkvalue of ('ex, 'fb, 'en) expr * ('ex, 'fb, 'en) expr
 
-and ('ex, 'fb, 'en, 'hi) xhp_simple = {
+and ('ex, 'fb, 'en) xhp_simple = {
   xs_name: pstring;
-  xs_type: 'hi;
-  xs_expr: ('ex, 'fb, 'en, 'hi) expr;
+  xs_type: 'ex;
+  xs_expr: ('ex, 'fb, 'en) expr;
 }
 
-and ('ex, 'fb, 'en, 'hi) xhp_attribute =
-  | Xhp_simple of ('ex, 'fb, 'en, 'hi) xhp_simple
-  | Xhp_spread of ('ex, 'fb, 'en, 'hi) expr
+and ('ex, 'fb, 'en) xhp_attribute =
+  | Xhp_simple of ('ex, 'fb, 'en) xhp_simple
+  | Xhp_spread of ('ex, 'fb, 'en) expr
 
 and is_variadic = bool
 
-and ('ex, 'fb, 'en, 'hi) fun_param = {
+and ('ex, 'fb, 'en) fun_param = {
   param_annotation: 'ex;
-  param_type_hint: 'hi type_hint;
+  param_type_hint: 'ex type_hint;
   param_is_variadic: is_variadic;
   param_pos: pos;
   param_name: string;
-  param_expr: ('ex, 'fb, 'en, 'hi) expr option;
+  param_expr: ('ex, 'fb, 'en) expr option;
   param_readonly: Ast_defs.readonly_kind option;
   param_callconv: Ast_defs.param_kind option;
-  param_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  param_user_attributes: ('ex, 'fb, 'en) user_attribute list;
   param_visibility: visibility option;
 }
 
 (** Does this function/method take a variable number of arguments? *)
-and ('ex, 'fb, 'en, 'hi) fun_variadicity =
-  | FVvariadicArg of ('ex, 'fb, 'en, 'hi) fun_param
+and ('ex, 'fb, 'en) fun_variadicity =
+  | FVvariadicArg of ('ex, 'fb, 'en) fun_param
       (** Named variadic argument.
 
       function foo(int ...$args): void {} *)
@@ -717,23 +698,23 @@ and ('ex, 'fb, 'en, 'hi) fun_variadicity =
   | FVnonVariadic
       (** Function is not variadic, takes an exact number of arguments. *)
 
-and ('ex, 'fb, 'en, 'hi) fun_ = {
+and ('ex, 'fb, 'en) fun_ = {
   f_span: pos;
   f_readonly_this: Ast_defs.readonly_kind option;
   f_annotation: 'en;
   f_readonly_ret: Ast_defs.readonly_kind option;
   (* Whether the return value is readonly *)
-  f_ret: 'hi type_hint;
+  f_ret: 'ex type_hint;
   f_name: sid;
-  f_tparams: ('ex, 'fb, 'en, 'hi) tparam list;
+  f_tparams: ('ex, 'fb, 'en) tparam list;
   f_where_constraints: where_constraint_hint list;
-  f_variadic: ('ex, 'fb, 'en, 'hi) fun_variadicity;
-  f_params: ('ex, 'fb, 'en, 'hi) fun_param list;
+  f_variadic: ('ex, 'fb, 'en) fun_variadicity;
+  f_params: ('ex, 'fb, 'en) fun_param list;
   f_ctxs: contexts option;
   f_unsafe_ctxs: contexts option;
-  f_body: ('ex, 'fb, 'en, 'hi) func_body;
+  f_body: ('ex, 'fb, 'en) func_body;
   f_fun_kind: Ast_defs.fun_kind;
-  f_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  f_user_attributes: ('ex, 'fb, 'en) user_attribute list;
   f_external: bool;
       (** true if this declaration has no body because it is an
                          external function declaration (e.g. from an HHI file)*)
@@ -748,43 +729,43 @@ and ('ex, 'fb, 'en, 'hi) fun_ = {
  * have named and unnamed variants of the annotation.
  * See BodyNamingAnnotation in nast.ml and the comment in naming.ml
  *)
-and ('ex, 'fb, 'en, 'hi) func_body = {
-  fb_ast: ('ex, 'fb, 'en, 'hi) block;
+and ('ex, 'fb, 'en) func_body = {
+  fb_ast: ('ex, 'fb, 'en) block;
   fb_annotation: 'fb;
 }
 
 (** A type annotation is two things:
   - the localized hint, or if the hint is missing, the inferred type
   - The typehint associated to this expression if it exists *)
-and 'hi type_hint = 'hi * type_hint_
+and 'ex type_hint = 'ex * type_hint_
 
 (** Explicit type argument to function, constructor, or collection literal.
- * 'hi = unit in NAST
- * 'hi = Typing_defs.(locl ty) in TAST,
+ * 'ex = unit in NAST
+ * 'ex = Typing_defs.(locl ty) in TAST,
  * and is used to record inferred type arguments, with wildcard hint.
  *)
-and 'hi targ = 'hi * hint
+and 'ex targ = 'ex * hint
 
 and type_hint_ = hint option
 
-and ('ex, 'fb, 'en, 'hi) user_attribute = {
+and ('ex, 'fb, 'en) user_attribute = {
   ua_name: sid;
-  ua_params: ('ex, 'fb, 'en, 'hi) expr list;
+  ua_params: ('ex, 'fb, 'en) expr list;
       (** user attributes are restricted to scalar values *)
 }
 
-and ('ex, 'fb, 'en, 'hi) file_attribute = {
-  fa_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+and ('ex, 'fb, 'en) file_attribute = {
+  fa_user_attributes: ('ex, 'fb, 'en) user_attribute list;
   fa_namespace: nsenv;
 }
 
-and ('ex, 'fb, 'en, 'hi) tparam = {
+and ('ex, 'fb, 'en) tparam = {
   tp_variance: Ast_defs.variance;
   tp_name: sid;
-  tp_parameters: ('ex, 'fb, 'en, 'hi) tparam list;
+  tp_parameters: ('ex, 'fb, 'en) tparam list;
   tp_constraints: (Ast_defs.constraint_kind * hint) list;
   tp_reified: reify_kind;
-  tp_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  tp_user_attributes: ('ex, 'fb, 'en) user_attribute list;
 }
 
 and use_as_alias = sid option * pstring * sid option * use_as_visibility list
@@ -799,7 +780,7 @@ and emit_id =
   (* Closures are hoisted to classes, but they don't get an entry in .main. *)
   | Anonymous
 
-and ('ex, 'fb, 'en, 'hi) class_ = {
+and ('ex, 'fb, 'en) class_ = {
   c_span: pos;
   c_annotation: 'en;
   c_mode: FileInfo.mode; [@visitors.opaque]
@@ -808,7 +789,7 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_has_xhp_keyword: bool;
   c_kind: Ast_defs.class_kind;
   c_name: sid;
-  c_tparams: ('ex, 'fb, 'en, 'hi) tparam list;
+  c_tparams: ('ex, 'fb, 'en) tparam list;
       (** The type parameters of a class A<T> (T is the parameter) *)
   c_extends: class_hint list;
   c_uses: trait_hint list;
@@ -824,16 +805,16 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_implements: class_hint list;
   c_support_dynamic_type: bool;
   c_where_constraints: where_constraint_hint list;
-  c_consts: ('ex, 'fb, 'en, 'hi) class_const list;
-  c_typeconsts: ('ex, 'fb, 'en, 'hi) class_typeconst_def list;
-  c_vars: ('ex, 'fb, 'en, 'hi) class_var list;
-  c_methods: ('ex, 'fb, 'en, 'hi) method_ list;
-  c_attributes: ('ex, 'fb, 'en, 'hi) class_attr list;
+  c_consts: ('ex, 'fb, 'en) class_const list;
+  c_typeconsts: ('ex, 'fb, 'en) class_typeconst_def list;
+  c_vars: ('ex, 'fb, 'en) class_var list;
+  c_methods: ('ex, 'fb, 'en) method_ list;
+  c_attributes: ('ex, 'fb, 'en) class_attr list;
   c_xhp_children: (pos * xhp_child) list;
-  c_xhp_attrs: ('ex, 'fb, 'en, 'hi) xhp_attr list;
+  c_xhp_attrs: ('ex, 'fb, 'en) xhp_attr list;
   c_namespace: nsenv;
-  c_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
-  c_file_attributes: ('ex, 'fb, 'en, 'hi) file_attribute list;
+  c_user_attributes: ('ex, 'fb, 'en) user_attribute list;
+  c_file_attributes: ('ex, 'fb, 'en) file_attribute list;
   c_enum: enum_ option;
   c_doc_comment: doc_comment option;
   c_emit_id: emit_id option;
@@ -849,20 +830,20 @@ and xhp_attr_tag =
   | Required
   | LateInit
 
-and ('ex, 'fb, 'en, 'hi) xhp_attr =
-  'hi type_hint
-  * ('ex, 'fb, 'en, 'hi) class_var
+and ('ex, 'fb, 'en) xhp_attr =
+  'ex type_hint
+  * ('ex, 'fb, 'en) class_var
   * xhp_attr_tag option
-  * (pos * ('ex, 'fb, 'en, 'hi) expr list) option
+  * (pos * ('ex, 'fb, 'en) expr list) option
 
-and ('ex, 'fb, 'en, 'hi) class_attr =
+and ('ex, 'fb, 'en) class_attr =
   | CA_name of sid
-  | CA_field of ('ex, 'fb, 'en, 'hi) ca_field
+  | CA_field of ('ex, 'fb, 'en) ca_field
 
-and ('ex, 'fb, 'en, 'hi) ca_field = {
+and ('ex, 'fb, 'en) ca_field = {
   ca_type: ca_type;
   ca_id: sid;
-  ca_value: ('ex, 'fb, 'en, 'hi) expr option;
+  ca_value: ('ex, 'fb, 'en) expr option;
   ca_required: bool;
 }
 
@@ -870,23 +851,23 @@ and ca_type =
   | CA_hint of hint
   | CA_enum of string list
 
-and ('ex, 'fb, 'en, 'hi) class_const_kind =
-  | CCAbstract of ('ex, 'fb, 'en, 'hi) expr option
+and ('ex, 'fb, 'en) class_const_kind =
+  | CCAbstract of ('ex, 'fb, 'en) expr option
       (** CCAbstract represents the states
        *    abstract const int X;
        *    abstract const int Y = 4;
        * The expr option is a default value
        *)
-  | CCConcrete of ('ex, 'fb, 'en, 'hi) expr
+  | CCConcrete of ('ex, 'fb, 'en) expr
       (** CCConcrete represents
        *    const int Z = 4;
        * The expr is the value of the constant. It is not optional
        *)
 
-and ('ex, 'fb, 'en, 'hi) class_const = {
+and ('ex, 'fb, 'en) class_const = {
   cc_type: hint option;
   cc_id: sid;
-  cc_kind: ('ex, 'fb, 'en, 'hi) class_const_kind;
+  cc_kind: ('ex, 'fb, 'en) class_const_kind;
   cc_doc_comment: doc_comment option;
 }
 
@@ -917,8 +898,8 @@ and class_typeconst =
   | TCConcrete of class_concrete_typeconst
   | TCPartiallyAbstract of class_partially_abstract_typeconst
 
-and ('ex, 'fb, 'en, 'hi) class_typeconst_def = {
-  c_tconst_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+and ('ex, 'fb, 'en) class_typeconst_def = {
+  c_tconst_user_attributes: ('ex, 'fb, 'en) user_attribute list;
   c_tconst_name: sid;
   c_tconst_kind: class_typeconst;
   c_tconst_span: pos;
@@ -931,23 +912,23 @@ and xhp_attr_info = {
   xai_enum_values: Ast_defs.xhp_enum_value list;
 }
 
-and ('ex, 'fb, 'en, 'hi) class_var = {
+and ('ex, 'fb, 'en) class_var = {
   cv_final: bool;
   cv_xhp_attr: xhp_attr_info option;
   cv_abstract: bool;
   cv_readonly: bool;
   cv_visibility: visibility;
-  cv_type: 'hi type_hint;
+  cv_type: 'ex type_hint;
   cv_id: sid;
-  cv_expr: ('ex, 'fb, 'en, 'hi) expr option;
-  cv_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  cv_expr: ('ex, 'fb, 'en) expr option;
+  cv_user_attributes: ('ex, 'fb, 'en) user_attribute list;
   cv_doc_comment: doc_comment option;
   cv_is_promoted_variadic: bool;
   cv_is_static: bool;
   cv_span: pos;
 }
 
-and ('ex, 'fb, 'en, 'hi) method_ = {
+and ('ex, 'fb, 'en) method_ = {
   m_span: pos;
   m_annotation: 'en;
   m_final: bool;
@@ -956,17 +937,17 @@ and ('ex, 'fb, 'en, 'hi) method_ = {
   m_readonly_this: bool;
   m_visibility: visibility;
   m_name: sid;
-  m_tparams: ('ex, 'fb, 'en, 'hi) tparam list;
+  m_tparams: ('ex, 'fb, 'en) tparam list;
   m_where_constraints: where_constraint_hint list;
-  m_variadic: ('ex, 'fb, 'en, 'hi) fun_variadicity;
-  m_params: ('ex, 'fb, 'en, 'hi) fun_param list;
+  m_variadic: ('ex, 'fb, 'en) fun_variadicity;
+  m_params: ('ex, 'fb, 'en) fun_param list;
   m_ctxs: contexts option;
   m_unsafe_ctxs: contexts option;
-  m_body: ('ex, 'fb, 'en, 'hi) func_body;
+  m_body: ('ex, 'fb, 'en) func_body;
   m_fun_kind: Ast_defs.fun_kind;
-  m_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  m_user_attributes: ('ex, 'fb, 'en) user_attribute list;
   m_readonly_ret: Ast_defs.readonly_kind option;
-  m_ret: 'hi type_hint;
+  m_ret: 'ex type_hint;
   m_external: bool;
       (** true if this declaration has no body because it is an external method
           declaration (e.g. from an HHI file) *)
@@ -975,13 +956,13 @@ and ('ex, 'fb, 'en, 'hi) method_ = {
 
 and nsenv = (Namespace_env.env[@visitors.opaque])
 
-and ('ex, 'fb, 'en, 'hi) typedef = {
+and ('ex, 'fb, 'en) typedef = {
   t_annotation: 'en;
   t_name: sid;
-  t_tparams: ('ex, 'fb, 'en, 'hi) tparam list;
+  t_tparams: ('ex, 'fb, 'en) tparam list;
   t_constraint: hint option;
   t_kind: hint;
-  t_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  t_user_attributes: ('ex, 'fb, 'en) user_attribute list;
   t_mode: FileInfo.mode; [@visitors.opaque]
   t_vis: typedef_visibility;
   t_namespace: nsenv;
@@ -990,24 +971,24 @@ and ('ex, 'fb, 'en, 'hi) typedef = {
   t_is_ctx: bool;
 }
 
-and ('ex, 'fb, 'en, 'hi) gconst = {
+and ('ex, 'fb, 'en) gconst = {
   cst_annotation: 'en;
   cst_mode: FileInfo.mode; [@visitors.opaque]
   cst_name: sid;
   cst_type: hint option;
-  cst_value: ('ex, 'fb, 'en, 'hi) expr;
+  cst_value: ('ex, 'fb, 'en) expr;
   cst_namespace: nsenv;
   cst_span: pos;
   cst_emit_id: emit_id option;
 }
 
-and ('ex, 'fb, 'en, 'hi) record_def = {
+and ('ex, 'fb, 'en) record_def = {
   rd_annotation: 'en;
   rd_name: sid;
   rd_extends: record_hint option;
   rd_abstract: bool;
-  rd_fields: (sid * hint * ('ex, 'fb, 'en, 'hi) expr option) list;
-  rd_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
+  rd_fields: (sid * hint * ('ex, 'fb, 'en) expr option) list;
+  rd_user_attributes: ('ex, 'fb, 'en) user_attribute list;
   rd_namespace: nsenv;
   rd_span: pos;
   rd_doc_comment: doc_comment option;
@@ -1016,24 +997,24 @@ and ('ex, 'fb, 'en, 'hi) record_def = {
 
 and record_hint = hint
 
-and ('ex, 'fb, 'en, 'hi) fun_def = {
+and ('ex, 'fb, 'en) fun_def = {
   fd_namespace: nsenv;
-  fd_file_attributes: ('ex, 'fb, 'en, 'hi) file_attribute list;
+  fd_file_attributes: ('ex, 'fb, 'en) file_attribute list;
   fd_mode: FileInfo.mode; [@visitors.opaque]
-  fd_fun: ('ex, 'fb, 'en, 'hi) fun_;
+  fd_fun: ('ex, 'fb, 'en) fun_;
 }
 
-and ('ex, 'fb, 'en, 'hi) def =
-  | Fun of ('ex, 'fb, 'en, 'hi) fun_def
-  | Class of ('ex, 'fb, 'en, 'hi) class_
-  | RecordDef of ('ex, 'fb, 'en, 'hi) record_def
-  | Stmt of ('ex, 'fb, 'en, 'hi) stmt
-  | Typedef of ('ex, 'fb, 'en, 'hi) typedef
-  | Constant of ('ex, 'fb, 'en, 'hi) gconst
-  | Namespace of sid * ('ex, 'fb, 'en, 'hi) program
+and ('ex, 'fb, 'en) def =
+  | Fun of ('ex, 'fb, 'en) fun_def
+  | Class of ('ex, 'fb, 'en) class_
+  | RecordDef of ('ex, 'fb, 'en) record_def
+  | Stmt of ('ex, 'fb, 'en) stmt
+  | Typedef of ('ex, 'fb, 'en) typedef
+  | Constant of ('ex, 'fb, 'en) gconst
+  | Namespace of sid * ('ex, 'fb, 'en) program
   | NamespaceUse of (ns_kind * sid * sid) list
   | SetNamespaceEnv of nsenv
-  | FileAttributes of ('ex, 'fb, 'en, 'hi) file_attribute
+  | FileAttributes of ('ex, 'fb, 'en) file_attribute
 
 and ns_kind =
   | NSNamespace
@@ -1133,10 +1114,10 @@ let get_break_continue_level level_opt =
   | exception _ -> Level_non_literal
 
 (* extract the hint from a type annotation *)
-let hint_of_type_hint : 'hi. 'hi type_hint -> type_hint_ = snd
+let hint_of_type_hint : 'ex. 'ex type_hint -> type_hint_ = snd
 
 (* extract the type from a type annotation *)
-let type_of_type_hint : 'hi. 'hi type_hint -> 'hi = fst
+let type_of_type_hint : 'ex. 'ex type_hint -> 'ex = fst
 
 (* map a function over the second part of a type annotation *)
 let type_hint_option_map ~f ta =

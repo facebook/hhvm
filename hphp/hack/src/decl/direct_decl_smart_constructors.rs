@@ -246,7 +246,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
 
     fn accumulate_const_ref(
         &mut self,
-        class_id: &'a aast::ClassId<(), nast::FuncBodyAnn, (), ()>,
+        class_id: &'a aast::ClassId<(), nast::FuncBodyAnn, ()>,
         value_id: &Id<'a>,
     ) {
         // The decl for a class constant stores a list of all the scope-resolution expressions

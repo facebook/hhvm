@@ -118,7 +118,7 @@ let expander =
     method! on_class_id env (ty, pos, cid_) =
       (expand_ty ~pos env ty, pos, self#on_class_id_ env cid_)
 
-    method! on_'hi env ty = expand_ty env ty
+    method! on_'ex env ty = expand_ty env ty
   end
 
 (* Replace all types in a program AST by their expansions *)

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d5664e86ef961cc985d4ca8c57a3c085>>
+// @generated SignedSource<<de15adb64e4c3b95ff20b542733ae72b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -26,9 +26,7 @@ pub use doc_comment::DocComment;
 /// ex: Expression annotation type (when typechecking, the inferred type)
 /// fb: Function body tag (e.g. has naming occurred)
 /// en: Environment (tracking state inside functions and classes)
-/// hi: Hint annotation (when typechecking it will be the localized type hint or the
-/// inferred missing type if the hint is missing)
-pub type Program<Ex, Fb, En, Hi> = Vec<Def<Ex, Fb, En, Hi>>;
+pub type Program<Ex, Fb, En> = Vec<Def<Ex, Fb, En>>;
 
 #[derive(
     Clone,
@@ -44,7 +42,7 @@ pub type Program<Ex, Fb, En, Hi> = Vec<Def<Ex, Fb, En, Hi>>;
     Serialize,
     ToOcamlRep
 )]
-pub struct Stmt<Ex, Fb, En, Hi>(pub Pos, pub Stmt_<Ex, Fb, En, Hi>);
+pub struct Stmt<Ex, Fb, En>(pub Pos, pub Stmt_<Ex, Fb, En>);
 
 #[derive(
     Clone,
@@ -60,7 +58,7 @@ pub struct Stmt<Ex, Fb, En, Hi>(pub Pos, pub Stmt_<Ex, Fb, En, Hi>);
     Serialize,
     ToOcamlRep
 )]
-pub enum Stmt_<Ex, Fb, En, Hi> {
+pub enum Stmt_<Ex, Fb, En> {
     /// Marker for a switch statement that falls through.
     ///
     /// // FALLTHROUGH
@@ -68,7 +66,7 @@ pub enum Stmt_<Ex, Fb, En, Hi> {
     /// Standalone expression.
     ///
     /// 1 + 2;
-    Expr(Box<Expr<Ex, Fb, En, Hi>>),
+    Expr(Box<Expr<Ex, Fb, En>>),
     /// Break inside a loop or switch statement.
     ///
     /// break;
@@ -80,12 +78,12 @@ pub enum Stmt_<Ex, Fb, En, Hi> {
     /// Throw an exception.
     ///
     /// throw $foo;
-    Throw(Box<Expr<Ex, Fb, En, Hi>>),
+    Throw(Box<Expr<Ex, Fb, En>>),
     /// Return, with an optional value.
     ///
     /// return;
     /// return $foo;
-    Return(Box<Option<Expr<Ex, Fb, En, Hi>>>),
+    Return(Box<Option<Expr<Ex, Fb, En>>>),
     /// Yield break, terminating the current generator. This behaves like
     /// return; but is more explicit, and ensures the function is treated
     /// as a generator.
@@ -105,39 +103,28 @@ pub enum Stmt_<Ex, Fb, En, Hi> {
     /// $bar = await g();
     /// await h();
     /// }
-    Awaitall(
-        Box<(
-            Vec<(Option<Lid>, Expr<Ex, Fb, En, Hi>)>,
-            Block<Ex, Fb, En, Hi>,
-        )>,
-    ),
+    Awaitall(Box<(Vec<(Option<Lid>, Expr<Ex, Fb, En>)>, Block<Ex, Fb, En>)>),
     /// If statement.
     ///
     /// if ($foo) { ... } else { ... }
-    If(
-        Box<(
-            Expr<Ex, Fb, En, Hi>,
-            Block<Ex, Fb, En, Hi>,
-            Block<Ex, Fb, En, Hi>,
-        )>,
-    ),
+    If(Box<(Expr<Ex, Fb, En>, Block<Ex, Fb, En>, Block<Ex, Fb, En>)>),
     /// Do-while loop.
     ///
     /// do {
     /// bar();
     /// } while($foo)
-    Do(Box<(Block<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),
+    Do(Box<(Block<Ex, Fb, En>, Expr<Ex, Fb, En>)>),
     /// While loop.
     ///
     /// while ($foo) {
     /// bar();
     /// }
-    While(Box<(Expr<Ex, Fb, En, Hi>, Block<Ex, Fb, En, Hi>)>),
+    While(Box<(Expr<Ex, Fb, En>, Block<Ex, Fb, En>)>),
     /// Initialize a value that is automatically disposed of.
     ///
     /// using $foo = bar(); // disposed at the end of the function
     /// using ($foo = bar(), $baz = quux()) {} // disposed after the block
-    Using(Box<UsingStmt<Ex, Fb, En, Hi>>),
+    Using(Box<UsingStmt<Ex, Fb, En>>),
     /// For loop. The initializer and increment parts can include
     /// multiple comma-separated statements. The termination condition is
     /// optional.
@@ -146,10 +133,10 @@ pub enum Stmt_<Ex, Fb, En, Hi> {
     /// for ($x = 0, $y = 0; ; $x++, $y++) { ... }
     For(
         Box<(
-            Vec<Expr<Ex, Fb, En, Hi>>,
-            Option<Expr<Ex, Fb, En, Hi>>,
-            Vec<Expr<Ex, Fb, En, Hi>>,
-            Block<Ex, Fb, En, Hi>,
+            Vec<Expr<Ex, Fb, En>>,
+            Option<Expr<Ex, Fb, En>>,
+            Vec<Expr<Ex, Fb, En>>,
+            Block<Ex, Fb, En>,
         )>,
     ),
     /// Switch statement.
@@ -162,20 +149,14 @@ pub enum Stmt_<Ex, Fb, En, Hi> {
     /// baz();
     /// break;
     /// }
-    Switch(Box<(Expr<Ex, Fb, En, Hi>, Vec<Case<Ex, Fb, En, Hi>>)>),
+    Switch(Box<(Expr<Ex, Fb, En>, Vec<Case<Ex, Fb, En>>)>),
     /// For-each loop.
     ///
     /// foreach ($items as $item) { ... }
     /// foreach ($items as $key => value) { ... }
     /// foreach ($items await as $item) { ... } // AsyncIterator<_>
     /// foreach ($items await as $key => value) { ... } // AsyncKeyedIterator<_>
-    Foreach(
-        Box<(
-            Expr<Ex, Fb, En, Hi>,
-            AsExpr<Ex, Fb, En, Hi>,
-            Block<Ex, Fb, En, Hi>,
-        )>,
-    ),
+    Foreach(Box<(Expr<Ex, Fb, En>, AsExpr<Ex, Fb, En>, Block<Ex, Fb, En>)>),
     /// Try statement, with catch blocks and a finally block.
     ///
     /// try {
@@ -185,13 +166,7 @@ pub enum Stmt_<Ex, Fb, En, Hi> {
     /// } finally {
     /// baz();
     /// }
-    Try(
-        Box<(
-            Block<Ex, Fb, En, Hi>,
-            Vec<Catch<Ex, Fb, En, Hi>>,
-            Block<Ex, Fb, En, Hi>,
-        )>,
-    ),
+    Try(Box<(Block<Ex, Fb, En>, Vec<Catch<Ex, Fb, En>>, Block<Ex, Fb, En>)>),
     /// No-op, the empty statement.
     ///
     /// {}
@@ -201,7 +176,7 @@ pub enum Stmt_<Ex, Fb, En, Hi> {
     /// Block, a list of statements in curly braces.
     ///
     /// { $foo = 42; }
-    Block(Block<Ex, Fb, En, Hi>),
+    Block(Block<Ex, Fb, En>),
     /// The mode tag at the beginning of a file.
     /// TODO: this really belongs in def.
     ///
@@ -249,11 +224,11 @@ arena_deserializer::impl_deserialize_in_arena!(EnvAnnot);
     Serialize,
     ToOcamlRep
 )]
-pub struct UsingStmt<Ex, Fb, En, Hi> {
+pub struct UsingStmt<Ex, Fb, En> {
     pub is_block_scoped: bool,
     pub has_await: bool,
-    pub exprs: (Pos, Vec<Expr<Ex, Fb, En, Hi>>),
-    pub block: Block<Ex, Fb, En, Hi>,
+    pub exprs: (Pos, Vec<Expr<Ex, Fb, En>>),
+    pub block: Block<Ex, Fb, En>,
 }
 
 #[derive(
@@ -270,14 +245,14 @@ pub struct UsingStmt<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub enum AsExpr<Ex, Fb, En, Hi> {
-    AsV(Expr<Ex, Fb, En, Hi>),
-    AsKv(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>),
-    AwaitAsV(Pos, Expr<Ex, Fb, En, Hi>),
-    AwaitAsKv(Pos, Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>),
+pub enum AsExpr<Ex, Fb, En> {
+    AsV(Expr<Ex, Fb, En>),
+    AsKv(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>),
+    AwaitAsV(Pos, Expr<Ex, Fb, En>),
+    AwaitAsKv(Pos, Expr<Ex, Fb, En>, Expr<Ex, Fb, En>),
 }
 
-pub type Block<Ex, Fb, En, Hi> = Vec<Stmt<Ex, Fb, En, Hi>>;
+pub type Block<Ex, Fb, En> = Vec<Stmt<Ex, Fb, En>>;
 
 #[derive(
     Clone,
@@ -293,7 +268,7 @@ pub type Block<Ex, Fb, En, Hi> = Vec<Stmt<Ex, Fb, En, Hi>>;
     Serialize,
     ToOcamlRep
 )]
-pub struct ClassId<Ex, Fb, En, Hi>(pub Ex, pub Pos, pub ClassId_<Ex, Fb, En, Hi>);
+pub struct ClassId<Ex, Fb, En>(pub Ex, pub Pos, pub ClassId_<Ex, Fb, En>);
 
 /// Class ID, used in things like instantiation and static property access.
 #[derive(
@@ -310,7 +285,7 @@ pub struct ClassId<Ex, Fb, En, Hi>(pub Ex, pub Pos, pub ClassId_<Ex, Fb, En, Hi>
     Serialize,
     ToOcamlRep
 )]
-pub enum ClassId_<Ex, Fb, En, Hi> {
+pub enum ClassId_<Ex, Fb, En> {
     /// The class ID of the parent of the lexically scoped class.
     ///
     /// In a trait, it is the parent class ID of the using class.
@@ -346,7 +321,7 @@ pub enum ClassId_<Ex, Fb, En, Hi> {
     /// $d::some_meth();
     /// $d::$prop = 1;
     /// new $d();
-    CIexpr(Expr<Ex, Fb, En, Hi>),
+    CIexpr(Expr<Ex, Fb, En>),
     /// Explicit class name. This is the common case.
     ///
     /// Foop::some_meth()
@@ -369,7 +344,7 @@ pub enum ClassId_<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct Expr<Ex, Fb, En, Hi>(pub Ex, pub Pos, pub Expr_<Ex, Fb, En, Hi>);
+pub struct Expr<Ex, Fb, En>(pub Ex, pub Pos, pub Expr_<Ex, Fb, En>);
 
 #[derive(
     Clone,
@@ -385,9 +360,9 @@ pub struct Expr<Ex, Fb, En, Hi>(pub Ex, pub Pos, pub Expr_<Ex, Fb, En, Hi>);
     Serialize,
     ToOcamlRep
 )]
-pub enum CollectionTarg<Hi> {
-    CollectionTV(Targ<Hi>),
-    CollectionTKV(Targ<Hi>, Targ<Hi>),
+pub enum CollectionTarg<Ex> {
+    CollectionTV(Targ<Ex>),
+    CollectionTKV(Targ<Ex>, Targ<Ex>),
 }
 
 #[derive(
@@ -404,9 +379,9 @@ pub enum CollectionTarg<Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub enum FunctionPtrId<Ex, Fb, En, Hi> {
+pub enum FunctionPtrId<Ex, Fb, En> {
     FPId(Sid),
-    FPClassConst(ClassId<Ex, Fb, En, Hi>, Pstring),
+    FPClassConst(ClassId<Ex, Fb, En>, Pstring),
 }
 
 #[derive(
@@ -423,11 +398,11 @@ pub enum FunctionPtrId<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct ExpressionTree<Ex, Fb, En, Hi> {
+pub struct ExpressionTree<Ex, Fb, En> {
     pub hint: Hint,
-    pub splices: Block<Ex, Fb, En, Hi>,
-    pub virtualized_expr: Expr<Ex, Fb, En, Hi>,
-    pub runtime_expr: Expr<Ex, Fb, En, Hi>,
+    pub splices: Block<Ex, Fb, En>,
+    pub virtualized_expr: Expr<Ex, Fb, En>,
+    pub runtime_expr: Expr<Ex, Fb, En>,
 }
 
 #[derive(
@@ -444,26 +419,26 @@ pub struct ExpressionTree<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub enum Expr_<Ex, Fb, En, Hi> {
+pub enum Expr_<Ex, Fb, En> {
     /// darray literal.
     ///
     /// darray['x' => 0, 'y' => 1]
     /// darray<string, int>['x' => 0, 'y' => 1]
     Darray(
         Box<(
-            Option<(Targ<Hi>, Targ<Hi>)>,
-            Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>,
+            Option<(Targ<Ex>, Targ<Ex>)>,
+            Vec<(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)>,
         )>,
     ),
     /// varray literal.
     ///
     /// varray['hello', 'world']
     /// varray<string>['hello', 'world']
-    Varray(Box<(Option<Targ<Hi>>, Vec<Expr<Ex, Fb, En, Hi>>)>),
+    Varray(Box<(Option<Targ<Ex>>, Vec<Expr<Ex, Fb, En>>)>),
     /// Shape literal.
     ///
     /// shape('x' => 1, 'y' => 2)
-    Shape(Vec<(ast_defs::ShapeFieldName, Expr<Ex, Fb, En, Hi>)>),
+    Shape(Vec<(ast_defs::ShapeFieldName, Expr<Ex, Fb, En>)>),
     /// Collection literal for indexable structures.
     ///
     /// Vector {1, 2}
@@ -471,7 +446,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     /// Set<string> {'foo', 'bar'}
     /// vec[1, 2]
     /// keyset[]
-    ValCollection(Box<(VcKind, Option<Targ<Hi>>, Vec<Expr<Ex, Fb, En, Hi>>)>),
+    ValCollection(Box<(VcKind, Option<Targ<Ex>>, Vec<Expr<Ex, Fb, En>>)>),
     /// Collection literal for key-value structures.
     ///
     /// dict['x' => 1, 'y' => 2]
@@ -480,8 +455,8 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     KeyValCollection(
         Box<(
             KvcKind,
-            Option<(Targ<Hi>, Targ<Hi>)>,
-            Vec<Field<Ex, Fb, En, Hi>>,
+            Option<(Targ<Ex>, Targ<Ex>)>,
+            Vec<Field<Ex, Fb, En>>,
         )>,
     ),
     /// Null literal.
@@ -520,12 +495,12 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     /// Clone expression.
     ///
     /// clone $foo
-    Clone(Box<Expr<Ex, Fb, En, Hi>>),
+    Clone(Box<Expr<Ex, Fb, En>>),
     /// Array indexing.
     ///
     /// $foo[]
     /// $foo[$bar]
-    ArrayGet(Box<(Expr<Ex, Fb, En, Hi>, Option<Expr<Ex, Fb, En, Hi>>)>),
+    ArrayGet(Box<(Expr<Ex, Fb, En>, Option<Expr<Ex, Fb, En>>)>),
     /// Instance property or method access.  is_prop_call is always
     /// false, except when inside a call is accessing a property.
     ///
@@ -533,20 +508,13 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     /// $foo->bar() // (Call (Obj_get false)) method call
     /// ($foo->bar)() // (Call (Obj_get true)) call lambda stored in property
     /// $foo?->bar // nullsafe access
-    ObjGet(
-        Box<(
-            Expr<Ex, Fb, En, Hi>,
-            Expr<Ex, Fb, En, Hi>,
-            OgNullFlavor,
-            bool,
-        )>,
-    ),
+    ObjGet(Box<(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>, OgNullFlavor, bool)>),
     /// Static property access.
     ///
     /// Foo::$bar
     /// $some_classname::$bar
     /// Foo::${$bar} // only in partial mode
-    ClassGet(Box<(ClassId<Ex, Fb, En, Hi>, ClassGetExpr<Ex, Fb, En, Hi>, bool)>),
+    ClassGet(Box<(ClassId<Ex, Fb, En>, ClassGetExpr<Ex, Fb, En>, bool)>),
     /// Class constant or static method call. As a standalone expression,
     /// this is a class constant. Inside a Call node, this is a static
     /// method call.
@@ -562,7 +530,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     ///
     /// parent::someStaticMeth()
     /// parent::someInstanceMeth()
-    ClassConst(Box<(ClassId<Ex, Fb, En, Hi>, Pstring)>),
+    ClassConst(Box<(ClassId<Ex, Fb, En>, Pstring)>),
     /// Function or method call.
     ///
     /// foo()
@@ -575,17 +543,17 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     /// (async () ==> { return 1; })()
     Call(
         Box<(
-            Expr<Ex, Fb, En, Hi>,
-            Vec<Targ<Hi>>,
-            Vec<Expr<Ex, Fb, En, Hi>>,
-            Option<Expr<Ex, Fb, En, Hi>>,
+            Expr<Ex, Fb, En>,
+            Vec<Targ<Ex>>,
+            Vec<Expr<Ex, Fb, En>>,
+            Option<Expr<Ex, Fb, En>>,
         )>,
     ),
     /// A reference to a function or method.
     ///
     /// foo_fun<>
     /// FooCls::meth<int>
-    FunctionPointer(Box<(FunctionPtrId<Ex, Fb, En, Hi>, Vec<Targ<Hi>>)>),
+    FunctionPointer(Box<(FunctionPtrId<Ex, Fb, En>, Vec<Targ<Ex>>)>),
     /// Integer literal.
     ///
     /// 42
@@ -619,29 +587,29 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     /// <<<DOC
     /// hello $foo $bar
     /// DOC
-    String2(Vec<Expr<Ex, Fb, En, Hi>>),
+    String2(Vec<Expr<Ex, Fb, En>>),
     /// Prefixed string literal. Only used for regular expressions.
     ///
     /// re"foo"
-    PrefixedString(Box<(String, Expr<Ex, Fb, En, Hi>)>),
+    PrefixedString(Box<(String, Expr<Ex, Fb, En>)>),
     /// Yield expression. The enclosing function should have an Iterator
     /// return type.
     ///
     /// yield $foo // enclosing function returns an Iterator
     /// yield $foo => $bar // enclosing function returns a KeyedIterator
-    Yield(Box<Afield<Ex, Fb, En, Hi>>),
+    Yield(Box<Afield<Ex, Fb, En>>),
     /// Await expression.
     ///
     /// await $foo
-    Await(Box<Expr<Ex, Fb, En, Hi>>),
+    Await(Box<Expr<Ex, Fb, En>>),
     /// Readonly expression.
     ///
     /// readonly $foo
-    ReadonlyExpr(Box<Expr<Ex, Fb, En, Hi>>),
+    ReadonlyExpr(Box<Expr<Ex, Fb, En>>),
     /// Tuple expression.
     ///
     /// tuple("a", 1, $foo)
-    Tuple(Vec<Expr<Ex, Fb, En, Hi>>),
+    Tuple(Vec<Expr<Ex, Fb, En>>),
     /// List expression, only used in destructuring. Allows any arbitrary
     /// lvalue as a subexpression. May also nest.
     ///
@@ -649,23 +617,23 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     /// list(, $y) = vec[1, 2]; // skipping items
     /// list(list($x)) = vec[vec[1]]; // nesting
     /// list($v[0], $x[], $y->foo) = $blah;
-    List(Vec<Expr<Ex, Fb, En, Hi>>),
+    List(Vec<Expr<Ex, Fb, En>>),
     /// Cast expression, converting a value to a different type. Only
     /// primitive types are supported in the hint position.
     ///
     /// (int)$foo
     /// (string)$foo
-    Cast(Box<(Hint, Expr<Ex, Fb, En, Hi>)>),
+    Cast(Box<(Hint, Expr<Ex, Fb, En>)>),
     /// Unary operator.
     ///
     /// !$foo
     /// -$foo
     /// +$foo
-    Unop(Box<(ast_defs::Uop, Expr<Ex, Fb, En, Hi>)>),
+    Unop(Box<(ast_defs::Uop, Expr<Ex, Fb, En>)>),
     /// Binary operator.
     ///
     /// $foo + $bar
-    Binop(Box<(ast_defs::Bop, Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),
+    Binop(Box<(ast_defs::Bop, Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)>),
     /// Pipe expression. The lid is the ID of the $$ that is implicitly
     /// declared by this pipe.
     ///
@@ -673,27 +641,21 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     ///
     /// $foo |> bar() // equivalent: bar($foo)
     /// $foo |> bar(1, $$) // equivalent: bar(1, $foo)
-    Pipe(Box<(Lid, Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),
+    Pipe(Box<(Lid, Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)>),
     /// Ternary operator, or elvis operator.
     ///
     /// $foo ? $bar : $baz // ternary
     /// $foo ?: $baz // elvis
-    Eif(
-        Box<(
-            Expr<Ex, Fb, En, Hi>,
-            Option<Expr<Ex, Fb, En, Hi>>,
-            Expr<Ex, Fb, En, Hi>,
-        )>,
-    ),
+    Eif(Box<(Expr<Ex, Fb, En>, Option<Expr<Ex, Fb, En>>, Expr<Ex, Fb, En>)>),
     /// Is operator.
     ///
     /// $foo is SomeType
-    Is(Box<(Expr<Ex, Fb, En, Hi>, Hint)>),
+    Is(Box<(Expr<Ex, Fb, En>, Hint)>),
     /// As operator.
     ///
     /// $foo as int
     /// $foo ?as int
-    As(Box<(Expr<Ex, Fb, En, Hi>, Hint, bool)>),
+    As(Box<(Expr<Ex, Fb, En>, Hint, bool)>),
     /// Instantiation.
     ///
     /// new Foo(1, 2);
@@ -701,17 +663,17 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     /// new Foo('blah', ...$rest);
     New(
         Box<(
-            ClassId<Ex, Fb, En, Hi>,
-            Vec<Targ<Hi>>,
-            Vec<Expr<Ex, Fb, En, Hi>>,
-            Option<Expr<Ex, Fb, En, Hi>>,
+            ClassId<Ex, Fb, En>,
+            Vec<Targ<Ex>>,
+            Vec<Expr<Ex, Fb, En>>,
+            Option<Expr<Ex, Fb, En>>,
             Ex,
         )>,
     ),
     /// Record literal.
     ///
     /// MyRecord['x' => $foo, 'y' => $bar]
-    Record(Box<(Sid, Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>)>),
+    Record(Box<(Sid, Vec<(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)>)>),
     /// PHP-style lambda. Does not capture variables unless explicitly
     /// specified.
     ///
@@ -721,48 +683,42 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     /// function(int $x): int { return $x; }
     /// function($x) use ($y) { return $y; }
     /// function($x): int use ($y, $z) { return $x + $y + $z; }
-    Efun(Box<(Fun_<Ex, Fb, En, Hi>, Vec<Lid>)>),
+    Efun(Box<(Fun_<Ex, Fb, En>, Vec<Lid>)>),
     /// Hack lambda. Captures variables automatically.
     ///
     /// $x ==> $x
     /// (int $x): int ==> $x + $other
     /// ($x, $y) ==> { return $x + $y; }
-    Lfun(Box<(Fun_<Ex, Fb, En, Hi>, Vec<Lid>)>),
+    Lfun(Box<(Fun_<Ex, Fb, En>, Vec<Lid>)>),
     /// XHP expression. May contain interpolated expressions.
     ///
     /// <foo x="hello" y={$foo}>hello {$bar}</foo>
-    Xml(
-        Box<(
-            Sid,
-            Vec<XhpAttribute<Ex, Fb, En, Hi>>,
-            Vec<Expr<Ex, Fb, En, Hi>>,
-        )>,
-    ),
+    Xml(Box<(Sid, Vec<XhpAttribute<Ex, Fb, En>>, Vec<Expr<Ex, Fb, En>>)>),
     /// Explicit calling convention, used for inout. Inout supports any lvalue.
     ///
     /// TODO: This could be a flag on parameters in Call.
     ///
     /// foo(inout $x[0])
-    Callconv(Box<(ast_defs::ParamKind, Expr<Ex, Fb, En, Hi>)>),
+    Callconv(Box<(ast_defs::ParamKind, Expr<Ex, Fb, En>)>),
     /// Include or require expression.
     ///
     /// require('foo.php')
     /// require_once('foo.php')
     /// include('foo.php')
     /// include_once('foo.php')
-    Import(Box<(ImportFlavor, Expr<Ex, Fb, En, Hi>)>),
+    Import(Box<(ImportFlavor, Expr<Ex, Fb, En>)>),
     /// Collection literal.
     ///
     /// TODO: T38184446 this is redundant with ValCollection/KeyValCollection.
     ///
     /// Vector {}
-    Collection(Box<(Sid, Option<CollectionTarg<Hi>>, Vec<Afield<Ex, Fb, En, Hi>>)>),
+    Collection(Box<(Sid, Option<CollectionTarg<Ex>>, Vec<Afield<Ex, Fb, En>>)>),
     /// Expression tree literal. Expression trees are not evaluated at
     /// runtime, but desugared to an expression representing the code.
     ///
     /// Foo`1 + bar()`
     /// Foo`$x ==> $x * ${$value}` // splicing $value
-    ExpressionTree(Box<ExpressionTree<Ex, Fb, En, Hi>>),
+    ExpressionTree(Box<ExpressionTree<Ex, Fb, En>>),
     /// Placeholder local variable.
     ///
     /// $_
@@ -777,7 +733,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     /// lowering or be removed. The emitter just sees a normal Call.
     ///
     /// inst_meth($f, 'some_meth') // equivalent: $f->some_meth<>
-    MethodId(Box<(Expr<Ex, Fb, En, Hi>, Pstring)>),
+    MethodId(Box<(Expr<Ex, Fb, En>, Pstring)>),
     /// Instance method reference that can be called with an instance.
     ///
     /// meth_caller(FooClass::class, 'some_meth')
@@ -791,22 +747,22 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     ///
     /// class_meth('FooClass', 'some_static_meth')
     /// // equivalent: FooClass::some_static_meth<>
-    SmethodId(Box<(ClassId<Ex, Fb, En, Hi>, Pstring)>),
+    SmethodId(Box<(ClassId<Ex, Fb, En>, Pstring)>),
     /// Pair literal.
     ///
     /// Pair {$foo, $bar}
     Pair(
         Box<(
-            Option<(Targ<Hi>, Targ<Hi>)>,
-            Expr<Ex, Fb, En, Hi>,
-            Expr<Ex, Fb, En, Hi>,
+            Option<(Targ<Ex>, Targ<Ex>)>,
+            Expr<Ex, Fb, En>,
+            Expr<Ex, Fb, En>,
         )>,
     ),
     /// Expression tree splice expression. Only valid inside an
     /// expression tree literal (backticks).
     ///
     /// ${$foo}
-    ETSplice(Box<Expr<Ex, Fb, En, Hi>>),
+    ETSplice(Box<Expr<Ex, Fb, En>>),
     /// Label used for enum classes.
     ///
     /// enum_name#label_name or #label_name
@@ -843,7 +799,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     ///            , None
     ///            )
     /// ```
-    Hole(Box<(Expr<Ex, Fb, En, Hi>, Hi, Hi, HoleSource)>),
+    Hole(Box<(Expr<Ex, Fb, En>, Ex, Ex, HoleSource)>),
 }
 
 #[derive(
@@ -860,9 +816,9 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub enum ClassGetExpr<Ex, Fb, En, Hi> {
+pub enum ClassGetExpr<Ex, Fb, En> {
     CGstring(Pstring),
-    CGexpr(Expr<Ex, Fb, En, Hi>),
+    CGexpr(Expr<Ex, Fb, En>),
 }
 
 #[derive(
@@ -879,9 +835,9 @@ pub enum ClassGetExpr<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub enum Case<Ex, Fb, En, Hi> {
-    Default(Pos, Block<Ex, Fb, En, Hi>),
-    Case(Expr<Ex, Fb, En, Hi>, Block<Ex, Fb, En, Hi>),
+pub enum Case<Ex, Fb, En> {
+    Default(Pos, Block<Ex, Fb, En>),
+    Case(Expr<Ex, Fb, En>, Block<Ex, Fb, En>),
 }
 
 #[derive(
@@ -898,7 +854,7 @@ pub enum Case<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct Catch<Ex, Fb, En, Hi>(pub Sid, pub Lid, pub Block<Ex, Fb, En, Hi>);
+pub struct Catch<Ex, Fb, En>(pub Sid, pub Lid, pub Block<Ex, Fb, En>);
 
 #[derive(
     Clone,
@@ -914,7 +870,7 @@ pub struct Catch<Ex, Fb, En, Hi>(pub Sid, pub Lid, pub Block<Ex, Fb, En, Hi>);
     Serialize,
     ToOcamlRep
 )]
-pub struct Field<Ex, Fb, En, Hi>(pub Expr<Ex, Fb, En, Hi>, pub Expr<Ex, Fb, En, Hi>);
+pub struct Field<Ex, Fb, En>(pub Expr<Ex, Fb, En>, pub Expr<Ex, Fb, En>);
 
 #[derive(
     Clone,
@@ -930,9 +886,9 @@ pub struct Field<Ex, Fb, En, Hi>(pub Expr<Ex, Fb, En, Hi>, pub Expr<Ex, Fb, En, 
     Serialize,
     ToOcamlRep
 )]
-pub enum Afield<Ex, Fb, En, Hi> {
-    AFvalue(Expr<Ex, Fb, En, Hi>),
-    AFkvalue(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>),
+pub enum Afield<Ex, Fb, En> {
+    AFvalue(Expr<Ex, Fb, En>),
+    AFkvalue(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>),
 }
 
 #[derive(
@@ -949,10 +905,10 @@ pub enum Afield<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct XhpSimple<Ex, Fb, En, Hi> {
+pub struct XhpSimple<Ex, Fb, En> {
     pub name: Pstring,
-    pub type_: Hi,
-    pub expr: Expr<Ex, Fb, En, Hi>,
+    pub type_: Ex,
+    pub expr: Expr<Ex, Fb, En>,
 }
 
 #[derive(
@@ -969,9 +925,9 @@ pub struct XhpSimple<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub enum XhpAttribute<Ex, Fb, En, Hi> {
-    XhpSimple(XhpSimple<Ex, Fb, En, Hi>),
-    XhpSpread(Expr<Ex, Fb, En, Hi>),
+pub enum XhpAttribute<Ex, Fb, En> {
+    XhpSimple(XhpSimple<Ex, Fb, En>),
+    XhpSpread(Expr<Ex, Fb, En>),
 }
 
 pub type IsVariadic = bool;
@@ -990,16 +946,16 @@ pub type IsVariadic = bool;
     Serialize,
     ToOcamlRep
 )]
-pub struct FunParam<Ex, Fb, En, Hi> {
+pub struct FunParam<Ex, Fb, En> {
     pub annotation: Ex,
-    pub type_hint: TypeHint<Hi>,
+    pub type_hint: TypeHint<Ex>,
     pub is_variadic: IsVariadic,
     pub pos: Pos,
     pub name: String,
-    pub expr: Option<Expr<Ex, Fb, En, Hi>>,
+    pub expr: Option<Expr<Ex, Fb, En>>,
     pub readonly: Option<ast_defs::ReadonlyKind>,
     pub callconv: Option<ast_defs::ParamKind>,
-    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
+    pub user_attributes: Vec<UserAttribute<Ex, Fb, En>>,
     pub visibility: Option<Visibility>,
 }
 
@@ -1018,11 +974,11 @@ pub struct FunParam<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub enum FunVariadicity<Ex, Fb, En, Hi> {
+pub enum FunVariadicity<Ex, Fb, En> {
     /// Named variadic argument.
     ///
     /// function foo(int ...$args): void {}
-    FVvariadicArg(FunParam<Ex, Fb, En, Hi>),
+    FVvariadicArg(FunParam<Ex, Fb, En>),
     /// Unnamed variaidic argument. Partial mode only.
     ///
     /// function foo(...): void {}
@@ -1045,22 +1001,22 @@ pub enum FunVariadicity<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct Fun_<Ex, Fb, En, Hi> {
+pub struct Fun_<Ex, Fb, En> {
     pub span: Pos,
     pub readonly_this: Option<ast_defs::ReadonlyKind>,
     pub annotation: En,
     pub readonly_ret: Option<ast_defs::ReadonlyKind>,
-    pub ret: TypeHint<Hi>,
+    pub ret: TypeHint<Ex>,
     pub name: Sid,
-    pub tparams: Vec<Tparam<Ex, Fb, En, Hi>>,
+    pub tparams: Vec<Tparam<Ex, Fb, En>>,
     pub where_constraints: Vec<WhereConstraintHint>,
-    pub variadic: FunVariadicity<Ex, Fb, En, Hi>,
-    pub params: Vec<FunParam<Ex, Fb, En, Hi>>,
+    pub variadic: FunVariadicity<Ex, Fb, En>,
+    pub params: Vec<FunParam<Ex, Fb, En>>,
     pub ctxs: Option<Contexts>,
     pub unsafe_ctxs: Option<Contexts>,
-    pub body: FuncBody<Ex, Fb, En, Hi>,
+    pub body: FuncBody<Ex, Fb, En>,
     pub fun_kind: ast_defs::FunKind,
-    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
+    pub user_attributes: Vec<UserAttribute<Ex, Fb, En>>,
     /// true if this declaration has no body because it is an
     /// external function declaration (e.g. from an HHI file)
     pub external: bool,
@@ -1087,8 +1043,8 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct FuncBody<Ex, Fb, En, Hi> {
-    pub ast: Block<Ex, Fb, En, Hi>,
+pub struct FuncBody<Ex, Fb, En> {
+    pub ast: Block<Ex, Fb, En>,
     pub annotation: Fb,
 }
 
@@ -1109,11 +1065,11 @@ pub struct FuncBody<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct TypeHint<Hi>(pub Hi, pub TypeHint_);
+pub struct TypeHint<Ex>(pub Ex, pub TypeHint_);
 
 /// Explicit type argument to function, constructor, or collection literal.
-/// 'hi = unit in NAST
-/// 'hi = Typing_defs.(locl ty) in TAST,
+/// 'ex = unit in NAST
+/// 'ex = Typing_defs.(locl ty) in TAST,
 /// and is used to record inferred type arguments, with wildcard hint.
 #[derive(
     Clone,
@@ -1129,7 +1085,7 @@ pub struct TypeHint<Hi>(pub Hi, pub TypeHint_);
     Serialize,
     ToOcamlRep
 )]
-pub struct Targ<Hi>(pub Hi, pub Hint);
+pub struct Targ<Ex>(pub Ex, pub Hint);
 
 pub type TypeHint_ = Option<Hint>;
 
@@ -1147,10 +1103,10 @@ pub type TypeHint_ = Option<Hint>;
     Serialize,
     ToOcamlRep
 )]
-pub struct UserAttribute<Ex, Fb, En, Hi> {
+pub struct UserAttribute<Ex, Fb, En> {
     pub name: Sid,
     /// user attributes are restricted to scalar values
-    pub params: Vec<Expr<Ex, Fb, En, Hi>>,
+    pub params: Vec<Expr<Ex, Fb, En>>,
 }
 
 #[derive(
@@ -1167,8 +1123,8 @@ pub struct UserAttribute<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct FileAttribute<Ex, Fb, En, Hi> {
-    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
+pub struct FileAttribute<Ex, Fb, En> {
+    pub user_attributes: Vec<UserAttribute<Ex, Fb, En>>,
     pub namespace: Nsenv,
 }
 
@@ -1186,13 +1142,13 @@ pub struct FileAttribute<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct Tparam<Ex, Fb, En, Hi> {
+pub struct Tparam<Ex, Fb, En> {
     pub variance: ast_defs::Variance,
     pub name: Sid,
-    pub parameters: Vec<Tparam<Ex, Fb, En, Hi>>,
+    pub parameters: Vec<Tparam<Ex, Fb, En>>,
     pub constraints: Vec<(ast_defs::ConstraintKind, Hint)>,
     pub reified: ReifyKind,
-    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
+    pub user_attributes: Vec<UserAttribute<Ex, Fb, En>>,
 }
 
 #[derive(
@@ -1270,7 +1226,7 @@ arena_deserializer::impl_deserialize_in_arena!(EmitId);
     Serialize,
     ToOcamlRep
 )]
-pub struct Class_<Ex, Fb, En, Hi> {
+pub struct Class_<Ex, Fb, En> {
     pub span: Pos,
     pub annotation: En,
     pub mode: file_info::Mode,
@@ -1280,7 +1236,7 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub kind: ast_defs::ClassKind,
     pub name: Sid,
     /// The type parameters of a class A<T> (T is the parameter)
-    pub tparams: Vec<Tparam<Ex, Fb, En, Hi>>,
+    pub tparams: Vec<Tparam<Ex, Fb, En>>,
     pub extends: Vec<ClassHint>,
     pub uses: Vec<TraitHint>,
     /// PHP feature not supported in hack but required
@@ -1295,16 +1251,16 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub implements: Vec<ClassHint>,
     pub support_dynamic_type: bool,
     pub where_constraints: Vec<WhereConstraintHint>,
-    pub consts: Vec<ClassConst<Ex, Fb, En, Hi>>,
-    pub typeconsts: Vec<ClassTypeconstDef<Ex, Fb, En, Hi>>,
-    pub vars: Vec<ClassVar<Ex, Fb, En, Hi>>,
-    pub methods: Vec<Method_<Ex, Fb, En, Hi>>,
-    pub attributes: Vec<ClassAttr<Ex, Fb, En, Hi>>,
+    pub consts: Vec<ClassConst<Ex, Fb, En>>,
+    pub typeconsts: Vec<ClassTypeconstDef<Ex, Fb, En>>,
+    pub vars: Vec<ClassVar<Ex, Fb, En>>,
+    pub methods: Vec<Method_<Ex, Fb, En>>,
+    pub attributes: Vec<ClassAttr<Ex, Fb, En>>,
     pub xhp_children: Vec<(Pos, XhpChild)>,
-    pub xhp_attrs: Vec<XhpAttr<Ex, Fb, En, Hi>>,
+    pub xhp_attrs: Vec<XhpAttr<Ex, Fb, En>>,
     pub namespace: Nsenv,
-    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
-    pub file_attributes: Vec<FileAttribute<Ex, Fb, En, Hi>>,
+    pub user_attributes: Vec<UserAttribute<Ex, Fb, En>>,
+    pub file_attributes: Vec<FileAttribute<Ex, Fb, En>>,
     pub enum_: Option<Enum_>,
     pub doc_comment: Option<DocComment>,
     pub emit_id: Option<EmitId>,
@@ -1353,11 +1309,11 @@ arena_deserializer::impl_deserialize_in_arena!(XhpAttrTag);
     Serialize,
     ToOcamlRep
 )]
-pub struct XhpAttr<Ex, Fb, En, Hi>(
-    pub TypeHint<Hi>,
-    pub ClassVar<Ex, Fb, En, Hi>,
+pub struct XhpAttr<Ex, Fb, En>(
+    pub TypeHint<Ex>,
+    pub ClassVar<Ex, Fb, En>,
     pub Option<XhpAttrTag>,
-    pub Option<(Pos, Vec<Expr<Ex, Fb, En, Hi>>)>,
+    pub Option<(Pos, Vec<Expr<Ex, Fb, En>>)>,
 );
 
 #[derive(
@@ -1374,9 +1330,9 @@ pub struct XhpAttr<Ex, Fb, En, Hi>(
     Serialize,
     ToOcamlRep
 )]
-pub enum ClassAttr<Ex, Fb, En, Hi> {
+pub enum ClassAttr<Ex, Fb, En> {
     CAName(Sid),
-    CAField(CaField<Ex, Fb, En, Hi>),
+    CAField(CaField<Ex, Fb, En>),
 }
 
 #[derive(
@@ -1393,10 +1349,10 @@ pub enum ClassAttr<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct CaField<Ex, Fb, En, Hi> {
+pub struct CaField<Ex, Fb, En> {
     pub type_: CaType,
     pub id: Sid,
-    pub value: Option<Expr<Ex, Fb, En, Hi>>,
+    pub value: Option<Expr<Ex, Fb, En>>,
     pub required: bool,
 }
 
@@ -1433,16 +1389,16 @@ pub enum CaType {
     Serialize,
     ToOcamlRep
 )]
-pub enum ClassConstKind<Ex, Fb, En, Hi> {
+pub enum ClassConstKind<Ex, Fb, En> {
     /// CCAbstract represents the states
     ///    abstract const int X;
     ///    abstract const int Y = 4;
     /// The expr option is a default value
-    CCAbstract(Option<Expr<Ex, Fb, En, Hi>>),
+    CCAbstract(Option<Expr<Ex, Fb, En>>),
     /// CCConcrete represents
     ///    const int Z = 4;
     /// The expr is the value of the constant. It is not optional
-    CCConcrete(Expr<Ex, Fb, En, Hi>),
+    CCConcrete(Expr<Ex, Fb, En>),
 }
 
 #[derive(
@@ -1459,10 +1415,10 @@ pub enum ClassConstKind<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct ClassConst<Ex, Fb, En, Hi> {
+pub struct ClassConst<Ex, Fb, En> {
     pub type_: Option<Hint>,
     pub id: Sid,
-    pub kind: ClassConstKind<Ex, Fb, En, Hi>,
+    pub kind: ClassConstKind<Ex, Fb, En>,
     pub doc_comment: Option<DocComment>,
 }
 
@@ -1557,8 +1513,8 @@ pub enum ClassTypeconst {
     Serialize,
     ToOcamlRep
 )]
-pub struct ClassTypeconstDef<Ex, Fb, En, Hi> {
-    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
+pub struct ClassTypeconstDef<Ex, Fb, En> {
+    pub user_attributes: Vec<UserAttribute<Ex, Fb, En>>,
     pub name: Sid,
     pub kind: ClassTypeconst,
     pub span: Pos,
@@ -1599,16 +1555,16 @@ pub struct XhpAttrInfo {
     Serialize,
     ToOcamlRep
 )]
-pub struct ClassVar<Ex, Fb, En, Hi> {
+pub struct ClassVar<Ex, Fb, En> {
     pub final_: bool,
     pub xhp_attr: Option<XhpAttrInfo>,
     pub abstract_: bool,
     pub readonly: bool,
     pub visibility: Visibility,
-    pub type_: TypeHint<Hi>,
+    pub type_: TypeHint<Ex>,
     pub id: Sid,
-    pub expr: Option<Expr<Ex, Fb, En, Hi>>,
-    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
+    pub expr: Option<Expr<Ex, Fb, En>>,
+    pub user_attributes: Vec<UserAttribute<Ex, Fb, En>>,
     pub doc_comment: Option<DocComment>,
     pub is_promoted_variadic: bool,
     pub is_static: bool,
@@ -1629,7 +1585,7 @@ pub struct ClassVar<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct Method_<Ex, Fb, En, Hi> {
+pub struct Method_<Ex, Fb, En> {
     pub span: Pos,
     pub annotation: En,
     pub final_: bool,
@@ -1638,17 +1594,17 @@ pub struct Method_<Ex, Fb, En, Hi> {
     pub readonly_this: bool,
     pub visibility: Visibility,
     pub name: Sid,
-    pub tparams: Vec<Tparam<Ex, Fb, En, Hi>>,
+    pub tparams: Vec<Tparam<Ex, Fb, En>>,
     pub where_constraints: Vec<WhereConstraintHint>,
-    pub variadic: FunVariadicity<Ex, Fb, En, Hi>,
-    pub params: Vec<FunParam<Ex, Fb, En, Hi>>,
+    pub variadic: FunVariadicity<Ex, Fb, En>,
+    pub params: Vec<FunParam<Ex, Fb, En>>,
     pub ctxs: Option<Contexts>,
     pub unsafe_ctxs: Option<Contexts>,
-    pub body: FuncBody<Ex, Fb, En, Hi>,
+    pub body: FuncBody<Ex, Fb, En>,
     pub fun_kind: ast_defs::FunKind,
-    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
+    pub user_attributes: Vec<UserAttribute<Ex, Fb, En>>,
     pub readonly_ret: Option<ast_defs::ReadonlyKind>,
-    pub ret: TypeHint<Hi>,
+    pub ret: TypeHint<Ex>,
     /// true if this declaration has no body because it is an external method
     /// declaration (e.g. from an HHI file)
     pub external: bool,
@@ -1671,13 +1627,13 @@ pub type Nsenv = ocamlrep::rc::RcOc<namespace_env::Env>;
     Serialize,
     ToOcamlRep
 )]
-pub struct Typedef<Ex, Fb, En, Hi> {
+pub struct Typedef<Ex, Fb, En> {
     pub annotation: En,
     pub name: Sid,
-    pub tparams: Vec<Tparam<Ex, Fb, En, Hi>>,
+    pub tparams: Vec<Tparam<Ex, Fb, En>>,
     pub constraint: Option<Hint>,
     pub kind: Hint,
-    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
+    pub user_attributes: Vec<UserAttribute<Ex, Fb, En>>,
     pub mode: file_info::Mode,
     pub vis: TypedefVisibility,
     pub namespace: Nsenv,
@@ -1700,12 +1656,12 @@ pub struct Typedef<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct Gconst<Ex, Fb, En, Hi> {
+pub struct Gconst<Ex, Fb, En> {
     pub annotation: En,
     pub mode: file_info::Mode,
     pub name: Sid,
     pub type_: Option<Hint>,
-    pub value: Expr<Ex, Fb, En, Hi>,
+    pub value: Expr<Ex, Fb, En>,
     pub namespace: Nsenv,
     pub span: Pos,
     pub emit_id: Option<EmitId>,
@@ -1725,13 +1681,13 @@ pub struct Gconst<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub struct RecordDef<Ex, Fb, En, Hi> {
+pub struct RecordDef<Ex, Fb, En> {
     pub annotation: En,
     pub name: Sid,
     pub extends: Option<RecordHint>,
     pub abstract_: bool,
-    pub fields: Vec<(Sid, Hint, Option<Expr<Ex, Fb, En, Hi>>)>,
-    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
+    pub fields: Vec<(Sid, Hint, Option<Expr<Ex, Fb, En>>)>,
+    pub user_attributes: Vec<UserAttribute<Ex, Fb, En>>,
     pub namespace: Nsenv,
     pub span: Pos,
     pub doc_comment: Option<DocComment>,
@@ -1754,11 +1710,11 @@ pub type RecordHint = Hint;
     Serialize,
     ToOcamlRep
 )]
-pub struct FunDef<Ex, Fb, En, Hi> {
+pub struct FunDef<Ex, Fb, En> {
     pub namespace: Nsenv,
-    pub file_attributes: Vec<FileAttribute<Ex, Fb, En, Hi>>,
+    pub file_attributes: Vec<FileAttribute<Ex, Fb, En>>,
     pub mode: file_info::Mode,
-    pub fun: Fun_<Ex, Fb, En, Hi>,
+    pub fun: Fun_<Ex, Fb, En>,
 }
 
 #[derive(
@@ -1775,17 +1731,17 @@ pub struct FunDef<Ex, Fb, En, Hi> {
     Serialize,
     ToOcamlRep
 )]
-pub enum Def<Ex, Fb, En, Hi> {
-    Fun(Box<FunDef<Ex, Fb, En, Hi>>),
-    Class(Box<Class_<Ex, Fb, En, Hi>>),
-    RecordDef(Box<RecordDef<Ex, Fb, En, Hi>>),
-    Stmt(Box<Stmt<Ex, Fb, En, Hi>>),
-    Typedef(Box<Typedef<Ex, Fb, En, Hi>>),
-    Constant(Box<Gconst<Ex, Fb, En, Hi>>),
-    Namespace(Box<(Sid, Program<Ex, Fb, En, Hi>)>),
+pub enum Def<Ex, Fb, En> {
+    Fun(Box<FunDef<Ex, Fb, En>>),
+    Class(Box<Class_<Ex, Fb, En>>),
+    RecordDef(Box<RecordDef<Ex, Fb, En>>),
+    Stmt(Box<Stmt<Ex, Fb, En>>),
+    Typedef(Box<Typedef<Ex, Fb, En>>),
+    Constant(Box<Gconst<Ex, Fb, En>>),
+    Namespace(Box<(Sid, Program<Ex, Fb, En>)>),
     NamespaceUse(Vec<(NsKind, Sid, Sid)>),
     SetNamespaceEnv(Box<Nsenv>),
-    FileAttributes(Box<FileAttribute<Ex, Fb, En, Hi>>),
+    FileAttributes(Box<FileAttribute<Ex, Fb, En>>),
 }
 
 #[derive(

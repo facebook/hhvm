@@ -10,5 +10,4 @@ val is_noreturn : Typing_env_types.env -> bool
 
 val typed_expression_exits : Tast.expr -> bool
 
-val expression_exits :
-  Typing_env_types.env -> ('a, 'b, 'c, 'd) Aast.expr -> bool
+val expression_exits : Typing_env_types.env -> ('a, 'b, 'c) Aast.expr -> bool

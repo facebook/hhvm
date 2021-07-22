@@ -40,63 +40,64 @@ let show_tprim =
     | Tarraykey -> arraykey
     | Tnoreturn -> noreturn)
 
-type program = (unit, func_body_ann, unit, unit) Aast.program [@@deriving show]
+type program = (unit, func_body_ann, unit) Aast.program [@@deriving show]
 
-type def = (unit, func_body_ann, unit, unit) Aast.def
+type def = (unit, func_body_ann, unit) Aast.def
 
-type expr = (unit, func_body_ann, unit, unit) Aast.expr [@@deriving eq, show]
+type expr = (unit, func_body_ann, unit) Aast.expr [@@deriving eq, show]
 
-type expr_ = (unit, func_body_ann, unit, unit) Aast.expr_
+type expr_ = (unit, func_body_ann, unit) Aast.expr_
 
-type stmt = (unit, func_body_ann, unit, unit) Aast.stmt
+type stmt = (unit, func_body_ann, unit) Aast.stmt
 
-type block = (unit, func_body_ann, unit, unit) Aast.block
+type block = (unit, func_body_ann, unit) Aast.block
 
-type user_attribute = (unit, func_body_ann, unit, unit) Aast.user_attribute
+type user_attribute = (unit, func_body_ann, unit) Aast.user_attribute
 [@@deriving eq, show]
 
-type class_id_ = (unit, func_body_ann, unit, unit) Aast.class_id_
-[@@deriving eq]
+type class_id_ = (unit, func_body_ann, unit) Aast.class_id_ [@@deriving eq]
 
-type class_ = (unit, func_body_ann, unit, unit) Aast.class_
+type class_ = (unit, func_body_ann, unit) Aast.class_
 
-type class_var = (unit, func_body_ann, unit, unit) Aast.class_var
+type class_var = (unit, func_body_ann, unit) Aast.class_var
 
-type method_ = (unit, func_body_ann, unit, unit) Aast.method_
+type method_ = (unit, func_body_ann, unit) Aast.method_
 
-type file_attribute = (unit, func_body_ann, unit, unit) Aast.file_attribute
+type file_attribute = (unit, func_body_ann, unit) Aast.file_attribute
 
-type fun_ = (unit, func_body_ann, unit, unit) Aast.fun_
+type fun_ = (unit, func_body_ann, unit) Aast.fun_
 
-type fun_def = (unit, func_body_ann, unit, unit) Aast.fun_def
+type fun_def = (unit, func_body_ann, unit) Aast.fun_def
 
-type func_body = (unit, func_body_ann, unit, unit) Aast.func_body
+type func_body = (unit, func_body_ann, unit) Aast.func_body
 
-type fun_param = (unit, func_body_ann, unit, unit) Aast.fun_param
+type fun_param = (unit, func_body_ann, unit) Aast.fun_param
 
-type fun_variadicity = (unit, func_body_ann, unit, unit) Aast.fun_variadicity
+type fun_variadicity = (unit, func_body_ann, unit) Aast.fun_variadicity
 
-type typedef = (unit, func_body_ann, unit, unit) Aast.typedef
+type typedef = (unit, func_body_ann, unit) Aast.typedef
 
-type record_def = (unit, func_body_ann, unit, unit) Aast.record_def
+type record_def = (unit, func_body_ann, unit) Aast.record_def
 
-type tparam = (unit, func_body_ann, unit, unit) Aast.tparam
+type tparam = (unit, func_body_ann, unit) Aast.tparam
 
-type gconst = (unit, func_body_ann, unit, unit) Aast.gconst
+type gconst = (unit, func_body_ann, unit) Aast.gconst
 
-type class_const = (unit, func_body_ann, unit, unit) Aast.class_const
+type class_const = (unit, func_body_ann, unit) Aast.class_const
 
-type class_id = (unit, func_body_ann, unit, unit) Aast.class_id
+type class_id = (unit, func_body_ann, unit) Aast.class_id
 
-type catch = (unit, func_body_ann, unit, unit) Aast.catch
+type catch = (unit, func_body_ann, unit) Aast.catch
 
-type case = (unit, func_body_ann, unit, unit) Aast.case
+type case = (unit, func_body_ann, unit) Aast.case
 
-type field = (unit, func_body_ann, unit, unit) Aast.field
+type field = (unit, func_body_ann, unit) Aast.field
 
-type afield = (unit, func_body_ann, unit, unit) Aast.afield
+type afield = (unit, func_body_ann, unit) Aast.afield
 
-type expression_tree = (unit, func_body_ann, unit, unit) Aast.expression_tree
+type xhp_attribute = (unit, func_body_ann, unit) Aast.xhp_attribute
+
+type expression_tree = (unit, func_body_ann, unit) Aast.expression_tree
 
 type targ = unit Aast.targ
 
@@ -260,8 +261,6 @@ let ast_deregister_attributes_mapper =
 
     method on_'en _ (en : unit) = en
 
-    method on_'hi _ (hi : unit) = hi
-
     method ignored_attr env l =
       List.exists l ~f:(fun attr ->
           List.mem env.ignored_attributes (snd attr.ua_name) ~equal:String.equal)
@@ -312,8 +311,6 @@ let ast_no_pos_or_docblock_mapper =
     method on_'ex _ (ex : unit) = ex
 
     method on_'en _ (en : unit) = en
-
-    method on_'hi _ (hi : unit) = hi
 
     method! on_fun_ env f = super#on_fun_ env { f with f_doc_comment = None }
 
@@ -435,7 +432,7 @@ module Visitor_DEPRECATED = struct
       method on_for : 'a -> expr list -> expr option -> expr list -> block -> 'a
 
       method on_foreach :
-        'a -> expr -> (unit, func_body_ann, unit, unit) as_expr -> block -> 'a
+        'a -> expr -> (unit, func_body_ann, unit) as_expr -> block -> 'a
 
       method on_if : 'a -> expr -> block -> block -> 'a
 
@@ -449,7 +446,7 @@ module Visitor_DEPRECATED = struct
 
       method on_stmt : 'a -> stmt -> 'a
 
-      method on_stmt_ : 'a -> (unit, func_body_ann, unit, unit) stmt_ -> 'a
+      method on_stmt_ : 'a -> (unit, func_body_ann, unit) stmt_ -> 'a
 
       method on_switch : 'a -> expr -> case list -> 'a
 
@@ -459,9 +456,9 @@ module Visitor_DEPRECATED = struct
 
       method on_while : 'a -> expr -> block -> 'a
 
-      method on_using : 'a -> (unit, func_body_ann, unit, unit) using_stmt -> 'a
+      method on_using : 'a -> (unit, func_body_ann, unit) using_stmt -> 'a
 
-      method on_as_expr : 'a -> (unit, func_body_ann, unit, unit) as_expr -> 'a
+      method on_as_expr : 'a -> (unit, func_body_ann, unit) as_expr -> 'a
 
       method on_shape : 'a -> (Ast_defs.shape_field_name * expr) list -> 'a
 
@@ -494,17 +491,14 @@ module Visitor_DEPRECATED = struct
       method on_array_get : 'a -> expr -> expr option -> 'a
 
       method on_class_get :
-        'a -> class_id -> (unit, func_body_ann, unit, unit) class_get_expr -> 'a
+        'a -> class_id -> (unit, func_body_ann, unit) class_get_expr -> 'a
 
       method on_class_const : 'a -> class_id -> pstring -> 'a
 
       method on_call : 'a -> expr -> expr list -> expr option -> 'a
 
       method on_function_pointer :
-        'a ->
-        (unit, func_body_ann, unit, unit) function_ptr_id ->
-        targ list ->
-        'a
+        'a -> (unit, func_body_ann, unit) function_ptr_id -> targ list -> 'a
 
       method on_true : 'a -> 'a
 
@@ -558,12 +552,7 @@ module Visitor_DEPRECATED = struct
 
       method on_lfun : 'a -> fun_ -> id list -> 'a
 
-      method on_xml :
-        'a ->
-        sid ->
-        (unit, func_body_ann, unit, unit) xhp_attribute list ->
-        expr list ->
-        'a
+      method on_xml : 'a -> sid -> xhp_attribute list -> expr list -> 'a
 
       method on_param_kind : 'a -> Ast_defs.param_kind -> 'a
 
@@ -576,7 +565,7 @@ module Visitor_DEPRECATED = struct
       method on_afield : 'a -> afield -> 'a
 
       method on_class_typeconst_def :
-        'a -> (unit, func_body_ann, unit, unit) class_typeconst_def -> 'a
+        'a -> (unit, func_body_ann, unit) class_typeconst_def -> 'a
 
       method on_class_c_const : 'a -> class_const -> 'a
 
@@ -621,7 +610,7 @@ module Visitor_DEPRECATED = struct
       method on_enum_class_label : 'a -> sid option -> string -> 'a
 
       method on_function_ptr_id :
-        'a -> (unit, func_body_ann, unit, unit) function_ptr_id -> 'a
+        'a -> (unit, func_body_ann, unit) function_ptr_id -> 'a
 
       method on_et_splice : 'a -> expr -> 'a
 

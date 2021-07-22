@@ -213,7 +213,7 @@ impl<'ast> Visitor<'ast> for VoidReturnCheck {
         self
     }
 
-    fn visit_expr(&mut self, env: &mut (), e: &aast::Expr<(), (), (), ()>) -> Result<(), ()> {
+    fn visit_expr(&mut self, env: &mut (), e: &aast::Expr<(), (), ()>) -> Result<(), ()> {
         use aast::Expr_::*;
 
         match &e.2 {
@@ -224,7 +224,7 @@ impl<'ast> Visitor<'ast> for VoidReturnCheck {
         }
     }
 
-    fn visit_stmt(&mut self, env: &mut (), s: &'ast aast::Stmt<(), (), (), ()>) -> Result<(), ()> {
+    fn visit_stmt(&mut self, env: &mut (), s: &'ast aast::Stmt<(), (), ()>) -> Result<(), ()> {
         use aast::Stmt_::*;
 
         match &s.1 {

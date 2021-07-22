@@ -23,7 +23,7 @@
                          f_name = ([4:8-23], ";anonymous"); f_tparams = []; 
                          f_where_constraints = []; f_variadic = FVnonVariadic;
                          f_params =
-                         [{ param_annotation = (#2051); param_type_hint = ((mixed), None); 
+                         [{ param_annotation = (mixed); param_type_hint = ((mixed), None); 
                             param_is_variadic = false; param_pos = [4:9-11]; 
                             param_name = "$i"; param_expr = None; param_readonly = None; 
                             param_callconv = None; param_user_attributes = []; 

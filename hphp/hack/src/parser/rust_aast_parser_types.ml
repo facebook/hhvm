@@ -32,7 +32,7 @@ type 'aast result_ = {
   lint_errors: Pos.t Lint.t list;
 }
 
-type result = (unit, unit, unit, unit) Aast.program result_
+type result = (unit, unit, unit) Aast.program result_
 
 type tast_result = Tast.program result_
 

@@ -128,7 +128,7 @@ impl<'src> AastParser {
         env: &Env,
         indexed_source_text: &'src IndexedSourceText<'src>,
         tree: &PositionedSyntaxTree<'src, 'arena>,
-        aast: Option<&Program<(), (), (), ()>>,
+        aast: Option<&Program<(), (), ()>>,
     ) -> Vec<SyntaxError> {
         let find_errors = |hhi_mode: bool| -> Vec<SyntaxError> {
             let mut errors = tree.errors().into_iter().cloned().collect::<Vec<_>>();

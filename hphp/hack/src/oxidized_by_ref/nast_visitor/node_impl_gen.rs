@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<624f59d3756733168422fcdc58406dd7>>
+// @generated SignedSource<<b4fe84b29e7fd44e979593f3db2f57bd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,7 +13,7 @@
 use super::node::Node;
 use super::visitor::Visitor;
 use crate::{aast::*, aast_defs::*, ast_defs::*, doc_comment::*, namespace_env::*};
-impl<'a> Node<'a> for Afield<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Afield<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_afield(self)
     }
@@ -24,7 +24,7 @@ impl<'a> Node<'a> for Afield<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyA
         }
     }
 }
-impl<'a> Node<'a> for AsExpr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for AsExpr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_as_expr(self)
     }
@@ -71,7 +71,7 @@ impl<'a> Node<'a> for Bop<'a> {
         }
     }
 }
-impl<'a> Node<'a> for CaField<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for CaField<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_ca_field(self)
     }
@@ -108,7 +108,7 @@ impl<'a> Node<'a> for CaType<'a> {
         }
     }
 }
-impl<'a> Node<'a> for Case<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Case<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_case(self)
     }
@@ -119,7 +119,7 @@ impl<'a> Node<'a> for Case<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn
         }
     }
 }
-impl<'a> Node<'a> for Catch<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Catch<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_catch(self)
     }
@@ -159,7 +159,7 @@ impl<'a> Node<'a> for ClassAbstractTypeconst<'a> {
         }
     }
 }
-impl<'a> Node<'a> for ClassAttr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for ClassAttr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_class_attr(self)
     }
@@ -182,9 +182,7 @@ impl<'a> Node<'a> for ClassConcreteTypeconst<'a> {
         }
     }
 }
-impl<'a> Node<'a>
-    for ClassConst<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>
-{
+impl<'a> Node<'a> for ClassConst<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_class_const(self)
     }
@@ -211,7 +209,7 @@ impl<'a> Node<'a>
     }
 }
 impl<'a> Node<'a>
-    for ClassConstKind<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>
+    for ClassConstKind<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()>
 {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_class_const_kind(self)
@@ -223,9 +221,7 @@ impl<'a> Node<'a>
         }
     }
 }
-impl<'a> Node<'a>
-    for ClassGetExpr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>
-{
+impl<'a> Node<'a> for ClassGetExpr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_class_get_expr(self)
     }
@@ -236,7 +232,7 @@ impl<'a> Node<'a>
         }
     }
 }
-impl<'a> Node<'a> for ClassId<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for ClassId<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_class_id(self)
     }
@@ -254,7 +250,7 @@ impl<'a> Node<'a> for ClassId<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBody
         }
     }
 }
-impl<'a> Node<'a> for ClassId_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for ClassId_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_class_id_(self)
     }
@@ -313,7 +309,7 @@ impl<'a> Node<'a> for ClassTypeconst<'a> {
     }
 }
 impl<'a> Node<'a>
-    for ClassTypeconstDef<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>
+    for ClassTypeconstDef<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()>
 {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_class_typeconst_def(self)
@@ -348,7 +344,7 @@ impl<'a> Node<'a>
         }
     }
 }
-impl<'a> Node<'a> for ClassVar<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for ClassVar<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_class_var(self)
     }
@@ -410,7 +406,7 @@ impl<'a> Node<'a> for ClassVar<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBod
         }
     }
 }
-impl<'a> Node<'a> for Class_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Class_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_class_(self)
     }
@@ -548,7 +544,7 @@ impl<'a> Node<'a> for Class_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyA
         }
     }
 }
-impl<'a> Node<'a> for CollectionTarg<'a, ()> {
+impl<'a> Node<'a> for CollectionTarg<'a, &'a crate::pos::Pos<'a>> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_collection_targ(self)
     }
@@ -586,7 +582,7 @@ impl<'a> Node<'a> for Contexts<'a> {
         }
     }
 }
-impl<'a> Node<'a> for Def<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Def<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_def(self)
     }
@@ -709,7 +705,7 @@ impl<'a> Node<'a> for EnvAnnot {
         }
     }
 }
-impl<'a> Node<'a> for Expr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Expr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_expr(self)
     }
@@ -727,7 +723,7 @@ impl<'a> Node<'a> for Expr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn
         }
     }
 }
-impl<'a> Node<'a> for Expr_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Expr_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_expr_(self)
     }
@@ -792,7 +788,7 @@ impl<'a> Node<'a> for Expr_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAn
     }
 }
 impl<'a> Node<'a>
-    for ExpressionTree<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>
+    for ExpressionTree<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()>
 {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_expression_tree(self)
@@ -819,7 +815,7 @@ impl<'a> Node<'a>
         }
     }
 }
-impl<'a> Node<'a> for Field<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Field<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_field(self)
     }
@@ -834,9 +830,7 @@ impl<'a> Node<'a> for Field<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAn
         }
     }
 }
-impl<'a> Node<'a>
-    for FileAttribute<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>
-{
+impl<'a> Node<'a> for FileAttribute<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_file_attribute(self)
     }
@@ -854,7 +848,7 @@ impl<'a> Node<'a>
         }
     }
 }
-impl<'a> Node<'a> for FunDef<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for FunDef<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_fun_def(self)
     }
@@ -893,7 +887,7 @@ impl<'a> Node<'a> for FunKind {
         }
     }
 }
-impl<'a> Node<'a> for FunParam<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for FunParam<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_fun_param(self)
     }
@@ -944,7 +938,7 @@ impl<'a> Node<'a> for FunParam<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBod
     }
 }
 impl<'a> Node<'a>
-    for FunVariadicity<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>
+    for FunVariadicity<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()>
 {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_fun_variadicity(self)
@@ -957,7 +951,7 @@ impl<'a> Node<'a>
         }
     }
 }
-impl<'a> Node<'a> for Fun_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Fun_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_fun_(self)
     }
@@ -1035,7 +1029,7 @@ impl<'a> Node<'a> for Fun_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn
         }
     }
 }
-impl<'a> Node<'a> for FuncBody<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for FuncBody<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_func_body(self)
     }
@@ -1053,9 +1047,7 @@ impl<'a> Node<'a> for FuncBody<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBod
         }
     }
 }
-impl<'a> Node<'a>
-    for FunctionPtrId<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>
-{
+impl<'a> Node<'a> for FunctionPtrId<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_function_ptr_id(self)
     }
@@ -1066,7 +1058,7 @@ impl<'a> Node<'a>
         }
     }
 }
-impl<'a> Node<'a> for Gconst<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Gconst<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_gconst(self)
     }
@@ -1298,7 +1290,7 @@ impl<'a> Node<'a> for Lid<'a> {
         }
     }
 }
-impl<'a> Node<'a> for Method_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Method_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_method_(self)
     }
@@ -1455,7 +1447,7 @@ impl<'a> Node<'a> for ReadonlyKind {
         }
     }
 }
-impl<'a> Node<'a> for RecordDef<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for RecordDef<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_record_def(self)
     }
@@ -1551,7 +1543,7 @@ impl<'a> Node<'a> for ShapeFieldName<'a> {
         }
     }
 }
-impl<'a> Node<'a> for Stmt<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Stmt<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_stmt(self)
     }
@@ -1566,7 +1558,7 @@ impl<'a> Node<'a> for Stmt<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn
         }
     }
 }
-impl<'a> Node<'a> for Stmt_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Stmt_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_stmt_(self)
     }
@@ -1595,7 +1587,7 @@ impl<'a> Node<'a> for Stmt_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAn
         }
     }
 }
-impl<'a> Node<'a> for Targ<'a, ()> {
+impl<'a> Node<'a> for Targ<'a, &'a crate::pos::Pos<'a>> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_targ(self)
     }
@@ -1610,7 +1602,7 @@ impl<'a> Node<'a> for Targ<'a, ()> {
         }
     }
 }
-impl<'a> Node<'a> for Tparam<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Tparam<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_tparam(self)
     }
@@ -1663,7 +1655,7 @@ impl<'a> Node<'a> for Tprim {
         }
     }
 }
-impl<'a> Node<'a> for TypeHint<'a, ()> {
+impl<'a> Node<'a> for TypeHint<'a, &'a crate::pos::Pos<'a>> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_type_hint(self)
     }
@@ -1678,7 +1670,7 @@ impl<'a> Node<'a> for TypeHint<'a, ()> {
         }
     }
 }
-impl<'a> Node<'a> for Typedef<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for Typedef<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_typedef(self)
     }
@@ -1800,9 +1792,7 @@ impl<'a> Node<'a> for UseAsVisibility {
         }
     }
 }
-impl<'a> Node<'a>
-    for UserAttribute<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>
-{
+impl<'a> Node<'a> for UserAttribute<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_user_attribute(self)
     }
@@ -1820,7 +1810,7 @@ impl<'a> Node<'a>
         }
     }
 }
-impl<'a> Node<'a> for UsingStmt<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for UsingStmt<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_using_stmt(self)
     }
@@ -1904,7 +1894,7 @@ impl<'a> Node<'a> for WhereConstraintHint<'a> {
         }
     }
 }
-impl<'a> Node<'a> for XhpAttr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for XhpAttr<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_xhp_attr(self)
     }
@@ -1954,9 +1944,7 @@ impl<'a> Node<'a> for XhpAttrTag {
         }
     }
 }
-impl<'a> Node<'a>
-    for XhpAttribute<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()>
-{
+impl<'a> Node<'a> for XhpAttribute<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_xhp_attribute(self)
     }
@@ -2003,7 +1991,7 @@ impl<'a> Node<'a> for XhpEnumValue<'a> {
         }
     }
 }
-impl<'a> Node<'a> for XhpSimple<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, (), ()> {
+impl<'a> Node<'a> for XhpSimple<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn<'a>, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_xhp_simple(self)
     }

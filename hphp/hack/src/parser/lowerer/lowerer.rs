@@ -4930,7 +4930,7 @@ where
 
     fn check_effect_memoized(
         contexts: &Option<ast::Contexts>,
-        user_attributes: &[aast::UserAttribute<(), (), (), ()>],
+        user_attributes: &[aast::UserAttribute<(), (), ()>],
         kind: &str,
         env: &mut Env<'a, TF>,
     ) {

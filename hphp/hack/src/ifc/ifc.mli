@@ -8,11 +8,7 @@
 
 val should_print : user_mode:Ifc_types.mode -> phase:Ifc_types.mode -> bool
 
-val check :
-  Ifc_types.options ->
-  (Typing_defs.locl_ty, unit, Tast.saved_env, Typing_defs.locl_ty) Aast.def list ->
-  Provider_context.t ->
-  unit
+val check : Ifc_types.options -> Tast.def list -> Provider_context.t -> unit
 
 val get_solver_result :
   Ifc_types.callable_result list -> Ifc_types.callable_result SMap.t
@@ -38,16 +34,7 @@ val analyse_callable :
   saved_env:Tast.saved_env ->
   ctx:Provider_context.t ->
   Ifc_types.purpose ->
-  ( Typing_defs.locl_ty,
-    unit,
-    Tast.saved_env,
-    Typing_defs.locl_ty )
-  Aast.fun_param
-  list ->
-  ( Typing_defs.locl_ty,
-    unit,
-    Tast.saved_env,
-    Typing_defs.locl_ty )
-  Aast.func_body ->
+  Tast.fun_param list ->
+  Tast.func_body ->
   Typing_defs.locl_ty ->
   Ifc_types.callable_result option

@@ -9,7 +9,7 @@
         f_readonly_ret = None; f_ret = ((?string), None); f_name = ([4:10-13], "\\foo"); 
         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = (A<#100000871562131>); param_type_hint = ((A<string>), (Some ([4:14-15], (Happly (([4:14-15], "\\A"), []))))); 
+        [{ param_annotation = (A<string>); param_type_hint = ((A<string>), (Some ([4:14-15], (Happly (([4:14-15], "\\A"), []))))); 
            param_is_variadic = false; param_pos = [4:16-18]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }

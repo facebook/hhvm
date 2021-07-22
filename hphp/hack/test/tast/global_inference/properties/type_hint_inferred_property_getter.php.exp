@@ -17,7 +17,7 @@
          m_name = ([6:19-30], "__construct"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = (#100001073655756); param_type_hint = ((int), None); 
+         [{ param_annotation = (int); param_type_hint = ((int), None); 
             param_is_variadic = false; param_pos = [6:31-33]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -76,7 +76,7 @@
              (Expr
                 ((A), [17:3-16],
                  (Binop ((Eq None), ((A), [17:3-5], (Lvar ([17:3-5], $a))),
-                    ((A), [17:8-16], (New (((A), [17:12-13], (CI ([17:12-13], "\\A"))), [], [((int), [17:14-15], (Int "1"))], None, ((function(#100001073655756 $x): void))))))))));
+                    ((A), [17:8-16], (New (((A), [17:12-13], (CI ([17:12-13], "\\A"))), [], [((int), [17:14-15], (Int "1"))], None, ((function(int $x): void))))))))));
              ([18:3-18],
               (Expr
                  ((void), [18:3-17],

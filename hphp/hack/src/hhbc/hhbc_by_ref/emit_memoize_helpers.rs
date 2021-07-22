@@ -62,9 +62,9 @@ pub fn param_code_gets<'arena>(
     )
 }
 
-pub fn check_memoize_possible<Ex, Fb, En, Hi>(
+pub fn check_memoize_possible<Ex, Fb, En>(
     pos: &Pos,
-    params: &[FunParam<Ex, Fb, En, Hi>],
+    params: &[FunParam<Ex, Fb, En>],
     is_method: bool,
 ) -> Result<()> {
     if !is_method && params.iter().any(|param| param.is_variadic) {

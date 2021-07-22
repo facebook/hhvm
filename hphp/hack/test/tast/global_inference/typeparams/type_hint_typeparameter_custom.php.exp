@@ -59,7 +59,7 @@ Errors:
          f_readonly_ret = None; f_ret = ((void), None); f_name = ([10:10-13], "\\foo"); 
          f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = (C<#100000861544184>); param_type_hint = ((C<int>), (Some ([10:14-15], (Happly (([10:14-15], "\\C"), []))))); 
+         [{ param_annotation = (C<int>); param_type_hint = ((C<int>), (Some ([10:14-15], (Happly (([10:14-15], "\\C"), []))))); 
             param_is_variadic = false; param_pos = [10:16-18]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }

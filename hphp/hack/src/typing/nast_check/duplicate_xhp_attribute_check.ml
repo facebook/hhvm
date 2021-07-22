@@ -22,8 +22,7 @@ open Aast
  * parser itself.
  *)
 
-let error_if_repeated_attribute
-    (attribs : ('ex, 'fb, 'en, 'hi) xhp_attribute list) =
+let error_if_repeated_attribute (attribs : ('ex, 'fb, 'en) xhp_attribute list) =
   let rec loop attribs (seen : SSet.t) =
     match attribs with
     | Xhp_simple { xs_name = (pos, name); _ } :: _ when SSet.mem name seen ->

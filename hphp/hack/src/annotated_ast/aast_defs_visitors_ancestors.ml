@@ -35,8 +35,6 @@ class ['self] iter_defs_base =
     method on_'ex _ _ = ()
 
     method on_'en _ _ = ()
-
-    method on_'hi _ _ = ()
   end
 
 class virtual ['self] reduce_defs_base =
@@ -68,8 +66,6 @@ class virtual ['self] reduce_defs_base =
     method on_'ex _env _ = self#zero
 
     method on_'en _env _ = self#zero
-
-    method on_'hi _env _ = self#zero
   end
 
 class ['self] map_defs_base =

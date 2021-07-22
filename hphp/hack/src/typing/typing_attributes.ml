@@ -24,7 +24,7 @@ let check_implements
       is_using_clause:bool ->
       Pos.t ->
       env ->
-      (_, _, _, _) Aast.class_id_ ->
+      Nast.class_id_ ->
       _ list ->
       Nast.expr list ->
       _ option ->

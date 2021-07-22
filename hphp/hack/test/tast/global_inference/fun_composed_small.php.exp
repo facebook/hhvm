@@ -9,7 +9,7 @@
         f_readonly_ret = None; f_ret = ((int), None); f_name = ([3:10-12], "\\g1"); 
         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = (#100000163631446); param_type_hint = ((int), None); 
+        [{ param_annotation = (int); param_type_hint = ((int), None); 
            param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -28,7 +28,7 @@
         f_readonly_ret = None; f_ret = ((int), None); f_name = ([3:10-12], "\\g2"); 
         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = (#100000740538837); param_type_hint = ((int), None); 
+        [{ param_annotation = (int); param_type_hint = ((int), None); 
            param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }

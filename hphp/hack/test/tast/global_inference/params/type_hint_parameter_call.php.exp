@@ -10,7 +10,7 @@
         f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
         f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = (#100000927383256); param_type_hint = ((int), None); 
+        [{ param_annotation = (int); param_type_hint = ((int), None); 
            param_is_variadic = false; param_pos = [3:14-16]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }

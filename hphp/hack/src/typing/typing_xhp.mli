@@ -43,8 +43,4 @@ val is_xhp_child : env -> Pos.t -> Typing_defs.locl_ty -> bool
  * typing perspective, so they are set to arbitrary defaults.
  *)
 val rewrite_xml_into_new :
-  Pos.t ->
-  sid ->
-  (unit, 'b, 'c, 'd) xhp_attribute list ->
-  (unit, 'b, 'c, 'd) expr list ->
-  (unit, 'b, 'c, 'd) expr
+  Pos.t -> sid -> Nast.xhp_attribute list -> Nast.expr list -> Nast.expr

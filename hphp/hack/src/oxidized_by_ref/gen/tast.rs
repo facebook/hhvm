@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<53b862b780453c13658bda9553e5c04d>>
+// @generated SignedSource<<3595f101435000a4eb410116ce9f6324>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -78,58 +78,56 @@ pub struct SavedEnv<'a> {
 impl<'a> TrivialDrop for SavedEnv<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(SavedEnv<'arena>);
 
-pub type Program<'a> = aast::Program<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type Program<'a> = aast::Program<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type Def<'a> = aast::Def<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type Def<'a> = aast::Def<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type Expr<'a> = aast::Expr<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type Expr<'a> = aast::Expr<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type Expr_<'a> = aast::Expr_<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type Expr_<'a> = aast::Expr_<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type Stmt<'a> = aast::Stmt<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type Stmt<'a> = aast::Stmt<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type Stmt_<'a> = aast::Stmt_<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type Stmt_<'a> = aast::Stmt_<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type Block<'a> = aast::Block<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type Block<'a> = aast::Block<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type Class_<'a> = aast::Class_<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type Class_<'a> = aast::Class_<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type ClassId<'a> = aast::ClassId<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type ClassId<'a> = aast::ClassId<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
 pub type TypeHint<'a> = aast::TypeHint<'a, &'a Ty<'a>>;
 
 pub type Targ<'a> = aast::Targ<'a, &'a Ty<'a>>;
 
-pub type ClassGetExpr<'a> = aast::ClassGetExpr<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type ClassGetExpr<'a> = aast::ClassGetExpr<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type ClassTypeconstDef<'a> =
-    aast::ClassTypeconstDef<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type ClassTypeconstDef<'a> = aast::ClassTypeconstDef<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type UserAttribute<'a> = aast::UserAttribute<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type UserAttribute<'a> = aast::UserAttribute<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type Fun_<'a> = aast::Fun_<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type Fun_<'a> = aast::Fun_<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type FileAttribute<'a> = aast::FileAttribute<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type FileAttribute<'a> = aast::FileAttribute<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type FunDef<'a> = aast::FunDef<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type FunDef<'a> = aast::FunDef<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type FunParam<'a> = aast::FunParam<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type FunParam<'a> = aast::FunParam<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type FunVariadicity<'a> =
-    aast::FunVariadicity<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type FunVariadicity<'a> = aast::FunVariadicity<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type FuncBody<'a> = aast::FuncBody<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type FuncBody<'a> = aast::FuncBody<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type Method_<'a> = aast::Method_<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type Method_<'a> = aast::Method_<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type ClassVar<'a> = aast::ClassVar<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type ClassVar<'a> = aast::ClassVar<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type ClassConst<'a> = aast::ClassConst<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type ClassConst<'a> = aast::ClassConst<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type Tparam<'a> = aast::Tparam<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type Tparam<'a> = aast::Tparam<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type Typedef<'a> = aast::Typedef<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type Typedef<'a> = aast::Typedef<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type RecordDef<'a> = aast::RecordDef<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type RecordDef<'a> = aast::RecordDef<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;
 
-pub type Gconst<'a> = aast::Gconst<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>, &'a Ty<'a>>;
+pub type Gconst<'a> = aast::Gconst<'a, &'a Ty<'a>, (), &'a SavedEnv<'a>>;

@@ -21,19 +21,18 @@ pub use visitor::{visit, Visitor};
 pub use visitor_mut::{visit as visit_mut, VisitorMut};
 
 mod type_params_defaults {
-    pub struct P<Context, Error, Ex, Fb, En, Hi>(
-        std::marker::PhantomData<(Context, Error, Ex, Fb, En, Hi)>,
+    pub struct P<Context, Error, Ex, Fb, En>(
+        std::marker::PhantomData<(Context, Error, Ex, Fb, En)>,
     );
-    impl<C, E, Ex, Fb, En, Hi> super::type_params::Params for P<C, E, Ex, Fb, En, Hi> {
+    impl<C, E, Ex, Fb, En> super::type_params::Params for P<C, E, Ex, Fb, En> {
         type Context = C;
         type Error = E;
         type Ex = Ex;
         type Fb = Fb;
         type En = En;
-        type Hi = Hi;
     }
 
-    pub type AstParams<Context, Error> = P<Context, Error, (), (), (), ()>;
+    pub type AstParams<Context, Error> = P<Context, Error, (), (), ()>;
 }
 
 #[cfg(test)]
@@ -49,12 +48,12 @@ mod tests {
     #[test]
     fn simple() {
         impl<'ast> Visitor<'ast> for usize {
-            type P = type_params_defaults::P<(), (), (), (), (), ()>;
+            type P = type_params_defaults::P<(), (), (), (), ()>;
             fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
                 self
             }
 
-            fn visit_expr(&mut self, c: &mut (), p: &Expr<(), (), (), ()>) -> Result<(), ()> {
+            fn visit_expr(&mut self, c: &mut (), p: &Expr<(), (), ()>) -> Result<(), ()> {
                 *self += 1;
                 p.recurse(c, self)
             }
@@ -73,12 +72,12 @@ mod tests {
     #[test]
     fn simple_mut() {
         impl<'ast> VisitorMut<'ast> for () {
-            type P = type_params_defaults::P<(), (), (), (), (), ()>;
+            type P = type_params_defaults::P<(), (), (), (), ()>;
             fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
                 self
             }
 
-            fn visit_expr_(&mut self, c: &mut (), p: &mut Expr_<(), (), (), ()>) -> Result<(), ()> {
+            fn visit_expr_(&mut self, c: &mut (), p: &mut Expr_<(), (), ()>) -> Result<(), ()> {
                 *p = Expr_::Null;
                 p.recurse(c, self)
             }
@@ -109,7 +108,7 @@ mod tests {
         use std::collections::BTreeMap;
 
         impl<'ast> Visitor<'ast> for u8 {
-            type P = type_params_defaults::P<(), (), u8, (), (), ()>;
+            type P = type_params_defaults::P<(), (), u8, (), ()>;
             fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
                 self
             }
@@ -123,7 +122,7 @@ mod tests {
         map.insert((0, "".into()), (Pos::make_none(), 1));
         map.insert((1, "".into()), (Pos::make_none(), 3));
         map.insert((2, "".into()), (Pos::make_none(), 5));
-        let stmt_: Stmt_<u8, (), (), ()> =
+        let stmt_: Stmt_<u8, (), ()> =
             Stmt_::AssertEnv(Box::new((EnvAnnot::Join, LocalIdMap(map))));
         let mut s = 0u8;
         visitor::visit(&mut s, &mut (), &stmt_).unwrap();

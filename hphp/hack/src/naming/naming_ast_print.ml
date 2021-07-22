@@ -12,7 +12,7 @@ let print_nast_internal pp_ex nast =
   let pp_unit fmt () = Format.pp_print_string fmt "()" in
   let formatter = Format.formatter_of_out_channel Stdlib.stdout in
   Format.pp_set_margin formatter 200;
-  Aast.pp_program pp_ex Nast.pp_func_body_ann pp_unit pp_unit formatter nast;
+  Aast.pp_program pp_ex Nast.pp_func_body_ann pp_unit formatter nast;
   Format.pp_print_newline formatter ()
 
 let print_nast nast = print_nast_internal pp_unit nast
@@ -29,8 +29,6 @@ let print_nast_without_position nast =
       method on_'ex _ _pos = ()
 
       method on_'en _ en = en
-
-      method on_'hi _ hi = hi
     end
   in
   let nast = remove_pos#on_program () nast in

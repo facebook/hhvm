@@ -10,7 +10,7 @@
         f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
         f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = (#100000046348575); param_type_hint = ((mixed), None); 
+        [{ param_annotation = (mixed); param_type_hint = ((mixed), None); 
            param_is_variadic = false; param_pos = [3:14-16]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
@@ -40,7 +40,7 @@
          f_name = ([10:10-13], "\\bar"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = (#100000657740766); param_type_hint = ((num), None); 
+         [{ param_annotation = (num); param_type_hint = ((num), None); 
             param_is_variadic = false; param_pos = [10:14-16]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }

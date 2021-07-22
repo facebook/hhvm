@@ -9,8 +9,7 @@
         f_readonly_ret = None; f_ret = ((?int), None); f_name = ([4:10-13], "\\foo"); 
         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
-        [{ param_annotation = (MyMap<#100000046081361, #100000052502809>); 
-           param_type_hint = ((MyMap<string, int>), (Some ([4:14-19], (Happly (([4:14-19], "\\MyMap"), []))))); 
+        [{ param_annotation = (MyMap<string, int>); param_type_hint = ((MyMap<string, int>), (Some ([4:14-19], (Happly (([4:14-19], "\\MyMap"), []))))); 
            param_is_variadic = false; param_pos = [4:20-22]; param_name = "$m"; 
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }

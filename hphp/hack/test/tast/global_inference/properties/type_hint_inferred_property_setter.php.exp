@@ -17,7 +17,7 @@
          m_name = ([6:19-30], "__construct"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = (#100000067688394); param_type_hint = ((int), None); 
+         [{ param_annotation = (int); param_type_hint = ((int), None); 
             param_is_variadic = false; param_pos = [6:31-33]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
@@ -70,7 +70,7 @@
              (Expr
                 ((void), [18:3-16],
                  (Binop ((Eq None), ((void), [18:3-5], (Lplaceholder [18:3-5])),
-                    ((A), [18:8-16], (New (((A), [18:12-13], (CI ([18:12-13], "\\A"))), [], [((int), [18:14-15], (Int "1"))], None, ((function(#100000067688394 $x): void))))))))))
+                    ((A), [18:8-16], (New (((A), [18:12-13], (CI ([18:12-13], "\\A"))), [], [((int), [18:14-15], (Int "1"))], None, ((function(int $x): void))))))))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

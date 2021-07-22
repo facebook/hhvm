@@ -33,6 +33,8 @@ val pp_large_list :
 
 val timestring : float -> string
 
+val time : string -> float
+
 val opt : ('a -> 'b -> 'a * 'c) -> 'a -> 'b option -> 'a * 'c option
 
 val singleton_if : bool -> 'a -> 'a list

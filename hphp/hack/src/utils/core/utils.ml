@@ -49,6 +49,26 @@ let timestring (time : float) : string =
     tm.Unix.tm_sec
     (Int.of_float (time *. 1000.) % 1000)
 
+let time (timestring : string) : float =
+  let to_float year mon tm_mday tm_hour tm_min tm_sec millsec =
+    let tm =
+      Unix.
+        {
+          tm_sec;
+          tm_min;
+          tm_hour;
+          tm_mday;
+          tm_mon = mon - 1;
+          tm_year = year - 1900;
+          tm_wday = 0;
+          tm_yday = 0;
+          tm_isdst = true;
+        }
+    in
+    fst (Unix.mktime tm) +. (Float.of_int millsec *. 0.001)
+  in
+  Scanf.sscanf timestring "[%d-%02d-%02d %02d:%02d:%02d.%03d]" to_float
+
 let opt f env = function
   | None -> (env, None)
   | Some x ->

@@ -74,7 +74,7 @@ cat > main.cpp <<EOF
 int main() {
   using namespace HPHP::hackc::hhbc::ast;
 
-  Instruct _b6;
+  InstrSeq _b6;
 
   std::cout << "Ok!" << std::endl;
   return 0;

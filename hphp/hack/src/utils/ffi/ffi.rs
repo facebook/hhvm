@@ -232,7 +232,7 @@ impl<'a, T> BumpSliceMut<'a, T> {
         }
     }
 
-    pub fn as_inner_mut(&mut self) -> &'a mut [T] {
+    pub fn as_inner_mut(&self) -> &'a mut [T] {
         // Safety: Assumes `self` has been constructed via
         // `BumpSliceMut<'a, T>::new()` from some `&'a[T]` and so the
         // call to `from_raw_parts_mut` is a valid.

@@ -3,7 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{BumpSliceMut, Maybe::Just, Pair, Slice, Str};
+use ffi::{
+    BumpSliceMut,
+    Maybe::{self, Just, Nothing},
+    Pair, Slice, Str,
+};
 use hhbc_by_ref_hhbc_ast::*;
 use hhbc_by_ref_iterator::Id as IterId;
 use hhbc_by_ref_label::Label;
@@ -29,11 +33,10 @@ pub fn unrecoverable(msg: impl std::convert::Into<std::string::String>) -> Error
 
 /// The various from_X functions below take some kind of AST
 /// (expression, statement, etc.) and produce what is logically a
-/// sequence of instructions. This could simply be represented by a
-/// list, but then we would need to use an accumulator to avoid the
-/// quadratic complexity associated with repeated appending to a list.
-/// Instead, we simply build a tree of instructions which can easily
-/// be flattened at the end.
+/// sequence of instructions. This could be represented by a list, but
+/// we wish to avoid the quadratic complexity associated with repeated
+/// appending. So, we build a tree of instructions which can be
+/// flattened when complete.
 #[derive(Debug)]
 pub enum InstrSeq<'a> {
     List(&'a mut [Instruct<'a>]),
@@ -288,9 +291,7 @@ pub mod instr {
     pub fn goto<'a>(alloc: &'a bumpalo::Bump, label: std::string::String) -> InstrSeq {
         instr(
             alloc,
-            Instruct::ISpecialFlow(InstructSpecialFlow::Goto(
-                bumpalo::collections::String::from_str_in(label.as_str(), alloc).into_bump_str(),
-            )),
+            Instruct::ISpecialFlow(InstructSpecialFlow::Goto(Str::new_str(alloc, label))),
         )
     }
 
@@ -949,7 +950,24 @@ pub mod instr {
         label: Label,
         range: Option<(Local<'a>, isize)>,
     ) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::MemoGet(label, range)))
+        instr(
+            alloc,
+            Instruct::IMisc(InstructMisc::MemoGet(
+                label,
+                match range {
+                    Some((fst, snd)) => Just(Pair(fst, snd)),
+                    None => Nothing,
+                },
+            )),
+        )
+    }
+
+    // Factored out to reduce verbosity.
+    fn range_opt_to_maybe<'a>(range: Option<(Local<'a>, isize)>) -> Maybe<Pair<Local<'a>, isize>> {
+        match range {
+            Some((fst, snd)) => Just(Pair(fst, snd)),
+            None => Nothing,
+        }
     }
 
     pub fn memoget_eager<'a>(
@@ -960,7 +978,11 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMisc(InstructMisc::MemoGetEager(label1, label2, range)),
+            Instruct::IMisc(InstructMisc::MemoGetEager(
+                label1,
+                label2,
+                range_opt_to_maybe(range),
+            )),
         )
     }
 
@@ -968,14 +990,20 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         range: Option<(Local<'a>, isize)>,
     ) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::MemoSet(range)))
+        instr(
+            alloc,
+            Instruct::IMisc(InstructMisc::MemoSet(range_opt_to_maybe(range))),
+        )
     }
 
     pub fn memoset_eager<'a>(
         alloc: &'a bumpalo::Bump,
         range: Option<(Local<'a>, isize)>,
     ) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::MemoSetEager(range)))
+        instr(
+            alloc,
+            Instruct::IMisc(InstructMisc::MemoSetEager(range_opt_to_maybe(range))),
+        )
     }
 
     pub fn getmemokeyl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
@@ -1352,7 +1380,10 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         range: Option<(Local<'a>, isize)>,
     ) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IAsync(AsyncFunctions::AwaitAll(range)))
+        instr(
+            alloc,
+            Instruct::IAsync(AsyncFunctions::AwaitAll(range_opt_to_maybe(range))),
+        )
     }
 
     pub fn label<'a>(alloc: &'a bumpalo::Bump, label: Label) -> InstrSeq<'a> {
@@ -1803,9 +1834,7 @@ mod tests {
     fn iter() {
         let a = bumpalo::Bump::new();
         let alloc: &bumpalo::Bump = &a;
-        let mk_i = || {
-            Instruct::IComment(bumpalo::collections::String::from_str_in("", alloc).into_bump_str())
-        };
+        let mk_i = || Instruct::IComment(Str::from(""));
         let empty = || InstrSeq::new_empty(alloc);
 
         let one = || instr(alloc, mk_i());

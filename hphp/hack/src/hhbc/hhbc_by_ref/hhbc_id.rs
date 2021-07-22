@@ -72,7 +72,7 @@ macro_rules! impl_id {
             S: std::convert::Into<&'a str>,
         {
             fn from((alloc, s): (&'arena bumpalo::Bump, S)) -> $type<'arena> {
-                $type(Str::new(bumpalo::collections::String::from_str_in(s.into(), alloc).into_bump_str().as_bytes()))
+                $type(Str::new_str(alloc, s.into()))
             }
         }
 

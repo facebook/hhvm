@@ -9,7 +9,10 @@ mod write;
 pub use context::Context;
 pub use write::{Error, IoWrite, Result, Write};
 
-use ffi::{Maybe::Just, Maybe::Nothing, Pair};
+use ffi::{
+    Maybe::{Just, Nothing},
+    Pair,
+};
 
 use indexmap::IndexSet;
 use itertools::Itertools;
@@ -1294,7 +1297,7 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
         IBase(i) => print_base(w, i),
         IFinal(i) => print_final(w, i),
         ITry(itry) => print_try(w, itry),
-        IComment(s) => concat_str_by(w, " ", ["#", s]),
+        IComment(s) => concat_str_by(w, " ", ["#", s.as_str()]),
         ISrcLoc(p) => write!(
             w,
             ".srcloc {}:{},{}:{};",
@@ -1469,8 +1472,10 @@ fn print_async<W: Write>(w: &mut W, a: &AsyncFunctions) -> Result<(), W::Error> 
     match a {
         A::WHResult => w.write("WHResult"),
         A::Await => w.write("Await"),
-        A::AwaitAll(Some((Local::Unnamed(id), count))) => write!(w, "AwaitAll L:{}+{}", id, count),
-        A::AwaitAll(None) => w.write("AwaitAll L:0+0"),
+        A::AwaitAll(Just(Pair(Local::Unnamed(id), count))) => {
+            write!(w, "AwaitAll L:{}+{}", id, count)
+        }
+        A::AwaitAll(Nothing) => w.write("AwaitAll L:0+0"),
         _ => Err(Error::fail("AwaitAll needs an unnamed local")),
     }
 }
@@ -1790,32 +1795,32 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
             ],
         ),
 
-        M::MemoGet(label, Some((Local::Unnamed(first), local_count))) => {
+        M::MemoGet(label, Just(Pair(Local::Unnamed(first), local_count))) => {
             w.write("MemoGet ")?;
             print_label(w, label)?;
             write!(w, " L:{}+{}", first, local_count)
         }
-        M::MemoGet(label, None) => {
+        M::MemoGet(label, Nothing) => {
             w.write("MemoGet ")?;
             print_label(w, label)?;
             w.write(" L:0+0")
         }
         M::MemoGet(_, _) => Err(Error::fail("MemoGet needs an unnamed local")),
 
-        M::MemoSet(Some((Local::Unnamed(first), local_count))) => {
+        M::MemoSet(Just(Pair(Local::Unnamed(first), local_count))) => {
             write!(w, "MemoSet L:{}+{}", first, local_count)
         }
-        M::MemoSet(None) => w.write("MemoSet L:0+0"),
+        M::MemoSet(Nothing) => w.write("MemoSet L:0+0"),
         M::MemoSet(_) => Err(Error::fail("MemoSet needs an unnamed local")),
 
-        M::MemoGetEager(label1, label2, Some((Local::Unnamed(first), local_count))) => {
+        M::MemoGetEager(label1, label2, Just(Pair(Local::Unnamed(first), local_count))) => {
             w.write("MemoGetEager ")?;
             print_label(w, label1)?;
             w.write(" ")?;
             print_label(w, label2)?;
             write!(w, " L:{}+{}", first, local_count)
         }
-        M::MemoGetEager(label1, label2, None) => {
+        M::MemoGetEager(label1, label2, Nothing) => {
             w.write("MemoGetEager ")?;
             print_label(w, label1)?;
             w.write(" ")?;
@@ -1824,10 +1829,10 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
         }
         M::MemoGetEager(_, _, _) => Err(Error::fail("MemoGetEager needs an unnamed local")),
 
-        M::MemoSetEager(Some((Local::Unnamed(first), local_count))) => {
+        M::MemoSetEager(Just(Pair(Local::Unnamed(first), local_count))) => {
             write!(w, "MemoSetEager L:{}+{}", first, local_count)
         }
-        M::MemoSetEager(None) => w.write("MemoSetEager L:0+0"),
+        M::MemoSetEager(Nothing) => w.write("MemoSetEager L:0+0"),
         M::MemoSetEager(_) => Err(Error::fail("MemoSetEager needs an unnamed local")),
 
         M::OODeclExists(k) => concat_str_by(

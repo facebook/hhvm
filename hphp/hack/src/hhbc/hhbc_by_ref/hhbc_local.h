@@ -16,6 +16,7 @@
 #include <cstdlib>
 #include <ostream>
 #include <new>
+#include "hphp/hack/src/utils/ffi/ffi.h"
 
 
 namespace HPHP {

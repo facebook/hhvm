@@ -20,7 +20,7 @@ namespaces = ["hackc", "hhbc", "ast"]
 using_namespaces = []
 sys_includes = []
 includes = [
-  "hphp/hack/src/utils/ffi/ffi.h",
+  "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_ast.h",
 ]
 no_includes = false
 after_includes = ""

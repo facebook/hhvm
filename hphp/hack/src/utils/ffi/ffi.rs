@@ -87,7 +87,7 @@ pub struct Slice<'a, T> {
 }
 impl<'a, T> AsRef<[T]> for Slice<'a, T> {
     fn as_ref(&self) -> &[T] {
-        //Safety: Assumes `self` has been constructed via `Slice<'a,
+        // Safety: Assumes `self` has been constructed via `Slice<'a,
         // T>::new()` from some `&'a[T]` and so the call to
         // `from_raw_parts` is a valid.
         unsafe { std::slice::from_raw_parts(self.data, self.len) }
@@ -125,7 +125,7 @@ impl<'a, T> std::convert::From<&'a mut [T]> for Slice<'a, T> {
 
 impl<'a, T: PartialEq> PartialEq for Slice<'a, T> {
     fn eq(&self, other: &Self) -> bool {
-        //Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
+        // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
         // safety].
         unsafe {
             let left = from_raw_parts(self.data, self.len);
@@ -137,7 +137,7 @@ impl<'a, T: PartialEq> PartialEq for Slice<'a, T> {
 impl<'a, T: Eq> Eq for Slice<'a, T> {}
 impl<'a, T: Hash> Hash for Slice<'a, T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        //Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
+        // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
         // safety].
         unsafe {
             let me = from_raw_parts(self.data, self.len);
@@ -147,7 +147,7 @@ impl<'a, T: Hash> Hash for Slice<'a, T> {
 }
 impl<'a, T: Ord> Ord for Slice<'a, T> {
     fn cmp(&self, other: &Self) -> Ordering {
-        //Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
+        // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
         // safety].
         unsafe {
             let left = from_raw_parts(self.data, self.len);
@@ -157,7 +157,7 @@ impl<'a, T: Ord> Ord for Slice<'a, T> {
     }
 }
 impl<'a, T: PartialOrd> PartialOrd for Slice<'a, T> {
-    //Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
+    // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
     // safety].
     fn partial_cmp(&self, other: &Self) -> std::option::Option<Ordering> {
         unsafe {
@@ -175,9 +175,16 @@ pub type Str<'a> = Slice<'a, u8>;
 //    return std::string{s.data, s.data + s.len};
 // }
 impl<'a> Str<'a> {
+    /// Make a copy of a `&str` in an `'a Bump` and return it as a `Str<'a>`.
+    //  Don't use this if you have an `&'a str` already, prefer
+    //  `Str::from` in that case and avoid a copy.
+    pub fn new_str(alloc: &'a bumpalo::Bump, src: impl AsRef<str>) -> Str<'a> {
+        Slice::new(alloc.alloc_str(src.as_ref()).as_bytes())
+    }
+
     /// Cast a `Str<'a>` back into a `&'a str`.
     pub fn as_str(&self) -> &'a str {
-        //Safety: Assumes `self` has been constructed via `Slice<'a,
+        // Safety: Assumes `self` has been constructed via `Slice<'a,
         // T>::new()` from some `&'a str` and so the calls to
         // `from_raw_parts` and `from_utf8_unchecked` are valid.
         unsafe { std::str::from_utf8_unchecked(std::slice::from_raw_parts(self.data, self.len)) }
@@ -250,7 +257,7 @@ impl<'a, T> AsMut<[T]> for BumpSliceMut<'a, T> {
 }
 impl<'arena, T: 'arena + Clone> Clone for BumpSliceMut<'arena, T> {
     fn clone(&self) -> Self {
-        //Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
+        // Safety: See [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>`
         // safety].
         let alloc: &'arena bumpalo::Bump =
             unsafe { (self.alloc as *const bumpalo::Bump).as_ref().unwrap() };

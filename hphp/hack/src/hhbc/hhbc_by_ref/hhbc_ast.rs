@@ -91,7 +91,7 @@ impl<'arena> FcallArgs<'arena> {
             inouts,
             Maybe::from(async_eager_label),
             match context {
-                Some(s) => Maybe::Just(Slice::new(s.as_bytes())),
+                Some(s) => Maybe::Just(Str::new(s.as_bytes())),
                 None => Maybe::Nothing,
             },
         )
@@ -340,13 +340,15 @@ pub enum InstructControlFlow<'arena> {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum InstructSpecialFlow<'arena> {
     Continue(isize),
     Break(isize),
-    Goto(&'arena str),
+    Goto(Str<'arena>),
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum InstructGet<'arena> {
     CGetL(Local<'arena>),
     CGetQuietL(Local<'arena>),
@@ -360,6 +362,7 @@ pub enum InstructGet<'arena> {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum IstypeOp {
     OpNull,
     OpBool,
@@ -374,7 +377,7 @@ pub enum IstypeOp {
     OpDict,
     OpVec,
     OpArrLike,
-    /// Arr or Vec or Dict or Keyset *)
+    /// Arr or Vec or Dict or Keyset
     OpClsMeth,
     OpFunc,
     OpLegacyArrLike,
@@ -382,6 +385,7 @@ pub enum IstypeOp {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum InstructIsset<'arena> {
     IssetC,
     IssetL(Local<'arena>),
@@ -393,12 +397,14 @@ pub enum InstructIsset<'arena> {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum SetrangeOp {
     Forward,
     Reverse,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum EqOp {
     PlusEqual,
     MinusEqual,
@@ -418,6 +424,7 @@ pub enum EqOp {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum IncdecOp {
     PreInc,
     PostInc,
@@ -430,12 +437,14 @@ pub enum IncdecOp {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum InitpropOp {
     Static,
     NonStatic,
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum InstructMutator<'arena> {
     SetL(Local<'arena>),
     /// PopL is put in mutators since it behaves as SetL + PopC
@@ -455,12 +464,14 @@ pub enum InstructMutator<'arena> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum ObjNullFlavor {
     NullThrows,
     NullSafe,
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum InstructCall<'arena> {
     NewObj,
     NewObjR,
@@ -480,6 +491,7 @@ pub enum InstructCall<'arena> {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum InstructBase<'arena> {
     BaseGC(StackIndex, MemberOpMode),
     BaseGL(Local<'arena>, MemberOpMode),
@@ -491,6 +503,7 @@ pub enum InstructBase<'arena> {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum InstructFinal<'arena> {
     QueryM(NumParams, QueryOp, MemberKey<'arena>),
     SetM(NumParams, MemberKey<'arena>),
@@ -501,6 +514,7 @@ pub enum InstructFinal<'arena> {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum InstructIterator<'arena> {
     IterInit(IterArgs<'arena>, Label),
     IterNext(IterArgs<'arena>, Label),
@@ -508,6 +522,7 @@ pub enum InstructIterator<'arena> {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum InstructIncludeEvalDefine {
     Incl,
     InclOnce,
@@ -518,6 +533,7 @@ pub enum InstructIncludeEvalDefine {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum BareThisOp {
     Notice,
     NoNotice,
@@ -525,6 +541,7 @@ pub enum BareThisOp {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum ClassKind {
     Class,
     Interface,
@@ -532,12 +549,14 @@ pub enum ClassKind {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum OpSilence {
     Start,
     End,
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum InstructMisc<'arena> {
     This,
     BareThis(BareThisOp),
@@ -571,16 +590,17 @@ pub enum InstructMisc<'arena> {
     GetMemoKeyL(Local<'arena>),
     CGetCUNop,
     UGetCUNop,
-    MemoGet(Label, Option<(Local<'arena>, isize)>),
-    MemoGetEager(Label, Label, Option<(Local<'arena>, isize)>),
-    MemoSet(Option<(Local<'arena>, isize)>),
-    MemoSetEager(Option<(Local<'arena>, isize)>),
+    MemoGet(Label, Maybe<Pair<Local<'arena>, isize>>),
+    MemoGetEager(Label, Label, Maybe<Pair<Local<'arena>, isize>>),
+    MemoSet(Maybe<Pair<Local<'arena>, isize>>),
+    MemoSetEager(Maybe<Pair<Local<'arena>, isize>>),
     LockObj,
     ThrowNonExhaustiveSwitch,
     RaiseClassStringConversionWarning,
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum GenCreationExecution {
     CreateCont,
     ContEnter,
@@ -595,13 +615,15 @@ pub enum GenCreationExecution {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum AsyncFunctions<'arena> {
     WHResult,
     Await,
-    AwaitAll(Option<(Local<'arena>, isize)>),
+    AwaitAll(Maybe<Pair<Local<'arena>, isize>>),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum InstructTry {
     TryCatchBegin,
     TryCatchMiddle,
@@ -609,6 +631,7 @@ pub enum InstructTry {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub struct Srcloc {
     pub line_begin: isize,
     pub col_begin: isize,
@@ -617,6 +640,7 @@ pub struct Srcloc {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub enum Instruct<'arena> {
     IBasic(InstructBasic),
     IIterator(InstructIterator<'arena>),
@@ -633,7 +657,7 @@ pub enum Instruct<'arena> {
     IFinal(InstructFinal<'arena>),
     ILabel(Label),
     ITry(InstructTry),
-    IComment(&'arena str),
+    IComment(Str<'arena>),
     ISrcLoc(Srcloc),
     IAsync(AsyncFunctions<'arena>),
     IGenerator(GenCreationExecution),
@@ -641,40 +665,6 @@ pub enum Instruct<'arena> {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhbc_ast<'a, 'arena>(
-    _: CheckStarted,
-    _: FreeIterator,
-    _: FcallFlags,
-    _: ParamNum,
-    _: StackIndex,
-    _: RecordNum,
-    _: TypedefNum,
-    _: ClassNum,
-    _: ConstNum,
-    _: ClassId<'arena>,
-    _: FunctionId<'arena>,
-    _: MethodId<'arena>,
-    _: ConstId<'arena>,
-    _: PropId<'arena>,
-    _: FcallArgs<'arena>,
-    _: IterArgs<'arena>,
-    _: AdataId<'arena>,
-    _: ParamLocations<'arena>,
-    _: SpecialClsRef,
-    _: MemberOpMode,
-    _: QueryOp,
-    _: CollectionType,
-    _: FatalOp,
-    _: MemberKey<'arena>,
-    _: InstructBasic,
-    _: TypestructResolveOp,
-    _: ReadOnlyOp,
-    _: HasGenericsOp,
-    _: IsLogAsDynamicCallOp,
-    _: InstructLitConst<'arena>,
-    _: InstructOperator<'arena>,
-    _: Switchkind,
-    _: InstructControlFlow<'arena>,
-) {
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhbc_ast<'a, 'arena>(_: Instruct<'arena>) {
     unimplemented!()
 }

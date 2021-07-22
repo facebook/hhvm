@@ -19,7 +19,9 @@ namespace = "HPHP"
 namespaces = ["hackc", "hhbc", "ast"]
 using_namespaces = []
 sys_includes = []
-includes = []
+includes = [
+  "hphp/hack/src/utils/ffi/ffi.h",
+]
 no_includes = false
 after_includes = ""
 #cpp_compat=true

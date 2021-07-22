@@ -55,17 +55,27 @@ set -x
               --crate hhbc_by_ref_hhbc_ast \
               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_ast.h")
 
+# hhbc_instruction_sequence.h
+(cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_instruction_sequence && \
+     cbindgen --config ../../cbindgen_hhbc_instruction_sequence.toml \
+              --crate hhbc_by_ref_instruction_sequence \
+              --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_instruction_sequence.h")
+
 signscript="$top/../xplat/python/signedsource_lib/signedsource.py"
 eval "${signscript}" sign "${top}"/hphp/hack/src/utils/ffi/ffi.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_ast.h
 
 # Quick sanity check: Does a program that includes these headers compile?
 cat > main.cpp <<EOF
-#include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_ast.h"
+#include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_instruction_sequence.h"
 
 #include <iostream>
 
 int main() {
+  using namespace HPHP::hackc::hhbc::ast;
+
+  Instruct _b6;
+
   std::cout << "Ok!" << std::endl;
   return 0;
 }

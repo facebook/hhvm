@@ -16,24 +16,13 @@
 #include <cstdlib>
 #include <ostream>
 #include <new>
-#include "hphp/hack/src/utils/ffi/ffi.h"
+#include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_ast.h"
 
 
 namespace HPHP {
 namespace hackc {
 namespace hhbc {
 namespace ast {
-
-struct Type {
-  Str _0;
-};
-
-
-extern "C" {
-
-void no_call_compile_only_USED_TYPES_hhbc_id(Type, Type, Type, Type, Type, Type);
-
-} // extern "C"
 
 } // namespace ast
 } // namespace hhbc

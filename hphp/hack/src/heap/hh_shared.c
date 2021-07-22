@@ -622,7 +622,7 @@ static HANDLE memfd;
  * Committing the whole shared heap at once would require the same
  * amount of free space in memory (or in swap file).
  **************************************************************************/
-void memfd_init(char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
+void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
   memfd = CreateFileMapping(
     INVALID_HANDLE_VALUE,
     NULL,
@@ -658,7 +658,7 @@ static void raise_less_than_minimum_available(uint64_t avail) {
 }
 
 #include <sys/statvfs.h>
-void assert_avail_exceeds_minimum(char *shm_dir, uint64_t minimum_avail) {
+void assert_avail_exceeds_minimum(const char *shm_dir, uint64_t minimum_avail) {
   struct statvfs stats;
   uint64_t avail;
   if (statvfs(shm_dir, &stats)) {
@@ -686,7 +686,7 @@ void assert_avail_exceeds_minimum(char *shm_dir, uint64_t minimum_avail) {
  * The resulting file descriptor should be mmaped with the memfd_map
  * function (see below).
  ****************************************************************************/
-void memfd_init(char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
+void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
   if (shm_dir == NULL) {
     // This means that we should try to use the anonymous-y system calls
 #if defined(MEMFD_CREATE)
@@ -1065,7 +1065,7 @@ CAMLprim value hh_shared_init(
 
   // None -> NULL
   // Some str -> String_val(str)
-  char *shm_dir = NULL;
+  const char *shm_dir = NULL;
   if (shm_dir_val != Val_int(0)) {
     shm_dir = String_val(Field(shm_dir_val, 0));
   }
@@ -2278,8 +2278,7 @@ CAMLprim value hh_deserialize(heap_entry_t *elt) {
   }
 
   if (Entry_kind(elt->header) == KIND_STRING) {
-    result = caml_alloc_string(size);
-    memcpy(String_val(result), data, size);
+    result = caml_alloc_initialized_string(size, data);
   } else {
     result = caml_input_value_from_block(data, size);
   }
@@ -2598,7 +2597,7 @@ CAMLprim value hh_save_dep_table_blob(
     value reset_state_after_saving
 ) {
   CAMLparam3(out_filename, build_revision, reset_state_after_saving);
-  char *out_filename_raw = String_val(out_filename);
+  const char *out_filename_raw = String_val(out_filename);
   size_t reset_state_after_saving_raw = Bool_val(reset_state_after_saving);
 
   // TODO: use build_revision
@@ -2618,7 +2617,7 @@ CAMLprim value hh_load_dep_table_blob(
   struct timeval tv2 = { 0 };
   gettimeofday(&tv, NULL);
 
-  char *in_filename_raw = String_val(in_filename);
+  const char *in_filename_raw = String_val(in_filename);
 
   // TODO: T38685889 - use ignore_hh_version
   assert(ignore_hh_version);
@@ -3020,8 +3019,8 @@ CAMLprim value hh_save_dep_table_sqlite(
     value build_revision,
     value replace_state_after_saving) {
   CAMLparam3(out_filename, build_revision, replace_state_after_saving);
-  char *out_filename_raw = String_val(out_filename);
-  char *build_revision_raw = String_val(build_revision);
+  const char *out_filename_raw = String_val(out_filename);
+  const char *build_revision_raw = String_val(build_revision);
   size_t replace_state_after_saving_raw = Bool_val(replace_state_after_saving);
   size_t edges_added = hh_save_dep_table_helper_sqlite(
     out_filename_raw,
@@ -3036,8 +3035,8 @@ CAMLprim value hh_update_dep_table_sqlite(
     value build_revision,
     value replace_state_after_saving) {
   CAMLparam3(out_filename, build_revision, replace_state_after_saving);
-  char *out_filename_raw = String_val(out_filename);
-  char *build_revision_raw = String_val(build_revision);
+  const char *out_filename_raw = String_val(out_filename);
+  const char *build_revision_raw = String_val(build_revision);
   size_t replace_state_after_saving_raw = Bool_val(replace_state_after_saving);
   sqlite3 *db_out = NULL;
 

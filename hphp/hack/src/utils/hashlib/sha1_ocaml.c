@@ -16,7 +16,7 @@
 value sha1sum(value data) {
   CAMLparam1(data);
 
-  char *msg = String_val(data);
+  const char *msg = String_val(data);
   size_t msglen = caml_string_length(data);
 
   struct sha1_ctx ctx;

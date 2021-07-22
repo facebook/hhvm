@@ -30,7 +30,7 @@ void hh_lutimes(value filename_v) {
   /* Not implemented */
   CAMLreturn0;
 #else
-  char* filename = String_val(filename_v);
+  const char* filename = String_val(filename_v);
   int success = lutimes(filename, NULL);
   if (success != 0) {
     caml_failwith("lutimes failed");
@@ -43,7 +43,7 @@ value hh_is_nfs(value filename_v) {
   CAMLparam1(filename_v);
 #ifdef __linux__
   struct statfs buf;
-  char* filename = String_val(filename_v);
+  const char* filename = String_val(filename_v);
   int success = statfs(filename, &buf);
   if (success != 0) {
     caml_failwith("statfs failed");
@@ -69,8 +69,8 @@ value hh_is_nfs(value filename_v) {
 // https://stackoverflow.com/questions/584868/rerouting-stdin-and-stdout-from-c/586416#586416
 void hh_freopen(value filename_v, value mode_v, value fd_v) {
   CAMLparam3(filename_v, mode_v, fd_v);
-  char *filename = String_val(filename_v);
-  char *mode = String_val(mode_v);
+  const char *filename = String_val(filename_v);
+  const char *mode = String_val(mode_v);
   int fd = Int_val(fd_v);
   FILE *fp = fdopen(fd, mode);
   if (fp == NULL) {

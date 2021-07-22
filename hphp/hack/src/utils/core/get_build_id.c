@@ -35,9 +35,7 @@ value hh_get_build_revision(void) {
 
   const char* const buf = BuildInfo_kRevision;
   const size_t len = strlen(buf);
-  result = caml_alloc_string(len);
-
-  memcpy(String_val(result), buf, len);
+  result = caml_alloc_initialized_string(len, buf);
 
   CAMLreturn(result);
 }
@@ -74,9 +72,7 @@ value hh_get_build_mode(void) {
   CAMLlocal1(result);
 
   const size_t len = strlen(BuildInfo_kBuildMode);
-  result = caml_alloc_string(len);
-
-  memcpy(String_val(result), BuildInfo_kBuildMode, len);
+  result = caml_alloc_initialized_string(len, BuildInfo_kBuildMode);
 
   CAMLreturn(result);
 }

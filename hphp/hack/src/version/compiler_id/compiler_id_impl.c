@@ -18,7 +18,6 @@ value hh_get_compiler_id(void) {
   const ssize_t len = strlen(buf);
   value result;
 
-  result = caml_alloc_string(len);
-  memcpy(String_val(result), buf, len);
+  result = caml_alloc_initialized_string(len, buf);
   CAMLreturn(result);
 }

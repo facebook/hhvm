@@ -28,7 +28,7 @@ Val_some( value v )
 
 CAMLprim value
 hh_realpath(value v) {
-  char *input;
+  const char *input;
 #ifndef _WIN32
   char output[PATH_MAX];
 #else

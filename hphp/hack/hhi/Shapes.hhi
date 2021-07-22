@@ -15,23 +15,28 @@ namespace HH {
 abstract final class Shapes {
 
 /**
- * Shapes::idx is a helper function for accessing shape field value, or getting
- * a default if it's not set - similar to idx(), but for shapes.
+ * Use `Shapes::idx` to retrieve a field value in a shape, when the key may or may not exist.
+ * If `$index` does not exist in the shape, the default value will be returned (`$default`), if one has been set.
+ * It behaves similarily to `idx()` for Collections.
  *
- * This behavior cannot be expressed with type hints, so it's hardcoded in the
- * typechecker. Depending on arity, it will be one of the
+ * A few examples:
+ * * `Shapes::idx(shape('x' => 123), 'x') // 123`
+ * * `Shapes::idx(shape('x' => 123), 'y') // null`
+ * * `Shapes::idx(shape('x' => 123), 'y', 456) // 456`
  *
- * idx(?S $shape, arraykey $index) : ?Tv,
- * idx(?S $shape, arraykey $index, Tv $default) : Tv,
+ * * `Shapes::idx(null, 'y', 456) // 45`
  *
- * where $index must be statically known (literal or class constant), and S is
- * a shape containing such key:
+ * Use `Shapes::idx` when the key in your shape is optional (e.g., `?x`, in `shape(?'x' => int`).
+ * If the key in your shape is always present, access the value directly: `$my_shape['x']`.
  *
- * type S = shape(
- *   ...
- *   $index => Tv,
- *   ...
- * )
+ * The second argument, `$index` must always be a literal.
+ *
+ * @param shape(...) $shape   - shape to search for $index.
+ * @param arraykey $index     - Key ($index) to search. Must be a literal!
+ * @param mixed $default      - Default value to return if $index does not exist. By default, returns `null`.
+ *
+ * @return $value              - Value at $index, if it exists, or $default.
+ *
  */
   public static function idx(
     ?shape(...) $shape,

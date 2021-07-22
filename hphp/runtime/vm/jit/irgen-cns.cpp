@@ -28,7 +28,7 @@ namespace HPHP { namespace jit { namespace irgen {
 ///////////////////////////////////////////////////////////////////////////////
 
 void emitCnsE(IRGS& env, const StringData* name) {
-  if (auto const tv = Unit::lookupPersistentCns(name)) {
+  if (auto const tv = Constant::lookupPersistent(name)) {
     if (tv->m_type == KindOfUninit) {
       // KindOfUninit is a dynamic system constant. always a slow
       // lookup.

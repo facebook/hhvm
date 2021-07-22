@@ -1334,7 +1334,7 @@ OPTBLD_INLINE void iopColFromArray(CollectionType cType) {
 }
 
 OPTBLD_INLINE void iopCnsE(const StringData* s) {
-  auto const cns = Unit::loadCns(s);
+  auto const cns = Constant::load(s);
   if (type(cns) == KindOfUninit) {
     raise_error("Undefined constant '%s'", s->data());
   }

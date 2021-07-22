@@ -3561,7 +3561,7 @@ void parse_constant(AsmState& as) {
   constant.val = parse_member_tv_initializer(as);
   constant.attrs = attrs;
   if (type(constant.val) == KindOfUninit) {
-    constant.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(Unit::getCns);
+    constant.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(Constant::get);
   }
   as.ue->addConstant(constant);
 }

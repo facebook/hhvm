@@ -158,7 +158,7 @@ struct ConstExistsChecker {
   explicit ConstExistsChecker(const StringData* name)
     : m_name(name) {}
   bool operator()() const {
-    return type(Unit::lookupCns(m_name)) != KindOfUninit;
+    return type(Constant::lookup(m_name)) != KindOfUninit;
   }
 };
 struct TypeExistsChecker {

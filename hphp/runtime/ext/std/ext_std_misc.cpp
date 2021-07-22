@@ -393,7 +393,7 @@ Variant HHVM_FUNCTION(constant, const String& name) {
       }
     }
   } else {
-    auto const cns = Unit::loadCns(name.get());
+    auto const cns = Constant::load(name.get());
     if (type(cns) != KindOfUninit) return Variant::attach(cns);
   }
 
@@ -418,7 +418,7 @@ bool HHVM_FUNCTION(defined, const String& name, bool autoload /* = true */) {
     }
     return false;
   } else {
-    auto* cb = autoload ? Unit::loadCns : Unit::lookupCns;
+    auto* cb = autoload ? Constant::load : Constant::lookup;
     return type(cb(name.get())) != KindOfUninit;
   }
 }

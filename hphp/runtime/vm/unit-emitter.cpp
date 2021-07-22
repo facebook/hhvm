@@ -658,7 +658,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       sd(cns.name);
       sd(cns);
       if (type(cns.val) == KindOfUninit) {
-        cns.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(Unit::getCns);
+        cns.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(Constant::get);
       }
       auto const id UNUSED = addConstant(cns);
       assertx(id == i);

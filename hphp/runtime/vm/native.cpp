@@ -861,7 +861,7 @@ bool registerConstant(const StringData* cnsName,
   tv.m_type = KindOfUninit;
   tv.m_data.pcnt = reinterpret_cast<MaybeCountable*>(callback);
   tv.dynamic() = true;
-  if (!Unit::defNativeConstantCallback(cnsName, tv)) {
+  if (!Constant::defNativeConstantCallback(cnsName, tv)) {
     return false;
   }
   s_constant_map[cnsName] = tv;

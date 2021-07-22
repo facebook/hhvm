@@ -43,6 +43,44 @@ struct Constant {
 
   static const StringData* nameFromFuncName(const StringData* func_name);
   static const StringData* funcNameFromName(const StringData* name);
+
+  /*
+   * Define the constant
+   */
+  static void def(const Constant* constant);
+
+  static Variant get(const StringData* name);
+
+  /*
+   * Look up the value of the defined constant in this request with name
+   * `cnsName'.
+   *
+   * Return nullptr if no such constant is defined.
+   */
+  static TypedValue lookup(const StringData* cnsName);
+
+  /*
+   * Look up the value of the persistent constant with name `cnsName'.
+   *
+   * Return nullptr if no such constant exists, or the constant is not
+   * persistent.
+   */
+  static const TypedValue* lookupPersistent(const StringData* cnsName);
+
+  /*
+   * Look up, or autoload and define, the value of the constant with name
+   * `cnsName' for this request.
+   */
+  static TypedValue load(const StringData* cnsName);
+
+  /*
+   * Define a constant with name `cnsName' with a magic callback. The
+   * TypedValue should be KindOfUninit, with a Native::ConstantCallback in
+   * its m_data.pcnt.
+   *
+   * The canonical examples are STDIN, STDOUT, and STDERR.
+   */
+  static bool defNativeConstantCallback(const StringData* cnsName, TypedValue cell);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -131,7 +131,7 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
 namespace {
 
 TypedValue lookupCnsEHelper(StringData* nm) {
-  auto const cns = Unit::loadCns(nm);
+  auto const cns = Constant::load(nm);
   if (LIKELY(type(cns) != KindOfUninit)) {
     return cns;
   }

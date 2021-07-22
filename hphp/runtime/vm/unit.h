@@ -385,35 +385,25 @@ public:
   /*
    * Look up a RepoAuthType::Array by ID
    */
-   const RepoAuthType::Array* lookupArrayTypeId(Id id) const;
+  const RepoAuthType::Array* lookupArrayTypeId(Id id) const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Funcs, PreClasses, and RecordDescs.                                [const]
+  // PreClasses.
 
-  /*
-   * Look up a Func or PreClass or PreRecordDesc by ID.
-   */
-  Func* lookupFuncId(Id id) const;
   PreClass* lookupPreClassId(Id id) const;
-  PreRecordDesc* lookupPreRecordId(Id id) const;
-  const Constant* lookupConstantId(Id id) const;
-  const PreTypeAlias* lookupTypeAliasId(Id id) const;
-
-  /*
-   * Range over all PreClasses or RecordDescs in the Unit.
-   */
   folly::Range<PreClassPtr*> preclasses();
   folly::Range<const PreClassPtr*> preclasses() const;
-  folly::Range<PreRecordDescPtr*> prerecords();
-  folly::Range<const PreRecordDescPtr*> prerecords() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Funcs.
 
+  Func* lookupFuncId(Id id) const;
   folly::Range<Func**> funcs();
   folly::Range<Func* const*> funcs() const;
 
-  // Return the cached EntryPoint
+  /*
+   * Return the cached EntryPoint
+   */
   Func* getEntryPoint() const;
 
   /*
@@ -424,56 +414,23 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Constants.
 
+  const Constant* lookupConstantId(Id id) const;
   folly::Range<Constant*> constants();
   folly::Range<const Constant*> constants() const;
-
-  /*
-   * Define the constant
-   */
-  void defCns(const Constant* constant);
-
-  static Variant getCns(const StringData* name);
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Constant lookup.                                                  [static]
-
-  /*
-   * Look up the value of the defined constant in this request with name
-   * `cnsName'.
-   *
-   * Return nullptr if no such constant is defined.
-   */
-  static TypedValue lookupCns(const StringData* cnsName);
-
-  /*
-   * Look up the value of the persistent constant with name `cnsName'.
-   *
-   * Return nullptr if no such constant exists, or the constant is not
-   * persistent.
-   */
-  static const TypedValue* lookupPersistentCns(const StringData* cnsName);
-
-  /*
-   * Look up, or autoload and define, the value of the constant with name
-   * `cnsName' for this request.
-   */
-  static TypedValue loadCns(const StringData* cnsName);
-
-  /*
-   * Define a constant with name `cnsName' with a magic callback. The
-   * TypedValue should be KindOfUninit, with a Native::ConstantCallback in
-   * its m_data.pcnt.
-   *
-   * The canonical examples are STDIN, STDOUT, and STDERR.
-   */
-  static bool defNativeConstantCallback(const StringData* cnsName, TypedValue cell);
 
   /////////////////////////////////////////////////////////////////////////////
   // Type aliases.
 
+  const PreTypeAlias* lookupTypeAliasId(Id id) const;
   folly::Range<PreTypeAlias*> typeAliases();
   folly::Range<const PreTypeAlias*> typeAliases() const;
 
+  /////////////////////////////////////////////////////////////////////////////
+  // PreRecords.
+
+  PreRecordDesc* lookupPreRecordId(Id id) const;
+  folly::Range<PreRecordDescPtr*> prerecords();
+  folly::Range<const PreRecordDescPtr*> prerecords() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // File attributes.

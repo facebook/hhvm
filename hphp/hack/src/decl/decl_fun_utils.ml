@@ -157,7 +157,6 @@ let make_param_ty env ~is_lambda param =
       mk (Reason.Rvar_param_from_decl param_pos, t)
     | _ -> ty
   in
-  let module UA = SN.UserAttributes in
   let mode = get_param_mode param.param_callconv in
   {
     fp_pos = param_pos;

@@ -1077,7 +1077,7 @@ module Old : functor
   (Raw : Raw)
   (Key : Key)
   (Value : Value.Type)
-  (WithLocalChanges : module type of WithLocalChanges (Raw) (Key) (Value))
+  (_ : module type of WithLocalChanges (Raw) (Key) (Value))
   -> sig
   val get : Key.old -> Value.t option
 

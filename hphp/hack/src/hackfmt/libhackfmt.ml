@@ -217,7 +217,6 @@ let format_at_offset ?config (tree : SyntaxTree.t) offset =
     | _ -> false
   in
   let (token, node) =
-    let module SK = Full_fidelity_syntax_kind in
     match PS.parentage (SyntaxTree.root tree) offset with
     | token :: parent :: grandparent :: _
       when is_sk_compound_statement (PS.kind parent)

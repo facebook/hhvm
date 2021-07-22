@@ -83,7 +83,6 @@ let get_coverage root ctx neutral fnl =
 
 let go_ fn genv env =
   let root = Path.make fn in
-  let module RP = Relative_path in
   let next_files =
     MultiWorker.next
       genv.ServerEnv.workers

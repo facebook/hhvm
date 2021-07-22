@@ -711,7 +711,7 @@ module LazyCheckKind : CheckKindType = struct
   let is_full = false
 end
 
-module Make : functor (CheckKind : CheckKindType) -> sig
+module Make : functor (_ : CheckKindType) -> sig
   val type_check_core :
     ServerEnv.genv ->
     ServerEnv.env ->

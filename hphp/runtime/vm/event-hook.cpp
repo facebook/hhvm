@@ -437,15 +437,12 @@ static Variant call_intercept_handler_callback(
 } // namespace
 
 bool EventHook::RunInterceptHandler(ActRec* ar) {
+  assertx(!isResumed(ar));
+
   const Func* func = ar->func();
-  if (LIKELY(func->maybeIntercepted() == 0)) return true;
+  if (LIKELY(!func->maybeIntercepted())) return true;
 
-  // Intercept only original generator / async function calls, not resumption.
-  if (isResumed(ar)) return true;
-
-  auto const name = func->fullName();
-
-  Variant* h = get_intercept_handler(StrNR(name), &func->maybeIntercepted());
+  Variant* h = get_intercept_handler(func);
   if (!h) return true;
 
   /*
@@ -724,6 +721,7 @@ bool EventHook::onFunctionCallJit(const ActRec* ar, int funcType) {
 
 bool EventHook::onFunctionCall(const ActRec* ar, int funcType,
                                EventHook::Source sourceType) {
+  assertx(!isResumed(ar));
   auto const flags = handle_request_surprise();
   if (flags & InterceptFlag &&
       !RunInterceptHandler(const_cast<ActRec*>(ar))) {

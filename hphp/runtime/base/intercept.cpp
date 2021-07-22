@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/req-optional.h"
-#include "hphp/runtime/base/string-hash-map.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
@@ -47,7 +46,7 @@ struct InterceptRequestData final : RequestEventHandler {
   void requestInit() override { clear(); }
   void requestShutdown() override { clear(); }
 
-  req::StringIMap<Variant>& intercept_handlers() {
+  req::hash_map<const Func*, Variant>& intercept_handlers() {
     if (!m_intercept_handlers) m_intercept_handlers.emplace();
     return *m_intercept_handlers;
   }
@@ -59,40 +58,40 @@ struct InterceptRequestData final : RequestEventHandler {
 private:
   // get_intercept_handler() returns Variant* pointing into this map,
   // so we need reference stability.
-  req::Optional<req::StringIMap<Variant>> m_intercept_handlers;
+  req::Optional<req::hash_map<const Func*, Variant>> m_intercept_handlers;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(InterceptRequestData, s_intercept_data);
 
-static Mutex s_mutex;
-
-/*
- * The bool indicates whether fb_intercept2 has ever been called
- * on a function with this name.
- * The vector contains a list of maybeIntercepted flags for functions
- * with this name.
- */
-static hphp_hash_map<
-  String, std::pair<bool,std::vector<int8_t*>>,
-  hphp_string_hash, hphp_string_isame
-> s_registered_flags;
-
 ///////////////////////////////////////////////////////////////////////////////
-
-static void flag_maybe_intercepted(std::vector<int8_t*> &flags) {
-  for (auto flag : flags) {
-    *flag = 1;
-  }
-}
 
 bool register_intercept(const String& name, const Variant& callback) {
   SCOPE_EXIT {
     DEBUGGER_ATTACHED_ONLY(phpDebuggerInterceptRegisterHook(name));
   };
 
+  auto const interceptedFunc = [&]() -> Func* {
+    auto const pos = name.find("::");
+    if (pos != 0 && pos != String::npos && pos + 2 < name.size()) {
+      auto const cls = Class::load(name.substr(0, pos).get());
+      if (!cls) return nullptr;
+      auto const meth = cls->lookupMethod(name.substr(pos + 2).get());
+      if (!meth || meth->cls() != cls) return nullptr;
+      return meth;
+    } else {
+      return Func::load(name.get());
+    }
+  }();
+
+  if (interceptedFunc == nullptr) {
+    // This intercept request can't possibly do anything, we are done.
+    // TODO: should this throw?
+    return true;
+  }
+
   if (!callback.toBoolean()) {
     if (!s_intercept_data->empty()) {
       auto& handlers = s_intercept_data->intercept_handlers();
-      auto it = handlers.find(name);
+      auto it = handlers.find(interceptedFunc);
       if (it != handlers.end()) {
         // erase the map entry before destroying the value
         auto tmp = it->second;
@@ -112,62 +111,23 @@ bool register_intercept(const String& name, const Variant& callback) {
   EventHook::EnableIntercept();
 
   auto& handlers = s_intercept_data->intercept_handlers();
-  handlers[name] = callback;
-
-  Lock lock(s_mutex);
-  auto sd = makeStaticString(name.get());
-  auto &entry = s_registered_flags[StrNR(sd)];
-  entry.first = true;
-  flag_maybe_intercepted(entry.second);
-
+  handlers[interceptedFunc] = callback;
+  interceptedFunc->setMaybeIntercepted();
   return true;
 }
 
-static Variant *get_enabled_intercept_handler(const String& name) {
+Variant* get_intercept_handler(const Func* func) {
+  FTRACE(1, "get_intercept_handler {}\n", func->fullName());
+
   if (!s_intercept_data->empty()) {
     auto& handlers = s_intercept_data->intercept_handlers();
-    auto iter = handlers.find(name);
+    auto iter = handlers.find(func);
     if (iter != handlers.end()) {
+      assertx(func->maybeIntercepted());
       return &iter->second;
     }
   }
   return nullptr;
-}
-
-Variant *get_intercept_handler(const String& name, int8_t* flag) {
-  TRACE(1, "get_intercept_handler %s flag is %d\n",
-        name.get()->data(), (int)*flag);
-  if (*flag == -1) {
-    Lock lock(s_mutex);
-    if (*flag == -1) {
-      auto sd = makeStaticString(name.get());
-      auto &entry = s_registered_flags[StrNR(sd)];
-      entry.second.push_back(flag);
-      *flag = entry.first;
-    }
-    if (!*flag) return nullptr;
-  }
-
-  Variant *handler = get_enabled_intercept_handler(name);
-  if (handler == nullptr) {
-    return nullptr;
-  }
-  assertx(*flag);
-  return handler;
-}
-
-void unregister_intercept_flag(const String& name, int8_t *flag) {
-  Lock lock(s_mutex);
-  auto iter = s_registered_flags.find(name);
-  if (iter != s_registered_flags.end()) {
-    std::vector<int8_t*> &flags = iter->second.second;
-    for (int i = flags.size(); i--; ) {
-      if (flag == flags[i]) {
-        flags.erase(flags.begin() + i);
-        break;
-      }
-    }
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

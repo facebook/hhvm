@@ -764,8 +764,12 @@ inline void Func::setPrologue(int index, unsigned char* tca) {
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 
-inline int8_t& Func::maybeIntercepted() const {
-  return m_maybeIntercepted;
+inline bool Func::maybeIntercepted() const {
+  return atomicFlags().check(Func::Flags::MaybeIntercepted);
+}
+
+inline void Func::setMaybeIntercepted() {
+  atomicFlags().set(Func::Flags::MaybeIntercepted);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -20,6 +20,7 @@
 namespace HPHP {
 
 struct Array;
+struct Func;
 struct String;
 struct Variant;
 
@@ -36,18 +37,13 @@ bool register_intercept(const String& name, const Variant& callback);
 /**
  * Check to see if it is actually intercepted for current request.
  */
-Variant* get_intercept_handler(const String& name, int8_t* flag);
+Variant* get_intercept_handler(const Func* func);
 
 /**
  * Call intercept handler with original parameters.
  */
 bool handle_intercept(const Variant& handler, const String& name,
                       const Array& params, Variant& ret);
-
-/**
- * Removes a previously registered flag.
- */
-void unregister_intercept_flag(const String& name, int8_t* flag);
 
 ///////////////////////////////////////////////////////////////////////////////
 // fb_rename_function()

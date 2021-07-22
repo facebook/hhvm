@@ -129,10 +129,6 @@ Func::Func(
 }
 
 Func::~Func() {
-  if (m_fullName != nullptr && m_maybeIntercepted != -1) {
-    unregister_intercept_flag(fullNameStr(), &m_maybeIntercepted);
-  }
-
   // Should've deregistered in Func::destroy() or Func::freeClone()
   assertx(!m_registeredInDataMap);
 #ifndef NDEBUG
@@ -228,7 +224,6 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   f->setFullName(numParams);
 
   if (f != this) {
-    f->m_maybeIntercepted = -1;
     f->m_isPreFunc = false;
     f->m_registeredInDataMap = false;
   }
@@ -253,7 +248,6 @@ void Func::init(int numParams) {
   m_magic = kMagic;
 #endif
   // For methods, we defer setting the full name until m_cls is initialized
-  m_maybeIntercepted = -1;
   if (!preClass()) {
     setNewFuncId();
     setFullName(numParams);

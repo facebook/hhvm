@@ -1112,7 +1112,8 @@ public:
   /*
    * Intercept hook flag.
    */
-  int8_t& maybeIntercepted() const;
+  bool maybeIntercepted() const;
+  void setMaybeIntercepted();
 
   /*
    * When function call based coverage is enabled for the current request,
@@ -1174,7 +1175,6 @@ public:
   OFF(requiredCoeffects)
   OFF(name)
   OFF(maxStackCells)
-  OFF(maybeIntercepted)
   OFF(paramCounts)
   OFF(prologueTable)
   OFF(inoutBitVal)
@@ -1562,9 +1562,10 @@ private:
 
 public:
   enum Flags : uint8_t {
-    None      = 0,
-    Optimized = 1 << 0,
-    Locked    = 1 << 1,
+    None             = 0,
+    Optimized        = 1 << 0,
+    Locked           = 1 << 1,
+    MaybeIntercepted = 1 << 2,
   };
 
  /*
@@ -1694,9 +1695,6 @@ private:
     Slot m_methodSlot{0};
     LowPtr<const NamedEntity>::storage_type m_namedEntity;
   };
-  // Atomically-accessed intercept flag.  -1, 0, or 1.
-  // TODO(#1114385) intercept should work via invalidation.
-  mutable int8_t m_maybeIntercepted;
   mutable ClonedFlag m_cloned;
   mutable AtomicFlags m_atomicFlags;
   bool m_isPreFunc : 1;
@@ -1704,7 +1702,7 @@ private:
   bool m_shouldSampleJit : 1;
   bool m_hasForeignThis : 1;
   bool m_registeredInDataMap : 1;
-  // 3 free bits
+  // 3 free bits + 1 free byte
   RuntimeCoeffects m_requiredCoeffects{RuntimeCoeffects::none()};
   int16_t m_maxStackCells{0};
   uint64_t m_inoutBitVal{0};

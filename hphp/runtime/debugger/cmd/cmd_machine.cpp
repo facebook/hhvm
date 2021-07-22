@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/intercept.h"
-#include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
 #include "hphp/runtime/debugger/debugger_client.h"
@@ -32,7 +31,6 @@ TRACE_SET_MOD(debugger);
 void CmdMachine::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_sandboxes);
-  thrift.write(m_rpcConfig);
   thrift.write(m_force);
   thrift.write(m_succeed);
 }
@@ -40,7 +38,6 @@ void CmdMachine::sendImpl(DebuggerThriftBuffer &thrift) {
 void CmdMachine::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_sandboxes);
-  thrift.read(m_rpcConfig);
   thrift.read(m_force);
   thrift.read(m_succeed);
 }
@@ -48,7 +45,7 @@ void CmdMachine::recvImpl(DebuggerThriftBuffer &thrift) {
 void CmdMachine::list(DebuggerClient &client) {
   if (client.argCount() == 0) {
     static const char *keywords[] =
-      { "disconnect", "connect", "rpc", "list", "attach", nullptr };
+      { "disconnect", "connect", "list", "attach", nullptr };
     client.addCompletion(keywords);
   }
 }
@@ -58,8 +55,6 @@ void CmdMachine::help(DebuggerClient &client) {
   client.helpCmds(
     "[m]achine [c]onnect {host}",         "debugging remote server natively",
     "[m]achine [c]onnect {host}:{port}",  "debugging remote server natively",
-    "[m]achine [r]pc {host}",             "debugging remote server with RPC",
-    "[m]achine [r]pc {host}:{port}",      "debugging remote server with RPC",
     "[m]achine [d]isconnect",             "disconnect, debugging local script",
     "[m]achine [l]ist",                   "list all sandboxes",
     "[m]achine [a]ttach {index}",         "attach to a sandbox",
@@ -195,18 +190,6 @@ const StaticString
   s_auth("auth"),
   s_timeout("timeout");
 
-void CmdMachine::UpdateIntercept(DebuggerClient &client,
-                                 const std::string &host, int port) {
-  CmdMachine cmd;
-  cmd.m_body = "rpc";
-  cmd.m_rpcConfig = make_dict_array
-    (s_host_string, String(host),
-     s_port, port ? port : RuntimeOption::DebuggerDefaultRpcPort,
-     s_auth, String(RuntimeOption::DebuggerDefaultRpcAuth),
-     s_timeout, RuntimeOption::DebuggerDefaultRpcTimeout);
-  client.xend<CmdMachine>(&cmd);
-}
-
 void CmdMachine::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
   if (client.argCount() == 0) {
@@ -214,8 +197,7 @@ void CmdMachine::onClient(DebuggerClient &client) {
     return;
   }
 
-  bool rpc = client.arg(1, "rpc");
-  if (rpc || client.arg(1, "connect")) {
+  if (client.arg(1, "connect")) {
     if (client.argCount() != 2) {
       help(client);
       return;
@@ -233,14 +215,8 @@ void CmdMachine::onClient(DebuggerClient &client) {
       host = host.substr(0, pos);
     }
 
-    if (rpc) {
-      if (client.connectRPC(host, port)) {
-        throw DebuggerConsoleExitException();
-      }
-    } else {
-      if (client.connect(host, port)) {
-        throw DebuggerConsoleExitException();
-      }
+    if (client.connect(host, port)) {
+      throw DebuggerConsoleExitException();
     }
     if (!client.initializeMachine()) {
       throw DebuggerConsoleExitException();
@@ -312,18 +288,6 @@ void CmdMachine::onClient(DebuggerClient &client) {
 }
 
 bool CmdMachine::onServer(DebuggerProxy &proxy) {
-  if (m_body == "rpc") {
-    String host = m_rpcConfig[s_host_string].toString();
-    if (host.empty()) {
-      register_intercept("", false, uninit_null(), false, false);
-    } else {
-      int port = m_rpcConfig[s_port].toInt32();
-      LibEventHttpClient::SetCache(host.data(), port, 1);
-      register_intercept("", "fb_rpc_intercept_handler",
-                         m_rpcConfig, false, false);
-    }
-    return proxy.sendToClient(this);
-  }
   if (m_body == "list") {
     Debugger::GetRegisteredSandboxes(m_sandboxes);
     return proxy.sendToClient(this);

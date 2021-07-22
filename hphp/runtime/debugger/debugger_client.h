@@ -257,7 +257,6 @@ public:
    * need to call initializeMachine() immediately without waiting.
    */
   bool connect(const std::string &host, int port);
-  bool connectRPC(const std::string &host, int port);
   bool reconnect();
   bool disconnect();
   bool initializeMachine();
@@ -441,7 +440,6 @@ private:
   std::vector<std::shared_ptr<DMachineInfo>> m_machines;
 
   std::shared_ptr<DMachineInfo> m_machine; // Current machine
-  std::string m_rpcHost; // Current RPC host
 
   std::vector<DSandboxInfoPtr> m_sandboxes;
   std::vector<DThreadInfoPtr> m_threads;

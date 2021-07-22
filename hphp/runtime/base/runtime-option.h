@@ -1468,10 +1468,6 @@ public:
   static bool DebuggerDisableIPv6;
   static std::string DebuggerServerIP;
   static int DebuggerServerPort;
-  static int DebuggerDefaultRpcPort;
-  static std::string DebuggerDefaultRpcAuth;
-  static std::string DebuggerRpcHostDomain;
-  static int DebuggerDefaultRpcTimeout;
   static std::string DebuggerDefaultSandboxPath;
   static std::string DebuggerStartupDocument;
   static int DebuggerSignalTimeout;

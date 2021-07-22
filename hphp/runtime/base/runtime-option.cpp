@@ -1275,10 +1275,6 @@ bool RuntimeOption::EnableDebuggerUsageLog = false;
 bool RuntimeOption::DebuggerDisableIPv6 = false;
 std::string RuntimeOption::DebuggerServerIP;
 int RuntimeOption::DebuggerServerPort = 8089;
-int RuntimeOption::DebuggerDefaultRpcPort = 8083;
-std::string RuntimeOption::DebuggerDefaultRpcAuth;
-std::string RuntimeOption::DebuggerRpcHostDomain;
-int RuntimeOption::DebuggerDefaultRpcTimeout = 30;
 std::string RuntimeOption::DebuggerDefaultSandboxPath;
 std::string RuntimeOption::DebuggerStartupDocument;
 int RuntimeOption::DebuggerSignalTimeout = 1;
@@ -2112,14 +2108,6 @@ void RuntimeOption::Load(
                    "Eval.Debugger.StartupDocument");
       Config::Bind(DebuggerSignalTimeout, ini, config,
                    "Eval.Debugger.SignalTimeout", 1);
-      Config::Bind(DebuggerDefaultRpcPort, ini, config,
-                   "Eval.Debugger.RPC.DefaultPort", 8083);
-      DebuggerDefaultRpcAuth =
-        Config::GetString(ini, config, "Eval.Debugger.RPC.DefaultAuth");
-      Config::Bind(DebuggerRpcHostDomain, ini, config,
-                   "Eval.Debugger.RPC.HostDomain");
-      Config::Bind(DebuggerDefaultRpcTimeout, ini, config,
-                   "Eval.Debugger.RPC.DefaultTimeout", 30);
       Config::Bind(DebuggerAuthTokenScriptBin, ini, config,
                    "Eval.Debugger.Auth.TokenScriptBin");
       Config::Bind(DebuggerSessionAuthScriptBin, ini, config,

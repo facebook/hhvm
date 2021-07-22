@@ -563,33 +563,17 @@ bool DebuggerClient::connect(const std::string &host, int port) {
   return connectRemote(host, port);
 }
 
-bool DebuggerClient::connectRPC(const std::string &host, int port) {
-  TRACE(2, "DebuggerClient::connectRPC\n");
-  assertx(!m_machines.empty());
-  auto local = m_machines[0];
-  assertx(local->m_name == LocalPrompt);
-  local->m_rpcHost = host;
-  local->m_rpcPort = port;
-  switchMachine(local);
-  m_rpcHost = "rpc:" + host;
-  usageLogEvent("RPC connect", m_rpcHost);
-  return !local->m_interrupting;
-}
-
 bool DebuggerClient::disconnect() {
   TRACE(2, "DebuggerClient::disconnect\n");
   assertx(!m_machines.empty());
   auto local = m_machines[0];
   assertx(local->m_name == LocalPrompt);
-  local->m_rpcHost.clear();
-  local->m_rpcPort = 0;
   switchMachine(local);
   return !local->m_interrupting;
 }
 
 void DebuggerClient::switchMachine(std::shared_ptr<DMachineInfo> machine) {
   TRACE(2, "DebuggerClient::switchMachine\n");
-  m_rpcHost.clear();
   machine->m_initialized = false; // even if m_machine == machine
 
   if (m_machine != machine) {
@@ -718,9 +702,6 @@ std::string DebuggerClient::getPrompt() {
     return "";
   }
   auto name = &m_machine->m_name;
-  if (!m_rpcHost.empty()) {
-    name = &m_rpcHost;
-  }
   if (m_inputState == TakingCode) {
     std::string prompt = " ";
     for (unsigned i = 2; i < name->size() + 2; i++) {
@@ -1092,11 +1073,6 @@ char* DebuggerClient::getCompletion(const char* text, int state) {
 // machine is at an interrupt.
 bool DebuggerClient::initializeMachine() {
   TRACE(2, "DebuggerClient::initializeMachine\n");
-  // set/clear intercept for RPC thread
-  if (!m_machines.empty() && m_machine == m_machines[0]) {
-    CmdMachine::UpdateIntercept(*this, m_machine->m_rpcHost,
-                                m_machine->m_rpcPort);
-  }
 
   // upload breakpoints
   if (!m_breakpoints.empty()) {

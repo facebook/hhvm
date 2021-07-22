@@ -27,8 +27,6 @@ namespace HPHP { namespace Eval {
 struct CmdMachine : DebuggerCommand {
   static bool AttachSandbox(DebuggerClient &client, const char *user = nullptr,
                             const char *name = nullptr, bool force = false);
-  static void UpdateIntercept(DebuggerClient &client,
-                              const std::string &host, int port);
 
   CmdMachine() : DebuggerCommand(KindOfMachine) {}
 
@@ -48,7 +46,6 @@ private:
                             bool force = false);
 
   std::vector<DSandboxInfoPtr> m_sandboxes;
-  req::root<Array> m_rpcConfig;
   bool m_force{false};
   bool m_succeed{false};
 

@@ -37,13 +37,10 @@ struct TimerPool final : RequestEventHandler {
   }
 
   void requestShutdown() override {
-    do {
-      for (auto it = m_timers->begin(); it != m_timers->end(); ) {
-        auto timer = *it;
-        it = m_timers->erase(it);
-        timer->~IntervalTimer();
-      }
-    } while (!m_timers->empty());
+    while (!m_timers->empty()) {
+      (*m_timers->begin())->stop();
+    }
+
     m_timers.reset();
   }
 
@@ -114,6 +111,7 @@ void IntervalTimer::init(double interval,
                          double initial,
                          const Variant& callback,
                          RequestInjectionData* data) {
+  assertx(data);
   m_interval = interval;
   m_initial = initial;
   m_callback = callback;
@@ -121,22 +119,20 @@ void IntervalTimer::init(double interval,
 }
 
 void IntervalTimer::start() {
-  if (!m_data) return;
   if (m_thread.joinable()) return;
-  m_done = false;
   m_thread = std::thread([](IntervalTimer* t) { t->run(); }, this);
   s_timer_pool->timers().insert(this);
 }
 
 void IntervalTimer::stop() {
-  if (!m_data) return;
   if (!m_thread.joinable()) return;
   {
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_done = true;
+    m_stopping = true;
   }
   m_cv.notify_one();
   m_thread.join();
+  m_stopping = false;
   s_timer_pool->timers().erase(this);
 }
 
@@ -150,7 +146,7 @@ void IntervalTimer::run() {
 #else
                                 std::chrono::duration<double>(waitTime),
 #endif
-                                [this]{ return m_done; });
+                                [this]{ return m_stopping; });
     if (status) break;
     {
       std::lock_guard<std::mutex> l(m_signalMutex);

@@ -491,6 +491,86 @@ class DoReasoningTest(unittest.TestCase):
                 additional_programs=rules, generator=raw_codegen
             )
 
+    def test_class_method_fun_dependency(self) -> None:
+        # This one covered the 'creates_in_body' with <'Method', 'Fun'>.
+        exp = [
+            'add_method("B","foo")',
+            'class("B")',
+            'creates_in_body("Fn","B")',
+            'funcs("Fn")',
+            'implements("B","A")',
+            'interface("A")',
+            'invokes_in_body("Fn","B","foo")',
+        ]
+        rules = [
+            'method("B", "foo", "Fn").'
+            'symbols("A"; "B").'
+            'funcs("Fn").'
+            'extends_to("A","B").'
+        ]
+        raw_codegen = hh_codesynthesis.CodeGenerator()
+        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        self.assertListEqual(sorted(str(raw_codegen).split()), exp)
+
+    def test_interface_method_fun_dependency(self) -> None:
+        # This one covered the 'has_parameter_and_argument' with <'Method', 'Fun'>.
+        exp = [
+            'add_method("A","foo")',
+            'class("B")',
+            'funcs("Fn")',
+            'has_parameter_and_argument("Fn","A","B")',
+            'implements("B","A")',
+            'interface("A")',
+            'invokes_in_body("Fn","A","foo")',
+        ]
+        rules = [
+            'method("A", "foo", "Fn").'
+            'symbols("A"; "B").'
+            'funcs("Fn").'
+            'extends_to("A","B").'
+        ]
+        raw_codegen = hh_codesynthesis.CodeGenerator()
+        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        self.assertListEqual(sorted(str(raw_codegen).split()), exp)
+
+    def test_class_type_fun_dependency(self) -> None:
+        # This one covered the 'creates_in_body' with <'Type', 'Fun'>.
+        exp = [
+            'class("B")',
+            'creates_in_body("Fn","B")',
+            'funcs("Fn")',
+            'implements("B","A")',
+            'interface("A")',
+        ]
+        rules = [
+            'type("B", "Fn").'
+            'symbols("A"; "B").'
+            'funcs("Fn").'
+            'extends_to("A","B").'
+        ]
+        raw_codegen = hh_codesynthesis.CodeGenerator()
+        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        self.assertListEqual(sorted(str(raw_codegen).split()), exp)
+
+    def test_interface_type_fun_dependency(self) -> None:
+        # This one covered the 'has_parameter_and_argument' with <'Type', 'Fun'>.
+        exp = [
+            'class("B")',
+            'funcs("Fn")',
+            'has_parameter_and_argument("Fn","A","B")',
+            'implements("B","A")',
+            'interface("A")',
+        ]
+        rules = [
+            'type("A", "Fn").'
+            'symbols("A"; "B").'
+            'funcs("Fn").'
+            'extends_to("A","B").'
+        ]
+        raw_codegen = hh_codesynthesis.CodeGenerator()
+        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        self.assertListEqual(sorted(str(raw_codegen).split()), exp)
+
     def test_extends_dependency_with_rule_extraction(self) -> None:
         exp = [
             'add_method("A","foo")',

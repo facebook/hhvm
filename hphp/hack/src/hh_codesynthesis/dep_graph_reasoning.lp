@@ -188,6 +188,63 @@ invokes_function(TypeX, FnName) :- invoked_by(FnName, TypeX).
 % If TypeX is an interface, it can't invoke a function.
 :- invoked_by(_, TypeX), interface(TypeX).
 
+% $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+% Method Dependency Edge <Method, Fun>. Extended Milestone 2 <Method, Type>.
+% =============================================================================
+% If FnX is a function, and we see a "Method" edge, then TypeY could be a
+% class or an interface.
+invokes_in_body(FnX, TypeY, MethodName) :-
+        method(TypeY, MethodName, FnX), funcs(FnX).
+
+% If TypeY is a class, we create an object inside the function body.
+creates_in_body(FnX, TypeY) :- method(TypeY, _, FnX), funcs(FnX), class(TypeY).
+
+% If TypeY is an interface, we could only pass by parameter. And the caller must
+% create a TypeZ object where TypeZ implements TypeY, as the argument before
+% calling this function.
+1 {has_parameter_and_argument(FnX, TypeY, ClassZ)} 1 :-
+        method(TypeY, MethodName, FnX), funcs(FnX), interface(TypeY),
+        extends_to(TypeY, ClassZ), class(ClassZ).
+
+% $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+% Type Dependency Edge <Type, Fun>. Extended Milestone 2 <Type, Type>.
+% =============================================================================
+% If TypeY needs "Type" check FnX, so the "Type" edge is coming from a return
+% value, a parameter or an object creation in the function definition.
+% We created an object or added a parameter if we see a <Method, Fun> edge,
+% which will naturally introduce <Type, Fun> edge. Therefore, here we are dealing
+% with those cases where no <Method, Fun> edge shows up.
+%
+% If TypeY is a class, we create an object inside the function body.
+creates_in_body(FnX, TypeY) :-
+        type(TypeY, FnX), funcs(FnX), class(TypeY),
+        not method(TypeY, _, FnX), not static_method(TypeY, _, FnX).
+
+% If TypeY is an inferface, we could only pass by parameter. And the caller must
+% create a TypeZ object where TypeZ implements TypeY, as the argument before
+% calling this function.
+1 {has_parameter_and_argument(FnX, TypeY, ClassZ)} 1 :-
+        type(TypeY, FnX), funcs(FnX), not method(TypeY, _, FnX),
+        interface(TypeY), extends_to(TypeY, ClassZ), class(ClassZ).
+
+% Here is an example for how 'has_parameter_and_argument' handles the
+% <"Interface", "Fun"> scenario.
+% <?hh
+% interface I {
+%     public function interface_only_method(): void;
+% }
+% class C implements I {
+%     public function interface_only_method(): void {}
+%     public function class_only_method(): void {}
+% }
+% function foo(I $I_obj): void {
+%     $I_obj->interface_only_method();
+% }
+% function bar(): void {
+%     $C_obj = new C();
+%     foo($C_obj)
+% }
+
 
 #show class/1.
 #show interface/1.
@@ -201,6 +258,10 @@ invokes_function(TypeX, FnName) :- invoked_by(FnName, TypeX).
 
 #show add_method/2.
 #show add_static_method/2.
+
+#show creates_in_body/2.
+#show invokes_in_body/3.
+#show has_parameter_and_argument/3.
 
 #show invokes_in_method/3.
 #show invokes_static_method/3.

@@ -15,6 +15,8 @@
 */
 #include "hphp/runtime/vm/jit/opt.h"
 
+#include "hphp/runtime/base/perf-warning.h"
+
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -455,10 +457,20 @@ void runAnalysis(
  * to IncRef the replacement value. Its not enough to IncRef it where
  * the replacement occurs (where a refcount would originally have been
  * produced), because the replacement value might not survive that
- * long. Instead, we need to IncRef it right after the canonical
- * instruction. However, in general there will be paths from the
- * canonical instruction that don't reach the replaced instruction, so
- * we'll need to insert DecRefs on those paths.
+ * long. For example:
+ *
+ * (1) t2:Str = CastIntToStr t1:Int
+ * ....
+ * (2) DecRef t2:Str
+ * ....
+ * (3) t3:Str = CastIntToStr t1:Int
+ *
+ * The DecRef in (2) might release t2. So, inserting an IncRef after
+ * (3) isn't correct, as t2 will have already been released. Instead,
+ * we need to IncRef it right after the canonical instruction
+ * (1). However, in general there will be paths from the canonical
+ * instruction that don't reach the replaced instruction, so we'll
+ * need to insert DecRefs on those paths.
  *
  * As an example, given:
  *
@@ -491,15 +503,14 @@ void runAnalysis(
  * ensure Orig's dst lives until Rep2), and a DecRef in exit2 (to keep
  * the RefCounts balanced).
  *
- * We do this by computing Availability, Anticipability and
- * Partial-Anticipability of the candidate instructions (Orig, Rep1
- * and Rep2 in the example). After each candidate instruction we
- * insert an IncRef if a candidate is Partially-Anticipated-out. If a
- * candidate is Available-in and not Partially-Anticipated-in, we
- * insert a DecRef if its Partially-Anticipated out of all
- * predecessors. This could fail to insert DecRefs if we don't split
- * critical edges - but in that case there simply wouldn't be anywhere
- * to insert the DecRef.
+ * We do this by computing the Partial-Anticipability of the candidate
+ * instructions (Orig, Rep1 and Rep2 in the example). After each
+ * candidate instruction we insert an IncRef if a candidate is
+ * Partially-Anticipated-out. If a candidateis
+ * Partially-Anticipated-out in a predecessor, but not
+ * Partially-Anticipated-in in the successor, then a DecRef is
+ * inserted in the successor. Since critical edges are split, this
+ * covers all of the cases.
  */
 constexpr uint32_t kMaxTrackedPrcs = 64;
 
@@ -508,20 +519,14 @@ struct PrcState {
 
   uint32_t rpoId;
 
+  /* original definition of candidates (kills pant) */
+  Bits orig;
   /* local is the set of candidates in this block */
   Bits local;
-  /* antIn = local | antOut */
-  Bits antIn;
-  /* pantIn = local | pantOut */
+  /* pantIn = (local | pantOut) - orig */
   Bits pantIn;
-  /* antOut = Intersection<succs>(antIn) (empty if numSucc==0) */
-  Bits antOut;
   /* pantOut = Union<succs>(pantIn) */
   Bits pantOut;
-  /* avlIn = Intersection<preds>(avlOut) (empty if numPred==0) */
-  Bits avlIn;
-  /* avlOut = local | avlIn */
-  Bits avlOut;
 };
 
 std::string show(const PrcState::Bits& bits) {
@@ -538,20 +543,15 @@ std::string show(const PrcState::Bits& bits) {
 
 std::string show(const PrcState& state) {
   return folly::sformat(
-    "   antIn   : {}\n"
     "   pantIn  : {}\n"
-    "   avlIn   : {}\n"
+    "   orig    : {}\n"
     "   local   : {}\n"
-    "   antOut  : {}\n"
-    "   pantOut : {}\n"
-    "   avlOut  : {}\n",
-    show(state.antIn),
+    "   pantOut : {}\n",
     show(state.pantIn),
-    show(state.avlIn),
+    show(state.orig),
     show(state.local),
-    show(state.antOut),
-    show(state.pantOut),
-    show(state.avlOut));
+    show(state.pantOut)
+  );
 }
 
 struct PrcEnv {
@@ -569,22 +569,18 @@ struct PrcEnv {
 void insertIncRefs(PrcEnv& env) {
   auto antQ =
     dataflow_worklist<uint32_t, std::less<uint32_t>>(env.rpoBlocks.size());
-  auto avlQ =
-    dataflow_worklist<uint32_t, std::greater<uint32_t>>(env.rpoBlocks.size());
 
   env.states.resize(env.unit.numBlocks());
   for (uint32_t i = 0; i < env.rpoBlocks.size(); i++) {
     auto blk = env.rpoBlocks[i];
     auto& state = env.states[blk->id()];
     state.rpoId = i;
-    if (blk->numSuccs()) state.antOut.set();
-    if (blk->numPreds()) state.avlIn.set();
     antQ.push(i);
-    avlQ.push(i);
   }
 
   auto id = 0;
-  for (auto& v : env.insertMap) {
+  for (auto const& v : env.insertMap) {
+    assertx(!v.empty());
     for (auto const tmp : v) {
       auto const blk = tmp->inst()->block();
       auto& state = env.states[blk->id()];
@@ -593,6 +589,7 @@ void insertIncRefs(PrcEnv& env) {
         continue;
       }
     }
+    env.states[v[0]->inst()->block()->id()].orig.set(id);
     id++;
   }
 
@@ -600,37 +597,18 @@ void insertIncRefs(PrcEnv& env) {
   do {
     auto const blk = env.rpoBlocks[antQ.pop()];
     auto& state = env.states[blk->id()];
-    state.antIn = state.antOut | state.local;
-    state.pantIn = state.pantOut | state.local;
+    state.pantIn = (state.pantOut | state.local) & ~state.orig;
     blk->forEachPred(
       [&] (Block* b) {
         auto& s = env.states[b->id()];
-        auto const antOut = s.antOut & state.antIn;
         auto const pantOut = s.pantOut | state.pantIn;
-        if (antOut != s.antOut || pantOut != s.pantOut) {
-          s.antOut = antOut;
+        if (pantOut != s.pantOut) {
           s.pantOut = pantOut;
           antQ.push(s.rpoId);
         }
       }
     );
   } while (!antQ.empty());
-
-  // compute available
-  do {
-    auto const blk = env.rpoBlocks[avlQ.pop()];
-    auto& state = env.states[blk->id()];
-    state.avlOut = state.avlIn | state.local;
-    blk->forEachSucc(
-      [&] (Block* b) {
-        auto& s = env.states[b->id()];
-        auto const avlIn = s.avlIn & state.avlOut;
-        if (avlIn != s.avlIn) {
-          s.avlIn = avlIn;
-          avlQ.push(s.rpoId);
-        }
-      });
-  } while (!avlQ.empty());
 
   for (auto blk : env.rpoBlocks) {
     auto& state = env.states[blk->id()];
@@ -660,7 +638,8 @@ void insertIncRefs(PrcEnv& env) {
       if (inc.test(0)) {
         auto const& tmps = env.insertMap[inc_id];
         auto insert = [&] (IRInstruction* inst) {
-          FTRACE(3, "Inserting IncRef into B{}\n", blk->id());
+          FTRACE(3, "Inserting IncRef into B{} for t{}\n",
+                 blk->id(), tmps[0]->id());
           auto const iter = std::next(blk->iteratorTo(inst));
           blk->insert(iter, env.unit.gen(IncRef, inst->bcctx(), tmps[0]));
         };
@@ -680,22 +659,22 @@ void insertIncRefs(PrcEnv& env) {
         if (state.pantOut.test(inc_id)) insert(last->inst());
       }
     }
-    auto dec = state.avlIn & ~state.pantIn;
-    if (dec.any()) {
-      blk->forEachPred(
-        [&] (Block* pred) {
-          auto& pstate = env.states[pred->id()];
-          dec &= pstate.pantOut;
-        });
 
-      for (auto dec_id = 0; dec.any(); dec >>= 1, dec_id++) {
-        if (dec.test(0)) {
-          FTRACE(3, "Inserting DecRef into B{}\n", blk->id());
-          auto const tmp = env.insertMap[dec_id][0];
-          blk->prepend(env.unit.gen(DecRef, tmp->inst()->bcctx(),
-                                    DecRefData{}, tmp));
+    if (state.pantOut.any()) {
+      blk->forEachSucc(
+        [&] (Block* succ) {
+          auto dec = state.pantOut & ~env.states[succ->id()].pantIn;
+          if (!dec.any()) return;
+          for (auto dec_id = 0; dec.any(); dec >>= 1, dec_id++) {
+            if (!dec.test(0)) continue;
+            auto const tmp = env.insertMap[dec_id][0];
+            FTRACE(3, "Inserting DecRef into B{} for t{}\n",
+                   blk->id(), tmp->id());
+            succ->prepend(env.unit.gen(DecRef, tmp->inst()->bcctx(),
+                                       DecRefData{}, tmp));
+          }
         }
-      }
+      );
     }
   }
 }
@@ -797,6 +776,17 @@ void replaceRedundantComputations(
       continue;
     }
     env.insertMap.push_back(std::move(elm.second));
+    if (env.insertMap.size() >= kMaxTrackedPrcs) {
+      logPerfWarning(
+        "gvnMaxPrcs",
+        [&](StructuredLogEntry& cols) {
+          auto const func = unit.context().initSrcKey.func();
+          cols.setStr("func", func->fullName()->slice());
+          cols.setStr("filename", func->unit()->origFilepath()->slice());
+          cols.setStr("hhir_unit", show(unit));
+        }
+      );
+    }
   }
   insertIncRefs(env);
 }

@@ -151,6 +151,51 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
                 Rty::Mutable
             }
         }
+        Record(r) => {
+            let (_, fields) = &**r;
+            ro_expr_list2(context, &fields)
+        }
+        Xml(_) | Efun(_) | Lfun(_) => Rty::Mutable,
+        Callconv(c) => {
+            let (_, expr) = &**c;
+            rty_expr(context, &expr)
+        }
+        Tuple(t) => ro_expr_list(context, t),
+        // Only list destructuring
+        List(_) => Rty::Mutable,
+        // Boolean statement always mutable
+        Is(_) => Rty::Mutable,
+        //
+        As(a) => {
+            // Readonlyness of inner expression
+            let (exp, _, _) = &**a;
+            rty_expr(context, &exp)
+        }
+        Eif(e) => {
+            // $x ? a : b is readonly if either a or b are readonly
+            let (_, exp1_opt, exp2) = &**e;
+            if let Some(exp1) = exp1_opt {
+                match (rty_expr(context, exp1), rty_expr(context, exp2)) {
+                    (_, Rty::Readonly) | (Rty::Readonly, _) => Rty::Readonly,
+                    (Rty::Mutable, Rty::Mutable) => Rty::Mutable,
+                }
+            } else {
+                rty_expr(context, &exp2)
+            }
+        }
+        Pair(p) => {
+            let (_, exp1, exp2) = &**p;
+            match (rty_expr(context, exp1), rty_expr(context, exp2)) {
+                (_, Rty::Readonly) | (Rty::Readonly, _) => Rty::Readonly,
+                (Rty::Mutable, Rty::Mutable) => Rty::Mutable,
+            }
+        }
+        Hole(h) => {
+            let (expr, _, _, _) = &**h;
+            rty_expr(context, &expr)
+        }
+        Cast(_) => Rty::Mutable, // Casts are only valid on primitive types, so its always mutable
+        New(_) => Rty::Mutable,
         // FWIW, this does not appear on the aast at this stage(it only appears after naming in typechecker),
         // but we can handle it for future in case that changes
         This => context.this_ty,
@@ -178,8 +223,10 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         Unop(_) | Binop(_) => Rty::Mutable,
         // TODO: track the left side of pipe expressions' readonlyness for $$
         Pipe(_) => Rty::Mutable,
-        ExpressionTree(_) | Record(_) | EnumClassLabel(_) | ETSplice(_) => Rty::Mutable,
-        _ => Rty::Mutable,
+        ExpressionTree(_) | EnumClassLabel(_) | ETSplice(_) => Rty::Mutable,
+        Import(_) | Lplaceholder(_) => Rty::Mutable,
+        // More function values which are always mutable
+        MethodId(_) | MethodCaller(_) | SmethodId(_) | FunId(_) => Rty::Mutable,
     }
 }
 

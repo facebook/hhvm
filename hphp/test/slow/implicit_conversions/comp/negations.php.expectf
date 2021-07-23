@@ -47,7 +47,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(Pair < 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(closure < 42)
-Threw: Object of class Closure$less#10;82 could not be converted to int
+Threw: Object of class Closure$less#10;%s could not be converted to int
 !(fun < 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun < 'baz')
@@ -131,7 +131,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(Pair <= 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(closure <= 42)
-Threw: Object of class Closure$lesseq#10;107 could not be converted to int
+Threw: Object of class Closure$lesseq#10;%s could not be converted to int
 !(fun <= 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun <= 'baz')
@@ -215,7 +215,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(Pair > 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(closure > 42)
-Threw: Object of class Closure$gt#10;132 could not be converted to int
+Threw: Object of class Closure$gt#10;%s could not be converted to int
 !(fun > 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun > 'baz')
@@ -299,7 +299,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(Pair >= 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(closure >= 42)
-Threw: Object of class Closure$gte#10;157 could not be converted to int
+Threw: Object of class Closure$gte#10;%s could not be converted to int
 !(fun >= 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun >= 'baz')
@@ -383,7 +383,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 !(Pair <=> 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 !(closure <=> 42)
-Threw: Object of class Closure$cmp#10;182 could not be converted to int
+Threw: Object of class Closure$cmp#10;%s could not be converted to int
 !(fun <=> 42)
 Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 !(fun <=> 'baz')

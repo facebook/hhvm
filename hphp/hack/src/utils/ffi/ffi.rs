@@ -272,19 +272,19 @@ impl<'a, T> std::ops::IndexMut<usize> for BumpSliceMut<'a, T> {
     }
 }
 impl<'a, T> AsRef<[T]> for BumpSliceMut<'a, T> {
-    fn as_ref(&self) -> &[T] {
-        // Safety: Assumes `self` has been constructed via
-        // `BumpSliceMut<'a, T>::new()` from some `&'a[T]` and so the
-        // call to `from_raw_parts` is a valid.
+    fn as_ref<'r>(&'r self) -> &'r [T] {
+        // Safety:
+        // - We assume 'a: 'r
+        // - Assumes `self` has been constructed via
+        //   `BumpSliceMut<'a, T>::new()` from some `&'a[T]` and so the
+        //   call to `from_raw_parts` is a valid.
         unsafe { std::slice::from_raw_parts(self.data, self.len) }
     }
 }
 impl<'a, T> AsMut<[T]> for BumpSliceMut<'a, T> {
-    fn as_mut(&mut self) -> &mut [T] {
+    fn as_mut<'r>(&'r mut self) -> &'r mut [T] {
         // Safety:
-        // - This function is particularly dangerous. One can use this
-        //   to create a non-exclusive mutable reference something
-        //   usually forbidden in Rust. Be sure to avoid doing this.
+        // - We assume 'a: 'r
         // - Assumes `self` has been constructed via
         //   `BumpSliceMut<'a, T>::new()` from some `&'a[T]` and so the
         //   call to `from_raw_parts_mut` is a valid.

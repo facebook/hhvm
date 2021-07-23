@@ -56,6 +56,11 @@ function unserialize_pure(string $str, darray $options = darray[])[];
 function import_request_variables(string $types, string $prefix = "");
 }
 
+namespace HH {
+<<__PHPStdLib>>
+function object_prop_array(/*object*/mixed $obj)[]: darray<arraykey, mixed>;
+}
+
 namespace HH\Lib\_Private\Native {
   function first<Tv>(
 

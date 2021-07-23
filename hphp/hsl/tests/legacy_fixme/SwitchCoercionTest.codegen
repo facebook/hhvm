@@ -1,0 +1,1041 @@
+@generated
+!@#$%codegentest:basicStringSwitch 0
+'default'
+!@#$%codegentest:basicStringSwitch 1
+'default'
+!@#$%codegentest:basicStringSwitch 10
+'default'
+!@#$%codegentest:basicStringSwitch 11
+'default'
+!@#$%codegentest:basicStringSwitch 12
+'default'
+!@#$%codegentest:basicStringSwitch 13
+'default'
+!@#$%codegentest:basicStringSwitch 14
+'default'
+!@#$%codegentest:basicStringSwitch 15
+'default'
+!@#$%codegentest:basicStringSwitch 16
+'default'
+!@#$%codegentest:basicStringSwitch 17
+'default'
+!@#$%codegentest:basicStringSwitch 18
+'default'
+!@#$%codegentest:basicStringSwitch 19
+'default'
+!@#$%codegentest:basicStringSwitch 2
+'foo'
+!@#$%codegentest:basicStringSwitch 20
+'foo'
+!@#$%codegentest:basicStringSwitch 21
+'default'
+!@#$%codegentest:basicStringSwitch 22
+'default'
+!@#$%codegentest:basicStringSwitch 23
+'default'
+!@#$%codegentest:basicStringSwitch 24
+'default'
+!@#$%codegentest:basicStringSwitch 25
+'default'
+!@#$%codegentest:basicStringSwitch 26
+'default'
+!@#$%codegentest:basicStringSwitch 27
+'default'
+!@#$%codegentest:basicStringSwitch 28
+'default'
+!@#$%codegentest:basicStringSwitch 29
+'default'
+!@#$%codegentest:basicStringSwitch 3
+'default'
+!@#$%codegentest:basicStringSwitch 30
+'default'
+!@#$%codegentest:basicStringSwitch 31
+'default'
+!@#$%codegentest:basicStringSwitch 32
+'default'
+!@#$%codegentest:basicStringSwitch 33
+'default'
+!@#$%codegentest:basicStringSwitch 34
+'default'
+!@#$%codegentest:basicStringSwitch 35
+'default'
+!@#$%codegentest:basicStringSwitch 36
+'default'
+!@#$%codegentest:basicStringSwitch 37
+'default'
+!@#$%codegentest:basicStringSwitch 38
+'default'
+!@#$%codegentest:basicStringSwitch 39
+'default'
+!@#$%codegentest:basicStringSwitch 4
+'default'
+!@#$%codegentest:basicStringSwitch 40
+'default'
+!@#$%codegentest:basicStringSwitch 41
+'default'
+!@#$%codegentest:basicStringSwitch 42
+'default'
+!@#$%codegentest:basicStringSwitch 43
+'default'
+!@#$%codegentest:basicStringSwitch 44
+'default'
+!@#$%codegentest:basicStringSwitch 45
+'default'
+!@#$%codegentest:basicStringSwitch 46
+'baz'
+!@#$%codegentest:basicStringSwitch 47
+'default'
+!@#$%codegentest:basicStringSwitch 48
+'foo'
+!@#$%codegentest:basicStringSwitch 49
+'default'
+!@#$%codegentest:basicStringSwitch 5
+'default'
+!@#$%codegentest:basicStringSwitch 50
+'default'
+!@#$%codegentest:basicStringSwitch 51
+'default'
+!@#$%codegentest:basicStringSwitch 52
+'default'
+!@#$%codegentest:basicStringSwitch 53
+'default'
+!@#$%codegentest:basicStringSwitch 54
+'default'
+!@#$%codegentest:basicStringSwitch 55
+'default'
+!@#$%codegentest:basicStringSwitch 56
+'default'
+!@#$%codegentest:basicStringSwitch 57
+'default'
+!@#$%codegentest:basicStringSwitch 58
+'default'
+!@#$%codegentest:basicStringSwitch 59
+'default'
+!@#$%codegentest:basicStringSwitch 6
+'default'
+!@#$%codegentest:basicStringSwitch 60
+'default'
+!@#$%codegentest:basicStringSwitch 61
+'default'
+!@#$%codegentest:basicStringSwitch 62
+'default'
+!@#$%codegentest:basicStringSwitch 63
+'default'
+!@#$%codegentest:basicStringSwitch 64
+'default'
+!@#$%codegentest:basicStringSwitch 7
+'default'
+!@#$%codegentest:basicStringSwitch 8
+'foo'
+!@#$%codegentest:basicStringSwitch 9
+'default'
+!@#$%codegentest:intSwitch1 0
+42
+!@#$%codegentest:intSwitch1 1
+-1
+!@#$%codegentest:intSwitch1 10
+2
+!@#$%codegentest:intSwitch1 11
+42
+!@#$%codegentest:intSwitch1 12
+42
+!@#$%codegentest:intSwitch1 13
+42
+!@#$%codegentest:intSwitch1 14
+5
+!@#$%codegentest:intSwitch1 15
+42
+!@#$%codegentest:intSwitch1 16
+42
+!@#$%codegentest:intSwitch1 17
+42
+!@#$%codegentest:intSwitch1 18
+42
+!@#$%codegentest:intSwitch1 19
+0
+!@#$%codegentest:intSwitch1 2
+0
+!@#$%codegentest:intSwitch1 20
+-1
+!@#$%codegentest:intSwitch1 21
+0
+!@#$%codegentest:intSwitch1 22
+0
+!@#$%codegentest:intSwitch1 23
+0
+!@#$%codegentest:intSwitch1 24
+0
+!@#$%codegentest:intSwitch1 25
+1
+!@#$%codegentest:intSwitch1 26
+1
+!@#$%codegentest:intSwitch1 27
+2
+!@#$%codegentest:intSwitch1 28
+2
+!@#$%codegentest:intSwitch1 29
+42
+!@#$%codegentest:intSwitch1 3
+1
+!@#$%codegentest:intSwitch1 30
+42
+!@#$%codegentest:intSwitch1 31
+42
+!@#$%codegentest:intSwitch1 32
+4
+!@#$%codegentest:intSwitch1 33
+4
+!@#$%codegentest:intSwitch1 34
+0
+!@#$%codegentest:intSwitch1 35
+2
+!@#$%codegentest:intSwitch1 36
+2
+!@#$%codegentest:intSwitch1 37
+42
+!@#$%codegentest:intSwitch1 38
+42
+!@#$%codegentest:intSwitch1 39
+42
+!@#$%codegentest:intSwitch1 4
+2
+!@#$%codegentest:intSwitch1 40
+4
+!@#$%codegentest:intSwitch1 41
+5
+!@#$%codegentest:intSwitch1 42
+42
+!@#$%codegentest:intSwitch1 43
+42
+!@#$%codegentest:intSwitch1 44
+42
+!@#$%codegentest:intSwitch1 45
+5
+!@#$%codegentest:intSwitch1 46
+0
+!@#$%codegentest:intSwitch1 47
+0
+!@#$%codegentest:intSwitch1 48
+0
+!@#$%codegentest:intSwitch1 49
+0
+!@#$%codegentest:intSwitch1 5
+42
+!@#$%codegentest:intSwitch1 50
+Object of class xhpclass could not be converted to int
+!@#$%codegentest:intSwitch1 51
+Object of class xhpclass could not be converted to int
+!@#$%codegentest:intSwitch1 52
+0
+!@#$%codegentest:intSwitch1 53
+0
+!@#$%codegentest:intSwitch1 54
+Object of class SwitchCoercionsTestC could not be converted to int
+!@#$%codegentest:intSwitch1 55
+Object of class SwitchCoercionsTestDateTime could not be converted to int
+!@#$%codegentest:intSwitch1 56
+Object of class SwitchCoercionsTestDateTime could not be converted to int
+!@#$%codegentest:intSwitch1 57
+Object of class SwitchCoercionsTestDateTime could not be converted to int
+!@#$%codegentest:intSwitch1 58
+Object of class stdClass could not be converted to int
+!@#$%codegentest:intSwitch1 59
+42
+!@#$%codegentest:intSwitch1 6
+4
+!@#$%codegentest:intSwitch1 60
+42
+!@#$%codegentest:intSwitch1 61
+42
+!@#$%codegentest:intSwitch1 62
+42
+!@#$%codegentest:intSwitch1 63
+42
+!@#$%codegentest:intSwitch1 64
+42
+!@#$%codegentest:intSwitch1 7
+5
+!@#$%codegentest:intSwitch1 8
+0
+!@#$%codegentest:intSwitch1 9
+1
+!@#$%codegentest:intSwitch2 0
+42
+!@#$%codegentest:intSwitch2 1
+42
+!@#$%codegentest:intSwitch2 10
+42
+!@#$%codegentest:intSwitch2 11
+42
+!@#$%codegentest:intSwitch2 12
+42
+!@#$%codegentest:intSwitch2 13
+42
+!@#$%codegentest:intSwitch2 14
+5
+!@#$%codegentest:intSwitch2 15
+42
+!@#$%codegentest:intSwitch2 16
+42
+!@#$%codegentest:intSwitch2 17
+42
+!@#$%codegentest:intSwitch2 18
+42
+!@#$%codegentest:intSwitch2 19
+0
+!@#$%codegentest:intSwitch2 2
+0
+!@#$%codegentest:intSwitch2 20
+5
+!@#$%codegentest:intSwitch2 21
+0
+!@#$%codegentest:intSwitch2 22
+0
+!@#$%codegentest:intSwitch2 23
+0
+!@#$%codegentest:intSwitch2 24
+0
+!@#$%codegentest:intSwitch2 25
+1
+!@#$%codegentest:intSwitch2 26
+1
+!@#$%codegentest:intSwitch2 27
+42
+!@#$%codegentest:intSwitch2 28
+42
+!@#$%codegentest:intSwitch2 29
+42
+!@#$%codegentest:intSwitch2 3
+1
+!@#$%codegentest:intSwitch2 30
+42
+!@#$%codegentest:intSwitch2 31
+42
+!@#$%codegentest:intSwitch2 32
+42
+!@#$%codegentest:intSwitch2 33
+42
+!@#$%codegentest:intSwitch2 34
+0
+!@#$%codegentest:intSwitch2 35
+42
+!@#$%codegentest:intSwitch2 36
+42
+!@#$%codegentest:intSwitch2 37
+42
+!@#$%codegentest:intSwitch2 38
+42
+!@#$%codegentest:intSwitch2 39
+42
+!@#$%codegentest:intSwitch2 4
+42
+!@#$%codegentest:intSwitch2 40
+42
+!@#$%codegentest:intSwitch2 41
+5
+!@#$%codegentest:intSwitch2 42
+42
+!@#$%codegentest:intSwitch2 43
+42
+!@#$%codegentest:intSwitch2 44
+42
+!@#$%codegentest:intSwitch2 45
+5
+!@#$%codegentest:intSwitch2 46
+0
+!@#$%codegentest:intSwitch2 47
+0
+!@#$%codegentest:intSwitch2 48
+0
+!@#$%codegentest:intSwitch2 49
+0
+!@#$%codegentest:intSwitch2 5
+42
+!@#$%codegentest:intSwitch2 50
+Object of class xhpclass could not be converted to int
+!@#$%codegentest:intSwitch2 51
+Object of class xhpclass could not be converted to int
+!@#$%codegentest:intSwitch2 52
+0
+!@#$%codegentest:intSwitch2 53
+0
+!@#$%codegentest:intSwitch2 54
+Object of class SwitchCoercionsTestC could not be converted to int
+!@#$%codegentest:intSwitch2 55
+Object of class SwitchCoercionsTestDateTime could not be converted to int
+!@#$%codegentest:intSwitch2 56
+Object of class SwitchCoercionsTestDateTime could not be converted to int
+!@#$%codegentest:intSwitch2 57
+Object of class SwitchCoercionsTestDateTime could not be converted to int
+!@#$%codegentest:intSwitch2 58
+Object of class stdClass could not be converted to int
+!@#$%codegentest:intSwitch2 59
+42
+!@#$%codegentest:intSwitch2 6
+42
+!@#$%codegentest:intSwitch2 60
+42
+!@#$%codegentest:intSwitch2 61
+42
+!@#$%codegentest:intSwitch2 62
+42
+!@#$%codegentest:intSwitch2 63
+42
+!@#$%codegentest:intSwitch2 64
+42
+!@#$%codegentest:intSwitch2 7
+5
+!@#$%codegentest:intSwitch2 8
+0
+!@#$%codegentest:intSwitch2 9
+1
+!@#$%codegentest:stringSwitch1 0
+'default'
+!@#$%codegentest:stringSwitch1 1
+'default'
+!@#$%codegentest:stringSwitch1 10
+'default'
+!@#$%codegentest:stringSwitch1 11
+'default'
+!@#$%codegentest:stringSwitch1 12
+'default'
+!@#$%codegentest:stringSwitch1 13
+'default'
+!@#$%codegentest:stringSwitch1 14
+'default'
+!@#$%codegentest:stringSwitch1 15
+'default'
+!@#$%codegentest:stringSwitch1 16
+'default'
+!@#$%codegentest:stringSwitch1 17
+'default'
+!@#$%codegentest:stringSwitch1 18
+'default'
+!@#$%codegentest:stringSwitch1 19
+'0'
+!@#$%codegentest:stringSwitch1 2
+'0'
+!@#$%codegentest:stringSwitch1 20
+'123'
+!@#$%codegentest:stringSwitch1 21
+'{empty str}'
+!@#$%codegentest:stringSwitch1 22
+'{empty str}'
+!@#$%codegentest:stringSwitch1 23
+'0'
+!@#$%codegentest:stringSwitch1 24
+'default'
+!@#$%codegentest:stringSwitch1 25
+'default'
+!@#$%codegentest:stringSwitch1 26
+'default'
+!@#$%codegentest:stringSwitch1 27
+'default'
+!@#$%codegentest:stringSwitch1 28
+'default'
+!@#$%codegentest:stringSwitch1 29
+'default'
+!@#$%codegentest:stringSwitch1 3
+'default'
+!@#$%codegentest:stringSwitch1 30
+'default'
+!@#$%codegentest:stringSwitch1 31
+'default'
+!@#$%codegentest:stringSwitch1 32
+'4'
+!@#$%codegentest:stringSwitch1 33
+'4abc'
+!@#$%codegentest:stringSwitch1 34
+'0'
+!@#$%codegentest:stringSwitch1 35
+'default'
+!@#$%codegentest:stringSwitch1 36
+'default'
+!@#$%codegentest:stringSwitch1 37
+'default'
+!@#$%codegentest:stringSwitch1 38
+'default'
+!@#$%codegentest:stringSwitch1 39
+'default'
+!@#$%codegentest:stringSwitch1 4
+'default'
+!@#$%codegentest:stringSwitch1 40
+'4'
+!@#$%codegentest:stringSwitch1 41
+'default'
+!@#$%codegentest:stringSwitch1 42
+'default'
+!@#$%codegentest:stringSwitch1 43
+'default'
+!@#$%codegentest:stringSwitch1 44
+'default'
+!@#$%codegentest:stringSwitch1 45
+'default'
+!@#$%codegentest:stringSwitch1 46
+'default'
+!@#$%codegentest:stringSwitch1 47
+'default'
+!@#$%codegentest:stringSwitch1 48
+'default'
+!@#$%codegentest:stringSwitch1 49
+'default'
+!@#$%codegentest:stringSwitch1 5
+'default'
+!@#$%codegentest:stringSwitch1 50
+'default'
+!@#$%codegentest:stringSwitch1 51
+'default'
+!@#$%codegentest:stringSwitch1 52
+'{empty str}'
+!@#$%codegentest:stringSwitch1 53
+'default'
+!@#$%codegentest:stringSwitch1 54
+'default'
+!@#$%codegentest:stringSwitch1 55
+'default'
+!@#$%codegentest:stringSwitch1 56
+'default'
+!@#$%codegentest:stringSwitch1 57
+'default'
+!@#$%codegentest:stringSwitch1 58
+'default'
+!@#$%codegentest:stringSwitch1 59
+'default'
+!@#$%codegentest:stringSwitch1 6
+'4abc'
+!@#$%codegentest:stringSwitch1 60
+'default'
+!@#$%codegentest:stringSwitch1 61
+'default'
+!@#$%codegentest:stringSwitch1 62
+'default'
+!@#$%codegentest:stringSwitch1 63
+'default'
+!@#$%codegentest:stringSwitch1 64
+'default'
+!@#$%codegentest:stringSwitch1 7
+'default'
+!@#$%codegentest:stringSwitch1 8
+'0'
+!@#$%codegentest:stringSwitch1 9
+'default'
+!@#$%codegentest:stringSwitch2 0
+'default'
+!@#$%codegentest:stringSwitch2 1
+'default'
+!@#$%codegentest:stringSwitch2 10
+'2.0'
+!@#$%codegentest:stringSwitch2 11
+'default'
+!@#$%codegentest:stringSwitch2 12
+'default'
+!@#$%codegentest:stringSwitch2 13
+'3.212'
+!@#$%codegentest:stringSwitch2 14
+'default'
+!@#$%codegentest:stringSwitch2 15
+'default'
+!@#$%codegentest:stringSwitch2 16
+'default'
+!@#$%codegentest:stringSwitch2 17
+'default'
+!@#$%codegentest:stringSwitch2 18
+'default'
+!@#$%codegentest:stringSwitch2 19
+'0'
+!@#$%codegentest:stringSwitch2 2
+'foo'
+!@#$%codegentest:stringSwitch2 20
+'foo'
+!@#$%codegentest:stringSwitch2 21
+'{empty str}'
+!@#$%codegentest:stringSwitch2 22
+'{empty str}'
+!@#$%codegentest:stringSwitch2 23
+'0'
+!@#$%codegentest:stringSwitch2 24
+'default'
+!@#$%codegentest:stringSwitch2 25
+'1'
+!@#$%codegentest:stringSwitch2 26
+'default'
+!@#$%codegentest:stringSwitch2 27
+'2.0'
+!@#$%codegentest:stringSwitch2 28
+'default'
+!@#$%codegentest:stringSwitch2 29
+'default'
+!@#$%codegentest:stringSwitch2 3
+'1'
+!@#$%codegentest:stringSwitch2 30
+'default'
+!@#$%codegentest:stringSwitch2 31
+'default'
+!@#$%codegentest:stringSwitch2 32
+'default'
+!@#$%codegentest:stringSwitch2 33
+'default'
+!@#$%codegentest:stringSwitch2 34
+'0'
+!@#$%codegentest:stringSwitch2 35
+'2.0'
+!@#$%codegentest:stringSwitch2 36
+'default'
+!@#$%codegentest:stringSwitch2 37
+'default'
+!@#$%codegentest:stringSwitch2 38
+'default'
+!@#$%codegentest:stringSwitch2 39
+'default'
+!@#$%codegentest:stringSwitch2 4
+'2.0'
+!@#$%codegentest:stringSwitch2 40
+'default'
+!@#$%codegentest:stringSwitch2 41
+'default'
+!@#$%codegentest:stringSwitch2 42
+'default'
+!@#$%codegentest:stringSwitch2 43
+'default'
+!@#$%codegentest:stringSwitch2 44
+'default'
+!@#$%codegentest:stringSwitch2 45
+'default'
+!@#$%codegentest:stringSwitch2 46
+'default'
+!@#$%codegentest:stringSwitch2 47
+'default'
+!@#$%codegentest:stringSwitch2 48
+'foo'
+!@#$%codegentest:stringSwitch2 49
+'default'
+!@#$%codegentest:stringSwitch2 5
+'default'
+!@#$%codegentest:stringSwitch2 50
+'default'
+!@#$%codegentest:stringSwitch2 51
+'default'
+!@#$%codegentest:stringSwitch2 52
+'{empty str}'
+!@#$%codegentest:stringSwitch2 53
+'default'
+!@#$%codegentest:stringSwitch2 54
+'default'
+!@#$%codegentest:stringSwitch2 55
+'default'
+!@#$%codegentest:stringSwitch2 56
+'default'
+!@#$%codegentest:stringSwitch2 57
+'default'
+!@#$%codegentest:stringSwitch2 58
+'default'
+!@#$%codegentest:stringSwitch2 59
+'default'
+!@#$%codegentest:stringSwitch2 6
+'default'
+!@#$%codegentest:stringSwitch2 60
+'default'
+!@#$%codegentest:stringSwitch2 61
+'default'
+!@#$%codegentest:stringSwitch2 62
+'default'
+!@#$%codegentest:stringSwitch2 63
+'default'
+!@#$%codegentest:stringSwitch2 64
+'default'
+!@#$%codegentest:stringSwitch2 7
+'default'
+!@#$%codegentest:stringSwitch2 8
+'foo'
+!@#$%codegentest:stringSwitch2 9
+'1'
+!@#$%codegentest:stringSwitch3 0
+'default'
+!@#$%codegentest:stringSwitch3 1
+'default'
+!@#$%codegentest:stringSwitch3 10
+'default'
+!@#$%codegentest:stringSwitch3 11
+'default'
+!@#$%codegentest:stringSwitch3 12
+'default'
+!@#$%codegentest:stringSwitch3 13
+'default'
+!@#$%codegentest:stringSwitch3 14
+'default'
+!@#$%codegentest:stringSwitch3 15
+'default'
+!@#$%codegentest:stringSwitch3 16
+'default'
+!@#$%codegentest:stringSwitch3 17
+'default'
+!@#$%codegentest:stringSwitch3 18
+'default'
+!@#$%codegentest:stringSwitch3 19
+'{empty str}'
+!@#$%codegentest:stringSwitch3 2
+'{empty str}'
+!@#$%codegentest:stringSwitch3 20
+'default'
+!@#$%codegentest:stringSwitch3 21
+'{empty str}'
+!@#$%codegentest:stringSwitch3 22
+'{empty str}'
+!@#$%codegentest:stringSwitch3 23
+'0'
+!@#$%codegentest:stringSwitch3 24
+'default'
+!@#$%codegentest:stringSwitch3 25
+'default'
+!@#$%codegentest:stringSwitch3 26
+'default'
+!@#$%codegentest:stringSwitch3 27
+'default'
+!@#$%codegentest:stringSwitch3 28
+'default'
+!@#$%codegentest:stringSwitch3 29
+'default'
+!@#$%codegentest:stringSwitch3 3
+'default'
+!@#$%codegentest:stringSwitch3 30
+'default'
+!@#$%codegentest:stringSwitch3 31
+'default'
+!@#$%codegentest:stringSwitch3 32
+'default'
+!@#$%codegentest:stringSwitch3 33
+'default'
+!@#$%codegentest:stringSwitch3 34
+'0'
+!@#$%codegentest:stringSwitch3 35
+'default'
+!@#$%codegentest:stringSwitch3 36
+'default'
+!@#$%codegentest:stringSwitch3 37
+'default'
+!@#$%codegentest:stringSwitch3 38
+'default'
+!@#$%codegentest:stringSwitch3 39
+'default'
+!@#$%codegentest:stringSwitch3 4
+'default'
+!@#$%codegentest:stringSwitch3 40
+'default'
+!@#$%codegentest:stringSwitch3 41
+'default'
+!@#$%codegentest:stringSwitch3 42
+'default'
+!@#$%codegentest:stringSwitch3 43
+'default'
+!@#$%codegentest:stringSwitch3 44
+'default'
+!@#$%codegentest:stringSwitch3 45
+'default'
+!@#$%codegentest:stringSwitch3 46
+'default'
+!@#$%codegentest:stringSwitch3 47
+'default'
+!@#$%codegentest:stringSwitch3 48
+'default'
+!@#$%codegentest:stringSwitch3 49
+'default'
+!@#$%codegentest:stringSwitch3 5
+'default'
+!@#$%codegentest:stringSwitch3 50
+'default'
+!@#$%codegentest:stringSwitch3 51
+'default'
+!@#$%codegentest:stringSwitch3 52
+'{empty str}'
+!@#$%codegentest:stringSwitch3 53
+'default'
+!@#$%codegentest:stringSwitch3 54
+'default'
+!@#$%codegentest:stringSwitch3 55
+'default'
+!@#$%codegentest:stringSwitch3 56
+'default'
+!@#$%codegentest:stringSwitch3 57
+'default'
+!@#$%codegentest:stringSwitch3 58
+'default'
+!@#$%codegentest:stringSwitch3 59
+'default'
+!@#$%codegentest:stringSwitch3 6
+'default'
+!@#$%codegentest:stringSwitch3 60
+'default'
+!@#$%codegentest:stringSwitch3 61
+'default'
+!@#$%codegentest:stringSwitch3 62
+'default'
+!@#$%codegentest:stringSwitch3 63
+'default'
+!@#$%codegentest:stringSwitch3 64
+'default'
+!@#$%codegentest:stringSwitch3 7
+'default'
+!@#$%codegentest:stringSwitch3 8
+'{empty str}'
+!@#$%codegentest:stringSwitch3 9
+'default'
+!@#$%codegentest:stringSwitch4 0
+'default'
+!@#$%codegentest:stringSwitch4 1
+'default'
+!@#$%codegentest:stringSwitch4 10
+'default'
+!@#$%codegentest:stringSwitch4 11
+'default'
+!@#$%codegentest:stringSwitch4 12
+'3.0abc'
+!@#$%codegentest:stringSwitch4 13
+'default'
+!@#$%codegentest:stringSwitch4 14
+'default'
+!@#$%codegentest:stringSwitch4 15
+'default'
+!@#$%codegentest:stringSwitch4 16
+'default'
+!@#$%codegentest:stringSwitch4 17
+'default'
+!@#$%codegentest:stringSwitch4 18
+'default'
+!@#$%codegentest:stringSwitch4 19
+'default'
+!@#$%codegentest:stringSwitch4 2
+'default'
+!@#$%codegentest:stringSwitch4 20
+'3.0abc'
+!@#$%codegentest:stringSwitch4 21
+'default'
+!@#$%codegentest:stringSwitch4 22
+'default'
+!@#$%codegentest:stringSwitch4 23
+'default'
+!@#$%codegentest:stringSwitch4 24
+'default'
+!@#$%codegentest:stringSwitch4 25
+'default'
+!@#$%codegentest:stringSwitch4 26
+'default'
+!@#$%codegentest:stringSwitch4 27
+'default'
+!@#$%codegentest:stringSwitch4 28
+'default'
+!@#$%codegentest:stringSwitch4 29
+'3.0'
+!@#$%codegentest:stringSwitch4 3
+'default'
+!@#$%codegentest:stringSwitch4 30
+'default'
+!@#$%codegentest:stringSwitch4 31
+'default'
+!@#$%codegentest:stringSwitch4 32
+'default'
+!@#$%codegentest:stringSwitch4 33
+'default'
+!@#$%codegentest:stringSwitch4 34
+'default'
+!@#$%codegentest:stringSwitch4 35
+'default'
+!@#$%codegentest:stringSwitch4 36
+'default'
+!@#$%codegentest:stringSwitch4 37
+'default'
+!@#$%codegentest:stringSwitch4 38
+'3.0'
+!@#$%codegentest:stringSwitch4 39
+'default'
+!@#$%codegentest:stringSwitch4 4
+'default'
+!@#$%codegentest:stringSwitch4 40
+'default'
+!@#$%codegentest:stringSwitch4 41
+'default'
+!@#$%codegentest:stringSwitch4 42
+'default'
+!@#$%codegentest:stringSwitch4 43
+'default'
+!@#$%codegentest:stringSwitch4 44
+'default'
+!@#$%codegentest:stringSwitch4 45
+'default'
+!@#$%codegentest:stringSwitch4 46
+'default'
+!@#$%codegentest:stringSwitch4 47
+'default'
+!@#$%codegentest:stringSwitch4 48
+'default'
+!@#$%codegentest:stringSwitch4 49
+'default'
+!@#$%codegentest:stringSwitch4 5
+'3.0abc'
+!@#$%codegentest:stringSwitch4 50
+'default'
+!@#$%codegentest:stringSwitch4 51
+'default'
+!@#$%codegentest:stringSwitch4 52
+'default'
+!@#$%codegentest:stringSwitch4 53
+'default'
+!@#$%codegentest:stringSwitch4 54
+'default'
+!@#$%codegentest:stringSwitch4 55
+'default'
+!@#$%codegentest:stringSwitch4 56
+'default'
+!@#$%codegentest:stringSwitch4 57
+'default'
+!@#$%codegentest:stringSwitch4 58
+'default'
+!@#$%codegentest:stringSwitch4 59
+'default'
+!@#$%codegentest:stringSwitch4 6
+'default'
+!@#$%codegentest:stringSwitch4 60
+'default'
+!@#$%codegentest:stringSwitch4 61
+'default'
+!@#$%codegentest:stringSwitch4 62
+'default'
+!@#$%codegentest:stringSwitch4 63
+'default'
+!@#$%codegentest:stringSwitch4 64
+'default'
+!@#$%codegentest:stringSwitch4 7
+'default'
+!@#$%codegentest:stringSwitch4 8
+'default'
+!@#$%codegentest:stringSwitch4 9
+'default'
+!@#$%codegentest:stringSwitch5 0
+'default'
+!@#$%codegentest:stringSwitch5 1
+'default'
+!@#$%codegentest:stringSwitch5 10
+'default'
+!@#$%codegentest:stringSwitch5 11
+'default'
+!@#$%codegentest:stringSwitch5 12
+'3'
+!@#$%codegentest:stringSwitch5 13
+'default'
+!@#$%codegentest:stringSwitch5 14
+'5'
+!@#$%codegentest:stringSwitch5 15
+'default'
+!@#$%codegentest:stringSwitch5 16
+'default'
+!@#$%codegentest:stringSwitch5 17
+'default'
+!@#$%codegentest:stringSwitch5 18
+'default'
+!@#$%codegentest:stringSwitch5 19
+'0'
+!@#$%codegentest:stringSwitch5 2
+'0'
+!@#$%codegentest:stringSwitch5 20
+'5'
+!@#$%codegentest:stringSwitch5 21
+'default'
+!@#$%codegentest:stringSwitch5 22
+'default'
+!@#$%codegentest:stringSwitch5 23
+'0'
+!@#$%codegentest:stringSwitch5 24
+'default'
+!@#$%codegentest:stringSwitch5 25
+'default'
+!@#$%codegentest:stringSwitch5 26
+'default'
+!@#$%codegentest:stringSwitch5 27
+'default'
+!@#$%codegentest:stringSwitch5 28
+'default'
+!@#$%codegentest:stringSwitch5 29
+'3'
+!@#$%codegentest:stringSwitch5 3
+'default'
+!@#$%codegentest:stringSwitch5 30
+'default'
+!@#$%codegentest:stringSwitch5 31
+'default'
+!@#$%codegentest:stringSwitch5 32
+'4'
+!@#$%codegentest:stringSwitch5 33
+'default'
+!@#$%codegentest:stringSwitch5 34
+'0'
+!@#$%codegentest:stringSwitch5 35
+'default'
+!@#$%codegentest:stringSwitch5 36
+'default'
+!@#$%codegentest:stringSwitch5 37
+'default'
+!@#$%codegentest:stringSwitch5 38
+'3'
+!@#$%codegentest:stringSwitch5 39
+'default'
+!@#$%codegentest:stringSwitch5 4
+'default'
+!@#$%codegentest:stringSwitch5 40
+'4'
+!@#$%codegentest:stringSwitch5 41
+'5'
+!@#$%codegentest:stringSwitch5 42
+'default'
+!@#$%codegentest:stringSwitch5 43
+'default'
+!@#$%codegentest:stringSwitch5 44
+'default'
+!@#$%codegentest:stringSwitch5 45
+'5'
+!@#$%codegentest:stringSwitch5 46
+'default'
+!@#$%codegentest:stringSwitch5 47
+'default'
+!@#$%codegentest:stringSwitch5 48
+'default'
+!@#$%codegentest:stringSwitch5 49
+'default'
+!@#$%codegentest:stringSwitch5 5
+'3'
+!@#$%codegentest:stringSwitch5 50
+'default'
+!@#$%codegentest:stringSwitch5 51
+'default'
+!@#$%codegentest:stringSwitch5 52
+'default'
+!@#$%codegentest:stringSwitch5 53
+'default'
+!@#$%codegentest:stringSwitch5 54
+'default'
+!@#$%codegentest:stringSwitch5 55
+'default'
+!@#$%codegentest:stringSwitch5 56
+'default'
+!@#$%codegentest:stringSwitch5 57
+'default'
+!@#$%codegentest:stringSwitch5 58
+'default'
+!@#$%codegentest:stringSwitch5 59
+'default'
+!@#$%codegentest:stringSwitch5 6
+'4'
+!@#$%codegentest:stringSwitch5 60
+'default'
+!@#$%codegentest:stringSwitch5 61
+'default'
+!@#$%codegentest:stringSwitch5 62
+'default'
+!@#$%codegentest:stringSwitch5 63
+'default'
+!@#$%codegentest:stringSwitch5 64
+'default'
+!@#$%codegentest:stringSwitch5 7
+'5'
+!@#$%codegentest:stringSwitch5 8
+'0'
+!@#$%codegentest:stringSwitch5 9
+'default'

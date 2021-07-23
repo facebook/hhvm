@@ -1,6 +1,8 @@
 namespace HH\__Private\MiniTest;
 
 abstract class HackTest {
+  private ?arraykey $dataName;
+
   protected static function fail(string $message): noreturn {
     invariant_violation('%s', $message);
   }
@@ -12,6 +14,7 @@ abstract class HackTest {
   final public async function runAsync(): Awaitable<void> {
     \printf("--- %s::%s()\n", static::class, __FUNCTION__);
     $rc = new \ReflectionClass($this);
+    static::beforeFirstTest();
     foreach ($rc->getMethods() as $method) {
       if (!$method->isPublic()) {
         continue;
@@ -45,6 +48,7 @@ abstract class HackTest {
         \printf("-----     Invoking DataProvider %s::%s()\n", static::class, $dp->name);
         $values = $dp->invoke($this);
         foreach($values as $k => $args) {
+          $this->dataName = $k;
           \printf("-----     Invoking with data set %s...\n", \var_export($k, true));
           try {
             $ret = $method->invokeArgs($this, $args);
@@ -54,9 +58,18 @@ abstract class HackTest {
           } catch (SkippedTestException $ex) {
             \printf("------- SKIPPED: %s\n", $ex->getMessage());
           }
+          $this->dataName = null;
         }
       }
     }
+    static::afterLastTest();
     \printf("OK: %s\n", static::class);
   }
+
+  final public function getDataLabel(): arraykey {
+    return $this->dataName as nonnull;
+  }
+
+  public static function beforeFirstTest(): void {}
+  public static function afterLastTest(): void {}
 }

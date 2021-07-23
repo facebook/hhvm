@@ -1329,7 +1329,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                                     let alloc = bumpalo::Bump::new();
                                     let id = cid.as_ciexpr().unwrap().as_id().unwrap();
                                     let mangled_class_name =
-                                        class::Type::from_ast_name(&alloc, id.as_ref());
+                                        class::ClassType::from_ast_name(&alloc, id.as_ref());
                                     let mangled_class_name = mangled_class_name.to_raw_string();
                                     convert_meth_caller_to_func_ptr(
                                         env,

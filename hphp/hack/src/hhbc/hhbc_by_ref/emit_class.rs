@@ -48,10 +48,10 @@ use std::collections::BTreeMap;
 fn add_symbol_refs<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
-    base: &Option<class::Type<'arena>>,
-    implements: &[class::Type<'arena>],
+    base: &Option<class::ClassType<'arena>>,
+    implements: &[class::ClassType<'arena>],
     uses: &[&str],
-    requirements: &[(class::Type<'arena>, TraitReqKind)],
+    requirements: &[(class::ClassType<'arena>, TraitReqKind)],
 ) {
     base.iter()
         .for_each(|x| emit_symbol_refs::add_class(alloc, emitter, *x));
@@ -59,7 +59,7 @@ fn add_symbol_refs<'arena, 'decl, D: DeclProvider<'decl>>(
         .iter()
         .for_each(|x| emit_symbol_refs::add_class(alloc, emitter, *x));
     uses.iter().for_each(|x| {
-        emit_symbol_refs::add_class(alloc, emitter, class::Type::from_ast_name(alloc, x))
+        emit_symbol_refs::add_class(alloc, emitter, class::ClassType::from_ast_name(alloc, x))
     });
     requirements
         .iter()
@@ -69,7 +69,7 @@ fn add_symbol_refs<'arena, 'decl, D: DeclProvider<'decl>>(
 fn make_86method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
-    name: method::Type<'arena>,
+    name: method::MethodType<'arena>,
     params: Vec<HhasParam<'arena>>,
     is_static: bool,
     visibility: Visibility,
@@ -127,7 +127,7 @@ fn from_extends<'arena>(
     is_enum: bool,
     is_enum_class: bool,
     extends: &[tast::Hint],
-) -> Option<hhbc_id::class::Type<'arena>> {
+) -> Option<hhbc_id::class::ClassType<'arena>> {
     if is_enum {
         // Do not use special_names:: as there's a prefix \ which breaks HHVM
         if is_enum_class {
@@ -148,7 +148,7 @@ fn from_extends<'arena>(
 fn from_implements<'arena>(
     alloc: &'arena bumpalo::Bump,
     implements: &[tast::Hint],
-) -> Vec<hhbc_id::class::Type<'arena>> {
+) -> Vec<hhbc_id::class::ClassType<'arena>> {
     implements
         .iter()
         .map(|x| emit_type_hint::hint_to_class(alloc, x))
@@ -158,7 +158,7 @@ fn from_implements<'arena>(
 fn from_includes<'arena>(
     alloc: &'arena bumpalo::Bump,
     includes: &[tast::Hint],
-) -> Vec<hhbc_id::class::Type<'arena>> {
+) -> Vec<hhbc_id::class::ClassType<'arena>> {
     includes
         .iter()
         .map(|x| emit_type_hint::hint_to_class(alloc, x))
@@ -298,7 +298,7 @@ fn from_class_elt_constants<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 fn from_class_elt_requirements<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     class_: &'a tast::Class_,
-) -> Vec<(hhbc_id::class::Type<'arena>, TraitReqKind)> {
+) -> Vec<(hhbc_id::class::ClassType<'arena>, TraitReqKind)> {
     class_
         .reqs
         .iter()
@@ -580,7 +580,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     // class_is_const, but for now class_is_const is the only thing that turns
     // it on.
     let no_dynamic_props = is_const;
-    let name = class::Type::from_ast_name(alloc, &ast_class.name.1);
+    let name = class::ClassType::from_ast_name(alloc, &ast_class.name.1);
     let is_trait = ast_class.kind == tast::ClassKind::Ctrait;
     let is_interface = ast_class.kind == tast::ClassKind::Cinterface;
 
@@ -603,7 +603,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .collect::<Result<Vec<_>>>()?;
 
     let elaborate_namespace_id =
-        |x: &'a tast::Id| hhbc_id::class::Type::from_ast_name(alloc, x.name());
+        |x: &'a tast::Id| hhbc_id::class::ClassType::from_ast_name(alloc, x.name());
     let use_aliases = ast_class
         .use_as_alias
         .iter()
@@ -619,7 +619,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .iter()
         .map(|tast::InsteadofAlias(id1, id2, ids)| {
             let id1 = elaborate_namespace_id(id1);
-            let id2: hhbc_by_ref_hhbc_id::class::Type<'arena> = (alloc, id2.1.as_ref()).into();
+            let id2: hhbc_by_ref_hhbc_id::class::ClassType<'arena> = (alloc, id2.1.as_ref()).into();
             let ids = ids.iter().map(|x| elaborate_namespace_id(x)).collect();
             (id1, id2, ids)
         })
@@ -765,7 +765,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             e: &mut Emitter<'arena, 'decl, D>,
             default_label: label::Label,
             pos: &Pos,
-            consts: &[(&r#const::Type<'arena>, label::Label, &InstrSeq<'arena>)],
+            consts: &[(&r#const::ConstType<'arena>, label::Label, &InstrSeq<'arena>)],
         ) -> InstrSeq<'arena> {
             match consts {
                 [] => InstrSeq::gather(

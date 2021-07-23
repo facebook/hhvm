@@ -100,7 +100,7 @@ fn rewrite_xml_<'arena, 'decl, D: DeclProvider<'decl>>(
         pos.clone(),
         E_::mk_id(Id(pos.clone(), pseudo_consts::G__LINE__.into())),
     );
-    let renamed_id = class::Type::from_ast_name_and_mangle(alloc, &id.1);
+    let renamed_id = class::ClassType::from_ast_name_and_mangle(alloc, &id.1);
     let cid = ClassId(
         (),
         pos.clone(),

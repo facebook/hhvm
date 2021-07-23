@@ -24,24 +24,24 @@ pub enum TraitReqKind {
 #[derive(Debug)]
 pub struct HhasClass<'a, 'arena> {
     pub attributes: Vec<HhasAttribute<'arena>>,
-    pub base: Option<class::Type<'arena>>,
-    pub implements: Vec<class::Type<'arena>>,
-    pub enum_includes: Vec<class::Type<'arena>>,
-    pub name: class::Type<'arena>,
+    pub base: Option<class::ClassType<'arena>>,
+    pub implements: Vec<class::ClassType<'arena>>,
+    pub enum_includes: Vec<class::ClassType<'arena>>,
+    pub name: class::ClassType<'arena>,
     pub span: Span,
     pub uses: Vec<&'a str>,
     // Deprecated - kill please
     pub use_aliases: Vec<(
-        Option<class::Type<'arena>>,
-        class::Type<'arena>,
-        Option<class::Type<'arena>>,
+        Option<class::ClassType<'arena>>,
+        class::ClassType<'arena>,
+        Option<class::ClassType<'arena>>,
         &'a Vec<tast::UseAsVisibility>,
     )>,
     // Deprecated - kill please
     pub use_precedences: Vec<(
-        class::Type<'arena>,
-        class::Type<'arena>,
-        Vec<class::Type<'arena>>,
+        class::ClassType<'arena>,
+        class::ClassType<'arena>,
+        Vec<class::ClassType<'arena>>,
     )>,
     pub enum_type: Option<hhbc_by_ref_hhas_type::Info>,
     pub methods: Vec<HhasMethod<'arena>>,
@@ -49,7 +49,7 @@ pub struct HhasClass<'a, 'arena> {
     pub constants: Vec<HhasConstant<'arena>>,
     pub type_constants: Vec<HhasTypeConstant<'arena>>,
     pub ctx_constants: Vec<HhasCtxConstant>,
-    pub requirements: Vec<(class::Type<'arena>, TraitReqKind)>,
+    pub requirements: Vec<(class::ClassType<'arena>, TraitReqKind)>,
     pub upper_bounds: Vec<(String, Vec<hhbc_by_ref_hhas_type::Info>)>,
     pub doc_comment: Option<DocComment>,
     pub flags: HhasClassFlags,

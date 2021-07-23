@@ -241,13 +241,13 @@ pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     };
     let name = {
         if is_memoize {
-            method::Type::from_ast_name_and_suffix(
+            method::MethodType::from_ast_name_and_suffix(
                 alloc,
                 &method.name.1,
                 emit_memoize_helpers::MEMOIZE_SUFFIX,
             )
         } else {
-            method::Type::from_ast_name(alloc, &method.name.1)
+            method::MethodType::from_ast_name(alloc, &method.name.1)
         }
     };
     let is_interceptable = is_method_interceptable(emitter.options());

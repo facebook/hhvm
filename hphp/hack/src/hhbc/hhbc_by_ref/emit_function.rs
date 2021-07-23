@@ -32,7 +32,7 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     use hhas_function::Flags;
 
     let f = &fd.fun;
-    let original_id = hhbc_id::function::Type::from_ast_name(alloc, &f.name.1);
+    let original_id = hhbc_id::function::FunctionType::from_ast_name(alloc, &f.name.1);
     let mut flags = Flags::empty();
     flags.set(
         hhas_function::Flags::ASYNC,
@@ -48,7 +48,7 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
     let renamed_id = {
         if memoized {
-            hhbc_id::function::Type::add_suffix(
+            hhbc_id::function::FunctionType::add_suffix(
                 alloc,
                 &original_id,
                 emit_memoize_helpers::MEMOIZE_SUFFIX,
@@ -69,7 +69,7 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 params,
             }] if s == "__MethCaller" => match &params[..] {
                 [tast::Expr(_, _, tast::Expr_::String(ref ctx))] if !ctx.is_empty() => Some(
-                    hhbc_id::class::Type::from_ast_name(
+                    hhbc_id::class::ClassType::from_ast_name(
                         alloc,
                         // FIXME: This is not safe--string literals are binary strings.
                         // There's no guarantee that they're valid UTF-8.

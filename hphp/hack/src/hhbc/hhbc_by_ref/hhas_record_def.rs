@@ -12,9 +12,9 @@ pub struct Field<'a, 'arena>(pub &'a str, pub Info, pub Option<TypedValue<'arena
 
 #[derive(Debug)]
 pub struct HhasRecord<'a, 'arena> {
-    pub name: record::Type<'arena>,
+    pub name: record::RecordType<'arena>,
     pub is_abstract: bool,
-    pub base: Option<record::Type<'arena>>,
+    pub base: Option<record::RecordType<'arena>>,
     pub fields: Vec<Field<'a, 'arena>>,
     pub span: Span,
 }

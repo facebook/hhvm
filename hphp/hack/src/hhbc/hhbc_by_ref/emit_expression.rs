@@ -592,7 +592,7 @@ fn emit_id<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         EXIT | DIE => return emit_exit(emitter, env, None),
         _ => {
             // panic!("TODO: uncomment after D19350786 lands")
-            // let cid: ConstId = r#const::Type::from_ast_name(&s);
+            // let cid: ConstId = r#const::ConstType::from_ast_name(&s);
             let cid: ConstId = (alloc, string_utils::strip_global_ns(&s)).into();
             emit_symbol_refs::add_constant(alloc, emitter, cid.clone());
             return Ok(emit_pos_then(alloc, p, instr::lit_const(alloc, CnsE(cid))));
@@ -1646,7 +1646,7 @@ fn emit_record<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let es = mk_afkvalues(es);
-    let id = class::Type::from_ast_name_and_mangle(alloc, &cid.1);
+    let id = class::ClassType::from_ast_name_and_mangle(alloc, &cid.1);
     emit_symbol_refs::add_class(alloc, e, id);
     emit_struct_array(e, env, pos, &es, |alloc, _, keys| {
         Ok(instr::new_record(alloc, id, keys))
@@ -1853,7 +1853,7 @@ fn emit_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     if let Some(ast_defs::Id(_, s)) = expr.as_id() {
-        let fid = function::Type::<'arena>::from_ast_name(alloc, s);
+        let fid = function::FunctionType::<'arena>::from_ast_name(alloc, s);
         emit_symbol_refs::add_function(alloc, e, fid);
     }
     let fcall_args = get_fcall_args(
@@ -1867,7 +1867,7 @@ fn emit_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     match expr.2.as_id() {
         None => emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args),
         Some(ast_defs::Id(_, id)) => {
-            let fq = function::Type::<'arena>::from_ast_name(alloc, id);
+            let fq = function::FunctionType::<'arena>::from_ast_name(alloc, id);
             let lower_fq_name = fq.to_raw_string();
             emit_special_function(e, env, pos, args, uarg, lower_fq_name)
                 .transpose()
@@ -2116,7 +2116,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     null_flavor: &tast::OgNullFlavor,
                     mut fcall_args,
                 | {
-                    let name: method::Type<'arena> =
+                    let name: method::MethodType<'arena> =
                         (alloc, string_utils::strip_global_ns(id)).into();
                     let obj = emit_object_expr(e, env, obj)?;
                     let generics = emit_generics(e, env, &mut fcall_args)?;
@@ -2193,7 +2193,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                                 vec![instr::fcallfuncd(
                                                     alloc,
                                                     fcall_args,
-                                                    function::Type::<'arena>::from_ast_name(
+                                                    function::FunctionType::<'arena>::from_ast_name(
                                                         alloc, fid,
                                                     ),
                                                 )],
@@ -2242,11 +2242,11 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     cexpr = reified_var_cexpr;
                 }
             }
-            let method_id: method::Type = (alloc, string_utils::strip_global_ns(&id)).into();
+            let method_id: method::MethodType = (alloc, string_utils::strip_global_ns(&id)).into();
             Ok(match cexpr {
                 // Statically known
                 ClassExpr::Id(ast_defs::Id(_, cname)) => {
-                    let cid = class::Type::<'arena>::from_ast_name_and_mangle(alloc, &cname);
+                    let cid = class::ClassType::<'arena>::from_ast_name_and_mangle(alloc, &cname);
                     emit_symbol_refs::add_class(alloc, e, cid.clone());
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
@@ -2475,10 +2475,10 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             let FcallArgs(flags, num_args, _, _, _, _) = fcall_args;
             let fq_id = match string_utils::strip_global_ns(&id.1) {
                 "min" if num_args == 2 && !flags.contains(FcallFlags::HAS_UNPACK) => {
-                    function::Type::<'arena>::from_ast_name(alloc, "__SystemLib\\min2")
+                    function::FunctionType::<'arena>::from_ast_name(alloc, "__SystemLib\\min2")
                 }
                 "max" if num_args == 2 && !flags.contains(FcallFlags::HAS_UNPACK) => {
-                    function::Type::<'arena>::from_ast_name(alloc, "__SystemLib\\max2")
+                    function::FunctionType::<'arena>::from_ast_name(alloc, "__SystemLib\\max2")
                 }
                 _ => (alloc, string_utils::strip_global_ns(&id.1)).into(),
             };
@@ -3227,7 +3227,7 @@ fn emit_class_meth_native<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     Ok(match cexpr {
         ClassExpr::Id(ast_defs::Id(_, name)) if !has_generics => instr::resolveclsmethodd(
             alloc,
-            class::Type::<'arena>::from_ast_name_and_mangle(alloc, &name),
+            class::ClassType::<'arena>::from_ast_name_and_mangle(alloc, &name),
             method_id,
         ),
         ClassExpr::Id(ast_defs::Id(_, name)) => InstrSeq::gather(
@@ -3236,7 +3236,7 @@ fn emit_class_meth_native<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 emit_generics()?,
                 instr::resolverclsmethodd(
                     alloc,
-                    class::Type::<'arena>::from_ast_name_and_mangle(alloc, &name),
+                    class::ClassType::<'arena>::from_ast_name_and_mangle(alloc, &name),
                     method_id,
                 ),
             ],
@@ -3311,8 +3311,8 @@ fn emit_function_pointer<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         tast::FunctionPtrId::FPId(id) => emit_hh_fun(e, env, pos, targs, id.name())?,
         // class_meth
         tast::FunctionPtrId::FPClassConst(cid, method_id) => {
-            // TODO(hrust) should accept `let method_id = method::Type::from_ast_name(&(cc.1).1);`
-            let method_id: method::Type<'arena> =
+            // TODO(hrust) should accept `let method_id = method::MethodType::from_ast_name(&(cc.1).1);`
+            let method_id: method::MethodType<'arena> =
                 (alloc, string_utils::strip_global_ns(&method_id.1)).into();
             emit_class_meth_native(e, env, pos, cid, method_id, targs)?
         }
@@ -3666,7 +3666,7 @@ fn emit_known_class_id<'arena, 'decl, D: DeclProvider<'decl>>(
     e: &mut Emitter<'arena, 'decl, D>,
     id: &ast_defs::Id,
 ) -> InstrSeq<'arena> {
-    let cid = class::Type::from_ast_name(alloc, &id.1);
+    let cid = class::ClassType::from_ast_name(alloc, &id.1);
     let cid_string = instr::string(alloc, cid.to_raw_string());
     emit_symbol_refs::add_class(alloc, e, cid);
     InstrSeq::gather(alloc, vec![cid_string, instr::classgetc(alloc)])
@@ -3774,7 +3774,7 @@ fn emit_new<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     } else {
         let newobj_instrs = match cexpr {
             ClassExpr::Id(ast_defs::Id(_, cname)) => {
-                let id = class::Type::<'arena>::from_ast_name_and_mangle(alloc, &cname);
+                let id = class::ClassType::<'arena>::from_ast_name_and_mangle(alloc, &cname);
                 emit_symbol_refs::add_class(alloc, e, id);
                 match has_generics {
                     H::NoGenerics => InstrSeq::gather(
@@ -3959,7 +3959,7 @@ fn emit_prop_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 MemberKey::PL(get_local(e, env, pos, name)?, ReadOnlyOp::Any)
             } else {
                 // Special case for known property name
-                let pid: prop::Type<'arena> = prop::Type::<'arena>::from_ast_name(
+                let pid: prop::PropType<'arena> = prop::PropType::<'arena>::from_ast_name(
                     alloc,
                     string_utils::strip_global_ns(&name),
                 );
@@ -3971,7 +3971,7 @@ fn emit_prop_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         }
         // Special case for known property name
         tast::Expr_::String(name) => {
-            let pid: prop::Type<'arena> = prop::Type::<'arena>::from_ast_name(
+            let pid: prop::PropType<'arena> = prop::PropType::<'arena>::from_ast_name(
                 alloc,
                 string_utils::strip_global_ns(
                     // FIXME: This is not safe--string literals are binary strings.
@@ -4419,7 +4419,8 @@ fn get_elem_member_key<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         ));
                     }
                 };
-                let fq_id = class::Type::<'arena>::from_ast_name(alloc, &cname).to_raw_string();
+                let fq_id =
+                    class::ClassType::<'arena>::from_ast_name(alloc, &cname).to_raw_string();
                 if e.options().emit_class_pointers() > 0 {
                     Ok((
                         MemberKey::ET(Str::from(fq_id), ReadOnlyOp::Any),
@@ -4630,7 +4631,7 @@ fn emit_class_const<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     }
     match cexpr {
         ClassExpr::Id(ast_defs::Id(pos, name)) => {
-            let cid = class::Type::from_ast_name_and_mangle(alloc, &name);
+            let cid = class::ClassType::from_ast_name_and_mangle(alloc, &name);
             let cname = cid.to_raw_string();
             Ok(if string_utils::is_class(&id.1) {
                 if e.options().emit_class_pointers() == 1 {
@@ -4642,9 +4643,10 @@ fn emit_class_const<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 }
             } else {
                 emit_symbol_refs::add_class(alloc, e, cid.clone());
-                // TODO(hrust) enabel `let const_id = r#const::Type::from_ast_name(&id.1);`,
+                // TODO(hrust) enabel `let const_id = r#const::ConstType::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
-                let const_id: r#const::Type = (alloc, string_utils::strip_global_ns(&id.1)).into();
+                let const_id: r#const::ConstType =
+                    (alloc, string_utils::strip_global_ns(&id.1)).into();
                 emit_pos_then(alloc, &pos, instr::clscnsd(alloc, const_id, cid))
             })
         }
@@ -4656,9 +4658,10 @@ fn emit_class_const<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     instr::classname(alloc)
                 }
             } else {
-                // TODO(hrust) enabel `let const_id = r#const::Type::from_ast_name(&id.1);`,
+                // TODO(hrust) enabel `let const_id = r#const::ConstType::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
-                let const_id: r#const::Type = (alloc, string_utils::strip_global_ns(&id.1)).into();
+                let const_id: r#const::ConstType =
+                    (alloc, string_utils::strip_global_ns(&id.1)).into();
                 instr::clscns(alloc, const_id)
             };
             if string_utils::is_class(&id.1) && e.options().emit_class_pointers() == 1 {

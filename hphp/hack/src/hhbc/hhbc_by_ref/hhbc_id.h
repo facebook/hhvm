@@ -24,14 +24,39 @@ namespace hackc {
 namespace hhbc {
 namespace ast {
 
-struct Type {
+struct ClassType {
+  Str _0;
+};
+
+struct FunctionType {
+  Str _0;
+};
+
+struct MethodType {
+  Str _0;
+};
+
+struct PropType {
+  Str _0;
+};
+
+struct ConstType {
+  Str _0;
+};
+
+struct RecordType {
   Str _0;
 };
 
 
 extern "C" {
 
-void no_call_compile_only_USED_TYPES_hhbc_id(Type, Type, Type, Type, Type, Type);
+void no_call_compile_only_USED_TYPES_hhbc_id(ClassType,
+                                             FunctionType,
+                                             MethodType,
+                                             PropType,
+                                             ConstType,
+                                             RecordType);
 
 } // extern "C"
 

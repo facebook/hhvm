@@ -107,10 +107,10 @@ pub mod class {
 
     #[derive(Copy, Clone)]
     #[repr(C)]
-    pub struct Type<'arena>(Str<'arena>);
+    pub struct ClassType<'arena>(Str<'arena>);
 
-    impl_id!(Type, mangle = true, {
-        fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Type<'arena> {
+    impl_id!(ClassType, mangle = true, {
+        fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> ClassType<'arena> {
             (
                 alloc,
                 hhbc_by_ref_hhbc_string_utils::strip_global_ns(
@@ -121,13 +121,13 @@ pub mod class {
         }
     });
 
-    impl<'arena> Type<'arena> {
+    impl<'arena> ClassType<'arena> {
         pub fn from_ast_name_and_mangle(
             alloc: &'arena bumpalo::Bump,
             s: impl std::convert::Into<std::string::String>,
         ) -> Self {
             use crate::Id;
-            self::Type::<'arena>::from_ast_name(alloc, s.into().as_str())
+            self::ClassType::<'arena>::from_ast_name(alloc, s.into().as_str())
         }
     }
 }
@@ -137,14 +137,14 @@ pub mod prop {
 
     #[derive(Copy, Clone)]
     #[repr(C)]
-    pub struct Type<'arena>(Str<'arena>);
+    pub struct PropType<'arena>(Str<'arena>);
 
-    impl_id!(Type, mangle = false, {
-        fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Type<'arena> {
+    impl_id!(PropType, mangle = false, {
+        fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> PropType<'arena> {
             (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
         }
     });
-    impl_add_suffix!(Type);
+    impl_add_suffix!(PropType);
 }
 
 pub mod method {
@@ -152,16 +152,16 @@ pub mod method {
 
     #[derive(Copy, Clone)]
     #[repr(C)]
-    pub struct Type<'arena>(Str<'arena>);
+    pub struct MethodType<'arena>(Str<'arena>);
 
-    impl_id!(Type, mangle = false, {
-        fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Type<'arena> {
+    impl_id!(MethodType, mangle = false, {
+        fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> MethodType<'arena> {
             (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
         }
     });
-    impl_add_suffix!(Type);
+    impl_add_suffix!(MethodType);
 
-    impl<'arena> Type<'arena> {
+    impl<'arena> MethodType<'arena> {
         pub fn from_ast_name_and_suffix(
             alloc: &'arena bumpalo::Bump,
             s: &str,
@@ -181,14 +181,14 @@ pub mod function {
 
     #[derive(Copy, Clone)]
     #[repr(C)]
-    pub struct Type<'arena>(Str<'arena>);
+    pub struct FunctionType<'arena>(Str<'arena>);
 
-    impl_id!(Type, mangle = false, {
-        fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Type<'arena> {
+    impl_id!(FunctionType, mangle = false, {
+        fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> FunctionType<'arena> {
             (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
         }
     });
-    impl_add_suffix!(Type);
+    impl_add_suffix!(FunctionType);
 }
 
 // escape reserved keyword via r#
@@ -197,10 +197,10 @@ pub mod r#const {
 
     #[derive(Copy, Clone)]
     #[repr(C)]
-    pub struct Type<'arena>(Str<'arena>);
+    pub struct ConstType<'arena>(Str<'arena>);
 
-    impl_id!(Type, mangle = false, {
-        fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Type<'arena> {
+    impl_id!(ConstType, mangle = false, {
+        fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> ConstType<'arena> {
             (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
         }
     });
@@ -211,10 +211,10 @@ pub mod record {
 
     #[derive(Copy, Clone)]
     #[repr(C)]
-    pub struct Type<'arena>(Str<'arena>);
+    pub struct RecordType<'arena>(Str<'arena>);
 
-    impl_id!(Type, mangle = false, {
-        fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Type<'arena> {
+    impl_id!(RecordType, mangle = false, {
+        fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> RecordType<'arena> {
             (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
         }
     });
@@ -233,27 +233,27 @@ mod tests {
     #[test]
     fn test_add_suffix() {
         let alloc = bumpalo::Bump::new();
-        let id: prop::Type = (&alloc, "Some").into();
-        let id = prop::Type::add_suffix(&alloc, &id, "Property");
+        let id: prop::PropType = (&alloc, "Some").into();
+        let id = prop::PropType::add_suffix(&alloc, &id, "Property");
         assert_eq!("SomeProperty", id.to_raw_string());
     }
 
     #[test]
     fn test_from_ast_name() {
         let alloc = bumpalo::Bump::new();
-        let id: method::Type = method::Type::from_ast_name(&alloc, "meth");
+        let id: method::MethodType = method::MethodType::from_ast_name(&alloc, "meth");
         assert_eq!("meth", id.to_raw_string());
     }
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhbc_id<'a, 'arena>(
-    _: class::Type<'arena>,
-    _: function::Type<'arena>,
-    _: method::Type<'arena>,
-    _: prop::Type<'arena>,
-    _: r#const::Type<'arena>,
-    _: record::Type<'arena>,
+    _: class::ClassType<'arena>,
+    _: function::FunctionType<'arena>,
+    _: method::MethodType<'arena>,
+    _: prop::PropType<'arena>,
+    _: r#const::ConstType<'arena>,
+    _: record::RecordType<'arena>,
 ) {
     unimplemented!()
 }

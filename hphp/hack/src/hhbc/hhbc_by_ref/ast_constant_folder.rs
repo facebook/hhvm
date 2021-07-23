@@ -110,12 +110,12 @@ fn class_const_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl
         if let ast_class_expr::ClassExpr::Id(ast_defs::Id(_, cname)) = cexpr {
             if emitter.options().emit_class_pointers() == 2 {
                 let classid =
-                    hhbc_by_ref_hhbc_id::class::Type::from_ast_name_and_mangle(alloc, &cname)
+                    hhbc_by_ref_hhbc_id::class::ClassType::from_ast_name_and_mangle(alloc, &cname)
                         .to_raw_ffi_str();
                 return Ok(TypedValue::LazyClass(classid));
             } else {
-                let classid =
-                    hhbc_by_ref_hhbc_id::class::Type::from_ast_name(alloc, &cname).to_raw_ffi_str();
+                let classid = hhbc_by_ref_hhbc_id::class::ClassType::from_ast_name(alloc, &cname)
+                    .to_raw_ffi_str();
                 return Ok(TypedValue::String(classid));
             }
         }

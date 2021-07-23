@@ -32,7 +32,7 @@ fn fmt_name_or_prim<'arena>(
     if tparams.contains(&name) || string_utils::is_self(&name) || string_utils::is_parent(&name) {
         (alloc.alloc_str(name) as &str).into()
     } else {
-        let id: class::Type<'arena> = class::Type::from_ast_name(alloc, &name);
+        let id: class::ClassType<'arena> = class::ClassType::from_ast_name(alloc, &name);
         if string_utils::is_xhp(&string_utils::strip_ns(&name)) {
             id.to_unmangled_str()
         } else {
@@ -331,7 +331,7 @@ fn type_application_helper<'arena>(
             Ok(Type::make(Some(name.to_owned()), Flags::empty()))
         }
     } else {
-        let name: String = class::Type::from_ast_name(alloc, name).into();
+        let name: String = class::ClassType::from_ast_name(alloc, name).into();
         Ok(Type::make(Some(name), Flags::empty()))
     }
 }
@@ -454,10 +454,13 @@ pub fn hint_to_type_info<'arena>(
     )
 }
 
-pub fn hint_to_class<'arena>(alloc: &'arena bumpalo::Bump, hint: &Hint) -> class::Type<'arena> {
+pub fn hint_to_class<'arena>(
+    alloc: &'arena bumpalo::Bump,
+    hint: &Hint,
+) -> class::ClassType<'arena> {
     let Hint(_, h) = hint;
     if let Happly(Id(_, name), _) = &**h {
-        class::Type::from_ast_name(alloc, &name)
+        class::ClassType::from_ast_name(alloc, &name)
     } else {
         class::from_raw_string(alloc, "__type_is_not_class__")
     }

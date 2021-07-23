@@ -96,7 +96,7 @@ pub fn emit_stmt<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             )),
             a::Expr_::Call(c) => {
                 if let (a::Expr(_, _, a::Expr_::Id(sid)), _, exprs, None) = c.as_ref() {
-                    let ft = hhbc_id::function::Type::from_ast_name(alloc, &sid.1);
+                    let ft = hhbc_id::function::FunctionType::from_ast_name(alloc, &sid.1);
                     let fname = ft.to_raw_string();
                     if fname.eq_ignore_ascii_case("unset") {
                         Ok(InstrSeq::gather(
@@ -1034,7 +1034,7 @@ fn emit_catch<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     // Note that this is a "regular" label; we're not going to branch to
     // it directly in the event of an exception.
     let next_catch = e.label_gen_mut().next_regular();
-    let id = hhbc_id::class::Type::from_ast_name_and_mangle(alloc, &(catch.0).1);
+    let id = hhbc_id::class::ClassType::from_ast_name_and_mangle(alloc, &(catch.0).1);
     Ok(InstrSeq::gather(
         alloc,
         vec![

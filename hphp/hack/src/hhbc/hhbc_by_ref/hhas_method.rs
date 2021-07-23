@@ -16,7 +16,7 @@ use bitflags::bitflags;
 pub struct HhasMethod<'arena> {
     pub attributes: Vec<HhasAttribute<'arena>>,
     pub visibility: Visibility,
-    pub name: method::Type<'arena>,
+    pub name: method::MethodType<'arena>,
     pub body: HhasBody<'arena>,
     pub span: hhas_pos::Span,
     pub coeffects: HhasCoeffects,

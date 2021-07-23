@@ -27,7 +27,7 @@ bitflags! {
 
 #[derive(Debug)]
 pub struct HhasProperty<'arena> {
-    pub name: hhbc_id::prop::Type<'arena>,
+    pub name: hhbc_id::prop::PropType<'arena>,
     pub flags: HhasPropertyFlags,
     pub attributes: Vec<HhasAttribute<'arena>>,
     pub visibility: Visibility,

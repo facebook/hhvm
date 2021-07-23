@@ -37,8 +37,8 @@ pub(crate) fn is_interceptable(opts: &Options) -> bool {
 pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
-    original_id: function::Type<'arena>,
-    renamed_id: &function::Type<'arena>,
+    original_id: function::FunctionType<'arena>,
+    renamed_id: &function::FunctionType<'arena>,
     deprecation_info: &Option<&[TypedValue<'arena>]>,
     fd: &'a T::FunDef,
 ) -> Result<HhasFunction<'arena>> {
@@ -123,7 +123,7 @@ fn make_memoize_function_code<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     deprecation_info: Option<&[TypedValue<'arena>]>,
     hhas_params: &[HhasParam<'arena>],
     ast_params: &[T::FunParam],
-    renamed_id: function::Type<'arena>,
+    renamed_id: function::FunctionType<'arena>,
     is_async: bool,
     is_reified: bool,
     should_emit_implicit_context: bool,
@@ -156,7 +156,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
     deprecation_info: Option<&[TypedValue<'arena>]>,
     hhas_params: &[HhasParam<'arena>],
     ast_params: &[T::FunParam],
-    renamed_id: function::Type<'arena>,
+    renamed_id: function::FunctionType<'arena>,
     is_async: bool,
     is_reified: bool,
     _should_emit_implicit_context: bool,
@@ -268,7 +268,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
     e: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     deprecation_info: Option<&[TypedValue<'arena>]>,
-    renamed_id: function::Type<'arena>,
+    renamed_id: function::FunctionType<'arena>,
     is_async: bool,
 ) -> Result<InstrSeq<'arena>> {
     let notfound = e.label_gen_mut().next_regular();

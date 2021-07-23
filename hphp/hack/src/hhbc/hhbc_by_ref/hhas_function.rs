@@ -16,7 +16,7 @@ use bitflags::bitflags;
 #[derive(Debug)]
 pub struct HhasFunction<'arena> {
     pub attributes: Vec<HhasAttribute<'arena>>,
-    pub name: hhbc_id::function::Type<'arena>,
+    pub name: hhbc_id::function::FunctionType<'arena>,
     pub body: HhasBody<'arena>,
     pub span: hhas_pos::Span,
     pub coeffects: HhasCoeffects,

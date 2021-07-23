@@ -24,10 +24,10 @@ fn emit_constant_cinit<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     c: &HhasConstant<'arena>,
 ) -> Result<Option<HhasFunction<'arena>>> {
     let alloc = env.arena;
-    let const_id = r#const::Type::from_ast_name(alloc, &constant.name.1);
+    let const_id = r#const::ConstType::from_ast_name(alloc, &constant.name.1);
     let (ns, name) = utils::split_ns_from_name(const_id.to_raw_string());
     let name = String::new() + strip_global_ns(ns) + "86cinit_" + name;
-    let original_id: function::Type = (alloc, name.as_ref()).into();
+    let original_id: function::FunctionType = (alloc, name.as_ref()).into();
     let ret = constant.type_.as_ref();
     let return_type_info = ret
         .map(|h| {

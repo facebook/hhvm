@@ -41,7 +41,10 @@ fn rewrite_typed_value<'arena, 'decl, D: DeclProvider<'decl>>(
             TypedValue::String(s) => InstructLitConst::String(*s),
             TypedValue::LazyClass(s) => {
                 let classid: hhbc_by_ref_hhbc_ast::ClassId<'arena> =
-                    hhbc_by_ref_hhbc_id::class::Type::from_ast_name_and_mangle(alloc, s.as_str());
+                    hhbc_by_ref_hhbc_id::class::ClassType::from_ast_name_and_mangle(
+                        alloc,
+                        s.as_str(),
+                    );
                 InstructLitConst::LazyClass(classid)
             }
             TypedValue::Float(f) => {

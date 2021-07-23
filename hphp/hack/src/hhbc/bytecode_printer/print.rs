@@ -335,7 +335,7 @@ fn print_fun_def<W: Write>(
 fn print_requirement<W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    r: &(class::Type<'_>, hhas_class::TraitReqKind),
+    r: &(class::ClassType<'_>, hhas_class::TraitReqKind),
 ) -> Result<(), W::Error> {
     ctx.newline(w)?;
     w.write(".require ")?;
@@ -521,7 +521,7 @@ fn print_doc_comment<W: Write>(
 fn print_use_precedence<W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    (id1, id2, ids): &(class::Type, class::Type, Vec<class::Type>),
+    (id1, id2, ids): &(class::ClassType, class::ClassType, Vec<class::ClassType>),
 ) -> Result<(), W::Error> {
     ctx.newline(w)?;
     concat_str(w, [id1.to_raw_string(), "::", id2.to_raw_string()])?;
@@ -544,9 +544,9 @@ fn print_use_alias<W: Write>(
     ctx: &mut Context,
     w: &mut W,
     (ido1, id, ido2, kindl): &(
-        Option<class::Type>,
-        class::Type,
-        Option<class::Type>,
+        Option<class::ClassType>,
+        class::ClassType,
+        Option<class::ClassType>,
         &Vec<ast::UseAsVisibility>,
     ),
 ) -> Result<(), W::Error> {
@@ -555,7 +555,7 @@ fn print_use_alias<W: Write>(
     option_or(
         w,
         ido1,
-        |w, i: &class::Type| concat_str(w, [i.to_raw_string(), "::", id]),
+        |w, i: &class::ClassType| concat_str(w, [i.to_raw_string(), "::", id]),
         id,
     )?;
     w.write(" as ")?;
@@ -565,7 +565,9 @@ fn print_use_alias<W: Write>(
         })?;
     }
     w.write_if(!kindl.is_empty() && ido2.is_some(), " ")?;
-    option(w, ido2, |w, i: &class::Type| w.write(i.to_raw_string()))?;
+    option(w, ido2, |w, i: &class::ClassType| {
+        w.write(i.to_raw_string())
+    })?;
     w.write(";")
 }
 
@@ -668,7 +670,10 @@ fn print_class_special_attributes<W: Write>(
     })
 }
 
-fn print_implements<W: Write>(w: &mut W, implements: &[class::Type<'_>]) -> Result<(), W::Error> {
+fn print_implements<W: Write>(
+    w: &mut W,
+    implements: &[class::ClassType<'_>],
+) -> Result<(), W::Error> {
     if implements.is_empty() {
         return Ok(());
     }
@@ -686,7 +691,7 @@ fn print_implements<W: Write>(w: &mut W, implements: &[class::Type<'_>]) -> Resu
 
 fn print_enum_includes<W: Write>(
     w: &mut W,
-    enum_includes: &[class::Type<'_>],
+    enum_includes: &[class::ClassType<'_>],
 ) -> Result<(), W::Error> {
     if enum_includes.is_empty() {
         return Ok(());
@@ -2478,7 +2483,7 @@ fn print_expr<W: Write>(
 
         if env.is_some() {
             let alloc = bumpalo::Bump::new();
-            let class_id = class::Type::from_ast_name(&alloc, id);
+            let class_id = class::ClassType::from_ast_name(&alloc, id);
             let id = class_id.to_raw_string();
             get(should_format, is_class_constant, id)
                 .into_owned()
@@ -2616,7 +2621,7 @@ fn print_expr<W: Write>(
                         Some(ast_defs::Id(_, cname)) => w.write(lstrip(
                             &adjust_id(
                                 env,
-                                &class::Type::from_ast_name(&bumpalo::Bump::new(), cname)
+                                &class::ClassType::from_ast_name(&bumpalo::Bump::new(), cname)
                                     .to_raw_string(),
                             ),
                             "\\\\",

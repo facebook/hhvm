@@ -11,7 +11,7 @@ use hhbc_by_ref_runtime::TypedValue;
 
 #[derive(Debug)]
 pub struct Typedef<'arena> {
-    pub name: hhas_id::class::Type<'arena>,
+    pub name: hhas_id::class::ClassType<'arena>,
     pub attributes: ffi::Slice<'arena, HhasAttribute<'arena>>,
     pub type_info: hhas_type::Info,
     pub type_structure: TypedValue<'arena>,

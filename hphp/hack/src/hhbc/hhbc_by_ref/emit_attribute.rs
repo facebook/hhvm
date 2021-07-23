@@ -47,7 +47,7 @@ pub fn from_ast<'arena, 'decl, D: DeclProvider<'decl>>(
         alloc.alloc_str(&attr.name.1)
     } else {
         match escaper::escape(
-            hhbc_id::class::Type::from_ast_name(alloc, &attr.name.1).to_raw_string(),
+            hhbc_id::class::ClassType::from_ast_name(alloc, &attr.name.1).to_raw_string(),
         ) {
             std::borrow::Cow::Borrowed(s) => s,
             std::borrow::Cow::Owned(s) => alloc.alloc_str(s.as_str()),

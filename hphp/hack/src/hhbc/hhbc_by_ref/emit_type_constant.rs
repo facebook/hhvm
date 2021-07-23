@@ -103,7 +103,7 @@ fn shape_field_name<'arena>(alloc: &'arena bumpalo::Bump, sf: &ShapeFieldName) -
             )
         }
         SFclassConst(Id(_, cname), (_, s)) => {
-            let id = class::Type::from_ast_name(alloc, &cname);
+            let id = class::ClassType::from_ast_name(alloc, &cname);
             (format!("{}::{}", id.to_raw_string(), s), true)
         }
     }
@@ -192,7 +192,7 @@ fn resolve_classname<'arena>(
 ) -> (Option<Pair<TypedValue<'arena>, TypedValue<'arena>>>, String) {
     let is_tparam = s == "_" || tparams.contains(&s.as_str());
     if !is_tparam {
-        s = class::Type::from_ast_name(alloc, s.as_str()).into()
+        s = class::ClassType::from_ast_name(alloc, s.as_str()).into()
     };
     if is_prim(&s) || is_resolved_classname(&s) {
         (None, s)
@@ -244,7 +244,7 @@ fn root_to_string<'arena>(alloc: &'arena bumpalo::Bump, s: &str) -> String {
     if s == "this" {
         string_utils::prefix_namespace("HH", s)
     } else {
-        class::Type::from_ast_name(alloc, s).into()
+        class::ClassType::from_ast_name(alloc, s).into()
     }
 }
 

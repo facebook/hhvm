@@ -25,7 +25,7 @@ pub fn add_include<'arena, 'decl, D: DeclProvider<'decl>>(
 pub fn add_constant<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
-    s: r#const::Type,
+    s: r#const::ConstType,
 ) {
     if !s.to_raw_string().is_empty() {
         e.emit_symbol_refs_state_mut(alloc)
@@ -38,7 +38,7 @@ pub fn add_constant<'arena, 'decl, D: DeclProvider<'decl>>(
 pub fn add_class<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
-    s: class::Type,
+    s: class::ClassType,
 ) {
     if !s.to_raw_string().is_empty() {
         e.emit_symbol_refs_state_mut(alloc)
@@ -63,7 +63,7 @@ pub fn reset<'arena, 'decl, D: DeclProvider<'decl>>(
 pub fn add_function<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
-    s: function::Type,
+    s: function::FunctionType,
 ) {
     if !s.to_raw_string().is_empty() {
         e.emit_symbol_refs_state_mut(alloc)

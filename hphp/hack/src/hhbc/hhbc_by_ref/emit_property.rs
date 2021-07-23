@@ -41,7 +41,7 @@ pub fn from_ast<'ast, 'arena, 'decl, D: DeclProvider<'decl>>(
     args: FromAstArgs,
 ) -> Result<HhasProperty<'arena>> {
     let ast_defs::Id(pos, cv_name) = args.id;
-    let pid: prop::Type<'arena> = prop::Type::from_ast_name(alloc, cv_name);
+    let pid: prop::PropType<'arena> = prop::PropType::from_ast_name(alloc, cv_name);
     let attributes = emit_attribute::from_asts(alloc, emitter, args.user_attributes)?;
 
     let is_const = (!args.is_static && class_is_const)
@@ -76,7 +76,7 @@ pub fn from_ast<'ast, 'arena, 'decl, D: DeclProvider<'decl>>(
             format!(
                 "Invalid property type hint for '{}::${}'",
                 string_utils::strip_global_ns(&class.name.1),
-                prop::Type::to_raw_string(&pid)
+                prop::PropType::to_raw_string(&pid)
             ),
         ));
     };
@@ -97,7 +97,7 @@ pub fn from_ast<'ast, 'arena, 'decl, D: DeclProvider<'decl>>(
                 format!(
                     "<<__LateInit>> property '{}::${}' cannot have an initial value",
                     string_utils::strip_global_ns(&class.name.1),
-                    prop::Type::to_raw_string(&pid)
+                    prop::PropType::to_raw_string(&pid)
                 ),
             ));
         }

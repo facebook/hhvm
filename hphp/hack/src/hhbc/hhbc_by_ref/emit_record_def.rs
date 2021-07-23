@@ -62,7 +62,10 @@ fn emit_record_def<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &Emitter<'arena, 'decl, D>,
     rd: &'a RecordDef,
 ) -> Result<HhasRecord<'a, 'arena>> {
-    fn elaborate<'arena>(alloc: &'arena bumpalo::Bump, Id(_, name): &Id) -> record::Type<'arena> {
+    fn elaborate<'arena>(
+        alloc: &'arena bumpalo::Bump,
+        Id(_, name): &Id,
+    ) -> record::RecordType<'arena> {
         (alloc, name.trim_start_matches('\\')).into()
     }
     let parent_name = match &rd.extends {

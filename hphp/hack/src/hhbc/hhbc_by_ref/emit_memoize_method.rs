@@ -38,7 +38,7 @@ pub struct MemoizeInfo<'arena> {
     /// True if the enclosing class is a trait
     is_trait: bool,
     /// Enclosing class ID
-    class_id: class::Type<'arena>,
+    class_id: class::ClassType<'arena>,
 }
 
 fn is_memoize(method: &T::Method_) -> bool {
@@ -57,7 +57,7 @@ fn is_memoize_lsb(method: &T::Method_) -> bool {
 
 pub fn make_info<'arena>(
     class: &T::Class_,
-    class_id: class::Type<'arena>,
+    class_id: class::ClassType<'arena>,
     methods: &[T::Method_],
 ) -> Result<MemoizeInfo<'arena>> {
     for m in methods.iter() {
@@ -122,7 +122,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     } else {
         method.ret.1.as_ref()
     };
-    let name = method::Type::from_ast_name(alloc, &method.name.1);
+    let name = method::MethodType::from_ast_name(alloc, &method.name.1);
     let scope = &Scope {
         items: vec![
             ScopeItem::Class(ast_scope::Class::new_ref(class)),
@@ -367,7 +367,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
             if args.method.static_ {
                 call_cls_method(alloc, fcall_args, args)
             } else {
-                let renamed_method_id = method::Type::add_suffix(
+                let renamed_method_id = method::MethodType::add_suffix(
                     alloc,
                     args.method_id,
                     emit_memoize_helpers::MEMOIZE_SUFFIX,
@@ -458,7 +458,7 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl>>
             if args.method.static_ {
                 call_cls_method(alloc, fcall_args, args)
             } else {
-                let renamed_method_id = method::Type::add_suffix(
+                let renamed_method_id = method::MethodType::add_suffix(
                     alloc,
                     args.method_id,
                     emit_memoize_helpers::MEMOIZE_SUFFIX,
@@ -529,7 +529,7 @@ fn call_cls_method<'a, 'arena>(
     args: &Args<'_, 'a, 'arena>,
 ) -> InstrSeq<'arena> {
     let method_id =
-        method::Type::add_suffix(alloc, args.method_id, emit_memoize_helpers::MEMOIZE_SUFFIX);
+        method::MethodType::add_suffix(alloc, args.method_id, emit_memoize_helpers::MEMOIZE_SUFFIX);
     if args.info.is_trait || args.flags.contains(Flags::WITH_LSB) {
         instr::fcallclsmethodsd(alloc, fcall_args, SpecialClsRef::Self_, method_id)
     } else {
@@ -545,7 +545,7 @@ struct Args<'r, 'ast, 'arena> {
     pub deprecation_info: Option<&'r [TypedValue<'arena>]>,
     pub params: &'r [T::FunParam],
     pub ret: Option<&'r T::Hint>,
-    pub method_id: &'r method::Type<'arena>,
+    pub method_id: &'r method::MethodType<'arena>,
     pub flags: Flags,
 }
 

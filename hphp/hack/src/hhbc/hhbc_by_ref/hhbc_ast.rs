@@ -38,11 +38,11 @@ pub type TypedefNum = isize;
 pub type ClassNum = isize;
 pub type ConstNum = isize;
 
-pub type ClassId<'arena> = hhbc_by_ref_hhbc_id::class::Type<'arena>;
-pub type FunctionId<'arena> = hhbc_by_ref_hhbc_id::function::Type<'arena>;
-pub type MethodId<'arena> = hhbc_by_ref_hhbc_id::method::Type<'arena>;
-pub type ConstId<'arena> = hhbc_by_ref_hhbc_id::r#const::Type<'arena>;
-pub type PropId<'arena> = hhbc_by_ref_hhbc_id::prop::Type<'arena>;
+pub type ClassId<'arena> = hhbc_by_ref_hhbc_id::class::ClassType<'arena>;
+pub type FunctionId<'arena> = hhbc_by_ref_hhbc_id::function::FunctionType<'arena>;
+pub type MethodId<'arena> = hhbc_by_ref_hhbc_id::method::MethodType<'arena>;
+pub type ConstId<'arena> = hhbc_by_ref_hhbc_id::r#const::ConstType<'arena>;
+pub type PropId<'arena> = hhbc_by_ref_hhbc_id::prop::PropType<'arena>;
 
 pub type NumParams = usize;
 pub type ByRefs<'arena> = Slice<'arena, bool>;

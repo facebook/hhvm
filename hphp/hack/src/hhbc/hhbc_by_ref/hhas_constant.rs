@@ -18,7 +18,7 @@ use oxidized::ast as tast;
 
 #[derive(Debug)]
 pub struct HhasConstant<'arena> {
-    pub name: hhbc_id::r#const::Type<'arena>,
+    pub name: hhbc_id::r#const::ConstType<'arena>,
     pub value: Option<TypedValue<'arena>>,
     pub initializer_instrs: Option<InstrSeq<'arena>>,
     pub is_abstract: bool,
@@ -43,7 +43,7 @@ pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         },
     };
     Ok(HhasConstant {
-        name: hhbc_id::r#const::Type::from_ast_name(alloc, id.name()),
+        name: hhbc_id::r#const::ConstType::from_ast_name(alloc, id.name()),
         value,
         initializer_instrs,
         is_abstract,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the \"hack\" directory of this source tree.
 //
-// @generated SignedSource<<f902e96b7689087f3b65c11c42c485f7>>
+// @generated SignedSource<<0e0b5da0bb038db8ad2a2ac297878836>>
 
 
 #pragma once
@@ -236,12 +236,12 @@ struct InstructIterator {
   };
 };
 
-using ClassId = Type;
+using ClassId = ClassType;
 
 /// Conventionally this is "A_" followed by an integer
 using AdataId = Str;
 
-using ConstId = Type;
+using ConstId = ConstType;
 
 struct InstructLitConst {
   enum class Tag {
@@ -382,9 +382,9 @@ struct InstructLitConst {
   };
 };
 
-using FunctionId = Type;
+using FunctionId = FunctionType;
 
-using MethodId = Type;
+using MethodId = MethodType;
 
 struct InstructOperator {
   enum class Tag {
@@ -962,7 +962,7 @@ struct InstructGet {
   };
 };
 
-using PropId = Type;
+using PropId = PropType;
 
 struct InstructMutator {
   enum class Tag {

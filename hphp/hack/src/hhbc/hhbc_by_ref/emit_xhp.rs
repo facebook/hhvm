@@ -364,7 +364,7 @@ fn emit_xhp_attribute_array<'arena>(
         id: &str,
         enum_opt: Option<&Vec<Expr>>,
     ) -> Result<(Expr, Expr)> {
-        let id = class::Type::from_ast_name_and_mangle(alloc, id).to_raw_string();
+        let id = class::ClassType::from_ast_name_and_mangle(alloc, id).to_raw_string();
         let type_ = hint_to_num(id);
         let type_ident = mk_expr(Expr_::Int(type_.to_string()));
         let class_name = match type_ {

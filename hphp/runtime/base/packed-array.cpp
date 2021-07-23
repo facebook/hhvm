@@ -649,15 +649,20 @@ ArrayData* PackedArray::AppendInPlace(ArrayData* adIn, TypedValue v) {
   return AppendImpl(adIn, v, false);
 }
 
-ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
+ArrayData* PackedArray::PopMove(ArrayData* adIn, Variant& value) {
   assertx(checkInvariants(adIn));
 
-  auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
-
-  if (UNLIKELY(ad->m_size == 0)) {
+  if (UNLIKELY(adIn->empty())) {
     value = uninit_null();
-    return ad;
+    return adIn;
   }
+
+  auto const ad = [&] {
+    if (!adIn->cowCheck()) return adIn;
+    auto const res = Copy(adIn);
+    adIn->decRefCount();
+    return res;
+  }();
 
   auto const size = ad->m_size - 1;
   auto const tv = *LvalUncheckedInt(ad, size);

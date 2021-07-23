@@ -437,9 +437,10 @@ public:
 
   /*
    * Remove the first or last element of the array, and assign it to `value'.
-   * Return a copied/escalated array if necessary, or `this` otherwise.
+   * If copy/escalation is necessary, this operation will destroy `this` and
+   * return a new array; else, it'll return `this`.
    */
-  ArrayData* pop(Variant& value);
+  ArrayData* popMove(Variant& value);
 
   /*
    * Comparisons.
@@ -752,7 +753,7 @@ struct ArrayFunctions {
   bool (*uasort[NK])(ArrayData* ad, const Variant& cmp_function);
   ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*appendMove[NK])(ArrayData*, TypedValue v);
-  ArrayData* (*pop[NK])(ArrayData*, Variant& value);
+  ArrayData* (*popMove[NK])(ArrayData*, Variant& value);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*makeUncounted[NK])(
     ArrayData*, const MakeUncountedEnv& env, bool hasApcTv);

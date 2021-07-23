@@ -512,13 +512,13 @@ void Array::append(TypedValue v) {
 }
 
 Variant Array::pop() {
-  if (m_arr) {
-    Variant ret;
-    ArrayData *newarr = m_arr->pop(ret);
-    if (newarr != m_arr) m_arr = Ptr::attach(newarr);
-    return ret;
-  }
-  return init_null();
+  if (!m_arr) return init_null();
+
+  Variant ret;
+  m_arr.mutateInPlace([&](ArrayData* ad) {
+    return ad->popMove(ret);
+  });
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

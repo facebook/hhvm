@@ -187,8 +187,8 @@ inline bool ArrayData::uasort(const Variant& compare) {
 }
 
 NO_PROFILING
-inline ArrayData* ArrayData::pop(Variant& value) {
-  return g_array_funcs.pop[kind()](this, value);
+inline ArrayData* ArrayData::popMove(Variant& value) {
+  return g_array_funcs.popMove[kind()](this, value);
 }
 
 NO_PROFILING

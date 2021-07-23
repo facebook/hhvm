@@ -192,7 +192,7 @@ public:
 
   // high-level ops
   static ArrayData* AppendMove(ArrayData* ad, TypedValue v);
-  static ArrayData* Pop(ArrayData* ad, Variant& out);
+  static ArrayData* PopMove(ArrayData* ad, Variant& out);
   static void OnSetEvalScalar(ArrayData* ad);
 
   // copies and conversions

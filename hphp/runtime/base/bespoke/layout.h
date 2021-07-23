@@ -98,7 +98,7 @@ BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile);
   X(ArrayData*, RemoveInt, T*, int64_t) \
   X(ArrayData*, RemoveStr, T*, const StringData*) \
   X(ArrayData*, AppendMove, T*, TypedValue v) \
-  X(ArrayData*, Pop, T*, Variant&) \
+  X(ArrayData*, PopMove, T*, Variant&) \
   X(ArrayData*, PreSort, T*, SortFunction sf) \
   X(ArrayData*, PostSort, T*, ArrayData* vad) \
   X(ArrayData*, SetLegacyArray, T*, bool copy, bool legacy)
@@ -235,8 +235,8 @@ struct LayoutFunctionDispatcher {
     assertx(type(v) != KindOfUninit);
     return Array::AppendMove(Cast(ad, __func__), v);
   }
-  static ArrayData* Pop(ArrayData* ad, Variant& v) {
-    return Array::Pop(Cast(ad, __func__), v);
+  static ArrayData* PopMove(ArrayData* ad, Variant& v) {
+    return Array::PopMove(Cast(ad, __func__), v);
   }
   static ArrayData* PreSort(ArrayData* ad, SortFunction sf) {
     return Array::PreSort(Cast(ad, __func__), sf);

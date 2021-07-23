@@ -272,7 +272,7 @@ ArrayData* EmptyMonotypeVec::AppendMove(EmptyMonotypeVec* ead, TypedValue v) {
   return res;
 }
 
-ArrayData* EmptyMonotypeVec::Pop(EmptyMonotypeVec* ead, Variant& value) {
+ArrayData* EmptyMonotypeVec::PopMove(EmptyMonotypeVec* ead, Variant& value) {
   value = uninit_null();
   return ead;
 }
@@ -705,13 +705,19 @@ ArrayData* MonotypeVec::AppendMove(MonotypeVec* madIn, TypedValue v) {
   return res;
 }
 
-ArrayData* MonotypeVec::Pop(MonotypeVec* madIn, Variant& value) {
+ArrayData* MonotypeVec::PopMove(MonotypeVec* madIn, Variant& value) {
   if (UNLIKELY(madIn->m_size) == 0) {
     value = uninit_null();
     return madIn;
   }
 
-  auto const mad = madIn->cowCheck() ? madIn->copy() : madIn;
+  auto const mad = [&] {
+    if (!madIn->cowCheck()) return madIn;
+    auto const res = madIn->copy();
+    madIn->decRefCount();
+    return res;
+  }();
+
   auto const newSize = mad->size() - 1;
   value = Variant::attach(mad->typedValueUnchecked(newSize));
   mad->m_size = newSize;

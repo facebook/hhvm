@@ -596,11 +596,11 @@ ArrayData* LoggingArray::AppendMove(LoggingArray* lad, TypedValue v) {
   return mutateMove(lad, ms, ko,
                     [&](ArrayData* w) { return w->appendMove(v); });
 }
-ArrayData* LoggingArray::Pop(LoggingArray* lad, Variant& ret) {
+ArrayData* LoggingArray::PopMove(LoggingArray* lad, Variant& ret) {
   auto const ko = lad->keyOrder.pop();
   logEvent(lad, ko, ArrayOp::Pop);
-  return mutate(lad, lad->entryTypes, ko,
-                [&](ArrayData* w) { return w->pop(ret); });
+  return mutateMove(lad, lad->entryTypes, ko,
+                    [&](ArrayData* w) { return w->popMove(ret); });
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -599,21 +599,29 @@ ArrayData* SetArray::AppendMove(ArrayData* ad, TypedValue v) {
   return AppendImpl(ad, tvClassToString(v), ad->cowCheck());
 }
 
-ArrayData* SetArray::Pop(ArrayData* ad, Variant& value) {
-  auto a = asSet(ad);
-  if (a->cowCheck()) a = a->copySet();
-  if (a->m_size) {
-    ssize_t pos = a->getIterLast();
-    tvDup(a->getElm(pos), *value.asTypedValue());
-    auto const pelm = &a->data()[pos];
-    auto const loc = a->findForRemove(pelm->hash(),
-      [pelm] (const Elm& e) { return &e == pelm; }
-    );
-    assertx(loc.valid());
-    a->erase(loc);
-  } else {
+ArrayData* SetArray::PopMove(ArrayData* ad, Variant& value) {
+  if (ad->empty()) {
     value = uninit_null();
+    return ad;
   }
+
+  auto const a = [&] {
+    auto const old = asSet(ad);
+    if (!ad->cowCheck()) return old;
+    auto const result = old->copySet();
+    old->decRefCount();
+    return result;
+  }();
+
+  ssize_t pos = a->getIterLast();
+  tvDup(a->getElm(pos), *value.asTypedValue());
+  auto const pelm = &a->data()[pos];
+  auto const loc = a->findForRemove(pelm->hash(),
+    [pelm] (const Elm& e) { return &e == pelm; }
+  );
+  assertx(loc.valid());
+  a->erase(loc);
+
   return a;
 }
 

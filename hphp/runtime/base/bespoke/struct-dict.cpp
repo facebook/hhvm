@@ -715,13 +715,19 @@ ArrayData* StructDict::AppendMove(StructDict* sad, TypedValue v) {
   return res;
 }
 
-ArrayData* StructDict::Pop(StructDict* sadIn, Variant& value) {
+ArrayData* StructDict::PopMove(StructDict* sadIn, Variant& value) {
   if (UNLIKELY(sadIn->size() == 0)) {
     value = uninit_null();
     return sadIn;
   }
 
-  auto const sad = sadIn->cowCheck() ? sadIn->copy() : sadIn;
+  auto const sad = [&] {
+    if (!sadIn->cowCheck()) return sadIn;
+    auto const res = sadIn->copy();
+    sadIn->decRefCount();
+    return res;
+  }();
+
   auto const pos = sad->size() - 1;
   auto const slot = sad->getSlotInPos(pos);
   value = Variant::attach(sad->typedValueUnchecked(slot));

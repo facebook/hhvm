@@ -311,7 +311,7 @@ public:
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* AppendMove(ArrayData*, TypedValue v);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
-  static ArrayData* Pop(ArrayData*, Variant& value);
+  static ArrayData* PopMove(ArrayData*, Variant& value);
 
   static ArrayData* Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);

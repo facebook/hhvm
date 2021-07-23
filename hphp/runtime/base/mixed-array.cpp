@@ -1200,27 +1200,26 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
   return ret;
 }
 
-ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
-  auto a = asMixed(ad);
-  if (a->cowCheck()) a = a->copyMixed();
-  auto elms = a->data();
-  if (a->m_size) {
-    ssize_t pos = IterLast(a);
-    assertx(pos >= 0 && pos < a->m_used);
-    auto& e = elms[pos];
-    assertx(!isTombstone(e.data.m_type));
-    value = tvAsCVarRef(&e.data);
-    auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash())
-                              : a->findForRemove(e.ikey, e.hash());
-    assertx(pos2.elmIdx == pos);
-    if (!e.hasStrKey()) {
-      a->updateNextKI(e.ikey, true);
-    }
-    a->erase(pos2);
-  } else {
+ArrayData* MixedArray::PopMove(ArrayData* ad, Variant& value) {
+  if (ad->empty()) {
     value = uninit_null();
+    return ad;
   }
-  return a;
+
+  auto const a = asMixed(ad);
+  auto elms = a->data();
+  ssize_t pos = IterLast(a);
+
+  assertx(pos >= 0 && pos < a->m_used);
+  auto& e = elms[pos];
+  assertx(!isTombstone(e.data.m_type));
+  value = tvAsCVarRef(&e.data);
+
+  auto const res = e.hasStrKey() ? MixedArray::RemoveStr(a, e.skey)
+                                 : MixedArray::RemoveInt(a, e.ikey);
+
+  if (a != res && a->decReleaseCheck()) Release(a);
+  return res;
 }
 
 ArrayData* MixedArray::Renumber(ArrayData* adIn) {

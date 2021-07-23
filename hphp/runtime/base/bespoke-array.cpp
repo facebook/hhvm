@@ -253,8 +253,8 @@ ArrayData* BespokeArray::AppendMove(ArrayData* ad, TypedValue v) {
   return g_layout_funcs.fnAppendMove[getVtableIndex(ad)](ad, v);
 }
 NO_PROFILING
-ArrayData* BespokeArray::Pop(ArrayData* ad, Variant& out) {
-  return g_layout_funcs.fnPop[getVtableIndex(ad)](ad, out);
+ArrayData* BespokeArray::PopMove(ArrayData* ad, Variant& out) {
+  return g_layout_funcs.fnPopMove[getVtableIndex(ad)](ad, out);
 }
 void BespokeArray::OnSetEvalScalar(ArrayData*) {
   always_assert(false);

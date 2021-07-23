@@ -344,20 +344,22 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(GetPosVal)
 
   /*
-   * ArrayData* SetInt(ArrayData*, int64_t key, TypedValue v)
+   * ArrayData* SetIntMove(ArrayData*, int64_t key, TypedValue v)
    *
-   *   Set a value in the array for an integer key, with copies / escalation.
-   *   SetIntMove is equivalent to SetInt, followed by a dec-ref of the value,
-   *   followed by a dec-ref of the old array (if it was copied or escalated).
+   *   Set a value in the array for an integer key. If copy / escalation is
+   *   necessary, this operation will dec-ref the array and return a new one;
+   *   else, it'll return the original array. It does not inc-ref the value.
    */
   DISPATCH(SetIntMove)
 
   /*
-   * ArrayData* SetStr(ArrayData*, StringData*, TypedValue v)
+   * ArrayData* SetStrMove(ArrayData*, StringData*, TypedValue v)
    *
-   *   Set a value in the array for a string key, with copies / escalation.
-   *   SetStrMove is equivalent to SetStr, followed by a dec-ref of the value,
-   *   followed by a dec-ref of the old array (if it was copied or escalated).
+   *   Set a value in the array for a string key. If copy / escalation is
+   *   necessary, this operation will dec-ref the array and return a new one;
+   *   else, it'll return the original array. It does not inc-ref the value.
+   *
+   *   SetStrMove *does* inc-ref the key if it's newly added to the array.
    */
   DISPATCH(SetStrMove)
 
@@ -531,23 +533,21 @@ const ArrayFunctions g_array_funcs = {
   /*
    * ArrayData* Append(ArrayData*, TypedValue v);
    *
-   *   Append a new value to the array, with the next available integer key,
-   *   copying or escalating as necessary. If there is no available integer
-   *   key, no value is appended, but this method may still copy the array.
-   *
-   *   AppendMove is equivalent to calling Append, dec-ref-ing the value,
-   *   and (if copy or escalation was needed), dec-ref-ing the old array.
+   *   Append a new value to the array, with the next available integer key.
+   *   If copy / escalation is necessary, this operation will dec-ref the
+   *   array and return a new one; else, it'll return the original array.
+   *   This operation does not inc-ref the value.
    */
   DISPATCH(AppendMove)
 
   /*
-   * ArrayData* Pop(ArrayData*, Variant& value);
+   * ArrayData* PopMove(ArrayData*, Variant& value);
    *
-   *   Remove the last element from the array and assign it to `value'.  This
-   *   function may return a new array if it decided to COW due to
-   *   cowCheck().
+   *   Remove the last element from the array and assign it to `value'.
+   *   If copy / escalation is necessary, this operation will dec-ref the
+   *   array and return a new one; else, it'll return the original array.
    */
-  DISPATCH(Pop)
+  DISPATCH(PopMove)
 
   /*
    * void OnSetEvalScalar(ArrayData*)

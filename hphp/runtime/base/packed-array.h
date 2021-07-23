@@ -91,7 +91,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool Usort(ArrayData*, const Variant&);
   static bool Uasort(ArrayData*, const Variant&);
   static ArrayData* AppendMove(ArrayData*, TypedValue v);
-  static ArrayData* Pop(ArrayData*, Variant& value);
+  static ArrayData* PopMove(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, TypedValue v);
   static void OnSetEvalScalar(ArrayData*);
 

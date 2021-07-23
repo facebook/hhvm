@@ -301,7 +301,7 @@ ArrayData* EmptyMonotypeDict::RemoveStr(Self* ad, const StringData* k) {
 ArrayData* EmptyMonotypeDict::AppendMove(Self* ad, TypedValue v) {
   return SetIntMove(ad, 0, v);
 }
-ArrayData* EmptyMonotypeDict::Pop(Self* ad, Variant& ret) {
+ArrayData* EmptyMonotypeDict::PopMove(Self* ad, Variant& ret) {
   ret = uninit_null();
   return ad;
 }
@@ -1359,7 +1359,7 @@ ArrayData* MonotypeDict<Key>::AppendMove(Self* mad, TypedValue v) {
 }
 
 template <typename Key>
-ArrayData* MonotypeDict<Key>::Pop(Self* mad, Variant& value) {
+ArrayData* MonotypeDict<Key>::PopMove(Self* mad, Variant& value) {
   if (mad->empty()) {
     value = uninit_null();
     return mad;
@@ -1367,8 +1367,12 @@ ArrayData* MonotypeDict<Key>::Pop(Self* mad, Variant& value) {
   auto const pos = IterLast(mad);
   auto const key = GetPosKey(mad, pos);
   value = tvAsCVarRef(GetPosVal(mad, pos));
-  return tvIsString(key) ? RemoveStr(mad, val(key).pstr)
-                         : RemoveInt(mad, val(key).num);
+
+  auto const res = tvIsString(key) ? RemoveStr(mad, val(key).pstr)
+                                   : RemoveInt(mad, val(key).num);
+
+  if (mad != res && mad->decReleaseCheck()) Release(mad);
+  return res;
 }
 
 template <typename Key>

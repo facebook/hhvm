@@ -45,13 +45,14 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/watchman.h"
+#include "hphp/runtime/base/watchman-connection.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/ext_facts.h"
 #include "hphp/runtime/ext/facts/fact-extractor.h"
 #include "hphp/runtime/ext/facts/facts-store.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
-#include "hphp/runtime/ext/facts/watchman.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/assertions.h"
@@ -442,18 +443,12 @@ struct Facts final : Extension {
           m_data->m_expirationTime.count());
     }
 
-    auto watchmanSocket =
-        Config::GetString(ini, config, "watchman.socket.default");
-    if (!watchmanSocket.empty()) {
-      FTRACE(3, "watchman.socket.default = {}\n", watchmanSocket);
-      m_data->m_watchmanDefaultSocket = std::move(watchmanSocket);
+    if (!RO::WatchmanDefaultSocket.empty()) {
+      FTRACE(3, "watchman.socket.default = {}\n", RO::WatchmanDefaultSocket);
     }
 
-    auto watchmanRootSocket =
-        Config::GetString(ini, config, "watchman.socket.root");
-    if (!watchmanRootSocket.empty()) {
-      FTRACE(3, "watchman.socket.root = {}\n", watchmanRootSocket);
-      m_data->m_watchmanRootSocket = std::move(watchmanRootSocket);
+    if (!RO::WatchmanRootSocket.empty()) {
+      FTRACE(3, "watchman.socket.root = {}\n", RO::WatchmanRootSocket);
     }
 
     auto excluded = Config::GetStrVector(ini, config, "Autoload.ExcludedRepos");
@@ -542,11 +537,11 @@ struct Facts final : Extension {
       return;
     }
 
-    if (!m_data->m_watchmanDefaultSocket) {
+    if (RO::WatchmanDefaultSocket.empty()) {
       FTRACE(2, "watchman.socket.default was not provided.\n");
     }
 
-    if (!m_data->m_watchmanRootSocket) {
+    if (RO::WatchmanRootSocket.empty()) {
       FTRACE(2, "watchman.socket.root was not provided.\n");
     }
 
@@ -564,103 +559,15 @@ struct Facts final : Extension {
     return m_data->m_expirationTime;
   }
 
-  const Optional<std::string>& getWatchmanDefaultSocket() const {
-    return m_data->m_watchmanDefaultSocket;
-  }
-
-  const Optional<std::string>& getWatchmanRootSocket() const {
-    return m_data->m_watchmanRootSocket;
-  }
-
-  Watchman& getWatchmanClient(const folly::fs::path& root) {
-    auto it = m_data->m_watchmanClients.find(root.native());
-    if (it != m_data->m_watchmanClients.end()) {
-      return *it->second;
-    }
-    auto watchmanSocket = getPerUserWatchmanSocket();
-    if (!watchmanSocket) {
-      FTRACE(3, "No per-user watchman socket found.\n");
-      watchmanSocket = getWatchmanDefaultSocket();
-    }
-
-    return *m_data->m_watchmanClients
-                .insert(root.native(), Watchman::get(root, watchmanSocket))
-                .first->second;
-  }
-
 private:
   // Add new members to this struct instead of the top level so we can be sure
   // your new member is destroyed at the right time.
   struct FactsData {
     std::chrono::seconds m_expirationTime{30 * 60};
-    Optional<std::string> m_watchmanDefaultSocket;
-    Optional<std::string> m_watchmanRootSocket;
     hphp_hash_set<std::string> m_excludedRepos;
-    folly::ConcurrentHashMap<std::string, std::shared_ptr<Watchman>>
-        m_watchmanClients{};
     std::unique_ptr<WatchmanAutoloadMapFactory> m_mapFactory;
   };
   Optional<FactsData> m_data;
-
-  /**
-   * Discover who owns the given repo and return the Watchman socket
-   * corresponding to that user.
-   */
-  Optional<std::string> getPerUserWatchmanSocket() {
-    IniSetting::Map ini = IniSetting::Map::object;
-    Hdf config;
-    auto* repoOptions = g_context->getRepoOptionsForRequest();
-    if (!repoOptions) {
-      return {};
-    }
-
-    // Figure out who owns the repo we're trying to run code in
-    auto repoRoot = getRepoRoot(*repoOptions);
-    int repoRootFD = ::open(repoRoot.native().c_str(), O_DIRECTORY | O_RDONLY);
-    if (repoRootFD == -1) {
-      return {};
-    }
-    SCOPE_EXIT {
-      ::close(repoRootFD);
-    };
-    struct ::stat hstat {};
-    if (::fstat(repoRootFD, &hstat) != 0) {
-      return {};
-    }
-
-    // The repo is owned by root, so use a special root socket
-    if (hstat.st_uid == 0) {
-      auto const& rootSock = getWatchmanRootSocket();
-      FTRACE(
-          3,
-          "{} is owned by root, looking for socket at {}\n",
-          repoRoot.native(),
-          rootSock ? *rootSock : "<none>");
-      return rootSock;
-    }
-
-    // Find the `watchman.socket` setting in the repo owner's
-    // SandboxConfFile (usually a .hphp file somewhere in their home
-    // directory).
-    UserInfo info{hstat.st_uid};
-    auto user = std::string{info.pw->pw_name};
-    auto homePath = RuntimeOption::GetHomePath(user);
-    if (!homePath) {
-      return {};
-    }
-    auto confFileName = (*homePath) / RuntimeOption::SandboxConfFile;
-    bool success =
-        RuntimeOption::ReadPerUserSettings(confFileName, ini, config);
-    if (!success) {
-      return {};
-    }
-    auto sock = Config::GetString(ini, config, "watchman.socket.default");
-    if (sock.empty()) {
-      return {};
-    }
-    return {std::move(sock)};
-  }
-
 } s_ext;
 
 FactsStore*
@@ -719,7 +626,7 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
                mapKey->m_root,
                mapKey->m_dbData,
                mapKey->m_queryExpr,
-               s_ext.getWatchmanClient(mapKey->m_root),
+               get_watchman_client(mapKey->m_root),
                RuntimeOption::ServerExecutionMode())})
       .first->second.get();
 }

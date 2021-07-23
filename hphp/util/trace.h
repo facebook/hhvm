@@ -203,10 +203,10 @@ namespace Trace {
       TM(vasm_copy)     \
       TM(vasm_graph_color) \
       TM(vasm_phi)      \
+      TM(watchman)      \
       TM(xenon)         \
       TM(xls)           \
       TM(xls_stats)     \
-      TM(pdce_inline)   \
       TM(clisrv)        \
       TM(factparse)     \
       TM(bccache)       \

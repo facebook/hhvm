@@ -957,6 +957,10 @@ uint64_t RuntimeOption::DisableConstant = 0;
 bool RuntimeOption::DisableNontoplevelDeclarations = false;
 bool RuntimeOption::EnableClassLevelWhereClauses = false;
 
+
+std::string RuntimeOption::WatchmanRootSocket;
+std::string RuntimeOption::WatchmanDefaultSocket;
+
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
 #else
@@ -1824,6 +1828,12 @@ void RuntimeOption::Load(
                  "ResourceLimit.HeapLowWaterMark", HeapLowWaterMark);
     Config::Bind(HeapHighWaterMark , ini, config,
                  "ResourceLimit.HeapHighWaterMark",HeapHighWaterMark);
+  }
+  {
+    // watchman
+    Config::Bind(WatchmanRootSocket, ini, config, "watchman.socket.root", "");
+    Config::Bind(WatchmanDefaultSocket, ini, config,
+                 "watchman.socket.default", "");
   }
   {
     // PHPisms

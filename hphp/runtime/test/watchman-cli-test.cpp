@@ -22,11 +22,11 @@
 #include <folly/init/Init.h>
 #include <folly/json.h>
 
-#include "hphp/runtime/ext/facts/watchman.h"
+#include "hphp/runtime/base/watchman.h"
 
 #include "hphp/util/optional.h"
 
-using namespace HPHP::Facts;
+using namespace HPHP;
 
 int main(int argc, char** argv) {
   folly::Init _{&argc, &argv};

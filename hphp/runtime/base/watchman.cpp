@@ -23,16 +23,14 @@
 #include <folly/executors/GlobalExecutor.h>
 #include <folly/json.h>
 
-#include "hphp/runtime/ext/facts/exception.h"
-#include "hphp/runtime/ext/facts/watchman.h"
+#include "hphp/runtime/base/watchman.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/optional.h"
 #include "hphp/util/trace.h"
 
-TRACE_SET_MOD(facts);
+TRACE_SET_MOD(watchman);
 
 namespace HPHP {
-namespace Facts {
 
 std::shared_ptr<Watchman> Watchman::get(
     const folly::fs::path& path, const Optional<std::string>& sockPath) {
@@ -77,6 +75,32 @@ Watchman::query(folly::dynamic queryObj, int nReconnects) {
             [sharedThis, queryObj = std::move(queryObj), nReconnects](
                 folly::Try<WatchData>&&) mutable {
               return sharedThis->query(std::move(queryObj), nReconnects - 1);
+            });
+      })
+      .semi();
+}
+
+folly::SemiFuture<watchman::Clock> Watchman::getClock() { return getClock(1); }
+
+folly::SemiFuture<watchman::Clock> Watchman::getClock(int nReconnects) {
+  auto data = m_data.lock();
+  return data->m_watchFuture.getFuture()
+      .via(&m_exec)
+      .thenValue([](WatchData&& watchData) {
+        return watchData.m_client->getClock(std::move(watchData.m_watchPath));
+      })
+      .thenError([weakThis = weak_from_this(), nReconnects](
+                     const folly::exception_wrapper& e) mutable {
+        auto sharedThis = weakThis.lock();
+        if (!sharedThis) {
+          throw std::bad_weak_ptr();
+        }
+        if (nReconnects <= 0) {
+          e.throw_exception();
+        }
+        return sharedThis->reconnect().thenTry(
+            [sharedThis, nReconnects](folly::Try<WatchData>&&) mutable {
+              return sharedThis->getClock(nReconnects - 1);
             });
       })
       .semi();
@@ -207,5 +231,4 @@ folly::Future<WatchData> Watchman::reconnect() {
   return data->m_watchFuture.getFuture();
 }
 
-} // namespace Facts
 } // namespace HPHP

@@ -30,7 +30,6 @@
 #include <watchman/cppclient/WatchmanClient.h>
 
 namespace HPHP {
-namespace Facts {
 
 /**
  * Result of connecting and watching
@@ -70,6 +69,11 @@ public:
    */
   folly::SemiFuture<folly::dynamic> query(folly::dynamic query);
 
+  /*
+   * Return the current watchman clock.
+   */
+  folly::SemiFuture<watchman::Clock> getClock();
+
   /**
    * Invoke the given callback whenever the given Watchman query
    * returns new results.
@@ -88,6 +92,8 @@ private:
    */
   folly::SemiFuture<folly::dynamic>
   query(folly::dynamic query, int nReconnects);
+
+  folly::SemiFuture<watchman::Clock> getClock(int nReconnects);
 
   /**
    * Initialize a client from scratch and watch the given root.
@@ -124,5 +130,4 @@ private:
   folly::Synchronized<Data, std::mutex> m_data;
 };
 
-} // namespace Facts
 } // namespace HPHP

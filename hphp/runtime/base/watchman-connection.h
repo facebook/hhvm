@@ -16,35 +16,12 @@
 
 #pragma once
 
-#include <memory>
+#include "hphp/runtime/base/watchman.h"
 
-#include <folly/dynamic.h>
 #include <folly/experimental/io/FsUtil.h>
 
-#include "hphp/runtime/base/autoload-map.h"
-#include "hphp/runtime/base/watchman.h"
-#include "hphp/runtime/ext/facts/autoload-db.h"
-
 namespace HPHP {
-namespace Facts {
 
-/**
- * Create a FactsStore that learns about changed files from Watchman and
- * updates the DB at `dbData.m_path` accordingly.
- */
-std::shared_ptr<FactsStore> make_watchman_facts(
-    folly::fs::path root,
-    DBData dbData,
-    folly::dynamic queryExpr,
-    Watchman& watchmanClient,
-    bool shouldSubscribe);
+Watchman& get_watchman_client(const folly::fs::path& root);
 
-/**
- * Create a FactsStore that trusts the DB at `dbData.m_path` and never modifies
- * it.
- */
-std::shared_ptr<FactsStore>
-make_trusted_facts(folly::fs::path root, DBData dbData);
-
-} // namespace Facts
-} // namespace HPHP
+}

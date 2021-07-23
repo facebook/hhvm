@@ -638,6 +638,9 @@ struct RuntimeOption {
   static int64_t HeapLowWaterMark;
   static int64_t HeapHighWaterMark;
 
+  static std::string WatchmanRootSocket;
+  static std::string WatchmanDefaultSocket;
+
   // Disables PHP's call_user_func function.
   // Valid values are 0 => enabled (default),
   // 1 => warning, 2 => error.

@@ -122,27 +122,25 @@ impl<'i, 'a> InstrIter<'i, 'a> {
     }
 }
 
-impl<'i, 'a: 'i> Iterator for InstrIter<'i, 'a> {
+impl<'i, 'a> Iterator for InstrIter<'i, 'a> {
     type Item = &'i Instruct<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         //self: & mut InstrIter<'i, 'a>
         //self.instr_seq: &'i InstrSeq<'a>
-        match *(self.instr_seq/*:InstrSeq<'a>*/) {
-            InstrSeq::List(ref s) if s.as_ref().is_empty() => None,
-            InstrSeq::List(ref s) if s.as_ref().len() == 1 && self.index > 0 => None,
-            InstrSeq::List(ref s) if s.as_ref().len() == 1 => {
-                let slice: &'a mut [Instruct<'a>] = s.as_inner_mut();
+        match self.instr_seq {
+            InstrSeq::List(s) if s.is_empty() => None,
+            InstrSeq::List(s) if s.len() == 1 && self.index > 0 => None,
+            InstrSeq::List(s) if s.len() == 1 => {
                 self.index += 1;
-                let instr: Option<&'a Instruct<'a>> = slice.get(0);
-                instr
+                s.get(0)
             }
-            InstrSeq::List(ref s) if s.as_ref().len() > 1 && self.index >= s.as_ref().len() => None,
-            InstrSeq::List(ref s) => {
-                let r = s.as_inner_mut().get(self.index);
+            InstrSeq::List(s) if s.len() > 1 && self.index >= s.len() => None,
+            InstrSeq::List(s) => {
+                let r = s.get(self.index);
                 self.index += 1;
                 r
             }
-            InstrSeq::Concat(ref s) => {
+            InstrSeq::Concat(s) => {
                 if self.concat_stack.is_empty() {
                     if self.index == 0 {
                         self.index += 1;
@@ -154,32 +152,30 @@ impl<'i, 'a: 'i> Iterator for InstrIter<'i, 'a> {
 
                 while !self.concat_stack.is_empty() {
                     let top: &mut itertools::Either<_, _> = self.concat_stack.last_mut().unwrap();
-                    match *top {
-                        itertools::Either::Left((list, size)) if size >= list.as_ref().len() => {
+                    match top {
+                        itertools::Either::Left((list, size)) if *size >= list.len() => {
                             self.concat_stack.pop();
                         }
-                        itertools::Either::Left((list, ref mut size)) => {
-                            let r = list.as_inner_mut().get(*size);
+                        itertools::Either::Left((list, size)) => {
+                            let r: Option<&'i Instruct<'a>> = list.get(*size);
                             *size += 1;
                             return r;
                         }
-                        itertools::Either::Right((concat, size))
-                            if size >= concat.as_ref().len() =>
-                        {
+                        itertools::Either::Right((concat, size)) if *size >= concat.len() => {
                             self.concat_stack.pop();
                         }
-                        itertools::Either::Right((concat, ref mut size)) => {
-                            let i: &'a InstrSeq<'a> = &(concat.as_inner_mut()[*size]);
+                        itertools::Either::Right((concat, size)) => {
+                            let i: &'i InstrSeq<'a> = &(concat[*size]);
                             *size += 1;
-                            match *i {
-                                InstrSeq::List(ref s) if s.as_inner_mut().is_empty() => {}
-                                InstrSeq::List(ref s) if s.as_inner_mut().len() == 1 => {
-                                    return s.as_inner_mut().get(0);
+                            match i {
+                                InstrSeq::List(s) if s.is_empty() => {}
+                                InstrSeq::List(s) if s.len() == 1 => {
+                                    return s.get(0);
                                 }
-                                InstrSeq::List(ref s) => {
+                                InstrSeq::List(s) => {
                                     self.concat_stack.push(itertools::Either::Left((s, 0)));
                                 }
-                                InstrSeq::Concat(ref s) => {
+                                InstrSeq::Concat(s) => {
                                     self.concat_stack.push(itertools::Either::Right((s, 0)));
                                 }
                             }
@@ -1643,7 +1639,7 @@ impl<'a> InstrSeq<'a> {
     pub fn gather(alloc: &'a bumpalo::Bump, iss: std::vec::Vec<InstrSeq<'a>>) -> InstrSeq<'a> {
         fn prd<'a>(is: &InstrSeq<'a>) -> bool {
             match is {
-                InstrSeq::List(s) if s.as_ref().is_empty() => false,
+                InstrSeq::List(s) if s.is_empty() => false,
                 _ => true,
             }
         }
@@ -1704,42 +1700,33 @@ impl<'a> InstrSeq<'a> {
     }
 
     pub fn first(&self) -> Option<&Instruct<'a>> {
+        // self: &InstrSeq<'a>
         match self {
-            InstrSeq::List(ref s) if s.as_inner_mut().is_empty() => None,
-            InstrSeq::List(ref s) if s.as_inner_mut().len() == 1 => {
-                let i = &s.as_ref()[0];
+            InstrSeq::List(s) if s.is_empty() => None,
+            InstrSeq::List(s) if s.len() == 1 => {
+                let i = &s[0];
                 if InstrSeq::is_srcloc(i) {
                     None
                 } else {
                     Some(i)
                 }
             }
-            InstrSeq::List(ref s) => {
-                let l = s.as_ref();
-                match l.iter().find(|&i| !InstrSeq::is_srcloc(i)) {
-                    Some(i) => Some(i),
-                    None => None,
-                }
-            }
-            InstrSeq::Concat(ref s) => {
-                let l = s.as_ref();
-                l.iter().find_map(InstrSeq::first)
-            }
+            InstrSeq::List(s) => match s.iter().find(|&i| !InstrSeq::is_srcloc(i)) {
+                Some(i) => Some(i),
+                None => None,
+            },
+            InstrSeq::Concat(s) => s.iter().find_map(InstrSeq::first),
         }
     }
 
     /// Test for the empty instruction sequence.
     pub fn is_empty(&self) -> bool {
+        // self:&InstrSeq<'a>
         match self {
-            InstrSeq::List(ref s) if s.as_ref().is_empty() => true,
-            InstrSeq::List(ref s) if s.as_ref().len() == 1 => {
-                let i = &s.as_ref()[0];
-                InstrSeq::is_srcloc(i)
-            }
-            InstrSeq::List(l) => {
-                l.as_ref().is_empty() || l.as_ref().iter().all(InstrSeq::is_srcloc)
-            }
-            InstrSeq::Concat(l) => l.as_ref().iter().all(InstrSeq::is_empty),
+            InstrSeq::List(s) if s.is_empty() => true,
+            InstrSeq::List(s) if s.len() == 1 => InstrSeq::is_srcloc(&s[0]),
+            InstrSeq::List(s) => s.is_empty() || s.iter().all(InstrSeq::is_srcloc),
+            InstrSeq::Concat(s) => s.iter().all(InstrSeq::is_empty),
         }
     }
 
@@ -1747,34 +1734,23 @@ impl<'a> InstrSeq<'a> {
     where
         F: FnMut(&Instruct<'a>) -> Self,
     {
+        // self: &InstrSeq<'a>
         match self {
-            InstrSeq::List(ref s) if s.as_ref().is_empty() => InstrSeq::new_empty(alloc),
-            InstrSeq::List(ref s) if s.as_ref().len() == 1 => {
-                let x: &'a Instruct<'a> = &s.as_inner_mut()[0];
-                f(x)
-            }
-            InstrSeq::List(ref s) => {
-                let instr_lst = s.as_ref();
-                InstrSeq::Concat(BumpSliceMut::new(
-                    alloc,
-                    bumpalo::collections::vec::Vec::from_iter_in(
-                        instr_lst.iter().map(|x| f(x)),
-                        alloc,
-                    )
+            InstrSeq::List(s) if s.is_empty() => InstrSeq::new_empty(alloc),
+            InstrSeq::List(s) if s.len() == 1 => f(&s[0]),
+            InstrSeq::List(s) => InstrSeq::Concat(BumpSliceMut::new(
+                alloc,
+                bumpalo::collections::vec::Vec::from_iter_in(s.iter().map(|x| f(x)), alloc)
                     .into_bump_slice_mut(),
-                ))
-            }
-            InstrSeq::Concat(ref s) => {
-                let instrseq_lst = s.as_ref();
-                InstrSeq::Concat(BumpSliceMut::new(
+            )),
+            InstrSeq::Concat(s) => InstrSeq::Concat(BumpSliceMut::new(
+                alloc,
+                bumpalo::collections::vec::Vec::from_iter_in(
+                    s.iter().map(|x| x.flat_map_seq(alloc, f)),
                     alloc,
-                    bumpalo::collections::vec::Vec::from_iter_in(
-                        instrseq_lst.iter().map(|x| x.flat_map_seq(alloc, f)),
-                        alloc,
-                    )
-                    .into_bump_slice_mut(),
-                ))
-            }
+                )
+                .into_bump_slice_mut(),
+            )),
         }
     }
 
@@ -1782,20 +1758,12 @@ impl<'a> InstrSeq<'a> {
     where
         F: FnMut(A, &'i Instruct<'a>) -> A,
     {
+        // self:& InstrSeq<'a>
         match self {
-            InstrSeq::List(ref s) if s.as_ref().is_empty() => init,
-            InstrSeq::List(ref s) if s.as_ref().len() == 1 => {
-                let x: &'a mut Instruct<'a> = &mut s.as_inner_mut()[0];
-                f(init, x)
-            }
-            InstrSeq::List(s) => {
-                let instr_lst = s.as_inner_mut();
-                instr_lst.iter().fold(init, f)
-            }
-            InstrSeq::Concat(s) => {
-                let instrseq_lst = s.as_inner_mut();
-                instrseq_lst.iter().fold(init, |acc, x| x.fold_left(f, acc))
-            }
+            InstrSeq::List(s) if s.is_empty() => init,
+            InstrSeq::List(s) if s.len() == 1 => f(init, &s[0]),
+            InstrSeq::List(s) => s.iter().fold(init, f),
+            InstrSeq::Concat(s) => s.iter().fold(init, |acc, x| x.fold_left(f, acc)),
         }
     }
 
@@ -1805,36 +1773,27 @@ impl<'a> InstrSeq<'a> {
     {
         //self: &InstrSeq<'a>
         match self {
-            InstrSeq::List(s) if s.as_inner_mut().is_empty() => InstrSeq::new_empty(alloc),
-            InstrSeq::List(s) if s.as_inner_mut().len() == 1 => {
-                let x: &'a Instruct<'a> = &s.as_inner_mut()[0];
+            InstrSeq::List(s) if s.is_empty() => InstrSeq::new_empty(alloc),
+            InstrSeq::List(s) if s.len() == 1 => {
+                let x: &Instruct<'a> = &s[0];
                 match f(x) {
                     Some(x) => instr::instr(alloc, x),
                     None => InstrSeq::new_empty(alloc),
                 }
             }
-            InstrSeq::List(s) => {
-                let instr_lst = s.as_ref();
-                InstrSeq::List(BumpSliceMut::new(
-                    alloc,
-                    bumpalo::collections::vec::Vec::from_iter_in(
-                        instr_lst.iter().filter_map(f),
-                        alloc,
-                    )
+            InstrSeq::List(s) => InstrSeq::List(BumpSliceMut::new(
+                alloc,
+                bumpalo::collections::vec::Vec::from_iter_in(s.iter().filter_map(f), alloc)
                     .into_bump_slice_mut(),
-                ))
-            }
-            InstrSeq::Concat(s) => {
-                let instrseq_lst = s.as_ref();
-                InstrSeq::Concat(BumpSliceMut::new(
+            )),
+            InstrSeq::Concat(s) => InstrSeq::Concat(BumpSliceMut::new(
+                alloc,
+                bumpalo::collections::vec::Vec::from_iter_in(
+                    s.iter().map(|x| x.filter_map(alloc, f)),
                     alloc,
-                    bumpalo::collections::vec::Vec::from_iter_in(
-                        instrseq_lst.iter().map(|x| x.filter_map(alloc, f)),
-                        alloc,
-                    )
-                    .into_bump_slice_mut(),
-                ))
-            }
+                )
+                .into_bump_slice_mut(),
+            )),
         }
     }
 
@@ -1844,51 +1803,36 @@ impl<'a> InstrSeq<'a> {
     {
         //self: &mut InstrSeq<'a>
         match self {
-            InstrSeq::List(s) if s.as_inner_mut().is_empty() => {}
-            InstrSeq::List(s) if s.as_ref().len() == 1 => {
-                let x: &'a mut Instruct<'a> = &mut s.as_inner_mut()[0];
+            InstrSeq::List(s) if s.is_empty() => {}
+            InstrSeq::List(s) if s.len() == 1 => {
+                let x: &mut Instruct<'a> = &mut s[0];
                 if !f(x) {
                     *self = instr::empty(alloc)
                 }
             }
             InstrSeq::List(s) => {
-                let instr_lst: &'a mut [Instruct<'a>] = s.as_inner_mut();
                 let mut new_lst = bumpalo::vec![in alloc;];
-                for mut i in instr_lst.iter_mut() {
+                for mut i in s.iter_mut() {
                     if f(&mut i) {
                         new_lst.push(i.clone())
                     }
                 }
                 *self = instr::instrs(alloc, new_lst.into_bump_slice_mut())
             }
-            InstrSeq::Concat(s) => {
-                let instrseq_lst: &'a mut [InstrSeq<'a>] = s.as_inner_mut();
-                instrseq_lst
-                    .iter_mut()
-                    .for_each(|x| x.filter_map_mut(alloc, f))
-            }
+            InstrSeq::Concat(s) => s.iter_mut().for_each(|x| x.filter_map_mut(alloc, f)),
         }
     }
 
-    pub fn map_mut<'i, F>(&'i mut self, f: &mut F)
+    pub fn map_mut<F>(&mut self, f: &mut F)
     where
-        F: FnMut(&'i mut Instruct<'a>),
+        F: FnMut(&mut Instruct<'a>),
     {
-        //self: &'i mut InstrSeq<'a>
+        //self: &mut InstrSeq<'a>
         match self {
-            InstrSeq::List(s) if s.as_inner_mut().is_empty() => {}
-            InstrSeq::List(s) if s.as_inner_mut().len() == 1 => {
-                let x: &'a mut Instruct<'a> = &mut s.as_inner_mut()[0];
-                f(x)
-            }
-            InstrSeq::List(s) => {
-                let instr_lst: &'a mut [Instruct<'a>] = s.as_inner_mut();
-                instr_lst.iter_mut().for_each(f)
-            }
-            InstrSeq::Concat(s) => {
-                let instrseq_lst: &'a mut [InstrSeq<'a>] = s.as_inner_mut();
-                instrseq_lst.iter_mut().for_each(|x| x.map_mut(f))
-            }
+            InstrSeq::List(s) if s.is_empty() => {}
+            InstrSeq::List(s) if s.len() == 1 => f(&mut s[0]),
+            InstrSeq::List(s) => s.iter_mut().for_each(f),
+            InstrSeq::Concat(s) => s.iter_mut().for_each(|x| x.map_mut(f)),
         }
     }
 
@@ -1897,23 +1841,12 @@ impl<'a> InstrSeq<'a> {
     where
         F: FnMut(&mut Instruct<'a>) -> Result<()>,
     {
-        //self: &'i mut InstrSeq<'a>
+        //self: &mut InstrSeq<'a>
         match self {
-            InstrSeq::List(s) if s.as_ref().is_empty() => Ok(()),
-            InstrSeq::List(s) if s.as_ref().len() == 1 => {
-                let x: &'a mut Instruct<'a> = &mut s.as_inner_mut()[0];
-                f(x)
-            }
-            InstrSeq::List(s) => {
-                let instr_lst: &'a mut [Instruct<'a>] = s.as_inner_mut();
-                instr_lst.iter_mut().try_for_each(|x| f(x))
-            }
-            InstrSeq::Concat(s) => {
-                let instrseq_lst: &'a mut [InstrSeq<'a>] = s.as_inner_mut();
-                instrseq_lst
-                    .iter_mut()
-                    .try_for_each(|x| x.map_result_mut(f))
-            }
+            InstrSeq::List(s) if s.is_empty() => Ok(()),
+            InstrSeq::List(s) if s.len() == 1 => f(&mut s[0]),
+            InstrSeq::List(s) => s.iter_mut().try_for_each(|x| f(x)),
+            InstrSeq::Concat(s) => s.iter_mut().try_for_each(|x| x.map_result_mut(f)),
         }
     }
 }

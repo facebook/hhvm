@@ -232,11 +232,43 @@ impl<'a, T> BumpSliceMut<'a, T> {
         }
     }
 
-    pub fn as_inner_mut(&self) -> &'a mut [T] {
-        // Safety: Assumes `self` has been constructed via
-        // `BumpSliceMut<'a, T>::new()` from some `&'a[T]` and so the
-        // call to `from_raw_parts_mut` is a valid.
-        unsafe { std::slice::from_raw_parts_mut(self.data, self.len) }
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.as_ref().is_empty()
+    }
+
+    #[inline]
+    pub fn len(&self) -> usize {
+        self.as_ref().len()
+    }
+
+    #[inline]
+    pub fn iter(&self) -> std::slice::Iter<T> {
+        self.as_ref().iter()
+    }
+
+    #[inline]
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<T> {
+        self.as_mut().iter_mut()
+    }
+
+    #[inline]
+    pub fn get(&self, index: usize) -> Option<&T> {
+        self.as_ref().get(index)
+    }
+}
+impl<'a, T> std::ops::Index<usize> for BumpSliceMut<'a, T> {
+    type Output = T;
+
+    #[inline]
+    fn index(&self, i: usize) -> &T {
+        &self.as_ref()[i]
+    }
+}
+impl<'a, T> std::ops::IndexMut<usize> for BumpSliceMut<'a, T> {
+    #[inline]
+    fn index_mut(&mut self, i: usize) -> &mut T {
+        &mut self.as_mut()[i]
     }
 }
 impl<'a, T> AsRef<[T]> for BumpSliceMut<'a, T> {
@@ -249,9 +281,13 @@ impl<'a, T> AsRef<[T]> for BumpSliceMut<'a, T> {
 }
 impl<'a, T> AsMut<[T]> for BumpSliceMut<'a, T> {
     fn as_mut(&mut self) -> &mut [T] {
-        // Safety: Assumes `self` has been constructed via
-        // `BumpSliceMut<'a, T>::new()` from some `&'a[T]` and so the
-        // call to `from_raw_parts_mut` is a valid.
+        // Safety:
+        // - This function is particularly dangerous. One can use this
+        //   to create a non-exclusive mutable reference something
+        //   usually forbidden in Rust. Be sure to avoid doing this.
+        // - Assumes `self` has been constructed via
+        //   `BumpSliceMut<'a, T>::new()` from some `&'a[T]` and so the
+        //   call to `from_raw_parts_mut` is a valid.
         unsafe { std::slice::from_raw_parts_mut(self.data, self.len) }
     }
 }

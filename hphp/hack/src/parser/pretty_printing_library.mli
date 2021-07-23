@@ -9,4 +9,4 @@
 open Pretty_printing_library_sig
 
 (* Functor to create the actual module containing defined functionality *)
-module Make (C : DocCompare) : Library
+module Make (_ : DocCompare) : Library

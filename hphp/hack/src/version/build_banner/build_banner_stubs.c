@@ -28,8 +28,7 @@ CAMLprim value hh_get_build_banner(void) {
   const char* const buf =
     STRINGIFY_VALUE(HH_BUILD_BANNER) "-" HHVM_VERSION_C_STRING_LITERALS;
   const size_t len = strlen(buf);
-  result = caml_alloc_string(len);
-  memcpy(String_val(result), buf, len);
+  result = caml_alloc_initialized_string(len, buf);
   option = caml_alloc(1, 0); // Some result
   Store_field(option, 0, result);
 #else

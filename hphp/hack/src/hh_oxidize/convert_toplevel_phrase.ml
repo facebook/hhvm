@@ -130,7 +130,7 @@ let structure_item (env : Env.t) (si : structure_item) : Env.t =
   (* Convert `module F = Foo` to `use crate::foo as f;` *)
   | Pstr_module
       {
-        pmb_name = { txt = alias; _ };
+        pmb_name = { txt = Some alias; _ };
         pmb_expr = { pmod_desc = Pmod_ident id; _ };
         _;
       } ->
@@ -162,7 +162,7 @@ let structure_item (env : Env.t) (si : structure_item) : Env.t =
     env
   | Pstr_module
       {
-        pmb_name = { txt = mod_name; _ };
+        pmb_name = { txt = Some mod_name; _ };
         pmb_expr = { pmod_desc = Pmod_structure _; _ };
         _;
       }
@@ -176,7 +176,7 @@ let structure_item (env : Env.t) (si : structure_item) : Env.t =
     env
   | Pstr_module
       {
-        pmb_name = { txt = mod_name; _ };
+        pmb_name = { txt = Some mod_name; _ };
         pmb_expr =
           {
             pmod_desc =
@@ -202,8 +202,8 @@ let structure_item (env : Env.t) (si : structure_item) : Env.t =
     in
     Convert_type_decl.type_declaration enum_type;
     env
-  | Pstr_module { pmb_name = { txt = name; _ }; pmb_expr = { pmod_desc; _ }; _ }
-    ->
+  | Pstr_module
+      { pmb_name = { txt = Some name; _ }; pmb_expr = { pmod_desc; _ }; _ } ->
     let kind = string_of_module_desc pmod_desc in
     log "Not converting submodule %s: %s not supported" name kind;
     let env = Env.add_defined_module env name in
@@ -227,6 +227,9 @@ let structure_item (env : Env.t) (si : structure_item) : Env.t =
     env
   | Pstr_recmodule _ ->
     log "Not converting Pstr_recmodule";
+    env
+  | Pstr_module { pmb_name = { txt = None; _ }; _ } ->
+    log "Not converting unnamed Pstr_module";
     env
   | Pstr_modtype _ ->
     log "Not converting Pstr_modtype";

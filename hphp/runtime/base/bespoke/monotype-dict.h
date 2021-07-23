@@ -209,7 +209,7 @@ private:
   void initHash();
   MonotypeDict* copy();
   MonotypeDict* prepareForInsert();
-  MonotypeDict* compactIfNeeded(bool free);
+  MonotypeDict* compactIfNeeded();
   MonotypeDict* resize(uint8_t index, bool copy);
   ArrayData* escalateWithCapacity(size_t capacity, const char* reason) const;
 

@@ -690,20 +690,29 @@ void StructDict::decRefValues() {
   }
 }
 
-ArrayData* StructDict::RemoveInt(StructDict* sad, int64_t) {
+ArrayData* StructDict::RemoveIntMove(StructDict* sad, int64_t) {
   return sad;
 }
 
-ArrayData* StructDict::RemoveStr(StructDict* sadIn, const StringData* k) {
+ArrayData* StructDict::RemoveStrMove(StructDict* sadIn, const StringData* k) {
   auto const slot = StructLayout::keySlot(sadIn->layoutIndex(), k);
   if (slot == kInvalidSlot) return sadIn;
+
   auto const& currType = sadIn->rawTypes()[slot];
   if (currType == KindOfUninit) return sadIn;
-  auto const sad = sadIn->cowCheck() ? sadIn->copy() : sadIn;
+
+  auto const sad = [&] {
+    if (!sadIn->cowCheck()) return sadIn;
+    auto const result = sadIn->copy();
+    sadIn->decRefCount();
+    return result;
+  }();
+
   tvDecRefGen(sad->typedValueUnchecked(slot));
   auto& t = sad->rawTypes()[slot];
   t = KindOfUninit;
   sad->removeSlot(slot);
+
   return sad;
 }
 

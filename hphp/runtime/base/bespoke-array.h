@@ -172,8 +172,8 @@ public:
   static ArrayData* SetStrMove(ArrayData* ad, StringData* key, TypedValue v);
 
   // deletion
-  static ArrayData* RemoveInt(ArrayData* ad, int64_t key);
-  static ArrayData* RemoveStr(ArrayData* ad, const StringData* key);
+  static ArrayData* RemoveIntMove(ArrayData* ad, int64_t key);
+  static ArrayData* RemoveStrMove(ArrayData* ad, const StringData* key);
 
   // sorting
   //

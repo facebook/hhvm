@@ -381,11 +381,11 @@ public:
    * Remove the value at key `k', making a copy first if necessary. Returns
    * `this' if copy/escalation are not needed, or a copied/escalated ArrayData.
    */
-  ArrayData* remove(int64_t k);
-  ArrayData* remove(const StringData* k);
-  ArrayData* remove(TypedValue k);
-  ArrayData* remove(const String& k);
-  ArrayData* remove(const Variant& k);
+  ArrayData* removeMove(int64_t k);
+  ArrayData* removeMove(const StringData* k);
+  ArrayData* removeMove(TypedValue k);
+  ArrayData* removeMove(const String& k);
+  ArrayData* removeMove(const Variant& k);
 
   /**
    * Append `v' to the array, making a copy first if necessary. Returns `this`
@@ -737,8 +737,8 @@ struct ArrayFunctions {
   bool (*existsStr[NK])(const ArrayData*, const StringData* k);
   arr_lval (*lvalInt[NK])(ArrayData*, int64_t k);
   arr_lval (*lvalStr[NK])(ArrayData*, StringData* k);
-  ArrayData* (*removeInt[NK])(ArrayData*, int64_t k);
-  ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k);
+  ArrayData* (*removeIntMove[NK])(ArrayData*, int64_t k);
+  ArrayData* (*removeStrMove[NK])(ArrayData*, const StringData* k);
   ssize_t (*iterBegin[NK])(const ArrayData*);
   ssize_t (*iterLast[NK])(const ArrayData*);
   ssize_t (*iterEnd[NK])(const ArrayData*);

@@ -286,7 +286,7 @@ private:
   using ArrayData::exists;
   using ArrayData::at;
   using ArrayData::lval;
-  using ArrayData::remove;
+  using ArrayData::removeMove;
   using ArrayData::release;
 
 public:
@@ -305,8 +305,8 @@ public:
   static ArrayData* SetStrMoveSkipConflict(ArrayData* ad, StringData* k, TypedValue v);
   static ArrayData* AddInt(ArrayData*, int64_t k, TypedValue v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, TypedValue v, bool copy);
-  static ArrayData* RemoveInt(ArrayData*, int64_t k);
-  static ArrayData* RemoveStr(ArrayData*, const StringData* k);
+  static ArrayData* RemoveIntMove(ArrayData*, int64_t k);
+  static ArrayData* RemoveStrMove(ArrayData*, const StringData* k);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* AppendMove(ArrayData*, TypedValue v);

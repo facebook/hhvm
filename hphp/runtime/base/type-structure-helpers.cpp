@@ -288,8 +288,8 @@ bool typeStructureIsType(
           auto inputField = getShapeFieldElement(tv);
           // If this field is associated with the value, kill it
           // This is safe since we already checked this above
-          auto cleanedInput = inputField->remove(s_optional_shape_field.get());
-          auto cleanedType = typeField->remove(s_optional_shape_field.get());
+          auto cleanedInput = inputField->removeMove(s_optional_shape_field.get());
+          auto cleanedType = typeField->removeMove(s_optional_shape_field.get());
           if (!typeStructureIsType(cleanedInput, cleanedType, warn, strict)) {
             if (warn || is_ts_soft(typeField)) {
               willWarn = true;

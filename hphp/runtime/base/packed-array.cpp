@@ -566,14 +566,20 @@ ArrayData* PackedArray::SetStrMove(ArrayData* adIn, StringData* k, TypedValue v)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k) {
+ArrayData* PackedArray::RemoveIntMove(ArrayData* adIn, int64_t k) {
   assertx(checkInvariants(adIn));
 
   // You're only allowed to remove an element at the end of the varray or
   // vec (or beyond the end, which is a no-op).
   if (UNLIKELY(size_t(k) >= adIn->m_size)) return adIn;
   if (LIKELY(size_t(k) + 1 == adIn->m_size)) {
-    auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
+    auto const ad = [&] {
+      if (!adIn->cowCheck()) return adIn;
+      auto const res = Copy(adIn);
+      adIn->decRefCount();
+      return res;
+    }();
+
     auto const size = ad->m_size - 1;
     ad->m_size = size;
     tvDecRefGen(LvalUncheckedInt(ad, size));
@@ -587,7 +593,7 @@ ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k) {
   }
 }
 
-ArrayData* PackedArray::RemoveStr(ArrayData* adIn, const StringData*) {
+ArrayData* PackedArray::RemoveStrMove(ArrayData* adIn, const StringData*) {
   assertx(checkInvariants(adIn));
   return adIn;
 }

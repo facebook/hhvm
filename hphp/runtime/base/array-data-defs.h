@@ -110,13 +110,13 @@ inline ArrayData* ArrayData::setMove(StringData* k, TypedValue v) {
 }
 
 NO_PROFILING
-inline ArrayData* ArrayData::remove(int64_t k) {
-  return g_array_funcs.removeInt[kind()](this, k);
+inline ArrayData* ArrayData::removeMove(int64_t k) {
+  return g_array_funcs.removeIntMove[kind()](this, k);
 }
 
 NO_PROFILING
-inline ArrayData* ArrayData::remove(const StringData* k) {
-  return g_array_funcs.removeStr[kind()](this, k);
+inline ArrayData* ArrayData::removeMove(const StringData* k) {
+  return g_array_funcs.removeStrMove[kind()](this, k);
 }
 
 NO_PROFILING
@@ -302,10 +302,10 @@ inline TypedValue ArrayData::at(TypedValue k) const {
                              : at(detail::getStringKey(k));
 }
 
-inline ArrayData* ArrayData::remove(TypedValue k) {
+inline ArrayData* ArrayData::removeMove(TypedValue k) {
   assertx(IsValidKey(k));
-  return detail::isIntKey(k) ? remove(detail::getIntKey(k))
-                             : remove(detail::getStringKey(k));
+  return detail::isIntKey(k) ? removeMove(detail::getIntKey(k))
+                             : removeMove(detail::getStringKey(k));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -371,13 +371,13 @@ inline ArrayData* ArrayData::setMove(const Variant& k, const Variant& v) {
   return setMove(*k.asTypedValue(), *v.asTypedValue());
 }
 
-inline ArrayData* ArrayData::remove(const String& k) {
+inline ArrayData* ArrayData::removeMove(const String& k) {
   assertx(IsValidKey(k));
-  return remove(k.get());
+  return removeMove(k.get());
 }
 
-inline ArrayData* ArrayData::remove(const Variant& k) {
-  return remove(*k.asTypedValue());
+inline ArrayData* ArrayData::removeMove(const Variant& k) {
+  return removeMove(*k.asTypedValue());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

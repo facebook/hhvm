@@ -291,10 +291,10 @@ ArrayData* EmptyMonotypeDict::SetStrMove(Self* ad, StringData* k, TypedValue v) 
   return k->isStatic() ? makeStrMonotypeDict<StaticStrPtr>(legacy, k, v)
                        : makeStrMonotypeDict<StringData*>(legacy, k, v);
 }
-ArrayData* EmptyMonotypeDict::RemoveInt(Self* ad, int64_t k) {
+ArrayData* EmptyMonotypeDict::RemoveIntMove(Self* ad, int64_t k) {
   return ad;
 }
-ArrayData* EmptyMonotypeDict::RemoveStr(Self* ad, const StringData* k) {
+ArrayData* EmptyMonotypeDict::RemoveStrMove(Self* ad, const StringData* k) {
   return ad;
 }
 
@@ -659,7 +659,14 @@ ArrayData* MonotypeDict<Key>::removeImpl(Key key) {
   if (hash_pos < 0) return this;
 
   assertx(!hasEmptyLayout());
-  auto const mad = cowCheck() ? copy() : this;
+
+  auto const mad = [&] {
+    if (!cowCheck()) return this;
+    auto const res = copy();
+    this->decRefCount();
+    return res;
+  }();
+
   auto& index = mad->indices()[hash_pos];
   auto const elm = mad->elmAtIndex(index);
   assertx(keysEqual(elm->key, key));
@@ -671,7 +678,7 @@ ArrayData* MonotypeDict<Key>::removeImpl(Key key) {
   mad->m_extra_lo16++;
   mad->m_size--;
 
-  return mad->compactIfNeeded(mad != this);
+  return mad->compactIfNeeded();
 }
 
 template <typename Key>
@@ -899,7 +906,7 @@ MonotypeDict<Key>* MonotypeDict<Key>::prepareForInsert() {
 }
 
 template <typename Key>
-MonotypeDict<Key>* MonotypeDict<Key>::compactIfNeeded(bool free) {
+MonotypeDict<Key>* MonotypeDict<Key>::compactIfNeeded() {
   assertx(!cowCheck());
 
   // The zombie flag is in the m_tombstones slot, so when we hit our physical
@@ -927,11 +934,7 @@ MonotypeDict<Key>* MonotypeDict<Key>::compactIfNeeded(bool free) {
   });
 
   if (shrink) {
-    if (free) {
-      tl_heap->objFreeIndex(this, sizeIndex());
-    } else {
-      setZombie();
-    }
+    tl_heap->objFreeIndex(this, sizeIndex());
   }
 
   result->m_size = cur;
@@ -1321,16 +1324,16 @@ ArrayData* MonotypeDict<Key>::SetStrMove(Self* mad, StringData* k, TypedValue v)
 }
 
 template <typename Key>
-ArrayData* MonotypeDict<Key>::RemoveInt(Self* mad, int64_t k) {
+ArrayData* MonotypeDict<Key>::RemoveIntMove(Self* mad, int64_t k) {
   return mad->removeImpl(coerceKey<Key>(k));
 }
 
 template <typename Key>
-ArrayData* MonotypeDict<Key>::RemoveStr(Self* mad, const StringData* k) {
+ArrayData* MonotypeDict<Key>::RemoveStrMove(Self* mad, const StringData* k) {
   if (loosenToStr<Key>(k)) {
-    return StringDict::RemoveStr(reinterpret_cast<StringDict*>(mad), k);
+    return StringDict::RemoveStrMove(reinterpret_cast<StringDict*>(mad), k);
   } else if (tightenToStaticStr<Key>(k, mad->layoutIndex())) {
-    return StaticStrDict::RemoveStr(reinterpret_cast<StaticStrDict*>(mad), k);
+    return StaticStrDict::RemoveStrMove(reinterpret_cast<StaticStrDict*>(mad), k);
   }
   return mad->removeImpl(coerceKey<Key>(k));
 }
@@ -1368,11 +1371,9 @@ ArrayData* MonotypeDict<Key>::PopMove(Self* mad, Variant& value) {
   auto const key = GetPosKey(mad, pos);
   value = tvAsCVarRef(GetPosVal(mad, pos));
 
-  auto const res = tvIsString(key) ? RemoveStr(mad, val(key).pstr)
-                                   : RemoveInt(mad, val(key).num);
+  return tvIsString(key) ? RemoveStrMove(mad, val(key).pstr)
+                         : RemoveIntMove(mad, val(key).num);
 
-  if (mad != res && mad->decReleaseCheck()) Release(mad);
-  return res;
 }
 
 template <typename Key>

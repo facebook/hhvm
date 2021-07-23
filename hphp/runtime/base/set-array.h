@@ -359,7 +359,7 @@ private:
   using ArrayData::exists;
   using ArrayData::at;
   using ArrayData::lval;
-  using ArrayData::remove;
+  using ArrayData::removeMove;
   using ArrayData::release;
 
 //////////////////////////////////////////////////////////////////////
@@ -396,8 +396,8 @@ public:
   static arr_lval LvalStr(ArrayData*, StringData*);
   static ArrayData* SetIntMove(ArrayData*, int64_t, TypedValue);
   static ArrayData* SetStrMove(ArrayData*, StringData*, TypedValue);
-  static ArrayData* RemoveInt(ArrayData*, int64_t);
-  static ArrayData* RemoveStr(ArrayData*, const StringData*);
+  static ArrayData* RemoveIntMove(ArrayData*, int64_t);
+  static ArrayData* RemoveStrMove(ArrayData*, const StringData*);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* AppendMove(ArrayData*, TypedValue);

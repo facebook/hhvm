@@ -224,12 +224,12 @@ ArrayData* BespokeArray::SetStrMove(ArrayData* ad, StringData* key, TypedValue v
 
 // deletion
 NO_PROFILING
-ArrayData* BespokeArray::RemoveInt(ArrayData* ad, int64_t key) {
-  return g_layout_funcs.fnRemoveInt[getVtableIndex(ad)](ad, key);
+ArrayData* BespokeArray::RemoveIntMove(ArrayData* ad, int64_t key) {
+  return g_layout_funcs.fnRemoveIntMove[getVtableIndex(ad)](ad, key);
 }
 NO_PROFILING
-ArrayData* BespokeArray::RemoveStr(ArrayData* ad, const StringData* key) {
-  return g_layout_funcs.fnRemoveStr[getVtableIndex(ad)](ad, key);
+ArrayData* BespokeArray::RemoveStrMove(ArrayData* ad, const StringData* key) {
+  return g_layout_funcs.fnRemoveStrMove[getVtableIndex(ad)](ad, key);
 }
 
 // sorting

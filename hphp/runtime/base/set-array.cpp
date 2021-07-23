@@ -539,19 +539,26 @@ void SetArray::eraseNoCompact(RemovePos pos) {
 
 template<class K> ArrayData*
 SetArray::RemoveImpl(ArrayData* ad, K k, bool copy, SetArrayElm::hash_t h) {
-  auto a = asSet(ad);
-  auto const pos = a->findForRemove(k, h);
-  if (!pos.valid()) return a;
-  if (copy) a = a->copySet();
-  a->erase(pos);
-  return a;
+    auto a = asSet(ad);
+    auto const pos = a->findForRemove(k, h);
+    if (!pos.valid()) return a;
+
+    auto const sas = [&] {
+      if (!copy) return a;
+      auto const res = a->copySet();
+      a->decRefCount();
+      return res;
+    }();
+
+    sas->erase(pos);
+    return sas;
 }
 
-ArrayData* SetArray::RemoveInt(ArrayData* ad, int64_t k) {
+ArrayData* SetArray::RemoveIntMove(ArrayData* ad, int64_t k) {
   return RemoveImpl(ad, k, ad->cowCheck(), hash_int64(k));
 }
 
-ArrayData* SetArray::RemoveStr(ArrayData* ad, const StringData* k) {
+ArrayData* SetArray::RemoveStrMove(ArrayData* ad, const StringData* k) {
   return RemoveImpl(ad, k, ad->cowCheck(), k->hash());
 }
 

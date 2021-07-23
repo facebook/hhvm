@@ -95,8 +95,8 @@ BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile);
   X(tv_lval, ElemStr, tv_lval lval, StringData* k, bool) \
   X(ArrayData*, SetIntMove, T*, int64_t k, TypedValue v) \
   X(ArrayData*, SetStrMove, T*, StringData* k, TypedValue v)\
-  X(ArrayData*, RemoveInt, T*, int64_t) \
-  X(ArrayData*, RemoveStr, T*, const StringData*) \
+  X(ArrayData*, RemoveIntMove, T*, int64_t) \
+  X(ArrayData*, RemoveStrMove, T*, const StringData*) \
   X(ArrayData*, AppendMove, T*, TypedValue v) \
   X(ArrayData*, PopMove, T*, Variant&) \
   X(ArrayData*, PreSort, T*, SortFunction sf) \
@@ -210,11 +210,11 @@ struct LayoutFunctionDispatcher {
     assertx(type(v) != KindOfUninit);
     return Array::SetStrMove(Cast(ad, __func__), k, v);
   }
-  static ArrayData* RemoveInt(ArrayData* ad, int64_t k) {
-    return Array::RemoveInt(Cast(ad, __func__), k);
+  static ArrayData* RemoveIntMove(ArrayData* ad, int64_t k) {
+    return Array::RemoveIntMove(Cast(ad, __func__), k);
   }
-  static ArrayData* RemoveStr(ArrayData* ad, const StringData* k) {
-    return Array::RemoveStr(Cast(ad, __func__), k);
+  static ArrayData* RemoveStrMove(ArrayData* ad, const StringData* k) {
+    return Array::RemoveStrMove(Cast(ad, __func__), k);
   }
   static ssize_t IterBegin(const ArrayData* ad) {
     return Array::IterBegin(Cast(ad, __func__));

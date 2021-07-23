@@ -1009,23 +1009,36 @@ void MixedArray::eraseNoCompact(RemovePos pos) {
   mutableKeyTypes()->recordTombstone();
 }
 
-ArrayData* MixedArray::RemoveInt(ArrayData* ad, int64_t k) {
+ArrayData* MixedArray::RemoveIntMove(ArrayData* ad, int64_t k) {
   auto a = asMixed(ad);
   auto const pos = a->findForRemove(k, hash_int64(k));
   if (!pos.valid()) return a;
-  if (a->cowCheck()) a = a->copyMixed();
-  a->updateNextKI(k, false);
-  a->erase(pos);
-  return a;
+
+  auto const mad = [&] {
+    if (!a->cowCheck()) return a;
+    auto const res = a->copyMixed();
+    a->decRefCount();
+    return res;
+  }();
+
+  mad->updateNextKI(k, false);
+  mad->erase(pos);
+  return mad;
 }
 
-ArrayData* MixedArray::RemoveStr(ArrayData* ad, const StringData* key) {
+ArrayData* MixedArray::RemoveStrMove(ArrayData* ad, const StringData* key) {
   auto a = asMixed(ad);
   auto const pos = a->findForRemove(key, key->hash());
   if (!pos.valid()) return a;
-  if (a->cowCheck()) a = a->copyMixed();
-  a->erase(pos);
-  return a;
+  auto const mad = [&] {
+    if (!a->cowCheck()) return a;
+    auto const res = a->copyMixed();
+    a->decRefCount();
+    return res;
+  }();
+
+  mad->erase(pos);
+  return mad;
 }
 
 ArrayData* MixedArray::Copy(const ArrayData* ad) {
@@ -1215,11 +1228,9 @@ ArrayData* MixedArray::PopMove(ArrayData* ad, Variant& value) {
   assertx(!isTombstone(e.data.m_type));
   value = tvAsCVarRef(&e.data);
 
-  auto const res = e.hasStrKey() ? MixedArray::RemoveStr(a, e.skey)
-                                 : MixedArray::RemoveInt(a, e.ikey);
+  return e.hasStrKey() ? MixedArray::RemoveStrMove(a, e.skey)
+                       : MixedArray::RemoveIntMove(a, e.ikey);
 
-  if (a != res && a->decReleaseCheck()) Release(a);
-  return res;
 }
 
 ArrayData* MixedArray::Renumber(ArrayData* adIn) {

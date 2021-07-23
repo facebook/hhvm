@@ -2008,7 +2008,7 @@ inline TypedValue IncDecNewElem(IncDecOp op, tv_lval base) {
  */
 
 inline ArrayData* UnsetElemVecPre(ArrayData* a, int64_t key) {
-  return PackedArray::RemoveInt(a, key);
+  return PackedArray::RemoveIntMove(a, key);
 }
 
 inline ArrayData*
@@ -2028,15 +2028,12 @@ template <KeyType keyType>
 inline void UnsetElemVec(tv_lval base, key_type<keyType> key) {
   assertx(tvIsVec(base));
   assertx(tvIsPlausible(*base));
+
   ArrayData* a = val(base).parr;
   ArrayData* a2 = UnsetElemVecPre(a, key);
 
-  if (a2 != a) {
-    type(base) = dt_with_rc(type(base));
-    val(base).parr = a2;
-    assertx(tvIsPlausible(*base));
-    a->decRefAndRelease();
-  }
+  type(base) = dt_with_rc(type(base));
+  val(base).parr = a2;
 }
 
 /**
@@ -2044,11 +2041,11 @@ inline void UnsetElemVec(tv_lval base, key_type<keyType> key) {
  */
 
 inline ArrayData* UnsetElemDictPre(ArrayData* a, int64_t key) {
-  return MixedArray::RemoveInt(a, key);
+  return MixedArray::RemoveIntMove(a, key);
 }
 
 inline ArrayData* UnsetElemDictPre(ArrayData* a, StringData* key) {
-  return MixedArray::RemoveStr(a, key);
+  return MixedArray::RemoveStrMove(a, key);
 }
 
 inline ArrayData* UnsetElemDictPre(ArrayData* a, TypedValue key) {
@@ -2062,15 +2059,12 @@ template <KeyType keyType>
 inline void UnsetElemDict(tv_lval base, key_type<keyType> key) {
   assertx(tvIsDict(base));
   assertx(tvIsPlausible(*base));
+
   ArrayData* a = val(base).parr;
   ArrayData* a2 = UnsetElemDictPre(a, key);
 
-  if (a2 != a) {
-    type(base) = dt_with_rc(type(base));
-    val(base).parr = a2;
-    assertx(tvIsPlausible(*base));
-    a->decRefAndRelease();
- }
+  type(base) = dt_with_rc(type(base));
+  val(base).parr = a2;
 }
 
 /**
@@ -2078,11 +2072,11 @@ inline void UnsetElemDict(tv_lval base, key_type<keyType> key) {
  */
 
 inline ArrayData* UnsetElemKeysetPre(ArrayData* a, int64_t key) {
-  return SetArray::RemoveInt(a, key);
+  return SetArray::RemoveIntMove(a, key);
 }
 
 inline ArrayData* UnsetElemKeysetPre(ArrayData* a, StringData* key) {
-  return SetArray::RemoveStr(a, key);
+  return SetArray::RemoveStrMove(a, key);
 }
 
 inline ArrayData* UnsetElemKeysetPre(ArrayData* a, TypedValue key) {
@@ -2096,26 +2090,23 @@ template <KeyType keyType>
 inline void UnsetElemKeyset(tv_lval base, key_type<keyType> key) {
   assertx(tvIsKeyset(base));
   assertx(tvIsPlausible(*base));
+
   ArrayData* a = val(base).parr;
   ArrayData* a2 = UnsetElemKeysetPre(a, key);
 
-  if (a2 != a) {
-    type(base) = KindOfKeyset;
-    val(base).parr = a2;
-    assertx(tvIsPlausible(*base));
-    a->decRefAndRelease();
- }
+  type(base) = KindOfKeyset;
+  val(base).parr = a2;
 }
 
 /**
  * UnsetElem when base is a bespoke Hack array
  */
 inline ArrayData* UnsetElemBespokePre(ArrayData* a, int64_t key) {
-  return BespokeArray::RemoveInt(a, key);
+  return BespokeArray::RemoveIntMove(a, key);
 }
 
 inline ArrayData* UnsetElemBespokePre(ArrayData* a, StringData* key) {
-  return BespokeArray::RemoveStr(a, key);
+  return BespokeArray::RemoveStrMove(a, key);
 }
 
 inline ArrayData* UnsetElemBespokePre(ArrayData* a, TypedValue key) {
@@ -2136,7 +2127,6 @@ inline void UnsetElemBespoke(tv_lval base, key_type<keyType> key) {
   if (result != oldArr) {
     type(base) = dt_with_rc(type(base));
     val(base).parr = result;
-    decRefArr(oldArr);
   }
   assertx(tvIsPlausible(*base));
 }

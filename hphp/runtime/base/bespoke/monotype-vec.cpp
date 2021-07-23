@@ -236,12 +236,12 @@ ArrayData* EmptyMonotypeVec::SetStrMove(EmptyMonotypeVec* eadIn, StringData* k,
   throwInvalidArrayKeyException(k, eadIn);
 }
 
-ArrayData* EmptyMonotypeVec::RemoveInt(EmptyMonotypeVec* eadIn, int64_t) {
+ArrayData* EmptyMonotypeVec::RemoveIntMove(EmptyMonotypeVec* eadIn, int64_t) {
   return eadIn;
 }
 
-ArrayData* EmptyMonotypeVec::RemoveStr(EmptyMonotypeVec* eadIn,
-                                       const StringData*) {
+ArrayData* EmptyMonotypeVec::RemoveStrMove(EmptyMonotypeVec* eadIn,
+                                           const StringData*) {
   return eadIn;
 }
 
@@ -639,10 +639,17 @@ ArrayData* MonotypeVec::SetStrMove(MonotypeVec* madIn, StringData* k, TypedValue
   throwInvalidArrayKeyException(k, madIn);
 }
 
-ArrayData* MonotypeVec::RemoveInt(MonotypeVec* madIn, int64_t k) {
+ArrayData* MonotypeVec::RemoveIntMove(MonotypeVec* madIn, int64_t k) {
   if (UNLIKELY(size_t(k) >= madIn->m_size)) return madIn;
   if (LIKELY(size_t(k) + 1 == madIn->m_size)) {
-    auto const mad = madIn->cowCheck() ? madIn->copy() : madIn;
+
+    auto const mad = [&] {
+      if(!madIn->cowCheck()) return madIn;
+      auto const result = madIn->copy();
+      madIn->decRefCount();
+      return result;
+    }();
+
     mad->m_size--;
     tvDecRefGen(mad->typedValueUnchecked(mad->m_size));
     return mad;
@@ -655,7 +662,7 @@ ArrayData* MonotypeVec::RemoveInt(MonotypeVec* madIn, int64_t k) {
   }
 }
 
-ArrayData* MonotypeVec::RemoveStr(MonotypeVec* madIn, const StringData*) {
+ArrayData* MonotypeVec::RemoveStrMove(MonotypeVec* madIn, const StringData*) {
   return madIn;
 }
 

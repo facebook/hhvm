@@ -74,8 +74,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool ExistsStr(const ArrayData*, const StringData*);
   static arr_lval LvalInt(ArrayData*, int64_t k);
   static arr_lval LvalStr(ArrayData*, StringData* k);
-  static ArrayData* RemoveInt(ArrayData*, int64_t k);
-  static ArrayData* RemoveStr(ArrayData*, const StringData* k);
+  static ArrayData* RemoveIntMove(ArrayData*, int64_t k);
+  static ArrayData* RemoveStrMove(ArrayData*, const StringData* k);
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
@@ -219,4 +219,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-

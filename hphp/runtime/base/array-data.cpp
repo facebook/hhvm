@@ -400,22 +400,26 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(LvalStr)
 
   /*
-   * ArrayData* RemoveInt(ArrayData*, int64_t key)
+   * ArrayData* RemoveIntMove(ArrayData*, int64_t key)
    *
    *   Remove an array element with an integer key, copying or escalating
    *   as necessary. If there was no entry for that element, this function
-   *   will not remove it, but it may still copy the array in that case.
+   *   will not remove it, but it may still copy the array in that case. If
+   *   a copy or escalation was required, there will be a dec-ref of the old
+   *   array.
    */
-  DISPATCH(RemoveInt)
+  DISPATCH(RemoveIntMove)
 
   /*
    * ArrayData* RemoveStr(ArrayData*, const StringData*)
    *
    *   Remove an array element with a string key, copying or escalating
    *   as necessary. If there was no entry for that element, this function
-   *   will not remove it, but it may still copy the array in that case.
+   *   will not remove it, but it may still copy the array in that case. If
+   *   a copy or escalation was required, there will be a dec-ref of the old
+   *   array.
    */
-  DISPATCH(RemoveStr)
+  DISPATCH(RemoveStrMove)
 
   /*
    * ssize_t IterEnd(const ArrayData*)

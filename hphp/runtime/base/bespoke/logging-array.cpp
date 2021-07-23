@@ -576,15 +576,15 @@ ArrayData* LoggingArray::SetStrMove(LoggingArray* lad, StringData* k, TypedValue
   return mutateMove(lad, ms, ko,
                     [&](ArrayData* w) { return w->setMove(k, v); });
 }
-ArrayData* LoggingArray::RemoveInt(LoggingArray* lad, int64_t k) {
+ArrayData* LoggingArray::RemoveIntMove(LoggingArray* lad, int64_t k) {
   logEvent(lad, ArrayOp::RemoveInt, k);
-  return mutate(lad, [&](ArrayData* w) { return w->remove(k); });
+  return mutateMove(lad, lad->entryTypes, lad->keyOrder, [&](ArrayData* w) { return w->removeMove(k); });
 }
-ArrayData* LoggingArray::RemoveStr(LoggingArray* lad, const StringData* k) {
+ArrayData* LoggingArray::RemoveStrMove(LoggingArray* lad, const StringData* k) {
   auto const ko = lad->keyOrder.remove(k);
   logEvent(lad, ko, ArrayOp::RemoveStr, k);
-  return mutate(lad, lad->entryTypes, ko,
-                [&](ArrayData* w) { return w->remove(k); });
+  return mutateMove(lad, lad->entryTypes, ko,
+                [&](ArrayData* w) { return w->removeMove(k); });
 }
 
 ArrayData* LoggingArray::AppendMove(LoggingArray* lad, TypedValue v) {

@@ -63,7 +63,12 @@ set -x
 
 signscript="$top/../xplat/python/signedsource_lib/signedsource.py"
 eval "${signscript}" sign "${top}"/hphp/hack/src/utils/ffi/ffi.h
+eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_id.h
+eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_label.h
+eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_local.h
+eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_runtime.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_ast.h
+eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_instruction_sequence.h
 
 # Quick sanity check: Does a program that includes these headers compile?
 cat > main.cpp <<EOF

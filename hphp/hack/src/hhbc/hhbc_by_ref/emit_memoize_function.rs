@@ -19,7 +19,7 @@ use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_type::Info as HhasTypeInfo;
 use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags};
 use hhbc_by_ref_hhbc_id::function;
-use hhbc_by_ref_hhbc_string_utils::{coeffects, reified};
+use hhbc_by_ref_hhbc_string_utils::reified;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
 use hhbc_by_ref_local::Local;
 use hhbc_by_ref_options::{HhvmFlags, Options, RepoFlags};
@@ -88,7 +88,6 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         should_emit_implicit_context,
     )?;
     let coeffects = HhasCoeffects::from_ast(&f.ctxs, &f.params, &f.tparams, vec![]);
-    let has_coeffects_local = coeffects.has_coeffects_local();
     let body = make_wrapper_body(
         alloc,
         emitter,
@@ -97,7 +96,6 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         params,
         body_instrs,
         is_reified,
-        has_coeffects_local,
     )?;
 
     let mut flags = HhasFunctionFlags::empty();
@@ -334,14 +332,10 @@ fn make_wrapper_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     params: Vec<HhasParam<'arena>>,
     body_instrs: InstrSeq<'arena>,
     is_reified: bool,
-    has_coeffects_local: bool,
 ) -> Result<HhasBody<'arena>> {
     let mut decl_vars = vec![];
     if is_reified {
         decl_vars.push(reified::GENERICS_LOCAL_NAME.into());
-    }
-    if has_coeffects_local {
-        decl_vars.push(coeffects::LOCAL_NAME.into());
     }
     emit_body::make_body(
         alloc,

@@ -21,7 +21,7 @@ use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_type::Info as HhasTypeInfo;
 use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags, SpecialClsRef};
 use hhbc_by_ref_hhbc_id::{class, method, Id};
-use hhbc_by_ref_hhbc_string_utils::{coeffects, reified};
+use hhbc_by_ref_hhbc_string_utils::reified;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
 use hhbc_by_ref_local::Local;
 use hhbc_by_ref_options::{HhvmFlags, Options};
@@ -163,7 +163,6 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         Flags::SHOULD_EMIT_IMPLICIT_CONTEXT,
         should_emit_implicit_context,
     );
-    arg_flags.set(Flags::HAS_COEFFECTS_LOCAL, coeffects.has_coeffects_local());
     let mut args = Args {
         info,
         method,
@@ -497,9 +496,6 @@ fn make_wrapper<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     if args.flags.contains(Flags::IS_REIFIED) {
         decl_vars.push(reified::GENERICS_LOCAL_NAME.into());
     }
-    if args.flags.contains(Flags::HAS_COEFFECTS_LOCAL) {
-        decl_vars.push(coeffects::LOCAL_NAME.into());
-    }
     emit_body::make_body(
         alloc,
         emitter,
@@ -551,7 +547,6 @@ struct Args<'r, 'ast, 'arena> {
 
 bitflags! {
     pub struct Flags: u8 {
-        const HAS_COEFFECTS_LOCAL = 1 << 0;
         const IS_STATIC = 1 << 1;
         const IS_REIFIED = 1 << 2;
         const WITH_LSB = 1 << 3;

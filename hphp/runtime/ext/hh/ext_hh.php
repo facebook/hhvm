@@ -343,6 +343,8 @@ function clear_all_coverage_data(): void {
   }
 }
 
+namespace ImplicitContext\_Private {
+
 /**
  * Returns the implicit context keyed by $key or null if such doesn't exist
  */
@@ -367,6 +369,8 @@ function set_implicit_context(
 <<__Native>>
 function set_implicit_context_by_index(int $index)[policied]: int;
 
+} // namespace ImplicitContext\_Private
+
 final class ImplicitContextConsts {
   const EMPTY_CONTEXT = -1;
 }
@@ -379,11 +383,15 @@ abstract class ImplicitContext {
     (function (): Awaitable<Tout>) $f
   )[policied]: Awaitable<Tout> {
     $memokey = (string)\__hhvm_internal_getmemokeyl($context);
-    $prev = set_implicit_context(static::class, $context, $memokey);
+    $prev = ImplicitContext\_Private\set_implicit_context(
+      static::class,
+      $context,
+      $memokey
+    );
     try {
       $result = $f();
     } finally {
-      set_implicit_context_by_index($prev);
+      ImplicitContext\_Private\set_implicit_context_by_index($prev);
     }
     // Needs to be awaited here so that context dependency is established
     // between parent/child functions
@@ -395,16 +403,20 @@ abstract class ImplicitContext {
     (function (): Tout) $f
   )[policied]: Tout {
     $memokey = (string)\__hhvm_internal_getmemokeyl($context);
-    $prev = set_implicit_context(static::class, $context, $memokey);
+    $prev = ImplicitContext\_Private\set_implicit_context(
+      static::class,
+      $context,
+      $memokey
+    );
     try {
       return $f();
     } finally {
-      set_implicit_context_by_index($prev);
+      ImplicitContext\_Private\set_implicit_context_by_index($prev);
     }
   }
 
   protected static function get()[policied]: this::T {
-    return get_implicit_context(static::class);
+    return ImplicitContext\_Private\get_implicit_context(static::class);
   }
 }
 
@@ -546,13 +558,17 @@ namespace HH\Coeffects {
   <<__Native>>
   function backdoor((function()[defaults]: Tout) $f)[]: mixed;
 
+  namespace _Private {
+
   /**
    * The internal entry point for policied_of functions
    */
   <<__Native>>
-  function enter_policied_of_internal<Tout, Tpolicy>(
+  function enter_policied_of<Tout, Tpolicy>(
     (function()[policied_of<Tpolicy>]: Tout) $f
   )[policied]: mixed /* Tout */;
+
+  } // namespace _Private
 
   /**
    * The public entry point for policied_of functions
@@ -562,7 +578,10 @@ namespace HH\Coeffects {
     Tval $value,
     (function()[policied_of<Tval>]: Tout) $f,
   )[policied]: Tout where Tval = Tcontext::T {
-    return $cls::set($value, ()[policied] ==> enter_policied_of_internal($f));
+    return $cls::set(
+      $value,
+      ()[policied] ==> _Private\enter_policied_of($f)
+    );
   }
 
   /**
@@ -579,7 +598,7 @@ namespace HH\Coeffects {
   )[policied]: Awaitable<Tout> where Tval = Tcontext::T {
     return await $cls::setAsync(
       $value,
-      ()[policied] ==> enter_policied_of_internal($f)
+      ()[policied] ==> _Private\enter_policied_of($f)
     );
   }
 

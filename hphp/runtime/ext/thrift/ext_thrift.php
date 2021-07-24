@@ -91,11 +91,16 @@ final class RpcOptions {
 final class TClientBufferedStream {
   public function __construct(): void {}
 
-  public async function gen(): HH\AsyncGenerator<null, string, void> {
+  public async function gen<TStreamResponse>(
+    (function(?string, ?Exception): TStreamResponse) $streamDecode,
+  ): HH\AsyncGenerator<null, TStreamResponse, void> {
     while (true) {
       $timer = WallTimeOperation::begin();
       try {
         list($buffer, $ex_msg) = await $this->genNext();
+      } catch (Exception $ex) {
+        $streamDecode(null, $ex);
+        break;
       } finally {
         $timer->end();
       }
@@ -106,14 +111,15 @@ final class TClientBufferedStream {
       }
       if ($buffer !== null) {
         foreach ($buffer as $value) {
-          yield $value;
+          yield $streamDecode($value, null);
         }
       }
       if ($ex_msg !== null) {
-        throw new TApplicationException(
-          $ex_msg,
-          TApplicationException::UNKNOWN,
+        $streamDecode(
+          null,
+          new TApplicationException($ex_msg, TApplicationException::UNKNOWN),
         );
+        break;
       }
     }
   }

@@ -86,3 +86,38 @@ final class RpcOptions {
   <<__Native>>
   public function __toString(): string;
 }
+
+<<__NativeData("TClientBufferedStream")>>
+final class TClientBufferedStream {
+  public function __construct(): void {}
+
+  public async function gen(): HH\AsyncGenerator<null, string, void> {
+    while (true) {
+      $timer = WallTimeOperation::begin();
+      try {
+        list($buffer, $ex_msg) = await $this->genNext();
+      } finally {
+        $timer->end();
+      }
+
+      if ($buffer === null && $ex_msg === null) {
+        // If still no data after buffer filling, the stream has finished
+        break;
+      }
+      if ($buffer !== null) {
+        foreach ($buffer as $value) {
+          yield $value;
+        }
+      }
+      if ($ex_msg !== null) {
+        throw new TApplicationException(
+          $ex_msg,
+          TApplicationException::UNKNOWN,
+        );
+      }
+    }
+  }
+
+  <<__Native>>
+  public function genNext(): Awaitable<(?vec<string>,?string)>;
+}

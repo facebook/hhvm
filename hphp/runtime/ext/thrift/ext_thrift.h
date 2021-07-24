@@ -17,10 +17,18 @@
 
 #pragma once
 
+#include <folly/io/IOBuf.h>
+#include <thrift/lib/cpp/transport/TTransportException.h>
+#include <thrift/lib/cpp2/async/StreamCallbacks.h>
+#include <thrift/lib/cpp2/async/ClientStreamBridge.h>
+#include <thrift/lib/cpp2/async/RequestCallback.h>
+#include <thrift/lib/cpp2/async/RequestChannel.h>
+#include <exception>
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native-data.h"
-#include "thrift/lib/cpp2/async/RequestCallback.h"
-#include "thrift/lib/cpp2/async/RequestChannel.h"
 
 namespace HPHP { namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
@@ -150,17 +158,106 @@ struct TClientBufferedStream {
   TClientBufferedStream() = default;
   TClientBufferedStream(const TClientBufferedStream&) = delete;
   TClientBufferedStream& operator=(const TClientBufferedStream&) = delete;
-  ~TClientBufferedStream();
+  ~TClientBufferedStream() { sweep(); }
 
-  void sweep() { close(true); }
+  using BufferAndErrorPair = std::pair<
+      std::vector<std::unique_ptr<folly::IOBuf>>,
+      std::unique_ptr<folly::IOBuf>>;
 
-  void close(bool /*sweeping*/ = false) {}
+  void sweep() {
+    endStream();
+  }
 
   void init(
       apache::thrift::detail::ClientStreamBridge::ClientPtr streamBridge,
       apache::thrift::BufferOptions bufferOptions) {
     streamBridge_ = std::move(streamBridge);
     bufferOptions_ = bufferOptions;
+    if (bufferOptions_.chunkSize == 0) {
+      streamBridge_->requestN(1);
+      ++bufferOptions_.chunkSize;
+    }
+    outstanding_ = bufferOptions_.chunkSize;
+    payloadDataSize_ = 0;
+  }
+
+  void endStream() {
+    streamBridge_.reset();
+  }
+
+  bool shouldRequestMore() {
+    return (outstanding_ <= bufferOptions_.chunkSize / 2) ||
+        (payloadDataSize_ >= kRequestCreditPayloadSize);
+  }
+
+  std::unique_ptr<folly::IOBuf> getErrorMessage(folly::exception_wrapper ew) {
+    std::unique_ptr<folly::IOBuf> msgBuffer;
+    std::string msgStr = ew.what().toStdString();
+    ew.handle(
+        [&](apache::thrift::detail::EncodedError& err) {
+          msgBuffer = std::move(err.encoded);
+        },
+        [&](apache::thrift::detail::EncodedStreamError& err) {
+          auto& payload = err.encoded;
+          DCHECK(payload.metadata.payloadMetadata_ref().has_value());
+          DCHECK_EQ(
+              payload.metadata.payloadMetadata_ref()->getType(),
+              apache::thrift::PayloadMetadata::exceptionMetadata);
+          auto& exceptionMetadataBase =
+              payload.metadata.payloadMetadata_ref()->get_exceptionMetadata();
+          if (auto exceptionMetadataRef =
+                  exceptionMetadataBase.metadata_ref()) {
+            if (exceptionMetadataRef->getType() ==
+                apache::thrift::PayloadExceptionMetadata::declaredException) {
+              msgBuffer = std::move(payload.payload);
+              if (!msgBuffer) {
+                msgStr = "Failed to parse declared exception";
+              }
+            } else {
+              msgStr = exceptionMetadataBase.what_utf8_ref().value_or("");
+            }
+          } else {
+            msgStr = "Missing payload exception metadata";
+          }
+        },
+        [&](apache::thrift::detail::EncodedStreamRpcError& err) {
+          msgBuffer = std::move(err.encoded);
+        },
+        [](...) {});
+
+    if (msgBuffer) {
+      return msgBuffer;
+    }
+    return folly::IOBuf::copyBuffer(msgStr, msgStr.size());
+  }
+
+  BufferAndErrorPair clientQueueToVec() {
+    std::vector<std::unique_ptr<folly::IOBuf>> bufferVec;
+    std::unique_ptr<folly::IOBuf> error;
+    while (!queue_.empty()) {
+      auto& payload = queue_.front();
+      if (!payload.hasValue() && !payload.hasException()) {
+        queue_.pop();
+        endStream();
+        break;
+      }
+      if (payload.hasException()) {
+        error = getErrorMessage(payload.exception());
+        queue_.pop();
+        endStream();
+        break;
+      }
+      if (payload->payload) {
+        payloadDataSize_ += payload->payload->computeChainDataLength();
+        bufferVec.push_back(std::move(payload->payload));
+        --outstanding_;
+      }
+      queue_.pop();
+      if (shouldRequestMore()) {
+        break;
+      }
+    }
+    return std::make_pair(std::move(bufferVec), std::move(error));
   }
 
   static Class* PhpClass() {
@@ -186,9 +283,86 @@ struct TClientBufferedStream {
   }
 
  private:
+  Object genNext();
+
+ public:
   apache::thrift::detail::ClientStreamBridge::ClientPtr streamBridge_;
   apache::thrift::BufferOptions bufferOptions_;
+  apache::thrift::detail::ClientStreamBridge::ClientQueue queue_;
+  int32_t outstanding_ = 0;
+  size_t payloadDataSize_ = 0;
+  static constexpr size_t kRequestCreditPayloadSize = 16384;
 
   static Class* c_TClientBufferedStream;
 };
 }}
+
+namespace HPHP {
+  inline String ioBufToString(const folly::IOBuf& ioBuf) {
+    auto resultStringData = StringData::Make(ioBuf.computeChainDataLength());
+    for (const auto& buf : ioBuf) {
+      auto const data = reinterpret_cast<const char*>(buf.data());
+      auto const piece = folly::StringPiece{data, buf.size()};
+      resultStringData->append(piece);
+    }
+    return String::attach(resultStringData);
+  }
+
+  struct Thrift2StreamEvent final : AsioExternalThreadEvent {
+  Thrift2StreamEvent() {}
+
+  void finish(
+      thrift::TClientBufferedStream::BufferAndErrorPair bufferAndError) {
+    buffer_ = std::move(bufferAndError.first);
+    errorMsg_ = std::move(bufferAndError.second);
+    markAsFinished();
+  }
+
+  void error(std::unique_ptr<folly::IOBuf> err){
+    serverError_ = std::move(err);
+    markAsFinished();
+  }
+
+ protected:
+  // Called by PHP thread
+  void unserialize(TypedValue& result) final {
+    if (serverError_) {
+      throw_object(
+          "TTransportException",
+          make_vec_array(
+              ioBufToString(*serverError_),
+              0 // error code UNKNOWN
+              ));
+    }
+    String errorStr;
+    if (errorMsg_) {
+      errorStr = ioBufToString(*errorMsg_);
+    } else {
+      errorStr = null_string;
+    }
+
+    Array bufferVec;
+    if (buffer_.empty()) {
+      bufferVec = null_array;
+    } else {
+      VecInit resArr(buffer_.size());
+      for (auto& ioBuf : buffer_) {
+        resArr.append(ioBufToString(*ioBuf));
+      }
+      bufferVec = resArr.toArray();
+    }
+    tvCopy(
+        make_array_like_tv(make_vec_array(bufferVec, errorStr).detach()), result);
+  }
+
+ private:
+  std::vector<std::unique_ptr<folly::IOBuf>> buffer_;
+
+  // any error while processing queue, this should be returned as error message
+  // along with the buffer and should be sequenced after any received payloads
+  std::unique_ptr<folly::IOBuf> errorMsg_;
+
+  // Unexpected server error which should be thrown immediately
+  std::unique_ptr<folly::IOBuf> serverError_;
+};
+} // namespace HPHP

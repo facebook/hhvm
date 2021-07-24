@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP { namespace thrift {
 
@@ -33,6 +34,65 @@ Class* InteractionId::PhpClass() {
 
 Class* RpcOptions::c_RpcOptions = nullptr;
 Class* TClientBufferedStream::c_TClientBufferedStream = nullptr;
+
+Object HHVM_METHOD(TClientBufferedStream, genNext) {
+  auto data = TClientBufferedStream::GetDataOrThrowException(this_);
+  if (!data->streamBridge_) {
+    return null_object;
+  }
+  auto event = new Thrift2StreamEvent();
+
+  // Make sure event is abandoned, in case of an error
+  auto guard = folly::makeGuard([=] { event->abandon(); });
+
+  if (data->shouldRequestMore()) {
+    data->streamBridge_->requestN(
+        data->bufferOptions_.chunkSize - data->outstanding_);
+    data->outstanding_ = data->bufferOptions_.chunkSize;
+    data->payloadDataSize_ = 0;
+  }
+
+  if (!data->queue_.empty()) {
+    event->finish(data->clientQueueToVec());
+    guard.dismiss();
+    return Object{event->getWaitHandle()};
+  }
+
+  class ReadyCallback : public apache::thrift::detail::ClientStreamConsumer {
+   public:
+    explicit ReadyCallback(
+        HPHP::thrift::TClientBufferedStream* stream,
+        HPHP::Thrift2StreamEvent* event)
+        : stream(stream), event(event) {}
+    void consume() override {
+      stream->queue_ = stream->streamBridge_->getMessages();
+      event->finish(stream->clientQueueToVec());
+      delete this;
+    }
+    void canceled() override {
+      // If we reach here then that means the stream is cancelled by
+      // destroying the object. So finish
+      // the event immediately, with an error message to be safe.
+      std::string msg = "Something went wrong, queue is empty";
+      std::unique_ptr<folly::IOBuf> msgBuffer =
+          folly::IOBuf::copyBuffer(msg, msg.size());
+      event->error(std::move(msgBuffer));
+      delete this;
+    }
+
+   private:
+    HPHP::thrift::TClientBufferedStream* stream;
+    HPHP::Thrift2StreamEvent* event;
+  };
+
+  auto callback = new ReadyCallback(data, event);
+  if (!data->streamBridge_->wait(callback)) {
+    callback->consume();
+  }
+
+  guard.dismiss();
+  return Object{event->getWaitHandle()};
+}
 
 Object HHVM_METHOD(RpcOptions, setChunkBufferSize, int64_t chunk_buffer_size) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
@@ -161,6 +221,10 @@ static struct ThriftExtension final : Extension {
     HHVM_ME(RpcOptions, __toString);
 
     Native::registerNativeDataInfo<InteractionId>(s_InteractionId.get());
+
+    Native::registerNativeDataInfo<TClientBufferedStream>(
+      s_TClientBufferedStream.get(), Native::NDIFlags::NO_COPY);
+    HHVM_ME(TClientBufferedStream, genNext);
 
     loadSystemlib("thrift");
   }

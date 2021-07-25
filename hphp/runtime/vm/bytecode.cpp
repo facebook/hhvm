@@ -4966,37 +4966,40 @@ OPTBLD_INLINE TCA iopCreateCont(PC origpc, PC& pc) {
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE void movePCIntoGenerator(PC origpc, BaseGenerator* gen) {
-  ActRec* genAR = gen->actRec();
+OPTBLD_INLINE TCA contEnterImpl(PC origpc) {
+  // The stack must have one cell! Or else resumableStackBase() won't work!
+  assertx(vmStack().top() + 1 ==
+         (TypedValue*)vmfp() - vmfp()->func()->numSlotsInFrame());
+
+  auto const gen = this_base_generator(vmfp());
+  auto const genAR = gen->actRec();
+
+  // Stack overflow check.
+  checkStack(vmStack(), genAR->func(), 0);
 
   // Point of no return, set the generator state to Running.
   assertx(!gen->isRunning() && !gen->isDone());
   gen->setState(BaseGenerator::State::Running);
 
+  // Set up previous FP and return address.
   auto const retHelper = genAR->func()->isAsync()
     ? jit::tc::ustubs().asyncGenRetHelper
     : jit::tc::ustubs().genRetHelper;
   genAR->setReturn(vmfp(), origpc, retHelper, false);
 
+  // Enter the generator frame.
   vmfp() = genAR;
   vmpc() = genAR->func()->at(gen->resumable()->resumeFromYieldOffset());
-}
 
-OPTBLD_INLINE void contEnterImpl(PC origpc) {
-
-  // The stack must have one cell! Or else resumableStackBase() won't work!
-  assertx(vmStack().top() + 1 ==
-         (TypedValue*)vmfp() - vmfp()->func()->numSlotsInFrame());
-
-  // Do linkage of the generator's AR.
-  assertx(vmfp()->hasThis());
-  movePCIntoGenerator(origpc, this_base_generator(vmfp()));
   EventHook::FunctionResumeYield(vmfp(), EventHook::Source::Interpreter);
+
+  return gen->resumable()->resumeAddr();
 }
 
-OPTBLD_INLINE void iopContEnter(PC origpc, PC& pc) {
-  contEnterImpl(origpc);
+OPTBLD_INLINE TCA iopContEnter(PC origpc, PC& pc) {
+  auto const retAddr = contEnterImpl(origpc);
   pc = vmpc();
+  return retAddr;
 }
 
 OPTBLD_INLINE void iopContRaise(PC origpc, PC& pc) {

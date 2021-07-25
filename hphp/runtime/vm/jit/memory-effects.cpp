@@ -1685,16 +1685,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StArResumeAddr:
     return PureStore { AFMeta { inst.src(0) }, nullptr };
 
-  case StContArKey:
-  case StContArValue:
-  case StContArState:
-  case ContArIncIdx:
-  case ContArIncKey:
-  case ContArUpdateIdx:
-  case LdContArKey:
-  case LdContArValue:
-    return may_load_store(AFContext { inst.src(0) }, AEmpty);
-
   case LdFrameThis:
   case LdFrameCls:
     return PureLoad { AFContext { inst.src(0) }};
@@ -1800,8 +1790,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdLazyCls:
   case LdAFWHActRec:
   case LdContActRec:
+  case LdContArKey:
+  case LdContArValue:
   case LdContField:
   case LdContResumeAddr:
+  case StContArKey:
+  case StContArValue:
+  case StContArState:
+  case ContArIncIdx:
+  case ContArIncKey:
+  case ContArUpdateIdx:
   case LdClsCachedSafe:
   case LdRecDescCachedSafe:
   case LdClsInitData:

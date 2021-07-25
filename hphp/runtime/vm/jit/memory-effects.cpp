@@ -1729,12 +1729,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RestoreErrorLevel:
   case CheckCold:
   case ContValid:
-  case ContStarted:
   case IncProfCounter:
   case IncCallCounter:
   case IncStat:
-  case ContPreNext:
-  case ContStartedCheck:
+  case ContCheckNext:
   case CountVec:
   case CountDict:
   case CountKeyset:

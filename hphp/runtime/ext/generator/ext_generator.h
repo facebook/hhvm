@@ -117,6 +117,10 @@ struct BaseGenerator {
     return getState() == State::Running;
   }
 
+  bool isDone() const {
+    return getState() == State::Done;
+  }
+
   void startedCheck() {
     if (getState() == State::Created) {
       throw_exception(
@@ -125,14 +129,13 @@ struct BaseGenerator {
     }
   }
 
-  void preNext(bool checkStarted) {
+  void checkNext(bool checkStarted) {
     if (checkStarted) {
       startedCheck();
     }
     switch (getState()) {
       case State::Created:
       case State::Started:
-        setState(State::Running);
         break;
       case State::Running:
         throw_exception(

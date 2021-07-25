@@ -693,6 +693,10 @@ void emitContEnter(IRGS& env) {
   // Exit to interpreter if resume address is not known.
   resumeAddr = gen(env, CheckNonNull, exitSlow, resumeAddr);
 
+  // Set state from Running to Started.
+  auto const gs = GeneratorState { BaseGenerator::State::Running };
+  gen(env, StContArState, gs, genFp);
+
   auto const sendVal = popC(env, DataTypeGeneric);
   updateMarker(env);
   env.irb->exceptionStackBoundary();
@@ -725,7 +729,7 @@ void emitContCheck(IRGS& env, ContCheckOp subop) {
           curClass(env)->classof(Generator::getClass()));
   auto const cont = ldThis(env);
   auto const checkStarted = subop == ContCheckOp::CheckStarted;
-  gen(env, ContPreNext,
+  gen(env, ContCheckNext,
     IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())),
     makeExitSlow(env), cont, cns(env, checkStarted));
 }

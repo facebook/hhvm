@@ -560,9 +560,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ContArIncIdx:
   case ContArIncKey:
   case ContArUpdateIdx:
-  case ContPreNext:
-  case ContStarted:
-  case ContStartedCheck:
+  case ContCheckNext:
   case ContValid:
   case ConvBoolToDbl:
   case ConvBoolToInt:

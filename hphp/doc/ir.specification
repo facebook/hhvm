@@ -2442,26 +2442,15 @@ To string conversions:
   the yield statement. The `callBCOffset' will be stored to the m_callOff
   field of the ActRec in the generator.
 
-| ContPreNext, ND, S(Obj) C(Bool), B
+| ContCheckNext, ND, S(Obj) C(Bool), B
 
-  Performs operations needed for the next() method of Generator object S0.
-  If the generator is already running or finished, or it was not started yet
-  and the S1 check-started flag is set, the branch B is taken. Otherwise,
-  the generator is marked as running.
-
-| ContStartedCheck, ND, S(Obj), B
-
-  Checks if the Generator object S0 has started, and if not branches to
-  block B.
+  Check whether the generator S0 can be iterated. If the generator is already
+  running or finished, or it was not started yet and the S1 check-started flag
+  is set, the branch B is taken.
 
 | ContValid, D(Bool), S(Obj), NF
 
   Return true if a generator is not done, false otherwise.
-
-| ContStarted, D(Bool), S(Obj), NF
-
-  Return true if a generator has been run at least once, i.e. is not in the
-  Created state, false otherwise.
 
 | ContArIncKey, ND, S(FramePtr), NF
 

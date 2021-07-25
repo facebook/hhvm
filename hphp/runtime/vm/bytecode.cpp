@@ -4967,8 +4967,12 @@ OPTBLD_INLINE TCA iopCreateCont(PC origpc, PC& pc) {
 }
 
 OPTBLD_INLINE void movePCIntoGenerator(PC origpc, BaseGenerator* gen) {
-  assertx(gen->isRunning());
   ActRec* genAR = gen->actRec();
+
+  // Point of no return, set the generator state to Running.
+  assertx(!gen->isRunning() && !gen->isDone());
+  gen->setState(BaseGenerator::State::Running);
+
   auto const retHelper = genAR->func()->isAsync()
     ? jit::tc::ustubs().asyncGenRetHelper
     : jit::tc::ustubs().genRetHelper;
@@ -5055,7 +5059,7 @@ OPTBLD_INLINE TCA iopYieldK(PC origpc, PC& pc) {
 }
 
 OPTBLD_INLINE void iopContCheck(ContCheckOp subop) {
-  this_base_generator(vmfp())->preNext(subop == ContCheckOp::CheckStarted);
+  this_base_generator(vmfp())->checkNext(subop == ContCheckOp::CheckStarted);
 }
 
 OPTBLD_INLINE void iopContValid() {

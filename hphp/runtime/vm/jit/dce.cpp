@@ -537,10 +537,8 @@ bool canDCE(IRInstruction* inst) {
   case AFWHPrepareChild:
   case StArResumeAddr:
   case ContEnter:
-  case ContPreNext:
-  case ContStartedCheck:
+  case ContCheckNext:
   case ContValid:
-  case ContStarted:
   case ContArIncKey:
   case ContArIncIdx:
   case ContArUpdateIdx:

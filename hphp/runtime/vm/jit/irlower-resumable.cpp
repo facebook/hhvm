@@ -116,7 +116,7 @@ void cgContEnter(IRLS& env, const IRInstruction* inst) {
   }
 }
 
-void cgContPreNext(IRLS& env, const IRInstruction* inst) {
+void cgContCheckNext(IRLS& env, const IRInstruction* inst) {
   auto const cont = srcLoc(env, inst, 0).reg();
   auto const checkStarted = inst->src(1)->boolVal();
   auto const isAsync = inst->extra<IsAsyncData>()->isAsync;
@@ -129,42 +129,13 @@ void cgContPreNext(IRLS& env, const IRInstruction* inst) {
   static_assert(uint8_t(BaseGenerator::State::Started) == 1, "used below");
 
   // Take exit if state != 1 (checkStarted) or if state > 1 (!checkStarted).
-  auto stateOff = BaseGenerator::stateOff() - genOffset(isAsync);
+  auto const cc = checkStarted ? CC_NE : CC_A;
+  auto const stateOff = BaseGenerator::stateOff() - genOffset(isAsync);
   v << cmpbim{int8_t(BaseGenerator::State::Started), cont[stateOff], sf};
-  fwdJcc(v, env, checkStarted ? CC_NE : CC_A, sf, inst->taken());
-
-  // Transition the generator into the Running state
-  v << storeli{int8_t(BaseGenerator::State::Running), cont[stateOff]};
+  v << jcc{cc, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void cgContStartedCheck(IRLS& env, const IRInstruction* inst) {
-  auto const cont = srcLoc(env, inst, 0).reg();
-  auto const isAsync = inst->extra<IsAsyncData>()->isAsync;
-  auto& v = vmain(env);
-
-  static_assert(uint8_t(BaseGenerator::State::Created) == 0, "used below");
-
-  // Take exit if state == 0.
-  auto const sf = v.makeReg();
-  auto const stateOff = BaseGenerator::stateOff() - genOffset(isAsync);
-  v << testbim{int8_t(0xffu), cont[stateOff], sf};
-  v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
-}
-
-void cgContStarted(IRLS& env, const IRInstruction* inst) {
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const cont = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  // Return true if generator state is not in the Created state.
-  auto const sf = v.makeReg();
-  auto const stateOff = BaseGenerator::stateOff() -
-                        genOffset(false /* isAsync */);
-  v << cmpbim{int8_t(BaseGenerator::State::Created), cont[stateOff], sf};
-  v << setcc{CC_NE, sf, dst};
-}
 
 void cgContValid(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();

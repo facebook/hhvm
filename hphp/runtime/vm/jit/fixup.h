@@ -164,6 +164,19 @@ private:
   SBInvOffset m_spOffset;
 };
 
+/*
+ * A record of a VMFrame used in unwinding. It captures a conceptual suspended
+ * frame, including the ActRec/rbp, the rip of the next instruction, and the
+ * CFA of the child frame. Note that m_actRec and m_rip are stored separately
+ * (instead of simply storing the child ActRec), as C++ frames need not lay out
+ * their frames with these fields adjacent.
+ */
+struct VMFrame {
+  ActRec* m_actRec;
+  TCA m_rip;
+  uintptr_t m_prevCfa;
+};
+
 namespace FixupMap {
 /*
  * Record a new fixup (or overwrite an existing fixup) at tca.
@@ -179,6 +192,13 @@ const Fixup* findFixup(CTCA tca);
  * Number of entries in the fixup map.
  */
 size_t size();
+
+/*
+ * Perform a fixup of the VM registers for a leaf VM frame `frame`.
+ *
+ * Returns whether we successfully performed the fixup.
+ */
+bool processFixupForVMFrame(VMFrame frame);
 
 /*
  * Perform a fixup of the VM registers for a stack whose first frame is `rbp`.

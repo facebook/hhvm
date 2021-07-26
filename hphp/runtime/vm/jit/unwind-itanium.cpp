@@ -68,18 +68,30 @@ namespace {
 /*
  * Sync VM regs for the TC frame represented by `context'.
  */
-void sync_regstate(TCA rip, _Unwind_Context* context) {
+void sync_regstate(TCA ip, _Unwind_Context* context) {
   assertx(tl_regState == VMRegState::DIRTY);
   Stats::inc(Stats::TC_SyncUnwind);
 
-  // `fp` points to the native frame immediately called from the TC. The address
-  // of this frame is needed by fixupWork() to properly process indirect Fixups.
-  auto const fp = reinterpret_cast<ActRec*>(
-    _Unwind_GetCFA(context) - kNativeFrameSize);
-  assertx(reinterpret_cast<TCA>(fp->m_savedRip) == rip);
-  FTRACE(2, "syncing regstate for: fp {}, sfp {}, ip {}\n",
-         fp, fp->m_sfp, (void*)fp->m_savedRip);
-  FixupMap::fixupWork(fp);
+  auto const frame = [&] () -> VMFrame {
+    // `actRec` points to the leaf frame of the VM.
+    auto const actRec =
+      reinterpret_cast<ActRec*>(_Unwind_GetGR(context, dw_reg::FP));
+    if (isVMFrame(actRec)) {
+      auto const cfa = _Unwind_GetCFA(context);
+      return {actRec, TCA(ip), cfa};
+    }
+
+    // `actRec` points to a synthetic frame in a stub. The next frame is the
+    // first true VM frame. It is safe to deduce the CFA from the rbp, as VM
+    // frames do not perform CFA padding.
+    auto const cfa = uintptr_t(actRec) + kNativeFrameSize;
+    return {actRec->m_sfp, TCA(actRec->m_savedRip), cfa};
+  }();
+
+  FTRACE(2, "syncing regstate for: cfa {}, sfp {}, ip {}\n",
+         (void*)frame.m_prevCfa, (void*)frame.m_actRec, (void*)frame.m_rip);
+  always_assert(FixupMap::processFixupForVMFrame(frame));
+
   tl_regState = VMRegState::CLEAN;
   FTRACE(2, "synced vmfp {}, vmsp {}, vmpc {}\n", vmfp(), vmsp(), vmpc());
 }

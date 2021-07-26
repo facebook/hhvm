@@ -109,15 +109,16 @@ void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
 
 //////////////////////////////////////////////////////////////////////
 
-bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
-  auto tca = (TCA)ar->m_savedRip;
+bool getFrameRegs(VMFrame frame, VMRegs* outVMRegs) {
+  auto tca = frame.m_rip;
   auto fixup = s_fixups.find(tc::addrToOffset(tca));
   if (!fixup) return false;
 
   auto extraSpOffset = SBInvOffset{0};
   if (fixup->isIndirect()) {
-    TRACE(3, "getFrameRegs: fp %p -> %s\n", ar, fixup->show().c_str());
-    auto const ripAddr = reinterpret_cast<uintptr_t>(ar) + fixup->ripOffset();
+    auto const ar = frame.m_prevCfa - kNativeFrameSize;
+    TRACE(3, "getFrameRegs: fp %p -> %s\n", (void*) ar, fixup->show().c_str());
+    auto const ripAddr = ar + fixup->ripOffset();
     tca = *reinterpret_cast<TCA*>(ripAddr);
     extraSpOffset = fixup->spOffset();
     fixup = s_fixups.find(tc::addrToOffset(tca));
@@ -128,9 +129,8 @@ bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
   // Non-obvious off-by-one fun: if the *return address* points into the TC,
   // then the frame we were running on in the TC is actually the previous
   // frame.
-  ar = ar->m_sfp;
-
-  regsFromActRec(tca, ar, *fixup, extraSpOffset, outVMRegs);
+  auto const nextAR = frame.m_actRec;
+  regsFromActRec(tca, nextAR, *fixup, extraSpOffset, outVMRegs);
   return true;
 }
 
@@ -156,6 +156,23 @@ const Fixup* findFixup(CTCA tca) {
 
 size_t size() { return s_fixups.size(); }
 
+bool processFixupForVMFrame(VMFrame frame) {
+  assertx(isVMFrame(frame.m_actRec, false));
+
+  VMRegs regs;
+  if (!getFrameRegs(frame, &regs)) return false;
+
+  TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\n",
+      regs.fp->func()->name()->data(),
+      regs.fp, regs.sp, regs.pc);
+  auto& vmRegs = vmRegsUnsafe();
+  vmRegs.fp = const_cast<ActRec*>(regs.fp);
+  vmRegs.pc = reinterpret_cast<PC>(regs.pc);
+  vmRegs.stack.top() = regs.sp;
+  vmRegs.jitReturnAddr = regs.retAddr;
+  return true;
+}
+
 bool fixupWork(ActRec* nextRbp, bool soft) {
   assertx(RuntimeOption::EvalJit);
 
@@ -173,21 +190,11 @@ bool fixupWork(ActRec* nextRbp, bool soft) {
     if (isVMFrame(nextRbp, soft)) {
       TRACE(2, "fixup checking vm frame %s\n",
             nextRbp->func()->name()->data());
-      VMRegs regs;
-      if (getFrameRegs(rbp, &regs)) {
-        TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\n",
-              regs.fp->func()->name()->data(),
-              regs.fp, regs.sp, regs.pc);
-        auto& vmRegs = vmRegsUnsafe();
-        vmRegs.fp = const_cast<ActRec*>(regs.fp);
-        vmRegs.pc = reinterpret_cast<PC>(regs.pc);
-        vmRegs.stack.top() = regs.sp;
-        vmRegs.jitReturnAddr = regs.retAddr;
-        return true;
-      } else {
-        if (LIKELY(soft)) return false;
-        always_assert(false && "Fixup expected for leafmost VM frame");
-      }
+      auto const cfa = uintptr_t(rbp) + kNativeFrameSize;
+      auto const frame = VMFrame{nextRbp, TCA(rbp->m_savedRip), cfa};
+      auto const res = processFixupForVMFrame(frame);
+      if (res || LIKELY(soft)) return res;
+      always_assert(false && "Fixup expected for leafmost VM frame");
     }
   }
   return false;
@@ -227,6 +234,8 @@ void syncVMRegsWork(bool soft) {
   auto fp = tl_regState >= VMRegState::GUARDED_THRESHOLD ?
     (ActRec*)tl_regState : framePtr;
 
+  // TODO(mcolavita): This is incorrect for C++ routines with padding after
+  // their CFA.
   auto const synced = FixupMap::fixupWork(fp, soft);
 
   if (synced) tl_regState = VMRegState::CLEAN;

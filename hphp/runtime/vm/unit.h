@@ -490,7 +490,7 @@ public:
    * Log any units which were changed on disk after having been loaded by the
    * current request.
    */
-  static void logTearing();
+  void logTearing(int64_t nsecs);
 
   /*
    * Get parse/runtime failure information if this unit is created as

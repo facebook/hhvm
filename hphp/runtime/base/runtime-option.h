@@ -1395,6 +1395,8 @@ struct RuntimeOption {
   F(string, TaoMigrationOverride, std::string(""))                      \
   F(string, SRRouteMigrationOverride, std::string(""))                  \
   F(int32_t, SampleRequestTearing, 0)                                   \
+  F(int32_t, RequestTearingSkewMicros, 1500)                            \
+  F(bool,    SampleRequestTearingForce, true)                           \
   F(bool, EnableAbstractContextConstants, true)                         \
   F(bool, TypeconstAbstractDefaultReflectionIsAbstract, false)          \
   F(bool, AbstractContextConstantUninitAccess, false)                   \

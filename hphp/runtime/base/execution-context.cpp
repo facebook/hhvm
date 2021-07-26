@@ -79,6 +79,7 @@
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/util/timer.h"
 #include "hphp/zend/zend-math.h"
 
 #include "hphp/runtime/base/bespoke-runtime.h"
@@ -1452,8 +1453,10 @@ void ExecutionContext::requestInit() {
   autoTypecheckRequestInit();
 
   if (!RO::RepoAuthoritative && RO::EvalSampleRequestTearing) {
-    m_shouldSampleUnitTearing =
-      StructuredLog::coinflip(RO::EvalSampleRequestTearing);
+    if (StructuredLog::coinflip(RO::EvalSampleRequestTearing)) {
+      m_requestStartForTearing.emplace();
+      Timer::GetRealtimeTime(*m_requestStartForTearing);
+    }
   }
 }
 
@@ -1486,11 +1489,7 @@ void ExecutionContext::requestExit() {
 
   if (Logger::UseRequestLog) Logger::SetThreadHook(nullptr);
   if (m_requestTrace) record_trace(std::move(*m_requestTrace));
-
-  if (!RO::RepoAuthoritative && m_shouldSampleUnitTearing) {
-    Unit::logTearing();
-    m_shouldSampleUnitTearing = false;
-  }
+  if (!RO::RepoAuthoritative) m_requestStartForTearing.reset();
 }
 
 /**

@@ -963,6 +963,26 @@ void prefetchSymbolRefs(SymbolRefs symbols, const Unit* loadingUnit) {
 
 //////////////////////////////////////////////////////////////////////
 
+void logTearing(const CachedFilePtr& ptr) {
+  if (g_context && g_context->m_requestStartForTearing &&
+      ptr->cu.unit && !ptr->cu.unit->isSystemLib()) {
+    auto const t = ptr->mtime;
+    auto const s = *g_context->m_requestStartForTearing;
+    constexpr uint64_t sec_to_ns = 1000000000;
+
+    auto const skew = RO::EvalRequestTearingSkewMicros * 1000;
+    auto const skew_ns = skew % sec_to_ns;
+    auto const skew_s = skew / sec_to_ns;
+
+    if (s.tv_sec < t.tv_sec + skew_s ||
+        (s.tv_sec == t.tv_sec + skew_s && s.tv_nsec < t.tv_nsec + skew_ns)) {
+      auto const diff =
+        (t.tv_sec - s.tv_sec) * sec_to_ns + (t.tv_nsec - s.tv_nsec);
+      ptr->cu.unit->logTearing(diff);
+    }
+  }
+}
+
 CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
                                NonRepoUnitCache& cache,
                                Stream::Wrapper* wrapper,
@@ -1005,6 +1025,7 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
           cachedUnit.unlock();
           flags = FileLoadFlags::kWaited;
           if (ent) ent->setStr("type", "cache_hit_writelock");
+          logTearing(tmp);
           return tmp->cu;
         } else {
           // An unit exists, but is already bound to a different
@@ -1044,6 +1065,7 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
     }
 
     assertx(cachedUnit.copy() != ptr);
+    logTearing(ptr);
 
     // Otherwise update the entry. Defer the destruction of the
     // old copy_ptr using the Treadmill. Other threads may be
@@ -1095,6 +1117,7 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
           if (forPrefetch || canBeBoundToPath(cachedUnit, rpath)) {
             if (ent) ent->setStr("type", "cache_hit_readlock");
             flags = FileLoadFlags::kHitMem;
+            logTearing(cachedUnit);
             return cachedUnit->cu;
           }
         }

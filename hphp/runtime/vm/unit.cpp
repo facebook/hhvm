@@ -63,6 +63,8 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/unit-cache.h"
 
+#include "hphp/runtime/debugger/debugger.h"
+
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/debug/debug.h"
@@ -89,6 +91,8 @@
 
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -317,44 +321,53 @@ void Unit::merge() {
   }
 }
 
-namespace {
-RDS_LOCAL(hphp_fast_set<const Unit*>, rl_mergedUnits);
-}
-
-void Unit::logTearing() {
+void Unit::logTearing(int64_t nsecs) {
   assertx(!RO::RepoAuthoritative);
   assertx(RO::EvalSampleRequestTearing);
-  assertx(g_context);
 
   auto const repoOptions = g_context->getRepoOptionsForRequest();
   auto repoRoot = folly::fs::path(repoOptions->path()).parent_path();
 
-  for (auto const u : *rl_mergedUnits) {
-    assertx(!u->isSystemLib());
-    auto const loaded = lookupUnit(const_cast<StringData*>(u->origFilepath()),
-                                   "", nullptr, Native::s_noNativeFuncs, true);
+  assertx(!isSystemLib());
+  StructuredLogEntry ent;
 
-    if (loaded != u && (!loaded || loaded->sha1() != u->sha1())) {
-      StructuredLogEntry ent;
-
-      auto const tpath = [&] () -> std::string {
-        auto const orig = folly::fs::path(u->origFilepath()->data());
-        if (repoRoot.size() > orig.size()) return orig.native();
-        if (!std::equal(repoRoot.begin(), repoRoot.end(), orig.begin())) {
-          return orig.native();
-        }
-        return orig.lexically_relative(repoRoot).native();
-      }();
-      ent.setStr("filepath", tpath);
-      ent.setStr("same_bc",
-                 loaded && loaded->bcSha1() == u->bcSha1() ? "true" : "false");
-      ent.setStr("removed", loaded ? "false" : "true");
-
-      StructuredLog::log("hhvm_sandbox_file_tearing", ent);
+  auto const tpath = [&] () -> std::string {
+    auto const orig = folly::fs::path(origFilepath()->data());
+    if (repoRoot.size() > orig.size() || repoRoot.empty()) return orig.native();
+    if (!std::equal(repoRoot.begin(), repoRoot.end(), orig.begin())) {
+      return orig.native();
     }
-  }
+    return orig.lexically_relative(repoRoot).native();
+  }();
 
-  rl_mergedUnits->clear();
+  auto const debuggerCount = [&] {
+    if (RuntimeOption::EnableHphpdDebugger) {
+      return Eval::Debugger::CountConnectedProxy();
+    }
+
+    HPHP::VSDEBUG::Debugger* vspDebugger =
+      HPHP::VSDEBUG::VSDebugExtension::getDebugger();
+    if (vspDebugger != nullptr && vspDebugger->clientConnected()) {
+      return 1;
+    }
+
+    return 0;
+  }();
+
+  auto const hash = sha1().toString();
+  auto const bchash = bcSha1().toString();
+  ent.setStr("filepath", tpath);
+  ent.setStr("sha1", hash);
+  ent.setStr("bc_sha1", bchash);
+  ent.setInt("time_diff_ns", nsecs);
+  ent.setInt("debuggers", debuggerCount);
+
+  // always generate logs
+  ent.force_init = RO::EvalSampleRequestTearingForce;
+
+  FTRACE(2, "Tearing in {} ({} ns)\n", tpath.data(), nsecs);
+
+  StructuredLog::log("hhvm_sandbox_file_tearing", ent);
 }
 
 template <typename T, typename I>
@@ -381,13 +394,6 @@ static bool defineSymbols(const T& symbols, boost::dynamic_bitset<>& define, boo
 void Unit::mergeImpl(MergeTypes mergeTypes) {
   assertx(m_mergeState.load(std::memory_order_relaxed) >= MergeState::InitialMerged);
   autoTypecheck(this);
-
-  if (!RO::RepoAuthoritative &&
-      !isSystemLib() &&
-      !origFilepath()->empty() &&
-      g_context && g_context->m_shouldSampleUnitTearing) {
-    rl_mergedUnits->emplace(this);
-  }
 
   FTRACE(1, "Merging unit {} ({} funcs, {} constants, {} typealiases, {} classes, {} records)\n",
          this->m_origFilepath->data(), m_funcs.size(), m_constants.size(), m_typeAliases.size(),

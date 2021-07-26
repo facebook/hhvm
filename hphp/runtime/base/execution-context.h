@@ -634,7 +634,7 @@ public:
 
   VMParserFrame* m_parserFrame{nullptr};
 
-  bool m_shouldSampleUnitTearing{false};
+  Optional<struct timespec> m_requestStartForTearing;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

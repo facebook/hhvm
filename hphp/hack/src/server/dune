@@ -561,11 +561,13 @@
     serverEagerInit
     serverInit
     serverInitCommon
+    serverInitMessages
     serverInitTypes
     serverLazyInit
     serverMain
     serverRemoteInit
-    serverRpc)
+    serverRpc
+  )
   (libraries
     build
     ci_util
@@ -588,7 +590,11 @@
     typing_service_api
     vfs
     watchman_client
-    write_symbol_info)
+    write_symbol_info
+    (select serverInitMessages.ml from
+    (facebook signed_source -> facebook/serverInitMessages.ml)
+    (-> ../stubs/serverInitMessages.ml))
+  )
   (preprocess (pps lwt_ppx ppx_deriving.std)))
 
 (library

@@ -164,13 +164,22 @@ let lazy_saved_state_init genv env root load_state_approach profiling =
         as verbose_error) =
       load_state_error_to_verbose_string err
     in
-    let (next_step_descr, next_step) =
+    let (next_step_descr, next_step, user_instructions) =
       match (genv.local_config.SLC.require_saved_state, auto_retry) with
-      | (true, true) -> ("retry", Exit_status.Failed_to_load_should_retry)
-      | (true, false) -> ("fatal", Exit_status.Failed_to_load_should_abort)
-      | (false, _) -> ("fallback", Exit_status.No_error)
+      | (true, true) -> ("retry", Exit_status.Failed_to_load_should_retry, None)
+      | (true, false) ->
+        ( "fatal",
+          Exit_status.Failed_to_load_should_abort,
+          Some ServerInitMessages.messageSavedStateFailedFullInitDisabled )
+      | (false, _) -> ("fallback", Exit_status.No_error, None)
     in
     let user_message = Printf.sprintf "%s [%s]" message next_step_descr in
+    let user_message =
+      match user_instructions with
+      | None -> user_message
+      | Some user_instructions ->
+        Printf.sprintf "%s\n\n%s" user_message user_instructions
+    in
     let exception_telemetry =
       Telemetry.create ()
       |> Telemetry.string_ ~key:"message" ~value:message

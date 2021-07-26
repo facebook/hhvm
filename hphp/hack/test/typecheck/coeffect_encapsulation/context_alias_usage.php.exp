@@ -1,3 +1,5 @@
+File "context_alias_usage.php--f.php", line 4, characters 20-39:
+Unbound name: `HH\Contexts\HH\Contexts\defaults` (Naming[2049])
 File "context_alias_usage.php--g.php", line 5, characters 3-20:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "context_alias_usage.php--g.php", line 4, characters 21-22:

@@ -1,0 +1,8 @@
+File "context_alias_unicode.php", line 6, characters 9-11:
+Context i̇ should begin with an uppercase letter (Parsing[1002])
+File "context_alias_unicode.php", line 12, characters 20-22:
+Unbound name: `HH\Contexts\i̇` (Naming[2049])
+File "context_alias_unicode.php", line 22, characters 18-20:
+Unbound name: `HH\Contexts\Unsafe\i̇` (Naming[2049])
+File "context_alias_unicode.php", line 22, characters 18-20:
+Unbound name: `HH\Contexts\i̇` (Naming[2049])

@@ -1,18 +1,19 @@
 File "syntax_elaboration.php", line 16, characters 43-55:
-Unbound name: `HH\Contexts\Unsafe\WriteProperty` (Naming[2049])
-File "syntax_elaboration.php", line 16, characters 43-55:
-Unbound name: `HH\Contexts\WriteProperty` (Naming[2049])
+Unbound name: `WriteProperty` (Naming[2049])
 File "syntax_elaboration.php", line 31, characters 34-46:
-Unbound name: `HH\Contexts\AccessGlobals` (Naming[2049])
-File "syntax_elaboration.php", line 31, characters 34-46:
-Unbound name: `HH\Contexts\Unsafe\AccessGlobals` (Naming[2049])
+Unbound name: `AccessGlobals` (Naming[2049])
 File "syntax_elaboration.php", line 13, characters 5-34:
 Illegal context: `\HH\Capabilities\WriteProperty`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "syntax_elaboration.php", line 16, characters 42-56:
-Illegal context: `\HH\Contexts\WriteProperty`
+Illegal context: `\WriteProperty`
+Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "syntax_elaboration.php", line 16, characters 43-55:
+Illegal context: `\WriteProperty`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
@@ -22,7 +23,12 @@ Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here
 File "syntax_elaboration.php", line 31, characters 33-47:
-Illegal context: `\HH\Contexts\AccessGlobals`
+Illegal context: `\AccessGlobals`
+Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "syntax_elaboration.php", line 31, characters 34-46:
+Illegal context: `\AccessGlobals`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

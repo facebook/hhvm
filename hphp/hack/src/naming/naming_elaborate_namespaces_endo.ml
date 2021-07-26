@@ -142,7 +142,16 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
     method! on_typedef env td =
       let env = { env with namespace = td.t_namespace } in
       let env = extend_tparams env td.t_tparams in
-      super#on_typedef env td
+      if td.t_is_ctx then
+        let ctx_constr =
+          Option.map ~f:(self#on_ctx_hint_ns contexts_ns env) td.t_constraint
+        in
+        let ctx_kind = self#on_ctx_hint_ns contexts_ns env td.t_kind in
+        super#on_typedef
+          env
+          { td with t_constraint = ctx_constr; t_kind = ctx_kind }
+      else
+        super#on_typedef env td
 
     (* Difference between fun_def and fun_ is that fun_ is also lambdas *)
     method! on_fun_def env f =
@@ -354,19 +363,31 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
      * in the standard namespace *)
     method private on_contexts_ns ctx_ns env ctxs =
       let (p, cs) = ctxs in
-      let ctx_env = { env with namespace = ctx_ns } in
-      let cs =
-        List.map
-          ~f:(fun h ->
-            match h with
-            | (p, Happly (((_, x) as ctx), hl))
-              when not (is_reserved_type_hint x) ->
-              let ctx = elaborate_type_name ctx_env ctx in
-              (p, Happly (ctx, List.map hl ~f:(self#on_hint env)))
-            | _ -> self#on_hint ctx_env h)
-          cs
-      in
+      let cs = List.map ~f:(self#on_ctx_hint_ns ctx_ns env) cs in
       (p, cs)
+
+    method private on_ctx_hint_ns ctx_ns env h =
+      let ctx_env = { env with namespace = ctx_ns } in
+      let is_ctx_user_defined ctx =
+        let tokens = Str.split (Str.regexp "\\") ctx in
+        match List.last tokens with
+        | Some ctx_name ->
+          Char.equal ctx_name.[0] (Char.uppercase ctx_name.[0])
+          (* Char.is_uppercase does not work on unicode characters *)
+        | None -> false
+      in
+      match h with
+      | (p, Happly (((_, x) as ctx), hl)) when not (is_reserved_type_hint x) ->
+        let ctx =
+          if is_ctx_user_defined x then
+            elaborate_type_name env ctx
+          else
+            elaborate_type_name ctx_env ctx
+        in
+        (p, Happly (ctx, List.map hl ~f:(self#on_hint env)))
+      | (p, Hintersection ctxs) ->
+        (p, Hintersection (List.map ctxs ~f:(self#on_ctx_hint_ns ctx_ns env)))
+      | _ -> self#on_hint ctx_env h
 
     method! on_shape_field_name env sfn =
       match sfn with

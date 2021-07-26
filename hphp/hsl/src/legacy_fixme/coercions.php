@@ -264,11 +264,13 @@ function __cast_and_compare(mixed $l, mixed $r, COMPARISON_TYPE $ctype)[]: int {
     } else if ($l is num) {
       $r = \HH\str_to_numeric($r) ?? 0;
       return __cast_and_compare($l, $r, $ctype);
-    } else if (
-      \is_object($l) && !($l is \ConstCollection<_> || $l is \StringishObject)
-    ) {
-      $l = true;
-      $r = false;
+    } else if (\is_object($l)) {
+      if ($l is \StringishObject && !($l is \ConstCollection<_>)) {
+        $l = (string)$l;
+      } else if (!($l is \ConstCollection<_>)) {
+        $l = true;
+        $r = false;
+      }
     } else if ($l is resource) {
       $l = (float)$l;
       $r = (float)$r;
@@ -357,9 +359,13 @@ function __cast_and_compare(mixed $l, mixed $r, COMPARISON_TYPE $ctype)[]: int {
     return 0;
   } else if (\is_object($r)) {
     if (
+      $l is string && $r is \StringishObject && !($r is \ConstCollection<_>)
+    ) {
+      $r = (string)$r;
+    } else if (
       $l is null ||
       $l is resource ||
-      ($l is string && !($r is \ConstCollection<_> || $r is \StringishObject))
+      ($l is string && !($r is \ConstCollection<_>))
     ) {
       $l = false;
       $r = true;

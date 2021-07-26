@@ -255,8 +255,9 @@ static MaybeDataType convert_for_pow(const Variant& val,
     case KindOfBoolean:
     case KindOfResource:
     case KindOfObject:
+      ival = val.toInt64(); // do conv first in case it throws
       handleConvNotice(getDataTypeString(val.getType()).c_str());
-      // FALLTHROUGH
+      return KindOfInt64;
     case KindOfInt64:
       ival = val.toInt64();
       return KindOfInt64;

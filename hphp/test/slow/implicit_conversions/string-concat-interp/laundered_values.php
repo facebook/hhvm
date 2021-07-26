@@ -21,12 +21,15 @@ const vec<mixed> VALS = vec[
 function main(): void {
   foreach(VALS as $i) {
     $i_ = __hhvm_intrinsics\launder_value($i);
-    foreach(VALS as $j) {
-      echo '<'.$i_.' '.__hhvm_intrinsics\launder_value($j).">\n";
-    }
-    "$i ";
+    "$i_ ";
     echo '' . $i_;
     echo $i_ . '';
     echo "\n";
+    foreach(VALS as $j) {
+      $j_ = __hhvm_intrinsics\launder_value($j);
+      echo '<'.$i_.' '.$j_.">\n";
+      $i__ = $i_;
+      var_dump($i__ .= $j_);
+    }
   }
 }

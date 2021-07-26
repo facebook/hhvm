@@ -60,8 +60,8 @@ X(Resource)
 #undef Y
 #undef X
 
-template<typename T>
-enable_if_lval_t<T, void> tvCastToStringInPlace(T tv);
+template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
+  T tv, const ConvNoticeLevel, const StringData* notice_reason);
 void tvSetLegacyArrayInPlace(tv_lval tv, bool isLegacy);
 
 /*

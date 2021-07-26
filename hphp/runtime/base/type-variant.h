@@ -1512,7 +1512,11 @@ ALWAYS_INLINE Variant init_null() {
 inline void concat_assign(Variant &v1, const char* s2) = delete;
 
 inline void concat_assign(tv_lval lhs, const String& s2) {
-  if (!isStringType(type(lhs))) tvCastToStringInPlace(lhs);
+  if (!tvIsString(lhs)) {
+    const auto notice_level =
+      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForStrConcat2);
+    tvCastToStringInPlace(lhs, notice_level, s_ConvNoticeReasonConcat.get());
+  }
   asStrRef(lhs) += s2;
 }
 

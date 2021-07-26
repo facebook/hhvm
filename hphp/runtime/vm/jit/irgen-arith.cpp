@@ -1328,8 +1328,8 @@ void implAdd(IRGS& env, Op op) {
   binaryArith(env, op);
 }
 
-template<class PreDecRef>
-void implConcat(IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef) {
+template<class PreDecRef> void implConcat(
+    IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef, bool setop) {
   auto cast =
     [&] (SSATmp* s) {
       if (s->isA(TStr)) return s;
@@ -1366,19 +1366,20 @@ void implConcat(IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef) {
   /*
    * Generic translation: convert both to strings, and then concatenate them.
    *
-   * NB: the order we convert to strings is observable (because of __toString
-   * methods).
+   * NB: the order we convert to strings is observable because of __toString
+   * methods and error/notice messages.
    *
    * We don't want to convert to strings if either was already a string.  Note
    * that for the c2 string, failing to do this could change big-O program
    * behavior if refcount opts were off, since we'd COW strings that we
    * shouldn't (a ConvTVToStr of a Str will simplify into an IncRef).
    */
-  auto const s2 = cast(c2);
-  auto const s1 = cast(c1);
-  auto const r  = gen(env, ConcatStrStr, s2, s1);  // consumes s2 reference
+  if (!setop) c2 = cast(c2);
+  c1 = cast(c1);
+  if (setop) c2 = cast(c2);
+  auto const r  = gen(env, ConcatStrStr, c2, c1);  // consumes c2 reference
   preDecRef(r);
-  decRef(env, s1);
+  decRef(env, c1);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1388,7 +1389,7 @@ void implConcat(IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef) {
 void emitConcat(IRGS& env) {
   auto const c1 = popC(env);
   auto const c2 = popC(env);
-  implConcat(env, c1, c2, [&] (SSATmp* r) { push(env, r); });
+  implConcat(env, c1, c2, [&] (SSATmp* r) { push(env, r); }, false);
 }
 
 void emitConcatN(IRGS& env, uint32_t n) {
@@ -1458,7 +1459,7 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
     env.irb->constrainValue(loc, DataTypeSpecific);
     implConcat(env, val, loc, [&] (SSATmp* result) {
       pushIncRef(env, stLocNRC(env, id, result));
-    });
+    }, true);
     return;
   }
 

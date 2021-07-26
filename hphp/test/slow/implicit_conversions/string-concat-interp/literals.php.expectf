@@ -183,3 +183,35 @@ Notice: Implicit null to string conversion for string concatenation/interpolatio
 
 Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/literals.php on line 131
 0-101001.234-34000000000INF-INFNAN19223372036854775807Resource id #1string
+0foo
+-10foo
+100foo
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 138
+1.234foo
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 139
+-34000000000foo
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 140
+INFfoo
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 141
+-INFfoo
+
+Notice: Implicit double to string conversion for string concatenation/interpolation in %s/literals.php on line 142
+NANfoo
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 143
+1foo
+
+Notice: Implicit bool to string conversion for string concatenation/interpolation in %s/literals.php on line 144
+foo
+
+Notice: Implicit null to string conversion for string concatenation/interpolation in %s/literals.php on line 145
+foo
+9223372036854775807foo
+
+Notice: Implicit resource to string conversion for string concatenation/interpolation in %s/literals.php on line 147
+Resource id #1foo
+stringfoo

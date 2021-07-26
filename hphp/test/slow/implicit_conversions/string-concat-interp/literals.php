@@ -131,4 +131,19 @@ function main(): void {
   $a .= STDIN;
   $a .= "string";
   echo "$a\n";
+
+  $a = 0;           $a .= 'foo'; echo "$a\n";
+  $a = -10;         $a .= 'foo'; echo "$a\n";
+  $a = 100;         $a .= 'foo'; echo "$a\n";
+  $a = 1.234;       $a .= 'foo'; echo "$a\n";
+  $a = -3.4e10;     $a .= 'foo'; echo "$a\n";
+  $a = INF;         $a .= 'foo'; echo "$a\n";
+  $a = -INF;        $a .= 'foo'; echo "$a\n";
+  $a = NAN;         $a .= 'foo'; echo "$a\n";
+  $a = true;        $a .= 'foo'; echo "$a\n";
+  $a = false;       $a .= 'foo'; echo "$a\n";
+  $a = null;        $a .= 'foo'; echo "$a\n";
+  $a = PHP_INT_MAX; $a .= 'foo'; echo "$a\n";
+  $a = STDIN;       $a .= 'foo'; echo "$a\n";
+  $a = "string";    $a .= 'foo'; echo "$a\n";
 }

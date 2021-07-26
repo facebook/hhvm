@@ -20,12 +20,14 @@ const vec<mixed> VALS = vec[
 <<__EntryPoint>>
 function main(): void {
   foreach(VALS as $i) {
-    foreach(VALS as $j) {
-      echo "<$i $j>\n";
-    }
     "$i "; // this should generate a notice as applicable
     echo '' . $i;
     echo $i . '';
     echo "\n";
+    foreach(VALS as $j) {
+      echo "<$i $j>\n";
+      $i_ = $i;
+      var_dump($i_ .= $j);
+    }
   }
 }

@@ -1,1 +1,1 @@
--vEval.NoticeOnCoerceForStrConcat=1
+-vEval.NoticeOnCoerceForStrConcat=1 -vEval.NoticeOnCoerceForStrConcat2=1

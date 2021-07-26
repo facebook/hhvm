@@ -387,8 +387,8 @@ const StaticString
   s_1("1"),
   s_scalar("scalar");
 
-template<typename T>
-enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
+template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
+  T tv, const ConvNoticeLevel notice_level, const StringData* notice_reason) {
   assertx(tvIsPlausible(*tv));
 
   auto string = [&](StringData* s) {
@@ -404,15 +404,18 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
   switch (type(tv)) {
     case KindOfUninit:
     case KindOfNull:
+      handleConvNoticeLevel(notice_level, "null", "string", notice_reason);
       return persistentString(staticEmptyString());
 
     case KindOfBoolean:
+      handleConvNoticeLevel(notice_level, "bool", "string", notice_reason);
       return persistentString(val(tv).num ? s_1.get() : staticEmptyString());
 
     case KindOfInt64:
       return string(buildStringData(val(tv).num));
 
     case KindOfDouble:
+      handleConvNoticeLevel(notice_level, "double", "string", notice_reason);
       return string(buildStringData(val(tv).dbl));
 
     case KindOfPersistentString:
@@ -445,6 +448,7 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
       return;
 
     case KindOfResource:
+      handleConvNoticeLevel(notice_level, "resource", "string", notice_reason);
       tvMove(
         make_tv<KindOfString>(val(tv).pres->data()->o_toString().detach()),
         tv
@@ -478,6 +482,10 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
       raise_convert_record_to_type("string");
   }
   not_reached();
+}
+
+template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
+  tvCastToStringInPlace(tv, ConvNoticeLevel::None, nullptr);
 }
 
 void tvSetLegacyArrayInPlace(tv_lval tv, bool isLegacy) {
@@ -1198,6 +1206,13 @@ X(Vec)
 X(Dict)
 X(Keyset)
 X(Resource)
+#undef X
+
+#define X(kind) template void \
+  tvCastToStringInPlace<kind>(kind, const ConvNoticeLevel, const StringData*);
+X(TypedValue*)
+X(tv_lval)
+X(arr_lval)
 #undef X
 
 #define X(kind, IC) \

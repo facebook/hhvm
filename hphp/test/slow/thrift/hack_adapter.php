@@ -12,6 +12,9 @@ class ThriftStruct {
   public function __construct(?int $int_value = null) {
     $this->int_value = $int_value;
   }
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 class HackStruct {
@@ -80,6 +83,9 @@ class OuterStruct {
   public ?vec<StringToIntStructAdapter::THackType> $vec = null;
   public ?StringToIntStructAdapter::THackType $unset = null;
   public function __construct() {}
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 // This class is identical to OuterStruct but with all the adapters removed.
@@ -117,6 +123,9 @@ class OuterStructNoAdapter {
   public ?vec<ThriftStruct> $vec = null;
   public ?ThriftStruct $unset = null;
   public function __construct() {}
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 function getStruct() {

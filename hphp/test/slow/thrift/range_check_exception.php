@@ -9,6 +9,10 @@ class TestStruct {
       'type' => TType::I32,
     ],
   ];
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 <<__EntryPoint>>

@@ -17,6 +17,9 @@ class OldStruct {
   ];
   public $features = null;
   public function __construct($vals=null) {}
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 class NewStruct {
@@ -36,6 +39,9 @@ class NewStruct {
   ];
   public $features = null;
   public function __construct($vals=null) {}
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 function testBinary() {

@@ -10,6 +10,9 @@ class TestStruct {
   public function __construct(
     public $var = null,
   ) {}
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 function _try($fn) {

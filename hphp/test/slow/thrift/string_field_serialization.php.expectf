@@ -12,7 +12,7 @@ object(TestStruct) (1) {
   string(4) "1.23"
 }
 
-Warning: runtime/ext_thrift: Output buffer has 18 unflushed bytes in %s/string_field_serialization.php on line 26
+Warning: runtime/ext_thrift: Output buffer has 18 unflushed bytes in %s/string_field_serialization.php on line 29
 <TProtocolException: Attempt to send object type as a T_STRING>
 --- compact ---
 object(TestStruct) (1) {
@@ -28,5 +28,5 @@ object(TestStruct) (1) {
   string(4) "1.23"
 }
 
-Warning: runtime/ext_thrift: Output buffer has 8 unflushed bytes in %s/string_field_serialization.php on line 33
+Warning: runtime/ext_thrift: Output buffer has 8 unflushed bytes in %s/string_field_serialization.php on line 36
 <TProtocolException: Attempt to send object type as a T_STRING>

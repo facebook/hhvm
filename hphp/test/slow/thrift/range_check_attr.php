@@ -30,6 +30,10 @@ class TestStruct {
       ],
     ],
   ];
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 <<__EntryPoint>>

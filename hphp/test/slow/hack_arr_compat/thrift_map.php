@@ -62,6 +62,10 @@ class Mappish {
         'format' => 'collection',
       ],
   ];
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 class TestStruct {
@@ -74,6 +78,10 @@ class TestStruct {
   ];
 
   const int STRUCTURAL_ID = 957977401221134810;
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 function test() {

@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/strings.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
@@ -69,9 +70,9 @@ const int8_t T_EXCEPTION = 3;
 const int INVALID_DATA = 1;
 const int BAD_VERSION = 4;
 
-void binary_deserialize_struct(const Object& zthis,
-                               PHPInputTransport& transport,
-                               int options);
+Object binary_deserialize_struct(const String& clsName,
+                                 PHPInputTransport& transport,
+                                 int options);
 Variant binary_deserialize(int8_t thrift_typeID,
                            PHPInputTransport& transport,
                            const FieldSpec& fieldspec,
@@ -84,28 +85,9 @@ void binary_serialize(int8_t thrift_typeID,
                       const FieldSpec& fieldspec);
 void skip_element(long thrift_typeID, PHPInputTransport& transport);
 
-// Create a PHP object given a typename and call the ctor,
-//optionally passing up to 2 arguments
-Object createObject(const String& obj_typename, int nargs = 0,
-                    const Variant& arg1 = uninit_variant,
-                    const Variant& arg2 = uninit_variant) {
-  if (!HHVM_FN(class_exists)(obj_typename)) {
-    raise_warning("runtime/ext_thrift: Class %s does not exist",
-                  obj_typename.data());
-    return Object();
-  }
-  Array args;
-  if (nargs == 1) {
-    args = make_vec_array(arg1);
-  } else if (nargs == 2 ) {
-    args = make_vec_array(arg1, arg2);
-  }
-  return create_object(obj_typename, args);
-}
-
 [[noreturn]] NEVER_INLINE
 void throw_tprotocolexception(const String& what, long errorcode) {
-  throw_object(createObject(s_TProtocolException, 2, what, errorcode));
+  throw_object(s_TProtocolException, make_vec_array(what, errorcode));
 }
 
 Variant binary_deserialize_internal(int8_t thrift_typeID,
@@ -117,15 +99,8 @@ Variant binary_deserialize_internal(int8_t thrift_typeID,
     case T_VOID:
       return init_null();
     case T_STRUCT: {
-      Variant val;
-      Object ret(createObject(fieldspec.className()));
-      if (ret.isNull()) {
-        // unable to create class entry
-        skip_element(T_STRUCT, transport);
-        return init_null();
-      }
-      binary_deserialize_struct(ret, transport, options);
-      return ret;
+      return
+        binary_deserialize_struct(fieldspec.className(), transport, options);
     }
     case T_BOOL: {
       uint8_t c;
@@ -450,18 +425,24 @@ void binary_deserialize_slow(const Object& zthis,
   assertx(zthis->assertPropTypeHints());
 }
 
-void binary_deserialize_struct(const Object& dest,
-                               PHPInputTransport& transport,
-                               int options) {
+Object binary_deserialize_struct(const String& clsName,
+                                 PHPInputTransport& transport,
+                                 int options) {
+  auto const cls = Class::load(clsName.get());
+  if (cls == nullptr) raise_error(Strings::UNKNOWN_CLASS, clsName.data());
+
   SpecHolder specHolder;
-  const auto& fields = specHolder.getSpec(dest->getVMClass(), true);
+  auto const& spec = specHolder.getSpec(cls);
+  Object dest = spec.newObject(cls);
+
+  auto const& fields = spec.fields;
   const size_t numFields = fields.size();
-  Class* cls = dest->getVMClass();
   if (cls->numDeclProperties() < numFields) {
     TType fieldType = static_cast<TType>(transport.readI8());
     int16_t fieldNum = transport.readI16();
-    return binary_deserialize_slow(
-      dest, fields, fieldNum, fieldType, transport, options);
+    binary_deserialize_slow(
+      dest, spec, fieldNum, fieldType, transport, options);
+    return dest;
   }
   auto objProps = dest->props();
   auto prop = cls->declProperties().begin();
@@ -477,16 +458,18 @@ void binary_deserialize_struct(const Object& dest,
         prop[i].name != fields[i].name ||
         !ttypes_are_compatible(fieldType, fields[i].type)) {
       // Verify everything we've set so far
-      return binary_deserialize_slow(
-        dest, fields, fieldNum, fieldType, transport, options);
+      binary_deserialize_slow(
+        dest, spec, fieldNum, fieldType, transport, options);
+      return dest;
     }
     if (fields[i].isUnion) {
       if (s__type.equal(prop[numFields].name)) {
         auto index = cls->propSlotToIndex(numFields);
         tvSetInt(fieldNum, objProps->at(index));
       } else {
-        return binary_deserialize_slow(
-          dest, fields, fieldNum, fieldType, transport, options);
+        binary_deserialize_slow(
+          dest, spec, fieldNum, fieldType, transport, options);
+        return dest;
       }
     }
     auto index = cls->propSlotToIndex(i);
@@ -501,6 +484,7 @@ void binary_deserialize_struct(const Object& dest,
     fieldType = static_cast<TType>(transport.readI8());
   }
   assertx(dest->assertPropTypeHints());
+  return dest;
 }
 
 void binary_serialize_internal(int8_t thrift_typeID,
@@ -637,7 +621,7 @@ void binary_serialize_struct(const Object& obj, PHPOutputTransport& transport) {
   const size_t numProps = cls->numDeclProperties();
 
   SpecHolder specHolder;
-  const auto& fields = specHolder.getSpec(cls, true);
+  auto const& fields = specHolder.getSpec(cls).fields;
   const size_t numFields = fields.size();
   // Write each member
   for (int slot = 0; slot < numFields; ++slot) {
@@ -734,14 +718,11 @@ Object HHVM_FUNCTION(thrift_protocol_read_binary,
   }
 
   if (messageType == T_EXCEPTION) {
-    Object ex = createObject(s_TApplicationException);
-    binary_deserialize_struct(ex, transport, options);
-    throw_object(ex);
+    throw_object(
+      binary_deserialize_struct(s_TApplicationException, transport, options));
   }
 
-  Object ret_val = createObject(obj_typename);
-  binary_deserialize_struct(ret_val, transport, options);
-  return ret_val;
+  return binary_deserialize_struct(obj_typename, transport, options);
 }
 
 Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
@@ -750,10 +731,7 @@ Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
                       int options) {
   EagerVMRegAnchor _;
   PHPInputTransport transport(transportobj);
-
-  Object ret_val = createObject(obj_typename);
-  binary_deserialize_struct(ret_val, transport, options);
-  return ret_val;
+  return binary_deserialize_struct(obj_typename, transport, options);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

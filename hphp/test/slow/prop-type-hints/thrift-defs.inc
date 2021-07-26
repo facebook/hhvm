@@ -50,9 +50,15 @@ class DummyTransport {
 
 class DummyStruct {
   const SPEC = vec[];
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 class DummyStruct2 {
   const SPEC = vec[];
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 class TestStruct1 {
@@ -82,6 +88,10 @@ class TestStruct1 {
     dict['var' => 'p6',
          'type' => TType::I32]
   ];
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 class TestStruct2 {
@@ -111,6 +121,10 @@ class TestStruct2 {
     dict['var' => 'p6',
          'type' => TType::STRING]
   ];
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 class TestStruct3 {
@@ -123,6 +137,10 @@ class TestStruct3 {
          'class' => 'DoesntExist',
          'type' => TType::STRUCT]
   ];
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 enum ComplexUnionEnum: int {
@@ -147,6 +165,9 @@ class TestStruct4 {
   public ?int $intValue = 123;
   public ?string $stringValue;
   public ComplexUnionEnum $_type = ComplexUnionEnum::intValue;
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 class TestStruct5 {
@@ -165,6 +186,9 @@ class TestStruct5 {
   public ?int $intValue = 123;
   public ?string $stringValue;
   public string $_type = ComplexUnionEnum::intValue;
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 class TestStruct6 {
@@ -230,6 +254,10 @@ class TestStruct6 {
          'format' => 'collection',
          'type' => TType::SET],
   ];
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 class TestStruct7 {
@@ -295,4 +323,8 @@ class TestStruct7 {
          'format' => 'collection',
          'type' => TType::SET],
   ];
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }

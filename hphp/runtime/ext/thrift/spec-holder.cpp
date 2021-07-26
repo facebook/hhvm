@@ -18,11 +18,13 @@
 #include "hphp/runtime/ext/thrift/spec-holder.h"
 
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/thrift/adapter.h"
 #include "hphp/runtime/ext/thrift/util.h"
+#include "hphp/util/hash-map.h"
 
 #include <folly/concurrency/ConcurrentHashMap.h>
 #include <folly/Portability.h>
@@ -64,8 +66,7 @@ Array get_tspec(const Class* cls) {
 // always be satisfied. We don't need to do type verification if so.
 bool typeSatisfiesConstraint(const TypeConstraint& tc,
                              TType type,
-                             const Array& spec,
-                             bool isBinary) {
+                             const Array& spec) {
   switch (type) {
     case T_STOP:
     case T_VOID:
@@ -74,10 +75,7 @@ bool typeSatisfiesConstraint(const TypeConstraint& tc,
       auto const className = spec.lookup(s_class);
       if (isNullType(className.type())) return false;
       auto const classNameString = tvCastToString(className);
-      // Binary deserializing can assign a null to an object, while compact
-      // won't (this might be a bug).
-      return tc.alwaysPasses(classNameString.get()) &&
-        (!isBinary || tc.alwaysPasses(KindOfNull));
+      return tc.alwaysPasses(classNameString.get());
     }
     case T_BOOL:
       return tc.alwaysPasses(KindOfBoolean);
@@ -127,7 +125,26 @@ bool typeSatisfiesConstraint(const TypeConstraint& tc,
   return false;
 }
 
-StructSpec compileSpec(const Array& spec, const Class* cls, bool isBinary) {
+const StaticString s_withDefaultValues("withDefaultValues");
+
+const Func* lookupWithDefaultValuesFunc(const Class* cls) {
+  auto const func = cls->lookupMethod(s_withDefaultValues.get());
+  if (func == nullptr) {
+    thrift_error(
+      folly::sformat("Method {}::withDefaultValues() not found", cls->name()),
+      ERR_INVALID_DATA
+    );
+  }
+  if (!func->isStatic()) {
+    thrift_error(
+      folly::sformat("Method {}::withDefaultValues() not static", cls->name()),
+      ERR_INVALID_DATA
+    );
+  }
+  return func;
+}
+
+StructSpec compileSpec(const Array& spec, const Class* cls) {
   // A union field also writes to a property named __type. If one exists, we
   // need to also verify that it accepts integer values. We only need to do
   // this once, so cache it in the optional.
@@ -165,7 +182,7 @@ StructSpec compileSpec(const Array& spec, const Class* cls, bool isBinary) {
       }
 
       return typeSatisfiesConstraint(
-        cls->declPropTypeConstraint(slot), field.type, fieldSpec, isBinary);
+        cls->declPropTypeConstraint(slot), field.type, fieldSpec);
     }();
 
     temp[i] = std::move(field);
@@ -174,7 +191,13 @@ StructSpec compileSpec(const Array& spec, const Class* cls, bool isBinary) {
   if (temp.size() >> 16) {
     thrift_error("Too many keys in TSPEC (expected < 2^16)", ERR_INVALID_DATA);
   }
-  return StructSpec(std::move(temp));
+
+  // We can precompute the cls::withDefaultValues() func pointer only if the
+  // underlying class cannot change.
+  auto const func = cls != nullptr && cls->isPersistent()
+    ? lookupWithDefaultValuesFunc(cls) : nullptr;
+
+  return StructSpec{HPHP::FixedVector(std::move(temp)), func};
 }
 
 } // namespace
@@ -226,50 +249,58 @@ FieldSpec FieldSpec::compile(const Array& fieldSpec, bool topLevel) {
 }
 
 // The returned reference is valid at least while this SpecHolder is alive.
-const StructSpec& SpecHolder::getSpec(const Class* cls, bool isBinary) {
-  // If we're not verifying property type-hints we can skip this (and get more
-  // potential sharing).
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) {
-    isBinary = false;
-  }
+const StructSpec& SpecHolder::getSpec(const Class* cls) {
+  static folly_concurrent_hash_map_simd<
+    const Class*,
+    // Store the pointer as non-SIMD version of folly_concurrent_hash_map_simd
+    // macro doesn't guarantee reference stability.
+    std::unique_ptr<StructSpec>
+  > s_specCacheMap(1000);
 
-  static
-#if FOLLY_SSE_PREREQ(4, 2)
-      folly::ConcurrentHashMapSIMD
-#else
-      folly::ConcurrentHashMap
-#endif
-      <std::tuple<const Class*, bool>,
-       // Store the pointer as the non-SIMD map doesn't have reference stability.
-       std::unique_ptr<StructSpec>> s_specCacheMap(1000);
-  decltype(s_specCacheMap)::key_type key{cls, isBinary};
-
-  {
-    const auto it = s_specCacheMap.find(key);
+  // Can only cache if the underlying Class can't be freed.
+  auto const cacheable = classHasPersistentRDS(cls);
+  if (cacheable) {
+    const auto it = s_specCacheMap.find(cls);
     if (it != s_specCacheMap.cend()) return *it->second;
   }
 
   const auto spec = get_tspec(cls);
-  if (spec->isStatic()) {
+  if (cacheable && spec->isStatic()) {
     // Static specs are kept by the cache.
     const auto [it, _] = s_specCacheMap.try_emplace(
-      key, std::make_unique<StructSpec>(compileSpec(spec, cls, isBinary)));
+      cls, std::make_unique<StructSpec>(compileSpec(spec, cls)));
     return *it->second;
   } else {
     // Temporary specs are kept by m_tempSpec.
-    StructSpec temp(compileSpec(spec, nullptr, false));
-    m_tempSpec.swap(temp);
+    m_tempSpec = compileSpec(spec, nullptr);
     return m_tempSpec;
   }
 }
 
 const FieldSpec* getFieldSlow(const StructSpec& spec, int16_t fieldNum) {
-  for (const auto& field : spec) {
+  for (const auto& field : spec.fields) {
     if (field.fieldNum == fieldNum) {
       return &field;
     }
   }
   return nullptr;
+}
+
+Object StructSpec::newObject(Class* cls) const {
+  auto const func = withDefaultValuesFunc != nullptr
+    ? withDefaultValuesFunc : lookupWithDefaultValuesFunc(cls);
+
+  auto obj = g_context->invokeFuncFew(func, cls, RuntimeCoeffects::pure());
+  if (tvIsObject(obj)) return Object::attach(obj.m_data.pobj);
+
+  SCOPE_EXIT { tvDecRefGen(obj); };
+  thrift_error(
+    folly::sformat(
+      "Method {}::withDefaultValues() returned a non-object.",
+      cls->name()
+    ),
+    ERR_INVALID_DATA
+  );
 }
 
 }}

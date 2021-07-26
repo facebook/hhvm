@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/strings.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
@@ -264,7 +265,7 @@ struct CompactWriter {
       // Get field specification
       Class* cls = obj->getVMClass();
       SpecHolder specHolder;
-      const auto& fields = specHolder.getSpec(cls, false);
+      auto const& fields = specHolder.getSpec(cls).fields;
       auto prop = cls->declProperties().begin();
       auto objProps = obj->props();
       const size_t numProps = cls->numDeclProperties();
@@ -630,13 +631,9 @@ struct CompactReader {
       skip(T_STRING); // name (unused)
 
       if (type == T_REPLY) {
-        Object ret = create_object(resultClassName, Array());
-        readStruct(ret);
-        return ret;
+        return readStruct(resultClassName);
       } else if (type == T_EXCEPTION) {
-        Object exn = create_object(s_TApplicationException, Array());
-        readStruct(exn);
-        throw_object(exn);
+        throw_object(readStruct(s_TApplicationException));
       } else {
         thrift_error("Invalid response type", ERR_INVALID_DATA);
       }
@@ -675,18 +672,24 @@ struct CompactReader {
       assertx(dest->assertPropTypeHints());
     }
 
-    void readStruct(const Object& dest) {
+    Object readStruct(const String& clsName) {
+      auto const cls = Class::load(clsName.get());
+      if (cls == nullptr) raise_error(Strings::UNKNOWN_CLASS, clsName.data());
+
+      SpecHolder specHolder;
+      auto const& spec = specHolder.getSpec(cls);
+      Object dest = spec.newObject(cls);
+
       readStructBegin();
       int16_t fieldNum;
       TType fieldType;
       readFieldBegin(fieldNum, fieldType);
 
-      SpecHolder specHolder;
-      const auto& fields = specHolder.getSpec(dest->getVMClass(), false);
+      auto const& fields = spec.fields;
       const size_t numFields = fields.size();
-      Class* cls = dest->getVMClass();
       if (cls->numDeclProperties() < numFields) {
-        return readStructSlow(dest, fields, fieldNum, fieldType);
+        readStructSlow(dest, spec, fieldNum, fieldType);
+        return dest;
       }
       auto objProp = dest->props();
       auto prop = cls->declProperties().begin();
@@ -698,14 +701,16 @@ struct CompactReader {
         if (slot == numFields ||
             prop[slot].name != fields[slot].name ||
             !typesAreCompatible(fieldType, fields[slot].type)) {
-          return readStructSlow(dest, fields, fieldNum, fieldType);
+          readStructSlow(dest, spec, fieldNum, fieldType);
+          return dest;
         }
         if (fields[slot].isUnion) {
           if (s__type.equal(prop[numFields].name)) {
             auto index = cls->propSlotToIndex(numFields);
             tvSetInt(fieldNum, objProp->at(index));
           } else {
-            return readStructSlow(dest, fields, fieldNum, fieldType);
+            readStructSlow(dest, spec, fieldNum, fieldType);
+            return dest;
           }
         }
         auto index = cls->propSlotToIndex(slot);
@@ -720,6 +725,7 @@ struct CompactReader {
       }
       readStructEnd();
       assertx(dest->assertPropTypeHints());
+      return dest;
     }
 
   private:
@@ -791,16 +797,8 @@ struct CompactReader {
         case T_VOID:
           return init_null();
 
-        case T_STRUCT: {
-          Variant newStruct = create_object(spec.className(), Array());
-          if (newStruct.isNull()) {
-            thrift_error("invalid class type in spec", ERR_INVALID_DATA);
-          }
-
-          Object obj = newStruct.toObject();
-          readStruct(obj);
-          return newStruct;
-        }
+        case T_STRUCT:
+          return readStruct(spec.className());
 
         case T_BOOL:
           if (state == STATE_BOOL_READ) {
@@ -1227,9 +1225,7 @@ Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      int options) {
   EagerVMRegAnchor _;
   CompactReader reader(transportobj, options);
-  Object ret = create_object(obj_typename, Array());
-  reader.readStruct(ret);
-  return ret;
+  return reader.readStruct(obj_typename);
 }
 
 }}

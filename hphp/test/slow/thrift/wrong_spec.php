@@ -9,6 +9,9 @@ class InnerStruct {
   ];
   public $value = null;
   public function __construct($value = null) { $this->value = $value; }
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 class OldStruct {
@@ -38,6 +41,9 @@ class OldStruct {
   public $field1 = null;
   public $field2 = null;
   public function __construct() {}
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 class NewStruct {
@@ -62,6 +68,9 @@ class NewStruct {
   public $field1 = null;
   public $field2 = null;
   public function __construct() {}
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 function testBinary($val) {

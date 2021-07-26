@@ -24,9 +24,9 @@ function test() {
 
   serde(@new TestStruct1());
   serde(@new TestStruct2());
-  serde(@new TestStruct3());
   serde(@new TestStruct4());
   serde(@new TestStruct5());
   serde(@new TestStruct6());
   serde(@new TestStruct7());
+  serde(@new TestStruct3());
 }

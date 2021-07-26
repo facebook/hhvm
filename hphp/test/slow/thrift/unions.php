@@ -85,6 +85,10 @@ class ComplexUnion {
     }
   }
 
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
   public function getName(): string {
     return 'ComplexUnion';
   }

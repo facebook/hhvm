@@ -56,12 +56,17 @@ private:
   StringData* className_{};
 };
 
-using StructSpec = FixedVector<FieldSpec>;
+struct StructSpec {
+  FixedVector<FieldSpec> fields;
+  const Func* withDefaultValuesFunc;
+
+  Object newObject(Class* cls) const;
+};
 
 // Provides safe access to specifications.
 struct SpecHolder {
   // The returned reference is valid at least while this SpecHolder is alive.
-  const StructSpec& getSpec(const Class* cls, bool isBinary);
+  const StructSpec& getSpec(const Class* cls);
 
 private:
   // Non-static spec, or empty if source spec is static.

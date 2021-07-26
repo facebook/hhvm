@@ -47,6 +47,10 @@ class NodeObject {
     }
   }
 
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
   public function getName() {
     return 'NodeObject';
   }
@@ -139,6 +143,10 @@ class EdgeObject {
     }
   }
 
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
   public function getName() {
     return 'EdgeObject';
   }
@@ -155,20 +163,36 @@ class EdgeObjectWithBadSpec1 extends EdgeObject {
       'type' => TType::STRING,
     ],
   ];
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 class EdgeObjectWithBadSpec2 extends EdgeObject {
   const SPEC = varray[];
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 class EdgeObjectWithBadSpec3 extends EdgeObject {
   const SPEC = 42;
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 class EdgeObjectWithBadSpec4 extends EdgeObject {
   const SPEC = darray[
     'foo' => 'bar',
   ];
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 function testBadSpec($bad) {

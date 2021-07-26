@@ -30,6 +30,9 @@ class TestStruct {
   public $aList = null;
   public $aMap = null;
   public $aSet = null;
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
 }
 
 function test($name, $list, $map, $set) {

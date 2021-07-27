@@ -17,7 +17,7 @@ use oxidized::typing_deps_mode::HashMode;
 pub enum DepType {
     GConst = 0,
     Fun = 1,
-    Class = 2,
+    Type = 2,
     Extends = 3,
     Const = 5,
     Cstr = 6,
@@ -38,7 +38,7 @@ impl DepType {
         match tag {
             0 => Some(DepType::GConst),
             1 => Some(DepType::Fun),
-            2 => Some(DepType::Class),
+            2 => Some(DepType::Type),
             3 => Some(DepType::Extends),
             5 => Some(DepType::Const),
             6 => Some(DepType::Cstr),
@@ -64,7 +64,7 @@ fn make_hasher() -> FnvHasher {
 
 fn postprocess_hash(mode: HashMode, dep_type: DepType, hash: u64) -> u64 {
     let hash: u64 = match dep_type {
-        DepType::Class => {
+        DepType::Type => {
             // For class dependencies, set the lowest bit to 1. For extends
             // dependencies, the lowest bit will be 0 (in the case below), so we'll
             // be able to convert from a class hash to its extends hash without
@@ -97,10 +97,10 @@ fn postprocess_hash(mode: HashMode, dep_type: DepType, hash: u64) -> u64 {
 
 fn get_dep_type_hash_key(dep_type: DepType) -> u8 {
     match dep_type {
-        DepType::Class | DepType::Extends => {
+        DepType::Type | DepType::Extends => {
             // Use the same tag for classes and extends dependencies, so that we can
             // convert between them without reversing the hash.
-            DepType::Class as u8
+            DepType::Type as u8
         }
         _ => dep_type as u8,
     }

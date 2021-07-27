@@ -813,18 +813,14 @@ mod tests {
     #[bench]
     fn bench_hash1_short(b: &mut Bencher) {
         b.iter(|| {
-            crate::hash1(
-                HASH_MODE,
-                crate::DepType::Class,
-                SHORT_CLASS_NAME.as_bytes(),
-            );
+            crate::hash1(HASH_MODE, crate::DepType::Type, SHORT_CLASS_NAME.as_bytes());
         });
     }
 
     #[bench]
     fn bench_hash1_long(b: &mut Bencher) {
         b.iter(|| {
-            crate::hash1(HASH_MODE, crate::DepType::Class, LONG_CLASS_NAME.as_bytes());
+            crate::hash1(HASH_MODE, crate::DepType::Type, LONG_CLASS_NAME.as_bytes());
         });
     }
 
@@ -855,7 +851,7 @@ mod tests {
     #[bench]
     fn bench_hash1_ocaml(b: &mut Bencher) {
         let arena = Arena::new();
-        let dep_type = crate::DepType::Class;
+        let dep_type = crate::DepType::Type;
         let name1 = arena.add(&String::from(LONG_CLASS_NAME));
         b.iter(|| unsafe {
             crate::hash1_ocaml(

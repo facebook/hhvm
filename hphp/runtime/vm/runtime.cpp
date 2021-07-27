@@ -219,19 +219,14 @@ void throwParamInOutMismatch(const Func* func, uint32_t index) {
     func->fullName()->data(), index, func->isInOut(index)));
 }
 
-void throwParamInOutMismatchRange(const Func* func, unsigned firstVal,
-                                  uint64_t mask, uint64_t vals) {
-  for (auto i = 0; i < 64; ++i) {
-    if (mask & (1UL << i)) {
-      bool isInOut = vals & (1UL << i);
-      if (func->isInOut(firstVal + i) != isInOut) {
-        throwParamInOutMismatch(func, firstVal + i);
-      }
-    }
+void checkInOutMismatch(const Func* func, uint32_t numArgs,
+                        const uint8_t* inoutArgs) {
+  assertx(numArgs == 0 || inoutArgs != nullptr);
+  uint8_t tmp = 0;
+  for (auto i = 0; i < numArgs; ++i) {
+    tmp = (i % 8) == 0 ? *(inoutArgs++) : tmp >> 1;
+    if (func->isInOut(i) != (tmp & 1)) throwParamInOutMismatch(func, i);
   }
-
-  // Caller guarantees at least one parameter with inout-ness mismatch.
-  not_reached();
 }
 
 void throwInvalidUnpackArgs() {

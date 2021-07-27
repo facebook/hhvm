@@ -173,6 +173,7 @@ using PrintLocal = std::function<std::string(int32_t local)>;
 std::string show(const IterArgs&, PrintLocal);
 
 std::string show(const LocalRange&);
+std::string show(uint32_t numArgs, const uint8_t* inoutArgs);
 std::string show(const FCallArgsBase&, const uint8_t* inoutArgs,
                  std::string asyncEagerLabel, const StringData* ctx);
 

@@ -300,35 +300,6 @@ void Func::setFullName(int /*numParams*/) {
   }
 }
 
-void Func::appendParam(bool ref, const Func::ParamInfo& info,
-                       std::vector<ParamInfo>& pBuilder) {
-  auto numParams = pBuilder.size();
-
-  // When called by FuncEmitter, the least significant bit of m_paramCounts
-  // are not yet being used as a variadic flag, so numParams() cannot be
-  // used
-  const int qword = numParams / kBitsPerQword;
-  const int bit   = numParams % kBitsPerQword;
-  assertx(!info.isVariadic() || (m_attrs & AttrVariadicParam));
-  uint64_t* refBits = &m_inoutBitVal;
-  // Grow args, if necessary.
-  if (qword) {
-    if (bit == 0) {
-      extShared()->m_inoutBitPtr = (uint64_t*)
-        realloc(extShared()->m_inoutBitPtr, qword * sizeof(uint64_t));
-    }
-    refBits = extShared()->m_inoutBitPtr + qword - 1;
-  }
-
-  if (bit == 0) {
-    *refBits = 0;
-  }
-
-  assertx(!(*refBits & (uint64_t(1) << bit)));
-  *refBits |= uint64_t(ref) << bit;
-  pBuilder.push_back(info);
-}
-
 /* This function is expected to be called after all calls to appendParam
  * are complete. After, m_paramCounts is initialized such that the least
  * significant bit of this->m_paramCounts indicates whether the last param
@@ -336,15 +307,21 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
  */
 void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
   assertx(m_paramCounts == 0);
-  assertx(fParams.size() || (!m_inoutBitVal &&
-                             (!extShared() || !extShared()->m_inoutBitPtr)));
+  assertx(m_inoutBits == 0);
 
+  // Initialize m_paramCounts.
   shared()->m_params = fParams;
   m_paramCounts = fParams.size() << 1;
   if (!(m_attrs & AttrVariadicParam)) {
     m_paramCounts |= 1;
   }
   assertx(numParams() == fParams.size());
+
+  // Build m_inoutBits.
+  for (auto i = 0u; i < fParams.size(); ++i) {
+    if (LIKELY(!fParams[i].isInOut())) continue;
+    m_inoutBits |= 1u << std::min(i, kInoutFastCheckBits);
+  }
 }
 
 void Func::registerInDataMap() {
@@ -480,47 +457,29 @@ Offset Func::getEntryForNumArgs(int numArgsPassed) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Parameters.
 
-bool Func::takesInOutParams() const {
-  if (m_inoutBitVal) {
-    return true;
-  }
-
-  if (UNLIKELY(numParams() > kBitsPerQword)) {
-    auto limit = argToQword(numParams() - 1);
-    assertx(limit >= 0);
-    for (int i = 0; i <= limit; ++i) {
-      if (extShared()->m_inoutBitPtr[i]) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
 bool Func::isInOut(int32_t arg) const {
-  const uint64_t* ref = &m_inoutBitVal;
   assertx(arg >= 0);
-  if (UNLIKELY(arg >= kBitsPerQword)) {
-    if (arg >= numParams()) {
-      return false;
-    }
-    ref = &extShared()->m_inoutBitPtr[argToQword(arg)];
+  if (LIKELY(arg < kInoutFastCheckBits)) {
+    return m_inoutBits & (1ull << arg);
   }
-  int bit = (uint32_t)arg % kBitsPerQword;
-  return *ref & (1ull << bit);
+
+  if (arg >= numParams()) return false;
+  return params()[arg].isInOut();
 }
 
 uint32_t Func::numInOutParams() const {
-  uint32_t count = folly::popcount(m_inoutBitVal);
-
-  if (UNLIKELY(numParams() > kBitsPerQword)) {
-    auto limit = argToQword(numParams() - 1);
-    assertx(limit >= 0);
-    for (int i = 0; i <= limit; ++i) {
-      count += folly::popcount(extShared()->m_inoutBitPtr[i]);
-    }
+  uint32_t count = folly::popcount(m_inoutBits);
+  if (LIKELY(static_cast<int32_t>(m_inoutBits) >= 0)) {
+    // The sign bit is not set, so only args 0..31 can possibly be inout.
+    return count;
   }
-  return count;
+
+  assertx(numParams() > kInoutFastCheckBits);
+  for (auto i = numParams() - 1; i >= kInoutFastCheckBits; --i) {
+    count += params()[i].isInOut() ? 1 : 0;
+  }
+  // Minus one for the sign bit.
+  return count - 1;
 }
 
 uint32_t Func::numInOutParamsForArgs(int32_t numArgs) const {
@@ -776,7 +735,6 @@ void Func::SharedData::atomicRelease() {
 }
 
 Func::ExtendedSharedData::~ExtendedSharedData() {
-  free(m_inoutBitPtr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

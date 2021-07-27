@@ -1156,29 +1156,28 @@ std::string show(const LocalRange& range) {
   );
 }
 
-std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgsRaw,
-                 std::string asyncEagerLabel, const StringData* ctx) {
-  auto const inoutArgs = [&] {
-    if (!inoutArgsRaw) return std::string{"\"\""};
-    std::string out = "\"";
-    uint8_t tmp = 0;
-    for (int i = 0; i < fca.numArgs; ++i) {
-      if (i % 8 == 0) tmp = *(inoutArgsRaw++);
-      out += ((tmp >> (i % 8)) & 1) ? "1" : "0";
-    }
-    out += "\"";
-    return out;
-  }();
+std::string show(uint32_t numArgs, const uint8_t* inoutArgs) {
+  if (!inoutArgs) return "";
+  std::string out = "";
+  uint8_t tmp = 0;
+  for (auto i = 0; i < numArgs; ++i) {
+    if (i % 8 == 0) tmp = *(inoutArgs++);
+    out += ((tmp >> (i % 8)) & 1) ? "1" : "0";
+  }
+  return out;
+}
 
+std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgs,
+                 std::string asyncEagerLabel, const StringData* ctx) {
   std::vector<std::string> flags;
   if (fca.hasUnpack()) flags.push_back("Unpack");
   if (fca.hasGenerics()) flags.push_back("Generics");
   if (fca.lockWhileUnwinding()) flags.push_back("LockWhileUnwinding");
   if (fca.skipRepack()) flags.push_back("SkipRepack");
   return folly::sformat(
-    "<{}> {} {} {} {} \"{}\"",
-    folly::join(' ', flags), fca.numArgs, fca.numRets, inoutArgs,
-    asyncEagerLabel, ctx ? ctx->data() : ""
+    "<{}> {} {} \"{}\" {} \"{}\"",
+    folly::join(' ', flags), fca.numArgs, fca.numRets,
+    show(fca.numArgs, inoutArgs), asyncEagerLabel, ctx ? ctx->data() : ""
   );
 }
 

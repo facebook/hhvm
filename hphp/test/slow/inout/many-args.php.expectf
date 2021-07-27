@@ -1,0 +1,15 @@
+int(31)
+int(31)
+int(32)
+int(32)
+int(70)
+string(95) "inoutArgument31() expects parameter 31 to be inout, but the call was not annotated with 'inout'"
+string(57) "inoutArgument31() expects exactly 70 parameters, 30 given"
+string(99) "inoutArgument31Last() expects parameter 31 to be inout, but the call was not annotated with 'inout'"
+string(61) "inoutArgument31Last() expects exactly 31 parameters, 30 given"
+string(95) "inoutArgument32() expects parameter 32 to be inout, but the call was not annotated with 'inout'"
+string(57) "inoutArgument32() expects exactly 70 parameters, 31 given"
+string(99) "inoutArgument32Last() expects parameter 32 to be inout, but the call was not annotated with 'inout'"
+string(61) "inoutArgument32Last() expects exactly 32 parameters, 31 given"
+string(95) "inoutArgument70() expects parameter 70 to be inout, but the call was not annotated with 'inout'"
+string(57) "inoutArgument70() expects exactly 70 parameters, 69 given"

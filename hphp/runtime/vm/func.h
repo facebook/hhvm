@@ -538,6 +538,11 @@ public:
   bool isInOut(int32_t arg) const;
 
   /*
+   * Return the raw m_inoutBits field.
+   */
+  uint64_t inOutBits() const;
+
+  /*
    * Whether any of the parameters to this function are inout parameters.
    */
   bool takesInOutParams() const;
@@ -1177,7 +1182,7 @@ public:
   OFF(maxStackCells)
   OFF(paramCounts)
   OFF(prologueTable)
-  OFF(inoutBitVal)
+  OFF(inoutBits)
   OFF(shared)
   OFF(unit)
   OFF(methCallerMethName)
@@ -1189,10 +1194,6 @@ public:
 
   static constexpr ptrdiff_t methCallerClsNameOff() {
     return offsetof(Func, m_u);
-  }
-
-  static constexpr ptrdiff_t extSharedInOutBitPtrOff() {
-    return offsetof(ExtendedSharedData, m_inoutBitPtr);
   }
 
   static constexpr ptrdiff_t sharedAllFlags() {
@@ -1376,12 +1377,9 @@ private:
     MaybeDataType m_hniReturnType;
     RuntimeCoeffects m_coeffectEscapes{RuntimeCoeffects::none()};
     int64_t m_dynCallSampleRate;
-    // Bits 64 and up of the inout-ness guards (the first 64 bits are in
-    // Func::m_inoutBitVal for faster access).
-    uint64_t* m_inoutBitPtr = nullptr;
     LowStringPtr m_docComment;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 288 : 312>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 280 : 304>(), "");
 
   /*
    * SharedData accessors for internal use.
@@ -1440,8 +1438,6 @@ private:
   void init(int numParams);
   void initPrologues(int numParams);
   void setFullName(int numParams);
-  void appendParam(bool ref, const ParamInfo& info,
-                   std::vector<ParamInfo>& pBuilder);
   void finishedEmittingParams(std::vector<ParamInfo>& pBuilder);
   void setNamedEntity(const NamedEntity*);
 
@@ -1647,14 +1643,13 @@ private:
   // Constants.
 
 private:
-  static constexpr int argToQword(int32_t arg) {
-    return static_cast<uint32_t>(arg) / kBitsPerQword - 1;
-  }
-  static constexpr int kBitsPerQword = 64;
   static constexpr int kMagic = 0xba5eba11;
   static constexpr intptr_t kNeedsFullName = 0x1;
 
 public:
+  // Use by m_inoutBits
+  static constexpr uint32_t kInoutFastCheckBits = 31;
+
   static std::atomic<bool>     s_treadmill;
   static std::atomic<uint32_t> s_totalClonedClosures;
 
@@ -1705,9 +1700,12 @@ private:
   // 3 free bits + 1 free byte
   RuntimeCoeffects m_requiredCoeffects{RuntimeCoeffects::none()};
   int16_t m_maxStackCells{0};
-  uint64_t m_inoutBitVal{0};
   Unit* const m_unit;
   AtomicSharedPtr<SharedData> m_shared;
+  // The lower 31 bits represent inout-ness of the corresponding parameter. The
+  // highest bit is set if there is an inout parameter beyond the 0..31 range.
+  // Initialized by Func::finishedEmittingParams.
+  uint32_t m_inoutBits{0};
   // Initialized by Func::finishedEmittingParams.  The least significant bit is
   // 1 if the last param is not variadic; the 31 most significant bits are the
   // total number of params (including the variadic param).
@@ -1717,8 +1715,8 @@ private:
   // should not be inherited from.
   AtomicLowPtr<uint8_t> m_prologueTable[1];
 };
-static constexpr size_t kFuncSize = debug ? (use_lowptr ? 80 : 112)
-                                          : (use_lowptr ? 72 : 104);
+static constexpr size_t kFuncSize = debug ? (use_lowptr ? 72 : 112)
+                                          : (use_lowptr ? 64 : 104);
 static_assert(CheckSize<Func, kFuncSize>(), "");
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -62,8 +62,8 @@ bool emitCallerInOutChecksKnown(IRGS& env, const Func* callee,
 
   for (auto i = 0; i < fca.numArgs; ++i) {
     if (callee->isInOut(i) != fca.isInOut(i)) {
-      auto const func = cns(env, callee);
-      gen(env, ThrowParamInOutMismatch, ParamData { i }, func);
+      auto const ioaData = InOutArgsData { fca.numArgs, fca.inoutArgs };
+      gen(env, ThrowInOutMismatch, ioaData, cns(env, callee));
       return false;
     }
   }
@@ -74,37 +74,44 @@ void emitCallerInOutChecksUnknown(IRGS& env, SSATmp* callee,
                                       const FCallArgs& fca) {
   if (!fca.enforceInOut()) return;
 
-  SSATmp* numParams = nullptr;
-  for (uint32_t i = 0; i * 8 < fca.numArgs; i += 8) {
-    uint64_t vals = 0;
-    for (uint32_t j = 0; j < 8 && (i + j) * 8 < fca.numArgs; ++j) {
-      vals |= ((uint64_t)fca.inoutArgs[i + j]) << (8 * j);
-    }
+  uint32_t inoutArgBits = 0;
+  for (auto i = 0u; i < fca.numArgs; ++i) {
+    if (!fca.isInOut(i)) continue;
+    inoutArgBits |= 1u << std::min(i, Func::kInoutFastCheckBits);
+  }
 
-    uint64_t bits = fca.numArgs - i * 8;
-    uint64_t mask = bits >= 64
-      ? std::numeric_limits<uint64_t>::max()
-      : (1UL << bits) - 1;
-
-    // CheckInOuts only needs to know the number of parameters when there are more
-    // than 64 args.
-    if (i == 0) {
-      numParams = cns(env, 64);
-    } else if (!numParams || numParams->hasConstVal()) {
-      numParams = gen(env, LdFuncNumParams, callee);
-    }
-
-    auto const crData = CheckInOutsData { i * 8, mask, vals };
+  if (static_cast<int32_t>(inoutArgBits) >= 0) {
+    // All inout arguments are in the 0..31 range, so check for the exact match.
+    auto const inoutParamBits = gen(env, LdFuncInOutBits, callee);
     ifThen(
       env,
       [&] (Block* taken) {
-        gen(env, CheckInOuts, taken, crData, callee, numParams);
+        auto const eq = gen(env, EqInt, inoutParamBits, cns(env, inoutArgBits));
+        gen(env, JmpZero, taken, eq);
       },
       [&] {
         hint(env, Block::Hint::Unlikely);
-        gen(env, ThrowParamInOutMismatchRange, crData, callee);
+
+        // Even if the bits are different we may not want an inout mismatch error
+        // message. It could be that the function was just called with too few arguments
+        // And if that is the case we want to show that error instead.
+        //
+        // But the reason we don't handle that is that it is handled later any way.
+        // And it will be very rare that we get here so no reason to make it performant.
+        //
+        // It could also be that we have packed args and in that case when unpacking them
+        // we will verify that they are not in positions of inout args.
+        //
+        // So we use CheckInOutMismatch that will check if the normal args matched.
+        // Otherwise we just continue and later code will handle things
+        auto const ioaData = InOutArgsData { fca.numArgs, fca.inoutArgs };
+        gen(env, CheckInOutMismatch, ioaData, callee);
       }
     );
+  } else {
+    // Passing inout arg beyond the 0..31 range, call the C++ helper.
+    auto const ioaData = InOutArgsData { fca.numArgs, fca.inoutArgs };
+    gen(env, CheckInOutMismatch, ioaData, callee);
   }
 }
 

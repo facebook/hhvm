@@ -53,10 +53,9 @@ void raiseNotice(const StringData* sd);
 [[noreturn]] void throwArrayKeyException(const ArrayData *ad, const StringData* key);
 std::string formatParamInOutMismatch(const char* fname, uint32_t index,
                                      bool funcByRef);
+void checkInOutMismatch(const Func* func, uint32_t numArgs,
+                        const uint8_t* inoutArgs);
 [[noreturn]] void throwParamInOutMismatch(const Func* func, uint32_t index);
-[[noreturn]] void throwParamInOutMismatchRange(const Func* func,
-                                               unsigned firstBit, uint64_t mask,
-                                               uint64_t vals);
 [[noreturn]] void throwInvalidUnpackArgs();
 [[noreturn]] void throwMissingArgument(const Func* func, int got);
 [[noreturn]] void throwMustBeMutableException(const Class* cls, const StringData* propName);

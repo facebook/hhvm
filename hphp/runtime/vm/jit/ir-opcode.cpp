@@ -296,6 +296,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
+  case CheckInOutMismatch:
   case CheckStackOverflow:
   case CheckSurpriseAndStack:
   case CheckSurpriseFlagsEnter:
@@ -451,6 +452,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowCallReifiedFunctionWithoutGenerics:
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:
+  case ThrowInOutMismatch:
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:
   case ThrowLateInitPropError:
@@ -458,8 +460,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowMissingThis:
   case ThrowOutOfBounds:
   case ThrowParameterWrongType:
-  case ThrowParamInOutMismatch:
-  case ThrowParamInOutMismatchRange:
   case ThrowMustBeMutableException:
   case ThrowMustBeReadOnlyException:
   case UnsetElem:
@@ -528,7 +528,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckImplicitContextNull:
   case CheckInit:
   case CheckInitMem:
-  case CheckInOuts:
   case CheckIter:
   case CheckKeysetOffset:
   case CheckLoc:
@@ -739,6 +738,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdFuncFromClsMeth:
   case LdFuncFromRClsMeth:
   case LdFuncFromRFunc:
+  case LdFuncInOutBits:
   case LdFuncName:
   case LdFuncNumParams:
   case LdFuncRequiredCoeffects:

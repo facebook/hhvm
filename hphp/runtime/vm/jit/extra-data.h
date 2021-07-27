@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/iter.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -2225,6 +2226,31 @@ struct FuncEntryData : IRExtraData {
   uint32_t argc;
 };
 
+struct InOutArgsData : IRExtraData {
+  InOutArgsData(uint32_t numArgs, const uint8_t* inoutArgs)
+    : numArgs(numArgs)
+    , inoutArgs(reinterpret_cast<uintptr_t>(inoutArgs))
+  {}
+
+  std::string show() const {
+    return HPHP::show(numArgs, reinterpret_cast<const uint8_t*>(inoutArgs));
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      std::hash<uint32_t>()(numArgs),
+      std::hash<uintptr_t>()(inoutArgs)
+    );
+  }
+
+  bool equals(const InOutArgsData& o) const {
+    return numArgs == o.numArgs && inoutArgs == o.inoutArgs;
+  }
+
+  uint32_t numArgs;
+  uintptr_t inoutArgs;
+};
+
 struct CheckInOutsData : IRExtraData {
   CheckInOutsData(unsigned firstBit, uint64_t mask, uint64_t vals)
     : firstBit(safe_cast<int>(firstBit))
@@ -2729,8 +2755,8 @@ X(ThrowMissingArg,              FuncArgData);
 X(RaiseTooManyArg,              FuncData);
 X(RaiseCoeffectsCallViolation,  FuncData);
 X(RaiseCoeffectsFunParamTypeViolation, ParamData);
-X(ThrowParamInOutMismatch,      ParamData);
-X(ThrowParamInOutMismatchRange, CheckInOutsData);
+X(CheckInOutMismatch,           InOutArgsData);
+X(ThrowInOutMismatch,           InOutArgsData);
 X(ThrowParameterWrongType,      FuncArgTypeData);
 X(CheckClsReifiedGenericMismatch,
                                 ClassData);
@@ -2820,7 +2846,6 @@ X(DecRef,                       DecRefData);
 X(DecRefNZ,                     DecRefData);
 X(ProfileDecRef,                DecRefData);
 X(LdTVAux,                      LdTVAuxData);
-X(CheckInOuts,                  CheckInOutsData);
 X(DbgAssertRefCount,            AssertReason);
 X(Unreachable,                  AssertReason);
 X(EndBlock,                     AssertReason);

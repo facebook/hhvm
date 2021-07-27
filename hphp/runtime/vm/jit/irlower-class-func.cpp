@@ -192,6 +192,13 @@ void cgLookupSPropSlot(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void cgLdFuncInOutBits(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const func = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << loadzlq{func[Func::inoutBitsOff()], dst};
+}
+
 void cgLdFuncNumParams(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const func = srcLoc(env, inst, 0).reg();

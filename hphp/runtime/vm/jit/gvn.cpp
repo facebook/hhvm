@@ -277,6 +277,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdClsFromClsMeth:
   case LdSmashableFunc:
   case LdFuncFromClsMeth:
+  case LdFuncInOutBits:
   case LdFuncVecLen:
   case LdClsMethod:
   case LdIfaceMethod:

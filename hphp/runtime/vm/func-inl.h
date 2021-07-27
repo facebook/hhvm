@@ -411,6 +411,14 @@ inline bool Func::hasVariadicCaptureParam() const {
   return m_attrs & AttrVariadicParam;
 }
 
+inline uint64_t Func::inOutBits() const {
+  return m_inoutBits;
+}
+
+inline bool Func::takesInOutParams() const {
+  return m_inoutBits != 0;
+}
+
 inline bool Func::hasParamsWithMultiUBs() const {
   return shared()->m_allFlags.m_hasParamsWithMultiUBs;
 }

@@ -353,6 +353,14 @@ SSATmp* simplifyEqFunc(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+
+SSATmp* simplifyLdFuncInOutBits(State& env, const IRInstruction* inst) {
+  auto const funcTmp = inst->src(0);
+  return funcTmp->hasConstVal(TFunc)
+    ? cns(env, funcTmp->funcVal()->inOutBits())
+    : nullptr;
+}
+
 SSATmp* simplifyLdFuncNumParams(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   return funcTmp->hasConstVal(TFunc)
@@ -2506,31 +2514,6 @@ SSATmp* simplifyCheckNonNull(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyCheckInOuts(State& env, const IRInstruction* inst) {
-  if (!inst->src(0)->hasConstVal()) return nullptr;
-
-  auto const func = inst->src(0)->funcVal();
-  auto const extra = inst->extra<CheckInOuts>();
-  auto i = extra->firstBit;
-  auto m = extra->mask;
-  auto v = extra->vals;
-  while (m) {
-    if (m & 1) {
-      if (func->isInOut(i) != (v & 1)) {
-        // This shouldn't happen - the mask/value are predictions
-        // based on previously seen Funcs; but we're now claiming its
-        // always this Func. But unreachable code mumble mumble.
-        return gen(env, Jmp, inst->taken());
-      }
-    }
-    m >>= 1;
-    v >>= 1;
-    i++;
-  }
-
-  return gen(env, Nop);
-}
-
 SSATmp* simplifyDefLabel(State& env, const IRInstruction* inst) {
   if (inst->numDsts() == 0) {
     return gen(env, Nop);
@@ -3759,7 +3742,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(MarkRDSAccess)
       X(CheckLoc)
       X(CheckMBase)
-      X(CheckInOuts)
       X(CheckStk)
       X(CheckType)
       X(CheckTypeMem)
@@ -3844,6 +3826,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdMonotypeVecElem)
       X(LdVecElem)
       X(MethodExists)
+      X(LdFuncInOutBits)
       X(LdFuncNumParams)
       X(FuncHasAttr)
       X(ClassHasAttr)

@@ -1721,7 +1721,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case OrdStr:
   case ChrInt:
   case CreateSSWH:
-  case CheckInOuts:
   case BeginCatch:
   case CheckSurpriseFlags:
   case CheckType:
@@ -1812,6 +1811,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsTypeCnsClsName:
   case ProfileSwitchDest:
   case LdFuncCls:
+  case LdFuncInOutBits:
   case LdFuncNumParams:
   case LdFuncName:
   case LdMethCallerName:
@@ -1907,6 +1907,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
+  case CheckInOutMismatch:
   case ConvTVToStr:
   case ConvObjToStr:
   case Count:      // re-enters on CountableClass
@@ -1968,12 +1969,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowCallReifiedFunctionWithoutGenerics:
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:
+  case ThrowInOutMismatch:
   case ThrowLateInitPropError:
   case ThrowMissingArg:
   case ThrowMissingThis:
   case ThrowParameterWrongType:
-  case ThrowParamInOutMismatch:
-  case ThrowParamInOutMismatchRange:
   case ArrayMarkLegacyShallow:
   case ArrayMarkLegacyRecursive:
   case ThrowMustBeMutableException:

@@ -258,21 +258,6 @@ Instruction set
   a fixed threshold). If it's not (i.e. such translation has reached the
   "hotness threshold"), then branch to block B.
 
-| CheckInOuts<firstBit,mask,vals>, ND, S(Func) S(Int), B
-
-  Perform inout-ness guard checks. Operands:
-
-    S0 - function pointer for the callee
-    S1 - num params expected in the func
-    firstBit - first bit to check, must be a multiple of 64
-    mask - mask to check
-    vals - values to check
-
-  For each bit `i` set in the mask, checks whether inout-ness of parameter
-  `firstBit + i` of S0 is equal to the bit `i` of vals.
-
-  If any of the checks fail, branch to block B.
-
 | EndGuards, ND, NA, NF
 
   A no-op at runtime, this instruction serves to mark the end of the initial
@@ -1303,6 +1288,10 @@ To string conversions:
 
   Returns the value of func->numParams().
 
+| LdFuncInOutBits, D(Int), S(Func), NF
+
+  Loads the Func::m_inoutBits field.
+
 | LdARFunc, D(Func), S(FramePtr), NF
 
   Loads the result of ar->func() where ar is S0.
@@ -2114,17 +2103,16 @@ To string conversions:
   Throws a BadMethodCallException to indicate that S0 was called without reified
   generics.
 
-| ThrowParamInOutMismatch<paramIndex>, ND, S(Func), T
+| CheckInOutMismatch<numArgs, inoutArgs>, ND, S(Func), NF
 
-  Throw an exception indicating that the inout-ness of a parameter was
-  incorrectly annotated at the callsite.
+| ThrowInOutMismatch<numArgs, inoutArgs>, ND, S(Func), T
 
-| ThrowParamInOutMismatchRange<firstBit,mask,vals>, ND, S(Func), T
+  Throw an exception if the inout-ness of passed arguments given by `inoutArgs'
+  does not match the inout-ness of parameters of the callee S0. There must be
+  a mismatch if ThrowInOutMismatch is used.
 
-  Throw an exception indicating that the inout-ness of at least one parameter
-  within a given range was incorrectly annotated at the callsite.
-
-  See CheckInOuts for meaning of firstBit, mask and vals.
+  These don't verify that if there are packed args they are not in a position
+  that require inout. You will still need verify that when unpacking.
 
 | RaiseForbiddenDynCall, ND, S(Func), NF
 

@@ -184,6 +184,7 @@ bool canDCE(IRInstruction* inst) {
   case LdLazyClsName:
   case LdLazyCls:
   case LdFuncCls:
+  case LdFuncInOutBits:
   case LdFuncNumParams:
   case LdFuncName:
   case LdMethCallerName:
@@ -342,7 +343,6 @@ bool canDCE(IRInstruction* inst) {
   case CheckInit:
   case CheckInitMem:
   case CheckCold:
-  case CheckInOuts:
   case EndGuards:
   case CheckNonNull:
   case DivDbl:
@@ -519,6 +519,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
+  case CheckInOutMismatch:
   case PrintStr:
   case PrintInt:
   case PrintBool:
@@ -654,8 +655,7 @@ bool canDCE(IRInstruction* inst) {
   case ThrowMissingArg:
   case ThrowMissingThis:
   case ThrowParameterWrongType:
-  case ThrowParamInOutMismatch:
-  case ThrowParamInOutMismatchRange:
+  case ThrowInOutMismatch:
   case ThrowMustBeMutableException:
   case ThrowMustBeReadOnlyException:
   case StMBase:

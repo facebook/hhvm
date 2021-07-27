@@ -291,7 +291,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   bool const needsExtendedSharedData =
     isNative ||
-    params.size() > 64 ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
     m_bclen >= Func::kSmallDeltaLimit ||
     m_sn >= Func::kSmallDeltaLimit ||
@@ -336,7 +335,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     if (pi.isVariadic()) {
       pi.builtinType = KindOfVec;
     }
-    f->appendParam(params[i].isInOut(), pi, fParams);
+    fParams.push_back(pi);
     auto const& fromUBs = params[i].upperBounds;
     if (!fromUBs.empty()) {
       auto& ub = f->extShared()->m_paramUBs[i];

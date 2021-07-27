@@ -82,16 +82,6 @@ private:
   Optional<RuntimeCoeffects> m_coeffects;
 };
 
-inline void callerInOutChecks(const Func* func, const FCallArgs& fca) {
-  for (auto i = 0; i < fca.numArgs; ++i) {
-    auto const inout = func->isInOut(i);
-    if (inout != fca.isInOut(i)) {
-      SystemLib::throwInvalidArgumentExceptionObject(
-        formatParamInOutMismatch(func->fullName()->data(), i, inout));
-    }
-  }
-}
-
 inline void callerDynamicCallChecks(const Func* func,
                                     bool allowDynCallNoPointer = false) {
   auto dynCallable = func->isDynamicallyCallable();

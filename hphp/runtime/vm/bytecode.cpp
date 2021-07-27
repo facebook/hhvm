@@ -3683,7 +3683,7 @@ template<bool dynamic, typename Ctx>
 TCA fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
               const Func* func, Ctx&& ctx, bool logAsDynamicCall = true,
               bool isCtor = false) {
-  if (fca.enforceInOut()) callerInOutChecks(func, fca);
+  if (fca.enforceInOut()) checkInOutMismatch(func, fca.numArgs, fca.inoutArgs);
   if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
   checkStack(vmStack(), func, 0);
 

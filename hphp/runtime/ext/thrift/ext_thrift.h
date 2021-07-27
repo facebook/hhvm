@@ -152,6 +152,17 @@ struct RpcOptions {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct TClientBufferedStreamError {
+ public:
+  TClientBufferedStreamError() {}
+  TClientBufferedStreamError(std::unique_ptr<folly::IOBuf> encodedErrorMsg) :
+      errorMsg_(std::move(encodedErrorMsg)), isEncoded_(true) {}
+  TClientBufferedStreamError(std::string errorStr) :
+      errorMsg_(folly::IOBuf::copyBuffer(errorStr, errorStr.size())), isEncoded_(false) {}
+  std::unique_ptr<folly::IOBuf> errorMsg_;
+  bool isEncoded_;
+};
+
 const StaticString s_TClientBufferedStream("TClientBufferedStream");
 
 struct TClientBufferedStream {
@@ -162,7 +173,7 @@ struct TClientBufferedStream {
 
   using BufferAndErrorPair = std::pair<
       std::vector<std::unique_ptr<folly::IOBuf>>,
-      std::unique_ptr<folly::IOBuf>>;
+      TClientBufferedStreamError>;
 
   void sweep() {
     endStream();
@@ -190,7 +201,8 @@ struct TClientBufferedStream {
         (payloadDataSize_ >= kRequestCreditPayloadSize);
   }
 
-  std::unique_ptr<folly::IOBuf> getErrorMessage(folly::exception_wrapper ew) {
+  TClientBufferedStreamError getErrorMessage(
+      folly::exception_wrapper ew) {
     std::unique_ptr<folly::IOBuf> msgBuffer;
     std::string msgStr = ew.what().toStdString();
     ew.handle(
@@ -221,19 +233,23 @@ struct TClientBufferedStream {
           }
         },
         [&](apache::thrift::detail::EncodedStreamRpcError& err) {
-          msgBuffer = std::move(err.encoded);
+          apache::thrift::StreamRpcError streamRpcError;
+          apache::thrift::CompactProtocolReader reader;
+          reader.setInput(err.encoded.get());
+          streamRpcError.read(&reader);
+          msgStr = streamRpcError.what_utf8_ref().value_or("");
         },
         [](...) {});
 
     if (msgBuffer) {
-      return msgBuffer;
+      return TClientBufferedStreamError(std::move(msgBuffer));
     }
-    return folly::IOBuf::copyBuffer(msgStr, msgStr.size());
+    return TClientBufferedStreamError(msgStr);
   }
 
   BufferAndErrorPair clientQueueToVec() {
     std::vector<std::unique_ptr<folly::IOBuf>> bufferVec;
-    std::unique_ptr<folly::IOBuf> error;
+    TClientBufferedStreamError error;
     while (!queue_.empty()) {
       auto& payload = queue_.front();
       if (!payload.hasValue() && !payload.hasException()) {
@@ -314,7 +330,7 @@ namespace HPHP {
   void finish(
       thrift::TClientBufferedStream::BufferAndErrorPair bufferAndError) {
     buffer_ = std::move(bufferAndError.first);
-    errorMsg_ = std::move(bufferAndError.second);
+    error_ = std::move(bufferAndError.second);
     markAsFinished();
   }
 
@@ -334,11 +350,18 @@ namespace HPHP {
               0 // error code UNKNOWN
               ));
     }
-    String errorStr;
-    if (errorMsg_) {
-      errorStr = ioBufToString(*errorMsg_);
-    } else {
-      errorStr = null_string;
+
+    String errorStr = null_string;
+    if (error_.errorMsg_) {
+      if (error_.isEncoded_) {
+        // Encoded stream exceptions need to be deserialized by generated code.
+        // Adding it at the end of the buffer vec so that it will be decoded
+        // along with other payloads and will throw exception after returning
+        // all payloads to client.
+        buffer_.push_back(std::move(error_.errorMsg_));
+      } else {
+        errorStr = ioBufToString(*error_.errorMsg_);
+      }
     }
 
     Array bufferVec;
@@ -352,7 +375,8 @@ namespace HPHP {
       bufferVec = resArr.toArray();
     }
     tvCopy(
-        make_array_like_tv(make_vec_array(bufferVec, errorStr).detach()), result);
+        make_array_like_tv(make_vec_array(bufferVec, errorStr).detach()),
+        result);
   }
 
  private:
@@ -360,7 +384,7 @@ namespace HPHP {
 
   // any error while processing queue, this should be returned as error message
   // along with the buffer and should be sequenced after any received payloads
-  std::unique_ptr<folly::IOBuf> errorMsg_;
+  thrift::TClientBufferedStreamError error_;
 
   // Unexpected server error which should be thrown immediately
   std::unique_ptr<folly::IOBuf> serverError_;

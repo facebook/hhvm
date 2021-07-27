@@ -19,44 +19,53 @@ fi
 
 set -x
 
+# 'cargo update' ensures the existing Cargo.lock files contain the latest versions
+
 # ffi.h
-(cd hphp/hack/src/utils/ffi&& \
+(cd hphp/hack/src/utils/ffi && \
+     cargo update && \
      cbindgen --config ./cbindgen_ffi.toml \
               --crate ffi \
               --output "$top/hphp/hack/src/utils/ffi/ffi.h")
 
 #  hhbc_id.h
 (cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhbc_id && \
+     cargo update && \
      cbindgen --config ../../cbindgen_hhbc_id.toml \
               --crate hhbc_by_ref_hhbc_id \
               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_id.h")
 
 #  hhbc_label.h
 (cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_label && \
+     cargo update && \
      cbindgen --config ../../cbindgen_hhbc_label.toml \
               --crate hhbc_by_ref_label \
               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_label.h")
 
 #  hhbc_local.h
 (cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_local && \
+     cargo update && \
      cbindgen --config ../../cbindgen_hhbc_local.toml \
               --crate hhbc_by_ref_local \
               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_local.h")
 
-#  hhbc_local.h
+#  hhbc_runtime.h
 (cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_runtime && \
+     cargo update && \
      cbindgen --config ../../cbindgen_hhbc_runtime.toml \
               --crate hhbc_by_ref_runtime \
               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_runtime.h")
 
 # hhbc_ast.h
 (cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhbc_ast && \
+     cargo update && \
      cbindgen --config ../../cbindgen_hhbc_ast.toml \
               --crate hhbc_by_ref_hhbc_ast \
               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_ast.h")
 
 # hhbc_instruction_sequence.h
 (cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_instruction_sequence && \
+     cargo update && \
      cbindgen --config ../../cbindgen_hhbc_instruction_sequence.toml \
               --crate hhbc_by_ref_instruction_sequence \
               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_instruction_sequence.h")

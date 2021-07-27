@@ -56,7 +56,7 @@ $xmlstr = "<?xml version='1.0' standalone='yes'?>
 
 echo "Test 1: accessing single nodes from php
 ";
-$dom = new domDocument;
+$dom = new DOMDocument;
 $dom->loadXML($xmlstr);
 if(!$dom) {
   echo "Error while parsing the document
@@ -132,7 +132,7 @@ print_node_list($children);
 
 echo "--------- Add child to root
 ";
-$myelement = new domElement("Silly", "Symphony");
+$myelement = new DOMElement("Silly", "Symphony");
 $newchild = $rootnode->appendChild($myelement);
 print_node($newchild);
 print $dom->saveXML();

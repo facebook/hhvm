@@ -8,7 +8,7 @@ function adjustDoctype($xml) {
 
 <<__EntryPoint>>
 function main_1674() {
-$dom = new domdocument;
+$dom = new DOMDocument;
 $html = <<<EOM
 <html><head>
 <title>Hello world</title>

@@ -5,7 +5,7 @@
 function main_entry(): void {
   echo "Test 8: Stream Wrapper Includes ";
   include("prepare.inc");
-  $xsl = new domDocument;
+  $xsl = new DOMDocument;
   $xsl->load(dirname(__FILE__)."/streamsinclude.xsl");
   if(!$xsl) {
     echo "Error while parsing the document\n";

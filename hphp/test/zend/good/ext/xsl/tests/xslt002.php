@@ -4,7 +4,7 @@ echo "Test 2: Transform To HTML String";
 include("prepare.inc");
 // changing output method to html
 $xsl = XSLTPrepare::getXSL();
-$xp = new domxpath($xsl);
+$xp = new DOMXPath($xsl);
 $res = $xp->query("/xsl:stylesheet/xsl:output/@method");
 if ($res->length != 1) {
     print "No or more than one xsl:output/@method found";

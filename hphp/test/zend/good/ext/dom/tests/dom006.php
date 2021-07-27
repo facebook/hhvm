@@ -1,6 +1,6 @@
 <?hh
 
-class books extends domDocument {
+class books extends DOMDocument {
     function addBook($title, $author) {
         $titleElement = $this->createElement("title");
         $titleElement->appendChild($this->createTextNode($title));

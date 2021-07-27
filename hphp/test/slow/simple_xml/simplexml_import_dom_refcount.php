@@ -1,7 +1,7 @@
 <?hh
 
 function main() {
-  $dom = new domDocument;
+  $dom = new DOMDocument;
   $string = <<<END
 <a>
   <b>c</b>

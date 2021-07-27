@@ -1,11 +1,11 @@
 <?hh <<__EntryPoint>> function main(): void {
-$dom = new domDocument;
+$dom = new DOMDocument;
 $dom->load(dirname(__FILE__)."/area_name.xml");
 if(!$dom) {
   echo "Error while parsing the document\n";
   exit;
 }
-$xsl = new domDocument;
+$xsl = new DOMDocument;
 $xsl->load(dirname(__FILE__)."/area_list.xsl");
 if(!$xsl) {
   echo "Error while parsing the document\n";

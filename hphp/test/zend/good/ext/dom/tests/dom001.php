@@ -5,7 +5,7 @@ function main_entry(): void {
   require_once("dom_test.inc");
 
   echo "Test 1: accessing single nodes from php\n";
-  $dom = new domDocument;
+  $dom = new DOMDocument;
   $dom->loadXML(getXmlStr());
   if(!$dom) {
     echo "Error while parsing the document\n";
@@ -67,7 +67,7 @@ function main_entry(): void {
   print_node_list($children);
 
   echo "--------- Add child to root\n";
-  $myelement = new domElement("Silly", "Symphony");
+  $myelement = new DOMElement("Silly", "Symphony");
   $newchild = $rootnode->appendChild($myelement);
   print_node($newchild);
   print $dom->saveXML();

@@ -1,7 +1,7 @@
 <?hh <<__EntryPoint>> function main(): void {
 echo "Test 10: EXSLT Support";
 
-$dom = new domDocument();
+$dom = new DOMDocument();
   $dom->load(dirname(__FILE__)."/exslt.xsl");
   $proc = new xsltprocessor;
   $xsl = $proc->importStylesheet($dom);

@@ -6,6 +6,8 @@ function foo(...$args) {
 }
 
 class lol {}
+
+<<__DynamicallyCallable>>
 function bar($_1, $_2, inout $_3) {
   var_dump(varray[$_1, $_2, $_3]);
   $x = new lol();

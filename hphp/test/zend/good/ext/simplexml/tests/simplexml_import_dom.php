@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$dom = new domDocument;
+$dom = new DOMDocument;
 $dom->load(dirname(__FILE__)."/book.xml");
 if(!$dom) {
   echo "Error while parsing the document\n";

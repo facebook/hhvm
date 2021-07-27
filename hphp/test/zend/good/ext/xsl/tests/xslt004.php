@@ -3,7 +3,7 @@
 echo "Test 4: Checking UTF8 Output";
 include("prepare.inc");
 $xsl = XSLTPrepare::getXSL();
-$xp = new domxpath($xsl);
+$xp = new DOMXPath($xsl);
 $res = $xp->query("/xsl:stylesheet/xsl:output/@encoding");
 if ($res->length != 1) {
     print "No or more than one xsl:output/@encoding found";

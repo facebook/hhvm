@@ -5,7 +5,7 @@
   }
 <<__EntryPoint>> function main(): void {
 print "Test 11: php:function Support\n";
-$dom = new domDocument();
+$dom = new DOMDocument();
   $dom->load(dirname(__FILE__)."/xslt011.xsl");
   $proc = new xsltprocessor;
   $xsl = $proc->importStylesheet($dom);
@@ -27,7 +27,7 @@ $dom = new domDocument();
       if ($id && is_array($id)) {
           return $id[0];
       } else {
-          $dom = new domdocument;
+          $dom = new DOMDocument;
           $dom->loadXML("<root>this is from an external DomDocument</root>");
           return $dom->documentElement;
       }

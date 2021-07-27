@@ -180,13 +180,16 @@ pub fn from_ast<'ast, 'arena, 'decl, D: DeclProvider<'decl>>(
 
     Ok(HhasProperty {
         name: pid,
-        attributes,
+        attributes: alloc.alloc_slice_fill_iter(attributes.into_iter()).into(),
         type_info,
-        initial_value,
-        initializer_instrs,
+        initial_value: initial_value.into(),
+        initializer_instrs: initializer_instrs.into(),
         flags: hhas_property_flags,
         visibility: args.visibility,
-        doc_comment: args.doc_comment,
+        doc_comment: args
+            .doc_comment
+            .map(|pstr| ffi::Str::from(alloc.alloc_str(&pstr.0.1)))
+            .into(),
     })
 }
 

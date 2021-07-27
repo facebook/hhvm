@@ -1605,6 +1605,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "decl_provider",
+ "ffi",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_expression",
@@ -1893,6 +1894,7 @@ name = "hhbc_by_ref_hhas_property"
 version = "0.0.0"
 dependencies = [
  "bitflags",
+ "ffi",
  "hhbc_by_ref_hhas_attribute",
  "hhbc_by_ref_hhas_type",
  "hhbc_by_ref_hhbc_id",

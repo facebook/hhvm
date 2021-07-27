@@ -38,6 +38,18 @@ impl<U> Maybe<U> {
             Nothing => Nothing,
         }
     }
+
+    pub const fn is_just(&self) -> bool {
+        matches!(self, Just(_))
+    }
+
+    #[inline]
+    pub fn map<T, F: FnOnce(U) -> T>(self, f: F) -> Maybe<T> {
+        match self {
+            Just(x) => Just(f(x)),
+            Nothing => Nothing,
+        }
+    }
 }
 
 impl<U> std::convert::From<Option<U>> for Maybe<U> {

@@ -389,8 +389,8 @@ fn print_ctx_constant<W: Write>(
 }
 
 fn print_property_doc_comment<W: Write>(w: &mut W, p: &HhasProperty) -> Result<(), W::Error> {
-    if let Some(s) = p.doc_comment.as_ref() {
-        w.write(triple_quote_string(&(s.0).1))?;
+    if let Just(s) = p.doc_comment.as_ref() {
+        w.write(triple_quote_string(s.as_str()))?;
         w.write(" ")?;
     }
     Ok(())
@@ -463,12 +463,12 @@ fn print_property<W: Write>(
     w.write(property.name.to_raw_string())?;
     w.write(" =\n    ")?;
     let initial_value = property.initial_value.as_ref();
-    if class_def.is_closure() || initial_value == Some(&TypedValue::Uninit) {
+    if class_def.is_closure() || initial_value == Just(&TypedValue::Uninit) {
         w.write("uninit;")
     } else {
         triple_quotes(w, |w| match initial_value {
-            None => w.write("N;"),
-            Some(value) => print_adata(ctx, w, &value),
+            Nothing => w.write("N;"),
+            Just(value) => print_adata(ctx, w, &value),
         })?;
         w.write(";")
     }

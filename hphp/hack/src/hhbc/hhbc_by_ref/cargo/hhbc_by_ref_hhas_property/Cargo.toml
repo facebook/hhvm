@@ -9,6 +9,7 @@ path = "../../hhas_property.rs"
 
 [dependencies]
 bitflags = "1.2"
+ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_hhas_attribute = { path = "../hhbc_by_ref_hhas_attribute" }
 hhbc_by_ref_hhas_type = { path = "../hhbc_by_ref_hhas_type" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }

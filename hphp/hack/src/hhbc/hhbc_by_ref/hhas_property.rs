@@ -4,10 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bitflags::bitflags;
+use ffi::{Maybe, Slice, Str};
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhbc_id as hhbc_id;
 use hhbc_by_ref_instruction_sequence::InstrSeq;
-use oxidized::{aast_defs::Visibility, doc_comment::DocComment};
+use oxidized::aast_defs::Visibility;
 
 bitflags! {
     pub struct HhasPropertyFlags: u16 {
@@ -29,12 +30,12 @@ bitflags! {
 pub struct HhasProperty<'arena> {
     pub name: hhbc_id::prop::PropType<'arena>,
     pub flags: HhasPropertyFlags,
-    pub attributes: Vec<HhasAttribute<'arena>>,
+    pub attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub visibility: Visibility,
-    pub initial_value: Option<hhbc_by_ref_runtime::TypedValue<'arena>>,
-    pub initializer_instrs: Option<InstrSeq<'arena>>,
+    pub initial_value: Maybe<hhbc_by_ref_runtime::TypedValue<'arena>>,
+    pub initializer_instrs: Maybe<InstrSeq<'arena>>,
     pub type_info: hhbc_by_ref_hhas_type::Info,
-    pub doc_comment: Option<DocComment>,
+    pub doc_comment: Maybe<Str<'arena>>,
 }
 impl<'arena> HhasProperty<'arena> {
     pub fn is_private(&self) -> bool {

@@ -519,7 +519,7 @@ where
 {
     if properties
         .iter()
-        .any(|p: &HhasProperty| p.initializer_instrs.is_some() && filter(p))
+        .any(|p: &HhasProperty| p.initializer_instrs.is_just() && filter(p))
     {
         let instrs = InstrSeq::gather(
             alloc,
@@ -529,8 +529,7 @@ where
                     if filter(p) {
                         // TODO(hrust) this clone can be avoided by wrapping initializer_instrs by Rc
                         // and also support Rc in InstrSeq
-                        p.initializer_instrs
-                            .as_ref()
+                        std::convert::Into::<Option<_>>::into(p.initializer_instrs.as_ref())
                             .map(|i| InstrSeq::clone(alloc, i))
                     } else {
                         None

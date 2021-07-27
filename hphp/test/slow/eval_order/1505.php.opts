@@ -1,1 +1,2 @@
 -vEval.NoticeOnCoerceForMath=0
+-vEval.NoticeOnCoerceForCmp=0

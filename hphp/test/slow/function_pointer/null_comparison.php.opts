@@ -1,1 +1,2 @@
 -vEval.Jit=false
+-vEval.NoticeOnCoerceForCmp=0

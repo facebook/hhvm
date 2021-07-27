@@ -1,1 +1,2 @@
 -vEval.NoticeOnCoerceForCmp=0
+-vEval.NoticeOnCoerceForEq=0

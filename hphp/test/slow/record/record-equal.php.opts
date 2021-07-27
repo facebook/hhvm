@@ -1,1 +1,2 @@
 -vEval.HackRecords=true
+-vEval.NoticeOnCoerceForEq=0

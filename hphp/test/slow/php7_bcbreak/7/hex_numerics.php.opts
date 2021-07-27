@@ -1,2 +1,3 @@
 -vEval.NoticeOnCoerceForIncDec=0
 -vEval.NoticeOnCoerceForMath=0
+-vEval.NoticeOnCoerceForEq=0

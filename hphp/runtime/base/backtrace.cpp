@@ -178,7 +178,8 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
     prevFP->setFunc(ifr.func);
     prevFP->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
       ifr.callOff,
-      1 << ActRec::LocalsDecRefd  // don't attempt to read locals
+      // Don't attempt to read locals. Mark as inlined for skipInlined().
+      (1U << ActRec::LocalsDecRefd) | (1U << ActRec::IsInlined)
     );
 
     ctx.prevIFID = stk->frame;
@@ -242,7 +243,8 @@ BTFrame getPrevActRec(
     prev.fp->setFunc(ifr.func);
     prev.fp->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
       ifr.callOff,
-      1 << ActRec::LocalsDecRefd  // don't attempt to read locals
+      // Don't attempt to read locals. Mark as inlined for skipInlined().
+      (1U << ActRec::LocalsDecRefd) | (1U << ActRec::IsInlined)
     );
     prev.pc = fp->callOffset();
 

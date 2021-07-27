@@ -1391,7 +1391,7 @@ struct RuntimeOption {
   /* 0 nothing, 1 notice, 2 error */                                    \
   F(int32_t, NoticeOnCoerceForMath, 1)                                  \
   /* 0 nothing, 1 notice, 2 error */                                    \
-  F(int32_t, NoticeOnCoerceForCmp, 0)                                   \
+  F(int32_t, NoticeOnCoerceForCmp, 1)                                   \
   /* 0 nothing, 1 notice, 2 error, 3 behaviour change */                \
   F(int32_t, NoticeOnCoerceForEq, 0)                                    \
   F(string, TaoMigrationOverride, std::string(""))                      \

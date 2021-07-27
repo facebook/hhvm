@@ -81,6 +81,9 @@ final class RpcOptions {
   public function setProcessingTimeout(int $processing_timeout): RpcOptions;
 
   <<__Native>>
+  public function setChunkTimeout(int $chunk_timeout): RpcOptions;
+
+  <<__Native>>
   public function setInteractionId(InteractionId $interaction_id): RpcOptions;
 
   <<__Native>>

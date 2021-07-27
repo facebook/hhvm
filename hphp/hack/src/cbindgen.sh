@@ -12,7 +12,7 @@ fi
 if ! command -v "cbindgen" &> /dev/null
 then
     echo "It seems cbindgen is not in the PATH."
-    echo "Try 'cargo --force install cbindgen' and then run this script again."
+    echo "Try 'cargo install --force cbindgen' and then run this script again."
     echo "(You may need to 'export https_proxy=http://fwdproxy:8080' to install cbindgen)."
     exit 2
 fi

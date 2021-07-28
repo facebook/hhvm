@@ -81,9 +81,6 @@ final class RpcOptions {
   public function setProcessingTimeout(int $processing_timeout): RpcOptions;
 
   <<__Native>>
-  public function setChunkTimeout(int $chunk_timeout): RpcOptions;
-
-  <<__Native>>
   public function setInteractionId(InteractionId $interaction_id): RpcOptions;
 
   <<__Native>>
@@ -94,16 +91,11 @@ final class RpcOptions {
 final class TClientBufferedStream {
   public function __construct(): void {}
 
-  public async function gen<TStreamResponse>(
-    (function(?string, ?Exception): TStreamResponse) $streamDecode,
-  ): HH\AsyncGenerator<null, TStreamResponse, void> {
+  public async function gen(): HH\AsyncGenerator<null, string, void> {
     while (true) {
       $timer = WallTimeOperation::begin();
       try {
         list($buffer, $ex_msg) = await $this->genNext();
-      } catch (Exception $ex) {
-        $streamDecode(null, $ex);
-        break;
       } finally {
         $timer->end();
       }
@@ -114,15 +106,14 @@ final class TClientBufferedStream {
       }
       if ($buffer !== null) {
         foreach ($buffer as $value) {
-          yield $streamDecode($value, null);
+          yield $value;
         }
       }
       if ($ex_msg !== null) {
-        $streamDecode(
-          null,
-          new TApplicationException($ex_msg, TApplicationException::UNKNOWN),
+        throw new TApplicationException(
+          $ex_msg,
+          TApplicationException::UNKNOWN,
         );
-        break;
       }
     }
   }

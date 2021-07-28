@@ -157,12 +157,6 @@ Object HHVM_METHOD(RpcOptions, setProcessingTimeout, int64_t processing_timeout)
   return Object(this_);
 }
 
-Object HHVM_METHOD(RpcOptions, setChunkTimeout, int64_t chunk_timeout) {
-  auto data = RpcOptions::GetDataOrThrowException(this_);
-  data->rpcOptions.setChunkTimeout(std::chrono::milliseconds(chunk_timeout));
-  return Object(this_);
-}
-
 Object HHVM_METHOD(RpcOptions, setInteractionId, const Object& interaction_id) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   auto interaction = Native::data<InteractionId>(interaction_id.get());
@@ -223,7 +217,6 @@ static struct ThriftExtension final : Extension {
     HHVM_ME(RpcOptions, setLoggingContext);
     HHVM_ME(RpcOptions, setOverallTimeout);
     HHVM_ME(RpcOptions, setProcessingTimeout);
-    HHVM_ME(RpcOptions, setChunkTimeout);
     HHVM_ME(RpcOptions, setInteractionId);
     HHVM_ME(RpcOptions, __toString);
 

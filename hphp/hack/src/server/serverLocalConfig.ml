@@ -37,7 +37,6 @@ module Watchman = struct
     }
 
   let load ~current_version ~default config =
-    let prefix = Some "watchman" in
     let use_watchman =
       bool_if_min_version
         "use_watchman"
@@ -47,35 +46,31 @@ module Watchman = struct
     in
     let enabled =
       bool_if_min_version
-        "enabled"
-        ~prefix
+        "watchman_enabled"
         ~default:use_watchman
         ~current_version
         config
     in
     let init_timeout =
-      int_ "init_timeout" ~prefix ~default:default.init_timeout config
+      int_ "watchman_init_timeout" ~default:default.init_timeout config
     in
-    let sockname = string_opt "sockname" ~prefix config in
+    let sockname = string_opt "watchman_sockname" config in
     let subscribe =
       bool_if_min_version
-        "subscribe_v2"
-        ~prefix
+        "watchman_subscribe_v2"
         ~default:default.subscribe
         ~current_version
         config
     in
     let synchronous_timeout =
       int_
-        "synchronous_timeout"
-        ~prefix
+        "watchman_synchronous_timeout"
         ~default:default.synchronous_timeout
         config
     in
     let debug_logging =
       bool_if_min_version
-        "debug_logging"
-        ~prefix
+        "watchman_debug_logging"
         ~default:default.debug_logging
         ~current_version
         config
@@ -154,11 +149,9 @@ module RemoteTypeCheck = struct
     }
 
   let load ~current_version ~default config =
-    let prefix = Some "remote_type_check" in
     let declaration_threshold =
       int_
-        "declaration_threshold"
-        ~prefix
+        "remote_type_check_declaration_threshold"
         ~default:default.declaration_threshold
         config
     in
@@ -167,8 +160,7 @@ module RemoteTypeCheck = struct
       let open ArtifactStore in
       let file_system_mode =
         string_
-          "file_system_mode"
-          ~prefix
+          "remote_type_check_file_system_mode"
           ~default:(string_of_file_system_mode Distributed)
           config
       in
@@ -178,22 +170,23 @@ module RemoteTypeCheck = struct
     in
 
     let max_cas_bytes =
-      int_ "max_cas_bytes" ~prefix ~default:default.max_cas_bytes config
+      int_
+        "remote_type_check_max_cas_bytes"
+        ~default:default.max_cas_bytes
+        config
     in
 
     let max_artifact_inline_bytes =
       int_
-        "max_artifact_inline_bytes"
-        ~prefix
+        "remote_type_check_max_artifact_inline_bytes"
         ~default:default.max_artifact_inline_bytes
         config
     in
 
     let enabled_on_errors =
       string_list
-        "enabled_on_errors"
+        "remote_type_check_enabled_on_errors"
         ~delim:(Str.regexp ",")
-        ~prefix
         ~default:["typing"]
         config
       |> List.fold ~init:[] ~f:(fun acc phase ->
@@ -210,53 +203,59 @@ module RemoteTypeCheck = struct
                  Errors.equal_phase enabled_phase phase)))
     in
     let heartbeat_period =
-      int_ "heartbeat_period" ~prefix ~default:default.heartbeat_period config
+      int_
+        "remote_type_check_heartbeat_period"
+        ~default:default.heartbeat_period
+        config
     in
     let num_workers =
-      int_ "num_workers" ~prefix ~default:default.num_workers config
+      int_ "remote_type_check_num_workers" ~default:default.num_workers config
     in
     let max_batch_size =
-      int_ "max_batch_size" ~prefix ~default:default.max_batch_size config
+      int_
+        "remote_type_check_max_batch_size"
+        ~default:default.max_batch_size
+        config
     in
     let min_batch_size =
-      int_ "min_batch_size" ~prefix ~default:default.min_batch_size config
+      int_
+        "remote_type_check_min_batch_size"
+        ~default:default.min_batch_size
+        config
     in
     let prefetch_deferred_files =
       bool_if_min_version
-        "prefetch_deferred_files"
-        ~prefix
+        "remote_type_check_prefetch_deferred_files"
         ~default:default.prefetch_deferred_files
         ~current_version
         config
     in
-    let recheck_threshold = int_opt "recheck_threshold" ~prefix config in
+    let recheck_threshold =
+      int_opt "remote_type_check_recheck_threshold" config
+    in
     let remote_initial_payload_ratio =
       float_
-        "remote_initial_payload_ratio"
-        ~prefix
+        "remote_type_check_remote_initial_payload_ratio"
         ~default:default.remote_initial_payload_ratio
         config
     in
     let load_naming_table_on_full_init =
       bool_if_min_version
-        "load_naming_table_on_full_init"
-        ~prefix
+        "remote_type_check_load_naming_table_on_full_init"
         ~default:default.load_naming_table_on_full_init
         ~current_version
         config
     in
     let enabled =
       bool_if_min_version
-        "enabled"
-        ~prefix
+        "remote_type_check_enabled"
         ~default:default.enabled
         ~current_version
         config
     in
     let enabled_for_noninteractive_hosts =
       bool_if_min_version
-        "enabled_for_noninteractive_hosts"
-        ~prefix
+        "remote_type_check_enabled_for_noninteractive_hosts"
         ~default:default.enabled_for_noninteractive_hosts
         ~current_version
         config
@@ -266,8 +265,7 @@ module RemoteTypeCheck = struct
         Hh_logger.Level.of_enum_string
           (String.lowercase
              (string_
-                ~prefix
-                "worker_min_log_level"
+                "remote_type_check_worker_min_log_level"
                 ~default:
                   (Hh_logger.Level.to_enum_string default.worker_min_log_level)
                 config))
@@ -277,8 +275,7 @@ module RemoteTypeCheck = struct
     in
     let worker_vfs_checkout_threshold =
       int_
-        "worker_vfs_checkout_threshold"
-        ~prefix
+        "remote_type_check_worker_vfs_checkout_threshold"
         ~default:default.worker_vfs_checkout_threshold
         config
     in
@@ -347,33 +344,35 @@ module RecheckCapture = struct
     }
 
   let load ~current_version ~default config =
-    let prefix = Some "recheck_capture" in
     let enabled =
       bool_if_min_version
-        "enabled"
-        ~prefix
+        "recheck_capture_enabled"
         ~default:default.enabled
         ~current_version
         config
     in
     let error_threshold =
-      int_ "error_threshold" ~prefix ~default:default.error_threshold config
+      int_
+        "recheck_capture_error_threshold"
+        ~default:default.error_threshold
+        config
     in
     let fanout_threshold =
-      int_ "fanout_threshold" ~prefix ~default:default.fanout_threshold config
+      int_
+        "recheck_capture_fanout_threshold"
+        ~default:default.fanout_threshold
+        config
     in
     let rechecked_files_threshold =
       int_
-        "rechecked_files_threshold"
-        ~prefix
+        "recheck_capture_rechecked_files_threshold"
         ~default:default.rechecked_files_threshold
         config
     in
     let sample_threshold =
       let sample_threshold =
         float_
-          "sample_threshold"
-          ~prefix
+          "recheck_capture_sample_threshold"
           ~default:default.sample_threshold
           config
       in
@@ -653,25 +652,31 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
      altered via the CLI, even though the CLI overrides take precedence
      over the experiments overrides *)
   let config = Config_file.apply_overrides ~silent ~config ~overrides in
-  let prefix = Some "experiments_config" in
   let enabled =
-    bool_if_min_version "enabled" ~prefix ~default:false ~current_version config
+    bool_if_min_version
+      "experiments_config_enabled"
+      ~default:false
+      ~current_version
+      config
   in
   if enabled then (
     Disk.mkdir_p GlobalConfig.tmp_dir;
-    let dir = string_ "path" ~prefix ~default:GlobalConfig.tmp_dir config in
+    let dir =
+      string_ "experiments_config_path" ~default:GlobalConfig.tmp_dir config
+    in
     let owner = Sys_utils.get_primary_owner () in
     let file = Filename.concat dir (Printf.sprintf "hh.%s.experiments" owner) in
     let update =
       bool_if_min_version
-        "update"
-        ~prefix
+        "experiments_config_update"
         ~default:false
         ~current_version
         config
     in
-    let ttl = float_of_int (int_ "ttl_seconds" ~prefix ~default:86400 config) in
-    let source = string_opt "source" ~prefix config in
+    let ttl =
+      float_of_int (int_ "experiments_config_ttl_seconds" ~default:86400 config)
+    in
+    let source = string_opt "experiments_config_source" config in
     let meta =
       if update then
         match Experiments_config_file.update ~file ~source ~ttl with

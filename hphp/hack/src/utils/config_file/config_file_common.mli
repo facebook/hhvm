@@ -29,38 +29,29 @@ val of_list : (string * string) list -> t
 val keys : t -> string list
 
 module Getters : sig
-  val make_key : string -> prefix:string option -> string
+  val string_opt : string -> t -> string option
 
-  val string_opt : string -> ?prefix:string option -> t -> string option
+  val string_ : string -> default:string -> t -> string
 
-  val string_ : string -> ?prefix:string option -> default:string -> t -> string
+  val int_ : string -> default:int -> t -> int
 
-  val int_ : string -> ?prefix:string option -> default:int -> t -> int
+  val int_opt : string -> t -> int option
 
-  val int_opt : string -> ?prefix:string option -> t -> int option
+  val float_ : string -> default:float -> t -> float
 
-  val float_ : string -> ?prefix:string option -> default:float -> t -> float
+  val float_opt : string -> t -> float option
 
-  val float_opt : string -> ?prefix:string option -> t -> float option
+  val bool_ : string -> default:bool -> t -> bool
 
-  val bool_ : string -> ?prefix:string option -> default:bool -> t -> bool
+  val bool_opt : string -> t -> bool option
 
-  val bool_opt : string -> ?prefix:string option -> t -> bool option
-
-  val string_list_opt :
-    string -> ?prefix:string option -> t -> string list option
+  val string_list_opt : string -> t -> string list option
 
   val string_list :
-    delim:Str.regexp ->
-    string ->
-    ?prefix:string option ->
-    default:string list ->
-    t ->
-    string list
+    delim:Str.regexp -> string -> default:string list -> t -> string list
 
   val bool_if_min_version :
     string ->
-    ?prefix:string option ->
     default:bool ->
     current_version:Config_file_version.version ->
     t ->

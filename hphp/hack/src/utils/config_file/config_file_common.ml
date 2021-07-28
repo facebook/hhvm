@@ -14,11 +14,14 @@ type t = string SMap.t
 
 let file_path_relative_to_repo_root = ".hhconfig"
 
+(* c.f. [ConfigFile::empty] in Rust *)
 let empty () = SMap.empty
 
+(* c.f. [ConfigFile::print_to_stderr] in Rust *)
 let print_config (config : t) : unit =
   SMap.iter (fun k v -> Printf.eprintf "%s = %s\n" k v) config
 
+(* c.f. [ConfigFile::apply_overrides] in Rust *)
 let apply_overrides ~silent ~(config : t) ~(overrides : t) : t =
   if SMap.cardinal overrides = 0 then
     config
@@ -37,6 +40,8 @@ let apply_overrides ~silent ~(config : t) ~(overrides : t) : t =
  * Config file format:
  * # Some comment. Indicate by a pound sign at the start of a new line
  * key = a possibly space-separated value
+ *
+ * c.f. [ConfigFile::from_slice] in Rust
  *)
 let parse_contents (contents : string) : t =
   let lines = Str.split (Str.regexp "\n") contents in
@@ -59,6 +64,7 @@ let parse_contents (contents : string) : t =
       end
     ~init:SMap.empty
 
+(* c.f. [ConfigFile::from_file_with_sha1] in Rust *)
 let parse ~silent (fn : string) : string * t =
   let contents = cat fn in
   if not silent then
@@ -77,10 +83,13 @@ let parse_local_config ~silent (fn : string) : t =
     Hh_logger.log "Could not load config at %s" fn;
     SMap.empty
 
+(* c.f. [ConfigFile::to_json] in Rust *)
 let to_json t = Hh_json.JSON_Object (SMap.elements @@ SMap.map Hh_json.string_ t)
 
+(* c.f. [impl FromIterator<(String, String)> for ConfigFile] in Rust *)
 let of_list = SMap.of_list
 
+(* c.f. [ConfigFile::keys] in Rust *)
 let keys = SMap.keys
 
 module Getters = struct

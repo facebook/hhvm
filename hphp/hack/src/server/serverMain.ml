@@ -369,11 +369,11 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
   else
     let check_kind =
       if lazy_check then
-        ServerTypeCheck.Lazy_check
+        ServerTypeCheck.CheckKind.Lazy
       else
-        ServerTypeCheck.Full_check
+        ServerTypeCheck.CheckKind.Full
     in
-    let check_kind_str = ServerTypeCheck.check_kind_to_string check_kind in
+    let check_kind_str = ServerTypeCheck.CheckKind.to_string check_kind in
     let env = { env with can_interrupt = not lazy_check } in
     let needed_full_init = env.init_env.why_needed_full_init in
     let old_errorl = Errors.get_error_list env.errorl in

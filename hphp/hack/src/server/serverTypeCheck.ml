@@ -14,33 +14,15 @@ open ServerEnv
 open Reordered_argument_collections
 module SLC = ServerLocalConfig
 
-type check_kind =
-  (* Lazy check is a check limited to the files open in IDE. It:
-   * - produces push diagnostics for those files
-   * - updates their parsing / naming / decl definitions on heap
-   * - updates their parsing level indexes, like SymbolIndex or
-   *     ServerEnv.naming_table
-   * - invalidates their declaration dependencies, by removing them from the
-   *     heap and depending on lazy declaration to redeclare them on
-   *     as-needed basis later
-   * - stores the information about what it skipped doing to be finished later
-   *     by Full_check
-   *
-   * It does not do the "full" expensive fanout:
-   * - does not re-declare dependencies ("phase 2 decl")
-   * - does not fan out to all typing dependencies
-   * - because of that, it does not update structures depending on global state,
-   *     like global error list, dependency table or the lists of files that
-   *     failed parsing / declaration / checking
-   *
-   * Any operation that need the global state to be up to date and cannot get
-   * the data that they need through lazy decl, need to be preceded by
-   * Full_check. *)
-  | Lazy_check
-  (* Full check brings the global state of the server to consistency by
-   * executing all the re-checks that lazy checks delayed. It processes the
-   * disk updates and typechecks the full fanout of accumulated changes. *)
-  | Full_check
+module CheckKind = struct
+  type t =
+    | Lazy
+    | Full
+
+  let to_string = function
+    | Full -> "Full_check"
+    | Lazy -> "Lazy_check"
+end
 
 type check_results = {
   reparse_count: int;
@@ -1846,37 +1828,25 @@ functor
       (env, { reparse_count; total_rechecked_count }, telemetry)
   end
 
-(** This function is used to get the variant constructor names of
-    the check kind type. The names are used in a few places:
-    - the `type_check_unsafe` function below:
-      - logs the names into the server log
-      - uses HackEventLogger to log the names as the check_kind column value
-      - lots of dashboards depend on it
-    - serverMain writes it into telemetry
-*)
-let check_kind_to_string = function
-  | Full_check -> "Full_check"
-  | Lazy_check -> "Lazy_check"
-
 module FC = Make (FullCheckKind)
 module LC = Make (LazyCheckKind)
 
 let type_check_unsafe genv env kind start_time profiling =
-  let check_kind = check_kind_to_string kind in
+  let check_kind = CheckKind.to_string kind in
   let telemetry =
     Telemetry.create ()
     |> Telemetry.string_ ~key:"kind" ~value:check_kind
     |> Telemetry.duration ~key:"start" ~start_time
   in
   (match kind with
-  | Lazy_check -> HackEventLogger.set_lazy_incremental ()
-  | Full_check -> ());
+  | CheckKind.Lazy -> HackEventLogger.set_lazy_incremental ()
+  | CheckKind.Full -> ());
 
   (* CAUTION! Lots of alerts/dashboards depend on the exact string of check_kind *)
   HackEventLogger.with_check_kind check_kind @@ fun () ->
   Hh_logger.log "******************************************";
   match kind with
-  | Lazy_check ->
+  | CheckKind.Lazy ->
     Hh_logger.log
       "Check kind: will check only those files already open in IDE or with reported errors ('%s')"
       check_kind;
@@ -1899,7 +1869,7 @@ let type_check_unsafe genv env kind start_time profiling =
     in
     let telemetry = Telemetry.duration telemetry ~key:"sent_done" ~start_time in
     (env, res, telemetry)
-  | Full_check ->
+  | CheckKind.Full ->
     Hh_logger.log
       "Check kind: will bring hh_server to consistency with code changes, by checking whatever fanout is needed ('%s')"
       check_kind;
@@ -1950,7 +1920,7 @@ let type_check_unsafe genv env kind start_time profiling =
 let type_check :
     genv ->
     env ->
-    check_kind ->
+    CheckKind.t ->
     seconds ->
     CgroupProfiler.Profiling.t ->
     env * check_results * Telemetry.t =

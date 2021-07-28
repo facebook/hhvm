@@ -789,7 +789,7 @@ let method_def env cls m =
       m.m_variadic
   in
   let env = set_tyvars_variance_in_callable env locl_ty param_tys t_variadic in
-  let nb = Nast.assert_named_body m.m_body in
+  let nb = m.m_body in
   let local_tpenv = Env.get_tpenv env in
   let disable =
     Naming_attributes.mem

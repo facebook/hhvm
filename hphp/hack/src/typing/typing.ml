@@ -4640,7 +4640,7 @@ and closure_make
     (env, (te, hret, ft))
   in
   type_closure @@ fun env ->
-  let nb = Nast.assert_named_body f.f_body in
+  let nb = f.f_body in
   (* Extract capabilities from AAST and add them to the environment *)
   let (env, capability) =
     match (f.f_ctxs, f.f_unsafe_ctxs) with

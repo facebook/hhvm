@@ -3,13 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4164ec691acafe8d88e6e1c5ab24ee1f>>
+// @generated SignedSource<<7b173aa0a3853e4b95a591841b3cf0d5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
+use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
@@ -28,10 +30,12 @@ pub use ast_defs::ShapeFieldName;
 
 #[derive(
     Clone,
+    Copy,
     Debug,
     Deserialize,
     Eq,
     FromOcamlRep,
+    FromOcamlRepIn,
     Hash,
     NoPosHash,
     Ord,
@@ -43,8 +47,9 @@ pub use ast_defs::ShapeFieldName;
 pub enum FuncBodyAnn {
     Named,
     NamedWithUnsafeBlocks,
-    Unnamed(namespace_env::Env),
 }
+impl TrivialDrop for FuncBodyAnn {}
+arena_deserializer::impl_deserialize_in_arena!(FuncBodyAnn);
 
 pub type Program = aast::Program<(), FuncBodyAnn, ()>;
 

@@ -239,8 +239,7 @@ be wrapped by Box to keep ty1 size down.
 *)
 let box_variant () =
   (match Configuration.mode () with
-  | Configuration.ByRef ->
-    [("nast", "FuncBodyAnn"); ("typing_defs_core", "Ty_")]
+  | Configuration.ByRef -> [("typing_defs_core", "Ty_")]
   | Configuration.ByBox -> [])
   @ [("aast", "Expr_"); ("aast", "Stmt_"); ("aast", "Def")]
 

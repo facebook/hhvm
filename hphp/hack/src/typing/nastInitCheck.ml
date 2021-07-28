@@ -380,7 +380,7 @@ and constructor env cstr =
     let check_param_initializer e = ignore (expr env S.empty e) in
     List.iter cstr.m_params ~f:(fun p ->
         Option.iter p.param_expr ~f:check_param_initializer);
-    let b = Nast.assert_named_body cstr.m_body in
+    let b = cstr.m_body in
     toplevel env S.empty b.fb_ast
 
 and assign _env acc x = S.add x acc
@@ -556,8 +556,7 @@ and expr_ env acc p e =
           Option.value_map ~f:(expr acc) ~default:acc unpacked_element
         in
         method_ := Done;
-        let fb = Nast.assert_named_body b in
-        toplevel env acc fb.fb_ast))
+        toplevel env acc b.fb_ast))
   | Call (e, _, el, unpacked_element) ->
     let el =
       match e with

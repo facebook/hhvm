@@ -1443,20 +1443,17 @@ and method_ genv m =
       { N.fb_ast = []; fb_annotation = Nast.NamedWithUnsafeBlocks }
     | FileInfo.Mstrict
     | FileInfo.Mpartial ->
-      if Nast.is_body_named m.Aast.m_body then
-        let env = List.fold_left ~f:Env.add_param m.N.m_params ~init:env in
-        let env =
-          match m.N.m_variadic with
-          | N.FVellipsis _
-          | N.FVnonVariadic ->
-            env
-          | N.FVvariadicArg param -> Env.add_param env param
-        in
-        let fub_ast = block env m.N.m_body.N.fb_ast in
-        let annotation = Nast.Named in
-        { N.fb_ast = fub_ast; fb_annotation = annotation }
-      else
-        failwith "ast_to_nast error unnamedbody in method_"
+      let env = List.fold_left ~f:Env.add_param m.N.m_params ~init:env in
+      let env =
+        match m.N.m_variadic with
+        | N.FVellipsis _
+        | N.FVnonVariadic ->
+          env
+        | N.FVvariadicArg param -> Env.add_param env param
+      in
+      let fub_ast = block env m.N.m_body.N.fb_ast in
+      let annotation = Nast.Named in
+      { N.fb_ast = fub_ast; fb_annotation = annotation }
   in
   let attrs = user_attributes env m.Aast.m_user_attributes in
   let m_ctxs = Option.map ~f:(contexts env) m.Aast.m_ctxs in
@@ -1575,20 +1572,17 @@ and fun_ genv f =
       { N.fb_ast = []; fb_annotation = Nast.NamedWithUnsafeBlocks }
     | FileInfo.Mstrict
     | FileInfo.Mpartial ->
-      if Nast.is_body_named f.Aast.f_body then
-        let env = List.fold_left ~f:Env.add_param paraml ~init:env in
-        let env =
-          match variadicity with
-          | N.FVellipsis _
-          | N.FVnonVariadic ->
-            env
-          | N.FVvariadicArg param -> Env.add_param env param
-        in
-        let fb_ast = block env f.Aast.f_body.Aast.fb_ast in
-        let annotation = Nast.Named in
-        { N.fb_ast; fb_annotation = annotation }
-      else
-        failwith "ast_to_nast error unnamedbody in fun_"
+      let env = List.fold_left ~f:Env.add_param paraml ~init:env in
+      let env =
+        match variadicity with
+        | N.FVellipsis _
+        | N.FVnonVariadic ->
+          env
+        | N.FVvariadicArg param -> Env.add_param env param
+      in
+      let fb_ast = block env f.Aast.f_body.Aast.fb_ast in
+      let annotation = Nast.Named in
+      { N.fb_ast; fb_annotation = annotation }
   in
   let f_ctxs = Option.map ~f:(contexts env) f.Aast.f_ctxs in
   let f_unsafe_ctxs = Option.map ~f:(contexts env) f.Aast.f_unsafe_ctxs in
@@ -2361,11 +2355,7 @@ and expr_lambda env f =
     f_doc_comment = f.Aast.f_doc_comment;
   }
 
-and f_body env f_body =
-  if Nast.is_body_named f_body then
-    block env f_body.Aast.fb_ast
-  else
-    failwith "Malformed f_body: unexpected UnnamedBody from ast_to_nast"
+and f_body env f_body = block env f_body.Aast.fb_ast
 
 and make_class_id env ((p, x) as cid) =
   ( (),

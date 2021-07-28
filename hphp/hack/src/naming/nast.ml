@@ -14,14 +14,11 @@ module SN = Naming_special_names
 type func_body_ann =
   | Named
   | NamedWithUnsafeBlocks
-  (* Namespace info *)
-  | Unnamed of Namespace_env.env
 [@@deriving eq]
 
 let show_func_body_ann = function
   | Named -> "Named"
   | NamedWithUnsafeBlocks -> "NamedWithUnsafeBlocks"
-  | Unnamed _ -> "Unnamed"
 
 let pp_func_body_ann fmt fba =
   Format.pp_print_string fmt (show_func_body_ann fba)
@@ -117,27 +114,10 @@ type type_hint = unit Aast.type_hint
 
 module ShapeMap = Ast_defs.ShapeMap
 
-(* Expecting that Naming.func_body / Naming.class_meth_bodies has been
- * allowed at the AST. Ideally this would be enforced by the compiler,
- * a la the typechecking decl vs local phases *)
-let is_body_named fb =
-  match fb.fb_annotation with
-  | Named
-  | NamedWithUnsafeBlocks ->
-    true
-  | Unnamed _ -> false
-
-let assert_named_body fb =
-  if is_body_named fb then
-    fb
-  else
-    failwith "Expecting a named function body"
-
 let named_body_is_unsafe fb =
   match fb.fb_annotation with
   | Named -> false
   | NamedWithUnsafeBlocks -> true
-  | Unnamed _ -> failwith "Expecting a named function body"
 
 let class_id_to_str = function
   | CIparent -> SN.Classes.cParent
@@ -574,10 +554,6 @@ module Visitor_DEPRECATED = struct
       method on_class_use : 'a -> hint -> 'a
 
       method on_class_req : 'a -> hint * bool -> 'a
-
-      method on_func_named_body : 'a -> func_body -> 'a
-
-      method on_func_unnamed_body : 'a -> func_body -> 'a
 
       method on_func_body : 'a -> func_body -> 'a
 
@@ -1024,19 +1000,9 @@ module Visitor_DEPRECATED = struct
         in
         acc
 
-      method on_efun acc f _ =
-        if is_body_named f.f_body then
-          this#on_block acc f.f_body.fb_ast
-        else
-          failwith
-            "lambdas expected to be named in the context of the surrounding function"
+      method on_efun acc f _ = this#on_block acc f.f_body.fb_ast
 
-      method on_lfun acc f _ =
-        if is_body_named f.f_body then
-          this#on_block acc f.f_body.fb_ast
-        else
-          failwith
-            "lambdas expected to be named in the context of the surrounding function"
+      method on_lfun acc f _ = this#on_block acc f.f_body.fb_ast
 
       method on_record acc _ fl = List.fold_left fl ~f:this#on_field ~init:acc
 
@@ -1089,16 +1055,7 @@ module Visitor_DEPRECATED = struct
         in
         acc
 
-      method on_func_named_body acc fnb = this#on_block acc fnb.fb_ast
-
-      method on_func_unnamed_body acc _ = acc
-
-      method on_func_body acc fb =
-        if is_body_named fb then
-          this#on_func_named_body acc fb
-        (* No action on unnamed body *)
-        else
-          acc
+      method on_func_body acc fb = this#on_block acc fb.fb_ast
 
       method on_method_ acc m =
         let acc = this#on_id acc m.m_name in

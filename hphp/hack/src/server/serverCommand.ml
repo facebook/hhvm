@@ -332,7 +332,9 @@ let handle
   in
   let env = { env with ServerEnv.remote = force_remote msg } in
   let full_recheck_needed = command_needs_full_check msg in
-  let is_stale = ServerEnv.(env.last_recheck_loop_stats.updates_stale) in
+  let is_stale =
+    ServerEnv.(env.last_recheck_loop_stats.RecheckLoopStats.updates_stale)
+  in
 
   let handle_command =
     actually_handle genv client msg full_recheck_needed ~is_stale

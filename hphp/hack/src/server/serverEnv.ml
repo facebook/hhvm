@@ -14,42 +14,54 @@ open Hh_prelude
 (*****************************************************************************)
 type seconds = float
 
-type recheck_loop_stats = {
-  updates_stale: bool;
-      (** Watchman subscription has gone down, so state of the world after the
+module RecheckLoopStats = struct
+  type t = {
+    updates_stale: bool;
+        (** Watchman subscription has gone down, so state of the world after the
           recheck loop may not reflect what is actually on disk. *)
-  per_batch_telemetry: Telemetry.t list;
-  rechecked_count: int;
-  total_rechecked_count: int;  (** includes dependencies *)
-  duration: seconds;
-  recheck_id: string;
-  any_full_checks: bool;
-}
-
-let empty_recheck_loop_stats ~(recheck_id : string) : recheck_loop_stats =
-  {
-    updates_stale = false;
-    per_batch_telemetry = [];
-    rechecked_count = 0;
-    total_rechecked_count = 0;
-    duration = 0.;
-    recheck_id;
-    any_full_checks = false;
+    per_batch_telemetry: Telemetry.t list;
+    rechecked_count: int;
+    total_rechecked_count: int;  (** includes dependencies *)
+    duration: seconds;
+    recheck_id: string;
+    any_full_checks: bool;
   }
 
-(** The format of this json is user-facing, returned from 'hh check --json' *)
-let recheck_loop_stats_to_user_telemetry (stats : recheck_loop_stats) :
-    Telemetry.t =
-  Telemetry.create ()
-  |> Telemetry.string_ ~key:"id" ~value:stats.recheck_id
-  |> Telemetry.float_ ~key:"time" ~value:stats.duration
-  |> Telemetry.int_ ~key:"count" ~value:stats.total_rechecked_count
-  |> Telemetry.int_ ~key:"reparse_count" ~value:stats.rechecked_count
-  |> Telemetry.object_list
-       ~key:"per_batch"
-       ~value:(List.rev stats.per_batch_telemetry)
-  |> Telemetry.bool_ ~key:"updates_stale" ~value:stats.updates_stale
-  |> Telemetry.bool_ ~key:"any_full_checks" ~value:stats.any_full_checks
+  let empty ~(recheck_id : string) : t =
+    {
+      updates_stale = false;
+      per_batch_telemetry = [];
+      rechecked_count = 0;
+      total_rechecked_count = 0;
+      duration = 0.;
+      recheck_id;
+      any_full_checks = false;
+    }
+
+  (** The format of this json is user-facing, returned from 'hh check --json' *)
+  let to_user_telemetry (stats : t) : Telemetry.t =
+    let {
+      updates_stale;
+      per_batch_telemetry;
+      rechecked_count;
+      total_rechecked_count;
+      duration;
+      recheck_id;
+      any_full_checks;
+    } =
+      stats
+    in
+    Telemetry.create ()
+    |> Telemetry.string_ ~key:"id" ~value:recheck_id
+    |> Telemetry.float_ ~key:"time" ~value:duration
+    |> Telemetry.int_ ~key:"count" ~value:total_rechecked_count
+    |> Telemetry.int_ ~key:"reparse_count" ~value:rechecked_count
+    |> Telemetry.object_list
+         ~key:"per_batch"
+         ~value:(List.rev per_batch_telemetry)
+    |> Telemetry.bool_ ~key:"updates_stale" ~value:updates_stale
+    |> Telemetry.bool_ ~key:"any_full_checks" ~value:any_full_checks
+end
 
 (*****************************************************************************)
 
@@ -209,8 +221,8 @@ type env = {
       (** The diagnostic subscription information of the current client *)
   diagnostic_pusher: Diagnostic_pusher.t;
       (** Structure tracking errors to push to LSP client. *)
-  last_recheck_loop_stats: recheck_loop_stats;
-  last_recheck_loop_stats_for_actual_work: recheck_loop_stats option;
+  last_recheck_loop_stats: RecheckLoopStats.t;
+  last_recheck_loop_stats_for_actual_work: RecheckLoopStats.t option;
   local_symbol_table: SearchUtils.si_env; [@opaque]
       (** Symbols for locally changed files *)
 }

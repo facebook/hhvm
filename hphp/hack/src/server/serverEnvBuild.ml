@@ -325,7 +325,7 @@ let make_env ~init_id ~deps_mode config : ServerEnv.env =
       };
     diag_subscribe = None;
     diagnostic_pusher = Diagnostic_pusher.init;
-    last_recheck_loop_stats = empty_recheck_loop_stats ~recheck_id:"<none>";
+    last_recheck_loop_stats = RecheckLoopStats.empty ~recheck_id:"<none>";
     last_recheck_loop_stats_for_actual_work = None;
     local_symbol_table = SearchUtils.default_si_env;
   }

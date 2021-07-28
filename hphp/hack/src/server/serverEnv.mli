@@ -157,17 +157,24 @@ type prechecked_files_status =
   | Initial_typechecking of dirty_deps
   | Prechecked_files_ready of dirty_deps
 
-type recheck_loop_stats = {
-  updates_stale: bool;
-      (** Watchman subscription has gone down, so state of the world after the
-          recheck loop may not reflect what is actually on disk. *)
-  per_batch_telemetry: Telemetry.t list;
-  rechecked_count: int;
-  total_rechecked_count: int;  (** includes dependencies *)
-  duration: seconds;
-  recheck_id: string;
-  any_full_checks: bool;
-}
+module RecheckLoopStats : sig
+  type t = {
+    updates_stale: bool;
+        (** Watchman subscription has gone down, so state of the world after the
+            recheck loop may not reflect what is actually on disk. *)
+    per_batch_telemetry: Telemetry.t list;
+    rechecked_count: int;
+    total_rechecked_count: int;  (** includes dependencies *)
+    duration: seconds;
+    recheck_id: string;
+    any_full_checks: bool;
+  }
+
+  val empty : recheck_id:string -> t
+
+  (** The format of this json is user-facing, returned from 'hh check --json' *)
+  val to_user_telemetry : t -> Telemetry.t
+end
 
 (** The environment constantly maintained by the server
     In addition to this environment, many functions are storing and
@@ -270,16 +277,11 @@ type env = {
       (** The diagnostic subscription information of the current client *)
   diagnostic_pusher: Diagnostic_pusher.t;
       (** Structure tracking errors to push to LSP client. *)
-  last_recheck_loop_stats: recheck_loop_stats;
-  last_recheck_loop_stats_for_actual_work: recheck_loop_stats option;
+  last_recheck_loop_stats: RecheckLoopStats.t;
+  last_recheck_loop_stats_for_actual_work: RecheckLoopStats.t option;
   local_symbol_table: SearchUtils.si_env; [@opaque]
       (** Symbols for locally changed files *)
 }
-
-val empty_recheck_loop_stats : recheck_id:string -> recheck_loop_stats
-
-(** The format of this json is user-facing, returned from 'hh check --json' *)
-val recheck_loop_stats_to_user_telemetry : recheck_loop_stats -> Telemetry.t
 
 val is_full_check_done : full_check_status -> bool
 

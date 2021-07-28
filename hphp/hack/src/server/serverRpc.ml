@@ -57,7 +57,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let last_recheck_stats =
       Option.map
         env.ServerEnv.last_recheck_loop_stats_for_actual_work
-        ~f:ServerEnv.recheck_loop_stats_to_user_telemetry
+        ~f:ServerEnv.RecheckLoopStats.to_user_telemetry
     in
     ( env,
       {

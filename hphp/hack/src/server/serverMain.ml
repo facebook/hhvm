@@ -81,7 +81,7 @@ module Program = struct
       (save_state_result : SaveStateServiceTypes.save_state_result option) =
     let recheck_stats =
       Option.map
-        ~f:ServerEnv.recheck_loop_stats_to_user_telemetry
+        ~f:ServerEnv.RecheckLoopStats.to_user_telemetry
         env.ServerEnv.last_recheck_loop_stats_for_actual_work
     in
     ServerError.print_error_list
@@ -235,7 +235,8 @@ let query_notifier genv env query_kind start_time =
  * The above doesn't apply in presence of interruptions / cancellations -
  * it's possible for client to request current recheck to be stopped.
  *)
-let rec recheck_until_no_changes_left acc genv env select_outcome =
+let rec recheck_until_no_changes_left stats genv env select_outcome :
+    RecheckLoopStats.t * env =
   let start_time = Unix.gettimeofday () in
   (* this is telemetry for the current batch, i.e. iteration: *)
   let telemetry =
@@ -269,7 +270,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
     |> Telemetry.object_ ~key:"query" ~value:query_telemetry
     |> Telemetry.duration ~key:"query_done" ~start_time
   in
-  let acc = { acc with updates_stale } in
+  let stats = { stats with RecheckLoopStats.updates_stale } in
   let is_idle =
     (match select_outcome with
     | ClientProvider.Select_persistent -> false
@@ -357,10 +358,14 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
     let telemetry =
       Telemetry.string_ telemetry ~key:"check_kind" ~value:"None"
     in
-    let acc =
-      { acc with per_batch_telemetry = telemetry :: acc.per_batch_telemetry }
+    let stats =
+      {
+        stats with
+        RecheckLoopStats.per_batch_telemetry =
+          telemetry :: stats.RecheckLoopStats.per_batch_telemetry;
+      }
     in
-    (acc, env)
+    (stats, env)
   else
     let check_kind =
       if lazy_check then
@@ -379,7 +384,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
       |> Telemetry.string_ ~key:"check_kind" ~value:check_kind_str
       |> Telemetry.duration ~key:"type_check_start" ~start_time
     in
-    let (env, res, type_check_telemetry) =
+    let (env, check_stats, type_check_telemetry) =
       CgroupProfiler.profile_memory ~event:(`Recheck check_kind_str)
       @@ ServerTypeCheck.type_check genv env check_kind start_time
     in
@@ -403,17 +408,34 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
     let telemetry =
       Telemetry.duration telemetry ~key:"finalized_and_touched" ~start_time
     in
-    let acc =
+    let stats =
+      let {
+        RecheckLoopStats.rechecked_count;
+        per_batch_telemetry;
+        total_rechecked_count;
+        updates_stale;
+        recheck_id;
+        duration;
+        any_full_checks;
+      } =
+        stats
+      in
+      let {
+        ServerTypeCheck.total_rechecked_count =
+          total_rechecked_count_in_iteration;
+        reparse_count;
+      } =
+        check_stats
+      in
       {
-        rechecked_count =
-          acc.rechecked_count + res.ServerTypeCheck.reparse_count;
-        per_batch_telemetry = telemetry :: acc.per_batch_telemetry;
+        RecheckLoopStats.rechecked_count = rechecked_count + reparse_count;
+        per_batch_telemetry = telemetry :: per_batch_telemetry;
         total_rechecked_count =
-          acc.total_rechecked_count + res.ServerTypeCheck.total_rechecked_count;
-        updates_stale = acc.updates_stale;
-        recheck_id = acc.recheck_id;
-        duration = acc.duration +. (Unix.gettimeofday () -. start_time);
-        any_full_checks = acc.any_full_checks || not lazy_check;
+          total_rechecked_count + total_rechecked_count_in_iteration;
+        updates_stale;
+        recheck_id;
+        duration = duration +. (Unix.gettimeofday () -. start_time);
+        any_full_checks = any_full_checks || not lazy_check;
       }
     in
     (* Avoid batching ide rechecks with disk rechecks - there might be
@@ -428,9 +450,9 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
       || Option.is_some env.pending_command_needs_writes
       || !force_break_recheck_loop_for_test_ref
     then
-      (acc, env)
+      (stats, env)
     else
-      recheck_until_no_changes_left acc genv env select_outcome
+      recheck_until_no_changes_left stats genv env select_outcome
 
 let new_serve_iteration_id () = Random_id.short_string ()
 
@@ -491,16 +513,23 @@ let generate_and_update_recheck_id env =
 let idle_if_no_client env waiting_client =
   match waiting_client with
   | ClientProvider.Select_nothing ->
-    let last_stats = env.last_recheck_loop_stats in
+    let {
+      RecheckLoopStats.per_batch_telemetry;
+      rechecked_count;
+      total_rechecked_count;
+      _;
+    } =
+      env.last_recheck_loop_stats
+    in
     (* Ugly hack: We want GC_SHAREDMEM_RAN to record the last rechecked
      * count so that we can figure out if the largest reclamations
      * correspond to massive rebases. However, the logging call is done in
      * the SharedMem module, which doesn't know anything about Server stuff.
      * So we wrap the call here. *)
     HackEventLogger.with_rechecked_stats
-      (List.length last_stats.per_batch_telemetry)
-      last_stats.rechecked_count
-      last_stats.total_rechecked_count
+      (List.length per_batch_telemetry)
+      rechecked_count
+      total_rechecked_count
       (fun () -> SharedMem.collect `aggressive);
     let t = Unix.gettimeofday () in
     if Float.(t -. env.last_idle_job_time > 0.5) then
@@ -545,6 +574,35 @@ let push_diagnostics genv env =
           | ClientProvider.Client_went_away ->
             (* Leaving cleanup of this condition to handled_connection function *)
             (env, "Client_went_away"))
+
+let log_recheck_end stats diag_reason =
+  let telemetry =
+    ServerEnv.RecheckLoopStats.to_user_telemetry stats
+    |> Telemetry.string_ ~key:"diag_reason" ~value:diag_reason
+  in
+  let {
+    RecheckLoopStats.duration;
+    rechecked_count;
+    total_rechecked_count;
+    per_batch_telemetry;
+    any_full_checks;
+    recheck_id;
+    updates_stale = _;
+  } =
+    stats
+  in
+  HackEventLogger.recheck_end
+    duration
+    (List.length per_batch_telemetry - 1)
+    rechecked_count
+    total_rechecked_count
+    (Option.some_if any_full_checks telemetry);
+  Hh_logger.log
+    "RECHECK_END (recheck_id %s):\n%s"
+    recheck_id
+    (Telemetry.to_string telemetry);
+  (* we're only interested in full check data *)
+  CgroupProfiler.print_summary_memory_table ~event:(`Recheck "Full_check")
 
 let serve_one_iteration genv env client_provider =
   let (env, recheck_id) = generate_and_update_recheck_id env in
@@ -619,13 +677,13 @@ let serve_one_iteration genv env client_provider =
   let t_start_recheck = Unix.gettimeofday () in
   let (stats, env) =
     recheck_until_no_changes_left
-      (empty_recheck_loop_stats ~recheck_id)
+      (RecheckLoopStats.empty ~recheck_id)
       genv
       env
       selected_client
   in
   let t_done_recheck = Unix.gettimeofday () in
-  let did_work = stats.total_rechecked_count > 0 in
+  let did_work = stats.RecheckLoopStats.total_rechecked_count > 0 in
   let env =
     {
       env with
@@ -640,24 +698,7 @@ let serve_one_iteration genv env client_provider =
   let (env, diag_reason) = push_diagnostics genv env in
   let t_sent_diagnostics = Unix.gettimeofday () in
 
-  if did_work then begin
-    let telemetry =
-      ServerEnv.recheck_loop_stats_to_user_telemetry stats
-      |> Telemetry.string_ ~key:"diag_reason" ~value:diag_reason
-    in
-    HackEventLogger.recheck_end
-      stats.duration
-      (List.length stats.per_batch_telemetry - 1)
-      stats.rechecked_count
-      stats.total_rechecked_count
-      (Option.some_if stats.any_full_checks telemetry);
-    Hh_logger.log
-      "RECHECK_END (recheck_id %s):\n%s"
-      recheck_id
-      (Telemetry.to_string telemetry);
-    (* we're only interested in full check data *)
-    CgroupProfiler.print_summary_memory_table ~event:(`Recheck "Full_check")
-  end;
+  if did_work then log_recheck_end stats diag_reason;
 
   let env =
     match selected_client with

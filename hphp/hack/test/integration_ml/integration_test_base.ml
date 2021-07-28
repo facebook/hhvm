@@ -166,17 +166,19 @@ let run_loop_once :
         SearchServiceRunner.run_completely ctx env.ServerEnv.local_symbol_table;
     }
   in
+  let { ServerEnv.RecheckLoopStats.rechecked_count; total_rechecked_count; _ } =
+    env.ServerEnv.last_recheck_loop_stats
+  in
   ( env,
     {
       did_read_disk_changes = !did_read_disk_changes_ref;
-      rechecked_count =
-        env.ServerEnv.last_recheck_loop_stats.ServerEnv.rechecked_count;
-      total_rechecked_count =
-        env.ServerEnv.last_recheck_loop_stats.ServerEnv.total_rechecked_count;
+      rechecked_count;
+      total_rechecked_count;
       last_actual_total_rechecked_count =
         (match env.ServerEnv.last_recheck_loop_stats_for_actual_work with
         | None -> None
-        | Some stats -> Some stats.ServerEnv.total_rechecked_count);
+        | Some stats ->
+          Some stats.ServerEnv.RecheckLoopStats.total_rechecked_count);
       new_client_response =
         TestClientProvider.get_client_response Non_persistent;
       persistent_client_response =
@@ -489,7 +491,7 @@ let errors_to_string buf x =
 let print_telemetries env =
   Printf.eprintf "\n==Telemetries==\n";
   List.iter
-    ServerEnv.(env.last_recheck_loop_stats.per_batch_telemetry)
+    ServerEnv.(env.last_recheck_loop_stats.RecheckLoopStats.per_batch_telemetry)
     ~f:(fun t -> Printf.eprintf "%s\n" (Telemetry.to_string ~pretty:true t))
 
 let assert_errors errors expected =

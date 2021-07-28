@@ -1,0 +1,3938 @@
+$i int(0)
+not<-1>
+$i int(0)
+$j int(0)
+and<0>
+or<0>
+xor<0>
+shl<0>
+shr<0>
+$i int(0)
+$j int(-10)
+and<0>
+or<-10>
+xor<-10>
+shl<0>
+shr<0>
+$i int(0)
+$j float(1.234)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i int(0)
+$j float(INF)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i int(0)
+$j float(NAN)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i int(0)
+$j bool(true)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i int(0)
+$j bool(false)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i int(0)
+$j NULL
+and<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+or<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+xor<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shl<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shr<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+$i int(0)
+$j resource(1) of type (stream)
+and<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+or<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+xor<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shl<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shr<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+$i int(0)
+$j string(6) "string"
+and<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+or<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+xor<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shl<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shr<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+$i int(0)
+$j vec(1) {
+  int(42)
+}
+and<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+or<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+xor<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shl<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shr<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+$i int(0)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+and<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+or<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+xor<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shl<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shr<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+$i int(-10)
+not<9>
+$i int(-10)
+$j int(0)
+and<0>
+or<-10>
+xor<-10>
+shl<-10>
+shr<-10>
+$i int(-10)
+$j int(-10)
+and<-10>
+or<-10>
+xor<0>
+shl<-180143985094819840>
+shr<-1>
+$i int(-10)
+$j float(1.234)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i int(-10)
+$j float(INF)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i int(-10)
+$j float(NAN)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i int(-10)
+$j bool(true)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i int(-10)
+$j bool(false)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i int(-10)
+$j NULL
+and<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+or<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+xor<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shl<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shr<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+$i int(-10)
+$j resource(1) of type (stream)
+and<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+or<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+xor<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shl<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shr<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+$i int(-10)
+$j string(6) "string"
+and<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+or<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+xor<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shl<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shr<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+$i int(-10)
+$j vec(1) {
+  int(42)
+}
+and<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+or<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+xor<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shl<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shr<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+$i int(-10)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+and<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+or<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+xor<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shl<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shr<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+$i float(1.234)
+not<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(1.234)
+$j int(0)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(1.234)
+$j int(-10)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(1.234)
+$j float(1.234)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(1.234)
+$j float(INF)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(1.234)
+$j float(NAN)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(1.234)
+$j bool(true)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(1.234)
+$j bool(false)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(1.234)
+$j NULL
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(1.234)
+$j resource(1) of type (stream)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(1.234)
+$j string(6) "string"
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(1.234)
+$j vec(1) {
+  int(42)
+}
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(1.234)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(INF)
+not<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(INF)
+$j int(0)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(INF)
+$j int(-10)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(INF)
+$j float(1.234)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(INF)
+$j float(INF)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(INF)
+$j float(NAN)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(INF)
+$j bool(true)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(INF)
+$j bool(false)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(INF)
+$j NULL
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(INF)
+$j resource(1) of type (stream)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(INF)
+$j string(6) "string"
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(INF)
+$j vec(1) {
+  int(42)
+}
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(INF)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(NAN)
+not<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(NAN)
+$j int(0)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(NAN)
+$j int(-10)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(NAN)
+$j float(1.234)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(NAN)
+$j float(INF)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(NAN)
+$j float(NAN)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(NAN)
+$j bool(true)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(NAN)
+$j bool(false)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(NAN)
+$j NULL
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(NAN)
+$j resource(1) of type (stream)
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(NAN)
+$j string(6) "string"
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(NAN)
+$j vec(1) {
+  int(42)
+}
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i float(NAN)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+and<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+or<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+xor<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shl<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+shr<
+Implicit double to int conversion for bitwise operation
+
+Implicit double to int conversion for bitwise operation
+>
+$i bool(true)
+$j int(0)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(true)
+$j int(-10)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(true)
+$j float(1.234)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(true)
+$j float(INF)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(true)
+$j float(NAN)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(true)
+$j bool(true)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(true)
+$j bool(false)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(true)
+$j NULL
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(true)
+$j resource(1) of type (stream)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(true)
+$j string(6) "string"
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(true)
+$j vec(1) {
+  int(42)
+}
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(true)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(false)
+$j int(0)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(false)
+$j int(-10)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(false)
+$j float(1.234)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(false)
+$j float(INF)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(false)
+$j float(NAN)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(false)
+$j bool(true)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(false)
+$j bool(false)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(false)
+$j NULL
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(false)
+$j resource(1) of type (stream)
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(false)
+$j string(6) "string"
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(false)
+$j vec(1) {
+  int(42)
+}
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i bool(false)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+and<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+or<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+xor<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shl<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+shr<
+Implicit bool to int conversion for bitwise operation
+
+Implicit bool to int conversion for bitwise operation
+>
+$i NULL
+$j int(0)
+and<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+or<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+xor<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shl<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shr<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+$i NULL
+$j int(-10)
+and<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+or<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+xor<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shl<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shr<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+$i NULL
+$j float(1.234)
+and<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+or<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+xor<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shl<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shr<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+$i NULL
+$j float(INF)
+and<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+or<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+xor<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shl<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shr<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+$i NULL
+$j float(NAN)
+and<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+or<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+xor<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shl<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shr<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+$i NULL
+$j bool(true)
+and<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+or<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+xor<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shl<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shr<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+$i NULL
+$j bool(false)
+and<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+or<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+xor<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shl<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shr<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+$i NULL
+$j NULL
+and<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+or<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+xor<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shl<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shr<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+$i NULL
+$j resource(1) of type (stream)
+and<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+or<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+xor<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shl<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shr<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+$i NULL
+$j string(6) "string"
+and<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+or<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+xor<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shl<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shr<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+$i NULL
+$j vec(1) {
+  int(42)
+}
+and<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+or<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+xor<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shl<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shr<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+$i NULL
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+and<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+or<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+xor<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shl<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+shr<
+Implicit null to int conversion for bitwise operation
+
+Implicit null to int conversion for bitwise operation
+>
+$i resource(1) of type (stream)
+$j int(0)
+and<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+or<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+xor<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shl<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shr<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+$i resource(1) of type (stream)
+$j int(-10)
+and<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+or<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+xor<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shl<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shr<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+$i resource(1) of type (stream)
+$j float(1.234)
+and<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+or<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+xor<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shl<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shr<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+$i resource(1) of type (stream)
+$j float(INF)
+and<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+or<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+xor<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shl<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shr<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+$i resource(1) of type (stream)
+$j float(NAN)
+and<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+or<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+xor<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shl<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shr<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+$i resource(1) of type (stream)
+$j bool(true)
+and<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+or<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+xor<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shl<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shr<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+$i resource(1) of type (stream)
+$j bool(false)
+and<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+or<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+xor<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shl<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shr<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+$i resource(1) of type (stream)
+$j NULL
+and<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+or<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+xor<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shl<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shr<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+$i resource(1) of type (stream)
+$j resource(1) of type (stream)
+and<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+or<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+xor<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shl<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shr<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+$i resource(1) of type (stream)
+$j string(6) "string"
+and<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+or<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+xor<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shl<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shr<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+$i resource(1) of type (stream)
+$j vec(1) {
+  int(42)
+}
+and<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+or<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+xor<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shl<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shr<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+$i resource(1) of type (stream)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+and<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+or<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+xor<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shl<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+shr<
+Implicit resource to int conversion for bitwise operation
+
+Implicit resource to int conversion for bitwise operation
+>
+$i string(6) "string"
+$j int(0)
+and<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+or<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+xor<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shl<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shr<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+$i string(6) "string"
+$j int(-10)
+and<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+or<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+xor<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shl<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shr<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+$i string(6) "string"
+$j float(1.234)
+and<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+or<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+xor<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shl<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shr<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+$i string(6) "string"
+$j float(INF)
+and<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+or<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+xor<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shl<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shr<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+$i string(6) "string"
+$j float(NAN)
+and<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+or<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+xor<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shl<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shr<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+$i string(6) "string"
+$j bool(true)
+and<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+or<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+xor<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shl<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shr<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+$i string(6) "string"
+$j bool(false)
+and<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+or<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+xor<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shl<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shr<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+$i string(6) "string"
+$j NULL
+and<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+or<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+xor<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shl<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shr<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+$i string(6) "string"
+$j resource(1) of type (stream)
+and<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+or<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+xor<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shl<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shr<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+$i string(6) "string"
+$j string(6) "string"
+and<string>
+or<string>
+xor<      >
+shl<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shr<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+$i string(6) "string"
+$j vec(1) {
+  int(42)
+}
+and<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+or<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+xor<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shl<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shr<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+$i string(6) "string"
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+and<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+or<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+xor<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shl<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+shr<
+Implicit string to int conversion for bitwise operation
+
+Implicit string to int conversion for bitwise operation
+>
+$i vec(1) {
+  int(42)
+}
+$j int(0)
+and<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+or<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+xor<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shl<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shr<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+$i vec(1) {
+  int(42)
+}
+$j int(-10)
+and<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+or<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+xor<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shl<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shr<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+$i vec(1) {
+  int(42)
+}
+$j float(1.234)
+and<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+or<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+xor<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shl<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shr<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+$i vec(1) {
+  int(42)
+}
+$j float(INF)
+and<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+or<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+xor<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shl<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shr<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+$i vec(1) {
+  int(42)
+}
+$j float(NAN)
+and<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+or<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+xor<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shl<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shr<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+$i vec(1) {
+  int(42)
+}
+$j bool(true)
+and<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+or<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+xor<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shl<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shr<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+$i vec(1) {
+  int(42)
+}
+$j bool(false)
+and<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+or<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+xor<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shl<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shr<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+$i vec(1) {
+  int(42)
+}
+$j NULL
+and<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+or<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+xor<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shl<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shr<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+$i vec(1) {
+  int(42)
+}
+$j resource(1) of type (stream)
+and<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+or<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+xor<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shl<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shr<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+$i vec(1) {
+  int(42)
+}
+$j string(6) "string"
+and<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+or<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+xor<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shl<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shr<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+$i vec(1) {
+  int(42)
+}
+$j vec(1) {
+  int(42)
+}
+and<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+or<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+xor<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shl<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shr<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+$i vec(1) {
+  int(42)
+}
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+and<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+or<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+xor<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shl<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+shr<
+Implicit varray/vec to int conversion for bitwise operation
+
+Implicit varray/vec to int conversion for bitwise operation
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j int(0)
+and<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+or<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+xor<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shl<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shr<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j int(-10)
+and<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+or<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+xor<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shl<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shr<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j float(1.234)
+and<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+or<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+xor<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shl<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shr<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j float(INF)
+and<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+or<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+xor<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shl<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shr<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j float(NAN)
+and<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+or<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+xor<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shl<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shr<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j bool(true)
+and<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+or<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+xor<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shl<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shr<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j bool(false)
+and<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+or<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+xor<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shl<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shr<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j NULL
+and<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+or<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+xor<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shl<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shr<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j resource(1) of type (stream)
+and<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+or<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+xor<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shl<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shr<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j string(6) "string"
+and<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+or<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+xor<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shl<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shr<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j vec(1) {
+  int(42)
+}
+and<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+or<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+xor<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shl<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shr<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+and<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+or<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+xor<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shl<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>
+shr<
+Implicit darray/dict to int conversion for bitwise operation
+
+Implicit darray/dict to int conversion for bitwise operation
+>

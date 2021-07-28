@@ -122,138 +122,6 @@
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
-  BitOr
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_true"
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_false"
-  BitOr
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_true"
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_true"
-  BitOr
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_false"
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_false"
-  BitOr
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_false"
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_true"
-  BitAnd
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_true"
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_false"
-  BitAnd
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_true"
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_true"
-  BitAnd
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_false"
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_false"
-  BitAnd
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_false"
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_true"
-  BitXor
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_true"
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_false"
-  BitXor
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_true"
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_true"
-  BitXor
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_false"
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_false"
-  BitXor
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_false"
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_true"
   Mul
   FCallFuncD <> 1 1 "" - "" "print_bool_result"
   PopC
@@ -341,33 +209,6 @@
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" - "" "g_true"
-  False
-  BitOr
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_true"
-  True
-  BitAnd
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_false"
-  False
-  BitXor
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "g_true"
   True
   Mul
   FCallFuncD <> 1 1 "" - "" "print_bool_result"
@@ -386,27 +227,6 @@
   True
   False
   Sub
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  False
-  False
-  BitOr
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  False
-  True
-  BitAnd
-  FCallFuncD <> 1 1 "" - "" "print_bool_result"
-  PopC
-  NullUninit
-  NullUninit
-  True
-  False
-  BitXor
   FCallFuncD <> 1 1 "" - "" "print_bool_result"
   PopC
   NullUninit

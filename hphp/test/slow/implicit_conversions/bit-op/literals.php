@@ -12,163 +12,172 @@ function main(): void {
   shr();
 }
 
+function with_exn($fn): mixed {
+  try {
+    return $fn();
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+    return null;
+  }
+}
+
 function not(): void {
   echo 'not<';
-  echo ~1.234;
+  echo with_exn(() ==> ~1.234);
   echo ">\n";
 }
 
 function and(): void {
   echo 'and<';
-  echo 0 & -10;
-  echo 1.234 & INF;
-  echo NAN & true;
-  echo false & null;
-  echo STDIN & "string";
-  echo "string" & "string";
-  echo varray[42] & dict['foobar' => false];
+  echo with_exn(() ==> 0 & -10);
+  echo with_exn(() ==> 1.234 & INF);
+  echo with_exn(() ==> NAN & true);
+  echo with_exn(() ==> false & null);
+  echo with_exn(() ==> STDIN & "string");
+  echo with_exn(() ==> "string" & "string");
+  echo with_exn(() ==> varray[42] & dict['foobar' => false]);
   echo ">\n";
 
   $i = 1;
   echo "andeq<";
-  $i &= 0;
-  $i &= -10;
-  $i &= 1.234;
-  $i &= INF;
-  $i &= NAN;
-  $i &= true;
-  $i &= false;
-  $i &= STDIN;
-  $i &= "string";
-  $i &= varray[42];
-  $i &= dict['foobar' => false];
+  $i = with_exn(() ==> { $i &= 0; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i &= -10; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i &= 1.234; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i &= INF; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i &= NAN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i &= true; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i &= false; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i &= STDIN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i &= "string"; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i &= varray[42]; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i &= dict['foobar' => false]; return $i; }) ?? $i;
   echo $i;
 
   $i = "string";
-  $i &= "string";
+  $i = with_exn(() ==> { $i &= "string"; return $i; }) ?? $i;
   echo "$i>\n";
 }
 
 function or(): void {
   echo 'or<';
-  echo 0 | -10;
-  echo 1.234 | INF;
-  echo NAN | true;
-  echo false | null;
-  echo STDIN | "string";
-  echo "string" | "string";
-  echo varray[42] | dict['foobar' => false];
+  echo with_exn(() ==> 0 | -10);
+  echo with_exn(() ==> 1.234 | INF);
+  echo with_exn(() ==> NAN | true);
+  echo with_exn(() ==> false | null);
+  echo with_exn(() ==> STDIN | "string");
+  echo with_exn(() ==> "string" | "string");
+  echo with_exn(() ==> varray[42] | dict['foobar' => false]);
   echo ">\n";
 
   $i = 1;
   echo "oreq<";
-  $i |= 0;
-  $i |= -10;
-  $i |= 1.234;
-  $i |= INF;
-  $i |= NAN;
-  $i |= true;
-  $i |= false;
-  $i |= STDIN;
-  $i |= "string";
-  $i |= varray[42];
-  $i |= dict['foobar' => false];
+  $i = with_exn(() ==> { $i |= 0; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i |= -10; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i |= 1.234; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i |= INF; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i |= NAN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i |= true; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i |= false; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i |= STDIN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i |= "string"; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i |= varray[42]; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i |= dict['foobar' => false]; return $i; }) ?? $i;
   echo $i;
 
   $i = "string";
-  $i |= "string";
+  $i = with_exn(() ==> { $i |= "string"; return $i; }) ?? $i;
   echo "$i>\n";
 }
 
 function xor(): void {
   echo 'xor<';
-  echo 0 ^ -10;
-  echo 1.234 ^ INF;
-  echo NAN ^ true;
-  echo false ^ null;
-  echo STDIN ^ "string";
-  echo "string" ^ "string";
-  echo varray[42] ^ dict['foobar' => false];
+  echo with_exn(() ==> 0 ^ -10);
+  echo with_exn(() ==> 1.234 ^ INF);
+  echo with_exn(() ==> NAN ^ true);
+  echo with_exn(() ==> false ^ null);
+  echo with_exn(() ==> STDIN ^ "string");
+  echo with_exn(() ==> "string" ^ "string");
+  echo with_exn(() ==> varray[42] ^ dict['foobar' => false]);
   echo ">\n";
 
   $i = 1;
   echo "xoreq<";
-  $i ^= 0;
-  $i ^= -10;
-  $i ^= 1.234;
-  $i ^= INF;
-  $i ^= NAN;
-  $i ^= true;
-  $i ^= false;
-  $i ^= STDIN;
-  $i ^= "string";
-  $i ^= varray[42];
-  $i ^= dict['foobar' => false];
+  $i = with_exn(() ==> { $i ^= 0; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i ^= -10; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i ^= 1.234; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i ^= INF; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i ^= NAN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i ^= true; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i ^= false; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i ^= STDIN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i ^= "string"; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i ^= varray[42]; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i ^= dict['foobar' => false]; return $i; }) ?? $i;
   echo $i;
 
   $i = "string";
-  $i ^= "string";
+  $i = with_exn(() ==> { $i ^= "string"; return $i; }) ?? $i;
   echo "$i>\n";
 }
 
 function shl(): void {
   echo 'shl<';
-  echo 0 << -10;
-  echo 1.234 << INF;
-  echo NAN << true;
-  echo false << null;
-  echo STDIN << "string";
-  echo "string" << "string";
-  echo varray[42] << dict['foobar' => false];
+  echo with_exn(() ==> 0 << -10);
+  echo with_exn(() ==> 1.234 << INF);
+  echo with_exn(() ==> NAN << true);
+  echo with_exn(() ==> false << null);
+  echo with_exn(() ==> STDIN << "string");
+  echo with_exn(() ==> "string" << "string");
+  echo with_exn(() ==> varray[42] << dict['foobar' => false]);
   echo ">\n";
 
   $i = 1;
   echo "shleq<";
-  $i <<= 0;
-  $i <<= -10;
-  $i <<= 1.234;
-  $i <<= INF;
-  $i <<= NAN;
-  $i <<= true;
-  $i <<= false;
-  $i <<= STDIN;
-  $i <<= "string";
-  $i <<= varray[42];
-  $i <<= dict['foobar' => false];
+  $i = with_exn(() ==> { $i <<= 0; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i <<= -10; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i <<= 1.234; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i <<= INF; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i <<= NAN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i <<= true; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i <<= false; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i <<= STDIN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i <<= "string"; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i <<= varray[42]; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i <<= dict['foobar' => false]; return $i; }) ?? $i;
   echo $i;
 
   $i = "string";
-  $i <<= "string";
+  $i = with_exn(() ==> { $i <<= "string"; return $i; }) ?? $i;
   echo "$i>\n";
 }
 
 function shr(): void {
   echo 'shr<';
-  echo 0 >> -10;
-  echo 1.234 >> INF;
-  echo NAN >> true;
-  echo false >> null;
-  echo STDIN >> "string";
-  echo "string" >> "string";
-  echo varray[42] >> dict['foobar' => false];
+  echo with_exn(() ==> 0 >> -10);
+  echo with_exn(() ==> 1.234 >> INF);
+  echo with_exn(() ==> NAN >> true);
+  echo with_exn(() ==> false >> null);
+  echo with_exn(() ==> STDIN >> "string");
+  echo with_exn(() ==> "string" >> "string");
+  echo with_exn(() ==> varray[42] >> dict['foobar' => false]);
   echo ">\n";
 
   $i = 1;
   echo "shreq<";
-  $i >>= 0;
-  $i >>= -10;
-  $i >>= 1.234;
-  $i >>= INF;
-  $i >>= NAN;
-  $i >>= true;
-  $i >>= false;
-  $i >>= STDIN;
-  $i >>= "string";
-  $i >>= varray[42];
-  $i >>= dict['foobar' => false];
+  $i = with_exn(() ==> { $i >>= 0; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i >>= -10; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i >>= 1.234; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i >>= INF; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i >>= NAN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i >>= true; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i >>= false; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i >>= STDIN; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i >>= "string"; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i >>= varray[42]; return $i; }) ?? $i;
+  $i = with_exn(() ==> { $i >>= dict['foobar' => false]; return $i; }) ?? $i;
   echo $i;
 
   $i = "string";
-  $i >>= "string";
+  $i = with_exn(() ==> { $i >>= "string"; return $i; }) ?? $i;
   echo "$i>\n";
 }

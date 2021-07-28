@@ -107,12 +107,12 @@ function run_tests() {
 
   try {
     echo (new stdClass) >> 64, "\n";
-  } catch (TypecastException $e) {
+  } catch (Exception $e) {
     var_dump($e->getMessage());
   }
   try {
     echo (new stdClass) << 64, "\n";
-  } catch (TypecastException $e) {
+  } catch (Exception $e) {
     var_dump($e->getMessage());
   }
 

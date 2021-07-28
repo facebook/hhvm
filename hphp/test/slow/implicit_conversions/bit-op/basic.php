@@ -15,67 +15,67 @@ const vec<mixed> VALS = vec[
   dict['foobar' => false],
 ];
 
+function with_exn($fn): mixed {
+  try {
+    return $fn();
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+    return null;
+  }
+}
+
 <<__EntryPoint>>
 function main(): void {
   foreach(VALS as $i) {
     if ($i is float || $i is int) {
       echo '$i '; var_dump($i);
       echo 'not<';
-      ~$i; // this should generate a notice as applicable
-      echo ~$i;
+      with_exn(() ==> {~$i;}); // this should still throw as applicable
+      echo with_exn(() ==> ~$i);
       echo ">\n";
     }
     foreach(VALS as $j) {
       echo '$i '; var_dump($i); echo '$j '; var_dump($j);
-      do_the_thing($i, $j);
+      and($i, $j);
+      or($i, $j);
+      xor($i, $j);
+      shl($i, $j);
+      shr($i, $j);
     }
   }
 }
 
-function do_the_thing(mixed $i, mixed $j): void {
-  and($i, $j);
-  or($i, $j);
-  xor($i, $j);
-  shl($i, $j);
-  shr($i, $j);
-}
-
 function and(mixed $i, mixed $j): void {
   echo 'and<';
-  $i & $j; // this should generate a notice as applicable
-  $i &= $j;
-  echo $i;
+  with_exn(() ==> { $i & $j; }); // this should still throw as applicable
+  echo with_exn(() ==> { $i &= $j; return $i; });
   echo ">\n";
 }
 
 function or(mixed $i, mixed $j): void {
   echo 'or<';
-  $i | $j; // this should generate a notice as applicable
-  $i |= $j;
-  echo $i;
+  with_exn(() ==> { $i | $j; }); // this should still throw as applicable
+  echo with_exn(() ==> { $i |= $j; return $i; });
   echo ">\n";
 }
 
 function xor(mixed $i, mixed $j): void {
   echo 'xor<';
-  $i ^ $j; // this should generate a notice as applicable
-  $i ^= $j;
-  echo $i;
+  with_exn(() ==> { $i ^ $j; }); // this should still throw as applicable
+  echo with_exn(() ==> { $i ^= $j; return $i; });
   echo ">\n";
 }
 
 function shl(mixed $i, mixed $j): void {
   echo 'shl<';
-  $i << $j; // this should generate a notice as applicable
-  $i <<= $j;
-  echo $i;
+  with_exn(() ==> { $i << $j; }); // this should still throw as applicable
+  echo with_exn(() ==> { $i <<= $j; return $i; });
   echo ">\n";
 }
 
 function shr(mixed $i, mixed $j): void {
   echo 'shr<';
-  $i >> $j; // this should generate a notice as applicable
-  $i >>= $j;
-  echo $i;
+  with_exn(() ==> { $i >> $j; }); // this should still throw as applicable
+  echo with_exn(() ==> { $i >>= $j; return $i; });
   echo ">\n";
 }

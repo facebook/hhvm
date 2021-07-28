@@ -16,47 +16,47 @@ function main() {
 
   try {
     $i1 += 1;
-  } catch (TypecastException $e) {
+  } catch (Exception $e) {
     var_dump($e->getMessage());
   }
   try {
     $i2 -= 1;
-  } catch (TypecastException $e) {
+  } catch (Exception $e) {
     var_dump($e->getMessage());
   }
   try {
     $i3 *= 1;
-  } catch (TypecastException $e) {
+  } catch (Exception $e) {
     var_dump($e->getMessage());
   }
   try {
     $i4 /= 1;
-  } catch (TypecastException $e) {
+  } catch (Exception $e) {
     var_dump($e->getMessage());
   }
   try {
     $i5 %= 1;
-  } catch (TypecastException $e) {
+  } catch (Exception $e) {
     var_dump($e->getMessage());
   }
   try {
     $i6 **= 1;
-  } catch (TypecastException $e) {
+  } catch (Exception $e) {
     var_dump($e->getMessage());
   }
   try {
     $i7 &= 1;
-  } catch (TypecastException $e) {
+  } catch (Exception $e) {
     var_dump($e->getMessage());
   }
   try {
     $i8 |= 1;
-  } catch (TypecastException $e) {
+  } catch (Exception $e) {
     var_dump($e->getMessage());
   }
   try {
     $i9 ^= 1;
-  } catch (TypecastException $e) {
+  } catch (Exception $e) {
     var_dump($e->getMessage());
   }
 

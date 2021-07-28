@@ -245,17 +245,17 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
       setopBody(&c, op, &rhs);
       return c;
     });
-    if (!resultTy) resultTy = TInitCell;
+    if (resultTy) {
+      // We may have inferred a TSStr or TSArr with a value here, but
+      // at runtime it will not be static.  For now just throw that
+      // away.  TODO(#3696042): should be able to loosen_staticness here.
+      if (resultTy->subtypeOf(BStr)) return TStr;
+      else if (resultTy->subtypeOf(BVec)) return TVec;
+      else if (resultTy->subtypeOf(BDict)) return TDict;
+      else if (resultTy->subtypeOf(BKeyset)) return TKeyset;
 
-    // We may have inferred a TSStr or TSArr with a value here, but
-    // at runtime it will not be static.  For now just throw that
-    // away.  TODO(#3696042): should be able to loosen_staticness here.
-    if (resultTy->subtypeOf(BStr)) resultTy = TStr;
-    else if (resultTy->subtypeOf(BVec)) resultTy = TVec;
-    else if (resultTy->subtypeOf(BDict)) resultTy = TDict;
-    else if (resultTy->subtypeOf(BKeyset)) resultTy = TKeyset;
-
-    return *resultTy;
+      return *resultTy;
+    }
   }
 
   switch (op) {

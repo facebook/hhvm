@@ -11,7 +11,7 @@ from typing import List, Dict, Set
 class DependencyEdges(object):
     """A simple internal representation to categorize DependencyEdges"""
 
-    edge_types = ["Extends", "Type", "Method"]
+    edge_types = ["Extends", "Type", "Method", "SMethod", "Fun"]
 
     def __init__(self, lines: List[str]) -> None:
         super(DependencyEdges, self).__init__()

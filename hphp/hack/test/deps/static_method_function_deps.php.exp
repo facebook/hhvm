@@ -1,0 +1,15 @@
+Cstr C -> Fun bar, Fun obj_only, Type C
+Extends I -> Type C
+Fun bar -> Type C
+Fun foo -> Fun bar, Type C
+Fun obj_only -> Type C
+Method C::class_only_method -> Fun bar
+Method I::interface_only_method -> Fun foo, Type C
+SMethod C::static_counter -> Fun foo, Type A
+Type C -> Fun bar, Fun foo, Fun obj_only, Type A
+Type HH\Capabilities\WriteProperty -> Fun bar,
+                                      Fun foo,
+                                      Fun obj_only,
+                                      Type A,
+                                      Type C
+Type I -> Fun bar, Fun foo, Type C

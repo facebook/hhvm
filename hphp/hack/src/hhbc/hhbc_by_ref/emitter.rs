@@ -118,9 +118,6 @@ impl<'arena, 'decl, D: DeclProvider<'decl>> Emitter<'arena, 'decl, D> {
         self.adata_state_
             .get_or_insert_with(|| AdataState::init(alloc))
     }
-    pub fn into_adata_emit_state(self) -> AdataState<'arena> {
-        self.adata_state_.expect("uninit'd adata_state")
-    }
 
     pub fn emit_statement_state(&self) -> &StatementState<'arena> {
         self.statement_state_
@@ -133,9 +130,6 @@ impl<'arena, 'decl, D: DeclProvider<'decl>> Emitter<'arena, 'decl, D> {
     ) -> &mut StatementState<'arena> {
         self.statement_state_
             .get_or_insert_with(|| StatementState::init(alloc))
-    }
-    pub fn into_statement_emit_state(self) -> StatementState<'arena> {
-        self.statement_state_.expect("uninit'd statement_state")
     }
 
     pub fn emit_symbol_refs_state(&self) -> &SymbolRefsState {
@@ -150,17 +144,11 @@ impl<'arena, 'decl, D: DeclProvider<'decl>> Emitter<'arena, 'decl, D> {
         self.symbol_refs_state_
             .get_or_insert_with(|| SymbolRefsState::init(alloc))
     }
-    pub fn into_symbol_refs_emit_state(self) -> SymbolRefsState {
-        self.symbol_refs_state_.expect("uninit'd symbol_refs_state")
-    }
 
     pub fn emit_global_state(&self) -> &GlobalState {
         self.global_state_.as_ref().expect("uninit'd global_state")
     }
     pub fn emit_global_state_mut(&mut self) -> &mut GlobalState {
         self.global_state_.get_or_insert_with(GlobalState::init)
-    }
-    pub fn into_global_emit_state(self) -> GlobalState {
-        self.global_state_.expect("uninit'd global_state")
     }
 }

@@ -1880,7 +1880,9 @@ let type_check_unsafe genv env kind start_time profiling =
     Hh_logger.log
       "Check kind: will check only those files already open in IDE or with reported errors ('%s')"
       check_kind;
-    ServerBusyStatus.send env ServerCommandTypes.Doing_local_typecheck;
+    let (_ : seconds option) =
+      ServerBusyStatus.send env ServerCommandTypes.Doing_local_typecheck
+    in
     let telemetry =
       Telemetry.duration telemetry ~key:"core_start" ~start_time
     in
@@ -1892,17 +1894,21 @@ let type_check_unsafe genv env kind start_time profiling =
       |> Telemetry.duration ~key:"core_end" ~start_time
       |> Telemetry.object_ ~key:"core" ~value:core_telemetry
     in
-    ServerBusyStatus.send env ServerCommandTypes.Done_local_typecheck;
+    let (_ : seconds option) =
+      ServerBusyStatus.send env ServerCommandTypes.Done_local_typecheck
+    in
     let telemetry = Telemetry.duration telemetry ~key:"sent_done" ~start_time in
     (env, res, telemetry)
   | Full_check ->
     Hh_logger.log
       "Check kind: will bring hh_server to consistency with code changes, by checking whatever fanout is needed ('%s')"
       check_kind;
-    ServerBusyStatus.send
-      env
-      (ServerCommandTypes.Doing_global_typecheck
-         (global_typecheck_kind genv env));
+    let (_ : seconds option) =
+      ServerBusyStatus.send
+        env
+        (ServerCommandTypes.Doing_global_typecheck
+           (global_typecheck_kind genv env))
+    in
     let telemetry =
       Telemetry.duration telemetry ~key:"core_start" ~start_time
     in
@@ -1916,15 +1922,19 @@ let type_check_unsafe genv env kind start_time profiling =
       |> Telemetry.duration ~key:"core_end" ~start_time
       |> Telemetry.object_ ~key:"core" ~value:core_telemetry
     in
-    (if is_full_check_done env.full_check_status then
-      let (is_truncated, shown) =
-        match env.ServerEnv.diag_subscribe with
-        | None -> (None, 0)
-        | Some ds -> Diagnostic_subscription.get_pushed_error_length ds
-      in
-      let total = Option.value is_truncated ~default:shown in
-      let msg = ServerCommandTypes.Done_global_typecheck { shown; total } in
-      ServerBusyStatus.send env msg);
+    let (_ : seconds option) =
+      if is_full_check_done env.full_check_status then
+        let (is_truncated, shown) =
+          match env.ServerEnv.diag_subscribe with
+          | None -> (None, 0)
+          | Some ds -> Diagnostic_subscription.get_pushed_error_length ds
+        in
+        let total = Option.value is_truncated ~default:shown in
+        let msg = ServerCommandTypes.Done_global_typecheck { shown; total } in
+        ServerBusyStatus.send env msg
+      else
+        None
+    in
     let telemetry =
       telemetry
       |> Telemetry.duration ~key:"sent_done" ~start_time

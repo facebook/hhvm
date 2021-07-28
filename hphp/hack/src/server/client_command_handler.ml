@@ -217,11 +217,14 @@ end = struct
         in
         (* If the client connected in the middle of recheck, let them know it's
          * happening. *)
-        if ServerEnv.is_full_check_started env.ServerEnv.full_check_status then
-          ServerBusyStatus.send
-            env
-            (ServerCommandTypes.Doing_global_typecheck
-               (ServerCheckUtils.global_typecheck_kind genv env));
+        (if ServerEnv.is_full_check_started env.ServerEnv.full_check_status then
+          let (_ : ServerEnv.seconds option) =
+            ServerBusyStatus.send
+              env
+              (ServerCommandTypes.Doing_global_typecheck
+                 (ServerCheckUtils.global_typecheck_kind genv env))
+          in
+          ());
         env
       in
       if

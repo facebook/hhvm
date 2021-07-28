@@ -144,7 +144,9 @@ let edit_file ~predeclare env path (edits : File_content.text_edit list) =
     then
       let ctx = Provider_utils.ctx_from_server_env env in
       Decl.make_env ~sh:SharedMem.Uses ctx path);
-    ServerBusyStatus.send env ServerCommandTypes.Needs_local_typecheck;
+    let (_ : ServerEnv.seconds option) =
+      ServerBusyStatus.send env ServerCommandTypes.Needs_local_typecheck
+    in
     let file_content =
       match File_provider.get path with
       | Some (File_provider.Ide content)

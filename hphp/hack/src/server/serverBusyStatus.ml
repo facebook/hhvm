@@ -7,13 +7,17 @@
  *
  *)
 
-let send (env : ServerEnv.env) (status : ServerCommandTypes.busy_status) : unit
-    =
+let send (env : ServerEnv.env) (status : ServerCommandTypes.busy_status) :
+    ServerEnv.seconds option =
   match env.ServerEnv.persistent_client with
-  | None -> ()
+  | None -> None
   | Some client ->
     let message = ServerCommandTypes.BUSY_STATUS status in
-    (try ClientProvider.send_push_message_to_client client message with
-    | ClientProvider.Client_went_away -> ()
+    (try
+       ClientProvider.send_push_message_to_client client message;
+       Some (Unix.gettimeofday ())
+     with
+    | ClientProvider.Client_went_away -> None
     | e ->
-      Hh_logger.log "Failed to send busy status - %s" (Printexc.to_string e))
+      Hh_logger.log "Failed to send busy status - %s" (Printexc.to_string e);
+      None)

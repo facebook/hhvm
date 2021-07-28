@@ -3599,8 +3599,8 @@ let track_open_and_recent_files (state : state) (event : event) : state =
   | _ -> state
 
 let track_edits_if_necessary (state : state) (event : event) : state =
-  (* We'll keep track of which files have unsaved edits. Note that not all    *)
-  (* clients send didSave messages; for those we only rely on didClose.       *)
+  (* We'll keep track of which files have unsaved edits. Note that not all
+   * clients send didSave messages; for those we only rely on didClose. *)
   let previous = get_uris_with_unsaved_changes state in
   let uris_with_unsaved_changes =
     match event with

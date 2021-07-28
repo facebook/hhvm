@@ -9,40 +9,40 @@ print "1 + 1.5 --> "; print __hhvm_intrinsics\launder_value(1) + 1.5; print "\n"
 print "1.5 + 1.0 --> "; print __hhvm_intrinsics\launder_value(1.5) + 1.0; print "\n";
 //print "print array(1, 2) + array(3, 4) --> "; print array(1, 2) + array(3, 4);
 //  print "\n";
-print "\"5.5\" + 5 --> "; print __hhvm_intrinsics\launder_value("5.5") + 5; print "\n";
-print "5 + \"5.5\" --> "; print __hhvm_intrinsics\launder_value(5) + "5.5"; print "\n";
-print "5.5 + \"5\" --> "; print __hhvm_intrinsics\launder_value(5.5) + "5"; print "\n";
-print "\"5.5\" + \"5\" --> "; print __hhvm_intrinsics\launder_value("5.5") + "5"; print "\n";
+print "\"5.5\" + 5 --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value("5.5")) + 5; print "\n";
+print "5 + \"5.5\" --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value(5)) + HH\Lib\Legacy_FIXME\cast_for_arithmetic("5.5"); print "\n";
+print "5.5 + \"5\" --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value(5.5)) + HH\Lib\Legacy_FIXME\cast_for_arithmetic("5"); print "\n";
+print "\"5.5\" + \"5\" --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value("5.5")) + HH\Lib\Legacy_FIXME\cast_for_arithmetic("5"); print "\n";
 print "\n";
 
 print "1 - 1 --> "; print __hhvm_intrinsics\launder_value(1) - 1; print "\n";
 print "1.5 - 1 --> "; print __hhvm_intrinsics\launder_value(1.5) - 1; print "\n";
 print "1 - 1.5 --> "; print __hhvm_intrinsics\launder_value(1) - 1.5; print "\n";
 print "1.5 - 1.0 --> "; print __hhvm_intrinsics\launder_value(1.5) - 1.0; print "\n";
-print "\"5.5\" - 5 --> "; print __hhvm_intrinsics\launder_value("5.5") - 5; print "\n";
-print "5 - \"5.5\" --> "; print __hhvm_intrinsics\launder_value(5) - "5.5"; print "\n";
-print "5.5 - \"5\" --> "; print __hhvm_intrinsics\launder_value(5.5) - "5"; print "\n";
-print "\"5.5\" - \"5\" --> "; print __hhvm_intrinsics\launder_value("5.5") - "5"; print "\n";
+print "\"5.5\" - 5 --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value("5.5")) - 5; print "\n";
+print "5 - \"5.5\" --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value(5)) - HH\Lib\Legacy_FIXME\cast_for_arithmetic("5.5"); print "\n";
+print "5.5 - \"5\" --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value(5.5)) - HH\Lib\Legacy_FIXME\cast_for_arithmetic("5"); print "\n";
+print "\"5.5\" - \"5\" --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value("5.5")) - HH\Lib\Legacy_FIXME\cast_for_arithmetic("5"); print "\n";
 print "\n";
 
 print "2 * 2 --> "; print __hhvm_intrinsics\launder_value(2) * 2; print "\n";
 print "2.5 * 3 --> "; print __hhvm_intrinsics\launder_value(2.5) * 3; print "\n";
 print "3 * 2.5 --> "; print __hhvm_intrinsics\launder_value(3) * 2.5; print "\n";
 print "2.5 * 3.0 --> "; print __hhvm_intrinsics\launder_value(2.5) * 3.0; print "\n";
-print "\"5.5\" * 5 --> "; print __hhvm_intrinsics\launder_value("5.5") * 5; print "\n";
-print "5 * \"5.5\" --> "; print __hhvm_intrinsics\launder_value(5) * "5.5"; print "\n";
-print "5.5 * \"5\" --> "; print __hhvm_intrinsics\launder_value(5.5) * "5"; print "\n";
-print "\"5.5\" * \"5\" --> "; print __hhvm_intrinsics\launder_value("5.5") * "5"; print "\n";
+print "\"5.5\" * 5 --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value("5.5")) * 5; print "\n";
+print "5 * \"5.5\" --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value(5)) * HH\Lib\Legacy_FIXME\cast_for_arithmetic("5.5"); print "\n";
+print "5.5 * \"5\" --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value(5.5)) * HH\Lib\Legacy_FIXME\cast_for_arithmetic("5"); print "\n";
+print "\"5.5\" * \"5\" --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value("5.5")) * HH\Lib\Legacy_FIXME\cast_for_arithmetic("5"); print "\n";
 print "\n";
 
 print "2 / 2 --> "; print __hhvm_intrinsics\launder_value(2) / 2; print "\n";
 print "2.5 / 5 --> "; print __hhvm_intrinsics\launder_value(2.5) / 5; print "\n";
 print "5 / 2.0 --> "; print __hhvm_intrinsics\launder_value(5) / 2.0; print "\n";
 print "5.0 / 2.0 --> "; print __hhvm_intrinsics\launder_value(5.0) / 2.0; print "\n";
-print "\"5.5\" / 5 --> "; print __hhvm_intrinsics\launder_value("5.5") / 5; print "\n";
-print "5 / \"5.5\" --> "; print __hhvm_intrinsics\launder_value(5) / "5.5"; print "\n";
-print "5.5 / \"5\" --> "; print __hhvm_intrinsics\launder_value(5.5) / "5"; print "\n";
-print "\"5.5\" / \"5\" --> "; print __hhvm_intrinsics\launder_value("5.5") / "5"; print "\n";
+print "\"5.5\" / 5 --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value("5.5")) / 5; print "\n";
+print "5 / \"5.5\" --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value(5)) / HH\Lib\Legacy_FIXME\cast_for_arithmetic("5.5"); print "\n";
+print "5.5 / \"5\" --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value(5.5)) / HH\Lib\Legacy_FIXME\cast_for_arithmetic("5"); print "\n";
+print "\"5.5\" / \"5\" --> "; print HH\Lib\Legacy_FIXME\cast_for_arithmetic(__hhvm_intrinsics\launder_value("5.5")) / HH\Lib\Legacy_FIXME\cast_for_arithmetic("5"); print "\n";
 try {
   print "1 / 0 --> "; print __hhvm_intrinsics\launder_value(1) / 0;
 } catch (DivisionByZeroException $e) {
@@ -90,10 +90,10 @@ print "2 % 2 --> "; print __hhvm_intrinsics\launder_value(2) % 2; print "\n";
 print "2.5 % 5 --> "; print __hhvm_intrinsics\launder_value(2.5) % 5; print "\n";
 print "5 % 2.0 --> "; print __hhvm_intrinsics\launder_value(5) % 2.0; print "\n";
 print "5.0 % 2.0 --> "; print __hhvm_intrinsics\launder_value(5.0) % 2.0; print "\n";
-print "\"5.5\" % 5 --> "; print __hhvm_intrinsics\launder_value("5.5") % 5; print "\n";
-print "5 % \"5.5\" --> "; print __hhvm_intrinsics\launder_value(5) % "5.5"; print "\n";
-print "5.5 % \"5\" --> "; print __hhvm_intrinsics\launder_value(5.5) % "5"; print "\n";
-print "\"5.5\" % \"5\" --> "; print __hhvm_intrinsics\launder_value("5.5") % "5"; print "\n";
+print "\"5.5\" % 5 --> "; print (int)(__hhvm_intrinsics\launder_value("5.5")) % 5; print "\n";
+print "5 % \"5.5\" --> "; print (int)(__hhvm_intrinsics\launder_value(5)) % (int)("5.5"); print "\n";
+print "5.5 % \"5\" --> "; print (int)(__hhvm_intrinsics\launder_value(5.5)) % (int)("5"); print "\n";
+print "\"5.5\" % \"5\" --> "; print (int)(__hhvm_intrinsics\launder_value("5.5")) % (int)("5"); print "\n";
 try {
   print "1 % 0 --> "; print __hhvm_intrinsics\launder_value(1) % 0;
 } catch (DivisionByZeroException $e) {

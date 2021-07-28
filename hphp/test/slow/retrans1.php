@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function main($a, $b, $c) {
-  return $a + $b + $c;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($c);
 }
 <<__EntryPoint>> function main_entry(): void {
 for ($i=0; $i < 5; $i++) {

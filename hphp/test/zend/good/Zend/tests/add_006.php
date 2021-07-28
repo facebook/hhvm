@@ -6,28 +6,28 @@ $s2 = "876222numeric";
 $s3 = "48474874";
 $s4 = "25.68";
 
-$c = $i + $s1;
+$c = $i + HH\Lib\Legacy_FIXME\cast_for_arithmetic($s1);
 var_dump($c);
 
-$c = $i + $s2;
+$c = $i + HH\Lib\Legacy_FIXME\cast_for_arithmetic($s2);
 var_dump($c);
 
-$c = $i + $s3;
+$c = $i + HH\Lib\Legacy_FIXME\cast_for_arithmetic($s3);
 var_dump($c);
 
-$c = $i + $s4;
+$c = $i + HH\Lib\Legacy_FIXME\cast_for_arithmetic($s4);
 var_dump($c);
 
-$c = $s1 + $i;
+$c = HH\Lib\Legacy_FIXME\cast_for_arithmetic($s1) + $i;
 var_dump($c);
 
-$c = $s2 + $i;
+$c = HH\Lib\Legacy_FIXME\cast_for_arithmetic($s2) + $i;
 var_dump($c);
 
-$c = $s3 + $i;
+$c = HH\Lib\Legacy_FIXME\cast_for_arithmetic($s3) + $i;
 var_dump($c);
 
-$c = $s4 + $i;
+$c = HH\Lib\Legacy_FIXME\cast_for_arithmetic($s4) + $i;
 var_dump($c);
 
 echo "Done\n";

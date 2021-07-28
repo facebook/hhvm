@@ -5,7 +5,7 @@ function MyAverage($nodelist) {
     $val = 0;
     foreach ($nodelist as $node) {
         $count++;
-        $val += $node->textContent;
+        $val += HH\Lib\Legacy_FIXME\cast_for_arithmetic($node->textContent);
     }
     if ($val > 0) {
         return $val/$count;

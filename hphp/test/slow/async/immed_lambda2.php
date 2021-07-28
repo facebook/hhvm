@@ -26,7 +26,7 @@ async function foo() {
     },
   );
 
-  return $res1 + $res2 * $res3;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($res1) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($res2) * HH\Lib\Legacy_FIXME\cast_for_arithmetic($res3);
 }
 
 

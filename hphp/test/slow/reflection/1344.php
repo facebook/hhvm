@@ -5,7 +5,7 @@ function test() {
     $classes = get_declared_classes();
     foreach ($classes as $class) {
       $r = new ReflectionClass($class);
-      $t += count($r->getMethods());
+      $t += HH\Lib\Legacy_FIXME\cast_for_arithmetic(count($r->getMethods()));
     }
     var_dump('ok');
   }

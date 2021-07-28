@@ -3,7 +3,7 @@
 <<__EntryPoint>> function main(): void {
   $sub = function($a, $b) {
     try {
-      $c = $a - $b;
+      $c = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) - HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);
       printf("%s - %s = %s\n",
              var_export($a, true),
              var_export($b, true),

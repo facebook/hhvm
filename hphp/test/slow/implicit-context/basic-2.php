@@ -5,8 +5,8 @@ function printImplicit() {
 }
 
 function addFive() {
-  return IntContext::getContext()
-    + IntContext::start(4, printImplicit<>);
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic(IntContext::getContext())
+    + HH\Lib\Legacy_FIXME\cast_for_arithmetic(IntContext::start(4, printImplicit<>));
 }
 
 <<__EntryPoint>>

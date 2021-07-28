@@ -1,7 +1,7 @@
 <?hh
 
 function mult1($x) {
-  return $x * 1;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) * 1;
 }
 <<__EntryPoint>> function main(): void {
 var_dump(mult1(false));

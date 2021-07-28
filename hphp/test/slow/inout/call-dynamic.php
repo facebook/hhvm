@@ -6,7 +6,7 @@ function foo(inout $x) {
 <<__DynamicallyCallable>>
 function bar(inout $a, inout $b) {
   list($a, $b) = varray[$b, $a];
-  return $a + $b;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);
 }
 <<__DynamicallyCallable>>
 function baz(inout $q) {

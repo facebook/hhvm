@@ -2,7 +2,7 @@
 
 function f($x, $y) {
   var_dump($x, $y);
-  return $x + $x + $y + 1;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($y) + 1;
 }
 
 

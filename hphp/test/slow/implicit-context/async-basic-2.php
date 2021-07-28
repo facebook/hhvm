@@ -5,8 +5,8 @@ async function printImplicit() {
 }
 
 async function addFive() {
-  return IntContext::getContext()
-    + await IntContext::genStart(4, printImplicit<>);
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic(IntContext::getContext())
+    + HH\Lib\Legacy_FIXME\cast_for_arithmetic(await IntContext::genStart(4, printImplicit<>));
 }
 
 <<__EntryPoint>>

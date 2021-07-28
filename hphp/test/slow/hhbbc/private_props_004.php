@@ -19,6 +19,8 @@ class MVecFinalOps {
     var_dump(isset($this->s));
     var_dump(!($this->s ?? false));
 
+    $this->icell = HH\Lib\Legacy_FIXME\cast_for_arithmetic($this->icell);
+
     $this->icell += 2;
     $this->icell++;
   }

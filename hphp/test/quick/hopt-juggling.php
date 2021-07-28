@@ -2,27 +2,27 @@
 
 function foo1() {
   $x = true;
-  return $x + true;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) + HH\Lib\Legacy_FIXME\cast_for_arithmetic(true);
 }
 
 function foo2() {
   $x = true;
-  return $x + null;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) + HH\Lib\Legacy_FIXME\cast_for_arithmetic(null);
 }
 
 function foo3() {
   $x = "5";
-  return $x + 3;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) + 3;
 }
 
 function foo4() {
   $x = true;
-  return $x - true;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) - HH\Lib\Legacy_FIXME\cast_for_arithmetic(true);
 }
 
 function foo5() {
   $x = true;
-  return $x * true;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) * HH\Lib\Legacy_FIXME\cast_for_arithmetic(true);
 }
 
 function foo6() {
@@ -37,20 +37,20 @@ function foo7() {
 
 function foo8() {
   $x = "4";
-  return $x * "6";
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) * HH\Lib\Legacy_FIXME\cast_for_arithmetic("6");
 }
 
 function foo9() {
   $x = "3";
-  return $x - null;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) - HH\Lib\Legacy_FIXME\cast_for_arithmetic(null);
 }
 
 function foo10($x) {
-  return $x + "10";
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) + HH\Lib\Legacy_FIXME\cast_for_arithmetic("10");
 }
 
 function foo11($x, $y) {
-  return $x + $y;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($y);
 }
 
 function foo12() {

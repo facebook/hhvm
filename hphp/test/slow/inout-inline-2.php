@@ -14,6 +14,7 @@ function foo(
 ) {
   $a += 1;
   $b += 2;
+  $c = HH\Lib\Legacy_FIXME\cast_for_arithmetic($c);
   $c += 3;
   $c = (string)$c;
 

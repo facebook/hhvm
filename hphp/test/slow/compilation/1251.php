@@ -3,5 +3,5 @@
 
 <<__EntryPoint>>
 function main_1251() {
-$a = date('d') % 10;
+$a = (int)(date('d')) % 10;
 }

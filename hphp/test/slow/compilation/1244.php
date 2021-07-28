@@ -6,5 +6,5 @@ function d() {
 
  <<__EntryPoint>>
 function main_1244() {
-$y = (d()) + 6;
+$y = HH\Lib\Legacy_FIXME\cast_for_arithmetic(d()) + 6;
 }

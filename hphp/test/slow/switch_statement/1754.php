@@ -136,7 +136,7 @@ function st($x) {
     print '1';
   default: break;
   }
-  switch ($x + $y + f(true)) {
+  switch ($x + HH\Lib\Legacy_FIXME\cast_for_arithmetic($y) + HH\Lib\Legacy_FIXME\cast_for_arithmetic(f(true))) {
   case -30:
     print '-30';
     break;

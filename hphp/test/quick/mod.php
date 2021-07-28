@@ -10,7 +10,7 @@
   foreach ($a as $l) {
     foreach ($a as $r) {
       try {
-        var_dump($l % $r);
+        var_dump((int)($l) % (int)($r));
       } catch (DivisionByZeroException $e) {
         echo $e->getMessage(), "\n";
       }

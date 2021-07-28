@@ -3,6 +3,7 @@
 function foo($a, inout $b, inout $c, $d) {
   $a = 10;
   $b = 20;
+  $c = HH\Lib\Legacy_FIXME\cast_for_arithmetic($c);
   $c *= 10;
   $d *= 10;
   echo (__METHOD__."(): a: ".$a.", b: ".$b.", c: ".$c.", d: ".$d."\n");

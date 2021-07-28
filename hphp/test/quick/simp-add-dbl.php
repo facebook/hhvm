@@ -1,7 +1,7 @@
 <?hh
 
 function foo1(bool $a) {
-  return $a + 1.1;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + 1.1;
 }
 
 function foo2() {

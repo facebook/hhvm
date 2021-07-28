@@ -17,17 +17,20 @@ foreach ($lefts as $left) {
 
     echo "  + ";
     $a = $left;
-    var_dump($a += $right);
+    $a = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a);
+    var_dump($a += HH\Lib\Legacy_FIXME\cast_for_arithmetic($right));
     var_dump($a);
 
     echo "  - ";
     $a = $left;
-    var_dump($a -= $right);
+    $a = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a);
+    var_dump($a -= HH\Lib\Legacy_FIXME\cast_for_arithmetic($right));
     var_dump($a);
 
     echo "  * ";
     $a = $left;
-    var_dump($a *= $right);
+    $a = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a);
+    var_dump($a *= HH\Lib\Legacy_FIXME\cast_for_arithmetic($right));
     var_dump($a);
 
     echo "  . ";
@@ -38,7 +41,8 @@ foreach ($lefts as $left) {
     echo "  / ";
     $a = $left;
     try {
-      var_dump($a /= $right);
+      $a = HH\Lib\Legacy_FIXME\cast_for_arithmetic($a);
+      var_dump($a /= HH\Lib\Legacy_FIXME\cast_for_arithmetic($right));
       var_dump($a);
     } catch (DivisionByZeroException $e) {
       echo "\n", $e->getMessage(), "\n";
@@ -47,7 +51,8 @@ foreach ($lefts as $left) {
     echo "  % ";
     $a = $left;
     try {
-      var_dump($a %= $right);
+      $a = (int)($a);
+      var_dump($a %= (int)($right));
       var_dump($a);
     } catch (DivisionByZeroException $e) {
       echo "\n", $e->getMessage(), "\n";

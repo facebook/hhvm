@@ -43,6 +43,6 @@ foreach ($oper as $e1)
 }
 //*/
 
-var_dump(10 + 5 . 12 . 100 - 50);
-var_dump((((10 + 5) . 12) . 100) - 50);
+var_dump(HH\Lib\Legacy_FIXME\cast_for_arithmetic(10 + 5 . 12 . 100) - 50);
+var_dump(HH\Lib\Legacy_FIXME\cast_for_arithmetic(((10 + 5) . 12) . 100) - 50);
 }

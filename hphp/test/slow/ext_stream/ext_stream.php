@@ -17,7 +17,7 @@ abstract final class Statics {
 // so we run on different range of ports every time
 function get_random_port() {
   if (Statics::$base == -1) {
-    Statics::$base = 12345 + (int)((int)(microtime(false) * 100) % 30000);
+    Statics::$base = 12345 + (int)((int)(HH\Lib\Legacy_FIXME\cast_for_arithmetic(microtime(false)) * 100) % 30000);
   }
   return ++Statics::$base;
 }

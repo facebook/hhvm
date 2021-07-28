@@ -16,6 +16,7 @@ function incdec($a)
 
     --$a;
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
+    $b = HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);
     $b -= 1;
 //  echo '$b = '.$b." <---> "; var_dump($b);
 
@@ -44,6 +45,7 @@ function incdecrev($a)
 
     ++$a;
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
+    $b = HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);
     $b += 1;
 //  echo '$b = '.$b." <---> "; var_dump($b);
 

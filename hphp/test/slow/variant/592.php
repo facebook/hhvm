@@ -5,6 +5,6 @@
 function main_592() {
 $a = 't';
  $a = 10;
- $a %= '5';
+ $a %= (int)('5');
  print $a;
 }

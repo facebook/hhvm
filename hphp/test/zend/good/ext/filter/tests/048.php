@@ -7,7 +7,7 @@ function hex_inc($s) {
             if ($s[$len] == '9') {
                 $s[$len] = 'a';
             } else {
-                $s[$len] = $s[$len] + 1;
+                $s[$len] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($s[$len]) + 1;
             }
             return $s;
         }

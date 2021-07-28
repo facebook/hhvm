@@ -36,13 +36,13 @@ function intFunc() {
   $prefix = 1;
 
   if ($results[0]) {
-    $groups[] = ($prefix += $results[0]);
+    $groups[] = ($prefix += HH\Lib\Legacy_FIXME\cast_for_arithmetic($results[0]));
 
     if ($results[1]) {
-      $groups[] = ($prefix += $results[1]);
+      $groups[] = ($prefix += HH\Lib\Legacy_FIXME\cast_for_arithmetic($results[1]));
 
       if ($results[2]) {
-        $groups[] = ($prefix += $results[2]);
+        $groups[] = ($prefix += HH\Lib\Legacy_FIXME\cast_for_arithmetic($results[2]));
       }
     }
   }

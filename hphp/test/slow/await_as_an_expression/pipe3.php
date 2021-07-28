@@ -11,7 +11,7 @@ function f(int $x): void {
 
 async function async_main(): Awaitable<void> {
   echo "--- a\n";
-  (await bar1()) |> (print "b\n") + f($$);
+  (await bar1()) |> (print "b\n") + HH\Lib\Legacy_FIXME\cast_for_arithmetic(f($$));
   echo "--- d\n";
 }
 

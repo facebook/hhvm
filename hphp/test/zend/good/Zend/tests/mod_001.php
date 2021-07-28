@@ -4,7 +4,7 @@ $a = varray[1,2,3];
 $b = varray[];
 
 try {
-  $c = $a % $b;
+  $c = (int)($a) % (int)($b);
 } catch (DivisionByZeroException $e) {
     echo $e->getMessage(), "\n";
 }

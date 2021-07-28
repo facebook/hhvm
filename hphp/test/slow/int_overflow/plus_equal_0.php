@@ -4,7 +4,8 @@
   $plusEq = function($a, $b) {
     try {
       $c = $a;
-      $c += $b;
+      $c = HH\Lib\Legacy_FIXME\cast_for_arithmetic($c);
+      $c += HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);
       printf("%s += %s = %s\n",
              var_export($a, true),
              var_export($b, true),

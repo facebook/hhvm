@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function foo() {
-	(ZendGoodZendTestsBug43851::$LAST = ZendGoodZendTestsBug43851::$LAST + 0) * 1;
+	(ZendGoodZendTestsBug43851::$LAST = HH\Lib\Legacy_FIXME\cast_for_arithmetic(ZendGoodZendTestsBug43851::$LAST) + 0) * 1;
 	echo "ok\n";
 }
 

@@ -2,7 +2,7 @@
 
 function main($num,$zero) {
   try {
-    $z = $num / $zero;
+    $z = HH\Lib\Legacy_FIXME\cast_for_arithmetic($num) / HH\Lib\Legacy_FIXME\cast_for_arithmetic($zero);
     var_dump($z);
   } catch (DivisionByZeroException $e) {
     var_dump($e->getMessage());

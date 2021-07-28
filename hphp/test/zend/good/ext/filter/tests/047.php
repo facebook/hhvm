@@ -4,7 +4,7 @@ function octal_inc($s) {
     while ($len > 0) {
         $len--;
         if ($s[$len] != '7') {
-            $s[$len] = $s[$len] + 1;
+            $s[$len] = HH\Lib\Legacy_FIXME\cast_for_arithmetic($s[$len]) + 1;
             return $s;
         }
         $s[$len] = '0';

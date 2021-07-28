@@ -2,7 +2,7 @@
 
 function main($num,$zero) {
   try {
-    $z = $num % $zero;
+    $z = (int)($num) % (int)($zero);
     var_dump($z);
   } catch (DivisionByZeroException $e) {
     var_dump($e->getMessage());

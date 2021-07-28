@@ -4,7 +4,8 @@
 function add_up($running_total, $current_value)
 {
     echo "running_total is ".(int)$running_total.", current_value is {$current_value}\n";
-    $running_total += $current_value * $current_value;
+    $running_total = HH\Lib\Legacy_FIXME\cast_for_arithmetic($running_total);
+    $running_total += HH\Lib\Legacy_FIXME\cast_for_arithmetic($current_value) * HH\Lib\Legacy_FIXME\cast_for_arithmetic($current_value);
     return $running_total;
 }
 function foo ($a, $b)
@@ -13,7 +14,8 @@ function foo ($a, $b)
 }
 function rsum($v, $w)
 {
-    $v += $w;
+    $v = HH\Lib\Legacy_FIXME\cast_for_arithmetic($v);
+    $v += HH\Lib\Legacy_FIXME\cast_for_arithmetic($w);
     return $v;
 }
 function rmul($v, $w)

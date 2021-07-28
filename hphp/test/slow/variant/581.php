@@ -5,6 +5,6 @@
 function main_581() {
 $a = 't';
  $a = 10;
- $a *= 'n';
+ $a *= HH\Lib\Legacy_FIXME\cast_for_arithmetic('n');
  print $a;
 }

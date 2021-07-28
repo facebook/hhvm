@@ -1,11 +1,11 @@
 <?hh
 
 function plus0($x) {
-  return $x + 0;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) + 0;
 }
 
 function minus0($x) {
-  return $x - 0;
+  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) - 0;
 }
 <<__EntryPoint>> function main(): void {
 var_dump(plus0(false));

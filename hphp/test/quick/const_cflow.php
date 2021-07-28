@@ -3,9 +3,10 @@
 function f(inout $x) { var_dump($x); }
 function test($b, $c) {
   $x = false && $b;
-  $x += true && $b;
-  $x += false || $b;
-  $x += true || $b;
+  $x = HH\Lib\Legacy_FIXME\cast_for_arithmetic($x);
+  $x += HH\Lib\Legacy_FIXME\cast_for_arithmetic(true && $b);
+  $x += HH\Lib\Legacy_FIXME\cast_for_arithmetic(false || $b);
+  $x += HH\Lib\Legacy_FIXME\cast_for_arithmetic(true || $b);
 
   $x += false ? $b : $c;
   $x += true ? $b : $c;

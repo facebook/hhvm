@@ -7,7 +7,7 @@ abstract final class GetRandomPortStatics {
 // borrowed from test/slow/ext_stream/ext_stream.php
 function get_random_port() {
   if (GetRandomPortStatics::$base == -1) {
-    GetRandomPortStatics::$base = 12345 + (int)((int)(microtime(false) * 100) % 30000);
+    GetRandomPortStatics::$base = 12345 + (int)((int)(HH\Lib\Legacy_FIXME\cast_for_arithmetic(microtime(false)) * 100) % 30000);
   }
   return ++GetRandomPortStatics::$base;
 }

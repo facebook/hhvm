@@ -4,6 +4,7 @@
 function foo(inout float $a, inout int $b, inout string $c) {
   $a += 1;
   $b += 2;
+  $c = HH\Lib\Legacy_FIXME\cast_for_arithmetic($c);
   $c += 3;
   $c = (string)$c;
   return 4;

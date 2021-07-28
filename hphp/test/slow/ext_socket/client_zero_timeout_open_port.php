@@ -21,7 +21,7 @@ $time = microtime();
 $errno = null;
 $errstr = null;
 var_dump(stream_socket_client("tcp://127.0.0.1:$port", inout $errno, inout $errstr, 0.0));
-$elapsed = microtime() - $time;
+$elapsed = HH\Lib\Legacy_FIXME\cast_for_arithmetic(microtime()) - HH\Lib\Legacy_FIXME\cast_for_arithmetic($time);
 if ($elapsed > 1) {
   print "FAILURE";
 } else {

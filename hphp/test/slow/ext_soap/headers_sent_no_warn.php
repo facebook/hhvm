@@ -1,7 +1,7 @@
 <?hh
 
 function add($a, $b) {
- return $a + $b;
+ return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);
  }
 
 <<__EntryPoint>>

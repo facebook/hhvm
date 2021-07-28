@@ -63,9 +63,9 @@ const StaticString
   // The following are used in serialize_memoize_param(); they are what
   // serialize_memoize_tv would have produced on some common inputs; having
   // these lets us avoid creating a StringBuffer
-  s_nullMemoKey("\xf0"),
-  s_trueMemoKey("\xf1"),
-  s_falseMemoKey("\xf2");
+  s_nullMemoKey("\xe0"),
+  s_trueMemoKey("\xe1"),
+  s_falseMemoKey("\xe2");
 
 ///////////////////////////////////////////////////////////////////////////////
 bool HHVM_FUNCTION(autoload_is_native) {
@@ -189,10 +189,10 @@ namespace {
  *
  * === Format ===
  *
- * Integer values are returned as-is. Strings where the first byte is < 0xf0
- * are returned as-is. All other values are converted to strings of the form
- * <c> <data> where c is a byte (0xf0 | code), and data is a sequence of 0 or
- * more bytes. The codes are:
+ * Integer values are returned as-is. Strings where the first byte is
+ * < kCodePrefix are returned as-is. All other values are converted to strings
+ * of the form <c> <data> where c is a byte (kCodePrefix | code), and data is
+ * a sequence of 0 or more bytes. The codes are:
  *
  * 0 (NULL): KindOfUninit or KindOfNull; data has length 0
  * 1 (TRUE),
@@ -457,10 +457,11 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
 ALWAYS_INLINE TypedValue serialize_memoize_string_top(StringData* str) {
   if (str->empty()) {
     return make_tv<KindOfPersistentString>(staticEmptyString());
-  } else if ((unsigned char)str->data()[0] < 0xf0) {
+  } else if ((unsigned char)str->data()[0] < kCodePrefix) {
     // serialize_memoize_string_data always returns a string with the first
-    // character >= 0xf0, so anything less than that can't collide. There's no
-    // worry about int-like strings because we won't perform key coercion.
+    // character >= kCodePrefix, so anything less than that can't collide.
+    // There's no worry about int-like strings because we won't perform key
+    // coercion.
     str->incRefCount();
     return make_tv<KindOfString>(str);
   }
@@ -524,12 +525,15 @@ TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param) {
   } else if (isStringType(type)) {
     return serialize_memoize_string_top(param.m_data.pstr);
   } else if (type == KindOfUninit || type == KindOfNull) {
+    assertx((uint8_t)s_nullMemoKey.data()[0] == (kCodePrefix | SER_MC_NULL));
     return make_tv<KindOfPersistentString>(s_nullMemoKey.get());
   } else if (isLazyClassType(type)) {
     return serialize_memoize_string_top(
       const_cast<StringData*>(
         lazyClassToStringHelper(param.m_data.plazyclass)));
   } else if (type == KindOfBoolean) {
+    assertx((uint8_t)s_trueMemoKey.data()[0] == (kCodePrefix | SER_MC_TRUE));
+    assertx((uint8_t)s_falseMemoKey.data()[0] == (kCodePrefix | SER_MC_FALSE));
     return make_tv<KindOfPersistentString>(
       param.m_data.num ? s_trueMemoKey.get() : s_falseMemoKey.get()
     );

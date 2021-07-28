@@ -40,9 +40,9 @@ string(39) "=EA=E3=00=E6=FF=FF=FF=7F=FF=FF=FF=FF=F0"
 string(39) "=EA=E3=00=E6=FF=FF=FF=FF=FF=FF=FF=7F=F0"
 string(39) "=EA=E3=00=E6=00=00=00=00=00=00=00=80=F0"
 ==== other basic types ====
-string(3) "=F0"
-string(3) "=F1"
-string(3) "=F2"
+string(3) "=E0"
+string(3) "=E1"
+string(3) "=E2"
 string(19) "=E7X9=B4=C8v=BE=F3?"
 ==== other basic types (in an array) ====
 string(15) "=EA=E3=00=E0=F0"

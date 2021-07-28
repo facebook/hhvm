@@ -641,11 +641,7 @@ mod atom_helpers {
         label_done: Label,
     ) -> Result<InstrSeq<'arena>> {
         let param_name = &param.name;
-        let loc = Named(Slice::new(
-            bumpalo::collections::String::from_str_in(param_name, alloc)
-                .into_bump_str()
-                .as_bytes(),
-        ));
+        let loc = Named(Str::new_str(alloc, param_name));
         Ok(InstrSeq::gather(
             alloc,
             vec![
@@ -875,7 +871,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let mut make_param_instr =
         |(param, ast_param): (&HhasParam<'arena>, &tast::FunParam)| -> Result<Option<InstrSeq<'arena>>> {
             let param_name = &param.name;
-            let param_name = || ParamId::ParamNamed(Slice::new(bumpalo::collections::String::from_str_in(param_name, alloc).into_bump_str().as_bytes()));
+            let param_name = || ParamId::ParamNamed(Str::new_str(alloc, param_name));
             if param.is_variadic {
                 Ok(None)
             } else {
@@ -901,7 +897,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         (L::Definitely, Some(h)) => {
                             let check = instr::istypel(
                                 alloc,
-                                Local::Named(Slice::new(bumpalo::collections::String::from_str_in(param.name.as_str(), alloc).into_bump_str().as_bytes())),
+                                Local::Named(Str::new_str(alloc, param.name.as_str())),
                                 IstypeOp::OpNull,
                             );
                             let verify_instr = instr::verify_param_type_ts(alloc, param_name());
@@ -1032,14 +1028,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                         instr::int(alloc, error_code),
                         instr::fcallfuncd(
                             alloc,
-                            FcallArgs::new(
-                                FcallFlags::default(),
-                                1,
-                                Slice::new(bumpalo::vec![in alloc;].into_bump_slice()),
-                                None,
-                                3,
-                                None,
-                            ),
+                            FcallArgs::new(FcallFlags::default(), 1, Slice::empty(), None, 3, None),
                             function::from_raw_string(alloc, "trigger_sampled_error"),
                         ),
                         instr::popc(alloc),
@@ -1111,14 +1100,7 @@ fn emit_verify_out<'arena>(
                 Some(InstrSeq::gather(
                     alloc,
                     vec![
-                        instr::cgetl(
-                            alloc,
-                            Local::Named(Slice::new(
-                                bumpalo::collections::String::from_str_in(p.name.as_str(), alloc)
-                                    .into_bump_str()
-                                    .as_bytes(),
-                            )),
-                        ),
+                        instr::cgetl(alloc, Local::Named(Str::new_str(alloc, p.name.as_str()))),
                         match p.type_info.as_ref() {
                             Some(HhasTypeInfo { user_type, .. })
                                 if user_type.as_ref().map_or(true, |t| {

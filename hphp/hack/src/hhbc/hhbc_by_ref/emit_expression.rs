@@ -828,12 +828,16 @@ fn emit_lambda<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         match string_utils::reified::is_captured_generic(local_id::get_name(id)) {
                             Some((is_fun, i)) => {
                                 if is_in_lambda {
-                                    Ok(instr::cgetl(alloc, Local::Named(
-                                    Slice::new(bumpalo::collections::String::from_str_in(
-                                    string_utils::reified::reified_generic_captured_name(
-                                        is_fun, i as usize,
-                                    ).as_str(), alloc).into_bump_str().as_bytes()),
-                                )))
+                                    Ok(instr::cgetl(
+                                        alloc,
+                                        Local::Named(Str::new_str(
+                                            alloc,
+                                            string_utils::reified::reified_generic_captured_name(
+                                                is_fun, i as usize,
+                                            )
+                                            .as_str(),
+                                        )),
+                                    ))
                                 } else {
                                     emit_reified_generic_instrs(
                                         alloc,
@@ -935,7 +939,7 @@ fn inline_gena_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     FcallArgs::new(
                         FcallFlags::default(),
                         1,
-                        Slice::new(bumpalo::vec![in alloc;].into_bump_slice()),
+                        Slice::empty(),
                         Some(async_eager_label),
                         1,
                         None,
@@ -1948,13 +1952,9 @@ pub fn emit_reified_targs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     Ok(if !is_in_lambda && same_as_targs(&current_fun_tparams) {
         instr::cgetl(
             alloc,
-            Local::Named(Slice::new(
-                bumpalo::collections::String::from_str_in(
-                    string_utils::reified::GENERICS_LOCAL_NAME,
-                    alloc,
-                )
-                .into_bump_str()
-                .as_bytes(),
+            Local::Named(Str::new_str(
+                alloc,
+                string_utils::reified::GENERICS_LOCAL_NAME,
             )),
         )
     } else if !is_in_lambda && same_as_targs(&current_cls_tparams[..]) {
@@ -2173,7 +2173,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                         let fcall_args = FcallArgs::new(
                                             FcallFlags::default(),
                                             1,
-                                            Slice::new(bumpalo::vec![in alloc;].into_bump_slice()),
+                                            Slice::empty(),
                                             None,
                                             1,
                                             None,
@@ -2353,10 +2353,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     tast::ClassGetExpr::CGstring((pos, id)) => Ok(emit_pos_then(
                         alloc,
                         pos,
-                        instr::cgetl(
-                            alloc,
-                            Local::Named(Slice::new(alloc.alloc_str(id.as_str()).as_bytes())),
-                        ),
+                        instr::cgetl(alloc, Local::Named(Str::new_str(alloc, id.as_str()))),
                     )),
                     tast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
                 };
@@ -3035,9 +3032,7 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 vec![
                     instr::cgetl(
                         alloc,
-                        Local::Named(Slice::new(
-                            alloc.alloc_str(local_id::get_name(&param.1)).as_bytes(),
-                        )),
+                        Local::Named(Str::new_str(alloc, local_id::get_name(&param.1))),
                     ),
                     instr::whresult(alloc),
                 ],
@@ -3046,9 +3041,7 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         ("__hhvm_internal_getmemokeyl", &[E(_, _, E_::Lvar(ref param))]) if e.systemlib() => {
             Ok(Some(instr::getmemokeyl(
                 alloc,
-                Local::Named(Slice::new(
-                    alloc.alloc_str(local_id::get_name(&param.1)).as_bytes(),
-                )),
+                Local::Named(Str::new_str(alloc, local_id::get_name(&param.1))),
             )))
         }
         ("HH\\array_mark_legacy", _) if args.len() == 1 || args.len() == 2 => {
@@ -3563,10 +3556,9 @@ pub fn emit_reified_generic_instrs<'arena>(
     let base = if is_fun {
         instr::basel(
             alloc,
-            Local::Named(Slice::new(
-                alloc
-                    .alloc_str(string_utils::reified::GENERICS_LOCAL_NAME)
-                    .as_bytes(),
+            Local::Named(Str::new_str(
+                alloc,
+                string_utils::reified::GENERICS_LOCAL_NAME,
             )),
             MemberOpMode::Warn,
         )
@@ -3621,13 +3613,9 @@ fn emit_reified_type_opt<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let cget_instr = |is_fun, i| {
         instr::cgetl(
             env.arena,
-            Local::Named(Slice::new(
-                bumpalo::collections::String::from_str_in(
-                    string_utils::reified::reified_generic_captured_name(is_fun, i).as_str(),
-                    alloc,
-                )
-                .into_bump_str()
-                .as_bytes(),
+            Local::Named(Str::new_str(
+                alloc,
+                string_utils::reified::reified_generic_captured_name(is_fun, i).as_str(),
             )),
         )
     };
@@ -6750,11 +6738,7 @@ pub fn get_local<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     } else if special_idents::is_tmp_var(s) {
         Ok(*e.local_gen().get_unnamed_for_tempname(s))
     } else {
-        Ok(Local::Named(Slice::new(
-            bumpalo::collections::String::from_str_in(s, alloc)
-                .into_bump_str()
-                .as_bytes(),
-        )))
+        Ok(Local::Named(Str::new_str(alloc, s)))
     }
 }
 

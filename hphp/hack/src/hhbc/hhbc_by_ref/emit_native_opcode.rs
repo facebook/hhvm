@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use decl_provider::DeclProvider;
-use ffi::Slice;
+use ffi::Str;
 use hhbc_by_ref_ast_scope::Scope;
 use hhbc_by_ref_emit_body as emit_body;
 use hhbc_by_ref_emit_fatal as emit_fatal;
@@ -76,9 +76,7 @@ fn emit_generator_method<'arena>(
 ) -> Result<InstrSeq<'arena>> {
     let instrs = match name {
         "send" => {
-            let local = Local::Named(Slice::new(
-                alloc.alloc_str(get_first_param_name(params)?).as_bytes(),
-            ));
+            let local = Local::Named(Str::new_str(alloc, get_first_param_name(params)?));
             InstrSeq::gather(
                 alloc,
                 vec![
@@ -89,9 +87,7 @@ fn emit_generator_method<'arena>(
             )
         }
         "raise" | "throw" => {
-            let local = Local::Named(Slice::new(
-                alloc.alloc_str(get_first_param_name(params)?).as_bytes(),
-            ));
+            let local = Local::Named(Str::new_str(alloc, get_first_param_name(params)?));
             InstrSeq::gather(
                 alloc,
                 vec![

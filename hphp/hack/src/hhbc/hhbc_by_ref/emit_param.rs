@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
-use ffi::Slice;
+use ffi::Str;
 use hhbc_by_ref_ast_scope::Scope;
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_expression as emit_expression;
@@ -205,11 +205,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl, D: DeclProvider<'decl>
                     emit_pos::emit_pos(alloc, pos),
                     instr::setl(
                         alloc,
-                        Local::Named(Slice::new(
-                            bumpalo::collections::String::from_str_in(param.name.as_str(), alloc)
-                                .into_bump_str()
-                                .as_bytes(),
-                        )),
+                        Local::Named(Str::new_str(alloc, param.name.as_str())),
                     ),
                     instr::popc(alloc),
                 ],

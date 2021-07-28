@@ -114,6 +114,14 @@ impl<'a, T> Slice<'a, T> {
         }
     }
 
+    pub fn empty() -> Self {
+        Slice {
+            data: std::ptr::NonNull::dangling().as_ptr(),
+            len: 0,
+            marker: std::marker::PhantomData,
+        }
+    }
+
     pub fn is_empty(&self) -> bool {
         self.len == 0
     }

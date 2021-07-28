@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Slice;
+use ffi::Str;
 use hhbc_by_ref_emit_fatal::raise_fatal_runtime;
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
@@ -19,10 +19,7 @@ pub fn get_memo_key_list<'arena>(
     name: impl AsRef<str>,
 ) -> Vec<InstrSeq<'arena>> {
     vec![
-        instr::getmemokeyl(
-            alloc,
-            Local::Named(Slice::new(alloc.alloc_str(name.as_ref()).as_bytes())),
-        ),
+        instr::getmemokeyl(alloc, Local::Named(Str::new_str(alloc, name.as_ref()))),
         instr::setl(alloc, Local::Unnamed(local + index)),
         instr::popc(alloc),
     ]
@@ -52,12 +49,7 @@ pub fn param_code_gets<'arena>(
         alloc,
         params
             .iter()
-            .map(|param| {
-                instr::cgetl(
-                    alloc,
-                    Local::Named(Slice::new(alloc.alloc_str(param.name.as_ref()).as_bytes())),
-                )
-            })
+            .map(|param| instr::cgetl(alloc, Local::Named(Str::new_str(alloc, &param.name))))
             .collect(),
     )
 }

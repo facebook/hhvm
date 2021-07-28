@@ -18,7 +18,7 @@ use hhbc_by_ref_local::Local;
 use hhbc_by_ref_scope::scope;
 use hhbc_by_ref_statement_state::StatementState;
 
-use ffi::{Maybe, Slice};
+use ffi::{Maybe, Slice, Str};
 use lazy_static::lazy_static;
 use naming_special_names_rust::{special_functions, special_idents, superglobals};
 use oxidized::{aast as a, ast as tast, ast_defs, local_id, pos::Pos};
@@ -454,14 +454,7 @@ fn emit_using<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             let (local, preamble) = match &(using.exprs.1[0].2) {
                 tast::Expr_::Binop(x) => match (&x.0, (x.1).2.as_lvar()) {
                     (ast_defs::Bop::Eq(None), Some(tast::Lid(_, id))) => (
-                        Local::Named(Slice::new(
-                            bumpalo::collections::String::from_str_in(
-                                local_id::get_name(&id).as_str(),
-                                alloc,
-                            )
-                            .into_bump_str()
-                            .as_bytes(),
-                        )),
+                        Local::Named(Str::new_str(alloc, local_id::get_name(&id).as_str())),
                         InstrSeq::gather(
                             alloc,
                             vec![
@@ -487,14 +480,7 @@ fn emit_using<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     }
                 },
                 tast::Expr_::Lvar(lid) => (
-                    Local::Named(Slice::new(
-                        bumpalo::collections::String::from_str_in(
-                            local_id::get_name(&lid.1).as_str(),
-                            alloc,
-                        )
-                        .into_bump_str()
-                        .as_bytes(),
-                    )),
+                    Local::Named(Str::new_str(alloc, local_id::get_name(&lid.1).as_str())),
                     InstrSeq::gather(
                         alloc,
                         vec![
@@ -572,7 +558,7 @@ fn emit_using<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             FcallArgs::new(
                                 FcallFlags::empty(),
                                 1,
-                                Slice::new(bumpalo::vec![in alloc;].into_bump_slice()),
+                                Slice::empty(),
                                 async_eager_label,
                                 0,
                                 env.call_context
@@ -1041,14 +1027,7 @@ fn emit_catch<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             instr::dup(alloc),
             instr::instanceofd(alloc, id),
             instr::jmpz(alloc, next_catch),
-            instr::setl(
-                alloc,
-                Local::Named(Slice::new(
-                    bumpalo::collections::String::from_str_in(&((catch.1).1).1, alloc)
-                        .into_bump_str()
-                        .as_bytes(),
-                )),
-            ),
+            instr::setl(alloc, Local::Named(Str::new_str(alloc, &((catch.1).1).1))),
             instr::popc(alloc),
             emit_stmts(e, env, &catch.2)?,
             emit_pos(alloc, pos),
@@ -1177,7 +1156,7 @@ fn emit_foreach_await<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     FcallArgs::new(
                         FcallFlags::empty(),
                         1,
-                        Slice::new(bumpalo::vec![in alloc;].into_bump_slice()),
+                        Slice::empty(),
                         Some(async_eager_label),
                         0,
                         None,
@@ -1279,7 +1258,7 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         A::AsV(v) => Ok(match get_id_of_simple_lvar_opt(&v.2)? {
             Some(val_id) => (
                 None,
-                Local::Named(Slice::new(alloc.alloc_str(val_id).as_bytes())),
+                Local::Named(Str::new_str(alloc, val_id)),
                 instr::empty(alloc),
             ),
             None => {
@@ -1408,14 +1387,7 @@ fn emit_load_list_element<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     query_value(path),
                     instr::setl(
                         alloc,
-                        Local::Named(Slice::new(
-                            bumpalo::collections::String::from_str_in(
-                                local_id::get_name(&lid.1),
-                                alloc,
-                            )
-                            .into_bump_str()
-                            .as_bytes(),
-                        )),
+                        Local::Named(Str::new_str(alloc, local_id::get_name(&lid.1))),
                     ),
                     instr::popc(alloc),
                 ],

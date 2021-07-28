@@ -45,6 +45,8 @@ module CheckKind : sig
       - serverMain writes it into telemetry
       *)
   val to_string : t -> string
+
+  val is_full_check : t -> bool
 end
 
 type check_results = {

@@ -22,6 +22,10 @@ module CheckKind = struct
   let to_string = function
     | Full -> "Full_check"
     | Lazy -> "Lazy_check"
+
+  let is_full_check = function
+    | Full -> true
+    | Lazy -> false
 end
 
 type check_results = {

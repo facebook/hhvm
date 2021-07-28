@@ -218,6 +218,42 @@ let query_notifier genv env query_kind start_time =
     HackEventLogger.notifier_returned start_time (SSet.cardinal raw_updates);
   (env, updates, updates_stale, telemetry)
 
+let update_stats_after_recheck :
+    RecheckLoopStats.t ->
+    ServerTypeCheck.check_results ->
+    check_kind:_ ->
+    telemetry:Telemetry.t ->
+    start_time:seconds ->
+    RecheckLoopStats.t =
+ fun {
+       RecheckLoopStats.rechecked_count;
+       per_batch_telemetry;
+       total_rechecked_count;
+       updates_stale;
+       recheck_id;
+       duration;
+       any_full_checks;
+     }
+     {
+       ServerTypeCheck.total_rechecked_count =
+         total_rechecked_count_in_iteration;
+       reparse_count;
+     }
+     ~check_kind
+     ~telemetry
+     ~start_time ->
+  {
+    RecheckLoopStats.rechecked_count = rechecked_count + reparse_count;
+    per_batch_telemetry = telemetry :: per_batch_telemetry;
+    total_rechecked_count =
+      total_rechecked_count + total_rechecked_count_in_iteration;
+    updates_stale;
+    recheck_id;
+    duration = duration +. (Unix.gettimeofday () -. start_time);
+    any_full_checks =
+      any_full_checks || ServerTypeCheck.CheckKind.is_full_check check_kind;
+  }
+
 (* This function loops until it has processed all outstanding changes.
  *
  * One reason for doing this is so that, if a client makes a request,
@@ -409,34 +445,12 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
       Telemetry.duration telemetry ~key:"finalized_and_touched" ~start_time
     in
     let stats =
-      let {
-        RecheckLoopStats.rechecked_count;
-        per_batch_telemetry;
-        total_rechecked_count;
-        updates_stale;
-        recheck_id;
-        duration;
-        any_full_checks;
-      } =
+      update_stats_after_recheck
         stats
-      in
-      let {
-        ServerTypeCheck.total_rechecked_count =
-          total_rechecked_count_in_iteration;
-        reparse_count;
-      } =
         check_stats
-      in
-      {
-        RecheckLoopStats.rechecked_count = rechecked_count + reparse_count;
-        per_batch_telemetry = telemetry :: per_batch_telemetry;
-        total_rechecked_count =
-          total_rechecked_count + total_rechecked_count_in_iteration;
-        updates_stale;
-        recheck_id;
-        duration = duration +. (Unix.gettimeofday () -. start_time);
-        any_full_checks = any_full_checks || not lazy_check;
-      }
+        ~check_kind
+        ~start_time
+        ~telemetry
     in
     (* Avoid batching ide rechecks with disk rechecks - there might be
      * other ide edits to process first and we want to give the main loop

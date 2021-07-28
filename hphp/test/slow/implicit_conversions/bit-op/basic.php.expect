@@ -17,247 +17,247 @@ shr<0>
 $i int(0)
 $j float(1.234)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 $i int(0)
 $j float(INF)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 $i int(0)
 $j float(NAN)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 $i int(0)
 $j bool(true)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 $i int(0)
 $j bool(false)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 $i int(0)
 $j NULL
 and<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 >
 or<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 >
 xor<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 >
 shl<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 >
 shr<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 >
 $i int(0)
 $j resource(1) of type (stream)
 and<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 >
 or<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 >
 xor<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 >
 shl<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 >
 shr<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 >
 $i int(0)
 $j string(6) "string"
 and<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 >
 or<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 >
 xor<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 >
 shl<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 >
 shr<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 >
 $i int(0)
 $j vec(1) {
   int(42)
 }
 and<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 >
 or<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 >
 xor<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 >
 shl<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 >
 shr<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 >
 $i int(0)
 $j dict(1) {
@@ -265,29 +265,29 @@ $j dict(1) {
   bool(false)
 }
 and<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 >
 or<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 >
 xor<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 >
 shl<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 >
 shr<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 >
 $i int(-10)
 not<9>
@@ -308,247 +308,247 @@ shr<-1>
 $i int(-10)
 $j float(1.234)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 $i int(-10)
 $j float(INF)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 $i int(-10)
 $j float(NAN)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and float
 >
 $i int(-10)
 $j bool(true)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 $i int(-10)
 $j bool(false)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and bool
 >
 $i int(-10)
 $j NULL
 and<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 >
 or<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 >
 xor<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 >
 shl<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 >
 shr<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and null
 >
 $i int(-10)
 $j resource(1) of type (stream)
 and<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 >
 or<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 >
 xor<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 >
 shl<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 >
 shr<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and File
 >
 $i int(-10)
 $j string(6) "string"
 and<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 >
 or<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 >
 xor<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 >
 shl<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 >
 shr<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and string
 >
 $i int(-10)
 $j vec(1) {
   int(42)
 }
 and<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 >
 or<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 >
 xor<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 >
 shl<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 >
 shr<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\vec
 >
 $i int(-10)
 $j dict(1) {
@@ -556,334 +556,334 @@ $j dict(1) {
   bool(false)
 }
 and<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 >
 or<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 >
 xor<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 >
 shl<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 >
 shr<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on int and HH\dict
 >
 $i float(1.234)
 not<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise not on float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise not on float
 >
 $i float(1.234)
 $j int(0)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 $i float(1.234)
 $j int(-10)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 $i float(1.234)
 $j float(1.234)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 $i float(1.234)
 $j float(INF)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 $i float(1.234)
 $j float(NAN)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 $i float(1.234)
 $j bool(true)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 $i float(1.234)
 $j bool(false)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 $i float(1.234)
 $j NULL
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 $i float(1.234)
 $j resource(1) of type (stream)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 $i float(1.234)
 $j string(6) "string"
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 $i float(1.234)
 $j vec(1) {
   int(42)
 }
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 $i float(1.234)
 $j dict(1) {
@@ -891,334 +891,334 @@ $j dict(1) {
   bool(false)
 }
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 $i float(INF)
 not<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise not on float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise not on float
 >
 $i float(INF)
 $j int(0)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 $i float(INF)
 $j int(-10)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 $i float(INF)
 $j float(1.234)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 $i float(INF)
 $j float(INF)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 $i float(INF)
 $j float(NAN)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 $i float(INF)
 $j bool(true)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 $i float(INF)
 $j bool(false)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 $i float(INF)
 $j NULL
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 $i float(INF)
 $j resource(1) of type (stream)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 $i float(INF)
 $j string(6) "string"
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 $i float(INF)
 $j vec(1) {
   int(42)
 }
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 $i float(INF)
 $j dict(1) {
@@ -1226,334 +1226,334 @@ $j dict(1) {
   bool(false)
 }
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 $i float(NAN)
 not<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise not on float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise not on float
 >
 $i float(NAN)
 $j int(0)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 $i float(NAN)
 $j int(-10)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and int
 >
 $i float(NAN)
 $j float(1.234)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 $i float(NAN)
 $j float(INF)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 $i float(NAN)
 $j float(NAN)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and float
 >
 $i float(NAN)
 $j bool(true)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 $i float(NAN)
 $j bool(false)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and bool
 >
 $i float(NAN)
 $j NULL
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and null
 >
 $i float(NAN)
 $j resource(1) of type (stream)
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and File
 >
 $i float(NAN)
 $j string(6) "string"
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and string
 >
 $i float(NAN)
 $j vec(1) {
   int(42)
 }
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\vec
 >
 $i float(NAN)
 $j dict(1) {
@@ -1561,328 +1561,328 @@ $j dict(1) {
   bool(false)
 }
 and<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 or<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 xor<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 shl<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 shr<
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 
-Implicit double to int conversion for bitwise operation
+Cannot perform a bitwise operation on float and HH\dict
 >
 $i bool(true)
 $j int(0)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 $i bool(true)
 $j int(-10)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 $i bool(true)
 $j float(1.234)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 $i bool(true)
 $j float(INF)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 $i bool(true)
 $j float(NAN)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 $i bool(true)
 $j bool(true)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 $i bool(true)
 $j bool(false)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 $i bool(true)
 $j NULL
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 >
 $i bool(true)
 $j resource(1) of type (stream)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 >
 $i bool(true)
 $j string(6) "string"
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 >
 $i bool(true)
 $j vec(1) {
   int(42)
 }
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 >
 $i bool(true)
 $j dict(1) {
@@ -1890,328 +1890,328 @@ $j dict(1) {
   bool(false)
 }
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 >
 $i bool(false)
 $j int(0)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 $i bool(false)
 $j int(-10)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and int
 >
 $i bool(false)
 $j float(1.234)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 $i bool(false)
 $j float(INF)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 $i bool(false)
 $j float(NAN)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and float
 >
 $i bool(false)
 $j bool(true)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 $i bool(false)
 $j bool(false)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and bool
 >
 $i bool(false)
 $j NULL
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and null
 >
 $i bool(false)
 $j resource(1) of type (stream)
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and File
 >
 $i bool(false)
 $j string(6) "string"
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and string
 >
 $i bool(false)
 $j vec(1) {
   int(42)
 }
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\vec
 >
 $i bool(false)
 $j dict(1) {
@@ -2219,328 +2219,328 @@ $j dict(1) {
   bool(false)
 }
 and<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 >
 or<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 >
 xor<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 >
 shl<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 >
 shr<
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 
-Implicit bool to int conversion for bitwise operation
+Cannot perform a bitwise operation on bool and HH\dict
 >
 $i NULL
 $j int(0)
 and<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 >
 or<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 >
 xor<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 >
 shl<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 >
 shr<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 >
 $i NULL
 $j int(-10)
 and<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 >
 or<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 >
 xor<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 >
 shl<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 >
 shr<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and int
 >
 $i NULL
 $j float(1.234)
 and<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 or<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 xor<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 shl<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 shr<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 $i NULL
 $j float(INF)
 and<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 or<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 xor<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 shl<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 shr<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 $i NULL
 $j float(NAN)
 and<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 or<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 xor<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 shl<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 shr<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and float
 >
 $i NULL
 $j bool(true)
 and<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 >
 or<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 >
 xor<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 >
 shl<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 >
 shr<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 >
 $i NULL
 $j bool(false)
 and<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 >
 or<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 >
 xor<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 >
 shl<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 >
 shr<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and bool
 >
 $i NULL
 $j NULL
 and<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and null
 >
 or<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and null
 >
 xor<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and null
 >
 shl<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and null
 >
 shr<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and null
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and null
 >
 $i NULL
 $j resource(1) of type (stream)
 and<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and File
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and File
 >
 or<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and File
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and File
 >
 xor<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and File
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and File
 >
 shl<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and File
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and File
 >
 shr<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and File
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and File
 >
 $i NULL
 $j string(6) "string"
 and<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and string
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and string
 >
 or<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and string
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and string
 >
 xor<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and string
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and string
 >
 shl<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and string
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and string
 >
 shr<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and string
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and string
 >
 $i NULL
 $j vec(1) {
   int(42)
 }
 and<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\vec
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\vec
 >
 or<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\vec
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\vec
 >
 xor<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\vec
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\vec
 >
 shl<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\vec
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\vec
 >
 shr<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\vec
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\vec
 >
 $i NULL
 $j dict(1) {
@@ -2548,328 +2548,328 @@ $j dict(1) {
   bool(false)
 }
 and<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\dict
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\dict
 >
 or<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\dict
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\dict
 >
 xor<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\dict
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\dict
 >
 shl<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\dict
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\dict
 >
 shr<
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\dict
 
-Implicit null to int conversion for bitwise operation
+Cannot perform a bitwise operation on null and HH\dict
 >
 $i resource(1) of type (stream)
 $j int(0)
 and<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 >
 or<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 >
 xor<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 >
 shl<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 >
 shr<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 >
 $i resource(1) of type (stream)
 $j int(-10)
 and<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 >
 or<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 >
 xor<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 >
 shl<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 >
 shr<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and int
 >
 $i resource(1) of type (stream)
 $j float(1.234)
 and<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 or<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 xor<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 shl<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 shr<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 $i resource(1) of type (stream)
 $j float(INF)
 and<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 or<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 xor<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 shl<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 shr<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 $i resource(1) of type (stream)
 $j float(NAN)
 and<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 or<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 xor<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 shl<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 shr<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and float
 >
 $i resource(1) of type (stream)
 $j bool(true)
 and<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 >
 or<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 >
 xor<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 >
 shl<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 >
 shr<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 >
 $i resource(1) of type (stream)
 $j bool(false)
 and<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 >
 or<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 >
 xor<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 >
 shl<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 >
 shr<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and bool
 >
 $i resource(1) of type (stream)
 $j NULL
 and<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and null
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and null
 >
 or<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and null
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and null
 >
 xor<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and null
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and null
 >
 shl<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and null
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and null
 >
 shr<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and null
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and null
 >
 $i resource(1) of type (stream)
 $j resource(1) of type (stream)
 and<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and File
 >
 or<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and File
 >
 xor<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and File
 >
 shl<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and File
 >
 shr<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and File
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and File
 >
 $i resource(1) of type (stream)
 $j string(6) "string"
 and<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and string
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and string
 >
 or<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and string
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and string
 >
 xor<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and string
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and string
 >
 shl<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and string
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and string
 >
 shr<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and string
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and string
 >
 $i resource(1) of type (stream)
 $j vec(1) {
   int(42)
 }
 and<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\vec
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\vec
 >
 or<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\vec
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\vec
 >
 xor<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\vec
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\vec
 >
 shl<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\vec
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\vec
 >
 shr<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\vec
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\vec
 >
 $i resource(1) of type (stream)
 $j dict(1) {
@@ -2877,272 +2877,272 @@ $j dict(1) {
   bool(false)
 }
 and<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\dict
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\dict
 >
 or<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\dict
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\dict
 >
 xor<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\dict
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\dict
 >
 shl<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\dict
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\dict
 >
 shr<
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\dict
 
-Implicit resource to int conversion for bitwise operation
+Cannot perform a bitwise operation on File and HH\dict
 >
 $i string(6) "string"
 $j int(0)
 and<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 >
 or<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 >
 xor<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 >
 shl<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 >
 shr<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 >
 $i string(6) "string"
 $j int(-10)
 and<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 >
 or<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 >
 xor<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 >
 shl<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 >
 shr<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and int
 >
 $i string(6) "string"
 $j float(1.234)
 and<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 or<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 xor<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 shl<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 shr<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 $i string(6) "string"
 $j float(INF)
 and<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 or<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 xor<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 shl<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 shr<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 $i string(6) "string"
 $j float(NAN)
 and<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 or<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 xor<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 shl<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 shr<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and float
 >
 $i string(6) "string"
 $j bool(true)
 and<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 >
 or<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 >
 xor<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 >
 shl<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 >
 shr<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 >
 $i string(6) "string"
 $j bool(false)
 and<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 >
 or<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 >
 xor<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 >
 shl<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 >
 shr<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and bool
 >
 $i string(6) "string"
 $j NULL
 and<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and null
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and null
 >
 or<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and null
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and null
 >
 xor<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and null
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and null
 >
 shl<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and null
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and null
 >
 shr<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and null
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and null
 >
 $i string(6) "string"
 $j resource(1) of type (stream)
 and<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and File
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and File
 >
 or<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and File
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and File
 >
 xor<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and File
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and File
 >
 shl<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and File
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and File
 >
 shr<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and File
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and File
 >
 $i string(6) "string"
 $j string(6) "string"
@@ -3150,43 +3150,43 @@ and<string>
 or<string>
 xor<      >
 shl<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and string
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and string
 >
 shr<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and string
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and string
 >
 $i string(6) "string"
 $j vec(1) {
   int(42)
 }
 and<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\vec
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\vec
 >
 or<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\vec
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\vec
 >
 xor<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\vec
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\vec
 >
 shl<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\vec
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\vec
 >
 shr<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\vec
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\vec
 >
 $i string(6) "string"
 $j dict(1) {
@@ -3194,319 +3194,319 @@ $j dict(1) {
   bool(false)
 }
 and<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\dict
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\dict
 >
 or<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\dict
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\dict
 >
 xor<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\dict
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\dict
 >
 shl<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\dict
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\dict
 >
 shr<
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\dict
 
-Implicit string to int conversion for bitwise operation
+Cannot perform a bitwise operation on string and HH\dict
 >
 $i vec(1) {
   int(42)
 }
 $j int(0)
 and<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 >
 or<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 >
 xor<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 >
 shl<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 >
 shr<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 >
 $i vec(1) {
   int(42)
 }
 $j int(-10)
 and<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 >
 or<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 >
 xor<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 >
 shl<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 >
 shr<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and int
 >
 $i vec(1) {
   int(42)
 }
 $j float(1.234)
 and<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 or<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 xor<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 shl<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 shr<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 $i vec(1) {
   int(42)
 }
 $j float(INF)
 and<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 or<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 xor<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 shl<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 shr<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 $i vec(1) {
   int(42)
 }
 $j float(NAN)
 and<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 or<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 xor<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 shl<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 shr<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and float
 >
 $i vec(1) {
   int(42)
 }
 $j bool(true)
 and<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 >
 or<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 >
 xor<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 >
 shl<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 >
 shr<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 >
 $i vec(1) {
   int(42)
 }
 $j bool(false)
 and<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 >
 or<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 >
 xor<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 >
 shl<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 >
 shr<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and bool
 >
 $i vec(1) {
   int(42)
 }
 $j NULL
 and<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and null
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and null
 >
 or<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and null
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and null
 >
 xor<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and null
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and null
 >
 shl<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and null
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and null
 >
 shr<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and null
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and null
 >
 $i vec(1) {
   int(42)
 }
 $j resource(1) of type (stream)
 and<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and File
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and File
 >
 or<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and File
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and File
 >
 xor<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and File
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and File
 >
 shl<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and File
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and File
 >
 shr<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and File
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and File
 >
 $i vec(1) {
   int(42)
 }
 $j string(6) "string"
 and<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and string
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and string
 >
 or<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and string
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and string
 >
 xor<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and string
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and string
 >
 shl<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and string
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and string
 >
 shr<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and string
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and string
 >
 $i vec(1) {
   int(42)
@@ -3515,29 +3515,29 @@ $j vec(1) {
   int(42)
 }
 and<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\vec
 >
 or<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\vec
 >
 xor<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\vec
 >
 shl<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\vec
 >
 shr<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\vec
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\vec
 >
 $i vec(1) {
   int(42)
@@ -3547,29 +3547,29 @@ $j dict(1) {
   bool(false)
 }
 and<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\dict
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\dict
 >
 or<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\dict
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\dict
 >
 xor<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\dict
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\dict
 >
 shl<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\dict
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\dict
 >
 shr<
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\dict
 
-Implicit varray/vec to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\vec and HH\dict
 >
 $i dict(1) {
   ["foobar"]=>
@@ -3577,29 +3577,29 @@ $i dict(1) {
 }
 $j int(0)
 and<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 >
 or<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 >
 xor<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 >
 shl<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 >
 shr<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 >
 $i dict(1) {
   ["foobar"]=>
@@ -3607,29 +3607,29 @@ $i dict(1) {
 }
 $j int(-10)
 and<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 >
 or<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 >
 xor<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 >
 shl<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 >
 shr<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and int
 >
 $i dict(1) {
   ["foobar"]=>
@@ -3637,29 +3637,29 @@ $i dict(1) {
 }
 $j float(1.234)
 and<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 or<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 xor<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 shl<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 shr<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 $i dict(1) {
   ["foobar"]=>
@@ -3667,29 +3667,29 @@ $i dict(1) {
 }
 $j float(INF)
 and<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 or<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 xor<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 shl<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 shr<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 $i dict(1) {
   ["foobar"]=>
@@ -3697,29 +3697,29 @@ $i dict(1) {
 }
 $j float(NAN)
 and<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 or<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 xor<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 shl<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 shr<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and float
 >
 $i dict(1) {
   ["foobar"]=>
@@ -3727,29 +3727,29 @@ $i dict(1) {
 }
 $j bool(true)
 and<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 >
 or<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 >
 xor<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 >
 shl<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 >
 shr<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 >
 $i dict(1) {
   ["foobar"]=>
@@ -3757,29 +3757,29 @@ $i dict(1) {
 }
 $j bool(false)
 and<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 >
 or<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 >
 xor<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 >
 shl<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 >
 shr<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and bool
 >
 $i dict(1) {
   ["foobar"]=>
@@ -3787,29 +3787,29 @@ $i dict(1) {
 }
 $j NULL
 and<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and null
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and null
 >
 or<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and null
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and null
 >
 xor<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and null
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and null
 >
 shl<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and null
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and null
 >
 shr<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and null
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and null
 >
 $i dict(1) {
   ["foobar"]=>
@@ -3817,29 +3817,29 @@ $i dict(1) {
 }
 $j resource(1) of type (stream)
 and<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and File
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and File
 >
 or<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and File
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and File
 >
 xor<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and File
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and File
 >
 shl<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and File
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and File
 >
 shr<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and File
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and File
 >
 $i dict(1) {
   ["foobar"]=>
@@ -3847,29 +3847,29 @@ $i dict(1) {
 }
 $j string(6) "string"
 and<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and string
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and string
 >
 or<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and string
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and string
 >
 xor<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and string
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and string
 >
 shl<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and string
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and string
 >
 shr<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and string
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and string
 >
 $i dict(1) {
   ["foobar"]=>
@@ -3879,29 +3879,29 @@ $j vec(1) {
   int(42)
 }
 and<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\vec
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\vec
 >
 or<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\vec
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\vec
 >
 xor<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\vec
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\vec
 >
 shl<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\vec
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\vec
 >
 shr<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\vec
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\vec
 >
 $i dict(1) {
   ["foobar"]=>
@@ -3912,27 +3912,27 @@ $j dict(1) {
   bool(false)
 }
 and<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\dict
 >
 or<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\dict
 >
 xor<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\dict
 >
 shl<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\dict
 >
 shr<
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\dict
 
-Implicit darray/dict to int conversion for bitwise operation
+Cannot perform a bitwise operation on HH\dict and HH\dict
 >

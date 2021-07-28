@@ -27,13 +27,6 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
-ConvNoticeData getConvNoticeDataForBitOp() {
-   return ConvNoticeData {
-      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForBitOp),
-      s_ConvNoticeReasonBitOp.get()
-   };
-}
-
 ConvNoticeData getConvNoticeDataForMath() {
    return ConvNoticeData {
       flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForMath),
@@ -45,9 +38,6 @@ ConvNoticeData getConvNoticeDataForMath() {
 bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   auto checkArith = [](Type ty) {
     return ty.subtypeOfAny(TInt, TBool, TDbl);
-  };
-  auto checkBitOp = [](Type ty) {
-    return ty.subtypeOfAny(TInt, TBool);
   };
 
   switch (op) {
@@ -61,7 +51,7 @@ bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   case Op::BitAnd:
   case Op::BitOr:
   case Op::BitXor:
-    return checkBitOp(t1) && checkBitOp(t2);
+    return t1 <= TInt && t2 <= TInt;
   default:
     break;
   }
@@ -118,13 +108,10 @@ bool isBitOp(Op op) {
   }
 }
 
-// booleans in arithmetic and bitwise operations get cast to ints
-SSATmp* promoteBool(IRGS& env, SSATmp* src, bool isBitOp) {
+// booleans in arithmetic operations get cast to ints
+SSATmp* promoteBool(IRGS& env, SSATmp* src) {
   if (!(src->type() <= TBool)) return src;
-  handleConvNoticeLevel(env,
-    isBitOp ? getConvNoticeDataForBitOp() : getConvNoticeDataForMath(),
-    "bool",
-    "int");
+  handleConvNoticeLevel(env, getConvNoticeDataForMath(), "bool", "int");
   return gen(env, ConvBoolToInt, src);
 }
 
@@ -154,8 +141,8 @@ void binaryBitOp(IRGS& env, Op op) {
     return;
   }
 
-  auto const src2 = promoteBool(env, popC(env), true);
-  auto const src1 = promoteBool(env, popC(env), true);
+  auto const src2 = popC(env);
+  auto const src1 = popC(env);
   push(env, gen(env, bitOp(op), src1, src2));
 }
 
@@ -168,8 +155,8 @@ void binaryArith(IRGS& env, Op op) {
   }
 
   auto const exitSlow = makeExitSlow(env);
-  auto src2 = promoteBool(env, popC(env), false);
-  auto src1 = promoteBool(env, popC(env), false);
+  auto src2 = promoteBool(env, popC(env));
+  auto src1 = promoteBool(env, popC(env));
   auto const opc = promoteBinaryDoubles(env, op, src1, src2);
 
   if (opc == AddIntO || opc == SubIntO || opc == MulIntO) {
@@ -1470,13 +1457,12 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
   auto const exitSlow = makeExitSlow(env);
   auto val = popC(env);
   env.irb->constrainValue(loc, DataTypeSpecific);
-  bool isBitOp_ = isBitOp(*subOpc);
-  loc = promoteBool(env, loc, isBitOp_);
-  val = promoteBool(env, val, isBitOp_);
   Opcode opc;
-  if (isBitOp_) {
+  if (isBitOp(*subOpc)) {
     opc = bitOp(*subOpc);
   } else {
+    loc = promoteBool(env, loc);
+    val = promoteBool(env, val);
     opc = promoteBinaryDoubles(env, *subOpc, loc, val);
   }
 
@@ -1501,10 +1487,13 @@ void emitIncDecL(IRGS& env, NamedLocal loc, IncDecOp subop) {
 }
 
 void implShift(IRGS& env, Opcode op) {
-  auto const shiftAmount    = popC(env);
-  auto const lhs            = popC(env);
-  auto const lhsInt         = gen(env, ConvTVToInt, getConvNoticeDataForBitOp(), lhs);
-  auto const shiftAmountInt = gen(env, ConvTVToInt, getConvNoticeDataForBitOp(), shiftAmount);
+  auto const shiftAmount    = topC(env);
+  auto const lhs            = topC(env, BCSPRelOffset{1});
+  if (!lhs->isA(TInt) || !shiftAmount->isA(TInt)) {
+    interpOne(env, TBottom, 2);
+    return;
+  }
+  discard(env, 2);
 
   // - PHP7 defines shifts of width >= 64 to return the value you get from a
   //   naive shift, i.e., either 0 or -1 depending on the shift and value. This
@@ -1512,7 +1501,7 @@ void implShift(IRGS& env, Opcode op) {
   //   to do some comparison logic here.
   // - PHP7 defines negative shifts to throw an ArithmeticError.
   // - PHP5 semantics for such operations are machine-dependent.
-  push(env, gen(env, op, lhsInt, shiftAmountInt));
+  push(env, gen(env, op, lhs, shiftAmount));
   decRef(env, lhs);
   decRef(env, shiftAmount);
 }
@@ -1589,9 +1578,7 @@ void emitBitNot(IRGS& env) {
   }
 
   if (srcType <= TDbl) {
-    handleConvNoticeLevel(env, getConvNoticeDataForBitOp(), "double", "int");
-    auto const src = gen(env, ConvDblToInt, popC(env));
-    push(env, gen(env, XorInt, src, cns(env, -1)));
+    interpOne(env, TBottom, 1);
     return;
   }
 
@@ -1697,8 +1684,8 @@ void emitDiv(IRGS& env) {
     [&] {
       return gen(env,
                  DivInt,
-                 promoteBool(env, dividend, false),
-                 promoteBool(env, divisor, false));
+                 promoteBool(env, dividend),
+                 promoteBool(env, divisor));
     },
     [&] { return gen(env, DivDbl, toDbl(dividend), toDbl(divisor)); }
   );

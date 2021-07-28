@@ -1787,13 +1787,14 @@ SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
     return nullptr;
   }
 
-  bool isBitOp_ = isBitOp(bcOp);
+  auto const hhirOp = [&] {
+    if (isBitOp(bcOp)) return bitOp(bcOp);
 
-  lhs = promoteBool(env, lhs, isBitOp_);
-  rhs = promoteBool(env, rhs, isBitOp_);
+    lhs = promoteBool(env, lhs);
+    rhs = promoteBool(env, rhs);
+    return promoteBinaryDoubles(env, bcOp, lhs, rhs);
+  }();
 
-  auto const hhirOp = isBitOp_ ? bitOp(bcOp)
-                               : promoteBinaryDoubles(env, bcOp, lhs, rhs);
   auto result = gen(env, hhirOp, lhs, rhs);
   assertx(result->isA(TUncounted));
   return result;

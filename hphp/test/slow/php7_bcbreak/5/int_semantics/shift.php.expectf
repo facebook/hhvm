@@ -72,8 +72,8 @@
 -2
 -2
 -
-string(54) "Object of class stdClass could not be converted to int"
-string(54) "Object of class stdClass could not be converted to int"
+string(54) "Cannot perform a bitwise operation on stdClass and int"
+string(54) "Cannot perform a bitwise operation on stdClass and int"
 -
 -9223372036854775808
 -9223372036854775808

@@ -52,9 +52,9 @@ Optional<Type> eval_const(Type t1, Type t2, Fun fun) {
 
 template<class Fun>
 Type bitwise_impl(Type t1, Type t2, Fun op) {
-  if (!(t1.subtypeOf(BInt) && t2.subtypeOf(BInt)) &&
-      !(t1.subtypeOf(BStr) && t2.subtypeOf(BStr))) {
-    return TInitCell;
+  if (!(t1.couldBe(BInt) && t2.couldBe(BInt)) &&
+      !(t1.couldBe(BStr) && t2.couldBe(BStr))) {
+    return TBottom;
   }
   if (auto t = eval_const(t1, t2, op))          return *t;
   if (t1.subtypeOf(BStr) && t2.subtypeOf(BStr)) return TStr;
@@ -64,15 +64,7 @@ Type bitwise_impl(Type t1, Type t2, Fun op) {
 
 template<class Fun>
 Type shift_impl(Type t1, Type t2, Fun op) {
-  if (!t1.subtypeOf(BInt) || !t2.subtypeOf(BInt)) {
-    // because typeToInt is triggered outside of eval_const, we need to do the
-    // check for bailing manually
-    return TInt;
-  }
-
-  t1 = typeToInt(t1);
-  t2 = typeToInt(t2);
-
+  if (!t1.couldBe(BInt) || !t2.couldBe(BInt)) return TBottom;
   if (auto const t = eval_const(t1, t2, op)) return *t;
   return TInt;
 }

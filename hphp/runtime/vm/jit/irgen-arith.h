@@ -37,7 +37,7 @@ bool areBinaryArithTypesSupported(Op op, Type lhs, Type rhs);
 /*
  * If val->isA(TBool), return it converted to TInt. Otherwise, return val.
  */
-SSATmp* promoteBool(IRGS& env, SSATmp* val, bool isBitOp);
+SSATmp* promoteBool(IRGS& env, SSATmp* val);
 
 /*
  * If either lhs or rhs is TDbl, make sure the other one is as well. Return the

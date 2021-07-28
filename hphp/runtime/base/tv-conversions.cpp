@@ -1189,9 +1189,14 @@ void handleConvNoticeLevelImpl(ConvNoticeLevel level, const std::string& str) {
 }
 
 const StaticString s_ConvNoticeReasonConcat("string concatenation/interpolation");
-const StaticString s_ConvNoticeReasonBitOp("bitwise operation");
 const StaticString s_ConvNoticeReasonIncDec("pre/post inc/dec");
 const StaticString s_ConvNoticeReasonMath("math");
+
+void throwBitOpBadTypesException(tv_rval t1, tv_rval t2) {
+  SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+    "Cannot perform a bitwise operation on {} and {}",
+    describe_actual_type(t1), describe_actual_type(t2)));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 #define X(kind) \

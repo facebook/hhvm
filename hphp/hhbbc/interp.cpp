@@ -1348,7 +1348,11 @@ void in(ISS& env, const bc::Shr& op)    { arithImpl(env, op, typeShr); }
 void in(ISS& env, const bc::BitNot& /*op*/) {
   auto const t = popC(env);
   auto const v = tv(t);
-  if (v && t.subtypeOf(BInt | BStr | BSStr | BLazyCls | BCls)) {
+  if (!t.couldBe(BInt | BStr | BSStr | BLazyCls | BCls)) {
+    return push(env, TBottom);
+  }
+
+  if (v) {
     constprop(env);
     auto cell = eval_cell([&] {
       auto c = *v;

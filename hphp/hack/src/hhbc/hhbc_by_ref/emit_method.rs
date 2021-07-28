@@ -152,18 +152,20 @@ pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             .get(&class_name)
             .unwrap_or(&class.namespace),
     );
-    let mut coeffects = HhasCoeffects::from_ast(
-        &method.ctxs,
-        &method.params,
-        &method.tparams,
-        &class.tparams,
-    );
-    if method.ctxs == None && is_closure_body {
+    let mut coeffects = if method.ctxs == None && is_closure_body {
         let parent_coeffects = emitter
             .emit_global_state()
             .get_lambda_coeffects_of_scope(&class.name.1, &method.name.1);
-        coeffects = parent_coeffects.inherit_to_child_closure()
-    }
+        parent_coeffects.inherit_to_child_closure()
+    } else {
+        HhasCoeffects::from_ast(
+            &method.ctxs,
+            &method.params,
+            &method.tparams,
+            &class.tparams,
+        )
+    };
+
     if is_native_opcode_impl
         && (class.name.1.as_str() == classes::GENERATOR
             || class.name.1.as_str() == classes::ASYNC_GENERATOR)

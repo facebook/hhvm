@@ -9,12 +9,77 @@ if [ "$(echo "$top" | grep -c "fbsource/fbcode\$")" -ne 1 ]
     exit 1
 fi
 
+if ! command -v "cargo" &> /dev/null
+then
+    echo "It seems cargo is not in the PATH."
+    echo " Try: 'export PATH=/data/users/${USER}/fbsource/fbcode/third-party-buck/platform009/build/rust/bin:\$PATH'"
+    read -r -p " Perform these steps? [y/n] " input
+    case $input in
+        [yY][eE][sS]|[yY])
+        echo " Perfoming steps"
+        export PATH="/data/users/${USER}/fbsource/fbcode/third-party-buck/platform009/build/rust/bin:$PATH"
+        ;;
+    *)
+        echo " No steps performed. Exiting."
+        exit 2
+        ;;
+    esac
+fi
+
+if [ "$(sudo feature installed | grep -c ttls_fwdproxy)" -ne 1 ]
+then
+    echo "ttls_fwdproxy is not installed."
+    echo "Try: 'sudo feature install ttls_fwdproxy'"
+    read -r -p " Perform these steps? [y/n] " input
+    case $input in
+        [yY][eE][sS]|[yY])
+        echo " Perfoming steps"
+        sudo feature install ttls_fwdproxy
+        ;;
+    *)
+        echo " No steps performed. Exiting."
+        exit 2
+        ;;
+    esac
+fi
+
+DIR=hphp/hack/.cargo_vendor
+if [ ! -d "$DIR" ];
+then
+    echo "Need to generate .cargo_vendor"
+    echo " Try 'hphp/hack/scripts/facebook/cargo_fetch.sh'"
+    read -r -p " Perform these steps? [y/n] " input
+    case $input in
+        [yY][eE][sS]|[yY])
+        echo " Perfoming steps"
+        hphp/hack/scripts/facebook/cargo_fetch.sh
+        ;;
+    *)
+        echo " No steps performed. Exiting."
+        exit 2
+        ;;
+    esac
+fi
+
 if ! command -v "cbindgen" &> /dev/null
 then
     echo "It seems cbindgen is not in the PATH."
-    echo "Try 'cargo install --force cbindgen' and then run this script again."
-    echo "(You may need to 'export https_proxy=http://fwdproxy:8080' to install cbindgen)."
-    exit 2
+    echo " Try: 'cargo install --force cbindgen'"
+    echo "  (You may need to 'export https_proxy=http://fwdproxy:8080' to install cbindgen)."
+    echo "  (You may need to 'export PATH=${HOME}/.cargo/bin:\$PATH' to be able to run the installed binaries)."
+    read -r -p " Perform these steps? [y/n] " input
+    case $input in
+        [yY][eE][sS]|[yY])
+        echo " Perfoming steps"
+        export https_proxy=http://fwdproxy:8080
+        cargo install --force cbindgen
+        export PATH="${HOME}/.cargo/bin:$PATH"
+        ;;
+    *)
+        echo " No steps performed. Exiting."
+        exit 2
+        ;;
+    esac
 fi
 
 set -x

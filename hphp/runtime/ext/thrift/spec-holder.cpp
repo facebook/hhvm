@@ -290,7 +290,8 @@ Object StructSpec::newObject(Class* cls) const {
   auto const func = withDefaultValuesFunc != nullptr
     ? withDefaultValuesFunc : lookupWithDefaultValuesFunc(cls);
 
-  auto obj = g_context->invokeFuncFew(func, cls, RuntimeCoeffects::pure());
+  auto obj = g_context->invokeFuncFew(
+    func, cls, 0, nullptr, RuntimeCoeffects::pure(), false /* dynamic */);
   if (tvIsObject(obj)) return Object::attach(obj.m_data.pobj);
 
   SCOPE_EXIT { tvDecRefGen(obj); };

@@ -17,7 +17,7 @@
 # _HackFunctionGenerator maintains each function definition.
 # HackGenerator extends CodeGenerator combines all _Hack*Generator to
 # emit Hack code on clingo output.
-from typing import Set, Dict, Any, Tuple
+from typing import Set, Dict, Any, Tuple, List
 
 import clingo
 from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
@@ -189,15 +189,63 @@ class _HackFunctionGenerator:
     def __init__(self, name: str, **kwargs: Dict[str, Any]) -> None:
         self.name = name
         # A set of static methods to invoke in the function.
+        # A tuple with (class_name, static_method_name) added to the set.
         self.invoke_static_set: Set[Tuple[str, str]] = set()
+        # A set of type(class/interface) methods to invoke in the function.
+        # A tuple with (type_name, method_name) added to the set.
+        self.type_method_set: Set[Tuple[str, str]] = set()
         # A set of functions to invoke in the function.
         self.invoke_funcs_set: Set["_HackFunctionGenerator"] = set()
+        # A set of class objects to create in the function.
+        # To invoke a class method, we are creating objects from this set
+        # prior to invoke the method in `type_method_set`
+        # A string with class_name added to the set.
+        self.class_obj_set: Set[str] = set()
+        # A list of parameter and argument pairs.
+        # To invoke an interface method, we are adding this list to the function
+        # parameter, the objects are created by the caller
+        # later in the function body invokes method in `type_method_set`
+        # A tuple with (parameter_type, argument_type) appended to the list.
+        self.parameter_list: List[Tuple[str, str]] = []
 
     def add_invoke_static_method(self, class_name: str, method_name: str) -> None:
         self.invoke_static_set.add((class_name, method_name))
 
     def add_invoke_function(self, fn_obj: "_HackFunctionGenerator") -> None:
         self.invoke_funcs_set.add(fn_obj)
+
+    def add_class_obj(self, class_name: str) -> None:
+        self.class_obj_set.add(class_name)
+
+    def add_class_method(self, class_name: str, method_name: str) -> None:
+        self.type_method_set.add((class_name, method_name))
+
+    def add_parameter(self, parameter_type: str, argument_type: str) -> None:
+        self.parameter_list.append((parameter_type, argument_type))
+
+    def _create_arguments(self) -> str:
+        return "".join(
+            [
+                f"${argument_type}_obj = new {argument_type}();\n"
+                for (_, argument_type) in self.parameter_list
+            ]
+        )
+
+    def _print_parameters(self) -> str:
+        return ", ".join(
+            [
+                f"{parameter_type} ${parameter_type}_obj"
+                for (parameter_type, _) in self.parameter_list
+            ]
+        )
+
+    def _print_arguments(self) -> str:
+        return ", ".join(
+            [f"${argument_type}_obj" for (_, argument_type) in self.parameter_list]
+        )
+
+    def _print_callee(self) -> str:
+        return self._create_arguments() + f"{self.name}({self._print_arguments()});"
 
     def _print_body(self) -> str:
         return (
@@ -211,14 +259,23 @@ class _HackFunctionGenerator:
                     for x in sorted(self.invoke_funcs_set, key=lambda x: x.name)
                 ]
             )
+            + "".join(
+                [
+                    f"\n${class_name}_obj = new {class_name}();\n"
+                    for class_name in sorted(self.class_obj_set)
+                ]
+            )
+            + "".join(
+                [
+                    f"\n${type_name}_obj->{method}();\n"
+                    for (type_name, method) in sorted(self.type_method_set)
+                ]
+            )
             + "}"
         )
 
-    def _print_callee(self) -> str:
-        return f"{self.name}();"
-
     def __str__(self) -> str:
-        return f"function {self.name}(): void {self._print_body()}"
+        return f"function {self.name}({self._print_parameters()}): void {self._print_body()}"
 
 
 class HackCodeGenerator(CodeGenerator):
@@ -280,6 +337,10 @@ class HackCodeGenerator(CodeGenerator):
                 self.function_objs[function_name]
             )
 
+    def _add_object_in_function(self, name: str, class_name: str) -> None:
+        if name in self.function_objs:
+            self.function_objs[name].add_class_obj(class_name)
+
     def _add_invoke(self, name: str, object_type: str, method_name: str) -> None:
         if name in self.class_objs:
             self.class_objs[name].add_invoke(object_type, method_name)
@@ -291,6 +352,18 @@ class HackCodeGenerator(CodeGenerator):
             self.class_objs[name].add_invoke_static_method(class_name, method_name)
         if name in self.function_objs:
             self.function_objs[name].add_invoke_static_method(class_name, method_name)
+
+    def _add_invoke_in_function(
+        self, name: str, type_name: str, method_name: str
+    ) -> None:
+        if name in self.function_objs:
+            self.function_objs[name].add_class_method(type_name, method_name)
+
+    def _add_parameter_to_function(
+        self, name: str, parameter_type: str, argument_type: str
+    ) -> None:
+        if name in self.function_objs:
+            self.function_objs[name].add_parameter(parameter_type, argument_type)
 
     def __str__(self) -> str:
         return (
@@ -306,8 +379,9 @@ class HackCodeGenerator(CodeGenerator):
         # Separate into 'class(?)', 'interface(?)', 'funcs(?)',
         # 'implements(?, ?)', 'extends(?, ?)', 'add_method(?, ?)',
         # 'add_static_method(?, ?)', 'has_method_with_parameter(?, ?)'
-        # 'invokes_function(?, ?)'
+        # 'invokes_function(?, ?)', 'creates_in_body(?, ?)'
         # 'invokes_in_method(?, ?, ?)', 'invokes_static_method(?, ?, ?)'
+        # 'invokes_in_body(?, ?, ?)', 'has_parameter_and_argument(?, ?, ?)'
         predicates = m.symbols(atoms=True)
         node_func = {
             "class": self._add_class,
@@ -321,10 +395,13 @@ class HackCodeGenerator(CodeGenerator):
             "add_static_method": self._add_static_method,
             "has_method_with_parameter": self._add_to_parameter_set,
             "invokes_function": self._add_invoke_function,
+            "creates_in_body": self._add_object_in_function,
         }
         trip_func = {
             "invokes_in_method": self._add_invoke,
             "invokes_static_method": self._add_invoke_static_method,
+            "invokes_in_body": self._add_invoke_in_function,
+            "has_parameter_and_argument": self._add_parameter_to_function,
         }
         # Three passes,
         #   First pass creates individual nodes like class, interface, function.

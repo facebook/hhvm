@@ -395,3 +395,56 @@ F0();
         self.obj._add_invoke_function("C0", "F0")
         self.obj._add_invoke_function("F1", "F0")
         self.assertEqual(exp, str(self.obj))
+
+    def test_function_creates_an_object_of_another_class(
+        self,
+    ) -> None:
+        exp = """\
+<?hh
+class C0   {
+public function foo(): void{}
+}
+
+function F0(): void {
+$C0_obj = new C0();
+
+$C0_obj->foo();
+}
+"""
+        self.obj._add_function("F0")
+        self.obj._add_class("C0")
+        self.obj._add_method("C0", "foo")
+        self.obj._add_object_in_function("F0", "C0")
+        self.obj._add_invoke_in_function("F0", "C0", "foo")
+        self.assertEqual(exp, str(self.obj))
+
+    def test_function_creates_an_object_invokes_another_function_has_an_interface(
+        self,
+    ) -> None:
+        exp = """\
+<?hh
+class C0  implements I0 {
+public function foo(): void{}
+}
+interface I0  {
+public function foo(): void;
+}
+function F0(I0 $I0_obj): void {
+$I0_obj->foo();
+}
+function F1(): void {
+$C0_obj = new C0();
+F0($C0_obj);
+}
+"""
+        self.obj._add_function("F0")
+        self.obj._add_function("F1")
+        self.obj._add_class("C0")
+        self.obj._add_interface("I0")
+        self.obj._add_method("I0", "foo")
+        self.obj._add_implement("C0", "I0")
+        self.obj._add_method("C0", "foo")
+        self.obj._add_invoke_function("F1", "F0")
+        self.obj._add_parameter_to_function("F0", "I0", "C0")
+        self.obj._add_invoke_in_function("F0", "I0", "foo")
+        self.assertEqual(exp, str(self.obj))

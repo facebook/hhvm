@@ -765,6 +765,101 @@ Type I -> Type A
 """
         self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
 
+    def test_function_class_with_rule_extraction_hack_codegen(self) -> None:
+        exp = """\
+<?hh
+class A extends I  {}
+class I   {}
+interface B  {
+public function dummy_B_method(A $A_obj): void;
+}
+interface T  {
+public function dummy_T_method(A $A_obj): void;
+}
+function F0(): void {
+$I_obj = new I();
+}
+"""
+        deps = """\
+Extends I -> Type A
+Type A -> Type B, Type T
+Type I -> Type A, Fun F0
+"""
+        self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
+
+    def test_function_interface_with_rule_extraction_hack_codegen(self) -> None:
+        exp = """\
+<?hh
+class A  implements I {
+public static function foo(): void{}
+}
+class B   {
+public function dummy_B_method(A $A_obj): void{
+F1();
+}
+}
+class T   {
+public function dummy_T_method(A $A_obj): void{
+A::foo();
+}
+}
+interface I  {}
+function F0(I $I_obj): void {
+A::foo();
+}
+function F1(): void {
+$A_obj = new A();
+F0($A_obj);
+}
+"""
+        deps = """\
+Extends I -> Type A
+SMethod A::foo -> Fun F0, Type T
+Fun F0 -> Fun F1
+Fun F1 -> Type B
+Type A -> Type B, Type T
+Type I -> Type A, Fun F0
+"""
+        self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
+
+    def test_function_interface_method_with_rule_extraction_hack_codegen(self) -> None:
+        exp = """\
+<?hh
+class A  implements I {
+public static function foo(): void{}
+
+public function bar(): void{}
+}
+class B   {
+public function dummy_B_method(): void{
+$A_obj = new A();
+F0($A_obj);
+}
+}
+class T   {
+public function dummy_T_method(A $A_obj): void{
+A::foo();
+}
+}
+interface I  {
+public function bar(): void;
+}
+function F0(I $I_obj): void {
+A::foo();
+
+$I_obj->bar();
+}
+"""
+        deps = """\
+Extends I -> Type A
+SMethod A::foo -> Fun F0, Type T
+Method I::bar -> Type A, Fun F0
+Fun F0 -> Type B
+Type A -> Fun F0, Type T
+Type I -> Fun F0, Type A, Fun F0
+"""
+        self.extract_run_and_compare(deps, exp, hackGenerator.HackCodeGenerator())
+
     def test_circular_type_method_dependency_with_rule_extraction_hack_codegen(
         self,
     ) -> None:

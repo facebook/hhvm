@@ -58,17 +58,6 @@ let get_and_cache
         | None -> None
       end)
 
-let check_valid key pos =
-  if Relative_path.equal (FileInfo.get_pos_filename pos) Relative_path.default
-  then (
-    Hh_logger.log
-      "WARNING: setting canonical position of %s to be in dummy file. If this happens in incremental mode, things will likely break later."
-      key;
-    Hh_logger.log
-      "%s"
-      (Caml.Printexc.raw_backtrace_to_string (Caml.Printexc.get_callstack 100))
-  )
-
 let canonize_set = SSet.map Naming_sqlite.to_canon_name_key
 
 module type ReverseNamingTable = sig
@@ -134,8 +123,6 @@ module Types = struct
       end)
 
   let add id type_info =
-    if not @@ TypePosHeap.LocalChanges.has_local_changes () then
-      check_valid id (fst type_info);
     TypeCanonHeap.add (Naming_sqlite.to_canon_name_key id) id;
     TypePosHeap.write_around id type_info
 
@@ -286,8 +273,6 @@ module Funs = struct
       end)
 
   let add id pos =
-    if not @@ FunPosHeap.LocalChanges.has_local_changes () then
-      check_valid id pos;
     FunCanonHeap.add (Naming_sqlite.to_canon_name_key id) id;
     FunPosHeap.add id pos
 
@@ -375,10 +360,7 @@ module Consts = struct
         let description = "Naming_ConstBlocked"
       end)
 
-  let add id pos =
-    if not @@ ConstPosHeap.LocalChanges.has_local_changes () then
-      check_valid id pos;
-    ConstPosHeap.add id pos
+  let add id pos = ConstPosHeap.add id pos
 
   let get_pos db_path_opt ?bypass_cache:(_ = false) id =
     let map_result path = Some (FileInfo.File (FileInfo.Const, path)) in

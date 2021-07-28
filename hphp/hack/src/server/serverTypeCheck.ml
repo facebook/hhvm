@@ -207,15 +207,18 @@ let get_files_with_stale_errors
 (*****************************************************************************)
 
 let push_errors env ~rechecked ~phase new_errors =
-  {
-    env with
-    diagnostic_pusher =
-      Diagnostic_pusher.push_new_errors
-        env.diagnostic_pusher
-        ~rechecked
-        new_errors
-        ~phase;
-  }
+  if TypecheckerOptions.stream_errors env.tcopt then
+    {
+      env with
+      diagnostic_pusher =
+        Diagnostic_pusher.push_new_errors
+          env.diagnostic_pusher
+          ~rechecked
+          new_errors
+          ~phase;
+    }
+  else
+    env
 
 let erase_errors env = push_errors env Errors.empty
 

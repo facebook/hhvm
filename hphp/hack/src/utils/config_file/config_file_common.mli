@@ -6,9 +6,11 @@
  *
  *)
 
-type t = string SMap.t
+type t
 
 val file_path_relative_to_repo_root : string
+
+val empty : unit -> t
 
 val print_config : t -> unit
 
@@ -19,6 +21,12 @@ val parse_contents : string -> t
 val parse : silent:bool -> string -> string * t
 
 val parse_local_config : silent:bool -> string -> t
+
+val to_json : t -> Hh_json.json
+
+val of_list : (string * string) list -> t
+
+val keys : t -> string list
 
 module Getters : sig
   val make_key : string -> prefix:string option -> string

@@ -58,4 +58,4 @@ val warn_on_non_opt_build : t -> bool
 val convert_auto_namespace_to_map : string -> (string * string) list
 
 val make_sharedmem_config :
-  string SMap.t -> ServerArgs.options -> ServerLocalConfig.t -> SharedMem.config
+  Config_file.t -> ServerArgs.options -> ServerLocalConfig.t -> SharedMem.config

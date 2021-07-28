@@ -10,13 +10,14 @@
 open Core_kernel
 include Config_file_version
 
-type t = string SMap.t
+type t = Config_file_common.t
 
 let file_path_relative_to_repo_root =
   Config_file_common.file_path_relative_to_repo_root
 
-let parse_hhconfig (fn : string) : (string * string SMap.t, string) Lwt_result.t
-    =
+let empty = Config_file_common.empty
+
+let parse_hhconfig (fn : string) : (string * t, string) Lwt_result.t =
   let%lwt contents = Lwt_utils.read_all fn in
   match contents with
   | Ok contents ->

@@ -575,7 +575,8 @@ let read_hhconfig_version () : string Lwt.t =
     (match config with
     | Ok (_hash, config) ->
       let version =
-        SMap.find_opt "version" config
+        config
+        |> Config_file.Getters.string_opt "version"
         |> Config_file_lwt.parse_version
         |> Config_file_lwt.version_to_string_opt
         |> Option.value ~default:"[NoVersion]"
@@ -4826,7 +4827,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
     ServerLocalConfig.load
       ~silent:true
       ~current_version:(Config_file.parse_version None)
-      (SMap.of_list args.config)
+      (Config_file.of_list args.config)
   in
   let env =
     {

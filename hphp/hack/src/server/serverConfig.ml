@@ -114,7 +114,9 @@ let process_experimental sl =
   | features -> List.fold_left features ~f:SSet.add ~init:SSet.empty
 
 let config_experimental_tc_features config =
-  match SMap.find_opt config "enable_experimental_tc_features" with
+  match
+    Config_file.Getters.string_opt "enable_experimental_tc_features" config
+  with
   | None -> SSet.empty
   | Some s ->
     let sl = Str.split config_list_regexp s in
@@ -131,7 +133,7 @@ let process_migration_flags sl =
     List.fold_left flags ~f:SSet.add ~init:SSet.empty
 
 let config_tc_migration_flags config =
-  SMap.find_opt config "enable_tc_migration_flags"
+  Config_file.Getters.string_opt "enable_tc_migration_flags" config
   |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
   |> List.map ~f:String.lowercase
   |> process_migration_flags
@@ -147,7 +149,7 @@ let convert_paths str =
     l
 
 let process_ignored_paths config =
-  SMap.find_opt config "ignored_paths"
+  Config_file.Getters.string_opt "ignored_paths" config
   |> Option.value_map ~f:convert_paths ~default:[]
 
 let maybe_relative_path fn =
@@ -162,12 +164,12 @@ let maybe_relative_path fn =
     end
 
 let process_extra_paths config =
-  match SMap.find_opt config "extra_paths" with
+  match Config_file.Getters.string_opt "extra_paths" config with
   | Some s -> Str.split config_list_regexp s |> List.map ~f:maybe_relative_path
   | _ -> []
 
 let process_untrusted_mode config =
-  match SMap.find_opt config "untrusted_mode" with
+  match Config_file.Getters.string_opt "untrusted_mode" config with
   | Some s ->
     if bool_of_string s then
       let blacklist =
@@ -182,8 +184,7 @@ let process_untrusted_mode config =
         [(* potential resource abuse *) "gc_"; "sharedmem_"]
       in
       let invalid_keys =
-        SMap.filter
-          ~f:(fun ck _ ->
+        List.filter (Config_file.keys config) ~f:(fun ck ->
             let ck = String.lowercase ck in
             let exact_match =
               List.find ~f:(fun bli -> String.equal bli ck) blacklist
@@ -196,8 +197,6 @@ let process_untrusted_mode config =
             match (exact_match, prefix_match) with
             | (None, None) -> false
             | _ -> true)
-          config
-        |> SMap.keys
       in
       if not (List.is_empty invalid_keys) then
         failwith
@@ -223,12 +222,12 @@ let convert_auto_namespace_to_map map =
 
 let prepare_auto_namespace_map config =
   Option.value_map
-    (SMap.find_opt config "auto_namespace_map")
+    (Config_file.Getters.string_opt "auto_namespace_map" config)
     ~default:[]
     ~f:convert_auto_namespace_to_map
 
 let prepare_iset config config_name initial_values =
-  SMap.find_opt config config_name
+  Config_file.Getters.string_opt config_name config
   |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
   |> List.map ~f:int_of_string
   |> List.fold_right ~init:initial_values ~f:ISet.add
@@ -240,7 +239,7 @@ let prepare_allowed_decl_fixme_codes config =
   prepare_iset config "allowed_decl_fixme_codes" (ISet.of_list [])
 
 let load ~silent config_filename options : t * ServerLocalConfig.t =
-  let config_overrides = SMap.of_list @@ ServerArgs.config options in
+  let config_overrides = Config_file.of_list @@ ServerArgs.config options in
   let (config_hash, config) =
     Config_file.parse_hhconfig
       ~silent:true
@@ -250,7 +249,9 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
     Config_file.apply_overrides ~silent:true ~config ~overrides:config_overrides
   in
   process_untrusted_mode config;
-  let version = Config_file.parse_version (SMap.find_opt config "version") in
+  let version =
+    Config_file.parse_version (Config_file.Getters.string_opt "version" config)
+  in
   let local_config =
     ServerLocalConfig.load ~silent ~current_version:version config_overrides
   in
@@ -282,7 +283,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
   in
   let formatter_override =
     Option.map
-      (SMap.find_opt config "formatter_override")
+      (Config_file.Getters.string_opt "formatter_override" config)
       ~f:maybe_relative_path
   in
   let global_opts =

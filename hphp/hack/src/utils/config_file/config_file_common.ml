@@ -14,12 +14,12 @@ type t = string SMap.t
 
 let file_path_relative_to_repo_root = ".hhconfig"
 
-let print_config (config : string SMap.t) : unit =
+let empty () = SMap.empty
+
+let print_config (config : t) : unit =
   SMap.iter (fun k v -> Printf.eprintf "%s = %s\n" k v) config
 
-let apply_overrides
-    ~silent ~(config : string SMap.t) ~(overrides : string SMap.t) :
-    string SMap.t =
+let apply_overrides ~silent ~(config : t) ~(overrides : t) : t =
   if SMap.cardinal overrides = 0 then
     config
   else
@@ -38,7 +38,7 @@ let apply_overrides
  * # Some comment. Indicate by a pound sign at the start of a new line
  * key = a possibly space-separated value
  *)
-let parse_contents (contents : string) : string SMap.t =
+let parse_contents (contents : string) : t =
   let lines = Str.split (Str.regexp "\n") contents in
   List.fold_left
     lines
@@ -59,7 +59,7 @@ let parse_contents (contents : string) : string SMap.t =
       end
     ~init:SMap.empty
 
-let parse ~silent (fn : string) : string * string SMap.t =
+let parse ~silent (fn : string) : string * t =
   let contents = cat fn in
   if not silent then
     Printf.eprintf "%s on-file-system contents:\n%s\n" fn contents;
@@ -67,7 +67,7 @@ let parse ~silent (fn : string) : string * string SMap.t =
   let hash = Sha1.digest contents in
   (hash, parsed)
 
-let parse_local_config ~silent (fn : string) : string SMap.t =
+let parse_local_config ~silent (fn : string) : t =
   try
     let (_hash, config) = parse ~silent fn in
     config
@@ -76,6 +76,12 @@ let parse_local_config ~silent (fn : string) : string SMap.t =
     Hh_logger.log "Loading config exception: %s" (Exn.to_string e);
     Hh_logger.log "Could not load config at %s" fn;
     SMap.empty
+
+let to_json t = Hh_json.JSON_Object (SMap.elements @@ SMap.map Hh_json.string_ t)
+
+let of_list = SMap.of_list
+
+let keys = SMap.keys
 
 module Getters = struct
   let make_key key ~prefix =

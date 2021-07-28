@@ -77,12 +77,16 @@ let test_bool_if_min_version () =
   let current_version =
     Version_components { major = 3; minor = 37; build = 1 }
   in
-  let config = SMap.empty in
-  let config = SMap.add "feature_true" "true" config in
-  let config = SMap.add "feature_false" "false" config in
-  let config = SMap.add "feature_version_eq" "^3.37.1" config in
-  let config = SMap.add "feature_version_less" "^3.36.1" config in
-  let config = SMap.add "feature_version_greater" "^3.40.1" config in
+  let config =
+    of_list
+      [
+        ("feature_true", "true");
+        ("feature_false", "false");
+        ("feature_version_eq", "^3.37.1");
+        ("feature_version_less", "^3.36.1");
+        ("feature_version_greater", "^3.40.1");
+      ]
+  in
   let actual =
     bool_if_min_version "feature_true" ~default:false ~current_version config
   in

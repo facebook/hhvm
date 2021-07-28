@@ -732,11 +732,13 @@ let parse_options () =
       (* We will pick up values from .hhconfig, unless they've been overridden at the command-line. *)
       if Option.is_none !auto_namespace_map then
         auto_namespace_map :=
-          SMap.find_opt "auto_namespace_map" config
+          config
+          |> Config_file.Getters.string_opt "auto_namespace_map"
           |> Option.map ~f:ServerConfig.convert_auto_namespace_to_map;
       if Option.is_none !allowed_fixme_codes_strict then
         allowed_fixme_codes_strict :=
-          SMap.find_opt "allowed_fixme_codes_strict" config
+          config
+          |> Config_file.Getters.string_opt "allowed_fixme_codes_strict"
           |> Option.map ~f:comma_string_to_iset;
       sharedmem_config :=
         ServerConfig.make_sharedmem_config

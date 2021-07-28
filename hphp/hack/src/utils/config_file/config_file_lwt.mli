@@ -6,15 +6,15 @@
  *
  *)
 
-type t = string SMap.t
+type t = Config_file_common.t
 
-type version_components = {
+type version_components = Config_file_version.version_components = {
   major: int;
   minor: int;
   build: int;
 }
 
-type version =
+type version = Config_file_version.version =
   | Opaque_version of string option
   | Version_components of version_components
 
@@ -24,4 +24,6 @@ val version_to_string_opt : ?pad:bool -> version -> string option
 
 val file_path_relative_to_repo_root : string
 
-val parse_hhconfig : string -> (string * string SMap.t, string) Lwt_result.t
+val empty : unit -> t
+
+val parse_hhconfig : string -> (string * t, string) Lwt_result.t

@@ -29,7 +29,7 @@ let get_and_cache
     ~(get_func : 'key -> 'value option)
     ~(check_block_func : 'key -> blocked_entry option)
     ~(fallback_get_func_opt : ('key -> 'fallback_value option) option)
-    ~(add_func : 'key -> 'value -> unit)
+    ~(cache_func : 'key -> 'value -> unit)
     ~(measure_name : string)
     ~(key : 'key) : 'value option =
   match (get_func key, fallback_get_func_opt) with
@@ -51,7 +51,7 @@ let get_and_cache
           begin
             match map_result res with
             | Some pos ->
-              add_func key pos;
+              cache_func key pos;
               Some pos
             | None -> None
           end
@@ -150,7 +150,7 @@ module Types = struct
       ~get_func
       ~check_block_func:BlockedEntries.get
       ~fallback_get_func_opt
-      ~add_func:add
+      ~cache_func:TypePosHeap.write_around
       ~measure_name:"Reverse naming table (types) cache hit rate"
       ~key:id
 
@@ -220,7 +220,7 @@ module Types = struct
       ~get_func:TypeCanonHeap.get
       ~check_block_func:BlockedEntries.get
       ~fallback_get_func_opt
-      ~add_func:TypeCanonHeap.add
+      ~cache_func:TypeCanonHeap.add
       ~measure_name:"Canon naming table (types) cache hit rate"
       ~key:id
 
@@ -286,7 +286,7 @@ module Funs = struct
       ~get_func:FunPosHeap.get
       ~check_block_func:BlockedEntries.get
       ~fallback_get_func_opt
-      ~add_func:add
+      ~cache_func:FunPosHeap.add
       ~measure_name:"Reverse naming table (functions) cache hit rate"
       ~key:id
 
@@ -319,7 +319,7 @@ module Funs = struct
       ~get_func:FunCanonHeap.get
       ~check_block_func:BlockedEntries.get
       ~fallback_get_func_opt
-      ~add_func:FunCanonHeap.add
+      ~cache_func:FunCanonHeap.add
       ~measure_name:"Canon naming table (functions) cache hit rate"
       ~key:name
 
@@ -373,7 +373,7 @@ module Consts = struct
       ~get_func:ConstPosHeap.get
       ~check_block_func:BlockedEntries.get
       ~fallback_get_func_opt
-      ~add_func:add
+      ~cache_func:ConstPosHeap.add
       ~measure_name:"Reverse naming table (consts) cache hit rate"
       ~key:id
 

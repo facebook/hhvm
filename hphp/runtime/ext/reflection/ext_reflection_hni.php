@@ -2356,8 +2356,8 @@ class ReflectionTypeAlias implements Reflector {
   }
 
   // helper for ctor
-  <<__Native, __Pure, __Mutable>>
-  private function __init(string $name): string;
+  <<__Native>>
+  private function __init(string $name)[write_this_props]: string;
 
   /**
    * Get the TypeStructure that contains the full type information of

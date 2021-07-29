@@ -3,7 +3,7 @@
 set -euo pipefail
 
 top="$(pwd)"
-if [ "$(echo "$top" | grep -c "fbsource/fbcode\$")" -ne 1 ]
+if [ "$(echo "$top" | grep -c "fbcode\$")" -ne 1 ]
   then
     echo "This script should be run from fbsource/fbcode."
     exit 1
@@ -59,6 +59,14 @@ then
         exit 2
         ;;
     esac
+fi
+
+# These are sometimes needed to properly install cbindgen
+if [ "$(git config --list | grep -c http.proxy)" -ne 1 ]
+then  git config --global  http.proxy http://fwdproxy:8080
+fi
+if [ "$(git config --list | grep -c https.proxy)" -ne 1 ]
+then  git config --global  https.proxy https://fwdproxy:8080
 fi
 
 if ! command -v "cbindgen" &> /dev/null

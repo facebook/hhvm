@@ -610,29 +610,6 @@ auto run_compiler(
   return err.str();
 }
 
-ParseFactsResult extract_facts_worker(const CompilerGuard& compiler,
-                               const std::string& filename,
-                               const char* code,
-                               int len,
-                               int maxRetries,
-                               bool verboseErrors,
-                               const RepoOptions& options
-) {
-  auto extract = [&](const CompilerGuard& c) {
-    auto result = c->extract_facts(filename, folly::StringPiece(code, len),
-                                   options);
-    return FactsJSONString { result };
-  };
-  auto internal_error = false;
-  return run_compiler(
-    compiler,
-    maxRetries,
-    verboseErrors,
-    extract,
-    internal_error,
-    CompileAbortMode::Never);
-}
-
 namespace {
 CompilerResult assemble_string_handle_errors(const char* code,
                                              const char* hhas,
@@ -1091,72 +1068,57 @@ CompilerResult hackc_compile(
   const RepoOptions& options,
   CompileAbortMode mode
 ) {
-  if (RuntimeOption::EvalHackCompilerUseCompilerPool) {
-    return s_manager.get_hackc_pool().compile(
-      code,
-      len,
-      filename,
-      sha1,
-      nativeFuncs,
-      forDebuggerEval,
-      internal_error,
-      options,
-      mode
-    );
+  using namespace ::HPHP::hackc::compile;
+
+  std::uint8_t flags = 0;
+  if(forDebuggerEval) {
+    flags |= FOR_DEBUGGER_EVAL;
+  }
+  if(!SystemLib::s_inited) {
+    flags |= IS_SYSTEMLIB;
+  }
+  if (RuntimeOption::EvalEnableDecl) {
+    flags |= ENABLE_DECL;
+  }
+  flags |= DUMP_SYMBOL_REFS;
+
+  HhvmDeclProvider decl_provider;
+
+  std::string aliased_namespaces = options.getAliasedNamespacesConfig();
+
+  native_environment const native_env{
+    &hhvm_decl_provider_get_decl,
+    &decl_provider,
+    filename,
+    aliased_namespaces.data(),
+    s_misc_config.data(),
+    RuntimeOption::EvalEmitClassPointers,
+    RuntimeOption::CheckIntOverflow,
+    options.getCompilerFlags(),
+    options.getParserFlags(),
+    flags
+  };
+
+  output_config const output{true, nullptr};
+
+  std::array<char, 256> buf;
+  buf.fill(0);
+  error_buf_t error_buf {buf.data(), buf.size()};
+
+  hackc_compile_from_text_ptr hhas{
+    hackc_compile_from_text(&native_env, code, &output, &error_buf)
+  };
+  if (hhas) {
+    return assemble_string_handle_errors(code,
+                                          hhas.get(),
+                                          strlen(hhas.get()),
+                                          filename,
+                                          sha1,
+                                          nativeFuncs,
+                                          internal_error,
+                                          mode);
   } else {
-
-    using namespace ::HPHP::hackc::compile;
-
-    std::uint8_t flags = 0;
-    if(forDebuggerEval) {
-      flags |= FOR_DEBUGGER_EVAL;
-    }
-    if(!SystemLib::s_inited) {
-      flags |= IS_SYSTEMLIB;
-    }
-    if (RuntimeOption::EvalEnableDecl) {
-      flags |= ENABLE_DECL;
-    }
-    flags |= DUMP_SYMBOL_REFS;
-
-    HhvmDeclProvider decl_provider;
-
-    std::string aliased_namespaces = options.getAliasedNamespacesConfig();
-
-    native_environment const native_env{
-      &hhvm_decl_provider_get_decl,
-      &decl_provider,
-      filename,
-      aliased_namespaces.data(),
-      s_misc_config.data(),
-      RuntimeOption::EvalEmitClassPointers,
-      RuntimeOption::CheckIntOverflow,
-      options.getCompilerFlags(),
-      options.getParserFlags(),
-      flags
-    };
-
-    output_config const output{true, nullptr};
-
-    std::array<char, 256> buf;
-    buf.fill(0);
-    error_buf_t error_buf {buf.data(), buf.size()};
-
-    hackc_compile_from_text_ptr hhas{
-      hackc_compile_from_text(&native_env, code, &output, &error_buf)
-    };
-    if (hhas) {
-      return assemble_string_handle_errors(code,
-                                           hhas.get(),
-                                           strlen(hhas.get()),
-                                           filename,
-                                           sha1,
-                                           nativeFuncs,
-                                           internal_error,
-                                           mode);
-    } else {
-      throwErrno(buf.data());
-    }
+    throwErrno(buf.data());
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -1276,47 +1238,32 @@ ParseFactsResult extract_facts(
   int len,
   const RepoOptions& options
 ) {
-  if (RuntimeOption::EvalHackCompilerUseCompilerPool) {
-    size_t maxRetries;
-    bool verboseErrors;
-    std::tie(maxRetries, verboseErrors) =
-      s_manager.get_hackc_pool().getMaxRetriesAndVerbosity();
-    return extract_facts_worker(
-      dynamic_cast<const CompilerGuard&>(facts_parser),
-      filename,
-      code,
-      len,
-      maxRetries,
-      verboseErrors,
-      options);
-  } else {
-    auto const get_facts = [&](const char* source_text) -> ParseFactsResult {
-      try {
-        hackc_extract_as_json_ptr facts{
-          hackc_extract_as_json(options.getFactsFlags(), filename.data(), source_text, true)
-        };
-        if (facts) {
-          std::string facts_str{facts.get()};
-          return FactsJSONString { facts_str };
-        }
-        return FactsJSONString { "" }; // Swallow errors from HackC
-      } catch (const std::exception& e) {
-        return FactsJSONString { "" }; // Swallow errors from HackC
+  auto const get_facts = [&](const char* source_text) -> ParseFactsResult {
+    try {
+      hackc_extract_as_json_ptr facts{
+        hackc_extract_as_json(options.getFactsFlags(), filename.data(), source_text, true)
+      };
+      if (facts) {
+        std::string facts_str{facts.get()};
+        return FactsJSONString { facts_str };
       }
-    };
-
-    if (code && code[0] != '\0') {
-      return get_facts(code);
-    } else {
-      auto w = Stream::getWrapperFromURI(StrNR(filename));
-      if (!(w && dynamic_cast<FileStreamWrapper*>(w))) {
-        throwErrno("Failed to extract facts: Could not get FileStreamWrapper.");
-      }
-      const auto f = w->open(StrNR(filename), "r", 0, nullptr);
-      if (!f) throwErrno("Failed to extract facts: Could not read source code.");
-      auto const str = f->read();
-      return get_facts(str.data());
+      return FactsJSONString { "" }; // Swallow errors from HackC
+    } catch (const std::exception& e) {
+      return FactsJSONString { "" }; // Swallow errors from HackC
     }
+  };
+
+  if (code && code[0] != '\0') {
+    return get_facts(code);
+  } else {
+    auto w = Stream::getWrapperFromURI(StrNR(filename));
+    if (!(w && dynamic_cast<FileStreamWrapper*>(w))) {
+      throwErrno("Failed to extract facts: Could not get FileStreamWrapper.");
+    }
+    const auto f = w->open(StrNR(filename), "r", 0, nullptr);
+    if (!f) throwErrno("Failed to extract facts: Could not read source code.");
+    auto const str = f->read();
+    return get_facts(str.data());
   }
 }
 
@@ -1326,19 +1273,15 @@ FfpResult ffp_parse_file(
   int size,
   const RepoOptions& options
 ) {
-  if (RuntimeOption::EvalHackCompilerUseCompilerPool) {
-    return s_manager.get_hackc_pool().parse(file, contents, size, options);
+  auto const env = options.getParserEnvironment();
+  hackc_parse_positioned_full_trivia_ptr parse_tree{
+    hackc_parse_positioned_full_trivia(file.c_str(), contents, &env)
+  };
+  if (parse_tree) {
+    std::string ffp_str{parse_tree.get()};
+    return FfpJSONString { ffp_str };
   } else {
-    auto const env = options.getParserEnvironment();
-    hackc_parse_positioned_full_trivia_ptr parse_tree{
-      hackc_parse_positioned_full_trivia(file.c_str(), contents, &env)
-    };
-    if (parse_tree) {
-      std::string ffp_str{parse_tree.get()};
-      return FfpJSONString { ffp_str };
-    } else {
-      return FfpJSONString { "{}" };
-    }
+    return FfpJSONString { "{}" };
   }
 }
 

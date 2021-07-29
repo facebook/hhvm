@@ -56,7 +56,7 @@ function hphp_create_object(string $name, ?varray<mixed> $params): object;
  * @return object - The newly created object
  */
 <<__Native("NoInjection")>>
-function hphp_create_object_without_constructor(string $name): object;
+function hphp_create_object_without_constructor(string $name)[]: object;
 
 /**
  * hphp_get_property() - Used by ReflectionProperty to get the value of a

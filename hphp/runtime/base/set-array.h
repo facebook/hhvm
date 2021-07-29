@@ -214,8 +214,6 @@ private:
   static SetArray* CopySet(const SetArray& other, AllocMode);
   SetArray* copySet() const { return CopySet(*this, AllocMode::Request); }
 
-  static ArrayData* ToDArrayImpl(const SetArray*);
-
   void eraseNoCompact(RemovePos pos);
 
 private:
@@ -278,22 +276,6 @@ private:
   void insert(StringData* k, strhash_t h);
   template <bool Move>
   void insert(StringData* k);
-
-  /*
-   * Append idx at the end of the linked list containing the set
-   * insertion order.
-   */
-  void linkLast(uint32_t idx);
-
-  /*
-   * Helper routine for inserting elements into a new array
-   * when grow()ing the array, that also checks for potentially
-   * unbalanced entries because of hash collision.
-   */
-  SetArray* insertCheckUnbalanced(SetArray* ad, Elm* table,
-                                  uint32_t mask,
-                                  Elm* iter, Elm* stop);
-
 
   /*
    * Returns a copy of the set with twice the scale of the original. It

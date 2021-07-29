@@ -118,6 +118,8 @@ the chain of jobs could be used to minimize the number of restarts.
 
 module Delegate = Typing_service_delegate
 
+type seconds_since_epoch = float
+
 type progress = job_progress
 
 let neutral : unit -> typing_result =
@@ -614,27 +616,31 @@ let possibly_push_new_errors_to_lsp_client :
     progress:Typing_service_types.computation_progress ->
     Errors.t ->
     Diagnostic_pusher.t option ->
-    Diagnostic_pusher.t option =
+    Diagnostic_pusher.t option * seconds_since_epoch option =
  fun ctx ~progress new_errors diag ->
   if TypecheckerOptions.stream_errors (Provider_context.get_tcopt ctx) then
-    diag
-    |> Option.map ~f:(fun diag ->
-           let rechecked =
-             progress.completed
-             |> List.filter_map ~f:(function
-                    | Check { path; deferred_count = _ } -> Some path
-                    | Declare _
-                    | Prefetch _ ->
-                      None)
-             |> Relative_path.Set.of_list
-           in
-           Diagnostic_pusher.push_new_errors
-             diag
-             ~rechecked
-             new_errors
-             ~phase:Errors.Typing)
+    match diag with
+    | None -> (None, None)
+    | Some diag ->
+      let rechecked =
+        progress.completed
+        |> List.filter_map ~f:(function
+               | Check { path; deferred_count = _ } -> Some path
+               | Declare _
+               | Prefetch _ ->
+                 None)
+        |> Relative_path.Set.of_list
+      in
+      let (diag, time_errors_pushed) =
+        Diagnostic_pusher.push_new_errors
+          diag
+          ~rechecked
+          new_errors
+          ~phase:Errors.Typing
+      in
+      (Some diag, time_errors_pushed)
   else
-    diag
+    (diag, None)
 
 (** Merge the results from multiple workers.
 
@@ -650,6 +656,7 @@ let merge
     (files_in_progress : file_computation Hash_set.t)
     (files_checked_count : int ref)
     (diagnostic_pusher : Diagnostic_pusher.t option ref)
+    (time_first_error : seconds_since_epoch option ref)
     ( (produced_by_job : typing_result),
       ({ kind = progress_kind; progress : computation_progress } : progress) )
     (acc : typing_result) : typing_result =
@@ -724,12 +731,15 @@ let merge
     ~unit:"files"
     ~extra:delegate_progress;
 
-  diagnostic_pusher :=
+  let (diag_pusher, time_errors_pushed) =
     possibly_push_new_errors_to_lsp_client
       ctx
       ~progress
       produced_by_job.errors
-      !diagnostic_pusher;
+      !diagnostic_pusher
+  in
+  diagnostic_pusher := diag_pusher;
+  time_first_error := Option.first_some !time_first_error time_errors_pushed;
 
   accumulate_job_output produced_by_job acc
 
@@ -865,7 +875,7 @@ let process_in_parallel
     * Telemetry.t
     * _
     * Relative_path.t list
-    * Diagnostic_pusher.t option =
+    * (Diagnostic_pusher.t option * seconds_since_epoch option) =
   let record = Measure.create () in
   (* [record] is used by [next] *)
   let delegate_state = ref delegate_state in
@@ -874,6 +884,7 @@ let process_in_parallel
   let files_processed_count = ref 0 in
   let files_initial_count = BigList.length fnl in
   let diagnostic_pusher = ref diagnostic_pusher in
+  let time_first_error = ref None in
   let delegate_progress =
     Typing_service_delegate.get_progress !delegate_state
   in
@@ -929,7 +940,8 @@ let process_in_parallel
            files_initial_count
            files_in_progress
            files_processed_count
-           diagnostic_pusher)
+           diagnostic_pusher
+           time_first_error)
       ~next
       ~on_cancelled:(on_cancelled next files_to_process files_in_progress)
       ~interrupt
@@ -957,7 +969,7 @@ let process_in_parallel
     telemetry,
     env,
     paths_of cancelled_results,
-    !diagnostic_pusher )
+    (!diagnostic_pusher, !time_first_error) )
 
 let process_sequentially
     ?diagnostic_pusher
@@ -966,7 +978,8 @@ let process_sequentially
     dynamic_view_files
     ~longlived_workers
     ~remote_execution
-    ~check_info =
+    ~check_info :
+    typing_result * (Diagnostic_pusher.t option * seconds_since_epoch option) =
   let progress =
     { completed = []; remaining = BigList.as_list fnl; deferred = [] }
   in
@@ -981,14 +994,14 @@ let process_sequentially
       ~remote_execution
       ~check_info
   in
-  let diagnostic_pusher =
+  let push_result =
     possibly_push_new_errors_to_lsp_client
       ctx
       ~progress
       typing_result.errors
       diagnostic_pusher
   in
-  (typing_result, diagnostic_pusher)
+  (typing_result, push_result)
 
 type ('a, 'b, 'c, 'd, 'e) job_result =
   'a * 'b * 'c * 'd * 'e * Relative_path.t list
@@ -1072,7 +1085,7 @@ let go_with_interrupt
       Delegate.state,
       Telemetry.t,
       _,
-      Diagnostic_pusher.t option )
+      Diagnostic_pusher.t option * seconds_since_epoch option )
     job_result =
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
@@ -1211,7 +1224,7 @@ let go
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : Errors.t * Delegate.state * Telemetry.t =
   let interrupt = MultiThreadedCall.no_interrupt () in
-  let (res, delegate_state, telemetry, (), diagnostic_pusher, cancelled) =
+  let (res, delegate_state, telemetry, (), (diagnostic_pusher, _), cancelled) =
     go_with_interrupt
       ?diagnostic_pusher:None
       ctx

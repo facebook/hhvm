@@ -10,6 +10,8 @@
 type ('a, 'b, 'c, 'd, 'e) job_result =
   'a * 'b * 'c * 'd * 'e * Relative_path.t list
 
+type seconds_since_epoch = float
+
 type process_file_results = {
   errors: Errors.t;
   deferred_decls: Deferred_decl.deferment list;
@@ -39,6 +41,8 @@ val go :
   check_info:Typing_service_types.check_info ->
   Errors.t * Typing_service_delegate.state * Telemetry.t
 
+(** The last element returned, a list of paths, are the files which have not been
+    processed fully or at all due to interrupts. *)
 val go_with_interrupt :
   ?diagnostic_pusher:Diagnostic_pusher.t ->
   Provider_context.t ->
@@ -57,7 +61,7 @@ val go_with_interrupt :
     Typing_service_delegate.state,
     Telemetry.t,
     'a,
-    Diagnostic_pusher.t option )
+    Diagnostic_pusher.t option * seconds_since_epoch option )
   job_result
 
 module TestMocking : sig

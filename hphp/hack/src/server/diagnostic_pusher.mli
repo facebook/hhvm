@@ -12,16 +12,26 @@
     keep track of diagnostics. *)
 type t [@@deriving show]
 
+type seconds_since_epoch = float
+
 val init : t
 
 (** Push a new batch of errors to the LSP client. [rechecked] is the full
-    set of files that have been rechecked to produce this new batch of errors. *)
+    set of files that have been rechecked to produce this new batch of errors.
+    Return the updated pusher and the timestamp of the push if anything was pushed,
+    or None if not, e.g. there was nothing to push or no persistent client or the push failed. *)
 val push_new_errors :
-  t -> rechecked:Relative_path.Set.t -> Errors.t -> phase:Errors.phase -> t
+  t ->
+  rechecked:Relative_path.Set.t ->
+  Errors.t ->
+  phase:Errors.phase ->
+  t * seconds_since_epoch option
 
 (** If any error remains to be pushed, for example because the previous push failed or
-    because there was no IDE connected at the time, push them. *)
-val push_whats_left : t -> t
+    because there was no IDE connected at the time, push them.
+    Return the updated pusher and the timestamp of the push if anything was pushed,
+    or None if not, e.g. there was nothing to push or no persistent client or the push failed. *)
+val push_whats_left : t -> t * seconds_since_epoch option
 
 (** Module to export internal functions for unit testing. Do not use in production code. *)
 module TestExporter : sig

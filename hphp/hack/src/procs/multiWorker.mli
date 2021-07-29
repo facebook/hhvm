@@ -69,6 +69,8 @@ val call_with_worker_id :
   next:'a Hh_bucket.next ->
   'c
 
+(** The last element returned, a list of job inputs, are the job inputs which have not been
+    processed fully or at all due to interrupts. *)
 val call_with_interrupt :
   ?on_cancelled:
     ((* [on_cancelled] should be specified if your [next] function ever returns

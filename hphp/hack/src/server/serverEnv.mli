@@ -10,6 +10,8 @@ open Hh_prelude
 
 type seconds = float
 
+type seconds_since_epoch = float
+
 (** The "static" environment, initialized first and then doesn't change *)
 type genv = {
   options: ServerArgs.options;
@@ -165,7 +167,14 @@ module RecheckLoopStats : sig
     per_batch_telemetry: Telemetry.t list;
     rechecked_count: int;
     total_rechecked_count: int;  (** includes dependencies *)
+    last_iteration_start_time: seconds_since_epoch;
+        (** Start time of the last loop iteration, after the last user change. *)
     duration: seconds;
+    time_first_result: seconds_since_epoch option;
+        (** This is either the duration to get the first error if any
+            or until we get "typecheck done" status message.
+            This is originally None when no result has been sent yet,
+            and should be [Some timestamp] at the end of the loop. *)
     recheck_id: string;
     any_full_checks: bool;
   }
@@ -174,9 +183,13 @@ module RecheckLoopStats : sig
 
   (** The format of this json is user-facing, returned from 'hh check --json' *)
   val to_user_telemetry : t -> Telemetry.t
+
+  (** Update field [time_first_result] if given timestamp is the
+      first sent result. *)
+  val record_result_sent_ts : t -> seconds_since_epoch option -> t
 end
 
-(** The environment constantly maintained by the server
+(** The environment constantly maintained by the server.
     In addition to this environment, many functions are storing and
     updating ASTs, NASTs, and types in a shared space
     (see respectively Parser_heap, Naming_table, Typing_env).

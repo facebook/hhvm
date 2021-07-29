@@ -243,7 +243,7 @@ let test_push _ =
 
   let errors = errors1 file1 in
   let errors_absolute = errors1_absolute file1_absolute in
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 errors ~phase
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
@@ -255,7 +255,7 @@ let test_push _ =
   in
   assert_equal_messages expected_pushed_messages pushed_messages;
 
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 no_errors ~phase
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
@@ -277,7 +277,7 @@ let test_initially_no_client _ =
 
   let errors = errors1 file1 in
   let errors1_absolute = errors1_absolute file1_absolute in
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors ~phase pusher ~rechecked:files1 errors
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
@@ -290,7 +290,7 @@ let test_initially_no_client _ =
   (* Add an new batch of new errors. *)
   let errors = errors2 file2 in
   let errors2_absolute = errors2_absolute file2_absolute in
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       ~phase
       pusher
@@ -319,7 +319,7 @@ let test_disconnects _ =
 
   let errors = Errors.from_file_error_list ~phase [(file1, error1)] in
   let errors1_absolute = errors1_absolute file1_absolute in
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors ~phase pusher ~rechecked:files1 errors
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
@@ -330,7 +330,7 @@ let test_disconnects _ =
   connect_persistent ();
 
   (* This time error should be pushed *)
-  let pusher = Diagnostic_pusher.push_whats_left pusher in
+  let (pusher, _) = Diagnostic_pusher.push_whats_left pusher in
   let pushed_messages = TestClientProvider.get_push_messages () in
   let expected_pushed_messages =
     [
@@ -345,7 +345,7 @@ let test_disconnects _ =
   connect_persistent ();
 
   (* Errors should be repushed *)
-  let pusher = Diagnostic_pusher.push_whats_left pusher in
+  let (pusher, _) = Diagnostic_pusher.push_whats_left pusher in
   let pushed_messages = TestClientProvider.get_push_messages () in
   let expected_pushed_messages =
     [
@@ -359,7 +359,7 @@ let test_disconnects _ =
   Ide_info_store.ide_disconnect ();
 
   (* No errors pushed *)
-  let pusher = Diagnostic_pusher.push_whats_left pusher in
+  let (pusher, _) = Diagnostic_pusher.push_whats_left pusher in
   let pushed_messages = TestClientProvider.get_push_messages () in
   let expected_pushed_messages = [] in
   assert_equal_messages expected_pushed_messages pushed_messages;
@@ -368,7 +368,7 @@ let test_disconnects _ =
   connect_persistent ();
 
   (* Errors should be repushed *)
-  let pusher = Diagnostic_pusher.push_whats_left pusher in
+  let (pusher, _) = Diagnostic_pusher.push_whats_left pusher in
   let pushed_messages = TestClientProvider.get_push_messages () in
   let expected_pushed_messages =
     [
@@ -389,7 +389,7 @@ let test_switch_client _ =
 
   let errors = errors1 file1 in
   let errors1_absolute = errors1_absolute file1_absolute in
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors ~phase pusher ~rechecked:files1 errors
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
@@ -434,7 +434,7 @@ let test_switch_client_erase _ =
 
   let errors = errors1 file1 in
   let errors1_absolute = errors1_absolute file1_absolute in
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors ~phase pusher ~rechecked:files1 errors
   in
   let pushed_messages = TestClientProvider.get_push_messages () in
@@ -467,7 +467,7 @@ let test_error_limit_one_file _ =
   connect_persistent ();
 
   (* Add 2 errors in the same file file1: nothing should be pushed. *)
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       ~phase
       pusher
@@ -478,7 +478,7 @@ let test_error_limit_one_file _ =
   assert_equal_messages [] pushed_messages;
 
   (* Now file1 only has 1 error: it should be pushed. *)
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       ~phase
       pusher
@@ -499,7 +499,7 @@ let test_error_limit_one_file _ =
 
   (* Now file1 has 2 errors again: the previous error should be erased
    * because for a given file, we want either all errors or none. *)
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       ~phase
       pusher
@@ -525,7 +525,7 @@ let test_error_limit_two_files _ =
   connect_persistent ();
 
   (* Add 2 errors in file1: they should be pushed *)
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       ~phase
       pusher
@@ -546,7 +546,7 @@ let test_error_limit_two_files _ =
   assert_equal_messages expected_pushed_messages pushed_messages;
 
   (* Add 1 error in file2: it should not be pushed *)
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       ~phase
       pusher
@@ -557,7 +557,7 @@ let test_error_limit_two_files _ =
   assert_equal_messages [] pushed_messages;
 
   (* Now file1 only has 1 error: we should push that error and the error in file2. *)
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       ~phase
       pusher
@@ -591,7 +591,7 @@ let test_error_limit_two_files_priority _ =
   connect_persistent ();
 
   (* Add 2 errors in file1: they should be pushed *)
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       ~phase
       pusher
@@ -615,7 +615,7 @@ let test_error_limit_two_files_priority _ =
   (* Add 1 error in file2: it should be pushed even if it goes beyond the limit.
    * The limit will only be exceeded by the number of errors in open files, which should
    * be small relatively. *)
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       ~phase
       pusher
@@ -637,7 +637,7 @@ let test_error_limit_two_files_priority _ =
 
   (* Now file1 only has 1 error: we can't push that error because the error count would be beyond
    * the limit, so we erase errors for file 1. *)
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       ~phase
       pusher
@@ -661,7 +661,7 @@ let test_multiple_phases _ =
   connect_persistent ();
 
   let phase = Errors.Parsing in
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       pusher
       ~phase
@@ -682,7 +682,7 @@ let test_multiple_phases _ =
 
   (* Changing phase. Errors from previous phases should be kept around. *)
   let phase = Errors.Naming in
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       pusher
       ~phase
@@ -704,7 +704,7 @@ let test_multiple_phases _ =
 
   (* Changing phase. Errors from previous phases should be kept around. *)
   let phase = Errors.Typing in
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       pusher
       ~phase
@@ -730,7 +730,7 @@ let test_multiple_phases _ =
 
   (* Back to previous phase. Error2 is fixed, and errors from other phases should be preserved. *)
   let phase = Errors.Naming in
-  let pusher =
+  let (pusher, _) =
     Diagnostic_pusher.push_new_errors
       pusher
       ~phase

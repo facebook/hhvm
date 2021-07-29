@@ -11,6 +11,8 @@ open Option.Monad_infix
 
 type error = Errors.error [@@deriving show]
 
+type seconds_since_epoch = float
+
 module FileMap = Relative_path.Map
 module PhaseMap = Errors.PhaseMap
 
@@ -380,24 +382,33 @@ type t = {
 }
 [@@deriving show]
 
+type push_result =
+  | DidPush of { timestamp: seconds_since_epoch }
+  | DidNotPush
+
+let push_result_as_option = function
+  | DidPush { timestamp } -> Some timestamp
+  | DidNotPush -> None
+
 let init = { error_tracker = ErrorTracker.init; tracked_ide_id = None }
 
 let push_to_client :
-    ServerCommandTypes.diagnostic_errors -> ClientProvider.client -> bool =
+    ServerCommandTypes.diagnostic_errors -> ClientProvider.client -> push_result
+    =
  fun errors client ->
   if ClientProvider.client_has_message client then
-    false
+    DidNotPush
   else if SMap.is_empty errors then
-    false
+    DidNotPush
   else
     let message =
       ServerCommandTypes.DIAGNOSTIC { errors; is_truncated = None }
     in
     try
       ClientProvider.send_push_message_to_client client message;
-      true
+      DidPush { timestamp = Unix.gettimeofday () }
     with
-    | ClientProvider.Client_went_away -> false
+    | ClientProvider.Client_went_away -> DidNotPush
 
 (** Reset the error tracker if the new client ID is different from the tracked one. *)
 let possibly_reset_tracker { error_tracker; tracked_ide_id } new_ide_id =
@@ -459,7 +470,11 @@ let get_client :
   (pusher, (current_client, current_ide_open_files))
 
 let push_new_errors :
-    t -> rechecked:Relative_path.Set.t -> Errors.t -> phase:Errors.phase -> t =
+    t ->
+    rechecked:Relative_path.Set.t ->
+    Errors.t ->
+    phase:Errors.phase ->
+    t * seconds_since_epoch option =
  fun pusher ~rechecked new_errors ~phase ->
   let ({ error_tracker; tracked_ide_id }, (client, priority_files)) =
     get_client pusher
@@ -472,20 +487,20 @@ let push_new_errors :
       ~phase
       ~priority_files
   in
-  let was_pushed =
+  let push_result =
     match client with
-    | None -> false
+    | None -> DidNotPush
     | Some client -> push_to_client to_push client
   in
   let error_tracker =
-    if was_pushed then
+    match push_result with
+    | DidPush { timestamp = _ } ->
       ErrorTracker.commit_pushed_errors error_tracker
-    else
-      error_tracker
+    | DidNotPush -> error_tracker
   in
-  { error_tracker; tracked_ide_id }
+  ({ error_tracker; tracked_ide_id }, push_result_as_option push_result)
 
-let push_whats_left : t -> t =
+let push_whats_left : t -> t * seconds_since_epoch option =
  fun pusher ->
   push_new_errors
     ~rechecked:Relative_path.Set.empty

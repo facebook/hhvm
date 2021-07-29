@@ -28,10 +28,22 @@ module CheckKind = struct
     | Lazy -> false
 end
 
-type check_results = {
-  reparse_count: int;
-  total_rechecked_count: int;
-}
+module CheckStats = struct
+  type t = {
+    reparse_count: int;
+    total_rechecked_count: int;
+    time_first_result: seconds_since_epoch option;
+  }
+
+  (** Update field [time_first_result] if given timestamp is the
+      first sent result. *)
+  let record_result_sent_ts stats new_result_sent_ts =
+    {
+      stats with
+      time_first_result =
+        Option.first_some stats.time_first_result new_result_sent_ts;
+    }
+end
 
 let shallow_decl_enabled (ctx : Provider_context.t) =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
@@ -194,35 +206,52 @@ let get_files_with_stale_errors
 
 let push_errors env ~rechecked ~phase new_errors =
   if TypecheckerOptions.stream_errors env.tcopt then
-    {
-      env with
-      diagnostic_pusher =
-        Diagnostic_pusher.push_new_errors
-          env.diagnostic_pusher
-          ~rechecked
-          new_errors
-          ~phase;
-    }
+    let (diagnostic_pusher, time_errors_pushed) =
+      Diagnostic_pusher.push_new_errors
+        env.diagnostic_pusher
+        ~rechecked
+        new_errors
+        ~phase
+    in
+    let env = { env with diagnostic_pusher } in
+    (env, time_errors_pushed)
   else
-    env
+    (env, None)
 
 let erase_errors env = push_errors env Errors.empty
 
-let push_and_accumulate_errors (env, errors_acc) ~rechecked new_errors ~phase =
-  let env = push_errors env new_errors ~rechecked ~phase in
+let push_and_accumulate_errors :
+    env * Errors.t ->
+    rechecked:Relative_path.Set.t ->
+    Errors.t ->
+    phase:Errors.phase ->
+    env * Errors.t * seconds_since_epoch option =
+ fun (env, errors_acc) ~rechecked new_errors ~phase ->
+  let (env, time_errors_pushed) =
+    push_errors env new_errors ~rechecked ~phase
+  in
   let errors =
     Errors.incremental_update ~old:errors_acc ~new_:new_errors ~rechecked phase
   in
-  (env, errors)
+  (env, errors, time_errors_pushed)
 
 (** Remove files which failed parsing from [fast] files and
     discard any previous errors they had in [omitted_phases] *)
 let wont_do_failed_parsing
     fast ~stop_at_errors ~omitted_phases env failed_parsing =
   if stop_at_errors then
-    let env =
-      List.fold omitted_phases ~init:env ~f:(fun env phase ->
-          erase_errors env ~rechecked:failed_parsing ~phase)
+    let (env, time_first_erased) =
+      List.fold
+        omitted_phases
+        ~init:(env, None)
+        ~f:(fun (env, time_first_erased) phase ->
+          let (env, time_erased) =
+            erase_errors env ~rechecked:failed_parsing ~phase
+          in
+          let time_first_erased =
+            Option.first_some time_first_erased time_erased
+          in
+          (env, time_first_erased))
     in
     let fast =
       Relative_path.Set.filter fast ~f:(fun k ->
@@ -230,9 +259,9 @@ let wont_do_failed_parsing
           @@ Relative_path.(
                Set.mem failed_parsing k && Set.mem env.editor_open_files k))
     in
-    (env, fast)
+    (env, fast, time_first_erased)
   else
-    (env, fast)
+    (env, fast, None)
 
 let parsing genv env to_check ~stop_at_errors profiling =
   let (ide_files, disk_files) =
@@ -706,7 +735,7 @@ module Make : functor (_ : CheckKindType) -> sig
     ServerEnv.env ->
     float ->
     CgroupProfiler.Profiling.t ->
-    ServerEnv.env * check_results * Telemetry.t
+    ServerEnv.env * CheckStats.t * Telemetry.t
 end =
 functor
   (CheckKind : CheckKindType)
@@ -757,12 +786,20 @@ functor
             Errors.[Naming; Decl; Typing]
             ~init:acc
             ~f:(fun acc phase ->
-              push_and_accumulate_errors acc ~rechecked:path Errors.empty ~phase))
+              let (env, errors, _) =
+                push_and_accumulate_errors
+                  acc
+                  ~rechecked:path
+                  Errors.empty
+                  ~phase
+              in
+              (env, errors)))
 
     type parsing_result = {
       parse_errors: Errors.t;
       failed_parsing: Relative_path.Set.t;
       fast_parsed: FileInfo.t Relative_path.Map.t;
+      time_errors_pushed: seconds_since_epoch option;
     }
 
     let do_parsing
@@ -776,7 +813,7 @@ functor
       let (env, fast_parsed, errorl, failed_parsing) =
         parsing genv env files_to_parse ~stop_at_errors profiling
       in
-      let (env, errors) =
+      let (env, errors, time_errors_pushed) =
         push_and_accumulate_errors
           (env, errors)
           errorl
@@ -784,12 +821,19 @@ functor
           ~phase:Errors.Parsing
       in
       let (env, errors) = clear_failed_parsing env errors failed_parsing in
-      (env, { parse_errors = errors; failed_parsing; fast_parsed })
+      ( env,
+        {
+          parse_errors = errors;
+          failed_parsing;
+          fast_parsed;
+          time_errors_pushed;
+        } )
 
     type naming_result = {
       errors_after_naming: Errors.t;
       failed_naming: Relative_path.Set.t;
       fast: Naming_table.fast;
+      time_errors_pushed: seconds_since_epoch option;
     }
 
     let do_naming
@@ -801,30 +845,27 @@ functor
         ~(naming_table : Naming_table.t)
         ~(files_to_parse : Relative_path.Set.t)
         ~(profiling : CgroupProfiler.Profiling.t) : naming_result =
-      let (errors, failed_naming, fast) =
-        CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"naming"
-        @@ fun () ->
-        let (errorl', failed_naming, fast) = declare_names env fast_parsed in
-        let (env, errors) =
-          push_and_accumulate_errors
-            (env, errors)
-            errorl'
-            ~rechecked:
-              (fast |> Relative_path.Map.keys |> Relative_path.Set.of_list)
-            ~phase:Errors.Naming
-        in
-        (* failed_naming can be a superset of keys in fast - see comment in
-         * Naming_global.ndecl_file *)
-        let fast = extend_fast genv fast naming_table failed_naming in
-        (* COMPUTES WHAT MUST BE REDECLARED  *)
-        let failed_decl =
-          CheckKind.get_defs_to_redecl ~reparsed:files_to_parse ~env ~ctx
-        in
-        let fast = extend_fast genv fast naming_table failed_decl in
-        let fast = add_old_decls env.naming_table fast in
-        (errors, failed_naming, fast)
+      CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"naming"
+      @@ fun () ->
+      let (errorl', failed_naming, fast) = declare_names env fast_parsed in
+      let (env, errors, time_errors_pushed) =
+        push_and_accumulate_errors
+          (env, errors)
+          errorl'
+          ~rechecked:
+            (fast |> Relative_path.Map.keys |> Relative_path.Set.of_list)
+          ~phase:Errors.Naming
       in
-      { errors_after_naming = errors; failed_naming; fast }
+      (* failed_naming can be a superset of keys in fast - see comment in
+       * Naming_global.ndecl_file *)
+      let fast = extend_fast genv fast naming_table failed_naming in
+      (* COMPUTES WHAT MUST BE REDECLARED  *)
+      let failed_decl =
+        CheckKind.get_defs_to_redecl ~reparsed:files_to_parse ~env ~ctx
+      in
+      let fast = extend_fast genv fast naming_table failed_decl in
+      let fast = add_old_decls env.naming_table fast in
+      { errors_after_naming = errors; failed_naming; fast; time_errors_pushed }
 
     type redecl_phase1_result = {
       changed: Typing_deps.DepSet.t;
@@ -882,6 +923,7 @@ functor
           (** Note that the intuitive property
             [get_files to_recheck2_deps == to_recheck2] does NOT hold. That's
             because in a lazy check, we might add files open in the IDE *)
+      time_errors_pushed: seconds_since_epoch option;
     }
 
     let do_redecl_phase2
@@ -921,7 +963,7 @@ functor
           ~previously_oldified_defs:oldified_defs
           ~defs:fast_redecl_phase2_now
       in
-      let (env, errors) =
+      let (env, errors, time_errors_pushed) =
         push_and_accumulate_errors
           (env, errors)
           errorl'
@@ -952,6 +994,7 @@ functor
         needs_phase2_redecl;
         to_recheck2;
         to_recheck2_deps;
+        time_errors_pushed;
       }
 
     (** Merge the results of the two redecl phases. *)
@@ -1006,6 +1049,7 @@ functor
       full_check_done: bool;
       needs_recheck: Relative_path.Set.t;
       total_rechecked_count: int;
+      time_first_typing_error: seconds option;
     }
 
     let do_type_checking
@@ -1036,7 +1080,7 @@ functor
       in
       let diag_subscribe_before = env.diag_subscribe in
 
-      let (errorl', telemetry, env, cancelled) =
+      let (errorl', telemetry, env, cancelled, time_first_typing_error) =
         let ctx = Provider_utils.ctx_from_server_env env in
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"type check"
         @@ fun () ->
@@ -1044,7 +1088,7 @@ functor
               delegate_state,
               telemetry,
               env,
-              diagnostic_pusher,
+              (diagnostic_pusher, time_first_typing_error),
               cancelled ) =
           Typing_check_service.go_with_interrupt
             ~diagnostic_pusher:env.ServerEnv.diagnostic_pusher
@@ -1069,7 +1113,7 @@ functor
             typing_service = { env.typing_service with delegate_state };
           }
         in
-        (errorl, telemetry, env, cancelled)
+        (errorl, telemetry, env, cancelled, time_first_typing_error)
       in
 
       log_if_diag_subscribe_changed
@@ -1152,6 +1196,7 @@ functor
         full_check_done;
         needs_recheck;
         total_rechecked_count;
+        time_first_typing_error;
       }
 
     let type_check_core genv env start_time profiling =
@@ -1171,6 +1216,7 @@ functor
              ~key:"init"
              ~value:env.ServerEnv.init_env.ServerEnv.why_needed_full_init
       in
+      let time_first_error = None in
       let env =
         if CheckKind.is_full then
           { env with full_check_status = Full_check_started }
@@ -1248,8 +1294,17 @@ functor
         Telemetry.duration telemetry ~key:"parse_start" ~start_time
       in
       let errors = env.errorl in
-      let (env, { parse_errors = errors; failed_parsing; fast_parsed }) =
+      let ( env,
+            {
+              parse_errors = errors;
+              failed_parsing;
+              fast_parsed;
+              time_errors_pushed;
+            } ) =
         do_parsing genv env ~errors ~files_to_parse ~stop_at_errors ~profiling
+      in
+      let time_first_error =
+        Option.first_some time_first_error time_errors_pushed
       in
       let hs = SharedMem.heap_size () in
       let telemetry =
@@ -1304,7 +1359,12 @@ functor
          assigning unique identifiers to locals, among other things). The Naming
          module is something of a historical artifact and is slated for removal,
          but for now, it is run immediately before typechecking. *)
-      let { errors_after_naming = errors; failed_naming; fast } =
+      let {
+        errors_after_naming = errors;
+        failed_naming;
+        fast;
+        time_errors_pushed;
+      } =
         do_naming
           genv
           env
@@ -1314,6 +1374,9 @@ functor
           ~naming_table
           ~files_to_parse
           ~profiling
+      in
+      let time_first_error =
+        Option.first_some time_first_error time_errors_pushed
       in
 
       let heap_size = SharedMem.heap_size () in
@@ -1452,37 +1515,38 @@ functor
          of changed classes.
 
          When shallow_class_decl is enabled, there is no need to do phase 2. *)
-      let (errors, needs_phase2_redecl, to_recheck2, to_recheck2_deps) =
+      let {
+        errors_after_phase2 = errors;
+        needs_phase2_redecl;
+        to_recheck2;
+        to_recheck2_deps;
+        time_errors_pushed;
+      } =
         if shallow_decl_enabled ctx then
-          ( errors,
-            Relative_path.Set.empty,
-            Relative_path.Set.empty,
-            Typing_deps.DepSet.make env.deps_mode )
+          {
+            errors_after_phase2 = errors;
+            needs_phase2_redecl = Relative_path.Set.empty;
+            to_recheck2 = Relative_path.Set.empty;
+            to_recheck2_deps = Typing_deps.DepSet.make env.deps_mode;
+            time_errors_pushed = None;
+          }
         else
-          let {
-            errors_after_phase2;
-            needs_phase2_redecl;
-            to_recheck2;
-            to_recheck2_deps;
-          } =
-            do_redecl_phase2
-              genv
-              env
-              ~errors
-              ~fast_redecl_phase2_now
-              ~naming_table
-              ~lazy_decl_later
-              ~oldified_defs
-              ~to_redecl_phase2_deps
-              ~profiling
-          in
-          ( errors_after_phase2,
-            needs_phase2_redecl,
-            to_recheck2,
-            to_recheck2_deps )
+          do_redecl_phase2
+            genv
+            env
+            ~errors
+            ~fast_redecl_phase2_now
+            ~naming_table
+            ~lazy_decl_later
+            ~oldified_defs
+            ~to_redecl_phase2_deps
+            ~profiling
       in
       let telemetry =
         Telemetry.duration telemetry ~key:"redecl2_end" ~start_time
+      in
+      let time_first_error =
+        Option.first_some time_first_error time_errors_pushed
       in
 
       let (fast, to_recheck, to_recheck_deps) =
@@ -1602,13 +1666,16 @@ functor
           (Relative_path.Set.cardinal files_to_check)
           errors
       in
-      let (env, files_to_check) =
+      let (env, files_to_check, time_erased_errors) =
         wont_do_failed_parsing
           files_to_check
           ~stop_at_errors
           ~omitted_phases:[Errors.Typing]
           env
           failed_parsing
+      in
+      let time_first_error =
+        Option.first_some time_first_error time_erased_errors
       in
       let to_recheck_count = Relative_path.Set.cardinal files_to_check in
       (* The intent of capturing the snapshot here is to increase the likelihood
@@ -1646,6 +1713,7 @@ functor
         full_check_done = _;
         needs_recheck;
         total_rechecked_count;
+        time_first_typing_error;
       } =
         do_type_checking
           genv
@@ -1657,6 +1725,9 @@ functor
           ~lazy_check_later
           ~old_env
           ~profiling
+      in
+      let time_first_error =
+        Option.first_some time_first_error time_first_typing_error
       in
       log_if_diag_subscribe_changed
         "type_check_core[old_env->env]"
@@ -1829,7 +1900,13 @@ functor
         ~desc:"serverTypeCheck"
         ~start_t:type_check_start_t;
 
-      (env, { reparse_count; total_rechecked_count }, telemetry)
+      ( env,
+        {
+          CheckStats.reparse_count;
+          total_rechecked_count;
+          time_first_result = time_first_error;
+        },
+        telemetry )
   end
 
 module FC = Make (FullCheckKind)
@@ -1860,7 +1937,7 @@ let type_check_unsafe genv env kind start_time profiling =
     let telemetry =
       Telemetry.duration telemetry ~key:"core_start" ~start_time
     in
-    let (env, res, core_telemetry) =
+    let (env, stats, core_telemetry) =
       LC.type_check_core genv env start_time profiling
     in
     let telemetry =
@@ -1868,11 +1945,12 @@ let type_check_unsafe genv env kind start_time profiling =
       |> Telemetry.duration ~key:"core_end" ~start_time
       |> Telemetry.object_ ~key:"core" ~value:core_telemetry
     in
-    let (_ : seconds option) =
+    let t_sent_done =
       ServerBusyStatus.send env ServerCommandTypes.Done_local_typecheck
     in
+    let stats = CheckStats.record_result_sent_ts stats t_sent_done in
     let telemetry = Telemetry.duration telemetry ~key:"sent_done" ~start_time in
-    (env, res, telemetry)
+    (env, stats, telemetry)
   | CheckKind.Full ->
     Hh_logger.log
       "Check kind: will bring hh_server to consistency with code changes, by checking whatever fanout is needed ('%s')"
@@ -1887,7 +1965,7 @@ let type_check_unsafe genv env kind start_time profiling =
       Telemetry.duration telemetry ~key:"core_start" ~start_time
     in
 
-    let (env, res, core_telemetry) =
+    let (env, stats, core_telemetry) =
       FC.type_check_core genv env start_time profiling
     in
 
@@ -1896,7 +1974,7 @@ let type_check_unsafe genv env kind start_time profiling =
       |> Telemetry.duration ~key:"core_end" ~start_time
       |> Telemetry.object_ ~key:"core" ~value:core_telemetry
     in
-    let (_ : seconds option) =
+    let t_sent_done =
       if is_full_check_done env.full_check_status then
         let (is_truncated, shown) =
           match env.ServerEnv.diag_subscribe with
@@ -1909,6 +1987,7 @@ let type_check_unsafe genv env kind start_time profiling =
       else
         None
     in
+    let stats = CheckStats.record_result_sent_ts stats t_sent_done in
     let telemetry =
       telemetry
       |> Telemetry.duration ~key:"sent_done" ~start_time
@@ -1919,7 +1998,7 @@ let type_check_unsafe genv env kind start_time profiling =
          this fact. This way we can look at all recheck telemetry and determine how often
          it's done with an IDE connected, hence presumably how long users wait in the IDE. *)
     in
-    (env, res, telemetry)
+    (env, stats, telemetry)
 
 let type_check :
     genv ->
@@ -1927,7 +2006,7 @@ let type_check :
     CheckKind.t ->
     seconds ->
     CgroupProfiler.Profiling.t ->
-    env * check_results * Telemetry.t =
+    env * CheckStats.t * Telemetry.t =
  fun genv env kind start_time profiling ->
   ServerUtils.with_exit_on_exception @@ fun () ->
   let type_check_result =

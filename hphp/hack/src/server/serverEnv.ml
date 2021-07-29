@@ -8,11 +8,14 @@
  *)
 
 open Hh_prelude
+open Option.Monad_infix
 
 (*****************************************************************************)
 (* Recheck loop types. *)
 (*****************************************************************************)
 type seconds = float
+
+type seconds_since_epoch = float
 
 module RecheckLoopStats = struct
   type t = {
@@ -22,7 +25,9 @@ module RecheckLoopStats = struct
     per_batch_telemetry: Telemetry.t list;
     rechecked_count: int;
     total_rechecked_count: int;  (** includes dependencies *)
+    last_iteration_start_time: seconds_since_epoch;
     duration: seconds;
+    time_first_result: seconds_since_epoch option;
     recheck_id: string;
     any_full_checks: bool;
   }
@@ -33,7 +38,9 @@ module RecheckLoopStats = struct
       per_batch_telemetry = [];
       rechecked_count = 0;
       total_rechecked_count = 0;
+      last_iteration_start_time = 0.;
       duration = 0.;
+      time_first_result = None;
       recheck_id;
       any_full_checks = false;
     }
@@ -45,7 +52,9 @@ module RecheckLoopStats = struct
       per_batch_telemetry;
       rechecked_count;
       total_rechecked_count;
+      last_iteration_start_time;
       duration;
+      time_first_result;
       recheck_id;
       any_full_checks;
     } =
@@ -61,6 +70,20 @@ module RecheckLoopStats = struct
          ~value:(List.rev per_batch_telemetry)
     |> Telemetry.bool_ ~key:"updates_stale" ~value:updates_stale
     |> Telemetry.bool_ ~key:"any_full_checks" ~value:any_full_checks
+    |> Telemetry.int_opt
+         ~key:"time_to_first_result_ms"
+         ~value:
+           ( time_first_result >>| fun time ->
+             int_of_float ((time -. last_iteration_start_time) *. 1000.) )
+
+  (** Update field [time_first_result] if given timestamp is the
+      first sent result. *)
+  let record_result_sent_ts stats new_result_sent_ts =
+    {
+      stats with
+      time_first_result =
+        Option.first_some stats.time_first_result new_result_sent_ts;
+    }
 end
 
 (*****************************************************************************)
@@ -203,7 +226,8 @@ type env = {
   remote: bool;  (** Whether we should force remote type checking or not *)
   pending_command_needs_writes: (env -> env) option;
       (** When persistent client sends a command that cannot be handled (due to
-          thread safety) we put the continuation that finishes handling it here. *)
+          thread safety, e.g. opening, closing, editing files)
+          we put the continuation that finishes handling it here. *)
   persistent_client_pending_command_needs_full_check:
     ((env -> env) * string) option;
       (** When the persistent client sends a command that cannot be immediately handled

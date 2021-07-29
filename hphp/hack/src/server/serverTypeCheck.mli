@@ -49,10 +49,15 @@ module CheckKind : sig
   val is_full_check : t -> bool
 end
 
-type check_results = {
-  reparse_count: int;
-  total_rechecked_count: int;
-}
+module CheckStats : sig
+  type t = {
+    reparse_count: int;
+    total_rechecked_count: int;
+    time_first_result: ServerEnv.seconds_since_epoch option;
+        (** This is either the duration to get the first error if any
+            or until we get "typecheck done" status message. *)
+  }
+end
 
 val type_check :
   ServerEnv.genv ->
@@ -60,7 +65,7 @@ val type_check :
   CheckKind.t ->
   float ->
   CgroupProfiler.Profiling.t ->
-  ServerEnv.env * check_results * Telemetry.t
+  ServerEnv.env * CheckStats.t * Telemetry.t
 
 (****************************************************************************)
 (* Debugging: Declared here to stop ocamlc yelling at us for unused defs *)

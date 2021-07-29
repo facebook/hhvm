@@ -220,10 +220,10 @@ let query_notifier genv env query_kind start_time =
 
 let update_stats_after_recheck :
     RecheckLoopStats.t ->
-    ServerTypeCheck.check_results ->
+    ServerTypeCheck.CheckStats.t ->
     check_kind:_ ->
     telemetry:Telemetry.t ->
-    start_time:seconds ->
+    start_time:seconds_since_epoch ->
     RecheckLoopStats.t =
  fun {
        RecheckLoopStats.rechecked_count;
@@ -231,13 +231,16 @@ let update_stats_after_recheck :
        total_rechecked_count;
        updates_stale;
        recheck_id;
+       last_iteration_start_time = _;
        duration;
+       time_first_result = _;
        any_full_checks;
      }
      {
-       ServerTypeCheck.total_rechecked_count =
+       ServerTypeCheck.CheckStats.total_rechecked_count =
          total_rechecked_count_in_iteration;
        reparse_count;
+       time_first_result;
      }
      ~check_kind
      ~telemetry
@@ -249,7 +252,9 @@ let update_stats_after_recheck :
       total_rechecked_count + total_rechecked_count_in_iteration;
     updates_stale;
     recheck_id;
+    last_iteration_start_time = start_time;
     duration = duration +. (Unix.gettimeofday () -. start_time);
+    time_first_result;
     any_full_checks =
       any_full_checks || ServerTypeCheck.CheckKind.is_full_check check_kind;
   }
@@ -553,46 +558,52 @@ let idle_if_no_client env waiting_client =
       env
   | _ -> env
 
-let push_diagnostics genv env =
+(** Push diagnostics (typechecker errors in the IDE are called diagnostics) to IDE.
+    Return a reason why nothing was pushed and optionally the timestamp of the push. *)
+let push_diagnostics genv env : env * string * seconds_since_epoch option =
   if TypecheckerOptions.stream_errors env.tcopt then
-    let diagnostic_pusher =
+    let (diagnostic_pusher, time_errors_pushed) =
       Diagnostic_pusher.push_whats_left env.diagnostic_pusher
     in
     let env = { env with diagnostic_pusher } in
-    (env, "pushed any leftover")
+    (env, "pushed any leftover", time_errors_pushed)
   else
     match env.diag_subscribe with
-    | None -> (env, "no diag subscriptions")
+    | None -> (env, "no diag subscriptions", None)
     | Some sub ->
       let client = Option.value_exn env.persistent_client in
       (* Should we hold off sending diagnostics to the client? *)
       if ClientProvider.client_has_message client then
-        (env, "client has message")
+        (env, "client has message", None)
       else if not @@ Relative_path.Set.is_empty env.ide_needs_parsing then
-        (env, "ide_needs_parsing: processed edits but didn't recheck them yet")
+        ( env,
+          "ide_needs_parsing: processed edits but didn't recheck them yet",
+          None )
       else if has_pending_disk_changes genv then
-        (env, "has_pending_disk_changes")
+        (env, "has_pending_disk_changes", None)
       else
         let (sub, errors, is_truncated) =
           Diagnostic_subscription.pop_errors sub ~global_errors:env.errorl
         in
         let env = { env with diag_subscribe = Some sub } in
         if SMap.is_empty errors then
-          (env, "is_empty errors")
+          (env, "is_empty errors", None)
         else
           let res = ServerCommandTypes.DIAGNOSTIC { errors; is_truncated } in
           (try
              ClientProvider.send_push_message_to_client client res;
-             (env, "sent push message")
+             let time_errors_pushed = Some (Unix.gettimeofday ()) in
+             (env, "sent push message", time_errors_pushed)
            with
           | ClientProvider.Client_went_away ->
             (* Leaving cleanup of this condition to handled_connection function *)
-            (env, "Client_went_away"))
+            (env, "Client_went_away", None))
 
-let log_recheck_end stats diag_reason =
+let log_recheck_end stats ~errors ~diag_reason =
   let telemetry =
     ServerEnv.RecheckLoopStats.to_user_telemetry stats
     |> Telemetry.string_ ~key:"diag_reason" ~value:diag_reason
+    |> Telemetry.object_ ~key:"errors" ~value:(Errors.as_telemetry errors)
   in
   let {
     RecheckLoopStats.duration;
@@ -602,6 +613,8 @@ let log_recheck_end stats diag_reason =
     any_full_checks;
     recheck_id;
     updates_stale = _;
+    last_iteration_start_time = _;
+    time_first_result = _;
   } =
     stats
   in
@@ -697,6 +710,11 @@ let serve_one_iteration genv env client_provider =
       selected_client
   in
   let t_done_recheck = Unix.gettimeofday () in
+  let (env, diag_reason, time_errors_pushed) = push_diagnostics genv env in
+  let t_sent_diagnostics = Unix.gettimeofday () in
+  let stats =
+    ServerEnv.RecheckLoopStats.record_result_sent_ts stats time_errors_pushed
+  in
   let did_work = stats.RecheckLoopStats.total_rechecked_count > 0 in
   let env =
     {
@@ -709,10 +727,8 @@ let serve_one_iteration genv env client_provider =
           env.last_recheck_loop_stats_for_actual_work);
     }
   in
-  let (env, diag_reason) = push_diagnostics genv env in
-  let t_sent_diagnostics = Unix.gettimeofday () in
 
-  if did_work then log_recheck_end stats diag_reason;
+  if did_work then log_recheck_end stats ~errors:env.errorl ~diag_reason;
 
   let env =
     match selected_client with

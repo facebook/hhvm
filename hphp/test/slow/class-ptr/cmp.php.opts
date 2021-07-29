@@ -1,4 +1,4 @@
 -vEval.EmitClassPointers=2
 -vEval.NoticeOnCoerceForCmp=0
--vEval.NoticeOnCoerceForMath=0
+
 -vEval.NoticeOnCoerceForEq=0

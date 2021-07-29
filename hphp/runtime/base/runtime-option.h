@@ -1387,7 +1387,7 @@ struct RuntimeOption {
   /* 0 nothing, 1 notice, 2 error */                                    \
   F(int32_t, NoticeOnCoerceForIncDec, 1)                                \
   /* 0 nothing, 1 notice, 2 error */                                    \
-  F(int32_t, NoticeOnCoerceForMath, 1)                                  \
+  F(int32_t, NoticeOnCoerceForMath, 2)                                  \
   /* 0 nothing, 1 notice, 2 error */                                    \
   F(int32_t, NoticeOnCoerceForCmp, 1)                                   \
   /* 0 nothing, 1 notice, 2 error, 3 behaviour change */                \

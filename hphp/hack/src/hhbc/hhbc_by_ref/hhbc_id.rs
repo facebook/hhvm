@@ -107,7 +107,7 @@ pub mod class {
 
     #[derive(Copy, Clone)]
     #[repr(C)]
-    pub struct ClassType<'arena>(Str<'arena>);
+    pub struct ClassType<'arena>(pub Str<'arena>);
 
     impl_id!(ClassType, mangle = true, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> ClassType<'arena> {
@@ -137,7 +137,7 @@ pub mod prop {
 
     #[derive(Copy, Clone)]
     #[repr(C)]
-    pub struct PropType<'arena>(Str<'arena>);
+    pub struct PropType<'arena>(pub Str<'arena>);
 
     impl_id!(PropType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> PropType<'arena> {
@@ -152,7 +152,7 @@ pub mod method {
 
     #[derive(Copy, Clone)]
     #[repr(C)]
-    pub struct MethodType<'arena>(Str<'arena>);
+    pub struct MethodType<'arena>(pub Str<'arena>);
 
     impl_id!(MethodType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> MethodType<'arena> {
@@ -181,7 +181,7 @@ pub mod function {
 
     #[derive(Copy, Clone)]
     #[repr(C)]
-    pub struct FunctionType<'arena>(Str<'arena>);
+    pub struct FunctionType<'arena>(pub Str<'arena>);
 
     impl_id!(FunctionType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> FunctionType<'arena> {
@@ -197,7 +197,7 @@ pub mod r#const {
 
     #[derive(Copy, Clone)]
     #[repr(C)]
-    pub struct ConstType<'arena>(Str<'arena>);
+    pub struct ConstType<'arena>(pub Str<'arena>);
 
     impl_id!(ConstType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> ConstType<'arena> {
@@ -211,7 +211,7 @@ pub mod record {
 
     #[derive(Copy, Clone)]
     #[repr(C)]
-    pub struct RecordType<'arena>(Str<'arena>);
+    pub struct RecordType<'arena>(pub Str<'arena>);
 
     impl_id!(RecordType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> RecordType<'arena> {

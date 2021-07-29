@@ -22,7 +22,7 @@ pub struct HhasProgram<'a, 'arena> {
     pub record_defs: Vec<HhasRecord<'a, 'arena>>,
     pub typedefs: Vec<Typedef<'arena>>,
     pub file_attributes: Vec<HhasAttribute<'arena>>,
-    pub symbol_refs: HhasSymbolRefs,
+    pub symbol_refs: HhasSymbolRefs<'arena>,
     pub constants: Vec<HhasConstant<'arena>>,
     pub fatal: Option<(FatalOp, Pos, String)>,
 }

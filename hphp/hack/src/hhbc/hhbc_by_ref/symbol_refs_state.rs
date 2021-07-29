@@ -7,12 +7,12 @@ use hhbc_by_ref_hhas_symbol_refs::HhasSymbolRefs;
 use std::collections::BTreeSet;
 
 #[derive(Debug, Default)]
-pub struct SymbolRefsState {
-    pub symbol_refs: HhasSymbolRefs,
+pub struct SymbolRefsState<'arena> {
+    pub symbol_refs: HhasSymbolRefs<'arena>,
 }
 
-impl SymbolRefsState {
-    pub fn init<'arena>(_alloc: &'arena bumpalo::Bump) -> Self {
+impl<'arena> SymbolRefsState<'arena> {
+    pub fn init(_alloc: &'arena bumpalo::Bump) -> Self {
         SymbolRefsState {
             symbol_refs: HhasSymbolRefs {
                 includes: BTreeSet::new(),

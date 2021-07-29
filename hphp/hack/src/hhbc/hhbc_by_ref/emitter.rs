@@ -27,7 +27,7 @@ pub struct Emitter<'arena, 'decl, D: DeclProvider<'decl> = NoDeclProvider> {
 
     pub adata_state_: Option<AdataState<'arena>>,
     pub statement_state_: Option<StatementState<'arena>>,
-    pub symbol_refs_state_: Option<SymbolRefsState>,
+    pub symbol_refs_state_: Option<SymbolRefsState<'arena>>,
     /// State is also frozen and set after closure conversion
     pub global_state_: Option<GlobalState>,
 
@@ -132,7 +132,7 @@ impl<'arena, 'decl, D: DeclProvider<'decl>> Emitter<'arena, 'decl, D> {
             .get_or_insert_with(|| StatementState::init(alloc))
     }
 
-    pub fn emit_symbol_refs_state(&self) -> &SymbolRefsState {
+    pub fn emit_symbol_refs_state(&self) -> &SymbolRefsState<'arena> {
         self.symbol_refs_state_
             .as_ref()
             .expect("uninit'd symbol_refs_state")
@@ -140,7 +140,7 @@ impl<'arena, 'decl, D: DeclProvider<'decl>> Emitter<'arena, 'decl, D> {
     pub fn emit_symbol_refs_state_mut(
         &mut self,
         alloc: &'arena bumpalo::Bump,
-    ) -> &mut SymbolRefsState {
+    ) -> &mut SymbolRefsState<'arena> {
         self.symbol_refs_state_
             .get_or_insert_with(|| SymbolRefsState::init(alloc))
     }

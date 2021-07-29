@@ -7,6 +7,10 @@ edition = "2018"
 [lib]
 path = "../../hhas_symbol_refs.rs"
 
+[dependencies]
+bumpalo = { version = "3.2.1", features = ["collections"] }
+ffi = { path = "../../../../utils/ffi" }
+
 [profile.release]
 incremental = false
 

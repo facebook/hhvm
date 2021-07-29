@@ -11,7 +11,7 @@ pub use write::{Error, IoWrite, Result, Write};
 
 use ffi::{
     Maybe::{Just, Nothing},
-    Pair,
+    Pair, Str,
 };
 
 use indexmap::IndexSet;
@@ -169,20 +169,21 @@ fn print_include_region<W: Write>(
         inc: IncludePath,
     ) -> Result<(), W::Error> {
         let include_roots = ctx.include_roots;
-        match inc.into_doc_root_relative(include_roots) {
-            IncludePath::Absolute(p) => print_if_exists(w, Path::new(&p)),
+        let alloc = bumpalo::Bump::new();
+        match inc.into_doc_root_relative(&alloc, include_roots) {
+            IncludePath::Absolute(p) => print_if_exists(w, Path::new(&p.as_str())),
             IncludePath::SearchPathRelative(p) => {
                 let path_from_cur_dirname = ctx
                     .path
                     .and_then(|p| p.path().parent())
                     .unwrap_or_else(|| Path::new(""))
-                    .join(&p);
+                    .join(&p.as_str());
                 if path_from_cur_dirname.exists() {
                     print_path(w, &path_from_cur_dirname)
                 } else {
                     let search_paths = ctx.include_search_paths;
                     for prefix in search_paths.iter() {
-                        let path = Path::new(prefix).join(&p);
+                        let path = Path::new(prefix).join(&p.as_str());
                         if path.exists() {
                             return print_path(w, &path);
                         }
@@ -192,17 +193,20 @@ fn print_include_region<W: Write>(
             }
             IncludePath::IncludeRootRelative(v, p) => {
                 if !p.is_empty() {
-                    include_roots.get(&v).iter().try_for_each(|ir| {
-                        let doc_root = ctx.doc_root;
-                        let resolved = Path::new(doc_root).join(ir).join(&p);
-                        print_if_exists(w, &resolved)
-                    })?
+                    include_roots
+                        .get(&v.as_str().to_owned())
+                        .iter()
+                        .try_for_each(|ir| {
+                            let doc_root = ctx.doc_root;
+                            let resolved = Path::new(doc_root).join(ir).join(&p.as_str());
+                            print_if_exists(w, &resolved)
+                        })?
                 }
                 Ok(())
             }
             IncludePath::DocRootRelative(p) => {
                 let doc_root = ctx.doc_root;
-                let resolved = Path::new(doc_root).join(&p);
+                let resolved = Path::new(doc_root).join(&p.as_str());
                 print_if_exists(w, &resolved)
             }
         }
@@ -220,12 +224,12 @@ fn print_include_region<W: Write>(
     }
 }
 
-fn print_symbol_ref_regions<W: Write>(
+fn print_symbol_ref_regions<'arena, W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    symbol_refs: &HhasSymbolRefs,
+    symbol_refs: &HhasSymbolRefs<'arena>,
 ) -> Result<(), W::Error> {
-    let mut print_region = |name, refs: &BTreeSet<String>| {
+    let mut print_region = |name, refs: &BTreeSet<Str<'arena>>| {
         if !refs.is_empty() {
             ctx.newline(w)?;
             write!(w, ".{} {{", name)?;

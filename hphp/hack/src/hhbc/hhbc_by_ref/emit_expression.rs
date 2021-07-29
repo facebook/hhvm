@@ -644,7 +644,7 @@ fn emit_yield<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     })
 }
 
-fn parse_include(e: &tast::Expr) -> IncludePath {
+fn parse_include<'arena>(alloc: &'arena bumpalo::Bump, e: &tast::Expr) -> IncludePath<'arena> {
     fn strip_backslash(s: &mut String) {
         if s.starts_with('/') {
             *s = s[1..].into()
@@ -672,13 +672,13 @@ fn parse_include(e: &tast::Expr) -> IncludePath {
     }
     if var.is_empty() {
         if std::path::Path::new(lit.as_str()).is_relative() {
-            IncludePath::SearchPathRelative(lit)
+            IncludePath::SearchPathRelative(Str::new_str(alloc, lit))
         } else {
-            IncludePath::Absolute(lit)
+            IncludePath::Absolute(Str::new_str(alloc, lit))
         }
     } else {
         strip_backslash(&mut lit);
-        IncludePath::IncludeRootRelative(var, lit)
+        IncludePath::IncludeRootRelative(Str::new_str(alloc, var), Str::new_str(alloc, lit))
     }
 }
 
@@ -723,16 +723,17 @@ fn emit_import<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 ) -> Result<InstrSeq<'arena>> {
     use tast::ImportFlavor;
     let alloc = env.arena;
-    let inc = parse_include(expr);
+    let inc = parse_include(alloc, expr);
     emit_symbol_refs::add_include(alloc, e, inc.clone());
     let (expr_instrs, import_op_instr) = match flavor {
         ImportFlavor::Include => (emit_expr(e, env, expr)?, instr::incl(alloc)),
         ImportFlavor::Require => (emit_expr(e, env, expr)?, instr::req(alloc)),
         ImportFlavor::IncludeOnce => (emit_expr(e, env, expr)?, instr::inclonce(alloc)),
         ImportFlavor::RequireOnce => {
-            match inc.into_doc_root_relative(e.options().hhvm.include_roots.get()) {
+            match inc.into_doc_root_relative(alloc, e.options().hhvm.include_roots.get()) {
                 IncludePath::DocRootRelative(path) => {
-                    let expr = tast::Expr((), pos.clone(), tast::Expr_::String(path.into()));
+                    let expr =
+                        tast::Expr((), pos.clone(), tast::Expr_::String(path.as_str().into()));
                     (emit_expr(e, env, &expr)?, instr::reqdoc(alloc))
                 }
                 _ => (emit_expr(e, env, expr)?, instr::reqonce(alloc)),

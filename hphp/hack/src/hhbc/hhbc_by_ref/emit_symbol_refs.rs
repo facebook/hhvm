@@ -14,7 +14,7 @@ use std::collections::BTreeSet;
 pub fn add_include<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
-    inc: IncludePath,
+    inc: IncludePath<'arena>,
 ) {
     e.emit_symbol_refs_state_mut(alloc)
         .symbol_refs
@@ -25,26 +25,26 @@ pub fn add_include<'arena, 'decl, D: DeclProvider<'decl>>(
 pub fn add_constant<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
-    s: r#const::ConstType,
+    s: r#const::ConstType<'arena>,
 ) {
     if !s.to_raw_string().is_empty() {
         e.emit_symbol_refs_state_mut(alloc)
             .symbol_refs
             .constants
-            .insert(s.into());
+            .insert(s.0);
     }
 }
 
 pub fn add_class<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
-    s: class::ClassType,
+    s: class::ClassType<'arena>,
 ) {
     if !s.to_raw_string().is_empty() {
         e.emit_symbol_refs_state_mut(alloc)
             .symbol_refs
             .classes
-            .insert(s.into());
+            .insert(s.0);
     }
 }
 
@@ -63,20 +63,20 @@ pub fn reset<'arena, 'decl, D: DeclProvider<'decl>>(
 pub fn add_function<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
-    s: function::FunctionType,
+    s: function::FunctionType<'arena>,
 ) {
     if !s.to_raw_string().is_empty() {
         e.emit_symbol_refs_state_mut(alloc)
             .symbol_refs
             .functions
-            .insert(s.into());
+            .insert(s.0);
     }
 }
 
 pub fn take<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
-) -> SymbolRefsState {
+) -> SymbolRefsState<'arena> {
     let state = e.emit_symbol_refs_state_mut(alloc);
     std::mem::take(state) // Replace `state` with the default
     // `SymbolRefsState` value and return the previous `state` value.

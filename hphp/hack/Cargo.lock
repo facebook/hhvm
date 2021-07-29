@@ -1916,6 +1916,10 @@ dependencies = [
 [[package]]
 name = "hhbc_by_ref_hhas_symbol_refs"
 version = "0.0.0"
+dependencies = [
+ "bumpalo",
+ "ffi",
+]
 
 [[package]]
 name = "hhbc_by_ref_hhas_type"

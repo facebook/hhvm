@@ -2384,16 +2384,25 @@ where
             p.parse_generic_type_parameter_list_opt()
         });
         let is_coeffect = self.peek_token_kind_with_lookahead(1) == TokenKind::LeftBracket;
-        let constr = if is_coeffect {
-            self.with_type_parser(|p| p.parse_list_until_none(|p| p.parse_context_constraint_opt()))
+        let (constr, equal, ty) = if is_coeffect {
+            let constr = self.with_type_parser(|p| {
+                p.parse_list_until_none(|p| p.parse_context_constraint_opt())
+            });
+            if self.peek_token_kind() == TokenKind::Equal {
+                let equal = self.require_equal();
+                let ty = self.with_type_parser(|p| p.parse_contexts());
+                (constr, equal, ty)
+            } else {
+                let equal = S!(make_missing, self, self.pos());
+                let ty = S!(make_missing, self, self.pos());
+                (constr, equal, ty)
+            }
         } else {
-            self.parse_type_constraint_opt()
-        };
-        let equal = self.require_equal();
-        let ty = if is_coeffect {
-            self.with_type_parser(|p| p.parse_contexts())
-        } else {
-            self.parse_type_specifier(false /* allow_var */, true /* allow_attr */)
+            let constr = self.parse_type_constraint_opt();
+            let equal = self.require_equal();
+            let ty =
+                self.parse_type_specifier(false /* allow_var */, true /* allow_attr */);
+            (constr, equal, ty)
         };
         let semi = self.require_semicolon();
         if is_coeffect {

@@ -5014,6 +5014,13 @@ where
         }
     }
 
+    fn defaults_coeffect(env: &mut Env<'a, TF>, node: S<'a, T, V>) -> ast::Hint {
+        use ast::Hint_::Happly;
+        let pos = Self::p_pos(node, env);
+        let hint_ = Happly(ast::Id(pos.clone(), String::from("defaults")), vec![]);
+        ast::Hint::new(pos, hint_)
+    }
+
     fn p_def(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<Vec<ast::Def>, Error> {
         let doc_comment_opt = Self::extract_docblock(node, env);
         match &node.children {
@@ -5242,7 +5249,10 @@ where
                         Some(TK::Newtype) => ast::TypedefVisibility::Opaque,
                         _ => Self::missing_syntax("kind", &c.keyword, env)?,
                     },
-                    kind: Self::p_context_list_to_intersection(&c.context, env)?.unwrap(),
+                    kind: match Self::p_context_list_to_intersection(&c.context, env)? {
+                        Some(h) => h,
+                        None => Self::defaults_coeffect(env, &c.context),
+                    },
                     span: Self::p_pos(node, env),
                     emit_id: None,
                     is_ctx: true,

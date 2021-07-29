@@ -72,7 +72,7 @@ function hphp_create_object_without_constructor(string $name): object;
 function hphp_get_property(
   object $obj,
   string $cls = "", // null will convert to this and do what we expect
-  string $prop): mixed;
+  string $prop)[]: mixed;
 
 /**
  * hphp_set_property() - Used by ReflectionProperty to set the value of a
@@ -89,7 +89,7 @@ function hphp_set_property(
   object $obj,
   string $cls = "", // null will convert to this and do what we expect
   string $prop,
-  mixed $value): void;
+  mixed $value)[write_props]: void;
 
 /**
  * hphp_get_static_property() - Used by ReflectionProperty to get the value of a
@@ -103,7 +103,7 @@ function hphp_set_property(
  */
 <<__Native("NoInjection")>>
 function hphp_get_static_property(string $cls, string $prop,
-                                  bool $force): mixed;
+                                  bool $force)[read_globals]: mixed;
 
 /**
  * hphp_set_static_property() - Used by ReflectionProperty to set the value of a
@@ -117,4 +117,4 @@ function hphp_get_static_property(string $cls, string $prop,
  */
 <<__Native("NoInjection")>>
 function hphp_set_static_property(string $cls, string $prop, mixed $value,
-                                  bool $force): void;
+                                  bool $force)[globals]: void;

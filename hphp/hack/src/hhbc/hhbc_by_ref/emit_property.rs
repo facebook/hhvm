@@ -193,7 +193,7 @@ pub fn from_ast<'ast, 'arena, 'decl, D: DeclProvider<'decl>>(
     })
 }
 
-fn valid_for_prop(tc: &constraint::Type) -> bool {
+fn valid_for_prop(tc: &constraint::Constraint) -> bool {
     match &tc.name {
         None => true,
         Some(s) => {

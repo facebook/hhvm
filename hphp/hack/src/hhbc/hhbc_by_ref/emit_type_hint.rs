@@ -198,14 +198,18 @@ fn hint_to_type_constraint<'arena>(
     tparams: &[&str],
     skipawaitable: bool,
     h: &Hint,
-) -> std::result::Result<constraint::Type, hhbc_by_ref_instruction_sequence::Error> {
-    use constraint::{Flags, Type};
+) -> std::result::Result<constraint::Constraint, hhbc_by_ref_instruction_sequence::Error> {
+    use constraint::{Constraint, Flags};
     let Hint(pos, hint) = h;
     Ok(match &**hint {
-        Hdynamic | Hlike(_) | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed => Type::default(),
-        Haccess(_, _) => Type::make_with_raw_str("", Flags::EXTENDED_HINT | Flags::TYPE_CONSTANT),
-        Hshape(_) => Type::make_with_raw_str("HH\\darray", Flags::EXTENDED_HINT),
-        Htuple(_) => Type::make_with_raw_str("HH\\varray", Flags::EXTENDED_HINT),
+        Hdynamic | Hlike(_) | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed => {
+            Constraint::default()
+        }
+        Haccess(_, _) => {
+            Constraint::make_with_raw_str("", Flags::EXTENDED_HINT | Flags::TYPE_CONSTANT)
+        }
+        Hshape(_) => Constraint::make_with_raw_str("HH\\darray", Flags::EXTENDED_HINT),
+        Htuple(_) => Constraint::make_with_raw_str("HH\\varray", Flags::EXTENDED_HINT),
         Hsoft(t) => make_tc_with_flags_if_non_empty_flags(
             alloc,
             kind,
@@ -223,7 +227,7 @@ fn hint_to_type_constraint<'arena>(
             if let Happly(Id(_, s), hs) = &*(t.1) {
                 if skipawaitable && is_awaitable(&s) {
                     match &hs[..] {
-                        [] => return Ok(Type::default()),
+                        [] => return Ok(Constraint::default()),
                         [h] => return hint_to_type_constraint(alloc, kind, tparams, false, h),
                         _ => {}
                     }
@@ -260,13 +264,13 @@ fn hint_to_type_constraint<'arena>(
                     || (skipawaitable && is_awaitable(s))
                     || (s.eq_ignore_ascii_case("\\hh\\void") && !is_typedef(&kind)) =>
                 {
-                    return Ok(Type::default());
+                    return Ok(Constraint::default());
                 }
                 [Hint(_, h)] if skipawaitable && is_awaitable(s) => {
                     return match &**h {
-                        Hprim(Tprim::Tvoid) => Ok(Type::default()),
+                        Hprim(Tprim::Tvoid) => Ok(Constraint::default()),
                         Happly(Id(_, id), hs) if id == "\\HH\\void" && hs.is_empty() => {
-                            Ok(Type::default())
+                            Ok(Constraint::default())
                         }
                         _ => hint_to_type_constraint(alloc, kind, tparams, false, &hs[0]),
                     };
@@ -295,11 +299,11 @@ fn make_tc_with_flags_if_non_empty_flags<'arena>(
     skipawaitable: bool,
     hint: &Hint,
     flags: constraint::Flags,
-) -> std::result::Result<constraint::Type, hhbc_by_ref_instruction_sequence::Error> {
+) -> std::result::Result<constraint::Constraint, hhbc_by_ref_instruction_sequence::Error> {
     let tc = hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?;
     Ok(match (&tc.name, &tc.flags.bits()) {
         (None, 0) => tc,
-        _ => constraint::Type::make(tc.name, flags | tc.flags),
+        _ => constraint::Constraint::make(tc.name, flags | tc.flags),
     })
 }
 
@@ -310,14 +314,14 @@ fn type_application_helper<'arena>(
     kind: &Kind,
     pos: &Pos,
     name: &str,
-) -> std::result::Result<constraint::Type, hhbc_by_ref_instruction_sequence::Error> {
-    use constraint::{Flags, Type};
+) -> std::result::Result<constraint::Constraint, hhbc_by_ref_instruction_sequence::Error> {
+    use constraint::{Constraint, Flags};
     if tparams.contains(&name) {
         let tc_name = match kind {
             Kind::Param | Kind::Return | Kind::Property => name,
             _ => "",
         };
-        Ok(Type::make(
+        Ok(Constraint::make(
             Some(tc_name.into()),
             Flags::EXTENDED_HINT | Flags::TYPE_VAR,
         ))
@@ -328,11 +332,11 @@ fn type_application_helper<'arena>(
                 format!("Cannot access {} when no class scope is active", name),
             ))
         } else {
-            Ok(Type::make(Some(name.to_owned()), Flags::empty()))
+            Ok(Constraint::make(Some(name.to_owned()), Flags::empty()))
         }
     } else {
         let name: String = class::ClassType::from_ast_name(alloc, name).into();
-        Ok(Type::make(Some(name), Flags::empty()))
+        Ok(Constraint::make(Some(name), Flags::empty()))
     }
 }
 
@@ -357,7 +361,7 @@ fn make_type_info<'arena>(
     tc_flags: constraint::Flags,
 ) -> std::result::Result<Info, hhbc_by_ref_instruction_sequence::Error> {
     let type_info_user_type = Some(fmt_hint(alloc, tparams, false, h)?);
-    let type_info_type_constraint = constraint::Type::make(tc_name, tc_flags);
+    let type_info_type_constraint = constraint::Constraint::make(tc_name, tc_flags);
     Ok(Info::make(type_info_user_type, type_info_type_constraint))
 }
 
@@ -491,7 +495,7 @@ pub fn emit_type_constraint_for_native_function(
             }
         }
     };
-    let tc = constraint::Type::make(name, flags);
+    let tc = constraint::Constraint::make(name, flags);
     Info::make(ti.user_type, tc)
 }
 

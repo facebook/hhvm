@@ -318,7 +318,7 @@ fn from_enum_type(opt: Option<&tast::Enum_>) -> Result<Option<hhbc_by_ref_hhas_t
     opt.map(|e| {
         let alloc = bumpalo::Bump::new();
         let type_info_user_type = Some(emit_type_hint::fmt_hint(&alloc, &[], true, &e.base)?);
-        let type_info_type_constraint = Type::make(None, Flags::EXTENDED_HINT);
+        let type_info_type_constraint = Constraint::make(None, Flags::EXTENDED_HINT);
         Ok(hhbc_by_ref_hhas_type::Info::make(
             type_info_user_type,
             type_info_type_constraint,
@@ -480,7 +480,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     if num_reified == 0 && !maybe_has_reified_parents {
         Ok(None)
     } else {
-        let tc = Type::make(Some("HH\\varray".into()), Flags::empty());
+        let tc = Constraint::make(Some("HH\\varray".into()), Flags::empty());
         let params = vec![HhasParam {
             name: string_utils::reified::INIT_METH_PARAM_NAME.to_string(),
             is_variadic: false,

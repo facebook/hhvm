@@ -7,13 +7,13 @@
 #[derive(Clone, Debug)]
 pub struct Info {
     pub user_type: Option<String>,
-    pub type_constraint: constraint::Type,
+    pub type_constraint: constraint::Constraint,
 }
 
 #[derive(Debug)]
 pub struct Constant {
     pub name: String,
-    pub initializer: constraint::Type,
+    pub initializer: constraint::Constraint,
 }
 
 #[allow(dead_code)]
@@ -21,7 +21,7 @@ pub mod constraint {
     use bitflags::bitflags;
 
     #[derive(Clone, Default, Debug)]
-    pub struct Type {
+    pub struct Constraint {
         pub name: Option<String>,
         pub flags: Flags,
     }
@@ -52,19 +52,19 @@ pub mod constraint {
         }
     }
 
-    impl Type {
-        pub fn make(name: Option<String>, flags: Flags) -> Type {
-            Type { name, flags }
+    impl Constraint {
+        pub fn make(name: Option<String>, flags: Flags) -> Self {
+            Constraint { name, flags }
         }
 
-        pub fn make_with_raw_str(name: &str, flags: Flags) -> Type {
-            Self::make(Some(String::from(name)), flags)
+        pub fn make_with_raw_str(name: &str, flags: Flags) -> Self {
+            Constraint::make(Some(String::from(name)), flags)
         }
     }
 }
 
 impl Info {
-    pub fn make(user_type: Option<String>, type_constraint: constraint::Type) -> Info {
+    pub fn make(user_type: Option<String>, type_constraint: constraint::Constraint) -> Info {
         Info {
             user_type,
             type_constraint,
@@ -72,7 +72,7 @@ impl Info {
     }
 
     pub fn make_empty() -> Info {
-        Info::make(Some(String::from("")), constraint::Type::default())
+        Info::make(Some(String::from("")), constraint::Constraint::default())
     }
 
     pub fn has_type_constraint(&self) -> bool {
@@ -81,7 +81,7 @@ impl Info {
 }
 
 impl Constant {
-    pub fn make(name: String, initializer: constraint::Type) -> Constant {
+    pub fn make(name: String, initializer: constraint::Constraint) -> Constant {
         Constant { name, initializer }
     }
 }

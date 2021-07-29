@@ -15,7 +15,7 @@ use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::Result;
 use oxidized::ast::*;
 
-fn valid_tc_for_record_field(tc: &constraint::Type) -> bool {
+fn valid_tc_for_record_field(tc: &constraint::Constraint) -> bool {
     match &tc.name {
         None => true,
         Some(name) => {

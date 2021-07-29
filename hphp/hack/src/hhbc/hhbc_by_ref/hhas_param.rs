@@ -27,7 +27,7 @@ impl<'arena> HhasParam<'arena> {
 
     pub fn without_type(&mut self) {
         if let Some(ti) = self.type_info.as_mut() {
-            ti.type_constraint = constraint::Type::default()
+            ti.type_constraint = constraint::Constraint::default()
         }
     }
 

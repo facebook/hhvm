@@ -367,7 +367,7 @@ pub fn emit_return_type_info<'arena>(
     match ret {
         None => Ok(HhasTypeInfo::make(
             Some("".to_string()),
-            hhbc_by_ref_hhas_type::constraint::Type::default(),
+            hhbc_by_ref_hhas_type::constraint::Constraint::default(),
         )),
         Some(hint) => emit_type_hint::hint_to_type_info(
             alloc,

@@ -11,7 +11,7 @@ pub use write::{Error, IoWrite, Result, Write};
 
 use ffi::{
     Maybe::{Just, Nothing},
-    Pair, Str,
+    Pair, Slice, Str,
 };
 
 use indexmap::IndexSet;
@@ -55,7 +55,7 @@ use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id};
 use regex::Regex;
 use write::*;
 
-use std::{borrow::Cow, collections::BTreeSet, io::Write as _, path::Path, write};
+use std::{borrow::Cow, io::Write as _, path::Path, write};
 
 struct ExprEnv<'e> {
     pub codegen_env: Option<&'e HhasBodyEnv>,
@@ -155,7 +155,7 @@ fn print_program_<W: Write>(
 fn print_include_region<W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    includes: &BTreeSet<IncludePath>,
+    includes: &Slice<IncludePath>,
 ) -> Result<(), W::Error> {
     fn print_path<W: Write>(w: &mut W, p: &Path) -> Result<(), W::Error> {
         option(w, p.to_str(), |w, p: &str| write!(w, "\n  {}", p))
@@ -213,7 +213,7 @@ fn print_include_region<W: Write>(
     }
     if !includes.is_empty() {
         w.write("\n.includes {")?;
-        for inc in includes.iter() {
+        for inc in includes.as_ref().iter() {
             // TODO(hrust): avoid clone. Rethink onwership of inc in
             // hhas_symbol_refs_rust::IncludePath::into_doc_root_relative
             print_include(ctx, w, inc.clone())?;
@@ -229,12 +229,12 @@ fn print_symbol_ref_regions<'arena, W: Write>(
     w: &mut W,
     symbol_refs: &HhasSymbolRefs<'arena>,
 ) -> Result<(), W::Error> {
-    let mut print_region = |name, refs: &BTreeSet<Str<'arena>>| {
+    let mut print_region = |name, refs: &Slice<'arena, Str<'arena>>| {
         if !refs.is_empty() {
             ctx.newline(w)?;
             write!(w, ".{} {{", name)?;
             ctx.block(w, |c, w| {
-                for s in refs.iter() {
+                for s in refs.as_ref().iter() {
                     c.newline(w)?;
                     w.write(s)?;
                 }

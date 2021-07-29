@@ -32,6 +32,7 @@ pub type IncludePathSet<'arena> = BTreeSet<IncludePath<'arena>>;
 pub type SSet<'arena> = BTreeSet<Str<'arena>>;
 
 #[derive(Clone, Debug, Eq)]
+#[repr(C)]
 pub enum IncludePath<'arena> {
     Absolute(Str<'arena>),                         // /foo/bar/baz.php
     SearchPathRelative(Str<'arena>),               // foo/bar/baz.php
@@ -85,4 +86,12 @@ impl<'arena> PartialEq for IncludePath<'arena> {
     fn eq(&self, other: &Self) -> bool {
         self.extract_str().eq(&other.extract_str())
     }
+}
+// For cbindgen
+#[allow(clippy::needless_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_symbol_refs_state<'arena>(
+    _: IncludePath<'arena>,
+) {
+    unimplemented!()
 }

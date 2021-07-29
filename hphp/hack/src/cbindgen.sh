@@ -135,6 +135,20 @@ set -x
               --crate hhbc_by_ref_instruction_sequence \
               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_instruction_sequence.h")
 
+# hhbc_symbol_refs_state.h
+(cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_symbol_refs_state && \
+     cargo update && \
+     cbindgen --config ../../cbindgen_hhbc_symbol_refs_state.toml \
+              --crate hhbc_by_ref_symbol_refs_state \
+              --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_symbol_refs_state.h")
+
+# hhbc_hhas_symbol_refs.h
+(cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhas_symbol_refs && \
+     cargo update && \
+     cbindgen --config ../../cbindgen_hhbc_hhas_symbol_refs.toml \
+              --crate hhbc_by_ref_hhas_symbol_refs \
+              --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_symbol_refs.h")
+
 signscript="$top/../xplat/python/signedsource_lib/signedsource.py"
 eval "${signscript}" sign "${top}"/hphp/hack/src/utils/ffi/ffi.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_id.h
@@ -143,10 +157,13 @@ eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_local.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_runtime.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_ast.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_instruction_sequence.h
+eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_symbol_refs_state.h
+eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_symbol_refs.h
 
 # Quick sanity check: Does a program that includes these headers compile?
 cat > main.cpp <<EOF
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_instruction_sequence.h"
+#include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_symbol_refs.h"
 
 #include <iostream>
 
@@ -154,6 +171,7 @@ int main() {
   using namespace HPHP::hackc::hhbc::ast;
 
   InstrSeq _b6;
+  HhasSymbolRefs _b7;
 
   std::cout << "Ok!" << std::endl;
   return 0;

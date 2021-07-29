@@ -18,7 +18,6 @@ use hhbc_by_ref_hhas_program::HhasProgram;
 use hhbc_by_ref_hhas_symbol_refs::HhasSymbolRefs;
 use hhbc_by_ref_hhbc_ast::FatalOp;
 use hhbc_by_ref_instruction_sequence::{Error, Result};
-use hhbc_by_ref_symbol_refs_state::SymbolRefsState;
 use ocamlrep::rc::RcOc;
 use oxidized::{ast as Tast, namespace_env, pos::Pos};
 
@@ -69,15 +68,8 @@ fn emit_program_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     functions.append(&mut const_inits);
     let file_attributes = emit_file_attributes_from_program(alloc, emitter, prog)?;
     let adata = emit_adata::take(alloc, emitter).adata;
-    let symbols: SymbolRefsState<'arena> = emit_symbol_refs::take(alloc, emitter);
-    // Next iteration of this program these members will be replaced by
-    // `Slice<'arena>`s.
-    let symbol_refs: HhasSymbolRefs<'arena> = HhasSymbolRefs {
-        includes: symbols.includes,
-        constants: symbols.constants,
-        functions: symbols.functions,
-        classes: symbols.classes,
-    };
+    let symbol_refs =
+        HhasSymbolRefs::from_symbol_refs_state(alloc, emit_symbol_refs::take(alloc, emitter));
     let fatal = None;
 
     Ok(HhasProgram {

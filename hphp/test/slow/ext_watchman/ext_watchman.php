@@ -171,7 +171,7 @@ function test_core(WatchmanInstance $wminst): void {
 
         case 2: // touch a file
           $touch_c++;
-          file_put_contents($wminst->getRepoRoot() + '/afile', 'X');
+          file_put_contents($wminst->getRepoRoot() . '/afile', 'X');
           break;
       }
     } catch (Exception $e) {

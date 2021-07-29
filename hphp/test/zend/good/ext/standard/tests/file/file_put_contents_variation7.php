@@ -1,8 +1,8 @@
 <?hh
 /* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
- * Description: Write/Create a file with contents data and return the number of bytes written 
+ * Description: Write/Create a file with contents data and return the number of bytes written
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing file_put_contents() : usage variation ***\n";
@@ -28,14 +28,14 @@ $allDirs = varray[
   "$absSubDir/../../".$mainDir."/./".$subDir,
   "$absSubDir/..///".$subDir."//..//../".$subDir,
   "$absSubDir/BADDIR",
-  
+
   // relative paths
   $mainDir."/".$subDir,
-  $mainDir."//".$subDir, 
-   $mainDir."///".$subDir, 
+  $mainDir."//".$subDir,
+   $mainDir."///".$subDir,
   "./".$mainDir."/../".$mainDir."/".$subDir,
-  "BADDIR",  
-  
+  "BADDIR",
+
 ];
 
 $filename = 'FileGetContentsVar7.tmp';
@@ -46,10 +46,10 @@ for($i = 0; $i<count($allDirs); $i++) {
   $j = $i+1;
   $dir = $allDirs[$i];
   echo "\n-- Iteration $j --\n";
-  $res = file_put_contents($dir."/".$filename, ($data + $i));
+  $res = file_put_contents($dir."/".$filename, HH\Lib\Legacy_FIXME\cast_for_arithmetic($data) + $i);
   if ($res !== false) {
       $in = file_get_contents($absFile);
-      if ($in == ($data + $i)) {
+      if ($in == (HH\Lib\Legacy_FIXME\cast_for_arithmetic($data) + $i)) {
          echo "Data written correctly\n";
       }
       else {
@@ -60,7 +60,7 @@ for($i = 0; $i<count($allDirs); $i++) {
   else {
      echo "No data written\n";
   }
-      
+
 }
 
 rmdir($absSubDir);

@@ -4,6 +4,7 @@ function test($thing) {
   echo "==== " . get_class($thing) . " ====\n";
   $thing->dynprop = 3;
   $propname = __hhvm_intrinsics\launder_value("dynprop") . "2";
+  $thing->$propname ??= 0;
   $thing->$propname += 2;
   $thing->dynprop3++;
   var_dump($thing);

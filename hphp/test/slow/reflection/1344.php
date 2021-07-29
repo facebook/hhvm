@@ -3,6 +3,7 @@
 function test() {
   try {
     $classes = get_declared_classes();
+    $t = 0;
     foreach ($classes as $class) {
       $r = new ReflectionClass($class);
       $t += HH\Lib\Legacy_FIXME\cast_for_arithmetic(count($r->getMethods()));

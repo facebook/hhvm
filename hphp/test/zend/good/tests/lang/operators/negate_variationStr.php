@@ -8,8 +8,8 @@ $strVals = varray[
 
 foreach ($strVals as $strVal) {
    echo "--- testing: '$strVal' ---\n";
-   var_dump(-$strVal);
+   var_dump(-HH\Lib\Legacy_FIXME\cast_for_arithmetic($strVal));
 }
-   
+
 echo "===DONE===\n";
 }

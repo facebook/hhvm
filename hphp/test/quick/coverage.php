@@ -48,7 +48,7 @@ function main() {
   var_dump($r);
 }
 abstract final class Coverage {
-  public static $y;
+  public static $y = 0;
 }
 <<__EntryPoint>>
 function main_entry(): void {

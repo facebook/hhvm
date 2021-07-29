@@ -4,9 +4,9 @@ function DoIt($a)
 {
     echo "--- start DoIt -------------------------\n\n";
     echo "     original: "; var_dump($a);
-    $b = +$a;
+    $b = +HH\Lib\Legacy_FIXME\cast_for_arithmetic($a);
 //  echo "after unary +: "; var_dump($b);
-    $c = -$a;
+    $c = -HH\Lib\Legacy_FIXME\cast_for_arithmetic($a);
 //  echo "after unary -: "; var_dump($c);
     $d = !$a;
 //  echo "after unary !: "; var_dump($d);

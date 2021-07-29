@@ -12,7 +12,7 @@ function genFoo($a) {
   // a fall-thru destination of the first opcode of the line after the
   // foreach in main(). If flow control interferes with breakpoints,
   // then we'll execute that opcode (load $a) before stopping.
-  yield $z+1;
+  yield HH\Lib\Legacy_FIXME\cast_for_arithmetic($z)+1;
   error_log('Finished in genFoo');
 }
 

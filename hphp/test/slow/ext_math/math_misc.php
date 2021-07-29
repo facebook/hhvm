@@ -45,10 +45,6 @@ VC(pow(2, 8), 256);
 VC(pow(-1, 20), 1);
 var_dump(pow(0, 0));
 var_dump(is_int(pow(2, 32)));
-VC(pow("2", "8"), 256);
-VC(pow("-1", "20"), 1);
-var_dump(pow("0", "0"));
-var_dump(is_int(pow("2", "32")));
 
 VC(exp(12.0), 162754.791419);
 VC(exp(5.7), 298.86740096706);

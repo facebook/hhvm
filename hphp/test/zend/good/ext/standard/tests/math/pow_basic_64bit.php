@@ -33,7 +33,7 @@ foreach($bases as $base) {
     foreach($exponents as $exponent) {
         $exponent__str = (string)($exponent);
         echo "\n..... Exponent = $exponent__str Result = ";
-        $res = pow($base, $exponent);
+        $res = pow(HH\Lib\Legacy_FIXME\cast_for_exponent($base), HH\Lib\Legacy_FIXME\cast_for_exponent($exponent));
         echo $res;
     }
     echo "\n\n";

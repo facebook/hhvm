@@ -146,7 +146,7 @@ Break at foo() on line 40 of %s/flow2.php
 continue
 Breakpoint 2 reached at genFoo() on line 12 of %s/flow2.php
   11   $z = yield $a+5;
-  12*  yield $z+1;
+  12*  yield HH\Lib\Legacy_FIXME\cast_for_arithmetic($z)+1;
   13   error_log('Finished in genFoo');
 
 out

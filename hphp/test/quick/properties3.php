@@ -16,7 +16,9 @@ class D {
   }
 
   function setopprop() {
+    $this->x ??= 0;
     $this->x += 1;
+    $this->y ??= 0;
     $this->y += 2;
     var_dump($this);
   }

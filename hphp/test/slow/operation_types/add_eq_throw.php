@@ -1,9 +1,9 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-  $a = null;
+  $a = 0;
   $e = keyset[];
   try {
-    $a += $e;
+    $a += HH\Lib\Legacy_FIXME\cast_for_arithmetic($e);
   } catch (Exception $e) {
     var_dump($a);
   }

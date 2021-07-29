@@ -1,9 +1,9 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $a = null;
- var_dump(+$a);
+ var_dump(+HH\Lib\Legacy_FIXME\cast_for_arithmetic($a));
 $a = null;
- var_dump(-$a);
+ var_dump(-HH\Lib\Legacy_FIXME\cast_for_arithmetic($a));
 $a = null;
  $b = null;
  var_dump(HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b));

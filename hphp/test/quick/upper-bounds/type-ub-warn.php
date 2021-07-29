@@ -1,7 +1,7 @@
 <?hh
 
 function foo1<T as num>(inout T $x): void {
-  $x = $x + 1;
+  $x = HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) + 1;
 }
 
 function foo2<T as num>(inout T $x): void {

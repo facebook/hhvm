@@ -14,8 +14,8 @@ Error: Setting a property on a non-object
 Error: Setting a property on a non-object
 Error: Setting a property on a non-object
 
-Warning: Attempt to assign property of non-object in %s on line 37
-
 Warning: Attempt to assign property of non-object in %s on line 38
+
+Warning: Attempt to assign property of non-object in %s on line 39
 42
 Test end

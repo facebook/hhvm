@@ -1,10 +1,10 @@
 ==== C ====
 
-Notice: Created dynamic property with static name C::dynprop in %s/dynprop_write_notice.php on line 5
+Notice: Created dynamic property with static name C::dynprop in %s/slow/object_property/dynprop_write_notice.php on line 5
 
-Notice: Created dynamic property with dynamic name C::dynprop2 in %s/dynprop_write_notice.php on line 7
+Notice: Created dynamic property with dynamic name C::dynprop2 in %s/slow/object_property/dynprop_write_notice.php on line 7
 
-Notice: Created dynamic property with static name C::dynprop3 in %s/dynprop_write_notice.php on line 8
+Notice: Created dynamic property with static name C::dynprop3 in %s/dynprop_write_notice.php on line 9
 object(C) (3) {
   ["dynprop"]=>
   int(3)
@@ -14,11 +14,11 @@ object(C) (3) {
   int(1)
 }
 
-Notice: Created dynamic property with dynamic name C::dynprop in %s/dynprop_write_notice.php on line 10
+Notice: Created dynamic property with dynamic name C::dynprop in %s/slow/object_property/dynprop_write_notice.php on line 11
 
-Notice: Created dynamic property with dynamic name C::dynprop2 in %s/dynprop_write_notice.php on line 10
+Notice: Created dynamic property with dynamic name C::dynprop2 in %s/slow/object_property/dynprop_write_notice.php on line 11
 
-Notice: Created dynamic property with dynamic name C::dynprop3 in %s/dynprop_write_notice.php on line 10
+Notice: Created dynamic property with dynamic name C::dynprop3 in %s/slow/object_property/dynprop_write_notice.php on line 11
 object(C) (3) {
   ["dynprop"]=>
   int(3)
@@ -28,11 +28,11 @@ object(C) (3) {
   int(1)
 }
 
-Notice: Created dynamic property with static name C::dynprop in %s/dynprop_write_notice.php on line 12
+Notice: Created dynamic property with static name C::dynprop in %s/slow/object_property/dynprop_write_notice.php on line 13
 
-Notice: Created dynamic property with dynamic name C::dynprop2 in %s/dynprop_write_notice.php on line 12
+Notice: Created dynamic property with dynamic name C::dynprop2 in %s/slow/object_property/dynprop_write_notice.php on line 13
 
-Notice: Created dynamic property with static name C::dynprop3 in %s/dynprop_write_notice.php on line 12
+Notice: Created dynamic property with static name C::dynprop3 in %s/slow/object_property/dynprop_write_notice.php on line 13
 object(C) (3) {
   ["dynprop"]=>
   int(3)
@@ -43,11 +43,11 @@ object(C) (3) {
 }
 ==== GMP ====
 
-Notice: Created dynamic property with static name GMP::dynprop in %s/dynprop_write_notice.php on line 5
+Notice: Created dynamic property with static name GMP::dynprop in %s/slow/object_property/dynprop_write_notice.php on line 5
 
-Notice: Created dynamic property with dynamic name GMP::dynprop2 in %s/dynprop_write_notice.php on line 7
+Notice: Created dynamic property with dynamic name GMP::dynprop2 in %s/slow/object_property/dynprop_write_notice.php on line 7
 
-Notice: Created dynamic property with static name GMP::dynprop3 in %s/dynprop_write_notice.php on line 8
+Notice: Created dynamic property with static name GMP::dynprop3 in %s/dynprop_write_notice.php on line 9
 object(GMP) (4) {
   ["dynprop"]=>
   int(3)
@@ -59,11 +59,11 @@ object(GMP) (4) {
   string(1) "0"
 }
 
-Notice: Created dynamic property with dynamic name GMP::dynprop in %s/dynprop_write_notice.php on line 10
+Notice: Created dynamic property with dynamic name GMP::dynprop in %s/slow/object_property/dynprop_write_notice.php on line 11
 
-Notice: Created dynamic property with dynamic name GMP::dynprop2 in %s/dynprop_write_notice.php on line 10
+Notice: Created dynamic property with dynamic name GMP::dynprop2 in %s/slow/object_property/dynprop_write_notice.php on line 11
 
-Notice: Created dynamic property with dynamic name GMP::dynprop3 in %s/dynprop_write_notice.php on line 10
+Notice: Created dynamic property with dynamic name GMP::dynprop3 in %s/slow/object_property/dynprop_write_notice.php on line 11
 object(GMP) (4) {
   ["dynprop"]=>
   int(3)
@@ -75,11 +75,11 @@ object(GMP) (4) {
   string(1) "0"
 }
 
-Notice: Created dynamic property with dynamic name GMP::dynprop in %s/dynprop_write_notice.php on line 12
+Notice: Created dynamic property with dynamic name GMP::dynprop in %s/slow/object_property/dynprop_write_notice.php on line 13
 
-Notice: Created dynamic property with dynamic name GMP::dynprop2 in %s/dynprop_write_notice.php on line 12
+Notice: Created dynamic property with dynamic name GMP::dynprop2 in %s/slow/object_property/dynprop_write_notice.php on line 13
 
-Notice: Created dynamic property with dynamic name GMP::dynprop3 in %s/dynprop_write_notice.php on line 12
+Notice: Created dynamic property with dynamic name GMP::dynprop3 in %s/slow/object_property/dynprop_write_notice.php on line 13
 object(GMP) (4) {
   ["dynprop"]=>
   int(3)

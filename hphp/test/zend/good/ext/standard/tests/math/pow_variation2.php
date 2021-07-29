@@ -60,7 +60,7 @@ $inputs = varray[
 $iterator = 1;
 foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
-    var_dump(pow(20.3, $input));
+    var_dump(pow(20.3, HH\Lib\Legacy_FIXME\cast_for_exponent($input)));
     $iterator++;
 };
 fclose($fp);

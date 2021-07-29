@@ -4,6 +4,6 @@
 <<__EntryPoint>>
 function main_570() {
 $a = 't';
- $a = -$a;
+ $a = -HH\Lib\Legacy_FIXME\cast_for_arithmetic($a);
  print $a;
 }

@@ -27,17 +27,6 @@ var_dump((int)"12345 xxx");             // int(12345); trailing non-numerics ign
 var_dump((float)"12345.6xxx");          // float(12345.6); trailing non-numerics ignored
 var_dump((float)"12345.6 xxx");         // float(12345.6); trailing non-numerics ignored
 
-echo "\n============== +/- numeric_like_string ===================\n\n";
-
-var_dump(+"12345xxx");              // int(12345); trailing non-numerics ignored
-var_dump(+"12345 xxx");             // int(12345)
-var_dump(+"12345.6xxx");            // float(12345.6)
-var_dump(+"12345.6 xxx");           // float(12345.6)
-var_dump(-"12345xxx");              // int(-12345)
-var_dump(-"12345 xxx");             // int(-12345)
-var_dump(-"12345.6xxx");            // float(-12345.6)
-var_dump(-"12345.6 xxx");           // float(-12345.6)
-
 echo "\n============== relational/equality ops with numeric_like_string ===================\n\n";
 
 var_dump(12345   == "12345xxx");        // int(12345); trailing non-numerics ignored

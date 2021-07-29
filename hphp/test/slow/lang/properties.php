@@ -144,7 +144,7 @@ class J extends I {
   public $p = J::J;
 }
 
-class dumper {
+class dumper { public int $prop = 0;
 }
 function foo() {
   return new dumper;

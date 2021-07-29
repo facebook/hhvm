@@ -26,7 +26,7 @@ const T_24 = 1 == "1";
 const T_25 = 1 + 2 * 3;
 
 // Test for memory leaks
-const T_26 = "1" + 2 + "3";
+const T_26 = "1" . 2 . "3";
 
 // Allow T_POW
 const T_27 = 2 ** 3;

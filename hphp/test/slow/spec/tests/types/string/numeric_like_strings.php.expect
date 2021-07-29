@@ -19,17 +19,6 @@ int(12345)
 float(12345.6)
 float(12345.6)
 
-============== +/- numeric_like_string ===================
-
-int(12345)
-int(12345)
-float(12345.6)
-float(12345.6)
-int(-12345)
-int(-12345)
-float(-12345.6)
-float(-12345.6)
-
 ============== relational/equality ops with numeric_like_string ===================
 
 bool(true)

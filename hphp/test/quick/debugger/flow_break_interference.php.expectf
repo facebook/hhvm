@@ -9,7 +9,7 @@ c
 int(8)
 Breakpoint 1 reached at genFoo() on line 15 of %s/flow_break_interference.php
   14   // then we'll execute that opcode (load $a) before stopping.
-  15*  yield $z+1;
+  15*  yield HH\Lib\Legacy_FIXME\cast_for_arithmetic($z)+1;
   16   error_log('Finished in genFoo');
 
 b c 1

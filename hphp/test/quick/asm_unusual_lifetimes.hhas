@@ -18,7 +18,9 @@
   PopC
 
   CGetL $k
+  CastInt
   CGetL $k2
+  CastInt
   Add
   RetC
 }

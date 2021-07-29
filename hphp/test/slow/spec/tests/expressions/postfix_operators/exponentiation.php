@@ -13,10 +13,6 @@ function main_entry(): void {
   var_dump(2**3.0);
   var_dump(2.0**3.0);
   var_dump(2.111**3.111);
-  var_dump(2**"3");
-  var_dump("2"**3.0);
-  var_dump("2.0"**"3.0");
-  var_dump("2.111"**"3.111");
 
   echo "===========\n";
 

@@ -3,5 +3,5 @@
 
 <<__EntryPoint>>
 function main_1249() {
-$a = -date('w');
+$a = -HH\Lib\Legacy_FIXME\cast_for_arithmetic(date('w'));
 }

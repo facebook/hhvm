@@ -5,7 +5,7 @@ class C {
 }
 
 <<__EntryPoint>> function main(): void {
-  $add = function($a,$b) { return $a + $b; };
+  $add = function($a,$b) { return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b); };
   $sub = function($a,$b) { return $a - $b; };
   $mul = function($a,$b) { return $a * $b; };
 

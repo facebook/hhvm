@@ -106,7 +106,7 @@
 # Warning: ++ and -- do odd things to strings.
 # ++ increments the final character by 1.
 # -- seems to do nothing, leaving the string as-is.
-      '11',  ++,      'ign',         12
-    '0x21',  ++,      'ign',         34
-      '11',  --,      'ign',         10
-    '0x21',  --,      'ign',         32
+      '11',  ++,      'ign',        ERR
+    '0x21',  ++,      'ign',        ERR
+      '11',  --,      'ign',        ERR
+    '0x21',  --,      'ign',        ERR

@@ -16,23 +16,31 @@ const vec<mixed> VALS = vec[
 
 class Foo {}
 
+function with_exn(inout $x, $fn): void {
+  try {
+    echo $fn(inout $x);
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
+}
+
 <<__EntryPoint>>
 function main(): void {
   foreach(VALS as $i) {
     var_dump($i);
     echo "preinc<";
     $l = $i;
-    echo ++$l;
+    with_exn(inout $l, (inout $o) ==> ++$o);
     echo "> postinc<";
     $l = $i;
-    echo $l++;
+    with_exn(inout $l, (inout $o) ==> $o++);
     echo $l;
     echo "> predec<";
     $l = $i;
-    echo --$l;
+    with_exn(inout $l, (inout $o) ==> --$o);
     echo "> postdec<";
     $l = $i;
-    echo $l--;
+    with_exn(inout $l, (inout $o) ==> $o--);
     echo $l;
     echo ">\n";
   }

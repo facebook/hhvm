@@ -1,52 +1,52 @@
 exception for ++(9223372036854775807): Integer overflow
-exception for ++('9223372036854775807'): Integer overflow
+exception for ++('9223372036854775807'): Implicit string to int conversion for pre/post inc/dec
 exception for (9223372036854775807)++: Integer overflow
-exception for ('9223372036854775807')++: Integer overflow
+exception for ('9223372036854775807')++: Implicit string to int conversion for pre/post inc/dec
 exception for --(-9223372036854775808): Integer overflow
-exception for --('-9223372036854775808'): Integer overflow
+exception for --('-9223372036854775808'): Implicit string to int conversion for pre/post inc/dec
 exception for (-9223372036854775808)--: Integer overflow
-exception for ('-9223372036854775808')--: Integer overflow
+exception for ('-9223372036854775808')--: Implicit string to int conversion for pre/post inc/dec
 array post inc
 (-9223372036854775808)++ = -9223372036854775808 (-9223372036854775807)
 exception for (9223372036854775807)++: Integer overflow
 (-4)++ = -4 (-3)
 (0)++ = 0 (1)
 (5)++ = 5 (6)
-('12')++ = '12' (13)
+exception for ('12')++: Implicit string to int conversion for pre/post inc/dec
 (5.2)++ = 5.2 (6.2)
-('1.5')++ = '1.5' (2.5)
+exception for ('1.5')++: Implicit string to double conversion for pre/post inc/dec
 
-Notice: Increment on string 'abc' in %s/inc_dec_2.php on line 113
+Notice: Increment on string 'abc' in %s/slow/int_overflow/inc_dec_2.php on line 113
 ('abc')++ = 'abc' ('abd')
-('')++ = '' ('1')
-(NULL)++ = NULL (1)
+exception for ('')++: Increment on empty string
+exception for (NULL)++: Implicit null to int conversion for pre/post inc/dec
 array pre inc
 ++(-9223372036854775808) = -9223372036854775807 (-9223372036854775807)
 exception for ++(9223372036854775807): Integer overflow
 ++(-4) = -3 (-3)
 ++(0) = 1 (1)
 ++(5) = 6 (6)
-++('12') = 13 (13)
+exception for ++('12'): Implicit string to int conversion for pre/post inc/dec
 ++(5.2) = 6.2 (6.2)
-++('1.5') = 2.5 (2.5)
+exception for ++('1.5'): Implicit string to double conversion for pre/post inc/dec
 
-Notice: Increment on string 'abc' in %s/inc_dec_2.php on line 125
+Notice: Increment on string 'abc' in %s/slow/int_overflow/inc_dec_2.php on line 125
 ++('abc') = 'abd' ('abd')
-++('') = '1' ('1')
-++(NULL) = 1 (1)
+exception for ++(''): Increment on empty string
+exception for ++(NULL): Implicit null to int conversion for pre/post inc/dec
 array post dec
 exception for (-9223372036854775808)--: Integer overflow
 (9223372036854775807)-- = 9223372036854775807 (9223372036854775806)
 (-4)-- = -4 (-5)
 (0)-- = 0 (-1)
 (5)-- = 5 (4)
-('12')-- = '12' (11)
+exception for ('12')--: Implicit string to int conversion for pre/post inc/dec
 (5.2)-- = 5.2 (4.2)
-('1.5')-- = '1.5' (0.5)
+exception for ('1.5')--: Implicit string to double conversion for pre/post inc/dec
 
-Notice: Decrement on string 'abc' in %s/inc_dec_2.php on line 137
+Notice: Decrement on string 'abc' in %s/slow/int_overflow/inc_dec_2.php on line 137
 ('abc')-- = 'abc' ('abc')
-('')-- = '' (-1)
+exception for ('')--: Implicit string to int conversion for pre/post inc/dec
 (NULL)-- = NULL (NULL)
 array pre dec
 exception for --(-9223372036854775808): Integer overflow
@@ -54,13 +54,13 @@ exception for --(-9223372036854775808): Integer overflow
 --(-4) = -5 (-5)
 --(0) = -1 (-1)
 --(5) = 4 (4)
---('12') = 11 (11)
+exception for --('12'): Implicit string to int conversion for pre/post inc/dec
 --(5.2) = 4.2 (4.2)
---('1.5') = 0.5 (0.5)
+exception for --('1.5'): Implicit string to double conversion for pre/post inc/dec
 
-Notice: Decrement on string 'abc' in %s/inc_dec_2.php on line 149
+Notice: Decrement on string 'abc' in %s/slow/int_overflow/inc_dec_2.php on line 149
 --('abc') = 'abc' ('abc')
---('') = -1 (-1)
+exception for --(''): Implicit string to int conversion for pre/post inc/dec
 --(NULL) = NULL (NULL)
 properties
 exception for C->max++: Integer overflow

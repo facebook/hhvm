@@ -4,14 +4,15 @@ Notice: Created dynamic property with static name C::dynprop in %s/slow/object_p
 
 Notice: Created dynamic property with dynamic name C::dynprop2 in %s/slow/object_property/dynprop_write_notice.php on line 7
 
-Notice: Created dynamic property with static name C::dynprop3 in %s/dynprop_write_notice.php on line 9
+Notice: Created dynamic property with static name C::dynprop3 in %s/slow/object_property/dynprop_write_notice.php on line 9
+Error: Implicit null to int conversion for pre/post inc/dec
 object(C) (3) {
   ["dynprop"]=>
   int(3)
   ["dynprop2"]=>
   int(2)
   ["dynprop3"]=>
-  int(1)
+  NULL
 }
 
 Notice: Created dynamic property with dynamic name C::dynprop in %s/slow/object_property/dynprop_write_notice.php on line 11
@@ -25,7 +26,7 @@ object(C) (3) {
   ["dynprop2"]=>
   int(2)
   ["dynprop3"]=>
-  int(1)
+  NULL
 }
 
 Notice: Created dynamic property with static name C::dynprop in %s/slow/object_property/dynprop_write_notice.php on line 13
@@ -39,7 +40,7 @@ object(C) (3) {
   ["dynprop2"]=>
   int(2)
   ["dynprop3"]=>
-  int(1)
+  NULL
 }
 ==== GMP ====
 
@@ -47,14 +48,15 @@ Notice: Created dynamic property with static name GMP::dynprop in %s/slow/object
 
 Notice: Created dynamic property with dynamic name GMP::dynprop2 in %s/slow/object_property/dynprop_write_notice.php on line 7
 
-Notice: Created dynamic property with static name GMP::dynprop3 in %s/dynprop_write_notice.php on line 9
+Notice: Created dynamic property with static name GMP::dynprop3 in %s/slow/object_property/dynprop_write_notice.php on line 9
+Error: Implicit null to int conversion for pre/post inc/dec
 object(GMP) (4) {
   ["dynprop"]=>
   int(3)
   ["dynprop2"]=>
   int(2)
   ["dynprop3"]=>
-  int(1)
+  NULL
   ["num"]=>
   string(1) "0"
 }
@@ -70,7 +72,7 @@ object(GMP) (4) {
   ["dynprop2"]=>
   int(2)
   ["dynprop3"]=>
-  int(1)
+  NULL
   ["num"]=>
   string(1) "0"
 }
@@ -86,18 +88,19 @@ object(GMP) (4) {
   ["dynprop2"]=>
   int(2)
   ["dynprop3"]=>
-  int(1)
+  NULL
   ["num"]=>
   string(1) "0"
 }
 ==== stdClass ====
+Error: Implicit null to int conversion for pre/post inc/dec
 object(stdClass) (3) {
   ["dynprop"]=>
   int(3)
   ["dynprop2"]=>
   int(2)
   ["dynprop3"]=>
-  int(1)
+  NULL
 }
 object(stdClass) (3) {
   ["dynprop"]=>
@@ -105,7 +108,7 @@ object(stdClass) (3) {
   ["dynprop2"]=>
   int(2)
   ["dynprop3"]=>
-  int(1)
+  NULL
 }
 object(stdClass) (3) {
   ["dynprop"]=>
@@ -113,9 +116,10 @@ object(stdClass) (3) {
   ["dynprop2"]=>
   int(2)
   ["dynprop3"]=>
-  int(1)
+  NULL
 }
 ==== __PHP_Incomplete_Class ====
+Error: Implicit null to int conversion for pre/post inc/dec
 object(__PHP_Incomplete_Class) (4) {
   ["__PHP_Incomplete_Class_Name"]=>
   string(4) "Nope"
@@ -124,7 +128,7 @@ object(__PHP_Incomplete_Class) (4) {
   ["dynprop2"]=>
   int(2)
   ["dynprop3"]=>
-  int(1)
+  NULL
 }
 object(__PHP_Incomplete_Class) (4) {
   ["__PHP_Incomplete_Class_Name"]=>
@@ -134,7 +138,7 @@ object(__PHP_Incomplete_Class) (4) {
   ["dynprop2"]=>
   int(2)
   ["dynprop3"]=>
-  int(1)
+  NULL
 }
 object(__PHP_Incomplete_Class) (4) {
   ["__PHP_Incomplete_Class_Name"]=>
@@ -144,5 +148,5 @@ object(__PHP_Incomplete_Class) (4) {
   ["dynprop2"]=>
   int(2)
   ["dynprop3"]=>
-  int(1)
+  NULL
 }

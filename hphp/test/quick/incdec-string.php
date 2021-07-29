@@ -16,13 +16,8 @@ function foo() {
   $go('a1');
 }
 
-function bar() {
-  $x = '1';
-  var_dump(is_int(++$x));
-}
 <<__EntryPoint>>
 function main_entry(): void {
   set_error_handler(handler<>);
   foo();
-  bar();
 }

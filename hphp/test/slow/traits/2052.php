@@ -13,6 +13,14 @@ class C2 {
  use T;
  }
 
+function error_boundary($fn) {
+  try {
+    $fn();
+  } catch (Exception $e) {
+    print("Error: ".$e->getMessage()."\n");
+  }
+}
+
 <<__EntryPoint>>
 function main_2052() {
 $o1 = new C1;
@@ -22,25 +30,25 @@ var_dump(C1::$x);
 var_dump(C2::$x);
 $o1->printX();
 $o2->printX();
-T::$x++;
+error_boundary(() ==> T::$x++);
 var_dump(T::$x);
 var_dump(C1::$x);
 var_dump(C2::$x);
 $o1->printX();
 $o2->printX();
-C1::$x++;
+error_boundary(() ==> C1::$x++);
 var_dump(T::$x);
 var_dump(C1::$x);
 var_dump(C2::$x);
 $o1->printX();
 $o2->printX();
-C2::$x++;
+error_boundary(() ==> C2::$x++);
 var_dump(T::$x);
 var_dump(C1::$x);
 var_dump(C2::$x);
 $o1->printX();
 $o2->printX();
-$o1->x++;
+error_boundary(() ==> $o1->x++);
 var_dump(T::$x);
 var_dump(C1::$x);
 var_dump(C2::$x);

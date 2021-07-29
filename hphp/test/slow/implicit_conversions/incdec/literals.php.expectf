@@ -1,40 +1,85 @@
 preinc<
-Notice: Implicit null to int conversion for pre/post inc/dec in %s/literals.php on line 17
-111432.234
-Notice: Increment on string 'foobar' in %s/literals.php on line 29
+Implicit null to int conversion for pre/post inc/dec
+
+1
+1
+43
+2.234
+
+Notice: Increment on string 'foobar' in %s/slow/implicit_conversions/incdec/literals.php on line 51
 foobas
-Notice: Increment on empty string in %s/literals.php on line 31
-1
-Notice: Implicit string to int conversion for pre/post inc/dec in %s/literals.php on line 33
-1235
-Notice: Implicit string to double conversion for pre/post inc/dec in %s/literals.php on line 35
-2.234Resource id #1>
+
+Increment on empty string
+
+Implicit string to int conversion for pre/post inc/dec
+
+Implicit string to double conversion for pre/post inc/dec
+Resource id #1
+>
 postinc<
-Notice: Implicit null to int conversion for pre/post inc/dec in %s/literals.php on line 46
-1110142431.2342.234
-Notice: Increment on string 'foobar' in %s/literals.php on line 64
-foobarfoobas
-Notice: Increment on empty string in %s/literals.php on line 67
+Implicit null to int conversion for pre/post inc/dec
+
+
 1
-Notice: Implicit string to int conversion for pre/post inc/dec in %s/literals.php on line 70
-12341235
-Notice: Implicit string to double conversion for pre/post inc/dec in %s/literals.php on line 73
-1.2342.234Resource id #1Resource id #1>
-predec<1-1410.234
-Notice: Decrement on string 'foobar' in %s/literals.php on line 99
+1
+0
+1
+42
+43
+1.234
+2.234
+
+Notice: Increment on string 'foobar' in %s/slow/implicit_conversions/incdec/literals.php on line 107
 foobar
-Notice: Implicit string to int conversion for pre/post inc/dec in %s/literals.php on line 101
+foobas
+
+Increment on empty string
+
+Implicit string to int conversion for pre/post inc/dec
+
+Implicit string to double conversion for pre/post inc/dec
+Resource id #1
+Resource id #1
+>
+predec<
+
+1
 -1
-Notice: Implicit string to int conversion for pre/post inc/dec in %s/literals.php on line 103
-1233
-Notice: Implicit string to double conversion for pre/post inc/dec in %s/literals.php on line 105
-0.234Resource id #1>
-postdec<110-142411.2340.234
-Notice: Decrement on string 'foobar' in %s/literals.php on line 134
-foobarfoobar
-Notice: Implicit string to int conversion for pre/post inc/dec in %s/literals.php on line 137
+41
+0.234
+
+Notice: Decrement on string 'foobar' in %s/slow/implicit_conversions/incdec/literals.php on line 163
+foobar
+
+Implicit string to int conversion for pre/post inc/dec
+
+Implicit string to int conversion for pre/post inc/dec
+
+Implicit string to double conversion for pre/post inc/dec
+Resource id #1
+>
+postdec<
+
+
+
+1
+1
+0
 -1
-Notice: Implicit string to int conversion for pre/post inc/dec in %s/literals.php on line 140
-12341233
-Notice: Implicit string to double conversion for pre/post inc/dec in %s/literals.php on line 143
-1.2340.234Resource id #1Resource id #1>
+42
+41
+1.234
+0.234
+
+Notice: Decrement on string 'foobar' in %s/slow/implicit_conversions/incdec/literals.php on line 219
+foobar
+foobar
+
+Implicit string to int conversion for pre/post inc/dec
+
+Implicit string to int conversion for pre/post inc/dec
+
+Implicit string to double conversion for pre/post inc/dec
+Resource id #1
+Resource id #1
+>

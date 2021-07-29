@@ -21,6 +21,14 @@ class Foo {
   public mixed $postDec;
 }
 
+function with_exn($fn): void {
+  try {
+    echo $fn();
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
+}
+
 <<__EntryPoint>>
 function main(): void {
   foreach(VALS as $i) {
@@ -28,17 +36,17 @@ function main(): void {
     var_dump($i);
     echo "preinc<";
     $o->preInc = __hhvm_intrinsics\launder_value($i);
-    echo ++$o->preInc;
+    with_exn(() ==> ++$o->preInc);
     echo "> postinc<";
     $o->postInc = __hhvm_intrinsics\launder_value($i);
-    echo $o->postInc++;
+    with_exn(() ==> $o->postInc++);
     echo $o->postInc;
     echo "> predec<";
     $o->preDec = __hhvm_intrinsics\launder_value($i);
-    echo --$o->preDec;
+    with_exn(() ==> --$o->preDec);
     echo "> postdec<";
     $o->postDec = __hhvm_intrinsics\launder_value($i);
-    echo $o->postDec--;
+    with_exn(() ==> $o->postDec--);
     echo $o->postDec;
     echo ">\n";
   }

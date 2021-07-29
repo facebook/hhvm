@@ -1,9 +1,9 @@
 NULL
 preinc<
-Notice: Implicit null to int conversion for pre/post inc/dec in %s/basic.php on line 25
-1> postinc<
-Notice: Implicit null to int conversion for pre/post inc/dec in %s/basic.php on line 28
-1> predec<> postdec<>
+Implicit null to int conversion for pre/post inc/dec
+> postinc<
+Implicit null to int conversion for pre/post inc/dec
+> predec<> postdec<>
 bool(false)
 preinc<> postinc<> predec<> postdec<>
 bool(true)
@@ -16,43 +16,43 @@ float(1.234)
 preinc<2.234> postinc<1.2342.234> predec<0.234> postdec<1.2340.234>
 string(6) "foobar"
 preinc<
-Notice: Increment on string 'foobar' in %s/basic.php on line 25
+Notice: Increment on string 'foobar' in %s/slow/implicit_conversions/incdec/basic.php on line 33
 foobas> postinc<
-Notice: Increment on string 'foobar' in %s/basic.php on line 28
+Notice: Increment on string 'foobar' in %s/slow/implicit_conversions/incdec/basic.php on line 36
 foobarfoobas> predec<
-Notice: Decrement on string 'foobar' in %s/basic.php on line 32
+Notice: Decrement on string 'foobar' in %s/slow/implicit_conversions/incdec/basic.php on line 40
 foobar> postdec<
-Notice: Decrement on string 'foobar' in %s/basic.php on line 35
+Notice: Decrement on string 'foobar' in %s/slow/implicit_conversions/incdec/basic.php on line 43
 foobarfoobar>
 string(0) ""
 preinc<
-Notice: Increment on empty string in %s/basic.php on line 25
-1> postinc<
-Notice: Increment on empty string in %s/basic.php on line 28
-1> predec<
-Notice: Implicit string to int conversion for pre/post inc/dec in %s/basic.php on line 32
--1> postdec<
-Notice: Implicit string to int conversion for pre/post inc/dec in %s/basic.php on line 35
--1>
+Increment on empty string
+> postinc<
+Increment on empty string
+> predec<
+Implicit string to int conversion for pre/post inc/dec
+> postdec<
+Implicit string to int conversion for pre/post inc/dec
+>
 string(4) "1234"
 preinc<
-Notice: Implicit string to int conversion for pre/post inc/dec in %s/basic.php on line 25
-1235> postinc<
-Notice: Implicit string to int conversion for pre/post inc/dec in %s/basic.php on line 28
-12341235> predec<
-Notice: Implicit string to int conversion for pre/post inc/dec in %s/basic.php on line 32
-1233> postdec<
-Notice: Implicit string to int conversion for pre/post inc/dec in %s/basic.php on line 35
-12341233>
+Implicit string to int conversion for pre/post inc/dec
+> postinc<
+Implicit string to int conversion for pre/post inc/dec
+1234> predec<
+Implicit string to int conversion for pre/post inc/dec
+> postdec<
+Implicit string to int conversion for pre/post inc/dec
+1234>
 string(5) "1.234"
 preinc<
-Notice: Implicit string to double conversion for pre/post inc/dec in %s/basic.php on line 25
-2.234> postinc<
-Notice: Implicit string to double conversion for pre/post inc/dec in %s/basic.php on line 28
-1.2342.234> predec<
-Notice: Implicit string to double conversion for pre/post inc/dec in %s/basic.php on line 32
-0.234> postdec<
-Notice: Implicit string to double conversion for pre/post inc/dec in %s/basic.php on line 35
-1.2340.234>
+Implicit string to double conversion for pre/post inc/dec
+> postinc<
+Implicit string to double conversion for pre/post inc/dec
+1.234> predec<
+Implicit string to double conversion for pre/post inc/dec
+> postdec<
+Implicit string to double conversion for pre/post inc/dec
+1.234>
 resource(1) of type (stream)
 preinc<Resource id #1> postinc<Resource id #1Resource id #1> predec<Resource id #1> postdec<Resource id #1Resource id #1>

@@ -4,6 +4,14 @@ class C {
   public $max = PHP_INT_MAX;
 }
 
+function error_boundary(inout $x, $fn) {
+  try {
+    $fn(inout $x);
+  } catch (Exception $e) {
+    print("Error: ".$e->getMessage()."\n");
+  }
+}
+
 <<__EntryPoint>> function main(): void {
   $add = function($a,$b) { return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b); };
   $sub = function($a,$b) { return $a - $b; };
@@ -51,19 +59,19 @@ class C {
   // inc/dec
   foreach ($unary as $val) {
     $x = $val;
-    var_dump(++$x);
+    error_boundary(inout $x, (inout $o) ==> var_dump(++$o));
     var_dump($x);
 
     $x = $val;
-    var_dump($x++);
+    error_boundary(inout $x, (inout $o) ==> var_dump($o++));
     var_dump($x);
 
     $x = $val;
-    var_dump(--$x);
+    error_boundary(inout $x, (inout $o) ==> var_dump(--$o));
     var_dump($x);
 
     $x = $val;
-    var_dump($x--);
+    error_boundary(inout $x, (inout $o) ==> var_dump($o--));
     var_dump($x);
   }
 
@@ -71,28 +79,28 @@ class C {
   $array = $unary;
   for ($i = 0; $i < count($array); ++$i) {
     var_dump($array[$i]);
-    var_dump($array[$i]++);
+    error_boundary(inout $array[$i], (inout $o) ==> var_dump($o++));
     var_dump($array[$i]);
   }
 
   $array = $unary;
   for ($i = 0; $i < count($array); ++$i) {
     var_dump($array[$i]);
-    var_dump(++$array[$i]);
+    error_boundary(inout $array[$i], (inout $o) ==> var_dump(++$o));
     var_dump($array[$i]);
   }
 
   $array = $unary;
   for ($i = 0; $i < count($array); ++$i) {
     var_dump($array[$i]);
-    var_dump($array[$i]--);
+    error_boundary(inout $array[$i], (inout $o) ==> var_dump($o--));
     var_dump($array[$i]);
   }
 
   $array = $unary;
   for ($i = 0; $i < count($array); ++$i) {
     var_dump($array[$i]);
-    var_dump(--$array[$i]);
+    error_boundary(inout $array[$i], (inout $o) ==> var_dump(--$o));
     var_dump($array[$i]);
   }
 

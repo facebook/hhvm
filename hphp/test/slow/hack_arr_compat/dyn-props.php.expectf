@@ -1,3 +1,4 @@
+Error: Implicit null to int conversion for pre/post inc/dec
 object(C) (3) {
   ["foo"]=>
   dict(1) {
@@ -7,5 +8,5 @@ object(C) (3) {
   ["bar"]=>
   int(42)
   ["baz"]=>
-  int(1)
+  NULL
 }

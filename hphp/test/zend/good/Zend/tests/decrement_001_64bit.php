@@ -18,8 +18,12 @@ $a = varray[
 ];
 
 foreach ($a as $var) {
-	$var--;
-	var_dump($var);
+	try {
+		$var--;
+		var_dump($var);
+  } catch (Exception $e) {
+    print("Error: ".$e->getMessage()."\n");
+  }
 }
 
 echo "Done\n";

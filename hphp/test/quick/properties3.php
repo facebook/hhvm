@@ -1,5 +1,13 @@
 <?hh
 
+function error_boundary($fn) {
+  try {
+    $fn();
+  } catch (Exception $e) {
+    print("Error: ".$e->getMessage()."\n");
+  }
+}
+
 class D {
   private $x;
   public $y;
@@ -24,8 +32,8 @@ class D {
   }
 
   function incdecprop() {
-    $this->x++;
-    $this->y++;
+    error_boundary(() ==> $this->x++);
+    error_boundary(() ==> $this->y++);
     var_dump($this);
   }
 }

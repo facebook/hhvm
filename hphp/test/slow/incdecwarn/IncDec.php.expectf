@@ -7,38 +7,40 @@ float(3.5)
 float(2.5)
 float(1.5)
 
-Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+Warning: Unsupported operand type (bool) for IncDec in %s/slow/incdecwarn/IncDec.php on line 13
 bool(false)
 
-Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+Warning: Unsupported operand type (bool) for IncDec in %s/slow/incdecwarn/IncDec.php on line 17
 bool(false)
 
-Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+Warning: Unsupported operand type (bool) for IncDec in %s/slow/incdecwarn/IncDec.php on line 21
 bool(false)
 
-Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+Warning: Unsupported operand type (bool) for IncDec in %s/slow/incdecwarn/IncDec.php on line 25
 bool(false)
 
-Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+Warning: Unsupported operand type (bool) for IncDec in %s/slow/incdecwarn/IncDec.php on line 13
 bool(true)
 
-Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+Warning: Unsupported operand type (bool) for IncDec in %s/slow/incdecwarn/IncDec.php on line 17
 bool(true)
 
-Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+Warning: Unsupported operand type (bool) for IncDec in %s/slow/incdecwarn/IncDec.php on line 21
 bool(true)
 
-Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+Warning: Unsupported operand type (bool) for IncDec in %s/slow/incdecwarn/IncDec.php on line 25
 bool(true)
 
-Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+Warning: Unsupported operand type (null) for IncDec in %s/slow/incdecwarn/IncDec.php on line 13
+Error: Implicit null to int conversion for pre/post inc/dec
 NULL
 
-Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
-int(1)
-
-Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+Warning: Unsupported operand type (null) for IncDec in %s/slow/incdecwarn/IncDec.php on line 17
+Error: Implicit null to int conversion for pre/post inc/dec
 NULL
 
-Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+Warning: Unsupported operand type (null) for IncDec in %s/slow/incdecwarn/IncDec.php on line 21
+NULL
+
+Warning: Unsupported operand type (null) for IncDec in %s/slow/incdecwarn/IncDec.php on line 25
 NULL

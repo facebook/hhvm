@@ -1,5 +1,13 @@
 <?hh
 
+function error_boundary(inout $x, $fn) {
+  try {
+    $fn(inout $x);
+  } catch (Exception $e) {
+    print("Error: ".$e->getMessage()."\n");
+  }
+}
+
 class C {
   public $preInc = 0;
   public $preDec = 0;
@@ -18,11 +26,11 @@ function main_entry(): void {
   var_dump(--$o->preDec);
   var_dump($o->postInc++);
   var_dump($o->postDec--);
-  var_dump(++$o->p);
-  var_dump(--$o->q);
-  var_dump($o->r++);
-  var_dump($o->s--);
-  print_r($o);
+  error_boundary(inout $o, (inout $o) ==> var_dump(++$o->p));
+  error_boundary(inout $o, (inout $o) ==> var_dump(--$o->q));
+  error_boundary(inout $o, (inout $o) ==> var_dump($o->r++));
+  error_boundary(inout $o, (inout $o) ==> var_dump($o->s--));
+  var_dump($o);
 
   print "Test end\n";
 }

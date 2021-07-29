@@ -21,23 +21,31 @@ class Foo {
   public static mixed $postDec;
 }
 
+function with_exn($fn): void {
+  try {
+    echo $fn();
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
+}
+
 <<__EntryPoint>>
 function main(): void {
   foreach(VALS as $i) {
     var_dump($i);
     echo "preinc<";
     Foo::$preInc = $i;
-    echo ++Foo::$preInc;
+    with_exn(() ==> ++Foo::$preInc);
     echo "> postinc<";
     Foo::$postInc = $i;
-    echo Foo::$postInc++;
+    with_exn(() ==> Foo::$postInc++);
     echo Foo::$postInc;
     echo "> predec<";
     Foo::$preDec = $i;
-    echo --Foo::$preDec;
+    with_exn(() ==> --Foo::$preDec);
     echo "> postdec<";
     Foo::$postDec = $i;
-    echo Foo::$postDec--;
+    with_exn(() ==> Foo::$postDec--);
     echo Foo::$postDec;
     echo ">\n";
   }

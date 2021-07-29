@@ -18,6 +18,7 @@ int(2)
 int(2)
 int(2)
 int(2)
+Error: Implicit null to int conversion for pre/post inc/dec
 int(2)
 int(2)
 int(2)

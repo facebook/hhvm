@@ -113,16 +113,19 @@ $a = NAN <---> float(NAN)
 --------------------------------------- start incdec ---
 $a =  <---> NULL
 $a =  <---> NULL
-$a = 1 <---> int(1)
-$a = 1
-$a = 2 <---> int(2)
+Error: Implicit null to int conversion for pre/post inc/dec
+$a =  <---> NULL
+Error: Implicit null to int conversion for pre/post inc/dec
+$a = 
+$a =  <---> NULL
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a =  <---> NULL
-$a = 1 <---> int(1)
-$a = 0 <---> int(0)
-$a = 0
-$a = -1 <---> int(-1)
+Error: Implicit null to int conversion for pre/post inc/dec
+$a =  <---> NULL
+$a =  <---> NULL
+$a = 
+$a =  <---> NULL
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 1 <---> bool(true)
@@ -140,285 +143,417 @@ $a =  <---> bool(false)
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a =  <---> string(0) ""
-$a = -1 <---> int(-1)
-$a = 0 <---> int(0)
-$a = 0
-$a = 1 <---> int(1)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a =  <---> string(0) ""
+Error: Increment on empty string
+$a =  <---> string(0) ""
+Error: Increment on empty string
+$a = 
+$a =  <---> string(0) ""
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a =  <---> string(0) ""
-$a = 1 <---> string(1) "1"
-$a = 0 <---> int(0)
-$a = 0
-$a = -1 <---> int(-1)
+Error: Increment on empty string
+$a =  <---> string(0) ""
+Error: Implicit string to int conversion for pre/post inc/dec
+$a =  <---> string(0) ""
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a =  <---> string(0) ""
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 0 <---> string(1) "0"
-$a = -1 <---> int(-1)
-$a = 0 <---> int(0)
-$a = 0
-$a = 1 <---> int(1)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 0 <---> string(1) "0"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 0 <---> string(1) "0"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 0 <---> string(1) "0"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 0 <---> string(1) "0"
-$a = 1 <---> int(1)
-$a = 0 <---> int(0)
-$a = 0
-$a = -1 <---> int(-1)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 0 <---> string(1) "0"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 0 <---> string(1) "0"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 0 <---> string(1) "0"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 9 <---> string(1) "9"
-$a = 8 <---> int(8)
-$a = 9 <---> int(9)
-$a = 9
-$a = 10 <---> int(10)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 9 <---> string(1) "9"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 9 <---> string(1) "9"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 9 <---> string(1) "9"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 9 <---> string(1) "9"
-$a = 10 <---> int(10)
-$a = 9 <---> int(9)
-$a = 9
-$a = 8 <---> int(8)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 9 <---> string(1) "9"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 9 <---> string(1) "9"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 9 <---> string(1) "9"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 26 <---> string(2) "26"
-$a = 25 <---> int(25)
-$a = 26 <---> int(26)
-$a = 26
-$a = 27 <---> int(27)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 26 <---> string(2) "26"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 26 <---> string(2) "26"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 26 <---> string(2) "26"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 26 <---> string(2) "26"
-$a = 27 <---> int(27)
-$a = 26 <---> int(26)
-$a = 26
-$a = 25 <---> int(25)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 26 <---> string(2) "26"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 26 <---> string(2) "26"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 26 <---> string(2) "26"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 98325 <---> string(5) "98325"
-$a = 98324 <---> int(98324)
-$a = 98325 <---> int(98325)
-$a = 98325
-$a = 98326 <---> int(98326)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 98325 <---> string(5) "98325"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 98325 <---> string(5) "98325"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 98325 <---> string(5) "98325"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 98325 <---> string(5) "98325"
-$a = 98326 <---> int(98326)
-$a = 98325 <---> int(98325)
-$a = 98325
-$a = 98324 <---> int(98324)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 98325 <---> string(5) "98325"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 98325 <---> string(5) "98325"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 98325 <---> string(5) "98325"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 9223372036854775807 <---> string(19) "9223372036854775807"
-$a = 9223372036854775806 <---> int(9223372036854775806)
-$a = 9223372036854775807 <---> int(9223372036854775807)
-$a = 9223372036854775807
-$a = -9223372036854775808 <---> int(-9223372036854775808)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 9223372036854775807 <---> string(19) "9223372036854775807"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 9223372036854775807 <---> string(19) "9223372036854775807"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 9223372036854775807 <---> string(19) "9223372036854775807"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 9223372036854775807 <---> string(19) "9223372036854775807"
-$a = -9223372036854775808 <---> int(-9223372036854775808)
-$a = 9223372036854775807 <---> int(9223372036854775807)
-$a = 9223372036854775807
-$a = 9223372036854775806 <---> int(9223372036854775806)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 9223372036854775807 <---> string(19) "9223372036854775807"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 9223372036854775807 <---> string(19) "9223372036854775807"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 9223372036854775807 <---> string(19) "9223372036854775807"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 012 <---> string(3) "012"
-$a = 11 <---> int(11)
-$a = 12 <---> int(12)
-$a = 12
-$a = 13 <---> int(13)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 012 <---> string(3) "012"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 012 <---> string(3) "012"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 012 <---> string(3) "012"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 012 <---> string(3) "012"
-$a = 13 <---> int(13)
-$a = 12 <---> int(12)
-$a = 12
-$a = 11 <---> int(11)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 012 <---> string(3) "012"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 012 <---> string(3) "012"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 012 <---> string(3) "012"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 0x12 <---> string(4) "0x12"
-$a = 17 <---> int(17)
-$a = 18 <---> int(18)
-$a = 18
-$a = 19 <---> int(19)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 0x12 <---> string(4) "0x12"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 0x12 <---> string(4) "0x12"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 0x12 <---> string(4) "0x12"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 0x12 <---> string(4) "0x12"
-$a = 19 <---> int(19)
-$a = 18 <---> int(18)
-$a = 18
-$a = 17 <---> int(17)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 0x12 <---> string(4) "0x12"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 0x12 <---> string(4) "0x12"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 0x12 <---> string(4) "0x12"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 0X12 <---> string(4) "0X12"
-$a = 17 <---> int(17)
-$a = 18 <---> int(18)
-$a = 18
-$a = 19 <---> int(19)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 0X12 <---> string(4) "0X12"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 0X12 <---> string(4) "0X12"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 0X12 <---> string(4) "0X12"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 0X12 <---> string(4) "0X12"
-$a = 19 <---> int(19)
-$a = 18 <---> int(18)
-$a = 18
-$a = 17 <---> int(17)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 0X12 <---> string(4) "0X12"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 0X12 <---> string(4) "0X12"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 0X12 <---> string(4) "0X12"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 123.456 <---> string(7) "123.456"
-$a = 122.456 <---> float(122.456)
-$a = 123.456 <---> float(123.456)
-$a = 123.456
-$a = 124.456 <---> float(124.456)
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 123.456 <---> string(7) "123.456"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 123.456 <---> string(7) "123.456"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 
+$a = 123.456 <---> string(7) "123.456"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 123.456 <---> string(7) "123.456"
-$a = 124.456 <---> float(124.456)
-$a = 123.456 <---> float(123.456)
-$a = 123.456
-$a = 122.456 <---> float(122.456)
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 123.456 <---> string(7) "123.456"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 123.456 <---> string(7) "123.456"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 
+$a = 123.456 <---> string(7) "123.456"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 1.23E-27 <---> string(8) "1.23E-27"
-$a = -1 <---> float(-1)
-$a = 0 <---> float(0)
-$a = 0
-$a = 1 <---> float(1)
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 1.23E-27 <---> string(8) "1.23E-27"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 1.23E-27 <---> string(8) "1.23E-27"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 
+$a = 1.23E-27 <---> string(8) "1.23E-27"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 1.23E-27 <---> string(8) "1.23E-27"
-$a = 1 <---> float(1)
-$a = 0 <---> float(0)
-$a = 0
-$a = -1 <---> float(-1)
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 1.23E-27 <---> string(8) "1.23E-27"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 1.23E-27 <---> string(8) "1.23E-27"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 
+$a = 1.23E-27 <---> string(8) "1.23E-27"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a =  43 <---> string(3) " 43"
-$a = 42 <---> int(42)
-$a = 43 <---> int(43)
-$a = 43
-$a = 44 <---> int(44)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a =  43 <---> string(3) " 43"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a =  43 <---> string(3) " 43"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a =  43 <---> string(3) " 43"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a =  43 <---> string(3) " 43"
-$a = 44 <---> int(44)
-$a = 43 <---> int(43)
-$a = 43
-$a = 42 <---> int(42)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a =  43 <---> string(3) " 43"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a =  43 <---> string(3) " 43"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a =  43 <---> string(3) " 43"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a =    654 <---> string(6) "   654"
-$a = 653 <---> int(653)
-$a = 654 <---> int(654)
-$a = 654
-$a = 655 <---> int(655)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a =    654 <---> string(6) "   654"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a =    654 <---> string(6) "   654"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a =    654 <---> string(6) "   654"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a =    654 <---> string(6) "   654"
-$a = 655 <---> int(655)
-$a = 654 <---> int(654)
-$a = 654
-$a = 653 <---> int(653)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a =    654 <---> string(6) "   654"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a =    654 <---> string(6) "   654"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a =    654 <---> string(6) "   654"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 	 
 94 <---> string(8) "	 
 94"
-$a = 93 <---> int(93)
-$a = 94 <---> int(94)
-$a = 94
-$a = 95 <---> int(95)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 	 
+94 <---> string(8) "	 
+94"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 	 
+94 <---> string(8) "	 
+94"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 	 
+94 <---> string(8) "	 
+94"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 	 
 94 <---> string(8) "	 
 94"
-$a = 95 <---> int(95)
-$a = 94 <---> int(94)
-$a = 94
-$a = 93 <---> int(93)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 	 
+94 <---> string(8) "	 
+94"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 	 
+94 <---> string(8) "	 
+94"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 	 
+94 <---> string(8) "	 
+94"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 012 <---> string(3) "012"
-$a = 11 <---> int(11)
-$a = 12 <---> int(12)
-$a = 12
-$a = 13 <---> int(13)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 012 <---> string(3) "012"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 012 <---> string(3) "012"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 012 <---> string(3) "012"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 012 <---> string(3) "012"
-$a = 13 <---> int(13)
-$a = 12 <---> int(12)
-$a = 12
-$a = 11 <---> int(11)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 012 <---> string(3) "012"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 012 <---> string(3) "012"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = 012 <---> string(3) "012"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a =    000012345 <---> string(12) "   000012345"
-$a = 12344 <---> int(12344)
-$a = 12345 <---> int(12345)
-$a = 12345
-$a = 12346 <---> int(12346)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a =    000012345 <---> string(12) "   000012345"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a =    000012345 <---> string(12) "   000012345"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a =    000012345 <---> string(12) "   000012345"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a =    000012345 <---> string(12) "   000012345"
-$a = 12346 <---> int(12346)
-$a = 12345 <---> int(12345)
-$a = 12345
-$a = 12344 <---> int(12344)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a =    000012345 <---> string(12) "   000012345"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a =    000012345 <---> string(12) "   000012345"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a =    000012345 <---> string(12) "   000012345"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 00012.345 <---> string(9) "00012.345"
-$a = 11.345 <---> float(11.345)
-$a = 12.345 <---> float(12.345)
-$a = 12.345
-$a = 13.345 <---> float(13.345)
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 00012.345 <---> string(9) "00012.345"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 00012.345 <---> string(9) "00012.345"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 
+$a = 00012.345 <---> string(9) "00012.345"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 00012.345 <---> string(9) "00012.345"
-$a = 13.345 <---> float(13.345)
-$a = 12.345 <---> float(12.345)
-$a = 12.345
-$a = 11.345 <---> float(11.345)
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 00012.345 <---> string(9) "00012.345"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 00012.345 <---> string(9) "00012.345"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 
+$a = 00012.345 <---> string(9) "00012.345"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a =   00012.345 <---> string(11) "  00012.345"
-$a = 11.345 <---> float(11.345)
-$a = 12.345 <---> float(12.345)
-$a = 12.345
-$a = 13.345 <---> float(13.345)
+Error: Implicit string to double conversion for pre/post inc/dec
+$a =   00012.345 <---> string(11) "  00012.345"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a =   00012.345 <---> string(11) "  00012.345"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 
+$a =   00012.345 <---> string(11) "  00012.345"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a =   00012.345 <---> string(11) "  00012.345"
-$a = 13.345 <---> float(13.345)
-$a = 12.345 <---> float(12.345)
-$a = 12.345
-$a = 11.345 <---> float(11.345)
+Error: Implicit string to double conversion for pre/post inc/dec
+$a =   00012.345 <---> string(11) "  00012.345"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a =   00012.345 <---> string(11) "  00012.345"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 
+$a =   00012.345 <---> string(11) "  00012.345"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = -12345 <---> string(6) "-12345"
-$a = -12346 <---> int(-12346)
-$a = -12345 <---> int(-12345)
-$a = -12345
-$a = -12344 <---> int(-12344)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = -12345 <---> string(6) "-12345"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = -12345 <---> string(6) "-12345"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = -12345 <---> string(6) "-12345"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = -12345 <---> string(6) "-12345"
-$a = -12344 <---> int(-12344)
-$a = -12345 <---> int(-12345)
-$a = -12345
-$a = -12346 <---> int(-12346)
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = -12345 <---> string(6) "-12345"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = -12345 <---> string(6) "-12345"
+Error: Implicit string to int conversion for pre/post inc/dec
+$a = 
+$a = -12345 <---> string(6) "-12345"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = +9.87 <---> string(5) "+9.87"
-$a = 8.87 <---> float(8.87)
-$a = 9.87 <---> float(9.87)
-$a = 9.87
-$a = 10.87 <---> float(10.87)
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = +9.87 <---> string(5) "+9.87"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = +9.87 <---> string(5) "+9.87"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 
+$a = +9.87 <---> string(5) "+9.87"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = +9.87 <---> string(5) "+9.87"
-$a = 10.87 <---> float(10.87)
-$a = 9.87 <---> float(9.87)
-$a = 9.87
-$a = 8.87 <---> float(8.87)
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = +9.87 <---> string(5) "+9.87"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = +9.87 <---> string(5) "+9.87"
+Error: Implicit string to double conversion for pre/post inc/dec
+$a = 
+$a = +9.87 <---> string(5) "+9.87"
 --------------------------------------- end incdecrev ---

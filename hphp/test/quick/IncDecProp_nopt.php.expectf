@@ -4,21 +4,28 @@ int(1)
 int(-1)
 int(0)
 int(0)
-int(1)
+Error: Implicit null to int conversion for pre/post inc/dec
 NULL
+Error: Implicit null to int conversion for pre/post inc/dec
 NULL
-NULL
-C Object
-(
-    [preInc] => 1
-    [preDec] => -1
-    [postInc] => 1
-    [postDec] => -1
-    [p] => 1
-    [q] => 
-    [r] => 1
-    [s] => 
-)
+object(C) (8) {
+  ["preInc"]=>
+  int(1)
+  ["preDec"]=>
+  int(-1)
+  ["postInc"]=>
+  int(1)
+  ["postDec"]=>
+  int(-1)
+  ["p"]=>
+  NULL
+  ["q"]=>
+  NULL
+  ["r"]=>
+  NULL
+  ["s"]=>
+  NULL
+}
 --- null ---
 Error: Setting a property on a non-object
 Error: Setting a property on a non-object
@@ -27,7 +34,7 @@ Error: Setting a property on a non-object
 NULL
 --- 42 ---
 
-Warning: Attempt to increment/decrement property of non-object in %s/test/quick/IncDecProp_nopt.php on line %d
+Warning: Attempt to increment/decrement property of non-object in %s/quick/IncDecProp_nopt.php on line 45
 NULL
 42
 Test end

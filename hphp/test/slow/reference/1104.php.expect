@@ -1,3 +1,2 @@
-int(1)
-int(1)
-int(1)
+Error: Implicit null to int conversion for pre/post inc/dec
+NULL

@@ -31,7 +31,7 @@ function print_ex(
   mixed $before,
   string $op,
   bool $is_pre,
-  ArithmeticError $err
+  Throwable $err
 ): void {
   if ($is_pre) {
     printf("exception for %s(%s): %s\n",
@@ -52,7 +52,7 @@ function print_ex(
     try {
       $c = ++$a;
       print_op($b, $c, $a, "++", true);
-    } catch (ArithmeticError $ex) {
+    } catch (Throwable $ex) {
       print_ex($b, "++", true, $ex);
       return -1;
     }
@@ -62,7 +62,7 @@ function print_ex(
     try {
       $c = $a++;
       print_op($b, $c, $a, "++", false);
-    } catch (ArithmeticError $ex) {
+    } catch (Throwable $ex) {
       print_ex($b, "++", false, $ex);
       return -1;
     }
@@ -72,7 +72,7 @@ function print_ex(
     try {
       $c = --$a;
       print_op($b, $c, $a, "--", true);
-    } catch (ArithmeticError $ex) {
+    } catch (Throwable $ex) {
       print_ex($b, "--", true, $ex);
       return -1;
     }
@@ -82,7 +82,7 @@ function print_ex(
     try {
       $c = $a--;
       print_op($b, $c, $a, "--", false);
-    } catch (ArithmeticError $ex) {
+    } catch (Throwable $ex) {
       print_ex($b, "--", false, $ex);
       return -1;
    }
@@ -112,7 +112,7 @@ function print_ex(
     try {
       $b = $array[$i]++;
       print_op($a, $b, $array[$i], "++", false);
-    } catch (ArithmeticError $ex) {
+    } catch (Throwable $ex) {
       print_ex($a, "++", false, $ex);
     }
   }
@@ -124,7 +124,7 @@ function print_ex(
     try {
       $b = ++$array[$i];
       print_op($a, $b, $array[$i], "++", true);
-    } catch (ArithmeticError $ex) {
+    } catch (Throwable $ex) {
       print_ex($a, "++", true, $ex);
     }
   }
@@ -136,7 +136,7 @@ function print_ex(
     try {
       $b = $array[$i]--;
       print_op($a, $b, $array[$i], "--", false);
-    } catch (ArithmeticError $ex) {
+    } catch (Throwable $ex) {
       print_ex($a, "--", false, $ex);
     }
   }
@@ -148,7 +148,7 @@ function print_ex(
     try {
       $b = --$array[$i];
       print_op($a, $b, $array[$i], "--", true);
-    } catch (ArithmeticError $ex) {
+    } catch (Throwable $ex) {
       print_ex($a, "--", true, $ex);
     }
   }
@@ -159,7 +159,7 @@ function print_ex(
   try {
     $b = $x->max++;
     print "C->max++ = {$x->max} ($b)\n";
-  } catch (ArithmeticError $ex) {
+  } catch (Throwable $ex) {
     printf("exception for C->max++: %s\n", $ex->getMessage());
   }
 
@@ -168,7 +168,7 @@ function print_ex(
   try {
     $b = ++$x->max;
     print "++C->max = {$x->max} ($b)\n";
-  } catch (ArithmeticError $ex) {
+  } catch (Throwable $ex) {
     printf("exception for ++C->max: %s\n", $ex->getMessage());
   }
 
@@ -177,7 +177,7 @@ function print_ex(
   try {
     $b = $x->min--;
     print "C->min-- = {$x->min} ($b)\n";
-  } catch (ArithmeticError $ex) {
+  } catch (Throwable $ex) {
     printf("exception for C->max--: %s\n", $ex->getMessage());
   }
 
@@ -186,7 +186,7 @@ function print_ex(
   try {
     $b = --$x->min;
     print "--C->min = {$x->min} ($b)\n";
-  } catch (ArithmeticError $ex) {
+  } catch (Throwable $ex) {
     printf("exception for --C->max: %s\n", $ex->getMessage());
   }
 
@@ -195,7 +195,7 @@ function print_ex(
   try {
     $x->max += 1;
     print "C->max += 1 -> {$x->max}\n";
-  } catch (ArithmeticError $ex) {
+  } catch (Throwable $ex) {
     printf("exception for C->max += 1: %s\n", $ex->getMessage());
   }
 
@@ -204,7 +204,7 @@ function print_ex(
   try {
     $x->min -= 1;
     print "C->min -= 1 -> {$x->min}\n";
-  } catch (ArithmeticError $ex) {
+  } catch (Throwable $ex) {
     printf("exception for C->max -= 1: %s\n", $ex->getMessage());
   }
 
@@ -213,7 +213,7 @@ function print_ex(
   try {
     $x->max *= 2;
     print "C->max *= 2 -> {$x->max}\n";
-  } catch (ArithmeticError $ex) {
+  } catch (Throwable $ex) {
     printf("exception for C->max *= 2: %s\n", $ex->getMessage());
   }
 }

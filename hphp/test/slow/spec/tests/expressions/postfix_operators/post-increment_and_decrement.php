@@ -6,18 +6,27 @@
    +-------------------------------------------------------------+
 */
 
+function error_boundary(inout $x, $fn) {
+  try {
+    return $fn(inout $x);
+  } catch (Exception $e) {
+    print("Error: ".$e->getMessage()."\n");
+    return null;
+  }
+}
+
 function incdec($a)
 {
     echo "--------------------------------------- start incdec ---\n";
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
-    $a--;
+    error_boundary(inout $a, (inout $o) ==> $o--);
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
-    $a++;
+    error_boundary(inout $a, (inout $o) ==> $o++);
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
-    echo '$a = '.(string)($a++)."\n";
+    echo '$a = '.(string)(error_boundary(inout $a, (inout $o) ==> $o++))."\n";
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
     echo "--------------------------------------- end incdec ---\n";
 }
@@ -27,13 +36,13 @@ function incdecrev($a)
     echo "--------------------------------------- start incdecrev ---\n";
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
-    $a++;
+    error_boundary(inout $a, (inout $o) ==> $o++);
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
-    $a--;
+    error_boundary(inout $a, (inout $o) ==> $o--);
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
-    echo '$a = '.(string)($a--)."\n";
+    echo '$a = '.(string)(error_boundary(inout $a, (inout $o) ==> $o--))."\n";
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
     echo "--------------------------------------- end incdecrev ---\n";
 }

@@ -55,14 +55,14 @@ int(4)
 int(4)
 int(5)
 int(4)
-int(13)
-int(13)
+Error: Implicit string to int conversion for pre/post inc/dec
 string(2) "12"
-int(13)
-int(11)
-int(11)
+Error: Implicit string to int conversion for pre/post inc/dec
 string(2) "12"
-int(11)
+Error: Implicit string to int conversion for pre/post inc/dec
+string(2) "12"
+Error: Implicit string to int conversion for pre/post inc/dec
+string(2) "12"
 float(6.2)
 float(6.2)
 float(5.2)
@@ -71,42 +71,42 @@ float(4.2)
 float(4.2)
 float(5.2)
 float(4.2)
-float(2.5)
-float(2.5)
+Error: Implicit string to double conversion for pre/post inc/dec
 string(3) "1.5"
-float(2.5)
-float(0.5)
-float(0.5)
+Error: Implicit string to double conversion for pre/post inc/dec
 string(3) "1.5"
-float(0.5)
+Error: Implicit string to double conversion for pre/post inc/dec
+string(3) "1.5"
+Error: Implicit string to double conversion for pre/post inc/dec
+string(3) "1.5"
 
-Notice: Increment on string 'abc' in %s/int-overflow.php on line 54
+Notice: Increment on string 'abc' in %s/quick/int-overflow.php on line 62
 string(3) "abd"
 string(3) "abd"
 
-Notice: Increment on string 'abc' in %s/int-overflow.php on line 58
+Notice: Increment on string 'abc' in %s/quick/int-overflow.php on line 66
 string(3) "abc"
 string(3) "abd"
 
-Notice: Decrement on string 'abc' in %s/int-overflow.php on line 62
+Notice: Decrement on string 'abc' in %s/quick/int-overflow.php on line 70
 string(3) "abc"
 string(3) "abc"
 
-Notice: Decrement on string 'abc' in %s/int-overflow.php on line 66
+Notice: Decrement on string 'abc' in %s/quick/int-overflow.php on line 74
 string(3) "abc"
 string(3) "abc"
-string(1) "1"
-string(1) "1"
+Error: Increment on empty string
 string(0) ""
-string(1) "1"
-int(-1)
-int(-1)
+Error: Increment on empty string
 string(0) ""
-int(-1)
-int(1)
-int(1)
+Error: Implicit string to int conversion for pre/post inc/dec
+string(0) ""
+Error: Implicit string to int conversion for pre/post inc/dec
+string(0) ""
+Error: Implicit null to int conversion for pre/post inc/dec
 NULL
-int(1)
+Error: Implicit null to int conversion for pre/post inc/dec
+NULL
 NULL
 NULL
 NULL
@@ -127,25 +127,25 @@ int(5)
 int(5)
 int(6)
 string(2) "12"
+Error: Implicit string to int conversion for pre/post inc/dec
 string(2) "12"
-int(13)
 float(5.2)
 float(5.2)
 float(6.2)
 string(3) "1.5"
+Error: Implicit string to double conversion for pre/post inc/dec
 string(3) "1.5"
-float(2.5)
 string(3) "abc"
 
-Notice: Increment on string 'abc' in %s/int-overflow.php on line 74
+Notice: Increment on string 'abc' in %s/quick/int-overflow.php on line 82
 string(3) "abc"
 string(3) "abd"
 string(0) ""
+Error: Increment on empty string
 string(0) ""
-string(1) "1"
 NULL
+Error: Implicit null to int conversion for pre/post inc/dec
 NULL
-int(1)
 int(-9223372036854775808)
 int(-9223372036854775807)
 int(-9223372036854775807)
@@ -162,25 +162,25 @@ int(5)
 int(6)
 int(6)
 string(2) "12"
-int(13)
-int(13)
+Error: Implicit string to int conversion for pre/post inc/dec
+string(2) "12"
 float(5.2)
 float(6.2)
 float(6.2)
 string(3) "1.5"
-float(2.5)
-float(2.5)
+Error: Implicit string to double conversion for pre/post inc/dec
+string(3) "1.5"
 string(3) "abc"
 
-Notice: Increment on string 'abc' in %s/int-overflow.php on line 81
+Notice: Increment on string 'abc' in %s/quick/int-overflow.php on line 89
 string(3) "abd"
 string(3) "abd"
 string(0) ""
-string(1) "1"
-string(1) "1"
+Error: Increment on empty string
+string(0) ""
 NULL
-int(1)
-int(1)
+Error: Implicit null to int conversion for pre/post inc/dec
+NULL
 int(-9223372036854775808)
 int(-9223372036854775808)
 int(9223372036854775807)
@@ -197,22 +197,22 @@ int(5)
 int(5)
 int(4)
 string(2) "12"
+Error: Implicit string to int conversion for pre/post inc/dec
 string(2) "12"
-int(11)
 float(5.2)
 float(5.2)
 float(4.2)
 string(3) "1.5"
+Error: Implicit string to double conversion for pre/post inc/dec
 string(3) "1.5"
-float(0.5)
 string(3) "abc"
 
-Notice: Decrement on string 'abc' in %s/int-overflow.php on line 88
+Notice: Decrement on string 'abc' in %s/quick/int-overflow.php on line 96
 string(3) "abc"
 string(3) "abc"
 string(0) ""
+Error: Implicit string to int conversion for pre/post inc/dec
 string(0) ""
-int(-1)
 NULL
 NULL
 NULL
@@ -232,22 +232,22 @@ int(5)
 int(4)
 int(4)
 string(2) "12"
-int(11)
-int(11)
+Error: Implicit string to int conversion for pre/post inc/dec
+string(2) "12"
 float(5.2)
 float(4.2)
 float(4.2)
 string(3) "1.5"
-float(0.5)
-float(0.5)
+Error: Implicit string to double conversion for pre/post inc/dec
+string(3) "1.5"
 string(3) "abc"
 
-Notice: Decrement on string 'abc' in %s/int-overflow.php on line 95
+Notice: Decrement on string 'abc' in %s/quick/int-overflow.php on line 103
 string(3) "abc"
 string(3) "abc"
 string(0) ""
-int(-1)
-int(-1)
+Error: Implicit string to int conversion for pre/post inc/dec
+string(0) ""
 NULL
 NULL
 NULL

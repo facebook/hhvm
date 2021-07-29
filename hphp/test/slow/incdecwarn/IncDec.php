@@ -1,19 +1,28 @@
 <?hh
 
+function error_boundary($fn) {
+  try {
+    return $fn();
+  } catch (Exception $e) {
+    print("Error: ".$e->getMessage()."\n");
+    return null;
+  }
+}
+
 function postInc($x) {
-  return $x++;
+  return error_boundary(() ==> $x++);
 }
 
 function preInc($x) {
-  return ++$x;
+  return error_boundary(() ==> ++$x);
 }
 
 function postDec($x) {
-  return $x--;
+  return error_boundary(() ==> $x--);
 }
 
 function preDec($x) {
-  return --$x;
+  return error_boundary(() ==> --$x);
 }
 <<__EntryPoint>> function main(): void {
 var_dump(postInc(2));

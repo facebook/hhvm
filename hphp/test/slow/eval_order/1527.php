@@ -2,7 +2,8 @@
 
 function f() {
   EvalOrder1527::$a ??=0;
-  return ++EvalOrder1527::$a;
+  EvalOrder1527::$a += 1;
+  return EvalOrder1527::$a;
 }
 
 abstract final class EvalOrder1527 {

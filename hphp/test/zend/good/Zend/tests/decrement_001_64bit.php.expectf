@@ -3,12 +3,12 @@ vec(3) {
   int(2)
   int(3)
 }
-int(-1)
+Error: Implicit string to int conversion for pre/post inc/dec
 int(0)
 float(1.5)
 int(-1)
-int(122)
-float(1.5)
+Error: Implicit string to int conversion for pre/post inc/dec
+Error: Implicit string to double conversion for pre/post inc/dec
 NULL
 bool(true)
 bool(false)
@@ -17,5 +17,5 @@ object(stdClass) (0) {
 vec(0) {
 }
 int(9223372036854775807)
-int(9223372036854775807)
+Error: Implicit string to int conversion for pre/post inc/dec
 Done

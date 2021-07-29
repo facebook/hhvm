@@ -22,9 +22,11 @@ function manyInits() {
     echo "Initialised to 20: ".State::$c."\n";
     echo "Unitialised      : ".(string)(State::$d)."\n";
     echo "Initialised to 30: ".State::$e."\n";
+    State::$a ??= 0;
     State::$a++;
     State::$b++;
     State::$c++;
+    State::$d ??= 0;
     State::$d++;
     State::$e++;
     State::$counter++;
@@ -46,6 +48,7 @@ manyInits();
 echo "\nUsing static keyword at global scope\n";
 for ($i=0; $i<3; $i++) {
    echo (string)(State::$s)." ".(string)(State::$k)."\n";
+   State::$s ??= 0;
    State::$s++;
    State::$k++;
 }

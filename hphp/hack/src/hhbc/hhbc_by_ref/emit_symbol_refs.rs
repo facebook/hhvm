@@ -5,21 +5,15 @@
 
 use decl_provider::DeclProvider;
 use hhbc_by_ref_env::emitter::Emitter;
-use hhbc_by_ref_hhas_symbol_refs::*;
 use hhbc_by_ref_hhbc_id::{class, r#const, function, Id};
-use hhbc_by_ref_symbol_refs_state::SymbolRefsState;
-
-use std::collections::BTreeSet;
+use hhbc_by_ref_symbol_refs_state::{IncludePath, SymbolRefsState};
 
 pub fn add_include<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
     inc: IncludePath<'arena>,
 ) {
-    e.emit_symbol_refs_state_mut(alloc)
-        .symbol_refs
-        .includes
-        .insert(inc);
+    e.emit_symbol_refs_state_mut(alloc).includes.insert(inc);
 }
 
 pub fn add_constant<'arena, 'decl, D: DeclProvider<'decl>>(
@@ -28,10 +22,7 @@ pub fn add_constant<'arena, 'decl, D: DeclProvider<'decl>>(
     s: r#const::ConstType<'arena>,
 ) {
     if !s.to_raw_string().is_empty() {
-        e.emit_symbol_refs_state_mut(alloc)
-            .symbol_refs
-            .constants
-            .insert(s.0);
+        e.emit_symbol_refs_state_mut(alloc).constants.insert(s.0);
     }
 }
 
@@ -41,10 +32,7 @@ pub fn add_class<'arena, 'decl, D: DeclProvider<'decl>>(
     s: class::ClassType<'arena>,
 ) {
     if !s.to_raw_string().is_empty() {
-        e.emit_symbol_refs_state_mut(alloc)
-            .symbol_refs
-            .classes
-            .insert(s.0);
+        e.emit_symbol_refs_state_mut(alloc).classes.insert(s.0);
     }
 }
 
@@ -52,12 +40,7 @@ pub fn reset<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
 ) {
-    e.emit_symbol_refs_state_mut(alloc).symbol_refs = HhasSymbolRefs {
-        includes: BTreeSet::new(),
-        constants: BTreeSet::new(),
-        functions: BTreeSet::new(),
-        classes: BTreeSet::new(),
-    };
+    *e.emit_symbol_refs_state_mut(alloc) = SymbolRefsState::init(alloc);
 }
 
 pub fn add_function<'arena, 'decl, D: DeclProvider<'decl>>(
@@ -66,10 +49,7 @@ pub fn add_function<'arena, 'decl, D: DeclProvider<'decl>>(
     s: function::FunctionType<'arena>,
 ) {
     if !s.to_raw_string().is_empty() {
-        e.emit_symbol_refs_state_mut(alloc)
-            .symbol_refs
-            .functions
-            .insert(s.0);
+        e.emit_symbol_refs_state_mut(alloc).functions.insert(s.0);
     }
 }
 

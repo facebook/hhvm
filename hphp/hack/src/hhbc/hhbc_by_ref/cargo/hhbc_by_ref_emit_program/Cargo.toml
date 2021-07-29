@@ -21,8 +21,10 @@ hhbc_by_ref_emit_symbol_refs = { path = "../hhbc_by_ref_emit_symbol_refs" }
 hhbc_by_ref_emit_typedef = { path = "../hhbc_by_ref_emit_typedef" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
 hhbc_by_ref_hhas_program = { path = "../hhbc_by_ref_hhas_program" }
+hhbc_by_ref_hhas_symbol_refs = { path = "../hhbc_by_ref_hhas_symbol_refs" }
 hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
 hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }
+hhbc_by_ref_symbol_refs_state = { path = "../hhbc_by_ref_symbol_refs_state" }
 ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }
 

@@ -9,7 +9,7 @@ path = "../../symbol_refs_state.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
-hhbc_by_ref_hhas_symbol_refs = { path = "../hhbc_by_ref_hhas_symbol_refs" }
+ffi = { path = "../../../../utils/ffi" }
 
 [profile.release]
 incremental = false

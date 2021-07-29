@@ -11,7 +11,6 @@ path = "../../emit_symbol_refs.rs"
 bumpalo = { version = "3.2.1", features = ["collections"] }
 decl_provider = { path = "../../../decl_provider" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
-hhbc_by_ref_hhas_symbol_refs = { path = "../hhbc_by_ref_hhas_symbol_refs" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
 hhbc_by_ref_symbol_refs_state = { path = "../hhbc_by_ref_symbol_refs_state" }
 

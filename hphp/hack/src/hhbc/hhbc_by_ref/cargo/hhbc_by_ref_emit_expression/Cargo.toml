@@ -21,7 +21,6 @@ hhbc_by_ref_emit_pos = { path = "../hhbc_by_ref_emit_pos" }
 hhbc_by_ref_emit_symbol_refs = { path = "../hhbc_by_ref_emit_symbol_refs" }
 hhbc_by_ref_emit_type_constant = { path = "../hhbc_by_ref_emit_type_constant" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
-hhbc_by_ref_hhas_symbol_refs = { path = "../hhbc_by_ref_hhas_symbol_refs" }
 hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
 hhbc_by_ref_hhbc_string_utils = { path = "../hhbc_by_ref_hhbc_string_utils" }
@@ -31,6 +30,7 @@ hhbc_by_ref_local = { path = "../hhbc_by_ref_local" }
 hhbc_by_ref_options = { path = "../hhbc_by_ref_options" }
 hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
 hhbc_by_ref_scope = { path = "../hhbc_by_ref_scope" }
+hhbc_by_ref_symbol_refs_state = { path = "../hhbc_by_ref_symbol_refs_state" }
 indexmap = { version = "1.6", features = ["rayon", "serde-1"] }
 itertools = "0.10.1"
 lazy_static = "1.0"

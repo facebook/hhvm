@@ -13,7 +13,6 @@ use hhbc_by_ref_emit_pos::{emit_pos, emit_pos_then};
 use hhbc_by_ref_emit_symbol_refs as emit_symbol_refs;
 use hhbc_by_ref_emit_type_constant as emit_type_constant;
 use hhbc_by_ref_env::{emitter::Emitter, Env, Flags as EnvFlags};
-use hhbc_by_ref_hhas_symbol_refs::IncludePath;
 use hhbc_by_ref_hhbc_ast::*;
 use hhbc_by_ref_hhbc_id::{class, r#const, function, method, prop, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
@@ -27,6 +26,7 @@ use hhbc_by_ref_local::Local;
 use hhbc_by_ref_options::{CompilerFlags, HhvmFlags, LangFlags, Options};
 use hhbc_by_ref_runtime::TypedValue;
 use hhbc_by_ref_scope::scope;
+use hhbc_by_ref_symbol_refs_state::IncludePath;
 use itertools::Either;
 use lazy_static::lazy_static;
 use naming_special_names_rust::{

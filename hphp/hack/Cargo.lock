@@ -1374,7 +1374,6 @@ dependencies = [
  "hhbc_by_ref_emit_symbol_refs",
  "hhbc_by_ref_emit_type_constant",
  "hhbc_by_ref_env",
- "hhbc_by_ref_hhas_symbol_refs",
  "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_hhbc_string_utils",
@@ -1384,6 +1383,7 @@ dependencies = [
  "hhbc_by_ref_options",
  "hhbc_by_ref_runtime",
  "hhbc_by_ref_scope",
+ "hhbc_by_ref_symbol_refs_state",
  "indexmap",
  "itertools 0.10.1",
  "lazy_static",
@@ -1593,8 +1593,10 @@ dependencies = [
  "hhbc_by_ref_emit_typedef",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhas_program",
+ "hhbc_by_ref_hhas_symbol_refs",
  "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_instruction_sequence",
+ "hhbc_by_ref_symbol_refs_state",
  "ocamlrep",
  "oxidized",
 ]
@@ -1650,7 +1652,6 @@ dependencies = [
  "bumpalo",
  "decl_provider",
  "hhbc_by_ref_env",
- "hhbc_by_ref_hhas_symbol_refs",
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_symbol_refs_state",
 ]
@@ -1917,8 +1918,7 @@ dependencies = [
 name = "hhbc_by_ref_hhas_symbol_refs"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
- "ffi",
+ "hhbc_by_ref_symbol_refs_state",
 ]
 
 [[package]]
@@ -2126,7 +2126,7 @@ name = "hhbc_by_ref_symbol_refs_state"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "hhbc_by_ref_hhas_symbol_refs",
+ "ffi",
 ]
 
 [[package]]

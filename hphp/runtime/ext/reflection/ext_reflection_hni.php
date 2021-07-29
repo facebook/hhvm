@@ -496,8 +496,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    *
    * @return     string   The name of the function.
    */
-  <<__Pure, __MaybeMutable>>
-  public function getName(): string {
+  public function getName()[]: string {
     if ($this->closure) {
       // Format: Closure$scope;hash
       $cls = get_class($this->closure);

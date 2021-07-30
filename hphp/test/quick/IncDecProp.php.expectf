@@ -4,8 +4,8 @@ int(1)
 int(-1)
 int(0)
 int(0)
-Error: Implicit null to int conversion for pre/post inc/dec
-Error: Implicit null to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on null
+Error: Cannot perform pre/post inc/dec on null
 object(C) (8) {
   ["preInc"]=>
   int(1)
@@ -32,7 +32,7 @@ Error: Setting a property on a non-object
 NULL
 --- 42 ---
 
-Warning: Attempt to increment/decrement property of non-object in %s/quick/IncDecProp.php on line 45
+Warning: Attempt to increment/decrement property of non-object in %s/test/quick/IncDecProp.php on line %d
 NULL
 42
 Test end

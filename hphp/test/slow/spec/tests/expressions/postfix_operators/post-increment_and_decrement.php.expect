@@ -113,15 +113,15 @@ $a = NAN <---> float(NAN)
 --------------------------------------- start incdec ---
 $a =  <---> NULL
 $a =  <---> NULL
-Error: Implicit null to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on null
 $a =  <---> NULL
-Error: Implicit null to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on null
 $a = 
 $a =  <---> NULL
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a =  <---> NULL
-Error: Implicit null to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on null
 $a =  <---> NULL
 $a =  <---> NULL
 $a = 
@@ -143,261 +143,261 @@ $a =  <---> bool(false)
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a =  <---> string(0) ""
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on empty string
 $a =  <---> string(0) ""
-Error: Increment on empty string
+Error: Cannot perform pre/post inc/dec on empty string
 $a =  <---> string(0) ""
-Error: Increment on empty string
-$a = 
-$a =  <---> string(0) ""
---------------------------------------- end incdec ---
---------------------------------------- start incdecrev ---
-$a =  <---> string(0) ""
-Error: Increment on empty string
-$a =  <---> string(0) ""
-Error: Implicit string to int conversion for pre/post inc/dec
-$a =  <---> string(0) ""
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on empty string
 $a = 
 $a =  <---> string(0) ""
+--------------------------------------- end incdec ---
+--------------------------------------- start incdecrev ---
+$a =  <---> string(0) ""
+Error: Cannot perform pre/post inc/dec on empty string
+$a =  <---> string(0) ""
+Error: Cannot perform pre/post inc/dec on empty string
+$a =  <---> string(0) ""
+Error: Cannot perform pre/post inc/dec on empty string
+$a = 
+$a =  <---> string(0) ""
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 0 <---> string(1) "0"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 0 <---> string(1) "0"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 0 <---> string(1) "0"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 0 <---> string(1) "0"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 0 <---> string(1) "0"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 0 <---> string(1) "0"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 0 <---> string(1) "0"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 0 <---> string(1) "0"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 9 <---> string(1) "9"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 9 <---> string(1) "9"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 9 <---> string(1) "9"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 9 <---> string(1) "9"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 9 <---> string(1) "9"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 9 <---> string(1) "9"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 9 <---> string(1) "9"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 9 <---> string(1) "9"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 26 <---> string(2) "26"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 26 <---> string(2) "26"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 26 <---> string(2) "26"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 26 <---> string(2) "26"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 26 <---> string(2) "26"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 26 <---> string(2) "26"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 26 <---> string(2) "26"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 26 <---> string(2) "26"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 98325 <---> string(5) "98325"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 98325 <---> string(5) "98325"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 98325 <---> string(5) "98325"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 98325 <---> string(5) "98325"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 98325 <---> string(5) "98325"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 98325 <---> string(5) "98325"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 98325 <---> string(5) "98325"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 98325 <---> string(5) "98325"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 9223372036854775807 <---> string(19) "9223372036854775807"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 9223372036854775807 <---> string(19) "9223372036854775807"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 9223372036854775807 <---> string(19) "9223372036854775807"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 9223372036854775807 <---> string(19) "9223372036854775807"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 9223372036854775807 <---> string(19) "9223372036854775807"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 9223372036854775807 <---> string(19) "9223372036854775807"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 9223372036854775807 <---> string(19) "9223372036854775807"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 9223372036854775807 <---> string(19) "9223372036854775807"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 012 <---> string(3) "012"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 012 <---> string(3) "012"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 012 <---> string(3) "012"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 012 <---> string(3) "012"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 012 <---> string(3) "012"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 012 <---> string(3) "012"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 012 <---> string(3) "012"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 012 <---> string(3) "012"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 0x12 <---> string(4) "0x12"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 0x12 <---> string(4) "0x12"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 0x12 <---> string(4) "0x12"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 0x12 <---> string(4) "0x12"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 0x12 <---> string(4) "0x12"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 0x12 <---> string(4) "0x12"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 0x12 <---> string(4) "0x12"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 0x12 <---> string(4) "0x12"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 0X12 <---> string(4) "0X12"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 0X12 <---> string(4) "0X12"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 0X12 <---> string(4) "0X12"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 0X12 <---> string(4) "0X12"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 0X12 <---> string(4) "0X12"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 0X12 <---> string(4) "0X12"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 0X12 <---> string(4) "0X12"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 0X12 <---> string(4) "0X12"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 123.456 <---> string(7) "123.456"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 123.456 <---> string(7) "123.456"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 123.456 <---> string(7) "123.456"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 123.456 <---> string(7) "123.456"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 123.456 <---> string(7) "123.456"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 123.456 <---> string(7) "123.456"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 123.456 <---> string(7) "123.456"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 123.456 <---> string(7) "123.456"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 1.23E-27 <---> string(8) "1.23E-27"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 1.23E-27 <---> string(8) "1.23E-27"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 1.23E-27 <---> string(8) "1.23E-27"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 1.23E-27 <---> string(8) "1.23E-27"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 1.23E-27 <---> string(8) "1.23E-27"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 1.23E-27 <---> string(8) "1.23E-27"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 1.23E-27 <---> string(8) "1.23E-27"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 1.23E-27 <---> string(8) "1.23E-27"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a =  43 <---> string(3) " 43"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =  43 <---> string(3) " 43"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =  43 <---> string(3) " 43"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a =  43 <---> string(3) " 43"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a =  43 <---> string(3) " 43"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =  43 <---> string(3) " 43"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =  43 <---> string(3) " 43"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a =  43 <---> string(3) " 43"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a =    654 <---> string(6) "   654"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =    654 <---> string(6) "   654"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =    654 <---> string(6) "   654"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a =    654 <---> string(6) "   654"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a =    654 <---> string(6) "   654"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =    654 <---> string(6) "   654"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =    654 <---> string(6) "   654"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a =    654 <---> string(6) "   654"
 --------------------------------------- end incdecrev ---
@@ -405,15 +405,15 @@ $a =    654 <---> string(6) "   654"
 $a = 	 
 94 <---> string(8) "	 
 94"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 	 
 94 <---> string(8) "	 
 94"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 	 
 94 <---> string(8) "	 
 94"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 	 
 94 <---> string(8) "	 
@@ -423,15 +423,15 @@ $a =
 $a = 	 
 94 <---> string(8) "	 
 94"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 	 
 94 <---> string(8) "	 
 94"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 	 
 94 <---> string(8) "	 
 94"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 	 
 94 <---> string(8) "	 
@@ -439,121 +439,121 @@ $a =
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 012 <---> string(3) "012"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 012 <---> string(3) "012"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 012 <---> string(3) "012"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 012 <---> string(3) "012"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 012 <---> string(3) "012"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 012 <---> string(3) "012"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 012 <---> string(3) "012"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 012 <---> string(3) "012"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a =    000012345 <---> string(12) "   000012345"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =    000012345 <---> string(12) "   000012345"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =    000012345 <---> string(12) "   000012345"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a =    000012345 <---> string(12) "   000012345"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a =    000012345 <---> string(12) "   000012345"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =    000012345 <---> string(12) "   000012345"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =    000012345 <---> string(12) "   000012345"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a =    000012345 <---> string(12) "   000012345"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = 00012.345 <---> string(9) "00012.345"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 00012.345 <---> string(9) "00012.345"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 00012.345 <---> string(9) "00012.345"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 00012.345 <---> string(9) "00012.345"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = 00012.345 <---> string(9) "00012.345"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 00012.345 <---> string(9) "00012.345"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 00012.345 <---> string(9) "00012.345"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = 00012.345 <---> string(9) "00012.345"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a =   00012.345 <---> string(11) "  00012.345"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =   00012.345 <---> string(11) "  00012.345"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =   00012.345 <---> string(11) "  00012.345"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a =   00012.345 <---> string(11) "  00012.345"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a =   00012.345 <---> string(11) "  00012.345"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =   00012.345 <---> string(11) "  00012.345"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a =   00012.345 <---> string(11) "  00012.345"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a =   00012.345 <---> string(11) "  00012.345"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = -12345 <---> string(6) "-12345"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = -12345 <---> string(6) "-12345"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = -12345 <---> string(6) "-12345"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = -12345 <---> string(6) "-12345"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = -12345 <---> string(6) "-12345"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = -12345 <---> string(6) "-12345"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = -12345 <---> string(6) "-12345"
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = -12345 <---> string(6) "-12345"
 --------------------------------------- end incdecrev ---
 --------------------------------------- start incdec ---
 $a = +9.87 <---> string(5) "+9.87"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = +9.87 <---> string(5) "+9.87"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = +9.87 <---> string(5) "+9.87"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = +9.87 <---> string(5) "+9.87"
 --------------------------------------- end incdec ---
 --------------------------------------- start incdecrev ---
 $a = +9.87 <---> string(5) "+9.87"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = +9.87 <---> string(5) "+9.87"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = +9.87 <---> string(5) "+9.87"
-Error: Implicit string to double conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 $a = 
 $a = +9.87 <---> string(5) "+9.87"
 --------------------------------------- end incdecrev ---

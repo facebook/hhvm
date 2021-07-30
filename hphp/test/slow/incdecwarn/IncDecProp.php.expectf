@@ -5,16 +5,16 @@ int(-1)
 int(0)
 int(0)
 
-Warning: Unsupported operand type (null) for IncDec in %s/slow/incdecwarn/IncDecProp.php on line 29
-Error: Implicit null to int conversion for pre/post inc/dec
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+Error: Cannot perform pre/post inc/dec on null
 
-Warning: Unsupported operand type (null) for IncDec in %s/slow/incdecwarn/IncDecProp.php on line 30
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
 NULL
 
-Warning: Unsupported operand type (null) for IncDec in %s/slow/incdecwarn/IncDecProp.php on line 31
-Error: Implicit null to int conversion for pre/post inc/dec
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+Error: Cannot perform pre/post inc/dec on null
 
-Warning: Unsupported operand type (null) for IncDec in %s/slow/incdecwarn/IncDecProp.php on line 32
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
 NULL
 object(C) (8) {
   ["preInc"]=>

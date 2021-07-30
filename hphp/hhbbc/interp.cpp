@@ -3406,12 +3406,15 @@ void in(ISS& env, const bc::SetOpS& op) {
 void in(ISS& env, const bc::IncDecL& op) {
   auto loc = locAsCell(env, op.nloc1.id);
   auto newT = typeIncDec(op.subop2, loc);
-  auto const pre = isPre(op.subop2);
 
-  if (!locCouldBeUninit(env, op.nloc1.id) && loc.subtypeOf(BNum)) {
-    nothrow(env);
+  if (newT.subtypeOf(BBottom)) {
+    unreachable(env);
+    return push(env, TBottom);
   }
 
+  if (!locCouldBeUninit(env, op.nloc1.id) && loc.subtypeOf(BNum)) nothrow(env);
+
+  auto const pre = isPre(op.subop2);
   if (!pre) push(env, std::move(loc));
   setLoc(env, op.nloc1.id, newT);
   if (pre)  push(env, std::move(newT));

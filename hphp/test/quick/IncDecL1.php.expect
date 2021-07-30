@@ -14,9 +14,9 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-Error: Implicit null to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on null
 NULL
-Error: Implicit null to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on null
 NULL
 NULL
 NULL

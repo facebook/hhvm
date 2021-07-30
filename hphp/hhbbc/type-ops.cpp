@@ -188,13 +188,11 @@ Type typeIncDec(IncDecOp op, Type t) {
       if (t.subtypeOf(BInt)) {
         return overflowToDbl ? TNum : TInt;
       }
-      // Null goes to 1 on ++, stays null on --. Uninit is folded to init.
-      if (t.subtypeOf(BNull)) {
-        return isInc(op) ? ival(1) : TInitNull;
-      }
+      // ++ on null throws, stays null on --. Uninit is folded to init.
+      if (t.subtypeOf(BNull)) return isInc(op) ? TBottom : TInitNull;
       // Optional integer case. The union of the above two cases.
       if (isInc(op)) return overflowToDbl ? TNum : TInt;
-      return overflowToDbl? TOptNum : TOptInt;
+      return overflowToDbl ? TOptNum : TOptInt;
     }
 
     // No-op on bool, array, resource, object.
@@ -216,12 +214,10 @@ Type typeIncDec(IncDecOp op, Type t) {
     }
     return c;
   });
-  if (!resultTy) resultTy = TInitCell;
 
   // We may have inferred a TSStr or TSArr with a value here, but at
   // runtime it will not be static.
-  resultTy = loosen_staticness(*resultTy);
-  return *resultTy;
+  return resultTy ? loosen_staticness(*resultTy) : TInitCell;
 }
 
 Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {

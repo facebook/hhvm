@@ -3,11 +3,11 @@ Warning: Property 'A::p1' declared as type int, string assigned in %s/sets.php o
 Warning: Property 'A::p2' declared as type string, int assigned in %s/sets.php on line 27
 
 Warning: Property 'A::p2' declared as type string, int assigned in %s/sets.php on line 28
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string
 
 Warning: Static property 'A::s1' declared as type int, string assigned in %s/sets.php on line 32
 
 Warning: Static property 'A::s2' declared as type string, int assigned in %s/sets.php on line 33
 
 Warning: Static property 'A::s2' declared as type string, int assigned in %s/sets.php on line 34
-Error: Implicit string to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on numeric string

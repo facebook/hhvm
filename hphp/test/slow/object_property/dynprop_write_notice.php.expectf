@@ -5,7 +5,7 @@ Notice: Created dynamic property with static name C::dynprop in %s/slow/object_p
 Notice: Created dynamic property with dynamic name C::dynprop2 in %s/slow/object_property/dynprop_write_notice.php on line 7
 
 Notice: Created dynamic property with static name C::dynprop3 in %s/slow/object_property/dynprop_write_notice.php on line 9
-Error: Implicit null to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on null
 object(C) (3) {
   ["dynprop"]=>
   int(3)
@@ -49,7 +49,7 @@ Notice: Created dynamic property with static name GMP::dynprop in %s/slow/object
 Notice: Created dynamic property with dynamic name GMP::dynprop2 in %s/slow/object_property/dynprop_write_notice.php on line 7
 
 Notice: Created dynamic property with static name GMP::dynprop3 in %s/slow/object_property/dynprop_write_notice.php on line 9
-Error: Implicit null to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on null
 object(GMP) (4) {
   ["dynprop"]=>
   int(3)
@@ -93,7 +93,7 @@ object(GMP) (4) {
   string(1) "0"
 }
 ==== stdClass ====
-Error: Implicit null to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on null
 object(stdClass) (3) {
   ["dynprop"]=>
   int(3)
@@ -119,7 +119,7 @@ object(stdClass) (3) {
   NULL
 }
 ==== __PHP_Incomplete_Class ====
-Error: Implicit null to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on null
 object(__PHP_Incomplete_Class) (4) {
   ["__PHP_Incomplete_Class_Name"]=>
   string(4) "Nope"

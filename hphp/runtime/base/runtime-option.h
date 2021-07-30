@@ -1385,8 +1385,6 @@ struct RuntimeOption {
   /* 0 nothing, 1 notice, 2 error */                                    \
   F(int32_t, NoticeOnCoerceForStrConcat2, 0)                            \
   /* 0 nothing, 1 notice, 2 error */                                    \
-  F(int32_t, NoticeOnCoerceForIncDec, 2)                                \
-  /* 0 nothing, 1 notice, 2 error */                                    \
   F(int32_t, NoticeOnCoerceForMath, 2)                                  \
   /* 0 nothing, 1 notice, 2 error */                                    \
   F(int32_t, NoticeOnCoerceForCmp, 1)                                   \

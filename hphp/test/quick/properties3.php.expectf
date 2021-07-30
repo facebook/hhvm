@@ -11,8 +11,8 @@ object(D) (2) {
   ["y"]=>
   int(2)
 }
-Error: Implicit null to int conversion for pre/post inc/dec
-Error: Implicit null to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on null
+Error: Cannot perform pre/post inc/dec on null
 object(D) (2) {
   ["x":"D":private]=>
   NULL

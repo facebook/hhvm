@@ -1,2 +1,2 @@
-Error: Implicit null to int conversion for pre/post inc/dec
+Error: Cannot perform pre/post inc/dec on null
 NULL

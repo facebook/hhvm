@@ -1,23 +1,23 @@
 preinc<
-Implicit null to int conversion for pre/post inc/dec
+Cannot perform pre/post inc/dec on null
 
 1
 1
 43
 2.234
 
-Notice: Increment on string 'foobar' in %s/slow/implicit_conversions/incdec/literals.php on line 51
+Notice: Increment on string 'foobar' in %s/literals.php on line 51
 foobas
 
-Increment on empty string
+Cannot perform pre/post inc/dec on empty string
 
-Implicit string to int conversion for pre/post inc/dec
+Cannot perform pre/post inc/dec on numeric string
 
-Implicit string to double conversion for pre/post inc/dec
+Cannot perform pre/post inc/dec on numeric string
 Resource id #1
 >
 postinc<
-Implicit null to int conversion for pre/post inc/dec
+Cannot perform pre/post inc/dec on null
 
 
 1
@@ -29,15 +29,15 @@ Implicit null to int conversion for pre/post inc/dec
 1.234
 2.234
 
-Notice: Increment on string 'foobar' in %s/slow/implicit_conversions/incdec/literals.php on line 107
+Notice: Increment on string 'foobar' in %s/literals.php on line 107
 foobar
 foobas
 
-Increment on empty string
+Cannot perform pre/post inc/dec on empty string
 
-Implicit string to int conversion for pre/post inc/dec
+Cannot perform pre/post inc/dec on numeric string
 
-Implicit string to double conversion for pre/post inc/dec
+Cannot perform pre/post inc/dec on numeric string
 Resource id #1
 Resource id #1
 >
@@ -48,14 +48,14 @@ predec<
 41
 0.234
 
-Notice: Decrement on string 'foobar' in %s/slow/implicit_conversions/incdec/literals.php on line 163
+Notice: Decrement on string 'foobar' in %s/literals.php on line 163
 foobar
 
-Implicit string to int conversion for pre/post inc/dec
+Cannot perform pre/post inc/dec on empty string
 
-Implicit string to int conversion for pre/post inc/dec
+Cannot perform pre/post inc/dec on numeric string
 
-Implicit string to double conversion for pre/post inc/dec
+Cannot perform pre/post inc/dec on numeric string
 Resource id #1
 >
 postdec<
@@ -71,15 +71,15 @@ postdec<
 1.234
 0.234
 
-Notice: Decrement on string 'foobar' in %s/slow/implicit_conversions/incdec/literals.php on line 219
+Notice: Decrement on string 'foobar' in %s/literals.php on line 219
 foobar
 foobar
 
-Implicit string to int conversion for pre/post inc/dec
+Cannot perform pre/post inc/dec on empty string
 
-Implicit string to int conversion for pre/post inc/dec
+Cannot perform pre/post inc/dec on numeric string
 
-Implicit string to double conversion for pre/post inc/dec
+Cannot perform pre/post inc/dec on numeric string
 Resource id #1
 Resource id #1
 >

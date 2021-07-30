@@ -1,0 +1,24 @@
+File "projected_type_const_error3.php", line 18, characters 10-18:
+A `where` type constraint is violated here (Typing[4323])
+  File "projected_type_const_error3.php", line 13, characters 10-18:
+  This is the method with `where` type constraints
+  File "projected_type_const_error3.php", line 9, characters 23-25:
+  Expected `int`
+  File "projected_type_const_error3.php", line 13, characters 78-89:
+    resulting from expanding the type constant `IntBox::TInner`
+  File "projected_type_const_error3.php", line 18, characters 28-33:
+  But got `string`
+  File "projected_type_const_error3.php", line 13, characters 71-74:
+    via this generic `TVal`
+File "projected_type_const_error3.php", line 18, characters 10-18:
+A `where` type constraint is violated here (Typing[4323])
+  File "projected_type_const_error3.php", line 13, characters 10-18:
+  This is the method with `where` type constraints
+  File "projected_type_const_error3.php", line 18, characters 28-33:
+  Expected `string`
+  File "projected_type_const_error3.php", line 13, characters 71-74:
+    via this generic `TVal`
+  File "projected_type_const_error3.php", line 9, characters 23-25:
+  But got `int`
+  File "projected_type_const_error3.php", line 13, characters 78-89:
+    resulting from expanding the type constant `IntBox::TInner`

@@ -1,0 +1,10 @@
+File "projected_type_const_error.php", line 19, characters 22-28:
+Invalid argument (Typing[4110])
+  File "projected_type_const_error.php", line 9, characters 23-25:
+  Expected `int`
+  File "projected_type_const_error.php", line 13, characters 84-89:
+    resulting from accessing the type constant 'TInner'
+  File "projected_type_const_error.php", line 19, characters 12-17:
+    on an object of exactly the class IntBox
+  File "projected_type_const_error.php", line 19, characters 22-28:
+  But got `string`

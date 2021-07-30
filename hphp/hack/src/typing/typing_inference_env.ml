@@ -664,7 +664,20 @@ let set_tyvar_type_const env var ((_, tyconstid_) as tyconstid) ty =
   let type_constants =
     SMap.add tyconstid_ (tyconstid, ty) tvinfo.type_constants
   in
-  set_tyvar_constraints env var { tvinfo with type_constants }
+  let env = set_tyvar_constraints env var { tvinfo with type_constants } in
+  (* We don't want to solve such type variables too early, because of valid
+   * code patterns like that one:
+   *
+   * abstract class A { abstract type const T; }
+   *
+   * function f<TA as A, T>(TA $_, T $_) : ... where T = TA::T
+   *
+   * We force it covariantly until we can implement a proper fix to
+   * avoid eager solving (to the upperbound) as it would bind TA to
+   * an abstract class
+   *)
+  let env = set_tyvar_appears_covariantly env var in
+  env
 
 (** Conjoin a subtype proposition onto the subtype_prop in the environment *)
 let add_subtype_prop env prop =

@@ -1,0 +1,6 @@
+File "projected_type_const_error4.php", line 18, characters 20-20:
+Can't access a type constant TInner from an unresolved type (Typing[4436])
+  File "projected_type_const_error4.php", line 13, characters 84-89:
+  Access happens here
+  File "projected_type_const_error4.php", line 18, characters 20-20:
+  Disambiguate the types using explicit type annotations here.

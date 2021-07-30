@@ -291,12 +291,9 @@ let rec array_get
            * and $d[$i] should actually type check because
            * dict<string,int> <: dict<arraykey,int>
            *)
-          let (env, k) = Env.expand_type env k in
-          let (env, err_res1) =
-            check_arraykey_index_read env expr_pos ty1 ty2
-          in
-          let (env, err_res2) =
+          let (env, err_res) =
             if String.equal cn SN.Collections.cMap then
+              let (env, k) = Env.expand_type env k in
               type_index
                 env
                 expr_pos
@@ -304,12 +301,7 @@ let rec array_get
                 (MakeType.enforced k)
                 (Reason.index_class cn)
             else
-              (env, Ok ty2)
-          in
-          let err_res =
-            match (err_res1, err_res2) with
-            | (Error _, _) -> err_res1
-            | (_, _) -> err_res2
+              check_arraykey_index_read env expr_pos ty1 ty2
           in
           (env, v, err_res)
       (* Certain container/collection types are intended to be immutable/const,

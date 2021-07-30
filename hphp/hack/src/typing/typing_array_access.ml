@@ -176,12 +176,13 @@ let rec array_get
       array_pos
       ty1
   in
-  GenericRules.apply_rules_with_err
+  GenericRules.apply_rules_with_index_value_errs
     ~ignore_type_structure:true
     env
     ty1
     (fun env ty1 ->
       let (r, ety1_) = deref ty1 in
+      let dflt_arr_res = Ok ty1 in
       (* This is a little weird -- we enforce the right arity when you use certain
        * collections, even in partial mode (where normally completely omitting the
        * type parameter list is admitted). Basically the "omit type parameter"
@@ -193,7 +194,7 @@ let rec array_get
       let arity_error (_, name) =
         Errors.array_get_arity expr_pos name (Reason.to_pos r)
       in
-      let nullable_container_get env ty =
+      let nullable_container_get env ty_actual ty =
         if
           lhs_of_null_coalesce
           (* Normally, we would not allow indexing into a nullable container,
@@ -210,14 +211,28 @@ let rec array_get
             ty
             e2
             ty2
-        else (
+        else
+          let mixed = MakeType.mixed Reason.none in
+          (* If our non-null type, ty, is a subtype of `KeyedContainer`
+             use it in the hole, otherwise suggest KeyedContainer *)
+          let ty_expected =
+            if
+              SubType.is_sub_type
+                env
+                ty
+                (MakeType.keyed_container Reason.none mixed mixed)
+            then
+              ty
+            else
+              let nothing = MakeType.nothing Reason.none in
+              MakeType.keyed_container Reason.none nothing nothing
+          in
           Errors.null_container
             expr_pos
             (Reason.to_string
                "This is what makes me believe it can be `null`."
                r);
-          (env, err_witness env expr_pos, None)
-        )
+          (env, err_witness env expr_pos, None, Some (ty_actual, ty_expected))
       in
       let type_index env p ty_have ty_expect reason =
         Typing_log.(
@@ -251,7 +266,7 @@ let rec array_get
         let (env, err_res) =
           type_index env expr_pos ty2 ty1 Reason.index_array
         in
-        (env, ty, err_res)
+        (env, ty, err_res, dflt_arr_res)
       | Tclass (((_, cn) as id), _, argl)
         when String.equal cn SN.Collections.cVector
              || String.equal cn SN.Collections.cVec ->
@@ -267,14 +282,14 @@ let rec array_get
         let (env, err_res) =
           type_index env expr_pos ty2 ty1 (Reason.index_class cn)
         in
-        (env, ty, err_res)
+        (env, ty, err_res, dflt_arr_res)
       | Tclass (((_, cn) as id), _, argl)
         when cn = SN.Collections.cMap
              || cn = SN.Collections.cDict
              || cn = SN.Collections.cKeyset ->
         if cn = SN.Collections.cKeyset && is_lvalue then (
           Errors.keyset_set expr_pos (Reason.to_pos r);
-          (env, err_witness env expr_pos, Ok ty2)
+          (env, err_witness env expr_pos, Ok ty2, dflt_arr_res)
         ) else
           let (k, v) =
             match argl with
@@ -303,7 +318,7 @@ let rec array_get
             else
               check_arraykey_index_read env expr_pos ty1 ty2
           in
-          (env, v, err_res)
+          (env, v, err_res, dflt_arr_res)
       (* Certain container/collection types are intended to be immutable/const,
        * thus they should never appear as a lvalue when indexing i.e.
        *
@@ -317,7 +332,7 @@ let rec array_get
              || String.equal cn SN.Collections.cAnyArray ->
         if is_lvalue then
           let (env, ty1) = error_const_mutation env expr_pos ty1 in
-          (env, ty1, Ok ty2)
+          (env, ty1, Ok ty2, dflt_arr_res)
         else
           let (_k, v) =
             match argl with
@@ -328,7 +343,7 @@ let rec array_get
               (any, any)
           in
           let (env, err_res) = check_arraykey_index_read env expr_pos ty1 ty2 in
-          (env, v, err_res)
+          (env, v, err_res, dflt_arr_res)
       | Tclass (((_, cn) as id), _, argl)
         when (not is_lvalue)
              && (String.equal cn SN.Collections.cConstVector
@@ -345,21 +360,21 @@ let rec array_get
         let (env, err_res) =
           type_index env expr_pos ty2 ty1 (Reason.index_class cn)
         in
-        (env, ty, err_res)
+        (env, ty, err_res, dflt_arr_res)
       | Tclass ((_, cn), _, _)
         when is_lvalue
              && (String.equal cn SN.Collections.cConstVector
                 || String.equal cn SN.Collections.cImmVector) ->
         let (env, ty1) = error_const_mutation env expr_pos ty1 in
-        (env, ty1, Ok ty2)
+        (env, ty1, Ok ty2, dflt_arr_res)
       | Tdarray (_k, v)
       | Tvec_or_dict (_k, v)
       | Tvarray_or_darray (_k, v) ->
         let (env, err_res) = check_arraykey_index_read env expr_pos ty1 ty2 in
-        (env, v, err_res)
-      | Terr -> (env, err_witness env expr_pos, Ok ty2)
-      | Tdynamic -> (env, ty1, Ok ty2)
-      | Tany _ -> (env, TUtils.mk_tany env expr_pos, Ok ty2)
+        (env, v, err_res, dflt_arr_res)
+      | Terr -> (env, err_witness env expr_pos, Ok ty2, dflt_arr_res)
+      | Tdynamic -> (env, ty1, Ok ty2, dflt_arr_res)
+      | Tany _ -> (env, TUtils.mk_tany env expr_pos, Ok ty2, dflt_arr_res)
       | Tprim Tstring ->
         let ty = MakeType.string (Reason.Rwitness expr_pos) in
         let (_, p2, _) = e2 in
@@ -367,20 +382,22 @@ let rec array_get
         let (env, err_res) =
           type_index env expr_pos ty2 ty1 Reason.index_array
         in
-        (env, ty, err_res)
+        (env, ty, err_res, dflt_arr_res)
       | Ttuple tyl ->
         (* requires integer literal *)
         (match e2 with
         | (_, p, Int n) ->
           let idx = int_of_string_opt n in
           (match Option.bind idx ~f:(List.nth tyl) with
-          | Some nth -> (env, nth, Ok ty2)
+          | Some nth -> (env, nth, Ok ty2, dflt_arr_res)
           | None ->
             Errors.typing_error p (Reason.string_of_ureason Reason.index_tuple);
-            (env, err_witness env p, Ok ty2))
+            (env, err_witness env p, Ok ty2, dflt_arr_res))
         | (_, p, _) ->
-          Errors.typing_error p (Reason.string_of_ureason Reason.URtuple_access);
-          (env, err_witness env p, Error (ty2, MakeType.int Reason.none)))
+          ( env,
+            err_witness env p,
+            Error (ty2, MakeType.int Reason.none),
+            dflt_arr_res ))
       | Tclass (((_, cn) as id), _, argl)
         when String.equal cn SN.Collections.cPair ->
         let (ty1, ty2) =
@@ -396,14 +413,17 @@ let rec array_get
         | (_, p, Int n) ->
           let idx = int_of_string_opt n in
           (match Option.bind ~f:(List.nth [ty1; ty2]) idx with
-          | Some nth -> (env, nth, Ok ty2)
+          | Some nth -> (env, nth, Ok ty2, dflt_arr_res)
           | None ->
             Errors.typing_error p
             @@ Reason.string_of_ureason (Reason.index_class cn);
-            (env, err_witness env p, Ok ty2))
+            (env, err_witness env p, Ok ty2, dflt_arr_res))
         | (_, p, _) ->
           Errors.typing_error p (Reason.string_of_ureason Reason.URpair_access);
-          (env, err_witness env p, Error (ty2, MakeType.int Reason.none)))
+          ( env,
+            err_witness env p,
+            Error (ty2, MakeType.int Reason.none),
+            dflt_arr_res ))
       | Tshape (_, fdm) ->
         if is_lvalue || lhs_of_null_coalesce then
           (* The expression $s['x'] ?? $y is semantically equivalent to
@@ -422,7 +442,7 @@ let rec array_get
               ~fun_pos:Reason.Rnone
               ~shape_pos:array_pos
           in
-          (env, ty, Ok ty2)
+          (env, ty, Ok ty2, dflt_arr_res)
         else
           let (_, p, _) = e2 in
           begin
@@ -430,7 +450,7 @@ let rec array_get
             | None ->
               (* there was already an error in shape_field name,
                  don't report another one for a missing field *)
-              (env, err_witness env p, Ok ty2)
+              (env, err_witness env p, Ok ty2, dflt_arr_res)
             | Some field ->
               let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
               begin
@@ -440,7 +460,7 @@ let rec array_get
                     ~use_pos:p
                     ~name:(TUtils.get_printable_shape_field_name field)
                     ~shape_type_pos:(Reason.to_pos r);
-                  (env, err_witness env p, Ok ty2)
+                  (env, err_witness env p, Ok ty2, dflt_arr_res)
                 | Some { sft_optional; sft_ty } ->
                   if sft_optional then (
                     let declared_field =
@@ -452,36 +472,52 @@ let rec array_get
                       p
                       (Env.get_shape_field_name_pos declared_field)
                       (TUtils.get_printable_shape_field_name field);
-                    (env, err_witness env p, Ok ty2)
+                    (env, err_witness env p, Ok ty2, dflt_arr_res)
                   ) else
-                    (env, sft_ty, Ok ty2)
+                    (env, sft_ty, Ok ty2, dflt_arr_res)
               end
           end
       | Toption ty ->
-        let (env, ty, err_opt) = nullable_container_get env ty in
-        let err_res =
+        let (env, ty, err_opt_idx, err_opt_arr) =
+          nullable_container_get env ty1 ty
+        in
+        let err_res_arr =
           Option.value_map
-            err_opt
+            err_opt_arr
+            ~default:dflt_arr_res
+            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+        in
+        let err_res_idx =
+          Option.value_map
+            err_opt_idx
             ~default:(Ok ty2)
             ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
         in
-        (env, ty, err_res)
+        (env, ty, err_res_idx, err_res_arr)
       | Tprim Tnull ->
         let ty = MakeType.nothing Reason.Rnone in
-        let (env, ty, err_opt) = nullable_container_get env ty in
-        let err_res =
+        let (env, ty, err_opt_idx, err_opt_arr) =
+          nullable_container_get env ty1 ty
+        in
+        let err_res_arr =
           Option.value_map
-            err_opt
+            err_opt_arr
+            ~default:dflt_arr_res
+            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+        in
+        let err_res_idx =
+          Option.value_map
+            err_opt_idx
             ~default:(Ok ty2)
             ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
         in
-        (env, ty, err_res)
+        (env, ty, err_res_idx, err_res_arr)
       | Tobject ->
         if Partial.should_check_error (Env.get_mode env) 4005 then
           let (env, ty1) = error_array env expr_pos ty1 in
-          (env, ty1, Ok ty2)
+          (env, ty1, Ok ty2, dflt_arr_res)
         else
-          (env, TUtils.mk_tany env expr_pos, Ok ty2)
+          (env, TUtils.mk_tany env expr_pos, Ok ty2, dflt_arr_res)
       | Tnewtype (ts, [ty], bound) ->
         begin
           match deref bound with
@@ -491,7 +527,7 @@ let rec array_get
               Typing_structure.transform_shapemap env array_pos ty fields
             in
             let ty = mk (r, Tshape (shape_kind, fields)) in
-            let (env, ty, err_opt) =
+            let (env, ty, err_opt_idx, err_opt_arr) =
               array_get
                 ~array_pos
                 ~expr_pos
@@ -502,16 +538,22 @@ let rec array_get
                 e2
                 ty2
             in
-            let err_res =
+            let err_res_idx =
               Option.value_map
-                err_opt
+                err_opt_idx
                 ~default:(Ok ty2)
                 ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
             in
-            (env, ty, err_res)
+            let err_res_arr =
+              Option.value_map
+                err_opt_arr
+                ~default:dflt_arr_res
+                ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+            in
+            (env, ty, err_res_idx, err_res_arr)
           | _ ->
             let (env, ty1) = error_array env expr_pos ty1 in
-            (env, ty1, Ok ty2)
+            (env, ty1, Ok ty2, dflt_arr_res)
         end
       | Tunapplied_alias _ ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
@@ -527,7 +569,7 @@ let rec array_get
       | Taccess _
       | Tneg _ ->
         let (env, ty1) = error_array env expr_pos ty1 in
-        (env, ty1, Ok ty2)
+        (env, ty1, Ok ty2, dflt_arr_res)
       (* Type-check array access as though it is the method
        * array_get<Tk,Tv>(KeyedContainer<Tk,Tv> $array, Tk $key): Tv
        * (We can already force Tk to be the type of the key argument because
@@ -543,7 +585,7 @@ let rec array_get
             keyed_container
             (Errors.index_type_mismatch_at expr_pos)
         in
-        (env, value, Ok ty2))
+        (env, value, Ok ty2, dflt_arr_res))
 
 (* Given a type `ty` known to be a lower bound on the type of the array operand
  * to an array append operation, compute the largest upper bound on that type

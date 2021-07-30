@@ -3370,7 +3370,7 @@ and expr_
     let env = might_throw env in
     let is_lvalue = phys_equal valkind `lvalue in
     let (_, p1, _) = e1 in
-    let (env, ty, key_err_opt) =
+    let (env, ty, key_err_opt, arr_err_opt) =
       Typing_array_access.array_get
         ~array_pos:p1
         ~expr_pos:p
@@ -3384,7 +3384,9 @@ and expr_
     make_result
       env
       p
-      (Aast.Array_get (te1, Some (hole_on_err ~err_opt:key_err_opt te2)))
+      (Aast.Array_get
+         ( hole_on_err ~err_opt:arr_err_opt te1,
+           Some (hole_on_err ~err_opt:key_err_opt te2) ))
       ty
   | Call ((_, pos_id, Id ((_, s) as id)), [], el, None)
     when Hash_set.mem typing_env_pseudofunctions s ->

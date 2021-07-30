@@ -164,10 +164,8 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let mut args = Args {
         info,
         method,
-        namespace: &class.namespace,
         scope,
         deprecation_info: deprecation_info(attributes.iter()),
-        //deprecation_info: None,
         params: &method.params,
         ret,
         method_id: &name,
@@ -538,8 +536,6 @@ fn call_cls_method<'a, 'arena>(
 struct Args<'r, 'ast, 'arena> {
     pub info: &'r MemoizeInfo<'arena>,
     pub method: &'r T::Method_,
-    #[allow(dead_code)]
-    pub namespace: &'r T::Nsenv,
     pub scope: &'r Scope<'ast>,
     pub deprecation_info: Option<&'r [TypedValue<'arena>]>,
     pub params: &'r [T::FunParam],

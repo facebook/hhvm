@@ -59,8 +59,6 @@ use std::{borrow::Cow, io::Write as _, path::Path, write};
 
 struct ExprEnv<'e> {
     pub codegen_env: Option<&'e HhasBodyEnv>,
-    #[allow(dead_code)]
-    pub is_xhp: bool,
 }
 
 pub fn print_program<W: Write>(
@@ -2216,7 +2214,6 @@ fn print_param_default_value<W: Write>(
 ) -> Result<(), W::Error> {
     let expr_env = ExprEnv {
         codegen_env: body_env,
-        is_xhp: false,
     };
     w.write(" = ")?;
     print_label(w, &default_val.0)?;
@@ -2906,7 +2903,6 @@ fn print_xml<W: Write>(
     }?;
     let env = ExprEnv {
         codegen_env: env.codegen_env,
-        is_xhp: true,
     };
     write!(w, "new {}", mangle(id.into()))?;
     paren(w, |w| {
@@ -3359,10 +3355,7 @@ fn print_record_def<W: Write>(
 pub fn expr_to_string_lossy(mut ctx: Context, expr: &ast::Expr) -> String {
     ctx.dump_lambdas = true;
 
-    let env = ExprEnv {
-        codegen_env: None,
-        is_xhp: false,
-    };
+    let env = ExprEnv { codegen_env: None };
     let mut escaped_src = String::new();
     print_expr(&mut ctx, &mut escaped_src, &env, expr).expect("Printing failed");
 

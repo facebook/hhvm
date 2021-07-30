@@ -8103,16 +8103,19 @@ and string2 env idl =
                 MakeType.new_type r SN.Classes.cHHFormatString [formatter_tyvar];
               ]
           in
-          let env =
-            Typing_ops.sub_type
-              p
-              Reason.URstr_interp
-              env
-              ty
-              stringlike
-              Errors.strict_str_interp_type_mismatch
+          let (env, err_opt) =
+            Result.fold
+              ~ok:(fun env -> (env, None))
+              ~error:(fun env -> (env, Some (ty, stringlike)))
+            @@ Typing_ops.sub_type_res
+                 p
+                 Reason.URstr_interp
+                 env
+                 ty
+                 stringlike
+                 Errors.strict_str_interp_type_mismatch
           in
-          (env, te :: tel)
+          (env, hole_on_err ~err_opt te :: tel)
         else
           let env = Typing_substring.sub_string p env ty in
           (env, te :: tel))

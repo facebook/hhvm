@@ -26,9 +26,7 @@
             (Return
                (Some ((string), [5:10-15],
                       (Binop (Dot, ((string), [5:10-12], (Lvar ([5:10-12], $x))),
-                         ((DateTime), [5:13-15],
-                          (Hole (((DateTime), [5:13-15], (Lvar ([5:13-15], $y))), (DateTime), (?(dynamic | bool | float | resource | arraykey | HH\FormatString<nothing>)), Typing)))
-                         ))))))
+                         ((DateTime), [5:13-15], (Hole (((DateTime), [5:13-15], (Lvar ([5:13-15], $y))), (DateTime), ((dynamic | arraykey | HH\FormatString<nothing>)), Typing)))))))))
             ];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

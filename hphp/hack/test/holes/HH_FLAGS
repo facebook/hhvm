@@ -1,3 +1,5 @@
---allowed-fixme-codes-strict 4063,4067,4101,4110,4116,4240,4298,4323,4324,4343,4371,4417,4423,4435
+--allowed-fixme-codes-strict 4063,4067,4101,4110,4116,4240,4298,4323,4324,4343,4371,4414,4415,4417,4423,4435
 --allowed-decl-fixme-codes 4101
 --union-intersection-type-hints
+
+--enable-strict-string-concat-interp

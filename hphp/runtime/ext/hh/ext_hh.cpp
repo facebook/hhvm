@@ -1188,8 +1188,16 @@ Variant coeffects_call_helper(const Variant& function, const char* name,
 } // namespace
 
 Variant HHVM_FUNCTION(coeffects_backdoor, const Variant& function) {
-  return coeffects_call_helper(function, "HH\\Coeffects\\backdoor",
-                               RuntimeCoeffects::defaults(), true);
+  auto const run = [&] {
+    return coeffects_call_helper(function, "HH\\Coeffects\\backdoor",
+                                 RuntimeCoeffects::defaults(), true);
+  };
+  if (!RO::EvalEnableImplicitContext) return run();
+  // Kill and restore implicit context
+  auto const prev = *ImplicitContext::activeCtx;
+  *ImplicitContext::activeCtx = nullptr;
+  SCOPE_EXIT { *ImplicitContext::activeCtx = prev; };
+  return run();
 }
 
 Variant HHVM_FUNCTION(enter_policied_of, const Variant& function) {

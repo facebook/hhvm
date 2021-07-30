@@ -1,0 +1,7 @@
+Setting context to 5
+in f context is 5 
+in g context is null 
+back in f context is 5 
+in h_exception context is null 
+throwing exception from h_exception()
+back in f context is 5 

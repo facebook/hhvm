@@ -26,8 +26,8 @@ interface Reflector {
 }
 
 trait ReflectionLegacyAttribute {
-  <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
-  final public function getAttributes(): darray<arraykey, varray<mixed>> {
+  <<__ProvenanceSkipFrame>>
+  final public function getAttributes()[]: darray<arraykey, varray<mixed>> {
     $denamespaced = darray[];
     foreach ($this->getAttributesNamespaced() as $name => $args) {
       $pos = strrpos($name, '\\');
@@ -37,13 +37,11 @@ trait ReflectionLegacyAttribute {
     return $denamespaced;
   }
 
-  <<__Pure, __MaybeMutable>>
-  final public function hasAttribute(string $name): bool {
+  final public function hasAttribute(string $name)[]: bool {
     return array_key_exists($name, $this->getAttributes());
   }
 
-  <<__Pure, __MaybeMutable>>
-  final public function getAttribute(string $name): ?varray<mixed> {
+  final public function getAttribute(string $name)[]: ?varray<mixed> {
     return hphp_array_idx($this->getAttributes(), $name, null);
   }
 }
@@ -550,8 +548,7 @@ class ReflectionParameter implements Reflector {
 
   use ReflectionTypedAttribute;
 
-  <<__Pure, __MaybeMutable>>
-  final public function getAttributesNamespaced() {
+  final public function getAttributesNamespaced()[] {
     return $this->info['attributes'];
   }
 

@@ -166,7 +166,8 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
     // The local that contains the reified generics is the first non parameter local,
     // so the first local is parameter count + 1 when there are reified = generics
     let add_reified = usize::from(is_reified);
-    let first_local = Local::Unnamed(param_count + add_reified);
+    let add_implicit_context = usize::from(should_emit_implicit_context);
+    let first_local_idx = param_count + add_reified;
     let deprecation_body =
         emit_body::emit_deprecation_info(alloc, &env.scope, deprecation_info, e.systemlib())?;
     let (begin_label, default_value_setters) =
@@ -197,7 +198,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
                 emit_memoize_helpers::get_memo_key_list(
                     alloc,
                     param_count,
-                    param_count + add_reified,
+                    first_local_idx,
                     reified::GENERICS_LOCAL_NAME,
                 ),
             ),
@@ -207,19 +208,18 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
         instr::empty(alloc)
     } else {
         // Last unnamed local slot
-        let local = 2 * (param_count + add_reified);
+        let local = first_local_idx + param_count + add_reified;
         emit_memoize_helpers::get_implicit_context_memo_key(alloc, local)
     };
-    let param_start = param_count + add_reified;
-    let add_implicit_context = usize::from(should_emit_implicit_context);
-    let param_count = (param_start + add_implicit_context) as isize;
+    let first_local = Local::Unnamed(first_local_idx);
+    let key_count = (param_count + add_reified + add_implicit_context) as isize;
     Ok(InstrSeq::gather(
         alloc,
         vec![
             begin_label,
             emit_body::emit_method_prolog(e, env, pos, hhas_params, ast_params, &[])?,
             deprecation_body,
-            emit_memoize_helpers::param_code_sets(alloc, hhas_params, param_start),
+            emit_memoize_helpers::param_code_sets(alloc, hhas_params, first_local_idx),
             reified_memokeym,
             ic_memokey,
             if is_async {
@@ -230,7 +230,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
                             alloc,
                             notfound,
                             suspended_get,
-                            Some((first_local, param_count)),
+                            Some((first_local, key_count)),
                         ),
                         instr::retc(alloc),
                         instr::label(alloc, suspended_get),
@@ -241,7 +241,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
                 InstrSeq::gather(
                     alloc,
                     vec![
-                        instr::memoget(alloc, notfound, Some((first_local, param_count))),
+                        instr::memoget(alloc, notfound, Some((first_local, key_count))),
                         instr::retc(alloc),
                     ],
                 )
@@ -252,14 +252,14 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
             emit_memoize_helpers::param_code_gets(alloc, hhas_params),
             reified_get,
             instr::fcallfuncd(alloc, fcall_args, renamed_id),
-            instr::memoset(alloc, Some((first_local, param_count))),
+            instr::memoset(alloc, Some((first_local, key_count))),
             if is_async {
                 InstrSeq::gather(
                     alloc,
                     vec![
                         instr::retc_suspended(alloc),
                         instr::label(alloc, eager_set),
-                        instr::memoset_eager(alloc, Some((first_local, param_count))),
+                        instr::memoset_eager(alloc, Some((first_local, key_count))),
                         instr::retc(alloc),
                     ],
                 )

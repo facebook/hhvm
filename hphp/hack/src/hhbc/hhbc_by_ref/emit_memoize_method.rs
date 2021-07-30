@@ -29,8 +29,6 @@ use hhbc_by_ref_runtime::TypedValue;
 use naming_special_names_rust::{members, user_attributes as ua};
 use oxidized::{ast as T, pos::Pos};
 
-use std::convert::TryInto;
-
 use bitflags::bitflags;
 
 /// Precomputed information required for generation of memoized methods
@@ -258,14 +256,16 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let mut param_count = hhas_params.len();
+    let param_count = hhas_params.len();
     let notfound = emitter.label_gen_mut().next_regular();
     let suspended_get = emitter.label_gen_mut().next_regular();
     let eager_set = emitter.label_gen_mut().next_regular();
     // The local that contains the reified generics is the first non parameter local,
     // so the first local is parameter count + 1 when there are reified = generics
     let add_reified = usize::from(args.flags.contains(Flags::IS_REIFIED));
-    let first_local = Local::Unnamed(param_count + add_reified);
+    let should_emit_implicit_context = args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT);
+    let add_implicit_context = usize::from(should_emit_implicit_context);
+    let first_local_idx = param_count + add_reified;
     let deprecation_body = emit_body::emit_deprecation_info(
         alloc,
         args.scope,
@@ -306,24 +306,21 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
                 emit_memoize_helpers::get_memo_key_list(
                     alloc,
                     param_count,
-                    param_count + add_reified,
+                    first_local_idx,
                     reified::GENERICS_LOCAL_NAME,
                 ),
             ),
         )
     };
-    let should_emit_implicit_context = args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT);
-    let add_implicit_context = usize::from(should_emit_implicit_context);
     let ic_memokey = if !should_emit_implicit_context {
         instr::empty(alloc)
     } else {
         // Last unnamed local slot
-        let local = 2 * (param_count + add_reified);
+        let local = first_local_idx + param_count + add_reified;
         emit_memoize_helpers::get_implicit_context_memo_key(alloc, local)
     };
-    let param_start = param_count + add_reified;
-    param_count = param_start + add_implicit_context;
-
+    let first_local = Local::Unnamed(first_local_idx);
+    let key_count = (param_count + add_reified + add_implicit_context) as isize;
     Ok(InstrSeq::gather(
         alloc,
         vec![
@@ -335,7 +332,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
             } else {
                 instr::checkthis(alloc)
             },
-            emit_memoize_helpers::param_code_sets(alloc, hhas_params, param_start),
+            emit_memoize_helpers::param_code_sets(alloc, hhas_params, first_local_idx),
             reified_memokeym,
             ic_memokey,
             if args.flags.contains(Flags::IS_ASYNC) {
@@ -346,7 +343,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
                             alloc,
                             notfound,
                             suspended_get,
-                            Some((first_local, param_count.try_into().unwrap())),
+                            Some((first_local, key_count)),
                         ),
                         instr::retc(alloc),
                         instr::label(alloc, suspended_get),
@@ -357,11 +354,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
                 InstrSeq::gather(
                     alloc,
                     vec![
-                        instr::memoget(
-                            alloc,
-                            notfound,
-                            Some((first_local, param_count.try_into().unwrap())),
-                        ),
+                        instr::memoget(alloc, notfound, Some((first_local, key_count))),
                         instr::retc(alloc),
                     ],
                 )
@@ -385,17 +378,14 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
                 );
                 instr::fcallobjmethodd_nullthrows(alloc, fcall_args, renamed_method_id)
             },
-            instr::memoset(alloc, Some((first_local, param_count.try_into().unwrap()))),
+            instr::memoset(alloc, Some((first_local, key_count))),
             if args.flags.contains(Flags::IS_ASYNC) {
                 InstrSeq::gather(
                     alloc,
                     vec![
                         instr::retc_suspended(alloc),
                         instr::label(alloc, eager_set),
-                        instr::memoset_eager(
-                            alloc,
-                            Some((first_local, param_count.try_into().unwrap())),
-                        ),
+                        instr::memoset_eager(alloc, Some((first_local, key_count))),
                         instr::retc(alloc),
                     ],
                 )

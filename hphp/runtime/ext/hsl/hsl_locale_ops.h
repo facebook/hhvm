@@ -52,5 +52,8 @@ namespace HPHP {
     virtual String slice(const String& str, int64_t offset, int64_t length) const = 0;
 
     virtual String reverse(const String& str) const = 0;
+
+    virtual String pad_left(const String& str, int64_t len, const String& pad) const = 0;
+    virtual String pad_right(const String& str, int64_t len, const String& pad) const = 0;
   };
 } // namespace HPHP

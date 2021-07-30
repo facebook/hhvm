@@ -38,4 +38,7 @@ function slice_l(string $str, int $offset, int $length, ?Locale $loc = null): st
 function reverse_l(string $str, ?Locale $loc = null): string;
 function vsprintf_l(?Locale $loc, string $fmt, vec<mixed> $args): string;
 
+function pad_left_l(string $str, int $length, string $pad_str = ' ', ?Locale $loc = null): string;
+function pad_right_l(string $str, int $length, string $pad_str = ' ', ?Locale $loc = null): string;
+
 } // namespace HH\Lib\_Private\_Str

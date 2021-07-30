@@ -71,4 +71,9 @@ function reverse_l(string $str, ?Locale $loc = null): string;
 <<__Native>>
 function vsprintf_l(?Locale $loc, string $fmt, vec<mixed> $args): string;
 
+<<__Native>>
+function pad_left_l(string $str, int $length, string $pad_str = ' ', ?Locale $loc = null): string;
+<<__Native>>
+function pad_right_l(string $str, int $length, string $pad_str = ' ', ?Locale $loc = null): string;
+
 } // namespace HH\Lib\_Private\_Str

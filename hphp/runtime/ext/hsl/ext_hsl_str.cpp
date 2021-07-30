@@ -200,6 +200,32 @@ String HHVM_FUNCTION(reverse_l,
   return get_locale(maybe_loc)->ops()->reverse(str);
 }
 
+String HHVM_FUNCTION(pad_left_l,
+                     const String& str,
+                     int64_t len,
+                     const String& pad,
+                     const Variant& maybe_loc) {
+  if (pad.empty()) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "padding string can not be empty"
+    );
+  }
+  return get_locale(maybe_loc)->ops()->pad_left(str, len, pad);
+}
+
+String HHVM_FUNCTION(pad_right_l,
+                     const String& str,
+                     int64_t len,
+                     const String& pad,
+                     const Variant& maybe_loc) {
+  if (pad.empty()) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "padding string can not be empty"
+    );
+  }
+  return get_locale(maybe_loc)->ops()->pad_right(str, len, pad);
+}
+
 String HHVM_FUNCTION(vsprintf_l,
                      const Variant& maybe_loc,
                      const String& fmt,
@@ -257,6 +283,9 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\reverse_l, reverse_l);
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\vsprintf_l, vsprintf_l);
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\pad_left_l, pad_left_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\pad_right_l, pad_right_l);
 
     loadSystemlib();
   }

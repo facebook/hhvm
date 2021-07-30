@@ -426,4 +426,42 @@ String HSLLocaleICUOps::reverse(const String& str) const {
   return ret;
 }
 
+String HSLLocaleICUOps::pad_left(const String& str, int64_t len, const String& pad) const {
+  auto ustr = ustr_from_utf8(str);
+  const auto strl = ustr.countChar32();
+  if (strl >= len) {
+    return str;
+  }
+
+  const auto upad = ustr_from_utf8(pad);
+  const auto padl = ustr.countChar32();
+  icu::UnicodeString uret;
+  for (int64_t diff = len - strl; diff >= 0; diff -= padl) {
+    uret.append(upad);
+  }
+  uret.truncate(uret.moveIndex32(0, len - strl));
+  uret.append(ustr);
+  std::string ret;
+  uret.toUTF8String(ret);
+  return ret;
+}
+
+String HSLLocaleICUOps::pad_right(const String& str, int64_t len, const String& pad) const {
+  auto ustr = ustr_from_utf8(str);
+  const auto strl = ustr.countChar32();
+  if (strl >= len) {
+    return str;
+  }
+
+  const auto upad = ustr_from_utf8(pad);
+  const auto padl = ustr.countChar32();
+  for (int64_t diff = len - strl; diff >= 0; diff -= padl) {
+    ustr.append(upad);
+  }
+  ustr.truncate(ustr.moveIndex32(0, len));
+  std::string ret;
+  ustr.toUTF8String(ret);
+  return ret;
+}
+
 } // namespace HPHP

@@ -218,4 +218,12 @@ String HSLLocaleLibcOps::reverse(const String& str) const {
   return HHVM_FN(strrev)(str);
 }
 
+String HSLLocaleLibcOps::pad_left(const String& str, int64_t len, const String& pad) const {
+  return string_pad(str.data(), str.length(), len, pad.data(), pad.length(), k_STR_PAD_LEFT);
+}
+
+String HSLLocaleLibcOps::pad_right(const String& str, int64_t len, const String& pad) const {
+  return string_pad(str.data(), str.length(), len, pad.data(), pad.length(), k_STR_PAD_RIGHT);
+}
+
 } // namespace HPHP

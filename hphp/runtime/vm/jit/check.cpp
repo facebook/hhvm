@@ -540,6 +540,7 @@ using TypeNames::TCA;
 #define DDictElem
 #define DModified(n)
 #define DArrLikeSet
+#define DArrLikeUnset
 #define DArrLikeAppend
 #define DKeysetElem
 #define DVecKey
@@ -599,6 +600,7 @@ using TypeNames::TCA;
 #undef DDictElem
 #undef DModified
 #undef DArrLikeSet
+#undef DArrLikeUnset
 #undef DArrLikeAppend
 #undef DKeysetElem
 #undef DVecFirstElem

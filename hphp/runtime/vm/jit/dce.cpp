@@ -608,6 +608,7 @@ bool canDCE(IRInstruction* inst) {
   case MapSet:
   case VectorSet:
   case BespokeSet:
+  case BespokeUnset:
   case StructDictSet:
   case BespokeAppend:
   case SetElem:

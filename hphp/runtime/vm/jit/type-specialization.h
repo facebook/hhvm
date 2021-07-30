@@ -56,7 +56,7 @@ struct ArraySpec {
   ArraySpec(ArrayLayout layout, const RepoAuthType::Array* type);
 
   /*
-   * Update the layout of the ArraySpec wit the given info, if it is possible
+   * Update the layout of the ArraySpec with the given info, if it is possible
    * to do so without a contradiction - otherwise, return Bottom.
    */
   ArraySpec narrowToLayout(ArrayLayout layout) const;

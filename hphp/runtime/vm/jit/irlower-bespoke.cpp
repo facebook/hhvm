@@ -206,6 +206,26 @@ void cgBespokeSet(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
+void cgBespokeUnset(IRLS &env, const IRInstruction *inst) {
+  using UnsetInt = ArrayData* (ArrayData::*)(int64_t);
+  using UnsetStr = ArrayData* (ArrayData::*)(const StringData*);
+
+  auto const unsetIntMove =
+    CallSpec::method(static_cast<UnsetInt>(&ArrayData::removeMove));
+  auto const unsetStrMove =
+    CallSpec::method(static_cast<UnsetStr>(&ArrayData::removeMove));
+
+  auto const arr = inst->src(0)->type();
+  auto const key = inst->src(1)->type();
+  auto const target = (key <= TInt)
+    ? CALL_TARGET(arr, RemoveIntMove, unsetIntMove)
+    : CALL_TARGET(arr, RemoveStrMove, unsetStrMove);
+
+  auto& v = vmain(env);
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+}
+
 void cgBespokeAppend(IRLS& env, const IRInstruction* inst) {
   using Append = ArrayData* (ArrayData::*)(TypedValue);
 

@@ -179,6 +179,10 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
       // Consumes the reference to its input array, and moves input value
       return move == Consume && (srcNo == 0 || srcNo == 2);
 
+    case BespokeUnset:
+      // Only consumes the reference to its input array
+      return move == Consume && srcNo == 0;
+
     case BespokeAppend:
       // Consumes the reference to its input array, and moves input value (both
       // parameters).
@@ -550,6 +554,19 @@ Type arrLikeSetReturn(const IRInstruction* inst) {
   return base.narrowToLayout(layout);
 }
 
+Type arrLikeUnsetReturn(const IRInstruction* inst) {
+  assertx(inst->is(BespokeUnset));
+  auto const arr = inst->src(0)->type();
+  auto const key = inst->src(1)->type();
+
+  assertx(arr <= TArrLike);
+  assertx(arr.isKnownDataType());
+  assertx(key.subtypeOfAny(TInt, TStr));
+  auto const base = arr | (TCounted & arr.modified());
+  auto const layout = arr.arrSpec().layout().removeType(key);
+  return base.narrowToLayout(layout);
+}
+
 Type arrLikeAppendReturn(const IRInstruction* inst) {
   assertx(inst->is(BespokeAppend));
   auto const arr = inst->src(0)->type();
@@ -636,6 +653,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DLoggingArrLike   return loggingArrLikeReturn(inst);
 #define DModified(n)      return inst->src(n)->type().modified();
 #define DArrLikeSet       return arrLikeSetReturn(inst);
+#define DArrLikeUnset     return arrLikeUnsetReturn(inst);
 #define DArrLikeAppend    return arrLikeAppendReturn(inst);
 #define DStructDict     return structDictReturn(inst);
 #define DCol            return newColReturn(inst);

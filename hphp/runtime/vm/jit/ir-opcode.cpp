@@ -59,6 +59,7 @@ TRACE_SET_MOD(hhir);
 #define DDictElem      HasDest
 #define DModified(n)   HasDest
 #define DArrLikeSet    HasDest
+#define DArrLikeUnset  HasDest
 #define DArrLikeAppend HasDest
 #define DKeysetElem    HasDest
 #define DBespokeElemLval  HasDest
@@ -288,6 +289,7 @@ bool opcodeMayRaise(Opcode opc) {
   case BespokeElem:
   case BespokeGetThrow:
   case BespokeSet:
+  case BespokeUnset:
   case Call:
   case CallBuiltin:
   case CGetElem:

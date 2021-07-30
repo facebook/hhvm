@@ -1371,6 +1371,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetNewElemVec:
   case SetNewElemKeyset:
   case UnsetElem:
+  case BespokeUnset:
   case ElemVecD:
   case ElemVecU:
   case ElemDictD:

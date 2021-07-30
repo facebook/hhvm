@@ -3035,6 +3035,10 @@ fields of that struct for holding intermediate values.
   This op has SetMove semantics; it consumes a refcount on the input array and
   produces one on the output, and does no refcounting to the value S2.
 
+| BespokeUnset, DArrLikeUnset, S(Vec,Dict,Keyset) S(Int,Str), LA|PRc|CRc
+
+  Unset element with key S1 in the array S0, which may have an arbitrary layout.
+
 | BespokeAppend, DArrLikeAppend, S(Vec,Dict,Keyset) S(InitCell), LA|PRc|CRc
 
   Set element with key S1 in the array S0, which may have an arbitrary layout.

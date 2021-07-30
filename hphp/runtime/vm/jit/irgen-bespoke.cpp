@@ -251,6 +251,7 @@ SSATmp* emitSetNewElem(IRGS& env, SSATmp* origValue) {
 }
 
 SSATmp* emitSetElem(IRGS& env, SSATmp* key, SSATmp* value) {
+  assertx(key->type().isKnownDataType());
   auto const baseType = env.irb->fs().mbase().type;
   auto const base = extractBase(env);
   if (((baseType <= TVec) && !key->isA(TInt)) ||
@@ -291,6 +292,28 @@ void emitBespokeSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   }();
   popC(env, DataTypeGeneric);
   mFinalImpl(env, nDiscard, result);
+}
+
+void emitBespokeUnsetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
+  auto const key = memberKey(env, mk);
+
+  assertx(key->type().isKnownDataType());
+
+  auto const arr = extractBase(env);
+
+  if (!key->isA(TInt | TStr)) {
+    gen(env, ThrowInvalidArrayKey, arr, key);
+  } else {
+    auto const baseLoc = gen(env, LdMBase, TLvalToCell);
+    if (!canUpdateCanonicalBase(baseLoc)) {
+      gen(env, UnsetElem, baseLoc, key);
+    } else {
+      auto const newArr = gen(env, BespokeUnset, arr, key);
+      updateCanonicalBase(env, baseLoc, newArr);
+    }
+  }
+
+  mFinalImpl(env, nDiscard, nullptr);
 }
 
 SSATmp* emitIsset(IRGS& env, SSATmp* key) {
@@ -781,6 +804,9 @@ void translateDispatchBespoke(IRGS& env, const NormalizedInstruction& ni) {
     case Op::SetM:
       emitBespokeSetM(env, ni.imm[0].u_IVA, ni.imm[1].u_KA);
       return;
+    case Op::UnsetM:
+      emitBespokeUnsetM(env, ni.imm[0].u_IVA, ni.imm[1].u_KA);
+      return;
     case Op::Idx:
     case Op::ArrayIdx:
       emitBespokeIdx(env);
@@ -823,7 +849,7 @@ Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
   auto const op = sk.op();
   auto const soff = env.irb->fs().bcSPOff();
 
-  if (isMemberDimOp(op) || (op == Op::QueryM || op == Op::SetM)) {
+  if (isMemberDimOp(op) || (op == Op::QueryM || op == Op::SetM || op == Op::UnsetM)) {
     return {Location::MBase{}};
   }
 
@@ -1276,7 +1302,7 @@ void handleSink(IRGS& env, const NormalizedInstruction& ni,
 
   if (isIteratorOp(sk.op())) {
     emitVanilla(env);
-  } else if (isFCall(sk.op())) {
+  } else if (isFCall(sk.op()) || sk.op() == OpUnsetM) {
     guardToLayout(env, ni, loc, type, nullptr);
     translateDispatchBespoke(env, ni);
   } else if (env.context.kind == TransKind::Profile) {

@@ -88,12 +88,15 @@
              (Expr
                 ((void), [15:5-47],
                  (Call ((((function(int $i): void)), [15:5-9], (Id ([15:5-9], "\\prim"))), 
-                    [], [((int), [15:10-46], (Hole (((float), [15:43-45], (Lvar ([15:43-45], $f))), (float), (int), UnsafeCast)))], None)))));
+                    [], [((int), [15:10-46], (Hole (((float), [15:43-45], (Lvar ([15:43-45], $f))), (float), (int), (UnsafeCast [([15:32-37], (Hprim Tfloat)); ([15:38-41], (Hprim Tint))]))))], None)))));
              ([18:5-47],
               (Expr
                  ((void), [18:5-46],
                   (Call ((((function(int $i): void)), [18:5-9], (Id ([18:5-9], "\\prim"))), 
-                     [], [((int), [18:10-45], (Hole (((?int), [18:42-44], (Lvar ([18:42-44], $x))), (?int), (int), UnsafeCast)))], None)))))
+                     [],
+                     [((int), [18:10-45],
+                       (Hole (((?int), [18:42-44], (Lvar ([18:42-44], $x))), (?int), (int), (UnsafeCast [([18:32-36], (Hoption ([18:33-36], (Hprim Tint)))); ([18:37-40], (Hprim Tint))]))))],
+                     None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

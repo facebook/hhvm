@@ -117,7 +117,14 @@
              (Expr
                 ((void), [25:3-53],
                  (Call ((((function(Set<int> $h): void)), [25:3-4], (Id ([25:3-4], "\\h"))), 
-                    [], [((Set<int>), [25:5-52], (Hole (((Set<string>), [25:49-51], (Lvar ([25:49-51], $h))), (Set<string>), (Set<int>), UnsafeCast)))], None)))));
+                    [],
+                    [((Set<int>), [25:5-52],
+                      (Hole (((Set<string>), [25:49-51], (Lvar ([25:49-51], $h))), (Set<string>), (Set<int>),
+                         (UnsafeCast
+                            [([25:27-38], (Happly (([25:27-30], "\\HH\\Set"), [([25:31-37], (Hprim Tstring))]))); ([25:39-47], (Happly (([25:39-42], "\\HH\\Set"), [([25:43-46], (Hprim Tint))])))])
+                         )))
+                      ],
+                    None)))));
              ([27:3-24],
               (Expr
                  ((TestSet), [27:3-23],
@@ -128,7 +135,14 @@
                   (Call (
                      (((function(Set<int> $h): void)), [30:3-10],
                       (Obj_get (((TestSet), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Set<int> $h): void)), [30:9-10], (Id ([30:9-10], "h"))), OG_nullthrows, false))),
-                     [], [((Set<int>), [30:11-58], (Hole (((Set<string>), [30:55-57], (Lvar ([30:55-57], $h))), (Set<string>), (Set<int>), UnsafeCast)))], None)))))
+                     [],
+                     [((Set<int>), [30:11-58],
+                       (Hole (((Set<string>), [30:55-57], (Lvar ([30:55-57], $h))), (Set<string>), (Set<int>),
+                          (UnsafeCast
+                             [([30:33-44], (Happly (([30:33-36], "\\HH\\Set"), [([30:37-43], (Hprim Tstring))]))); ([30:45-53], (Happly (([30:45-48], "\\HH\\Set"), [([30:49-52], (Hprim Tint))])))])
+                          )))
+                       ],
+                     None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

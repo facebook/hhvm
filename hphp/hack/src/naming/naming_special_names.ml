@@ -470,6 +470,8 @@ module PseudoFunctions = struct
 
   let unsafe_cast = "\\HH\\FIXME\\UNSAFE_CAST"
 
+  let enforced_cast = "\\HH\\FIXME\\ENFORCED_CAST"
+
   let all_pseudo_functions =
     HashSet.of_list
       [

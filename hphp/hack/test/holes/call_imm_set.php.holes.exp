@@ -118,7 +118,15 @@
              (Expr
                 ((void), [25:3-59],
                  (Call ((((function(ImmSet<int> $j): void)), [25:3-4], (Id ([25:3-4], "\\j"))), 
-                    [], [((ImmSet<int>), [25:5-58], (Hole (((ImmSet<string>), [25:55-57], (Lvar ([25:55-57], $j))), (ImmSet<string>), (ImmSet<int>), UnsafeCast)))], None)))));
+                    [],
+                    [((ImmSet<int>), [25:5-58],
+                      (Hole (((ImmSet<string>), [25:55-57], (Lvar ([25:55-57], $j))), (ImmSet<string>), (ImmSet<int>),
+                         (UnsafeCast
+                            [([25:27-41], (Happly (([25:27-33], "\\HH\\ImmSet"), [([25:34-40], (Hprim Tstring))])));
+                              ([25:42-53], (Happly (([25:42-48], "\\HH\\ImmSet"), [([25:49-52], (Hprim Tint))])))])
+                         )))
+                      ],
+                    None)))));
              ([27:3-27],
               (Expr
                  ((TestImmSet), [27:3-26],
@@ -130,7 +138,15 @@
                   (Call (
                      (((function(ImmSet<int> $j): void)), [30:3-10],
                       (Obj_get (((TestImmSet), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(ImmSet<int> $j): void)), [30:9-10], (Id ([30:9-10], "j"))), OG_nullthrows, false))),
-                     [], [((ImmSet<int>), [30:11-64], (Hole (((ImmSet<string>), [30:61-63], (Lvar ([30:61-63], $j))), (ImmSet<string>), (ImmSet<int>), UnsafeCast)))], None)))))
+                     [],
+                     [((ImmSet<int>), [30:11-64],
+                       (Hole (((ImmSet<string>), [30:61-63], (Lvar ([30:61-63], $j))), (ImmSet<string>), (ImmSet<int>),
+                          (UnsafeCast
+                             [([30:33-47], (Happly (([30:33-39], "\\HH\\ImmSet"), [([30:40-46], (Hprim Tstring))])));
+                               ([30:48-59], (Happly (([30:48-54], "\\HH\\ImmSet"), [([30:55-58], (Hprim Tint))])))])
+                          )))
+                       ],
+                     None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

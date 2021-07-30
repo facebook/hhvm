@@ -152,13 +152,29 @@ let get_type ((ty, _, _) : expr) = ty
 
 let nast_converter =
   object
-    inherit [_] Aast.map
+    inherit [_] Aast.map as super
 
     method on_'ex _ _ = ()
 
     method on_'fb _ _fb = Nast.Named
 
     method on_'en _ _ = ()
+
+    method! on_Hole _ ex _ _ src =
+      let ((_, pos, ex_) as ex) = super#on_expr () ex in
+      let mk_call hints name =
+        let targs =
+          List.map ~f:(fun hint -> ((), super#on_hint () hint)) hints
+        in
+        let id = ((), pos, Aast.Id (pos, name)) in
+        Aast.Call (id, targs, [ex], None)
+      in
+      match src with
+      | Aast.UnsafeCast hints ->
+        mk_call hints Naming_special_names.PseudoFunctions.unsafe_cast
+      | Aast.EnforcedCast hints ->
+        mk_call hints Naming_special_names.PseudoFunctions.enforced_cast
+      | _ -> ex_
   end
 
 let to_nast p = nast_converter#on_program () p

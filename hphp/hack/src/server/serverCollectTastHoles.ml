@@ -25,7 +25,7 @@ let filter_source hole_filter src =
   match (hole_filter, src) with
   | (ServerCommandTypes.Tast_hole.Any, _) -> true
   | (ServerCommandTypes.Tast_hole.Typing, Aast.Typing) -> true
-  | (ServerCommandTypes.Tast_hole.Cast, Aast.(UnsafeCast | EnforcedCast)) ->
+  | (ServerCommandTypes.Tast_hole.Cast, Aast.(UnsafeCast _ | EnforcedCast _)) ->
     true
   | _ -> false
 

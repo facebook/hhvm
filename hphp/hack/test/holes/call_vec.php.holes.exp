@@ -117,7 +117,14 @@
              (Expr
                 ((void), [25:3-52],
                  (Call ((((function(vec<int> $e): void)), [25:3-4], (Id ([25:3-4], "\\e"))), 
-                    [], [((vec<int>), [25:5-51], (Hole (((vec<float>), [25:48-50], (Lvar ([25:48-50], $e))), (vec<float>), (vec<int>), UnsafeCast)))], None)))));
+                    [],
+                    [((vec<int>), [25:5-51],
+                      (Hole (((vec<float>), [25:48-50], (Lvar ([25:48-50], $e))), (vec<float>), (vec<int>),
+                         (UnsafeCast
+                            [([25:27-37], (Happly (([25:27-30], "\\HH\\vec"), [([25:31-36], (Hprim Tfloat))]))); ([25:38-46], (Happly (([25:38-41], "\\HH\\vec"), [([25:42-45], (Hprim Tint))])))])
+                         )))
+                      ],
+                    None)))));
              ([27:3-24],
               (Expr
                  ((TestVec), [27:3-23],
@@ -128,7 +135,14 @@
                   (Call (
                      (((function(vec<int> $e): void)), [30:3-10],
                       (Obj_get (((TestVec), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(vec<int> $e): void)), [30:9-10], (Id ([30:9-10], "e"))), OG_nullthrows, false))),
-                     [], [((vec<int>), [30:11-57], (Hole (((vec<float>), [30:54-56], (Lvar ([30:54-56], $e))), (vec<float>), (vec<int>), UnsafeCast)))], None)))))
+                     [],
+                     [((vec<int>), [30:11-57],
+                       (Hole (((vec<float>), [30:54-56], (Lvar ([30:54-56], $e))), (vec<float>), (vec<int>),
+                          (UnsafeCast
+                             [([30:33-43], (Happly (([30:33-36], "\\HH\\vec"), [([30:37-42], (Hprim Tfloat))]))); ([30:44-52], (Happly (([30:44-47], "\\HH\\vec"), [([30:48-51], (Hprim Tint))])))])
+                          )))
+                       ],
+                     None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

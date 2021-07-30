@@ -644,6 +644,11 @@ and ('ex, 'fb, 'en) expr_ =
           ```
       *)
 
+and hole_source =
+  | Typing
+  | UnsafeCast of hint list
+  | EnforcedCast of hint list
+
 and ('ex, 'fb, 'en) class_get_expr =
   | CGstring of pstring
   | CGexpr of ('ex, 'fb, 'en) expr
@@ -1022,11 +1027,6 @@ and ns_kind =
   | NSClassAndNamespace
   | NSFun
   | NSConst
-
-and hole_source =
-  | Typing
-  | UnsafeCast
-  | EnforcedCast
 
 and doc_comment = (Doc_comment.t[@visitors.opaque])
 

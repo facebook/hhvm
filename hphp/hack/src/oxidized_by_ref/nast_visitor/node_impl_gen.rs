@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fd3fe840b094c433985426ebbe73c0a1>>
+// @generated SignedSource<<5ca78762915ec30980ac82c86213b0a9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1197,15 +1197,15 @@ impl<'a> Node<'a> for Hint_<'a> {
         }
     }
 }
-impl<'a> Node<'a> for HoleSource {
+impl<'a> Node<'a> for HoleSource<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_hole_source(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             HoleSource::Typing => {}
-            HoleSource::UnsafeCast => {}
-            HoleSource::EnforcedCast => {}
+            HoleSource::UnsafeCast(ref __binding_0) => __binding_0.accept(v),
+            HoleSource::EnforcedCast(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

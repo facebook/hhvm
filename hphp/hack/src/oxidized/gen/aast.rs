@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<de15adb64e4c3b95ff20b542733ae72b>>
+// @generated SignedSource<<9999285d8ebadf50a4ad6c3f6ae9ff91>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -800,6 +800,26 @@ pub enum Expr_<Ex, Fb, En> {
     ///            )
     /// ```
     Hole(Box<(Expr<Ex, Fb, En>, Ex, Ex, HoleSource)>),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum HoleSource {
+    Typing,
+    UnsafeCast(Vec<Hint>),
+    EnforcedCast(Vec<Hint>),
 }
 
 #[derive(
@@ -1769,30 +1789,6 @@ pub enum NsKind {
 }
 impl TrivialDrop for NsKind {}
 arena_deserializer::impl_deserialize_in_arena!(NsKind);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum HoleSource {
-    Typing,
-    UnsafeCast,
-    EnforcedCast,
-}
-impl TrivialDrop for HoleSource {}
-arena_deserializer::impl_deserialize_in_arena!(HoleSource);
 
 #[derive(
     Clone,

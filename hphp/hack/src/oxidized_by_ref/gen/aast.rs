@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f9c2d56fab0506e84b3fd39b92402f6c>>
+// @generated SignedSource<<79f9cfe8266bc7b16af75b7365d96c65>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1029,17 +1029,35 @@ pub enum Expr_<'a, Ex, Fb, En> {
     ///            )
     /// ```
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Hole(
-        &'a (
-            &'a Expr<'a, Ex, Fb, En>,
-            Ex,
-            Ex,
-            &'a oxidized::aast::HoleSource,
-        ),
-    ),
+    Hole(&'a (&'a Expr<'a, Ex, Fb, En>, Ex, Ex, HoleSource<'a>)),
 }
 impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop> TrivialDrop for Expr_<'a, Ex, Fb, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Expr_<'arena, Ex, Fb, En>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub enum HoleSource<'a> {
+    Typing,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    UnsafeCast(&'a [&'a Hint<'a>]),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    EnforcedCast(&'a [&'a Hint<'a>]),
+}
+impl<'a> TrivialDrop for HoleSource<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(HoleSource<'arena>);
 
 #[derive(
     Clone,
@@ -2344,7 +2362,5 @@ impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop> TrivialDrop for Def<
 arena_deserializer::impl_deserialize_in_arena!(Def<'arena, Ex, Fb, En>);
 
 pub use oxidized::aast::NsKind;
-
-pub use oxidized::aast::HoleSource;
 
 pub use oxidized::aast::BreakContinueLevel;

@@ -75,15 +75,15 @@ let debug_print_last_pos _ =
 (* Helpers *)
 (*****************************************************************************)
 
-let mk_hole ?(source = Aast.Typing) (expr : Tast.expr) ~ty_have ~ty_expect =
+let mk_hole ?(source = Aast.Typing) expr ~ty_have ~ty_expect =
   (* if the hole is generated from typing, we leave the type unchanged,
      if it is a call to `[unsafe|enforced]_cast`, we give it the expected type
   *)
   let ty_hole =
     match source with
     | Aast.Typing -> ty_have
-    | UnsafeCast
-    | EnforcedCast ->
+    | UnsafeCast _
+    | EnforcedCast _ ->
       ty_expect
   in
   match expr with
@@ -5808,7 +5808,11 @@ and dispatch_call
               | (ty, _) :: _ -> (ty, ty)
               | _ -> (dflt_ty, dflt_ty)
             in
-            make_result env p (Aast.Hole (el, ty_from, ty_to, UnsafeCast)) ty
+            let te =
+              Aast.Hole
+                (el, ty_from, ty_to, UnsafeCast (List.map ~f:snd explicit_targs))
+            in
+            make_result env p te ty
           )
         in
         let should_forget_fakes = false in

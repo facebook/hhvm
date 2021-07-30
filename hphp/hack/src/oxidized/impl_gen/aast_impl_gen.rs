@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a8d819281c7d552161ddcd95f659da5b>>
+// @generated SignedSource<<3917999bf1fdaf01b136577579717d1f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2466,6 +2466,71 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
         }
     }
 }
+impl HoleSource {
+    pub fn mk_typing() -> Self {
+        HoleSource::Typing
+    }
+    pub fn mk_unsafe_cast(p0: Vec<Hint>) -> Self {
+        HoleSource::UnsafeCast(p0)
+    }
+    pub fn mk_enforced_cast(p0: Vec<Hint>) -> Self {
+        HoleSource::EnforcedCast(p0)
+    }
+    pub fn is_typing(&self) -> bool {
+        match self {
+            HoleSource::Typing => true,
+            _ => false,
+        }
+    }
+    pub fn is_unsafe_cast(&self) -> bool {
+        match self {
+            HoleSource::UnsafeCast(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_enforced_cast(&self) -> bool {
+        match self {
+            HoleSource::EnforcedCast(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_unsafe_cast(&self) -> Option<&Vec<Hint>> {
+        match self {
+            HoleSource::UnsafeCast(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_enforced_cast(&self) -> Option<&Vec<Hint>> {
+        match self {
+            HoleSource::EnforcedCast(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_unsafe_cast_mut(&mut self) -> Option<&mut Vec<Hint>> {
+        match self {
+            HoleSource::UnsafeCast(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_enforced_cast_mut(&mut self) -> Option<&mut Vec<Hint>> {
+        match self {
+            HoleSource::EnforcedCast(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_unsafe_cast_into(self) -> Option<Vec<Hint>> {
+        match self {
+            HoleSource::UnsafeCast(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_enforced_cast_into(self) -> Option<Vec<Hint>> {
+        match self {
+            HoleSource::EnforcedCast(p0) => Some(p0),
+            _ => None,
+        }
+    }
+}
 impl<Ex, Fb, En> ClassGetExpr<Ex, Fb, En> {
     pub fn mk_cgstring(p0: Pstring) -> Self {
         ClassGetExpr::CGstring(p0)
@@ -3379,35 +3444,6 @@ impl NsKind {
     pub fn is_nsconst(&self) -> bool {
         match self {
             NsKind::NSConst => true,
-            _ => false,
-        }
-    }
-}
-impl HoleSource {
-    pub fn mk_typing() -> Self {
-        HoleSource::Typing
-    }
-    pub fn mk_unsafe_cast() -> Self {
-        HoleSource::UnsafeCast
-    }
-    pub fn mk_enforced_cast() -> Self {
-        HoleSource::EnforcedCast
-    }
-    pub fn is_typing(&self) -> bool {
-        match self {
-            HoleSource::Typing => true,
-            _ => false,
-        }
-    }
-    pub fn is_unsafe_cast(&self) -> bool {
-        match self {
-            HoleSource::UnsafeCast => true,
-            _ => false,
-        }
-    }
-    pub fn is_enforced_cast(&self) -> bool {
-        match self {
-            HoleSource::EnforcedCast => true,
             _ => false,
         }
     }

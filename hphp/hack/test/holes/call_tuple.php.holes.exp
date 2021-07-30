@@ -138,12 +138,26 @@
              (Expr
                 ((void), [31:3-54],
                  (Call ((((function((int, int) $a): void)), [31:3-4], (Id ([31:3-4], "\\a"))), 
-                    [], [(((int, int)), [31:5-53], (Hole ((((int, bool)), [31:49-52], (Lvar ([31:49-52], $a1))), ((int, bool)), ((int, int)), UnsafeCast)))], None)))));
+                    [],
+                    [(((int, int)), [31:5-53],
+                      (Hole ((((int, bool)), [31:49-52], (Lvar ([31:49-52], $a1))), ((int, bool)), ((int, int)),
+                         (UnsafeCast
+                            [([31:27-37], (Htuple [([31:28-31], (Hprim Tint)); ([31:32-36], (Hprim Tbool))])); ([31:38-47], (Htuple [([31:39-42], (Hprim Tint)); ([31:43-46], (Hprim Tint))]))])
+                         )))
+                      ],
+                    None)))));
              ([33:3-55],
               (Expr
                  ((void), [33:3-54],
                   (Call ((((function((int, int) $a): void)), [33:3-4], (Id ([33:3-4], "\\a"))), 
-                     [], [(((int, int)), [33:5-53], (Hole ((((bool, int)), [33:49-52], (Lvar ([33:49-52], $a2))), ((bool, int)), ((int, int)), UnsafeCast)))], None)))));
+                     [],
+                     [(((int, int)), [33:5-53],
+                       (Hole ((((bool, int)), [33:49-52], (Lvar ([33:49-52], $a2))), ((bool, int)), ((int, int)),
+                          (UnsafeCast
+                             [([33:27-37], (Htuple [([33:28-32], (Hprim Tbool)); ([33:33-36], (Hprim Tint))])); ([33:38-47], (Htuple [([33:39-42], (Hprim Tint)); ([33:43-46], (Hprim Tint))]))])
+                          )))
+                       ],
+                     None)))));
              ([35:3-26],
               (Expr
                  ((TestTuple), [35:3-25],
@@ -155,14 +169,28 @@
                   (Call (
                      (((function((int, int) $a): void)), [38:3-10],
                       (Obj_get (((TestTuple), [38:3-7], (Lvar ([38:3-7], $foo))), (((function((int, int) $a): void)), [38:9-10], (Id ([38:9-10], "a"))), OG_nullthrows, false))),
-                     [], [(((int, int)), [38:11-59], (Hole ((((int, bool)), [38:55-58], (Lvar ([38:55-58], $a1))), ((int, bool)), ((int, int)), UnsafeCast)))], None)))));
+                     [],
+                     [(((int, int)), [38:11-59],
+                       (Hole ((((int, bool)), [38:55-58], (Lvar ([38:55-58], $a1))), ((int, bool)), ((int, int)),
+                          (UnsafeCast
+                             [([38:33-43], (Htuple [([38:34-37], (Hprim Tint)); ([38:38-42], (Hprim Tbool))])); ([38:44-53], (Htuple [([38:45-48], (Hprim Tint)); ([38:49-52], (Hprim Tint))]))])
+                          )))
+                       ],
+                     None)))));
              ([40:3-61],
               (Expr
                  ((void), [40:3-60],
                   (Call (
                      (((function((int, int) $a): void)), [40:3-10],
                       (Obj_get (((TestTuple), [40:3-7], (Lvar ([40:3-7], $foo))), (((function((int, int) $a): void)), [40:9-10], (Id ([40:9-10], "a"))), OG_nullthrows, false))),
-                     [], [(((int, int)), [40:11-59], (Hole ((((bool, int)), [40:55-58], (Lvar ([40:55-58], $a2))), ((bool, int)), ((int, int)), UnsafeCast)))], None)))))
+                     [],
+                     [(((int, int)), [40:11-59],
+                       (Hole ((((bool, int)), [40:55-58], (Lvar ([40:55-58], $a2))), ((bool, int)), ((int, int)),
+                          (UnsafeCast
+                             [([40:33-43], (Htuple [([40:34-38], (Hprim Tbool)); ([40:39-42], (Hprim Tint))])); ([40:44-53], (Htuple [([40:45-48], (Hprim Tint)); ([40:49-52], (Hprim Tint))]))])
+                          )))
+                       ],
+                     None)))))
              ];
            fb_annotation = () };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

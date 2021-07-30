@@ -2,9 +2,9 @@
 <?hh
 <<file:__EnableUnstableFeatures('context_alias_declaration')>>
 
-newtype X as [] = [HH\Contexts\defaults];
+newtype X as [] = [defaults];
 
-function internal()[\X]: void {
+function internal()[X]: void {
   default_lib_func(); // ok
 }
 
@@ -14,7 +14,7 @@ function default_lib_func(): void {}
 <?hh
 <<file:__EnableUnstableFeatures('context_alias_declaration')>>
 
-function external()[\X]: void {
+function external()[X]: void {
   default_lib_func(); // error, X is not <: defaults
   pure_ok(); // ok
 }

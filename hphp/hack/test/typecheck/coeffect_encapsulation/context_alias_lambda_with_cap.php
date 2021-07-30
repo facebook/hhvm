@@ -3,10 +3,10 @@
 <<file:__EnableUnstableFeatures('context_alias_declaration')>>
 
 // Codegen framework
-newtype Codegen as [] = [\HH\Contexts\defaults];
+newtype Codegen as [] = [defaults];
 
 function enter_codegen(
-  (function ()[\Codegen]: void) $f
+  (function ()[Codegen]: void) $f
 ): void {
   echo "Hello I can secretly do IO";
   $f();
@@ -20,7 +20,7 @@ function enter_codegen(
 <<__EntryPoint>>
 function main(): void {
   enter_codegen(
-    ()[\Codegen] ==> {
+    ()[Codegen] ==> {
       echo "break purity"; // illegal!
     }
   );

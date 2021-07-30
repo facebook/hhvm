@@ -1,6 +1,6 @@
 <?hh
 <<file:__EnableUnstableFeatures('context_alias_declaration')>>
 
-newtype x as [] = [HH\Contexts\defaults];
+newtype x as [] = [defaults];
 
-function test()[\x]: void {}
+function test()[x]: void {}

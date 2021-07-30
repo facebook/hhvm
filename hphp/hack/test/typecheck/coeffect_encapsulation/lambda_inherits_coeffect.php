@@ -2,10 +2,10 @@
 <?hh
 <<file:__EnableUnstableFeatures('context_alias_declaration')>>
 
-newtype Foo as [] = [\HH\Contexts\defaults];
+newtype Foo as [] = [defaults];
 
 function enter_foo(
-  (function ()[\Foo]: void) $f
+  (function ()[Foo]: void) $f
 )[\Foo]: void {
   echo "Hello I can secretly do IO";
   $f();
@@ -17,7 +17,7 @@ function enter_foo(
 
 // client code
 <<__EntryPoint>>
-function main()[\Foo]: void {
+function main()[Foo]: void {
   enter_foo(
     () ==> {
       echo "break purity"; // illegal!

@@ -2407,15 +2407,9 @@ void emitAKExists(IRGS& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
-const StaticString
-  s_implicit_context_set("HH\\ImplicitContext::set"),
-  s_implicit_context_setAsync("HH\\ImplicitContext::setAsync");
-
 void emitGetMemoKeyL(IRGS& env, NamedLocal loc) {
   DEBUG_ONLY auto const func = curFunc(env);
-  assertx(func->isMemoizeWrapper() ||
-          func->fullName()->isame(s_implicit_context_set.get()) ||
-          func->fullName()->isame(s_implicit_context_setAsync.get()));
+  assertx(func->isMemoizeWrapper());
 
   auto const value = ldLocWarn(env, loc, DataTypeSpecific);
 

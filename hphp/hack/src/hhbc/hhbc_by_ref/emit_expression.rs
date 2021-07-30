@@ -3039,12 +3039,6 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 ],
             )))
         }
-        ("__hhvm_internal_getmemokeyl", &[E(_, _, E_::Lvar(ref param))]) if e.systemlib() => {
-            Ok(Some(instr::getmemokeyl(
-                alloc,
-                Local::Named(Str::new_str(alloc, local_id::get_name(&param.1))),
-            )))
-        }
         ("HH\\array_mark_legacy", _) if args.len() == 1 || args.len() == 2 => {
             Ok(Some(emit_array_mark_legacy(e, env, pos, args, true)?))
         }

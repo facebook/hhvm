@@ -3273,16 +3273,9 @@ OPTBLD_INLINE void iopAKExists() {
   vmStack().replaceTV<KindOfBoolean>(result);
 }
 
-const StaticString
-  s_implicit_context_set("HH\\ImplicitContext::set"),
-  s_implicit_context_setAsync("HH\\ImplicitContext::setAsync");
-
 OPTBLD_INLINE void iopGetMemoKeyL(named_local_var loc) {
   DEBUG_ONLY auto const func = vmfp()->func();
-  assertx(func->isMemoizeWrapper() ||
-          func->fullName()->isame(s_implicit_context_set.get()) ||
-          func->fullName()->isame(s_implicit_context_setAsync.get()));
-
+  assertx(func->isMemoizeWrapper());
   assertx(tvIsPlausible(*loc.lval));
 
   if (UNLIKELY(type(loc.lval) == KindOfUninit)) {

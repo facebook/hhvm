@@ -213,7 +213,9 @@ void FuncEmitter::finish() {
 
 const StaticString
   s_construct("__construct"),
-  s_DynamicallyCallable("__DynamicallyCallable");
+  s_DynamicallyCallable("__DynamicallyCallable"),
+  s_PolicyShardedMemoize("__PolicyShardedMemoize"),
+  s_PolicyShardedMemoizeLSB("__PolicyShardedMemoizeLSB");
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(name->data()[0]);
@@ -323,6 +325,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_allFlags.m_returnByValue = false;
     ex->m_allFlags.m_isMemoizeWrapper = false;
     ex->m_allFlags.m_isMemoizeWrapperLSB = false;
+    ex->m_allFlags.m_isPolicyShardedMemoize = false;
 
     if (!coeffectRules.empty()) ex->m_coeffectRules = coeffectRules;
     ex->m_coeffectEscapes = coeffectsInfo.second;
@@ -378,6 +381,14 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_allFlags.m_isMemoizeWrapper = isMemoizeWrapper;
   f->shared()->m_allFlags.m_isMemoizeWrapperLSB = isMemoizeWrapperLSB;
   f->shared()->m_allFlags.m_hasReifiedGenerics = hasReifiedGenerics;
+
+  if ((isMemoizeWrapper &&
+       userAttributes.find(s_PolicyShardedMemoize.get()) != userAttributes.end()) ||
+      (isMemoizeWrapperLSB &&
+       userAttributes.find(s_PolicyShardedMemoizeLSB.get()) != userAttributes.end())) {
+    f->shared()->m_allFlags.m_isPolicyShardedMemoize = true;
+  }
+
 
   for (auto const& name : staticCoeffects) {
     f->shared()->m_staticCoeffectNames.push_back(name);

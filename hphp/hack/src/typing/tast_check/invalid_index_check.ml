@@ -67,14 +67,16 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
     List.iter tyl ~f:(fun ty ->
         array_get ~array_pos ~expr_pos ~index_pos env ty index_ty)
   | Tdarray (key_ty, _) -> type_index env index_ty key_ty Reason.index_array
+  | Tclass ((_, cn), _, _ :: _)
+    when cn = SN.Collections.cDict || cn = SN.Collections.cKeyset ->
+    let key_ty = MakeType.arraykey (Reason.Ridx_dict array_pos) in
+    type_index env index_ty key_ty (Reason.index_class cn)
   | Tclass ((_, cn), _, key_ty :: _)
     when cn = SN.Collections.cMap
          || cn = SN.Collections.cConstMap
          || cn = SN.Collections.cImmMap
          || cn = SN.Collections.cKeyedContainer
-         || cn = SN.Collections.cAnyArray
-         || cn = SN.Collections.cDict
-         || cn = SN.Collections.cKeyset ->
+         || cn = SN.Collections.cAnyArray ->
     type_index env index_ty key_ty (Reason.index_class cn)
   | Toption array_ty ->
     array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty

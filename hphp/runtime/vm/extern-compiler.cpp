@@ -1227,12 +1227,7 @@ void compilers_detach_after_fork() {
   }
 }
 
-std::unique_ptr<FactsParser> acquire_facts_parser() {
-  return std::make_unique<CompilerGuard>(s_manager.get_hackc_pool());
-}
-
 ParseFactsResult extract_facts(
-  const FactsParser& facts_parser,
   const std::string& filename,
   const char* code,
   int len,

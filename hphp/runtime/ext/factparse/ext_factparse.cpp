@@ -41,18 +41,9 @@ namespace {
 
 struct HackCFactsExtractor {
   using result_type = Optional<FactsJSONString>;
-  using state_type = std::unique_ptr<FactsParser>;
 
   static int get_workers_count() {
     return RuntimeOption::EvalHackCompilerWorkers;
-  }
-
-  static state_type init_state() {
-    return acquire_facts_parser();
-  }
-
-  static state_type clear_state() {
-    return std::unique_ptr<FactsParser>();
   }
 
   static void mark_failed(result_type& workerResult) {
@@ -63,10 +54,9 @@ struct HackCFactsExtractor {
     const std::string& path,
     bool allowHipHopSyntax,
     folly::StringPiece code,
-    result_type& res,
-    const state_type& state
+    result_type& res
   ) {
-    auto result = extract_facts(*state, path, code.data(), code.size(),
+    auto result = extract_facts(path, code.data(), code.size(),
                                 RepoOptions::forFile(path.data()));
     match<void>(
       result,
@@ -112,8 +102,7 @@ void parse_file(
   const std::string& root,
   folly::StringPiece path,
   bool allowHipHopSyntax,
-  HackCFactsExtractor::result_type& res,
-  const HackCFactsExtractor::state_type& state
+  HackCFactsExtractor::result_type& res
 ) {
   HackCFactsExtractor::mark_failed(res);
   std::string cleanPath;
@@ -139,7 +128,7 @@ void parse_file(
     if (!f) return;
     auto str = f->read();
     HackCFactsExtractor::parse_file_impl(cleanPath, allowHipHopSyntax,
-                                         str.slice(), res, state);
+                                         str.slice(), res);
   } else {
     // It would be nice to have an atomic stat + open operation here but this
     // doesn't seem to be possible with STL in a portable way.
@@ -150,7 +139,7 @@ void parse_file(
       return;
     }
     HackCFactsExtractor::parse_file_impl(cleanPath, allowHipHopSyntax,
-                                         folly::StringPiece{""}, res, state);
+                                         folly::StringPiece{""}, res);
   }
 }
 
@@ -160,17 +149,15 @@ void facts_parse_sequential(
   DictInit& outResArr,
   bool allowHipHopSyntax
 ) {
-  const auto state = HackCFactsExtractor::init_state();
   for (auto i = 0; i < pathList.size(); ++i) {
     HackCFactsExtractor::result_type workerResult;
     auto path = pathList.at(i);
     try {
-      parse_file(root, path->slice(), allowHipHopSyntax, workerResult, state);
+      parse_file(root, path->slice(), allowHipHopSyntax, workerResult);
     } catch (...) {
       HackCFactsExtractor::mark_failed(workerResult);
     }
-    HackCFactsExtractor::merge_result(workerResult, outResArr,
-                                      StrNR(path));
+    HackCFactsExtractor::merge_result(workerResult, outResArr, StrNR(path));
   }
 }
 struct JobContext {
@@ -194,33 +181,27 @@ using BaseWorker = JobQueueWorker<size_t, const JobContext*, false, true>;
 
 struct ParseFactsWorker: public BaseWorker {
   void doJob(BaseWorker::JobType job) override {
-    parse(m_state, *(this->m_context), job);
+    parse(*(this->m_context), job);
   }
   void onThreadEnter() override {
     hphp_session_init(Treadmill::SessionKind::FactsWorker);
-    m_state = HackCFactsExtractor::init_state();
   }
   void onThreadExit() override {
-    m_state = HackCFactsExtractor::clear_state();
     hphp_context_exit();
     hphp_session_exit();
   }
-  static void parse(const HackCFactsExtractor::state_type& state,
-                    const JobContext& ctx, size_t i) {
+  static void parse(const JobContext& ctx, size_t i) {
     try {
       parse_file(
         ctx.m_root,
         ctx.m_paths[i]->slice(),
         ctx.m_allowHipHopSyntax,
-        ctx.m_worker_results[i],
-        state);
+        ctx.m_worker_results[i]);
     } catch (...) {
       HackCFactsExtractor::mark_failed(ctx.m_worker_results[i]);
     }
     ctx.m_result_q.write(i);
   }
-private:
-  HackCFactsExtractor::state_type m_state;
 };
 
 void facts_parse_threaded(

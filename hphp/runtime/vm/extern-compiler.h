@@ -52,8 +52,6 @@ struct FactsParser {
   }
 };
 
-std::unique_ptr<FactsParser> acquire_facts_parser();
-
 struct FactsJSONString {
   std::string value;
 };
@@ -67,8 +65,7 @@ struct FfpJSONString {
 using ParseFactsResult = boost::variant<FactsJSONString, std::string>;
 using FfpResult = boost::variant<FfpJSONString, std::string>;
 
-ParseFactsResult extract_facts(const FactsParser&,
-                               const std::string& filename,
+ParseFactsResult extract_facts(const std::string& filename,
                                const char* code,
                                int len,
                                const RepoOptions& options);

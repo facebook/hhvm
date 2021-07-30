@@ -181,10 +181,9 @@ struct SimpleExtractor final : public Extractor {
 
 std::string facts_json_from_path(const folly::fs::path& path) {
   assertx(path.is_absolute());
-  auto parser = acquire_facts_parser();
 
   auto const result = extract_facts(
-      *parser, path.native(), "", 0, RepoOptions::forFile(path.c_str()));
+      path.native(), "", 0, RepoOptions::forFile(path.c_str()));
   return match<std::string>(
       result,
       [&](const FactsJSONString& r) { return r.value; },

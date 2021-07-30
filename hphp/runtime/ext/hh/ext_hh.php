@@ -352,14 +352,13 @@ namespace ImplicitContext\_Private {
 function get_implicit_context(string $key)[policied]: mixed;
 
 /**
- * Sets implicit context $context keyed by $key using the $memokey when
- * memoization is needed. Returns the previous implicit context's index.
+ * Sets implicit context $context keyed by $key.
+ * Returns the previous implicit context's index.
  */
 <<__Native>>
 function set_implicit_context(
   string $key,
   mixed $context,
-  string $memokey
 )[policied]: int;
 
 /*
@@ -389,11 +388,9 @@ abstract class ImplicitContext {
     this::T $context,
     (function (): Awaitable<Tout>) $f
   )[policied]: Awaitable<Tout> {
-    $memokey = (string)\__hhvm_internal_getmemokeyl($context);
     $prev = ImplicitContext\_Private\set_implicit_context(
       static::class,
       $context,
-      $memokey
     );
     try {
       $result = $f();
@@ -409,11 +406,9 @@ abstract class ImplicitContext {
     this::T $context,
     (function (): Tout) $f
   )[policied]: Tout {
-    $memokey = (string)\__hhvm_internal_getmemokeyl($context);
     $prev = ImplicitContext\_Private\set_implicit_context(
       static::class,
       $context,
-      $memokey
     );
     try {
       return $f();

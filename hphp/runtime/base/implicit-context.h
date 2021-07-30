@@ -36,7 +36,7 @@ int64_t m_index;
 StringData* m_memokey;
 
 // HashMap of TypedValues and their instance keys
-req::fast_map<const StringData*, std::pair<TypedValue, StringData*>,
+req::fast_map<const StringData*, std::pair<TypedValue, TypedValue>,
               string_data_hash, string_data_same> m_map;
 };
 

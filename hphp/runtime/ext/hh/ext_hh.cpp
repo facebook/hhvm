@@ -1083,8 +1083,7 @@ TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
 }
 
 int64_t HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
-                                            TypedValue data,
-                                            StringArg memokey) {
+                                            TypedValue data) {
   if (!RO::EvalEnableImplicitContext) {
     throw_implicit_context_exception("Implicit context feature is not enabled");
   }
@@ -1103,13 +1102,13 @@ int64_t HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
   // Leak `data`, `key` and `memokey` to the end of the request
   if (isRefcountedType(data.m_type)) tvIncRefCountable(data);
   key->incRefCount();
-  memokey.get()->incRefCount();
-  auto entry = std::make_pair(data, memokey.get());
+  auto const memokey = HHVM_FN(serialize_memoize_param)(data);
+  auto entry = std::make_pair(data, memokey);
   auto const it = context->m_map.insert({key, entry});
   // If the insertion failed, overwrite
   if (!it.second) it.first->second = entry;
 
-  using Elem = std::pair<const StringData*, StringData*>;
+  using Elem = std::pair<const StringData*, TypedValue>;
   req::vector<Elem> vec;
   for (auto const& p : context->m_map) {
     vec.push_back(std::make_pair(p.first, p.second.second));
@@ -1119,8 +1118,8 @@ int64_t HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
                                     });
   StringBuffer sb;
   for (auto const& e : vec) {
-    sb.append(e.first);
-    sb.append(e.second);
+    serialize_memoize_string_data(sb, e.first);
+    serialize_memoize_tv(sb, 0, e.second);
   }
   context->m_memokey = sb.detach().detach();
   context->m_index = g_context->m_implicitContexts.size();

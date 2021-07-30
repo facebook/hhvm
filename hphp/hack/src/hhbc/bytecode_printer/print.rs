@@ -59,6 +59,7 @@ use std::{borrow::Cow, io::Write as _, path::Path, write};
 
 struct ExprEnv<'e> {
     pub codegen_env: Option<&'e HhasBodyEnv>,
+    #[allow(dead_code)]
     pub is_xhp: bool,
 }
 

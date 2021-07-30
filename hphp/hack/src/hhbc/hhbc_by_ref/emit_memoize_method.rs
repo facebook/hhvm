@@ -536,6 +536,7 @@ fn call_cls_method<'a, 'arena>(
 struct Args<'r, 'ast, 'arena> {
     pub info: &'r MemoizeInfo<'arena>,
     pub method: &'r T::Method_,
+    #[allow(dead_code)]
     pub namespace: &'r T::Nsenv,
     pub scope: &'r Scope<'ast>,
     pub deprecation_info: Option<&'r [TypedValue<'arena>]>,

@@ -157,7 +157,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
     renamed_id: function::FunctionType<'arena>,
     is_async: bool,
     is_reified: bool,
-    _should_emit_implicit_context: bool,
+    should_emit_implicit_context: bool,
 ) -> Result<InstrSeq<'arena>> {
     let param_count = hhas_params.len();
     let notfound = e.label_gen_mut().next_regular();
@@ -203,15 +203,25 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
             ),
         )
     };
-    let param_count = (param_count + add_reified) as isize;
+    let ic_memokey = if !should_emit_implicit_context {
+        instr::empty(alloc)
+    } else {
+        // Last unnamed local slot
+        let local = 2 * (param_count + add_reified);
+        emit_memoize_helpers::get_implicit_context_memo_key(alloc, local)
+    };
+    let param_start = param_count + add_reified;
+    let add_implicit_context = usize::from(should_emit_implicit_context);
+    let param_count = (param_start + add_implicit_context) as isize;
     Ok(InstrSeq::gather(
         alloc,
         vec![
             begin_label,
             emit_body::emit_method_prolog(e, env, pos, hhas_params, ast_params, &[])?,
             deprecation_body,
-            emit_memoize_helpers::param_code_sets(alloc, hhas_params, param_count as usize),
+            emit_memoize_helpers::param_code_sets(alloc, hhas_params, param_start),
             reified_memokeym,
+            ic_memokey,
             if is_async {
                 InstrSeq::gather(
                     alloc,

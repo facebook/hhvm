@@ -6,9 +6,13 @@
 use ffi::Str;
 use hhbc_by_ref_emit_fatal::raise_fatal_runtime;
 use hhbc_by_ref_hhas_param::HhasParam;
+use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags};
+use hhbc_by_ref_hhbc_id::function;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
 use hhbc_by_ref_local::Local;
 use oxidized::{aast::FunParam, pos::Pos};
+
+use ffi::Slice;
 
 pub const MEMOIZE_SUFFIX: &str = "$memoize_impl";
 
@@ -66,4 +70,27 @@ pub fn check_memoize_possible<Ex, Fb, En>(
         ));
     }
     Ok(())
+}
+
+pub fn get_implicit_context_memo_key<'arena>(
+    alloc: &'arena bumpalo::Bump,
+    local: hhbc_by_ref_local::Id,
+) -> InstrSeq<'arena> {
+    InstrSeq::gather(
+        alloc,
+        vec![
+            instr::nulluninit(alloc),
+            instr::nulluninit(alloc),
+            instr::fcallfuncd(
+                alloc,
+                FcallArgs::new(FcallFlags::default(), 1, Slice::empty(), None, 0, None),
+                function::from_raw_string(
+                    alloc,
+                    "HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",
+                ),
+            ),
+            instr::setl(alloc, Local::Unnamed(local)),
+            instr::popc(alloc),
+        ],
+    )
 }

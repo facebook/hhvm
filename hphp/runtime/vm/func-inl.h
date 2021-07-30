@@ -537,7 +537,10 @@ inline const StringData* Func::memoizeImplName() const {
 }
 
 inline size_t Func::numKeysForMemoize() const {
-  return numParams() + (hasReifiedGenerics() ? 1 : 0);
+  return numParams()
+         + (hasReifiedGenerics() ? 1 : 0);
+         + (RO::EvalEnableImplicitContext &&
+            (shared()->m_allFlags.m_isPolicyShardedMemoize) ? 1 : 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

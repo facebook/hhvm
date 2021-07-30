@@ -12,6 +12,8 @@ bumpalo = { version = "3.2.1", features = ["collections"] }
 ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_emit_fatal = { path = "../hhbc_by_ref_emit_fatal" }
 hhbc_by_ref_hhas_param = { path = "../hhbc_by_ref_hhas_param" }
+hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
+hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
 hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }
 hhbc_by_ref_local = { path = "../hhbc_by_ref_local" }
 oxidized = { path = "../../../../oxidized" }

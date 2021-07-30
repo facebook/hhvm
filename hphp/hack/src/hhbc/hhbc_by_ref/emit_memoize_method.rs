@@ -312,7 +312,18 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
             ),
         )
     };
-    param_count += add_reified;
+    let should_emit_implicit_context = args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT);
+    let add_implicit_context = usize::from(should_emit_implicit_context);
+    let ic_memokey = if !should_emit_implicit_context {
+        instr::empty(alloc)
+    } else {
+        // Last unnamed local slot
+        let local = 2 * (param_count + add_reified);
+        emit_memoize_helpers::get_implicit_context_memo_key(alloc, local)
+    };
+    let param_start = param_count + add_reified;
+    param_count = param_start + add_implicit_context;
+
     Ok(InstrSeq::gather(
         alloc,
         vec![
@@ -324,8 +335,9 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
             } else {
                 instr::checkthis(alloc)
             },
-            emit_memoize_helpers::param_code_sets(alloc, hhas_params, param_count),
+            emit_memoize_helpers::param_code_sets(alloc, hhas_params, param_start),
             reified_memokeym,
+            ic_memokey,
             if args.flags.contains(Flags::IS_ASYNC) {
                 InstrSeq::gather(
                     alloc,

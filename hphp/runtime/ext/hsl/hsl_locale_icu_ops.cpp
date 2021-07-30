@@ -230,6 +230,54 @@ bool HSLLocaleICUOps::ends_with_ci(const String& str, const String& suffix) cons
   return nstr.endsWith(nsuffix);
 }
 
+String HSLLocaleICUOps::strip_prefix(const String& str, const String& prefix) const {
+  if (str.substr(0, prefix.size()) == prefix) {
+    return str.substr(prefix.size());
+  }
+
+  auto ustr = ustr_from_utf8(str);
+  auto uprefix = ustr_from_utf8(prefix);
+  icu::ErrorCode err;
+
+  // singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  icu::UnicodeString nprefix;
+  icu::UnicodeString nstr;
+  normalizer->normalize(uprefix, nprefix, err);
+  normalizer->normalize(ustr, nstr, err);
+
+  if (!nstr.startsWith(nprefix)) {
+    return str;
+  }
+
+  auto tail = nstr.tempSubString(nprefix.length());
+  std::string ret;
+  tail.toUTF8String(ret);
+  return ret;
+}
+
+String HSLLocaleICUOps::strip_suffix(const String& str, const String& suffix) const {
+  auto ustr = ustr_from_utf8(str);
+  auto usuffix = ustr_from_utf8(suffix);
+  icu::ErrorCode err;
+
+  // singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  icu::UnicodeString nsuffix;
+  icu::UnicodeString nstr;
+  normalizer->normalize(usuffix, nsuffix, err);
+  normalizer->normalize(ustr, nstr, err);
+
+  if (!nstr.endsWith(nsuffix)) {
+    return str;
+  }
+
+  auto tail = nstr.tempSubString(0, nstr.length() - nsuffix.length());
+  std::string ret;
+  tail.toUTF8String(ret);
+  return ret;
+}
+
 icu::Collator* HSLLocaleICUOps::collator() const {
   // const is a lie, but only because we're doing lazy initialization
   if (m_collator) {

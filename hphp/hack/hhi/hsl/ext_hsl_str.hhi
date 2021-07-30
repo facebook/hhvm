@@ -26,6 +26,9 @@ function starts_with_ci_l(string $str, string $prefix, ?Locale $loc = null): boo
 function ends_with_l(string $str, string $suffix, ?Locale $loc = null): bool;
 function ends_with_ci_l(string $str, string $suffix, ?Locale $loc = null): bool;
 
+function strip_prefix_l(string $str, string $prefix, ?Locale $loc = null): string;
+function strip_suffix_l(string $str, string $prefix, ?Locale $loc = null): string;
+
 function strpos_l(string $haystack, string $needle, int $offset, ?Locale $loc = null): int;
 function strrpos_l(string $haystack, string $needle, int $offset, ?Locale $loc = null): int;
 function stripos_l(string $haystack, string $needle, int $offset, ?Locale $loc = null): int;

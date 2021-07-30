@@ -49,6 +49,11 @@ function ends_with_l(string $str, string $suffix, ?Locale $loc = null): bool;
 function ends_with_ci_l(string $str, string $suffix, ?Locale $loc = null): bool;
 
 <<__Native>>
+function strip_prefix_l(string $str, string $prefix, ?Locale $loc = null): string;
+<<__Native>>
+function strip_suffix_l(string $str, string $prefix, ?Locale $loc = null): string;
+
+<<__Native>>
 function strpos_l(string $haystack, string $needle, int $offset, ?Locale $loc = null): int;
 <<__Native>>
 function strrpos_l(string $haystack, string $needle, int $offset, ?Locale $loc = null): int;

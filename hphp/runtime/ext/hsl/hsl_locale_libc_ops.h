@@ -39,6 +39,9 @@ namespace HPHP {
     virtual bool ends_with(const String& str, const String& suffix) const override;
     virtual bool ends_with_ci(const String& str, const String& suffix) const override; 
 
+    virtual String strip_prefix(const String& str, const String& prefix) const override;
+    virtual String strip_suffix(const String& str, const String& suffix) const override;
+
     virtual int64_t strpos(const String& haystack, const String& needle, int64_t offset) const override;
     virtual int64_t strrpos(const String& haystack, const String& needle, int64_t offset) const override;
     virtual int64_t stripos(const String& haystack, const String& needle, int64_t offset) const override;

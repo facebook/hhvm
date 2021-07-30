@@ -128,6 +128,20 @@ bool HSLLocaleLibcOps::ends_with_ci(const String& str, const String& suffix) con
   return bstrcaseeq(str.data() + offset, suffix.data(), suffix.size());
 }
 
+String HSLLocaleLibcOps::strip_prefix(const String& str, const String& prefix) const {
+  if (!starts_with(str, prefix)) {
+    return str;
+  }
+  return str.substr(prefix.length());
+}
+
+String HSLLocaleLibcOps::strip_suffix(const String& str, const String& suffix) const {
+  if (!ends_with(str, suffix)) {
+    return str;
+  }
+  return str.substr(0, str.length() - suffix.length());
+}
+
 int64_t HSLLocaleLibcOps::strpos(const String& haystack, const String& needle, int64_t offset) const {
   if (needle.empty() || haystack.empty()) {
     return -1;

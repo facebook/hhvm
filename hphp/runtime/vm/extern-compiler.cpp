@@ -338,97 +338,6 @@ struct ExternCompiler {
   }
   ~ExternCompiler() { stop(); }
 
-  std::string extract_facts(
-    const std::string& filename,
-    folly::StringPiece code,
-    const RepoOptions& options
-  ) {
-    if (!isRunning()) {
-      start();
-    }
-    std::string facts;
-    try {
-      writeExtractFacts(filename, code, options);
-      return readResult(nullptr /* structured log entry */);
-    }
-    catch (CompileException& ex) {
-      stop();
-      if (m_options.verboseErrors) {
-        Logger::FError("ExternCompiler Error (facts): {}", ex.what());
-      }
-      throw;
-    }
-  }
-
-  std::string ffp_parse_file(
-    const std::string& filename,
-    folly::StringPiece code,
-    const RepoOptions& options
-  ) {
-    if (!isRunning()) {
-      start();
-    }
-    try {
-      writeParseFile(filename, code, options);
-      return readResult(nullptr /* structured log entry */);
-    }
-    catch (CompileException& ex) {
-      stop();
-      if (m_options.verboseErrors) {
-        Logger::FError("ExternCompiler Error (parse): {}", ex.what());
-      }
-      throw;
-    }
-  }
-
-  // To avoid ambiguity with std::string in variant
-  struct Hhas { std::string s; };
-
-  Hhas compile(
-    const char* filename,
-    const SHA1& sha1,
-    folly::StringPiece code,
-    bool forDebuggerEval,
-    const RepoOptions& options
-  ) {
-    try {
-      tracing::Block _{
-        "extern-compiler-invoke",
-        [&] {
-          return tracing::Props{}
-            .add("filename", filename)
-            .add("code_size", code.size());
-        }
-      };
-      if (!isRunning()) start();
-      writeProgram(filename, sha1, code, forDebuggerEval, options);
-      StructuredLogEntry log;
-      auto const hhas = readResult(&log);
-      if (RuntimeOption::EvalLogExternCompilerPerf) {
-        log.setStr("filename", filename);
-        StructuredLog::log("hhvm_detailed_frontend_performance", log);
-      }
-      return Hhas { hhas };
-    } catch (const CompileException& ex) {
-      stop();
-      if (m_options.verboseErrors) {
-        Logger::FError("ExternCompiler Error: {}", ex.what());
-      }
-      throw;
-    } catch (const CompilerFatal&) {
-      // this catch is here so we don't fall into the std::runtime_error one
-      throw;
-    } catch (const FatalErrorException&) {
-      // we want these to propagate out of the compiler
-      throw;
-    } catch (const std::runtime_error& ex) {
-      if (m_options.verboseErrors) {
-        Logger::FError("ExternCompiler Runtime Error: {}", ex.what());
-      }
-      throw;
-    }
-  }
-
   std::string getVersionString() {
     if (!isRunning()) start();
     return m_version;
@@ -442,13 +351,6 @@ private:
 
   void writeMessage(folly::dynamic& header, folly::StringPiece body);
   void writeConfigs();
-  void writeProgram(const char* filename, SHA1 sha1, folly::StringPiece code,
-                    bool forDebuggerEval, const RepoOptions& options);
-  void writeExtractFacts(const std::string& filename, folly::StringPiece code,
-                         const RepoOptions&);
-  void writeParseFile(const std::string& filename, folly::StringPiece code,
-                      const RepoOptions&);
-
   std::string readVersion() const;
   std::string readResult(StructuredLogEntry* log) const;
 
@@ -473,22 +375,6 @@ struct CompilerPool {
   void releaseCompiler(std::unique_ptr<ExternCompiler> ptr);
   void start();
   void shutdown(bool detach_compilers);
-  CompilerResult compile(const char* code,
-                         int len,
-                         const char* filename,
-                         const SHA1& sha1,
-                         const Native::FuncTable& nativeFuncs,
-                         bool forDebuggerEval,
-                         bool& internal_error,
-                         const RepoOptions& options,
-                         CompileAbortMode mode);
-  FfpResult parse(std::string name, const char* code, int len,
-                  const RepoOptions&);
-  ParseFactsResult extract_facts(const CompilerGuard& compiler,
-                                 const std::string& filename,
-                                 const char* code,
-                                 int len,
-                                 const RepoOptions& options);
   std::string getVersionString() { return m_version; }
   std::pair<uint64_t, bool> getMaxRetriesAndVerbosity() const {
     return std::make_pair(m_options.maxRetries, m_options.verboseErrors);
@@ -561,55 +447,6 @@ void CompilerPool::shutdown(bool detach) {
   m_compilers.clear();
 }
 
-template<typename F>
-auto run_compiler(
-  const CompilerGuard& compiler,
-  int maxRetries,
-  bool verboseErrors,
-  F&& func,
-  bool& internal_error,
-  CompileAbortMode mode) ->
-  boost::variant<
-    typename std::result_of<F&&(const CompilerGuard&)>::type,
-    std::string
-  >
-{
-  std::stringstream err;
-
-  size_t retry = 0;
-  const size_t max = std::max<size_t>(1, maxRetries + 1);
-  while (retry++ < max) {
-    try {
-      internal_error = false;
-      return func(compiler);
-    } catch (FatalErrorException&) {
-      // let these propagate out of the compiler
-      throw;
-    } catch (CompilerFatal& ex) {
-      if (mode >= CompileAbortMode::AllErrors) internal_error = true;
-      // ExternCompiler returned an error when building this unit
-      return ex.what();
-    } catch (CompileException& ex) {
-      internal_error = true;
-      // Swallow and retry, we return infra errors in bulk once the retry limit
-      // is exceeded.
-      err << ex.what();
-      if (retry < max) err << '\n';
-    } catch (std::runtime_error& ex) {
-      internal_error = true;
-      // Nontransient, don't bother with a retry.
-      return ex.what();
-    }
-  }
-
-  if (verboseErrors) {
-    Logger::Error(
-      "ExternCompiler encountered too many communication errors, giving up."
-    );
-  }
-  return err.str();
-}
-
 namespace {
 CompilerResult assemble_string_handle_errors(const char* code,
                                              const char* hhas,
@@ -661,69 +498,6 @@ CompilerResult assemble_string_handle_errors(const char* code,
     return ex.what();
   }
 }
-}
-
-CompilerResult CompilerPool::compile(const char* code,
-                                     int len,
-                                     const char* filename,
-                                     const SHA1& sha1,
-                                     const Native::FuncTable& nativeFuncs,
-                                     bool forDebuggerEval,
-                                     bool& internal_error,
-                                     const RepoOptions& options,
-                                     CompileAbortMode mode) {
-  tracing::BlockNoTrace _{"compile-unit-emitter"};
-
-  auto const hhas = run_compiler(
-    CompilerGuard{*this},
-    m_options.maxRetries,
-    m_options.verboseErrors,
-    [&] (const CompilerGuard& c) {
-      return c->compile(filename,
-                        sha1,
-                        folly::StringPiece(code, len),
-                        forDebuggerEval,
-                        options);
-    },
-    internal_error,
-    mode
-  );
-
-  return match<CompilerResult>(
-    hhas,
-    [&] (const ExternCompiler::Hhas& s) -> CompilerResult {
-      return assemble_string_handle_errors(code,
-                                           s.s.data(),
-                                           s.s.size(),
-                                           filename,
-                                           sha1,
-                                           nativeFuncs,
-                                           internal_error,
-                                           mode);
-    },
-    [] (std::string s) { return s; }
-  );
-}
-
-FfpResult CompilerPool::parse(
-  std::string file,
-  const char* code,
-  int len,
-  const RepoOptions& options
-) {
-  auto compile = [&](const CompilerGuard& c) {
-    auto result = c->ffp_parse_file(file, folly::StringPiece(code, len),
-                                    options);
-    return FfpJSONString { result };
-  };
-  auto internal_error = false;
-  return run_compiler(
-    CompilerGuard(*this),
-    m_options.maxRetries,
-    m_options.verboseErrors,
-    compile,
-    internal_error,
-    CompileAbortMode::Never);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -856,48 +630,6 @@ void ExternCompiler::writeConfigs() {
   folly::dynamic header = folly::dynamic::object("type", "config");
   writeMessage(header, s_bound_config);
   writeMessage(header, s_misc_config);
-}
-
-void ExternCompiler::writeProgram(
-  const char* filename,
-  SHA1 sha1,
-  folly::StringPiece code,
-  bool forDebuggerEval,
-  const RepoOptions& options
-) {
-  folly::dynamic header = folly::dynamic::object
-    ("type", "code")
-    ("sha1", sha1.toString())
-    ("file", filename)
-    ("is_systemlib", !SystemLib::s_inited)
-    ("for_debugger_eval", forDebuggerEval)
-    ("config_overrides", options.toDynamic())
-    ("log_hackc_mem_stats", RuntimeOption::EvalLogHackcMemStats);
-  writeMessage(header, code);
-}
-
-void ExternCompiler::writeExtractFacts(
-  const std::string& filename,
-  folly::StringPiece code,
-  const RepoOptions& options
-) {
-  folly::dynamic header = folly::dynamic::object
-    ("type", "facts")
-    ("file", filename)
-    ("config_overrides", options.toDynamic());
-  writeMessage(header, code);
-}
-
-void ExternCompiler::writeParseFile(
-  const std::string& filename,
-  folly::StringPiece code,
-  const RepoOptions& options
-) {
-  folly::dynamic header = folly::dynamic::object
-    ("type", "parse")
-    ("file", filename)
-    ("config_overrides", options.toDynamic());
-  writeMessage(header, code);
 }
 
 struct CompilerManager final {
@@ -1108,18 +840,15 @@ CompilerResult hackc_compile(
   hackc_compile_from_text_ptr hhas{
     hackc_compile_from_text(&native_env, code, &output, &error_buf)
   };
-  if (hhas) {
-    return assemble_string_handle_errors(code,
-                                          hhas.get(),
-                                          strlen(hhas.get()),
-                                          filename,
-                                          sha1,
-                                          nativeFuncs,
-                                          internal_error,
-                                          mode);
-  } else {
-    throwErrno(buf.data());
-  }
+  if (!hhas) throwErrno(buf.data());
+  return assemble_string_handle_errors(code,
+                                       hhas.get(),
+                                       strlen(hhas.get()),
+                                       filename,
+                                       sha1,
+                                       nativeFuncs,
+                                       internal_error,
+                                       mode);
 }
 ////////////////////////////////////////////////////////////////////////////////
 }

@@ -753,6 +753,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 initializer_instrs
                     .as_ref()
                     .map(|instrs| (name, emitter.label_gen_mut().next_regular(), instrs))
+                    .into()
             },
         )
         .collect();

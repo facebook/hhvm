@@ -490,12 +490,12 @@ fn print_constant<W: Write>(
         w.write(" isAbstract")?;
     }
     match c.value.as_ref() {
-        Some(TypedValue::Uninit) => w.write(" = uninit")?,
-        Some(value) => {
+        Just(TypedValue::Uninit) => w.write(" = uninit")?,
+        Just(value) => {
             w.write(" = ")?;
             triple_quotes(w, |w| print_adata(ctx, w, value))?;
         }
-        None => {}
+        Nothing => {}
     }
     w.write(";")
 }

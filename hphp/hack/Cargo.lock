@@ -1821,6 +1821,7 @@ name = "hhbc_by_ref_hhas_constant"
 version = "0.0.0"
 dependencies = [
  "decl_provider",
+ "ffi",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_expression",
  "hhbc_by_ref_env",

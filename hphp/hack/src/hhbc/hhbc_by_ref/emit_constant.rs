@@ -41,46 +41,44 @@ fn emit_constant_cinit<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             )
         })
         .transpose()?;
-    c.initializer_instrs
-        .as_ref()
-        .map(|instrs| {
-            let verify_instr = match return_type_info {
-                None => instr::empty(alloc),
-                Some(_) => instr::verify_ret_type_c(alloc),
-            };
-            let instrs = InstrSeq::gather(
-                alloc,
-                vec![
-                    InstrSeq::clone(alloc, instrs),
-                    verify_instr,
-                    instr::retc(alloc),
-                ],
-            );
-            let body = emit_body::make_body(
-                alloc,
-                e,
-                instrs,
-                vec![],
-                false,  /* is_memoize_wrapper */
-                false,  /* is_memoize_wrapper_lsb */
-                0,      /* num closures */
-                vec![], /* upper_bounds */
-                vec![], /* shadowed_params */
-                vec![], /* params */
-                return_type_info,
-                None, /* doc_comment */
-                Some(env),
-            )?;
-            Ok(HhasFunction {
-                attributes: vec![],
-                name: original_id,
-                body,
-                span: Span::from_pos(&constant.span),
-                coeffects: HhasCoeffects::default(),
-                flags: hhas_function::Flags::NO_INJECTION,
-            })
+    Option::from(c.initializer_instrs.as_ref().map(|instrs| {
+        let verify_instr = match return_type_info {
+            None => instr::empty(alloc),
+            Some(_) => instr::verify_ret_type_c(alloc),
+        };
+        let instrs = InstrSeq::gather(
+            alloc,
+            vec![
+                InstrSeq::clone(alloc, instrs),
+                verify_instr,
+                instr::retc(alloc),
+            ],
+        );
+        let body = emit_body::make_body(
+            alloc,
+            e,
+            instrs,
+            vec![],
+            false,  /* is_memoize_wrapper */
+            false,  /* is_memoize_wrapper_lsb */
+            0,      /* num closures */
+            vec![], /* upper_bounds */
+            vec![], /* shadowed_params */
+            vec![], /* params */
+            return_type_info,
+            None, /* doc_comment */
+            Some(env),
+        )?;
+        Ok(HhasFunction {
+            attributes: vec![],
+            name: original_id,
+            body,
+            span: Span::from_pos(&constant.span),
+            coeffects: HhasCoeffects::default(),
+            flags: hhas_function::Flags::NO_INJECTION,
         })
-        .transpose()
+    }))
+    .transpose()
 }
 
 fn emit_constant<'a, 'arena, 'decl, D: DeclProvider<'decl>>(

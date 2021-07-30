@@ -45,6 +45,7 @@ void handleConvNoticeForEq(const char* const lhs, const char* const rhs);
 
 void throwBitOpBadTypesException(tv_rval t1, tv_rval t2);
 void throwIncDecBadTypeException(const char* t);
+void throwMathBadTypesException(tv_rval t1, tv_rval t2);
 
 inline bool useStrictEquality() {
    return flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForEq)

@@ -158,21 +158,12 @@ static CallMap s_callMap {
     {ConvTVToDbl,      convTVToDblHelper, DSSA, SSync,
                            {{TV, 0}}},
 
-    {ConvObjToInt,       &ObjectData::toInt64, DSSA, SSync,
-                           {{SSA, 0}, extra(&ConvNoticeData::level),
-                            extra(&ConvNoticeData::reasonIntVal)}},
+    {ConvObjToInt,       &ObjectData::toInt64, DSSA, SSync, {{SSA, 0}}},
     {ConvStrToInt,       &StringData::toInt64, DSSA, SNone,
                            {{SSA, 0}, immed(10)}},
     {ConvResToInt,       &ResourceHdr::getId, DSSA, SNone,
                            {{SSA, 0}}},
-    {ConvTVToInt,        static_cast<int64_t (*)(
-                             TypedValue,
-                             const ConvNoticeLevel,
-                             const StringData*,
-                             bool)>(tvToInt), DSSA, SSync,
-                           {{TV, 0}, extra(&ConvNoticeData::level),
-                            extra(&ConvNoticeData::reasonIntVal),
-                            extra(&ConvNoticeData::noticeWithinNum)}},
+    {ConvTVToInt,        tvToInt, DSSA, SSync, {{TV, 0}}},
 
     {ConvDblToStr,       convDblToStrHelper, DSSA, SNone,
                            {{SSA, 0}}},

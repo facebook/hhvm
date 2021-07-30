@@ -9,6 +9,22 @@ function handler($_, $str, $file, $line) {
   return false;
 }
 
+function with_exn($fn): mixed {
+  try {
+    $fn();
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
+}
+
+function with_exnio(inout $x, $fn): mixed {
+  try {
+    $fn(inout $x);
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
+}
+
 <<__EntryPoint>>
 function main(): void {
   set_error_handler(handler<>);
@@ -22,205 +38,162 @@ function main(): void {
 
 function plus(): void {
   echo 'plus<';
-  echo 0 + -10;
-  echo 1.234 + INF;
-  echo NAN + true;
-  echo false + null;
-  echo STDIN + "string";
-  try {
-    echo new Foo() + -INF;
-  } catch (Exception $e) {
-    echo "\n".$e->getMessage()."\n";
-  }
+  with_exn(() ==> print(0 + -10));
+  with_exn(() ==> print(1.234 + INF));
+  with_exn(() ==> print(NAN + true));
+  with_exn(() ==> print(false + null));
+  with_exn(() ==> print(STDIN + "string"));
+  with_exn(() ==> print(varray[42] + dict['foobar' => false]));
+  with_exn(() ==> print(new Foo() + -INF));
 
   echo ">\n";
 
   $i = 1;
-  echo "pluseq<";
-  $i += 0;
-  $i += -10;
-  $i += 1.234;
-  $i += INF;
-  $i += NAN;
-  $i += true;
-  $i += false;
-  $i += STDIN;
-  $i += "string";
-  try {
-    $i += new Foo();
-  } catch (Exception $e) {
-    echo "\n".$e->getMessage()."\n";
-  }
+  echo 'pluseq<';
+  with_exnio(inout $i, (inout $o) ==> { $o += 0; });
+  with_exnio(inout $i, (inout $o) ==> { $o += -10; });
+  with_exnio(inout $i, (inout $o) ==> { $o += 1.234; });
+  with_exnio(inout $i, (inout $o) ==> { $o += INF; });
+  with_exnio(inout $i, (inout $o) ==> { $o += NAN; });
+  with_exnio(inout $i, (inout $o) ==> { $o += true; });
+  with_exnio(inout $i, (inout $o) ==> { $o += false; });
+  with_exnio(inout $i, (inout $o) ==> { $o += STDIN; });
+  with_exnio(inout $i, (inout $o) ==> { $o += "string"; });
+  with_exnio(inout $i, (inout $o) ==> { $o += new Foo(); });
   echo $i;
   echo ">\n";
 }
 
 function minus(): void {
   echo 'minus<';
-  echo 0 - -10;
-  echo 1.234 - INF;
-  echo NAN - true;
-  echo false - null;
-  echo STDIN - "string";
-  try {
-    echo new Foo() - -INF;
-  } catch (Exception $e) {
-    echo "\n".$e->getMessage()."\n";
-  }
+  with_exn(() ==> print(0 - -10));
+  with_exn(() ==> print(1.234 - INF));
+  with_exn(() ==> print(NAN - true));
+  with_exn(() ==> print(false - null));
+  with_exn(() ==> print(STDIN - "string"));
+  with_exn(() ==> print(varray[42] - dict['foobar' => false]));
+  with_exn(() ==> print(new Foo() - -INF));
   echo ">\n";
 
   $i = 1;
-  echo "minuseq<";
-  $i -= 0;
-  $i -= -10;
-  $i -= 1.234;
-  $i -= INF;
-  $i -= NAN;
-  $i -= true;
-  $i -= false;
-  $i -= STDIN;
-  $i -= "string";
-  try {
-    $i -= new Foo();
-  } catch (Exception $e) {
-    echo "\n".$e->getMessage()."\n";
-  }
+  echo 'minuseq<';
+  with_exnio(inout $i, (inout $o) ==> { $o -= 0; });
+  with_exnio(inout $i, (inout $o) ==> { $o -= -10; });
+  with_exnio(inout $i, (inout $o) ==> { $o -= 1.234; });
+  with_exnio(inout $i, (inout $o) ==> { $o -= INF; });
+  with_exnio(inout $i, (inout $o) ==> { $o -= NAN; });
+  with_exnio(inout $i, (inout $o) ==> { $o -= true; });
+  with_exnio(inout $i, (inout $o) ==> { $o -= false; });
+  with_exnio(inout $i, (inout $o) ==> { $o -= STDIN; });
+  with_exnio(inout $i, (inout $o) ==> { $o -= "string"; });
+  with_exnio(inout $i, (inout $o) ==> { $o -= new Foo(); });
   echo $i;
   echo ">\n";
 }
 
 function mul(): void {
   echo 'mul<';
-  echo 0 * -10;
-  echo 1.234 * INF;
-  echo NAN * true;
-  echo false * null;
-  echo STDIN * "string";
-  try {
-    echo new Foo() * -INF;
-  } catch (Exception $e) {
-    echo "\n".$e->getMessage()."\n";
-  }
+  with_exn(() ==> print(0 * -10));
+  with_exn(() ==> print(1.234 * INF));
+  with_exn(() ==> print(NAN * true));
+  with_exn(() ==> print(false * null));
+  with_exn(() ==> print(STDIN * "string"));
+  with_exn(() ==> print(varray[42] * dict['foobar' => false]));
+  with_exn(() ==> print(new Foo() * -INF));
   echo ">\n";
 
   $i = 1;
   echo "muleq<";
-  $i *= 0;
-  $i *= -10;
-  $i *= 1.234;
-  $i *= INF;
-  $i *= NAN;
-  $i *= true;
-  $i *= false;
-  $i *= STDIN;
-  $i *= "string";
-  try {
-    $i *= new Foo();
-  } catch (Exception $e) {
-    echo "\n".$e->getMessage()."\n";
-  }
+  with_exnio(inout $i, (inout $o) ==> { $o *= 0; });
+  with_exnio(inout $i, (inout $o) ==> { $o *= -10; });
+  with_exnio(inout $i, (inout $o) ==> { $o *= 1.234; });
+  with_exnio(inout $i, (inout $o) ==> { $o *= INF; });
+  with_exnio(inout $i, (inout $o) ==> { $o *= NAN; });
+  with_exnio(inout $i, (inout $o) ==> { $o *= true; });
+  with_exnio(inout $i, (inout $o) ==> { $o *= false; });
+  with_exnio(inout $i, (inout $o) ==> { $o *= STDIN; });
+  with_exnio(inout $i, (inout $o) ==> { $o *= "string"; });
+  with_exnio(inout $i, (inout $o) ==> { $o *= new Foo(); });
   echo $i;
   echo ">\n";
 }
 
 function div(): void {
   echo 'div<';
-  echo 0 / -10;
-  echo 1.234 / INF;
-  echo null / true;
-  echo false / NAN;
-  echo "string" / STDIN;
-  try {
-    echo -INF / new Foo();
-  } catch (Exception $e) {
-    echo "\n".$e->getMessage()."\n";
-  }
+  with_exn(() ==> print(0 / -10));
+  with_exn(() ==> print(1.234 / INF));
+  with_exn(() ==> print(null / true));
+  with_exn(() ==> print(false / NAN));
+  with_exn(() ==> print("string" / STDIN));
+  with_exn(() ==> print(varray[42] / dict['foobar' => false]));
+  with_exn(() ==> print(-INF / new Foo()));
   echo ">\n";
 
   $i = 1;
   echo "diveq<";
-  $i /= -10;
-  $i /= 1.234;
-  $i /= INF;
-  $i /= NAN;
-  $i /= true;
-  $i /= STDIN;
-  $i /= "12string";
-  try {
-    $i /= new Foo();
-  } catch (Exception $e) {
-    echo "\n".$e->getMessage()."\n";
-  }
+  with_exnio(inout $i, (inout $o) ==> { $o /= -10; });
+  with_exnio(inout $i, (inout $o) ==> { $o /= 1.234; });
+  with_exnio(inout $i, (inout $o) ==> { $o /= INF; });
+  with_exnio(inout $i, (inout $o) ==> { $o /= NAN; });
+  with_exnio(inout $i, (inout $o) ==> { $o /= true; });
+  with_exnio(inout $i, (inout $o) ==> { $o /= STDIN; });
+  with_exnio(inout $i, (inout $o) ==> { $o /= "12string"; });
+  with_exnio(inout $i, (inout $o) ==> { $o /= new Foo(); });
   echo $i;
   echo "\n";
 }
 
 function mod(): void {
   echo 'mod<';
-  echo 0 % -10;
-  echo null % true;
-  echo false % NAN;
-  echo STDIN % "12string";
-  echo varray[42] % dict['foobar' => false];
-  try {
-    echo -INF % new Foo();
-  } catch (Exception $e) {
-    echo "\n".$e->getMessage()."\n";
-  }
+  with_exn(() ==> print(0 % -10));
+  with_exn(() ==> print(null % true));
+  with_exn(() ==> print(false % NAN));
+  with_exn(() ==> print(STDIN % "12string"));
+  with_exn(() ==> print(varray[42] % dict['foobar' => false]));
+  with_exn(() ==> print(-INF % new Foo()));
   echo ">\n";
 
   $i = 1;
   echo "modeq<";
-  $i %= -10;
-  $i %= 1.234;
-  $i %= NAN;
-  $i %= true;
-  $i %= STDIN;
-  $i %= "12string";
-  $i %= varray[42];
-  $i %= dict['foobar' => false];
-  try {
-    $i %= new Foo();
-  } catch (Exception $e) {
-    echo "\n".$e->getMessage()."\n";
-  }
+  with_exnio(inout $i, (inout $o) ==> { $o %= -10; });
+  with_exnio(inout $i, (inout $o) ==> { $o %= 1.234; });
+  with_exnio(inout $i, (inout $o) ==> { $o %= NAN; });
+  with_exnio(inout $i, (inout $o) ==> { $o %= true; });
+  with_exnio(inout $i, (inout $o) ==> { $o %= STDIN; });
+  with_exnio(inout $i, (inout $o) ==> { $o %= "12string"; });
+  with_exnio(inout $i, (inout $o) ==> { $o %= varray[42]; });
+  with_exnio(inout $i, (inout $o) ==> { $o %= dict['foobar' => false]; });
+  with_exnio(inout $i, (inout $o) ==> { $o %= new Foo(); });
   echo $i;
   echo ">\n";
 }
 
 function pow_(): void {
   echo 'pow<';
-  echo 0 ** -10;
-  echo 1.234 ** INF;
-  echo NAN ** true;
-  echo false ** null;
-  echo STDIN ** "string";
-  echo varray[42] ** dict['foobar' => false];
-  try {
-    echo new Foo() ** -INF;
-  } catch (Exception $e) {
-    echo "\n".$e->getMessage()."\n";
-  }
+  with_exn(() ==> print(0 ** -10));
+  with_exn(() ==> print(1.234 ** INF));
+  with_exn(() ==> print(NAN ** true));
+  with_exn(() ==> print(false ** null));
+  with_exn(() ==> print(STDIN ** "string"));
+  with_exn(() ==> print(varray[42] ** dict['foobar' => false]));
+  with_exn(() ==> print(new Foo() ** -INF));
   echo ">\n";
 
   $i = 1;
   echo "poweq<";
-  $i  **=  0;
-  $i  **=  -10;
-  $i  **=  1.234;
-  $i  **=  INF;
-  $i  **=  NAN;
-  $i  **=  true;
-  $i  **=  false;
-  $i  **=  STDIN;
-  $i  **=  "string";
-  $i  **=  varray[42];
-  $i  **=  dict['foobar' => false];
-  try {
-    $i **= new Foo();
-  } catch (Exception $e) {
-    echo "\n".$e->getMessage()."\n";
-  }
+  with_exnio(inout $i, (inout $o) ==> { $o **=  0; });
+  with_exnio(inout $i, (inout $o) ==> { $o **=  -10; });
+  with_exnio(inout $i, (inout $o) ==> { $o **=  1.234; });
+  with_exnio(inout $i, (inout $o) ==> { $o **=  INF; });
+  with_exnio(inout $i, (inout $o) ==> { $o **=  NAN; });
+  with_exnio(inout $i, (inout $o) ==> { $o **=  true; });
+  with_exnio(inout $i, (inout $o) ==> { $o **=  false; });
+  with_exnio(inout $i, (inout $o) ==> { $o **=  STDIN; });
+  with_exnio(inout $i, (inout $o) ==> { $o **=  "string"; });
+  with_exnio(inout $i, (inout $o) ==> { $o **=  varray[42]; });
+  with_exnio(inout $i, (inout $o) ==> { $o **=  dict['foobar' => false]; });
+  with_exnio(inout $i, (inout $o) ==> { $o **= new Foo(); });
+
   echo $i;
   echo ">\n";
 }

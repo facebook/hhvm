@@ -86,10 +86,6 @@ ObjectData* tvCastToObjectData(TypedValue tv);
  */
 bool tvToBool(TypedValue);
 int64_t tvToInt(TypedValue);
-int64_t tvToInt(TypedValue,
-                const ConvNoticeLevel,
-                const StringData* notice_reason,
-                bool notice_within_num = true);
 
 double tvToDouble(TypedValue);
 

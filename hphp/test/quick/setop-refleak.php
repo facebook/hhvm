@@ -10,7 +10,7 @@ function main() {
   $x->bug = new Dtor;
   try {
     $x->bug += 12;
-  } catch (TypecastException $e) {
+  } catch (Exception $e) {
     var_dump($e->getMessage());
   }
   var_dump($x);

@@ -1,4 +1,3 @@
-
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Invalid operand type was used: cannot perform this operation with vecs' in %s/mul_001.php:6
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Cannot perform mathematical operation on HH\vec and HH\vec' in %s/mul_001.php:6
 Stack trace:
 %A

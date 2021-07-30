@@ -1,0 +1,2808 @@
+$i int(0)
+$j int(0)
+plus<0>
+minus<0>
+mul<0>
+pow<1>
+$i int(0)
+$j int(-10)
+plus<-10>
+minus<10>
+mul<0>
+div<0>
+mod<0>
+pow<INF>
+$i int(0)
+$j float(1.234)
+plus<1.234>
+minus<-1.234>
+mul<0>
+div<0>
+mod<0>
+pow<0>
+$i int(0)
+$j float(INF)
+plus<INF>
+minus<-INF>
+mul<NAN>
+div<0>
+pow<0>
+$i int(0)
+$j float(NAN)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+mod<0>
+pow<NAN>
+$i int(0)
+$j bool(true)
+plus<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+minus<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+mul<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+div<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+mod<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+pow<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+$i int(0)
+$j bool(false)
+plus<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+minus<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+mul<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+pow<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+$i int(0)
+$j NULL
+plus<
+Cannot perform mathematical operation on int and null
+
+Cannot perform mathematical operation on int and null
+>
+minus<
+Cannot perform mathematical operation on int and null
+
+Cannot perform mathematical operation on int and null
+>
+mul<
+Cannot perform mathematical operation on int and null
+
+Cannot perform mathematical operation on int and null
+>
+pow<
+Cannot perform mathematical operation on int and null
+
+Cannot perform mathematical operation on int and null
+>
+$i int(0)
+$j resource(1) of type (stream)
+plus<
+Cannot perform mathematical operation on int and File
+
+Cannot perform mathematical operation on int and File
+>
+minus<
+Cannot perform mathematical operation on int and File
+
+Cannot perform mathematical operation on int and File
+>
+mul<
+Cannot perform mathematical operation on int and File
+
+Cannot perform mathematical operation on int and File
+>
+div<
+Cannot perform mathematical operation on int and File
+
+Cannot perform mathematical operation on int and File
+>
+mod<
+Cannot perform mathematical operation on int and File
+
+Cannot perform mathematical operation on int and File
+>
+pow<
+Cannot perform mathematical operation on int and File
+
+Cannot perform mathematical operation on int and File
+>
+$i int(0)
+$j string(6) "string"
+plus<
+Cannot perform mathematical operation on int and string
+
+Cannot perform mathematical operation on int and string
+>
+minus<
+Cannot perform mathematical operation on int and string
+
+Cannot perform mathematical operation on int and string
+>
+mul<
+Cannot perform mathematical operation on int and string
+
+Cannot perform mathematical operation on int and string
+>
+pow<
+Cannot perform mathematical operation on int and string
+
+Cannot perform mathematical operation on int and string
+>
+$i int(0)
+$j vec(1) {
+  int(42)
+}
+mod<
+Cannot perform mathematical operation on int and HH\vec
+
+Cannot perform mathematical operation on int and HH\vec
+>
+pow<
+Cannot perform mathematical operation on int and HH\vec
+
+Cannot perform mathematical operation on int and HH\vec
+>
+$i int(0)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Cannot perform mathematical operation on int and HH\dict
+
+Cannot perform mathematical operation on int and HH\dict
+>
+pow<
+Cannot perform mathematical operation on int and HH\dict
+
+Cannot perform mathematical operation on int and HH\dict
+>
+$i int(-10)
+$j int(0)
+plus<-10>
+minus<-10>
+mul<0>
+pow<1>
+$i int(-10)
+$j int(-10)
+plus<-20>
+minus<0>
+mul<100>
+div<1>
+mod<0>
+pow<1.0E-10>
+$i int(-10)
+$j float(1.234)
+plus<-8.766>
+minus<-11.234>
+mul<-12.34>
+div<-8.1037277147488>
+mod<0>
+pow<NAN>
+$i int(-10)
+$j float(INF)
+plus<INF>
+minus<-INF>
+mul<-INF>
+div<0>
+pow<INF>
+$i int(-10)
+$j float(NAN)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+mod<-10>
+pow<NAN>
+$i int(-10)
+$j bool(true)
+plus<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+minus<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+mul<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+div<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+mod<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+pow<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+$i int(-10)
+$j bool(false)
+plus<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+minus<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+mul<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+pow<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and bool
+>
+$i int(-10)
+$j NULL
+plus<
+Cannot perform mathematical operation on int and null
+
+Cannot perform mathematical operation on int and null
+>
+minus<
+Cannot perform mathematical operation on int and null
+
+Cannot perform mathematical operation on int and null
+>
+mul<
+Cannot perform mathematical operation on int and null
+
+Cannot perform mathematical operation on int and null
+>
+pow<
+Cannot perform mathematical operation on int and null
+
+Cannot perform mathematical operation on int and null
+>
+$i int(-10)
+$j resource(1) of type (stream)
+plus<
+Cannot perform mathematical operation on int and File
+
+Cannot perform mathematical operation on int and File
+>
+minus<
+Cannot perform mathematical operation on int and File
+
+Cannot perform mathematical operation on int and File
+>
+mul<
+Cannot perform mathematical operation on int and File
+
+Cannot perform mathematical operation on int and File
+>
+div<
+Cannot perform mathematical operation on int and File
+
+Cannot perform mathematical operation on int and File
+>
+mod<
+Cannot perform mathematical operation on int and File
+
+Cannot perform mathematical operation on int and File
+>
+pow<
+Cannot perform mathematical operation on int and File
+
+Cannot perform mathematical operation on int and File
+>
+$i int(-10)
+$j string(6) "string"
+plus<
+Cannot perform mathematical operation on int and string
+
+Cannot perform mathematical operation on int and string
+>
+minus<
+Cannot perform mathematical operation on int and string
+
+Cannot perform mathematical operation on int and string
+>
+mul<
+Cannot perform mathematical operation on int and string
+
+Cannot perform mathematical operation on int and string
+>
+pow<
+Cannot perform mathematical operation on int and string
+
+Cannot perform mathematical operation on int and string
+>
+$i int(-10)
+$j vec(1) {
+  int(42)
+}
+mod<
+Cannot perform mathematical operation on int and HH\vec
+
+Cannot perform mathematical operation on int and HH\vec
+>
+pow<
+Cannot perform mathematical operation on int and HH\vec
+
+Cannot perform mathematical operation on int and HH\vec
+>
+$i int(-10)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Cannot perform mathematical operation on int and HH\dict
+
+Cannot perform mathematical operation on int and HH\dict
+>
+pow<
+Cannot perform mathematical operation on int and HH\dict
+
+Cannot perform mathematical operation on int and HH\dict
+>
+$i float(1.234)
+$j int(0)
+plus<1.234>
+minus<1.234>
+mul<0>
+pow<1>
+$i float(1.234)
+$j int(-10)
+plus<-8.766>
+minus<11.234>
+mul<-12.34>
+div<-0.1234>
+mod<1>
+pow<0.12213732471812>
+$i float(1.234)
+$j float(1.234)
+plus<2.468>
+minus<0>
+mul<1.522756>
+div<1>
+mod<0>
+pow<1.2962325026676>
+$i float(1.234)
+$j float(INF)
+plus<INF>
+minus<-INF>
+mul<INF>
+div<0>
+pow<INF>
+$i float(1.234)
+$j float(NAN)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+mod<1>
+pow<NAN>
+$i float(1.234)
+$j bool(true)
+plus<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+minus<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+mul<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+div<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+mod<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+pow<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+$i float(1.234)
+$j bool(false)
+plus<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+minus<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+mul<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+pow<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+$i float(1.234)
+$j NULL
+plus<
+Cannot perform mathematical operation on float and null
+
+Cannot perform mathematical operation on float and null
+>
+minus<
+Cannot perform mathematical operation on float and null
+
+Cannot perform mathematical operation on float and null
+>
+mul<
+Cannot perform mathematical operation on float and null
+
+Cannot perform mathematical operation on float and null
+>
+pow<
+Cannot perform mathematical operation on float and null
+
+Cannot perform mathematical operation on float and null
+>
+$i float(1.234)
+$j resource(1) of type (stream)
+plus<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+minus<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+mul<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+div<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+mod<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+pow<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+$i float(1.234)
+$j string(6) "string"
+plus<
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and string
+>
+minus<
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and string
+>
+mul<
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and string
+>
+pow<
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and string
+>
+$i float(1.234)
+$j vec(1) {
+  int(42)
+}
+mod<
+Cannot perform mathematical operation on float and HH\vec
+
+Cannot perform mathematical operation on float and HH\vec
+>
+pow<
+Cannot perform mathematical operation on float and HH\vec
+
+Cannot perform mathematical operation on float and HH\vec
+>
+$i float(1.234)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Cannot perform mathematical operation on float and HH\dict
+
+Cannot perform mathematical operation on float and HH\dict
+>
+pow<
+Cannot perform mathematical operation on float and HH\dict
+
+Cannot perform mathematical operation on float and HH\dict
+>
+$i float(INF)
+$j int(0)
+plus<INF>
+minus<INF>
+mul<NAN>
+pow<1>
+$i float(INF)
+$j int(-10)
+plus<INF>
+minus<INF>
+mul<-INF>
+div<-INF>
+mod<0>
+pow<0>
+$i float(INF)
+$j float(1.234)
+plus<INF>
+minus<INF>
+mul<INF>
+div<INF>
+mod<0>
+pow<INF>
+$i float(INF)
+$j float(INF)
+plus<INF>
+minus<NAN>
+mul<INF>
+div<NAN>
+pow<INF>
+$i float(INF)
+$j float(NAN)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+mod<0>
+pow<NAN>
+$i float(INF)
+$j bool(true)
+plus<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+minus<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+mul<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+div<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+mod<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+pow<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+$i float(INF)
+$j bool(false)
+plus<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+minus<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+mul<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+pow<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+$i float(INF)
+$j NULL
+plus<
+Cannot perform mathematical operation on float and null
+
+Cannot perform mathematical operation on float and null
+>
+minus<
+Cannot perform mathematical operation on float and null
+
+Cannot perform mathematical operation on float and null
+>
+mul<
+Cannot perform mathematical operation on float and null
+
+Cannot perform mathematical operation on float and null
+>
+pow<
+Cannot perform mathematical operation on float and null
+
+Cannot perform mathematical operation on float and null
+>
+$i float(INF)
+$j resource(1) of type (stream)
+plus<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+minus<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+mul<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+div<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+mod<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+pow<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+$i float(INF)
+$j string(6) "string"
+plus<
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and string
+>
+minus<
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and string
+>
+mul<
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and string
+>
+pow<
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and string
+>
+$i float(INF)
+$j vec(1) {
+  int(42)
+}
+mod<
+Cannot perform mathematical operation on float and HH\vec
+
+Cannot perform mathematical operation on float and HH\vec
+>
+pow<
+Cannot perform mathematical operation on float and HH\vec
+
+Cannot perform mathematical operation on float and HH\vec
+>
+$i float(INF)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Cannot perform mathematical operation on float and HH\dict
+
+Cannot perform mathematical operation on float and HH\dict
+>
+pow<
+Cannot perform mathematical operation on float and HH\dict
+
+Cannot perform mathematical operation on float and HH\dict
+>
+$i float(NAN)
+$j int(0)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+pow<1>
+$i float(NAN)
+$j int(-10)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+mod<-8>
+pow<NAN>
+$i float(NAN)
+$j float(1.234)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+mod<0>
+pow<NAN>
+$i float(NAN)
+$j float(INF)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+pow<NAN>
+$i float(NAN)
+$j float(NAN)
+plus<NAN>
+minus<NAN>
+mul<NAN>
+div<NAN>
+mod<0>
+pow<NAN>
+$i float(NAN)
+$j bool(true)
+plus<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+minus<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+mul<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+div<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+mod<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+pow<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+$i float(NAN)
+$j bool(false)
+plus<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+minus<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+mul<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+pow<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+>
+$i float(NAN)
+$j NULL
+plus<
+Cannot perform mathematical operation on float and null
+
+Cannot perform mathematical operation on float and null
+>
+minus<
+Cannot perform mathematical operation on float and null
+
+Cannot perform mathematical operation on float and null
+>
+mul<
+Cannot perform mathematical operation on float and null
+
+Cannot perform mathematical operation on float and null
+>
+pow<
+Cannot perform mathematical operation on float and null
+
+Cannot perform mathematical operation on float and null
+>
+$i float(NAN)
+$j resource(1) of type (stream)
+plus<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+minus<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+mul<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+div<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+mod<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+pow<
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and File
+>
+$i float(NAN)
+$j string(6) "string"
+plus<
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and string
+>
+minus<
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and string
+>
+mul<
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and string
+>
+pow<
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and string
+>
+$i float(NAN)
+$j vec(1) {
+  int(42)
+}
+mod<
+Cannot perform mathematical operation on float and HH\vec
+
+Cannot perform mathematical operation on float and HH\vec
+>
+pow<
+Cannot perform mathematical operation on float and HH\vec
+
+Cannot perform mathematical operation on float and HH\vec
+>
+$i float(NAN)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Cannot perform mathematical operation on float and HH\dict
+
+Cannot perform mathematical operation on float and HH\dict
+>
+pow<
+Cannot perform mathematical operation on float and HH\dict
+
+Cannot perform mathematical operation on float and HH\dict
+>
+$i bool(true)
+$j int(0)
+plus<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+minus<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+mul<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+pow<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+$i bool(true)
+$j int(-10)
+plus<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+minus<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+mul<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+div<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+mod<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+pow<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+$i bool(true)
+$j float(1.234)
+plus<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+minus<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+mul<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+div<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+mod<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+pow<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+$i bool(true)
+$j float(INF)
+plus<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+minus<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+mul<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+div<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+pow<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+$i bool(true)
+$j float(NAN)
+plus<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+minus<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+mul<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+div<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+mod<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+pow<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+$i bool(true)
+$j bool(true)
+plus<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+minus<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+mul<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+div<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+mod<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+pow<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+$i bool(true)
+$j bool(false)
+plus<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+minus<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+mul<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+pow<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+$i bool(true)
+$j NULL
+plus<
+Cannot perform mathematical operation on bool and null
+
+Cannot perform mathematical operation on bool and null
+>
+minus<
+Cannot perform mathematical operation on bool and null
+
+Cannot perform mathematical operation on bool and null
+>
+mul<
+Cannot perform mathematical operation on bool and null
+
+Cannot perform mathematical operation on bool and null
+>
+pow<
+Cannot perform mathematical operation on bool and null
+
+Cannot perform mathematical operation on bool and null
+>
+$i bool(true)
+$j resource(1) of type (stream)
+plus<
+Cannot perform mathematical operation on bool and File
+
+Cannot perform mathematical operation on bool and File
+>
+minus<
+Cannot perform mathematical operation on bool and File
+
+Cannot perform mathematical operation on bool and File
+>
+mul<
+Cannot perform mathematical operation on bool and File
+
+Cannot perform mathematical operation on bool and File
+>
+div<
+Cannot perform mathematical operation on bool and File
+
+Cannot perform mathematical operation on bool and File
+>
+mod<
+Cannot perform mathematical operation on bool and File
+
+Cannot perform mathematical operation on bool and File
+>
+pow<
+Cannot perform mathematical operation on bool and File
+
+Cannot perform mathematical operation on bool and File
+>
+$i bool(true)
+$j string(6) "string"
+plus<
+Cannot perform mathematical operation on bool and string
+
+Cannot perform mathematical operation on bool and string
+>
+minus<
+Cannot perform mathematical operation on bool and string
+
+Cannot perform mathematical operation on bool and string
+>
+mul<
+Cannot perform mathematical operation on bool and string
+
+Cannot perform mathematical operation on bool and string
+>
+pow<
+Cannot perform mathematical operation on bool and string
+
+Cannot perform mathematical operation on bool and string
+>
+$i bool(true)
+$j vec(1) {
+  int(42)
+}
+mod<
+Cannot perform mathematical operation on bool and HH\vec
+
+Cannot perform mathematical operation on bool and HH\vec
+>
+pow<
+Cannot perform mathematical operation on bool and HH\vec
+
+Cannot perform mathematical operation on bool and HH\vec
+>
+$i bool(true)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Cannot perform mathematical operation on bool and HH\dict
+
+Cannot perform mathematical operation on bool and HH\dict
+>
+pow<
+Cannot perform mathematical operation on bool and HH\dict
+
+Cannot perform mathematical operation on bool and HH\dict
+>
+$i bool(false)
+$j int(0)
+plus<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+minus<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+mul<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+pow<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+$i bool(false)
+$j int(-10)
+plus<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+minus<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+mul<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+div<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+mod<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+pow<
+Cannot perform mathematical operation on bool and int
+
+Cannot perform mathematical operation on bool and int
+>
+$i bool(false)
+$j float(1.234)
+plus<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+minus<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+mul<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+div<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+mod<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+pow<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+$i bool(false)
+$j float(INF)
+plus<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+minus<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+mul<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+div<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+pow<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+$i bool(false)
+$j float(NAN)
+plus<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+minus<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+mul<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+div<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+mod<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+pow<
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on bool and float
+>
+$i bool(false)
+$j bool(true)
+plus<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+minus<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+mul<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+div<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+mod<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+pow<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+$i bool(false)
+$j bool(false)
+plus<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+minus<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+mul<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+pow<
+Cannot perform mathematical operation on bool and bool
+
+Cannot perform mathematical operation on bool and bool
+>
+$i bool(false)
+$j NULL
+plus<
+Cannot perform mathematical operation on bool and null
+
+Cannot perform mathematical operation on bool and null
+>
+minus<
+Cannot perform mathematical operation on bool and null
+
+Cannot perform mathematical operation on bool and null
+>
+mul<
+Cannot perform mathematical operation on bool and null
+
+Cannot perform mathematical operation on bool and null
+>
+pow<
+Cannot perform mathematical operation on bool and null
+
+Cannot perform mathematical operation on bool and null
+>
+$i bool(false)
+$j resource(1) of type (stream)
+plus<
+Cannot perform mathematical operation on bool and File
+
+Cannot perform mathematical operation on bool and File
+>
+minus<
+Cannot perform mathematical operation on bool and File
+
+Cannot perform mathematical operation on bool and File
+>
+mul<
+Cannot perform mathematical operation on bool and File
+
+Cannot perform mathematical operation on bool and File
+>
+div<
+Cannot perform mathematical operation on bool and File
+
+Cannot perform mathematical operation on bool and File
+>
+mod<
+Cannot perform mathematical operation on bool and File
+
+Cannot perform mathematical operation on bool and File
+>
+pow<
+Cannot perform mathematical operation on bool and File
+
+Cannot perform mathematical operation on bool and File
+>
+$i bool(false)
+$j string(6) "string"
+plus<
+Cannot perform mathematical operation on bool and string
+
+Cannot perform mathematical operation on bool and string
+>
+minus<
+Cannot perform mathematical operation on bool and string
+
+Cannot perform mathematical operation on bool and string
+>
+mul<
+Cannot perform mathematical operation on bool and string
+
+Cannot perform mathematical operation on bool and string
+>
+pow<
+Cannot perform mathematical operation on bool and string
+
+Cannot perform mathematical operation on bool and string
+>
+$i bool(false)
+$j vec(1) {
+  int(42)
+}
+mod<
+Cannot perform mathematical operation on bool and HH\vec
+
+Cannot perform mathematical operation on bool and HH\vec
+>
+pow<
+Cannot perform mathematical operation on bool and HH\vec
+
+Cannot perform mathematical operation on bool and HH\vec
+>
+$i bool(false)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Cannot perform mathematical operation on bool and HH\dict
+
+Cannot perform mathematical operation on bool and HH\dict
+>
+pow<
+Cannot perform mathematical operation on bool and HH\dict
+
+Cannot perform mathematical operation on bool and HH\dict
+>
+$i NULL
+$j int(0)
+plus<
+Cannot perform mathematical operation on null and int
+
+Cannot perform mathematical operation on null and int
+>
+minus<
+Cannot perform mathematical operation on null and int
+
+Cannot perform mathematical operation on null and int
+>
+mul<
+Cannot perform mathematical operation on null and int
+
+Cannot perform mathematical operation on null and int
+>
+pow<
+Cannot perform mathematical operation on null and int
+
+Cannot perform mathematical operation on null and int
+>
+$i NULL
+$j int(-10)
+plus<
+Cannot perform mathematical operation on null and int
+
+Cannot perform mathematical operation on null and int
+>
+minus<
+Cannot perform mathematical operation on null and int
+
+Cannot perform mathematical operation on null and int
+>
+mul<
+Cannot perform mathematical operation on null and int
+
+Cannot perform mathematical operation on null and int
+>
+div<
+Cannot perform mathematical operation on null and int
+
+Cannot perform mathematical operation on null and int
+>
+mod<
+Cannot perform mathematical operation on null and int
+
+Cannot perform mathematical operation on null and int
+>
+pow<
+Cannot perform mathematical operation on null and int
+
+Cannot perform mathematical operation on null and int
+>
+$i NULL
+$j float(1.234)
+plus<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+minus<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+mul<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+div<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+mod<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+pow<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+$i NULL
+$j float(INF)
+plus<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+minus<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+mul<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+div<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+pow<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+$i NULL
+$j float(NAN)
+plus<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+minus<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+mul<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+div<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+mod<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+pow<
+Cannot perform mathematical operation on null and float
+
+Cannot perform mathematical operation on null and float
+>
+$i NULL
+$j bool(true)
+plus<
+Cannot perform mathematical operation on null and bool
+
+Cannot perform mathematical operation on null and bool
+>
+minus<
+Cannot perform mathematical operation on null and bool
+
+Cannot perform mathematical operation on null and bool
+>
+mul<
+Cannot perform mathematical operation on null and bool
+
+Cannot perform mathematical operation on null and bool
+>
+div<
+Cannot perform mathematical operation on null and bool
+
+Cannot perform mathematical operation on null and bool
+>
+mod<
+Cannot perform mathematical operation on null and bool
+
+Cannot perform mathematical operation on null and bool
+>
+pow<
+Cannot perform mathematical operation on null and bool
+
+Cannot perform mathematical operation on null and bool
+>
+$i NULL
+$j bool(false)
+plus<
+Cannot perform mathematical operation on null and bool
+
+Cannot perform mathematical operation on null and bool
+>
+minus<
+Cannot perform mathematical operation on null and bool
+
+Cannot perform mathematical operation on null and bool
+>
+mul<
+Cannot perform mathematical operation on null and bool
+
+Cannot perform mathematical operation on null and bool
+>
+pow<
+Cannot perform mathematical operation on null and bool
+
+Cannot perform mathematical operation on null and bool
+>
+$i NULL
+$j NULL
+plus<
+Cannot perform mathematical operation on null and null
+
+Cannot perform mathematical operation on null and null
+>
+minus<
+Cannot perform mathematical operation on null and null
+
+Cannot perform mathematical operation on null and null
+>
+mul<
+Cannot perform mathematical operation on null and null
+
+Cannot perform mathematical operation on null and null
+>
+pow<
+Cannot perform mathematical operation on null and null
+
+Cannot perform mathematical operation on null and null
+>
+$i NULL
+$j resource(1) of type (stream)
+plus<
+Cannot perform mathematical operation on null and File
+
+Cannot perform mathematical operation on null and File
+>
+minus<
+Cannot perform mathematical operation on null and File
+
+Cannot perform mathematical operation on null and File
+>
+mul<
+Cannot perform mathematical operation on null and File
+
+Cannot perform mathematical operation on null and File
+>
+div<
+Cannot perform mathematical operation on null and File
+
+Cannot perform mathematical operation on null and File
+>
+mod<
+Cannot perform mathematical operation on null and File
+
+Cannot perform mathematical operation on null and File
+>
+pow<
+Cannot perform mathematical operation on null and File
+
+Cannot perform mathematical operation on null and File
+>
+$i NULL
+$j string(6) "string"
+plus<
+Cannot perform mathematical operation on null and string
+
+Cannot perform mathematical operation on null and string
+>
+minus<
+Cannot perform mathematical operation on null and string
+
+Cannot perform mathematical operation on null and string
+>
+mul<
+Cannot perform mathematical operation on null and string
+
+Cannot perform mathematical operation on null and string
+>
+pow<
+Cannot perform mathematical operation on null and string
+
+Cannot perform mathematical operation on null and string
+>
+$i NULL
+$j vec(1) {
+  int(42)
+}
+mod<
+Cannot perform mathematical operation on null and HH\vec
+
+Cannot perform mathematical operation on null and HH\vec
+>
+pow<
+Cannot perform mathematical operation on null and HH\vec
+
+Cannot perform mathematical operation on null and HH\vec
+>
+$i NULL
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Cannot perform mathematical operation on null and HH\dict
+
+Cannot perform mathematical operation on null and HH\dict
+>
+pow<
+Cannot perform mathematical operation on null and HH\dict
+
+Cannot perform mathematical operation on null and HH\dict
+>
+$i resource(1) of type (stream)
+$j int(0)
+plus<
+Cannot perform mathematical operation on File and int
+
+Cannot perform mathematical operation on File and int
+>
+minus<
+Cannot perform mathematical operation on File and int
+
+Cannot perform mathematical operation on File and int
+>
+mul<
+Cannot perform mathematical operation on File and int
+
+Cannot perform mathematical operation on File and int
+>
+pow<
+Cannot perform mathematical operation on File and int
+
+Cannot perform mathematical operation on File and int
+>
+$i resource(1) of type (stream)
+$j int(-10)
+plus<
+Cannot perform mathematical operation on File and int
+
+Cannot perform mathematical operation on File and int
+>
+minus<
+Cannot perform mathematical operation on File and int
+
+Cannot perform mathematical operation on File and int
+>
+mul<
+Cannot perform mathematical operation on File and int
+
+Cannot perform mathematical operation on File and int
+>
+div<
+Cannot perform mathematical operation on File and int
+
+Cannot perform mathematical operation on File and int
+>
+mod<
+Cannot perform mathematical operation on File and int
+
+Cannot perform mathematical operation on File and int
+>
+pow<
+Cannot perform mathematical operation on File and int
+
+Cannot perform mathematical operation on File and int
+>
+$i resource(1) of type (stream)
+$j float(1.234)
+plus<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+minus<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+mul<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+div<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+mod<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+pow<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+$i resource(1) of type (stream)
+$j float(INF)
+plus<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+minus<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+mul<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+div<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+pow<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+$i resource(1) of type (stream)
+$j float(NAN)
+plus<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+minus<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+mul<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+div<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+mod<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+pow<
+Cannot perform mathematical operation on File and float
+
+Cannot perform mathematical operation on File and float
+>
+$i resource(1) of type (stream)
+$j bool(true)
+plus<
+Cannot perform mathematical operation on File and bool
+
+Cannot perform mathematical operation on File and bool
+>
+minus<
+Cannot perform mathematical operation on File and bool
+
+Cannot perform mathematical operation on File and bool
+>
+mul<
+Cannot perform mathematical operation on File and bool
+
+Cannot perform mathematical operation on File and bool
+>
+div<
+Cannot perform mathematical operation on File and bool
+
+Cannot perform mathematical operation on File and bool
+>
+mod<
+Cannot perform mathematical operation on File and bool
+
+Cannot perform mathematical operation on File and bool
+>
+pow<
+Cannot perform mathematical operation on File and bool
+
+Cannot perform mathematical operation on File and bool
+>
+$i resource(1) of type (stream)
+$j bool(false)
+plus<
+Cannot perform mathematical operation on File and bool
+
+Cannot perform mathematical operation on File and bool
+>
+minus<
+Cannot perform mathematical operation on File and bool
+
+Cannot perform mathematical operation on File and bool
+>
+mul<
+Cannot perform mathematical operation on File and bool
+
+Cannot perform mathematical operation on File and bool
+>
+pow<
+Cannot perform mathematical operation on File and bool
+
+Cannot perform mathematical operation on File and bool
+>
+$i resource(1) of type (stream)
+$j NULL
+plus<
+Cannot perform mathematical operation on File and null
+
+Cannot perform mathematical operation on File and null
+>
+minus<
+Cannot perform mathematical operation on File and null
+
+Cannot perform mathematical operation on File and null
+>
+mul<
+Cannot perform mathematical operation on File and null
+
+Cannot perform mathematical operation on File and null
+>
+pow<
+Cannot perform mathematical operation on File and null
+
+Cannot perform mathematical operation on File and null
+>
+$i resource(1) of type (stream)
+$j resource(1) of type (stream)
+plus<
+Cannot perform mathematical operation on File and File
+
+Cannot perform mathematical operation on File and File
+>
+minus<
+Cannot perform mathematical operation on File and File
+
+Cannot perform mathematical operation on File and File
+>
+mul<
+Cannot perform mathematical operation on File and File
+
+Cannot perform mathematical operation on File and File
+>
+div<
+Cannot perform mathematical operation on File and File
+
+Cannot perform mathematical operation on File and File
+>
+mod<
+Cannot perform mathematical operation on File and File
+
+Cannot perform mathematical operation on File and File
+>
+pow<
+Cannot perform mathematical operation on File and File
+
+Cannot perform mathematical operation on File and File
+>
+$i resource(1) of type (stream)
+$j string(6) "string"
+plus<
+Cannot perform mathematical operation on File and string
+
+Cannot perform mathematical operation on File and string
+>
+minus<
+Cannot perform mathematical operation on File and string
+
+Cannot perform mathematical operation on File and string
+>
+mul<
+Cannot perform mathematical operation on File and string
+
+Cannot perform mathematical operation on File and string
+>
+pow<
+Cannot perform mathematical operation on File and string
+
+Cannot perform mathematical operation on File and string
+>
+$i resource(1) of type (stream)
+$j vec(1) {
+  int(42)
+}
+mod<
+Cannot perform mathematical operation on File and HH\vec
+
+Cannot perform mathematical operation on File and HH\vec
+>
+pow<
+Cannot perform mathematical operation on File and HH\vec
+
+Cannot perform mathematical operation on File and HH\vec
+>
+$i resource(1) of type (stream)
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Cannot perform mathematical operation on File and HH\dict
+
+Cannot perform mathematical operation on File and HH\dict
+>
+pow<
+Cannot perform mathematical operation on File and HH\dict
+
+Cannot perform mathematical operation on File and HH\dict
+>
+$i string(6) "string"
+$j int(0)
+plus<
+Cannot perform mathematical operation on string and int
+
+Cannot perform mathematical operation on string and int
+>
+minus<
+Cannot perform mathematical operation on string and int
+
+Cannot perform mathematical operation on string and int
+>
+mul<
+Cannot perform mathematical operation on string and int
+
+Cannot perform mathematical operation on string and int
+>
+pow<
+Cannot perform mathematical operation on string and int
+
+Cannot perform mathematical operation on string and int
+>
+$i string(6) "string"
+$j int(-10)
+plus<
+Cannot perform mathematical operation on string and int
+
+Cannot perform mathematical operation on string and int
+>
+minus<
+Cannot perform mathematical operation on string and int
+
+Cannot perform mathematical operation on string and int
+>
+mul<
+Cannot perform mathematical operation on string and int
+
+Cannot perform mathematical operation on string and int
+>
+div<
+Cannot perform mathematical operation on string and int
+
+Cannot perform mathematical operation on string and int
+>
+mod<
+Cannot perform mathematical operation on string and int
+
+Cannot perform mathematical operation on string and int
+>
+pow<
+Cannot perform mathematical operation on string and int
+
+Cannot perform mathematical operation on string and int
+>
+$i string(6) "string"
+$j float(1.234)
+plus<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+minus<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+mul<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+div<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+mod<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+pow<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+$i string(6) "string"
+$j float(INF)
+plus<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+minus<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+mul<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+div<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+pow<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+$i string(6) "string"
+$j float(NAN)
+plus<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+minus<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+mul<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+div<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+mod<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+pow<
+Cannot perform mathematical operation on string and float
+
+Cannot perform mathematical operation on string and float
+>
+$i string(6) "string"
+$j bool(true)
+plus<
+Cannot perform mathematical operation on string and bool
+
+Cannot perform mathematical operation on string and bool
+>
+minus<
+Cannot perform mathematical operation on string and bool
+
+Cannot perform mathematical operation on string and bool
+>
+mul<
+Cannot perform mathematical operation on string and bool
+
+Cannot perform mathematical operation on string and bool
+>
+div<
+Cannot perform mathematical operation on string and bool
+
+Cannot perform mathematical operation on string and bool
+>
+mod<
+Cannot perform mathematical operation on string and bool
+
+Cannot perform mathematical operation on string and bool
+>
+pow<
+Cannot perform mathematical operation on string and bool
+
+Cannot perform mathematical operation on string and bool
+>
+$i string(6) "string"
+$j bool(false)
+plus<
+Cannot perform mathematical operation on string and bool
+
+Cannot perform mathematical operation on string and bool
+>
+minus<
+Cannot perform mathematical operation on string and bool
+
+Cannot perform mathematical operation on string and bool
+>
+mul<
+Cannot perform mathematical operation on string and bool
+
+Cannot perform mathematical operation on string and bool
+>
+pow<
+Cannot perform mathematical operation on string and bool
+
+Cannot perform mathematical operation on string and bool
+>
+$i string(6) "string"
+$j NULL
+plus<
+Cannot perform mathematical operation on string and null
+
+Cannot perform mathematical operation on string and null
+>
+minus<
+Cannot perform mathematical operation on string and null
+
+Cannot perform mathematical operation on string and null
+>
+mul<
+Cannot perform mathematical operation on string and null
+
+Cannot perform mathematical operation on string and null
+>
+pow<
+Cannot perform mathematical operation on string and null
+
+Cannot perform mathematical operation on string and null
+>
+$i string(6) "string"
+$j resource(1) of type (stream)
+plus<
+Cannot perform mathematical operation on string and File
+
+Cannot perform mathematical operation on string and File
+>
+minus<
+Cannot perform mathematical operation on string and File
+
+Cannot perform mathematical operation on string and File
+>
+mul<
+Cannot perform mathematical operation on string and File
+
+Cannot perform mathematical operation on string and File
+>
+div<
+Cannot perform mathematical operation on string and File
+
+Cannot perform mathematical operation on string and File
+>
+mod<
+Cannot perform mathematical operation on string and File
+
+Cannot perform mathematical operation on string and File
+>
+pow<
+Cannot perform mathematical operation on string and File
+
+Cannot perform mathematical operation on string and File
+>
+$i string(6) "string"
+$j string(6) "string"
+plus<
+Cannot perform mathematical operation on string and string
+
+Cannot perform mathematical operation on string and string
+>
+minus<
+Cannot perform mathematical operation on string and string
+
+Cannot perform mathematical operation on string and string
+>
+mul<
+Cannot perform mathematical operation on string and string
+
+Cannot perform mathematical operation on string and string
+>
+pow<
+Cannot perform mathematical operation on string and string
+
+Cannot perform mathematical operation on string and string
+>
+$i string(6) "string"
+$j vec(1) {
+  int(42)
+}
+mod<
+Cannot perform mathematical operation on string and HH\vec
+
+Cannot perform mathematical operation on string and HH\vec
+>
+pow<
+Cannot perform mathematical operation on string and HH\vec
+
+Cannot perform mathematical operation on string and HH\vec
+>
+$i string(6) "string"
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Cannot perform mathematical operation on string and HH\dict
+
+Cannot perform mathematical operation on string and HH\dict
+>
+pow<
+Cannot perform mathematical operation on string and HH\dict
+
+Cannot perform mathematical operation on string and HH\dict
+>
+$i vec(1) {
+  int(42)
+}
+$j int(0)
+pow<
+Cannot perform mathematical operation on HH\vec and int
+
+Cannot perform mathematical operation on HH\vec and int
+>
+$i vec(1) {
+  int(42)
+}
+$j int(-10)
+mod<
+Cannot perform mathematical operation on HH\vec and int
+
+Cannot perform mathematical operation on HH\vec and int
+>
+pow<
+Cannot perform mathematical operation on HH\vec and int
+
+Cannot perform mathematical operation on HH\vec and int
+>
+$i vec(1) {
+  int(42)
+}
+$j float(1.234)
+mod<
+Cannot perform mathematical operation on HH\vec and float
+
+Cannot perform mathematical operation on HH\vec and float
+>
+pow<
+Cannot perform mathematical operation on HH\vec and float
+
+Cannot perform mathematical operation on HH\vec and float
+>
+$i vec(1) {
+  int(42)
+}
+$j float(INF)
+pow<
+Cannot perform mathematical operation on HH\vec and float
+
+Cannot perform mathematical operation on HH\vec and float
+>
+$i vec(1) {
+  int(42)
+}
+$j float(NAN)
+mod<
+Cannot perform mathematical operation on HH\vec and float
+
+Cannot perform mathematical operation on HH\vec and float
+>
+pow<
+Cannot perform mathematical operation on HH\vec and float
+
+Cannot perform mathematical operation on HH\vec and float
+>
+$i vec(1) {
+  int(42)
+}
+$j bool(true)
+mod<
+Cannot perform mathematical operation on HH\vec and bool
+
+Cannot perform mathematical operation on HH\vec and bool
+>
+pow<
+Cannot perform mathematical operation on HH\vec and bool
+
+Cannot perform mathematical operation on HH\vec and bool
+>
+$i vec(1) {
+  int(42)
+}
+$j bool(false)
+pow<
+Cannot perform mathematical operation on HH\vec and bool
+
+Cannot perform mathematical operation on HH\vec and bool
+>
+$i vec(1) {
+  int(42)
+}
+$j NULL
+pow<
+Cannot perform mathematical operation on HH\vec and null
+
+Cannot perform mathematical operation on HH\vec and null
+>
+$i vec(1) {
+  int(42)
+}
+$j resource(1) of type (stream)
+mod<
+Cannot perform mathematical operation on HH\vec and File
+
+Cannot perform mathematical operation on HH\vec and File
+>
+pow<
+Cannot perform mathematical operation on HH\vec and File
+
+Cannot perform mathematical operation on HH\vec and File
+>
+$i vec(1) {
+  int(42)
+}
+$j string(6) "string"
+pow<
+Cannot perform mathematical operation on HH\vec and string
+
+Cannot perform mathematical operation on HH\vec and string
+>
+$i vec(1) {
+  int(42)
+}
+$j vec(1) {
+  int(42)
+}
+mod<
+Cannot perform mathematical operation on HH\vec and HH\vec
+
+Cannot perform mathematical operation on HH\vec and HH\vec
+>
+pow<
+Cannot perform mathematical operation on HH\vec and HH\vec
+
+Cannot perform mathematical operation on HH\vec and HH\vec
+>
+$i vec(1) {
+  int(42)
+}
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Cannot perform mathematical operation on HH\vec and HH\dict
+
+Cannot perform mathematical operation on HH\vec and HH\dict
+>
+pow<
+Cannot perform mathematical operation on HH\vec and HH\dict
+
+Cannot perform mathematical operation on HH\vec and HH\dict
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j int(0)
+pow<
+Cannot perform mathematical operation on HH\dict and int
+
+Cannot perform mathematical operation on HH\dict and int
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j int(-10)
+mod<
+Cannot perform mathematical operation on HH\dict and int
+
+Cannot perform mathematical operation on HH\dict and int
+>
+pow<
+Cannot perform mathematical operation on HH\dict and int
+
+Cannot perform mathematical operation on HH\dict and int
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j float(1.234)
+mod<
+Cannot perform mathematical operation on HH\dict and float
+
+Cannot perform mathematical operation on HH\dict and float
+>
+pow<
+Cannot perform mathematical operation on HH\dict and float
+
+Cannot perform mathematical operation on HH\dict and float
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j float(INF)
+pow<
+Cannot perform mathematical operation on HH\dict and float
+
+Cannot perform mathematical operation on HH\dict and float
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j float(NAN)
+mod<
+Cannot perform mathematical operation on HH\dict and float
+
+Cannot perform mathematical operation on HH\dict and float
+>
+pow<
+Cannot perform mathematical operation on HH\dict and float
+
+Cannot perform mathematical operation on HH\dict and float
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j bool(true)
+mod<
+Cannot perform mathematical operation on HH\dict and bool
+
+Cannot perform mathematical operation on HH\dict and bool
+>
+pow<
+Cannot perform mathematical operation on HH\dict and bool
+
+Cannot perform mathematical operation on HH\dict and bool
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j bool(false)
+pow<
+Cannot perform mathematical operation on HH\dict and bool
+
+Cannot perform mathematical operation on HH\dict and bool
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j NULL
+pow<
+Cannot perform mathematical operation on HH\dict and null
+
+Cannot perform mathematical operation on HH\dict and null
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j resource(1) of type (stream)
+mod<
+Cannot perform mathematical operation on HH\dict and File
+
+Cannot perform mathematical operation on HH\dict and File
+>
+pow<
+Cannot perform mathematical operation on HH\dict and File
+
+Cannot perform mathematical operation on HH\dict and File
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j string(6) "string"
+pow<
+Cannot perform mathematical operation on HH\dict and string
+
+Cannot perform mathematical operation on HH\dict and string
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j vec(1) {
+  int(42)
+}
+mod<
+Cannot perform mathematical operation on HH\dict and HH\vec
+
+Cannot perform mathematical operation on HH\dict and HH\vec
+>
+pow<
+Cannot perform mathematical operation on HH\dict and HH\vec
+
+Cannot perform mathematical operation on HH\dict and HH\vec
+>
+$i dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+$j dict(1) {
+  ["foobar"]=>
+  bool(false)
+}
+mod<
+Cannot perform mathematical operation on HH\dict and HH\dict
+
+Cannot perform mathematical operation on HH\dict and HH\dict
+>
+pow<
+Cannot perform mathematical operation on HH\dict and HH\dict
+
+Cannot perform mathematical operation on HH\dict and HH\dict
+>

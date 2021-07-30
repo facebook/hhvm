@@ -27,21 +27,6 @@ namespace HPHP { namespace HHBBC {
 
 namespace {
 
-Optional<Type> usual_arith_conversions(Type t1, Type t2) {
-  /*
-   * TODO(#3577303): some of these could be nothrow, which is probably
-   * information we have want to propagate back out through the return
-   * value here (rather than bundling everything into the
-   * interpreter).
-   */
-  if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt)) return TInt;
-  if (t1.subtypeOf(BInt) && t2.subtypeOf(BDbl)) return TDbl;
-  if (t1.subtypeOf(BDbl) && t2.subtypeOf(BInt)) return TDbl;
-  if (t1.subtypeOf(BDbl) && t2.subtypeOf(BDbl)) return TDbl;
-  if (t1.subtypeOf(BNum) && t2.subtypeOf(BNum)) return TNum;
-  return std::nullopt;
-}
-
 template<class Fun>
 Optional<Type> eval_const(Type t1, Type t2, Fun fun) {
   auto const v1 = tv(t1);
@@ -80,80 +65,40 @@ Type typeToInt(Type ty) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool okTypesForConstMath(Type t1, Type t2) {
-  // we're banning math on non-num types and they're gonna be rare on literals
-  // and immediately codemodded away anyway, so just kill the optimization now
-  return t1.subtypeOf(BNum) && t2.subtypeOf(BNum);
-}
-
-Type typeAdd(Type t1, Type t2) {
-  if (okTypesForConstMath(t1, t2)) {
-    if (auto t = eval_const(t1, t2, tvAdd)) return *t;
-  }
-  if (auto t = usual_arith_conversions(t1, t2))       return *t;
-  if (t1.subtypeOf(BVec) && t2.subtypeOf(BVec))       return TVec;
-  if (t1.subtypeOf(BDict) && t2.subtypeOf(BDict))     return TDict;
-  if (t1.subtypeOf(BKeyset) && t2.subtypeOf(BKeyset)) return TKeyset;
-  return TInitCell;
-}
-
-Type typeAddO(Type t1, Type t2) {
-  if (okTypesForConstMath(t1, t2)) {
-    if (auto t = eval_const(t1, t2, tvAddO))          return *t;
-  }
-  if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt))       return TNum;
-  if (auto t = usual_arith_conversions(t1, t2))       return *t;
-  if (t1.subtypeOf(BVec) && t2.subtypeOf(BVec))       return TVec;
-  if (t1.subtypeOf(BDict) && t2.subtypeOf(BDict))     return TDict;
-  if (t1.subtypeOf(BKeyset) && t2.subtypeOf(BKeyset)) return TKeyset;
-  return TInitCell;
-}
-
 template <class CellOp>
-Type typeSubMulImpl(Type t1, Type t2, CellOp op) {
-  if (okTypesForConstMath(t1, t2)) {
-    if (auto t = eval_const(t1, t2, op))        return *t;
+Type typeArithImpl(Type t1, Type t2, CellOp op) {
+  // TODO: this should be TBottom, but HHBBC straight up chokes on stuff like
+  // vec[null + 58] in Type::checkInvariants
+  if (!t1.couldBe(BNum) || !t2.couldBe(BNum)) return TNum;
+  if (auto t = eval_const(t1, t2, op)) return *t;
+  if (op == tvMod) return TInt;
+
+  /*
+   * TODO(#3577303): some of these could be nothrow, which is probably
+   * information we have want to propagate back out through the return
+   * value here (rather than bundling everything into the
+   * interpreter).
+   */
+  if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt)) {
+    // can't switch on pointers, so use template magic
+    auto is_any = [](auto first, auto ...t) { return ((first == t) || ...); };
+    return is_any(op, tvSubO, tvMulO, tvAddO, tvDiv, tvPow) ? TNum : TInt;
   }
-  if (auto t = usual_arith_conversions(t1, t2)) return *t;
-  return TInitPrim;
-}
-
-template <class CellOp>
-Type typeSubMulImplO(Type t1, Type t2, CellOp op) {
-  if (okTypesForConstMath(t1, t2)) {
-    if (auto t = eval_const(t1, t2, op))        return *t;
-  }
-  if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt)) return TNum;
-  if (auto t = usual_arith_conversions(t1, t2)) return *t;
-  return TInitPrim;
-}
-
-Type typeSub(Type t1, Type t2)  { return typeSubMulImpl(t1, t2, tvSub); }
-Type typeMul(Type t1, Type t2)  { return typeSubMulImpl(t1, t2, tvMul); }
-
-Type typeSubO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, tvSubO); }
-Type typeMulO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, tvMulO); }
-
-Type typeDiv(Type t1, Type t2) {
-  if (okTypesForConstMath(t1, t2)) {
-    if (auto t = eval_const(t1, t2, tvDiv)) return *t;
-  }
-  return TInitPrim;
-}
-
-Type typeMod(Type t1, Type t2) {
-  if (okTypesForConstMath(t1, t2)) {
-    if (auto t = eval_const(t1, t2, tvMod)) return *t;
-  }
-  return TInitPrim;
-}
-
-Type typePow(Type t1, Type t2) {
-  if (okTypesForConstMath(t1, t2)) {
-    if (auto t = eval_const(t1, t2, tvPow)) return *t;
-  }
+  if (t1.subtypeOf(BNum) && t2.subtypeOf(BNum) &&
+     (t1.subtypeOf(BDbl) || t2.subtypeOf(BDbl))) return TDbl;
   return TNum;
 }
+
+Type typeAdd(Type t1, Type t2) { return typeArithImpl(t1, t2, tvAdd); }
+Type typeSub(Type t1, Type t2) { return typeArithImpl(t1, t2, tvSub); }
+Type typeMul(Type t1, Type t2) { return typeArithImpl(t1, t2, tvMul); }
+Type typeDiv(Type t1, Type t2) { return typeArithImpl(t1, t2, tvDiv); }
+Type typePow(Type t1, Type t2) { return typeArithImpl(t1, t2, tvPow); }
+Type typeMod(Type t1, Type t2) { return typeArithImpl(t1, t2, tvMod); }
+
+Type typeSubO(Type t1, Type t2) { return typeArithImpl(t1, t2, tvSubO); }
+Type typeMulO(Type t1, Type t2) { return typeArithImpl(t1, t2, tvMulO); }
+Type typeAddO(Type t1, Type t2) { return typeArithImpl(t1, t2, tvAddO); }
 
 Type typeConcat(Type t1, Type t2) {
   auto const tv = eval_const(t1, t2, [&] (auto v1, auto v2) {

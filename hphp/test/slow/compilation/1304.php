@@ -4,42 +4,42 @@ class C {
   function foo($a) {
     try {
       var_dump($this + $a);
-    } catch (TypecastException $e) {
+    } catch (Exception $e) {
       var_dump($e->getMessage());
     }
     try {
       var_dump($this - $a);
-    } catch (TypecastException $e) {
+    } catch (Exception $e) {
       var_dump($e->getMessage());
     }
     try {
       var_dump($this * $a);
-    } catch (TypecastException $e) {
+    } catch (Exception $e) {
       var_dump($e->getMessage());
     }
     try {
       var_dump($this / $a);
-    } catch (TypecastException $e) {
+    } catch (Exception $e) {
       var_dump($e->getMessage());
     }
     try {
       var_dump($a + $this);
-    } catch (TypecastException $e) {
+    } catch (Exception $e) {
       var_dump($e->getMessage());
     }
     try {
       var_dump($a - $this);
-    } catch (TypecastException $e) {
+    } catch (Exception $e) {
       var_dump($e->getMessage());
     }
     try {
       var_dump($a * $this);
-    } catch (TypecastException $e) {
+    } catch (Exception $e) {
       var_dump($e->getMessage());
     }
     try {
       var_dump($a / $this);
-    } catch (TypecastException $e) {
+    } catch (Exception $e) {
       var_dump($e->getMessage());
     }
   }

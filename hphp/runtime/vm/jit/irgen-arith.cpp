@@ -27,35 +27,26 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
-ConvNoticeData getConvNoticeDataForMath() {
-   return ConvNoticeData {
-      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForMath),
-      s_ConvNoticeReasonMath.get(),
-      false, // don't trigger notices from int <-> double
-   };
-}
-
 bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
-  auto checkArith = [](Type ty) {
-    return ty.subtypeOfAny(TInt, TBool, TDbl);
-  };
+  auto is_numeric = [](Type ty) { return ty.subtypeOfAny(TInt, TDbl); };
 
   switch (op) {
   case Op::Add:
   case Op::Sub:
   case Op::Mul:
+  case Op::Div:
+  case Op::Mod:
   case Op::AddO:
   case Op::SubO:
   case Op::MulO:
-    return checkArith(t1) && checkArith(t2);
+    return is_numeric(t1) && is_numeric(t2);
   case Op::BitAnd:
   case Op::BitOr:
   case Op::BitXor:
     return t1 <= TInt && t2 <= TInt;
   default:
-    break;
+    always_assert(0);
   }
-  always_assert(0);
 }
 
 Opcode intArithOp(Op op) {
@@ -108,13 +99,6 @@ bool isBitOp(Op op) {
   }
 }
 
-// booleans in arithmetic operations get cast to ints
-SSATmp* promoteBool(IRGS& env, SSATmp* src) {
-  if (!(src->type() <= TBool)) return src;
-  handleConvNoticeLevel(env, getConvNoticeDataForMath(), "bool", "int");
-  return gen(env, ConvBoolToInt, src);
-}
-
 Opcode promoteBinaryDoubles(IRGS& env, Op op, SSATmp*& src1, SSATmp*& src2) {
   auto const type1 = src1->type();
   auto const type2 = src2->type();
@@ -150,13 +134,13 @@ void binaryArith(IRGS& env, Op op) {
   auto const type2 = topC(env, BCSPRelOffset{0})->type();
   auto const type1 = topC(env, BCSPRelOffset{1})->type();
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
-    // either an int or a dbl, but can't tell
-    PUNT(BinaryArith-Unsupported);
+    interpOne(env, TBottom, 2);
+    return;
   }
 
   auto const exitSlow = makeExitSlow(env);
-  auto src2 = promoteBool(env, popC(env));
-  auto src1 = promoteBool(env, popC(env));
+  auto src2 = popC(env);
+  auto src1 = popC(env);
   auto const opc = promoteBinaryDoubles(env, op, src1, src2);
 
   if (opc == AddIntO || opc == SubIntO || opc == MulIntO) {
@@ -646,11 +630,7 @@ SSATmp* implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       right,
       [&]{
         return gen(
-          env,
-          toIntCmpOpcode(op),
-          left,
-          gen(env, ConvObjToInt, ConvNoticeData{}, right)
-        );
+          env, toIntCmpOpcode(op), left, gen(env, ConvObjToInt, right));
       }
     );
   } else if (rightTy <= TClsMeth) {
@@ -664,11 +644,7 @@ SSATmp* implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else {
     // For everything else, convert to an int. The conversion may be a no-op if
     // the right operand is already an int.
-    return gen(
-      env,
-      toIntCmpOpcode(op),
-      left,
-      gen(env, ConvTVToInt, ConvNoticeData{}, right));
+    return gen(env, toIntCmpOpcode(op), left, gen(env, ConvTVToInt, right));
   }
 }
 
@@ -946,11 +922,7 @@ SSATmp* implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       left,
       [&]{
         return gen(
-          env,
-          toIntCmpOpcode(op),
-          gen(env, ConvObjToInt, ConvNoticeData{}, left),
-          right
-        );
+          env, toIntCmpOpcode(op), gen(env, ConvObjToInt, left), right);
       }
     );
   } else if (rightTy <= TDbl) {
@@ -1457,14 +1429,9 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
   auto const exitSlow = makeExitSlow(env);
   auto val = popC(env);
   env.irb->constrainValue(loc, DataTypeSpecific);
-  Opcode opc;
-  if (isBitOp(*subOpc)) {
-    opc = bitOp(*subOpc);
-  } else {
-    loc = promoteBool(env, loc);
-    val = promoteBool(env, val);
-    opc = promoteBinaryDoubles(env, *subOpc, loc, val);
-  }
+  auto opc = isBitOp(*subOpc)
+    ? bitOp(*subOpc)
+    : promoteBinaryDoubles(env, *subOpc, loc, val);
 
   auto const result = opc == AddIntO || opc == SubIntO || opc == MulIntO
     ? gen(env, opc, exitSlow, loc, val)
@@ -1600,24 +1567,10 @@ void emitDiv(IRGS& env) {
   auto const divisorType  = topC(env, BCSPRelOffset{0})->type();
   auto const dividendType = topC(env, BCSPRelOffset{1})->type();
 
-  auto isNumeric = [&] (Type type) {
-    return type.subtypeOfAny(TInt, TDbl, TBool);
-  };
-
-  // not going to bother with string division etc.
-  if (!isNumeric(divisorType) || !isNumeric(dividendType)) {
-    interpOne(env, TUncountedInit, 2);
+  if (!areBinaryArithTypesSupported(Op::Div, divisorType, dividendType)) {
+    interpOne(env, TBottom, 2);
     return;
   }
-
-  auto toDbl = [&] (SSATmp* x) {
-    if (x->isA(TBool)) {
-       // say int to match interp due to just using the float version of the int
-      handleConvNoticeLevel(env, getConvNoticeDataForMath(), "bool", "int");
-      return gen(env, ConvBoolToDbl, x);
-    }
-    return x->isA(TInt) ? gen(env, ConvIntToDbl, x) : x;
-  };
 
   auto const divisor  = popC(env);
   auto const dividend = popC(env);
@@ -1636,6 +1589,10 @@ void emitDiv(IRGS& env) {
       gen(env, ThrowDivisionByZeroException);
       }
   );
+
+  auto toDbl = [&] (SSATmp* x) {
+    return x->isA(TInt) ? gen(env, ConvIntToDbl, x) : x;
+  };
 
   if (divisor->isA(TDbl) || dividend->isA(TDbl)) {
     push(env, gen(env, DivDbl, toDbl(dividend), toDbl(divisor)));
@@ -1673,30 +1630,29 @@ void emitDiv(IRGS& env) {
   auto const result = cond(
     env,
     [&] (Block* taken) {
-      // We don't want to trigger notices for conversions from here because
-      // they'd be duplicated in the result of the condition
-      auto toInt = [&] (SSATmp* x) {
-        return x->isA(TBool) ? gen(env, ConvBoolToInt, x) : x;
-      };
-      auto const mod = gen(env, Mod, toInt(dividend), toInt(divisor));
-      gen(env, JmpNZero, taken, mod);
+      gen(env, JmpNZero, taken, gen(env, Mod, dividend, divisor));
     },
-    [&] {
-      return gen(env,
-                 DivInt,
-                 promoteBool(env, dividend),
-                 promoteBool(env, divisor));
-    },
+    [&] { return gen(env, DivInt, dividend, divisor); },
     [&] { return gen(env, DivDbl, toDbl(dividend), toDbl(divisor)); }
   );
   push(env, result);
 }
 
 void emitMod(IRGS& env) {
-  auto const btr = popC(env);
-  auto const btl = popC(env);
-  auto const tl = gen(env, ConvTVToInt, getConvNoticeDataForMath(), btl);
-  auto const tr = gen(env, ConvTVToInt, getConvNoticeDataForMath(), btr);
+  auto const leftTy  = topC(env, BCSPRelOffset{0})->type();
+  auto const rightTy = topC(env, BCSPRelOffset{1})->type();
+
+  if (!areBinaryArithTypesSupported(Op::Mod, leftTy, rightTy)) {
+    interpOne(env, TBottom, 2);
+    return;
+  }
+
+  auto toInt = [&] (SSATmp* x) {
+    return x->isA(TDbl) ? gen(env, ConvDblToInt, x) : x;
+  };
+
+  auto const tr = toInt(popC(env));
+  auto const tl = toInt(popC(env));
 
   // Generate an exit for the rare case that r is zero.
   ifThen(
@@ -1709,12 +1665,6 @@ void emitMod(IRGS& env) {
       gen(env, ThrowDivisionByZeroException);
     }
   );
-
-  // DecRefs on the main line must happen after the potentially-throwing exit
-  // above: if we throw during the RaiseWarning, those values must still be on
-  // the stack.
-  decRef(env, btr);
-  decRef(env, btl);
 
   // Check for -1.  The Mod IR instruction has undefined behavior for -1, but
   // php semantics are to return zero.

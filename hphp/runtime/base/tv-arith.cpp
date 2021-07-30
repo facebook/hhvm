@@ -91,179 +91,69 @@ inline int64_t shl_ignore_overflow(int64_t a, int64_t b) {
 TypedValue make_int(int64_t n) { return make_tv<KindOfInt64>(n); }
 TypedValue make_dbl(double d)  { return make_tv<KindOfDouble>(d); }
 
-// Helper for converting String, Array, Bool, Null or Obj to Dbl|Int.
-// Other types (i.e. Int and Double) must be handled outside of this.
-TypedNum numericConvHelper(TypedValue cell) {
-  assertx(tvIsPlausible(cell));
+bool is_numeric(TypedValue tv) { return tvIsInt(tv) || tvIsDouble(tv); }
 
-
-  auto handleConvToIntNotice = [&](const char* from) {
-    handleConvNoticeLevel(
-      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForMath),
-      from,
-      "int",
-      s_ConvNoticeReasonMath.get());
-  };
-
-  auto stringToNumeric_ = [](const StringData* str) {
-    return stringToNumeric(str,
-      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForMath),
-      s_ConvNoticeReasonMath.get());
-  };
-
-  switch (cell.m_type) {
-    case KindOfUninit:
-    case KindOfNull:
-      handleConvToIntNotice("null");
-      return make_int(0);
-
-    case KindOfBoolean:
-      handleConvToIntNotice("bool");
-      return make_int(cell.m_data.num);
-
-    case KindOfRFunc:
-      raise_convert_rfunc_to_type("num");
-
-    case KindOfFunc:
-      invalidFuncConversion("int");
-
-    case KindOfClass:
-      return stringToNumeric_(classToStringHelper(cell.m_data.pclass));
-
-    case KindOfLazyClass:
-      return stringToNumeric_(lazyClassToStringHelper(cell.m_data.plazyclass));
-
-    case KindOfString:
-    case KindOfPersistentString:
-      return stringToNumeric_(cell.m_data.pstr);
-
-    case KindOfPersistentVec:
-    case KindOfVec:
-    case KindOfPersistentDict:
-    case KindOfDict:
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-      throw_bad_array_operand(cell.m_data.parr);
-    case KindOfClsMeth:
-      throw ExtendedException("Invalid operand type was used: cannot perform "
-                              "this operation with clsmeth");
-
-    case KindOfRClsMeth:
-      raise_convert_rcls_meth_to_type("num");
-
-    case KindOfRecord:
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
-    case KindOfObject: {
-      // do the conversion first as it often throws due to handling of the
-      // unconditional Object->num warning. Soon that should be an unconditional
-      // exception
-      const auto res = make_int(cell.m_data.pobj->toInt64());
-      handleConvToIntNotice("object");
-      return res;
-    }
-
-    case KindOfResource:
-      handleConvToIntNotice("resource");
-      return make_int(cell.m_data.pres->data()->o_toInt64());
-
-    case KindOfInt64:
-    case KindOfDouble:
-      break;
+inline void check_numeric(const TypedValue& c1, const TypedValue& c2) {
+  if (UNLIKELY(!is_numeric(c1) || !is_numeric(c2))) {
+    throwMathBadTypesException(&c1, &c2);
   }
-  not_reached();
 }
 
 template<class Op>
 TypedValue tvArith(Op o, TypedValue c1, TypedValue c2) {
-again:
-  if (c1.m_type == KindOfInt64) {
-    for (;;) {
-      if (c2.m_type == KindOfInt64)  return o(c1.m_data.num, c2.m_data.num);
-      if (c2.m_type == KindOfDouble) return o(c1.m_data.num, c2.m_data.dbl);
-      tvCopy(numericConvHelper(c2), c2);
-      assertx(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
-    }
+  check_numeric(c1, c2);
+  if (tvIsInt(c1)) {
+    return tvIsInt(c2)
+      ? o(c1.m_data.num, c2.m_data.num)
+      : o(c1.m_data.num, c2.m_data.dbl);
   }
-
-  if (c1.m_type == KindOfDouble) {
-    for (;;) {
-      if (c2.m_type == KindOfDouble) return o(c1.m_data.dbl, c2.m_data.dbl);
-      if (c2.m_type == KindOfInt64)  return o(c1.m_data.dbl, c2.m_data.num);
-      tvCopy(numericConvHelper(c2), c2);
-      assertx(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
-    }
-  }
-
-  if (isArrayLikeType(c1.m_type) && isArrayLikeType(c2.m_type)) {
-    return make_array_like_tv(o(c1.m_data.parr, c2.m_data.parr));
-  }
-
-  tvCopy(numericConvHelper(c1), c1);
-  assertx(c1.m_type == KindOfInt64 || c1.m_type == KindOfDouble);
-  goto again;
+  return tvIsInt(c2)
+    ? o(c1.m_data.dbl, c2.m_data.num)
+    : o(c1.m_data.dbl, c2.m_data.dbl);
 }
 
 // Check is the function that checks for overflow, Over is the function that
 // returns the overflowed value.
 template<class Op, class Check, class Over>
 TypedValue tvArithO(Op o, Check ck, Over ov, TypedValue c1, TypedValue c2) {
-  if (isArrayLikeType(c1.m_type) && isArrayLikeType(c2.m_type)) {
-    return tvArith(o, c1, c2);
-  }
-
-  auto ensure_num = [](TypedValue& c) {
-    if (c.m_type != KindOfInt64 && c.m_type != KindOfDouble) {
-      tvCopy(numericConvHelper(c), c);
-    }
-  };
-
-  ensure_num(c1);
-  ensure_num(c2);
-  auto both_ints = (c1.m_type == KindOfInt64 && c2.m_type == KindOfInt64);
+  check_numeric(c1, c2);
   int64_t a = c1.m_data.num;
   int64_t b = c2.m_data.num;
 
-  return (both_ints && ck(a,b)) ? ov(a,b) : tvArith(o, c1, c2);
+  return (tvIsInt(c1) && tvIsInt(c2) && ck(a,b)) ? ov(a,b) : tvArith(o, c1, c2);
 }
 
-struct Add {
-  TypedValue operator()(double  a, int64_t b) const { return make_dbl(a + b); }
-  TypedValue operator()(double  a, double  b) const { return make_dbl(a + b); }
-  TypedValue operator()(int64_t a, double  b) const { return make_dbl(a + b); }
-  TypedValue operator()(int64_t a, int64_t b) const {
-    return make_int(add_ignore_overflow(a, b));
+/*
+ * Template params:
+ * 1. A functor class for doing the standard mathematical operation
+ * 2. A fn ptr for doing the mathematical operation ignoring int overflow issues
+ * 3. true if the result should be wrapped in a typedvalue or left as a double
+ */
+template <typename Op, int64_t (*ovrflw)(int64_t a, int64_t b), bool tv_ret>
+struct ArithBase {
+  template<class T, class U> typename std::enable_if_t<
+    std::is_floating_point_v<T> || std::is_floating_point_v<U>,
+    std::conditional_t<tv_ret, TypedValue, double>
+  > operator()(T a, U b) const {
+    if constexpr (tv_ret) return make_dbl(Op()(a, b));
+    else return Op()(a, b);
   }
 
-  ArrayData* operator()(ArrayData* a1, ArrayData* /*ad2*/) const {
-    throw_bad_array_operand(a1);
+  std::conditional_t<tv_ret, TypedValue, int64_t>
+  operator()(int64_t a, int64_t b) const {
+    if constexpr (tv_ret) return make_int(ovrflw(a, b));
+    else return ovrflw(a, b);
   }
 };
 
-struct Sub {
-  TypedValue operator()(double  a, int64_t b) const { return make_dbl(a - b); }
-  TypedValue operator()(double  a, double  b) const { return make_dbl(a - b); }
-  TypedValue operator()(int64_t a, double  b) const { return make_dbl(a - b); }
-  TypedValue operator()(int64_t a, int64_t b) const {
-    return make_int(sub_ignore_overflow(a, b));
-  }
+using Add = ArithBase<std::plus<>, add_ignore_overflow, true>;
+using Sub = ArithBase<std::minus<>, sub_ignore_overflow, true>;
+using Mul = ArithBase<std::multiplies<>, mul_ignore_overflow, true>;
 
-  ArrayData* operator()(ArrayData* a1, ArrayData* /*a2*/) const {
-    throw_bad_array_operand(a1);
-  }
-};
-
-struct Mul {
-  TypedValue operator()(double  a, int64_t b) const { return make_dbl(a * b); }
-  TypedValue operator()(double  a, double  b) const { return make_dbl(a * b); }
-  TypedValue operator()(int64_t a, double  b) const { return make_dbl(a * b); }
-  TypedValue operator()(int64_t a, int64_t b) const {
-    return make_int(mul_ignore_overflow(a, b));
-  }
-
-  ArrayData* operator()(ArrayData* a1, ArrayData* /*a2*/) const {
-    throw_bad_array_operand(a1);
-  }
-};
+using AddEq = ArithBase<std::plus<>, add_ignore_overflow, false>;
+using SubEq = ArithBase<std::minus<>, sub_ignore_overflow, false>;
+int64_t mul(int64_t a, int64_t b) { return a * b; }
+using MulEq = ArithBase<std::multiplies<>, mul, false>;
 
 struct Div {
   TypedValue operator()(int64_t t, int64_t u) const {
@@ -291,24 +181,11 @@ struct Div {
     }
     return make_dbl(t / u);
   }
-
-  ArrayData* operator()(ArrayData* a1, ArrayData* /*a2*/) const {
-    throw_bad_array_operand(a1);
-  }
 };
 
 template<class Op>
 void tvOpEq(Op op, tv_lval c1, TypedValue c2) {
-  if (UNLIKELY(isArrayLikeType(type(c1)) && isArrayLikeType(c2.m_type))) {
-    throw_bad_array_operand(val(c1).parr);
-    return;
-  }
-
-  auto lhs = *c1;
-  if (UNLIKELY(!tvIsInt(lhs) && !tvIsDouble(lhs))) tvCopy(numericConvHelper(lhs), lhs);
-  if (UNLIKELY(!tvIsInt(c2)  && !tvIsDouble(c2)))  tvCopy(numericConvHelper(c2), c2);
-  assertx(tvIsInt(c2) || tvIsDouble(c2));
-  tvSet(lhs, c1); // do the write-back after both conversions in case one throws
+  check_numeric(*c1, c2);
 
   if (tvIsDouble(c1)) {
     val(c1).dbl = op(val(c1).dbl, tvIsInt(c2) ? c2.m_data.num : c2.m_data.dbl);
@@ -322,33 +199,7 @@ void tvOpEq(Op op, tv_lval c1, TypedValue c2) {
     type(c1) = KindOfDouble;
     val(c1).dbl = op(val(c1).num, c2.m_data.dbl);
   }
-
 }
-
-struct AddEq {
-  int64_t operator()(int64_t a, int64_t b) const {
-    return add_ignore_overflow(a, b);
-  }
-  double  operator()(double  a, int64_t b) const { return a + b; }
-  double  operator()(int64_t a, double  b) const { return a + b; }
-  double  operator()(double  a, double  b) const { return a + b; }
-};
-
-struct SubEq {
-  int64_t operator()(int64_t a, int64_t b) const {
-    return sub_ignore_overflow(a, b);
-  }
-  double  operator()(double  a, int64_t b) const { return a - b; }
-  double  operator()(int64_t a, double  b) const { return a - b; }
-  double  operator()(double  a, double  b) const { return a - b; }
-};
-
-struct MulEq {
-  int64_t operator()(int64_t a, int64_t b) const { return a * b; }
-  double  operator()(double  a, int64_t b) const { return a * b; }
-  double  operator()(int64_t a, double  b) const { return a * b; }
-  double  operator()(double  a, double  b) const { return a * b; }
-};
 
 template<class SzOp, class BitOp>
 StringData* stringBitOp(BitOp bop, SzOp sop, StringData* s1, StringData* s2) {
@@ -628,21 +479,14 @@ TypedValue tvPow(TypedValue c1, TypedValue c2) {
 }
 
 TypedValue tvMod(TypedValue c1, TypedValue c2) {
-  auto toIntWithNotice = [](TypedValue i) {
-    return tvToInt(
-          i,
-          flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForMath),
-          s_ConvNoticeReasonMath.get(),
-          false);
+  check_numeric(c1, c2);
+  auto to_int = [](TypedValue tv) {
+    return tvIsInt(tv) ? tv.m_data.num : double_to_int64(tv.m_data.dbl);
   };
-  auto const i1 = toIntWithNotice(c1);
-  auto const i2 = toIntWithNotice(c2);
-  if (UNLIKELY(i2 == 0)) {
-    SystemLib::throwDivisionByZeroExceptionObject();
-  }
-
+  auto const i2 = to_int(c2);
+  if (UNLIKELY(i2 == 0)) SystemLib::throwDivisionByZeroExceptionObject();
   // This is to avoid SIGFPE in the case of INT64_MIN % -1.
-  return make_int(UNLIKELY(i2 == -1) ? 0 : i1 % i2);
+  return make_int(UNLIKELY(i2 == -1) ? 0 : to_int(c1) % i2);
 }
 
 TypedValue tvBitAnd(TypedValue c1, TypedValue c2) {
@@ -695,9 +539,7 @@ void tvMulEqO(tv_lval c1, TypedValue c2) { tvSet(tvMulO(*c1, c2), c1); }
 void tvDivEq(tv_lval c1, TypedValue c2) {
   assertx(tvIsPlausible(*c1));
   assertx(tvIsPlausible(c2));
-  if (!isIntType(type(c1)) && !isDoubleType(type(c1))) {
-    tvSet(numericConvHelper(*c1), c1);
-  }
+  if (UNLIKELY(!is_numeric(*c1))) throwMathBadTypesException(c1, &c2);
   tvCopy(tvDiv(*c1, c2), c1);
 }
 

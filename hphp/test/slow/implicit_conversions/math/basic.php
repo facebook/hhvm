@@ -15,7 +15,6 @@ const vec<mixed> VALS = vec[
   dict['foobar' => false],
 ];
 
-
 <<__EntryPoint>>
 function main(): void {
   foreach(VALS as $i) {
@@ -43,50 +42,52 @@ function do_the_thing(mixed $i, mixed $j): void {
   pow_($i, $j);
 }
 
+function with_exn($fn): mixed {
+  try {
+    $fn();
+  } catch (Exception $e) {
+    echo "\n".$e->getMessage()."\n";
+  }
+}
+
 function plus(mixed $i, mixed $j): void {
   echo 'plus<';
-  $i + $j; // this should generate a notice as applicable
-  $i += $j;
-  echo $i;
+  with_exn(() ==> { $i + $j; }); // this should generate a notice as applicable
+  with_exn(() ==> print($i += $j));
   echo ">\n";
 }
 
 function minus(mixed $i, mixed $j): void {
   echo 'minus<';
-  $i - $j; // this should generate a notice as applicable
-  $i -= $j;
-  echo $i;
+  with_exn(() ==> { $i - $j; }); // this should generate a notice as applicable
+  with_exn(() ==> print($i -= $j));
   echo ">\n";
 }
 
 function div(mixed $i, mixed $j): void {
   echo 'div<';
-  $i / $j; // this should generate a notice as applicable
-  $i /= $j;
-  echo $i;
+  with_exn(() ==> { $i / $j; }); // this should generate a notice as applicable
+  with_exn(() ==> print($i /= $j));
   echo ">\n";
 }
 
 function mul(mixed $i, mixed $j): void {
   echo 'mul<';
-  $i * $j; // this should generate a notice as applicable
-  $i *= $j;
-  echo $i;
+  with_exn(() ==> { $i * $j; }); // this should generate a notice as applicable
+  with_exn(() ==> print($i *= $j));
   echo ">\n";
 }
 
 function mod(mixed $i, mixed $j): void {
   echo 'mod<';
-  $i % $j; // this should generate a notice as applicable
-  $i %= $j;
-  echo $i;
+  with_exn(() ==> { $i % $j; }); // this should generate a notice as applicable
+  with_exn(() ==> print($i %= $j));
   echo ">\n";
 }
 
 function pow_(mixed $i, mixed $j): void {
   echo 'pow<';
-  $i ** $j; // this should generate a notice as applicable
-  $i **= $j;
-  echo $i;
+  with_exn(() ==> { $i ** $j; }); // this should generate a notice as applicable
+  with_exn(() ==> print($i **= $j));
   echo ">\n";
 }

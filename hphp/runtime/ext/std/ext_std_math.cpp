@@ -239,96 +239,13 @@ Variant HHVM_FUNCTION(base_convert,
   return string_numeric_to_base(v, tobase);
 }
 
-static MaybeDataType convert_for_pow(const Variant& val,
-                                     int64_t& ival, double& dval) {
- auto handleConvNotice = [&](const char* from, const char* to = "int") {
-    handleConvNoticeLevel(
-      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForMath),
-      from,
-      to,
-      s_ConvNoticeReasonMath.get());
-  };
-
-  switch (val.getType()) {
-    case KindOfUninit:
-    case KindOfNull:
-    case KindOfBoolean:
-    case KindOfResource:
-    case KindOfObject:
-      ival = val.toInt64(); // do conv first in case it throws
-      handleConvNotice(getDataTypeString(val.getType()).c_str());
-      return KindOfInt64;
-    case KindOfInt64:
-      ival = val.toInt64();
-      return KindOfInt64;
-
-    case KindOfDouble:
-      dval = val.toDouble();
-      return KindOfDouble;
-
-    case KindOfFunc:
-    case KindOfClass:
-    case KindOfLazyClass:
-    case KindOfPersistentString:
-    case KindOfString: {
-      auto dt = val.toNumeric(ival, dval, true);
-      handleConvNotice("string", dt == KindOfDouble ? "double" : "int");
-      if ((dt != KindOfInt64) && (dt != KindOfDouble)) {
-        ival = 0;
-        return KindOfInt64;
-      }
-      return dt;
-    }
-
-    case KindOfPersistentVec:
-    case KindOfVec:
-    case KindOfPersistentDict:
-    case KindOfDict:
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfClsMeth:
-    case KindOfRClsMeth:
-    case KindOfRFunc:
-      // Not reachable since HHVM_FN(pow) deals with these base cases first.
-    case KindOfRecord:
-      break;
-  }
-
-  // Unknown data type.
-  raise_error("Unsupported operand types");
-  not_reached();
-}
-
 Variant HHVM_FUNCTION(pow, const Variant& base, const Variant& exp) {
-  int64_t bint, eint;
-  double bdbl, edbl;
-
- auto handleConvNotice = [&](const char* from, const char* to) {
-    handleConvNoticeLevel(
-      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForMath),
-      from,
-      to,
-      s_ConvNoticeReasonMath.get());
-  };
-
-  auto HandleArrayConvNotice = [&](const Variant& v) {
-    const auto type = v.getType();
-    const auto from = isDictType(type) ? "darray/dict" :
-                      isVecType(type) ? "varray/vec" : "keyset";
-    handleConvNotice(from, "int");
-  };
-
-  if (base.isArray()) {
-    HandleArrayConvNotice(base);
-    return 0LL;
+  if (!base.isNumeric() || !exp.isNumeric()) {
+    throwMathBadTypesException(base.asTypedValue(), exp.asTypedValue());
   }
-  MaybeDataType bt = convert_for_pow(base, bint, bdbl);
-  if (exp.isArray()) {
-    HandleArrayConvNotice(exp);
-    return 1LL;
-  }
-  MaybeDataType et = convert_for_pow(exp,  eint, edbl);
-  if (bt == KindOfInt64 && et == KindOfInt64 && eint >= 0) {
+
+  if (base.isInteger() && exp.isInteger() && exp.asInt64Val() >= 0) {
+    int64_t bint = base.asInt64Val(), eint = exp.asInt64Val();
     if (eint == 0) return 1LL;
     if (bint == 0) return 0LL;
 
@@ -352,27 +269,11 @@ Variant HHVM_FUNCTION(pow, const Variant& base, const Variant& exp) {
     }
   }
 
-  auto const castableToNumber = [] (const ObjectData* obj) {
-    return !obj->isCollection() &&
-           obj->getVMClass()->rtAttribute(Class::CallToImpl);
+  auto const as_double = [](const Variant& v) -> double {
+    return v.isDouble() ? v.getDouble() : v.getInt64();
   };
 
-  // We'll have already raised a notice in convert_for_pow
-  // so avoid re-raising the notice here.
-  auto const silent_val_to_double = [&](const Variant& v) {
-    if (v.isObject() && !castableToNumber(v.toObject().get())) {
-      return 1.0;
-    }
-    return v.toDouble();
-  };
-
-  if (bt != KindOfDouble) {
-    bdbl = silent_val_to_double(base);
-  }
-  if (et != KindOfDouble) {
-    edbl = silent_val_to_double(exp);
-  }
-  return pow(bdbl, edbl);
+  return pow(as_double(base), as_double(exp));
 }
 
 double HHVM_FUNCTION(exp, double arg) { return exp(arg);}

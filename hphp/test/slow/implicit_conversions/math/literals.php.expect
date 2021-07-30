@@ -1,0 +1,136 @@
+plus<-10INF
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on bool and null
+
+Cannot perform mathematical operation on File and string
+
+Cannot perform mathematical operation on HH\vec and HH\dict
+
+Cannot perform mathematical operation on Foo and float
+>
+pluseq<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and Foo
+NAN>
+minus<10-INF
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on bool and null
+
+Cannot perform mathematical operation on File and string
+
+Cannot perform mathematical operation on HH\vec and HH\dict
+
+Cannot perform mathematical operation on Foo and float
+>
+minuseq<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and Foo
+NAN>
+mul<0INF
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on bool and null
+
+Cannot perform mathematical operation on File and string
+
+Cannot perform mathematical operation on HH\vec and HH\dict
+
+Cannot perform mathematical operation on Foo and float
+>
+muleq<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and Foo
+NAN>
+div<00
+Cannot perform mathematical operation on null and bool
+
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on string and File
+
+Cannot perform mathematical operation on HH\vec and HH\dict
+
+Cannot perform mathematical operation on float and Foo
+>
+diveq<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and Foo
+NAN
+mod<0
+Cannot perform mathematical operation on null and bool
+
+Cannot perform mathematical operation on bool and float
+
+Cannot perform mathematical operation on File and string
+
+Cannot perform mathematical operation on HH\vec and HH\dict
+
+Cannot perform mathematical operation on float and Foo
+>
+modeq<
+Cannot perform mathematical operation on int and bool
+
+Cannot perform mathematical operation on int and File
+
+Cannot perform mathematical operation on int and string
+
+Cannot perform mathematical operation on int and HH\vec
+
+Cannot perform mathematical operation on int and HH\dict
+
+Cannot perform mathematical operation on int and Foo
+0>
+pow<INFINF
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on bool and null
+
+Cannot perform mathematical operation on File and string
+
+Cannot perform mathematical operation on HH\vec and HH\dict
+
+Cannot perform mathematical operation on Foo and float
+>
+poweq<
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and bool
+
+Cannot perform mathematical operation on float and File
+
+Cannot perform mathematical operation on float and string
+
+Cannot perform mathematical operation on float and HH\vec
+
+Cannot perform mathematical operation on float and HH\dict
+
+Cannot perform mathematical operation on float and Foo
+1>

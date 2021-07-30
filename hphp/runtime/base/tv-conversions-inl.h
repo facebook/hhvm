@@ -65,49 +65,31 @@ inline bool tvToBool(TypedValue cell) {
   not_reached();
 }
 
-inline int64_t tvToInt(
-  TypedValue cell,
-  ConvNoticeLevel level,
-  const StringData* notice_reason,
-  bool notice_within_num) {
+inline int64_t tvToInt(TypedValue cell) {
   assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
     case KindOfNull:
-      handleConvNoticeLevel(level, "null", "int", notice_reason);
       return 0;
     case KindOfBoolean:
-      handleConvNoticeLevel(level, "bool", "int", notice_reason);
+    case KindOfInt64:
       return cell.m_data.num;
-    case KindOfInt64:         return cell.m_data.num;
     case KindOfDouble:
-      if (notice_within_num) handleConvNoticeLevel(level, "double", "int", notice_reason);
       return double_to_int64(cell.m_data.dbl);
     case KindOfPersistentString:
     case KindOfString:
-      handleConvNoticeLevel(level, "string", "int", notice_reason);
       return cell.m_data.pstr->toInt64(10);
     case KindOfPersistentDict:
     case KindOfDict:
-      handleConvNoticeLevel(level, "darray/dict", "int", notice_reason);
-      return cell.m_data.parr->empty() ? 0 : 1;
     case KindOfPersistentVec:
     case KindOfVec:
-      handleConvNoticeLevel(level, "varray/vec", "int", notice_reason);
-      return cell.m_data.parr->empty() ? 0 : 1;
-    case KindOfPersistentKeyset:
+      case KindOfPersistentKeyset:
     case KindOfKeyset:
-      handleConvNoticeLevel(level, "keyset", "int", notice_reason);
       return cell.m_data.parr->empty() ? 0 : 1;
-    case KindOfObject: {
-      // do the conversion first in case it throws
-      const auto ret = cell.m_data.pobj->toInt64();
-      handleConvNoticeLevel(level, "object", "int", notice_reason);
-      return ret;
-    }
+    case KindOfObject:
+      return cell.m_data.pobj->toInt64();
     case KindOfResource:
-      handleConvNoticeLevel(level, "resource", "int", notice_reason);
       return cell.m_data.pres->data()->o_toInt64();
     case KindOfRecord:        raise_convert_record_to_type("int"); break;
     case KindOfRFunc:         raise_convert_rfunc_to_type("int"); break;
@@ -122,11 +104,6 @@ inline int64_t tvToInt(
     case KindOfRClsMeth:      raise_convert_rcls_meth_to_type("int"); break;
   }
   not_reached();
-}
-
-
-inline int64_t tvToInt(TypedValue cell) {
-  return tvToInt(cell, ConvNoticeLevel::None, nullptr, true);
 }
 ///////////////////////////////////////////////////////////////////////////////
 

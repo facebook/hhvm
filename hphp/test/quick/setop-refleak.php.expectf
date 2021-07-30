@@ -1,4 +1,4 @@
-string(50) "Object of class Dtor could not be converted to int"
+string(53) "Cannot perform mathematical operation on Dtor and int"
 object(Foo) (1) {
   ["bug"]=>
   object(Dtor) (0) {

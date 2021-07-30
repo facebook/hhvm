@@ -2,7 +2,7 @@
 
 class Base implements HH\IMemoizeParam {
   public function getInstanceKey(): string {
-    return 'class ' . $this->name();
+    return 'KEY' . $this->name();
   }
   public function name(): string { return static::class; }
 }
@@ -22,7 +22,7 @@ abstract final class IntContext extends HH\ImplicitContext {
   }
 }
 
-abstract final class ClassContext extends HH\ImplicitContext {
+trait ClassContextDefs {
   const type T = Base;
   public static function start(Base $context, (function (): int) $f) {
     return parent::set($context, $f);
@@ -30,4 +30,12 @@ abstract final class ClassContext extends HH\ImplicitContext {
   public static function getContext(): Base {
     return parent::get() as nonnull;
   }
+}
+
+abstract final class ClassContext extends HH\ImplicitContext {
+  use ClassContextDefs;
+}
+
+abstract final class ClassContext2 extends HH\ImplicitContext {
+  use ClassContextDefs;
 }

@@ -369,6 +369,13 @@ function set_implicit_context(
 <<__Native>>
 function set_implicit_context_by_index(int $index)[policied]: int;
 
+/*
+ * Returns the currently implicit context hash or emptry string if
+ * no implicit context is set
+ */
+<<__Native>>
+function get_implicit_context_memo_key()[policied]: string;
+
 } // namespace ImplicitContext\_Private
 
 final class ImplicitContextConsts {

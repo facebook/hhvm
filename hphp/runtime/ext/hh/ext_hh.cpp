@@ -1115,12 +1115,12 @@ int64_t HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
     vec.push_back(std::make_pair(p.first, p.second.second));
   }
   std::sort(vec.begin(), vec.end(), [](const Elem e1, const Elem e2) {
-                                      return e1.first->compare(e2.first);
+                                      return e1.first->hash() < e2.first->hash();
                                     });
   StringBuffer sb;
   for (auto const& e : vec) {
-    sb.append(e.first->data(), e.first->size());
-    sb.append(e.second->data(), e.second->size());
+    sb.append(e.first);
+    sb.append(e.second);
   }
   context->m_memokey = sb.detach().detach();
   context->m_index = g_context->m_implicitContexts.size();
@@ -1146,6 +1146,17 @@ int64_t HHVM_FUNCTION(set_implicit_context_by_index, int64_t index) {
   }
   *ImplicitContext::activeCtx = g_context->m_implicitContexts[index];
   return prev_index;
+}
+
+String HHVM_FUNCTION(get_implicit_context_memo_key) {
+  if (!RO::EvalEnableImplicitContext) {
+    throw_implicit_context_exception("Implicit context feature is not enabled");
+  }
+  auto const context = *ImplicitContext::activeCtx;
+  if (!context) return "";
+  assertx(context->m_index != ImplicitContext::kEmptyIndex);
+  assertx(context->m_memokey);
+  return String{context->m_memokey};
 }
 
 namespace {
@@ -1364,6 +1375,8 @@ static struct HHExtension final : Extension {
                   HHVM_FN(set_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\set_implicit_context_by_index,
                   HHVM_FN(set_implicit_context_by_index));
+    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key,
+                  HHVM_FN(get_implicit_context_memo_key));
 
     HHVM_NAMED_FE(HH\\Coeffects\\backdoor, HHVM_FN(coeffects_backdoor));
     HHVM_NAMED_FE(HH\\Coeffects\\_Private\\enter_policied_of,

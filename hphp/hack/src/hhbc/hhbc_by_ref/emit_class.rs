@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
-use ffi::{Maybe::*, Slice};
+use ffi::{Maybe::*, Slice, Str};
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_body as emit_body;
 use hhbc_by_ref_emit_expression as emit_expression;
@@ -319,7 +319,10 @@ fn from_enum_type<'arena>(
 ) -> Result<Option<hhbc_by_ref_hhas_type::Info<'arena>>> {
     use hhbc_by_ref_hhas_type::constraint::*;
     opt.map(|e| {
-        let type_info_user_type = Some(emit_type_hint::fmt_hint(alloc, &[], true, &e.base)?);
+        let type_info_user_type = Some(Str::new_str(
+            alloc,
+            emit_type_hint::fmt_hint(alloc, &[], true, &e.base)?,
+        ));
         let type_info_type_constraint = Constraint::make(Nothing, ConstraintFlags::EXTENDED_HINT);
         Ok(hhbc_by_ref_hhas_type::Info::make(
             type_info_user_type,

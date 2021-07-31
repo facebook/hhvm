@@ -61,7 +61,7 @@ pub fn from_ast<'ast, 'arena, 'decl, D: DeclProvider<'decl>>(
     };
 
     let type_info = match args.typehint.as_ref() {
-        None => TypeInfo::make_empty(),
+        None => TypeInfo::make_empty(alloc),
         Some(th) => emit_type_hint::hint_to_type_info(
             alloc,
             &emit_type_hint::Kind::Property,

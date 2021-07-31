@@ -381,9 +381,12 @@ fn make_type_info<'arena>(
     tc_name: Maybe<Str<'arena>>,
     tc_flags: constraint::ConstraintFlags,
 ) -> std::result::Result<Info<'arena>, hhbc_by_ref_instruction_sequence::Error> {
-    let type_info_user_type = Some(fmt_hint(alloc, tparams, false, h)?);
+    let type_info_user_type = fmt_hint(alloc, tparams, false, h)?;
     let type_info_type_constraint = constraint::Constraint::make(tc_name, tc_flags);
-    Ok(Info::make(type_info_user_type, type_info_type_constraint))
+    Ok(Info::make(
+        Some(Str::new_str(alloc, type_info_user_type)),
+        type_info_type_constraint,
+    ))
 }
 
 fn param_hint_to_type_info<'arena>(
@@ -495,7 +498,7 @@ pub fn emit_type_constraint_for_native_function<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     ret_opt: Option<&Hint>,
-    ti: Info,
+    ti: Info<'arena>,
 ) -> Info<'arena> {
     use constraint::ConstraintFlags;
     let (name, flags) = match (&ti.user_type, ret_opt) {
@@ -504,13 +507,14 @@ pub fn emit_type_constraint_for_native_function<'arena>(
             ConstraintFlags::EXTENDED_HINT,
         ),
         (Some(t), _) => {
-            if t == "HH\\mixed" || t == "callable" {
+            if t.as_str() == "HH\\mixed" || t.as_str() == "callable" {
                 (Nothing, ConstraintFlags::default())
             } else {
                 let Hint(_, h) = ret_opt.as_ref().unwrap();
                 let name = Just(
                     string_utils::strip_type_list(
-                        t.trim_start_matches('?')
+                        t.as_str()
+                            .trim_start_matches('?')
                             .trim_start_matches('@')
                             .trim_start_matches('?'),
                     )

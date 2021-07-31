@@ -292,7 +292,7 @@ fn default_type_check(
     }))
 }
 
-fn get_hint_display_name(hint: Option<&String>) -> Option<&str> {
+fn get_hint_display_name<'arena>(hint: Option<&Str<'arena>>) -> Option<&'static str> {
     hint.map(|h| match h.as_str() {
         "HH\\bool" => "bool",
         "HH\\varray" => "HH\\varray",

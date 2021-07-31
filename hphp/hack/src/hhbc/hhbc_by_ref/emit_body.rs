@@ -366,7 +366,7 @@ pub fn emit_return_type_info<'arena>(
 ) -> Result<HhasTypeInfo<'arena>> {
     match ret {
         None => Ok(HhasTypeInfo::make(
-            Some("".to_string()),
+            Some(Str::new_str(alloc, "")),
             hhbc_by_ref_hhas_type::constraint::Constraint::default(),
         )),
         Some(hint) => emit_type_hint::hint_to_type_info(
@@ -1052,7 +1052,7 @@ fn set_emit_statement_state<'arena, 'decl, D: DeclProvider<'decl>>(
     is_generator: bool,
 ) {
     let verify_return = match &return_type_info.user_type {
-        Some(s) if s == "" => None,
+        Some(s) if s.as_str() == "" => None,
         _ if return_type_info.has_type_constraint() && !is_generator => {
             return_type.map(|h| h.clone())
         }
@@ -1104,7 +1104,8 @@ fn emit_verify_out<'arena>(
                         match p.type_info.as_ref() {
                             Some(HhasTypeInfo { user_type, .. })
                                 if user_type.as_ref().map_or(true, |t| {
-                                    !(t.ends_with("HH\\mixed") || t.ends_with("HH\\dynamic"))
+                                    !(t.as_str().ends_with("HH\\mixed")
+                                        || t.as_str().ends_with("HH\\dynamic"))
                                 }) =>
                             {
                                 instr::verify_out_type(alloc, ParamId::ParamUnnamed(i as isize))

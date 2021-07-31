@@ -7,6 +7,7 @@ use ffi::{Maybe, Maybe::*, Str};
 
 /// Type info has additional optional user type
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub struct Info<'arena> {
     pub user_type: Maybe<Str<'arena>>,
     pub type_constraint: constraint::Constraint<'arena>,
@@ -97,4 +98,11 @@ mod test {
         let typevar_and_soft = ConstraintFlags::TYPE_VAR | ConstraintFlags::SOFT;
         assert_eq!("type_var soft", typevar_and_soft.to_string());
     }
+}
+
+// For cbindgen
+#[allow(clippy::needless_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_type<'arena>(_: Info<'arena>) {
+    unimplemented!()
 }

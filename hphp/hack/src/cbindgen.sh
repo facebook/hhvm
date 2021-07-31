@@ -164,6 +164,13 @@ set -x
               --crate hhbc_by_ref_hhas_constant \
               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_constant.h")
 
+# hhbc_hhas_type.h
+(cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhas_type && \
+     cargo update && \
+     cbindgen --config ../../cbindgen_hhbc_hhas_type.toml \
+              --crate hhbc_by_ref_hhas_type \
+              --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_type.h")
+
 signscript="$top/../xplat/python/signedsource_lib/signedsource.py"
 eval "${signscript}" sign "${top}"/hphp/hack/src/utils/ffi/ffi.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_id.h
@@ -175,12 +182,14 @@ eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_instructi
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_symbol_refs_state.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_symbol_refs.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_constant.h
+eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_type.h
 
 # Quick sanity check: Does a program that includes these headers compile?
 cat > main.cpp <<EOF
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_instruction_sequence.h"
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_symbol_refs.h"
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_constant.h"
+#include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_type.h"
 
 #include <iostream>
 
@@ -190,6 +199,7 @@ int main() {
   InstrSeq _b6;
   HhasSymbolRefs _b7;
   HhasConstant _b8;
+  Info _c1;
 
   std::cout << "Ok!" << std::endl;
   return 0;

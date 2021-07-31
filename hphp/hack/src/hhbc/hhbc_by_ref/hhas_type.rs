@@ -12,12 +12,6 @@ pub struct Info<'arena> {
     pub type_constraint: constraint::Constraint<'arena>,
 }
 
-#[derive(Debug)]
-pub struct Constant<'arena> {
-    pub name: String,
-    pub initializer: constraint::Constraint<'arena>,
-}
-
 #[allow(dead_code)]
 pub mod constraint {
     use bitflags::bitflags;
@@ -92,12 +86,6 @@ impl<'arena> Info<'arena> {
 
     pub fn has_type_constraint(&self) -> bool {
         self.type_constraint.name.is_just()
-    }
-}
-
-impl<'arena> Constant<'arena> {
-    pub fn make(name: String, initializer: constraint::Constraint<'arena>) -> Constant {
-        Constant { name, initializer }
     }
 }
 

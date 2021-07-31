@@ -200,24 +200,30 @@ fn hint_to_type_constraint<'arena>(
     skipawaitable: bool,
     h: &Hint,
 ) -> std::result::Result<constraint::Constraint<'arena>, hhbc_by_ref_instruction_sequence::Error> {
-    use constraint::{Constraint, Flags};
+    use constraint::{Constraint, ConstraintFlags};
     let Hint(pos, hint) = h;
     Ok(match &**hint {
         Hdynamic | Hlike(_) | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed => {
             Constraint::default()
         }
-        Haccess(_, _) => {
-            Constraint::make_with_raw_str(alloc, "", Flags::EXTENDED_HINT | Flags::TYPE_CONSTANT)
+        Haccess(_, _) => Constraint::make_with_raw_str(
+            alloc,
+            "",
+            ConstraintFlags::EXTENDED_HINT | ConstraintFlags::TYPE_CONSTANT,
+        ),
+        Hshape(_) => {
+            Constraint::make_with_raw_str(alloc, "HH\\darray", ConstraintFlags::EXTENDED_HINT)
         }
-        Hshape(_) => Constraint::make_with_raw_str(alloc, "HH\\darray", Flags::EXTENDED_HINT),
-        Htuple(_) => Constraint::make_with_raw_str(alloc, "HH\\varray", Flags::EXTENDED_HINT),
+        Htuple(_) => {
+            Constraint::make_with_raw_str(alloc, "HH\\varray", ConstraintFlags::EXTENDED_HINT)
+        }
         Hsoft(t) => make_tc_with_flags_if_non_empty_flags(
             alloc,
             kind,
             tparams,
             skipawaitable,
             t,
-            Flags::SOFT | Flags::EXTENDED_HINT,
+            ConstraintFlags::SOFT | ConstraintFlags::EXTENDED_HINT,
         )?,
         Herr | Hany => {
             return Err(Unrecoverable(
@@ -243,7 +249,7 @@ fn hint_to_type_constraint<'arena>(
                                 tparams,
                                 skipawaitable,
                                 h,
-                                Flags::SOFT | Flags::EXTENDED_HINT,
+                                ConstraintFlags::SOFT | ConstraintFlags::EXTENDED_HINT,
                             );
                         }
                     }
@@ -255,7 +261,9 @@ fn hint_to_type_constraint<'arena>(
                 tparams,
                 skipawaitable,
                 t,
-                Flags::NULLABLE | Flags::DISPLAY_NULLABLE | Flags::EXTENDED_HINT,
+                ConstraintFlags::NULLABLE
+                    | ConstraintFlags::DISPLAY_NULLABLE
+                    | ConstraintFlags::EXTENDED_HINT,
             )?
         }
         Happly(Id(_, s), hs) => {
@@ -299,7 +307,7 @@ fn make_tc_with_flags_if_non_empty_flags<'arena>(
     tparams: &[&str],
     skipawaitable: bool,
     hint: &Hint,
-    flags: constraint::Flags,
+    flags: constraint::ConstraintFlags,
 ) -> std::result::Result<constraint::Constraint<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     let tc = hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?;
     Ok(match (&tc.name, &tc.flags.bits()) {
@@ -316,7 +324,7 @@ fn type_application_helper<'arena>(
     pos: &Pos,
     name: &str,
 ) -> std::result::Result<constraint::Constraint<'arena>, hhbc_by_ref_instruction_sequence::Error> {
-    use constraint::{Constraint, Flags};
+    use constraint::{Constraint, ConstraintFlags};
     if tparams.contains(&name) {
         let tc_name = match kind {
             Kind::Param | Kind::Return | Kind::Property => name,
@@ -324,7 +332,7 @@ fn type_application_helper<'arena>(
         };
         Ok(Constraint::make(
             Some(Str::new_str(alloc, tc_name)),
-            Flags::EXTENDED_HINT | Flags::TYPE_VAR,
+            ConstraintFlags::EXTENDED_HINT | ConstraintFlags::TYPE_VAR,
         ))
     } else if string_utils::is_self(&name) || string_utils::is_parent(name) {
         if is_typedef(&kind) {
@@ -335,27 +343,33 @@ fn type_application_helper<'arena>(
         } else {
             Ok(Constraint::make(
                 Some(Str::new_str(alloc, name)),
-                Flags::empty(),
+                ConstraintFlags::empty(),
             ))
         }
     } else {
         let name: String = class::ClassType::from_ast_name(alloc, name).into();
         Ok(Constraint::make(
             Some(Str::new_str(alloc, name)),
-            Flags::empty(),
+            ConstraintFlags::empty(),
         ))
     }
 }
 
-fn add_nullable(nullable: bool, flags: constraint::Flags) -> constraint::Flags {
+fn add_nullable(nullable: bool, flags: constraint::ConstraintFlags) -> constraint::ConstraintFlags {
     if nullable {
-        constraint::Flags::NULLABLE | constraint::Flags::DISPLAY_NULLABLE | flags
+        constraint::ConstraintFlags::NULLABLE
+            | constraint::ConstraintFlags::DISPLAY_NULLABLE
+            | flags
     } else {
         flags
     }
 }
 
-fn try_add_nullable(nullable: bool, hint: &Hint, flags: constraint::Flags) -> constraint::Flags {
+fn try_add_nullable(
+    nullable: bool,
+    hint: &Hint,
+    flags: constraint::ConstraintFlags,
+) -> constraint::ConstraintFlags {
     let Hint(_, h) = hint;
     add_nullable(nullable && can_be_nullable(&**h), flags)
 }
@@ -365,7 +379,7 @@ fn make_type_info<'arena>(
     tparams: &[&str],
     h: &Hint,
     tc_name: Option<Str<'arena>>,
-    tc_flags: constraint::Flags,
+    tc_flags: constraint::ConstraintFlags,
 ) -> std::result::Result<Info<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     let type_info_user_type = Some(fmt_hint(alloc, tparams, false, h)?);
     let type_info_type_constraint = constraint::Constraint::make(tc_name, tc_flags);
@@ -425,7 +439,7 @@ fn param_hint_to_type_info<'arena>(
             nullable,
             hint,
             if is_simple_hint {
-                constraint::Flags::empty()
+                constraint::ConstraintFlags::empty()
             } else {
                 tc.flags
             },
@@ -447,9 +461,9 @@ pub fn hint_to_type_info<'arena>(
     let tc = hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?;
     let flags = match kind {
         Kind::Return | Kind::Property if tc.name.is_some() => {
-            constraint::Flags::EXTENDED_HINT | tc.flags
+            constraint::ConstraintFlags::EXTENDED_HINT | tc.flags
         }
-        Kind::UpperBound => constraint::Flags::UPPERBOUND | tc.flags,
+        Kind::UpperBound => constraint::ConstraintFlags::UPPERBOUND | tc.flags,
         _ => tc.flags,
     };
     make_type_info(
@@ -483,12 +497,15 @@ pub fn emit_type_constraint_for_native_function<'arena>(
     ret_opt: Option<&Hint>,
     ti: Info,
 ) -> Info<'arena> {
-    use constraint::Flags;
+    use constraint::ConstraintFlags;
     let (name, flags) = match (&ti.user_type, ret_opt) {
-        (_, None) | (None, _) => (Some(String::from("HH\\void")), Flags::EXTENDED_HINT),
+        (_, None) | (None, _) => (
+            Some(String::from("HH\\void")),
+            ConstraintFlags::EXTENDED_HINT,
+        ),
         (Some(t), _) => {
             if t == "HH\\mixed" || t == "callable" {
-                (None, Flags::default())
+                (None, ConstraintFlags::default())
             } else {
                 let Hint(_, h) = ret_opt.as_ref().unwrap();
                 let name = Some(
@@ -499,7 +516,7 @@ pub fn emit_type_constraint_for_native_function<'arena>(
                     )
                     .to_string(),
                 );
-                (name, get_flags(tparams, Flags::EXTENDED_HINT, &h))
+                (name, get_flags(tparams, ConstraintFlags::EXTENDED_HINT, &h))
             }
         }
     };
@@ -507,19 +524,25 @@ pub fn emit_type_constraint_for_native_function<'arena>(
     Info::make(ti.user_type, tc)
 }
 
-fn get_flags(tparams: &[&str], flags: constraint::Flags, hint: &Hint_) -> constraint::Flags {
-    use constraint::Flags;
+fn get_flags(
+    tparams: &[&str],
+    flags: constraint::ConstraintFlags,
+    hint: &Hint_,
+) -> constraint::ConstraintFlags {
+    use constraint::ConstraintFlags;
     match hint {
         Hoption(x) => {
             let Hint(_, h) = x;
-            Flags::NULLABLE | Flags::DISPLAY_NULLABLE | get_flags(tparams, flags, &**h)
+            ConstraintFlags::NULLABLE
+                | ConstraintFlags::DISPLAY_NULLABLE
+                | get_flags(tparams, flags, &**h)
         }
         Hsoft(x) => {
             let Hint(_, h) = x;
-            Flags::SOFT | get_flags(tparams, flags, &**h)
+            ConstraintFlags::SOFT | get_flags(tparams, flags, &**h)
         }
-        Haccess(_, _) => Flags::TYPE_CONSTANT | flags,
-        Happly(Id(_, s), _) if tparams.contains(&s.as_str()) => Flags::TYPE_VAR | flags,
+        Haccess(_, _) => ConstraintFlags::TYPE_CONSTANT | flags,
+        Happly(Id(_, s), _) if tparams.contains(&s.as_str()) => ConstraintFlags::TYPE_VAR | flags,
         _ => flags,
     }
 }

@@ -3209,7 +3209,10 @@ fn print_type_info<W: Write>(w: &mut W, ti: &HhasTypeInfo) -> Result<(), W::Erro
     print_type_info_(w, false, ti)
 }
 
-fn print_type_flags<W: Write>(w: &mut W, flag: constraint::Flags) -> Result<(), W::Error> {
+fn print_type_flags<W: Write>(
+    w: &mut W,
+    flag: constraint::ConstraintFlags,
+) -> Result<(), W::Error> {
     let mut first = true;
     let mut print_space = |w: &mut W| -> Result<(), W::Error> {
         if !first {
@@ -3218,7 +3221,7 @@ fn print_type_flags<W: Write>(w: &mut W, flag: constraint::Flags) -> Result<(), 
             Ok(first = false)
         }
     };
-    use constraint::Flags as F;
+    use constraint::ConstraintFlags as F;
     if flag.contains(F::DISPLAY_NULLABLE) {
         print_space(w)?;
         w.write("display_nullable")?;
@@ -3278,10 +3281,13 @@ fn print_typedef_info<W: Write>(w: &mut W, ti: &HhasTypeInfo) -> Result<(), W::E
         w.write(quote_string(
             ti.type_constraint.name.as_ref().map_or("", |n| n.as_str()),
         ))?;
-        let flags = ti.type_constraint.flags & constraint::Flags::NULLABLE;
+        let flags = ti.type_constraint.flags & constraint::ConstraintFlags::NULLABLE;
         if !flags.is_empty() {
             wrap_by(w, " ", |w| {
-                print_type_flags(w, ti.type_constraint.flags & constraint::Flags::NULLABLE)
+                print_type_flags(
+                    w,
+                    ti.type_constraint.flags & constraint::ConstraintFlags::NULLABLE,
+                )
             })?;
         }
         Ok(())

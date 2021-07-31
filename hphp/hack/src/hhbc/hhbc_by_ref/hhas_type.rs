@@ -24,12 +24,13 @@ pub mod constraint {
     #[derive(Clone, Default, Debug)]
     pub struct Constraint<'arena> {
         pub name: Option<Str<'arena>>,
-        pub flags: Flags,
+        pub flags: ConstraintFlags,
     }
 
     bitflags! {
         #[derive(Default)]
-        pub struct Flags: u8 {
+        #[repr(C)]
+        pub struct ConstraintFlags: u8 {
             const NULLABLE =         0b0000_0001;
             const EXTENDED_HINT =    0b0000_0100;
             const TYPE_VAR =         0b0000_1000;
@@ -42,7 +43,7 @@ pub mod constraint {
 
     /// Implicitly provides a to_string() method consistent with the one
     /// used in hhbc_hhas: i.e., lowercased flag names separated by space.
-    impl std::fmt::Display for Flags {
+    impl std::fmt::Display for ConstraintFlags {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             let set_names: String = format!("{:?}", self)
                 .split(" | ")
@@ -54,11 +55,15 @@ pub mod constraint {
     }
 
     impl<'arena> Constraint<'arena> {
-        pub fn make(name: Option<Str<'arena>>, flags: Flags) -> Self {
+        pub fn make(name: Option<Str<'arena>>, flags: ConstraintFlags) -> Self {
             Constraint { name, flags }
         }
 
-        pub fn make_with_raw_str(alloc: &'arena bumpalo::Bump, name: &str, flags: Flags) -> Self {
+        pub fn make_with_raw_str(
+            alloc: &'arena bumpalo::Bump,
+            name: &str,
+            flags: ConstraintFlags,
+        ) -> Self {
             Constraint::make(Some(Str::new_str(alloc, name)), flags)
         }
     }
@@ -94,8 +99,8 @@ impl<'arena> Constant<'arena> {
 mod test {
     #[test]
     fn test_constraint_flags_to_string_called_by_hhbc_hhas() {
-        use crate::constraint::Flags;
-        let typevar_and_soft = Flags::TYPE_VAR | Flags::SOFT;
+        use crate::constraint::ConstraintFlags;
+        let typevar_and_soft = ConstraintFlags::TYPE_VAR | ConstraintFlags::SOFT;
         assert_eq!("type_var soft", typevar_and_soft.to_string());
     }
 }

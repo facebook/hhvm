@@ -1677,6 +1677,7 @@ name = "hhbc_by_ref_emit_type_hint"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "ffi",
  "hhbc_by_ref_emit_fatal",
  "hhbc_by_ref_hhas_type",
  "hhbc_by_ref_hhbc_id",
@@ -1930,6 +1931,8 @@ name = "hhbc_by_ref_hhas_type"
 version = "0.0.0"
 dependencies = [
  "bitflags",
+ "bumpalo",
+ "ffi",
 ]
 
 [[package]]

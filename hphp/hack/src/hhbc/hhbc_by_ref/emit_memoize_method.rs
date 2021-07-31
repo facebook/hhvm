@@ -218,7 +218,7 @@ fn emit<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     hhas_params: Vec<HhasParam<'arena>>,
-    return_type_info: HhasTypeInfo,
+    return_type_info: HhasTypeInfo<'arena>,
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<HhasBody<'arena>> {
     let alloc = env.arena;
@@ -488,7 +488,7 @@ fn make_wrapper<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     env: &Env<'a, 'arena>,
     instrs: InstrSeq<'arena>,
     params: Vec<HhasParam<'arena>>,
-    return_type_info: HhasTypeInfo,
+    return_type_info: HhasTypeInfo<'arena>,
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<HhasBody<'arena>> {
     let alloc = env.arena;

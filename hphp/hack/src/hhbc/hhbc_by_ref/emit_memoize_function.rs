@@ -338,7 +338,7 @@ fn make_wrapper_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: Env<'a, 'arena>,
-    return_type_info: HhasTypeInfo,
+    return_type_info: HhasTypeInfo<'arena>,
     params: Vec<HhasParam<'arena>>,
     body_instrs: InstrSeq<'arena>,
     is_reified: bool,

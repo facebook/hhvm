@@ -3188,9 +3188,9 @@ fn print_special_and_user_attrs<W: Write>(
     Ok(())
 }
 
-fn print_upper_bounds<W: Write>(
+fn print_upper_bounds<'arena, W: Write>(
     w: &mut W,
-    ubs: impl AsRef<[(String, Vec<HhasTypeInfo>)]>,
+    ubs: impl AsRef<[(String, Vec<HhasTypeInfo<'arena>>)]>,
 ) -> Result<(), W::Error> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound))
 }
@@ -3266,7 +3266,7 @@ fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo) -> Re
         print_quote_str(w, &ti.user_type)?;
         w.write(" ")?;
         if !is_enum {
-            print_quote_str(w, &ti.type_constraint.name)?;
+            print_quote_str(w, &(ti.type_constraint.name.map(|n| n.as_str().to_owned())))?;
             w.write(" ")?;
         }
         print_type_flags(w, ti.type_constraint.flags)

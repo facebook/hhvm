@@ -13,7 +13,7 @@ use hhbc_by_ref_runtime::TypedValue;
 pub struct Typedef<'arena> {
     pub name: hhas_id::class::ClassType<'arena>,
     pub attributes: ffi::Slice<'arena, HhasAttribute<'arena>>,
-    pub type_info: hhas_type::Info,
+    pub type_info: hhas_type::Info<'arena>,
     pub type_structure: TypedValue<'arena>,
     pub span: Span,
 }

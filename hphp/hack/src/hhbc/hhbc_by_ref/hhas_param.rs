@@ -14,7 +14,7 @@ pub struct HhasParam<'arena> {
     pub is_variadic: bool,
     pub is_inout: bool,
     pub user_attributes: Vec<HhasAttribute<'arena>>,
-    pub type_info: Option<Info>,
+    pub type_info: Option<Info<'arena>>,
     pub default_value: Option<(Label, tast::Expr)>,
 }
 

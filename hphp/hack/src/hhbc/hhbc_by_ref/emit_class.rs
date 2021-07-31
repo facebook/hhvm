@@ -313,11 +313,13 @@ fn from_class_elt_requirements<'a, 'arena>(
         .collect()
 }
 
-fn from_enum_type(opt: Option<&tast::Enum_>) -> Result<Option<hhbc_by_ref_hhas_type::Info>> {
+fn from_enum_type<'arena>(
+    alloc: &'arena bumpalo::Bump,
+    opt: Option<&tast::Enum_>,
+) -> Result<Option<hhbc_by_ref_hhas_type::Info<'arena>>> {
     use hhbc_by_ref_hhas_type::constraint::*;
     opt.map(|e| {
-        let alloc = bumpalo::Bump::new();
-        let type_info_user_type = Some(emit_type_hint::fmt_hint(&alloc, &[], true, &e.base)?);
+        let type_info_user_type = Some(emit_type_hint::fmt_hint(alloc, &[], true, &e.base)?);
         let type_info_type_constraint = Constraint::make(None, Flags::EXTENDED_HINT);
         Ok(hhbc_by_ref_hhas_type::Info::make(
             type_info_user_type,
@@ -625,7 +627,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .collect();
 
     let enum_type = if ast_class.kind == tast::ClassKind::Cenum {
-        from_enum_type(ast_class.enum_.as_ref())?
+        from_enum_type(alloc, ast_class.enum_.as_ref())?
     } else {
         None
     };

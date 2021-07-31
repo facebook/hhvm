@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use ffi::Str;
 use hhbc_by_ref_emit_fatal as emit_fatal;
 use hhbc_by_ref_hhas_type::{constraint, Info};
 use hhbc_by_ref_hhbc_id::{class, Id as ClassId};
@@ -198,7 +199,7 @@ fn hint_to_type_constraint<'arena>(
     tparams: &[&str],
     skipawaitable: bool,
     h: &Hint,
-) -> std::result::Result<constraint::Constraint, hhbc_by_ref_instruction_sequence::Error> {
+) -> std::result::Result<constraint::Constraint<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     use constraint::{Constraint, Flags};
     let Hint(pos, hint) = h;
     Ok(match &**hint {
@@ -206,10 +207,10 @@ fn hint_to_type_constraint<'arena>(
             Constraint::default()
         }
         Haccess(_, _) => {
-            Constraint::make_with_raw_str("", Flags::EXTENDED_HINT | Flags::TYPE_CONSTANT)
+            Constraint::make_with_raw_str(alloc, "", Flags::EXTENDED_HINT | Flags::TYPE_CONSTANT)
         }
-        Hshape(_) => Constraint::make_with_raw_str("HH\\darray", Flags::EXTENDED_HINT),
-        Htuple(_) => Constraint::make_with_raw_str("HH\\varray", Flags::EXTENDED_HINT),
+        Hshape(_) => Constraint::make_with_raw_str(alloc, "HH\\darray", Flags::EXTENDED_HINT),
+        Htuple(_) => Constraint::make_with_raw_str(alloc, "HH\\varray", Flags::EXTENDED_HINT),
         Hsoft(t) => make_tc_with_flags_if_non_empty_flags(
             alloc,
             kind,
@@ -299,7 +300,7 @@ fn make_tc_with_flags_if_non_empty_flags<'arena>(
     skipawaitable: bool,
     hint: &Hint,
     flags: constraint::Flags,
-) -> std::result::Result<constraint::Constraint, hhbc_by_ref_instruction_sequence::Error> {
+) -> std::result::Result<constraint::Constraint<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     let tc = hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?;
     Ok(match (&tc.name, &tc.flags.bits()) {
         (None, 0) => tc,
@@ -314,7 +315,7 @@ fn type_application_helper<'arena>(
     kind: &Kind,
     pos: &Pos,
     name: &str,
-) -> std::result::Result<constraint::Constraint, hhbc_by_ref_instruction_sequence::Error> {
+) -> std::result::Result<constraint::Constraint<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     use constraint::{Constraint, Flags};
     if tparams.contains(&name) {
         let tc_name = match kind {
@@ -322,7 +323,7 @@ fn type_application_helper<'arena>(
             _ => "",
         };
         Ok(Constraint::make(
-            Some(tc_name.into()),
+            Some(Str::new_str(alloc, tc_name)),
             Flags::EXTENDED_HINT | Flags::TYPE_VAR,
         ))
     } else if string_utils::is_self(&name) || string_utils::is_parent(name) {
@@ -332,11 +333,17 @@ fn type_application_helper<'arena>(
                 format!("Cannot access {} when no class scope is active", name),
             ))
         } else {
-            Ok(Constraint::make(Some(name.to_owned()), Flags::empty()))
+            Ok(Constraint::make(
+                Some(Str::new_str(alloc, name)),
+                Flags::empty(),
+            ))
         }
     } else {
         let name: String = class::ClassType::from_ast_name(alloc, name).into();
-        Ok(Constraint::make(Some(name), Flags::empty()))
+        Ok(Constraint::make(
+            Some(Str::new_str(alloc, name)),
+            Flags::empty(),
+        ))
     }
 }
 
@@ -357,9 +364,9 @@ fn make_type_info<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     h: &Hint,
-    tc_name: Option<String>,
+    tc_name: Option<Str<'arena>>,
     tc_flags: constraint::Flags,
-) -> std::result::Result<Info, hhbc_by_ref_instruction_sequence::Error> {
+) -> std::result::Result<Info<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     let type_info_user_type = Some(fmt_hint(alloc, tparams, false, h)?);
     let type_info_type_constraint = constraint::Constraint::make(tc_name, tc_flags);
     Ok(Info::make(type_info_user_type, type_info_type_constraint))
@@ -372,7 +379,7 @@ fn param_hint_to_type_info<'arena>(
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> std::result::Result<Info, hhbc_by_ref_instruction_sequence::Error> {
+) -> std::result::Result<Info<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     let Hint(_, h) = hint;
     let is_simple_hint = match h.as_ref() {
         Hsoft(_)
@@ -433,7 +440,7 @@ pub fn hint_to_type_info<'arena>(
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> std::result::Result<Info, hhbc_by_ref_instruction_sequence::Error> {
+) -> std::result::Result<Info<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     if let Kind::Param = kind {
         return param_hint_to_type_info(alloc, kind, skipawaitable, nullable, tparams, hint);
     };
@@ -470,11 +477,12 @@ pub fn hint_to_class<'arena>(
     }
 }
 
-pub fn emit_type_constraint_for_native_function(
+pub fn emit_type_constraint_for_native_function<'arena>(
+    alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     ret_opt: Option<&Hint>,
     ti: Info,
-) -> Info {
+) -> Info<'arena> {
     use constraint::Flags;
     let (name, flags) = match (&ti.user_type, ret_opt) {
         (_, None) | (None, _) => (Some(String::from("HH\\void")), Flags::EXTENDED_HINT),
@@ -495,7 +503,7 @@ pub fn emit_type_constraint_for_native_function(
             }
         }
     };
-    let tc = constraint::Constraint::make(name, flags);
+    let tc = constraint::Constraint::make(name.map(|n| Str::new_str(alloc, n)), flags);
     Info::make(ti.user_type, tc)
 }
 

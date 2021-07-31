@@ -34,7 +34,7 @@ pub struct HhasProperty<'arena> {
     pub visibility: Visibility,
     pub initial_value: Maybe<hhbc_by_ref_runtime::TypedValue<'arena>>,
     pub initializer_instrs: Maybe<InstrSeq<'arena>>,
-    pub type_info: hhbc_by_ref_hhas_type::Info,
+    pub type_info: hhbc_by_ref_hhas_type::Info<'arena>,
     pub doc_comment: Maybe<Str<'arena>>,
 }
 impl<'arena> HhasProperty<'arena> {

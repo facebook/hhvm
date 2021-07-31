@@ -5,24 +5,25 @@
 
 /// Type info has additional optional user type
 #[derive(Clone, Debug)]
-pub struct Info {
+pub struct Info<'arena> {
     pub user_type: Option<String>,
-    pub type_constraint: constraint::Constraint,
+    pub type_constraint: constraint::Constraint<'arena>,
 }
 
 #[derive(Debug)]
-pub struct Constant {
+pub struct Constant<'arena> {
     pub name: String,
-    pub initializer: constraint::Constraint,
+    pub initializer: constraint::Constraint<'arena>,
 }
 
 #[allow(dead_code)]
 pub mod constraint {
     use bitflags::bitflags;
+    use ffi::Str;
 
     #[derive(Clone, Default, Debug)]
-    pub struct Constraint {
-        pub name: Option<String>,
+    pub struct Constraint<'arena> {
+        pub name: Option<Str<'arena>>,
         pub flags: Flags,
     }
 
@@ -52,26 +53,29 @@ pub mod constraint {
         }
     }
 
-    impl Constraint {
-        pub fn make(name: Option<String>, flags: Flags) -> Self {
+    impl<'arena> Constraint<'arena> {
+        pub fn make(name: Option<Str<'arena>>, flags: Flags) -> Self {
             Constraint { name, flags }
         }
 
-        pub fn make_with_raw_str(name: &str, flags: Flags) -> Self {
-            Constraint::make(Some(String::from(name)), flags)
+        pub fn make_with_raw_str(alloc: &'arena bumpalo::Bump, name: &str, flags: Flags) -> Self {
+            Constraint::make(Some(Str::new_str(alloc, name)), flags)
         }
     }
 }
 
-impl Info {
-    pub fn make(user_type: Option<String>, type_constraint: constraint::Constraint) -> Info {
+impl<'arena> Info<'arena> {
+    pub fn make(
+        user_type: Option<String>,
+        type_constraint: constraint::Constraint<'arena>,
+    ) -> Info<'arena> {
         Info {
             user_type,
             type_constraint,
         }
     }
 
-    pub fn make_empty() -> Info {
+    pub fn make_empty() -> Info<'arena> {
         Info::make(Some(String::from("")), constraint::Constraint::default())
     }
 
@@ -80,8 +84,8 @@ impl Info {
     }
 }
 
-impl Constant {
-    pub fn make(name: String, initializer: constraint::Constraint) -> Constant {
+impl<'arena> Constant<'arena> {
+    pub fn make(name: String, initializer: constraint::Constraint<'arena>) -> Constant {
         Constant { name, initializer }
     }
 }

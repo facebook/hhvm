@@ -21,10 +21,10 @@ fn valid_tc_for_record_field(tc: &constraint::Constraint) -> bool {
         Some(name) => {
             !(string_utils::is_self(name)
                 || string_utils::is_parent(name)
-                || name.eq_ignore_ascii_case("hh\\this")
-                || name.eq_ignore_ascii_case("callable")
-                || name.eq_ignore_ascii_case("hh\\nothing")
-                || name.eq_ignore_ascii_case("hh\\noreturn"))
+                || name.as_str().eq_ignore_ascii_case("hh\\this")
+                || name.as_str().eq_ignore_ascii_case("callable")
+                || name.as_str().eq_ignore_ascii_case("hh\\nothing")
+                || name.as_str().eq_ignore_ascii_case("hh\\noreturn"))
         }
     }
 }

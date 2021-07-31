@@ -71,7 +71,7 @@ fn kind_to_type_info<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     h: &Hint,
-) -> Result<TypeInfo> {
+) -> Result<TypeInfo<'arena>> {
     use emit_type_hint::Kind;
     emit_type_hint::hint_to_type_info(alloc, &Kind::TypeDef, false, h.1.is_hoption(), tparams, h)
 }

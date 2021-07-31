@@ -363,7 +363,7 @@ pub fn emit_return_type_info<'arena>(
     tp_names: &[&str],
     skip_awaitable: bool,
     ret: Option<&aast::Hint>,
-) -> Result<HhasTypeInfo> {
+) -> Result<HhasTypeInfo<'arena>> {
     match ret {
         None => Ok(HhasTypeInfo::make(
             Some("".to_string()),
@@ -386,11 +386,11 @@ fn make_return_type_info<'arena>(
     is_native: bool,
     ret: Option<&aast::Hint>,
     tp_names: &[&str],
-) -> Result<HhasTypeInfo> {
+) -> Result<HhasTypeInfo<'arena>> {
     let return_type_info = emit_return_type_info(alloc, tp_names, skip_awaitable, ret);
     if is_native {
         return return_type_info.map(|rti| {
-            emit_type_hint::emit_type_constraint_for_native_function(tp_names, ret, rti)
+            emit_type_hint::emit_type_constraint_for_native_function(alloc, tp_names, ret, rti)
         });
     };
     return_type_info
@@ -435,10 +435,10 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
     num_closures: u32,
-    upper_bounds: Vec<(String, Vec<HhasTypeInfo>)>,
+    upper_bounds: Vec<(String, Vec<HhasTypeInfo<'arena>>)>,
     shadowed_tparams: Vec<String>,
     mut params: Vec<HhasParam<'arena>>,
-    return_type_info: Option<HhasTypeInfo>,
+    return_type_info: Option<HhasTypeInfo<'arena>>,
     doc_comment: Option<DocComment>,
     opt_env: Option<&Env<'a, 'arena>>,
 ) -> Result<HhasBody<'arena>> {
@@ -1129,7 +1129,7 @@ pub fn emit_generics_upper_bounds<'arena>(
     immediate_tparams: &[tast::Tparam],
     class_tparam_names: &[&str],
     skip_awaitable: bool,
-) -> Vec<(String, Vec<HhasTypeInfo>)> {
+) -> Vec<(String, Vec<HhasTypeInfo<'arena>>)> {
     let constraint_filter = |(kind, hint): &(ast_defs::ConstraintKind, tast::Hint)| {
         if let ast_defs::ConstraintKind::ConstraintAs = &kind {
             let mut tparam_names = get_tp_names(immediate_tparams);

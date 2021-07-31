@@ -21,10 +21,10 @@ pub struct HhasBody<'arena> {
     pub num_closures: u32,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
-    pub upper_bounds: Vec<(String, Vec<hhbc_by_ref_hhas_type::Info>)>,
+    pub upper_bounds: Vec<(String, Vec<hhbc_by_ref_hhas_type::Info<'arena>>)>,
     pub shadowed_tparams: Vec<String>,
     pub params: Vec<HhasParam<'arena>>,
-    pub return_type_info: Option<hhbc_by_ref_hhas_type::Info>,
+    pub return_type_info: Option<hhbc_by_ref_hhas_type::Info<'arena>>,
     pub doc_comment: Option<DocComment>,
     pub env: Option<HhasBodyEnv>,
 }

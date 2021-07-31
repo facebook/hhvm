@@ -199,9 +199,9 @@ fn valid_for_prop(tc: &constraint::Constraint) -> bool {
         Some(s) => {
             !(string_utils::is_self(&s)
                 || string_utils::is_parent(&s)
-                || s.eq_ignore_ascii_case("hh\\nothing")
-                || s.eq_ignore_ascii_case("hh\\noreturn")
-                || s.eq_ignore_ascii_case("callable"))
+                || s.as_str().eq_ignore_ascii_case("hh\\nothing")
+                || s.as_str().eq_ignore_ascii_case("hh\\noreturn")
+                || s.as_str().eq_ignore_ascii_case("callable"))
         }
     }
 }

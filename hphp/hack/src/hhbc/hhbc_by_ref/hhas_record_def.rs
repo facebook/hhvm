@@ -8,7 +8,11 @@ use hhbc_by_ref_hhbc_id::record;
 use hhbc_by_ref_runtime::TypedValue;
 
 #[derive(Debug)]
-pub struct Field<'a, 'arena>(pub &'a str, pub Info, pub Option<TypedValue<'arena>>);
+pub struct Field<'a, 'arena>(
+    pub &'a str,
+    pub Info<'arena>,
+    pub Option<TypedValue<'arena>>,
+);
 
 #[derive(Debug)]
 pub struct HhasRecord<'a, 'arena> {

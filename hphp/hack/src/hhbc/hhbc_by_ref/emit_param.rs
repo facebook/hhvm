@@ -275,7 +275,7 @@ fn default_type_check(
     let hint_type = get_hint_display_name(
         param_type_info
             .as_ref()
-            .and_then(|ti| ti.user_type.as_ref()),
+            .and_then(|ti| ti.user_type.as_ref().into()),
     );
     // If matches, return None, otherwise return default_type
     let default_type = hint_type.and_then(|ht| match_default_and_hint(ht, param_expr));

@@ -3266,7 +3266,10 @@ fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo) -> Re
         )
     };
     angle(w, |w| {
-        print_quote_str(w, &(ti.user_type.map(|n| n.as_str().to_owned())))?;
+        print_quote_str(
+            w,
+            &Option::from(ti.user_type.map(|n| n.as_str().to_owned())),
+        )?;
         w.write(" ")?;
         if !is_enum {
             print_quote_str(

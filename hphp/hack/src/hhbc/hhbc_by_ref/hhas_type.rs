@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Str;
+use ffi::{Maybe, Maybe::*, Str};
 
 /// Type info has additional optional user type
 #[derive(Clone, Debug)]
 pub struct Info<'arena> {
-    pub user_type: Option<Str<'arena>>,
+    pub user_type: Maybe<Str<'arena>>,
     pub type_constraint: constraint::Constraint<'arena>,
 }
 
@@ -74,7 +74,7 @@ pub mod constraint {
 
 impl<'arena> Info<'arena> {
     pub fn make(
-        user_type: Option<Str<'arena>>,
+        user_type: Maybe<Str<'arena>>,
         type_constraint: constraint::Constraint<'arena>,
     ) -> Info<'arena> {
         Info {
@@ -85,7 +85,7 @@ impl<'arena> Info<'arena> {
 
     pub fn make_empty(alloc: &'arena bumpalo::Bump) -> Info<'arena> {
         Info::make(
-            Some(Str::new_str(alloc, "")),
+            Just(Str::new_str(alloc, "")),
             constraint::Constraint::default(),
         )
     }

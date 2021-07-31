@@ -319,7 +319,7 @@ fn from_enum_type<'arena>(
 ) -> Result<Option<hhbc_by_ref_hhas_type::Info<'arena>>> {
     use hhbc_by_ref_hhas_type::constraint::*;
     opt.map(|e| {
-        let type_info_user_type = Some(Str::new_str(
+        let type_info_user_type = Just(Str::new_str(
             alloc,
             emit_type_hint::fmt_hint(alloc, &[], true, &e.base)?,
         ));
@@ -491,7 +491,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             is_variadic: false,
             is_inout: false,
             user_attributes: vec![],
-            type_info: Some(Info::make(Some("HH\\varray".into()), tc)),
+            type_info: Some(Info::make(Just("HH\\varray".into()), tc)),
             default_value: None,
         }];
 

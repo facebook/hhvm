@@ -50,7 +50,7 @@ use oxidized::{
     aast, aast_defs, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos,
 };
 
-use ffi::{Slice, Str};
+use ffi::{Maybe::Just, Slice, Str};
 
 use bitflags::bitflags;
 use indexmap::IndexSet;
@@ -366,7 +366,7 @@ pub fn emit_return_type_info<'arena>(
 ) -> Result<HhasTypeInfo<'arena>> {
     match ret {
         None => Ok(HhasTypeInfo::make(
-            Some(Str::new_str(alloc, "")),
+            Just(Str::new_str(alloc, "")),
             hhbc_by_ref_hhas_type::constraint::Constraint::default(),
         )),
         Some(hint) => emit_type_hint::hint_to_type_info(
@@ -1052,7 +1052,7 @@ fn set_emit_statement_state<'arena, 'decl, D: DeclProvider<'decl>>(
     is_generator: bool,
 ) {
     let verify_return = match &return_type_info.user_type {
-        Some(s) if s.as_str() == "" => None,
+        Just(s) if s.as_str() == "" => None,
         _ if return_type_info.has_type_constraint() && !is_generator => {
             return_type.map(|h| h.clone())
         }

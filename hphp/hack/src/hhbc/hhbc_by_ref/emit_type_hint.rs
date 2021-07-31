@@ -384,7 +384,7 @@ fn make_type_info<'arena>(
     let type_info_user_type = fmt_hint(alloc, tparams, false, h)?;
     let type_info_type_constraint = constraint::Constraint::make(tc_name, tc_flags);
     Ok(Info::make(
-        Some(Str::new_str(alloc, type_info_user_type)),
+        Just(Str::new_str(alloc, type_info_user_type)),
         type_info_type_constraint,
     ))
 }
@@ -502,11 +502,11 @@ pub fn emit_type_constraint_for_native_function<'arena>(
 ) -> Info<'arena> {
     use constraint::ConstraintFlags;
     let (name, flags) = match (&ti.user_type, ret_opt) {
-        (_, None) | (None, _) => (
+        (_, None) | (Nothing, _) => (
             Just(String::from("HH\\void")),
             ConstraintFlags::EXTENDED_HINT,
         ),
-        (Some(t), _) => {
+        (Just(t), _) => {
             if t.as_str() == "HH\\mixed" || t.as_str() == "callable" {
                 (Nothing, ConstraintFlags::default())
             } else {

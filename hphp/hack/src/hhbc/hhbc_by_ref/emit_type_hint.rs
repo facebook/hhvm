@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use ffi::Str;
+use ffi::{Maybe, Maybe::*, Str};
 use hhbc_by_ref_emit_fatal as emit_fatal;
 use hhbc_by_ref_hhas_type::{constraint, Info};
 use hhbc_by_ref_hhbc_id::{class, Id as ClassId};
@@ -311,8 +311,8 @@ fn make_tc_with_flags_if_non_empty_flags<'arena>(
 ) -> std::result::Result<constraint::Constraint<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     let tc = hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?;
     Ok(match (&tc.name, &tc.flags.bits()) {
-        (None, 0) => tc,
-        _ => constraint::Constraint::make(tc.name, flags | tc.flags),
+        (Nothing, 0) => tc,
+        _ => constraint::Constraint::make(tc.name.into(), flags | tc.flags),
     })
 }
 
@@ -331,7 +331,7 @@ fn type_application_helper<'arena>(
             _ => "",
         };
         Ok(Constraint::make(
-            Some(Str::new_str(alloc, tc_name)),
+            Just(Str::new_str(alloc, tc_name)),
             ConstraintFlags::EXTENDED_HINT | ConstraintFlags::TYPE_VAR,
         ))
     } else if string_utils::is_self(&name) || string_utils::is_parent(name) {
@@ -342,14 +342,14 @@ fn type_application_helper<'arena>(
             ))
         } else {
             Ok(Constraint::make(
-                Some(Str::new_str(alloc, name)),
+                Just(Str::new_str(alloc, name)),
                 ConstraintFlags::empty(),
             ))
         }
     } else {
         let name: String = class::ClassType::from_ast_name(alloc, name).into();
         Ok(Constraint::make(
-            Some(Str::new_str(alloc, name)),
+            Just(Str::new_str(alloc, name)),
             ConstraintFlags::empty(),
         ))
     }
@@ -378,7 +378,7 @@ fn make_type_info<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     h: &Hint,
-    tc_name: Option<Str<'arena>>,
+    tc_name: Maybe<Str<'arena>>,
     tc_flags: constraint::ConstraintFlags,
 ) -> std::result::Result<Info<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     let type_info_user_type = Some(fmt_hint(alloc, tparams, false, h)?);
@@ -460,7 +460,7 @@ pub fn hint_to_type_info<'arena>(
     };
     let tc = hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?;
     let flags = match kind {
-        Kind::Return | Kind::Property if tc.name.is_some() => {
+        Kind::Return | Kind::Property if tc.name.is_just() => {
             constraint::ConstraintFlags::EXTENDED_HINT | tc.flags
         }
         Kind::UpperBound => constraint::ConstraintFlags::UPPERBOUND | tc.flags,
@@ -500,15 +500,15 @@ pub fn emit_type_constraint_for_native_function<'arena>(
     use constraint::ConstraintFlags;
     let (name, flags) = match (&ti.user_type, ret_opt) {
         (_, None) | (None, _) => (
-            Some(String::from("HH\\void")),
+            Just(String::from("HH\\void")),
             ConstraintFlags::EXTENDED_HINT,
         ),
         (Some(t), _) => {
             if t == "HH\\mixed" || t == "callable" {
-                (None, ConstraintFlags::default())
+                (Nothing, ConstraintFlags::default())
             } else {
                 let Hint(_, h) = ret_opt.as_ref().unwrap();
-                let name = Some(
+                let name = Just(
                     string_utils::strip_type_list(
                         t.trim_start_matches('?')
                             .trim_start_matches('@')

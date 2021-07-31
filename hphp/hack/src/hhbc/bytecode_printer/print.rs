@@ -3269,7 +3269,10 @@ fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo) -> Re
         print_quote_str(w, &ti.user_type)?;
         w.write(" ")?;
         if !is_enum {
-            print_quote_str(w, &(ti.type_constraint.name.map(|n| n.as_str().to_owned())))?;
+            print_quote_str(
+                w,
+                &Option::from(ti.type_constraint.name.map(|n| n.as_str().to_owned())),
+            )?;
             w.write(" ")?;
         }
         print_type_flags(w, ti.type_constraint.flags)

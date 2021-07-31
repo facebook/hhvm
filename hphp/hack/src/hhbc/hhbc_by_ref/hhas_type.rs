@@ -19,11 +19,12 @@ pub struct Constant<'arena> {
 #[allow(dead_code)]
 pub mod constraint {
     use bitflags::bitflags;
-    use ffi::Str;
+    use ffi::{Maybe, Maybe::Just, Str};
 
     #[derive(Clone, Default, Debug)]
+    #[repr(C)]
     pub struct Constraint<'arena> {
-        pub name: Option<Str<'arena>>,
+        pub name: Maybe<Str<'arena>>,
         pub flags: ConstraintFlags,
     }
 
@@ -55,7 +56,7 @@ pub mod constraint {
     }
 
     impl<'arena> Constraint<'arena> {
-        pub fn make(name: Option<Str<'arena>>, flags: ConstraintFlags) -> Self {
+        pub fn make(name: Maybe<Str<'arena>>, flags: ConstraintFlags) -> Self {
             Constraint { name, flags }
         }
 
@@ -64,7 +65,7 @@ pub mod constraint {
             name: &str,
             flags: ConstraintFlags,
         ) -> Self {
-            Constraint::make(Some(Str::new_str(alloc, name)), flags)
+            Constraint::make(Just(Str::new_str(alloc, name)), flags)
         }
     }
 }
@@ -85,7 +86,7 @@ impl<'arena> Info<'arena> {
     }
 
     pub fn has_type_constraint(&self) -> bool {
-        self.type_constraint.name.is_some()
+        self.type_constraint.name.is_just()
     }
 }
 

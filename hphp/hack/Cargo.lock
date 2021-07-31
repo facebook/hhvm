@@ -1633,6 +1633,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "decl_provider",
+ "ffi",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_fatal",
  "hhbc_by_ref_emit_type_hint",

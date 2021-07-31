@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use decl_provider::DeclProvider;
+use ffi::Maybe::*;
 use hhbc_by_ref_ast_constant_folder as constant_folder;
 use hhbc_by_ref_emit_fatal as emit_fatal;
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
@@ -17,8 +18,8 @@ use oxidized::ast::*;
 
 fn valid_tc_for_record_field(tc: &constraint::Constraint) -> bool {
     match &tc.name {
-        None => true,
-        Some(name) => {
+        Nothing => true,
+        Just(name) => {
             !(string_utils::is_self(name)
                 || string_utils::is_parent(name)
                 || name.as_str().eq_ignore_ascii_case("hh\\this")

@@ -15,6 +15,12 @@ pub enum Maybe<T> {
     Nothing,
 }
 pub use self::Maybe::*;
+impl<T: Clone> Default for Maybe<T> {
+    #[inline]
+    fn default() -> Self {
+        Nothing
+    }
+}
 impl<T: Clone> Clone for Maybe<T> {
     #[inline]
     fn clone(&self) -> Self {
@@ -32,6 +38,7 @@ impl<T: Clone> Clone for Maybe<T> {
     }
 }
 impl<U> Maybe<U> {
+    #[inline]
     pub const fn as_ref(&self) -> Maybe<&U> {
         match *self {
             Just(ref x) => Just(x),
@@ -39,6 +46,7 @@ impl<U> Maybe<U> {
         }
     }
 
+    #[inline]
     pub const fn is_just(&self) -> bool {
         matches!(self, Just(_))
     }
@@ -48,6 +56,14 @@ impl<U> Maybe<U> {
         match self {
             Just(x) => Just(f(x)),
             Nothing => Nothing,
+        }
+    }
+
+    #[inline]
+    pub fn map_or<T, F: FnOnce(U) -> T>(self, default: T, f: F) -> T {
+        match self {
+            Just(t) => f(t),
+            Nothing => default,
         }
     }
 }

@@ -3161,7 +3161,7 @@ function run_test($options, $test) {
   return run_foreach_config($options, $test, $hhvm, $hhvm_env);
 }
 
-function num_cpus() {
+function num_cpus(): int {
   switch(PHP_OS) {
     case 'Linux':
       $data = file('/proc/stat');
@@ -3176,7 +3176,7 @@ function num_cpus() {
     case 'FreeBSD':
       $output = null;
       $return_var = -1;
-      return exec('sysctl -n hw.ncpu', inout $output, inout $return_var);
+      return (int)exec('sysctl -n hw.ncpu', inout $output, inout $return_var);
   }
   return 2; // default when we don't know how to detect.
 }
@@ -3629,7 +3629,7 @@ EOT;
   return $servers;
 }
 
-function get_num_threads($options, $tests) {
+function get_num_threads($options, $tests): int {
   if (isset($options['threads'])) {
     $threads = (int)$options['threads'];
     if ((string)$threads !== $options['threads'] || $threads < 1) {

@@ -33,9 +33,6 @@ function titlecase_l(string $str, ?Locale $loc = null): string;
 function foldcase_l(string $str, ?Locale $loc = null): string;
 
 <<__Native>>
-function chunk_l(string $str, int $size, ?Locale $loc = null): vec<string>;
-
-<<__Native>>
 function strcoll_l(string $a, string $b, ?Locale $loc = null): int;
 <<__Native>>
 function strcasecmp_l(string $a, string $b, ?Locale $loc = null): int;
@@ -63,7 +60,11 @@ function stripos_l(string $haystack, string $needle, int $offset, ?Locale $loc =
 function strripos_l(string $haystack, string $needle, int $offset, ?Locale $loc = null): int;
 
 <<__Native>>
+function chunk_l(string $str, int $size, ?Locale $loc = null): vec<string>;
+<<__Native>>
 function slice_l(string $str, int $offset, int $length, ?Locale $loc = null): string;
+<<__Native>>
+function split_l(string $string, string $delimiter, ?int $limit = null, ?Locale $loc = null): vec<string>;
 
 <<__Native>>
 function reverse_l(string $str, ?Locale $loc = null): string;

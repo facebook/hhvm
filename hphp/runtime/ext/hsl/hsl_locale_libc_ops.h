@@ -30,8 +30,6 @@ namespace HPHP {
     virtual String lowercase(const String&) const override;
     virtual String foldcase(const String&) const override;
 
-    virtual Array chunk(const String&, int64_t) const override;
-
     virtual int64_t strcoll(const String&, const String&) const override;
     virtual int64_t strcasecmp(const String&, const String&) const override;
     virtual bool starts_with(const String& str, const String& prefix) const override;
@@ -47,7 +45,9 @@ namespace HPHP {
     virtual int64_t stripos(const String& haystack, const String& needle, int64_t offset) const override;
     virtual int64_t strripos(const String& haystack, const String& needle, int64_t offset) const override;
 
+    virtual Array chunk(const String&, int64_t) const override;
     virtual String slice(const String& str, int64_t offset, int64_t length) const override;
+    virtual Array split(const String& str, const String& delimiter, int64_t limit = -1) const override;
 
     virtual String reverse(const String& str) const override;
 

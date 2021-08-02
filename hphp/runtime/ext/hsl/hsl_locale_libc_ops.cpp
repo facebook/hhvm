@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_libc_ops.h"
 #include "hphp/runtime/ext/string/ext_string.h"
@@ -66,6 +67,14 @@ Array HSLLocaleLibcOps::chunk(const String& str, int64_t chunk_size) const {
     ret.append(str.substr(i, chunk_size));
   }
   return ret.toArray();
+}
+
+Array HSLLocaleLibcOps::split(const String& str, const String& delimiter, int64_t limit) const {
+  assertx(limit > 0);
+
+  auto ret = StringUtil::Explode(str, delimiter, limit);
+  assertx(ret.isVec());
+  return ret.asCArrRef();
 }
 
 int64_t HSLLocaleLibcOps::strcoll(const String& a, const String& b) const {

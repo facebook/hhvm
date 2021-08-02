@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/locale.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/hsl/ext_hsl_locale.h"
@@ -191,6 +192,28 @@ String HHVM_FUNCTION(slice_l,
   return get_locale(maybe_loc)->ops()->slice(str, offset, length);
 }
 
+Array HHVM_FUNCTION(split_l,
+                    const String& str,
+                    const String& delimiter,
+                    const Variant& limit,
+                    const Variant& maybe_loc) {
+  if (str.empty()) {
+    return make_vec_array(empty_string());
+  }
+  if (delimiter.empty()) {
+    return HHVM_FN(chunk_l)(str, 1, maybe_loc);
+  }
+
+  int64_t int_limit = limit.isNull() ? k_PHP_INT_MAX : limit.asInt64Val();
+  if (int_limit == 0) {
+    return empty_vec_array();
+  }
+  if (int_limit < 0) {
+    int_limit = k_PHP_INT_MAX;
+  }
+  return get_locale(maybe_loc)->ops()->split(str, delimiter, int_limit);
+}
+
 String HHVM_FUNCTION(reverse_l,
                      const String& str,
                      const Variant& maybe_loc) {
@@ -261,8 +284,6 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\titlecase_l, titlecase_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\foldcase_l, foldcase_l);
 
-    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\chunk_l, chunk_l);
-
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strcoll_l, strcoll_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strcasecmp_l, strcasecmp_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\starts_with_l, starts_with_l);
@@ -278,7 +299,9 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\stripos_l, stripos_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strripos_l, strripos_l);
 
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\chunk_l, chunk_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\slice_l, slice_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\split_l, split_l);
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\reverse_l, reverse_l);
 

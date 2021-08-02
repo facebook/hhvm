@@ -464,4 +464,41 @@ String HSLLocaleICUOps::pad_right(const String& str, int64_t len, const String& 
   return ret;
 }
 
+Array HSLLocaleICUOps::split(const String& str, const String& delimiter, int64_t limit) const {
+  assertx(limit > 0);
+
+  auto ustr = ustr_from_utf8(str);
+  auto udelim = ustr_from_utf8(delimiter);
+
+  icu::ErrorCode err;
+  // Singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  ustr = normalizer->normalize(ustr, err);
+  udelim = normalizer->normalize(udelim, err);
+
+  VecInit ret {(size_t) (ustr.length() / udelim.length()) + 1};
+
+  int32_t offset = 0, next = 0, count = 0;
+  while (next < ustr.length() && count + 1 < limit) {
+    next = ustr.indexOf(udelim, offset);
+    if (next == -1) {
+      break;
+    }
+
+    std::string slice;
+    ustr.tempSubStringBetween(offset, next).toUTF8String(slice);
+    ret.append(slice);
+    count++;
+
+    next += udelim.length();
+    offset = next;
+  }
+
+  std::string slice;
+  ustr.tempSubString(offset).toUTF8String(slice);
+  ret.append(slice);
+
+  return ret.toArray();
+}
+
 } // namespace HPHP

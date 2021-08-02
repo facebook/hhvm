@@ -26,7 +26,6 @@ namespace HPHP {
     virtual String uppercase(const String&) const = 0;
     virtual String lowercase(const String&) const = 0;
     virtual String foldcase(const String&) const = 0;
-    virtual Array chunk(const String&, int64_t chunk_size) const = 0;
     virtual int64_t strcoll(const String&, const String&) const = 0;
     virtual int64_t strcasecmp(const String&, const String&) const = 0;
 
@@ -49,7 +48,9 @@ namespace HPHP {
     virtual int64_t stripos(const String& haystack, const String& needle, int64_t offset) const = 0;
     virtual int64_t strripos(const String& haystack, const String& needle, int64_t offset) const = 0;
 
+    virtual Array chunk(const String&, int64_t chunk_size) const = 0;
     virtual String slice(const String& str, int64_t offset, int64_t length) const = 0;
+    virtual Array split(const String& str, const String& delimiter, int64_t limit = -1) const = 0;
 
     virtual String reverse(const String& str) const = 0;
 

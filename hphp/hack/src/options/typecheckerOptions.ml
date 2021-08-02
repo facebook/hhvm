@@ -102,6 +102,8 @@ let log_levels = GlobalOptions.log_levels
 
 let shallow_class_decl = GlobalOptions.tco_shallow_class_decl
 
+let skip_hierarchy_checks = GlobalOptions.tco_skip_hierarchy_checks
+
 let call_coeffects = GlobalOptions.tco_call_coeffects
 
 let local_coeffects = GlobalOptions.tco_local_coeffects

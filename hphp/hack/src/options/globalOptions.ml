@@ -50,6 +50,7 @@ type t = {
   log_levels: int SMap.t;
   po_disable_lval_as_an_expression: bool;
   tco_shallow_class_decl: bool;
+  tco_skip_hierarchy_checks: bool;
   po_rust_parser_errors: bool;
   tco_like_type_hints: bool;
   tco_union_intersection_type_hints: bool;
@@ -241,6 +242,7 @@ let default =
     log_levels = SMap.empty;
     po_disable_lval_as_an_expression = true;
     tco_shallow_class_decl = false;
+    tco_skip_hierarchy_checks = false;
     po_rust_parser_errors = false;
     tco_like_type_hints = false;
     tco_union_intersection_type_hints = false;
@@ -373,6 +375,7 @@ let make
     ?(po_disable_lval_as_an_expression =
       default.po_disable_lval_as_an_expression)
     ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
+    ?(tco_skip_hierarchy_checks = default.tco_skip_hierarchy_checks)
     ?(po_rust_parser_errors = default.po_rust_parser_errors)
     ?(tco_like_type_hints = default.tco_like_type_hints)
     ?(tco_union_intersection_type_hints =
@@ -520,6 +523,7 @@ let make
     log_levels;
     po_disable_lval_as_an_expression;
     tco_shallow_class_decl;
+    tco_skip_hierarchy_checks;
     po_rust_parser_errors;
     tco_like_type_hints;
     tco_union_intersection_type_hints;
@@ -698,6 +702,8 @@ let log_levels t = t.log_levels
 let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
 
 let tco_shallow_class_decl t = t.tco_shallow_class_decl
+
+let tco_skip_hierarchy_checks t = t.tco_skip_hierarchy_checks
 
 let po_rust_parser_errors t = t.po_rust_parser_errors
 

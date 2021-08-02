@@ -474,6 +474,9 @@ type t = {
   (* Look up class members lazily from shallow declarations instead of eagerly
      computing folded declarations representing the entire class type. *)
   shallow_class_decl: bool;
+  (* Skip checks on hierarchy e.g. overrides, require extend, etc.
+     Set to true only for debugging purposes! *)
+  skip_hierarchy_checks: bool;
   (* If false, only the type check delegate's logic will be used.
      If the delegate fails to type check, the typing check service as a whole
      will fail. *)
@@ -600,6 +603,7 @@ let default =
     load_decls_from_saved_state = false;
     idle_gc_slice = 0;
     shallow_class_decl = false;
+    skip_hierarchy_checks = false;
     num_local_workers = None;
     parallel_type_checking_threshold = 10;
     defer_class_declaration_threshold = None;
@@ -1011,6 +1015,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let skip_hierarchy_checks =
+    bool_if_min_version
+      "skip_hierarchy_checks"
+      ~default:default.skip_hierarchy_checks
+      ~current_version
+      config
+  in
   let parallel_type_checking_threshold =
     int_
       "parallel_type_checking_threshold"
@@ -1234,6 +1245,7 @@ let load_ fn ~silent ~current_version overrides =
     load_decls_from_saved_state;
     idle_gc_slice;
     shallow_class_decl;
+    skip_hierarchy_checks;
     num_local_workers;
     parallel_type_checking_threshold;
     defer_class_declaration_threshold;

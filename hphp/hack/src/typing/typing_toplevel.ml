@@ -1121,6 +1121,9 @@ let check_enum_includes env cls =
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
+let skip_hierarchy_checks (ctx : Provider_context.t) : bool =
+  TypecheckerOptions.skip_hierarchy_checks (Provider_context.get_tcopt ctx)
+
 let class_type_param env ct =
   let (env, tparam_list) = List.map_env env ct ~f:Typing.type_param in
   (env, tparam_list)
@@ -1945,8 +1948,11 @@ let class_def_ env c tc =
   List.iter methods ~f:(fun { m_name = (p, id); _ } ->
       check_dynamic_class_element (Cls.get_smethod tc) ~elt_type:`Method id p);
   let env =
-    List.fold ~init:env impl ~f:(fun env ->
-        class_implements_type env (List.map implements ~f:snd) c)
+    if skip_hierarchy_checks ctx then
+      env
+    else
+      List.fold ~init:env impl ~f:(fun env ->
+          class_implements_type env (List.map implements ~f:snd) c)
   in
   if Cls.is_disposable tc then
     List.iter
@@ -2072,9 +2078,15 @@ let class_def ctx c =
     then
       None
     else
-      let env = Typing_requirements.check_class env name_pos tc in
-      if shallow_decl_enabled ctx then
-        Typing_inheritance.check_class env name_pos tc;
+      let env =
+        if skip_hierarchy_checks ctx then
+          env
+        else
+          let env = Typing_requirements.check_class env name_pos tc in
+          if shallow_decl_enabled ctx then
+            Typing_inheritance.check_class env name_pos tc;
+          env
+      in
       Some (class_def_ env c tc)
 
 let gconst_def ctx cst =

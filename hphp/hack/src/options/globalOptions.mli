@@ -131,6 +131,9 @@ type t = {
   (* Look up class members lazily from shallow declarations instead of eagerly
      computing folded declarations representing the entire class type. *)
   tco_shallow_class_decl: bool;
+  (* Skip checks on hierarchy e.g. overrides, require extend, etc.
+     Set to true only for debugging purposes! *)
+  tco_skip_hierarchy_checks: bool;
   (* Use Rust parser errors *)
   po_rust_parser_errors: bool;
   (* Enables like type hints *)
@@ -359,6 +362,7 @@ val make :
   ?log_levels:int SMap.t ->
   ?po_disable_lval_as_an_expression:bool ->
   ?tco_shallow_class_decl:bool ->
+  ?tco_skip_hierarchy_checks:bool ->
   ?po_rust_parser_errors:bool ->
   ?tco_like_type_hints:bool ->
   ?tco_union_intersection_type_hints:bool ->
@@ -547,6 +551,8 @@ val log_levels : t -> int SMap.t
 val po_disable_lval_as_an_expression : t -> bool
 
 val tco_shallow_class_decl : t -> bool
+
+val tco_skip_hierarchy_checks : t -> bool
 
 val po_rust_parser_errors : t -> bool
 

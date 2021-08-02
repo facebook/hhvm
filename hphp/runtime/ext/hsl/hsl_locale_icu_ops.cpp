@@ -501,4 +501,43 @@ Array HSLLocaleICUOps::split(const String& str, const String& delimiter, int64_t
   return ret.toArray();
 }
 
+String HSLLocaleICUOps::splice(const String& str,
+                               const String& replacement,
+                               int64_t offset,
+                               int64_t length) const {
+
+  assertx(length >= 0);
+  auto mut = ustr_from_utf8(str);
+
+  // Normalize: if we replace the first character of "éfg" with "X":
+  // - we want "Xfg", not "X́fg"
+  // - we don't want the result to depend on if the UTF8 string has been
+  //   normalized already
+  // - this also affects offset calculation, as normalization can reduce the
+  //   length
+  icu::ErrorCode err;
+  // Singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  mut = normalizer->normalize(mut, err);
+
+  const auto char32_len = mut.countChar32();
+  if (offset < 0) {
+    offset += char32_len;
+  }
+  if (offset < 0 || offset > char32_len) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Offset {} was out-of-bounds for length {}", offset, length)
+    );
+  }
+  const auto ureplacement = ustr_from_utf8(replacement);
+
+  offset = mut.moveIndex32(0, offset);
+  length = mut.moveIndex32(offset, length) - offset;
+  mut.replace(offset, length, ureplacement);
+
+  std::string ret;
+  mut.toUTF8String(ret);
+  return ret;
+}
+
 } // namespace HPHP

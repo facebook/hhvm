@@ -192,6 +192,21 @@ String HHVM_FUNCTION(slice_l,
   return get_locale(maybe_loc)->ops()->slice(str, offset, length);
 }
 
+String HHVM_FUNCTION(splice_l,
+                     const String& str,
+                     const String& replacement,
+                     int64_t offset,
+                     const Variant& length,
+                     const Variant& maybe_loc) {
+  const int64_t int_length = length.isNull() ? StringData::MaxSize : length.asInt64Val();
+  if (int_length < 0) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Length must be null, or >= 0"
+    );
+  }
+  return get_locale(maybe_loc)->ops()->splice(str, replacement, offset, int_length);
+}
+
 Array HHVM_FUNCTION(split_l,
                     const String& str,
                     const String& delimiter,
@@ -301,6 +316,7 @@ struct HSLStrExtension final : Extension {
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\chunk_l, chunk_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\slice_l, slice_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\splice_l, splice_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\split_l, split_l);
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\reverse_l, reverse_l);

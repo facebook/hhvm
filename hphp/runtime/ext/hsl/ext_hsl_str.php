@@ -64,6 +64,8 @@ function chunk_l(string $str, int $size, ?Locale $loc = null): vec<string>;
 <<__Native>>
 function slice_l(string $str, int $offset, int $length, ?Locale $loc = null): string;
 <<__Native>>
+function splice_l(string $str, string $replacement, int $offset, ?int $length = null, ?Locale $loc = null): string;
+<<__Native>>
 function split_l(string $string, string $delimiter, ?int $limit = null, ?Locale $loc = null): vec<string>;
 
 <<__Native>>

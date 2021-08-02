@@ -47,6 +47,7 @@ namespace HPHP {
 
     virtual Array chunk(const String&, int64_t) const override;
     virtual String slice(const String& str, int64_t offset, int64_t length) const override;
+    virtual String splice(const String& str, const String& replacement, int64_t offset, int64_t length) const override;
     virtual Array split(const String& str, const String& delimiter, int64_t limit = -1) const override;
 
     virtual String reverse(const String& str) const override;

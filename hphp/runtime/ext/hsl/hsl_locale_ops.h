@@ -50,6 +50,7 @@ namespace HPHP {
 
     virtual Array chunk(const String&, int64_t chunk_size) const = 0;
     virtual String slice(const String& str, int64_t offset, int64_t length) const = 0;
+    virtual String splice(const String& str, const String& replacement, int64_t offset, int64_t length) const = 0;
     virtual Array split(const String& str, const String& delimiter, int64_t limit = -1) const = 0;
 
     virtual String reverse(const String& str) const = 0;

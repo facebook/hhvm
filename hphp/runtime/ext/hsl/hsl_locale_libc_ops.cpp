@@ -207,6 +207,25 @@ int64_t HSLLocaleLibcOps::strripos(const String& haystack, const String& needle,
   return pos.m_data.num;
 }
 
+String HSLLocaleLibcOps::splice(const String& str,
+                                const String& replacement,
+                                int64_t offset,
+                                int64_t length) const {
+  assertx(length >= 0);
+  if (offset < 0) {
+    offset += str.length();
+  }
+  if (offset < 0 || offset > str.length()) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Offset {} was out-of-bounds for length {}", offset, length)
+    );
+  }
+
+  const auto prefix = slice(str, 0, offset);
+  const auto suffix = str.substr(offset + length, StringData::MaxSize);
+  return prefix + replacement + suffix;
+}
+
 String HSLLocaleLibcOps::slice(const String& str, int64_t offset, int64_t length) const {
   if (length < 0) {
     length += str.length();

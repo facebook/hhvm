@@ -576,7 +576,7 @@ arr_lval StructDict::LvalInt(StructDict* sad, int64_t k) {
 arr_lval StructDict::LvalStr(StructDict* sad, StringData* key) {
   auto const slot = StructLayout::keySlot(sad->layoutIndex(), key);
   if (slot == kInvalidSlot) throwOOBArrayKeyException(key, sad);
-  auto const& currType = sad->rawTypes()[slot];
+  auto const currType = sad->rawTypes()[slot];
   if (currType == KindOfUninit) throwOOBArrayKeyException(key, sad);
   auto const newad = sad->cowCheck() ? sad->copy() : sad;
   return { newad, &newad->rawTypes()[slot], &newad->rawValues()[slot] };
@@ -593,12 +593,11 @@ arr_lval StructDict::elemImpl(StringData* k, bool throwOnMissing) {
     if (throwOnMissing) throwOOBArrayKeyException(k, this);
     return {this, const_cast<TypedValue*>(&immutable_null_base)};
   }
-  auto const& currType = rawTypes()[slot];
+  auto const currType = rawTypes()[slot];
   if (currType == KindOfUninit) {
     if (throwOnMissing) throwOOBArrayKeyException(k, this);
     return {this, const_cast<TypedValue*>(&immutable_null_base)};
   }
-  if (currType == KindOfClsMeth) return LvalStr(this, k);
   auto const sad = cowCheck() ? this->copy() : this;
   auto& t = sad->rawTypes()[slot];
   t = dt_modulo_persistence(t);
@@ -698,7 +697,7 @@ ArrayData* StructDict::RemoveStrMove(StructDict* sadIn, const StringData* k) {
   auto const slot = StructLayout::keySlot(sadIn->layoutIndex(), k);
   if (slot == kInvalidSlot) return sadIn;
 
-  auto const& currType = sadIn->rawTypes()[slot];
+  auto const currType = sadIn->rawTypes()[slot];
   if (currType == KindOfUninit) return sadIn;
 
   auto const sad = [&] {

@@ -575,12 +575,10 @@ arr_lval MonotypeVec::elemImpl(int64_t k, bool throwOnMissing) {
     return {this, const_cast<TypedValue*>(&immutable_null_base)};
   }
 
-  auto const dt = type();
-  if (dt == KindOfClsMeth) return LvalInt(this, k);
-
   auto const cow = cowCheck();
   auto const mad = cow ? copy() : this;
-  mad->setLayoutIndex(getLayoutIndex(dt_modulo_persistence(dt)));
+  auto const dt = dt_modulo_persistence(mad->type());
+  mad->setLayoutIndex(getLayoutIndex(dt));
 
   static_assert(folly::kIsLittleEndian);
   auto const type_ptr = reinterpret_cast<DataType*>(&mad->m_layout_index.raw);

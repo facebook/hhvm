@@ -157,8 +157,8 @@ public:
   //    (i.e. KindOfPersistentString, or any of the persistent array-likes).
   //
   //  * The caller using this method may *never* change the value of the type
-  //    the resulting lval points to, except for ClsMeth -> Vec escalation.
-  //    (The caller may store to it with the same type.)
+  //    the resulting lval points to. However, the caller may store to it with
+  //    the same type.
   //
   // Furthermore, Elem methods accept the tv_lval of the array being operated
   // on. This lval is updated accordingly if the array is escalated or copied.

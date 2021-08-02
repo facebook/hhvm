@@ -698,9 +698,6 @@ arr_lval MonotypeDict<Key>::elemImpl(Key key, K k, bool throwOnMissing) {
     return {this, const_cast<TypedValue*>(&immutable_null_base)};
   }
 
-  auto const dt = type();
-  if (dt == KindOfClsMeth) return lvalDispatch(k);
-
   auto const old = findForGet(key, getHash(key));
   if (old == nullptr) {
     if (throwOnMissing) throwOOBArrayKeyException(k, this);
@@ -711,8 +708,8 @@ arr_lval MonotypeDict<Key>::elemImpl(Key key, K k, bool throwOnMissing) {
   auto const mad = cowCheck() ? copy() : this;
   auto const elm = old - elms() + mad->elms();
   assertx(keysEqual(elm->key, key));
-  auto const dtp = dt_modulo_persistence(dt);
-  mad->setLayoutIndex(getLayoutIndex<Key>(dtp, layoutIndex()));
+  auto const dt = dt_modulo_persistence(mad->type());
+  mad->setLayoutIndex(getLayoutIndex<Key>(dt, layoutIndex()));
 
   static_assert(folly::kIsLittleEndian);
   auto const type_ptr = reinterpret_cast<DataType*>(&mad->m_layout_index.raw);

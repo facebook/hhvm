@@ -46,7 +46,7 @@ Invalid return type (Typing[4110])
   But got `mixed` from the argument to this \HH\is_any_array test
   File "hackarray.hhi", line 19, characters 77-78:
     via this generic `Tv`
-  File "interfaces.hhi", line 123, characters 66-67:
+  File "interfaces.hhi", line 111, characters 66-67:
     via this generic `Tv`
   File "interfaces.hhi", line 93, characters 53-54:
     via this generic `Tv`

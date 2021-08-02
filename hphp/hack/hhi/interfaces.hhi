@@ -96,24 +96,12 @@ interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {
 }
 
 /**
- * Represents an entity that can be iterated over using `foreach`, allowing
- * a key, except it does not include objects that implement `KeyedIterator` nor
- * `Set` and `ImmSet`.
+ * `KeyedContainer` allows you to do `(foreach $value as $k => $v, $value[$key])` and is an
+ * interface used by both Hack arrays (vec/dict/keyset) and Hack collections (Vector/Map/Set).
  *
- * Additionally, represents an entity that can be indexed using square-bracket syntax
+ * If you need to iterate over an array / collection with keys, use KeyedContainer; otherwise, use Container.
+ * Without iterating, you can access keys directly: `$keyed_container[$key]`.
  *
- * Square bracket syntax is:
- *
- * ```
- * $keyed_container[$key]
- * ```
- *
- * At this point, this includes entities with keys of `int` and `string`.
- *
- * The iteration variables will have a type of `Tk` for the key and `Tv` for the
- * value.
- *
- * In addition to Hack collections, PHP `array`s are `KeyedContainer`s.
  *
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces

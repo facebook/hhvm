@@ -54,6 +54,8 @@ struct StructDict : public BespokeArray {
   static ArrayData* SetStrInSlot(StructDict* adIn, Slot slot, TypedValue v);
   static void SetStrInSlotInPlace(StructDict* adIn, Slot slot, TypedValue v);
 
+  static ArrayData* RemoveStrInSlot(StructDict* adIn, Slot slot);
+
 #define X(Return, Name, Args...) static Return Name(Args);
   BESPOKE_LAYOUT_FUNCTIONS(StructDict)
 #undef X

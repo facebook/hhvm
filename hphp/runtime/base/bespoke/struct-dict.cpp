@@ -695,8 +695,10 @@ ArrayData* StructDict::RemoveIntMove(StructDict* sad, int64_t) {
 
 ArrayData* StructDict::RemoveStrMove(StructDict* sadIn, const StringData* k) {
   auto const slot = StructLayout::keySlot(sadIn->layoutIndex(), k);
-  if (slot == kInvalidSlot) return sadIn;
+  return slot == kInvalidSlot ? sadIn : RemoveStrInSlot(sadIn, slot);
+}
 
+ArrayData* StructDict::RemoveStrInSlot(StructDict* sadIn, Slot slot) {
   auto const currType = sadIn->rawTypes()[slot];
   if (currType == KindOfUninit) return sadIn;
 

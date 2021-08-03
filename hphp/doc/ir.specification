@@ -3097,9 +3097,14 @@ fields of that struct for holding intermediate values.
 
 | StructDictSet, DArrLikeSet, SStructDict C(StaticStr) S(InitCell), PRc|CRc
 
-  Set element with key S1 in the array S0 with struct layout to S2.
+  Set element with key S1 in the struct-layout dict S0 to the value S2.
   This op has SetMove semantics; it consumes a refcount on the input array
   and produces one on the output, and does no refcounting to the value S2.
+
+| StructDictUnset, DArrLikeUnset, SStructDict C(StaticStr), PRc|CRc
+
+  Unset element with key S1 in the struct-layout dict S0. This op has move
+  semantics: it consumes a refcount on S0 and produces one on the output.
 
 | StructDictGetWithColor, DBespokeElemUninit, SStructDict S(Str), NF
 

@@ -774,6 +774,24 @@ void cgStructDictSet(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
+void cgStructDictUnset(IRLS& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  auto const slot = getStructSlot(arr, key);
+
+  if (!slot) return cgBespokeUnset(env, inst);
+
+  auto& v = vmain(env);
+  if (*slot == kInvalidSlot) {
+    v << copy{srcLoc(env, inst, 0).reg(), dstLoc(env, inst, 0).reg()};
+    return;
+  }
+
+  auto const target = CallSpec::direct(bespoke::StructDict::RemoveStrInSlot);
+  auto const args = argGroup(env, inst).ssa(0).imm(*slot);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 }}}

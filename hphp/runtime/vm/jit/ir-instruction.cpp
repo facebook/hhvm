@@ -176,10 +176,12 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case VecSet:
     case DictSet:
     case BespokeSet:
+    case StructDictSet:
       // Consumes the reference to its input array, and moves input value
       return move == Consume && (srcNo == 0 || srcNo == 2);
 
     case BespokeUnset:
+    case StructDictUnset:
       // Only consumes the reference to its input array
       return move == Consume && srcNo == 0;
 
@@ -555,7 +557,7 @@ Type arrLikeSetReturn(const IRInstruction* inst) {
 }
 
 Type arrLikeUnsetReturn(const IRInstruction* inst) {
-  assertx(inst->is(BespokeUnset));
+  assertx(inst->is(BespokeUnset, StructDictUnset));
   auto const arr = inst->src(0)->type();
   auto const key = inst->src(1)->type();
 

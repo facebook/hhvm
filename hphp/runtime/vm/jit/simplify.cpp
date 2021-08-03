@@ -3173,13 +3173,29 @@ SSATmp* simplifyBespokeGetThrow(State& env, const IRInstruction* inst) {
 SSATmp* simplifyBespokeSet(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const key = inst->src(1);
-  auto const v = inst->src(2);
+  auto const val = inst->src(2);
 
-  if (key->isA(TInt)) return nullptr;
+  if (arr->type().arrSpec().is_struct() && key->hasConstVal(TStr)) {
+    return gen(env, StructDictSet, arr, key, val);
+  }
 
-  assertx(key->isA(TStr));
-  if (arr->type().arrSpec().is_struct() && key->hasConstVal()) {
-    return gen(env, StructDictSet, arr, key, v);
+  return nullptr;
+}
+
+SSATmp* simplifyBespokeUnset(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+
+  // If the key is definitely missing, we can skip the remove.
+  auto const missing = [&]{
+    if (arr->isA(TVec) && key->isA(TStr)) return true;
+    auto const type = arrLikeElemType(arr->type(), key->type(), inst->ctx());
+    return type.first == TBottom;
+  }();
+  if (missing) return arr;
+
+  if (arr->type().arrSpec().is_struct() && key->hasConstVal(TStr)) {
+    return gen(env, StructDictUnset, arr, key);
   }
 
   return nullptr;
@@ -3793,6 +3809,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdStrLen)
       X(BespokeGet)
       X(BespokeSet)
+      X(BespokeUnset)
       X(BespokeGetThrow)
       X(BespokeIterFirstPos)
       X(BespokeIterLastPos)

@@ -913,6 +913,7 @@ bool opcodeMayRaise(Opcode opc) {
   case StringIsset:
   case StructDictGetWithColor:
   case StructDictSet:
+  case StructDictUnset:
   case StStk:
   case StStkRange:
   case SubDbl:

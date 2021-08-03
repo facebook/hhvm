@@ -1,9 +1,7 @@
 Testing subscription
-
+%A
 Notice: 'callback' called dynamically but is not __DynamicallyCallable
-
+%A
 Notice: 'callback' called dynamically but is not __DynamicallyCallable
-
-Notice: 'callback' called dynamically but is not __DynamicallyCallable
-Unsubscribing
+%A
 PASS

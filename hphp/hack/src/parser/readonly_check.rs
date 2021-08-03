@@ -230,14 +230,24 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
     }
 }
 
+fn explicit_readonly(context: &mut Context, expr: &mut Expr) {
+    match (rty_expr(context, &expr), &expr.2) {
+        (Rty::Readonly, aast::Expr_::ReadonlyExpr(_)) => {}
+        (Rty::Mutable, _) => {}
+        (Rty::Readonly, _) => {
+            expr.2 = aast::Expr_::ReadonlyExpr(Box::new(expr.clone()));
+        }
+    }
+}
+
 fn check_assignment_validity(
     context: &mut Context,
     checker: &mut Checker,
     pos: &Pos,
-    lhs: &Expr,
-    rhs: &Expr,
+    lhs: &mut Expr,
+    rhs: &mut Expr,
 ) {
-    match &lhs.2 {
+    match &mut lhs.2 {
         aast::Expr_::Lvar(id_orig) => {
             let var_name = local_id::get_name(&id_orig.1).to_string();
             let is_readonly = Rty::Readonly == rty_expr(context, &rhs);
@@ -250,12 +260,23 @@ fn check_assignment_validity(
                 );
             }
         }
-        aast::Expr_::ObjGet(_) => match rty_expr(context, &lhs) {
-            Rty::Readonly => {
-                checker.add_error(&pos, syntax_error::assignment_to_readonly);
+        aast::Expr_::ObjGet(_) => {
+            match rty_expr(context, &lhs) {
+                Rty::Readonly => {
+                    checker.add_error(&pos, syntax_error::assignment_to_readonly);
+                }
+                Rty::Mutable => {}
             }
-            _ => {}
-        },
+            // make the readonly expression explicit here
+            explicit_readonly(context, rhs);
+        }
+        aast::Expr_::ArrayGet(ag) => {
+            let (array, _) = &mut **ag;
+            // make lefthand of array explicit (since writing to a readonly value is only legal for value types like vec)
+            explicit_readonly(context, array);
+            // make rhs explicit (to make sure we are not writing a readonly value to a mutable one)
+            explicit_readonly(context, rhs);
+        }
         _ => {}
     }
 }
@@ -342,7 +363,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
         p: &mut aast::Expr<(), (), ()>,
     ) -> Result<(), ()> {
         if let aast::Expr_::Binop(x) = &mut p.2 {
-            let (bop, e_lhs, e_rhs) = x.as_ref();
+            let (bop, e_lhs, e_rhs) = x.as_mut();
             if let Bop::Eq(_) = bop {
                 check_assignment_validity(context, self, &p.1, e_lhs, e_rhs);
             }

@@ -12,7 +12,15 @@ pub const DICT_PREFIX: &str = "D";
 pub const KEYSET_PREFIX: &str = "k";
 
 #[derive(Debug)]
+#[repr(C)]
 pub struct HhasAdata<'arena> {
     pub id: Str<'arena>,
     pub value: TypedValue<'arena>,
+}
+
+// For cbindgen
+#[allow(clippy::needless_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_adata<'arena>(_: HhasAdata<'arena>) {
+    unimplemented!()
 }

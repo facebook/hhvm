@@ -177,6 +177,13 @@ set -x
               --crate hhbc_by_ref_hhas_attribute \
               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_attribute.h")
 
+# hhbc_hhas_adata.h
+(cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhas_adata && \
+     cargo update && \
+     cbindgen --config ../../cbindgen_hhbc_hhas_adata.toml \
+              --crate hhbc_by_ref_hhas_adata \
+              --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_adata.h")
+
 signscript="$top/../xplat/python/signedsource_lib/signedsource.py"
 eval "${signscript}" sign "${top}"/hphp/hack/src/utils/ffi/ffi.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_id.h
@@ -190,6 +197,7 @@ eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_symb
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_constant.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_type.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_attribute.h
+eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_adata.h
 
 # Quick sanity check: Does a program that includes these headers compile?
 cat > main.cpp <<EOF
@@ -198,6 +206,7 @@ cat > main.cpp <<EOF
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_constant.h"
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_type.h"
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_attribute.h"
+#include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_adata.h"
 
 #include <iostream>
 
@@ -209,6 +218,7 @@ int main() {
   HhasConstant _b8;
   HhasAttribute _b9;
   Info _c1;
+  HhasAdata _b10;
 
   std::cout << "Ok!" << std::endl;
   return 0;

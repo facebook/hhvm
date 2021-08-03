@@ -7,7 +7,7 @@
 use naming_special_names_rust::special_idents;
 use oxidized::{
     aast,
-    aast_visitor::{visit, AstParams, Node, Visitor},
+    aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
     ast::*,
     local_id,
     pos::Pos,
@@ -287,17 +287,17 @@ impl Checker {
     }
 }
 
-impl<'ast> Visitor<'ast> for Checker {
+impl<'ast> VisitorMut<'ast> for Checker {
     type P = AstParams<Context, ()>;
 
-    fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
         self
     }
 
     fn visit_method_(
         &mut self,
         _context: &mut Context,
-        m: &aast::Method_<(), (), ()>,
+        m: &mut aast::Method_<(), (), ()>,
     ) -> Result<(), ()> {
         let readonly_return = ro_kind_to_rty(m.readonly_ret);
         let readonly_this = if m.readonly_this {
@@ -314,10 +314,14 @@ impl<'ast> Visitor<'ast> for Checker {
                 context.add_local(&p.name, false)
             }
         }
-        m.recurse(&mut context, self)
+        m.recurse(&mut context, self.object())
     }
 
-    fn visit_fun_(&mut self, _context: &mut Context, f: &aast::Fun_<(), (), ()>) -> Result<(), ()> {
+    fn visit_fun_(
+        &mut self,
+        _context: &mut Context,
+        f: &mut aast::Fun_<(), (), ()>,
+    ) -> Result<(), ()> {
         let readonly_return = ro_kind_to_rty(f.readonly_ret);
         let readonly_this = ro_kind_to_rty(f.readonly_this);
         let mut context = Context::new(readonly_return, readonly_this);
@@ -329,39 +333,41 @@ impl<'ast> Visitor<'ast> for Checker {
                 context.add_local(&p.name, false)
             }
         }
-        f.recurse(&mut context, self)
+        f.recurse(&mut context, self.object())
     }
 
-    fn visit_expr(&mut self, context: &mut Context, p: &aast::Expr<(), (), ()>) -> Result<(), ()> {
-        if let aast::Expr_::Binop(x) = &p.2 {
-            x.recurse(context, self.object())?;
+    fn visit_expr(
+        &mut self,
+        context: &mut Context,
+        p: &mut aast::Expr<(), (), ()>,
+    ) -> Result<(), ()> {
+        if let aast::Expr_::Binop(x) = &mut p.2 {
             let (bop, e_lhs, e_rhs) = x.as_ref();
-            if let Bop::Eq(None) = bop {
+            if let Bop::Eq(_) = bop {
                 check_assignment_validity(context, self, &p.1, e_lhs, e_rhs);
             }
         }
 
-        p.recurse(context, self)
+        p.recurse(context, self.object())
     }
 
     fn visit_stmt(
         &mut self,
         context: &mut Context,
-        s: &aast::Stmt<(), (), ()>,
+        s: &mut aast::Stmt<(), (), ()>,
     ) -> std::result::Result<(), ()> {
-        if let aast::Stmt_::Return(r) = &s.1 {
-            r.recurse(context, self.object())?;
-            if let Some(expr) = r.as_ref() {
+        if let aast::Stmt_::Return(r) = &mut s.1 {
+            if let Some(expr) = r.as_mut() {
                 self.subtype(&expr.1, &rty_expr(context, &expr), &context.readonly_return, "this function does not return readonly. Please mark it to return readonly if needed.")
             }
         }
-        s.recurse(context, self)
+        s.recurse(context, self.object())
     }
 }
 
-pub fn check_program(program: &aast::Program<(), (), ()>) -> Vec<SyntaxError> {
+pub fn check_program(program: &mut aast::Program<(), (), ()>) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
     let mut context = Context::new(Rty::Mutable, Rty::Mutable);
-    visit(&mut checker, &mut context, program).unwrap();
+    visit_mut(&mut checker, &mut context, program).unwrap();
     checker.errors
 }

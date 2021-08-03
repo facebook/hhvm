@@ -98,14 +98,14 @@ impl<'src> AastParser {
             &arena,
         );
         let ret = lower(&mut lowerer_env, tree.root());
-        let ret = if env.elaborate_namespaces {
+        let mut ret = if env.elaborate_namespaces {
             ret.map(|ast| {
                 namespaces::toplevel_elaborator::elaborate_toplevel_defs::<AstAnnot>(ns, ast)
             })
         } else {
             ret
         };
-        let syntax_errors = match &ret {
+        let syntax_errors = match &mut ret {
             Ok(aast) => Self::check_syntax_error(&env, indexed_source_text, &tree, Some(aast)),
             Err(_) => Self::check_syntax_error(env, indexed_source_text, &tree, None),
         };
@@ -128,7 +128,7 @@ impl<'src> AastParser {
         env: &Env,
         indexed_source_text: &'src IndexedSourceText<'src>,
         tree: &PositionedSyntaxTree<'src, 'arena>,
-        aast: Option<&Program<(), (), ()>>,
+        aast: Option<&mut Program<(), (), ()>>,
     ) -> Vec<SyntaxError> {
         let find_errors = |hhi_mode: bool| -> Vec<SyntaxError> {
             let mut errors = tree.errors().into_iter().cloned().collect::<Vec<_>>();
@@ -143,10 +143,10 @@ impl<'src> AastParser {
             ));
             errors.sort_by(SyntaxError::compare_offset);
 
-            let empty_program = vec![];
-            let aast = aast.unwrap_or(&empty_program);
+            let mut empty_program = vec![];
+            let mut aast = aast.unwrap_or(&mut empty_program);
             if env.parser_options.po_enable_readonly_enforcement {
-                errors.extend(readonly_check::check_program(&aast));
+                errors.extend(readonly_check::check_program(&mut aast));
             }
             errors.extend(aast_check::check_program(&aast));
             errors.extend(expression_tree_check::check_splices(&aast));

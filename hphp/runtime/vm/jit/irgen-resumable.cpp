@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-ret.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
@@ -439,88 +440,55 @@ bool likelySuspended(const SSATmp* awaitable) {
   return false;
 }
 
-//////////////////////////////////////////////////////////////////////
-
-}
-
-void emitWHResult(IRGS& env) {
-  if (!topC(env)->isA(TObj)) PUNT(WHResult-NonObject);
-
-  auto const TAwaitable = Type::SubObj(c_Awaitable::classof());
-  auto const exitSlow = makeExitSlow(env);
-  auto const popped = popC(env);
-  // In most conditions, this will be optimized out by the simplifier.
-  // We already need to setup a side-exit for the !succeeded case.
-  gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, popped));
-  auto const child = gen(env, AssertType, TAwaitable, popped);
-  static_assert(
-    c_Awaitable::STATE_SUCCEEDED == 0,
-    "we test state for non-zero, success must be zero"
-  );
-  gen(env, JmpNZero, exitSlow, gen(env, LdWHState, child));
+void implAwaitSucceeded(IRGS& env, SSATmp* child) {
   auto const awaitedTy = awaitedType(env, child, nextSrcKey(env));
   auto const res = gen(env, LdWHResult, awaitedTy, child);
+  popC(env);
   gen(env, IncRef, res);
   decRef(env, child);
   push(env, res);
 }
 
-void emitAwait(IRGS& env) {
-  auto const suspendOffset = bcOff(env);
-  assertx(curFunc(env)->isAsync());
-  assertx(spOffBCFromStackBase(env) == spOffEmpty(env) + 1);
-
-  if (curFunc(env)->isAsyncGenerator() &&
-      resumeMode(env) == ResumeMode::Async) {
-    PUNT(Await-AsyncGenerator);
+void implAwaitFailed(IRGS& env, SSATmp* child, Block* exit) {
+  auto const stackEmpty = spOffBCFromStackBase(env) == spOffEmpty(env) + 1;
+  if (!stackEmpty) {
+    assertx(exit);
+    assertx(curSrcKey(env).op() == Op::WHResult);
+    gen(env, Jmp, exit);
+    return;
   }
 
-  // Side-exit if not an Awaitable.
-  if (!topC(env)->isA(TObj)) PUNT(Await-NonObject);
-  auto const exitSlow = makeExitSlow(env);
-  gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, topC(env)));
+  auto const offset = findCatchHandler(curFunc(env), bcOff(env));
+  auto const exception = gen(env, LdWHResult, TObj, child);
+  popC(env);
+  gen(env, IncRef, exception);
+  decRef(env, child);
+  if (offset != kInvalidOffset) {
+    push(env, exception);
+    jmpImpl(env, offset);
+  } else {
+    // There are no more catch blocks in this function, we are at the top
+    // level throw
+    hint(env, Block::Hint::Unlikely);
+    auto const etcData = EnterTCUnwindData { spOffBCFromIRSP(env), true };
+    gen(env, EnterTCUnwind, etcData, sp(env), fp(env), exception);
+  }
+}
 
-  auto const popped = popC(env);
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
-
+template<class T>
+void implAwait(IRGS& env, T handleNotFinished) {
+  // Side exit if not an Awaitable. In most conditions IsWaitHandle check
+  // will be optimized out.
   auto const TAwaitable = Type::SubObj(c_Awaitable::classof());
-  auto const childIsSWH =
-    popped->type() <= Type::SubObj(c_StaticWaitHandle::classof());
-  auto const child = gen(env, AssertType, TAwaitable, popped);
+  auto const maybeChild = topC(env);
+  if (!maybeChild->isA(TObj)) return interpOne(env);
+  if (!maybeChild->type().maybe(TAwaitable)) return interpOne(env);
+  auto const exitSlow = makeExitSlow(env);
+  gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, maybeChild));
 
-  auto const handleSucceeded = [&] {
-    auto const awaitedTy = awaitedType(env, child, nextSrcKey(env));
-    auto const res = gen(env, LdWHResult, awaitedTy, child);
-    gen(env, IncRef, res);
-    decRef(env, child);
-    push(env, res);
-  };
-  auto const handleFailed = [&] {
-    auto const offset = findCatchHandler(curFunc(env), bcOff(env));
-    auto const exception = gen(env, LdWHResult, TObj, child);
-    gen(env, IncRef, exception);
-    decRef(env, child);
-    if (offset != kInvalidOffset) {
-      push(env, exception);
-      jmpImpl(env, offset);
-    } else {
-      // There are no more catch blocks in this function, we are at the top
-      // level throw
-      hint(env, Block::Hint::Unlikely);
-      auto const etcData = EnterTCUnwindData { spOffBCFromIRSP(env), true };
-      gen(env, EnterTCUnwind, etcData, sp(env), fp(env), exception);
-    }
-  };
-  auto const handleNotFinished = [&] {
-    if (childIsSWH) {
-      gen(env, Unreachable, ASSERT_REASON);
-    } else if (resumeMode(env) == ResumeMode::Async) {
-      implAwaitR(env, child, suspendOffset, nextBcOff(env));
-    } else {
-      implAwaitE(env, child, suspendOffset, nextBcOff(env));
-    }
-  };
+  auto const childIsSWH =
+    maybeChild->type() <= Type::SubObj(c_StaticWaitHandle::classof());
+  auto const child = gen(env, AssertType, TAwaitable, maybeChild);
 
   auto const state = gen(env, LdWHState, child);
   assertx(c_Awaitable::STATE_SUCCEEDED == 0);
@@ -529,15 +497,15 @@ void emitAwait(IRGS& env) {
   if (childIsSWH || !likelySuspended(child)) {
     ifThenElse(env,
       [&] (Block* taken) { gen(env, JmpNZero, taken, state); },
-      [&] { handleSucceeded(); },
+      [&] { implAwaitSucceeded(env, child); },
       [&] {
+        if (childIsSWH) return implAwaitFailed(env, child, exitSlow);
         ifThenElse(env,
           [&] (Block* taken) {
-            if (childIsSWH) return;
             gen(env, JmpZero, taken, gen(env, EqInt, state, cns(env, 1)));
           },
-          [&] { handleFailed(); },
-          [&] { handleNotFinished(); }
+          [&] { implAwaitFailed(env, child, exitSlow); },
+          [&] { handleNotFinished(child, exitSlow); }
         );
       }
     );
@@ -546,7 +514,7 @@ void emitAwait(IRGS& env) {
       [&] (Block* taken) {
         gen(env, JmpNZero, taken, gen(env, LteInt, state, cns(env, 1)));
       },
-      [&] { handleNotFinished(); },
+      [&] { handleNotFinished(child, exitSlow); },
       [&] {
         // Coming from a call with request for async eager return that did
         // not return eagerly.
@@ -556,14 +524,48 @@ void emitAwait(IRGS& env) {
         ifThenElse(env,
           [&] (Block* taken) { gen(env, JmpNZero, taken, state); },
           [&] {
-            handleSucceeded();
+            implAwaitSucceeded(env, child);
             gen(env, Jmp, makeExit(env, nextSrcKey(env)));
           },
-          [&] { handleFailed(); }
+          [&] { implAwaitFailed(env, child, exitSlow); }
         );
       }
     );
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+void emitWHResult(IRGS& env) {
+  implAwait(env, [&] (SSATmp*, Block* exit) {
+    gen(env, Jmp, exit);
+  });
+}
+
+void emitAwait(IRGS& env) {
+  assertx(curFunc(env)->isAsync());
+  assertx(spOffBCFromStackBase(env) == spOffEmpty(env) + 1);
+
+  implAwait(env, [&] (SSATmp* child, Block* exit) {
+    // Work in progress: fast path not supported yet
+    if (curFunc(env)->isAsyncGenerator() &&
+        resumeMode(env) == ResumeMode::Async) {
+      gen(env, Jmp, exit);
+      return;
+    }
+
+    popC(env);
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
+
+    if (resumeMode(env) == ResumeMode::Async) {
+      implAwaitR(env, child, bcOff(env), nextBcOff(env));
+    } else {
+      implAwaitE(env, child, bcOff(env), nextBcOff(env));
+    }
+  });
 }
 
 void emitAwaitAll(IRGS& env, LocalRange locals) {
@@ -572,11 +574,9 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
   assertx(curFunc(env)->isAsync());
   assertx(spOffBCFromStackBase(env) == spOffEmpty(env));
 
-  if (curFunc(env)->isAsyncGenerator() &&
-      resumeMode(env) == ResumeMode::Async) {
-    PUNT(Await-AsyncGenerator);
-  }
-
+  // Work in progress: fast path not supported yet
+  auto const suspendInJitNotSupported =
+    curFunc(env)->isAsyncGenerator() && resumeMode(env) == ResumeMode::Async;
   auto const exitSlow = makeExitSlow(env);
 
   auto const cnt = [&] {
@@ -595,11 +595,22 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
       if (loc->isA(TNull)) continue;
       if (!loc->isA(TObj)) PUNT(Await-NonObject);
       gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, loc));
-      auto const not_done = gen(env, LdWHNotDone, loc);
-      cnt = gen(env, AddInt, cnt, not_done);
+      auto const notDone = gen(env, LdWHNotDone, loc);
+      if (suspendInJitNotSupported) {
+        gen(env, JmpNZero, exitSlow, notDone);
+      } else {
+        cnt = gen(env, AddInt, cnt, notDone);
+      }
     }
     return cnt;
   }();
+
+  if (suspendInJitNotSupported) {
+    // Side-exit if CountWHNotDone was non-zero.
+    gen(env, JmpNZero, exitSlow, cnt);
+    push(env, cns(env, TInitNull));
+    return;
+  }
 
   ifThenElse(
     env,

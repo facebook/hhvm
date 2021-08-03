@@ -9,7 +9,7 @@ use oxidized::{ast_defs, doc_comment::DocComment};
 #[derive(Default, Debug)]
 pub struct HhasBodyEnv {
     pub is_namespaced: bool,
-    pub class_info: Option<(ast_defs::ClassKind, String)>,
+    pub class_info: Option<(ast_defs::ClassishKind, String)>,
     pub parent_name: Option<String>,
 }
 

@@ -1350,7 +1350,7 @@ pub mod instr {
         )
     }
 
-    pub fn oodeclexists<'a>(alloc: &'a bumpalo::Bump, class_kind: ClassKind) -> InstrSeq<'a> {
+    pub fn oodeclexists<'a>(alloc: &'a bumpalo::Bump, class_kind: ClassishKind) -> InstrSeq<'a> {
         instr(
             alloc,
             Instruct::IMisc(InstructMisc::OODeclExists(class_kind)),

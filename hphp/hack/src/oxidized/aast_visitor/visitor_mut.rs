@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d84e7433dc1753e0529414cf8de65d8f>>
+// @generated SignedSource<<c6caf348d6970b78b80e3dc92848bb3a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -192,13 +192,6 @@ pub trait VisitorMut<'node> {
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
-    fn visit_class_kind(
-        &mut self,
-        c: &mut <Self::P as Params>::Context,
-        p: &'node mut ClassKind,
-    ) -> Result<(), <Self::P as Params>::Error> {
-        p.recurse(c, self.object())
-    }
     fn visit_class_partially_abstract_typeconst(
         &mut self,
         c: &mut <Self::P as Params>::Context,
@@ -243,6 +236,13 @@ pub trait VisitorMut<'node> {
             <Self::P as Params>::Fb,
             <Self::P as Params>::En,
         >,
+    ) -> Result<(), <Self::P as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_classish_kind(
+        &mut self,
+        c: &mut <Self::P as Params>::Context,
+        p: &'node mut ClassishKind,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }

@@ -585,8 +585,8 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     // it on.
     let no_dynamic_props = is_const;
     let name = class::ClassType::from_ast_name(alloc, &ast_class.name.1);
-    let is_trait = ast_class.kind == tast::ClassKind::Ctrait;
-    let is_interface = ast_class.kind == tast::ClassKind::Cinterface;
+    let is_trait = ast_class.kind == tast::ClassishKind::Ctrait;
+    let is_interface = ast_class.kind == tast::ClassishKind::Cinterface;
 
     let uses = ast_class
         .uses
@@ -629,12 +629,12 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         })
         .collect();
 
-    let enum_type = if ast_class.kind == tast::ClassKind::Cenum {
+    let enum_type = if ast_class.kind == tast::ClassishKind::Cenum {
         from_enum_type(alloc, ast_class.enum_.as_ref())?
     } else {
         None
     };
-    let is_enum_class = if ast_class.kind == tast::ClassKind::Cenum {
+    let is_enum_class = if ast_class.kind == tast::ClassishKind::Cenum {
         match &ast_class.enum_ {
             Some(info) => info.enum_class,
             None => false,
@@ -661,7 +661,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .as_ref()
         .map(|(p, c)| (p, c.iter().map(|x| &x.1).collect()));
 
-    let is_abstract = ast_class.kind == tast::ClassKind::Cabstract;
+    let is_abstract = ast_class.kind == tast::ClassishKind::Cabstract;
     let is_final = ast_class.final_ || is_trait;
     let is_sealed = hhas_attribute::has_sealed(&attributes);
 
@@ -698,7 +698,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         &ast_class.implements
     };
     let implements = from_implements(alloc, implements);
-    let enum_includes = if ast_class.kind == tast::ClassKind::Cenum {
+    let enum_includes = if ast_class.kind == tast::ClassishKind::Cenum {
         match &ast_class.enum_ {
             None => vec![],
             Some(enum_) => from_includes(alloc, &enum_.includes),

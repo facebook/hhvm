@@ -51,8 +51,8 @@ let rec check_hint env (pos, hint) =
       | Some (Tast_env.ClassResult cls)
         when let kind = Cls.kind cls in
              let tc_name = Cls.name cls in
-             (Ast_defs.(equal_class_kind kind Ctrait)
-             || (Ast_defs.(equal_class_kind kind Cabstract) && Cls.final cls))
+             (Ast_defs.is_c_trait kind
+             || (Ast_defs.is_c_abstract kind && Cls.final cls))
              && String.( <> ) tc_name SN.Collections.cDict
              && String.( <> ) tc_name SN.Collections.cKeyset
              && String.( <> ) tc_name SN.Collections.cVec ->

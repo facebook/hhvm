@@ -154,10 +154,7 @@ module Env = struct
         DICheck.class_ ~has_own_cstr tenv.Typing_env_types.decl_env sc
     in
     let private_props = lookup_props tenv (snd c.c_name) private_props in
-    if
-      Ast_defs.equal_class_kind sc.sc_kind Ast_defs.Cabstract
-      && not has_own_cstr
-    then
+    if Ast_defs.is_c_abstract sc.sc_kind && not has_own_cstr then
       let uninit =
         SMap.filter
           (fun _ ty_opt -> not (type_does_not_require_init tenv ty_opt))
@@ -281,7 +278,7 @@ let rec class_ tenv c =
         | _ -> ());
   let (c_constructor, _, _) = split_methods c.c_methods in
   match c_constructor with
-  | _ when Ast_defs.(equal_class_kind c.c_kind Cinterface) -> ()
+  | _ when Ast_defs.is_c_interface c.c_kind -> ()
   | Some { m_body = { fb_annotation = Nast.NamedWithUnsafeBlocks; _ }; _ } -> ()
   | _ ->
     let p =
@@ -325,10 +322,7 @@ let rec class_ tenv c =
         ()
       | S.Set inits -> check_inits inits
     in
-    if
-      Ast_defs.(equal_class_kind c.c_kind Ctrait)
-      || Ast_defs.(equal_class_kind c.c_kind Cabstract)
-    then
+    if Ast_defs.is_c_trait c.c_kind || Ast_defs.is_c_abstract c.c_kind then
       let has_constructor =
         match c_constructor with
         | None -> false

@@ -29,7 +29,7 @@ let check_is_class env (p, h) =
           Errors.requires_non_class
             p
             name
-            (Ast_defs.string_of_class_kind kind ~is_enum_class))
+            (Ast_defs.string_of_classish_kind kind ~is_enum_class))
     end
   | Aast.Habstr (name, _) -> Errors.requires_non_class p name "a generic"
   | _ -> Errors.requires_non_class p "This" "an invalid type hint"
@@ -40,8 +40,7 @@ let check_is_interface (env, error_verb) (p, h) =
     begin
       match Env.get_class env name with
       | None -> ()
-      | Some cls when Ast_defs.(equal_class_kind (Cls.kind cls) Cinterface) ->
-        ()
+      | Some cls when Ast_defs.is_c_interface (Cls.kind cls) -> ()
       | Some cls -> Errors.non_interface p (Cls.name cls) error_verb
     end
   | Aast.Habstr _ -> Errors.non_interface p "generic" error_verb
@@ -54,7 +53,7 @@ let check_is_trait env (p, h) =
     begin
       match type_info with
       | None -> ()
-      | Some cls when Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) -> ()
+      | Some cls when Ast_defs.is_c_trait (Cls.kind cls) -> ()
       | Some cls ->
         let name = Cls.name cls in
         let kind = Cls.kind cls in
@@ -62,7 +61,7 @@ let check_is_trait env (p, h) =
         Errors.uses_non_trait
           p
           name
-          (Ast_defs.string_of_class_kind kind ~is_enum_class)
+          (Ast_defs.string_of_classish_kind kind ~is_enum_class)
     end
   | _ -> failwith "assertion failure: trait isn't an Happly"
 

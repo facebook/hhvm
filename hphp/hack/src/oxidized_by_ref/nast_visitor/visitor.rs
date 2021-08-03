@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<48c7372194690b5212eb9a53af29bb56>>
+// @generated SignedSource<<a2751069ca4e4ffcc1465d4345470fb5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -91,9 +91,6 @@ pub trait Visitor<'a> {
     ) {
         p.recurse(self.object())
     }
-    fn visit_class_kind(&mut self, p: &'a ClassKind) {
-        p.recurse(self.object())
-    }
     fn visit_class_partially_abstract_typeconst(
         &mut self,
         p: &'a ClassPartiallyAbstractTypeconst<'a>,
@@ -119,6 +116,9 @@ pub trait Visitor<'a> {
         &mut self,
         p: &'a Class_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn, ()>,
     ) {
+        p.recurse(self.object())
+    }
+    fn visit_classish_kind(&mut self, p: &'a ClassishKind) {
         p.recurse(self.object())
     }
     fn visit_collection_targ(&mut self, p: &'a CollectionTarg<'a, &'a crate::pos::Pos<'a>>) {

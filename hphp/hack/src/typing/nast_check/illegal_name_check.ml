@@ -40,7 +40,7 @@ let handler =
     method! at_expr env (_, _, e) =
       match e with
       | Id (pos, const) ->
-        let ck = env.class_kind in
+        let ck = env.classish_kind in
         if not (SN.PseudoConsts.is_pseudo_const const) then
           ()
         else if
@@ -51,7 +51,7 @@ let handler =
           String.equal const SN.PseudoConsts.g__TRAIT__
           && not
                (Option.equal
-                  Ast_defs.equal_class_kind
+                  Ast_defs.equal_classish_kind
                   ck
                   (Some Ast_defs.Ctrait))
         then

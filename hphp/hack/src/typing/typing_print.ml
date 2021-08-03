@@ -879,7 +879,7 @@ module ErrorString = struct
     let l = List.map l ~f:(to_string env) in
     String.concat l ~sep:" and "
 
-  and class_kind c_kind final =
+  and classish_kind c_kind final =
     let fs =
       if final then
         " final"
@@ -1470,7 +1470,7 @@ module PrintClass = struct
     let (line, start, end_) = Pos_or_decl.line_start_end_columns p in
     Printf.sprintf "(line %d: chars %d-%d)" line start end_
 
-  let class_kind = function
+  let classish_kind = function
     | Ast_defs.Cabstract -> "Cabstract"
     | Ast_defs.Cnormal -> "Cnormal"
     | Ast_defs.Cinterface -> "Cinterface"
@@ -1622,7 +1622,7 @@ module PrintClass = struct
                 " "
               else
                 "~"),
-              " (" ^ class_kind (Cls.kind cls) ^ ")" )
+              " (" ^ classish_kind (Cls.kind cls) ^ ")" )
         in
         let ty_str = Full.to_string_decl v in
         "\n" ^ indent ^ sigil ^ " " ^ ty_str ^ kind ^ acc)
@@ -1655,7 +1655,7 @@ module PrintClass = struct
       else
         Cls.deferred_init_members c
     in
-    let tc_kind = class_kind (Cls.kind c) in
+    let tc_kind = classish_kind (Cls.kind c) in
     let tc_name = Cls.name c in
     let tc_tparams = tparam_list (Cls.tparams c) in
     let tc_consts = class_consts (Cls.consts c) in
@@ -1822,7 +1822,7 @@ let constraints_for_type env ty =
   |> Libhackfmt.format_doc_unbroken Full.format_env
   |> String.strip
 
-let class_kind c_kind final = ErrorString.class_kind c_kind final
+let classish_kind c_kind final = ErrorString.classish_kind c_kind final
 
 let coercion_direction cd =
   match cd with

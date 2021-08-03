@@ -95,7 +95,7 @@ impl<'a> Class<'a> {
         self.either(|x| x.mode, |x| x.mode)
     }
 
-    pub fn get_kind(&self) -> ast::ClassKind {
+    pub fn get_kind(&self) -> ast::ClassishKind {
         self.either(|x| x.kind, |x| x.kind)
     }
 
@@ -202,7 +202,7 @@ pub struct Class_ {
     tparams: Vec<ast::Tparam>,
     vars: Vec<ast::ClassVar>,
     mode: file_info::Mode,
-    kind: ast::ClassKind,
+    kind: ast::ClassishKind,
     extends: Vec<ast::Hint>,
 }
 

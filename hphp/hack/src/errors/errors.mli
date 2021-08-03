@@ -918,11 +918,11 @@ val contravariant_this : Pos.t -> string -> string -> unit
 
 val wrong_extend_kind :
   parent_pos:Pos_or_decl.t ->
-  parent_kind:Ast_defs.class_kind ->
+  parent_kind:Ast_defs.classish_kind ->
   parent_name:string ->
   parent_is_enum_class:bool ->
   child_pos:Pos.t ->
-  child_kind:Ast_defs.class_kind ->
+  child_kind:Ast_defs.classish_kind ->
   child_name:string ->
   child_is_enum_class:bool ->
   unit
@@ -1680,8 +1680,8 @@ val override_method_support_dynamic_type :
 
 val parent_support_dynamic_type :
   Pos.t ->
-  string * Ast_defs.class_kind ->
-  string * Ast_defs.class_kind ->
+  string * Ast_defs.classish_kind ->
+  string * Ast_defs.classish_kind ->
   bool ->
   unit
 

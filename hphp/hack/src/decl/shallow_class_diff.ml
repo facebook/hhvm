@@ -37,14 +37,13 @@ let diff_members
     (members : ('member option * 'member option) SMap.t)
     (diff_member : 'member -> 'member -> member_change option)
     (is_private : 'member -> bool)
-    (class_kind : Ast_defs.class_kind) : member_change SMap.t =
+    (classish_kind : Ast_defs.classish_kind) : member_change SMap.t =
   SMap.fold members ~init:SMap.empty ~f:(fun name old_and_new diff ->
       match old_and_new with
       | (None, None) -> failwith "merge_member_lists added (None, None)"
       | (Some member, None)
       | (None, Some member)
-        when (not Ast_defs.(equal_class_kind class_kind Ctrait))
-             && is_private member ->
+        when (not Ast_defs.(is_c_trait classish_kind)) && is_private member ->
         SMap.add diff ~key:name ~data:Private_change
       | (Some _, None) -> SMap.add diff ~key:name ~data:Removed
       | (None, Some _) -> SMap.add diff ~key:name ~data:Added
@@ -187,7 +186,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
 let mro_inputs_equal (c1 : shallow_class) (c2 : shallow_class) : bool =
   let is_to_string m = String.equal (snd m.sm_name) SN.Members.__toString in
   Typing_defs.equal_pos_id c1.sc_name c2.sc_name
-  && Ast_defs.equal_class_kind c1.sc_kind c2.sc_kind
+  && Ast_defs.equal_classish_kind c1.sc_kind c2.sc_kind
   && Option.equal
        equal_shallow_method
        (List.find c1.sc_methods ~f:is_to_string)

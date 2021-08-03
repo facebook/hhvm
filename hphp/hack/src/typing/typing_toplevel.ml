@@ -1015,7 +1015,7 @@ let check_constructor_dep env deps =
 let check_non_const_trait_members pos env use_list =
   let (_, trait, _) = Decl_utils.unwrap_class_hint use_list in
   match Env.get_class env trait with
-  | Some c when Ast_defs.(equal_class_kind (Cls.kind c) Ctrait) ->
+  | Some c when Ast_defs.is_c_trait (Cls.kind c) ->
     List.iter (Cls.props c) ~f:(fun (x, ce) ->
         if not (get_ce_const ce) then Errors.trait_prop_const_class pos x)
   | _ -> ()
@@ -1205,7 +1205,7 @@ let check_extend_abstract_const ~is_final p seq =
 let check_extend_abstract (pc, tc) =
   let is_final = Cls.final tc in
   if
-    (Ast_defs.(equal_class_kind (Cls.kind tc) Cnormal) || is_final)
+    (Ast_defs.is_c_normal (Cls.kind tc) || is_final)
     && Cls.members_fully_known tc
   then (
     let constructor_as_list cstr =
@@ -1248,7 +1248,7 @@ let contains_generic : Typing_defs.decl_ty -> Pos_or_decl.t option =
     any generic type parameters. Outside of traits, this is illegal as static
      * properties are shared across all generic instantiations. *)
 let check_no_generic_static_property env tc =
-  if Ast_defs.(equal_class_kind (Cls.kind tc) Ctrait) then
+  if Ast_defs.is_c_trait (Cls.kind tc) then
     ()
   else
     Cls.sprops tc
@@ -1432,7 +1432,7 @@ let class_const_def ~in_enum_class c env cc =
           if
             (not (is_literal_expr e))
             && Partial.should_check_error c.c_mode 2035
-            && not Ast_defs.(equal_class_kind c.c_kind Cenum)
+            && not Ast_defs.(is_c_enum c.c_kind)
           then
             Errors.missing_typehint (fst id)
       end;
@@ -1816,10 +1816,7 @@ let class_def_ env c tc =
   in
   let (env, file_attrs) = Typing.file_attributes env c.c_file_attributes in
   let ctx = Env.get_ctx env in
-  if
-    (not Ast_defs.(equal_class_kind c.c_kind Ctrait))
-    && not (shallow_decl_enabled ctx)
-  then (
+  if (not Ast_defs.(is_c_trait c.c_kind)) && not (shallow_decl_enabled ctx) then (
     (* These checks are only for eager mode. The same checks are performed
      * for shallow mode in Typing_inheritance *)
     let method_pos ~is_static class_id meth_id =
@@ -1849,8 +1846,7 @@ let class_def_ env c tc =
           | Some parent_class ->
             (* If it's not defined here, then either it's inherited (so we have emitted an error already)
              * or it's in a trait, and so we need to emit the error now *)
-            if not Ast_defs.(equal_class_kind (Cls.kind parent_class) Ctrait)
-            then
+            if not Ast_defs.(is_c_trait (Cls.kind parent_class)) then
               ()
             else
               Errors.override_per_trait c.c_name id ce.ce_origin pos

@@ -33,11 +33,11 @@ module SN = Naming_special_names
 
 let check_extend_kind
     (parent_pos : Pos_or_decl.t)
-    (parent_kind : Ast_defs.class_kind)
+    (parent_kind : Ast_defs.classish_kind)
     (parent_name : string)
     (parent_is_enum_class : bool)
     (child_pos : Pos_or_decl.t)
-    (child_kind : Ast_defs.class_kind)
+    (child_kind : Ast_defs.classish_kind)
     (child_name : string)
     (child_is_enum_class : bool) : unit =
   match (parent_kind, child_kind) with
@@ -137,7 +137,7 @@ let add_grand_parents_or_traits
     (parent_enum_type : enum_type option) : SSet.t * bool * 'a =
   let (extends, is_complete, pass) = acc in
   let class_pos = fst shallow_class.sc_name in
-  let class_kind = shallow_class.sc_kind in
+  let classish_kind = shallow_class.sc_kind in
   let class_name = snd shallow_class.sc_name in
   let class_enum_type = shallow_class.sc_enum_type in
   let parent_is_enum_class = is_enum_class parent_enum_type in
@@ -149,7 +149,7 @@ let add_grand_parents_or_traits
       parent_type.dc_name
       parent_is_enum_class
       class_pos
-      class_kind
+      classish_kind
       class_name
       class_is_enum_class;
 
@@ -178,7 +178,7 @@ let get_class_parent_or_trait
   let no_trait_reuse =
     disallow_trait_reuse env
     && (not (phys_equal pass `Xhp_pass))
-    && not Ast_defs.(equal_class_kind shallow_class.sc_kind Cinterface)
+    && not Ast_defs.(is_c_interface shallow_class.sc_kind)
   in
   let (_, (parent_pos, parent), _) = Decl_utils.unwrap_class_type ty in
   (* If we already had this exact trait, we need to flag trait reuse *)
@@ -397,7 +397,7 @@ and class_decl
       ~init:(typeconsts, consts)
   in
   let (typeconsts, consts) =
-    if Ast_defs.(equal_class_kind c.sc_kind Cnormal) then
+    if Ast_defs.is_c_normal c.sc_kind then
       let consts = SMap.map synthesize_const_defaults consts in
       SMap.fold synthesize_typeconst_defaults typeconsts (typeconsts, consts)
     else

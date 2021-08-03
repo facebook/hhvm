@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9999285d8ebadf50a4ad6c3f6ae9ff91>>
+// @generated SignedSource<<342d54a77443c0686ea6c60dc31ebcdb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1253,7 +1253,7 @@ pub struct Class_<Ex, Fb, En> {
     pub final_: bool,
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
-    pub kind: ast_defs::ClassKind,
+    pub kind: ast_defs::ClassishKind,
     pub name: Sid,
     /// The type parameters of a class A<T> (T is the parameter)
     pub tparams: Vec<Tparam<Ex, Fb, En>>,

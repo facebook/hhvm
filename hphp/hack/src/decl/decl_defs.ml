@@ -173,7 +173,7 @@ type decl_class_type = {
   dc_const: bool;
   dc_internal: bool;
   dc_deferred_init_members: SSet.t;
-  dc_kind: Ast_defs.class_kind;
+  dc_kind: Ast_defs.classish_kind;
   dc_is_xhp: bool;
   dc_has_xhp_keyword: bool;
   dc_module: string option;

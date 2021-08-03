@@ -22,7 +22,7 @@ use namespaces_rust as namespaces;
 use oxidized_by_ref::{
     aast,
     ast_defs::{
-        Bop, ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance, XhpEnumValue,
+        Bop, ClassishKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance, XhpEnumValue,
     },
     decl_parser_options::DeclParserOptions,
     direct_decl_parser::Decls,
@@ -3628,15 +3628,15 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let is_xhp = raw_name.starts_with(':') || xhp_keyword.is_present();
 
         let mut class_kind = match class_keyword.token_kind() {
-            Some(TokenKind::Interface) => ClassKind::Cinterface,
-            Some(TokenKind::Trait) => ClassKind::Ctrait,
-            _ => ClassKind::Cnormal,
+            Some(TokenKind::Interface) => ClassishKind::Cinterface,
+            Some(TokenKind::Trait) => ClassishKind::Ctrait,
+            _ => ClassishKind::Cnormal,
         };
         let mut final_ = false;
 
         for modifier in modifiers.iter() {
             match modifier.token_kind() {
-                Some(TokenKind::Abstract) => class_kind = ClassKind::Cabstract,
+                Some(TokenKind::Abstract) => class_kind = ClassishKind::Cabstract,
                 Some(TokenKind::Final) => final_ = true,
                 _ => {}
             }
@@ -4227,7 +4227,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             final_: false,
             is_xhp: false,
             has_xhp_keyword: false,
-            kind: ClassKind::Cenum,
+            kind: ClassishKind::Cenum,
             module: None, // TODO: grab module from attributes
             name: id.into(),
             tparams: &[],
@@ -4365,7 +4365,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             final_: false,
             is_xhp: false,
             has_xhp_keyword: false,
-            kind: ClassKind::Cenum,
+            kind: ClassishKind::Cenum,
             module: None, // TODO: grab module from attributes
             name: name.into(),
             tparams: &[],

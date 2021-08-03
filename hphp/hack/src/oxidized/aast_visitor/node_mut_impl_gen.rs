@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<31a54006934ff5301e7941dba12e3770>>
+// @generated SignedSource<<d7593a4c974c943378344adffe564f0f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -390,28 +390,6 @@ impl<P: Params> NodeMut<P> for ClassId_<P::Ex, P::Fb, P::En> {
         }
     }
 }
-impl<P: Params> NodeMut<P> for ClassKind {
-    fn accept<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_class_kind(c, self)
-    }
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            ClassKind::Cabstract => Ok(()),
-            ClassKind::Cnormal => Ok(()),
-            ClassKind::Cinterface => Ok(()),
-            ClassKind::Ctrait => Ok(()),
-            ClassKind::Cenum => Ok(()),
-        }
-    }
-}
 impl<P: Params> NodeMut<P> for ClassPartiallyAbstractTypeconst {
     fn accept<'node>(
         &'node mut self,
@@ -556,6 +534,28 @@ impl<P: Params> NodeMut<P> for Class_<P::Ex, P::Fb, P::En> {
         self.doc_comment.accept(c, v)?;
         self.emit_id.accept(c, v)?;
         Ok(())
+    }
+}
+impl<P: Params> NodeMut<P> for ClassishKind {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_classish_kind(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            ClassishKind::Cabstract => Ok(()),
+            ClassishKind::Cnormal => Ok(()),
+            ClassishKind::Cinterface => Ok(()),
+            ClassishKind::Ctrait => Ok(()),
+            ClassishKind::Cenum => Ok(()),
+        }
     }
 }
 impl<P: Params> NodeMut<P> for CollectionTarg<P::Ex> {

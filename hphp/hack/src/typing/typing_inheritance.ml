@@ -73,7 +73,7 @@ let check_trait_override_annotations env class_pos cls ~static =
         match Env.get_class env meth.ce_origin with
         | None -> ()
         | Some parent_class ->
-          if not Ast_defs.(equal_class_kind (Cls.kind parent_class) Ctrait) then
+          if not Ast_defs.(is_c_trait (Cls.kind parent_class)) then
             ()
           else (
             match meth with
@@ -146,7 +146,7 @@ let check_extend_kind
 (** Check that the [extends] keyword is between two classes or two interfaces, but not
     between a class and an interface or vice-versa. *)
 let check_extend_kinds ctx class_pos shallow_class =
-  let class_kind = shallow_class.sc_kind in
+  let classish_kind = shallow_class.sc_kind in
   let class_name = snd shallow_class.sc_name in
   List.iter shallow_class.sc_extends ~f:(fun ty ->
       let (_, (parent_pos, parent_name), _) = Decl_utils.unwrap_class_type ty in
@@ -161,7 +161,7 @@ let check_extend_kinds ctx class_pos shallow_class =
           (snd parent.sc_name)
           parent_is_enum_class
           class_pos
-          class_kind
+          classish_kind
           class_name
           class_is_enum_class)
 
@@ -192,11 +192,11 @@ let check_class env class_pos cls =
   check_extend_kinds (Env.get_ctx env) class_pos shallow_class;
   if disallow_trait_reuse env then
     check_trait_reuse (Env.get_ctx env) class_pos cls;
-  if not Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) then (
+  if not Ast_defs.(is_c_trait (Cls.kind cls)) then (
     check_override_annotations env cls ~static:false;
     check_override_annotations env cls ~static:true
   );
-  if Ast_defs.(equal_class_kind (Cls.kind cls) Cnormal) then (
+  if Ast_defs.is_c_normal (Cls.kind cls) then (
     check_trait_override_annotations env class_pos cls ~static:false;
     check_trait_override_annotations env class_pos cls ~static:true
   );

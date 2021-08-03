@@ -2537,7 +2537,7 @@ end = struct
       user_attrs: Nast.user_attribute list;
       is_final: bool;
       is_xhp: bool;
-      kind: Ast_defs.class_kind;
+      kind: Ast_defs.classish_kind;
       tparams: Nast.tparam list;
       extends: Aast.class_hint list;
       implements: Aast.class_hint list;
@@ -2572,7 +2572,7 @@ end = struct
         implements = c_implements;
       }
 
-    let pp_class_kind ppf =
+    let pp_classish_kind ppf =
       Ast_defs.(
         function
         | Cabstract -> Fmt.string ppf "abstract class"
@@ -2606,7 +2606,7 @@ end = struct
           user_attrs
           (cond ~pp_t:(const string "final") ~pp_f:nop)
           is_final
-          pp_class_kind
+          pp_classish_kind
           kind
           (strip_ns name)
           pp_tparams

@@ -53,7 +53,7 @@ module Api : sig
       Raises [Failure] if used when shallow_class_decl is enabled. *)
   val deferred_init_members : t -> SSet.t
 
-  val kind : t -> Ast_defs.class_kind
+  val kind : t -> Ast_defs.classish_kind
 
   val is_xhp : t -> bool
 

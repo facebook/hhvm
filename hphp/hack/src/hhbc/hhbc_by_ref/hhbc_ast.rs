@@ -542,7 +542,7 @@ pub enum BareThisOp {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
-pub enum ClassKind {
+pub enum ClassishKind {
     Class,
     Interface,
     Trait,
@@ -563,7 +563,7 @@ pub enum InstructMisc<'arena> {
     CheckThis,
     FuncNumArgs,
     ChainFaults,
-    OODeclExists(ClassKind),
+    OODeclExists(ClassishKind),
     VerifyParamType(ParamId<'arena>),
     VerifyParamTypeTS(ParamId<'arena>),
     VerifyOutType(ParamId<'arena>),

@@ -4108,7 +4108,7 @@ let wrong_extend_kind
     ~child_name
     ~child_is_enum_class =
   let parent_kind_str =
-    Ast_defs.string_of_class_kind
+    Ast_defs.string_of_classish_kind
       parent_kind
       ~is_enum_class:parent_is_enum_class
   in

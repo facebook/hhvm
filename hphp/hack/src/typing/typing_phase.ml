@@ -472,10 +472,10 @@ and localize_with_kind
         match Env.get_class_or_typedef env name with
         | Some (Env.ClassResult class_info) ->
           let tparams = Cls.tparams class_info in
-          let class_kind =
+          let classish_kind =
             KindDefs.Simple.type_with_params_to_simple_kind tparams
           in
-          if Kinding.Simple.is_subkind env ~sub:class_kind ~sup:expected_kind
+          if Kinding.Simple.is_subkind env ~sub:classish_kind ~sup:expected_kind
           then
             (env, mk (r, Tclass (id, Nonexact, [])))
           else

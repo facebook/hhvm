@@ -20,7 +20,7 @@ let check_expr env (_, pos, e) =
     let tenv = Env.tast_env_as_typing_env env in
     (match Typing_env.get_parent_class tenv with
     | Some parent_class
-      when Ast_defs.(equal_class_kind (Cls.kind parent_class) Cabstract)
+      when Ast_defs.is_c_abstract (Cls.kind parent_class)
            && Option.is_none (fst (Cls.construct parent_class)) ->
       Errors.parent_abstract_call construct pos (Cls.pos parent_class)
     | _ -> ())
@@ -32,7 +32,7 @@ let check_method_body m =
     Errors.abstract_with_body m.m_name
 
 let check_class _ c =
-  if Ast_defs.(equal_class_kind c.c_kind Cabstract) && c.c_final then (
+  if Ast_defs.is_c_abstract c.c_kind && c.c_final then (
     let err m =
       Errors.nonstatic_method_in_abstract_final_class (fst m.m_name)
     in

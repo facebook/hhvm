@@ -29,7 +29,7 @@ use hhbc_by_ref_hhas_body::{HhasBody, HhasBodyEnv};
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhas_type::Info as HhasTypeInfo;
 use hhbc_by_ref_hhbc_ast::{
-    ClassKind, FcallArgs, FcallFlags, Instruct, IstypeOp, MemberKey, MemberOpMode, ParamId,
+    ClassishKind, FcallArgs, FcallFlags, Instruct, IstypeOp, MemberKey, MemberOpMode, ParamId,
     QueryOp, ReadOnlyOp,
 };
 use hhbc_by_ref_hhbc_id::function;
@@ -731,7 +731,7 @@ fn atom_instrs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                                         )?,
                                                         instr::oodeclexists(
                                                             alloc,
-                                                            ClassKind::Class,
+                                                            ClassishKind::Class,
                                                         ),
                                                         instr::jmpz(
                                                             alloc,
@@ -963,7 +963,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
             let (class_name, trait_instrs, concat_instruction): (String, _, _) =
                 match scope.get_class() {
                     None => ("".into(), instr::empty(alloc), instr::empty(alloc)),
-                    Some(c) if c.get_kind() == tast::ClassKind::Ctrait => (
+                    Some(c) if c.get_kind() == tast::ClassishKind::Ctrait => (
                         "::".into(),
                         InstrSeq::gather(alloc, vec![instr::self_(alloc), instr::classname(alloc)]),
                         instr::concat(alloc),

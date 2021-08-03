@@ -25,17 +25,17 @@ impl<'arena> ClassExpr<'arena> {
         emitter: &Emitter<'arena, 'decl, D>,
         check_traits: bool,
         resolve_self: bool,
-        opt_class_info: Option<(ast_defs::ClassKind, &str)>,
+        opt_class_info: Option<(ast_defs::ClassishKind, &str)>,
     ) -> Option<String> {
         if let Some((kind, class_name)) = opt_class_info {
-            if (kind != ast_defs::ClassKind::Ctrait || check_traits) && resolve_self {
+            if (kind != ast_defs::ClassishKind::Ctrait || check_traits) && resolve_self {
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
                     return Some(class_name.to_string());
                 } else if let Some(c) = emitter
                     .emit_global_state()
                     .get_closure_enclosing_class(class_name)
                 {
-                    if c.kind != ast_defs::ClassKind::Ctrait {
+                    if c.kind != ast_defs::ClassishKind::Ctrait {
                         return Some(c.name.clone());
                     }
                 }
@@ -58,14 +58,14 @@ impl<'arena> ClassExpr<'arena> {
         emitter: &Emitter<'arena, 'decl, D>,
         check_traits: bool,
         resolve_self: bool,
-        opt_class_info: Option<(ast_defs::ClassKind, &str)>,
+        opt_class_info: Option<(ast_defs::ClassishKind, &str)>,
         opt_parent_name: Option<String>,
     ) -> Option<String> {
         if let Some((kind, class_name)) = opt_class_info {
-            if kind == ast_defs::ClassKind::Cinterface {
+            if kind == ast_defs::ClassishKind::Cinterface {
                 return Some(classes::PARENT.to_string());
             };
-            if (kind != ast_defs::ClassKind::Ctrait || check_traits) && resolve_self {
+            if (kind != ast_defs::ClassishKind::Ctrait || check_traits) && resolve_self {
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
                     return opt_parent_name;
                 } else if let Some(c) = emitter
@@ -104,7 +104,7 @@ impl<'arena> ClassExpr<'arena> {
         emitter: &Emitter<'arena, 'decl, D>,
         check_traits: bool,
         resolve_self: bool,
-        opt_class_info: Option<(ast_defs::ClassKind, &str)>,
+        opt_class_info: Option<(ast_defs::ClassishKind, &str)>,
         opt_parent_name: Option<String>,
         expr: ast::Expr,
     ) -> Self {

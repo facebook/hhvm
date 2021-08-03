@@ -112,7 +112,7 @@ type shallow_class = {
   sc_final: bool;
   sc_is_xhp: bool;
   sc_has_xhp_keyword: bool;
-  sc_kind: Ast_defs.class_kind;
+  sc_kind: Ast_defs.classish_kind;
   sc_module: string option;
   sc_name: Typing_defs.pos_id;
   sc_tparams: decl_tparam list;

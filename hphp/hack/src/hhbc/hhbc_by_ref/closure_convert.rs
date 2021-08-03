@@ -509,7 +509,7 @@ fn make_closure(
         final_: false,
         is_xhp: false,
         has_xhp_keyword: false,
-        kind: ClassKind::Cnormal,
+        kind: ClassishKind::Cnormal,
         name: Id(p.clone(), make_closure_name(env, st)),
         tparams: class_tparams,
         extends: vec![Hint(
@@ -554,11 +554,11 @@ fn convert_id(env: &Env, Id(p, s): Id) -> Expr_ {
 
     match s {
         _ if s.eq_ignore_ascii_case(pseudo_consts::G__TRAIT__) => match env.scope.get_class() {
-            Some(c) if c.get_kind() == ClassKind::Ctrait => name(c),
+            Some(c) if c.get_kind() == ClassishKind::Ctrait => name(c),
             _ => ret("".into()),
         },
         _ if s.eq_ignore_ascii_case(pseudo_consts::G__CLASS__) => match env.scope.get_class() {
-            Some(c) if c.get_kind() != ClassKind::Ctrait => name(c),
+            Some(c) if c.get_kind() != ClassishKind::Ctrait => name(c),
             Some(_) => Expr_::mk_id(Id(p, s)),
             None => ret("".into()),
         },
@@ -567,7 +567,7 @@ fn convert_id(env: &Env, Id(p, s): Id) -> Expr_ {
                 None => ("".into(), false),
                 Some(cd) => (
                     string_utils::mangle_xhp_id(strip_id(cd.get_name()).to_string()) + "::",
-                    cd.get_kind() == ClassKind::Ctrait,
+                    cd.get_kind() == ClassishKind::Ctrait,
                 ),
             };
             // for lambdas nested in trait methods HHVM replaces __METHOD__

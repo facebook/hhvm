@@ -38,7 +38,7 @@ let is_private_visible env origin_id self_id =
     in
     match Env.get_class env self_id with
     | Some cls
-      when Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait)
+      when Ast_defs.is_c_trait (Cls.kind cls)
            && in_bounds (Cls.upper_bounds_on_this_from_constraints cls)
            && in_bounds (Cls.lower_bounds_on_this_from_constraints cls) ->
       None
@@ -93,7 +93,7 @@ let is_private_visible_for_class env x self_id cid class_ =
     | Some _ ->
       begin
         match Env.get_class env called_ci with
-        | Some cls when Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) ->
+        | Some cls when Ast_defs.is_c_trait (Cls.kind cls) ->
           Some
             "You cannot access private members using the trait's name (did you mean to use self::?)"
         | _ -> Some "You cannot access this member"
@@ -207,8 +207,7 @@ let is_visible_for_class env (vis, lsb) cid cty =
       | Some self_id ->
         let their_class = Env.get_class env x in
         (match (cid, their_class) with
-        | (CI _, Some cls)
-          when Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) ->
+        | (CI _, Some cls) when Ast_defs.is_c_trait (Cls.kind cls) ->
           Some
             "You cannot access protected members using the trait's name (did you mean to use static:: or self::?)"
         | _ -> is_protected_visible env x self_id))

@@ -141,7 +141,7 @@ let get_class_requirements env class_cache shallow_class =
     List.fold_left
       ~f:(flatten_parent_class_reqs env class_cache shallow_class)
       ~init:acc
-      (if Ast_defs.(equal_class_kind shallow_class.sc_kind Cinterface) then
+      (if Ast_defs.is_c_interface shallow_class.sc_kind then
         shallow_class.sc_extends
       else
         shallow_class.sc_implements)

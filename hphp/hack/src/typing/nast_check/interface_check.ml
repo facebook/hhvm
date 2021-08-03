@@ -50,5 +50,5 @@ let handler =
     inherit Nast_visitor.handler_base
 
     method! at_class_ _ c =
-      if Ast_defs.(equal_class_kind c.c_kind Cinterface) then check_interface c
+      if Ast_defs.is_c_interface c.c_kind then check_interface c
   end

@@ -7,11 +7,11 @@ use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_unique_id_builder::{get_unique_id_for_method, SMap, SSet};
 use lazy_static::lazy_static;
 use ocamlrep::rc::RcOc;
-use oxidized::{ast_defs::ClassKind, namespace_env::Env as NamespaceEnv};
+use oxidized::{ast_defs::ClassishKind, namespace_env::Env as NamespaceEnv};
 
 #[derive(Debug, Clone)]
 pub struct ClosureEnclosingClassInfo {
-    pub kind: ClassKind,
+    pub kind: ClassishKind,
     pub name: String,
     pub parent_class_name: Option<String>,
 }
@@ -19,7 +19,7 @@ pub struct ClosureEnclosingClassInfo {
 impl Default for ClosureEnclosingClassInfo {
     fn default() -> Self {
         Self {
-            kind: ClassKind::Cnormal,
+            kind: ClassishKind::Cnormal,
             name: "".to_string(),
             parent_class_name: None,
         }

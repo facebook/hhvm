@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<57e6e4da7cee094ae573de4bdbffb39d>>
+// @generated SignedSource<<11daab1fe705ba90de4b3afefb429b18>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -86,7 +86,7 @@ pub use oxidized::ast_defs::ConstraintKind;
 
 pub use oxidized::ast_defs::Reified;
 
-pub use oxidized::ast_defs::ClassKind;
+pub use oxidized::ast_defs::ClassishKind;
 
 pub use oxidized::ast_defs::ParamKind;
 

@@ -381,12 +381,10 @@ and linearize (env : env) (c : shallow_class) : mro_element list =
 
 and next_state
     (env : env)
-    (child_class_kind : Ast_defs.class_kind)
+    (child_classish_kind : Ast_defs.classish_kind)
     (emitted_elements : (string, mro_element list) Caml.Hashtbl.t)
     (state : state) : (Decl_defs.mro_element, state) Sequence.Step.t =
-  let child_class_concrete =
-    Ast_defs.equal_class_kind child_class_kind Ast_defs.Cnormal
-  in
+  let child_class_concrete = Ast_defs.is_c_normal child_classish_kind in
   let add_emitted mro =
     let list =
       match Caml.Hashtbl.find_opt emitted_elements mro.mro_name with
@@ -416,12 +414,10 @@ and next_state
         mro_ty_pos = fst c.sc_name;
         mro_flags =
           empty_mro_element.mro_flags
-          |> set_bit
-               mro_copy_private_members
-               (Ast_defs.equal_class_kind c.sc_kind Ast_defs.Ctrait)
+          |> set_bit mro_copy_private_members (Ast_defs.is_c_trait c.sc_kind)
           |> set_bit
                mro_passthrough_abstract_typeconst
-               (not Ast_defs.(equal_class_kind c.sc_kind Cnormal));
+               (not Ast_defs.(is_c_normal c.sc_kind));
       }
     in
     let ancestors = get_ancestors c env.linearization_kind in
@@ -479,7 +475,7 @@ and next_state
           | Member_resolution ->
             if is_set mro_via_req_extends next.mro_flags then
               let synths =
-                match (next.mro_required_at, child_class_kind) with
+                match (next.mro_required_at, child_classish_kind) with
                 (* Always aggregate synthesized ancestors for traits and
                    interfaces (necessary for typechecking) *)
                 | (_, Ast_defs.(Ctrait | Cinterface))

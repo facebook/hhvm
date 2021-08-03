@@ -1849,9 +1849,9 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
             [
                 "OODeclExists",
                 match k {
-                    ClassKind::Class => "Class",
-                    ClassKind::Interface => "Interface",
-                    ClassKind::Trait => "Trait",
+                    ClassishKind::Class => "Class",
+                    ClassishKind::Interface => "Interface",
+                    ClassishKind::Trait => "Trait",
                 },
             ],
         ),

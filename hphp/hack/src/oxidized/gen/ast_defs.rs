@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0dff0ce6ee4704503c2e9aca503515e6>>
+// @generated SignedSource<<2eba3c5afc688c797be2b0f956771930>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -139,15 +139,15 @@ pub type Reified = bool;
     Serialize,
     ToOcamlRep
 )]
-pub enum ClassKind {
+pub enum ClassishKind {
     Cabstract,
     Cnormal,
     Cinterface,
     Ctrait,
     Cenum,
 }
-impl TrivialDrop for ClassKind {}
-arena_deserializer::impl_deserialize_in_arena!(ClassKind);
+impl TrivialDrop for ClassishKind {}
+arena_deserializer::impl_deserialize_in_arena!(ClassishKind);
 
 #[derive(
     Clone,

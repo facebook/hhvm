@@ -2809,9 +2809,9 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             if nargs == 1 || nargs == 2 =>
         {
             let class_kind = match lower_fq_name {
-                "class_exists" => ClassKind::Class,
-                "interface_exists" => ClassKind::Interface,
-                "trait_exists" => ClassKind::Trait,
+                "class_exists" => ClassishKind::Class,
+                "interface_exists" => ClassishKind::Interface,
+                "trait_exists" => ClassishKind::Trait,
                 _ => return Err(unrecoverable("emit_special_function: class_kind")),
             };
             Ok(Some(InstrSeq::gather(

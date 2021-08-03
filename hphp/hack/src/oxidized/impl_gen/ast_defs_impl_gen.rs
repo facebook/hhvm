@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<597bfb31ca818b21f35b237f1bb7f863>>
+// @generated SignedSource<<61259d45478ae125aac54f92cadca991>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -150,49 +150,49 @@ impl ConstraintKind {
         }
     }
 }
-impl ClassKind {
+impl ClassishKind {
     pub fn mk_cabstract() -> Self {
-        ClassKind::Cabstract
+        ClassishKind::Cabstract
     }
     pub fn mk_cnormal() -> Self {
-        ClassKind::Cnormal
+        ClassishKind::Cnormal
     }
     pub fn mk_cinterface() -> Self {
-        ClassKind::Cinterface
+        ClassishKind::Cinterface
     }
     pub fn mk_ctrait() -> Self {
-        ClassKind::Ctrait
+        ClassishKind::Ctrait
     }
     pub fn mk_cenum() -> Self {
-        ClassKind::Cenum
+        ClassishKind::Cenum
     }
     pub fn is_cabstract(&self) -> bool {
         match self {
-            ClassKind::Cabstract => true,
+            ClassishKind::Cabstract => true,
             _ => false,
         }
     }
     pub fn is_cnormal(&self) -> bool {
         match self {
-            ClassKind::Cnormal => true,
+            ClassishKind::Cnormal => true,
             _ => false,
         }
     }
     pub fn is_cinterface(&self) -> bool {
         match self {
-            ClassKind::Cinterface => true,
+            ClassishKind::Cinterface => true,
             _ => false,
         }
     }
     pub fn is_ctrait(&self) -> bool {
         match self {
-            ClassKind::Ctrait => true,
+            ClassishKind::Ctrait => true,
             _ => false,
         }
     }
     pub fn is_cenum(&self) -> bool {
         match self {
-            ClassKind::Cenum => true,
+            ClassishKind::Cenum => true,
             _ => false,
         }
     }

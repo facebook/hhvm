@@ -792,7 +792,7 @@ and ('ex, 'fb, 'en) class_ = {
   c_final: bool;
   c_is_xhp: bool;
   c_has_xhp_keyword: bool;
-  c_kind: Ast_defs.class_kind;
+  c_kind: Ast_defs.classish_kind;
   c_name: sid;
   c_tparams: ('ex, 'fb, 'en) tparam list;
       (** The type parameters of a class A<T> (T is the parameter) *)

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<79f9cfe8266bc7b16af75b7365d96c65>>
+// @generated SignedSource<<2d9f09b886920471ad144d9776958dda>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1645,7 +1645,7 @@ pub struct Class_<'a, Ex, Fb, En> {
     pub final_: bool,
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
-    pub kind: oxidized::ast_defs::ClassKind,
+    pub kind: oxidized::ast_defs::ClassishKind,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: Sid<'a>,
     /// The type parameters of a class A<T> (T is the parameter)

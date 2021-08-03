@@ -28,7 +28,7 @@ let valid_newable_hint env tp (pos, hint) =
     begin
       match Env.get_class_or_typedef env h with
       | Some (Env.ClassResult cls) ->
-        if not Ast_defs.(equal_class_kind (Cls.kind cls) Cnormal) then
+        if not Ast_defs.(is_c_normal (Cls.kind cls)) then
           Errors.invalid_newable_type_argument tp p
       | _ ->
         (* This case should never happen *)

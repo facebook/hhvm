@@ -45,7 +45,7 @@ type genv = {
    * constraint on these parameters. *)
   type_params: SSet.t;
   (* The current class, None if we are in a function *)
-  current_cls: (Ast_defs.id * Ast_defs.class_kind * is_final) option;
+  current_cls: (Ast_defs.id * Ast_defs.classish_kind * is_final) option;
   (* Namespace environment, e.g., what namespace we're in and what use
    * declarations are in play. *)
   namespace: Namespace_env.env;

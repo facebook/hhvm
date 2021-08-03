@@ -857,7 +857,7 @@ let check_class_get env p def_pos cid mid ce e function_pointer =
          * the trait's code *)
         begin
           match Env.get_class env self with
-          | Some cls when Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) ->
+          | Some cls when Ast_defs.is_c_trait (Cls.kind cls) ->
             (* Ban self::some_abstract_method() in a trait, if the
              * method is also defined in a trait.
              *
@@ -865,8 +865,7 @@ let check_class_get env p def_pos cid mid ce e function_pointer =
              * in the child class that we actually have an
              * implementation. *)
             (match Decl_provider.get_class (Env.get_ctx env) ce.ce_origin with
-            | Some meth_cls
-              when Ast_defs.(equal_class_kind (Cls.kind meth_cls) Ctrait) ->
+            | Some meth_cls when Ast_defs.is_c_trait (Cls.kind meth_cls) ->
               Errors.self_abstract_call mid p def_pos
             | _ -> ())
           | _ ->
@@ -999,9 +998,8 @@ let trait_most_concrete_req_class trait env =
           let class_ = Env.get_class env name in
           match class_ with
           | None -> acc
-          | Some c when Ast_defs.(equal_class_kind (Cls.kind c) Cinterface) ->
-            acc
-          | Some c when Ast_defs.(equal_class_kind (Cls.kind c) Ctrait) ->
+          | Some c when Ast_defs.is_c_interface (Cls.kind c) -> acc
+          | Some c when Ast_defs.is_c_trait (Cls.kind c) ->
             (* this is an error case for which Typing_type_wellformedness spits out
              * an error, but does *not* currently remove the offending
              * 'require extends' or 'require implements' *)
@@ -5160,8 +5158,8 @@ and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs :
       | `Class ((pos, name), class_info, c_ty) ->
         let pos = Pos_or_decl.unsafe_to_raw_pos pos in
         if
-          Ast_defs.(equal_class_kind (Cls.kind class_info) Ctrait)
-          || Ast_defs.(equal_class_kind (Cls.kind class_info) Cenum)
+          Ast_defs.is_c_trait (Cls.kind class_info)
+          || Ast_defs.is_c_enum (Cls.kind class_info)
         then
           match cid with
           | CIexpr _
@@ -5172,8 +5170,7 @@ and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs :
           | CIself ->
             ()
         else if
-          Ast_defs.(equal_class_kind (Cls.kind class_info) Cabstract)
-          && Cls.final class_info
+          Ast_defs.is_c_abstract (Cls.kind class_info) && Cls.final class_info
         then
           uninstantiable_error env p cid (Cls.pos class_info) name pos c_ty
         else
@@ -5609,7 +5606,7 @@ and call_parent_construct pos env el unpacked_element =
     (match Env.get_self_id env with
     | Some self ->
       (match Env.get_class env self with
-      | Some trait when Ast_defs.(equal_class_kind (Cls.kind trait) Ctrait) ->
+      | Some trait when Ast_defs.is_c_trait (Cls.kind trait) ->
         (match trait_most_concrete_req_class trait env with
         | None ->
           Errors.parent_in_trait pos;
@@ -7020,7 +7017,7 @@ and class_expr
     (match Env.get_self_id env with
     | Some self ->
       (match Env.get_class env self with
-      | Some trait when Ast_defs.(equal_class_kind (Cls.kind trait) Ctrait) ->
+      | Some trait when Ast_defs.is_c_trait (Cls.kind trait) ->
         (match trait_most_concrete_req_class trait env with
         | None ->
           Errors.parent_in_trait p;

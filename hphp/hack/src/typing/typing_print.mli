@@ -57,7 +57,7 @@ val typedef : Decl_provider.typedef_decl -> string
 
 val constraints_for_type : env -> Typing_defs.locl_ty -> string
 
-val class_kind : Ast_defs.class_kind -> bool -> string
+val classish_kind : Ast_defs.classish_kind -> bool -> string
 
 val subtype_prop : env -> Typing_logic.subtype_prop -> string
 

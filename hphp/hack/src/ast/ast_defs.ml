@@ -42,7 +42,7 @@ and constraint_kind =
 
 and reified = bool
 
-and class_kind =
+and classish_kind =
   | Cabstract
   | Cnormal
   | Cinterface
@@ -201,7 +201,7 @@ let is_f_async_or_generator = function
     true
   | _ -> false
 
-let string_of_class_kind kind ~is_enum_class =
+let string_of_classish_kind kind ~is_enum_class =
   match kind with
   | Cabstract -> "an abstract class"
   | Cnormal -> "a class"

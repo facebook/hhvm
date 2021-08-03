@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5ca78762915ec30980ac82c86213b0a9>>
+// @generated SignedSource<<0fabdbce056e1794ad20744815ca154e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -259,20 +259,6 @@ impl<'a> Node<'a> for ClassId_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBod
             ClassId_::CIstatic => {}
             ClassId_::CIexpr(ref __binding_0) => __binding_0.accept(v),
             ClassId_::CI(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for ClassKind {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_class_kind(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ClassKind::Cabstract => {}
-            ClassKind::Cnormal => {}
-            ClassKind::Cinterface => {}
-            ClassKind::Ctrait => {}
-            ClassKind::Cenum => {}
         }
     }
 }
@@ -537,6 +523,20 @@ impl<'a> Node<'a> for Class_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyA
                 }
                 { __binding_31.accept(v) }
             }
+        }
+    }
+}
+impl<'a> Node<'a> for ClassishKind {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_classish_kind(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            ClassishKind::Cabstract => {}
+            ClassishKind::Cnormal => {}
+            ClassishKind::Cinterface => {}
+            ClassishKind::Ctrait => {}
+            ClassishKind::Cenum => {}
         }
     }
 }

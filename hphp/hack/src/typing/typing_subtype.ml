@@ -1913,8 +1913,8 @@ and simplify_subtype_i
                 simplify_subtype ~subtype_env ~this_ty up_obj ty_super env
               | None ->
                 if
-                  Ast_defs.(equal_class_kind (Cls.kind class_sub) Ctrait)
-                  || Ast_defs.(equal_class_kind (Cls.kind class_sub) Cinterface)
+                  Ast_defs.is_c_trait (Cls.kind class_sub)
+                  || Ast_defs.is_c_interface (Cls.kind class_sub)
                 then
                   let rec try_upper_bounds_on_this up_objs env =
                     match up_objs with

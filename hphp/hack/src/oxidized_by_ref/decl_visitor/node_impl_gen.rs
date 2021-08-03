@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<171c383c2ecabbe931108694aa9ef8e5>>
+// @generated SignedSource<<c69efe1353176caa396f3e26b368481d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -121,17 +121,17 @@ impl<'a> Node<'a> for ClassConstRef<'a> {
         }
     }
 }
-impl<'a> Node<'a> for ClassKind {
+impl<'a> Node<'a> for ClassishKind {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_class_kind(self)
+        v.visit_classish_kind(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            ClassKind::Cabstract => {}
-            ClassKind::Cnormal => {}
-            ClassKind::Cinterface => {}
-            ClassKind::Ctrait => {}
-            ClassKind::Cenum => {}
+            ClassishKind::Cabstract => {}
+            ClassishKind::Cnormal => {}
+            ClassishKind::Cinterface => {}
+            ClassishKind::Ctrait => {}
+            ClassishKind::Cenum => {}
         }
     }
 }

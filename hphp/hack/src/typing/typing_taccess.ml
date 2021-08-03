@@ -366,7 +366,7 @@ let rec expand ctx env root : _ * result =
            likely because originally there was `self::T` written.
            TODO(T54081153): fix `self` in traits and clean this up *)
         let allow_abstract =
-          Ast_defs.(equal_class_kind (Decl_provider.Class.kind ci) Ctrait)
+          Ast_defs.is_c_trait (Decl_provider.Class.kind ci)
           || ctx.allow_abstract
         in
 

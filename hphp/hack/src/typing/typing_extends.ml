@@ -715,9 +715,7 @@ let check_constructors env parent_class class_ psubst subst on_error =
   let consistent =
     not (equal_consistent_kind (snd (Cls.construct parent_class)) Inconsistent)
   in
-  if
-    Ast_defs.(equal_class_kind (Cls.kind parent_class) Cinterface) || consistent
-  then
+  if Ast_defs.is_c_interface (Cls.kind parent_class) || consistent then
     match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
     | (Some parent_cstr, _) when get_ce_synthesized parent_cstr -> env
     | (Some parent_cstr, None) ->
@@ -1171,9 +1169,7 @@ let check_class_implements
   in
   let memberl = make_all_members ~parent_class ~child_class:class_ in
   let env = check_constructors env parent_class class_ psubst subst on_error in
-  let check_privates : bool =
-    Ast_defs.(equal_class_kind (Cls.kind parent_class) Ctrait)
-  in
+  let check_privates : bool = Ast_defs.is_c_trait (Cls.kind parent_class) in
   if Cls.members_fully_known class_ then
     List.iter
       memberl

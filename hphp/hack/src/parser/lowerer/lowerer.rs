@@ -5090,11 +5090,13 @@ where
                 *env.cls_reified_generics() = HashSet::default();
                 let tparams = Self::p_tparam_l(true, &c.type_parameters, env)?;
                 let class_kind = match Self::token_kind(&c.keyword) {
-                    Some(TK::Class) if kinds.has(modifier::ABSTRACT) => ast::ClassKind::Cabstract,
-                    Some(TK::Class) => ast::ClassKind::Cnormal,
-                    Some(TK::Interface) => ast::ClassKind::Cinterface,
-                    Some(TK::Trait) => ast::ClassKind::Ctrait,
-                    Some(TK::Enum) => ast::ClassKind::Cenum,
+                    Some(TK::Class) if kinds.has(modifier::ABSTRACT) => {
+                        ast::ClassishKind::Cabstract
+                    }
+                    Some(TK::Class) => ast::ClassishKind::Cnormal,
+                    Some(TK::Interface) => ast::ClassishKind::Cinterface,
+                    Some(TK::Trait) => ast::ClassishKind::Ctrait,
+                    Some(TK::Enum) => ast::ClassishKind::Cenum,
                     _ => Self::missing_syntax("class kind", &c.keyword, env)?,
                 };
                 let extends = Self::could_map(Self::p_hint, &c.extends_list, env)?;
@@ -5294,7 +5296,7 @@ where
                     user_attributes: Self::p_user_attributes(&c.attribute_spec, env)?,
                     file_attributes: vec![],
                     final_: false,
-                    kind: ast::ClassKind::Cenum,
+                    kind: ast::ClassishKind::Cenum,
                     is_xhp: false,
                     has_xhp_keyword: false,
                     name: Self::pos_name(&c.name, env)?,
@@ -5362,7 +5364,7 @@ where
                     user_attributes,
                     file_attributes: vec![],
                     final_: false, // TODO(T77095784): support final EDTs
-                    kind: ast::ClassKind::Cenum,
+                    kind: ast::ClassishKind::Cenum,
                     is_xhp: false,
                     has_xhp_keyword: false,
                     name,

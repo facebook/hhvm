@@ -35,30 +35,19 @@ const StaticString s_returnHook("SurpriseReturnHook");
 
 template<class AH>
 void retSurpriseCheck(IRGS& env, SSATmp* retVal, AH afterHook) {
-  /*
-   * This is a weird situation for throwing: we've partially torn down the
-   * ActRec (decref'd all the frame's locals), and we've popped the return
-   * value.  If we throw, the unwinder needs to know the return value is not on
-   * the eval stack, so we need to sync the marker after the pop---the return
-   * value will be decref'd by the return hook while unwinding, in this case.
-   */
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
-
-  ifThenElse(
+  ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
+  ifThen(
     env,
     [&] (Block* taken) {
       auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
       gen(env, CheckSurpriseFlags, taken, ptr);
     },
     [&] {
-      ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
-    },
-    [&] {
+      // Return value is no longer on the stack. If the ReturnHook throws, it
+      // is responsible for decrefing it.
       hint(env, Block::Hint::Unlikely);
       ringbufferMsg(env, Trace::RBTypeMsg, s_returnHook.get());
       gen(env, ReturnHook, fp(env), retVal);
-      ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
       afterHook();
     }
   );
@@ -157,6 +146,11 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
   assertx(resumeMode(env) == ResumeMode::GenIter);
   retSurpriseCheck(env, retval, []{});
 
+  gen(env,
+      StContArState,
+      GeneratorState { BaseGenerator::State::Done },
+      fp(env));
+
   if (!curFunc(env)->isAsync()) {
     // Clear generator's key.
     auto const oldKey = gen(env, LdContArKey, TInitCell, fp(env));
@@ -173,11 +167,6 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
     retval = gen(env, CreateSSWH, cns(env, TInitNull));
   }
 
-  gen(env,
-      StContArState,
-      GeneratorState { BaseGenerator::State::Done },
-      fp(env));
-
   // Return control to the caller (Gen::next()).
   auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
   auto const retData = RetCtrlData { spAdjust, true, AuxUnion{0} };
@@ -185,15 +174,17 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
 }
 
 void implRet(IRGS& env, bool suspended) {
-  auto func = curFunc(env);
+  auto const func = curFunc(env);
   assertx(!suspended || func->isAsyncFunction());
   assertx(!suspended || resumeMode(env) == ResumeMode::None);
+
+  freeLocalsAndThis(env);
 
   // Pop the return value. Since it will be teleported to its place in memory,
   // we don't care about the type.
   auto const retval = pop(env, DataTypeGeneric);
-
-  freeLocalsAndThis(env);
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
 
   // Async function has its own surprise check.
   if (func->isAsyncFunction()) {

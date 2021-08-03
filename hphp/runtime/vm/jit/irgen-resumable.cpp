@@ -140,11 +140,6 @@ void doTailAwaitDecRefs(IRGS& env, const std::vector<Type>& locals) {
 
 template<class Hook>
 void suspendHook(IRGS& env, Hook hook) {
-  // Sync the marker to let the unwinder know that the consumed input is
-  // no longer on the eval stack.
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
-
   ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
   ifThen(
     env,
@@ -351,6 +346,11 @@ void implYield(IRGS& env, bool withKey) {
       fp(env),
       resumeAddr);
 
+  // Set state from Running to Started.
+  gen(env, StContArState,
+      GeneratorState { BaseGenerator::State::Started },
+      fp(env));
+
   // No inc/dec-ref as keys and values are teleported.
   auto const value = popC(env, DataTypeGeneric);
   auto const key = withKey ? popC(env) : nullptr;
@@ -358,11 +358,6 @@ void implYield(IRGS& env, bool withKey) {
   auto const retVal = !curFunc(env)->isAsync()
     ? implYieldGen(env, key, value)
     : implYieldAGen(env, key, value);
-
-  // Set state from Running to Started.
-  gen(env, StContArState,
-      GeneratorState { BaseGenerator::State::Started },
-      fp(env));
 
   // Return control to the caller (Gen::next()).
   auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
@@ -480,15 +475,18 @@ void emitAwait(IRGS& env) {
     PUNT(Await-AsyncGenerator);
   }
 
-
+  // Side-exit if not an Awaitable.
   if (!topC(env)->isA(TObj)) PUNT(Await-NonObject);
+  auto const exitSlow = makeExitSlow(env);
+  gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, topC(env)));
+
+  auto const popped = popC(env);
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
 
   auto const TAwaitable = Type::SubObj(c_Awaitable::classof());
-  auto const exitSlow = makeExitSlow(env);
-  auto const popped = popC(env);
   auto const childIsSWH =
     popped->type() <= Type::SubObj(c_StaticWaitHandle::classof());
-  gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, popped));
   auto const child = gen(env, AssertType, TAwaitable, popped);
 
   auto const handleSucceeded = [&] {
@@ -510,7 +508,6 @@ void emitAwait(IRGS& env) {
       // There are no more catch blocks in this function, we are at the top
       // level throw
       hint(env, Block::Hint::Unlikely);
-      updateMarker(env);
       auto const etcData = EnterTCUnwindData { spOffBCFromIRSP(env), true };
       gen(env, EnterTCUnwind, etcData, sp(env), fp(env), exception);
     }

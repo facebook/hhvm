@@ -112,6 +112,7 @@ void Generator::yield(Offset suspendOffset,
                       const TypedValue* key, const TypedValue value) {
   assertx(isRunning());
   resumable()->setResumeAddr(nullptr, suspendOffset);
+  setState(State::Started);
 
   if (key) {
     tvSet(*key, m_key);
@@ -125,15 +126,14 @@ void Generator::yield(Offset suspendOffset,
   }
   tvSet(value, m_value);
   tvDecRefGenNZ(value);
-
-  setState(State::Started);
 }
 
 void Generator::done(TypedValue tv) {
   assertx(isRunning());
+  setState(State::Done);
+
   tvSetNull(m_key);
   tvSet(tv, m_value);
-  setState(State::Done);
 }
 
 bool Generator::successfullyFinishedExecuting() {

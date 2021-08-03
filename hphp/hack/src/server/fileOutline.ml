@@ -228,9 +228,10 @@ let summarize_class class_ ~no_children =
       []
   in
   let modifiers =
-    match class_.c_kind with
-    | Ast_defs.Cabstract -> Abstract :: modifiers
-    | _ -> modifiers
+    if Ast_defs.is_c_abstract class_.c_kind then
+      Abstract :: modifiers
+    else
+      modifiers
   in
   let children =
     if no_children then
@@ -293,7 +294,7 @@ let summarize_class class_ ~no_children =
     | Ast_defs.Cinterface -> Interface
     | Ast_defs.Ctrait -> Trait
     | Ast_defs.Cenum -> Enum
-    | _ -> Class
+    | Ast_defs.(Cnormal | Cabstract) -> Class
   in
   let name = class_name in
   let id = get_symbol_id kind None name in

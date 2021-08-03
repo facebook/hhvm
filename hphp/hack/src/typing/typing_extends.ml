@@ -553,7 +553,7 @@ let check_members
       && (not (get_ce_synthesized parent_class_elt))
       (* defined on original class *)
       && String.( <> ) class_elt.ce_origin (Cls.name class_)
-    | _ -> false
+    | Ast_defs.(Cnormal | Cabstract | Cenum) -> false
   in
   List.fold
     ~init:env

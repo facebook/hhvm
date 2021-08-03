@@ -281,4 +281,4 @@ let valid_newable_class cls =
     || not (equal_consistent_kind (snd (Cls.construct cls)) Inconsistent)
   (* There is currently a bug with interfaces that allows constructors to change
    * their signature, so they are not considered here. TODO: T41093452 *)
-  | _ -> false
+  | Ast_defs.(Cinterface | Ctrait | Cenum) -> false

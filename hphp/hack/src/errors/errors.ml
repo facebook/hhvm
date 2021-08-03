@@ -5482,7 +5482,7 @@ let parent_support_dynamic_type
     | (_, Ast_defs.Ctrait) -> "uses "
     | (Ast_defs.Cinterface, Ast_defs.Cinterface) -> "extends "
     | (_, Ast_defs.Cinterface) -> "implements "
-    | (_, _) -> ""
+    | (_, Ast_defs.Cenum) -> ""
   in
   let child_name = Markdown_lite.md_codify (strip_ns child_name) in
   let child_kind_s = kind_to_string child_kind in

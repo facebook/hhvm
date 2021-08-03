@@ -1798,19 +1798,19 @@ let check_SupportDynamicType env c =
                 error_parent_support_dynamic_type
                   parent_type
                   c.c_support_dynamic_type
-            | _ -> ()
+            | Ast_defs.(Cenum | Ctrait) -> ()
           end
         | None -> ())
 
 let class_def_ env c tc =
   let env =
     let kind =
-      match c.c_kind with
-      | Ast_defs.Cenum ->
-        (match c.c_enum with
+      if Ast_defs.is_c_enum c.c_kind then
+        match c.c_enum with
         | Some enum when enum.e_enum_class -> SN.AttributeKinds.enumcls
-        | _ -> SN.AttributeKinds.enum)
-      | _ -> SN.AttributeKinds.cls
+        | _ -> SN.AttributeKinds.enum
+      else
+        SN.AttributeKinds.cls
     in
     Typing.attributes_check_def env kind c.c_user_attributes
   in
@@ -1877,7 +1877,7 @@ let class_def_ env c tc =
     match c.c_kind with
     | Ast_defs.Cabstract -> implements
     | Ast_defs.Ctrait -> implements @ req_implements
-    | _ -> []
+    | Ast_defs.(Cnormal | Cinterface | Cenum) -> []
   in
   let check_constructor_dep = check_constructor_dep env in
   check_implements_or_extends_unique implements;
@@ -1924,13 +1924,14 @@ let class_def_ env c tc =
   let env = check_class_parents_where_constraints env pc impl in
   check_parent env c tc;
   check_parents_sealed env c tc;
-  (if TypecheckerOptions.enforce_sealed_subclasses (Env.get_tcopt env) then
-    match c.c_kind with
-    | Ast_defs.Cenum
-      when TypecheckerOptions.enable_enum_supertyping (Env.get_tcopt env) ->
-      sealed_subtype ctx c ~is_enum:true
-    | Ast_defs.Cenum -> ()
-    | _ -> sealed_subtype ctx c ~is_enum:false);
+  if TypecheckerOptions.enforce_sealed_subclasses (Env.get_tcopt env) then
+    if Ast_defs.is_c_enum c.c_kind then
+      if TypecheckerOptions.enable_enum_supertyping (Env.get_tcopt env) then
+        sealed_subtype ctx c ~is_enum:true
+      else
+        ()
+    else
+      sealed_subtype ctx c ~is_enum:false;
   let (_ : env) =
     check_generic_class_with_SupportDynamicType env c (extends @ implements)
   in

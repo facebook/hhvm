@@ -171,4 +171,5 @@ and class_ env c =
     (match c.sc_kind with
     | Ast_defs.Cabstract when not has_own_cstr -> get_deferred_init_props env c
     | Ast_defs.Ctrait -> get_deferred_init_props env c
-    | _ -> (SSet.empty, SSet.empty))
+    | Ast_defs.(Cnormal | Cinterface | Cenum | Cabstract) ->
+      (SSet.empty, SSet.empty))

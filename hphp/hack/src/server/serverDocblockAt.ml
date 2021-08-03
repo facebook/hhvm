@@ -91,7 +91,7 @@ let fallback ctx class_name member_name =
           | Ast_defs.Cabstract
           | Ast_defs.Cnormal ->
             [(Cls.name ancestor, docblock)]
-          | _ ->
+          | Ast_defs.(Ctrait | Cinterface | Cenum) ->
             all_interfaces_or_first_class_docblock
               ((Cls.name ancestor, docblock) :: seen_interfaces)
               ancestors)

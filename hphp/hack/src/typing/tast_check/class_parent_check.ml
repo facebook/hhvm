@@ -24,7 +24,7 @@ let check_is_class env (p, h) =
         (match kind with
         | Ast_defs.(Cabstract | Cnormal) ->
           if Cls.final cls then Errors.requires_final_class p name
-        | _ ->
+        | Ast_defs.(Cinterface | Ctrait | Cenum) ->
           let is_enum_class = Typing_defs.is_enum_class (Cls.enum_type cls) in
           Errors.requires_non_class
             p

@@ -24,12 +24,9 @@ let is_class_kind (k : Ast_defs.class_kind) : bool =
   match k with
   | Ast_defs.Cabstract -> true
   | Ast_defs.Cnormal -> true
-  | _ -> false
+  | Ast_defs.(Cinterface | Ctrait | Cenum) -> false
 
-let is_trait_kind (k : Ast_defs.class_kind) : bool =
-  match k with
-  | Ast_defs.Ctrait -> true
-  | _ -> false
+let is_trait_kind (k : Ast_defs.class_kind) : bool = Ast_defs.is_c_trait k
 
 let is_trait_name tgenv (type_name : string) : bool =
   let decl =

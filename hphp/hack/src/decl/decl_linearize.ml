@@ -191,7 +191,7 @@ let from_parent (c : shallow_class) : decl_ty list =
   match c.sc_kind with
   | Ast_defs.Cabstract -> c.sc_implements @ c.sc_extends
   | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
-  | _ -> c.sc_extends
+  | Ast_defs.(Cnormal | Cinterface | Cenum) -> c.sc_extends
 
 let get_ancestors (c : shallow_class) (linearization_kind : linearization_kind)
     : ancestor list =
@@ -452,7 +452,7 @@ and next_state
         let skip_or_mark_trait_reuse was_emitted =
           let is_trait class_name =
             match Shallow_classes_provider.get (get_ctx env) class_name with
-            | Some { sc_kind = Ast_defs.Ctrait; _ } -> true
+            | Some { sc_kind; _ } -> Ast_defs.is_c_trait sc_kind
             | _ -> false
           in
           if

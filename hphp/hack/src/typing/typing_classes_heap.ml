@@ -159,7 +159,7 @@ module ApiShallow = struct
         | Ast_defs.Ctrait
         | Ast_defs.Cenum ->
           true
-        | _ -> false
+        | Ast_defs.Cnormal -> false
       end
     | Eager (c, _) -> c.Decl_defs.dc_abstract
 

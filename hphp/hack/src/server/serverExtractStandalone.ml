@@ -363,16 +363,12 @@ end = struct
 
   let is_enum ctx nm =
     Option.value_map ~default:false ~f:(fun Aast.{ c_kind; _ } ->
-        match c_kind with
-        | Ast_defs.Cenum -> true
-        | _ -> false)
+        Ast_defs.is_c_enum c_kind)
     @@ get_class ctx nm
 
   let is_interface ctx nm =
     Option.value_map ~default:false ~f:(fun Aast.{ c_kind; _ } ->
-        match c_kind with
-        | Ast_defs.Cinterface -> true
-        | _ -> false)
+        Ast_defs.is_c_interface c_kind)
     @@ get_class ctx nm
 end
 
@@ -1207,11 +1203,8 @@ end = struct
         | Happly ((_, name), hints) ->
           (match Nast_helper.get_class ctx name with
           | Some
-              {
-                c_kind = Ast_defs.Cenum;
-                c_consts = Aast.{ cc_id = (_, const_name); _ } :: _;
-                _;
-              } ->
+              { c_kind; c_consts = Aast.{ cc_id = (_, const_name); _ } :: _; _ }
+            when Ast_defs.is_c_enum c_kind ->
             Fmt.(pair ~sep:dbl_colon string string) ppf (name, const_name)
           | Some _ -> unsupported_hint ()
           | _ ->

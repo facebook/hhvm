@@ -9,7 +9,6 @@
  *)
 
 open Aast
-open Ast_defs
 open Full_fidelity_source_text
 open Hh_json
 open Hh_prelude
@@ -107,11 +106,7 @@ let add_container_defn_fact ctx source_map clss decl_id member_decls prog =
       in
       (TraitDefinition, req_fields, prog)
     | ClassContainer ->
-      let is_abstract =
-        match clss.c_kind with
-        | Cabstract -> true
-        | _ -> false
-      in
+      let is_abstract = Ast_defs.is_c_abstract clss.c_kind in
       let (class_fields, prog) =
         let (impls, prog) =
           add_parent_decls ctx clss.c_implements InterfaceDeclaration prog

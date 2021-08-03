@@ -325,7 +325,7 @@ and class_is_abstract (c : Shallow_decl_defs.shallow_class) : bool =
   | Ast_defs.Ctrait
   | Ast_defs.Cenum ->
     true
-  | _ -> false
+  | Ast_defs.Cnormal -> false
 
 and synthesize_const_defaults c =
   let open Typing_defs in

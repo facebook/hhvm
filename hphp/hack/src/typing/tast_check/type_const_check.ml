@@ -26,15 +26,16 @@ let handler =
         | None -> ()
         | Some cls ->
           begin
-            match (Cls.kind cls, c_tconst_kind) with
-            | (Ast_defs.Cnormal, TCAbstract _) ->
-              Errors.implement_abstract
-                ~is_final:(Cls.final cls)
-                (Cls.pos cls |> Pos_or_decl.unsafe_to_raw_pos)
-                (p |> Pos_or_decl.of_raw_pos)
-                "type constant"
-                name
-            | _ -> ()
+            if Ast_defs.is_c_normal (Cls.kind cls) then
+              match c_tconst_kind with
+              | TCAbstract _ ->
+                Errors.implement_abstract
+                  ~is_final:(Cls.final cls)
+                  (Cls.pos cls |> Pos_or_decl.unsafe_to_raw_pos)
+                  (p |> Pos_or_decl.of_raw_pos)
+                  "type constant"
+                  name
+              | _ -> ()
           end;
           (if
            TypecheckerOptions.disallow_partially_abstract_typeconst_definitions

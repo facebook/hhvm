@@ -33,11 +33,7 @@ let handler =
         | (_, Aast.Happly ((_, parent_name), _)) :: _ -> Some parent_name
         | _ -> None
       in
-      let is_trait =
-        match c.Aast.c_kind with
-        | Ast_defs.Ctrait -> true
-        | _ -> false
-      in
+      let is_trait = Ast_defs.is_c_trait c.Aast.c_kind in
       {
         in_final_class = c.Aast.c_final;
         class_name = Some (snd c.Aast.c_name);

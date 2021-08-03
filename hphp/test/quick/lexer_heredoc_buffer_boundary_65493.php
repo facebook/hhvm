@@ -18,7 +18,7 @@ if (strlen($x) != $total_size) {
 }
 
 for ($i = 0; $i < $total_size; $i++) {
-  if ($x[$i] != ($i % 10)) {
+  if (HH\Lib\Legacy_FIXME\neq($x[$i], ($i % 10))) {
     echo "Fail!\n";
     exit(1);
   }

@@ -115,7 +115,7 @@ function dump_param($param) {
      var_dump($func->isConstructor());
      var_dump($func->getModifiers() & 0xFFFF);
      verify_class($func->getDeclaringClass());
-     if ($name == 'method1') $func->invoke($obj, 'invoked');
+     if (HH\Lib\Legacy_FIXME\eq($name, 'method1')) $func->invoke($obj, 'invoked');
    }
 }
 

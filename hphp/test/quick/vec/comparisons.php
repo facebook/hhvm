@@ -36,14 +36,14 @@ function single_compare($a, $b) {
 
   echo "\t==  : ";
   try {
-    var_dump($a == $b);
+    var_dump(HH\Lib\Legacy_FIXME\eq($a, $b));
   } catch (Exception $e) {
     echo "Error: ", $e->getMessage(), "\n";
   }
 
   echo "\t!=  : ";
   try {
-    var_dump($a != $b);
+    var_dump(HH\Lib\Legacy_FIXME\neq($a, $b));
   } catch (Exception $e) {
     echo "Error: ", $e->getMessage(), "\n";
   }

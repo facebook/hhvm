@@ -7,8 +7,8 @@ $b = new Bar;
 
 var_dump($b == NULL);
 var_dump($b != NULL);
-var_dump($b == true);
-var_dump($b != true);
+var_dump(HH\Lib\Legacy_FIXME\eq($b, true));
+var_dump(HH\Lib\Legacy_FIXME\neq($b, true));
 var_dump($b == false);
 var_dump($b != false);
 var_dump($b == "");

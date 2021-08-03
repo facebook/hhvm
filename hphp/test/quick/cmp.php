@@ -8,8 +8,8 @@
     foreach ($arr as $right) {
       echo "left: " . (string)(var_dump($left));
       echo "right: " . (string)(var_dump($right));
-      echo "==  "; echo $left == $right ? "true\n" : "false\n";
-      echo "!=  "; echo $left != $right ? "true\n" : "false\n";
+      echo "==  "; echo HH\Lib\Legacy_FIXME\eq($left, $right) ? "true\n" : "false\n";
+      echo "!=  "; echo HH\Lib\Legacy_FIXME\neq($left, $right) ? "true\n" : "false\n";
       echo "=== "; echo $left === $right ? "true\n" : "false\n";
       echo "!== "; echo $left !== $right ? "true\n" : "false\n";
       echo "\n";

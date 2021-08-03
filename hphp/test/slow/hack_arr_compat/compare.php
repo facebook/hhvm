@@ -38,8 +38,8 @@ function do_compares($a, $b, $cmp) {
   echo " ".$cmp(() ==> $a > $b);
   echo " ".$cmp(() ==> $a >= $b);
   echo " ".$cmp(() ==> $a <=> $b);
-  echo " ".$cmp(() ==> $a == $b);
-  echo " ".$cmp(() ==> $a != $b);
+  echo " ".$cmp(() ==> HH\Lib\Legacy_FIXME\eq($a, $b));
+  echo " ".$cmp(() ==> HH\Lib\Legacy_FIXME\neq($a, $b));
   echo " ".$cmp(() ==> $a === $b);
   echo " ".$cmp(() ==> $a !== $b);
   echo "\n==================================================================\n";

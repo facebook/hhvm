@@ -3,7 +3,7 @@
 function doswitch($foo) {
   echo "--------------------------------\n";
   var_dump($foo);
-  switch($foo) {
+  switch(HH\Lib\Legacy_FIXME\int_cast_for_switch($foo, -1)) {
     case 0:
       echo "0\n";
       break;
@@ -56,7 +56,7 @@ function main() {
     new c(),
     $f
   ];
-  var_dump($f == 4);
+  var_dump(HH\Lib\Legacy_FIXME\eq($f, 4));
   foreach ($things as $t) {
     try {
       doswitch($t);

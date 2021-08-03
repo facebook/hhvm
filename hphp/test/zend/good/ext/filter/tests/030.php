@@ -47,7 +47,7 @@ $ipv6_test = darray[
 foreach ($ipv6_test as $ip => $exp) {
     $out = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
     $out = (int) ($out === false ? 0 : 1);
-    if ($exp != $out) {
+    if (HH\Lib\Legacy_FIXME\neq($exp, $out)) {
         echo "$ip failed (expected ", $exp?"true":"false", ", got ",
             $out?"true":"false", ")\n";
     }

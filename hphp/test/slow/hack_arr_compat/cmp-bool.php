@@ -46,8 +46,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($va<= $fa); } catch (Exception $_) { E(); }
     try { C($va > $fa); } catch (Exception $_) { E(); }
     try { C($va >=$fa); } catch (Exception $_) { E(); }
-    C($va ==$fa);
-    C($va !=$fa);
+    C(HH\Lib\Legacy_FIXME\eq($va, $fa));
+    C(HH\Lib\Legacy_FIXME\neq($va, $fa));
     C($va===$fa);
     C($va!==$fa);
     try { I($va<=>$fa); } catch (Exception $_) { E(); }
@@ -56,8 +56,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($va<= $nu); } catch (Exception $_) { E(); }
     try { C($va > $nu); } catch (Exception $_) { E(); }
     try { C($va >=$nu); } catch (Exception $_) { E(); }
-    C($va ==$nu);
-    C($va !=$nu);
+    C(HH\Lib\Legacy_FIXME\eq($va, $nu));
+    C(HH\Lib\Legacy_FIXME\neq($va, $nu));
     C($va===$nu);
     C($va!==$nu);
     try { I($va<=>$nu); } catch (Exception $_) { E(); }
@@ -79,8 +79,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($fa<= $va); } catch (Exception $_) { E(); }
     try { C($fa > $va); } catch (Exception $_) { E(); }
     try { C($fa >=$va); } catch (Exception $_) { E(); }
-    C($fa ==$va);
-    C($fa !=$va);
+    C(HH\Lib\Legacy_FIXME\eq($fa, $va));
+    C(HH\Lib\Legacy_FIXME\neq($fa, $va));
     C($fa===$va);
     C($fa!==$va);
     try { I($fa<=>$va); } catch (Exception $_) { E(); }
@@ -89,8 +89,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($nu<= $va); } catch (Exception $_) { E(); }
     try { C($nu > $va); } catch (Exception $_) { E(); }
     try { C($nu >=$va); } catch (Exception $_) { E(); }
-    C($nu ==$va);
-    C($nu !=$va);
+    C(HH\Lib\Legacy_FIXME\eq($nu, $va));
+    C(HH\Lib\Legacy_FIXME\neq($nu, $va));
     C($nu===$va);
     C($nu!==$va);
     try { I($nu<=>$va); } catch (Exception $_) { E(); }
@@ -119,8 +119,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($va<= $fa); } catch (Exception $_) { E(); }
     try { C($va > $fa); } catch (Exception $_) { E(); }
     try { C($va >=$fa); } catch (Exception $_) { E(); }
-    C($va ==$fa);
-    C($va !=$fa);
+    C(HH\Lib\Legacy_FIXME\eq($va, $fa));
+    C(HH\Lib\Legacy_FIXME\neq($va, $fa));
     C($va===$fa);
     C($va!==$fa);
     try { I($va<=>$fa); } catch (Exception $_) { E(); }
@@ -129,8 +129,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($va<= $nu); } catch (Exception $_) { E(); }
     try { C($va > $nu); } catch (Exception $_) { E(); }
     try { C($va >=$nu); } catch (Exception $_) { E(); }
-    C($va ==$nu);
-    C($va !=$nu);
+    C(HH\Lib\Legacy_FIXME\eq($va, $nu));
+    C(HH\Lib\Legacy_FIXME\neq($va, $nu));
     C($va===$nu);
     C($va!==$nu);
     try { I($va<=>$nu); } catch (Exception $_) { E(); }
@@ -152,8 +152,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($fa<= $va); } catch (Exception $_) { E(); }
     try { C($fa > $va); } catch (Exception $_) { E(); }
     try { C($fa >=$va); } catch (Exception $_) { E(); }
-    C($fa ==$va);
-    C($fa !=$va);
+    C(HH\Lib\Legacy_FIXME\eq($fa, $va));
+    C(HH\Lib\Legacy_FIXME\neq($fa, $va));
     C($fa===$va);
     C($fa!==$va);
     try { I($fa<=>$va); } catch (Exception $_) { E(); }
@@ -162,8 +162,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($nu<= $va); } catch (Exception $_) { E(); }
     try { C($nu > $va); } catch (Exception $_) { E(); }
     try { C($nu >=$va); } catch (Exception $_) { E(); }
-    C($nu ==$va);
-    C($nu !=$va);
+    C(HH\Lib\Legacy_FIXME\eq($nu, $va));
+    C(HH\Lib\Legacy_FIXME\neq($nu, $va));
     C($nu===$va);
     C($nu!==$va);
     try { I($nu<=>$va); } catch (Exception $_) { E(); }
@@ -182,8 +182,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($vx<= $tr); } catch (Exception $_) { E(); }
     try { C($vx > $tr); } catch (Exception $_) { E(); }
     try { C($vx >=$tr); } catch (Exception $_) { E(); }
-    C($vx ==$tr);
-    C($vx !=$tr);
+    C(HH\Lib\Legacy_FIXME\eq($vx, $tr));
+    C(HH\Lib\Legacy_FIXME\neq($vx, $tr));
     C($vx===$tr);
     C($vx!==$tr);
     try { I($vx<=>$tr); } catch (Exception $_) { E(); }
@@ -215,8 +215,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($tr<= $vx); } catch (Exception $_) { E(); }
     try { C($tr > $vx); } catch (Exception $_) { E(); }
     try { C($tr >=$vx); } catch (Exception $_) { E(); }
-    C($tr ==$vx);
-    C($tr !=$vx);
+    C(HH\Lib\Legacy_FIXME\eq($tr, $vx));
+    C(HH\Lib\Legacy_FIXME\neq($tr, $vx));
     C($tr===$vx);
     C($tr!==$vx);
     try { I($tr<=>$vx); } catch (Exception $_) { E(); }
@@ -255,8 +255,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($vx<= $tr); } catch (Exception $_) { E(); }
     try { C($vx > $tr); } catch (Exception $_) { E(); }
     try { C($vx >=$tr); } catch (Exception $_) { E(); }
-    C($vx ==$tr);
-    C($vx !=$tr);
+    C(HH\Lib\Legacy_FIXME\eq($vx, $tr));
+    C(HH\Lib\Legacy_FIXME\neq($vx, $tr));
     C($vx===$tr);
     C($vx!==$tr);
     try { I($vx<=>$tr); } catch (Exception $_) { E(); }
@@ -288,8 +288,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($tr<= $vx); } catch (Exception $_) { E(); }
     try { C($tr > $vx); } catch (Exception $_) { E(); }
     try { C($tr >=$vx); } catch (Exception $_) { E(); }
-    C($tr ==$vx);
-    C($tr !=$vx);
+    C(HH\Lib\Legacy_FIXME\eq($tr, $vx));
+    C(HH\Lib\Legacy_FIXME\neq($tr, $vx));
     C($tr===$vx);
     C($tr!==$vx);
     try { I($tr<=>$vx); } catch (Exception $_) { E(); }
@@ -338,8 +338,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($da<= $fa); } catch (Exception $_) { E(); }
     try { C($da > $fa); } catch (Exception $_) { E(); }
     try { C($da >=$fa); } catch (Exception $_) { E(); }
-    C($da ==$fa);
-    C($da !=$fa);
+    C(HH\Lib\Legacy_FIXME\eq($da, $fa));
+    C(HH\Lib\Legacy_FIXME\neq($da, $fa));
     C($da===$fa);
     C($da!==$fa);
     try { I($da<=>$fa); } catch (Exception $_) { E(); }
@@ -348,8 +348,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($da<= $nu); } catch (Exception $_) { E(); }
     try { C($da > $nu); } catch (Exception $_) { E(); }
     try { C($da >=$nu); } catch (Exception $_) { E(); }
-    C($da ==$nu);
-    C($da !=$nu);
+    C(HH\Lib\Legacy_FIXME\eq($da, $nu));
+    C(HH\Lib\Legacy_FIXME\neq($da, $nu));
     C($da===$nu);
     C($da!==$nu);
     try { I($da<=>$nu); } catch (Exception $_) { E(); }
@@ -371,8 +371,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($fa<= $da); } catch (Exception $_) { E(); }
     try { C($fa > $da); } catch (Exception $_) { E(); }
     try { C($fa >=$da); } catch (Exception $_) { E(); }
-    C($fa ==$da);
-    C($fa !=$da);
+    C(HH\Lib\Legacy_FIXME\eq($fa, $da));
+    C(HH\Lib\Legacy_FIXME\neq($fa, $da));
     C($fa===$da);
     C($fa!==$da);
     try { I($fa<=>$da); } catch (Exception $_) { E(); }
@@ -381,8 +381,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($nu<= $da); } catch (Exception $_) { E(); }
     try { C($nu > $da); } catch (Exception $_) { E(); }
     try { C($nu >=$da); } catch (Exception $_) { E(); }
-    C($nu ==$da);
-    C($nu !=$da);
+    C(HH\Lib\Legacy_FIXME\eq($nu, $da));
+    C(HH\Lib\Legacy_FIXME\neq($nu, $da));
     C($nu===$da);
     C($nu!==$da);
     try { I($nu<=>$da); } catch (Exception $_) { E(); }
@@ -411,8 +411,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($da<= $fa); } catch (Exception $_) { E(); }
     try { C($da > $fa); } catch (Exception $_) { E(); }
     try { C($da >=$fa); } catch (Exception $_) { E(); }
-    C($da ==$fa);
-    C($da !=$fa);
+    C(HH\Lib\Legacy_FIXME\eq($da, $fa));
+    C(HH\Lib\Legacy_FIXME\neq($da, $fa));
     C($da===$fa);
     C($da!==$fa);
     try { I($da<=>$fa); } catch (Exception $_) { E(); }
@@ -421,8 +421,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($da<= $nu); } catch (Exception $_) { E(); }
     try { C($da > $nu); } catch (Exception $_) { E(); }
     try { C($da >=$nu); } catch (Exception $_) { E(); }
-    C($da ==$nu);
-    C($da !=$nu);
+    C(HH\Lib\Legacy_FIXME\eq($da, $nu));
+    C(HH\Lib\Legacy_FIXME\neq($da, $nu));
     C($da===$nu);
     C($da!==$nu);
     try { I($da<=>$nu); } catch (Exception $_) { E(); }
@@ -444,8 +444,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($fa<= $da); } catch (Exception $_) { E(); }
     try { C($fa > $da); } catch (Exception $_) { E(); }
     try { C($fa >=$da); } catch (Exception $_) { E(); }
-    C($fa ==$da);
-    C($fa !=$da);
+    C(HH\Lib\Legacy_FIXME\eq($fa, $da));
+    C(HH\Lib\Legacy_FIXME\neq($fa, $da));
     C($fa===$da);
     C($fa!==$da);
     try { I($fa<=>$da); } catch (Exception $_) { E(); }
@@ -454,8 +454,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($nu<= $da); } catch (Exception $_) { E(); }
     try { C($nu > $da); } catch (Exception $_) { E(); }
     try { C($nu >=$da); } catch (Exception $_) { E(); }
-    C($nu ==$da);
-    C($nu !=$da);
+    C(HH\Lib\Legacy_FIXME\eq($nu, $da));
+    C(HH\Lib\Legacy_FIXME\neq($nu, $da));
     C($nu===$da);
     C($nu!==$da);
     try { I($nu<=>$da); } catch (Exception $_) { E(); }
@@ -474,8 +474,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($dx<= $tr); } catch (Exception $_) { E(); }
     try { C($dx > $tr); } catch (Exception $_) { E(); }
     try { C($dx >=$tr); } catch (Exception $_) { E(); }
-    C($dx ==$tr);
-    C($dx !=$tr);
+    C(HH\Lib\Legacy_FIXME\eq($dx, $tr));
+    C(HH\Lib\Legacy_FIXME\neq($dx, $tr));
     C($dx===$tr);
     C($dx!==$tr);
     try { I($dx<=>$tr); } catch (Exception $_) { E(); }
@@ -507,8 +507,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($tr<= $dx); } catch (Exception $_) { E(); }
     try { C($tr > $dx); } catch (Exception $_) { E(); }
     try { C($tr >=$dx); } catch (Exception $_) { E(); }
-    C($tr ==$dx);
-    C($tr !=$dx);
+    C(HH\Lib\Legacy_FIXME\eq($tr, $dx));
+    C(HH\Lib\Legacy_FIXME\neq($tr, $dx));
     C($tr===$dx);
     C($tr!==$dx);
     try { I($tr<=>$dx); } catch (Exception $_) { E(); }
@@ -547,8 +547,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($dx<= $tr); } catch (Exception $_) { E(); }
     try { C($dx > $tr); } catch (Exception $_) { E(); }
     try { C($dx >=$tr); } catch (Exception $_) { E(); }
-    C($dx ==$tr);
-    C($dx !=$tr);
+    C(HH\Lib\Legacy_FIXME\eq($dx, $tr));
+    C(HH\Lib\Legacy_FIXME\neq($dx, $tr));
     C($dx===$tr);
     C($dx!==$tr);
     try { I($dx<=>$tr); } catch (Exception $_) { E(); }
@@ -580,8 +580,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($tr<= $dx); } catch (Exception $_) { E(); }
     try { C($tr > $dx); } catch (Exception $_) { E(); }
     try { C($tr >=$dx); } catch (Exception $_) { E(); }
-    C($tr ==$dx);
-    C($tr !=$dx);
+    C(HH\Lib\Legacy_FIXME\eq($tr, $dx));
+    C(HH\Lib\Legacy_FIXME\neq($tr, $dx));
     C($tr===$dx);
     C($tr!==$dx);
     try { I($tr<=>$dx); } catch (Exception $_) { E(); }
@@ -630,8 +630,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($ve<= $fa); } catch (Exception $_) { E(); }
     try { C($ve > $fa); } catch (Exception $_) { E(); }
     try { C($ve >=$fa); } catch (Exception $_) { E(); }
-    C($ve ==$fa);
-    C($ve !=$fa);
+    C(HH\Lib\Legacy_FIXME\eq($ve, $fa));
+    C(HH\Lib\Legacy_FIXME\neq($ve, $fa));
     C($ve===$fa);
     C($ve!==$fa);
     try { I($ve<=>$fa); } catch (Exception $_) { E(); }
@@ -640,8 +640,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($ve<= $nu); } catch (Exception $_) { E(); }
     try { C($ve > $nu); } catch (Exception $_) { E(); }
     try { C($ve >=$nu); } catch (Exception $_) { E(); }
-    C($ve ==$nu);
-    C($ve !=$nu);
+    C(HH\Lib\Legacy_FIXME\eq($ve, $nu));
+    C(HH\Lib\Legacy_FIXME\neq($ve, $nu));
     C($ve===$nu);
     C($ve!==$nu);
     try { I($ve<=>$nu); } catch (Exception $_) { E(); }
@@ -663,8 +663,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($fa<= $ve); } catch (Exception $_) { E(); }
     try { C($fa > $ve); } catch (Exception $_) { E(); }
     try { C($fa >=$ve); } catch (Exception $_) { E(); }
-    C($fa ==$ve);
-    C($fa !=$ve);
+    C(HH\Lib\Legacy_FIXME\eq($fa, $ve));
+    C(HH\Lib\Legacy_FIXME\neq($fa, $ve));
     C($fa===$ve);
     C($fa!==$ve);
     try { I($fa<=>$ve); } catch (Exception $_) { E(); }
@@ -673,8 +673,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($nu<= $ve); } catch (Exception $_) { E(); }
     try { C($nu > $ve); } catch (Exception $_) { E(); }
     try { C($nu >=$ve); } catch (Exception $_) { E(); }
-    C($nu ==$ve);
-    C($nu !=$ve);
+    C(HH\Lib\Legacy_FIXME\eq($nu, $ve));
+    C(HH\Lib\Legacy_FIXME\neq($nu, $ve));
     C($nu===$ve);
     C($nu!==$ve);
     try { I($nu<=>$ve); } catch (Exception $_) { E(); }
@@ -703,8 +703,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($ve<= $fa); } catch (Exception $_) { E(); }
     try { C($ve > $fa); } catch (Exception $_) { E(); }
     try { C($ve >=$fa); } catch (Exception $_) { E(); }
-    C($ve ==$fa);
-    C($ve !=$fa);
+    C(HH\Lib\Legacy_FIXME\eq($ve, $fa));
+    C(HH\Lib\Legacy_FIXME\neq($ve, $fa));
     C($ve===$fa);
     C($ve!==$fa);
     try { I($ve<=>$fa); } catch (Exception $_) { E(); }
@@ -713,8 +713,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($ve<= $nu); } catch (Exception $_) { E(); }
     try { C($ve > $nu); } catch (Exception $_) { E(); }
     try { C($ve >=$nu); } catch (Exception $_) { E(); }
-    C($ve ==$nu);
-    C($ve !=$nu);
+    C(HH\Lib\Legacy_FIXME\eq($ve, $nu));
+    C(HH\Lib\Legacy_FIXME\neq($ve, $nu));
     C($ve===$nu);
     C($ve!==$nu);
     try { I($ve<=>$nu); } catch (Exception $_) { E(); }
@@ -736,8 +736,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($fa<= $ve); } catch (Exception $_) { E(); }
     try { C($fa > $ve); } catch (Exception $_) { E(); }
     try { C($fa >=$ve); } catch (Exception $_) { E(); }
-    C($fa ==$ve);
-    C($fa !=$ve);
+    C(HH\Lib\Legacy_FIXME\eq($fa, $ve));
+    C(HH\Lib\Legacy_FIXME\neq($fa, $ve));
     C($fa===$ve);
     C($fa!==$ve);
     try { I($fa<=>$ve); } catch (Exception $_) { E(); }
@@ -746,8 +746,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($nu<= $ve); } catch (Exception $_) { E(); }
     try { C($nu > $ve); } catch (Exception $_) { E(); }
     try { C($nu >=$ve); } catch (Exception $_) { E(); }
-    C($nu ==$ve);
-    C($nu !=$ve);
+    C(HH\Lib\Legacy_FIXME\eq($nu, $ve));
+    C(HH\Lib\Legacy_FIXME\neq($nu, $ve));
     C($nu===$ve);
     C($nu!==$ve);
     try { I($nu<=>$ve); } catch (Exception $_) { E(); }
@@ -766,8 +766,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($vz<= $tr); } catch (Exception $_) { E(); }
     try { C($vz > $tr); } catch (Exception $_) { E(); }
     try { C($vz >=$tr); } catch (Exception $_) { E(); }
-    C($vz ==$tr);
-    C($vz !=$tr);
+    C(HH\Lib\Legacy_FIXME\eq($vz, $tr));
+    C(HH\Lib\Legacy_FIXME\neq($vz, $tr));
     C($vz===$tr);
     C($vz!==$tr);
     try { I($vz<=>$tr); } catch (Exception $_) { E(); }
@@ -799,8 +799,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($tr<= $vz); } catch (Exception $_) { E(); }
     try { C($tr > $vz); } catch (Exception $_) { E(); }
     try { C($tr >=$vz); } catch (Exception $_) { E(); }
-    C($tr ==$vz);
-    C($tr !=$vz);
+    C(HH\Lib\Legacy_FIXME\eq($tr, $vz));
+    C(HH\Lib\Legacy_FIXME\neq($tr, $vz));
     C($tr===$vz);
     C($tr!==$vz);
     try { I($tr<=>$vz); } catch (Exception $_) { E(); }
@@ -839,8 +839,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($vz<= $tr); } catch (Exception $_) { E(); }
     try { C($vz > $tr); } catch (Exception $_) { E(); }
     try { C($vz >=$tr); } catch (Exception $_) { E(); }
-    C($vz ==$tr);
-    C($vz !=$tr);
+    C(HH\Lib\Legacy_FIXME\eq($vz, $tr));
+    C(HH\Lib\Legacy_FIXME\neq($vz, $tr));
     C($vz===$tr);
     C($vz!==$tr);
     try { I($vz<=>$tr); } catch (Exception $_) { E(); }
@@ -872,8 +872,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($tr<= $vz); } catch (Exception $_) { E(); }
     try { C($tr > $vz); } catch (Exception $_) { E(); }
     try { C($tr >=$vz); } catch (Exception $_) { E(); }
-    C($tr ==$vz);
-    C($tr !=$vz);
+    C(HH\Lib\Legacy_FIXME\eq($tr, $vz));
+    C(HH\Lib\Legacy_FIXME\neq($tr, $vz));
     C($tr===$vz);
     C($tr!==$vz);
     try { I($tr<=>$vz); } catch (Exception $_) { E(); }
@@ -922,8 +922,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($di<= $fa); } catch (Exception $_) { E(); }
     try { C($di > $fa); } catch (Exception $_) { E(); }
     try { C($di >=$fa); } catch (Exception $_) { E(); }
-    C($di ==$fa);
-    C($di !=$fa);
+    C(HH\Lib\Legacy_FIXME\eq($di, $fa));
+    C(HH\Lib\Legacy_FIXME\neq($di, $fa));
     C($di===$fa);
     C($di!==$fa);
     try { I($di<=>$fa); } catch (Exception $_) { E(); }
@@ -932,8 +932,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($di<= $nu); } catch (Exception $_) { E(); }
     try { C($di > $nu); } catch (Exception $_) { E(); }
     try { C($di >=$nu); } catch (Exception $_) { E(); }
-    C($di ==$nu);
-    C($di !=$nu);
+    C(HH\Lib\Legacy_FIXME\eq($di, $nu));
+    C(HH\Lib\Legacy_FIXME\neq($di, $nu));
     C($di===$nu);
     C($di!==$nu);
     try { I($di<=>$nu); } catch (Exception $_) { E(); }
@@ -955,8 +955,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($fa<= $di); } catch (Exception $_) { E(); }
     try { C($fa > $di); } catch (Exception $_) { E(); }
     try { C($fa >=$di); } catch (Exception $_) { E(); }
-    C($fa ==$di);
-    C($fa !=$di);
+    C(HH\Lib\Legacy_FIXME\eq($fa, $di));
+    C(HH\Lib\Legacy_FIXME\neq($fa, $di));
     C($fa===$di);
     C($fa!==$di);
     try { I($fa<=>$di); } catch (Exception $_) { E(); }
@@ -965,8 +965,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($nu<= $di); } catch (Exception $_) { E(); }
     try { C($nu > $di); } catch (Exception $_) { E(); }
     try { C($nu >=$di); } catch (Exception $_) { E(); }
-    C($nu ==$di);
-    C($nu !=$di);
+    C(HH\Lib\Legacy_FIXME\eq($nu, $di));
+    C(HH\Lib\Legacy_FIXME\neq($nu, $di));
     C($nu===$di);
     C($nu!==$di);
     try { I($nu<=>$di); } catch (Exception $_) { E(); }
@@ -995,8 +995,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($di<= $fa); } catch (Exception $_) { E(); }
     try { C($di > $fa); } catch (Exception $_) { E(); }
     try { C($di >=$fa); } catch (Exception $_) { E(); }
-    C($di ==$fa);
-    C($di !=$fa);
+    C(HH\Lib\Legacy_FIXME\eq($di, $fa));
+    C(HH\Lib\Legacy_FIXME\neq($di, $fa));
     C($di===$fa);
     C($di!==$fa);
     try { I($di<=>$fa); } catch (Exception $_) { E(); }
@@ -1005,8 +1005,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($di<= $nu); } catch (Exception $_) { E(); }
     try { C($di > $nu); } catch (Exception $_) { E(); }
     try { C($di >=$nu); } catch (Exception $_) { E(); }
-    C($di ==$nu);
-    C($di !=$nu);
+    C(HH\Lib\Legacy_FIXME\eq($di, $nu));
+    C(HH\Lib\Legacy_FIXME\neq($di, $nu));
     C($di===$nu);
     C($di!==$nu);
     try { I($di<=>$nu); } catch (Exception $_) { E(); }
@@ -1028,8 +1028,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($fa<= $di); } catch (Exception $_) { E(); }
     try { C($fa > $di); } catch (Exception $_) { E(); }
     try { C($fa >=$di); } catch (Exception $_) { E(); }
-    C($fa ==$di);
-    C($fa !=$di);
+    C(HH\Lib\Legacy_FIXME\eq($fa, $di));
+    C(HH\Lib\Legacy_FIXME\neq($fa, $di));
     C($fa===$di);
     C($fa!==$di);
     try { I($fa<=>$di); } catch (Exception $_) { E(); }
@@ -1038,8 +1038,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($nu<= $di); } catch (Exception $_) { E(); }
     try { C($nu > $di); } catch (Exception $_) { E(); }
     try { C($nu >=$di); } catch (Exception $_) { E(); }
-    C($nu ==$di);
-    C($nu !=$di);
+    C(HH\Lib\Legacy_FIXME\eq($nu, $di));
+    C(HH\Lib\Legacy_FIXME\neq($nu, $di));
     C($nu===$di);
     C($nu!==$di);
     try { I($nu<=>$di); } catch (Exception $_) { E(); }
@@ -1058,8 +1058,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($dz<= $tr); } catch (Exception $_) { E(); }
     try { C($dz > $tr); } catch (Exception $_) { E(); }
     try { C($dz >=$tr); } catch (Exception $_) { E(); }
-    C($dz ==$tr);
-    C($dz !=$tr);
+    C(HH\Lib\Legacy_FIXME\eq($dz, $tr));
+    C(HH\Lib\Legacy_FIXME\neq($dz, $tr));
     C($dz===$tr);
     C($dz!==$tr);
     try { I($dz<=>$tr); } catch (Exception $_) { E(); }
@@ -1091,8 +1091,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($tr<= $dz); } catch (Exception $_) { E(); }
     try { C($tr > $dz); } catch (Exception $_) { E(); }
     try { C($tr >=$dz); } catch (Exception $_) { E(); }
-    C($tr ==$dz);
-    C($tr !=$dz);
+    C(HH\Lib\Legacy_FIXME\eq($tr, $dz));
+    C(HH\Lib\Legacy_FIXME\neq($tr, $dz));
     C($tr===$dz);
     C($tr!==$dz);
     try { I($tr<=>$dz); } catch (Exception $_) { E(); }
@@ -1131,8 +1131,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($dz<= $tr); } catch (Exception $_) { E(); }
     try { C($dz > $tr); } catch (Exception $_) { E(); }
     try { C($dz >=$tr); } catch (Exception $_) { E(); }
-    C($dz ==$tr);
-    C($dz !=$tr);
+    C(HH\Lib\Legacy_FIXME\eq($dz, $tr));
+    C(HH\Lib\Legacy_FIXME\neq($dz, $tr));
     C($dz===$tr);
     C($dz!==$tr);
     try { I($dz<=>$tr); } catch (Exception $_) { E(); }
@@ -1164,8 +1164,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($tr<= $dz); } catch (Exception $_) { E(); }
     try { C($tr > $dz); } catch (Exception $_) { E(); }
     try { C($tr >=$dz); } catch (Exception $_) { E(); }
-    C($tr ==$dz);
-    C($tr !=$dz);
+    C(HH\Lib\Legacy_FIXME\eq($tr, $dz));
+    C(HH\Lib\Legacy_FIXME\neq($tr, $dz));
     C($tr===$dz);
     C($tr!==$dz);
     try { I($tr<=>$dz); } catch (Exception $_) { E(); }
@@ -1214,8 +1214,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($ks<= $fa); } catch (Exception $_) { E(); }
     try { C($ks > $fa); } catch (Exception $_) { E(); }
     try { C($ks >=$fa); } catch (Exception $_) { E(); }
-    C($ks ==$fa);
-    C($ks !=$fa);
+    C(HH\Lib\Legacy_FIXME\eq($ks, $fa));
+    C(HH\Lib\Legacy_FIXME\neq($ks, $fa));
     C($ks===$fa);
     C($ks!==$fa);
     try { I($ks<=>$fa); } catch (Exception $_) { E(); }
@@ -1224,8 +1224,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($ks<= $nu); } catch (Exception $_) { E(); }
     try { C($ks > $nu); } catch (Exception $_) { E(); }
     try { C($ks >=$nu); } catch (Exception $_) { E(); }
-    C($ks ==$nu);
-    C($ks !=$nu);
+    C(HH\Lib\Legacy_FIXME\eq($ks, $nu));
+    C(HH\Lib\Legacy_FIXME\neq($ks, $nu));
     C($ks===$nu);
     C($ks!==$nu);
     try { I($ks<=>$nu); } catch (Exception $_) { E(); }
@@ -1247,8 +1247,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($fa<= $ks); } catch (Exception $_) { E(); }
     try { C($fa > $ks); } catch (Exception $_) { E(); }
     try { C($fa >=$ks); } catch (Exception $_) { E(); }
-    C($fa ==$ks);
-    C($fa !=$ks);
+    C(HH\Lib\Legacy_FIXME\eq($fa, $ks));
+    C(HH\Lib\Legacy_FIXME\neq($fa, $ks));
     C($fa===$ks);
     C($fa!==$ks);
     try { I($fa<=>$ks); } catch (Exception $_) { E(); }
@@ -1257,8 +1257,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($nu<= $ks); } catch (Exception $_) { E(); }
     try { C($nu > $ks); } catch (Exception $_) { E(); }
     try { C($nu >=$ks); } catch (Exception $_) { E(); }
-    C($nu ==$ks);
-    C($nu !=$ks);
+    C(HH\Lib\Legacy_FIXME\eq($nu, $ks));
+    C(HH\Lib\Legacy_FIXME\neq($nu, $ks));
     C($nu===$ks);
     C($nu!==$ks);
     try { I($nu<=>$ks); } catch (Exception $_) { E(); }
@@ -1287,8 +1287,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($ks<= $fa); } catch (Exception $_) { E(); }
     try { C($ks > $fa); } catch (Exception $_) { E(); }
     try { C($ks >=$fa); } catch (Exception $_) { E(); }
-    C($ks ==$fa);
-    C($ks !=$fa);
+    C(HH\Lib\Legacy_FIXME\eq($ks, $fa));
+    C(HH\Lib\Legacy_FIXME\neq($ks, $fa));
     C($ks===$fa);
     C($ks!==$fa);
     try { I($ks<=>$fa); } catch (Exception $_) { E(); }
@@ -1297,8 +1297,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($ks<= $nu); } catch (Exception $_) { E(); }
     try { C($ks > $nu); } catch (Exception $_) { E(); }
     try { C($ks >=$nu); } catch (Exception $_) { E(); }
-    C($ks ==$nu);
-    C($ks !=$nu);
+    C(HH\Lib\Legacy_FIXME\eq($ks, $nu));
+    C(HH\Lib\Legacy_FIXME\neq($ks, $nu));
     C($ks===$nu);
     C($ks!==$nu);
     try { I($ks<=>$nu); } catch (Exception $_) { E(); }
@@ -1320,8 +1320,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($fa<= $ks); } catch (Exception $_) { E(); }
     try { C($fa > $ks); } catch (Exception $_) { E(); }
     try { C($fa >=$ks); } catch (Exception $_) { E(); }
-    C($fa ==$ks);
-    C($fa !=$ks);
+    C(HH\Lib\Legacy_FIXME\eq($fa, $ks));
+    C(HH\Lib\Legacy_FIXME\neq($fa, $ks));
     C($fa===$ks);
     C($fa!==$ks);
     try { I($fa<=>$ks); } catch (Exception $_) { E(); }
@@ -1330,8 +1330,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($nu<= $ks); } catch (Exception $_) { E(); }
     try { C($nu > $ks); } catch (Exception $_) { E(); }
     try { C($nu >=$ks); } catch (Exception $_) { E(); }
-    C($nu ==$ks);
-    C($nu !=$ks);
+    C(HH\Lib\Legacy_FIXME\eq($nu, $ks));
+    C(HH\Lib\Legacy_FIXME\neq($nu, $ks));
     C($nu===$ks);
     C($nu!==$ks);
     try { I($nu<=>$ks); } catch (Exception $_) { E(); }
@@ -1350,8 +1350,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($ky<= $tr); } catch (Exception $_) { E(); }
     try { C($ky > $tr); } catch (Exception $_) { E(); }
     try { C($ky >=$tr); } catch (Exception $_) { E(); }
-    C($ky ==$tr);
-    C($ky !=$tr);
+    C(HH\Lib\Legacy_FIXME\eq($ky, $tr));
+    C(HH\Lib\Legacy_FIXME\neq($ky, $tr));
     C($ky===$tr);
     C($ky!==$tr);
     try { I($ky<=>$tr); } catch (Exception $_) { E(); }
@@ -1383,8 +1383,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($tr<= $ky); } catch (Exception $_) { E(); }
     try { C($tr > $ky); } catch (Exception $_) { E(); }
     try { C($tr >=$ky); } catch (Exception $_) { E(); }
-    C($tr ==$ky);
-    C($tr !=$ky);
+    C(HH\Lib\Legacy_FIXME\eq($tr, $ky));
+    C(HH\Lib\Legacy_FIXME\neq($tr, $ky));
     C($tr===$ky);
     C($tr!==$ky);
     try { I($tr<=>$ky); } catch (Exception $_) { E(); }
@@ -1423,8 +1423,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($ky<= $tr); } catch (Exception $_) { E(); }
     try { C($ky > $tr); } catch (Exception $_) { E(); }
     try { C($ky >=$tr); } catch (Exception $_) { E(); }
-    C($ky ==$tr);
-    C($ky !=$tr);
+    C(HH\Lib\Legacy_FIXME\eq($ky, $tr));
+    C(HH\Lib\Legacy_FIXME\neq($ky, $tr));
     C($ky===$tr);
     C($ky!==$tr);
     try { I($ky<=>$tr); } catch (Exception $_) { E(); }
@@ -1456,8 +1456,8 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
     try { C($tr<= $ky); } catch (Exception $_) { E(); }
     try { C($tr > $ky); } catch (Exception $_) { E(); }
     try { C($tr >=$ky); } catch (Exception $_) { E(); }
-    C($tr ==$ky);
-    C($tr !=$ky);
+    C(HH\Lib\Legacy_FIXME\eq($tr, $ky));
+    C(HH\Lib\Legacy_FIXME\neq($tr, $ky));
     C($tr===$ky);
     C($tr!==$ky);
     try { I($tr<=>$ky); } catch (Exception $_) { E(); }

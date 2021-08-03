@@ -35,8 +35,8 @@ foreach ($oper1 as $e1)
     foreach ($oper2 as $e2)
     {
         $t2 = HH\is_any_array($e2) ? 'Array' : (string)$e2;
-        echo "{$t1} ==   {$t2}  result: "; var_dump($e1 == $e2);
-        echo "{$t1} !=   {$t2}  result: "; var_dump($e1 != $e2);
+        echo "{$t1} ==   {$t2}  result: "; var_dump(HH\Lib\Legacy_FIXME\eq($e1, $e2));
+        echo "{$t1} !=   {$t2}  result: "; var_dump(HH\Lib\Legacy_FIXME\neq($e1, $e2));
         echo "{$t1} ===  {$t2}  result: "; var_dump($e1 === $e2);
         echo "{$t1} !==  {$t2}  result: "; var_dump($e1 !== $e2);
         echo "=======\n";
@@ -81,8 +81,8 @@ foreach ($oper1 as $e1)
     foreach ($oper2 as $e2)
     {
         $t2 = HH\is_any_array($e2) ? 'Array' : (string)$e2;
-        echo "{$t1} ==   {$t2}  result: "; var_dump($e1 == $e2);
-        echo "{$t1} !=   {$t2}  result: "; var_dump($e1 != $e2);
+        echo "{$t1} ==   {$t2}  result: "; var_dump(HH\Lib\Legacy_FIXME\eq($e1, $e2));
+        echo "{$t1} !=   {$t2}  result: "; var_dump(HH\Lib\Legacy_FIXME\neq($e1, $e2));
         echo "{$t1} ===  {$t2}  result: "; var_dump($e1 === $e2);
         echo "{$t1} !==  {$t2}  result: "; var_dump($e1 !== $e2);
         echo "=======\n";
@@ -104,8 +104,8 @@ foreach ($oper1 as $e1)
     foreach ($oper2 as $e2)
     {
         $t2 = HH\is_any_array($e2) ? 'Array' : (string)$e2;
-        echo "{$t1} ==   {$t2}  result: "; var_dump($e1 == $e2);
-        echo "{$t1} !=   {$t2}  result: "; var_dump($e1 != $e2);
+        echo "{$t1} ==   {$t2}  result: "; var_dump(HH\Lib\Legacy_FIXME\eq($e1, $e2));
+        echo "{$t1} !=   {$t2}  result: "; var_dump(HH\Lib\Legacy_FIXME\neq($e1, $e2));
         echo "{$t1} ===  {$t2}  result: "; var_dump($e1 === $e2);
         echo "{$t1} !==  {$t2}  result: "; var_dump($e1 !== $e2);
         echo "=======\n";
@@ -127,8 +127,8 @@ foreach ($oper1 as $e1)
     foreach ($oper2 as $e2)
     {
         $t2 = HH\is_any_array($e2) ? 'Array' : (string)$e2;
-        echo "{$t1} ==   {$t2}  result: "; var_dump($e1 == $e2);
-        echo "{$t1} !=   {$t2}  result: "; var_dump($e1 != $e2);
+        echo "{$t1} ==   {$t2}  result: "; var_dump(HH\Lib\Legacy_FIXME\eq($e1, $e2));
+        echo "{$t1} !=   {$t2}  result: "; var_dump(HH\Lib\Legacy_FIXME\neq($e1, $e2));
         echo "{$t1} ===  {$t2}  result: "; var_dump($e1 === $e2);
         echo "{$t1} !==  {$t2}  result: "; var_dump($e1 !== $e2);
         echo "=======\n";

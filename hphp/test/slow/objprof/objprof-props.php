@@ -103,9 +103,9 @@ echo get_instances('SimpleProps::prop1', $objs) == 1 &&
      get_bytes('SimpleProps::prop1', $objs) == 19 &&
      get_bytes('SimpleProps::prop2', $objs) == 16 &&
      get_bytes('SimpleProps::prop2', $objs) == 16 &&
-     get_bytesd('SimpleProps::prop1', $objs) == 16 &&
-     get_bytesd('SimpleProps::prop2', $objs) == 16 &&
-     get_bytesd('SimpleProps::prop2', $objs) == 16 ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleProps::prop1', $objs), 16) &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleProps::prop2', $objs), 16) &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleProps::prop2', $objs), 16) ?
       "(GOOD) Bytes (props) works\n" :
       "(BAD) Bytes (props) failed: " . var_export($objs, true) . "\n";
 $myClass = null;
@@ -119,9 +119,9 @@ echo get_instances('SimpleArrays::arrEmpty', $objs) == 1 &&
      get_bytes('SimpleArrays::arrEmpty', $objs) == 32 &&
      get_bytes('SimpleArrays::arrMixed', $objs) == 110 &&
      get_bytes('SimpleArrays::arrNums', $objs) == 80 &&
-     get_bytesd('SimpleArrays::arrEmpty', $objs) == 16 &&
-     get_bytesd('SimpleArrays::arrMixed', $objs) == 16 &&
-     get_bytesd('SimpleArrays::arrNums', $objs) == 16 ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleArrays::arrEmpty', $objs), 16) &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleArrays::arrMixed', $objs), 16) &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleArrays::arrNums', $objs), 16) ?
       "(GOOD) Bytes (arrays) works\n" :
       "(BAD) Bytes (arrays) failed: " . var_export($objs, true) . "\n";
 $myClass = null;
@@ -137,8 +137,8 @@ echo get_instances('DynamicClass::abcd', $objs) == 1 &&
      get_instances('DynamicClass::1234', $objs) == 1 &&
      get_bytes('DynamicClass::abcd', $objs) == 36 &&
      get_bytes('DynamicClass::1234', $objs) == 36 &&
-     get_bytesd('DynamicClass::abcd', $objs) == 32 &&
-     get_bytesd('DynamicClass::1234', $objs) == 32 ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('DynamicClass::abcd', $objs), 32) &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('DynamicClass::1234', $objs), 32) ?
       "(GOOD) Bytes (dynamic) works\n" :
       "(BAD) Bytes (dynamic) failed: " . var_export($objs, true) . "\n";
 $myClass = null;
@@ -162,9 +162,9 @@ echo get_instances('HH\Map::abc', $objs) == 1 &&
      get_bytes('HH\Map::abc', $objs) == 35 &&
      get_bytes('HH\Map::1', $objs) == 34 &&
      get_bytes('HH\Map::1234123', $objs) == 32 &&
-     get_bytesd('HH\Map::abc', $objs) == 32 &&
-     get_bytesd('HH\Map::1', $objs) == 32 &&
-     get_bytesd('HH\Map::1234123', $objs) == 32 ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\Map::abc', $objs), 32) &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\Map::1', $objs), 32) &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\Map::1234123', $objs), 32) ?
       "(GOOD) Bytes (Mixed Map) works in default mode\n" :
       "(BAD) Bytes (Mixed Map) failed: " . var_export($objs, true) . "\n";
 $myClass = null;
@@ -198,7 +198,7 @@ $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_instances('HH\Vector::<index>', $objs) == 2 &&
      get_bytes('HH\Vector::<index>', $objs) == 35 &&
-     get_bytesd('HH\Vector::<index>', $objs) == 32 ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\Vector::<index>', $objs), 32) ?
       "(GOOD) Bytes (Vector) works in default mode\n" :
       "(BAD) Bytes (Vector) failed: " . var_export($objs, true) . "\n";
 $myClass = null;
@@ -231,7 +231,7 @@ __hhvm_intrinsics\launder_value($myClass);
 __hhvm_intrinsics\launder_value($myClass2);
 echo get_instances('SharedStringClass::val_ref', $objs) == 2 &&
      get_bytes('SharedStringClass::val_ref', $objs) == (25*2) &&
-     get_bytesd('SharedStringClass::val_ref', $objs) == (16*2 + (9/3)*2) ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SharedStringClass::val_ref', $objs), (16*2 + (9/3)*2)) ?
       "(GOOD) Bytes (SharedString) works\n" :
       "(BAD) Bytes (SharedString) failed: " . var_export($objs, true) . "\n";
 $myClass = null;
@@ -250,11 +250,11 @@ echo get_instances('SimpleClassForExclude::map', $objs) == 1 &&
      get_bytes('SimpleClassForExclude::fooCls2', $objs) == 16 /* (tv) */ &&
      get_bytes('HH\Map::foo', $objs) == 39 &&
      get_bytes('HH\Map::bar', $objs) == 43 &&
-     get_bytesd('SimpleClassForExclude::map', $objs) == 16 &&
-     get_bytesd('SimpleClassForExclude::fooCls1', $objs) == 16 &&
-     get_bytesd('SimpleClassForExclude::fooCls2', $objs) == 16 &&
-     get_bytesd('HH\Map::foo', $objs) == 36 &&
-     get_bytesd('HH\Map::bar', $objs) == 40 ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleClassForExclude::map', $objs), 16) &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleClassForExclude::fooCls1', $objs), 16) &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleClassForExclude::fooCls2', $objs), 16) &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\Map::foo', $objs), 36) &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('HH\Map::bar', $objs), 40) ?
       "(GOOD) Bytes (Mixed Class Props) works in default mode\n" :
       "(BAD) Bytes (Mixed Map) failed: " . var_export($objs, true) . "\n";
 $myClass = null;
@@ -270,9 +270,9 @@ echo get_instances('SimpleClassForExclude::map', $objs) == 1 &&
      get_bytes('SimpleClassForExclude::map', $objs) == (16+$MapSize+39+43) &&
      get_bytes('SimpleClassForExclude::fooCls1', $objs) == 16 /* (tv) */  &&
      get_bytes('SimpleClassForExclude::fooCls2', $objs) == 16 /* (tv) */  &&
-     get_bytesd('SimpleClassForExclude::map', $objs) == (16+$MapSize+36+40) &&
-     get_bytesd('SimpleClassForExclude::fooCls1', $objs) == 16 &&
-     get_bytesd('SimpleClassForExclude::fooCls2', $objs) == 16 ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleClassForExclude::map', $objs), (16+$MapSize+36+40)) &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleClassForExclude::fooCls1', $objs), 16) &&
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleClassForExclude::fooCls2', $objs), 16) ?
       "(GOOD) Bytes (Mixed Class Props) works in USER_TYPES_ONLY mode\n" :
       "(BAD) Bytes (Mixed Map) failed: " . var_export($objs, true) . "\n";
 $myClass = null;

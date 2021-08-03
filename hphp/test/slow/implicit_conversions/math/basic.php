@@ -30,12 +30,12 @@ function do_the_thing(mixed $i, mixed $j): void {
     plus($i, $j);
     minus($i, $j);
     mul($i, $j);
-    if ($j != 0) {
+    if (HH\Lib\Legacy_FIXME\neq($j, 0)) {
       // don't trigger div-by-zero exceptions
       div($i, $j);
     }
   }
-  if ($j != 0 && $j !== INF) {
+  if (HH\Lib\Legacy_FIXME\neq($j, 0) && $j !== INF) {
     // don't trigger div-by-zero exceptions
     mod($i, $j);
   }

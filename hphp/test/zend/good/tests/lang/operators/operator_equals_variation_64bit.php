@@ -26,7 +26,7 @@ for ($i = 0; $i < count($validEqual); $i +=2) {
    $typeToTestVal = $validEqual[$i];
    $compares = $validEqual[$i + 1];
    foreach($compares as $compareVal) {
-      if ($typeToTestVal == $compareVal) {
+      if (HH\Lib\Legacy_FIXME\eq($typeToTestVal, $compareVal)) {
          // do nothing
       }
       else {

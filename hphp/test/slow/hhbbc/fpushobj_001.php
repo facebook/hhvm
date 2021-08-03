@@ -1,7 +1,7 @@
 <?hh
 class C { public function heh() { echo "heh\n"; } }
 function foo() {
-  switch (\HH\global_get('x')) {
+  switch (HH\Lib\Legacy_FIXME\int_cast_for_switch(\HH\global_get('x'), null)) {
   case 0:
     return new C;
   }

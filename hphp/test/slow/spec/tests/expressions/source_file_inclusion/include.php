@@ -68,7 +68,7 @@
   // see how low the precedence of include is
 
   //if (include('return_with_value.php') == 987) ;
-  if ((include('return_with_value.php')) == 987) ;
+  if (HH\Lib\Legacy_FIXME\eq((include('return_with_value.php')), 987)) ;
   //if (include('return_with_value.php') | 987) ;
   if ((int)(include('return_with_value.php')) | 987) ;
   //if (include('return_with_value.php') && 987) ;

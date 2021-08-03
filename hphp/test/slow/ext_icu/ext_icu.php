@@ -37,7 +37,7 @@ function test_icu_match() {
 
   // Test basic regex parsing functionality.
   VERIFY(icu_match("scripting", $subject) != false);
-  VERIFY(icu_match("php", $subject) == false);
+  VERIFY(HH\Lib\Legacy_FIXME\eq(icu_match("php", $subject), false));
   VERIFY(icu_match("(\\bPHP\\b)", $subject) != false);
   VERIFY(icu_match("(\\bPHP\\b))", $subject) == false);
 
@@ -141,7 +141,7 @@ function test_icu_match() {
     ) !=
       false,
   );
-  VERIFY(icu_match("(php)", $subject) == false);
+  VERIFY(HH\Lib\Legacy_FIXME\eq(icu_match("(php)", $subject), false));
 
   // Test ICU specific (ie bidi) functionality.
   $pattern_ltr = "\\p{Bidi_Class=Left_To_Right}";
@@ -149,14 +149,14 @@ function test_icu_match() {
   $pattern_arl = "\\p{Bidi_Class=Arabic_Letter}";
 
   VERIFY(icu_match($pattern_ltr, $subject_en) != false);
-  VERIFY(icu_match($pattern_rtl, $subject_en) == false);
+  VERIFY(HH\Lib\Legacy_FIXME\eq(icu_match($pattern_rtl, $subject_en), false));
 
-  VERIFY(icu_match($pattern_ltr, $subject_he) == false);
+  VERIFY(HH\Lib\Legacy_FIXME\eq(icu_match($pattern_ltr, $subject_he), false));
   VERIFY(icu_match($pattern_rtl, $subject_he) != false);
-  VERIFY(icu_match($pattern_arl, $subject_he) == false);
+  VERIFY(HH\Lib\Legacy_FIXME\eq(icu_match($pattern_arl, $subject_he), false));
 
-  VERIFY(icu_match($pattern_ltr, $subject_ar) == false);
-  VERIFY(icu_match($pattern_rtl, $subject_ar) == false);
+  VERIFY(HH\Lib\Legacy_FIXME\eq(icu_match($pattern_ltr, $subject_ar), false));
+  VERIFY(HH\Lib\Legacy_FIXME\eq(icu_match($pattern_rtl, $subject_ar), false));
   VERIFY(icu_match($pattern_arl, $subject_ar) != false);
 
   VERIFY(icu_match($pattern_ltr, $subject_mixed) != false);

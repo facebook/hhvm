@@ -79,7 +79,7 @@ function test_hash_hmac() {
 
 function test_furchash() {
   if (is_facebook()) {
-    var_dump(furchash_hphp_ext("15minutesoffame", 15, 86) == '25');
+    var_dump(HH\Lib\Legacy_FIXME\eq(furchash_hphp_ext("15minutesoffame", 15, 86), '25'));
   } else {
     var_dump(furchash_hphp_ext("15minutesoffame", 15, 86) == '85');
   }

@@ -22,7 +22,7 @@ function wrap($fun) {
 
 function comp($x, $y) {
   wrap(() ==> var_dump($x === $y));
-  wrap(() ==> var_dump($x == $y));
+  wrap(() ==> var_dump(HH\Lib\Legacy_FIXME\eq($x, $y)));
   wrap(() ==> var_dump($x < $y));
   wrap(() ==> var_dump($x <= $y));
   wrap(() ==> var_dump($x > $y));

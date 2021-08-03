@@ -46,8 +46,8 @@ function main() {
   try { var_dump(dict[1.234 => 123] === dict[5.678 => 123]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
   try { var_dump(dict[null => 123] === dict[null => 123]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
 
-  var_dump(varray[dict[0 => 123], dict[0 => '123']] == varray[dict[0 => '123'], dict[0 => 123]]);
-  var_dump(varray[dict[0 => 123], dict[0 => '123']] != varray[dict[0 => '123'], dict[0 => 123]]);
+  var_dump(HH\Lib\Legacy_FIXME\eq(varray[dict[0 => 123], dict[0 => '123']], varray[dict[0 => '123'], dict[0 => 123]]));
+  var_dump(HH\Lib\Legacy_FIXME\neq(varray[dict[0 => 123], dict[0 => '123']], varray[dict[0 => '123'], dict[0 => 123]]));
   var_dump(varray[dict[0 => 123], dict[0 => '123']] === varray[dict[0 => '123'], dict[0 => 123]]);
   var_dump(varray[dict[0 => 123], dict[0 => '123']] !== varray[dict[0 => '123'], dict[0 => 123]]);
   try { var_dump(varray[dict[0 => 123], dict[0 => '123']] < varray[dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }

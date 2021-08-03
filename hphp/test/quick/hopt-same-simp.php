@@ -22,22 +22,22 @@ function foo4() {
 
 function foo5() {
   $x = 2;
-  return $x == "2";
+  return HH\Lib\Legacy_FIXME\eq($x, "2");
 }
 
 function foo6() {
   $x = 2;
-  return $x != "2";
+  return HH\Lib\Legacy_FIXME\neq($x, "2");
 }
 
 function foo7() {
   $x = "2";
-  return $x == 2;
+  return HH\Lib\Legacy_FIXME\eq($x, 2);
 }
 
 function foo8() {
   $x = "2";
-  return $x != 2;
+  return HH\Lib\Legacy_FIXME\neq($x, 2);
 }
 
 function foo9($x) {

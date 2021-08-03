@@ -7,7 +7,7 @@ class Y extends X {
 }
 
 function test(X $obj, string $s) {
-  return $obj == $s;
+  return HH\Lib\Legacy_FIXME\eq($obj, $s);
 }
 
 function main() {

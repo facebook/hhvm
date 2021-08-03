@@ -21,14 +21,14 @@ function main() {
   var_dump(ImmMap {'42' => 42} == ImmMap { 42  => 42});
 
   // intish string value can be == integer value
-  var_dump(   Map {42 =>  42 } ==    Map {42 => '42'});
-  var_dump(   Map {42 =>  42 } == ImmMap {42 => '42'});
-  var_dump(ImmMap {42 =>  42 } ==    Map {42 => '42'});
-  var_dump(ImmMap {42 =>  42 } == ImmMap {42 => '42'});
-  var_dump(   Map {42 => '42'} ==    Map {42 =>  42 });
-  var_dump(   Map {42 => '42'} == ImmMap {42 =>  42 });
-  var_dump(ImmMap {42 => '42'} ==    Map {42 =>  42 });
-  var_dump(ImmMap {42 => '42'} == ImmMap {42 =>  42 });
+  var_dump(   HH\Lib\Legacy_FIXME\eq(Map {42 =>  42 }, Map {42 => '42'}));
+  var_dump(   HH\Lib\Legacy_FIXME\eq(Map {42 =>  42 }, ImmMap {42 => '42'}));
+  var_dump(HH\Lib\Legacy_FIXME\eq(ImmMap {42 =>  42 }, Map {42 => '42'}));
+  var_dump(HH\Lib\Legacy_FIXME\eq(ImmMap {42 =>  42 }, ImmMap {42 => '42'}));
+  var_dump(   HH\Lib\Legacy_FIXME\eq(Map {42 => '42'}, Map {42 =>  42 }));
+  var_dump(   HH\Lib\Legacy_FIXME\eq(Map {42 => '42'}, ImmMap {42 =>  42 }));
+  var_dump(HH\Lib\Legacy_FIXME\eq(ImmMap {42 => '42'}, Map {42 =>  42 }));
+  var_dump(HH\Lib\Legacy_FIXME\eq(ImmMap {42 => '42'}, ImmMap {42 =>  42 }));
 }
 
 <<__EntryPoint>>

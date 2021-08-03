@@ -207,7 +207,7 @@ function checkServerId($serverPort, $expectedIds) {
       $expectedIds = varray[$expectedIds];
     }
     foreach ($expectedIds as $id) {
-      if ($matches[1] == $id) return true;
+      if (HH\Lib\Legacy_FIXME\eq($matches[1], $id)) return true;
     }
     tlog('a server for a different test responded');
     return false;

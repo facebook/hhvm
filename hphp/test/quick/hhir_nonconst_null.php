@@ -11,8 +11,8 @@ function ar() { return null; }
   echo "\n";
   echo $x == true;
   echo "\n";
-  echo $x != false;
+  echo HH\Lib\Legacy_FIXME\neq($x, false);
   echo "\n";
-  echo $x == false;
+  echo HH\Lib\Legacy_FIXME\eq($x, false);
   echo "\n";
 }

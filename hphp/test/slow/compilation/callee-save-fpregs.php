@@ -25,7 +25,7 @@ class X {
 }
 
 function test($a, $x) {
-  return $a == $x;
+  return HH\Lib\Legacy_FIXME\eq($a, $x);
 }
 
 abstract final class CompilationCalleeSaveFpregs {

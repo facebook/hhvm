@@ -54,7 +54,11 @@ function strswitch() {
   }
 
   $x = '123';
-  switch ($x) {
+  switch (HH\Lib\Legacy_FIXME\string_cast_for_switch($x, '123.0', null, null, dict[
+  '123.0' => 123,
+  '123' => 123,
+], dict[
+])) {
     case '123.0':
       echo "right\n";
       break;

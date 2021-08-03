@@ -49,28 +49,28 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('va');
     C($cm<$va);C($cm<=$va);C($cm>$va);C($cm>=$va);C($cm==$va);C($cm===$va);
   begin_row('oa');
-    C($cm<$oa);C($cm<=$oa);C($cm>$oa);C($cm>=$oa);C($cm==$oa);C($cm===$oa);
+    C($cm<$oa);C($cm<=$oa);C($cm>$oa);C($cm>=$oa);C(HH\Lib\Legacy_FIXME\eq($cm, $oa));C($cm===$oa);
   begin_row('fa');
     C($cm<$fa);C($cm<=$fa);C($cm>$fa);C($cm>=$fa);C($cm==$fa);C($cm===$fa);
 
   begin_row('va', 'WRAPA');
     C($xx<$vx);C($xx<=$vx);C($xx>$vx);C($xx>=$vx);C($xx==$vx);C($xx===$vx);
   begin_row('oa', 'WRAPA');
-    C($xx<$ox);C($xx<=$ox);C($xx>$ox);C($xx>=$ox);C($xx==$ox);C($xx===$ox);
+    C($xx<$ox);C($xx<=$ox);C($xx>$ox);C($xx>=$ox);C(HH\Lib\Legacy_FIXME\eq($xx, $ox));C($xx===$ox);
   begin_row('fa', 'WRAPA');
     C($xx<$fx);C($xx<=$fx);C($xx>$fx);C($xx>=$fx);C($xx==$fx);C($xx===$fx);
 
   begin_row('va', 'WRAPO');
     C($xy<$vy);C($xy<=$vy);C($xy>$vy);C($xy>=$vy);C($xy==$vy);C($xy===$vy);
   begin_row('oa', 'WRAPO');
-    C($xy<$oy);C($xy<=$oy);C($xy>$oy);C($xy>=$oy);C($xy==$oy);C($xy===$oy);
+    C($xy<$oy);C($xy<=$oy);C($xy>$oy);C($xy>=$oy);C(HH\Lib\Legacy_FIXME\eq($xy, $oy));C($xy===$oy);
   begin_row('fa', 'WRAPO');
     C($xy<$fy);C($xy<=$fy);C($xy>$fy);C($xy>=$fy);C($xy==$fy);C($xy===$fy);
 
   begin_row('va', 'WRAPD');
     C($xz<$vz);C($xz<=$vz);C($xz>$vz);C($xz>=$vz);C($xz==$vz);C($xz===$vz);
   begin_row('oa', 'WRAPD');
-    C($xz<$oz);C($xz<=$oz);C($xz>$oz);C($xz>=$oz);C($xz==$oz);C($xz===$oz);
+    C($xz<$oz);C($xz<=$oz);C($xz>$oz);C($xz>=$oz);C(HH\Lib\Legacy_FIXME\eq($xz, $oz));C($xz===$oz);
   begin_row('fa', 'WRAPD');
     C($xz<$fz);C($xz<=$fz);C($xz>$fz);C($xz>=$fz);C($xz==$fz);C($xz===$fz);
   print_footer();
@@ -79,28 +79,28 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('va');
     C($va<$cm);C($va<=$cm);C($va>$cm);C($va>=$cm);C($va==$cm);C($va===$cm);
   begin_row('oa');
-    C($oa<$cm);C($oa<=$cm);C($oa>$cm);C($oa>=$cm);C($oa==$cm);C($oa===$cm);
+    C($oa<$cm);C($oa<=$cm);C($oa>$cm);C($oa>=$cm);C(HH\Lib\Legacy_FIXME\eq($oa, $cm));C($oa===$cm);
   begin_row('fa');
     C($fa<$cm);C($fa<=$cm);C($fa>$cm);C($fa>=$cm);C($fa==$cm);C($fa===$cm);
 
   begin_row('va', 'WRAPA');
     C($vx<$xx);C($vx<=$xx);C($vx>$xx);C($vx>=$xx);C($vx==$xx);C($vx===$xx);
   begin_row('oa', 'WRAPA');
-    C($ox<$xx);C($ox<=$xx);C($ox>$xx);C($ox>=$xx);C($ox==$xx);C($ox===$xx);
+    C($ox<$xx);C($ox<=$xx);C($ox>$xx);C($ox>=$xx);C(HH\Lib\Legacy_FIXME\eq($ox, $xx));C($ox===$xx);
   begin_row('fa', 'WRAPA');
     C($fx<$xx);C($fx<=$xx);C($fx>$xx);C($fx>=$xx);C($fx==$xx);C($fx===$xx);
 
   begin_row('va', 'WRAPO');
     C($vy<$xy);C($vy<=$xy);C($vy>$xy);C($vy>=$xy);C($vy==$xy);C($vy===$xy);
   begin_row('oa', 'WRAPO');
-    C($oy<$xy);C($oy<=$xy);C($oy>$xy);C($oy>=$xy);C($oy==$xy);C($oy===$xy);
+    C($oy<$xy);C($oy<=$xy);C($oy>$xy);C($oy>=$xy);C(HH\Lib\Legacy_FIXME\eq($oy, $xy));C($oy===$xy);
   begin_row('fa', 'WRAPO');
     C($fy<$xy);C($fy<=$xy);C($fy>$xy);C($fy>=$xy);C($fy==$xy);C($fy===$xy);
 
   begin_row('va', 'WRAPD');
     C($vz<$xz);C($vz<=$xz);C($vz>$xz);C($vz>=$xz);C($vz==$xz);C($vz===$xz);
   begin_row('oa', 'WRAPD');
-    C($oz<$xz);C($oz<=$xz);C($oz>$xz);C($oz>=$xz);C($oz==$xz);C($oz===$xz);
+    C($oz<$xz);C($oz<=$xz);C($oz>$xz);C($oz>=$xz);C(HH\Lib\Legacy_FIXME\eq($oz, $xz));C($oz===$xz);
   begin_row('fa', 'WRAPD');
     C($fz<$xz);C($fz<=$xz);C($fz>$xz);C($fz>=$xz);C($fz==$xz);C($fz===$xz);
   print_footer();
@@ -122,28 +122,28 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('va');
     C($cm<$va);C($cm<=$va);C($cm>$va);C($cm>=$va);C($cm==$va);C($cm===$va);
   begin_row('oa');
-    C($cm<$oa);C($cm<=$oa);C($cm>$oa);C($cm>=$oa);C($cm==$oa);C($cm===$oa);
+    C($cm<$oa);C($cm<=$oa);C($cm>$oa);C($cm>=$oa);C(HH\Lib\Legacy_FIXME\eq($cm, $oa));C($cm===$oa);
   begin_row('fa');
     C($cm<$fa);C($cm<=$fa);C($cm>$fa);C($cm>=$fa);C($cm==$fa);C($cm===$fa);
 
   begin_row('va', 'WRAPA');
     C($xx<$vx);C($xx<=$vx);C($xx>$vx);C($xx>=$vx);C($xx==$vx);C($xx===$vx);
   begin_row('oa', 'WRAPA');
-    C($xx<$ox);C($xx<=$ox);C($xx>$ox);C($xx>=$ox);C($xx==$ox);C($xx===$ox);
+    C($xx<$ox);C($xx<=$ox);C($xx>$ox);C($xx>=$ox);C(HH\Lib\Legacy_FIXME\eq($xx, $ox));C($xx===$ox);
   begin_row('fa', 'WRAPA');
     C($xx<$fx);C($xx<=$fx);C($xx>$fx);C($xx>=$fx);C($xx==$fx);C($xx===$fx);
 
   begin_row('va', 'WRAPO');
     C($xy<$vy);C($xy<=$vy);C($xy>$vy);C($xy>=$vy);C($xy==$vy);C($xy===$vy);
   begin_row('oa', 'WRAPO');
-    C($xy<$oy);C($xy<=$oy);C($xy>$oy);C($xy>=$oy);C($xy==$oy);C($xy===$oy);
+    C($xy<$oy);C($xy<=$oy);C($xy>$oy);C($xy>=$oy);C(HH\Lib\Legacy_FIXME\eq($xy, $oy));C($xy===$oy);
   begin_row('fa', 'WRAPO');
     C($xy<$fy);C($xy<=$fy);C($xy>$fy);C($xy>=$fy);C($xy==$fy);C($xy===$fy);
 
   begin_row('va', 'WRAPD');
     C($xz<$vz);C($xz<=$vz);C($xz>$vz);C($xz>=$vz);C($xz==$vz);C($xz===$vz);
   begin_row('oa', 'WRAPD');
-    C($xz<$oz);C($xz<=$oz);C($xz>$oz);C($xz>=$oz);C($xz==$oz);C($xz===$oz);
+    C($xz<$oz);C($xz<=$oz);C($xz>$oz);C($xz>=$oz);C(HH\Lib\Legacy_FIXME\eq($xz, $oz));C($xz===$oz);
   begin_row('fa', 'WRAPD');
     C($xz<$fz);C($xz<=$fz);C($xz>$fz);C($xz>=$fz);C($xz==$fz);C($xz===$fz);
   print_footer();
@@ -152,28 +152,28 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
   begin_row('va');
     C($va<$cm);C($va<=$cm);C($va>$cm);C($va>=$cm);C($va==$cm);C($va===$cm);
   begin_row('oa');
-    C($oa<$cm);C($oa<=$cm);C($oa>$cm);C($oa>=$cm);C($oa==$cm);C($oa===$cm);
+    C($oa<$cm);C($oa<=$cm);C($oa>$cm);C($oa>=$cm);C(HH\Lib\Legacy_FIXME\eq($oa, $cm));C($oa===$cm);
   begin_row('fa');
     C($fa<$cm);C($fa<=$cm);C($fa>$cm);C($fa>=$cm);C($fa==$cm);C($fa===$cm);
 
   begin_row('va', 'WRAPA');
     C($vx<$xx);C($vx<=$xx);C($vx>$xx);C($vx>=$xx);C($vx==$xx);C($vx===$xx);
   begin_row('oa', 'WRAPA');
-    C($ox<$xx);C($ox<=$xx);C($ox>$xx);C($ox>=$xx);C($ox==$xx);C($ox===$xx);
+    C($ox<$xx);C($ox<=$xx);C($ox>$xx);C($ox>=$xx);C(HH\Lib\Legacy_FIXME\eq($ox, $xx));C($ox===$xx);
   begin_row('fa', 'WRAPA');
     C($fx<$xx);C($fx<=$xx);C($fx>$xx);C($fx>=$xx);C($fx==$xx);C($fx===$xx);
 
   begin_row('va', 'WRAPO');
     C($vy<$xy);C($vy<=$xy);C($vy>$xy);C($vy>=$xy);C($vy==$xy);C($vy===$xy);
   begin_row('oa', 'WRAPO');
-    C($oy<$xy);C($oy<=$xy);C($oy>$xy);C($oy>=$xy);C($oy==$xy);C($oy===$xy);
+    C($oy<$xy);C($oy<=$xy);C($oy>$xy);C($oy>=$xy);C(HH\Lib\Legacy_FIXME\eq($oy, $xy));C($oy===$xy);
   begin_row('fa', 'WRAPO');
     C($fy<$xy);C($fy<=$xy);C($fy>$xy);C($fy>=$xy);C($fy==$xy);C($fy===$xy);
 
   begin_row('va', 'WRAPD');
     C($vz<$xz);C($vz<=$xz);C($vz>$xz);C($vz>=$xz);C($vz==$xz);C($vz===$xz);
   begin_row('oa', 'WRAPD');
-    C($oz<$xz);C($oz<=$xz);C($oz>$xz);C($oz>=$xz);C($oz==$xz);C($oz===$xz);
+    C($oz<$xz);C($oz<=$xz);C($oz>$xz);C($oz>=$xz);C(HH\Lib\Legacy_FIXME\eq($oz, $xz));C($oz===$xz);
   begin_row('fa', 'WRAPD');
     C($fz<$xz);C($fz<=$xz);C($fz>$xz);C($fz>=$xz);C($fz==$xz);C($fz===$xz);
   print_footer();

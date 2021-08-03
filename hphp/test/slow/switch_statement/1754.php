@@ -3,7 +3,7 @@
 function f_str($x) {
   var_dump($x);
   print ' goes to: ';
-  switch ($x) {
+  switch (HH\Lib\Legacy_FIXME\int_cast_for_switch($x, -1)) {
   case -1:
     print '-1';
     break;
@@ -21,7 +21,7 @@ function f_str($x) {
 function f_bool($x) {
   var_dump($x);
   print ' goes to: ';
-  switch ($x) {
+  switch (HH\Lib\Legacy_FIXME\int_cast_for_switch($x, -10)) {
   case -10:
     print '-10';
     break;
@@ -39,7 +39,7 @@ function f_bool($x) {
 function f_dbl($x) {
   var_dump($x);
   print ' goes to: ';
-  switch ($x) {
+  switch (HH\Lib\Legacy_FIXME\int_cast_for_switch($x, 5000000)) {
   case 5000000:
     print '5000000';
     break;
@@ -57,7 +57,7 @@ function f_dbl($x) {
 function f_dbl_notpe($x) {
   var_dump($x);
   print ' goes to: ';
-  switch ($x) {
+  switch (HH\Lib\Legacy_FIXME\int_cast_for_switch($x, 5000000)) {
   case 5000000:
     print '5000000';
     break;
@@ -96,7 +96,7 @@ function f_int($x) {
 function f($x) {
   var_dump($x);
   print ' goes to: ';
-  switch ($x) {
+  switch (HH\Lib\Legacy_FIXME\int_cast_for_switch($x, 5)) {
   case 5:
     print '5';
     break;

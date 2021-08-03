@@ -10,7 +10,7 @@ function DoIt($a)
 //  echo "after unary -: "; var_dump($c);
     $d = !$a;
 //  echo "after unary !: "; var_dump($d);
-    $e = ($a == 0);
+    $e = (HH\Lib\Legacy_FIXME\eq($a, 0));
 //  echo "after $a == 0: "; var_dump($e);
 /*
     $f = ~$a;

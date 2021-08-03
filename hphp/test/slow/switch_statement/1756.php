@@ -1,7 +1,10 @@
 <?hh
 
 function f($x) {
-  switch ($x) {
+  switch (HH\Lib\Legacy_FIXME\string_cast_for_switch($x, "foo", "foo", null, dict[
+  "3" => 3,
+], dict[
+])) {
   case "foo":
     print "foo-0";
   case "3":
@@ -18,7 +21,10 @@ function f($x) {
   print "\n";
 }
 function g($x) {
-  switch ($x) {
+  switch (HH\Lib\Legacy_FIXME\string_cast_for_switch($x, 'x', 'x', '0', dict[
+  '0' => 0,
+], dict[
+])) {
   case 'x': print 'x';
  break;
   case '0': print '0';

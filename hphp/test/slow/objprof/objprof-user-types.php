@@ -11,7 +11,7 @@ function get_bytes_eq(string $cls, ?darray $objs) {
   if (!$objs) return 0;
   $bytes = get_bytes($cls, $objs);
   $bytesd = get_bytesd($cls, $objs);
-  if ($bytes != $bytesd) {
+  if (HH\Lib\Legacy_FIXME\neq($bytes, $bytesd)) {
     echo "(BAD) Normalized bytes mismatch: " . var_export($objs, true) . "\n";
   }
   return $bytes;
@@ -179,7 +179,7 @@ $myClass = new SimpleProps();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('SimpleProps', $objs) == $ObjSize + 51 &&
-     get_bytesd('SimpleProps', $objs) == $ObjSize + 48 ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleProps', $objs), $ObjSize + 48) ?
       "(GOOD) Bytes (props) works\n" :
       "(BAD) Bytes (props) failed: " . var_export($objs, true) . "\n";
 $objs = null;
@@ -188,7 +188,7 @@ $myClass = new SimpleArrays();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('SimpleArrays', $objs) == $ObjSize + 80 + 110 + 32 &&
-     get_bytesd('SimpleArrays', $objs) == $ObjSize + (16 * 3) ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleArrays', $objs), $ObjSize + (16 * 3)) ?
       "(GOOD) Bytes (arrays) works\n" :
       "(BAD) Bytes (arrays) failed: " . var_export($objs, true) . "\n";
 $objs = null;
@@ -201,7 +201,7 @@ $myClass->$dynamic_field2 = 1; // 16:16
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('DynamicClass', $objs) == $ObjSize + 20 + 20 + 16 + 16 &&
-     get_bytesd('DynamicClass', $objs) == $ObjSize + (16 * 4) ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('DynamicClass', $objs), $ObjSize + (16 * 4)) ?
       "(GOOD) Bytes (dynamic) works\n" :
       "(BAD) Bytes (dynamic) failed: " . var_export($objs, true) . "\n";
 $objs = null;
@@ -287,7 +287,7 @@ __hhvm_intrinsics\launder_value($mystr);
 __hhvm_intrinsics\launder_value($myClass);
 __hhvm_intrinsics\launder_value($myClass2);
 echo get_bytes('SharedStringClass', $objs) == 2*($ObjSize+25)  &&
-     get_bytesd('SharedStringClass', $objs) == 2*($ObjSize+16)+(2*(9/3)) ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SharedStringClass', $objs), 2*($ObjSize+16)+(2*(9/3))) ?
       "(GOOD) Bytes (SharedString) works\n" :
       "(BAD) Bytes (SharedString) failed: " . var_export($objs, true) . "\n";
 $objs = null;
@@ -308,8 +308,7 @@ __hhvm_intrinsics\launder_value($myClass);
 __hhvm_intrinsics\launder_value($myClass2);
 echo get_bytes('SharedArrayClass', $objs) ==
       2 * ($ObjSize + 88 + 16 /*(tv)*/ + 16 /*(ArrayData)*/)  &&
-     get_bytesd('SharedArrayClass', $objs) ==
-      2 * ($ObjSize + (88 + 16 /*(ArrayData)*/)/2 + 16 /*(tv)*/) ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SharedArrayClass', $objs), 2 * ($ObjSize + (88 + 16 /*(ArrayData)*/)/2 + 16 /*(tv)*/)) ?
         "(GOOD) Bytes (SharedArray) works\n" :
         "(BAD) Bytes (SharedArray) failed: " . var_export($objs, true) . "\n";
 $objs = null;
@@ -336,8 +335,7 @@ __hhvm_intrinsics\launder_value($myClass);
 __hhvm_intrinsics\launder_value($myClass2);
 echo get_bytes('SimpleMapClass', $objs) ==
       2 * ($ObjSize + 16 /*(tv)*/ + $MapSize + 39 + 43) &&
-     get_bytesd('SimpleMapClass', $objs) ==
-      2 * ($ObjSize + 16 /*(tv)*/ + $MapSize + 36 + 40) ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleMapClass', $objs), 2 * ($ObjSize + 16 /*(tv)*/ + $MapSize + 36 + 40)) ?
       "(GOOD) Bytes (SimpleMapClass) works\n" :
       "(BAD) Bytes (SimpleMapClass) failed: " . var_export($objs, true) . "\n";
 $objs = null;
@@ -361,8 +359,7 @@ __hhvm_intrinsics\launder_value($my_obj1);
 __hhvm_intrinsics\launder_value($my_obj2);
 echo get_bytes('SharedMapClass', $objs) ==
       2 * ($ObjSize + 16 /*(tv)*/ + $MapSize + 39 + 43) &&
-     get_bytesd('SharedMapClass', $objs) ==
-      2 * ($ObjSize + 16 /*(tv)*/ + ($MapSize + 36 + 40) / 2) ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SharedMapClass', $objs), 2 * ($ObjSize + 16 /*(tv)*/ + ($MapSize + 36 + 40) / 2)) ?
       "(GOOD) Bytes (SharedMapClass) works\n" :
       "(BAD) Bytes (SharedMapClass) failed: " . var_export($objs, true) . "\n";
 $objs = null;
@@ -374,8 +371,7 @@ $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($my_obj);
 echo get_bytes('SimpleMapClassWithBackEdge', $objs) ==
       ($ObjSize + 16 /*(tv)*/ + $MapSize + 39 + 35) &&
-     get_bytesd('SimpleMapClassWithBackEdge', $objs) ==
-      ($ObjSize + 16 /*(tv)*/ + $MapSize + 36 + 32) ?
+     HH\Lib\Legacy_FIXME\eq(get_bytesd('SimpleMapClassWithBackEdge', $objs), ($ObjSize + 16 /*(tv)*/ + $MapSize + 36 + 32)) ?
         "(GOOD) Bytes (SimpleMapClassWithBackEdge) works\n" :
         "(BAD) Bytes (SimpleMapClassWithBackEdge) failed: " .
         var_export($objs, true) . "\n";

@@ -40,7 +40,7 @@ for ($i = 0; $i < count($invalidNotEquals); $i +=2) {
    $typeToTestVal = $invalidNotEquals[$i];
    $compares = $invalidNotEquals[$i + 1];
    foreach($compares as $compareVal) {
-      if ($typeToTestVal != $compareVal) {
+      if (HH\Lib\Legacy_FIXME\neq($typeToTestVal, $compareVal)) {
          echo "FAILED: '$typeToTestVal' != '$compareVal'\n";
          $failed = true;
       }

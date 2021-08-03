@@ -68,7 +68,7 @@
   // see how low the precedence of require is
 
   //if (require('return_with_value.php') == 987) ;
-  if ((require('return_with_value.php')) == 987) ;
+  if (HH\Lib\Legacy_FIXME\eq((require('return_with_value.php')), 987)) ;
   //if (require('return_with_value.php') | 987) ;
   if ((int)(require('return_with_value.php')) | 987) ;
   //if (require('return_with_value.php') && 987) ;

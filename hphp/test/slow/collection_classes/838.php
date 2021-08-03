@@ -46,7 +46,7 @@ $m = Set {
 }
 ;
 var_dump($m == null);
-var_dump($m == false);
+var_dump(HH\Lib\Legacy_FIXME\eq($m, false));
 var_dump($m == true);
 var_dump($m == 1);
 var_dump($m == "Set");
@@ -56,7 +56,7 @@ $m = Set {
 ;
 var_dump($m == null);
 var_dump($m == false);
-var_dump($m == true);
+var_dump(HH\Lib\Legacy_FIXME\eq($m, true));
 var_dump($m == 1);
 var_dump($m == "Set");
 }

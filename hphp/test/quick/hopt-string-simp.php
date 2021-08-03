@@ -29,7 +29,7 @@ function foo5() {
 
 function foo6() {
   $x = "2";
-  return 2 != $x;
+  return HH\Lib\Legacy_FIXME\neq(2, $x);
 }
 
 function foo7() {
@@ -39,7 +39,7 @@ function foo7() {
 
 function foo8() {
   $x = "";
-  return $x == null;
+  return HH\Lib\Legacy_FIXME\eq($x, null);
 }
 
 function foo9() {

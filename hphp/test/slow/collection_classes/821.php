@@ -8,7 +8,7 @@ function main() {
   $s2['b'] = 2;
   var_dump($s1 == $s2);
   $s1['b'] = "2";
-  var_dump($s1 == $s2);
+  var_dump(HH\Lib\Legacy_FIXME\eq($s1, $s2));
   $s1['b'] = 3;
   var_dump($s1 == $s2);
 
@@ -23,7 +23,7 @@ function main() {
   echo "------------------------\n";
   $m = Map {};
   var_dump($m == null);
-  var_dump($m == false);
+  var_dump(HH\Lib\Legacy_FIXME\eq($m, false));
   var_dump($m == true);
   var_dump($m == 1);
   var_dump($m == "Map");
@@ -32,7 +32,7 @@ function main() {
   $m = Map {'x' => 7};
   var_dump($m == null);
   var_dump($m == false);
-  var_dump($m == true);
+  var_dump(HH\Lib\Legacy_FIXME\eq($m, true));
   var_dump($m == 1);
   var_dump($m == "Map");
 }

@@ -1,7 +1,7 @@
 <?hh
 
 function eq($x, $y) {
-  var_dump($x == $y);
+  var_dump(HH\Lib\Legacy_FIXME\eq($x, $y));
 }
 
 function lt($x, $y) {

@@ -14,7 +14,7 @@ $m1['a'] = "123";
 $m1['b'] = 73;
 $m2['a'] = 123;
 $m2['b'] = "73";
-var_dump($m1 == $m2);
+var_dump(HH\Lib\Legacy_FIXME\eq($m1, $m2));
 $m1['c'] = 0;
 var_dump($m1 == $m2);
 echo "------------------------\n";
@@ -40,7 +40,7 @@ $m = Map {
 }
 ;
 var_dump($m == null);
-var_dump($m == false);
+var_dump(HH\Lib\Legacy_FIXME\eq($m, false));
 var_dump($m == true);
 var_dump($m == 1);
 var_dump($m == "Map");
@@ -50,7 +50,7 @@ $m = Map {
 ;
 var_dump($m == null);
 var_dump($m == false);
-var_dump($m == true);
+var_dump(HH\Lib\Legacy_FIXME\eq($m, true));
 var_dump($m == 1);
 var_dump($m == "Map");
 }

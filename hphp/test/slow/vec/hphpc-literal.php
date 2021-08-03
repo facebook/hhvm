@@ -2,8 +2,8 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function main() {
-  var_dump(vec[123] == vec['123']);
-  var_dump(vec[123] != vec['123']);
+  var_dump(HH\Lib\Legacy_FIXME\eq(vec[123], vec['123']));
+  var_dump(HH\Lib\Legacy_FIXME\neq(vec[123], vec['123']));
   var_dump(vec[123] === vec['123']);
   var_dump(vec[123] !== vec['123']);
   var_dump(vec[123] < vec['123']);
@@ -12,8 +12,8 @@ function main() {
   var_dump(vec[123] >= vec['123']);
   var_dump(vec[123] <=> vec['123']);
 
-  var_dump(vec['123'] == vec[123]);
-  var_dump(vec['123'] != vec[123]);
+  var_dump(HH\Lib\Legacy_FIXME\eq(vec['123'], vec[123]));
+  var_dump(HH\Lib\Legacy_FIXME\neq(vec['123'], vec[123]));
   var_dump(vec['123'] === vec[123]);
   var_dump(vec['123'] !== vec[123]);
   var_dump(vec['123'] < vec[123]);
@@ -42,8 +42,8 @@ function main() {
   try { var_dump(vec[123] >= 123); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
   try { var_dump(vec[123] <=> 123); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
 
-  var_dump(varray[vec[123], vec['123']] == varray[vec['123'], vec[123]]);
-  var_dump(varray[vec[123], vec['123']] != varray[vec['123'], vec[123]]);
+  var_dump(HH\Lib\Legacy_FIXME\eq(varray[vec[123], vec['123']], varray[vec['123'], vec[123]]));
+  var_dump(HH\Lib\Legacy_FIXME\neq(varray[vec[123], vec['123']], varray[vec['123'], vec[123]]));
   var_dump(varray[vec[123], vec['123']] === varray[vec['123'], vec[123]]);
   var_dump(varray[vec[123], vec['123']] !== varray[vec['123'], vec[123]]);
   var_dump(varray[vec[123], vec['123']] < varray[vec['123'], vec[123]]);

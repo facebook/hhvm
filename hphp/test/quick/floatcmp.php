@@ -8,8 +8,8 @@
      function($x, $y) { return $x <= $y; },
      function($x, $y) { return $x > $y; },
      function($x, $y) { return $x >= $y; },
-     function($x, $y) { return $x == $y; },
-     function($x, $y) { return $x != $y; },
+     function($x, $y) { return HH\Lib\Legacy_FIXME\eq($x, $y); },
+     function($x, $y) { return HH\Lib\Legacy_FIXME\neq($x, $y); },
      function($x, $y) { return $x === $y; },
      function($x, $y) { return $x !== $y; }];
   $cmpJmps = varray[
@@ -17,8 +17,8 @@
      function($x, $y) { return $x <= $y ? true : false; },
      function($x, $y) { return $x > $y ? true : false; },
      function($x, $y) { return $x >= $y ? true : false; },
-     function($x, $y) { return $x == $y ? true : false; },
-     function($x, $y) { return $x != $y ? true : false; },
+     function($x, $y) { return HH\Lib\Legacy_FIXME\eq($x, $y) ? true : false; },
+     function($x, $y) { return HH\Lib\Legacy_FIXME\neq($x, $y) ? true : false; },
      function($x, $y) { return $x === $y ? true : false; },
      function($x, $y) { return $x !== $y ? true : false; }];
   $cmpNames = varray["<", "<=", ">", ">=", "==", "!=", "===", "!=="];

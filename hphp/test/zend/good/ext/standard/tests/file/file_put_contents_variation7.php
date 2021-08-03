@@ -49,7 +49,7 @@ for($i = 0; $i<count($allDirs); $i++) {
   $res = file_put_contents($dir."/".$filename, HH\Lib\Legacy_FIXME\cast_for_arithmetic($data) + $i);
   if ($res !== false) {
       $in = file_get_contents($absFile);
-      if ($in == (HH\Lib\Legacy_FIXME\cast_for_arithmetic($data) + $i)) {
+      if (HH\Lib\Legacy_FIXME\eq($in, HH\Lib\Legacy_FIXME\cast_for_arithmetic($data) + $i)) {
          echo "Data written correctly\n";
       }
       else {

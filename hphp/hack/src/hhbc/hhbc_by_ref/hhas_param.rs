@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::Str;
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_type::{constraint, Info};
 use hhbc_by_ref_label::Label;
@@ -10,7 +11,7 @@ use oxidized::ast as tast;
 
 #[derive(Clone, Debug)]
 pub struct HhasParam<'arena> {
-    pub name: String,
+    pub name: Str<'arena>,
     pub is_variadic: bool,
     pub is_inout: bool,
     pub user_attributes: Vec<HhasAttribute<'arena>>,
@@ -31,7 +32,7 @@ impl<'arena> HhasParam<'arena> {
         }
     }
 
-    pub fn with_name(&mut self, name: String) {
-        self.name = name;
+    pub fn with_name(&mut self, alloc: &'arena bumpalo::Bump, name: &str) {
+        self.name = Str::new_str(alloc, name);
     }
 }

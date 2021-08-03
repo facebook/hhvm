@@ -49,25 +49,29 @@ pub fn from_asts<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 .filter_map(|p| p.to_owned())
                 .collect::<Vec<_>>()
         })
-        .map(rename_params)
+        .map(|params| rename_params(alloc, params))
 }
 
 #[allow(clippy::needless_lifetimes)]
-fn rename_params<'arena>(mut params: Vec<HhasParam<'arena>>) -> Vec<HhasParam<'arena>> {
+fn rename_params<'arena>(
+    alloc: &'arena bumpalo::Bump,
+    mut params: Vec<HhasParam<'arena>>,
+) -> Vec<HhasParam<'arena>> {
     fn rename<'arena>(
-        names: &BTreeSet<String>,
+        alloc: &'arena bumpalo::Bump,
+        names: &BTreeSet<Str<'arena>>,
         param_counts: &mut BTreeMap<String, usize>,
         param: &mut HhasParam<'arena>,
     ) {
-        match param_counts.get_mut(&param.name) {
+        match param_counts.get_mut(param.name.as_str()) {
             None => {
-                param_counts.insert(param.name.clone(), 0);
+                param_counts.insert(param.name.as_str().into(), 0);
             }
             Some(count) => {
-                let newname = format!("{}{}", param.name, count);
+                let newname = Str::new_str(alloc, format!("{}{}", param.name.as_str(), count));
                 *count += 1;
                 if names.contains(&newname) {
-                    rename(names, param_counts, param);
+                    rename(alloc, names, param_counts, param);
                 } else {
                     param.name = newname;
                 }
@@ -82,7 +86,7 @@ fn rename_params<'arena>(mut params: Vec<HhasParam<'arena>>) -> Vec<HhasParam<'a
     params
         .iter_mut()
         .rev()
-        .for_each(|p| rename(&names, &mut param_counts, p));
+        .for_each(|p| rename(alloc, &names, &mut param_counts, p));
     params.into_iter().collect()
 }
 
@@ -180,7 +184,7 @@ fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         _ => false,
     };
     Ok(Some(HhasParam {
-        name: param.name.clone(),
+        name: Str::new_str(alloc, &param.name),
         is_variadic: param.is_variadic,
         is_inout,
         user_attributes: emit_attribute::from_asts(alloc, emitter, &param.user_attributes)?,

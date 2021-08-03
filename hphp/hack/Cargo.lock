@@ -1865,6 +1865,8 @@ dependencies = [
 name = "hhbc_by_ref_hhas_param"
 version = "0.0.0"
 dependencies = [
+ "bumpalo",
+ "ffi",
  "hhbc_by_ref_hhas_attribute",
  "hhbc_by_ref_hhas_type",
  "hhbc_by_ref_label",

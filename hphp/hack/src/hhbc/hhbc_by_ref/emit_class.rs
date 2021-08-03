@@ -487,7 +487,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     } else {
         let tc = Constraint::make(Just("HH\\varray".into()), ConstraintFlags::empty());
         let params = vec![HhasParam {
-            name: string_utils::reified::INIT_METH_PARAM_NAME.to_string(),
+            name: Str::new_str(alloc, string_utils::reified::INIT_METH_PARAM_NAME),
             is_variadic: false,
             is_inout: false,
             user_attributes: vec![],
@@ -824,7 +824,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         };
         let instrs = emit_pos::emit_pos_then(alloc, &ast_class.span, body_instrs);
         let params = vec![HhasParam {
-            name: "$constName".to_string(),
+            name: Str::new_str(alloc, "$constName"),
             is_variadic: false,
             is_inout: false,
             user_attributes: vec![],

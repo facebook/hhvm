@@ -8,6 +8,8 @@ edition = "2018"
 path = "../../hhas_param.rs"
 
 [dependencies]
+bumpalo = { version = "3.2.1", features = ["collections"] }
+ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_hhas_attribute = { path = "../hhbc_by_ref_hhas_attribute" }
 hhbc_by_ref_hhas_type = { path = "../hhbc_by_ref_hhas_type" }
 hhbc_by_ref_label = { path = "../hhbc_by_ref_label" }

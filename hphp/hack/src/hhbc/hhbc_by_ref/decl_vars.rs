@@ -248,7 +248,7 @@ pub fn from_ast<'arena>(
 ) -> Result<Vec<String>, String> {
     let decl_vars = uls_from_ast(
         params,
-        |p| &p.name,
+        |p| p.name.as_str(),
         |p| p.default_value.as_ref().map(|x| &x.1),
         Some(explicit_use_set),
         body,

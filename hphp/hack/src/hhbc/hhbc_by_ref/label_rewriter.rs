@@ -4,7 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
-use ffi::{Maybe::Just, Pair};
+use ffi::{
+    Maybe::{Just, Nothing},
+    Pair,
+};
 use hash::{HashMap, HashSet};
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_param::HhasParam;
@@ -98,8 +101,8 @@ fn create_label_ref_map<'arena>(
         |acc: (usize, (HashSet<Id>, HashMap<Id, usize>)), param: &HhasParam<'arena>| match &param
             .default_value
         {
-            None => acc,
-            Some((l, _)) => process_ref(acc, *l),
+            Nothing => acc,
+            Just((l, _)) => process_ref(acc, *l),
         },
     );
     map
@@ -169,7 +172,7 @@ fn rewrite_params_and_body<'arena>(
         }
     };
     let rewrite_param = |param: &mut HhasParam<'arena>| {
-        if let Some((l, _)) = &mut param.default_value {
+        if let Just((l, _)) = &mut param.default_value {
             *l = l.map(relabel_id);
         }
     };

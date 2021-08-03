@@ -2189,12 +2189,12 @@ fn print_param<W: Write>(
     print_param_user_attributes(ctx, w, param)?;
     w.write_if(param.is_inout, "inout ")?;
     w.write_if(param.is_variadic, "...")?;
-    option(w, &param.type_info, |w, ty| {
+    option(w, &Option::from(param.type_info.clone()), |w, ty| {
         print_type_info(w, ty)?;
         w.write(" ")
     })?;
     w.write(&param.name)?;
-    option(w, &param.default_value, |w, i| {
+    option(w, &Option::from(param.default_value.clone()), |w, i| {
         print_param_default_value(ctx, w, body_env, i)
     })
 }

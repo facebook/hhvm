@@ -878,7 +878,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             } else {
                 use RGH::ReificationLevel as L;
                 let param_checks =
-                    match has_type_constraint(env, param.type_info.as_ref(), ast_param) {
+                    match has_type_constraint(env, Option::from(param.type_info.as_ref()), ast_param) {
                         (L::Unconstrained, _) => Ok(None),
                         (L::Not, _) => Ok(Some(instr::verify_param_type(alloc, param_name()))),
                         (L::Maybe, Some(h)) => Ok(Some(InstrSeq::gather(alloc, vec![
@@ -1103,7 +1103,7 @@ fn emit_verify_out<'arena>(
                     vec![
                         instr::cgetl(alloc, Local::Named(Str::new_str(alloc, p.name.as_str()))),
                         match p.type_info.as_ref() {
-                            Some(HhasTypeInfo { user_type, .. })
+                            Just(HhasTypeInfo { user_type, .. })
                                 if user_type.as_ref().map_or(true, |t| {
                                     !(t.as_str().ends_with("HH\\mixed")
                                         || t.as_str().ends_with("HH\\dynamic"))

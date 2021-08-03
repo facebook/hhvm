@@ -491,8 +491,8 @@ fn emit_reified_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             is_variadic: false,
             is_inout: false,
             user_attributes: Slice::empty(),
-            type_info: Some(Info::make(Just("HH\\varray".into()), tc)),
-            default_value: None,
+            type_info: Just(Info::make(Just("HH\\varray".into()), tc)),
+            default_value: Nothing,
         }];
 
         let body_instrs = emit_reified_init_body(emitter, env, num_reified, ast_class)?;
@@ -828,8 +828,8 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             is_variadic: false,
             is_inout: false,
             user_attributes: Slice::empty(),
-            type_info: None,
-            default_value: None,
+            type_info: Nothing,
+            default_value: Nothing,
         }];
 
         Some(make_86method(

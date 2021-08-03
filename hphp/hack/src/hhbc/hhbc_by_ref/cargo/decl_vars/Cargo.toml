@@ -8,6 +8,7 @@ edition = "2018"
 path = "../../decl_vars.rs"
 
 [dependencies]
+ffi = { path = "../../../../utils/ffi" }
 hash = { path = "../../../../utils/hash" }
 hhbc_by_ref_ast_body = { path = "../hhbc_by_ref_ast_body" }
 hhbc_by_ref_hhas_param = { path = "../hhbc_by_ref_hhas_param" }

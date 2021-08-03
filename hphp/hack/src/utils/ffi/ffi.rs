@@ -48,6 +48,14 @@ impl<U> Maybe<U> {
     }
 
     #[inline]
+    pub fn as_mut(&mut self) -> Maybe<&mut U> {
+        match *self {
+            Just(ref mut x) => Just(x),
+            Nothing => Nothing,
+        }
+    }
+
+    #[inline]
     pub const fn is_just(&self) -> bool {
         matches!(self, Just(_))
     }

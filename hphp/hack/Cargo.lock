@@ -1202,6 +1202,7 @@ dependencies = [
 name = "hhbc_by_ref_decl_vars"
 version = "0.0.0"
 dependencies = [
+ "ffi",
  "hash",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_hhas_param",

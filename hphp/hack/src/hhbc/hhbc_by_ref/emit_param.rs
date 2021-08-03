@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
-use ffi::{Slice, Str};
+use ffi::{Maybe, Slice, Str};
 use hhbc_by_ref_ast_scope::Scope;
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_expression as emit_expression;
@@ -189,8 +189,8 @@ fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         is_variadic: param.is_variadic,
         is_inout,
         user_attributes: Slice::new(alloc.alloc_slice_fill_iter(attrs.into_iter())).into(),
-        type_info,
-        default_value,
+        type_info: Maybe::from(type_info),
+        default_value: Maybe::from(default_value),
     }))
 }
 
@@ -201,7 +201,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl, D: DeclProvider<'decl>
     params: &[HhasParam<'arena>],
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     let alloc = env.arena;
-    let param_to_setter = |param: &HhasParam<'arena>| {
+    let mut param_to_setter = |param: &HhasParam<'arena>| {
         param.default_value.as_ref().map(|(lbl, expr)| {
             let instrs = InstrSeq::gather(
                 alloc,
@@ -223,7 +223,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl, D: DeclProvider<'decl>
     };
     let setters = params
         .iter()
-        .filter_map(param_to_setter)
+        .filter_map(|p| Option::from(param_to_setter(p)))
         .collect::<Result<Vec<_>>>()?;
     if setters.is_empty() {
         Ok((instr::empty(alloc), instr::empty(alloc)))

@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::{Just, Maybe};
 use hash::HashSet;
 use hhbc_by_ref_ast_body::AstBody;
 use hhbc_by_ref_hhas_param::HhasParam;
@@ -225,12 +226,12 @@ fn uls_from_ast<P, F1, F2>(
 ) -> Result<impl Iterator<Item = String>, String>
 where
     F1: Fn(&P) -> &str,
-    F2: Fn(&P) -> Option<&Expr>,
+    F2: Fn(&P) -> Maybe<&Expr>,
 {
     let mut visitor = DeclvarVisitor::new(explicit_use_set_opt);
 
     for p in params {
-        if let Some(e) = get_param_default_value(p) {
+        if let Just(e) = get_param_default_value(p) {
             visitor.visit_expr(&mut (), e)?;
         }
     }
@@ -259,9 +260,9 @@ pub fn from_ast<'arena>(
 pub fn vars_from_ast(params: &[FunParam], b: &AstBody) -> Result<HashSet<String>, String> {
     let decl_vars = uls_from_ast(
         params,
-        |p| &p.name,         // get_param_name
-        |p| p.expr.as_ref(), // get_param_default_value
-        None,                // explicit_use_set_opt
+        |p| &p.name,                      // get_param_name
+        |p| Maybe::from(p.expr.as_ref()), // get_param_default_value
+        None,                             // explicit_use_set_opt
         b,
     )?;
     Ok(decl_vars.collect())

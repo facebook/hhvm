@@ -42,7 +42,7 @@ function test_dir(): string {
 }
 
 function get_expect_file_and_type($test, $options) {
-  $types = varray[
+  $types = vec[
     'expect',
     'expectf',
     'expectregex',
@@ -51,15 +51,15 @@ function get_expect_file_and_type($test, $options) {
   ];
   if (isset($options['repo'])) {
     if (file_exists($test . '.hphpc_assert')) {
-      return varray[$test . '.hphpc_assert', 'expectf'];
+      return vec[$test . '.hphpc_assert', 'expectf'];
     }
     if (file_exists($test . '.hhbbc_assert')) {
-      return varray[$test . '.hhbbc_assert', 'expectf'];
+      return vec[$test . '.hhbbc_assert', 'expectf'];
     }
     foreach ($types as $type) {
       $fname = "$test.$type-repo";
       if (file_exists($fname)) {
-        return varray[$fname, $type];
+        return vec[$fname, $type];
       }
     }
   }
@@ -67,14 +67,14 @@ function get_expect_file_and_type($test, $options) {
   foreach ($types as $type) {
     $fname = "$test.$type";
     if (file_exists($fname)) {
-      return varray[$fname, $type];
+      return vec[$fname, $type];
     }
   }
-  return varray[null, null];
+  return vec[null, null];
 }
 
 function multi_request_modes() {
-  return varray['retranslate-all',
+  return vec['retranslate-all',
                'recycle-tc',
                'jit-serialize',
                'cli-server'];
@@ -207,7 +207,7 @@ function check_executable(string $path): string {
           "If using HHVM_BIN, make sure that is set correctly.");
   }
 
-  $output = varray[];
+  $output = vec[];
   $return_var = -1;
   exec($rpath . " --version 2> /dev/null", inout $output, inout $return_var);
   if (strpos(implode($output), "HipHop ") !== 0) {
@@ -219,14 +219,14 @@ function check_executable(string $path): string {
 }
 
 function hhvm_binary_routes() {
-  return darray[
+  return dict[
     "buck"    => "/buck-out/gen/hphp/hhvm/hhvm",
     "cmake"   => "/hphp/hhvm"
   ];
 }
 
 function hh_codegen_binary_routes() {
-  return darray[
+  return dict[
     "buck"    => "/buck-out/bin/hphp/hack/src/hh_single_compile",
     "cmake"   => "/hphp/hack/bin"
   ];
@@ -243,7 +243,7 @@ function check_for_multiple_default_binaries() {
   }
 
   $home = hphp_home();
-  $found = varray[];
+  $found = vec[];
   foreach (hhvm_binary_routes() as $path) {
     $abs_path = $home . $path . "/hhvm";
     if (file_exists($abs_path)) {
@@ -417,10 +417,10 @@ function rel_path($to) {
   return implode('/', $relPath);
 }
 
-function get_options($argv): (darray<string, mixed>, varray<string>) {
+function get_options($argv): (dict<string, mixed>, vec<string>) {
   // Options marked * affect test behavior, and need to be reported by list_tests.
   // Options with a trailing : take a value.
-  $parameters = darray[
+  $parameters = dict[
     '*env:' => '',
     'exclude:' => 'e:',
     'exclude-pattern:' => 'E:',
@@ -471,9 +471,9 @@ function get_options($argv): (darray<string, mixed>, varray<string>) {
     'lazyclass' => '',
     'hn' => '',
   ];
-  $options = darray[];
-  $files = varray[];
-  $recorded = varray[];
+  $options = dict[];
+  $files = vec[];
+  $recorded = vec[];
 
   /*
    * '-' argument causes all future arguments to be treated as filenames, even
@@ -496,7 +496,7 @@ function get_options($argv): (darray<string, mixed>, varray<string>) {
 
       foreach ($parameters as $long => $short) {
         if ($arg == '-'.str_replace(':', '', $short) ||
-            $arg == '--'.str_replace(varray[':', '*'], varray['', ''], $long)) {
+            $arg == '--'.str_replace(vec[':', '*'], vec['', ''], $long)) {
           $record = substr($long, 0, 1) === '*';
           if ($record) $recorded[] = $arg;
           if (substr($long, -1, 1) == ':') {
@@ -505,7 +505,7 @@ function get_options($argv): (darray<string, mixed>, varray<string>) {
           } else {
             $value = true;
           }
-          $options[str_replace(varray[':', '*'], varray['', ''], $long)] = $value;
+          $options[str_replace(vec[':', '*'], vec['', ''], $long)] = $value;
           $found = true;
           break;
         }
@@ -630,7 +630,7 @@ function canonical_path($test) {
  * suites are, to avoid typing 'hphp/test/foo'.
  */
 function find_test_files($file) {
-  $mappage = darray[
+  $mappage = dict[
     'quick'      => 'hphp/test/quick',
     'slow'       => 'hphp/test/slow',
     'debugger'   => 'hphp/test/server/debugger/tests',
@@ -663,18 +663,18 @@ function find_test_files($file) {
     return $matches;
   }
 
-  return varray[$file];
+  return vec[$file];
 }
 
 // Some tests have to be run together in the same test bucket, serially, one
 // after other in order to avoid races and other collisions.
-function serial_only_tests(varray<string> $tests): varray<string> {
+function serial_only_tests(vec<string> $tests): vec<string> {
   if (is_testing_dso_extension()) {
-    return varray[];
+    return vec[];
   }
   // Add a <testname>.php.serial file to make your test run in the serial
   // bucket.
-  $serial_tests = varray(array_filter(
+  $serial_tests = vec(array_filter(
     $tests,
     function($test) {
       return file_exists($test . '.serial');
@@ -687,7 +687,7 @@ function serial_only_tests(varray<string> $tests): varray<string> {
 // "find" command (especially because "escapeshellarg()" adds two single
 // quote characters to each file), so we split "files" into chunks below.
 function exec_find(mixed $files, string $extra): mixed {
-  $results = varray[];
+  $results = vec[];
   foreach (array_chunk($files, 500) as $chunk) {
     $efa = implode(' ', array_map(escapeshellarg<>, $chunk));
     $output = shell_exec("find $efa $extra");
@@ -699,17 +699,17 @@ function exec_find(mixed $files, string $extra): mixed {
   return $results;
 }
 
-function find_tests($files, darray $options = null): varray<string> {
+function find_tests($files, dict $options = null): vec<string> {
   if (!$files) {
-    $files = varray['quick'];
+    $files = vec['quick'];
   }
-  if ($files == varray['all']) {
-    $files = varray['quick', 'slow', 'zend', 'fastcgi', 'http', 'debugger'];
+  if ($files == vec['all']) {
+    $files = vec['quick', 'slow', 'zend', 'fastcgi', 'http', 'debugger'];
     if (is_dir(hphp_home() . '/hphp/facebook/test')) {
       $files[] = 'facebook';
     }
   }
-  $ft = varray[];
+  $ft = vec[];
   foreach ($files as $file) {
     $ft = array_merge($ft, find_test_files($file));
   }
@@ -742,35 +742,35 @@ function find_tests($files, darray $options = null): varray<string> {
           usage());
   }
   asort(inout $tests);
-  $tests = varray(array_filter($tests));
+  $tests = vec(array_filter($tests));
   if ($options['exclude'] ?? false) {
     $exclude = $options['exclude'];
-    $tests = varray(array_filter($tests, function($test) use ($exclude) {
+    $tests = vec(array_filter($tests, function($test) use ($exclude) {
       return (false === strpos($test, $exclude));
     }));
   }
   if ($options['exclude-pattern'] ?? false) {
     $exclude = $options['exclude-pattern'];
-    $tests = varray(array_filter($tests, function($test) use ($exclude) {
+    $tests = vec(array_filter($tests, function($test) use ($exclude) {
       return !preg_match($exclude, $test);
     }));
   }
   if ($options['exclude-recorded-failures'] ?? false) {
     $exclude_file = $options['exclude-recorded-failures'];
     $exclude = file($exclude_file, FILE_IGNORE_NEW_LINES);
-    $tests = varray(array_filter($tests, function($test) use ($exclude) {
+    $tests = vec(array_filter($tests, function($test) use ($exclude) {
       return (false === in_array(canonical_path($test), $exclude));
     }));
   }
   if ($options['include'] ?? false) {
     $include = $options['include'];
-    $tests = varray(array_filter($tests, function($test) use ($include) {
+    $tests = vec(array_filter($tests, function($test) use ($include) {
       return (false !== strpos($test, $include));
     }));
   }
   if ($options['include-pattern'] ?? false) {
     $include = $options['include-pattern'];
-    $tests = varray(array_filter($tests, function($test) use ($include) {
+    $tests = vec(array_filter($tests, function($test) use ($include) {
       return preg_match($include, $test);
     }));
   }
@@ -786,7 +786,7 @@ function list_tests($files, $options) {
 
   foreach (find_tests($files, $options) as $test) {
     $test_info = Status::jsonEncode(
-        darray['args' => $args, 'name' => $test],
+        dict['args' => $args, 'name' => $test],
     );
     if ($escape_info) {
         print str_replace('\\', '\\\\', $test_info)."\n";
@@ -836,7 +836,7 @@ function find_debug_config($test, $name) {
   return "";
 }
 
-function mode_cmd($options): varray<string> {
+function mode_cmd($options): vec<string> {
   $repo_args = '';
   if (!isset($options['repo'])) {
     $repo_args = "-vUnitFileCache.Path=".unit_cache_file();
@@ -847,11 +847,11 @@ function mode_cmd($options): varray<string> {
   switch ($mode) {
     case '':
     case 'jit':
-      return varray[$jit_args];
+      return vec[$jit_args];
     case 'interp':
-      return varray[$interp_args];
+      return vec[$interp_args];
     case 'interp,jit':
-      return varray[$interp_args, $jit_args];
+      return vec[$interp_args, $jit_args];
     default:
       error("-m must be one of jit | interp | interp,jit. Got: '$mode'");
   }
@@ -882,10 +882,10 @@ function hhvm_cmd_impl(
   $config,
   $autoload_db_prefix,
   ...$extra_args
-): varray<string> {
-  $cmds = varray[];
+): vec<string> {
+  $cmds = vec[];
   foreach (mode_cmd($options) as $mode_num => $mode) {
-    $args = varray[
+    $args = vec[
       hhvm_path(),
       '-c',
       $config,
@@ -991,7 +991,7 @@ function hhvm_cmd(
   $test,
   $test_run = null,
   $is_temp_file = false
-): (varray<string>, darray<string, mixed>) {
+): (vec<string>, dict<string, mixed>) {
   $test_run ??= $test;
   // hdf support is only temporary until we fully migrate to ini
   // Discourage broad use.
@@ -1109,7 +1109,7 @@ function hphp_cmd($options, $test, $program): string {
   $compiler_args = extra_compiler_args($options);
   if (isset($options['hackc'])) {
     $hh_single_compile = hh_codegen_path();
-    $compiler_args = implode(" ", varray[
+    $compiler_args = implode(" ", vec[
       '-vRuntime.Eval.HackCompilerUseEmbedded=false',
       "-vRuntime.Eval.HackCompilerInheritConfig=true",
       "-vRuntime.Eval.HackCompilerCommand=\"{$hh_single_compile} --daemon --dump-symbol-refs\"",
@@ -1132,7 +1132,7 @@ function hphp_cmd($options, $test, $program): string {
     }
   }
 
-  return implode(" ", varray[
+  return implode(" ", vec[
     hphpc_path($options),
     '--hphp',
     '-vUseHHBBC='. (repo_separate($options, $test) ? 'false' : 'true'),
@@ -1173,7 +1173,7 @@ function hphpc_path($options) {
 
 function hhbbc_cmd($options, $test, $program) {
   $test_repo = test_repo($options, $test);
-  return implode(" ", varray[
+  return implode(" ", vec[
     hphpc_path($options),
     '--hhbbc',
     '--no-logging',
@@ -1191,9 +1191,9 @@ function hhbbc_cmd($options, $test, $program) {
 function exec_with_stack($cmd) {
   $pipes = null;
   $proc = proc_open($cmd,
-                    darray[0 => varray['pipe', 'r'],
-                          1 => varray['pipe', 'w'],
-                          2 => varray['pipe', 'w']], inout $pipes);
+                    dict[0 => vec['pipe', 'r'],
+                          1 => vec['pipe', 'w'],
+                          2 => vec['pipe', 'w']], inout $pipes);
   fclose($pipes[0]);
   $s = '';
   $all_selects_failed=true;
@@ -1202,7 +1202,7 @@ function exec_with_stack($cmd) {
   while (true) {
     $now = microtime(true);
     if ($now >= $end) break;
-    $read = varray[$pipes[1], $pipes[2]];
+    $read = vec[$pipes[1], $pipes[2]];
     $write = null;
     $except = null;
     $available = @stream_select(
@@ -1474,7 +1474,7 @@ enum TempDirRemove: int {
 }
 
 final class Status {
-  private static $results = varray[];
+  private static $results = vec[];
   private static $mode = 0;
 
   private static $use_color = false;
@@ -1493,7 +1493,7 @@ final class Status {
 
   public static $passed = 0;
   public static $skipped = 0;
-  public static $skip_reasons = darray[];
+  public static $skip_reasons = dict[];
   public static $failed = 0;
 
   const MODE_NORMAL = 0;
@@ -1692,7 +1692,7 @@ final class Status {
   }
 
   public static function pass($test, $time, $stime, $etime) {
-    self::$results[] = darray['name' => $test,
+    self::$results[] = dict['name' => $test,
                              'status' => 'passed',
                              'start_time' => $stime,
                              'end_time' => $etime,
@@ -1701,7 +1701,7 @@ final class Status {
   }
 
   public static function skip($test, $reason, $time, $stime, $etime) {
-    self::$results[] = darray[
+    self::$results[] = dict[
       'name' => $test,
       /* testpilot needs a positive response for every test run, report
        * that this test isn't relevant so it can silently drop. */
@@ -1717,7 +1717,7 @@ final class Status {
   }
 
   public static function fail($test, $time, $stime, $etime, $diff) {
-    self::$results[] = darray[
+    self::$results[] = dict[
       'name' => $test,
       'status' => 'failed',
       'details' => self::utf8Sanitize($diff),
@@ -1882,8 +1882,8 @@ final class Status {
   }
 
   public static function sayTestpilot($test, $status, $stime, $etime, $time) {
-    $start = darray['op' => 'start', 'test' => $test];
-    $end = darray['op' => 'test_done', 'test' => $test, 'status' => $status,
+    $start = dict['op' => 'start', 'test' => $test];
+    $end = dict['op' => 'test_done', 'test' => $test, 'status' => $status,
                  'start_time' => $stime, 'end_time' => $etime, 'time' => $time];
     if ($status == 'failed') {
       $end['details'] = self::utf8Sanitize(Status::diffForTest($test));
@@ -1922,11 +1922,11 @@ final class Status {
 
   <<__Memoize>>
   public static function getSTTY() {
-    $descriptorspec = darray[1 => varray["pipe", "w"], 2 => varray["pipe", "w"]];
+    $descriptorspec = dict[1 => vec["pipe", "w"], 2 => vec["pipe", "w"]];
     $pipes = null;
     $process = proc_open(
       'stty -a', $descriptorspec, inout $pipes, null, null,
-      darray['suppress_errors' => true]
+      dict['suppress_errors' => true]
     );
     $stty = stream_get_contents($pipes[1]);
     proc_close($process);
@@ -1969,7 +1969,7 @@ function clean_intermediate_files($test, $options) {
   }
   if (isset($options['write-to-checkout'])) {
     // in --write-to-checkout mode, normal test output goes next to the test
-    $exts = varray[
+    $exts = vec[
       'out',
       'diff',
     ];
@@ -1980,7 +1980,7 @@ function clean_intermediate_files($test, $options) {
       }
     }
   }
-  $tmp_exts = varray[
+  $tmp_exts = vec[
     // normal test output goes here by default
     'out',
     'diff',
@@ -2018,8 +2018,8 @@ function clean_intermediate_files($test, $options) {
 }
 
 function child_main(
-  darray<string, mixed> $options,
-  varray<string> $tests,
+  dict<string, mixed> $options,
+  vec<string> $tests,
   string $json_results_file,
 ): int {
   foreach ($tests as $test) {
@@ -2087,7 +2087,7 @@ function runif_known_os(string $match_os): bool {
   }
 }
 
-function runif_os_matches(varray<string> $words): RunifResult {
+function runif_os_matches(vec<string> $words): RunifResult {
   if (count($words) === 2) {
     if ($words[0] !== 'not') {
       return shape('valid' => false, 'error' => "malformed 'os' match");
@@ -2112,7 +2112,7 @@ function runif_os_matches(varray<string> $words): RunifResult {
   );
 }
 
-function runif_file_matches(varray<string> $words): RunifResult {
+function runif_file_matches(vec<string> $words): RunifResult {
   /* This implementation has a trade-off. On the one hand, we could get more
    * accurate results if we do the check in a process with the same configs as
    * the test via runif_test_for_feature (e.g. if config differences make a
@@ -2135,7 +2135,7 @@ function runif_file_matches(varray<string> $words): RunifResult {
 }
 
 function runif_test_for_feature(
-  darray<string, mixed> $options,
+  dict<string, mixed> $options,
   string $test,
   string $bool_expression,
 ): bool {
@@ -2170,9 +2170,9 @@ function runif_test_for_feature(
 }
 
 function runif_euid_matches(
-  darray<string, mixed> $options,
+  dict<string, mixed> $options,
   string $test,
-  varray<string> $words,
+  vec<string> $words,
 ): RunifResult {
   if (count($words) === 2) {
     if ($words[0] !== 'not' || $words[1] !== 'root') {
@@ -2197,9 +2197,9 @@ function runif_euid_matches(
 }
 
 function runif_extension_matches(
-  darray<string, mixed> $options,
+  dict<string, mixed> $options,
   string $test,
-  varray<string> $words,
+  vec<string> $words,
 ): RunifResult {
   if (count($words) !== 1) {
     return shape('valid' => false, 'error' => "malformed 'extension' match");
@@ -2215,9 +2215,9 @@ function runif_extension_matches(
 }
 
 function runif_function_matches(
-  darray<string, mixed> $options,
+  dict<string, mixed> $options,
   string $test,
-  varray<string> $words,
+  vec<string> $words,
 ): RunifResult {
   if (count($words) !== 1) {
     return shape('valid' => false, 'error' => "malformed 'function' match");
@@ -2233,9 +2233,9 @@ function runif_function_matches(
 }
 
 function runif_class_matches(
-  darray<string, mixed> $options,
+  dict<string, mixed> $options,
   string $test,
-  varray<string> $words,
+  vec<string> $words,
 ): RunifResult {
   if (count($words) !== 1) {
     return shape('valid' => false, 'error' => "malformed 'class' match");
@@ -2251,9 +2251,9 @@ function runif_class_matches(
 }
 
 function runif_method_matches(
-  darray<string, mixed> $options,
+  dict<string, mixed> $options,
   string $test,
-  varray<string> $words,
+  vec<string> $words,
 ): RunifResult {
   if (count($words) !== 2) {
     return shape('valid' => false, 'error' => "malformed 'method' match");
@@ -2270,9 +2270,9 @@ function runif_method_matches(
 }
 
 function runif_const_matches(
-  darray<string, mixed> $options,
+  dict<string, mixed> $options,
   string $test,
-  varray<string> $words,
+  vec<string> $words,
 ): RunifResult {
   if (count($words) !== 1) {
     return shape('valid' => false, 'error' => "malformed 'const' match");
@@ -2288,9 +2288,9 @@ function runif_const_matches(
 }
 
 function runif_locale_matches(
-  darray<string, mixed> $options,
+  dict<string, mixed> $options,
   string $test,
-  varray<string> $words,
+  vec<string> $words,
 ): RunifResult {
   if (count($words) < 2) {
     return shape('valid' => false, 'error' => "malformed 'locale' match");
@@ -2316,7 +2316,7 @@ function runif_locale_matches(
 }
 
 function runif_should_skip_test(
-  darray<string, mixed> $options,
+  dict<string, mixed> $options,
   string $test,
 ): RunifResult {
   $runif_path = find_test_ext($test, 'runif');
@@ -2344,7 +2344,7 @@ function runif_should_skip_test(
     }
 
     $type = array_shift(inout $words);
-    $words = varray($words); // array_shift always promotes to darray :-\
+    $words = vec($words); // array_shift always promotes to dict :-\
     switch ($type) {
       case 'os':
         $result = runif_os_matches($words);
@@ -2383,7 +2383,7 @@ function runif_should_skip_test(
 }
 
 function should_skip_test_simple(
-  darray<string, mixed> $options,
+  dict<string, mixed> $options,
   string $test,
 ): ?string {
   if ((isset($options['cli-server']) || isset($options['server'])) &&
@@ -2444,7 +2444,7 @@ function should_skip_test_simple(
 }
 
 function skipif_should_skip_test(
-  darray<string, mixed> $options,
+  dict<string, mixed> $options,
   string $test,
 ): RunifResult {
   $skipif_test = find_test_ext($test, 'skipif');
@@ -2462,10 +2462,10 @@ function skipif_should_skip_test(
   // Remove any --count <n> from the command
   $hhvm = preg_replace('/ --count[ =]\d+/', '', $hhvm);
 
-  $descriptorspec = darray[
-    0 => varray["pipe", "r"],
-    1 => varray["pipe", "w"],
-    2 => varray["pipe", "w"],
+  $descriptorspec = dict[
+    0 => vec["pipe", "r"],
+    1 => vec["pipe", "w"],
+    2 => vec["pipe", "w"],
   ];
   $pipes = null;
   $process = proc_open("$hhvm $test 2>&1", $descriptorspec, inout $pipes);
@@ -2551,8 +2551,8 @@ function count_array_diff($ar1, $ar2, $is_reg, $idx1, $idx2, $cnt1, $cnt2,
 function generate_array_diff($ar1, $ar2, $is_reg, $w) {
   $idx1 = 0; $cnt1 = @count($ar1);
   $idx2 = 0; $cnt2 = @count($ar2);
-  $old1 = darray[];
-  $old2 = darray[];
+  $old1 = dict[];
+  $old2 = dict[];
 
   while ($idx1 < $cnt1 && $idx2 < $cnt2) {
     if (comp_line($ar1[$idx1], $ar2[$idx2], $is_reg)) {
@@ -2576,7 +2576,7 @@ function generate_array_diff($ar1, $ar2, $is_reg, $w) {
     }
   }
 
-  $diff = varray[];
+  $diff = vec[];
   $old1_keys = array_keys($old1);
   $old2_keys = array_keys($old2);
   $old1_values = array_values($old1);
@@ -2626,8 +2626,8 @@ function generate_diff($wanted, $wanted_re, $output)
   } else {
     if (preg_match_with_matches('/^\((.*)\)\{(\d+)\}$/s', $wanted_re, inout $m)) {
       $t = explode("\n", $m[1]);
-      $r = varray[];
-      $w2 = varray[];
+      $r = vec[];
+      $w2 = vec[];
       for ($i = 0; $i < (int)$m[2]; $i++) {
         foreach ($t as $v) {
           $r[] = $v;
@@ -2647,7 +2647,7 @@ function generate_diff($wanted, $wanted_re, $output)
 }
 
 function dump_hhas_cmd(string $hhvm_cmd, $test, $hhas_file) {
-  $dump_flags = implode(' ', varray[
+  $dump_flags = implode(' ', vec[
     '-vEval.AllowHhas=true',
     '-vEval.DumpHhas=1',
     '-vEval.DumpHhasToFile='.escapeshellarg($hhas_file),
@@ -2727,14 +2727,14 @@ function run_config_server($options, $test) {
   }
   curl_close($ch);
 
-  return run_config_post(varray[$output, ''], $test, $options);
+  return run_config_post(vec[$output, ''], $test, $options);
 }
 
 function run_config_cli(
   $options,
   $test,
   string $cmd,
-  darray<string, mixed> $cmd_env,
+  dict<string, mixed> $cmd_env,
 ) {
   $cmd = timeout_prefix() . $cmd;
 
@@ -2750,10 +2750,10 @@ function run_config_cli(
     $cmd_env['HPHP_TRACE_FILE'] = $test . '.log';
   }
 
-  $descriptorspec = darray[
-    0 => varray["pipe", "r"],
-    1 => varray["pipe", "w"],
-    2 => varray["pipe", "w"],
+  $descriptorspec = dict[
+    0 => vec["pipe", "r"],
+    1 => vec["pipe", "w"],
+    2 => vec["pipe", "w"],
   ];
   $pipes = null;
   $process = proc_open(
@@ -2772,7 +2772,7 @@ function run_config_cli(
   fclose($pipes[2]);
   proc_close($process);
 
-  return varray[$output, $stderr];
+  return vec[$output, $stderr];
 }
 
 function replace_object_resource_ids($str, $replacement) {
@@ -2881,22 +2881,22 @@ function run_config_post($outputs, $test, $options) {
     $wanted_re = $temp;
 
     $wanted_re = str_replace(
-      varray['%binary_string_optional%'],
+      vec['%binary_string_optional%'],
       'string',
       $wanted_re
     );
     $wanted_re = str_replace(
-      varray['%unicode_string_optional%'],
+      vec['%unicode_string_optional%'],
       'string',
       $wanted_re
     );
     $wanted_re = str_replace(
-      varray['%unicode\|string%', '%string\|unicode%'],
+      vec['%unicode\|string%', '%string\|unicode%'],
       'string',
       $wanted_re
     );
     $wanted_re = str_replace(
-      varray['%u\|b%', '%b\|u%'],
+      vec['%u\|b%', '%b\|u%'],
       '',
       $wanted_re
     );
@@ -2958,8 +2958,8 @@ function timeout_prefix() {
 function run_foreach_config(
   $options,
   $test,
-  varray<string> $cmds,
-  darray<string, mixed> $cmd_env,
+  vec<string> $cmds,
+  dict<string, mixed> $cmd_env,
 ) {
   invariant(count($cmds) > 0, "run_foreach_config: no modes");
   foreach ($cmds as $cmd) {
@@ -3066,16 +3066,16 @@ function run_test($options, $test) {
 
     if (file_exists($test . '.hphpc_assert')) {
       $hphp = hphp_cmd($options, $test, $program);
-      return run_foreach_config($options, $test, varray[$hphp], $hhvm_env);
+      return run_foreach_config($options, $test, vec[$hphp], $hhvm_env);
     } else if (file_exists($test . '.hhbbc_assert')) {
       $hphp = hphp_cmd($options, $test, $program);
       if (repo_separate($options, $test)) {
         $result = exec_with_stack($hphp);
         if ($result !== true) return false;
         $hhbbc = hhbbc_cmd($options, $test, $program);
-        return run_foreach_config($options, $test, varray[$hhbbc], $hhvm_env);
+        return run_foreach_config($options, $test, vec[$hhbbc], $hhvm_env);
       } else {
-        return run_foreach_config($options, $test, varray[$hphp], $hhvm_env);
+        return run_foreach_config($options, $test, vec[$hphp], $hhvm_env);
       }
     }
 
@@ -3191,7 +3191,7 @@ function print_commands($tests, $options) {
   } else {
     $test = $tests[0];
     print make_header("Run $test by hand:");
-    $tests = varray[$test];
+    $tests = vec[$test];
   }
 
   foreach ($tests as $test) {
@@ -3394,8 +3394,8 @@ SHIP
 }
 
 function print_failure($argv, $results, $options) {
-  $failed = varray[];
-  $passed = varray[];
+  $failed = vec[];
+  $passed = vec[];
   foreach ($results as $result) {
     if ($result['status'] === 'failed') {
       $failed[] = $result['name'];
@@ -3536,10 +3536,10 @@ function start_server_proc($options, $config, $port) {
     echo "Starting server '$command'\n";
   }
 
-  $descriptors = darray[
-    0 => varray['file', '/dev/null', 'r'],
-    1 => varray['file', '/dev/null', 'w'],
-    2 => varray['file', '/dev/null', 'w'],
+  $descriptors = dict[
+    0 => vec['file', '/dev/null', 'r'],
+    1 => vec['file', '/dev/null', 'w'],
+    2 => vec['file', '/dev/null', 'w'],
   ];
 
   $dummy = null;
@@ -3579,17 +3579,17 @@ EOT;
     );
   }
 
-  $starting = varray[];
+  $starting = vec[];
   foreach ($configs as $config) {
     $starting[] = start_server_proc($options, $config, find_open_port());
   }
 
   $start_time = microtime(true);
-  $servers = darray['pids' => darray[], 'configs' => darray[]];
+  $servers = dict['pids' => dict[], 'configs' => dict[]];
 
   // Wait for all servers to come up.
   while (count($starting) > 0) {
-    $still_starting = varray[];
+    $still_starting = vec[];
 
     foreach ($starting as $server) {
       $new_status = proc_get_status($server['proc']);
@@ -3730,16 +3730,16 @@ function main($argv) {
   // out serial tests.
   $parallel_threads = get_num_threads($options, $tests);
   if ($parallel_threads === 1) {
-    $test_buckets = varray[$tests];
+    $test_buckets = vec[$tests];
   } else {
     if (count($serial_tests) > 0) {
       // reserve a thread for serial tests
       $parallel_threads--;
     }
 
-    $test_buckets = varray[];
+    $test_buckets = vec[];
     for ($i = 0; $i < $parallel_threads; $i++) {
-      $test_buckets[] = varray[];
+      $test_buckets[] = vec[];
     }
 
     $i = 0;
@@ -3795,9 +3795,9 @@ function main($argv) {
   Status::started();
 
   // Fork "worker" children (if needed).
-  $children = darray[];
+  $children = dict[];
   // We write results as json in each child and collate them at the end
-  $json_results_files = varray[];
+  $json_results_files = vec[];
   if (Status::$nofork) {
     Status::registerCleanup(isset($options['no-clean']));
     $json_results_file = tempnam('/tmp', 'test-run-');
@@ -3874,7 +3874,7 @@ function main($argv) {
   }
 
   // aggregate results
-  $results = darray[];
+  $results = dict[];
   foreach ($json_results_files as $json_results_file) {
     $json = json_decode(file_get_contents($json_results_file), true);
     if (!is_array($json)) {
@@ -3890,8 +3890,8 @@ function main($argv) {
   // print results
   if (isset($options['record-failures'])) {
     $fail_file = $options['record-failures'];
-    $failed_tests = varray[];
-    $prev_failing = varray[];
+    $failed_tests = vec[];
+    $prev_failing = vec[];
     if (file_exists($fail_file)) {
       $prev_failing = explode("\n", file_get_contents($fail_file));
     }
@@ -3918,7 +3918,7 @@ function main($argv) {
     sort(inout $failed_tests);
     file_put_contents($fail_file, implode("\n", $failed_tests));
   } else if (isset($options['testpilot'])) {
-    Status::say(darray['op' => 'all_done', 'results' => $results]);
+    Status::say(dict['op' => 'all_done', 'results' => $results]);
     return $return_value;
   } else if (!$return_value) {
     print_success($tests, $results, $options);

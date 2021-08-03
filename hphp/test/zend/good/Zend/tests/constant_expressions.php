@@ -19,8 +19,6 @@ const T_19 = 1 > 0;
 const T_20 = 1 >= 0;
 const T_21 = 1 === 1;
 const T_22 = 1 !== 1;
-const T_23 = 0 != "0";
-const T_24 = 1 == "1";
 
 // Test order of operations
 const T_25 = 1 + 2 * 3;
@@ -51,8 +49,6 @@ function main_entry(): void {
   var_dump(T_20);
   var_dump(T_21);
   var_dump(T_22);
-  var_dump(T_23);
-  var_dump(T_24);
   var_dump(T_25);
   var_dump(T_26);
   var_dump(T_27);

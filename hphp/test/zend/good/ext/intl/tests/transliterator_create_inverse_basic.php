@@ -18,7 +18,7 @@ function main_entry(): void {
   echo $new_str,"\n";
   echo $recovstr,"\n";
 
-  var_dump(($orstr == $recovstr) == $recovstr2);
+  var_dump(HH\Lib\Legacy_FIXME\eq(($orstr == $recovstr), $recovstr2));
 
   echo "Done.\n";
 }

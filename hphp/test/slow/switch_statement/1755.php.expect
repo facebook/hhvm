@@ -1,4 +1,4 @@
-"""""0""0"default"0""0""0""123""0""4abc""4abc"default"Evil4"int(1)
+"""""0""0"default"0""0""0""123""0""4abc""4abc"default"Evil"int(1)
   goes to:1int(2)
   goes to:2.0float(2)
   goes to:2.0bool(true)

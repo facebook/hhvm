@@ -1,7 +1,7 @@
 <?hh
 
 function compare_lines($line_from_macro, $line_from_trace) {
-  if ($line_from_macro != $line_from_trace) {
+  if (HH\Lib\Legacy_FIXME\neq($line_from_macro, $line_from_trace)) {
     echo "Expected line: ".$line_from_macro."\n";
     echo "Got line: ".$line_from_trace."\n";
   }

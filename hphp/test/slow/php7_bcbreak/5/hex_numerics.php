@@ -34,7 +34,7 @@ function do_op($x, $op, $y) {
   try {
     switch($op) {
     case Operator::COMP_EQ:
-      $res = ($x == $y) ? 'true' : 'false';
+      $res = HH\Lib\Legacy_FIXME\eq($x, $y) ? 'true' : 'false';
       break;
     case Operator::PLUS:
       $res = var_export($x + $y, true);

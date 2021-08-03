@@ -48,23 +48,6 @@ case 30:
     break;
 }
 
-// chooses first match with equal value, 30 matches 30.0 before 30
-
-$v = 30;
-switch ($v)
-{
-case 30.0:  // <===== this case matches with 30
-    echo "case 30.0\n";
-    break;
-default:
-    echo "default case: \$v is $v\n";
-    break;
-case 30:        // <===== rather than this case matching with 30
-    echo "case 30\n";
-    break;
-}
-//*/
-
 ///*
 // ; is allowed in place of : at end of case/default label; can mix-n-match
 

@@ -47,30 +47,6 @@ fail:
   RetC
 }
 
-.class Obj {
-  .default_ctor;
-  .method [public] __toString() {
-    String "2"
-    RetC
-  }
-}
-
-.function with_obj() {
-  NewObjD "Obj"
-  Dup
-  NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
-  PopC
-  LockObj
-  SetL $obj
-  PopC
-  NullUninit
-  NullUninit
-  CGetL $obj
-  FCallFuncD <> 1 1 "" - "" "sswitch_on"
-  RetC
-}
-
 .function case_default() {
   NullUninit
   NullUninit
@@ -83,10 +59,6 @@ fail:
   NullUninit
   NullUninit
   FCallFuncD <> 0 1 "" - "" "case_three"
-  PopC
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "with_obj"
   PopC
   NullUninit
   NullUninit

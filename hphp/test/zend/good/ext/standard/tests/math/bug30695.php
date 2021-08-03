@@ -1,9 +1,9 @@
 <?hh
 function toUTF8( $char_code )
 {
-    switch ( $char_code )
+    switch ( (bool)$char_code )
     {
-        case 0:
+        case false:
             $char = chr( 0 );
         case !($char_code & 0xffffff80): // 7 bit
             $char = chr( $char_code );

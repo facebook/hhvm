@@ -26,7 +26,7 @@ function f4($x) {
 }
 function f5($x) {
   switch ($x[0]) {
-  case 0:
+  case (bool)0:
     var_dump($x[0]);
   }
 }

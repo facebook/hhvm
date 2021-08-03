@@ -512,7 +512,7 @@ let process_files
                 check_info.recheck_id
             in
             let check_fns = List.map check_fns ~f:(fun f -> Check f) in
-            (fns, check_fns, result.errors)
+            (fns, check_fns, Errors.merge errors result.errors)
         | None -> (fns, [], errors)
       in
       let progress =

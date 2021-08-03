@@ -1387,7 +1387,7 @@ struct RuntimeOption {
   /* 0 nothing, 1 notice, 2 error */                                    \
   F(int32_t, NoticeOnCoerceForCmp, 1)                                   \
   /* 0 nothing, 1 notice, 2 error, 3 behaviour change */                \
-  F(int32_t, NoticeOnCoerceForEq, 1)                                    \
+  F(int32_t, NoticeOnCoerceForEq, 3)                                    \
   F(string, TaoMigrationOverride, std::string(""))                      \
   F(string, SRRouteMigrationOverride, std::string(""))                  \
   F(int32_t, SampleRequestTearing, 0)                                   \

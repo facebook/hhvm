@@ -14,12 +14,6 @@ __toString called
 Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 24
 __toString called
 
-Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 25
-__toString called
-
-Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 26
-__toString called
-
 Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 27
 __toString called
 
@@ -36,12 +30,6 @@ Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tos
 __toString called
 
 Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 32
-__toString called
-
-Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 33
-__toString called
-
-Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 34
 __toString called
 
 Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 35
@@ -63,12 +51,6 @@ __toString called
 Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 43
 __toString called
 
-Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 44
-__toString called
-
-Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 45
-__toString called
-
 Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 46
 __toString called
 
@@ -85,12 +67,6 @@ Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tos
 __toString called
 
 Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 51
-__toString called
-
-Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 52
-__toString called
-
-Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 53
 __toString called
 
 Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 54

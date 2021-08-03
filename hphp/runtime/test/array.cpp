@@ -82,7 +82,7 @@ TEST(Array, Constructors) {
   EXPECT_TRUE(arr.length() == 1);
   EXPECT_TRUE(!arr.isNull());
   EXPECT_TRUE(arr[0].toArray().size() == 1);
-  EXPECT_TRUE(equal(arr[0], arrCopy.get()));
+  EXPECT_TRUE(tvEqual(*(arr[0].asTypedValue()), arrCopy.get()));
   EXPECT_TRUE(arr.isVec());
   EXPECT_FALSE(arr.isDict());
   EXPECT_FALSE(arr.isKeyset());

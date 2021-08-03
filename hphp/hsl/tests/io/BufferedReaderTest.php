@@ -8,8 +8,8 @@
  *
  */
 
-use namespace HH\Lib\{IO, OS, Str, Vec};
-use namespace HH\Lib\_Private\_IO;
+use namespace HH\Lib\{File, IO, OS, Str, Vec};
+use namespace HH\Lib\_Private\{_IO, _OS};
 
 use function HH\__Private\MiniTest\expect;
 use type HH\__Private\MiniTest\HackTest;
@@ -208,5 +208,23 @@ final class BufferedReaderTest extends HackTest {
 
     expect(async () ==> await $b->readLinexAsync())->toThrow(OS\BrokenPipeException::class);
     expect($b->isEndOfFile())->toBeTrue();
+  }
+
+  public async function testReadByteAfterBufferSize(): Awaitable<void> {
+    using $tf = File\temporary_file();
+    $in = Str\repeat('a', _IO\DEFAULT_READ_BUFFER_SIZE).'b';
+    $f = $tf->getHandle();
+    await $f->writeAllAsync($in);
+    $f->seek(0);
+    $br = new IO\BufferedReader($f);
+    $out = '';
+    while (!$br->isEndOfFile()) {
+      $byte = await $br->readByteAsync();
+      expect(Str\length($byte))->toEqual(1);
+      $out .= $byte;
+    }
+    expect(Str\ends_with($out, 'b'))->toBeTrue('Missing final byte');
+    expect(Str\length($out))->toEqual(Str\length($in));
+    expect($out)->toEqual($in);
   }
 }

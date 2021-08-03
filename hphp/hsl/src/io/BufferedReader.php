@@ -268,7 +268,6 @@ final class BufferedReader implements IO\ReadHandle {
     $ret = $this->buffer[0];
     if ($ret === $this->buffer) {
       $this->buffer = '';
-      $this->eof = true;
       return $ret;
     }
     $this->buffer = Str\slice($this->buffer, 1);

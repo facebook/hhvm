@@ -3311,23 +3311,8 @@ function print_success($tests, $results, $options) {
   if (!$tests) {
     print "\nCLOWNTOWN: No tests!\n";
     if (!($options['no-fun'] ?? false)) {
-      print <<<CLOWN
-            _
-           {_}
-           /*\\
-          /_*_\\
-         {('o')}
-      C{{([^*^])}}D
-          [ * ]
-         /  Y  \\
-        _\\__|__/_
-       (___/ \\___)
-CLOWN
-        ."\n\n";
+      print_clown();
     }
-
-    /* Emacs' syntax highlighting gets confused by that clown and this comment
-     * resets whatever state got messed up. */
     return;
   }
   $ran_tests = false;
@@ -3343,47 +3328,13 @@ CLOWN
   if (!$ran_tests) {
     print "\nSKIP-ALOO: Only skipped tests!\n";
     if (!($options['no-fun'] ?? false)) {
-      print <<<SKIPPER
-                          .".
-                         /  |
-                        /  /
-                       / ,"
-           .-------.--- /
-          "._ __.-/ o. o\
-             "   (    Y  )
-                  )     /
-                 /     (
-                /       Y
-            .-"         |
-           /  _     \    \
-          /    `. ". ) /' )
-         Y       )( / /(,/
-        ,|      /     )
-       ( |     /     /
-        " \_  (__   (__
-            "-._,)--._,)
-SKIPPER
-        ."\n\n";
+      print_skipper();
     }
-
-    /* Emacs' syntax highlighting may get confused by the skipper and this
-     * rcomment esets whatever state got messed up. */
     return;
   }
   print "\nAll tests passed.\n";
   if (!($options['no-fun'] ?? false)) {
-    print <<<SHIP
-              |    |    |
-             )_)  )_)  )_)
-            )___))___))___)\
-           )____)____)_____)\\
-         _____|____|____|____\\\__
----------\      SHIP IT      /---------
-  ^^^^^ ^^^^^^^^^^^^^^^^^^^^^
-    ^^^^      ^^^^     ^^^    ^^
-         ^^^^      ^^^
-SHIP
-      ."\n";
+    print_ship();
   }
   if ($options['failure-file'] ?? false) {
     @unlink($options['failure-file']);
@@ -3942,4 +3893,62 @@ function main($argv) {
 <<__EntryPoint>>
 function run_main(): void {
   exit(main(\HH\global_get('argv')));
+}
+
+
+// NOTE: Inline ASCII art moved to end-of-file to avoid confusing emacs.
+
+function print_clown(): void {
+  print <<<CLOWN
+            _
+           {_}
+           /*\\
+          /_*_\\
+         {('o')}
+      C{{([^*^])}}D
+          [ * ]
+         /  Y  \\
+        _\\__|__/_
+       (___/ \\___)
+CLOWN
+        ."\n\n";
+}
+
+function print_skipper(): void {
+  print <<<SKIPPER
+                          .".
+                         /  |
+                        /  /
+                       / ,"
+           .-------.--- /
+          "._ __.-/ o. o\
+             "   (    Y  )
+                  )     /
+                 /     (
+                /       Y
+            .-"         |
+           /  _     \    \
+          /    `. ". ) /' )
+         Y       )( / /(,/
+        ,|      /     )
+       ( |     /     /
+        " \_  (__   (__
+            "-._,)--._,)
+SKIPPER
+        ."\n\n";
+}
+
+function print_ship(): void {
+  print <<<SHIP
+              |    |    |
+             )_)  )_)  )_)
+            )___))___))___)\
+           )____)____)_____)\\
+         _____|____|____|____\\\__
+---------\      SHIP IT      /---------
+  ^^^^^ ^^^^^^^^^^^^^^^^^^^^^
+    ^^^^      ^^^^     ^^^    ^^
+         ^^^^      ^^^
+SHIP
+      ."\n";
 }

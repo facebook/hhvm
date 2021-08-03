@@ -3124,7 +3124,7 @@ fn print_param_user_attributes<W: Write>(
     w: &mut W,
     param: &HhasParam,
 ) -> Result<(), W::Error> {
-    match &param.user_attributes[..] {
+    match param.user_attributes.as_ref()[..] {
         [] => Ok(()),
         _ => square(w, |w| print_attributes(ctx, w, &param.user_attributes)),
     }

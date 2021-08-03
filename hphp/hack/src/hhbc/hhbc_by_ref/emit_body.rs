@@ -671,6 +671,7 @@ fn atom_instrs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let alloc = env.arena;
     if !param
         .user_attributes
+        .as_ref()
         .iter()
         .any(|a| a.is(|x| x == ua::VIA_LABEL))
     {

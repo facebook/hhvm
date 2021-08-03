@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
-use ffi::Str;
+use ffi::{Slice, Str};
 use hhbc_by_ref_ast_scope::Scope;
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_expression as emit_expression;
@@ -183,11 +183,12 @@ fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         Some(ParamKind::Pinout) => true,
         _ => false,
     };
+    let attrs = emit_attribute::from_asts(alloc, emitter, &param.user_attributes)?;
     Ok(Some(HhasParam {
         name: Str::new_str(alloc, &param.name),
         is_variadic: param.is_variadic,
         is_inout,
-        user_attributes: emit_attribute::from_asts(alloc, emitter, &param.user_attributes)?,
+        user_attributes: Slice::new(alloc.alloc_slice_fill_iter(attrs.into_iter())).into(),
         type_info,
         default_value,
     }))

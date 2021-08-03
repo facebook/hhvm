@@ -37,6 +37,7 @@ impl<T: Clone> Clone for Maybe<T> {
         }
     }
 }
+
 impl<U> Maybe<U> {
     #[inline]
     pub const fn as_ref(&self) -> Maybe<&U> {

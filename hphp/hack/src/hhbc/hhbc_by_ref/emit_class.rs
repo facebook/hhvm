@@ -490,7 +490,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             name: Str::new_str(alloc, string_utils::reified::INIT_METH_PARAM_NAME),
             is_variadic: false,
             is_inout: false,
-            user_attributes: vec![],
+            user_attributes: Slice::empty(),
             type_info: Some(Info::make(Just("HH\\varray".into()), tc)),
             default_value: None,
         }];
@@ -579,7 +579,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         )
     }
 
-    let is_const = hhas_attribute::has_const(&attributes);
+    let is_const = hhas_attribute::has_const(attributes.as_ref());
     // In the future, we intend to set class_no_dynamic_props independently from
     // class_is_const, but for now class_is_const is the only thing that turns
     // it on.
@@ -663,7 +663,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
     let is_abstract = ast_class.kind == tast::ClassishKind::Cabstract;
     let is_final = ast_class.final_ || is_trait;
-    let is_sealed = hhas_attribute::has_sealed(&attributes);
+    let is_sealed = hhas_attribute::has_sealed(attributes.as_ref());
 
     let tparams: Vec<&str> = ast_class
         .tparams
@@ -827,7 +827,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             name: Str::new_str(alloc, "$constName"),
             is_variadic: false,
             is_inout: false,
-            user_attributes: vec![],
+            user_attributes: Slice::empty(),
             type_info: None,
             default_value: None,
         }];

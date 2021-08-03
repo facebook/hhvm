@@ -21,6 +21,7 @@ use naming_special_names_rust as naming_special_names;
 /// ```
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub struct HhasAttribute<'arena> {
     pub name: Str<'arena>,
     pub arguments: Slice<'arena, TypedValue<'arena>>,
@@ -187,6 +188,15 @@ pub fn deprecation_info<'a, 'arena>(
 pub mod native_arg {
     pub const OP_CODE_IMPL: &str = "OpCodeImpl";
     pub const NO_INJECTION: &str = "NoInjection";
+}
+
+// For cbindgen
+#[allow(clippy::needless_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_attribute<'arena>(
+    _: HhasAttribute<'arena>,
+) {
+    unimplemented!()
 }
 
 #[cfg(test)]

@@ -99,7 +99,7 @@ struct IterArgs {
 //   inoutArgs        = flags & EnforceInOut ? decode bool vec : nullptr
 //   asyncEagerOffset = flags & HasAEO ? decode_ba() : kInvalidOffset
 struct FCallArgsBase {
-  enum Flags : uint8_t {
+  enum Flags : uint16_t {
     None                     = 0,
     // Unpack remaining arguments from a varray passed by ...$args.
     HasUnpack                = (1 << 0),
@@ -118,11 +118,15 @@ struct FCallArgsBase {
     EnforceInOut             = (1 << 6),
     // HHBC-only: is the async eager offset provided? false => kInvalidOffset
     HasAsyncEagerOffset      = (1 << 7),
+    // HHBC-only: the remaining space is used for number of arguments
+    NumArgsStart             = (1 << 8),
   };
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
   static constexpr uint8_t kInternalFlags =
     HasUnpack | HasGenerics | LockWhileUnwinding | SkipRepack;
+  // The first (lowest) bit of numArgs.
+  static constexpr uint8_t kFirstNumArgsBit = 8;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
     : numArgs(numArgs)
@@ -168,6 +172,8 @@ struct FCallArgs : FCallArgsBase {
   const uint8_t* inoutArgs;
   const StringData* context;
 };
+
+static_assert(1 << FCallArgs::kFirstNumArgsBit == FCallArgs::NumArgsStart, "");
 
 using PrintLocal = std::function<std::string(int32_t local)>;
 std::string show(const IterArgs&, PrintLocal);

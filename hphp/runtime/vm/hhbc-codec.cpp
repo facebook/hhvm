@@ -134,15 +134,21 @@ IterArgs decodeIterArgs(PC& pc) {
 void encodeFCallArgsBase(FuncEmitter& fe, const FCallArgsBase& fca,
                          bool hasInoutArgs, bool hasAsyncEagerOffset,
                          bool hasContext) {
-  auto flags = uint8_t{fca.flags};
+  auto constexpr kFirstNumArgsBit = FCallArgsBase::kFirstNumArgsBit;
+  auto constexpr kLimit =
+    std::numeric_limits<std::underlying_type_t<FCallArgs::Flags>>::max();
+  bool smallNumArgs = ((fca.numArgs + 1) << kFirstNumArgsBit) <= kLimit;
+  auto flags = uint16_t{fca.flags};
   assertx(!(flags & ~FCallArgsBase::kInternalFlags));
+  if (smallNumArgs) flags |= ((fca.numArgs + 1) << kFirstNumArgsBit);
   if (fca.numRets != 1) flags |= FCallArgsBase::HasInOut;
   if (hasInoutArgs) flags |= FCallArgsBase::EnforceInOut;
   if (hasAsyncEagerOffset) flags |= FCallArgsBase::HasAsyncEagerOffset;
   if (hasContext) flags |= FCallArgsBase::ExplicitContext;
 
-  fe.emitByte(flags);
-  fe.emitIVA(fca.numArgs);
+  static_assert(sizeof(std::underlying_type_t<FCallArgs::Flags>) * 8 == 16);
+  fe.emitInt16(flags);
+  if (!smallNumArgs) fe.emitIVA(fca.numArgs);
   if (fca.numRets != 1) fe.emitIVA(fca.numRets);
 }
 
@@ -155,13 +161,14 @@ FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc, StringDecoder u) {
   assertx(isFCall(thisOpcode));
   bool skipContext = true;
   auto const flags = [&]() {
-    auto rawFlags = decode_byte(pc);
+    auto rawFlags = decode_raw<std::underlying_type_t<FCallArgs::Flags>>(pc);
     skipContext = !(rawFlags & FCallArgs::ExplicitContext);
     if (u.isNull()) rawFlags &= ~FCallArgs::ExplicitContext;
     return rawFlags;
   }();
 
-  uint32_t numArgs = decode_iva(pc);
+  uint32_t numArgs = (flags >> FCallArgs::kFirstNumArgsBit)
+    ? (flags >> FCallArgs::kFirstNumArgsBit) - 1 : decode_iva(pc);
   auto const numRets = (flags & FCallArgs::HasInOut) ? decode_iva(pc) : 1;
   auto const inoutArgs = (flags & FCallArgs::EnforceInOut) ? pc : nullptr;
   if (inoutArgs != nullptr) pc += (numArgs + 7) / 8;

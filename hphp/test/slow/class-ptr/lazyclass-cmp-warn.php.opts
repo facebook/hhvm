@@ -1,4 +1,4 @@
 -vEval.EmitClassPointers=2
 -vEval.RaiseClassConversionWarning=true
--vEval.NoticeOnCoerceForCmp=0
 -vEval.NoticeOnCoerceForEq=0
+-vEval.NoticeOnCoerceForCmp=0

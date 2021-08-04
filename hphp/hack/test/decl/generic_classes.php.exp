@@ -1,8 +1,9 @@
 [("\\Bag",
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-       sc_module = None; sc_name = ([3:7-10], "\\Bag");
+       sc_is_xhp = false; sc_has_xhp_keyword = false;
+       sc_kind = (Cclass Concrete); sc_module = None;
+       sc_name = ([3:7-10], "\\Bag");
        sc_tparams =
        [{ Typing_defs_core.tp_variance = Invariant;
           tp_name = ([3:11-12], "T"); tp_tparams = []; tp_constraints = [];
@@ -74,8 +75,9 @@
   ("\\ContravariantBag",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-        sc_module = None; sc_name = ([15:7-23], "\\ContravariantBag");
+        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = (Cclass Concrete); sc_module = None;
+        sc_name = ([15:7-23], "\\ContravariantBag");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Contravariant;
            tp_name = ([15:25-26], "T"); tp_tparams = []; tp_constraints = [];
@@ -129,8 +131,9 @@
   ("\\CovariantBag",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-        sc_module = None; sc_name = ([23:7-19], "\\CovariantBag");
+        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = (Cclass Concrete); sc_module = None;
+        sc_name = ([23:7-19], "\\CovariantBag");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Covariant;
            tp_name = ([23:21-22], "T"); tp_tparams = []; tp_constraints = [];

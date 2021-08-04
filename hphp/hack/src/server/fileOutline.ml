@@ -294,7 +294,7 @@ let summarize_class class_ ~no_children =
     | Ast_defs.Cinterface -> Interface
     | Ast_defs.Ctrait -> Trait
     | Ast_defs.Cenum -> Enum
-    | Ast_defs.(Cnormal | Cabstract) -> Class
+    | Ast_defs.(Cclass _) -> Class
   in
   let name = class_name in
   let id = get_symbol_id kind None name in

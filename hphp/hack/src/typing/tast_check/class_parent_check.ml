@@ -22,7 +22,7 @@ let check_is_class env (p, h) =
         let kind = Cls.kind cls in
         let name = Cls.name cls in
         (match kind with
-        | Ast_defs.(Cabstract | Cnormal) ->
+        | Ast_defs.(Cclass _) ->
           if Cls.final cls then Errors.requires_final_class p name
         | Ast_defs.(Cinterface | Ctrait | Cenum) ->
           let is_enum_class = Typing_defs.is_enum_class (Cls.enum_type cls) in

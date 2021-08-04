@@ -275,8 +275,7 @@ let is_class_disjoint env c1 c2 =
       | Cinterface
       | Ctrait ->
         true
-      | Cabstract
-      | Cnormal
+      | Cclass _
       | Cenum ->
         false)
   in

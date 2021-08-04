@@ -45,8 +45,7 @@ let flatten_parent_class_reqs
           (parent_pos, ty))
     in
     (match shallow_class.sc_kind with
-    | Ast_defs.Cnormal
-    | Ast_defs.Cabstract ->
+    | Ast_defs.Cclass _ ->
       (* not necessary to accumulate req_ancestors_extends for classes --
        * it's not used *)
       (req_ancestors, SSet.empty)

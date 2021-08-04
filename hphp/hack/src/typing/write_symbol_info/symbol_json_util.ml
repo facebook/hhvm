@@ -124,9 +124,7 @@ let get_parent_kind clss =
   | Cenum -> raise (Failure "Unexpected enum as parent container kind")
   | Cinterface -> InterfaceContainer
   | Ctrait -> TraitContainer
-  | Cnormal
-  | Cabstract ->
-    ClassContainer
+  | Cclass _ -> ClassContainer
 
 let init_progress =
   let default_json =

@@ -2,7 +2,7 @@ Errors:
   [6:21-23] `Tc` is a type parameter. Type parameters cannot take type arguments (e.g. `Tc<int>` isn't allowed)
 [(Class
     { c_span = [4:1-7:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([4:7-9], "\\Tc"); c_tparams = [{ tp_variance = Invariant; tp_name = ([4:10-12], "Tc"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
@@ -33,7 +33,7 @@ Errors:
       c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [9:1-12:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([9:7-15], "\\Tc_other"); c_tparams = []; c_extends = []; 
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
        c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false; 

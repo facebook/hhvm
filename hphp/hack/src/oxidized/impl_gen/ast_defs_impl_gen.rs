@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<61259d45478ae125aac54f92cadca991>>
+// @generated SignedSource<<7545746289c2b529a6dc54996a586382>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -150,12 +150,29 @@ impl ConstraintKind {
         }
     }
 }
-impl ClassishKind {
-    pub fn mk_cabstract() -> Self {
-        ClassishKind::Cabstract
+impl Abstraction {
+    pub fn mk_concrete() -> Self {
+        Abstraction::Concrete
     }
-    pub fn mk_cnormal() -> Self {
-        ClassishKind::Cnormal
+    pub fn mk_abstract() -> Self {
+        Abstraction::Abstract
+    }
+    pub fn is_concrete(&self) -> bool {
+        match self {
+            Abstraction::Concrete => true,
+            _ => false,
+        }
+    }
+    pub fn is_abstract(&self) -> bool {
+        match self {
+            Abstraction::Abstract => true,
+            _ => false,
+        }
+    }
+}
+impl ClassishKind {
+    pub fn mk_cclass(p0: Abstraction) -> Self {
+        ClassishKind::Cclass(p0)
     }
     pub fn mk_cinterface() -> Self {
         ClassishKind::Cinterface
@@ -166,15 +183,9 @@ impl ClassishKind {
     pub fn mk_cenum() -> Self {
         ClassishKind::Cenum
     }
-    pub fn is_cabstract(&self) -> bool {
+    pub fn is_cclass(&self) -> bool {
         match self {
-            ClassishKind::Cabstract => true,
-            _ => false,
-        }
-    }
-    pub fn is_cnormal(&self) -> bool {
-        match self {
-            ClassishKind::Cnormal => true,
+            ClassishKind::Cclass(..) => true,
             _ => false,
         }
     }
@@ -194,6 +205,24 @@ impl ClassishKind {
         match self {
             ClassishKind::Cenum => true,
             _ => false,
+        }
+    }
+    pub fn as_cclass(&self) -> Option<&Abstraction> {
+        match self {
+            ClassishKind::Cclass(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_cclass_mut(&mut self) -> Option<&mut Abstraction> {
+        match self {
+            ClassishKind::Cclass(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_cclass_into(self) -> Option<Abstraction> {
+        match self {
+            ClassishKind::Cclass(p0) => Some(p0),
+            _ => None,
         }
     }
 }

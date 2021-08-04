@@ -52,9 +52,7 @@ let convert_fileinfo_to_contents
           let real_kind = Decl_provider.Class.kind cls in
           let converted_kind =
             match real_kind with
-            | Ast_defs.Cnormal
-            | Ast_defs.Cabstract ->
-              SI_Class
+            | Ast_defs.Cclass _ -> SI_Class
             | Ast_defs.Cinterface -> SI_Interface
             | Ast_defs.Ctrait -> SI_Trait
             | Ast_defs.Cenum -> SI_Enum

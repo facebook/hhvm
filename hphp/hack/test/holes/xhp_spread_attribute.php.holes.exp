@@ -1,9 +1,9 @@
 [(Class
     { c_span = [4:3-13:4]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-      c_is_xhp = true; c_has_xhp_keyword = false; c_kind = Cnormal; c_name = ([4:9-17], "\\XhpSpread\\:element"); 
-      c_tparams = []; c_extends = []; c_uses = []; c_use_as_alias = []; 
-      c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None; 
-      c_reqs = []; c_implements = []; c_support_dynamic_type = false; 
+      c_is_xhp = true; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+      c_name = ([4:9-17], "\\XhpSpread\\:element"); c_tparams = []; c_extends = []; 
+      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false; 
       c_where_constraints = []; c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
@@ -103,7 +103,7 @@
       c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [14:3-23:4]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = true; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_is_xhp = true; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([14:9-18], "\\XhpSpread\\:element2"); c_tparams = []; 
        c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 

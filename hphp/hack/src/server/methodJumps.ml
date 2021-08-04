@@ -158,8 +158,7 @@ let get_child_classes_and_methods ctx cls ~filter naming_table workers =
 let class_passes_filter ~filter cls =
   match (filter, Cls.kind cls) with
   | (No_filter, _) -> true
-  | (Class, Ast_defs.Cnormal) -> true
-  | (Class, Ast_defs.Cabstract) -> true
+  | (Class, Ast_defs.Cclass _) -> true
   | (Interface, Ast_defs.Cinterface) -> true
   | (Trait, Ast_defs.Ctrait) -> true
   | _ -> false

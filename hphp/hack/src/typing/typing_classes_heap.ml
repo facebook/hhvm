@@ -154,12 +154,11 @@ module ApiShallow = struct
     | Lazy (sc, _lc) ->
       begin
         match sc.sc_kind with
-        | Ast_defs.Cabstract
+        | Ast_defs.Cclass k -> Ast_defs.is_abstract k
         | Ast_defs.Cinterface
         | Ast_defs.Ctrait
         | Ast_defs.Cenum ->
           true
-        | Ast_defs.Cnormal -> false
       end
     | Eager (c, _) -> c.Decl_defs.dc_abstract
 

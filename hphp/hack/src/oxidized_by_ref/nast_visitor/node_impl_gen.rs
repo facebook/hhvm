@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0fabdbce056e1794ad20744815ca154e>>
+// @generated SignedSource<<1e46010623403f36fd3623d415755c83>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,6 +13,17 @@
 use super::node::Node;
 use super::visitor::Visitor;
 use crate::{aast::*, aast_defs::*, ast_defs::*, doc_comment::*, namespace_env::*};
+impl<'a> Node<'a> for Abstraction {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_abstraction(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Abstraction::Concrete => {}
+            Abstraction::Abstract => {}
+        }
+    }
+}
 impl<'a> Node<'a> for Afield<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn, ()> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_afield(self)
@@ -526,14 +537,13 @@ impl<'a> Node<'a> for Class_<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyA
         }
     }
 }
-impl<'a> Node<'a> for ClassishKind {
+impl<'a> Node<'a> for ClassishKind<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_classish_kind(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            ClassishKind::Cabstract => {}
-            ClassishKind::Cnormal => {}
+            ClassishKind::Cclass(ref __binding_0) => __binding_0.accept(v),
             ClassishKind::Cinterface => {}
             ClassishKind::Ctrait => {}
             ClassishKind::Cenum => {}

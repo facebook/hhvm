@@ -887,8 +887,10 @@ module ErrorString = struct
         ""
     in
     match c_kind with
-    | Ast_defs.Cabstract -> "an abstract" ^ fs ^ " class"
-    | Ast_defs.Cnormal -> "a" ^ fs ^ " class"
+    | Ast_defs.Cclass k ->
+      (match k with
+      | Ast_defs.Abstract -> "an abstract" ^ fs ^ " class"
+      | Ast_defs.Concrete -> "a" ^ fs ^ " class")
     | Ast_defs.Cinterface -> "an interface"
     | Ast_defs.Ctrait -> "a trait"
     | Ast_defs.Cenum -> "an enum"
@@ -1471,8 +1473,10 @@ module PrintClass = struct
     Printf.sprintf "(line %d: chars %d-%d)" line start end_
 
   let classish_kind = function
-    | Ast_defs.Cabstract -> "Cabstract"
-    | Ast_defs.Cnormal -> "Cnormal"
+    | Ast_defs.Cclass k ->
+      (match k with
+      | Ast_defs.Abstract -> "Cabstract"
+      | Ast_defs.Concrete -> "Cnormal")
     | Ast_defs.Cinterface -> "Cinterface"
     | Ast_defs.Ctrait -> "Ctrait"
     | Ast_defs.Cenum -> "Cenum"

@@ -5091,9 +5091,9 @@ where
                 let tparams = Self::p_tparam_l(true, &c.type_parameters, env)?;
                 let class_kind = match Self::token_kind(&c.keyword) {
                     Some(TK::Class) if kinds.has(modifier::ABSTRACT) => {
-                        ast::ClassishKind::Cabstract
+                        ast::ClassishKind::Cclass(ast::Abstraction::Abstract)
                     }
-                    Some(TK::Class) => ast::ClassishKind::Cnormal,
+                    Some(TK::Class) => ast::ClassishKind::Cclass(ast::Abstraction::Concrete),
                     Some(TK::Interface) => ast::ClassishKind::Cinterface,
                     Some(TK::Trait) => ast::ClassishKind::Ctrait,
                     Some(TK::Enum) => ast::ClassishKind::Cenum,

@@ -55,9 +55,8 @@ let class_env ?origin ctx c =
         MakeType.class_type (Reason.Rwitness (fst c.c_name)) (snd c.c_name) []
       )
     | Ast_defs.Cinterface
-    | Ast_defs.Cabstract
-    | Ast_defs.Ctrait
-    | Ast_defs.Cnormal ->
+    | Ast_defs.Cclass _
+    | Ast_defs.Ctrait ->
       Typing_phase.localize_no_subst env ~ignore_errors:true self
   in
   let env = Env.set_self env self_id self_ty in

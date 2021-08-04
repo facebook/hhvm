@@ -3,7 +3,7 @@ Errors:
   [12:33-56] Attribute arguments must be literals
 [(Class
     { c_span = [4:3-6:4]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([4:9-30], "\\A\\MyStringFileAttribute"); c_tparams = []; 
       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = [([4:42-59], (Happly (([4:42-59], "\\HH\\FileAttribute"), [])))]; 
@@ -63,7 +63,7 @@ Errors:
       c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [8:3-10:4]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([8:9-16], "\\A\\MyClass"); c_tparams = []; c_extends = []; 
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
        c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false; 
@@ -93,7 +93,7 @@ Errors:
        c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [16:3-25]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([16:9-21], "\\B\\MyOtherClass"); c_tparams = []; c_extends = []; 
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
        c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false; 

@@ -116,8 +116,7 @@ let typeconst env c tc =
   | Ast_defs.Cenum -> None
   | Ast_defs.Ctrait
   | Ast_defs.Cinterface
-  | Ast_defs.Cabstract
-  | Ast_defs.Cnormal ->
+  | Ast_defs.Cclass _ ->
     let stc_kind =
       match tc.c_tconst_kind with
       | Aast.TCAbstract

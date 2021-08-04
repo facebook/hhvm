@@ -25,6 +25,7 @@ aast::Stmt_
 aast::TypeconstAbstractKind
 aast::XhpAttribute
 ast_defs::Bop
+ast_defs::ClassishKind
 ast_defs::Id
 ast_defs::ShapeFieldName
 ast_defs::XhpEnumValue
@@ -55,7 +56,7 @@ oxidized::aast_defs::UseAsVisibility
 oxidized::aast_defs::VcKind
 oxidized::aast_defs::Visibility
 oxidized::aast_defs::XhpChildOp
-oxidized::aast::ClassishKind
+oxidized::aast::Abstraction
 oxidized::aast::ConstraintKind
 oxidized::aast::EnvAnnot
 oxidized::aast::FuncReactive
@@ -77,7 +78,7 @@ oxidized::aast::VcKind
 oxidized::aast::Visibility
 oxidized::aast::XhpAttrTag
 oxidized::aast::XhpChildOp
-oxidized::ast_defs::ClassishKind
+oxidized::ast_defs::Abstraction
 oxidized::ast_defs::ConstraintKind
 oxidized::ast_defs::FunKind
 oxidized::ast_defs::OgNullFlavor

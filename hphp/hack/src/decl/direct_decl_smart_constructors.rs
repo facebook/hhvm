@@ -22,7 +22,8 @@ use namespaces_rust as namespaces;
 use oxidized_by_ref::{
     aast,
     ast_defs::{
-        Bop, ClassishKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance, XhpEnumValue,
+        Abstraction, Bop, ClassishKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance,
+        XhpEnumValue,
     },
     decl_parser_options::DeclParserOptions,
     direct_decl_parser::Decls,
@@ -3630,13 +3631,15 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let mut class_kind = match class_keyword.token_kind() {
             Some(TokenKind::Interface) => ClassishKind::Cinterface,
             Some(TokenKind::Trait) => ClassishKind::Ctrait,
-            _ => ClassishKind::Cnormal,
+            _ => ClassishKind::Cclass(&Abstraction::Concrete),
         };
         let mut final_ = false;
 
         for modifier in modifiers.iter() {
             match modifier.token_kind() {
-                Some(TokenKind::Abstract) => class_kind = ClassishKind::Cabstract,
+                Some(TokenKind::Abstract) => {
+                    class_kind = ClassishKind::Cclass(&Abstraction::Abstract)
+                }
                 Some(TokenKind::Final) => final_ = true,
                 _ => {}
             }

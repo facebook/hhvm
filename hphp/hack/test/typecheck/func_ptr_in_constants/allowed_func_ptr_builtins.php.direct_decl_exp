@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,83 +1,84 @@
+@@ -1,86 +1,87 @@
  [("\\foo",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -23,8 +23,9 @@
    ("\\Cls",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
-         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-         sc_module = None; sc_name = ([5:7-10], "\\Cls"); sc_tparams = [];
+         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cclass Concrete); sc_module = None;
+         sc_name = ([5:7-10], "\\Cls"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_implements = [];
@@ -52,8 +53,9 @@
    ("\\A",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
-         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-         sc_module = None; sc_name = ([9:7-8], "\\A"); sc_tparams = [];
+         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cclass Concrete); sc_module = None;
+         sc_name = ([9:7-8], "\\A"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_implements = [];
@@ -69,8 +71,9 @@
    ("\\B",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
-         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cabstract;
-         sc_module = None; sc_name = ([16:16-17], "\\B"); sc_tparams = [];
+         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cclass Abstract); sc_module = None;
+         sc_name = ([16:16-17], "\\B"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_implements = [];

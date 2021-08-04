@@ -92,9 +92,10 @@
   ("\\MyTraitUsingClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
-        sc_module = None; sc_name = ([17:7-24], "\\MyTraitUsingClass");
-        sc_tparams = []; sc_where_constraints = []; sc_extends = [];
+        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = (Cclass Concrete); sc_module = None;
+        sc_name = ([17:7-24], "\\MyTraitUsingClass"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = [];
         sc_uses =
         [(Rhint ([18:7-16]), (Tapply (([18:7-16], "\\TMyTrait2"), [])));
           (Rhint ([19:7-16]), (Tapply (([19:7-16], "\\TMyTrait3"), [])))];

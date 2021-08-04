@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d7593a4c974c943378344adffe564f0f>>
+// @generated SignedSource<<54cebdc90941be67e60e3a05fc53ddb8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,6 +13,25 @@ use super::node_mut::NodeMut;
 use super::type_params::Params;
 use super::visitor_mut::VisitorMut;
 use crate::{aast::*, aast_defs::*, ast_defs::*, doc_comment::*};
+impl<P: Params> NodeMut<P> for Abstraction {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_abstraction(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            Abstraction::Concrete => Ok(()),
+            Abstraction::Abstract => Ok(()),
+        }
+    }
+}
 impl<P: Params> NodeMut<P> for Afield<P::Ex, P::Fb, P::En> {
     fn accept<'node>(
         &'node mut self,
@@ -550,8 +569,10 @@ impl<P: Params> NodeMut<P> for ClassishKind {
         v: &mut dyn VisitorMut<'node, P = P>,
     ) -> Result<(), P::Error> {
         match self {
-            ClassishKind::Cabstract => Ok(()),
-            ClassishKind::Cnormal => Ok(()),
+            ClassishKind::Cclass(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
             ClassishKind::Cinterface => Ok(()),
             ClassishKind::Ctrait => Ok(()),
             ClassishKind::Cenum => Ok(()),

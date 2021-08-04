@@ -2575,8 +2575,10 @@ end = struct
     let pp_classish_kind ppf =
       Ast_defs.(
         function
-        | Cabstract -> Fmt.string ppf "abstract class"
-        | Cnormal -> Fmt.string ppf "class"
+        | Cclass k ->
+          (match k with
+          | Abstract -> Fmt.string ppf "abstract class"
+          | Concrete -> Fmt.string ppf "class")
         | Cinterface -> Fmt.string ppf "interface"
         | Ctrait -> Fmt.string ppf "trait"
         | Cenum -> Fmt.string ppf "enum")

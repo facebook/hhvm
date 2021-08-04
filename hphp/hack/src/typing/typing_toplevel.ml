@@ -914,9 +914,7 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum =
             let child_name = Cls.name decl in
             let (child_kind, verb) =
               match Cls.kind decl with
-              | Ast_defs.Cabstract
-              | Ast_defs.Cnormal ->
-                ("Class", "extend")
+              | Ast_defs.Cclass _ -> ("Class", "extend")
               | Ast_defs.Cinterface -> ("Interface", "implement")
               | Ast_defs.Ctrait -> ("Trait", "use")
               | Ast_defs.Cenum -> ("Enum", "use")
@@ -950,9 +948,7 @@ let check_parent_sealed
       | (Ast_defs.Cinterface, Ast_defs.Cinterface) -> check "interface" "extend"
       | (Ast_defs.Cinterface, _) -> check "interface" "implement"
       | (Ast_defs.Ctrait, _) -> check "trait" "use"
-      | (Ast_defs.Cabstract, _)
-      | (Ast_defs.Cnormal, _) ->
-        check "class" "extend"
+      | (Ast_defs.Cclass _, _) -> check "class" "extend"
       | (Ast_defs.Cenum, _) when is_enum_class -> check "enum class" "extend"
       | (Ast_defs.Cenum, _) -> check "enum" "use"
     end
@@ -1786,8 +1782,7 @@ let check_SupportDynamicType env c =
         | Some parent_type ->
           begin
             match Cls.kind parent_type with
-            | Ast_defs.Cnormal
-            | Ast_defs.Cabstract
+            | Ast_defs.Cclass _
             | Ast_defs.Cinterface ->
               (* ensure that we implement dynamic if we are a subclass/subinterface of a class/interface
                * that implements dynamic.  Upward well-formedness checks are performed in Typing_extends *)
@@ -1871,9 +1866,9 @@ let class_def_ env c tc =
        will be implemented in the future, so we take them as
        part of the class (as requested by dependency injection implementers) *)
     match c.c_kind with
-    | Ast_defs.Cabstract -> implements
+    | Ast_defs.Cclass k when Ast_defs.is_abstract k -> implements
     | Ast_defs.Ctrait -> implements @ req_implements
-    | Ast_defs.(Cnormal | Cinterface | Cenum) -> []
+    | Ast_defs.(Cclass _ | Cinterface | Cenum) -> []
   in
   let check_constructor_dep = check_constructor_dep env in
   check_implements_or_extends_unique implements;

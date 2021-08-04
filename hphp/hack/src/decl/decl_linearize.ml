@@ -189,9 +189,10 @@ let from_parent (c : shallow_class) : decl_ty list =
    * part of the class (as requested by dependency injection implementers)
    *)
   match c.sc_kind with
-  | Ast_defs.Cabstract -> c.sc_implements @ c.sc_extends
+  | Ast_defs.Cclass k when Ast_defs.is_abstract k ->
+    c.sc_implements @ c.sc_extends
   | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
-  | Ast_defs.(Cnormal | Cinterface | Cenum) -> c.sc_extends
+  | Ast_defs.(Cclass _ | Cinterface | Cenum) -> c.sc_extends
 
 let get_ancestors (c : shallow_class) (linearization_kind : linearization_kind)
     : ancestor list =
@@ -358,7 +359,7 @@ let rec ancestor_linearization
         Shallow_classes_provider.get (get_ctx env) class_name
         |> Option.value_map ~default:false ~f:(fun c ->
                match c.sc_kind with
-               | Ast_defs.(Cnormal | Cabstract) -> true
+               | Ast_defs.Cclass _ -> true
                | Ast_defs.(Ctrait | Cinterface | Cenum) -> false)
       in
       if not ancestor_checks_requirements then
@@ -481,7 +482,7 @@ and next_state
                 | (_, Ast_defs.(Ctrait | Cinterface))
                 (* Otherwise, keep them only if they represent a requirement that
                    we will need to validate later. *)
-                | (Some _, Ast_defs.(Cnormal | Cabstract | Cenum)) ->
+                | (Some _, Ast_defs.(Cclass _ | Cenum)) ->
                   next :: synths
                 | (None, _) -> synths
               in

@@ -50,7 +50,11 @@ pub fn from_ast<'ast, 'arena, 'decl, D: DeclProvider<'decl>>(
     let is_lsb = attributes.iter().any(|a| a.name.as_str() == ua::LSB);
     let is_late_init = attributes.iter().any(|a| a.name.as_str() == ua::LATE_INIT);
 
-    if !args.is_static && class.final_ && class.kind.is_cabstract() {
+    let is_cabstract = match class.kind {
+        ast_defs::ClassishKind::Cclass(k) => k.is_abstract(),
+        _ => false,
+    };
+    if !args.is_static && class.final_ && is_cabstract {
         return Err(emit_fatal::raise_fatal_parse(
             &pos,
             format!(

@@ -66,8 +66,7 @@ let add_if_valid_origin ctx class_elt child_class method_name result =
         ( method_name,
           Lazy.force class_elt.ce_pos |> Naming_provider.resolve_position ctx )
         :: result
-      | Ast_defs.Cabstract
-      | Ast_defs.Cnormal
+      | Ast_defs.Cclass _
       | Ast_defs.Cinterface
       | Ast_defs.Cenum ->
         result)

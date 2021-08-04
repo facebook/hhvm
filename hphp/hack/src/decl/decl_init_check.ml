@@ -127,7 +127,7 @@ let trait_props decl_env c props =
              * If the curr. class does not have its own constructor, only fold in
              * the trait members if it would not have had its own constructor when
              * defining `dc_deferred_init_members`. See logic in `class_` for
-             * Ast_defs.Cabstract to see where this deviated for traits. *)
+             * Ast_defs.Cclass (Abstract) to see where this deviated for traits. *)
             begin
               match fst cstr with
               | None -> SSet.union members props_acc
@@ -166,8 +166,7 @@ let get_deferred_init_props ?(class_cache : class_cache option) decl_env c =
 
 let class_ ~has_own_cstr ?(class_cache : class_cache option) decl_env c =
   match c.sc_kind with
-  | Ast_defs.Cabstract when not has_own_cstr ->
+  | Ast_defs.Cclass k when Ast_defs.is_abstract k && not has_own_cstr ->
     get_deferred_init_props ?class_cache decl_env c
   | Ast_defs.Ctrait -> get_deferred_init_props decl_env c
-  | Ast_defs.(Cnormal | Cinterface | Cenum | Cabstract) ->
-    (SSet.empty, SSet.empty)
+  | Ast_defs.(Cclass _ | Cinterface | Cenum) -> (SSet.empty, SSet.empty)

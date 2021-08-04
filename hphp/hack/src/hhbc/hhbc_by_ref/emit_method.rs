@@ -96,7 +96,11 @@ pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             ),
         ));
     };
-    if !method.static_ && class.final_ && class.kind.is_cabstract() {
+    let is_cabstract = match class.kind {
+        ast_defs::ClassishKind::Cclass(k) => k.is_abstract(),
+        _ => false,
+    };
+    if !method.static_ && class.final_ && is_cabstract {
         return Err(raise_fatal_parse(
             &method.name.0,
             format!(

@@ -114,11 +114,12 @@ let check_extend_kind
     child_is_enum_class =
   Ast_defs.(
     match (parent_kind, child_kind) with
-    | ((Cabstract | Cnormal), (Cabstract | Cnormal))
-    | (Cabstract, Cenum) (* enums extend BuiltinEnum under the hood *)
+    | (Cclass _, Cclass _)
     | (Ctrait, Ctrait)
     | (Cinterface, Cinterface) ->
       ()
+    (* enums extend BuiltinEnum under the hood *)
+    | (Cclass k, Cenum) when is_abstract k -> ()
     | (Ast_defs.Cenum, Ast_defs.Cenum) ->
       if parent_is_enum_class && child_is_enum_class then
         ()

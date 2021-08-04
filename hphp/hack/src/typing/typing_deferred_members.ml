@@ -169,7 +169,7 @@ and class_ env c =
     let has_concrete_cstr = Cls.need_init cls in
     let has_own_cstr = has_concrete_cstr && Option.is_some c.sc_constructor in
     (match c.sc_kind with
-    | Ast_defs.Cabstract when not has_own_cstr -> get_deferred_init_props env c
+    | Ast_defs.Cclass k when Ast_defs.is_abstract k && not has_own_cstr ->
+      get_deferred_init_props env c
     | Ast_defs.Ctrait -> get_deferred_init_props env c
-    | Ast_defs.(Cnormal | Cinterface | Cenum | Cabstract) ->
-      (SSet.empty, SSet.empty))
+    | Ast_defs.(Cclass _ | Cinterface | Cenum) -> (SSet.empty, SSet.empty))

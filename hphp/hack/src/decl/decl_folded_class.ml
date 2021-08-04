@@ -42,13 +42,12 @@ let check_extend_kind
     (child_is_enum_class : bool) : unit =
   match (parent_kind, child_kind) with
   (* What is allowed *)
-  | ( (Ast_defs.Cabstract | Ast_defs.Cnormal),
-      (Ast_defs.Cabstract | Ast_defs.Cnormal) )
-  | (Ast_defs.Cabstract, Ast_defs.Cenum)
-  (* enums extend BuiltinEnum under the hood *)
+  | (Ast_defs.Cclass _, Ast_defs.Cclass _)
   | (Ast_defs.Ctrait, Ast_defs.Ctrait)
   | (Ast_defs.Cinterface, Ast_defs.Cinterface) ->
     ()
+  (* enums extend BuiltinEnum under the hood *)
+  | (Ast_defs.Cclass k, Ast_defs.Cenum) when Ast_defs.is_abstract k -> ()
   | (Ast_defs.Cenum, Ast_defs.Cenum) ->
     if parent_is_enum_class && child_is_enum_class then
       ()
@@ -320,12 +319,11 @@ and class_decl_if_missing
 
 and class_is_abstract (c : Shallow_decl_defs.shallow_class) : bool =
   match c.sc_kind with
-  | Ast_defs.Cabstract
+  | Ast_defs.Cclass k -> Ast_defs.is_abstract k
   | Ast_defs.Cinterface
   | Ast_defs.Ctrait
   | Ast_defs.Cenum ->
     true
-  | Ast_defs.Cnormal -> false
 
 and synthesize_const_defaults c =
   let open Typing_defs in
@@ -822,8 +820,7 @@ and typeconst_fold
   | Ast_defs.Cenum -> acc
   | Ast_defs.Ctrait
   | Ast_defs.Cinterface
-  | Ast_defs.Cabstract
-  | Ast_defs.Cnormal ->
+  | Ast_defs.Cclass _ ->
     let name = snd stc.stc_name in
     let c_name = snd c.sc_name in
     let ts = typeconst_structure c stc in

@@ -1,6 +1,6 @@
 [(Class
     { c_span = [5:1-7:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([5:7-8], "\\A"); c_tparams = []; c_extends = []; c_uses = []; 
       c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
       c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false; 
@@ -46,7 +46,7 @@
       c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [9:1-50]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([9:7-8], "\\C"); c_tparams = []; c_extends = [([9:17-18], (Happly (([9:17-18], "\\A"), [])))]; 
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
        c_xhp_category = None; c_reqs = []; c_implements = [([9:30-47], (Happly (([9:30-47], "\\HH\\ClassAttribute"), [])))]; 
@@ -77,7 +77,7 @@
        c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [10:1-49]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([10:7-8], "\\E"); c_tparams = []; c_extends = [([10:17-18], (Happly (([10:17-18], "\\A"), [])))]; 
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
        c_xhp_category = None; c_reqs = []; c_implements = [([10:30-46], (Happly (([10:30-46], "\\HH\\EnumAttribute"), [])))]; 
@@ -108,7 +108,7 @@
        c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [11:1-53]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([11:7-8], "\\F"); c_tparams = []; c_extends = [([11:17-18], (Happly (([11:17-18], "\\A"), [])))]; 
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
        c_xhp_category = None; c_reqs = []; c_implements = [([11:30-50], (Happly (([11:30-50], "\\HH\\FunctionAttribute"), [])))]; 
@@ -139,7 +139,7 @@
        c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [12:1-53]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([12:7-10], "\\Met"); c_tparams = []; c_extends = [([12:19-20], (Happly (([12:19-20], "\\A"), [])))]; 
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
        c_xhp_category = None; c_reqs = []; c_implements = [([12:32-50], (Happly (([12:32-50], "\\HH\\MethodAttribute"), [])))]; 
@@ -170,7 +170,7 @@
        c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [13:1-65]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([13:7-12], "\\IProp"); c_tparams = []; c_extends = [([13:21-22], (Happly (([13:21-22], "\\A"), [])))]; 
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
        c_xhp_category = None; c_reqs = []; c_implements = [([13:34-62], (Happly (([13:34-62], "\\HH\\InstancePropertyAttribute"), [])))]; 
@@ -201,7 +201,7 @@
        c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [14:1-63]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([14:7-12], "\\SProp"); c_tparams = []; c_extends = [([14:21-22], (Happly (([14:21-22], "\\A"), [])))]; 
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
        c_xhp_category = None; c_reqs = []; c_implements = [([14:34-60], (Happly (([14:34-60], "\\HH\\StaticPropertyAttribute"), [])))]; 
@@ -232,7 +232,7 @@
        c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [15:1-54]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([15:7-8], "\\P"); c_tparams = []; c_extends = [([15:17-18], (Happly (([15:17-18], "\\A"), [])))]; 
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
        c_xhp_category = None; c_reqs = []; c_implements = [([15:30-51], (Happly (([15:30-51], "\\HH\\ParameterAttribute"), [])))]; 
@@ -263,7 +263,7 @@
        c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [16:1-59]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([16:7-13], "\\TAlias"); c_tparams = []; c_extends = [([16:22-23], (Happly (([16:22-23], "\\A"), [])))]; 
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
        c_xhp_category = None; c_reqs = []; c_implements = [([16:35-56], (Happly (([16:35-56], "\\HH\\TypeAliasAttribute"), [])))]; 
@@ -294,7 +294,7 @@
        c_enum = None; c_doc_comment = None; c_emit_id = None });
   (Class
      { c_span = [17:1-50]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([17:7-9], "\\Fi"); c_tparams = []; c_extends = [([17:18-19], (Happly (([17:18-19], "\\A"), [])))]; 
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
        c_xhp_category = None; c_reqs = []; c_implements = [([17:31-47], (Happly (([17:31-47], "\\HH\\FileAttribute"), [])))]; 
@@ -376,7 +376,7 @@
        });
   (Class
      { c_span = [22:1-30:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([23:7-9], "\\CC"); c_tparams = []; c_extends = []; c_uses = []; 
        c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
        c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false; 

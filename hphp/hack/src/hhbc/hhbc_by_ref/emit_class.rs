@@ -661,7 +661,10 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .as_ref()
         .map(|(p, c)| (p, c.iter().map(|x| &x.1).collect()));
 
-    let is_abstract = ast_class.kind == tast::ClassishKind::Cabstract;
+    let is_abstract = match ast_class.kind {
+        tast::ClassishKind::Cclass(k) => k.is_abstract(),
+        _ => false,
+    };
     let is_final = ast_class.final_ || is_trait;
     let is_sealed = hhas_attribute::has_sealed(attributes.as_ref());
 

@@ -37,8 +37,7 @@ let check_fulfillment env class_pos get_impl (trait_pos, req_ty) =
     namely [require extends] and [require implements]. *)
 let check_class env class_pos tc =
   match Cls.kind tc with
-  | Ast_defs.Cnormal
-  | Ast_defs.Cabstract ->
+  | Ast_defs.Cclass _ ->
     List.fold
       (Cls.all_ancestor_reqs tc)
       ~f:(fun env req ->

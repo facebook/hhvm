@@ -4122,8 +4122,7 @@ let wrong_extend_kind
   in
   let child_msg =
     match child_kind with
-    | Ast_defs.Cabstract
-    | Ast_defs.Cnormal ->
+    | Ast_defs.Cclass _ ->
       let extends_msg = "Classes can only extend other classes." in
       let suggestion =
         if Ast_defs.is_c_interface parent_kind then
@@ -5467,18 +5466,14 @@ let parent_support_dynamic_type
     (parent_name, parent_kind)
     child_support_dynamic_type =
   let kind_to_string = function
-    | Ast_defs.Cabstract
-    | Ast_defs.Cnormal ->
-      "class "
+    | Ast_defs.Cclass _ -> "class "
     | Ast_defs.Ctrait -> "trait "
     | Ast_defs.Cinterface -> "interface "
     | Ast_defs.Cenum -> (* cannot happen *) ""
   in
   let kinds_to_use child_kind parent_kind =
     match (child_kind, parent_kind) with
-    | (_, Ast_defs.Cabstract)
-    | (_, Ast_defs.Cnormal) ->
-      "extends "
+    | (_, Ast_defs.Cclass _) -> "extends "
     | (_, Ast_defs.Ctrait) -> "uses "
     | (Ast_defs.Cinterface, Ast_defs.Cinterface) -> "extends "
     | (_, Ast_defs.Cinterface) -> "implements "

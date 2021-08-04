@@ -136,9 +136,7 @@ let rec truthiness env ty =
       | None -> Unknown
       | Some cls ->
         (match Cls.kind cls with
-        | Cnormal
-        | Cabstract ->
-          Always_truthy
+        | Cclass _ -> Always_truthy
         | Cinterface
         | Cenum ->
           Possibly_falsy
@@ -230,8 +228,7 @@ let rec find_sketchy_types env acc ty =
       | Some cls ->
         (match Cls.kind cls with
         | Cinterface -> Traversable_interface (Env.print_ty env ty) :: acc
-        | Cnormal
-        | Cabstract
+        | Cclass _
         | Ctrait
         | Cenum ->
           acc)
@@ -275,8 +272,7 @@ let find_sketchy_types env ty = find_sketchy_types env [] ty
 
 let valid_newable_class cls =
   match Cls.kind cls with
-  | Ast_defs.Cnormal
-  | Ast_defs.Cabstract ->
+  | Ast_defs.Cclass _ ->
     Cls.final cls
     || not (equal_consistent_kind (snd (Cls.construct cls)) Inconsistent)
   (* There is currently a bug with interfaces that allows constructors to change

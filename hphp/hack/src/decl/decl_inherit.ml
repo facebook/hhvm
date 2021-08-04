@@ -374,8 +374,7 @@ let inherit_hack_class
     | Ast_defs.Ctrait ->
       (* Change the private/protected visibility to point to the inheriting class *)
       chown_private_and_protected (snd child.sc_name) parent
-    | Ast_defs.Cnormal
-    | Ast_defs.Cabstract
+    | Ast_defs.Cclass _
     | Ast_defs.Cinterface ->
       filter_privates parent
     | Ast_defs.Cenum -> parent
@@ -539,9 +538,10 @@ let from_parent env c (parents : Decl_store.class_entries SMap.t) =
      * part of the class (as requested by dependency injection implementers)
      *)
     match c.sc_kind with
-    | Ast_defs.Cabstract -> c.sc_implements @ c.sc_extends
+    | Ast_defs.Cclass k when Ast_defs.is_abstract k ->
+      c.sc_implements @ c.sc_extends
     | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
-    | Ast_defs.(Cnormal | Cinterface | Cenum) -> c.sc_extends
+    | Ast_defs.(Cclass _ | Cinterface | Cenum) -> c.sc_extends
   in
   let inherited_l = List.map extends ~f:(from_class env c parents) in
   List.fold_right ~f:add_inherited inherited_l ~init:empty

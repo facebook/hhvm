@@ -96,7 +96,7 @@ impl<'a> Class<'a> {
     }
 
     pub fn get_kind(&self) -> ast::ClassishKind {
-        self.either(|x| x.kind, |x| x.kind)
+        self.either(|x| x.kind.clone(), |x| x.kind.clone())
     }
 
     pub fn get_extends(&self) -> &[ast::Hint] {
@@ -214,7 +214,7 @@ impl Class_ {
             tparams: c.tparams.clone(),
             vars: c.vars.clone(),
             mode: c.mode,
-            kind: c.kind,
+            kind: c.kind.clone(),
             extends: c.extends.clone(),
         }
     }

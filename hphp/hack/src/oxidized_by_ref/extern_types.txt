@@ -29,7 +29,7 @@ oxidized::aast::UseAsVisibility
 oxidized::aast::VcKind
 oxidized::aast::Visibility
 oxidized::aast::XhpAttrTag
-oxidized::ast_defs::ClassishKind
+oxidized::ast_defs::Abstraction
 oxidized::ast_defs::ConstraintKind
 oxidized::ast_defs::FunKind
 oxidized::ast_defs::OgNullFlavor

@@ -30,7 +30,7 @@
         f_doc_comment = None }
       })[(Class
     { c_span = [3:1-7:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-8], "\\A");
       c_tparams =
       [{ tp_variance = Invariant; tp_name = ([3:9-10], "T"); tp_parameters = []; tp_constraints = [(Constraint_super, ([3:17-23], (Hprim Tstring)))]; tp_reified = Erased; tp_user_attributes = [] }];

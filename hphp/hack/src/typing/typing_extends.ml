@@ -421,8 +421,7 @@ let conflict_with_declared_interface
   in
   match Cls.kind parent_class with
   | Ast_defs.Cinterface -> is_inherited_and_conflicts_with_parent
-  | Ast_defs.Cabstract
-  | Ast_defs.Cnormal ->
+  | Ast_defs.Cclass _ ->
     is_inherited_and_conflicts_with_parent
     && child_const_from_declared_interface
   | Ast_defs.Ctrait ->
@@ -480,7 +479,7 @@ let check_const_override
       both_are_non_synthetic_and_concrete
       (* Check that the constant is indeed defined in class_ *)
       && String.( = ) class_const.cc_origin (Cls.name class_)
-    | Ast_defs.(Cabstract | Cnormal | Ctrait | Cenum) -> false
+    | Ast_defs.(Cclass _ | Ctrait | Cenum) -> false
   in
   let is_abstract_concrete_override =
     match (parent_class_const.cc_abstract, class_const.cc_abstract) with
@@ -553,7 +552,7 @@ let check_members
       && (not (get_ce_synthesized parent_class_elt))
       (* defined on original class *)
       && String.( <> ) class_elt.ce_origin (Cls.name class_)
-    | Ast_defs.(Cnormal | Cabstract | Cenum) -> false
+    | Ast_defs.(Cclass _ | Cenum) -> false
   in
   List.fold
     ~init:env
@@ -602,8 +601,7 @@ let check_members
          (* TODO: ideally refactor so the last test is not systematically performed on all methods *)
         then
           match Cls.kind parent_class with
-          | Ast_defs.Cabstract
-          | Ast_defs.Cnormal
+          | Ast_defs.Cclass _
           | Ast_defs.Ctrait ->
             begin
               match mem_source with

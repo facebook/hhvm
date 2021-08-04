@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c6caf348d6970b78b80e3dc92848bb3a>>
+// @generated SignedSource<<b4f3290935cde582c1158b25f530489d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -42,6 +42,13 @@ pub trait VisitorMut<'node> {
         p: &'node mut <Self::P as Params>::En,
     ) -> Result<(), <Self::P as Params>::Error> {
         Ok(())
+    }
+    fn visit_abstraction(
+        &mut self,
+        c: &mut <Self::P as Params>::Context,
+        p: &'node mut Abstraction,
+    ) -> Result<(), <Self::P as Params>::Error> {
+        p.recurse(c, self.object())
     }
     fn visit_afield(
         &mut self,

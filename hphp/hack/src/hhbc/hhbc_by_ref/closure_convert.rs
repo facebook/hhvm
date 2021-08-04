@@ -509,7 +509,7 @@ fn make_closure(
         final_: false,
         is_xhp: false,
         has_xhp_keyword: false,
-        kind: ClassishKind::Cnormal,
+        kind: ClassishKind::Cclass(Abstraction::Concrete),
         name: Id(p.clone(), make_closure_name(env, st)),
         tparams: class_tparams,
         extends: vec![Hint(

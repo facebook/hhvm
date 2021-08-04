@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c69efe1353176caa396f3e26b368481d>>
+// @generated SignedSource<<58afa098e7e031f8a7deb4925d090dfa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -35,6 +35,17 @@ impl<'a> Node<'a> for AbstractTypeconst<'a> {
                 }
                 { __binding_2.accept(v) }
             }
+        }
+    }
+}
+impl<'a> Node<'a> for Abstraction {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_abstraction(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Abstraction::Concrete => {}
+            Abstraction::Abstract => {}
         }
     }
 }
@@ -121,14 +132,13 @@ impl<'a> Node<'a> for ClassConstRef<'a> {
         }
     }
 }
-impl<'a> Node<'a> for ClassishKind {
+impl<'a> Node<'a> for ClassishKind<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_classish_kind(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            ClassishKind::Cabstract => {}
-            ClassishKind::Cnormal => {}
+            ClassishKind::Cclass(ref __binding_0) => __binding_0.accept(v),
             ClassishKind::Cinterface => {}
             ClassishKind::Ctrait => {}
             ClassishKind::Cenum => {}

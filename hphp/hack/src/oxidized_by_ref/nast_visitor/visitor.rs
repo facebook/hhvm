@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a2751069ca4e4ffcc1465d4345470fb5>>
+// @generated SignedSource<<651482d69d28e0383a431b0df9a08dec>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -13,6 +13,9 @@ use super::node::Node;
 use crate::{aast::*, aast_defs::*, ast_defs::*, doc_comment::*, namespace_env::*};
 pub trait Visitor<'a> {
     fn object(&mut self) -> &mut dyn Visitor<'a>;
+    fn visit_abstraction(&mut self, p: &'a Abstraction) {
+        p.recurse(self.object())
+    }
     fn visit_afield(
         &mut self,
         p: &'a Afield<'a, &'a crate::pos::Pos<'a>, crate::nast::FuncBodyAnn, ()>,
@@ -118,7 +121,7 @@ pub trait Visitor<'a> {
     ) {
         p.recurse(self.object())
     }
-    fn visit_classish_kind(&mut self, p: &'a ClassishKind) {
+    fn visit_classish_kind(&mut self, p: &'a ClassishKind<'a>) {
         p.recurse(self.object())
     }
     fn visit_collection_targ(&mut self, p: &'a CollectionTarg<'a, &'a crate::pos::Pos<'a>>) {

@@ -42,9 +42,12 @@ and constraint_kind =
 
 and reified = bool
 
+and abstraction =
+  | Concrete
+  | Abstract
+
 and classish_kind =
-  | Cabstract
-  | Cnormal
+  | Cclass of abstraction
   | Cinterface
   | Ctrait
   | Cenum
@@ -151,26 +154,38 @@ let get_pos : type a. Pos.t * a -> Pos.t = (fun (p, _) -> p)
 
 let get_id : id -> id_ = (fun (_p, id) -> id)
 
-let is_c_normal = function
-  | Cnormal -> true
+let is_concrete = function
+  | Concrete -> true
+  | Abstract -> false
+
+let is_abstract = function
+  | Abstract -> true
+  | Concrete -> false
+
+let is_c_class = function
+  | Cclass _ -> true
   | Cenum
-  | Cabstract
+  | Ctrait
+  | Cinterface ->
+    false
+
+let is_c_normal = function
+  | Cclass c -> is_concrete c
+  | Cenum
   | Ctrait
   | Cinterface ->
     false
 
 let is_c_enum = function
   | Cenum -> true
-  | Cabstract
-  | Cnormal
+  | Cclass _
   | Ctrait
   | Cinterface ->
     false
 
 let is_c_interface = function
   | Cinterface -> true
-  | Cabstract
-  | Cnormal
+  | Cclass _
   | Ctrait
   | Cenum ->
     false
@@ -178,15 +193,13 @@ let is_c_interface = function
 let is_c_trait = function
   | Ctrait -> true
   | Cinterface
-  | Cabstract
-  | Cnormal
+  | Cclass _
   | Cenum ->
     false
 
 let is_c_abstract = function
-  | Cabstract -> true
+  | Cclass c -> is_abstract c
   | Cinterface
-  | Cnormal
   | Ctrait
   | Cenum ->
     false
@@ -203,8 +216,10 @@ let is_f_async_or_generator = function
 
 let string_of_classish_kind kind ~is_enum_class =
   match kind with
-  | Cabstract -> "an abstract class"
-  | Cnormal -> "a class"
+  | Cclass c ->
+    (match c with
+    | Abstract -> "an abstract class"
+    | Concrete -> "a class")
   | Cinterface -> "an interface"
   | Ctrait -> "a trait"
   | Cenum ->

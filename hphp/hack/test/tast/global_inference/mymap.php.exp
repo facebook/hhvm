@@ -37,7 +37,7 @@
         f_doc_comment = None }
       })[(Class
     { c_span = [3:1-8:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cnormal; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-12], "\\MyMap");
       c_tparams =
       [{ tp_variance = Invariant; tp_name = ([3:13-15], "Tk"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };

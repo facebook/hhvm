@@ -6,7 +6,7 @@ option(STATIC_CXX_LIB "Statically link libstd++ and libgcc." OFF)
 option(ENABLE_AVX2 "Enable the use of AVX2 instructions" OFF)
 option(ENABLE_AARCH64_CRC "Enable the use of CRC instructions" OFF)
 option(ENABLE_FASTCGI "Enable the FastCGI interface." ON)
-option(ENABLE_SSE4_2 "Enable SSE4.2 supported code." OFF)
+option(ENABLE_SSE4_2 "Enable SSE4.2 supported code." ON)
 
 option(EXECUTION_PROFILER "Enable the execution profiler" OFF)
 

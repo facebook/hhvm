@@ -1745,20 +1745,6 @@ void emitFCallClsMethodSD(IRGS& env, FCallArgs fca, const StringData* clsHint,
 
 //////////////////////////////////////////////////////////////////////
 
-void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
-                    SSATmp* const* const args) {
-  allocActRec(env);
-  for (int32_t i = 0; i < numParams; i++) {
-    push(env, args[i]);
-  }
-
-  auto const fca = FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr,
-                             nullptr, kInvalidOffset, nullptr);
-  prepareAndCallKnown(env, callee, fca, nullptr, false, false);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 Type callReturnType(const Func* callee) {
   // Don't make any assumptions about functions which can be intercepted. The
   // interception functions can return arbitrary types.

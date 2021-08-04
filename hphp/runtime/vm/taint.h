@@ -16,13 +16,7 @@
 
 #pragma once
 
-constexpr bool enable_taint =
 #ifdef HHVM_TAINT
-true
-#else
-false
-#endif
-;
 
 #include "hphp/runtime/vm/hhbc.h"
 
@@ -41,7 +35,14 @@ struct State {
   std::vector<int> history;
 };
 
-void retC();
+#define O(name, imm, in, out, flags) \
+void iop##name();
 
-}
-}
+OPCODES
+
+#undef O
+
+} // taint
+} // HPHP
+
+#endif

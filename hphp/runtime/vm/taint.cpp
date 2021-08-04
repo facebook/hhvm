@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef HHVM_TAINT
 
 #include <folly/Singleton.h>
 
@@ -25,8 +26,10 @@ namespace HPHP {
 namespace taint {
 
 namespace {
-  struct SingletonTag {};
-}
+
+struct SingletonTag {};
+
+} // namespace
 
 folly::Singleton<State, SingletonTag> singleton{};
 /* static */ std::shared_ptr<State> State::get() {
@@ -35,10 +38,904 @@ folly::Singleton<State, SingletonTag> singleton{};
 
 TRACE_SET_MOD(taint);
 
-void retC() {
-  FTRACE(1, "taint: RetC\n");
+namespace {
+
+inline void iopUnhandled(const std::string& name) {
+  FTRACE(1, "taint: iopUnhandled opcode `{}`\n", name);
+}
+
+} // namespace
+
+void iopNop() {
+  iopUnhandled("Nop");
+}
+
+void iopEntryNop() {
+  iopUnhandled("EntryNop");
+}
+
+void iopBreakTraceHint() {
+  iopUnhandled("BreakTraceHint");
+}
+
+void iopPopC() {
+  iopUnhandled("PopC");
+}
+
+void iopPopU() {
+  iopUnhandled("PopU");
+}
+
+void iopPopU2() {
+  iopUnhandled("PopU2");
+}
+
+void iopPopL() {
+  iopUnhandled("PopL");
+}
+
+void iopDup() {
+  iopUnhandled("Dup");
+}
+
+void iopCGetCUNop() {
+  iopUnhandled("CGetCUNop");
+}
+
+void iopUGetCUNop() {
+  iopUnhandled("UGetCUNop");
+}
+
+void iopNull() {
+  iopUnhandled("Null");
+}
+
+void iopNullUninit() {
+  iopUnhandled("NullUninit");
+}
+
+void iopTrue() {
+  iopUnhandled("True");
+}
+
+void iopFalse() {
+  iopUnhandled("False");
+}
+
+void iopFuncCred() {
+  iopUnhandled("FuncCred");
+}
+
+void iopInt() {
+  iopUnhandled("Int");
+}
+
+void iopDouble() {
+  iopUnhandled("Double");
+}
+
+void iopString() {
+  iopUnhandled("String");
+}
+
+void iopDict() {
+  iopUnhandled("Dict");
+}
+
+void iopKeyset() {
+  iopUnhandled("Keyset");
+}
+
+void iopVec() {
+  iopUnhandled("Vec");
+}
+
+void iopNewDictArray() {
+  iopUnhandled("NewDictArray");
+}
+
+void iopNewStructDict() {
+  iopUnhandled("NewStructDict");
+}
+
+void iopNewVec() {
+  iopUnhandled("NewVec");
+}
+
+void iopNewKeysetArray() {
+  iopUnhandled("NewKeysetArray");
+}
+
+void iopNewRecord() {
+  iopUnhandled("NewRecord");
+}
+
+void iopAddElemC() {
+  iopUnhandled("AddElemC");
+}
+
+void iopAddNewElemC() {
+  iopUnhandled("AddNewElemC");
+}
+
+void iopNewCol() {
+  iopUnhandled("NewCol");
+}
+
+void iopNewPair() {
+  iopUnhandled("NewPair");
+}
+
+void iopColFromArray() {
+  iopUnhandled("ColFromArray");
+}
+
+void iopCnsE() {
+  iopUnhandled("CnsE");
+}
+
+void iopClsCns() {
+  iopUnhandled("ClsCns");
+}
+
+void iopClsCnsD() {
+  iopUnhandled("ClsCnsD");
+}
+
+void iopClsCnsL() {
+  iopUnhandled("ClsCnsL");
+}
+
+void iopClassName() {
+  iopUnhandled("ClassName");
+}
+
+void iopLazyClassFromClass() {
+  iopUnhandled("LazyClassFromClass");
+}
+
+void iopFile() {
+  iopUnhandled("File");
+}
+
+void iopDir() {
+  iopUnhandled("Dir");
+}
+
+void iopMethod() {
+  iopUnhandled("Method");
+}
+
+void iopConcat() {
+  iopUnhandled("Concat");
+}
+
+void iopConcatN() {
+  iopUnhandled("ConcatN");
+}
+
+void iopAdd() {
+  iopUnhandled("Add");
+}
+
+void iopSub() {
+  iopUnhandled("Sub");
+}
+
+void iopMul() {
+  iopUnhandled("Mul");
+}
+
+void iopAddO() {
+  iopUnhandled("AddO");
+}
+
+void iopSubO() {
+  iopUnhandled("SubO");
+}
+
+void iopMulO() {
+  iopUnhandled("MulO");
+}
+
+void iopDiv() {
+  iopUnhandled("Div");
+}
+
+void iopMod() {
+  iopUnhandled("Mod");
+}
+
+void iopPow() {
+  iopUnhandled("Pow");
+}
+
+void iopNot() {
+  iopUnhandled("Not");
+}
+
+void iopSame() {
+  iopUnhandled("Same");
+}
+
+void iopNSame() {
+  iopUnhandled("NSame");
+}
+
+void iopEq() {
+  iopUnhandled("Eq");
+}
+
+void iopNeq() {
+  iopUnhandled("Neq");
+}
+
+void iopLt() {
+  iopUnhandled("Lt");
+}
+
+void iopLte() {
+  iopUnhandled("Lte");
+}
+
+void iopGt() {
+  iopUnhandled("Gt");
+}
+
+void iopGte() {
+  iopUnhandled("Gte");
+}
+
+void iopCmp() {
+  iopUnhandled("Cmp");
+}
+
+void iopBitAnd() {
+  iopUnhandled("BitAnd");
+}
+
+void iopBitOr() {
+  iopUnhandled("BitOr");
+}
+
+void iopBitXor() {
+  iopUnhandled("BitXor");
+}
+
+void iopBitNot() {
+  iopUnhandled("BitNot");
+}
+
+void iopShl() {
+  iopUnhandled("Shl");
+}
+
+void iopShr() {
+  iopUnhandled("Shr");
+}
+
+void iopCastBool() {
+  iopUnhandled("CastBool");
+}
+
+void iopCastInt() {
+  iopUnhandled("CastInt");
+}
+
+void iopCastDouble() {
+  iopUnhandled("CastDouble");
+}
+
+void iopCastString() {
+  iopUnhandled("CastString");
+}
+
+void iopCastDict() {
+  iopUnhandled("CastDict");
+}
+
+void iopCastKeyset() {
+  iopUnhandled("CastKeyset");
+}
+
+void iopCastVec() {
+  iopUnhandled("CastVec");
+}
+
+void iopDblAsBits() {
+  iopUnhandled("DblAsBits");
+}
+
+void iopInstanceOf() {
+  iopUnhandled("InstanceOf");
+}
+
+void iopInstanceOfD() {
+  iopUnhandled("InstanceOfD");
+}
+
+void iopIsLateBoundCls() {
+  iopUnhandled("IsLateBoundCls");
+}
+
+void iopIsTypeStructC() {
+  iopUnhandled("IsTypeStructC");
+}
+
+void iopThrowAsTypeStructException() {
+  iopUnhandled("ThrowAsTypeStructException");
+}
+
+void iopCombineAndResolveTypeStruct() {
+  iopUnhandled("CombineAndResolveTypeStruct");
+}
+
+void iopSelect() {
+  iopUnhandled("Select");
+}
+
+void iopPrint() {
+  iopUnhandled("Print");
+}
+
+void iopClone() {
+  iopUnhandled("Clone");
+}
+
+void iopExit() {
+  iopUnhandled("Exit");
+}
+
+void iopFatal() {
+  iopUnhandled("Fatal");
+}
+
+void iopJmp() {
+  iopUnhandled("Jmp");
+}
+
+void iopJmpNS() {
+  iopUnhandled("JmpNS");
+}
+
+void iopJmpZ() {
+  iopUnhandled("JmpZ");
+}
+
+void iopJmpNZ() {
+  iopUnhandled("JmpNZ");
+}
+
+void iopSwitch() {
+  iopUnhandled("Switch");
+}
+
+void iopSSwitch() {
+  iopUnhandled("SSwitch");
+}
+
+void iopRetC() {
+  FTRACE(1, "taint: iopRetC\n");
   State::get()->history.push_back(1);
+}
+
+void iopRetM() {
+  iopUnhandled("RetM");
+}
+
+void iopRetCSuspended() {
+  iopUnhandled("RetCSuspended");
+}
+
+void iopThrow() {
+  iopUnhandled("Throw");
+}
+
+void iopCGetL() {
+  iopUnhandled("CGetL");
+}
+
+void iopCGetQuietL() {
+  iopUnhandled("CGetQuietL");
+}
+
+void iopCUGetL() {
+  iopUnhandled("CUGetL");
+}
+
+void iopCGetL2() {
+  iopUnhandled("CGetL2");
+}
+
+void iopPushL() {
+  iopUnhandled("PushL");
+}
+
+void iopCGetG() {
+  iopUnhandled("CGetG");
+}
+
+void iopCGetS() {
+  iopUnhandled("CGetS");
+}
+
+void iopClassGetC() {
+  iopUnhandled("ClassGetC");
+}
+
+void iopClassGetTS() {
+  iopUnhandled("ClassGetTS");
+}
+
+void iopGetMemoKeyL() {
+  iopUnhandled("GetMemoKeyL");
+}
+
+void iopAKExists() {
+  iopUnhandled("AKExists");
+}
+
+void iopIssetL() {
+  iopUnhandled("IssetL");
+}
+
+void iopIssetG() {
+  iopUnhandled("IssetG");
+}
+
+void iopIssetS() {
+  iopUnhandled("IssetS");
+}
+
+void iopIsUnsetL() {
+  iopUnhandled("IsUnsetL");
+}
+
+void iopIsTypeC() {
+  iopUnhandled("IsTypeC");
+}
+
+void iopIsTypeL() {
+  iopUnhandled("IsTypeL");
+}
+
+void iopAssertRATL() {
+  iopUnhandled("AssertRATL");
+}
+
+void iopAssertRATStk() {
+  iopUnhandled("AssertRATStk");
+}
+
+void iopSetL() {
+  iopUnhandled("SetL");
+}
+
+void iopSetG() {
+  iopUnhandled("SetG");
+}
+
+void iopSetS() {
+  iopUnhandled("SetS");
+}
+
+void iopSetOpL() {
+  iopUnhandled("SetOpL");
+}
+
+void iopSetOpG() {
+  iopUnhandled("SetOpG");
+}
+
+void iopSetOpS() {
+  iopUnhandled("SetOpS");
+}
+
+void iopIncDecL() {
+  iopUnhandled("IncDecL");
+}
+
+void iopIncDecG() {
+  iopUnhandled("IncDecG");
+}
+
+void iopIncDecS() {
+  iopUnhandled("IncDecS");
+}
+
+void iopUnsetL() {
+  iopUnhandled("UnsetL");
+}
+
+void iopUnsetG() {
+  iopUnhandled("UnsetG");
+}
+
+void iopResolveFunc() {
+  iopUnhandled("ResolveFunc");
+}
+
+void iopResolveMethCaller() {
+  iopUnhandled("ResolveMethCaller");
+}
+
+void iopResolveRFunc() {
+  iopUnhandled("ResolveRFunc");
+}
+
+void iopResolveObjMethod() {
+  iopUnhandled("ResolveObjMethod");
+}
+
+void iopResolveClsMethod() {
+  iopUnhandled("ResolveClsMethod");
+}
+
+void iopResolveClsMethodD() {
+  iopUnhandled("ResolveClsMethodD");
+}
+
+void iopResolveClsMethodS() {
+  iopUnhandled("ResolveClsMethodS");
+}
+
+void iopResolveRClsMethod() {
+  iopUnhandled("ResolveRClsMethod");
+}
+
+void iopResolveRClsMethodD() {
+  iopUnhandled("ResolveRClsMethodD");
+}
+
+void iopResolveRClsMethodS() {
+  iopUnhandled("ResolveRClsMethodS");
+}
+
+void iopResolveClass() {
+  iopUnhandled("ResolveClass");
+}
+
+void iopLazyClass() {
+  iopUnhandled("LazyClass");
+}
+
+void iopNewObj() {
+  iopUnhandled("NewObj");
+}
+
+void iopNewObjR() {
+  iopUnhandled("NewObjR");
+}
+
+void iopNewObjD() {
+  iopUnhandled("NewObjD");
+}
+
+void iopNewObjRD() {
+  iopUnhandled("NewObjRD");
+}
+
+void iopNewObjS() {
+  iopUnhandled("NewObjS");
+}
+
+void iopLockObj() {
+  iopUnhandled("LockObj");
+}
+
+void iopFCallClsMethod() {
+  iopUnhandled("FCallClsMethod");
+}
+
+void iopFCallClsMethodD() {
+  iopUnhandled("FCallClsMethodD");
+}
+
+void iopFCallClsMethodS() {
+  iopUnhandled("FCallClsMethodS");
+}
+
+void iopFCallClsMethodSD() {
+  iopUnhandled("FCallClsMethodSD");
+}
+
+void iopFCallCtor() {
+  iopUnhandled("FCallCtor");
+}
+
+void iopFCallFunc() {
+  iopUnhandled("FCallFunc");
+}
+
+void iopFCallFuncD() {
+  iopUnhandled("FCallFuncD");
+}
+
+void iopFCallObjMethod() {
+  iopUnhandled("FCallObjMethod");
+}
+
+void iopFCallObjMethodD() {
+  iopUnhandled("FCallObjMethodD");
+}
+
+void iopIterInit() {
+  iopUnhandled("IterInit");
+}
+
+void iopLIterInit() {
+  iopUnhandled("LIterInit");
+}
+
+void iopIterNext() {
+  iopUnhandled("IterNext");
+}
+
+void iopLIterNext() {
+  iopUnhandled("LIterNext");
+}
+
+void iopIterFree() {
+  iopUnhandled("IterFree");
+}
+
+void iopLIterFree() {
+  iopUnhandled("LIterFree");
+}
+
+void iopIncl() {
+  iopUnhandled("Incl");
+}
+
+void iopInclOnce() {
+  iopUnhandled("InclOnce");
+}
+
+void iopReq() {
+  iopUnhandled("Req");
+}
+
+void iopReqOnce() {
+  iopUnhandled("ReqOnce");
+}
+
+void iopReqDoc() {
+  iopUnhandled("ReqDoc");
+}
+
+void iopEval() {
+  iopUnhandled("Eval");
+}
+
+void iopThis() {
+  iopUnhandled("This");
+}
+
+void iopBareThis() {
+  iopUnhandled("BareThis");
+}
+
+void iopCheckThis() {
+  iopUnhandled("CheckThis");
+}
+
+void iopChainFaults() {
+  iopUnhandled("ChainFaults");
+}
+
+void iopOODeclExists() {
+  iopUnhandled("OODeclExists");
+}
+
+void iopVerifyOutType() {
+  iopUnhandled("VerifyOutType");
+}
+
+void iopVerifyParamType() {
+  iopUnhandled("VerifyParamType");
+}
+
+void iopVerifyParamTypeTS() {
+  iopUnhandled("VerifyParamTypeTS");
+}
+
+void iopVerifyRetTypeC() {
+  iopUnhandled("VerifyRetTypeC");
+}
+
+void iopVerifyRetTypeTS() {
+  iopUnhandled("VerifyRetTypeTS");
+}
+
+void iopVerifyRetNonNullC() {
+  iopUnhandled("VerifyRetNonNullC");
+}
+
+void iopSelf() {
+  iopUnhandled("Self");
+}
+
+void iopParent() {
+  iopUnhandled("Parent");
+}
+
+void iopLateBoundCls() {
+  iopUnhandled("LateBoundCls");
+}
+
+void iopRecordReifiedGeneric() {
+  iopUnhandled("RecordReifiedGeneric");
+}
+
+void iopCheckReifiedGenericMismatch() {
+  iopUnhandled("CheckReifiedGenericMismatch");
+}
+
+void iopNativeImpl() {
+  iopUnhandled("NativeImpl");
+}
+
+void iopCreateCl() {
+  iopUnhandled("CreateCl");
+}
+
+void iopCreateCont() {
+  iopUnhandled("CreateCont");
+}
+
+void iopContEnter() {
+  iopUnhandled("ContEnter");
+}
+
+void iopContRaise() {
+  iopUnhandled("ContRaise");
+}
+
+void iopYield() {
+  iopUnhandled("Yield");
+}
+
+void iopYieldK() {
+  iopUnhandled("YieldK");
+}
+
+void iopContCheck() {
+  iopUnhandled("ContCheck");
+}
+
+void iopContValid() {
+  iopUnhandled("ContValid");
+}
+
+void iopContKey() {
+  iopUnhandled("ContKey");
+}
+
+void iopContCurrent() {
+  iopUnhandled("ContCurrent");
+}
+
+void iopContGetReturn() {
+  iopUnhandled("ContGetReturn");
+}
+
+void iopWHResult() {
+  iopUnhandled("WHResult");
+}
+
+void iopAwait() {
+  iopUnhandled("Await");
+}
+
+void iopAwaitAll() {
+  iopUnhandled("AwaitAll");
+}
+
+void iopIdx() {
+  iopUnhandled("Idx");
+}
+
+void iopArrayIdx() {
+  iopUnhandled("ArrayIdx");
+}
+
+void iopArrayMarkLegacy() {
+  iopUnhandled("ArrayMarkLegacy");
+}
+
+void iopArrayUnmarkLegacy() {
+  iopUnhandled("ArrayUnmarkLegacy");
+}
+
+void iopCheckProp() {
+  iopUnhandled("CheckProp");
+}
+
+void iopInitProp() {
+  iopUnhandled("InitProp");
+}
+
+void iopSilence() {
+  iopUnhandled("Silence");
+}
+
+void iopThrowNonExhaustiveSwitch() {
+  iopUnhandled("ThrowNonExhaustiveSwitch");
+}
+
+void iopRaiseClassStringConversionWarning() {
+  iopUnhandled("RaiseClassStringConversionWarning");
+}
+
+void iopBaseGC() {
+  iopUnhandled("BaseGC");
+}
+
+void iopBaseGL() {
+  iopUnhandled("BaseGL");
+}
+
+void iopBaseSC() {
+  iopUnhandled("BaseSC");
+}
+
+void iopBaseL() {
+  iopUnhandled("BaseL");
+}
+
+void iopBaseC() {
+  iopUnhandled("BaseC");
+}
+
+void iopBaseH() {
+  iopUnhandled("BaseH");
+}
+
+void iopDim() {
+  iopUnhandled("Dim");
+}
+
+void iopQueryM() {
+  iopUnhandled("QueryM");
+}
+
+void iopSetM() {
+  iopUnhandled("SetM");
+}
+
+void iopSetRangeM() {
+  iopUnhandled("SetRangeM");
+}
+
+void iopIncDecM() {
+  iopUnhandled("IncDecM");
+}
+
+void iopSetOpM() {
+  iopUnhandled("SetOpM");
+}
+
+void iopUnsetM() {
+  iopUnhandled("UnsetM");
+}
+
+void iopMemoGet() {
+  iopUnhandled("MemoGet");
+}
+
+void iopMemoGetEager() {
+  iopUnhandled("MemoGetEager");
+}
+
+void iopMemoSet() {
+  iopUnhandled("MemoSet");
+}
+
+void iopMemoSetEager() {
+  iopUnhandled("MemoSetEager");
 }
 
 } // namespace taint
 } // namespace HPHP
+
+#endif

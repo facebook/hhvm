@@ -2289,7 +2289,6 @@ OPTBLD_INLINE TCA ret(PC& pc) {
 }
 
 OPTBLD_INLINE TCA iopRetC(PC& pc) {
-  if (enable_taint) taint::retC();
   return ret<false>(pc);
 }
 
@@ -5593,12 +5592,20 @@ struct litstr_id {
 #define PASS_FIVE(...) , imm1, imm2, imm3, imm4, imm5
 #define PASS_SIX(...) , imm1, imm2, imm3, imm4, imm5, imm6
 
+#ifdef HHVM_TAINT
+#define TAINT(name, imm, in, out, flags)                             \
+  HPHP::taint::iop##name();
+#else
+#define TAINT(name, imm, in, out, flags) ;
+#endif
+
 #define O(name, imm, in, out, flags)                                 \
   template<bool breakOnCtlFlow>                                      \
   OPTBLD_INLINE TCA iopWrap##name(PC& pc) {                          \
     UNUSED auto constexpr op = Op::name;                             \
     UNUSED auto const origpc = pc - encoded_op_size(op);             \
     DECODE_##imm                                                     \
+    TAINT(name, imm, in, out, flags);                                \
     return iopWrapReturn(                                            \
       iop##name, breakOnCtlFlow, origpc FLAG_##flags PASS_##imm);    \
   }

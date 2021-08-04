@@ -34,7 +34,7 @@ class TaintTest : public ::testing::Test {
 TEST(TaintTest, DummyTest) {
   EXPECT_TRUE(State::get()->history.empty());
 
-  retC();
+  iopRetC();
 
   EXPECT_EQ(State::get()->history.size(), 1);
   EXPECT_EQ(State::get()->history[0], 1);

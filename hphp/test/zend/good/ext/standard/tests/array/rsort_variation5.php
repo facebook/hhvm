@@ -27,7 +27,7 @@ foreach ($various_arrays as $array) {
 
     echo "- With Default sort flag -\n";
     $temp_array = $array;
-    var_dump(rsort(inout $temp_array) );
+    var_dump(usort(inout $temp_array,  ($a, $b) ==> -HH\Lib\Legacy_FIXME\cmp($a, $b)) );
     var_dump($temp_array);
 
     // loop through $flags array and setting all possible flag values

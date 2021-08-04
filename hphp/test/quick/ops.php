@@ -170,13 +170,13 @@ print "\n";
 print "3 < 4 --> "; print 3 < 4; print "\n";
 print "3 < 3 --> "; print 3 < 3; print "\n";
 print "4 < 3 --> "; print 4 < 3; print "\n";
-print "\"4\" < 3 --> "; print "4" < 3; print "\n";
+print "\"4\" < 3 --> "; print HH\Lib\Legacy_FIXME\lt("4", 3); print "\n";
 print "\n";
 
 print "3 <= 4 --> "; print 3 <= 4; print "\n";
 print "3 <= 3 --> "; print 3 <= 3; print "\n";
 print "4 <= 3 --> "; print 4 <= 3; print "\n";
-print "\"4\" <= 3 --> "; print "4" <= 3; print "\n";
+print "\"4\" <= 3 --> "; print HH\Lib\Legacy_FIXME\lte("4", 3); print "\n";
 print "\n";
 
 if (true) {

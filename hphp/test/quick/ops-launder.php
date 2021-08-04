@@ -170,13 +170,13 @@ print "\n";
 print "3 < 4 --> "; print __hhvm_intrinsics\launder_value(3) < 4; print "\n";
 print "3 < 3 --> "; print __hhvm_intrinsics\launder_value(3) < 3; print "\n";
 print "4 < 3 --> "; print __hhvm_intrinsics\launder_value(4) < 3; print "\n";
-print "\"4\" < 3 --> "; print __hhvm_intrinsics\launder_value("4") < 3; print "\n";
+print "\"4\" < 3 --> "; print HH\Lib\Legacy_FIXME\lt(__hhvm_intrinsics\launder_value("4"), 3); print "\n";
 print "\n";
 
 print "3 <= 4 --> "; print __hhvm_intrinsics\launder_value(3) <= 4; print "\n";
 print "3 <= 3 --> "; print __hhvm_intrinsics\launder_value(3) <= 3; print "\n";
 print "4 <= 3 --> "; print __hhvm_intrinsics\launder_value(4) <= 3; print "\n";
-print "\"4\" <= 3 --> "; print __hhvm_intrinsics\launder_value("4") <= 3; print "\n";
+print "\"4\" <= 3 --> "; print HH\Lib\Legacy_FIXME\lte(__hhvm_intrinsics\launder_value("4"), 3); print "\n";
 print "\n";
 
 if (__hhvm_intrinsics\launder_value(true)) {

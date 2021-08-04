@@ -4,7 +4,7 @@
 
 function show_iter($iter) {
   $vs = new Vector($iter);
-  sort(inout $vs);
+  usort(inout $vs,  HH\Lib\Legacy_FIXME\cmp<>);
   echo "...\n";
   foreach ($vs as $v) var_dump($v);
   echo "...\n";

@@ -1,7 +1,7 @@
 <?hh
 
 function f1($x) {
-  return true < $x;
+  return HH\Lib\Legacy_FIXME\lt(true, $x);
 }
 
 function f2($x) {

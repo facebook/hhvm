@@ -12,14 +12,14 @@ function main() {
     var_dump($b == $a);
     var_dump($a != $b);
     var_dump($b != $a);
-    var_dump($a < $b);
-    var_dump($b < $a);
-    var_dump($a <= $b);
-    var_dump($b <= $a);
-    var_dump($a > $b);
-    var_dump($b > $a);
-    var_dump($a >= $b);
-    var_dump($b >= $a);
+    var_dump(HH\Lib\Legacy_FIXME\lt($a, $b));
+    var_dump(HH\Lib\Legacy_FIXME\lt($b, $a));
+    var_dump(HH\Lib\Legacy_FIXME\lte($a, $b));
+    var_dump(HH\Lib\Legacy_FIXME\lte($b, $a));
+    var_dump(HH\Lib\Legacy_FIXME\gt($a, $b));
+    var_dump(HH\Lib\Legacy_FIXME\gt($b, $a));
+    var_dump(HH\Lib\Legacy_FIXME\gte($a, $b));
+    var_dump(HH\Lib\Legacy_FIXME\gte($b, $a));
     echo "--------\n";
   }
 }

@@ -8,28 +8,28 @@ function single_compare($a, $b) {
 
   echo "\t<   : ";
   try {
-    var_dump($a < $b);
+    var_dump(HH\Lib\Legacy_FIXME\lt($a, $b));
   } catch (Exception $e) {
     echo "Error: ", $e->getMessage(), "\n";
   }
 
   echo "\t<=  : ";
   try {
-    var_dump($a <= $b);
+    var_dump(HH\Lib\Legacy_FIXME\lte($a, $b));
   } catch (Exception $e) {
     echo "Error: ", $e->getMessage(), "\n";
   }
 
   echo "\t>   : ";
   try {
-    var_dump($a > $b);
+    var_dump(HH\Lib\Legacy_FIXME\gt($a, $b));
   } catch (Exception $e) {
     echo "Error: ", $e->getMessage(), "\n";
   }
 
   echo "\t>=  : ";
   try {
-    var_dump($a >= $b);
+    var_dump(HH\Lib\Legacy_FIXME\gte($a, $b));
   } catch (Exception $e) {
     echo "Error: ", $e->getMessage(), "\n";
   }
@@ -64,7 +64,7 @@ function single_compare($a, $b) {
 
   echo "\t<=> : ";
   try {
-    var_dump($a <=> $b);
+    var_dump(HH\Lib\Legacy_FIXME\cmp($a, $b));
   } catch (Exception $e) {
     echo "Error: ", $e->getMessage(), "\n";
   }

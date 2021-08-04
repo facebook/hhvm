@@ -31,8 +31,8 @@ var_dump($a->q('1')->foo == $a->q('2')->bar);
 var_dump($a->q('1')->foo === $a->q('2')->bar);
 var_dump($a->q('1')->foo != $a->q('2')->bar);
 var_dump($a->q('1')->foo !== $a->q('2')->bar);
-var_dump($a->q('1')->foo > $a->q('2')->bar);
-var_dump($a->q('1')->foo >= $a->q('2')->bar);
-var_dump($a->q('1')->foo < $a->q('2')->bar);
-var_dump($a->q('1')->foo <= $a->q('2')->bar);
+var_dump(HH\Lib\Legacy_FIXME\gt($a->q('1')->foo, $a->q('2')->bar));
+var_dump(HH\Lib\Legacy_FIXME\gte($a->q('1')->foo, $a->q('2')->bar));
+var_dump(HH\Lib\Legacy_FIXME\lt($a->q('1')->foo, $a->q('2')->bar));
+var_dump(HH\Lib\Legacy_FIXME\lte($a->q('1')->foo, $a->q('2')->bar));
 }

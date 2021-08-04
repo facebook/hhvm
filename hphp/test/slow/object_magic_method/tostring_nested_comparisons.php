@@ -14,14 +14,14 @@ class Box {
 <<__EntryPoint>>
 function test() {
   echo "==== arrays ====\n";
-  var_dump(vec[new C()] <= vec["a"]);
-  var_dump(vec[new C()] >= vec["a"]);
-  var_dump(vec["a"] <= vec[new C()]);
-  var_dump(vec["a"] >= vec[new C()]);
+  var_dump(HH\Lib\Legacy_FIXME\lte(vec[new C()], vec["a"]));
+  var_dump(HH\Lib\Legacy_FIXME\gte(vec[new C()], vec["a"]));
+  var_dump(HH\Lib\Legacy_FIXME\lte(vec["a"], vec[new C()]));
+  var_dump(HH\Lib\Legacy_FIXME\gte(vec["a"], vec[new C()]));
 
   echo "==== objects ====\n";
-  var_dump(new Box(new C()) <= new Box("a"));
-  var_dump(new Box(new C()) >= new Box("a"));
-  var_dump(new Box("a") <= new Box(new C()));
-  var_dump(new Box("a") >= new Box(new C()));
+  var_dump(HH\Lib\Legacy_FIXME\lte(new Box(new C()), new Box("a")));
+  var_dump(HH\Lib\Legacy_FIXME\gte(new Box(new C()), new Box("a")));
+  var_dump(HH\Lib\Legacy_FIXME\lte(new Box("a"), new Box(new C())));
+  var_dump(HH\Lib\Legacy_FIXME\gte(new Box("a"), new Box(new C())));
 }

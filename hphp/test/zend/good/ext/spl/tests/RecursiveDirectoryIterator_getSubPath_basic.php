@@ -26,7 +26,7 @@ function main_entry(): void {
     $list[] = $it->getInnerIterator()->getSubPath();
     $it->next();
   }
-  asort(inout $list);
+  uasort(inout $list,  HH\Lib\Legacy_FIXME\cmp<>);
   foreach ($list as $item) {
   	echo (string)($item) . "\n";
   }

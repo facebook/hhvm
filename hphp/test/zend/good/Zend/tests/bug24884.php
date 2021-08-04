@@ -4,7 +4,7 @@ class Test {
     {
         $string = PHP_VERSION;
         $version = $string[0];
-        if($string < 5)
+        if(HH\Lib\Legacy_FIXME\lt($string, 5))
         {
             return $this;
         }

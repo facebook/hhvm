@@ -16,7 +16,7 @@ $xw->endAttribute();
 
 $xw->text("Test text for tag1");
 $res = $xw->startElement('tag2');
-if ($res < 1) {
+if (HH\Lib\Legacy_FIXME\lt($res, 1)) {
     echo "StartElement context validation failed\n";
     exit();
 }

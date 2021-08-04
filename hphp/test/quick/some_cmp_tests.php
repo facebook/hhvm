@@ -6,7 +6,7 @@ function eq($x, $y) {
 
 function lt($x, $y) {
   try {
-    var_dump($x < $y);
+    var_dump(HH\Lib\Legacy_FIXME\lt($x, $y));
   } catch (Exception $e) {
     echo "Caught: ".$e->getMessage()."\n";
   }
@@ -14,7 +14,7 @@ function lt($x, $y) {
 
 function gt($x, $y) {
   try {
-    var_dump($x > $y);
+    var_dump(HH\Lib\Legacy_FIXME\gt($x, $y));
   } catch (Exception $e) {
     echo "Caught: ".$e->getMessage()."\n";
   }

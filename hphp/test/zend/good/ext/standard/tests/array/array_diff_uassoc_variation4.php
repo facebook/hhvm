@@ -22,7 +22,7 @@ function key_compare_func($a, $b)
     if ($a === $b) {
         return 0;
     }
-    return ($a > $b)? 1:-1;
+    return (HH\Lib\Legacy_FIXME\gt($a, $b))? 1:-1;
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";

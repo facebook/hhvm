@@ -39,7 +39,7 @@ foreach ($various_arrays as $array) {
 
   echo "- With default sort_flag -\n";
   $temp_array = $array;
-  var_dump(asort(inout $temp_array) ); // expecting : bool(true)
+  var_dump(uasort(inout $temp_array,  HH\Lib\Legacy_FIXME\cmp<>) ); // expecting : bool(true)
   var_dump($temp_array);
 
   // loop through $flags array and setting all possible flag values

@@ -23,7 +23,7 @@ for ($i = 0; $i < count($validGreaterThan); $i +=2) {
    $typeToTestVal = $validGreaterThan[$i];
    $compares = $validGreaterThan[$i + 1];
    foreach($compares as $compareVal) {
-      if ($typeToTestVal > $compareVal) {
+      if (HH\Lib\Legacy_FIXME\gt($typeToTestVal, $compareVal)) {
          // do nothing
       }
       else {

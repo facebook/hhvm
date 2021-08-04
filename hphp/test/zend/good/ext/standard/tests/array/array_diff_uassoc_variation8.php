@@ -10,7 +10,7 @@ function key_compare_func($key1, $key2)
     if ($key1 === $key2) {
         return 0;
     }
-    return ($key1 > $key2)? 1:-1;
+    return (HH\Lib\Legacy_FIXME\gt($key1, $key2))? 1:-1;
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";

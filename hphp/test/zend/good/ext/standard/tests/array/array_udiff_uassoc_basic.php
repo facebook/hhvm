@@ -14,7 +14,7 @@ class cr {
     }
     <<__DynamicallyCallable>> static function comp_func_key($a, $b) {
         if ($a === $b) return 0;
-        return ($a > $b) ? 1 : -1;
+        return (HH\Lib\Legacy_FIXME\gt($a, $b)) ? 1 : -1;
     }
 }
 <<__EntryPoint>> function main(): void {

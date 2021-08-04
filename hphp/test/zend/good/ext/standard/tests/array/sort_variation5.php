@@ -1,6 +1,6 @@
 <?hh
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
+ * Description: This function sorts an array.
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
@@ -15,10 +15,10 @@
 echo "*** Testing sort() : usage variations ***\n";
 
 $various_arrays = varray [
-  // group of escape sequences 
+  // group of escape sequences
   varray[null, NULL, "\a", "\cx", "\e", "\f", "\n", "\r", "\t", "\xhh", "\ddd", "\v"],
 
-  // array contains combination of capital/small letters 
+  // array contains combination of capital/small letters
   varray["lemoN", "Orange", "banana", "apple", "Test", "TTTT", "ttt", "ww", "x", "X", "oraNGe", "BANANA"]
 ];
 
@@ -33,7 +33,7 @@ foreach ($various_arrays as $array) {
 
   echo "- With Default sort flag -\n";
   $temp_array = $array;
-  var_dump(sort(inout $temp_array) ); // expecting : bool(true)
+  var_dump(usort(inout $temp_array,  HH\Lib\Legacy_FIXME\cmp<>) ); // expecting : bool(true)
   var_dump($temp_array);
 
   // loop through $flags array and setting all possible flag values

@@ -35,14 +35,14 @@ for ($i = 0; $i < count($toCompare); $i +=3) {
   $invalid_compares = $toCompare[$i + 2];
 
   foreach($valid_compares as $compareVal) {
-    if (($typeToTest <=> $compareVal) === 1) {
+    if ((HH\Lib\Legacy_FIXME\cmp($typeToTest, $compareVal)) === 1) {
       // do nothing
     }
     else {
       echo "FAILED: ('$typeToTest' <=> '$compareVal') !== 1\n";
       $failed = true;
     }
-    if (($compareVal <=> $typeToTest) === -1) {
+    if ((HH\Lib\Legacy_FIXME\cmp($compareVal, $typeToTest)) === -1) {
       // do nothing
     }
     else {
@@ -59,11 +59,11 @@ for ($i = 0; $i < count($toCompare); $i +=3) {
   }
 
   foreach($invalid_compares as $compareVal) {
-    if (($typeToTest <=> $compareVal) === 1) {
+    if ((HH\Lib\Legacy_FIXME\cmp($typeToTest, $compareVal)) === 1) {
       echo "FAILED: ('$typeToTest' <=> '$compareVal') === 1\n";
       $failed = true;
     }
-    if (($compareVal <=> $typeToTest) === -1) {
+    if ((HH\Lib\Legacy_FIXME\cmp($compareVal, $typeToTest)) === -1) {
       echo "FAILED: ('$compareVal' <=> '$typeToTest') === -1\n";
       $failed = true;
     }

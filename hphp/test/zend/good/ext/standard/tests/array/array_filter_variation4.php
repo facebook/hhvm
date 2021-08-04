@@ -31,7 +31,7 @@ function callback3()
 // callback function with parameter and with return value
 function callback4($input)
 {
-  if($input > 0 ) {
+  if(HH\Lib\Legacy_FIXME\gt($input, 0) ) {
     return true;
   }
   else {

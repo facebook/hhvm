@@ -11,6 +11,6 @@ const FOO = 'foo';
 <<__EntryPoint>>
 function main_691() {
 $vars = get_class_vars('X');
- asort(inout $vars);
+ uasort(inout $vars,  HH\Lib\Legacy_FIXME\cmp<>);
  var_dump($vars);
 }

@@ -19,12 +19,12 @@ function foo3() {
 
 function foo4() {
   $x = 33;
-  return $x >= "3";
+  return HH\Lib\Legacy_FIXME\gte($x, "3");
 }
 
 function foo5() {
   $x = "33";
-  return $x >= 3;
+  return HH\Lib\Legacy_FIXME\gte($x, 3);
 }
 
 function foo6() {
@@ -44,12 +44,12 @@ function foo8() {
 
 function foo9() {
   $x = "-1";
-  return $x < null;
+  return HH\Lib\Legacy_FIXME\lt($x, null);
 }
 
 function foo10() {
   $x = "-1";
-  return $x > null;
+  return HH\Lib\Legacy_FIXME\gt($x, null);
 }
 
 function foo11() {

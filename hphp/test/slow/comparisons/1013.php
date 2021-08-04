@@ -7,121 +7,121 @@ function main_1013() {
 $i = 0;
  print ++$i;
  print "\t";
- try { P(null<=true); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, true)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = null;
- try { P($a <=true); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, true)); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = true;
- try { P(null<=$b); } catch (Throwable $_) { print 'E'; }
- try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, $b)); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, $b)); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "null <= true	";
  print "\n";
  print ++$i;
  print "\t";
- try { P(null<=false); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, false)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = null;
- try { P($a <=false); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, false)); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = false;
- try { P(null<=$b); } catch (Throwable $_) { print 'E'; }
- try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, $b)); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, $b)); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "null <= false	";
  print "\n";
  print ++$i;
  print "\t";
- try { P(null<=1); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, 1)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = null;
- try { P($a <=1); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, 1)); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = 1;
- try { P(null<=$b); } catch (Throwable $_) { print 'E'; }
- try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, $b)); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, $b)); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "null <= 1	";
  print "\n";
  print ++$i;
  print "\t";
- try { P(null<=0); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, 0)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = null;
- try { P($a <=0); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, 0)); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = 0;
- try { P(null<=$b); } catch (Throwable $_) { print 'E'; }
- try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, $b)); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, $b)); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "null <= 0	";
  print "\n";
  print ++$i;
  print "\t";
- try { P(null<=-1); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, -1)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = null;
- try { P($a <=-1); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, -1)); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = -1;
- try { P(null<=$b); } catch (Throwable $_) { print 'E'; }
- try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, $b)); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, $b)); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "null <= -1	";
  print "\n";
  print ++$i;
  print "\t";
- try { P(null<='1'); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, '1')); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = null;
- try { P($a <='1'); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, '1')); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = '1';
- try { P(null<=$b); } catch (Throwable $_) { print 'E'; }
- try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, $b)); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, $b)); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "null <= '1'	";
  print "\n";
  print ++$i;
  print "\t";
- try { P(null<='0'); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, '0')); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = null;
- try { P($a <='0'); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, '0')); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = '0';
- try { P(null<=$b); } catch (Throwable $_) { print 'E'; }
- try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, $b)); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, $b)); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "null <= '0'	";
  print "\n";
  print ++$i;
  print "\t";
- try { P(null<='-1'); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, '-1')); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = null;
- try { P($a <='-1'); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, '-1')); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = '-1';
- try { P(null<=$b); } catch (Throwable $_) { print 'E'; }
- try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, $b)); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, $b)); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "null <= '-1'	";
  print "\n";
@@ -307,31 +307,31 @@ $i = 0;
  print "\n";
  print ++$i;
  print "\t";
- try { P(null<='php'); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, 'php')); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = null;
- try { P($a <='php'); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, 'php')); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = 'php';
- try { P(null<=$b); } catch (Throwable $_) { print 'E'; }
- try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, $b)); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, $b)); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "null <= 'php'	";
  print "\n";
  print ++$i;
  print "\t";
- try { P(null<=''); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, '')); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = null;
- try { P($a <=''); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, '')); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = '';
- try { P(null<=$b); } catch (Throwable $_) { print 'E'; }
- try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte(null, $b)); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lte($a, $b)); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "null <= ''	";
  print "\n";

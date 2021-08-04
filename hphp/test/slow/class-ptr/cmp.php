@@ -21,10 +21,10 @@ function wrap($fun) {
 function comp($x, $y) {
   wrap(() ==> var_dump($x === $y));
   wrap(() ==> var_dump(HH\Lib\Legacy_FIXME\eq($x, $y)));
-  wrap(() ==> var_dump($x < $y));
-  wrap(() ==> var_dump($x <= $y));
-  wrap(() ==> var_dump($x > $y));
-  wrap(() ==> var_dump($x >= $y));
+  wrap(() ==> var_dump(HH\Lib\Legacy_FIXME\lt($x, $y)));
+  wrap(() ==> var_dump(HH\Lib\Legacy_FIXME\lte($x, $y)));
+  wrap(() ==> var_dump(HH\Lib\Legacy_FIXME\gt($x, $y)));
+  wrap(() ==> var_dump(HH\Lib\Legacy_FIXME\gte($x, $y)));
   print("\n");
 }
 

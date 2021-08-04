@@ -19,10 +19,10 @@ function main_entry(): void {
 
   echo "\n===== compare instances of different object types =====\n\n";
 
-  var_dump($c1a >= $c2);  // bool(false)
-  var_dump($c1a >  $c2);  // bool(false)
-  var_dump($c1a <= $c2);  // bool(false)
-  var_dump($c1a <  $c2);  // bool(false)
+  var_dump(HH\Lib\Legacy_FIXME\gte($c1a, $c2));  // bool(false)
+  var_dump(HH\Lib\Legacy_FIXME\gt($c1a, $c2));  // bool(false)
+  var_dump(HH\Lib\Legacy_FIXME\lte($c1a, $c2));  // bool(false)
+  var_dump(HH\Lib\Legacy_FIXME\lt($c1a, $c2));  // bool(false)
 
   echo "\n===== compare instances of the same (empty) object type =====\n\n";
 

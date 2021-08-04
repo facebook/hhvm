@@ -21,21 +21,21 @@ function test_cls1() {
   $x = new Cls1;
   $s = "hello";
 
-  $x < $s;
-  $x <= $s;
-  $x > $s;
-  $x >= $s;
+  HH\Lib\Legacy_FIXME\lt($x, $s);
+  HH\Lib\Legacy_FIXME\lte($x, $s);
+  HH\Lib\Legacy_FIXME\gt($x, $s);
+  HH\Lib\Legacy_FIXME\gte($x, $s);
   $x == $s;
   $x != $s;
-  $x <=> $s;
+  HH\Lib\Legacy_FIXME\cmp($x, $s);
 
-  $s < $x;
-  $s <= $x;
-  $s > $x;
-  $s >= $x;
+  HH\Lib\Legacy_FIXME\lt($s, $x);
+  HH\Lib\Legacy_FIXME\lte($s, $x);
+  HH\Lib\Legacy_FIXME\gt($s, $x);
+  HH\Lib\Legacy_FIXME\gte($s, $x);
   $s == $x;
   $s != $x;
-  $s <=> $x;
+  HH\Lib\Legacy_FIXME\cmp($s, $x);
 }
 
 function test_cls2() {
@@ -66,21 +66,21 @@ function test_arr() {
   // <= and >= can evaluate the operands an indeterminate number of times
   // depending on the mode.
 
-  $x1 < $x2;
+  HH\Lib\Legacy_FIXME\lt($x1, $x2);
   //$x1 <= $x2;
-  $x1 > $x2;
+  HH\Lib\Legacy_FIXME\gt($x1, $x2);
   //$x1 >= $x2;
   $x1 == $x2;
   $x1 != $x2;
-  $x1 <=> $x2;
+  HH\Lib\Legacy_FIXME\cmp($x1, $x2);
 
-  $x2 < $x1;
+  HH\Lib\Legacy_FIXME\lt($x2, $x1);
   //$x2 <= $x1;
-  $x2 > $x1;
+  HH\Lib\Legacy_FIXME\gt($x2, $x1);
   //$x2 >= $x1;
   $x2 == $x1;
   $x2 != $x1;
-  $x2 <=> $x1;
+  HH\Lib\Legacy_FIXME\cmp($x2, $x1);
 }
 
 

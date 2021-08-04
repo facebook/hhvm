@@ -36,7 +36,7 @@ foreach($a as $var) {
     for ($i = 0; $i < $var_cnt; $i++) {
         my_dump($var);
         try {
-          echo ($var <= $a[$i]) ? " <= " : " > ";
+          echo (HH\Lib\Legacy_FIXME\lte($var, $a[$i])) ? " <= " : " > ";
         } catch (Exception $_) {
           echo " cannot be compared to ";
         }

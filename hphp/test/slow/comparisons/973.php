@@ -157,31 +157,31 @@ $i = 0;
  print "\n";
  print ++$i;
  print "\t";
- try { P(varray['a']<varray[1]); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lt(varray['a'], varray[1])); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = varray['a'];
- try { P($a <varray[1]); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lt($a, varray[1])); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = varray[1];
- try { P(varray['a']<$b); } catch (Throwable $_) { print 'E'; }
- try { P($a <$b); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lt(varray['a'], $b)); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lt($a, $b)); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "array('a') < array(1)	";
  print "\n";
  print ++$i;
  print "\t";
- try { P(varray['a']<varray[2]); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lt(varray['a'], varray[2])); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = varray['a'];
- try { P($a <varray[2]); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lt($a, varray[2])); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = varray[2];
- try { P(varray['a']<$b); } catch (Throwable $_) { print 'E'; }
- try { P($a <$b); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lt(varray['a'], $b)); } catch (Throwable $_) { print 'E'; }
+ try { P(HH\Lib\Legacy_FIXME\lt($a, $b)); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "array('a') < array(2)	";
  print "\n";

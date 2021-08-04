@@ -11,21 +11,21 @@ function test() {
   include '685-classes.inc';
 
   $vars = get_class_vars('A');
-  asort(inout $vars);
+  uasort(inout $vars,  HH\Lib\Legacy_FIXME\cmp<>);
   var_dump($vars);
   $vars = get_class_vars('B');
-  asort(inout $vars);
+  uasort(inout $vars,  HH\Lib\Legacy_FIXME\cmp<>);
   var_dump($vars);
   $vars = get_class_vars('C');
-  asort(inout $vars);
+  uasort(inout $vars,  HH\Lib\Legacy_FIXME\cmp<>);
   var_dump($vars);
   $vars = get_class_vars('X');
-  asort(inout $vars);
+  uasort(inout $vars,  HH\Lib\Legacy_FIXME\cmp<>);
   var_dump($vars);
   $vars = get_class_vars('Y');
-  asort(inout $vars);
+  uasort(inout $vars,  HH\Lib\Legacy_FIXME\cmp<>);
   var_dump($vars);
   $vars = get_class_vars('Z');
-  asort(inout $vars);
+  uasort(inout $vars,  HH\Lib\Legacy_FIXME\cmp<>);
   var_dump($vars);
 }

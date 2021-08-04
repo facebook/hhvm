@@ -14,7 +14,7 @@ $input = varray[0, 1, -1, 10, 100, 1000, 'Hello', null];
 
 // anonymous callback function
 echo "Anonymous callback function with regular parameter and statement\n";
-var_dump( array_filter($input, $i ==> $i > 1) );
+var_dump( array_filter($input, $i ==> HH\Lib\Legacy_FIXME\gt($i, 1)) );
 
 // anonymous callback function with null argument
 echo "Anonymous callback funciton with null argument\n";

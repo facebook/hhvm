@@ -24,7 +24,7 @@ for ($i = 0; $i < count($validLtOrEqual); $i +=2) {
    $typeToTestVal = $validLtOrEqual[$i];
    $compares = $validLtOrEqual[$i + 1];
    foreach($compares as $compareVal) {
-      if ($typeToTestVal <= $compareVal) {
+      if (HH\Lib\Legacy_FIXME\lte($typeToTestVal, $compareVal)) {
          // do nothing
       }
       else {
@@ -38,7 +38,7 @@ for ($i = 0; $i < count($invalidLtOrEqual); $i +=2) {
    $typeToTestVal = $invalidLtOrEqual[$i];
    $compares = $invalidLtOrEqual[$i + 1];
    foreach($compares as $compareVal) {
-      if ($typeToTestVal <= $compareVal) {
+      if (HH\Lib\Legacy_FIXME\lte($typeToTestVal, $compareVal)) {
          echo "FAILED: '$typeToTestVal' <= '$compareVal'\n";
          $failed = true;
       }

@@ -46,10 +46,8 @@ function ut_main()
         varray[ 'ba' , 'b'  , 'ab'  ],
         varray[ 'e'  , 'c'  , 'a'   ],
         varray[ '100', '25' , '36'  ],
-        varray[ 5    , '30' , 2     ],
         varray[ 'd'  , ''   , ' a'  ],
         varray[ 'd ' , 'f ' , ' a'  ],
-        varray[ 'a'  , null , '3'   ],
         varray[ 'y'  , 'k'  , 'i' ]
     ];
 

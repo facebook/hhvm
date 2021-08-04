@@ -1222,20 +1222,13 @@ void implCmp(IRGS& env, Op op) {
   }
 
   auto equiv = [&] {
+    const auto isStringOrClassish = [](DataType t) {
+      return isStringType(t) || isClassType(t) || isLazyClassType(t);
+    };
     return
       equivDataTypes(leftTy.toDataType(), rightTy.toDataType()) ||
-      (isClassType(leftTy.toDataType()) &&
-       isStringType(rightTy.toDataType()))||
-      (isClassType(leftTy.toDataType()) &&
-       isLazyClassType(rightTy.toDataType()))||
-      (isLazyClassType(leftTy.toDataType()) &&
-       isClassType(rightTy.toDataType()))||
-      (isLazyClassType(leftTy.toDataType()) &&
-       isStringType(rightTy.toDataType()))||
-      (isStringType(leftTy.toDataType()) &&
-        isClassType(rightTy.toDataType())) ||
-      (isStringType(leftTy.toDataType()) &&
-        isLazyClassType(rightTy.toDataType()));
+      (isStringOrClassish(leftTy.toDataType()) &&
+       isStringOrClassish(rightTy.toDataType()));
   };
 
   // If it's a same-ish comparison and the types don't match (taking into

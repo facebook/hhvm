@@ -16,7 +16,7 @@ echo "*** Testing sort() : usage variations ***\n";
 
 $various_arrays = varray [
   // group of escape sequences
-  varray[null, NULL, "\a", "\cx", "\e", "\f", "\n", "\r", "\t", "\xhh", "\ddd", "\v"],
+  varray["\a", "\cx", "\e", "\f", "\n", "\r", "\t", "\xhh", "\ddd", "\v"],
 
   // array contains combination of capital/small letters
   varray["lemoN", "Orange", "banana", "apple", "Test", "TTTT", "ttt", "ww", "x", "X", "oraNGe", "BANANA"]

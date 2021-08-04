@@ -16,7 +16,7 @@ echo "*** Testing arsort() : usage variations ***\n";
 
 $various_arrays = varray [
   // group of escape sequences
-  darray ["null"=>  null, "NULL" => NULL, "\a" => "\a", "\cx" => "\cx", "\e" => "\e",
+  darray ["\a" => "\a", "\cx" => "\cx", "\e" => "\e",
         "\f" => "\f", "\n" =>"\n", "\r" => "\r", "\t" => "\t", "\xhh" => "\xhh",
         "\ddd" => "\ddd", "\v" => "\v"
         ],

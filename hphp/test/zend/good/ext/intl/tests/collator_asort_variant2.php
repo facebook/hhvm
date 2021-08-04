@@ -56,16 +56,11 @@ function ut_main()
 
         darray[ '1' => 'abc',
                '5' => '!'  ,
-               '2' => null ,
                '7' => ''   ],
 
         darray[ '1' => '100',
                '2' => '25' ,
                '3' => '36' ],
-
-        darray[ '1' => 5    ,
-               '2' => '30' ,
-               '3' => 2    ]
     ];
 
     $res_str .= sort_arrays( 'en_US', $test_params );
@@ -75,10 +70,6 @@ function ut_main()
         darray[ '1' => '100',
                '2' => '25' ,
                '3' => '36' ],
-
-        darray[ '1' => 5    ,
-               '2' => '30' ,
-               '3' => 2    ],
 
         darray[ '1' => 'd'  ,
                '2' => ''   ,

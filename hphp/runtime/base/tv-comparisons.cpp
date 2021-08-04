@@ -70,15 +70,11 @@ void handleConvNotice(const std::string& lhs, const std::string& rhs) {
  * testing for in-progress migrations
  */
 bool equivDataTypesIncludingMigrations(DataType t1, DataType t2) {
-  if (equivDataTypes(t1, t2)) return true;
-
-  if (!RO::EvalRaiseClassConversionWarning) {
-    const auto isStringOrClassish = [](DataType t) {
-      return isStringType(t) || isClassType(t) || isLazyClassType(t);
-    };
-    return isStringOrClassish(t1) && isStringOrClassish(t2);
-  }
-  return false;
+  const auto isStringOrClassish = [](DataType t) {
+    return isStringType(t) || isClassType(t) || isLazyClassType(t);
+  };
+  return equivDataTypes(t1, t2) ||
+          (isStringOrClassish(t1) && isStringOrClassish(t2));
 }
 
 template<class Op> bool shouldMaybeTriggerConvNotice(

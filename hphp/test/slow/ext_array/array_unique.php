@@ -30,7 +30,6 @@ function c() {
     "b" => "C",
     0 => "1",
     2 => "01",
-    1 => 1,
     "c" => "C"
   ];
   var_dump(array_unique($input, SORT_STRING));
@@ -40,7 +39,6 @@ function c() {
 
 function d() {
   $input = darray[
-    1 => 1,
     'a' => 'A',
     'b' => 'C',
     0 => '1',

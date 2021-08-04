@@ -5,16 +5,13 @@
 -- Iteration 1 --
 - With Default sort flag -
 bool(true)
-vec(12) {
-  NULL
-  NULL
+vec(10) {
   string(1) "	"
   string(1) "
 "
   string(1) ""
   string(1) ""
-  string(1) "
-"
+  string(1) ""
   string(1) ""
   string(2) "\a"
   string(3) "\cx"
@@ -23,16 +20,13 @@ vec(12) {
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-vec(12) {
-  NULL
-  NULL
+vec(10) {
   string(1) "	"
   string(1) "
 "
   string(1) ""
   string(1) ""
-  string(1) "
-"
+  string(1) ""
   string(1) ""
   string(2) "\a"
   string(3) "\cx"
@@ -41,16 +35,13 @@ vec(12) {
 }
 - Sort flag = SORT_STRING -
 bool(true)
-vec(12) {
-  NULL
-  NULL
+vec(10) {
   string(1) "	"
   string(1) "
 "
   string(1) ""
   string(1) ""
-  string(1) "
-"
+  string(1) ""
   string(1) ""
   string(2) "\a"
   string(3) "\cx"

@@ -46,15 +46,7 @@ vec [
 ]
  Result: true
 
-Test 7.6bcd5099afc31c1b7f7b09450137c8d5:
-vec [
-  2,
-  5,
-  '30',
-]
- Result: true
-
-Test 8.6e8b96676ae67c86db1660b0ce70ce45:
+Test 7.6e8b96676ae67c86db1660b0ce70ce45:
 vec [
   '',
   ' a',
@@ -62,7 +54,7 @@ vec [
 ]
  Result: true
 
-Test 9.4e3a927e92fef57dcba48f88517ea8e4:
+Test 8.4e3a927e92fef57dcba48f88517ea8e4:
 vec [
   ' a',
   'd ',
@@ -70,15 +62,7 @@ vec [
 ]
  Result: true
 
-Test 10.fafc77ca66955b539693d68becac29f6:
-vec [
-  NULL,
-  '3',
-  'a',
-]
- Result: true
-
-Test 11.9fe68c05033cdd06abb380826afbb058:
+Test 9.9fe68c05033cdd06abb380826afbb058:
 vec [
   'i',
   'k',
@@ -86,7 +70,7 @@ vec [
 ]
  Result: true
 
-Test 12.d43626e3930520561d084366b840107e:
+Test 10.d43626e3930520561d084366b840107e:
 vec [
   '100',
   '25',
@@ -94,7 +78,7 @@ vec [
 ]
  Result: true
 
-Test 13.6f79ed7ec0bfc08087f5ab2948a76766:
+Test 11.6f79ed7ec0bfc08087f5ab2948a76766:
 vec [
   2,
   '30',
@@ -102,7 +86,7 @@ vec [
 ]
  Result: true
 
-Test 14.6e8b96676ae67c86db1660b0ce70ce45:
+Test 12.6e8b96676ae67c86db1660b0ce70ce45:
 vec [
   '',
   ' a',
@@ -110,7 +94,7 @@ vec [
 ]
  Result: true
 
-Test 15.9fe68c05033cdd06abb380826afbb058:
+Test 13.9fe68c05033cdd06abb380826afbb058:
 vec [
   'i',
   'k',
@@ -118,7 +102,7 @@ vec [
 ]
  Result: true
 
-Test 16.6a356206232f5cbf71028611c88859f0:
+Test 14.6a356206232f5cbf71028611c88859f0:
 vec [
   'ааа',
   'абв',
@@ -127,7 +111,7 @@ vec [
 ]
  Result: true
 
-Test 17.5d27a145952612b4e10782f74f3eeea3:
+Test 15.5d27a145952612b4e10782f74f3eeea3:
 vec [
   'а',
   'аа',
@@ -135,7 +119,7 @@ vec [
 ]
  Result: true
 
-Test 18.9ec4e88c7d969a27847c3b1b44abbb5f:
+Test 16.9ec4e88c7d969a27847c3b1b44abbb5f:
 vec [
   'i',
   'y',

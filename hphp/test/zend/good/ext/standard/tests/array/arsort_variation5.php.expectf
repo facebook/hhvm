@@ -5,7 +5,7 @@
 -- Iteration 1 --
 - With default sort_flag -
 bool(true)
-dict(12) {
+dict(10) {
   ["\xhh"]=>
   string(4) "\xhh"
   ["\ddd"]=>
@@ -16,10 +16,8 @@ dict(12) {
   string(2) "\a"
   [""]=>
   string(1) ""
-  ["
-"]=>
-  string(1) "
-"
+  [""]=>
+  string(1) ""
   [""]=>
   string(1) ""
   [""]=>
@@ -30,14 +28,10 @@ dict(12) {
 "
   ["	"]=>
   string(1) "	"
-  ["null"]=>
-  NULL
-  ["NULL"]=>
-  NULL
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
-dict(12) {
+dict(10) {
   ["\xhh"]=>
   string(4) "\xhh"
   ["\ddd"]=>
@@ -48,10 +42,8 @@ dict(12) {
   string(2) "\a"
   [""]=>
   string(1) ""
-  ["
-"]=>
-  string(1) "
-"
+  [""]=>
+  string(1) ""
   [""]=>
   string(1) ""
   [""]=>
@@ -62,14 +54,10 @@ dict(12) {
 "
   ["	"]=>
   string(1) "	"
-  ["null"]=>
-  NULL
-  ["NULL"]=>
-  NULL
 }
 - Sort_flag = SORT_STRING -
 bool(true)
-dict(12) {
+dict(10) {
   ["\xhh"]=>
   string(4) "\xhh"
   ["\ddd"]=>
@@ -80,10 +68,8 @@ dict(12) {
   string(2) "\a"
   [""]=>
   string(1) ""
-  ["
-"]=>
-  string(1) "
-"
+  [""]=>
+  string(1) ""
   [""]=>
   string(1) ""
   [""]=>
@@ -94,10 +80,6 @@ dict(12) {
 "
   ["	"]=>
   string(1) "	"
-  ["null"]=>
-  NULL
-  ["NULL"]=>
-  NULL
 }
 
 -- Iteration 2 --

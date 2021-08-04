@@ -101,16 +101,13 @@ function ut_main1()
         varray[ 'ba' , 'b'  , 'ab'  ],
         varray[ 'e'  , 'c'  , 'a'   ],
         varray[ '100', '25' , '36'  ], // test 6
-        varray[ 5    , '30' , 2     ],
         varray[ 'd'  , ''   , ' a'  ],
         varray[ 'd ' , 'f ' , ' a'  ],
-        varray[ 'a'  , null , '3'   ],
         varray[ 'y'  , 'k'  , 'i' ]
     ];
     $res_str .= sort_arrays( 'en_US', $test_params );
     $test_params = varray[
         varray[ '100', '25' , '36'  ],
-        varray[ 5    , '30' , 2     ], // test 13
         varray[ 'd'  , ''   , ' a'  ],
         varray[ 'y'  , 'k'  , 'i' ]
     ];
@@ -128,45 +125,6 @@ function ut_main1()
     ];
     $res_str .= sort_arrays( 'lt_LT', $test_params );
     return $res_str;
-}
-function ut_main2() {
-  $obj = ut_coll_create('en_US');
-  $arr0 = varray[ 100, 25, 36, '30.2', '30.12' ];
- // test 6
-  $arr1 = varray[ '100', '25', '36'  ];
- // test 6
-  $arr2 = varray[ 11, 5, '2', 64, 17, '30', 10, 2, '54' ];
-  // strcmp 17 and 30, ret = 1
-  // Comparing values 17 and 30, ret = 1
-  $arr3 = varray[ 11, 5, 2, 64, 17, 30, 10, 2, 54 ];
-  $arrA = $arr0;
-  $arrB = $arr0;
-  $arrC = $arr0;
-  ut_coll_sort($obj, inout $arrA, Collator::SORT_REGULAR);
-  ut_coll_sort($obj, inout $arrB, Collator::SORT_STRING);
-  ut_coll_sort($obj, inout $arrC, Collator::SORT_NUMERIC);
-  var_dump($arrA, $arrB, $arrC);
-  $arrA = $arr1;
-  $arrB = $arr1;
-  $arrC = $arr1;
-  ut_coll_sort($obj, inout $arrA, Collator::SORT_REGULAR);
-  ut_coll_sort($obj, inout $arrB, Collator::SORT_STRING);
-  ut_coll_sort($obj, inout $arrC, Collator::SORT_NUMERIC);
-  var_dump($arrA, $arrB, $arrC);
-  $arrA = $arr2;
-  $arrB = $arr2;
-  $arrC = $arr2;
-  ut_coll_sort($obj, inout $arrA, Collator::SORT_REGULAR);
-  ut_coll_sort($obj, inout $arrB, Collator::SORT_STRING);
-  ut_coll_sort($obj, inout $arrC, Collator::SORT_NUMERIC);
-  var_dump($arrA, $arrB, $arrC);
-  $arrA = $arr3;
-  $arrB = $arr3;
-  $arrC = $arr3;
-  ut_coll_sort($obj, inout $arrA, Collator::SORT_REGULAR);
-  ut_coll_sort($obj, inout $arrB, Collator::SORT_STRING);
-  ut_coll_sort($obj, inout $arrC, Collator::SORT_NUMERIC);
-  var_dump($arrA, $arrB, $arrC);
 }
 function ut_main3()
 {
@@ -298,7 +256,6 @@ function ut_main6()
         varray[ 'e'  , 'c'  , 'a'   ],
         varray[ 'd'  , ''   , ' a'  ],
         varray[ 'd ' , 'f ' , ' a'  ],
-        varray[ 'a'  , null , '3'   ],
         varray[ 'y'  , 'i'  , 'k'   ]
     ];
     $res_str .= sort_arrays_with_sort_keys( 'en_US', $test_params );
@@ -321,7 +278,6 @@ function ut_main6()
 function main_1810() {
 $test_num = 1;
 ut_run(ut_main1<>);
-ut_run(ut_main2<>);
 ut_run(ut_main3<>);
 ut_run(ut_main4<>);
 ut_run(ut_main5<>);

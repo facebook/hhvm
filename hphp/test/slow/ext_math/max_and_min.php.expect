@@ -13,18 +13,6 @@ int(2)
 string(10) "1236150163"
 string(10) "1236150163"
  === Multiple Arguments ===
-int(0)
-bool(true)
-int(0)
-bool(true)
-string(5) "hello"
-bool(true)
-string(5) "hello"
-bool(true)
-string(5) "hello"
-bool(true)
-int(-1)
-bool(true)
 vec(3) {
   vec(1) {
     int(2)
@@ -40,10 +28,6 @@ vec(1) {
     int(1)
   }
 }
-bool(true)
-int(42)
-bool(true)
-string(3) "foo"
 bool(true)
 int(1)
 bool(true)

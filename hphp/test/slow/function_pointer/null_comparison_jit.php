@@ -18,12 +18,17 @@ class Foo {
   public static function baz(): void {}
 }
 
+function is_reified($x) {
+  return !HH\is_fun($x) && !HH\is_class_meth($x) && !($x is Closure) && !($x is null);
+}
+
 function comp($what, $x, $y) {
-  echo "$what <   :"; wrap(() ==> var_dump($x < $y));
-  echo "$what <=  :"; wrap(() ==> var_dump($x <= $y));
-  echo "$what >   :"; wrap(() ==> var_dump($x > $y));
-  echo "$what >=  :"; wrap(() ==> var_dump($x >= $y));
-  echo "$what <=> :"; wrap(() ==> var_dump($x <=> $y));
+  $either_reified = is_reified($x) || is_reified($y);
+  echo "$what <   :"; wrap(() ==> var_dump($either_reified ? $x < $y   : HH\Lib\Legacy_FIXME\lt($x, $y)));
+  echo "$what <=  :"; wrap(() ==> var_dump($either_reified ? $x <= $y  : HH\Lib\Legacy_FIXME\lte($x, $y)));
+  echo "$what >   :"; wrap(() ==> var_dump($either_reified ? $x > $y   : HH\Lib\Legacy_FIXME\gt($x, $y)));
+  echo "$what >=  :"; wrap(() ==> var_dump($either_reified ? $x >= $y  : HH\Lib\Legacy_FIXME\gte($x, $y)));
+  echo "$what <=> :"; wrap(() ==> var_dump($either_reified ? $x <=> $y : HH\Lib\Legacy_FIXME\cmp($x, $y)));
   print("\n");
 }
 
@@ -53,9 +58,7 @@ function main(): void {
   $inner = dict["null" => null];
 
   foreach ($outer as $fn => $f) {
-    foreach ($inner as $gn => $g) {
-      comp("$fn x $gn", $f, $g);
-      comp("$gn x $fn:", $g, $f);
-    }
+    comp("$fn x null", $f, null);
+    comp("null x $fn:", null, $f);
   }
 }

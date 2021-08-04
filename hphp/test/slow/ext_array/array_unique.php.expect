@@ -36,9 +36,7 @@ dict(3) {
   [0]=>
   string(1) "1"
 }
-dict(4) {
-  [1]=>
-  int(1)
+dict(3) {
   ["a"]=>
   string(1) "A"
   ["b"]=>

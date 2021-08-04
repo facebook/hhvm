@@ -46,15 +46,7 @@ vec [
 ]
  Result: true
 
-Test 7.6bcd5099afc31c1b7f7b09450137c8d5:
-vec [
-  2,
-  5,
-  '30',
-]
- Result: true
-
-Test 8.6e8b96676ae67c86db1660b0ce70ce45:
+Test 7.6e8b96676ae67c86db1660b0ce70ce45:
 vec [
   '',
   ' a',
@@ -62,7 +54,7 @@ vec [
 ]
  Result: true
 
-Test 9.4e3a927e92fef57dcba48f88517ea8e4:
+Test 8.4e3a927e92fef57dcba48f88517ea8e4:
 vec [
   ' a',
   'd ',
@@ -70,15 +62,7 @@ vec [
 ]
  Result: true
 
-Test 10.fafc77ca66955b539693d68becac29f6:
-vec [
-  NULL,
-  '3',
-  'a',
-]
- Result: true
-
-Test 11.9fe68c05033cdd06abb380826afbb058:
+Test 9.9fe68c05033cdd06abb380826afbb058:
 vec [
   'i',
   'k',
@@ -86,7 +70,7 @@ vec [
 ]
  Result: true
 
-Test 12.d43626e3930520561d084366b840107e:
+Test 10.d43626e3930520561d084366b840107e:
 vec [
   '100',
   '25',
@@ -94,15 +78,7 @@ vec [
 ]
  Result: true
 
-Test 13.6f79ed7ec0bfc08087f5ab2948a76766:
-vec [
-  2,
-  '30',
-  5,
-]
- Result: true
-
-Test 14.6e8b96676ae67c86db1660b0ce70ce45:
+Test 11.6e8b96676ae67c86db1660b0ce70ce45:
 vec [
   '',
   ' a',
@@ -110,7 +86,7 @@ vec [
 ]
  Result: true
 
-Test 15.9fe68c05033cdd06abb380826afbb058:
+Test 12.9fe68c05033cdd06abb380826afbb058:
 vec [
   'i',
   'k',
@@ -118,7 +94,7 @@ vec [
 ]
  Result: true
 
-Test 16.0b977711afdd45554644f555d4b9014f:
+Test 13.0b977711afdd45554644f555d4b9014f:
 vec [
   'ааа',
   'абв',
@@ -127,7 +103,7 @@ vec [
 ]
  Result: true
 
-Test 17.5d27a145952612b4e10782f74f3eeea3:
+Test 14.5d27a145952612b4e10782f74f3eeea3:
 vec [
   'а',
   'аа',
@@ -135,217 +111,13 @@ vec [
 ]
  Result: true
 
-Test 18.9ec4e88c7d969a27847c3b1b44abbb5f:
+Test 15.9ec4e88c7d969a27847c3b1b44abbb5f:
 vec [
   'i',
   'y',
   'k',
 ]
- Result: truevec(5) {
-  int(25)
-  string(5) "30.12"
-  string(4) "30.2"
-  int(36)
-  int(100)
-}
-vec(5) {
-  int(100)
-  int(25)
-  string(5) "30.12"
-  string(4) "30.2"
-  int(36)
-}
-vec(5) {
-  int(25)
-  string(5) "30.12"
-  string(4) "30.2"
-  int(36)
-  int(100)
-}
-vec(3) {
-  string(2) "25"
-  string(2) "36"
-  string(3) "100"
-}
-vec(3) {
-  string(3) "100"
-  string(2) "25"
-  string(2) "36"
-}
-vec(3) {
-  string(2) "25"
-  string(2) "36"
-  string(3) "100"
-}
-vec(9) {
-  int(2)
-  string(1) "2"
-  int(5)
-  int(10)
-  int(11)
-  int(17)
-  string(2) "30"
-  string(2) "54"
-  int(64)
-}
-vec(9) {
-  int(10)
-  int(11)
-  int(17)
-  string(1) "2"
-  int(2)
-  string(2) "30"
-  int(5)
-  string(2) "54"
-  int(64)
-}
-vec(9) {
-  int(2)
-  string(1) "2"
-  int(5)
-  int(10)
-  int(11)
-  int(17)
-  string(2) "30"
-  string(2) "54"
-  int(64)
-}
-vec(9) {
-  int(2)
-  int(2)
-  int(5)
-  int(10)
-  int(11)
-  int(17)
-  int(30)
-  int(54)
-  int(64)
-}
-vec(9) {
-  int(10)
-  int(11)
-  int(17)
-  int(2)
-  int(2)
-  int(30)
-  int(5)
-  int(54)
-  int(64)
-}
-vec(9) {
-  int(2)
-  int(2)
-  int(5)
-  int(10)
-  int(11)
-  int(17)
-  int(30)
-  int(54)
-  int(64)
-}
-vec(5) {
-  int(25)
-  string(5) "30.12"
-  string(4) "30.2"
-  int(36)
-  int(100)
-}
-vec(5) {
-  int(100)
-  int(25)
-  string(5) "30.12"
-  string(4) "30.2"
-  int(36)
-}
-vec(5) {
-  int(25)
-  string(5) "30.12"
-  string(4) "30.2"
-  int(36)
-  int(100)
-}
-vec(3) {
-  string(2) "25"
-  string(2) "36"
-  string(3) "100"
-}
-vec(3) {
-  string(3) "100"
-  string(2) "25"
-  string(2) "36"
-}
-vec(3) {
-  string(2) "25"
-  string(2) "36"
-  string(3) "100"
-}
-vec(9) {
-  int(2)
-  string(1) "2"
-  int(5)
-  int(10)
-  int(11)
-  int(17)
-  string(2) "30"
-  string(2) "54"
-  int(64)
-}
-vec(9) {
-  int(10)
-  int(11)
-  int(17)
-  string(1) "2"
-  int(2)
-  string(2) "30"
-  int(5)
-  string(2) "54"
-  int(64)
-}
-vec(9) {
-  int(2)
-  string(1) "2"
-  int(5)
-  int(10)
-  int(11)
-  int(17)
-  string(2) "30"
-  string(2) "54"
-  int(64)
-}
-vec(9) {
-  int(2)
-  int(2)
-  int(5)
-  int(10)
-  int(11)
-  int(17)
-  int(30)
-  int(54)
-  int(64)
-}
-vec(9) {
-  int(10)
-  int(11)
-  int(17)
-  int(2)
-  int(2)
-  int(30)
-  int(5)
-  int(54)
-  int(64)
-}
-vec(9) {
-  int(2)
-  int(2)
-  int(5)
-  int(10)
-  int(11)
-  int(17)
-  int(30)
-  int(54)
-  int(64)
-}
-Locale: 'EN-US-ODESSA'
+ Result: trueLocale: 'EN-US-ODESSA'
   ULOC_VALID_LOCALE     = 'en_US'
 Locale: 'UK_UA_ODESSA'
   ULOC_VALID_LOCALE     = 'uk'
@@ -447,15 +219,7 @@ vec [
 ]
  Result: true
 
-Test 8.fafc77ca66955b539693d68becac29f6:
-vec [
-  NULL,
-  '3',
-  'a',
-]
- Result: true
-
-Test 9.9fe68c05033cdd06abb380826afbb058:
+Test 8.9fe68c05033cdd06abb380826afbb058:
 vec [
   'i',
   'k',
@@ -463,7 +227,7 @@ vec [
 ]
  Result: true
 
-Test 10.0b977711afdd45554644f555d4b9014f:
+Test 9.0b977711afdd45554644f555d4b9014f:
 vec [
   'ааа',
   'абв',
@@ -472,7 +236,7 @@ vec [
 ]
  Result: true
 
-Test 11.5d27a145952612b4e10782f74f3eeea3:
+Test 10.5d27a145952612b4e10782f74f3eeea3:
 vec [
   'а',
   'аа',
@@ -480,7 +244,7 @@ vec [
 ]
  Result: true
 
-Test 12.9ec4e88c7d969a27847c3b1b44abbb5f:
+Test 11.9ec4e88c7d969a27847c3b1b44abbb5f:
 vec [
   'i',
   'y',

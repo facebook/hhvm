@@ -22,10 +22,9 @@ dict [
 ]
  Result: true
 
-Test 4.f2e4e91cbecdce6dd5e22ff5fd5d9613:
+Test 4.2701d49a1c57b10ed0c21c37d6a8a5df:
 dict [
   '7' => '',
-  '2' => NULL,
   '5' => '!',
   '1' => 'abc',
 ]
@@ -39,15 +38,7 @@ dict [
 ]
  Result: true
 
-Test 6.6dde383f1da221f48c0555ca65b47b50:
-dict [
-  '3' => 2,
-  '1' => 5,
-  '2' => '30',
-]
- Result: true
-
-Test 7.f0abff44df2812d54bf54e26e0297c73:
+Test 6.f0abff44df2812d54bf54e26e0297c73:
 dict [
   '1' => '100',
   '2' => '25',
@@ -55,15 +46,7 @@ dict [
 ]
  Result: true
 
-Test 8.9ba3543a48c8fd783774b5da8b6dfec4:
-dict [
-  '3' => 2,
-  '2' => '30',
-  '1' => 5,
-]
- Result: true
-
-Test 9.be89775fb05e083b78ca2ae8363ad00d:
+Test 7.be89775fb05e083b78ca2ae8363ad00d:
 dict [
   '2' => '',
   '3' => ' a',
@@ -71,7 +54,7 @@ dict [
 ]
  Result: true
 
-Test 10.e256eb0198d61355223f8e9e2c8e961d:
+Test 8.e256eb0198d61355223f8e9e2c8e961d:
 dict [
   '3' => 'i',
   '2' => 'k',
@@ -79,7 +62,7 @@ dict [
 ]
  Result: true
 
-Test 11.a057b90d0565c39ee886c412f1b561b3:
+Test 9.a057b90d0565c39ee886c412f1b561b3:
 dict [
   'е' => 'а',
   'б' => 'в',
@@ -87,7 +70,7 @@ dict [
 ]
  Result: true
 
-Test 12.ebd6bedc2382b0dc82d666a28efede2c:
+Test 10.ebd6bedc2382b0dc82d666a28efede2c:
 dict [
   '4' => '',
   '1' => 'п',
@@ -96,7 +79,7 @@ dict [
 ]
  Result: true
 
-Test 13.0adf7a0fe9745aa650d286491f95e039:
+Test 11.0adf7a0fe9745aa650d286491f95e039:
 dict [
   'c' => 'i',
   'd' => 'y',

@@ -3,7 +3,7 @@
 -- Iteration 1 --
 - With Default sort flag -
 bool(true)
-vec(11) {
+vec(9) {
   string(4) "\xhh"
   string(4) "\ddd"
   string(3) "\cx"
@@ -14,12 +14,10 @@ vec(11) {
   string(1) "
 "
   string(1) "	"
-  NULL
-  NULL
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-vec(11) {
+vec(9) {
   string(4) "\xhh"
   string(4) "\ddd"
   string(3) "\cx"
@@ -30,12 +28,10 @@ vec(11) {
   string(1) "
 "
   string(1) "	"
-  NULL
-  NULL
 }
 - Sort flag = SORT_STRING -
 bool(true)
-vec(11) {
+vec(9) {
   string(4) "\xhh"
   string(4) "\ddd"
   string(3) "\cx"
@@ -46,8 +42,6 @@ vec(11) {
   string(1) "
 "
   string(1) "	"
-  NULL
-  NULL
 }
 
 -- Iteration 2 --

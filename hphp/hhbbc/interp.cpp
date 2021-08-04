@@ -723,6 +723,17 @@ resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
   not_reached();
 }
 
+/*
+ * Very simple check to see if the top level class is reified or not
+ * If not we can reduce a VerifyTypeTS to a regular VerifyType
+ */
+bool shouldReduceToNonReifiedVerifyType(ISS& env, SArray ts) {
+  if (get_ts_kind(ts) != TypeStructure::Kind::T_unresolved) return false;
+  auto const rcls = env.index.resolve_class(env.ctx, get_ts_classname(ts));
+  if (!rcls || !rcls->resolved()) return false;
+  return !rcls->cls()->hasReifiedGenerics;
+}
+
 } // namespace
 
 ArrayData*
@@ -4864,6 +4875,19 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
       reduce(env, bc::VerifyParamTypeTS { op.loc1 });
       return;
     }
+    if (shouldReduceToNonReifiedVerifyType(env, inputTS->m_data.parr)) {
+      return reduce(env, bc::PopC {}, bc::VerifyParamType { op.loc1 });
+    }
+  }
+  if (auto const last = last_op(env)) {
+    if (last->op == Op::CombineAndResolveTypeStruct) {
+      if (auto const last2 = last_op(env, 1)) {
+        if (last2->op == Op::Dict &&
+            shouldReduceToNonReifiedVerifyType(env, last2->Dict.arr1)) {
+          return reduce(env, bc::PopC {}, bc::VerifyParamType { op.loc1 });
+        }
+      }
+    }
   }
   popC(env);
 }
@@ -5006,6 +5030,19 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
       reduce(env, bc::Dict { resolvedTS });
       reduce(env, bc::VerifyRetTypeTS {});
       return;
+    }
+    if (shouldReduceToNonReifiedVerifyType(env, inputTS->m_data.parr)) {
+      return reduce(env, bc::PopC {}, bc::VerifyRetTypeC {});
+    }
+  }
+  if (auto const last = last_op(env)) {
+    if (last->op == Op::CombineAndResolveTypeStruct) {
+      if (auto const last2 = last_op(env, 1)) {
+        if (last2->op == Op::Dict &&
+            shouldReduceToNonReifiedVerifyType(env, last2->Dict.arr1)) {
+          return reduce(env, bc::PopC {}, bc::VerifyRetTypeC {});
+        }
+      }
     }
   }
   TCVec tcs {&constraint};

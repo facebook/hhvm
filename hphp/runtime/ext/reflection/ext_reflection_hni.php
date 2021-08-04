@@ -416,7 +416,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     $ret .= ($type == 'Method') ? 'method ' : 'function ';
     $ret .= $this->getName() . " ] {\n";
 
-    if ($this->getStartLine() > 0) {
+    if ((int)$this->getStartLine() > 0) {
       $file = (string)$this->getFileName();
       $start = (string)$this->getStartLine();
       $end = (string)$this->getEndLine();

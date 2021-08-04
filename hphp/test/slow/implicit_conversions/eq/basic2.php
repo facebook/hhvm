@@ -13,12 +13,12 @@ function test_pair($k1, $v1, $k2, $v2) {
     echo "Err     ";
   }
   try {
-    echo (($v1 < $v2) ? "T       " : "F       ");
+    echo ((HH\Lib\Legacy_FIXME\lt($v1, $v2)) ? "T       " : "F       ");
   } catch (Exception $e) {
     echo "Err     ";
   }
   try {
-    echo (($v1 <= $v2) ? "T       " : "F       ");
+    echo ((HH\Lib\Legacy_FIXME\lte($v1, $v2)) ? "T       " : "F       ");
   } catch (Exception $e) {
     echo "Err     ";
   }
@@ -33,17 +33,17 @@ function test_pair($k1, $v1, $k2, $v2) {
     echo "Err     ";
   }
   try {
-    echo (($v1 >= $v2) ? "T       " : "F       ");
+    echo ((HH\Lib\Legacy_FIXME\gte($v1, $v2)) ? "T       " : "F       ");
   } catch (Exception $e) {
     echo "Err     ";
   }
   try {
-    echo (($v1 > $v2) ? "T       " : "F       ");
+    echo ((HH\Lib\Legacy_FIXME\gt($v1, $v2)) ? "T       " : "F       ");
   } catch (Exception $e) {
     echo "Err     ";
   }
   try {
-    $cmp = $v1 <=> $v2;
+    $cmp = HH\Lib\Legacy_FIXME\cmp($v1, $v2);
     echo "$cmp";
   } catch (Exception $e) {
     echo "Err";

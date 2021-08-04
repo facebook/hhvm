@@ -110,17 +110,22 @@ void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
   v << syncvmret{data, tp};
 }
 
-void asyncFuncRetImpl(IRLS& env, const IRInstruction* inst, TCA target) {
-  auto const ret = inst->src(2);
-  auto const retLoc = srcLoc(env, inst, 2);
+void asyncRetRImpl(IRLS& env, const IRInstruction* inst, TCA target,
+                   uint32_t numRets) {
   auto& v = vmain(env);
 
   adjustSPForReturn<IRSPRelOffsetData>(env, inst);
 
-  // The asyncFuncRet{,Slow} stubs take the return TV as its arguments.
-  copyTV(v, rarg(0), rarg(1), retLoc, ret);
-  auto args = vm_regs_with_sp() | rarg(1);
-  if (!ret->isA(TNull)) args |= rarg(0);
+  auto args = vm_regs_with_sp();
+  for (auto i = 0; i < numRets; ++i) {
+    auto const ret = inst->src(2 + i);
+    auto const retLoc = srcLoc(env, inst, 2 + i);
+
+    // The `target' stub takes `numRets` return TVs as its rarg() arguments.
+    copyTV(v, rarg(2 * i), rarg(2 * i + 1), retLoc, ret);
+    args |= rarg(2 * i + 1);
+    if (!ret->isA(TNull)) args |= rarg(2 * i);
+  }
 
   v << jmpi{target, args};
 }
@@ -162,11 +167,19 @@ void cgRetCtrl(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgAsyncFuncRet(IRLS& env, const IRInstruction* inst) {
-  asyncFuncRetImpl(env, inst, tc::ustubs().asyncFuncRet);
+  asyncRetRImpl(env, inst, tc::ustubs().asyncFuncRet, 1);
 }
 
 void cgAsyncFuncRetSlow(IRLS& env, const IRInstruction* inst) {
-  asyncFuncRetImpl(env, inst, tc::ustubs().asyncFuncRetSlow);
+  asyncRetRImpl(env, inst, tc::ustubs().asyncFuncRetSlow, 1);
+}
+
+void cgAsyncGenRetR(IRLS& env, const IRInstruction* inst) {
+  asyncRetRImpl(env, inst, tc::ustubs().asyncGenRetR, 0);
+}
+
+void cgAsyncGenYieldR(IRLS& env, const IRInstruction* inst) {
+  asyncRetRImpl(env, inst, tc::ustubs().asyncGenYieldR, 2);
 }
 
 void cgAsyncSwitchFast(IRLS& env, const IRInstruction* inst) {

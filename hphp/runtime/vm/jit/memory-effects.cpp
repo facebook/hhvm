@@ -570,8 +570,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case AsyncFuncRet:
   case AsyncFuncRetSlow:
+  case AsyncGenRetR:
     return ReturnEffects { AStackAny | AMIStateAny | livefp(inst.src(1)) };
 
+  case AsyncGenYieldR:
   case AsyncSwitchFast:
     // Suspending can go anywhere, and doesn't even kill locals.
     return UnknownEffects {};

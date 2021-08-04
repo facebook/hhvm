@@ -315,6 +315,13 @@ SSATmp* implYieldGen(IRGS& env, SSATmp* key, SSATmp* value) {
 SSATmp* implYieldAGen(IRGS& env, SSATmp* key, SSATmp* value) {
   key = key ? key : cns(env, TInitNull);
 
+  if (resumeMode(env) == ResumeMode::Async) {
+    auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
+    gen(env, AsyncGenYieldR, IRSPRelOffsetData { spAdjust }, sp(env), fp(env),
+        key, value);
+    return nullptr;
+  }
+
   // Wrap the key and value into a tuple.
   auto const keyValueTuple = gen(env, AllocVec, PackedArrayData { 2 });
   gen(env, InitVecElem, IndexData { 0 }, keyValueTuple, key);
@@ -328,8 +335,7 @@ void implYield(IRGS& env, bool withKey) {
   assertx(resumeMode(env) != ResumeMode::None);
   assertx(curFunc(env)->isGenerator());
   assertx(spOffBCFromStackBase(env) == spOffEmpty(env) + (withKey ? 2 : 1));
-
-  if (resumeMode(env) == ResumeMode::Async) PUNT(Yield-AsyncGenerator);
+  assertx(!isInlining(env));
 
   suspendHook(env, [&] {
     gen(env, SuspendHookYield, fp(env));
@@ -360,7 +366,11 @@ void implYield(IRGS& env, bool withKey) {
     ? implYieldGen(env, key, value)
     : implYieldAGen(env, key, value);
 
+  // Return to the asio scheduler already handled.
+  if (retVal == nullptr) return;
+
   // Return control to the caller (Gen::next()).
+  assertx(resumeMode(env) == ResumeMode::GenIter);
   auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
   auto const retData = RetCtrlData { spAdjust, true, AuxUnion{0} };
   gen(env, RetCtrl, retData, sp(env), fp(env), retVal);

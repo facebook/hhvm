@@ -143,6 +143,8 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
 
     case AsyncFuncRet:
     case AsyncFuncRetSlow:
+    case AsyncGenRetR:
+    case AsyncGenYieldR:
     case EnterTCUnwind:
       return true;
 

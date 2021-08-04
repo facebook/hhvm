@@ -2728,6 +2728,8 @@ X(CallBuiltin,                  CallBuiltinData);
 X(RetCtrl,                      RetCtrlData);
 X(AsyncFuncRet,                 IRSPRelOffsetData);
 X(AsyncFuncRetSlow,             IRSPRelOffsetData);
+X(AsyncGenRetR,                 IRSPRelOffsetData);
+X(AsyncGenYieldR,               IRSPRelOffsetData);
 X(AsyncSwitchFast,              IRSPRelOffsetData);
 X(LookupClsMethodCache,         ClsMethodData);
 X(LdClsMethodCacheFunc,         ClsMethodData);

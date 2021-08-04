@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/surprise-flags.h"
 
 #include "hphp/runtime/vm/bytecode.h"
@@ -32,6 +33,7 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/phys-reg-saver.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -43,6 +45,7 @@
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
+#include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 
 namespace HPHP { namespace jit {
@@ -71,7 +74,10 @@ void alignCacheLine(CodeBlock& cb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+using A = c_Awaitable;
 using AFWH = c_AsyncFunctionWaitHandle;
+using AG = AsyncGenerator;
+using AGWH = c_AsyncGeneratorWaitHandle;
 
 /*
  * Convert an AsyncFunctionWaitHandle-relative offset to an offset relative to
@@ -82,6 +88,14 @@ constexpr ptrdiff_t afwhToAr(ptrdiff_t off) {
 }
 constexpr ptrdiff_t afwhToBl(ptrdiff_t off) {
   return off - AFWH::childrenOff() - AFWH::Node::blockableOff();
+}
+
+/*
+ * Convert an AsyncGenerator-relative offset to an offset relative to its
+ * contained ActRec.
+ */
+constexpr ptrdiff_t agToAr(ptrdiff_t off) {
+  return off - AG::arOff();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -111,26 +125,28 @@ void freeAFWH(c_AsyncFunctionWaitHandle* wh) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Store the async function's return value to the AsyncFunctionWaitHandle and
- * mark it as succeeded.
+ * Store the result provided by `data' and `type' into the wait handle `wh'
+ * and mark it as succeeded.
  *
  * Note that this overwrites parentChain and contextIdx, so these fields need
  * to be loaded before the result is stored.
  */
-void storeAFWHResult(Vout& v, PhysReg data, PhysReg type) {
-  auto const resultOff = afwhToAr(AFWH::resultOff());
-  v << store{data, rvmfp()[resultOff + TVOFF(m_data)]};
-  // This store must preserve the other bits in the WaitHandle for correctness.
-  v << storeb{type, rvmfp()[resultOff + TVOFF(m_type)]};
+void storeWHResult(Vout& v, PhysReg data, PhysReg type, Vptr wh,
+                   A::Kind whKind) {
+  v << store{data, wh + A::resultOff() + TVOFF(m_data)};
+  // This store must preserve the other bits in the Awaitable for correctness.
+  v << storeb{type, wh + A::resultOff() + TVOFF(m_type)};
 
   // Set state to succeeded.
-  v << storebi{
-    c_Awaitable::toKindState(
-      c_Awaitable::Kind::AsyncFunction,
-      c_Awaitable::STATE_SUCCEEDED
-    ),
-    rvmfp()[afwhToAr(c_Awaitable::stateOff())]
-  };
+  v << storebi{A::toKindState(whKind, A::STATE_SUCCEEDED), wh + A::stateOff()};
+}
+
+void storeAFWHResult(Vout& v, PhysReg data, PhysReg type) {
+  storeWHResult(v, data, type, rvmfp()[-AFWH::arOff()], A::Kind::AsyncFunction);
+}
+
+void storeAGWHResult(Vout& v, PhysReg data, PhysReg type, Vreg wh) {
+  storeWHResult(v, data, type, wh[0], A::Kind::AsyncGenerator);
 }
 
 /*
@@ -332,7 +348,7 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
 }
 
 /*
- * Store the return value into the wait handle, unblock its parents,
+ * Store the return value into the AsyncFunctionWaitHandle, unblock its parents,
  * update the frame pointer and decref.
  */
 void asyncFuncRetOnly(Vout& v, PhysReg data, PhysReg type, Vreg parentBl) {
@@ -349,6 +365,43 @@ void asyncFuncRetOnly(Vout& v, PhysReg data, PhysReg type, Vreg parentBl) {
   v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
 
   // Decref the AFWH for no longer being in the running state.
+  emitDecRefWorkObj(v, wh, TRAP_REASON);
+}
+
+/*
+ * Store the return value into the AsyncGeneratorWaitHandle, unlink it from
+ * the async generator, unblock its parents, update the frame pointer and
+ * decref.
+ */
+void asyncGenRetYieldOnly(Vout& v, PhysReg data, PhysReg type) {
+  // Load and unlink the async generator wait handle from the async generator.
+  auto const wh = v.makeReg();
+  v << load{rvmfp()[agToAr(AG::waitHandleOff())], wh};
+  v << storeqi{0, rvmfp()[agToAr(AG::waitHandleOff())]};
+
+  // Load ptr to the first parent's blockable.
+  auto const parentBl = v.makeReg();
+  v << load{wh[AGWH::parentChainOff()], parentBl};
+
+  // Transfer the return value from return registers into the AGWH, mark
+  // it as finished and unblock all parents.
+  storeAGWHResult(v, data, type, wh);
+  unblockParents(v, parentBl);
+
+  // Unlink the async generator from the async generator wait handle.
+  v << storeqi{0, wh[AGWH::generatorOff()]};
+
+  // Get the pointer to the AG before losing FP.
+  auto const gen = v.makeReg();
+  v << lea{rvmfp()[agToAr(AG::objectOff())], gen};
+
+  // Load the saved frame pointer from the ActRec.
+  v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
+
+  // Decref the AG and AGWH for no longer being referenced by each other, and
+  // AGWH once more for no longer being in the running state.
+  emitDecRefWorkObj(v, gen, TRAP_REASON);
+  emitDecRef(v, wh, TRAP_REASON);
   emitDecRefWorkObj(v, wh, TRAP_REASON);
 }
 
@@ -421,6 +474,75 @@ TCA emitAsyncFuncRetSlow(CodeBlock& cb, DataBlock& data, TCA asyncFuncRet) {
   });
 }
 
+TCA emitAsyncGenRetR(CodeBlock& cb, DataBlock& data, TCA switchCtrl,
+                     TCA* asyncGenRetYieldR) {
+  alignCacheLine(cb);
+
+  auto const ret = vwrap(cb, data, [] (Vout& v) {
+    // Async generator return is signalled with a null.
+    v << copy{v.cns(KindOfNull), rarg(1)};
+    v << fallthru{vm_regs_with_sp() | rarg(1)};
+  });
+
+  *asyncGenRetYieldR = vwrap(cb, data, [&] (Vout& v) {
+    auto const turtlePath = Vlabel(v.makeBlock());
+
+    // Check for surprise.
+    irlower::emitCheckSurpriseFlags(v, rvmsp(), turtlePath);
+
+    // Slow path. Finish returning and try to use the asyncSwitchCtrl stub
+    // to resume another ResumableWaitHandle.
+    asyncGenRetYieldOnly(v, rarg(0), rarg(1));
+    v << jmpi{switchCtrl, vm_regs_with_sp()};
+
+    // Turtle path.
+    v = turtlePath;
+
+    // Finish returning and transfer control to the asio scheduler, which will
+    // properly deal with the surprise when resuming the next function.
+    asyncGenRetYieldOnly(v, rarg(0), rarg(1));
+    v << syncvmrettype{v.cns(KindOfNull)};
+    v << leavetc{vm_regs_with_sp() | rret_type()};
+  });
+
+  return ret;
+}
+
+TCA emitAsyncGenYieldR(CodeBlock& cb, DataBlock& data, TCA asyncGenRetYieldR) {
+  alignJmpTarget(cb);
+
+  return vwrap(cb, data, [&] (Vout& v) {
+    auto const keyData = v.makeReg();
+    auto const keyType = v.makeReg();
+    v << copy{rarg(0), keyData};
+    v << copy{rarg(1), keyType};
+
+    // Async generator yield $k => $v is signalled with a tuple($k, $v).
+    auto const vec = v.makeReg();
+    {
+      // Not enough callee saved regs for both $k and $v, save $v on the stack.
+      PhysRegSaver prs{v, rarg(2) | rarg(3)};
+      v << vcall{
+        CallSpec::direct(PackedArray::MakeUninitializedVec),
+        v.makeVcallArgs({{v.cns(2)}}),
+        v.makeTuple({vec}),
+        Fixup::none(),
+        DestType::SSA
+      };
+    }
+
+    auto const keyOffset = PackedArray::entryOffset(0);
+    auto const valueOffset = PackedArray::entryOffset(1);
+    v << store{keyData, vec[keyOffset.data_offset]};
+    v << storeb{keyType, vec[keyOffset.type_offset]};
+    v << store{rarg(2), vec[valueOffset.data_offset]};
+    v << storeb{rarg(3), vec[valueOffset.type_offset]};
+    v << copy{vec, rarg(0)};
+    v << copy{v.cns(KindOfVec), rarg(1)};
+    v << jmpi{asyncGenRetYieldR, vm_regs_with_sp() | rarg(0) | rarg(1)};
+  });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -451,12 +573,18 @@ void UniqueStubs::emitAllResumable(CodeCache& code, Debug::DebugInfo& dbg) {
   }()
 
 #define ADD(name, v, stub) name = EMIT(#name, v, [&] { return (stub); })
-  TCA inner_stub;
+  TCA switchCtrl;
   ADD(asyncSwitchCtrl,
       hotView(),
-      emitAsyncSwitchCtrl(hot(), data, &inner_stub));
-  ADD(asyncFuncRet,     hotView(), emitAsyncFuncRet(hot(), data, inner_stub));
+      emitAsyncSwitchCtrl(hot(), data, &switchCtrl));
+  ADD(asyncFuncRet, hotView(), emitAsyncFuncRet(hot(), data, switchCtrl));
   ADD(asyncFuncRetSlow, view, emitAsyncFuncRetSlow(cold, data, asyncFuncRet));
+
+  TCA asyncGenRetYieldR;
+  ADD(asyncGenRetR, hotView(),
+      emitAsyncGenRetR(hot(), data, switchCtrl, &asyncGenRetYieldR));
+  ADD(asyncGenYieldR, hotView(),
+      emitAsyncGenYieldR(hot(), data, asyncGenRetYieldR));
 #undef ADD
 }
 

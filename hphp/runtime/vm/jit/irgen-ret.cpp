@@ -143,7 +143,8 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal, bool suspended) {
 }
 
 void generatorReturn(IRGS& env, SSATmp* retval) {
-  assertx(resumeMode(env) == ResumeMode::GenIter);
+  assertx(curFunc(env)->isGenerator());
+
   retSurpriseCheck(env, retval, []{});
 
   gen(env,
@@ -164,10 +165,18 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
     retval = cns(env, TInitNull);
   } else {
     assertx(retval->isA(TInitNull));
+
+    if (resumeMode(env) == ResumeMode::Async) {
+      auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
+      gen(env, AsyncGenRetR, IRSPRelOffsetData { spAdjust }, sp(env), fp(env));
+      return;
+    }
+
     retval = gen(env, CreateSSWH, cns(env, TInitNull));
   }
 
   // Return control to the caller (Gen::next()).
+  assertx(resumeMode(env) == ResumeMode::GenIter);
   auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
   auto const retData = RetCtrlData { spAdjust, true, AuxUnion{0} };
   gen(env, RetCtrl, retData, sp(env), fp(env), retval);
@@ -212,11 +221,6 @@ IRSPRelOffset offsetToReturnSlot(IRGS& env) {
 }
 
 void emitRetC(IRGS& env) {
-  if (curFunc(env)->isAsyncGenerator() &&
-      resumeMode(env) == ResumeMode::Async) {
-    PUNT(RetC-AsyncGenerator);
-  }
-
   if (isInlining(env)) {
     assertx(resumeMode(env) == ResumeMode::None);
     retFromInlined(env);

@@ -207,6 +207,23 @@ struct UniqueStubs {
   TCA asyncFuncRetSlow;
 
   /*
+   * Return or yield from a resumed async generator.
+   *
+   * Compute the result (null for return, tuple($k, $v) for yield $k => $v),
+   * store it into the AsyncGeneratorWaitHandle, mark it as finished and
+   * unblock its parents. Then jump to asyncSwitchCtrl.
+   *
+   * rvmfp() should point to the ActRec of the AsyncGenerator that is
+   * returning or yielding, rvmsp() should point to an uninitialized cell on
+   * the stack containing garbage.
+   *
+   * @reached:  jmp from TC
+   * @context:  func body
+   */
+  TCA asyncGenRetR;
+  TCA asyncGenYieldR;
+
+  /*
    * Async function finish-suspend-and-resume stub.
    *
    * Check for fast resumables on the AsioContext runnable queue.  If one is

@@ -1684,6 +1684,28 @@ To string conversions:
   path of AsyncFuncRet if it was not, without resuming another function, as
   we are not able to call a potential "resume await" event hook from the stub.
 
+| AsyncGenRetR<spOff>, ND, S(StkPtr) S(FramePtr), T
+
+  Return from an async generator resumed at Await, assuming unknown surprise
+  flag state. Ensures that S0 + `spOff` (in cells) is stored in rvmsp and that
+  S1 is stored in rvmfp and calls the `asyncGenRetR` unique stub. The stub
+  stores `null` result indicating end of iteration into the async generator
+  wait handle associated with the generator associated with the frame pointer,
+  marks the wait handle as finished and unblocks its parents. If the surprise
+  flag was not set and there is a pending fast runnable ResumableWaitHandle,
+  it resumes it directly (slow path). Otherwise, it will exit VM and return
+  control to the asio scheduler (turtle path). The stack must contain exactly
+  one cell containing uninitialized garbage, which will be populated by the
+  stub either to pass the return value to the resumed function, or to return
+  null to the scheduler.
+
+| AsyncGenYieldR<spOff>, ND, S(StkPtr) S(FramePtr) S(Cell) S(Cell), T
+
+  Yield from an async generator resumed at Await, assuming unknown surprise
+  flag state. Works the same as `AsyncGenRetR`, except the async generator
+  wait handle is populated with `tuple($key, $value)` result of the iteration
+  step, where `$key` is given by S2 and `$value` by S3.
+
 | AsyncSwitchFast<spOff>, ND, S(StkPtr) S(FramePtr), T
 
   Switch control to another ResumableWaitHandle. Ensures that S0 + `spOff`

@@ -511,6 +511,8 @@ bool opcodeMayRaise(Opcode opc) {
   case AssertType:
   case AsyncFuncRet:
   case AsyncFuncRetSlow:
+  case AsyncGenRetR:
+  case AsyncGenYieldR:
   case AsyncSwitchFast:
   case BeginCatch:
   case BeginInlining:

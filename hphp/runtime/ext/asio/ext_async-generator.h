@@ -48,6 +48,10 @@ struct AsyncGenerator final : BaseGenerator {
   static constexpr ptrdiff_t objectOff() {
     return -(Native::dataOffset<AsyncGenerator>());
   }
+  static constexpr ptrdiff_t waitHandleOff() {
+    return offsetof(AsyncGenerator, m_waitHandle);
+  }
+
   static AsyncGenerator* fromObject(ObjectData *obj) {
     return Native::data<AsyncGenerator>(obj);
   }

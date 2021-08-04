@@ -55,6 +55,9 @@ struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
   ~c_AsyncGeneratorWaitHandle();
 
  public:
+  static constexpr ptrdiff_t generatorOff() {
+    return offsetof(c_AsyncGeneratorWaitHandle, m_generator);
+  }
   static constexpr ptrdiff_t blockableOff() {
     return offsetof(c_AsyncGeneratorWaitHandle, m_blockable);
   }

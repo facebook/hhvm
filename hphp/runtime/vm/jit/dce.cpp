@@ -455,6 +455,8 @@ bool canDCE(IRInstruction* inst) {
   case RetCtrl:
   case AsyncFuncRet:
   case AsyncFuncRetSlow:
+  case AsyncGenRetR:
+  case AsyncGenYieldR:
   case AsyncSwitchFast:
   case GenericRetDecRefs:
   case StClsInitElem:

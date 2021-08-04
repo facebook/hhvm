@@ -359,7 +359,7 @@ let fun_def ctx fd :
   let pos = fst f.f_name in
   let decl_header = get_decl_function_header env (snd f.f_name) in
   let env = Env.open_tyvars env (fst f.f_name) in
-  let env = Env.set_env_function_pos env pos in
+  let env = Env.set_env_callable_pos env pos in
   let env = Env.set_env_pessimize env in
   let env =
     Typing.attributes_check_def env SN.AttributeKinds.fn f.f_user_attributes
@@ -683,7 +683,7 @@ let method_def env cls m =
   let pos = fst m.m_name in
   let env = Env.open_tyvars env (fst m.m_name) in
   let env = Env.reinitialize_locals env in
-  let env = Env.set_env_function_pos env pos in
+  let env = Env.set_env_callable_pos env pos in
   let env =
     Typing.attributes_check_def env SN.AttributeKinds.mthd m.m_user_attributes
   in

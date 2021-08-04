@@ -499,6 +499,7 @@ let param_as_value env (ty, _pos, mode) =
 let genv_as_value env genv =
   let {
     tcopt = _;
+    callable_pos;
     return;
     params;
     condition_types;
@@ -517,6 +518,7 @@ let genv_as_value env genv =
   make_map
     ([
        ("return", return_info_as_value env return);
+       ("callable_pos", pos_as_value callable_pos);
        ("params", local_id_map_as_value (param_as_value env) params);
        ( "condition_types",
          smap_as_value (decl_type_as_value env) condition_types );
@@ -558,7 +560,6 @@ let fun_tast_info_as_map = function
 
 let env_as_value env =
   let {
-    function_pos;
     fresh_typarams;
     lenv;
     genv;
@@ -582,7 +583,6 @@ let env_as_value env =
   in
   make_map
     [
-      ("function_pos", pos_as_value function_pos);
       ("fresh_typarams", Set fresh_typarams);
       ("lenv", lenv_as_value env lenv);
       ("genv", genv_as_value env genv);

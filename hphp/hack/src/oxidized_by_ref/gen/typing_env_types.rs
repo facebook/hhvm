@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8c6779513872b33422fd46d3ab417fb9>>
+// @generated SignedSource<<671b6ebac5e77f9b4fed947f28ae37a6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -47,6 +47,7 @@ pub struct LocalEnv<'a> {
 impl<'a> TrivialDrop for LocalEnv<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(LocalEnv<'arena>);
 
+/// See the .mli file for the documentation of fields.
 #[derive(
     Clone,
     Debug,
@@ -58,8 +59,6 @@ arena_deserializer::impl_deserialize_in_arena!(LocalEnv<'arena>);
     ToOcamlRep
 )]
 pub struct Env<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub function_pos: &'a pos::Pos<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub fresh_typarams: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -92,6 +91,7 @@ pub struct Env<'a> {
 impl<'a> TrivialDrop for Env<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Env<'arena>);
 
+/// See the .mli file for the documentation of fields.
 #[derive(
     Clone,
     Debug,
@@ -105,6 +105,8 @@ arena_deserializer::impl_deserialize_in_arena!(Env<'arena>);
 pub struct Genv<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tcopt: &'a typechecker_options::TypecheckerOptions<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub callable_pos: &'a pos::Pos<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub return_: &'a typing_env_return_info::TypingEnvReturnInfo<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

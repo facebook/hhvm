@@ -484,7 +484,7 @@ val get_tpenv_size : env -> int
 
 val get_tpenv_tparams : env -> SSet.t
 
-val set_env_function_pos : env -> Pos.t -> env
+val set_env_callable_pos : env -> Pos.t -> env
 
 val set_env_pessimize : env -> env
 

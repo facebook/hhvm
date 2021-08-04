@@ -217,7 +217,7 @@ let check_fun_tast_info_present env = function
   | Some _ -> ()
   | None ->
     Errors.internal_error
-      env.Typing_env_types.function_pos
+      env.Typing_env_types.genv.Typing_env_types.callable_pos
       "fun_tast_info of a function or method was not filled in before TAST checking"
 
 let restore_method_env env m =

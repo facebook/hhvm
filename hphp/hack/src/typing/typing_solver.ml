@@ -24,14 +24,14 @@ module TySet = Typing_set
 module MakeType = Typing_make_type
 
 let log_remaining_prop env =
-  let filename = Pos.filename env.function_pos in
+  let filename = Pos.filename env.genv.callable_pos in
   if not (Relative_path.is_hhi (Relative_path.prefix filename)) then (
     let prop =
       Typing_inference_env.get_nongraph_subtype_prop env.inference_env
     in
     (if TypecheckerOptions.log_inference_constraints (Env.get_tcopt env) then
       let p_as_string = Typing_print.subtype_prop env prop in
-      let pos = Pos.string (Pos.to_absolute env.function_pos) in
+      let pos = Pos.string (Pos.to_absolute env.genv.callable_pos) in
       let size = TL.size prop in
       let n_disj = TL.n_disj prop in
       let n_conj = TL.n_conj prop in
@@ -39,7 +39,7 @@ let log_remaining_prop env =
     if (not (Errors.currently_has_errors ())) && not (TL.is_valid prop) then
       Typing_log.log_prop
         1
-        env.function_pos
+        env.genv.callable_pos
         "There are remaining unsolved constraints!"
         env
         prop

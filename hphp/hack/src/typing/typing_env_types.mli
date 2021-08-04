@@ -17,7 +17,6 @@ type local_env = {
 }
 
 type env = {
-  function_pos: Pos.t;  (** position of the function/method being checked *)
   fresh_typarams: SSet.t;
   lenv: local_env;
   genv: genv;
@@ -48,9 +47,11 @@ type env = {
 
 and genv = {
   tcopt: TypecheckerOptions.t;
+  callable_pos: Pos.t;  (** position of the function/method being checked *)
   return: Typing_env_return_info.t;
+      (** For each function/method parameter, its type, position, calling convention. *)
   params: (locl_ty * Pos.t * param_mode) Local_id.Map.t;
-      (** For each function parameter, its type, position, calling convention. *)
+      (** For each function/method parameter, its type, position, calling convention. *)
   condition_types: decl_ty SMap.t;
       (** condition types associated with parameters.
           For every mayberx parameter that has condition type we create
@@ -64,7 +65,7 @@ and genv = {
   static: bool;
   fun_kind: Ast_defs.fun_kind;
   val_kind: Typing_defs.val_kind;
-  fun_is_ctor: bool;
+  fun_is_ctor: bool;  (** Is the method a constructor? *)
   file: Relative_path.t;
       (** The file containing the top-level definition that we are checking *)
   this_module: string option;

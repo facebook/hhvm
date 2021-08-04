@@ -3572,7 +3572,8 @@ and decompose_subtype_add_prop env prop =
   | TL.Disj (_, []) -> Env.mark_inconsistent env
   | TL.Disj (_, [prop']) -> decompose_subtype_add_prop env prop'
   | TL.Disj _ ->
-    Typing_log.log_prop 2 env.function_pos "decompose_subtype_add_prop" env prop;
+    let callable_pos = env.genv.callable_pos in
+    Typing_log.log_prop 2 callable_pos "decompose_subtype_add_prop" env prop;
     env
   | TL.Coerce (TL.CoerceToDynamic, ty1, ty2) ->
     decompose_subtype_add_bound env ty1 ty2

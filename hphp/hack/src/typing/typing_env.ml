@@ -88,7 +88,7 @@ let log_env_change_ :
     let pos =
       Option.value
         (Inf.get_current_pos_from_tyvar_stack old_env.inference_env)
-        ~default:old_env.function_pos
+        ~default:old_env.genv.callable_pos
     in
     !env_log_function pos name old_env new_env);
   (new_env, res)
@@ -597,7 +597,6 @@ let initial_local tpenv =
 
 let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
   {
-    function_pos = Pos.none;
     fresh_typarams = SSet.empty;
     lenv = initial_local TPEnv.empty;
     in_loop = false;
@@ -612,6 +611,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     genv =
       {
         tcopt = Provider_context.get_tcopt ctx;
+        callable_pos = Pos.none;
         return =
           {
             (* Actually should get set straight away anyway *)
@@ -650,11 +650,12 @@ let set_env_pessimize env =
     TypecheckerOptions.simple_pessimize (get_tcopt env)
   in
   let pessimize =
-    Pos.pessimize_enabled env.function_pos pessimize_coefficient
+    Pos.pessimize_enabled env.genv.callable_pos pessimize_coefficient
   in
   { env with pessimize }
 
-let set_env_function_pos env function_pos = { env with function_pos }
+let set_env_callable_pos env callable_pos =
+  { env with genv = { env.genv with callable_pos } }
 
 let set_fun_tast_info env fun_tast_info =
   { env with fun_tast_info = Some fun_tast_info }

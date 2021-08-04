@@ -6,7 +6,6 @@ members = [
     "src/decl/direct_decl_smart_constructors",
     "src/decl/cpp_ffi",
     "src/decl/ffi",
-    "src/depgraph",
     "src/deps/cargo/deps_rust",
     "src/deps/cargo/typing_deps_hash",
     "src/facebook/hh",

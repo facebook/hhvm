@@ -9,7 +9,7 @@ path = "../../typing_deps.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-depgraph = { path = "../../../depgraph" }
+depgraph = { path = "../../../depgraph/cargo/depgraph" }
 im-rc = { version = "14.2", features = ["serde"] }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_custom = { path = "../../../ocamlrep_custom" }

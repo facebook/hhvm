@@ -5,16 +5,13 @@ version = "0.0.0"
 edition = "2018"
 
 [lib]
-path = "lib.rs"
+path = "../../lib.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
 im-rc = { version = "14.2", features = ["serde"] }
 memmap = "0.7"
-ocamlrep = { path = "../ocamlrep" }
-
-[dev-dependencies]
-tempfile = "3.1"
+ocamlrep = { path = "../../../ocamlrep" }
 
 [profile.release]
 incremental = false

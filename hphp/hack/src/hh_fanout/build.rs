@@ -14,7 +14,7 @@ use std::{fs, io};
 
 use depgraph::dep::Dep;
 use depgraph::reader::{DepGraph, DepGraphOpener};
-use depgraph::writer::{write_hash_list, DepGraphWriter, HashListIndex};
+use depgraph_writer::{write_hash_list, DepGraphWriter, HashListIndex};
 use deps_rust::DepGraphDelta;
 use ocamlrep_ocamlpool::ocaml_ffi;
 

@@ -643,6 +643,13 @@ dependencies = [
  "im-rc",
  "memmap",
  "ocamlrep",
+]
+
+[[package]]
+name = "depgraph_writer"
+version = "0.0.0"
+dependencies = [
+ "depgraph",
  "tempfile",
 ]
 
@@ -1055,6 +1062,7 @@ version = "0.0.0"
 dependencies = [
  "crossbeam",
  "depgraph",
+ "depgraph_writer",
  "deps_rust",
  "env_logger",
  "log",

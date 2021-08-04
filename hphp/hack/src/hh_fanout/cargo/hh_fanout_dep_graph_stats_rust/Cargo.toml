@@ -9,7 +9,7 @@ path = "../../dep_graph_stats.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-depgraph = { path = "../../../depgraph" }
+depgraph = { path = "../../../depgraph/cargo/depgraph" }
 env_logger = "0.7"
 json = "0.12.1"
 log = { version = "0.4.8", features = ["kv_unstable"] }

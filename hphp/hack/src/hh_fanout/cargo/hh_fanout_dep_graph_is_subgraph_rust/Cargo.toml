@@ -9,7 +9,7 @@ path = "../../dep_graph_is_subgraph.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-depgraph = { path = "../../../depgraph" }
+depgraph = { path = "../../../depgraph/cargo/depgraph" }
 env_logger = "0.7"
 log = { version = "0.4.8", features = ["kv_unstable"] }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }

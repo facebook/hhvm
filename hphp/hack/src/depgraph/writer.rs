@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-pub use crate::dep::Dep;
+pub use depgraph::dep::Dep;
 
 use std::collections::HashMap;
 use std::convert::TryInto;
@@ -199,7 +199,7 @@ impl<W: Write + Seek> DepGraphWriter<W, Phase2RegisterHashSets> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::reader::DepGraphOpener;
+    use depgraph::reader::DepGraphOpener;
 
     use std::collections::{BTreeSet, HashMap, HashSet};
     use std::fs;

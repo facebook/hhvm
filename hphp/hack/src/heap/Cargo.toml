@@ -10,7 +10,7 @@ path = "dump_saved_state_depgraph.rs"
 test = false
 
 [dependencies]
-depgraph = { path = "../depgraph" }
+depgraph = { path = "../depgraph/cargo/depgraph" }
 indicatif = { version = "0.15", features = ["with_rayon"] }
 rusqlite = { version = "0.23", features = ["blob"] }
 structopt = "0.3.21"

@@ -111,9 +111,16 @@ T decode(const Buffer& buffer, size_t& pos) {
       memmove(inout.get(), &buffer[pos], bytes);
       pos += bytes;
     }
+    auto readonly = std::unique_ptr<uint8_t[]>();
+    if (base.flags & FCallArgsBase::EnforceReadonly) {
+      auto const bytes = (base.numArgs + 7) / 8;
+      readonly = std::make_unique<uint8_t[]>(bytes);
+      memmove(readonly.get(), &buffer[pos], bytes);
+      pos += bytes;
+    }
     return FCallArgs(static_cast<FCA::Flags>(base.flags & FCA::kInternalFlags),
-                     base.numArgs, base.numRets, std::move(inout), aeTarget,
-                     context);
+                     base.numArgs, base.numRets, std::move(inout),
+                     std::move(readonly), aeTarget, context);
   }
 
   if constexpr (std::is_same<T, IterArgs>::value) {

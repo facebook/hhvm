@@ -51,7 +51,7 @@
   .method [public] some_junk {
     This
     NullUninit
-    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "prot_method"
+    FCallObjMethodD <> 0 1 "" "" - "" "" NullThrows "prot_method"
     PopC
 
     Null
@@ -120,7 +120,7 @@
   NewObjD "WithProps"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   SetL $obj
@@ -134,12 +134,12 @@
 
   CGetL $obj
   NullUninit
-  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "print_funk"
+  FCallObjMethodD <> 0 1 "" "" - "" "" NullThrows "print_funk"
   PopC
 
   CGetL $obj
   NullUninit
-  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "print_defaulted"
+  FCallObjMethodD <> 0 1 "" "" - "" "" NullThrows "print_defaulted"
   PopC
 
   True
@@ -150,7 +150,7 @@
   NewObjD "Base"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   SetL $base
@@ -161,13 +161,13 @@
   String "print_it"
   String "Base"
   ClassGetC
-  FCallClsMethod <> 1 1 "" - "" "" LogAsDynamicCall
+  FCallClsMethod <> 1 1 "" "" - "" "" LogAsDynamicCall
   PopC
 
   NewObjD "Derived"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   SetL $derived
@@ -175,26 +175,26 @@
 
   CGetL $derived
   NullUninit
-  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "some_junk"
+  FCallObjMethodD <> 0 1 "" "" - "" "" NullThrows "some_junk"
   PopC
 
   CGetL $base
   NullUninit
-  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "overriden"
+  FCallObjMethodD <> 0 1 "" "" - "" "" NullThrows "overriden"
   PopC
 
   CGetL $derived
   NullUninit
-  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "overriden"
+  FCallObjMethodD <> 0 1 "" "" - "" "" NullThrows "overriden"
   PopC
 
   CGetL $derived
   NullUninit
-  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "abs_method"
+  FCallObjMethodD <> 0 1 "" "" - "" "" NullThrows "abs_method"
   PopC
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "" "prop_test"
+  FCallFuncD <> 0 1 "" "" - "" "prop_test"
   PopC
 
   Int 1

@@ -22,7 +22,7 @@
   .numiters 1;
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "" "R"
+  FCallFuncD <> 0 1 "" "" - "" "R"
   IterInit 0 NK V:$i L0
   .try {
   L1:

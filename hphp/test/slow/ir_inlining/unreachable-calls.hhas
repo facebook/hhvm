@@ -26,7 +26,7 @@
   CGetL $x
   CGetL $x
   CGetL $x
-  FCallObjMethodD <> 5 1 "" - "" "Cls1" NullThrows "foobaz"
+  FCallObjMethodD <> 5 1 "" "" - "" "Cls1" NullThrows "foobaz"
   Jmp end
 
 cls2:
@@ -38,7 +38,7 @@ cls2:
   CGetL $x
   CGetL $x
   CGetL $x
-  FCallObjMethodD <> 5 1 "" - "" "Cls2" NullThrows "foobaz"
+  FCallObjMethodD <> 5 1 "" "" - "" "Cls2" NullThrows "foobaz"
   Jmp end
 
 end:
@@ -52,7 +52,7 @@ end:
   NewObjD "Cls1"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   SetL $obj
@@ -62,14 +62,14 @@ end:
   CGetL $obj
   CGetL $type
   CGetL $x
-  FCallFuncD <> 3 1 "" - "" "test"
+  FCallFuncD <> 3 1 "" "" - "" "test"
   RetC
 
 cls2:
   NewObjD "Cls2"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   SetL $obj
@@ -79,7 +79,7 @@ cls2:
   CGetL $obj
   CGetL $type
   CGetL $x
-  FCallFuncD <> 3 1 "" - "" "test"
+  FCallFuncD <> 3 1 "" "" - "" "test"
   RetC
 }
 
@@ -97,7 +97,7 @@ header:
   NullUninit
   CGetL $type
   Int 1
-  FCallFuncD <> 2 1 "" - "" "test_outer"
+  FCallFuncD <> 2 1 "" "" - "" "test_outer"
   PopC
 
   IncDecL $count PreInc
@@ -114,13 +114,13 @@ end:
   NullUninit
   False
   Int 40
-  FCallFuncD <> 2 1 "" - "" "loop"
+  FCallFuncD <> 2 1 "" "" - "" "loop"
   PopC
   NullUninit
   NullUninit
   True
   Int 100
-  FCallFuncD <> 2 1 "" - "" "loop"
+  FCallFuncD <> 2 1 "" "" - "" "loop"
   PopC
 
   String "DONE\n"

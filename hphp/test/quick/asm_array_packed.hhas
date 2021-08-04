@@ -67,7 +67,7 @@
   Int 64
   NewVec 64
 
-  FCallFuncD <> 1 1 "" - "" "var_dump"
+  FCallFuncD <> 1 1 "" "" - "" "var_dump"
   PopC
 
   Int 1

@@ -35,15 +35,15 @@
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "" "foo"
+  FCallFuncD <> 0 1 "" "" - "" "foo"
   PopC
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "" "bar"
+  FCallFuncD <> 0 1 "" "" - "" "bar"
   PopC
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "" "baz"
+  FCallFuncD <> 0 1 "" "" - "" "baz"
   PopC
 
   Int 1

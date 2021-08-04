@@ -6,7 +6,7 @@
   Dup
   NullUninit
     String "hi"
-  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" "" - "" ""
   PopC
   LockObj
   Throw
@@ -39,7 +39,7 @@
   Dup
   NullUninit
     CGetL $id
-  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" "" - "" ""
   PopC
   LockObj
   RetC
@@ -64,91 +64,91 @@
   NullUninit
   NullUninit
     Int 0
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_0
   PopC
   NullUninit
   NullUninit
     Int 1
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_1
   PopC
   NullUninit
   NullUninit
     Int 2
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_2
   PopC
   NullUninit
   NullUninit
     Int 3
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_3
   PopC
   NullUninit
   NullUninit
     Int 4
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_4
   PopC
   NullUninit
   NullUninit
     Int 5
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_5
   PopC
   NullUninit
   NullUninit
     Int 6
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_6
   PopC
   NullUninit
   NullUninit
     Int 7
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_7
   PopC
   NullUninit
   NullUninit
     Int 8
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_8
   PopC
   NullUninit
   NullUninit
     Int 9
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_9
   PopC
   NullUninit
   NullUninit
     Int 10
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_10
   PopC
   NullUninit
   NullUninit
     Int 11
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_11
   PopC
   NullUninit
   NullUninit
     Int 12
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_12
   PopC
   NullUninit
   NullUninit
     Int 13
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_13
   PopC
   NullUninit
   NullUninit
     Int 14
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_14
   PopC
 
@@ -169,7 +169,7 @@
   CGetL $k_14
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "" "get_undefined_var"
+  FCallFuncD <> 0 1 "" "" - "" "get_undefined_var"
   PopC
 
   # This code isn't reached---but let's Pop this junk just so
@@ -200,7 +200,7 @@
   NullUninit
   NullUninit
     String "thrower"
-  FCallFuncD <> 1 1 "" - "" "set_error_handler"
+  FCallFuncD <> 1 1 "" "" - "" "set_error_handler"
   PopC
 
   # If get_undefined_var is inlined then the context passed to handler will
@@ -211,13 +211,13 @@
   NullUninit
   NullUninit
     CnsE "DEBUG_BACKTRACE_IGNORE_ARGS"
-  FCallClsMethodD <> 1 1 "" - "" "" "Exception" "setTraceOptions"
+  FCallClsMethodD <> 1 1 "" "" - "" "" "Exception" "setTraceOptions"
   PopC
 
   .try {
     NullUninit
     NullUninit
-    FCallFuncD <> 0 1 "" - "" "test_unwind_dirty_stack_regs"
+    FCallFuncD <> 0 1 "" "" - "" "test_unwind_dirty_stack_regs"
     RetC
   } .catch {
     SetL _1
@@ -225,7 +225,7 @@
     String "Received exception:  "
     PushL _1
     NullUninit
-    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "getMessage"
+    FCallObjMethodD <> 0 1 "" "" - "" "" NullThrows "getMessage"
     Concat
     String "\n"
     Concat

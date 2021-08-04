@@ -371,6 +371,12 @@ void populate_block(ParseUnitState& puState,
                          if (inoutArgs) {                                    \
                            memcpy(inoutArgs.get(), fca.inoutArgs, numBytes); \
                          }                                                   \
+                         auto readonlyArgs = fca.enforceReadonly()           \
+                           ? std::make_unique<uint8_t[]>(numBytes)           \
+                           : nullptr;                                        \
+                         if (readonlyArgs) {                                 \
+                           memcpy(readonlyArgs.get(), fca.readonlyArgs, numBytes); \
+                         }                                                   \
                          auto const aeOffset = fca.asyncEagerOffset;         \
                          auto const aeTarget = aeOffset != kInvalidOffset    \
                            ? findBlock(opPC + aeOffset - fe.bc())            \
@@ -378,6 +384,7 @@ void populate_block(ParseUnitState& puState,
                          assertx(aeTarget == NoBlockId || next == past);     \
                          return FCallArgs(fca.flags, fca.numArgs,            \
                                           fca.numRets, std::move(inoutArgs), \
+                                          std::move(readonlyArgs),           \
                                           aeTarget, fca.context);            \
                        }();
 

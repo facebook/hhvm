@@ -9,7 +9,7 @@
   AssertRATStk 3 Cell
 target_label:
   Int 42
-  FCallFuncD <> 1 1 "" - "" "var_dump"
+  FCallFuncD <> 1 1 "" "" - "" "var_dump"
   PopC
   PopC
   Int 1

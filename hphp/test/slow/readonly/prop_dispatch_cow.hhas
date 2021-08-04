@@ -8,7 +8,7 @@
   NewObjD "Bar"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   .srcloc 16:3,16:16;
@@ -19,7 +19,7 @@
   NewObjD "Foo"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   BaseL $a Define
@@ -31,7 +31,7 @@
   NewObjD "Foo"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   BaseL $a Define
@@ -75,9 +75,9 @@
     CGetL $e
     NullUninit
     .srcloc 23:14,23:29;
-    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "getMessage"
+    FCallObjMethodD <> 0 1 "" "" - "" "" NullThrows "getMessage"
     .srcloc 23:5,23:30;
-    FCallFuncD <> 1 1 "0" - "" "var_dump"
+    FCallFuncD <> 1 1 "0" "" - "" "var_dump"
     PopC
     .srcloc 20:3,24:109;
     Jmp L0

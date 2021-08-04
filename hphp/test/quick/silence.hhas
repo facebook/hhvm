@@ -12,7 +12,7 @@
   NullUninit
   Int 3
   Int 2
-  FCallFuncD <> 2 1 "" - "" "add"
+  FCallFuncD <> 2 1 "" "" - "" "add"
   Silence $z Start
   SetL $z
   Silence $z End
@@ -36,7 +36,7 @@
   NullUninit
   NullUninit
   Int 1
-  FCallFuncD <> 1 1 "" - "" "var_dump"
+  FCallFuncD <> 1 1 "" "" - "" "var_dump"
   PopC
   Jmp L1
 L0:
@@ -46,7 +46,7 @@ L0:
   NullUninit
   NullUninit
   Int 2
-  FCallFuncD <> 1 1 "" - "" "var_dump"
+  FCallFuncD <> 1 1 "" "" - "" "var_dump"
   PopC
 L1:
   Silence _1 End

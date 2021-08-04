@@ -449,7 +449,15 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
                          [&] {                                          \
                            data.fca.applyIO(                            \
                              [&] (int numBytes, const uint8_t* inOut) { \
-                               encodeFCallArgsIO(fe, numBytes, inOut);  \
+                               encodeFCallArgsBoolVec(fe, numBytes, inOut); \
+                             }                                          \
+                           );                                           \
+                         },                                             \
+                         data.fca.enforceReadonly(),                    \
+                         [&] {                                          \
+                           data.fca.applyReadonly(                     \
+                             [&] (int numBytes, const uint8_t* readonly) { \
+                               encodeFCallArgsBoolVec(fe, numBytes, readonly); \
                              }                                          \
                            );                                           \
                          },                                             \

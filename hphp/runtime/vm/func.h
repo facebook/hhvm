@@ -543,6 +543,11 @@ public:
   uint64_t inOutBits() const;
 
   /*
+   * Whether the arg-th parameter was declared readonly.
+   */
+  bool isReadonly(int32_t arg) const;
+
+  /*
    * Whether any of the parameters to this function are inout parameters.
    */
   bool takesInOutParams() const;

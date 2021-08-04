@@ -27,14 +27,14 @@ L4:
   String "a"
   String "b"
   String "c"
-  FCallFuncD <> 3 1 "" - "" "test"
+  FCallFuncD <> 3 1 "" "" - "" "test"
   NullUninit
   NullUninit
   Null
   String "b"
   String "c"
-  FCallFuncD <> 3 1 "" - "" "test"
-  FCallFuncD <> 2 1 "" - "" "var_dump"
+  FCallFuncD <> 3 1 "" "" - "" "test"
+  FCallFuncD <> 2 1 "" "" - "" "var_dump"
   PopC
   Int 1
   RetC

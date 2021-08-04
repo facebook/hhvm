@@ -6,7 +6,7 @@
   NewObjD "heh"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   SetL $x
@@ -25,8 +25,8 @@
   NullUninit
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "" "foo"
-  FCallFuncD <> 1 1 "" - "" "HH\\Asio\\join"
+  FCallFuncD <> 0 1 "" "" - "" "foo"
+  FCallFuncD <> 1 1 "" "" - "" "HH\\Asio\\join"
   PopC
   Null
   RetC

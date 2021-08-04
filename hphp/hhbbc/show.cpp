@@ -188,7 +188,8 @@ std::string show(const Func& func, const Bytecode& bc) {
     ? folly::sformat("<aeblk:{}>", data.fca.asyncEagerTarget())    \
     : "-";                                                         \
   folly::toAppend(                                                 \
-    " ", show(data.fca.base(), data.fca.inoutArgs(), aeTarget,     \
+    " ", show(data.fca.base(), data.fca.inoutArgs(),               \
+              data.fca.readonlyArgs(), aeTarget,                   \
               data.fca.context()), &ret);                          \
 } while (false);
 

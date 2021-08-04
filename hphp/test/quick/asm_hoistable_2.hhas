@@ -22,7 +22,7 @@
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
   NullUninit
-  FCallClsMethodD <> 0 1 "" - "" "" "B" "print"
+  FCallClsMethodD <> 0 1 "" "" - "" "" "B" "print"
   PopC
 
   Int 1

@@ -37,13 +37,13 @@ fail:
 .function case_three() {
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "" "get_three"
+  FCallFuncD <> 0 1 "" "" - "" "get_three"
   SetL $foo
   PopC
   NullUninit
   NullUninit
   CGetL $foo
-  FCallFuncD <> 1 1 "" - "" "sswitch_on"
+  FCallFuncD <> 1 1 "" "" - "" "sswitch_on"
   RetC
 }
 
@@ -51,18 +51,18 @@ fail:
   NullUninit
   NullUninit
   String "kujhasekguheku"
-  FCallFuncD <> 1 1 "" - "" "sswitch_on"
+  FCallFuncD <> 1 1 "" "" - "" "sswitch_on"
   RetC
 }
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "" "case_three"
+  FCallFuncD <> 0 1 "" "" - "" "case_three"
   PopC
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "" "case_default"
+  FCallFuncD <> 0 1 "" "" - "" "case_default"
   PopC
 
   String "Done\n"

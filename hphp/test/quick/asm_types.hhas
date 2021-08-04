@@ -38,55 +38,55 @@
   NewObjD "C"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
-  FCallFuncD <> 1 1 "" - "" "use_class"
+  FCallFuncD <> 1 1 "" "" - "" "use_class"
   PopC
   NullUninit
   NullUninit
   Null
-  FCallFuncD <> 1 1 "" - "" "use_class"
+  FCallFuncD <> 1 1 "" "" - "" "use_class"
   PopC
   NullUninit
   NullUninit
   Int 5
-  FCallFuncD <> 1 1 "" - "" "use_int_soft"
+  FCallFuncD <> 1 1 "" "" - "" "use_int_soft"
   PopC
   NullUninit
   NullUninit
   Dict @A_0
-  FCallFuncD <> 1 1 "" - "" "use_int_soft"
+  FCallFuncD <> 1 1 "" "" - "" "use_int_soft"
   PopC
   NullUninit
   NullUninit
   Null
-  FCallFuncD <> 1 1 "" - "" "use_int_soft"
+  FCallFuncD <> 1 1 "" "" - "" "use_int_soft"
   PopC
   NullUninit
   NullUninit
   Int 6
-  FCallFuncD <> 1 1 "" - "" "use_int_nullable"
+  FCallFuncD <> 1 1 "" "" - "" "use_int_nullable"
   PopC
   NullUninit
   NullUninit
   Null
-  FCallFuncD <> 1 1 "" - "" "use_int_nullable"
+  FCallFuncD <> 1 1 "" "" - "" "use_int_nullable"
   PopC
   NullUninit
   NullUninit
   Int 5
-  FCallFuncD <> 1 1 "" - "" "use_int"
+  FCallFuncD <> 1 1 "" "" - "" "use_int"
   PopC
   NullUninit
   NullUninit
   Dict @A_0
-  FCallFuncD <> 1 1 "" - "" "use_mixed"
+  FCallFuncD <> 1 1 "" "" - "" "use_mixed"
   PopC
   NullUninit
   NullUninit
   Dict @A_0
-  FCallFuncD <> 1 1 "" - "" "use_int"
+  FCallFuncD <> 1 1 "" "" - "" "use_int"
   PopC
 
   Null

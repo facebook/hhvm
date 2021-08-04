@@ -9,7 +9,7 @@
   NullUninit
   NullUninit
   CGetL $arr
-  FCallFuncD <> 1 1 "" - "" "var_dump"
+  FCallFuncD <> 1 1 "" "" - "" "var_dump"
   PopC
 
   Int 1

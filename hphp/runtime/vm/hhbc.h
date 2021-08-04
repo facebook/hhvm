@@ -89,9 +89,11 @@ struct IterArgs {
 };
 
 // Arguments to FCall opcodes.
-// hhas format: <flags> <numArgs> <numRets> <inoutArgs> <asyncEagerOffset>
+// hhas format: <flags> <numArgs> <numRets> <inoutArgs> <readonlyArgs>
+//              <asyncEagerOffset>
 // hhbc format: <uint8:flags> ?<iva:numArgs> ?<iva:numRets>
-//              ?<boolvec:inoutArgs> ?<ba:asyncEagerOffset>
+//              ?<boolvec:inoutArgs> ?<boolvec:readonlyArgs>
+//              ?<ba:asyncEagerOffset>
 //   flags            = flags (hhas doesn't have HHBC-only flags)
 //   numArgs          = flags >> kFirstNumArgsBit
 //                        ? flags >> kFirstNumArgsBit - 1 : decode_iva()
@@ -116,17 +118,19 @@ struct FCallArgsBase {
     HasInOut                 = (1 << 5),
     // HHBC-only: should this FCall enforce argument inout-ness?
     EnforceInOut             = (1 << 6),
+    // HHBC-only: should this FCall enforce argument readonly-ness?
+    EnforceReadonly          = (1 << 7),
     // HHBC-only: is the async eager offset provided? false => kInvalidOffset
-    HasAsyncEagerOffset      = (1 << 7),
+    HasAsyncEagerOffset      = (1 << 8),
     // HHBC-only: the remaining space is used for number of arguments
-    NumArgsStart             = (1 << 8),
+    NumArgsStart             = (1 << 9),
   };
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
   static constexpr uint8_t kInternalFlags =
     HasUnpack | HasGenerics | LockWhileUnwinding | SkipRepack;
   // The first (lowest) bit of numArgs.
-  static constexpr uint8_t kFirstNumArgsBit = 8;
+  static constexpr uint8_t kFirstNumArgsBit = 9;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
     : numArgs(numArgs)
@@ -149,11 +153,12 @@ struct FCallArgsBase {
 
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
-                     const uint8_t* inoutArgs, Offset asyncEagerOffset,
-                     const StringData* context)
+                     const uint8_t* inoutArgs, const uint8_t* readonlyArgs,
+                     Offset asyncEagerOffset, const StringData* context)
     : FCallArgsBase(flags, numArgs, numRets)
     , asyncEagerOffset(asyncEagerOffset)
     , inoutArgs(inoutArgs)
+    , readonlyArgs(readonlyArgs)
     , context(context) {
     assertx(IMPLIES(inoutArgs != nullptr, numArgs != 0));
   }
@@ -162,14 +167,20 @@ struct FCallArgs : FCallArgsBase {
     assertx(enforceInOut());
     return inoutArgs[i / 8] & (1 << (i % 8));
   }
+  bool enforceReadonly() const { return readonlyArgs != nullptr; }
+  bool isReadonly(uint32_t i) const {
+    assertx(enforceReadonly());
+    return readonlyArgs[i / 8] & (1 << (i % 8));
+  }
   FCallArgs withGenerics() const {
     assertx(!hasGenerics());
     return FCallArgs(
       static_cast<Flags>(flags | Flags::HasGenerics),
-      numArgs, numRets, inoutArgs, asyncEagerOffset, context);
+      numArgs, numRets, inoutArgs, readonlyArgs, asyncEagerOffset, context);
   }
   Offset asyncEagerOffset;
   const uint8_t* inoutArgs;
+  const uint8_t* readonlyArgs;
   const StringData* context;
 };
 
@@ -179,8 +190,9 @@ using PrintLocal = std::function<std::string(int32_t local)>;
 std::string show(const IterArgs&, PrintLocal);
 
 std::string show(const LocalRange&);
-std::string show(uint32_t numArgs, const uint8_t* inoutArgs);
+std::string show(uint32_t numArgs, const uint8_t* boolVecArgs);
 std::string show(const FCallArgsBase&, const uint8_t* inoutArgs,
+                 const uint8_t* readonlyArgs,
                  std::string asyncEagerLabel, const StringData* ctx);
 
 /*

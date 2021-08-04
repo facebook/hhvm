@@ -8,7 +8,7 @@
     AssertRATL $x Int
   target_label:
     Int 42
-    FCallFuncD <> 1 1 "" - "" "var_dump"
+    FCallFuncD <> 1 1 "" "" - "" "var_dump"
     RetC
 }
 
@@ -16,7 +16,7 @@
   NullUninit
   NullUninit
   Int 9
-  FCallFuncD <> 1 1 "" - "" "foo"
+  FCallFuncD <> 1 1 "" "" - "" "foo"
   PopC
   Int 1
   RetC

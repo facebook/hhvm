@@ -3,13 +3,13 @@
   Dup
   NullUninit
   String "foo"
-  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" "" - "" ""
   PopC
   LockObj
   Throw
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "" "bar"
+  FCallFuncD <> 0 1 "" "" - "" "bar"
   PopC
   Int 1
   RetC 

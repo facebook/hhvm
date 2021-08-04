@@ -16,7 +16,7 @@
   NullUninit
   NullUninit
   Vec @A_0
-  FCallFuncD <Generics> 0 1 "" - "" "f"
+  FCallFuncD <Generics> 0 1 "" "" - "" "f"
   PopC
   Int 1
   RetC

@@ -30,7 +30,7 @@
   NewObjD "Foo"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   SetL $object
@@ -41,16 +41,16 @@
    NewObjD "Foo"
    Dup
    NullUninit
-   FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+   FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
    PopC
    LockObj
-  FCallObjMethodD <> 1 1 "" - "" "" NullThrows "main"
+  FCallObjMethodD <> 1 1 "" "" - "" "" NullThrows "main"
   PopC
 
   CGetL $object
   NullUninit
    Null
-  FCallObjMethodD <> 1 1 "" - "" "" NullThrows "main"
+  FCallObjMethodD <> 1 1 "" "" - "" "" NullThrows "main"
   PopC
 
   Int 1

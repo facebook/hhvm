@@ -392,6 +392,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     callee->numNonVariadicParams(),
     fca.numRets,
     nullptr,  // inout-ness already checked
+    nullptr,  // readonly-ness already checked
     fca.asyncEagerOffset,
     fca.context
   ), true /* skipRepack */);
@@ -1752,7 +1753,7 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
   }
 
   auto const fca = FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr,
-                             kInvalidOffset, nullptr);
+                             nullptr, kInvalidOffset, nullptr);
   prepareAndCallKnown(env, callee, fca, nullptr, false, false);
 }
 

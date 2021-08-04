@@ -18,12 +18,12 @@
   NullUninit
   NullUninit
   ClsCnsD "FOO" "Foo"
-  FCallFuncD <> 1 1 "" - "" "test"
+  FCallFuncD <> 1 1 "" "" - "" "test"
   PopC
   NullUninit
   NullUninit
   String "hi"
-  FCallFuncD <> 1 1 "" - "" "test"
+  FCallFuncD <> 1 1 "" "" - "" "test"
   PopC
   Int 1
   RetC

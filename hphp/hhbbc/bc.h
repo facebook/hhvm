@@ -143,27 +143,35 @@ inline bool operator!=(const LocalRange& a, const LocalRange& b) {
 
 struct FCallArgsLong : FCallArgsBase {
   explicit FCallArgsLong(uint32_t numArgs)
-    : FCallArgsLong(Flags::None, numArgs, 1, nullptr, NoBlockId, nullptr) {
+    : FCallArgsLong(Flags::None, numArgs, 1, nullptr, nullptr, NoBlockId, nullptr) {
   }
   explicit FCallArgsLong(Flags flags, uint32_t numArgs, uint32_t numRets,
                          std::unique_ptr<uint8_t[]> inoutArgs,
+                         std::unique_ptr<uint8_t[]> readonlyArgs,
                          BlockId asyncEagerTarget, LSString context)
     : FCallArgsBase(flags, numArgs, numRets)
     , inoutArgs(std::move(inoutArgs))
+    , readonlyArgs(std::move(readonlyArgs))
     , asyncEagerTarget(asyncEagerTarget)
     , context(context) {
   }
   FCallArgsLong(const FCallArgsLong& o)
-    : FCallArgsLong(o.flags, o.numArgs, o.numRets, nullptr, o.asyncEagerTarget,
-                    o.context) {
+    : FCallArgsLong(o.flags, o.numArgs, o.numRets, nullptr, nullptr,
+                    o.asyncEagerTarget, o.context) {
     if (o.inoutArgs) {
       auto const numBytes = (numArgs + 7) / 8;
       inoutArgs = std::make_unique<uint8_t[]>(numBytes);
       memcpy(inoutArgs.get(), o.inoutArgs.get(), numBytes);
     }
+    if (o.readonlyArgs) {
+      auto const numBytes = (numArgs + 7) / 8;
+      readonlyArgs = std::make_unique<uint8_t[]>(numBytes);
+      memcpy(readonlyArgs.get(), o.readonlyArgs.get(), numBytes);
+    }
   }
   FCallArgsLong(FCallArgsLong&& o)
     : FCallArgsLong(o.flags, o.numArgs, o.numRets, std::move(o.inoutArgs),
+                    std::move(o.readonlyArgs),
                     o.asyncEagerTarget, o.context) {}
 
   bool enforceInOut() const { return inoutArgs.get() != nullptr; }
@@ -171,6 +179,7 @@ struct FCallArgsLong : FCallArgsBase {
     assertx(enforceInOut());
     return inoutArgs[i / 8] & (1 << (i % 8));
   }
+  bool enforceReadonly() const { return readonlyArgs.get() != nullptr; }
 
   FCallArgsLong withoutGenerics() const {
     auto fca = *this;
@@ -204,6 +213,10 @@ struct FCallArgsLong : FCallArgsBase {
   void applyIO(F f) const {
     f((numArgs + 7) / 8, inoutArgs.get());
   }
+  template<typename F>
+  void applyReadonly(F f) const {
+    f((numArgs + 7) / 8, readonlyArgs.get());
+  }
   friend bool operator==(const FCallArgsLong& a, const FCallArgsLong& b) {
     auto const eq = [&] (uint8_t* a, uint8_t* b, uint32_t bytes) {
       if (a == nullptr && b == nullptr) return true;
@@ -214,6 +227,7 @@ struct FCallArgsLong : FCallArgsBase {
     return
       a.flags == b.flags && a.numArgs == b.numArgs && a.numRets == b.numRets &&
       eq(a.inoutArgs.get(), b.inoutArgs.get(), (a.numArgs + 7) / 8) &&
+      eq(a.readonlyArgs.get(), b.readonlyArgs.get(), (a.numArgs + 7) / 8) &&
       a.asyncEagerTarget == b.asyncEagerTarget &&
       a.context == b.context;
   }
@@ -222,6 +236,10 @@ struct FCallArgsLong : FCallArgsBase {
     uint64_t hash = HPHP::hash_int64_pair(numArgs, numRets);
     hash = HPHP::hash_int64_pair(hash, flags);
     if (auto const br = reinterpret_cast<const char*>(inoutArgs.get())) {
+      auto const hash_br = hash_string_cs(br, (numArgs + 7) / 8);
+      hash = HPHP::hash_int64_pair(hash, hash_br);
+    }
+    if (auto const br = reinterpret_cast<const char*>(readonlyArgs.get())) {
       auto const hash_br = hash_string_cs(br, (numArgs + 7) / 8);
       hash = HPHP::hash_int64_pair(hash, hash_br);
     }
@@ -254,6 +272,7 @@ struct FCallArgsLong : FCallArgsBase {
   FCallArgsBase base() const { return *this; }
 
   std::unique_ptr<uint8_t[]> inoutArgs;
+  std::unique_ptr<uint8_t[]> readonlyArgs;
   BlockId asyncEagerTarget;
   LSString context;
 };
@@ -261,13 +280,16 @@ struct FCallArgsLong : FCallArgsBase {
 struct FCallArgs {
   using Flags = FCallArgsBase::Flags;
   explicit FCallArgs(uint32_t numArgs)
-    : FCallArgs(Flags::None, numArgs, 1, nullptr, NoBlockId, nullptr) {}
+    : FCallArgs(Flags::None, numArgs, 1, nullptr, nullptr, NoBlockId, nullptr) {}
   FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
-            std::unique_ptr<uint8_t[]> inoutArgs, BlockId asyncEagerTarget,
+            std::unique_ptr<uint8_t[]> inoutArgs,
+            std::unique_ptr<uint8_t[]> readonlyArgs,
+            BlockId asyncEagerTarget,
             LSString context) {
     raw = 0;
-    l.emplace(flags, numArgs, numRets, std::move(inoutArgs), asyncEagerTarget,
-              context);
+    l.emplace(flags, numArgs, numRets,
+              std::move(inoutArgs), std::move(readonlyArgs),
+              asyncEagerTarget, context);
   }
   FCallArgs(const FCallArgsLong& o) : l{o} {}
   FCallArgs(const FCallArgs& o) : l{} {
@@ -299,6 +321,9 @@ struct FCallArgs {
   bool isInOut(uint32_t i) const {
     assertx(enforceInOut());
     return l->isInOut(i);
+  }
+  bool enforceReadonly() const {
+    return l->enforceReadonly();
   }
 
   FCallArgs withoutGenerics() const {
@@ -346,6 +371,15 @@ struct FCallArgs {
   void applyIO(F f) const {
     assertx(enforceInOut());
     l->applyIO(f);
+  }
+
+  const uint8_t* readonlyArgs() const {
+    return l->readonlyArgs.get();
+  }
+  template<typename F>
+  void applyReadonly(F f) const {
+    assertx(enforceReadonly());
+    l->applyReadonly(f);
   }
 
   BlockId asyncEagerTarget() const {

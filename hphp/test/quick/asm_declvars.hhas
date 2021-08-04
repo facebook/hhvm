@@ -32,7 +32,7 @@
   NullUninit
   NullUninit
   Int 12
-  FCallFuncD <> 1 1 "" - "" "foo"
+  FCallFuncD <> 1 1 "" "" - "" "foo"
   PopC
   Null
   RetC

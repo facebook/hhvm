@@ -318,7 +318,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     auto const aeLabel = fca.asyncEagerOffset != kInvalidOffset
       ? rel_label(fca.asyncEagerOffset)
       : "-";
-    return show(fca, fca.inoutArgs, aeLabel, fca.context);
+    return show(fca, fca.inoutArgs, fca.readonlyArgs, aeLabel, fca.context);
   };
 
 #define IMM_BLA    print_switch();

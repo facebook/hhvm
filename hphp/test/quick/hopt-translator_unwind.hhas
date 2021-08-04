@@ -6,7 +6,7 @@
   Dup
   NullUninit
     String "hi"
-  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" "" - "" ""
   PopC
   LockObj
   Throw
@@ -39,7 +39,7 @@
   Dup
   NullUninit
     CGetL $id
-  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" "" - "" ""
   PopC
   LockObj
   RetC
@@ -64,19 +64,19 @@
   NullUninit
   NullUninit
     Int 0
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_0
   PopC
   NullUninit
   NullUninit
     Int 1
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_1
   PopC
   NullUninit
   NullUninit
     Int 2
-  FCallFuncD <> 1 1 "" - "" "make_obj"
+  FCallFuncD <> 1 1 "" "" - "" "make_obj"
   SetL $k_2
   PopC
 
@@ -85,7 +85,7 @@
   CGetL $k_2
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "" "get_undefined_var"
+  FCallFuncD <> 0 1 "" "" - "" "get_undefined_var"
   PopC
 
   # This code isn't reached---but let's Pop this junk just so
@@ -102,7 +102,7 @@
   NullUninit
   NullUninit
     String "thrower"
-  FCallFuncD <> 1 1 "" - "" "set_error_handler"
+  FCallFuncD <> 1 1 "" "" - "" "set_error_handler"
   PopC
 
   # If get_undefined_var is inlined then the context passed to handler will
@@ -113,13 +113,13 @@
   NullUninit
   NullUninit
     CnsE "DEBUG_BACKTRACE_IGNORE_ARGS"
-  FCallClsMethodD <> 1 1 "" - "" "" "Exception" "setTraceOptions"
+  FCallClsMethodD <> 1 1 "" "" - "" "" "Exception" "setTraceOptions"
   PopC
 
   .try {
     NullUninit
     NullUninit
-    FCallFuncD <> 0 1 "" - "" "test_unwind_dirty_stack_regs"
+    FCallFuncD <> 0 1 "" "" - "" "test_unwind_dirty_stack_regs"
     RetC
   } .catch {
     SetL _1
@@ -127,7 +127,7 @@
     String "Received exception:  "
     PushL _1
     NullUninit
-    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "getMessage"
+    FCallObjMethodD <> 0 1 "" "" - "" "" NullThrows "getMessage"
     Concat
     String "\n"
     Concat

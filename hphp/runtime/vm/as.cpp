@@ -1355,7 +1355,8 @@ FCallArgs::Flags read_fcall_flags(AsmState& as, Op thisOpcode) {
 }
 
 // Read a vector of booleans formatted as a quoted string of '0' and '1'.
-std::unique_ptr<uint8_t[]> read_inouts(AsmState& as, uint32_t numArgs) {
+std::unique_ptr<uint8_t[]> read_arg_modifiers(AsmState& as, const char* type,
+                                              uint32_t numArgs) {
   as.in.skipSpaceTab();
   std::string strVal;
   if (!as.in.readQuotedStr(strVal)) {
@@ -1364,7 +1365,8 @@ std::unique_ptr<uint8_t[]> read_inouts(AsmState& as, uint32_t numArgs) {
 
   if (strVal.empty()) return nullptr;
   if (strVal.length() != numArgs) {
-    as.error("inout-ness vector must be either empty or match number of args");
+    as.error("%s-ness vector must be either empty or match number of args",
+             type);
   }
 
   auto result = std::make_unique<uint8_t[]>((numArgs + 7) / 8);
@@ -1386,18 +1388,21 @@ const StringData* read_fca_context(AsmState& as) {
   return !strVal.empty() ? makeStaticString(strVal) : nullptr;
 }
 
-std::tuple<FCallArgsBase, std::unique_ptr<uint8_t[]>, std::string,
+std::tuple<FCallArgsBase, std::unique_ptr<uint8_t[]>,
+           std::unique_ptr<uint8_t[]>, std::string,
            const StringData*>
 read_fcall_args(AsmState& as, Op thisOpcode) {
   auto const flags = read_fcall_flags(as, thisOpcode);
   auto const numArgs = read_opcode_arg<uint32_t>(as);
   auto const numRets = read_opcode_arg<uint32_t>(as);
-  auto inoutArgs = read_inouts(as, numArgs);
+  auto inoutArgs = read_arg_modifiers(as, "inout", numArgs);
+  auto readonlyArgs = read_arg_modifiers(as, "readonly", numArgs);
   auto asyncEagerLabel = read_opcode_arg<std::string>(as);
   auto const ctx = read_fca_context(as);
   return std::make_tuple(
     FCallArgsBase(flags, numArgs, numRets),
     std::move(inoutArgs),
+    std::move(readonlyArgs),
     std::move(asyncEagerLabel),
     ctx
   );
@@ -1457,20 +1462,26 @@ std::map<std::string,ParserFunc> opcode_parsers;
     auto const fca = read_fcall_args(as, thisOpcode);                   \
     auto const& fcab = std::get<0>(fca);                                \
     auto const io = std::get<1>(fca).get();                             \
+    auto const readonly = std::get<2>(fca).get();                       \
+    auto const label = std::get<3>(fca);                                \
+    auto const sd = std::get<4>(fca);                                   \
     encodeFCallArgs(                                                    \
       *as.fe, fcab,                                                     \
       io != nullptr,                                                    \
       [&] {                                                             \
-        encodeFCallArgsIO(*as.fe, (fcab.numArgs+7)/8, io);              \
+        encodeFCallArgsBoolVec(*as.fe, (fcab.numArgs+7)/8, io);         \
       },                                                                \
-      std::get<2>(fca) != "-",                                          \
+      readonly != nullptr,                                              \
       [&] {                                                             \
-        labelJumps.emplace_back(std::get<2>(fca), as.fe->bcPos());      \
+        encodeFCallArgsBoolVec(*as.fe, (fcab.numArgs+7)/8, readonly);   \
+      },                                                                \
+      label != "-",                                                     \
+      [&] {                                                             \
+        labelJumps.emplace_back(label, as.fe->bcPos());                 \
         as.fe->emitInt32(0);                                            \
       },                                                                \
-      std::get<3>(fca) != nullptr,                                      \
+      sd != nullptr,                                                    \
       [&] {                                                             \
-        auto const sd = std::get<3>(fca);                               \
         auto const id = as.ue->mergeLitstr(sd);                         \
         as.litstrMap.emplace(id, sd);                                   \
         as.fe->emitInt32(id);                                           \

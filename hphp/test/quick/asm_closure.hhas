@@ -18,7 +18,7 @@
   CUGetL $x
   CreateCl 1 0
 
-  FCallFunc <> 0 1 "" - ""
+  FCallFunc <> 0 1 "" "" - ""
   Print
   PopC
 

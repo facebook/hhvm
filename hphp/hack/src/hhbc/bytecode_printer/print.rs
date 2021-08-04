@@ -1137,6 +1137,8 @@ fn print_fcall_args<W: Write>(
         concat_by(w, "", inouts, |w, i| w.write(if *i { "1" } else { "0" }))
     })?;
     w.write(" ")?;
+    w.write("\"\"")?; // TODO: replace with readonly
+    w.write(" ")?;
     option_or(w, async_eager_label.as_ref(), print_label, "-")?;
     w.write(" ")?;
     match context {

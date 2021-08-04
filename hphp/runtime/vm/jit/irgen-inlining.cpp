@@ -408,7 +408,7 @@ void conjureBeginInlining(IRGS& env,
   beginInlining(
     env,
     func,
-    FCallArgs(flags, numParams, 1, nullptr, kInvalidOffset, nullptr),
+    FCallArgs(flags, numParams, 1, nullptr, nullptr, kInvalidOffset, nullptr),
     ctx,
     false,
     env.context.initSrcKey.op(),

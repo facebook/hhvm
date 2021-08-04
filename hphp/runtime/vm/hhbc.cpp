@@ -806,7 +806,7 @@ std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f) {
     ? showOffset(fca.asyncEagerOffset)                           \
     : "-";                                                       \
   out += ' ';                                                    \
-  out += show(fca, fca.inoutArgs, aeOffset, fca.context);        \
+  out += show(fca, fca.inoutArgs, fca.readonlyArgs, aeOffset, fca.context); \
 } while (false)
 
 #define O(name, imm, push, pop, flags)       \
@@ -1156,18 +1156,19 @@ std::string show(const LocalRange& range) {
   );
 }
 
-std::string show(uint32_t numArgs, const uint8_t* inoutArgs) {
-  if (!inoutArgs) return "";
+std::string show(uint32_t numArgs, const uint8_t* boolVecArgs) {
+  if (!boolVecArgs) return "";
   std::string out = "";
   uint8_t tmp = 0;
   for (auto i = 0; i < numArgs; ++i) {
-    if (i % 8 == 0) tmp = *(inoutArgs++);
+    if (i % 8 == 0) tmp = *(boolVecArgs++);
     out += ((tmp >> (i % 8)) & 1) ? "1" : "0";
   }
   return out;
 }
 
 std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgs,
+                 const uint8_t* readonlyArgs,
                  std::string asyncEagerLabel, const StringData* ctx) {
   std::vector<std::string> flags;
   if (fca.hasUnpack()) flags.push_back("Unpack");
@@ -1175,9 +1176,11 @@ std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgs,
   if (fca.lockWhileUnwinding()) flags.push_back("LockWhileUnwinding");
   if (fca.skipRepack()) flags.push_back("SkipRepack");
   return folly::sformat(
-    "<{}> {} {} \"{}\" {} \"{}\"",
+    "<{}> {} {} \"{}\" \"{}\" {} \"{}\"",
     folly::join(' ', flags), fca.numArgs, fca.numRets,
-    show(fca.numArgs, inoutArgs), asyncEagerLabel, ctx ? ctx->data() : ""
+    show(fca.numArgs, inoutArgs),
+    show(fca.numArgs, readonlyArgs),
+    asyncEagerLabel, ctx ? ctx->data() : ""
   );
 }
 

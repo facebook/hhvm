@@ -59,28 +59,28 @@
   NullUninit
   NullUninit
   String "sup: "
-  FCallFuncD <> 1 1 "" - "" "foo"
+  FCallFuncD <> 1 1 "" "" - "" "foo"
   PopC
   NullUninit
   NullUninit
   String "sup: "
   String " non-default y value\n"
-  FCallFuncD <> 2 1 "" - "" "foo"
+  FCallFuncD <> 2 1 "" "" - "" "foo"
   PopC
   NullUninit
   NullUninit
-  FCallFuncD <> 0 1 "" - "" "multiple"
+  FCallFuncD <> 0 1 "" "" - "" "multiple"
   PopC
   NullUninit
   NullUninit
   String "nondef\n"
-  FCallFuncD <> 1 1 "" - "" "multiple"
+  FCallFuncD <> 1 1 "" "" - "" "multiple"
   PopC
   NullUninit
   NullUninit
   String "nondef1\n"
   String "nondef2\n"
-  FCallFuncD <> 2 1 "" - "" "multiple"
+  FCallFuncD <> 2 1 "" "" - "" "multiple"
   PopC
 
   String "done\n"

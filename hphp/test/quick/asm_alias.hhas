@@ -37,18 +37,18 @@
   NullUninit
   NullUninit
   Int 0
-  FCallFuncD <> 1 1 "" - "" "foo"
+  FCallFuncD <> 1 1 "" "" - "" "foo"
   PopC
   NullUninit
   NullUninit
   String "hi"
-  FCallFuncD <> 1 1 "" - "" "foo"
+  FCallFuncD <> 1 1 "" "" - "" "foo"
   PopC
 
   NewObjD "C"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   SetL $x
@@ -56,47 +56,47 @@
   NullUninit
   NullUninit
   CGetL $x
-  FCallFuncD <> 1 1 "" - "" "bar"
+  FCallFuncD <> 1 1 "" "" - "" "bar"
   PopC
   NullUninit
   NullUninit
   String "hi"
-  FCallFuncD <> 1 1 "" - "" "bar"
+  FCallFuncD <> 1 1 "" "" - "" "bar"
   PopC
   NullUninit
   NullUninit
   Null
-  FCallFuncD <> 1 1 "" - "" "bar"
+  FCallFuncD <> 1 1 "" "" - "" "bar"
   PopC
   NullUninit
   NullUninit
   CGetL $x
-  FCallFuncD <> 1 1 "" - "" "baz"
+  FCallFuncD <> 1 1 "" "" - "" "baz"
   PopC
   NullUninit
   NullUninit
   String "hi"
-  FCallFuncD <> 1 1 "" - "" "baz"
+  FCallFuncD <> 1 1 "" "" - "" "baz"
   PopC
   NullUninit
   NullUninit
   Null
-  FCallFuncD <> 1 1 "" - "" "baz"
+  FCallFuncD <> 1 1 "" "" - "" "baz"
   PopC
   NullUninit
   NullUninit
   CGetL $x
-  FCallFuncD <> 1 1 "" - "" "quux"
+  FCallFuncD <> 1 1 "" "" - "" "quux"
   PopC
   NullUninit
   NullUninit
   String "hi"
-  FCallFuncD <> 1 1 "" - "" "quux"
+  FCallFuncD <> 1 1 "" "" - "" "quux"
   PopC
   NullUninit
   NullUninit
   Null
-  FCallFuncD <> 1 1 "" - "" "quux"
+  FCallFuncD <> 1 1 "" "" - "" "quux"
   PopC
 
   Int 1

@@ -188,19 +188,22 @@ IterArgs decodeIterArgs(const unsigned char*&);
 //////////////////////////////////////////////////////////////////////
 
 void encodeFCallArgsBase(FuncEmitter&, const FCallArgsBase&,
-                         bool hasInoutArgs, bool hasAsyncEagerOffset,
-                         bool hasContext);
-void encodeFCallArgsIO(FuncEmitter&, int numBytes, const uint8_t* inoutArgs);
+                         bool hasInoutArgs, bool hasReadonlyArgs,
+                         bool hasAsyncEagerOffset, bool hasContext);
+void encodeFCallArgsBoolVec(FuncEmitter&, int numBytes, const uint8_t*);
 
 FCallArgs decodeFCallArgs(Op, PC&, StringDecoder);
 
-template<typename T, typename IO, typename CTX>
+template<typename T, typename IO, typename RO, typename CTX>
 void encodeFCallArgs(FuncEmitter& fe, const FCallArgsBase& fca,
                      bool hasInoutArgs, IO emitInoutArgs,
+                     bool hasReadonlyArgs, RO emitReadonlyArgs,
                      bool hasAsyncEagerOffset, T emitAsyncEagerOffset,
                      bool hasContext, CTX emitContext) {
-  encodeFCallArgsBase(fe, fca, hasInoutArgs, hasAsyncEagerOffset, hasContext);
+  encodeFCallArgsBase(fe, fca, hasInoutArgs, hasReadonlyArgs,
+                      hasAsyncEagerOffset, hasContext);
   if (hasInoutArgs) emitInoutArgs();
+  if (hasReadonlyArgs) emitReadonlyArgs();
   if (hasAsyncEagerOffset) emitAsyncEagerOffset();
   if (hasContext) emitContext();
 }

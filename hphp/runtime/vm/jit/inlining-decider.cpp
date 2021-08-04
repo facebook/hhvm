@@ -166,6 +166,14 @@ bool checkNumArgs(SrcKey callSK,
     }
   }
 
+  if (fca.enforceReadonly()) {
+    for (auto i = 0; i < fca.numArgs; ++i) {
+      if (callee->isReadonly(i) != fca.isReadonly(i)) {
+        return refuse("callee called with arguments with mismatched readonly");
+      }
+    }
+  }
+
   return true;
 }
 

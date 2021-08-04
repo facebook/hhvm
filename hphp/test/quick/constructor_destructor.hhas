@@ -47,7 +47,7 @@
   Dup
   NullUninit
   String "foo"
-  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" "" - "" ""
   PopC
   LockObj
   SetL $x
@@ -55,14 +55,14 @@
   CGetL $x
   NullUninit
   String "bar"
-  FCallObjMethodD <> 1 1 "" - "" "" NullThrows "set"
+  FCallObjMethodD <> 1 1 "" "" - "" "" NullThrows "set"
   PopC
   NullUninit
   NullUninit
   CGetL $x
   NullUninit
-  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "get"
-  FCallFuncD <> 1 1 "" - "" "var_dump"
+  FCallObjMethodD <> 0 1 "" "" - "" "" NullThrows "get"
+  FCallFuncD <> 1 1 "" "" - "" "var_dump"
   PopC
   Int 1
   RetC

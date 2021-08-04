@@ -6,7 +6,7 @@
   NewObjD "Foo"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   .srcloc 17:3,17:16;
@@ -63,7 +63,7 @@
     NewObjD "Bar"
     Dup
     NullUninit
-    FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+    FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
     PopC
     LockObj
     BaseH

@@ -467,6 +467,11 @@ bool Func::isInOut(int32_t arg) const {
   return params()[arg].isInOut();
 }
 
+bool Func::isReadonly(int32_t arg) const {
+  assertx(arg >= 0);
+  return false; // TODO: implement readonly
+}
+
 uint32_t Func::numInOutParams() const {
   uint32_t count = folly::popcount(m_inoutBits);
   if (LIKELY(static_cast<int32_t>(m_inoutBits) >= 0)) {

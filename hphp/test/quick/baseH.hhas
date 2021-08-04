@@ -23,7 +23,7 @@
   NullUninit
   NullUninit
   CGetL $foo
-  FCallFuncD <> 1 1 "" - "" "var_dump"
+  FCallFuncD <> 1 1 "" "" - "" "var_dump"
   PopC
   RetC  
 }

@@ -42,6 +42,6 @@
   NullUninit
     PushL $a
     PushL $b
-  FCallFuncD <> 2 1 "" - "" "foo"
+  FCallFuncD <> 2 1 "" "" - "" "foo"
   RetC
 }

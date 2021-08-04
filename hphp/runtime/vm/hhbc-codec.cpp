@@ -132,8 +132,8 @@ IterArgs decodeIterArgs(PC& pc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void encodeFCallArgsBase(FuncEmitter& fe, const FCallArgsBase& fca,
-                         bool hasInoutArgs, bool hasAsyncEagerOffset,
-                         bool hasContext) {
+                         bool hasInoutArgs, bool hasReadonlyArgs,
+                         bool hasAsyncEagerOffset, bool hasContext) {
   auto constexpr kFirstNumArgsBit = FCallArgsBase::kFirstNumArgsBit;
   auto constexpr kLimit =
     std::numeric_limits<std::underlying_type_t<FCallArgs::Flags>>::max();
@@ -143,6 +143,7 @@ void encodeFCallArgsBase(FuncEmitter& fe, const FCallArgsBase& fca,
   if (smallNumArgs) flags |= ((fca.numArgs + 1) << kFirstNumArgsBit);
   if (fca.numRets != 1) flags |= FCallArgsBase::HasInOut;
   if (hasInoutArgs) flags |= FCallArgsBase::EnforceInOut;
+  if (hasReadonlyArgs) flags |= FCallArgsBase::EnforceReadonly;
   if (hasAsyncEagerOffset) flags |= FCallArgsBase::HasAsyncEagerOffset;
   if (hasContext) flags |= FCallArgsBase::ExplicitContext;
 
@@ -152,9 +153,9 @@ void encodeFCallArgsBase(FuncEmitter& fe, const FCallArgsBase& fca,
   if (fca.numRets != 1) fe.emitIVA(fca.numRets);
 }
 
-void encodeFCallArgsIO(FuncEmitter& fe, int numBytes,
-                       const uint8_t* inoutArgs) {
-  for (auto i = 0; i < numBytes; ++i) fe.emitByte(inoutArgs[i]);
+void encodeFCallArgsBoolVec(FuncEmitter& fe, int numBytes,
+                       const uint8_t* boolVec) {
+  for (auto i = 0; i < numBytes; ++i) fe.emitByte(boolVec[i]);
 }
 
 FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc, StringDecoder u) {
@@ -172,12 +173,14 @@ FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc, StringDecoder u) {
   auto const numRets = (flags & FCallArgs::HasInOut) ? decode_iva(pc) : 1;
   auto const inoutArgs = (flags & FCallArgs::EnforceInOut) ? pc : nullptr;
   if (inoutArgs != nullptr) pc += (numArgs + 7) / 8;
+  auto const readonlyArgs = (flags & FCallArgs::EnforceReadonly) ? pc : nullptr;
+  if (readonlyArgs != nullptr) pc += (numArgs + 7) / 8;
   auto const asyncEagerOffset = (flags & FCallArgs::HasAsyncEagerOffset)
     ? decode_ba(pc) : kInvalidOffset;
   auto const context = !skipContext ? decode_string(pc, u) : nullptr;
   return FCallArgs(
     static_cast<FCallArgs::Flags>(flags & FCallArgs::kInternalFlags),
-    numArgs, numRets, inoutArgs, asyncEagerOffset, context
+    numArgs, numRets, inoutArgs, readonlyArgs, asyncEagerOffset, context
   );
 }
 

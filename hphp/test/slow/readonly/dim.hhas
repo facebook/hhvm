@@ -6,7 +6,7 @@
   NewObjD "Foo1"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   .srcloc 18:3,18:17;
@@ -17,7 +17,7 @@
   NewObjD "Foo1"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   .srcloc 19:3,19:18;
@@ -28,7 +28,7 @@
   NewObjD "Foo2"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   .srcloc 20:12,20:26;
@@ -51,7 +51,7 @@
   NewObjD "Foo2"
   Dup
   NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
   .srcloc 22:16,22:30;
@@ -86,9 +86,9 @@
     CGetL $e
     NullUninit
     .srcloc 26:14,26:29;
-    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "getMessage"
+    FCallObjMethodD <> 0 1 "" "" - "" "" NullThrows "getMessage"
     .srcloc 26:5,26:30;
-    FCallFuncD <> 1 1 "0" - "" "var_dump"
+    FCallFuncD <> 1 1 "0" "" - "" "var_dump"
     PopC
     .srcloc 23:3,27:125;
     Jmp L0
@@ -105,7 +105,7 @@ L0:
   .srcloc 29:33,29:34;
   Int 20
   .srcloc 29:20,29:35;
-  FCallCtor <LockWhileUnwinding> 2 1 "00" - "" ""
+  FCallCtor <LockWhileUnwinding> 2 1 "00" "" - "" ""
   PopC
   LockObj
   .srcloc 29:16,29:36;
@@ -140,9 +140,9 @@ L0:
     CGetL $e
     NullUninit
     .srcloc 33:14,33:29;
-    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "getMessage"
+    FCallObjMethodD <> 0 1 "" "" - "" "" NullThrows "getMessage"
     .srcloc 33:5,33:30;
-    FCallFuncD <> 1 1 "0" - "" "var_dump"
+    FCallFuncD <> 1 1 "0" "" - "" "var_dump"
     PopC
     .srcloc 30:3,34:125;
     Jmp L2

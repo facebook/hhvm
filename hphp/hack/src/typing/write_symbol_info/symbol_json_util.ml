@@ -71,7 +71,7 @@ let ends_in_newline source_text =
   let last_char =
     Full_fidelity_source_text.get source_text (source_text.length - 1)
   in
-  phys_equal '\n' last_char || phys_equal '\r' last_char
+  Char.equal '\n' last_char || Char.equal '\r' last_char
 
 (* True if the source text contains tab characters, multibyte
 UTF-8 codepoints, or malformed UTF-8 *)

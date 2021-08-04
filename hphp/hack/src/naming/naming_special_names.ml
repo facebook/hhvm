@@ -632,7 +632,7 @@ module Typehints = struct
   let is_namespace_with_reserved_hh_name x =
     let unqualify qualified_name =
       let as_list = Str.split (Str.regexp "\\") qualified_name in
-      let as_list = List.filter as_list ~f:(fun s -> not (phys_equal s "")) in
+      let as_list = List.filter as_list ~f:(fun s -> not (String.equal s "")) in
       match List.rev as_list with
       | name :: qualifiers -> (List.rev qualifiers, name)
       | [] -> ([], qualified_name)

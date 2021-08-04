@@ -1644,6 +1644,10 @@ module EnumClassLabelOps = struct
     | None -> (env, ClassNotFound)
 end
 
+let is_lvalue = function
+  | `lvalue -> true
+  | _ -> false
+
 (* Given a localized parameter type and parameter information, infer
  * a type for the parameter default expression (if present) and check that
  * it is a subtype of the parameter type (if present). If no parameter type
@@ -3264,7 +3268,7 @@ and expr_
     let r = Reason.Rplaceholder p in
     let ty = MakeType.void r in
     make_result env p (Aast.Lplaceholder p) ty
-  | Dollardollar _ when phys_equal valkind `lvalue ->
+  | Dollardollar _ when is_lvalue valkind ->
     Errors.dollardollar_lvalue p;
     expr_error env (Reason.Rwitness p) outer
   | Dollardollar id ->
@@ -3366,7 +3370,7 @@ and expr_
     in
     let (env, te2, ty2) = expr env e2 in
     let env = might_throw env in
-    let is_lvalue = phys_equal valkind `lvalue in
+    let is_lvalue = is_lvalue valkind in
     let (_, p1, _) = e1 in
     let (env, ty, key_err_opt, arr_err_opt) =
       Typing_array_access.array_get
@@ -3650,7 +3654,7 @@ and expr_
       Errors.try_if_no_errors
         (fun () -> Typing_local_ops.enforce_static_property_access ppos env)
         (fun env ->
-          let is_lvalue = phys_equal valkind `lvalue in
+          let is_lvalue = is_lvalue valkind in
           (* If it's an lvalue we throw an error in a separate check in check_assign *)
           if in_readonly_expr || is_lvalue then
             env

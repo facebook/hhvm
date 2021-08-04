@@ -43,9 +43,9 @@ let magic_method_name input =
   | None -> "format_eof"
   | Some c ->
     let uc = Char.uppercase c and lc = Char.lowercase c in
-    if phys_equal lc uc then
+    if Char.equal lc uc then
       Printf.sprintf "format_0x%02x" (Char.to_int lc)
-    else if phys_equal c uc then
+    else if Char.equal c uc then
       "format_upcase_" ^ String.make 1 lc
     else
       "format_" ^ String.make 1 lc

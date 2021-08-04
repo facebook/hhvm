@@ -3086,7 +3086,7 @@ let array_access code pos1 pos2 ty =
   add_list
     (Typing.err_code code)
     (pos1, "This is not an object of type `KeyedContainer`, this is " ^ ty)
-    (if not (phys_equal pos2 Pos_or_decl.none) then
+    (if not Pos_or_decl.(equal pos2 none) then
       [(pos2, "Definition is here")]
     else
       [])
@@ -3099,7 +3099,7 @@ let keyset_set pos1 pos2 =
   add_list
     (Typing.err_code Typing.KeysetSet)
     (pos1, "Elements in a keyset cannot be assigned, use append instead.")
-    (if not (phys_equal pos2 Pos_or_decl.none) then
+    (if not Pos_or_decl.(equal pos2 none) then
       [(pos2, "Definition is here")]
     else
       [])
@@ -3108,7 +3108,7 @@ let array_append pos1 pos2 ty =
   add_list
     (Typing.err_code Typing.ArrayAppend)
     (pos1, ty ^ " does not allow array append")
-    (if not (phys_equal pos2 Pos_or_decl.none) then
+    (if not Pos_or_decl.(equal pos2 none) then
       [(pos2, "Definition is here")]
     else
       [])
@@ -3117,7 +3117,7 @@ let const_mutation pos1 pos2 ty =
   add_list
     (Typing.err_code Typing.ConstMutation)
     (pos1, "You cannot mutate this")
-    (if not (phys_equal pos2 Pos_or_decl.none) then
+    (if not Pos_or_decl.(equal pos2 none) then
       [(pos2, "This is " ^ ty)]
     else
       [])

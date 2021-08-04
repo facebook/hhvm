@@ -613,7 +613,7 @@ and hint_id
       | x when String.equal x SN.Typehints.dynamic -> N.Hdynamic
       | x when String.equal x SN.Typehints.nothing -> N.Hnothing
       | x when String.equal x SN.Typehints.this && not forbid_this ->
-        if not (phys_equal hl []) then Errors.this_no_argument p;
+        if not (List.is_empty hl) then Errors.this_no_argument p;
         N.Hthis
       | x when String.equal x SN.Typehints.this ->
         Errors.this_type_forbidden p;

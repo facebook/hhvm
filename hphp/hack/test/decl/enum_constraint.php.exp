@@ -24,7 +24,7 @@
        sc_enum_type =
        (Some { Typing_defs.te_base = (Rhint ([3:10-16]), (Tprim Tstring));
                te_constraint = (Some (Rhint ([3:20-26]), (Tprim Tstring)));
-               te_includes = []; te_enum_class = false })
+               te_includes = [] })
        }));
   ("\\B",
    (Shallow_decl_defs.Class
@@ -57,7 +57,7 @@
                           [(Rhint ([5:22-23]),
                             (Tapply (([5:22-23], "\\X"), [])))]
                           ))));
-                te_includes = []; te_enum_class = false })
+                te_includes = [] })
         }));
   ("\\C",
    (Shallow_decl_defs.Class
@@ -85,7 +85,7 @@
         sc_enum_type =
         (Some { Typing_defs.te_base = (Rhint ([7:10-13]), (Tprim Tint));
                 te_constraint = (Some (Rhint ([7:17-25]), (Tprim Tarraykey)));
-                te_includes = []; te_enum_class = false })
+                te_includes = [] })
         }));
   ("\\N",
    (Shallow_decl_defs.Typedef
@@ -124,7 +124,7 @@
         (Some { Typing_defs.te_base = (Rhint ([11:10-13]), (Tprim Tint));
                 te_constraint =
                 (Some (Rhint ([11:17-18]), (Tapply (([11:17-18], "\\N"), []))));
-                te_includes = []; te_enum_class = false })
+                te_includes = [] })
         }));
   ("\\E",
    (Shallow_decl_defs.Class
@@ -154,7 +154,7 @@
                 (Rhint ([13:10-11]), (Tapply (([13:10-11], "\\C"), [])));
                 te_constraint =
                 (Some (Rhint ([13:15-16]), (Tapply (([13:15-16], "\\C"), []))));
-                te_includes = []; te_enum_class = false })
+                te_includes = [] })
         }))
   ]
 

@@ -89,7 +89,7 @@ let fallback ctx class_name member_name =
         | Some docblock ->
           (match Cls.kind ancestor with
           | Ast_defs.Cclass _ -> [(Cls.name ancestor, docblock)]
-          | Ast_defs.(Ctrait | Cinterface | Cenum) ->
+          | Ast_defs.(Ctrait | Cinterface | Cenum | Cenum_class) ->
             all_interfaces_or_first_class_docblock
               ((Cls.name ancestor, docblock) :: seen_interfaces)
               ancestors)

@@ -4099,19 +4099,8 @@ let php_lambda_disallowed pos =
 (*****************************************************************************)
 
 let wrong_extend_kind
-    ~parent_pos
-    ~parent_kind
-    ~parent_name
-    ~parent_is_enum_class
-    ~child_pos
-    ~child_kind
-    ~child_name
-    ~child_is_enum_class =
-  let parent_kind_str =
-    Ast_defs.string_of_classish_kind
-      parent_kind
-      ~is_enum_class:parent_is_enum_class
-  in
+    ~parent_pos ~parent_kind ~parent_name ~child_pos ~child_kind ~child_name =
+  let parent_kind_str = Ast_defs.string_of_classish_kind parent_kind in
   let parent_name = strip_ns parent_name in
   let child_name = strip_ns child_name in
   let use_msg =
@@ -4142,13 +4131,11 @@ let wrong_extend_kind
           ""
       in
       extends_msg ^ suggestion
+    | Ast_defs.Cenum_class -> "Enum classes can only extend other enum classes."
     | Ast_defs.Cenum ->
-      if child_is_enum_class then
-        "Enum classes can only extend other enum classes."
-      else
-        (* This case should never happen, as the type checker will have already caught
-           it with EnumTypeBad. But just in case, report this error here too. *)
-        "Enums can only extend int, string, or arraykey."
+      (* This case should never happen, as the type checker will have already caught
+         it with EnumTypeBad. But just in case, report this error here too. *)
+      "Enums can only extend int, string, or arraykey."
     | Ast_defs.Ctrait ->
       (* This case should never happen, as the parser will have caught it before
           we get here. *)
@@ -5469,7 +5456,9 @@ let parent_support_dynamic_type
     | Ast_defs.Cclass _ -> "class "
     | Ast_defs.Ctrait -> "trait "
     | Ast_defs.Cinterface -> "interface "
-    | Ast_defs.Cenum -> (* cannot happen *) ""
+    | Ast_defs.Cenum_class
+    | Ast_defs.Cenum ->
+      (* cannot happen *) ""
   in
   let kinds_to_use child_kind parent_kind =
     match (child_kind, parent_kind) with
@@ -5477,7 +5466,9 @@ let parent_support_dynamic_type
     | (_, Ast_defs.Ctrait) -> "uses "
     | (Ast_defs.Cinterface, Ast_defs.Cinterface) -> "extends "
     | (_, Ast_defs.Cinterface) -> "implements "
-    | (_, Ast_defs.Cenum) -> ""
+    | (_, Ast_defs.Cenum_class)
+    | (_, Ast_defs.Cenum) ->
+      ""
   in
   let child_name = Markdown_lite.md_codify (strip_ns child_name) in
   let child_kind_s = kind_to_string child_kind in

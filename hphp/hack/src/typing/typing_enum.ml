@@ -40,6 +40,7 @@ let member_type env member_ce =
         (match
            Decl_enum.enum_kind
              (Cls.pos tc, Cls.name tc)
+             ~is_enum_class:(Ast_defs.is_c_enum_class (Cls.kind tc))
              (Cls.enum_type tc)
              Option.(
                Cls.get_typeconst tc Naming_special_names.FB.tInner >>= fun t ->
@@ -134,6 +135,7 @@ let enum_class_check env tc consts const_types =
   let enum_info_opt =
     Decl_enum.enum_kind
       (pos, Cls.name tc)
+      ~is_enum_class:(Ast_defs.is_c_enum_class (Cls.kind tc))
       (Cls.enum_type tc)
       Option.(
         Cls.get_typeconst tc Naming_special_names.FB.tInner >>= fun t ->

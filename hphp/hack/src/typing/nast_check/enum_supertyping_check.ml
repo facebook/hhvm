@@ -16,11 +16,11 @@ let handler =
     method! at_class_ env c =
       let tcopt = Nast_check_env.get_tcopt env in
       let enabled = tcopt.GlobalOptions.po_enable_enum_supertyping in
+      let is_enum_class = Ast_defs.is_c_enum_class c.Aast.c_kind in
       let uses_enum_supertyping =
         match c.Aast.c_enum with
         | Some enum_ ->
-          (not (List.is_empty enum_.Aast.e_includes))
-          && not enum_.Aast.e_enum_class
+          (not (List.is_empty enum_.Aast.e_includes)) && not is_enum_class
         | None -> false
       in
       let pos = fst c.Aast.c_name in

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b126f3b35f637a3a4a17225e9d1bd43e>>
+// @generated SignedSource<<c884cd3978e4eed5325e68dd8d474388>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -110,6 +110,7 @@ pub enum ClassishKind<'a> {
     Cinterface,
     Ctrait,
     Cenum,
+    CenumClass,
 }
 impl<'a> TrivialDrop for ClassishKind<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ClassishKind<'arena>);

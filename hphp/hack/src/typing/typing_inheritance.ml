@@ -104,14 +104,7 @@ let check_if_cyclic class_pos cls =
     Errors.cyclic_class_def classes class_pos
 
 let check_extend_kind
-    parent_pos
-    parent_kind
-    parent_name
-    parent_is_enum_class
-    child_pos
-    child_kind
-    child_name
-    child_is_enum_class =
+    parent_pos parent_kind parent_name child_pos child_kind child_name =
   Ast_defs.(
     match (parent_kind, child_kind) with
     | (Cclass _, Cclass _)
@@ -119,30 +112,24 @@ let check_extend_kind
     | (Cinterface, Cinterface) ->
       ()
     (* enums extend BuiltinEnum under the hood *)
-    | (Cclass k, Cenum) when is_abstract k -> ()
-    | (Ast_defs.Cenum, Ast_defs.Cenum) ->
-      if parent_is_enum_class && child_is_enum_class then
-        ()
-      else
-        Errors.wrong_extend_kind
-          ~parent_pos
-          ~parent_kind
-          ~parent_name
-          ~parent_is_enum_class
-          ~child_pos
-          ~child_kind
-          ~child_name
-          ~child_is_enum_class
+    | (Cclass k, (Cenum | Cenum_class)) when is_abstract k -> ()
+    | (Cenum_class, Cenum_class) -> ()
+    | ((Cenum | Cenum_class), (Cenum | Cenum_class)) ->
+      Errors.wrong_extend_kind
+        ~parent_pos
+        ~parent_kind
+        ~parent_name
+        ~child_pos
+        ~child_kind
+        ~child_name
     | _ ->
       Errors.wrong_extend_kind
         ~parent_pos
         ~parent_kind
         ~parent_name
-        ~parent_is_enum_class
         ~child_pos
         ~child_kind
-        ~child_name
-        ~child_is_enum_class)
+        ~child_name)
 
 (** Check that the [extends] keyword is between two classes or two interfaces, but not
     between a class and an interface or vice-versa. *)
@@ -154,17 +141,13 @@ let check_extend_kinds ctx class_pos shallow_class =
       match Shallow_classes_provider.get ctx parent_name with
       | None -> ()
       | Some parent ->
-        let parent_is_enum_class = is_enum_class parent.sc_enum_type in
-        let class_is_enum_class = is_enum_class shallow_class.sc_enum_type in
         check_extend_kind
           parent_pos
           parent.sc_kind
           (snd parent.sc_name)
-          parent_is_enum_class
           class_pos
           classish_kind
-          class_name
-          class_is_enum_class)
+          class_name)
 
 let disallow_trait_reuse env =
   TypecheckerOptions.disallow_trait_reuse (Env.get_tcopt env)

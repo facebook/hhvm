@@ -266,7 +266,7 @@ module Nast_helper : sig
 
   val is_class : Provider_context.t -> string -> bool
 
-  val is_enum : Provider_context.t -> string -> bool
+  val is_enum_or_enum_class : Provider_context.t -> string -> bool
 
   val is_interface : Provider_context.t -> string -> bool
 end = struct
@@ -361,9 +361,9 @@ end = struct
 
   let is_class ctx nm = Option.is_some @@ get_class ctx nm
 
-  let is_enum ctx nm =
+  let is_enum_or_enum_class ctx nm =
     Option.value_map ~default:false ~f:(fun Aast.{ c_kind; _ } ->
-        Ast_defs.is_c_enum c_kind)
+        Ast_defs.is_c_enum c_kind || Ast_defs.is_c_enum_class c_kind)
     @@ get_class ctx nm
 
   let is_interface ctx nm =
@@ -1204,7 +1204,7 @@ end = struct
           (match Nast_helper.get_class ctx name with
           | Some
               { c_kind; c_consts = Aast.{ cc_id = (_, const_name); _ } :: _; _ }
-            when Ast_defs.is_c_enum c_kind ->
+            when Ast_defs.is_c_enum c_kind || Ast_defs.is_c_enum_class c_kind ->
             Fmt.(pair ~sep:dbl_colon string string) ppf (name, const_name)
           | Some _ -> unsupported_hint ()
           | _ ->
@@ -2581,7 +2581,8 @@ end = struct
           | Concrete -> Fmt.string ppf "class")
         | Cinterface -> Fmt.string ppf "interface"
         | Ctrait -> Fmt.string ppf "trait"
-        | Cenum -> Fmt.string ppf "enum")
+        | Cenum -> Fmt.string ppf "enum"
+        | Cenum_class -> Fmt.string ppf "enum_class")
 
     let pp_class_ancestors class_or_intf ppf = function
       | [] ->
@@ -2739,7 +2740,7 @@ end = struct
       (* -- Class elements -- *)
       | Const (cls_nm, nm)
         when String.(cls_nm = Dep.get_origin ctx cls_nm dep && nm <> "class")
-             && (not @@ Nast_helper.is_enum ctx cls_nm) ->
+             && (not @@ Nast_helper.is_enum_or_enum_class ctx cls_nm) ->
         PartClsElt
           ( cls_nm,
             value_or_not_found (cls_nm ^ "::" ^ nm)
@@ -2781,7 +2782,7 @@ end = struct
       (* -- Type defs, Enums, Classes, RecordDefs -- *)
       | Type nm when Nast_helper.is_tydef ctx nm ->
         PartSingle (Single.mk_tydef @@ Nast_helper.get_typedef_exn ctx nm)
-      | Type nm when Nast_helper.is_enum ctx nm ->
+      | Type nm when Nast_helper.is_enum_or_enum_class ctx nm ->
         PartSingle (Single.mk_enum ctx @@ Nast_helper.get_class_exn ctx nm)
       | Type nm when Nast_helper.is_class ctx nm -> PartCls nm
       | Type _ -> raise Unsupported

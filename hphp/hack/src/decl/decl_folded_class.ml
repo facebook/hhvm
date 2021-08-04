@@ -35,11 +35,9 @@ let check_extend_kind
     (parent_pos : Pos_or_decl.t)
     (parent_kind : Ast_defs.classish_kind)
     (parent_name : string)
-    (parent_is_enum_class : bool)
     (child_pos : Pos_or_decl.t)
     (child_kind : Ast_defs.classish_kind)
-    (child_name : string)
-    (child_is_enum_class : bool) : unit =
+    (child_name : string) : unit =
   match (parent_kind, child_kind) with
   (* What is allowed *)
   | (Ast_defs.Cclass _, Ast_defs.Cclass _)
@@ -47,32 +45,28 @@ let check_extend_kind
   | (Ast_defs.Cinterface, Ast_defs.Cinterface) ->
     ()
   (* enums extend BuiltinEnum under the hood *)
-  | (Ast_defs.Cclass k, Ast_defs.Cenum) when Ast_defs.is_abstract k -> ()
-  | (Ast_defs.Cenum, Ast_defs.Cenum) ->
-    if parent_is_enum_class && child_is_enum_class then
-      ()
-    else
-      Errors.wrong_extend_kind
-        ~parent_pos
-        ~parent_kind
-        ~parent_name
-        ~parent_is_enum_class
-        ~child_pos:
-          (Pos_or_decl.unsafe_to_raw_pos child_pos) (* TODO: T87242856 *)
-        ~child_kind
-        ~child_name
-        ~child_is_enum_class
+  | (Ast_defs.Cclass k, (Ast_defs.Cenum | Ast_defs.Cenum_class))
+    when Ast_defs.is_abstract k ->
+    ()
+  | (Ast_defs.Cenum_class, Ast_defs.Cenum_class) -> ()
+  | ( (Ast_defs.Cenum | Ast_defs.Cenum_class),
+      (Ast_defs.Cenum | Ast_defs.Cenum_class) ) ->
+    Errors.wrong_extend_kind
+      ~parent_pos
+      ~parent_kind
+      ~parent_name
+      ~child_pos:(Pos_or_decl.unsafe_to_raw_pos child_pos) (* TODO: T87242856 *)
+      ~child_kind
+      ~child_name
   | _ ->
     (* What is disallowed *)
     Errors.wrong_extend_kind
       ~parent_pos
       ~parent_kind
       ~parent_name
-      ~parent_is_enum_class
       ~child_pos:(Pos_or_decl.unsafe_to_raw_pos child_pos) (* TODO: T87242856 *)
       ~child_kind
       ~child_name
-      ~child_is_enum_class
 
 (*****************************************************************************)
 (* Functions used retrieve everything implemented in parent classes
@@ -132,25 +126,19 @@ let add_grand_parents_or_traits
     (parent_pos : Pos_or_decl.t)
     (shallow_class : Shallow_decl_defs.shallow_class)
     (acc : SSet.t * bool * [> `Extends_pass | `Xhp_pass ])
-    (parent_type : Decl_defs.decl_class_type)
-    (parent_enum_type : enum_type option) : SSet.t * bool * 'a =
+    (parent_type : Decl_defs.decl_class_type) : SSet.t * bool * 'a =
   let (extends, is_complete, pass) = acc in
   let class_pos = fst shallow_class.sc_name in
   let classish_kind = shallow_class.sc_kind in
   let class_name = snd shallow_class.sc_name in
-  let class_enum_type = shallow_class.sc_enum_type in
-  let parent_is_enum_class = is_enum_class parent_enum_type in
-  let class_is_enum_class = is_enum_class class_enum_type in
   if phys_equal pass `Extends_pass then
     check_extend_kind
       parent_pos
       parent_type.dc_kind
       parent_type.dc_name
-      parent_is_enum_class
       class_pos
       classish_kind
-      class_name
-      class_is_enum_class;
+      class_name;
 
   (* If we are crawling the xhp attribute deps, we need to merge their xhp deps
    * as well *)
@@ -198,7 +186,6 @@ let get_class_parent_or_trait
       shallow_class
       acc
       parent_type
-      parent_type.dc_enum_type
 
 let get_class_parents_and_traits
     (env : Decl_env.env)
@@ -322,6 +309,7 @@ and class_is_abstract (c : Shallow_decl_defs.shallow_class) : bool =
   | Ast_defs.Cclass k -> Ast_defs.is_abstract k
   | Ast_defs.Cinterface
   | Ast_defs.Ctrait
+  | Ast_defs.Cenum_class
   | Ast_defs.Cenum ->
     true
 
@@ -476,9 +464,11 @@ and class_decl
   in
   let enum = c.sc_enum_type in
   let enum_inner_ty = SMap.find_opt SN.FB.tInner typeconsts in
+  let is_enum_class = Ast_defs.is_c_enum_class c.sc_kind in
   let consts =
     Decl_enum.rewrite_class
       c.sc_name
+      ~is_enum_class
       enum
       Option.(
         enum_inner_ty >>= fun t ->
@@ -817,7 +807,9 @@ and typeconst_fold
     Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t =
   let (typeconsts, consts) = acc in
   match c.sc_kind with
-  | Ast_defs.Cenum -> acc
+  | Ast_defs.Cenum_class
+  | Ast_defs.Cenum ->
+    acc
   | Ast_defs.Ctrait
   | Ast_defs.Cinterface
   | Ast_defs.Cclass _ ->

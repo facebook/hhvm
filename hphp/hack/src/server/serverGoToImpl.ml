@@ -68,6 +68,7 @@ let add_if_valid_origin ctx class_elt child_class method_name result =
         :: result
       | Ast_defs.Cclass _
       | Ast_defs.Cinterface
+      | Ast_defs.Cenum_class
       | Ast_defs.Cenum ->
         result)
     | None -> failwith "TODO"

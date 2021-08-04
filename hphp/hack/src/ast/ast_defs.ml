@@ -51,6 +51,7 @@ and classish_kind =
   | Cinterface
   | Ctrait
   | Cenum
+  | Cenum_class
 
 and param_kind = Pinout
 
@@ -165,6 +166,7 @@ let is_abstract = function
 let is_c_class = function
   | Cclass _ -> true
   | Cenum
+  | Cenum_class
   | Ctrait
   | Cinterface ->
     false
@@ -172,12 +174,22 @@ let is_c_class = function
 let is_c_normal = function
   | Cclass c -> is_concrete c
   | Cenum
+  | Cenum_class
   | Ctrait
   | Cinterface ->
     false
 
 let is_c_enum = function
   | Cenum -> true
+  | Cenum_class
+  | Cclass _
+  | Ctrait
+  | Cinterface ->
+    false
+
+let is_c_enum_class = function
+  | Cenum_class -> true
+  | Cenum
   | Cclass _
   | Ctrait
   | Cinterface ->
@@ -186,6 +198,7 @@ let is_c_enum = function
 let is_c_interface = function
   | Cinterface -> true
   | Cclass _
+  | Cenum_class
   | Ctrait
   | Cenum ->
     false
@@ -193,6 +206,7 @@ let is_c_interface = function
 let is_c_trait = function
   | Ctrait -> true
   | Cinterface
+  | Cenum_class
   | Cclass _
   | Cenum ->
     false
@@ -200,6 +214,7 @@ let is_c_trait = function
 let is_c_abstract = function
   | Cclass c -> is_abstract c
   | Cinterface
+  | Cenum_class
   | Ctrait
   | Cenum ->
     false
@@ -214,7 +229,7 @@ let is_f_async_or_generator = function
     true
   | _ -> false
 
-let string_of_classish_kind kind ~is_enum_class =
+let string_of_classish_kind kind =
   match kind with
   | Cclass c ->
     (match c with
@@ -222,11 +237,8 @@ let string_of_classish_kind kind ~is_enum_class =
     | Concrete -> "a class")
   | Cinterface -> "an interface"
   | Ctrait -> "a trait"
-  | Cenum ->
-    if is_enum_class then
-      "an enum class"
-    else
-      "an enum"
+  | Cenum -> "an enum"
+  | Cenum_class -> "an enum class"
 
 let string_of_param_kind = function
   | Pinout -> "inout"

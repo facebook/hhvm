@@ -629,18 +629,15 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         })
         .collect();
 
-    let enum_type = if ast_class.kind == tast::ClassishKind::Cenum {
-        from_enum_type(alloc, ast_class.enum_.as_ref())?
-    } else {
-        None
-    };
-    let is_enum_class = if ast_class.kind == tast::ClassishKind::Cenum {
-        match &ast_class.enum_ {
-            Some(info) => info.enum_class,
-            None => false,
+    let enum_type = match ast_class.kind {
+        tast::ClassishKind::Cenum | tast::ClassishKind::CenumClass => {
+            from_enum_type(alloc, ast_class.enum_.as_ref())?
         }
-    } else {
-        false
+        _ => None,
+    };
+    let is_enum_class = match ast_class.kind {
+        tast::ClassishKind::CenumClass => true,
+        _ => false,
     };
     let xhp_attributes: Vec<_> = ast_class
         .xhp_attrs
@@ -701,7 +698,9 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         &ast_class.implements
     };
     let implements = from_implements(alloc, implements);
-    let enum_includes = if ast_class.kind == tast::ClassishKind::Cenum {
+    let enum_includes = if ast_class.kind == tast::ClassishKind::Cenum
+        || ast_class.kind == tast::ClassishKind::CenumClass
+    {
         match &ast_class.enum_ {
             None => vec![],
             Some(enum_) => from_includes(alloc, &enum_.includes),

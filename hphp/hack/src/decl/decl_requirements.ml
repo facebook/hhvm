@@ -55,7 +55,9 @@ let flatten_parent_class_reqs
         SSet.union parent_type.dc_req_ancestors_extends req_ancestors_extends
       in
       (req_ancestors, req_ancestors_extends)
-    | Ast_defs.Cenum -> assert false)
+    | Ast_defs.Cenum
+    | Ast_defs.Cenum_class ->
+      assert false)
 
 let declared_class_req env class_cache (requirements, req_extends) req_ty =
   let (_, (req_pos, req_name), _) = Decl_utils.unwrap_class_type req_ty in

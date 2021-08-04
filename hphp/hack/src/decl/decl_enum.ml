@@ -27,7 +27,7 @@ type t = {
 }
 
 (** Figures out if a class needs to be treated like an enum. *)
-let enum_kind name enum inner_ty ~get_ancestor =
+let enum_kind name ~is_enum_class enum inner_ty ~get_ancestor =
   match enum with
   | None ->
     (match get_ancestor SN.FB.cEnum with
@@ -70,7 +70,7 @@ let enum_kind name enum inner_ty ~get_ancestor =
     let pos = Reason.to_pos reason in
     let enum_type = Typing_defs.mk (reason, Tapply (name, [])) in
     let (te_base, te_interface) =
-      if enum.te_enum_class then
+      if is_enum_class then
         let te_interface = enum.te_base in
         let te_base =
           Tapply ((pos, SN.Classes.cMemberOf), [enum_type; enum.te_base])
@@ -92,8 +92,8 @@ let enum_kind name enum inner_ty ~get_ancestor =
 (** If a class is an Enum, we give all of the constants in the class the type
     of the Enum. We don't do this for Enum<mixed> and Enum<arraykey>, since
     that could *lose* type information. *)
-let rewrite_class name enum inner_ty ~get_ancestor consts =
-  match enum_kind name enum inner_ty ~get_ancestor with
+let rewrite_class name ~is_enum_class enum inner_ty ~get_ancestor consts =
+  match enum_kind name ~is_enum_class enum inner_ty ~get_ancestor with
   | None -> consts
   | Some { base = _; type_ = ty; constraint_ = _; interface = te_interface } ->
     let te_enum_class = Option.is_some te_interface in

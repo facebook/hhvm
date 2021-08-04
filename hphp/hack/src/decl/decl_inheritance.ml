@@ -269,6 +269,7 @@ let consts ~target ctx child_class_name get_typeconst get_ancestor lin =
         lazy
           (Decl_enum.enum_kind
              cls.sc_name
+             ~is_enum_class:(Ast_defs.is_c_enum_class cls.sc_kind)
              cls.sc_enum_type
              Option.(
                get_typeconst Naming_special_names.FB.tInner >>= fun t ->

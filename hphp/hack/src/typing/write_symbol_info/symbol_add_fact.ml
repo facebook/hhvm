@@ -298,6 +298,7 @@ let add_enum_defn_fact ctx source_map enm enum_id enum_data enumerators progress
   let (includes, prog) =
     add_parent_decls ctx enum_data.e_includes EnumDeclaration prog
   in
+  let is_enum_class = Aast.is_enum_class enm in
   let json_fields =
     [
       ("declaration", build_id_json enum_id);
@@ -307,7 +308,7 @@ let add_enum_defn_fact ctx source_map enm enum_id enum_data enumerators progress
       ( "attributes",
         build_attributes_json_nested source_map enm.c_user_attributes );
       ("includes", JSON_Array includes);
-      ("isEnumClass", JSON_Bool enum_data.e_enum_class);
+      ("isEnumClass", JSON_Bool is_enum_class);
     ]
   in
   let json_fields =

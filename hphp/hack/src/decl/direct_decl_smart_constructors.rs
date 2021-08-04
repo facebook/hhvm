@@ -4255,7 +4255,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 base: hint,
                 constraint,
                 includes,
-                enum_class: false,
             })),
         });
         self.add_class(key, cls);
@@ -4368,7 +4367,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             final_: false,
             is_xhp: false,
             has_xhp_keyword: false,
-            kind: ClassishKind::Cenum,
+            kind: ClassishKind::CenumClass,
             module: None, // TODO: grab module from attributes
             name: name.into(),
             tparams: &[],
@@ -4393,7 +4392,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 base,
                 constraint: None,
                 includes,
-                enum_class: true,
             })),
         });
         self.add_class(name.1, cls);

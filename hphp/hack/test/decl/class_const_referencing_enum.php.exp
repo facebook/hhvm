@@ -28,7 +28,7 @@
        sc_enum_type =
        (Some { Typing_defs.te_base = (Rhint ([3:13-19]), (Tprim Tstring));
                te_constraint = (Some (Rhint ([3:23-29]), (Tprim Tstring)));
-               te_includes = []; te_enum_class = false })
+               te_includes = [] })
        }));
   ("\\TestClassConstReferencingEnum",
    (Shallow_decl_defs.Class

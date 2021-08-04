@@ -7,7 +7,6 @@
  *)
 
 open Aast
-open Ast_defs
 open Hh_json
 open Hh_prelude
 open Symbol_add_fact
@@ -16,6 +15,12 @@ open Symbol_builder_types
 open Symbol_json_util
 open SymbolDefinition
 open SymbolOccurrence
+
+let is_enum_or_enum_class = function
+  | Ast_defs.Cenum
+  | Ast_defs.Cenum_class ->
+    true
+  | Ast_defs.(Cinterface | Cclass _ | Ctrait) -> false
 
 (* These functions define the process to go through when
 encountering symbols of a given type. *)
@@ -248,7 +253,7 @@ let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
         member.full_name;
       (xrefs, prog)
     | Some cls ->
-      if phys_equal cls.c_kind Cenum then
+      if is_enum_or_enum_class cls.c_kind then
         match member.kind with
         | Const ->
           let (enum_id, prog) = add_enum_decl_fact con_name prog in
@@ -284,7 +289,7 @@ let process_attribute_xref ctx attr opt_info (xrefs, prog) =
         con_name;
       None
     | Some cls ->
-      if phys_equal cls.c_kind Cenum then (
+      if is_enum_or_enum_class cls.c_kind then (
         Hh_logger.log
           "WARNING: unexpected enum %s processing attribute reference %s"
           con_name_with_ns
@@ -399,7 +404,7 @@ let process_decls ctx (files_info : file_info list) =
       let (file_decls, prog) =
         List.fold tast ~init:([], prog) ~f:(fun acc def ->
             match def with
-            | Class en when phys_equal en.c_kind Cenum ->
+            | Class en when is_enum_or_enum_class en.c_kind ->
               process_enum_decl ctx source_map en acc
             | Class cd -> process_container_decl ctx source_map cd acc
             | Constant gd -> process_gconst_decl ctx source_map gd acc

@@ -890,10 +890,11 @@ let rec class_ ctx c =
   let xhp_attrs = List.map ~f:(xhp_attribute_decl env) c.Aast.c_xhp_attrs in
   (* These would be out of order with the old attributes, but that shouldn't matter? *)
   let props = props @ xhp_attrs in
-  let (enum_bound, enum, in_enum_class) =
+  let in_enum_class = Ast_defs.is_c_enum_class c.Aast.c_kind in
+  let (enum_bound, enum) =
     match c.Aast.c_enum with
-    | Some enum -> enum_ env name enum
-    | None -> (None, None, false)
+    | Some enum -> enum_ env name ~in_enum_class enum
+    | None -> (None, None)
   in
   let parents = List.map c.Aast.c_extends ~f:(hint ~allow_retonly:false env) in
   let parents =
@@ -1104,15 +1105,14 @@ and xhp_attribute_decl env (h, cv, tag, maybe_enum) =
     N.cv_span = cv.Aast.cv_span;
   }
 
-and enum_ env enum_name e =
+and enum_ env enum_name ~in_enum_class e =
   let open Aast in
   let pos = fst enum_name in
   let enum_hint = (pos, Happly (enum_name, [])) in
-  let is_enum_class = e.e_enum_class in
   let old_base = e.e_base in
   let new_base = hint env old_base in
   let bound =
-    if is_enum_class then
+    if in_enum_class then
       (* Turn the base type of the enum class into MemberOf<E, base> *)
       let elt = (pos, SN.Classes.cMemberOf) in
       let h = (pos, Happly (elt, [enum_hint; old_base])) in
@@ -1125,10 +1125,9 @@ and enum_ env enum_name e =
       N.e_base = new_base;
       N.e_constraint = Option.map e.e_constraint ~f:(hint env);
       N.e_includes = List.map ~f:(hint env) e.e_includes;
-      N.e_enum_class = is_enum_class;
     }
   in
-  (Some bound, Some enum, is_enum_class)
+  (Some bound, Some enum)
 
 and type_paraml ?(forbid_this = false) env tparams =
   List.map tparams ~f:(type_param ~forbid_this env)

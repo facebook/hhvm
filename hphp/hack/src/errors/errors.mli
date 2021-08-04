@@ -920,11 +920,9 @@ val wrong_extend_kind :
   parent_pos:Pos_or_decl.t ->
   parent_kind:Ast_defs.classish_kind ->
   parent_name:string ->
-  parent_is_enum_class:bool ->
   child_pos:Pos.t ->
   child_kind:Ast_defs.classish_kind ->
   child_name:string ->
-  child_is_enum_class:bool ->
   unit
 
 val unsatisfied_req :

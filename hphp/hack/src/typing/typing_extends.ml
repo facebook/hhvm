@@ -432,7 +432,9 @@ let conflict_with_declared_interface
     (match Env.get_class env parent_origin with
     | Some cls -> Cls.kind cls |> Ast_defs.is_c_trait
     | None -> false)
-  | Ast_defs.Cenum -> false
+  | Ast_defs.Cenum_class
+  | Ast_defs.Cenum ->
+    false
 
 let check_const_override
     env
@@ -479,7 +481,7 @@ let check_const_override
       both_are_non_synthetic_and_concrete
       (* Check that the constant is indeed defined in class_ *)
       && String.( = ) class_const.cc_origin (Cls.name class_)
-    | Ast_defs.(Cclass _ | Ctrait | Cenum) -> false
+    | Ast_defs.(Cclass _ | Ctrait | Cenum | Cenum_class) -> false
   in
   let is_abstract_concrete_override =
     match (parent_class_const.cc_abstract, class_const.cc_abstract) with
@@ -552,7 +554,7 @@ let check_members
       && (not (get_ce_synthesized parent_class_elt))
       (* defined on original class *)
       && String.( <> ) class_elt.ce_origin (Cls.name class_)
-    | Ast_defs.(Cclass _ | Cenum) -> false
+    | Ast_defs.(Cclass _ | Cenum | Cenum_class) -> false
   in
   List.fold
     ~init:env
@@ -637,6 +639,7 @@ let check_members
                 ()
             end
           | Ast_defs.Cinterface
+          | Ast_defs.Cenum_class
           | Ast_defs.Cenum ->
             ());
         env)

@@ -157,6 +157,7 @@ module ApiShallow = struct
         | Ast_defs.Cclass k -> Ast_defs.is_abstract k
         | Ast_defs.Cinterface
         | Ast_defs.Ctrait
+        | Ast_defs.Cenum_class
         | Ast_defs.Cenum ->
           true
       end

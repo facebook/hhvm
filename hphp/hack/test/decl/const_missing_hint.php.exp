@@ -50,8 +50,7 @@
         sc_user_attributes = [];
         sc_enum_type =
         (Some { Typing_defs.te_base = (Rhint ([13:10-13]), (Tprim Tint));
-                te_constraint = None; te_includes = []; te_enum_class = false
-                })
+                te_constraint = None; te_includes = [] })
         }))
   ]
 

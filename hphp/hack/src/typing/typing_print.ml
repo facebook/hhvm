@@ -894,6 +894,7 @@ module ErrorString = struct
     | Ast_defs.Cinterface -> "an interface"
     | Ast_defs.Ctrait -> "a trait"
     | Ast_defs.Cenum -> "an enum"
+    | Ast_defs.Cenum_class -> "an enum class"
 
   and to_string ?(ignore_dynamic = false) env ty =
     let (_, ety) = Env.expand_type env ty in
@@ -1480,6 +1481,7 @@ module PrintClass = struct
     | Ast_defs.Cinterface -> "Cinterface"
     | Ast_defs.Ctrait -> "Ctrait"
     | Ast_defs.Cenum -> "Cenum"
+    | Ast_defs.Cenum_class -> "Cenum_class"
 
   let constraint_ty = function
     | (Ast_defs.Constraint_as, ty) -> "as " ^ Full.to_string_decl ty

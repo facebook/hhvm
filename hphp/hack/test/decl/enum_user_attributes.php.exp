@@ -32,8 +32,7 @@
          ];
        sc_enum_type =
        (Some { Typing_defs.te_base = (Rhint ([4:10-16]), (Tprim Tstring));
-               te_constraint = None; te_includes = []; te_enum_class = false
-               })
+               te_constraint = None; te_includes = [] })
        }))
   ]
 

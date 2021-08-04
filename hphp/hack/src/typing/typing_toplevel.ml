@@ -918,6 +918,7 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum =
               | Ast_defs.Cinterface -> ("Interface", "implement")
               | Ast_defs.Ctrait -> ("Trait", "use")
               | Ast_defs.Cenum -> ("Enum", "use")
+              | Ast_defs.Cenum_class -> ("Enum Class", "extend")
             in
             Errors.sealed_not_subtype
               verb
@@ -931,8 +932,7 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum =
     in
     List.iter sealed_attr.ua_params ~f:iter_item
 
-let check_parent_sealed
-    ~(is_enum_class : bool) (child_pos, child_type) parent_type =
+let check_parent_sealed (child_pos, child_type) parent_type =
   match Cls.sealed_whitelist parent_type with
   | None -> ()
   | Some whitelist ->
@@ -949,7 +949,7 @@ let check_parent_sealed
       | (Ast_defs.Cinterface, _) -> check "interface" "implement"
       | (Ast_defs.Ctrait, _) -> check "trait" "use"
       | (Ast_defs.Cclass _, _) -> check "class" "extend"
-      | (Ast_defs.Cenum, _) when is_enum_class -> check "enum class" "extend"
+      | (Ast_defs.Cenum_class, _) -> check "enum class" "extend"
       | (Ast_defs.Cenum, _) -> check "enum" "use"
     end
 
@@ -960,16 +960,12 @@ let check_parents_sealed env child_def child_type =
     | None -> child_def.c_extends
   in
   let parents = parents @ child_def.c_implements @ child_def.c_uses in
-  let is_enum_class = Aast.is_enum_class child_def in
   List.iter parents ~f:(function
       | (_, Happly ((_, name), _)) ->
         begin
           match Env.get_class_dep env name with
           | Some parent_type ->
-            check_parent_sealed
-              ~is_enum_class
-              (fst child_def.c_name, child_type)
-              parent_type
+            check_parent_sealed (fst child_def.c_name, child_type) parent_type
           | None -> ()
         end
       | _ -> ())
@@ -1018,6 +1014,8 @@ let check_non_const_trait_members pos env use_list =
 
 let check_consistent_enum_inclusion
     included_cls ((dest_cls_pos, dest_cls) : Pos.t * Cls.t) =
+  let included_kind = Cls.kind included_cls in
+  let dest_kind = Cls.kind dest_cls in
   match (Cls.enum_type included_cls, Cls.enum_type dest_cls) with
   | (Some included_e, Some dest_e) ->
     (* ensure that the base types are identical *)
@@ -1035,16 +1033,17 @@ let check_consistent_enum_inclusion
         (Cls.name included_cls)
     | (_, _) -> ());
     (* ensure normal enums can't include enum classes *)
-    if included_e.te_enum_class && not dest_e.te_enum_class then
+    if
+      Ast_defs.is_c_enum_class included_kind
+      && not (Ast_defs.is_c_enum_class dest_kind)
+    then
       Errors.wrong_extend_kind
         ~parent_pos:(Cls.pos included_cls)
-        ~parent_kind:Ast_defs.Cenum
+        ~parent_kind:included_kind
         ~parent_name:(Cls.name included_cls)
-        ~parent_is_enum_class:true
         ~child_pos:dest_cls_pos
-        ~child_kind:Ast_defs.Cenum
+        ~child_kind:dest_kind
         ~child_name:(Cls.name dest_cls)
-        ~child_is_enum_class:false
   | (None, _) ->
     Errors.enum_inclusion_not_enum
       dest_cls_pos
@@ -1052,9 +1051,11 @@ let check_consistent_enum_inclusion
       (Cls.name included_cls)
   | (_, _) -> ()
 
+let is_enum_or_enum_class k = Ast_defs.is_c_enum k || Ast_defs.is_c_enum_class k
+
 let check_enum_includes env cls =
   (* checks that there are no duplicated enum-constants when folded-decls are enabled *)
-  if Ast_defs.is_c_enum cls.c_kind then (
+  if is_enum_or_enum_class cls.c_kind then (
     let (dest_class_pos, dest_class_name) = cls.c_name in
     let enum_constant_map = ref SMap.empty in
     (* prepopulate the map with the constants declared in cls *)
@@ -1292,7 +1293,7 @@ let typeconst_def
       c_tconst_doc_comment;
       c_tconst_is_ctx;
     } =
-  if Ast_defs.is_c_enum cls.c_kind then
+  if is_enum_or_enum_class cls.c_kind then
     Errors.cannot_declare_constant `enum pos cls.c_name;
 
   let name = snd cls.c_name ^ "::" ^ snd id in
@@ -1428,7 +1429,7 @@ let class_const_def ~in_enum_class c env cc =
           if
             (not (is_literal_expr e))
             && Partial.should_check_error c.c_mode 2035
-            && not Ast_defs.(is_c_enum c.c_kind)
+            && not (is_enum_or_enum_class c.c_kind)
           then
             Errors.missing_typehint (fst id)
       end;
@@ -1793,7 +1794,7 @@ let check_SupportDynamicType env c =
                 error_parent_support_dynamic_type
                   parent_type
                   c.c_support_dynamic_type
-            | Ast_defs.(Cenum | Ctrait) -> ()
+            | Ast_defs.(Cenum | Cenum_class | Ctrait) -> ()
           end
         | None -> ())
 
@@ -1801,9 +1802,9 @@ let class_def_ env c tc =
   let env =
     let kind =
       if Ast_defs.is_c_enum c.c_kind then
-        match c.c_enum with
-        | Some enum when enum.e_enum_class -> SN.AttributeKinds.enumcls
-        | _ -> SN.AttributeKinds.enum
+        SN.AttributeKinds.enum
+      else if Ast_defs.is_c_enum_class c.c_kind then
+        SN.AttributeKinds.enumcls
       else
         SN.AttributeKinds.cls
     in
@@ -1868,7 +1869,7 @@ let class_def_ env c tc =
     match c.c_kind with
     | Ast_defs.Cclass k when Ast_defs.is_abstract k -> implements
     | Ast_defs.Ctrait -> implements @ req_implements
-    | Ast_defs.(Cclass _ | Cinterface | Cenum) -> []
+    | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class) -> []
   in
   let check_constructor_dep = check_constructor_dep env in
   check_implements_or_extends_unique implements;
@@ -1916,7 +1917,7 @@ let class_def_ env c tc =
   check_parent env c tc;
   check_parents_sealed env c tc;
   if TypecheckerOptions.enforce_sealed_subclasses (Env.get_tcopt env) then
-    if Ast_defs.is_c_enum c.c_kind then
+    if is_enum_or_enum_class c.c_kind then
       if TypecheckerOptions.enable_enum_supertyping (Env.get_tcopt env) then
         sealed_subtype ctx c ~is_enum:true
       else

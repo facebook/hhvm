@@ -5157,9 +5157,11 @@ and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs :
       | `Dynamic -> ()
       | `Class ((pos, name), class_info, c_ty) ->
         let pos = Pos_or_decl.unsafe_to_raw_pos pos in
+        let kind = Cls.kind class_info in
         if
-          Ast_defs.is_c_trait (Cls.kind class_info)
-          || Ast_defs.is_c_enum (Cls.kind class_info)
+          Ast_defs.is_c_trait kind
+          || Ast_defs.is_c_enum kind
+          || Ast_defs.is_c_enum_class kind
         then
           match cid with
           | CIexpr _
@@ -5169,9 +5171,7 @@ and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs :
           | CIparent
           | CIself ->
             ()
-        else if
-          Ast_defs.is_c_abstract (Cls.kind class_info) && Cls.final class_info
-        then
+        else if Ast_defs.is_c_abstract kind && Cls.final class_info then
           uninstantiable_error env p cid (Cls.pos class_info) name pos c_ty
         else
           ());

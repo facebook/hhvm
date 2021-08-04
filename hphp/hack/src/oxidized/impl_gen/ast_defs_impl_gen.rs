@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7545746289c2b529a6dc54996a586382>>
+// @generated SignedSource<<6f8d22235d405972424aab9c7ad3a2cc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -183,6 +183,9 @@ impl ClassishKind {
     pub fn mk_cenum() -> Self {
         ClassishKind::Cenum
     }
+    pub fn mk_cenum_class() -> Self {
+        ClassishKind::CenumClass
+    }
     pub fn is_cclass(&self) -> bool {
         match self {
             ClassishKind::Cclass(..) => true,
@@ -204,6 +207,12 @@ impl ClassishKind {
     pub fn is_cenum(&self) -> bool {
         match self {
             ClassishKind::Cenum => true,
+            _ => false,
+        }
+    }
+    pub fn is_cenum_class(&self) -> bool {
+        match self {
+            ClassishKind::CenumClass => true,
             _ => false,
         }
     }

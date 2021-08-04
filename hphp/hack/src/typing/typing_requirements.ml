@@ -45,5 +45,6 @@ let check_class env class_pos tc =
       ~init:env
   | Ast_defs.Ctrait
   | Ast_defs.Cinterface
+  | Ast_defs.Cenum_class
   | Ast_defs.Cenum ->
     env

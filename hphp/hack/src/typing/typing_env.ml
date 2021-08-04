@@ -793,6 +793,7 @@ let get_enum_constraint env x =
     | None -> None
     | Some e -> e.te_constraint)
 
+(* TODO: do we want to introduce a Cls.enum_class_type ? *)
 let get_enum env x =
   match get_class env x with
   | Some tc when Option.is_some (Cls.enum_type tc) -> Some tc
@@ -800,18 +801,12 @@ let get_enum env x =
 
 let is_enum env x =
   match get_enum env x with
-  | Some cls ->
-    (match Cls.enum_type cls with
-    | Some enum_type -> not enum_type.te_enum_class
-    | None -> false (* we know this is impossible due to get_enum *))
+  | Some cls -> Ast_defs.is_c_enum (Cls.kind cls)
   | None -> false
 
 let is_enum_class env x =
   match get_enum env x with
-  | Some cls ->
-    (match Cls.enum_type cls with
-    | Some enum_type -> enum_type.te_enum_class
-    | None -> false (* we know this is impossible due to get_enum *))
+  | Some cls -> Ast_defs.is_c_enum_class (Cls.kind cls)
   | None -> false
 
 let get_typeconst env class_ mid =

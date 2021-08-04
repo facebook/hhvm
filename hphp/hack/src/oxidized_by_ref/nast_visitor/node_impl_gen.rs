@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1e46010623403f36fd3623d415755c83>>
+// @generated SignedSource<<46b6407df634fae7f36375bdf6d512c2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -547,6 +547,7 @@ impl<'a> Node<'a> for ClassishKind<'a> {
             ClassishKind::Cinterface => {}
             ClassishKind::Ctrait => {}
             ClassishKind::Cenum => {}
+            ClassishKind::CenumClass => {}
         }
     }
 }
@@ -638,7 +639,6 @@ impl<'a> Node<'a> for Enum_<'a> {
                 base: ref __binding_0,
                 constraint: ref __binding_1,
                 includes: ref __binding_2,
-                enum_class: ref __binding_3,
             } => {
                 {
                     __binding_0.accept(v)
@@ -646,10 +646,7 @@ impl<'a> Node<'a> for Enum_<'a> {
                 {
                     __binding_1.accept(v)
                 }
-                {
-                    __binding_2.accept(v)
-                }
-                { __binding_3.accept(v) }
+                { __binding_2.accept(v) }
             }
         }
     }

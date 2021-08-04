@@ -207,7 +207,6 @@ and enum_type = {
   te_base: decl_ty;
   te_constraint: decl_ty option;
   te_includes: decl_ty list;
-  te_enum_class: bool;
 }
 [@@deriving show]
 
@@ -221,10 +220,6 @@ type typedef_type = {
   td_is_ctx: bool;
 }
 [@@deriving show]
-
-let is_enum_class = function
-  | None -> false
-  | Some info -> info.te_enum_class
 
 type phase_ty =
   | DeclTy of decl_ty

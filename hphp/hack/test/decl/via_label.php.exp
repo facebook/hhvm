@@ -1,7 +1,7 @@
 [("\\EE",
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
+       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum_class;
        sc_module = None; sc_name = ([8:12-14], "\\EE"); sc_tparams = [];
        sc_where_constraints = [];
        sc_extends =
@@ -38,12 +38,12 @@
        sc_enum_type =
        (Some { Typing_defs.te_base =
                (Rhint ([8:17-18]), (Tapply (([8:17-18], "\\I"), [])));
-               te_constraint = None; te_includes = []; te_enum_class = true })
+               te_constraint = None; te_includes = [] })
        }));
   ("\\FF",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum_class;
         sc_module = None; sc_name = ([12:12-14], "\\FF"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
@@ -82,13 +82,12 @@
                 (Rhint ([12:17-18]), (Tapply (([12:17-18], "\\I"), [])));
                 te_constraint = None;
                 te_includes =
-                [(Rhint ([12:27-29]), (Tapply (([12:27-29], "\\EE"), [])))];
-                te_enum_class = true })
+                [(Rhint ([12:27-29]), (Tapply (([12:27-29], "\\EE"), [])))] })
         }));
   ("\\Foo",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum_class;
         sc_module = None; sc_name = ([16:12-15], "\\Foo"); sc_tparams = [];
         sc_where_constraints = [];
         sc_extends =
@@ -127,8 +126,7 @@
           ];
         sc_enum_type =
         (Some { Typing_defs.te_base = (Rhint ([16:17-22]), Tmixed);
-                te_constraint = None; te_includes = []; te_enum_class = true
-                })
+                te_constraint = None; te_includes = [] })
         }));
   ("\\ff",
    (Shallow_decl_defs.Fun

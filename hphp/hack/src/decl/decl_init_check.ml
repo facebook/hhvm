@@ -169,4 +169,5 @@ let class_ ~has_own_cstr ?(class_cache : class_cache option) decl_env c =
   | Ast_defs.Cclass k when Ast_defs.is_abstract k && not has_own_cstr ->
     get_deferred_init_props ?class_cache decl_env c
   | Ast_defs.Ctrait -> get_deferred_init_props decl_env c
-  | Ast_defs.(Cclass _ | Cinterface | Cenum) -> (SSet.empty, SSet.empty)
+  | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class) ->
+    (SSet.empty, SSet.empty)

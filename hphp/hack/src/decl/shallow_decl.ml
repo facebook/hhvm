@@ -113,7 +113,9 @@ let typeconst env c tc =
    * ones.
    *)
   match c.c_kind with
-  | Ast_defs.Cenum -> None
+  | Ast_defs.Cenum_class
+  | Ast_defs.Cenum ->
+    None
   | Ast_defs.Ctrait
   | Ast_defs.Cinterface
   | Ast_defs.Cclass _ ->
@@ -356,7 +358,6 @@ let class_ ctx c =
         te_base = hint e.e_base;
         te_constraint = Option.map e.e_constraint ~f:hint;
         te_includes = List.map e.e_includes ~f:hint;
-        te_enum_class = e.e_enum_class;
       }
     in
     {

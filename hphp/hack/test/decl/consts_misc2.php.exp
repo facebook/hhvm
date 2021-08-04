@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,223 +1,223 @@
+@@ -1,222 +1,222 @@
  [("\\TestC",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -86,7 +86,7 @@
          sc_enum_type =
          (Some { Typing_defs.te_base = (Rhint ([7:13-16]), (Tprim Tint));
                  te_constraint = (Some (Rhint ([7:20-23]), (Tprim Tint)));
-                 te_includes = []; te_enum_class = false })
+                 te_includes = [] })
          }));
    ("\\TestRefs1",
     (Shallow_decl_defs.Class
@@ -129,7 +129,7 @@
    ("\\TestRefs2",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
+         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum_class;
          sc_module = None; sc_name = ([17:12-21], "\\TestRefs2");
          sc_tparams = []; sc_where_constraints = [];
          sc_extends =
@@ -222,7 +222,6 @@
            ];
          sc_enum_type =
          (Some { Typing_defs.te_base = (Rhint ([17:22-27]), Tmixed);
-                 te_constraint = None; te_includes = []; te_enum_class = true
-                 })
+                 te_constraint = None; te_includes = [] })
          }))
    ]

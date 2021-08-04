@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,96 +1,96 @@
+@@ -1,95 +1,95 @@
  [("\\foo",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = (Some "here");
@@ -90,8 +90,7 @@
            ];
          sc_enum_type =
          (Some { Typing_defs.te_base = (Rhint ([18:10-13]), (Tprim Tint));
-                 te_constraint = None; te_includes = []; te_enum_class = false
-                 })
+                 te_constraint = None; te_includes = [] })
          }));
    ("\\Tnew",
     (Shallow_decl_defs.Typedef

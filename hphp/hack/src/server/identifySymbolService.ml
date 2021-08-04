@@ -434,63 +434,59 @@ let visitor =
             && String.equal name c_name
           | _ -> false
         in
-        if Ast_defs.is_c_enum class_.c_kind then
-          match class_.c_enum with
-          | Some enum ->
-            (* If the class is an enum or enum class, remove the generated
-             * occurrences.
-             *)
-            if enum.Aast_defs.e_enum_class then
-              (* Enum classes might extend other classes, so we filter
-               * the list and we don't depend on their order.
-               *)
-              let c_extends =
-                List.filter_map
-                  ~f:(fun h ->
-                    if is_generated_builtin_enum_class h then
-                      (* don't take this occurrence into account *)
-                      None
-                    else
-                      Some h)
-                  class_.c_extends
-              in
-              (* We also have to take care of the type of constants that
-               * are rewritten from Foo to MemberOf<EnumName, Foo>
-               *)
-              let c_consts =
-                List.map
-                  ~f:(fun cc ->
-                    let cc_type =
-                      Option.map
-                        ~f:(fun h ->
-                          match snd h with
-                          | Happly ((_, name), [_; h])
-                            when String.equal name SN.Classes.cMemberOf ->
-                            h
-                          | _ -> h)
-                        cc.cc_type
-                    in
-                    { cc with cc_type })
-                  class_.c_consts
-              in
-              { class_ with c_extends; c_consts }
-            else
-              (* For enums, we could remove everything as they don't extends
-               * other classes, but let's filter anyway, just to be resilient
-               * to future evolutions
-               *)
-              let c_extends =
-                List.filter_map
-                  ~f:(fun h ->
-                    if is_generated_builtin_enum h then
-                      (* don't take this occurrence into account *)
-                      None
-                    else
-                      Some h)
-                  class_.c_extends
-              in
-              { class_ with c_extends }
-          | None -> class_
+        (* If the class is an enum or enum class, remove the generated
+               * occurrences.
+        *)
+        if Ast_defs.is_c_enum_class class_.c_kind then
+          (* Enum classes might extend other classes, so we filter
+           * the list and we don't depend on their order.
+           *)
+          let c_extends =
+            List.filter_map
+              ~f:(fun h ->
+                if is_generated_builtin_enum_class h then
+                  (* don't take this occurrence into account *)
+                  None
+                else
+                  Some h)
+              class_.c_extends
+          in
+          (* We also have to take care of the type of constants that
+           * are rewritten from Foo to MemberOf<EnumName, Foo>
+           *)
+          let c_consts =
+            List.map
+              ~f:(fun cc ->
+                let cc_type =
+                  Option.map
+                    ~f:(fun h ->
+                      match snd h with
+                      | Happly ((_, name), [_; h])
+                        when String.equal name SN.Classes.cMemberOf ->
+                        h
+                      | _ -> h)
+                    cc.cc_type
+                in
+                { cc with cc_type })
+              class_.c_consts
+          in
+          { class_ with c_extends; c_consts }
+        else if Ast_defs.is_c_enum class_.c_kind then
+          (* For enums, we could remove everything as they don't extends
+           * other classes, but let's filter anyway, just to be resilient
+           * to future evolutions
+           *)
+          let c_extends =
+            List.filter_map
+              ~f:(fun h ->
+                if is_generated_builtin_enum h then
+                  (* don't take this occurrence into account *)
+                  None
+                else
+                  Some h)
+              class_.c_extends
+          in
+          { class_ with c_extends }
         else
           class_
       in

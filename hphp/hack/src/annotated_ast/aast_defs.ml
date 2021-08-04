@@ -189,7 +189,6 @@ and enum_ = {
   e_base: hint;
   e_constraint: hint option;
   e_includes: hint list;
-  e_enum_class: bool;
 }
 
 and where_constraint_hint = hint * Ast_defs.constraint_kind * hint

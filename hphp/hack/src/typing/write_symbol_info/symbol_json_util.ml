@@ -121,6 +121,8 @@ let parent_decl_predicate parent_container_type =
 
 let get_parent_kind clss =
   match clss.c_kind with
+  | Cenum_class ->
+    raise (Failure "Unexpected enum class as parent container kind")
   | Cenum -> raise (Failure "Unexpected enum as parent container kind")
   | Cinterface -> InterfaceContainer
   | Ctrait -> TraitContainer

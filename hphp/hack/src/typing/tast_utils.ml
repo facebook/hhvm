@@ -138,7 +138,8 @@ let rec truthiness env ty =
         (match Cls.kind cls with
         | Cclass _ -> Always_truthy
         | Cinterface
-        | Cenum ->
+        | Cenum
+        | Cenum_class ->
           Possibly_falsy
         | Ctrait -> Unknown)
     )
@@ -230,6 +231,7 @@ let rec find_sketchy_types env acc ty =
         | Cinterface -> Traversable_interface (Env.print_ty env ty) :: acc
         | Cclass _
         | Ctrait
+        | Cenum_class
         | Cenum ->
           acc)
     )
@@ -277,4 +279,4 @@ let valid_newable_class cls =
     || not (equal_consistent_kind (snd (Cls.construct cls)) Inconsistent)
   (* There is currently a bug with interfaces that allows constructors to change
    * their signature, so they are not considered here. TODO: T41093452 *)
-  | Ast_defs.(Cinterface | Ctrait | Cenum) -> false
+  | Ast_defs.(Cinterface | Ctrait | Cenum | Cenum_class) -> false

@@ -92,7 +92,6 @@ bool TestExtCurl::RunTests(const std::string &which) {
   ServerPtr server = runServer();
 
   RUN_TEST(test_curl_init);
-  RUN_TEST(test_curl_copy_handle);
   RUN_TEST(test_curl_version);
   RUN_TEST(test_curl_setopt);
   RUN_TEST(test_curl_setopt_array);
@@ -121,23 +120,6 @@ bool TestExtCurl::test_curl_init() {
   Variant c = HHVM_FN(curl_init)();
   VS(HHVM_FN(curl_errno)(c.toResource()), 0);
   VS(HHVM_FN(curl_error)(c.toResource()), "");
-  return Count(true);
-}
-
-const StaticString s_OK("OK");
-
-bool TestExtCurl::test_curl_copy_handle() {
-  Variant c = HHVM_FN(curl_init)();
-  HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_URL,
-                       String(get_request_uri()));
-  HHVM_FN(curl_setopt)(c.toResource(), CURLOPT_RETURNTRANSFER, true);
-  Variant cpy = HHVM_FN(curl_copy_handle)(c.toResource());
-  HHVM_FN(curl_close)(c.toResource()); // to test cpy is still working fine
-  Variant res = HHVM_FN(curl_exec)(cpy.toResource());
-  if (res.toString() != s_OK) {
-    // XXX: t1782098
-    return CountSkip();
-  }
   return Count(true);
 }
 

@@ -25,7 +25,6 @@ struct TestExtCurl : TestCppExt {
   bool RunTests(const std::string& which) override;
 
   bool test_curl_init();
-  bool test_curl_copy_handle();
   bool test_curl_version();
   bool test_curl_setopt();
   bool test_curl_setopt_array();

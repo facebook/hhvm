@@ -1,4 +1,0 @@
-<?hh
-// the curl pool is 1, so the second request will throw RuntimeException
-$ch = HH\curl_init_pooled('test', 'foo.bar.com');
-$ch2 = HH\curl_init_pooled('test', 'www.baz.com');

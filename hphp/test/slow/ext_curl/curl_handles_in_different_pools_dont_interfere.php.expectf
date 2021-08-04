@@ -1,6 +1,0 @@
-string(7) "foo.com"
-string(7) "bar.com"
-
-Fatal error: Uncaught exception 'RuntimeException' with message 'Timeout reached waiting for an available pooled curl connection!' in %s/curl_handles_in_different_pools_dont_interfere.php:9
-Stack trace:
-#0 {main}

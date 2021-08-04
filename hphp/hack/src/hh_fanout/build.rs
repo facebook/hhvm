@@ -8,18 +8,16 @@ use rayon::prelude::*;
 
 use std::collections::{HashMap, HashSet};
 use std::ffi::OsString;
-use std::io::{BufReader, BufWriter, Read};
+use std::hash::{BuildHasher, Hash, Hasher};
+use std::io::{BufReader, Read};
 use std::path::Path;
 use std::{fs, io};
 
 use depgraph::dep::Dep;
 use depgraph::reader::{DepGraph, DepGraphOpener};
-use depgraph_writer::{write_hash_list, DepGraphWriter, HashListIndex};
+use depgraph_writer::{DepGraphWriter, HashListIndex, ShardedLookupTableWriter};
 use deps_rust::DepGraphDelta;
 use ocamlrep_ocamlpool::ocaml_ffi;
-
-use crossbeam;
-use crossbeam::channel::{bounded, Receiver, Sender};
 
 struct EdgesDir {
     handles: Vec<BufReader<fs::File>>,
@@ -93,6 +91,9 @@ impl EdgesDir {
 const NUM_BUCKETS: usize = 2048;
 const BUCKET_INDEX_MASK: u64 = (NUM_BUCKETS - 1) as u64;
 
+/// Structure used to read in all edges in parallel.
+///
+/// Basically a shared HashMap+HashSet
 struct Edges {
     edges: Vec<Mutex<HashMap<u64, HashSet<u64>>>>,
     hashes: Vec<Mutex<HashSet<u64>>>,
@@ -140,9 +141,12 @@ impl Edges {
             .map(|old_map| {
                 let mut new_map = HashMap::new();
                 for (dependency, dependents) in old_map.lock().iter() {
-                    let mut dependents: Vec<u64> = dependents.iter().copied().collect();
-                    dependents.sort();
-                    new_map.insert(*dependency, dependents);
+                    let mut dependents_vec: Vec<u64> = Vec::with_capacity(dependents.len());
+                    for x in dependents.iter() {
+                        dependents_vec.push(*x);
+                    }
+                    dependents_vec.sort();
+                    new_map.insert(*dependency, dependents_vec);
                 }
                 new_map
             })
@@ -176,6 +180,88 @@ impl Edges {
             .iter()
             .map(|bucket_mutex| bucket_mutex.lock().len())
             .sum()
+    }
+}
+
+/// Structure used to calculate hash list offsets in parallel.
+///
+/// Each bucket keeps track of
+///   - an internal offset `next_offset` that is incremented
+///     when reserving space for a hash list.
+///   - a map of hash list to
+///       1. internal hash list offset
+///       2. a list of dependencies that use this hash list
+///   - a bucket offset which is only calculated after the fact
+///     when all buckets have been processed.
+struct HashListsIndicesBucket<'a> {
+    next_offset: HashListIndex,
+    hash_list_indices: HashMap<&'a [u64], (HashListIndex, Vec<u64>)>,
+    bucket_offset: u32,
+}
+
+impl HashListsIndicesBucket<'_> {
+    fn with_hasher(hasher: std::collections::hash_map::RandomState) -> Self {
+        Self {
+            next_offset: HashListIndex(0),
+            hash_list_indices: HashMap::with_hasher(hasher),
+            bucket_offset: 0,
+        }
+    }
+}
+
+/// Allocates hash lists and populates the lookup table
+struct HashListsIndices<'a> {
+    buckets: Vec<Mutex<HashListsIndicesBucket<'a>>>,
+    hash_builder: std::collections::hash_map::RandomState,
+}
+
+impl<'a> HashListsIndices<'a> {
+    fn new() -> Self {
+        let hash_builder = std::collections::hash_map::RandomState::new();
+        Self {
+            hash_builder: hash_builder.clone(),
+            buckets: std::iter::repeat_with(|| {
+                Mutex::new(HashListsIndicesBucket::with_hasher(hash_builder.clone()))
+            })
+            .take(NUM_BUCKETS)
+            .collect(),
+        }
+    }
+
+    fn hash_u64(&self, key: &[u64]) -> u64 {
+        let mut hasher = self.hash_builder.build_hasher();
+        key.hash(&mut hasher);
+        hasher.finish() as u64
+    }
+
+    fn allocate_hash_list(&self, dependency: u64, hash_list: &'a [u64]) {
+        let hash = self.hash_u64(hash_list);
+        let bucket_index = (hash & BUCKET_INDEX_MASK) as usize;
+        let mut bucket = self.buckets.get(bucket_index).unwrap().lock();
+
+        let mut new_next_offset = bucket.next_offset;
+        bucket
+            .hash_list_indices
+            .entry(hash_list)
+            .and_modify(|(_, dependencies)| dependencies.push(dependency))
+            .or_insert_with(|| {
+                let size = DepGraphWriter::size_needed_for_hash_list(hash_list);
+                let offset = new_next_offset;
+                new_next_offset = offset.incr(size);
+                let dependencies = vec![dependency];
+                (offset, dependencies)
+            });
+        bucket.next_offset = new_next_offset;
+    }
+
+    fn make_absolute(&self, first_set_offset: u32) -> HashListIndex {
+        let mut bucket_offset: u32 = first_set_offset;
+        for lck in self.buckets.iter() {
+            let mut bucket = lck.lock();
+            bucket.bucket_offset = bucket_offset;
+            bucket_offset += bucket.next_offset.0;
+        }
+        HashListIndex(bucket_offset)
     }
 }
 
@@ -241,10 +327,10 @@ fn main(
 
     info!("Opening output file at {:?}", output);
     let f = fs::OpenOptions::new()
+        .read(true)
         .write(true)
         .create(true)
         .open(&output)?;
-    let f = BufWriter::new(f);
 
     match incremental {
         None => info!("Not reading in edges from previous dependency graph (incremental=None)"),
@@ -276,51 +362,44 @@ fn main(
     let sorted_hashes = all_edges.sorted_hashes();
 
     info!("Registering unique hashes");
-    let mut w = DepGraphWriter::new(f, sorted_hashes)?;
+    let w = DepGraphWriter::new(sorted_hashes)?;
 
-    info!("Registering unique sets of dependents");
-    let mut hash_list_indices: HashMap<&[u64], HashListIndex> = HashMap::new();
-    let mut lookup_table: HashMap<u64, HashListIndex> = HashMap::new();
-
-    let thread_num = 16;
-    let (tx, rx): (
-        Sender<(&[u64], HashListIndex)>,
-        Receiver<(&[u64], HashListIndex)>,
-    ) = bounded(2 * thread_num);
-
-    let indexer = w.get_indexer();
-    info!("Finished indexer clone");
-    crossbeam::scope(|s| {
-        for _n in 0..thread_num {
-            s.spawn(|_| {
-                let ff = fs::OpenOptions::new().write(true).open(&output).unwrap();
-                let mut ff = BufWriter::new(ff);
-                let thread_rx = rx.clone();
-                for d in thread_rx.iter() {
-                    write_hash_list(&indexer, &mut ff, d.1, &*d.0).unwrap();
-                }
-            });
+    info!("Calculating relative hash list offsets");
+    let hash_list_indices = HashListsIndices::new();
+    structured_edges.par_iter().for_each(|m| {
+        for (dependency, dependents) in m.iter() {
+            hash_list_indices.allocate_hash_list(*dependency, dependents);
         }
+    });
 
-        for m in structured_edges.iter() {
-            for (dependency, dependents) in m.iter() {
-                let hash_list_index = hash_list_indices.entry(dependents).or_insert_with(|| {
-                    let h = w.allocate_hash_list(dependents).unwrap();
-                    tx.send((dependents, h)).unwrap();
-                    h
-                });
-                lookup_table.insert(*dependency, *hash_list_index);
+    info!("Calculating absolute hash list offsets");
+    let next_set_offset = hash_list_indices.make_absolute(w.first_hash_list_offset());
+
+    info!("Cloning out indexer");
+    let mut w = w.open_writer(&f, next_set_offset)?;
+    let indexer = w.clone_indexer();
+
+    info!("Writing hash lists to database and constructing lookup table");
+    let lookup_table = ShardedLookupTableWriter::new();
+    let mmap = w.sharded_mmap();
+    hash_list_indices.buckets.par_iter().for_each(|lck| {
+        let bucket = lck.lock();
+        for (dependents, (hash_list_index, dependencies)) in bucket.hash_list_indices.iter() {
+            let absolute_hash_list_index = hash_list_index.incr(bucket.bucket_offset);
+            DepGraphWriter::write_hash_list(&mmap, &indexer, absolute_hash_list_index, dependents)
+                .unwrap();
+            for dependency in dependencies {
+                lookup_table.insert(*dependency, absolute_hash_list_index);
             }
         }
-        drop(tx);
-    })
-    .unwrap();
+    });
 
+    info!("Writing lookup table");
     let mut w = w.finalize();
+    w.register_lookup_table(lookup_table)?;
 
-    info!("Finalizing database");
-    w.register_lookup_table(lookup_table);
-    w.finalize()?;
+    info!("Writing indexer and syncing to disk");
+    w.write_indexer_and_finalize()?;
 
     info!("Done");
     std::process::exit(0)

@@ -10,6 +10,9 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 depgraph = { path = "../depgraph" }
+memmap = "0.7"
+parking_lot = "0.10.2"
+rayon = "1.2"
 
 [dev-dependencies]
 tempfile = "3.1"

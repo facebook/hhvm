@@ -204,7 +204,7 @@ function proc_nice(int $increment): bool;
  *
  */
 <<__Native>>
-function escapeshellarg(string $arg): string;
+function escapeshellarg(string $arg)[]: string;
 
 /**
  * escapeshellcmd() escapes any characters in a string that might be used to

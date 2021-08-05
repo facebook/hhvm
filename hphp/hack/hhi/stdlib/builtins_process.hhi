@@ -61,7 +61,7 @@ function proc_get_status(resource $process);
 <<__PHPStdLib>>
 function proc_nice(int $increment);
 <<__PHPStdLib>>
-function escapeshellarg(string $arg);
+function escapeshellarg(string $arg)[];
 <<__PHPStdLib>>
 function escapeshellcmd(string $command);
 

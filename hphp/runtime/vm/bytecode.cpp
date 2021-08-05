@@ -2625,8 +2625,9 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
       name->data());
   }
 
-  if (lookup.readonly && (op == ReadOnlyOp::Mutable || op == ReadOnlyOp::CheckROCOW)) {
-    if (op == ReadOnlyOp::CheckROCOW &&
+  if (lookup.readonly && (op == ReadOnlyOp::Mutable ||
+    op == ReadOnlyOp::CheckMutROCOW)) {
+    if (op == ReadOnlyOp::CheckMutROCOW &&
      (!isRefcountedType(lookup.val->m_type) || hasPersistentFlavor(lookup.val->m_type))) {
       mstate.roProp = true;
     } else {

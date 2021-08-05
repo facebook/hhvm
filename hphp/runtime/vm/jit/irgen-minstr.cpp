@@ -961,7 +961,7 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadOnlyOp
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
   if (!propInfo || propInfo->isConst || mode == MOpMode::Unset ||
-    (propInfo->readOnly && op == ReadOnlyOp::CheckROCOW)) {
+    (propInfo->readOnly && op == ReadOnlyOp::CheckMutROCOW)) {
     return propGenericImpl(env, mode, base, key, nullsafe, op);
   }
   if (propInfo->readOnly && op == ReadOnlyOp::Mutable) {

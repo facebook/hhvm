@@ -1231,11 +1231,11 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
           }
         }
         if (lookup.readonly) {
-          if (op == ReadOnlyOp::CheckROCOW &&
+          if (op == ReadOnlyOp::CheckMutROCOW &&
             (!isRefcountedType(lookup.val.type()) || hasPersistentFlavor(lookup.val.type()))) {
             assertx(roProp);
             *roProp = true;
-          } else if (op == ReadOnlyOp::Mutable || op == ReadOnlyOp::CheckROCOW) {
+          } else if (op == ReadOnlyOp::Mutable || op == ReadOnlyOp::CheckMutROCOW) {
             throwMustBeMutable(lookup.slot);
           }
         }

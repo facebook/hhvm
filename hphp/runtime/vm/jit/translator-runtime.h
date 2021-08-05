@@ -126,7 +126,7 @@ TypedValue* getSPropOrNull(const Class* cls,
                            bool writeMode,
                            bool mustBeMutable,
                            bool mustBeReadOnly,
-                           bool checkROCOW);
+                           bool checkMutROCOW);
 TypedValue* getSPropOrRaise(const Class* cls,
                             const StringData* name,
                             Class* ctx,
@@ -135,7 +135,7 @@ TypedValue* getSPropOrRaise(const Class* cls,
                             bool writeMode,
                             bool mustBeMutable,
                             bool mustBeReadOnly,
-                            bool checkROCOW);
+                            bool checkMutROCOW);
 
 int64_t switchDoubleHelper(double val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);

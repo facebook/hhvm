@@ -43,9 +43,9 @@
   Int 10
   .srcloc 19:3,19:18;
   BaseL $a Define
-  Dim Define PT:"foo" CheckROCOW
+  Dim Define PT:"foo" CheckMutROCOW
   Dim Define PT:"c" Mutable
-  Dim Define EI:0 CheckROCOW
+  Dim Define EI:0 CheckMutROCOW
   SetM 0 EI:0 Any
   .srcloc 19:3,19:24;
   PopC
@@ -55,7 +55,7 @@
     .srcloc 21:5,21:23;
     BaseL $a Define
     Dim Define PT:"ro_foo" Mutable
-    Dim Define PT:"c" CheckROCOW
+    Dim Define PT:"c" CheckMutROCOW
     Dim Define EI:0 Any
     SetM 0 EI:0 Any
     .srcloc 21:5,21:29;

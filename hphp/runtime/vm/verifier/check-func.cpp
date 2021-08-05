@@ -1560,7 +1560,7 @@ bool FuncChecker::checkReadOnlyOp(State* cur, PC pc, Op op) {
       decode_oa<MOpMode>(new_pc);
       auto const rop = decode_oa<ReadOnlyOp>(new_pc);
       if (rop == ReadOnlyOp::ReadOnly) return readOnlyImmNotSupported(rop, op);
-      cur->afterCheckROCOW = decode_oa<ReadOnlyOp>(new_pc) == ReadOnlyOp::CheckROCOW;
+      cur->afterCheckROCOW = decode_oa<ReadOnlyOp>(new_pc) == ReadOnlyOp::CheckMutROCOW;
       return true;
     } else {
       cur->afterCheckROCOW = false;
@@ -1592,12 +1592,12 @@ bool FuncChecker::checkReadOnlyOp(State* cur, PC pc, Op op) {
     }
     auto const is_prop_flavor = isPropFlavor(mcode);
     if (is_prop_flavor && cur->afterCheckROCOW) {
-      ferror("CheckROCOW must only appear on the last prop access.\n");
+      ferror("CheckMutROCOW must only appear on the last prop access.\n");
       return false;
     }
-    if (decode_oa<ReadOnlyOp>(new_pc) == ReadOnlyOp::CheckROCOW) {
+    if (decode_oa<ReadOnlyOp>(new_pc) == ReadOnlyOp::CheckMutROCOW) {
       if (!is_prop_flavor) {
-        ferror("Only property-flavored member keys may be marked CheckROCOW.\n");
+        ferror("Only property-flavored member keys may be marked CheckMutROCOW.\n");
         return false;
       } else {
         cur->afterCheckROCOW = true;

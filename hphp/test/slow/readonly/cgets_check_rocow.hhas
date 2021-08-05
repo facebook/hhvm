@@ -6,7 +6,7 @@
   String "ro_prop"
   String "Foo"
   ClassGetC
-  CGetS CheckROCOW
+  CGetS CheckMutROCOW
   .srcloc 9:3,9:20;
   SetL $x
   .srcloc 9:3,9:21;

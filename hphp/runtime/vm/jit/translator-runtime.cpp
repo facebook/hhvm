@@ -437,7 +437,7 @@ TypedValue* getSPropOrNull(const Class* cls,
                            bool writeMode,
                            bool mustBeMutable,
                            bool mustBeReadOnly,
-                           bool checkROCOW) {
+                           bool checkMutROCOW) {
   auto const lookup = ignoreLateInit
     ? cls->getSPropIgnoreLateInit(ctx, name)
     : cls->getSProp(ctx, name);
@@ -445,11 +445,11 @@ TypedValue* getSPropOrNull(const Class* cls,
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
   if (lookup.readonly) {
-    if (checkROCOW && (!isRefcountedType(lookup.val->m_type) ||
+    if (checkMutROCOW && (!isRefcountedType(lookup.val->m_type) ||
       hasPersistentFlavor(lookup.val->m_type))) {
       assertx(roProp);
       *roProp = true;
-    } else if (mustBeMutable || checkROCOW) {
+    } else if (mustBeMutable || checkMutROCOW) {
       throw_must_be_mutable(cls->name()->data(), name->data());
     }
   }
@@ -469,9 +469,9 @@ TypedValue* getSPropOrRaise(const Class* cls,
                             bool writeMode,
                             bool mustBeMutable,
                             bool mustBeReadOnly,
-                            bool checkROCOW) {
+                            bool checkMutROCOW) {
   auto sprop = getSPropOrNull(cls, name, ctx, roProp, ignoreLateInit, writeMode,
-                              mustBeMutable, mustBeReadOnly, checkROCOW);
+                              mustBeMutable, mustBeReadOnly, checkMutROCOW);
   if (UNLIKELY(!sprop)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(), name->data());

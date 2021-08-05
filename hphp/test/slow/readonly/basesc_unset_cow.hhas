@@ -7,7 +7,7 @@
   String "Foo"
   ClassGetC
   .srcloc 11:9,11:21;
-  BaseSC 1 0 Unset CheckROCOW
+  BaseSC 1 0 Unset CheckMutROCOW
   Dim Unset EI:0 Any
   UnsetM 2 EI:0 Any
   .srcloc 12:14,12:19;
@@ -15,7 +15,7 @@
   String "Foo"
   ClassGetC
   .srcloc 12:9,12:25;
-  BaseSC 1 0 Unset CheckROCOW
+  BaseSC 1 0 Unset CheckMutROCOW
   Dim Unset EI:0 Any
   UnsetM 2 EI:0 Any
   .srcloc 13:2,13:2;

@@ -127,7 +127,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, SSATmp* 
 
   auto const mustBeMutable = opts.readOnlyCheck == ReadOnlyOp::Mutable;
   auto const mustBeReadOnly = opts.readOnlyCheck == ReadOnlyOp::ReadOnly;
-  auto const checkROCOW = opts.readOnlyCheck == ReadOnlyOp::CheckROCOW;
+  auto const checkMutROCOW = opts.readOnlyCheck == ReadOnlyOp::CheckMutROCOW;
   /*
    * We can use ldClsPropAddrKnown if either we know which property it is and
    * that it is visible && accessible, or we know it is a property on this
@@ -145,7 +145,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, SSATmp* 
     if (lookup.slot == kInvalidSlot) return false;
     if (!lookup.accessible) return false;
     if (opts.writeMode && lookup.constant) return false;
-    if ((mustBeMutable || checkROCOW) && lookup.readonly) return false;
+    if ((mustBeMutable || checkMutROCOW) && lookup.readonly) return false;
     if (mustBeReadOnly && !lookup.readonly) return false;
     return true;
   }();
@@ -173,7 +173,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, SSATmp* 
     cns(env, opts.writeMode),
     cns(env, mustBeMutable),
     cns(env, mustBeReadOnly),
-    cns(env, checkROCOW)
+    cns(env, checkMutROCOW)
   );
   return { propAddr, nullptr, nullptr, kInvalidSlot };
 }

@@ -2006,7 +2006,7 @@ void in(ISS& env, const bc::BaseSC& op) {
   }
   auto const mightReadOnlyThrow =
     (op.subop4 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Maybe) ||
-    (op.subop4 == ReadOnlyOp::CheckROCOW && lookup.readOnly != TriBool::No);
+    (op.subop4 == ReadOnlyOp::CheckMutROCOW && lookup.readOnly != TriBool::No);
 
   // Loading the base from a static property can be considered
   // effect_free if there's no possibility of throwing. This requires

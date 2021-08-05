@@ -9,7 +9,7 @@
   .srcloc 11:20,11:20;
   Int 2
   .srcloc 11:3,11:16;
-  BaseSC 2 1 Define CheckROCOW
+  BaseSC 2 1 Define CheckMutROCOW
   SetM 2 EI:1 Any
   .srcloc 11:3,11:21;
   PopC
@@ -20,7 +20,7 @@
   .srcloc 12:16,12:16;
   Int 2
   .srcloc 12:3,12:12;
-  BaseSC 2 1 Define CheckROCOW
+  BaseSC 2 1 Define CheckMutROCOW
   SetM 2 EI:1 Any
   .srcloc 12:3,12:17;
   PopC

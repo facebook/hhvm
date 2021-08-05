@@ -690,17 +690,19 @@ void IniSetting::ParserCallback::onConstant(std::string &result,
 
 void IniSetting::ParserCallback::onVar(std::string &result,
                                        const std::string& name) {
-  std::string curval;
-  if (IniSetting::Get(name, curval)) {
-    result = curval;
-    return;
-  }
-  String value = g_context->getenv(name);
-  if (!value.isNull()) {
-    result = value.toCppString();
-    return;
-  }
   result.clear();
+  if (IniSetting::Get(name, result)) return;
+
+  if (g_context) {
+    auto const value = g_context->getenv(name);
+    if (value) result = value.toCppString();
+    return;
+  }
+
+  // We read -c ini files before ExecutionContext is initialized, so we can't
+  // use the m_env cache or CLI-server-specific env variables in that case.
+  auto const value = ::getenv(name.data());
+  if (value) result = value;
 }
 
 void IniSetting::ParserCallback::onOp(

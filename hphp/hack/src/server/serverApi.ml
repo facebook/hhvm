@@ -216,7 +216,7 @@ let make_remote_server_api
         }
       in
       (* TODO: use the telemetry *)
-      let (errors, _, _telemetry) =
+      let { Typing_check_service.errors; _ } =
         Typing_check_service.go
           ctx
           workers

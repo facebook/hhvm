@@ -84,7 +84,13 @@ let test () =
       profile_decling = Typing_service_types.DeclingOff;
     }
   in
-  let (errors, _delegate_state, _telemetry, (), (diag_pusher, _), cancelled) =
+  let ( ( (),
+          {
+            Typing_check_service.errors;
+            diagnostic_pusher = (diag_pusher, _);
+            _;
+          } ),
+        cancelled ) =
     Typing_check_service.go_with_interrupt
       ctx
       workers

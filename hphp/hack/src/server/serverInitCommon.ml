@@ -248,9 +248,12 @@ let type_check
     let count = List.length files_to_check in
     let logstring = Printf.sprintf "type-check %d files" count in
     Hh_logger.log "Begin %s" logstring;
-    let ( (errorl : Errors.t),
-          (delegate_state : Typing_service_delegate.state),
-          (typecheck_telemetry : Telemetry.t) ) =
+    let {
+      Typing_check_service.errors = errorl;
+      delegate_state;
+      telemetry = typecheck_telemetry;
+      _;
+    } =
       let memory_cap =
         genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
       in

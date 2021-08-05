@@ -155,7 +155,7 @@ let test_dep_graph_blob () =
 
       (* Check reentrancy *)
       for i = 0 to 2 do
-        let (errors, _delegate_state, _telemetry) =
+        let { Typing_check_service.errors; _ } =
           Typing_check_service.go
             ctx
             workers

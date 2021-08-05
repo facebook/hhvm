@@ -1084,11 +1084,14 @@ functor
         let ctx = Provider_utils.ctx_from_server_env env in
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"type check"
         @@ fun () ->
-        let ( errorl,
-              delegate_state,
-              telemetry,
-              env,
-              (diagnostic_pusher, time_first_typing_error),
+        let ( ( env,
+                {
+                  Typing_check_service.errors = errorl;
+                  delegate_state;
+                  telemetry;
+                  diagnostic_pusher =
+                    (diagnostic_pusher, time_first_typing_error);
+                } ),
               cancelled ) =
           Typing_check_service.go_with_interrupt
             ~diagnostic_pusher:env.ServerEnv.diagnostic_pusher

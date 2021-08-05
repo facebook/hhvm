@@ -68,7 +68,7 @@ let test () =
     }
   in
   let delegate_state = Typing_service_delegate.default in
-  let (errors, delegate_state, telemetry) =
+  let { Typing_check_service.errors; delegate_state; telemetry; _ } =
     Typing_check_service.go
       ctx
       None
@@ -82,7 +82,7 @@ let test () =
       ~check_info
   in
   Test.assert_errors errors "";
-  let (errors, delegate_state, telemetry) =
+  let { Typing_check_service.errors; delegate_state; telemetry; _ } =
     Typing_check_service.go
       ctx
       None
@@ -97,7 +97,7 @@ let test () =
   in
   Test.assert_errors errors "";
 
-  let (errors, delegate_state, telemetry) =
+  let { Typing_check_service.errors; delegate_state; telemetry; _ } =
     Typing_check_service.go
       ctx
       None
@@ -111,7 +111,7 @@ let test () =
       ~check_info
   in
   Test.assert_errors errors expected_errors;
-  let (errors, _delegate_state, _telemetry) =
+  let { Typing_check_service.errors; _ } =
     Typing_check_service.go
       ctx
       None

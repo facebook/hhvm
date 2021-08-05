@@ -7,8 +7,7 @@
  *
  *)
 
-type ('a, 'b, 'c, 'd, 'e) job_result =
-  'a * 'b * 'c * 'd * 'e * Relative_path.t list
+type 'a job_result = 'a * Relative_path.t list
 
 type seconds_since_epoch = float
 
@@ -27,6 +26,13 @@ val process_file :
   Typing_service_types.check_file_computation ->
   process_file_results
 
+type result = {
+  errors: Errors.t;
+  delegate_state: Typing_service_delegate.state;
+  telemetry: Telemetry.t;
+  diagnostic_pusher: Diagnostic_pusher.t option * seconds_since_epoch option;
+}
+
 val go :
   ?profiling:CgroupProfiler.Profiling.t ->
   Provider_context.t ->
@@ -39,7 +45,7 @@ val go :
   longlived_workers:bool ->
   remote_execution:ReEnv.t option ->
   check_info:Typing_service_types.check_info ->
-  Errors.t * Typing_service_delegate.state * Telemetry.t
+  result
 
 (** The last element returned, a list of paths, are the files which have not been
     processed fully or at all due to interrupts. *)
@@ -51,18 +57,13 @@ val go_with_interrupt :
   Telemetry.t ->
   Relative_path.Set.t ->
   Relative_path.t list ->
-  interrupt:'a MultiWorker.interrupt_config ->
+  interrupt:'env MultiWorker.interrupt_config ->
   memory_cap:int option ->
   longlived_workers:bool ->
   remote_execution:ReEnv.t option ->
   check_info:Typing_service_types.check_info ->
   profiling:CgroupProfiler.Profiling.t ->
-  ( Errors.t,
-    Typing_service_delegate.state,
-    Telemetry.t,
-    'a,
-    Diagnostic_pusher.t option * seconds_since_epoch option )
-  job_result
+  ('env * result) job_result
 
 module TestMocking : sig
   val set_is_cancelled : Relative_path.t -> unit

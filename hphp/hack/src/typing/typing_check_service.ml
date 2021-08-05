@@ -1003,8 +1003,7 @@ let process_sequentially
   in
   (typing_result, push_result)
 
-type ('a, 'b, 'c, 'd, 'e) job_result =
-  'a * 'b * 'c * 'd * 'e * Relative_path.t list
+type 'a job_result = 'a * Relative_path.t list
 
 module type Mocking_sig = sig
   val with_test_mocking :
@@ -1012,9 +1011,9 @@ module type Mocking_sig = sig
     file_computation BigList.t ->
     ((* ... before passing it to the real job executor... *)
      file_computation BigList.t ->
-    ('a, 'b, 'c, 'd, 'e) job_result) ->
+    'a job_result) ->
     (* ... which output we can also modify. *)
-    ('a, 'b, 'c, 'd, 'e) job_result
+    'a job_result
 end
 
 module NoMocking = struct
@@ -1041,10 +1040,8 @@ module TestMocking = struct
     in
     (* Only cancel once to avoid infinite loops *)
     cancelled := Relative_path.Set.empty;
-    let (res, delegate_state, telemetry, env, diag, cancelled) =
-      f (BigList.create fnl)
-    in
-    (res, delegate_state, telemetry, env, diag, mock_cancelled @ cancelled)
+    let (res, cancelled) = f (BigList.create fnl) in
+    (res, mock_cancelled @ cancelled)
 end
 
 module Mocking =
@@ -1067,6 +1064,13 @@ let should_process_sequentially
   | (None, file_count) when file_count < parallel_threshold -> true
   | _ -> false
 
+type result = {
+  errors: Errors.t;
+  delegate_state: Delegate.state;
+  telemetry: Telemetry.t;
+  diagnostic_pusher: Diagnostic_pusher.t option * seconds_since_epoch option;
+}
+
 let go_with_interrupt
     ?(diagnostic_pusher : Diagnostic_pusher.t option)
     (ctx : Provider_context.t)
@@ -1080,13 +1084,7 @@ let go_with_interrupt
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
-    ~(profiling : CgroupProfiler.Profiling.t) :
-    ( Errors.t,
-      Delegate.state,
-      Telemetry.t,
-      _,
-      Diagnostic_pusher.t option * seconds_since_epoch option )
-    job_result =
+    ~(profiling : CgroupProfiler.Profiling.t) : (_ * result) job_result =
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
   let fnl = BigList.create fnl in
@@ -1168,7 +1166,16 @@ let go_with_interrupt
         ~check_info
     end
   in
-  Typing_deps.register_discovered_dep_edges typing_result.dep_edges;
+  let {
+    errors;
+    dep_edges;
+    telemetry = typing_telemetry;
+    jobs_finished_to_end;
+    jobs_finished_early;
+  } =
+    typing_result
+  in
+  Typing_deps.register_discovered_dep_edges dep_edges;
   let cgroup_total_max =
     Base.Option.value ~default:0.0 (Measure.get_max "worker_cgroup_total")
   in
@@ -1188,27 +1195,17 @@ let go_with_interrupt
     Telemetry.create ()
     |> Telemetry.object_
          ~key:"finished_to_end"
-         ~value:
-           (Measure.stats_to_telemetry
-              ~record:typing_result.jobs_finished_to_end
-              ())
+         ~value:(Measure.stats_to_telemetry ~record:jobs_finished_to_end ())
     |> Telemetry.object_
          ~key:"finished_early"
-         ~value:
-           (Measure.stats_to_telemetry
-              ~record:typing_result.jobs_finished_early
-              ())
+         ~value:(Measure.stats_to_telemetry ~record:jobs_finished_early ())
   in
   let telemetry =
     telemetry
-    |> Telemetry.object_ ~key:"profiling_info" ~value:typing_result.telemetry
+    |> Telemetry.object_ ~key:"profiling_info" ~value:typing_telemetry
     |> Telemetry.object_ ~key:"job_sizes" ~value:job_size_telemetry
   in
-  ( typing_result.errors,
-    delegate_state,
-    telemetry,
-    env,
-    diagnostic_pusher,
+  ( (env, { errors; delegate_state; telemetry; diagnostic_pusher }),
     cancelled_fnl )
 
 let go
@@ -1222,9 +1219,9 @@ let go
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
-    ~(check_info : check_info) : Errors.t * Delegate.state * Telemetry.t =
+    ~(check_info : check_info) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
-  let (res, delegate_state, telemetry, (), (diagnostic_pusher, _), cancelled) =
+  let (((), result), cancelled) =
     go_with_interrupt
       ?diagnostic_pusher:None
       ctx
@@ -1240,6 +1237,5 @@ let go
       ~check_info
       ~profiling
   in
-  assert (Option.is_none diagnostic_pusher);
   assert (List.is_empty cancelled);
-  (res, delegate_state, telemetry)
+  result

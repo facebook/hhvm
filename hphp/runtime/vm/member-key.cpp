@@ -44,7 +44,9 @@ const char* memberCodeString(MemberCode mcode) {
   return memberNames[mcode];
 }
 
-const char* const readOnlyNames[] = {"Any", "ReadOnly", "Mutable", "CheckROCOW"};
+const char* const readOnlyNames[] = {
+  "Any", "ReadOnly", "Mutable", "CheckROCOW", "CheckMutROCOW"
+};
 
 const char* readOnlyString(ReadOnlyOp op) {
   static_assert(

@@ -200,6 +200,7 @@ pub enum ReadOnlyOp {
     Mutable,
     Any,
     CheckROCOW,
+    CheckMutROCOW,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

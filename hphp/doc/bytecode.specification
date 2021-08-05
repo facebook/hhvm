@@ -727,16 +727,18 @@ instruction in the group perform similar actions but take different kinds of
 inputs to specify the location to access.
 
 There are numerous instructions which incorporate a readonly immediate.
-These opcodes can be Mutable, Any, ReadOnly, or CheckROCOW, and specify the
-readonlyness constraint on the property read/written by the instruction.
-The Any immediate is equivalent to no runtime check. The ReadOnly immediate 
-specifies this property must be readonly. The Mutable immediate specifies
-this property must be mutable. The CheckROCOW immediate specifies this property
-can be readonly, if it is COW, and otherwise must be mutable.
+These opcodes can be Mutable, Any, ReadOnly, CheckROCOW, or CheckMutROCOW and
+specify the readonlyness constraint on the property read/written by the
+instruction. The Any immediate is equivalent to no runtime check.
+The ReadOnly immediate specifies this property must be readonly.
+The Mutable immediate specifies this property must be mutable. The CheckROCOW
+immediate specifies this property must be readonly and COW. The CheckMutROCOW
+immediate specifies this property must be mutable unless it is readonly
+and COW.
 
 The member instructions provide functionality to operate on elements and
 properties. Many of these instructions incorporate a readonly immediate
-argument, as well as an immediate argument which specifies one of the 
+argument, as well as an immediate argument which specifies one of the
 following member descriptors.
 
   EC       - consume a cell from the evaluation stack as an element

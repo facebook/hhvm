@@ -49,7 +49,7 @@ type 'a t
 
     A [get_single_seq] function should be supplied if there is a more efficient
     method to answer a single get/mem query. This will be used up until to_list
-    is called*)
+    is called. *)
 val make :
   is_canonical:('a -> bool) ->
   merge:(earlier:'a -> later:'a -> 'a) ->

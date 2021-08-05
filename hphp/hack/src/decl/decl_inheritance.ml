@@ -30,7 +30,7 @@ type inherited_members = {
 }
 
 (** Are we targeting a particular member or all members. Different sequences
- * will be generated depending on the [target] *)
+    will be generated depending on the [target] *)
 type target =
   | SingleMember of string
   | AllMembers

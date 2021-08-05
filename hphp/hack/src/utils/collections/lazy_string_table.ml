@@ -8,7 +8,12 @@
  *)
 
 open Core_kernel
+open Option.Monad_infix
 
+(** This is made of sequence [seq] and a hash table [tbl].
+    Initially, the hash table is empty while the sequence is not.
+    As we traverse the sequence to search for keys, we add them in the
+    hash table for future lookups. *)
 type 'a t = {
   tbl: ('a * bool) String.Table.t;
   mutable get_single_seq: (string -> 'a Sequence.t) option;
@@ -90,25 +95,25 @@ let rec get_from_single_seq t seq result =
       get_from_single_seq t rest (Some result))
 
 let get t id =
-  let rec go () =
-    match Hashtbl.find t.tbl id with
-    | Some (v, true) -> Some v
-    | (None | Some (_, false)) as result ->
-      (match advance t with
-      | Complete -> Option.map result ~f:fst
-      | Yield (id', v) when String.equal id' id -> Some v
-      | Skipped
-      | Yield _ ->
-        go ())
+  let rec search_in_seq () =
+    match advance t with
+    | Complete ->
+      (* We've traversed the entire seq, so whatever element we have cached
+         (canonical or not) is the correct value. *)
+      Hashtbl.find t.tbl id >>| fst
+    | Yield (id', v) when String.equal id' id -> Some v
+    | Skipped
+    | Yield _ ->
+      search_in_seq ()
   in
   match Hashtbl.find t.tbl id with
   | Some (v, true) -> Some v
   | None
   | Some (_, false) ->
     (match t.get_single_seq with
-    | None -> go ()
-    | Some f ->
-      let result = get_from_single_seq t (f id) None in
+    | None -> search_in_seq ()
+    | Some get_sub_seq ->
+      let result = get_from_single_seq t (get_sub_seq id) None in
       Option.iter result ~f:(fun v -> Hashtbl.set t.tbl ~key:id ~data:(v, true));
       result)
 

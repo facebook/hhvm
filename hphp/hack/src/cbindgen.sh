@@ -110,6 +110,7 @@ cbindgen="buck run fbsource//third-party/rust:cbindgen-cbindgen --"
      $cbindgen --config ../../cbindgen_hhbc_hhas_type.toml \
               --crate hhbc_by_ref_hhas_type \
               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_type.h")
+
 # hhbc_hhas_attribute.h
 (cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhas_attribute && \
      $cargo update && \
@@ -123,6 +124,13 @@ cbindgen="buck run fbsource//third-party/rust:cbindgen-cbindgen --"
      $cbindgen --config ../../cbindgen_hhbc_hhas_adata.toml \
               --crate hhbc_by_ref_hhas_adata \
               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_adata.h")
+
+# hhbc_hhas_body.h
+(cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhas_body && \
+     $cargo update && \
+     $cbindgen --config ../../cbindgen_hhbc_hhas_body.toml \
+              --crate hhbc_by_ref_hhas_body \
+              --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_body.h")
 
 signscript="$top/../xplat/python/signedsource_lib/signedsource.py"
 eval "${signscript}" sign "${top}"/hphp/hack/src/utils/ffi/ffi.h
@@ -138,6 +146,7 @@ eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_cons
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_type.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_attribute.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_adata.h
+eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_body.h
 
 # Quick sanity check: Does a program that includes these headers compile?
 cat > main.cpp <<EOF
@@ -147,6 +156,7 @@ cat > main.cpp <<EOF
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_type.h"
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_attribute.h"
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_adata.h"
+#include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_body.h"
 
 #include <iostream>
 
@@ -157,8 +167,10 @@ int main() {
   HhasSymbolRefs _b7;
   HhasConstant _b8;
   HhasAttribute _b9;
-  Info _c1;
-  HhasAdata _b10;
+  Info _b10;
+  HhasAdata _b11;
+  HhasBodyEnv _b12;
+  //HhasBody _b13;
 
   std::cout << "Ok!" << std::endl;
   return 0;

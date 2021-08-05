@@ -50,7 +50,7 @@ use oxidized::{
     aast, aast_defs, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos,
 };
 
-use ffi::{Maybe::*, Slice, Str};
+use ffi::{Maybe, Maybe::*, Slice, Str};
 
 use bitflags::bitflags;
 use indexmap::IndexSet;
@@ -460,7 +460,9 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         if let Some(cd) = env.scope.get_class() {
             Some(HhasBodyEnv {
                 is_namespaced,
-                class_info: Just((cd.get_kind().into(), Str::new_str(alloc, cd.get_name_str()))),
+                class_info: Just(
+                    (cd.get_kind().into(), Str::new_str(alloc, cd.get_name_str())).into(),
+                ),
                 parent_name: ClassExpr::get_parent_class_name(cd)
                     .map(|s| Str::new_str(alloc, s))
                     .into(),
@@ -497,9 +499,9 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             shadowed_tparams.into_iter().map(|s| Str::new_str(alloc, s)),
         ),
         params: Slice::fill_iter(alloc, params.into_iter()),
-        return_type_info,
-        doc_comment: doc_comment.map(|c| Str::new_str(alloc, &(c.0).1)),
-        env: body_env,
+        return_type_info: Maybe::from(return_type_info),
+        doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &(c.0).1))),
+        env: Maybe::from(body_env),
     })
 }
 

@@ -15,7 +15,7 @@ pub enum Maybe<T> {
     Nothing,
 }
 pub use self::Maybe::*;
-impl<T: Clone> Default for Maybe<T> {
+impl<T> Default for Maybe<T> {
     #[inline]
     fn default() -> Self {
         Nothing

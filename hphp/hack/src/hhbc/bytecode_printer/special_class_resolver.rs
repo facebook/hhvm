@@ -6,6 +6,7 @@
 use std::borrow::Cow;
 
 use decl_provider::DeclProvider;
+use ffi::Pair;
 use hhbc_by_ref_ast_class_expr::ClassExpr;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_body::HhasBodyEnv;
@@ -37,7 +38,7 @@ impl<'arena, 'decl, D: DeclProvider<'decl>> SpecialClassResolver for Emitter<'ar
                 body_env
                     .class_info
                     .as_ref()
-                    .map(|(k, s)| (k.clone().into(), s.as_str()))
+                    .map(|Pair(k, s)| (k.clone().into(), s.as_str()))
                     .into(),
                 body_env
                     .parent_name

@@ -9,10 +9,7 @@ mod write;
 pub use context::Context;
 pub use write::{Error, IoWrite, Result, Write};
 
-use ffi::{
-    Maybe::{Just, Nothing},
-    Pair, Slice, Str,
-};
+use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 
 use indexmap::IndexSet;
 use itertools::Itertools;
@@ -311,12 +308,16 @@ fn print_fun_def<W: Write>(
     print_fun_attrs(ctx, w, fun_def)?;
     print_span(w, &fun_def.span)?;
     w.write(" ")?;
-    option(w, &body.return_type_info, |w, ti| {
-        print_type_info(w, ti)?;
-        w.write(" ")
-    })?;
+    option(
+        w,
+        &(Option::from(body.return_type_info.clone())),
+        |w, ti| {
+            print_type_info(w, ti)?;
+            w.write(" ")
+        },
+    )?;
     w.write(fun_def.name.to_raw_string())?;
-    print_params(ctx, w, fun_def.body.env.as_ref(), fun_def.params())?;
+    print_params(ctx, w, fun_def.body.env.as_ref().into(), fun_def.params())?;
     if fun_def.is_generator() {
         w.write(" isGenerator")?;
     }
@@ -524,9 +525,9 @@ fn print_doc_comment<W: Write>(
 fn print_doc_comment_<'arena, W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    doc_comment: &Option<Str<'arena>>,
+    doc_comment: &Maybe<Str<'arena>>,
 ) -> Result<(), W::Error> {
-    if let Some(cmt) = doc_comment {
+    if let Just(cmt) = doc_comment {
         ctx.newline(w)?;
         write!(w, ".doc {};", triple_quote_string(cmt.as_str()))?;
     }
@@ -744,12 +745,12 @@ fn print_method_def<W: Write>(
     print_method_attrs(ctx, w, method_def)?;
     print_span(w, &method_def.span)?;
     w.write(" ")?;
-    option(w, &body.return_type_info, |w, t| {
+    option(w, &(Option::from(body.return_type_info.clone())), |w, t| {
         print_type_info(w, t)?;
         w.write(" ")
     })?;
     w.write(method_def.name.to_raw_string())?;
-    print_params(ctx, w, body.env.as_ref(), &body.params)?;
+    print_params(ctx, w, body.env.as_ref().into(), &body.params)?;
     if method_def.flags.contains(HhasMethodFlags::IS_GENERATOR) {
         w.write(" isGenerator")?;
     }

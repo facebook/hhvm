@@ -338,7 +338,6 @@ name = "compile_ffi"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "atty",
  "decl_provider",
  "external_decl_provider",
  "hhbc_by_ref_compile",

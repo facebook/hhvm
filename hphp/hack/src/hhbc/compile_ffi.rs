@@ -228,7 +228,7 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
         let on_retry = &mut |stack_size_tried: usize| {
             // Not always printing warning here because this would fail
             // some HHVM tests.
-            if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
+            if std::env::var_os("HH_TEST_MODE").is_some() {
                 // Safety : We rely on the C caller that `env` can be
                 // legitmately reinterpreted as a `*const CEnv` and that
                 // on doing so, it points to a valid properly initialized
@@ -290,7 +290,9 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
     }) {
         Ok(ptr) => ptr,
         Err(_) => {
-            eprintln!("Error: panic in ffi function hackc_compile_from_text_cpp_ffi");
+            if std::env::var_os("HH_TEST_MODE").is_some() {
+                eprintln!("Error: panic in ffi function hackc_compile_from_text_cpp_ffi");
+            }
             std::ptr::null()
         }
     }
@@ -335,7 +337,7 @@ extern "C" fn compile_from_text_ffi(
             let stack_slack = |stack_size| stack_size * 6 / 10;
             let on_retry = &mut |stack_size_tried: usize| {
                 // Not always printing warning here because this would fail some HHVM tests
-                if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
+                if std::env::var_os("HH_TEST_MODE").is_some() {
                     let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
                     eprintln!(
                         "[hrust] warning: hhbc_by_ref_compile_from_text_ffi exceeded stack of {} KiB on: {}",

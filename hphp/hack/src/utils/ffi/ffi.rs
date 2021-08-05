@@ -123,14 +123,8 @@ pub struct Slice<'a, T> {
     pub marker: std::marker::PhantomData<&'a ()>,
 }
 impl<'a, T> Default for Slice<'a, T> {
-    //TODO(SF, 2021-07-28): Replace body with `Slice::empty()` when
-    // D29944377 lands.
     fn default() -> Self {
-        Slice {
-            data: std::ptr::NonNull::dangling().as_ptr(),
-            len: 0,
-            marker: std::marker::PhantomData,
-        }
+        Slice::empty()
     }
 }
 impl<'a, T> AsRef<[T]> for Slice<'a, T> {

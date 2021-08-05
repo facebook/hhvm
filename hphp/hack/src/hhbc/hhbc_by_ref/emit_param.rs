@@ -52,7 +52,6 @@ pub fn from_asts<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .map(|params| rename_params(alloc, params))
 }
 
-#[allow(clippy::needless_lifetimes)]
 fn rename_params<'arena>(
     alloc: &'arena bumpalo::Bump,
     mut params: Vec<HhasParam<'arena>>,
@@ -60,12 +59,12 @@ fn rename_params<'arena>(
     fn rename<'arena>(
         alloc: &'arena bumpalo::Bump,
         names: &BTreeSet<Str<'arena>>,
-        param_counts: &mut BTreeMap<String, usize>,
+        param_counts: &mut BTreeMap<Str<'arena>, usize>,
         param: &mut HhasParam<'arena>,
     ) {
-        match param_counts.get_mut(param.name.as_str()) {
+        match param_counts.get_mut(&param.name) {
             None => {
-                param_counts.insert(param.name.as_str().into(), 0);
+                param_counts.insert(param.name, 0);
             }
             Some(count) => {
                 let newname = Str::new_str(alloc, format!("{}{}", param.name.as_str(), count));

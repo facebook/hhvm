@@ -7,7 +7,6 @@ use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhas_type::Info;
 use hhbc_by_ref_hhbc_ast::ClassishKind;
 use hhbc_by_ref_instruction_sequence::InstrSeq;
-use oxidized::doc_comment::DocComment;
 
 #[derive(Default, Debug)]
 #[repr(C)]
@@ -29,7 +28,7 @@ pub struct HhasBody<'arena> {
     pub shadowed_tparams: Slice<'arena, Str<'arena>>,
     pub params: Slice<'arena, HhasParam<'arena>>,
     pub return_type_info: Option<Info<'arena>>,
-    pub doc_comment: Option<DocComment>,
+    pub doc_comment: Option<Str<'arena>>,
     pub env: Option<HhasBodyEnv<'arena>>,
 }
 
@@ -45,7 +44,7 @@ pub fn default_with_body_instrs<'arena>(body_instrs: InstrSeq<'arena>) -> HhasBo
         shadowed_tparams: Slice::<'arena, Str<'arena>>::default(),
         params: Slice::<'arena, HhasParam<'arena>>::default(),
         return_type_info: Option::<Info>::default(),
-        doc_comment: Option::<DocComment>::default(),
+        doc_comment: Option::<Str<'arena>>::default(),
         env: Option::<HhasBodyEnv<'arena>>::default(),
     }
 }

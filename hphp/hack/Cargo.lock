@@ -1735,7 +1735,6 @@ dependencies = [
  "hhbc_by_ref_hhas_type",
  "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_instruction_sequence",
- "oxidized",
 ]
 
 [[package]]

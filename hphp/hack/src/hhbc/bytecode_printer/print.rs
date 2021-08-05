@@ -521,6 +521,18 @@ fn print_doc_comment<W: Write>(
     Ok(())
 }
 
+fn print_doc_comment_<'arena, W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    doc_comment: &Option<Str<'arena>>,
+) -> Result<(), W::Error> {
+    if let Some(cmt) = doc_comment {
+        ctx.newline(w)?;
+        write!(w, ".doc {};", triple_quote_string(cmt.as_str()))?;
+    }
+    Ok(())
+}
+
 fn print_use_precedence<W: Write>(
     ctx: &mut Context,
     w: &mut W,
@@ -1034,7 +1046,7 @@ fn print_body<W: Write>(
     body: &HhasBody,
     coeffects: &HhasCoeffects,
 ) -> Result<(), W::Error> {
-    print_doc_comment(ctx, w, &body.doc_comment)?;
+    print_doc_comment_(ctx, w, &body.doc_comment)?;
     if body.is_memoize_wrapper {
         ctx.newline(w)?;
         w.write(".ismemoizewrapper;")?;

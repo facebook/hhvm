@@ -497,7 +497,7 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         ),
         params: Slice::fill_iter(alloc, params.into_iter()),
         return_type_info,
-        doc_comment,
+        doc_comment: doc_comment.map(|c| Str::new_str(alloc, &(c.0).1)),
         env: body_env,
     })
 }

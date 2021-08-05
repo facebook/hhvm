@@ -1,0 +1,266 @@
+----- C -----
+dict(5) {
+  ["input"]=>
+  string(9) "   foo   "
+  ["to trim"]=>
+  NULL
+  ["trim_l()"]=>
+  string(3) "foo"
+  ["trim_left_l()"]=>
+  string(6) "foo   "
+  ["trim_right_l()"]=>
+  string(6) "   foo"
+}
+dict(5) {
+  ["input"]=>
+  string(9) "   foo   "
+  ["to trim"]=>
+  string(2) "ab"
+  ["trim_l()"]=>
+  string(9) "   foo   "
+  ["trim_left_l()"]=>
+  string(9) "   foo   "
+  ["trim_right_l()"]=>
+  string(9) "   foo   "
+}
+dict(5) {
+  ["input"]=>
+  string(0) ""
+  ["to trim"]=>
+  string(0) ""
+  ["trim_l()"]=>
+  string(0) ""
+  ["trim_left_l()"]=>
+  string(0) ""
+  ["trim_right_l()"]=>
+  string(0) ""
+}
+dict(5) {
+  ["input"]=>
+  string(3) "   "
+  ["to trim"]=>
+  string(0) ""
+  ["trim_l()"]=>
+  string(3) "   "
+  ["trim_left_l()"]=>
+  string(3) "   "
+  ["trim_right_l()"]=>
+  string(3) "   "
+}
+dict(5) {
+  ["input"]=>
+  string(3) "   "
+  ["to trim"]=>
+  string(1) "a"
+  ["trim_l()"]=>
+  string(3) "   "
+  ["trim_left_l()"]=>
+  string(3) "   "
+  ["trim_right_l()"]=>
+  string(3) "   "
+}
+dict(5) {
+  ["input"]=>
+  string(5) "afoob"
+  ["to trim"]=>
+  string(2) "ab"
+  ["trim_l()"]=>
+  string(3) "foo"
+  ["trim_left_l()"]=>
+  string(4) "foob"
+  ["trim_right_l()"]=>
+  string(4) "afoo"
+}
+dict(5) {
+  ["input"]=>
+  string(11) "💩foo💩"
+  ["to trim"]=>
+  string(4) "💩"
+  ["trim_l()"]=>
+  string(3) "foo"
+  ["trim_left_l()"]=>
+  string(7) "foo💩"
+  ["trim_right_l()"]=>
+  string(7) "💩foo"
+}
+dict(5) {
+  ["input"]=>
+  string(11) "💩foo💩"
+  ["to trim"]=>
+  string(4) "😀"
+  ["trim_l()"]=>
+  string(9) "��foo💩"
+  ["trim_left_l()"]=>
+  string(9) "��foo💩"
+  ["trim_right_l()"]=>
+  string(11) "💩foo💩"
+}
+----- UTF-8 -----
+dict(5) {
+  ["input"]=>
+  string(9) "   foo   "
+  ["to trim"]=>
+  NULL
+  ["trim_l()"]=>
+  string(3) "foo"
+  ["trim_left_l()"]=>
+  string(6) "foo   "
+  ["trim_right_l()"]=>
+  string(6) "   foo"
+}
+dict(5) {
+  ["input"]=>
+  string(9) "   foo   "
+  ["to trim"]=>
+  string(2) "ab"
+  ["trim_l()"]=>
+  string(9) "   foo   "
+  ["trim_left_l()"]=>
+  string(9) "   foo   "
+  ["trim_right_l()"]=>
+  string(9) "   foo   "
+}
+dict(5) {
+  ["input"]=>
+  string(0) ""
+  ["to trim"]=>
+  string(0) ""
+  ["trim_l()"]=>
+  string(0) ""
+  ["trim_left_l()"]=>
+  string(0) ""
+  ["trim_right_l()"]=>
+  string(0) ""
+}
+dict(5) {
+  ["input"]=>
+  string(3) "   "
+  ["to trim"]=>
+  string(0) ""
+  ["trim_l()"]=>
+  string(3) "   "
+  ["trim_left_l()"]=>
+  string(3) "   "
+  ["trim_right_l()"]=>
+  string(3) "   "
+}
+dict(5) {
+  ["input"]=>
+  string(3) "   "
+  ["to trim"]=>
+  string(1) "a"
+  ["trim_l()"]=>
+  string(3) "   "
+  ["trim_left_l()"]=>
+  string(3) "   "
+  ["trim_right_l()"]=>
+  string(3) "   "
+}
+dict(5) {
+  ["input"]=>
+  string(5) "afoob"
+  ["to trim"]=>
+  string(2) "ab"
+  ["trim_l()"]=>
+  string(3) "foo"
+  ["trim_left_l()"]=>
+  string(4) "foob"
+  ["trim_right_l()"]=>
+  string(4) "afoo"
+}
+dict(5) {
+  ["input"]=>
+  string(11) "💩foo💩"
+  ["to trim"]=>
+  string(4) "💩"
+  ["trim_l()"]=>
+  string(3) "foo"
+  ["trim_left_l()"]=>
+  string(7) "foo💩"
+  ["trim_right_l()"]=>
+  string(7) "💩foo"
+}
+dict(5) {
+  ["input"]=>
+  string(11) "💩foo💩"
+  ["to trim"]=>
+  string(4) "😀"
+  ["trim_l()"]=>
+  string(11) "💩foo💩"
+  ["trim_left_l()"]=>
+  string(11) "💩foo💩"
+  ["trim_right_l()"]=>
+  string(11) "💩foo💩"
+}
+dict(5) {
+  ["input"]=>
+  string(7) "
+ foo 
+"
+  ["to trim"]=>
+  NULL
+  ["trim_l()"]=>
+  string(3) "foo"
+  ["trim_left_l()"]=>
+  string(5) "foo 
+"
+  ["trim_right_l()"]=>
+  string(5) "
+ foo"
+}
+dict(5) {
+  ["input"]=>
+  string(7) "
+ foo 
+"
+  ["to trim"]=>
+  string(2) "ab"
+  ["trim_l()"]=>
+  string(7) "
+ foo 
+"
+  ["trim_left_l()"]=>
+  string(7) "
+ foo 
+"
+  ["trim_right_l()"]=>
+  string(7) "
+ foo 
+"
+}
+dict(5) {
+  ["input"]=>
+  string(7) "
+ foo 
+"
+  ["to trim"]=>
+  string(2) "
+ "
+  ["trim_l()"]=>
+  string(3) "foo"
+  ["trim_left_l()"]=>
+  string(5) "foo 
+"
+  ["trim_right_l()"]=>
+  string(5) "
+ foo"
+}
+dict(5) {
+  ["input"]=>
+  string(8) "
+ foo 
+	"
+  ["to trim"]=>
+  string(2) "
+ "
+  ["trim_l()"]=>
+  string(6) "foo 
+	"
+  ["trim_left_l()"]=>
+  string(6) "foo 
+	"
+  ["trim_right_l()"]=>
+  string(8) "
+ foo 
+	"
+}

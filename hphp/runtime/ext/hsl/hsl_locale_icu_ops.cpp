@@ -540,4 +540,55 @@ String HSLLocaleICUOps::splice(const String& str,
   return ret;
 }
 
+String HSLLocaleICUOps::trim_impl(const String& str,
+                                  const std::function<bool(UChar32)>& test,
+                                  TrimSides sides) const {
+  auto ustr = ustr_from_utf8(str);
+  int32_t start = 0;
+  int32_t end = ustr.length();
+  if ((uint8_t) sides & (uint8_t) TrimSides::LEFT) {
+    while (start <= end) {
+      if (!test(ustr.char32At(start))) {
+        break;
+      }
+      start = ustr.moveIndex32(start, 1);
+    }
+  }
+  if ((uint8_t) sides & (uint8_t) TrimSides::RIGHT) {
+    while (start <= end) {
+      auto prev = ustr.moveIndex32(end, -1);
+      if (!test(ustr.char32At(prev))) {
+        break;
+      }
+      end = prev;
+    }
+  }
+  if (end <= start) {
+    return empty_string();
+  }
+  std::string ret;
+  ustr.tempSubStringBetween(start, end).toUTF8String(ret);
+  return ret;
+}
+
+String HSLLocaleICUOps::trim(const String& str, TrimSides sides) const {
+  return trim_impl(str, u_isUWhiteSpace, sides);
+}
+
+String HSLLocaleICUOps::trim(const String& str, const String& what, TrimSides sides) const {
+  std::set<UChar32> what_set;
+  const auto uwhat = ustr_from_utf8(what);
+  for (int32_t i = 0; i < uwhat.length(); i = uwhat.moveIndex32(i, 1)) {
+    what_set.emplace(uwhat.char32At(i));
+  }
+
+  return trim_impl(
+    str,
+    [what_set](UChar32 ch) {
+      return what_set.find(ch) != what_set.end();
+    },
+    sides
+  );
+}
+
 } // namespace HPHP

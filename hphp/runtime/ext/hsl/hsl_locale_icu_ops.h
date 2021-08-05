@@ -59,6 +59,9 @@ namespace HPHP {
 
     virtual String pad_left(const String& str, int64_t len, const String& pad) const override;
     virtual String pad_right(const String& str, int64_t len, const String& pad) const override;
+
+    virtual String trim(const String& str, TrimSides sides) const override;
+    virtual String trim(const String& str, const String& what, TrimSides sides) const override;
     private:
       icu::Locale m_collate;
       icu::Locale m_ctype;
@@ -66,5 +69,11 @@ namespace HPHP {
       icu::Collator* m_collator = nullptr;
 
       icu::Collator* collator() const;
+      String trim_impl(
+        const String& str,
+        const std::function<bool(int32_t)>& test,
+        TrimSides sides
+      ) const;
   };
+
 } // namespace HPHP

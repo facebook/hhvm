@@ -57,5 +57,14 @@ namespace HPHP {
 
     virtual String pad_left(const String& str, int64_t len, const String& pad) const = 0;
     virtual String pad_right(const String& str, int64_t len, const String& pad) const = 0;
+
+    enum class TrimSides: uint8_t {
+      LEFT = 1,
+      RIGHT = 2,
+      BOTH = LEFT | RIGHT
+    };
+
+    virtual String trim(const String& str, TrimSides sides) const = 0;
+    virtual String trim(const String& str, const String& what, TrimSides sides) const = 0;
   };
 } // namespace HPHP

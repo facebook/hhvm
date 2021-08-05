@@ -254,4 +254,28 @@ String HSLLocaleLibcOps::pad_right(const String& str, int64_t len, const String&
   return string_pad(str.data(), str.length(), len, pad.data(), pad.length(), k_STR_PAD_RIGHT);
 }
 
+String HSLLocaleLibcOps::trim(const String& str, TrimSides sides) const {
+  switch (sides) {
+    case TrimSides::BOTH:
+      return HHVM_FN(trim)(str);
+    case TrimSides::LEFT:
+      return HHVM_FN(ltrim)(str);
+    case TrimSides::RIGHT:
+      return HHVM_FN(rtrim)(str);
+  }
+  not_reached();
+}
+
+String HSLLocaleLibcOps::trim(const String& str, const String& what, TrimSides sides) const {
+  switch (sides) {
+    case TrimSides::BOTH:
+      return HHVM_FN(trim)(str, what);
+    case TrimSides::LEFT:
+      return HHVM_FN(ltrim)(str, what);
+    case TrimSides::RIGHT:
+      return HHVM_FN(rtrim)(str, what);
+  }
+  not_reached();
+}
+
 } // namespace HPHP

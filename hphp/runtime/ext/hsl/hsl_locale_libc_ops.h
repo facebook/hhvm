@@ -54,6 +54,9 @@ namespace HPHP {
 
     virtual String pad_left(const String& str, int64_t len, const String& pad) const override;
     virtual String pad_right(const String& str, int64_t len, const String& pad) const override;
+
+    virtual String trim(const String& str, TrimSides sides) const override;
+    virtual String trim(const String& str, const String& what, TrimSides sides) const override;
     private:
       locale_t m_loc;
   };

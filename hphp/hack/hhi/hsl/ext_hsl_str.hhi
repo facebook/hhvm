@@ -41,4 +41,8 @@ function vsprintf_l(?Locale $loc, string $fmt, vec<mixed> $args): string;
 function pad_left_l(string $str, int $length, string $pad_str = ' ', ?Locale $loc = null): string;
 function pad_right_l(string $str, int $length, string $pad_str = ' ', ?Locale $loc = null): string;
 
+function trim_l(string $str, ?string $what, ?Locale $loc = null): string;
+function trim_left_l(string $str, ?string $what, ?Locale $loc = null): string;
+function trim_right_l(string $str, ?string $what, ?Locale $loc = null): string;
+
 } // namespace HH\Lib\_Private\_Str

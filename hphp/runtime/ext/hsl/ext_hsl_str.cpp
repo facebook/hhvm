@@ -283,6 +283,48 @@ String HHVM_FUNCTION(vsprintf_l,
   return string_printf(fmt.data(), fmt.size(), args);
 }
 
+namespace {
+String trim_impl(const String& str,
+                 const Variant& what,
+                 const Variant& maybe_loc,
+                 HSLLocale::Ops::TrimSides sides) {
+  if (str.empty()) {
+    return str;
+  }
+  if (what.isNull()) {
+    return get_locale(maybe_loc)->ops()->trim(str, sides);
+  }
+  assertx(what.isString());
+  const auto& swhat = what.asCStrRef();
+  
+  if (swhat.empty()) {
+    return str;
+  }
+  return get_locale(maybe_loc)->ops()->trim(str, swhat, sides);
+}
+} // namespace
+
+String HHVM_FUNCTION(trim_l,
+                     const String& str,
+                     const Variant& what,
+                     const Variant& maybe_loc) {
+  return trim_impl(str, what, maybe_loc, HSLLocale::Ops::TrimSides::BOTH);
+}
+
+String HHVM_FUNCTION(trim_left_l,
+                     const String& str,
+                     const Variant& what,
+                     const Variant& maybe_loc) {
+  return trim_impl(str, what, maybe_loc, HSLLocale::Ops::TrimSides::LEFT);
+}
+
+String HHVM_FUNCTION(trim_right_l,
+                     const String& str,
+                     const Variant& what,
+                     const Variant& maybe_loc) {
+  return trim_impl(str, what, maybe_loc, HSLLocale::Ops::TrimSides::RIGHT);
+}
+
 struct HSLStrExtension final : Extension {
   HSLStrExtension() : Extension("hsl_str", "0.1") {}
 
@@ -325,6 +367,10 @@ struct HSLStrExtension final : Extension {
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\pad_left_l, pad_left_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\pad_right_l, pad_right_l);
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\trim_l, trim_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\trim_left_l, trim_left_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\trim_right_l, trim_right_l);
 
     loadSystemlib();
   }

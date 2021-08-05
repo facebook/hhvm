@@ -79,4 +79,11 @@ function pad_left_l(string $str, int $length, string $pad_str = ' ', ?Locale $lo
 <<__Native>>
 function pad_right_l(string $str, int $length, string $pad_str = ' ', ?Locale $loc = null): string;
 
+<<__Native>>
+function trim_l(string $str, ?string $what, ?Locale $loc = null): string;
+<<__Native>>
+function trim_left_l(string $str, ?string $what, ?Locale $loc = null): string;
+<<__Native>>
+function trim_right_l(string $str, ?string $what, ?Locale $loc = null): string;
+
 } // namespace HH\Lib\_Private\_Str

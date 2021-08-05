@@ -30,15 +30,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(curl_init, const Variant& url = null_string);
-Variant HHVM_FUNCTION(curl_init_pooled, const String& poolName,
-                              const Variant& url = null_string);
-void HHVM_FUNCTION(curl_create_pool, const String& poolName,
-                              const int size = 5,
-                              const int connGetTimeout = 5000,
-                              const int reuseLimit = 500);
-bool HHVM_FUNCTION(curl_destroy_pool, const String& poolName);
-Array HHVM_FUNCTION(curl_list_pools);
-Variant HHVM_FUNCTION(curl_copy_handle, const Resource& ch);
 Variant HHVM_FUNCTION(curl_version, int uversion = CURLVERSION_NOW);
 bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int option, const Variant& value);
 bool HHVM_FUNCTION(curl_setopt_array, const Resource& ch, const Array& options);

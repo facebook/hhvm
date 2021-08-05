@@ -18,7 +18,6 @@
 #include "hphp/runtime/ext/curl/ext_curl.h"
 #include "hphp/runtime/ext/curl/curl-multi-await.h"
 #include "hphp/runtime/ext/curl/curl-multi-resource.h"
-#include "hphp/runtime/ext/curl/curl-pool.h"
 #include "hphp/runtime/ext/curl/curl-resource.h"
 #include "hphp/runtime/ext/curl/curl-share-resource.h"
 #include "hphp/runtime/ext/asio/socket-event.h"
@@ -76,80 +75,6 @@ Variant HHVM_FUNCTION(curl_init, const Variant& url /* = null_string */) {
   } else {
     return Variant(req::make<CurlResource>(url.toString()));
   }
-}
-
-Variant HHVM_FUNCTION(curl_init_pooled,
-    const String& poolName,
-    const Variant& url /* = null_string */)
-{
-  CurlHandlePoolPtr pool;
-  {
-    std::string cppPoolName = poolName.toCppString();
-    ReadLock lock(CurlHandlePool::namedPoolsMutex);
-    bool poolExists = (CurlHandlePool::namedPools.find(cppPoolName) !=
-        CurlHandlePool::namedPools.end());
-    if (!poolExists) {
-      raise_warning("Attempting to use connection pooling without "
-                    "specifying an existent connection pool!");
-      return false;
-    }
-    pool = CurlHandlePool::namedPools.at(cppPoolName);
-  }
-  if (url.isNull()) {
-    return Variant(req::make<CurlResource>(null_string, pool));
-  } else {
-    return Variant(req::make<CurlResource>(url.toString(), pool));
-  }
-}
-
-void HHVM_FUNCTION(curl_create_pool, const String& poolName,
-                   int size /* = 5 */, int connGetTimeout /* = 5000 */,
-                   int reuseLimit /* = 500 */) {
-  auto hp = std::make_shared<CurlHandlePool>(size, connGetTimeout, reuseLimit);
-  WriteLock lock(CurlHandlePool::namedPoolsMutex);
-  CurlHandlePool::namedPools[poolName.toCppString()] = hp;
-}
-
-bool HHVM_FUNCTION(curl_destroy_pool, const String& poolName) {
-  WriteLock lock(CurlHandlePool::namedPoolsMutex);
-  return CurlHandlePool::namedPools.erase(poolName.toCppString()) > 0;
-}
-
-const StaticString
-  s_size("size"),
-  s_connGetTimeout("connGetTimeout"),
-  s_reuseLimit("reuseLimit"),
-  s_stats("stats"),
-  s_fetches("fetches"),
-  s_empty("empty"),
-  s_fetchMs("fetchMs");
-
-Array HHVM_FUNCTION(curl_list_pools) {
-  ReadLock lock(CurlHandlePool::namedPoolsMutex);
-  auto size = CurlHandlePool::namedPools.size();
-  if (!size) return empty_dict_array();
-
-  DictInit ret(size);
-  for (auto it: CurlHandlePool::namedPools) {
-    auto pool = it.second;
-    auto stats = make_dict_array(
-      s_fetches, pool->statsFetches(),
-      s_empty, pool->statsEmpty(),
-      s_fetchMs, pool->statsFetchUs() / 1000
-    );
-    ret.set(String(it.first), make_dict_array(s_size, pool->size(),
-                                          s_connGetTimeout,
-                                          pool->connGetTimeout(),
-                                          s_reuseLimit,
-                                          pool->reuseLimit(),
-                                          s_stats, stats));
-  }
-  return ret.toArray();
-}
-
-Variant HHVM_FUNCTION(curl_copy_handle, const Resource& ch) {
-  CHECK_RESOURCE(curl);
-  return Variant(req::make<CurlResource>(curl));
 }
 
 const StaticString
@@ -732,9 +657,6 @@ bool HHVM_FUNCTION(curl_share_setopt, const Resource& sh,
 
 
 ///////////////////////////////////////////////////////////////////////////////
-
-static int  s_sizeVal, s_connGetTimeoutVal, s_reuseLimitVal;
-static std::string s_namedPools;
 
 struct CurlExtension final : Extension {
   CurlExtension() : Extension("curl") {}
@@ -1572,11 +1494,6 @@ struct CurlExtension final : Extension {
                 CurlResource::fb_specific_options::CURLOPT_FB_TLS_CIPHER_SPEC);
 
     HHVM_FE(curl_init);
-    HHVM_FALIAS(HH\\curl_init_pooled, curl_init_pooled);
-    HHVM_FALIAS(HH\\curl_create_pool, curl_create_pool);
-    HHVM_FALIAS(HH\\curl_destroy_pool, curl_destroy_pool);
-    HHVM_FALIAS(HH\\curl_list_pools, curl_list_pools);
-    HHVM_FE(curl_copy_handle);
     HHVM_FE(curl_version);
     HHVM_FE(curl_setopt);
     HHVM_FE(curl_setopt_array);
@@ -1604,48 +1521,8 @@ struct CurlExtension final : Extension {
     HHVM_FE(curl_share_setopt);
     HHVM_FE(curl_share_close);
 
-    Extension* ext = ExtensionRegistry::get("curl");
-    assertx(ext);
-
-    IniSetting::Bind(ext, IniSetting::PHP_INI_SYSTEM, "curl.namedPools",
-      "", &s_namedPools);
-    if (s_namedPools.length() > 0) {
-
-      // split on commas, search and bind ini settings for each pool
-      std::vector<string> pools;
-      boost::split(pools, s_namedPools, boost::is_any_of(","));
-
-      for (std::string poolname: pools) {
-        if (poolname.length() == 0) { continue; }
-
-        // get the user-entered settings for this pool, if there are any
-        std::string sizeIni = "curl.namedPools." + poolname + ".size";
-        std::string reuseLimitIni =
-          "curl.namedPools." + poolname + ".reuseLimit";
-        std::string connGetTimeoutIni =
-          "curl.namedPools." + poolname + ".connGetTimeout";
-
-        IniSetting::Bind(ext, IniSetting::PHP_INI_SYSTEM, sizeIni,
-            "5", &s_sizeVal);
-        IniSetting::Bind(ext, IniSetting::PHP_INI_SYSTEM, reuseLimitIni,
-            "100", &s_reuseLimitVal);
-        IniSetting::Bind(ext, IniSetting::PHP_INI_SYSTEM, connGetTimeoutIni,
-            "5000", &s_connGetTimeoutVal);
-
-        auto hp = std::make_shared<CurlHandlePool>(s_sizeVal,
-                                                   s_connGetTimeoutVal,
-                                                   s_reuseLimitVal);
-        CurlHandlePool::namedPools[poolname] = hp;
-      }
-    }
-
     loadSystemlib();
   }
-
-  void moduleShutdown() override {
-    CurlHandlePool::namedPools.clear();
-  }
-
 } s_curl_extension;
 
 }

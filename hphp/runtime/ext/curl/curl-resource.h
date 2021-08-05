@@ -4,7 +4,6 @@
 #include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/curl/curl-pool.h"
 
 #include "hphp/util/type-scan.h"
 
@@ -53,8 +52,7 @@ struct CurlResource : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(CurlResource)
   bool isInvalid() const override { return !m_cp; }
 
-  explicit CurlResource(const String& url, CurlHandlePoolPtr pool = nullptr);
-  explicit CurlResource(req::ptr<CurlResource> src);
+  explicit CurlResource(const String& url);
   ~CurlResource() { close(); }
 
   void closeForSweep();
@@ -148,8 +146,6 @@ struct CurlResource : SweepableResourceData {
   bool m_in_exec{false};
   bool m_emptyPost;
   bool m_safeUpload;
-  CurlHandlePoolPtr m_connPool;
-  PooledCurlHandle* m_pooledHandle;
   friend struct CurlMultiResource;
 };
 

@@ -131,28 +131,6 @@ function curl_getinfo(resource $ch,
 <<__Native>>
 function curl_init(?string $url = null): mixed;
 
-
-/**
- * Initialize a cURL session using a pooled curl handle. When this resource
- * is garbage collected, the curl handle will be saved for reuse later.
- * Pooled curl handles persist between requests.
- *
- * @deprecated Use HH\curl_init_pooled instead
- * @param string $poolName - The name of the connection pool to use.
- *  Named connection pools are initialized via the 'curl.namedPools' ini
- *  setting, which is a comma separated list of named pools to create,
- *  or at runtime with curl_create_pool.
- * @param string $url - If provided, the CURLOPT_URL option will be set
- *   to its value. You can manually set this using the curl_setopt()
- *   function.    The file protocol is disabled by cURL if open_basedir is
- *   set.
- *
- * @return resource - Returns a cURL handle on success, FALSE on errors.
- */
-function curl_init_pooled(string $poolName, ?string $url = null): mixed {
-    return HH\curl_init_pooled($poolName, $url);
-}
-
 /**
  * Add a normal cURL handle to a cURL multi handle
  *
@@ -430,66 +408,6 @@ function curl_share_setopt(resource $sh, int $option, mixed $value) : bool;
 function curl_share_close(resource $sh): void;
 
 } // root namespace
-
-namespace HH {
-
-/**
- * Initialize a cURL session using a pooled curl handle. When this resource
- * is garbage collected, the curl handle will be saved for reuse later.
- * Pooled curl handles persist between requests.
- *
- * @param string $poolName - The name of the connection pool to use.
- *  Named connection pools are initialized via the 'curl.namedPools' ini
- *  setting, which is a comma separated list of named pools to create,
- *  or at runtime with curl_create_pool.
- * @param string $url - If provided, the CURLOPT_URL option will be set
- *   to its value. You can manually set this using the curl_setopt()
- *   function.    The file protocol is disabled by cURL if open_basedir is
- *   set.
- *
- * @return resource - Returns a cURL handle on success, FALSE on errors.
- */
-<<__Native>>
-function curl_init_pooled(string $poolName, ?string $url = null): mixed;
-
-/**
- * Create a new cURL pool for use with curl_init_pooled. If a pool of
- * this name already exists it will be replaced.
- *
- * @param string $poolName = The name of the connection pool to create.
- * @param int $size - The number of connections the pool will hold
- * @param int $connGetTimeout - The maximum time curl_init_pooled() will wait
- *  for a connection to become available before throwing a RuntimeException
- * @param int $reuseLimit - The number of times a connection will be reused
- *  before being recycled.
- */
-<<__Native>>
-function curl_create_pool(string $poolName, int $size = 5,
-                          int $connGetTimeout = 5000,
-                          int $reuseLimit = 500): void;
-
-/**
- * Destroys a cURL connection pool. curl_init_pooled() calls that are
- * already waiting on a handle will still complete, but no new calls
- * will receive a pooled handle.
- *
- * @param string $poolName - The name of the connection pool to destroy.
- * @return bool - Returns true on success, or false if the pool does not
- *  exist.
- */
-<<__Native>>
-function curl_destroy_pool(string $poolName): bool;
-
-/**
- * Lists currently available cURL connection pools and their configuration.
- *
- * @return array
- */
-<<__Native>>
-function curl_list_pools(): darray<string, darray>;
-
-
-} // namespace HH
 
 namespace HH\Asio {
 

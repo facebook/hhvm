@@ -1,5 +1,4 @@
 #include "hphp/runtime/ext/curl/curl-resource.h"
-#include "hphp/runtime/ext/curl/curl-pool.h"
 #include "hphp/runtime/ext/curl/curl-share-resource.h"
 #include "hphp/runtime/ext/curl/ext_curl.h"
 
@@ -51,16 +50,9 @@ CurlResource::ToFree::~ToFree() {
   }
 }
 
-CurlResource::CurlResource(const String& url,
-                           CurlHandlePoolPtr pool /*=nullptr */)
-: m_emptyPost(true), m_safeUpload(true), m_connPool(pool),
-  m_pooledHandle(nullptr) {
-  if (m_connPool) {
-    m_pooledHandle = m_connPool->fetch();
-    m_cp = m_pooledHandle->useHandle();
-  } else {
-    m_cp = curl_easy_init();
-  }
+CurlResource::CurlResource(const String& url)
+    : m_emptyPost(true), m_safeUpload(true) {
+  m_cp = curl_easy_init();
   m_url = url;
 
   memset(m_error_str, 0, sizeof(m_error_str));
@@ -87,40 +79,6 @@ CurlResource::CurlResource(const String& url,
   }
 }
 
-CurlResource::CurlResource(req::ptr<CurlResource> src)
-: m_connPool(nullptr), m_pooledHandle(nullptr) {
-  // NOTE: we never pool copied curl handles, because all spots in
-  // the pool are pre-populated
-
-  assertx(src && src != this);
-  assertx(!src->m_exception);
-
-  m_cp = curl_easy_duphandle(src->get());
-  m_url = src->m_url;
-
-  memset(m_error_str, 0, sizeof(m_error_str));
-  m_error_no = CURLE_OK;
-
-  m_write.method = src->m_write.method;
-  m_write.type   = src->m_write.type;
-  m_read.method  = src->m_read.method;
-  m_write_header.method = src->m_write_header.method;
-
-  m_write.fp        = src->m_write.fp;
-  m_write_header.fp = src->m_write_header.fp;
-  m_read.fp         = src->m_read.fp;
-
-  m_write.callback = src->m_write.callback;
-  m_read.callback = src->m_read.callback;
-  m_write_header.callback = src->m_write_header.callback;
-
-  reseat();
-
-  m_to_free = src->m_to_free;
-  m_emptyPost = src->m_emptyPost;
-  m_safeUpload = src->m_safeUpload;
-}
-
 void CurlResource::sweep() {
   m_write.buf.release();
   m_write_header.buf.release();
@@ -142,17 +100,9 @@ void CurlResource::close() {
 
 void CurlResource::closeForSweep() {
   assertx(!m_exception);
-  if (m_cp) {
-    if (m_connPool) {
-      // reuse this curl handle if we're pooling
-      assertx(m_pooledHandle);
-      m_connPool->store(m_pooledHandle);
-      m_pooledHandle = nullptr;
-    } else {
-      curl_easy_cleanup(m_cp);
-    }
-    m_cp = nullptr;
-  }
+  if (!m_cp) return;
+  curl_easy_cleanup(m_cp);
+  m_cp = nullptr;
 }
 
 void CurlResource::check_exception() {

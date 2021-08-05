@@ -544,9 +544,24 @@ pub enum BareThisOp {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
 pub enum ClassishKind {
-    Class,
+    Class, // c.f. ast_defs::ClassishKind - may need Abstraction (Concrete, Abstract)
     Interface,
     Trait,
+    Enum,
+    EnumClass,
+}
+impl std::convert::From<oxidized::ast_defs::ClassishKind> for ClassishKind {
+    fn from(k: oxidized::ast_defs::ClassishKind) -> ClassishKind {
+        use oxidized::ast_defs::ClassishKind::*;
+        use ClassishKind::*;
+        match k {
+            Cclass(_) => Class,
+            Cinterface => Interface,
+            Ctrait => Trait,
+            Cenum => Enum,
+            CenumClass => EnumClass,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

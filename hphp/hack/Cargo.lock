@@ -1732,6 +1732,7 @@ version = "0.0.0"
 dependencies = [
  "hhbc_by_ref_hhas_param",
  "hhbc_by_ref_hhas_type",
+ "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_instruction_sequence",
  "oxidized",
 ]
@@ -1917,6 +1918,7 @@ dependencies = [
  "hhbc_by_ref_label",
  "hhbc_by_ref_local",
  "hhbc_by_ref_runtime",
+ "oxidized",
 ]
 
 [[package]]

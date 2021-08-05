@@ -460,7 +460,7 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         if let Some(cd) = env.scope.get_class() {
             Some(HhasBodyEnv {
                 is_namespaced,
-                class_info: Some((cd.get_kind(), cd.get_name_str().to_string())),
+                class_info: Some((cd.get_kind().into(), cd.get_name_str().to_string())),
                 parent_name: ClassExpr::get_parent_class_name(cd),
             })
         } else {

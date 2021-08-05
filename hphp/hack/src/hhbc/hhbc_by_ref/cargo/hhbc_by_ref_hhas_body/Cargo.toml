@@ -10,6 +10,7 @@ path = "../../hhas_body.rs"
 [dependencies]
 hhbc_by_ref_hhas_param = { path = "../hhbc_by_ref_hhas_param" }
 hhbc_by_ref_hhas_type = { path = "../hhbc_by_ref_hhas_type" }
+hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
 hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }
 oxidized = { path = "../../../../oxidized" }
 

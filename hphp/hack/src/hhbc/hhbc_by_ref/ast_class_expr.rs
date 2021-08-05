@@ -7,6 +7,7 @@ use decl_provider::DeclProvider;
 use hhbc_by_ref_ast_scope::{self as ast_scope, Scope};
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhbc_ast::SpecialClsRef;
+use hhbc_by_ref_hhbc_ast::{ClassishKind, ClassishKind::*};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::InstrSeq;
 use naming_special_names_rust::classes;
@@ -25,17 +26,17 @@ impl<'arena> ClassExpr<'arena> {
         emitter: &Emitter<'arena, 'decl, D>,
         check_traits: bool,
         resolve_self: bool,
-        opt_class_info: Option<(ast_defs::ClassishKind, &str)>,
+        opt_class_info: Option<(ClassishKind, &str)>,
     ) -> Option<String> {
         if let Some((kind, class_name)) = opt_class_info {
-            if (kind != ast_defs::ClassishKind::Ctrait || check_traits) && resolve_self {
+            if (kind != Trait || check_traits) && resolve_self {
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
                     return Some(class_name.to_string());
                 } else if let Some(c) = emitter
                     .emit_global_state()
                     .get_closure_enclosing_class(class_name)
                 {
-                    if c.kind != ast_defs::ClassishKind::Ctrait {
+                    if ClassishKind::from(c.kind.clone()) != Trait {
                         return Some(c.name.clone());
                     }
                 }
@@ -58,14 +59,14 @@ impl<'arena> ClassExpr<'arena> {
         emitter: &Emitter<'arena, 'decl, D>,
         check_traits: bool,
         resolve_self: bool,
-        opt_class_info: Option<(ast_defs::ClassishKind, &str)>,
+        opt_class_info: Option<(hhbc_by_ref_hhbc_ast::ClassishKind, &str)>,
         opt_parent_name: Option<String>,
     ) -> Option<String> {
         if let Some((kind, class_name)) = opt_class_info {
-            if kind == ast_defs::ClassishKind::Cinterface {
+            if kind == hhbc_by_ref_hhbc_ast::ClassishKind::Interface {
                 return Some(classes::PARENT.to_string());
             };
-            if (kind != ast_defs::ClassishKind::Ctrait || check_traits) && resolve_self {
+            if (kind != hhbc_by_ref_hhbc_ast::ClassishKind::Trait || check_traits) && resolve_self {
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
                     return opt_parent_name;
                 } else if let Some(c) = emitter
@@ -91,7 +92,10 @@ impl<'arena> ClassExpr<'arena> {
                 emitter,
                 check_traits,
                 resolve_self,
-                Some((cd.get_kind(), cd.get_name_str())),
+                Some((
+                    hhbc_by_ref_hhbc_ast::ClassishKind::from(cd.get_kind()),
+                    cd.get_name_str(),
+                )),
                 Self::get_parent_class_name(cd),
                 expr,
             )
@@ -104,7 +108,7 @@ impl<'arena> ClassExpr<'arena> {
         emitter: &Emitter<'arena, 'decl, D>,
         check_traits: bool,
         resolve_self: bool,
-        opt_class_info: Option<(ast_defs::ClassishKind, &str)>,
+        opt_class_info: Option<(hhbc_by_ref_hhbc_ast::ClassishKind, &str)>,
         opt_parent_name: Option<String>,
         expr: ast::Expr,
     ) -> Self {

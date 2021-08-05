@@ -1855,6 +1855,8 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
                     ClassishKind::Class => "Class",
                     ClassishKind::Interface => "Interface",
                     ClassishKind::Trait => "Trait",
+                    ClassishKind::Enum => "Enum",
+                    ClassishKind::EnumClass => "EnumClass",
                 },
             ],
         ),

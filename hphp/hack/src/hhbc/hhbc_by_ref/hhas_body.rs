@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use hhbc_by_ref_hhas_param::HhasParam;
+use hhbc_by_ref_hhbc_ast::ClassishKind;
 use hhbc_by_ref_instruction_sequence::InstrSeq;
-use oxidized::{ast_defs, doc_comment::DocComment};
+use oxidized::doc_comment::DocComment;
 
 #[derive(Default, Debug)]
 pub struct HhasBodyEnv {
     pub is_namespaced: bool,
-    pub class_info: Option<(ast_defs::ClassishKind, String)>,
+    pub class_info: Option<(ClassishKind, String)>,
     pub parent_name: Option<String>,
 }
 

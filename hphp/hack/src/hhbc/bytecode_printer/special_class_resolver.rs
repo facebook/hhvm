@@ -34,10 +34,12 @@ impl<'arena, 'decl, D: DeclProvider<'decl>> SpecialClassResolver for Emitter<'ar
                 self,
                 true,
                 true,
-                body_env
-                    .class_info
-                    .as_ref()
-                    .map(|(k, s)| (k.clone(), s.as_str())),
+                body_env.class_info.as_ref().map(|(k, s)| {
+                    (
+                        hhbc_by_ref_hhbc_ast::ClassishKind::from(k.clone()),
+                        s.as_str(),
+                    )
+                }),
                 body_env.parent_name.clone(),
                 ast::Expr(
                     (),

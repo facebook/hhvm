@@ -4,4 +4,4 @@ not varray: dict
 not varray: keyset
 varray(0) {
 }
-not varray: array
+not varray: dict

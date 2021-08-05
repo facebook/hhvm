@@ -79,5 +79,5 @@ varray(2) {
   int(2)
 }
 int(1)
-string(5) "array"
-string(5) "array"
+string(3) "vec"
+string(4) "dict"

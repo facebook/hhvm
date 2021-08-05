@@ -2521,7 +2521,6 @@ void parse_parameter_list(AsmState& as,
   as.in.getc();
 
   bool seenVariadic = false;
-  bool seenRef = false;
 
   for (;;) {
     FuncEmitter::ParamInfo param;
@@ -2549,12 +2548,7 @@ void parse_parameter_list(AsmState& as,
     }
 
     if (as.in.tryConsume("inout")) {
-      if (seenVariadic) {
-        as.error("inout parameters cannot be variadic");
-      }
-      if (seenRef) {
-        as.error("functions cannot contain both inout and ref parameters");
-      }
+      if (seenVariadic) as.error("inout parameters cannot be variadic");
       param.setFlag(Func::ParamInfo::Flags::InOut);
     }
 

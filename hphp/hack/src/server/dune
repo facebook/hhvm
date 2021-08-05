@@ -348,6 +348,26 @@
   (preprocess (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name server_code_actions_services)
+  (wrapped false)
+  (modules
+    codeActionsService)
+  (libraries
+    annotated_ast
+    ast
+    collections
+    decl_provider
+    errors
+    full_fidelity
+    lsp
+    pos
+    provider_context
+    tast_provider
+    typing
+    utils_core)
+  (preprocess (pps lwt_ppx ppx_deriving.std)))
+
+(library
   (name server_api)
   (wrapped false)
   (modules
@@ -518,6 +538,7 @@
     server_api
     server_codemod_type_printer
     recli_stubs
+    server_code_actions_services
     server_coverage_metric_utils
     server_docblock_at
     server_env

@@ -891,6 +891,22 @@ let handle_request :
             ~column:document_location.column)
     in
     Lwt.return (state, Ok results)
+  (* Code actions (refactorings, quickfixes) *)
+  | (Initialized istate, Code_action param) ->
+    let path = param.Code_action.file_path |> Path.to_string in
+    let ctx = make_empty_ctx istate in
+    let (ctx, entry) =
+      Provider_context.add_entry_if_missing
+        ~ctx
+        ~path:(Relative_path.create_detect_prefix path)
+    in
+
+    let range = param.Code_action.range in
+    let results =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          CodeActionsService.go ~ctx ~entry ~path ~range)
+    in
+    Lwt.return (state, Ok results)
   (* Go to definition *)
   | (Initialized istate, Definition document_location) ->
     let (state, ctx, entry) = update_file_ctx istate document_location in

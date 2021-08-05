@@ -3269,6 +3269,36 @@ let do_willSaveWaitUntil
       }
   | false -> []
 
+let do_codeAction_local
+    (ide_service : ClientIdeService.t ref)
+    (env : env)
+    (tracking_id : string)
+    (ref_unblocked_time : float ref)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
+    (params : CodeActionRequest.params) :
+    CodeAction.command_or_action list Lwt.t =
+  let file_path =
+    Path.make
+      (lsp_uri_to_path
+         params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri)
+  in
+  let file_contents =
+    get_document_contents
+      editor_open_files
+      params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri
+  in
+  let range = lsp_range_to_ide params.CodeActionRequest.range in
+  let%lwt actions =
+    ide_rpc
+      ide_service
+      ~env
+      ~tracking_id
+      ~ref_unblocked_time
+      (ClientIdeMessage.Code_action
+         { ClientIdeMessage.Code_action.file_path; file_contents; range })
+  in
+  Lwt.return actions
+
 let do_signatureHelp
     (conn : server_conn)
     (ref_unblocked_time : float ref)
@@ -3497,7 +3527,7 @@ let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
           documentHighlightProvider = true;
           documentSymbolProvider = true;
           workspaceSymbolProvider = true;
-          codeActionProvider = false;
+          codeActionProvider = true;
           codeLensProvider = None;
           documentFormattingProvider = true;
           documentRangeFormattingProvider = true;
@@ -4313,6 +4343,20 @@ let handle_client_message
         | Some { SignatureHelp.signatures; _ } -> List.length signatures
       in
       Lwt.return_some { result_count; result_extra_telemetry = None }
+    (* textDocument/codeAction request *)
+    | (_, Some ide_service, RequestMessage (id, CodeActionRequest params)) ->
+      let%lwt result =
+        do_codeAction_local
+          ide_service
+          env
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
+      in
+      respond_jsonrpc ~powered_by:Serverless_ide id (CodeActionResult result);
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/formatting *)
     | (_, _, RequestMessage (id, DocumentFormattingRequest params)) ->
       let result = do_documentFormatting editor_open_files params in

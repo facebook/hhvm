@@ -118,6 +118,17 @@ module Document_symbol = struct
   type result = FileOutline.outline
 end
 
+(* Handles "textDocument/codeActions" LSP messages *)
+module Code_action = struct
+  type request = {
+    file_path: Path.t;
+    file_contents: string option;
+    range: Ide_api_types.range;
+  }
+
+  type result = Lsp.CodeAction.command_or_action list
+end
+
 module Type_coverage = struct
   type request = document_and_path
 
@@ -168,6 +179,7 @@ type _ t =
   | Type_definition : Type_definition.request -> Type_definition.result t
   | Type_coverage : Type_coverage.request -> Type_coverage.result t
   | Signature_help : Signature_help.request -> Signature_help.result t
+  | Code_action : Code_action.request -> Code_action.result t
 
 let t_to_string : type a. a t -> string = function
   | Initialize_from_saved_state _ -> "Initialize_from_saved_state"
@@ -211,6 +223,8 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Type_coverage(%s)" (Path.to_string file_path)
   | Signature_help { file_path; _ } ->
     Printf.sprintf "Signature_help(%s)" (Path.to_string file_path)
+  | Code_action { Code_action.file_path; _ } ->
+    Printf.sprintf "Code_action(%s)" (Path.to_string file_path)
 
 type 'a tracked_t = {
   tracking_id: string;

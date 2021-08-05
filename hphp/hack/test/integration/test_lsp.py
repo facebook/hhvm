@@ -3779,7 +3779,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "documentHighlightProvider": True,
                     "documentSymbolProvider": True,
                     "workspaceSymbolProvider": True,
-                    "codeActionProvider": False,
+                    "codeActionProvider": True,
                     "documentFormattingProvider": True,
                     "documentRangeFormattingProvider": True,
                     "documentOnTypeFormattingProvider": {

@@ -41,7 +41,7 @@
         "documentHighlightProvider": true,
         "documentSymbolProvider": true,
         "workspaceSymbolProvider": true,
-        "codeActionProvider": false,
+        "codeActionProvider": true,
         "documentFormattingProvider": true,
         "documentRangeFormattingProvider": true,
         "documentOnTypeFormattingProvider": {

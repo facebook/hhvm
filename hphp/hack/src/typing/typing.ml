@@ -5819,14 +5819,24 @@ and dispatch_call
         let env = Typing_local_ops.enforce_io pos env in
         let (env, tel, _) = exprs ~accept_using_var:true env el in
         let arraykey_ty = MakeType.arraykey (Reason.Rwitness pos) in
-        let env =
-          List.fold tel ~init:env ~f:(fun env (ty, pos, _) ->
-              SubType.sub_type
-                env
-                ty
-                arraykey_ty
-                (Errors.invalid_echo_argument_at pos))
+        let (env, rev_tel) =
+          List.fold
+            tel
+            ~init:(env, [])
+            ~f:(fun (env, tel) ((ty, pos, _) as te) ->
+              let (env, err_opt) =
+                Result.fold
+                  ~ok:(fun env -> (env, None))
+                  ~error:(fun env -> (env, Some (ty, arraykey_ty)))
+                @@ SubType.sub_type_res
+                     env
+                     ty
+                     arraykey_ty
+                     (Errors.invalid_echo_argument_at pos)
+              in
+              (env, hole_on_err ~err_opt te :: tel))
         in
+        let tel = List.rev rev_tel in
         let should_forget_fakes = false in
         ( make_call_special env id tel (MakeType.void (Reason.Rwitness pos)),
           should_forget_fakes )

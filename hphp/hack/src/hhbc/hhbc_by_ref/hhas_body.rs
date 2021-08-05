@@ -2,17 +2,18 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use ffi::Str;
+use ffi::{Maybe, Str};
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhbc_ast::ClassishKind;
 use hhbc_by_ref_instruction_sequence::InstrSeq;
 use oxidized::doc_comment::DocComment;
 
 #[derive(Default, Debug)]
+#[repr(C)]
 pub struct HhasBodyEnv<'arena> {
     pub is_namespaced: bool,
-    pub class_info: Option<(ClassishKind, Str<'arena>)>,
-    pub parent_name: Option<Str<'arena>>,
+    pub class_info: Maybe<(ClassishKind, Str<'arena>)>,
+    pub parent_name: Maybe<Str<'arena>>,
 }
 
 #[derive(Debug)] //Cannot be Default...

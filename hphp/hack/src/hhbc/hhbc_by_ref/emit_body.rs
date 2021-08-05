@@ -50,7 +50,7 @@ use oxidized::{
     aast, aast_defs, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos,
 };
 
-use ffi::{Maybe::Just, Slice, Str};
+use ffi::{Maybe::*, Slice, Str};
 
 use bitflags::bitflags;
 use indexmap::IndexSet;
@@ -460,14 +460,16 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         if let Some(cd) = env.scope.get_class() {
             Some(HhasBodyEnv {
                 is_namespaced,
-                class_info: Some((cd.get_kind().into(), Str::new_str(alloc, cd.get_name_str()))),
-                parent_name: ClassExpr::get_parent_class_name(cd).map(|s| Str::new_str(alloc, s)),
+                class_info: Just((cd.get_kind().into(), Str::new_str(alloc, cd.get_name_str()))),
+                parent_name: ClassExpr::get_parent_class_name(cd)
+                    .map(|s| Str::new_str(alloc, s))
+                    .into(),
             })
         } else {
             Some(HhasBodyEnv {
                 is_namespaced,
-                class_info: None,
-                parent_name: None,
+                class_info: Nothing,
+                parent_name: Nothing,
             })
         }
     } else {

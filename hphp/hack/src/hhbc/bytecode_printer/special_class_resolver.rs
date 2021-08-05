@@ -37,8 +37,13 @@ impl<'arena, 'decl, D: DeclProvider<'decl>> SpecialClassResolver for Emitter<'ar
                 body_env
                     .class_info
                     .as_ref()
-                    .map(|(k, s)| (k.clone().into(), s.as_str())),
-                body_env.parent_name.clone().map(|s| s.as_str().to_owned()),
+                    .map(|(k, s)| (k.clone().into(), s.as_str()))
+                    .into(),
+                body_env
+                    .parent_name
+                    .clone()
+                    .map(|s| s.as_str().to_owned())
+                    .into(),
                 ast::Expr(
                     (),
                     Pos::make_none(),

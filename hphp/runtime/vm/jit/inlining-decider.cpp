@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
@@ -123,9 +124,6 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
   }
   if (callee->maxStackCells() >= kStackCheckLeafPadding) {
     return refuse("function stack depth too deep");
-  }
-  if (callee->isMethod() && callee->cls() == Generator::getClass()) {
-    return refuse("generator member function");
   }
   if (callee->userAttributes().count(s_NeverInline.get())) {
     return refuse("callee marked __NEVER_INLINE");

@@ -6,7 +6,7 @@ vec(4) {
     vec(0) {
     }
   }
-  dict(7) {
+  dict(6) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -15,9 +15,6 @@ vec(4) {
     string(4) "send"
     ["class"]=>
     string(9) "Generator"
-    ["object"]=>
-    object(Generator) (0) {
-    }
     ["type"]=>
     string(2) "->"
     ["args"]=>
@@ -56,7 +53,7 @@ vec(4) {
     vec(0) {
     }
   }
-  dict(7) {
+  dict(6) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -65,9 +62,6 @@ vec(4) {
     string(4) "send"
     ["class"]=>
     string(9) "Generator"
-    ["object"]=>
-    object(Generator) (0) {
-    }
     ["type"]=>
     string(2) "->"
     ["args"]=>

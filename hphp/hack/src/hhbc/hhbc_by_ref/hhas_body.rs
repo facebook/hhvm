@@ -2,16 +2,17 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use ffi::Str;
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhbc_ast::ClassishKind;
 use hhbc_by_ref_instruction_sequence::InstrSeq;
 use oxidized::doc_comment::DocComment;
 
 #[derive(Default, Debug)]
-pub struct HhasBodyEnv {
+pub struct HhasBodyEnv<'arena> {
     pub is_namespaced: bool,
-    pub class_info: Option<(ClassishKind, String)>,
-    pub parent_name: Option<String>,
+    pub class_info: Option<(ClassishKind, Str<'arena>)>,
+    pub parent_name: Option<Str<'arena>>,
 }
 
 #[derive(Debug)] //Cannot be Default...
@@ -27,7 +28,7 @@ pub struct HhasBody<'arena> {
     pub params: Vec<HhasParam<'arena>>,
     pub return_type_info: Option<hhbc_by_ref_hhas_type::Info<'arena>>,
     pub doc_comment: Option<DocComment>,
-    pub env: Option<HhasBodyEnv>,
+    pub env: Option<HhasBodyEnv<'arena>>,
 }
 
 pub fn default_with_body_instrs<'arena>(body_instrs: InstrSeq<'arena>) -> HhasBody<'arena> {
@@ -43,6 +44,6 @@ pub fn default_with_body_instrs<'arena>(body_instrs: InstrSeq<'arena>) -> HhasBo
         params: Vec::<HhasParam<'arena>>::default(),
         return_type_info: Option::<hhbc_by_ref_hhas_type::Info>::default(),
         doc_comment: Option::<DocComment>::default(),
-        env: Option::<HhasBodyEnv>::default(),
+        env: Option::<HhasBodyEnv<'arena>>::default(),
     }
 }

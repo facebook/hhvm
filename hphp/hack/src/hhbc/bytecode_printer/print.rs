@@ -57,8 +57,8 @@ use write::*;
 
 use std::{borrow::Cow, io::Write as _, path::Path, write};
 
-struct ExprEnv<'e> {
-    pub codegen_env: Option<&'e HhasBodyEnv>,
+struct ExprEnv<'arena, 'e> {
+    pub codegen_env: Option<&'e HhasBodyEnv<'arena>>,
 }
 
 pub fn print_program<W: Write>(

@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use ffi::{Maybe, Slice, Str};
+use ffi::{Maybe, Pair, Slice, Str};
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhas_type::Info;
 use hhbc_by_ref_hhbc_ast::ClassishKind;
@@ -24,7 +24,7 @@ pub struct HhasBody<'arena> {
     pub num_closures: u32,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
-    pub upper_bounds: Slice<'arena, (Str<'arena>, Slice<'arena, Info<'arena>>)>,
+    pub upper_bounds: Slice<'arena, Pair<Str<'arena>, Slice<'arena, Info<'arena>>>>,
     pub shadowed_tparams: Slice<'arena, Str<'arena>>,
     pub params: Slice<'arena, HhasParam<'arena>>,
     pub return_type_info: Option<Info<'arena>>,
@@ -40,7 +40,7 @@ pub fn default_with_body_instrs<'arena>(body_instrs: InstrSeq<'arena>) -> HhasBo
         num_closures: u32::default(),
         is_memoize_wrapper: bool::default(),
         is_memoize_wrapper_lsb: bool::default(),
-        upper_bounds: Slice::<'arena, (Str<'arena>, Slice<'arena, Info>)>::default(),
+        upper_bounds: Slice::<'arena, Pair<Str<'arena>, Slice<'arena, Info>>>::default(),
         shadowed_tparams: Slice::<'arena, Str<'arena>>::default(),
         params: Slice::<'arena, HhasParam<'arena>>::default(),
         return_type_info: Option::<Info>::default(),

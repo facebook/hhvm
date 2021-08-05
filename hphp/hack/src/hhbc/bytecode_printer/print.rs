@@ -3224,14 +3224,14 @@ fn print_upper_bound<W: Write>(
 
 fn print_upper_bounds_<'arena, W: Write>(
     w: &mut W,
-    ubs: impl AsRef<[(Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>)]>,
+    ubs: impl AsRef<[Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>]>,
 ) -> Result<(), W::Error> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound_))
 }
 
 fn print_upper_bound_<'arena, W: Write>(
     w: &mut W,
-    (id, tys): &(Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>),
+    Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>,
 ) -> Result<(), W::Error> {
     paren(w, |w| {
         concat_str_by(w, " ", [id.as_str(), "as", ""])?;

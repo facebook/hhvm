@@ -489,6 +489,7 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     Str::new_str(alloc, s),
                     Slice::fill_iter(alloc, is.into_iter()),
                 )
+                    .into()
             }),
         ),
         shadowed_tparams: Slice::fill_iter(

@@ -2783,7 +2783,7 @@ and expr_
           | Set
           | ImmSet
           | Keyset ->
-            arraykey_value p class_name true
+            arraykey_value ~add_hole:true p class_name true
           | Vector
           | ImmVector
           | Vec ->
@@ -5535,8 +5535,13 @@ and array_value ~(expected : ExpectedTy.t option) env x =
   (env, (te, ty))
 
 and arraykey_value
-    p class_name is_set ~(expected : ExpectedTy.t option) env ((_, pos, _) as x)
-    =
+    ?(add_hole = false)
+    p
+    class_name
+    is_set
+    ~(expected : ExpectedTy.t option)
+    env
+    ((_, pos, _) as x) =
   let (env, (te, ty)) = array_value ~expected env x in
   let (ty_arraykey, reason) =
     if is_set then
@@ -5545,19 +5550,66 @@ and arraykey_value
     else
       (MakeType.arraykey (Reason.Ridx_dict pos), Reason.index_class class_name)
   in
-  let (env, err_opt) =
-    Result.fold
-      ~ok:(fun env -> (env, None))
-      ~error:(fun env -> (env, Some (ty, ty_arraykey)))
-    @@ Typing_coercion.coerce_type_res
-         p
-         reason
-         env
-         ty
-         { et_type = ty_arraykey; et_enforced = Enforced }
-         Errors.unify_error
+  let ty_expected = { et_type = ty_arraykey; et_enforced = Enforced } in
+  let (env, te) =
+    if add_hole then
+      (* If we have an error in coercion here, we will add a `Hole` indicating the
+           actual and expected type. The `Hole` may then be used in a codemod to
+           add a call to `UNSAFE_CAST` so we need to consider what type we expect.
+
+           If we were to add an expected type of 'arraykey' here it would be
+           correct but adding an `UNSAFE_CAST<?string,arraykey>($x)` means we
+           get cascading errors if we have e.g. a return type of keyset<string>.
+
+           To try and prevent this, if this is an optional type where the nonnull
+           part can be coerced to arraykey, we prefer that type as our expected type.
+      *)
+      let (ok, ty_actual) =
+        match deref ty with
+        | (_, Toption ty_inner) ->
+          ( (fun env ->
+              let r =
+                Reason.to_string "Expected `arraykey`" (Reason.Ridx_dict pos)
+                @ [
+                    ( get_pos ty,
+                      Format.sprintf
+                        "But got `?%s`"
+                        (Typing_print.full_strip_ns env ty_inner) );
+                  ]
+              in
+              (* We actually failed so generate the error we should
+                 have seen *)
+              Errors.unify_error (p, Reason.string_of_ureason reason) r;
+
+              (env, Some (ty, ty_inner))),
+            ty_inner )
+        | _ -> ((fun env -> (env, None)), ty)
+      in
+      let (env, err_opt) =
+        Result.fold ~ok ~error:(fun env -> (env, Some (ty_actual, ty_arraykey)))
+        @@ Typing_coercion.coerce_type_res
+             p
+             reason
+             env
+             ty_actual
+             ty_expected
+             Errors.unify_error
+      in
+      (env, hole_on_err ~err_opt te)
+    else
+      let env =
+        Typing_coercion.coerce_type
+          p
+          reason
+          env
+          ty
+          ty_expected
+          Errors.unify_error
+      in
+      (env, te)
   in
-  (env, (hole_on_err ~err_opt te, ty))
+
+  (env, (te, ty))
 
 and check_parent_construct pos env el unpacked_element env_parent =
   let check_not_abstract = false in

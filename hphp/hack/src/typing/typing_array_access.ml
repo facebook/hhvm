@@ -133,19 +133,52 @@ let check_arraykey_index error env pos container_ty index_ty =
       | _ -> Reason.index_array
     in
     let info_of_type ty = (get_pos ty, Typing_print.error env ty) in
+    let container_info = info_of_type container_ty
+    and index_info = info_of_type index_ty in
     let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict pos) in
-    (* Wrap generic type mismatch error with special error code *)
-    Result.fold
-      ~ok:(fun env -> (env, Ok index_ty))
-      ~error:(fun env -> (env, Error (index_ty, ty_arraykey)))
+    let ty_expected = { et_type = ty_arraykey; et_enforced = Enforced } in
+    (* If we have an error in coercion here, we will add a `Hole` indicating the
+       actual and expected type. The `Hole` may then be used in a codemod to
+       add a call to `UNSAFE_CAST` so we need to consider what type we expect.
+       There is a somewhat common pattern in older parts of www to do something like:
+
+       ```
+       function keyset_issue(?string $x): keyset<string> {
+         $xs = keyset<string>[];
+         ...
+         /* HH_FIXME[4435] keyset values must be arraykeys */
+         $xs[] = $x;
+         return Keyset\filter_nulls($xs);
+       }
+       ```
+       (even though it is impossible for keysets to contain nulls).
+
+       If we were to add an expected type of 'arraykey' here it would be
+       correct but adding an `UNSAFE_CAST<?string,arraykey>($x)` means we
+       get cascading errors; here, we now have the wrong return type.
+
+       To try and prevent this, if this is an optional type where the nonnull
+       part can be coerced to arraykey, we prefer that type as our expected type.
+    *)
+    let (ok, ty_actual) =
+      match deref index_ty with
+      | (_, Toption inner_ty) ->
+        ( (fun env ->
+            (* We actually failed to subtype against arraykey so generate
+               the error we would have seen *)
+            error pos container_info index_info;
+            (env, Error (index_ty, inner_ty))),
+          inner_ty )
+      | _ -> ((fun env -> (env, Ok index_ty)), index_ty)
+    in
+    Result.fold ~ok ~error:(fun env -> (env, Error (index_ty, ty_arraykey)))
     @@ Typing_coercion.coerce_type_res
          pos
          reason
          env
-         index_ty
-         { et_type = ty_arraykey; et_enforced = Enforced }
-         (fun ?code:_ _ _ ->
-           error pos (info_of_type container_ty) (info_of_type index_ty))
+         ty_actual
+         ty_expected
+         (fun ?code:_ _ _ -> error pos container_info index_info)
   else
     (env, Ok index_ty)
 

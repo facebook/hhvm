@@ -22,4 +22,35 @@
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
-      })
+      });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [8:1-11:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([8:46-50], (Hprim Tvoid)))); 
+         f_name = ([8:10-31], "\\keyset_lit_string_opt"); f_tparams = []; 
+         f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_params =
+         [{ param_annotation = (?string); param_type_hint = ((?string), (Some ([8:32-39], (Hoption ([8:33-39], (Hprim Tstring)))))); 
+            param_is_variadic = false; param_pos = [8:40-42]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([10:3-19],
+             (Expr
+                ((keyset<?string>), [10:3-18],
+                 (Binop ((Eq None), ((keyset<?string>), [10:3-5], (Lvar ([10:3-5], $y))),
+                    ((keyset<?string>), [10:8-18], (ValCollection (Keyset, None, [((?string), [10:15-17], (Hole (((?string), [10:15-17], (Lvar ([10:15-17], $x))), (?string), (string), Typing)))]))))))))
+             ];
+           fb_annotation = () };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

@@ -75,6 +75,6 @@ impl<'arena> HhasFunction<'arena> {
     }
 
     pub fn params(&self) -> &[HhasParam<'arena>] {
-        self.body.params.as_slice()
+        self.body.params.as_ref()
     }
 }

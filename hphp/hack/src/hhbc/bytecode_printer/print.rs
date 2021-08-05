@@ -713,7 +713,7 @@ fn print_enum_includes<W: Write>(
 
 fn print_shadowed_tparams<'arena, W: Write>(
     w: &mut W,
-    shadowed_tparams: &[Str<'arena>],
+    shadowed_tparams: impl AsRef<[Str<'arena>]>,
 ) -> Result<(), W::Error> {
     braces(w, |w| concat_str_by(w, ", ", shadowed_tparams))
 }
@@ -2174,22 +2174,22 @@ fn print_fatal_op<W: Write>(w: &mut W, f: &FatalOp) -> Result<(), W::Error> {
     }
 }
 
-fn print_params<W: Write>(
+fn print_params<'arena, W: Write>(
     ctx: &mut Context,
     w: &mut W,
     body_env: Option<&HhasBodyEnv>,
-    params: &[HhasParam],
+    params: impl AsRef<[HhasParam<'arena>]>,
 ) -> Result<(), W::Error> {
     paren(w, |w| {
         concat_by(w, ", ", params, |w, i| print_param(ctx, w, body_env, i))
     })
 }
 
-fn print_param<W: Write>(
+fn print_param<'arena, W: Write>(
     ctx: &mut Context,
     w: &mut W,
     body_env: Option<&HhasBodyEnv>,
-    param: &HhasParam,
+    param: &HhasParam<'arena>,
 ) -> Result<(), W::Error> {
     print_param_user_attributes(ctx, w, param)?;
     w.write_if(param.is_inout, "inout ")?;
@@ -3212,14 +3212,14 @@ fn print_upper_bound<W: Write>(
 
 fn print_upper_bounds_<'arena, W: Write>(
     w: &mut W,
-    ubs: impl AsRef<[(Str<'arena>, Vec<HhasTypeInfo<'arena>>)]>,
+    ubs: impl AsRef<[(Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>)]>,
 ) -> Result<(), W::Error> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound_))
 }
 
 fn print_upper_bound_<'arena, W: Write>(
     w: &mut W,
-    (id, tys): &(Str<'arena>, Vec<HhasTypeInfo>),
+    (id, tys): &(Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>),
 ) -> Result<(), W::Error> {
     paren(w, |w| {
         concat_str_by(w, " ", [id.as_str(), "as", ""])?;

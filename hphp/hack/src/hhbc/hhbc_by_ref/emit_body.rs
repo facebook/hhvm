@@ -477,20 +477,25 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     };
     Ok(HhasBody {
         body_instrs,
-        decl_vars: decl_vars.iter().map(|s| Str::new_str(alloc, s)).collect(),
+        decl_vars: Slice::fill_iter(alloc, decl_vars.into_iter().map(|s| Str::new_str(alloc, s))),
         num_iters,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
         num_closures,
-        upper_bounds: upper_bounds
-            .into_iter()
-            .map(|(s, is)| (Str::new_str(alloc, s), is))
-            .collect(),
-        shadowed_tparams: shadowed_tparams
-            .iter()
-            .map(|s| Str::new_str(alloc, s))
-            .collect(),
-        params,
+        upper_bounds: Slice::fill_iter(
+            alloc,
+            upper_bounds.into_iter().map(|(s, is)| {
+                (
+                    Str::new_str(alloc, s),
+                    Slice::fill_iter(alloc, is.into_iter()),
+                )
+            }),
+        ),
+        shadowed_tparams: Slice::fill_iter(
+            alloc,
+            shadowed_tparams.into_iter().map(|s| Str::new_str(alloc, s)),
+        ),
+        params: Slice::fill_iter(alloc, params.into_iter()),
         return_type_info,
         doc_comment,
         env: body_env,

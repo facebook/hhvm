@@ -122,7 +122,7 @@ pub struct Slice<'a, T> {
     pub len: usize,
     pub marker: std::marker::PhantomData<&'a ()>,
 }
-impl<'a, T> Default for Slice<'a, T> {
+impl<'a, T: 'a> Default for Slice<'a, T> {
     fn default() -> Self {
         Slice::empty()
     }
@@ -135,13 +135,21 @@ impl<'a, T> AsRef<[T]> for Slice<'a, T> {
         unsafe { std::slice::from_raw_parts(self.data, self.len) }
     }
 }
-impl<'a, T> Slice<'a, T> {
+impl<'a, T: 'a> Slice<'a, T> {
     pub fn new(t: &'a [T]) -> Self {
         Slice {
             data: t.as_ptr(),
             len: t.len(),
             marker: std::marker::PhantomData,
         }
+    }
+
+    pub fn fill_iter<I>(alloc: &'a bumpalo::Bump, iter: I) -> Slice<'a, T>
+    where
+        I: IntoIterator<Item = T>,
+        I::IntoIter: ExactSizeIterator,
+    {
+        Slice::new(alloc.alloc_slice_fill_iter(iter))
     }
 
     pub fn empty() -> Self {

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use decl_provider::DeclProvider;
-use ffi::Str;
+use ffi::{Slice, Str};
 use hhbc_by_ref_ast_scope::Scope;
 use hhbc_by_ref_emit_body as emit_body;
 use hhbc_by_ref_emit_fatal as emit_fatal;
@@ -37,7 +37,7 @@ pub fn emit_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         params.and_then(|params| {
             return_type_info.map(|rti| {
                 let mut body = hhbc_by_ref_hhas_body::default_with_body_instrs(body_instrs);
-                body.params = params;
+                body.params = Slice::fill_iter(alloc, params.into_iter());
                 body.return_type_info = Some(rti);
                 body
             })

@@ -306,7 +306,7 @@ fn print_fun_def<W: Write>(
     let body = &fun_def.body;
     newline(w)?;
     w.write(".function ")?;
-    print_upper_bounds(w, &body.upper_bounds)?;
+    print_upper_bounds_(w, &body.upper_bounds)?;
     w.write(" ")?;
     print_fun_attrs(ctx, w, fun_def)?;
     print_span(w, &fun_def.span)?;
@@ -711,9 +711,9 @@ fn print_enum_includes<W: Write>(
     w.write(")")
 }
 
-fn print_shadowed_tparams<W: Write>(
+fn print_shadowed_tparams<'arena, W: Write>(
     w: &mut W,
-    shadowed_tparams: &[String],
+    shadowed_tparams: &[Str<'arena>],
 ) -> Result<(), W::Error> {
     braces(w, |w| concat_str_by(w, ", ", shadowed_tparams))
 }
@@ -727,7 +727,7 @@ fn print_method_def<W: Write>(
     newline(w)?;
     w.write("  .method ")?;
     print_shadowed_tparams(w, &body.shadowed_tparams)?;
-    print_upper_bounds(w, &body.upper_bounds)?;
+    print_upper_bounds_(w, &body.upper_bounds)?;
     w.write(" ")?;
     print_method_attrs(ctx, w, method_def)?;
     print_span(w, &method_def.span)?;
@@ -1051,10 +1051,10 @@ fn print_body<W: Write>(
         ctx.newline(w)?;
         w.write(".declvars ")?;
         concat_by(w, " ", &body.decl_vars, |w, var| {
-            if var.as_bytes().iter().all(is_bareword_char) {
+            if var.as_str().as_bytes().iter().all(is_bareword_char) {
                 w.write(var)
             } else {
-                quotes(w, |w| w.write(escaper::escape(var)))
+                quotes(w, |w| w.write(escaper::escape(var.as_str())))
             }
         })?;
         w.write(";")?;
@@ -3203,6 +3203,23 @@ fn print_upper_bounds<'arena, W: Write>(
 fn print_upper_bound<W: Write>(
     w: &mut W,
     (id, tys): &(String, Vec<HhasTypeInfo>),
+) -> Result<(), W::Error> {
+    paren(w, |w| {
+        concat_str_by(w, " ", [id.as_str(), "as", ""])?;
+        concat_by(w, ", ", &tys, print_type_info)
+    })
+}
+
+fn print_upper_bounds_<'arena, W: Write>(
+    w: &mut W,
+    ubs: impl AsRef<[(Str<'arena>, Vec<HhasTypeInfo<'arena>>)]>,
+) -> Result<(), W::Error> {
+    braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound_))
+}
+
+fn print_upper_bound_<'arena, W: Write>(
+    w: &mut W,
+    (id, tys): &(Str<'arena>, Vec<HhasTypeInfo>),
 ) -> Result<(), W::Error> {
     paren(w, |w| {
         concat_str_by(w, " ", [id.as_str(), "as", ""])?;

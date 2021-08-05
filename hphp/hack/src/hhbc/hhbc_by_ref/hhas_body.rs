@@ -19,13 +19,13 @@ pub struct HhasBodyEnv<'arena> {
 #[derive(Debug)] //Cannot be Default...
 pub struct HhasBody<'arena> {
     pub body_instrs: InstrSeq<'arena>, //... because InstrSeq not Default.
-    pub decl_vars: Vec<String>,
+    pub decl_vars: Vec<Str<'arena>>,
     pub num_iters: usize,
     pub num_closures: u32,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
-    pub upper_bounds: Vec<(String, Vec<hhbc_by_ref_hhas_type::Info<'arena>>)>,
-    pub shadowed_tparams: Vec<String>,
+    pub upper_bounds: Vec<(Str<'arena>, Vec<hhbc_by_ref_hhas_type::Info<'arena>>)>,
+    pub shadowed_tparams: Vec<Str<'arena>>,
     pub params: Vec<HhasParam<'arena>>,
     pub return_type_info: Option<hhbc_by_ref_hhas_type::Info<'arena>>,
     pub doc_comment: Option<DocComment>,
@@ -35,13 +35,13 @@ pub struct HhasBody<'arena> {
 pub fn default_with_body_instrs<'arena>(body_instrs: InstrSeq<'arena>) -> HhasBody<'arena> {
     HhasBody {
         body_instrs,
-        decl_vars: Vec::<String>::default(),
+        decl_vars: Vec::<Str<'arena>>::default(),
         num_iters: usize::default(),
         num_closures: u32::default(),
         is_memoize_wrapper: bool::default(),
         is_memoize_wrapper_lsb: bool::default(),
-        upper_bounds: Vec::<(String, Vec<hhbc_by_ref_hhas_type::Info>)>::default(),
-        shadowed_tparams: Vec::<String>::default(),
+        upper_bounds: Vec::<(Str<'arena>, Vec<hhbc_by_ref_hhas_type::Info>)>::default(),
+        shadowed_tparams: Vec::<Str<'arena>>::default(),
         params: Vec::<HhasParam<'arena>>::default(),
         return_type_info: Option::<hhbc_by_ref_hhas_type::Info>::default(),
         doc_comment: Option::<DocComment>::default(),

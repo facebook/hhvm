@@ -14,6 +14,7 @@ pub struct HhasParam<'arena> {
     pub name: Str<'arena>,
     pub is_variadic: bool,
     pub is_inout: bool,
+    pub is_readonly: bool,
     pub user_attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub type_info: Maybe<Info<'arena>>,
     pub default_value: Maybe<(Label, tast::Expr)>,

@@ -573,6 +573,9 @@ std::string func_param_list(const FuncInfo& finfo) {
     if (func->isInOut(i)) {
       ret += "inout ";
     }
+    if (func->isReadonly(i)) {
+      ret += "readonly ";
+    }
     ret += opt_type_info(func->params()[i].userType,
                          func->params()[i].typeConstraint);
     ret += folly::format("{}", loc_name(finfo, i)).str();

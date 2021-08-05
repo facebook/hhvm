@@ -721,6 +721,7 @@ void emit_locals_and_params(FuncEmitter& fe, const php::Func& func,
       pinfo.userAttributes = param.userAttributes;
       pinfo.builtinType = param.builtinType;
       if (param.inout) pinfo.setFlag(Func::ParamInfo::Flags::InOut);
+      if (param.readonly) pinfo.setFlag(Func::ParamInfo::Flags::Readonly);
       if (param.isVariadic) pinfo.setFlag(Func::ParamInfo::Flags::Variadic);
       fe.appendParam(func.locals[id].name, pinfo);
       auto const dv = param.dvEntryPoint;

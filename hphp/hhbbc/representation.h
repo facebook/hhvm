@@ -200,6 +200,11 @@ struct Param {
   bool inout: 1;
 
   /*
+   * Whether this parameter is passed as readonly.
+   */
+  bool readonly: 1;
+
+  /*
    * Whether this parameter is a variadic capture.
    */
   bool isVariadic: 1;

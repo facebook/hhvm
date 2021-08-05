@@ -137,6 +137,7 @@ struct Func final {
   struct ParamInfo {
     enum class Flags {
       InOut,      // Is this an `inout' parameter?
+      Readonly,   // Is this a `readonly` parameter?
       Variadic,   // Is this a `...' parameter?
       NativeArg,  // Does this use a NativeArg?
       AsVariant,  // Native function takes as const Variant&
@@ -148,6 +149,7 @@ struct Func final {
     bool hasDefaultValue() const;
     bool hasScalarDefaultValue() const;
     bool isInOut() const;
+    bool isReadonly() const;
     bool isVariadic() const;
     bool isNativeArg() const;
     bool isTakenAsVariant() const;

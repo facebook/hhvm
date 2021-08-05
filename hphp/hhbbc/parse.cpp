@@ -638,6 +638,7 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
         param.phpCode,
         param.builtinType,
         param.isInOut(),
+        param.isReadonly(),
         param.isVariadic()
       }
     );

@@ -2552,6 +2552,11 @@ void parse_parameter_list(AsmState& as,
       param.setFlag(Func::ParamInfo::Flags::InOut);
     }
 
+    if (as.in.tryConsume("readonly")) {
+      if (seenVariadic) as.error("readonly parameters cannot be variadic");
+      param.setFlag(Func::ParamInfo::Flags::Readonly);
+    }
+
     std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
     auto currUBs = getRelevantUpperBounds(param.typeConstraint, ubs,
                                           class_ubs, shadowed_tparams);

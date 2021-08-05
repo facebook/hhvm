@@ -469,7 +469,8 @@ bool Func::isInOut(int32_t arg) const {
 
 bool Func::isReadonly(int32_t arg) const {
   assertx(arg >= 0);
-  return false; // TODO: implement readonly
+  if (arg >= numParams()) return false;
+  return params()[arg].isReadonly();
 }
 
 uint32_t Func::numInOutParams() const {

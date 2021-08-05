@@ -2206,6 +2206,7 @@ fn print_param<'arena, W: Write>(
 ) -> Result<(), W::Error> {
     print_param_user_attributes(ctx, w, param)?;
     w.write_if(param.is_inout, "inout ")?;
+    w.write_if(param.is_readonly, "readonly ")?;
     w.write_if(param.is_variadic, "...")?;
     option(w, &Option::from(param.type_info.clone()), |w, ty| {
         print_type_info(w, ty)?;

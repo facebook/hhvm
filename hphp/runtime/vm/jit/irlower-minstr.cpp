@@ -898,10 +898,13 @@ namespace {
 void implDictGet(IRLS& env, const IRInstruction* inst, MOpMode mode) {
   assertx(mode == MOpMode::None || mode == MOpMode::Warn);
   BUILD_OPTAB(DICTGET_HELPER_TABLE, getKeyType(inst->src(1)), mode);
+  auto const sync = mode == MOpMode::None
+    ? SyncOptions::None
+    : SyncOptions::Sync;
   auto const args = argGroup(env, inst).ssa(0).ssa(1);
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDestTV(env, inst), sync, args);
 }
 
 void implDictSet(IRLS& env, const IRInstruction* inst) {
@@ -964,7 +967,7 @@ void cgDictIsset(IRLS& env, const IRInstruction* inst) {
   auto args = argGroup(env, inst).ssa(0).ssa(1);
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
 void cgDictIdx(IRLS& env, const IRInstruction* inst) {
@@ -984,7 +987,7 @@ void cgDictIdx(IRLS& env, const IRInstruction* inst) {
   auto args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDestTV(env, inst),
-               SyncOptions::Sync, args);
+               SyncOptions::None, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -997,12 +1000,15 @@ void implKeysetGet(IRLS& env, const IRInstruction* inst) {
   auto const mode = inst->op() == KeysetGetQuiet
     ? MOpMode::None
     : MOpMode::Warn;
+  auto const sync = inst->op() == KeysetGetQuiet
+    ? SyncOptions::None
+    : SyncOptions::Sync;
   BUILD_OPTAB(KEYSETGET_HELPER_TABLE, getKeyType(key), mode);
 
   auto args = argGroup(env, inst).ssa(0).ssa(1);
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDestTV(env, inst), sync, args);
 }
 
 }
@@ -1058,7 +1064,7 @@ void cgKeysetIsset(IRLS& env, const IRInstruction* inst) {
   auto args = argGroup(env, inst).ssa(0).ssa(1);
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
 void cgKeysetIdx(IRLS& env, const IRInstruction* inst) {
@@ -1069,7 +1075,7 @@ void cgKeysetIdx(IRLS& env, const IRInstruction* inst) {
   auto args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDestTV(env, inst),
-               SyncOptions::Sync, args);
+               SyncOptions::None, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

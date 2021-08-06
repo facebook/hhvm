@@ -178,7 +178,7 @@ void implIterFree(IRLS& env, const IRInstruction* inst, CallSpec meth) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const iterOff = iterOffset(inst->marker(), extra->iterId);
 
-  cgCallHelper(vmain(env), env, meth, kVoidDest, SyncOptions::Sync,
+  cgCallHelper(vmain(env), env, meth, kVoidDest, SyncOptions::None,
                argGroup(env, inst).addr(fp, iterOff));
 }
 

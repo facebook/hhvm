@@ -1294,7 +1294,7 @@ let invalid_fun_pointer pos name =
     ^ Markdown_lite.md_codify (strip_ns name)
     ^ " is not a valid name for fun()")
 
-let hint_message ?(modifier = "") orig hint hint_pos =
+let suggestion_message ?(modifier = "") orig hint hint_pos =
   let s =
     if
       (not (String.equal orig hint))
@@ -1321,7 +1321,7 @@ let undefined pos var_name did_you_mean =
   let suggestion =
     match did_you_mean with
     | Some (did_you_mean, pos) ->
-      [hint_message var_name did_you_mean pos |> claim_as_reason]
+      [suggestion_message var_name did_you_mean pos |> claim_as_reason]
     | None -> []
   in
   add_list (Naming.err_code Naming.Undefined) (pos, msg) suggestion
@@ -1834,7 +1834,7 @@ let did_you_mean_naming pos name suggest_pos suggest_name =
   add_list
     (Naming.err_code Naming.DidYouMeanNaming)
     (pos, "Could not find " ^ Markdown_lite.md_codify name ^ ".")
-    [hint_message name suggest_name (Pos_or_decl.of_raw_pos suggest_pos)]
+    [suggestion_message name suggest_name (Pos_or_decl.of_raw_pos suggest_pos)]
 
 let using_internal_class pos name =
   add
@@ -3168,19 +3168,17 @@ let unknown_type description pos r =
   let msg = "Was expecting " ^ description ^ " but type is unknown" in
   add_list (Typing.err_code Typing.UnknownType) (pos, msg) r
 
-let not_found_hint orig hint =
-  match hint with
-  | `no_hint -> None
-  | `closest (pos, v) ->
-    Some (hint_message ~modifier:"static method " orig v pos)
-  | `did_you_mean (pos, v) -> Some (hint_message orig v pos)
+let not_found_suggestion orig similar =
+  match similar with
+  | (`static, pos, v) ->
+    suggestion_message ~modifier:"static method " orig v pos
+  | (`instance, pos, v) -> suggestion_message orig v pos
 
-let snot_found_hint orig hint =
-  match hint with
-  | `no_hint -> None
-  | `closest (pos, v) ->
-    Some (hint_message ~modifier:"instance method " orig v pos)
-  | `did_you_mean (pos, v) -> Some (hint_message orig v pos)
+let snot_found_suggestion orig similar =
+  match similar with
+  | (`instance, pos, v) ->
+    suggestion_message ~modifier:"instance method " orig v pos
+  | (`static, pos, v) -> suggestion_message orig v pos
 
 let string_of_class_member_kind = function
   | `class_constant -> "class constant"
@@ -3190,7 +3188,7 @@ let string_of_class_member_kind = function
   | `method_ -> "method"
   | `property -> "property"
 
-let smember_not_found_messages kind (cpos, class_name) member_name hint =
+let smember_not_found_messages kind (cpos, class_name) member_name similar =
   let kind = string_of_class_member_kind kind in
   let class_name = strip_ns class_name in
   let msg =
@@ -3200,14 +3198,14 @@ let smember_not_found_messages kind (cpos, class_name) member_name hint =
       (Markdown_lite.md_codify member_name)
       (Markdown_lite.md_codify class_name)
   in
-  let hint =
-    match snot_found_hint member_name hint with
+  let similar_suggestion =
+    match similar with
     | None -> []
-    | Some hint -> [hint]
+    | Some similar -> [snot_found_suggestion member_name similar]
   in
   ( Typing.err_code Typing.SmemberNotFound,
     msg,
-    hint
+    similar_suggestion
     @ [
         ( cpos,
           "Declaration of " ^ Markdown_lite.md_codify class_name ^ " is here" );
@@ -3233,7 +3231,7 @@ let member_not_found
     pos
     (cpos, type_name)
     member_name
-    hint
+    similar
     reason
     (on_error : typing_error_callback) =
   let type_name = strip_ns type_name |> Markdown_lite.md_codify in
@@ -3249,15 +3247,17 @@ let member_not_found
       (Markdown_lite.md_codify member_name)
       type_name
   in
+  let similar_suggestion =
+    match similar with
+    | None -> []
+    | Some similar -> [not_found_suggestion member_name similar]
+  in
   on_error
     ~code:(Typing.err_code Typing.MemberNotFound)
     (pos, msg)
-    (let hint =
-       match not_found_hint member_name hint with
-       | None -> []
-       | Some hint -> [hint]
-     in
-     hint @ reason @ [(cpos, "Declaration of " ^ type_name ^ " is here")])
+    (similar_suggestion
+    @ reason
+    @ [(cpos, "Declaration of " ^ type_name ^ " is here")])
 
 let expr_tree_unsupported_operator cls_name meth_name pos =
   let msg =

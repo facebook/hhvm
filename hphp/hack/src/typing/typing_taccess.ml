@@ -110,7 +110,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
             id_pos
             (Cls.pos class_, class_name)
             id_name
-            `no_hint
+            None
             ctx.ety_env.on_error) )
   | Some typeconst ->
     let name = tp_name class_name id in

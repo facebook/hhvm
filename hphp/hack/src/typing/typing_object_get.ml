@@ -51,15 +51,15 @@ let smember_not_found
     Errors.consider_meth_caller pos (Cls.name class_) member_name
   (* If there is a normal method of the same name, suggest it *)
   | (Some _, Some (def_pos, v)) when String.equal v member_name ->
-    error (`closest (def_pos, v))
+    error (Some (`instance, def_pos, v))
   (* Otherwise suggest a different static method *)
-  | (Some (def_pos, v), _) -> error (`did_you_mean (def_pos, v))
+  | (Some (def_pos, v), _) -> error (Some (`static, def_pos, v))
   (* Fallback to closest normal method *)
-  | (None, Some (def_pos, v)) -> error (`closest (def_pos, v))
+  | (None, Some (def_pos, v)) -> error (Some (`instance, def_pos, v))
   (* no error in this case ... the member might be present
    * in one of the parents of class_ that the typing cannot see *)
   | (None, None) when not (Cls.members_fully_known class_) -> ()
-  | (None, None) -> error `no_hint
+  | (None, None) -> error None
 
 let member_not_found
     (env : Typing_env_types.env) pos ~is_method class_ member_name r on_error =
@@ -90,14 +90,14 @@ let member_not_found
     (* Prefer suggesting a different method, unless there's a
        static method whose name matches exactly. *)
     | (Some _, Some (def_pos, v)) when String.equal v member_name ->
-      error (`closest (def_pos, v))
-    | (Some (def_pos, v), _) -> error (`did_you_mean (def_pos, v))
-    | (None, Some (def_pos, v)) -> error (`closest (def_pos, v))
+      error (Some (`static, def_pos, v))
+    | (Some (def_pos, v), _) -> error (Some (`instance, def_pos, v))
+    | (None, Some (def_pos, v)) -> error (Some (`static, def_pos, v))
     | (None, None) when not (Cls.members_fully_known class_) ->
       (* no error in this case ... the member might be present
        * in one of the parents of class_ that the typing cannot see *)
       ()
-    | (None, None) -> error `no_hint
+    | (None, None) -> error None
 
 let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
   match deref ty with

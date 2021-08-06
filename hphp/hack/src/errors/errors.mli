@@ -654,10 +654,7 @@ val smember_not_found :
   Pos.t ->
   Pos_or_decl.t * string ->
   string ->
-  [< `closest of Pos_or_decl.t * string
-  | `did_you_mean of Pos_or_decl.t * string
-  | `no_hint
-  ] ->
+  ([< `instance | `static ] * Pos_or_decl.t * string) option ->
   typing_error_callback ->
   unit
 
@@ -666,10 +663,7 @@ val smember_not_found_ :
   Pos_or_decl.t ->
   Pos_or_decl.t * string ->
   string ->
-  [< `closest of Pos_or_decl.t * string
-  | `did_you_mean of Pos_or_decl.t * string
-  | `no_hint
-  ] ->
+  ([< `instance | `static ] * Pos_or_decl.t * string) option ->
   error_from_reasons_callback ->
   unit
 
@@ -678,10 +672,7 @@ val member_not_found :
   Pos.t ->
   Pos_or_decl.t * string ->
   string ->
-  [< `closest of Pos_or_decl.t * string
-  | `did_you_mean of Pos_or_decl.t * string
-  | `no_hint
-  ] ->
+  ([< `instance | `static ] * Pos_or_decl.t * string) option ->
   (Pos_or_decl.t * string) list ->
   typing_error_callback ->
   unit

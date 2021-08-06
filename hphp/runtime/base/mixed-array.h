@@ -292,9 +292,6 @@ private:
 public:
   static TypedValue GetPosVal(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
-  static bool IsStrictVector(const ArrayData* ad) {
-    return ad->m_size == asMixed(ad)->m_nextKI && IsVectorData(ad);
-  }
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
   static arr_lval LvalInt(ArrayData* ad, int64_t k);
@@ -303,8 +300,6 @@ public:
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
   static ArrayData* SetIntMoveSkipConflict(ArrayData* ad, int64_t k, TypedValue v);
   static ArrayData* SetStrMoveSkipConflict(ArrayData* ad, StringData* k, TypedValue v);
-  static ArrayData* AddInt(ArrayData*, int64_t k, TypedValue v, bool copy);
-  static ArrayData* AddStr(ArrayData*, StringData* k, TypedValue v, bool copy);
   static ArrayData* RemoveIntMove(ArrayData*, int64_t k);
   static ArrayData* RemoveStrMove(ArrayData*, const StringData* k);
   static ArrayData* Copy(const ArrayData*);
@@ -487,9 +482,6 @@ private:
 
   template <bool Move>
   void nextInsert(TypedValue);
-  ArrayData* addVal(int64_t ki, TypedValue data);
-  ArrayData* addVal(StringData* key, TypedValue data);
-  ArrayData* addValNoAsserts(StringData* key, TypedValue data);
 
   template <class K> arr_lval addLvalImpl(K k);
   template <class K> ArrayData* update(K k, TypedValue data);

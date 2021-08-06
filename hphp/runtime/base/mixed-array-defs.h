@@ -111,40 +111,6 @@ TypedValue MixedArray::getArrayElmKey(ssize_t pos) const {
   return getElmKey(elm);
 }
 
-inline ArrayData* MixedArray::addVal(int64_t ki, TypedValue data) {
-  assertx(!exists(ki));
-  assertx(!isFull());
-  auto h = hash_int64(ki);
-  auto ei = findForNewInsert(h);
-  auto e = allocElm(ei);
-  e->setIntKey(ki, h);
-  mutableKeyTypes()->recordInt();
-  if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
-  tvDup(data, e->data);
-  // TODO(#3888164): should avoid needing these KindOfUninit checks.
-  if (UNLIKELY(e->data.m_type == KindOfUninit)) {
-    e->data.m_type = KindOfNull;
-  }
-  return this;
-}
-
-inline ArrayData* MixedArray::addVal(StringData* key, TypedValue data) {
-  assertx(!exists(key));
-  assertx(!isFull());
-  return addValNoAsserts(key, data);
-}
-
-inline ArrayData* MixedArray::addValNoAsserts(StringData* key, TypedValue data) {
-  assertx(data.m_type != KindOfUninit);
-  strhash_t h = key->hash();
-  auto ei = findForNewInsert(h);
-  auto e = allocElm(ei);
-  e->setStrKey(key, h);
-  mutableKeyTypes()->recordStr(key);
-  tvDup(data, e->data);
-  return this;
-}
-
 template <class K>
 arr_lval MixedArray::addLvalImpl(K k) {
   assertx(!isFull());

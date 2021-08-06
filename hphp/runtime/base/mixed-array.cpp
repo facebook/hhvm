@@ -977,18 +977,6 @@ ArrayData* MixedArray::SetStrInPlace(ArrayData* ad, StringData* k, TypedValue v)
   return asMixed(ad)->prepareForInsert(false/*copy*/)->update(k, v);
 }
 
-ArrayData* MixedArray::AddInt(ArrayData* ad, int64_t k, TypedValue v, bool copy) {
-  assertx(!ad->exists(k));
-  assertx(v.m_type != KindOfUninit);
-  return asMixed(ad)->prepareForInsert(copy)->addVal(k, v);
-}
-
-ArrayData* MixedArray::AddStr(ArrayData* ad, StringData* k, TypedValue v, bool copy) {
-  assertx(!ad->exists(k));
-  assertx(v.m_type != KindOfUninit);
-  return asMixed(ad)->prepareForInsert(copy)->addVal(k, v);
-}
-
 //=============================================================================
 // Delete.
 

@@ -138,7 +138,7 @@ function filter_keys<Tk as arraykey, Tv>(
 
 /**
  * Given a KeyedTraversable with nullable values, returns a new dict with
- * those entries removed.
+ * null values removed.
  *
  * Time complexity: O(n)
  * Space complexity: O(n)

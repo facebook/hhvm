@@ -209,7 +209,7 @@ mod tests {
     fn example_is_memoized_vs_eq_memoize() {
         let attr = HhasAttribute {
             name: ua::MEMOIZE_LSB.into(),
-            arguments: ffi::Slice::new(&[]),
+            arguments: ffi::Slice::empty(),
         };
         assert_eq!(true, attr.is(ua::is_memoized));
         assert_eq!(false, attr.is(|s| s == ua::MEMOIZE));
@@ -220,7 +220,7 @@ mod tests {
     fn example_has_dynamically_callable() {
         let mk_attr = |name: &'static str| HhasAttribute {
             name: name.into(),
-            arguments: ffi::Slice::new(&[]),
+            arguments: ffi::Slice::empty(),
         };
         let attrs = vec![mk_attr(ua::CONST), mk_attr(ua::DYNAMICALLY_CALLABLE)];
         let has_result = attrs

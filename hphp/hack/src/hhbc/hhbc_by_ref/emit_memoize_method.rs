@@ -282,8 +282,8 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
             FcallArgs::new(
                 fcall_flags,
                 1,
-                Slice::new(&[]),
-                Slice::new(&[]),
+                Slice::empty(),
+                Slice::empty(),
                 Some(eager_set),
                 param_count,
                 None,
@@ -292,8 +292,8 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
             FcallArgs::new(
                 fcall_flags,
                 1,
-                Slice::new(&[]),
-                Slice::new(&[]),
+                Slice::empty(),
+                Slice::empty(),
                 None,
                 param_count,
                 None,
@@ -422,8 +422,8 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl>>
     let fcall_args = FcallArgs::new(
         FcallFlags::default(),
         1,
-        Slice::new(&[]),
-        Slice::new(&[]),
+        Slice::empty(),
+        Slice::empty(),
         if args.flags.contains(Flags::IS_ASYNC) {
             Some(eager_set)
         } else {

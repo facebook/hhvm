@@ -109,7 +109,7 @@ pub fn add_reified_parent_attribute<'a, 'arena>(
         if emit_expression::has_non_tparam_generics(env, hl) {
             return Some(HhasAttribute {
                 name: "__HasReifiedParent".into(),
-                arguments: ffi::Slice::new(&[]),
+                arguments: ffi::Slice::empty(),
             });
         }
     }

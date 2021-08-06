@@ -395,7 +395,7 @@ fn emit_reified_extends_params<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         },
         _ => {}
     }
-    let tv = TypedValue::Vec(Slice::new(&[]));
+    let tv = TypedValue::Vec(Slice::empty());
     Ok(instr::typedvalue(alloc, tv))
 }
 
@@ -457,8 +457,8 @@ fn emit_reified_init_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     FcallArgs::new(
                         FcallFlags::default(),
                         1,
-                        Slice::new(&[]),
-                        Slice::new(&[]),
+                        Slice::empty(),
+                        Slice::empty(),
                         None,
                         1,
                         None,

@@ -16,6 +16,7 @@ module TySet = Typing_set
 module Utils = Typing_utils
 module MakeType = Typing_make_type
 module Nast = Aast
+module Cls = Decl_provider.Class
 
 exception Dont_simplify
 
@@ -712,11 +713,53 @@ let normalize_union env ?on_tyvar tyl :
   in
   normalize_union env tyl None None None
 
-(** Quadratically union types in a list two by two, attempting to simplify
-each pair. *)
+(* Is this type minimal with respect to the ground subtype ordering, if we ignore the nothing type?
+ * Examples are exact or final non-generic classes.
+ * Non-examples (surprisingly) are int or string (because an enum can be a subtype).
+ *
+ * Another example is classname<C>, if C is minimal, and this pattern occurs
+ * frequently e.g. vec[C::class, D::class].
+ *
+ * Note that doesn't work for general covariant classes or built-ins e.g. vec<exact C> is not
+ * minimal because vec<nothing> <: vec<exact C>. But classname<nothing> is uninhabited so it's
+ * ok to suppose that it is equivalent to nothing.
+ *
+ * Finally note that if we did treat string, int, and float as minimal, then the code in
+ * union_list_2_by_2 would not simplify int|float to num or string|classname<C> to string.
+ *)
+let rec is_minimal env ty =
+  match get_node ty with
+  | Tclass (_, Exact, []) -> true
+  | Tclass ((_, name), _, []) ->
+    begin
+      match Env.get_class env name with
+      | Some cd -> Cls.final cd
+      | None -> false
+    end
+  | Tnewtype (name, [ty], _)
+    when String.equal name Naming_special_names.Classes.cClassname ->
+    is_minimal env ty
+  | _ -> false
+
+(** Construct union of a list of types by applying binary union pairwise.
+ * This uses a quadratic number of subtype tests so we apply the following
+ * optimization that's particularly useful for the common pattern of vec[C1::class,...,Cn::class].
+ *
+ * First split the list of types into "final" types (those known to have no non-empty subtypes)
+ * and non-final types (that might have a non-empty subtype).
+ * For the non-final types, we apply binary union pointwise, which is quadratic in the number
+ * of types. Then for each of the final types we drop those that subtype any of the types
+ *  in the result.
+ *
+ * If m is the number of final types, and n is the number of non-final types, the first
+ * stage uses O(n^2) subtype tests and the second stage uses O(mn) subtype tests.
+ * One common pattern is a union of exact classnames: constructing this will involve no
+ * subtype tests at all.
+ *)
 let union_list_2_by_2 ~approx_cancel_neg env r tyl =
-  let (env, tyl) =
-    List.fold tyl ~init:(env, []) ~f:(fun (env, res_tyl) ty ->
+  let (tyl_final, tyl_nonfinal) = List.partition_tf tyl ~f:(is_minimal env) in
+  let (env, reduced_nonfinal) =
+    List.fold tyl_nonfinal ~init:(env, []) ~f:(fun (env, res_tyl) ty ->
         let rec union_ty_w_tyl env ty tyl tyl_acc =
           match tyl with
           | [] -> (env, ty :: tyl_acc)
@@ -730,7 +773,14 @@ let union_list_2_by_2 ~approx_cancel_neg env r tyl =
         in
         union_ty_w_tyl env ty res_tyl [])
   in
-  (env, tyl)
+  let reduced_final =
+    List.filter tyl_final ~f:(fun fty ->
+        not
+          (List.exists
+             reduced_nonfinal
+             ~f:(Typing_utils.is_sub_type_for_union ~coerce:None env fty)))
+  in
+  (env, reduced_final @ reduced_nonfinal)
 
 let union_list env ?(approx_cancel_neg = false) r tyl =
   Log.log_union_list r tyl

@@ -640,7 +640,6 @@ int process(const CompilerOptions &po) {
           new_workers
         );
         RO::EvalHackCompilerWorkers = new_workers;
-        compilers_shutdown();
       }
     }
   }

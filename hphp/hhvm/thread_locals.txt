@@ -15,7 +15,6 @@ HPHP::(anonymous namespace)::tl_cliSock
 HPHP::(anonymous namespace)::tl_traceTask
 HPHP::(anonymous namespace)::s_connections
 HPHP::(anonymous namespace)::tl_perf_event
-HPHP::(anonymous namespace)::tl_extractPath
 HPHP::(anonymous namespace)::request_time_ns
 HPHP::(anonymous namespace)::tl_loaded_units
 HPHP::(anonymous namespace)::tl_env

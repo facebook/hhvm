@@ -1380,8 +1380,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + CoeffectsConfig::mangle()
     + opts.cacheKeySha1().toString()
     + mangleExtension(fileName)
-    + mangleUnitPHP7Options()
-    + hackc_version();
+    + mangleUnitPHP7Options();
   return string_sha1(t);
 }
 

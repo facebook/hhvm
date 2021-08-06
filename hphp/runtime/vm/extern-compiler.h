@@ -30,27 +30,11 @@ struct FuncTable;
 
 struct SHA1;
 
-struct BadCompilerException : Exception {
-  explicit BadCompilerException(const std::string& what) : Exception(what) {}
-  template<class... A>
-  explicit BadCompilerException(A&&... args)
-    : Exception(folly::sformat(std::forward<A>(args)...))
-  {}
-};
-
 void compilers_start();
-void compilers_shutdown();
-void compilers_set_user(const std::string& username);
-void compilers_detach_after_fork();
 
 // On success return a verified unit, and on failure return a string stating the
 // type of error encountered
 using CompilerResult = boost::variant<std::unique_ptr<UnitEmitter>,std::string>;
-
-struct FactsParser {
-  virtual ~FactsParser() {
-  }
-};
 
 struct FactsJSONString {
   std::string value;
@@ -73,8 +57,6 @@ FfpResult ffp_parse_file(std::string file,
                          const char* contents,
                          int size,
                          const RepoOptions& options);
-
-std::string hackc_version();
 
 /*
  * Controls handling for errors detected during compilation. By default errors

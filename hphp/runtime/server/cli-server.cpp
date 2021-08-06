@@ -147,6 +147,7 @@ way to determine how much progress the server made.
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
@@ -1632,6 +1633,12 @@ Optional<int> run_client(const char* sock_path,
 
     zend_get_bigint_data();
     tl_heap.getCheck()->init();
+
+    // We need to initialize the CLI server extension handlers before we
+    // serialize the runtime-options so that they are included in the API
+    // version we send to the server.
+    ExtensionRegistry::cliClientInit();
+
     auto settings = IniSetting::GetAllAsJSON();
     cli_write(fd, settings);
 

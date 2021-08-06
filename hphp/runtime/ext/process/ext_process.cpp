@@ -292,7 +292,6 @@ int64_t HHVM_FUNCTION(pcntl_fork) {
   postfork(pid);
   if (pid == 0) {
     postfork_restart_handler_thread();
-    compilers_detach_after_fork();
   }
   return pid;
 }

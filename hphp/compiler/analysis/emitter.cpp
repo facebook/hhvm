@@ -505,14 +505,9 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
       auto uc = UnitCompiler::create(code, codeLen, filename, sha1,
                                      nativeFuncs, forDebuggerEval, options);
       assertx(uc);
-      try {
-        tracing::BlockNoTrace _{"unit-compiler-run"};
-        bool ignore;
-        ue = uc->compile(ignore);
-      } catch (const BadCompilerException& exc) {
-        Logger::Error("Bad external compiler: %s", exc.what());
-        return nullptr;
-      }
+      tracing::BlockNoTrace _{"unit-compiler-run"};
+      bool ignore;
+      ue = uc->compile(ignore);
     }
 
     unit = ue->create();

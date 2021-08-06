@@ -1073,7 +1073,6 @@ static int start_server(const std::string &username, int xhprof) {
       _exit(1);
     }
     LightProcess::ChangeUser(username);
-    compilers_set_user(username);
   } else if (getuid() == 0 && !RuntimeOption::AllowRunAsRoot) {
     Logger::Error("hhvm not allowed to run as root unless "
                   "-vServer.AllowRunAsRoot=1 is used.");
@@ -2398,7 +2397,6 @@ void cli_client_init() {
   HHProf::Init();
   rds::processInit();
   rds::threadInit();
-  ExtensionRegistry::cliClientInit();
   ServerStats::GetLogger();
   zend_rand_init();
   get_server_note();
@@ -3017,7 +3015,6 @@ void hphp_process_exit() noexcept {
   LOG_AND_IGNORE(shutdownUnitReaper());
   LOG_AND_IGNORE(Strobelight::shutdown())
   LOG_AND_IGNORE(ExtensionRegistry::moduleShutdown())
-  LOG_AND_IGNORE(compilers_shutdown())
 #ifndef _MSC_VER
   LOG_AND_IGNORE(LightProcess::Close())
 #endif

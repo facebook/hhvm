@@ -173,7 +173,7 @@ function startServer(inout $serverPort, inout $adminPort, inout $debugPort, $hom
   $return_var = -1;
   $safe_children = array_flip(array_map(
     $v ==> (int)$v,
-    explode(',', exec("pgrep -f -d , -P $pid", inout $output, inout $return_var)),
+    explode(',', exec("pgrep -f -d , -P $pid", inout $output, inout $return_var) ?? ''),
   ));
 
   for ($i = 0; $i < 5; $i++) {

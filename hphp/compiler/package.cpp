@@ -489,32 +489,27 @@ bool Package::parseImpl(const std::string* fileName) {
     content.data(), content.size(), fileName->c_str(), sha1,
     Native::s_noNativeFuncs, false, options);
   assertx(uc);
-  try {
-    ++m_totalParses;
-    auto cacheHit = false;
-    auto ue = uc->compile(cacheHit, mode);
-    if (cacheHit) ++m_parseCacheHits;
-    if (ue && !ue->m_ICE) {
-      if (is_symlink) {
-        ue = createSymlinkWrapper(fullPath, *fileName, std::move(ue));
-        if (!ue) {
-          // If the symlink contains no EntryPoint we don't do anything but it
-          // is still success
-          return true;
-        }
+  ++m_totalParses;
+  auto cacheHit = false;
+  auto ue = uc->compile(cacheHit, mode);
+  if (cacheHit) ++m_parseCacheHits;
+  if (ue && !ue->m_ICE) {
+    if (is_symlink) {
+      ue = createSymlinkWrapper(fullPath, *fileName, std::move(ue));
+      if (!ue) {
+        // If the symlink contains no EntryPoint we don't do anything but it
+        // is still success
+        return true;
       }
-      addUnitEmitter(std::move(ue));
-      report(0);
-      return true;
-    } else {
-      Logger::Error(
-        "Unable to compile using %s compiler: %s",
-        uc->getName(),
-        fullPath.c_str());
-      return false;
     }
-  } catch (const BadCompilerException& exc) {
-    Logger::Error("Bad external compiler: %s", exc.what());
+    addUnitEmitter(std::move(ue));
+    report(0);
+    return true;
+  } else {
+    Logger::Error(
+      "Unable to compile using %s compiler: %s",
+      uc->getName(),
+      fullPath.c_str());
     return false;
   }
 }

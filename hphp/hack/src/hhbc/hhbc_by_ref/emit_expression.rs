@@ -2692,7 +2692,7 @@ fn get_fcall_args<'arena>(
         flags,
         num_rets,
         Slice::fill_iter(alloc, args.iter().map(is_inout_arg)),
-        Slice::fill_iter(alloc, args.iter().map(is_readonly_arg)),
+        Slice::fill_iter(alloc, args.iter().map(is_readonly_expr)),
         async_eager_label,
         num_args,
         context
@@ -2704,10 +2704,12 @@ fn is_inout_arg(e: &tast::Expr) -> bool {
     e.2.as_callconv().map_or(false, |cc| cc.0.is_pinout())
 }
 
-fn is_readonly_arg(_e: &tast::Expr) -> bool {
-    false // TODO: implement me
+fn is_readonly_expr(e: &tast::Expr) -> bool {
+    match &e.2 {
+        tast::Expr_::ReadonlyExpr(_) => true,
+        _ => false,
+    }
 }
-
 fn has_inout_arg(es: &[tast::Expr]) -> bool {
     es.iter().any(is_inout_arg)
 }

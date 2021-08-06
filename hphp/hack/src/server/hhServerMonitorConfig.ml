@@ -161,19 +161,42 @@ module HhServerConfig = struct
           ~stack
           e)
 
-  let rec wait_for_server_exit process start_t =
-    let exit_status =
-      Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.ServerProcess.pid
+  let wait_for_server_exit process start_t =
+    (* There's a bug: before entering this function, we might have tried
+       to kill the server too soon (before the SIGUSR2 handler was installed).
+       This would put this function in an infinite loop.
+
+       Let's log when this happens, so that we can be sure we've fixed it. *)
+    let rec wait_for_server_exit_impl ~has_logged_waiting_bug =
+      let waited_for = Unix.gettimeofday () -. start_t in
+      let has_logged_waiting_bug =
+        if (not has_logged_waiting_bug) && waited_for > 10.0 then begin
+          HackEventLogger.monitor_wait_for_server_exit_bug
+            ~pid:process.ServerProcess.pid
+            ~waited_for;
+          true
+        end else
+          has_logged_waiting_bug
+      in
+      let exit_status =
+        Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.ServerProcess.pid
+      in
+      match exit_status with
+      | (0, _) ->
+        Unix.sleep 1;
+        wait_for_server_exit_impl ~has_logged_waiting_bug
+      | _ ->
+        let (_ : float) =
+          Hh_logger.log_duration
+            (Printf.sprintf "typechecker has exited. Time since sigterm: ")
+            start_t
+        in
+        if has_logged_waiting_bug then
+          HackEventLogger.monitor_wait_for_server_exit_recovery
+            ~pid:process.ServerProcess.pid
+            ~waited_for
     in
-    match exit_status with
-    | (0, _) ->
-      Unix.sleep 1;
-      wait_for_server_exit process start_t
-    | _ ->
-      ignore
-        (Hh_logger.log_duration
-           (Printf.sprintf "typechecker has exited. Time since sigterm: ")
-           start_t)
+    wait_for_server_exit_impl ~has_logged_waiting_bug:false
 
   let wait_pid process =
     Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.ServerProcess.pid

@@ -9,18 +9,19 @@
 
 type process_data = {
   pid: int;  (** Process ID. *)
-  server_specific_files: ServerCommandTypes.server_specific_files;
+  server_specific_files: ServerCommandTypes.server_specific_files; [@opaque]
   start_t: float;
-  in_fd: Unix.file_descr;
+  in_fd: Unix.file_descr; [@opaque]
       (** Get occasional updates about status/busyness from typechecker here. *)
-  out_fds: (string * Unix.file_descr) list;
+  out_fds: (string * Unix.file_descr) list; [@opaque]
       (** Send client's File Descriptors to the typechecker over this. *)
   last_request_handoff: float ref;
 }
+[@@deriving show]
 
 type server_process =
   | Not_yet_started
-  | Alive of (process_data[@opaque])
+  | Alive of process_data
   (* When the server crashes, we want to track that it has crashed and report
    * that crash info to the next hh_client that connects. We keep that info
    * here. *)

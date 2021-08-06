@@ -250,6 +250,9 @@ struct
    * of state transitions. See docs on the ServerProcess.server_process ADT for
    * state transitions. *)
   let kill_and_maybe_restart_server env exit_status =
+    Hh_logger.log
+      "kill_and_maybe_restart_server (env.server=%s)"
+      (show_server_process env.server);
     (* We're going to collect all FDs right here and now. This will be done again below,
        in [kill_server_with_check], but Informant.reinit might take too long or might throw. *)
     Sent_fds_collector.collect_all_fds ();

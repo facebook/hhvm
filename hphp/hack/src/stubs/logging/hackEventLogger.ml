@@ -422,6 +422,10 @@ let monitor_giving_up_exception _ = ()
 
 let processed_clients _ = ()
 
+let monitor_wait_for_server_exit_bug ~pid:_ ~waited_for:_ = ()
+
+let monitor_wait_for_server_exit_recovery ~pid:_ ~waited_for:_ = ()
+
 let search_symbol_index
     ~query_text:_
     ~max_results:_

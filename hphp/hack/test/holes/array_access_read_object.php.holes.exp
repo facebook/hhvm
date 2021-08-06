@@ -1,0 +1,32 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [4:1-8:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([4:57-61], (Hprim Tvoid)))); 
+        f_name = ([4:10-34], "\\array_access_read_object"); f_tparams = []; 
+        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = (classname<_>); param_type_hint = ((classname<_>), (Some ([4:35-47], (Happly (([4:35-44], "\\HH\\classname"), [([4:45-46], Herr)]))))); 
+           param_is_variadic = false; param_pos = [4:48-53]; param_name = "$yolo"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:3-20],
+            (Expr
+               ((object), [5:3-19],
+                (Binop ((Eq None), ((object), [5:3-5], (Lvar ([5:3-5], $x))),
+                   ((object), [5:8-19], (New (((_), [5:12-17], (CIexpr ((classname<_>), [5:12-17], (Lvar ([5:12-17], $yolo))))), [], [], None, (_)))))))));
+            ([7:3-9],
+             (Expr ((_), [7:3-8], (Array_get (((_), [7:3-5], (Hole (((object), [7:3-5], (Lvar ([7:3-5], $x))), (_), (KeyedContainer<int, nothing>), Typing))), (Some ((int), [7:6-7], (Int "1"))))))))
+            ];
+          fb_annotation = () };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

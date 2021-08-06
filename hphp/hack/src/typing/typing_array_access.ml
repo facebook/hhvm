@@ -548,7 +548,11 @@ let rec array_get
       | Tobject ->
         if Partial.should_check_error (Env.get_mode env) 4005 then
           let (env, ty1) = error_array env expr_pos ty1 in
-          (env, ty1, Ok ty2, dflt_arr_res)
+          let ty_nothing = Typing_make_type.nothing Reason.none in
+          let ty_keyedcontainer =
+            Typing_make_type.(keyed_container Reason.none ty2 ty_nothing)
+          in
+          (env, ty1, Ok ty2, Error (ty1, ty_keyedcontainer))
         else
           (env, TUtils.mk_tany env expr_pos, Ok ty2, dflt_arr_res)
       | Tnewtype (ts, [ty], bound) ->
@@ -586,7 +590,11 @@ let rec array_get
             (env, ty, err_res_idx, err_res_arr)
           | _ ->
             let (env, ty1) = error_array env expr_pos ty1 in
-            (env, ty1, Ok ty2, dflt_arr_res)
+            let ty_nothing = Typing_make_type.nothing Reason.none in
+            let ty_keyedcontainer =
+              Typing_make_type.(keyed_container Reason.none ty2 ty_nothing)
+            in
+            (env, ty1, Ok ty2, Error (ty1, ty_keyedcontainer))
         end
       | Tunapplied_alias _ ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
@@ -602,7 +610,11 @@ let rec array_get
       | Taccess _
       | Tneg _ ->
         let (env, ty1) = error_array env expr_pos ty1 in
-        (env, ty1, Ok ty2, dflt_arr_res)
+        let ty_nothing = Typing_make_type.nothing Reason.none in
+        let ty_keyedcontainer =
+          Typing_make_type.(keyed_container Reason.none ty2 ty_nothing)
+        in
+        (env, ty1, Ok ty2, Error (ty1, ty_keyedcontainer))
       (* Type-check array access as though it is the method
        * array_get<Tk,Tv>(KeyedContainer<Tk,Tv> $array, Tk $key): Tv
        * (We can already force Tk to be the type of the key argument because
@@ -611,14 +623,17 @@ let rec array_get
       | Tvar _ ->
         let (env, value) = Env.fresh_type env expr_pos in
         let keyed_container = MakeType.keyed_container r ty2 value in
-        let env =
-          SubType.sub_type
-            env
-            ty1
-            keyed_container
-            (Errors.index_type_mismatch_at expr_pos)
+        let (env, arr_res) =
+          Result.fold
+            ~ok:(fun env -> (env, Ok ty1))
+            ~error:(fun env -> (env, Error (ty1, keyed_container)))
+          @@ SubType.sub_type_res
+               env
+               ty1
+               keyed_container
+               (Errors.index_type_mismatch_at expr_pos)
         in
-        (env, value, Ok ty2, dflt_arr_res))
+        (env, value, Ok ty2, arr_res))
 
 (* Given a type `ty` known to be a lower bound on the type of the array operand
  * to an array append operation, compute the largest upper bound on that type

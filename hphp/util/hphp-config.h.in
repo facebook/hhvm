@@ -193,15 +193,3 @@ ${HHVM_EXTENSIONS_ENABLED_DEFINE_STRING}
 # define ENABLE_EXTENSION_XMLWRITER 1
 # define ENABLE_EXTENSION_ZLIB 1
 #endif
-
-#ifdef USE_CMAKE
-/* We try to use PHP_BINDIR/hh_single_compile - but allow this too so that we
- * can run out of a build tree without running 'make install'
- *
- * Allow opting out out of this behavior (e.g. release builds probably shouldn't
- * be configured to look for executables in /tmp/, /home, /Users etc).
- */
-#ifndef NO_HACKC_FALLBACK_PATH
-#define HACKC_FALLBACK_PATH "${CMAKE_BINARY_DIR}/hphp/hack/bin/hh_single_compile"
-#endif
-#endif

@@ -32,7 +32,6 @@ build-hack$(2):
 		src/hackfmt.$(1) \
 		src/hh_parse.$(1) \
 		src/generate_full_fidelity.$(1) \
-		src/hh_single_compile.$(1) \
 		src/hh_fanout/hh_fanout.$(1)
 		
 copy-hack$(2)-files: build-hack$(2)
@@ -43,7 +42,6 @@ copy-hack$(2)-files: build-hack$(2)
 	cp "$(DUNE_BUILD_DIR)/default/src/hackfmt.$(1)" "$(HACK_BIN_DIR)/hackfmt$(ext)"
 	cp "$(DUNE_BUILD_DIR)/default/src/hh_parse.$(1)" "$(HACK_BIN_DIR)/hh_parse$(ext)"
 	cp "$(DUNE_BUILD_DIR)/default/src/generate_full_fidelity.$(1)" "$(HACK_BIN_DIR)/generate_full_fidelity$(ext)"
-	cp "$(DUNE_BUILD_DIR)/default/src/hh_single_compile.$(1)" "$(HACK_BIN_DIR)/hh_single_compile$(ext)"
 	cp "$(DUNE_BUILD_DIR)/default/src/hh_fanout/hh_fanout.$(1)" "$(HACK_BIN_DIR)/hh_fanout$(ext)"	
 endef
 

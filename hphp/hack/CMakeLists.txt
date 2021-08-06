@@ -201,7 +201,3 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/hackfmt
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/hh_parse
   DESTINATION bin
   COMPONENT dev)
-
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/hh_single_compile
-  DESTINATION bin
-  COMPONENT dev)

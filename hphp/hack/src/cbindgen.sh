@@ -131,6 +131,12 @@ cbindgen="buck run fbsource//third-party/rust:cbindgen-cbindgen --"
      $cbindgen --config ../../cbindgen_hhbc_hhas_body.toml \
               --crate hhbc_by_ref_hhas_body \
               --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_body.h")
+# hhbc_hhas_param.h
+(cd hphp/hack/src/hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhas_param && \
+     cargo update && \
+     cbindgen --config ../../cbindgen_hhbc_hhas_param.toml \
+              --crate hhbc_by_ref_hhas_param \
+              --output "$top/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_param.h")
 
 signscript="$top/../xplat/python/signedsource_lib/signedsource.py"
 eval "${signscript}" sign "${top}"/hphp/hack/src/utils/ffi/ffi.h
@@ -147,6 +153,7 @@ eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_type
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_attribute.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_adata.h
 eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_body.h
+eval "${signscript}" sign "${top}"/hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_param.h
 
 # Quick sanity check: Does a program that includes these headers compile?
 cat > main.cpp <<EOF
@@ -157,6 +164,7 @@ cat > main.cpp <<EOF
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_attribute.h"
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_adata.h"
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_body.h"
+#include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc_hhas_param.h"
 
 #include <iostream>
 
@@ -170,7 +178,8 @@ int main() {
   Info _b10;
   HhasAdata _b11;
   HhasBodyEnv _b12;
-  //HhasBody _b13;
+  HhasBody _b13;
+  HhasParam _b14;
 
   std::cout << "Ok!" << std::endl;
   return 0;

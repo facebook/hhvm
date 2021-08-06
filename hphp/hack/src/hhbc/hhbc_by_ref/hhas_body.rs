@@ -17,8 +17,7 @@ pub struct HhasBodyEnv<'arena> {
 }
 
 #[derive(Debug)] //Cannot derive `Default`...
-// TODO(SF, 2021-08-05): Enable this when D30115681 lands.
-//#[repr(C)]
+#[repr(C)]
 pub struct HhasBody<'arena> {
     pub body_instrs: InstrSeq<'arena>, //... because no `Default` instance for `InstrSeq`.
     pub decl_vars: Slice<'arena, Str<'arena>>,
@@ -54,10 +53,6 @@ pub fn default_with_body_instrs<'arena>(body_instrs: InstrSeq<'arena>) -> HhasBo
 // For cbindgen
 #[allow(clippy::needless_lifetimes)]
 #[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_body<'arena>(
-    _: HhasBodyEnv<'arena>,
-    // TODO(SF, 2021-08-05): Enable this and add to cbindgen.sh when D30115681 lands.
-    //  _: HhasBody<'arena>,
-) {
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_body<'arena>(_: HhasBody<'arena>) {
     unimplemented!()
 }

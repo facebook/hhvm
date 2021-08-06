@@ -9,6 +9,7 @@ use hhbc_by_ref_hhas_type::{constraint, Info};
 use hhbc_by_ref_label::Label;
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub struct HhasParam<'arena> {
     pub name: Str<'arena>,
     pub is_variadic: bool,
@@ -35,4 +36,11 @@ impl<'arena> HhasParam<'arena> {
     pub fn with_name(&mut self, alloc: &'arena bumpalo::Bump, name: &str) {
         self.name = Str::new_str(alloc, name);
     }
+}
+
+// For cbindgen
+#[allow(clippy::needless_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_param<'arena>(_: HhasParam<'arena>) {
+    unimplemented!()
 }

@@ -1131,7 +1131,7 @@ fn if_then<F: FnOnce() -> R, R>(cond: bool, f: F) -> Option<R> {
 
 fn print_fcall_args<W: Write>(
     w: &mut W,
-    FcallArgs(fls, num_args, num_rets, inouts, async_eager_label, context): &FcallArgs,
+    FcallArgs(fls, num_args, num_rets, inouts, readonly, async_eager_label, context): &FcallArgs,
 ) -> Result<(), W::Error> {
     use FcallFlags as F;
     let mut flags = vec![];
@@ -1150,7 +1150,9 @@ fn print_fcall_args<W: Write>(
         concat_by(w, "", inouts, |w, i| w.write(if *i { "1" } else { "0" }))
     })?;
     w.write(" ")?;
-    w.write("\"\"")?; // TODO: replace with readonly
+    quotes(w, |w| {
+        concat_by(w, "", readonly, |w, i| w.write(if *i { "1" } else { "0" }))
+    })?;
     w.write(" ")?;
     option_or(w, async_eager_label.as_ref(), print_label, "-")?;
     w.write(" ")?;

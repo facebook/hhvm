@@ -941,6 +941,7 @@ fn inline_gena_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         FcallFlags::default(),
                         1,
                         Slice::empty(),
+                        Slice::empty(),
                         Some(async_eager_label),
                         1,
                         None,
@@ -1895,7 +1896,7 @@ fn emit_call_default<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     scope::with_unnamed_locals(alloc, e, |alloc, em| {
-        let FcallArgs(_, _, num_ret, _, _, _) = &fcall_args;
+        let FcallArgs(_, _, num_ret, _, _, _, _) = &fcall_args;
         let num_uninit = num_ret - 1;
         let (lhs, fcall) = emit_call_lhs_and_fcall(em, env, expr, fcall_args, targs)?;
         let (args, inout_setters) = emit_args_inout_setters(em, env, args)?;
@@ -2174,6 +2175,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                         let fcall_args = FcallArgs::new(
                                             FcallFlags::default(),
                                             1,
+                                            Slice::empty(),
                                             Slice::empty(),
                                             None,
                                             1,
@@ -2470,7 +2472,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             }
         }
         E_::Id(id) => {
-            let FcallArgs(flags, num_args, _, _, _, _) = fcall_args;
+            let FcallArgs(flags, num_args, _, _, _, _, _) = fcall_args;
             let fq_id = match string_utils::strip_global_ns(&id.1) {
                 "min" if num_args == 2 && !flags.contains(FcallFlags::HAS_UNPACK) => {
                     function::FunctionType::<'arena>::from_ast_name(alloc, "__SystemLib\\min2")
@@ -2693,6 +2695,10 @@ fn get_fcall_args<'arena>(
             bumpalo::collections::Vec::from_iter_in(args.iter().map(is_inout_arg), alloc)
                 .into_bump_slice(),
         ),
+        Slice::new(
+            bumpalo::collections::Vec::from_iter_in(args.iter().map(is_readonly_arg), alloc)
+                .into_bump_slice(),
+        ),
         async_eager_label,
         num_args,
         context
@@ -2702,6 +2708,10 @@ fn get_fcall_args<'arena>(
 
 fn is_inout_arg(e: &tast::Expr) -> bool {
     e.2.as_callconv().map_or(false, |cc| cc.0.is_pinout())
+}
+
+fn is_readonly_arg(_e: &tast::Expr) -> bool {
+    false // TODO: implement me
 }
 
 fn has_inout_arg(es: &[tast::Expr]) -> bool {

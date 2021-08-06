@@ -454,7 +454,15 @@ fn emit_reified_init_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 generic_arr,
                 instr::fcallclsmethodsd(
                     alloc,
-                    FcallArgs::new(FcallFlags::default(), 1, Slice::new(&[]), None, 1, None),
+                    FcallArgs::new(
+                        FcallFlags::default(),
+                        1,
+                        Slice::new(&[]),
+                        Slice::new(&[]),
+                        None,
+                        1,
+                        None,
+                    ),
                     SpecialClsRef::Parent,
                     method::from_raw_string(alloc, INIT_METH_NAME),
                 ),

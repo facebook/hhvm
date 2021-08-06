@@ -559,6 +559,7 @@ fn emit_using<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                 FcallFlags::empty(),
                                 1,
                                 Slice::empty(),
+                                Slice::empty(),
                                 async_eager_label,
                                 0,
                                 env.call_context
@@ -1156,6 +1157,7 @@ fn emit_foreach_await<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     FcallArgs::new(
                         FcallFlags::empty(),
                         1,
+                        Slice::empty(),
                         Slice::empty(),
                         Some(async_eager_label),
                         0,

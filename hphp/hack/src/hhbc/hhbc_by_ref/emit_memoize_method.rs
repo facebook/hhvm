@@ -283,12 +283,21 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
                 fcall_flags,
                 1,
                 Slice::new(&[]),
+                Slice::new(&[]),
                 Some(eager_set),
                 param_count,
                 None,
             )
         } else {
-            FcallArgs::new(fcall_flags, 1, Slice::new(&[]), None, param_count, None)
+            FcallArgs::new(
+                fcall_flags,
+                1,
+                Slice::new(&[]),
+                Slice::new(&[]),
+                None,
+                param_count,
+                None,
+            )
         }
     };
     let (reified_get, reified_memokeym) = if !args.flags.contains(Flags::IS_REIFIED) {
@@ -413,6 +422,7 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl>>
     let fcall_args = FcallArgs::new(
         FcallFlags::default(),
         1,
+        Slice::new(&[]),
         Slice::new(&[]),
         if args.flags.contains(Flags::IS_ASYNC) {
             Some(eager_set)

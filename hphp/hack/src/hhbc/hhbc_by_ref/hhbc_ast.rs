@@ -68,6 +68,7 @@ pub struct FcallArgs<'arena>(
     pub NumParams,
     pub NumParams,
     pub ByRefs<'arena>,
+    pub ByRefs<'arena>,
     pub Maybe<Label>,
     pub Maybe<Str<'arena>>,
 );
@@ -77,11 +78,14 @@ impl<'arena> FcallArgs<'arena> {
         flags: FcallFlags,
         num_rets: usize,
         inouts: Slice<'arena, bool>,
+        readonly: Slice<'arena, bool>,
         async_eager_label: Option<Label>,
         num_args: usize,
         context: Option<&'arena str>,
     ) -> FcallArgs<'arena> {
-        if !inouts.len == 0 && inouts.len != num_args {
+        if (!inouts.len == 0 && inouts.len != num_args)
+            || (!readonly.len == 0 && readonly.len != num_args)
+        {
             panic!("length of by_refs must be either zero or num_args");
         }
         FcallArgs(
@@ -89,6 +93,7 @@ impl<'arena> FcallArgs<'arena> {
             num_args,
             num_rets,
             inouts,
+            readonly,
             Maybe::from(async_eager_label),
             match context {
                 Some(s) => Maybe::Just(Str::new(s.as_bytes())),

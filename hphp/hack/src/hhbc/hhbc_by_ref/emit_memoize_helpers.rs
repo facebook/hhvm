@@ -83,7 +83,15 @@ pub fn get_implicit_context_memo_key<'arena>(
             instr::nulluninit(alloc),
             instr::fcallfuncd(
                 alloc,
-                FcallArgs::new(FcallFlags::default(), 1, Slice::empty(), None, 0, None),
+                FcallArgs::new(
+                    FcallFlags::default(),
+                    1,
+                    Slice::empty(),
+                    Slice::empty(),
+                    None,
+                    0,
+                    None,
+                ),
                 function::from_raw_string(
                     alloc,
                     "HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",

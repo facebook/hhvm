@@ -180,6 +180,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
             fcall_flags,
             1,
             Slice::new(&[]),
+            Slice::new(&[]),
             if is_async { Some(eager_set) } else { None },
             param_count,
             None,
@@ -287,6 +288,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
     let fcall_args = FcallArgs::new(
         FcallFlags::default(),
         1,
+        Slice::new(&[]),
         Slice::new(&[]),
         if is_async { Some(eager_set) } else { None },
         0,

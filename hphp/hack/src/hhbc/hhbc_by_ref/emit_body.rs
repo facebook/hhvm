@@ -1045,7 +1045,15 @@ pub fn emit_deprecation_info<'a, 'arena>(
                         instr::int(alloc, error_code),
                         instr::fcallfuncd(
                             alloc,
-                            FcallArgs::new(FcallFlags::default(), 1, Slice::empty(), None, 3, None),
+                            FcallArgs::new(
+                                FcallFlags::default(),
+                                1,
+                                Slice::empty(),
+                                Slice::empty(),
+                                None,
+                                3,
+                                None,
+                            ),
                             function::from_raw_string(alloc, "trigger_sampled_error"),
                         ),
                         instr::popc(alloc),

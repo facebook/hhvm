@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{Maybe, Maybe::*, Slice, Str};
+use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_type::{constraint, Info};
 use hhbc_by_ref_label::Label;
@@ -16,12 +16,12 @@ pub struct HhasParam<'arena> {
     pub is_readonly: bool,
     pub user_attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub type_info: Maybe<Info<'arena>>,
-    pub default_value: Maybe<(Label, Str<'arena>)>,
+    pub default_value: Maybe<Pair<Label, Str<'arena>>>,
 }
 
 impl<'arena> HhasParam<'arena> {
     pub fn replace_default_value_label(&mut self, new_label: Label) {
-        if let Just((label, _)) = self.default_value.as_mut() {
+        if let Just(Pair(label, _)) = self.default_value.as_mut() {
             *label = new_label;
         }
     }

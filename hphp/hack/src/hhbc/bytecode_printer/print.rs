@@ -2213,9 +2213,11 @@ fn print_param<'arena, W: Write>(
         w.write(" ")
     })?;
     w.write(&param.name)?;
-    option(w, &Option::from(param.default_value.clone()), |w, i| {
-        print_param_default_value(w, i)
-    })
+    option(
+        w,
+        &Option::from(param.default_value.map(|x| (x.0, x.1))),
+        |w, i| print_param_default_value(w, i),
+    )
 }
 
 fn print_param_id<W: Write>(w: &mut W, param_id: &ParamId) -> Result<(), W::Error> {

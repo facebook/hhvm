@@ -51,7 +51,7 @@ use oxidized::{
     aast, aast_defs, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos,
 };
 
-use ffi::{Maybe, Maybe::*, Slice, Str};
+use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 
 use bitflags::bitflags;
 use indexmap::IndexSet;
@@ -489,7 +489,7 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     };
                     let mut buf = String::new();
                     print_expr(&mut ctx, &mut buf, &expr_env, &expr)
-                        .map(|_| (l.clone(), Str::new_str(alloc, buf)))
+                        .map(|_| Pair(l.clone(), Str::new_str(alloc, buf)))
                         .ok()
                 })
                 .flatten(),

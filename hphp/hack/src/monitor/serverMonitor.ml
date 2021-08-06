@@ -145,6 +145,7 @@ struct
       Queue.t;
     (* Whether to ignore hh version mismatches *)
     ignore_hh_version: bool;
+    monitor_kill_again_fix: bool;
   }
 
   type t = env * ServerMonitorUtils.monitor_config * Unix.file_descr
@@ -926,6 +927,8 @@ struct
         watchman_retries = 0;
         ignore_hh_version =
           Informant.should_ignore_hh_version informant_init_env;
+        monitor_kill_again_fix =
+          Informant.monitor_kill_again_fix informant_init_env;
       }
     in
     (env, monitor_config, socket)

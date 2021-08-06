@@ -32,6 +32,7 @@ module Tools = struct
       min_distance_restart = 100;
       ignore_hh_version = false;
       is_saved_state_precomputed = false;
+      monitor_kill_again_fix = false;
     }
 end
 

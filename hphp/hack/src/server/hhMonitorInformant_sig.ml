@@ -16,6 +16,8 @@ module Types = struct
     ignore_hh_version: bool;
         (** Was the server initialized with a precomputed saved-state? *)
     is_saved_state_precomputed: bool;
+    monitor_kill_again_fix: bool;
+        (** Should we try to kill the server again when we wait too long? *)
   }
 
   type init_env = options

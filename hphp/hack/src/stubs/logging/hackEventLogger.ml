@@ -19,6 +19,7 @@ type rollout_flags = {
   symbolindex_search_provider: string;
   require_saved_state: bool;
   stream_errors: bool;
+  monitor_kill_again_fix: bool;
 }
 
 let flush () = ()

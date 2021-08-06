@@ -83,8 +83,8 @@ impl<'arena> FcallArgs<'arena> {
         num_args: usize,
         context: Option<&'arena str>,
     ) -> FcallArgs<'arena> {
-        if (!inouts.len == 0 && inouts.len != num_args)
-            || (!readonly.len == 0 && readonly.len != num_args)
+        if (!inouts.is_empty() && inouts.len() != num_args)
+            || (!readonly.is_empty() && readonly.len() != num_args)
         {
             panic!("length of by_refs must be either zero or num_args");
         }

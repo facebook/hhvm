@@ -2691,14 +2691,8 @@ fn get_fcall_args<'arena>(
     FcallArgs::new(
         flags,
         num_rets,
-        Slice::new(
-            bumpalo::collections::Vec::from_iter_in(args.iter().map(is_inout_arg), alloc)
-                .into_bump_slice(),
-        ),
-        Slice::new(
-            bumpalo::collections::Vec::from_iter_in(args.iter().map(is_readonly_arg), alloc)
-                .into_bump_slice(),
-        ),
+        Slice::fill_iter(alloc, args.iter().map(is_inout_arg)),
+        Slice::fill_iter(alloc, args.iter().map(is_readonly_arg)),
         async_eager_label,
         num_args,
         context

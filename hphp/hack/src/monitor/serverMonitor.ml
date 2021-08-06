@@ -209,15 +209,13 @@ struct
       Not_yet_started
     )
 
-  let kill_server_with_check (server : server_process) : unit =
+  let kill_server_with_check_and_wait (server : server_process) : unit =
     Sent_fds_collector.collect_all_fds ();
     match server with
-    | Alive server -> SC.kill_server server
-    | _ -> ()
-
-  let wait_for_server_exit_with_check server kill_signal_time =
-    match server with
-    | Alive server -> SC.wait_for_server_exit server kill_signal_time
+    | Alive server ->
+      let kill_signal_time = Unix.gettimeofday () in
+      SC.kill_server server;
+      SC.wait_for_server_exit server kill_signal_time
     | _ -> ()
 
   (* Reads current hhconfig contents from disk and returns true if the
@@ -255,15 +253,13 @@ struct
       "kill_and_maybe_restart_server (env.server=%s)"
       (show_server_process env.server);
     (* We're going to collect all FDs right here and now. This will be done again below,
-       in [kill_server_with_check], but Informant.reinit might take too long or might throw. *)
+       in [kill_server_with_check_and_wait], but Informant.reinit might take too long or might throw. *)
     Sent_fds_collector.collect_all_fds ();
     (* Iff we just restart and keep going, we risk
      * Changed_merge_base eventually arriving and restarting the already started server
      * for no reason. Re-issuing merge base query here should bring the Monitor and Server
      * understanding of current revision to be the same *)
-    kill_server_with_check env.server;
-    let kill_signal_time = Unix.gettimeofday () in
-    wait_for_server_exit_with_check env.server kill_signal_time;
+    kill_server_with_check_and_wait env.server;
 
     let version_matches = is_config_version_matching env in
     if SC.is_saved_state_precomputed env.server_start_options then begin
@@ -407,8 +403,6 @@ struct
    *)
   let client_out_of_date env client_fd mismatch_info =
     Hh_logger.log "Client out of date. Killing server.";
-    kill_server_with_check env.server;
-    let kill_signal_time = Unix.gettimeofday () in
     (* If we detect out of date client, should always kill server and exit
      * monitor, even if messaging to channel or event logger fails. *)
     (try client_out_of_date_ client_fd mismatch_info with
@@ -416,7 +410,7 @@ struct
       Hh_logger.log
         "Handling client_out_of_date threw with: %s"
         (Exn.to_string e));
-    wait_for_server_exit_with_check env.server kill_signal_time;
+    kill_server_with_check_and_wait env.server;
     Exit.exit Exit_status.Build_id_mismatch
 
   (** Send (possibly empty) sequences of messages before handing off to
@@ -528,9 +522,7 @@ struct
         client_fd
     | MonitorRpc.SHUT_DOWN tracker ->
       log "Got shutdown RPC. Shutting down." ~tracker;
-      let kill_signal_time = Unix.gettimeofday () in
-      kill_server_with_check env.server;
-      wait_for_server_exit_with_check env.server kill_signal_time;
+      kill_server_with_check_and_wait env.server;
       Exit.exit Exit_status.No_error
 
   let ack_and_handoff_client env client_fd =

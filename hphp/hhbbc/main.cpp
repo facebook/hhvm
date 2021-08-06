@@ -157,9 +157,6 @@ void parse_options(int argc, char** argv) {
     ("trace-bytecode",
       po::value(&trace_bcs)->composing(),
       "Add a bytecode to trace (for debugging)")
-    ("hack-compiler-extract-path",
-      po::value(&hack_compiler_extract_path)->default_value(""),
-      "hack compiler extract path")
     ;
 
   // Some extra esoteric options that aren't exposed in --help for
@@ -479,9 +476,6 @@ int main(int argc, char** argv) try {
   RO::EvalJit             = false;
   RO::EvalLowStaticArrays = false;
   RO::RepoDebugInfo       = false;
-  if (!hack_compiler_extract_path.empty()) {
-    RO::EvalHackCompilerExtractPath = hack_compiler_extract_path;
-  }
 
   register_process_init();
 

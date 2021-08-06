@@ -202,7 +202,7 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
 
   folly::CPUThreadPoolExecutor exec{
       std::min(
-          RuntimeOption::EvalHackCompilerWorkers,
+          RuntimeOption::EvalFactsWorkers,
           static_cast<uint64_t>(pathsAndHashes.size())),
       make_thread_factory("FactExtractor")};
 

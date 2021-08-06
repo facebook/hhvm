@@ -1345,7 +1345,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EnableXHP ? '1' : '0')
     + (RuntimeOption::EvalEnableCallBuiltin ? '1' : '0')
     + (RuntimeOption::EvalHackArrCompatSerializeNotices ? '1' : '0')
-    + (RuntimeOption::EvalHackCompilerUseEmbedded ? '1' : '0')
     + (RuntimeOption::EvalHackCompilerVerboseErrors ? '1' : '0')
     + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
     + (RuntimeOption::EvalLoadFilepathFromUnitCache ? '1' : '0')
@@ -1357,8 +1356,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalLogKnownMethodsAsDynamicCalls ? '1' : '0')
     + (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls ? '1' : '0')
     + (RuntimeOption::EvalAssemblerFoldDefaultValues ? '1' : '0')
-    + RuntimeOption::EvalHackCompilerCommand + '\0'
-    + RuntimeOption::EvalHackCompilerArgs + '\0'
     + (RuntimeOption::RepoDebugInfo ? '1' : '0')
     + std::to_string(RuntimeOption::CheckIntOverflow)
     + (RuntimeOption::DisableNontoplevelDeclarations ? '1' : '0')
@@ -1372,7 +1369,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + std::to_string(RuntimeOption::EvalAssemblerMaxScalarSize)
     + std::to_string(RuntimeOption::EvalEmitClassPointers)
     + (RuntimeOption::EvalFoldLazyClassKeys ? '1' : '0')
-    + (RuntimeOption::EvalHackCompilerUseCompilerPool ? '1' : '0')
     + (RuntimeOption::EvalEnableAbstractContextConstants ? '1': '0')
     + (RuntimeOption::EvalTraitConstantInterfaceBehavior ? '1' : '0')
     + (RuntimeOption::EvalEnableImplicitContext ? '1' : '0')

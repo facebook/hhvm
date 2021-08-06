@@ -289,15 +289,6 @@ function hhvm_path() {
   return rel_path($file);
 }
 
-function hh_codegen_cmd($options) {
-  $cmd = hh_codegen_path();
-  if (isset($options['hackc'])) {
-    $cmd .= ' --daemon';
-  }
-
-  return $cmd;
-}
-
 function bin_root() {
   if (getenv("HHVM_BIN") !== false) {
     return dirname(realpath(getenv("HHVM_BIN")));
@@ -448,7 +439,6 @@ function get_options($argv): (dict<string, mixed>, vec<string>) {
     'failure-file:' => '',
     '*wholecfg' => '',
     '*hhas-round-trip' => '',
-    '*use-internal-compiler' => '',
     'color' => 'c',
     'no-fun' => '',
     'no-skipif' => '',
@@ -462,7 +452,6 @@ function get_options($argv): (dict<string, mixed>, vec<string>) {
     '*hhvm-binary-path:' => 'b:',
     '*vendor:' => '',
     'record-failures:' => '',
-    '*hackc' => '',
     '*ignore-oids' => '',
     'jitsample:' => '',
     '*hh_single_type_check:' => '',
@@ -585,11 +574,6 @@ function get_options($argv): (dict<string, mixed>, vec<string>) {
 
   if (isset($options['write-to-checkout'])) {
     Status::$write_to_checkout = true;
-  }
-
-  if (isset($options['hackc']) && isset($options['use-internal-compiler'])) {
-    echo "hackc and use-internal-compiler are mutually exclusive options\n";
-    exit(1);
   }
 
   return tuple($options, $files);
@@ -903,10 +887,6 @@ function hhvm_cmd_impl(
       // load/store counters don't work on Ivy Bridge so disable for tests
       '-vEval.ProfileHWEnable=false',
 
-      isset($options['use-internal-compiler']) ?  '' :
-        '-vEval.HackCompilerExtractPath='
-        .escapeshellarg(bin_root().'/hackc_%{schema}'),
-
       // use a fixed path for embedded data
       '-vEval.EmbeddedDataExtractPath='
         .escapeshellarg(bin_root().'/hhvm_%{type}_%{buildid}'),
@@ -920,11 +900,6 @@ function hhvm_cmd_impl(
 
     if ($autoload_db_prefix !== null) {
       $args[] = '-vAutoload.DB.Path='.escapeshellarg("$autoload_db_prefix.$mode_num");
-    }
-
-    if (isset($options['hackc'])) {
-      $args[] = '-vEval.HackCompilerCommand="'.hh_codegen_cmd($options).'"';
-      $args[] = '-vEval.HackCompilerUseEmbedded=false';
     }
 
     if (isset($options['retranslate-all'])) {
@@ -969,10 +944,6 @@ function hhvm_cmd_impl(
     if (isset($options['bespoke'])) {
       $args[] = '-vEval.BespokeArrayLikeMode=1';
       $args[] = '-vServer.APC.MemModelTreadmill=true';
-    }
-
-    if (isset($options['use-internal-compiler'])) {
-      $args[] = '-vEval.HackCompilerUseCompilerPool=false';
     }
 
     $cmds[] = implode(' ', array_merge($args, $extra_args));
@@ -1054,7 +1025,7 @@ function hhvm_cmd(
   if (isset($options['repo'])) {
     $repo_suffix = repo_separate($options, $test) ? 'hhbbc' : 'hhbc';
 
-    $program = isset($options['hackc']) ? "hackc" : "hhvm";
+    $program = "hhvm";
     $hhbbc_repo = '"' . test_repo($options, $test) . "/$program.$repo_suffix\"";
     $cmd .= ' -vRepo.Authoritative=true';
     $cmd .= " -vRepo.Path=$hhbbc_repo";
@@ -1107,15 +1078,6 @@ function hphp_cmd($options, $test, $program): string {
   $extra_args = preg_replace("/(^-v|\s+-v)\s*/", "$1Runtime.", extra_args($options));
 
   $compiler_args = extra_compiler_args($options);
-  if (isset($options['hackc'])) {
-    $hh_single_compile = hh_codegen_path();
-    $compiler_args = implode(" ", vec[
-      '-vRuntime.Eval.HackCompilerUseEmbedded=false',
-      "-vRuntime.Eval.HackCompilerInheritConfig=true",
-      "-vRuntime.Eval.HackCompilerCommand=\"{$hh_single_compile} --daemon --dump-symbol-refs\"",
-      $compiler_args
-    ]);
-  }
 
   $hdf_suffix = ".use.for.ini.migration.testing.only.hdf";
   $hdf = file_exists($test.$hdf_suffix)
@@ -1143,9 +1105,6 @@ function hphp_cmd($options, $test, $program): string {
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
     '-vRuntime.Eval.EnableArgsInBacktraces=true',
     '-vRuntime.Eval.FoldLazyClassKeys=false',
-    isset($options['use-internal-compiler']) ?  '' :
-      '-vRuntime.Eval.HackCompilerExtractPath='
-      .escapeshellarg(bin_root().'/hackc_%{schema}'),
     '-vParserThreadCount=' . ($options['repo-threads'] ?? 1),
     '--nofork=1 -thhbc -l1 -k1',
     '-o "' . test_repo($options, $test) . '"',
@@ -1179,8 +1138,6 @@ function hhbbc_cmd($options, $test, $program) {
     '--no-logging',
     '--no-cores',
     '--parallel-num-threads=' . ($options['repo-threads'] ?? 1),
-    '--hack-compiler-extract-path='
-      .escapeshellarg(bin_root().'/hackc_%{schema}'),
     read_opts_file("$test.hhbbc_opts"),
     "-o \"$test_repo/$program.hhbbc\" \"$test_repo/$program.hhbc\"",
   ]);
@@ -3053,7 +3010,7 @@ function run_test($options, $test) {
     $test_repo = test_repo($options, $test);
     if (isset($options['repo-out'])) {
       // we may need to clean up after a previous run
-      $repo_files = vec['hhvm.hhbc', 'hhvm.hhbbc', 'hackc.hhbc', 'hackc.hhbbc'];
+      $repo_files = vec['hhvm.hhbc', 'hhvm.hhbbc'];
       foreach ($repo_files as $repo_file) {
         @unlink("$test_repo/$repo_file");
       }
@@ -3062,7 +3019,7 @@ function run_test($options, $test) {
       Status::createTestTmpDir($test);
     }
 
-    $program = isset($options['hackc']) ? "hackc" : "hhvm";
+    $program = "hhvm";
 
     if (file_exists($test . '.hphpc_assert')) {
       $hphp = hphp_cmd($options, $test, $program);
@@ -3204,7 +3161,7 @@ function print_commands($tests, $options) {
     }
 
     // How to run it with hhbbc:
-    $program = isset($options['hackc']) ? "hackc" : "hhvm";
+    $program = "hhvm";
     $hhbbc_cmds = hphp_cmd($options, $test, $program)."\n";
     if (repo_separate($options, $test)) {
       $hhbbc_cmd  = hhbbc_cmd($options, $test, $program)."\n";

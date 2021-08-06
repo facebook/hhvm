@@ -43,7 +43,7 @@ struct HackCFactsExtractor {
   using result_type = Optional<FactsJSONString>;
 
   static int get_workers_count() {
-    return RuntimeOption::EvalHackCompilerWorkers;
+    return RuntimeOption::EvalFactsWorkers;
   }
 
   static void mark_failed(result_type& workerResult) {

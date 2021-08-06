@@ -1022,37 +1022,6 @@ static inline bool eagerGcDefault() {
 #endif
 }
 
-static inline std::string hackCompilerArgsDefault() {
-  return "--daemon --dump-symbol-refs";
-}
-
-static inline std::string hackCompilerCommandDefault() {
-#ifdef FACEBOOK
-  return "";
-#else
-  std::string hackc = folly::sformat(
-    "{}/hh_single_compile",
-    current_executable_directory()
-  );
-  if (::access(hackc.data(), X_OK) != 0) {
-#ifndef HACKC_FALLBACK_PATH
-    return "";
-#else
-    hackc = HACKC_FALLBACK_PATH;
-    if (::access(hackc.data(), X_OK) != 0) {
-      return "";
-    }
-#endif
-  }
-
-  return folly::sformat(
-    "{} {}",
-    hackc,
-    hackCompilerArgsDefault()
-  );
-#endif
-}
-
 static inline bool enableGcDefault() {
   return RuntimeOption::EvalEagerGC;
 }
@@ -2042,8 +2011,6 @@ void RuntimeOption::Load(
     s_enable_static_arena =
       Config::GetBool(ini, config, "Eval.UseTLStaticArena", true);
 
-    replacePlaceholders(EvalHackCompilerExtractPath);
-    replacePlaceholders(EvalHackCompilerFallbackPath);
     replacePlaceholders(EvalEmbeddedDataExtractPath);
     replacePlaceholders(EvalEmbeddedDataFallbackPath);
 

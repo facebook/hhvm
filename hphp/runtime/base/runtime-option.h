@@ -720,27 +720,8 @@ struct RuntimeOption {
    */                                                                   \
   F(uint32_t, EnableCodeCoverage,      0)                               \
   F(bool, EnableFuncCoverage,          false)                           \
-  /* Whether to use the embedded hackc binary */                        \
-  F(bool, HackCompilerUseEmbedded,     facebook)                        \
-  /* Whether to trust existing versions of the extracted compiler */    \
-  F(bool, HackCompilerTrustExtract,    true)                            \
-  /* When using an embedded hackc, extract it to the ExtractPath or the
-     ExtractFallback. */                                                \
-  F(string, HackCompilerExtractPath,   "/var/run/hackc_%{schema}")      \
-  F(string, HackCompilerFallbackPath,  "/tmp/hackc_%{schema}_XXXXXX")   \
-  /* Arguments to run embedded hackc binary with */                     \
-  F(string, HackCompilerArgs,          hackCompilerArgsDefault())       \
-  /* The command to invoke to spawn hh_single_compile in server mode. */\
-  F(string, HackCompilerCommand,       hackCompilerCommandDefault())    \
-  /* The number of hh_single_compile daemons to keep alive. */          \
-  F(uint64_t, HackCompilerWorkers,     Process::GetCPUCount())          \
-  /* The number of hh_single_compile daemons to keep alive during a     \
-   * repo build after the files in the tree are parsed--set to 0 to     \
-   * disable resizing the pool of compilers */                          \
-  F(uint64_t, HackCompilerSecondaryWorkers, 2)                          \
-  /* The number of times to retry after an infra failure communicating
-     with a compiler process. */                                        \
-  F(uint64_t, HackCompilerMaxRetries,  0)                               \
+  /* The number of worker threads to spawn for facts extraction. */     \
+  F(uint64_t, FactsWorkers,            Process::GetCPUCount())          \
   /* Whether to log extern compiler performance */                      \
   F(bool, LogExternCompilerPerf,       false)                           \
   /* Whether to write verbose log messages to the error log and include
@@ -750,8 +731,6 @@ struct RuntimeOption {
   /* Whether the HackC compiler should inherit the compiler config of the
      HHVM process that launches it. */                                  \
   F(bool, HackCompilerInheritConfig,   true)                            \
-  /* Use compiler pool to get hhas from hh_single_compile process */    \
-  F(bool, HackCompilerUseCompilerPool, true)                            \
   /* enable decls in compilation */                                     \
   F(bool, EnableDecl, false)                                     \
   /* When using embedded data, extract it to the ExtractPath or the
@@ -1044,8 +1023,7 @@ struct RuntimeOption {
   F(bool, TwoPhaseGC,                  false)                           \
   F(bool, EnableGC,                    enableGcDefault())               \
   /* End of GC Options */                                               \
-  F(bool, Verify,                      (getenv("HHVM_VERIFY") ||        \
-    !EvalHackCompilerCommand.empty()))                                  \
+  F(bool, Verify,                      getenv("HHVM_VERIFY"))           \
   F(bool, VerifyOnly,                  false)                           \
   F(bool, FatalOnVerifyError,          !RepoAuthoritative)              \
   F(bool, AbortBuildOnVerifyError,     true)                            \

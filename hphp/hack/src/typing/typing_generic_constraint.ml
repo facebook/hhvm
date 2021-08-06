@@ -71,5 +71,5 @@ let check_tparams_constraint (env : env) ~use_pos ck ~cstr_ty ty =
 
 let check_where_constraint
     ~in_class (env : env) ~use_pos ~definition_pos ck ~cstr_ty ty =
-  check_constraint env ck ty ~cstr_ty (fun ?code:_ reasons ->
+  check_constraint env ck ty ~cstr_ty (fun ?code:_ ?quickfixes:_ reasons ->
       Errors.explain_where_constraint ~in_class ~use_pos ~definition_pos reasons)

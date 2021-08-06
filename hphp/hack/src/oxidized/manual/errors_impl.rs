@@ -10,11 +10,17 @@ use crate::pos::Pos;
 use crate::pos_or_decl::PosOrDecl;
 
 impl<PP, P> Error_<PP, P> {
-    pub fn new(code: ErrorCode, claim: Message<PP>, reasons: Vec<Message<P>>) -> Self {
+    pub fn new(
+        code: ErrorCode,
+        claim: Message<PP>,
+        reasons: Vec<Message<P>>,
+        quickfixes: Vec<Quickfix<PP>>,
+    ) -> Self {
         Error_ {
             code,
             claim,
             reasons,
+            quickfixes,
         }
     }
 
@@ -45,11 +51,13 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> Ord for Error_<PP, P> {
             code: self_code,
             claim: self_claim,
             reasons: self_reasons,
+            quickfixes: _,
         } = self;
         let Self {
             code: other_code,
             claim: other_claim,
             reasons: other_reasons,
+            quickfixes: _,
         } = other;
         let (self_pos, self_msg) = self_claim;
         let (other_pos, other_msg) = other_claim;
@@ -91,6 +99,7 @@ impl<'a> std::fmt::Display for DisplayRaw<'a> {
             code,
             claim,
             reasons,
+            quickfixes: _,
         } = self.0;
         let (pos, msg) = claim;
         let code = DisplayErrorCode(*code);
@@ -158,6 +167,7 @@ impl Naming {
             Self::FdNameAlreadyBound as isize,
             (p, "Field name already bound".into()),
             vec![],
+            vec![],
         )
     }
 
@@ -168,6 +178,7 @@ impl Naming {
                 p,
                 "Methods need to be marked public, private, or protected.".into(),
             ),
+            vec![],
             vec![],
         )
     }
@@ -180,6 +191,7 @@ impl Naming {
                 "Trait use as is a PHP feature that is unsupported in Hack".into(),
             ),
             vec![],
+            vec![],
         )
     }
 
@@ -191,6 +203,7 @@ impl Naming {
                 "insteadof is a PHP feature that is unsupported in Hack".into(),
             ),
             vec![],
+            vec![],
         )
     }
 
@@ -201,6 +214,7 @@ impl Naming {
                 p,
                 "Cannot redeclare trait method's visibility in this manner".into(),
             ),
+            vec![],
             vec![],
         )
     }
@@ -216,6 +230,7 @@ impl NastCheck {
                     .into(),
             ),
             vec![],
+            vec![],
         )
     }
 
@@ -226,6 +241,7 @@ impl NastCheck {
                 p,
                 "XHP classes can only contain one category declaration".into(),
             ),
+            vec![],
             vec![],
         )
     }

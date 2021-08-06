@@ -86,7 +86,12 @@ let check_members_implemented
         ()
       | _ when Option.is_none (get_member member_name) ->
         let (lazy defn_pos) = class_elt.ce_pos in
-        Errors.member_not_implemented member_name parent_reason reason defn_pos
+        Errors.member_not_implemented
+          member_name
+          parent_reason
+          reason
+          defn_pos
+          []
       | _ -> ())
 
 (* An abstract member can be declared in multiple ancestors. Sometimes these
@@ -313,7 +318,7 @@ let check_override
         `property)
       ~current_decl_and_file:(Env.get_current_decl_and_file env);
   if check_params then (
-    let on_error ?code:_ reasons =
+    let on_error ?code:_ ?quickfixes:_ reasons =
       (if is_method then
         Errors.bad_method_override
       else
@@ -1102,7 +1107,8 @@ let check_typeconsts env implements parent_class class_ on_error =
           tconst_name
           parent_pos
           pos
-          (fst parent_tconst.ttc_name);
+          (fst parent_tconst.ttc_name)
+          [];
         env)
 
 let check_consts
@@ -1135,7 +1141,8 @@ let check_consts
             const_name
             parent_const.cc_pos
             name_pos
-            (Cls.pos parent_class);
+            (Cls.pos parent_class)
+            [];
           env
       ) else
         env)
@@ -1205,7 +1212,7 @@ let check_implements env implements parent_type (name_pos, type_to_be_checked) =
       implements
       parent_class
       (name_pos, class_)
-      (fun ?code:_ reasons ->
+      (fun ?code:_ ?quickfixes:_ reasons ->
         (* sadly, enum error reporting requires this to keep the error in the file
            with the enum *)
         if String.equal parent_name_str SN.Classes.cHH_BuiltinEnum then

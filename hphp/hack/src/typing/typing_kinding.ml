@@ -226,7 +226,8 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
                     ck
                     ty
                     ~cstr_ty
-                    (fun ?code:_ _ -> report_constraint ty cls_name x)
+                    (fun ?code:_ ?quickfixes:_ _ ->
+                      report_constraint ty cls_name x)
                 in
                 ())
           end

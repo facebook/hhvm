@@ -2506,7 +2506,7 @@ and simplify_subtype_implicit_params
         subtype_env with
         on_error =
           begin
-            fun ?code:_ _ ->
+            fun ?code:_ ?quickfixes:_ _ ->
             let expected = Typing_coeffects.get_type sub_cap in
             let got = Typing_coeffects.get_type super_cap in
             Errors.coeffect_subtyping_error
@@ -3771,10 +3771,10 @@ let subtype_funs
     old_env
 
 let sub_type_or_fail env ty1 ty2 fail =
-  sub_type env ty1 ty2 (fun ?code:_ _ -> fail ())
+  sub_type env ty1 ty2 (fun ?code:_ ?quickfixes:_ _ -> fail ())
 
 let sub_type_or_fail_res env ty1 ty2 fail =
-  sub_type_res env ty1 ty2 (fun ?code:_ _ -> fail ())
+  sub_type_res env ty1 ty2 (fun ?code:_ ?quickfixes:_ _ -> fail ())
 
 let set_fun_refs () =
   Typing_utils.sub_type_ref := sub_type;

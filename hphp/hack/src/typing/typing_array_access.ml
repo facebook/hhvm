@@ -178,7 +178,7 @@ let check_arraykey_index error env pos container_ty index_ty =
          env
          ty_actual
          ty_expected
-         (fun ?code:_ _ _ -> error pos container_info index_info)
+         (fun ?code:_ ?quickfixes:_ _ _ -> error pos container_info index_info)
   else
     (env, Ok index_ty)
 

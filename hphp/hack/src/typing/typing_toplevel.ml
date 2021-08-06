@@ -1736,7 +1736,7 @@ let check_generic_class_with_SupportDynamicType env c parents =
                       env_with_assumptions
                       self_ty
                       dynamic_ty
-                      (fun ?code:_ reasons ->
+                      (fun ?code:_ ?quickfixes:_ reasons ->
                         let message =
                           Typing_print.full_strip_ns_decl env ty
                           ^ " is subtype of dynamic implies "

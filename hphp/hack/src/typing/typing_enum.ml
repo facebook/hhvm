@@ -113,7 +113,7 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
       env
       ty
       ty_arraykey
-      (fun ?code:_ _ _ ->
+      (fun ?code:_ ?quickfixes:_ _ _ ->
         Errors.enum_type_bad
           (Pos_or_decl.unsafe_to_raw_pos pos)
           false

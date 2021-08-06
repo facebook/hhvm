@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e2d069f70bdfaf3485339730d42e014b>>
+// @generated SignedSource<<e2b25999e5ff516fd290d8f0026d6d2c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -109,6 +109,27 @@ arena_deserializer::impl_deserialize_in_arena!(Format);
 
 #[derive(
     Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct Quickfix<Pos> {
+    pub title: String,
+    pub new_text: String,
+    pub pos: Pos,
+}
+
+#[derive(
+    Clone,
     Copy,
     Debug,
     Deserialize,
@@ -159,6 +180,7 @@ pub struct Error_<PrimPos, Pos> {
     pub code: ErrorCode,
     pub claim: Message<PrimPos>,
     pub reasons: Vec<Message<Pos>>,
+    pub quickfixes: Vec<Quickfix<PrimPos>>,
 }
 
 pub type Error = Error_<pos::Pos, pos_or_decl::PosOrDecl>;

@@ -413,7 +413,7 @@ let refresh_tvar tv (on_error : Errors.error_from_reasons_callback) renv =
      this tvar *)
   let renv = { renv with on_error } in
   let tv_ity = LoclType (mk (Reason.none, Tvar tv)) in
-  let elim_on_error pos name ?code:_ _ =
+  let elim_on_error pos name ?code:_ ?quickfixes:_ _ =
     let name = Markdown_lite.md_codify name in
     on_error [(pos, "Could not remove rigid type variable " ^ name)]
   in
@@ -472,10 +472,13 @@ let refresh_locals renv =
   let on_error = renv.on_error in
   Local_id.Map.fold
     (fun local (lty, pos, _expr_id) renv ->
-      let on_error ?code reasons =
+      let on_error ?code ?quickfixes reasons =
         let pos = Pos_or_decl.of_raw_pos pos in
         let name = Markdown_lite.md_codify (Local_id.to_string local) in
-        on_error ?code (reasons @ [(pos, "in the type of local " ^ name)])
+        on_error
+          ?code
+          ?quickfixes
+          (reasons @ [(pos, "in the type of local " ^ name)])
       in
       let renv = { renv with on_error } in
       let (renv, lty, changed) = refresh_type renv Ast_defs.Covariant lty in
@@ -508,9 +511,12 @@ let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
       }
     in
     let renv = refresh_locals renv in
-    let on_error ?code reasons =
+    let on_error ?code ?quickfixes reasons =
       let pos = Pos_or_decl.of_raw_pos pos in
-      on_error ?code (reasons @ [(pos, "in the return type of this lambda")])
+      on_error
+        ?code
+        ?quickfixes
+        (reasons @ [(pos, "in the return type of this lambda")])
     in
     let renv = { renv with on_error } in
     let (renv, ty, _) = refresh_type renv Ast_defs.Covariant ty in

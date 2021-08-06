@@ -63,11 +63,24 @@ type format =
   | Raw
   | Highlighted
 
+type 'pos quickfix = {
+  title: string;
+  new_text: string;
+  pos: 'pos;
+}
+
 type typing_error_callback =
-  ?code:int -> Pos.t * string -> (Pos_or_decl.t * string) list -> unit
+  ?code:int ->
+  ?quickfixes:Pos.t quickfix list ->
+  Pos.t * string ->
+  (Pos_or_decl.t * string) list ->
+  unit
 
 type error_from_reasons_callback =
-  ?code:int -> (Pos_or_decl.t * string) list -> unit
+  ?code:int ->
+  ?quickfixes:Pos.t quickfix list ->
+  (Pos_or_decl.t * string) list ->
+  unit
 
 (** Type representing the errors for a single file. *)
 type per_file_errors
@@ -121,6 +134,8 @@ val num_digits : int -> int
 
 val add_error : error -> unit
 
+val quickfixes : error -> Pos.t quickfix list
+
 (* Error codes that can be suppressed in strict mode with a FIXME based on configuration. *)
 val allowed_fixme_codes_strict : ISet.t ref
 
@@ -155,7 +170,12 @@ val get_pos : error -> Pos.t
 
 val get_severity : ('pp, 'p) error_ -> severity
 
-val make_error : int -> Pos.t * string -> (Pos_or_decl.t * string) list -> error
+val make_error :
+  int ->
+  ?quickfixes:Pos.t quickfix list ->
+  Pos.t * string ->
+  (Pos_or_decl.t * string) list ->
+  error
 
 val make_absolute_error : int -> (Pos.absolute * string) list -> finalized_error
 
@@ -1069,7 +1089,12 @@ val visibility_override_internal :
   unit
 
 val member_not_implemented :
-  string -> Pos_or_decl.t -> Pos.t -> Pos_or_decl.t -> unit
+  string ->
+  Pos_or_decl.t ->
+  Pos.t ->
+  Pos_or_decl.t ->
+  Pos.t quickfix list ->
+  unit
 
 val bad_decl_override :
   Pos_or_decl.t ->

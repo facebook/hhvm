@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7b563dfdcf9b330554dee4a159a85b2b>>
+// @generated SignedSource<<887d62603e0f26f55e9380c1e0651823>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -36,6 +36,33 @@ pub use oxidized::errors::Severity;
 
 pub use oxidized::errors::Format;
 
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(deserialize = "Pos: 'de + arena_deserializer::DeserializeInArena<'de>"))]
+pub struct Quickfix<'a, Pos> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub title: &'a str,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub new_text: &'a str,
+    #[serde(deserialize_with = "arena_deserializer::arena")]
+    pub pos: Pos,
+}
+impl<'a, Pos: TrivialDrop> TrivialDrop for Quickfix<'a, Pos> {}
+arena_deserializer::impl_deserialize_in_arena!(Quickfix<'arena, Pos>);
+
 pub use oxidized::errors::NameContext;
 
 /// Results of single file analysis.
@@ -66,6 +93,8 @@ pub struct Error_<'a, PrimPos, Pos> {
     pub claim: &'a Message<'a, PrimPos>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub reasons: &'a [&'a Message<'a, Pos>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub quickfixes: &'a [&'a Quickfix<'a, PrimPos>],
 }
 impl<'a, PrimPos: TrivialDrop, Pos: TrivialDrop> TrivialDrop for Error_<'a, PrimPos, Pos> {}
 arena_deserializer::impl_deserialize_in_arena!(Error_<'arena, PrimPos, Pos>);

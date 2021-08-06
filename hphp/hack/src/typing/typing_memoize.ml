@@ -118,7 +118,7 @@ let check_param : env -> Nast.fun_param -> unit =
                      param_pos,
                      Lvar (param_pos, Local_id.make_unscoped param_name) ))
               ~member_id:(pos, SN.Members.mGetInstanceKey)
-              ~on_error:(fun ?code:_ _ _ -> error ty)
+              ~on_error:(fun ?code:_ ?quickfixes:_ _ _ -> error ty)
               env
               ty
           in

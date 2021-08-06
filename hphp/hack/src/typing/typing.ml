@@ -2648,7 +2648,8 @@ and expr_
           match bound with
           | None -> env
           | Some ty ->
-            SubType.sub_type env supertype ty (fun ?code _ -> ignore code)
+            SubType.sub_type env supertype ty (fun ?code ?quickfixes _ ->
+                ignore (code, quickfixes))
         in
         (env, supertype)
       | Some ExpectedTy.{ ty = { et_type = ty; _ }; _ } -> (env, ty)
@@ -5205,7 +5206,7 @@ and check_shape_keys_validity :
           env
           ty
           (MakeType.arraykey r)
-          (fun ?code:_ _ _ ->
+          (fun ?code:_ ?quickfixes:_ _ _ ->
             Errors.invalid_shape_field_type
               key_pos
               (get_pos ty)
@@ -7722,7 +7723,7 @@ and call
             env
             env_capability
             capability
-            (fun ?code:_c _ _ ->
+            (fun ?code:_ ?quickfixes:_ _ _ ->
               Errors.call_coeffect_error
                 pos
                 ~available_incl_unsafe:

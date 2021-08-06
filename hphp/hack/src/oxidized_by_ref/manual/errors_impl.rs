@@ -14,11 +14,13 @@ impl<'a> Error_<'a, Pos<'a>, PosOrDecl<'a>> {
         code: ErrorCode,
         claim: &'a Message<'a, Pos<'a>>,
         reasons: &'a [&'a Message<'a, PosOrDecl<'a>>],
+        quickfixes: &'a [&'a Quickfix<Pos<'a>>],
     ) -> Self {
         Error_ {
             code,
             claim,
             reasons,
+            quickfixes,
         }
     }
 
@@ -49,11 +51,13 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> Ord for Error_<'_, PP, P> {
             code: self_code,
             claim: self_claim,
             reasons: self_reasons,
+            quickfixes: _,
         } = self;
         let Self {
             code: other_code,
             claim: other_claim,
             reasons: other_reasons,
+            quickfixes: _,
         } = other;
         let (self_pos, self_msg) = self_claim;
         let (other_pos, other_msg) = other_claim;
@@ -95,6 +99,7 @@ impl<'a> std::fmt::Display for DisplayRaw<'a> {
             code,
             claim,
             reasons,
+            quickfixes: _,
         } = self.0;
         let (pos, msg) = claim;
         let code = DisplayErrorCode(*code);

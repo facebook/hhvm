@@ -35,11 +35,11 @@ end
 
 let convert_on_error :
     (Errors.error -> unit) -> Pos.t -> Errors.error_from_reasons_callback =
- fun on_error pos ?code reasons ->
+ fun on_error pos ?code ?quickfixes reasons ->
   let code =
     Option.value code ~default:Error_codes.Typing.(err_code UnifyError)
   in
-  on_error (Errors.make_error code (pos, "Typing_error") reasons)
+  on_error (Errors.make_error code ?quickfixes (pos, "Typing_error") reasons)
 
 let catch_exc
     pos

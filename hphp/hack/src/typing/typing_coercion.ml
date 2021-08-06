@@ -155,13 +155,13 @@ let result t ~on_ok ~on_err =
 let coerce_type
     p ur env ty_have ty_expect (on_error : Errors.typing_error_callback) =
   result ~on_ok:Fn.id ~on_err:Fn.id
-  @@ coerce_type_impl env ty_have ty_expect (fun ?code reasons ->
-         on_error ?code (p, Reason.string_of_ureason ur) reasons)
+  @@ coerce_type_impl env ty_have ty_expect (fun ?code ?quickfixes reasons ->
+         on_error ?code ?quickfixes (p, Reason.string_of_ureason ur) reasons)
 
 let coerce_type_res
     p ur env ty_have ty_expect (on_error : Errors.typing_error_callback) =
-  coerce_type_impl env ty_have ty_expect (fun ?code reasons ->
-      on_error ?code (p, Reason.string_of_ureason ur) reasons)
+  coerce_type_impl env ty_have ty_expect (fun ?code ?quickfixes reasons ->
+      on_error ?code ?quickfixes (p, Reason.string_of_ureason ur) reasons)
 
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)

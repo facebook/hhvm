@@ -30,7 +30,6 @@ pub use manual::s_set;
 pub use manual::scoured_comments_impl;
 pub use manual::shape_map;
 pub use manual::symbol_name;
-pub use manual::uast;
 
 mod stubs;
 

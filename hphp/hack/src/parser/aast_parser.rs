@@ -15,7 +15,7 @@ use ocamlrep::rc::RcOc;
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized::{
     aast::Program, file_info::Mode, namespace_env::Env as NamespaceEnv, pos::Pos,
-    scoured_comments::ScouredComments, uast::AstAnnot,
+    scoured_comments::ScouredComments,
 };
 use parser_core_types::{
     indexed_source_text::IndexedSourceText,
@@ -99,9 +99,7 @@ impl<'src> AastParser {
         );
         let ret = lower(&mut lowerer_env, tree.root());
         let mut ret = if env.elaborate_namespaces {
-            ret.map(|ast| {
-                namespaces::toplevel_elaborator::elaborate_toplevel_defs::<AstAnnot>(ns, ast)
-            })
+            ret.map(|ast| namespaces::toplevel_elaborator::elaborate_toplevel_defs(ns, ast))
         } else {
             ret
         };

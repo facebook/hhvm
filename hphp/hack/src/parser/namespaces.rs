@@ -246,7 +246,7 @@ pub fn elaborate_into_current_ns_in<'a>(
 /// allow us to fix those up during a second pass during naming.
 pub mod toplevel_elaborator {
     use ocamlrep::rc::RcOc;
-    use oxidized::{namespace_env, uast::*};
+    use oxidized::{ast::*, namespace_env};
 
     fn elaborate_xhp_namespace(id: &mut String) {
         if let Some(s) = super::elaborate_xhp_namespace(id.as_str()) {
@@ -277,12 +277,8 @@ pub mod toplevel_elaborator {
         }
     }
 
-    fn on_def<A: ClonableAnnot>(
-        nsenv: &mut RcOc<namespace_env::Env>,
-        acc: &mut Vec<Def<A>>,
-        def: Def<A>,
-    ) {
-        use oxidized::uast::Def as D;
+    fn on_def(nsenv: &mut RcOc<namespace_env::Env>, acc: &mut Vec<Def>, def: Def) {
+        use oxidized::ast::Def as D;
         match def {
             // The default namespace in php is the global namespace specified by
             // the empty string. In the case of an empty string, we model it as
@@ -290,7 +286,7 @@ pub mod toplevel_elaborator {
             //
             // We remove namespace and use nodes and replace them with
             // SetNamespaceEnv nodes that contain the namespace environment
-            D::<A>::Namespace(ns) => {
+            D::Namespace(ns) => {
                 let (Id(_, nsname), defs) = *ns;
                 let nsname: Option<String> = if nsname.is_empty() {
                     None
@@ -304,10 +300,10 @@ pub mod toplevel_elaborator {
                 new_nsenv.name = nsname;
                 let new_nsenv = RcOc::new(new_nsenv);
 
-                acc.push(Def::<A>::mk_set_namespace_env(RcOc::clone(&new_nsenv)));
-                on_program_::<A>(new_nsenv, defs, acc);
+                acc.push(Def::mk_set_namespace_env(RcOc::clone(&new_nsenv)));
+                on_program_(new_nsenv, defs, acc);
             }
-            D::<A>::NamespaceUse(nsu) => {
+            D::NamespaceUse(nsu) => {
                 let mut new_nsenv = nsenv.as_ref().clone();
 
                 for (kind, Id(_, id1), Id(_, id2)) in nsu.into_iter() {
@@ -325,9 +321,9 @@ pub mod toplevel_elaborator {
 
                 let new_nsenv = RcOc::new(new_nsenv);
                 *nsenv = RcOc::clone(&new_nsenv);
-                acc.push(Def::<A>::mk_set_namespace_env(new_nsenv));
+                acc.push(Def::mk_set_namespace_env(new_nsenv));
             }
-            D::<A>::Class(mut x) => {
+            D::Class(mut x) => {
                 let c = x.as_mut();
                 elaborate_defined_id(nsenv, &mut c.name);
                 c.extends.iter_mut().for_each(|ref mut x| on_hint(nsenv, x));
@@ -342,71 +338,67 @@ pub mod toplevel_elaborator {
                     .iter_mut()
                     .for_each(|ref mut x| on_hint(nsenv, x));
                 c.namespace = RcOc::clone(nsenv);
-                acc.push(Def::<A>::Class(x));
+                acc.push(Def::Class(x));
             }
-            D::<A>::RecordDef(mut x) => {
+            D::RecordDef(mut x) => {
                 let r = x.as_mut();
                 elaborate_defined_id(nsenv, &mut r.name);
                 r.namespace = RcOc::clone(nsenv);
-                acc.push(Def::<A>::RecordDef(x));
+                acc.push(Def::RecordDef(x));
             }
-            D::<A>::Fun(mut x) => {
+            D::Fun(mut x) => {
                 let f = x.as_mut();
                 elaborate_defined_id(nsenv, &mut f.fun.name);
                 f.namespace = RcOc::clone(nsenv);
-                acc.push(Def::<A>::Fun(x));
+                acc.push(Def::Fun(x));
             }
-            D::<A>::Typedef(mut x) => {
+            D::Typedef(mut x) => {
                 let t = x.as_mut();
                 elaborate_defined_id(nsenv, &mut t.name);
                 t.namespace = RcOc::clone(nsenv);
-                acc.push(Def::<A>::Typedef(x));
+                acc.push(Def::Typedef(x));
             }
-            D::<A>::Constant(mut x) => {
+            D::Constant(mut x) => {
                 let c = x.as_mut();
                 elaborate_defined_id(nsenv, &mut c.name);
                 c.namespace = RcOc::clone(nsenv);
-                acc.push(Def::<A>::Constant(x));
+                acc.push(Def::Constant(x));
             }
-            D::<A>::FileAttributes(mut f) => {
+            D::FileAttributes(mut f) => {
                 f.as_mut().namespace = RcOc::clone(nsenv);
-                acc.push(Def::<A>::FileAttributes(f));
+                acc.push(Def::FileAttributes(f));
             }
             x => acc.push(x),
         }
     }
 
-    fn attach_file_attributes<A: ClonableAnnot>(p: &mut Program<A>) {
-        let file_attrs: Vec<FileAttribute<A>> = p
+    fn attach_file_attributes(p: &mut Program) {
+        let file_attrs: Vec<FileAttribute> = p
             .iter()
             .filter_map(|x| x.as_file_attributes())
             .cloned()
             .collect();
 
         p.iter_mut().for_each(|x| match x {
-            Def::<A>::Class(c) => c.file_attributes = file_attrs.clone(),
-            Def::<A>::Fun(f) => f.file_attributes = file_attrs.clone(),
+            Def::Class(c) => c.file_attributes = file_attrs.clone(),
+            Def::Fun(f) => f.file_attributes = file_attrs.clone(),
             _ => {}
         });
     }
 
-    fn on_program_<A: ClonableAnnot>(
-        mut nsenv: RcOc<namespace_env::Env>,
-        p: Program<A>,
-        acc: &mut Vec<Def<A>>,
-    ) {
+    fn on_program_(mut nsenv: RcOc<namespace_env::Env>, p: Program, acc: &mut Vec<Def>) {
         let mut new_acc = vec![];
         for def in p.into_iter() {
-            on_def::<A>(&mut nsenv, &mut new_acc, def)
+            on_def(&mut nsenv, &mut new_acc, def)
         }
 
-        attach_file_attributes::<A>(&mut new_acc);
+        attach_file_attributes(&mut new_acc);
         acc.append(&mut new_acc);
     }
 
-    fn on_program<A: ClonableAnnot>(nsenv: RcOc<namespace_env::Env>, p: Program<A>) -> Program<A> {
+    fn on_program(nsenv: RcOc<namespace_env::Env>, p: Program) -> Program {
         let mut acc = vec![];
-        on_program_::<A>(nsenv, p, &mut acc);
+        on_program_(nsenv, p, &mut acc);
         acc
     }
 
@@ -415,10 +407,7 @@ pub mod toplevel_elaborator {
     /// incur a perf hit that everybody will have to pay. For codegen purposed
     /// namespaces are propagated to inline declarations
     /// during closure conversion process
-    pub fn elaborate_toplevel_defs<A: ClonableAnnot>(
-        ns: RcOc<namespace_env::Env>,
-        defs: Program<A>,
-    ) -> Program<A> {
-        on_program::<A>(ns, defs)
+    pub fn elaborate_toplevel_defs(ns: RcOc<namespace_env::Env>, defs: Program) -> Program {
+        on_program(ns, defs)
     }
 }

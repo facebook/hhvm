@@ -149,6 +149,7 @@ module HhServerConfig = struct
     | _ -> start_hh_server ~informant_managed options
 
   let kill_server process =
+    Hh_logger.log "kill_server: sending SIGUSR2 to %d" process.ServerProcess.pid;
     try Unix.kill process.ServerProcess.pid Sys.sigusr2 with
     | _ ->
       Hh_logger.log
@@ -161,40 +162,47 @@ module HhServerConfig = struct
           ~stack
           e)
 
-  let wait_for_server_exit process start_t =
+  let wait_for_server_exit ~(timeout_t : float option) process start_t =
     (* There's a bug: before entering this function, we might have tried
        to kill the server too soon (before the SIGUSR2 handler was installed).
        This would put this function in an infinite loop.
 
        Let's log when this happens, so that we can be sure we've fixed it. *)
     let rec wait_for_server_exit_impl ~has_logged_waiting_bug =
-      let waited_for = Unix.gettimeofday () -. start_t in
-      let has_logged_waiting_bug =
-        if (not has_logged_waiting_bug) && waited_for > 10.0 then begin
-          HackEventLogger.monitor_wait_for_server_exit_bug
-            ~pid:process.ServerProcess.pid
-            ~waited_for;
-          true
-        end else
-          has_logged_waiting_bug
-      in
-      let exit_status =
-        Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.ServerProcess.pid
-      in
-      match exit_status with
-      | (0, _) ->
-        Unix.sleep 1;
-        wait_for_server_exit_impl ~has_logged_waiting_bug
+      let now_t = Unix.gettimeofday () in
+      match timeout_t with
+      | Some timeout_t when now_t > timeout_t -> false
       | _ ->
-        let (_ : float) =
-          Hh_logger.log_duration
-            (Printf.sprintf "typechecker has exited. Time since sigterm: ")
-            start_t
+        let waited_for = now_t -. start_t in
+        let has_logged_waiting_bug =
+          if (not has_logged_waiting_bug) && waited_for > 10.0 then begin
+            HackEventLogger.monitor_wait_for_server_exit_bug
+              ~pid:process.ServerProcess.pid
+              ~waited_for;
+            true
+          end else
+            has_logged_waiting_bug
         in
-        if has_logged_waiting_bug then
-          HackEventLogger.monitor_wait_for_server_exit_recovery
-            ~pid:process.ServerProcess.pid
-            ~waited_for
+        let exit_status =
+          Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.ServerProcess.pid
+        in
+        (match exit_status with
+        | (0, _) ->
+          Unix.sleep 1;
+          wait_for_server_exit_impl ~has_logged_waiting_bug
+        | _ ->
+          let (_ : float) =
+            Hh_logger.log_duration
+              (Printf.sprintf "typechecker has exited. Time since sigterm: ")
+              start_t
+          in
+          let () =
+            if has_logged_waiting_bug then
+              HackEventLogger.monitor_wait_for_server_exit_recovery
+                ~pid:process.ServerProcess.pid
+                ~waited_for
+          in
+          true)
     in
     wait_for_server_exit_impl ~has_logged_waiting_bug:false
 

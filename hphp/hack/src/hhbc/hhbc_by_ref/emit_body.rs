@@ -11,6 +11,7 @@ use reified_generics_helpers as RGH;
 
 use aast::TypeHint;
 use aast_defs::{Hint, Hint_::*};
+use bytecode_printer::{print_expr, Context, ExprEnv};
 use decl_provider::DeclProvider;
 use hash::HashSet;
 use hhbc_by_ref_ast_body::AstBody;
@@ -234,7 +235,7 @@ pub fn emit_body<'b, 'arena, 'decl, D: DeclProvider<'decl>>(
 fn make_body_instrs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
-    params: &[HhasParam<'arena>],
+    params: &[(HhasParam<'arena>, Option<(Label, tast::Expr)>)],
     tparams: &[tast::Tparam],
     decl_vars: &[String],
     body: AstBody,
@@ -286,7 +287,7 @@ fn make_body_instrs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 fn make_header_content<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
-    params: &[HhasParam<'arena>],
+    params: &[(HhasParam<'arena>, Option<(Label, tast::Expr)>)],
     tparams: &[tast::Tparam],
     _decl_vars: &[String],
     is_generator: bool,
@@ -321,7 +322,7 @@ fn make_decl_vars<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     scope: &Scope<'a>,
     immediate_tparams: &[tast::Tparam],
-    params: &[HhasParam<'arena>],
+    params: &[(HhasParam<'arena>, Option<(Label, tast::Expr)>)],
     body: &AstBody,
     arg_flags: Flags,
 ) -> Result<Vec<String>> {
@@ -415,7 +416,7 @@ fn make_params<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     ast_params: &[tast::FunParam],
     scope: &Scope<'a>,
     flags: Flags,
-) -> Result<Vec<HhasParam<'arena>>> {
+) -> Result<Vec<(HhasParam<'arena>, Option<(Label, tast::Expr)>)>> {
     let generate_defaults = !flags.contains(Flags::MEMOIZE);
     emit_param::from_asts(
         alloc,
@@ -437,7 +438,7 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     num_closures: u32,
     upper_bounds: Vec<(String, Vec<HhasTypeInfo<'arena>>)>,
     shadowed_tparams: Vec<String>,
-    mut params: Vec<HhasParam<'arena>>,
+    mut params: Vec<(HhasParam<'arena>, Option<(Label, tast::Expr)>)>,
     return_type_info: Option<HhasTypeInfo<'arena>>,
     doc_comment: Option<DocComment>,
     opt_env: Option<&Env<'a, 'arena>>,
@@ -477,6 +478,24 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     } else {
         None
     };
+    params.iter_mut().for_each(|(p, default_value)| {
+        p.default_value = Maybe::from(
+            default_value
+                .as_ref()
+                .map(|(l, expr)| {
+                    let mut ctx = Context::new(emitter, None, false, emitter.systemlib());
+                    let expr_env = ExprEnv {
+                        codegen_env: body_env.as_ref(),
+                    };
+                    let mut buf = String::new();
+                    print_expr(&mut ctx, &mut buf, &expr_env, &expr)
+                        .map(|_| (l.clone(), Str::new_str(alloc, buf)))
+                        .ok()
+                })
+                .flatten(),
+        );
+    });
+
     Ok(HhasBody {
         body_instrs,
         decl_vars: Slice::fill_iter(alloc, decl_vars.into_iter().map(|s| Str::new_str(alloc, s))),
@@ -498,7 +517,7 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             alloc,
             shadowed_tparams.into_iter().map(|s| Str::new_str(alloc, s)),
         ),
-        params: Slice::fill_iter(alloc, params.into_iter()),
+        params: Slice::fill_iter(alloc, params.into_iter().map(|x| x.0.to_owned())),
         return_type_info: Maybe::from(return_type_info),
         doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &(c.0).1))),
         env: Maybe::from(body_env),
@@ -880,7 +899,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    params: &[HhasParam<'arena>],
+    params: &[(HhasParam<'arena>, Option<(Label, tast::Expr)>)],
     ast_params: &[tast::FunParam],
     tparams: &[tast::Tparam],
 ) -> Result<InstrSeq<'arena>> {
@@ -956,7 +975,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let param_instrs = params
         .iter()
         .zip(ast_params.into_iter())
-        .filter_map(|p| make_param_instr(p).transpose())
+        .filter_map(|((param, _), ast_param)| make_param_instr((param, ast_param)).transpose())
         .collect::<Result<Vec<_>>>()?;
     let mut instrs = vec![emit_pos(alloc, pos)];
     for i in param_instrs.iter() {
@@ -1068,7 +1087,7 @@ fn set_emit_statement_state<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
     default_return_value: InstrSeq<'arena>,
-    params: &[HhasParam<'arena>],
+    params: &[(HhasParam<'arena>, Option<(Label, tast::Expr)>)],
     return_type_info: &HhasTypeInfo,
     return_type: Option<&tast::Hint>,
     pos: &Pos,
@@ -1115,12 +1134,12 @@ fn set_emit_statement_state<'arena, 'decl, D: DeclProvider<'decl>>(
 
 fn emit_verify_out<'arena>(
     alloc: &'arena bumpalo::Bump,
-    params: &[HhasParam<'arena>],
+    params: &[(HhasParam<'arena>, Option<(Label, tast::Expr)>)],
 ) -> (usize, InstrSeq<'arena>) {
     let param_instrs: Vec<InstrSeq<'arena>> = params
         .iter()
         .enumerate()
-        .filter_map(|(i, p)| {
+        .filter_map(|(i, (p, _))| {
             if p.is_inout {
                 Some(InstrSeq::gather(
                     alloc,

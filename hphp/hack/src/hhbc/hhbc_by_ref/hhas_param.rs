@@ -7,7 +7,6 @@ use ffi::{Maybe, Maybe::*, Slice, Str};
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_type::{constraint, Info};
 use hhbc_by_ref_label::Label;
-use oxidized::ast as tast;
 
 #[derive(Clone, Debug)]
 pub struct HhasParam<'arena> {
@@ -17,7 +16,7 @@ pub struct HhasParam<'arena> {
     pub is_readonly: bool,
     pub user_attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub type_info: Maybe<Info<'arena>>,
-    pub default_value: Maybe<(Label, tast::Expr)>,
+    pub default_value: Maybe<(Label, Str<'arena>)>,
 }
 
 impl<'arena> HhasParam<'arena> {

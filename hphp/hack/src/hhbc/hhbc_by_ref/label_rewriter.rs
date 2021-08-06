@@ -4,10 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
-use ffi::{
-    Maybe::{Just, Nothing},
-    Pair,
-};
+use ffi::{Maybe::Just, Pair};
 use hash::{HashMap, HashSet};
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_param::HhasParam;
@@ -16,6 +13,7 @@ use hhbc_by_ref_hhbc_ast::{
 };
 use hhbc_by_ref_instruction_sequence::InstrSeq;
 use hhbc_by_ref_label::{Id, Label};
+use oxidized::ast as tast;
 
 fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<Id, usize> {
     let mut folder =
@@ -71,7 +69,7 @@ fn get_regular_labels<'arena>(instr: &Instruct<'arena>) -> Vec<Label> {
 
 fn create_label_ref_map<'arena>(
     defs: &HashMap<Id, usize>,
-    params: &[HhasParam<'arena>],
+    params: &[(HhasParam<'arena>, Option<(Label, tast::Expr)>)],
     body: &InstrSeq<'arena>,
 ) -> (HashSet<Id>, HashMap<Id, usize>) {
     let process_ref =
@@ -98,11 +96,12 @@ fn create_label_ref_map<'arena>(
     let init = gather_using((0, (HashSet::default(), HashMap::default())), body);
     let (_, map) = params.iter().fold(
         init,
-        |acc: (usize, (HashSet<Id>, HashMap<Id, usize>)), param: &HhasParam<'arena>| match &param
-            .default_value
-        {
-            Nothing => acc,
-            Just((l, _)) => process_ref(acc, *l),
+        |
+            acc: (usize, (HashSet<Id>, HashMap<Id, usize>)),
+            (_, default_value): &(HhasParam<'arena>, Option<(Label, tast::Expr)>),
+        | match &default_value {
+            None => acc,
+            Some((l, _)) => process_ref(acc, *l),
         },
     );
     map
@@ -150,7 +149,7 @@ fn rewrite_params_and_body<'arena>(
     defs: &HashMap<Id, usize>,
     used: &HashSet<Id>,
     refs: &HashMap<Id, usize>,
-    params: &mut Vec<HhasParam<'arena>>,
+    params: &mut Vec<(HhasParam<'arena>, Option<(Label, tast::Expr)>)>,
     body: &mut InstrSeq<'arena>,
 ) {
     let relabel_id = |id: &Id| -> Id {
@@ -171,18 +170,19 @@ fn rewrite_params_and_body<'arena>(
             true
         }
     };
-    let rewrite_param = |param: &mut HhasParam<'arena>| {
-        if let Just((l, _)) = &mut param.default_value {
-            *l = l.map(relabel_id);
-        }
-    };
+    let rewrite_param =
+        |(_, default_value): &mut (HhasParam<'arena>, Option<(Label, tast::Expr)>)| {
+            if let Some((l, _)) = default_value {
+                *l = l.map(relabel_id);
+            }
+        };
     params.iter_mut().for_each(|param| rewrite_param(param));
     body.filter_map_mut(alloc, &mut rewrite_instr);
 }
 
 pub fn relabel_function<'arena>(
     alloc: &'arena bumpalo::Bump,
-    params: &mut Vec<HhasParam<'arena>>,
+    params: &mut Vec<(HhasParam<'arena>, Option<(Label, tast::Expr)>)>,
     body: &mut InstrSeq<'arena>,
 ) {
     let defs = create_label_to_offset_map(body);

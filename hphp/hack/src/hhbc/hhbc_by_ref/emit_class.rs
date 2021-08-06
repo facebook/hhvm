@@ -105,7 +105,7 @@ fn make_86method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         0,
         vec![],
         vec![],
-        params,
+        params.into_iter().map(|p| (p, None)).collect::<Vec<_>>(),
         method_return_type,
         method_doc_comment,
         method_env,

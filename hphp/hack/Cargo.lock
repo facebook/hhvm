@@ -1147,6 +1147,7 @@ dependencies = [
  "hash",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_hhas_param",
+ "hhbc_by_ref_label",
  "hhbc_by_ref_unique_id_builder",
  "hhbc_by_ref_unique_list",
  "naming_special_names_rust",
@@ -1198,6 +1199,7 @@ dependencies = [
  "bitflags",
  "bstr",
  "bumpalo",
+ "bytecode_printer",
  "decl_provider",
  "ffi",
  "hash",
@@ -1384,6 +1386,7 @@ dependencies = [
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_instruction_sequence",
+ "hhbc_by_ref_label",
  "hhbc_by_ref_local",
  "hhbc_by_ref_options",
  "hhbc_by_ref_runtime",
@@ -1404,6 +1407,7 @@ dependencies = [
  "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_instruction_sequence",
+ "hhbc_by_ref_label",
  "hhbc_by_ref_local",
  "oxidized",
 ]
@@ -1435,6 +1439,7 @@ dependencies = [
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_instruction_sequence",
+ "hhbc_by_ref_label",
  "hhbc_by_ref_local",
  "hhbc_by_ref_options",
  "hhbc_by_ref_runtime",
@@ -1505,6 +1510,7 @@ dependencies = [
  "hhbc_by_ref_hhas_type",
  "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_instruction_sequence",
+ "hhbc_by_ref_label",
  "hhbc_by_ref_local",
  "hhbc_by_ref_options",
  "naming_special_names_rust",
@@ -1813,7 +1819,6 @@ dependencies = [
  "hhbc_by_ref_hhas_attribute",
  "hhbc_by_ref_hhas_type",
  "hhbc_by_ref_label",
- "oxidized",
 ]
 
 [[package]]
@@ -1981,6 +1986,7 @@ dependencies = [
  "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_instruction_sequence",
  "hhbc_by_ref_label",
+ "oxidized",
 ]
 
 [[package]]

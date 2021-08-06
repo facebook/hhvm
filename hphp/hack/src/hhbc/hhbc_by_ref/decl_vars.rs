@@ -7,6 +7,7 @@ use ffi::{Just, Maybe};
 use hash::HashSet;
 use hhbc_by_ref_ast_body::AstBody;
 use hhbc_by_ref_hhas_param::HhasParam;
+use hhbc_by_ref_label::Label;
 use hhbc_by_ref_unique_id_builder::SSet;
 use naming_special_names_rust::{emitter_special_functions, special_idents};
 use oxidized::{
@@ -243,14 +244,14 @@ where
 }
 
 pub fn from_ast<'arena>(
-    params: &[HhasParam<'arena>],
+    params: &[(HhasParam<'arena>, Option<(Label, Expr)>)],
     body: &AstBody,
     explicit_use_set: &SSet,
 ) -> Result<Vec<String>, String> {
     let decl_vars = uls_from_ast(
         params,
-        |p| p.name.as_str(),
-        |p| p.default_value.as_ref().map(|x| &x.1),
+        |(param, _)| param.name.as_str(),
+        |(_, default_value)| Maybe::from(default_value.as_ref().map(|x| &x.1)),
         Some(explicit_use_set),
         body,
     )?;

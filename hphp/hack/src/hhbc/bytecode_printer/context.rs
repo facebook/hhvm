@@ -51,8 +51,8 @@ pub struct Context<'a> {
 }
 
 impl<'a> Context<'a> {
-    pub fn new<'decl, D: DeclProvider<'decl>>(
-        emitter: &'a Emitter<'a, 'decl, D>,
+    pub fn new<'arena, 'decl, D: DeclProvider<'decl>>(
+        emitter: &'a Emitter<'arena, 'decl, D>,
         path: Option<&'a RelativePath>,
         dump_symbol_refs: bool,
         is_system_lib: bool,

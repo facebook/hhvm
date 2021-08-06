@@ -23,6 +23,7 @@ use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags, SpecialClsRef};
 use hhbc_by_ref_hhbc_id::{class, method, Id};
 use hhbc_by_ref_hhbc_string_utils::reified;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
+use hhbc_by_ref_label::Label;
 use hhbc_by_ref_local::Local;
 use hhbc_by_ref_options::{HhvmFlags, Options};
 use hhbc_by_ref_runtime::TypedValue;
@@ -217,7 +218,7 @@ fn emit_memoize_wrapper_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 fn emit<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
-    hhas_params: Vec<HhasParam<'arena>>,
+    hhas_params: Vec<(HhasParam<'arena>, Option<(Label, T::Expr)>)>,
     return_type_info: HhasTypeInfo<'arena>,
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<HhasBody<'arena>> {
@@ -232,7 +233,7 @@ fn make_memoize_method_code<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    hhas_params: &[HhasParam<'arena>],
+    hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<InstrSeq<'arena>> {
     if args.params.is_empty()
@@ -250,7 +251,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'decl
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    hhas_params: &[HhasParam<'arena>],
+    hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
@@ -497,7 +498,7 @@ fn make_wrapper<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
     instrs: InstrSeq<'arena>,
-    params: Vec<HhasParam<'arena>>,
+    params: Vec<(HhasParam<'arena>, Option<(Label, T::Expr)>)>,
     return_type_info: HhasTypeInfo<'arena>,
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<HhasBody<'arena>> {

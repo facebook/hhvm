@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
-use ffi::{Maybe, Slice, Str};
+use ffi::{Maybe, Nothing, Slice, Str};
 use hhbc_by_ref_ast_scope::Scope;
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_expression as emit_expression;
@@ -16,6 +16,7 @@ use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhas_type::Info;
 use hhbc_by_ref_hhbc_string_utils::locals::strip_dollar;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
+use hhbc_by_ref_label::Label;
 use hhbc_by_ref_local::Local;
 use hhbc_by_ref_options::LangFlags;
 use oxidized::{
@@ -38,7 +39,7 @@ pub fn from_asts<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     generate_defaults: bool,
     scope: &Scope<'a>,
     ast_params: &[a::FunParam],
-) -> Result<Vec<HhasParam<'arena>>> {
+) -> Result<Vec<(HhasParam<'arena>, Option<(Label, a::Expr)>)>> {
     ast_params
         .iter()
         .map(|param| from_ast(alloc, emitter, tparams, generate_defaults, scope, param))
@@ -54,8 +55,8 @@ pub fn from_asts<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
 fn rename_params<'arena>(
     alloc: &'arena bumpalo::Bump,
-    mut params: Vec<HhasParam<'arena>>,
-) -> Vec<HhasParam<'arena>> {
+    mut params: Vec<(HhasParam<'arena>, Option<(Label, a::Expr)>)>,
+) -> Vec<(HhasParam<'arena>, Option<(Label, a::Expr)>)> {
     fn rename<'arena>(
         alloc: &'arena bumpalo::Bump,
         names: &BTreeSet<Str<'arena>>,
@@ -80,12 +81,12 @@ fn rename_params<'arena>(
     let mut param_counts = BTreeMap::new();
     let names = params
         .iter()
-        .map(|p| p.name.clone())
+        .map(|(p, _)| p.name.clone())
         .collect::<BTreeSet<_>>();
     params
         .iter_mut()
         .rev()
-        .for_each(|p| rename(alloc, &names, &mut param_counts, p));
+        .for_each(|(p, _)| rename(alloc, &names, &mut param_counts, p));
     params.into_iter().collect()
 }
 
@@ -96,7 +97,7 @@ fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     generate_defaults: bool,
     scope: &Scope<'a>,
     param: &a::FunParam,
-) -> Result<Option<HhasParam<'arena>>> {
+) -> Result<Option<(HhasParam<'arena>, Option<(Label, a::Expr)>)>> {
     if param.is_variadic && param.name == "..." {
         return Ok(None);
     };
@@ -187,26 +188,32 @@ fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         _ => false,
     };
     let attrs = emit_attribute::from_asts(alloc, emitter, &param.user_attributes)?;
-    Ok(Some(HhasParam {
-        name: Str::new_str(alloc, &param.name),
-        is_variadic: param.is_variadic,
-        is_inout,
-        is_readonly,
-        user_attributes: Slice::new(alloc.alloc_slice_fill_iter(attrs.into_iter())).into(),
-        type_info: Maybe::from(type_info),
-        default_value: Maybe::from(default_value),
-    }))
+    Ok(Some((
+        HhasParam {
+            name: Str::new_str(alloc, &param.name),
+            is_variadic: param.is_variadic,
+            is_inout,
+            is_readonly,
+            user_attributes: Slice::new(alloc.alloc_slice_fill_iter(attrs.into_iter())).into(),
+            type_info: Maybe::from(type_info),
+            // - Write hhas_param.default_value as `Nothing` while keeping `default_value` around
+            //   for emitting decl vars and default value setters
+            // - emit_body::make_body will rewrite hhas_param.default_value using `default_value`
+            default_value: Nothing,
+        },
+        default_value,
+    )))
 }
 
 pub fn emit_param_default_value_setter<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    params: &[HhasParam<'arena>],
+    params: &[(HhasParam<'arena>, Option<(Label, a::Expr)>)],
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     let alloc = env.arena;
-    let mut param_to_setter = |param: &HhasParam<'arena>| {
-        param.default_value.as_ref().map(|(lbl, expr)| {
+    let mut to_setter = |(param, default_value): &(HhasParam<'arena>, Option<(Label, a::Expr)>)| {
+        default_value.as_ref().map(|(lbl, expr)| {
             let instrs = InstrSeq::gather(
                 alloc,
                 vec![
@@ -227,7 +234,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl, D: DeclProvider<'decl>
     };
     let setters = params
         .iter()
-        .filter_map(|p| Option::from(param_to_setter(p)))
+        .filter_map(|p| Option::from(to_setter(p)))
         .collect::<Result<Vec<_>>>()?;
     if setters.is_empty() {
         Ok((instr::empty(alloc), instr::empty(alloc)))

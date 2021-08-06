@@ -37,7 +37,7 @@ pub fn emit_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         params.and_then(|params| {
             return_type_info.map(|rti| {
                 let mut body = hhbc_by_ref_hhas_body::default_with_body_instrs(body_instrs);
-                body.params = Slice::fill_iter(alloc, params.into_iter());
+                body.params = Slice::fill_iter(alloc, params.into_iter().map(|p| p.0));
                 body.return_type_info = Just(rti);
                 body
             })

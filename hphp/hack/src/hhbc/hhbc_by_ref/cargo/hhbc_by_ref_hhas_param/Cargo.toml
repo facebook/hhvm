@@ -13,7 +13,6 @@ ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_hhas_attribute = { path = "../hhbc_by_ref_hhas_attribute" }
 hhbc_by_ref_hhas_type = { path = "../hhbc_by_ref_hhas_type" }
 hhbc_by_ref_label = { path = "../hhbc_by_ref_label" }
-oxidized = { path = "../../../../oxidized" }
 
 [profile.release]
 incremental = false

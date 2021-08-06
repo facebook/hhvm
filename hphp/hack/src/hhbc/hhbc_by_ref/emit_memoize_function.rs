@@ -21,6 +21,7 @@ use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags};
 use hhbc_by_ref_hhbc_id::function;
 use hhbc_by_ref_hhbc_string_utils::reified;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
+use hhbc_by_ref_label::Label;
 use hhbc_by_ref_local::Local;
 use hhbc_by_ref_options::{HhvmFlags, Options, RepoFlags};
 use hhbc_by_ref_runtime::TypedValue;
@@ -119,7 +120,7 @@ fn make_memoize_function_code<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue<'arena>]>,
-    hhas_params: &[HhasParam<'arena>],
+    hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
     ast_params: &[T::FunParam],
     renamed_id: function::FunctionType<'arena>,
     is_async: bool,
@@ -152,7 +153,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl, D: DeclProvider<'de
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     deprecation_info: Option<&[TypedValue<'arena>]>,
-    hhas_params: &[HhasParam<'arena>],
+    hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
     ast_params: &[T::FunParam],
     renamed_id: function::FunctionType<'arena>,
     is_async: bool,
@@ -341,7 +342,7 @@ fn make_wrapper_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: Env<'a, 'arena>,
     return_type_info: HhasTypeInfo<'arena>,
-    params: Vec<HhasParam<'arena>>,
+    params: Vec<(HhasParam<'arena>, Option<(Label, T::Expr)>)>,
     body_instrs: InstrSeq<'arena>,
     is_reified: bool,
 ) -> Result<HhasBody<'arena>> {

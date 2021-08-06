@@ -31,6 +31,7 @@ hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
 hhbc_by_ref_hhbc_string_utils = { path = "../hhbc_by_ref_hhbc_string_utils" }
 hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }
+hhbc_by_ref_label = { path = "../hhbc_by_ref_label" }
 hhbc_by_ref_local = { path = "../hhbc_by_ref_local" }
 hhbc_by_ref_options = { path = "../hhbc_by_ref_options" }
 hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }

@@ -54,7 +54,7 @@ use write::*;
 
 use std::{borrow::Cow, io::Write as _, path::Path, write};
 
-struct ExprEnv<'arena, 'e> {
+pub struct ExprEnv<'arena, 'e> {
     pub codegen_env: Option<&'e HhasBodyEnv<'arena>>,
 }
 
@@ -317,7 +317,7 @@ fn print_fun_def<W: Write>(
         },
     )?;
     w.write(fun_def.name.to_raw_string())?;
-    print_params(ctx, w, fun_def.body.env.as_ref().into(), fun_def.params())?;
+    print_params(ctx, w, fun_def.params())?;
     if fun_def.is_generator() {
         w.write(" isGenerator")?;
     }
@@ -750,7 +750,7 @@ fn print_method_def<W: Write>(
         w.write(" ")
     })?;
     w.write(method_def.name.to_raw_string())?;
-    print_params(ctx, w, body.env.as_ref().into(), &body.params)?;
+    print_params(ctx, w, &body.params)?;
     if method_def.flags.contains(HhasMethodFlags::IS_GENERATOR) {
         w.write(" isGenerator")?;
     }
@@ -2192,18 +2192,16 @@ fn print_fatal_op<W: Write>(w: &mut W, f: &FatalOp) -> Result<(), W::Error> {
 fn print_params<'arena, W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    body_env: Option<&HhasBodyEnv>,
     params: impl AsRef<[HhasParam<'arena>]>,
 ) -> Result<(), W::Error> {
     paren(w, |w| {
-        concat_by(w, ", ", params, |w, i| print_param(ctx, w, body_env, i))
+        concat_by(w, ", ", params, |w, i| print_param(ctx, w, i))
     })
 }
 
 fn print_param<'arena, W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    body_env: Option<&HhasBodyEnv>,
     param: &HhasParam<'arena>,
 ) -> Result<(), W::Error> {
     print_param_user_attributes(ctx, w, param)?;
@@ -2216,7 +2214,7 @@ fn print_param<'arena, W: Write>(
     })?;
     w.write(&param.name)?;
     option(w, &Option::from(param.default_value.clone()), |w, i| {
-        print_param_default_value(ctx, w, body_env, i)
+        print_param_default_value(w, i)
     })
 }
 
@@ -2227,20 +2225,13 @@ fn print_param_id<W: Write>(w: &mut W, param_id: &ParamId) -> Result<(), W::Erro
     }
 }
 
-fn print_param_default_value<W: Write>(
-    ctx: &mut Context,
+fn print_param_default_value<'arena, W: Write>(
     w: &mut W,
-    body_env: Option<&HhasBodyEnv>,
-    default_val: &(Label, ast::Expr),
+    default_val: &(Label, Str<'arena>),
 ) -> Result<(), W::Error> {
-    let expr_env = ExprEnv {
-        codegen_env: body_env,
-    };
     w.write(" = ")?;
     print_label(w, &default_val.0)?;
-    paren(w, |w| {
-        triple_quotes(w, |w| print_expr(ctx, w, &expr_env, &default_val.1))
-    })
+    paren(w, |w| triple_quotes(w, |w| w.write(default_val.1.as_str())))
 }
 
 fn print_label<W: Write>(w: &mut W, label: &Label) -> Result<(), W::Error> {
@@ -2443,7 +2434,7 @@ fn print_expr_to_string<W: Write>(
     Ok(buf)
 }
 
-fn print_expr<W: Write>(
+pub fn print_expr<W: Write>(
     ctx: &mut Context,
     w: &mut W,
     env: &ExprEnv,

@@ -921,10 +921,22 @@ int64_t ObjectData::compare(const ObjectData& other) const {
   }
   // Return 1 for different classes to match PHP7 behavior.
   if (getVMClass() != other.getVMClass()) {
+
+      const auto level =
+        flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForCmp);
+    if (level == ConvNoticeLevel::Throw) {
+      const auto lhs = make_tv<DataType::Object>(const_cast<ObjectData*>(this));
+      const auto rhs = make_tv<DataType::Object>(const_cast<ObjectData*>(&other));
+      throwCmpBadTypesException(&lhs, &rhs);
+      not_reached();
+    }
+
     handleConvNoticeForCmp(
       folly::sformat("object of class {}", classname_cstr()).c_str(),
       folly::sformat("object of class {}", other.classname_cstr()).c_str());
     return 1;
+
+
   }
   if (UNLIKELY(instanceof(SimpleXMLElement_classof()))) {
     if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {

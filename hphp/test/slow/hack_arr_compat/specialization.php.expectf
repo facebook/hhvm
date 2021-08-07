@@ -38,11 +38,11 @@ Comparisons:
   Comparing vec and dict:
     === false
     !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+    <   Cannot compare HH\vec and HH\dict using a relational operator
+    >   Cannot compare HH\vec and HH\dict using a relational operator
+    <=  Cannot compare HH\vec and HH\dict using a relational operator
+    >=  Cannot compare HH\vec and HH\dict using a relational operator
+    <=> Cannot compare HH\vec and HH\dict using a relational operator
   Comparing vec and vec:
     === true
     !== false
@@ -54,19 +54,19 @@ Comparisons:
   Comparing vec and dict:
     === false
     !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+    <   Cannot compare HH\vec and HH\dict using a relational operator
+    >   Cannot compare HH\vec and HH\dict using a relational operator
+    <=  Cannot compare HH\vec and HH\dict using a relational operator
+    >=  Cannot compare HH\vec and HH\dict using a relational operator
+    <=> Cannot compare HH\vec and HH\dict using a relational operator
   Comparing dict and vec:
     === false
     !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <   Cannot compare HH\dict and HH\vec using a relational operator
+    >   Cannot compare HH\dict and HH\vec using a relational operator
+    <=  Cannot compare HH\dict and HH\vec using a relational operator
+    >=  Cannot compare HH\dict and HH\vec using a relational operator
+    <=> Cannot compare HH\dict and HH\vec using a relational operator
   Comparing dict and dict:
     === true
     !== false
@@ -78,11 +78,11 @@ Comparisons:
   Comparing dict and vec:
     === false
     !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <   Cannot compare HH\dict and HH\vec using a relational operator
+    >   Cannot compare HH\dict and HH\vec using a relational operator
+    <=  Cannot compare HH\dict and HH\vec using a relational operator
+    >=  Cannot compare HH\dict and HH\vec using a relational operator
+    <=> Cannot compare HH\dict and HH\vec using a relational operator
   Comparing dict and dict:
     === true
     !== false
@@ -102,11 +102,11 @@ Comparisons:
   Comparing vec and dict:
     === false
     !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+    <   Cannot compare HH\vec and HH\dict using a relational operator
+    >   Cannot compare HH\vec and HH\dict using a relational operator
+    <=  Cannot compare HH\vec and HH\dict using a relational operator
+    >=  Cannot compare HH\vec and HH\dict using a relational operator
+    <=> Cannot compare HH\vec and HH\dict using a relational operator
   Comparing vec and vec:
     === true
     !== false
@@ -118,19 +118,19 @@ Comparisons:
   Comparing vec and dict:
     === false
     !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+    <   Cannot compare HH\vec and HH\dict using a relational operator
+    >   Cannot compare HH\vec and HH\dict using a relational operator
+    <=  Cannot compare HH\vec and HH\dict using a relational operator
+    >=  Cannot compare HH\vec and HH\dict using a relational operator
+    <=> Cannot compare HH\vec and HH\dict using a relational operator
   Comparing dict and vec:
     === false
     !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <   Cannot compare HH\dict and HH\vec using a relational operator
+    >   Cannot compare HH\dict and HH\vec using a relational operator
+    <=  Cannot compare HH\dict and HH\vec using a relational operator
+    >=  Cannot compare HH\dict and HH\vec using a relational operator
+    <=> Cannot compare HH\dict and HH\vec using a relational operator
   Comparing dict and dict:
     === true
     !== false
@@ -142,11 +142,11 @@ Comparisons:
   Comparing dict and vec:
     === false
     !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <   Cannot compare HH\dict and HH\vec using a relational operator
+    >   Cannot compare HH\dict and HH\vec using a relational operator
+    <=  Cannot compare HH\dict and HH\vec using a relational operator
+    >=  Cannot compare HH\dict and HH\vec using a relational operator
+    <=> Cannot compare HH\dict and HH\vec using a relational operator
   Comparing dict and dict:
     === true
     !== false

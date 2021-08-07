@@ -29,11 +29,11 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot compare HH\vec and int using a relational operator
+Cannot compare HH\vec and int using a relational operator
+Cannot compare HH\vec and int using a relational operator
+Cannot compare HH\vec and int using a relational operator
+Cannot compare HH\vec and int using a relational operator
 bool(true)
 bool(false)
 bool(false)
@@ -47,8 +47,8 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot compare HH\vec and HH\keyset using a relational operator
+Cannot compare HH\vec and HH\keyset using a relational operator
+Cannot compare HH\vec and HH\keyset using a relational operator
+Cannot compare HH\vec and HH\keyset using a relational operator
+Cannot compare HH\vec and HH\keyset using a relational operator

@@ -1,194 +1,194 @@
 Test 0
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare clsmeth and null using a relational operator
+Caught: Cannot compare clsmeth and null using a relational operator
+Caught: Cannot compare clsmeth and null using a relational operator
+Caught: Cannot compare clsmeth and null using a relational operator
 
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare null and clsmeth using a relational operator
+Caught: Cannot compare null and clsmeth using a relational operator
+Caught: Cannot compare null and clsmeth using a relational operator
+Caught: Cannot compare null and clsmeth using a relational operator
 
 Test 1
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare clsmeth and bool using a relational operator
+Caught: Cannot compare clsmeth and bool using a relational operator
+Caught: Cannot compare clsmeth and bool using a relational operator
+Caught: Cannot compare clsmeth and bool using a relational operator
 
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare bool and clsmeth using a relational operator
+Caught: Cannot compare bool and clsmeth using a relational operator
+Caught: Cannot compare bool and clsmeth using a relational operator
+Caught: Cannot compare bool and clsmeth using a relational operator
 
 Test 2
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare clsmeth and bool using a relational operator
+Caught: Cannot compare clsmeth and bool using a relational operator
+Caught: Cannot compare clsmeth and bool using a relational operator
+Caught: Cannot compare clsmeth and bool using a relational operator
 
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare bool and clsmeth using a relational operator
+Caught: Cannot compare bool and clsmeth using a relational operator
+Caught: Cannot compare bool and clsmeth using a relational operator
+Caught: Cannot compare bool and clsmeth using a relational operator
 
 Test 3
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare clsmeth and int using a relational operator
+Caught: Cannot compare clsmeth and int using a relational operator
+Caught: Cannot compare clsmeth and int using a relational operator
+Caught: Cannot compare clsmeth and int using a relational operator
 
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare int and clsmeth using a relational operator
+Caught: Cannot compare int and clsmeth using a relational operator
+Caught: Cannot compare int and clsmeth using a relational operator
+Caught: Cannot compare int and clsmeth using a relational operator
 
 Test 4
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare clsmeth and int using a relational operator
+Caught: Cannot compare clsmeth and int using a relational operator
+Caught: Cannot compare clsmeth and int using a relational operator
+Caught: Cannot compare clsmeth and int using a relational operator
 
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare int and clsmeth using a relational operator
+Caught: Cannot compare int and clsmeth using a relational operator
+Caught: Cannot compare int and clsmeth using a relational operator
+Caught: Cannot compare int and clsmeth using a relational operator
 
 Test 5
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare clsmeth and float using a relational operator
+Caught: Cannot compare clsmeth and float using a relational operator
+Caught: Cannot compare clsmeth and float using a relational operator
+Caught: Cannot compare clsmeth and float using a relational operator
 
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare float and clsmeth using a relational operator
+Caught: Cannot compare float and clsmeth using a relational operator
+Caught: Cannot compare float and clsmeth using a relational operator
+Caught: Cannot compare float and clsmeth using a relational operator
 
 Test 6
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare clsmeth and float using a relational operator
+Caught: Cannot compare clsmeth and float using a relational operator
+Caught: Cannot compare clsmeth and float using a relational operator
+Caught: Cannot compare clsmeth and float using a relational operator
 
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare float and clsmeth using a relational operator
+Caught: Cannot compare float and clsmeth using a relational operator
+Caught: Cannot compare float and clsmeth using a relational operator
+Caught: Cannot compare float and clsmeth using a relational operator
 
 Test 7
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare clsmeth and string using a relational operator
+Caught: Cannot compare clsmeth and string using a relational operator
+Caught: Cannot compare clsmeth and string using a relational operator
+Caught: Cannot compare clsmeth and string using a relational operator
 
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare string and clsmeth using a relational operator
+Caught: Cannot compare string and clsmeth using a relational operator
+Caught: Cannot compare string and clsmeth using a relational operator
+Caught: Cannot compare string and clsmeth using a relational operator
 
 Test 8
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare clsmeth and func using a relational operator
+Caught: Cannot compare clsmeth and func using a relational operator
+Caught: Cannot compare clsmeth and func using a relational operator
+Caught: Cannot compare clsmeth and func using a relational operator
 
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare func and clsmeth using a relational operator
+Caught: Cannot compare func and clsmeth using a relational operator
+Caught: Cannot compare func and clsmeth using a relational operator
+Caught: Cannot compare func and clsmeth using a relational operator
 
 Test 9
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare clsmeth and HH\Vector using a relational operator
+Caught: Cannot compare clsmeth and HH\Vector using a relational operator
+Caught: Cannot compare clsmeth and HH\Vector using a relational operator
+Caught: Cannot compare clsmeth and HH\Vector using a relational operator
 
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare HH\Vector and clsmeth using a relational operator
+Caught: Cannot compare HH\Vector and clsmeth using a relational operator
+Caught: Cannot compare HH\Vector and clsmeth using a relational operator
+Caught: Cannot compare HH\Vector and clsmeth using a relational operator
 
 Test 10
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare clsmeth and HH\vec using a relational operator
+Caught: Cannot compare clsmeth and HH\vec using a relational operator
+Caught: Cannot compare clsmeth and HH\vec using a relational operator
+Caught: Cannot compare clsmeth and HH\vec using a relational operator
 
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare HH\vec and clsmeth using a relational operator
+Caught: Cannot compare HH\vec and clsmeth using a relational operator
+Caught: Cannot compare HH\vec and clsmeth using a relational operator
+Caught: Cannot compare HH\vec and clsmeth using a relational operator
 
 Test 11
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare clsmeth and HH\dict using a relational operator
+Caught: Cannot compare clsmeth and HH\dict using a relational operator
+Caught: Cannot compare clsmeth and HH\dict using a relational operator
+Caught: Cannot compare clsmeth and HH\dict using a relational operator
 
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare HH\dict and clsmeth using a relational operator
+Caught: Cannot compare HH\dict and clsmeth using a relational operator
+Caught: Cannot compare HH\dict and clsmeth using a relational operator
+Caught: Cannot compare HH\dict and clsmeth using a relational operator
 
 Test 12
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare clsmeth and HH\keyset using a relational operator
+Caught: Cannot compare clsmeth and HH\keyset using a relational operator
+Caught: Cannot compare clsmeth and HH\keyset using a relational operator
+Caught: Cannot compare clsmeth and HH\keyset using a relational operator
 
 bool(false)
 bool(false)
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+Caught: Cannot compare HH\keyset and clsmeth using a relational operator
+Caught: Cannot compare HH\keyset and clsmeth using a relational operator
+Caught: Cannot compare HH\keyset and clsmeth using a relational operator
+Caught: Cannot compare HH\keyset and clsmeth using a relational operator

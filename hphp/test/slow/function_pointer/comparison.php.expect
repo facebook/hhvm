@@ -4,33 +4,32 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified func
 Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
 Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
 
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
+Cannot compare reified function and bool using a relational operator
+Cannot compare reified function and bool using a relational operator
+Cannot compare reified function and bool using a relational operator
+Cannot compare reified function and bool using a relational operator
+Cannot compare reified function and bool using a relational operator
 
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
+Cannot compare reified function and int using a relational operator
+Cannot compare reified function and int using a relational operator
+Cannot compare reified function and int using a relational operator
+Cannot compare reified function and int using a relational operator
+Cannot compare reified function and int using a relational operator
 
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
+Cannot compare reified function and string using a relational operator
+Cannot compare reified function and string using a relational operator
+Cannot compare reified function and string using a relational operator
+Cannot compare reified function and string using a relational operator
+Cannot compare reified function and string using a relational operator
 
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot compare reified function and func using a relational operator
+Cannot compare reified function and func using a relational operator
+Cannot compare reified function and func using a relational operator
+Cannot compare reified function and func using a relational operator
+Cannot compare reified function and func using a relational operator
 
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-
+Cannot compare reified function and HH\vec using a relational operator
+Cannot compare reified function and HH\vec using a relational operator
+Cannot compare reified function and HH\vec using a relational operator
+Cannot compare reified function and HH\vec using a relational operator
+Cannot compare reified function and HH\vec using a relational operator

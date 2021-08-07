@@ -12,15 +12,15 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot compare func and string using a relational operator
+Cannot compare func and string using a relational operator
+Cannot compare func and string using a relational operator
+Cannot compare func and string using a relational operator
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot compare func and string using a relational operator
+Cannot compare func and string using a relational operator
+Cannot compare func and string using a relational operator
+Cannot compare func and string using a relational operator
 bool(false)
 bool(true)

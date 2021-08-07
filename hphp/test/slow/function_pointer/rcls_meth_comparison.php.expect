@@ -4,32 +4,32 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reif
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
 
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
+Cannot compare reified clsmeth and bool using a relational operator
+Cannot compare reified clsmeth and bool using a relational operator
+Cannot compare reified clsmeth and bool using a relational operator
+Cannot compare reified clsmeth and bool using a relational operator
+Cannot compare reified clsmeth and bool using a relational operator
 
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
+Cannot compare reified clsmeth and int using a relational operator
+Cannot compare reified clsmeth and int using a relational operator
+Cannot compare reified clsmeth and int using a relational operator
+Cannot compare reified clsmeth and int using a relational operator
+Cannot compare reified clsmeth and int using a relational operator
 
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot compare reified clsmeth and HH\vec using a relational operator
+Cannot compare reified clsmeth and HH\vec using a relational operator
+Cannot compare reified clsmeth and HH\vec using a relational operator
+Cannot compare reified clsmeth and HH\vec using a relational operator
+Cannot compare reified clsmeth and HH\vec using a relational operator
 
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
+Cannot compare reified clsmeth and clsmeth using a relational operator
+Cannot compare reified clsmeth and clsmeth using a relational operator
+Cannot compare reified clsmeth and clsmeth using a relational operator
+Cannot compare reified clsmeth and clsmeth using a relational operator
+Cannot compare reified clsmeth and clsmeth using a relational operator
 
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
+Cannot compare reified clsmeth and string using a relational operator
+Cannot compare reified clsmeth and string using a relational operator
+Cannot compare reified clsmeth and string using a relational operator
+Cannot compare reified clsmeth and string using a relational operator
+Cannot compare reified clsmeth and string using a relational operator

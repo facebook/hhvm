@@ -1,6 +1,6 @@
 bool(false)
 bool(false)
-string(54) "Object of class stdClass could not be converted to int"
-string(54) "Object of class stdClass could not be converted to int"
-string(54) "Object of class stdClass could not be converted to int"
-string(54) "Object of class stdClass could not be converted to int"
+string(59) "Cannot compare stdClass and int using a relational operator"
+string(59) "Cannot compare stdClass and int using a relational operator"
+string(59) "Cannot compare stdClass and int using a relational operator"
+string(59) "Cannot compare stdClass and int using a relational operator"

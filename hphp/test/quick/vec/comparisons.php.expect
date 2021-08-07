@@ -322,160 +322,160 @@ Comparing:
 vec(0) {
 }
 NULL
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare HH\vec and bool using a relational operator
+	<=  : Error: Cannot compare HH\vec and bool using a relational operator
+	>   : Error: Cannot compare HH\vec and bool using a relational operator
+	>=  : Error: Cannot compare HH\vec and bool using a relational operator
 	==  : bool(true)
 	!=  : bool(false)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare HH\vec and bool using a relational operator
 Comparing:
 NULL
 vec(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare bool and HH\vec using a relational operator
+	<=  : Error: Cannot compare bool and HH\vec using a relational operator
+	>   : Error: Cannot compare bool and HH\vec using a relational operator
+	>=  : Error: Cannot compare bool and HH\vec using a relational operator
 	==  : bool(true)
 	!=  : bool(false)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare bool and HH\vec using a relational operator
 Comparing:
 vec(0) {
 }
 bool(false)
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare HH\vec and bool using a relational operator
+	<=  : Error: Cannot compare HH\vec and bool using a relational operator
+	>   : Error: Cannot compare HH\vec and bool using a relational operator
+	>=  : Error: Cannot compare HH\vec and bool using a relational operator
 	==  : bool(true)
 	!=  : bool(false)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare HH\vec and bool using a relational operator
 Comparing:
 bool(false)
 vec(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare bool and HH\vec using a relational operator
+	<=  : Error: Cannot compare bool and HH\vec using a relational operator
+	>   : Error: Cannot compare bool and HH\vec using a relational operator
+	>=  : Error: Cannot compare bool and HH\vec using a relational operator
 	==  : bool(true)
 	!=  : bool(false)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare bool and HH\vec using a relational operator
 Comparing:
 vec(0) {
 }
 int(123)
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare HH\vec and int using a relational operator
+	<=  : Error: Cannot compare HH\vec and int using a relational operator
+	>   : Error: Cannot compare HH\vec and int using a relational operator
+	>=  : Error: Cannot compare HH\vec and int using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare HH\vec and int using a relational operator
 Comparing:
 int(123)
 vec(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare int and HH\vec using a relational operator
+	<=  : Error: Cannot compare int and HH\vec using a relational operator
+	>   : Error: Cannot compare int and HH\vec using a relational operator
+	>=  : Error: Cannot compare int and HH\vec using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare int and HH\vec using a relational operator
 Comparing:
 vec(0) {
 }
 float(1.2345)
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare HH\vec and float using a relational operator
+	<=  : Error: Cannot compare HH\vec and float using a relational operator
+	>   : Error: Cannot compare HH\vec and float using a relational operator
+	>=  : Error: Cannot compare HH\vec and float using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare HH\vec and float using a relational operator
 Comparing:
 float(1.2345)
 vec(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare float and HH\vec using a relational operator
+	<=  : Error: Cannot compare float and HH\vec using a relational operator
+	>   : Error: Cannot compare float and HH\vec using a relational operator
+	>=  : Error: Cannot compare float and HH\vec using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare float and HH\vec using a relational operator
 Comparing:
 vec(0) {
 }
 string(3) "abc"
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare HH\vec and string using a relational operator
+	<=  : Error: Cannot compare HH\vec and string using a relational operator
+	>   : Error: Cannot compare HH\vec and string using a relational operator
+	>=  : Error: Cannot compare HH\vec and string using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare HH\vec and string using a relational operator
 Comparing:
 string(3) "abc"
 vec(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare string and HH\vec using a relational operator
+	<=  : Error: Cannot compare string and HH\vec using a relational operator
+	>   : Error: Cannot compare string and HH\vec using a relational operator
+	>=  : Error: Cannot compare string and HH\vec using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare string and HH\vec using a relational operator
 Comparing:
 vec(0) {
 }
 object(stdClass) (0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare HH\vec and stdClass using a relational operator
+	<=  : Error: Cannot compare HH\vec and stdClass using a relational operator
+	>   : Error: Cannot compare HH\vec and stdClass using a relational operator
+	>=  : Error: Cannot compare HH\vec and stdClass using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare HH\vec and stdClass using a relational operator
 Comparing:
 object(stdClass) (0) {
 }
 vec(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare stdClass and HH\vec using a relational operator
+	<=  : Error: Cannot compare stdClass and HH\vec using a relational operator
+	>   : Error: Cannot compare stdClass and HH\vec using a relational operator
+	>=  : Error: Cannot compare stdClass and HH\vec using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare stdClass and HH\vec using a relational operator
 Comparing:
 vec(0) {
 }
@@ -509,57 +509,57 @@ vec(0) {
 }
 dict(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare HH\vec and HH\dict using a relational operator
+	<=  : Error: Cannot compare HH\vec and HH\dict using a relational operator
+	>   : Error: Cannot compare HH\vec and HH\dict using a relational operator
+	>=  : Error: Cannot compare HH\vec and HH\dict using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare HH\vec and HH\dict using a relational operator
 Comparing:
 dict(0) {
 }
 vec(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<   : Error: Cannot compare HH\dict and HH\vec using a relational operator
+	<=  : Error: Cannot compare HH\dict and HH\vec using a relational operator
+	>   : Error: Cannot compare HH\dict and HH\vec using a relational operator
+	>=  : Error: Cannot compare HH\dict and HH\vec using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=> : Error: Cannot compare HH\dict and HH\vec using a relational operator
 Comparing:
 vec(0) {
 }
 keyset(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare HH\vec and HH\keyset using a relational operator
+	<=  : Error: Cannot compare HH\vec and HH\keyset using a relational operator
+	>   : Error: Cannot compare HH\vec and HH\keyset using a relational operator
+	>=  : Error: Cannot compare HH\vec and HH\keyset using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare HH\vec and HH\keyset using a relational operator
 Comparing:
 keyset(0) {
 }
 vec(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare HH\keyset and HH\vec using a relational operator
+	<=  : Error: Cannot compare HH\keyset and HH\vec using a relational operator
+	>   : Error: Cannot compare HH\keyset and HH\vec using a relational operator
+	>=  : Error: Cannot compare HH\keyset and HH\vec using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare HH\keyset and HH\vec using a relational operator
 Comparing:
 vec(1) {
   dict(0) {

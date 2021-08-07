@@ -1,50 +1,50 @@
-func_ptr x null <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-func_ptr x null <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-func_ptr x null >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-func_ptr x null >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-func_ptr x null <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+func_ptr x null <   :Cannot compare func and bool using a relational operator
+func_ptr x null <=  :Cannot compare func and bool using a relational operator
+func_ptr x null >   :Cannot compare func and bool using a relational operator
+func_ptr x null >=  :Cannot compare func and bool using a relational operator
+func_ptr x null <=> :Cannot compare func and bool using a relational operator
 
-null x func_ptr: <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-null x func_ptr: <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-null x func_ptr: >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-null x func_ptr: >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-null x func_ptr: <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+null x func_ptr: <   :Cannot compare null and func using a relational operator
+null x func_ptr: <=  :Cannot compare null and func using a relational operator
+null x func_ptr: >   :Cannot compare null and func using a relational operator
+null x func_ptr: >=  :Cannot compare null and func using a relational operator
+null x func_ptr: <=> :Cannot compare null and func using a relational operator
 
-rfunc_ptr x null <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-rfunc_ptr x null <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-rfunc_ptr x null >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-rfunc_ptr x null >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-rfunc_ptr x null <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
+rfunc_ptr x null <   :Cannot compare reified function and null using a relational operator
+rfunc_ptr x null <=  :Cannot compare reified function and null using a relational operator
+rfunc_ptr x null >   :Cannot compare reified function and null using a relational operator
+rfunc_ptr x null >=  :Cannot compare reified function and null using a relational operator
+rfunc_ptr x null <=> :Cannot compare reified function and null using a relational operator
 
-null x rfunc_ptr: <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-null x rfunc_ptr: <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-null x rfunc_ptr: >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-null x rfunc_ptr: >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
-null x rfunc_ptr: <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) with reified functions
+null x rfunc_ptr: <   :Cannot compare null and reified function using a relational operator
+null x rfunc_ptr: <=  :Cannot compare null and reified function using a relational operator
+null x rfunc_ptr: >   :Cannot compare null and reified function using a relational operator
+null x rfunc_ptr: >=  :Cannot compare null and reified function using a relational operator
+null x rfunc_ptr: <=> :Cannot compare null and reified function using a relational operator
 
-clsmeth x null <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-clsmeth x null <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-clsmeth x null >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-clsmeth x null >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-clsmeth x null <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+clsmeth x null <   :Cannot compare clsmeth and bool using a relational operator
+clsmeth x null <=  :Cannot compare clsmeth and bool using a relational operator
+clsmeth x null >   :Cannot compare clsmeth and bool using a relational operator
+clsmeth x null >=  :Cannot compare clsmeth and bool using a relational operator
+clsmeth x null <=> :Cannot compare clsmeth and bool using a relational operator
 
-null x clsmeth: <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-null x clsmeth: <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-null x clsmeth: >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-null x clsmeth: >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
-null x clsmeth: <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a clsmeth
+null x clsmeth: <   :Cannot compare null and clsmeth using a relational operator
+null x clsmeth: <=  :Cannot compare null and clsmeth using a relational operator
+null x clsmeth: >   :Cannot compare null and clsmeth using a relational operator
+null x clsmeth: >=  :Cannot compare null and clsmeth using a relational operator
+null x clsmeth: <=> :Cannot compare null and clsmeth using a relational operator
 
-rclsmeth x null <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-rclsmeth x null <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-rclsmeth x null >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-rclsmeth x null >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-rclsmeth x null <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
+rclsmeth x null <   :Cannot compare reified clsmeth and null using a relational operator
+rclsmeth x null <=  :Cannot compare reified clsmeth and null using a relational operator
+rclsmeth x null >   :Cannot compare reified clsmeth and null using a relational operator
+rclsmeth x null >=  :Cannot compare reified clsmeth and null using a relational operator
+rclsmeth x null <=> :Cannot compare reified clsmeth and null using a relational operator
 
-null x rclsmeth: <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-null x rclsmeth: <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-null x rclsmeth: >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-null x rclsmeth: >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
-null x rclsmeth: <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a reified class meth
+null x rclsmeth: <   :Cannot compare null and reified clsmeth using a relational operator
+null x rclsmeth: <=  :Cannot compare null and reified clsmeth using a relational operator
+null x rclsmeth: >   :Cannot compare null and reified clsmeth using a relational operator
+null x rclsmeth: >=  :Cannot compare null and reified clsmeth using a relational operator
+null x rclsmeth: <=> :Cannot compare null and reified clsmeth using a relational operator
 
 lambda x null <   :bool(false)
 lambda x null <=  :bool(false)
@@ -58,14 +58,14 @@ null x lambda: >   :bool(false)
 null x lambda: >=  :bool(false)
 null x lambda: <=> :int(-1)
 
-fun x null <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-fun x null <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-fun x null >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-fun x null >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-fun x null <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+fun x null <   :Cannot compare func and bool using a relational operator
+fun x null <=  :Cannot compare func and bool using a relational operator
+fun x null >   :Cannot compare func and bool using a relational operator
+fun x null >=  :Cannot compare func and bool using a relational operator
+fun x null <=> :Cannot compare func and bool using a relational operator
 
-null x fun: <   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-null x fun: <=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-null x fun: >   :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-null x fun: >=  :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
-null x fun: <=> :Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+null x fun: <   :Cannot compare null and func using a relational operator
+null x fun: <=  :Cannot compare null and func using a relational operator
+null x fun: >   :Cannot compare null and func using a relational operator
+null x fun: >=  :Cannot compare null and func using a relational operator
+null x fun: <=> :Cannot compare null and func using a relational operator

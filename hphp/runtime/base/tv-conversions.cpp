@@ -1130,7 +1130,7 @@ void handleConvNoticeLevel(
   const char* const from,
   const char* const to,
   const StringData* reason) {
-  if (LIKELY(level == ConvNoticeLevel::None)) return;
+   if (LIKELY(level == ConvNoticeLevel::None)) return;
   assertx(reason != nullptr);
   handleConvNoticeLevelImpl(
     level,
@@ -1178,7 +1178,7 @@ void handleConvNoticeForCmpOrEq(
 }
 
 void handleConvNoticeLevelImpl(ConvNoticeLevel level, const std::string& str) {
-  if (level == ConvNoticeLevel::Throw) {
+    if (level == ConvNoticeLevel::Throw) {
     SystemLib::throwInvalidOperationExceptionObject(str);
   } else if (level == ConvNoticeLevel::Log) {
     raise_notice(str);
@@ -1203,6 +1203,36 @@ void throwMathBadTypesException(tv_rval t1, tv_rval t2) {
   SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
     "Cannot perform mathematical operation on {} and {}",
     describe_actual_type(t1), describe_actual_type(t2)));
+}
+
+namespace {
+void throwCmpBadTypesExceptionImpl(tv_rval t1, const char* t2) {
+  SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+    "Cannot compare {} and {} using a relational operator",
+    describe_actual_type(t1), t2));
+}
+}
+
+void throwCmpBadTypesException(tv_rval t1, tv_rval t2) {
+  throwCmpBadTypesExceptionImpl(t1, describe_actual_type(t2).c_str());
+}
+void throwCmpBadTypesException(tv_rval t1, DataType dt) {
+   const char* rhs = [&] {
+      switch(dt) {
+        case DataType::Boolean:  return "bool";
+        case DataType::Int64:    return "int";
+        case DataType::Double:   return "float";
+        case DataType::String:   return "string";
+        case DataType::Vec:      return "vec";
+        case DataType::Dict:     return "dict";
+        case DataType::Keyset:   return "keyset";
+        case DataType::Resource: return "resource";
+        case DataType::ClsMeth:  return "clsmeth";
+        default: always_assert(false);
+      }
+      not_reached();
+   }();
+  throwCmpBadTypesExceptionImpl(t1, rhs);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

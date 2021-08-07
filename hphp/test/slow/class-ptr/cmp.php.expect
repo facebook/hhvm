@@ -106,92 +106,92 @@ bool(true)
 Test 7
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot compare string and HH\dict using a relational operator
+Cannot compare string and HH\dict using a relational operator
+Cannot compare string and HH\dict using a relational operator
+Cannot compare string and HH\dict using a relational operator
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot compare HH\dict and string using a relational operator
+Cannot compare HH\dict and string using a relational operator
+Cannot compare HH\dict and string using a relational operator
+Cannot compare HH\dict and string using a relational operator
 
 Test 8
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot compare string and HH\vec using a relational operator
+Cannot compare string and HH\vec using a relational operator
+Cannot compare string and HH\vec using a relational operator
+Cannot compare string and HH\vec using a relational operator
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot compare HH\vec and string using a relational operator
+Cannot compare HH\vec and string using a relational operator
+Cannot compare HH\vec and string using a relational operator
+Cannot compare HH\vec and string using a relational operator
 
 Test 9
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot compare string and HH\vec using a relational operator
+Cannot compare string and HH\vec using a relational operator
+Cannot compare string and HH\vec using a relational operator
+Cannot compare string and HH\vec using a relational operator
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot compare HH\vec and string using a relational operator
+Cannot compare HH\vec and string using a relational operator
+Cannot compare HH\vec and string using a relational operator
+Cannot compare HH\vec and string using a relational operator
 
 Test 10
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot compare string and HH\dict using a relational operator
+Cannot compare string and HH\dict using a relational operator
+Cannot compare string and HH\dict using a relational operator
+Cannot compare string and HH\dict using a relational operator
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot compare HH\dict and string using a relational operator
+Cannot compare HH\dict and string using a relational operator
+Cannot compare HH\dict and string using a relational operator
+Cannot compare HH\dict and string using a relational operator
 
 Test 11
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot compare string and HH\dict using a relational operator
+Cannot compare string and HH\dict using a relational operator
+Cannot compare string and HH\dict using a relational operator
+Cannot compare string and HH\dict using a relational operator
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot compare HH\dict and string using a relational operator
+Cannot compare HH\dict and string using a relational operator
+Cannot compare HH\dict and string using a relational operator
+Cannot compare HH\dict and string using a relational operator
 
 Test 12
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Cannot compare string and HH\keyset using a relational operator
+Cannot compare string and HH\keyset using a relational operator
+Cannot compare string and HH\keyset using a relational operator
+Cannot compare string and HH\keyset using a relational operator
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Cannot compare HH\keyset and string using a relational operator
+Cannot compare HH\keyset and string using a relational operator
+Cannot compare HH\keyset and string using a relational operator
+Cannot compare HH\keyset and string using a relational operator
 
 --- test class --- 
 Test 0
@@ -302,89 +302,89 @@ bool(true)
 Test 7
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot compare lazy class and HH\dict using a relational operator
+Cannot compare lazy class and HH\dict using a relational operator
+Cannot compare lazy class and HH\dict using a relational operator
+Cannot compare lazy class and HH\dict using a relational operator
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot compare HH\dict and lazy class using a relational operator
+Cannot compare HH\dict and lazy class using a relational operator
+Cannot compare HH\dict and lazy class using a relational operator
+Cannot compare HH\dict and lazy class using a relational operator
 
 Test 8
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot compare lazy class and HH\vec using a relational operator
+Cannot compare lazy class and HH\vec using a relational operator
+Cannot compare lazy class and HH\vec using a relational operator
+Cannot compare lazy class and HH\vec using a relational operator
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot compare HH\vec and lazy class using a relational operator
+Cannot compare HH\vec and lazy class using a relational operator
+Cannot compare HH\vec and lazy class using a relational operator
+Cannot compare HH\vec and lazy class using a relational operator
 
 Test 9
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot compare lazy class and HH\vec using a relational operator
+Cannot compare lazy class and HH\vec using a relational operator
+Cannot compare lazy class and HH\vec using a relational operator
+Cannot compare lazy class and HH\vec using a relational operator
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot compare HH\vec and lazy class using a relational operator
+Cannot compare HH\vec and lazy class using a relational operator
+Cannot compare HH\vec and lazy class using a relational operator
+Cannot compare HH\vec and lazy class using a relational operator
 
 Test 10
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot compare lazy class and HH\dict using a relational operator
+Cannot compare lazy class and HH\dict using a relational operator
+Cannot compare lazy class and HH\dict using a relational operator
+Cannot compare lazy class and HH\dict using a relational operator
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot compare HH\dict and lazy class using a relational operator
+Cannot compare HH\dict and lazy class using a relational operator
+Cannot compare HH\dict and lazy class using a relational operator
+Cannot compare HH\dict and lazy class using a relational operator
 
 Test 11
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot compare lazy class and HH\dict using a relational operator
+Cannot compare lazy class and HH\dict using a relational operator
+Cannot compare lazy class and HH\dict using a relational operator
+Cannot compare lazy class and HH\dict using a relational operator
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot compare HH\dict and lazy class using a relational operator
+Cannot compare HH\dict and lazy class using a relational operator
+Cannot compare HH\dict and lazy class using a relational operator
+Cannot compare HH\dict and lazy class using a relational operator
 
 Test 12
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Cannot compare lazy class and HH\keyset using a relational operator
+Cannot compare lazy class and HH\keyset using a relational operator
+Cannot compare lazy class and HH\keyset using a relational operator
+Cannot compare lazy class and HH\keyset using a relational operator
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Cannot compare HH\keyset and lazy class using a relational operator
+Cannot compare HH\keyset and lazy class using a relational operator
+Cannot compare HH\keyset and lazy class using a relational operator
+Cannot compare HH\keyset and lazy class using a relational operator

@@ -29,11 +29,11 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot compare HH\dict and int using a relational operator
+Cannot compare HH\dict and int using a relational operator
+Cannot compare HH\dict and int using a relational operator
+Cannot compare HH\dict and int using a relational operator
+Cannot compare HH\dict and int using a relational operator
 Invalid dict key: expected a key of type int or string, bool given
 Invalid dict key: expected a key of type int or string, float given
 Invalid dict key: expected a key of type int or string, null given
@@ -50,8 +50,8 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot compare HH\dict and HH\vec using a relational operator
+Cannot compare HH\dict and HH\vec using a relational operator
+Cannot compare HH\dict and HH\vec using a relational operator
+Cannot compare HH\dict and HH\vec using a relational operator
+Cannot compare HH\dict and HH\vec using a relational operator

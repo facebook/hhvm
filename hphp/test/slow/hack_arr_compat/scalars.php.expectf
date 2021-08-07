@@ -3,29 +3,29 @@ bool(true)
 bool(false)
 bool(true)
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 9
+Caught: Cannot compare HH\dict and bool using a relational operator on line 9
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 10
+Caught: Cannot compare HH\dict and bool using a relational operator on line 10
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 11
+Caught: Cannot compare HH\dict and bool using a relational operator on line 11
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 12
+Caught: Cannot compare HH\dict and bool using a relational operator on line 12
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 13
+Caught: Cannot compare HH\dict and bool using a relational operator on line 13
 bool(false)
 bool(true)
 bool(false)
 bool(true)
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 19
+Caught: Cannot compare bool and HH\dict using a relational operator on line 19
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 20
+Caught: Cannot compare bool and HH\dict using a relational operator on line 20
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 21
+Caught: Cannot compare bool and HH\dict using a relational operator on line 21
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 22
+Caught: Cannot compare bool and HH\dict using a relational operator on line 22
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts on line 23
+Caught: Cannot compare bool and HH\dict using a relational operator on line 23
 dict(1) {
   ["0"]=>
   int(1)

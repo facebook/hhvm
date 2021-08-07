@@ -30,10 +30,11 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
   try {
     printf(" %s    |", $v() ? 'T' : 'F');
   } catch (Exception $ex) {
-    $m =
-      'Cannot use relational comparison operators (<, <=, >, >=, <=>) to '.
-      'compare funcs';
-    printf(" %s    |", $ex->getMessage() === $m ? "E" : "X");
+    $m = \HH\Lib\Regex\matches(
+      $ex->getMessage(),
+      re"/Cannot compare .* and .* using a relational operator/",
+    );
+    printf(" %s    |", $m ? "E" : "X");
   }
 }
 <<__NEVER_INLINE>> function print_footer() {

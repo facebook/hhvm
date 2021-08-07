@@ -234,241 +234,241 @@ Comparing:
 keyset(0) {
 }
 NULL
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare HH\keyset and null using a relational operator
+	<=  : Error: Cannot compare HH\keyset and null using a relational operator
+	>   : Error: Cannot compare HH\keyset and null using a relational operator
+	>=  : Error: Cannot compare HH\keyset and null using a relational operator
 	==  : bool(true)
 	!=  : bool(false)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare HH\keyset and null using a relational operator
 Comparing:
 NULL
 keyset(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare null and HH\keyset using a relational operator
+	<=  : Error: Cannot compare null and HH\keyset using a relational operator
+	>   : Error: Cannot compare null and HH\keyset using a relational operator
+	>=  : Error: Cannot compare null and HH\keyset using a relational operator
 	==  : bool(true)
 	!=  : bool(false)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare null and HH\keyset using a relational operator
 Comparing:
 keyset(0) {
 }
 bool(false)
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare HH\keyset and bool using a relational operator
+	<=  : Error: Cannot compare HH\keyset and bool using a relational operator
+	>   : Error: Cannot compare HH\keyset and bool using a relational operator
+	>=  : Error: Cannot compare HH\keyset and bool using a relational operator
 	==  : bool(true)
 	!=  : bool(false)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare HH\keyset and bool using a relational operator
 Comparing:
 bool(false)
 keyset(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare bool and HH\keyset using a relational operator
+	<=  : Error: Cannot compare bool and HH\keyset using a relational operator
+	>   : Error: Cannot compare bool and HH\keyset using a relational operator
+	>=  : Error: Cannot compare bool and HH\keyset using a relational operator
 	==  : bool(true)
 	!=  : bool(false)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare bool and HH\keyset using a relational operator
 Comparing:
 keyset(0) {
 }
 int(123)
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare HH\keyset and int using a relational operator
+	<=  : Error: Cannot compare HH\keyset and int using a relational operator
+	>   : Error: Cannot compare HH\keyset and int using a relational operator
+	>=  : Error: Cannot compare HH\keyset and int using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare HH\keyset and int using a relational operator
 Comparing:
 int(123)
 keyset(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare int and HH\keyset using a relational operator
+	<=  : Error: Cannot compare int and HH\keyset using a relational operator
+	>   : Error: Cannot compare int and HH\keyset using a relational operator
+	>=  : Error: Cannot compare int and HH\keyset using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare int and HH\keyset using a relational operator
 Comparing:
 keyset(0) {
 }
 float(1.2345)
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare HH\keyset and float using a relational operator
+	<=  : Error: Cannot compare HH\keyset and float using a relational operator
+	>   : Error: Cannot compare HH\keyset and float using a relational operator
+	>=  : Error: Cannot compare HH\keyset and float using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare HH\keyset and float using a relational operator
 Comparing:
 float(1.2345)
 keyset(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare float and HH\keyset using a relational operator
+	<=  : Error: Cannot compare float and HH\keyset using a relational operator
+	>   : Error: Cannot compare float and HH\keyset using a relational operator
+	>=  : Error: Cannot compare float and HH\keyset using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare float and HH\keyset using a relational operator
 Comparing:
 keyset(0) {
 }
 string(3) "abc"
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare HH\keyset and string using a relational operator
+	<=  : Error: Cannot compare HH\keyset and string using a relational operator
+	>   : Error: Cannot compare HH\keyset and string using a relational operator
+	>=  : Error: Cannot compare HH\keyset and string using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare HH\keyset and string using a relational operator
 Comparing:
 string(3) "abc"
 keyset(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare string and HH\keyset using a relational operator
+	<=  : Error: Cannot compare string and HH\keyset using a relational operator
+	>   : Error: Cannot compare string and HH\keyset using a relational operator
+	>=  : Error: Cannot compare string and HH\keyset using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare string and HH\keyset using a relational operator
 Comparing:
 keyset(0) {
 }
 object(stdClass) (0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare HH\keyset and stdClass using a relational operator
+	<=  : Error: Cannot compare HH\keyset and stdClass using a relational operator
+	>   : Error: Cannot compare HH\keyset and stdClass using a relational operator
+	>=  : Error: Cannot compare HH\keyset and stdClass using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare HH\keyset and stdClass using a relational operator
 Comparing:
 object(stdClass) (0) {
 }
 keyset(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare stdClass and HH\keyset using a relational operator
+	<=  : Error: Cannot compare stdClass and HH\keyset using a relational operator
+	>   : Error: Cannot compare stdClass and HH\keyset using a relational operator
+	>=  : Error: Cannot compare stdClass and HH\keyset using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare stdClass and HH\keyset using a relational operator
 Comparing:
 keyset(0) {
 }
 vec(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare HH\keyset and HH\vec using a relational operator
+	<=  : Error: Cannot compare HH\keyset and HH\vec using a relational operator
+	>   : Error: Cannot compare HH\keyset and HH\vec using a relational operator
+	>=  : Error: Cannot compare HH\keyset and HH\vec using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare HH\keyset and HH\vec using a relational operator
 Comparing:
 vec(0) {
 }
 keyset(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare HH\vec and HH\keyset using a relational operator
+	<=  : Error: Cannot compare HH\vec and HH\keyset using a relational operator
+	>   : Error: Cannot compare HH\vec and HH\keyset using a relational operator
+	>=  : Error: Cannot compare HH\vec and HH\keyset using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare HH\vec and HH\keyset using a relational operator
 Comparing:
 keyset(0) {
 }
 vec(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare HH\keyset and HH\vec using a relational operator
+	<=  : Error: Cannot compare HH\keyset and HH\vec using a relational operator
+	>   : Error: Cannot compare HH\keyset and HH\vec using a relational operator
+	>=  : Error: Cannot compare HH\keyset and HH\vec using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare HH\keyset and HH\vec using a relational operator
 Comparing:
 vec(0) {
 }
 keyset(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<   : Error: Cannot compare HH\vec and HH\keyset using a relational operator
+	<=  : Error: Cannot compare HH\vec and HH\keyset using a relational operator
+	>   : Error: Cannot compare HH\vec and HH\keyset using a relational operator
+	>=  : Error: Cannot compare HH\vec and HH\keyset using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=> : Error: Cannot compare HH\vec and HH\keyset using a relational operator
 Comparing:
 keyset(0) {
 }
 dict(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<   : Error: Cannot compare HH\keyset and HH\dict using a relational operator
+	<=  : Error: Cannot compare HH\keyset and HH\dict using a relational operator
+	>   : Error: Cannot compare HH\keyset and HH\dict using a relational operator
+	>=  : Error: Cannot compare HH\keyset and HH\dict using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=> : Error: Cannot compare HH\keyset and HH\dict using a relational operator
 Comparing:
 dict(0) {
 }
 keyset(0) {
 }
-	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<   : Error: Cannot compare HH\dict and HH\keyset using a relational operator
+	<=  : Error: Cannot compare HH\dict and HH\keyset using a relational operator
+	>   : Error: Cannot compare HH\dict and HH\keyset using a relational operator
+	>=  : Error: Cannot compare HH\dict and HH\keyset using a relational operator
 	==  : bool(false)
 	!=  : bool(true)
 	=== : bool(false)
 	!== : bool(true)
-	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=> : Error: Cannot compare HH\dict and HH\keyset using a relational operator

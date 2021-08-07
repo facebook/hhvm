@@ -80,25 +80,25 @@ function main(): void {
 
 function less(): void {
   echo "!(null < false)\n";
-  !(null < false);
+  wrapped(() ==> !(null < false));
   echo "!(true < 0)\n";
-  !(true < 0);
+  wrapped(() ==> !(true < 0));
   echo "!(99 < 99.0)\n";
-  !(99 < 99.0);
+  wrapped(() ==> !(99 < 99.0));
   echo "!(empty string < NAN)\n";
-  !('' < NAN);
+  wrapped(() ==> !('' < NAN));
   echo "!('0' < 'baz')\n";
-  !("0" < 'baz');
+  wrapped(() ==> !("0" < 'baz'));
   echo "!('0' < 42)\n";
-  !("0" < 42);
+  wrapped(() ==> !("0" < 42));
   echo "!('0bcd' < 1.234)\n";
-  !("0bcd" < 1.234);
+  wrapped(() ==> !("0bcd" < 1.234));
   echo "!('0bcd' < 'baz')\n";
-  !("0bcd" < 'baz');
+  wrapped(() ==> !("0bcd" < 'baz'));
   echo "!('0bcd' < 42)\n";
-  !("0bcd" < 42);
+  wrapped(() ==> !("0bcd" < 42));
   echo "!('0bcd' < 1.234)\n";
-  !("0bcd" < 1.234);
+  wrapped(() ==> !("0bcd" < 1.234));
 
   echo "!(new A() < 42)\n";
   wrapped(() ==> !(new A() < 42));
@@ -113,7 +113,7 @@ function less(): void {
   wrapped(() ==> !(new DateTime1(1000) < 42));
 
   echo "!(xml < 42)\n";
-  !(simplexml_load_string("<root />")->unknown < 42);
+  wrapped(() ==> !(simplexml_load_string("<root />")->unknown < 42));
 
   echo "!(Vector < Vector)\n";
   wrapped(() ==> !(Vector {0, 1, 2, 3, 4} < Vector {5, 6, 7, 8, 9}));
@@ -167,31 +167,31 @@ function less(): void {
 
   $f1 = imagecreate(10, 10);
   echo "!(imagecreate(10, 10) < 42)\n";
-  !($f1 < 42);
+  wrapped(() ==> !($f1 < 42));
   imagedestroy($f1);
 }
 
 function lesseq(): void {
   echo "!(null <= false)\n";
-  !(null <= false);
+  wrapped(() ==> !(null <= false));
   echo "!(true <= 0)\n";
-  !(true <= 0);
+  wrapped(() ==> !(true <= 0));
   echo "!(99 <= 99.0)\n";
-  !(99 <= 99.0);
+  wrapped(() ==> !(99 <= 99.0));
   echo "!(empty string <= NAN)\n";
-  !('' <= NAN);
+  wrapped(() ==> !('' <= NAN));
   echo "!('0' <= 'baz')\n";
-  !("0" <= 'baz');
+  wrapped(() ==> !("0" <= 'baz'));
   echo "!('0' <= 42)\n";
-  !("0" <= 42);
+  wrapped(() ==> !("0" <= 42));
   echo "!('0bcd' <= 1.234)\n";
-  !("0bcd" <= 1.234);
+  wrapped(() ==> !("0bcd" <= 1.234));
   echo "!('0bcd' <= 'baz')\n";
-  !("0bcd" <= 'baz');
+  wrapped(() ==> !("0bcd" <= 'baz'));
   echo "!('0bcd' <= 42)\n";
-  !("0bcd" <= 42);
+  wrapped(() ==> !("0bcd" <= 42));
   echo "!('0bcd' <= 1.234)\n";
-  !("0bcd" <= 1.234);
+  wrapped(() ==> !("0bcd" <= 1.234));
 
   echo "!(new A() <= 42)\n";
   wrapped(() ==> !(new A() <= 42));
@@ -206,7 +206,7 @@ function lesseq(): void {
   wrapped(() ==> !(new DateTime1(1000) <= 42));
 
   echo "!(xml <= 42)\n";
-  !(simplexml_load_string("<root />")->unknown <= 42);
+  wrapped(() ==> !(simplexml_load_string("<root />")->unknown <= 42));
 
   echo "!(Vector <= Vector)\n";
   wrapped(() ==> !(Vector {0, 1, 2, 3, 4} <= Vector {5, 6, 7, 8, 9}));
@@ -260,31 +260,31 @@ function lesseq(): void {
 
   $f1 = imagecreate(10, 10);
   echo "!(imagecreate(10, 10) <= 42)\n";
-  !($f1 <= 42);
+  wrapped(() ==> !($f1 <= 42));
   imagedestroy($f1);
 }
 
 function gt(): void {
   echo "!(null > false)\n";
-  !(null > false);
+  wrapped(() ==> !(null > false));
   echo "!(true > 0)\n";
-  !(true > 0);
+  wrapped(() ==> !(true > 0));
   echo "!(99 > 99.0)\n";
-  !(99 > 99.0);
+  wrapped(() ==> !(99 > 99.0));
   echo "!(empty string > NAN)\n";
-  !('' > NAN);
+  wrapped(() ==> !('' > NAN));
   echo "!('0' > 'baz')\n";
-  !("0" > 'baz');
+  wrapped(() ==> !("0" > 'baz'));
   echo "!('0' > 42)\n";
-  !("0" > 42);
+  wrapped(() ==> !("0" > 42));
   echo "!('0bcd' > 1.234)\n";
-  !("0bcd" > 1.234);
+  wrapped(() ==> !("0bcd" > 1.234));
   echo "!('0bcd' > 'baz')\n";
-  !("0bcd" > 'baz');
+  wrapped(() ==> !("0bcd" > 'baz'));
   echo "!('0bcd' > 42)\n";
-  !("0bcd" > 42);
+  wrapped(() ==> !("0bcd" > 42));
   echo "!('0bcd' > 1.234)\n";
-  !("0bcd" > 1.234);
+  wrapped(() ==> !("0bcd" > 1.234));
 
   echo "!(new A() > 42)\n";
   wrapped(() ==> !(new A() > 42));
@@ -299,7 +299,7 @@ function gt(): void {
   wrapped(() ==> !(new DateTime1(1000) > 42));
 
   echo "!(xml > 42)\n";
-  !(simplexml_load_string("<root />")->unknown > 42);
+  wrapped(() ==> !(simplexml_load_string("<root />")->unknown > 42));
 
   echo "!(Vector > Vector)\n";
   wrapped(() ==> !(Vector {0, 1, 2, 3, 4} > Vector {5, 6, 7, 8, 9}));
@@ -353,31 +353,31 @@ function gt(): void {
 
   $f1 = imagecreate(10, 10);
   echo "!(imagecreate(10, 10) > 42)\n";
-  !($f1 > 42);
+  wrapped(() ==> !($f1 > 42));
   imagedestroy($f1);
 }
 
 function gte(): void {
   echo "!(null >= false)\n";
-  !(null >= false);
+  wrapped(() ==> !(null >= false));
   echo "!(true >= 0)\n";
-  !(true >= 0);
+  wrapped(() ==> !(true >= 0));
   echo "!(99 >= 99.0)\n";
-  !(99 >= 99.0);
+  wrapped(() ==> !(99 >= 99.0));
   echo "!(empty string >= NAN)\n";
-  !('' >= NAN);
+  wrapped(() ==> !('' >= NAN));
   echo "!('0' >= 'baz')\n";
-  !("0" >= 'baz');
+  wrapped(() ==> !("0" >= 'baz'));
   echo "!('0' >= 42)\n";
-  !("0" >= 42);
+  wrapped(() ==> !("0" >= 42));
   echo "!('0bcd' >= 1.234)\n";
-  !("0bcd" >= 1.234);
+  wrapped(() ==> !("0bcd" >= 1.234));
   echo "!('0bcd' >= 'baz')\n";
-  !("0bcd" >= 'baz');
+  wrapped(() ==> !("0bcd" >= 'baz'));
   echo "!('0bcd' >= 42)\n";
-  !("0bcd" >= 42);
+  wrapped(() ==> !("0bcd" >= 42));
   echo "!('0bcd' >= 1.234)\n";
-  !("0bcd" >= 1.234);
+  wrapped(() ==> !("0bcd" >= 1.234));
 
   echo "!(new A() >= 42)\n";
   wrapped(() ==> !(new A() >= 42));
@@ -392,7 +392,7 @@ function gte(): void {
   wrapped(() ==> !(new DateTime1(1000) >= 42));
 
   echo "!(xml >= 42)\n";
-  !(simplexml_load_string("<root />")->unknown >= 42);
+  wrapped(() ==> !(simplexml_load_string("<root />")->unknown >= 42));
 
   echo "!(Vector >= Vector)\n";
   wrapped(() ==> !(Vector {0, 1, 2, 3, 4} >= Vector {5, 6, 7, 8, 9}));
@@ -446,32 +446,32 @@ function gte(): void {
 
   $f1 = imagecreate(10, 10);
   echo "!(imagecreate(10, 10) >= 42)\n";
-  !($f1 >= 42);
+  wrapped(() ==> !($f1 >= 42));
   imagedestroy($f1);
 }
 
 function cmp(): void {
 
   echo "!(null <=> false)\n";
-  !(null <=> false);
+  wrapped(() ==> !(null <=> false));
   echo "!(true <=> 0)\n";
-  !(true <=> 0);
+  wrapped(() ==> !(true <=> 0));
   echo "!(99 <=> 99.0)\n";
-  !(99 <=> 99.0);
+  wrapped(() ==> !(99 <=> 99.0));
   echo "!(empty string <=> NAN)\n";
-  !('' <=> NAN);
+  wrapped(() ==> !('' <=> NAN));
   echo "!('0' <=> 'baz')\n";
-  !("0" <=> 'baz');
+  wrapped(() ==> !("0" <=> 'baz'));
   echo "!('0' <=> 42)\n";
-  !("0" <=> 42);
+  wrapped(() ==> !("0" <=> 42));
   echo "!('0bcd' <=> 1.234)\n";
-  !("0bcd" <=> 1.234);
+  wrapped(() ==> !("0bcd" <=> 1.234));
   echo "!('0bcd' <=> 'baz')\n";
-  !("0bcd" <=> 'baz');
+  wrapped(() ==> !("0bcd" <=> 'baz'));
   echo "!('0bcd' <=> 42)\n";
-  !("0bcd" <=> 42);
+  wrapped(() ==> !("0bcd" <=> 42));
   echo "!('0bcd' <=> 1.234)\n";
-  !("0bcd" <=> 1.234);
+  wrapped(() ==> !("0bcd" <=> 1.234));
 
   echo "!(new A() <=> 42)\n";
   wrapped(() ==> !(new A() <=> 42));
@@ -486,7 +486,7 @@ function cmp(): void {
   wrapped(() ==> !(new DateTime1(1000) <=> 42));
 
   echo "!(xml <=> 42)\n";
-  !(simplexml_load_string("<root />")->unknown <=> 42);
+  wrapped(() ==> !(simplexml_load_string("<root />")->unknown <=> 42));
 
   echo "!(Vector <=> Vector)\n";
   wrapped(() ==> !(Vector {0, 1, 2, 3, 4} <=> Vector {5, 6, 7, 8, 9}));
@@ -540,6 +540,6 @@ function cmp(): void {
 
   $f1 = imagecreate(10, 10);
   echo "!(imagecreate(10, 10) <=> 42)\n";
-  !($f1 <=> 42);
+  wrapped(() ==> !($f1 <=> 42));
   imagedestroy($f1);
 }

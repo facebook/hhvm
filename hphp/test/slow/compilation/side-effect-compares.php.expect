@@ -8,16 +8,16 @@ Cls1::__toString()
 Cls1::__toString()
 Cls1::__toString()
 Cls1::__toString()
-Exn: Cls2::__toString()
-Exn: Cls2::__toString()
-Exn: Cls2::__toString()
-Exn: Cls2::__toString()
-Exn: Cls2::__toString()
-Exn: Cls2::__toString()
-Exn: Cls2::__toString()
-Exn: Cls2::__toString()
-Exn: Cls2::__toString()
-Exn: Cls2::__toString()
+Exn: Cannot compare Cls2 and string using a relational operator
+Exn: Cannot compare Cls2 and string using a relational operator
+Exn: Cannot compare Cls2 and string using a relational operator
+Exn: Cannot compare Cls2 and string using a relational operator
+Exn: Cannot compare Cls2 and string using a relational operator
+Exn: Cannot compare string and Cls2 using a relational operator
+Exn: Cannot compare string and Cls2 using a relational operator
+Exn: Cannot compare string and Cls2 using a relational operator
+Exn: Cannot compare string and Cls2 using a relational operator
+Exn: Cannot compare string and Cls2 using a relational operator
 Cls1::__toString()
 Cls1::__toString()
 Cls1::__toString()

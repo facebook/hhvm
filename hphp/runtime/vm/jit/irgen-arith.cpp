@@ -1240,6 +1240,15 @@ void implCmp(IRGS& env, Op op) {
        !equiv()) {
     push(env, emitConstCmp(env, op, false, true));
   } else {
+
+    if (!equiv()
+        && !(leftTy <= TInt && rightTy <= TDbl)
+        && !(leftTy <= TDbl && rightTy <= TInt)) {
+      const auto level =
+        flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForCmp);
+      if (level == ConvNoticeLevel::Throw) PUNT(implCmp-DiffTypes);
+    }
+
     SSATmp* res = [&]() {
       if (leftTy <= TNull) return implNullCmp(env, op, left, right);
       else if (leftTy <= TBool) return implBoolCmp(env, op, left, right);

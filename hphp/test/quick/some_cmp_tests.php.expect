@@ -4,15 +4,15 @@ bool(false)
 bool(false)
 bool(false)
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Caught: Cannot compare string and HH\vec using a relational operator
+Caught: Cannot compare string and HH\vec using a relational operator
+Caught: Cannot compare HH\vec and string using a relational operator
+Caught: Cannot compare HH\vec and string using a relational operator
 
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Caught: Cannot compare string and HH\vec using a relational operator
+Caught: Cannot compare string and HH\vec using a relational operator
+Caught: Cannot compare HH\vec and string using a relational operator
+Caught: Cannot compare HH\vec and string using a relational operator
 ======
 bool(true)
 bool(true)

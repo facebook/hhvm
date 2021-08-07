@@ -858,9 +858,18 @@ typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
   assertx(tvIsPlausible(c1));
   assertx(tvIsPlausible(c2));
 
-  if (std::is_same_v<Op, Eq> && useStrictEquality() &&
-      !equivDataTypesIncludingMigrations(c1.m_type, c2.m_type)) {
-    return false;
+  if (std::is_same_v<Op, Eq>) {
+    if (useStrictEquality() &&
+        !equivDataTypesIncludingMigrations(c1.m_type, c2.m_type)) {
+      return false;
+    }
+  } else {
+    const auto level =
+      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForCmp);
+    if (level == ConvNoticeLevel::Throw &&
+        shouldMaybeTriggerConvNotice<Op>(c1.m_type, c2.m_type, false)) {
+      throwCmpBadTypesException(&c1, &c2);
+    }
   }
 
   const auto res = [&](){
@@ -1357,9 +1366,19 @@ bool tvSame(TypedValue c1, TypedValue c2) {
 
 template<class Op, DataType DT, typename T>
 typename Op::RetType tvRelOp(TypedValue cell, T val) {
-  if (std::is_same_v<Op, Eq> && useStrictEquality() &&
-      !equivDataTypesIncludingMigrations(cell.m_type, DT)) {
-    return false;
+
+  if (std::is_same_v<Op, Eq>) {
+    if (useStrictEquality() &&
+        !equivDataTypesIncludingMigrations(cell.m_type, DT)) {
+      return false;
+    }
+  } else {
+    const auto level =
+      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForCmp);
+    if (level == ConvNoticeLevel::Throw &&
+        shouldMaybeTriggerConvNotice<Op>(cell.m_type, DT, false)) {
+      throwCmpBadTypesException(&cell, DT);
+    }
   }
 
   typename Op::RetType res;

@@ -69,7 +69,7 @@ namespace {
  * Sync VM regs for the TC frame represented by `context'.
  */
 void sync_regstate(TCA ip, _Unwind_Context* context) {
-  assertx(tl_regState == VMRegState::DIRTY);
+  assertx(regState() == VMRegState::DIRTY);
   Stats::inc(Stats::TC_SyncUnwind);
 
   auto const frame = [&] () -> VMFrame {
@@ -92,7 +92,7 @@ void sync_regstate(TCA ip, _Unwind_Context* context) {
          (void*)frame.m_prevCfa, (void*)frame.m_actRec, (void*)frame.m_rip);
   always_assert(FixupMap::processFixupForVMFrame(frame));
 
-  tl_regState = VMRegState::CLEAN;
+  regState() = VMRegState::CLEAN;
   FTRACE(2, "synced vmfp {}, vmsp {}, vmpc {}\n", vmfp(), vmsp(), vmpc());
 }
 
@@ -161,7 +161,7 @@ void install_catch_trace(_Unwind_Context* ctx, TCA rip,
   g_unwind_rds->doSideExit = do_side_exit;
 
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
-  tl_regState = VMRegState::DIRTY;
+  regState() = VMRegState::DIRTY;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -201,8 +201,8 @@ tc_unwind_personality(int version,
       reinterpret_cast<ActRec*>(_Unwind_GetGR(context, dw_reg::FP));
     FTRACE(1, "unwind {} exn {}: regState {}, ip {}, type {}, {} {}\n",
            unwindType, ue,
-           tl_regState == VMRegState::DIRTY ? "dirty" :
-           tl_regState == VMRegState::CLEAN ? "clean" : "guarded",
+           regState() == VMRegState::DIRTY ? "dirty" :
+           regState() == VMRegState::CLEAN ? "clean" : "guarded",
            (TCA)_Unwind_GetIP(context), exnType,
            isVMFrame(fp) ? fp->func()->fullName()->data() : "non-vm", fp);
   }
@@ -219,7 +219,7 @@ tc_unwind_personality(int version,
   /*
    * We don't do anything during the search phase---before attempting cleanup,
    * we want all deeper frames to have run their object destructors (which can
-   * have side effects like setting tl_regState) and spilled any values they
+   * have side effects like setting regState()) and spilled any values they
    * may have been holding in callee-saved regs.
    */
   if (actions & _UA_SEARCH_PHASE) return _URC_HANDLER_FOUND;
@@ -235,7 +235,7 @@ tc_unwind_personality(int version,
   auto const ism = ti != typeid(InvalidSetMException) ? nullptr :
     static_cast<InvalidSetMException*>(exn);
   __cxxabiv1::__cxa_begin_catch(ue);
-  if (tl_regState == VMRegState::DIRTY) sync_regstate(ip, context);
+  if (regState() == VMRegState::DIRTY) sync_regstate(ip, context);
   g_unwind_rds->exn = [&]() -> Either<ObjectData*, Exception*> {
     if (ti == typeid(Object)) return static_cast<Object*>(exn)->get();
     if (ti == typeid(req::root<Object>)) {
@@ -275,7 +275,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
 
     auto savedRip = reinterpret_cast<TCA>(fp->m_savedRip);
 
-    tl_regState = VMRegState::CLEAN;
+    regState() = VMRegState::CLEAN;
     if (!g_unwind_rds->exn.isNull() && !g_unwind_rds->isFirstFrame) {
       lockObjectWhileUnwinding(vmpc(), vmStack());
     }
@@ -301,7 +301,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
             if (!vmfp_ || vmfp_ == sfp) {
               g_unwind_rds->savedRip = savedRip;
               ITRACE(3, "vmsp() is {}\n", vmsp());
-              tl_regState = VMRegState::DIRTY;
+              regState() = VMRegState::DIRTY;
               auto const ret = g_unwind_rds->fswh
                 ? tc::ustubs().unwinderAsyncRet
                 : tc::ustubs().unwinderAsyncNullRet;
@@ -313,7 +313,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
             // we have a FSWH on our hand
             ITRACE(2, "Got FSWH but vmfp: {}, sfp: {}\n", vmfp_, sfp);
           }
-          tl_regState = VMRegState::DIRTY;
+          regState() = VMRegState::DIRTY;
           FTRACE(1, "Resuming from resumeHelper with fp {}\n", fp);
           return {tc::ustubs().resumeHelper, fp};
         }

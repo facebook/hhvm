@@ -222,7 +222,7 @@ TCA resume(SrcKey sk, TranslationResult transResult) noexcept {
     Trace::ringbufferEntry(Trace::RBTypeResumeTC, skData, (uint64_t)start);
   }
 
-  tl_regState = VMRegState::DIRTY;
+  regState() = VMRegState::DIRTY;
   return start;
 }
 
@@ -233,7 +233,7 @@ TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept {
 
   // This is a lie, only vmfp() is synced. We will sync vmsp() below and vmpc()
   // later if we are going to use the resume helper.
-  tl_regState = VMRegState::CLEAN;
+  regState() = VMRegState::CLEAN;
   vmsp() = Stack::anyFrameStackBase(vmfp()) - spOff.offset;
 
   FTRACE(1, "handleTranslate {}\n", vmfp()->func()->fullName()->data());
@@ -247,7 +247,7 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
 
   // This is a lie, only vmfp() is synced. We will sync vmsp() below and vmpc()
   // later if we are going to use the resume helper.
-  tl_regState = VMRegState::CLEAN;
+  regState() = VMRegState::CLEAN;
   vmsp() = Stack::anyFrameStackBase(vmfp()) - spOff.offset;
 
   FTRACE(1, "handleRetranslate {}\n", vmfp()->func()->fullName()->data());
@@ -265,7 +265,7 @@ TCA handleRetranslateOpt(Offset bcOff, SBInvOffset spOff) noexcept {
 
   // This is a lie, only vmfp() is synced. We will sync vmsp() below and vmpc()
   // later if we are going to use the resume helper.
-  tl_regState = VMRegState::CLEAN;
+  regState() = VMRegState::CLEAN;
   vmsp() = Stack::anyFrameStackBase(vmfp()) - spOff.offset;
 
   FTRACE(1, "handleRetranslateOpt {}\n", vmfp()->func()->fullName()->data());
@@ -286,7 +286,7 @@ TCA handleRetranslateOpt(Offset bcOff, SBInvOffset spOff) noexcept {
 
 TCA handlePostInterpRet(uint32_t callOffAndFlags) noexcept {
   assert_native_stack_aligned();
-  tl_regState = VMRegState::CLEAN; // partially a lie: vmpc() isn't synced
+  regState() = VMRegState::CLEAN; // partially a lie: vmpc() isn't synced
 
   FTRACE(3, "handlePostInterpRet to {}\n", vmfp()->func()->fullName()->data());
 
@@ -358,7 +358,7 @@ TCA handleResume(ResumeFlags flags) {
 
   if (!vmRegsUnsafe().pc) return tc::ustubs().callToExit;
 
-  tl_regState = VMRegState::CLEAN;
+  regState() = VMRegState::CLEAN;
 
   auto sk = liveSK();
   FTRACE(2, "handleResume: sk: {}\n", showShort(sk));
@@ -414,7 +414,7 @@ TCA handleResume(ResumeFlags flags) {
     Trace::ringbufferEntry(Trace::RBTypeResumeTC, skData, (uint64_t)start);
   }
 
-  tl_regState = VMRegState::DIRTY;
+  regState() = VMRegState::DIRTY;
   return start;
 }
 

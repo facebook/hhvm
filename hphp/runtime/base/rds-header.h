@@ -26,6 +26,27 @@
 namespace HPHP {
 
 /*
+ * The current sync-state of the RDS vmRegs().
+ *
+ * CLEAN means that the RDS vmRegs are sync'd.  DIRTY means we need to sync
+ * them (by traversing the stack and looking up fixups)---this is what the
+ * value of regState() should be whenever we enter native code from translated
+ * PHP code.
+ *
+ * Values above GUARDED_THRESHOLD are a special case of dirty which indicates
+ * that the state will be reset to DIRTY (via a scope guard) when returning to
+ * PHP code, and the actual value can be used as a start point for following the
+ * c++ callchain back into the VM. This makes it suitable for guarding callbacks
+ * through code compiled without frame pointers, and in places where we may
+ * end up needing to clean the registers multiple times.
+ */
+enum VMRegState : uintptr_t {
+  CLEAN,
+  DIRTY,
+  GUARDED_THRESHOLD
+};
+
+/*
  * Do not access this struct directly from rds::header(). Use the accessors in
  * runtime/vm/vm-regs.h.
  */
@@ -116,6 +137,8 @@ struct Header {
 #endif
 
   VMRegs     vmRegs;
+  /* Register dirtiness. */
+  VMRegState regState;
   GenNumber  currentGen;
 };
 
@@ -138,6 +161,7 @@ constexpr ptrdiff_t kVmMInstrStateOff  = kVmRegsOff +
                                            offsetof(VMRegs, mInstrState);
 constexpr ptrdiff_t kVmJitReturnAddrOff = kVmRegsOff +
                                            offsetof(VMRegs, jitReturnAddr);
+constexpr ptrdiff_t kVmRegStateOff     = offsetof(Header, regState);
 
 static_assert((kVmMInstrStateOff % 16) == 0,
               "MInstrState should be 16-byte aligned in rds::Header");

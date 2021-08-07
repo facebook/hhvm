@@ -209,9 +209,9 @@ AsioBlockableChain::firstInContext(context_idx_t ctx_idx) {
 void AsioBlockableChain::UnblockJitHelper(ActRec* ar,
                                           TypedValue* sp,
                                           AsioBlockableChain chain) {
-  assertx(tl_regState == VMRegState::DIRTY);
-  tl_regState = VMRegState::CLEAN;
-  SCOPE_EXIT { tl_regState = VMRegState::DIRTY; };
+  assertx(regState() == VMRegState::DIRTY);
+  regState() = VMRegState::CLEAN;
+  SCOPE_EXIT { regState() = VMRegState::DIRTY; };
 
   auto prevAr = g_context->getOuterVMFrame(ar);
   const Func* prevF = prevAr->func();

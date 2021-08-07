@@ -222,7 +222,7 @@ void syncVMRegsWork(bool soft); // internal sync work for a dirty vm state
  * Sync VM registers for the first TC frame in the callstack.
  */
 inline void syncVMRegs(bool soft = false) {
-  if (tl_regState == VMRegState::CLEAN) return;
+  if (regState() == VMRegState::CLEAN) return;
   detail::syncVMRegsWork(soft);
 }
 

@@ -226,19 +226,19 @@ bool eagerRecord(const Func* func) {
 
 namespace detail {
 void syncVMRegsWork(bool soft) {
-  assertx(tl_regState != VMRegState::CLEAN);
+  assertx(regState() != VMRegState::CLEAN);
 
   // Start looking for fixup entries at the current (C++) frame.  This
   // will walk the frames upward until we find a TC frame.
   DECLARE_FRAME_POINTER(framePtr);
-  auto fp = tl_regState >= VMRegState::GUARDED_THRESHOLD ?
-    (ActRec*)tl_regState : framePtr;
+  auto fp = regState() >= VMRegState::GUARDED_THRESHOLD ?
+    (ActRec*)regState() : framePtr;
 
   // TODO(mcolavita): This is incorrect for C++ routines with padding after
   // their CFA.
   auto const synced = FixupMap::fixupWork(fp, soft);
 
-  if (synced) tl_regState = VMRegState::CLEAN;
+  if (synced) regState() = VMRegState::CLEAN;
   Stats::inc(Stats::TC_Sync);
 }
 }

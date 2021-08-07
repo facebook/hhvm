@@ -175,7 +175,7 @@ Result withVMRegsForCall(CallFlags callFlags, const Func* func,
   // The stub already synced the vmfp() and vmsp() registers, but the vmsp() is
   // pointing to the space reserved for the ActRec. Adjust it to point to the
   // top of the stack containing call inputs and set vmpc()/vmJitReturnAddr().
-  assertx(tl_regState == VMRegState::DIRTY);
+  assertx(regState() == VMRegState::DIRTY);
   auto& unsafeRegs = vmRegsUnsafe();
   auto const calleeFP = unsafeRegs.stack.top();
   auto const callerFP = unsafeRegs.fp;
@@ -184,13 +184,13 @@ Result withVMRegsForCall(CallFlags callFlags, const Func* func,
     numArgs + (hasUnpack ? 1 : 0) + (callFlags.hasGenerics() ? 1 : 0));
   unsafeRegs.pc = callerFP->func()->at(callFlags.callOffset());
   unsafeRegs.jitReturnAddr = savedRip;
-  tl_regState = VMRegState::CLEAN;
+  regState() = VMRegState::CLEAN;
 
   try {
     auto const result = handler(unsafeRegs.stack, calleeFP);
     // If we did not throw, we are going to reenter TC, so set the registers
     // as dirty.
-    tl_regState = VMRegState::DIRTY;
+    regState() = VMRegState::DIRTY;
     return result;
   } catch (...) {
     // Manually unwind the stack to the point expected by the Call opcode as
@@ -1038,9 +1038,9 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   CGMeta meta;
 
   us.resumeCPPUnwind = vwrap(cb, data, meta, [&] (Vout& v) {
-    static_assert(sizeof(tl_regState) == 8,
-                  "The following store must match the size of tl_regState.");
-    auto const regstate = emitTLSAddr(v, tls_datum(tl_regState));
+    static_assert(sizeof(regState()) == 8,
+                  "The following store must match the size of regState().");
+    auto const regstate = rvmtl()[rds::kVmRegStateOff];
     v << storeqi{static_cast<int32_t>(VMRegState::CLEAN), regstate};
     // We were about to return to callToExit, so drop the return
     // address, then do what enterTCExit would have done.

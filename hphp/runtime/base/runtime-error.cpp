@@ -42,7 +42,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Careful in these functions: they can be called when tl_regState is
+ * Careful in these functions: they can be called when regState() is
  * DIRTY.  ExecutionContext::handleError is dirty-reg safe, but
  * evaluate other functions that you might need here.
  */

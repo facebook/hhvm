@@ -1174,7 +1174,7 @@ SrcKey getSrcKey() {
   if (!rds::header()) return SrcKey();
 
   VMRegAnchor _(VMRegAnchor::Soft);
-  if (tl_regState != VMRegState::CLEAN || vmfp() == nullptr) {
+  if (regState() != VMRegState::CLEAN || vmfp() == nullptr) {
     return SrcKey();
   }
   return fromLeaf([&](const ActRec* ar, Offset offset) {

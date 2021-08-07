@@ -38,6 +38,7 @@ void protect() {
     if (!s_fakeRdsBase.load(std::memory_order_relaxed)) {
       rds::tl_base = nullptr;
       rds::threadInit(false /* shouldRegister */);
+      regState() = VMRegState::DIRTY;
 
       // The current thread may attempt to read the Gen numbers of the normal
       // portion of rds. These will all be invalid. No writes to non-persistent
@@ -56,14 +57,12 @@ void protect() {
   }
   rds::tl_base = s_fakeRdsBase.load(std::memory_order_acquire);
 
-  tl_regState = VMRegState::DIRTY;
   VMProtect::is_protected = true;
 }
 
-void unprotect(void* base, VMRegState state) {
+void unprotect(void* base) {
   assertx(rds::tl_base == s_fakeRdsBase.load(std::memory_order_relaxed));
   rds::tl_base = base;
-  tl_regState = state;
   VMProtect::is_protected = false;
 }
 
@@ -73,7 +72,6 @@ __thread bool VMProtect::is_protected{false};
 
 VMProtect::VMProtect()
   : m_oldBase(rds::tl_base)
-  , m_oldState(tl_regState)
 {
   if (is_protected) return;
 
@@ -85,7 +83,7 @@ VMProtect::VMProtect()
 VMProtect::~VMProtect() {
   if (tl_active_prot != this) return;
 
-  unprotect(m_oldBase, m_oldState);
+  unprotect(m_oldBase);
   tl_active_prot = nullptr;
 }
 
@@ -95,7 +93,7 @@ VMProtect::Pause::Pause() {
     return;
   }
   if (auto const prot = tl_active_prot) {
-    unprotect(prot->m_oldBase, prot->m_oldState);
+    unprotect(prot->m_oldBase);
   }
 }
 

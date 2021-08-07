@@ -59,7 +59,7 @@ void handleStackOverflow(ActRec* calleeAR) {
   unsafeRegs.stack.top() =
     reinterpret_cast<TypedValue*>(calleeAR) - calleeAR->func()->numSlotsInFrame();
   unsafeRegs.jitReturnAddr = nullptr;
-  tl_regState = VMRegState::CLEAN;
+  regState() = VMRegState::CLEAN;
 
   throw_stack_overflow();
 }

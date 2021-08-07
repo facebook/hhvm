@@ -677,21 +677,21 @@ SSATmp* opt_foldable(IRGS& env,
     }
   }
 
+  VMProtect::Pause deprot;
+  always_assert(regState() == VMRegState::CLEAN);
+
+  // Even though regState() is marked clean, vmpc() has not necessarily been
+  // set to anything valid, so we need to do so here (for assertions and
+  // backtraces in the invocation, among other things).
+  auto const savedPC = vmpc();
+  vmpc() = vmfp() ? vmfp()->func()->entry() : nullptr;
+  SCOPE_EXIT{ vmpc() = savedPC; };
+
   try {
     // We don't know if notices would be enabled or not when this function
     // would normally get called, so be safe and don't optimize any calls that
     // COULD generate notices.
     ThrowAllErrorsSetter taes;
-
-    VMProtect::Pause deprot;
-    always_assert(tl_regState == VMRegState::CLEAN);
-
-    // Even though tl_regState is marked clean, vmpc() has not necessarily been
-    // set to anything valid, so we need to do so here (for assertions and
-    // backtraces in the invocation, among other things).
-    auto const savedPC = vmpc();
-    vmpc() = vmfp() ? vmfp()->func()->entry() : nullptr;
-    SCOPE_EXIT{ vmpc() = savedPC; };
 
     assertx(!RID().getJitFolding());
     RID().setJitFolding(true);

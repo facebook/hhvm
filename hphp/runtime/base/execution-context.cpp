@@ -1725,8 +1725,8 @@ static void prepareAsyncFuncEntry(ActRec* enterFnAr,
 void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
                                        ObjectData* freeObj,
                                        const TypedValue awaitResult) {
-  assertx(tl_regState == VMRegState::CLEAN);
-  SCOPE_EXIT { assertx(tl_regState == VMRegState::CLEAN); };
+  assertx(regState() == VMRegState::CLEAN);
+  SCOPE_EXIT { assertx(regState() == VMRegState::CLEAN); };
 
   auto fp = resumable->actRec();
 
@@ -1771,8 +1771,8 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
                                             ObjectData* exception) {
   assertx(exception);
   assertx(exception->instanceof(SystemLib::s_ThrowableClass));
-  assertx(tl_regState == VMRegState::CLEAN);
-  SCOPE_EXIT { assertx(tl_regState == VMRegState::CLEAN); };
+  assertx(regState() == VMRegState::CLEAN);
+  SCOPE_EXIT { assertx(regState() == VMRegState::CLEAN); };
 
   auto fp = resumable->actRec();
 

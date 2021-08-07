@@ -5697,7 +5697,7 @@ OPCODES
    * is actually still correct, and we don't have information in the
    * fixup map for interpOne calls anyway.
    */ \
-  tl_regState = VMRegState::DIRTY;                                      \
+  regState() = VMRegState::DIRTY;                                       \
   return retAddr;                                                       \
 }
 OPCODES

@@ -19,16 +19,14 @@
 #include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/fixup.h"
+#include "hphp/runtime/vm/jit/vm-protect.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Register dirtiness: thread-private.
-__thread VMRegState tl_regState = VMRegState::CLEAN;
-
 VMRegAnchor::VMRegAnchor(Mode mode)
-  : m_old(tl_regState)
+  : m_old(regState())
 {
   assert_native_stack_aligned();
   jit::syncVMRegs(mode == Soft);

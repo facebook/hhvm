@@ -958,6 +958,7 @@ void threadInit(bool shouldRegister) {
   }
 
   header()->currentGen = 1;
+  header()->regState = VMRegState::CLEAN;
   if (shouldRegister) {
     local::init();
     s_hasFullInit.store(true, std::memory_order_release);

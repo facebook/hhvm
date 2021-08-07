@@ -45,11 +45,11 @@ ALWAYS_INLINE void preEnter(TCA start) {
     Trace::ringbufferEntry(Trace::RBTypeEnterTC, skData, (uint64_t)start);
   }
 
-  tl_regState = VMRegState::DIRTY;
+  regState() = VMRegState::DIRTY;
 }
 
 ALWAYS_INLINE void postExit() {
-  tl_regState = VMRegState::CLEAN;
+  regState() = VMRegState::CLEAN;
   assertx(isValidVMStackAddress(vmsp()));
 
   vmfp() = nullptr;

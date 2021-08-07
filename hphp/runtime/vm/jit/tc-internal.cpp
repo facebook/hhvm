@@ -314,7 +314,7 @@ void assertOwnsCodeLock(OptView v) {
 void assertOwnsMetadataLock() { s_metadataLock.assertOwnedBySelf(); }
 
 void requestInit() {
-  tl_regState = VMRegState::CLEAN;
+  regState() = VMRegState::CLEAN;
   Timer::RequestInit();
   memset(rl_perf_counters.getCheck(), 0, sizeof(PerfCounters));
   Stats::init();

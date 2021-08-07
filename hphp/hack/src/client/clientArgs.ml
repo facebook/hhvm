@@ -1020,6 +1020,7 @@ let parse_rage_args () =
     | None ->
       Printf.printf
         ("Sorry that hh isn't working. What's wrong?\n"
+        ^^ "0. There's something wrong relating to VSCode or IDE\n"
         ^^ "1. hh_server takes ages to initialize\n"
         ^^ "2. hh is stuck in an infinite loop\n"
         ^^ "3. hh gives some error message about the monitor\n"
@@ -1032,7 +1033,13 @@ let parse_rage_args () =
         ^^ "\nrage> %!");
       let response = In_channel.input_line_exn In_channel.stdin in
       let (response, info) =
-        if String.equal response "1" then
+        if String.equal response "0" then
+          let () =
+            Printf.printf
+              "Please use the VSCode bug nub (at the right of the status bar) instead of hh rage.\n"
+          in
+          exit 0
+        else if String.equal response "1" then
           ("hh_server slow initialize", `Verbose_hh_start)
         else if String.equal response "2" then
           ("hh stuck in infinite loop", `Verbose_hh_start)
@@ -1052,7 +1059,7 @@ let parse_rage_args () =
             Printf.printf
               ("Please ask in the appropriate support groups for advice on coding in Hack; "
               ^^ "`hh rage` is solely for reporting bugs in the tooling, not for reporting typechecker or "
-              ^^ "language issues.")
+              ^^ "language issues.\n")
           in
           exit 0
         else if String.equal response "7" then
@@ -1062,7 +1069,7 @@ let parse_rage_args () =
             Printf.printf
               ("Please file the bug from within your editor to capture the right logs. "
               ^^ "Note: you can do Preferences > Settings > Hack > Verbose, then `pkill hh_client`, "
-              ^^ "then reproduce the error, then file the bug. This way we'll get even richer logs.\n%!"
+              ^^ "then reproduce the error, then file the bug. This way we'll get even richer logs.\n"
               )
           in
           exit 0

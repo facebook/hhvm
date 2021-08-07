@@ -1,52 +1,36 @@
 --------------------------------
 NULL
-
-Notice: Comparing int and null using equality in %s/complex_int.php on line %s
-0
+default
 --------------------------------
 bool(true)
-
-Notice: Comparing bool and int using equality in %s/complex_int.php on line %s
--1
+default
 --------------------------------
 bool(false)
-
-Notice: Comparing bool and int using equality in %s/complex_int.php on line %s
-0
+default
 --------------------------------
 int(5)
 5
 --------------------------------
 float(2)
-
-Notice: Comparing float and int using equality in %s/complex_int.php on line %s
-2 or 4: 2
+default
 --------------------------------
 float(2.2)
 default
 --------------------------------
 string(1) "2"
-
-Notice: Comparing int and string using equality in %s/complex_int.php on line %s
-2 or 4: 2
+default
 --------------------------------
 string(3) "2.0"
-
-Notice: Comparing int and string using equality in %s/complex_int.php on line %s
-2 or 4: 2.0
+default
 --------------------------------
 string(3) "2.2"
 default
 --------------------------------
 string(4) "blar"
-
-Notice: Comparing int and string using equality in %s/complex_int.php on line %s
-0
+default
 --------------------------------
 string(0) ""
-
-Notice: Comparing int and string using equality in %s/complex_int.php on line %s
-0
+default
 --------------------------------
 int(4)
 2 or 4: 4
@@ -63,13 +47,11 @@ default
 --------------------------------
 object(stdClass) (0) {
 }
-Object of class stdClass could not be converted to int
+default
 --------------------------------
 object(C) (0) {
 }
-Object of class C could not be converted to int
+default
 --------------------------------
 resource(4) of type (stream)
-
-Notice: Comparing File and int using equality in %s/complex_int.php on line %s
-2 or 4: Resource id #4
+default

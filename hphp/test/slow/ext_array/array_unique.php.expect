@@ -28,19 +28,23 @@ dict(2) {
   [0]=>
   string(1) "1"
 }
-dict(3) {
+dict(4) {
   ["a"]=>
   string(1) "A"
   ["b"]=>
   string(1) "C"
   [0]=>
   string(1) "1"
+  [2]=>
+  string(2) "01"
 }
-dict(3) {
+dict(4) {
   ["a"]=>
   string(1) "A"
   ["b"]=>
   string(1) "C"
   [0]=>
   string(1) "1"
+  [2]=>
+  string(2) "01"
 }

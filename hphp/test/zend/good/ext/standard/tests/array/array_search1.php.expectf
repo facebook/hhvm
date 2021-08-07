@@ -1,14 +1,13 @@
-
 Warning: array_search() expects at least 2 parameters, 1 given in %s/array_search1.php on line 5
 
 Warning: array_search() expects parameter 2 to be an array or collection in %s/array_search1.php on line 6
 NULL
-int(1)
 bool(false)
-int(1)
+bool(false)
+bool(false)
 int(1)
 int(2)
 string(1) "c"
-int(1)
+string(1) "c"
 bool(false)
 Done

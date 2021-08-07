@@ -6,134 +6,88 @@ goes to:
 false
 NULL
 goes to:
-
-Notice: Comparing bool and null using equality in %s/misc_typed_cases.php on line 45
-false
+null
 string(3) "str"
 goes to:
-
-Notice: Comparing bool and string using equality in %s/misc_typed_cases.php on line 42
-true
+str
 int(1234)
 goes to:
-
-Notice: Comparing bool and int using equality in %s/misc_typed_cases.php on line 42
-true
+default
 float(1234.5)
 goes to:
-
-Notice: Comparing bool and float using equality in %s/misc_typed_cases.php on line 42
-true
+default
 string(4) "1234"
 goes to:
-
-Notice: Comparing bool and string using equality in %s/misc_typed_cases.php on line 42
-true
+'1234'
 string(6) "1234.5"
 goes to:
-
-Notice: Comparing bool and string using equality in %s/misc_typed_cases.php on line 42
-true
+'1234.5'
 int(42)
 goes to:
-
-Notice: Comparing bool and int using equality in %s/misc_typed_cases.php on line 42
-true
+42
 float(42.5)
 goes to:
-
-Notice: Comparing bool and float using equality in %s/misc_typed_cases.php on line 42
-true
+42.5
 string(2) "42"
 goes to:
-
-Notice: Comparing bool and string using equality in %s/misc_typed_cases.php on line 42
-true
+default
 string(4) "42.5"
 goes to:
-
-Notice: Comparing bool and string using equality in %s/misc_typed_cases.php on line 42
-true
+default
 string(0) ""
 goes to:
-
-Notice: Comparing bool and string using equality in %s/misc_typed_cases.php on line 45
-false
+default
 object(Derp) (0) {
 }
 goes to:
-
-Notice: Comparing Derp and bool using equality in %s/misc_typed_cases.php on line 42
-true
+derp
 object(Herp) (1) {
   ["x"]=>
   string(1) "1"
 }
 goes to:
-
-Notice: Comparing Herp and bool using equality in %s/misc_typed_cases.php on line 42
-true
+default
 object(Herp) (1) {
   ["x"]=>
   int(1)
 }
 goes to:
-
-Notice: Comparing Herp and bool using equality in %s/misc_typed_cases.php on line 42
-true
+Herp(1)
 object(stdClass) (0) {
 }
 goes to:
-
-Notice: Comparing bool and stdClass using equality in %s/misc_typed_cases.php on line 42
-true
+default
 int(1)
 goes to:
-
-Notice: Comparing bool and int using equality in %s/misc_typed_cases.php on line 42
-true
+default
 int(0)
 goes to:
-
-Notice: Comparing bool and int using equality in %s/misc_typed_cases.php on line 45
-false
+default
 string(1) "0"
 goes to:
-
-Notice: Comparing bool and string using equality in %s/misc_typed_cases.php on line 45
-false
+default
 resource(1) of type (stream)
 goes to:
-
-Notice: Comparing File and bool using equality in %s/misc_typed_cases.php on line 42
-true
+stdin
 vec(1) {
   int(1)
 }
 goes to:
-
-Notice: Comparing HH\vec and bool using equality in %s/misc_typed_cases.php on line 42
-true
+vec[1]
 vec(1) {
   string(1) "1"
 }
 goes to:
-
-Notice: Comparing HH\vec and bool using equality in %s/misc_typed_cases.php on line 42
-true
+default
 object(HH\Vector) (1) {
   [0]=>
   int(1)
 }
 goes to:
-
-Notice: Comparing HH\Vector and bool using equality in %s/misc_typed_cases.php on line 42
-true
+Vector{1}
 object(HH\Vector) (1) {
   [0]=>
   string(1) "1"
 }
 goes to:
-
-Notice: Comparing HH\Vector and bool using equality in %s/misc_typed_cases.php on line 42
-true
+default

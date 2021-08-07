@@ -4,8 +4,8 @@ string(3) "irx"
 bool(false)
 bool(false)
 === strict ===
-bool(true)
-int(124)
+bool(false)
+bool(false)
 bool(false)
 bool(false)
 bool(true)

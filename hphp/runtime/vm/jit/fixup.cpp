@@ -226,8 +226,6 @@ bool eagerRecord(const Func* func) {
 
 namespace detail {
 void syncVMRegsWork(bool soft) {
-  assertx(regState() != VMRegState::CLEAN);
-
   // Start looking for fixup entries at the current (C++) frame.  This
   // will walk the frames upward until we find a TC frame.
   DECLARE_FRAME_POINTER(framePtr);

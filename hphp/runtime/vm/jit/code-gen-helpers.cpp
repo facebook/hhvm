@@ -531,10 +531,16 @@ Vreg emitIsCollection(Vout& v, Vreg obj) {
 
 static std::atomic<int32_t> s_nextFakeAddress{-1};
 
+void emitSetVMRegState(Vout& v, VMRegState state) {
+  auto const regstate = rvmtl()[rds::kVmRegStateOff];
+  v << storeqi{static_cast<int32_t>(state), regstate};
+}
+
 void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
   v << store{vmfp, rds[rds::kVmfpOff]};
   v << store{vmsp, rds[rds::kVmspOff]};
   emitImmStoreq(v, intptr_t(pc), rds[rds::kVmpcOff]);
+  emitSetVMRegState(v, eagerlyCleanState());
 
   auto const addr = s_nextFakeAddress.fetch_sub(1, std::memory_order_relaxed);
   v << storeqi{addr, rds[rds::kVmJitReturnAddrOff]};

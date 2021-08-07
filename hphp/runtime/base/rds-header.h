@@ -31,7 +31,10 @@ namespace HPHP {
  * CLEAN means that the RDS vmRegs are sync'd.  DIRTY means we need to sync
  * them (by traversing the stack and looking up fixups)---this is what the
  * value of regState() should be whenever we enter native code from translated
- * PHP code.
+ * PHP code, unless we have eagerly synced. CLEAN_VERIFY is a state used only
+ * in debug mode to ensure that eagerly synced vmRegs match their lazily synced
+ * versions. In this mode, when a VMRegAnchor is dropped, it ensures that the
+ * current vmRegs match the value from unwinding.
  *
  * Values above GUARDED_THRESHOLD are a special case of dirty which indicates
  * that the state will be reset to DIRTY (via a scope guard) when returning to
@@ -42,6 +45,9 @@ namespace HPHP {
  */
 enum VMRegState : uintptr_t {
   CLEAN,
+#ifndef NDEBUG
+  CLEAN_VERIFY,
+#endif
   DIRTY,
   GUARDED_THRESHOLD
 };

@@ -223,6 +223,20 @@ void syncVMRegsWork(bool soft); // internal sync work for a dirty vm state
  */
 inline void syncVMRegs(bool soft = false) {
   if (regState() == VMRegState::CLEAN) return;
+#ifndef NDEBUG
+  if (regState() == VMRegState::CLEAN_VERIFY) {
+    auto& regs = vmRegsUnsafe();
+    DEBUG_ONLY auto const fp = regs.fp;
+    DEBUG_ONLY auto const sp = regs.stack.top();
+    DEBUG_ONLY auto const pc = regs.pc;
+    detail::syncVMRegsWork(soft);
+    assertx(regs.fp == fp);
+    assertx(regs.stack.top() == sp);
+    assertx(regs.pc == pc);
+    regState() = VMRegState::CLEAN;
+    return;
+  }
+#endif
   detail::syncVMRegsWork(soft);
 }
 

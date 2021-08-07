@@ -47,6 +47,14 @@
 
 namespace HPHP {
 
+inline VMRegState eagerlyCleanState() {
+#ifdef NDEBUG
+  return CLEAN;
+#else
+  return CLEAN_VERIFY;
+#endif
+}
+
 inline VMRegState& regState() {
   return rds::header()->regState;
 }
@@ -161,36 +169,6 @@ struct VMRegAnchor {
 
   VMRegAnchor(const VMRegAnchor&) = delete;
   VMRegAnchor& operator=(const VMRegAnchor&) = delete;
-
-  VMRegState m_old;
-};
-
-/*
- * This class is used as an invocation guard equivalent to VMRegAnchor, except
- * the sync is assumed to have already been done. This was part of a
- * project aimed at improving performance by doing the fixup in advance, i.e.
- * eagerly -- the benefits turned out to be marginal or negative in most cases.
- */
-struct EagerVMRegAnchor {
-  EagerVMRegAnchor() {
-    if (debug) {
-      auto& regs = vmRegsUnsafe();
-      DEBUG_ONLY auto const fp = regs.fp;
-      DEBUG_ONLY auto const sp = regs.stack.top();
-      DEBUG_ONLY auto const pc = regs.pc;
-      VMRegAnchor _;
-      assertx(regs.fp == fp);
-      assertx(regs.stack.top() == sp);
-      assertx(regs.pc == pc);
-    }
-    assertx(regState() < VMRegState::GUARDED_THRESHOLD);
-    m_old = regState();
-    regState() = VMRegState::CLEAN;
-  }
-
-  ~EagerVMRegAnchor() {
-    regState() = m_old;
-  }
 
   VMRegState m_old;
 };

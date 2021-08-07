@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/hhbc.h"
 
@@ -262,6 +263,11 @@ Vreg emitIsCollection(Vout& v, Vreg obj);
  * Eagerly sync the vm regs to RDS.
  */
 void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp);
+
+/*
+ * Set the VM register state.
+ */
+void emitSetVMRegState(Vout& v, VMRegState state);
 
 /*
  * Write `msg' of type `t' to the global ring buffer.

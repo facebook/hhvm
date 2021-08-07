@@ -218,7 +218,8 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
            t == KindOfObject || t == KindOfResource;
   };
 
-  if (FixupMap::eagerRecord(callee)) {
+  auto const eagerFixup = FixupMap::eagerRecord(callee);
+  if (eagerFixup) {
     auto const sp = srcLoc(env, inst, 1).reg();
     auto const spOffset = cellsToBytes(extra->spOffset.offset);
     auto const& marker = inst->marker();
@@ -334,6 +335,9 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     v << copy{tmpData, dstData};
     if (dstType.isValid()) v << copy{tmpType, dstType};
     if (isInlined) v << inlineend{};
+    if (eagerFixup) {
+      emitSetVMRegState(v, VMRegState::DIRTY);
+    }
   };
 
   cgCallHelper(v, env, CallSpec::direct(callee->nativeFuncPtr(), nullptr),
@@ -391,7 +395,8 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
 
   auto const func = inst->marker().func();
 
-  if (FixupMap::eagerRecord(func)) {
+  auto const eagerFixup = FixupMap::eagerRecord(func);
+  if (eagerFixup) {
     emitEagerSyncPoint(v, func->entry(), rvmtl(), fp, sp);
   }
   v << vinvoke{
@@ -402,6 +407,9 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
      label(env, inst->taken())},
     makeFixup(inst->marker(), SyncOptions::Sync)
   };
+  if (eagerFixup) {
+    emitSetVMRegState(v, VMRegState::DIRTY);
+  }
 }
 
 static void traceCallback(ActRec* fp, TypedValue* sp, Offset bcOff) {

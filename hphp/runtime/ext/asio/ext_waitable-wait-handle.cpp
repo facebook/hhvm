@@ -37,7 +37,7 @@ namespace HPHP {
 
 // throws on context depth level overflows and cross-context cycles
 void c_WaitableWaitHandle::join() {
-  EagerVMRegAnchor _;
+  VMRegAnchor _;
   auto const savedFP = vmfp();
 
   assertx(!isFinished());

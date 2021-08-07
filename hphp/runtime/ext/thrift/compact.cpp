@@ -1214,7 +1214,7 @@ Variant HHVM_FUNCTION(thrift_protocol_read_compact,
                       const Object& transportobj,
                       const String& obj_typename,
                       int options) {
-  EagerVMRegAnchor _;
+  VMRegAnchor _;
   CompactReader reader(transportobj, options);
   return reader.read(obj_typename);
 }
@@ -1223,7 +1223,7 @@ Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      const Object& transportobj,
                      const String& obj_typename,
                      int options) {
-  EagerVMRegAnchor _;
+  VMRegAnchor _;
   CompactReader reader(transportobj, options);
   return reader.readStruct(obj_typename);
 }

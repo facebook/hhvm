@@ -1113,7 +1113,7 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-char const *conv_notice_level_names[] = { "None", "Log", "Throw", "Change" };
+char const *conv_notice_level_names[] = { "None", "Log", "Throw" };
 
 const char* convOpToName(ConvNoticeLevel level) {
   return conv_notice_level_names[
@@ -1121,71 +1121,20 @@ const char* convOpToName(ConvNoticeLevel level) {
   ];
 }
 
-namespace {
-void handleConvNoticeLevelImpl(ConvNoticeLevel level, const std::string& str);
-}
-
 void handleConvNoticeLevel(
   ConvNoticeLevel level,
   const char* const from,
   const char* const to,
   const StringData* reason) {
-   if (LIKELY(level == ConvNoticeLevel::None)) return;
+  if (level == ConvNoticeLevel::None) return;
   assertx(reason != nullptr);
-  handleConvNoticeLevelImpl(
-    level,
-    folly::sformat("Implicit {} to {} conversion for {}", from, to, reason));
-}
-
-namespace {
-void handleConvNoticeForCmpOrEq(
-  int runtime_option,
-  const char* const format,
-  const char* lhs,
-  const char* rhs);
-}
-
-void handleConvNoticeForCmp(TypedValue lhs, TypedValue rhs) {
-  handleConvNoticeForCmp(
-    describe_actual_type(&lhs).c_str(), describe_actual_type(&rhs).c_str());
-}
-void handleConvNoticeForCmp(const char* lhs, const char* rhs) {
-  handleConvNoticeForCmpOrEq(
-    RuntimeOption::EvalNoticeOnCoerceForCmp, lhs, rhs, "a relational operator");
-}
-
-void handleConvNoticeForEq(TypedValue lhs, TypedValue rhs) {
-  handleConvNoticeForEq(
-    describe_actual_type(&lhs).c_str(), describe_actual_type(&rhs).c_str());
-}
-void handleConvNoticeForEq(const char* lhs, const char* rhs) {
-  handleConvNoticeForCmpOrEq(
-    RuntimeOption::EvalNoticeOnCoerceForEq, lhs, rhs, "equality");
-}
-
-namespace {
-
-void handleConvNoticeForCmpOrEq(
-  int runtime_option,
-  const char* lhs,
-  const char* rhs,
-  const char* const with) {
-  const auto level = flagToConvNoticeLevel(runtime_option);
-  if (LIKELY(level == ConvNoticeLevel::None)) return;
-  if (strcmp(lhs, rhs) > 0) std::swap(lhs, rhs);
-  handleConvNoticeLevelImpl(
-    level, folly::sformat("Comparing {} and {} using {}", lhs, rhs, with));
-}
-
-void handleConvNoticeLevelImpl(ConvNoticeLevel level, const std::string& str) {
-    if (level == ConvNoticeLevel::Throw) {
+  const auto str =
+    folly::sformat("Implicit {} to {} conversion for {}", from, to, reason);
+  if (level == ConvNoticeLevel::Throw) {
     SystemLib::throwInvalidOperationExceptionObject(str);
   } else if (level == ConvNoticeLevel::Log) {
     raise_notice(str);
   }
-  // we should never be getting here if conv level is change
-  always_assert(level != ConvNoticeLevel::Change);
-}
 }
 
 const StaticString s_ConvNoticeReasonConcat("string concatenation/interpolation");

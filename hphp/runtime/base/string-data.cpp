@@ -784,18 +784,10 @@ DataType StringData::toNumeric(int64_t &lval, double &dval) const {
 bool StringData::equal(const StringData *s) const {
   assertx(s);
   if (s == this) return true;
-  int ret;
-
-  if (!(m_hash < 0 || s->m_hash < 0 || useStrictEquality())) {
-    ret = numericCompare(s, true);
-    if (ret >= -1) {
-      return ret == 0;
-    }
-  }
   return same(s);
 }
 
-int StringData::numericCompare(const StringData *v2, bool eq) const {
+int StringData::numericCompare(const StringData *v2) const {
   assertx(v2);
 
   int oflow1, oflow2;
@@ -838,10 +830,7 @@ int StringData::numericCompare(const StringData *v2, bool eq) const {
   }
 
   if (dval1 > dval2) return 1;
-  if (dval1 == dval2) {
-    if (eq) handleConvNoticeForEq("int", "float");
-    return 0;
-  }
+  if (dval1 == dval2) return 0;
   return -1;
 }
 
@@ -850,7 +839,7 @@ int StringData::compare(const StringData *v2) const {
 
   if (v2 == this) return 0;
 
-  int ret = numericCompare(v2, false);
+  int ret = numericCompare(v2);
   if (ret < -1) {
     int len1 = size();
     int len2 = v2->size();

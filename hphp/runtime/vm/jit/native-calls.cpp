@@ -380,14 +380,6 @@ static CallMap s_callMap {
     {LdGblAddrDef,       ldGblAddrDefHelper, DSSA, SSync,
                            {{SSA, 0}}},
 
-    /* Switch helpers */
-    {LdSwitchDblIndex,   switchDoubleHelper, DSSA, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
-    {LdSwitchStrIndex,   switchStringHelper, DSSA, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
-    {LdSwitchObjIndex,   switchObjHelper, DSSA, SSync,
-                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
-
     /* Generator support helpers */
     {CreateGen,          &Generator::Create, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},

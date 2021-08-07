@@ -200,11 +200,6 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
       // Only consumes the reference to its input array
       return move == Consume && srcNo == 0;
 
-    case LdSwitchStrIndex:
-    case LdSwitchObjIndex:
-      // consumes the switch input
-      return move == Consume && srcNo == 0;
-
     case CreateAFWH:
       return srcNo == 4;
 

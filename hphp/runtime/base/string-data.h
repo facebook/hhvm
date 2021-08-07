@@ -511,7 +511,7 @@ private:
   ~StringData() = delete;
 
 private:
-  int numericCompare(const StringData *v2, bool eq) const;
+  int numericCompare(const StringData *v2) const;
   void incrementHelper();
   void preCompute();
 

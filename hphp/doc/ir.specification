@@ -623,10 +623,6 @@ To string conversions:
   Perform comparison of resources using PHP semantics. Resource comparisons
   never re-enter or throw.
 
-| RaiseBadComparisonViolation, ND, S(Cell) S(Cell),                       NF
-
-  Raise a notice or throw an exception for comparing different types.
-
 | EqCls,                       D(Bool), S(Cls) S(Cls),                    NF
 
   Checks if two Class values are equal.
@@ -2286,23 +2282,11 @@ To string conversions:
   satisfied) or to the native code for the given target address (once the
   service request is satisfied).
 
-| LdSwitchDblIndex, D(Int), S(Dbl) S(Int) S(Int), NF
+| LdSSwitchDest<numCases, cases, defaultOffset, bcSPOff>, D(TCA), S(Str), NF
 
-| LdSwitchStrIndex, D(Int), S(Str) S(Int) S(Int), CRc
-
-| LdSwitchObjIndex, D(Int), S(Obj) S(Int) S(Int), CRc
-
-  These instructions are used to determine the target of a switch statement
-  with target range [S1:S1 + S2), when invoked with the value S0. They call
-  helper functions to check whether S0 is an numeric integer in the range
-  [S1:S1 + S2), and if so return the value S1 - (Int)S0. Else, they return the
-  target of the default target, S2 + 1.
-
-| LdSSwitchDestFast, D(TCA), S(Cell), NF
-
-| LdSSwitchDestSlow, D(TCA), S(Cell), NF
-
-  Load string switch destinations (two different compilation strategies).
+  Using the cases in the extra data, create a hash table for destination lookup.
+  Then, lookup the destination for the switched value in the table and yield the
+  default if not present.
 
 | InterpOne<T,spOff,bcOff,numPopped,numPushed>, ND,
 |                                               S(StkPtr) S(FramePtr),

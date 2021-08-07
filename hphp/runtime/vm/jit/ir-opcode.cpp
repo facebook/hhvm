@@ -271,10 +271,6 @@ bool opcodeMayRaise(Opcode opc) {
     return RuntimeOption::EvalIsExprEnableUnresolvedWarning ||
            RuntimeOption::EvalIsVecNotices;
 
-  case EqStr:
-  case NeqStr:
-    return (bool)RuntimeOption::EvalNoticeOnCoerceForEq;
-
   case AddNewElemKeyset:
   case AFWHPrepareChild:
   case AKExistsObj:
@@ -378,8 +374,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdRecDescCached:
   case LdObjMethodD:
   case LdObjMethodS:
-  case LdSSwitchDestSlow:
-  case LdSwitchObjIndex:
   case LookupClsCns:
   case LookupClsCtxCns:
   case LookupClsMethod:
@@ -413,7 +407,6 @@ bool opcodeMayRaise(Opcode opc) {
   case PropQ:
   case PropTypeRedefineCheck:
   case PropX:
-  case RaiseBadComparisonViolation:
   case RaiseCoeffectsCallViolation:
   case RaiseCoeffectsFunParamCoeffectRulesViolation:
   case RaiseCoeffectsFunParamTypeViolation:
@@ -640,6 +633,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EqPtrIter:
   case EqRecDesc:
   case EqRes:
+  case EqStr:
   case EqStrPtr:
   case ExtendsClass:
   case FinishMemberOp:
@@ -777,14 +771,12 @@ bool opcodeMayRaise(Opcode opc) {
   case LdRetVal:
   case LdSmashable:
   case LdSmashableFunc:
-  case LdSSwitchDestFast:
+  case LdSSwitchDest:
   case LdStk:
   case LdStkAddr:
   case LdStrLen:
   case LdSubClsCns:
   case LdSubClsCnsClsName:
-  case LdSwitchDblIndex:
-  case LdSwitchStrIndex:
   case LdTVAux:
   case LdTypeCns:
   case LdUnitPerRequestFilepath:
@@ -847,6 +839,7 @@ bool opcodeMayRaise(Opcode opc) {
   case NeqDbl:
   case NeqInt:
   case NeqRes:
+  case NeqStr:
   case NewClsMeth:
   case NewRClsMeth:
   case NewCol:

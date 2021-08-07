@@ -22,7 +22,7 @@ namespace HPHP {
 
 struct StringData;
 
-enum class ConvNoticeLevel: uint8_t { None, Log, Throw, Change };
+enum class ConvNoticeLevel: uint8_t { None, Log, Throw,};
 
 const char* convOpToName(ConvNoticeLevel level);
 
@@ -38,21 +38,11 @@ void handleConvNoticeLevel(
    const char* const to,
    const StringData* reason);
 
-void handleConvNoticeForCmp(TypedValue lhs, TypedValue rhs);
-void handleConvNoticeForCmp(const char* const lhs, const char* const rhs);
-void handleConvNoticeForEq(TypedValue lhs, TypedValue rhs);
-void handleConvNoticeForEq(const char* const lhs, const char* const rhs);
-
 void throwBitOpBadTypesException(tv_rval t1, tv_rval t2);
 void throwIncDecBadTypeException(const char* t);
 void throwMathBadTypesException(tv_rval t1, tv_rval t2);
 void throwCmpBadTypesException(tv_rval t1, tv_rval t2);
 void throwCmpBadTypesException(tv_rval t1, DataType t2);
-
-inline bool useStrictEquality() {
-   return flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForEq)
-     == ConvNoticeLevel::Change;
-}
 
 extern const StaticString s_ConvNoticeReasonConcat;
 extern const StaticString s_ConvNoticeReasonMath;

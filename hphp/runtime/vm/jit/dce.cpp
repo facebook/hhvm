@@ -217,9 +217,7 @@ bool canDCE(IRInstruction* inst) {
   case AKExistsDict:
   case AKExistsKeyset:
   case LdBindAddr:
-  case LdSwitchDblIndex:
-  case LdSwitchStrIndex:
-  case LdSSwitchDestFast:
+  case LdSSwitchDest:
   case LdClosureCls:
   case LdClosureThis:
   case CreateSSWH:
@@ -517,7 +515,6 @@ bool canDCE(IRInstruction* inst) {
   case RaiseCoeffectsFunParamTypeViolation:
   case RaiseCoeffectsFunParamCoeffectRulesViolation:
   case RaiseStrToClassNotice:
-  case RaiseBadComparisonViolation:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
@@ -526,8 +523,6 @@ bool canDCE(IRInstruction* inst) {
   case PrintInt:
   case PrintBool:
   case GetMemoKey:
-  case LdSwitchObjIndex:
-  case LdSSwitchDestSlow:
   case InterpOne:
   case InterpOneCF:
   case OODeclExists:

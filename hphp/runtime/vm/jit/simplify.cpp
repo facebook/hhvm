@@ -2183,7 +2183,6 @@ bool handleConvNoticeLevel(
   // do this check here because if notice level is none, reason may be nullptr
   if (notice_data->level == ConvNoticeLevel::None) return false;
   assertx(notice_data->reason != nullptr);
-  always_assert(notice_data->level != ConvNoticeLevel::Change);
   const auto str = cns(env, makeStaticString(folly::sformat(
     "Implicit {} to {} conversion for {}", from, to, notice_data->reason)));
   switch(notice_data->level) {
@@ -2195,8 +2194,6 @@ bool handleConvNoticeLevel(
     // FALLTHROUGH
     case ConvNoticeLevel::None:
       return false;
-    case ConvNoticeLevel::Change:
-      not_reached();
   }
   not_reached();
 }

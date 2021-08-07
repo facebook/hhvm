@@ -121,66 +121,14 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
   Type type = switchVal->type();
   assertx(IMPLIES(!(type <= TInt), bounded));
   assertx(IMPLIES(bounded, iv.size() > 2));
-  SSATmp* index;
+  SSATmp* index = switchVal;
 
   Offset defaultOff = bcOff(env) + iv.vec32()[iv.size() - 1];
 
-  if (!(type <= TInt) && useStrictEquality()) {
+  if (UNLIKELY(!(type <= TInt))) {
     if (type <= TArrLike) decRef(env, switchVal);
     gen(env, Jmp, getBlock(env, defaultOff));
-  }
-
-  Offset zeroOff = 0;
-  if (base <= 0 && (base + nTargets) > 0) {
-    zeroOff = bcOff(env) + iv.vec32()[0 - base];
-  } else {
-    zeroOff = defaultOff;
-  }
-
-  const auto emitConvNotice = [&] {
-    const auto level = flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForEq);
-    if (level == ConvNoticeLevel::None) return;
-    // give it an int RHS for message generation
-    const auto rhs = cns(env, 42);
-    gen(env, RaiseBadComparisonViolation, BadComparisonData{true}, switchVal, rhs);
-  };
-
-  if (type <= TNull) {
-    if (zeroOff != defaultOff) emitConvNotice();
-    gen(env, Jmp, getBlock(env, zeroOff));
     return;
-  }
-  if (type <= TBool) {
-    Offset nonZeroOff = bcOff(env) + iv.vec32()[iv.size() - 2];
-    ifThen(
-      env,
-      [&] (Block* taken) { gen(env, JmpNZero, taken, switchVal); },
-      [&] {
-        if (nonZeroOff != defaultOff) emitConvNotice();
-        gen(env, Jmp, getBlock(env, nonZeroOff));
-      }
-    );
-    if (zeroOff != defaultOff) emitConvNotice();
-    gen(env, Jmp, getBlock(env, zeroOff));
-    return;
-  }
-  if (type <= TArrLike) {
-    decRef(env, switchVal);
-    gen(env, Jmp, getBlock(env, defaultOff));
-    return;
-  }
-
-  if (type <= TInt) {
-    // No special treatment needed
-    index = switchVal;
-  } else if (type <= TDbl || type <= TStr || type <= TObj) {
-    // determining whether we'll hit a coercion is too complicated for the jit
-    // so just punt to the interpreter. These cases should be pretty cold so
-    // it shouldn't be a major issue, hopefully. If it is an issue, we should
-    // be able to just fix www.
-    PUNT(Switch-MaybeCoercingType);
-  } else {
-    PUNT(Switch-UnknownType);
   }
 
   auto const dataSize = SwitchProfile::extraSize(iv.size());
@@ -260,25 +208,26 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
   gen(env, JmpSwitchDest, data, index, sp(env), fp(env));
 }
 
+const StaticString s_clsToStringWarning(Strings::CLASS_TO_STRING);
+
 void emitSSwitch(IRGS& env, const ImmVector& iv) {
   const int numCases = iv.size() - 1;
+  auto testVal = popC(env);
+  auto const defaultOff = bcOff(env) + iv.strvec()[numCases].dest;
 
-  /*
-   * We use a fast path translation with a hashtable if none of the
-   * cases are numeric strings and if the input is actually a string.
-   *
-   * Otherwise we do a linear search through the cases calling string
-   * conversion routines.
-   */
-  const bool fastPath =
-    topC(env)->isA(TStr) &&
-    std::none_of(iv.strvec(), iv.strvec() + numCases,
-      [&](const StrVecItem& item) {
-        return curUnit(env)->lookupLitstrId(item.str)->isNumeric();
-      }
-    );
+ if (UNLIKELY(testVal->isA(TCls) || testVal->isA(TLazyCls))) {
+    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+    }
+    testVal = gen(env, testVal->isA(TCls) ? LdClsName : LdLazyClsName, testVal);
+  }
 
-  auto const testVal = popC(env);
+  if (UNLIKELY(!testVal->isA(TStr))) {
+    // straight to the default
+    decRef(env, testVal);
+    gen(env, Jmp, getBlock(env, defaultOff));
+    return;
+  }
 
   std::vector<LdSSwitchData::Elm> cases(numCases);
   for (int i = 0; i < numCases; ++i) {
@@ -290,15 +239,10 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   LdSSwitchData data;
   data.numCases   = numCases;
   data.cases      = &cases[0];
-  data.defaultSk  = SrcKey{curSrcKey(env),
-                           bcOff(env) + iv.strvec()[iv.size() - 1].dest};
+  data.defaultSk  = SrcKey{curSrcKey(env), defaultOff};
   data.bcSPOff    = spOffBCFromStackBase(env);
 
-  auto const dest = gen(env,
-                        fastPath ? LdSSwitchDestFast
-                                 : LdSSwitchDestSlow,
-                        data,
-                        testVal);
+  auto const dest = gen(env, LdSSwitchDest, data, testVal);
   decRef(env, testVal);
   gen(
     env,

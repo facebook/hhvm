@@ -1909,20 +1909,6 @@ OPTBLD_INLINE void iopSelect() {
   }
 }
 
-enum class SwitchMatch {
-  NORMAL,  // value was converted to an int: match normally
-  NONZERO, // can't be converted to an int: match first nonzero case
-  DEFAULT, // can't be converted to an int: match default case
-};
-
-static SwitchMatch doubleCheck(double d, int64_t& out) {
-  if (int64_t(d) == d) {
-    out = d;
-    return SwitchMatch::NORMAL;
-  }
-  return SwitchMatch::DEFAULT;
-}
-
 OPTBLD_INLINE
 void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
                imm_array<Offset> jmptab) {
@@ -1939,144 +1925,11 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
     return;
   }
 
-  if (!tvIsInt(val) && useStrictEquality()) {
-    pc = origpc + jmptab[veclen - 1];
-    vmStack().popC();
-    return;
-  }
-
-  // Generic integer switch
-  int64_t intval = -1;
-  SwitchMatch match = SwitchMatch::NORMAL;
-
-  switch (val->m_type) {
-    case KindOfUninit:
-    case KindOfNull:
-      intval = 0;
-      break;
-
-    case KindOfBoolean:
-      // bool(true) is equal to any non-zero int, bool(false) == 0
-      if (val->m_data.num) {
-        match = SwitchMatch::NONZERO;
-      } else {
-        intval = 0;
-      }
-      break;
-
-    case KindOfInt64:
-      intval = val->m_data.num;
-      break;
-
-    case KindOfDouble:
-      match = doubleCheck(val->m_data.dbl, intval);
-      break;
-
-    case KindOfFunc:
-      match = SwitchMatch::DEFAULT;
-      break;
-
-    case KindOfClass:
-    case KindOfLazyClass:
-    case KindOfPersistentString:
-    case KindOfString: {
-      double dval = 0.0;
-      auto const str =
-        isClassType(val->m_type) ? classToStringHelper(val->m_data.pclass) :
-        isLazyClassType(val->m_type) ?
-        lazyClassToStringHelper(val->m_data.plazyclass) : val->m_data.pstr;
-      DataType t = str->isNumericWithVal(intval, dval, 1);
-      switch (t) {
-        case KindOfNull:
-          intval = 0;
-          break;
-        case KindOfInt64:
-          // do nothing
-          break;
-        case KindOfDouble:
-          match = doubleCheck(dval, intval);
-          break;
-        case KindOfUninit:
-        case KindOfBoolean:
-        case KindOfPersistentString:
-        case KindOfString:
-        case KindOfPersistentVec:
-        case KindOfVec:
-        case KindOfPersistentDict:
-        case KindOfDict:
-        case KindOfPersistentKeyset:
-        case KindOfKeyset:
-        case KindOfObject:
-        case KindOfResource:
-        case KindOfRFunc:
-        case KindOfFunc:
-        case KindOfClass:
-        case KindOfLazyClass:
-        case KindOfClsMeth:
-        case KindOfRClsMeth:
-        case KindOfRecord:
-          not_reached();
-      }
-      if (val->m_type == KindOfString) tvDecRefStr(val);
-      break;
-    }
-
-    case KindOfVec:
-    case KindOfDict:
-    case KindOfKeyset:
-      tvDecRefArr(val);
-    case KindOfPersistentVec:
-    case KindOfPersistentDict:
-    case KindOfPersistentKeyset:
-      match = SwitchMatch::DEFAULT;
-      break;
-
-    case KindOfClsMeth:
-      match = SwitchMatch::DEFAULT;
-      break;
-
-    case KindOfRClsMeth:
-      tvDecRefRClsMeth(val);
-      match = SwitchMatch::DEFAULT;
-      break;
-
-    case KindOfObject:
-      intval = val->m_data.pobj->toInt64();
-      tvDecRefObj(val);
-      break;
-
-    case KindOfResource:
-      intval = val->m_data.pres->data()->o_toInt64();
-      tvDecRefRes(val);
-      break;
-
-    case KindOfRFunc:
-      tvDecRefRFunc(val);
-      match = SwitchMatch::DEFAULT;
-      break;
-
-    case KindOfRecord: // TODO (T41029094)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
-  }
-
-  if (match == SwitchMatch::NORMAL &&
-      (intval < base || intval >= (base + veclen - 2))) {
-    match = SwitchMatch::DEFAULT;
-  }
-
-  const auto offset = [=]() -> int64_t {
-    switch (match) {
-      case SwitchMatch::NORMAL:  return intval - base;
-      case SwitchMatch::NONZERO: return veclen - 2;
-      case SwitchMatch::DEFAULT: return veclen - 1;
-    }
-    not_reached();
-  }();
-
-  if (!tvIsInt(val) && jmptab[offset] != jmptab[veclen - 1]) {
-    // only emit if we're not just going to hit default anyway
-    handleConvNoticeForEq(describe_actual_type(val).c_str(), "int");
-  }
+  const auto num = val->m_data.num;
+  const auto offset =
+    !tvIsInt(val) || num < base || num >= (base + veclen - 2)
+      ? veclen - 1
+      : num - base;
 
   pc = origpc + jmptab[offset];
   vmStack().discard();
@@ -2086,19 +1939,22 @@ OPTBLD_INLINE
 void iopSSwitch(PC origpc, PC& pc, imm_array<StrVecItem> jmptab) {
   auto const veclen = jmptab.size;
   assertx(veclen > 1);
-  unsigned cases = veclen - 1; // the last vector item is the default case
   TypedValue* val = vmStack().topTV();
-  Unit* u = vmfp()->func()->unit();
-  unsigned i;
-  for (i = 0; i < cases; ++i) {
-    auto item = jmptab[i];
-    const StringData* str = u->lookupLitstrId(item.str);
-    if (tvEqual(*val, str)) {
-      pc = origpc + item.dest;
-      vmStack().popC();
-      return;
+
+  if (tvIsString(val) || tvIsClass(val) || tvIsLazyClass(val)) {
+    unsigned cases = veclen - 1; // the last vector item is the default case
+    Unit* u = vmfp()->func()->unit();
+    for (unsigned i = 0; i < cases; ++i) {
+      auto item = jmptab[i];
+      const StringData* str = u->lookupLitstrId(item.str);
+      if (tvEqual(*val, str)) {
+        pc = origpc + item.dest;
+        vmStack().popC();
+        return;
+      }
     }
   }
+
   // default case
   pc = origpc + jmptab[veclen - 1].dest;
   vmStack().popC();

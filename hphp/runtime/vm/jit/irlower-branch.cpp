@@ -326,25 +326,17 @@ namespace {
 
 using SSwitchMap = FixedStringMap<TCA>;
 
-TCA sswitchHelperFast(const StringData* val,
+TCA sswitchHelper(const StringData* val,
                       const SSwitchMap* table,
                       TCA* def) {
   auto const dest = table->find(val);
   return dest ? *dest : *def;
 }
 
-TCA sswitchHelperSlow(TypedValue tv, const StringData** strs,
-                      int numCases, TCA* jmptab) {
-  for (int i = 0; i < numCases; ++i) {
-    if (tvEqual(tv, strs[i])) return jmptab[i];
-  }
-  return jmptab[numCases]; // default case
 }
 
-}
-
-void cgLdSSwitchDestFast(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<LdSSwitchDestFast>();
+void cgLdSSwitchDest(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<LdSSwitchDest>();
   auto& v = vmain(env);
 
   auto const table = v.allocData<SSwitchMap>();
@@ -378,32 +370,10 @@ void cgLdSSwitchDestFast(IRLS& env, const IRInstruction* inst) {
     .dataPtr(table)
     .dataPtr(def);
 
-  cgCallHelper(v, env, CallSpec::direct(sswitchHelperFast),
+  cgCallHelper(v, env, CallSpec::direct(sswitchHelper),
                callDest(env, inst), SyncOptions::None, args);
 }
 
-void cgLdSSwitchDestSlow(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<LdSSwitchDestSlow>();
-  auto& v = vmain(env);
-
-  auto strtab = v.allocData<const StringData*>(extra->numCases);
-  auto jmptab = v.allocData<TCA>(extra->numCases + 1);
-
-  for (int64_t i = 0; i < extra->numCases; ++i) {
-    strtab[i] = extra->cases[i].str;
-    v << bindaddr{&jmptab[i], extra->cases[i].dest, extra->bcSPOff};
-  }
-  v << bindaddr{&jmptab[extra->numCases], extra->defaultSk, extra->bcSPOff};
-
-  auto const args = argGroup(env, inst)
-    .typedValue(0)
-    .dataPtr(strtab)
-    .imm(extra->numCases)
-    .dataPtr(jmptab);
-
-  cgCallHelper(v, env, CallSpec::direct(sswitchHelperSlow),
-               callDest(env, inst), SyncOptions::Sync, args);
-}
 
 void cgJmpSSwitchDest(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<JmpSSwitchDest>();
@@ -413,10 +383,6 @@ void cgJmpSSwitchDest(IRLS& env, const IRInstruction* inst) {
   maybe_syncsp(v, marker, srcLoc(env, inst, 1).reg(), extra->offset);
   v << jmpr{srcLoc(env, inst, 0).reg(), cross_trace_args(marker)};
 }
-
-IMPL_OPCODE_CALL(LdSwitchDblIndex)
-IMPL_OPCODE_CALL(LdSwitchStrIndex)
-IMPL_OPCODE_CALL(LdSwitchObjIndex)
 
 ///////////////////////////////////////////////////////////////////////////////
 

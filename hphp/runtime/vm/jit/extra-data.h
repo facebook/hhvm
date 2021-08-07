@@ -2639,14 +2639,6 @@ struct ConvNoticeData : IRExtraData {
   union { const StringData* reason; int64_t reasonIntVal; };
 };
 
-struct BadComparisonData : IRExtraData {
-  explicit BadComparisonData(bool eqOp) : eq(eqOp)  {}
-  std::string show() const { return eq ? "For Eq" : "For Cmp"; }
-  size_t stableHash() const { return std::hash<bool>()(eq); }
-  bool equals(const BadComparisonData& o) const { return eq == o.eq; }
-  bool eq;
-};
-
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -2659,8 +2651,7 @@ X(DictIdx,                      SizeHintData);
 X(LdBindAddr,                   LdBindAddrData);
 X(ProfileSwitchDest,            ProfileSwitchData);
 X(JmpSwitchDest,                JmpSwitchData);
-X(LdSSwitchDestFast,            LdSSwitchData);
-X(LdSSwitchDestSlow,            LdSSwitchData);
+X(LdSSwitchDest,                LdSSwitchData);
 X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
 X(LdLocAddr,                    LocalId);
@@ -2872,7 +2863,6 @@ X(LdClsTypeCns,                 LdClsTypeCnsData);
 X(ConvTVToStr,                  ConvNoticeData);
 X(CheckFuncNeedsCoverage,       FuncData);
 X(RecordFuncCall,               FuncData);
-X(RaiseBadComparisonViolation,  BadComparisonData);
 
 #undef X
 

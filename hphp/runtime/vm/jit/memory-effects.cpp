@@ -1777,7 +1777,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LteRes:
   case CmpRes:
   case LdBindAddr:
-  case LdSSwitchDestFast:
+  case LdSSwitchDest:
   case RBTraceEntry:
   case RBTraceMsg:
   case ConvIntToBool:
@@ -1826,8 +1826,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdObjMethodS:
   case LdStrLen:
   case StringIsset:
-  case LdSwitchDblIndex:
-  case LdSwitchStrIndex:
   case LdWHResult:
   case LdWHState:
   case LdWHNotDone:
@@ -1933,7 +1931,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdFunc:         // autoload
   case LdFuncCached:   // autoload
   case LdRecDescCached:    // autoload
-  case LdSwitchObjIndex:  // decrefs arg
   case InitClsCns:      // autoload
   case InitSubClsCns: // May run 86cinit
   case ProfileSubClsCns: // May run 86cinit
@@ -1957,7 +1954,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case PrintInt:
   case ConcatIntStr:
   case ConcatStrInt:
-  case LdSSwitchDestSlow:
   case ConvObjToDbl:
   case ConvObjToInt:
   case ConvTVToInt:
@@ -1990,7 +1986,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case PropTypeRedefineCheck: // Can raise and autoload
   case HandleRequestSurprise:
   case BespokeEscalateToVanilla:
-  case RaiseBadComparisonViolation:
     return may_load_store(AHeapAny, AHeapAny);
 
   case AddNewElemVec:

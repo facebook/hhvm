@@ -62,9 +62,7 @@ inline bool equal(const Variant& v1, const Variant& v2) {
   return tvEqual(*v1.asTypedValue(), *v2.asTypedValue());
 }
 
-inline bool less(const Variant& v1, bool v2) {
-  return tvLess(*v1.asTypedValue(), v2);
-}
+inline bool less(const Variant& v1, bool v2) = delete;
 inline bool less(const Variant& v1, int v2) = delete;
 inline bool less(const Variant& v1, int64_t v2) {
   return tvLess(*v1.asTypedValue(), v2);
@@ -72,9 +70,7 @@ inline bool less(const Variant& v1, int64_t v2) {
 inline bool less(const Variant& v1, double v2) {
   return tvLess(*v1.asTypedValue(), v2);
 }
-inline bool less(const Variant& v1, const StringData* v2) {
-  return tvLess(*v1.asTypedValue(), v2);
-}
+inline bool less(const Variant& v1, const StringData* v2) = delete;
 inline bool less(const Variant& v1, const String& v2) = delete;
 inline bool less(const Variant& v1, const char* v2) = delete;
 inline bool less(const Variant& v1, const Array& v2) = delete;
@@ -84,9 +80,7 @@ inline bool less(const Variant& v1, const Variant& v2) {
   return tvLess(*v1.asTypedValue(), *v2.asTypedValue());
 }
 
-inline bool more(const Variant& v1, bool v2) {
-  return tvGreater(*v1.asTypedValue(), v2);
-}
+inline bool more(const Variant& v1, bool v2) = delete;
 inline bool more(const Variant& v1, int v2) = delete;
 inline bool more(const Variant& v1, int64_t v2) {
   return tvGreater(*v1.asTypedValue(), v2);
@@ -94,9 +88,7 @@ inline bool more(const Variant& v1, int64_t v2) {
 inline bool more(const Variant& v1, double v2) {
   return tvGreater(*v1.asTypedValue(), v2);
 }
-inline bool more(const Variant& v1, const StringData* v2) {
-  return tvGreater(*v1.asTypedValue(), v2);
-}
+inline bool more(const Variant& v1, const StringData* v2) = delete;
 inline bool more(const Variant& v1, const String& v2) = delete;
 inline bool more(const Variant& v1, const char* v2) = delete;
 inline bool more(const Variant& v1, const Array& v2) = delete;
@@ -162,7 +154,7 @@ inline bool less(bool v1, const Array& v2) {
  }
 inline bool less(bool v1, const Object& v2) = delete;
 inline bool less(bool v1, const Resource& v2) = delete;
-inline bool less(bool v1, const Variant& v2) { return more(v2,v1); }
+inline bool less(bool v1, const Variant& v2) = delete;
 
 inline bool more(bool v1, bool    v2) { return (v1?1:0) > (v2?1:0); }
 inline bool more(bool v1, int     v2) = delete;
@@ -181,7 +173,7 @@ inline bool more(bool v1, const Array& v2) {
 }
 inline bool more(bool v1, const Object& v2) = delete;
 inline bool more(bool v1, const Resource& v2) = delete;
-inline bool more(bool v1, const Variant& v2) { return less(v2,v1); }
+inline bool more(bool v1, const Variant& v2) = delete;
 
 inline int64_t compare(bool v1, bool v2) { return v1 - v2; }
 
@@ -486,9 +478,7 @@ inline bool less(const StringData *v1, const Array& v2) {
 }
 inline bool less(const StringData *v1, const Object& v2) = delete;
 inline bool less(const StringData *v1, const Resource& v2) = delete;
-inline bool less(const StringData *v1, const Variant& v2) {
-  return more(v2, v1);
-}
+inline bool less(const StringData *v1, const Variant& v2) = delete;
 
 inline bool lessEqual(const StringData* v1, const StringData* v2) {
   if (v1 == v2 || v1 == nullptr) return true;
@@ -520,9 +510,7 @@ inline bool more(const StringData *v1, const Array& v2) {
 }
 inline bool more(const StringData *v1, const Object& v2) = delete;
 inline bool more(const StringData *v1, const Resource& v2) = delete;
-inline bool more(const StringData *v1, const Variant& v2) {
-  return less(v2, v1);
-}
+inline bool more(const StringData *v1, const Variant& v2) = delete;
 
 inline bool moreEqual(const StringData* v1, const StringData* v2) {
   return lessEqual(v2, v1);

@@ -343,7 +343,7 @@ void doMemoSetValue(
         env,
         CallSpec::direct(memoSetDecRefImpl),
         kVoidDest,
-        SyncOptions::Sync,
+        SyncOptions::None,
         argGroup(env, inst)
           .typedValue(0, aux)
           .reg(handleAddr)
@@ -485,7 +485,7 @@ void doMemoSetCache(
       env,
       CallSpec::direct(setter),
       kVoidDest,
-      SyncOptions::Sync,
+      SyncOptions::None,
       args
     );
   } else {
@@ -502,7 +502,7 @@ void doMemoSetCache(
       env,
       CallSpec::direct(memoCacheSetGeneric),
       kVoidDest,
-      SyncOptions::Sync,
+      SyncOptions::None,
       args
     );
   }
@@ -661,7 +661,7 @@ void cgMemoSetInstanceValue(IRLS& env, const IRInstruction* inst) {
         env,
         CallSpec::direct(memoSetDecRefImpl),
         kVoidDest,
-        SyncOptions::Sync,
+        SyncOptions::None,
         argGroup(env, inst).typedValue(1, aux).reg(dest)
       );
     },
@@ -827,7 +827,7 @@ void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
         env,
         CallSpec::direct(memoCacheSetSharedOnly),
         kVoidDest,
-        SyncOptions::Sync,
+        SyncOptions::None,
         args
       );
     } else {
@@ -851,7 +851,7 @@ void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
           ? CallSpec::direct(setter)
           : CallSpec::direct(memoCacheSetGeneric),
         kVoidDest,
-        SyncOptions::Sync,
+        SyncOptions::None,
         args
       );
     }
@@ -877,7 +877,7 @@ void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
         ? CallSpec::direct(setter)
         : CallSpec::direct(memoCacheSetGeneric),
       kVoidDest,
-      SyncOptions::Sync,
+      SyncOptions::None,
       args
     );
   }

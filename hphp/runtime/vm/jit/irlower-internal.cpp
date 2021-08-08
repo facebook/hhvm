@@ -182,7 +182,10 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
   Vlabel targets[2];
   bool nothrow = false;
   auto const taken = inst->taken();
-  auto const do_catch = taken && taken->isCatch();
+  auto const has_catch = taken && taken->isCatch();
+  auto const may_raise = inst->mayRaiseErrorWithSources();
+  assertx(IMPLIES(may_raise, has_catch));
+  auto const do_catch = has_catch && may_raise;
 
   if (do_catch) {
     always_assert_flog(
@@ -204,8 +207,8 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
     targets[0] = v.makeBlock();
     targets[1] = env.labels[taken];
   } else {
-    // The current instruction doesn't have a catch block so it'd better not
-    // throw.  Register a null catch trace to indicate this to the unwinder.
+    // The current instruction claims to not throw. Register a null catch trace
+    // to indicate this to the unwinder.
     nothrow = true;
   }
 

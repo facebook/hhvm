@@ -1133,7 +1133,7 @@ void cgMapIsset(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst),
-               SyncOptions::Sync, args);
+               SyncOptions::None, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

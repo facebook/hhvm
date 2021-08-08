@@ -403,12 +403,12 @@ static CallMap s_callMap {
 
     /* AddNewElem helpers */
     {AddNewElemKeyset,   addNewElemKeyset, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
-    {AddNewElemVec,      addNewElemVec, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
+    {AddNewElemVec,      addNewElemVec, DSSA, SNone, {{SSA, 0}, {TV, 1}}},
 
     /* MInstrTranslator helpers */
     {StringGet, MInstrHelpers::stringGetI, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
 
-    {PairIsset, MInstrHelpers::pairIsset, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
+    {PairIsset, MInstrHelpers::pairIsset, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
     {VectorIsset, MInstrHelpers::vectorIsset, DSSA, SNone,
                   {{SSA, 0}, {SSA, 1}}},
     {ElemVecU, MInstrHelpers::elemVecIU, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},

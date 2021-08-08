@@ -108,7 +108,7 @@ void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
     env,
     target,
     callDest(dst),
-    SyncOptions::Sync,
+    SyncOptions::None,
     args
   );
   objectPropsRawInit(v, dst, cls->numDeclProperties());

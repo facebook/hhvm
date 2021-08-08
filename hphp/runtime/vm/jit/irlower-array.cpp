@@ -301,7 +301,7 @@ void cgAllocStructDict(IRLS& env, const IRInstruction* inst) {
   auto const target = CallSpec::direct(MixedArray::AllocStructDict);
   auto const args = argGroup(env, inst).imm(extra->numKeys).dataPtr(table);
 
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
 void cgInitDictElem(IRLS& env, const IRInstruction* inst) {

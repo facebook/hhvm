@@ -114,7 +114,7 @@ void implLdOrLookupCls(IRLS& env, const IRInstruction* inst, bool lookup) {
     if (!lookup) return implLdMeta<ClassCache>(env, inst, v, out);
     auto const args = argGroup(env, inst).ssa(0);
     cgCallHelper(v, env, CallSpec::direct(lookupCls),
-                 callDest(out), SyncOptions::Sync, args);
+                 callDest(out), SyncOptions::None, args);
   };
 
   if (!RO::RepoAuthoritative) return fallback(vmain(env), dst);

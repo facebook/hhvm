@@ -72,7 +72,7 @@ void profileIterInit(IRLS& env, const IRInstruction* inst, bool isInitK) {
     .ssa(0)
     .imm(isInitK);
   cgCallHelper(vmain(env), env, CallSpec::method(&ArrayIterProfile::update),
-               kVoidDest, SyncOptions::Sync, args);
+               kVoidDest, SyncOptions::None, args);
 }
 
 int iterOffset(const BCMarker& marker, uint32_t id) {
@@ -111,7 +111,7 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
     auto const target = isInitK
       ? CallSpec::direct(new_iter_array_key_helper(op))
       : CallSpec::direct(new_iter_array_helper(op));
-    cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+    cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
     return;
   }
 
@@ -170,7 +170,7 @@ void implLIterNext(IRLS& env, const IRInstruction* inst) {
     ? CallSpec::direct(liter_next_key_ind)
     : CallSpec::direct(liter_next_ind);
   auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
 void implIterFree(IRLS& env, const IRInstruction* inst, CallSpec meth) {

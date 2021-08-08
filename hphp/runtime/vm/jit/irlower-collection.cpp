@@ -100,7 +100,7 @@ void cgNewCol(IRLS& env, const IRInstruction* inst) {
     return CallSpec::direct(helper);
   }();
   cgCallHelper(vmain(env), env, target, callDest(env, inst),
-               SyncOptions::Sync, argGroup(env, inst));
+               SyncOptions::None, argGroup(env, inst));
 }
 
 IMPL_OPCODE_CALL(NewPair)
@@ -112,7 +112,7 @@ void cgNewColFromArray(IRLS& env, const IRInstruction* inst) {
     return CallSpec::direct(helper);
   }();
   cgCallHelper(vmain(env), env, target, callDest(env, inst),
-               SyncOptions::Sync, argGroup(env, inst).ssa(0));
+               SyncOptions::None, argGroup(env, inst).ssa(0));
 }
 
 void cgLdColVec(IRLS& env, const IRInstruction* inst) {

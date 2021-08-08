@@ -273,7 +273,7 @@ void implDecRefProf(Vout& v, IRLS& env,
     incrementProfile(v, profile, incr, offsetof(DecRefProfile, released));
     auto args = argGroup(env, inst).reg(base);
     auto const dtor = makeDtorCall(v, ty, srcLoc(env, inst, 0), args);
-    cgCallHelper(v, env, dtor, kVoidDest, SyncOptions::Sync, args);
+    cgCallHelper(v, env, dtor, kVoidDest, SyncOptions::None, args);
   };
 
   incrementProfile(v, profile, incr, offsetof(DecRefProfile, refcounted));
@@ -440,7 +440,7 @@ void implDecRef(Vout& v, IRLS& env,
   auto const destroy = [&] (Vout& v) {
     auto args = argGroup(env, inst).reg(base);
     auto const dtor = makeDtorCall(v, ty, srcLoc(env, inst, 0), args);
-    cgCallHelper(v, env, dtor, kVoidDest, SyncOptions::Sync, args);
+    cgCallHelper(v, env, dtor, kVoidDest, SyncOptions::None, args);
   };
 
   if (!ty.maybe(TPersistent)) {

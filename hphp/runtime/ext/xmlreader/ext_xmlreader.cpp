@@ -91,7 +91,6 @@ void XMLReader::sweep() {
 }
 
 void XMLReader::close() {
-  SYNC_VM_REGS_SCOPED();
   if (m_stream) {
     m_stream->close();
   }

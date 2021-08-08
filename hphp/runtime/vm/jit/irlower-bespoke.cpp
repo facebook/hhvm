@@ -247,7 +247,7 @@ void cgBespokeIterFirstPos(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   auto const args = argGroup(env, inst).ssa(0);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
 void cgBespokeIterLastPos(IRLS& env, const IRInstruction* inst) {
@@ -257,7 +257,7 @@ void cgBespokeIterLastPos(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   auto const args = argGroup(env, inst).ssa(0);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
 void cgBespokeIterEnd(IRLS& env, const IRInstruction* inst) {
@@ -267,7 +267,7 @@ void cgBespokeIterEnd(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   auto const args = argGroup(env, inst).ssa(0);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
 void cgBespokeIterGetKey(IRLS& env, const IRInstruction* inst) {
@@ -277,7 +277,7 @@ void cgBespokeIterGetKey(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   auto const args = argGroup(env, inst).ssa(0).ssa(1);
-  cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::None, args);
 }
 
 void cgBespokeIterGetVal(IRLS& env, const IRInstruction* inst) {
@@ -287,7 +287,7 @@ void cgBespokeIterGetVal(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   auto const args = argGroup(env, inst).ssa(0).ssa(1);
-  cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::None, args);
 }
 
 void cgBespokeEscalateToVanilla(IRLS& env, const IRInstruction* inst) {
@@ -590,7 +590,7 @@ void cgStructDictGetWithColor(IRLS& env, const IRInstruction* inst) {
       auto const target =
         CallSpec::direct(bespoke::StructDict::NvGetStrNonStatic);
       auto const args = argGroup(env, inst).ssa(0).ssa(1);
-      cgCallHelper(v, env, target, callDest(value, type), SyncOptions::Sync,
+      cgCallHelper(v, env, target, callDest(value, type), SyncOptions::None,
                    args);
     };
 
@@ -771,7 +771,7 @@ void cgStructDictSet(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const target = CallSpec::direct(bespoke::StructDict::SetStrInSlot);
   auto const args = argGroup(env, inst).ssa(0).imm(*slot).typedValue(2);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
 void cgStructDictUnset(IRLS& env, const IRInstruction* inst) {
@@ -789,7 +789,7 @@ void cgStructDictUnset(IRLS& env, const IRInstruction* inst) {
 
   auto const target = CallSpec::direct(bespoke::StructDict::RemoveStrInSlot);
   auto const args = argGroup(env, inst).ssa(0).imm(*slot);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
 //////////////////////////////////////////////////////////////////////////////

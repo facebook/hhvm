@@ -201,7 +201,7 @@ fn from_type_constant<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     };
 
     Ok(HhasTypeConstant {
-        name,
+        name: Str::new_str(alloc, name),
         initializer,
         is_abstract,
     })

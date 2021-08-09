@@ -359,7 +359,7 @@ fn print_type_constant<W: Write>(
     c: &HhasTypeConstant,
 ) -> Result<(), W::Error> {
     ctx.newline(w)?;
-    concat_str_by(w, " ", [".const", &c.name, "isType"])?;
+    concat_str_by(w, " ", [".const", c.name.as_str(), "isType"])?;
     if c.is_abstract {
         w.write(" isAbstract")?;
     }

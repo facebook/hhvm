@@ -1891,6 +1891,7 @@ dependencies = [
 name = "hhbc_by_ref_hhas_type_const"
 version = "0.0.0"
 dependencies = [
+ "ffi",
  "hhbc_by_ref_runtime",
 ]
 

@@ -396,25 +396,31 @@ Flags load(Local& env,
   return FNone{};
 }
 
-void store(Local& env, AliasClass acls, SSATmp* value) {
+Flags store(Local& env, AliasClass acls, SSATmp* value) {
   acls = canonicalize(acls);
 
   auto const meta = env.global.ainfo.find(acls);
   if (!meta) {
     env.state.avail &= ~env.global.ainfo.may_alias(acls);
-    return;
+    return FNone{};
   }
 
   FTRACE(5, "       av: {}\n", show(env.state.avail));
   env.state.avail &= ~meta->conflicts;
 
   auto& current = env.state.tracked[meta->index];
+  if (env.state.avail[meta->index] && value &&
+      current.knownValue == value) {
+    return FRemovable{};
+  }
   current.knownValue = value;
   current.knownType = value ? value->type() : TTop;
   env.state.avail.set(meta->index);
   FTRACE(4, "       {} <- {}\n", show(acls),
     value ? value->toString() : std::string("<>"));
   FTRACE(5, "       av: {}\n", show(env.state.avail));
+
+  return FNone{};
 }
 
 bool handle_minstr(Local& env, const IRInstruction& inst, GeneralEffects m) {
@@ -444,6 +450,7 @@ bool handle_minstr(Local& env, const IRInstruction& inst, GeneralEffects m) {
     FTRACE(5, "      Base unchanged. Keeping type: {}\n", old_val.knownType);
   }
   env.state.avail.set(meta->index);
+  store(env, m.kills, nullptr);
   return true;
 }
 
@@ -559,6 +566,7 @@ Flags handle_general_effects(Local& env,
   }
 
   store(env, m.stores, nullptr);
+  store(env, m.kills, nullptr);
 
   return FNone{};
 }
@@ -786,7 +794,7 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     },
     [&] (ReturnEffects)     {},
 
-    [&] (PureStore m)       { store(env, m.dst, m.value); },
+    [&] (PureStore m)       { flags = store(env, m.dst, m.value); },
     [&] (PureLoad m)        { flags = load(env, inst, m.src); },
 
     [&] (PureInlineCall m)    { store(env, m.base, m.fp); },

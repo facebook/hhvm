@@ -362,12 +362,22 @@ impl<'ast> VisitorMut<'ast> for Checker {
         context: &mut Context,
         p: &mut aast::Expr<(), (), ()>,
     ) -> Result<(), ()> {
-        if let aast::Expr_::Binop(x) = &mut p.2 {
-            let (bop, e_lhs, e_rhs) = x.as_mut();
-            if let Bop::Eq(_) = bop {
-                check_assignment_validity(context, self, &p.1, e_lhs, e_rhs);
+        match &mut p.2 {
+            aast::Expr_::Binop(x) => {
+                let (bop, e_lhs, e_rhs) = x.as_mut();
+                if let Bop::Eq(_) = bop {
+                    check_assignment_validity(context, self, &p.1, e_lhs, e_rhs);
+                }
             }
+            aast::Expr_::Call(x) => {
+                let (_caller, _targs, params, _variadic) = &mut **x;
+                for param in params.iter_mut() {
+                    explicit_readonly(context, param)
+                }
+            }
+            _ => {}
         }
+
 
         p.recurse(context, self.object())
     }

@@ -129,15 +129,20 @@ struct FpVisit {
 };
 
 void fixupVmfpUses(Vunit& unit) {
-  auto const rpo = sortBlocks(unit);
-  jit::vector<Vreg> livefp{unit.blocks.size(), InvalidReg};
-  jit::fast_map<size_t, std::pair<Vreg,int32_t>> regchain;
+  struct BlockState {
+    Vreg liveFp = InvalidReg;
+    jit::fast_map<size_t, std::pair<Vreg,int32_t>> regchain;
+  };
 
-  livefp[rpo[0]] = rvmfp();
+  auto const rpo = sortBlocks(unit);
+  jit::vector<BlockState> states{unit.blocks.size()};
+
+  states[rpo[0]].liveFp = rvmfp();
 
   for (auto const b : rpo) {
     auto& block = unit.blocks[b];
-    auto fp = livefp[b];
+    auto fp = states[b].liveFp;
+    auto regchain = states[b].regchain;
     always_assert_flog(fp.isValid(), "{} cannot have unknown vmfp", b);
 
     for (auto& inst : block.code) {
@@ -150,7 +155,8 @@ void fixupVmfpUses(Vunit& unit) {
       case Vinstr::pushvmfp: {
         auto const& p = inst.pushvmfp_;
         auto const& r = regchain.emplace(
-          p.s, std::make_pair(fp, p.offset)).first->second;
+          p.s, std::make_pair(fp, p.offset)
+        ).first->second;
         always_assert(r.first == fp);
         always_assert(r.second == p.offset);
         fp = p.s;
@@ -161,6 +167,7 @@ void fixupVmfpUses(Vunit& unit) {
         auto const it = regchain.find(fp);
         always_assert(it != regchain.end());
         fp = it->second.first;
+        regchain.erase(it);
         if (inst.op != Vinstr::contenter) break;
       }
       default:
@@ -170,12 +177,22 @@ void fixupVmfpUses(Vunit& unit) {
     }
 
     for (auto const s : succs(block)) {
-      always_assert_flog(
-        !livefp[s].isValid() || livefp[s] == fp,
-        "{} has multiple known vmfp values ({} and {} via {})",
-        s, show(livefp[s]), show(fp), b
-      );
-      livefp[s] = fp;
+      auto& succState = states[s];
+      if (succState.liveFp.isValid()) {
+        always_assert_flog(
+          succState.liveFp == fp,
+          "{} has multiple known vmfp values ({} and {} via {})",
+          s, show(succState.liveFp), show(fp), b
+        );
+        always_assert_flog(
+          succState.regchain == regchain,
+          "{} has mismatched reg-chain state with {}",
+          s, b
+        );
+      } else {
+        succState.liveFp = fp;
+        succState.regchain = regchain;
+      }
     }
   }
 }

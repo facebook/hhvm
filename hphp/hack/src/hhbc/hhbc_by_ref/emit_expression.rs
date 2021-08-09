@@ -1863,6 +1863,7 @@ fn emit_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         emit_symbol_refs::add_function(alloc, e, fid);
     }
     let fcall_args = get_fcall_args(
+        e,
         alloc,
         args,
         uarg,
@@ -2675,7 +2676,8 @@ fn emit_args_inout_setters<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     }
 }
 
-fn get_fcall_args<'arena>(
+fn get_fcall_args<'arena, 'decl, D: DeclProvider<'decl>>(
+    e: &mut Emitter<'arena, 'decl, D>,
     alloc: &'arena bumpalo::Bump,
     args: &[tast::Expr],
     uarg: Option<&tast::Expr>,
@@ -2688,11 +2690,22 @@ fn get_fcall_args<'arena>(
     let mut flags = FcallFlags::default();
     flags.set(FcallFlags::HAS_UNPACK, uarg.is_some());
     flags.set(FcallFlags::LOCK_WHILE_UNWINDING, lock_while_unwinding);
+    let is_readonly_arg = if e
+        .options()
+        .hhvm
+        .hack_lang
+        .flags
+        .contains(LangFlags::ENABLE_READONLY_ENFORCEMENT)
+    {
+        |expr| is_readonly_expr(expr)
+    } else {
+        |_expr| false
+    };
     FcallArgs::new(
         flags,
         num_rets,
         Slice::fill_iter(alloc, args.iter().map(is_inout_arg)),
-        Slice::fill_iter(alloc, args.iter().map(is_readonly_expr)),
+        Slice::fill_iter(alloc, args.iter().map(is_readonly_arg)),
         async_eager_label,
         num_args,
         context
@@ -3826,6 +3839,7 @@ fn emit_new<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         instr::fcallctor(
                             alloc,
                             get_fcall_args(
+                                e,
                                 alloc,
                                 args,
                                 uarg.as_ref(),

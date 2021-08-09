@@ -53,8 +53,7 @@ int main() {
   HhasAdata _b11;
   HhasBody _b13;
   HhasParam _b14;
-  Field _b15;
-  Span _b16;
+  HhasRecord _b15;
 
   std::cout << "Ok!" << std::endl;
   return 0;

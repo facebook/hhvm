@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use decl_provider::DeclProvider;
-use ffi::{Maybe, Maybe::*, Str};
+use ffi::{Maybe, Maybe::*, Slice, Str};
 use hhbc_by_ref_ast_constant_folder as constant_folder;
 use hhbc_by_ref_emit_fatal as emit_fatal;
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
@@ -80,15 +80,16 @@ fn emit_record_def<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         }
         _ => None,
     };
+    let fields = rd
+        .fields
+        .iter()
+        .map(|f| emit_field(alloc, emitter, &f))
+        .collect::<Result<Vec<_>>>()?;
     Ok(HhasRecord {
         name: elaborate(alloc, &rd.name),
         is_abstract: rd.abstract_,
         base: Maybe::from(parent_name),
-        fields: rd
-            .fields
-            .iter()
-            .map(|f| emit_field(alloc, emitter, &f))
-            .collect::<Result<Vec<_>>>()?,
+        fields: Slice::fill_iter(alloc, fields.into_iter()),
         span: Span::from_pos(&rd.span),
     })
 }

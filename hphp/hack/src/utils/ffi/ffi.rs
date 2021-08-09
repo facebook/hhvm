@@ -118,9 +118,9 @@ impl<U, V> std::convert::From<(U, V)> for Pair<U, V> {
 // Safety: Must be initialized from an `&[T]`. Use `Slice<'a,
 // T>::new()`.
 pub struct Slice<'a, T> {
-    pub data: *const T,
-    pub len: usize,
-    pub marker: std::marker::PhantomData<&'a ()>,
+    data: *const T,
+    len: usize,
+    marker: std::marker::PhantomData<&'a ()>,
 }
 impl<'a, T: 'a> Default for Slice<'a, T> {
     fn default() -> Self {
@@ -274,10 +274,10 @@ impl<'a> std::convert::From<&'a mut str> for Slice<'a, u8> {
 // Safety: Initialize from an `&'arena [T]` where the memory is owned
 // by `alloc`. Use `BumpSliceMut<'a, T>::new()`.
 pub struct BumpSliceMut<'a, T> {
-    pub data: *mut T,
-    pub len: usize,
-    pub alloc: usize, // *const bumpalo::Bump,
-    pub marker: std::marker::PhantomData<&'a ()>,
+    data: *mut T,
+    len: usize,
+    alloc: usize, // *const bumpalo::Bump,
+    marker: std::marker::PhantomData<&'a ()>,
 }
 impl<'a, T> BumpSliceMut<'a, T> {
     // Safety: `t` must be owned by `alloc`.

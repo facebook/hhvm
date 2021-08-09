@@ -75,7 +75,7 @@ bitflags! {
       pub struct HHBCFlags: u32 {
         const LTR_ASSIGN=1 << 0;
         const UVS=1 << 1;
-        // No longer using bit 2.
+        const ENABLE_READONLY_ENFORCEMENT=1 << 2;
         // No longer using bit 3.
         const AUTHORITATIVE=1 << 4;
         const JIT_ENABLE_RENAME_FUNCTION=1 << 5;
@@ -115,7 +115,7 @@ bitflags! {
         const ENABLE_ENUM_CLASSES=1 << 16;
         const ENABLE_XHP_CLASS_MODIFIER=1 << 17;
         const DISALLOW_DYNAMIC_METH_CALLER_ARGS=1 << 18;
-        const ENABLE_READONLY_ENFORCEMENT=1 << 19;
+        // No longer using bit 19.
         const ENABLE_CLASS_LEVEL_WHERE_CLAUSES=1 << 20;
         const ESCAPE_BRACE=1 << 21;
   }
@@ -164,6 +164,9 @@ impl HHBCFlags {
         }
         if self.contains(HHBCFlags::ENABLE_IMPLICIT_CONTEXT) {
             f |= HhvmFlags::ENABLE_IMPLICIT_CONTEXT;
+        }
+        if self.contains(HHBCFlags::ENABLE_READONLY_ENFORCEMENT) {
+            f |= HhvmFlags::ENABLE_READONLY_ENFORCEMENT;
         }
         f
     }
@@ -244,9 +247,6 @@ impl ParserFlags {
         }
         if self.contains(ParserFlags::DISALLOW_DYNAMIC_METH_CALLER_ARGS) {
             f |= LangFlags::DISALLOW_DYNAMIC_METH_CALLER_ARGS;
-        }
-        if self.contains(ParserFlags::ENABLE_READONLY_ENFORCEMENT) {
-            f |= LangFlags::ENABLE_READONLY_ENFORCEMENT;
         }
         if self.contains(ParserFlags::ESCAPE_BRACE) {
             f |= LangFlags::ESCAPE_BRACE;
@@ -506,6 +506,7 @@ fn emit_fatal<'a, 'arena>(
 fn create_parser_options(opts: &Options) -> ParserOptions {
     let hack_lang_flags = |flag| opts.hhvm.hack_lang.flags.contains(flag);
     let phpism_flags = |flag| opts.phpism_flags.contains(flag);
+    let hhbc_flags = |flag| opts.hhvm.flags.contains(flag);
     ParserOptions {
         po_auto_namespace_map: opts.hhvm.aliased_namespaces_cloned().collect(),
         po_codegen: true,
@@ -542,7 +543,7 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
         ),
         po_disallow_inst_meth: hack_lang_flags(LangFlags::DISALLOW_INST_METH),
         po_escape_brace: hack_lang_flags(LangFlags::ESCAPE_BRACE),
-        po_enable_readonly_enforcement: hack_lang_flags(LangFlags::ENABLE_READONLY_ENFORCEMENT),
+        po_enable_readonly_enforcement: hhbc_flags(HhvmFlags::ENABLE_READONLY_ENFORCEMENT),
         ..Default::default()
     }
 }

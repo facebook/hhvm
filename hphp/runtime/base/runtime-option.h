@@ -108,7 +108,6 @@ struct RepoOptions {
   H(bool,           DisallowFunAndClsMethPseudoFuncs, false)          \
   H(bool,           DisallowDynamicMethCallerArgs,    false)          \
   H(bool,           DisallowInstMeth,                 false)          \
-  H(bool,           EnableReadonlyEnforcement,        false)          \
   H(bool,           EscapeBrace,                      false)          \
   /**/
 
@@ -1369,7 +1368,8 @@ struct RuntimeOption {
   F(bool, EnableAbstractContextConstants, true)                         \
   F(bool, TypeconstAbstractDefaultReflectionIsAbstract, false)          \
   F(bool, AbstractContextConstantUninitAccess, false)                   \
-  F(bool, TraitConstantInterfaceBehavior, false)                       \
+  F(bool, TraitConstantInterfaceBehavior, false)                        \
+  F(bool, EnableReadonlyEnforcement, false)                             \
   /* */
 
 private:

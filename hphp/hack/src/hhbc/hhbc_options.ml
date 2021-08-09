@@ -574,9 +574,7 @@ let value_setters =
       { opts with option_disallow_fun_and_cls_meth_pseudo_funcs = v = 1 } );
     ( set_value "hhvm.hack.lang.disallow_inst_meth" get_value_from_config_int
     @@ fun opts v -> { opts with option_disallow_inst_meth = v = 1 } );
-    ( set_value
-        "hhvm.hack.lang.enable_readonly_enforcement"
-        get_value_from_config_int
+    ( set_value "hhvm.enable_readonly_enforcement" get_value_from_config_int
     @@ fun opts v -> { opts with option_enable_readonly_enforcement = v = 1 } );
     ( set_value "hhvm.hack.lang.escape_brace" get_value_from_config_int
     @@ fun opts v -> { opts with option_escape_brace = v = 1 } );

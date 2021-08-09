@@ -286,6 +286,7 @@ std::uint32_t RepoOptions::getCompilerFlags() const {
   #define HHBC_FLAGS()                                          \
     SETFLAGS(LTRAssign, 0)                                      \
     SETFLAGS(UVS, 1)                                            \
+    SETFLAGS(RuntimeOption::EvalEnableReadonlyEnforcement, 2)   \
     SETFLAGS(RuntimeOption::RepoAuthoritative, 4)               \
     SETFLAGS(RuntimeOption::EvalJitEnableRenameFunction, 5)     \
     SETFLAGS(RuntimeOption::EvalLogExternCompilerPerf, 6)       \
@@ -343,7 +344,6 @@ std::uint32_t RepoOptions::getParserFlags() const {
     SETFLAGS(EnableEnumClasses,16)                             \
     SETFLAGS(EnableXHPClassModifier,17)                        \
     SETFLAGS(DisallowDynamicMethCallerArgs, 18)                \
-    SETFLAGS(EnableReadonlyEnforcement, 19)                    \
     SETFLAGS(RuntimeOption::EnableClassLevelWhereClauses, 20)  \
     SETFLAGS(EscapeBrace, 21)
 

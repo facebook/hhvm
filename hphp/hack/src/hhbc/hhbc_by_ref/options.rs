@@ -164,6 +164,7 @@ prefixed_flags!(
     JIT_ENABLE_RENAME_FUNCTION,
     LOG_EXTERN_COMPILER_PERF,
     ENABLE_IMPLICIT_CONTEXT,
+    ENABLE_READONLY_ENFORCEMENT,
 );
 impl Default for HhvmFlags {
     fn default() -> HhvmFlags {
@@ -263,7 +264,6 @@ prefixed_flags!(
     DISALLOW_DYNAMIC_METH_CALLER_ARGS,
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
     ENABLE_ENUM_CLASSES,
-    ENABLE_READONLY_ENFORCEMENT,
     ENABLE_XHP_CLASS_MODIFIER,
     ESCAPE_BRACE,
     DISABLE_ARRAY_CAST,
@@ -679,6 +679,9 @@ mod tests {
   "hhvm.enable_intrinsics_extension": {
     "global_value": false
   },
+  "hhvm.enable_readonly_enforcement": {
+    "global_value": false
+  },
   "hhvm.fold_lazy_class_keys": {
     "global_value": true
   },
@@ -747,9 +750,6 @@ mod tests {
   },
   "hhvm.hack.lang.enable_enum_classes": {
     "global_value": true
-  },
-  "hhvm.hack.lang.enable_readonly_enforcement": {
-    "global_value": false
   },
   "hhvm.hack.lang.enable_xhp_class_modifier": {
     "global_value": false

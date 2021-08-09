@@ -387,6 +387,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         (p, Happly (ctx, List.map hl ~f:(self#on_hint env)))
       | (p, Hintersection ctxs) ->
         (p, Hintersection (List.map ctxs ~f:(self#on_ctx_hint_ns ctx_ns env)))
+      | (p, Haccess (root, names)) -> (p, Haccess (self#on_hint env root, names))
       | _ -> self#on_hint ctx_env h
 
     method! on_shape_field_name env sfn =

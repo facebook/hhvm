@@ -363,7 +363,7 @@ fn print_type_constant<W: Write>(
     if c.is_abstract {
         w.write(" isAbstract")?;
     }
-    option(w, &c.initializer, |w, init| {
+    option(w, Option::from(c.initializer.as_ref()), |w, init| {
         w.write(" = ")?;
         triple_quotes(w, |w| print_adata(ctx, w, init))
     })?;

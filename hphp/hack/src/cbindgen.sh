@@ -31,7 +31,8 @@ hphp/hack/src/hhbc/hhbc_by_ref/hhas_adata.rs,\
 hphp/hack/src/hhbc/hhbc_by_ref/hhas_body.rs,\
 hphp/hack/src/hhbc/hhbc_by_ref/hhas_param.rs,\
 hphp/hack/src/hhbc/hhbc_by_ref/hhas_pos.rs,\
-hphp/hack/src/hhbc/hhbc_by_ref/hhas_record_def.rs,
+hphp/hack/src/hhbc/hhbc_by_ref/hhas_record_def.rs,\
+hphp/hack/src/hhbc/hhbc_by_ref/hhas_type_const.rs,
 
 signscript="$top/../xplat/python/signedsource_lib/signedsource.py"
 eval "${signscript}" sign "${top}"/hhbc-ast.h
@@ -54,6 +55,7 @@ int main() {
   HhasBody _b13;
   HhasParam _b14;
   HhasRecord _b15;
+  HhasTypeConstant _b16;
 
   std::cout << "Ok!" << std::endl;
   return 0;

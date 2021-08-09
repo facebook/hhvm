@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
-use ffi::{Maybe::*, Slice, Str};
+use ffi::{Maybe, Maybe::*, Slice, Str};
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_body as emit_body;
 use hhbc_by_ref_emit_expression as emit_expression;
@@ -202,7 +202,7 @@ fn from_type_constant<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
     Ok(HhasTypeConstant {
         name: Str::new_str(alloc, name),
-        initializer,
+        initializer: Maybe::from(initializer),
         is_abstract,
     })
 }

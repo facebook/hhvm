@@ -19,7 +19,7 @@ pub struct HhasProgram<'a, 'arena> {
     pub adata: Vec<HhasAdata<'arena>>,
     pub functions: Vec<HhasFunction<'arena>>,
     pub classes: Vec<HhasClass<'a, 'arena>>,
-    pub record_defs: Vec<HhasRecord<'a, 'arena>>,
+    pub record_defs: Vec<HhasRecord<'arena>>,
     pub typedefs: Vec<Typedef<'arena>>,
     pub file_attributes: Vec<HhasAttribute<'arena>>,
     pub symbol_refs: HhasSymbolRefs<'arena>,

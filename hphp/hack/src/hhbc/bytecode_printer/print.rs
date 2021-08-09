@@ -3350,7 +3350,7 @@ fn print_record_field<W: Write>(
         Nothing => w.write("[public sys_initial_val] ")?,
     }
     print_type_info(w, type_info)?;
-    concat_str_by(w, " ", ["", name, "="])?;
+    concat_str_by(w, " ", ["", name.as_str(), "="])?;
 
     ctx.block(w, |c, w| {
         c.newline(w)?;

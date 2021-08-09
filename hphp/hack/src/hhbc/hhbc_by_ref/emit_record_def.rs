@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use decl_provider::DeclProvider;
-use ffi::{Maybe, Maybe::*};
+use ffi::{Maybe, Maybe::*, Str};
 use hhbc_by_ref_ast_constant_folder as constant_folder;
 use hhbc_by_ref_emit_fatal as emit_fatal;
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
@@ -34,7 +34,7 @@ fn emit_field<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &Emitter<'arena, 'decl, D>,
     field: &'a (Sid, Hint, Option<Expr>),
-) -> Result<RecordField<'a, 'arena>> {
+) -> Result<RecordField<'arena>> {
     let (Id(pos, name), hint, expr_opt) = field;
     let otv = expr_opt
         .as_ref()
@@ -48,7 +48,7 @@ fn emit_field<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         &hint,
     )?;
     if valid_tc_for_record_field(&ti.type_constraint) {
-        Ok(RecordField(name.as_str(), ti, Maybe::from(otv)))
+        Ok(RecordField(Str::new_str(alloc, name.as_str()), ti, Maybe::from(otv)))
     } else {
         let name = string_utils::strip_global_ns(name);
         Err(emit_fatal::raise_fatal_parse(
@@ -62,7 +62,7 @@ fn emit_record_def<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &Emitter<'arena, 'decl, D>,
     rd: &'a RecordDef,
-) -> Result<HhasRecord<'a, 'arena>> {
+) -> Result<HhasRecord<'arena>> {
     fn elaborate<'arena>(
         alloc: &'arena bumpalo::Bump,
         Id(_, name): &Id,
@@ -96,7 +96,7 @@ pub fn emit_record_defs_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &Emitter<'arena, 'decl, D>,
     p: &'a [Def],
-) -> Result<Vec<HhasRecord<'a, 'arena>>> {
+) -> Result<Vec<HhasRecord<'arena>>> {
     p.iter()
         .filter_map(|d| {
             d.as_record_def()

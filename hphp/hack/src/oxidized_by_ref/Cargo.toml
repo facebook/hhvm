@@ -20,6 +20,7 @@ ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }
 oxidized = { path = "../oxidized" }
 serde = { version = "1.0.126", features = ["derive", "rc"] }
+typing_deps_hash = { path = "../deps/cargo/typing_deps_hash" }
 
 [dev-dependencies]
 pretty_assertions = "0.6"

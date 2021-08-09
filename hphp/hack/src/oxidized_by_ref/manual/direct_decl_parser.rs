@@ -12,10 +12,9 @@ use ocamlrep::slab::OwnedSlab;
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 use oxidized::file_info::NameType;
 
-use crate::{
-    shallow_decl_defs::{self, Decl},
-    typing_defs,
-};
+use crate::{shallow_decl_defs, typing_defs};
+
+pub use shallow_decl_defs::Decl;
 
 #[derive(
     Copy,
@@ -129,6 +128,16 @@ impl<'a> Decl<'a> {
             Decl::Record(..) => NameType::RecordDef,
             Decl::Typedef(..) => NameType::Typedef,
             Decl::Const(..) => NameType::Const,
+        }
+    }
+
+    pub fn dep_type(&self) -> typing_deps_hash::DepType {
+        match self {
+            Decl::Fun(..) => typing_deps_hash::DepType::Fun,
+            Decl::Const(..) => typing_deps_hash::DepType::Const,
+            Decl::Class(..) | Decl::Record(..) | Decl::Typedef(..) => {
+                typing_deps_hash::DepType::Type
+            }
         }
     }
 

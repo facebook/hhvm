@@ -7,7 +7,7 @@ use std::hash::Hasher;
 
 use fnv::FnvHasher;
 
-use oxidized::typing_deps_mode::HashMode;
+use oxidized::{file_info::NameType, typing_deps_mode::HashMode};
 
 /// Variant types used in the naming table.
 ///
@@ -49,6 +49,24 @@ impl DepType {
             11 => Some(DepType::AllMembers),
             12 => Some(DepType::GConstName),
             _ => None,
+        }
+    }
+
+    #[inline]
+    pub fn is_toplevel_symbol(self) -> bool {
+        match self {
+            DepType::GConst | DepType::Fun | DepType::Type => true,
+            _ => false,
+        }
+    }
+}
+
+impl From<NameType> for DepType {
+    fn from(name_type: NameType) -> Self {
+        match name_type {
+            NameType::Fun => DepType::Fun,
+            NameType::Const => DepType::GConst,
+            NameType::Class | NameType::RecordDef | NameType::Typedef => DepType::Type,
         }
     }
 }

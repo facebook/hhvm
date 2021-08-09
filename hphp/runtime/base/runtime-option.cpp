@@ -294,8 +294,7 @@ std::uint32_t RepoOptions::getCompilerFlags() const {
     SETFLAGS(RuntimeOption::EvalEmitClsMethPointers, 10)        \
     SETFLAGS(RuntimeOption::EvalEmitMethCallerFuncPointers, 11) \
     SETFLAGS(RuntimeOption::EvalEnableImplicitContext, 12)      \
-    SETFLAGS(RuntimeOption::EvalFoldLazyClassKeys, 15)          \
-    SETFLAGS(EmitInstMethPointers,16)                           \
+    SETFLAGS(RuntimeOption::EvalFoldLazyClassKeys, 15)
 
   #define SETFLAGS(flag, n)                                     \
     if (flag) {hhbc_flags |= 1 << n;}

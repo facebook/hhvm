@@ -89,7 +89,7 @@ bitflags! {
         const ARRAY_PROVENANCE=1 << 13;
         // No longer using bit 14.
         const FOLD_LAZY_CLASS_KEYS=1 << 15;
-        const EMIT_INST_METH_POINTERS=1 << 16;
+        // No longer using bit 16.
     }
 }
 
@@ -146,9 +146,6 @@ impl HHBCFlags {
         }
         if self.contains(HHBCFlags::EMIT_CLS_METH_POINTERS) {
             f |= HhvmFlags::EMIT_CLS_METH_POINTERS;
-        }
-        if self.contains(HHBCFlags::EMIT_INST_METH_POINTERS) {
-            f |= HhvmFlags::EMIT_INST_METH_POINTERS;
         }
         if self.contains(HHBCFlags::EMIT_METH_CALLER_FUNC_POINTERS) {
             f |= HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS;

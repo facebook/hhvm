@@ -1,11 +1,3 @@
 function(main)
-vec(2) {
-  object(C) (0) {
-  }
-  string(5) "inner"
-}
-vec(2) {
-  object(C3) (0) {
-  }
-  string(5) "inner"
-}
+string(8) "C::inner"
+string(9) "C3::inner"

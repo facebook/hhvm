@@ -1380,52 +1380,6 @@ void emitFCallClsMethodD(IRGS& env,
   prepareAndCallProfiled(env, func, fca, ctx, false, false);
 }
 
-void emitResolveObjMethod(IRGS& env) {
-  auto const name = topC(env, BCSPRelOffset { 0 });
-  auto const obj = topC(env, BCSPRelOffset { 1 });
-  if (!(obj->type() <= TObj) || !(name->type() <= TStr)) {
-    PUNT(ResolveObjMethod-nonObjStr);
-  }
-  if (!name->hasConstVal()) PUNT(ResolveObjMethod-nonConstStr);
-  auto cls = obj->type().clsSpec().cls();
-  if (!cls || env.irb->constrainValue(obj, GuardConstraint(cls).setWeak())) {
-    PUNT(ResolveObjMethod-unknownClass);
-  }
-  auto const exactClass = obj->type().clsSpec().exact() ||
-                    cls->attrs() & AttrNoOverride;
-  auto const methodName = name->strVal();
-
-  SSATmp* func = nullptr;
-  auto const lookup = lookupImmutableObjMethod(
-    cls, methodName, curClass(env), exactClass);
-  switch (lookup.type) {
-    case ImmutableObjMethodLookup::Type::NotFound:
-      PUNT(ResolveObjMethod-unknownObjMethod);
-    case ImmutableObjMethodLookup::Type::Func:
-      if (lookup.func->isStaticInPrologue()) {
-        gen(env, ThrowHasThisNeedStatic, cns(env, lookup.func));
-        return;
-      }
-      func = cns(env, lookup.func);
-      break;
-    case ImmutableObjMethodLookup::Type::Class:
-      func = lookupObjMethodNonExactFunc(env, obj, lookup.func);
-      break;
-    case ImmutableObjMethodLookup::Type::Interface:
-      func = lookupObjMethodInterfaceFunc(env, obj, lookup.func);
-      break;
-  }
-
-  assertx(func);
-  auto methPair = gen(env, AllocVec, PackedArrayData { 2 });
-  gen(env, InitVecElem, IndexData { 0 }, methPair, obj);
-  gen(env, InitVecElem, IndexData { 1 }, methPair, func);
-  decRef(env, name);
-  popC(env);
-  popC(env);
-  push(env, methPair);
-}
-
 namespace {
 
 SSATmp* forwardCtx(IRGS& env, const Func* parentFunc, SSATmp* funcTmp) {

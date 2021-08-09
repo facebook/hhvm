@@ -28,7 +28,6 @@ type t = {
   option_enable_intrinsics_extension: bool;
   option_phpism_disable_nontoplevel_declarations: bool;
   option_emit_cls_meth_pointers: bool;
-  option_emit_inst_meth_pointers: bool;
   option_emit_meth_caller_func_pointers: bool;
   option_emit_class_pointers: int;
   option_fold_lazy_class_keys: bool;
@@ -81,7 +80,6 @@ let default =
     option_enable_intrinsics_extension = false;
     option_phpism_disable_nontoplevel_declarations = false;
     option_emit_cls_meth_pointers = true;
-    option_emit_inst_meth_pointers = true;
     option_emit_meth_caller_func_pointers = true;
     option_emit_class_pointers = 0;
     option_fold_lazy_class_keys = true;
@@ -145,8 +143,6 @@ let phpism_disable_nontoplevel_declarations o =
   o.option_phpism_disable_nontoplevel_declarations
 
 let emit_cls_meth_pointers o = o.option_emit_cls_meth_pointers
-
-let emit_inst_meth_pointers o = o.option_emit_inst_meth_pointers
 
 let emit_meth_caller_func_pointers o = o.option_emit_meth_caller_func_pointers
 
@@ -247,7 +243,6 @@ let to_string o =
       Printf.sprintf "phpism_disable_nontoplevel_declarations: %B"
       @@ phpism_disable_nontoplevel_declarations o;
       Printf.sprintf "emit_cls_meth_pointers: %B" @@ emit_cls_meth_pointers o;
-      Printf.sprintf "emit_inst_meth_pointers: %B" @@ emit_inst_meth_pointers o;
       Printf.sprintf "emit_meth_caller_func_pointers: %B"
       @@ emit_meth_caller_func_pointers o;
       Printf.sprintf "emit_class_pointers: %d" @@ emit_class_pointers o;
@@ -330,8 +325,6 @@ let set_option options name value =
     }
   | "hhvm.emit_cls_meth_pointers" ->
     { options with option_emit_cls_meth_pointers = int_of_string value > 0 }
-  | "hhvm.emit_inst_meth_pointers" ->
-    { options with option_emit_inst_meth_pointers = int_of_string value > 0 }
   | "hhvm.emit_meth_caller_func_pointers" ->
     {
       options with
@@ -514,8 +507,6 @@ let value_setters =
     ( set_value "hhvm.emit_meth_caller_func_pointers" get_value_from_config_int
     @@ fun opts v -> { opts with option_emit_meth_caller_func_pointers = v = 1 }
     );
-    ( set_value "hhvm.emit_inst_meth_pointers" get_value_from_config_int
-    @@ fun opts v -> { opts with option_emit_inst_meth_pointers = v = 1 } );
     ( set_value "hhvm.emit_class_pointers" get_value_from_config_int
     @@ fun opts v -> { opts with option_emit_class_pointers = v } );
     ( set_value "hhvm.fold_lazy_class_keys" get_value_from_config_int

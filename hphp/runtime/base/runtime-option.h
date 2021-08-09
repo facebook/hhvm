@@ -97,7 +97,6 @@ struct RepoOptions {
   H(bool,           AbstractStaticProps,              false)          \
   H(bool,           DisableUnsetClassConst,           false)          \
   H(bool,           DisallowFuncPtrsInConstants,      false)          \
-  E(bool,           EmitInstMethPointers,             false)          \
   H(bool,           AllowUnstableFeatures,            false)          \
   H(bool,           DisallowHashComments,             false)          \
   H(bool,           EnableXHPClassModifier,           true)           \

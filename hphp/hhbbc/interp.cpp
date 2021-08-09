@@ -3943,12 +3943,6 @@ void in(ISS& env, const bc::ResolveRFunc& op) {
   push(env, union_of(TFunc, TRFunc));
 }
 
-void in(ISS& env, const bc::ResolveObjMethod& op) {
-  popC(env);
-  popC(env);
-  push(env, TVec);
-}
-
 namespace {
 
 Type ctxCls(ISS& env) {

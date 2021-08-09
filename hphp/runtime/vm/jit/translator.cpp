@@ -347,8 +347,6 @@ static const struct {
   { OpResolveFunc, {None,             Stack1,       OutFunc         }},
   { OpResolveMethCaller,
                    {None,             Stack1,       OutFunc         }},
-  { OpResolveObjMethod,
-                   {StackTop2,        Stack1,       OutVec          }},
   { OpResolveClsMethod,
                    {Stack1,           Stack1,       OutClsMeth      }},
   { OpResolveClsMethodD,
@@ -970,7 +968,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::ResolveRClsMethod:
   case Op::ResolveRClsMethodD:
   case Op::ResolveRClsMethodS:
-  case Op::ResolveObjMethod:
   case Op::ResolveClass:
   case Op::LazyClass:
   case Op::False:

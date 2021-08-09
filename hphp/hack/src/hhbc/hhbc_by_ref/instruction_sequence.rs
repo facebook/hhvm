@@ -1261,10 +1261,6 @@ pub mod instr {
         )
     }
 
-    pub fn resolve_obj_method<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::ResolveObjMethod))
-    }
-
     pub fn resolveclsmethod<'a>(alloc: &'a bumpalo::Bump, method_id: MethodId<'a>) -> InstrSeq<'a> {
         instr(
             alloc,

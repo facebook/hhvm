@@ -311,7 +311,6 @@ pub enum InstructOperator<'arena> {
     ResolveFunc(FunctionId<'arena>),
     ResolveRFunc(FunctionId<'arena>),
     ResolveMethCaller(FunctionId<'arena>),
-    ResolveObjMethod,
     ResolveClsMethod(MethodId<'arena>),
     ResolveClsMethodD(ClassId<'arena>, MethodId<'arena>),
     ResolveClsMethodS(SpecialClsRef, MethodId<'arena>),

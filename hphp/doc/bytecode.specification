@@ -3164,13 +3164,6 @@ ResolveRFunc <litstr id> [C:Vec]  ->  [C]
   If the function pointer does not take reified generics, pushes just the
   function pointer into the top of stack.
 
-ResolveObjMethod [C C] -> [C]
-
-  Resolve $1 as a method of $2 to a method array, then push the array onto the
-  top of stack. When $1 represents a class method of $2, the first element of
-  the resulting array is the class pointer of $2, otherwise the first element is
-  always $2. When resolution fails, raise an error.
-
 ResolveClsMethod  <litstr id>               [C:Class] -> [C]
 ResolveClsMethodD <litstr id> <litstr id>   []        -> [C]
 ResolveClsMethodS <mode>      <litstr id>   []        -> [C]

@@ -158,7 +158,6 @@ prefixed_flags!(
     "hhvm.",
     ARRAY_PROVENANCE,
     EMIT_CLS_METH_POINTERS,
-    EMIT_INST_METH_POINTERS,
     EMIT_METH_CALLER_FUNC_POINTERS,
     ENABLE_INTRINSICS_EXTENSION,
     FOLD_LAZY_CLASS_KEYS,
@@ -169,7 +168,6 @@ prefixed_flags!(
 impl Default for HhvmFlags {
     fn default() -> HhvmFlags {
         HhvmFlags::EMIT_CLS_METH_POINTERS
-            | HhvmFlags::EMIT_INST_METH_POINTERS
             | HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS
             | HhvmFlags::FOLD_LAZY_CLASS_KEYS
     }
@@ -672,9 +670,6 @@ mod tests {
   "hhvm.emit_cls_meth_pointers": {
     "global_value": false
   },
-  "hhvm.emit_inst_meth_pointers": {
-    "global_value": false
-  },
   "hhvm.emit_meth_caller_func_pointers": {
     "global_value": true
   },
@@ -1121,7 +1116,7 @@ bitflags! {
         const DISABLE_NONTOPLEVEL_DECLARATIONS = 1 << 22;
         // No longer using bits 23-25.
         const EMIT_CLS_METH_POINTERS = 1 << 26;
-        const EMIT_INST_METH_POINTERS = 1 << 27;
+        // No longer using bit 27.
         const EMIT_METH_CALLER_FUNC_POINTERS = 1 << 28;
         const ENABLE_IMPLICIT_CONTEXT = 1 << 29;
         const DISABLE_LVAL_AS_AN_EXPRESSION = 1 << 30;

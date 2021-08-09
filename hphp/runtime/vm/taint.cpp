@@ -563,10 +563,6 @@ void iopResolveRFunc() {
   iopUnhandled("ResolveRFunc");
 }
 
-void iopResolveObjMethod() {
-  iopUnhandled("ResolveObjMethod");
-}
-
 void iopResolveClsMethod() {
   iopUnhandled("ResolveClsMethod");
 }

@@ -3923,55 +3923,6 @@ iopFCallObjMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
 
 namespace {
 
-void resolveMethodImpl(TypedValue* c1, TypedValue* c2) {
-  auto name = c1->m_data.pstr;
-  ObjectData* thiz = nullptr;
-  HPHP::Class* cls = nullptr;
-  bool dynamic = false;
-  auto arr = make_vec_array(tvAsVariant(*c2), tvAsVariant(*c1));
-  auto const func = vm_decode_function(
-    Variant{arr},
-    vmfp(),
-    thiz,
-    cls,
-    dynamic,
-    DecodeFlags::NoWarn
-  );
-  assertx(dynamic);
-  if (!func) raise_error("Failure to resolve method name \'%s\'", name->data());
-  if (thiz) {
-    assertx(isObjectType(type(c2)));
-    assertx(!(func->attrs() & AttrStatic));
-    assertx(val(c2).pobj == thiz);
-  } else {
-    assertx(cls);
-    assertx(func->attrs() & AttrStatic);
-    arr.set(0, Variant{cls});
-  }
-  arr.set(1, Variant{func});
-  vmStack().popC();
-  vmStack().popC();
-  vmStack().pushArrayLikeNoRc(arr.detach());
-}
-
-} // namespace
-
-OPTBLD_INLINE void iopResolveObjMethod() {
-  TypedValue* c1 = vmStack().topC();
-  TypedValue* c2 = vmStack().indC(1);
-  if (!isStringType(c1->m_type)) {
-    raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
-  }
-  auto name = c1->m_data.pstr;
-  if (!isObjectType(c2->m_type)) {
-    raise_resolve_non_object(name->data(),
-                             getDataTypeString(c2->m_type).get()->data());
-  }
-  resolveMethodImpl(c1, c2);
-}
-
-namespace {
-
 Class* specialClsRefToCls(SpecialClsRef ref) {
   switch (ref) {
     case SpecialClsRef::Static:

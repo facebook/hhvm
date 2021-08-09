@@ -3133,15 +3133,7 @@ fn emit_inst_meth<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         vec![
             emit_expr(e, env, obj_expr)?,
             emit_expr(e, env, method_name)?,
-            if e.options()
-                .hhvm
-                .flags
-                .contains(HhvmFlags::EMIT_INST_METH_POINTERS)
-            {
-                instr::resolve_obj_method(alloc)
-            } else {
-                instr::new_vec_array(alloc, 2)
-            },
+            instr::new_vec_array(alloc, 2),
         ],
     );
     Ok(instrs)

@@ -1,6 +1,2 @@
 function(main)
-vec(2) {
-  object(C2) (0) {
-  }
-  function(C2::inner)
-}
+string(9) "C2::inner"

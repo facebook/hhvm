@@ -1,7 +1,8 @@
 <?hh
+<<file:__EnableUnstableFeatures('readonly')>>
 
 class C2 {
-  function inner() {
-    var_dump(inst_meth($this, __FUNCTION__));
+  readonly static function inner() {
+    var_dump(__METHOD__);
   }
 }

@@ -3375,7 +3375,10 @@ fn print_record_def<W: Write>(
     }
     w.write(" ")?;
     print_span(w, &record.span)?;
-    print_extends(w, record.base.as_ref().map(|b| b.to_raw_string()))?;
+    print_extends(
+        w,
+        Option::from(record.base.as_ref().map(|b| b.to_raw_string())),
+    )?;
     w.write(" ")?;
 
     braces(w, |w| {

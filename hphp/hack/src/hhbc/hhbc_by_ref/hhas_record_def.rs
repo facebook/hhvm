@@ -5,7 +5,7 @@
 use ffi::{Maybe, Str};
 use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_type::Info;
-use hhbc_by_ref_hhbc_id::record;
+use hhbc_by_ref_hhbc_id::record::RecordType;
 use hhbc_by_ref_runtime::TypedValue;
 
 #[derive(Debug)]
@@ -18,9 +18,9 @@ pub struct Field<'arena>(
 
 #[derive(Debug)]
 pub struct HhasRecord<'arena> {
-    pub name: record::RecordType<'arena>,
+    pub name: RecordType<'arena>,
     pub is_abstract: bool,
-    pub base: Option<record::RecordType<'arena>>,
+    pub base: Maybe<RecordType<'arena>>,
     pub fields: Vec<Field<'arena>>,
     pub span: Span,
 }

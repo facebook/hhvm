@@ -11,7 +11,7 @@ use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_record_def::{Field as RecordField, HhasRecord};
 use hhbc_by_ref_hhas_type::constraint;
-use hhbc_by_ref_hhbc_id::record;
+use hhbc_by_ref_hhbc_id::record::RecordType;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::Result;
 use oxidized::ast::*;
@@ -67,10 +67,7 @@ fn emit_record_def<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &Emitter<'arena, 'decl, D>,
     rd: &'a RecordDef,
 ) -> Result<HhasRecord<'arena>> {
-    fn elaborate<'arena>(
-        alloc: &'arena bumpalo::Bump,
-        Id(_, name): &Id,
-    ) -> record::RecordType<'arena> {
+    fn elaborate<'arena>(alloc: &'arena bumpalo::Bump, Id(_, name): &Id) -> RecordType<'arena> {
         (alloc, name.trim_start_matches('\\')).into()
     }
     let parent_name = match &rd.extends {
@@ -86,7 +83,7 @@ fn emit_record_def<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     Ok(HhasRecord {
         name: elaborate(alloc, &rd.name),
         is_abstract: rd.abstract_,
-        base: parent_name,
+        base: Maybe::from(parent_name),
         fields: rd
             .fields
             .iter()

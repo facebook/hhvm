@@ -7,6 +7,7 @@ use oxidized::pos::Pos;
 
 /// Span, emitted as prefix to classes and functions
 #[derive(Clone, Copy, Debug, Default)]
+#[repr(C)]
 pub struct Span(pub usize, pub usize);
 
 impl Span {
@@ -14,4 +15,11 @@ impl Span {
         let (line_begin, line_end, _, _) = pos.info_pos_extended();
         Span(line_begin, line_end)
     }
+}
+
+// For cbindgen
+#[allow(clippy::needless_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_pos<'arena>(_: Span) {
+    unimplemented!()
 }

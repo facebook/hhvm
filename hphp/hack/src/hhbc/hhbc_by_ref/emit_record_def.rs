@@ -48,7 +48,11 @@ fn emit_field<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         &hint,
     )?;
     if valid_tc_for_record_field(&ti.type_constraint) {
-        Ok(RecordField(Str::new_str(alloc, name.as_str()), ti, Maybe::from(otv)))
+        Ok(RecordField(
+            Str::new_str(alloc, name.as_str()),
+            ti,
+            Maybe::from(otv),
+        ))
     } else {
         let name = string_utils::strip_global_ns(name);
         Err(emit_fatal::raise_fatal_parse(

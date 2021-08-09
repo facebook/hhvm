@@ -29,7 +29,8 @@ hphp/hack/src/hhbc/hhbc_by_ref/hhas_type.rs,\
 hphp/hack/src/hhbc/hhbc_by_ref/hhas_attribute.rs,\
 hphp/hack/src/hhbc/hhbc_by_ref/hhas_adata.rs,\
 hphp/hack/src/hhbc/hhbc_by_ref/hhas_body.rs,\
-hphp/hack/src/hhbc/hhbc_by_ref/hhas_param.rs,
+hphp/hack/src/hhbc/hhbc_by_ref/hhas_param.rs,\
+hphp/hack/src/hhbc/hhbc_by_ref/hhas_record_def.rs,
 
 signscript="$top/../xplat/python/signedsource_lib/signedsource.py"
 eval "${signscript}" sign "${top}"/hhbc-ast.h
@@ -49,9 +50,9 @@ int main() {
   HhasAttribute _b9;
   Info _b10;
   HhasAdata _b11;
-  HhasBodyEnv _b12;
   HhasBody _b13;
   HhasParam _b14;
+  Field _b15;
 
   std::cout << "Ok!" << std::endl;
   return 0;

@@ -14,7 +14,7 @@ use hhbc_by_ref_ast_scope::{self as ast_scope, Scope, ScopeItem};
 use hhbc_by_ref_label::Label;
 use hhbc_by_ref_local::Local;
 use ocamlrep::rc::RcOc;
-use oxidized::{ast as tast, namespace_env::Env as NamespaceEnv};
+use oxidized::{ast, namespace_env::Env as NamespaceEnv};
 
 bitflags! {
     #[derive(Default)]
@@ -77,10 +77,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
         self
     }
 
-    pub fn make_class_env(
-        arena: &'arena bumpalo::Bump,
-        class: &'a tast::Class_,
-    ) -> Env<'a, 'arena> {
+    pub fn make_class_env(arena: &'arena bumpalo::Bump, class: &'a ast::Class_) -> Env<'a, 'arena> {
         Env::default(arena, RcOc::clone(&class.namespace)).with_scope(Scope {
             items: vec![ScopeItem::Class(ast_scope::Class::new_ref(class))],
         })
@@ -92,11 +89,11 @@ impl<'a, 'arena> Env<'a, 'arena> {
         label_break: Label,
         label_continue: Label,
         iterator: Option<hhbc_by_ref_iterator::Id>,
-        b: &[tast::Stmt],
+        b: &[ast::Stmt],
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl, D>, &[tast::Stmt]) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl, D>, &[ast::Stmt]) -> R,
     {
         self.jump_targets_gen
             .with_loop(label_break, label_continue, iterator);
@@ -107,11 +104,11 @@ impl<'a, 'arena> Env<'a, 'arena> {
         &mut self,
         e: &mut Emitter<'arena, 'decl, D>,
         end_label: Label,
-        cases: &[tast::Case],
+        cases: &[ast::Case],
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl, D>, &[tast::Case]) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl, D>, &[ast::Case]) -> R,
     {
         self.jump_targets_gen.with_switch(end_label);
         self.run_and_release_ids(e, |env, e| f(env, e, cases))
@@ -121,12 +118,12 @@ impl<'a, 'arena> Env<'a, 'arena> {
         &mut self,
         e: &mut Emitter<'arena, 'decl, D>,
         finally_label: Label,
-        try_block: &[tast::Stmt],
-        catch_block: &[tast::Catch],
+        try_block: &[ast::Stmt],
+        catch_block: &[ast::Catch],
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl, D>, &[tast::Stmt], &[tast::Catch]) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl, D>, &[ast::Stmt], &[ast::Catch]) -> R,
     {
         self.jump_targets_gen.with_try_catch(finally_label);
         self.run_and_release_ids(e, |env, e| f(env, e, try_block, catch_block))
@@ -136,11 +133,11 @@ impl<'a, 'arena> Env<'a, 'arena> {
         &mut self,
         e: &mut Emitter<'arena, 'decl, D>,
         finally_label: Label,
-        block: &[tast::Stmt],
+        block: &[ast::Stmt],
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl, D>, &[tast::Stmt]) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl, D>, &[ast::Stmt]) -> R,
     {
         self.jump_targets_gen.with_try(finally_label);
         self.run_and_release_ids(e, |env, e| f(env, e, block))
@@ -149,11 +146,11 @@ impl<'a, 'arena> Env<'a, 'arena> {
     pub fn do_in_finally_body<'decl, R, F, D: DeclProvider<'decl>>(
         &mut self,
         e: &mut Emitter<'arena, 'decl, D>,
-        block: &[tast::Stmt],
+        block: &[ast::Stmt],
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl, D>, &[tast::Stmt]) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl, D>, &[ast::Stmt]) -> R,
     {
         self.jump_targets_gen.with_finally();
         self.run_and_release_ids(e, |env, e| f(env, e, block))
@@ -163,11 +160,11 @@ impl<'a, 'arena> Env<'a, 'arena> {
         &mut self,
         e: &mut Emitter<'arena, 'decl, D>,
         finally_label: Label,
-        block: &[tast::Stmt],
+        block: &[ast::Stmt],
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl, D>, &[tast::Stmt]) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl, D>, &[ast::Stmt]) -> R,
     {
         self.jump_targets_gen.with_using(finally_label);
         self.run_and_release_ids(e, |env, e| f(env, e, block))

@@ -6,7 +6,7 @@ use hhbc_by_ref_instruction_sequence::Result;
 use naming_special_names_rust::pseudo_consts;
 use oxidized::{
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
-    ast as tast, ast_defs,
+    ast, ast_defs,
     pos::Pos,
 };
 
@@ -31,12 +31,12 @@ impl<'ast, 'arena, 'emitter, 'decl, D: DeclProvider<'decl> + 'emitter> VisitorMu
     fn visit_expr(
         &mut self,
         c: &mut Ctx<'emitter, 'arena, 'decl, D>,
-        e: &'ast mut tast::Expr,
+        e: &'ast mut ast::Expr,
     ) -> Result<()> {
-        let tast::Expr(_, pos, expr) = e;
+        let ast::Expr(_, pos, expr) = e;
         let alloc = &c.alloc;
         let emitter = &mut c.emitter;
-        if let tast::Expr_::Xml(cs) = expr {
+        if let ast::Expr_::Xml(cs) = expr {
             *e = rewrite_xml_(alloc, emitter, pos, cs.as_ref().clone())?;
         }
         e.recurse(c, self.object())?;
@@ -47,7 +47,7 @@ impl<'ast, 'arena, 'emitter, 'decl, D: DeclProvider<'decl> + 'emitter> VisitorMu
 pub fn rewrite_xml<'p, 'arena, 'emitter, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &'emitter mut Emitter<'arena, 'decl, D>,
-    prog: &'p mut tast::Program,
+    prog: &'p mut ast::Program,
 ) -> Result<()> {
     let mut xml_visitor = RewriteXmlVisitor {
         phantom: std::marker::PhantomData,
@@ -61,10 +61,10 @@ fn rewrite_xml_<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
     pos: &Pos,
-    (id, attributes, children): (tast::Sid, Vec<tast::XhpAttribute>, Vec<tast::Expr>),
-) -> Result<tast::Expr> {
+    (id, attributes, children): (ast::Sid, Vec<ast::XhpAttribute>, Vec<ast::Expr>),
+) -> Result<ast::Expr> {
+    use ast::{ClassId, ClassId_, Expr as E, Expr_ as E_, XhpAttribute};
     use ast_defs::{Id, ShapeFieldName as SF};
-    use tast::{ClassId, ClassId_, Expr as E, Expr_ as E_, XhpAttribute};
 
     let (_, attributes) =
         attributes

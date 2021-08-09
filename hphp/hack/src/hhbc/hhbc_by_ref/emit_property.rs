@@ -19,12 +19,12 @@ use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
 use hhbc_by_ref_runtime::TypedValue;
 use naming_special_names_rust::{pseudo_consts, user_attributes as ua};
-use oxidized::{aast_defs, ast as tast, ast_defs, doc_comment};
+use oxidized::{aast_defs, ast, ast_defs, doc_comment};
 
 pub struct FromAstArgs<'ast> {
-    pub user_attributes: &'ast [tast::UserAttribute],
-    pub id: &'ast tast::Sid,
-    pub initial_value: &'ast Option<tast::Expr>,
+    pub user_attributes: &'ast [ast::UserAttribute],
+    pub id: &'ast ast::Sid,
+    pub initial_value: &'ast Option<ast::Expr>,
     pub typehint: Option<&'ast aast_defs::Hint>,
     pub doc_comment: Option<doc_comment::DocComment>,
     pub visibility: aast_defs::Visibility,
@@ -36,7 +36,7 @@ pub struct FromAstArgs<'ast> {
 pub fn from_ast<'ast, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
-    class: &'ast tast::Class_,
+    class: &'ast ast::Class_,
     tparams: &[&str],
     class_is_const: bool,
     args: FromAstArgs,
@@ -211,13 +211,13 @@ fn valid_for_prop(tc: &constraint::Constraint) -> bool {
     }
 }
 
-fn expr_requires_deep_init_(expr: &tast::Expr) -> bool {
+fn expr_requires_deep_init_(expr: &ast::Expr) -> bool {
     expr_requires_deep_init(expr, false)
 }
 
-fn expr_requires_deep_init(expr: &tast::Expr, force_class_init: bool) -> bool {
+fn expr_requires_deep_init(expr: &ast::Expr, force_class_init: bool) -> bool {
+    use ast::Expr_;
     use ast_defs::Uop::*;
-    use tast::Expr_;
     match &expr.2 {
         Expr_::Unop(e) if e.0 == Uplus || e.0 == Uminus => expr_requires_deep_init_(&e.1),
         Expr_::Binop(e) => expr_requires_deep_init_(&e.1) || expr_requires_deep_init_(&e.2),
@@ -248,20 +248,20 @@ fn expr_requires_deep_init(expr: &tast::Expr, force_class_init: bool) -> bool {
     }
 }
 
-fn af_expr_requires_deep_init(af: &tast::Afield) -> bool {
+fn af_expr_requires_deep_init(af: &ast::Afield) -> bool {
     match af {
-        tast::Afield::AFvalue(e) => expr_requires_deep_init_(e),
-        tast::Afield::AFkvalue(e1, e2) => {
+        ast::Afield::AFvalue(e) => expr_requires_deep_init_(e),
+        ast::Afield::AFkvalue(e1, e2) => {
             expr_requires_deep_init_(e1) || expr_requires_deep_init_(e2)
         }
     }
 }
 
-fn expr_pair_requires_deep_init((e1, e2): &(tast::Expr, tast::Expr)) -> bool {
+fn expr_pair_requires_deep_init((e1, e2): &(ast::Expr, ast::Expr)) -> bool {
     expr_requires_deep_init_(e1) || expr_requires_deep_init_(e2)
 }
 
-fn shape_field_requires_deep_init((name, expr): &(ast_defs::ShapeFieldName, tast::Expr)) -> bool {
+fn shape_field_requires_deep_init((name, expr): &(ast_defs::ShapeFieldName, ast::Expr)) -> bool {
     match name {
         ast_defs::ShapeFieldName::SFlitInt(_) | ast_defs::ShapeFieldName::SFlitStr(_) => {
             expr_requires_deep_init_(expr)

@@ -19,14 +19,14 @@ use hhbc_by_ref_hhbc_id::{self as hhbc_id, Id};
 use hhbc_by_ref_instruction_sequence::{instr, Result};
 use naming_special_names_rust::user_attributes as ua;
 use ocamlrep::rc::RcOc;
-use oxidized::{ast as tast, ast_defs};
+use oxidized::{ast, ast_defs};
 
 use itertools::Either;
 
 pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
-    fd: &'a tast::FunDef,
+    fd: &'a ast::FunDef,
 ) -> Result<Vec<HhasFunction<'arena>>> {
     use ast_defs::FunKind;
     use hhas_function::Flags;
@@ -64,11 +64,11 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let is_meth_caller = f.name.1.starts_with("\\MethCaller$");
     let call_context = if is_meth_caller {
         match &f.user_attributes[..] {
-            [tast::UserAttribute {
+            [ast::UserAttribute {
                 name: ast_defs::Id(_, ref s),
                 params,
             }] if s == "__MethCaller" => match &params[..] {
-                [tast::Expr(_, _, tast::Expr_::String(ref ctx))] if !ctx.is_empty() => Some(
+                [ast::Expr(_, _, ast::Expr_::String(ref ctx))] if !ctx.is_empty() => Some(
                     hhbc_id::class::ClassType::from_ast_name(
                         alloc,
                         // FIXME: This is not safe--string literals are binary strings.
@@ -86,7 +86,7 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         None
     };
     let is_debug_main = match f.user_attributes.as_slice() {
-        [tast::UserAttribute { name, params }]
+        [ast::UserAttribute { name, params }]
             if name.1 == "__DebuggerMain" && params.is_empty() =>
         {
             true
@@ -178,9 +178,9 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 pub fn emit_functions_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
-    tast: &'a [tast::Def],
+    ast: &'a [ast::Def],
 ) -> Result<Vec<HhasFunction<'arena>>> {
-    Ok(tast
+    Ok(ast
         .iter()
         .filter_map(|d| d.as_fun().map(|f| emit_function(alloc, e, f)))
         .collect::<Result<Vec<Vec<_>>>>()?

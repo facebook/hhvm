@@ -15,12 +15,12 @@ use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhbc_id::{r#const, function, Id};
 use hhbc_by_ref_hhbc_string_utils::strip_global_ns;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
-use oxidized::ast as tast;
+use oxidized::ast;
 
 fn emit_constant_cinit<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     e: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
-    constant: &'a tast::Gconst,
+    constant: &'a ast::Gconst,
     c: &HhasConstant<'arena>,
 ) -> Result<Option<HhasFunction<'arena>>> {
     let alloc = env.arena;
@@ -84,7 +84,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 fn emit_constant<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     e: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
-    constant: &'a tast::Gconst,
+    constant: &'a ast::Gconst,
 ) -> Result<(HhasConstant<'arena>, Option<HhasFunction<'arena>>)> {
     let c = hhas_constant::from_ast(e, env, &constant.name, false, Some(&constant.value))?;
     let f = emit_constant_cinit(e, env, constant, &c)?;
@@ -94,7 +94,7 @@ fn emit_constant<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 pub fn emit_constants_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     e: &mut Emitter<'arena, 'decl, D>,
     env: &mut Env<'a, 'arena>,
-    defs: &'a [tast::Def],
+    defs: &'a [ast::Def],
 ) -> Result<(Vec<HhasConstant<'arena>>, Vec<HhasFunction<'arena>>)> {
     let const_tuples = defs
         .iter()

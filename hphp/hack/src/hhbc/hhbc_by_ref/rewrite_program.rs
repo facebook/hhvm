@@ -10,9 +10,9 @@ use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_instruction_sequence::{unrecoverable, Result};
 use hhbc_by_ref_rewrite_xml::rewrite_xml;
 use ocamlrep::rc::RcOc;
-use oxidized::{ast as Tast, namespace_env};
+use oxidized::{ast, namespace_env};
 
-fn debugger_eval_should_modify(tast: &[Tast::Def]) -> Result<bool> {
+fn debugger_eval_should_modify(tast: &[ast::Def]) -> Result<bool> {
     /*
     The AST currently always starts with a Markup statement, so a
     length of 2 means there was 1 user def (statement, function,
@@ -41,14 +41,14 @@ fn debugger_eval_should_modify(tast: &[Tast::Def]) -> Result<bool> {
 pub fn rewrite_program<'p, 'arena, 'emitter, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &'emitter mut Emitter<'arena, 'decl, D>,
-    prog: &'p mut Tast::Program,
+    prog: &'p mut ast::Program,
     namespace_env: RcOc<namespace_env::Env>,
 ) -> Result<()> {
     let for_debugger_eval =
         emitter.for_debugger_eval && debugger_eval_should_modify(prog.as_slice())?;
     if !emitter.for_debugger_eval {
         let contains_toplevel_code = prog.iter().find_map(|d| {
-            if let Some(Tast::Stmt(pos, s_)) = d.as_stmt() {
+            if let Some(ast::Stmt(pos, s_)) = d.as_stmt() {
                 if s_.is_markup() { None } else { Some(pos) }
             } else {
                 None

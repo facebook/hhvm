@@ -13,7 +13,7 @@ use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_property::HhasProperty;
 use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
 use hhbc_by_ref_hhbc_id::class;
-use oxidized::{ast as tast, doc_comment::DocComment};
+use oxidized::{ast, doc_comment::DocComment};
 
 #[derive(Debug)]
 pub enum TraitReqKind {
@@ -35,7 +35,7 @@ pub struct HhasClass<'a, 'arena> {
         Option<class::ClassType<'arena>>,
         class::ClassType<'arena>,
         Option<class::ClassType<'arena>>,
-        &'a Vec<tast::UseAsVisibility>,
+        &'a Vec<ast::UseAsVisibility>,
     )>,
     // Deprecated - kill please
     pub use_precedences: Vec<(

@@ -13,15 +13,15 @@ use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_body::HhasBody;
 use hhbc_by_ref_instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use hhbc_by_ref_local::Local;
-use oxidized::{aast, ast as tast, pos::Pos};
+use oxidized::{aast, ast, pos::Pos};
 
 pub fn emit_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
     scope: &Scope<'a>,
-    class_attrs: &[tast::UserAttribute],
-    name: &tast::Sid,
-    params: &[tast::FunParam],
+    class_attrs: &[ast::UserAttribute],
+    name: &ast::Sid,
+    params: &[ast::FunParam],
     ret: Option<&aast::Hint>,
 ) -> Result<HhasBody<'arena>> {
     let body_instrs = emit_native_opcode_impl(alloc, &name.1, params, class_attrs);
@@ -48,8 +48,8 @@ pub fn emit_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 fn emit_native_opcode_impl<'arena>(
     alloc: &'arena bumpalo::Bump,
     name: &str,
-    params: &[tast::FunParam],
-    user_attrs: &[tast::UserAttribute],
+    params: &[ast::FunParam],
+    user_attrs: &[ast::UserAttribute],
 ) -> Result<InstrSeq<'arena>> {
     if let [ua] = user_attrs {
         if ua.name.1 == "__NativeData" {
@@ -72,7 +72,7 @@ fn emit_native_opcode_impl<'arena>(
 fn emit_generator_method<'arena>(
     alloc: &'arena bumpalo::Bump,
     name: &str,
-    params: &[tast::FunParam],
+    params: &[ast::FunParam],
 ) -> Result<InstrSeq<'arena>> {
     let instrs = match name {
         "send" => {
@@ -119,7 +119,7 @@ fn emit_generator_method<'arena>(
     Ok(InstrSeq::gather(alloc, vec![instrs, instr::retc(alloc)]))
 }
 
-fn get_first_param_name(params: &[tast::FunParam]) -> Result<&str> {
+fn get_first_param_name(params: &[ast::FunParam]) -> Result<&str> {
     match params {
         [p, ..] => Ok(&p.name),
         _ => Err(Unrecoverable(String::from(

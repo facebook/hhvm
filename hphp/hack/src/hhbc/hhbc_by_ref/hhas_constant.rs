@@ -15,7 +15,7 @@ use hhbc_by_ref_env::{emitter::Emitter, Env};
 use hhbc_by_ref_hhbc_id::{self as hhbc_id, Id};
 use hhbc_by_ref_instruction_sequence::{InstrSeq, Result};
 use hhbc_by_ref_runtime::TypedValue;
-use oxidized::ast as tast;
+use oxidized::ast;
 
 #[derive(Debug)]
 #[repr(C)]
@@ -29,9 +29,9 @@ pub struct HhasConstant<'arena> {
 pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
-    id: &'a tast::Id,
+    id: &'a ast::Id,
     is_abstract: bool,
-    expr: Option<&tast::Expr>,
+    expr: Option<&ast::Expr>,
 ) -> Result<HhasConstant<'arena>> {
     let alloc = env.arena;
     let (value, initializer_instrs) = match expr {

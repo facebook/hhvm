@@ -26,7 +26,7 @@ use itertools::{Either, Either::*};
 use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized::{
-    ast as Tast, namespace_env::Env as NamespaceEnv, parser_options::ParserOptions, pos::Pos,
+    ast, namespace_env::Env as NamespaceEnv, parser_options::ParserOptions, pos::Pos,
     relative_path::RelativePath,
 };
 use parser_core_types::{
@@ -430,7 +430,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<S>,
     namespace_env: RcOc<NamespaceEnv>,
-    ast: &'p mut Tast::Program,
+    ast: &'p mut ast::Program,
 ) -> Result<HhasProgram<'p, 'arena>, Error> {
     // First rewrite.
     let result = rewrite(alloc, emitter, ast, RcOc::clone(&namespace_env)); // Modifies `ast` in place.
@@ -449,7 +449,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
 fn rewrite<'p, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
-    ast: &'p mut Tast::Program,
+    ast: &'p mut ast::Program,
     namespace_env: RcOc<NamespaceEnv>,
 ) -> Result<(), Error> {
     rewrite_program(alloc, emitter, ast, namespace_env)
@@ -460,7 +460,7 @@ fn emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<S>,
     namespace: RcOc<NamespaceEnv>,
-    ast: &'p mut Tast::Program,
+    ast: &'p mut ast::Program,
 ) -> Result<HhasProgram<'p, 'arena>, Error> {
     let mut flags = FromAstFlags::empty();
     if env.flags.contains(EnvFlags::IS_EVALED) {
@@ -557,7 +557,7 @@ fn parse_file(
     source_text: SourceText,
     elaborate_namespaces: bool,
     namespace_env: RcOc<NamespaceEnv>,
-) -> Either<(Pos, String, bool), Tast::Program> {
+) -> Either<(Pos, String, bool), ast::Program> {
     let aast_env = AastEnv {
         codegen: true,
         fail_open: false,
@@ -637,7 +637,7 @@ fn time<T>(f: impl FnOnce() -> T) -> (T, f64) {
     (r, t.as_secs_f64())
 }
 
-pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &Tast::Expr) -> String {
+pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> String {
     let opts =
         Options::from_configs(&env.config_jsons, &env.config_list).expect("Malformed options");
 

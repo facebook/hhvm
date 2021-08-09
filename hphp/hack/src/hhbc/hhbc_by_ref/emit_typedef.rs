@@ -14,14 +14,14 @@ use hhbc_by_ref_hhas_typedef::Typedef;
 use hhbc_by_ref_hhbc_id::{class, Id};
 use hhbc_by_ref_instruction_sequence::Result;
 use hhbc_by_ref_runtime::TypedValue;
-use oxidized::{aast_defs::Hint, ast as tast};
+use oxidized::{aast_defs::Hint, ast};
 
 use std::collections::BTreeMap;
 
 pub fn emit_typedefs_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
-    prog: &'a [tast::Def],
+    prog: &'a [ast::Def],
 ) -> Result<Vec<Typedef<'arena>>> {
     prog.iter()
         .filter_map(|def| {
@@ -39,7 +39,7 @@ pub fn emit_typedefs_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 fn emit_typedef<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
-    typedef: &'a tast::Typedef,
+    typedef: &'a ast::Typedef,
 ) -> Result<Typedef<'arena>> {
     let name = class::ClassType::<'arena>::from_ast_name(alloc, &typedef.name.1);
     let attributes_res = emit_attribute::from_asts(alloc, emitter, &typedef.user_attributes);

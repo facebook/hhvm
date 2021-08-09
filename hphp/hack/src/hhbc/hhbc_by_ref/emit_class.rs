@@ -38,7 +38,8 @@ use hhbc_by_ref_local::Local;
 use hhbc_by_ref_runtime::TypedValue;
 use naming_special_names_rust as special_names;
 use oxidized::{
-    ast::{self as tast, Hint, ReifyKind, Visibility},
+    ast,
+    ast::{Hint, ReifyKind, Visibility},
     namespace_env,
     pos::Pos,
 };
@@ -126,7 +127,7 @@ fn from_extends<'arena>(
     alloc: &'arena bumpalo::Bump,
     is_enum: bool,
     is_enum_class: bool,
-    extends: &[tast::Hint],
+    extends: &[ast::Hint],
 ) -> Option<hhbc_id::class::ClassType<'arena>> {
     if is_enum {
         // Do not use special_names:: as there's a prefix \ which breaks HHVM
@@ -147,7 +148,7 @@ fn from_extends<'arena>(
 
 fn from_implements<'arena>(
     alloc: &'arena bumpalo::Bump,
-    implements: &[tast::Hint],
+    implements: &[ast::Hint],
 ) -> Vec<hhbc_id::class::ClassType<'arena>> {
     implements
         .iter()
@@ -157,7 +158,7 @@ fn from_implements<'arena>(
 
 fn from_includes<'arena>(
     alloc: &'arena bumpalo::Bump,
-    includes: &[tast::Hint],
+    includes: &[ast::Hint],
 ) -> Vec<hhbc_id::class::ClassType<'arena>> {
     includes
         .iter()
@@ -168,19 +169,19 @@ fn from_includes<'arena>(
 fn from_type_constant<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
-    tc: &'a tast::ClassTypeconstDef,
+    tc: &'a ast::ClassTypeconstDef,
 ) -> Result<HhasTypeConstant<'arena>> {
-    use tast::ClassTypeconst::*;
+    use ast::ClassTypeconst::*;
     let name = tc.name.1.to_string();
 
     let initializer = match &tc.kind {
-        TCAbstract(tast::ClassAbstractTypeconst { default: None, .. }) => None,
-        TCAbstract(tast::ClassAbstractTypeconst {
+        TCAbstract(ast::ClassAbstractTypeconst { default: None, .. }) => None,
+        TCAbstract(ast::ClassAbstractTypeconst {
             default: Some(init),
             ..
         })
-        | TCPartiallyAbstract(tast::ClassPartiallyAbstractTypeconst { type_: init, .. })
-        | TCConcrete(tast::ClassConcreteTypeconst { c_tc_type: init }) => {
+        | TCPartiallyAbstract(ast::ClassPartiallyAbstractTypeconst { type_: init, .. })
+        | TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: init }) => {
             // TODO: Deal with the constraint
             // Type constants do not take type vars hence tparams:[]
             Some(emit_type_constant::hint_to_type_constant(
@@ -207,17 +208,17 @@ fn from_type_constant<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     })
 }
 
-fn from_ctx_constant(tc: &tast::ClassTypeconstDef) -> Result<HhasCtxConstant> {
-    use tast::ClassTypeconst::*;
+fn from_ctx_constant(tc: &ast::ClassTypeconstDef) -> Result<HhasCtxConstant> {
+    use ast::ClassTypeconst::*;
     let name = tc.name.1.to_string();
     let coeffects = match &tc.kind {
-        TCAbstract(tast::ClassAbstractTypeconst { default: None, .. }) => (vec![], vec![]),
+        TCAbstract(ast::ClassAbstractTypeconst { default: None, .. }) => (vec![], vec![]),
         TCPartiallyAbstract(_) => (vec![], vec![]), // does not parse
-        TCAbstract(tast::ClassAbstractTypeconst {
+        TCAbstract(ast::ClassAbstractTypeconst {
             default: Some(hint),
             ..
         })
-        | TCConcrete(tast::ClassConcreteTypeconst { c_tc_type: hint }) => {
+        | TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: hint }) => {
             HhasCoeffects::from_ctx_constant(hint)
         }
     };
@@ -235,7 +236,7 @@ fn from_ctx_constant(tc: &tast::ClassTypeconstDef) -> Result<HhasCtxConstant> {
 fn from_class_elt_classvars<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
-    ast_class: &'a tast::Class_,
+    ast_class: &'a ast::Class_,
     class_is_const: bool,
     tparams: &[&str],
 ) -> Result<Vec<HhasProperty<'arena>>> {
@@ -279,7 +280,7 @@ fn from_class_elt_classvars<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 fn from_class_elt_constants<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
-    class_: &'a tast::Class_,
+    class_: &'a ast::Class_,
 ) -> Result<Vec<HhasConstant<'arena>>> {
     use oxidized::aast::ClassConstKind::*;
     class_
@@ -297,7 +298,7 @@ fn from_class_elt_constants<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
 fn from_class_elt_requirements<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
-    class_: &'a tast::Class_,
+    class_: &'a ast::Class_,
 ) -> Vec<(hhbc_id::class::ClassType<'arena>, TraitReqKind)> {
     class_
         .reqs
@@ -315,7 +316,7 @@ fn from_class_elt_requirements<'a, 'arena>(
 
 fn from_enum_type<'arena>(
     alloc: &'arena bumpalo::Bump,
-    opt: Option<&tast::Enum_>,
+    opt: Option<&ast::Enum_>,
 ) -> Result<Option<hhbc_by_ref_hhas_type::Info<'arena>>> {
     use hhbc_by_ref_hhas_type::constraint::*;
     opt.map(|e| {
@@ -332,7 +333,7 @@ fn from_enum_type<'arena>(
     .transpose()
 }
 
-fn validate_class_name(ns: &namespace_env::Env, tast::Id(p, class_name): &tast::Id) -> Result<()> {
+fn validate_class_name(ns: &namespace_env::Env, ast::Id(p, class_name): &ast::Id) -> Result<()> {
     let is_global_namespace = |ns: &namespace_env::Env| ns.name.is_none();
     let is_hh_namespace = |ns: &namespace_env::Env| {
         ns.name
@@ -372,7 +373,7 @@ fn validate_class_name(ns: &namespace_env::Env, tast::Id(p, class_name): &tast::
 fn emit_reified_extends_params<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     e: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
-    ast_class: &'a tast::Class_,
+    ast_class: &'a ast::Class_,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     match &ast_class.extends[..] {
@@ -403,7 +404,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     e: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
     num_reified: usize,
-    ast_class: &'a tast::Class_,
+    ast_class: &'a ast::Class_,
 ) -> Result<InstrSeq<'arena>> {
     use string_utils::reified::{INIT_METH_NAME, INIT_METH_PARAM_NAME, PROP_NAME};
 
@@ -476,7 +477,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 fn emit_reified_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
-    ast_class: &'a tast::Class_,
+    ast_class: &'a ast::Class_,
 ) -> Result<Option<HhasMethod<'arena>>> {
     use hhbc_by_ref_hhas_type::{constraint::*, Info};
 
@@ -571,7 +572,7 @@ where
 pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
-    ast_class: &'a tast::Class_,
+    ast_class: &'a ast::Class_,
 ) -> Result<HhasClass<'a, 'arena>> {
     let namespace = &ast_class.namespace;
     validate_class_name(namespace, &ast_class.name)?;
@@ -594,14 +595,14 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     // it on.
     let no_dynamic_props = is_const;
     let name = class::ClassType::from_ast_name(alloc, &ast_class.name.1);
-    let is_trait = ast_class.kind == tast::ClassishKind::Ctrait;
-    let is_interface = ast_class.kind == tast::ClassishKind::Cinterface;
+    let is_trait = ast_class.kind == ast::ClassishKind::Ctrait;
+    let is_interface = ast_class.kind == ast::ClassishKind::Cinterface;
 
     let uses = ast_class
         .uses
         .iter()
         .filter_map(|x| match x.1.as_ref() {
-            tast::Hint_::Happly(tast::Id(_, name), _) => {
+            ast::Hint_::Happly(ast::Id(_, name), _) => {
                 if is_interface {
                     Some(Err(emit_fatal::raise_fatal_parse(
                         &x.0,
@@ -616,11 +617,11 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .collect::<Result<Vec<_>>>()?;
 
     let elaborate_namespace_id =
-        |x: &'a tast::Id| hhbc_id::class::ClassType::from_ast_name(alloc, x.name());
+        |x: &'a ast::Id| hhbc_id::class::ClassType::from_ast_name(alloc, x.name());
     let use_aliases = ast_class
         .use_as_alias
         .iter()
-        .map(|tast::UseAsAlias(ido1, id, ido2, vis)| {
+        .map(|ast::UseAsAlias(ido1, id, ido2, vis)| {
             let id1 = ido1.as_ref().map(|x| elaborate_namespace_id(x));
             let id2 = ido2.as_ref().map(|x| (alloc, x.1.as_ref()).into());
             (id1, (alloc, id.1.as_ref()).into(), id2, vis)
@@ -630,7 +631,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let use_precedences = ast_class
         .insteadof_alias
         .iter()
-        .map(|tast::InsteadofAlias(id1, id2, ids)| {
+        .map(|ast::InsteadofAlias(id1, id2, ids)| {
             let id1 = elaborate_namespace_id(id1);
             let id2: hhbc_by_ref_hhbc_id::class::ClassType<'arena> = (alloc, id2.1.as_ref()).into();
             let ids = ids.iter().map(|x| elaborate_namespace_id(x)).collect();
@@ -639,20 +640,20 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .collect();
 
     let enum_type = match ast_class.kind {
-        tast::ClassishKind::Cenum | tast::ClassishKind::CenumClass => {
+        ast::ClassishKind::Cenum | ast::ClassishKind::CenumClass => {
             from_enum_type(alloc, ast_class.enum_.as_ref())?
         }
         _ => None,
     };
     let is_enum_class = match ast_class.kind {
-        tast::ClassishKind::CenumClass => true,
+        ast::ClassishKind::CenumClass => true,
         _ => false,
     };
     let xhp_attributes: Vec<_> = ast_class
         .xhp_attrs
         .iter()
         .map(
-            |tast::XhpAttr(type_, class_var, tag, maybe_enum)| HhasXhpAttribute {
+            |ast::XhpAttr(type_, class_var, tag, maybe_enum)| HhasXhpAttribute {
                 type_: type_.1.as_ref(),
                 class_var,
                 tag: *tag,
@@ -668,7 +669,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .map(|(p, c)| (p, c.iter().map(|x| &x.1).collect()));
 
     let is_abstract = match ast_class.kind {
-        tast::ClassishKind::Cclass(k) => k.is_abstract(),
+        ast::ClassishKind::Cclass(k) => k.is_abstract(),
         _ => false,
     };
     let is_final = ast_class.final_ || is_trait;
@@ -707,8 +708,8 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         &ast_class.implements
     };
     let implements = from_implements(alloc, implements);
-    let enum_includes = if ast_class.kind == tast::ClassishKind::Cenum
-        || ast_class.kind == tast::ClassishKind::CenumClass
+    let enum_includes = if ast_class.kind == ast::ClassishKind::Cenum
+        || ast_class.kind == ast::ClassishKind::CenumClass
     {
         match &ast_class.enum_ {
             None => vec![],
@@ -945,11 +946,11 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 pub fn emit_classes_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
-    tast: &'a [tast::Def],
+    ast: &'a [ast::Def],
 ) -> Result<Vec<HhasClass<'a, 'arena>>> {
-    tast.iter()
+    ast.iter()
         .filter_map(|class| {
-            if let tast::Def::Class(cd) = class {
+            if let ast::Def::Class(cd) = class {
                 Some(emit_class(alloc, emitter, cd))
             } else {
                 None

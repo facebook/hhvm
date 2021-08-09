@@ -13,7 +13,7 @@ use hhbc_by_ref_hhbc_ast::{
 };
 use hhbc_by_ref_instruction_sequence::InstrSeq;
 use hhbc_by_ref_label::{Id, Label};
-use oxidized::ast as tast;
+use oxidized::ast;
 
 fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<Id, usize> {
     let mut folder =
@@ -69,7 +69,7 @@ fn get_regular_labels<'arena>(instr: &Instruct<'arena>) -> Vec<Label> {
 
 fn create_label_ref_map<'arena>(
     defs: &HashMap<Id, usize>,
-    params: &[(HhasParam<'arena>, Option<(Label, tast::Expr)>)],
+    params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
     body: &InstrSeq<'arena>,
 ) -> (HashSet<Id>, HashMap<Id, usize>) {
     let process_ref =
@@ -98,7 +98,7 @@ fn create_label_ref_map<'arena>(
         init,
         |
             acc: (usize, (HashSet<Id>, HashMap<Id, usize>)),
-            (_, default_value): &(HhasParam<'arena>, Option<(Label, tast::Expr)>),
+            (_, default_value): &(HhasParam<'arena>, Option<(Label, ast::Expr)>),
         | match &default_value {
             None => acc,
             Some((l, _)) => process_ref(acc, *l),
@@ -149,7 +149,7 @@ fn rewrite_params_and_body<'arena>(
     defs: &HashMap<Id, usize>,
     used: &HashSet<Id>,
     refs: &HashMap<Id, usize>,
-    params: &mut Vec<(HhasParam<'arena>, Option<(Label, tast::Expr)>)>,
+    params: &mut Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>,
     body: &mut InstrSeq<'arena>,
 ) {
     let relabel_id = |id: &Id| -> Id {
@@ -170,19 +170,18 @@ fn rewrite_params_and_body<'arena>(
             true
         }
     };
-    let rewrite_param =
-        |(_, default_value): &mut (HhasParam<'arena>, Option<(Label, tast::Expr)>)| {
-            if let Some((l, _)) = default_value {
-                *l = l.map(relabel_id);
-            }
-        };
+    let rewrite_param = |(_, default_value): &mut (HhasParam<'arena>, Option<(Label, ast::Expr)>)| {
+        if let Some((l, _)) = default_value {
+            *l = l.map(relabel_id);
+        }
+    };
     params.iter_mut().for_each(|param| rewrite_param(param));
     body.filter_map_mut(alloc, &mut rewrite_instr);
 }
 
 pub fn relabel_function<'arena>(
     alloc: &'arena bumpalo::Bump,
-    params: &mut Vec<(HhasParam<'arena>, Option<(Label, tast::Expr)>)>,
+    params: &mut Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>,
     body: &mut InstrSeq<'arena>,
 ) {
     let defs = create_label_to_offset_map(body);

@@ -19,7 +19,7 @@ use hhbc_by_ref_hhas_symbol_refs::HhasSymbolRefs;
 use hhbc_by_ref_hhbc_ast::FatalOp;
 use hhbc_by_ref_instruction_sequence::{Error, Result};
 use ocamlrep::rc::RcOc;
-use oxidized::{ast as Tast, namespace_env, pos::Pos};
+use oxidized::{ast, namespace_env, pos::Pos};
 
 // PUBLIC INTERFACE (ENTRY POINTS)
 
@@ -41,7 +41,7 @@ pub fn emit_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     flags: FromAstFlags,
     namespace: RcOc<namespace_env::Env>,
-    tast: &'a Tast::Program,
+    tast: &'a ast::Program,
 ) -> Result<HhasProgram<'a, 'arena>> {
     let result = emit_program_(alloc, emitter, flags, namespace, tast);
     match result {
@@ -55,7 +55,7 @@ fn emit_program_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     emitter: &mut Emitter<'arena, 'decl, D>,
     _flags: FromAstFlags,
     namespace: RcOc<namespace_env::Env>,
-    prog: &'a Tast::Program,
+    prog: &'a ast::Program,
 ) -> Result<HhasProgram<'a, 'arena>> {
     let mut functions = emit_functions_from_program(alloc, emitter, prog)?;
     let classes = emit_classes_from_program(alloc, emitter, prog)?;

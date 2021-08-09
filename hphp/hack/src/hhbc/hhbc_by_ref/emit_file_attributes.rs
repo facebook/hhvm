@@ -7,7 +7,7 @@ use hhbc_by_ref_emit_attribute::from_asts;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_instruction_sequence::Result;
-use oxidized::ast as tast;
+use oxidized::ast;
 
 extern crate itertools;
 use itertools::Itertools;
@@ -15,7 +15,7 @@ use itertools::Itertools;
 fn emit_file_attributes<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
-    fa: &tast::FileAttribute,
+    fa: &ast::FileAttribute,
 ) -> Result<Vec<HhasAttribute<'arena>>> {
     from_asts(alloc, e, &fa.user_attributes[..])
 }
@@ -23,11 +23,11 @@ fn emit_file_attributes<'arena, 'decl, D: DeclProvider<'decl>>(
 pub fn emit_file_attributes_from_program<'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
-    prog: &[tast::Def],
+    prog: &[ast::Def],
 ) -> Result<Vec<HhasAttribute<'arena>>> {
     prog.iter()
         .filter_map(|node| {
-            if let tast::Def::FileAttributes(fa) = node {
+            if let ast::Def::FileAttributes(fa) = node {
                 Some(emit_file_attributes(alloc, e, fa))
             } else {
                 None

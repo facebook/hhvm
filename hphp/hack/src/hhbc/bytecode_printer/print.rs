@@ -3346,8 +3346,8 @@ fn print_record_field<W: Write>(
     ctx.newline(w)?;
     w.write(".property ")?;
     match intial_value {
-        Some(_) => w.write("[public] ")?,
-        None => w.write("[public sys_initial_val] ")?,
+        Just(_) => w.write("[public] ")?,
+        Nothing => w.write("[public sys_initial_val] ")?,
     }
     print_type_info(w, type_info)?;
     concat_str_by(w, " ", ["", name, "="])?;
@@ -3355,8 +3355,8 @@ fn print_record_field<W: Write>(
     ctx.block(w, |c, w| {
         c.newline(w)?;
         match intial_value {
-            None => w.write("uninit")?,
-            Some(value) => triple_quotes(w, |w| print_adata(c, w, value))?,
+            Nothing => w.write("uninit")?,
+            Just(value) => triple_quotes(w, |w| print_adata(c, w, value))?,
         }
         w.write(";")
     })

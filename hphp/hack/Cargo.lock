@@ -1862,6 +1862,7 @@ dependencies = [
 name = "hhbc_by_ref_hhas_record_def"
 version = "0.0.0"
 dependencies = [
+ "ffi",
  "hhbc_by_ref_hhas_pos",
  "hhbc_by_ref_hhas_type",
  "hhbc_by_ref_hhbc_id",

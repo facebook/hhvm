@@ -1138,6 +1138,7 @@ function hhbbc_cmd($options, $test, $program) {
     '--no-logging',
     '--no-cores',
     '--parallel-num-threads=' . ($options['repo-threads'] ?? 1),
+    '--parallel-final-threads=' . ($options['repo-threads'] ?? 1),
     read_opts_file("$test.hhbbc_opts"),
     "-o \"$test_repo/$program.hhbbc\" \"$test_repo/$program.hhbc\"",
   ]);

@@ -957,8 +957,8 @@ class ReflectionProperty implements Reflector {
   /**
    * Get the user defined attributes from the property declaration.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getAttributesNamespaced(): dict<string, mixed>;
+  <<__Native>>
+  public function getAttributesNamespaced()[]: dict<string, mixed>;
 
   use ReflectionLegacyAttribute;
 }

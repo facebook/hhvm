@@ -570,6 +570,37 @@ impl std::convert::From<oxidized::ast_defs::ClassishKind> for ClassishKind {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
+pub enum Visibility {
+    Private,
+    Public,
+    Protected,
+    Internal,
+}
+impl std::convert::From<oxidized::ast_defs::Visibility> for Visibility {
+    fn from(k: oxidized::ast_defs::Visibility) -> Visibility {
+        use oxidized::ast_defs::Visibility::*;
+        match k {
+            Private => Visibility::Private,
+            Public => Visibility::Public,
+            Protected => Visibility::Protected,
+            Internal => Visibility::Internal,
+        }
+    }
+}
+impl AsRef<str> for Visibility {
+    fn as_ref(&self) -> &str {
+        use Visibility::*;
+        match self {
+            Private => "private",
+            Public => "public",
+            Protected => "protected",
+            Internal => "internal",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum OpSilence {
     Start,
     End,

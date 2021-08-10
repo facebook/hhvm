@@ -1852,10 +1852,10 @@ dependencies = [
  "ffi",
  "hhbc_by_ref_hhas_attribute",
  "hhbc_by_ref_hhas_type",
+ "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_instruction_sequence",
  "hhbc_by_ref_runtime",
- "oxidized",
 ]
 
 [[package]]

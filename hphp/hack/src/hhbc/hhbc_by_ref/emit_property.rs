@@ -190,7 +190,7 @@ pub fn from_ast<'ast, 'arena, 'decl, D: DeclProvider<'decl>>(
         initial_value: initial_value.into(),
         initializer_instrs: initializer_instrs.into(),
         flags: hhas_property_flags,
-        visibility: args.visibility,
+        visibility: hhbc_by_ref_hhbc_ast::Visibility::from(args.visibility),
         doc_comment: args
             .doc_comment
             .map(|pstr| ffi::Str::from(alloc.alloc_str(&pstr.0.1)))

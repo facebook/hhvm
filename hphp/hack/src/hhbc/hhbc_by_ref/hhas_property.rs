@@ -6,11 +6,12 @@
 use bitflags::bitflags;
 use ffi::{Maybe, Slice, Str};
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
+use hhbc_by_ref_hhbc_ast::Visibility;
 use hhbc_by_ref_hhbc_id as hhbc_id;
 use hhbc_by_ref_instruction_sequence::InstrSeq;
-use oxidized::aast_defs::Visibility;
 
 bitflags! {
+    #[repr(C)]
     pub struct HhasPropertyFlags: u16 {
         const IS_ABSTRACT = 1 << 0;
         const IS_STATIC = 1 << 1;
@@ -27,6 +28,7 @@ bitflags! {
 }
 
 #[derive(Debug)]
+#[repr(C)]
 pub struct HhasProperty<'arena> {
     pub name: hhbc_id::prop::PropType<'arena>,
     pub flags: HhasPropertyFlags,
@@ -77,4 +79,13 @@ impl<'arena> HhasProperty<'arena> {
     pub fn is_readonly(&self) -> bool {
         self.flags.contains(HhasPropertyFlags::IS_READONLY)
     }
+}
+
+// For cbindgen
+#[allow(clippy::needless_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_property<'arena>(
+    _: HhasProperty<'arena>,
+) {
+    unimplemented!()
 }

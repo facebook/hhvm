@@ -1772,19 +1772,18 @@ class ReflectionClass implements Reflector {
 
   // This calculations requires walking the preclasses in the hierarchy and
   // should not be getting performed repeatedly.
-  <<__Native, __Pure>>
+  <<__Native>>
   // returns dict:
   //   'properties'               => darray<string, prop_info_array>
   //   'private_properties'       => darray<string, prop_info_array>
   //   'properties_index'         => darray<string, int>
   //   'private_properties_index' => darray<string, int>
-  private static function getClassPropertyInfo(string $clsname): dict;
+  private static function getClassPropertyInfo(string $clsname)[]: dict;
 
-  <<__Native, __Pure, __MaybeMutable>>
-  private function getDynamicPropertyInfos(object $obj): dict<string, mixed>;
+  <<__Native>>
+  private function getDynamicPropertyInfos(object $obj)[]: dict<string, mixed>;
 
-  <<__Pure, __MaybeMutable>>
-  private function getOrderedPropertyInfos(): ConstMap<string, mixed> {
+  private function getOrderedPropertyInfos()[]: ConstMap<string, mixed> {
     $props_map = self::getPropsMapCache($this->getName());
     if (!$this->obj) { return $props_map; }
 
@@ -1794,13 +1793,13 @@ class ReflectionClass implements Reflector {
     $dynamic_props = $this->getDynamicPropertyInfos($this->obj);
     return (!$dynamic_props)
       ? $props_map
-      : $props_map->toMap()->setAll($dynamic_props);
+      : new Map(HH\Lib\Dict\merge($props_map, $dynamic_props));
   }
 
-  <<__Memoize, __Pure>>
+  <<__Memoize>>
   private static function getPropsMapCache(
     string $clsname
-  ): ImmMap<string, mixed> {
+  )[]: ImmMap<string, mixed> {
     return new ImmMap(self::getClassPropertyInfo($clsname));
   }
 

@@ -1608,36 +1608,51 @@ struct PreResolveUpdates {
     std::tuple<std::unique_ptr<php::Class>, php::Unit*, uint32_t>
   > newClasses;
 
-  struct UnitPtrHashCompare {
-    bool equal(const php::Unit* u1, const php::Unit* u2) const {
-      return u1 == u2;
-    }
-    size_t hash(const php::Unit* u) const {
-      return pointer_hash<const php::Unit>{}(u);
-    }
-  };
-
-  using UnitNumClasses =
-    tbb::concurrent_hash_map<const php::Unit*, uint32_t, UnitPtrHashCompare>;
-  UnitNumClasses* numClasses = nullptr;
-
-  uint32_t nextClass(const php::Unit& unit) {
-    typename UnitNumClasses::accessor acc;
-    numClasses->insert(
-      acc,
-      std::make_pair(&unit, unit.classes.size())
-    );
-    return acc->second++;
-  }
+  uint32_t nextClassId = 0;
 };
 
 using RecPreResolveUpdates = PreResolveUpdates<RecordInfo>;
 using ClsPreResolveUpdates = PreResolveUpdates<ClassInfo>;
 
-using ClonedClosureMap = hphp_hash_map<
-  php::Class*,
-  std::pair<std::unique_ptr<php::Class>, uint32_t>
->;
+// Keep track of order of closure creation to make the logic more
+// deterministic.
+struct ClonedClosureMap {
+  using Tuple = std::tuple<const php::Class*,
+                           std::unique_ptr<php::Class>,
+                           uint32_t>;
+
+  bool empty() const { return ordered.empty(); }
+
+  CompactVector<Tuple>::iterator find(const php::Class* cls) {
+    auto const it = map.find(cls);
+    if (it == map.end()) return ordered.end();
+    auto const idx = it->second;
+    assertx(idx < ordered.size());
+    assertx(std::get<0>(ordered[idx]) == cls);
+    return ordered.begin() + idx;
+  }
+
+  bool emplace(const php::Class* cls,
+               std::unique_ptr<php::Class> clo,
+               uint32_t id) {
+    auto const inserted = map.emplace(cls, ordered.size()).second;
+    if (!inserted) return false;
+    ordered.emplace_back(cls, std::move(clo), id);
+    return true;
+  }
+
+  CompactVector<Tuple>::iterator begin() {
+    return ordered.begin();
+  }
+  CompactVector<Tuple>::iterator end() {
+    return ordered.end();
+  }
+
+private:
+  hphp_fast_map<const php::Class*, size_t> map;
+  CompactVector<Tuple> ordered;
+};
+
 std::unique_ptr<php::Func> clone_meth(php::Unit* unit,
                                       php::Class* newContext,
                                       const php::Func* origMeth,
@@ -1851,7 +1866,7 @@ bool build_class_constants(const php::Program* program, ClassInfo* cinfo, ClsPre
             auto& nextFuncId = const_cast<php::Program*>(program)->nextFuncId;
             current_86cinit = clone_meth(cls->unit, cls, cns_86cinit, cns_86cinit->name,
                                          cns_86cinit->attrs, nextFuncId, updates, clonedClosures);
-            assertx(!clonedClosures.size());
+            assertx(clonedClosures.empty());
             DEBUG_ONLY auto res = cinfo->methods.emplace(
               current_86cinit->name,
               MethTabEntry { current_86cinit.get(), current_86cinit->attrs, false, true }
@@ -2530,19 +2545,26 @@ std::unique_ptr<php::Func> clone_meth_helper(
 
   if (!origMeth->hasCreateCl) return cloneMeth;
 
-  auto const recordClosure = [&] (uint32_t* clsId) {
-    auto const cls = origMeth->unit->classes[*clsId].get();
-    auto& elm = clonedClosures[cls];
-    if (!elm.first) {
-      elm.first = clone_closure(unit,
-                                newContext->closureContextCls ?
-                                newContext->closureContextCls : newContext,
-                                cls, nextFuncId, preResolveUpdates,
-                                clonedClosures);
-      if (!elm.first) return false;
-      elm.second = preResolveUpdates.nextClass(*unit);
+  auto const recordClosure = [&] (uint32_t& clsId) {
+    auto const cls = origMeth->unit->classes[clsId].get();
+
+    auto it = clonedClosures.find(cls);
+    if (it == clonedClosures.end()) {
+      auto cloned = clone_closure(
+        unit,
+        newContext->closureContextCls ?
+          newContext->closureContextCls : newContext,
+        cls,
+        nextFuncId,
+        preResolveUpdates,
+        clonedClosures
+      );
+      if (!cloned) return false;
+      clsId = preResolveUpdates.nextClassId++;
+      always_assert(clonedClosures.emplace(cls, std::move(cloned), clsId));
+    } else {
+      clsId = std::get<2>(*it);
     }
-    *clsId = elm.second;
     return true;
   };
 
@@ -2556,7 +2578,7 @@ std::unique_ptr<php::Func> clone_meth_helper(
       switch (bc.op) {
         case Op::CreateCl: {
           auto clsId = bc.CreateCl.arg2;
-          if (!recordClosure(&clsId)) return nullptr;
+          if (!recordClosure(clsId)) return nullptr;
           updates[bid][ix] = clsId;
           break;
         }
@@ -2859,21 +2881,20 @@ void flatten_traits(const php::Program* program,
     }
     if (cinit) cls->methods.push_back(std::move(cinit));
 
-    if (clonedClosures.size()) {
+    if (!clonedClosures.empty()) {
       auto& closures = updates.closures[cls];
-      for (auto& ent : clonedClosures) {
-        auto clo = ent.second.first.get();
-        rename_closure(index, clo, updates);
-        ITRACE(5, "  - closure {} as {}\n", ent.first->name, clo->name);
+      for (auto& [orig, clo, idx] : clonedClosures) {
+        rename_closure(index, clo.get(), updates);
+        ITRACE(5, "  - closure {} as {}\n", orig->name, clo->name);
         assertx(clo->closureContextCls == cls);
         assertx(clo->unit == cls->unit);
-        closures.emplace_back(clo);
+        closures.emplace_back(clo.get());
         updates.newClasses.emplace_back(
-          std::move(ent.second.first),
+          std::move(clo),
           cls->unit,
-          ent.second.second
+          idx
         );
-        preresolve(program, index, clo, updates);
+        preresolve(program, index, closures.back(), updates);
       }
     }
   }
@@ -4648,20 +4669,44 @@ void preresolveTypes(php::Program* program,
         folly::sformat("round {} -- {} work items", round, workitems)
       );
 
-      using U = PreResolveUpdates<typename PhpTypeHelper<T>::Info>;
-      typename U::UnitNumClasses numClasses;
+      // Aggregate the types together by their Unit. This means only
+      // one thread will be processing a particular Unit at a
+      // time. This lets us avoid locking access to the Unit, and also
+      // keeps the flattening logic deterministic.
+      using UnitGroup = std::pair<const php::Unit*, CompactVector<const T*>>;
 
-      return parallel::gen(
-        workitems,
-        [&] (size_t idx) {
-          auto const t = tid.queue[idx + tid.cqFront];
+      hphp_fast_map<const php::Unit*, CompactVector<const T*>> group;
+      for (auto idx = tid.cqFront; idx < tid.cqBack; ++idx) {
+        auto const t = tid.queue[idx];
+        group[t->unit].emplace_back(t);
+      }
+      std::vector<UnitGroup> worklist{group.begin(), group.end()};
+
+      using U = PreResolveUpdates<typename PhpTypeHelper<T>::Info>;
+
+      return parallel::map(
+        worklist,
+        [&] (UnitGroup& group) {
           Trace::Bump bumper{
-            Trace::hhbbc_index, kSystemLibBump, is_systemlib_part(*t->unit)
+            Trace::hhbbc_index, kSystemLibBump, is_systemlib_part(*group.first)
           };
           (void)bumper;
+
+          std::sort(
+            group.second.begin(), group.second.end(),
+            [&] (const T* a, const T* b) {
+              return strcmp(a->name->data(), b->name->data()) < 0;
+            }
+          );
+
+          // NB: Even though we can freely access the Unit, we cannot
+          // modify it in preresolve because other threads might also
+          // be accessing it.
           U updates;
-          updates.numClasses = &numClasses;
-          preresolve(program, index, t, updates);
+          updates.nextClassId = group.first->classes.size();
+          for (auto const t : group.second) {
+            preresolve(program, index, t, updates);
+          }
           return updates;
         }
       );

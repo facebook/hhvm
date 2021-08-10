@@ -667,9 +667,7 @@ std::pair<Type, Effects> elemHelper(ISS& env, MOpMode mode, Type key) {
     warnsWithNull | justNull | BClsMeth |
     BStr | BCls | BLazyCls | BObj | BRecord | BArrLike;
 
-  // Can't static assert because warnsWithNull depends on
-  // RuntimeOptions.
-  assertx(handled == BCell);
+  static_assert(handled == BCell);
 
   OptEffects effects;
   auto ty = TBottom;
@@ -926,7 +924,7 @@ Effects setOpNewElemHelper(ISS& env, int32_t nDiscard) {
 //////////////////////////////////////////////////////////////////////
 // intermediate ops
 
-Effects miProp(ISS& env, bool, MOpMode mode, Type key, ReadOnlyOp op) {
+Effects miProp(ISS& env, MOpMode mode, Type key, ReadOnlyOp op) {
   auto const name     = mStringKey(key);
   auto const isDefine = mode == MOpMode::Define;
   auto const isUnset  = mode == MOpMode::Unset;
@@ -969,15 +967,35 @@ Effects miProp(ISS& env, bool, MOpMode mode, Type key, ReadOnlyOp op) {
         return Effects::AlwaysThrows;
       }
 
-      auto const ty = [&] {
+      auto const [ty, effects] = [&] () -> std::pair<Type, Effects> {
         if (update) {
-          if (auto const elem = thisPropType(env, name)) return *elem;
-        } else {
-          if (auto const propTy = thisPropAsCell(env, name)) return *propTy;
+          if (auto const elem = thisPropType(env, name)) {
+            return { *elem, Effects::Throws };
+          }
+        } else if (auto const propTy = thisPropAsCell(env, name)) {
+          if (propTy->subtypeOf(BBottom)) {
+            return { TBottom, Effects::AlwaysThrows };
+          }
+          if (op == ReadOnlyOp::Mutable &&
+              isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
+            return { *propTy, Effects::Throws };
+          }
+          if (isMaybeThisPropAttr(env, name, AttrLateInit)) {
+            return { *propTy, Effects::Throws };
+          }
+          if (mode == MOpMode::None) {
+            return { *propTy, Effects::None };
+          }
+          auto const elem = thisPropType(env, name);
+          assertx(elem.has_value());
+          return {
+            *propTy,
+            elem->couldBe(BUninit) ? Effects::Throws : Effects::None
+          };
         }
         auto const raw =
           env.index.lookup_public_prop(objcls(thisTy), sval(name));
-        return update ? raw : to_cell(raw);
+        return { update ? raw : to_cell(raw), Effects::Throws };
       }();
 
       if (ty.subtypeOf(BBottom)) return Effects::AlwaysThrows;
@@ -986,12 +1004,13 @@ Effects miProp(ISS& env, bool, MOpMode mode, Type key, ReadOnlyOp op) {
         Base { ty, BaseLoc::Prop, thisTy, name },
         update
       );
+      return effects;
     } else {
       moveBase(env,
                Base { TInitCell, BaseLoc::Prop, thisTy },
                update);
+      return Effects::Throws;
     }
-    return Effects::Throws;
   }
 
   // We know for sure we're going to be in an object property.
@@ -1365,11 +1384,14 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
   if (name) {
     if (mustBeThisObj(env, env.collect.mInstrState.base)) {
       if (auto t = thisPropAsCell(env, name)) {
+        if (t->subtypeOf(BBottom)) {
+          push(env, TBottom);
+          return Effects::AlwaysThrows;
+        }
         push(env, std::move(*t));
         if (mustBeMutable && isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
           return Effects::Throws;
         }
-        if (t->subtypeOf(BBottom)) return Effects::AlwaysThrows;
         if (isMaybeThisPropAttr(env, name, AttrLateInit)) {
           return Effects::Throws;
         }
@@ -2131,9 +2153,7 @@ void in(ISS& env, const bc::Dim& op) {
 
   auto const effects = [&] {
     if (mcodeIsProp(op.mkey.mcode)) {
-      return miProp(
-        env, op.mkey.mcode == MQT, op.subop1, std::move(key->first), op.mkey.rop
-      );
+      return miProp(env, op.subop1, std::move(key->first), op.mkey.rop);
     } else if (mcodeIsElem(op.mkey.mcode)) {
       return miElem(env, op.subop1, std::move(key->first), key_local(env, op));
     } else {

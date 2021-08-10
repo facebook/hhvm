@@ -119,6 +119,77 @@ bool prop_might_have_bad_initial_value(const Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
+Type get_type_of_reified_list(const UserAttributeMap& ua) {
+  auto const it = ua.find(s___Reified.get());
+  assertx(it != ua.end());
+  auto const tv = it->second;
+  assertx(tvIsVec(&tv));
+  auto const info = extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
+  auto const numGenerics = info.m_typeParamInfo.size();
+  assertx(numGenerics > 0);
+
+  auto t = vec(std::vector<Type>(numGenerics, TDict));
+
+  // If the type params are all soft, the reified list is allowed to
+  // be empty.
+  auto const allSoft = [&] {
+    for (auto const& tp : info.m_typeParamInfo) {
+      if (!tp.m_isSoft) return false;
+    }
+    return true;
+  }();
+  if (allSoft) t |= TVecE;
+  return t;
+}
+
+// The value returned from this must satisfy the type returned from
+// get_type_of_reified_list.
+TypedValue get_default_value_of_reified_list(const UserAttributeMap& ua) {
+  auto const it = ua.find(s___Reified.get());
+  assertx(it != ua.end());
+  auto const tv = it->second;
+  assertx(tvIsVec(&tv));
+  auto const info = extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
+  auto const numGenerics = info.m_typeParamInfo.size();
+  assertx(numGenerics > 0);
+
+  // Empty vec is allowed for the "all soft" case, so use that if it
+  // applies.
+  auto const allSoft = [&] {
+    for (auto const& tp : info.m_typeParamInfo) {
+      if (!tp.m_isSoft) return false;
+    }
+    return true;
+  }();
+  if (allSoft) return make_tv<KindOfPersistentVec>(staticEmptyVec());
+
+  // Otherwise make a vec of the appropriate size filled with empty
+  // dicts, which satisfies get_type_of_reified_list.
+  VecInit init{numGenerics};
+  for (size_t i = 0; i < numGenerics; ++i) {
+    init.append(make_tv<KindOfPersistentDict>(staticEmptyDictArray()));
+  }
+  auto var = init.toVariant();
+  var.setEvalScalar();
+  return *var.asTypedValue();
+}
+
+Type loosen_this_prop_for_serialization(const php::Class& ctx,
+                                        SString name,
+                                        Type type) {
+  // The 86reified_prop has special enforcement for serialization, so
+  // we don't have to pessimize it as much.
+  if (name->isame(s_86reified_prop.get())) {
+    return union_of(
+      std::move(type),
+      get_type_of_reified_list(ctx.userAttributes)
+    );
+  }
+  return loosen_vec_or_dict(loosen_all(std::move(type)));
+}
+
+//////////////////////////////////////////////////////////////////////
+
 namespace php {
 
 //////////////////////////////////////////////////////////////////////

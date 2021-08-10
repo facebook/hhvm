@@ -5096,9 +5096,16 @@ void Index::rewrite_default_initial_values(php::Program& program) const {
           continue;
         }
 
-        prop.val = nullable
-          ? make_tv<KindOfNull>()
-          : prop.typeConstraint.defaultValue();
+        prop.val = [&] {
+          if (nullable) return make_tv<KindOfNull>();
+          // Give the 86reified_prop a special default value to avoid
+          // pessimizing the inferred type (we want it to always be a
+          // vec of a specific size).
+          if (prop.name->isame(s_86reified_prop.get())) {
+            return get_default_value_of_reified_list(c->userAttributes);
+          }
+          return prop.typeConstraint.defaultValue();
+        }();
       }
     }
   }

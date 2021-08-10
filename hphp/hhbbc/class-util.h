@@ -93,6 +93,20 @@ bool prop_might_have_bad_initial_value(const Index& index,
                                        const php::Class& cls,
                                        const php::Prop& prop);
 
+Type get_type_of_reified_list(const UserAttributeMap& ua);
+
+TypedValue get_default_value_of_reified_list(const UserAttributeMap& ua);
+
+/*
+ * Given a type representing a prop with name "name" on the class
+ * "ctx", loosen the type appropriately to represent any possible
+ * deserializing of the prop. Generally, this discards any special
+ * inferred array structure or known values.
+ */
+Type loosen_this_prop_for_serialization(const php::Class& ctx,
+                                        SString name,
+                                        Type type);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

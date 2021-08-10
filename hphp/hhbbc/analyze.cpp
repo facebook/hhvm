@@ -65,18 +65,6 @@ uint32_t rpoId(const FuncAnalysis& ai, BlockId blk) {
   return ai.bdata[blk].rpoId;
 }
 
-Type get_type_of_reified_list(const UserAttributeMap& ua) {
-  auto const it = ua.find(s___Reified.get());
-  assertx(it != ua.end());
-  auto const tv = it->second;
-  assertx(tvIsVec(&tv));
-  auto const info = extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
-  auto const numGenerics = info.m_typeParamInfo.size();
-  assertx(numGenerics > 0);
-  std::vector<Type> types(numGenerics, TDictN);
-  return vec(types);
-}
-
 const StaticString s_reified_generics_var("0ReifiedGenerics");
 const StaticString s_coeffects_var("0Coeffects");
 
@@ -679,7 +667,8 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
     }
 
     if (!(prop.attrs & AttrStatic)) {
-      auto t = loosen_vec_or_dict(loosen_all(cellTy));
+      auto t = loosen_this_prop_for_serialization(*ctx.cls, prop.name, cellTy);
+
       if (!is_closure(*ctx.cls) && t.subtypeOf(BUninit)) {
         /*
          * For non-closure classes, a property of type KindOfUninit
@@ -695,8 +684,6 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
         t = TBottom;
       } else if (!(prop.attrs & AttrSystemInitialValue)) {
         t = adjust_type_for_prop(index, *ctx.cls, &prop.typeConstraint, t);
-      } else if (prop.name->isame(s_86reified_prop.get())) {
-        t = get_type_of_reified_list(ctx.cls->userAttributes);
       }
       auto& elem = clsAnalysis.privateProperties[prop.name];
       elem.ty = std::move(t);
@@ -728,12 +715,12 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
   if (isHNIBuiltin) expand_hni_prop_types(clsAnalysis);
 
   /*
-   * For classes with non-scalar initializers, the 86pinit, 86sinit, and
-   * 86linit methods are guaranteed to run before any other method, and
-   * are never called afterwards. Thus, we can analyze these
-   * methods first to determine the initial types of properties with
-   * non-scalar initializers, and these need not be be run again as part
-   * of the fixedpoint computation.
+   * For classes with non-scalar initializers, the 86pinit, 86sinit,
+   * 86linit, 86cinit, and 86reifiedinit methods are guaranteed to run
+   * before any other method, and are never called afterwards. Thus,
+   * we can analyze these methods first to determine the initial types
+   * of properties with non-scalar initializers, and these need not be
+   * be run again as part of the fixedpoint computation.
    */
   CompactVector<FuncAnalysis> initResults;
   auto analyze_86init = [&](const StaticString &name) {
@@ -746,12 +733,8 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
   analyze_86init(s_86pinit);
   analyze_86init(s_86sinit);
   analyze_86init(s_86linit);
-
-  /*
-   * The 86cinit is a little different from the other two, but
-   * similarly can't play a role in the fixed point computation.
-   */
   analyze_86init(s_86cinit);
+  analyze_86init(s_86reifiedinit);
 
   // NB: Properties can still be TBottom at this point if their initial values
   // cannot possibly satisfy their type-constraints. The classes of such
@@ -804,7 +787,8 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
     if (f->name->isame(s_86pinit.get()) ||
         f->name->isame(s_86sinit.get()) ||
         f->name->isame(s_86linit.get()) ||
-        f->name->isame(s_86cinit.get())) {
+        f->name->isame(s_86cinit.get()) ||
+        f->name->isame(s_86reifiedinit.get())) {
       continue;
     }
     auto const DEBUG_ONLY inserted = work.worklist.schedule(*f);

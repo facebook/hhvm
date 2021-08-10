@@ -943,7 +943,7 @@ void mergeThisProp(ISS& env, SString name, Type type) {
   env.collect.props.mergeInPrivateProp(
     env.index,
     name,
-    loosen_vec_or_dict(loosen_all(std::move(type)))
+    loosen_this_prop_for_serialization(*env.ctx.cls, name, std::move(type))
   );
 }
 

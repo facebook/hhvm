@@ -469,9 +469,11 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::WideFunc& func) {
       );
     }
   }
+
   for (auto bid : func.blockRange()) {
     auto& cblk = func.blocks()[bid];
     if (is_dead(cblk.get())) continue;
+
     while (cblk->fallthrough != NoBlockId) {
       auto const nid = cblk->fallthrough;
       auto& cnxt = func.blocks()[nid];
@@ -532,7 +534,8 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::WideFunc& func) {
       anyChanges = true;
     }
 
-    auto const& bInfo = blockInfo[bid];
+    auto& bInfo = blockInfo[bid];
+
     if (bInfo.couldBeSwitch &&
         (bInfo.multiplePreds || !bInfo.onlySwitch || !bInfo.followsSwitch)) {
       // This block looks like it could be part of a switch, and it's
@@ -540,6 +543,23 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::WideFunc& func) {
       if (buildSwitches(func, bid, blockInfo)) {
         anyChanges = true;
       }
+    }
+
+    // Turn a conditional jump to the same block into an unconditional
+    // jump. This can make the source of the conditional jump dead.
+    auto const jmpTarget = [&] () -> Optional<BlockId> {
+      auto const& lastOp = cblk->hhbcs.back();
+      if (lastOp.op == Op::JmpZ)  return lastOp.JmpZ.target1;
+      if (lastOp.op == Op::JmpNZ) return lastOp.JmpNZ.target1;
+      return std::nullopt;
+    }();
+
+    if (jmpTarget && cblk->fallthrough == *jmpTarget) {
+      FTRACE(2, "   removing redundant conditional jmp in {}\n", bid);
+      auto const blk = func.blocks()[bid].mutate();
+      blk->hhbcs.back() = bc_with_loc(blk->hhbcs.back().srcLoc, bc::PopC {});
+      bInfo.multipleSuccs = false;
+      anyChanges = true;
     }
   }
 

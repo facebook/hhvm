@@ -3254,8 +3254,17 @@ void in(ISS& env, const bc::RecordReifiedGeneric& op) {
 }
 
 void in(ISS& env, const bc::CheckReifiedGenericMismatch& op) {
-  // TODO(T31677864): implement real optimizations
+  auto const location = topStkEquiv(env, 0);
   popC(env);
+
+  if (location == NoLocalId) return;
+  auto const ok = refineLocation(
+    env, location,
+    [&] (Type) {
+      return get_type_of_reified_list(env.ctx.cls->userAttributes);
+    }
+  );
+  if (!ok) unreachable(env);
 }
 
 namespace {
@@ -3268,7 +3277,7 @@ namespace {
  */
 template <typename Set>
 Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
-                                                        const Set& op) {
+                                                 const Set& op) {
   if (auto const prev = last_op(env, 1)) {
     if (prev->op == Op::CGetL2 &&
         prev->CGetL2.nloc1.id == op.loc1 &&

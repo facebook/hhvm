@@ -1,0 +1,7 @@
+[Tany][context:\fx_param][position:decl_param.php:14:24][decl][param]
+[Tany][context:\inout_param][position:decl_param.php:17:33][decl][param][inout]
+[Tany][context:\variadic_param][position:decl_param.php:20:33][decl][param][variadic]
+[Tany][context:\C::static_method_param][position:decl_param.php:7:51][decl][param]
+[Tany][context:\C::static_method_param][position:decl_param.php:7:60][decl][param]
+[Tany][context:\C::method_param][position:decl_param.php:10:37][decl][param]
+No errors

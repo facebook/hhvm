@@ -3,6 +3,7 @@
   (wrapped false)
   (libraries
     ast
+    bad_type_logger
     core_kernel
     ifc_lib
     nast

@@ -18,8 +18,18 @@ let visitor ctx =
     [Xhp_required_check.make_handler; Redundant_generics_check.make_handler]
   in
   let handlers = List.map makers ~f:(( |> ) ctx) |> List.filter_opt in
+  (* Handlers in effect only when a typechecker option is set and is not part
+     of standard typechecker operation. *)
+  let irregular_handlers =
+    let tco = Provider_context.get_tcopt ctx in
+    let log_levels = TypecheckerOptions.log_levels tco in
+    match SMap.find_opt "tany" log_levels with
+    | Some level when level > 0 -> [Bad_type_logger.handler]
+    | _ -> []
+  in
   Tast_visitor.iter_with
     (handlers
+    @ irregular_handlers
     @ [
         Shape_field_check.handler;
         String_cast_check.handler;

@@ -1635,8 +1635,8 @@ Variant ObjectData::invokeWakeup(RuntimeCoeffects provided) {
   return InvokeSimple(this, s___wakeup, provided);
 }
 
-Variant ObjectData::invokeDebugInfo() {
-  return InvokeSimple(this, s___debugInfo, RuntimeCoeffects::fixme());
+Variant ObjectData::invokeDebugInfo(RuntimeCoeffects provided) {
+  return InvokeSimple(this, s___debugInfo, provided);
 }
 
 String ObjectData::invokeToString() {

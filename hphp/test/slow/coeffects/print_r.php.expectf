@@ -1,0 +1,12 @@
+CPure invokes CPure::__debugInfo safely.
+CPure Object
+(
+)
+CNonPure invokes CNonPure::__debugInfo safely.
+CNonPure Object
+(
+)
+CPure invokes CPure::__debugInfo safely.
+
+Warning: Call to CNonPure::__debugInfo() requires [defaults] coeffects but print_r_pure() provided [] in %s on line 24
+CNonPure invokes CNonPure::__debugInfo safely.

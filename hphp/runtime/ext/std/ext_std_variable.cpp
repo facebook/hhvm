@@ -202,11 +202,15 @@ Array HHVM_FUNCTION(HH_object_prop_array, const Object& obj) {
 ///////////////////////////////////////////////////////////////////////////////
 // input/output
 
-Variant HHVM_FUNCTION(print_r, const Variant& expression,
-                               bool ret /* = false */) {
+ALWAYS_INLINE Variant print_r_impl(const Variant& expression,
+                                   bool ret /* = false */,
+                                   bool pure /* = false */) {
   Variant res;
   try {
     VariableSerializer vs(VariableSerializer::Type::PrintR);
+    if (pure) {
+      vs.setPure();
+    }
     if (ret) {
       res = vs.serialize(expression, ret);
     } else {
@@ -218,6 +222,15 @@ Variant HHVM_FUNCTION(print_r, const Variant& expression,
     res = e.m_result;
   }
   return res;
+}
+
+Variant HHVM_FUNCTION(print_r, const Variant& expression,
+                               bool ret /* = false */) {
+  return print_r_impl(expression, ret, false);
+}
+
+Variant HHVM_FUNCTION(print_r_pure, const Variant& expression) {
+  return print_r_impl(expression, true, true);
 }
 
 Variant HHVM_FUNCTION(var_export, const Variant& expression,
@@ -636,6 +649,7 @@ void StandardExtension::initVariable() {
   HHVM_FE(gettype);
   HHVM_FE(get_resource_type);
   HHVM_FE(print_r);
+  HHVM_FE(print_r_pure);
   HHVM_FE(var_export);
   HHVM_FE(debug_zval_dump);
   HHVM_FE(var_dump);

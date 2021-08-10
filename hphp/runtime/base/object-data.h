@@ -395,7 +395,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   Variant invokeSleep(RuntimeCoeffects);
   Variant invokeToDebugDisplay();
   Variant invokeWakeup(RuntimeCoeffects);
-  Variant invokeDebugInfo();
+  Variant invokeDebugInfo(RuntimeCoeffects);
 
   Variant static InvokeSimple(ObjectData* data, const StaticString& name,
                               RuntimeCoeffects);

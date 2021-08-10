@@ -44,6 +44,7 @@ String HHVM_FUNCTION(get_resource_type, const Resource& handle);
 // input/output
 
 Variant HHVM_FUNCTION(print_r, const Variant& expression, bool ret = false);
+Variant HHVM_FUNCTION(print_r_pure, const Variant& expression);
 Variant HHVM_FUNCTION(var_export, const Variant& expression, bool ret = false);
 void HHVM_FUNCTION(var_dump,
                    const Variant& v, const Array& _argv = null_array);

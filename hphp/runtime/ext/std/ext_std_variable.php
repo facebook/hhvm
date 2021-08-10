@@ -121,6 +121,13 @@ function strval(mixed $var)[]: string;
 function print_r(mixed $expression,
                  bool $ret = false): mixed;
 
+/* Pure version of print_r(). print_r() has side effects because
+ * 1. when the 2nd arg is not set to true, we would write to std output
+ * 2. impure implementation of __debugInfo may cause coeffects violation
+ */
+<<__Native>>
+function print_r_pure(mixed $expression)[]: mixed;
+
 <<__Native>>
 function var_export(mixed $expression,
                     bool $ret = false): mixed;

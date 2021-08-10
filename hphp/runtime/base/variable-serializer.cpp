@@ -2081,7 +2081,9 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
                   cls->name()->data());
     return obj->toArray(false, true);
   }
-  auto ret = const_cast<ObjectData*>(obj)->invokeDebugInfo();
+  auto const providedCoeffects =
+    m_pure ? RuntimeCoeffects::pure() : RuntimeCoeffects::defaults();
+  auto ret = const_cast<ObjectData*>(obj)->invokeDebugInfo(providedCoeffects);
   if (ret.isArray()) {
     return ret.toArray();
   }

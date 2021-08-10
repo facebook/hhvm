@@ -1047,7 +1047,10 @@ Variant unserialize_ex(const char* str, int len,
     return false;
   }
 
-  VariableUnserializer vu(str, len, type, true, options);
+  VariableUnserializer vu(str, len, type,
+                          /* allowUnknownSerializableClass = */ true,
+                          /* suppressClassConversionWarnings = */ false,
+                          options);
   if (pure) vu.setPure();
   Variant v;
   try {

@@ -1771,7 +1771,8 @@ Variant parse_php_serialized(folly::StringPiece str) {
     str.data(),
     str.size(),
     VariableUnserializer::Type::Internal,
-    true
+    /* allowUnknownSerializableClass = */ true,
+    /* suppressClassConversionWarnings = */ true
   );
   try {
     return checkSize(vu.unserialize());

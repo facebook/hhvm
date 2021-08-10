@@ -134,7 +134,7 @@ impl<'a> Decl<'a> {
     pub fn dep_type(&self) -> typing_deps_hash::DepType {
         match self {
             Decl::Fun(..) => typing_deps_hash::DepType::Fun,
-            Decl::Const(..) => typing_deps_hash::DepType::Const,
+            Decl::Const(..) => typing_deps_hash::DepType::GConst,
             Decl::Class(..) | Decl::Record(..) | Decl::Typedef(..) => {
                 typing_deps_hash::DepType::Type
             }

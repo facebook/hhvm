@@ -226,6 +226,26 @@ let prepare_auto_namespace_map config =
     ~default:[]
     ~f:convert_auto_namespace_to_map
 
+let extract_log_level = function
+  | (log_key, Hh_json.JSON_Number log_level) ->
+    begin
+      match int_of_string_opt log_level with
+      | Some log_level -> (log_key, log_level)
+      | None -> failwith "non-integer log level value"
+    end
+  | _ -> failwith "non-integer log level value"
+
+let convert_log_levels_to_map map =
+  let json = Hh_json.json_of_string ~strict:true map in
+  let pairs = Hh_json.get_object_exn json in
+  List.map ~f:extract_log_level pairs |> SMap.of_list
+
+let prepare_log_levels config =
+  Option.value_map
+    (Config_file.Getters.string_opt "log_levels" config)
+    ~default:SMap.empty
+    ~f:convert_log_levels_to_map
+
 let prepare_iset config config_name initial_values =
   Config_file.Getters.string_opt config_name config
   |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
@@ -462,6 +482,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_strict_value_equality:(bool_opt "strict_value_equality" config)
       ?tco_enforce_sealed_subclasses:
         (bool_opt "enable_sealed_subclasses" config)
+      ~log_levels:(prepare_log_levels config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

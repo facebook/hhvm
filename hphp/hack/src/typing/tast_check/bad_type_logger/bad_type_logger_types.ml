@@ -10,7 +10,10 @@
 
   For example, both the log levels 1 (0x1) and 3 (0x11) enable logging to a
   file. *)
-type log_mask = File [@value 1] [@@deriving enum]
+type log_mask =
+  | File [@value 1]
+  | Scuba [@value 2]
+[@@deriving enum]
 
 type expression_info = {
   declaration_usage: bool;

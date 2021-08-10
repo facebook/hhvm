@@ -278,3 +278,11 @@
     formatting)
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name bad_type_logger_scuba_stubs)
+  (wrapped false)
+  (modules
+    bad_type_logger_scuba)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))

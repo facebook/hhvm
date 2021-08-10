@@ -2064,9 +2064,10 @@ To string conversions:
 
   Throws an UndefinedVariableException on an uninitialized local variable.
 
-| RaiseUndefProp, ND, S(Obj) CStr, T
+| ThrowUndefPropException, ND, S(Obj) CStr, T
 
-  Raises a fatal for an undefined property named S1 on the class of S0.
+  Throws an UndefinedPropertyException on an undefined property named S1 on the
+  class of S0.
 
 | RaiseTooManyArg<func>, ND, S(Vec), CRc|LA
 

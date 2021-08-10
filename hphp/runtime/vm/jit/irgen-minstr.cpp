@@ -374,7 +374,7 @@ SSATmp* checkInitProp(IRGS& env,
     [&] { // Taken: Property is Uninit. Raise a warning and return
           // &immutable_null_base.
       hint(env, Block::Hint::Unlikely);
-      gen(env, RaiseUndefProp, baseAsObj, key);
+      gen(env, ThrowUndefPropException, baseAsObj, key);
       return ptrToInitNull(env);
     }
   );

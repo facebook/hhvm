@@ -494,7 +494,7 @@ bool canDCE(IRInstruction* inst) {
   case VerifyRetRecDesc:
   case VerifyPropRecDesc:
   case ThrowUninitLoc:
-  case RaiseUndefProp:
+  case ThrowUndefPropException:
   case RaiseTooManyArg:
   case RaiseError:
   case RaiseErrorOnInvalidIsAsExpressionType:

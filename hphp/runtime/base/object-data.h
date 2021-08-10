@@ -549,7 +549,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   static void throwObjToIntException(const char*);
   static void throwObjToDoubleException(const char*);
   static void raiseAbstractClassError(Class*);
-  void raiseUndefProp(const StringData*) const;
+  void throwUndefPropException(const StringData*) const;
   void raiseCreateDynamicProp(const StringData*) const;
   void raiseReadDynamicProp(const StringData*) const;
   void raiseImplicitInvokeToString() const;

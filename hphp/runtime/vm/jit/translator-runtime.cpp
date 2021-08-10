@@ -180,8 +180,8 @@ StringData* convObjToStrHelper(ObjectData* o) {
   return o->invokeToString().detach();
 }
 
-void raiseUndefProp(ObjectData* base, const StringData* name) {
-  base->raiseUndefProp(name);
+void throwUndefPropException(ObjectData* base, const StringData* name) {
+  base->throwUndefPropException(name);
 }
 
 void throwUndefVariable(StringData* nm) {

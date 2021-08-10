@@ -1244,7 +1244,7 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
       // Property exists, is accessible, and is not unset.
       if (type(prop) != KindOfUninit) return checkPropAttrs();
 
-      if (mode == PropMode::ReadWarn) raiseUndefProp(key);
+      if (mode == PropMode::ReadWarn) throwUndefPropException(key);
       if (write) return checkPropAttrs();
       return const_cast<TypedValue*>(&immutable_null_base);
     }
@@ -1276,7 +1276,7 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
     throw_invalid_property_name(StrNR(key));
   }
 
-  if (mode == PropMode::ReadWarn) raiseUndefProp(key);
+  if (mode == PropMode::ReadWarn) throwUndefPropException(key);
   if (write) return makeDynProp(key);
   return const_cast<TypedValue*>(&immutable_null_base);
 }
@@ -1572,7 +1572,7 @@ void ObjectData::raiseAbstractClassError(Class* cls) {
               cls->preClass()->name()->data());
 }
 
-void ObjectData::raiseUndefProp(const StringData* key) const {
+void ObjectData::throwUndefPropException(const StringData* key) const {
   SystemLib::throwUndefinedPropertyExceptionObject(
     folly::sformat("Undefined property: {}::${}",
                    m_cls->name()->data(),

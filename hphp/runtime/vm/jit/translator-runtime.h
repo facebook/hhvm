@@ -72,7 +72,7 @@ StringData* convDblToStrHelper(double i);
 StringData* convIntToStrHelper(int64_t i);
 StringData* convObjToStrHelper(ObjectData* o);
 
-void raiseUndefProp(ObjectData* base, const StringData* name);
+void throwUndefPropException(ObjectData* base, const StringData* name);
 void throwUndefVariable(StringData* nm);
 void VerifyParamTypeSlow(const Class* cls,
                          const Class* constraint,

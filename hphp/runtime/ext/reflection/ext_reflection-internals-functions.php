@@ -45,7 +45,7 @@ function hphp_invoke_method(?object $obj, string $cls, string $name,
  * @return object - The newly created object
  */
 <<__Native("NoInjection")>>
-function hphp_create_object(string $name, ?varray<mixed> $params): object;
+function hphp_create_object(string $name, ?varray<mixed> $params)[defaults]: object;
 
 /**
  * hphp_create_object_without_constructor() - Used by ReflectionClass to create

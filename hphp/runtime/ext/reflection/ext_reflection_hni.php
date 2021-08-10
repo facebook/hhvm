@@ -1748,7 +1748,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   Returns a new instance of the class.
    */
-  public function newInstanceArgs(Traversable<mixed> $args = varray[]) {
+  public function newInstanceArgs(Traversable<mixed> $args = varray[])[defaults] {
     if ($args && !$this->getConstructorName()) {
       // consistent with reference, but perhaps not particularly useful
       throw new ReflectionException(

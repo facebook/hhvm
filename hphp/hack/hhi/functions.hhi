@@ -70,7 +70,7 @@ function get_class_constants(string $class_name)[]: darray<string, mixed>;
 // the return value is an instance with class $class
 // do **not** use this in your code, call newv() instead
 <<__PHPStdLib>>
-function hphp_create_object<T>(string $class_name, varray<mixed> $argv): T;
+function hphp_create_object<T>(string $class_name, varray<mixed> $argv)[defaults]: T;
 }
 
 namespace HH {

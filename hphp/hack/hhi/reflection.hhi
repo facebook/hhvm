@@ -98,7 +98,7 @@ class ReflectionClass implements Reflector {
   public function isTrait()[]: bool;
   public function isUserDefined()[]: bool;
   public function newInstance(...$args);
-  public function newInstanceArgs(Traversable<mixed> $args = varray[]);
+  public function newInstanceArgs(Traversable<mixed> $args = varray[])[defaults];
   public function newInstanceWithoutConstructor()[];
   public function setStaticPropertyValue(string $name, mixed $value): void;
   public function __toString()[]: string;

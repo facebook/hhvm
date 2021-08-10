@@ -597,7 +597,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, const Variant& data, int s
         data.isObject()) {
       auto clsname = data.toObject()->getClassName();
       for (ArrayIter iter(SOAP_GLOBAL(classmap)); iter; ++iter) {
-        if (same(iter.second(), clsname)) {
+        if (same(iter.second(), clsname.get())) {
           /* TODO: namespace isn't stored */
           encodePtr enc = nullptr;
           if (SOAP_GLOBAL(sdl)) {

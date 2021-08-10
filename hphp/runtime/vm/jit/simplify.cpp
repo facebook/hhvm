@@ -1014,7 +1014,6 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case GtInt:
   case GtDbl:
   case GtStr:
-  case GtStrInt:
   case GtObj:
   case GtArrLike:
   case GtRes: return a > b;
@@ -1022,7 +1021,6 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case GteInt:
   case GteDbl:
   case GteStr:
-  case GteStrInt:
   case GteObj:
   case GteArrLike:
   case GteRes: return a >= b;
@@ -1030,7 +1028,6 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case LtInt:
   case LtDbl:
   case LtStr:
-  case LtStrInt:
   case LtObj:
   case LtArrLike:
   case LtRes: return a < b;
@@ -1038,7 +1035,6 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case LteInt:
   case LteDbl:
   case LteStr:
-  case LteStrInt:
   case LteObj:
   case LteArrLike:
   case LteRes: return a <= b;
@@ -1049,7 +1045,6 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case EqInt:
   case EqDbl:
   case EqStr:
-  case EqStrInt:
   case EqObj:
   case EqArrLike:
   case EqRes: return a == b;
@@ -1060,7 +1055,6 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case NeqInt:
   case NeqDbl:
   case NeqStr:
-  case NeqStrInt:
   case NeqObj:
   case NeqArrLike:
   case NeqRes: return a != b;
@@ -1290,52 +1284,6 @@ SSATmp* cmpStrImpl(State& env,
   return nullptr;
 }
 
-SSATmp* cmpStrIntImpl(State& env,
-                      Opcode opc,
-                      const IRInstruction* const inst,
-                      SSATmp* left,
-                      SSATmp* right) {
-  assertx(left->type() <= TStr);
-  assertx(right->type() <= TInt);
-
-  if (!left->hasConstVal()) return nullptr;
-
-  // If the string operand has a constant value, convert it to the appropriate
-  // numeric and lower to a numeric comparison.
-  int64_t si;
-  double sd;
-  auto const type =
-    left->strVal()->isNumericWithVal(si, sd, true /* allow errors */);
-  if (type == KindOfDouble) {
-    auto const dblOpc = [](Opcode opcode) {
-      switch (opcode) {
-        case GtStrInt:  return GtDbl;
-        case GteStrInt: return GteDbl;
-        case LtStrInt:  return LtDbl;
-        case LteStrInt: return LteDbl;
-        case EqStrInt:  return EqDbl;
-        case NeqStrInt: return NeqDbl;
-        default: always_assert(false);
-      }
-    }(opc);
-    return gen(env, dblOpc, cns(env, sd), gen(env, ConvIntToDbl, right));
-  } else {
-    auto const intOpc = [](Opcode opcode) {
-      switch (opcode) {
-        case GtStrInt:  return GtInt;
-        case GteStrInt: return GteInt;
-        case LtStrInt:  return LtInt;
-        case LteStrInt: return LteInt;
-        case EqStrInt:  return EqInt;
-        case NeqStrInt: return NeqInt;
-        default: always_assert(false);
-      }
-    }(opc);
-    return gen(
-      env, intOpc, cns(env, type == KindOfNull ? (int64_t)0 : si), right);
-  }
-}
-
 SSATmp* cmpObjImpl(State& env, Opcode opc, const IRInstruction* const /*inst*/,
                    SSATmp* left, SSATmp* right) {
   assertx(left->type() <= TObj);
@@ -1454,13 +1402,6 @@ X(EqStr, Str)
 X(NeqStr, Str)
 X(SameStr, Str)
 X(NSameStr, Str)
-
-X(GtStrInt, StrInt)
-X(GteStrInt, StrInt)
-X(LtStrInt, StrInt)
-X(LteStrInt, StrInt)
-X(EqStrInt, StrInt)
-X(NeqStrInt, StrInt)
 
 X(GtObj, Obj)
 X(GteObj, Obj)
@@ -1585,26 +1526,6 @@ SSATmp* simplifyCmpStr(State& env, const IRInstruction* inst) {
   }
 
   return nullptr;
-}
-
-SSATmp* simplifyCmpStrInt(State& env, const IRInstruction* inst) {
-  auto const left = inst->src(0);
-  auto const right = inst->src(1);
-
-  assertx(left->type() <= TStr);
-  assertx(right->type() <= TInt);
-
-  if (!left->hasConstVal()) return nullptr;
-
-  // If the string operand has a constant value, convert it to the appropriate
-  // numeric and lower to a numeric comparison.
-  int64_t si;
-  double sd;
-  auto const type =
-    left->strVal()->isNumericWithVal(si, sd, true /* allow errors */);
-  return type == KindOfDouble
-    ? gen(env, CmpDbl, cns(env, sd), gen(env, ConvIntToDbl, right))
-    : gen(env, CmpInt, cns(env, type == KindOfNull ? (int64_t)0 : si), right);
 }
 
 SSATmp* simplifyCmpRes(State& env, const IRInstruction* inst) {
@@ -3876,13 +3797,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(SameStr)
       X(NSameStr)
       X(CmpStr)
-      X(GtStrInt)
-      X(GteStrInt)
-      X(LtStrInt)
-      X(LteStrInt)
-      X(EqStrInt)
-      X(NeqStrInt)
-      X(CmpStrInt)
       X(GtObj)
       X(GteObj)
       X(LtObj)

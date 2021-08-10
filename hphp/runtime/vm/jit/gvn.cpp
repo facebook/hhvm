@@ -221,13 +221,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case SameStr:
   case NSameStr:
   case CmpStr:
-  case GtStrInt:
-  case GteStrInt:
-  case LtStrInt:
-  case LteStrInt:
-  case EqStrInt:
-  case NeqStrInt:
-  case CmpStrInt:
   case GtBool:
   case GteBool:
   case LtBool:

@@ -291,7 +291,7 @@ bool String::same(const StringData *v2) const {
 }
 
 bool String::same(const String& v2) const {
-  return HPHP::same(get(), v2);
+  return HPHP::same(get(), v2.get());
 }
 
 bool String::equal(const StringData *v2) const {
@@ -299,7 +299,7 @@ bool String::equal(const StringData *v2) const {
 }
 
 bool String::equal(const String& v2) const {
-  return HPHP::equal(get(), v2);
+  return HPHP::equal(get(), v2.get());
 }
 
 bool String::less(const StringData *v2) const {
@@ -307,7 +307,7 @@ bool String::less(const StringData *v2) const {
 }
 
 bool String::less(const String& v2) const {
-  return HPHP::less(get(), v2);
+  return HPHP::less(get(), v2.get());
 }
 
 bool String::more(const StringData *v2) const {
@@ -315,7 +315,7 @@ bool String::more(const StringData *v2) const {
 }
 
 bool String::more(const String& v2) const {
-  return HPHP::more(get(), v2);
+  return HPHP::more(get(), v2.get());
 }
 
 int String::compare(const char* v2) const {
@@ -338,19 +338,19 @@ int String::compare(const String& v2) const {
 // comparison operators
 
 bool String::operator==(const String& v) const {
-  return HPHP::equal(get(), v);
+  return HPHP::equal(get(), v.get());
 }
 
 bool String::operator!=(const String& v) const {
-  return !HPHP::equal(get(), v);
+  return !HPHP::equal(get(), v.get());
 }
 
 bool String::operator>(const String& v) const {
-  return HPHP::more(get(), v);
+  return HPHP::more(get(), v.get());
 }
 
 bool String::operator<(const String& v) const {
-  return HPHP::less(get(), v);
+  return HPHP::less(get(), v.get());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

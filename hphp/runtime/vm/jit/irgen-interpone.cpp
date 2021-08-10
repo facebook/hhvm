@@ -32,24 +32,16 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 Type arithOpResult(Type t1, Type t2) {
-  if (!t1.isKnownDataType() || !t2.isKnownDataType()) {
-    return TCell;
-  }
-
+  if (!t1.isKnownDataType() || !t2.isKnownDataType()) return TCell;
+  const auto num = TDbl | TInt;
+  if (!(t1 <= num) || !(t2 <= num)) return TBottom;
   auto both = t1 | t2;
   if (both.maybe(TDbl)) return TDbl;
-  if (both.maybe(TVec)) return TVec;
-  if (both.maybe(TDict)) return TDict;
-  if (both.maybe(TKeyset)) return TKeyset;
-  if (both.maybe(TClsMeth)) return TClsMeth;
-  if (both.maybe(TStr)) return TCell;
   return TInt;
 }
 
 Type arithOpOverResult(Type t1, Type t2) {
-  if (t1 <= TInt && t2 <= TInt) {
-    return TInt | TDbl;
-  }
+  if (t1 <= TInt && t2 <= TInt) return TInt | TDbl;
   return arithOpResult(t1, t2);
 }
 

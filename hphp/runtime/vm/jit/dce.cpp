@@ -361,13 +361,6 @@ bool canDCE(IRInstruction* inst) {
   case LtArrLike:
   case LteArrLike:
   case CmpArrLike:
-  case GtStrInt:
-  case GteStrInt:
-  case LtStrInt:
-  case LteStrInt:
-  case EqStrInt:
-  case NeqStrInt:
-  case CmpStrInt:
   case JmpZero:
   case JmpNZero:
   case JmpSSwitchDest:

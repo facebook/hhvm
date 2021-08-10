@@ -213,21 +213,6 @@ Opcode toStrCmpOpcode(Op op) {
   }
 }
 
-Opcode toStrIntCmpOpcode(Op op) {
-  switch (op) {
-    case Op::Gt:    return GtStrInt;
-    case Op::Gte:   return GteStrInt;
-    case Op::Lt:    return LtStrInt;
-    case Op::Lte:   return LteStrInt;
-    case Op::Eq:
-    case Op::Same:  return EqStrInt;
-    case Op::Neq:
-    case Op::NSame: return NeqStrInt;
-    case Op::Cmp:   return CmpStrInt;
-    default: always_assert(false);
-  }
-}
-
 Opcode toObjCmpOpcode(Op op) {
   switch (op) {
     case Op::Gt:    return GtObj;

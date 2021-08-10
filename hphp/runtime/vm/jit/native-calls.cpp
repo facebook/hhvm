@@ -88,12 +88,10 @@ using IFaceSupportFn = bool (*)(const StringData*);
 using StrCmpFn = bool (*)(const StringData*, const StringData*);
 using ObjCmpFn = bool (*)(const ObjectData*, const ObjectData*);
 using ResCmpFn = bool (*)(const ResourceHdr*, const ResourceHdr*);
-using StrIntCmpFn = bool (*)(const StringData*, int64_t);
 
 using StrCmpFnInt = int64_t (*)(const StringData*, const StringData*);
 using ObjCmpFnInt = int64_t (*)(const ObjectData*, const ObjectData*);
 using ResCmpFnInt = int64_t (*)(const ResourceHdr*, const ResourceHdr*);
-using StrIntCmpFnInt = int64_t (*)(const StringData*, int64_t);
 
 }
 
@@ -305,20 +303,6 @@ static CallMap s_callMap {
     {NSameStr,           static_cast<StrCmpFn>(nsame), DSSA, SNone,
                           {{SSA, 0}, {SSA, 1}}},
     {CmpStr,             static_cast<StrCmpFnInt>(compare), DSSA, SNone,
-                          {{SSA, 0}, {SSA, 1}}},
-    {GtStrInt,           static_cast<StrIntCmpFn>(more), DSSA, SSync,
-                          {{SSA, 0}, {SSA, 1}}},
-    {GteStrInt,          static_cast<StrIntCmpFn>(moreEqual), DSSA, SSync,
-                          {{SSA, 0}, {SSA, 1}}},
-    {LtStrInt,           static_cast<StrIntCmpFn>(less), DSSA, SSync,
-                          {{SSA, 0}, {SSA, 1}}},
-    {LteStrInt,          static_cast<StrIntCmpFn>(lessEqual), DSSA, SSync,
-                          {{SSA, 0}, {SSA, 1}}},
-    {EqStrInt,           static_cast<StrIntCmpFn>(equal), DSSA, SSync,
-                          {{SSA, 0}, {SSA, 1}}},
-    {NeqStrInt,          static_cast<StrIntCmpFn>(nequal), DSSA, SSync,
-                          {{SSA, 0}, {SSA, 1}}},
-    {CmpStrInt,          static_cast<StrIntCmpFnInt>(compare), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
     {GtObj,              static_cast<ObjCmpFn>(more), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},

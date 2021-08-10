@@ -233,13 +233,6 @@ Optional<Opcode> negateCmpOp(Opcode opc) {
     case SameStr:             return NSameStr;
     case NSameStr:            return SameStr;
 
-    case GtStrInt:            return LteStrInt;
-    case GteStrInt:           return LtStrInt;
-    case LtStrInt:            return GteStrInt;
-    case LteStrInt:           return GtStrInt;
-    case EqStrInt:            return NeqStrInt;
-    case NeqStrInt:           return EqStrInt;
-
     // Objects can contain a property with NaN, so only equality comparisons can
     // be negated.
     case EqObj:               return NeqObj;
@@ -301,7 +294,6 @@ bool opcodeMayRaise(Opcode opc) {
   case Clone:
   case CmpArrLike:
   case CmpObj:
-  case CmpStrInt:
   case ConcatIntStr:
   case ConcatStr3:
   case ConcatStr4:
@@ -337,14 +329,11 @@ bool opcodeMayRaise(Opcode opc) {
   case ElemX:
   case EqArrLike:
   case EqObj:
-  case EqStrInt:
   case GetMemoKey:
   case GtArrLike:
   case GteArrLike:
   case GteObj:
-  case GteStrInt:
   case GtObj:
-  case GtStrInt:
   case HandleRequestSurprise:
   case IncDecElem:
   case IncDecProp:
@@ -384,15 +373,12 @@ bool opcodeMayRaise(Opcode opc) {
   case LtArrLike:
   case LteArrLike:
   case LteObj:
-  case LteStrInt:
   case LtObj:
-  case LtStrInt:
   case MapGet:
   case MapSet:
   case NativeImpl:
   case NeqArrLike:
   case NeqObj:
-  case NeqStrInt:
   case NewKeysetArray:
   case NewRecord:
   case NSameArrLike:

@@ -1764,13 +1764,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SameStr:
   case NSameStr:
   case CmpStr:
-  case GtStrInt:
-  case GteStrInt:
-  case LtStrInt:
-  case LteStrInt:
-  case EqStrInt:
-  case NeqStrInt:
-  case CmpStrInt:
   case GtRes:
   case GteRes:
   case LtRes:

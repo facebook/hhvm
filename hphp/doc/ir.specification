@@ -526,23 +526,7 @@ To string conversions:
 
 | CmpStr,                      D(Int),  S(Str) S(Str),                    NF
 
-  Performs comparison of strings using PHP semantics.
-
-| GtStrInt,                    D(Bool), S(Str) S(Int),                    NF
-
-| GteStrInt,                   D(Bool), S(Str) S(Int),                    NF
-
-| LtStrInt,                    D(Bool), S(Str) S(Int),                    NF
-
-| LteStrInt,                   D(Bool), S(Str) S(Int),                    NF
-
-| EqStrInt,                    D(Bool), S(Str) S(Int),                    NF
-
-| NeqStrInt,                   D(Bool), S(Str) S(Int),                    NF
-
-| CmpStrInt,                   D(Int),  S(Str) S(Int),                    NF
-
-  Performs comparison of strings with integers using PHP semantics.
+  Performs comparison of strings
 
 | GtBool,                      D(Bool), S(Bool) S(Bool),                  NF
 
@@ -578,9 +562,9 @@ To string conversions:
 
 | CmpObj,                      D(Int),  S(Obj) S(Obj),                    NF
 
-  Perform comparison of objects using PHP semantics. All versions except for
-  SameObj and NSameObj may re-enter the VM and therefore may throw
-  exceptions. SameObj and NSameObj never re-enter or throw.
+  Perform comparison of object. All versions except for SameObj and NSameObj may
+  re-enter the VM and therefore may throw exceptions. SameObj and NSameObj never
+  re-enter or throw.
 
 | GtArrLike,                   D(Bool), S(ArrLike) S(ArrLike),            NF|LA
 

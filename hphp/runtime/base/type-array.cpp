@@ -126,7 +126,7 @@ Array Array::intersect(const Variant& array, bool by_key, bool by_value,
 
 static int
 CompareAsStrings(const Variant& v1, const Variant& v2, const void* /*data*/) {
-  return HPHP::same(v1.toString(), v2.toString()) ? 0 : -1;
+  return HPHP::same(v1.toString().get(), v2.toString().get()) ? 0 : -1;
 }
 
 Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match,

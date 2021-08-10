@@ -506,7 +506,7 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
     // There is no known better way to extract this information out.
     const char* infoString = (const char*)&tzdb->data[table[i].pos];
     String countryCode = String(&infoString[5], 2, CopyString);
-    if ((what == DateTimeZoneData::PER_COUNTRY && equal(country, countryCode))
+    if ((what == DateTimeZoneData::PER_COUNTRY && equal(country.get(), countryCode.get()))
         || what == DateTimeZoneData::ALL_WITH_BC
         || (check_id_allowed(table[i].id, what)
             && tzdb->data[table[i].pos + 4] == '\1')) {

@@ -2692,9 +2692,8 @@ fn get_fcall_args<'arena, 'decl, D: DeclProvider<'decl>>(
     let is_readonly_arg = if e
         .options()
         .hhvm
-        .hack_lang
         .flags
-        .contains(LangFlags::ENABLE_READONLY_ENFORCEMENT)
+        .contains(HhvmFlags::ENABLE_READONLY_ENFORCEMENT)
     {
         |expr| is_readonly_expr(expr)
     } else {

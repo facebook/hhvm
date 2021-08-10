@@ -951,8 +951,8 @@ class ReflectionProperty implements Reflector {
    * statically, then you will get null instead of the correct value, so do
    * not rely on this API for static properties.
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function getDefaultValue(): mixed;
+  <<__Native>>
+  public function getDefaultValue()[]: mixed;
 
   /**
    * Get the user defined attributes from the property declaration.

@@ -278,11 +278,13 @@ let visitor =
       in
       acc + super#on_expr env expr
 
-    method! on_expression_tree env Aast.{ et_hint; et_virtualized_expr; _ } =
+    method! on_expression_tree
+        env Aast.{ et_hint; et_virtualized_expr; et_splices; _ } =
       (* We only want to consider completion from the hint and the
          virtualized expression, not the visitor expression. The
          visitor expression is unityped, so we can't do much.*)
       let acc = self#on_hint env et_hint in
+      let acc = self#plus acc (self#on_Block env et_splices) in
 
       (* We're overriding super#on_expression_tree, so we need to
          update the environment. *)

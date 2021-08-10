@@ -10,6 +10,7 @@ path = "../../emit_method.rs"
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
 decl_provider = { path = "../../../decl_provider" }
+ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_ast_scope = { path = "../hhbc_by_ref_ast_scope" }
 hhbc_by_ref_emit_attribute = { path = "../hhbc_by_ref_emit_attribute" }
 hhbc_by_ref_emit_body = { path = "../hhbc_by_ref_emit_body" }
@@ -21,6 +22,7 @@ hhbc_by_ref_hhas_attribute = { path = "../hhbc_by_ref_hhas_attribute" }
 hhbc_by_ref_hhas_coeffects = { path = "../hhbc_by_ref_hhas_coeffects" }
 hhbc_by_ref_hhas_method = { path = "../hhbc_by_ref_hhas_method" }
 hhbc_by_ref_hhas_pos = { path = "../hhas_by_ref_hhas_pos" }
+hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
 hhbc_by_ref_hhbc_string_utils = { path = "../hhbc_by_ref_hhbc_string_utils" }
 hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }

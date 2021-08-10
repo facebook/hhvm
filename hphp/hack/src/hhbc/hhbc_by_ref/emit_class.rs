@@ -28,7 +28,7 @@ use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_property::HhasProperty;
 use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
 use hhbc_by_ref_hhas_xhp_attribute::HhasXhpAttribute;
-use hhbc_by_ref_hhbc_ast::{FatalOp, FcallArgs, FcallFlags, ReadOnlyOp, SpecialClsRef};
+use hhbc_by_ref_hhbc_ast::{FatalOp, FcallArgs, FcallFlags, ReadOnlyOp, SpecialClsRef, Visibility};
 use hhbc_by_ref_hhbc_id::r#const;
 use hhbc_by_ref_hhbc_id::{self as hhbc_id, class, method, prop, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
@@ -39,7 +39,7 @@ use hhbc_by_ref_runtime::TypedValue;
 use naming_special_names_rust as special_names;
 use oxidized::{
     ast,
-    ast::{Hint, ReifyKind, Visibility},
+    ast::{Hint, ReifyKind},
     namespace_env,
     pos::Pos,
 };
@@ -114,12 +114,12 @@ fn make_86method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
     Ok(HhasMethod {
         body,
-        attributes,
+        attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         name,
         flags,
         span,
         coeffects,
-        visibility,
+        visibility: Visibility::from(visibility),
     })
 }
 

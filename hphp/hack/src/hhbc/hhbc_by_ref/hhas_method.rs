@@ -3,27 +3,29 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::Slice;
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_body::HhasBody;
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
-use hhbc_by_ref_hhas_pos as hhas_pos;
-use hhbc_by_ref_hhbc_id::method;
-use oxidized::aast_defs::Visibility;
+use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhbc_ast::Visibility;
+use hhbc_by_ref_hhbc_id::method::MethodType;
 
 use bitflags::bitflags;
 
 #[derive(Debug)]
 pub struct HhasMethod<'arena> {
-    pub attributes: Vec<HhasAttribute<'arena>>,
+    pub attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub visibility: Visibility,
-    pub name: method::MethodType<'arena>,
+    pub name: MethodType<'arena>,
     pub body: HhasBody<'arena>,
-    pub span: hhas_pos::Span,
-    pub coeffects: HhasCoeffects,
+    pub span: Span,
+    pub coeffects: HhasCoeffects, //TODO(SF, 2021-08-10): Fix when Steve's `HhasCoeffect`'s (`repr(C)`)work lands
     pub flags: HhasMethodFlags,
 }
 
 bitflags! {
+    #[repr(C)]
     pub struct HhasMethodFlags: u16 {
         const IS_STATIC = 1 << 1;
         const IS_FINAL = 1 << 2;

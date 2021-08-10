@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use decl_provider::DeclProvider;
+use ffi::Slice;
 use hhbc_by_ref_ast_scope::{self as ast_scope, Lambda, Scope, ScopeItem};
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_body as emit_body;
@@ -14,6 +15,7 @@ use hhbc_by_ref_hhas_attribute as hhas_attribute;
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhas_method::{HhasMethod, HhasMethodFlags};
 use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhbc_ast::Visibility;
 use hhbc_by_ref_hhbc_id::{method, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{instr, Result};
@@ -274,8 +276,8 @@ pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     flags.set(HhasMethodFlags::IS_MEMOIZE_IMPL, is_memoize);
     flags.set(HhasMethodFlags::NO_INJECTION, is_no_injection);
     Ok(HhasMethod {
-        attributes,
-        visibility,
+        attributes: Slice::fill_iter(alloc, attributes.into_iter()),
+        visibility: Visibility::from(visibility),
         name,
         body,
         span,

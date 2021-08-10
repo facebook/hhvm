@@ -1453,6 +1453,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "decl_provider",
+ "ffi",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_body",
@@ -1464,6 +1465,7 @@ dependencies = [
  "hhbc_by_ref_hhas_coeffects",
  "hhbc_by_ref_hhas_method",
  "hhbc_by_ref_hhas_pos",
+ "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_instruction_sequence",
@@ -1802,12 +1804,13 @@ name = "hhbc_by_ref_hhas_method"
 version = "0.0.0"
 dependencies = [
  "bitflags",
+ "ffi",
  "hhbc_by_ref_hhas_attribute",
  "hhbc_by_ref_hhas_body",
  "hhbc_by_ref_hhas_coeffects",
  "hhbc_by_ref_hhas_pos",
+ "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_hhbc_id",
- "oxidized",
 ]
 
 [[package]]

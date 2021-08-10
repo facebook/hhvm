@@ -780,7 +780,7 @@ fn print_method_attrs<W: Write>(
     m: &HhasMethod,
 ) -> Result<(), W::Error> {
     use hhas_attribute::*;
-    let user_attrs = &m.attributes;
+    let user_attrs = m.attributes.as_ref();
     let mut special_attrs = vec![];
     if has_provenance_skip_frame(user_attrs) {
         special_attrs.push("prov_skip_frame")
@@ -788,7 +788,7 @@ fn print_method_attrs<W: Write>(
     if m.is_interceptable() {
         special_attrs.push("interceptable");
     }
-    let visibility = m.visibility.to_string();
+    let visibility = m.visibility.as_ref().to_string();
     special_attrs.push(&visibility);
     if m.flags.contains(HhasMethodFlags::IS_STATIC) {
         special_attrs.push("static");

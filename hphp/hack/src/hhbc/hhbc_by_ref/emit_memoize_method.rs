@@ -19,7 +19,7 @@ use hhbc_by_ref_hhas_method::{HhasMethod, HhasMethodFlags};
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_type::Info as HhasTypeInfo;
-use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags, SpecialClsRef};
+use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags, SpecialClsRef, Visibility};
 use hhbc_by_ref_hhbc_id::{class, method, Id};
 use hhbc_by_ref_hhbc_string_utils::reified;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
@@ -180,8 +180,8 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     flags.set(HhasMethodFlags::IS_ASYNC, is_async);
     flags.set(HhasMethodFlags::IS_INTERCEPTABLE, is_interceptable);
     Ok(HhasMethod {
-        attributes,
-        visibility: method.visibility,
+        attributes: Slice::fill_iter(alloc, attributes.into_iter()),
+        visibility: Visibility::from(method.visibility),
         name,
         body,
         span: Span::from_pos(&method.span),

@@ -39,13 +39,31 @@ struct Configuration {
   std::set<std::string> sinks;
 };
 
+struct Issue {
+  Source source;
+  std::string sink_function;
+
+  bool operator==(const Issue& other) const {
+    return source == other.source && sink_function == other.sink_function;
+  }
+};
+
 struct State {
   static std::shared_ptr<State> get();
 
   void reset() {
     returned_source = kNoSource;
+    stack.clear();
+    issues.clear();
   }
+
+  // Keep track of encountered source.
   Source returned_source = kNoSource;
+
+  // Dummy shadow-stack, this is not yet maintained by the runtime.
+  std::vector<Source> stack;
+
+  std::vector<Issue> issues;
 };
 
 #define O(name, imm, in, out, flags) \

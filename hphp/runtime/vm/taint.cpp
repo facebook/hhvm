@@ -685,7 +685,13 @@ void iopFCallFunc() {
 }
 
 void iopFCallFuncD() {
-  iopUnhandled("FCallFuncD");
+  std::string name = vmfp()->func()->fullName()->data();
+  auto& sinks = Configuration::get()->sinks;
+  if (sinks.find(name) != sinks.end() &&
+      State::get()->stack.back() == kTestSource) {
+    FTRACE(1, "taint: {}: tainted value flows into sink\n", pcOff());
+    State::get()->issues.push_back({kTestSource, name});
+  }
 }
 
 void iopFCallObjMethod() {

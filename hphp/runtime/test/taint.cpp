@@ -53,6 +53,7 @@ struct TaintTest : public ::testing::Test {
  protected:
   void SetUp() override {
     Configuration::get()->sources = {"__source"};
+    Configuration::get()->sinks = {"__sink"};
     State::get()->reset();
   }
 
@@ -91,6 +92,33 @@ TEST_F(TaintTest, TestRetCNoSource) {
   EXPECT_EQ(State::get()->returned_source, kNoSource);
   iopRetC();
   EXPECT_EQ(State::get()->returned_source, kNoSource);
+}
+
+TEST_F(TaintTest, TestFCallFuncDIssue) {
+  ActRec act_rec;
+  vmfp() = &act_rec;
+
+  auto func = createFunc("__sink");
+  vmfp()->setFunc(func);
+
+  State::get()->stack.push_back(kTestSource);
+  EXPECT_TRUE(State::get()->issues.empty());
+  iopFCallFuncD();
+  EXPECT_EQ(State::get()->issues.size(), 1);
+  EXPECT_EQ(State::get()->issues[0], (Issue{kTestSource, "__sink"}));
+}
+
+TEST_F(TaintTest, TestFCallFuncDNoIssue) {
+  ActRec act_rec;
+  vmfp() = &act_rec;
+
+  auto func = createFunc("__sink");
+  vmfp()->setFunc(func);
+
+  State::get()->stack.push_back(kNoSource);
+  EXPECT_TRUE(State::get()->issues.empty());
+  iopFCallFuncD();
+  EXPECT_TRUE(State::get()->issues.empty());
 }
 
 } // namespace taint

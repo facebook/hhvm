@@ -15,10 +15,10 @@ use hhbc_by_ref_hhbc_ast::FatalOp;
 use oxidized::pos::Pos;
 
 #[derive(Default, Debug)]
-pub struct HhasProgram<'a, 'arena> {
+pub struct HhasProgram<'arena> {
     pub adata: Vec<HhasAdata<'arena>>,
     pub functions: Vec<HhasFunction<'arena>>,
-    pub classes: Vec<HhasClass<'a, 'arena>>,
+    pub classes: Vec<HhasClass<'arena>>,
     pub record_defs: Vec<HhasRecord<'arena>>,
     pub typedefs: Vec<Typedef<'arena>>,
     pub file_attributes: Vec<HhasAttribute<'arena>>,

@@ -24,11 +24,11 @@ use oxidized::{ast, namespace_env, pos::Pos};
 // PUBLIC INTERFACE (ENTRY POINTS)
 
 /// This is the entry point from hh_single_compile & fuzzer
-pub fn emit_fatal_program<'a, 'arena>(
+pub fn emit_fatal_program<'arena>(
     op: FatalOp,
     pos: &Pos,
     msg: impl AsRef<str>,
-) -> Result<HhasProgram<'a, 'arena>> {
+) -> Result<HhasProgram<'arena>> {
     Ok(HhasProgram {
         fatal: Some((op, pos.clone(), msg.as_ref().into())),
         ..HhasProgram::default()
@@ -42,7 +42,7 @@ pub fn emit_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     flags: FromAstFlags,
     namespace: RcOc<namespace_env::Env>,
     tast: &'a ast::Program,
-) -> Result<HhasProgram<'a, 'arena>> {
+) -> Result<HhasProgram<'arena>> {
     let result = emit_program_(alloc, emitter, flags, namespace, tast);
     match result {
         Err(Error::IncludeTimeFatalException(op, pos, msg)) => emit_fatal_program(op, &pos, msg),
@@ -56,7 +56,7 @@ fn emit_program_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     _flags: FromAstFlags,
     namespace: RcOc<namespace_env::Env>,
     prog: &'a ast::Program,
-) -> Result<HhasProgram<'a, 'arena>> {
+) -> Result<HhasProgram<'arena>> {
     let mut functions = emit_functions_from_program(alloc, emitter, prog)?;
     let classes = emit_classes_from_program(alloc, emitter, prog)?;
     let record_defs = emit_record_defs_from_program(alloc, emitter, prog)?;

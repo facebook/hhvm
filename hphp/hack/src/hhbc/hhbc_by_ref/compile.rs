@@ -431,7 +431,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
     env: &Env<S>,
     namespace_env: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
-) -> Result<HhasProgram<'p, 'arena>, Error> {
+) -> Result<HhasProgram<'arena>, Error> {
     // First rewrite.
     let result = rewrite(alloc, emitter, ast, RcOc::clone(&namespace_env)); // Modifies `ast` in place.
     match result {
@@ -461,7 +461,7 @@ fn emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
     env: &Env<S>,
     namespace: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
-) -> Result<HhasProgram<'p, 'arena>, Error> {
+) -> Result<HhasProgram<'arena>, Error> {
     let mut flags = FromAstFlags::empty();
     if env.flags.contains(EnvFlags::IS_EVALED) {
         flags |= FromAstFlags::IS_EVALED;
@@ -490,11 +490,11 @@ fn emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
     emit_program(alloc, emitter, flags, namespace, ast)
 }
 
-fn emit_fatal<'a, 'arena>(
+fn emit_fatal<'arena>(
     is_runtime_error: bool,
     pos: &Pos,
     msg: impl AsRef<str>,
-) -> Result<HhasProgram<'a, 'arena>, Error> {
+) -> Result<HhasProgram<'arena>, Error> {
     let op = if is_runtime_error {
         FatalOp::Runtime
     } else {

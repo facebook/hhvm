@@ -12,6 +12,7 @@ use hhbc_by_ref_hhas_constant::HhasConstant;
 use hhbc_by_ref_hhas_method::HhasMethod;
 use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_property::HhasProperty;
+use hhbc_by_ref_hhas_type::Info;
 use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
 use hhbc_by_ref_hhbc_ast::UseAsVisibility;
 use hhbc_by_ref_hhbc_id::class::ClassType;
@@ -24,14 +25,14 @@ pub enum TraitReqKind {
 }
 
 #[derive(Debug)]
-pub struct HhasClass<'a, 'arena> {
+pub struct HhasClass<'arena> {
     pub attributes: Vec<HhasAttribute<'arena>>,
     pub base: Option<ClassType<'arena>>,
     pub implements: Vec<ClassType<'arena>>,
     pub enum_includes: Vec<ClassType<'arena>>,
     pub name: ClassType<'arena>,
     pub span: Span,
-    pub uses: Vec<&'a str>,
+    pub uses: Vec<Str<'arena>>,
     // Deprecated - kill please
     pub use_aliases: Vec<(
         Option<ClassType<'arena>>,
@@ -48,7 +49,7 @@ pub struct HhasClass<'a, 'arena> {
     pub type_constants: Vec<HhasTypeConstant<'arena>>,
     pub ctx_constants: Vec<HhasCtxConstant>,
     pub requirements: Vec<(ClassType<'arena>, TraitReqKind)>,
-    pub upper_bounds: Vec<(String, Vec<hhbc_by_ref_hhas_type::Info<'arena>>)>,
+    pub upper_bounds: Vec<(String, Vec<Info<'arena>>)>,
     pub doc_comment: Maybe<Str<'arena>>,
     pub flags: HhasClassFlags,
 }
@@ -68,7 +69,7 @@ bitflags! {
     }
 }
 
-impl<'a, 'arena> HhasClass<'a, 'arena> {
+impl<'arena> HhasClass<'arena> {
     pub fn is_final(&self) -> bool {
         self.flags.contains(HhasClassFlags::IS_FINAL)
     }

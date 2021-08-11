@@ -575,7 +575,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
     ast_class: &'a ast::Class_,
-) -> Result<HhasClass<'a, 'arena>> {
+) -> Result<HhasClass<'arena>> {
     let namespace = &ast_class.namespace;
     validate_class_name(namespace, &ast_class.name)?;
     let mut env = Env::make_class_env(alloc, ast_class);
@@ -936,7 +936,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         span,
         flags,
         doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &(c.0).1))),
-        uses,
+        uses: uses.into_iter().map(|s| Str::new_str(alloc, s)).collect(),
         use_aliases,
         use_precedences,
         methods,
@@ -954,7 +954,7 @@ pub fn emit_classes_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
     ast: &'a [ast::Def],
-) -> Result<Vec<HhasClass<'a, 'arena>>> {
+) -> Result<Vec<HhasClass<'arena>>> {
     ast.iter()
         .filter_map(|class| {
             if let ast::Def::Class(cd) = class {

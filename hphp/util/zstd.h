@@ -29,7 +29,7 @@ namespace HPHP {
 
 struct ZstdCompressor {
  public:
-  explicit ZstdCompressor(int compression_level, bool should_checksum = false);
+  explicit ZstdCompressor(int compression_level, bool should_checksum = false, int window_log = 0);
 
   StringHolder compress(const void* data, size_t& len, bool last);
 
@@ -56,9 +56,9 @@ struct ZstdCompressor {
  protected:
   int compression_level_;
   bool should_checksum_;
+  int window_log_;
   ContextPool::Ref ctx_;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

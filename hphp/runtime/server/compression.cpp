@@ -37,11 +37,13 @@ const StaticString s_brotliCL("brotli.compression_lgwin");
 const StaticString s_brotliC("brotli.compression");
 const StaticString s_brotliCC("brotli.chunked_compression");
 
-const StaticString s_zlibOCL("zlib.output_compression_level");
 const StaticString s_zstdCL("zstd.compression_level");
 const StaticString s_zstdCR("zstd.checksum_rate");
-const StaticString s_zlibOC("zlib.output_compression");
+const StaticString s_zstdWL("zstd.window_log");
 const StaticString s_zstdC("zstd.compression");
+
+const StaticString s_zlibOCL("zlib.output_compression_level");
+const StaticString s_zlibOC("zlib.output_compression");
 
 bool isOff(const String& s) {
   return s.size() == 3 && bstrcaseeq(s.data(), "off", 3);
@@ -365,12 +367,17 @@ ZstdCompressor* ZstdResponseCompressor::getCompressor() {
     Variant quality;
     IniSetting::Get(s_zstdCL, quality);
     auto compression_level = quality.asInt64Val();
+
     Variant checksumRate;
     IniSetting::Get(s_zstdCR, checksumRate);
     auto checksum_rate = checksumRate.asInt64Val();
 
+    Variant windowLog;
+    IniSetting::Get(s_zstdWL, windowLog);
+    auto window_log = windowLog.asInt64Val();
+
     m_compressor = std::make_unique<ZstdCompressor>(
-        compression_level, folly::Random::oneIn(checksum_rate));
+        compression_level, folly::Random::oneIn(checksum_rate), window_log);
   }
 
   return m_compressor.get();

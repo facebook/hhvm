@@ -47,8 +47,8 @@ void ZstdCompressor::zstd_cctx_deleter(ZSTD_CCtx* ctx) {
   throwIfZstdError(error, "Error freeing ZSTD_CCtx! ");
 }
 
-ZstdCompressor::ZstdCompressor(int compression_level, bool should_checksum)
-    : compression_level_(compression_level), should_checksum_(should_checksum) {
+ZstdCompressor::ZstdCompressor(int compression_level, bool should_checksum, int window_log)
+    : compression_level_(compression_level), should_checksum_(should_checksum), window_log_(window_log) {
 }
 
 void ZstdCompressor::setChecksum(bool should_checksum) {
@@ -89,6 +89,12 @@ StringHolder ZstdCompressor::compress(const void* data,
     throwIfZstdError(ZSTD_CCtx_setParameter(
         ctx_.get(), ZSTD_c_checksumFlag, should_checksum_),
         "ZSTD_CCtx_setParameter() Setting checksum failed! ");
+    if (window_log_ != 0) {
+      // wlog == 0 implies that we should not custom-set this
+      throwIfZstdError(ZSTD_CCtx_setParameter(
+          ctx_.get(), ZSTD_c_windowLog, window_log_),
+          "ZSTD_CCtx_setParameter() Setting window log failed! ");
+    }
   }
 
   ZSTD_inBuffer inBuf = {data, len, 0};

@@ -371,6 +371,7 @@ struct RuntimeOption {
   static int BrotliCompressionQuality;
   static int ZstdCompressionEnabled;
   static int ZstdCompressionLevel;
+  static int ZstdWindowLog;
   static int ZstdChecksumRate;
   static int GzipCompressionLevel;
   static int GzipMaxCompressionLevel;

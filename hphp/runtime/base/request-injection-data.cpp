@@ -525,6 +525,12 @@ void RequestInjectionData::threadInit() {
       "zstd.checksum_rate",
       std::to_string(RuntimeOption::ZstdChecksumRate).c_str(),
       &m_zstdChecksumRate);
+  IniSetting::Bind(
+      IniSetting::CORE,
+      IniSetting::PHP_INI_ALL,
+      "zstd.window_log",
+      std::to_string(RuntimeOption::ZstdWindowLog).c_str(),
+      &m_zstdWindowLog);
 }
 
 std::string RequestInjectionData::getDefaultIncludePath() {

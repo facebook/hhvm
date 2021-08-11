@@ -454,6 +454,7 @@ private:
   int64_t m_brotliQuality;
   int64_t m_zstdLevel;
   int64_t m_zstdChecksumRate;
+  int64_t m_zstdWindowLog;
 
   /*
    * Instead of using several surprise flags, we can track the timeout info
@@ -483,4 +484,3 @@ private:
 #define incl_HPHP_REQUEST_INJECTION_DATA_INL_H_
 #include "hphp/runtime/base/request-injection-data-inl.h"
 #undef incl_HPHP_REQUEST_INJECTION_DATA_INL_H_
-

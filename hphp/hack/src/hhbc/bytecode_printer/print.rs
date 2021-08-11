@@ -48,7 +48,7 @@ use hhbc_by_ref_runtime::TypedValue;
 use lazy_static::lazy_static;
 use naming_special_names_rust::classes;
 use ocaml_helper::escaped;
-use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id};
+use oxidized::{ast, ast_defs, local_id};
 use regex::Regex;
 use write::*;
 
@@ -510,19 +510,7 @@ fn print_enum_ty<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Resul
     Ok(())
 }
 
-fn print_doc_comment<W: Write>(
-    ctx: &mut Context,
-    w: &mut W,
-    doc_comment: &Option<DocComment>,
-) -> Result<(), W::Error> {
-    if let Some(cmt) = doc_comment {
-        ctx.newline(w)?;
-        write!(w, ".doc {};", triple_quote_string(&(cmt.0).1))?;
-    }
-    Ok(())
-}
-
-fn print_doc_comment_<'arena, W: Write>(
+fn print_doc_comment<'arena, W: Write>(
     ctx: &mut Context,
     w: &mut W,
     doc_comment: &Maybe<Str<'arena>>,
@@ -1047,7 +1035,7 @@ fn print_body<W: Write>(
     body: &HhasBody,
     coeffects: &HhasCoeffects,
 ) -> Result<(), W::Error> {
-    print_doc_comment_(ctx, w, &body.doc_comment)?;
+    print_doc_comment(ctx, w, &body.doc_comment)?;
     if body.is_memoize_wrapper {
         ctx.newline(w)?;
         w.write(".ismemoizewrapper;")?;

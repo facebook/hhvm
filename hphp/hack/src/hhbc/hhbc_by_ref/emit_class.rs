@@ -928,7 +928,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         name,
         span,
         flags,
-        doc_comment,
+        doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &(c.0).1))),
         uses,
         use_aliases,
         use_precedences,

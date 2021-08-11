@@ -1771,6 +1771,7 @@ name = "hhbc_by_ref_hhas_class"
 version = "0.0.0"
 dependencies = [
  "bitflags",
+ "ffi",
  "hhbc_by_ref_hhas_attribute",
  "hhbc_by_ref_hhas_coeffects",
  "hhbc_by_ref_hhas_constant",

@@ -5,6 +5,7 @@
 
 use bitflags::bitflags;
 
+use ffi::{Maybe, Str};
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_coeffects::HhasCtxConstant;
 use hhbc_by_ref_hhas_constant::HhasConstant;
@@ -13,9 +14,10 @@ use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_property::HhasProperty;
 use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
 use hhbc_by_ref_hhbc_id::class;
-use oxidized::{ast, doc_comment::DocComment};
+use oxidized::ast;
 
 #[derive(Debug)]
+#[repr(C)]
 pub enum TraitReqKind {
     MustExtend,
     MustImplement,
@@ -51,11 +53,12 @@ pub struct HhasClass<'a, 'arena> {
     pub ctx_constants: Vec<HhasCtxConstant>,
     pub requirements: Vec<(class::ClassType<'arena>, TraitReqKind)>,
     pub upper_bounds: Vec<(String, Vec<hhbc_by_ref_hhas_type::Info<'arena>>)>,
-    pub doc_comment: Option<DocComment>,
+    pub doc_comment: Maybe<Str<'arena>>,
     pub flags: HhasClassFlags,
 }
 
 bitflags! {
+    #[repr(C)]
     pub struct HhasClassFlags: u16 {
         const IS_FINAL = 1 << 1;
         const IS_SEALED = 1 << 2;

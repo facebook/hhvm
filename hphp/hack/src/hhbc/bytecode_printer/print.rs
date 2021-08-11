@@ -3153,7 +3153,7 @@ fn print_fun_attrs<W: Write>(
     f: &HhasFunction,
 ) -> Result<(), W::Error> {
     use hhas_attribute::*;
-    let user_attrs = &f.attributes;
+    let user_attrs = f.attributes.as_ref();
     let mut special_attrs = vec![];
     if has_meth_caller(user_attrs) {
         special_attrs.push("builtin");

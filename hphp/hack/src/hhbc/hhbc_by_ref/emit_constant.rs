@@ -5,6 +5,7 @@
 
 use core_utils_rust as utils;
 use decl_provider::DeclProvider;
+use ffi::Slice;
 use hhbc_by_ref_emit_body as emit_body;
 use hhbc_by_ref_emit_type_hint::{self as emit_type_hint, Kind};
 use hhbc_by_ref_env::{emitter::Emitter, Env};
@@ -70,7 +71,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             Some(env),
         )?;
         Ok(HhasFunction {
-            attributes: vec![],
+            attributes: Slice::empty(),
             name: original_id,
             body,
             span: Span::from_pos(&constant.span),

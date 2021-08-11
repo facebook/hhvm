@@ -1308,6 +1308,7 @@ version = "0.0.0"
 dependencies = [
  "core_utils_rust",
  "decl_provider",
+ "ffi",
  "hhbc_by_ref_emit_body",
  "hhbc_by_ref_emit_type_hint",
  "hhbc_by_ref_env",
@@ -1811,6 +1812,7 @@ name = "hhbc_by_ref_hhas_function"
 version = "0.0.0"
 dependencies = [
  "bitflags",
+ "ffi",
  "hhbc_by_ref_hhas_attribute",
  "hhbc_by_ref_hhas_body",
  "hhbc_by_ref_hhas_coeffects",

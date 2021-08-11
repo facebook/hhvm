@@ -6,6 +6,7 @@
 mod emit_memoize_function;
 
 use decl_provider::DeclProvider;
+use ffi::Slice;
 use hhbc_by_ref_ast_scope::{self as ast_scope, Scope, ScopeItem};
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_body::{self as emit_body};
@@ -160,7 +161,7 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         None
     };
     let normal_function = HhasFunction {
-        attributes: attrs,
+        attributes: Slice::fill_iter(alloc, attrs.into_iter()),
         name: (alloc, renamed_id.to_raw_string()).into(),
         span: Span::from_pos(&f.span),
         coeffects,

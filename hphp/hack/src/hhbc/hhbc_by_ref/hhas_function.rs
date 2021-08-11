@@ -3,22 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::Slice;
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_body::HhasBody;
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhas_param::HhasParam;
-
-use hhbc_by_ref_hhas_pos as hhas_pos;
-use hhbc_by_ref_hhbc_id as hhbc_id;
+use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhbc_id::function::FunctionType;
 
 use bitflags::bitflags;
 
 #[derive(Debug)]
 pub struct HhasFunction<'arena> {
-    pub attributes: Vec<HhasAttribute<'arena>>,
-    pub name: hhbc_id::function::FunctionType<'arena>,
+    pub attributes: Slice<'arena, HhasAttribute<'arena>>,
+    pub name: FunctionType<'arena>,
     pub body: HhasBody<'arena>,
-    pub span: hhas_pos::Span,
+    pub span: Span,
     pub coeffects: HhasCoeffects,
     pub flags: Flags,
 }

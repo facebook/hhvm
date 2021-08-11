@@ -105,7 +105,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     flags.set(HhasFunctionFlags::INTERCEPTABLE, is_interceptable);
 
     Ok(HhasFunction {
-        attributes,
+        attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         name: original_id,
         body,
         span: Span::from_pos(&f.span),

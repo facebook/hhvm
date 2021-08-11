@@ -13,8 +13,8 @@ use hhbc_by_ref_hhas_method::HhasMethod;
 use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_property::HhasProperty;
 use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
-use hhbc_by_ref_hhbc_id::class;
-use oxidized::ast;
+use hhbc_by_ref_hhbc_ast::UseAsVisibility;
+use hhbc_by_ref_hhbc_id::class::ClassType;
 
 #[derive(Debug)]
 #[repr(C)]
@@ -26,32 +26,28 @@ pub enum TraitReqKind {
 #[derive(Debug)]
 pub struct HhasClass<'a, 'arena> {
     pub attributes: Vec<HhasAttribute<'arena>>,
-    pub base: Option<class::ClassType<'arena>>,
-    pub implements: Vec<class::ClassType<'arena>>,
-    pub enum_includes: Vec<class::ClassType<'arena>>,
-    pub name: class::ClassType<'arena>,
+    pub base: Option<ClassType<'arena>>,
+    pub implements: Vec<ClassType<'arena>>,
+    pub enum_includes: Vec<ClassType<'arena>>,
+    pub name: ClassType<'arena>,
     pub span: Span,
     pub uses: Vec<&'a str>,
     // Deprecated - kill please
     pub use_aliases: Vec<(
-        Option<class::ClassType<'arena>>,
-        class::ClassType<'arena>,
-        Option<class::ClassType<'arena>>,
-        &'a Vec<ast::UseAsVisibility>,
+        Option<ClassType<'arena>>,
+        ClassType<'arena>,
+        Option<ClassType<'arena>>,
+        Vec<UseAsVisibility>,
     )>,
     // Deprecated - kill please
-    pub use_precedences: Vec<(
-        class::ClassType<'arena>,
-        class::ClassType<'arena>,
-        Vec<class::ClassType<'arena>>,
-    )>,
+    pub use_precedences: Vec<(ClassType<'arena>, ClassType<'arena>, Vec<ClassType<'arena>>)>,
     pub enum_type: Option<hhbc_by_ref_hhas_type::Info<'arena>>,
     pub methods: Vec<HhasMethod<'arena>>,
     pub properties: Vec<HhasProperty<'arena>>,
     pub constants: Vec<HhasConstant<'arena>>,
     pub type_constants: Vec<HhasTypeConstant<'arena>>,
     pub ctx_constants: Vec<HhasCtxConstant>,
-    pub requirements: Vec<(class::ClassType<'arena>, TraitReqKind)>,
+    pub requirements: Vec<(ClassType<'arena>, TraitReqKind)>,
     pub upper_bounds: Vec<(String, Vec<hhbc_by_ref_hhas_type::Info<'arena>>)>,
     pub doc_comment: Maybe<Str<'arena>>,
     pub flags: HhasClassFlags,

@@ -601,6 +601,26 @@ impl AsRef<str> for Visibility {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
+pub enum UseAsVisibility {
+    UseAsPublic,
+    UseAsPrivate,
+    UseAsProtected,
+    UseAsFinal,
+}
+impl std::convert::From<oxidized::ast::UseAsVisibility> for UseAsVisibility {
+    fn from(k: oxidized::ast::UseAsVisibility) -> UseAsVisibility {
+        use oxidized::ast::UseAsVisibility::*;
+        match k {
+            UseAsPrivate => UseAsVisibility::UseAsPrivate,
+            UseAsPublic => UseAsVisibility::UseAsPublic,
+            UseAsProtected => UseAsVisibility::UseAsProtected,
+            UseAsFinal => UseAsVisibility::UseAsFinal,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub enum OpSilence {
     Start,
     End,

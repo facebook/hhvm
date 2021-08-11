@@ -1780,8 +1780,8 @@ dependencies = [
  "hhbc_by_ref_hhas_property",
  "hhbc_by_ref_hhas_type",
  "hhbc_by_ref_hhas_type_const",
+ "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_hhbc_id",
- "oxidized",
 ]
 
 [[package]]

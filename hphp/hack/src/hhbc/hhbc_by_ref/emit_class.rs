@@ -28,7 +28,9 @@ use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_property::HhasProperty;
 use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
 use hhbc_by_ref_hhas_xhp_attribute::HhasXhpAttribute;
-use hhbc_by_ref_hhbc_ast::{FatalOp, FcallArgs, FcallFlags, ReadOnlyOp, SpecialClsRef, Visibility};
+use hhbc_by_ref_hhbc_ast::{
+    FatalOp, FcallArgs, FcallFlags, ReadOnlyOp, SpecialClsRef, UseAsVisibility, Visibility,
+};
 use hhbc_by_ref_hhbc_id::r#const;
 use hhbc_by_ref_hhbc_id::{self as hhbc_id, class, method, prop, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
@@ -624,7 +626,12 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .map(|ast::UseAsAlias(ido1, id, ido2, vis)| {
             let id1 = ido1.as_ref().map(|x| elaborate_namespace_id(x));
             let id2 = ido2.as_ref().map(|x| (alloc, x.1.as_ref()).into());
-            (id1, (alloc, id.1.as_ref()).into(), id2, vis)
+            (
+                id1,
+                (alloc, id.1.as_ref()).into(),
+                id2,
+                vis.iter().map(|&v| UseAsVisibility::from(v)).collect(),
+            )
         })
         .collect();
 

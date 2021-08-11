@@ -18,8 +18,8 @@ hhbc_by_ref_hhas_pos = { path = "../hhas_by_ref_hhas_pos" }
 hhbc_by_ref_hhas_property = { path = "../hhbc_by_ref_hhas_property" }
 hhbc_by_ref_hhas_type = { path = "../hhbc_by_ref_hhas_type" }
 hhbc_by_ref_hhas_type_const = { path = "../hhbc_by_ref_hhas_type_const" }
+hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
-oxidized = { path = "../../../../oxidized" }
 
 [profile.release]
 incremental = false

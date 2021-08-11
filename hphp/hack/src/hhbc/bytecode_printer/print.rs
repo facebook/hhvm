@@ -535,12 +535,12 @@ fn print_use_precedence<W: Write>(
     w.write(";")
 }
 
-fn print_use_as_visibility<W: Write>(w: &mut W, u: ast::UseAsVisibility) -> Result<(), W::Error> {
+fn print_use_as_visibility<W: Write>(w: &mut W, u: UseAsVisibility) -> Result<(), W::Error> {
     w.write(match u {
-        ast::UseAsVisibility::UseAsPublic => "public",
-        ast::UseAsVisibility::UseAsPrivate => "private",
-        ast::UseAsVisibility::UseAsProtected => "protected",
-        ast::UseAsVisibility::UseAsFinal => "final",
+        UseAsVisibility::UseAsPublic => "public",
+        UseAsVisibility::UseAsPrivate => "private",
+        UseAsVisibility::UseAsProtected => "protected",
+        UseAsVisibility::UseAsFinal => "final",
     })
 }
 
@@ -551,7 +551,7 @@ fn print_use_alias<W: Write>(
         Option<class::ClassType>,
         class::ClassType,
         Option<class::ClassType>,
-        &Vec<ast::UseAsVisibility>,
+        Vec<UseAsVisibility>,
     ),
 ) -> Result<(), W::Error> {
     ctx.newline(w)?;

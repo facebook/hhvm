@@ -31,6 +31,7 @@ use hhbc_by_ref_hhas_xhp_attribute::HhasXhpAttribute;
 use hhbc_by_ref_hhbc_ast::{
     FatalOp, FcallArgs, FcallFlags, ReadOnlyOp, SpecialClsRef, UseAsVisibility, Visibility,
 };
+use hhbc_by_ref_hhbc_id::class::ClassType;
 use hhbc_by_ref_hhbc_id::r#const;
 use hhbc_by_ref_hhbc_id::{self as hhbc_id, class, method, prop, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
@@ -620,31 +621,35 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
     let elaborate_namespace_id =
         |x: &'a ast::Id| hhbc_id::class::ClassType::from_ast_name(alloc, x.name());
-    let use_aliases = ast_class
-        .use_as_alias
-        .iter()
-        .map(|ast::UseAsAlias(ido1, id, ido2, vis)| {
-            let id1 = ido1.as_ref().map(|x| elaborate_namespace_id(x));
-            let id2 = ido2.as_ref().map(|x| (alloc, x.1.as_ref()).into());
-            (
-                id1,
-                (alloc, id.1.as_ref()).into(),
-                id2,
-                vis.iter().map(|&v| UseAsVisibility::from(v)).collect(),
-            )
-        })
-        .collect();
+    let use_aliases = Slice::fill_iter(
+        alloc,
+        ast_class
+            .use_as_alias
+            .iter()
+            .map(|ast::UseAsAlias(ido1, id, ido2, vis)| {
+                let id1 = ido1.as_ref().map(|x| elaborate_namespace_id(x));
+                let id2 = ido2.as_ref().map(|x| (alloc, x.1.as_ref()).into());
+                (
+                    id1,
+                    (alloc, id.1.as_ref()).into(),
+                    id2,
+                    Slice::fill_iter(alloc, vis.iter().map(|&v| UseAsVisibility::from(v))),
+                )
+            }),
+    );
 
-    let use_precedences = ast_class
-        .insteadof_alias
-        .iter()
-        .map(|ast::InsteadofAlias(id1, id2, ids)| {
-            let id1 = elaborate_namespace_id(id1);
-            let id2: hhbc_by_ref_hhbc_id::class::ClassType<'arena> = (alloc, id2.1.as_ref()).into();
-            let ids = ids.iter().map(|x| elaborate_namespace_id(x)).collect();
-            (id1, id2, ids)
-        })
-        .collect();
+    let use_precedences = Slice::fill_iter(
+        alloc,
+        ast_class
+            .insteadof_alias
+            .iter()
+            .map(|ast::InsteadofAlias(id1, id2, ids)| {
+                let id1 = elaborate_namespace_id(id1);
+                let id2: ClassType<'arena> = (alloc, id2.1.as_ref()).into();
+                let ids = Slice::fill_iter(alloc, ids.iter().map(|x| elaborate_namespace_id(x)));
+                (id1, id2, ids)
+            }),
+    );
 
     let enum_type = match ast_class.kind {
         ast::ClassishKind::Cenum | ast::ClassishKind::CenumClass => {
@@ -928,25 +933,25 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         &requirements,
     );
     Ok(HhasClass {
-        attributes,
+        attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         base,
-        implements,
-        enum_includes,
+        implements: Slice::fill_iter(alloc, implements.into_iter()),
+        enum_includes: Slice::fill_iter(alloc, enum_includes.into_iter()),
         name,
         span,
         flags,
         doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &(c.0).1))),
-        uses: uses.into_iter().map(|s| Str::new_str(alloc, s)).collect(),
+        uses: Slice::fill_iter(alloc, uses.into_iter().map(|s| Str::new_str(alloc, s))),
         use_aliases,
         use_precedences,
-        methods,
+        methods: Slice::fill_iter(alloc, methods.into_iter()),
         enum_type,
-        upper_bounds,
-        properties,
-        requirements,
-        type_constants,
-        ctx_constants,
-        constants,
+        upper_bounds: Slice::fill_iter(alloc, upper_bounds.into_iter()),
+        properties: Slice::fill_iter(alloc, properties.into_iter()),
+        requirements: Slice::fill_iter(alloc, requirements.into_iter()),
+        type_constants: Slice::fill_iter(alloc, type_constants.into_iter()),
+        ctx_constants: Slice::fill_iter(alloc, ctx_constants.into_iter()),
+        constants: Slice::fill_iter(alloc, constants.into_iter()),
     })
 }
 

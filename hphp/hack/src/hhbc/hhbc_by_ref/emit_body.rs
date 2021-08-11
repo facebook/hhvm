@@ -434,7 +434,7 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
     num_closures: u32,
-    upper_bounds: Vec<(String, Vec<HhasTypeInfo<'arena>>)>,
+    upper_bounds: Vec<(Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>)>,
     shadowed_tparams: Vec<String>,
     mut params: Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>,
     return_type_info: Option<HhasTypeInfo<'arena>>,
@@ -503,13 +503,7 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         num_closures,
         upper_bounds: Slice::fill_iter(
             alloc,
-            upper_bounds.into_iter().map(|(s, is)| {
-                (
-                    Str::new_str(alloc, s),
-                    Slice::fill_iter(alloc, is.into_iter()),
-                )
-                    .into()
-            }),
+            upper_bounds.into_iter().map(|(s, is)| (s, is).into()),
         ),
         shadowed_tparams: Slice::fill_iter(
             alloc,
@@ -1172,7 +1166,7 @@ pub fn emit_generics_upper_bounds<'arena>(
     immediate_tparams: &[ast::Tparam],
     class_tparam_names: &[&str],
     skip_awaitable: bool,
-) -> Vec<(String, Vec<HhasTypeInfo<'arena>>)> {
+) -> Vec<(Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>)> {
     let constraint_filter = |(kind, hint): &(ast_defs::ConstraintKind, ast::Hint)| {
         if let ast_defs::ConstraintKind::ConstraintAs = &kind {
             let mut tparam_names = get_tp_names(immediate_tparams);
@@ -1198,7 +1192,10 @@ pub fn emit_generics_upper_bounds<'arena>(
             .collect::<Vec<_>>();
         match &ubs[..] {
             [] => None,
-            _ => Some((get_tp_name(tparam).to_owned(), ubs)),
+            _ => Some((
+                Str::new_str(alloc, get_tp_name(tparam)),
+                Slice::fill_iter(alloc, ubs.into_iter()),
+            )),
         }
     };
     immediate_tparams

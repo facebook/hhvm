@@ -5,7 +5,7 @@
 
 use bitflags::bitflags;
 
-use ffi::{Maybe, Str};
+use ffi::{Maybe, Slice, Str};
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_coeffects::HhasCtxConstant;
 use hhbc_by_ref_hhas_constant::HhasConstant;
@@ -26,30 +26,40 @@ pub enum TraitReqKind {
 
 #[derive(Debug)]
 pub struct HhasClass<'arena> {
-    pub attributes: Vec<HhasAttribute<'arena>>,
+    pub attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub base: Option<ClassType<'arena>>,
-    pub implements: Vec<ClassType<'arena>>,
-    pub enum_includes: Vec<ClassType<'arena>>,
+    pub implements: Slice<'arena, ClassType<'arena>>,
+    pub enum_includes: Slice<'arena, ClassType<'arena>>,
     pub name: ClassType<'arena>,
     pub span: Span,
-    pub uses: Vec<Str<'arena>>,
+    pub uses: Slice<'arena, Str<'arena>>,
     // Deprecated - kill please
-    pub use_aliases: Vec<(
-        Option<ClassType<'arena>>,
-        ClassType<'arena>,
-        Option<ClassType<'arena>>,
-        Vec<UseAsVisibility>,
-    )>,
+    pub use_aliases: Slice<
+        'arena,
+        (
+            Option<ClassType<'arena>>,
+            ClassType<'arena>,
+            Option<ClassType<'arena>>,
+            Slice<'arena, UseAsVisibility>,
+        ),
+    >,
     // Deprecated - kill please
-    pub use_precedences: Vec<(ClassType<'arena>, ClassType<'arena>, Vec<ClassType<'arena>>)>,
-    pub enum_type: Option<hhbc_by_ref_hhas_type::Info<'arena>>,
-    pub methods: Vec<HhasMethod<'arena>>,
-    pub properties: Vec<HhasProperty<'arena>>,
-    pub constants: Vec<HhasConstant<'arena>>,
-    pub type_constants: Vec<HhasTypeConstant<'arena>>,
-    pub ctx_constants: Vec<HhasCtxConstant>,
-    pub requirements: Vec<(ClassType<'arena>, TraitReqKind)>,
-    pub upper_bounds: Vec<(String, Vec<Info<'arena>>)>,
+    pub use_precedences: Slice<
+        'arena,
+        (
+            ClassType<'arena>,
+            ClassType<'arena>,
+            Slice<'arena, ClassType<'arena>>,
+        ),
+    >,
+    pub enum_type: Option<Info<'arena>>,
+    pub methods: Slice<'arena, HhasMethod<'arena>>,
+    pub properties: Slice<'arena, HhasProperty<'arena>>,
+    pub constants: Slice<'arena, HhasConstant<'arena>>,
+    pub type_constants: Slice<'arena, HhasTypeConstant<'arena>>,
+    pub ctx_constants: Slice<'arena, HhasCtxConstant>, // TODO(SF, 2021-0811): HhasCtxConstant is part of Steve's HhasCoeffect work
+    pub requirements: Slice<'arena, (ClassType<'arena>, TraitReqKind)>,
+    pub upper_bounds: Slice<'arena, (Str<'arena>, Slice<'arena, Info<'arena>>)>,
     pub doc_comment: Maybe<Str<'arena>>,
     pub flags: HhasClassFlags,
 }
@@ -98,6 +108,6 @@ impl<'arena> HhasClass<'arena> {
         self.flags.contains(HhasClassFlags::NEEDS_NO_REIFIEDINIT)
     }
     pub fn is_closure(&self) -> bool {
-        self.methods.iter().any(|x| x.is_closure_body())
+        self.methods.as_ref().iter().any(|x| x.is_closure_body())
     }
 }

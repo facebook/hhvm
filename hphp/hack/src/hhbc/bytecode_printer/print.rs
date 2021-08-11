@@ -35,7 +35,7 @@ use hhbc_by_ref_hhas_type::{constraint, Info as HhasTypeInfo};
 use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
 use hhbc_by_ref_hhas_typedef::Typedef as HhasTypedef;
 use hhbc_by_ref_hhbc_ast::*;
-use hhbc_by_ref_hhbc_id::{class, Id};
+use hhbc_by_ref_hhbc_id::{class::ClassType, Id};
 use hhbc_by_ref_hhbc_string_utils::{
     float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, mangle, quote_string,
     quote_string_with_escape, strip_global_ns, strip_ns, triple_quote_string, types,
@@ -339,7 +339,7 @@ fn print_fun_def<W: Write>(
 fn print_requirement<W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    r: &(class::ClassType<'_>, hhas_class::TraitReqKind),
+    r: &(ClassType<'_>, hhas_class::TraitReqKind),
 ) -> Result<(), W::Error> {
     ctx.newline(w)?;
     w.write(".require ")?;
@@ -522,15 +522,19 @@ fn print_doc_comment<'arena, W: Write>(
     Ok(())
 }
 
-fn print_use_precedence<W: Write>(
+fn print_use_precedence<'arena, W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    (id1, id2, ids): &(class::ClassType, class::ClassType, Vec<class::ClassType>),
+    (id1, id2, ids): &(
+        ClassType<'arena>,
+        ClassType<'arena>,
+        Slice<'arena, ClassType<'arena>>,
+    ),
 ) -> Result<(), W::Error> {
     ctx.newline(w)?;
     concat_str(w, [id1.to_raw_string(), "::", id2.to_raw_string()])?;
     w.write(" insteadof ")?;
-    let unique_ids: IndexSet<&str> = ids.iter().map(|i| i.to_raw_string()).collect();
+    let unique_ids: IndexSet<&str> = ids.as_ref().iter().map(|i| i.to_raw_string()).collect();
     concat_str_by(w, " ", unique_ids.iter().collect::<Vec<_>>())?;
     w.write(";")
 }
@@ -544,14 +548,14 @@ fn print_use_as_visibility<W: Write>(w: &mut W, u: UseAsVisibility) -> Result<()
     })
 }
 
-fn print_use_alias<W: Write>(
+fn print_use_alias<'arena, W: Write>(
     ctx: &mut Context,
     w: &mut W,
     (ido1, id, ido2, kindl): &(
-        Option<class::ClassType>,
-        class::ClassType,
-        Option<class::ClassType>,
-        Vec<UseAsVisibility>,
+        Option<ClassType>,
+        ClassType,
+        Option<ClassType>,
+        Slice<'arena, UseAsVisibility>,
     ),
 ) -> Result<(), W::Error> {
     ctx.newline(w)?;
@@ -559,7 +563,7 @@ fn print_use_alias<W: Write>(
     option_or(
         w,
         ido1,
-        |w, i: &class::ClassType| concat_str(w, [i.to_raw_string(), "::", id]),
+        |w, i: &ClassType| concat_str(w, [i.to_raw_string(), "::", id]),
         id,
     )?;
     w.write(" as ")?;
@@ -569,18 +573,24 @@ fn print_use_alias<W: Write>(
         })?;
     }
     w.write_if(!kindl.is_empty() && ido2.is_some(), " ")?;
-    option(w, ido2, |w, i: &class::ClassType| {
-        w.write(i.to_raw_string())
-    })?;
+    option(w, ido2, |w, i: &ClassType| w.write(i.to_raw_string()))?;
     w.write(";")
 }
 
-fn print_uses<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(), W::Error> {
+fn print_uses<'arena, W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    c: &HhasClass<'arena>,
+) -> Result<(), W::Error> {
     if c.uses.is_empty() {
         Ok(())
     } else {
-        let unique_ids: IndexSet<&str> =
-            c.uses.iter().map(|e| strip_global_ns(e.as_str())).collect();
+        let unique_ids: IndexSet<&str> = c
+            .uses
+            .as_ref()
+            .iter()
+            .map(|e| strip_global_ns(e.as_str()))
+            .collect();
         let unique_ids: Vec<_> = unique_ids.into_iter().collect();
 
         newline(w)?;
@@ -592,10 +602,21 @@ fn print_uses<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(
         } else {
             w.write(" {")?;
             ctx.block(w, |ctx, w| {
-                for x in &c.use_precedences {
+                let precs: &[(
+                    ClassType<'arena>,
+                    ClassType<'arena>,
+                    Slice<'arena, ClassType<'arena>>,
+                )] = c.use_precedences.as_ref();
+                let aliases: &[(
+                    Option<ClassType<'arena>>,
+                    ClassType<'arena>,
+                    Option<ClassType<'arena>>,
+                    Slice<'arena, UseAsVisibility>,
+                )] = c.use_aliases.as_ref();
+                for x in precs {
                     print_use_precedence(ctx, w, x)?;
                 }
-                for x in &c.use_aliases {
+                for x in aliases {
                     print_use_alias(ctx, w, x)?;
                 }
                 Ok(())
@@ -611,7 +632,7 @@ fn print_class_special_attributes<W: Write>(
     w: &mut W,
     c: &HhasClass,
 ) -> Result<(), W::Error> {
-    let user_attrs = &c.attributes;
+    let user_attrs = c.attributes.as_ref();
     let is_system_lib = ctx.is_system_lib();
 
     let mut special_attributes: Vec<&str> = vec![];
@@ -675,10 +696,7 @@ fn print_class_special_attributes<W: Write>(
     })
 }
 
-fn print_implements<W: Write>(
-    w: &mut W,
-    implements: &[class::ClassType<'_>],
-) -> Result<(), W::Error> {
+fn print_implements<W: Write>(w: &mut W, implements: &[ClassType<'_>]) -> Result<(), W::Error> {
     if implements.is_empty() {
         return Ok(());
     }
@@ -696,7 +714,7 @@ fn print_implements<W: Write>(
 
 fn print_enum_includes<W: Write>(
     w: &mut W,
-    enum_includes: &[class::ClassType<'_>],
+    enum_includes: &[ClassType<'_>],
 ) -> Result<(), W::Error> {
     if enum_includes.is_empty() {
         return Ok(());
@@ -816,7 +834,7 @@ fn print_class_def<W: Write>(
 ) -> Result<(), W::Error> {
     newline(w)?;
     w.write(".class ")?;
-    print_upper_bounds(w, &class_def.upper_bounds)?;
+    print_upper_bounds(w, class_def.upper_bounds.as_ref())?;
     w.write(" ")?;
     print_class_special_attributes(ctx, w, class_def)?;
     w.write(class_def.name.to_raw_string())?;
@@ -830,22 +848,22 @@ fn print_class_def<W: Write>(
         print_doc_comment(c, w, &class_def.doc_comment)?;
         print_uses(c, w, class_def)?;
         print_enum_ty(c, w, class_def)?;
-        for x in &class_def.requirements {
+        for x in class_def.requirements.as_ref() {
             print_requirement(c, w, x)?;
         }
-        for x in &class_def.constants {
+        for x in class_def.constants.as_ref() {
             print_constant(c, w, x)?;
         }
-        for x in &class_def.type_constants {
+        for x in class_def.type_constants.as_ref() {
             print_type_constant(c, w, x)?;
         }
-        for x in &class_def.ctx_constants {
+        for x in class_def.ctx_constants.as_ref() {
             print_ctx_constant(c, w, x)?;
         }
-        for x in &class_def.properties {
+        for x in class_def.properties.as_ref() {
             print_property(c, w, class_def, x)?;
         }
-        for m in &class_def.methods {
+        for m in class_def.methods.as_ref() {
             print_method_def(c, w, m)?;
         }
         Ok(())
@@ -2487,7 +2505,7 @@ pub fn print_expr<W: Write>(
 
         if env.is_some() {
             let alloc = bumpalo::Bump::new();
-            let class_id = class::ClassType::from_ast_name(&alloc, id);
+            let class_id = ClassType::from_ast_name(&alloc, id);
             let id = class_id.to_raw_string();
             get(should_format, is_class_constant, id)
                 .into_owned()
@@ -2625,7 +2643,7 @@ pub fn print_expr<W: Write>(
                         Some(ast_defs::Id(_, cname)) => w.write(lstrip(
                             &adjust_id(
                                 env,
-                                &class::ClassType::from_ast_name(&bumpalo::Bump::new(), cname)
+                                &ClassType::from_ast_name(&bumpalo::Bump::new(), cname)
                                     .to_raw_string(),
                             ),
                             "\\\\",
@@ -3192,14 +3210,14 @@ fn print_special_and_user_attrs<W: Write>(
 
 fn print_upper_bounds<'arena, W: Write>(
     w: &mut W,
-    ubs: impl AsRef<[(String, Vec<HhasTypeInfo<'arena>>)]>,
+    ubs: impl AsRef<[(Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>)]>,
 ) -> Result<(), W::Error> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound))
 }
 
-fn print_upper_bound<W: Write>(
+fn print_upper_bound<'arena, W: Write>(
     w: &mut W,
-    (id, tys): &(String, Vec<HhasTypeInfo>),
+    (id, tys): &(Str<'arena>, Slice<'arena, HhasTypeInfo>),
 ) -> Result<(), W::Error> {
     paren(w, |w| {
         concat_str_by(w, " ", [id.as_str(), "as", ""])?;

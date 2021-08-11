@@ -16,7 +16,6 @@ module TUtils = Typing_utils
 module Reason = Typing_reason
 module MakeType = Typing_make_type
 module SubType = Typing_subtype
-module Partial = Partial_provider
 module GenericRules = Typing_generic_rules
 module SN = Naming_special_names
 open String.Replace_polymorphic_compare
@@ -545,16 +544,6 @@ let rec array_get
             ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
         in
         (env, ty, err_res_idx, err_res_arr)
-      | Tobject ->
-        if Partial.should_check_error (Env.get_mode env) 4005 then
-          let (env, ty1) = error_array env expr_pos ty1 in
-          let ty_nothing = Typing_make_type.nothing Reason.none in
-          let ty_keyedcontainer =
-            Typing_make_type.(keyed_container Reason.none ty2 ty_nothing)
-          in
-          (env, ty1, Ok ty2, Error (ty1, ty_keyedcontainer))
-        else
-          (env, TUtils.mk_tany env expr_pos, Ok ty2, dflt_arr_res)
       | Tnewtype (ts, [ty], bound) ->
         begin
           match deref bound with
@@ -716,12 +705,6 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, mk (r, Tvarray tv'), Ok ty2)
       | (_, Tdynamic) -> (env, ty1, Ok ty2)
-      | (_, Tobject) ->
-        if Partial.should_check_error (Env.get_mode env) 4006 then
-          let (env, ty) = error_assign_array_append env expr_pos ty1 in
-          (env, ty, Ok ty2)
-        else
-          (env, ty1, Ok ty2)
       | (_, Tunapplied_alias _) ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | ( _,
@@ -1010,15 +993,6 @@ let assign_array_get_with_err
             in
             (env, mk (r, Tshape (shape_kind, fdm')), Ok tkey, Ok ty2)
         end
-      | Tobject ->
-        if Partial.should_check_error (Env.get_mode env) 4370 then (
-          Errors.array_access_write
-            expr_pos
-            (Reason.to_pos r)
-            (Typing_print.error env ety1);
-          error
-        ) else
-          (env, ety1, Ok tkey, Ok ty2)
       | Tunapplied_alias _ ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | Toption _

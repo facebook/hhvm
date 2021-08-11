@@ -6974,8 +6974,8 @@ and class_get_inner
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   | ( _,
       ( Tvar _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
-      | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tobject
-      | Tshape _ | Taccess _ | Tneg _ ) ) ->
+      | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _
+      | Taccess _ | Tneg _ ) ) ->
     Errors.non_class_member
       ~is_method
       mid
@@ -7212,7 +7212,7 @@ and class_expr
         let (env, tyl) = TUtils.run_on_intersection env tyl ~f:resolve_ety in
         Inter.intersect_list env r tyl
       | (_, Tdynamic) -> (env, base_ty)
-      | (_, (Tany _ | Tprim Tstring | Tobject)) when not (Env.is_strict env) ->
+      | (_, (Tany _ | Tprim Tstring)) when not (Env.is_strict env) ->
         (env, Typing_utils.mk_tany env p)
       | (_, Terr) -> (env, err_witness env p)
       | (r, Tvar _) ->
@@ -7223,8 +7223,7 @@ and class_expr
       | ( _,
           ( Tany _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
           | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _ | Ttuple _
-          | Tnewtype _ | Tdependent _ | Tobject | Tshape _ | Taccess _ | Tneg _
-            ) ) ->
+          | Tnewtype _ | Tdependent _ | Tshape _ | Taccess _ | Tneg _ ) ) ->
         Errors.expected_class
           ~suffix:(", but got " ^ Typing_print.error env base_ty)
           p;

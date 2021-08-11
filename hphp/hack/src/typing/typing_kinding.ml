@@ -71,8 +71,7 @@ module Locl_Inst = struct
       let ty1 = instantiate subst ty1 in
       let ty2 = instantiate subst ty2 in
       Tvec_or_dict (ty1, ty2)
-    | (Tobject | Tvar _ | Tdynamic | Tnonnull | Tany _ | Terr | Tprim _ | Tneg _)
-      as x ->
+    | (Tvar _ | Tdynamic | Tnonnull | Tany _ | Terr | Tprim _ | Tneg _) as x ->
       x
     | Ttuple tyl ->
       let tyl = List.map tyl ~f:(instantiate subst) in

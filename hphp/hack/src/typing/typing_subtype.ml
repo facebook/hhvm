@@ -390,7 +390,6 @@ let subst_for_dynamic partial_enf_kind (pos, class_name) (ty : internal_type) =
     | Tunapplied_alias _
     | Tnewtype _
     | Tdependent _
-    | Tobject
     | Tclass _
     | Tneg _ ->
       None
@@ -1289,9 +1288,8 @@ and simplify_subtype_i
             Typing_defs.error_Tunapplied_alias_in_illegal_context ()
           | ( ( _,
                 ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
-                | Tobject | Tclass _ | Tvarray _ | Tdarray _
-                | Tvarray_or_darray _ | Tvec_or_dict _ | Tany _ | Terr
-                | Taccess _ ) ),
+                | Tclass _ | Tvarray _ | Tdarray _ | Tvarray_or_darray _
+                | Tvec_or_dict _ | Tany _ | Terr | Taccess _ ) ),
               _ ) ->
             simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env
           (* This is treating the option as a union, and using the sound, but incomplete,
@@ -1415,9 +1413,9 @@ and simplify_subtype_i
                 Nast.(
                   ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
                   | Tarraykey | Tnoreturn ))
-            | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tobject | Tclass _
-            | Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _
-            | Taccess _ ) ) ->
+            | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tclass _ | Tvarray _
+            | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _ | Taccess _ ) )
+          ->
           valid env
         (* negations always contain null *)
         | (_, Tneg _) -> invalid_env env
@@ -1447,7 +1445,6 @@ and simplify_subtype_i
         | (_, Tunapplied_alias _)
         | (_, Tnewtype _)
         | (_, Tdependent _)
-        | (_, Tobject)
         | (_, Taccess _)
         | (_, Tunion _)
         | (_, Tintersection _)
@@ -1549,16 +1546,6 @@ and simplify_subtype_i
         | ((_, Toption arg_ty_sub), Nast.Tnull) ->
           simplify_subtype ~subtype_env ~this_ty arg_ty_sub ty_super env
         | (_, _) -> default_subtype env))
-    | (_, Tobject) ->
-      (match ety_sub with
-      | ConstraintType _ -> default_subtype env
-      (* Any class type is a subtype of object *)
-      | LoclType lty ->
-        (match get_node lty with
-        | Tobject
-        | Tclass _ ->
-          valid env
-        | _ -> default_subtype env))
     | (r_super, Tany _) ->
       (match ety_sub with
       | ConstraintType cty ->
@@ -1733,7 +1720,7 @@ and simplify_subtype_i
         (* All of these are definitely disjoint from primitive types *)
         | ( _,
             ( Tfun _ | Ttuple _ | Tshape _ | Tvarray _ | Tdarray _
-            | Tvarray_or_darray _ | Tobject | Tclass _ ) ) ->
+            | Tvarray_or_darray _ | Tclass _ ) ) ->
           valid env
         | _ -> default_subtype env))
     | (_, Tneg (Neg_class (_, c_super))) ->
@@ -1758,7 +1745,7 @@ and simplify_subtype_i
         (* All of these are definitely disjoint from class types *)
         | ( _,
             ( Tfun _ | Ttuple _ | Tshape _ | Tvarray _ | Tdarray _
-            | Tvarray_or_darray _ | Tobject | Tprim _ ) ) ->
+            | Tvarray_or_darray _ | Tprim _ ) ) ->
           valid env
         | _ -> default_subtype env))
     | (r_super, Tclass (((_, class_name) as x_super), exact_super, tyl_super))
@@ -1794,9 +1781,6 @@ and simplify_subtype_i
                && equal_exact exact_super Nonexact ->
           valid env
         (* Match what's done in unify for non-strict code *)
-        | (_, Tobject)
-          when not @@ Partial.should_check_error (Env.get_mode env) 4110 ->
-          valid env
         | (r_sub, Tclass (x_sub, exact_sub, tyl_sub)) ->
           let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
           let exact_match =
@@ -3443,16 +3427,13 @@ let is_type_disjoint env ty1 ty2 =
     | (_, Tneg _) ->
       false
     | (Tprim tp1, Tprim tp2) -> is_tprim_disjoint tp1 tp2
-    | (Tprim _, (Tfun _ | Tobject | Tclass _))
-    | ((Tfun _ | Tobject | Tclass _), Tprim _) ->
+    | (Tprim _, (Tfun _ | Tclass _))
+    | ((Tfun _ | Tclass _), Tprim _) ->
       true
     | (Tfun _, Tfun _) -> false
-    | (Tfun _, (Tobject | Tclass _))
-    | ((Tobject | Tclass _), Tfun _) ->
+    | (Tfun _, Tclass _)
+    | (Tclass _, Tfun _) ->
       true
-    | (Tobject, (Tobject | Tclass _))
-    | (Tclass _, Tobject) ->
-      false
     | (Tclass ((_, c1), _, _), Tclass ((_, c2), _, _)) ->
       is_class_disjoint env c1 c2
   (* incomplete, e.g., is_intersection_type_disjoint (?int & ?float) num *)

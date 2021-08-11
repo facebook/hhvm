@@ -145,7 +145,6 @@ let rec is_tany env ty =
 let level_of_type env fixme_map ((pos : Aast.pos), ty) =
   let (env, ty) = Tast_env.expand_type env ty in
   match get_node ty with
-  | Tobject -> (env, Partial)
   | _ ->
     let (env, r_opt) = is_tany env ty in
     let level =

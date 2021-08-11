@@ -46,11 +46,9 @@ type declaration_info = {
 type bad_type_indicator = {
   has_tany: bool;
   has_terr: bool;
-  has_tobject: bool;
 }
 
-let has_bad_type { has_tany; has_terr; has_tobject } =
-  has_tany || has_terr || has_tobject
+let has_bad_type { has_tany; has_terr } = has_tany || has_terr
 
 (** A context is either a function name or a method name qualified by the
     enclosing class. *)

@@ -87,7 +87,6 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   | Tclass _
   | Ttuple _
   | Tshape _
-  | Tobject
   | Terr
   | Tdynamic
   | Tany _

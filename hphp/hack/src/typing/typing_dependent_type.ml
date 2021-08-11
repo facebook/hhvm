@@ -150,9 +150,9 @@ module ExprDepTy = struct
         (env, mk (r, Taccess (ty, ids)))
       (* TODO(T36532263) check if this is legal *)
       | ( _,
-          ( Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic
-          | Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _
-          | Tfun _ | Tany _ | Tvar _ | Terr | Tneg _ ) ) ->
+          ( Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic | Tvarray _
+          | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _ | Tfun _ | Tany _
+          | Tvar _ | Terr | Tneg _ ) ) ->
         (env, ty)
     in
     make env ty

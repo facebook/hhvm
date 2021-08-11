@@ -11,7 +11,7 @@ open Bad_type_logger_types
 open Bad_type_logger_file
 open Bad_type_logger_scuba
 
-(* A bad type is a Tany, Terr, or Tobject *)
+(* A bad type is a Tany or Terr *)
 
 let log_info env (infos : info list) : unit =
   List.iter ~f:(log_info_to_file env) infos;
@@ -25,13 +25,9 @@ let extract_bad_type_indicator ty =
       method! on_tany indicator _ = { indicator with has_tany = true }
 
       method! on_terr indicator _ = { indicator with has_terr = true }
-
-      method! on_tobject indicator _ = { indicator with has_tobject = true }
     end
   in
-  let init_indicator =
-    { has_tany = false; has_terr = false; has_tobject = false }
-  in
+  let init_indicator = { has_tany = false; has_terr = false } in
   finder#on_type init_indicator ty
 
 let mk_common_info ~context_id ~indicator pos =

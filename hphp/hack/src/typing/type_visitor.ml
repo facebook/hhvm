@@ -206,8 +206,6 @@ class type ['a] locl_type_visitor_type =
 
     method on_tintersection : 'a -> Reason.t -> locl_ty list -> 'a
 
-    method on_tobject : 'a -> Reason.t -> 'a
-
     method on_tvarray_or_darray : 'a -> Reason.t -> locl_ty -> locl_ty -> 'a
 
     method on_tvec_or_dict : 'a -> Reason.t -> locl_ty -> locl_ty -> 'a
@@ -287,8 +285,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
     method on_tintersection acc _ tyl =
       List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_tobject acc _ = acc
-
     method on_tshape acc _ _ fdm =
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
       TShapeMap.fold f fdm acc
@@ -338,7 +334,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Ttuple tyl -> this#on_ttuple acc r tyl
       | Tunion tyl -> this#on_tunion acc r tyl
       | Tintersection tyl -> this#on_tintersection acc r tyl
-      | Tobject -> this#on_tobject acc r
       | Tshape (shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
       | Tclass (cls, exact, tyl) -> this#on_tclass acc r cls exact tyl
       | Tvarray ty -> this#on_tvarray acc r ty

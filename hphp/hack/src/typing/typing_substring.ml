@@ -14,14 +14,11 @@ module Env = Typing_env
 module MakeType = Typing_make_type
 module SN = Naming_special_names
 
-let is_object env ty =
-  Typing_solver.is_sub_type env ty (MakeType.ty_object (get_reason ty))
-
 let sub_string_err (p : Pos.t) (env : env) (ty : locl_ty) :
     env * (locl_ty * locl_ty) option =
   (* Under constraint-based inference, we implement sub_string as a subtype test.
    * All the cases in the legacy implementation just fall out from subtyping rules.
-   * We test against ?(arraykey | bool | float | resource | object | dynamic |
+   * We test against ?(arraykey | bool | float | resource | dynamic |
    * HH\FormatString<T>).
    *)
   let r = Reason.Rwitness p in
@@ -44,8 +41,6 @@ let sub_string_err (p : Pos.t) (env : env) (ty : locl_ty) :
   @@ Typing_subtype.sub_type_or_fail_res env ty stringlike (fun () ->
          if Typing_solver.is_sub_type env ty stringish then
            Errors.object_string_deprecated p
-         else if is_object env ty then
-           Errors.object_string p (get_pos ty)
          else
            Errors.invalid_sub_string p (Typing_print.error env ty))
 

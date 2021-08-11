@@ -620,7 +620,6 @@ module Full = struct
     | Tintersection [] -> text "mixed"
     | Tintersection tyl ->
       delimited_list (Space ^^ text "&" ^^ Space) "(" k tyl ")"
-    | Tobject -> text "object"
     | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
     | Taccess (root_ty, id) -> Concat [k root_ty; text "::"; to_doc (snd id)]
 
@@ -827,7 +826,6 @@ module ErrorString = struct
       "an object of exactly the class " ^ strip_ns x ^ inst env tyl
     | Tclass ((_, x), Nonexact, tyl) ->
       "an object of type " ^ strip_ns x ^ inst env tyl
-    | Tobject -> "an object"
     | Tshape _ -> "a shape"
     | Tunapplied_alias _ ->
       (* FIXME it seems like this function is only for
@@ -989,7 +987,6 @@ module Json = struct
     | (p, Tneg (Neg_class (_, c))) -> obj @@ kind p "negation" @ name c
     | (p, Tclass ((_, cid), _, tys)) ->
       obj @@ kind p "class" @ name cid @ args tys
-    | (p, Tobject) -> obj @@ kind p "object"
     | (p, Tshape (shape_kind, fl)) ->
       let fields_known =
         match shape_kind with
@@ -1269,7 +1266,6 @@ module Json = struct
           (* NB: "class" could have come from either a `Tapply` or a `Tclass`. Right
            * now, we always return a `Tclass`. *)
           ty (Tclass ((class_pos, name), Nonexact, tyl))
-        | "object" -> ty Tobject
         | "shape" ->
           get_array "fields" (json, keytrace)
           >>= fun (fields, fields_keytrace) ->

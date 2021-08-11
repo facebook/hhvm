@@ -3,13 +3,9 @@ Cannot cast a value of type `this` to string. Only primitives may be used in a `
 File "unmagic_stringish2.php", line 45, characters 12-25:
 Cannot cast a value of type `this` to string. Only primitives may be used in a `(string)` cast. (Typing[4281])
 File "unmagic_stringish2.php", line 66, characters 4-8:
-You cannot use this object as a string (Typing[4067])
-  File "unmagic_stringish2.php", line 58, characters 15-27:
-  This object doesn't implement `__toString`
+Expected an object convertible to string but got an object of exactly the class CNonStringish (Typing[4318])
 File "unmagic_stringish2.php", line 67, characters 6-10:
-You cannot use this object as a string (Typing[4067])
-  File "unmagic_stringish2.php", line 58, characters 15-27:
-  This object doesn't implement `__toString`
+Expected an object convertible to string but got an object of exactly the class CNonStringish (Typing[4318])
 File "unmagic_stringish2.php", line 69, characters 4-8:
 You cannot use this object as a string
 Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])

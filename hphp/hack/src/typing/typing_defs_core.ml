@@ -357,14 +357,6 @@ and _ ty_ =
        *)
   | Tdependent : dependent_type * locl_ty -> locl_phase ty_
       (** see dependent_type *)
-  | Tobject : locl_phase ty_
-      (** Tobject is an object type compatible with all objects. This type is also
-       * compatible with some string operations (since a class might implement
-       * __toString), but not with string type hints.
-       *
-       * Tobject is currently used to type code like:
-       *   ../test/typecheck/return_unknown_class.php
-       *)
   | Tclass : pos_id * exact * locl_ty list -> locl_phase ty_
       (** An instance of a class or interface, ty list are the arguments
        * If exact=Exact, then this represents instances of *exactly* this class
@@ -679,7 +671,6 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>Tintersection@ ";
       pp_ty_list fmt tyl;
       Format.fprintf fmt "@])"
-    | Tobject -> Format.pp_print_string fmt "Tobject"
     | Tclass (a0, a2, a1) ->
       Format.fprintf fmt "(@[<2>Tclass (@,";
       pp_pos_id fmt a0;

@@ -26,7 +26,6 @@ let rec strip_ty ty =
     | Tdynamic
     | Terr ->
       ty
-    | Tobject -> ty
     | Tprim _ -> ty
     | Tvar _ -> ty
     | Tgeneric (name, args) -> Tgeneric (name, strip_tyl args)

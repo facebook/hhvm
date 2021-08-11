@@ -1483,7 +1483,6 @@ and get_tyvars_i env (ty : internal_type) =
     | Tnonnull
     | Terr
     | Tdynamic
-    | Tobject
     | Tprim _
     | Tneg _ ->
       (env, ISet.empty, ISet.empty)

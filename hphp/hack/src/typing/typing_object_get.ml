@@ -614,7 +614,6 @@ let rec obj_get_concrete_ty
       | _ -> ());
     let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in
     (env, (ty, []), None)
-  | (_, Tobject)
   | (_, Tany _)
   | (_, Terr) ->
     default ()

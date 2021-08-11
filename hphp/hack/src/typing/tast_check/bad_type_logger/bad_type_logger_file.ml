@@ -47,10 +47,7 @@ let log_info_to_file_internal (info : info) : unit =
     | Declaration decl_info -> rest |> tag "decl" |> decl_info_tags decl_info
   in
   let indicator_tags indicator rest =
-    rest
-    |> iftag "Tany" indicator.has_tany
-    |> iftag "Terr" indicator.has_terr
-    |> iftag "Tobject" indicator.has_tobject
+    rest |> iftag "Tany" indicator.has_tany |> iftag "Terr" indicator.has_terr
   in
   let common_info_tags common_info rest =
     rest

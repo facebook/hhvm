@@ -76,7 +76,6 @@ let rec freshen_inside_ty env ty =
   | Tnonnull
   | Terr
   | Tdynamic
-  | Tobject
   | Tprim _
   | Tneg _ ->
     default ()
@@ -325,7 +324,6 @@ let ty_equal_shallow env ty1 ty2 =
   | (Tnonnull, Tnonnull)
   | (Terr, Terr)
   | (Tdynamic, Tdynamic)
-  | (Tobject, Tobject)
   | (Ttuple _, Ttuple _)
   | (Tvarray _, Tvarray _)
   | (Tvarray_or_darray _, Tvarray_or_darray _)

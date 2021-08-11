@@ -2,6 +2,4 @@ File "string_expressions4c.php", line 32, characters 12-19:
 You cannot use this object as a string
 Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])
 File "string_expressions4c.php", line 32, characters 20-24:
-You cannot use this object as a string (Typing[4067])
-File "string_expressions4c.php", line 32, characters 20-24:
-This object doesn't implement `__toString`
+Expected an object convertible to string but got the expression dependent type this (Typing[4318])

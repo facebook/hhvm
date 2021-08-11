@@ -162,7 +162,6 @@ impl std::fmt::Debug for Ty_<'_> {
                 .field(dependent_type)
                 .field(ty)
                 .finish(),
-            Tobject => write!(f, "Tobject"),
             Tclass((id, exact, tys)) => f
                 .debug_tuple("Tclass")
                 .field(id)

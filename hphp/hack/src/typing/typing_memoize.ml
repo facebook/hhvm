@@ -127,8 +127,7 @@ let check_param : env -> Nast.fun_param -> unit =
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | Taccess _ -> ()
       | Tfun _
-      | Tvar _
-      | Tobject ->
+      | Tvar _ ->
         error ty
     in
     check_memoizable env ty

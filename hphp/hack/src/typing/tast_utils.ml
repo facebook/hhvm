@@ -30,7 +30,6 @@ let rec type_non_nullable env ty =
   | Tfun _
   | Ttuple _
   | Tshape _
-  | Tobject
   | Tclass _
   | Tvarray _
   | Tdarray _
@@ -184,7 +183,6 @@ let rec truthiness env ty =
   | Ttuple (_ :: _) ->
     (* A tuple is a vec at runtime, and non-empty vecs are truthy. *)
     Always_truthy
-  | Tobject
   | Tfun _
   | Taccess _ ->
     (* TODO(T36532263) check if that's ok *) Unknown
@@ -255,7 +253,6 @@ let rec find_sketchy_types env acc ty =
   | Tnonnull
   | Tdynamic
   | Terr
-  | Tobject
   | Tprim _
   | Tfun _
   | Ttuple _

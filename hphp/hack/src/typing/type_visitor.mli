@@ -143,8 +143,6 @@ class type ['a] locl_type_visitor_type =
     method on_tintersection :
       'a -> Typing_reason.t -> Typing_defs.locl_ty list -> 'a
 
-    method on_tobject : 'a -> Typing_reason.t -> 'a
-
     method on_tvarray_or_darray :
       'a -> Typing_reason.t -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> 'a
 

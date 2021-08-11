@@ -57,8 +57,6 @@ class type ['env] type_mapper_type =
     method on_tclass :
       'env -> Reason.t -> pos_id -> exact -> locl_ty list -> 'env * locl_ty
 
-    method on_tobject : 'env -> Reason.t -> 'env * locl_ty
-
     method on_tshape :
       'env ->
       Reason.t ->
@@ -122,8 +120,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_tclass env r x e tyl = (env, mk (r, Tclass (x, e, tyl)))
 
-    method on_tobject env r = (env, mk (r, Tobject))
-
     method on_tshape env r shape_kind fdm =
       (env, mk (r, Tshape (shape_kind, fdm)))
 
@@ -158,7 +154,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tdependent (x, ty) -> this#on_tdependent env r x ty
       | Tclass (x, e, tyl) -> this#on_tclass env r x e tyl
       | Tdynamic -> this#on_tdynamic env r
-      | Tobject -> this#on_tobject env r
       | Tshape (shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
       | Tvarray ty -> this#on_tvarray env r ty
       | Tdarray (ty1, ty2) -> this#on_tdarray env r ty1 ty2

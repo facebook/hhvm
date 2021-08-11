@@ -331,14 +331,6 @@ and _ ty_ =
   | Tnewtype : string * locl_ty list * locl_ty -> locl_phase ty_
   (* see dependent_type *)
   | Tdependent : dependent_type * locl_ty -> locl_phase ty_
-  (* Tobject is an object type compatible with all objects. This type is also
-   * compatible with some string operations (since a class might implement
-   * __toString), but not with string type hints.
-   *
-   * Tobject is currently used to type code like:
-   *   ../test/typecheck/return_unknown_class.php
-   *)
-  | Tobject : locl_phase ty_
   (* An instance of a class or interface, ty list are the arguments
    * If exact=Exact, then this represents instances of *exactly* this class
    * If exact=Nonexact, this also includes subclasses

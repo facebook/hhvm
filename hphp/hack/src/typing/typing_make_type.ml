@@ -106,8 +106,6 @@ let mixed r = mk (r, Toption (nonnull r))
 
 let resource r = prim_type r Nast.Tresource
 
-let ty_object r = mk (r, Tobject)
-
 let tyvar r v = mk (r, Tvar v)
 
 let generic ?(type_args = []) r n = mk (r, Tgeneric (n, type_args))

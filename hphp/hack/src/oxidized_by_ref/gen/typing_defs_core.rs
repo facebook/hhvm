@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<da0976c160a062f71699d0aabf84b2b0>>
+// @generated SignedSource<<8a88fae513b2274c7bff98c3f0989ff4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -742,13 +742,6 @@ pub enum Ty_<'a> {
     /// see dependent_type
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tdependent(&'a (DependentType, &'a Ty<'a>)),
-    /// Tobject is an object type compatible with all objects. This type is also
-    /// compatible with some string operations (since a class might implement
-    /// __toString), but not with string type hints.
-    ///
-    /// Tobject is currently used to type code like:
-    ///   ../test/typecheck/return_unknown_class.php
-    Tobject,
     /// An instance of a class or interface, ty list are the arguments
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses

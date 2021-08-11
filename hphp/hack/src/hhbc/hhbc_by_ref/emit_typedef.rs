@@ -9,7 +9,7 @@ use hhbc_by_ref_emit_type_constant as emit_type_constant;
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_pos::Span;
-use hhbc_by_ref_hhas_type::Info as TypeInfo;
+use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhas_typedef::Typedef;
 use hhbc_by_ref_hhbc_id::{class, Id};
 use hhbc_by_ref_instruction_sequence::Result;
@@ -71,7 +71,7 @@ fn kind_to_type_info<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     h: &Hint,
-) -> Result<TypeInfo<'arena>> {
+) -> Result<HhasTypeInfo<'arena>> {
     use emit_type_hint::Kind;
     emit_type_hint::hint_to_type_info(alloc, &Kind::TypeDef, false, h.1.is_hoption(), tparams, h)
 }

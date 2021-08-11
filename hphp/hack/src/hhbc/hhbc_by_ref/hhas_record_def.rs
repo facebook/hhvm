@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use ffi::{Maybe, Slice, Str};
 use hhbc_by_ref_hhas_pos::Span;
-use hhbc_by_ref_hhas_type::Info;
+use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhbc_id::record::RecordType;
 use hhbc_by_ref_runtime::TypedValue;
 
@@ -12,7 +12,7 @@ use hhbc_by_ref_runtime::TypedValue;
 #[repr(C)]
 pub struct Field<'arena>(
     pub Str<'arena>,
-    pub Info<'arena>,
+    pub HhasTypeInfo<'arena>,
     pub Maybe<TypedValue<'arena>>,
 );
 

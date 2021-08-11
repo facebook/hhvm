@@ -31,7 +31,7 @@ use hhbc_by_ref_hhas_program::HhasProgram;
 use hhbc_by_ref_hhas_property::HhasProperty;
 use hhbc_by_ref_hhas_record_def::{Field, HhasRecord};
 use hhbc_by_ref_hhas_symbol_refs::{HhasSymbolRefs, IncludePath};
-use hhbc_by_ref_hhas_type::{constraint, Info as HhasTypeInfo};
+use hhbc_by_ref_hhas_type::{constraint, HhasTypeInfo};
 use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
 use hhbc_by_ref_hhas_typedef::Typedef as HhasTypedef;
 use hhbc_by_ref_hhbc_ast::*;

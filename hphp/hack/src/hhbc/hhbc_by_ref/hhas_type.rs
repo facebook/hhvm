@@ -8,7 +8,7 @@ use ffi::{Maybe, Maybe::*, Str};
 /// Type info has additional optional user type
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub struct Info<'arena> {
+pub struct HhasTypeInfo<'arena> {
     pub user_type: Maybe<Str<'arena>>,
     pub type_constraint: constraint::Constraint<'arena>,
 }
@@ -67,19 +67,19 @@ pub mod constraint {
     }
 }
 
-impl<'arena> Info<'arena> {
+impl<'arena> HhasTypeInfo<'arena> {
     pub fn make(
         user_type: Maybe<Str<'arena>>,
         type_constraint: constraint::Constraint<'arena>,
-    ) -> Info<'arena> {
-        Info {
+    ) -> HhasTypeInfo<'arena> {
+        HhasTypeInfo {
             user_type,
             type_constraint,
         }
     }
 
-    pub fn make_empty(alloc: &'arena bumpalo::Bump) -> Info<'arena> {
-        Info::make(
+    pub fn make_empty(alloc: &'arena bumpalo::Bump) -> HhasTypeInfo<'arena> {
+        HhasTypeInfo::make(
             Just(Str::new_str(alloc, "")),
             constraint::Constraint::default(),
         )
@@ -103,6 +103,8 @@ mod test {
 // For cbindgen
 #[allow(clippy::needless_lifetimes)]
 #[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_type<'arena>(_: Info<'arena>) {
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_type<'arena>(
+    _: HhasTypeInfo<'arena>,
+) {
     unimplemented!()
 }

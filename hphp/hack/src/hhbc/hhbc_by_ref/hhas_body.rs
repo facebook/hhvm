@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use ffi::{Maybe, Pair, Slice, Str};
 use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhas_type::Info;
+use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhbc_ast::ClassishKind;
 use hhbc_by_ref_instruction_sequence::InstrSeq;
 
@@ -25,10 +25,10 @@ pub struct HhasBody<'arena> {
     pub num_closures: u32,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
-    pub upper_bounds: Slice<'arena, Pair<Str<'arena>, Slice<'arena, Info<'arena>>>>,
+    pub upper_bounds: Slice<'arena, Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>>,
     pub shadowed_tparams: Slice<'arena, Str<'arena>>,
     pub params: Slice<'arena, HhasParam<'arena>>,
-    pub return_type_info: Maybe<Info<'arena>>,
+    pub return_type_info: Maybe<HhasTypeInfo<'arena>>,
     pub doc_comment: Maybe<Str<'arena>>,
     pub env: Maybe<HhasBodyEnv<'arena>>,
 }
@@ -41,10 +41,11 @@ pub fn default_with_body_instrs<'arena>(body_instrs: InstrSeq<'arena>) -> HhasBo
         num_closures: u32::default(),
         is_memoize_wrapper: bool::default(),
         is_memoize_wrapper_lsb: bool::default(),
-        upper_bounds: Slice::<'arena, Pair<Str<'arena>, Slice<'arena, Info>>>::default(),
+        upper_bounds:
+            Slice::<'arena, Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>>::default(),
         shadowed_tparams: Slice::<'arena, Str<'arena>>::default(),
         params: Slice::<'arena, HhasParam<'arena>>::default(),
-        return_type_info: Maybe::<Info>::default(),
+        return_type_info: Maybe::<HhasTypeInfo<'arena>>::default(),
         doc_comment: Maybe::<Str<'arena>>::default(),
         env: Maybe::<HhasBodyEnv<'arena>>::default(),
     }

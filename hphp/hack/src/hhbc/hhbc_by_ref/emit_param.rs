@@ -13,7 +13,7 @@ use hhbc_by_ref_emit_pos as emit_pos;
 use hhbc_by_ref_emit_type_hint::{hint_to_type_info, Kind};
 use hhbc_by_ref_env::{emitter::Emitter, Env};
 use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhas_type::Info;
+use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhbc_string_utils::locals::strip_dollar;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
 use hhbc_by_ref_label::Label;
@@ -283,9 +283,9 @@ impl<'ast, 'a, 'arena, 'decl, D: DeclProvider<'decl> + 'a> aast_visitor::Visitor
 }
 
 // Return None if it passes type check, otherwise return error msg
-fn default_type_check(
+fn default_type_check<'arena>(
     param_name: &str,
-    param_type_info: &Option<Info>,
+    param_type_info: &Option<HhasTypeInfo<'arena>>,
     param_expr: &Option<a::Expr>,
 ) -> Option<String> {
     let hint_type = get_hint_display_name(

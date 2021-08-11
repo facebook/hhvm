@@ -12,7 +12,7 @@ use hhbc_by_ref_emit_pos as emit_pos;
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
 use hhbc_by_ref_env::{emitter::Emitter, Env};
 use hhbc_by_ref_hhas_property::{HhasProperty, HhasPropertyFlags};
-use hhbc_by_ref_hhas_type::{constraint, Info as TypeInfo};
+use hhbc_by_ref_hhas_type::{constraint, HhasTypeInfo};
 use hhbc_by_ref_hhbc_ast::InitpropOp;
 use hhbc_by_ref_hhbc_id::{prop, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
@@ -65,7 +65,7 @@ pub fn from_ast<'ast, 'arena, 'decl, D: DeclProvider<'decl>>(
     };
 
     let type_info = match args.typehint.as_ref() {
-        None => TypeInfo::make_empty(alloc),
+        None => HhasTypeInfo::make_empty(alloc),
         Some(th) => emit_type_hint::hint_to_type_info(
             alloc,
             &emit_type_hint::Kind::Property,

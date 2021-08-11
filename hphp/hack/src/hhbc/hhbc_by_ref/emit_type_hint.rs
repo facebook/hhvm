@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use ffi::{Maybe, Maybe::*, Str};
 use hhbc_by_ref_emit_fatal as emit_fatal;
-use hhbc_by_ref_hhas_type::{constraint, Info};
+use hhbc_by_ref_hhas_type::{constraint, HhasTypeInfo};
 use hhbc_by_ref_hhbc_id::{class, Id as ClassId};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{Error::Unrecoverable, Result};
@@ -380,10 +380,10 @@ fn make_type_info<'arena>(
     h: &Hint,
     tc_name: Maybe<Str<'arena>>,
     tc_flags: constraint::ConstraintFlags,
-) -> std::result::Result<Info<'arena>, hhbc_by_ref_instruction_sequence::Error> {
+) -> std::result::Result<HhasTypeInfo<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     let type_info_user_type = fmt_hint(alloc, tparams, false, h)?;
     let type_info_type_constraint = constraint::Constraint::make(tc_name, tc_flags);
-    Ok(Info::make(
+    Ok(HhasTypeInfo::make(
         Just(Str::new_str(alloc, type_info_user_type)),
         type_info_type_constraint,
     ))
@@ -396,7 +396,7 @@ fn param_hint_to_type_info<'arena>(
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> std::result::Result<Info<'arena>, hhbc_by_ref_instruction_sequence::Error> {
+) -> std::result::Result<HhasTypeInfo<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     let Hint(_, h) = hint;
     let is_simple_hint = match h.as_ref() {
         Hsoft(_)
@@ -457,7 +457,7 @@ pub fn hint_to_type_info<'arena>(
     nullable: bool,
     tparams: &[&str],
     hint: &Hint,
-) -> std::result::Result<Info<'arena>, hhbc_by_ref_instruction_sequence::Error> {
+) -> std::result::Result<HhasTypeInfo<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     if let Kind::Param = kind {
         return param_hint_to_type_info(alloc, kind, skipawaitable, nullable, tparams, hint);
     };
@@ -498,8 +498,8 @@ pub fn emit_type_constraint_for_native_function<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     ret_opt: Option<&Hint>,
-    ti: Info<'arena>,
-) -> Info<'arena> {
+    ti: HhasTypeInfo<'arena>,
+) -> HhasTypeInfo<'arena> {
     use constraint::ConstraintFlags;
     let (name, flags) = match (&ti.user_type, ret_opt) {
         (_, None) | (Nothing, _) => (
@@ -525,7 +525,7 @@ pub fn emit_type_constraint_for_native_function<'arena>(
         }
     };
     let tc = constraint::Constraint::make(name.map(|n| Str::new_str(alloc, n)), flags);
-    Info::make(ti.user_type, tc)
+    HhasTypeInfo::make(ti.user_type, tc)
 }
 
 fn get_flags(

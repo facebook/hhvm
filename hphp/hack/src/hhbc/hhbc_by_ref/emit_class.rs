@@ -26,6 +26,7 @@ use hhbc_by_ref_hhas_method::{HhasMethod, HhasMethodFlags};
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_property::HhasProperty;
+use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
 use hhbc_by_ref_hhas_xhp_attribute::HhasXhpAttribute;
 use hhbc_by_ref_hhbc_ast::{
@@ -320,7 +321,7 @@ fn from_class_elt_requirements<'a, 'arena>(
 fn from_enum_type<'arena>(
     alloc: &'arena bumpalo::Bump,
     opt: Option<&ast::Enum_>,
-) -> Result<Option<hhbc_by_ref_hhas_type::Info<'arena>>> {
+) -> Result<Option<HhasTypeInfo<'arena>>> {
     use hhbc_by_ref_hhas_type::constraint::*;
     opt.map(|e| {
         let type_info_user_type = Just(Str::new_str(
@@ -328,7 +329,7 @@ fn from_enum_type<'arena>(
             emit_type_hint::fmt_hint(alloc, &[], true, &e.base)?,
         ));
         let type_info_type_constraint = Constraint::make(Nothing, ConstraintFlags::EXTENDED_HINT);
-        Ok(hhbc_by_ref_hhas_type::Info::make(
+        Ok(HhasTypeInfo::make(
             type_info_user_type,
             type_info_type_constraint,
         ))
@@ -482,7 +483,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     env: &Env<'a, 'arena>,
     ast_class: &'a ast::Class_,
 ) -> Result<Option<HhasMethod<'arena>>> {
-    use hhbc_by_ref_hhas_type::{constraint::*, Info};
+    use hhbc_by_ref_hhas_type::constraint::*;
 
     let alloc = env.arena;
     let num_reified = ast_class
@@ -504,7 +505,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             is_inout: false,
             is_readonly: false,
             user_attributes: Slice::empty(),
-            type_info: Just(Info::make(Just("HH\\varray".into()), tc)),
+            type_info: Just(HhasTypeInfo::make(Just("HH\\varray".into()), tc)),
             default_value: Nothing,
         }];
 

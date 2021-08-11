@@ -18,7 +18,7 @@ use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhas_method::{HhasMethod, HhasMethodFlags};
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhas_pos::Span;
-use hhbc_by_ref_hhas_type::Info as HhasTypeInfo;
+use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags, SpecialClsRef, Visibility};
 use hhbc_by_ref_hhbc_id::{class, method, Id};
 use hhbc_by_ref_hhbc_string_utils::reified;

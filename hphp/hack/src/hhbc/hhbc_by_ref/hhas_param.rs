@@ -5,7 +5,7 @@
 
 use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
-use hhbc_by_ref_hhas_type::{constraint, Info};
+use hhbc_by_ref_hhas_type::{constraint, HhasTypeInfo};
 use hhbc_by_ref_label::Label;
 
 #[derive(Clone, Debug)]
@@ -16,7 +16,7 @@ pub struct HhasParam<'arena> {
     pub is_inout: bool,
     pub is_readonly: bool,
     pub user_attributes: Slice<'arena, HhasAttribute<'arena>>,
-    pub type_info: Maybe<Info<'arena>>,
+    pub type_info: Maybe<HhasTypeInfo<'arena>>,
     pub default_value: Maybe<Pair<Label, Str<'arena>>>,
 }
 

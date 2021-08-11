@@ -28,7 +28,7 @@ use hhbc_by_ref_env::{emitter::Emitter, Env};
 use hhbc_by_ref_generator as generator;
 use hhbc_by_ref_hhas_body::{HhasBody, HhasBodyEnv};
 use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhas_type::Info as HhasTypeInfo;
+use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhbc_ast::{
     ClassishKind, FcallArgs, FcallFlags, Instruct, IstypeOp, MemberKey, MemberOpMode, ParamId,
     QueryOp, ReadOnlyOp,

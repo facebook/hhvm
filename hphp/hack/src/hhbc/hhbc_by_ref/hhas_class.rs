@@ -12,7 +12,7 @@ use hhbc_by_ref_hhas_constant::HhasConstant;
 use hhbc_by_ref_hhas_method::HhasMethod;
 use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_property::HhasProperty;
-use hhbc_by_ref_hhas_type::Info;
+use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
 use hhbc_by_ref_hhbc_ast::UseAsVisibility;
 use hhbc_by_ref_hhbc_id::class::ClassType;
@@ -52,14 +52,14 @@ pub struct HhasClass<'arena> {
             Slice<'arena, ClassType<'arena>>,
         ),
     >,
-    pub enum_type: Option<Info<'arena>>,
+    pub enum_type: Option<HhasTypeInfo<'arena>>,
     pub methods: Slice<'arena, HhasMethod<'arena>>,
     pub properties: Slice<'arena, HhasProperty<'arena>>,
     pub constants: Slice<'arena, HhasConstant<'arena>>,
     pub type_constants: Slice<'arena, HhasTypeConstant<'arena>>,
     pub ctx_constants: Slice<'arena, HhasCtxConstant>, // TODO(SF, 2021-0811): HhasCtxConstant is part of Steve's HhasCoeffect work
     pub requirements: Slice<'arena, (ClassType<'arena>, TraitReqKind)>,
-    pub upper_bounds: Slice<'arena, (Str<'arena>, Slice<'arena, Info<'arena>>)>,
+    pub upper_bounds: Slice<'arena, (Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>)>,
     pub doc_comment: Maybe<Str<'arena>>,
     pub flags: HhasClassFlags,
 }

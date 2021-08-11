@@ -16,7 +16,7 @@ use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhas_function::{HhasFunction, HhasFunctionFlags};
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhas_pos::Span;
-use hhbc_by_ref_hhas_type::Info as HhasTypeInfo;
+use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags};
 use hhbc_by_ref_hhbc_id::function;
 use hhbc_by_ref_hhbc_string_utils::reified;

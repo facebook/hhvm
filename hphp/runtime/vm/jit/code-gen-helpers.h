@@ -265,6 +265,11 @@ Vreg emitIsCollection(Vout& v, Vreg obj);
 void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp);
 
 /*
+ * Gets the next fake JIT return address for eager syncs.
+ */
+int32_t getNextFakeReturnAddress();
+
+/*
  * Set the VM register state.
  */
 void emitSetVMRegState(Vout& v, VMRegState state);

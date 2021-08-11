@@ -46,6 +46,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BElem:           return "Elem";
   case A::BMIState:        return "Mis";
   case A::BActRec:         return "ActRec";
+  case A::BVMReg:          return "VmRegAny"; break;
   case A::BLocal:          break;
   case A::BIter:           break;
   case A::BProp:           break;
@@ -60,6 +61,11 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BFFunc:          break;
   case A::BFMeta:          break;
   case A::BFBasePtr:       break;
+  case A::BVMRegState:     break;
+  case A::BVMFP:           break;
+  case A::BVMSP:           break;
+  case A::BVMPC:           break;
+  case A::BVMRetAddr:      break;
   }
 
   auto ret = std::string{};
@@ -90,6 +96,11 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BFFunc:          ret += "Ff"; break;
     case A::BFMeta:          ret += "Fm"; break;
     case A::BFBasePtr:       ret += "FrBase"; break;
+    case A::BVMRegState:     ret += "VmState"; break;
+    case A::BVMFP:           ret += "Vmfp"; break;
+    case A::BVMSP:           ret += "Vmsp"; break;
+    case A::BVMPC:           ret += "Vmpc"; break;
+    case A::BVMRetAddr:      ret += "VmRetAddr"; break;
     }
   }
   return ret;
@@ -295,6 +306,30 @@ Optional<AliasClass> AliasClass::frame_base() const {
 
 Optional<AliasClass> AliasClass::is_frame_base() const {
   if (*this <= AFBasePtr) return frame_base();
+  return std::nullopt;
+}
+
+Optional<AliasClass> AliasClass::vm_reg_state() const {
+  auto const bits = static_cast<rep>(m_bits & BVMRegState);
+
+  if (bits != BEmpty) return AliasClass{bits};
+  return std::nullopt;
+}
+
+Optional<AliasClass> AliasClass::is_vm_reg_state() const {
+  if (*this <= AVMRegState) return vm_reg_state();
+  return std::nullopt;
+}
+
+Optional<AliasClass> AliasClass::vm_reg() const {
+  auto const bits = static_cast<rep>(m_bits & BVMReg);
+
+  if (bits != BEmpty) return AliasClass{bits};
+  return std::nullopt;
+}
+
+Optional<AliasClass> AliasClass::is_vm_reg() const {
+  if (*this <= AVMRegAny) return vm_reg();
   return std::nullopt;
 }
 
@@ -728,9 +763,11 @@ bool AliasClass::isSingleLocation() const {
   // Either BEmpty or more than one bit set in rep.
   if (m_bits == 0 || (m_bits & (m_bits - 1))) return false;
 
-  // Only MIState and FBasePtr are allowed to have no specialization and be a
-  // valid single location.
-  if (m_stagBits == BEmpty) return *this <= (AMIStateAny | AFBasePtr);
+  // Only MIState, FBasePtr, VMReg, and VMRegState are allowed to have no
+  // specialization and be a valid single location.
+  if (m_stagBits == BEmpty) {
+    return *this <= (AMIStateAny | AFBasePtr | AVMRegAny | AVMRegState);
+  }
 
   // ALocal, AStack, and AIter can contain multiple locations.
   if (auto const frame = is_local()) {

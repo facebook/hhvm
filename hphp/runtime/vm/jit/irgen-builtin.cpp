@@ -1402,7 +1402,12 @@ private:
      * which is trying to detect failure to do this properly.
      */
     auto const spOff = IRSPRelOffsetData { spOffBCFromIRSP(env) };
-    gen(env, EagerSyncVMRegs, spOff, fp(env), sp(env));
+    auto const bcSP = gen(env, LoadBCSP, spOff, sp(env));
+    gen(env, StVMFP, fp(env));
+    gen(env, StVMSP, bcSP);
+    gen(env, StVMPC);
+    gen(env, StVMReturnAddr);
+    gen(env, StVMRegState, cns(env, eagerlyCleanState()));
     updateMarker(env);  // Mark the EndCatch safe, since we're eager syncing.
   }
 

@@ -275,6 +275,17 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
     add_single(fbase, AFBasePtr);
   }
 
+  if (auto const vm_reg_state = acls.vm_reg_state()) {
+    add_single(vm_reg_state, AVMRegState);
+  }
+
+  if (auto const vm_reg = acls.vm_reg()) {
+    add_single(vm_reg, AVMFP);
+    add_single(vm_reg, AVMSP);
+    add_single(vm_reg, AVMPC);
+    add_single(vm_reg, AVMRetAddr);
+  }
+
 #define MAY_ALIAS(What, what, all) \
   ret |= may_alias_part(*this, acls, acls.what(), A##What##Any, all);
 
@@ -327,6 +338,17 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
 
   if (auto const fbase = acls.frame_base()) {
     add_single(fbase, AFBasePtr);
+  }
+
+  if (auto const vm_reg_state = acls.vm_reg_state()) {
+    add_single(vm_reg_state, AVMRegState);
+  }
+
+  if (auto const vm_reg = acls.vm_reg()) {
+    add_single(vm_reg, AVMFP);
+    add_single(vm_reg, AVMSP);
+    add_single(vm_reg, AVMPC);
+    add_single(vm_reg, AVMRetAddr);
   }
 
 #define EXPAND(What, what, all) \
@@ -405,6 +427,18 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
     if (acls.is_frame_base() && acls.isSingleLocation()) {
       add_class(ret, acls);
       return;
+    }
+
+    if (acls.is_vm_reg_state() && acls.isSingleLocation()) {
+      add_class(ret, acls);
+      return;
+    }
+
+    if (auto const vm_reg = acls.vm_reg()) {
+      if (acls.maybe(AVMFP))      add_class(ret, AVMFP);
+      if (acls.maybe(AVMSP))      add_class(ret, AVMSP);
+      if (acls.maybe(AVMPC))      add_class(ret, AVMPC);
+      if (acls.maybe(AVMRetAddr)) add_class(ret, AVMRetAddr);
     }
 
     /*
@@ -530,6 +564,14 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
     if (acls.is_frame_base()) {
       // There's a single frame base register and it cannot conflict with any
       // other locations.
+      return;
+    }
+
+    if (acls.is_vm_reg_state()) {
+      return;
+    }
+
+    if (acls.is_vm_reg()) {
       return;
     }
 

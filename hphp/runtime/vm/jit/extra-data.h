@@ -2815,7 +2815,7 @@ X(IncDecElem,                   IncDecData);
 X(StArResumeAddr,               SuspendOffset);
 X(StContArState,                GeneratorState);
 X(ContEnter,                    ContEnterData);
-X(EagerSyncVMRegs,              IRSPRelOffsetData);
+X(LoadBCSP,                     IRSPRelOffsetData);
 X(JmpSSwitchDest,               IRSPRelOffsetData);
 X(DbgTrashStk,                  IRSPRelOffsetData);
 X(DbgTrashFrame,                IRSPRelOffsetData);

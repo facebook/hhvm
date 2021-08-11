@@ -228,6 +228,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     auto const synced_sp = v.makeReg();
     v << lea{sp[spOffset], synced_sp};
     emitEagerSyncPoint(v, pc, rvmtl(), srcLoc(env, inst, 0).reg(), synced_sp);
+    emitSetVMRegState(v, eagerlyCleanState());
   }
 
   int returnOffset = rds::kVmMInstrStateOff +
@@ -398,6 +399,7 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
   auto const eagerFixup = FixupMap::eagerRecord(func);
   if (eagerFixup) {
     emitEagerSyncPoint(v, func->entry(), rvmtl(), fp, sp);
+    emitSetVMRegState(v, eagerlyCleanState());
   }
   v << vinvoke{
     CallSpec::direct(func->arFuncPtr(), nullptr),

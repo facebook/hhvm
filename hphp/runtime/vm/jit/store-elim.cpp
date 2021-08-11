@@ -1498,14 +1498,35 @@ void adjust_inline_marker(IRInstruction& inst, Frames& scratch_frames,
 
 void insert_eager_sync(Global& genv, IRInstruction& endCatch) {
   auto const block = endCatch.block();
-  auto sync = genv.unit.gen(
-    EagerSyncVMRegs,
+  auto const bcSP = genv.unit.gen(
+    LoadBCSP,
     endCatch.bcctx(),
     IRSPRelOffsetData { endCatch.extra<EndCatch>()->offset },
-    endCatch.src(0),
     endCatch.src(1)
   );
-  block->insert(--block->end(), sync);
+  auto syncFP = genv.unit.gen(
+    StVMFP,
+    endCatch.bcctx(),
+    endCatch.src(0)
+  );
+  auto syncSP = genv.unit.gen(
+    StVMSP,
+    endCatch.bcctx(),
+    bcSP->dst()
+  );
+  auto syncPC = genv.unit.gen(
+    StVMPC,
+    endCatch.bcctx()
+  );
+  auto syncReturnAddr = genv.unit.gen(
+    StVMReturnAddr,
+    endCatch.bcctx()
+  );
+  block->insert(--block->end(), syncFP);
+  block->insert(--block->end(), bcSP);
+  block->insert(--block->end(), syncSP);
+  block->insert(--block->end(), syncPC);
+  block->insert(--block->end(), syncReturnAddr);
 }
 
 void fix_inline_frames(Global& genv) {
@@ -1563,7 +1584,6 @@ void fix_inline_frames(Global& genv) {
     }
 
     auto fp = state.entry;
-    Optional<IRSPRelOffset> lastSync;
     populate_ancestor_frames(fp, published_frames);
     assertx(published_frames.size() == state.exitDepth);
 
@@ -1617,19 +1637,18 @@ void fix_inline_frames(Global& genv) {
       if (inst.is(Call)) fix_inlined_call(genv, &inst, fp);
       if (inst.is(CallBuiltin)) inst.setSrc(0, fp);
 
-      if (inst.is(EagerSyncVMRegs)) {
+      if (inst.is(StVMFP)) {
         inst.setSrc(0, fp);
-        lastSync = inst.extra<EagerSyncVMRegs>()->offset;
       }
 
       if (inst.is(BeginCatch)) {
         state.catchSk = inst.marker().sk();
         state.catchFP = fp;
       }
+
       if (inst.is(EndCatch)) {
         if (state.catchFP != fp &&
-            inst.extra<EndCatch>()->mode != ECM::CallCatch &&
-            lastSync != inst.extra<EndCatch>()->offset) {
+            inst.extra<EndCatch>()->mode != ECM::CallCatch) {
           insert_eager_sync(genv, inst);
         }
       }

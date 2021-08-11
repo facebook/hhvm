@@ -1785,9 +1785,19 @@ To string conversions:
 
 10. Trace exits
 
-| EagerSyncVMRegs, ND, S(FramePtr) S(StkPtr), NF
+| StVMFP, ND, S(FramePtr), NF
 
-  Sync the given vmfp and vmsp to their in-memory locations.
+| StVMSP, ND, S(StkPtr), NF
+
+| StVMPC, ND, NA, NF
+
+| StVMReturnAddr, ND, NA, NF
+
+| StVMRegState, ND, C(Int), NF
+  
+  Sets the VM register state to the specified state. This is used
+  to track whether the register state is clean or dirty as
+  EagerSyncVMRegs is moved around by store elimination.
 
 | ReqBindJmp<target,invSPOff,irSPOff>, ND, S(StkPtr) S(FramePtr), T
 
@@ -1882,6 +1892,11 @@ To string conversions:
   i.e. it is pointing to the empty space reserved for an ActRec.
 
   In resumables, the stack base represents an empty VM stack.
+
+| LoadBCSP<irSPOff>, D(StkPtr), S(StkPtr), NF
+
+  Gets the bytecode stack pointer from IR stack pointer, for use in eager
+  syncing.
 
 | DefCallFlags, D(Int), NA, NF
 

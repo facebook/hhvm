@@ -287,6 +287,7 @@ bool canDCE(IRInstruction* inst) {
   case BespokeIterGetKey:
   case BespokeIterGetVal:
   case StructDictGetWithColor:
+  case LoadBCSP:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -459,7 +460,11 @@ bool canDCE(IRInstruction* inst) {
   case StIterPos:
   case StLoc:
   case StLocRange:
-  case EagerSyncVMRegs:
+  case StVMFP:
+  case StVMSP:
+  case StVMPC:
+  case StVMReturnAddr:
+  case StVMRegState:
   case ReqBindJmp:
   case ReqInterpBBNoTranslate:
   case ReqRetranslate:

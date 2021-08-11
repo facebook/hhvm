@@ -536,13 +536,16 @@ void emitSetVMRegState(Vout& v, VMRegState state) {
   v << storeqi{static_cast<int32_t>(state), regstate};
 }
 
+int32_t getNextFakeReturnAddress() {
+  return s_nextFakeAddress.fetch_sub(1, std::memory_order_relaxed);
+}
+
 void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
   v << store{vmfp, rds[rds::kVmfpOff]};
   v << store{vmsp, rds[rds::kVmspOff]};
   emitImmStoreq(v, intptr_t(pc), rds[rds::kVmpcOff]);
-  emitSetVMRegState(v, eagerlyCleanState());
 
-  auto const addr = s_nextFakeAddress.fetch_sub(1, std::memory_order_relaxed);
+  auto const addr = getNextFakeReturnAddress();
   v << storeqi{addr, rds[rds::kVmJitReturnAddrOff]};
   v << recordstack{(TCA)static_cast<int64_t>(addr)};
 }

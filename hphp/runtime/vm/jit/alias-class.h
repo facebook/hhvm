@@ -297,14 +297,20 @@ struct AliasClass {
     BMIBase     = 1U << 11,
     BMIROProp   = 1U << 12,
     BFBasePtr   = 1U << 13,
+    BVMFP       = 1U << 14,
+    BVMSP       = 1U << 15,
+    BVMPC       = 1U << 16,
+    BVMRetAddr  = 1U << 17,
+    BVMRegState = 1U << 18,
 
+    BVMReg     = BVMFP | BVMSP | BVMPC | BVMRetAddr,
     BElem      = BElemI | BElemS,
     BHeap      = BElem | BProp,
     BMIState   = BMITempBase | BMIBase | BMIROProp,
 
     BActRec = BFContext | BFFunc | BFMeta,
 
-    BUnknownTV = ~(BIter | BMIBase | BActRec),
+    BUnknownTV = ~(BIter | BMIBase | BActRec | BVMReg | BVMRegState),
 
     BUnknown   = static_cast<uint32_t>(-1),
   };
@@ -426,6 +432,10 @@ struct AliasClass {
   Optional<AliasClass> is_mis() const;
   Optional<AliasClass> frame_base() const;
   Optional<AliasClass> is_frame_base() const;
+  Optional<AliasClass> vm_reg() const;
+  Optional<AliasClass> is_vm_reg() const;
+  Optional<AliasClass> vm_reg_state() const;
+  Optional<AliasClass> is_vm_reg_state() const;
 
 private:
   enum class STag {
@@ -497,6 +507,15 @@ auto const AMIStateTempBase   = AliasClass{AliasClass::BMITempBase};
 
 /* Alias class for the frame base register */
 auto const AFBasePtr          = AliasClass{AliasClass::BFBasePtr};
+
+/* Alias class for the VM register state */
+auto const AVMFP              = AliasClass{AliasClass::BVMFP};
+auto const AVMSP              = AliasClass{AliasClass::BVMSP};
+auto const AVMPC              = AliasClass{AliasClass::BVMPC};
+auto const AVMRetAddr         = AliasClass{AliasClass::BVMRetAddr};
+auto const AVMRegAny          = AliasClass{AliasClass::BVMReg};
+auto const AVMRegState        = AliasClass{AliasClass::BVMRegState};
+
 
 //////////////////////////////////////////////////////////////////////
 

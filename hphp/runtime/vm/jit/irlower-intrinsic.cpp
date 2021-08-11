@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
@@ -102,15 +103,44 @@ void cgDefCallCtx(IRLS& env, const IRInstruction* inst) {
   v << copy{r_php_call_ctx(), dstLoc(env, inst, 0).reg()};
 }
 
-void cgEagerSyncVMRegs(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<EagerSyncVMRegs>();
+void cgStVMFP(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
-  auto const sp = srcLoc(env, inst, 1).reg();
+  auto& v = vmain(env);
+  v << store{fp, rvmtl()[rds::kVmfpOff]};
+}
+
+void cgStVMSP(IRLS& env, const IRInstruction* inst) {
+  auto const sp = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << store{sp, rvmtl()[rds::kVmspOff]};
+}
+
+void cgStVMPC(IRLS& env, const IRInstruction* inst) {
+  auto const pc = inst->marker().fixupSk().pc();
+  auto& v = vmain(env);
+  emitImmStoreq(v, intptr_t(pc), rvmtl()[rds::kVmpcOff]);
+}
+
+void cgStVMReturnAddr(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const addr = getNextFakeReturnAddress();
+  v << storeqi{addr, rvmtl()[rds::kVmJitReturnAddrOff]};
+  v << recordstack{(TCA)static_cast<int64_t>(addr)};
+}
+
+void cgLoadBCSP(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<LoadBCSP>();
+  auto const sp = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << lea{sp[cellsToBytes(extra->offset.offset)], dstLoc(env, inst, 0).reg()};
+}
+
+void cgStVMRegState(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
-  auto const sync_sp = v.makeReg();
-  v << lea{sp[cellsToBytes(extra->offset.offset)], sync_sp};
-  emitEagerSyncPoint(v, inst->marker().fixupSk().pc(), rvmtl(), fp, sync_sp);
+  assertx(inst->src(0)->hasConstVal(TInt));
+  auto const regState = static_cast<VMRegState>(inst->src(0)->intVal());
+  emitSetVMRegState(v, regState);
 }
 
 void cgMov(IRLS& env, const IRInstruction* inst) {

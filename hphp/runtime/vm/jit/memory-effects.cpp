@@ -385,7 +385,7 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   }();
 
   return GeneralEffects {
-    x.loads | AHeapAny | ARdsAny | backtrace_locals(inst),
+    x.loads | AHeapAny | ARdsAny | AVMRegAny | AVMRegState | backtrace_locals(inst),
     x.stores | AHeapAny | ARdsAny,
     x.moves,
     new_kills
@@ -444,7 +444,7 @@ GeneralEffects iter_effects(const IRInstruction& inst,
 GeneralEffects interp_one_effects(const IRInstruction& inst) {
   auto const extra  = inst.extra<InterpOne>();
   auto loads  = AHeapAny | AStackAny | ALocalAny | ARdsAny | livefp(inst);
-  auto stores = AHeapAny | AStackAny | ARdsAny;
+  auto stores = AHeapAny | AStackAny | ARdsAny | AVMRegAny | AVMRegState;
   if (extra->smashesAllLocals) {
     stores = stores | ALocalAny;
   } else {
@@ -761,7 +761,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const extra = inst.extra<Call>();
       return CallEffects {
         // Kills. Everything on the stack below the incoming parameters.
-        stack_below(extra->spOffset) | AMIStateAny,
+        stack_below(extra->spOffset) | AMIStateAny | AVMRegAny,
         // Input arguments.
         extra->numInputs() == 0 ? AEmpty : AStack::range(
           extra->spOffset,
@@ -804,8 +804,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       }();
       auto const foldable = callee->isFoldable() ? AEmpty : ARdsAny;
       return may_load_store_kill(
-        stk | AHeapAny | foldable,
-        out_stk | AHeapAny | foldable,
+        stk | AHeapAny | foldable | AVMRegAny | AVMRegState,
+        out_stk | AHeapAny | foldable | AVMRegAny,
         stack_below(extra->spOffset) | AMIStateAny
       );
     }
@@ -1157,10 +1157,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store_move(stack_in, AElemIAny, stack_in);
     }
 
+  // These ops may read anything referenced by the input array or object,
+  // but not any of the locals or stack frame slots.
   case NewLoggingArray:
   case ProfileArrLikeProps:
-    // These ops may read anything referenced by the input array or object,
-    // but not any of the locals or stack frame slots.
     return may_load_store(AHeapAny, AEmpty);
 
   case NewKeysetArray:
@@ -1670,6 +1670,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DirFromFilepath:
   case CheckFuncNeedsCoverage:
   case RecordFuncCall:
+  case LoadBCSP:
     return IrrelevantEffects {};
 
   case LookupClsCns:
@@ -1702,8 +1703,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StFrameMeta:
     return PureStore { AFMeta { inst.src(0) }, nullptr };
 
-  case EagerSyncVMRegs:
-    return may_load_store(AEmpty, AEmpty);
+  case StVMFP:
+    return PureStore { AVMFP, inst.src(0) };
+
+  case StVMSP:
+    return PureStore { AVMSP, inst.src(0) };
+
+  case StVMPC:
+    return PureStore { AVMPC, nullptr };
+
+  case StVMReturnAddr:
+    return PureStore { AVMRetAddr, nullptr };
+
+  case StVMRegState:
+    return PureStore { AVMRegState, inst.src(0) };
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that technically do some things w/ memory, but not in any way

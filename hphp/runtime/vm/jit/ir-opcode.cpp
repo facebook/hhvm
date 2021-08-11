@@ -600,7 +600,10 @@ bool opcodeMayRaise(Opcode opc) {
   case DirFromFilepath:
   case DivDbl:
   case DivInt:
-  case EagerSyncVMRegs:
+  case StVMFP:
+  case StVMSP:
+  case StVMPC:
+  case StVMReturnAddr:
   case ElemDictK:
   case ElemKeysetK:
   case EndBlock:
@@ -627,6 +630,7 @@ bool opcodeMayRaise(Opcode opc) {
   case FuncCred:
   case FuncHasAttr:
   case GenericRetDecRefs:
+  case LoadBCSP:
   case GetDictPtrIter:
   case GetMemoKeyScalar:
   case GetTime:
@@ -897,6 +901,7 @@ bool opcodeMayRaise(Opcode opc) {
   case StructDictUnset:
   case StStk:
   case StStkRange:
+  case StVMRegState:
   case SubDbl:
   case SubInt:
   case SubIntO:

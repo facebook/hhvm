@@ -20,12 +20,10 @@
         { fb_ast =
           [([5:3-20],
             (Expr
-               ((object), [5:3-19],
-                (Binop ((Eq None), ((object), [5:3-5], (Lvar ([5:3-5], $x))),
-                   ((object), [5:8-19], (New (((_), [5:12-17], (CIexpr ((classname<_>), [5:12-17], (Lvar ([5:12-17], $yolo))))), [], [], None, (_)))))))));
-            ([7:3-9],
-             (Expr ((_), [7:3-8], (Array_get (((_), [7:3-5], (Hole (((object), [7:3-5], (Lvar ([7:3-5], $x))), (_), (KeyedContainer<int, nothing>), Typing))), (Some ((int), [7:6-7], (Int "1"))))))))
-            ];
+               ((_), [5:3-19],
+                (Binop ((Eq None), ((_), [5:3-5], (Lvar ([5:3-5], $x))), (
+                   (_), [5:8-19], (New (((_), [5:12-17], (CIexpr ((classname<_>), [5:12-17], (Lvar ([5:12-17], $yolo))))), [], [], None, (_)))))))));
+            ([7:3-9], (Expr ((_), [7:3-8], (Array_get (((_), [7:3-5], (Lvar ([7:3-5], $x))), (Some ((int), [7:6-7], (Int "1"))))))))];
           fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }

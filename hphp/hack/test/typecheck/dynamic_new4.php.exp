@@ -1,8 +1,2 @@
 File "dynamic_new4.php", line 19, characters 15-17:
 Cannot use dynamic `new`. (Naming[2060])
-File "dynamic_new4.php", line 19, characters 10-20:
-Invalid return type (Typing[4110])
-  File "dynamic_new4.php", line 18, characters 15-15:
-  Expected `C`
-  File "dynamic_new4.php", line 19, characters 15-17:
-  But got `object`; this class name is unknown to Hack

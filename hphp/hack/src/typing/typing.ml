@@ -5103,7 +5103,8 @@ and new_object
           (env, Some e, ty)
       in
       let r = Reason.Runknown_class p in
-      (env, tel, typed_unpack_element, mk (r, Tobject), TUtils.terr env r)
+      let terr = TUtils.terr env r in
+      (env, tel, typed_unpack_element, terr, terr)
     | [(ty, ctor_fty)] -> (env, tel, typed_unpack_element, ty, ctor_fty)
     | l ->
       let (tyl, ctyl) = List.unzip l in

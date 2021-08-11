@@ -13,7 +13,7 @@ use hhbc_by_ref_emit_pos::emit_pos_then;
 use hhbc_by_ref_env::{emitter::Emitter, Env};
 use hhbc_by_ref_hhas_body::HhasBody;
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
-use hhbc_by_ref_hhas_function::{Flags as HhasFunctionFlags, HhasFunction};
+use hhbc_by_ref_hhas_function::{HhasFunction, HhasFunctionFlags};
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_type::Info as HhasTypeInfo;

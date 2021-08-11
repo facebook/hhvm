@@ -11,7 +11,7 @@ use hhbc_by_ref_emit_type_hint::{self as emit_type_hint, Kind};
 use hhbc_by_ref_env::{emitter::Emitter, Env};
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhas_constant::{self as hhas_constant, HhasConstant};
-use hhbc_by_ref_hhas_function::{self as hhas_function, HhasFunction};
+use hhbc_by_ref_hhas_function::{HhasFunction, HhasFunctionFlags};
 use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhbc_id::{r#const, function, Id};
 use hhbc_by_ref_hhbc_string_utils::strip_global_ns;
@@ -76,7 +76,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             body,
             span: Span::from_pos(&constant.span),
             coeffects: HhasCoeffects::default(),
-            flags: hhas_function::Flags::NO_INJECTION,
+            flags: HhasFunctionFlags::NO_INJECTION,
         })
     }))
     .transpose()

@@ -16,7 +16,7 @@ use hhbc_by_ref_hhas_attribute::{self as hhas_attribute, HhasAttribute};
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhas_function::{self as hhas_function, HhasFunction};
 use hhbc_by_ref_hhas_pos::Span;
-use hhbc_by_ref_hhbc_id::{self as hhbc_id, Id};
+use hhbc_by_ref_hhbc_id::{class::ClassType, function::FunctionType, Id};
 use hhbc_by_ref_instruction_sequence::{instr, Result};
 use naming_special_names_rust::user_attributes as ua;
 use ocamlrep::rc::RcOc;
@@ -30,13 +30,13 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     fd: &'a ast::FunDef,
 ) -> Result<Vec<HhasFunction<'arena>>> {
     use ast_defs::FunKind;
-    use hhas_function::Flags;
+    use hhas_function::HhasFunctionFlags;
 
     let f = &fd.fun;
-    let original_id = hhbc_id::function::FunctionType::from_ast_name(alloc, &f.name.1);
-    let mut flags = Flags::empty();
+    let original_id = FunctionType::from_ast_name(alloc, &f.name.1);
+    let mut flags = HhasFunctionFlags::empty();
     flags.set(
-        hhas_function::Flags::ASYNC,
+        HhasFunctionFlags::ASYNC,
         matches!(f.fun_kind, FunKind::FAsync | FunKind::FAsyncGenerator),
     );
 
@@ -44,22 +44,21 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         emit_attribute::from_asts(alloc, e, &f.user_attributes)?;
     attrs.extend(emit_attribute::add_reified_attribute(alloc, &f.tparams));
     let memoized = attrs.iter().any(|a| ua::is_memoized(a.name.as_str()));
-    flags.set(Flags::MEMOIZE_IMPL, memoized);
-    flags.set(Flags::NO_INJECTION, hhas_attribute::is_no_injection(&attrs));
+    flags.set(HhasFunctionFlags::MEMOIZE_IMPL, memoized);
+    flags.set(
+        HhasFunctionFlags::NO_INJECTION,
+        hhas_attribute::is_no_injection(&attrs),
+    );
 
     let renamed_id = {
         if memoized {
-            hhbc_id::function::FunctionType::add_suffix(
-                alloc,
-                &original_id,
-                emit_memoize_helpers::MEMOIZE_SUFFIX,
-            )
+            FunctionType::add_suffix(alloc, &original_id, emit_memoize_helpers::MEMOIZE_SUFFIX)
         } else {
             original_id
         }
     };
     flags.set(
-        Flags::INTERCEPTABLE,
+        HhasFunctionFlags::INTERCEPTABLE,
         emit_memoize_function::is_interceptable(e.options()),
     );
     let is_meth_caller = f.name.1.starts_with("\\MethCaller$");
@@ -70,7 +69,7 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 params,
             }] if s == "__MethCaller" => match &params[..] {
                 [ast::Expr(_, _, ast::Expr_::String(ref ctx))] if !ctx.is_empty() => Some(
-                    hhbc_id::class::ClassType::from_ast_name(
+                    ClassType::from_ast_name(
                         alloc,
                         // FIXME: This is not safe--string literals are binary strings.
                         // There's no guarantee that they're valid UTF-8.
@@ -112,7 +111,7 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         let mut body_flags = EmitBodyFlags::empty();
         body_flags.set(
             EmitBodyFlags::ASYNC,
-            flags.contains(hhas_function::Flags::ASYNC),
+            flags.contains(HhasFunctionFlags::ASYNC),
         );
         body_flags.set(EmitBodyFlags::NATIVE, native);
         body_flags.set(EmitBodyFlags::MEMOIZE, memoized);
@@ -146,8 +145,8 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             },
         )?
     };
-    flags.set(hhas_function::Flags::GENERATOR, is_gen);
-    flags.set(hhas_function::Flags::PAIR_GENERATOR, is_pair_gen);
+    flags.set(HhasFunctionFlags::GENERATOR, is_gen);
+    flags.set(HhasFunctionFlags::PAIR_GENERATOR, is_pair_gen);
     let memoize_wrapper = if memoized {
         Some(emit_memoize_function::emit_wrapper_function(
             alloc,

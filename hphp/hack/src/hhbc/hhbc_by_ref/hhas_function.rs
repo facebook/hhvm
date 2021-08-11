@@ -20,11 +20,12 @@ pub struct HhasFunction<'arena> {
     pub body: HhasBody<'arena>,
     pub span: Span,
     pub coeffects: HhasCoeffects,
-    pub flags: Flags,
+    pub flags: HhasFunctionFlags,
 }
 
 bitflags! {
-    pub struct Flags: u8 {
+    #[repr(C)]
+    pub struct HhasFunctionFlags: u8 {
         const ASYNC =          1 << 1;
         const GENERATOR =      1 << 2;
         const PAIR_GENERATOR = 1 << 3;
@@ -37,31 +38,31 @@ bitflags! {
 
 impl<'arena> HhasFunction<'arena> {
     pub fn is_async(&self) -> bool {
-        self.flags.contains(Flags::ASYNC)
+        self.flags.contains(HhasFunctionFlags::ASYNC)
     }
 
     pub fn is_generator(&self) -> bool {
-        self.flags.contains(Flags::GENERATOR)
+        self.flags.contains(HhasFunctionFlags::GENERATOR)
     }
 
     pub fn is_pair_generator(&self) -> bool {
-        self.flags.contains(Flags::PAIR_GENERATOR)
+        self.flags.contains(HhasFunctionFlags::PAIR_GENERATOR)
     }
 
     pub fn is_interceptable(&self) -> bool {
-        self.flags.contains(Flags::INTERCEPTABLE)
+        self.flags.contains(HhasFunctionFlags::INTERCEPTABLE)
     }
 
     pub fn is_no_injection(&self) -> bool {
-        self.flags.contains(Flags::NO_INJECTION)
+        self.flags.contains(HhasFunctionFlags::NO_INJECTION)
     }
 
     pub fn is_memoize_impl(&self) -> bool {
-        self.flags.contains(Flags::MEMOIZE_IMPL)
+        self.flags.contains(HhasFunctionFlags::MEMOIZE_IMPL)
     }
 
     pub fn rx_disabled(&self) -> bool {
-        self.flags.contains(Flags::RX_DISABLED)
+        self.flags.contains(HhasFunctionFlags::RX_DISABLED)
     }
 
     pub fn with_body<F, T>(&mut self, body: HhasBody<'arena>, f: F) -> T

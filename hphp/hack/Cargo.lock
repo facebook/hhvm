@@ -353,6 +353,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "config_file"
+version = "0.0.0"
+dependencies = [
+ "bstr",
+ "lazy_static",
+ "regex",
+ "serde_json",
+ "sha-1",
+]
+
+[[package]]
+name = "config_file_ffi"
+version = "0.0.0"
+dependencies = [
+ "config_file",
+ "ocamlrep_custom",
+ "ocamlrep_ocamlpool",
+]
+
+[[package]]
 name = "console"
 version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

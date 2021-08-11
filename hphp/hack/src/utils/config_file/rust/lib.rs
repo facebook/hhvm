@@ -14,8 +14,6 @@ pub struct ConfigFile {
     map: BTreeMap<String, String>,
 }
 
-pub struct Silent(pub bool);
-
 impl ConfigFile {
     pub fn empty() -> Self {
         Self {
@@ -28,25 +26,13 @@ impl ConfigFile {
         Ok(Self::from_slice(&contents))
     }
 
-    /// c.f. `Config_file_common.parse` in OCaml
-    pub fn from_file_with_sha1(
-        path: impl AsRef<Path>,
-        silent: Silent,
-    ) -> std::io::Result<(String, Self)> {
+    pub fn from_file_with_sha1(path: impl AsRef<Path>) -> std::io::Result<(String, Self)> {
         let path = path.as_ref();
         let contents = std::fs::read(path)?;
-        if !silent.0 {
-            eprintln!(
-                "{} on-file-system contents:\n{}",
-                path.display(),
-                String::from_utf8_lossy(&contents),
-            );
-        }
         let hash = format!("{:x}", Sha1::digest(&contents));
         Ok((hash, Self::from_slice(&contents)))
     }
 
-    /// c.f. `Config_file_common.parse_contents` in OCaml
     pub fn from_slice(bytes: &[u8]) -> Self {
         use bstr::ByteSlice;
 
@@ -75,33 +61,24 @@ impl ConfigFile {
         Self { map }
     }
 
-    /// c.f. `Config_file_common.print_config` in OCaml
-    pub fn print_to_stderr(&self) {
-        for (key, value) in self.map.iter() {
-            eprintln!("{} = {}", key, value);
-        }
+    pub fn is_empty(&self) -> bool {
+        self.map.is_empty()
     }
 
-    /// c.f. `Config_file_common.apply_overrides` in OCaml
-    pub fn apply_overrides(&mut self, overrides: &Self, silent: Silent) {
+    pub fn apply_overrides(&mut self, overrides: &Self) {
         for (key, value) in overrides.map.iter() {
-            self.map.entry(key.clone()).or_insert_with(|| value.clone());
-        }
-        if !silent.0 {
-            eprintln!("Config overrides:");
-            overrides.print_to_stderr();
-            eprintln!();
-            eprintln!("The combined config:");
-            self.print_to_stderr();
+            self.map.insert(key.clone(), value.clone());
         }
     }
 
-    /// c.f. `Config_file_common.to_json` in OCaml
     pub fn to_json(&self) -> serde_json::Result<String> {
         serde_json::to_string(&self.map)
     }
 
-    /// c.f. `Config_file_common.keys` in OCaml
+    pub fn iter(&self) -> impl Iterator<Item = (&str, &str)> {
+        self.map.iter().map(|(k, v)| (k.as_str(), v.as_str()))
+    }
+
     pub fn keys(&self) -> impl Iterator<Item = &str> {
         self.map.keys().map(|s| s.as_str())
     }
@@ -122,7 +99,6 @@ impl ConfigFile {
     }
 }
 
-/// c.f. `Config_file_common.of_list` in OCaml
 impl std::iter::FromIterator<(String, String)> for ConfigFile {
     fn from_iter<I: IntoIterator<Item = (String, String)>>(iter: I) -> Self {
         Self {

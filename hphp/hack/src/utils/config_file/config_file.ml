@@ -19,6 +19,8 @@ let empty = Config_file_common.empty
 
 let apply_overrides = Config_file_common.apply_overrides
 
+let parse_contents = Config_file_common.parse_contents
+
 let parse_hhconfig ~silent (fn : string) : string * t =
   try Config_file_common.parse ~silent fn with
   | e ->

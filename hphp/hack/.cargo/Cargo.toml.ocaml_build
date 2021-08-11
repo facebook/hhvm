@@ -169,6 +169,7 @@ members = [
     "src/typing/cargo/typing_collections_rust",
     "src/typing/cargo/typing_defs_rust",
     "src/utils/arena_deserializer",
+    "src/utils/config_file/rust/ffi",
     "src/utils/core",
     "src/utils/eq_modulo_pos",
     "src/utils/eq_modulo_pos_derive",

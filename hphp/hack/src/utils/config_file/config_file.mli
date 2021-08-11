@@ -28,6 +28,8 @@ val parse_version : string option -> version
 
 val empty : unit -> t
 
+val parse_contents : string -> t
+
 val parse_hhconfig : silent:bool -> string -> string * t
 
 val parse_local_config : silent:bool -> string -> t

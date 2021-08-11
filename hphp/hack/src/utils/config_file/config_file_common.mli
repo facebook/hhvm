@@ -12,7 +12,7 @@ val file_path_relative_to_repo_root : string
 
 val empty : unit -> t
 
-val print_config : t -> unit
+val print_to_stderr : t -> unit
 
 val apply_overrides : silent:bool -> config:t -> overrides:t -> t
 

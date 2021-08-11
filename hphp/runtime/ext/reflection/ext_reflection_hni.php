@@ -1474,15 +1474,14 @@ class ReflectionClass implements Reflector {
     return self::getOrderedAbstractConstants($clsname);
   }
 
-  <<__Pure, __MaybeMutable>>
-  private function getTypeConstantNamesWithCaching(): darray<string, string> {
+  private function getTypeConstantNamesWithCaching()[]: darray<string, string> {
     return self::getTypeConstantNamesCache($this->getName());
   }
 
-  <<__Memoize, __Pure>>
+  <<__Memoize>>
   private static function getTypeConstantNamesCache(
     string $clsname
-  ): darray<string, string> {
+  )[]: darray<string, string> {
     return self::getOrderedTypeConstants($clsname);
   }
 
@@ -1514,10 +1513,10 @@ class ReflectionClass implements Reflector {
     string $clsname
   )[]: darray<string, string>;
 
-  <<__Native, __Pure>>
+  <<__Native>>
   private static function getOrderedTypeConstants(
     string $clsname
-  ): darray<string, string>;
+  )[]: darray<string, string>;
 
   /**
    * ( excerpt from

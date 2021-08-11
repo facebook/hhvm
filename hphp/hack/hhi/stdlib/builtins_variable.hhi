@@ -39,9 +39,11 @@ function get_resource_type(resource $handle)[];
 <<__PHPStdLib>>
 function print_r($expression, bool $ret = false);
 <<__PHPStdLib>>
-function print_r_pure($expression);
+function print_r_pure($expression)[];
 <<__PHPStdLib>>
 function var_export($expression, bool $ret = false);
+<<__PHPStdLib>>
+function var_export_pure($expression)[];
 <<__PHPStdLib>>
 function var_dump(<<__AcceptDisposable>> mixed $expression, mixed ...$rest);
 <<__PHPStdLib>>

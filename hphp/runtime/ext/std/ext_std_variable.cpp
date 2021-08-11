@@ -233,11 +233,15 @@ Variant HHVM_FUNCTION(print_r_pure, const Variant& expression) {
   return print_r_impl(expression, true, true);
 }
 
-Variant HHVM_FUNCTION(var_export, const Variant& expression,
-                                  bool ret /* = false */) {
+ALWAYS_INLINE Variant var_export_impl(const Variant& expression,
+                                      bool ret /* = false */,
+                                      bool pure /* = false */) {
   Variant res;
   try {
     VariableSerializer vs(VariableSerializer::Type::VarExport);
+    if (pure) {
+      vs.setPure();
+    }
     if (ret) {
       res = vs.serialize(expression, ret);
     } else {
@@ -248,6 +252,15 @@ Variant HHVM_FUNCTION(var_export, const Variant& expression,
     raise_notice("var_export() exceeded max bytes limit");
   }
   return res;
+}
+
+Variant HHVM_FUNCTION(var_export, const Variant& expression,
+                                  bool ret /* = false */) {
+  return var_export_impl(expression, ret, false);
+}
+
+Variant HHVM_FUNCTION(var_export_pure, const Variant& expression) {
+  return var_export_impl(expression, true, true);
 }
 
 static ALWAYS_INLINE void do_var_dump(VariableSerializer& vs,
@@ -651,6 +664,7 @@ void StandardExtension::initVariable() {
   HHVM_FE(print_r);
   HHVM_FE(print_r_pure);
   HHVM_FE(var_export);
+  HHVM_FE(var_export_pure);
   HHVM_FE(debug_zval_dump);
   HHVM_FE(var_dump);
   HHVM_FE(serialize);

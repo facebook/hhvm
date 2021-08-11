@@ -132,6 +132,12 @@ function print_r_pure(mixed $expression)[]: mixed;
 function var_export(mixed $expression,
                     bool $ret = false): mixed;
 
+/* Pure version of var_export(). When var_export()'s 2nd arg
+ * is not set to true, we would write to std output.
+ */
+<<__Native>>
+function var_export_pure(mixed $expression)[]: mixed;
+
 /* Dumps information about a variable
  *
  * This function displays structured information about one or more expressions

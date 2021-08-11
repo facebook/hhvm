@@ -1408,7 +1408,7 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
           reason
           tparams_with_new_names
           tyl_fresh
-      | None -> (env, mk (Reason.Rwitness ivar_pos, Tobject))
+      | None -> (env, TUtils.terr env (Reason.Rwitness ivar_pos))
     end
   | (Ttuple ivar_tyl, Ttuple hint_tyl)
     when Int.equal (List.length ivar_tyl) (List.length hint_tyl) ->

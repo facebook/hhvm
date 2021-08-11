@@ -186,7 +186,6 @@ module RemoteTypeCheck = struct
     let enabled_on_errors =
       string_list
         "remote_type_check_enabled_on_errors"
-        ~delim:(Str.regexp ",")
         ~default:["typing"]
         config
       |> List.fold ~init:[] ~f:(fun acc phase ->
@@ -714,19 +713,11 @@ let load_ fn ~silent ~current_version overrides =
     apply_overrides ~silent ~current_version ~config ~overrides
   in
   let experiments =
-    string_list
-      "experiments"
-      ~delim:(Str.regexp ",")
-      ~default:default.experiments
-      config
+    string_list "experiments" ~default:default.experiments config
   in
 
   let log_categories =
-    string_list
-      "log_categories"
-      ~delim:(Str.regexp ",")
-      ~default:default.log_categories
-      config
+    string_list "log_categories" ~default:default.log_categories config
   in
   let min_log_level =
     match
@@ -862,11 +853,7 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   let shm_dirs =
-    string_list
-      ~delim:(Str.regexp ",")
-      "shm_dirs"
-      ~default:default.shm_dirs
-      config
+    string_list "shm_dirs" ~default:default.shm_dirs config
     |> List.map ~f:(fun dir -> Path.(to_string @@ make dir))
   in
   let max_workers = int_opt "max_workers" config in

@@ -94,8 +94,8 @@ module Getters = struct
     string_opt key config
     |> Option.map ~f:(Str.split (Str.regexp ",[ \n\r\x0c\t]*"))
 
-  let string_list ~delim key ~default config =
-    Option.value_map (string_opt key config) ~default ~f:(Str.split delim)
+  let string_list key ~default config =
+    Option.value (string_list_opt key config) ~default
 
   let bool_if_min_version key ~default ~current_version config : bool =
     let version_value = string_ key ~default:(string_of_bool default) config in

@@ -71,13 +71,7 @@ let make_sharedmem_config config options local_config =
   let log_level = int_ "sharedmem_log_level" ~default:0 config in
   let sample_rate = float_ "sharedmem_sample_rate" ~default:0.0 config in
   let compression = int_ "sharedmem_compression" ~default:0 config in
-  let shm_dirs =
-    string_list
-      ~delim:(Str.regexp ",")
-      "sharedmem_dirs"
-      ~default:shm_dirs
-      config
-  in
+  let shm_dirs = string_list "sharedmem_dirs" ~default:shm_dirs config in
   let shm_min_avail =
     int_ "sharedmem_minimum_available" ~default:shm_min_avail config
   in

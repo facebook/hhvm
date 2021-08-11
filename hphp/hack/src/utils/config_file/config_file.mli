@@ -59,8 +59,7 @@ module Getters : sig
 
   val string_list_opt : string -> t -> string list option
 
-  val string_list :
-    delim:Str.regexp -> string -> default:string list -> t -> string list
+  val string_list : string -> default:string list -> t -> string list
 
   val bool_if_min_version :
     string ->

@@ -99,10 +99,11 @@ let get_occurrence_info
     (ctx : Provider_context.t)
     (nast : Nast.program)
     (occurrence : Relative_path.t SymbolOccurrence.t) =
+  let module SO = SymbolOccurrence in
   let (ft_opt, full_occurrence) =
     (* Handle static methods, instance methods, and constructors *)
-    match occurrence.SymbolOccurrence.type_ with
-    | SymbolOccurrence.Method (classname, methodname) ->
+    match occurrence.SO.type_ with
+    | SO.Method (SO.ClassName classname, methodname) ->
       let classname = Utils.add_ns classname in
       let ft =
         Decl_provider.get_class ctx classname
@@ -133,13 +134,12 @@ let get_occurrence_info
       let fun_name =
         Utils.expand_namespace
           (ParserOptions.auto_namespace_map (Provider_context.get_popt ctx))
-          occurrence.SymbolOccurrence.name
+          occurrence.SO.name
       in
       let ft = Decl_provider.get_fun ctx fun_name in
       let full_occurrence =
-        match occurrence.SymbolOccurrence.type_ with
-        | SymbolOccurrence.Function ->
-          { occurrence with SymbolOccurrence.name = fun_name }
+        match occurrence.SO.type_ with
+        | SO.Function -> { occurrence with SO.name = fun_name }
         | _ -> occurrence
       in
       (ft, full_occurrence)

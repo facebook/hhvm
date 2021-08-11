@@ -19,15 +19,20 @@ type class_id_type =
   | Other
 [@@deriving ord, eq]
 
+type receiver_class =
+  | ClassName of string
+  | UnknownClass (* invoked dynamically *)
+[@@deriving ord, eq]
+
 type kind =
   | Class of class_id_type
   | Record
   | Function
-  | Method of string * string
+  | Method of receiver_class * string
   | LocalVar
-  | Property of string * string
+  | Property of receiver_class * string
   | XhpLiteralAttr of string * string
-  | ClassConst of string * string
+  | ClassConst of receiver_class * string
   | Typeconst of string * string
   | GConst
   (* For __Override occurrences, we track the associated method and class. *)
@@ -63,10 +68,10 @@ let kind_to_string = function
 
 let enclosing_class occurrence =
   match occurrence.type_ with
-  | Method (c, _)
-  | Property (c, _)
+  | Method (ClassName c, _)
+  | Property (ClassName c, _)
   | XhpLiteralAttr (c, _)
-  | ClassConst (c, _)
+  | ClassConst (ClassName c, _)
   | Typeconst (c, _)
   | EnumClassLabel (c, _) ->
     Some c

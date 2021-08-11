@@ -216,26 +216,30 @@ let to_ide symbol_name res =
   Some (symbol_name, List.map ~f:snd (to_absolute res))
 
 let get_action symbol (filename, file_content, line, char) =
+  let module SO = SymbolOccurrence in
   let name = symbol.SymbolOccurrence.name in
   match symbol.SymbolOccurrence.type_ with
-  | SymbolOccurrence.Class _ -> Some (Class name)
-  | SymbolOccurrence.Function -> Some (Function name)
-  | SymbolOccurrence.Method (class_name, method_name) ->
+  | SO.Class _ -> Some (Class name)
+  | SO.Function -> Some (Function name)
+  | SO.Method (SO.ClassName class_name, method_name) ->
     Some (Member (class_name, Method method_name))
-  | SymbolOccurrence.Property (class_name, prop_name)
-  | SymbolOccurrence.XhpLiteralAttr (class_name, prop_name) ->
+  | SO.Property (SO.ClassName class_name, prop_name)
+  | SO.XhpLiteralAttr (class_name, prop_name) ->
     Some (Member (class_name, Property prop_name))
-  | SymbolOccurrence.Record -> Some (Record name)
-  | SymbolOccurrence.ClassConst (class_name, const_name) ->
+  | SO.Record -> Some (Record name)
+  | SO.ClassConst (SO.ClassName class_name, const_name) ->
     Some (Member (class_name, Class_const const_name))
-  | SymbolOccurrence.Typeconst (class_name, tconst_name) ->
+  | SO.Typeconst (class_name, tconst_name) ->
     Some (Member (class_name, Typeconst tconst_name))
-  | SymbolOccurrence.GConst -> Some (GConst name)
-  | SymbolOccurrence.LocalVar ->
-    Some (LocalVar { filename; file_content; line; char })
-  | SymbolOccurrence.Attribute _ -> None
+  | SO.GConst -> Some (GConst name)
+  | SO.LocalVar -> Some (LocalVar { filename; file_content; line; char })
+  | SO.Attribute _ -> None
+  | SO.Method (SO.UnknownClass, _)
+  | SO.Property (SO.UnknownClass, _)
+  | SO.ClassConst (SO.UnknownClass, _) ->
+    None
   (* TODO(toyang): find references doesn't work for enum labels yet *)
-  | SymbolOccurrence.EnumClassLabel _ -> None
+  | SO.EnumClassLabel _ -> None
 
 let go_from_file_ctx
     ~(ctx : Provider_context.t)

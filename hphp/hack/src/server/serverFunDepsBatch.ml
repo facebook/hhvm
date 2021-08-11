@@ -32,7 +32,7 @@ let process_method_cid n cid =
   Results.singleton
     {
       name = cid ^ "::" ^ snd n;
-      type_ = Method (cid, snd n);
+      type_ = Method (ClassName cid, snd n);
       is_declaration = false;
       pos = fst n;
     }

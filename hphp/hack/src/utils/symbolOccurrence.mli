@@ -25,13 +25,18 @@ type class_id_type =
   | Other
 [@@deriving ord, eq]
 
+type receiver_class =
+  | ClassName of string
+  | UnknownClass (* invoked dynamically *)
+[@@deriving ord, eq]
+
 type kind =
   | Class of class_id_type
   | Record
   | Function
-  | Method of string * string
+  | Method of receiver_class * string
   | LocalVar
-  | Property of string * string
+  | Property of receiver_class * string
   (*
     XhpLiteralAttr is only used for attributes in XHP literals.
     i.e.
@@ -42,7 +47,7 @@ type kind =
         or attributes in class definitions
    *)
   | XhpLiteralAttr of string * string
-  | ClassConst of string * string
+  | ClassConst of receiver_class * string
   | Typeconst of string * string
   | GConst
   | Attribute of override_info option

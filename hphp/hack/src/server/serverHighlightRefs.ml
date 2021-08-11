@@ -12,20 +12,21 @@ open Hh_prelude
 let get_target symbol =
   SymbolOccurrence.(
     let module Types = ServerCommandTypes.Find_refs in
+    let module SO = SymbolOccurrence in
     FindRefsService.(
       match symbol.type_ with
-      | SymbolOccurrence.Class _ -> Some (IClass symbol.name)
-      | SymbolOccurrence.Function -> Some (IFunction symbol.name)
-      | SymbolOccurrence.Method (class_name, member_name) ->
+      | SO.Class _ -> Some (IClass symbol.name)
+      | SO.Function -> Some (IFunction symbol.name)
+      | SO.Method (SO.ClassName class_name, member_name) ->
         Some (IMember (Subclasses_of class_name, Types.Method member_name))
-      | SymbolOccurrence.Property (class_name, member_name)
-      | SymbolOccurrence.XhpLiteralAttr (class_name, member_name) ->
+      | SO.Property (SO.ClassName class_name, member_name)
+      | SO.XhpLiteralAttr (class_name, member_name) ->
         Some (IMember (Subclasses_of class_name, Types.Property member_name))
-      | SymbolOccurrence.ClassConst (class_name, member_name) ->
+      | SO.ClassConst (SO.ClassName class_name, member_name) ->
         Some (IMember (Subclasses_of class_name, Types.Class_const member_name))
-      | SymbolOccurrence.Typeconst (class_name, member_name) ->
+      | SO.Typeconst (class_name, member_name) ->
         Some (IMember (Subclasses_of class_name, Types.Typeconst member_name))
-      | SymbolOccurrence.GConst -> Some (IGConst symbol.name)
+      | SO.GConst -> Some (IGConst symbol.name)
       | _ -> None))
 
 let highlight_symbol ctx entry line char symbol =

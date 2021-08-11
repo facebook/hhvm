@@ -261,7 +261,7 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
       let snippet =
         match (occurrence, env_and_ty) with
         | ({ name; _ }, None) -> Utils.strip_ns name
-        | ({ type_ = Method (classname, name); _ }, Some (env, ty))
+        | ({ type_ = Method (ClassName classname, name); _ }, Some (env, ty))
           when String.equal name Naming_special_names.Members.__construct ->
           let snippet_opt =
             Option.Monad_infix.(

@@ -115,11 +115,18 @@ let fully_expand = Typing_expand.fully_expand
  * we have the statically known class type of some runtime value or class ID and
  * we would like the name of that class. *)
 (*****************************************************************************)
-let get_class_ids env ty =
+
+type receiver_identifier =
+  | RIclass of string
+  | RIdynamic
+  | RIerr
+  | RIany
+
+let get_receiver_ids env ty =
   let open Typing_defs in
   let rec aux seen acc ty =
     match get_node ty with
-    | Tclass ((_, cid), _, _) -> cid :: acc
+    | Tclass ((_, cid), _, _) -> RIclass cid :: acc
     | Toption ty
     | Tdependent (_, ty)
     | Tnewtype (_, _, ty) ->
@@ -132,9 +139,18 @@ let get_class_ids env ty =
       let seen = name :: seen in
       let upper_bounds = Typing_env.get_upper_bounds env name targs in
       Typing_set.fold (fun ty acc -> aux seen acc ty) upper_bounds acc
+    | Tdynamic -> [RIdynamic]
+    | Terr -> [RIerr]
+    | Tany _ -> [RIany]
     | _ -> acc
   in
   List.rev (aux [] [] (Typing_expand.fully_expand env ty))
+
+let get_class_ids env ty =
+  get_receiver_ids env ty
+  |> List.filter_map ~f:(function
+         | RIclass cid -> Some cid
+         | _ -> None)
 
 let non_null = Typing_solver.non_null
 

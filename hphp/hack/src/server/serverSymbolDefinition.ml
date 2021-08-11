@@ -107,9 +107,9 @@ let summarize_class_typedef ctx x =
     Some (FileOutline.summarize_record_decl rd)
 
 let go ctx ast result =
-  match result.SymbolOccurrence.type_ with
-  | SymbolOccurrence.Attribute
-      (Some { SymbolOccurrence.class_name; method_name; is_static }) ->
+  let module SO = SymbolOccurrence in
+  match result.SO.type_ with
+  | SO.Attribute (Some { SO.class_name; method_name; is_static }) ->
     Decl_provider.get_class ctx class_name >>= fun cls ->
     let matching_method =
       Cls.all_ancestor_names cls
@@ -131,10 +131,10 @@ let go ctx ast result =
     (match matching_method with
     | Some meth -> get_member_def ctx (Method, meth.ce_origin, method_name)
     | None -> None)
-  | SymbolOccurrence.Method (c_name, method_name) ->
+  | SO.Method (SO.ClassName c_name, method_name) ->
     (* Classes on typing heap have all the methods from inheritance hierarchy
-     * folded together, so we will correctly identify them even if method_name
-     * is not defined directly in class c_name *)
+       * folded together, so we will correctly identify them even if method_name
+       * is not defined directly in class c_name *)
     Decl_provider.get_class ctx c_name >>= fun class_ ->
     if String.equal method_name Naming_special_names.Members.__construct then
       match fst (Cls.construct class_) with
@@ -149,8 +149,9 @@ let go ctx ast result =
         Cls.get_smethod class_ method_name >>= fun m ->
         get_member_def ctx (Static_method, m.ce_origin, method_name)
     )
-  | SymbolOccurrence.Property (c_name, property_name)
-  | SymbolOccurrence.XhpLiteralAttr (c_name, property_name) ->
+  | SO.Method (SO.UnknownClass, _) -> None
+  | SO.Property (SO.ClassName c_name, property_name)
+  | SO.XhpLiteralAttr (c_name, property_name) ->
     Decl_provider.get_class ctx c_name >>= fun class_ ->
     let property_name = clean_member_name property_name in
     begin
@@ -160,36 +161,32 @@ let go ctx ast result =
         Cls.get_sprop class_ ("$" ^ property_name) >>= fun m ->
         get_member_def ctx (Static_property, m.ce_origin, property_name)
     end
-  | SymbolOccurrence.ClassConst (c_name, const_name) ->
+  | SO.Property (SO.UnknownClass, _) -> None
+  | SO.ClassConst (SO.ClassName c_name, const_name) ->
     Decl_provider.get_class ctx c_name >>= fun class_ ->
     Cls.get_const class_ const_name >>= fun m ->
     get_member_def ctx (Class_const, m.cc_origin, const_name)
-  | SymbolOccurrence.Function ->
-    get_function_by_name ctx result.SymbolOccurrence.name >>= fun f ->
+  | SO.ClassConst (SO.UnknownClass, _) -> None
+  | SO.Function ->
+    get_function_by_name ctx result.SO.name >>= fun f ->
     Some (FileOutline.summarize_fun f)
-  | SymbolOccurrence.GConst ->
-    get_gconst_by_name ctx result.SymbolOccurrence.name >>= fun cst ->
+  | SO.GConst ->
+    get_gconst_by_name ctx result.SO.name >>= fun cst ->
     Some (FileOutline.summarize_gconst cst)
-  | SymbolOccurrence.Class _ ->
-    summarize_class_typedef ctx result.SymbolOccurrence.name
-  | SymbolOccurrence.Record ->
-    summarize_class_typedef ctx result.SymbolOccurrence.name
-  | SymbolOccurrence.Typeconst (c_name, typeconst_name) ->
+  | SO.Class _ -> summarize_class_typedef ctx result.SO.name
+  | SO.Record -> summarize_class_typedef ctx result.SO.name
+  | SO.Typeconst (c_name, typeconst_name) ->
     Decl_provider.get_class ctx c_name >>= fun class_ ->
     Cls.get_typeconst class_ typeconst_name >>= fun m ->
     get_member_def ctx (Typeconst, m.ttc_origin, typeconst_name)
-  | SymbolOccurrence.LocalVar ->
+  | SO.LocalVar ->
     begin
       match ast with
       | None -> None
-      | Some ast ->
-        get_local_var_def
-          ast
-          result.SymbolOccurrence.name
-          result.SymbolOccurrence.pos
+      | Some ast -> get_local_var_def ast result.SO.name result.SO.pos
     end
-  | SymbolOccurrence.Attribute _ -> None
-  | SymbolOccurrence.EnumClassLabel (class_name, _member_name) ->
+  | SO.Attribute _ -> None
+  | SO.EnumClassLabel (class_name, _member_name) ->
     summarize_class_typedef ctx class_name
 
 let get_definition_cst_node_from_pos ctx entry kind pos =

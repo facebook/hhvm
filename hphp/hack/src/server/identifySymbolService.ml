@@ -57,9 +57,9 @@ let process_member ?(is_declaration = false) c_name id ~is_method ~is_const =
   let member_name = snd id in
   let type_ =
     if is_const then
-      ClassConst (c_name, member_name)
+      ClassConst (ClassName c_name, member_name)
     else if is_method then
-      Method (c_name, member_name)
+      Method (ClassName c_name, member_name)
     else
       (*
         Per comment in symbolOcurrence.mli, XhpLiteralAttr
@@ -67,7 +67,7 @@ let process_member ?(is_declaration = false) c_name id ~is_method ~is_const =
         process_member is not being used to handle XML attributes
         it is fine to define every symbol as Property.
       *)
-      Property (c_name, member_name)
+      Property (ClassName c_name, member_name)
   in
   Result_set.singleton
     {

@@ -224,12 +224,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     (env, result.With_complete_flag.value)
   | IDENTIFY_SYMBOL arg ->
+    let module SO = SymbolOccurrence in
     let ctx = Provider_utils.ctx_from_server_env env in
     let get_def_opt type_ name =
       ServerSymbolDefinition.go
         ctx
         None
-        SymbolOccurrence.{ type_; name; is_declaration = false; pos = Pos.none }
+        SO.{ type_; name; is_declaration = false; pos = Pos.none }
       |> Option.to_list
       |> List.map ~f:SymbolDefinition.to_absolute
     in
@@ -241,20 +242,20 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let c_name = Utils.add_ns c_name in
         List.concat
           [
-            get_def_opt (SymbolOccurrence.Method (c_name, member)) "";
-            get_def_opt (SymbolOccurrence.Property (c_name, member)) "";
-            get_def_opt (SymbolOccurrence.XhpLiteralAttr (c_name, member)) "";
-            get_def_opt (SymbolOccurrence.ClassConst (c_name, member)) "";
-            get_def_opt (SymbolOccurrence.Typeconst (c_name, member)) "";
+            get_def_opt (SO.Method (SO.ClassName c_name, member)) "";
+            get_def_opt (SO.Property (SO.ClassName c_name, member)) "";
+            get_def_opt (SO.XhpLiteralAttr (c_name, member)) "";
+            get_def_opt (SO.ClassConst (SO.ClassName c_name, member)) "";
+            get_def_opt (SO.Typeconst (c_name, member)) "";
           ]
       | [name] ->
         let name = Utils.add_ns name in
         List.concat
           [
-            get_def_opt (SymbolOccurrence.Class SymbolOccurrence.ClassId) name;
-            (* SymbolOccurrence.Record and Class find the same things *)
-            get_def_opt SymbolOccurrence.Function name;
-            get_def_opt SymbolOccurrence.GConst name;
+            get_def_opt (SO.Class SO.ClassId) name;
+            (* SO.Record and Class find the same things *)
+            get_def_opt SO.Function name;
+            get_def_opt SO.GConst name;
           ]
       | _ -> []
     in

@@ -4337,7 +4337,7 @@ and expr_
     let (env, typed_attrs) = xhp_attribute_exprs env class_info attrl sid obj in
     let txml = Aast.Xml (sid, typed_attrs, tchildren) in
     (match class_info with
-    | None -> make_result env p txml (mk (Reason.Runknown_class p, Tobject))
+    | None -> make_result env p txml (TUtils.terr env (Reason.Runknown_class p))
     | Some _ -> make_result env p txml obj)
   | Callconv (kind, e) ->
     let (env, te, ty) = expr env e in

@@ -1,6 +1,2 @@
 File "xhp_deep_parse.php", line 15, characters 15-18:
 Unbound name: `:x:xy` (an object type) (Naming[2049])
-File "xhp_deep_parse.php", line 15, characters 14-26:
-XHP children must be compatible with XHPChild (Typing[4193])
-File "xhp_deep_parse.php", line 15, characters 14-26:
-This is an object; this class name is unknown to Hack

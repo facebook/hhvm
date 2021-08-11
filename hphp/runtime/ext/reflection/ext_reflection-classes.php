@@ -1176,9 +1176,9 @@ class ReflectionExtension implements Reflector {
  */
 class ReflectionType {
   private $type_hint_info;
-  <<__Pure>>
+
   public function __construct(?Reflector $param_or_ret = null,
-                              darray $type_hint_info = darray[]) {
+                              darray $type_hint_info = darray[])[] {
     // PHP7 actually allows you to call this constructor from user code
     // successfully, even though it is really meant to only be called from
     // ReflectionParameter::getType() and

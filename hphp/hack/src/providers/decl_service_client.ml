@@ -80,7 +80,12 @@ let rpc_get_fun (t : t) (name : string) : Typing_defs.fun_elt option =
     | Some (Some _) -> assert false
     | Some None -> None
     | None ->
-      let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.Fun name in
+      let hash =
+        Typing_deps.Dep.Fun name
+        |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+        |> Typing_deps.Dep.to_int64
+      in
+      let ptr = Decl_ipc_ffi_externs.get_decl t.client hash in
       let fun_elt_opt = pointer_to_option ptr in
       Decls.add
         (FileInfo.Fun, name)
@@ -99,7 +104,12 @@ let rpc_get_class (t : t) (name : string) :
     | Some (Some _) -> assert false
     | Some None -> None
     | None ->
-      let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.Class name in
+      let hash =
+        Typing_deps.Dep.Type name
+        |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+        |> Typing_deps.Dep.to_int64
+      in
+      let ptr = Decl_ipc_ffi_externs.get_decl t.client hash in
       let class_decl_opt = pointer_to_option ptr in
       Decls.add
         (FileInfo.Class, name)
@@ -117,7 +127,12 @@ let rpc_get_typedef (t : t) (name : string) : Typing_defs.typedef_type option =
     | Some (Some _) -> assert false
     | Some None -> None
     | None ->
-      let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.Typedef name in
+      let hash =
+        Typing_deps.Dep.Type name
+        |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+        |> Typing_deps.Dep.to_int64
+      in
+      let ptr = Decl_ipc_ffi_externs.get_decl t.client hash in
       let typedef_decl_opt = pointer_to_option ptr in
       Decls.add
         (FileInfo.Typedef, name)
@@ -136,9 +151,12 @@ let rpc_get_record_def (t : t) (name : string) :
     | Some (Some _) -> assert false
     | Some None -> None
     | None ->
-      let ptr =
-        Decl_ipc_ffi_externs.get_decl t.client FileInfo.RecordDef name
+      let hash =
+        Typing_deps.Dep.Type name
+        |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+        |> Typing_deps.Dep.to_int64
       in
+      let ptr = Decl_ipc_ffi_externs.get_decl t.client hash in
       let record_decl_opt = pointer_to_option ptr in
       Decls.add
         (FileInfo.RecordDef, name)
@@ -156,7 +174,12 @@ let rpc_get_gconst (t : t) (name : string) : Typing_defs.const_decl option =
     | Some (Some _) -> assert false
     | Some None -> None
     | None ->
-      let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.Const name in
+      let hash =
+        Typing_deps.Dep.GConst name
+        |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+        |> Typing_deps.Dep.to_int64
+      in
+      let ptr = Decl_ipc_ffi_externs.get_decl t.client hash in
       let gconst_decl_opt = pointer_to_option ptr in
       Decls.add
         (FileInfo.Const, name)

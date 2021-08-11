@@ -444,7 +444,7 @@ TypedValue* getSPropOrNull(const Class* cls,
   if (writeMode && UNLIKELY(lookup.constant)) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
-  if (lookup.readonly) {
+  if (RO::EvalEnableReadonlyEnforcement && lookup.readonly) {
     if (checkMutROCOW && (!isRefcountedType(lookup.val->m_type) ||
       hasPersistentFlavor(lookup.val->m_type))) {
       assertx(roProp);
@@ -453,7 +453,8 @@ TypedValue* getSPropOrNull(const Class* cls,
       throw_must_be_mutable(cls->name()->data(), name->data());
     }
   }
-  if (mustBeReadOnly && UNLIKELY(!lookup.readonly)) {
+  if (RO::EvalEnableReadonlyEnforcement && mustBeReadOnly &&
+    UNLIKELY(!lookup.readonly)) {
     throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
   }
   if (UNLIKELY(!lookup.val || !lookup.accessible)) return nullptr;

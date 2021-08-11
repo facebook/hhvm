@@ -964,7 +964,8 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadOnlyOp
     (propInfo->readOnly && op == ReadOnlyOp::CheckMutROCOW)) {
     return propGenericImpl(env, mode, base, key, nullsafe, op);
   }
-  if (propInfo->readOnly && op == ReadOnlyOp::Mutable) {
+  if (RO::EvalEnableReadonlyEnforcement && propInfo->readOnly &&
+    op == ReadOnlyOp::Mutable) {
     gen(env, ThrowMustBeMutableException, cns(env, propInfo->propClass), key);
     return cns(env, TBottom);
   }
@@ -1173,7 +1174,8 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
   if (propInfo) {
-    if (propInfo->readOnly && op == ReadOnlyOp::Mutable) {
+    if (RO::EvalEnableReadonlyEnforcement && propInfo->readOnly &&
+      op == ReadOnlyOp::Mutable) {
       gen(env, ThrowMustBeMutableException, cns(env, propInfo->propClass), key);
       return cns(env, TBottom);
     }
@@ -1250,7 +1252,8 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadOnlyOp op) {
     getCurrentPropertyOffset(env, base, key->type(), true);
 
   if (propInfo && !propInfo->isConst) {
-    if (!propInfo->readOnly && op == ReadOnlyOp::ReadOnly) {
+    if (RO::EvalEnableReadonlyEnforcement && !propInfo->readOnly &&
+      op == ReadOnlyOp::ReadOnly) {
       gen(env, ThrowMustBeReadOnlyException, cns(env, propInfo->propClass), key);
       return cns(env, TBottom);
     }

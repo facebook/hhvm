@@ -693,8 +693,7 @@ std::pair<Type, Effects> elemHelper(ISS& env, MOpMode mode, Type key) {
       !inOutFail &&
       mode != MOpMode::Warn &&
       key.subtypeOf(BArrKey) &&
-      (!base.couldBe(BCls | BLazyCls) ||
-       !RuntimeOption::EvalRaiseClassConversionWarning);
+      (!base.couldBe(BCls | BLazyCls) || !RO::EvalRaiseClassConversionWarning);
     effects = unionEffects(
       effects,
       isNoThrow ? Effects::None : Effects::Throws
@@ -962,8 +961,8 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadOnlyOp op) {
     auto const optThisTy = thisTypeFromContext(env.index, env.ctx);
     auto const thisTy    = optThisTy ? *optThisTy : TObj;
     if (name) {
-      if (op == ReadOnlyOp::Mutable &&
-          isDefinitelyThisPropAttr(env, name, AttrIsReadOnly)) {
+      if (RO::EvalEnableReadonlyEnforcement && op == ReadOnlyOp::Mutable &&
+        isDefinitelyThisPropAttr(env, name, AttrIsReadOnly)) {
         return Effects::AlwaysThrows;
       }
 
@@ -976,7 +975,7 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadOnlyOp op) {
           if (propTy->subtypeOf(BBottom)) {
             return { TBottom, Effects::AlwaysThrows };
           }
-          if (op == ReadOnlyOp::Mutable &&
+          if (RO::EvalEnableReadonlyEnforcement && op == ReadOnlyOp::Mutable &&
               isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
             return { *propTy, Effects::Throws };
           }
@@ -1389,7 +1388,8 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
           return Effects::AlwaysThrows;
         }
         push(env, std::move(*t));
-        if (mustBeMutable && isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
+        if (RO::EvalEnableReadonlyEnforcement && mustBeMutable &&
+          isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
           return Effects::Throws;
         }
         if (isMaybeThisPropAttr(env, name, AttrLateInit)) {
@@ -1439,7 +1439,8 @@ Effects miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key, ReadOnlyOp o
     return Effects::AlwaysThrows;
   };
 
-  if (op == ReadOnlyOp::ReadOnly && !isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
+  if (RO::EvalEnableReadonlyEnforcement &&
+    op == ReadOnlyOp::ReadOnly && !isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
     return alwaysThrows();
   }
 
@@ -2023,12 +2024,14 @@ void in(ISS& env, const bc::BaseSC& op) {
   }
 
   // Whether we might potentially throw because of AttrIsReadOnly
-  if (op.subop4 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Yes) {
+  if (RO::EvalEnableReadonlyEnforcement &&
+    op.subop4 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Yes) {
     return unreachable(env);
   }
   auto const mightReadOnlyThrow =
+    RO::EvalEnableReadonlyEnforcement && (
     (op.subop4 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Maybe) ||
-    (op.subop4 == ReadOnlyOp::CheckMutROCOW && lookup.readOnly != TriBool::No);
+    (op.subop4 == ReadOnlyOp::CheckMutROCOW && lookup.readOnly != TriBool::No));
 
   // Loading the base from a static property can be considered
   // effect_free if there's no possibility of throwing. This requires

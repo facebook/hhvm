@@ -22,8 +22,9 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/vanilla-vec.h"
+#include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include <folly/ScopeGuard.h>
@@ -161,11 +162,11 @@ ArrayData* SetArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   return a->cowCheck() ? a->copySet() : a;
 }
 
-ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
+ArrayData* VanillaVec::EscalateForSort(ArrayData* ad, SortFunction sf) {
   assertx(checkInvariants(ad));
   assertx(sf != SORTFUNC_KSORT);
   if (isSortFamily(sf)) { // sort/rsort/usort
-    return ad->cowCheck() ? PackedArray::Copy(ad) : ad;
+    return ad->cowCheck() ? VanillaVec::Copy(ad) : ad;
   }
   return ToMixedCopy(ad);
 }
@@ -247,7 +248,7 @@ void SetArray::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
 
 #undef SORT_BODY
 
-void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
+void VanillaVec::Sort(ArrayData* ad, int sort_flags, bool ascending) {
   assertx(checkInvariants(ad));
   if (ad->m_size <= 1) {
     return;
@@ -256,7 +257,7 @@ void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
   auto a = ad;
   SortFlavor flav = preSort(ad);
   if constexpr (stores_typed_values) {
-    auto const data_begin = PackedArray::entries(ad);
+    auto const data_begin = VanillaVec::entries(ad);
     auto const data_end = data_begin + a->m_size;
     CALL_SORT(TVAccessor);
   } else {
@@ -312,7 +313,7 @@ bool SetArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
 
 #undef USER_SORT_BODY
 
-SortFlavor PackedArray::preSort(ArrayData* ad) {
+SortFlavor VanillaVec::preSort(ArrayData* ad) {
   assertx(checkInvariants(ad));
   assertx(ad->m_size > 0);
   bool allInts = true;
@@ -320,7 +321,7 @@ SortFlavor PackedArray::preSort(ArrayData* ad) {
   uint32_t i = 0;
   uint32_t size = ad->m_size;
   do {
-    const auto type = PackedArray::LvalUncheckedInt(ad, i).type();
+    const auto type = VanillaVec::LvalUncheckedInt(ad, i).type();
     if (type == KindOfInt64) {
       if (!allInts) return GenericSort;
       allStrs = false;
@@ -336,7 +337,7 @@ SortFlavor PackedArray::preSort(ArrayData* ad) {
   return StringSort;
 }
 
-bool PackedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
+bool VanillaVec::Usort(ArrayData* ad, const Variant& cmp_function) {
   assertx(checkInvariants(ad));
   if (ad->m_size <= 1) {
     return true;
@@ -350,7 +351,7 @@ bool PackedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
   if constexpr (stores_typed_values) {
     ElmUCompare<TVAccessor> comp;
     comp.ctx = &ctx;
-    auto const data = PackedArray::entries(ad);
+    auto const data = VanillaVec::entries(ad);
     Sort::sort(data, data + ad->m_size, comp);
   } else {
     ElmUCompare<PackedBlockAccessor> comp;

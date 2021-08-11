@@ -23,8 +23,8 @@
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -107,7 +107,7 @@ void cgProfileArrLikeProps(IRLS& env, const IRInstruction* inst) {
       }                                                             \
     }                                                               \
     if (layout.vanilla()) {                                         \
-      if (arr <= TVec)    return CallSpec::direct(PackedArray::Fn); \
+      if (arr <= TVec)    return CallSpec::direct(VanillaVec::Fn);  \
       if (arr <= TDict)   return CallSpec::direct(MixedArray::Fn);  \
       if (arr <= TKeyset) return CallSpec::direct(SetArray::Fn);    \
     }                                                               \
@@ -127,7 +127,7 @@ void cgProfileArrLikeProps(IRLS& env, const IRInstruction* inst) {
     }                                                                        \
     if (layout.vanilla()) {                                                  \
       if (arr <= TVec) {                                                     \
-        return CallSpec::direct(SynthesizedArrayFunctions<PackedArray>::Fn); \
+        return CallSpec::direct(SynthesizedArrayFunctions<VanillaVec>::Fn);  \
       }                                                                      \
       if (arr <= TDict) {                                                    \
         return CallSpec::direct(SynthesizedArrayFunctions<MixedArray>::Fn);  \

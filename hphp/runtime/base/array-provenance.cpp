@@ -25,8 +25,8 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/req-hash-set.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -70,8 +70,8 @@ ArrayData* apply_mutation(TypedValue tv, State& state,
 
 template <typename Array>
 tv_lval LvalAtIterPos(ArrayData* ad, ssize_t pos) {
-  if constexpr (std::is_same<Array, PackedArray>::value) {
-    return PackedArray::LvalUncheckedInt(ad, pos);
+  if constexpr (std::is_same<Array, VanillaVec>::value) {
+    return VanillaVec::LvalUncheckedInt(ad, pos);
   } else {
     static_assert(std::is_same<Array, MixedArray>::value);
     return &MixedArray::asMixed(ad)->data()[pos].data;
@@ -142,7 +142,7 @@ ArrayData* apply_mutation_to_array(ArrayData* in, State& state,
   // Recursively apply the mutation to the array's contents. For efficiency,
   // we do the layout check outside of the iteration loop.
   if (in->isVanillaVec()) {
-    return apply_mutation_fast<PackedArray>(in, result, state, cow, depth);
+    return apply_mutation_fast<VanillaVec>(in, result, state, cow, depth);
   } else if (in->isVanillaDict()) {
     return apply_mutation_fast<MixedArray>(in, result, state, cow, depth);
   }

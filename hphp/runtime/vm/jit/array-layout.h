@@ -36,7 +36,7 @@ namespace irgen { struct IRGS; }
 
 /*
  * A small lattice on array layouts, combining both vanilla array layouts
- * (PackedArray, MixedArray, SetArray) and bespoke array layouts. This type
+ * (VanillaVec, MixedArray, SetArray) and bespoke array layouts. This type
  * is kept small (just 2 bytes) and operations are implemented efficiently
  * so that it can be incorporated as part of the JIT's ArraySpec.
  */

@@ -22,9 +22,9 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -151,14 +151,14 @@ void fill_record(const StringData* sd, const void* addr,
 void fill_record(const ArrayData* arr, const void* addr,
                  StructuredLogEntry& record) {
   if (try_member(arr, addr, record)) return;
-  auto const idx = PackedArray::pointerToIndex(arr, addr);
+  auto const idx = VanillaVec::pointerToIndex(arr, addr);
   if (idx < 0) return;
 
   record.setInt("ikey", idx);
 
   if (idx < arr->size()) {
     auto const base = reinterpret_cast<const char*>(addr);
-    auto const rval = PackedArray::LvalInt(const_cast<ArrayData*>(arr), idx);
+    auto const rval = VanillaVec::LvalInt(const_cast<ArrayData*>(arr), idx);
     auto const type_diff = reinterpret_cast<const char*>(&type(rval)) - base;
     auto const data_diff = reinterpret_cast<const char*>(&val(rval)) - base;
     if (0 <= type_diff && type_diff < sizeof(type(rval))) {

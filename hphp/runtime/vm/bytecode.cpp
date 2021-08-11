@@ -1229,7 +1229,7 @@ OPTBLD_INLINE void iopNewStructDict(imm_array<int32_t> ids) {
 
 OPTBLD_INLINE void iopNewVec(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
-  auto const ad = PackedArray::MakeVec(n, vmStack().topC());
+  auto const ad = VanillaVec::MakeVec(n, vmStack().topC());
   vmStack().ndiscard(n);
   vmStack().pushVecNoRc(bespoke::maybeMakeLoggingArray(ad));
 }

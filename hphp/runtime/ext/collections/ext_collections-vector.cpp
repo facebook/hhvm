@@ -7,9 +7,9 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/zend/zend-math.h"
 
@@ -63,8 +63,8 @@ void copySlice(ArrayData* from, ArrayData* to,
   int64_t offset = from_pos - to_pos;
   int64_t to_end = to_pos + size;
   do {
-    auto from_elm = PackedArray::LvalUncheckedInt(from, to_pos + offset);
-    auto to_elm = PackedArray::LvalUncheckedInt(to, to_pos);
+    auto from_elm = VanillaVec::LvalUncheckedInt(from, to_pos + offset);
+    auto to_elm = VanillaVec::LvalUncheckedInt(to, to_pos);
     tvDup(*from_elm, to_elm);
   } while (++to_pos < to_end);
 }
@@ -153,13 +153,13 @@ bool BaseVector::OffsetContains(ObjectData* obj, const TypedValue* key) {
 bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto bv1 = static_cast<const BaseVector*>(obj1);
   auto bv2 = static_cast<const BaseVector*>(obj2);
-  return PackedArray::VecEqual(bv1->arrayData(), bv2->arrayData());
+  return VanillaVec::VecEqual(bv1->arrayData(), bv2->arrayData());
 }
 
 void BaseVector::addFront(TypedValue tv) {
   dropImmCopy();
   auto oldAd = arrayData();
-  setArrayData(PackedArray::Prepend(oldAd, tv));
+  setArrayData(VanillaVec::Prepend(oldAd, tv));
   if (arrayData() != oldAd) {
     decRefArr(oldAd);
   }
@@ -179,8 +179,8 @@ TypedValue BaseVector::removeKeyImpl(int64_t k) {
   mutate();
   const auto result = *lvalAt(k);
   if (k+1 < m_size) {
-    if constexpr (PackedArray::stores_typed_values) {
-      auto* data = PackedArray::entries(arrayData());
+    if constexpr (VanillaVec::stores_typed_values) {
+      auto* data = VanillaVec::entries(arrayData());
       size_t bytes = (m_size-(k+1)) * sizeof(TypedValue);
       std::memmove(&data[k], &data[k+1], bytes);
     } else {
@@ -196,13 +196,13 @@ TypedValue BaseVector::removeKeyImpl(int64_t k) {
 
 void BaseVector::reserveImpl(uint32_t newCap) {
   auto oldAd = arrayData();
-  auto const arr = PackedArray::MakeReserveVec(newCap);
+  auto const arr = VanillaVec::MakeReserveVec(newCap);
   setArrayData(arr);
   arr->m_size = m_size;
   if (LIKELY(!oldAd->cowCheck())) {
     assertx(oldAd->isVanillaVec());
     if (m_size > 0) {
-      const size_t bytes = PackedArray::capacityToSizeBytes(m_size);
+      const size_t bytes = VanillaVec::capacityToSizeBytes(m_size);
       std::memcpy(arrayData() + 1, oldAd + 1, bytes - sizeof(ArrayData));
       // Mark oldAd as having 0 elements so that the array release logic doesn't
       // decRef the elements (since we teleported the elements to a new array)
@@ -220,7 +220,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
 
 void BaseVector::reserve(uint32_t sz) {
   dropImmCopy();
-  if (sz > PackedArray::capacity(arrayData())) {
+  if (sz > VanillaVec::capacity(arrayData())) {
     reserveImpl(sz);
   } else if (!canMutateBuffer()) {
     mutateImpl();
@@ -235,12 +235,12 @@ void BaseVector::reserve(uint32_t sz) {
 BaseVector::~BaseVector() {
   // Avoid indirect call, as we know it is a vec array.
   auto const vec = arrayData();
-  if (vec->decReleaseCheck()) PackedArray::Release(vec);
+  if (vec->decReleaseCheck()) VanillaVec::Release(vec);
 }
 
 void BaseVector::mutateImpl() {
   auto oldAd = arrayData();
-  setArrayData(PackedArray::Copy(oldAd));
+  setArrayData(VanillaVec::Copy(oldAd));
   assertx(!oldAd->decWillRelease());
   oldAd->decRefCount();
 }
@@ -318,7 +318,7 @@ void c_Vector::resize(uint32_t sz, const TypedValue* val) {
     // keeping into a new vec, swap them, and decref the old one.
     dropImmCopy();
     auto oldAd = arrayData();
-    auto const arr = PackedArray::MakeReserveVec(sz);
+    auto const arr = VanillaVec::MakeReserveVec(sz);
     setArrayData(arr);
     copySlice(oldAd, arr, 0, 0, sz);
     arrayData()->m_size = m_size = sz;
@@ -352,7 +352,7 @@ void c_Vector::splice(int64_t startPos, int64_t endPos) {
   uint32_t sz = m_size - (endPos - startPos);
   dropImmCopy();
   auto oldAd = arrayData();
-  auto const arr = PackedArray::MakeReserveVec(sz);
+  auto const arr = VanillaVec::MakeReserveVec(sz);
   setArrayData(arr);
   if (startPos > 0) {
     copySlice(oldAd, arr, 0, 0, startPos);

@@ -91,7 +91,7 @@ inline bool isKSortFamily(SortFunction s) {
   return (uint8_t(s) & 6) == 0;
 }
 
-// Return true if result can be represented as a PackedArray
+// Return true if result can be represented as a VanillaVec
 inline bool supportedByPacked(SortFunction s) {
   // I put some static checking for encoding here.
   static_assert(SORTFUNC_USORT < 0, "");
@@ -106,7 +106,7 @@ inline bool supportedByPacked(SortFunction s) {
   static_assert(SORTFUNC_ARSORT == SORTFUNC_ASORT + 1, "");
 
   if (s == SORTFUNC_KSORT) {
-    return true;                        // ksort trivail for PackedArray
+    return true; // ksort is trivial for VanillaVecs
   }
   return isSortFamily(s);
 }

@@ -22,11 +22,11 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -177,8 +177,8 @@ protected:
 namespace detail {
 
 struct Vec {
-  static constexpr auto MakeReserve = &PackedArray::MakeReserveVec;
-  static constexpr auto Release = PackedArray::Release;
+  static constexpr auto MakeReserve = &VanillaVec::MakeReserveVec;
+  static constexpr auto Release = VanillaVec::Release;
 };
 
 struct Dict {
@@ -290,7 +290,7 @@ struct VecInit final : ArrayInitBase<detail::Vec, KindOfVec> {
 
   VecInit& append(TypedValue tv) {
     this->performOp([&]{
-      return PackedArray::AppendInPlace(m_arr, tvToInit(tv));
+      return VanillaVec::AppendInPlace(m_arr, tvToInit(tv));
     });
     return *this;
   }

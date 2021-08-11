@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/type-variant.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/collections.h"
@@ -30,9 +31,8 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
-#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
@@ -126,7 +126,7 @@ Variant Variant::fromDynamic(const folly::dynamic& dy) {
 namespace {
 
 void vecReleaseWrapper(ArrayData* ad) noexcept {
-  ad->isVanilla() ? PackedArray::Release(ad) : BespokeArray::Release(ad);
+  ad->isVanilla() ? VanillaVec::Release(ad) : BespokeArray::Release(ad);
 }
 
 void dictReleaseWrapper(ArrayData* ad) noexcept {
@@ -175,7 +175,7 @@ void specializeVanillaDestructors() {
     if (allowBespokeArrayLikes() && arrayTypeCouldBeBespoke(type)) return;
     g_destructors[typeToDestrIdx(type)] = (RawDestructor)destructor;
   };
-  specialize(KindOfVec,    &PackedArray::Release);
+  specialize(KindOfVec,    &VanillaVec::Release);
   specialize(KindOfDict,   &MixedArray::Release);
   specialize(KindOfKeyset, &SetArray::Release);
 }

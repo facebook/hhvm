@@ -1310,8 +1310,6 @@ struct RuntimeOption {
   F(uint32_t, PerfMemEventSampleFreq, 80)                               \
   /* Sampling frequency for TC branch profiling. */                     \
   F(uint32_t, ProfBranchSampleFreq, 0)                                  \
-  /* Sampling frequency for profiling packed array accesses. */         \
-  F(uint32_t, ProfPackedArraySampleFreq, 0)                             \
   F(bool, UseXedAssembler, false)                                       \
   /* Record the first N units loaded via StructuredLog::log()        */ \
   F(uint64_t, RecordFirstUnits, 0)                                      \

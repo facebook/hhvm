@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/strings.h"
@@ -34,6 +33,7 @@
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/system/systemlib.h"
@@ -186,7 +186,7 @@ inline TypedValue ElemEmptyish() {
  */
 template<MOpMode mode>
 inline TypedValue ElemVecPre(ArrayData* base, int64_t key) {
-  return PackedArray::NvGetInt(base, key);
+  return VanillaVec::NvGetInt(base, key);
 }
 
 template<MOpMode mode>
@@ -562,7 +562,7 @@ inline tv_lval ElemDBespoke(tv_lval base, key_type<keyType> key) {
  */
 inline tv_lval ElemDVecPre(tv_lval base, int64_t key) {
   auto const oldArr = base.val().parr;
-  auto const lval = PackedArray::LvalInt(oldArr, key);
+  auto const lval = VanillaVec::LvalInt(oldArr, key);
 
   if (lval.arr != oldArr) {
     base.type() = dt_with_rc(base.type());
@@ -859,21 +859,21 @@ inline tv_lval ElemUBespoke(tv_lval base, key_type<keyType> key) {
  */
 inline tv_lval ElemUVecPre(tv_lval base, int64_t key) {
   auto const oldArr = val(base).parr;
-  if (UNLIKELY(!PackedArray::ExistsInt(oldArr, key))) {
+  if (UNLIKELY(!VanillaVec::ExistsInt(oldArr, key))) {
     return ElemUEmptyish();
   }
 
   auto const newArr = [&]{
     if (!oldArr->cowCheck()) return oldArr;
     decRefArr(oldArr);
-    auto const newArr = PackedArray::Copy(oldArr);
+    auto const newArr = VanillaVec::Copy(oldArr);
     type(base) = dt_with_rc(type(base));
     val(base).parr = newArr;
     assertx(tvIsPlausible(*base));
     return newArr;
   }();
 
-  return PackedArray::LvalUncheckedInt(newArr, key);
+  return VanillaVec::LvalUncheckedInt(newArr, key);
 }
 
 inline tv_lval ElemUVecPre(tv_lval /*base*/, StringData* /*key*/) {
@@ -1322,7 +1322,7 @@ void arraySetUpdateBase(ArrayData* newData, tv_lval base) {
  */
 inline ArrayData* SetElemVecPre(ArrayData* a, int64_t key, TypedValue* value) {
   tvIncRefGen(*value);
-  return PackedArray::SetIntMove(a, key, *value);
+  return VanillaVec::SetIntMove(a, key, *value);
 }
 
 inline ArrayData*
@@ -1554,7 +1554,7 @@ inline void SetNewElemVec(tv_lval base, TypedValue* value) {
   assertx(tvIsVec(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto a2 = PackedArray::AppendMove(a, *value);
+  auto a2 = VanillaVec::AppendMove(a, *value);
   arraySetUpdateBase(a2, base);
 }
 
@@ -2010,7 +2010,7 @@ inline TypedValue IncDecNewElem(IncDecOp op, tv_lval base) {
  */
 
 inline ArrayData* UnsetElemVecPre(ArrayData* a, int64_t key) {
-  return PackedArray::RemoveIntMove(a, key);
+  return VanillaVec::RemoveIntMove(a, key);
 }
 
 inline ArrayData*

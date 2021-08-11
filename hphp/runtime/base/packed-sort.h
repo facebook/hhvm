@@ -17,11 +17,11 @@
 #ifndef incl_HPHP_PACKED_SORT_H_
 #define incl_HPHP_PACKED_SORT_H_
 
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-val.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 
 namespace HPHP {
 
@@ -90,7 +90,7 @@ struct PackedBlockIterator {
 
   reference operator*() const {
     assertx(0 <= m_index && m_index < m_arr->size());
-    return PackedBlockRef { PackedArray::LvalUncheckedInt(m_arr, m_index) };
+    return PackedBlockRef { VanillaVec::LvalUncheckedInt(m_arr, m_index) };
   }
 
   bool operator!=(const PackedBlockIterator& other) const {

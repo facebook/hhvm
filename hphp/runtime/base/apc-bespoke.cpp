@@ -60,7 +60,7 @@ const char* show(APCBespokeMode mode) {
 
 template <typename Array>
 ArrayData* GetEmptyArray(bool legacy) {
-  if constexpr (std::is_same<Array, PackedArray>::value) {
+  if constexpr (std::is_same<Array, VanillaVec>::value) {
     return ArrayData::CreateVec(legacy);
   }
   if constexpr (std::is_same<Array, MixedArray>::value) {
@@ -73,8 +73,8 @@ ArrayData* GetEmptyArray(bool legacy) {
 
 template <typename Array>
 tv_lval LvalAtIterPos(ArrayData* ad, ssize_t pos) {
-  if constexpr (std::is_same<Array, PackedArray>::value) {
-    return PackedArray::LvalUncheckedInt(ad, pos);
+  if constexpr (std::is_same<Array, VanillaVec>::value) {
+    return VanillaVec::LvalUncheckedInt(ad, pos);
   }
   if constexpr (std::is_same<Array, MixedArray>::value) {
     return &MixedArray::asMixed(ad)->data()[pos].data;
@@ -266,7 +266,7 @@ ArrayData* makeAPCBespoke(APCBespokeEnv& env, ArrayData* ain, bool hasApcTv) {
   }();
 
   if (vin->isVecType()) {
-    return implAPCBespoke<PackedArray, kVecHashSeed>(env, ain, vin, hasApcTv);
+    return implAPCBespoke<VanillaVec, kVecHashSeed>(env, ain, vin, hasApcTv);
   } else if (vin->isDictType()) {
     return implAPCBespoke<MixedArray, kDictHashSeed>(env, ain, vin, hasApcTv);
   } else if (vin->isKeysetType()) {

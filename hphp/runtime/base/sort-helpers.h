@@ -32,7 +32,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// For sorting PackedArray and Vector
+// For sorting VanillaVec and Vector
 struct TVAccessor {
   typedef const TypedValue& ElmT;
   bool isInt(ElmT elm) const { return elm.m_type == KindOfInt64; }

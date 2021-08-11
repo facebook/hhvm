@@ -23,11 +23,11 @@
 #include "hphp/runtime/base/bespoke-iter.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/vanilla-vec.h"
+#include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
 namespace HPHP {
@@ -236,9 +236,8 @@ private:
  * can do any necessary setup, and as with preCollFn can return true to bypass
  * any further work. Otherwise...
  *
- * The array is iterated efficiently (without ArrayIter for MixedArray,
- * PackedArray, and SetArray), and ArrFn is called for each element.
- * Otherwise...
+ * The array is iterated efficiently (without ArrayIter for vanilla arrays,
+ * or some bespoke arrays), and ArrFn is called for each element. Otherwise...
  *
  * If its an iterable object, the object is iterated using ArrayIter, and
  * objFn is called on each element. Otherwise...
@@ -260,7 +259,7 @@ template <typename ArrFn>
 void IterateV(const ArrayData* adata, ArrFn arrFn) {
   if (adata->empty()) return;
   if (adata->isVanillaVec()) {
-    PackedArray::IterateV(adata, arrFn);
+    VanillaVec::IterateV(adata, arrFn);
   } else if (adata->isVanillaDict()) {
     MixedArray::IterateV(MixedArray::asMixed(adata), arrFn);
   } else if (bespoke::IsStructDict(adata)) {
@@ -339,7 +338,7 @@ void IterateKV(const ArrayData* adata, ArrFn arrFn) {
   } else if (bespoke::IsStructDict(adata)) {
     bespoke::StructDictIterateKV(adata, arrFn);
   } else if (adata->isVanillaVec()) {
-    PackedArray::IterateKV(adata, arrFn);
+    VanillaVec::IterateKV(adata, arrFn);
   } else if (adata->isVanillaKeyset()) {
     auto fun = [&](TypedValue v) { return arrFn(v, v); };
     SetArray::Iterate(SetArray::asSet(adata), fun);

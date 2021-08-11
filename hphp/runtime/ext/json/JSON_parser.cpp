@@ -553,12 +553,12 @@ struct SimpleParser {
       if (container_type == JSONContainerType::HACK_ARRAYS) {
         return top == fp
           ? ArrayData::CreateVec()
-          : PackedArray::MakeVecNatural(top - fp, fp);
+          : VanillaVec::MakeVecNatural(top - fp, fp);
       }
       if (container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
         return top == fp
           ? ArrayData::CreateVec()
-          : PackedArray::MakeVecNatural(top - fp, fp);
+          : VanillaVec::MakeVecNatural(top - fp, fp);
       }
       assertx(container_type == JSONContainerType::DARRAYS);
       return top == fp

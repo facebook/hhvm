@@ -43,11 +43,20 @@ struct APCHandle;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * PackedArrays are a specialized array layout for vector-like data, used to
- * implement vecs and varrays. A PackedArray's values may have mixed types.
- * There are multiple layouts within PackedArray. See `stores_typed_values`.
+ * VanillaVec is the main array layout for vecs, backing a vector-like
+ * array with arbitrary values. We support two layouts for VanillaVec:
+ *
+ *  - If "stores_typed_values" is true, it's an array of TypedValue.
+ *    Each TypedValue takes up 16 bytes, due to alignment.
+ *
+ *  - Otherwise, it's stored as an array of PackedBlock "8-up" blocks.
+ *    Each block stores 8 types, then 8 values, in a total of 72 bytes.
+ *
+ * Using PackedBlock saves memory but increases the cost, in instructions,
+ * of accessing an array element: first we need to find the block, then
+ * the element with the block. Layout choice is a compile-time switch.
  */
-struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
+struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
   // Use the "8 type bytes / 8 value words" chunked layout.
   static constexpr bool stores_typed_values = false;
 
@@ -140,11 +149,9 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* MakeReserveVec(uint32_t capacity);
 
   /*
-   * Allocate a PackedArray containing `size' values, in the reverse order of
-   * the `values' array. This can only be used to populate the array with cells,
-   * not refs.
-   *
-   * This function takes ownership of the Cells in `values'.
+   * Allocate a VanillaVec containing `size' values, in the reverse order of
+   * the `values' array. This function takes ownership of the input `values',
+   * moving refcounts rather than doing refcounting ops.
    */
   static ArrayData* MakeVec(uint32_t size, const TypedValue* values);
 
@@ -171,7 +178,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   template <class F>
   static void IterateKV(const ArrayData* arr, F fn);
 
-  // Return a MixedArray with the same elements as this PackedArray.
+  // Return a MixedArray with the same elements as this VanillaVec..
   // The target type is based on the source: varray -> darray, vec -> dict.
   static MixedArray* ToMixed(ArrayData*);
   static MixedArray* ToMixedCopy(const ArrayData*);

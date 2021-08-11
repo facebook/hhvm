@@ -354,7 +354,7 @@ MonotypeVec* MonotypeVec::MakeFromVanilla(ArrayData* ad, DataType dt) {
     ? MakeReserve<true>(ad->isLegacyArray(), ad->size(), dt)
     : MakeReserve<false>(ad->isLegacyArray(), ad->size(), dt);
 
-  PackedArray::IterateV(ad, [&](auto v) {
+  VanillaVec::IterateV(ad, [&](auto v) {
     auto const next = AppendMove(result, v);
     tvIncRefGen(v);
     assertx(result == next);
@@ -439,19 +439,19 @@ MonotypeVec* MonotypeVec::prepareForInsert() {
 }
 
 /*
- * Escalates the MonotypeVec to a vanilla PackedArray with the contents of the
- * current array and the specified capacity. The new array will match the
- * MonotypeVec in size, contents, and legacy bit status.
+ * Escalates the MonotypeVec to a VanillaVec with the contents of the current
+ * array and the specified capacity. The new array will match the MonotypeVec
+ * in size, contents, and legacy bit status.
  */
 ArrayData* MonotypeVec::escalateWithCapacity(
     size_t capacity, const char* reason) const {
   assertx(capacity >= size());
   logEscalateToVanilla(this, reason);
 
-  auto const ad = PackedArray::MakeReserveVec(capacity);
+  auto const ad = VanillaVec::MakeReserveVec(capacity);
   for (uint32_t i = 0; i < size(); i++) {
     auto const tv = typedValueUnchecked(i);
-    tvCopy(tv, PackedArray::LvalUncheckedInt(ad, i));
+    tvCopy(tv, VanillaVec::LvalUncheckedInt(ad, i));
     tvIncRefGen(tv);
   }
   ad->setLegacyArrayInPlace(isLegacyArray());
@@ -688,7 +688,7 @@ ArrayData* MonotypeVec::appendImpl(TypedValue v) {
   auto const dt = type();
   if (dt != kExtraInvalidDataType && !equivDataTypes(dt, v.type())) {
     auto const ad = escalateWithCapacity(size() + 1, __func__);
-    auto const result = PackedArray::AppendMove(ad, v);
+    auto const result = VanillaVec::AppendMove(ad, v);
     assertx(ad == result);
     return result;
   }
@@ -735,7 +735,7 @@ ArrayData* MonotypeVec::PreSort(MonotypeVec* mad, SortFunction sf) {
 
 ArrayData* MonotypeVec::PostSort(MonotypeVec* mad, ArrayData* vad) {
   auto const result = MakeFromVanilla(vad, mad->type());
-  PackedArray::Release(vad);
+  VanillaVec::Release(vad);
   return result;
 }
 

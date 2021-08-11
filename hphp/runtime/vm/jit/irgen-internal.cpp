@@ -37,7 +37,7 @@ SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth) {
   assertx(clsMeth->isA(TClsMeth));
   auto const cls = gen(env, LdClsName, gen(env, LdClsFromClsMeth, clsMeth));
   auto const func = gen(env, LdFuncName, gen(env, LdFuncFromClsMeth, clsMeth));
-  auto vec = gen(env, AllocVec, PackedArrayData { 2 });
+  auto vec = gen(env, AllocVec, VanillaVecData { 2 });
   gen(env, InitVecElem, IndexData { 0 }, vec, cls);
   gen(env, InitVecElem, IndexData { 1 }, vec, func);
   return vec;

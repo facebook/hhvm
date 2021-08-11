@@ -23,8 +23,8 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/set-array.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 
 namespace HPHP {
 

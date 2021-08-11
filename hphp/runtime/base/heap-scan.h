@@ -22,13 +22,13 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/base/vanilla-vec.h"
+#include "hphp/runtime/base/vanilla-vec-defs.h"
 
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
@@ -107,7 +107,7 @@ inline void scanMemoSlots(const ObjectData* obj,
 inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
   switch (h->kind()) {
     case HeaderKind::Vec:
-      return PackedArray::scan(static_cast<const ArrayData*>(h), scanner);
+      return VanillaVec::scan(static_cast<const ArrayData*>(h), scanner);
     case HeaderKind::Dict:
       return static_cast<const MixedArray*>(h)->scan(scanner);
     case HeaderKind::Keyset:
@@ -171,13 +171,13 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       return;
     case HeaderKind::RClsMeth: {
       auto const rclsmeth = static_cast<const RClsMethData*>(h);
-      return PackedArray::scan(rclsmeth->m_arr, scanner);
+      return VanillaVec::scan(rclsmeth->m_arr, scanner);
     }
     case HeaderKind::Record:
       return static_cast<const RecordData*>(h)->scan(scanner);
     case HeaderKind::RFunc: {
       auto const rfunc = static_cast<const RFuncData*>(h);
-      return PackedArray::scan(rfunc->m_arr, scanner);
+      return VanillaVec::scan(rfunc->m_arr, scanner);
     }
     case HeaderKind::Cpp:
     case HeaderKind::SmallMalloc:

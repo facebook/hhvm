@@ -24,13 +24,13 @@
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
+#include "hphp/runtime/base/vanilla-vec.h"
+#include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -3328,7 +3328,7 @@ SSATmp* simplifyLdVecElem(State& env, const IRInstruction* inst) {
     auto const arr = src0->arrLikeVal();
     auto const idx = src1->intVal();
     assertx(arr->isVanillaVec());
-    auto const tv = PackedArray::NvGetInt(arr, idx);
+    auto const tv = VanillaVec::NvGetInt(arr, idx);
     return tv.is_init() ? cns(env, tv) : nullptr;
   }
   return nullptr;

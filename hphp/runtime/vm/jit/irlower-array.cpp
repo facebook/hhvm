@@ -23,14 +23,14 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/record-data.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-vec.h"
+#include "hphp/runtime/base/vanilla-vec-defs.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
@@ -244,8 +244,8 @@ void cgNewDictArray(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgAllocVec(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<PackedArrayData>();
-  auto const target = CallSpec::direct(PackedArray::MakeUninitializedVec);
+  auto const extra = inst->extra<VanillaVecData>();
+  auto const target = CallSpec::direct(VanillaVec::MakeUninitializedVec);
   cgCallHelper(vmain(env), env, target, callDest(env, inst),
                SyncOptions::None, argGroup(env, inst).imm(extra->size));
 }
@@ -324,7 +324,7 @@ void cgInitVecElem(IRLS& env, const IRInstruction* inst) {
   auto const arr = srcLoc(env, inst, 0).reg();
   auto const index = inst->extra<InitVecElem>()->index;
   auto const type = inst->src(1)->type();
-  auto const offset = PackedArray::entryOffset(index);
+  auto const offset = VanillaVec::entryOffset(index);
   storeTV(vmain(env), type, srcLoc(env, inst, 1),
           arr[offset.type_offset], arr[offset.data_offset]);
 }
@@ -352,12 +352,12 @@ void cgInitVecElemLoop(IRLS& env, const IRInstruction* inst) {
       auto const i2 = out[0], j2 = out[1];
       auto const sf = v.makeReg();
 
-      if constexpr (PackedArray::stores_typed_values) {
+      if constexpr (VanillaVec::stores_typed_values) {
         // Load the value from the stack and store into the array.  It's safe
-        // to copy all 16 bytes of the TV because PackedArrays don't use m_aux.
+        // to copy all 16 bytes of the TV because VanillaVecs don't use m_aux.
         auto const value = v.makeReg();
         v << loadups{sp[j1 * 8], value};
-        v << storeups{value, arr[i1 * 8] + PackedArray::entriesOffset()};
+        v << storeups{value, arr[i1 * 8] + VanillaVec::entriesOffset()};
         v << lea{i1[2], i2};
       } else {
         // See PackedBlock::LvalAt for an explanation of this math.
@@ -365,8 +365,8 @@ void cgInitVecElemLoop(IRLS& env, const IRInstruction* inst) {
         auto const a = v.makeReg();
         auto const b = v.makeReg();
         v << andqi{-8, i1, x, v.makeReg()};
-        v << lea{arr[x  * 8] + PackedArray::entriesOffset(), a};
-        v << lea{arr[i1 * 8] + PackedArray::entriesOffset(), b};
+        v << lea{arr[x  * 8] + VanillaVec::entriesOffset(), a};
+        v << lea{arr[i1 * 8] + VanillaVec::entriesOffset(), b};
 
         auto const data = v.makeReg();
         auto const type = v.makeReg();

@@ -22,8 +22,8 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/rclass-meth-data.h"
@@ -47,7 +47,7 @@ bool vecSameHelper(const ArrayData* ad1, const ArrayData* ad2) {
   assertx(ad1->isVecType());
   assertx(ad2->isVecType());
   return ArrayData::bothVanilla(ad1, ad2)
-    ? PackedArray::VecSame(ad1, ad2)
+    ? VanillaVec::VecSame(ad1, ad2)
     : ArrayData::Same(ad1, ad2);
 }
 
@@ -160,7 +160,7 @@ struct Eq {
     if constexpr (std::is_same_v<U, ArrayData*>) {
       if (t1->toDataType() != t2->toDataType()) return false;
       switch (t1->toDataType()) {
-        case KindOfVec:    return arrImpl<PackedArray::VecEqual>(t1, t2);
+        case KindOfVec:    return arrImpl<VanillaVec::VecEqual>(t1, t2);
         case KindOfDict:   return arrImpl<MixedArray::DictEqual>(t1, t2);
         case KindOfKeyset: return arrImpl<SetArray::Equal>(t1, t2);
         default: always_assert(false);

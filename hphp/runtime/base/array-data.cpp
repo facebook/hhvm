@@ -28,10 +28,10 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/interp-helpers.h"
@@ -267,7 +267,7 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
               "add new kinds here");
 
 #define DISPATCH(entry)                           \
-  { PackedArray::entry,      /* vanilla vec */    \
+  { VanillaVec::entry,       /* vanilla vec */    \
     BespokeArray::entry,     /* bespoke vec */    \
     MixedArray::entry,       /* vanilla dict */   \
     BespokeArray::entry,     /* bespoke dict */   \
@@ -712,7 +712,7 @@ bool ArrayData::same(const ArrayData* v2) const {
   if (toDataType() != v2->toDataType()) return false;
 
   if (!bothVanilla(this, v2)) return Same(this, v2);
-  if (isVanillaVec())  return PackedArray::VecSame(this, v2);
+  if (isVanillaVec())  return VanillaVec::VecSame(this, v2);
   if (isVanillaDict()) return MixedArray::DictSame(this, v2);
   return SetArray::Same(this, v2);
 }
@@ -900,7 +900,7 @@ ArrayData* ArrayData::setLegacyArray(bool copy, bool legacy) {
 
   auto const ad = [&]{
     if (!copy) return this;
-    return isVanillaVec() ? PackedArray::Copy(this) : MixedArray::Copy(this);
+    return isVanillaVec() ? VanillaVec::Copy(this) : MixedArray::Copy(this);
   }();
   ad->setLegacyArrayInPlace(legacy);
   return ad;

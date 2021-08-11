@@ -1354,7 +1354,7 @@ Array VariableUnserializer::unserializeVec() {
     expectChar('}');
     return Array::attach(staticEmptyVec());
   }
-  auto const sizeClass = PackedArray::capacityToSizeIndex(size);
+  auto const sizeClass = VanillaVec::capacityToSizeIndex(size);
   auto const allocsz = MemoryManager::sizeIndex2Size(sizeClass);
 
   // For large arrays, do a naive pre-check for OOM.
@@ -1366,7 +1366,7 @@ Array VariableUnserializer::unserializeVec() {
   reserveForAdd(size);
 
   for (int64_t i = 0; i < size; i++) {
-    unserializeVariant(PackedArray::LvalNewInPlace(arr.get()));
+    unserializeVariant(VanillaVec::LvalNewInPlace(arr.get()));
     if (i < size - 1) checkElemTermination();
   }
   check_non_safepoint_surprise();
@@ -1412,14 +1412,14 @@ Array VariableUnserializer::unserializeVArray() {
     }
   } else {
     // Deserialize to varray. Use direct calls to MixedArray.
-    auto const index = PackedArray::capacityToSizeIndex(size);
+    auto const index = VanillaVec::capacityToSizeIndex(size);
     oomCheck(MemoryManager::sizeIndex2Size(index));
 
     arr = VecInit(size).toArray();
     reserveForAdd(size);
 
     for (int64_t i = 0; i < size; i++) {
-      unserializeVariant(PackedArray::LvalNewInPlace(arr.get()));
+      unserializeVariant(VanillaVec::LvalNewInPlace(arr.get()));
       if (i < size - 1) checkElemTermination();
     }
   }
@@ -1561,7 +1561,7 @@ void VariableUnserializer::unserializeVector(ObjectData* obj, int64_t sz,
                                              char type) {
   if (type != 'V') throwBadFormat(obj, type);
 
-  auto const sizeClass = PackedArray::capacityToSizeIndex(sz);
+  auto const sizeClass = VanillaVec::capacityToSizeIndex(sz);
   auto const allocsz = MemoryManager::sizeIndex2Size(sizeClass);
   // For large vectors, do a naive pre-check for OOM.
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {

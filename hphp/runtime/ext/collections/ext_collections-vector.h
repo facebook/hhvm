@@ -3,9 +3,9 @@
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-val.h"
+#include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
@@ -45,7 +45,7 @@ protected:
     : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
     , m_unusedAndSize(0)
   {
-    setArrayData(PackedArray::MakeReserveVec(cap));
+    setArrayData(VanillaVec::MakeReserveVec(cap));
   }
   ~BaseVector();
 
@@ -60,13 +60,13 @@ public:
 
   void setSize(uint32_t sz) {
     assertx(canMutateBuffer());
-    assertx(sz <= PackedArray::capacity(arrayData()));
+    assertx(sz <= VanillaVec::capacity(arrayData()));
     m_size = sz;
     arrayData()->m_size = sz;
   }
   void incSize() {
     assertx(canMutateBuffer());
-    assertx(m_size < PackedArray::capacity(arrayData()));
+    assertx(m_size < VanillaVec::capacity(arrayData()));
     ++m_size;
     arrayData()->m_size = m_size;
   }
@@ -266,7 +266,7 @@ protected:
 
   // Get a (mutable or const) ref to the value. `index` must be a valid index.
   tv_lval lvalAt(int64_t index) {
-    return PackedArray::LvalUncheckedInt(arrayData(), index);
+    return VanillaVec::LvalUncheckedInt(arrayData(), index);
   }
   tv_rval rvalAt(int64_t index) const {
     return const_cast<BaseVector*>(this)->lvalAt(index);
@@ -284,13 +284,13 @@ protected:
     auto oldAd = arrayData();
     if (raw) {
       assertx(canMutateBuffer());
-      setArrayData(PackedArray::AppendInPlace(oldAd, tv));
+      setArrayData(VanillaVec::AppendInPlace(oldAd, tv));
       if (arrayData() != oldAd) {
         decRefArr(oldAd);
       }
     } else {
       dropImmCopy();
-      setArrayData(PackedArray::AppendMove(oldAd, tv));
+      setArrayData(VanillaVec::AppendMove(oldAd, tv));
       tvIncRefGen(tv);
     }
     m_size = arrayData()->m_size;
@@ -393,7 +393,7 @@ struct c_Vector : BaseVector {
   struct SortTmp {
     SortTmp(c_Vector* v, SortFunction sf) : m_v(v) {
       if (hasUserDefinedCmp(sf)) {
-        m_ad = PackedArray::Copy(m_v->arrayData());
+        m_ad = VanillaVec::Copy(m_v->arrayData());
       } else {
         m_v->mutate();
         m_ad = m_v->arrayData();

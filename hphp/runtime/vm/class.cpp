@@ -1555,7 +1555,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
    * during recursive resolution. This array is never exposed to the rest of
    * the runtime, so we can test for it by pointer equality.
    */
-  static auto const s_sentinelVec = PackedArray::CopyStatic(staticEmptyVec());
+  static auto const s_sentinelVec = VanillaVec::CopyStatic(staticEmptyVec());
   assertx(s_sentinelVec != staticEmptyVec());
 
   /*

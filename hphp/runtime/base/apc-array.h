@@ -18,8 +18,8 @@
 
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/hash.h"
@@ -67,9 +67,9 @@ struct APCArray {
     return reinterpret_cast<const APCArray*>(handle);
   }
 
-  ArrayData* toLocalVec() const { return PackedArray::MakeVecFromAPC(this); }
+  ArrayData* toLocalVec() const { return VanillaVec::MakeVecFromAPC(this); }
   ArrayData* toLocalLegacyVec() const {
-    return PackedArray::MakeVecFromAPC(this, /*isLegacy=*/true);
+    return VanillaVec::MakeVecFromAPC(this, /*isLegacy=*/true);
   }
   ArrayData* toLocalDict() const { return MixedArray::MakeDictFromAPC(this); }
   ArrayData* toLocalLegacyDict() const {

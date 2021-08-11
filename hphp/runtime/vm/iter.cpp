@@ -22,12 +22,12 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/packed-array-defs.h"
+#include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/base/bespoke/struct-dict.h"
@@ -131,7 +131,7 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   DEBUG_ONLY auto const arr = ad ? ad : m_data;
 
   // Check that array's vtable index is compatible with the array's layout.
-  if (m_nextHelperIdx == IterNextIndex::ArrayPacked) {
+  if (m_nextHelperIdx == IterNextIndex::VanillaVec) {
     assertx(arr->isVanillaVec());
   } else if (m_nextHelperIdx == IterNextIndex::ArrayMixed) {
     assertx(arr->isVanillaDict());
@@ -414,7 +414,7 @@ NEVER_INLINE void clearOutputLocal(TypedValue* local) {
 // These methods all return false (= 0) to signify that iteration is over.
 
 NEVER_INLINE int64_t iter_next_free_packed(Iter* iter, ArrayData* arr) {
-  PackedArray::Release(arr);
+  VanillaVec::Release(arr);
   iter->kill();
   return 0;
 }
@@ -506,8 +506,8 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   if (LIKELY(ad->isVanillaVec())) {
     aiter.m_pos = 0;
     aiter.m_end = size;
-    aiter.setArrayNext(IterNextIndex::ArrayPacked);
-    tvDup(PackedArray::GetPosVal(ad, 0), *valOut);
+    aiter.setArrayNext(IterNextIndex::VanillaVec);
+    tvDup(VanillaVec::GetPosVal(ad, 0), *valOut);
     return 1;
   }
 
@@ -586,8 +586,8 @@ int64_t new_iter_array_key(Iter*       dest,
   if (ad->isVanillaVec()) {
     aiter.m_pos = 0;
     aiter.m_end = size;
-    aiter.setArrayNext(IterNextIndex::ArrayPacked);
-    tvDup(PackedArray::GetPosVal(ad, 0), *valOut);
+    aiter.setArrayNext(IterNextIndex::VanillaVec);
+    tvDup(VanillaVec::GetPosVal(ad, 0), *valOut);
     tvCopy(make_tv<KindOfInt64>(0), *keyOut);
     return 1;
   }
@@ -832,7 +832,7 @@ int64_t iter_next_mixed_pointer(Iter* it, TypedValue* valOut,
 
 namespace {
 
-// "virtual" method implementation of *IterNext* for ArrayPacked iterators.
+// "virtual" method implementation of *IterNext* for VanillaVec iterators.
 // Since we know the array is packed, we just need to increment the position
 // and do a bounds check. The key is the position; for the value, we index.
 //
@@ -845,7 +845,7 @@ template<bool HasKey, bool Local>
 int64_t iter_next_packed_impl(Iter* it, TypedValue* valOut,
                               TypedValue* keyOut, ArrayData* ad) {
   auto& iter = *unwrap(it);
-  assertx(PackedArray::checkInvariants(ad));
+  assertx(VanillaVec::checkInvariants(ad));
 
   ssize_t pos = iter.getPos() + 1;
   if (UNLIKELY(pos == iter.getEnd())) {
@@ -857,7 +857,7 @@ int64_t iter_next_packed_impl(Iter* it, TypedValue* valOut,
   }
 
   iter.setPos(pos);
-  setOutputLocal(PackedArray::GetPosVal(ad, pos), valOut);
+  setOutputLocal(VanillaVec::GetPosVal(ad, pos), valOut);
   if constexpr (HasKey) setOutputLocal(make_tv<KindOfInt64>(pos), keyOut);
   return 1;
 }
@@ -961,7 +961,7 @@ int64_t literNextKObject(Iter*, TypedValue*, TypedValue*, ArrayData*) {
 }
 
 /*
- * This macro takes a name (e.g. ArrayPacked) and a helper that's templated
+ * This macro takes a name (e.g. VanillaVec) and a helper that's templated
  * on <bool HasKey, bool Local> (e.g. iter_next_packed_impl) and produces the
  * four helpers that we'll call from the iter_next dispatch methods below.
  */
@@ -987,7 +987,7 @@ int64_t literNextKObject(Iter*, TypedValue*, TypedValue*, ArrayData*) {
     return fn<true, true>(it, valOut, keyOut, ad);                       \
   }                                                                      \
 
-VTABLE_METHODS(ArrayPacked,        iter_next_packed_impl);
+VTABLE_METHODS(VanillaVec,         iter_next_packed_impl);
 VTABLE_METHODS(ArrayMixed,         iter_next_mixed_impl);
 VTABLE_METHODS(ArrayMixedPointer,  iter_next_mixed_pointer);
 VTABLE_METHODS(StructDict,         iter_next_struct_dict);
@@ -1000,7 +1000,7 @@ using LIterNextHelper  = int64_t (*)(Iter*, TypedValue*, ArrayData*);
 using LIterNextKHelper = int64_t (*)(Iter*, TypedValue*, TypedValue*, ArrayData*);
 
 const IterNextHelper g_iterNextHelpers[] = {
-  &iterNextArrayPacked,
+  &iterNextVanillaVec,
   &iterNextArrayMixed,
   &iterNextArray,
   &iterNextObject,
@@ -1009,7 +1009,7 @@ const IterNextHelper g_iterNextHelpers[] = {
 };
 
 const IterNextKHelper g_iterNextKHelpers[] = {
-  &iterNextKArrayPacked,
+  &iterNextKVanillaVec,
   &iterNextKArrayMixed,
   &iterNextKArray,
   &iter_next_cold, // iterNextKObject
@@ -1018,7 +1018,7 @@ const IterNextKHelper g_iterNextKHelpers[] = {
 };
 
 const LIterNextHelper g_literNextHelpers[] = {
-  &literNextArrayPacked,
+  &literNextVanillaVec,
   &literNextArrayMixed,
   &literNextArray,
   &literNextObject,
@@ -1027,7 +1027,7 @@ const LIterNextHelper g_literNextHelpers[] = {
 };
 
 const LIterNextKHelper g_literNextKHelpers[] = {
-  &literNextKArrayPacked,
+  &literNextKVanillaVec,
   &literNextKArrayMixed,
   &literNextKArray,
   &literNextKObject,

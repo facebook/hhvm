@@ -67,7 +67,7 @@ namespace {
 Array makeReserveLike(DataType type, size_t size) {
   auto const ad = [&]{
     switch (dt_with_rc(type)) {
-      case KindOfVec:    return PackedArray::MakeReserveVec(size);
+      case KindOfVec:    return VanillaVec::MakeReserveVec(size);
       case KindOfDict:   return MixedArray::MakeReserveDict(size);
       case KindOfKeyset: return SetArray::MakeReserveSet(size);
       default:           always_assert(false);

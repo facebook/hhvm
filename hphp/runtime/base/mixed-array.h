@@ -223,7 +223,7 @@ public:
 
 public:
   /*
-   * Same semantics as PackedArray::MakeNatural().
+   * Same semantics as VanillaVec::MakeNatural().
    */
   static MixedArray* MakeDictNatural(uint32_t size, const TypedValue* vals);
 
@@ -371,7 +371,7 @@ public:
 private:
   friend struct array::HashTable<MixedArray, MixedArrayElm>;
   friend struct MemoryProfile;
-  friend struct PackedArray;
+  friend struct VanillaVec;
   friend struct HashCollection;
   friend struct BaseMap;
   friend struct c_Map;

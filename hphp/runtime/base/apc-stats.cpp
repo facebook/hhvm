@@ -19,14 +19,14 @@
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-rclass-meth.h"
 #include "hphp/runtime/base/apc-rfunc.h"
+#include "hphp/runtime/base/vanilla-vec.h"
+#include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 #include "hphp/util/trace.h"
@@ -178,9 +178,9 @@ size_t getMemSize(const APCRClsMeth* rclsmeth) {
 size_t getMemSize(const ArrayData* arr, bool recurse) {
   switch (arr->kind()) {
   case ArrayData::ArrayKind::kVecKind: {
-    auto size = PackedArray::heapSize(arr);
+    auto size = VanillaVec::heapSize(arr);
     for (uint32_t i = 0; i < arr->m_size; ++i) {
-      auto const tv = PackedArray::NvGetInt(arr, i);
+      auto const tv = VanillaVec::NvGetInt(arr, i);
       size += getIndirectMemSize(&tv);
     }
     return size;

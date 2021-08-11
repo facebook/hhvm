@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
@@ -36,6 +35,7 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/zend-functions.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
@@ -97,7 +97,7 @@ void setNewElemDict(tv_lval base, TypedValue val) {
 ArrayData* addNewElemVec(ArrayData* vec, TypedValue v) {
   assertx(vec->isVanillaVec());
   tvIncRefGen(v);
-  return PackedArray::AppendMove(vec, v);
+  return VanillaVec::AppendMove(vec, v);
 }
 
 ArrayData* addNewElemKeyset(ArrayData* keyset, TypedValue v) {
@@ -409,7 +409,7 @@ TypedValue vecFirstLast(ArrayData* a) {
   assertx(a->isVanillaVec());
   auto const size = a->size();
   if (UNLIKELY(size == 0)) return make_tv<KindOfNull>();
-  return PackedArray::NvGetInt(a, isFirst ? 0 : size - 1);
+  return VanillaVec::NvGetInt(a, isFirst ? 0 : size - 1);
 }
 
 template TypedValue vecFirstLast<true>(ArrayData*);

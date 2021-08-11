@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/irgen-create.h"
 
-#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
@@ -389,12 +389,12 @@ void emitNewKeysetArray(IRGS& env, uint32_t numArgs) {
 }
 
 void emitNewVec(IRGS& env, uint32_t numArgs) {
-  auto const array = gen(env, AllocVec, PackedArrayData { numArgs });
+  auto const array = gen(env, AllocVec, VanillaVecData { numArgs });
   if (numArgs > RuntimeOption::EvalHHIRMaxInlineInitPackedElements) {
     gen(
       env,
       InitVecElemLoop,
-      InitPackedArrayLoopData {
+      InitVanillaVecLoopData {
         spOffBCFromIRSP(env),
         numArgs
       },

@@ -207,7 +207,7 @@ int32_t iteratorType(const IterTypeData& data) {
     }
     switch (data.type.base_type) {
       case S::Vec: {
-        return IterNextIndex::ArrayPacked;
+        return IterNextIndex::VanillaVec;
       }
       case S::Dict: {
         return data.type.base_const

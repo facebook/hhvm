@@ -27,7 +27,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {
@@ -177,7 +177,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
   if (!ad->isVanilla()) return c_AwaitAllWaitHandle::fromArrLike(ad);
   assertx(ad->isVanillaVec());
   return c_AwaitAllWaitHandle::Create([=](auto fn) {
-    PackedArray::IterateV(ad, fn);
+    VanillaVec::IterateV(ad, fn);
   });
 }
 
@@ -217,7 +217,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
       assertx(collections::isType(obj->getVMClass(), CollectionType::Vector,
                                                   CollectionType::ImmVector));
       return c_AwaitAllWaitHandle::Create([=](auto fn) {
-        PackedArray::IterateV(static_cast<BaseVector*>(obj)->arrayData(), fn);
+        VanillaVec::IterateV(static_cast<BaseVector*>(obj)->arrayData(), fn);
       });
     }
   }

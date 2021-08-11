@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
-#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/util/arch.h"
 
@@ -59,7 +59,7 @@ bool loadsCell(const IRInstruction& inst) {
     return arch_allows && inst.src(0)->isA(TPtrToCell);
 
   case LdVecElem:
-    return arch_allows && PackedArray::stores_typed_values;
+    return arch_allows && VanillaVec::stores_typed_values;
 
   case LdStk:
   case LdLoc:
@@ -114,7 +114,7 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   case StClsInitElem:
     return srcIdx == 1;
   case InitVecElem:
-    return srcIdx == 1 && PackedArray::stores_typed_values;
+    return srcIdx == 1 && VanillaVec::stores_typed_values;
   case StMem:
     return srcIdx == 1 && inst.src(0)->isA(TPtrToCell);
   default:

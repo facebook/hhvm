@@ -19,11 +19,11 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/str-key-table.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-vec.h"
+#include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -756,15 +756,15 @@ LvalPtrs implPackedLayoutElemAddr(IRLS& env, Vloc arrLoc,
   static_assert(TVOFF(m_data) == 0, "");
 
   if (idx->hasConstVal()) {
-    auto const offset = PackedArray::entryOffset(idx->intVal());
+    auto const offset = VanillaVec::entryOffset(idx->intVal());
     if (deltaFits(offset.type_offset, sz::dword) &&
         deltaFits(offset.data_offset, sz::dword)) {
       return {rarr[offset.type_offset], rarr[offset.data_offset]};
     }
   }
 
-  if constexpr (PackedArray::stores_typed_values) {
-    // Compute `rarr + ridx * sizeof(TypedValue) + PackedArray::entriesOffset().
+  if constexpr (VanillaVec::stores_typed_values) {
+    // Compute `rarr + ridx * sizeof(TypedValue) + VanillaVec::entriesOffset().
     //
     // The logic of `scaledIdx * 16` is split in the following two instructions,
     // in order to save a byte in the shl instruction.
@@ -778,7 +778,7 @@ LvalPtrs implPackedLayoutElemAddr(IRLS& env, Vloc arrLoc,
     v << movzlq{scaled_idxl, scaled_idx};
 
     auto const valPtr = rarr[
-      scaled_idx * int(sizeof(TypedValue) / 2) + PackedArray::entriesOffset()
+      scaled_idx * int(sizeof(TypedValue) / 2) + VanillaVec::entriesOffset()
     ];
     return {valPtr + TVOFF(m_type), valPtr};
   } else {
@@ -787,14 +787,14 @@ LvalPtrs implPackedLayoutElemAddr(IRLS& env, Vloc arrLoc,
     auto const a = v.makeReg();
     auto const b = v.makeReg();
     v << andqi{-8, ridx, x, v.makeReg()};
-    v << lea{rarr[x    * 8] + PackedArray::entriesOffset(), a};
-    v << lea{rarr[ridx * 8] + PackedArray::entriesOffset(), b};
+    v << lea{rarr[x    * 8] + VanillaVec::entriesOffset(), a};
+    v << lea{rarr[ridx * 8] + VanillaVec::entriesOffset(), b};
     return {a[ridx], b[x] + 8};
   }
 }
 
 void implVecSet(IRLS& env, const IRInstruction* inst) {
-  auto const target = CallSpec::direct(PackedArray::SetIntMove);
+  auto const target = CallSpec::direct(VanillaVec::SetIntMove);
   auto const args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
 
   auto& v = vmain(env);
@@ -806,23 +806,6 @@ void implVecSet(IRLS& env, const IRInstruction* inst) {
  */
 rds::Link<uint32_t, rds::Mode::Local> s_counter;
 
-}
-
-void record_packed_access(const ArrayData* ad) {
-  assertx(s_counter.bound());
-  *s_counter = RuntimeOption::EvalProfPackedArraySampleFreq;
-
-  auto record = StructuredLogEntry{};
-  record.setInt("size", ad->size());
-
-  auto const st = StackTrace(StackTrace::Force{});
-  auto frames = std::vector<folly::StringPiece>{};
-  folly::split("\n", st.toString(), frames);
-  record.setVec("stacktrace", frames);
-
-  FTRACE_MOD(Trace::prof_array, 1,
-             "prof_array: {}\n", show(record).c_str());
-  StructuredLog::log("hhvm_arrays", record);
 }
 
 void cgLdVecElemAddr(IRLS& env, const IRInstruction* inst) {
@@ -869,12 +852,12 @@ void cgReserveVecNewElem(IRLS& env, const IRInstruction* i) {
 
   { // Bail out unless size < cap
     auto const indexb = v.makeReg();
-    v << loadb{arrayData[PackedArray::SizeIndexOffset], indexb};
+    v << loadb{arrayData[VanillaVec::SizeIndexOffset], indexb};
     auto const index = v.makeReg();
     v << movzbq{indexb, index};
     auto const cap = v.makeReg();
     auto const table =
-      reinterpret_cast<uintptr_t>(kSizeIndex2PackedArrayCapacity);
+      reinterpret_cast<uintptr_t>(kSizeIndex2VanillaVecCapacity);
     if (table < std::numeric_limits<int>::max()) {
       v << loadzlq{baseless(index * 4 + table), cap};
     } else {

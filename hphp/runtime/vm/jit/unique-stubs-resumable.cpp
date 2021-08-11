@@ -18,8 +18,8 @@
 
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -523,7 +523,7 @@ TCA emitAsyncGenYieldR(CodeBlock& cb, DataBlock& data, TCA asyncGenRetYieldR) {
       // Not enough callee saved regs for both $k and $v, save $v on the stack.
       PhysRegSaver prs{v, rarg(2) | rarg(3)};
       v << vcall{
-        CallSpec::direct(PackedArray::MakeUninitializedVec),
+        CallSpec::direct(VanillaVec::MakeUninitializedVec),
         v.makeVcallArgs({{v.cns(2)}}),
         v.makeTuple({vec}),
         Fixup::none(),
@@ -531,8 +531,8 @@ TCA emitAsyncGenYieldR(CodeBlock& cb, DataBlock& data, TCA asyncGenRetYieldR) {
       };
     }
 
-    auto const keyOffset = PackedArray::entryOffset(0);
-    auto const valueOffset = PackedArray::entryOffset(1);
+    auto const keyOffset = VanillaVec::entryOffset(0);
+    auto const valueOffset = VanillaVec::entryOffset(1);
     v << store{keyData, vec[keyOffset.data_offset]};
     v << storeb{keyType, vec[keyOffset.type_offset]};
     v << store{rarg(2), vec[valueOffset.data_offset]};

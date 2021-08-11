@@ -18,8 +18,8 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
-#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/named-entity.h"

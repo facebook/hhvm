@@ -18,8 +18,8 @@
 
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/vanilla-vec-defs.h"
 
 #include "hphp/runtime/vm/class-meth-data.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -344,7 +344,7 @@ inline size_t allocSize(const HeapObject* h) {
   switch (kind) {
     case HeaderKind::Vec:
       // size = kSizeIndex2Size[h->aux16>>8]
-      size = PackedArray::heapSize(static_cast<const ArrayData*>(h));
+      size = VanillaVec::heapSize(static_cast<const ArrayData*>(h));
       assertx(size == MemoryManager::sizeClass(size));
       return size;
     case HeaderKind::Dict:

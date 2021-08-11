@@ -47,7 +47,7 @@
 #include <utility>
 
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/packed-array-defs.h"
+#include "hphp/runtime/base/vanilla-vec-defs.h"
 
 namespace HPHP {
 
@@ -1195,7 +1195,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
     return ArrayMergeGeneric(ret, elems);
   }
 
-  PackedArray::IterateV(elems, [&](TypedValue tv) {
+  VanillaVec::IterateV(elems, [&](TypedValue tv) {
     ret->nextInsert<false>(tv);
   });
   return ret;

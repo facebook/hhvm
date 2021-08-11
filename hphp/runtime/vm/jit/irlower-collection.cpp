@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"

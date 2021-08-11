@@ -36,7 +36,7 @@ struct Iter;
 enum class IterTypeOp { NonLocal, LocalBaseConst, LocalBaseMutable };
 
 enum class IterNextIndex : uint8_t {
-  ArrayPacked = 0,
+  VanillaVec = 0,
   ArrayMixed,
   Array,
   Object,
@@ -318,7 +318,7 @@ private:
     setArrayNext(IterNextIndex::Array);
     if (ad != nullptr) {
       if (ad->isVanillaVec()) {
-        setArrayNext(IterNextIndex::ArrayPacked);
+        setArrayNext(IterNextIndex::VanillaVec);
       } else if (ad->isVanillaDict()) {
         setArrayNext(IterNextIndex::ArrayMixed);
       }

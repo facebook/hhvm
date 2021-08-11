@@ -605,8 +605,7 @@ private:
 
 protected:
   friend struct BespokeArray;
-  friend struct PackedArray;
-  friend struct EmptyArray;
+  friend struct VanillaVec;
   friend struct MixedArray;
   friend struct BaseVector;
   friend struct c_Vector;

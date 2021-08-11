@@ -1627,23 +1627,23 @@ struct InitStructPositionsData : IRExtraData {
   Slot* slots;
 };
 
-struct PackedArrayData : IRExtraData {
-  explicit PackedArrayData(uint32_t size) : size(size) {}
+struct VanillaVecData : IRExtraData {
+  explicit VanillaVecData(uint32_t size) : size(size) {}
   std::string show() const { return folly::format("{}", size).str(); }
 
   size_t stableHash() const {
     return std::hash<uint32_t>()(size);
   }
 
-  bool equals(const PackedArrayData& o) const {
+  bool equals(const VanillaVecData& o) const {
     return size == o.size;
   }
 
   uint32_t size;
 };
 
-struct InitPackedArrayLoopData : IRExtraData {
-  explicit InitPackedArrayLoopData(IRSPRelOffset offset, uint32_t size)
+struct InitVanillaVecLoopData : IRExtraData {
+  explicit InitVanillaVecLoopData(IRSPRelOffset offset, uint32_t size)
     : offset(offset)
     , size(size)
   {}
@@ -1659,7 +1659,7 @@ struct InitPackedArrayLoopData : IRExtraData {
     );
   }
 
-  bool equals(const InitPackedArrayLoopData& o) const {
+  bool equals(const InitVanillaVecLoopData& o) const {
     return offset == o.offset && size == o.size;
   }
 
@@ -2762,9 +2762,9 @@ X(AllocStructDict,              NewStructData);
 X(AllocBespokeStructDict,       ArrayLayoutData);
 X(InitStructPositions,          InitStructPositionsData);
 X(NewBespokeStructDict,         NewBespokeStructData);
-X(AllocVec,                     PackedArrayData);
+X(AllocVec,                     VanillaVecData);
 X(NewKeysetArray,               NewKeysetArrayData);
-X(InitVecElemLoop,              InitPackedArrayLoopData);
+X(InitVecElemLoop,              InitVanillaVecLoopData);
 X(InitVecElem,                  IndexData);
 X(InitDictElem,                 KeyedIndexData);
 X(InitStructElem,               KeyedIndexData);

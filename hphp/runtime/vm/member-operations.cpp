@@ -17,10 +17,10 @@
 #include "hphp/runtime/vm/member-operations.h"
 
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/vanilla-vec.h"
+#include "hphp/runtime/base/vanilla-vec-defs.h"
 
 #include "hphp/system/systemlib.h"
 

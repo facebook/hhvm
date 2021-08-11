@@ -15,7 +15,7 @@
 */
 #pragma once
 
-#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/hash-table.h"
@@ -30,8 +30,8 @@ namespace HPHP {
 
 // This method does the actual logic for computing a size given a layout,
 // using `stores_typed_values` to select between layout types.
-constexpr size_t bytes2PackedArrayCapacity(size_t bytes) {
-  if (PackedArray::stores_typed_values) {
+constexpr size_t bytes2VanillaVecCapacity(size_t bytes) {
+  if (VanillaVec::stores_typed_values) {
     return bytes / sizeof(TypedValue);
   } else {
     static_assert(sizeof(Value) == 8);
@@ -44,7 +44,7 @@ constexpr size_t bytes2PackedArrayCapacity(size_t bytes) {
 // This method is just to help compilers with types in the macro usage below.
 // It also checks that the result of the arithmetic above fits in a uint32_t;
 // if this check fails, it probably means that MaxSizeIndex must be adjusted.
-constexpr uint32_t sizeClassParams2PackedArrayCapacity(
+constexpr uint32_t sizeClassParams2VanillaVecCapacity(
   size_t index,
   size_t lg_grp,
   size_t lg_delta,
@@ -52,9 +52,9 @@ constexpr uint32_t sizeClassParams2PackedArrayCapacity(
 ) {
   static_assert(sizeof(ArrayData) <= kSizeIndex2Size[0],
     "This math only works if ArrayData fits in the smallest size class.");
-  if (index > PackedArray::MaxSizeIndex) return 0;
+  if (index > VanillaVec::MaxSizeIndex) return 0;
   const size_t total = ((size_t{1} << lg_grp) + (ndelta << lg_delta));
-  const size_t capacity = bytes2PackedArrayCapacity(total - sizeof(ArrayData));
+  const size_t capacity = bytes2VanillaVecCapacity(total - sizeof(ArrayData));
   return capacity <= std::numeric_limits<uint32_t>::max()
     ? capacity
     : throw std::length_error("capacity > uint32_t::max");
@@ -62,33 +62,33 @@ constexpr uint32_t sizeClassParams2PackedArrayCapacity(
 
 // We can use uint32_t safely because capacity is in units of array elements,
 // and an ArrayData's m_size field is a uint32_t. See also the guard above.
-alignas(64) constexpr uint32_t kSizeIndex2PackedArrayCapacity[] = {
+alignas(64) constexpr uint32_t kSizeIndex2VanillaVecCapacity[] = {
 #define SIZE_CLASS(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
-  sizeClassParams2PackedArrayCapacity(index, lg_grp, lg_delta, ndelta),
+  sizeClassParams2VanillaVecCapacity(index, lg_grp, lg_delta, ndelta),
   SIZE_CLASSES
 #undef SIZE_CLASS
 };
 
 // This assertion lets us allocate by index and assume we know the capacity.
 static_assert(
-  kSizeIndex2PackedArrayCapacity[PackedArray::SmallSizeIndex]
-    == PackedArray::SmallSize,
+  kSizeIndex2VanillaVecCapacity[VanillaVec::SmallSizeIndex]
+    == VanillaVec::SmallSize,
   "SmallSizeIndex must be MM size class index for array of SmallSize"
 );
 
 //////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE TypedValue* PackedArray::entries(ArrayData* arr) {
+ALWAYS_INLINE TypedValue* VanillaVec::entries(ArrayData* arr) {
   assertx(stores_typed_values);
   return reinterpret_cast<TypedValue*>(arr + 1);
 }
 
-ALWAYS_INLINE ptrdiff_t PackedArray::entriesOffset() {
+ALWAYS_INLINE ptrdiff_t VanillaVec::entriesOffset() {
   return sizeof(ArrayData);
 }
 
 ALWAYS_INLINE
-size_t PackedArray::capacityToSizeBytes(size_t capacity) {
+size_t VanillaVec::capacityToSizeBytes(size_t capacity) {
   const auto base = sizeof(ArrayData);
   if constexpr (stores_typed_values) {
     return base + capacity * sizeof(TypedValue);
@@ -103,22 +103,22 @@ size_t PackedArray::capacityToSizeBytes(size_t capacity) {
 }
 
 ALWAYS_INLINE
-size_t PackedArray::capacityToSizeIndex(size_t capacity) {
-  if (capacity <= PackedArray::SmallSize) {
-    return PackedArray::SmallSizeIndex;
+size_t VanillaVec::capacityToSizeIndex(size_t capacity) {
+  if (capacity <= VanillaVec::SmallSize) {
+    return VanillaVec::SmallSizeIndex;
   }
   const auto index = MemoryManager::size2Index(capacityToSizeBytes(capacity));
-  assertx(index <= PackedArray::MaxSizeIndex);
+  assertx(index <= VanillaVec::MaxSizeIndex);
   return index;
 }
 
 ALWAYS_INLINE
-uint32_t PackedArray::capacity(const ArrayData* ad) {
-  return kSizeIndex2PackedArrayCapacity[sizeClass(ad)];
+uint32_t VanillaVec::capacity(const ArrayData* ad) {
+  return kSizeIndex2VanillaVecCapacity[sizeClass(ad)];
 }
 
 ALWAYS_INLINE
-size_t PackedArray::heapSize(const ArrayData* ad) {
+size_t VanillaVec::heapSize(const ArrayData* ad) {
   return kSizeIndex2Size[sizeClass(ad)];
 }
 
@@ -127,19 +127,19 @@ size_t PackedArray::heapSize(const ArrayData* ad) {
 // varray/darray state to be in the lower 8-bits, but we're free to use the
 // upper.
 ALWAYS_INLINE
-uint16_t PackedArray::packSizeIndexAndAuxBits(uint8_t idx, uint8_t aux) {
+uint16_t VanillaVec::packSizeIndexAndAuxBits(uint8_t idx, uint8_t aux) {
   return (static_cast<uint16_t>(idx) << 8) | aux;
 }
 
 ALWAYS_INLINE
-uint8_t PackedArray::sizeClass(const ArrayData* ad) {
+uint8_t VanillaVec::sizeClass(const ArrayData* ad) {
   return ad->m_aux16 >> 8;
 }
 
-inline void PackedArray::scan(const ArrayData* a, type_scan::Scanner& scanner) {
+inline void VanillaVec::scan(const ArrayData* a, type_scan::Scanner& scanner) {
   assertx(checkInvariants(a));
   if constexpr (stores_typed_values) {
-    const auto* data = PackedArray::entries(const_cast<ArrayData*>(a));
+    const auto* data = VanillaVec::entries(const_cast<ArrayData*>(a));
     scanner.scan(*data, a->size() * sizeof(*data));
   } else {
     for (uint32_t i = 0; i < a->size(); ++i) {
@@ -150,7 +150,7 @@ inline void PackedArray::scan(const ArrayData* a, type_scan::Scanner& scanner) {
 }
 
 template <class F>
-void PackedArray::IterateV(const ArrayData* arr, F fn) {
+void VanillaVec::IterateV(const ArrayData* arr, F fn) {
   assertx(checkInvariants(arr));
   auto const size = arr->m_size;
   for (uint32_t i = 0; i < size; ++i) {
@@ -159,7 +159,7 @@ void PackedArray::IterateV(const ArrayData* arr, F fn) {
 }
 
 template <class F>
-void PackedArray::IterateKV(const ArrayData* arr, F fn) {
+void VanillaVec::IterateKV(const ArrayData* arr, F fn) {
   assertx(checkInvariants(arr));
   auto const size = arr->m_size;
   for (auto k = make_tv<KindOfInt64>(0); val(k).num < size; ++val(k).num) {

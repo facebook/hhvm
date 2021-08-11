@@ -94,8 +94,8 @@ ArrayData* makeSampledArray(ArrayData* vad) {
   auto const result = [&]{
     if (!vad->cowCheck()) return vad;
     vad->decRefCount();
-    if (vad->isVanillaVec()) return PackedArray::Copy(vad);
-    if (vad->isVanillaDict())  return MixedArray::Copy(vad);
+    if (vad->isVanillaVec())  return VanillaVec::Copy(vad);
+    if (vad->isVanillaDict()) return MixedArray::Copy(vad);
     return SetArray::Copy(vad);
   }();
   assertx(result->hasExactlyOneRef());

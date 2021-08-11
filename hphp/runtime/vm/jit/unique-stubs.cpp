@@ -18,12 +18,12 @@
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -306,7 +306,7 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
       auto const save = r_php_call_flags()|r_php_call_func()|r_php_call_ctx();
       PhysRegSaver prs{v, save};
       v << vcall{
-        CallSpec::direct(PackedArray::MakeVec),
+        CallSpec::direct(VanillaVec::MakeVec),
         v.makeVcallArgs({{numToPack, stackTopPtr}}),
         v.makeTuple({packedArr}),
         Fixup::none(),

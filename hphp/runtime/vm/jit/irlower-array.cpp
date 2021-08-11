@@ -71,7 +71,7 @@ void cgCheckVecBounds(IRLS& env, const IRInstruction* inst) {
     if (arrTmp->hasConstVal()) return v.cns(arrTmp->arrLikeVal()->size());
     auto const at = arrTmp->type().arrSpec().type();
     using A = RepoAuthType::Array;
-    if (at && at->tag() == A::Tag::Packed && at->emptiness() == A::Empty::No) {
+    if (at && at->tag() == A::Tag::Tuple && at->emptiness() == A::Empty::No) {
       return v.cns(at->size());
     }
     // ArrayData::m_size is a uint32_t but we need to do a 64-bit comparison

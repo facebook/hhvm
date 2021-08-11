@@ -75,24 +75,24 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
   auto const maybeEmpty = arrTy->emptiness() == E::Maybe;
 
   switch (arrTy->tag()) {
-    case T::Packed: {
+    case T::Tuple: {
       if (idx.hasConstVal(TInt)) {
         auto const intIdx = idx.intVal();
         if (intIdx < 0 || intIdx >= arrTy->size()) return {TBottom, false};
-        type &= typeFromRAT(arrTy->packedElem(intIdx), ctx);
+        type &= typeFromRAT(arrTy->tupleElem(intIdx), ctx);
         return {type, !maybeEmpty};
       }
       auto all = TBottom;
       for (auto i = 0; i < arrTy->size(); ++i) {
-        all |= typeFromRAT(arrTy->packedElem(i), ctx);
+        all |= typeFromRAT(arrTy->tupleElem(i), ctx);
       }
       type &= all;
       break;
     }
-    case T::PackedN: {
+    case T::Packed: {
       auto const present =
         idx.hasConstVal(TInt) && !maybeEmpty && idx.intVal() == 0;
-      type &= typeFromRAT(arrTy->elemType(), ctx);
+      type &= typeFromRAT(arrTy->packedElems(), ctx);
       return {type, present};
     }
   }
@@ -181,8 +181,9 @@ std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
   return {type & idx, false};
 }
 
-std::pair<Type, bool> vecFirstLastValueType(
-    Type arr, bool isFirst, const Class* ctx) {
+std::pair<Type, bool> vecFirstLastValueType(Type arr,
+                                            bool isFirst,
+                                            const Class* ctx) {
   assertx(arr <= TVec);
 
   if (arr.hasConstVal()) {
@@ -202,14 +203,14 @@ std::pair<Type, bool> vecFirstLastValueType(
   auto const maybeEmpty = arrTy->emptiness() == E::Maybe;
 
   switch (arrTy->tag()) {
-    case T::Packed: {
+    case T::Tuple: {
       auto const sz = arrTy->size();
       if (sz == 0) return {TBottom, false};
-      type = type & typeFromRAT(arrTy->packedElem(isFirst ? 0 : sz - 1), ctx);
+      type = type & typeFromRAT(arrTy->tupleElem(isFirst ? 0 : sz - 1), ctx);
       break;
     }
-    case T::PackedN: {
-      type = type & typeFromRAT(arrTy->elemType(), ctx);
+    case T::Packed: {
+      type = type & typeFromRAT(arrTy->packedElems(), ctx);
       break;
     }
   }
@@ -234,7 +235,7 @@ std::pair<Type, bool> vecFirstLastKeyType(Type arr, bool isFirst) {
 
   auto const maybeEmpty = arrTy->emptiness() == E::Maybe;
 
-  if (arrTy->tag() == T::Packed) {
+  if (arrTy->tag() == T::Tuple) {
     auto const sz = arrTy->size();
     if (sz == 0) return {TBottom, false};
     return {Type::cns(isFirst ? 0 : sz - 1), !maybeEmpty};
@@ -352,14 +353,14 @@ VecBounds vecBoundsStaticCheck(Type arrayType, Optional<int64_t> idx) {
 
   using A = RepoAuthType::Array;
   switch (at->tag()) {
-  case A::Tag::Packed:
+  case A::Tag::Tuple:
     if (at->emptiness() == A::Empty::No) {
       return *idx < at->size() ? VecBounds::In : VecBounds::Out;
     } else if (*idx >= at->size()) {
       return VecBounds::Out;
     }
     return VecBounds::Unknown;
-  case A::Tag::PackedN:
+  case A::Tag::Packed:
     if (*idx == 0 && at->emptiness() == A::Empty::No) {
       return VecBounds::In;
     }

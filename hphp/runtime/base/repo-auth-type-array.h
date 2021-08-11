@@ -102,13 +102,13 @@ struct RepoAuthType::Array {
      *
      * May be used with list-like dicts as well as with vecs.
      */
-    Packed,
+    Tuple,
     /*
      * Unknown size, zero-based contiguous integer keys.
      *
      * May be used with list-like dicts as well as with vecs.
      */
-    PackedN,
+    Packed,
   };
   enum class Empty : uint8_t { Maybe, No };
 
@@ -155,21 +155,21 @@ struct RepoAuthType::Array {
   /*
    * Returns: how many elements are in the array, if it is non-empty.
    *
-   * Pre: tag() == Tag::Packed
+   * Pre: tag() == Tag::Tuple
    */
   uint32_t size() const {
-    assertx(tag() == Tag::Packed);
+    assertx(tag() == Tag::Tuple);
     return m_size;
   }
 
   /*
    * Return the type of the nth element in a packed-like array.
    *
-   * Pre: tag() == Tag::Packed
+   * Pre: tag() == Tag::Tuple
    *      idx < size()
    */
-  RepoAuthType packedElem(uint32_t idx) const {
-    assertx(tag() == Tag::Packed);
+  RepoAuthType tupleElem(uint32_t idx) const {
+    assertx(tag() == Tag::Tuple);
     assertx(idx < size());
     return types()[idx];
   }
@@ -177,10 +177,10 @@ struct RepoAuthType::Array {
   /*
    * Return a type that is larger than all possible element types.
    *
-   * Pre: tag() == Tag::PackedN
+   * Pre: tag() == Tag::Packed
    */
-  RepoAuthType elemType() const {
-    assertx(tag() == Tag::PackedN);
+  RepoAuthType packedElems() const {
+    assertx(tag() == Tag::Packed);
     return types()[0];
   }
 
@@ -235,23 +235,23 @@ struct ArrayTypeTable::Builder {
   ~Builder();
 
   /*
-   * Create a new Packed array type descriptor, using this table
+   * Create a new Tuple array type descriptor, using this table
    * builder.  May return an existing descriptor if it has the same
    * shape as an array type that already exists.
    *
    * Pre: !types.empty()
    */
-  const RepoAuthType::Array* packed(
+  const RepoAuthType::Array* tuple(
     RepoAuthType::Array::Empty emptiness,
     const std::vector<RepoAuthType>& types);
 
   /*
-   * Create a new PackedN array type descriptor, using this table
+   * Create a new Packed array type descriptor, using this table
    * builder.  May return an existing descriptor if it has the same
-   * shape as a PackedN type that already exists.
+   * shape as a Packed type that already exists.
    */
-  const RepoAuthType::Array* packedn(RepoAuthType::Array::Empty emptiness,
-                                     RepoAuthType elemTy);
+  const RepoAuthType::Array* packed(RepoAuthType::Array::Empty emptiness,
+                                    RepoAuthType elemTy);
 
 private:
   const RepoAuthType::Array* insert(RepoAuthType::Array*);
@@ -276,4 +276,3 @@ std::string show(const RepoAuthType::Array&);
 }
 
 #include "hphp/runtime/base/repo-auth-type-array-inl.h"
-

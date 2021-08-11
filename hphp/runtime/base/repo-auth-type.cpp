@@ -45,7 +45,7 @@ bool tvMatchesArrayType(TypedValue tv, const RepoAuthType::Array* arrTy) {
   using A = RepoAuthType::Array;
 
   if (ad->empty()) return arrTy->emptiness() == A::Empty::Maybe;
-  if (arrTy->tag() == A::Tag::Packed && ad->size() != arrTy->size()) {
+  if (arrTy->tag() == A::Tag::Tuple && ad->size() != arrTy->size()) {
     return false;
   }
 
@@ -55,20 +55,20 @@ bool tvMatchesArrayType(TypedValue tv, const RepoAuthType::Array* arrTy) {
   // it's ok to leave them out.
   if (false) {
     switch (arrTy->tag()) {
-      case A::Tag::Packed:
+      case A::Tag::Tuple:
         if (!ad->isVectorData()) return false;
         for (auto i = uint32_t{0}; i < ad->size(); ++i) {
           auto const elem = ad->at(i);
-          if (!tvMatchesRepoAuthType(elem, arrTy->packedElem(i))) {
+          if (!tvMatchesRepoAuthType(elem, arrTy->tupleElem(i))) {
             return false;
           }
         }
         break;
-      case A::Tag::PackedN:
+      case A::Tag::Packed:
         if (!ad->isVectorData()) return false;
         for (auto i = uint32_t{0}; i < ad->size(); ++i) {
           auto const elem = ad->at(i);
-          if (!tvMatchesRepoAuthType(elem, arrTy->elemType())) {
+          if (!tvMatchesRepoAuthType(elem, arrTy->packedElems())) {
             return false;
           }
         }

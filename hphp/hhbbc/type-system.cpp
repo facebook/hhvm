@@ -6786,7 +6786,7 @@ make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
     case DataTag::ArrLikeMapN:
       return nullptr;
     case DataTag::ArrLikePackedN:
-      return arrTable.packedn(
+      return arrTable.packed(
         emptiness,
         make_repo_type(arrTable, t.m_data.packedn->type)
       );
@@ -6798,7 +6798,7 @@ make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
           std::back_inserter(repoTypes),
           [&] (const Type& t2) { return make_repo_type(arrTable, t2); }
         );
-        return arrTable.packed(emptiness, repoTypes);
+        return arrTable.tuple(emptiness, repoTypes);
       }
       return nullptr;
     }

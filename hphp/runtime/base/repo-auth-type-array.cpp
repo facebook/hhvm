@@ -15,14 +15,15 @@
 */
 #include "hphp/runtime/base/repo-auth-type-array.h"
 
+#include "hphp/runtime/base/runtime-option.h"
+
+#include "hphp/util/compilation-flags.h"
+#include "hphp/util/hash-set.h"
+#include "hphp/util/trace.h"
+
 #include <cassert>
 #include <cstdlib>
 #include <mutex>
-#include <unordered_set>
-
-#include "hphp/util/compilation-flags.h"
-#include "hphp/util/trace.h"
-#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
 
@@ -44,7 +45,7 @@ struct repo_auth_array_hash {
     );
     using T = RepoAuthType::Array::Tag;
     switch (ar->tag()) {
-    case T::Packed:
+    case T::Tuple:
       {
         auto const size = ar->size();
         hash = folly::hash::hash_128_to_64(hash, size);
@@ -52,12 +53,12 @@ struct repo_auth_array_hash {
           // If we have arrays of arrays, this can try to hash the inner
           // arrays.  This is safe (it uses the array id) because they
           // must already be inserted in the array table builder.
-          hash = folly::hash::hash_128_to_64(hash, ar->packedElem(i).hash());
+          hash = folly::hash::hash_128_to_64(hash, ar->tupleElem(i).hash());
         }
       }
       break;
-    case T::PackedN:
-      hash = folly::hash::hash_128_to_64(hash, ar->elemType().hash());
+    case T::Packed:
+      hash = folly::hash::hash_128_to_64(hash, ar->packedElems().hash());
       break;
     }
     return hash;
@@ -72,17 +73,17 @@ struct repo_auth_array_eq {
     }
     using T = RepoAuthType::Array::Tag;
     switch (a->tag()) {
-    case T::Packed:
+    case T::Tuple:
       {
         if (a->size() != b->size()) return false;
         auto const size = a->size();
         for (auto i = uint32_t{0}; i < size; ++i) {
-          if (a->packedElem(i) != b->packedElem(i)) return false;
+          if (a->tupleElem(i) != b->tupleElem(i)) return false;
         }
       }
       return true;
-    case T::PackedN:
-      return a->elemType() == b->elemType();
+    case T::Packed:
+      return a->packedElems() == b->packedElems();
     }
     not_reached();
   }
@@ -105,16 +106,16 @@ bool ArrayTypeTable::check(const RepoAuthType::Array* arr) const {
   if (!arr) return true;
 
   switch (arr->tag()) {
-    case RepoAuthType::Array::Tag::Packed: {
+    case RepoAuthType::Array::Tag::Tuple: {
       for (uint32_t idx = 0; idx < arr->size(); ++idx) {
-        auto rat = arr->packedElem(idx);
+        auto rat = arr->tupleElem(idx);
         assertx(rat.resolved());
         if (rat.mayHaveArrData()) check(rat.array());
       }
       break;
     }
-    case RepoAuthType::Array::Tag::PackedN: {
-      auto rat = arr->elemType();
+    case RepoAuthType::Array::Tag::Packed: {
+      auto rat = arr->packedElems();
       assertx(rat.resolved());
       if (rat.mayHaveArrData()) check(rat.array());
       break;
@@ -140,7 +141,7 @@ using Builder = ArrayTypeTable::Builder;
 
 struct Builder::Impl {
   std::mutex mutex;
-  std::unordered_set<
+  hphp_fast_set<
     const RepoAuthType::Array*,
     repo_auth_array_hash,
     repo_auth_array_eq
@@ -154,14 +155,14 @@ Builder::~Builder() {}
 //////////////////////////////////////////////////////////////////////
 
 const RepoAuthType::Array*
-Builder::packed(RepoAuthType::Array::Empty emptiness,
-                const std::vector<RepoAuthType>& types) {
+Builder::tuple(RepoAuthType::Array::Empty emptiness,
+               const std::vector<RepoAuthType>& types) {
   assertx(!types.empty());
 
   auto const size = types.size() * sizeof(RepoAuthType) +
     sizeof(RepoAuthType::Array);
   auto const arr = new (std::malloc(size)) RepoAuthType::Array(
-    RepoAuthType::Array::Tag::Packed,
+    RepoAuthType::Array::Tag::Tuple,
     emptiness,
     types.size()
   );
@@ -182,10 +183,10 @@ Builder::packed(RepoAuthType::Array::Empty emptiness,
 }
 
 const RepoAuthType::Array*
-Builder::packedn(RepoAuthType::Array::Empty emptiness, RepoAuthType elemTy) {
+Builder::packed(RepoAuthType::Array::Empty emptiness, RepoAuthType elemTy) {
   auto const size = sizeof elemTy + sizeof(RepoAuthType::Array);
   auto const arr = new (std::malloc(size)) RepoAuthType::Array(
-    RepoAuthType::Array::Tag::PackedN,
+    RepoAuthType::Array::Tag::Packed,
     emptiness,
     std::numeric_limits<uint32_t>::max()
   );
@@ -249,14 +250,14 @@ std::string show(const RepoAuthType::Array& ar) {
   }
 
   switch (ar.tag()) {
-  case T::Packed:
+  case T::Tuple:
     for (auto i = uint32_t{0}; i < ar.size(); ++i) {
-      ret += show(ar.packedElem(i));
+      ret += show(ar.tupleElem(i));
       if (i != ar.size() - 1) ret += ',';
     }
     break;
-  case T::PackedN:
-    folly::format(&ret, "[{}]", show(ar.elemType()));
+  case T::Packed:
+    folly::format(&ret, "[{}]", show(ar.packedElems()));
     break;
   }
 

@@ -31,8 +31,8 @@ namespace {
 // more constrained type, and fall back to id to ensure commutativity.
 const RepoAuthType::Array* chooseRATArray(const RepoAuthType::Array* lhs,
                                           const RepoAuthType::Array* rhs) {
-  auto const lhs_size_known = lhs->tag() == RepoAuthType::Array::Tag::Packed;
-  auto const rhs_size_known = rhs->tag() == RepoAuthType::Array::Tag::Packed;
+  auto const lhs_size_known = lhs->tag() == RepoAuthType::Array::Tag::Tuple;
+  auto const rhs_size_known = rhs->tag() == RepoAuthType::Array::Tag::Tuple;
   if (lhs_size_known != rhs_size_known) return lhs_size_known ? lhs : rhs;
   return lhs->id() < rhs->id() ? lhs : rhs;
 }

@@ -679,18 +679,19 @@ static bool arrayFitsSpec(const ArrayData* arr, ArraySpec spec) {
   auto const& type = *spec.type();
   if (arr->empty()) return type.emptiness() != A::Empty::No;
 
-  // Right now, the only non-trivial RepoAuthType::Array we support is for
-  // arrays with "vector" keys (0, 1, ... n - 1). They don't have to be packed.
+  // Right now, the only non-trivial RepoAuthType::Array we support is
+  // for arrays with "vector" keys (0, 1, ... n - 1). They don't have
+  // to be PackedArray.
   if (!arr->isVectorData()) return false;
   switch (type.tag()) {
-    case A::Tag::Packed:
+    case A::Tag::Tuple:
       if (arr->size() != type.size()) return false;
       // fall through
-    case A::Tag::PackedN: {
+    case A::Tag::Packed: {
       int64_t k = 0;
-      auto const packed = type.tag() == A::Tag::Packed;
+      auto const tuple = type.tag() == A::Tag::Tuple;
       for ( ; k < arr->size(); ++k) {
-        auto const elemType = packed ? type.packedElem(k) : type.elemType();
+        auto const elemType = tuple ? type.tupleElem(k) : type.packedElems();
         if (!tvMatchesRepoAuthType(arr->get(k), elemType)) {
           return false;
         }
@@ -961,17 +962,17 @@ bool ratArrIsCounted(const RepoAuthType::Array* arr, const Class* ctx) {
   if (arr->emptiness() == E::Maybe) return false;
 
   switch (arr->tag()) {
-    case T::Packed: {
+    case T::Tuple: {
       auto const size = arr->size();
       for (size_t i = 0; i < size; ++i) {
-        if (!(typeFromRAT(arr->packedElem(i), ctx) <= TCounted)) {
+        if (!(typeFromRAT(arr->tupleElem(i), ctx) <= TCounted)) {
           return false;
         }
       }
       return true;
     }
-    case T::PackedN:
-      return typeFromRAT(arr->elemType(), ctx) <= TCounted;
+    case T::Packed:
+      return typeFromRAT(arr->packedElems(), ctx) <= TCounted;
   }
 
   return false;

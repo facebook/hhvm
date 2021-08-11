@@ -68,7 +68,7 @@ RepoAuthType::Array::deserialize(SerDe& sd, const ArrayTypeTable& table) {
   auto fn = [&](const uint32_t id) { return table.lookup(id); };
 
   switch (tag) {
-  case Tag::Packed:
+  case Tag::Tuple:
     {
       auto const bytes = size * sizeof(RepoAuthType) + sizeof(Array);
       auto const arr   = new (std::malloc(bytes)) Array(tag, emptiness, size);
@@ -81,7 +81,7 @@ RepoAuthType::Array::deserialize(SerDe& sd, const ArrayTypeTable& table) {
       }
       return arr;
     }
-  case Tag::PackedN:
+  case Tag::Packed:
     {
       auto const bytes = sizeof(RepoAuthType) + sizeof(Array);
       auto const arr   = new (std::malloc(bytes)) Array(tag, emptiness, size);
@@ -103,7 +103,7 @@ void RepoAuthType::Array::serialize(SerDe& sd) const {
     ;
 
   switch (m_tag) {
-  case Tag::Packed:
+  case Tag::Tuple:
     {
       auto tyPtr      = types();
       auto const stop = tyPtr + m_size;
@@ -112,7 +112,7 @@ void RepoAuthType::Array::serialize(SerDe& sd) const {
       }
     }
     break;
-  case Tag::PackedN:
+  case Tag::Packed:
     sd(types()[0]);
     break;
   }
@@ -121,4 +121,3 @@ void RepoAuthType::Array::serialize(SerDe& sd) const {
 //////////////////////////////////////////////////////////////////////
 
 }
-

@@ -2973,10 +2973,10 @@ SSATmp* simplifyCountHelper(State& env, const IRInstruction* inst) {
   if (!at) return nullptr;
   using A = RepoAuthType::Array;
   switch (at->tag()) {
-  case A::Tag::Packed:
+  case A::Tag::Tuple:
     if (at->emptiness() == A::Empty::No) return cns(env, at->size());
     break;
-  case A::Tag::PackedN:
+  case A::Tag::Packed:
     break;
   }
   return nullptr;

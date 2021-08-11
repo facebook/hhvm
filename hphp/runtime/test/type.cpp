@@ -629,9 +629,9 @@ TEST(Type, ArrayFitsSpec) {
   auto const int_rat = RepoAuthType(RepoAuthType::Tag::Int);
 
   ArrayTypeTable::Builder builder;
-  auto const rat1 = builder.packed(nonempty, {int_rat, int_rat});
-  auto const rat2 = builder.packed(maybe_empty, {int_rat, str_rat});
-  auto const rat3 = builder.packedn(nonempty, int_rat);
+  auto const rat1 = builder.tuple(nonempty, {int_rat, int_rat});
+  auto const rat2 = builder.tuple(maybe_empty, {int_rat, str_rat});
+  auto const rat3 = builder.packed(nonempty, int_rat);
 
   auto const ratType1 = Type::Vec(rat1);
   auto const ratType2 = Type::Vec(rat2);
@@ -881,10 +881,10 @@ TEST(Type, Const) {
   EXPECT_FALSE(TDict <= TVec);
 
   ArrayTypeTable::Builder ratBuilder;
-  auto const rat1 = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
+  auto const rat1 = ratBuilder.packed(RepoAuthType::Array::Empty::No,
                                        RepoAuthType(RepoAuthType::Tag::Str));
   auto const ratArray1 = Type::Dict(rat1);
-  auto const rat2 = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
+  auto const rat2 = ratBuilder.packed(RepoAuthType::Array::Empty::No,
                                        RepoAuthType(RepoAuthType::Tag::Int));
   auto const ratArray2 = Type::Dict(rat2);
   EXPECT_EQ(ratArray1, ratArray1 & ratArray2);
@@ -1011,7 +1011,7 @@ TEST(Type, BespokeVecRAT) {
   bespoke::selectBespokeLayouts();
 
   ArrayTypeTable::Builder ratBuilder;
-  auto const rat = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
+  auto const rat = ratBuilder.packed(RepoAuthType::Array::Empty::No,
                                       RepoAuthType(RepoAuthType::Tag::Str));
   auto const vecRat = Type::Vec(rat);
   EXPECT_EQ("Vec=N([Str])", vecRat.toString());
@@ -1027,7 +1027,7 @@ TEST(Type, BespokeVecRAT) {
 
 TEST(Type, VanillaVecRAT) {
   ArrayTypeTable::Builder ratBuilder;
-  auto const rat = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
+  auto const rat = ratBuilder.packed(RepoAuthType::Array::Empty::No,
                                       RepoAuthType(RepoAuthType::Tag::Str));
   auto const vecRat = Type::Vec(rat);
   EXPECT_EQ("Vec=N([Str])", vecRat.toString());

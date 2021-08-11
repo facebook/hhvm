@@ -99,7 +99,7 @@
                            ((), [6:8-9:4],
                             (Shape
                                [((SFlit_str ([6:8-9:4], "splices")), ((), [6:8-9:4], (KeyValCollection (Dict, None, []))));
-                                 ((SFlit_str ([6:8-9:4], "functions")), ((), [6:8-9:4], (ValCollection (Vec, None, [((), [8:5-12], (FunctionPointer ((FP_id ([8:5-12], "\\hh_show")), [])))]))));
+                                 ((SFlit_str ([6:8-9:4], "functions")), ((), [6:8-9:4], (ValCollection (Vec, None, []))));
                                  ((SFlit_str ([6:8-9:4], "static_methods")), ((), [6:8-9:4], (ValCollection (Vec, None, []))))]));
                            ((), [6:8-9:4],
                             (Lfun (

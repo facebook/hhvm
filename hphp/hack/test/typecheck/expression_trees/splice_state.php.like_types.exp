@@ -4,12 +4,3 @@ Typing error (Typing[4110])
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
   File "splice_state.php", line 12, characters 25-53:
   But got `dynamic` because it is an unenforceable type
-File "splice_state.php", line 25, characters 14-18:
-Typing error (Typing[4110])
-  File "splice_state.php", line 25, characters 14-22:
-  Expected `num` because this is used in an arithmetic operation
-  File "splice_state.php", line 6, characters 10-13:
-  But got `?int`
-  File "splice_state.php", line 25, characters 9-23:
-  All the local information about `$x->x` has been invalidated during this call.
-This is a limitation of the type-checker; use a local if that's the problem.

@@ -1,0 +1,12 @@
+File "splice_err6.php", line 10, characters 23-29:
+Typing error (Typing[4110])
+  File "splice_err6.php", line 10, characters 23-33:
+  Expected `num` because this is used in an arithmetic operation
+  File "splice_err6.php", line 10, characters 23-29:
+  But got `string`
+File "splice_err6.php", line 10, characters 23-33:
+Invalid argument (Typing[4110])
+  File "splice_err6.php", line 5, characters 14-19:
+  Expected `string`
+  File "splice_err6.php", line 10, characters 23-33:
+  But got `int` because this is the result of an integer arithmetic operation

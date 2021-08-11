@@ -62,22 +62,24 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
 
     // Extract calls to functions and static methods before any
     // desugaring occurs.
-    let (functions, static_methods) = extract_calls_as_fun_ptrs(&e);
+    let (functions, static_methods) = extract_calls_as_fun_ptrs(&mut e)?;
 
     let extracted_splices = extract_and_replace_splices(&mut e)?;
     let splice_count = extracted_splices.len();
+    let function_count = functions.len();
+    let static_method_count = static_methods.len();
     let et_literal_pos = e.1.clone();
 
     let metadata = maketree_metadata(
         &et_literal_pos,
         &extracted_splices,
-        functions,
-        static_methods,
+        &functions,
+        &static_methods,
     );
 
     // Create assignments of extracted splices
     // `$0splice0 = spliced_expr0;`
-    let splice_assignments: Vec<Stmt> = extracted_splices
+    let mut splice_assignments: Vec<Stmt> = extracted_splices
         .into_iter()
         .enumerate()
         .map(|(i, expr)| {
@@ -86,11 +88,54 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
                 Stmt_::Expr(Box::new(Expr::new(
                     (),
                     expr.1.clone(),
-                    Expr_::Binop(Box::new((Bop::Eq(None), temp_lvar(&expr.1, i), expr))),
+                    Expr_::Binop(Box::new((
+                        Bop::Eq(None),
+                        temp_splice_lvar(&expr.1, i),
+                        expr,
+                    ))),
                 ))),
             )
         })
         .collect();
+
+    let function_pointer_assignments: Vec<Stmt> = functions
+        .into_iter()
+        .enumerate()
+        .map(|(i, expr)| {
+            Stmt::new(
+                expr.1.clone(),
+                Stmt_::Expr(Box::new(Expr::new(
+                    (),
+                    expr.1.clone(),
+                    Expr_::Binop(Box::new((
+                        Bop::Eq(None),
+                        temp_function_pointer_lvar(&expr.1, i),
+                        expr,
+                    ))),
+                ))),
+            )
+        })
+        .collect();
+
+    let static_method_assignments: Vec<Stmt> = static_methods
+        .into_iter()
+        .enumerate()
+        .map(|(i, expr)| {
+            Stmt::new(
+                expr.1.clone(),
+                Stmt_::Expr(Box::new(Expr::new(
+                    (),
+                    expr.1.clone(),
+                    Expr_::Binop(Box::new((
+                        Bop::Eq(None),
+                        temp_static_method_lvar(&expr.1, i),
+                        expr,
+                    ))),
+                ))),
+            )
+        })
+        .collect();
+
 
     let (virtual_expr, desugar_expr) = rewrite_expr(env, e, &visitor_name)?;
 
@@ -127,10 +172,30 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
             annotation: (),
         };
         let typing_fun_ = wrap_fun_(typing_fun_body, vec![], et_literal_pos.clone());
-        let spliced_vars = (0..splice_count)
+        let mut spliced_vars: Vec<ast::Lid> = (0..splice_count)
             .into_iter()
-            .map(|i| ast::Lid(et_literal_pos.clone(), (0, temp_lvar_string(i))))
+            .map(|i| ast::Lid(et_literal_pos.clone(), (0, temp_splice_lvar_string(i))))
             .collect();
+        let function_pointer_vars: Vec<ast::Lid> = (0..function_count)
+            .into_iter()
+            .map(|i| {
+                ast::Lid(
+                    et_literal_pos.clone(),
+                    (0, temp_function_pointer_lvar_string(i)),
+                )
+            })
+            .collect();
+        let static_method_vars: Vec<ast::Lid> = (0..static_method_count)
+            .into_iter()
+            .map(|i| {
+                ast::Lid(
+                    et_literal_pos.clone(),
+                    (0, temp_static_method_lvar_string(i)),
+                )
+            })
+            .collect();
+        spliced_vars.extend(function_pointer_vars);
+        spliced_vars.extend(static_method_vars);
         Expr::new(
             (),
             et_literal_pos.clone(),
@@ -154,11 +219,19 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
         &et_literal_pos.clone(),
     );
 
+    splice_assignments.extend(function_pointer_assignments);
+    splice_assignments.extend(static_method_assignments);
+
     let runtime_expr = if splice_assignments.is_empty() {
         make_tree
     } else {
-        let mut body = splice_assignments.clone();
-        body.push(wrap_return(make_tree, &et_literal_pos));
+        let body = if env.codegen {
+            let mut b = splice_assignments.clone();
+            b.push(wrap_return(make_tree, &et_literal_pos));
+            b
+        } else {
+            vec![wrap_return(make_tree, &et_literal_pos)]
+        };
         immediately_invoked_lambda(&et_literal_pos, body)
     };
 
@@ -429,7 +502,7 @@ impl<'ast> VisitorMut<'ast> for SpliceExtractor {
                     // Extract this expression.
                     let len = self.extracted_splices.len();
                     self.extracted_splices.push((**ex).clone());
-                    (*e).2 = ETSplice(Box::new(temp_lvar(&ex.1, len)));
+                    (*e).2 = ETSplice(Box::new(temp_splice_lvar(&ex.1, len)));
                 }
             }
             _ => e.recurse(in_splice, self.object())?,
@@ -439,23 +512,26 @@ impl<'ast> VisitorMut<'ast> for SpliceExtractor {
 }
 
 /// Find all the calls in expression `e` and return a vec of the
-/// global function pointers and a vec of static method pointers.
+/// global function pointers and a vec of static method pointers
+/// Replaces those calls with temp variables.
 ///
 /// For example, given the expression tree literal:
 ///
 ///     $et = Code`foo() + Bar::baz()`;
 ///
+///     We transform this into
+///
+///     $et = Code`$0fp0() + $0sm0()`;
+///
 /// Our first vec contains foo<> and our second contains Bar::baz<>.
-fn extract_calls_as_fun_ptrs(e: &Expr) -> (Vec<Expr>, Vec<Expr>) {
+fn extract_calls_as_fun_ptrs(e: &mut Expr) -> Result<(Vec<Expr>, Vec<Expr>), (Pos, String)> {
     let mut visitor = CallExtractor {
         functions: vec![],
         static_methods: vec![],
     };
-    visitor
-        .visit_expr(&mut (), e)
-        .expect("CallExtractor should not error");
+    visitor.visit_expr(&mut (), e)?;
 
-    (visitor.functions, visitor.static_methods)
+    Ok((visitor.functions, visitor.static_methods))
 }
 
 struct CallExtractor {
@@ -463,46 +539,100 @@ struct CallExtractor {
     static_methods: Vec<Expr>,
 }
 
-impl<'ast> Visitor<'ast> for CallExtractor {
-    type P = AstParams<(), ()>;
+impl<'ast> VisitorMut<'ast> for CallExtractor {
+    type P = AstParams<(), (Pos, String)>;
 
-    fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
         self
     }
 
-    fn visit_expr(&mut self, env: &mut (), e: &Expr) -> Result<(), ()> {
+    fn visit_expr(&mut self, env: &mut (), e: &mut Expr) -> Result<(), (Pos, String)> {
         use aast::Expr_::*;
-        match &e.2 {
+        match &mut e.2 {
             // Don't recurse into splices.
             ETSplice(_) => {
                 return Ok(());
             }
 
-            Call(call) => {
-                let (recv, _, _, _) = &**call;
+            Call(ref mut call) => {
+                let (ref mut recv, ref mut targs, ref mut args, ref mut vargo) = **call;
+                recv.accept(env, self.object())?;
+                targs.accept(env, self.object())?;
+                args.accept(env, self.object())?;
+                vargo.accept(env, self.object())?;
                 match &recv.2 {
+                    Id(sid) if is_typechecker_fun_name(&sid.1) => e.recurse(env, self.object())?,
                     Id(sid) => {
+                        let len = self.functions.len();
                         self.functions.push(global_func_ptr(&sid));
+                        (*e).2 = Call(Box::new((
+                            temp_function_pointer_lvar(&recv.1, len),
+                            std::mem::take(targs),
+                            std::mem::take(args),
+                            std::mem::take(vargo),
+                        )));
                     }
                     ClassConst(cc) => {
                         let (ref cid, ref s) = **cc;
+                        if let ClassId_::CIexpr(Expr(_, _, Id(sid))) = &cid.2 {
+                            if sid.1 == classes::PARENT
+                                || sid.1 == classes::SELF
+                                || sid.1 == classes::STATIC
+                            {
+                                return Err((
+                                    e.1.clone(),
+                                    "Static method calls in expression trees require explicit class names.".into(),
+                                ));
+                            }
+                        } else {
+                            return Err((
+                                e.1.clone(),
+                                "Expression trees only support function calls and static method calls on named classes.".into()));
+                        };
+                        let len = self.static_methods.len();
                         self.static_methods.push(static_meth_ptr(&recv.1, cid, s));
+                        (*e).2 = Call(Box::new((
+                            temp_static_method_lvar(&recv.1, len),
+                            std::mem::take(targs),
+                            std::mem::take(args),
+                            std::mem::take(vargo),
+                        )));
                     }
-                    _ => {}
+                    _ => e.recurse(env, self.object())?,
                 }
             }
-            _ => {}
+            _ => e.recurse(env, self.object())?,
         };
-        e.recurse(env, self)
+        Ok(())
     }
 }
 
-fn temp_lvar_string(num: usize) -> String {
-    format!("$0splice{}", num.to_string())
+fn temp_lvar_string(name: &str, num: usize) -> String {
+    format!("$0{}{}", name, num)
 }
 
-fn temp_lvar(pos: &Pos, num: usize) -> Expr {
-    Expr::mk_lvar(pos, &temp_lvar_string(num))
+fn temp_splice_lvar_string(num: usize) -> String {
+    temp_lvar_string("splice", num)
+}
+
+fn temp_splice_lvar(pos: &Pos, num: usize) -> Expr {
+    Expr::mk_lvar(pos, &temp_splice_lvar_string(num))
+}
+
+fn temp_function_pointer_lvar_string(num: usize) -> String {
+    temp_lvar_string("fp", num)
+}
+
+fn temp_function_pointer_lvar(pos: &Pos, num: usize) -> Expr {
+    Expr::mk_lvar(pos, &temp_function_pointer_lvar_string(num))
+}
+
+fn temp_static_method_lvar_string(num: usize) -> String {
+    temp_lvar_string("sm", num)
+}
+
+fn temp_static_method_lvar(pos: &Pos, num: usize) -> Expr {
+    Expr::mk_lvar(pos, &temp_static_method_lvar_string(num))
 }
 
 /// Given a Pos, returns a shape literal expression representing it.
@@ -852,15 +982,18 @@ fn rewrite_expr<TF>(
 
             match recv.2 {
                 // Source: MyDsl`foo()`
-                // Virtualized: MyDsl::symbolType(foo<>)()
-                // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitGlobalFunction(new ExprPos(...), foo<>), vec[])
-                Id(sid) => {
-                    let fp = global_func_ptr(&sid);
+                // We have extracted out the function pointer to top a level temp $0fpXX = foo<>;
+                // Virtualized: MyDsl::symbolType($0fpXX)()
+                // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitGlobalFunction(new ExprPos(...), $0fpXX), vec[])
+                Lvar(ref lid) if lid.1.1.starts_with("$0fp") => {
                     let callee =
-                        static_meth_call(visitor_name, et::SYMBOL_TYPE, vec![fp.clone()], &pos);
+                        static_meth_call(visitor_name, et::SYMBOL_TYPE, vec![recv.clone()], &pos);
 
-                    let desugar_recv =
-                        v_meth_call(et::VISIT_GLOBAL_FUNCTION, vec![pos_expr.clone(), fp], &pos);
+                    let desugar_recv = v_meth_call(
+                        et::VISIT_GLOBAL_FUNCTION,
+                        vec![pos_expr.clone(), recv],
+                        &pos,
+                    );
                     let desugar_expr = v_meth_call(
                         et::VISIT_CALL,
                         vec![pos_expr, desugar_recv, vec_literal(desugar_args)],
@@ -874,33 +1007,15 @@ fn rewrite_expr<TF>(
                     (virtual_expr, desugar_expr)
                 }
                 // Source: MyDsl`Foo::bar()`
-                // Virtualized: MyDsl::symbolType(Foo::bar<>)()
-                // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitStaticMethod(new ExprPos(...), Foo::bar<>), vec[])
-                ClassConst(cc) => {
-                    let (cid, s) = *cc;
-                    if let ClassId_::CIexpr(Expr(_, _, Id(sid))) = &cid.2 {
-                        if sid.1 == classes::PARENT
-                            || sid.1 == classes::SELF
-                            || sid.1 == classes::STATIC
-                        {
-                            return Err((
-                                pos,
-                                "Static method calls in expression trees require explicit class names.".into(),
-                            ));
-                        }
-                    } else {
-                        return Err((
-                            pos,
-                            "Expression trees only support function calls and static method calls on named classes.".into()));
-                    };
-
-                    let fp = static_meth_ptr(&pos, &cid, &s);
-
+                // We have extracted out the function pointer to top a level temp $0smXX = foo<>;
+                // Virtualized: MyDsl::symbolType($0smXX)()
+                // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitStaticMethod(new ExprPos(...), $0smXX, vec[])
+                Lvar(ref lid) if lid.1.1.starts_with("$0sm") => {
                     let callee =
-                        static_meth_call(visitor_name, et::SYMBOL_TYPE, vec![fp.clone()], &pos);
+                        static_meth_call(visitor_name, et::SYMBOL_TYPE, vec![recv.clone()], &pos);
 
                     let desugar_recv =
-                        v_meth_call(et::VISIT_STATIC_METHOD, vec![pos_expr.clone(), fp], &pos);
+                        v_meth_call(et::VISIT_STATIC_METHOD, vec![pos_expr.clone(), recv], &pos);
                     let desugar_expr = v_meth_call(
                         et::VISIT_CALL,
                         vec![pos_expr, desugar_recv, vec_literal(desugar_args)],
@@ -1247,8 +1362,8 @@ fn strip_ns(name: &str) -> &str {
 fn maketree_metadata(
     pos: &Pos,
     splices: &[Expr],
-    functions: Vec<Expr>,
-    static_methods: Vec<Expr>,
+    functions: &[Expr],
+    static_methods: &[Expr],
 ) -> Expr {
     let key_value_pairs = splices
         .iter()
@@ -1257,20 +1372,34 @@ fn maketree_metadata(
             let key = Expr::new(
                 (),
                 expr.1.clone(),
-                Expr_::String(BString::from(temp_lvar_string(i))),
+                Expr_::String(BString::from(temp_splice_lvar_string(i))),
             );
-            let value = temp_lvar(&expr.1, i);
+            let value = temp_splice_lvar(&expr.1, i);
             (key, value)
         })
         .collect();
     let splices_dict = dict_literal(pos, key_value_pairs);
 
+    let function_vars = functions
+        .iter()
+        .enumerate()
+        .map(|(i, expr)| temp_function_pointer_lvar(&expr.1, i))
+        .collect();
+    let functions_vec = vec_literal_with_pos(&pos, function_vars);
+
+    let static_method_vars = static_methods
+        .iter()
+        .enumerate()
+        .map(|(i, expr)| temp_static_method_lvar(&expr.1, i))
+        .collect();
+    let static_method_vec = vec_literal_with_pos(&pos, static_method_vars);
+
     shape_literal(
         pos,
         vec![
             ("splices", splices_dict),
-            ("functions", vec_literal_with_pos(&pos, functions)),
-            ("static_methods", vec_literal_with_pos(&pos, static_methods)),
+            ("functions", functions_vec),
+            ("static_methods", static_method_vec),
         ],
     )
 }

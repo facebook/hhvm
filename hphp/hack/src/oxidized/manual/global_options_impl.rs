@@ -116,7 +116,7 @@ impl Default for GlobalOptions {
             po_disallow_hash_comments: false,
             po_disallow_fun_and_cls_meth_pseudo_funcs: false,
             po_disallow_inst_meth: false,
-            po_enable_readonly_enforcement: false,
+            po_enable_readonly_in_emitter: false,
             po_escape_brace: false,
             tco_use_direct_decl_parser: false,
             tco_ifc_enabled: vec![],

@@ -143,7 +143,7 @@ impl<'src> AastParser {
 
             let mut empty_program = vec![];
             let mut aast = aast.unwrap_or(&mut empty_program);
-            if env.parser_options.po_enable_readonly_enforcement {
+            if env.parser_options.po_enable_readonly_in_emitter {
                 errors.extend(readonly_check::check_program(&mut aast));
             }
             errors.extend(aast_check::check_program(&aast));

@@ -143,10 +143,10 @@ let disallow_inst_meth = GlobalOptions.po_disallow_inst_meth
 let with_disallow_inst_meth po b =
   { po with GlobalOptions.po_disallow_inst_meth = b }
 
-let enable_readonly_enforcement = GlobalOptions.po_enable_readonly_enforcement
+let enable_readonly_in_emitter = GlobalOptions.po_enable_readonly_in_emitter
 
-let with_enable_readonly_enforcement po b =
-  { po with GlobalOptions.po_enable_readonly_enforcement = b }
+let with_enable_readonly_in_emitter po b =
+  { po with GlobalOptions.po_enable_readonly_in_emitter = b }
 
 let escape_brace = GlobalOptions.po_escape_brace
 
@@ -187,7 +187,7 @@ let make
     ~disallow_fun_and_cls_meth_pseudo_funcs
     ~interpret_soft_types_as_like_types
     ~disallow_inst_meth
-    ~enable_readonly_enforcement
+    ~enable_readonly_in_emitter
     ~escape_brace =
   GlobalOptions.
     {
@@ -221,7 +221,7 @@ let make
         disallow_fun_and_cls_meth_pseudo_funcs;
       po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
       po_disallow_inst_meth = disallow_inst_meth;
-      po_enable_readonly_enforcement = enable_readonly_enforcement;
+      po_enable_readonly_in_emitter = enable_readonly_in_emitter;
       po_escape_brace = escape_brace;
     }
 
@@ -277,5 +277,5 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     disallow_fun_and_cls_meth_pseudo_funcs po,
     interpret_soft_types_as_like_types po,
     disallow_inst_meth po,
-    enable_readonly_enforcement po,
+    enable_readonly_in_emitter po,
     escape_brace po )

@@ -164,7 +164,7 @@ prefixed_flags!(
     JIT_ENABLE_RENAME_FUNCTION,
     LOG_EXTERN_COMPILER_PERF,
     ENABLE_IMPLICIT_CONTEXT,
-    ENABLE_READONLY_ENFORCEMENT,
+    ENABLE_READONLY_IN_EMITTER,
 );
 impl Default for HhvmFlags {
     fn default() -> HhvmFlags {
@@ -679,7 +679,7 @@ mod tests {
   "hhvm.enable_intrinsics_extension": {
     "global_value": false
   },
-  "hhvm.enable_readonly_enforcement": {
+  "hhvm.enable_readonly_in_emitter": {
     "global_value": false
   },
   "hhvm.fold_lazy_class_keys": {
@@ -1149,7 +1149,7 @@ bitflags! {
         const FOLD_LAZY_CLASS_KEYS = 1 << 58;
         const DISALLOW_DYNAMIC_METH_CALLER_ARGS = 1 << 59;
         const DISALLOW_INST_METH = 1 << 60;
-        const ENABLE_READONLY_ENFORCEMENT = 1 << 61;
+        const ENABLE_READONLY_IN_EMITTER = 1 << 61;
         const ESCAPE_BRACE = 1 << 62;
     }
 }

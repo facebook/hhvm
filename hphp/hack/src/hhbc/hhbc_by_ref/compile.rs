@@ -75,7 +75,7 @@ bitflags! {
       pub struct HHBCFlags: u32 {
         const LTR_ASSIGN=1 << 0;
         const UVS=1 << 1;
-        const ENABLE_READONLY_ENFORCEMENT=1 << 2;
+        const ENABLE_READONLY_IN_EMITTER=1 << 2;
         // No longer using bit 3.
         const AUTHORITATIVE=1 << 4;
         const JIT_ENABLE_RENAME_FUNCTION=1 << 5;
@@ -165,8 +165,8 @@ impl HHBCFlags {
         if self.contains(HHBCFlags::ENABLE_IMPLICIT_CONTEXT) {
             f |= HhvmFlags::ENABLE_IMPLICIT_CONTEXT;
         }
-        if self.contains(HHBCFlags::ENABLE_READONLY_ENFORCEMENT) {
-            f |= HhvmFlags::ENABLE_READONLY_ENFORCEMENT;
+        if self.contains(HHBCFlags::ENABLE_READONLY_IN_EMITTER) {
+            f |= HhvmFlags::ENABLE_READONLY_IN_EMITTER;
         }
         f
     }
@@ -543,7 +543,7 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
         ),
         po_disallow_inst_meth: hack_lang_flags(LangFlags::DISALLOW_INST_METH),
         po_escape_brace: hack_lang_flags(LangFlags::ESCAPE_BRACE),
-        po_enable_readonly_enforcement: hhbc_flags(HhvmFlags::ENABLE_READONLY_ENFORCEMENT),
+        po_enable_readonly_in_emitter: hhbc_flags(HhvmFlags::ENABLE_READONLY_IN_EMITTER),
         ..Default::default()
     }
 }

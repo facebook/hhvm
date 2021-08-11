@@ -2693,7 +2693,7 @@ fn get_fcall_args<'arena, 'decl, D: DeclProvider<'decl>>(
         .options()
         .hhvm
         .flags
-        .contains(HhvmFlags::ENABLE_READONLY_ENFORCEMENT)
+        .contains(HhvmFlags::ENABLE_READONLY_IN_EMITTER)
     {
         |expr| is_readonly_expr(expr)
     } else {

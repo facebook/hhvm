@@ -5,7 +5,6 @@
 
 use std::collections::BTreeMap;
 use std::path::Path;
-use std::str::FromStr;
 
 use sha1::{Digest, Sha1};
 
@@ -83,12 +82,20 @@ impl ConfigFile {
         self.map.keys().map(|s| s.as_str())
     }
 
-    pub fn get<T: FromStr>(&self, key: &str) -> Option<Result<T, T::Err>> {
+    pub fn get_str(&self, key: &str) -> Option<&str> {
+        self.map.get(key).map(|s| s.as_str())
+    }
+
+    pub fn get_int(&self, key: &str) -> Option<Result<isize, std::num::ParseIntError>> {
+        self.map.get(key).map(|s| parse_int(s))
+    }
+
+    pub fn get_float(&self, key: &str) -> Option<Result<f64, std::num::ParseFloatError>> {
         self.map.get(key).map(|s| s.parse())
     }
 
-    pub fn get_str(&self, key: &str) -> Option<&str> {
-        self.map.get(key).map(|s| s.as_str())
+    pub fn get_bool(&self, key: &str) -> Option<Result<bool, std::str::ParseBoolError>> {
+        self.map.get(key).map(|s| s.parse())
     }
 
     pub fn get_str_list(&self, key: &str) -> Option<impl Iterator<Item = &str>> {
@@ -104,5 +111,47 @@ impl std::iter::FromIterator<(String, String)> for ConfigFile {
         Self {
             map: BTreeMap::from_iter(iter),
         }
+    }
+}
+
+// Intended to behave like `caml_int_of_string`.
+fn parse_int(input: &str) -> Result<isize, std::num::ParseIntError> {
+    use std::borrow::Cow;
+
+    let input = if input.contains('_') {
+        Cow::Owned(input.chars().filter(|&c| c != '_').collect())
+    } else {
+        Cow::Borrowed(input)
+    };
+
+    if input.starts_with("0b") {
+        isize::from_str_radix(input.trim_start_matches("0b"), 2)
+    } else if input.starts_with("0o") {
+        isize::from_str_radix(input.trim_start_matches("0o"), 8)
+    } else if input.starts_with("0x") {
+        isize::from_str_radix(input.trim_start_matches("0x"), 16)
+    } else {
+        input.parse()
+    }
+}
+
+#[cfg(test)]
+mod test_parse_int {
+    use super::parse_int;
+
+    #[test]
+    fn test() {
+        // These test cases assert the same behavior as `caml_int_of_string`.
+        assert_eq!(parse_int("42"), Ok(42));
+        assert_eq!(parse_int("-42"), Ok(-42));
+        assert_eq!(parse_int("0x42"), Ok(66));
+        assert_eq!(parse_int("0o42"), Ok(34));
+        assert_eq!(parse_int("042"), Ok(42));
+        assert_eq!(parse_int("0b0110"), Ok(6));
+        assert_eq!(parse_int("0b0110_0110"), Ok(102));
+        assert_eq!(parse_int("0x0110_0110"), Ok(17_826_064));
+        assert_eq!(parse_int("0o0110_0110"), Ok(294_984));
+        assert_eq!(parse_int("1_100_110"), Ok(1_100_110));
+        assert_eq!(parse_int("0110_0110"), Ok(1_100_110));
     }
 }

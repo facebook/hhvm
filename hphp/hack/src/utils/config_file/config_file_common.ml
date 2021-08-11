@@ -69,30 +69,35 @@ let of_list = Config_file_ffi_externs.of_list
 let keys = Config_file_ffi_externs.keys
 
 module Getters = struct
+  let ok_or_invalid_arg = function
+    | Ok x -> x
+    | Error e -> invalid_arg e
+
   let string_opt key config = Config_file_ffi_externs.get_string_opt config key
+
+  let int_opt key config =
+    Config_file_ffi_externs.get_int_opt config key
+    |> Option.map ~f:ok_or_invalid_arg
+
+  let float_opt key config =
+    Config_file_ffi_externs.get_float_opt config key
+    |> Option.map ~f:ok_or_invalid_arg
+
+  let bool_opt key config =
+    Config_file_ffi_externs.get_bool_opt config key
+    |> Option.map ~f:ok_or_invalid_arg
+
+  let string_list_opt key config =
+    Config_file_ffi_externs.get_string_list_opt config key
 
   let string_ key ~default config =
     Option.value (string_opt key config) ~default
 
-  let int_ key ~default config =
-    Option.value_map (string_opt key config) ~default ~f:int_of_string
+  let int_ key ~default config = Option.value (int_opt key config) ~default
 
-  let int_opt key config = Option.map (string_opt key config) ~f:int_of_string
+  let float_ key ~default config = Option.value (float_opt key config) ~default
 
-  let float_ key ~default config =
-    Option.value_map (string_opt key config) ~default ~f:float_of_string
-
-  let float_opt key config =
-    Option.map (string_opt key config) ~f:float_of_string
-
-  let bool_ key ~default config =
-    Option.value_map (string_opt key config) ~default ~f:bool_of_string
-
-  let bool_opt key config = Option.map (string_opt key config) ~f:bool_of_string
-
-  let string_list_opt key config =
-    string_opt key config
-    |> Option.map ~f:(Str.split (Str.regexp ",[ \n\r\x0c\t]*"))
+  let bool_ key ~default config = Option.value (bool_opt key config) ~default
 
   let string_list key ~default config =
     Option.value (string_list_opt key config) ~default

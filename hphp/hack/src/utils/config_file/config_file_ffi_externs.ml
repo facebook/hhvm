@@ -28,3 +28,15 @@ external keys : config -> string list = "hh_config_file_keys"
 
 external get_string_opt : config -> string -> string option
   = "hh_config_file_get_string_opt"
+
+external get_int_opt : config -> string -> (int, string) result option
+  = "hh_config_file_get_int_opt"
+
+external get_float_opt : config -> string -> (float, string) result option
+  = "hh_config_file_get_float_opt"
+
+external get_bool_opt : config -> string -> (bool, string) result option
+  = "hh_config_file_get_bool_opt"
+
+external get_string_list_opt : config -> string -> string list option
+  = "hh_config_file_get_string_list_opt"

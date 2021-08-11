@@ -59,4 +59,36 @@ ocamlrep_ocamlpool::ocaml_ffi! {
     fn hh_config_file_get_string_opt(config: Custom<Config>, key: String) -> Option<String> {
         config.0.get_str(&key).map(|s| s.to_owned())
     }
+
+    fn hh_config_file_get_int_opt(
+        config: Custom<Config>,
+        key: String,
+    ) -> Option<Result<isize, String>> {
+        config.0.get_int(&key)
+            .map(|r| r.map_err(|e| e.to_string()))
+    }
+
+    fn hh_config_file_get_float_opt(
+        config: Custom<Config>,
+        key: String,
+    ) -> Option<Result<f64, String>> {
+        config.0.get_float(&key)
+            .map(|r| r.map_err(|e| e.to_string()))
+    }
+
+    fn hh_config_file_get_bool_opt(
+        config: Custom<Config>,
+        key: String,
+    ) -> Option<Result<bool, String>> {
+        config.0.get_bool(&key)
+            .map(|r| r.map_err(|e| e.to_string()))
+    }
+
+    fn hh_config_file_get_string_list_opt(
+        config: Custom<Config>,
+        key: String,
+    ) -> Option<Vec<String>> {
+        config.0.get_str_list(&key)
+            .map(|iter| iter.map(|s| s.to_owned()).collect())
+    }
 }

@@ -2414,7 +2414,7 @@ OPTBLD_INLINE void iopCGetS(ReadOnlyOp op) {
                 ss.cls->name()->data(),
                 ss.name->data());
   }
-  if (RO::EvalEnableReadonlyEnforcement &&
+  if (RO::EvalEnableReadonlyPropertyEnforcement &&
     ss.readonly && op == ReadOnlyOp::Mutable){
     throw_must_be_mutable(ss.cls->name()->data(), ss.name->data());
   }
@@ -2482,7 +2482,7 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
       name->data());
   }
 
-  if (RO::EvalEnableReadonlyEnforcement && lookup.readonly &&
+  if (RO::EvalEnableReadonlyPropertyEnforcement && lookup.readonly &&
     (op == ReadOnlyOp::Mutable || op == ReadOnlyOp::CheckMutROCOW)) {
     if (op == ReadOnlyOp::CheckMutROCOW &&
      (!isRefcountedType(lookup.val->m_type) || hasPersistentFlavor(lookup.val->m_type))) {
@@ -3275,7 +3275,7 @@ OPTBLD_INLINE void iopSetS(ReadOnlyOp op) {
                accessible, constant, readonly, true);
 
   SCOPE_EXIT { decRefStr(name); };
-  if (RO::EvalEnableReadonlyEnforcement &&
+  if (RO::EvalEnableReadonlyPropertyEnforcement &&
     !readonly && op == ReadOnlyOp::ReadOnly) {
     throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
   }

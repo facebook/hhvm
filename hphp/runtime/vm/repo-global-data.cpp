@@ -26,23 +26,23 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 void RepoGlobalData::load(bool loadConstantFuncs) const {
-  RO::EnableIntrinsicsExtension                 = EnableIntrinsicsExtension;
-  RO::PHP7_Builtins                             = PHP7_Builtins;
-  RO::PHP7_NoHexNumerics                        = PHP7_NoHexNumerics;
-  RO::PHP7_Substr                               = PHP7_Substr;
-  RO::EvalCheckPropTypeHints                    = CheckPropTypeHints;
-  RO::EnableArgsInBacktraces                    = EnableArgsInBacktraces;
-  RO::EvalAbortBuildOnVerifyError               = AbortBuildOnVerifyError;
-  RO::StrictArrayFillKeys                       = StrictArrayFillKeys;
-  RO::EvalEmitClassPointers                     = EmitClassPointers;
-  RO::EvalEmitClsMethPointers                   = EmitClsMethPointers;
-  RO::EvalForbidDynamicCallsWithAttr            = ForbidDynamicCallsWithAttr;
-  RO::EvalRaiseClassConversionWarning           = RaiseClassConversionWarning;
-  RO::EvalClassPassesClassname                  = ClassPassesClassname;
-  RO::EvalClassnameNotices                      = ClassnameNotices;
-  RO::EvalClassIsStringNotices                  = ClassIsStringNotices;
-  RO::EvalTraitConstantInterfaceBehavior        = TraitConstantInterfaceBehavior;
-  RO::EvalEnableReadonlyEnforcement             = EnableReadonlyEnforcement;
+  RO::EnableIntrinsicsExtension                    = EnableIntrinsicsExtension;
+  RO::PHP7_Builtins                                = PHP7_Builtins;
+  RO::PHP7_NoHexNumerics                           = PHP7_NoHexNumerics;
+  RO::PHP7_Substr                                  = PHP7_Substr;
+  RO::EvalCheckPropTypeHints                       = CheckPropTypeHints;
+  RO::EnableArgsInBacktraces                       = EnableArgsInBacktraces;
+  RO::EvalAbortBuildOnVerifyError                  = AbortBuildOnVerifyError;
+  RO::StrictArrayFillKeys                          = StrictArrayFillKeys;
+  RO::EvalEmitClassPointers                        = EmitClassPointers;
+  RO::EvalEmitClsMethPointers                      = EmitClsMethPointers;
+  RO::EvalForbidDynamicCallsWithAttr               = ForbidDynamicCallsWithAttr;
+  RO::EvalRaiseClassConversionWarning              = RaiseClassConversionWarning;
+  RO::EvalClassPassesClassname                     = ClassPassesClassname;
+  RO::EvalClassnameNotices                         = ClassnameNotices;
+  RO::EvalClassIsStringNotices                     = ClassIsStringNotices;
+  RO::EvalTraitConstantInterfaceBehavior           = TraitConstantInterfaceBehavior;
+  RO::EvalEnableReadonlyPropertyEnforcement        = EnableReadonlyPropertyEnforcement;
   RO::EvalBuildMayNoticeOnMethCallerHelperIsObject =
     BuildMayNoticeOnMethCallerHelperIsObject;
 
@@ -100,7 +100,7 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(ClassIsStringNotices);
   SHOW(StrictArrayFillKeys);
   SHOW(TraitConstantInterfaceBehavior);
-  SHOW(EnableReadonlyEnforcement);
+  SHOW(EnableReadonlyPropertyEnforcement);
   SHOW(BuildMayNoticeOnMethCallerHelperIsObject);
 #undef SHOW
   return out;

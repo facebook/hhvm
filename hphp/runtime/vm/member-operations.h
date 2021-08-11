@@ -772,7 +772,7 @@ tv_lval ElemD(tv_lval base, key_type<keyType> key, bool roProp) {
     return ElemDBespoke<keyType>(base, key);
   }
 
-  if (RO::EvalEnableReadonlyEnforcement && roProp &&
+  if (RO::EvalEnableReadonlyPropertyEnforcement && roProp &&
     !hasPersistentFlavor(base.type()) && isRefcountedType(base.type())) {
     throwReadOnlyCollectionMutation();
   }
@@ -1006,7 +1006,7 @@ tv_lval ElemU(tv_lval base, key_type<keyType> key, bool roProp) {
     return ElemUBespoke<keyType>(base, key);
   }
 
-  if (RO::EvalEnableReadonlyEnforcement && roProp &&
+  if (RO::EvalEnableReadonlyPropertyEnforcement && roProp &&
     (!hasPersistentFlavor(type(base)) && isRefcountedType(type(base)))) {
     throwReadOnlyCollectionMutation();
   }

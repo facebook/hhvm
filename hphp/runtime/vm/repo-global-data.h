@@ -158,7 +158,7 @@ struct RepoGlobalData {
 
   bool BuildMayNoticeOnMethCallerHelperIsObject = false;
 
-  bool EnableReadonlyEnforcement = false;
+  uint32_t EnableReadonlyPropertyEnforcement = 0;
 
   // Load the appropriate options into their matching
   // RuntimeOptions. If `loadConstantFuncs' is true, also deserialize
@@ -202,7 +202,7 @@ struct RepoGlobalData {
       (TraitConstantInterfaceBehavior)
       (ConstantFunctions)
       (BuildMayNoticeOnMethCallerHelperIsObject)
-      (EnableReadonlyEnforcement)
+      (EnableReadonlyPropertyEnforcement)
       ;
   }
 };

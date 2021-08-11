@@ -961,7 +961,7 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadOnlyOp op) {
     auto const optThisTy = thisTypeFromContext(env.index, env.ctx);
     auto const thisTy    = optThisTy ? *optThisTy : TObj;
     if (name) {
-      if (RO::EvalEnableReadonlyEnforcement && op == ReadOnlyOp::Mutable &&
+      if (RO::EvalEnableReadonlyPropertyEnforcement && op == ReadOnlyOp::Mutable &&
         isDefinitelyThisPropAttr(env, name, AttrIsReadOnly)) {
         return Effects::AlwaysThrows;
       }
@@ -975,7 +975,7 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadOnlyOp op) {
           if (propTy->subtypeOf(BBottom)) {
             return { TBottom, Effects::AlwaysThrows };
           }
-          if (RO::EvalEnableReadonlyEnforcement && op == ReadOnlyOp::Mutable &&
+          if (RO::EvalEnableReadonlyPropertyEnforcement && op == ReadOnlyOp::Mutable &&
               isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
             return { *propTy, Effects::Throws };
           }
@@ -1388,7 +1388,7 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
           return Effects::AlwaysThrows;
         }
         push(env, std::move(*t));
-        if (RO::EvalEnableReadonlyEnforcement && mustBeMutable &&
+        if (RO::EvalEnableReadonlyPropertyEnforcement && mustBeMutable &&
           isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
           return Effects::Throws;
         }
@@ -1439,7 +1439,7 @@ Effects miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key, ReadOnlyOp o
     return Effects::AlwaysThrows;
   };
 
-  if (RO::EvalEnableReadonlyEnforcement &&
+  if (RO::EvalEnableReadonlyPropertyEnforcement &&
     op == ReadOnlyOp::ReadOnly && !isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
     return alwaysThrows();
   }
@@ -2024,12 +2024,12 @@ void in(ISS& env, const bc::BaseSC& op) {
   }
 
   // Whether we might potentially throw because of AttrIsReadOnly
-  if (RO::EvalEnableReadonlyEnforcement &&
+  if (RO::EvalEnableReadonlyPropertyEnforcement &&
     op.subop4 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Yes) {
     return unreachable(env);
   }
   auto const mightReadOnlyThrow =
-    RO::EvalEnableReadonlyEnforcement && (
+    RO::EvalEnableReadonlyPropertyEnforcement && (
     (op.subop4 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Maybe) ||
     (op.subop4 == ReadOnlyOp::CheckMutROCOW && lookup.readOnly != TriBool::No));
 

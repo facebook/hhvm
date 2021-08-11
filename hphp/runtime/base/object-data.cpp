@@ -1229,7 +1229,7 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
             throwMutateConstProp(lookup.slot);
           }
         }
-        if (RO::EvalEnableReadonlyEnforcement && lookup.readonly) {
+        if (RO::EvalEnableReadonlyPropertyEnforcement && lookup.readonly) {
           if (op == ReadOnlyOp::CheckMutROCOW &&
             (!isRefcountedType(lookup.val.type()) || hasPersistentFlavor(lookup.val.type()))) {
             assertx(roProp);
@@ -1350,7 +1350,7 @@ void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val, Read
     if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
       throwMutateConstProp(lookup.slot);
     }
-    if (RO::EvalEnableReadonlyEnforcement && !lookup.readonly &&
+    if (RO::EvalEnableReadonlyPropertyEnforcement && !lookup.readonly &&
       op == ReadOnlyOp::ReadOnly) {
       throwMustBeReadOnly(lookup.slot);
     }

@@ -1370,7 +1370,8 @@ struct RuntimeOption {
   F(bool, TypeconstAbstractDefaultReflectionIsAbstract, false)          \
   F(bool, AbstractContextConstantUninitAccess, false)                   \
   F(bool, TraitConstantInterfaceBehavior, false)                        \
-  F(bool, EnableReadonlyEnforcement, false)                             \
+  /* 0 nothing, 1 notice, 2 error */                                    \
+  F(uint32_t, EnableReadonlyPropertyEnforcement, 0)                     \
   F(string, TaintConfigurationPath, std::string(""))                    \
   F(bool, EnableReadonlyInEmitter, false)                               \
   /* */

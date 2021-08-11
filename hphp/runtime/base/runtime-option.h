@@ -1371,6 +1371,7 @@ struct RuntimeOption {
   F(bool, AbstractContextConstantUninitAccess, false)                   \
   F(bool, TraitConstantInterfaceBehavior, false)                        \
   F(bool, EnableReadonlyEnforcement, false)                             \
+  F(string, TaintConfigurationPath, std::string(""))                    \
   /* */
 
 private:

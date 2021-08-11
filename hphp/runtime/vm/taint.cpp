@@ -17,26 +17,63 @@
 #ifdef HHVM_TAINT
 
 #include <folly/Singleton.h>
+#include <folly/json.h>
 
+#include <boost/filesystem/string_file.hpp>
+
+#include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/taint.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/trace.h"
 
 namespace HPHP {
 namespace taint {
 
+TRACE_SET_MOD(taint);
+
 namespace {
 
-struct SingletonTag {};
+struct ConfigurationSingletonTag {};
+struct StateSingletonTag {};
 
 } // namespace
 
-folly::Singleton<State, SingletonTag> singleton{};
-/* static */ std::shared_ptr<State> State::get() {
-  return singleton.try_get();
+InitFiniNode s_configurationInitialization([]() {
+  Configuration::get()->read(RO::EvalTaintConfigurationPath);
+}, InitFiniNode::When::ProcessInit);
+
+void Configuration::read(const std::string& path) {
+  sources.clear();
+  sinks.clear();
+
+  try {
+    std::string contents;
+    boost::filesystem::load_string_file(path, contents);
+    auto parsed = folly::parseJson(contents);
+    for (const auto source : parsed["sources"]) {
+      sources.insert(source.asString());
+    }
+    for (const auto sink : parsed["sinks"]) {
+      sinks.insert(sink.asString());
+    }
+  } catch (std::exception& exception) {
+    // Swallow because we don't use it in tests.
+    std::cerr << "taint: warning, unable to read configuration ("
+      << exception.what() << ")" << std::endl;
+  }
 }
 
-TRACE_SET_MOD(taint);
+folly::Singleton<Configuration, ConfigurationSingletonTag> kConfigurationSingleton{};
+/* static */ std::shared_ptr<Configuration> Configuration::get() {
+  return kConfigurationSingleton.try_get();
+}
+
+folly::Singleton<State, StateSingletonTag> kStateSingleton{};
+/* static */ std::shared_ptr<State> State::get() {
+  return kStateSingleton.try_get();
+}
 
 namespace {
 
@@ -415,8 +452,12 @@ void iopSSwitch() {
 }
 
 void iopRetC() {
-  FTRACE(1, "taint: iopRetC\n");
-  State::get()->history.push_back(1);
+  std::string name = vmfp()->func()->fullName()->data();
+  auto& sources = Configuration::get()->sources;
+  if (sources.find(name) != sources.end()) {
+    FTRACE(1, "taint: {}: function returns `TestSource`\n", pcOff());
+    State::get()->returned_source = kTestSource;
+  }
 }
 
 void iopRetM() {

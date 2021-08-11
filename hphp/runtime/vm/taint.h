@@ -21,18 +21,31 @@
 #include "hphp/runtime/vm/hhbc.h"
 
 #include <memory>
+#include <set>
 
 namespace HPHP {
 namespace taint {
 
+using Source = int;
+constexpr Source kNoSource = 0;
+constexpr Source kTestSource = 1;
+
+struct Configuration {
+  static std::shared_ptr<Configuration> get();
+
+  void read(const std::string& path);
+
+  std::set<std::string> sources;
+  std::set<std::string> sinks;
+};
+
 struct State {
   static std::shared_ptr<State> get();
 
-  // Dummy data for now. Just to illustrate testing.
   void reset() {
-    history.clear();
+    returned_source = kNoSource;
   }
-  std::vector<int> history;
+  Source returned_source = kNoSource;
 };
 
 #define O(name, imm, in, out, flags) \
@@ -42,7 +55,7 @@ OPCODES
 
 #undef O
 
-} // taint
-} // HPHP
+} // namespace taint
+} // namespace HPHP
 
 #endif

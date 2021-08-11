@@ -21,23 +21,76 @@
 
 #include "hphp/runtime/vm/taint.h"
 
+#include "hphp/runtime/base/attr.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/vm/act-rec.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/trace.h"
+
+
+
 namespace HPHP {
 namespace taint {
 
-class TaintTest : public ::testing::Test {
+struct TaintTest : public ::testing::Test {
+  TaintTest() {
+    SHA1 sha1, bcSha1;
+    m_unitEmitter = std::make_unique<UnitEmitter>(
+      sha1,
+      bcSha1,
+      m_funcTable,
+      /* useGlobalIDs */ false);
+
+    auto name = StringData::Make("func_emitter");
+    m_funcEmitter = std::make_unique<FuncEmitter>(*m_unitEmitter, 0, 0, name);
+    // Prime source location to avoid SEGFAULT.
+    m_funcEmitter->recordSourceLocation(Location::Range(0, 0, 0, 1), 1);
+  }
+
  protected:
   void SetUp() override {
+    Configuration::get()->sources = {"__source"};
     State::get()->reset();
   }
+
+  Func* createFunc(const std::string& name) {
+    auto func_name = StringData::MakeStatic(name);
+    m_funcEmitter->name = func_name;
+    m_funcEmitter->attrs = Attr::AttrNone;
+    return m_funcEmitter->create(m_unit);
+  }
+
+  Native::FuncTable m_funcTable;
+  std::unique_ptr<UnitEmitter> m_unitEmitter;
+  std::unique_ptr<FuncEmitter> m_funcEmitter;
+  Unit m_unit;
 };
 
-TEST(TaintTest, DummyTest) {
-  EXPECT_TRUE(State::get()->history.empty());
+TEST_F(TaintTest, TestRetCSource) {
+  ActRec act_rec;
+  vmfp() = &act_rec;
 
+  auto func = createFunc("__source");
+  vmfp()->setFunc(func);
+
+  EXPECT_EQ(State::get()->returned_source, kNoSource);
   iopRetC();
+  EXPECT_EQ(State::get()->returned_source, kTestSource);
+}
 
-  EXPECT_EQ(State::get()->history.size(), 1);
-  EXPECT_EQ(State::get()->history[0], 1);
+TEST_F(TaintTest, TestRetCNoSource) {
+  ActRec act_rec;
+  vmfp() = &act_rec;
+
+  auto func = createFunc("__unrelated");
+  vmfp()->setFunc(func);
+
+  EXPECT_EQ(State::get()->returned_source, kNoSource);
+  iopRetC();
+  EXPECT_EQ(State::get()->returned_source, kNoSource);
 }
 
 } // namespace taint

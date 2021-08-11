@@ -16,21 +16,17 @@ Generate a cbindgen style C++ header for a list of .rs sources.
 Example invocation:
 
   ffi_cbindgen \
---header hhbc-ast.h \
---srcs \
-hphp/hack/src/utils/ffi/ffi.rs,\
-hphp/hack/src/hhbc/hhbc_by_ref/hhbc_ast.rs \
---namespaces HPHP,hackc,hhbc
+  --header foo-bar.h \
+  --srcs \
+hphp/hack/src/foo/foo.rs,\
+hphp/hack/src/bar/bar.rs \
+  --namespaces HPHP,hackc
+  --includes hphp/hack/src/baz/baz.h
 "
 )]
 struct Opt {
     // Input files
-    #[structopt(
-        long = "srcs",
-        parse(from_os_str),
-        default_value = "",
-        use_delimiter = true
-    )]
+    #[structopt(long = "srcs", parse(from_os_str), use_delimiter = true)]
     srcs: Vec<path::PathBuf>,
 
     // The header file to write
@@ -38,8 +34,12 @@ struct Opt {
     header: path::PathBuf,
 
     // Any namespaces to wrap the generated code in
-    #[structopt(long = "namespaces", default_value = "", use_delimiter = true)]
+    #[structopt(long = "namespaces", use_delimiter = true)]
     namespaces: Vec<String>,
+
+    // Any headers to add to the top of the header
+    #[structopt(long = "includes", use_delimiter = true)]
+    includes: Vec<String>,
 }
 
 fn mk_builder(opts: &Opt) -> Builder {
@@ -62,6 +62,9 @@ fn mk_builder(opts: &Opt) -> Builder {
         .with_pragma_once(true);
     for src in opts.srcs.iter() {
         builder = builder.with_src(src)
+    }
+    for inc in opts.includes.iter() {
+        builder = builder.with_include(inc)
     }
     match &opts.namespaces[..] {
         [namespace, namespaces @ ..] => builder

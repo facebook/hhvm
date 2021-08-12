@@ -9,7 +9,7 @@ mod write;
 pub use context::Context;
 pub use write::{Error, IoWrite, Result, Write};
 
-use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
+use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
 
 use indexmap::IndexSet;
 use itertools::Itertools;
@@ -339,15 +339,15 @@ fn print_fun_def<W: Write>(
 fn print_requirement<W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    r: &(ClassType<'_>, hhas_class::TraitReqKind),
+    r: &Pair<ClassType<'_>, hhas_class::TraitReqKind>,
 ) -> Result<(), W::Error> {
     ctx.newline(w)?;
     w.write(".require ")?;
     match r {
-        (name, hhas_class::TraitReqKind::MustExtend) => {
+        Pair(name, hhas_class::TraitReqKind::MustExtend) => {
             write!(w, "extends <{}>;", name.to_raw_string())
         }
-        (name, hhas_class::TraitReqKind::MustImplement) => {
+        Pair(name, hhas_class::TraitReqKind::MustImplement) => {
             write!(w, "implements <{}>;", name.to_raw_string())
         }
     }
@@ -525,11 +525,11 @@ fn print_doc_comment<'arena, W: Write>(
 fn print_use_precedence<'arena, W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    (id1, id2, ids): &(
+    Triple(id1, id2, ids): &Triple<
         ClassType<'arena>,
         ClassType<'arena>,
         Slice<'arena, ClassType<'arena>>,
-    ),
+    >,
 ) -> Result<(), W::Error> {
     ctx.newline(w)?;
     concat_str(w, [id1.to_raw_string(), "::", id2.to_raw_string()])?;
@@ -551,12 +551,12 @@ fn print_use_as_visibility<W: Write>(w: &mut W, u: UseAsVisibility) -> Result<()
 fn print_use_alias<'arena, W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    (ido1, id, ido2, kindl): &(
+    Quadruple(ido1, id, ido2, kindl): &Quadruple<
         Option<ClassType>,
         ClassType,
         Option<ClassType>,
         Slice<'arena, UseAsVisibility>,
-    ),
+    >,
 ) -> Result<(), W::Error> {
     ctx.newline(w)?;
     let id = id.to_raw_string();
@@ -602,17 +602,17 @@ fn print_uses<'arena, W: Write>(
         } else {
             w.write(" {")?;
             ctx.block(w, |ctx, w| {
-                let precs: &[(
+                let precs: &[Triple<
                     ClassType<'arena>,
                     ClassType<'arena>,
                     Slice<'arena, ClassType<'arena>>,
-                )] = c.use_precedences.as_ref();
-                let aliases: &[(
+                >] = c.use_precedences.as_ref();
+                let aliases: &[Quadruple<
                     Option<ClassType<'arena>>,
                     ClassType<'arena>,
                     Option<ClassType<'arena>>,
                     Slice<'arena, UseAsVisibility>,
-                )] = c.use_aliases.as_ref();
+                >] = c.use_aliases.as_ref();
                 for x in precs {
                     print_use_precedence(ctx, w, x)?;
                 }
@@ -3212,14 +3212,14 @@ fn print_special_and_user_attrs<W: Write>(
 
 fn print_upper_bounds<'arena, W: Write>(
     w: &mut W,
-    ubs: impl AsRef<[(Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>)]>,
+    ubs: impl AsRef<[Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>]>,
 ) -> Result<(), W::Error> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound))
 }
 
 fn print_upper_bound<'arena, W: Write>(
     w: &mut W,
-    (id, tys): &(Str<'arena>, Slice<'arena, HhasTypeInfo>),
+    Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, HhasTypeInfo>>,
 ) -> Result<(), W::Error> {
     paren(w, |w| {
         concat_str_by(w, " ", [id.as_str(), "as", ""])?;

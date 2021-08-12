@@ -5,7 +5,7 @@
 
 use bitflags::bitflags;
 
-use ffi::{Maybe, Slice, Str};
+use ffi::{Maybe, Pair, Quadruple, Slice, Str, Triple};
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_coeffects::HhasCtxConstant;
 use hhbc_by_ref_hhas_constant::HhasConstant;
@@ -36,21 +36,17 @@ pub struct HhasClass<'arena> {
     // Deprecated - kill please
     pub use_aliases: Slice<
         'arena,
-        (
+        Quadruple<
             Option<ClassType<'arena>>,
             ClassType<'arena>,
             Option<ClassType<'arena>>,
             Slice<'arena, UseAsVisibility>,
-        ),
+        >,
     >,
     // Deprecated - kill please
     pub use_precedences: Slice<
         'arena,
-        (
-            ClassType<'arena>,
-            ClassType<'arena>,
-            Slice<'arena, ClassType<'arena>>,
-        ),
+        Triple<ClassType<'arena>, ClassType<'arena>, Slice<'arena, ClassType<'arena>>>,
     >,
     pub enum_type: Option<HhasTypeInfo<'arena>>,
     pub methods: Slice<'arena, HhasMethod<'arena>>,
@@ -58,8 +54,8 @@ pub struct HhasClass<'arena> {
     pub constants: Slice<'arena, HhasConstant<'arena>>,
     pub type_constants: Slice<'arena, HhasTypeConstant<'arena>>,
     pub ctx_constants: Slice<'arena, HhasCtxConstant>, // TODO(SF, 2021-0811): HhasCtxConstant is part of Steve's HhasCoeffect work
-    pub requirements: Slice<'arena, (ClassType<'arena>, TraitReqKind)>,
-    pub upper_bounds: Slice<'arena, (Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>)>,
+    pub requirements: Slice<'arena, Pair<ClassType<'arena>, TraitReqKind>>,
+    pub upper_bounds: Slice<'arena, Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>>,
     pub doc_comment: Maybe<Str<'arena>>,
     pub flags: HhasClassFlags,
 }

@@ -636,6 +636,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     id2,
                     Slice::fill_iter(alloc, vis.iter().map(|&v| UseAsVisibility::from(v))),
                 )
+                    .into()
             }),
     );
 
@@ -648,7 +649,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 let id1 = elaborate_namespace_id(id1);
                 let id2: ClassType<'arena> = (alloc, id2.1.as_ref()).into();
                 let ids = Slice::fill_iter(alloc, ids.iter().map(|x| elaborate_namespace_id(x)));
-                (id1, id2, ids)
+                (id1, id2, ids).into()
             }),
     );
 
@@ -943,7 +944,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         enum_type,
         upper_bounds: Slice::fill_iter(alloc, upper_bounds.into_iter()),
         properties: Slice::fill_iter(alloc, properties.into_iter()),
-        requirements: Slice::fill_iter(alloc, requirements.into_iter()),
+        requirements: Slice::fill_iter(alloc, requirements.into_iter().map(|r| r.into())),
         type_constants: Slice::fill_iter(alloc, type_constants.into_iter()),
         ctx_constants: Slice::fill_iter(alloc, ctx_constants.into_iter()),
         constants: Slice::fill_iter(alloc, constants.into_iter()),

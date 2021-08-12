@@ -434,7 +434,7 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
     num_closures: u32,
-    upper_bounds: Vec<(Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>)>,
+    upper_bounds: Vec<Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>>,
     shadowed_tparams: Vec<String>,
     mut params: Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>,
     return_type_info: Option<HhasTypeInfo<'arena>>,
@@ -501,10 +501,7 @@ pub fn make_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
         num_closures,
-        upper_bounds: Slice::fill_iter(
-            alloc,
-            upper_bounds.into_iter().map(|(s, is)| (s, is).into()),
-        ),
+        upper_bounds: Slice::fill_iter(alloc, upper_bounds.into_iter()),
         shadowed_tparams: Slice::fill_iter(
             alloc,
             shadowed_tparams.into_iter().map(|s| Str::new_str(alloc, s)),
@@ -1166,7 +1163,7 @@ pub fn emit_generics_upper_bounds<'arena>(
     immediate_tparams: &[ast::Tparam],
     class_tparam_names: &[&str],
     skip_awaitable: bool,
-) -> Vec<(Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>)> {
+) -> Vec<Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>> {
     let constraint_filter = |(kind, hint): &(ast_defs::ConstraintKind, ast::Hint)| {
         if let ast_defs::ConstraintKind::ConstraintAs = &kind {
             let mut tparam_names = get_tp_names(immediate_tparams);
@@ -1192,10 +1189,13 @@ pub fn emit_generics_upper_bounds<'arena>(
             .collect::<Vec<_>>();
         match &ubs[..] {
             [] => None,
-            _ => Some((
-                Str::new_str(alloc, get_tp_name(tparam)),
-                Slice::fill_iter(alloc, ubs.into_iter()),
-            )),
+            _ => Some(
+                (
+                    Str::new_str(alloc, get_tp_name(tparam)),
+                    Slice::fill_iter(alloc, ubs.into_iter()),
+                )
+                    .into(),
+            ),
         }
     };
     immediate_tparams

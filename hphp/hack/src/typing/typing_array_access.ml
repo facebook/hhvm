@@ -426,6 +426,7 @@ let rec array_get
             Errors.typing_error p (Reason.string_of_ureason Reason.index_tuple);
             (env, err_witness env p, Ok ty2, dflt_arr_res))
         | (_, p, _) ->
+          Errors.typing_error p (Reason.string_of_ureason Reason.URtuple_access);
           ( env,
             err_witness env p,
             Error (ty2, MakeType.int Reason.none),

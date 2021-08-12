@@ -961,7 +961,7 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadOnlyOp op) {
     auto const optThisTy = thisTypeFromContext(env.index, env.ctx);
     auto const thisTy    = optThisTy ? *optThisTy : TObj;
     if (name) {
-      if (RO::EvalEnableReadonlyPropertyEnforcement && op == ReadOnlyOp::Mutable &&
+      if (checkReadOnlyOp(ReadOnlyOp::Mutable, op) &&
         isDefinitelyThisPropAttr(env, name, AttrIsReadOnly)) {
         return Effects::AlwaysThrows;
       }
@@ -975,8 +975,8 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadOnlyOp op) {
           if (propTy->subtypeOf(BBottom)) {
             return { TBottom, Effects::AlwaysThrows };
           }
-          if (RO::EvalEnableReadonlyPropertyEnforcement && op == ReadOnlyOp::Mutable &&
-              isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
+          if (checkReadOnlyOp(ReadOnlyOp::Mutable, op) &&
+            isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
             return { *propTy, Effects::Throws };
           }
           if (isMaybeThisPropAttr(env, name, AttrLateInit)) {
@@ -1375,6 +1375,7 @@ Effects miFinalIssetProp(ISS& env, int32_t nDiscard, const Type& key) {
 
 Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
                         bool quiet, bool mustBeMutable) {
+  assertx(!mustBeMutable || RO::EvalEnableReadonlyPropertyEnforcement);
   auto const name = mStringKey(key);
   discard(env, nDiscard);
 
@@ -1388,7 +1389,7 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
           return Effects::AlwaysThrows;
         }
         push(env, std::move(*t));
-        if (RO::EvalEnableReadonlyPropertyEnforcement && mustBeMutable &&
+        if (mustBeMutable &&
           isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
           return Effects::Throws;
         }
@@ -1439,8 +1440,8 @@ Effects miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key, ReadOnlyOp o
     return Effects::AlwaysThrows;
   };
 
-  if (RO::EvalEnableReadonlyPropertyEnforcement &&
-    op == ReadOnlyOp::ReadOnly && !isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
+  if (checkReadOnlyOp(ReadOnlyOp::ReadOnly, op) &&
+    !isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
     return alwaysThrows();
   }
 
@@ -2024,13 +2025,13 @@ void in(ISS& env, const bc::BaseSC& op) {
   }
 
   // Whether we might potentially throw because of AttrIsReadOnly
-  if (RO::EvalEnableReadonlyPropertyEnforcement &&
-    op.subop4 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Yes) {
+  if (checkReadOnlyOp(ReadOnlyOp::Mutable, op.subop4) &&
+    lookup.readOnly == TriBool::Yes) {
     return unreachable(env);
   }
   auto const mightReadOnlyThrow =
-    RO::EvalEnableReadonlyPropertyEnforcement && (
-    (op.subop4 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Maybe) ||
+    checkReadOnlyOp() &&
+    ((op.subop4 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Maybe) ||
     (op.subop4 == ReadOnlyOp::CheckMutROCOW && lookup.readOnly != TriBool::No));
 
   // Loading the base from a static property can be considered
@@ -2241,10 +2242,11 @@ void in(ISS& env, const bc::QueryM& op) {
       // We don't currently do anything different for nullsafe query ops.
       switch (op.subop2) {
         case QueryMOp::CGet:
-        case QueryMOp::CGetQuiet:
+        case QueryMOp::CGetQuiet: {
+          auto const check = checkReadOnlyOp(ReadOnlyOp::Mutable, op.mkey.rop);
           return miFinalCGetProp(env, nDiscard, key->first,
-                                 op.subop2 == QueryMOp::CGetQuiet,
-                                 op.mkey.rop == ReadOnlyOp::Mutable);
+                                 op.subop2 == QueryMOp::CGetQuiet, check);
+        }
         case QueryMOp::Isset:
           return miFinalIssetProp(env, nDiscard, key->first);
         case QueryMOp::InOut:

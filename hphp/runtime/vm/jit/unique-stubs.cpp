@@ -1390,7 +1390,7 @@ void emitInterpReq(Vout& v, SrcKey sk, SBInvOffset spOff) {
     v << lea{rvmfp()[-cellsToBytes(frameRelOff)], rvmsp()};
   }
   v << store{v.cns(sk.pc()), rvmtl()[rds::kVmpcOff]};
-  v << jmpi{tc::ustubs().interpHelper, RegSet{}};
+  v << jmpi{tc::ustubs().interpHelper, RegSet{rvmsp()}};
 }
 
 void emitInterpReqNoTranslate(Vout& v, SrcKey sk, SBInvOffset spOff) {
@@ -1399,7 +1399,7 @@ void emitInterpReqNoTranslate(Vout& v, SrcKey sk, SBInvOffset spOff) {
     v << lea{rvmfp()[-cellsToBytes(frameRelOff)], rvmsp()};
   }
   v << store{v.cns(sk.pc()), rvmtl()[rds::kVmpcOff]};
-  v << jmpi{tc::ustubs().interpHelperNoTranslate, RegSet{}};
+  v << jmpi{tc::ustubs().interpHelperNoTranslate, RegSet{rvmsp()}};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,2 @@
+File "no_unstable_feature_class.bad.php", line 4, characters 1-32:
+Cannot use unstable feature: `abstract_enum_class` (Parsing[1002])

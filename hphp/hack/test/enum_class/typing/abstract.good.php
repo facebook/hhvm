@@ -1,5 +1,6 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures('abstract_enum_class')>>
 
 interface I {}
 class C implements I {}

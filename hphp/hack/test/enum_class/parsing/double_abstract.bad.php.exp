@@ -1,2 +1,2 @@
-(3,10)-(3,18) Enum classes cannot have duplicate modifiers
-(6,12)-(6,20) Enum class constants cannot have duplicate modifiers
+(6,10)-(6,18) Enum classes cannot have duplicate modifiers
+(9,12)-(9,20) Enum class constants cannot have duplicate modifiers

@@ -99,6 +99,7 @@ enum UnstableFeatures {
     Modules,
     ContextAliasDeclaration,
     ClassConstDefault,
+    AbstractEnumClass,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -115,6 +116,7 @@ impl UnstableFeatures {
             UnstableFeatures::Modules => Unstable,
             UnstableFeatures::ContextAliasDeclaration => Unstable,
             UnstableFeatures::ClassConstDefault => Migration,
+            UnstableFeatures::AbstractEnumClass => Unstable,
         }
     }
 }
@@ -3725,9 +3727,17 @@ where
     }
 
     fn enum_class_errors(&mut self, node: S<'a, Token, Value>) {
-        if let EnumClassDeclaration(_) = &node.children {
+        if let EnumClassDeclaration(e) = &node.children {
             // only allow abstract as modifier + detect modifier duplication
             self.invalid_modifier_errors("Enum classes", node, |kind| kind == TokenKind::Abstract);
+
+            if let SyntaxList(lst) = &e.modifiers.children {
+                for m in lst.iter() {
+                    if m.is_abstract() {
+                        self.check_can_use_feature(node, &UnstableFeatures::AbstractEnumClass)
+                    }
+                }
+            }
         }
     }
 
@@ -3739,6 +3749,9 @@ where
             });
 
             let is_abstract = Self::has_modifier_abstract(node);
+            if is_abstract {
+                self.check_can_use_feature(node, &UnstableFeatures::AbstractEnumClass)
+            }
             let has_initializer = !e.initializer.is_missing();
             if is_abstract && has_initializer {
                 self.errors.push(Self::make_error_from_node(

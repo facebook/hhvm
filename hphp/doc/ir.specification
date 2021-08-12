@@ -1178,10 +1178,9 @@ To string conversions:
   Loads a pointer to a global with name S0, defining it to be InitNull if it
   is not already defined.
 
-| LdClsPropAddrOrNull, D(PtrToSPropCell|Nullptr),
+| LdClsPropAddrOrNull<readonly op>, D(PtrToSPropCell|Nullptr),
 |                      S(Cls) S(Str) C(Cls|Nullptr) S(PtrToMISBool|Nullptr)
-|                      C(Bool) C(Bool) C(Bool) C(Bool) C(Bool),
-|                      NF
+|                      C(Bool) C(Bool), NF
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
   property name, and S2 is the class representing the context of the code
@@ -1189,13 +1188,12 @@ To string conversions:
   static property named S1, then nullptr is returned. An exception
   will be thrown if the property is marked LateInit and its value is
   Uninit, unless S3 is true. An exception is thrown if S4 is true,
-  and the property is constant. An exception is also thrown if S5 is true, and the
-  property is ReadOnly, or if S6 is true, and the property is not ReadOnly.
+  and the property is constant. An exception is also thrown if there is a
+  readonly violation with the readonly op.
 
-| LdClsPropAddrOrRaise, D(PtrToSPropCell),
+| LdClsPropAddrOrRaise<readonly op>, D(PtrToSPropCell),
 |                       S(Cls) S(Str) C(Cls|Nullptr) S(PtrToMISBool|Nullptr)
-|                       C(Bool) C(Bool) C(Bool) C(Bool) C(Bool),
-|                       NF
+|                       C(Bool) C(Bool), NF
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
   property name, and S2 is the class representing the context of the code
@@ -1203,8 +1201,8 @@ To string conversions:
   static property named S1, then nullptr is returned. An exception
   will be thrown if the property is marked LateInit and its value is
   Uninit, unless S3 is true. An exception is thrown if S4 is true,
-  and the property is constant. An exception is also thrown if S5 is true, and the
-  property is ReadOnly, or if S6 is true, and the property is not ReadOnly.
+  and the property is constant. An exception is also thrown if there is a
+  readonly violation with the readonly op.
 
 | LookupSPropSlot, D(Int), S(Cls) S(Str), NF
 
@@ -1794,7 +1792,7 @@ To string conversions:
 | StVMReturnAddr, ND, NA, NF
 
 | StVMRegState, ND, C(Int), NF
-  
+
   Sets the VM register state to the specified state. This is used
   to track whether the register state is clean or dirty as
   EagerSyncVMRegs is moved around by store elimination.

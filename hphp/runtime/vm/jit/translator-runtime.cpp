@@ -429,50 +429,48 @@ template TypedValue arrFirstLast<false, false>(ArrayData*);
 template TypedValue arrFirstLast<true, true>(ArrayData*);
 template TypedValue arrFirstLast<false, true>(ArrayData*);
 
-TypedValue* getSPropOrNull(const Class* cls,
+TypedValue* getSPropOrNull(ReadOnlyOp op,
+                           const Class* cls,
                            const StringData* name,
                            Class* ctx,
                            bool* roProp,
                            bool ignoreLateInit,
-                           bool writeMode,
-                           bool mustBeMutable,
-                           bool mustBeReadOnly,
-                           bool checkMutROCOW) {
+                           bool writeMode) {
   auto const lookup = ignoreLateInit
     ? cls->getSPropIgnoreLateInit(ctx, name)
     : cls->getSProp(ctx, name);
   if (writeMode && UNLIKELY(lookup.constant)) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
-  if (RO::EvalEnableReadonlyPropertyEnforcement && lookup.readonly) {
-    if (checkMutROCOW && (!isRefcountedType(lookup.val->m_type) ||
-      hasPersistentFlavor(lookup.val->m_type))) {
-      assertx(roProp);
-      *roProp = true;
-    } else if (mustBeMutable || checkMutROCOW) {
-      throw_must_be_mutable(cls->name()->data(), name->data());
+  if (RO::EvalEnableReadonlyPropertyEnforcement) {
+    if (lookup.readonly) {
+      auto cow = !isRefcountedType(lookup.val->m_type) ||
+        hasPersistentFlavor(lookup.val->m_type);
+
+      if (op == ReadOnlyOp::CheckMutROCOW && cow) {
+        assertx(roProp);
+        *roProp = true;
+      } else if (op == ReadOnlyOp::Mutable || op == ReadOnlyOp::CheckMutROCOW) {
+        throw_must_be_mutable(cls->name()->data(), name->data());
+      }
+    } else if (op == ReadOnlyOp::ReadOnly) {
+      throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
     }
-  }
-  if (RO::EvalEnableReadonlyPropertyEnforcement && mustBeReadOnly &&
-    UNLIKELY(!lookup.readonly)) {
-    throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
   }
   if (UNLIKELY(!lookup.val || !lookup.accessible)) return nullptr;
 
   return lookup.val;
 }
 
-TypedValue* getSPropOrRaise(const Class* cls,
+TypedValue* getSPropOrRaise(ReadOnlyOp op,
+                            const Class* cls,
                             const StringData* name,
                             Class* ctx,
                             bool* roProp,
                             bool ignoreLateInit,
-                            bool writeMode,
-                            bool mustBeMutable,
-                            bool mustBeReadOnly,
-                            bool checkMutROCOW) {
-  auto sprop = getSPropOrNull(cls, name, ctx, roProp, ignoreLateInit, writeMode,
-                              mustBeMutable, mustBeReadOnly, checkMutROCOW);
+                            bool writeMode) {
+  auto sprop = getSPropOrNull(op, cls, name, ctx, roProp, ignoreLateInit,
+                              writeMode);
   if (UNLIKELY(!sprop)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(), name->data());

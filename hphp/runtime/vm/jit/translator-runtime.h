@@ -118,24 +118,20 @@ TypedValue arrFirstLast(ArrayData* a);
 
 tv_lval ldGblAddrDefHelper(StringData* name);
 
-TypedValue* getSPropOrNull(const Class* cls,
+TypedValue* getSPropOrNull(ReadOnlyOp op,
+                           const Class* cls,
                            const StringData* name,
                            Class* ctx,
                            bool* roProp,
                            bool ignoreLateInit,
-                           bool writeMode,
-                           bool mustBeMutable,
-                           bool mustBeReadOnly,
-                           bool checkMutROCOW);
-TypedValue* getSPropOrRaise(const Class* cls,
+                           bool writeMode);
+TypedValue* getSPropOrRaise(ReadOnlyOp op,
+                            const Class* cls,
                             const StringData* name,
                             Class* ctx,
                             bool* roProp,
                             bool ignoreLateInit,
-                            bool writeMode,
-                            bool mustBeMutable,
-                            bool mustBeReadOnly,
-                            bool checkMutROCOW);
+                            bool writeMode);
 
 void checkFrame(ActRec* fp, TypedValue* sp, bool fullCheck);
 

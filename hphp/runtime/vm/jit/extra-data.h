@@ -2008,6 +2008,10 @@ struct ReadOnlyData : IRExtraData {
   explicit ReadOnlyData(ReadOnlyOp op) : op(op) {}
   std::string show() const { return subopToName(op); }
 
+  size_t hash() const {
+    return std::hash<ReadOnlyOp>()(op);
+  }
+
   size_t stableHash() const {
     return std::hash<ReadOnlyOp>()(op);
   }
@@ -2863,6 +2867,8 @@ X(LdClsTypeCns,                 LdClsTypeCnsData);
 X(ConvTVToStr,                  ConvNoticeData);
 X(CheckFuncNeedsCoverage,       FuncData);
 X(RecordFuncCall,               FuncData);
+X(LdClsPropAddrOrNull,          ReadOnlyData);
+X(LdClsPropAddrOrRaise,         ReadOnlyData);
 
 #undef X
 

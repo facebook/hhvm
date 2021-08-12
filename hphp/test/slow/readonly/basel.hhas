@@ -1,0 +1,44 @@
+.adata A_1073741824 = """v:1:{v:1:{v:1:{i:1;}}}""";
+.adata A_1073741825 = """v:1:{i:1;}""";
+
+.function{} ["__EntryPoint"("""v:0:{}""")] (4,9) <"HH\\void" N  > test() {
+  .declvars $x $y;
+  .srcloc 5:8,5:23;
+  Vec @A_1073741824
+  .srcloc 5:3,5:23;
+  SetL $x
+  .srcloc 5:3,5:24;
+  PopC
+  .srcloc 6:14,6:14;
+  Int 5
+  .srcloc 6:3,6:10;
+  BaseL $x Define CheckROCOW
+  Dim Define EI:0 Any
+  SetM 0 EI:0 Any
+  .srcloc 6:3,6:15;
+  PopC
+  .srcloc 7:22,7:27;
+  Vec @A_1073741825
+  ColFromArray Vector
+  .srcloc 7:15,7:20;
+  NewVec 1
+  ColFromArray Vector
+  .srcloc 7:8,7:13;
+  NewVec 1
+  ColFromArray Vector
+  .srcloc 7:3,7:32;
+  SetL $y
+  .srcloc 7:3,7:33;
+  PopC
+  .srcloc 8:14,8:14;
+  Int 5
+  .srcloc 8:3,8:10;
+  BaseL $y Define CheckROCOW
+  Dim Define EI:0 Any
+  SetM 0 EI:0 Any
+  .srcloc 8:3,8:15;
+  PopC
+  .srcloc 9:2,9:2;
+  Null
+  RetC
+}

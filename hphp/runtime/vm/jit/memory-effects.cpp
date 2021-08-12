@@ -996,6 +996,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StMBase:
     return PureStore { AMIStateBase, inst.src(0), nullptr };
 
+  case StMROProp:
+    return PureStore { AMIStateROProp, inst.src(0), nullptr };
+
   case LdMROProp:
     return PureLoad { AMIStateROProp };
 
@@ -1984,6 +1987,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ArrayMarkLegacyRecursive:
   case ThrowMustBeMutableException:
   case ThrowMustBeReadOnlyException:
+  case ThrowMustBeValueTypeException:
   case ArrayUnmarkLegacyShallow:
   case ArrayUnmarkLegacyRecursive:
   case SetOpTV:

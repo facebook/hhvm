@@ -128,7 +128,7 @@
 
   String "funk"
   String "value of funk"
-  BaseL $obj Define
+  BaseL $obj Define Any
   SetM 1 PC:1 Any
   PopC
 

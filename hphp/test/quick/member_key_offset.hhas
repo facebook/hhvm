@@ -11,10 +11,10 @@
   String "xyz"
   SetL $t
   PopC
-  BaseL $baz Warn
+  BaseL $baz Warn Any
   QueryM 0 CGet EL:$t Any
   Int 12
-  BaseL $foo Define
+  BaseL $foo Define Any
   Dim Define ET:"x" Any
   Dim Define ET:"y" Any
   Dim Define PT:"bar" Any

@@ -79,7 +79,7 @@
   PopC
 
   String "nonstat"
-  BaseL $obj Warn
+  BaseL $obj Warn Any
   QueryM 1 CGet PC:0 Any
   String "\n"
   Concat

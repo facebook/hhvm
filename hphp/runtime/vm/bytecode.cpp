@@ -2494,17 +2494,26 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
   mstate.base = tv_lval(lookup.val);
 }
 
-OPTBLD_INLINE void baseLImpl(named_local_var loc, MOpMode mode) {
+OPTBLD_INLINE void baseLImpl(named_local_var loc, MOpMode mode, ReadOnlyOp op) {
   auto& mstate = vmMInstrState();
   auto const local = loc.lval;
   if (mode == MOpMode::Warn && type(local) == KindOfUninit) {
     raise_undefined_local(vmfp(), loc.name);
   }
+
+  if (op == ReadOnlyOp::CheckROCOW) {
+    if (!isRefcountedType(local.type()) || hasPersistentFlavor(local.type())) {
+      mstate.roProp = true;
+    } else {
+      auto const name = vmfp()->func()->localVarName(loc.name)->data();
+      throw_local_must_be_value_type(name);
+    }
+  }
   mstate.base = local;
 }
 
-OPTBLD_INLINE void iopBaseL(named_local_var loc, MOpMode mode) {
-  baseLImpl(loc, mode);
+OPTBLD_INLINE void iopBaseL(named_local_var loc, MOpMode mode, ReadOnlyOp op) {
+  baseLImpl(loc, mode, op);
 }
 
 OPTBLD_INLINE void iopBaseC(uint32_t idx, MOpMode) {

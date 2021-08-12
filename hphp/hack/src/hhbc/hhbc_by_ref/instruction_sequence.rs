@@ -891,7 +891,10 @@ pub mod instr {
         local: Local<'a>,
         mode: MemberOpMode,
     ) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IBase(InstructBase::BaseL(local, mode)))
+        instr(
+            alloc,
+            Instruct::IBase(InstructBase::BaseL(local, mode, ReadOnlyOp::Any)),
+        )
     }
 
     pub fn basec<'a>(

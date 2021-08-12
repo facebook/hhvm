@@ -14,21 +14,21 @@
   .srcloc 17:3,17:17;
   PopC
   .srcloc 18:8,18:15;
-  BaseL $t Warn
+  BaseL $t Warn Any
   QueryM 0 CGet PT:"prop" Mutable
   .srcloc 18:3,18:15;
   SetL $y
   .srcloc 18:3,18:16;
   PopC
   .srcloc 19:17,19:22;
-  BaseL $t Warn
+  BaseL $t Warn Any
   QueryM 0 CGet PT:"ro" Any
   .srcloc 19:3,19:22;
   SetL $x
   .srcloc 19:3,19:23;
   PopC
   .srcloc 20:8,20:13;
-  BaseL $t Warn
+  BaseL $t Warn Any
   QueryM 0 CGet PT:"ro" Mutable
   .srcloc 20:3,20:13;
   SetL $z

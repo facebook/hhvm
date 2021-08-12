@@ -1525,6 +1525,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
       if (op == Op::BaseL) decode_iva(new_pc);
       decode_iva(new_pc);
       cur->mbr_mode = decode_oa<MOpMode>(new_pc);
+      if (op == Op::BaseL) decode_oa<ReadOnlyOp>(new_pc);
     }
   } else if (isMemberFinalOp(op)) {
     cur->mbr_live = false;
@@ -1561,6 +1562,17 @@ bool FuncChecker::checkReadOnlyOp(State* cur, PC pc, Op op) {
       auto const rop = decode_oa<ReadOnlyOp>(new_pc);
       if (rop == ReadOnlyOp::ReadOnly) return readOnlyImmNotSupported(rop, op);
       cur->afterCheckROCOW = rop == ReadOnlyOp::CheckROCOW || rop == ReadOnlyOp::CheckMutROCOW;
+      return true;
+    } else if (op == Op::BaseL) {
+      decode_op(new_pc);
+      decode_iva(new_pc);
+      decode_iva(new_pc);
+      decode_oa<MOpMode>(new_pc);
+      auto const rop = decode_oa<ReadOnlyOp>(new_pc);
+      if (rop != ReadOnlyOp::CheckROCOW && rop != ReadOnlyOp::Any) {
+        return readOnlyImmNotSupported(rop, op);
+      }
+      cur->afterCheckROCOW = rop == ReadOnlyOp::CheckROCOW;
       return true;
     } else {
       cur->afterCheckROCOW = false;

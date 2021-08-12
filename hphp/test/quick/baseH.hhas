@@ -11,7 +11,7 @@
   String "xyz"
   SetL $t
   PopC
-  BaseL $baz Warn
+  BaseL $baz Warn Any
   QueryM 0 CGet EL:$t Any
   Int 12
   BaseH
@@ -25,5 +25,5 @@
   CGetL $foo
   FCallFuncD <> 1 1 "" "" - "" "var_dump"
   PopC
-  RetC  
+  RetC
 }

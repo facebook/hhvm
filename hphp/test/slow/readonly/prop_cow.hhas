@@ -21,7 +21,7 @@
   FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
   PopC
   LockObj
-  BaseL $b Define
+  BaseL $b Define Any
   .srcloc 17:3,17:11;
   SetM 0 PT:"myFoo" Any
   .srcloc 17:3,17:24;
@@ -29,7 +29,7 @@
   .srcloc 18:27,18:28;
   Int 10
   .srcloc 18:3,18:23;
-  BaseL $b Define
+  BaseL $b Define Any
   Dim Define PT:"myFoo" Mutable
   Dim Define PT:"c" CheckMutROCOW
   Dim Define EI:0 Any
@@ -40,7 +40,7 @@
   .srcloc 19:31,19:32;
   Int 20
   .srcloc 19:3,19:27;
-  BaseL $b Define
+  BaseL $b Define Any
   Dim Define PT:"myFoo" Mutable
   Dim Define PT:"bad_c" CheckMutROCOW
   Dim Define EI:0 Any

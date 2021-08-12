@@ -2634,7 +2634,7 @@ BaseSC <stack index> <stack index> <member op mode> <readonly op>    []  ->  []
   BaseSC member operation. %1 gives the location of the static property name,
   and %2 gives the location of the class.
 
-BaseL <local id> <member op mode>    []  ->  []
+BaseL <local id> <member op mode> <readonly op>    []  ->  []
 
   BaseL{,W,D} member operation.
 

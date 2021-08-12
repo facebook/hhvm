@@ -47,7 +47,7 @@
   SetL $arr
   PopC
 
-  BaseL $arr Warn
+  BaseL $arr Warn Any
   QueryM 0 CGet ET:"foo" Any
   String "\n"
   Concat
@@ -55,11 +55,11 @@
   PopC
 
   String "one"
-  BaseL $arr Define
+  BaseL $arr Define Any
   SetM 0 EI:1 Any
   PopC
 
-  BaseL $arr Warn
+  BaseL $arr Warn Any
   QueryM 0 CGet EI:1 Any
   String "\n"
   Concat
@@ -69,7 +69,7 @@
   String "baz"
   SetL $key
   PopC
-  BaseL $arr Unset
+  BaseL $arr Unset Any
   UnsetM 0 EL:$key Any
 
   # Test that it's unset

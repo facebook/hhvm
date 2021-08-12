@@ -257,6 +257,7 @@ IMPL_OPCODE_CALL(ThrowMissingArg)
 IMPL_OPCODE_CALL(ThrowMissingThis)
 IMPL_OPCODE_CALL(ThrowMustBeMutableException)
 IMPL_OPCODE_CALL(ThrowMustBeReadOnlyException)
+IMPL_OPCODE_CALL(ThrowMustBeValueTypeException)
 IMPL_OPCODE_CALL(ThrowOutOfBounds)
 IMPL_OPCODE_CALL(ThrowParameterWrongType)
 

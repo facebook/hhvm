@@ -33,14 +33,14 @@
   LockObj
   .srcloc 20:12,20:26;
   NewVec 1
-  BaseL $t Define
+  BaseL $t Define Any
   .srcloc 20:3,20:8;
   SetM 0 PT:"f2" Any
   .srcloc 20:3,20:27;
   PopC
   .srcloc 21:18,21:19;
   Int 10
-  BaseL $t Define
+  BaseL $t Define Any
   Dim Define PT:"f2" Mutable
   Dim Define EI:0 Any
   .srcloc 21:3,21:14;
@@ -59,17 +59,17 @@
   LockObj
   .srcloc 22:16,22:32;
   NewVec 1
-  BaseL $t1 Define
+  BaseL $t1 Define Any
   .srcloc 22:3,22:12;
   SetM 0 PT:"ro_f2" Any
   .srcloc 22:3,22:33;
   PopC
   .srcloc 23:9,23:17;
-  BaseL $t Unset
+  BaseL $t Unset Any
   Dim Unset PT:"f2" Mutable
   UnsetM 0 EI:0 Any
   .srcloc 24:9,24:21;
-  BaseL $t1 Unset
+  BaseL $t1 Unset Any
   Dim Unset PT:"ro_f2" Mutable
   UnsetM 0 EI:0 Any
   .srcloc 25:2,25:2;

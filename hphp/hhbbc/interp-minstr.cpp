@@ -2073,6 +2073,11 @@ void in(ISS& env, const bc::BaseSC& op) {
 
 void in(ISS& env, const bc::BaseL& op) {
   auto ty = peekLocRaw(env, op.nloc1.id);
+  auto throws = false;
+
+  if (op.subop3 == ReadOnlyOp::CheckROCOW) {
+    if (ty.couldBe(BCounted) && !ty.subtypeOf(BArrLike)) throws = true;
+  }
 
   // An Uninit local base can raise a notice.
   if (!ty.couldBe(BUninit)) {
@@ -2093,16 +2098,17 @@ void in(ISS& env, const bc::BaseL& op) {
           env,
           bc::BaseL {
             NamedLocal { kInvalidLocalName, minLocEquiv },
-            op.subop2
+            op.subop2,
+            op.subop3,
           }
         );
       }
     }
 
-    effect_free(env);
+    if (!throws) effect_free(env);
   } else if (op.subop2 != MOpMode::Warn) {
     // The local could be Uninit, but we won't warn about it anyways.
-    effect_free(env);
+    if (!throws) effect_free(env);
   }
 
   mayReadLocal(env, op.nloc1.id);

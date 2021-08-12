@@ -776,7 +776,7 @@ constexpr uint32_t kMaxConcatN = 4;
                                        NOV,             NOV,        NF) \
   O(BaseSC,          FOUR(IVA, IVA, OA(MOpMode), OA(ReadOnlyOp)),       \
                                        NOV,             NOV,        NF) \
-  O(BaseL,           TWO(NLA, OA(MOpMode)),                             \
+  O(BaseL,           THREE(NLA, OA(MOpMode), OA(ReadOnlyOp)),           \
                                        NOV,             NOV,        NF) \
   O(BaseC,           TWO(IVA, OA(MOpMode)),                             \
                                        NOV,             NOV,        NF) \

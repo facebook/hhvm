@@ -501,7 +501,7 @@ pub enum InstructBase<'arena> {
     BaseGC(StackIndex, MemberOpMode),
     BaseGL(Local<'arena>, MemberOpMode),
     BaseSC(StackIndex, StackIndex, MemberOpMode, ReadOnlyOp),
-    BaseL(Local<'arena>, MemberOpMode),
+    BaseL(Local<'arena>, MemberOpMode, ReadOnlyOp),
     BaseC(StackIndex, MemberOpMode),
     BaseH,
     Dim(MemberOpMode, MemberKey<'arena>),

@@ -900,6 +900,15 @@ void throw_must_be_mutable(const char* className, const char* propName)
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
+void throw_local_must_be_value_type(const char* locName)
+{
+  auto msg = folly::sformat(
+    "Local {} must be a value type (e.g. Hack arrays).",
+    locName
+  );
+  SystemLib::throwInvalidOperationExceptionObject(msg);
+}
+
 NEVER_INLINE
 void throw_late_init_prop(const Class* cls,
                           const StringData* propName,

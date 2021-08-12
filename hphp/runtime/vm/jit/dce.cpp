@@ -655,7 +655,9 @@ bool canDCE(IRInstruction* inst) {
   case ThrowInOutMismatch:
   case ThrowMustBeMutableException:
   case ThrowMustBeReadOnlyException:
+  case ThrowMustBeValueTypeException:
   case StMBase:
+  case StMROProp:
   case FinishMemberOp:
   case BeginInlining:
   case EndInlining:

@@ -334,6 +334,12 @@ void cgLdMROProp(IRLS& env, const IRInstruction* inst) {
   vmain(env) << loadb{rvmtl()[off], dstLoc(env, inst, 0).reg()};
 }
 
+void cgStMROProp(IRLS& env, const IRInstruction* inst) {
+  auto const off = rds::kVmMInstrStateOff + offsetof(MInstrState, roProp);
+  auto const srcLoc = irlower::srcLoc(env, inst, 0);
+  vmain(env) << storeb{srcLoc.reg(0), rvmtl()[off]};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static tv_lval ldGblAddrHelper(const StringData* name) {

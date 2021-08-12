@@ -443,6 +443,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowParameterWrongType:
   case ThrowMustBeMutableException:
   case ThrowMustBeReadOnlyException:
+  case ThrowMustBeValueTypeException:
   case UnsetElem:
   case UnsetProp:
   case VecSet:
@@ -899,6 +900,7 @@ bool opcodeMayRaise(Opcode opc) {
   case StructDictGetWithColor:
   case StructDictSet:
   case StructDictUnset:
+  case StMROProp:
   case StStk:
   case StStkRange:
   case StVMRegState:

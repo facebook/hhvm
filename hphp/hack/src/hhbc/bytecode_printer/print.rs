@@ -1367,11 +1367,13 @@ fn print_base<W: Write>(w: &mut W, i: &InstructBase) -> Result<(), W::Error> {
             w.write(" ")?;
             print_readonly_op(w, op)
         }
-        I::BaseL(id, m) => {
+        I::BaseL(id, m, op) => {
             w.write("BaseL ")?;
             print_local(w, id)?;
             w.write(" ")?;
-            print_member_opmode(w, m)
+            print_member_opmode(w, m)?;
+            w.write(" ")?;
+            print_readonly_op(w, op)
         }
         I::BaseC(si, m) => {
             w.write("BaseC ")?;

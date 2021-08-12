@@ -1603,7 +1603,7 @@ void emitBaseSC(IRGS& env,
   stMBase(env, spropPtr);
 }
 
-void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode) {
+void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode, ReadOnlyOp op) {
   stMBase(env, ldLocAddr(env, loc.id));
 
   auto base = ldLoc(env, loc.id, DataTypeGeneric);
@@ -1615,6 +1615,15 @@ void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode) {
     env.irb->constrainLocal(loc.id, DataTypeSpecific,
                             "emitBaseL: Uninit base local");
     gen(env, ThrowUninitLoc, cns(env, baseName));
+  }
+
+  if (op == ReadOnlyOp::CheckROCOW) {
+    if (!base->type().maybe(TCounted) || base->type().subtypeOfAny(TArrLike)) {
+      gen(env, StMROProp, cns(env, true));
+    } else {
+      auto const baseName = curFunc(env)->localVarName(loc.name);
+      gen(env, ThrowMustBeValueTypeException, cns(env, baseName));
+    }
   }
 
   env.irb->fs().setMemberBase(base);

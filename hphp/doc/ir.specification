@@ -2710,6 +2710,10 @@ To string conversions:
 
   Load the address of the roProp field of MInstrState
 
+| StMROProp, ND, C(Bool), NF
+
+  Set the roProp field of MInstrState to S0.
+
 | FinishMemberOp, ND, NA, NF
 
   Mark the end of a member operation. This has no effect at runtime but exists
@@ -3249,6 +3253,11 @@ fields of that struct for holding intermediate values.
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the property was required to be readonly. S0 is the class the property
   was declared on. S1 is the property name.
+
+| ThrowMustBeValueTypeException, ND, S(Str), T
+
+  Throws an InvalidOperationException indicating a readonly semantics violation
+  where the local was required to be a value type. S0 is the local name.
 
 | ProfileType, ND, S(Cell), NF
 

@@ -239,6 +239,7 @@ bool is_constructor_name(const char* func);
 [[noreturn]] void throw_cannot_write_non_readonly_prop(const char* className,
                                                        const char* propName);
 [[noreturn]] void throw_must_be_mutable(const char* className, const char* propName);
+[[noreturn]] void throw_local_must_be_value_type(const char* locName);
 [[noreturn]] void throw_late_init_prop(const Class* cls,
                                        const StringData* propName,
                                        bool isSProp);

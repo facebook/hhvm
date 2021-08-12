@@ -407,6 +407,10 @@ type t = {
   load_state_natively: bool;
   (* make hh_server query and download saved state. *)
   load_state_natively_64bit: bool;
+  load_state_natively_download_timeout: int;
+  (* in seconds *)
+  load_state_natively_dirty_files_timeout: int;
+  (* in seconds *)
   type_decl_bucket_size: int;
   extend_fast_bucket_size: int;
   enable_on_nfs: bool;
@@ -560,6 +564,8 @@ let default =
     require_saved_state = false;
     load_state_natively = false;
     load_state_natively_64bit = false;
+    load_state_natively_download_timeout = 60;
+    load_state_natively_dirty_files_timeout = 200;
     type_decl_bucket_size = 1000;
     extend_fast_bucket_size = 2000;
     enable_on_nfs = false;
@@ -803,6 +809,18 @@ let load_ fn ~silent ~current_version overrides =
       "load_state_natively_64bit"
       ~default:default.load_state_natively_64bit
       ~current_version
+      config
+  in
+  let load_state_natively_download_timeout =
+    int_
+      "load_state_natively_download_timeout"
+      ~default:default.load_state_natively_download_timeout
+      config
+  in
+  let load_state_natively_dirty_files_timeout =
+    int_
+      "load_state_natively_dirty_files_timeout"
+      ~default:default.load_state_natively_dirty_files_timeout
       config
   in
   let use_dummy_informant =
@@ -1190,6 +1208,8 @@ let load_ fn ~silent ~current_version overrides =
     require_saved_state;
     load_state_natively;
     load_state_natively_64bit;
+    load_state_natively_download_timeout;
+    load_state_natively_dirty_files_timeout;
     max_purgatory_clients;
     type_decl_bucket_size;
     extend_fast_bucket_size;

@@ -219,7 +219,12 @@ let merge_saved_state_futures
           ~errors_path:(Path.to_string errors_path)
       in
       let t = Unix.time () in
-      (match dirty_files_promise |> Future.get ~timeout:200 with
+      (match
+         dirty_files_promise
+         |> Future.get
+              ~timeout:
+                genv.local_config.SLC.load_state_natively_dirty_files_timeout
+       with
       | Error error -> Error (Load_state_dirty_files_failure error)
       | Ok
           {
@@ -287,7 +292,8 @@ let download_and_load_state_exn
             Saved_state_loader.Watchman_options.{ root; sockname = None }
           ~ignore_hh_version
           ~saved_state_type:Saved_state_loader.Naming_table
-        |> Future.with_timeout ~timeout:60
+        |> Future.with_timeout
+             ~timeout:genv.local_config.SLC.load_state_natively_download_timeout
       in
       Future.continue_and_map_err loader_future @@ fun result ->
       match result with
@@ -316,7 +322,8 @@ let download_and_load_state_exn
                is_64bit =
                  genv.local_config.ServerLocalConfig.load_state_natively_64bit;
              })
-      |> Future.with_timeout ~timeout:60
+      |> Future.with_timeout
+           ~timeout:genv.local_config.SLC.load_state_natively_download_timeout
     in
     let loader_future =
       Future.continue_with loader_future @@ function

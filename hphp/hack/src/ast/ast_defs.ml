@@ -47,11 +47,14 @@ and abstraction =
   | Abstract
 
 and classish_kind =
-  | Cclass of abstraction
-  | Cinterface
-  | Ctrait
-  | Cenum
-  | Cenum_class
+  | Cclass of abstraction  (** Kind for `class` and `abstract class` *)
+  | Cinterface  (** Kind for `interface` *)
+  | Ctrait  (** Kind for `trait` *)
+  | Cenum  (** Kind for `enum` *)
+  | Cenum_class of abstraction
+      (** Kind for `enum class` and `abstract enum class`.
+      See https://docs.hhvm.com/hack/built-in-types/enum-class
+  *)
 
 and param_kind = Pinout
 
@@ -166,7 +169,7 @@ let is_abstract = function
 let is_c_class = function
   | Cclass _ -> true
   | Cenum
-  | Cenum_class
+  | Cenum_class _
   | Ctrait
   | Cinterface ->
     false
@@ -174,21 +177,21 @@ let is_c_class = function
 let is_c_normal = function
   | Cclass c -> is_concrete c
   | Cenum
-  | Cenum_class
+  | Cenum_class _
   | Ctrait
   | Cinterface ->
     false
 
 let is_c_enum = function
   | Cenum -> true
-  | Cenum_class
+  | Cenum_class _
   | Cclass _
   | Ctrait
   | Cinterface ->
     false
 
 let is_c_enum_class = function
-  | Cenum_class -> true
+  | Cenum_class _ -> true
   | Cenum
   | Cclass _
   | Ctrait
@@ -198,7 +201,7 @@ let is_c_enum_class = function
 let is_c_interface = function
   | Cinterface -> true
   | Cclass _
-  | Cenum_class
+  | Cenum_class _
   | Ctrait
   | Cenum ->
     false
@@ -206,7 +209,7 @@ let is_c_interface = function
 let is_c_trait = function
   | Ctrait -> true
   | Cinterface
-  | Cenum_class
+  | Cenum_class _
   | Cclass _
   | Cenum ->
     false
@@ -214,7 +217,7 @@ let is_c_trait = function
 let is_c_abstract = function
   | Cclass c -> is_abstract c
   | Cinterface
-  | Cenum_class
+  | Cenum_class _
   | Ctrait
   | Cenum ->
     false
@@ -238,7 +241,10 @@ let string_of_classish_kind kind =
   | Cinterface -> "an interface"
   | Ctrait -> "a trait"
   | Cenum -> "an enum"
-  | Cenum_class -> "an enum class"
+  | Cenum_class c ->
+    (match c with
+    | Abstract -> "an abstract enum class"
+    | Concrete -> "an enum class")
 
 let string_of_param_kind = function
   | Pinout -> "inout"

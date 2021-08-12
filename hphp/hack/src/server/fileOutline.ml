@@ -293,7 +293,7 @@ let summarize_class class_ ~no_children =
     match class_.c_kind with
     | Ast_defs.Cinterface -> Interface
     | Ast_defs.Ctrait -> Trait
-    | Ast_defs.Cenum_class
+    | Ast_defs.Cenum_class _
     | Ast_defs.Cenum ->
       Enum
     | Ast_defs.(Cclass _) -> Class

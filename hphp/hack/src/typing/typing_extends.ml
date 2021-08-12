@@ -437,7 +437,7 @@ let conflict_with_declared_interface
     (match Env.get_class env parent_origin with
     | Some cls -> Cls.kind cls |> Ast_defs.is_c_trait
     | None -> false)
-  | Ast_defs.Cenum_class
+  | Ast_defs.Cenum_class _
   | Ast_defs.Cenum ->
     false
 
@@ -481,12 +481,12 @@ let check_const_override
     (* HHVM does not support one specific case of overriding constants:
        If the original constant was defined as non-abstract in an interface,
        it cannot be overridden when implementing or extending that interface. *)
-    match Cls.kind parent_class with
-    | Ast_defs.Cinterface ->
+    if Ast_defs.is_c_interface (Cls.kind parent_class) then
       both_are_non_synthetic_and_concrete
       (* Check that the constant is indeed defined in class_ *)
       && String.( = ) class_const.cc_origin (Cls.name class_)
-    | Ast_defs.(Cclass _ | Ctrait | Cenum | Cenum_class) -> false
+    else
+      false
   in
   let is_abstract_concrete_override =
     match (parent_class_const.cc_abstract, class_const.cc_abstract) with
@@ -559,7 +559,7 @@ let check_members
       && (not (get_ce_synthesized parent_class_elt))
       (* defined on original class *)
       && String.( <> ) class_elt.ce_origin (Cls.name class_)
-    | Ast_defs.(Cclass _ | Cenum | Cenum_class) -> false
+    | Ast_defs.(Cclass _ | Cenum | Cenum_class _) -> false
   in
   List.fold
     ~init:env
@@ -644,7 +644,7 @@ let check_members
                 ()
             end
           | Ast_defs.Cinterface
-          | Ast_defs.Cenum_class
+          | Ast_defs.Cenum_class _
           | Ast_defs.Cenum ->
             ());
         env)

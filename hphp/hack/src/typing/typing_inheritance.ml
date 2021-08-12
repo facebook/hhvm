@@ -112,9 +112,9 @@ let check_extend_kind
     | (Cinterface, Cinterface) ->
       ()
     (* enums extend BuiltinEnum under the hood *)
-    | (Cclass k, (Cenum | Cenum_class)) when is_abstract k -> ()
-    | (Cenum_class, Cenum_class) -> ()
-    | ((Cenum | Cenum_class), (Cenum | Cenum_class)) ->
+    | (Cclass k, (Cenum | Cenum_class _)) when is_abstract k -> ()
+    | (Cenum_class _, Cenum_class _) -> ()
+    | ((Cenum | Cenum_class _), (Cenum | Cenum_class _)) ->
       Errors.wrong_extend_kind
         ~parent_pos
         ~parent_kind

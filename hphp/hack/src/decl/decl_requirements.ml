@@ -56,7 +56,7 @@ let flatten_parent_class_reqs
       in
       (req_ancestors, req_ancestors_extends)
     | Ast_defs.Cenum
-    | Ast_defs.Cenum_class ->
+    | Ast_defs.Cenum_class _ ->
       assert false)
 
 let declared_class_req env class_cache (requirements, req_extends) req_ty =

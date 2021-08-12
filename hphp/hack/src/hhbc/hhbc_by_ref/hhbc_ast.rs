@@ -563,7 +563,7 @@ impl std::convert::From<oxidized::ast_defs::ClassishKind> for ClassishKind {
             Cinterface => Interface,
             Ctrait => Trait,
             Cenum => Enum,
-            CenumClass => EnumClass,
+            CenumClass(_) => EnumClass,
         }
     }
 }

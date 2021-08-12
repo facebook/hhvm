@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c8753d718bfe24d9c340aeafc35bac53>>
+// @generated SignedSource<<a348a6b84e8a400892adb6fffc39ac1e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -162,11 +162,17 @@ arena_deserializer::impl_deserialize_in_arena!(Abstraction);
     ToOcamlRep
 )]
 pub enum ClassishKind {
+    /// Kind for `class` and `abstract class`
     Cclass(Abstraction),
+    /// Kind for `interface`
     Cinterface,
+    /// Kind for `trait`
     Ctrait,
+    /// Kind for `enum`
     Cenum,
-    CenumClass,
+    /// Kind for `enum class` and `abstract enum class`.
+    /// See https://docs.hhvm.com/hack/built-in-types/enum-class
+    CenumClass(Abstraction),
 }
 
 #[derive(

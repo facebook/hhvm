@@ -2582,7 +2582,10 @@ end = struct
         | Cinterface -> Fmt.string ppf "interface"
         | Ctrait -> Fmt.string ppf "trait"
         | Cenum -> Fmt.string ppf "enum"
-        | Cenum_class -> Fmt.string ppf "enum_class")
+        | Cenum_class k ->
+          (match k with
+          | Abstract -> Fmt.string ppf "abstract enum class"
+          | Concrete -> Fmt.string ppf "enum class"))
 
     let pp_class_ancestors class_or_intf ppf = function
       | [] ->

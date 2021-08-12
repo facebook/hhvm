@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<174ce7bfd8dff124160b3af3c8068272>>
+// @generated SignedSource<<2c4c2ddd829511c406e96fe1af60a9f9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -142,7 +142,7 @@ impl<'a> Node<'a> for ClassishKind<'a> {
             ClassishKind::Cinterface => {}
             ClassishKind::Ctrait => {}
             ClassishKind::Cenum => {}
-            ClassishKind::CenumClass => {}
+            ClassishKind::CenumClass(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

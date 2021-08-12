@@ -918,7 +918,7 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum =
               | Ast_defs.Cinterface -> ("Interface", "implement")
               | Ast_defs.Ctrait -> ("Trait", "use")
               | Ast_defs.Cenum -> ("Enum", "use")
-              | Ast_defs.Cenum_class -> ("Enum Class", "extend")
+              | Ast_defs.Cenum_class _ -> ("Enum Class", "extend")
             in
             Errors.sealed_not_subtype
               verb
@@ -949,7 +949,7 @@ let check_parent_sealed (child_pos, child_type) parent_type =
       | (Ast_defs.Cinterface, _) -> check "interface" "implement"
       | (Ast_defs.Ctrait, _) -> check "trait" "use"
       | (Ast_defs.Cclass _, _) -> check "class" "extend"
-      | (Ast_defs.Cenum_class, _) -> check "enum class" "extend"
+      | (Ast_defs.Cenum_class _, _) -> check "enum class" "extend"
       | (Ast_defs.Cenum, _) -> check "enum" "use"
     end
 
@@ -1794,7 +1794,7 @@ let check_SupportDynamicType env c =
                 error_parent_support_dynamic_type
                   parent_type
                   c.c_support_dynamic_type
-            | Ast_defs.(Cenum | Cenum_class | Ctrait) -> ()
+            | Ast_defs.(Cenum | Cenum_class _ | Ctrait) -> ()
           end
         | None -> ())
 
@@ -1869,7 +1869,7 @@ let class_def_ env c tc =
     match c.c_kind with
     | Ast_defs.Cclass k when Ast_defs.is_abstract k -> implements
     | Ast_defs.Ctrait -> implements @ req_implements
-    | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class) -> []
+    | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> []
   in
   let check_constructor_dep = check_constructor_dep env in
   check_implements_or_extends_unique implements;

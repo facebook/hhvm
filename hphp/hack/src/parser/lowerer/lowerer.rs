@@ -5363,7 +5363,8 @@ where
                     user_attributes,
                     file_attributes: vec![],
                     final_: false, // TODO(T77095784): support final EDTs
-                    kind: ast::ClassishKind::CenumClass,
+                    // Update with modifiers / abstract once the syntax is added
+                    kind: ast::ClassishKind::CenumClass(ast::Abstraction::Concrete),
                     is_xhp: false,
                     has_xhp_keyword: false,
                     name,

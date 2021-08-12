@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b56e128a1d3cd05edb3baecd42865a09>>
+// @generated SignedSource<<a2642c88329529d6bdb3fbe47388b2e9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -576,7 +576,10 @@ impl<P: Params> NodeMut<P> for ClassishKind {
             ClassishKind::Cinterface => Ok(()),
             ClassishKind::Ctrait => Ok(()),
             ClassishKind::Cenum => Ok(()),
-            ClassishKind::CenumClass => Ok(()),
+            ClassishKind::CenumClass(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
         }
     }
 }

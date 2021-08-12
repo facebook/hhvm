@@ -4367,7 +4367,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             final_: false,
             is_xhp: false,
             has_xhp_keyword: false,
-            kind: ClassishKind::CenumClass,
+            /* Update with modifiers/Abstract once the syntax is added */
+            kind: ClassishKind::CenumClass(&Abstraction::Concrete),
             module: None, // TODO: grab module from attributes
             name: name.into(),
             tparams: &[],

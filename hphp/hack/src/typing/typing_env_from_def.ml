@@ -50,7 +50,7 @@ let class_env ?origin ctx c =
    * want *)
   let (env, self_ty) =
     match c.c_kind with
-    | Ast_defs.Cenum_class
+    | Ast_defs.Cenum_class _
     | Ast_defs.Cenum ->
       ( env,
         MakeType.class_type (Reason.Rwitness (fst c.c_name)) (snd c.c_name) []

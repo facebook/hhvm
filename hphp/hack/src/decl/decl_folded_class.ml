@@ -45,12 +45,12 @@ let check_extend_kind
   | (Ast_defs.Cinterface, Ast_defs.Cinterface) ->
     ()
   (* enums extend BuiltinEnum under the hood *)
-  | (Ast_defs.Cclass k, (Ast_defs.Cenum | Ast_defs.Cenum_class))
+  | (Ast_defs.Cclass k, (Ast_defs.Cenum | Ast_defs.Cenum_class _))
     when Ast_defs.is_abstract k ->
     ()
-  | (Ast_defs.Cenum_class, Ast_defs.Cenum_class) -> ()
-  | ( (Ast_defs.Cenum | Ast_defs.Cenum_class),
-      (Ast_defs.Cenum | Ast_defs.Cenum_class) ) ->
+  | (Ast_defs.Cenum_class _, Ast_defs.Cenum_class _) -> ()
+  | ( (Ast_defs.Cenum | Ast_defs.Cenum_class _),
+      (Ast_defs.Cenum | Ast_defs.Cenum_class _) ) ->
     Errors.wrong_extend_kind
       ~parent_pos
       ~parent_kind
@@ -307,9 +307,9 @@ and class_decl_if_missing
 and class_is_abstract (c : Shallow_decl_defs.shallow_class) : bool =
   match c.sc_kind with
   | Ast_defs.Cclass k -> Ast_defs.is_abstract k
+  | Ast_defs.Cenum_class k -> Ast_defs.is_abstract k
   | Ast_defs.Cinterface
   | Ast_defs.Ctrait
-  | Ast_defs.Cenum_class
   | Ast_defs.Cenum ->
     true
 
@@ -807,7 +807,7 @@ and typeconst_fold
     Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t =
   let (typeconsts, consts) = acc in
   match c.sc_kind with
-  | Ast_defs.Cenum_class
+  | Ast_defs.Cenum_class _
   | Ast_defs.Cenum ->
     acc
   | Ast_defs.Ctrait

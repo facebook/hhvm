@@ -21,14 +21,13 @@ let check_is_class env (p, h) =
       | Some cls ->
         let kind = Cls.kind cls in
         let name = Cls.name cls in
-        (match kind with
-        | Ast_defs.(Cclass _) ->
+        if Ast_defs.is_c_class kind then (
           if Cls.final cls then Errors.requires_final_class p name
-        | Ast_defs.(Cinterface | Ctrait | Cenum | Cenum_class) ->
+        ) else
           Errors.requires_non_class
             p
             name
-            (Ast_defs.string_of_classish_kind kind))
+            (Ast_defs.string_of_classish_kind kind)
     end
   | Aast.Habstr (name, _) -> Errors.requires_non_class p name "a generic"
   | _ -> Errors.requires_non_class p "This" "an invalid type hint"

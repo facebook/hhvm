@@ -276,7 +276,7 @@ let is_class_disjoint env c1 c2 =
       | Ctrait ->
         true
       | Cclass _
-      | Cenum_class
+      | Cenum_class _
       | Cenum ->
         false)
   in

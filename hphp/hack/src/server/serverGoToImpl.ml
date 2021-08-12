@@ -61,16 +61,12 @@ let add_if_valid_origin ctx class_elt child_class method_name result =
     match origin_decl with
     | Some origin_decl ->
       let origin_kind = Decl_provider.Class.kind origin_decl in
-      (match origin_kind with
-      | Ast_defs.Ctrait ->
+      if Ast_defs.is_c_trait origin_kind then
         ( method_name,
           Lazy.force class_elt.ce_pos |> Naming_provider.resolve_position ctx )
         :: result
-      | Ast_defs.Cclass _
-      | Ast_defs.Cinterface
-      | Ast_defs.Cenum_class
-      | Ast_defs.Cenum ->
-        result)
+      else
+        result
     | None -> failwith "TODO"
 
 let find_positions_of_methods

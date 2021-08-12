@@ -18,7 +18,7 @@ open SymbolOccurrence
 
 let is_enum_or_enum_class = function
   | Ast_defs.Cenum
-  | Ast_defs.Cenum_class ->
+  | Ast_defs.Cenum_class _ ->
     true
   | Ast_defs.(Cinterface | Cclass _ | Ctrait) -> false
 

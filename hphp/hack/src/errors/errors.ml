@@ -4177,7 +4177,8 @@ let wrong_extend_kind
           ""
       in
       extends_msg ^ suggestion
-    | Ast_defs.Cenum_class -> "Enum classes can only extend other enum classes."
+    | Ast_defs.Cenum_class _ ->
+      "Enum classes can only extend other enum classes."
     | Ast_defs.Cenum ->
       (* This case should never happen, as the type checker will have already caught
          it with EnumTypeBad. But just in case, report this error here too. *)
@@ -5503,7 +5504,7 @@ let parent_support_dynamic_type
     | Ast_defs.Cclass _ -> "class "
     | Ast_defs.Ctrait -> "trait "
     | Ast_defs.Cinterface -> "interface "
-    | Ast_defs.Cenum_class
+    | Ast_defs.Cenum_class _
     | Ast_defs.Cenum ->
       (* cannot happen *) ""
   in
@@ -5513,7 +5514,7 @@ let parent_support_dynamic_type
     | (_, Ast_defs.Ctrait) -> "uses "
     | (Ast_defs.Cinterface, Ast_defs.Cinterface) -> "extends "
     | (_, Ast_defs.Cinterface) -> "implements "
-    | (_, Ast_defs.Cenum_class)
+    | (_, Ast_defs.Cenum_class _)
     | (_, Ast_defs.Cenum) ->
       ""
   in

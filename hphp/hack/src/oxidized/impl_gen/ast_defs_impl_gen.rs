@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6f8d22235d405972424aab9c7ad3a2cc>>
+// @generated SignedSource<<1805acf20b42794bc0b0808d7b287d66>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -183,8 +183,8 @@ impl ClassishKind {
     pub fn mk_cenum() -> Self {
         ClassishKind::Cenum
     }
-    pub fn mk_cenum_class() -> Self {
-        ClassishKind::CenumClass
+    pub fn mk_cenum_class(p0: Abstraction) -> Self {
+        ClassishKind::CenumClass(p0)
     }
     pub fn is_cclass(&self) -> bool {
         match self {
@@ -212,7 +212,7 @@ impl ClassishKind {
     }
     pub fn is_cenum_class(&self) -> bool {
         match self {
-            ClassishKind::CenumClass => true,
+            ClassishKind::CenumClass(..) => true,
             _ => false,
         }
     }
@@ -222,15 +222,33 @@ impl ClassishKind {
             _ => None,
         }
     }
+    pub fn as_cenum_class(&self) -> Option<&Abstraction> {
+        match self {
+            ClassishKind::CenumClass(p0) => Some(p0),
+            _ => None,
+        }
+    }
     pub fn as_cclass_mut(&mut self) -> Option<&mut Abstraction> {
         match self {
             ClassishKind::Cclass(p0) => Some(p0),
             _ => None,
         }
     }
+    pub fn as_cenum_class_mut(&mut self) -> Option<&mut Abstraction> {
+        match self {
+            ClassishKind::CenumClass(p0) => Some(p0),
+            _ => None,
+        }
+    }
     pub fn as_cclass_into(self) -> Option<Abstraction> {
         match self {
             ClassishKind::Cclass(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_cenum_class_into(self) -> Option<Abstraction> {
+        match self {
+            ClassishKind::CenumClass(p0) => Some(p0),
             _ => None,
         }
     }

@@ -155,9 +155,9 @@ module ApiShallow = struct
       begin
         match sc.sc_kind with
         | Ast_defs.Cclass k -> Ast_defs.is_abstract k
+        | Ast_defs.Cenum_class k -> Ast_defs.is_abstract k
         | Ast_defs.Cinterface
         | Ast_defs.Ctrait
-        | Ast_defs.Cenum_class
         | Ast_defs.Cenum ->
           true
       end

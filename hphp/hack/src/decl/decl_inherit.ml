@@ -378,7 +378,7 @@ let inherit_hack_class
     | Ast_defs.Cinterface ->
       filter_privates parent
     | Ast_defs.Cenum
-    | Ast_defs.Cenum_class ->
+    | Ast_defs.Cenum_class _ ->
       parent
   in
   let typeconsts =
@@ -543,7 +543,7 @@ let from_parent env c (parents : Decl_store.class_entries SMap.t) =
     | Ast_defs.Cclass k when Ast_defs.is_abstract k ->
       c.sc_implements @ c.sc_extends
     | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
-    | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class) -> c.sc_extends
+    | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> c.sc_extends
   in
   let inherited_l = List.map extends ~f:(from_class env c parents) in
   List.fold_right ~f:add_inherited inherited_l ~init:empty

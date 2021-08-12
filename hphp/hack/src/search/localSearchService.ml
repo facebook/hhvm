@@ -55,7 +55,7 @@ let convert_fileinfo_to_contents
             | Ast_defs.Cclass _ -> SI_Class
             | Ast_defs.Cinterface -> SI_Interface
             | Ast_defs.Ctrait -> SI_Trait
-            | Ast_defs.Cenum_class
+            | Ast_defs.Cenum_class _
             | Ast_defs.Cenum ->
               SI_Enum
           in

@@ -270,9 +270,9 @@ where
         )
     }
 
-    fn parse_enum_class_declaration(&mut self, attrs: S::R) -> S::R {
+    fn parse_enum_class_declaration(&mut self, attrs: S::R, modifiers: S::R) -> S::R {
         // enum-class-declaration:
-        //   attribute-specification-opt enum class name : base { enum-class-enumerator-list-opt }
+        //   attribute-specification-opt modifiers-opt enum class name : base { enum-class-enumerator-list-opt }
         let enum_kw = self.assert_token(TokenKind::Enum);
         let class_kw = self.assert_token(TokenKind::Class);
         let name = self.require_class_name();
@@ -287,6 +287,7 @@ where
             make_enum_class_declaration,
             self,
             attrs,
+            modifiers,
             enum_kw,
             class_kw,
             name,
@@ -301,8 +302,9 @@ where
     }
 
     fn parse_enum_or_enum_class_declaration(&mut self, attrs: S::R) -> S::R {
+        let modifiers = S!(make_missing, self, self.pos());
         match self.peek_token_kind_with_lookahead(1) {
-            TokenKind::Class => self.parse_enum_class_declaration(attrs),
+            TokenKind::Class => self.parse_enum_class_declaration(attrs, modifiers),
             _ => self.parse_enum_declaration(attrs),
         }
     }
@@ -620,6 +622,11 @@ where
 
     pub fn parse_classish_declaration(&mut self, attribute_spec: S::R) -> S::R {
         let modifiers = self.parse_classish_modifiers();
+
+        if self.peek_token_kind() == TokenKind::Enum {
+            return self.parse_enum_class_declaration(attribute_spec, modifiers);
+        }
+
         let (xhp, is_xhp_class) = self.parse_xhp_keyword();
 
         // Error on the XHP token unless it's been explicitly enabled

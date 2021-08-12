@@ -143,10 +143,11 @@ ss.serialize_field("enumerator_value", &self.with(value))?;
 ss.serialize_field("enumerator_semicolon", &self.with(semicolon))?;
       ss.end()
 } 
-SyntaxVariant::EnumClassDeclaration (EnumClassDeclarationChildren{attribute_spec,enum_keyword,class_keyword,name,colon,base,extends,extends_list,left_brace,elements,right_brace} ) => {
-      let mut ss = s.serialize_struct("", 12)?;
+SyntaxVariant::EnumClassDeclaration (EnumClassDeclarationChildren{attribute_spec,modifiers,enum_keyword,class_keyword,name,colon,base,extends,extends_list,left_brace,elements,right_brace} ) => {
+      let mut ss = s.serialize_struct("", 13)?;
       ss.serialize_field("kind", "enum_class_declaration")?;
       ss.serialize_field("enum_class_attribute_spec", &self.with(attribute_spec))?;
+ss.serialize_field("enum_class_modifiers", &self.with(modifiers))?;
 ss.serialize_field("enum_class_enum_keyword", &self.with(enum_keyword))?;
 ss.serialize_field("enum_class_class_keyword", &self.with(class_keyword))?;
 ss.serialize_field("enum_class_name", &self.with(name))?;

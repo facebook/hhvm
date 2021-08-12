@@ -2464,6 +2464,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.EnumClassDeclaration
         {
           enum_class_attribute_spec = attr_spec;
+          enum_class_modifiers = mods;
           enum_class_enum_keyword = enum_kw;
           enum_class_class_keyword = class_kw;
           enum_class_name = name;
@@ -2485,6 +2486,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         [
           t env attr_spec;
           when_present attr_spec newline;
+          t env mods;
+          Space;
           t env enum_kw;
           Space;
           t env class_kw;

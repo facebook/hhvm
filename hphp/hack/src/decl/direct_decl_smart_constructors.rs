@@ -4300,6 +4300,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
     fn make_enum_class_declaration(
         &mut self,
         attributes: Self::R,
+        modifiers: Self::R,
         _enum_keyword: Self::R,
         _class_keyword: Self::R,
         name: Self::R,
@@ -4318,6 +4319,16 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let base = self
             .node_to_ty(base)
             .unwrap_or_else(|| self.tany_with_pos(name.0));
+
+        let mut class_kind = ClassishKind::CenumClass(&Abstraction::Concrete);
+        for modifier in modifiers.iter() {
+            match modifier.token_kind() {
+                Some(TokenKind::Abstract) => {
+                    class_kind = ClassishKind::CenumClass(&Abstraction::Abstract);
+                }
+                _ => {}
+            }
+        }
 
         let builtin_enum_class_ty = {
             let pos = name.0;
@@ -4367,8 +4378,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             final_: false,
             is_xhp: false,
             has_xhp_keyword: false,
-            /* Update with modifiers/Abstract once the syntax is added */
-            kind: ClassishKind::CenumClass(&Abstraction::Concrete),
+            kind: class_kind,
             module: None, // TODO: grab module from attributes
             name: name.into(),
             tparams: &[],

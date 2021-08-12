@@ -207,6 +207,7 @@ let schema : schema_node list =
       fields =
         [
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
+          ("modifiers", ZeroOrOne Token);
           ("enum_keyword", Token);
           ("class_keyword", Token);
           ("name", Token);

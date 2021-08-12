@@ -116,6 +116,7 @@ pub struct EnumDeclChildren {
 pub struct EnumClassDeclChildren {
     pub name: Node,
     pub attributes: Node,
+    pub modifiers: Node,
     pub extends: Node,
 }
 
@@ -323,6 +324,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
     fn make_enum_class_declaration(
         &mut self,
         attributes: Self::R,
+        modifiers: Self::R,
         _enum_keyword: Self::R,
         _class_keyword: Self::R,
         name: Self::R,
@@ -339,6 +341,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
             _ => Node::EnumClassDecl(Box::new(EnumClassDeclChildren {
                 name,
                 attributes,
+                modifiers,
                 extends: extends_list,
             })),
         }

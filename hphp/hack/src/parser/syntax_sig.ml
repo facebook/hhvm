@@ -87,6 +87,7 @@ module type Syntax_S = sig
       }
     | EnumClassDeclaration of {
         enum_class_attribute_spec: t;
+        enum_class_modifiers: t;
         enum_class_enum_keyword: t;
         enum_class_class_keyword: t;
         enum_class_name: t;
@@ -1108,7 +1109,7 @@ module type Syntax_S = sig
   val make_enumerator : t -> t -> t -> t -> t
 
   val make_enum_class_declaration :
-    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_enum_class_enumerator : t -> t -> t -> t -> t -> t
 

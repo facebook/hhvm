@@ -151,9 +151,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_enum_class_declaration(_: &C, enum_class_attribute_spec: Self, enum_class_enum_keyword: Self, enum_class_class_keyword: Self, enum_class_name: Self, enum_class_colon: Self, enum_class_base: Self, enum_class_extends: Self, enum_class_extends_list: Self, enum_class_left_brace: Self, enum_class_elements: Self, enum_class_right_brace: Self) -> Self {
+    fn make_enum_class_declaration(_: &C, enum_class_attribute_spec: Self, enum_class_modifiers: Self, enum_class_enum_keyword: Self, enum_class_class_keyword: Self, enum_class_name: Self, enum_class_colon: Self, enum_class_base: Self, enum_class_extends: Self, enum_class_extends_list: Self, enum_class_left_brace: Self, enum_class_elements: Self, enum_class_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::EnumClassDeclaration(Box::new(EnumClassDeclarationChildren {
             enum_class_attribute_spec,
+            enum_class_modifiers,
             enum_class_enum_keyword,
             enum_class_class_keyword,
             enum_class_name,
@@ -1994,8 +1995,9 @@ where
                 acc
             },
             SyntaxVariant::EnumClassDeclaration(x) => {
-                let EnumClassDeclarationChildren { enum_class_attribute_spec, enum_class_enum_keyword, enum_class_class_keyword, enum_class_name, enum_class_colon, enum_class_base, enum_class_extends, enum_class_extends_list, enum_class_left_brace, enum_class_elements, enum_class_right_brace } = *x;
+                let EnumClassDeclarationChildren { enum_class_attribute_spec, enum_class_modifiers, enum_class_enum_keyword, enum_class_class_keyword, enum_class_name, enum_class_colon, enum_class_base, enum_class_extends, enum_class_extends_list, enum_class_left_brace, enum_class_elements, enum_class_right_brace } = *x;
                 let acc = f(enum_class_attribute_spec, acc);
+                let acc = f(enum_class_modifiers, acc);
                 let acc = f(enum_class_enum_keyword, acc);
                 let acc = f(enum_class_class_keyword, acc);
                 let acc = f(enum_class_name, acc);
@@ -3514,7 +3516,7 @@ where
                  enumerator_name: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::EnumClassDeclaration, 11) => SyntaxVariant::EnumClassDeclaration(Box::new(EnumClassDeclarationChildren {
+             (SyntaxKind::EnumClassDeclaration, 12) => SyntaxVariant::EnumClassDeclaration(Box::new(EnumClassDeclarationChildren {
                  enum_class_right_brace: ts.pop().unwrap(),
                  enum_class_elements: ts.pop().unwrap(),
                  enum_class_left_brace: ts.pop().unwrap(),
@@ -3525,6 +3527,7 @@ where
                  enum_class_name: ts.pop().unwrap(),
                  enum_class_class_keyword: ts.pop().unwrap(),
                  enum_class_enum_keyword: ts.pop().unwrap(),
+                 enum_class_modifiers: ts.pop().unwrap(),
                  enum_class_attribute_spec: ts.pop().unwrap(),
                  
              })),
@@ -4711,6 +4714,7 @@ pub struct EnumeratorChildren<T, V> {
 #[derive(Debug, Clone)]
 pub struct EnumClassDeclarationChildren<T, V> {
     pub enum_class_attribute_spec: Syntax<T, V>,
+    pub enum_class_modifiers: Syntax<T, V>,
     pub enum_class_enum_keyword: Syntax<T, V>,
     pub enum_class_class_keyword: Syntax<T, V>,
     pub enum_class_name: Syntax<T, V>,
@@ -6281,18 +6285,19 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             EnumClassDeclaration(x) => {
-                get_index(11).and_then(|index| { match index {
+                get_index(12).and_then(|index| { match index {
                         0 => Some(&x.enum_class_attribute_spec),
-                    1 => Some(&x.enum_class_enum_keyword),
-                    2 => Some(&x.enum_class_class_keyword),
-                    3 => Some(&x.enum_class_name),
-                    4 => Some(&x.enum_class_colon),
-                    5 => Some(&x.enum_class_base),
-                    6 => Some(&x.enum_class_extends),
-                    7 => Some(&x.enum_class_extends_list),
-                    8 => Some(&x.enum_class_left_brace),
-                    9 => Some(&x.enum_class_elements),
-                    10 => Some(&x.enum_class_right_brace),
+                    1 => Some(&x.enum_class_modifiers),
+                    2 => Some(&x.enum_class_enum_keyword),
+                    3 => Some(&x.enum_class_class_keyword),
+                    4 => Some(&x.enum_class_name),
+                    5 => Some(&x.enum_class_colon),
+                    6 => Some(&x.enum_class_base),
+                    7 => Some(&x.enum_class_extends),
+                    8 => Some(&x.enum_class_extends_list),
+                    9 => Some(&x.enum_class_left_brace),
+                    10 => Some(&x.enum_class_elements),
+                    11 => Some(&x.enum_class_right_brace),
                         _ => None,
                     }
                 })

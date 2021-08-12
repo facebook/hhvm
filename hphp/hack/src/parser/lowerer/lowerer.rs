@@ -5345,6 +5345,13 @@ where
 
                 let name_s = name.1.clone(); // TODO: can I avoid this clone ?
 
+                let kinds = Self::p_kinds(&c.modifiers, env)?;
+                let class_kind = if kinds.has(modifier::ABSTRACT) {
+                    ast::ClassishKind::CenumClass(ast::Abstraction::Abstract)
+                } else {
+                    ast::ClassishKind::CenumClass(ast::Abstraction::Concrete)
+                };
+
                 // Helper to build X -> HH\MemberOf<enum_name, X>
                 let build_elt = |p: Pos, ty: ast::Hint| -> ast::Hint {
                     let enum_name = ast::Id(p.clone(), name_s.clone());
@@ -5363,8 +5370,7 @@ where
                     user_attributes,
                     file_attributes: vec![],
                     final_: false, // TODO(T77095784): support final EDTs
-                    // Update with modifiers / abstract once the syntax is added
-                    kind: ast::ClassishKind::CenumClass(ast::Abstraction::Concrete),
+                    kind: class_kind,
                     is_xhp: false,
                     has_xhp_keyword: false,
                     name,

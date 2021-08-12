@@ -1597,6 +1597,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
           enum_class_name = validate_token x.enum_class_name;
           enum_class_class_keyword = validate_token x.enum_class_class_keyword;
           enum_class_enum_keyword = validate_token x.enum_class_enum_keyword;
+          enum_class_modifiers =
+            validate_option_with validate_token x.enum_class_modifiers;
           enum_class_attribute_spec =
             validate_option_with
               validate_attribute_specification
@@ -1614,6 +1616,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_option_with
                 invalidate_attribute_specification
                 x.enum_class_attribute_spec;
+            enum_class_modifiers =
+              invalidate_option_with invalidate_token x.enum_class_modifiers;
             enum_class_enum_keyword = invalidate_token x.enum_class_enum_keyword;
             enum_class_class_keyword =
               invalidate_token x.enum_class_class_keyword;

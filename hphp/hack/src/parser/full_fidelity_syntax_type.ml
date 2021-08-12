@@ -217,6 +217,7 @@ struct
       }
     | EnumClassDeclaration of {
         enum_class_attribute_spec: t;
+        enum_class_modifiers: t;
         enum_class_enum_keyword: t;
         enum_class_class_keyword: t;
         enum_class_name: t;
@@ -1500,6 +1501,7 @@ struct
 
   and enum_class_declaration = {
     enum_class_attribute_spec: attribute_specification option value;
+    enum_class_modifiers: Token.t option value;
     enum_class_enum_keyword: Token.t value;
     enum_class_class_keyword: Token.t value;
     enum_class_name: Token.t value;

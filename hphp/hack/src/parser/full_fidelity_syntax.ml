@@ -821,6 +821,7 @@ module WithToken (Token : TokenType) = struct
       | EnumClassDeclaration
           {
             enum_class_attribute_spec;
+            enum_class_modifiers;
             enum_class_enum_keyword;
             enum_class_class_keyword;
             enum_class_name;
@@ -833,6 +834,7 @@ module WithToken (Token : TokenType) = struct
             enum_class_right_brace;
           } ->
         let acc = f acc enum_class_attribute_spec in
+        let acc = f acc enum_class_modifiers in
         let acc = f acc enum_class_enum_keyword in
         let acc = f acc enum_class_class_keyword in
         let acc = f acc enum_class_name in
@@ -2542,6 +2544,7 @@ module WithToken (Token : TokenType) = struct
       | EnumClassDeclaration
           {
             enum_class_attribute_spec;
+            enum_class_modifiers;
             enum_class_enum_keyword;
             enum_class_class_keyword;
             enum_class_name;
@@ -2555,6 +2558,7 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           enum_class_attribute_spec;
+          enum_class_modifiers;
           enum_class_enum_keyword;
           enum_class_class_keyword;
           enum_class_name;
@@ -4172,6 +4176,7 @@ module WithToken (Token : TokenType) = struct
       | EnumClassDeclaration
           {
             enum_class_attribute_spec;
+            enum_class_modifiers;
             enum_class_enum_keyword;
             enum_class_class_keyword;
             enum_class_name;
@@ -4185,6 +4190,7 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           "enum_class_attribute_spec";
+          "enum_class_modifiers";
           "enum_class_enum_keyword";
           "enum_class_class_keyword";
           "enum_class_name";
@@ -5928,6 +5934,7 @@ module WithToken (Token : TokenType) = struct
       | ( SyntaxKind.EnumClassDeclaration,
           [
             enum_class_attribute_spec;
+            enum_class_modifiers;
             enum_class_enum_keyword;
             enum_class_class_keyword;
             enum_class_name;
@@ -5942,6 +5949,7 @@ module WithToken (Token : TokenType) = struct
         EnumClassDeclaration
           {
             enum_class_attribute_spec;
+            enum_class_modifiers;
             enum_class_enum_keyword;
             enum_class_class_keyword;
             enum_class_name;
@@ -7806,6 +7814,7 @@ module WithToken (Token : TokenType) = struct
 
       let make_enum_class_declaration
           enum_class_attribute_spec
+          enum_class_modifiers
           enum_class_enum_keyword
           enum_class_class_keyword
           enum_class_name
@@ -7820,6 +7829,7 @@ module WithToken (Token : TokenType) = struct
           EnumClassDeclaration
             {
               enum_class_attribute_spec;
+              enum_class_modifiers;
               enum_class_enum_keyword;
               enum_class_class_keyword;
               enum_class_name;

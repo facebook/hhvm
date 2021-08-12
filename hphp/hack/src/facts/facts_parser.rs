@@ -379,10 +379,11 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
             }
         }
         EnumClassDecl(decl) => {
+            let flags = modifiers_to_flags(&decl.modifiers);
             if let Some(name) = qualified_name(&acc.0, decl.name, acc.2) {
                 let attributes = attributes_into_facts(&acc.0, decl.attributes);
                 let mut enum_class_facts = TypeFacts {
-                    flags: Flag::default(),
+                    flags,
                     kind: TypeKind::Enum,
                     attributes,
                     base_types: StringSet::new(),

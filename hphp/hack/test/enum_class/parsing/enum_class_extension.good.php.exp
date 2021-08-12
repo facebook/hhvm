@@ -1428,6 +1428,7 @@
       {
         "kind":"enum_class_declaration",
         "enum_class_attribute_spec":{"kind":"missing"},
+        "enum_class_modifiers":{"kind":"missing"},
         "enum_class_enum_keyword":{
           "kind":"token",
           "token":{
@@ -2101,6 +2102,7 @@
       {
         "kind":"enum_class_declaration",
         "enum_class_attribute_spec":{"kind":"missing"},
+        "enum_class_modifiers":{"kind":"missing"},
         "enum_class_enum_keyword":{
           "kind":"token",
           "token":{

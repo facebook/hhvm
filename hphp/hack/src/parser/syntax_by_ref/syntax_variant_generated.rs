@@ -289,6 +289,7 @@ pub struct EnumeratorChildren<'a, T, V> {
 #[derive(Debug, Clone)]
 pub struct EnumClassDeclarationChildren<'a, T, V> {
     pub attribute_spec: Syntax<'a, T, V>,
+    pub modifiers: Syntax<'a, T, V>,
     pub enum_keyword: Syntax<'a, T, V>,
     pub class_keyword: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,

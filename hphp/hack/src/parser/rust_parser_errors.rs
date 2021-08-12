@@ -3722,6 +3722,23 @@ where
         }
     }
 
+    fn enum_class_errors(&mut self, node: S<'a, Token, Value>) {
+        if let EnumClassDeclaration(e) = &node.children {
+            // We only support the abstract modifier for now, check
+            // if any other is there
+            if let SyntaxList(lst) = &e.modifiers.children {
+                for m in lst.iter() {
+                    if !m.is_abstract() {
+                        self.errors.push(Self::make_error_from_node(
+                            m,
+                            errors::enum_class_wrong_modifier,
+                        ))
+                    }
+                }
+            }
+        }
+    }
+
     fn classish_errors(&mut self, node: S<'a, Token, Value>) {
         if let ClassishDeclaration(cd) = &node.children {
             // Given a ClassishDeclaration node, test whether or not it's a trait
@@ -5246,6 +5263,10 @@ where
             ClassishDeclaration(_) => {
                 self.classish_errors(node);
                 self.class_reified_param_errors(node);
+            }
+
+            EnumClassDeclaration(_) => {
+                self.enum_class_errors(node);
             }
 
             ConstDeclaration(_) => self.class_constant_modifier_errors(node),

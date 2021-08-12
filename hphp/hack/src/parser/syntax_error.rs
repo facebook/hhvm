@@ -1056,3 +1056,6 @@ pub fn redefined_assignment_different_mutability(var_name: &str) -> Error {
         var_name.to_string(),
     ))
 }
+
+pub const enum_class_wrong_modifier: Error =
+    Cow::Borrowed("Enum classes only support the `abstract` modifier");

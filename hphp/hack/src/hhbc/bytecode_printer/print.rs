@@ -26,7 +26,7 @@ use hhbc_by_ref_hhas_constant::HhasConstant;
 use hhbc_by_ref_hhas_function::HhasFunction;
 use hhbc_by_ref_hhas_method::{HhasMethod, HhasMethodFlags};
 use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhas_pos::{HhasPos, Span};
+use hhbc_by_ref_hhas_pos::{HhasPos, HhasSpan};
 use hhbc_by_ref_hhas_program::HhasProgram;
 use hhbc_by_ref_hhas_property::HhasProperty;
 use hhbc_by_ref_hhas_record_def::{Field, HhasRecord};
@@ -3158,7 +3158,10 @@ fn print_param_user_attributes<W: Write>(
     }
 }
 
-fn print_span<W: Write>(w: &mut W, &Span(line_begin, line_end): &Span) -> Result<(), W::Error> {
+fn print_span<W: Write>(
+    w: &mut W,
+    &HhasSpan(line_begin, line_end): &HhasSpan,
+) -> Result<(), W::Error> {
     write!(w, "({},{})", line_begin, line_end)
 }
 

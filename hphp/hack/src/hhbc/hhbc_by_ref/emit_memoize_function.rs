@@ -15,7 +15,7 @@ use hhbc_by_ref_hhas_body::HhasBody;
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhas_function::{HhasFunction, HhasFunctionFlags};
 use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhas_pos::HhasSpan;
 use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags};
 use hhbc_by_ref_hhbc_id::function;
@@ -108,7 +108,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         name: original_id,
         body,
-        span: Span::from_pos(&f.span),
+        span: HhasSpan::from_pos(&f.span),
         coeffects,
         flags,
     })

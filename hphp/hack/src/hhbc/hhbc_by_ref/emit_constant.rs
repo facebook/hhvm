@@ -12,7 +12,7 @@ use hhbc_by_ref_env::{emitter::Emitter, Env};
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhas_constant::{self as hhas_constant, HhasConstant};
 use hhbc_by_ref_hhas_function::{HhasFunction, HhasFunctionFlags};
-use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhas_pos::HhasSpan;
 use hhbc_by_ref_hhbc_id::{r#const, function, Id};
 use hhbc_by_ref_hhbc_string_utils::strip_global_ns;
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
@@ -74,7 +74,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             attributes: Slice::empty(),
             name: original_id,
             body,
-            span: Span::from_pos(&constant.span),
+            span: HhasSpan::from_pos(&constant.span),
             coeffects: HhasCoeffects::default(),
             flags: HhasFunctionFlags::NO_INJECTION,
         })

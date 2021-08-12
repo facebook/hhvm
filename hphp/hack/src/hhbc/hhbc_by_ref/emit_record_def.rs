@@ -8,7 +8,7 @@ use hhbc_by_ref_ast_constant_folder as constant_folder;
 use hhbc_by_ref_emit_fatal as emit_fatal;
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
 use hhbc_by_ref_env::emitter::Emitter;
-use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhas_pos::HhasSpan;
 use hhbc_by_ref_hhas_record_def::{Field as RecordField, HhasRecord};
 use hhbc_by_ref_hhas_type::constraint;
 use hhbc_by_ref_hhbc_id::record::RecordType;
@@ -90,7 +90,7 @@ fn emit_record_def<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         is_abstract: rd.abstract_,
         base: Maybe::from(parent_name),
         fields: Slice::fill_iter(alloc, fields.into_iter()),
-        span: Span::from_pos(&rd.span),
+        span: HhasSpan::from_pos(&rd.span),
     })
 }
 

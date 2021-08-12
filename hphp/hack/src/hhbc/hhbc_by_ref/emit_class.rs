@@ -24,7 +24,7 @@ use hhbc_by_ref_hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
 use hhbc_by_ref_hhas_constant::{self as hhas_constant, HhasConstant};
 use hhbc_by_ref_hhas_method::{HhasMethod, HhasMethodFlags};
 use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhas_pos::HhasSpan;
 use hhbc_by_ref_hhas_property::HhasProperty;
 use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
@@ -79,7 +79,7 @@ fn make_86method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     is_static: bool,
     visibility: Visibility,
     is_abstract: bool,
-    span: Span,
+    span: HhasSpan,
     instrs: InstrSeq<'arena>,
 ) -> Result<HhasMethod<'arena>> {
     // TODO: move this. We just know that there are no iterators in 86methods
@@ -519,7 +519,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             false, // is_static
             Visibility::Protected,
             false, // is_abstract
-            Span::from_pos(&ast_class.span),
+            HhasSpan::from_pos(&ast_class.span),
             instrs,
         )?))
     }
@@ -531,7 +531,7 @@ fn make_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>, F>(
     properties: &[HhasProperty<'arena>],
     filter: F,
     name: &'static str,
-    span: Span,
+    span: HhasSpan,
 ) -> Result<Option<HhasMethod<'arena>>>
 where
     F: Fn(&HhasProperty<'arena>) -> bool,
@@ -726,7 +726,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     } else {
         vec![]
     };
-    let span = Span::from_pos(&ast_class.span);
+    let span = HhasSpan::from_pos(&ast_class.span);
     let mut additional_methods: Vec<HhasMethod<'arena>> = vec![];
     if let Some(cats) = xhp_categories {
         additional_methods.push(emit_xhp::from_category_declaration(

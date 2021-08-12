@@ -17,7 +17,7 @@ use hhbc_by_ref_hhas_body::HhasBody;
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhas_method::{HhasMethod, HhasMethodFlags};
 use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhas_pos::HhasSpan;
 use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags, SpecialClsRef, Visibility};
 use hhbc_by_ref_hhbc_id::{class, method, Id};
@@ -184,7 +184,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         visibility: Visibility::from(method.visibility),
         name,
         body,
-        span: Span::from_pos(&method.span),
+        span: HhasSpan::from_pos(&method.span),
         coeffects,
         flags,
     })

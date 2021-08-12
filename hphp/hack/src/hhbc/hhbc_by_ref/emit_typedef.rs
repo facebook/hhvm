@@ -8,7 +8,7 @@ use hhbc_by_ref_emit_body as emit_body;
 use hhbc_by_ref_emit_type_constant as emit_type_constant;
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
 use hhbc_by_ref_env::emitter::Emitter;
-use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhas_pos::HhasSpan;
 use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhas_typedef::HhasTypedef;
 use hhbc_by_ref_hhbc_id::{class::ClassType, Id};
@@ -52,7 +52,7 @@ fn emit_typedef<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         typedef.kind.clone(),
         typedef.vis.is_opaque(),
     );
-    let span = Span::from_pos(&typedef.span);
+    let span = HhasSpan::from_pos(&typedef.span);
 
     attributes_res.and_then(|attributes| {
         type_info_res.and_then(|type_info| {

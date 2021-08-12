@@ -8,7 +8,7 @@ use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_body::HhasBody;
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhas_pos::HhasSpan;
 use hhbc_by_ref_hhbc_id::function::FunctionType;
 
 use bitflags::bitflags;
@@ -18,7 +18,7 @@ pub struct HhasFunction<'arena> {
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub name: FunctionType<'arena>,
     pub body: HhasBody<'arena>,
-    pub span: Span,
+    pub span: HhasSpan,
     pub coeffects: HhasCoeffects,
     pub flags: HhasFunctionFlags,
 }

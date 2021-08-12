@@ -7,7 +7,7 @@ use ffi::Slice;
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_body::HhasBody;
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
-use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhas_pos::HhasSpan;
 use hhbc_by_ref_hhbc_ast::Visibility;
 use hhbc_by_ref_hhbc_id::method::MethodType;
 
@@ -19,7 +19,7 @@ pub struct HhasMethod<'arena> {
     pub visibility: Visibility,
     pub name: MethodType<'arena>,
     pub body: HhasBody<'arena>,
-    pub span: Span,
+    pub span: HhasSpan,
     pub coeffects: HhasCoeffects, //TODO(SF, 2021-08-10): Fix when Steve's `HhasCoeffect`'s (`repr(C)`)work lands
     pub flags: HhasMethodFlags,
 }

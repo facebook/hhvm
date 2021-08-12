@@ -15,7 +15,7 @@ use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_attribute::{self as hhas_attribute, HhasAttribute};
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhas_function::{self as hhas_function, HhasFunction};
-use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhas_pos::HhasSpan;
 use hhbc_by_ref_hhbc_id::{class::ClassType, function::FunctionType, Id};
 use hhbc_by_ref_instruction_sequence::{instr, Result};
 use naming_special_names_rust::user_attributes as ua;
@@ -162,7 +162,7 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let normal_function = HhasFunction {
         attributes: Slice::fill_iter(alloc, attrs.into_iter()),
         name: (alloc, renamed_id.to_raw_string()).into(),
-        span: Span::from_pos(&f.span),
+        span: HhasSpan::from_pos(&f.span),
         coeffects,
         body,
         flags,

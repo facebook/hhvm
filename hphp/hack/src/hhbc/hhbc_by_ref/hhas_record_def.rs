@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use ffi::{Maybe, Slice, Str};
-use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhas_pos::HhasSpan;
 use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhbc_id::record::RecordType;
 use hhbc_by_ref_runtime::TypedValue;
@@ -23,7 +23,7 @@ pub struct HhasRecord<'arena> {
     pub is_abstract: bool,
     pub base: Maybe<RecordType<'arena>>,
     pub fields: Slice<'arena, Field<'arena>>,
-    pub span: Span,
+    pub span: HhasSpan,
 }
 
 // For cbindgen

@@ -10,7 +10,7 @@ use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_coeffects::HhasCtxConstant;
 use hhbc_by_ref_hhas_constant::HhasConstant;
 use hhbc_by_ref_hhas_method::HhasMethod;
-use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhas_pos::HhasSpan;
 use hhbc_by_ref_hhas_property::HhasProperty;
 use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
@@ -31,7 +31,7 @@ pub struct HhasClass<'arena> {
     pub implements: Slice<'arena, ClassType<'arena>>,
     pub enum_includes: Slice<'arena, ClassType<'arena>>,
     pub name: ClassType<'arena>,
-    pub span: Span,
+    pub span: HhasSpan,
     pub uses: Slice<'arena, Str<'arena>>,
     // Deprecated - kill please
     pub use_aliases: Slice<

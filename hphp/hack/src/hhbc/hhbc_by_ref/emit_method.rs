@@ -14,7 +14,7 @@ use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_attribute as hhas_attribute;
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhas_method::{HhasMethod, HhasMethodFlags};
-use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhas_pos::HhasSpan;
 use hhbc_by_ref_hhbc_ast::Visibility;
 use hhbc_by_ref_hhbc_id::{method, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
@@ -260,9 +260,9 @@ pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     };
     let is_interceptable = is_method_interceptable(emitter.options());
     let span = if is_native_opcode_impl {
-        Span(0, 0)
+        HhasSpan(0, 0)
     } else {
-        Span::from_pos(&method.span)
+        HhasSpan::from_pos(&method.span)
     };
     let mut flags = HhasMethodFlags::empty();
     flags.set(HhasMethodFlags::IS_STATIC, method.static_);

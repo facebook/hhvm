@@ -1394,11 +1394,7 @@ let saved_state_init
   ServerProgress.send_progress "loading saved state";
 
   let ctx = Provider_utils.ctx_from_server_env env in
-  (* A historical quirk: we allowed the timeout once while downloading+loading *)
-  (* saved-state, and then once again while waiting to get dirty files from hg *)
-  let timeout = 2 * genv.local_config.SLC.load_state_script_timeout in
-  (* following function will be run under the timeout *)
-  let do_ (_id : Timeout.t) : (loaded_info, load_state_error) result =
+  let do_ () : (loaded_info, load_state_error) result =
     let state_result =
       CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"load saved state"
       @@ fun () ->
@@ -1412,12 +1408,7 @@ let saved_state_init
   let t = Unix.gettimeofday () in
   let state_result =
     try
-      match
-        Timeout.with_timeout
-          ~timeout
-          ~do_
-          ~on_timeout:(fun (_ : Timeout.timings) -> Error Load_state_timeout)
-      with
+      match do_ () with
       | Error error -> Error error
       | Ok loaded_info ->
         let changed_while_parsing = get_updates_exn ~genv ~root in

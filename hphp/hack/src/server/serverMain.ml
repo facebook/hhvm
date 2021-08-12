@@ -1192,14 +1192,10 @@ let program_init genv env =
   ServerProgress.send_progress "wrapping up init...";
   genv.wait_until_ready ();
   ServerStamp.touch_stamp ();
-  let load_script_timeout =
-    genv.local_config.ServerLocalConfig.load_state_script_timeout
-  in
   EventLogger.set_init_type init_type;
   let telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
   HackEventLogger.init_lazy_end
     telemetry
-    ~load_script_timeout
     ~state_distance
     ~approach_name
     ~init_error

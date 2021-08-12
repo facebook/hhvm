@@ -92,7 +92,6 @@ let server_receipt_to_monitor_read_exn ~server_receipt_to_monitor_file:_ _ _ =
 
 let init_lazy_end
     _
-    ~load_script_timeout:_
     ~state_distance:_
     ~approach_name:_
     ~init_error:_

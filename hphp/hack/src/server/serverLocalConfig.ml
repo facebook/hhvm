@@ -404,10 +404,8 @@ type t = {
   (* should we attempt to load saved-state? (subject to further options) *)
   require_saved_state: bool;
   (* if attempting saved-state, should we fail upon failure? *)
-  load_state_script_timeout: int;
-      (** Prefer using Ocaml implementation over load script. *)
-  (* in seconds *)
   load_state_natively: bool;
+  (* make hh_server query and download saved state. *)
   load_state_natively_64bit: bool;
   type_decl_bucket_size: int;
   extend_fast_bucket_size: int;
@@ -560,7 +558,6 @@ let default =
     force_remote_type_check = false;
     use_saved_state = false;
     require_saved_state = false;
-    load_state_script_timeout = 20;
     load_state_natively = false;
     load_state_natively_64bit = false;
     type_decl_bucket_size = 1000;
@@ -793,12 +790,6 @@ let load_ fn ~silent ~current_version overrides =
   in
   let search_chunk_size =
     int_ "search_chunk_size" ~default:default.search_chunk_size config
-  in
-  let load_state_script_timeout =
-    int_
-      "load_mini_script_timeout"
-      ~default:default.load_state_script_timeout
-      config
   in
   let load_state_natively =
     bool_if_min_version
@@ -1197,7 +1188,6 @@ let load_ fn ~silent ~current_version overrides =
     experiments_config_meta;
     use_saved_state;
     require_saved_state;
-    load_state_script_timeout;
     load_state_natively;
     load_state_natively_64bit;
     max_purgatory_clients;

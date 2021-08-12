@@ -12,8 +12,6 @@ type load_state_error =
   | Load_state_saved_state_loader_failure of Saved_state_loader.load_error
   (* an error fetching list of dirty files from hg *)
   | Load_state_dirty_files_failure of Future.error
-  (* either the downloader or hg-dirty-files took too long *)
-  | Load_state_timeout
   (* any other unhandled exception from lazy_init *)
   | Load_state_unhandled_exception of {
       exn: exn;
@@ -81,13 +79,6 @@ let load_state_error_to_verbose_string (err : load_state_error) :
       auto_retry = false;
       stack;
       environment;
-    }
-  | Load_state_timeout ->
-    {
-      message = "Timed out trying to load state";
-      auto_retry = false;
-      stack = Utils.Callstack "";
-      environment = None;
     }
   | Load_state_unhandled_exception { exn; stack } ->
     {

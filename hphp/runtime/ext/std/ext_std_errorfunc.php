@@ -224,7 +224,7 @@ function hphp_set_error_page(string $page): void;
  * @param string $error_msg - The error message for the fatal.
  */
 <<__Native>>
-function hphp_throw_fatal_error(string $error_msg): void;
+function hphp_throw_fatal_error(string $error_msg): noreturn;
 
 /**
  * Clears any output contents that have not been flushed to networked.

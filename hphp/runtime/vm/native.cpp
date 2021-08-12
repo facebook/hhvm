@@ -587,6 +587,8 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     return ty == T::Mixed || ty == T::MixedTV;
   }
 
+  if (tc.isNothing() || tc.isNoReturn()) { return ty == T::Void; }
+
   if (!tc.underlyingDataType()) {
     return false;
   }

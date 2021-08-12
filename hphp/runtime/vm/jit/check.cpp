@@ -244,56 +244,6 @@ bool checkCfg(const IRUnit& unit) {
   return true;
 }
 
-bool checkTmpsSpanningCalls(const IRUnit& unit) {
-  auto ignoreSrc = [&](IRInstruction& /*inst*/, SSATmp* src) {
-    /*
-     * FramePtr/StkPtr-typed tmps may live across calls.
-     *
-     * Tmps defined by DefConst are always available and may be assigned to
-     * registers if needed by the instructions using the const.
-     */
-    return src->isA(TStkPtr) ||
-           src->isA(TFramePtr) ||
-           src->inst()->is(DefConst);
-  };
-
-  StateVector<Block,IdSet<SSATmp>> livein(unit, IdSet<SSATmp>());
-  bool isValid = true;
-  std::string failures;
-  postorderWalk(unit, [&](Block* block) {
-    auto& live = livein[block];
-    if (auto taken = block->taken()) live = livein[taken];
-    if (auto next  = block->next()) live |= livein[next];
-    for (auto it = block->end(); it != block->begin();) {
-      auto& inst = *--it;
-      for (auto dst : inst.dsts()) {
-        live.erase(dst);
-      }
-      if (isCallOp(inst.op())) {
-        live.forEach([&](uint32_t tmp) {
-          folly::format(&failures, "t{} is live across `{}`\n", tmp, inst);
-          isValid = false;
-        });
-      }
-      for (auto* src : inst.srcs()) {
-        if (!ignoreSrc(inst, src)) live.add(src);
-      }
-    }
-  });
-
-  if (!isValid) {
-    logLowPriPerfWarning(
-      "checkTmpsSpanningCalls",
-      100 * kDefaultPerfWarningRate,
-      [&](StructuredLogEntry& cols) {
-        cols.setStr("live_tmps", failures);
-        cols.setStr("hhir_unit", show(unit));
-      }
-    );
-  }
-  return isValid;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // checkOperandTypes().
 
@@ -624,7 +574,6 @@ using TypeNames::TCA;
 bool checkEverything(const IRUnit& unit) {
   assertx(checkCfg(unit));
   if (debug) {
-    checkTmpsSpanningCalls(unit);
     forEachInst(rpoSortCfg(unit), [&](IRInstruction* inst) {
       assertx(checkOperandTypes(inst, &unit));
     });

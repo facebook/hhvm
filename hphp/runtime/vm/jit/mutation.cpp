@@ -105,12 +105,6 @@ struct RefineTmpsRec {
         }
       }
 
-      if (isCallOp(inst.op()) && !state.empty()) {
-        if (!saved_state) saved_state = state;
-        state.clear();
-        continue;
-      }
-
       if (inst.is(CheckType, AssertType)) {
         // Type information for one use of a pointer can't be transferred to
         // other uses, because we may overwrite the pointer's target in between

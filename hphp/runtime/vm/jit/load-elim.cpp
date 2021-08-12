@@ -586,12 +586,6 @@ void handle_call_effects(Local& env,
                     env.global.ainfo.all_local    |
                     env.global.ainfo.all_iter;
   env.state.avail &= keep;
-  for (auto aloc = uint32_t{0};
-      aloc < env.global.ainfo.locations.size();
-      ++aloc) {
-    if (!env.state.avail[aloc]) continue;
-    env.state.tracked[aloc].knownValue = nullptr;
-  }
 
   // Any stack locations modified by the callee are no longer valid
   store(env, effects.kills, nullptr);

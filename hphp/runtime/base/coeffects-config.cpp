@@ -200,7 +200,7 @@ void CoeffectsConfig::initEnforcementLevel(
   s_instance->m_pureLevel = 0;
   s_instance->m_rxLevel = 0;
   s_instance->m_policiedLevel = 0;
-  for (auto const [name, level] : map) {
+  for (auto const& [name, level] : map) {
     if (name == C::s_rx) s_instance->m_rxLevel = level;
     else if (name == C::s_policied) s_instance->m_policiedLevel = level;
     s_instance->m_pureLevel = std::max(s_instance->m_pureLevel, level);

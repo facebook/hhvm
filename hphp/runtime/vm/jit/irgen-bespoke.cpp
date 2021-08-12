@@ -51,37 +51,33 @@ template <typename Finish>
 SSATmp* emitProfiledGet(
     IRGS& env, SSATmp* arr, SSATmp* key, Block* taken, Finish finish,
     bool profiled = true) {
-  auto const result = [&]{
-    if (arr->isA(TVec)) {
-      gen(env, CheckVecBounds, taken, arr, key);
-      auto const data = BespokeGetData { BespokeGetData::KeyState::Present };
-      auto const val = gen(env, BespokeGet, data, arr, key);
-      return profiled ? profiledType(env, val, [&] { finish(val); })
-                      : val;
-    } else {
-      auto const data = BespokeGetData { BespokeGetData::KeyState::Unknown };
-      auto const val = gen(env, BespokeGet, data, arr, key);
-      auto const pval = [&] {
-        if (!profiled) return val;
+  if (arr->isA(TVec)) {
+    gen(env, CheckVecBounds, taken, arr, key);
+    auto const data = BespokeGetData { BespokeGetData::KeyState::Present };
+    auto const val = gen(env, BespokeGet, data, arr, key);
+    return profiled ? profiledType(env, val, [&] { finish(val); }) : val;
+  }
 
-        // We prefer to test the profiledType first, as this will rule out
-        // TUninit when we have profiledType information. In this case, the
-        // latter test will be optimized out.
-        return profiledType(env, val, [&] {
-          gen(env, CheckType, TInitCell, taken, val);
-          finish(val);
-        });
-      }();
+  auto const data = BespokeGetData { BespokeGetData::KeyState::Unknown };
+  auto const val = gen(env, BespokeGet, data, arr, key);
+  auto const pval = [&] {
+    if (!profiled) return val;
 
-      auto const ival = gen(env, CheckType, TInitCell, taken, pval);
-      // TODO(mcolavita): We need this assertion because we can lose const-val
-      // information when we union the output type with TUninit.
-      auto const resultType =
-        arrLikeElemType(arr->type(), key->type(), curClass(env));
-      return gen(env, AssertType, resultType.first, ival);
-    }
+    // We prefer to test the profiledType first, as this will rule out
+    // TUninit when we have profiledType information. In this case, the
+    // latter test will be optimized out.
+    return profiledType(env, val, [&] {
+      gen(env, CheckType, TInitCell, taken, val);
+      finish(val);
+    });
   }();
-  return result;
+
+  auto const ival = gen(env, CheckType, TInitCell, taken, pval);
+  // We need this assertion because we lose const-val information about the
+  // output type when we union it with TUninit for the "missing key" case.
+  auto const resultType =
+    arrLikeElemType(arr->type(), key->type(), curClass(env));
+  return gen(env, AssertType, resultType.first, ival);
 }
 
 template <typename T>

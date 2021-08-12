@@ -176,12 +176,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_enum_class_enumerator(ctx: &C, type_: Self, name: Self, equal: Self, initial_value: Self, semicolon: Self) -> Self {
+    fn make_enum_class_enumerator(ctx: &C, modifiers: Self, type_: Self, name: Self, initializer: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::EnumClassEnumerator(ctx.get_arena().alloc(EnumClassEnumeratorChildren {
+            modifiers,
             type_,
             name,
-            equal,
-            initial_value,
+            initializer,
             semicolon,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));

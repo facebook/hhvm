@@ -229,10 +229,10 @@ let schema : schema_node list =
       aggregates = [];
       fields =
         [
+          ("modifiers", ZeroOrOne Token);
           ("type", Aggregate Specifier);
           ("name", Token);
-          ("equal", Token);
-          ("initial_value", Aggregate Expression);
+          ("initializer", ZeroOrOne (Just "SimpleInitializer"));
           ("semicolon", Token);
         ];
     };

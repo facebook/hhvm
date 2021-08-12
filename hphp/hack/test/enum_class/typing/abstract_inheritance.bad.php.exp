@@ -1,0 +1,12 @@
+File "abstract_inheritance.bad.php", line 8, characters 12-12:
+This class must be declared `abstract`, or provide an implementation for the abstract constant `X` (Typing[4047])
+  File "abstract_inheritance.bad.php", line 5, characters 16-16:
+  Declaration is here
+File "abstract_inheritance.bad.php", line 25, characters 16-16:
+Cannot re-declare this constant as abstract (Typing[4142])
+  File "abstract_inheritance.bad.php", line 21, characters 7-7:
+  Previously defined here
+File "abstract_inheritance.bad.php", line 25, characters 16-16:
+GG cannot re-declare constant X (Typing[4389])
+  File "abstract_inheritance.bad.php", line 24, characters 21-22:
+  because it already inherited it via FF

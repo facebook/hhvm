@@ -1,4 +1,2 @@
 (30,3)-(30,6) A type specifier is expected here.
-(30,8)-(30,8) An equals sign `=` is expected here.
-(30,9)-(31,1) An expression is expected here.
-(30,9)-(31,1) A semicolon `;` is expected here.
+(30,3)-(30,9) Concrete enum class constants must have an initial value

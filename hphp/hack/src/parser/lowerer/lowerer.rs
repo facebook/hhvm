@@ -5346,6 +5346,7 @@ where
                 let name_s = name.1.clone(); // TODO: can I avoid this clone ?
 
                 let kinds = Self::p_kinds(&c.modifiers, env)?;
+
                 let class_kind = if kinds.has(modifier::ABSTRACT) {
                     ast::ClassishKind::CenumClass(ast::Abstraction::Abstract)
                 } else {
@@ -5413,13 +5414,22 @@ where
                             // - const MemberOf<enum_name, type> name = expression
                             let name = Self::pos_name(&c.name, env)?;
                             let pos = &name.0;
+                            let kinds = Self::p_kinds(&c.modifiers, env)?;
+                            let has_abstract = kinds.has(modifier::ABSTRACT);
                             let elt_type = Self::p_hint(&c.type_, env)?;
                             let full_type = build_elt(pos.clone(), elt_type);
-                            let initial_value = Self::p_expr(&c.initial_value, env)?;
+                            let kind = if has_abstract {
+                                ast::ClassConstKind::CCAbstract(None)
+                            } else {
+                                ast::ClassConstKind::CCConcrete(Self::p_simple_initializer(
+                                    &c.initializer,
+                                    env,
+                                )?)
+                            };
                             let class_const = ast::ClassConst {
                                 type_: Some(full_type),
                                 id: name,
-                                kind: ast::ClassConstKind::CCConcrete(initial_value),
+                                kind,
                                 doc_comment: None,
                             };
                             enum_class.consts.push(class_const)

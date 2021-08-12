@@ -1,13 +1,3 @@
-File "typing.multiple.extends.vshape.bad.php", line 17, characters 12-13:
-Class `V0` does not correctly implement all required members  (Typing[4340])
-  File "typing.multiple.extends.vshape.bad.php", line 17, characters 31-32:
-  Some members are incompatible with those declared in type `E0`
-  File "typing.multiple.extends.vshape.bad.php", line 11, characters 11-11:
-  Expected `F0`
-  File "typing.multiple.extends.vshape.bad.php", line 7, characters 11-11:
-  But got `E0`
-  File "typing.multiple.extends.vshape.bad.php", line 7, characters 11-11:
-  This type argument to `HH\MemberOf` only allows supertypes (it is contravariant)
 File "typing.multiple.extends.vshape.bad.php", line 17, characters 35-36:
 V0 cannot re-inherit constant B from F0 (Typing[4389])
   File "typing.multiple.extends.vshape.bad.php", line 17, characters 12-13:
@@ -16,40 +6,18 @@ File "typing.multiple.extends.vshape.bad.php", line 28, characters 12-13:
 Class `V1` does not correctly implement all required members  (Typing[4340])
   File "typing.multiple.extends.vshape.bad.php", line 28, characters 31-32:
   Some members are incompatible with those declared in type `E0`
-  File "typing.multiple.extends.vshape.bad.php", line 22, characters 8-8:
-  Expected `F1`
-  File "typing.multiple.extends.vshape.bad.php", line 7, characters 11-11:
-  But got `E0`
-  File "typing.multiple.extends.vshape.bad.php", line 7, characters 11-11:
-  This type argument to `HH\MemberOf` only allows supertypes (it is contravariant)
+  File "typing.multiple.extends.vshape.bad.php", line 7, characters 4-9:
+  Expected `string`
+  File "typing.multiple.extends.vshape.bad.php", line 22, characters 4-6:
+  But got `int`
 File "typing.multiple.extends.vshape.bad.php", line 28, characters 35-36:
 V1 cannot re-inherit constant B from F1 (Typing[4389])
   File "typing.multiple.extends.vshape.bad.php", line 28, characters 12-13:
   because it already inherited it via E0
-File "typing.multiple.extends.vshape.bad.php", line 39, characters 12-13:
-Class `V2` does not correctly implement all required members  (Typing[4340])
-  File "typing.multiple.extends.vshape.bad.php", line 39, characters 31-32:
-  Some members are incompatible with those declared in type `E0`
-  File "typing.multiple.extends.vshape.bad.php", line 33, characters 11-11:
-  Expected `F2`
-  File "typing.multiple.extends.vshape.bad.php", line 7, characters 11-11:
-  But got `E0`
-  File "typing.multiple.extends.vshape.bad.php", line 7, characters 11-11:
-  This type argument to `HH\MemberOf` only allows supertypes (it is contravariant)
 File "typing.multiple.extends.vshape.bad.php", line 39, characters 35-36:
 V2 cannot re-inherit constant B from F2 (Typing[4389])
   File "typing.multiple.extends.vshape.bad.php", line 39, characters 12-13:
   because it already inherited it via E0
-File "typing.multiple.extends.vshape.bad.php", line 50, characters 12-13:
-Class `V3` does not correctly implement all required members  (Typing[4340])
-  File "typing.multiple.extends.vshape.bad.php", line 50, characters 35-36:
-  Some members are incompatible with those declared in type `F3`
-  File "typing.multiple.extends.vshape.bad.php", line 51, characters 11-11:
-  Expected `V3`
-  File "typing.multiple.extends.vshape.bad.php", line 44, characters 11-11:
-  But got `F3`
-  File "typing.multiple.extends.vshape.bad.php", line 44, characters 11-11:
-  This type argument to `HH\MemberOf` only allows supertypes (it is contravariant)
 File "typing.multiple.extends.vshape.bad.php", line 51, characters 11-11:
 V3 cannot re-declare constant C (Typing[4389])
   File "typing.multiple.extends.vshape.bad.php", line 50, characters 12-13:
@@ -58,26 +26,14 @@ File "typing.multiple.extends.vshape.bad.php", line 57, characters 12-13:
 Class `V4` does not correctly implement all required members  (Typing[4340])
   File "typing.multiple.extends.vshape.bad.php", line 57, characters 35-36:
   Some members are incompatible with those declared in type `F3`
-  File "typing.multiple.extends.vshape.bad.php", line 58, characters 8-8:
-  Expected `V4`
-  File "typing.multiple.extends.vshape.bad.php", line 44, characters 11-11:
-  But got `F3`
-  File "typing.multiple.extends.vshape.bad.php", line 44, characters 11-11:
-  This type argument to `HH\MemberOf` only allows supertypes (it is contravariant)
+  File "typing.multiple.extends.vshape.bad.php", line 44, characters 4-9:
+  Expected `string`
+  File "typing.multiple.extends.vshape.bad.php", line 58, characters 4-6:
+  But got `int`
 File "typing.multiple.extends.vshape.bad.php", line 58, characters 8-8:
 V4 cannot re-declare constant C (Typing[4389])
   File "typing.multiple.extends.vshape.bad.php", line 57, characters 12-13:
   because it already inherited it via F3
-File "typing.multiple.extends.vshape.bad.php", line 63, characters 12-13:
-Class `V5` does not correctly implement all required members  (Typing[4340])
-  File "typing.multiple.extends.vshape.bad.php", line 63, characters 35-36:
-  Some members are incompatible with those declared in type `F3`
-  File "typing.multiple.extends.vshape.bad.php", line 64, characters 11-11:
-  Expected `V5`
-  File "typing.multiple.extends.vshape.bad.php", line 44, characters 11-11:
-  But got `F3`
-  File "typing.multiple.extends.vshape.bad.php", line 44, characters 11-11:
-  This type argument to `HH\MemberOf` only allows supertypes (it is contravariant)
 File "typing.multiple.extends.vshape.bad.php", line 64, characters 11-11:
 V5 cannot re-declare constant C (Typing[4389])
   File "typing.multiple.extends.vshape.bad.php", line 63, characters 12-13:

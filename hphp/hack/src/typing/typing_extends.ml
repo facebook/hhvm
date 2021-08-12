@@ -450,18 +450,23 @@ let check_const_override
     parent_class_const
     class_const
     on_error =
+  let parent_kind = Cls.kind parent_class in
+  let class_kind = Cls.kind class_ in
   let check_params = should_check_params parent_class class_ in
   (* Shared preconditons for const_interface_member_not_unique and
      is_bad_interface_const_override *)
-  let ( = ) = Typing_defs.equal_class_const_kind in
+  let is_concrete = function
+    | CCConcrete -> true
+    | CCAbstract _ -> false
+  in
   let both_are_non_synthetic_and_concrete =
     (* Synthetic  *)
     (not class_const.cc_synthesized)
     (* The parent we are checking is synthetic, no point in checking *)
     && (not parent_class_const.cc_synthesized)
     (* Only check if parent and child have concrete definitions *)
-    && class_const.cc_abstract = CCConcrete
-    && parent_class_const.cc_abstract = CCConcrete
+    && is_concrete class_const.cc_abstract
+    && is_concrete parent_class_const.cc_abstract
   in
   let const_interface_member_not_unique =
     (* Similar to should_check_member_unique, we check if there are multiple
@@ -481,7 +486,7 @@ let check_const_override
     (* HHVM does not support one specific case of overriding constants:
        If the original constant was defined as non-abstract in an interface,
        it cannot be overridden when implementing or extending that interface. *)
-    if Ast_defs.is_c_interface (Cls.kind parent_class) then
+    if Ast_defs.is_c_interface parent_kind then
       both_are_non_synthetic_and_concrete
       (* Check that the constant is indeed defined in class_ *)
       && String.( = ) class_const.cc_origin (Cls.name class_)
@@ -492,6 +497,24 @@ let check_const_override
     match (parent_class_const.cc_abstract, class_const.cc_abstract) with
     | (CCConcrete, CCAbstract _) -> true
     | _ -> false
+  in
+
+  let remove_hh_member_of dty =
+    match get_node dty with
+    | Tapply (_hh_member_of, [_enum; dty]) -> dty
+    | _ -> dty
+  in
+  let class_const_type =
+    if Ast_defs.is_c_enum_class class_kind then
+      remove_hh_member_of class_const.cc_type
+    else
+      class_const.cc_type
+  in
+  let parent_class_const_type =
+    if Ast_defs.is_c_enum_class parent_kind then
+      remove_hh_member_of parent_class_const.cc_type
+    else
+      parent_class_const.cc_type
   in
 
   if check_params then
@@ -518,8 +541,8 @@ let check_const_override
         ~current_decl_and_file:(Env.get_current_decl_and_file env);
   Phase.sub_type_decl
     env
-    class_const.cc_type
-    parent_class_const.cc_type
+    class_const_type
+    parent_class_const_type
     (Errors.class_constant_type_mismatch on_error)
 
 (* Privates are only visible in the parent, we don't need to check them *)

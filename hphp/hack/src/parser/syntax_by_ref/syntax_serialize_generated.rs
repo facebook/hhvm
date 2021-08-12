@@ -160,13 +160,13 @@ ss.serialize_field("enum_class_elements", &self.with(elements))?;
 ss.serialize_field("enum_class_right_brace", &self.with(right_brace))?;
       ss.end()
 } 
-SyntaxVariant::EnumClassEnumerator (EnumClassEnumeratorChildren{type_,name,equal,initial_value,semicolon} ) => {
+SyntaxVariant::EnumClassEnumerator (EnumClassEnumeratorChildren{modifiers,type_,name,initializer,semicolon} ) => {
       let mut ss = s.serialize_struct("", 6)?;
       ss.serialize_field("kind", "enum_class_enumerator")?;
-      ss.serialize_field("enum_class_enumerator_type", &self.with(type_))?;
+      ss.serialize_field("enum_class_enumerator_modifiers", &self.with(modifiers))?;
+ss.serialize_field("enum_class_enumerator_type", &self.with(type_))?;
 ss.serialize_field("enum_class_enumerator_name", &self.with(name))?;
-ss.serialize_field("enum_class_enumerator_equal", &self.with(equal))?;
-ss.serialize_field("enum_class_enumerator_initial_value", &self.with(initial_value))?;
+ss.serialize_field("enum_class_enumerator_initializer", &self.with(initializer))?;
 ss.serialize_field("enum_class_enumerator_semicolon", &self.with(semicolon))?;
       ss.end()
 } 

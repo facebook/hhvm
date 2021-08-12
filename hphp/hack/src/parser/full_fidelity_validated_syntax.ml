@@ -1647,14 +1647,18 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
         {
           enum_class_enumerator_semicolon =
             validate_token x.enum_class_enumerator_semicolon;
-          enum_class_enumerator_initial_value =
-            validate_expression x.enum_class_enumerator_initial_value;
-          enum_class_enumerator_equal =
-            validate_token x.enum_class_enumerator_equal;
+          enum_class_enumerator_initializer =
+            validate_option_with
+              validate_simple_initializer
+              x.enum_class_enumerator_initializer;
           enum_class_enumerator_name =
             validate_token x.enum_class_enumerator_name;
           enum_class_enumerator_type =
             validate_specifier x.enum_class_enumerator_type;
+          enum_class_enumerator_modifiers =
+            validate_option_with
+              validate_token
+              x.enum_class_enumerator_modifiers;
         } )
     | s -> validation_fail (Some SyntaxKind.EnumClassEnumerator) s
 
@@ -1664,14 +1668,18 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       Syntax.syntax =
         Syntax.EnumClassEnumerator
           {
+            enum_class_enumerator_modifiers =
+              invalidate_option_with
+                invalidate_token
+                x.enum_class_enumerator_modifiers;
             enum_class_enumerator_type =
               invalidate_specifier x.enum_class_enumerator_type;
             enum_class_enumerator_name =
               invalidate_token x.enum_class_enumerator_name;
-            enum_class_enumerator_equal =
-              invalidate_token x.enum_class_enumerator_equal;
-            enum_class_enumerator_initial_value =
-              invalidate_expression x.enum_class_enumerator_initial_value;
+            enum_class_enumerator_initializer =
+              invalidate_option_with
+                invalidate_simple_initializer
+                x.enum_class_enumerator_initializer;
             enum_class_enumerator_semicolon =
               invalidate_token x.enum_class_enumerator_semicolon;
           };

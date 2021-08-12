@@ -170,12 +170,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_enum_class_enumerator(_: &C, enum_class_enumerator_type: Self, enum_class_enumerator_name: Self, enum_class_enumerator_equal: Self, enum_class_enumerator_initial_value: Self, enum_class_enumerator_semicolon: Self) -> Self {
+    fn make_enum_class_enumerator(_: &C, enum_class_enumerator_modifiers: Self, enum_class_enumerator_type: Self, enum_class_enumerator_name: Self, enum_class_enumerator_initializer: Self, enum_class_enumerator_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::EnumClassEnumerator(Box::new(EnumClassEnumeratorChildren {
+            enum_class_enumerator_modifiers,
             enum_class_enumerator_type,
             enum_class_enumerator_name,
-            enum_class_enumerator_equal,
-            enum_class_enumerator_initial_value,
+            enum_class_enumerator_initializer,
             enum_class_enumerator_semicolon,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
@@ -2011,11 +2011,11 @@ where
                 acc
             },
             SyntaxVariant::EnumClassEnumerator(x) => {
-                let EnumClassEnumeratorChildren { enum_class_enumerator_type, enum_class_enumerator_name, enum_class_enumerator_equal, enum_class_enumerator_initial_value, enum_class_enumerator_semicolon } = *x;
+                let EnumClassEnumeratorChildren { enum_class_enumerator_modifiers, enum_class_enumerator_type, enum_class_enumerator_name, enum_class_enumerator_initializer, enum_class_enumerator_semicolon } = *x;
+                let acc = f(enum_class_enumerator_modifiers, acc);
                 let acc = f(enum_class_enumerator_type, acc);
                 let acc = f(enum_class_enumerator_name, acc);
-                let acc = f(enum_class_enumerator_equal, acc);
-                let acc = f(enum_class_enumerator_initial_value, acc);
+                let acc = f(enum_class_enumerator_initializer, acc);
                 let acc = f(enum_class_enumerator_semicolon, acc);
                 acc
             },
@@ -3533,10 +3533,10 @@ where
              })),
              (SyntaxKind::EnumClassEnumerator, 5) => SyntaxVariant::EnumClassEnumerator(Box::new(EnumClassEnumeratorChildren {
                  enum_class_enumerator_semicolon: ts.pop().unwrap(),
-                 enum_class_enumerator_initial_value: ts.pop().unwrap(),
-                 enum_class_enumerator_equal: ts.pop().unwrap(),
+                 enum_class_enumerator_initializer: ts.pop().unwrap(),
                  enum_class_enumerator_name: ts.pop().unwrap(),
                  enum_class_enumerator_type: ts.pop().unwrap(),
+                 enum_class_enumerator_modifiers: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::RecordDeclaration, 9) => SyntaxVariant::RecordDeclaration(Box::new(RecordDeclarationChildren {
@@ -4729,10 +4729,10 @@ pub struct EnumClassDeclarationChildren<T, V> {
 
 #[derive(Debug, Clone)]
 pub struct EnumClassEnumeratorChildren<T, V> {
+    pub enum_class_enumerator_modifiers: Syntax<T, V>,
     pub enum_class_enumerator_type: Syntax<T, V>,
     pub enum_class_enumerator_name: Syntax<T, V>,
-    pub enum_class_enumerator_equal: Syntax<T, V>,
-    pub enum_class_enumerator_initial_value: Syntax<T, V>,
+    pub enum_class_enumerator_initializer: Syntax<T, V>,
     pub enum_class_enumerator_semicolon: Syntax<T, V>,
 }
 
@@ -6304,10 +6304,10 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
             },
             EnumClassEnumerator(x) => {
                 get_index(5).and_then(|index| { match index {
-                        0 => Some(&x.enum_class_enumerator_type),
-                    1 => Some(&x.enum_class_enumerator_name),
-                    2 => Some(&x.enum_class_enumerator_equal),
-                    3 => Some(&x.enum_class_enumerator_initial_value),
+                        0 => Some(&x.enum_class_enumerator_modifiers),
+                    1 => Some(&x.enum_class_enumerator_type),
+                    2 => Some(&x.enum_class_enumerator_name),
+                    3 => Some(&x.enum_class_enumerator_initializer),
                     4 => Some(&x.enum_class_enumerator_semicolon),
                         _ => None,
                     }

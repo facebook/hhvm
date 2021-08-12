@@ -304,10 +304,10 @@ pub struct EnumClassDeclarationChildren<'a, T, V> {
 
 #[derive(Debug, Clone)]
 pub struct EnumClassEnumeratorChildren<'a, T, V> {
+    pub modifiers: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
-    pub equal: Syntax<'a, T, V>,
-    pub initial_value: Syntax<'a, T, V>,
+    pub initializer: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
 }
 

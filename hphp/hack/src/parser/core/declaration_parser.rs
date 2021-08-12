@@ -2465,22 +2465,23 @@ where
         // SPEC
         // enum-class-enumerator:
         //   type-specifier name = expression ;
+        //   abstract type-specifier name ;
         // Taken from parse_enumerator:
         // TODO: We must allow TRUE to be a legal enum member name; here we allow
         // any keyword.  Consider making this more strict.
         self.sc_mut().begin_enum_class_enumerator();
+        let modifiers = self.parse_modifiers();
         let ty = self.parse_type_specifier(/*allow_var*/ false, /*allow_attr*/ true);
         let name = self.require_name_allow_all_keywords();
-        let equal_ = self.require_equal();
-        let initial_value = self.parse_expression();
+        let initializer_ = self.parse_simple_initializer_opt();
         let semicolon = self.require_semicolon();
         S!(
             make_enum_class_enumerator,
             self,
+            modifiers,
             ty,
             name,
-            equal_,
-            initial_value,
+            initializer_,
             semicolon
         )
     }

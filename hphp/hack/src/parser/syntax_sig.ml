@@ -100,10 +100,10 @@ module type Syntax_S = sig
         enum_class_right_brace: t;
       }
     | EnumClassEnumerator of {
+        enum_class_enumerator_modifiers: t;
         enum_class_enumerator_type: t;
         enum_class_enumerator_name: t;
-        enum_class_enumerator_equal: t;
-        enum_class_enumerator_initial_value: t;
+        enum_class_enumerator_initializer: t;
         enum_class_enumerator_semicolon: t;
       }
     | RecordDeclaration of {

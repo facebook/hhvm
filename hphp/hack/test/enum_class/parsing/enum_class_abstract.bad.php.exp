@@ -1,0 +1,4 @@
+(4,1)-(4,6) Enum classes cannot be declared `final`
+(7,3)-(7,9) Concrete enum class constants must have an initial value
+(11,3)-(11,23) Abstract enum class constants must not provide any initial value
+(15,3)-(15,8) Enum class constants cannot be declared `final`

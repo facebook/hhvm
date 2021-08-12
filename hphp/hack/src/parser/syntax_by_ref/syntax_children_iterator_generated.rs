@@ -175,10 +175,10 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
             },
             EnumClassEnumerator(x) => {
                 get_index(5).and_then(|index| { match index {
-                        0 => Some(&x.type_),
-                    1 => Some(&x.name),
-                    2 => Some(&x.equal),
-                    3 => Some(&x.initial_value),
+                        0 => Some(&x.modifiers),
+                    1 => Some(&x.type_),
+                    2 => Some(&x.name),
+                    3 => Some(&x.initializer),
                     4 => Some(&x.semicolon),
                         _ => None,
                     }

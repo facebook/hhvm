@@ -1,4 +1,2 @@
+(11,3)-(11,5) Concrete enum class constants must have an initial value
 (11,4)-(11,4) A name is expected here.
-(11,4)-(11,4) An equals sign `=` is expected here.
-(11,5)-(12,1) An expression is expected here.
-(11,5)-(12,1) A semicolon `;` is expected here.

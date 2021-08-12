@@ -1054,6 +1054,10 @@ let check_consistent_enum_inclusion
 let is_enum_or_enum_class k = Ast_defs.is_c_enum k || Ast_defs.is_c_enum_class k
 
 let check_enum_includes env cls =
+  let is_abstract = function
+    | CCAbstract has_default -> not has_default
+    | CCConcrete -> false
+  in
   (* checks that there are no duplicated enum-constants when folded-decls are enabled *)
   if is_enum_or_enum_class cls.c_kind then (
     let (dest_class_pos, dest_class_name) = cls.c_name in
@@ -1085,6 +1089,9 @@ let check_enum_includes env cls =
         (* 2. Check for duplicates *)
         List.iter (Cls.consts ie_cls) ~f:(fun (const_name, class_const) ->
             (if String.equal const_name "class" then
+              ()
+            (* TODO: Check with @fzn *)
+            else if is_abstract class_const.cc_abstract then
               ()
             else if SMap.mem const_name !enum_constant_map then
               (* distinguish between multiple inherit and redeclare *)
@@ -1200,11 +1207,19 @@ let check_extend_abstract_const ~is_final p seq =
 (** Error if there are abstract members that this class is supposed to provide
     implementation for. *)
 let check_extend_abstract (pc, tc) =
+  let is_concrete =
+    let open Ast_defs in
+    match Cls.kind tc with
+    | Cclass k
+    | Cenum_class k ->
+      is_concrete k
+    | Cinterface
+    | Ctrait
+    | Cenum ->
+      false
+  in
   let is_final = Cls.final tc in
-  if
-    (Ast_defs.is_c_normal (Cls.kind tc) || is_final)
-    && Cls.members_fully_known tc
-  then (
+  if (is_concrete || is_final) && Cls.members_fully_known tc then (
     let constructor_as_list cstr =
       fst cstr
       >>| (fun cstr -> (SN.Members.__construct, cstr))

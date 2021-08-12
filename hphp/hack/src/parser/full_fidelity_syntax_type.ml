@@ -230,10 +230,10 @@ struct
         enum_class_right_brace: t;
       }
     | EnumClassEnumerator of {
+        enum_class_enumerator_modifiers: t;
         enum_class_enumerator_type: t;
         enum_class_enumerator_name: t;
-        enum_class_enumerator_equal: t;
-        enum_class_enumerator_initial_value: t;
+        enum_class_enumerator_initializer: t;
         enum_class_enumerator_semicolon: t;
       }
     | RecordDeclaration of {
@@ -1515,10 +1515,10 @@ struct
   }
 
   and enum_class_enumerator = {
+    enum_class_enumerator_modifiers: Token.t option value;
     enum_class_enumerator_type: specifier value;
     enum_class_enumerator_name: Token.t value;
-    enum_class_enumerator_equal: Token.t value;
-    enum_class_enumerator_initial_value: expression value;
+    enum_class_enumerator_initializer: simple_initializer option value;
     enum_class_enumerator_semicolon: Token.t value;
   }
 

@@ -848,16 +848,16 @@ module WithToken (Token : TokenType) = struct
         acc
       | EnumClassEnumerator
           {
+            enum_class_enumerator_modifiers;
             enum_class_enumerator_type;
             enum_class_enumerator_name;
-            enum_class_enumerator_equal;
-            enum_class_enumerator_initial_value;
+            enum_class_enumerator_initializer;
             enum_class_enumerator_semicolon;
           } ->
+        let acc = f acc enum_class_enumerator_modifiers in
         let acc = f acc enum_class_enumerator_type in
         let acc = f acc enum_class_enumerator_name in
-        let acc = f acc enum_class_enumerator_equal in
-        let acc = f acc enum_class_enumerator_initial_value in
+        let acc = f acc enum_class_enumerator_initializer in
         let acc = f acc enum_class_enumerator_semicolon in
         acc
       | RecordDeclaration
@@ -2572,17 +2572,17 @@ module WithToken (Token : TokenType) = struct
         ]
       | EnumClassEnumerator
           {
+            enum_class_enumerator_modifiers;
             enum_class_enumerator_type;
             enum_class_enumerator_name;
-            enum_class_enumerator_equal;
-            enum_class_enumerator_initial_value;
+            enum_class_enumerator_initializer;
             enum_class_enumerator_semicolon;
           } ->
         [
+          enum_class_enumerator_modifiers;
           enum_class_enumerator_type;
           enum_class_enumerator_name;
-          enum_class_enumerator_equal;
-          enum_class_enumerator_initial_value;
+          enum_class_enumerator_initializer;
           enum_class_enumerator_semicolon;
         ]
       | RecordDeclaration
@@ -4204,17 +4204,17 @@ module WithToken (Token : TokenType) = struct
         ]
       | EnumClassEnumerator
           {
+            enum_class_enumerator_modifiers;
             enum_class_enumerator_type;
             enum_class_enumerator_name;
-            enum_class_enumerator_equal;
-            enum_class_enumerator_initial_value;
+            enum_class_enumerator_initializer;
             enum_class_enumerator_semicolon;
           } ->
         [
+          "enum_class_enumerator_modifiers";
           "enum_class_enumerator_type";
           "enum_class_enumerator_name";
-          "enum_class_enumerator_equal";
-          "enum_class_enumerator_initial_value";
+          "enum_class_enumerator_initializer";
           "enum_class_enumerator_semicolon";
         ]
       | RecordDeclaration
@@ -5963,18 +5963,18 @@ module WithToken (Token : TokenType) = struct
           }
       | ( SyntaxKind.EnumClassEnumerator,
           [
+            enum_class_enumerator_modifiers;
             enum_class_enumerator_type;
             enum_class_enumerator_name;
-            enum_class_enumerator_equal;
-            enum_class_enumerator_initial_value;
+            enum_class_enumerator_initializer;
             enum_class_enumerator_semicolon;
           ] ) ->
         EnumClassEnumerator
           {
+            enum_class_enumerator_modifiers;
             enum_class_enumerator_type;
             enum_class_enumerator_name;
-            enum_class_enumerator_equal;
-            enum_class_enumerator_initial_value;
+            enum_class_enumerator_initializer;
             enum_class_enumerator_semicolon;
           }
       | ( SyntaxKind.RecordDeclaration,
@@ -7846,18 +7846,18 @@ module WithToken (Token : TokenType) = struct
         make syntax value
 
       let make_enum_class_enumerator
+          enum_class_enumerator_modifiers
           enum_class_enumerator_type
           enum_class_enumerator_name
-          enum_class_enumerator_equal
-          enum_class_enumerator_initial_value
+          enum_class_enumerator_initializer
           enum_class_enumerator_semicolon =
         let syntax =
           EnumClassEnumerator
             {
+              enum_class_enumerator_modifiers;
               enum_class_enumerator_type;
               enum_class_enumerator_name;
-              enum_class_enumerator_equal;
-              enum_class_enumerator_initial_value;
+              enum_class_enumerator_initializer;
               enum_class_enumerator_semicolon;
             }
         in

@@ -1,4 +1,2 @@
 (15,3)-(15,6) A type specifier is expected here.
-(15,14)-(15,14) An equals sign `=` is expected here.
-(15,15)-(16,1) An expression is expected here.
-(15,15)-(16,1) A semicolon `;` is expected here.
+(15,3)-(15,15) Concrete enum class constants must have an initial value

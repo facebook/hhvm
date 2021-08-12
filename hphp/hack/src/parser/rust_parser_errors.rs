@@ -703,6 +703,8 @@ where
             TypeConstDeclaration(x) => Some(&x.modifiers),
             ClassishDeclaration(x) => Some(&x.modifiers),
             TraitUseAliasItem(x) => Some(&x.modifiers),
+            EnumClassDeclaration(x) => Some(&x.modifiers),
+            EnumClassEnumerator(x) => Some(&x.modifiers),
             _ => None,
         }
     }
@@ -3723,18 +3725,32 @@ where
     }
 
     fn enum_class_errors(&mut self, node: S<'a, Token, Value>) {
-        if let EnumClassDeclaration(e) = &node.children {
-            // We only support the abstract modifier for now, check
-            // if any other is there
-            if let SyntaxList(lst) = &e.modifiers.children {
-                for m in lst.iter() {
-                    if !m.is_abstract() {
-                        self.errors.push(Self::make_error_from_node(
-                            m,
-                            errors::enum_class_wrong_modifier,
-                        ))
-                    }
-                }
+        if let EnumClassDeclaration(_) = &node.children {
+            // only allow abstract as modifier + detect modifier duplication
+            self.invalid_modifier_errors("Enum classes", node, |kind| kind == TokenKind::Abstract);
+        }
+    }
+
+    fn enum_class_enumerator_errors(&mut self, node: S<'a, Token, Value>) {
+        if let EnumClassEnumerator(e) = node.children {
+            // only allow abstract as modifier + detect modifier duplication
+            self.invalid_modifier_errors("Enum class constants", node, |kind| {
+                kind == TokenKind::Abstract
+            });
+
+            let is_abstract = Self::has_modifier_abstract(node);
+            let has_initializer = !e.initializer.is_missing();
+            if is_abstract && has_initializer {
+                self.errors.push(Self::make_error_from_node(
+                    node,
+                    errors::enum_class_abstract_constant_with_value,
+                ))
+            }
+            if !is_abstract && !has_initializer {
+                self.errors.push(Self::make_error_from_node(
+                    node,
+                    errors::enum_class_constant_missing_initializer,
+                ))
             }
         }
     }
@@ -5268,6 +5284,8 @@ where
             EnumClassDeclaration(_) => {
                 self.enum_class_errors(node);
             }
+
+            EnumClassEnumerator(_) => self.enum_class_enumerator_errors(node),
 
             ConstDeclaration(_) => self.class_constant_modifier_errors(node),
 

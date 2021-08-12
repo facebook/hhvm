@@ -4418,10 +4418,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_enum_class_enumerator(
         &mut self,
+        modifiers: Self::R,
         type_: Self::R,
         name: Self::R,
-        _equal: Self::R,
-        _initial_value: Self::R,
+        _initializer: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
         let refs = self.stop_accumulating_const_refs();
@@ -4430,6 +4430,15 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             None => return Node::Ignored(SyntaxKind::EnumClassEnumerator),
         };
         let pos = name.0;
+        let has_abstract_keyword = modifiers
+            .iter()
+            .any(|node| node.is_token(TokenKind::Abstract));
+        let abstract_ = if has_abstract_keyword {
+            /* default values not allowed atm */
+            ClassConstKind::CCAbstract(false)
+        } else {
+            ClassConstKind::CCConcrete
+        };
         let type_ = self
             .node_to_ty(type_)
             .unwrap_or_else(|| self.tany_with_pos(name.0));
@@ -4445,7 +4454,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         )));
         let type_ = self.alloc(Ty(self.alloc(Reason::hint(pos)), type_));
         Node::Const(self.alloc(ShallowClassConst {
-            abstract_: ClassConstKind::CCConcrete,
+            abstract_,
             name: name.into(),
             type_,
             refs,

@@ -1057,5 +1057,8 @@ pub fn redefined_assignment_different_mutability(var_name: &str) -> Error {
     ))
 }
 
-pub const enum_class_wrong_modifier: Error =
-    Cow::Borrowed("Enum classes only support the `abstract` modifier");
+pub const enum_class_constant_missing_initializer: Error =
+    Cow::Borrowed("Concrete enum class constants must have an initial value");
+
+pub const enum_class_abstract_constant_with_value: Error =
+    Cow::Borrowed("Abstract enum class constants must not provide any initial value");

@@ -350,6 +350,10 @@ let saved_state_load_ok _ ~start_time:_ = ()
 
 let saved_state_load_failure _ ~start_time:_ = ()
 
+let saved_state_dirty_files_ok ~start_time:_ = ()
+
+let saved_state_dirty_files_failure _ ~start_time:_ = ()
+
 (** Informant events *)
 let init_informant_prefetcher_runner _ = ()
 

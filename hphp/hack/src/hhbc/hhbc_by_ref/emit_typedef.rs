@@ -10,8 +10,8 @@ use hhbc_by_ref_emit_type_hint as emit_type_hint;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_pos::Span;
 use hhbc_by_ref_hhas_type::HhasTypeInfo;
-use hhbc_by_ref_hhas_typedef::Typedef;
-use hhbc_by_ref_hhbc_id::{class, Id};
+use hhbc_by_ref_hhas_typedef::HhasTypedef;
+use hhbc_by_ref_hhbc_id::{class::ClassType, Id};
 use hhbc_by_ref_instruction_sequence::Result;
 use hhbc_by_ref_runtime::TypedValue;
 use oxidized::{aast_defs::Hint, ast};
@@ -22,7 +22,7 @@ pub fn emit_typedefs_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
     prog: &'a [ast::Def],
-) -> Result<Vec<Typedef<'arena>>> {
+) -> Result<Vec<HhasTypedef<'arena>>> {
     prog.iter()
         .filter_map(|def| {
             def.as_typedef().and_then(|td| {
@@ -40,8 +40,8 @@ fn emit_typedef<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
     typedef: &'a ast::Typedef,
-) -> Result<Typedef<'arena>> {
-    let name = class::ClassType::<'arena>::from_ast_name(alloc, &typedef.name.1);
+) -> Result<HhasTypedef<'arena>> {
+    let name = ClassType::<'arena>::from_ast_name(alloc, &typedef.name.1);
     let attributes_res = emit_attribute::from_asts(alloc, emitter, &typedef.user_attributes);
     let tparams = emit_body::get_tp_names(&typedef.tparams.as_slice());
     let type_info_res = kind_to_type_info(alloc, &tparams, &typedef.kind);
@@ -56,7 +56,7 @@ fn emit_typedef<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
     attributes_res.and_then(|attributes| {
         type_info_res.and_then(|type_info| {
-            type_structure_res.map(|type_structure| Typedef {
+            type_structure_res.map(|type_structure| HhasTypedef {
                 name,
                 attributes: alloc.alloc_slice_fill_iter(attributes.into_iter()).into(),
                 type_info,

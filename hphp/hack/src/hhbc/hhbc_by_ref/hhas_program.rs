@@ -10,7 +10,7 @@ use hhbc_by_ref_hhas_constant::HhasConstant;
 use hhbc_by_ref_hhas_function::HhasFunction;
 use hhbc_by_ref_hhas_record_def::HhasRecord;
 use hhbc_by_ref_hhas_symbol_refs::HhasSymbolRefs;
-use hhbc_by_ref_hhas_typedef::Typedef;
+use hhbc_by_ref_hhas_typedef::HhasTypedef;
 use hhbc_by_ref_hhbc_ast::FatalOp;
 use oxidized::pos::Pos;
 
@@ -20,7 +20,7 @@ pub struct HhasProgram<'arena> {
     pub functions: Vec<HhasFunction<'arena>>,
     pub classes: Vec<HhasClass<'arena>>,
     pub record_defs: Vec<HhasRecord<'arena>>,
-    pub typedefs: Vec<Typedef<'arena>>,
+    pub typedefs: Vec<HhasTypedef<'arena>>,
     pub file_attributes: Vec<HhasAttribute<'arena>>,
     pub symbol_refs: HhasSymbolRefs<'arena>,
     pub constants: Vec<HhasConstant<'arena>>,

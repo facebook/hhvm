@@ -11,10 +11,20 @@ use hhbc_by_ref_hhbc_id::class::ClassType;
 use hhbc_by_ref_runtime::TypedValue;
 
 #[derive(Debug)]
-pub struct Typedef<'arena> {
+#[repr(C)]
+pub struct HhasTypedef<'arena> {
     pub name: ClassType<'arena>,
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub type_info: HhasTypeInfo<'arena>,
     pub type_structure: TypedValue<'arena>,
     pub span: Span,
+}
+
+// For cbindgen
+#[allow(clippy::needless_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_typedef<'arena>(
+    _: HhasTypedef<'arena>,
+) {
+    unimplemented!()
 }

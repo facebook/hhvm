@@ -501,7 +501,7 @@ fn print_constant<W: Write>(
 }
 
 fn print_enum_ty<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(), W::Error> {
-    if let Some(et) = c.enum_type.as_ref() {
+    if let Just(et) = c.enum_type.as_ref() {
         ctx.newline(w)?;
         w.write(".enum_ty ")?;
         print_type_info_(w, true, et)?;
@@ -552,9 +552,9 @@ fn print_use_alias<'arena, W: Write>(
     ctx: &mut Context,
     w: &mut W,
     Quadruple(ido1, id, ido2, kindl): &Quadruple<
-        Option<ClassType>,
-        ClassType,
-        Option<ClassType>,
+        Maybe<ClassType<'arena>>,
+        ClassType<'arena>,
+        Maybe<ClassType<'arena>>,
         Slice<'arena, UseAsVisibility>,
     >,
 ) -> Result<(), W::Error> {
@@ -562,8 +562,8 @@ fn print_use_alias<'arena, W: Write>(
     let id = id.to_raw_string();
     option_or(
         w,
-        ido1,
-        |w, i: &ClassType| concat_str(w, [i.to_raw_string(), "::", id]),
+        ido1.as_ref(),
+        |w, i: &ClassType<'arena>| concat_str(w, [i.to_raw_string(), "::", id]),
         id,
     )?;
     w.write(" as ")?;
@@ -572,8 +572,10 @@ fn print_use_alias<'arena, W: Write>(
             concat_by(w, " ", kindl, |w, k| print_use_as_visibility(w, *k))
         })?;
     }
-    w.write_if(!kindl.is_empty() && ido2.is_some(), " ")?;
-    option(w, ido2, |w, i: &ClassType| w.write(i.to_raw_string()))?;
+    w.write_if(!kindl.is_empty() && ido2.is_just(), " ")?;
+    option(w, ido2.as_ref(), |w, i: &ClassType<'arena>| {
+        w.write(i.to_raw_string())
+    })?;
     w.write(";")
 }
 
@@ -607,15 +609,15 @@ fn print_uses<'arena, W: Write>(
                     ClassType<'arena>,
                     Slice<'arena, ClassType<'arena>>,
                 >] = c.use_precedences.as_ref();
-                let aliases: &[Quadruple<
-                    Option<ClassType<'arena>>,
-                    ClassType<'arena>,
-                    Option<ClassType<'arena>>,
-                    Slice<'arena, UseAsVisibility>,
-                >] = c.use_aliases.as_ref();
                 for x in precs {
                     print_use_precedence(ctx, w, x)?;
                 }
+                let aliases: &[Quadruple<
+                    Maybe<ClassType<'arena>>,
+                    ClassType<'arena>,
+                    Maybe<ClassType<'arena>>,
+                    Slice<'arena, UseAsVisibility>,
+                >] = c.use_aliases.as_ref();
                 for x in aliases {
                     print_use_alias(ctx, w, x)?;
                 }
@@ -675,7 +677,7 @@ fn print_class_special_attributes<W: Write>(
     if c.is_sealed() {
         special_attributes.push("sealed");
     }
-    if c.enum_type.is_some() && !hhbc_by_ref_hhas_attribute::has_enum_class(user_attrs) {
+    if c.enum_type.is_just() && !hhbc_by_ref_hhas_attribute::has_enum_class(user_attrs) {
         special_attributes.push("enum");
     }
     if c.is_abstract() {
@@ -827,10 +829,10 @@ fn print_method_attrs<W: Write>(
     print_special_and_user_attrs(ctx, w, &special_attrs, user_attrs)
 }
 
-fn print_class_def<W: Write>(
+fn print_class_def<'arena, W: Write>(
     ctx: &mut Context,
     w: &mut W,
-    class_def: &HhasClass,
+    class_def: &HhasClass<'arena>,
 ) -> Result<(), W::Error> {
     newline(w)?;
     w.write(".class ")?;
@@ -840,7 +842,10 @@ fn print_class_def<W: Write>(
     w.write(class_def.name.to_raw_string())?;
     w.write(" ")?;
     print_span(w, &class_def.span)?;
-    print_extends(w, class_def.base.as_ref().map(|x| x.to_raw_string()))?;
+    print_extends(
+        w,
+        Option::from(class_def.base.as_ref()).map(|x: &ClassType<'arena>| x.to_raw_string()),
+    )?;
     print_implements(w, class_def.implements.as_ref())?;
     print_enum_includes(w, class_def.enum_includes.as_ref())?;
     w.write(" {")?;

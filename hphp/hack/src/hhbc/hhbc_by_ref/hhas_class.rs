@@ -27,7 +27,7 @@ pub enum TraitReqKind {
 #[derive(Debug)]
 pub struct HhasClass<'arena> {
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
-    pub base: Option<ClassType<'arena>>,
+    pub base: Maybe<ClassType<'arena>>,
     pub implements: Slice<'arena, ClassType<'arena>>,
     pub enum_includes: Slice<'arena, ClassType<'arena>>,
     pub name: ClassType<'arena>,
@@ -37,9 +37,9 @@ pub struct HhasClass<'arena> {
     pub use_aliases: Slice<
         'arena,
         Quadruple<
-            Option<ClassType<'arena>>,
+            Maybe<ClassType<'arena>>,
             ClassType<'arena>,
-            Option<ClassType<'arena>>,
+            Maybe<ClassType<'arena>>,
             Slice<'arena, UseAsVisibility>,
         >,
     >,
@@ -48,7 +48,7 @@ pub struct HhasClass<'arena> {
         'arena,
         Triple<ClassType<'arena>, ClassType<'arena>, Slice<'arena, ClassType<'arena>>>,
     >,
-    pub enum_type: Option<HhasTypeInfo<'arena>>,
+    pub enum_type: Maybe<HhasTypeInfo<'arena>>,
     pub methods: Slice<'arena, HhasMethod<'arena>>,
     pub properties: Slice<'arena, HhasProperty<'arena>>,
     pub constants: Slice<'arena, HhasConstant<'arena>>,

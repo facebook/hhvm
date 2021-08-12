@@ -628,8 +628,8 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             .use_as_alias
             .iter()
             .map(|ast::UseAsAlias(ido1, id, ido2, vis)| {
-                let id1 = ido1.as_ref().map(|x| elaborate_namespace_id(x));
-                let id2 = ido2.as_ref().map(|x| (alloc, x.1.as_ref()).into());
+                let id1 = Maybe::from(ido1.as_ref()).map(|x| elaborate_namespace_id(x));
+                let id2 = Maybe::from(ido2.as_ref()).map(|x| (alloc, x.1.as_ref()).into());
                 (
                     id1,
                     (alloc, id.1.as_ref()).into(),
@@ -930,7 +930,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     );
     Ok(HhasClass {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),
-        base,
+        base: Maybe::from(base),
         implements: Slice::fill_iter(alloc, implements.into_iter()),
         enum_includes: Slice::fill_iter(alloc, enum_includes.into_iter()),
         name,
@@ -941,7 +941,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         use_aliases,
         use_precedences,
         methods: Slice::fill_iter(alloc, methods.into_iter()),
-        enum_type,
+        enum_type: Maybe::from(enum_type),
         upper_bounds: Slice::fill_iter(alloc, upper_bounds.into_iter()),
         properties: Slice::fill_iter(alloc, properties.into_iter()),
         requirements: Slice::fill_iter(alloc, requirements.into_iter().map(|r| r.into())),

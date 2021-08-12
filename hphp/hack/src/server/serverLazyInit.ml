@@ -239,7 +239,7 @@ let merge_saved_state_futures
             naming_table_fallback_fn = naming_table_fallback_path;
             corresponding_rev = Hg.Hg_rev corresponding_rev;
             mergebase_rev = mergebase_global_rev;
-            mergebase = Future.of_value (Some mergebase_rev);
+            mergebase = Some mergebase_rev;
             dirty_naming_files;
             dirty_master_files;
             dirty_local_files;
@@ -393,7 +393,7 @@ let use_precomputed_state_exn
     corresponding_rev =
       Hg.Global_rev (int_of_string corresponding_base_revision);
     mergebase_rev = None;
-    mergebase = Future.of_value None;
+    mergebase = None;
     dirty_naming_files = naming_changes;
     dirty_master_files = prechecked_changes;
     dirty_local_files = changes;
@@ -1120,22 +1120,6 @@ let parse_only_init
     (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   initialize_naming_table "parse-only initialization" genv env profiling
 
-let get_mergebase (mergebase_future : Hg.hg_rev option Future.t) :
-    Hg.hg_rev option =
-  match Future.get mergebase_future with
-  | Ok mergebase ->
-    let () =
-      match mergebase with
-      | Some mergebase -> Hh_logger.log "Got mergebase hash: %s" mergebase
-      | None -> Hh_logger.log "No mergebase hash"
-    in
-    mergebase
-  | Error error ->
-    Hh_logger.log
-      "Getting mergebase hash failed: %s"
-      (Future.error_to_string error);
-    None
-
 let post_saved_state_initialization
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env)
@@ -1174,12 +1158,7 @@ let post_saved_state_initialization
   let env =
     {
       env with
-      init_env =
-        {
-          env.init_env with
-          mergebase = get_mergebase mergebase;
-          naming_table_manifold_path;
-        };
+      init_env = { env.init_env with mergebase; naming_table_manifold_path };
       deps_mode =
         (if deptable_is_64bit then
           match ServerArgs.save_64bit genv.options with

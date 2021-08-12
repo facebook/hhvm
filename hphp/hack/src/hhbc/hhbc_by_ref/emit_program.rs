@@ -30,7 +30,7 @@ pub fn emit_fatal_program<'arena>(
     msg: impl AsRef<str>,
 ) -> Result<HhasProgram<'arena>> {
     Ok(HhasProgram {
-        fatal: Some((op, pos.clone(), msg.as_ref().into())),
+        fatal: Some((op, pos.clone().into(), msg.as_ref().into())),
         ..HhasProgram::default()
     })
 }

@@ -26,7 +26,7 @@ use hhbc_by_ref_hhas_constant::HhasConstant;
 use hhbc_by_ref_hhas_function::HhasFunction;
 use hhbc_by_ref_hhas_method::{HhasMethod, HhasMethodFlags};
 use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhas_pos::Span;
+use hhbc_by_ref_hhas_pos::{HhasPos, Span};
 use hhbc_by_ref_hhas_program::HhasProgram;
 use hhbc_by_ref_hhas_property::HhasProperty;
 use hhbc_by_ref_hhas_record_def::{Field, HhasRecord};
@@ -112,11 +112,12 @@ fn print_program_<W: Write>(
 ) -> Result<(), W::Error> {
     if let Some((fop, p, msg)) = &prog.fatal {
         newline(w)?;
-        let (line_begin, line_end, col_begin, col_end) = if p.is_none() || !p.is_valid() {
-            (1, 1, 0, 0)
-        } else {
-            p.info_pos_extended()
-        };
+        let HhasPos {
+            line_begin,
+            line_end,
+            col_begin,
+            col_end,
+        } = p;
         let pos = format!("{}:{},{}:{}", line_begin, col_begin, line_end, col_end);
         concat_str(
             w,

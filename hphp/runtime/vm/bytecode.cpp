@@ -2482,15 +2482,7 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
       name->data());
   }
 
-  if (RO::EvalEnableReadonlyPropertyEnforcement && lookup.readonly &&
-    (op == ReadOnlyOp::Mutable || op == ReadOnlyOp::CheckMutROCOW)) {
-    if (op == ReadOnlyOp::CheckMutROCOW &&
-     (!isRefcountedType(lookup.val->m_type) || hasPersistentFlavor(lookup.val->m_type))) {
-      mstate.roProp = true;
-    } else {
-      throw_must_be_mutable(class_->name()->data(), name->data());
-    }
-  }
+  if (checkReadonly(lookup.val, class_, name, lookup.readonly, op)) mstate.roProp = true;
   mstate.base = tv_lval(lookup.val);
 }
 

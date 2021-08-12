@@ -248,6 +248,9 @@ bool is_constructor_name(const char* func);
                                              unsigned int arg_num,
                                              const StringData* type);
 
+bool checkReadonly(const TypedValue* tv, const Class* cls, const StringData* name,
+                   bool readonly, ReadOnlyOp op);
+
 void check_collection_cast_to_array();
 
 Object create_object_only(const String& s);

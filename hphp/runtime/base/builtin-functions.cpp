@@ -909,6 +909,24 @@ void throw_local_must_be_value_type(const char* locName)
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
+bool checkReadonly(const TypedValue* tv,
+                   const Class* cls,
+                   const StringData* name,
+                   bool readonly,
+                   ReadOnlyOp op) {
+  if (!RO::EvalEnableReadonlyPropertyEnforcement) return false;
+  auto cow = !isRefcountedType(type(tv)) || hasPersistentFlavor(type(tv));
+  if (readonly) {
+    if (op == ReadOnlyOp::CheckMutROCOW || op == ReadOnlyOp::Mutable) {
+      if (op == ReadOnlyOp::CheckMutROCOW && cow) return true;
+      throw_must_be_mutable(cls->name()->data(), name->data());
+    }
+  } else if (op == ReadOnlyOp::ReadOnly) {
+      throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
+  }
+  return false;
+}
+
 NEVER_INLINE
 void throw_late_init_prop(const Class* cls,
                           const StringData* propName,

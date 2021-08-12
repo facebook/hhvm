@@ -442,20 +442,9 @@ TypedValue* getSPropOrNull(ReadOnlyOp op,
   if (writeMode && UNLIKELY(lookup.constant)) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
-  if (RO::EvalEnableReadonlyPropertyEnforcement) {
-    if (lookup.readonly) {
-      auto cow = !isRefcountedType(lookup.val->m_type) ||
-        hasPersistentFlavor(lookup.val->m_type);
-
-      if (op == ReadOnlyOp::CheckMutROCOW && cow) {
-        assertx(roProp);
-        *roProp = true;
-      } else if (op == ReadOnlyOp::Mutable || op == ReadOnlyOp::CheckMutROCOW) {
-        throw_must_be_mutable(cls->name()->data(), name->data());
-      }
-    } else if (op == ReadOnlyOp::ReadOnly) {
-      throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
-    }
+  if (checkReadonly(lookup.val, cls, name, lookup.readonly, op)) {
+    assertx(roProp);
+    *roProp = true;
   }
   if (UNLIKELY(!lookup.val || !lookup.accessible)) return nullptr;
 

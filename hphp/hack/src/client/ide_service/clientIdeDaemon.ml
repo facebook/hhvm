@@ -893,14 +893,14 @@ let handle_request :
     Lwt.return (state, Ok results)
   (* Code actions (refactorings, quickfixes) *)
   | (Initialized istate, Code_action param) ->
-    let path = param.Code_action.file_path |> Path.to_string in
-    let ctx = make_empty_ctx istate in
-    let (ctx, entry) =
-      Provider_context.add_entry_if_missing
-        ~ctx
-        ~path:(Relative_path.create_detect_prefix path)
+    let file_path = param.Code_action.file_path in
+    let file_contents = param.Code_action.file_contents in
+    let document_location : ClientIdeMessage.document_location =
+      { file_path; file_contents; line = 0; column = 0 }
     in
+    let (state, ctx, entry) = update_file_ctx istate document_location in
 
+    let path = Path.to_string file_path in
     let range = param.Code_action.range in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->

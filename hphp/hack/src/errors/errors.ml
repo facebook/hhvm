@@ -2891,6 +2891,12 @@ let this_var_outside_class p =
     p
     "Can't use `$this` outside of a class"
 
+let this_var_in_expr_tree p =
+  add
+    (Typing.err_code Typing.ThisVarOutsideClass)
+    p
+    "`$this` is not bound inside expression trees"
+
 let unbound_global cst_pos =
   add
     (Typing.err_code Typing.UnboundGlobal)

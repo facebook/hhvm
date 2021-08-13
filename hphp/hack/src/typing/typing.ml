@@ -711,7 +711,7 @@ let stash_conts_for_closure env p is_anon captured f =
       captured
   in
   let captured =
-    if Env.is_local_defined env this then
+    if Env.is_local_defined env this && not (Env.is_in_expr_tree env) then
       (Pos.none, this) :: captured
     else
       captured
@@ -2933,6 +2933,7 @@ and expr_
     make_result env p (Aast.Clone te) ty
   | This ->
     if Option.is_none (Env.get_self_ty env) then Errors.this_var_outside_class p;
+    if Env.is_in_expr_tree env then Errors.this_var_in_expr_tree p;
     if not accept_using_var then check_escaping_var env (p, this);
     let ty = Env.get_local env this in
     let r = Reason.Rwitness p in

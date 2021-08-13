@@ -8,3 +8,10 @@ function test(): void {
   // Expression Trees do not inherit local variables from the outer scope
   $_ = Code`$x + 1`;
 }
+
+class MyClass {
+  public function foo(): void {
+    // We should not suggest $this here.
+    Code`$x`;
+  }
+}

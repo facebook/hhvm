@@ -572,6 +572,8 @@ val return_in_void : Pos.t -> Pos.t -> unit
 
 val this_var_outside_class : Pos.t -> unit
 
+val this_var_in_expr_tree : Pos.t -> unit
+
 val unbound_global : Pos.t -> unit
 
 val private_inst_meth : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit

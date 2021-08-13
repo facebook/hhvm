@@ -397,7 +397,13 @@ let check =
           match (self#ty_expr env array, self#ty_expr env rval) with
           | (Readonly, _)
             when self#is_value_collection_ty env (Tast.get_type array) ->
-            ()
+            (* In the case of (expr)[0] = rvalue, where expr is a value collection like vec,
+               we need to check assignment recursively because ($x->prop)[0] is only valid if $x is mutable and prop is readonly. *)
+            (match array with
+            | (_, _, Array_get _)
+            | (_, _, Obj_get _) ->
+              self#assign env array rval
+            | _ -> ())
           | (Mut, Readonly) ->
             Errors.readonly_mismatch
               "Invalid collection modification"

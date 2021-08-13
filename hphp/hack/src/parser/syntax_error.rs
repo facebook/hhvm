@@ -1041,6 +1041,10 @@ pub fn user_ctx_should_be_caps(ctx_name: &str) -> Error {
 pub const assignment_to_readonly: Error =
     Cow::Borrowed("This expression is readonly, its members cannot be modified");
 
+pub const assign_readonly_to_mutable_collection: Error = Cow::Borrowed(
+    "This expression is readonly, but the collection you're modifying is mutable, which isn't allowed.",
+);
+
 pub fn invalid_readonly(r1: &str, r2: &str, reason: &str) -> Error {
     Cow::Owned(format!(
         "This expression is {}, but we expected a {} value because {}",

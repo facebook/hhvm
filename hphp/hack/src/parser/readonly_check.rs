@@ -230,16 +230,93 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
     }
 }
 
-fn explicit_readonly(context: &mut Context, expr: &mut Expr) {
-    match (rty_expr(context, &expr), &expr.2) {
-        (Rty::Readonly, aast::Expr_::ReadonlyExpr(_)) => {}
-        (Rty::Mutable, _) => {}
-        (Rty::Readonly, _) => {
+fn explicit_readonly(expr: &mut Expr) {
+    match &expr.2 {
+        aast::Expr_::ReadonlyExpr(_) => {}
+        _ => {
             expr.2 = aast::Expr_::ReadonlyExpr(Box::new(expr.clone()));
         }
     }
 }
 
+// For assignments to local variables, i.e.
+// $x = new Foo();
+fn check_assignment_local(
+    context: &mut Context,
+    checker: &mut Checker,
+    pos: &Pos,
+    id_orig: &Box<Lid>,
+    rhs: &mut Expr,
+) {
+    let var_name = local_id::get_name(&id_orig.1).to_string();
+    let is_readonly = Rty::Readonly == rty_expr(context, &rhs);
+    if context.is_new_local(&var_name) {
+        context.add_local(&var_name, is_readonly);
+    } else if context.is_readonly(&var_name) != is_readonly {
+        checker.add_error(
+            &pos,
+            syntax_error::redefined_assignment_different_mutability(&var_name),
+        );
+    }
+}
+
+// For assignments to nonlocals, i.e.
+// $x->prop[0] = new Foo();
+fn check_assignment_nonlocal(
+    context: &mut Context,
+    checker: &mut Checker,
+    pos: &Pos,
+    lhs: &mut Expr,
+    rhs: &mut Expr,
+) {
+    match &mut lhs.2 {
+        aast::Expr_::ObjGet(o) => {
+            let (obj, _get, _, _) = &**o;
+            // If obj is readonly, throw error
+            match rty_expr(context, &obj) {
+                Rty::Readonly => {
+                    checker.add_error(&pos, syntax_error::assignment_to_readonly);
+                }
+                Rty::Mutable => {
+                    match rty_expr(context, &rhs) {
+                        Rty::Readonly => {
+                            // make the readonly expression explicit, since if it is readonly we need to make sure the property is a readonly prop
+                            explicit_readonly(rhs);
+                        }
+                        // Mutable case does not require special checks
+                        Rty::Mutable => {}
+                    }
+                }
+            }
+        }
+        // On an array get <expr>[0] = <rhs>, recurse and check compatibility of inner <expr> with <rhs>
+        aast::Expr_::ArrayGet(ag) => {
+            let (array, _) = &mut **ag;
+            check_assignment_nonlocal(context, checker, pos, array, rhs);
+        }
+        _ => {
+            // Base case: here we just check whether the lhs expression is readonly compared to the rhs
+            match (rty_expr(context, &lhs), rty_expr(context, &rhs)) {
+                (Rty::Mutable, Rty::Readonly) => {
+                    // error, can't assign a readonly value to a mutable collection
+                    checker.add_error(
+                        &rhs.1, // Position of readonly expression
+                        syntax_error::assign_readonly_to_mutable_collection,
+                    )
+                }
+                (Rty::Readonly, Rty::Readonly) => {
+                    // make rhs explicit (to make sure we are not writing a readonly value to a mutable one)
+                    explicit_readonly(rhs);
+                }
+                (_, Rty::Mutable) => {
+                    // Assigning to a mutable value always succeeds, so no explicit checks are needed
+                }
+            }
+        }
+    }
+}
+
+// Toplevel assignment check
 fn check_assignment_validity(
     context: &mut Context,
     checker: &mut Checker,
@@ -248,36 +325,13 @@ fn check_assignment_validity(
     rhs: &mut Expr,
 ) {
     match &mut lhs.2 {
+        // TODO: list expressions are incorrect here
         aast::Expr_::Lvar(id_orig) => {
-            let var_name = local_id::get_name(&id_orig.1).to_string();
-            let is_readonly = Rty::Readonly == rty_expr(context, &rhs);
-            if context.is_new_local(&var_name) {
-                context.add_local(&var_name, is_readonly);
-            } else if context.is_readonly(&var_name) != is_readonly {
-                checker.add_error(
-                    &pos,
-                    syntax_error::redefined_assignment_different_mutability(&var_name),
-                );
-            }
+            check_assignment_local(context, checker, pos, id_orig, rhs);
         }
-        aast::Expr_::ObjGet(_) => {
-            match rty_expr(context, &lhs) {
-                Rty::Readonly => {
-                    checker.add_error(&pos, syntax_error::assignment_to_readonly);
-                }
-                Rty::Mutable => {}
-            }
-            // make the readonly expression explicit here
-            explicit_readonly(context, rhs);
+        _ => {
+            check_assignment_nonlocal(context, checker, pos, lhs, rhs);
         }
-        aast::Expr_::ArrayGet(ag) => {
-            let (array, _) = &mut **ag;
-            // make lefthand of array explicit (since writing to a readonly value is only legal for value types like vec)
-            explicit_readonly(context, array);
-            // make rhs explicit (to make sure we are not writing a readonly value to a mutable one)
-            explicit_readonly(context, rhs);
-        }
-        _ => {}
     }
 }
 
@@ -372,7 +426,10 @@ impl<'ast> VisitorMut<'ast> for Checker {
             aast::Expr_::Call(x) => {
                 let (_caller, _targs, params, _variadic) = &mut **x;
                 for param in params.iter_mut() {
-                    explicit_readonly(context, param)
+                    match rty_expr(context, param) {
+                        Rty::Readonly => explicit_readonly(param),
+                        Rty::Mutable => {}
+                    }
                 }
             }
             _ => {}

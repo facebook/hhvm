@@ -5273,6 +5273,164 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = self.setup_php_file("bad_call.php")
         self.load_and_run("bad_call", variables)
 
+    def test_code_action_missing_method(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("code_action_missing_method.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("code_action_missing_method"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                comment="make local, unsaved change to the file",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}", "version": 2},
+                    "contentChanges": [
+                        {
+                            "text": """\
+<?hh
+
+class ClassWithFooBar {
+  public function foobar(): void {}
+}
+
+function call_method(ClassWithFooBar $mc): void {
+  $mc->foobaz();
+}
+"""
+                        }
+                    ],
+                },
+            )
+            .request(
+                line=line(),
+                comment="get actions",
+                method="textDocument/codeAction",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "range": {
+                        "start": {"line": 7, "character": 7},
+                        "end": {"line": 7, "character": 13},
+                    },
+                    "context": {
+                        "diagnostics": [
+                            {
+                                "range": {
+                                    "start": {"line": 7, "character": 7},
+                                    "end": {"line": 7, "character": 13},
+                                },
+                                "severity": 1,
+                                "code": 4053,
+                                "source": "Hack",
+                                "message": "No instance method foobaz in ClassWithFooBar",
+                                "relatedInformation": [
+                                    {
+                                        "location": {
+                                            "uri": "${php_file_uri}",
+                                            "range": {
+                                                "start": {"line": 3, "character": 18},
+                                                "end": {"line": 3, "character": 24},
+                                            },
+                                        },
+                                        "message": "Did you mean foobar instead?",
+                                    },
+                                    {
+                                        "location": {
+                                            "uri": "${php_file_uri}",
+                                            "range": {
+                                                "start": {"line": 6, "character": 21},
+                                                "end": {"line": 6, "character": 36},
+                                            },
+                                        },
+                                        "message": "This is why I think it is an object of type ClassWithFooBar",
+                                    },
+                                    {
+                                        "location": {
+                                            "uri": "${php_file_uri}",
+                                            "range": {
+                                                "start": {"line": 2, "character": 6},
+                                                "end": {"line": 2, "character": 21},
+                                            },
+                                        },
+                                        "message": "Declaration of ClassWithFooBar is here",
+                                    },
+                                ],
+                                "relatedLocations": [
+                                    {
+                                        "location": {
+                                            "uri": "${php_file_uri}",
+                                            "range": {
+                                                "start": {"line": 3, "character": 18},
+                                                "end": {"line": 3, "character": 24},
+                                            },
+                                        },
+                                        "message": "Did you mean foobar instead?",
+                                    },
+                                    {
+                                        "location": {
+                                            "uri": "${php_file_uri}",
+                                            "range": {
+                                                "start": {"line": 6, "character": 21},
+                                                "end": {"line": 6, "character": 36},
+                                            },
+                                        },
+                                        "message": "This is why I think it is an object of type ClassWithFooBar",
+                                    },
+                                    {
+                                        "location": {
+                                            "uri": "${php_file_uri}",
+                                            "range": {
+                                                "start": {"line": 2, "character": 6},
+                                                "end": {"line": 2, "character": 21},
+                                            },
+                                        },
+                                        "message": "Declaration of ClassWithFooBar is here",
+                                    },
+                                ],
+                            }
+                        ],
+                    },
+                },
+                result=[
+                    {
+                        "title": "Change to ->foobar",
+                        "kind": "quickfix",
+                        "diagnostics": [],
+                        "edit": {
+                            "changes": {
+                                "${root_path}/code_action_missing_method.php": [
+                                    {
+                                        "range": {
+                                            "start": {"line": 7, "character": 7},
+                                            "end": {"line": 7, "character": 13},
+                                        },
+                                        "newText": "foobar",
+                                    }
+                                ]
+                            }
+                        },
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
     def test_non_blocking(self) -> None:
         self.prepare_server_environment()
         variables = self.setup_php_file("non_blocking.php")

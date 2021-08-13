@@ -3188,7 +3188,7 @@ let string_of_class_member_kind = function
   | `method_ -> "method"
   | `property -> "property"
 
-let smember_not_found_messages kind (cpos, class_name) member_name similar =
+let smember_not_found_messages pos kind (cpos, class_name) member_name similar =
   let kind = string_of_class_member_kind kind in
   let class_name = strip_ns class_name in
   let msg =
@@ -3198,12 +3198,26 @@ let smember_not_found_messages kind (cpos, class_name) member_name similar =
       (Markdown_lite.md_codify member_name)
       (Markdown_lite.md_codify class_name)
   in
-  let similar_suggestion =
+  let (similar_suggestion, quickfixes) =
     match similar with
-    | None -> []
-    | Some similar -> [snot_found_suggestion member_name similar]
+    | None -> ([], [])
+    | Some ((_, _, similar_name) as similar) ->
+      let quickfixes =
+        match pos with
+        | Some pos ->
+          [
+            {
+              title = "Change to ::" ^ similar_name;
+              new_text = similar_name;
+              pos;
+            };
+          ]
+        | None -> []
+      in
+      ([snot_found_suggestion member_name similar], quickfixes)
   in
   ( Typing.err_code Typing.SmemberNotFound,
+    quickfixes,
     msg,
     similar_suggestion
     @ [
@@ -3213,17 +3227,17 @@ let smember_not_found_messages kind (cpos, class_name) member_name similar =
 
 let smember_not_found
     kind pos class_ member_name hint (on_error : typing_error_callback) =
-  let (code, claim, reasons) =
-    smember_not_found_messages kind class_ member_name hint
+  let (code, quickfixes, claim, reasons) =
+    smember_not_found_messages (Some pos) kind class_ member_name hint
   in
-  on_error ~code (pos, claim) reasons
+  on_error ~code ~quickfixes (pos, claim) reasons
 
 let smember_not_found_
     kind pos class_ member_name hint (on_error : error_from_reasons_callback) =
-  let (code, claim, reasons) =
-    smember_not_found_messages kind class_ member_name hint
+  let (code, quickfixes, claim, reasons) =
+    smember_not_found_messages None kind class_ member_name hint
   in
-  on_error ~code ((pos, claim) :: reasons)
+  on_error ~code ~quickfixes ((pos, claim) :: reasons)
 
 (* Add quickfix *)
 let member_not_found
@@ -3247,13 +3261,18 @@ let member_not_found
       (Markdown_lite.md_codify member_name)
       type_name
   in
-  let similar_suggestion =
+  let (similar_suggestion, quickfixes) =
     match similar with
-    | None -> []
-    | Some similar -> [not_found_suggestion member_name similar]
+    | None -> ([], [])
+    | Some ((_, _, similar_name) as similar) ->
+      ( [not_found_suggestion member_name similar],
+        [
+          { title = "Change to ->" ^ similar_name; new_text = similar_name; pos };
+        ] )
   in
   on_error
     ~code:(Typing.err_code Typing.MemberNotFound)
+    ~quickfixes
     (pos, msg)
     (similar_suggestion
     @ reason

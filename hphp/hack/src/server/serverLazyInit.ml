@@ -1023,6 +1023,23 @@ let full_init
     |> Telemetry.string_ ~key:"reason" ~value:"lazy_full_init"
   in
   let is_check_mode = ServerArgs.check_mode genv.options in
+  let existing_name_count =
+    Naming_table.fold env.naming_table ~init:0 ~f:(fun _ _ i -> i + 1)
+  in
+  if existing_name_count > 0 then begin
+    let desc = "full_init_naming_not_empty" in
+    Hh_logger.log
+      "INVARIANT_VIOLATION_BUG [%s] count=%d"
+      desc
+      existing_name_count;
+    HackEventLogger.invariant_violation_bug
+      ~desc
+      ~typechecking_is_deferring:false
+      ~path:Relative_path.default
+      ~pos:""
+      (Telemetry.create ()
+      |> Telemetry.int_ ~key:"existing_name_count" ~value:existing_name_count)
+  end;
   let run () =
     let (env, t) =
       initialize_naming_table

@@ -127,6 +127,7 @@ But this function has some historical quirks:
 *)
 let should_report_duplicate
     (ctx : Provider_context.t)
+    (fi : FileInfo.t)
     (current_file_symbols_acc : FileInfo.pos list)
     ~(id : FileInfo.id)
     ~(canonical_id : FileInfo.id) : bool =
@@ -153,7 +154,8 @@ let should_report_duplicate
       |> Telemetry.string_ ~key:"canonical_name" ~value:canonical
       |> Telemetry.string_
            ~key:"canonical_path"
-           ~value:(FileInfo.get_pos_filename pc |> Relative_path.to_absolute))
+           ~value:(FileInfo.get_pos_filename pc |> Relative_path.to_absolute)
+      |> Telemetry.string_ ~key:"fileinfo" ~value:(FileInfo.show fi))
   in
   (* Detect anomaly where we're given a file-only [id] *)
   begin
@@ -235,6 +237,7 @@ module Env = struct
 
   let new_fun_error_if_already_bound
       (ctx : Provider_context.t)
+      (fi : FileInfo.t)
       (current_file_symbols_acc : FileInfo.pos list)
       (id : FileInfo.id) : FileInfo.pos list =
     let (p, name) = id in
@@ -245,6 +248,7 @@ module Env = struct
         if
         should_report_duplicate
           ctx
+          fi
           current_file_symbols_acc
           ~id
           ~canonical_id:(pc, canonical)
@@ -261,6 +265,7 @@ module Env = struct
 
   let new_type_error_if_already_bound
       (ctx : Provider_context.t)
+      (fi : FileInfo.t)
       ~(kind : Naming_types.kind_of_type)
       (current_file_symbols_acc : FileInfo.pos list)
       (id : FileInfo.id) : FileInfo.pos list =
@@ -277,6 +282,7 @@ module Env = struct
           if
           should_report_duplicate
             ctx
+            fi
             current_file_symbols_acc
             ~id
             ~canonical_id:(pc, canonical)
@@ -293,6 +299,7 @@ module Env = struct
 
   let new_global_const_error_if_already_bound
       (ctx : Provider_context.t)
+      (fi : FileInfo.t)
       (current_file_symbols_acc : FileInfo.pos list)
       (id : FileInfo.id) : FileInfo.pos list =
     let (p, name) = id in
@@ -302,6 +309,7 @@ module Env = struct
         if
         should_report_duplicate
           ctx
+          fi
           current_file_symbols_acc
           ~id
           ~canonical_id:(pc, name)
@@ -335,33 +343,45 @@ let make_env_error_if_already_bound ctx fileinfo =
     List.fold
       fileinfo.FileInfo.funs
       ~init:[]
-      ~f:(Env.new_fun_error_if_already_bound ctx)
+      ~f:(Env.new_fun_error_if_already_bound ctx fileinfo)
   in
   (* types *)
   let current_file_symbols_acc =
     List.fold
       fileinfo.FileInfo.classes
       ~init:[]
-      ~f:(Env.new_type_error_if_already_bound ctx ~kind:Naming_types.TClass)
+      ~f:
+        (Env.new_type_error_if_already_bound
+           ctx
+           fileinfo
+           ~kind:Naming_types.TClass)
   in
   let current_file_symbols_acc =
     List.fold
       fileinfo.FileInfo.record_defs
       ~init:current_file_symbols_acc
-      ~f:(Env.new_type_error_if_already_bound ctx ~kind:Naming_types.TRecordDef)
+      ~f:
+        (Env.new_type_error_if_already_bound
+           ctx
+           fileinfo
+           ~kind:Naming_types.TRecordDef)
   in
   let (_ : FileInfo.pos list) =
     List.fold
       fileinfo.FileInfo.typedefs
       ~init:current_file_symbols_acc
-      ~f:(Env.new_type_error_if_already_bound ctx ~kind:Naming_types.TTypedef)
+      ~f:
+        (Env.new_type_error_if_already_bound
+           ctx
+           fileinfo
+           ~kind:Naming_types.TTypedef)
   in
   (* consts *)
   let (_ : FileInfo.pos list) =
     List.fold
       fileinfo.FileInfo.consts
       ~init:[]
-      ~f:(Env.new_global_const_error_if_already_bound ctx)
+      ~f:(Env.new_global_const_error_if_already_bound ctx fileinfo)
   in
   ()
 

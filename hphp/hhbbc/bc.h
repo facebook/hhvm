@@ -180,6 +180,10 @@ struct FCallArgsLong : FCallArgsBase {
     return inoutArgs[i / 8] & (1 << (i % 8));
   }
   bool enforceReadonly() const { return readonlyArgs.get() != nullptr; }
+  bool isReadonly(uint32_t i) const {
+    assertx(enforceReadonly());
+    return readonlyArgs[i / 8] & (1 << (i % 8));
+  }
 
   FCallArgsLong withoutGenerics() const {
     auto fca = *this;
@@ -324,6 +328,10 @@ struct FCallArgs {
   }
   bool enforceReadonly() const {
     return l->enforceReadonly();
+  }
+  bool isReadonly(uint32_t i) const {
+    assertx(enforceReadonly());
+    return l->isReadonly(i);
   }
 
   FCallArgs withoutGenerics() const {

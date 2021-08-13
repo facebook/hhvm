@@ -235,6 +235,10 @@ void encode(Buffer& buffer, const T& data) {
       auto const flags = base.flags | FCallArgsBase::EnforceInOut;
       base.flags = static_cast<FCallArgsBase::Flags>(flags);
     }
+    if (data.enforceReadonly()) {
+      auto const flags = base.flags | FCallArgsBase::EnforceReadonly;
+      base.flags = static_cast<FCallArgsBase::Flags>(flags);
+    }
     encode(buffer, base);
     encode(buffer, data.context());
     encode(buffer, data.asyncEagerTarget() - NoBlockId);
@@ -244,6 +248,14 @@ void encode(Buffer& buffer, const T& data) {
       buffer.insert(buffer.end(), bytes, 0);
       for (auto i = 0; i < data.numArgs(); i++) {
         if (data.isInOut(i)) buffer[start + (i / 8)] |= (1 << (i % 8));
+      }
+    }
+    if (data.enforceReadonly()) {
+      auto const start = buffer.size();
+      auto const bytes = (data.numArgs() + 7) / 8;
+      buffer.insert(buffer.end(), bytes, 0);
+      for (auto i = 0; i < data.numArgs(); i++) {
+        if (data.isReadonly(i)) buffer[start + (i / 8)] |= (1 << (i % 8));
       }
     }
 

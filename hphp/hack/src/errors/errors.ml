@@ -5917,6 +5917,12 @@ let module_hint ~def_pos ~use_pos =
     (use_pos, "You cannot use this type in a public declaration.")
     [(def_pos, "It is declared as `internal` here")]
 
+let expression_tree_non_public_property ~use_pos ~def_pos =
+  add_list
+    (Typing.err_code Typing.ExpressionTreeNonPublicProperty)
+    (use_pos, "Cannot access non-public properties within expression trees.")
+    [(def_pos, "Property defined here")]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

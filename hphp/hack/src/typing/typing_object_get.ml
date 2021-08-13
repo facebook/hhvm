@@ -440,6 +440,11 @@ let rec obj_get_concrete_ty
               | _ -> ());
             TVis.check_obj_access ~use_pos:id_pos ~def_pos:mem_pos env vis;
             TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos ce_deprecated;
+            TVis.check_expression_tree_vis
+              ~use_pos:id_pos
+              ~def_pos:mem_pos
+              env
+              vis;
             if is_parent_call && get_ce_abstract member_ce then
               Errors.parent_abstract_call id_str id_pos mem_pos;
             let member_decl_ty = Typing_enum.member_type env member_ce in

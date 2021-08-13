@@ -31,6 +31,10 @@ val check_meth_caller_access :
 val check_deprecated :
   use_pos:Pos.t -> def_pos:Pos_or_decl.t -> string option -> unit
 
+(* Expression Trees can only access publicly accessible properties *)
+val check_expression_tree_vis :
+  use_pos:Pos.t -> def_pos:Pos_or_decl.t -> env -> ce_visibility -> unit
+
 val is_visible :
   env ->
   ce_visibility * bool ->

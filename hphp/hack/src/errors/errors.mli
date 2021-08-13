@@ -1798,3 +1798,6 @@ val invalid_echo_argument_at : Pos.t -> error_from_reasons_callback
 val module_mismatch : Pos.t -> Pos_or_decl.t -> string option -> string -> unit
 
 val module_hint : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
+
+val expression_tree_non_public_property :
+  use_pos:Pos.t -> def_pos:Pos_or_decl.t -> unit

@@ -231,6 +231,12 @@ let check_obj_access ~use_pos ~def_pos env vis =
   | None -> ()
   | Some msg -> visibility_error use_pos msg (def_pos, vis)
 
+let check_expression_tree_vis ~use_pos ~def_pos env vis =
+  if Typing_env.is_in_expr_tree env then
+    match vis with
+    | Vpublic -> ()
+    | _ -> Errors.expression_tree_non_public_property ~use_pos ~def_pos
+
 let check_inst_meth_access ~use_pos ~def_pos vis =
   match vis with
   | Vprivate _ -> Errors.private_inst_meth ~def_pos ~use_pos

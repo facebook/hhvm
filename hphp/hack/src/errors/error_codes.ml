@@ -642,6 +642,7 @@ module Typing = struct
     | SealedNotSubtype [@value 4445]
     | ModuleHintError [@value 4446]
     | MemoizeObjectWithoutGlobals [@value 4447]
+    | ExpressionTreeNonPublicProperty [@value 4448]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

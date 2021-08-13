@@ -190,6 +190,7 @@ let process_file
             (GlobalOptions.tco_defer_class_memory_mb_threshold opts)
         @@ fun () ->
         Errors.do_with_context fn Errors.Typing @@ fun () ->
+        let snd (_, x, _) = x in
         let (fun_tasts, fun_global_tvenvs) =
           List.map funs ~f:snd
           |> List.filter_map ~f:(type_fun ctx fn)

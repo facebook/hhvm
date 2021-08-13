@@ -119,6 +119,7 @@ let lint_xcontroller tcopt acc classes =
       errs @ acc)
 
 let go_xcontroller genv env (fnl : string list) =
+  let snd (_, x, _) = x in
   Option.Monad_infix.(
     let classes =
       List.filter_map fnl ~f:(fun path ->

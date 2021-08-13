@@ -438,6 +438,7 @@ let naming_from_saved_state
             ()
           | Some v ->
             let backend = Provider_context.get_backend ctx in
+            let snd (_, x, _) = x in
             Naming_provider.remove_type_batch
               backend
               (v.FileInfo.classes |> List.map ~f:snd);

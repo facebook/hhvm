@@ -84,7 +84,7 @@ let compute_fileinfo_for_path
           List.map names ~f:(fun name ->
               let fixed_name = Utils.add_ns name in
               let pos = FileInfo.File (name_type, path) in
-              (pos, fixed_name))
+              (pos, fixed_name, None))
         in
         let funs = facts.Facts.functions |> to_ids FileInfo.Fun in
         (* Classes and typedefs are both stored under `types`. There's also a

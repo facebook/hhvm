@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<853acc32a63031aa1cc3e355e5b8be32>>
+// @generated SignedSource<<5b39350512d8d0f8fc1a315cb54b5011>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -57,7 +57,7 @@ pub enum Pos<'a> {
 impl<'a> TrivialDrop for Pos<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Pos<'arena>);
 
-pub type Id<'a> = (Pos<'a>, &'a str);
+pub type Id<'a> = (Pos<'a>, &'a str, Option<isize>);
 
 pub type HashType<'a> = Option<isize>;
 

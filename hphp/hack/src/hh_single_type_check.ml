@@ -1287,7 +1287,8 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
     let get_classes path =
       match Relative_path.Map.find_opt files_info path with
       | None -> SSet.empty
-      | Some info -> SSet.of_list @@ List.map info.FileInfo.classes ~f:snd
+      | Some info ->
+        SSet.of_list @@ List.map info.FileInfo.classes ~f:(fun (_, x, _) -> x)
     in
     (* We need to oldify, not remove, for ClassEltDiff to work *)
     Decl_redecl_service.oldify_type_decl
@@ -1724,7 +1725,7 @@ let handle_mode
         if Relative_path.Map.mem builtins fn then
           ()
         else (
-          List.iter fileinfo.FileInfo.classes ~f:(fun (_p, class_) ->
+          List.iter fileinfo.FileInfo.classes ~f:(fun (_p, class_, _) ->
               Printf.printf
                 "Ancestors of %s and their overridden methods:\n"
                 class_;
@@ -1743,7 +1744,7 @@ let handle_mode
                 ~find_children:false;
               Printf.printf "\n");
           Printf.printf "\n";
-          List.iter fileinfo.FileInfo.classes ~f:(fun (_p, class_) ->
+          List.iter fileinfo.FileInfo.classes ~f:(fun (_p, class_, _) ->
               Printf.printf
                 "Children of %s and the methods they override:\n"
                 class_;
@@ -2168,7 +2169,7 @@ let handle_mode
     Relative_path.Map.iter files_info ~f:(fun _file info ->
         let { FileInfo.classes; _ } = info in
         let is_first = ref true in
-        List.iter classes ~f:(fun (_, classname) ->
+        List.iter classes ~f:(fun (_, classname, _) ->
             if not !is_first then Printf.printf "\n";
             is_first := false;
             let { Decl_linearize.lin_members; Decl_linearize.lin_ancestors } =

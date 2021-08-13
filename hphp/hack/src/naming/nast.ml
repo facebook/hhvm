@@ -199,6 +199,7 @@ let get_defs ast =
    * error messages than fold_left. E.g. in the case where a function is
    * declared twice in the same file, the error will say that the declaration
    * with the larger line number is a duplicate. *)
+  let to_id (a, b) = (a, b, None) in
   let rec get_defs ast acc =
     List.fold_right
       ast
@@ -207,15 +208,27 @@ let get_defs ast =
         Aast.(
           match def with
           | Fun f ->
-            (FileInfo.pos_full f.fd_fun.f_name :: acc1, acc2, acc3, acc4, acc5)
+            ( FileInfo.pos_full (to_id f.fd_fun.f_name) :: acc1,
+              acc2,
+              acc3,
+              acc4,
+              acc5 )
           | Class c ->
-            (acc1, FileInfo.pos_full c.c_name :: acc2, acc3, acc4, acc5)
+            (acc1, FileInfo.pos_full (to_id c.c_name) :: acc2, acc3, acc4, acc5)
           | RecordDef rd ->
-            (acc1, acc2, FileInfo.pos_full rd.rd_name :: acc3, acc4, acc5)
+            ( acc1,
+              acc2,
+              FileInfo.pos_full (to_id rd.rd_name) :: acc3,
+              acc4,
+              acc5 )
           | Typedef t ->
-            (acc1, acc2, acc3, FileInfo.pos_full t.t_name :: acc4, acc5)
+            (acc1, acc2, acc3, FileInfo.pos_full (to_id t.t_name) :: acc4, acc5)
           | Constant cst ->
-            (acc1, acc2, acc3, acc4, FileInfo.pos_full cst.cst_name :: acc5)
+            ( acc1,
+              acc2,
+              acc3,
+              acc4,
+              FileInfo.pos_full (to_id cst.cst_name) :: acc5 )
           | Namespace (_, defs) -> get_defs defs acc
           | NamespaceUse _
           | SetNamespaceEnv _ ->

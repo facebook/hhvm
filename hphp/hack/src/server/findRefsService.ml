@@ -125,6 +125,7 @@ let find_child_classes ctx target_class_name naming_table files =
         let { FileInfo.classes; _ } =
           Naming_table.get_file_info_unsafe naming_table fn
         in
+        let snd (_, x, _) = x in
         List.fold_left classes ~init:acc ~f:(fun acc cid ->
             add_if_extends_class ctx target_class_name (snd cid) acc)
       with

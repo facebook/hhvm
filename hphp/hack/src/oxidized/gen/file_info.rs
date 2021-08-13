@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f70b38f817329e890ff6a38352861ca4>>
+// @generated SignedSource<<534cbde9ec8419b578bca97fd859bda7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -99,7 +99,7 @@ pub enum Pos {
     File(NameType, ocamlrep::rc::RcOc<relative_path::RelativePath>),
 }
 
-pub type Id = (Pos, String);
+pub type Id = (Pos, String, Option<isize>);
 
 pub type HashType = Option<isize>;
 

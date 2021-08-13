@@ -5,6 +5,7 @@
 
 use bitflags::bitflags;
 use decl_provider::DeclProvider;
+use ffi::Maybe::*;
 use hhbc_by_ref_emit_adata as emit_adata;
 use hhbc_by_ref_emit_class::emit_classes_from_program;
 use hhbc_by_ref_emit_constant::emit_constants_from_program;
@@ -30,7 +31,7 @@ pub fn emit_fatal_program<'arena>(
     msg: impl AsRef<str>,
 ) -> Result<HhasProgram<'arena>> {
     Ok(HhasProgram {
-        fatal: Some((op, pos.clone().into(), msg.as_ref().into())),
+        fatal: Just((op, pos.clone().into(), msg.as_ref().into()).into()),
         ..HhasProgram::default()
     })
 }
@@ -70,7 +71,7 @@ fn emit_program_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let adata = emit_adata::take(alloc, emitter).adata;
     let symbol_refs =
         HhasSymbolRefs::from_symbol_refs_state(alloc, emit_symbol_refs::take(alloc, emitter));
-    let fatal = None;
+    let fatal = Nothing;
 
     Ok(HhasProgram {
         record_defs,

@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ffi::{Maybe, Triple};
 use hhbc_by_ref_hhas_adata::HhasAdata;
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_class::HhasClass;
@@ -24,5 +25,5 @@ pub struct HhasProgram<'arena> {
     pub file_attributes: Vec<HhasAttribute<'arena>>,
     pub symbol_refs: HhasSymbolRefs<'arena>,
     pub constants: Vec<HhasConstant<'arena>>,
-    pub fatal: Option<(FatalOp, HhasPos, String)>,
+    pub fatal: Maybe<Triple<FatalOp, HhasPos, String>>,
 }

@@ -110,7 +110,7 @@ fn print_program_<W: Write>(
     w: &mut W,
     prog: &HhasProgram,
 ) -> Result<(), W::Error> {
-    if let Some((fop, p, msg)) = &prog.fatal {
+    if let Just(Triple(fop, p, msg)) = &prog.fatal {
         newline(w)?;
         let HhasPos {
             line_begin,

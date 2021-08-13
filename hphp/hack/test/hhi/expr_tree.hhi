@@ -141,10 +141,7 @@ class Code {
   ): Code::TAst {
     throw new Exception();
   }
-  public function visitReturn(
-    ?ExprPos $_,
-    ?Code::TAst $_,
-  ): Code::TAst {
+  public function visitReturn(?ExprPos $_, ?Code::TAst $_): Code::TAst {
     throw new Exception();
   }
   public function visitFor(
@@ -159,10 +156,16 @@ class Code {
   public function visitBreak(?ExprPos $_): Code::TAst {
     throw new Exception();
   }
-  public function visitContinue(?ExprPos $_,): Code::TAst {
+  public function visitContinue(?ExprPos $_): Code::TAst {
     throw new Exception();
   }
-
+  public function visitPropertyAccess(
+    ?ExprPos $_,
+    Code::TAst $_,
+    string $_,
+  ): Code::TAst {
+    throw new Exception();
+  }
   // Splice
   public function splice<T>(
     ?ExprPos $_,

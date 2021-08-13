@@ -27,7 +27,6 @@ function foo(): void {
 
   // Ban assignment to things that aren't simple variables.
   $f = Code`(dynamic $x) ==> { $x[0] = 1; }`;
-  $f = Code`(dynamic $x) ==> { $x->foo = 1; }`;
 
   // Ban assignments that mutate a local.
   $f = Code`(int $x) ==> { $x += 1; }`;

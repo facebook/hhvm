@@ -1028,6 +1028,12 @@ fn rewrite_expr<TF>(
                     );
                     (virtual_expr, desugar_expr)
                 }
+                ObjGet(og) if !og.3 => {
+                    return Err((
+                        pos,
+                        "Expression trees do not support calling instance methods".into(),
+                    ));
+                }
                 _ => {
                     let (virtual_recv, desugar_recv) =
                         rewrite_expr(env, Expr((), recv.1, recv.2), visitor_name)?;
@@ -1107,6 +1113,35 @@ fn rewrite_expr<TF>(
             };
             let desugar_expr = v_meth_call(et::SPLICE, vec![pos_expr, s, *e.clone()], &pos);
             let virtual_expr = Expr((), pos, ETSplice(e));
+            (virtual_expr, desugar_expr)
+        }
+        ObjGet(og) => {
+            let (e1, e2, null_flavor, is_prop_call) = *og;
+            if null_flavor == OgNullFlavor::OGNullsafe {
+                return Err((
+                    pos,
+                    "Expression Trees do not support nullsafe property access".into(),
+                ));
+            }
+            let (virtual_e1, desugar_e1) = rewrite_expr(env, e1, visitor_name)?;
+            let id = if let Id(id) = &e2.2 {
+                string_literal(id.0.clone(), &id.1)
+            } else {
+                return Err((
+                    pos,
+                    "Expression trees only support named property access.".into(),
+                ));
+            };
+            let desugar_expr = v_meth_call(
+                et::VISIT_PROPERTY_ACCESS,
+                vec![pos_expr, desugar_e1, id],
+                &pos,
+            );
+            let virtual_expr = Expr(
+                (),
+                pos,
+                ObjGet(Box::new((virtual_e1, e2, null_flavor, is_prop_call))),
+            );
             (virtual_expr, desugar_expr)
         }
         ExpressionTree(_) => {

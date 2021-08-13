@@ -12,7 +12,5 @@ File "invalid_operator.php", line 26, characters 25-26:
 Expression trees do not support parameters with default values. (Parsing[1002])
 File "invalid_operator.php", line 29, characters 32-36:
 Unsupported expression tree syntax. (Parsing[1002])
-File "invalid_operator.php", line 30, characters 32-38:
-Unsupported expression tree syntax. (Parsing[1002])
-File "invalid_operator.php", line 33, characters 28-34:
+File "invalid_operator.php", line 32, characters 28-34:
 Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead. (Parsing[1002])

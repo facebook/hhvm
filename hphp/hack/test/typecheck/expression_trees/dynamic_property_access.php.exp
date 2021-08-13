@@ -1,0 +1,2 @@
+File "dynamic_property_access.php", line 12, characters 5-10:
+Expression trees only support named property access. (Parsing[1002])

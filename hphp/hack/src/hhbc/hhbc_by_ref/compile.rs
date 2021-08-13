@@ -114,8 +114,7 @@ bitflags! {
         // No longer using bit 15.
         const ENABLE_ENUM_CLASSES=1 << 16;
         const ENABLE_XHP_CLASS_MODIFIER=1 << 17;
-        const DISALLOW_DYNAMIC_METH_CALLER_ARGS=1 << 18;
-        // No longer using bit 19.
+        // No longer using bits 18-19.
         const ENABLE_CLASS_LEVEL_WHERE_CLAUSES=1 << 20;
         const ESCAPE_BRACE=1 << 21;
   }
@@ -244,9 +243,6 @@ impl ParserFlags {
         }
         if self.contains(ParserFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES) {
             f |= LangFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES;
-        }
-        if self.contains(ParserFlags::DISALLOW_DYNAMIC_METH_CALLER_ARGS) {
-            f |= LangFlags::DISALLOW_DYNAMIC_METH_CALLER_ARGS;
         }
         if self.contains(ParserFlags::ESCAPE_BRACE) {
             f |= LangFlags::ESCAPE_BRACE;

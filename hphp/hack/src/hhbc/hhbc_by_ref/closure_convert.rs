@@ -22,7 +22,7 @@ use hhbc_by_ref_hhbc_id as hhbc_id;
 use hhbc_by_ref_hhbc_id::class;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{unrecoverable, Error, Result};
-use hhbc_by_ref_options::{CompilerFlags, HhvmFlags, LangFlags, Options};
+use hhbc_by_ref_options::{CompilerFlags, HhvmFlags, Options};
 use hhbc_by_ref_unique_id_builder::*;
 use hhbc_by_ref_unique_list::UniqueList;
 use naming_special_names_rust::{fb, pseudo_consts, special_idents, superglobals};
@@ -1298,12 +1298,6 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                     }
                 } =>
             {
-                let strict = env
-                    .options
-                    .hhvm
-                    .hack_lang
-                    .flags
-                    .contains(LangFlags::DISALLOW_DYNAMIC_METH_CALLER_ARGS);
                 if let [Expr(_, pc, cls), Expr(_, pf, func)] = &mut *x.2 {
                     match (&cls, func.as_string()) {
                         (Expr_::ClassConst(cc), Some(fname))
@@ -1348,32 +1342,6 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                                 }
                             }
                         }
-                        (Expr_::ClassConst(_), Some(_)) => {
-                            return Err(emit_fatal::raise_fatal_parse(
-                                pc,
-                                "Class must be a Class or string type",
-                            ));
-                        }
-                        (Expr_::ClassConst(cc), None)
-                            if string_utils::is_class(&(cc.1).1) && strict =>
-                        {
-                            return Err(emit_fatal::raise_fatal_parse(
-                                pf,
-                                "Method name must be a literal string",
-                            ));
-                        }
-                        (Expr_::ClassConst(_), _) if strict => {
-                            return Err(emit_fatal::raise_fatal_parse(
-                                pc,
-                                "Class must be a Class or string type",
-                            ));
-                        }
-                        (Expr_::String(_), None) if strict => {
-                            return Err(emit_fatal::raise_fatal_parse(
-                                pf,
-                                "Method name must be a literal string",
-                            ));
-                        }
                         (Expr_::String(cls_name), Some(fname)) => convert_meth_caller_to_func_ptr(
                             env,
                             self,
@@ -1387,15 +1355,18 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                             // There's no guarantee that they're valid UTF-8.
                             unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
                         ),
-
-                        (_, _) if strict => {
+                        (_, Some(_)) => {
+                            return Err(emit_fatal::raise_fatal_parse(
+                                pc,
+                                "Class must be a Class or string type",
+                            ));
+                        }
+                        (_, _) => {
                             return Err(emit_fatal::raise_fatal_parse(
                                 pf,
                                 "Method name must be a literal string",
                             ));
                         }
-                        // For other cases, fallback to create __SystemLib\MethCallerHelper
-                        _ => Expr_::Call(x),
                     }
                 } else {
                     let mut res = Expr_::Call(x);
@@ -1410,12 +1381,6 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                         ["hh\\meth_caller", "meth_caller"]
                             .iter()
                             .any(|n| n.eq_ignore_ascii_case(name))
-                            && env
-                                .options
-                                .hhvm
-                                .hack_lang
-                                .flags
-                                .contains(LangFlags::DISALLOW_DYNAMIC_METH_CALLER_ARGS)
                     } else {
                         false
                     }
@@ -1447,22 +1412,16 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                             res.recurse(env, self.object())?;
                             res
                         }
-                        (Expr_::ClassConst(cc), None) if string_utils::is_class(&(cc.1).1) => {
+                        (_, Some(_)) => {
                             return Err(emit_fatal::raise_fatal_parse(
-                                pf,
-                                "Method name must be a literal string",
-                            ));
-                        }
-                        (Expr_::String(_), None) => {
-                            return Err(emit_fatal::raise_fatal_parse(
-                                pf,
-                                "Method name must be a literal string",
+                                pc,
+                                "Class must be a Class or string type",
                             ));
                         }
                         (_, _) => {
                             return Err(emit_fatal::raise_fatal_parse(
-                                pc,
-                                "Class must be a Class or string type",
+                                pf,
+                                "Method name must be a literal string",
                             ));
                         }
                     }

@@ -343,7 +343,6 @@ std::uint32_t RepoOptions::getParserFlags() const {
     SETFLAGS(DisallowHashComments, 14)                         \
     SETFLAGS(EnableEnumClasses,16)                             \
     SETFLAGS(EnableXHPClassModifier,17)                        \
-    SETFLAGS(DisallowDynamicMethCallerArgs, 18)                \
     SETFLAGS(RuntimeOption::EnableClassLevelWhereClauses, 20)  \
     SETFLAGS(EscapeBrace, 21)
 

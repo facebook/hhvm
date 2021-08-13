@@ -75,9 +75,9 @@ function testFunction(mixed $fun_meth_or_string) {
   return $function_name;
 }
 
-function get_name(string $name, string $n): string {
-  return $name . $n;
-}
+
+
+
 
 class A {
   private $map = darray[];
@@ -108,10 +108,10 @@ $x = \HH\meth_caller(Acls::class, "bfunc");
 \var_dump($x->getClassName(), $x->getMethodName());
 
 $o = new A();
-$func_name = testFunction(\HH\meth_caller(get_name('A', 'a'), 'B'));
-$o->set("a", $func_name);
-$func_name = testFunction(\HH\meth_caller(get_name('A', 'b'), 'B'));
-$o->set("b", $func_name);
+
+
+
+
 $func_name = testFunction(\HH\meth_caller('C', 'B'));
 $o->set("c", $func_name);
 $func_name = testFunction(\HH\meth_caller('D', 'B'));

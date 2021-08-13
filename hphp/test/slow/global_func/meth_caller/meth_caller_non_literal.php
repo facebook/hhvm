@@ -17,7 +17,7 @@ function main() {
   $carr = varray[A::class];
   $func_n = "afunc";
   foreach ($carr as $c) {
-    $m = HH\meth_caller($c, $func_n);
+    $m = new __SystemLib\MethCallerHelper($c, $func_n);
     test_builtins($m);
     var_dump($m(new $c(), 1));
   }

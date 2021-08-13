@@ -5,7 +5,7 @@
 
 use bitflags::bitflags;
 use decl_provider::DeclProvider;
-use ffi::Maybe::*;
+use ffi::{Maybe::*, Slice};
 use hhbc_by_ref_emit_adata as emit_adata;
 use hhbc_by_ref_emit_class::emit_classes_from_program;
 use hhbc_by_ref_emit_constant::emit_constants_from_program;
@@ -74,13 +74,13 @@ fn emit_program_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let fatal = Nothing;
 
     Ok(HhasProgram {
-        record_defs,
-        classes,
-        functions,
-        typedefs,
-        constants,
-        adata,
-        file_attributes,
+        record_defs: Slice::fill_iter(alloc, record_defs.into_iter()),
+        classes: Slice::fill_iter(alloc, classes.into_iter()),
+        functions: Slice::fill_iter(alloc, functions.into_iter()),
+        typedefs: Slice::fill_iter(alloc, typedefs.into_iter()),
+        constants: Slice::fill_iter(alloc, constants.into_iter()),
+        adata: Slice::fill_iter(alloc, adata.into_iter()),
+        file_attributes: Slice::fill_iter(alloc, file_attributes.into_iter()),
         symbol_refs,
         fatal,
     })

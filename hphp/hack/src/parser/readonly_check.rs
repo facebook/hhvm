@@ -25,7 +25,7 @@ pub enum Rty {
 }
 
 struct Context {
-    locals: HashMap<String, bool>,
+    locals: HashMap<String, Rty>,
     readonly_return: Rty,
     this_ty: Rty,
 }
@@ -39,7 +39,7 @@ impl Context {
         }
     }
 
-    pub fn add_local(&mut self, var_name: &String, is_readonly: bool) {
+    pub fn add_local(&mut self, var_name: &String, rty: Rty) {
         match self.locals.get(var_name) {
             Some(_) => {
                 // per @jjwu, "...once a variable is assigned a value, it
@@ -47,7 +47,7 @@ impl Context {
                 // for the rest of the function." See D29320968 for more context.
             }
             None => {
-                self.locals.insert(var_name.clone(), is_readonly);
+                self.locals.insert(var_name.clone(), rty);
             }
         }
     }
@@ -56,14 +56,14 @@ impl Context {
         !self.locals.contains_key(var_name)
     }
 
-    pub fn is_readonly<S: ?Sized>(&self, var_name: &S) -> bool
+    pub fn get_rty<S: ?Sized>(&self, var_name: &S) -> Rty
     where
         String: std::borrow::Borrow<S>,
         S: std::hash::Hash + Eq,
     {
         match self.locals.get(var_name) {
             Some(&x) => x,
-            None => false,
+            None => Rty::Mutable,
         }
     }
 }
@@ -109,11 +109,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             if is_this {
                 context.this_ty
             } else {
-                if context.is_readonly(var_name) {
-                    Rty::Readonly
-                } else {
-                    Rty::Mutable
-                }
+                context.get_rty(var_name)
             }
         }
         Darray(d) => {
@@ -249,10 +245,10 @@ fn check_assignment_local(
     rhs: &mut Expr,
 ) {
     let var_name = local_id::get_name(&id_orig.1).to_string();
-    let is_readonly = Rty::Readonly == rty_expr(context, &rhs);
+    let rhs_rty = rty_expr(context, &rhs);
     if context.is_new_local(&var_name) {
-        context.add_local(&var_name, is_readonly);
-    } else if context.is_readonly(&var_name) != is_readonly {
+        context.add_local(&var_name, rhs_rty);
+    } else if context.get_rty(&var_name) != rhs_rty {
         checker.add_error(
             &pos,
             syntax_error::redefined_assignment_different_mutability(&var_name),
@@ -390,9 +386,9 @@ impl<'ast> VisitorMut<'ast> for Checker {
 
         for p in m.params.iter() {
             if let Some(_) = p.readonly {
-                context.add_local(&p.name, true)
+                context.add_local(&p.name, Rty::Readonly)
             } else {
-                context.add_local(&p.name, false)
+                context.add_local(&p.name, Rty::Mutable)
             }
         }
         m.recurse(&mut context, self.object())
@@ -409,9 +405,9 @@ impl<'ast> VisitorMut<'ast> for Checker {
 
         for p in f.params.iter() {
             if let Some(_) = p.readonly {
-                context.add_local(&p.name, true)
+                context.add_local(&p.name, Rty::Readonly)
             } else {
-                context.add_local(&p.name, false)
+                context.add_local(&p.name, Rty::Mutable)
             }
         }
         f.recurse(&mut context, self.object())

@@ -325,9 +325,15 @@ fn check_assignment_validity(
     rhs: &mut Expr,
 ) {
     match &mut lhs.2 {
-        // TODO: list expressions are incorrect here
         aast::Expr_::Lvar(id_orig) => {
             check_assignment_local(context, checker, pos, id_orig, rhs);
+        }
+        // list assignment
+        aast::Expr_::List(l) => {
+            let exprs = &mut **l;
+            for e in exprs.iter_mut() {
+                check_assignment_validity(context, checker, &e.1.clone(), e, rhs);
+            }
         }
         _ => {
             check_assignment_nonlocal(context, checker, pos, lhs, rhs);

@@ -793,6 +793,8 @@ val invalid_type_hint : Pos.t -> error_from_reasons_callback
 
 val index_type_mismatch : typing_error_callback
 
+val covariant_index_type_mismatch : typing_error_callback
+
 val index_type_mismatch_at : Pos.t -> error_from_reasons_callback
 
 val expected_stringlike : typing_error_callback

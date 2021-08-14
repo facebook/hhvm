@@ -27,12 +27,12 @@ let should_enforce env = TCO.disallow_invalid_arraykey (Env.get_tcopt env)
  * have a type k'. We want k' <: k.
  *)
 let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
-  let type_index env ty_have ty_expect reason =
+  let type_index ?(is_covariant_index = false) env ty_have ty_expect reason =
     let t_env = Env.tast_env_as_typing_env env in
     match
       Typing_coercion.try_coerce t_env ty_have (MakeType.unenforced ty_expect)
     with
-    | Some _ -> ()
+    | Some _ -> Ok ()
     | None ->
       if
         (Env.can_subtype env ty_have (MakeType.dynamic (get_reason ty_have))
@@ -46,38 +46,79 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
         || (not (Env.can_subtype env ty_have (MakeType.arraykey Reason.Rnone)))
            && should_enforce env
       then
-        ()
+        Ok ()
       else
         let (_, ty_have) = Env.expand_type env ty_have in
         let (_, ty_expect) = Env.expand_type env ty_expect in
         let ty_expect_str = Env.print_error_ty env ty_expect in
         let ty_have_str = Env.print_error_ty env ty_have in
-        Errors.index_type_mismatch
+        let err =
+          if is_covariant_index then
+            Errors.covariant_index_type_mismatch
+          else
+            Errors.index_type_mismatch
+        in
+        err
           (expr_pos, Reason.string_of_ureason reason)
           (Typing_reason.to_string
              ("This is " ^ ty_expect_str)
              (get_reason ty_expect)
           @ Typing_reason.to_string
               ("It is incompatible with " ^ ty_have_str)
-              (get_reason ty_have))
+              (get_reason ty_have));
+        Error ()
   in
   let (_, ety) = Env.expand_type env array_ty in
   match get_node ety with
   | Tunion tyl ->
     List.iter tyl ~f:(fun ty ->
         array_get ~array_pos ~expr_pos ~index_pos env ty index_ty)
-  | Tdarray (key_ty, _) -> type_index env index_ty key_ty Reason.index_array
-  | Tclass ((_, cn), _, _ :: _)
+  | Tdarray (key_ty, _) ->
+    let (_ : (unit, unit) result) =
+      type_index env index_ty key_ty Reason.index_array
+    in
+    ()
+  | Tclass ((_, cn), _, key_ty :: _)
     when cn = SN.Collections.cDict || cn = SN.Collections.cKeyset ->
-    let key_ty = MakeType.arraykey (Reason.Ridx_dict array_pos) in
-    type_index env index_ty key_ty (Reason.index_class cn)
+    (* dict and keyset are both covariant in their key types so it is only
+       required that the index be a subtype of the upper bound on that param, i.e., arraykey
+       Here, we first check that we do not have a type error; if we do not, we
+       then check that the indexing expression is a subtype of the key type and
+       raise a distinct error.
+       This allows us to retain the older behavior (which raised an index_type_mismatch error)
+       whilst allowing us to discern between it and errors which can be
+       addressed with `UNSAFE_CAST`
+    *)
+    let arraykey_ty = MakeType.arraykey (Reason.Ridx_dict array_pos) in
+    let array_key_res =
+      type_index env index_ty arraykey_ty (Reason.index_class cn)
+    in
+    (match array_key_res with
+    | Error _ ->
+      (* We have raised the more general error *)
+      ()
+    | Ok _ ->
+      (* The index expression _is_ a subtype of arraykey, now check it is a subtype
+         of the given key_ty *)
+      let (_ : (unit, unit) result) =
+        type_index
+          ~is_covariant_index:true
+          env
+          index_ty
+          key_ty
+          (Reason.index_class cn)
+      in
+      ())
   | Tclass ((_, cn), _, key_ty :: _)
     when cn = SN.Collections.cMap
          || cn = SN.Collections.cConstMap
          || cn = SN.Collections.cImmMap
          || cn = SN.Collections.cKeyedContainer
          || cn = SN.Collections.cAnyArray ->
-    type_index env index_ty key_ty (Reason.index_class cn)
+    let (_ : (unit, unit) result) =
+      type_index env index_ty key_ty (Reason.index_class cn)
+    in
+    ()
   | Toption array_ty ->
     array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty
   | Tnonnull

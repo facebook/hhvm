@@ -3725,6 +3725,9 @@ let maybe_unify_error
 
 let index_type_mismatch = maybe_unify_error Typing.IndexTypeMismatch
 
+let covariant_index_type_mismatch =
+  maybe_unify_error Typing.CovariantIndexTypeMismatch
+
 let index_type_mismatch_at pos ?code ?(quickfixes = []) reasons =
   add_list
     (Option.value code ~default:(Typing.err_code Typing.IndexTypeMismatch))

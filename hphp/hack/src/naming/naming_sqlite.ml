@@ -213,7 +213,7 @@ module FileInfoTable = struct
         PATH_PREFIX_TYPE INTEGER NOT NULL,
         PATH_SUFFIX TEXT NOT NULL,
         TYPE_CHECKER_MODE INTEGER,
-        DECL_HASH BLOB,
+        DECL_HASH INTEGER,
         CLASSES TEXT,
         CONSTS TEXT,
         FUNS TEXT,

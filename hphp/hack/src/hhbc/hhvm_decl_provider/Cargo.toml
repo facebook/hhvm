@@ -9,7 +9,7 @@ path = "../external_decl_provider/lib.rs"
 
 [dependencies]
 decl_provider = { path = "../decl_provider" }
-libc = "0.2.86"
+libc = "0.2.98"
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 
 [profile.release]

@@ -10,7 +10,7 @@ path = "../../string_utils.rs"
 [dependencies]
 escaper = { path = "../../../../utils/escaper" }
 lazy_static = "1.0"
-libc = "0.2.86"
+libc = "0.2.98"
 naming_special_names_rust = { path = "../../../../naming" }
 ocaml_helper = { path = "../../../../utils/ocaml_helper" }
 regex = "1.4.2"

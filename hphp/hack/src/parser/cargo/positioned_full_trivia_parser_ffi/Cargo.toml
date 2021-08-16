@@ -11,7 +11,7 @@ doctest = false
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
-libc = "0.2.86"
+libc = "0.2.98"
 ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }

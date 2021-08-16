@@ -8,7 +8,7 @@ edition = "2018"
 path = "../../profile.rs"
 
 [dependencies]
-libc = "0.2.86"
+libc = "0.2.98"
 
 [profile.release]
 incremental = false

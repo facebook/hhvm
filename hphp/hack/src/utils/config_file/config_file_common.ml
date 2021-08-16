@@ -26,9 +26,9 @@ let apply_overrides ~silent ~(config : t) ~(overrides : t) : t =
   else
     let config = Config_file_ffi_externs.apply_overrides config overrides in
     if not silent then (
-      Printf.eprintf "Config overrides:\n";
+      Printf.eprintf "Config overrides:\n%!";
       print_to_stderr overrides;
-      Printf.eprintf "\nThe combined config:\n";
+      Printf.eprintf "\nThe combined config:\n%!";
       print_to_stderr config
     );
     config

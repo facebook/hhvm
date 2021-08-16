@@ -33,6 +33,8 @@ ocamlrep_ocamlpool::ocaml_ffi! {
         for (key, value) in config.0.iter() {
             eprintln!("{} = {}", key, value);
         }
+        use std::io::Write;
+        let _ = std::io::stderr().flush();
     }
 
     fn hh_config_file_apply_overrides(

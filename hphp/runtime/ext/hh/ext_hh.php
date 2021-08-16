@@ -13,7 +13,7 @@ interface IMemoizeParam {
    * Serialize this object to a string that can be used as a
    * dictionary key to differentiate instances of this class.
    */
-  public function getInstanceKey(): string;
+  public function getInstanceKey()[this::CMemoParam]: string;
 }
 
 /**

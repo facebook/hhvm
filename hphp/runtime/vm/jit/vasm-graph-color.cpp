@@ -2554,17 +2554,30 @@ void infer_register_classes(State& state) {
 
       jit::vector<std::pair<Vreg, Vreg>> copies;
       for (size_t i = 0; i < s.size(); ++i) {
+        // We don't handle phis between an ignored and non-ignored
+        // register right now. We could, but it complicates things. If
+        // a phi takes an ignored register as a source, but the dest
+        // is non-ignored, insert a copy before the phi to make both
+        // sides match.
+        if (is_ignored(state, s[i]) && !is_ignored(state, d[i])) {
+          auto const dCls = reg_class(state, d[i]);
+          assertx(dCls != RegClass::SF);
+          auto const newReg = unit.makeReg();
+          reg_info_insert(state, newReg, RegInfo{dCls});
+          copies.emplace_back(s[i], newReg);
+          s[i] = newReg;
+          invalidate_cached_operands(lastInst);
+          continue;
+        }
+        // However, don't allow the opposite case (non-ignored to
+        // ignored) since it doesn't occur right now
+        assertx(is_ignored(state, s[i]) == is_ignored(state, d[i]));
         // Since we allow rvmfp() to appear multiple times in a
         // phidef, it's not really clear how to properly emit code for
         // them. This isn't an issue if the source and dests are
         // always the same, which always happens now, so assert that
         // this remains the case.
         assertx((s[i] == rvmfp()) == (d[i] == rvmfp()));
-        // We don't handle a phi between an ignored and non-ignored
-        // register right now. We could, but it complicates things and
-        // we don't generate it right now, so assert that this remains
-        // the case.
-        assertx(is_ignored(state, s[i]) == is_ignored(state, d[i]));
         if (is_ignored(state, s[i])) continue;
 
         auto const sCls = reg_class(state, s[i]);

@@ -849,16 +849,31 @@ let localize_targs_with_kinds
     named_kinds
     targl =
   let targ_count = List.length targl in
+  let generated_tparam_count =
+    List.count
+      ~f:(fun t -> SN.Coeffects.is_generated_generic (snd t.tp_name))
+      tparaml
+  in
   let tparam_count =
     match List.length tparaml with
     | 0 -> List.length named_kinds
     | n -> n
   in
+  let explicit_tparam_count = tparam_count - generated_tparam_count in
   (* If there are explicit type arguments but too few or too many then
    * report an error *)
-  if Int.( <> ) targ_count 0 && Int.( <> ) tparam_count targ_count then
+  if
+    Int.(
+      targ_count <> 0
+      && tparam_count <> targ_count
+      && targ_count <> explicit_tparam_count)
+  then
     if is_method then
-      Errors.expected_tparam ~definition_pos:def_pos ~use_pos tparam_count None
+      Errors.expected_tparam
+        ~definition_pos:def_pos
+        ~use_pos
+        explicit_tparam_count
+        None
     else
       Errors.type_arity
         use_pos

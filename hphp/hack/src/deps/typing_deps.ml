@@ -84,11 +84,10 @@ module Dep = struct
   type t = int
 
   let to_int64 (t : t) : int64 =
-    (* The [t] is leading bit 0 followed by 63 bits of data.
+    (* The [t] is 63 bits of data followed by a trailing bit 0.
        Since we're storing it in Dep.t, an ocaml int stored in two's complement, the first
-       of those 63 bits is considered a sign bit. The preceding leading bit 0 is because
-       ocaml reserves the leading bit 0 to indicate that it's stored locally,
-       not a reference. *)
+       of those 63 bits is considered a sign bit. The trailing bit 0 is because ocaml reserves
+       the trailing bit 0 to indicate that it's stored locally, not a reference. *)
     let a = Int64.of_int t in
     (* [a] is an Int64 version of that int, which unlike the built-in int is always stored
        as a reference on the heap and hence does not need to reserve a leading bit and hence

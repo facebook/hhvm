@@ -45,4 +45,7 @@ function trim_l(string $str, ?string $what, ?Locale $loc = null): string;
 function trim_left_l(string $str, ?string $what, ?Locale $loc = null): string;
 function trim_right_l(string $str, ?string $what, ?Locale $loc = null): string;
 
+function replace_l(string $haystack, string $needle, string $replacement, ?Locale $loc = null): string;
+function replace_ci_l(string $haystack, string $needle, string $replacement, ?Locale $loc = null): string;
+
 } // namespace HH\Lib\_Private\_Str

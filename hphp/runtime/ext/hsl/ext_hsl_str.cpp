@@ -325,6 +325,22 @@ String HHVM_FUNCTION(trim_right_l,
   return trim_impl(str, what, maybe_loc, HSLLocale::Ops::TrimSides::RIGHT);
 }
 
+String HHVM_FUNCTION(replace_l,
+                     const String& haystack,
+                     const String& needle,
+                     const String& replacement,
+                     const Variant& maybe_loc) {
+  return get_locale(maybe_loc)->ops()->replace(haystack, needle, replacement); 
+}
+
+String HHVM_FUNCTION(replace_ci_l,
+                     const String& haystack,
+                     const String& needle,
+                     const String& replacement,
+                     const Variant& maybe_loc) {
+  return get_locale(maybe_loc)->ops()->replace_ci(haystack, needle, replacement); 
+}
+
 struct HSLStrExtension final : Extension {
   HSLStrExtension() : Extension("hsl_str", "0.1") {}
 
@@ -371,6 +387,10 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\trim_l, trim_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\trim_left_l, trim_left_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\trim_right_l, trim_right_l);
+
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_l, replace_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_ci_l, replace_ci_l);
 
     loadSystemlib();
   }

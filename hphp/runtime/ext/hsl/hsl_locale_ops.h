@@ -66,5 +66,8 @@ namespace HPHP {
 
     virtual String trim(const String& str, TrimSides sides) const = 0;
     virtual String trim(const String& str, const String& what, TrimSides sides) const = 0;
+
+    virtual String replace(const String& haystack, const String& needle, const String& replacement) const = 0;
+    virtual String replace_ci(const String& haystack, const String& needle, const String& replacement) const = 0;
   };
 } // namespace HPHP

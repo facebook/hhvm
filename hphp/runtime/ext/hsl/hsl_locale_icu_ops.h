@@ -62,6 +62,9 @@ namespace HPHP {
 
     virtual String trim(const String& str, TrimSides sides) const override;
     virtual String trim(const String& str, const String& what, TrimSides sides) const override;
+
+    virtual String replace(const String& haystack, const String& needle, const String& replacement) const override;
+    virtual String replace_ci(const String& haystack, const String& needle, const String& replacement) const override;
     private:
       icu::Locale m_collate;
       icu::Locale m_ctype;

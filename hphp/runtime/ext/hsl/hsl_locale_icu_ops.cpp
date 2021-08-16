@@ -591,4 +591,62 @@ String HSLLocaleICUOps::trim(const String& str, const String& what, TrimSides si
   );
 }
 
+String HSLLocaleICUOps::replace(const String& haystack,
+                                 const String& needle,
+                                 const String& replacement) const {
+  auto uhaystack = ustr_from_utf8(haystack);
+  auto uneedle = ustr_from_utf8(needle);
+  const auto ureplacement = ustr_from_utf8(replacement);
+
+  icu::ErrorCode err;
+  // singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  uhaystack = normalizer->normalize(uhaystack, err);
+  uneedle = normalizer->normalize(uneedle, err);
+  // No need to normalize replacement
+  
+  uhaystack.findAndReplace(uneedle, ureplacement);
+  std::string ret;
+  uhaystack.toUTF8String(ret);
+  return ret;
+}
+
+String HSLLocaleICUOps::replace_ci(const String& haystack,
+                                    const String& needle,
+                                    const String& replacement) const {
+  auto uhaystack = ustr_from_utf8(haystack);
+  auto uneedle = ustr_from_utf8(needle);
+  const auto ureplacement = ustr_from_utf8(replacement);
+
+  icu::ErrorCode err;
+  // singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  uhaystack = normalizer->normalize(uhaystack, err);
+  uneedle = normalizer->normalize(uneedle, err);
+  // No need to normalize replacement
+ 
+  auto usearch(uhaystack);
+  usearch.foldCase(m_caseFoldFlags);
+  uneedle.foldCase(m_caseFoldFlags);
+  assertx(usearch.length() == uhaystack.length());
+
+  int32_t i = 0;
+  while (i < usearch.length()) {
+    i = usearch.indexOf(uneedle, i);
+    if (i < 0) {
+      break;
+    }
+    // Mutate both so that offsets are in sync
+    usearch.replace(i, uneedle.length(), ureplacement);
+    uhaystack.replace(i, uneedle.length(), ureplacement);
+
+    i += ureplacement.length();
+  }
+
+  std::string ret;
+  uhaystack.toUTF8String(ret);
+  
+  return ret;
+}
+
 } // namespace HPHP

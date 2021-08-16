@@ -278,4 +278,20 @@ String HSLLocaleLibcOps::trim(const String& str, const String& what, TrimSides s
   not_reached();
 }
 
+String HSLLocaleLibcOps::replace(const String& haystack,
+                                 const String& needle,
+                                 const String& replacement) const {
+  const auto ret = HHVM_FN(str_replace)(needle, replacement, haystack);
+  assertx(isStringType(ret.type()));
+  return String(ret.val().pstr);
+}
+
+String HSLLocaleLibcOps::replace_ci(const String& haystack,
+                                    const String& needle,
+                                    const String& replacement) const {
+  const auto ret = HHVM_FN(str_ireplace)(needle, replacement, haystack);
+  assertx(isStringType(ret.type()));
+  return String(ret.val().pstr);
+}
+
 } // namespace HPHP

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c80690ad986708f10ec31298b63b2a36>>
+// @generated SignedSource<<ca2ed43ca45118f63386b83b6c1cca47>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -494,6 +494,10 @@ impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop> TrivialDrop
 }
 arena_deserializer::impl_deserialize_in_arena!(FunctionPtrId<'arena, Ex, Fb, En>);
 
+/// An expression tree literal consists of a hint, splices, and
+/// expressions. Consider this example:
+///
+/// Foo`1 + ${$x} + ${bar()}`
 #[derive(
     Clone,
     Debug,
@@ -512,12 +516,23 @@ arena_deserializer::impl_deserialize_in_arena!(FunctionPtrId<'arena, Ex, Fb, En>
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, Fb: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
 pub struct ExpressionTree<'a, Ex, Fb, En> {
+    /// The hint before the backtick, so Foo in this example.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub hint: &'a Hint<'a>,
+    /// The values spliced into expression tree at runtime are assigned
+    /// to temporaries.
+    ///
+    /// $0tmp1 = $x; $0tmp2 = bar();
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub splices: &'a Block<'a, Ex, Fb, En>,
+    pub splices: &'a [&'a Stmt<'a, Ex, Fb, En>],
+    /// The expression that gets type checked.
+    ///
+    /// 1 + $0tmp1 + $0tmp2
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub virtualized_expr: &'a Expr<'a, Ex, Fb, En>,
+    /// The expression that's executed at runtime.
+    ///
+    /// Foo::makeTree($v ==> $v->visitBinOp(...))
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub runtime_expr: &'a Expr<'a, Ex, Fb, En>,
 }

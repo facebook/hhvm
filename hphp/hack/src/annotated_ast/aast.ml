@@ -260,11 +260,26 @@ and ('ex, 'fb, 'en) function_ptr_id =
   | FP_id of sid
   | FP_class_const of ('ex, 'fb, 'en) class_id * pstring
 
+(** An expression tree literal consists of a hint, splices, and
+    expressions. Consider this example:
+
+    Foo`1 + ${$x} + ${bar()}` *)
 and ('ex, 'fb, 'en) expression_tree = {
   et_hint: hint;
-  et_splices: ('ex, 'fb, 'en) block;
+      (** The hint before the backtick, so Foo in this example. *)
+  et_splices: ('ex, 'fb, 'en) stmt list;
+      (** The values spliced into expression tree at runtime are assigned
+          to temporaries.
+
+          $0tmp1 = $x; $0tmp2 = bar(); *)
   et_virtualized_expr: ('ex, 'fb, 'en) expr;
+      (** The expression that gets type checked.
+
+          1 + $0tmp1 + $0tmp2 *)
   et_runtime_expr: ('ex, 'fb, 'en) expr;
+      (** The expression that's executed at runtime.
+
+      Foo::makeTree($v ==> $v->visitBinOp(...)) *)
 }
 
 and ('ex, 'fb, 'en) expr_ =

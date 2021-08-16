@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<342d54a77443c0686ea6c60dc31ebcdb>>
+// @generated SignedSource<<5f1ce200c42d03d46d04727d15ec0740>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -384,6 +384,10 @@ pub enum FunctionPtrId<Ex, Fb, En> {
     FPClassConst(ClassId<Ex, Fb, En>, Pstring),
 }
 
+/// An expression tree literal consists of a hint, splices, and
+/// expressions. Consider this example:
+///
+/// Foo`1 + ${$x} + ${bar()}`
 #[derive(
     Clone,
     Debug,
@@ -399,9 +403,20 @@ pub enum FunctionPtrId<Ex, Fb, En> {
     ToOcamlRep
 )]
 pub struct ExpressionTree<Ex, Fb, En> {
+    /// The hint before the backtick, so Foo in this example.
     pub hint: Hint,
-    pub splices: Block<Ex, Fb, En>,
+    /// The values spliced into expression tree at runtime are assigned
+    /// to temporaries.
+    ///
+    /// $0tmp1 = $x; $0tmp2 = bar();
+    pub splices: Vec<Stmt<Ex, Fb, En>>,
+    /// The expression that gets type checked.
+    ///
+    /// 1 + $0tmp1 + $0tmp2
     pub virtualized_expr: Expr<Ex, Fb, En>,
+    /// The expression that's executed at runtime.
+    ///
+    /// Foo::makeTree($v ==> $v->visitBinOp(...))
     pub runtime_expr: Expr<Ex, Fb, En>,
 }
 

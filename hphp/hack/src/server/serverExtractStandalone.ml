@@ -1136,9 +1136,6 @@ end = struct
     | Some (_, name) -> name
     | None -> obj_name
 
-  let is_contextual_param Aast.{ tp_name = (_, name); _ } =
-    String.is_substring ~substring:"Tctx" name
-
   (** Generate an initial value based on type hint *)
   let init_value ctx hint =
     let unsupported_hint _ =
@@ -1842,7 +1839,12 @@ end = struct
         tp_constraints)
 
   and pp_tparams ppf ps =
-    match List.filter ~f:Fn.(compose not is_contextual_param) ps with
+    match
+      List.filter
+        ~f:(fun Aast.{ tp_name = (_, name); _ } ->
+          not (SN.Coeffects.is_generated_generic name))
+        ps
+    with
     | [] -> ()
     | ps -> Fmt.(angles @@ list ~sep:comma pp_tparam) ppf ps
 

@@ -95,7 +95,8 @@ let handler =
                  then
                    Errors.illegal_context p id
                | (p, Hprim t) -> Errors.illegal_context p (Nast.show_tprim t)
-               | (p, Habstr (name, _)) ->
+               | (p, Habstr (name, _))
+                 when not (SN.Coeffects.is_generated_generic name) ->
                  (* TODO(coeffects) make this a parser error *)
                  Errors.illegal_context p ("generic " ^ name)
                | _ -> ())

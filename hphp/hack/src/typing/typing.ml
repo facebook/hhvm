@@ -750,7 +750,9 @@ let type_capability env ctxs unsafe_ctxs default_pos =
       List.iter
         hl
         ~f:
-          (Typing_kinding.Simple.check_well_kinded_hint ~in_signature:false env));
+          (Typing_kinding.Simple.check_well_kinded_context_hint
+             ~in_signature:false
+             env));
 
   let cc = Decl_hint.aast_contexts_to_decl_capability in
   let (decl_pos, cap) = cc env.decl_env ctxs default_pos in

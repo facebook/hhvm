@@ -31,6 +31,9 @@ module Simple : sig
   val check_well_kinded_hint :
     in_signature:bool -> Typing_env_types.env -> Aast.hint -> unit
 
+  val check_well_kinded_context_hint :
+    in_signature:bool -> Typing_env_types.env -> Aast.hint -> unit
+
   val is_subkind :
     Typing_env_types.env ->
     sub:KindDefs.Simple.kind ->

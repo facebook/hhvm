@@ -8,6 +8,8 @@
 
 val hint : Decl_env.env -> Aast.hint -> Typing_defs.decl_ty
 
+val context_hint : Decl_env.env -> Aast.hint -> Typing_defs.decl_ty
+
 val aast_tparam_to_decl_tparam :
   Decl_env.env -> Nast.tparam -> Typing_defs.decl_ty Typing_defs.tparam
 

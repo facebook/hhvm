@@ -3300,7 +3300,7 @@ where
         // For polymorphic context with form `ctx $f`
         // require that `(function (ts)[_]: t) $f` exists
         // rewrite as `(function (ts)[ctx $f]: t) $f`
-        // add a type parameter named "Tctx$f"
+        // add a type parameter named "T/[ctx $f]"
         let rewrite_fun_ctx =
             |env: &mut Env<'a, TF>, tparams: &mut Vec<ast::Tparam>, hint: &mut Hint, name: &str| {
                 let mut invalid = |p| {
@@ -3318,7 +3318,7 @@ where
                                     if s == "_" {
                                         *h.1 = Hint_::HfunContext(name.to_string());
                                         tparams.push(tp(
-                                            ast::Id(h.0.clone(), "Tctx".to_string() + name),
+                                            ast::Id(h.0.clone(), format!("T/[ctx {}]", name)),
                                             vec![],
                                         ));
                                     } else {
@@ -3340,11 +3340,11 @@ where
 
         // For polymorphic context with form `$g::C`
         // if $g's type is not a type parameter
-        //   add one named "T$g" constrained by $g's type
+        //   add one named "T/$g" constrained by $g's type
         //   replace $g's type hint
         // let Tg denote $g's final type (must be a type parameter).
-        // add a type parameter "T$g@C"
-        // add a where constraint T$g@C = Tg :: C
+        // add a type parameter "T/[$g::C]"
+        // add a where constraint T/[$g::C] = Tg :: C
         let rewrite_arg_ctx = |
             env: &mut Env<'a, TF>,
             tparams: &mut Vec<ast::Tparam>,
@@ -3358,7 +3358,7 @@ where
             Happly(ast::Id(_, ref type_name), _) => {
                 if !tparams.iter().any(|h| h.name.1 == *type_name) {
                     // If the parameter is X $g, create tparam `T$g as X` and replace $g's type hint
-                    let id = ast::Id(param_pos.clone(), "T".to_string() + name);
+                    let id = ast::Id(param_pos.clone(), "T/".to_string() + name);
                     tparams.push(tp(
                         id.clone(),
                         vec![(ast::ConstraintKind::ConstraintAs, hint.clone())],
@@ -3369,15 +3369,7 @@ where
                     context_pos.clone(),
                     Haccess(hint.clone(), vec![cst.clone()]),
                 );
-                let left_id = ast::Id(
-                    context_pos.clone(),
-                    // IMPORTANT: using `::` here will not work, because
-                    // Typing_taccess constructs its own fake type parameter
-                    // for the Taccess with `::`. So, if the two type parameters
-                    // are named `Tprefix` and `Tprefix::Const`, the latter
-                    // will collide with the one generated for `Tprefix`::Const
-                    "T".to_string() + name + "@" + &cst.1,
-                );
+                let left_id = ast::Id(context_pos.clone(), format!("T/[{}::{}]", name, &cst.1));
                 tparams.push(tp(left_id.clone(), vec![]));
                 let left = ast::Hint::new(context_pos.clone(), Happly(left_id, vec![]));
                 where_constraints.push(ast::WhereConstraintHint(

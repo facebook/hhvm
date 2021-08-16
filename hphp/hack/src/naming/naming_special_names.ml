@@ -804,6 +804,10 @@ module Coeffects = struct
   let contexts = "\\HH\\Contexts"
 
   let unsafe_contexts = contexts ^ "\\Unsafe"
+
+  let generated_generic_prefix = "T/"
+
+  let is_generated_generic = String.is_prefix ~prefix:generated_generic_prefix
 end
 
 module Readonly = struct

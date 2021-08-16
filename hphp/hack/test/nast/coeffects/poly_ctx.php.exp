@@ -13,8 +13,8 @@
         f_readonly_ret = None; f_ret = ((), (Some ([6:21-25], (Hprim Tvoid)))); 
         f_name = ([3:10-14], "\\poly");
         f_tparams =
-        [{ tp_variance = Invariant; tp_name = ([4:19-20], "Tctx$f"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
-          { tp_variance = Invariant; tp_name = ([5:23-24], "Tctx$nf"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+        [{ tp_variance = Invariant; tp_name = ([4:19-20], "T/[ctx $f]"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
+          { tp_variance = Invariant; tp_name = ([5:23-24], "T/[ctx $nf]"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
         f_where_constraints = []; f_variadic = FVnonVariadic;
         f_params =
         [{ param_annotation = ();

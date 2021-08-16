@@ -463,25 +463,21 @@ module Full = struct
         | Exact when !debug_mode -> Concat [text "exact"; Space; d]
         | _ -> d
       end
-    | Tgeneric (s, []) when String.contains s '$' ->
-      (* Saves a call to is_prefix then chop_prefix_exn *)
+    | Tgeneric (s, []) when SN.Coeffects.is_generated_generic s ->
       begin
-        match String.chop_prefix ~prefix:"Tctx" s with
-        | Some var -> (* Tctx$f *) to_doc ("ctx " ^ var)
-        | None ->
+        match String.get s 2 with
+        | '[' ->
+          (* has the form T/[...] *)
+          to_doc (String.sub s ~pos:3 ~len:(String.length s - 4))
+        | '$' ->
+          (* Generic replacement type for parameter used for dependent context *)
           begin
-            match String.rsplit2 s ~on:'@' with
-            | Some (tvar, cst) ->
-              (* T$x@C *) to_doc (String.drop_prefix tvar 1 ^ "::" ^ cst)
-            | None ->
-              (* T$x *)
-              begin
-                match get_constraints_on_tparam env s with
-                | [(_, Ast_defs.Constraint_as, ty)] ->
-                  locl_ty to_doc st (Loclenv env) ty
-                | _ -> (* this case shouldn't occur *) to_doc s
-              end
+            match get_constraints_on_tparam env s with
+            | [(_, Ast_defs.Constraint_as, ty)] ->
+              locl_ty to_doc st (Loclenv env) ty
+            | _ -> (* this case shouldn't occur *) to_doc s
           end
+        | _ -> to_doc s
       end
     | Tunapplied_alias s
     | Tnewtype (s, [], _)

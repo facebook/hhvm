@@ -991,15 +991,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         self.decls.add(name, Decl::Record(decl), self.arena);
     }
 
-    fn join(&self, strs: &[&str]) -> &'a str {
-        let len = strs.iter().map(|s| s.len()).sum();
-        let mut result = String::with_capacity_in(len, self.arena);
-        for s in strs {
-            result.push_str(s);
-        }
-        result.into_bump_str()
-    }
-
     #[inline]
     fn concat(&self, str1: &str, str2: &str) -> &'a str {
         concat(self.arena, str1, str2)
@@ -1951,6 +1942,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         })
     }
 
+    fn ctx_generic_for_fun(&self, name: &str) -> &'a str {
+        bumpalo::format!(in self.arena, "T/[ctx {}]", name).into_bump_str()
+    }
+
+    fn ctx_generic_for_dependent(&self, name: &str, cst: &str) -> &'a str {
+        bumpalo::format!(in self.arena, "T/[{}::{}]", name, cst).into_bump_str()
+    }
+
     fn rewrite_effect_polymorphism(
         &self,
         params: &'a [&'a FunParam<'a>],
@@ -2003,7 +2002,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 Ty_::Tapply(((pos, "_"), _)) => pos,
                 _ => return None,
             };
-            let name = self.concat("Tctx", param_name);
+            let name = self.ctx_generic_for_fun(param_name);
             let tparam = tp((pos, name), &[]);
             tparams.push(tparam);
             let cap_ty = self.alloc(Ty(cap_ty.0, Ty_::Tgeneric(self.alloc((name, &[])))));
@@ -2018,11 +2017,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
 
         // For a polymorphic context with form `$g::C`, if we have a function
         // parameter `$g` with type `G` (where `G` is not a type parameter),
-        //   - add a type parameter constrained by $g's type: `T$g as G`
-        //   - replace $g's type hint (`G`) with the new type parameter `T$g`
+        //   - add a type parameter constrained by $g's type: `T/$g as G`
+        //   - replace $g's type hint (`G`) with the new type parameter `T/$g`
         // Then, for each polymorphic context with form `$g::C`,
-        //   - add a type parameter `T$g@C`
-        //   - add a where constraint `T$g@C = T$g :: C`
+        //   - add a type parameter `T/[$g::C]`
+        //   - add a where constraint `T/[$g::C] = T$g :: C`
         let rewrite_arg_ctx = |
             tparams: &mut Vec<&'a Tparam<'a>>,
             where_constraints: &mut Vec<&'a WhereConstraint<'a>>,
@@ -2044,7 +2043,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 // Otherwise, if the parameter is `G $g`, create tparam
                 // `T$g as G` and replace $g's type hint
                 _ => {
-                    let id = (param_pos, self.concat("T", name));
+                    let id = (param_pos, self.concat("T/", name));
                     tparams.push(tp(
                         id,
                         std::slice::from_ref(self.alloc((ConstraintKind::ConstraintAs, ty))),
@@ -2063,12 +2062,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             ));
             let left_id = (
                 context_reason.pos().unwrap_or(Pos::none()),
-                // IMPORTANT: using `::` here will not work, because
-                // Typing_taccess constructs its own fake type parameter
-                // for the Taccess with `::`. So, if the two type parameters
-                // are named `Tprefix` and `Tprefix::Const`, the latter
-                // will collide with the one generated for `Tprefix`::Const
-                self.join(&["T", name, "@", &cst.1]),
+                self.ctx_generic_for_dependent(name, &cst.1),
             );
             tparams.push(tp(left_id, &[]));
             let left = self.alloc(Ty(
@@ -2160,12 +2154,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         let context_tys = self.slice(context_tys.iter().copied().map(|ty| {
             let ty_ = match ty.1 {
                 Ty_::Tapply(((_, name), &[])) if name.starts_with('$') => {
-                    Ty_::Tgeneric(self.alloc((self.concat("Tctx", name), &[])))
+                    Ty_::Tgeneric(self.alloc((self.ctx_generic_for_fun(name), &[])))
                 }
                 Ty_::Taccess(&TaccessType(Ty(_, Ty_::Tapply(((_, name), &[]))), cst))
                     if name.starts_with('$') =>
                 {
-                    let name = self.join(&["T", name, "@", &cst.1]);
+                    let name = self.ctx_generic_for_dependent(name, &cst.1);
                     Ty_::Tgeneric(self.alloc((name, &[])))
                 }
                 _ => return ty,

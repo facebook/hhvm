@@ -133,6 +133,13 @@ let rec hint ?(via_label = false) ?(in_signature = true) env (p, h) =
   Typing_kinding.Simple.check_well_kinded_hint ~in_signature env.tenv (p, h);
   hint_ ~via_label ~in_signature env p h
 
+and context_hint ?(via_label = false) ?(in_signature = true) env (p, h) =
+  Typing_kinding.Simple.check_well_kinded_context_hint
+    ~in_signature
+    env.tenv
+    (p, h);
+  hint_ ~via_label ~in_signature env p h
+
 and hint_ ~via_label ~in_signature env p h_ =
   let hint env (p, h) = hint_ ~via_label:false ~in_signature env p h in
   let () =
@@ -219,7 +226,7 @@ and hint_ ~via_label ~in_signature env p h_ =
     (* TODO(coeffects) *)
     ()
 
-and contexts env (_, hl) = List.iter ~f:(hint env) hl
+and contexts env (_, hl) = List.iter ~f:(context_hint env) hl
 
 let type_hint ?via_label env th =
   maybe (hint ?via_label) env (hint_of_type_hint th)

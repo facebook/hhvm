@@ -502,4 +502,8 @@ module Simple = struct
   let check_well_kinded_hint ~in_signature env hint =
     let decl_ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
     check_well_kinded_type ~in_signature env decl_ty
+
+  let check_well_kinded_context_hint ~in_signature env hint =
+    let decl_ty = Decl_hint.context_hint env.Typing_env_types.decl_env hint in
+    check_well_kinded_type ~in_signature env decl_ty
 end

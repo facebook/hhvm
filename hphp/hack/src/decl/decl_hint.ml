@@ -15,10 +15,21 @@ open Aast
 open Typing_defs
 module SN = Naming_special_names
 
+let make_decl_ty env p ty_ =
+  mk (Typing_reason.Rhint (Decl_env.make_decl_pos env p), ty_)
+
 (* Unpacking a hint for typing *)
 let rec hint env (p, h) =
-  let h = hint_ p env h in
-  mk (Typing_reason.Rhint (Decl_env.make_decl_pos env p), h)
+  let ty_ = hint_ p env h in
+  make_decl_ty env p ty_
+
+and context_hint env (p, h) =
+  match h with
+  | Hfun_context n ->
+    make_decl_ty env p (Tgeneric (Format.sprintf "T/[ctx %s]" n, []))
+  | Haccess ((_, Hvar n), [(_, id)]) ->
+    make_decl_ty env p (Tgeneric (Format.sprintf "T/[%s::%s]" n id, []))
+  | _ -> hint env (p, h)
 
 and shape_field_info_to_shape_field_type
     env { sfi_optional; sfi_hint; sfi_name = _ } =
@@ -39,7 +50,7 @@ and aast_contexts_to_decl_capability env ctxs default_pos :
     Aast.pos * decl_ty capability =
   match ctxs with
   | Some (pos, hl) ->
-    let dtys = List.map ~f:(hint env) hl in
+    let dtys = List.map ~f:(context_hint env) hl in
     (* For coeffect contexts, in general we do not simplify empty or singleton
      * intersection, we keep them as is, so we don't use Typing_make_type
      * on purpose.
@@ -190,7 +201,6 @@ and hint_ p env = function
     let id = Decl_env.make_decl_posed env id in
     let argl = List.map argl ~f:(hint env) in
     Tapply (id, argl)
-  | Haccess ((_, Hvar n), [(_, id)]) -> Tgeneric ("T" ^ n ^ "@" ^ id, [])
   | Haccess (root_ty, ids) ->
     let root_ty = hint_ p env (snd root_ty) in
     let rec translate res ids =
@@ -232,8 +242,10 @@ and hint_ p env = function
     in
     Tshape (shape_kind, fdm)
   | Hsoft (p, h_) -> hint_ p env h_
-  | Hfun_context n -> Tgeneric ("Tctx" ^ n, [])
-  | Hvar n -> Tgeneric ("T" ^ n, [])
+  | Hfun_context _
+  | Hvar _ ->
+    Errors.internal_error p "Unexpected context hint";
+    Terr
 
 and possibly_enforced_hint env h =
   (* Initially we assume that a type is not enforced at runtime.

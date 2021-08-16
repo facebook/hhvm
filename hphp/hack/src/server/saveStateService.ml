@@ -374,6 +374,7 @@ let save_state
       ~incremental_info_file
       ~replace_state_after_saving
   | Typing_deps_mode.SaveCustomMode { graph = _; new_edges_dir } ->
+    dump_errors_json output_filename env.ServerEnv.errorl;
     saved_state_build_revision_write ~base_file_name:output_filename;
     Hh_logger.warn
       "saveStateService: not saving 64-bit dep graph edges to disk, because they are already in %s"

@@ -1320,6 +1320,7 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 instr::cgetl(alloc, local),
                 1,
                 false,
+                false, // TODO: Readonly iterator assignment
             )?;
             Ok((
                 vec![lhs],
@@ -1415,6 +1416,7 @@ fn emit_load_list_element<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 query_value(path),
                 1,
                 false,
+                false, // TODO readonly load list elements
             )?;
             let load_value = InstrSeq::gather(alloc, vec![set_instrs, instr::popc(alloc)]);
             (vec![], vec![load_value])
@@ -1802,6 +1804,7 @@ fn emit_await_assignment<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     rhs_instrs,
                     1,
                     false,
+                    false, // unnamed local assignment does not need readonly check
                 )?;
                 Ok((
                     InstrSeq::gather(alloc, vec![awaited_instrs, instr::popl(alloc, temp)]),

@@ -3879,7 +3879,16 @@ fn emit_obj_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     } else {
         get_querym_op_mode(&query_op)
     };
-    let prop_stack_size = emit_prop_expr(e, env, nullflavor, 0, prop, null_coalesce_assignment)?.2;
+    let prop_stack_size = emit_prop_expr(
+        e,
+        env,
+        nullflavor,
+        0,
+        prop,
+        null_coalesce_assignment,
+        ReadOnlyOp::Any,
+    )?
+    .2;
     let (
         base_expr_instrs_begin,
         base_expr_instrs_end,
@@ -3904,6 +3913,7 @@ fn emit_obj_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         cls_stack_size,
         prop,
         null_coalesce_assignment,
+        ReadOnlyOp::Any, // TODO: readonly prop access (non assignment)
     )?;
     let total_stack_size = (prop_stack_size + base_stack_size + cls_stack_size) as usize;
     let num_params = if null_coalesce_assignment {
@@ -3943,13 +3953,15 @@ fn emit_prop_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     stack_index: StackIndex,
     prop: &ast::Expr,
     null_coalesce_assignment: bool,
+    readonly_op: ReadOnlyOp,
 ) -> Result<(MemberKey<'arena>, InstrSeq<'arena>, StackIndex)> {
     let alloc = env.arena;
+
     let mk = match &prop.2 {
         ast::Expr_::Id(id) => {
             let ast_defs::Id(pos, name) = &**id;
             if name.starts_with('$') {
-                MemberKey::PL(get_local(e, env, pos, name)?, ReadOnlyOp::Any)
+                MemberKey::PL(get_local(e, env, pos, name)?, readonly_op)
             } else {
                 // Special case for known property name
                 let pid: prop::PropType<'arena> = prop::PropType::<'arena>::from_ast_name(
@@ -3957,8 +3969,8 @@ fn emit_prop_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     string_utils::strip_global_ns(&name),
                 );
                 match nullflavor {
-                    ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid, ReadOnlyOp::Any),
-                    ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid, ReadOnlyOp::Any),
+                    ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid, readonly_op),
+                    ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid, readonly_op),
                 }
             }
         }
@@ -3973,17 +3985,17 @@ fn emit_prop_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 ),
             );
             match nullflavor {
-                ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid, ReadOnlyOp::Any),
-                ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid, ReadOnlyOp::Any),
+                ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid, readonly_op),
+                ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid, readonly_op),
             }
         }
         ast::Expr_::Lvar(lid) if !(is_local_this(env, &lid.1)) => MemberKey::PL(
             get_local(e, env, &lid.0, local_id::get_name(&lid.1))?,
-            ReadOnlyOp::Any,
+            readonly_op,
         ),
         _ => {
             // General case
-            MemberKey::PC(stack_index, ReadOnlyOp::Any)
+            MemberKey::PC(stack_index, readonly_op)
         }
     };
     // For nullsafe access, insist that property is known
@@ -3997,8 +4009,8 @@ fn emit_prop_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             ));
         }
         MemberKey::PC(_, _) => (mk, emit_expr(e, env, prop)?, 1),
-        MemberKey::PL(local, ReadOnlyOp::Any) if null_coalesce_assignment => (
-            MemberKey::PC(stack_index, ReadOnlyOp::Any),
+        MemberKey::PL(local, readonly_op) if null_coalesce_assignment => (
+            MemberKey::PC(stack_index, readonly_op),
             instr::cgetl(alloc, local),
             1,
         ),
@@ -5265,6 +5277,7 @@ pub fn emit_unset_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         instr::empty(alloc),
         0,
         false,
+        false,
     )
 }
 
@@ -5783,6 +5796,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             0,
                             prop_expr,
                             null_coalesce_assignment,
+                            ReadOnlyOp::Any,
                         )?
                         .2;
                         let (
@@ -5809,6 +5823,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             base_offset + cls_stack_size,
                             prop_expr,
                             null_coalesce_assignment,
+                            ReadOnlyOp::Any, // TODO: readonly properties (non assignment)
                         )?;
                         let total_stack_size = prop_stack_size + base_stack_size;
                         let final_instr = instr::dim(alloc, mode, mk);
@@ -5919,9 +5934,9 @@ pub fn emit_lval_op<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             }
         }
         _ => e.local_scope(|e| {
-            let (rhs_instrs, rhs_stack_size) = match expr2 {
-                None => (instr::empty(alloc), 0),
-                Some(ast::Expr(_, _, ast::Expr_::Yield(af))) => {
+            let (rhs_instrs, rhs_stack_size, rhs_readonly) = match expr2 {
+                None => (instr::empty(alloc), 0, false),
+                Some(aast::Expr(_, _, aast::Expr_::Yield(af))) => {
                     let temp = e.local_gen_mut().get_unnamed();
                     (
                         InstrSeq::gather(
@@ -5934,9 +5949,10 @@ pub fn emit_lval_op<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             ],
                         ),
                         1,
+                        false,
                     )
                 }
-                Some(expr) => (emit_expr(e, env, expr)?, 1),
+                Some(expr) => (emit_expr(e, env, expr)?, 1, is_readonly_expr(expr)),
             };
             emit_lval_op_nonlist(
                 e,
@@ -5946,6 +5962,7 @@ pub fn emit_lval_op<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 expr1,
                 rhs_instrs,
                 rhs_stack_size,
+                rhs_readonly,
                 null_coalesce_assignment,
             )
         }),
@@ -6138,6 +6155,7 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 access_instrs,
                 1,
                 false,
+                false, // TODO: readonly assignment (list expressions)
             )?;
             Ok(if is_ltr {
                 (
@@ -6168,6 +6186,7 @@ pub fn emit_lval_op_nonlist<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     expr: &ast::Expr,
     rhs_instrs: InstrSeq<'arena>,
     rhs_stack_size: isize,
+    rhs_readonly: bool,
     null_coalesce_assignment: bool,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
@@ -6179,6 +6198,7 @@ pub fn emit_lval_op_nonlist<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         expr,
         rhs_instrs,
         rhs_stack_size,
+        rhs_readonly,
         null_coalesce_assignment,
     )
     .map(|(lhs, rhs, setop)| InstrSeq::gather(alloc, vec![lhs, rhs, setop]))
@@ -6271,6 +6291,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     expr: &ast::Expr,
     rhs_instrs: InstrSeq<'arena>,
     rhs_stack_size: isize,
+    rhs_readonly: bool,
     null_coalesce_assignment: bool,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, InstrSeq<'arena>)> {
     let f = |alloc: &'arena bumpalo::Bump, env: &mut Env<'a, 'arena>| {
@@ -6383,8 +6404,21 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     LValOp::Unset => MemberOpMode::Unset,
                     _ => MemberOpMode::Define,
                 };
-                let prop_stack_size =
-                    emit_prop_expr(e, env, nullflavor, 0, e2, null_coalesce_assignment)?.2;
+                let readonly_op = if rhs_readonly {
+                    ReadOnlyOp::ReadOnly
+                } else {
+                    ReadOnlyOp::Any
+                };
+                let prop_stack_size = emit_prop_expr(
+                    e,
+                    env,
+                    nullflavor,
+                    0,
+                    e2,
+                    null_coalesce_assignment,
+                    readonly_op,
+                )?
+                .2;
                 let base_offset = prop_stack_size + rhs_stack_size;
                 let (
                     base_expr_instrs_begin,
@@ -6410,6 +6444,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     rhs_stack_size + cls_stack_size,
                     e2,
                     null_coalesce_assignment,
+                    readonly_op,
                 )?;
                 let total_stack_size = prop_stack_size + base_stack_size + cls_stack_size;
                 let final_instr = emit_pos_then(
@@ -6459,6 +6494,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             instr::empty(alloc),
                             rhs_stack_size,
                             false,
+                            false, // TODO: readonly assignment (Unop)
                         )?,
                         from_unop(alloc, e.options(), &uop.0)?,
                     ],

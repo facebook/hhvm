@@ -2553,6 +2553,7 @@ void infer_register_classes(State& state) {
       assertx(s.size() == d.size());
 
       jit::vector<std::pair<Vreg, Vreg>> copies;
+      jit::vector<std::pair<Vreg, Vreg>> ignoredCopies;
       for (size_t i = 0; i < s.size(); ++i) {
         // We don't handle phis between an ignored and non-ignored
         // register right now. We could, but it complicates things. If
@@ -2564,7 +2565,7 @@ void infer_register_classes(State& state) {
           assertx(dCls != RegClass::SF);
           auto const newReg = unit.makeReg();
           reg_info_insert(state, newReg, RegInfo{dCls});
-          copies.emplace_back(s[i], newReg);
+          ignoredCopies.emplace_back(s[i], newReg);
           s[i] = newReg;
           invalidate_cached_operands(lastInst);
           continue;
@@ -2597,6 +2598,12 @@ void infer_register_classes(State& state) {
         invalidate_cached_operands(lastInst);
       }
 
+      // The copies between ignored and non-ignored registers need to
+      // each happen separately (we don't want them in a copyargs), so
+      // do them one by one.
+      for (auto const& copy : ignoredCopies) {
+        addCopies({copy}, b, unit.blocks[b].code.size() - 1);
+      }
       if (!copies.empty()) {
         addCopies(copies, b, unit.blocks[b].code.size() - 1);
       }

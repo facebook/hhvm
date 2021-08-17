@@ -196,7 +196,7 @@ let aast_to_nast aast : Nast.program =
 
       method! on_pos = self#check_pos
 
-      method on_'fb _ _ = Nast.NamedWithUnsafeBlocks
+      method on_'fb _ _ = Nast.Named
 
       method on_'ex = i
 

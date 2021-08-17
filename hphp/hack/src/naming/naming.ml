@@ -1438,8 +1438,7 @@ and method_ genv m =
   in
   let body =
     match genv.in_mode with
-    | FileInfo.Mhhi ->
-      { N.fb_ast = []; fb_annotation = Nast.NamedWithUnsafeBlocks }
+    | FileInfo.Mhhi -> { N.fb_ast = []; fb_annotation = Nast.Named }
     | FileInfo.Mstrict
     | FileInfo.Mpartial ->
       let env = List.fold_left ~f:Env.add_param m.N.m_params ~init:env in
@@ -1567,8 +1566,7 @@ and fun_ genv f =
   let f_kind = f.Aast.f_fun_kind in
   let body =
     match genv.in_mode with
-    | FileInfo.Mhhi ->
-      { N.fb_ast = []; fb_annotation = Nast.NamedWithUnsafeBlocks }
+    | FileInfo.Mhhi -> { N.fb_ast = []; fb_annotation = Nast.Named }
     | FileInfo.Mstrict
     | FileInfo.Mpartial ->
       let env = List.fold_left ~f:Env.add_param paraml ~init:env in

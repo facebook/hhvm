@@ -359,6 +359,9 @@ SSATmp* opt_class_get_class_name(IRGS& env, const ParamPrep& params) {
   if (value->type() <= TCls) {
     return gen(env, LdClsName, value);
   }
+  if (value->type() <= TLazyCls) {
+    return gen(env, LdLazyClsName, value);
+  }
   return nullptr;
 }
 

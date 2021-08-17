@@ -377,12 +377,13 @@ String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
 }
 
 String HHVM_FUNCTION(HH_class_get_class_name, TypedValue v) {
-  if (!tvIsClass(v)) {
+  if (!tvIsClass(v) && !tvIsLazyClass(v)) {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Argument 1 passed to {}() must be a class",
       __FUNCTION__+5));
   }
-  return val(v).pclass->nameStr();
+  return tvIsClass(v) ? val(v).pclass->nameStr() :
+                        StrNR {val(v).plazyclass.name()};
 }
 
 namespace {

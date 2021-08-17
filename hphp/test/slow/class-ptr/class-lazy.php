@@ -17,6 +17,7 @@ function main() {
   $c = Bar::class;
   var_dump($c);
   var_dump(is_scalar($c));
+  var_dump(HH\class_get_class_name($c));
   $v = vec[Bar::class, Fizz::class]; // Fizz is not a class
   var_dump($v);
   var_dump($c::FOO);

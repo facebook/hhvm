@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_icu_ops.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
@@ -60,8 +61,18 @@ ALWAYS_INLINE icu::StringPiece icu_string_piece(const HPHP::String& str) {
   return icu::StringPiece(str.data(), str.size());
 }
 
-ALWAYS_INLINE icu::UnicodeString ustr_from_utf8(const HPHP::String& str) {
+ALWAYS_INLINE icu::StringPiece icu_string_piece(const HPHP::StringData* str) {
+  return icu::StringPiece(str->data(), str->size());
+}
+
+template<typename T>
+ALWAYS_INLINE icu::UnicodeString ustr_from_utf8(const T& str) {
   return icu::UnicodeString::fromUTF8(icu_string_piece(str));
+}
+template<>
+ALWAYS_INLINE icu::UnicodeString ustr_from_utf8<TypedValue>(const TypedValue& tv) {
+  assertx(isStringType(tv.type()));
+  return ustr_from_utf8(tv.val().pstr);
 }
 
 ALWAYS_INLINE String utf8_icu_op(
@@ -646,6 +657,62 @@ String HSLLocaleICUOps::replace_ci(const String& haystack,
   std::string ret;
   uhaystack.toUTF8String(ret);
   
+  return ret;
+}
+
+String HSLLocaleICUOps::replace_every(const String& haystack,
+                                      const Array& replacements) const {
+  auto uhaystack = ustr_from_utf8(haystack);
+  icu::ErrorCode err;
+  // singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  uhaystack = normalizer->normalize(uhaystack, err);
+
+  IterateKV(replacements.get(), [&](TypedValue needle, TypedValue replacement) {
+    auto uneedle = ustr_from_utf8(needle);
+    const auto ureplacement = ustr_from_utf8(replacement);
+    normalizer->normalize(uneedle, err);
+
+    uhaystack.findAndReplace(uneedle, ureplacement);
+  });
+
+  std::string ret;
+  uhaystack.toUTF8String(ret);
+  return ret;
+}
+
+String HSLLocaleICUOps::replace_every_ci(const String& haystack,
+                                         const Array& replacements) const {
+  auto uhaystack = ustr_from_utf8(haystack);
+  icu::ErrorCode err;
+  // singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  uhaystack = normalizer->normalize(uhaystack, err);
+  auto usearch(uhaystack);
+  usearch.foldCase(m_caseFoldFlags);
+  assertx(usearch.length() == uhaystack.length());
+
+  IterateKV(replacements.get(), [&](TypedValue needle, TypedValue replacement) {
+    auto uneedle = ustr_from_utf8(needle);
+    const auto ureplacement = ustr_from_utf8(replacement);
+    normalizer->normalize(uneedle, err);
+    uneedle.foldCase(m_caseFoldFlags);
+    auto ufoldedReplacement(ureplacement);
+    ufoldedReplacement.foldCase(m_caseFoldFlags);
+
+    int32_t i = 0;
+    while (i < usearch.length()) {
+      i = usearch.indexOf(uneedle, i);
+      if (i < 0) {
+        break;
+      }
+      usearch.replace(i, uneedle.length(), ufoldedReplacement);
+      uhaystack.replace(i, uneedle.length(), ureplacement);
+    }
+  });
+
+  std::string ret;
+  uhaystack.toUTF8String(ret);
   return ret;
 }
 

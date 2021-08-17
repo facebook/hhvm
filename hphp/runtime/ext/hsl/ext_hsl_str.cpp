@@ -330,6 +330,9 @@ String HHVM_FUNCTION(replace_l,
                      const String& needle,
                      const String& replacement,
                      const Variant& maybe_loc) {
+  if (haystack.empty() || needle.empty()) {
+    return haystack;
+  }
   return get_locale(maybe_loc)->ops()->replace(haystack, needle, replacement); 
 }
 
@@ -338,7 +341,30 @@ String HHVM_FUNCTION(replace_ci_l,
                      const String& needle,
                      const String& replacement,
                      const Variant& maybe_loc) {
+  if (haystack.empty() || needle.empty()) {
+    return haystack;
+  }
   return get_locale(maybe_loc)->ops()->replace_ci(haystack, needle, replacement); 
+}
+
+String HHVM_FUNCTION(replace_every_l,
+                     const String& haystack,
+                     const Array& replacements,
+                     const Variant& maybe_loc) {
+  if (haystack.empty() || replacements.empty()) {
+    return haystack;
+  }
+  return get_locale(maybe_loc)->ops()->replace_every(haystack, replacements);
+}
+
+String HHVM_FUNCTION(replace_every_ci_l,
+                     const String& haystack,
+                     const Array& replacements,
+                     const Variant& maybe_loc) {
+  if (haystack.empty() || replacements.empty()) {
+    return haystack;
+  }
+  return get_locale(maybe_loc)->ops()->replace_every_ci(haystack, replacements);
 }
 
 struct HSLStrExtension final : Extension {
@@ -391,6 +417,8 @@ struct HSLStrExtension final : Extension {
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_l, replace_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_ci_l, replace_ci_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_l, replace_every_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_ci_l, replace_every_ci_l);
 
     loadSystemlib();
   }

@@ -47,5 +47,7 @@ function trim_right_l(string $str, ?string $what, ?Locale $loc = null): string;
 
 function replace_l(string $haystack, string $needle, string $replacement, ?Locale $loc = null): string;
 function replace_ci_l(string $haystack, string $needle, string $replacement, ?Locale $loc = null): string;
+function replace_every_l(string $haystack, dict<string, string> $replacements, ?Locale $loc = null): string;
+function replace_every_ci_l(string $haystack, dict<string, string> $replacements, ?Locale $loc = null): string;
 
 } // namespace HH\Lib\_Private\_Str

@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_libc_ops.h"
@@ -88,7 +89,7 @@ int64_t HSLLocaleLibcOps::strcasecmp(const String& a, const String& b) const {
   // Overridden  in HSLLocaleByteOps for "C" locale
   assertx(!a.isNull() && !b.isNull());
   const auto min_len = MIN(a.size(), b.size());
-  // Defined on FreeBSD, but also an undocumented glibc extension 
+  // Defined on FreeBSD, but also an undocumented glibc extension
   const auto res = strncasecmp_l(a.data(), b.data(), min_len, this->m_loc);
   if (res != 0) {
     return res;
@@ -292,6 +293,37 @@ String HSLLocaleLibcOps::replace_ci(const String& haystack,
   const auto ret = HHVM_FN(str_ireplace)(needle, replacement, haystack);
   assertx(isStringType(ret.type()));
   return String(ret.val().pstr);
+}
+
+namespace {
+
+inline String replace_every_impl(decltype(HHVM_FN(str_replace)) impl,
+                            const String& haystack,
+                            const Array& replacements) {
+  VecInit keys { (size_t) replacements.size() };
+  VecInit values { (size_t) replacements.size() };
+
+  IterateKV(replacements.get(), [&](TypedValue k, TypedValue v) {
+    assertx(isStringType(k.type()));
+    assertx(isStringType(v.type()));
+    keys.append(String(k.val().pstr));
+    values.append(String(v.val().pstr));
+  });
+
+  const auto ret = impl(keys.toArray(), values.toArray(), haystack);
+  assertx(isStringType(ret.type()));
+  return String(ret.val().pstr);
+}
+} // namespace
+
+String HSLLocaleLibcOps::replace_every(const String& haystack,
+                                       const Array& replacements) const {
+  return replace_every_impl(HHVM_FN(str_replace), haystack, replacements);
+}
+
+String HSLLocaleLibcOps::replace_every_ci(const String& haystack,
+                                          const Array& replacements) const {
+  return replace_every_impl(HHVM_FN(str_ireplace), haystack, replacements);
 }
 
 } // namespace HPHP

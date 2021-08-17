@@ -65,6 +65,9 @@ namespace HPHP {
 
     virtual String replace(const String& haystack, const String& needle, const String& replacement) const override;
     virtual String replace_ci(const String& haystack, const String& needle, const String& replacement) const override;
+
+    virtual String replace_every(const String& haystack, const Array& replacements) const override;
+    virtual String replace_every_ci(const String& haystack, const Array& replacements) const override;
     private:
       icu::Locale m_collate;
       icu::Locale m_ctype;

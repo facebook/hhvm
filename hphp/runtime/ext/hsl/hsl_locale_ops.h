@@ -69,5 +69,8 @@ namespace HPHP {
 
     virtual String replace(const String& haystack, const String& needle, const String& replacement) const = 0;
     virtual String replace_ci(const String& haystack, const String& needle, const String& replacement) const = 0;
+
+    virtual String replace_every(const String& haystack, const Array& replacements) const = 0;
+    virtual String replace_every_ci(const String& haystack, const Array& replacements) const = 0;
   };
 } // namespace HPHP

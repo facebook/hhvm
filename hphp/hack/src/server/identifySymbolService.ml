@@ -53,13 +53,14 @@ let process_xml_attrs class_name attrs =
 
 let clean_member_name name = String_utils.lstrip name "$"
 
-let process_member ?(is_declaration = false) c_name id ~is_method ~is_const =
+let process_member ?(is_declaration = false) recv_class id ~is_method ~is_const
+    =
   let member_name = snd id in
   let type_ =
     if is_const then
-      ClassConst (ClassName c_name, member_name)
+      ClassConst (recv_class, member_name)
     else if is_method then
-      Method (ClassName c_name, member_name)
+      Method (recv_class, member_name)
     else
       (*
         Per comment in symbolOcurrence.mli, XhpLiteralAttr
@@ -67,7 +68,12 @@ let process_member ?(is_declaration = false) c_name id ~is_method ~is_const =
         process_member is not being used to handle XML attributes
         it is fine to define every symbol as Property.
       *)
-      Property (ClassName c_name, member_name)
+      Property (recv_class, member_name)
+  in
+  let c_name =
+    match recv_class with
+    | ClassName name -> name
+    | UnknownClass -> "_"
   in
   Result_set.singleton
     {
@@ -109,7 +115,7 @@ let process_class class_ =
     List.fold all_methods ~init:acc ~f:(fun acc method_ ->
         Result_set.union acc
         @@ process_member
-             c_name
+             (ClassName c_name)
              method_.Aast.m_name
              ~is_declaration:true
              ~is_method:true
@@ -120,7 +126,7 @@ let process_class class_ =
     List.fold all_props ~init:acc ~f:(fun acc prop ->
         Result_set.union acc
         @@ process_member
-             c_name
+             (ClassName c_name)
              prop.Aast.cv_id
              ~is_declaration:true
              ~is_method:false
@@ -130,7 +136,7 @@ let process_class class_ =
     List.fold class_.Aast.c_consts ~init:acc ~f:(fun acc const ->
         Result_set.union acc
         @@ process_member
-             c_name
+             (ClassName c_name)
              const.Aast.cc_id
              ~is_declaration:true
              ~is_method:false
@@ -156,7 +162,7 @@ let process_class class_ =
     let id = (fst method_.Aast.m_name, SN.Members.__construct) in
     Result_set.union acc
     @@ process_member
-         c_name
+         (ClassName c_name)
          id
          ~is_declaration:true
          ~is_method:true
@@ -164,8 +170,14 @@ let process_class class_ =
   | None -> acc
 
 let typed_member_id env receiver_ty mid ~is_method ~is_const =
-  Tast_env.get_class_ids env receiver_ty
-  |> List.map ~f:(fun cid -> process_member cid mid ~is_method ~is_const)
+  Tast_env.get_receiver_ids env receiver_ty
+  |> List.map ~f:(function
+         | Tast_env.RIclass cid -> ClassName cid
+         | Tast_env.RIdynamic
+         | Tast_env.RIerr
+         | Tast_env.RIany ->
+           UnknownClass)
+  |> List.map ~f:(fun rid -> process_member rid mid ~is_method ~is_const)
   |> List.fold ~init:Result_set.empty ~f:Result_set.union
 
 let typed_method = typed_member_id ~is_method:true ~is_const:false
@@ -237,7 +249,7 @@ let visitor =
           process_fun_id (pos, SN.AutoimportedFunctions.meth_caller)
           + process_class_id pcid
           + process_member
-              cid
+              (ClassName cid)
               (remove_apostrophes_from_function_eval mid)
               ~is_method:true
               ~is_const:false
@@ -524,7 +536,7 @@ let visitor =
     method! on_SFclass_const env cid mid =
       let ( + ) = Result_set.union in
       process_class_id cid
-      + process_member (snd cid) mid ~is_method:false ~is_const:true
+      + process_member (ClassName (snd cid)) mid ~is_method:false ~is_const:true
       + super#on_SFclass_const env cid mid
 
     method! on_method_ env m =

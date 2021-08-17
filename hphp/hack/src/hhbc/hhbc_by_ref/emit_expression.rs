@@ -2699,11 +2699,16 @@ fn get_fcall_args<'arena, 'decl, D: DeclProvider<'decl>>(
     } else {
         |_expr| false
     };
+    let readonly_args = if args.iter().any(is_readonly_arg) {
+        Slice::fill_iter(alloc, args.iter().map(is_readonly_arg))
+    } else {
+        Slice::empty()
+    };
     FcallArgs::new(
         flags,
         num_rets,
         Slice::fill_iter(alloc, args.iter().map(is_inout_arg)),
-        Slice::fill_iter(alloc, args.iter().map(is_readonly_arg)),
+        readonly_args,
         async_eager_label,
         num_args,
         context

@@ -14,7 +14,7 @@
   .srcloc 61:12,61:12;
   ClsCnsD "A" "E"
   .srcloc 61:3,61:16;
-  FCallClsMethodD <> 1 1 "0" "0" - "" "" "CE" "show"
+  FCallClsMethodD <> 1 1 "0" "" - "" "" "CE" "show"
   .srcloc 61:3,61:17;
   PopC
   .srcloc 62:3,62:16;
@@ -23,7 +23,7 @@
   .srcloc 62:12,62:12;
   ClsCnsD "B" "E"
   .srcloc 62:3,62:16;
-  FCallClsMethodD <> 1 1 "0" "0" - "" "" "CE" "show"
+  FCallClsMethodD <> 1 1 "0" "" - "" "" "CE" "show"
   .srcloc 62:3,62:17;
   PopC
   .srcloc 63:3,63:16;
@@ -32,7 +32,7 @@
   .srcloc 63:12,63:12;
   ClsCnsD "C" "F"
   .srcloc 63:3,63:16;
-  FCallClsMethodD <> 1 1 "0" "0" - "" "" "CF" "show"
+  FCallClsMethodD <> 1 1 "0" "" - "" "" "CF" "show"
   .srcloc 63:3,63:17;
   PopC
   .srcloc 64:8,64:11;
@@ -47,7 +47,7 @@
   .srcloc 65:29,65:30;
   String "A"
   .srcloc 65:3,65:31;
-  FCallClsMethodD <> 1 1 "0" "0" - "" "" "CE" "show_member_via_label"
+  FCallClsMethodD <> 1 1 "0" "" - "" "" "CE" "show_member_via_label"
   .srcloc 65:3,65:32;
   PopC
   .srcloc 66:3,66:31;
@@ -56,7 +56,7 @@
   .srcloc 66:29,66:30;
   String "B"
   .srcloc 66:3,66:31;
-  FCallClsMethodD <> 1 1 "0" "0" - "" "" "CE" "show_member_via_label"
+  FCallClsMethodD <> 1 1 "0" "" - "" "" "CE" "show_member_via_label"
   .srcloc 66:3,66:32;
   PopC
   .srcloc 67:3,67:31;
@@ -65,7 +65,7 @@
   .srcloc 67:29,67:30;
   String "C"
   .srcloc 67:3,67:31;
-  FCallClsMethodD <> 1 1 "0" "0" - "" "" "CF" "show_member_via_label"
+  FCallClsMethodD <> 1 1 "0" "" - "" "" "CF" "show_member_via_label"
   .srcloc 67:3,67:32;
   PopC
   .srcloc 68:2,68:2;
@@ -106,7 +106,7 @@
     .srcloc 12:20,12:25;
     String "zuck"
     .srcloc 12:12,12:26;
-    FCallCtor <LockWhileUnwinding> 1 1 "0" "0" - "" ""
+    FCallCtor <LockWhileUnwinding> 1 1 "0" "" - "" ""
     PopC
     LockObj
     .srcloc 12:5,12:27;
@@ -132,7 +132,7 @@
     .srcloc 17:25,17:26;
     Int 42
     .srcloc 17:17,17:27;
-    FCallCtor <LockWhileUnwinding> 1 1 "0" "0" - "" ""
+    FCallCtor <LockWhileUnwinding> 1 1 "0" "" - "" ""
     PopC
     LockObj
     .srcloc 16:1,19:84;
@@ -196,7 +196,7 @@
     .srcloc 26:27,26:30;
     Double 3.1400000000000001
     .srcloc 26:18,26:31;
-    FCallCtor <LockWhileUnwinding> 1 1 "0" "0" - "" ""
+    FCallCtor <LockWhileUnwinding> 1 1 "0" "" - "" ""
     PopC
     LockObj
     .srcloc 25:1,27:63;
@@ -234,7 +234,7 @@
     .srcloc 39:22,39:26;
     CGetL $enum
     .srcloc 39:10,39:27;
-    FCallClsMethodSD <> 1 1 "0" "0" - "" "" Static "get"
+    FCallClsMethodSD <> 1 1 "0" "" - "" "" Static "get"
     .srcloc 39:5,39:28;
     Print
     .srcloc 39:5,39:28;
@@ -275,7 +275,7 @@
     .srcloc 47:22,47:26;
     CGetL $enum
     .srcloc 47:10,47:27;
-    FCallClsMethodSD <> 1 1 "0" "0" - "" "" Static "get"
+    FCallClsMethodSD <> 1 1 "0" "" - "" "" Static "get"
     .srcloc 47:5,47:28;
     Print
     .srcloc 47:5,47:28;

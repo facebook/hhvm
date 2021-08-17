@@ -20,16 +20,25 @@ CurlMultiResource::CurlMultiResource() {
 }
 
 void CurlMultiResource::close() {
-  if (m_multi) {
-    curl_multi_cleanup(m_multi);
-    m_easyh.clear();
-    m_multi = nullptr;
-  }
+  if (!m_multi) return;
+  removeEasyHandles();
+  curl_multi_cleanup(m_multi);
+  m_multi = nullptr;
 }
 
 void CurlMultiResource::sweep() {
-  if (m_multi) {
-    curl_multi_cleanup(m_multi);
+  if (!m_multi) return;
+  removeEasyHandles(true);
+  curl_multi_cleanup(m_multi);
+}
+
+void CurlMultiResource::removeEasyHandles(bool leak) {
+  auto index_to_remove = 0;
+  auto const size = m_easyh.size();
+  for (auto i = 0; i < size; i++) {
+    assertx(index_to_remove < m_easyh.size());
+    auto const code = remove(m_easyh[index_to_remove].get(), leak);
+    if (code != CURLM_OK) index_to_remove++;
   }
 }
 
@@ -37,7 +46,7 @@ bool CurlMultiResource::setOption(int option, const Variant& value) {
 #if LIBCURL_VERSION_NUM <= 0x070f04 /* 7.15.4 */
   return false;
 #endif
-  if (m_multi == nullptr) {
+  if (!m_multi) {
     return false;
   }
 
@@ -64,45 +73,61 @@ bool CurlMultiResource::setOption(int option, const Variant& value) {
   return error == CURLM_OK;
 }
 
-void CurlMultiResource::remove(req::ptr<CurlResource> curle) {
-  assertx(m_easyh.isVec());
-  auto index_to_remove = -1;
-  for (ArrayIter iter(m_easyh); iter; ++iter) {
-    if (cast<CurlResource>(iter.second())->get(true) == curle->get()) {
-      assertx(tvIsInt(iter.nvFirst()));
-      index_to_remove = val(iter.nvFirst()).num;
-      break;
+CURLMcode CurlMultiResource::add(CurlResource* curle) {
+  // Don't add the handle to our metadata if the add op fails.
+  if (!m_multi) return CURLM_BAD_HANDLE;
+  if (!curle->get()) return CURLM_BAD_EASY_HANDLE;
+  if (curle->m_multi) return CURLM_ADDED_ALREADY;
+  auto const code = curl_multi_add_handle(m_multi, curle->get());
+  if (code != CURLM_OK) return code;
+
+  curle->m_multi = this;
+  m_easyh.emplace_back(curle);
+  return CURLM_OK;
+}
+
+CURLMcode CurlMultiResource::remove(CurlResource* curle, bool leak) {
+  // Don't remove the handle from our metadata if the remove op fails.
+  if (!m_multi) return CURLM_BAD_HANDLE;
+  if (!curle->get()) return CURLM_BAD_EASY_HANDLE;
+  if (curle->m_multi != this) return CURLM_OK; // we do this sometimes...
+  auto const code = curl_multi_remove_handle(m_multi, curle->get());
+  if (code != CURLM_OK) return code;
+
+  // Find the index to remove.
+  auto const index_to_remove = [&]{
+    for (auto i = 0; i < m_easyh.size(); i++) {
+      if (m_easyh[i].get() == curle) return i;
     }
+    always_assert(false);
+  }();
+
+  // Remove the easy handle, leaking it if requested.
+  curle->m_multi = nullptr;
+  if (leak) m_easyh[index_to_remove].detach();
+  auto const last = m_easyh.size() - 1;
+  if (index_to_remove != last) {
+    m_easyh[index_to_remove] = std::move(m_easyh[last]);
   }
-  if (index_to_remove >= 0) {
-    assertx(m_easyh.size() > 0);
-    auto const last = safe_cast<int64_t>(m_easyh.size() - 1);
-    if (index_to_remove != last) {
-      m_easyh.set(index_to_remove, m_easyh[last]);
-    }
-    m_easyh.pop();
-  }
+  m_easyh.pop_back();
+  return CURLM_OK;
 }
 
 Resource CurlMultiResource::find(CURL *cp) {
-  for (ArrayIter iter(m_easyh); iter; ++iter) {
-    if (cast<CurlResource>(iter.second())->get(true) == cp) {
-      return iter.second().toResource();
-    }
+  for (auto const& curl : m_easyh) {
+    if (curl->get() == cp) return Resource(curl.get());
   }
   return Resource();
 }
 
 void CurlMultiResource::setInExec(bool b) {
-  for (ArrayIter iter(m_easyh); iter; ++iter) {
-    auto const curl = cast<CurlResource>(iter.second());
+  for (auto& curl : m_easyh) {
     curl->m_in_exec = b;
   }
 }
 
 bool CurlMultiResource::anyInExec() const {
-  for (ArrayIter iter(m_easyh); iter; ++iter) {
-    auto const curl = cast<CurlResource>(iter.second());
+  for (auto const& curl : m_easyh) {
     if (curl->m_in_exec) return true;
   }
   return false;
@@ -111,8 +136,7 @@ bool CurlMultiResource::anyInExec() const {
 void CurlMultiResource::check_exceptions() {
   SCOPE_EXIT {
     if (debug) {
-      for (ArrayIter iter(m_easyh); iter; ++iter) {
-        auto const curl = cast<CurlResource>(iter.second());
+      for (auto const& curl : m_easyh) {
         always_assert(!curl->m_exception);
       }
     }
@@ -120,8 +144,7 @@ void CurlMultiResource::check_exceptions() {
 
   // If we exit unexpectedly, ensure we've released any queued exceptions.
   SCOPE_EXIT {
-    for (ArrayIter iter(m_easyh); iter; ++iter) {
-      auto const curl = cast<CurlResource>(iter.second());
+    for (auto const& curl : m_easyh) {
       if (auto const exn = curl->getAndClearException()) {
         if (!CurlResource::isPhpException(exn)) {
           delete CurlResource::getCppException(exn);
@@ -132,8 +155,7 @@ void CurlMultiResource::check_exceptions() {
 
   Exception* cppException = nullptr;
   Object phpException;
-  for (ArrayIter iter(m_easyh); iter; ++iter) {
-    auto const curl = cast<CurlResource>(iter.second());
+  for (auto const& curl : m_easyh) {
     auto const nextException = curl->getAndClearException();
     if (!nextException) continue;
     if (CurlResource::isPhpException(nextException)) {
@@ -157,7 +179,7 @@ void CurlMultiResource::check_exceptions() {
 }
 
 CURLM* CurlMultiResource::get() {
-  if (m_multi == nullptr) {
+  if (!m_multi) {
     throw_null_pointer_exception();
   }
   return m_multi;

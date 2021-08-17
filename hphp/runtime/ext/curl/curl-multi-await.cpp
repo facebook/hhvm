@@ -133,15 +133,10 @@ int CurlMultiAwait::addLowHandles(req::ptr<CurlMultiResource> multi) {
 // This is a little hacky, but necessary given cURL's APIs
 int CurlMultiAwait::addHighHandles(req::ptr<CurlMultiResource> multi) {
   int count = 0;
-  auto easy_handles = multi->getEasyHandles();
-  for (ArrayIter iter(easy_handles); iter; ++iter) {
-    Variant easy_handle = iter.second();
-    auto easy = dyn_cast_or_null<CurlResource>(easy_handle);
-    if (!easy) continue;
+  for (auto const& ch : multi->getEasyHandles()) {
     long sock;
-    if ((curl_easy_getinfo(easy->get(),
-                           CURLINFO_LASTSOCKET, &sock) != CURLE_OK) ||
-        (sock < FD_SETSIZE)) {
+    auto const code = curl_easy_getinfo(ch->get(), CURLINFO_LASTSOCKET, &sock);
+    if ((code != CURLE_OK) || (sock < FD_SETSIZE)) {
       continue;
     }
     // No idea which type of event it needs, ask for everything

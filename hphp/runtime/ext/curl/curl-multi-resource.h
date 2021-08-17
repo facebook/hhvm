@@ -2,6 +2,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 
+#include "hphp/util/compact-vector.h"
 #include "hphp/util/type-scan.h"
 
 #include <curl/curl.h>
@@ -13,6 +14,8 @@ namespace HPHP {
 struct CurlResource;
 
 struct CurlMultiResource : SweepableResourceData {
+  using EasyHandles = CompactVector<req::ptr<CurlResource>>;
+
   DECLARE_RESOURCE_ALLOCATION(CurlMultiResource)
   CLASSNAME_IS("curl_multi")
   const String& o_getClassNameHook() const override { return classnameof(); }
@@ -23,10 +26,10 @@ struct CurlMultiResource : SweepableResourceData {
   void close();
 
   bool setOption(int option, const Variant& value);
-  void add(const Resource& ch) { m_easyh.append(ch); }
-  const Array& getEasyHandles() const { return m_easyh; }
+  const EasyHandles& getEasyHandles() const { return m_easyh; }
 
-  void remove(req::ptr<CurlResource> curle);
+  CURLMcode add(CurlResource* curle);
+  CURLMcode remove(CurlResource* curle, bool leak = false);
   Resource find(CURL *cp);
 
   CURLM* get();
@@ -36,10 +39,11 @@ struct CurlMultiResource : SweepableResourceData {
   bool anyInExec() const;
 
  private:
+  void removeEasyHandles(bool leak = false);
+
   CURLM *m_multi;
-  // CURLM is a typedef to void
   TYPE_SCAN_IGNORE_FIELD(m_multi);
-  Array m_easyh = Array::CreateVec();
+  EasyHandles m_easyh;
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -13,6 +13,7 @@ namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 // CurlResource
 
+struct CurlMultiResource;
 
 struct CurlResource : SweepableResourceData {
   using ExceptionType = req::Optional<boost::variant<Object,Exception*>>;
@@ -71,7 +72,7 @@ struct CurlResource : SweepableResourceData {
   int getError() { return m_error_no; }
   String getErrorString() { return String(m_error_str, CopyString); }
 
-  CURL *get(bool nullOkay = false);
+  CURL *get();
 
   void check_exception();
   ExceptionType getAndClearException() { return std::move(m_exception); }
@@ -124,8 +125,12 @@ struct CurlResource : SweepableResourceData {
   static CURLcode ssl_ctx_callback(CURL *curl, void *sslctx, void *parm);
 
  private:
+  friend struct CurlMultiResource;
+
   CURL *m_cp;
   TYPE_SCAN_IGNORE_FIELD(m_cp);
+  CurlMultiResource* m_multi;
+  TYPE_SCAN_IGNORE_FIELD(m_multi);
   ExceptionType m_exception;
 
   char m_error_str[CURL_ERROR_SIZE + 1];
@@ -146,7 +151,6 @@ struct CurlResource : SweepableResourceData {
   bool m_in_exec{false};
   bool m_emptyPost;
   bool m_safeUpload;
-  friend struct CurlMultiResource;
 };
 
 /////////////////////////////////////////////////////////////////////////////

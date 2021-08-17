@@ -1,4 +1,5 @@
 #include "hphp/runtime/ext/curl/curl-resource.h"
+#include "hphp/runtime/ext/curl/curl-multi-resource.h"
 #include "hphp/runtime/ext/curl/curl-share-resource.h"
 #include "hphp/runtime/ext/curl/ext_curl.h"
 
@@ -53,6 +54,7 @@ CurlResource::ToFree::~ToFree() {
 CurlResource::CurlResource(const String& url)
     : m_emptyPost(true), m_safeUpload(true) {
   m_cp = curl_easy_init();
+  m_multi = nullptr;
   m_url = url;
 
   memset(m_error_str, 0, sizeof(m_error_str));
@@ -86,11 +88,8 @@ void CurlResource::sweep() {
 }
 
 void CurlResource::close() {
-  // If we try to close while we're in a callback, warn.
   if (m_in_callback) {
-    raise_warning(
-      "curl_close(): Attempt to close cURL in callback, ignored."
-    );
+    raise_warning("curl_close(): Attempt to close cURL in callback, ignored.");
     return;
   }
   closeForSweep();
@@ -100,7 +99,9 @@ void CurlResource::close() {
 
 void CurlResource::closeForSweep() {
   assertx(!m_exception);
+  assertx(IMPLIES(m_multi, m_cp));
   if (!m_cp) return;
+  if (m_multi) m_multi->remove(this, /*leak=*/true);
   curl_easy_cleanup(m_cp);
   m_cp = nullptr;
 }
@@ -283,8 +284,8 @@ Variant CurlResource::getOption(long option) {
   return false;
 }
 
-CURL* CurlResource::get(bool nullOkay /*=false*/) {
-  if (m_cp == nullptr && !nullOkay) {
+CURL* CurlResource::get() {
+  if (!m_cp) {
     throw_null_pointer_exception();
   }
   return m_cp;

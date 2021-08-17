@@ -446,17 +446,13 @@ Variant HHVM_FUNCTION(curl_multi_strerror, int64_t code) {
 Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh,
                       const Resource& ch) {
   CHECK_MULTI_RESOURCE(curlm);
-  auto curle = cast<CurlResource>(ch);
-  curlm->add(ch);
-  return curl_multi_add_handle(curlm->get(), curle->get());
+  return curlm->add(cast<CurlResource>(ch).get());
 }
 
 Variant HHVM_FUNCTION(curl_multi_remove_handle, const Resource& mh,
                       const Resource& ch) {
   CHECK_MULTI_RESOURCE(curlm);
-  auto curle = cast<CurlResource>(ch);
-  curlm->remove(curle);
-  return curl_multi_remove_handle(curlm->get(), curle->get());
+  return curlm->remove(cast<CurlResource>(ch).get());
 }
 
 Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh,

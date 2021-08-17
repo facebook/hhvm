@@ -1318,13 +1318,20 @@ let undefined pos var_name did_you_mean =
       "Variable %s is undefined, or not always defined."
       (Markdown_lite.md_codify var_name)
   in
-  let suggestion =
+  let (suggestion, quickfixes) =
     match did_you_mean with
-    | Some (did_you_mean, pos) ->
-      [suggestion_message var_name did_you_mean pos |> claim_as_reason]
-    | None -> []
+    | Some (did_you_mean, did_you_mean_pos) ->
+      let quickfixes =
+        [{ title = "Change to " ^ did_you_mean; new_text = did_you_mean; pos }]
+      in
+      ( [
+          suggestion_message var_name did_you_mean did_you_mean_pos
+          |> claim_as_reason;
+        ],
+        quickfixes )
+    | None -> ([], [])
   in
-  add_list (Naming.err_code Naming.Undefined) (pos, msg) suggestion
+  add_list (Naming.err_code Naming.Undefined) ~quickfixes (pos, msg) suggestion
 
 let this_reserved pos =
   add
@@ -1831,8 +1838,12 @@ let invalid_req_extends pos =
 let did_you_mean_naming pos name suggest_pos suggest_name =
   let name = strip_ns name in
   let suggest_name = strip_ns suggest_name in
+  let quickfixes =
+    [{ title = "Change to " ^ suggest_name; new_text = suggest_name; pos }]
+  in
   add_list
     (Naming.err_code Naming.DidYouMeanNaming)
+    ~quickfixes
     (pos, "Could not find " ^ Markdown_lite.md_codify name ^ ".")
     [suggestion_message name suggest_name (Pos_or_decl.of_raw_pos suggest_pos)]
 

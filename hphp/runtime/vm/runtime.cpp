@@ -233,6 +233,32 @@ void checkInOutMismatch(const Func* func, uint32_t numArgs,
   }
 }
 
+std::string formatParamReadonlyMismatch(const char* fname, uint32_t index) {
+  return folly::sformat(
+    "{}() does not allow for parameter {} to be passed readonly, but the argument "
+    "was annotated with 'readonly'", fname, index + 1
+  );
+}
+
+void throwParamReadonlyMismatch(const Func* func, uint32_t index) {
+  if (RO::EvalEnableReadonlyCallEnforcement == 1) {
+    raise_warning(formatParamReadonlyMismatch(func->fullName()->data(), index));
+  } else if (RO::EvalEnableReadonlyCallEnforcement > 1) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      formatParamReadonlyMismatch(func->fullName()->data(), index));
+  }
+}
+
+void checkReadonlyMismatch(const Func* func, uint32_t numArgs,
+                           const uint8_t* readonlyArgs) {
+  assertx(numArgs == 0 || readonlyArgs != nullptr);
+  uint8_t tmp = 0;
+  for (auto i = 0; i < numArgs; ++i) {
+    tmp = (i % 8) == 0 ? *(readonlyArgs++) : tmp >> 1;
+    if ((tmp & 1) && !func->isReadonly(i)) throwParamReadonlyMismatch(func, i);
+  }
+}
+
 void throwInvalidUnpackArgs() {
   SystemLib::throwInvalidArgumentExceptionObject(
     "Only containers may be unpacked");

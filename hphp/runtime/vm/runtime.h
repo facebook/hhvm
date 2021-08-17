@@ -55,7 +55,10 @@ std::string formatParamInOutMismatch(const char* fname, uint32_t index,
                                      bool funcByRef);
 void checkInOutMismatch(const Func* func, uint32_t numArgs,
                         const uint8_t* inoutArgs);
+void checkReadonlyMismatch(const Func* func, uint32_t numArgs,
+                           const uint8_t* readonlyArgs);
 [[noreturn]] void throwParamInOutMismatch(const Func* func, uint32_t index);
+void throwParamReadonlyMismatch(const Func* func, uint32_t index);
 [[noreturn]] void throwInvalidUnpackArgs();
 [[noreturn]] void throwMissingArgument(const Func* func, int got);
 [[noreturn]] void throwMustBeMutableException(const Class* cls, const StringData* propName);

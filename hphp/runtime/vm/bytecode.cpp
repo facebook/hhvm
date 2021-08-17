@@ -841,6 +841,9 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
       if (UNLIKELY(checkInOutAnnot && func->isInOut(i))) {
         throwParamInOutMismatch(func, i);
       }
+      if (UNLIKELY(func->isReadonly(i))) {
+        throwParamReadonlyMismatch(func, i);
+      }
       auto const from = iter.secondValPlus();
       tvDup(from, *stack.allocTV());
     }
@@ -3536,6 +3539,9 @@ TCA fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
               const Func* func, Ctx&& ctx, bool logAsDynamicCall = true,
               bool isCtor = false) {
   if (fca.enforceInOut()) checkInOutMismatch(func, fca.numArgs, fca.inoutArgs);
+  if (fca.enforceReadonly()) {
+    checkReadonlyMismatch(func, fca.numArgs, fca.readonlyArgs);
+  }
   if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
   checkStack(vmStack(), func, 0);
 

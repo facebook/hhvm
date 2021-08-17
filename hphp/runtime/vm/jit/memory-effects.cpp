@@ -1925,6 +1925,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
   case CheckInOutMismatch:
+  case CheckReadonlyMismatch:
   case ConvTVToStr:
   case ConvObjToStr:
   case Count:      // re-enters on CountableClass
@@ -1985,6 +1986,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:
   case ThrowInOutMismatch:
+  case ThrowReadonlyMismatch:
   case ThrowLateInitPropError:
   case ThrowMissingArg:
   case ThrowMissingThis:

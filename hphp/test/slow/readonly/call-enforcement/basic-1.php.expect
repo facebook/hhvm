@@ -1,0 +1,7 @@
+in f
+f() does not allow for parameter 1 to be passed readonly, but the argument was annotated with 'readonly'
+in g
+in g
+g() does not allow for parameter 2 to be passed readonly, but the argument was annotated with 'readonly'
+g() does not allow for parameter 2 to be passed readonly, but the argument was annotated with 'readonly'
+h() does not allow for parameter 1 to be passed readonly, but the argument was annotated with 'readonly'

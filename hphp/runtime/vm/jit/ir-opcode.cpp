@@ -288,6 +288,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
   case CheckInOutMismatch:
+  case CheckReadonlyMismatch:
   case CheckStackOverflow:
   case CheckSurpriseAndStack:
   case CheckSurpriseFlagsEnter:
@@ -434,6 +435,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:
   case ThrowInOutMismatch:
+  case ThrowReadonlyMismatch:
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:
   case ThrowLateInitPropError:

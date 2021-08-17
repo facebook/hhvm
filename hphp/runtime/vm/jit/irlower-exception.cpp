@@ -234,6 +234,7 @@ IMPL_OPCODE_CALL(CheckClsMethFunc)
 IMPL_OPCODE_CALL(CheckClsReifiedGenericMismatch)
 IMPL_OPCODE_CALL(CheckFunReifiedGenericMismatch)
 IMPL_OPCODE_CALL(CheckInOutMismatch)
+IMPL_OPCODE_CALL(CheckReadonlyMismatch)
 IMPL_OPCODE_CALL(RaiseErrorOnInvalidIsAsExpressionType)
 IMPL_OPCODE_CALL(RaiseCoeffectsCallViolation)
 IMPL_OPCODE_CALL(RaiseCoeffectsFunParamCoeffectRulesViolation)
@@ -260,6 +261,7 @@ IMPL_OPCODE_CALL(ThrowMustBeReadOnlyException)
 IMPL_OPCODE_CALL(ThrowMustBeValueTypeException)
 IMPL_OPCODE_CALL(ThrowOutOfBounds)
 IMPL_OPCODE_CALL(ThrowParameterWrongType)
+IMPL_OPCODE_CALL(ThrowReadonlyMismatch)
 
 ///////////////////////////////////////////////////////////////////////////////
 

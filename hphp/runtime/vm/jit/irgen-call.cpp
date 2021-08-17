@@ -62,7 +62,7 @@ bool emitCallerInOutChecksKnown(IRGS& env, const Func* callee,
 
   for (auto i = 0; i < fca.numArgs; ++i) {
     if (callee->isInOut(i) != fca.isInOut(i)) {
-      auto const ioaData = InOutArgsData { fca.numArgs, fca.inoutArgs };
+      auto const ioaData = BoolVecArgsData { fca.numArgs, fca.inoutArgs };
       gen(env, ThrowInOutMismatch, ioaData, cns(env, callee));
       return false;
     }
@@ -104,15 +104,39 @@ void emitCallerInOutChecksUnknown(IRGS& env, SSATmp* callee,
         //
         // So we use CheckInOutMismatch that will check if the normal args matched.
         // Otherwise we just continue and later code will handle things
-        auto const ioaData = InOutArgsData { fca.numArgs, fca.inoutArgs };
+        auto const ioaData = BoolVecArgsData { fca.numArgs, fca.inoutArgs };
         gen(env, CheckInOutMismatch, ioaData, callee);
       }
     );
   } else {
     // Passing inout arg beyond the 0..31 range, call the C++ helper.
-    auto const ioaData = InOutArgsData { fca.numArgs, fca.inoutArgs };
+    auto const ioaData = BoolVecArgsData { fca.numArgs, fca.inoutArgs };
     gen(env, CheckInOutMismatch, ioaData, callee);
   }
+}
+
+bool emitCallerReadonlyChecksKnown(IRGS& env, const Func* callee,
+                                   const FCallArgs& fca) {
+  if (RO::EvalEnableReadonlyCallEnforcement == 0) return true;
+  if (!fca.enforceReadonly()) return true;
+
+  for (auto i = 0; i < fca.numArgs; ++i) {
+    if (fca.isReadonly(i) && !callee->isReadonly(i)) {
+      auto const data = BoolVecArgsData { fca.numArgs, fca.readonlyArgs };
+      gen(env, ThrowReadonlyMismatch, data, cns(env, callee));
+      return RO::EvalEnableReadonlyCallEnforcement <= 1;
+    }
+  }
+  return true;
+}
+
+void emitCallerReadonlyChecksUnknown(IRGS& env, SSATmp* callee,
+                                      const FCallArgs& fca) {
+  if (RO::EvalEnableReadonlyCallEnforcement == 0) return;
+  if (!fca.enforceReadonly()) return;
+
+  auto const data = BoolVecArgsData { fca.numArgs, fca.readonlyArgs };
+  gen(env, CheckReadonlyMismatch, data, callee);
 }
 
 void emitCallerDynamicCallChecksKnown(IRGS& env, const Func* callee) {
@@ -315,6 +339,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
 
   // Caller checks
   if (!emitCallerInOutChecksKnown(env, callee, fca)) return;
+  if (!emitCallerReadonlyChecksKnown(env, callee, fca)) return;
   if (dynamicCall && !suppressDynCallCheck) {
     emitCallerDynamicCallChecksKnown(env, callee);
   }
@@ -410,6 +435,7 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
 
   // Caller checks
   emitCallerInOutChecksUnknown(env, callee, fca);
+  emitCallerReadonlyChecksUnknown(env, callee, fca);
   if (dynamicCall && !suppressDynCallCheck) {
     emitCallerDynamicCallChecksUnknown(env, callee);
   }

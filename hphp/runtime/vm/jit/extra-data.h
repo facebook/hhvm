@@ -2230,57 +2230,29 @@ struct FuncEntryData : IRExtraData {
   uint32_t argc;
 };
 
-struct InOutArgsData : IRExtraData {
-  InOutArgsData(uint32_t numArgs, const uint8_t* inoutArgs)
+struct BoolVecArgsData : IRExtraData {
+  BoolVecArgsData(uint32_t numArgs, const uint8_t* args)
     : numArgs(numArgs)
-    , inoutArgs(reinterpret_cast<uintptr_t>(inoutArgs))
+    , args(reinterpret_cast<uintptr_t>(args))
   {}
 
   std::string show() const {
-    return HPHP::show(numArgs, reinterpret_cast<const uint8_t*>(inoutArgs));
+    return HPHP::show(numArgs, reinterpret_cast<const uint8_t*>(args));
   }
 
   size_t stableHash() const {
     return folly::hash::hash_combine(
       std::hash<uint32_t>()(numArgs),
-      std::hash<uintptr_t>()(inoutArgs)
+      std::hash<uintptr_t>()(args)
     );
   }
 
-  bool equals(const InOutArgsData& o) const {
-    return numArgs == o.numArgs && inoutArgs == o.inoutArgs;
+  bool equals(const BoolVecArgsData& o) const {
+    return numArgs == o.numArgs && args == o.args;
   }
 
   uint32_t numArgs;
-  uintptr_t inoutArgs;
-};
-
-struct CheckInOutsData : IRExtraData {
-  CheckInOutsData(unsigned firstBit, uint64_t mask, uint64_t vals)
-    : firstBit(safe_cast<int>(firstBit))
-    , mask(mask)
-    , vals(vals)
-  {}
-
-  std::string show() const {
-    return folly::format("{},{},{}", firstBit, mask, vals).str();
-  }
-
-  size_t stableHash() const {
-    return folly::hash::hash_combine(
-      std::hash<int>()(firstBit),
-      std::hash<uint64_t>()(mask),
-      std::hash<uint64_t>()(vals)
-    );
-  }
-
-  bool equals(const CheckInOutsData& o) const {
-    return firstBit == o.firstBit && mask == o.mask && vals == o.vals;
-  }
-
-  int firstBit;
-  uint64_t mask;
-  uint64_t vals;
+  uintptr_t args;
 };
 
 struct ProfileCallTargetData : IRExtraData {
@@ -2747,8 +2719,10 @@ X(ThrowMissingArg,              FuncArgData);
 X(RaiseTooManyArg,              FuncData);
 X(RaiseCoeffectsCallViolation,  FuncData);
 X(RaiseCoeffectsFunParamTypeViolation, ParamData);
-X(CheckInOutMismatch,           InOutArgsData);
-X(ThrowInOutMismatch,           InOutArgsData);
+X(CheckInOutMismatch,           BoolVecArgsData);
+X(ThrowInOutMismatch,           BoolVecArgsData);
+X(CheckReadonlyMismatch,        BoolVecArgsData);
+X(ThrowReadonlyMismatch,        BoolVecArgsData);
 X(ThrowParameterWrongType,      FuncArgTypeData);
 X(CheckClsReifiedGenericMismatch,
                                 ClassData);

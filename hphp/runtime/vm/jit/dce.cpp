@@ -517,6 +517,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
   case CheckInOutMismatch:
+  case CheckReadonlyMismatch:
   case PrintStr:
   case PrintInt:
   case PrintBool:
@@ -653,6 +654,7 @@ bool canDCE(IRInstruction* inst) {
   case ThrowMissingThis:
   case ThrowParameterWrongType:
   case ThrowInOutMismatch:
+  case ThrowReadonlyMismatch:
   case ThrowMustBeMutableException:
   case ThrowMustBeReadOnlyException:
   case ThrowMustBeValueTypeException:

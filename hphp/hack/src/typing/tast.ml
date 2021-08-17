@@ -44,7 +44,6 @@ let pp_ifc_fun_decl fmt d = Typing_defs.pp_ifc_fun_decl fmt d
 type fun_tast_info = {
   has_implicit_return: bool;
       (** True if there are leaves of the function's imaginary CFG without a return statement *)
-  named_body_is_unsafe: bool;  (** Result of {!Nast.named_body_is_unsafe} *)
 }
 [@@deriving show]
 

@@ -1773,19 +1773,16 @@ and fun_ ?(abstract = false) ?(disable = false) env return pos named_body f_kind
       let { Typing_env_return_info.return_type = ret; _ } =
         Env.get_return env
       in
+      let decl_env = env.decl_env in
+      let is_hhi = FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi) in
       let has_implicit_return = LEnv.has_next env in
-      let named_body_is_unsafe = Nast.named_body_is_unsafe named_body in
       let env =
-        if (not has_implicit_return) || abstract || named_body_is_unsafe then
+        if (not has_implicit_return) || abstract || is_hhi then
           env
         else
           fun_implicit_return env pos ret.et_type f_kind
       in
-      let env =
-        Typing_env.set_fun_tast_info
-          env
-          { Tast.has_implicit_return; Tast.named_body_is_unsafe }
-      in
+      let env = Typing_env.set_fun_tast_info env { Tast.has_implicit_return } in
       debug_last_pos := Pos.none;
       (env, tb))
 
@@ -4802,18 +4799,13 @@ and closure_make
   in
   let (env, tb) = block env nb.fb_ast in
   let has_implicit_return = LEnv.has_next env in
-  let named_body_is_unsafe = Nast.named_body_is_unsafe nb in
   let env =
-    if (not has_implicit_return) || Nast.named_body_is_unsafe nb then
+    if not has_implicit_return then
       env
     else
       fun_implicit_return env lambda_pos hret f.f_fun_kind
   in
-  let env =
-    Typing_env.set_fun_tast_info
-      env
-      { Tast.has_implicit_return; Tast.named_body_is_unsafe }
-  in
+  let env = Typing_env.set_fun_tast_info env { Tast.has_implicit_return } in
   let (env, tparams) = List.map_env env f.f_tparams ~f:type_param in
   let (env, user_attributes) =
     List.map_env env f.f_user_attributes ~f:user_attribute

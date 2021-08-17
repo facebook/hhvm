@@ -551,12 +551,8 @@ let fun_tast_info_as_map = function
   | None -> make_map []
   | Some r ->
     let open Tast in
-    let { has_implicit_return; named_body_is_unsafe } = r in
-    make_map
-      [
-        ("has_implicit_return", bool_as_value has_implicit_return);
-        ("named_body_is_unsafe", bool_as_value named_body_is_unsafe);
-      ]
+    let { has_implicit_return } = r in
+    make_map [("has_implicit_return", bool_as_value has_implicit_return)]
 
 let env_as_value env =
   let {

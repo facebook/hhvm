@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3595f101435000a4eb410116ce9f6324>>
+// @generated SignedSource<<ebf76a15a71628e604b14748e733a59b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -42,8 +42,6 @@ pub type DeclTy<'a> = typing_defs::Ty<'a>;
 pub struct FunTastInfo {
     /// True if there are leaves of the function's imaginary CFG without a return statement
     pub has_implicit_return: bool,
-    /// Result of {!Nast.named_body_is_unsafe}
-    pub named_body_is_unsafe: bool,
 }
 impl TrivialDrop for FunTastInfo {}
 arena_deserializer::impl_deserialize_in_arena!(FunTastInfo);

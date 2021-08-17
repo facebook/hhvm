@@ -191,9 +191,9 @@ let visitor =
         state := { !state with prev_no_value_return = Some (Some return_pos) }
 
     method! on_fun_ env fun_ =
+      let decl_env = Tast_env.get_decl_env env in
       let has_impl_ret = Tast_env.fun_has_implicit_return env in
-      let is_unsafe = Tast_env.named_fun_body_is_unsafe env in
-      if not is_unsafe then
+      if not FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi) then
         this#traverse_fun_body
           (hint_of_type_hint fun_.f_ret)
           fun_.f_span
@@ -204,8 +204,12 @@ let visitor =
 
     method! on_method_ env method_ =
       let has_impl_ret = Tast_env.fun_has_implicit_return env in
-      let is_unsafe = Tast_env.named_fun_body_is_unsafe env in
-      if not (method_.m_abstract || is_unsafe) then
+      let decl_env = Tast_env.get_decl_env env in
+      if
+        not
+          (method_.m_abstract
+          || FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi))
+      then
         this#traverse_fun_body
           (hint_of_type_hint method_.m_ret)
           method_.m_span

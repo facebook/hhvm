@@ -612,7 +612,7 @@ let class_ tenv c =
   let (c_constructor, _, _) = split_methods c.c_methods in
   match c_constructor with
   | _ when Ast_defs.is_c_interface c.c_kind -> ()
-  | Some { m_body = { fb_annotation = Nast.NamedWithUnsafeBlocks; _ }; _ } -> ()
+  | Some _ when FileInfo.(equal_mode c.c_mode Mhhi) -> ()
   | _ ->
     let p =
       match c_constructor with

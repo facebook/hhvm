@@ -114,11 +114,6 @@ type type_hint = unit Aast.type_hint
 
 module ShapeMap = Ast_defs.ShapeMap
 
-let named_body_is_unsafe fb =
-  match fb.fb_annotation with
-  | Named -> false
-  | NamedWithUnsafeBlocks -> true
-
 let class_id_to_str = function
   | CIparent -> SN.Classes.cParent
   | CIself -> SN.Classes.cSelf

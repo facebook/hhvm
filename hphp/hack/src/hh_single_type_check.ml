@@ -48,6 +48,7 @@ type mode =
   | Go_to_impl of int * int
   | Dump_glean_deps
   | Hover of (int * int) option
+  | Apply_quickfixes
 
 type options = {
   files: string list;
@@ -677,6 +678,10 @@ let parse_options () =
       ( "--hover-at-caret",
         Arg.Unit (fun () -> set_mode (Hover None) ()),
         " Show the hover information indicated by // ^ hover-at-caret" );
+      ( "--fix",
+        Arg.Unit (fun () -> set_mode Apply_quickfixes ()),
+        " Apply quickfixes for all the errors in the file, and print the resulting code."
+      );
       ( "--require-extends-implements-ancestors",
         Arg.Set require_extends_implements_ancestors,
         " Consider `require extends` and `require implements` as ancestors when checking a class"
@@ -1377,6 +1382,14 @@ let hover_at_caret_pos (src : string) : int * int =
     (line_num, Option.value_exn col_num + 1)
   | None ->
     failwith "Could not find any occurrence of ^ hover-at-caret in source code"
+
+(* Aply [quickfix] by replacing/inserting the new text in [src]. *)
+let apply_quickfix (src : string) (quickfix : Pos.t Errors.quickfix) : string =
+  let { Errors.new_text; pos; _ } = quickfix in
+  let (start_offset, end_offset) = Pos.info_raw pos in
+  let src_before = String.subo src ~len:start_offset in
+  let src_after = String.subo src ~pos:end_offset in
+  src_before ^ new_text ^ src_after
 
 (**
  * Compute TASTs for some files, then expand all type variables.
@@ -2262,6 +2275,25 @@ let handle_mode
       Printf.printf "%s\n" (HoverService.string_of_result result)
     in
     List.iter results ~f:print
+  | Apply_quickfixes ->
+    let (errors, _) = compute_tasts ctx files_info files_contents in
+    let filename = expect_single_file () in
+    let src = Relative_path.Map.find files_contents filename in
+    let quickfixes =
+      Errors.get_error_list errors
+      |> List.map ~f:Errors.quickfixes
+      |> List.concat
+    in
+
+    (* Start with the quickfix that occurs last in the file, so we
+       don't affect the position of earlier code.*)
+    let pos_start_offset p = snd (Pos.info_raw p) in
+    let qf_start_offset qf = pos_start_offset qf.Errors.pos in
+    let cmp_qf x y = Int.compare (qf_start_offset x) (qf_start_offset y) in
+    let quickfixes = List.rev (List.sort ~compare:cmp_qf quickfixes) in
+
+    let new_src = List.fold quickfixes ~init:src ~f:apply_quickfix in
+    Printf.printf "%s" new_src
 
 (*****************************************************************************)
 (* Main entry point *)

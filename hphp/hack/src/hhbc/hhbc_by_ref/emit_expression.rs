@@ -436,9 +436,18 @@ pub fn emit_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             )?
             .0)
         }
-        Expr_::ObjGet(e) => {
-            Ok(emit_obj_get(emitter, env, pos, QueryOp::CGet, &e.0, &e.1, &e.2, false)?.0)
-        }
+        Expr_::ObjGet(e) => Ok(emit_obj_get(
+            emitter,
+            env,
+            pos,
+            QueryOp::CGet,
+            &e.0,
+            &e.1,
+            &e.2,
+            false,
+            false,
+        )?
+        .0),
         Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, c),
         Expr_::New(e) => emit_new(emitter, env, pos, e, false),
         Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, pos, &fp.0, &fp.1),
@@ -495,8 +504,7 @@ pub fn emit_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             emit_shape(emitter, env, expression, e)?,
         )),
         Expr_::Await(e) => emit_await(emitter, env, pos, e),
-        // TODO: emit readonly expressions
-        Expr_::ReadonlyExpr(e) => emit_expr(emitter, env, e),
+        Expr_::ReadonlyExpr(e) => emit_readonly_expr(emitter, env, pos, e),
         Expr_::Yield(e) => emit_yield(emitter, env, pos, e),
         Expr_::Efun(e) => Ok(emit_pos_then(
             alloc,
@@ -1684,7 +1692,18 @@ fn emit_call_isset_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         return emit_class_get(e, env, QueryOp::Isset, cid, id);
     }
     if let Some((expr_, prop, nullflavor, _)) = expr.2.as_obj_get() {
-        return Ok(emit_obj_get(e, env, pos, QueryOp::Isset, expr_, prop, nullflavor, false)?.0);
+        return Ok(emit_obj_get(
+            e,
+            env,
+            pos,
+            QueryOp::Isset,
+            expr_,
+            prop,
+            nullflavor,
+            false,
+            false,
+        )?
+        .0);
     }
     if let Some(lid) = expr.2.as_lvar() {
         let name = local_id::get_name(&lid.1);
@@ -3857,7 +3876,13 @@ fn emit_obj_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     prop: &ast::Expr,
     nullflavor: &ast_defs::OgNullFlavor,
     null_coalesce_assignment: bool,
+    readonly_get: bool, // obj_get enclosed in readonly expression
 ) -> Result<(InstrSeq<'arena>, Option<NumParams>)> {
+    let readonly_op = if readonly_get {
+        ReadOnlyOp::Any
+    } else {
+        ReadOnlyOp::Mutable
+    };
     let alloc = env.arena;
     if let Some(ast::Lid(pos, id)) = expr.2.as_lvar() {
         if local_id::get_name(&id) == special_idents::THIS
@@ -3913,7 +3938,7 @@ fn emit_obj_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         cls_stack_size,
         prop,
         null_coalesce_assignment,
-        ReadOnlyOp::Any, // TODO: readonly prop access (non assignment)
+        readonly_op,
     )?;
     let total_stack_size = (prop_stack_size + base_stack_size + cls_stack_size) as usize;
     let num_params = if null_coalesce_assignment {
@@ -4935,6 +4960,20 @@ pub fn emit_two_exprs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     ))
 }
 
+fn emit_readonly_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+    e: &mut Emitter<'arena, 'decl, D>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    expr: &aast::Expr<(), (), ()>,
+) -> Result<InstrSeq<'arena>> {
+    match &expr.2 {
+        aast::Expr_::ObjGet(x) => {
+            Ok(emit_obj_get(e, env, pos, QueryOp::CGet, &x.0, &x.1, &x.2, false, true)?.0)
+        }
+        _ => emit_expr(e, env, expr),
+    }
+}
+
 fn emit_quiet_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     e: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
@@ -4972,6 +5011,7 @@ fn emit_quiet_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     &x.1,
                     &x.2,
                     null_coalesce_assignment,
+                    false,
                 )
             }
         }
@@ -6494,7 +6534,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             instr::empty(alloc),
                             rhs_stack_size,
                             false,
-                            false, // TODO: readonly assignment (Unop)
+                            false, // all unary operations (++, --, etc) are on primitives, so no HHVM readonly checks
                         )?,
                         from_unop(alloc, e.options(), &uop.0)?,
                     ],

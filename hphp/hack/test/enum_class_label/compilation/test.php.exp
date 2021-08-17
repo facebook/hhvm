@@ -161,7 +161,7 @@
     CheckThis
     .srcloc 22:39,22:49;
     BaseH
-    QueryM 0 CGet PT:"data" Any
+    QueryM 0 CGet PT:"data" Mutable
     .srcloc 22:32,22:50;
     VerifyRetTypeC
     RetC
@@ -219,7 +219,7 @@
     VerifyParamTypeTS $enum
     .srcloc 34:12,34:22;
     BaseL $enum Warn Any
-    QueryM 0 CGet PT:"data" Any
+    QueryM 0 CGet PT:"data" Mutable
     .srcloc 34:5,34:23;
     VerifyRetTypeC
     RetC

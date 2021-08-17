@@ -648,10 +648,15 @@ void Variant::setEvalScalar() {
       do_array();
       return;
 
+    case KindOfFunc:
+      if (m_data.pfunc->isPersistent()) return;
+      break;
+    case KindOfClass:
+      if (m_data.pclass->isPersistent()) return;
+      break;
+
     case KindOfObject:
     case KindOfResource:
-    case KindOfFunc:
-    case KindOfClass:
       break;
 
     case KindOfRFunc:
@@ -664,6 +669,7 @@ void Variant::setEvalScalar() {
       raise_error(Strings::RCLS_METH_NOT_SUPPORTED);
 
     case KindOfClsMeth:
+      if (m_data.pclsmeth->isPersistent()) return;
       raise_error(Strings::CLS_METH_NOT_SUPPORTED);
   }
   not_reached();

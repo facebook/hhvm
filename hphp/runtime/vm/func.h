@@ -694,6 +694,8 @@ public:
    */
   bool isMemoizeWrapperLSB() const;
 
+  bool isPolicyShardedMemoize() const;
+
   /*
    * Is this string the name of a memoize implementation.
    */

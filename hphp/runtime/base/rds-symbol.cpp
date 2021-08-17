@@ -46,6 +46,7 @@ struct SymbolKind : boost::static_visitor<std::string> {
   std::string operator()(LSBMemoValue) const { return "LSBMemoValue"; }
   std::string operator()(LSBMemoCache) const { return "LSBMemoCache"; }
   std::string operator()(TSCache) const { return "TSCache"; }
+  std::string operator()(ConstMemoCache) const { return "ConstMemoCache"; }
 };
 
 struct SymbolRep : boost::static_visitor<std::string> {
@@ -95,6 +96,16 @@ struct SymbolRep : boost::static_visitor<std::string> {
   std::string operator()(TSCache k) const {
     auto const func = Func::fromFuncId(k.funcId);
     return func->fullName()->toCppString();
+  }
+
+  std::string operator()(ConstMemoCache k) const {
+    auto const func = Func::fromFuncId(k.funcId);
+    auto const funcName = func->fullName()->toCppString();
+    auto const clsPrefix =
+      k.cls ? folly::format("{}::", k.cls->name()).str() : "";
+    return folly::format(
+      "{}{}::{}::{}",
+      clsPrefix, funcName, k.paramVals, k.asyncEager).str();
   }
 };
 
@@ -160,6 +171,13 @@ struct SymbolEq : boost::static_visitor<bool> {
   bool operator()(TSCache k1, TSCache k2) const {
     return k1.funcId == k2.funcId;
   }
+
+  bool operator()(ConstMemoCache k1, ConstMemoCache k2) const {
+    return k1.funcId == k2.funcId &&
+           k1.cls == k2.cls &&
+           k1.paramVals == k2.paramVals &&
+           k1.asyncEager == k2.asyncEager;
+  }
 };
 
 struct SymbolHash : boost::static_visitor<size_t> {
@@ -219,6 +237,16 @@ struct SymbolHash : boost::static_visitor<size_t> {
 
   size_t operator()(TSCache k) const {
     return std::hash<FuncId>()(k.funcId);
+  }
+
+  size_t operator()(ConstMemoCache k) const {
+    auto const clsHash = k.cls ? k.cls->stableHash() : 0;
+    return folly::hash::hash_combine(
+      std::hash<FuncId>()(k.funcId),
+      clsHash,
+      std::hash<const ArrayData*>()(k.paramVals),
+      std::hash<bool>()(k.asyncEager)
+    );
   }
 };
 

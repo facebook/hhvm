@@ -81,4 +81,8 @@ String ClsMethData::getFuncStr() const {
   return getFunc()->nameStr();
 }
 
+bool ClsMethData::isPersistent() const {
+  return getCls()->isPersistent() && getFunc()->isPersistent();
+}
+
 } // namespace HPHP

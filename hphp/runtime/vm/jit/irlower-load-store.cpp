@@ -456,6 +456,31 @@ void cgLdInitRDSAddr(IRLS& env, const IRInstruction* inst) {
   v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
+void cgLdTVFromRDS(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const extra = inst->extra<LdTVFromRDS>();
+  loadTV(
+    v,
+    inst->dst(),
+    dstLoc(env, inst, 0),
+    rvmtl()[extra->handle],
+    extra->includeAux
+  );
+}
+
+void cgStTVInRDS(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const extra = inst->extra<StTVInRDS>();
+  storeTV(
+    v,
+    rvmtl()[extra->handle],
+    srcLoc(env, inst, 0),
+    inst->src(0),
+    TBottom,
+    extra->includeAux
+  );
+}
+
 void cgCheckFuncNeedsCoverage(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 

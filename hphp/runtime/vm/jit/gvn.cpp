@@ -327,6 +327,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case FuncHasAttr:
   case ClassHasAttr:
   case StructDictGetWithColor:
+  case LdTVFromRDS:
     return true;
 
   case EqArrLike:

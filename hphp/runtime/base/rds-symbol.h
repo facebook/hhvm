@@ -27,6 +27,7 @@
 
 namespace HPHP {
 
+struct ArrayData;
 struct Class;
 struct StringData;
 
@@ -151,6 +152,13 @@ struct TSCache {
   FuncId funcId;
 };
 
+struct ConstMemoCache {
+  FuncId funcId;
+  LowPtr<const Class> cls;
+  const ArrayData* paramVals;
+  bool asyncEager;
+};
+
 using Symbol = boost::variant<
   LinkName,
   LinkID,
@@ -163,7 +171,8 @@ using Symbol = boost::variant<
   StaticMemoCache,
   LSBMemoValue,
   LSBMemoCache,
-  TSCache
+  TSCache,
+  ConstMemoCache
 >;
 
 std::string symbol_kind(const Symbol&);

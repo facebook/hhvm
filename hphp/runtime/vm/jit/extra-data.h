@@ -651,6 +651,30 @@ struct RDSHandleData : IRExtraData {
   rds::Handle handle;
 };
 
+struct TVInRDSHandleData : RDSHandleData {
+  TVInRDSHandleData (rds::Handle handle, bool includeAux)
+    : RDSHandleData(handle), includeAux(includeAux) {}
+
+  std::string show() const {
+    return folly::to<std::string>(handle, ",", includeAux);
+  }
+
+  bool equals(TVInRDSHandleData o) const {
+    return handle == o.handle && includeAux == o.includeAux;
+  }
+  size_t hash() const {
+    return folly::hash::hash_combine(std::hash<uint32_t>()(handle),
+                                     std::hash<bool>()(includeAux));
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(RDSHandleData::stableHash(),
+                                     std::hash<bool>()(includeAux));
+  }
+
+  bool includeAux;
+};
+
 /*
  * Array access profile.
  */
@@ -2761,6 +2785,8 @@ X(CheckRDSInitialized,          RDSHandleData);
 X(MarkRDSInitialized,           RDSHandleData);
 X(MarkRDSAccess,                RDSHandleData);
 X(LdInitRDSAddr,                RDSHandleData);
+X(LdTVFromRDS,                  TVInRDSHandleData);
+X(StTVInRDS,                    TVInRDSHandleData);
 X(BaseG,                        MOpModeData);
 X(PropX,                        PropData);
 X(PropQ,                        ReadOnlyData);

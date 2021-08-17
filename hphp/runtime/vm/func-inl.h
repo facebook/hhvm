@@ -531,6 +531,10 @@ inline bool Func::isMemoizeWrapperLSB() const {
   return shared()->m_allFlags.m_isMemoizeWrapperLSB;
 }
 
+inline bool Func::isPolicyShardedMemoize() const {
+  return shared()->m_allFlags.m_isPolicyShardedMemoize;
+}
+
 inline bool Func::isMemoizeImpl() const {
   return isMemoizeImplName(name());
 }

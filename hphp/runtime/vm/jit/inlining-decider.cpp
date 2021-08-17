@@ -441,8 +441,9 @@ int costOfInlining(SrcKey callerSk,
                    const RegionDesc& region,
                    AnnotationData* annotationData) {
   auto const alwaysInl =
-    !RuntimeOption::EvalHHIRInliningIgnoreHints &&
-    callee->userAttributes().count(s_AlwaysInline.get());
+    (!RuntimeOption::EvalHHIRInliningIgnoreHints &&
+    callee->userAttributes().count(s_AlwaysInline.get())) ||
+    (callee->isMemoizeWrapper() && callee->numParams() == 0);
 
   // Functions marked as always inline don't contribute to overall cost
   return alwaysInl ?

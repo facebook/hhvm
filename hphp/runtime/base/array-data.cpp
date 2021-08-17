@@ -94,6 +94,24 @@ size_t hashArrayPortion(const ArrayData* arr) {
             (uintptr_t)v.m_data.plazyclass.name()
           );
           break;
+        case KindOfClass:
+          assertx(v.m_data.pclass->isPersistent());
+          hash = folly::hash::hash_combine(hash, (uintptr_t)v.m_data.pclass);
+          break;
+        case KindOfFunc:
+          assertx(v.m_data.pfunc->isPersistent());
+          hash = folly::hash::hash_combine(hash, (uintptr_t)v.m_data.pfunc);
+          break;
+        case KindOfClsMeth:
+          assertx(v.m_data.pclsmeth->isPersistent());
+          hash =
+            folly::hash::hash_combine(
+              hash, (uintptr_t)v.m_data.pclsmeth->getCls());
+          hash =
+            folly::hash::hash_combine(
+                hash, (uintptr_t)v.m_data.pclsmeth->getFunc());
+          break;
+
         case KindOfUninit:
         case KindOfString:
         case KindOfVec:
@@ -102,9 +120,6 @@ size_t hashArrayPortion(const ArrayData* arr) {
         case KindOfObject:
         case KindOfResource:
         case KindOfRFunc:
-        case KindOfFunc:
-        case KindOfClass:
-        case KindOfClsMeth:
         case KindOfRClsMeth:
         case KindOfRecord:
           always_assert(false);

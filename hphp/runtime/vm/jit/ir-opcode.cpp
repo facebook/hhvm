@@ -771,6 +771,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdSubClsCns:
   case LdSubClsCnsClsName:
   case LdTVAux:
+  case LdTVFromRDS:
   case LdTypeCns:
   case LdUnitPerRequestFilepath:
   case LdUnwinderValue:
@@ -906,6 +907,7 @@ bool opcodeMayRaise(Opcode opc) {
   case StStk:
   case StStkRange:
   case StVMRegState:
+  case StTVInRDS:
   case SubDbl:
   case SubInt:
   case SubIntO:

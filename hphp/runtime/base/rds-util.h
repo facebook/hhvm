@@ -72,6 +72,11 @@ bindTSCache(const Func*);
 Link<jit::TSClassCache, rds::Mode::Local>
 attachTSCache(const Func*);
 
+Link<TypedValue, rds::Mode::Normal>
+bindConstMemoCache(const Func*, const Class*,
+                   const ArrayData* paramVals, bool asyncEager);
+
+void clearConstMemoCache(const Func*, const Class*);
 //////////////////////////////////////////////////////////////////////
 
 }}

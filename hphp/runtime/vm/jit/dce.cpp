@@ -169,6 +169,7 @@ bool canDCE(IRInstruction* inst) {
   case LdFuncFromRFunc:
   case LdGenericsFromRFunc:
   case LdRecDesc:
+  case LdTVFromRDS:
   case DefConst:
   case Conjure:
   case LdClsInitData:
@@ -465,6 +466,7 @@ bool canDCE(IRInstruction* inst) {
   case StVMPC:
   case StVMReturnAddr:
   case StVMRegState:
+  case StTVInRDS:
   case ReqBindJmp:
   case ReqInterpBBNoTranslate:
   case ReqRetranslate:

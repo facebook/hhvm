@@ -61,6 +61,8 @@ struct ClsMethData {
     return offsetof(ClsMethData, m_func);
   }
 
+  bool isPersistent() const;
+
 private:
   ClsMethData(Class* cls, Func* func);
 

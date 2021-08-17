@@ -94,8 +94,9 @@ void emitCmpTVType(Vout& v, Vreg sf, DataType s0, Vreg s1);
  * Store `loc', the registers representing `src', to `dst'.
  */
 void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src,
-             Type ty = TBottom);
-void storeTV(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, Vptr dataPtr);
+             Type ty = TBottom, bool aux = false);
+void storeTV(Vout& v, Type type, Vloc srcLoc,
+             Vptr typePtr, Vptr dataPtr, bool aux = false);
 
 void storeTVWithAux(Vout& v, Vptr dst, Vloc srcLoc,
                     const SSATmp* src, AuxUnion aux);

@@ -570,6 +570,7 @@ bool HHVM_FUNCTION(clear_static_memoization,
     if (!func->isMemoizeWrapper()) return false;
     clearValueLink(rds::attachStaticMemoValue(func));
     clearCacheLink(rds::attachStaticMemoCache(func));
+    rds::clearConstMemoCache(func, nullptr);
     return true;
   };
 
@@ -629,6 +630,7 @@ bool HHVM_FUNCTION(clear_lsb_memoization,
     if (!func->isMemoizeWrapperLSB()) return false;
     clearValueLink(rds::attachLSBMemoValue(cls, func));
     clearCacheLink(rds::attachLSBMemoCache(cls, func));
+    rds::clearConstMemoCache(func, cls);
     return true;
   };
 

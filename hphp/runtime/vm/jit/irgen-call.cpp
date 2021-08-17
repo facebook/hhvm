@@ -46,6 +46,7 @@ namespace {
 
 const StaticString
   s_DynamicContextOverrideUnsafe("__SystemLib\\DynamicContextOverrideUnsafe");
+const StaticString s_attr_Deprecated("__Deprecated");
 
 const Class* callContext(IRGS& env, const FCallArgs& fca, const Class* cls) {
   if (!fca.context) return curClass(env);
@@ -332,6 +333,53 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
 
 //////////////////////////////////////////////////////////////////////
 
+bool hasConstParamMemoCache(IRGS& env, const Func* callee, const FCallArgs& fca,
+                            SSATmp* objOrClass) {
+  if (!callee->isMemoizeWrapper() || callee->isPolicyShardedMemoize()) {
+    return false;
+  }
+  if (callee->userAttributes().count(LowStringPtr(s_attr_Deprecated.get()))) {
+    return false;
+  }
+  // Classes are converted to strings before storing to memo caches.
+  // Bail out if we need to raise warning for class to string conversation.
+  if (RuntimeOption::EvalRaiseClassConversionWarning) return false;
+  if (objOrClass &&
+      (!objOrClass->hasConstVal(TCls) ||
+       !objOrClass->clsVal()->isPersistent())) {
+    return false;
+  }
+  if (callee->numParams() == 0) return false;
+  for (auto i = 0; i < fca.numInputs(); ++i) {
+    auto const t = publicTopType(env, BCSPRelOffset {i});
+    if (!t.admitsSingleVal()) return false;
+    if (t.hasConstVal(TCls) && !t.clsVal()->isPersistent()) return false;
+    if (t.hasConstVal(TFunc) && !t.funcVal()->isPersistent()) return false;
+    if (t.hasConstVal(TClsMeth) && !t.clsmethVal()->isPersistent()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+rds::Link<TypedValue, rds::Mode::Normal>
+constParamCacheLink(IRGS& env, const Func* callee, const FCallArgs& fca,
+                    SSATmp* cls, bool asyncEagerReturn) {
+  auto const clsVal = cls ? cls->clsVal() : nullptr;;
+  auto arr = Array::CreateVec();
+  for (auto i = 0; i < fca.numInputs(); ++i) {
+    auto const t = publicTopType(env, BCSPRelOffset {i});
+    assertx(t.hasConstVal() || t <= TInitNull);
+    auto const tv =
+      t.hasConstVal() ?
+      make_tv_of_type(make_value(t.rawVal()), t.toDataType()) :
+      make_tv<KindOfNull>();
+    arr.append(tv);
+  }
+  auto const paramVals = ArrayData::GetScalarArray(arr);
+  return rds::bindConstMemoCache(callee, clsVal, paramVals, asyncEagerReturn);
+}
+
 void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
                          SSATmp* objOrClass, bool dynamicCall,
                          bool suppressDynCallCheck) {
@@ -353,19 +401,56 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     updateMarker(env);
     env.irb->exceptionStackBoundary();
 
-    if (isFCall(curSrcKey(env).op()) && skipRepack) {
+    auto const asyncEagerReturn =
+      fca.asyncEagerOffset != kInvalidOffset &&
+      callee->supportsAsyncEagerReturn();
+
+    auto const hasRdsCache =
+      hasConstParamMemoCache(env, callee, fca, objOrClass);
+
+    if (isFCall(curSrcKey(env).op()) && skipRepack && !hasRdsCache) {
       if (irGenTryInlineFCall(env, callee, fca, objOrClass, dynamicCall)) {
         return;
       }
     }
 
-    auto const asyncEagerReturn =
-      fca.asyncEagerOffset != kInvalidOffset &&
-      callee->supportsAsyncEagerReturn();
-    auto const retVal = callImpl(env, cns(env, callee), fca, objOrClass,
-                                 skipRepack, dynamicCall, asyncEagerReturn);
-    handleCallReturn(env, callee, fca, retVal, asyncEagerReturn,
+    if (hasRdsCache) {
+      auto const link =
+        constParamCacheLink(env, callee, fca, objOrClass, asyncEagerReturn);
+      assertx(link.isNormal());
+      auto const data = TVInRDSHandleData { link.handle(), asyncEagerReturn };
+      auto const retType = asyncEagerReturn ? TInitCell : callReturnType(callee);
+      auto const res = cond(
+        env,
+        [&] (Block* taken) {
+          gen(env, CheckRDSInitialized, taken, RDSHandleData { data });
+        },
+        [&] {
+          for (auto i = 0; i < fca.numInputs(); ++i) popDecRef(env);
+          for (auto i = 0; i < kNumActRecCells; ++i) popU(env);
+          auto const retVal = gen(env, LdTVFromRDS, data, retType);
+          gen(env, IncRef, retVal);
+          return retVal;
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          auto const retVal = callImpl(env, cns(env, callee), fca, objOrClass,
+                                       skipRepack, dynamicCall,
+                                       asyncEagerReturn);
+          gen(env, StTVInRDS, data, retVal);
+          gen(env, IncRef, retVal);
+          gen(env, MarkRDSInitialized, RDSHandleData { data });
+          return retVal;
+        }
+      );
+      handleCallReturn(env, callee, fca, res,
+                       asyncEagerReturn, false /* unlikely */);
+    } else {
+      auto const retVal = callImpl(env, cns(env, callee), fca, objOrClass,
+                                   skipRepack, dynamicCall, asyncEagerReturn);
+      handleCallReturn(env, callee, fca, retVal, asyncEagerReturn,
                      false /* unlikely */);
+    }
   };
 
   if (fca.hasUnpack()) {

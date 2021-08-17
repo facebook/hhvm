@@ -20,7 +20,15 @@
 
 #include "hphp/runtime/vm/jit/target-cache.h"
 
+#include <unordered_map>
+
 namespace HPHP { namespace rds {
+
+std::unordered_multimap<
+  std::pair<const Func*, const Class*>, Link<TypedValue, Mode::Normal>
+> s_funcToConstMemoCaches;
+
+folly::SharedMutex s_constMemoLock;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -30,6 +38,33 @@ bindClassConstant(const StringData* clsName, const StringData* cnsName) {
     ClsConstant { clsName, cnsName }
   );
   return ret;
+}
+
+Link<TypedValue, Mode::Normal>
+bindConstMemoCache(const Func* func, const Class* cls,
+                   const ArrayData* paramVals, bool asyncEager) {
+  auto ret = bind<TypedValue,Mode::Normal>(
+    ConstMemoCache { func->getFuncId(), cls, paramVals, asyncEager }
+  );
+  {
+    folly::SharedMutex::WriteHolder wlock{s_constMemoLock};
+    s_funcToConstMemoCaches.emplace(std::pair{func, cls}, ret);
+  }
+  return ret;
+}
+
+void clearConstMemoCache(const Func* func, const Class* cls) {
+  folly::SharedMutex::ReadHolder rlock{s_constMemoLock};
+  auto const range = s_funcToConstMemoCaches.equal_range(std::pair{func, cls});
+  for (auto p = range.first; p != range.second; ++p) {
+    auto const link = p->second;
+    assertx(link.bound());
+    if (link.isInit()) {
+      auto old = *link;
+      link.markUninit();
+      tvDecRefGen(old);
+    }
+  }
 }
 
 Link<TypedValue, rds::Mode::Normal>

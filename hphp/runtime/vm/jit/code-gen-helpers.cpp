@@ -154,12 +154,14 @@ void storeTVVal(Vout& v, Type type, Vloc srcLoc, Vptr valPtr) {
 
 }
 
-void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src, Type ty) {
+void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src,
+             Type ty, bool aux) {
   if (ty == TBottom) ty = src->type();
-  storeTV(v, ty, srcLoc, dst + TVOFF(m_type), dst + TVOFF(m_data));
+  storeTV(v, ty, srcLoc, dst + TVOFF(m_type), dst + TVOFF(m_data), aux);
 }
 
-void storeTV(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, Vptr valPtr) {
+void storeTV(Vout& v, Type type, Vloc srcLoc,
+             Vptr typePtr, Vptr valPtr, bool aux) {
   if (srcLoc.isFullSIMD()) {
     // The whole TV is stored in a single SIMD reg.
     assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
@@ -168,9 +170,13 @@ void storeTV(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, Vptr valPtr) {
     return;
   }
 
-  if (type.needsReg()) {
+  if (type.needsReg() || aux) {
     assertx(srcLoc.hasReg(1));
-    v << storeb{srcLoc.reg(1), typePtr};
+    if (aux) {
+      v << store{srcLoc.reg(1), typePtr};
+    } else {
+      v << storeb{srcLoc.reg(1), typePtr};
+    }
   } else {
     v << storeb{v.cns(type.toDataType()), typePtr};
   }

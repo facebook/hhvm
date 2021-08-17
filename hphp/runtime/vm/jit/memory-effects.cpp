@@ -1029,6 +1029,18 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
   case MarkRDSAccess:
     return IrrelevantEffects{};
+  // LdTVFromRDS and StTVInRDS load/store aux bit, so they cannot be
+  // PureLoad/PureStore -- load/store elim do not track aux bit accesses.
+  case LdTVFromRDS:
+    return may_load_store(
+      ARds { inst.extra<LdTVFromRDS>()->handle },
+      AEmpty
+    );
+  case StTVInRDS:
+    return may_load_store(
+      AEmpty,
+      ARds { inst.extra<StTVInRDS>()->handle }
+    );
 
   case InitProps:
     return may_load_store(

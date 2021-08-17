@@ -906,6 +906,11 @@ To string conversions:
 
   Loads from S0 and puts the value in D.
 
+| LdTVFromRDS<T,RDSHandle,includeAux>, DParam(InitCell), NA, NF
+
+  Load the TypedValue from the specified RDS handle. Must load the aux bits if
+  `includeAux` is true.
+
 | LdContField<T>, DParam(Cell), S(Obj) C(Int), NF
 
   Loads a property from the object referenced by S0 at the offset given by S1
@@ -1714,6 +1719,11 @@ To string conversions:
 | StMem, ND, S(MemToCell) S(Cell), NF
 
   Store S1 into the location pointed to by S0.
+
+| StTVInRDS<RDSHandle,includeAux>, ND, S(InitCell), NF 
+  
+  Store the TypedValue in S0 into the specified RDS handle. Must store the aux
+  bits if `includeAux` is true.
 
 | StImplicitContext, ND, S(Obj), NF
 

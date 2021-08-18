@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_libc_ops.h"
+#include "hphp/runtime/ext/hsl/replace_every_nonrecursive.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/bstring.h"
 #include "hphp/zend/zend-string.h"
@@ -329,6 +330,31 @@ String HSLLocaleLibcOps::replace_every_ci(const String& haystack,
 String HSLLocaleLibcOps::replace_every_nonrecursive(const String& haystack,
                                                     const Array& replacements) const {
   return HHVM_FN(strtr)(haystack, replacements).asCStrRef();
+}
+
+String HSLLocaleLibcOps::replace_every_nonrecursive_ci(const String& haystack,
+                                                       const Array& replacements) const {
+  auto id = [](const String& s) -> String { return s; };
+  return HPHP::replace_every_nonrecursive<String>(
+    haystack,
+    replacements,
+    /* to_t = */ id,
+    /* from_t = */ id, 
+    /* normalize = */ [](String* s) {},
+    [](String* s) {
+      *s = HHVM_FN(strtolower)(*s);
+    },
+    [](const String& hs, const String& n, int32_t offset) {
+      auto pos = HHVM_FN(strpos)(hs, n, offset);
+      if (pos.type() == KindOfBoolean) {
+        return -1;
+      }
+      return static_cast<int32_t>(pos.val().num);
+    },
+    [](String* hs, int32_t offset, int32_t len, const String& n) {
+      *hs = string_replace(*hs, offset, len, n);
+    }
+  );
 }
 
 } // namespace HPHP

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_icu_ops.h"
+#include "hphp/runtime/ext/hsl/replace_every_nonrecursive.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/system/systemlib.h"
 
@@ -718,60 +719,54 @@ String HSLLocaleICUOps::replace_every_ci(const String& haystack,
 
 String HSLLocaleICUOps::replace_every_nonrecursive(const String& haystack,
                                                    const Array& replacements) const {
-  
-  auto uhaystack = ustr_from_utf8(haystack);
   icu::ErrorCode err;
-  // singleton, do not free
+  // Singleton, do not free
   auto normalizer = icu::Normalizer2::getNFCInstance(err);
-  uhaystack = normalizer->normalize(uhaystack, err);
 
-  std::vector<std::tuple<icu::UnicodeString, icu::UnicodeString>> ureplacements;
-
-  IterateKV(replacements.get(), [&](TypedValue needle, TypedValue replacement) {
-    auto uneedle = ustr_from_utf8(needle);
-    const auto ureplacement = ustr_from_utf8(replacement);
-    normalizer->normalize(uneedle, err);
-    ureplacements.push_back(std::make_tuple(uneedle, ureplacement));
-  });
-
-  // Longest matching needle wins
-  std::sort(ureplacements.begin(), ureplacements.end(), [](
-    decltype(ureplacements[0])& a,
-    decltype(ureplacements[0])& b) {
-      return std::get<0>(a).length() > std::get<0>(b).length();
-  });
-
-  int32_t i = 0;
-  while (i < uhaystack.length()) {
-    int32_t matchedOffset = -1;
-    icu::UnicodeString matchedNeedle, matchedReplacement;
-
-    for (const auto& [uneedle, ureplacement]: ureplacements) {
-#ifndef NDEBUG
-      if (matchedOffset >= 0) {
-        assertx(matchedNeedle.length() >= uneedle.length());
-      }
-#endif
-      if (matchedOffset >= 0 && uneedle.length() < matchedNeedle.length()) {
-        break;
-      }
-      auto j = uhaystack.indexOf(uneedle, i);
-      if (j < 0 || (matchedOffset >= 0 && j >= matchedOffset)) {
-        continue;
-      }
-      matchedOffset = j;
-      matchedNeedle = uneedle;
-      matchedReplacement = ureplacement;
+  return HPHP::replace_every_nonrecursive<icu::UnicodeString>(
+    haystack,
+    replacements,
+    [](const HPHP::String& s) { return ustr_from_utf8(s); },
+    [](const icu::UnicodeString& s) -> String {
+      std::string ret;
+      s.toUTF8String(ret);
+      return ret;
+    },
+    [&](icu::UnicodeString* s) { *s = normalizer->normalize(*s, err); },
+    [](icu::UnicodeString* s) { /* case sensitive, don't fold case */ },
+    [](const icu::UnicodeString& hs, const icu::UnicodeString& n, int32_t offset) {
+      return hs.indexOf(n, offset);
+    },
+    [](icu::UnicodeString* hs, int32_t offset, int32_t len, const icu::UnicodeString& r) {
+      hs->replace(offset, len, r);
     }
-    if (matchedOffset == -1) {
-      break;
+  );
+}
+
+String HSLLocaleICUOps::replace_every_nonrecursive_ci(const String& haystack,
+                                                      const Array& replacements) const {
+  icu::ErrorCode err;
+  // Singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+
+  return HPHP::replace_every_nonrecursive<icu::UnicodeString>(
+    haystack,
+    replacements,
+    [](const HPHP::String& s) { return ustr_from_utf8(s); },
+    [](const icu::UnicodeString& s) -> String {
+      std::string ret;
+      s.toUTF8String(ret);
+      return ret;
+    },
+    [&](icu::UnicodeString* s) { *s = normalizer->normalize(*s, err); },
+    [this](icu::UnicodeString* s) { s->foldCase(this->m_caseFoldFlags); },
+    [](const icu::UnicodeString& hs, const icu::UnicodeString& n, int32_t offset) {
+      return hs.indexOf(n, offset);
+    },
+    [](icu::UnicodeString* hs, int32_t offset, int32_t len, const icu::UnicodeString& r) {
+      hs->replace(offset, len, r);
     }
-    uhaystack.replace(matchedOffset, matchedNeedle.length(), matchedReplacement);
-    i += matchedReplacement.length();
-  }
-  std::string ret;
-  uhaystack.toUTF8String(ret);
-  return ret;
+  );
 }
 
 } // namespace HPHP

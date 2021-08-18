@@ -398,6 +398,17 @@ String HHVM_FUNCTION(replace_every_nonrecursive_l,
   return get_locale(maybe_loc)->ops()->replace_every_nonrecursive(haystack, replacements);
 }
 
+String HHVM_FUNCTION(replace_every_nonrecursive_ci_l,
+                     const String& haystack,
+                     const Array& replacements,
+                     const Variant& maybe_loc) {
+  if (haystack.empty() || replacements.empty()) {
+    return haystack;
+  }
+  check_replace_pairs(replacements);
+  return get_locale(maybe_loc)->ops()->replace_every_nonrecursive_ci(haystack, replacements);
+}
+
 struct HSLStrExtension final : Extension {
   HSLStrExtension() : Extension("hsl_str", "0.1") {}
 
@@ -451,6 +462,7 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_l, replace_every_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_ci_l, replace_every_ci_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_nonrecursive_l, replace_every_nonrecursive_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_nonrecursive_ci_l, replace_every_nonrecursive_ci_l);
 
     loadSystemlib();
   }

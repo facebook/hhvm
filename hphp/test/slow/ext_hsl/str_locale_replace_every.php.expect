@@ -7,30 +7,36 @@ dict(5) {
     string(2) "r1"
   }
   ["C"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(4) "r1bc"
     ["replace_every_nonrecursive_l()"]=>
     string(4) "r1bc"
     ["replace_every_ci_l()"]=>
+    string(4) "r1bc"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(4) "r1bc"
   }
   ["en_US.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(4) "r1bc"
     ["replace_every_nonrecursive_l()"]=>
     string(4) "r1bc"
     ["replace_every_ci_l()"]=>
+    string(4) "r1bc"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(4) "r1bc"
   }
   ["tr_TR.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(4) "r1bc"
     ["replace_every_nonrecursive_l()"]=>
     string(4) "r1bc"
     ["replace_every_ci_l()"]=>
+    string(4) "r1bc"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(4) "r1bc"
   }
 }
@@ -43,30 +49,36 @@ dict(5) {
     string(2) "r1"
   }
   ["C"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "Abc"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "Abc"
     ["replace_every_ci_l()"]=>
+    string(4) "r1bc"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(4) "r1bc"
   }
   ["en_US.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "Abc"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "Abc"
     ["replace_every_ci_l()"]=>
     string(4) "r1bc"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(4) "r1bc"
   }
   ["tr_TR.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "Abc"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "Abc"
     ["replace_every_ci_l()"]=>
+    string(4) "r1bc"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(4) "r1bc"
   }
 }
@@ -79,30 +91,36 @@ dict(5) {
     string(2) "r1"
   }
   ["C"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(6) "r1bbr1"
     ["replace_every_nonrecursive_l()"]=>
     string(6) "r1bbr1"
     ["replace_every_ci_l()"]=>
+    string(6) "r1bbr1"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(6) "r1bbr1"
   }
   ["en_US.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(6) "r1bbr1"
     ["replace_every_nonrecursive_l()"]=>
     string(6) "r1bbr1"
     ["replace_every_ci_l()"]=>
+    string(6) "r1bbr1"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(6) "r1bbr1"
   }
   ["tr_TR.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(6) "r1bbr1"
     ["replace_every_nonrecursive_l()"]=>
     string(6) "r1bbr1"
     ["replace_every_ci_l()"]=>
+    string(6) "r1bbr1"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(6) "r1bbr1"
   }
 }
@@ -117,30 +135,36 @@ dict(5) {
     string(2) "r2"
   }
   ["C"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(5) "r1r2c"
     ["replace_every_nonrecursive_l()"]=>
     string(5) "r1r2c"
     ["replace_every_ci_l()"]=>
+    string(5) "r1r2c"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(5) "r1r2c"
   }
   ["en_US.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(5) "r1r2c"
     ["replace_every_nonrecursive_l()"]=>
     string(5) "r1r2c"
     ["replace_every_ci_l()"]=>
+    string(5) "r1r2c"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(5) "r1r2c"
   }
   ["tr_TR.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(5) "r1r2c"
     ["replace_every_nonrecursive_l()"]=>
     string(5) "r1r2c"
     ["replace_every_ci_l()"]=>
+    string(5) "r1r2c"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(5) "r1r2c"
   }
 }
@@ -155,30 +179,36 @@ dict(5) {
     string(2) "r2"
   }
   ["C"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "r1c"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "r1c"
     ["replace_every_ci_l()"]=>
+    string(3) "r1c"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(3) "r1c"
   }
   ["en_US.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "r1c"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "r1c"
     ["replace_every_ci_l()"]=>
+    string(3) "r1c"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(3) "r1c"
   }
   ["tr_TR.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "r1c"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "r1c"
     ["replace_every_ci_l()"]=>
+    string(3) "r1c"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(3) "r1c"
   }
 }
@@ -193,31 +223,37 @@ dict(5) {
     string(2) "r2"
   }
   ["C"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "r2c"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "r1c"
     ["replace_every_ci_l()"]=>
     string(3) "r2c"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(3) "r1c"
   }
   ["en_US.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "r2c"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "r1c"
     ["replace_every_ci_l()"]=>
     string(3) "r2c"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(3) "r1c"
   }
   ["tr_TR.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "r2c"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "r1c"
     ["replace_every_ci_l()"]=>
     string(3) "r2c"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(3) "r1c"
   }
 }
 dict(5) {
@@ -231,31 +267,37 @@ dict(5) {
     string(2) "r2"
   }
   ["C"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(6) "r2bbr2"
     ["replace_every_nonrecursive_l()"]=>
     string(6) "r1bbr1"
     ["replace_every_ci_l()"]=>
     string(6) "r2bbr2"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(6) "r1bbr2"
   }
   ["en_US.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(6) "r2bbr2"
     ["replace_every_nonrecursive_l()"]=>
     string(6) "r1bbr2"
     ["replace_every_ci_l()"]=>
     string(6) "r2bbr2"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(6) "r1bbr2"
   }
   ["tr_TR.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(6) "r2bbr2"
     ["replace_every_nonrecursive_l()"]=>
     string(6) "r1bbr2"
     ["replace_every_ci_l()"]=>
     string(6) "r2bbr2"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(6) "r1bbr2"
   }
 }
 dict(5) {
@@ -269,31 +311,37 @@ dict(5) {
     string(2) "r2"
   }
   ["C"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(6) "R1bbR1"
     ["replace_every_nonrecursive_l()"]=>
     string(6) "R1bbR1"
     ["replace_every_ci_l()"]=>
     string(6) "r2bbr2"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(6) "R1bbR1"
   }
   ["en_US.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(6) "R1bbR1"
     ["replace_every_nonrecursive_l()"]=>
     string(6) "R1bbR1"
     ["replace_every_ci_l()"]=>
     string(6) "r2bbr2"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(6) "R1bbR1"
   }
   ["tr_TR.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(6) "R1bbR1"
     ["replace_every_nonrecursive_l()"]=>
     string(6) "R1bbR1"
     ["replace_every_ci_l()"]=>
     string(6) "r2bbr2"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(6) "R1bbR1"
   }
 }
 dict(5) {
@@ -305,30 +353,36 @@ dict(5) {
     string(1) "r"
   }
   ["C"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "aia"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "aia"
     ["replace_every_ci_l()"]=>
+    string(3) "ara"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(3) "ara"
   }
   ["en_US.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "aia"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "aia"
     ["replace_every_ci_l()"]=>
     string(3) "ara"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(3) "ara"
   }
   ["tr_TR.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "aia"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "aia"
     ["replace_every_ci_l()"]=>
+    string(3) "aia"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(3) "aia"
   }
 }
@@ -341,30 +395,36 @@ dict(5) {
     string(1) "r"
   }
   ["C"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "aia"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "aia"
     ["replace_every_ci_l()"]=>
+    string(3) "aia"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(3) "aia"
   }
   ["en_US.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "aia"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "aia"
     ["replace_every_ci_l()"]=>
+    string(3) "aia"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(3) "aia"
   }
   ["tr_TR.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "aia"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "aia"
     ["replace_every_ci_l()"]=>
+    string(3) "ara"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(3) "ara"
   }
 }
@@ -379,30 +439,36 @@ dict(5) {
     string(2) "r2"
   }
   ["C"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "aia"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "aia"
     ["replace_every_ci_l()"]=>
     string(4) "ar2a"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(4) "ar1a"
   }
   ["en_US.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "aia"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "aia"
     ["replace_every_ci_l()"]=>
     string(4) "ar2a"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(4) "ar1a"
   }
   ["tr_TR.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "aia"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "aia"
     ["replace_every_ci_l()"]=>
+    string(3) "aia"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(3) "aia"
   }
 }
@@ -417,31 +483,37 @@ dict(5) {
     string(2) "r2"
   }
   ["C"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "aia"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "aia"
     ["replace_every_ci_l()"]=>
+    string(3) "aia"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(3) "aia"
   }
   ["en_US.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "aia"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "aia"
     ["replace_every_ci_l()"]=>
     string(3) "aia"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(3) "aia"
   }
   ["tr_TR.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "aia"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "aia"
     ["replace_every_ci_l()"]=>
     string(4) "ar2a"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(4) "ar1a"
   }
 }
 dict(5) {
@@ -455,31 +527,37 @@ dict(5) {
     string(1) "2"
   }
   ["C"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(5) "1b1b1"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "221"
     ["replace_every_ci_l()"]=>
     string(5) "1b1b1"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(3) "221"
   }
   ["en_US.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(5) "1b1b1"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "221"
     ["replace_every_ci_l()"]=>
     string(5) "1b1b1"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(3) "221"
   }
   ["tr_TR.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(5) "1b1b1"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "221"
     ["replace_every_ci_l()"]=>
     string(5) "1b1b1"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(3) "221"
   }
 }
 dict(5) {
@@ -493,30 +571,36 @@ dict(5) {
     string(1) "2"
   }
   ["C"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "112"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "112"
     ["replace_every_ci_l()"]=>
+    string(3) "112"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(3) "112"
   }
   ["en_US.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "112"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "112"
     ["replace_every_ci_l()"]=>
+    string(3) "112"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(3) "112"
   }
   ["tr_TR.UTF-8"]=>
-  dict(3) {
+  dict(4) {
     ["replace_every_l()"]=>
     string(3) "112"
     ["replace_every_nonrecursive_l()"]=>
     string(3) "112"
     ["replace_every_ci_l()"]=>
+    string(3) "112"
+    ["replace_every_nonrecursive_ci_l()"]=>
     string(3) "112"
   }
 }
@@ -527,12 +611,16 @@ Keys and values passed to str_replace*() must be strings
 Keys and values passed to str_replace*() must be strings
 - HH\Lib\_Private\_Str\replace_every_nonrecursive_l
 Keys and values passed to str_replace*() must be strings
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
+Keys and values passed to str_replace*() must be strings
 --- UTF8: abc => 123
 - HH\Lib\_Private\_Str\replace_every_l
 Keys and values passed to str_replace*() must be strings
 - HH\Lib\_Private\_Str\replace_every_ci_l
 Keys and values passed to str_replace*() must be strings
 - HH\Lib\_Private\_Str\replace_every_nonrecursive_l
+Keys and values passed to str_replace*() must be strings
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
 Keys and values passed to str_replace*() must be strings
 --- C: 123 => abc
 - HH\Lib\_Private\_Str\replace_every_l
@@ -541,12 +629,16 @@ Keys and values passed to str_replace*() must be strings
 Keys and values passed to str_replace*() must be strings
 - HH\Lib\_Private\_Str\replace_every_nonrecursive_l
 Keys and values passed to str_replace*() must be strings
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
+Keys and values passed to str_replace*() must be strings
 --- UTF8: 123 => abc
 - HH\Lib\_Private\_Str\replace_every_l
 Keys and values passed to str_replace*() must be strings
 - HH\Lib\_Private\_Str\replace_every_ci_l
 Keys and values passed to str_replace*() must be strings
 - HH\Lib\_Private\_Str\replace_every_nonrecursive_l
+Keys and values passed to str_replace*() must be strings
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
 Keys and values passed to str_replace*() must be strings
 --- C:  => abc
 - HH\Lib\_Private\_Str\replace_every_l
@@ -555,10 +647,14 @@ Keys passed to str_replace*() must be non-empty strings
 Keys passed to str_replace*() must be non-empty strings
 - HH\Lib\_Private\_Str\replace_every_nonrecursive_l
 Keys passed to str_replace*() must be non-empty strings
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
+Keys passed to str_replace*() must be non-empty strings
 --- UTF8:  => abc
 - HH\Lib\_Private\_Str\replace_every_l
 Keys passed to str_replace*() must be non-empty strings
 - HH\Lib\_Private\_Str\replace_every_ci_l
 Keys passed to str_replace*() must be non-empty strings
 - HH\Lib\_Private\_Str\replace_every_nonrecursive_l
+Keys passed to str_replace*() must be non-empty strings
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
 Keys passed to str_replace*() must be non-empty strings

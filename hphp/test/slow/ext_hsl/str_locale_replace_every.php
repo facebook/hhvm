@@ -33,16 +33,19 @@ function main(): void {
         'replace_every_l()' => _Str\replace_every_l($haystack, $replacements, $c),
         'replace_every_nonrecursive_l()' => _Str\replace_every_nonrecursive_l($haystack, $replacements, $c),
         'replace_every_ci_l()' => _Str\replace_every_ci_l($haystack, $replacements, $c),
+        'replace_every_nonrecursive_ci_l()' => _Str\replace_every_nonrecursive_ci_l($haystack, $replacements, $c),
       ],
       'en_US.UTF-8' => dict[
         'replace_every_l()' => _Str\replace_every_l($haystack, $replacements, $en_us_utf8),
         'replace_every_nonrecursive_l()' => _Str\replace_every_nonrecursive_l($haystack, $replacements, $en_us_utf8),
         'replace_every_ci_l()' => _Str\replace_every_ci_l($haystack, $replacements, $en_us_utf8),
+        'replace_every_nonrecursive_ci_l()' => _Str\replace_every_nonrecursive_ci_l($haystack, $replacements, $en_us_utf8),
       ],
       'tr_TR.UTF-8' => dict[
         'replace_every_l()' => _Str\replace_every_l($haystack, $replacements, $tr_tr_utf8),
         'replace_every_nonrecursive_l()' => _Str\replace_every_nonrecursive_l($haystack, $replacements, $tr_tr_utf8),
         'replace_every_ci_l()' => _Str\replace_every_ci_l($haystack, $replacements, $tr_tr_utf8),
+        'replace_every_nonrecursive_ci_l()' => _Str\replace_every_nonrecursive_ci_l($haystack, $replacements, $tr_tr_utf8),
       ],
     ]);
   }
@@ -53,7 +56,12 @@ function main(): void {
     '' => 'abc',
   ];
   $encodings = dict['C' => $c, 'UTF8' => $en_us_utf8];
-  $funcs = vec[_Str\replace_every_l<>, _Str\replace_every_ci_l<>, _Str\replace_every_nonrecursive_l<>];
+  $funcs = vec[
+    _Str\replace_every_l<>,
+    _Str\replace_every_ci_l<>,
+    _Str\replace_every_nonrecursive_l<>,
+    _Str\replace_every_nonrecursive_ci_l<>,
+  ];
   foreach ($inputs as $needle => $replacement) {
     foreach($encodings as $name => $encoding) {
       printf("--- %s: %s => %s\n", $name, $needle, $replacement);

@@ -1446,10 +1446,10 @@ class ReflectionClass implements Reflector {
     return self::getConstantsCache($this->getName());
   }
 
-  <<__Memoize, __Pure>>
+  <<__Memoize>>
   private static function getConstantsCache(
     string $clsname
-  ): darray<string, mixed> {
+  )[]: darray<string, mixed> {
     return self::getOrderedConstants($clsname);
   }
 
@@ -1503,10 +1503,10 @@ class ReflectionClass implements Reflector {
     return $ret;
   }
 
-  <<__Native, __Pure>>
+  <<__Native>>
   private static function getOrderedConstants(
     string $clsname
-  ): darray<string, mixed>;
+  )[]: darray<string, mixed>;
 
   <<__Native>>
   private static function getOrderedAbstractConstants(

@@ -824,7 +824,7 @@ class ReflectionProperty implements Reflector {
    *
    * @return     mixed   The current value of the property.
    */
-  public function getValue($obj = null) {
+  public function getValue($obj = null)[read_globals] {
     if ($this->isStatic()) {
       return hphp_get_static_property(
         $this->class,
@@ -859,7 +859,7 @@ class ReflectionProperty implements Reflector {
    *
    * @return     mixed   No value is returned.
    */
-  public function setValue(mixed ...$args) {
+  public function setValue(mixed ...$args)[globals, write_props] {
     if (!$this->isAccessible()) {
       throw new ReflectionException(
         "Cannot access non-public member " . $this->class .
@@ -939,8 +939,7 @@ class ReflectionProperty implements Reflector {
   <<__Native>>
   public function getTypeText()[]: string;
 
-  <<__Pure, __MaybeMutable>>
-  private function isAccessible() {
+  private function isAccessible()[] {
     return ($this->isPublic() || $this->forceAccessible);
   }
 

@@ -3,7 +3,7 @@ use bstr::BString;
 use naming_special_names_rust::{classes, expression_trees as et, pseudo_functions};
 use oxidized::{
     aast,
-    aast_visitor::{visit, AstParams, Node, NodeMut, Visitor, VisitorMut},
+    aast_visitor::{visit, AstParams, Node, Visitor},
     ast,
     ast::{ClassId, ClassId_, Expr, Expr_, Hint_, Sid, Stmt, Stmt_},
     ast_defs::*,
@@ -57,87 +57,27 @@ use oxidized::{
 /// )
 /// ```
 /// Which is the runtime representation of the Expression Tree
-pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr, (Pos, String)> {
+pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<TF>) -> Result<Expr, (Pos, String)> {
     let visitor_name = hint_name(hint)?;
-
-    // Extract calls to functions and static methods before any
-    // desugaring occurs.
-    let (functions, static_methods) = extract_calls_as_fun_ptrs(&mut e)?;
-
-    let extracted_splices = extract_and_replace_splices(&mut e)?;
-    let splice_count = extracted_splices.len();
-    let function_count = functions.len();
-    let static_method_count = static_methods.len();
     let et_literal_pos = e.1.clone();
+
+    let mut temps = Temporaries {
+        splices: vec![],
+        global_function_pointers: vec![],
+        static_method_pointers: vec![],
+    };
+    let (virtual_expr, desugar_expr) = rewrite_expr(env, &mut temps, e, &visitor_name)?;
+
+    let splice_count = temps.splices.len();
+    let function_count = temps.global_function_pointers.len();
+    let static_method_count = temps.static_method_pointers.len();
 
     let metadata = maketree_metadata(
         &et_literal_pos,
-        &extracted_splices,
-        &functions,
-        &static_methods,
+        &temps.splices,
+        &temps.global_function_pointers,
+        &temps.static_method_pointers,
     );
-
-    // Create assignments of extracted splices
-    // `$0splice0 = spliced_expr0;`
-    let mut splice_assignments: Vec<Stmt> = extracted_splices
-        .into_iter()
-        .enumerate()
-        .map(|(i, expr)| {
-            Stmt::new(
-                expr.1.clone(),
-                Stmt_::Expr(Box::new(Expr::new(
-                    (),
-                    expr.1.clone(),
-                    Expr_::Binop(Box::new((
-                        Bop::Eq(None),
-                        temp_splice_lvar(&expr.1, i),
-                        expr,
-                    ))),
-                ))),
-            )
-        })
-        .collect();
-
-    let function_pointer_assignments: Vec<Stmt> = functions
-        .into_iter()
-        .enumerate()
-        .map(|(i, expr)| {
-            Stmt::new(
-                expr.1.clone(),
-                Stmt_::Expr(Box::new(Expr::new(
-                    (),
-                    expr.1.clone(),
-                    Expr_::Binop(Box::new((
-                        Bop::Eq(None),
-                        temp_function_pointer_lvar(&expr.1, i),
-                        expr,
-                    ))),
-                ))),
-            )
-        })
-        .collect();
-
-    let static_method_assignments: Vec<Stmt> = static_methods
-        .into_iter()
-        .enumerate()
-        .map(|(i, expr)| {
-            Stmt::new(
-                expr.1.clone(),
-                Stmt_::Expr(Box::new(Expr::new(
-                    (),
-                    expr.1.clone(),
-                    Expr_::Binop(Box::new((
-                        Bop::Eq(None),
-                        temp_static_method_lvar(&expr.1, i),
-                        expr,
-                    ))),
-                ))),
-            )
-        })
-        .collect();
-
-
-    let (virtual_expr, desugar_expr) = rewrite_expr(env, e, &visitor_name)?;
 
     // Make anonymous function of smart constructor calls
     let visitor_expr = wrap_return(desugar_expr, &et_literal_pos);
@@ -212,6 +152,21 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
         )
     };
 
+    // Create assignment of the extracted expressions to temporary variables
+    // `$0splice0 = spliced_expr0;`
+    let splice_assignments: Vec<Stmt> = create_temp_statements(temps.splices, temp_splice_lvar);
+    // `$0fp0 = foo<>;`
+    let function_pointer_assignments: Vec<Stmt> =
+        create_temp_statements(temps.global_function_pointers, temp_function_pointer_lvar);
+    // `$0sm0 = Foo::bar<>;`
+    let static_method_assignments: Vec<Stmt> =
+        create_temp_statements(temps.static_method_pointers, temp_static_method_lvar);
+
+    let mut temp_assignments = vec![];
+    temp_assignments.extend(splice_assignments);
+    temp_assignments.extend(function_pointer_assignments);
+    temp_assignments.extend(static_method_assignments);
+
     let make_tree = static_meth_call(
         &visitor_name,
         et::MAKE_TREE,
@@ -219,14 +174,11 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
         &et_literal_pos.clone(),
     );
 
-    splice_assignments.extend(function_pointer_assignments);
-    splice_assignments.extend(static_method_assignments);
-
-    let runtime_expr = if splice_assignments.is_empty() {
+    let runtime_expr = if temp_assignments.is_empty() {
         make_tree
     } else {
         let body = if env.codegen {
-            let mut b = splice_assignments.clone();
+            let mut b = temp_assignments.clone();
             b.push(wrap_return(make_tree, &et_literal_pos));
             b
         } else {
@@ -240,7 +192,7 @@ pub fn desugar<TF>(hint: &aast::Hint, mut e: Expr, env: &Env<TF>) -> Result<Expr
         et_literal_pos,
         Expr_::mk_expression_tree(ast::ExpressionTree {
             hint: hint.clone(),
-            splices: splice_assignments,
+            splices: temp_assignments,
             virtualized_expr,
             runtime_expr,
         }),
@@ -318,6 +270,45 @@ fn only_void_return(lfun_body: &ast::Block) -> bool {
     };
     visit(&mut checker, &mut (), lfun_body).unwrap();
     checker.only_void_return
+}
+
+struct NestedSpliceCheck {
+    has_nested_splice: Option<Pos>,
+}
+
+impl<'ast> Visitor<'ast> for NestedSpliceCheck {
+    type P = AstParams<(), ()>;
+
+    fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+        self
+    }
+
+    fn visit_expr(&mut self, env: &mut (), e: &aast::Expr<(), (), ()>) -> Result<(), ()> {
+        use aast::Expr_::*;
+
+        match &e.2 {
+            ETSplice(_) => {
+                self.has_nested_splice = Some(e.1.clone());
+            }
+            _ if self.has_nested_splice.is_none() => e.recurse(env, self)?,
+            _ => {}
+        }
+        Ok(())
+    }
+}
+
+/// Assumes that the Expr is the expression within a splice.
+/// If the expression has a splice contained within, then we have
+/// nested splices and this will raise an error
+fn check_nested_splice(e: &ast::Expr) -> Result<(), (Pos, String)> {
+    let mut checker = NestedSpliceCheck {
+        has_nested_splice: None,
+    };
+    visit(&mut checker, &mut (), e).unwrap();
+    if let Some(p) = checker.has_nested_splice {
+        return Err((p, "Splice syntax `${...}` cannot be nested.".into()));
+    }
+    Ok(())
 }
 
 fn null_literal(pos: Pos) -> Expr {
@@ -455,156 +446,21 @@ fn merge_positions(positions: &[&Pos]) -> Pos {
         .unwrap_or(Pos::make_none())
 }
 
-/// Replace all the splices in the expression tree with variables, and
-/// return a vec of the splice expressions found.
-///
-/// ```
-/// $c = Code`${$x->foo()} + ${$y};
-/// $c_after = Code`$0splice0 + $0splice1`;
-/// ```
-///
-/// Returns an error if users have nested splices.
-fn extract_and_replace_splices(e: &mut Expr) -> Result<Vec<Expr>, (Pos, String)> {
-    let mut visitor = SpliceExtractor {
-        extracted_splices: vec![],
-    };
-    let mut in_splice = false;
-    visitor.visit_expr(&mut in_splice, e)?;
-    Ok(visitor.extracted_splices)
-}
-
-struct SpliceExtractor {
-    extracted_splices: Vec<Expr>,
-}
-
-impl<'ast> VisitorMut<'ast> for SpliceExtractor {
-    type P = AstParams<bool, (Pos, String)>;
-
-    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
-        self
-    }
-
-    fn visit_expr(&mut self, in_splice: &mut bool, e: &mut Expr) -> Result<(), (Pos, String)> {
-        use aast::Expr_::*;
-        match &mut e.2 {
-            ETSplice(ref mut ex) => {
-                if *in_splice {
-                    return Err((
-                        e.1.clone(),
-                        "Splice syntax `${...}` cannot be nested.".into(),
-                    ));
-                } else {
-                    // Check for nested splices.
-                    *in_splice = true;
-                    ex.recurse(in_splice, self.object())?;
-                    *in_splice = false;
-
-                    // Extract this expression.
-                    let len = self.extracted_splices.len();
-                    self.extracted_splices.push((**ex).clone());
-                    (*e).2 = ETSplice(Box::new(temp_splice_lvar(&ex.1, len)));
-                }
-            }
-            _ => e.recurse(in_splice, self.object())?,
-        }
-        Ok(())
-    }
-}
-
-/// Find all the calls in expression `e` and return a vec of the
-/// global function pointers and a vec of static method pointers
-/// Replaces those calls with temp variables.
-///
-/// For example, given the expression tree literal:
-///
-///     $et = Code`foo() + Bar::baz()`;
-///
-///     We transform this into
-///
-///     $et = Code`$0fp0() + $0sm0()`;
-///
-/// Our first vec contains foo<> and our second contains Bar::baz<>.
-fn extract_calls_as_fun_ptrs(e: &mut Expr) -> Result<(Vec<Expr>, Vec<Expr>), (Pos, String)> {
-    let mut visitor = CallExtractor {
-        functions: vec![],
-        static_methods: vec![],
-    };
-    visitor.visit_expr(&mut (), e)?;
-
-    Ok((visitor.functions, visitor.static_methods))
-}
-
-struct CallExtractor {
-    functions: Vec<Expr>,
-    static_methods: Vec<Expr>,
-}
-
-impl<'ast> VisitorMut<'ast> for CallExtractor {
-    type P = AstParams<(), (Pos, String)>;
-
-    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
-        self
-    }
-
-    fn visit_expr(&mut self, env: &mut (), e: &mut Expr) -> Result<(), (Pos, String)> {
-        use aast::Expr_::*;
-        match &mut e.2 {
-            // Don't recurse into splices.
-            ETSplice(_) => {
-                return Ok(());
-            }
-
-            Call(ref mut call) => {
-                let (ref mut recv, ref mut targs, ref mut args, ref mut vargo) = **call;
-                recv.accept(env, self.object())?;
-                targs.accept(env, self.object())?;
-                args.accept(env, self.object())?;
-                vargo.accept(env, self.object())?;
-                match &recv.2 {
-                    Id(sid) if is_typechecker_fun_name(&sid.1) => e.recurse(env, self.object())?,
-                    Id(sid) => {
-                        let len = self.functions.len();
-                        self.functions.push(global_func_ptr(&sid));
-                        (*e).2 = Call(Box::new((
-                            temp_function_pointer_lvar(&recv.1, len),
-                            std::mem::take(targs),
-                            std::mem::take(args),
-                            std::mem::take(vargo),
-                        )));
-                    }
-                    ClassConst(cc) => {
-                        let (ref cid, ref s) = **cc;
-                        if let ClassId_::CIexpr(Expr(_, _, Id(sid))) = &cid.2 {
-                            if sid.1 == classes::PARENT
-                                || sid.1 == classes::SELF
-                                || sid.1 == classes::STATIC
-                            {
-                                return Err((
-                                    e.1.clone(),
-                                    "Static method calls in expression trees require explicit class names.".into(),
-                                ));
-                            }
-                        } else {
-                            return Err((
-                                e.1.clone(),
-                                "Expression trees only support function calls and static method calls on named classes.".into()));
-                        };
-                        let len = self.static_methods.len();
-                        self.static_methods.push(static_meth_ptr(&recv.1, cid, s));
-                        (*e).2 = Call(Box::new((
-                            temp_static_method_lvar(&recv.1, len),
-                            std::mem::take(targs),
-                            std::mem::take(args),
-                            std::mem::take(vargo),
-                        )));
-                    }
-                    _ => e.recurse(env, self.object())?,
-                }
-            }
-            _ => e.recurse(env, self.object())?,
-        };
-        Ok(())
-    }
+fn create_temp_statements(exprs: Vec<Expr>, mk_lvar: fn(&Pos, usize) -> Expr) -> Vec<Stmt> {
+    exprs
+        .into_iter()
+        .enumerate()
+        .map(|(i, expr)| {
+            Stmt::new(
+                expr.1.clone(),
+                Stmt_::Expr(Box::new(Expr::new(
+                    (),
+                    expr.1.clone(),
+                    Expr_::Binop(Box::new((Bop::Eq(None), mk_lvar(&expr.1, i), expr))),
+                ))),
+            )
+        })
+        .collect()
 }
 
 fn temp_lvar_string(name: &str, num: usize) -> String {
@@ -694,10 +550,19 @@ fn boolify(receiver: Expr) -> Expr {
     meth_call(receiver, "__bool", vec![], &pos)
 }
 
+struct Temporaries {
+    splices: Vec<Expr>,
+    global_function_pointers: Vec<Expr>,
+    static_method_pointers: Vec<Expr>,
+}
+
 /// Performs both the virtualization and the desugaring in tandem
-/// Assumes that splices have been extracted and replaced by temporaries
+/// Also extracts the expressions that need to be assigned to temporaries
+/// Replaces the extracted splices, function pointers, and static method pointers
+/// with temporary variables
 fn rewrite_expr<TF>(
     env: &Env<TF>,
+    temps: &mut Temporaries,
     e: Expr,
     visitor_name: &str,
 ) -> Result<(Expr, Expr), (Pos, String)> {
@@ -776,8 +641,8 @@ fn rewrite_expr<TF>(
         }
         Binop(bop) => {
             let (op, lhs, rhs) = *bop;
-            let (virtual_lhs, desugar_lhs) = rewrite_expr(env, lhs, visitor_name)?;
-            let (virtual_rhs, desugar_rhs) = rewrite_expr(env, rhs, visitor_name)?;
+            let (virtual_lhs, desugar_lhs) = rewrite_expr(env, temps, lhs, visitor_name)?;
+            let (virtual_rhs, desugar_rhs) = rewrite_expr(env, temps, rhs, visitor_name)?;
             if op == Bop::Eq(None) {
                 // Source: MyDsl`$x = ...`
                 // Virtualized: $x = ...
@@ -869,7 +734,8 @@ fn rewrite_expr<TF>(
         // Desugared: $0v->visitUnop(new ExprPos(...), ..., '__exclamationMark')
         Unop(unop) => {
             let (op, operand) = *unop;
-            let (virtual_operand, desugar_operand) = rewrite_expr(env, operand, visitor_name)?;
+            let (virtual_operand, desugar_operand) =
+                rewrite_expr(env, temps, operand, visitor_name)?;
             let op_str = match op {
                 // Allow boolean not operator !$x
                 Uop::Unot => "__exclamationMark",
@@ -921,16 +787,16 @@ fn rewrite_expr<TF>(
         // Desugared: $0v->visitTernary(new ExprPos(...), ..., ..., ...)
         Eif(eif) => {
             let (e1, e2o, e3) = *eif;
-            let (virtual_e1, desugar_e1) = rewrite_expr(env, e1, visitor_name)?;
+            let (virtual_e1, desugar_e1) = rewrite_expr(env, temps, e1, visitor_name)?;
             let (virtual_e2, desugar_e2) = if let Some(e2) = e2o {
-                rewrite_expr(env, e2, visitor_name)?
+                rewrite_expr(env, temps, e2, visitor_name)?
             } else {
                 return Err((
                     pos,
                     "Unsupport expression tree syntax: Elvis operator".into(),
                 ));
             };
-            let (virtual_e3, desugar_e3) = rewrite_expr(env, e3, visitor_name)?;
+            let (virtual_e3, desugar_e3) = rewrite_expr(env, temps, e3, visitor_name)?;
 
             let desugar_expr = v_meth_call(
                 et::VISIT_TERNARY,
@@ -978,53 +844,101 @@ fn rewrite_expr<TF>(
                 _ => {}
             }
 
-            let (virtual_args, desugar_args) = rewrite_exprs(env, args, visitor_name)?;
+            let (virtual_args, desugar_args) = rewrite_exprs(env, temps, args, visitor_name)?;
 
             match recv.2 {
                 // Source: MyDsl`foo()`
-                // We have extracted out the function pointer to top a level temp $0fpXX = foo<>;
                 // Virtualized: MyDsl::symbolType($0fpXX)()
                 // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitGlobalFunction(new ExprPos(...), $0fpXX), vec[])
-                Lvar(ref lid) if lid.1.1.starts_with("$0fp") => {
-                    let callee =
-                        static_meth_call(visitor_name, et::SYMBOL_TYPE, vec![recv.clone()], &pos);
+                Id(sid) => {
+                    let len = temps.global_function_pointers.len();
+                    temps.global_function_pointers.push(global_func_ptr(&sid));
+                    let temp_variable = temp_function_pointer_lvar(&recv.1, len);
 
-                    let desugar_recv = v_meth_call(
-                        et::VISIT_GLOBAL_FUNCTION,
-                        vec![pos_expr.clone(), recv],
-                        &pos,
-                    );
                     let desugar_expr = v_meth_call(
                         et::VISIT_CALL,
-                        vec![pos_expr, desugar_recv, vec_literal(desugar_args)],
+                        vec![
+                            pos_expr.clone(),
+                            v_meth_call(
+                                et::VISIT_GLOBAL_FUNCTION,
+                                vec![pos_expr, temp_variable.clone()],
+                                &pos,
+                            ),
+                            vec_literal(desugar_args),
+                        ],
                         &pos,
                     );
                     let virtual_expr = Expr(
                         (),
-                        pos,
-                        Call(Box::new((callee, vec![], virtual_args, None))),
+                        pos.clone(),
+                        Call(Box::new((
+                            static_meth_call(
+                                visitor_name,
+                                et::SYMBOL_TYPE,
+                                vec![temp_variable],
+                                &pos,
+                            ),
+                            vec![],
+                            virtual_args,
+                            None,
+                        ))),
                     );
                     (virtual_expr, desugar_expr)
                 }
                 // Source: MyDsl`Foo::bar()`
-                // We have extracted out the function pointer to top a level temp $0smXX = foo<>;
                 // Virtualized: MyDsl::symbolType($0smXX)()
                 // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitStaticMethod(new ExprPos(...), $0smXX, vec[])
-                Lvar(ref lid) if lid.1.1.starts_with("$0sm") => {
-                    let callee =
-                        static_meth_call(visitor_name, et::SYMBOL_TYPE, vec![recv.clone()], &pos);
+                ClassConst(cc) => {
+                    let (cid, s) = *cc;
+                    if let ClassId_::CIexpr(Expr(_, _, Id(sid))) = &cid.2 {
+                        if sid.1 == classes::PARENT
+                            || sid.1 == classes::SELF
+                            || sid.1 == classes::STATIC
+                        {
+                            return Err((
+                                pos,
+                                "Static method calls in expression trees require explicit class names.".into(),
+                            ));
+                        }
+                    } else {
+                        return Err((
+                            pos,
+                            "Expression trees only support function calls and static method calls on named classes.".into()));
+                    };
 
-                    let desugar_recv =
-                        v_meth_call(et::VISIT_STATIC_METHOD, vec![pos_expr.clone(), recv], &pos);
+                    let len = temps.static_method_pointers.len();
+                    temps
+                        .static_method_pointers
+                        .push(static_meth_ptr(&recv.1, &cid, &s));
+                    let temp_variable = temp_static_method_lvar(&recv.1, len);
+
                     let desugar_expr = v_meth_call(
                         et::VISIT_CALL,
-                        vec![pos_expr, desugar_recv, vec_literal(desugar_args)],
+                        vec![
+                            pos_expr.clone(),
+                            v_meth_call(
+                                et::VISIT_STATIC_METHOD,
+                                vec![pos_expr, temp_variable.clone()],
+                                &pos,
+                            ),
+                            vec_literal(desugar_args),
+                        ],
                         &pos,
                     );
                     let virtual_expr = Expr(
                         (),
-                        pos,
-                        Call(Box::new((callee, vec![], virtual_args, None))),
+                        pos.clone(),
+                        Call(Box::new((
+                            static_meth_call(
+                                visitor_name,
+                                et::SYMBOL_TYPE,
+                                vec![temp_variable],
+                                &pos,
+                            ),
+                            vec![],
+                            virtual_args,
+                            None,
+                        ))),
                     );
                     (virtual_expr, desugar_expr)
                 }
@@ -1036,7 +950,7 @@ fn rewrite_expr<TF>(
                 }
                 _ => {
                     let (virtual_recv, desugar_recv) =
-                        rewrite_expr(env, Expr((), recv.1, recv.2), visitor_name)?;
+                        rewrite_expr(env, temps, Expr((), recv.1, recv.2), visitor_name)?;
                     let desugar_expr = v_meth_call(
                         et::VISIT_CALL,
                         vec![pos_expr, desugar_recv, vec_literal(desugar_args)],
@@ -1073,7 +987,8 @@ fn rewrite_expr<TF>(
 
             let should_append_return = only_void_return(&body);
 
-            let (mut virtual_body_stmts, desugar_body) = rewrite_stmts(env, body, visitor_name)?;
+            let (mut virtual_body_stmts, desugar_body) =
+                rewrite_stmts(env, temps, body, visitor_name)?;
 
             if should_append_return {
                 virtual_body_stmts.push(Stmt(
@@ -1104,15 +1019,18 @@ fn rewrite_expr<TF>(
         // Virtualized to `${ ... }`
         // Desugared to `$0v->splice(new ExprPos(...), '$var_name', ...)`
         ETSplice(e) => {
-            // Assumes extract and replace has already occurred
-            let s = if let Lvar(lid) = &e.2 {
-                let aast::Lid(p, (_, lid)) = &**lid;
-                string_literal(p.clone(), lid)
-            } else {
-                return Err((pos, "Please report a bug".into()));
-            };
-            let desugar_expr = v_meth_call(et::SPLICE, vec![pos_expr, s, *e.clone()], &pos);
-            let virtual_expr = Expr((), pos, ETSplice(e));
+            check_nested_splice(&e)?;
+            let len = temps.splices.len();
+            let expr_pos = e.1.clone();
+            temps.splices.push(*e);
+            let temp_variable = temp_splice_lvar(&expr_pos, len);
+            let temp_variable_string = string_literal(expr_pos, &temp_splice_lvar_string(len));
+            let desugar_expr = v_meth_call(
+                et::SPLICE,
+                vec![pos_expr, temp_variable_string, temp_variable.clone()],
+                &pos,
+            );
+            let virtual_expr = Expr((), pos, ETSplice(Box::new(temp_variable)));
             (virtual_expr, desugar_expr)
         }
         ObjGet(og) => {
@@ -1123,7 +1041,7 @@ fn rewrite_expr<TF>(
                     "Expression Trees do not support nullsafe property access".into(),
                 ));
             }
-            let (virtual_e1, desugar_e1) = rewrite_expr(env, e1, visitor_name)?;
+            let (virtual_e1, desugar_e1) = rewrite_expr(env, temps, e1, visitor_name)?;
             let id = if let Id(id) = &e2.2 {
                 string_literal(id.0.clone(), &id.1)
             } else {
@@ -1156,13 +1074,14 @@ fn rewrite_expr<TF>(
 
 fn rewrite_exprs<TF>(
     env: &Env<TF>,
+    temps: &mut Temporaries,
     exprs: Vec<Expr>,
     visitor_name: &str,
 ) -> Result<(Vec<Expr>, Vec<Expr>), (Pos, String)> {
     let mut virtual_results = Vec::with_capacity(exprs.len());
     let mut desugar_results = Vec::with_capacity(exprs.len());
     for expr in exprs {
-        let (virtual_expr, desugar_expr) = rewrite_expr(env, expr, visitor_name)?;
+        let (virtual_expr, desugar_expr) = rewrite_expr(env, temps, expr, visitor_name)?;
         virtual_results.push(virtual_expr);
         desugar_results.push(desugar_expr);
     }
@@ -1171,13 +1090,14 @@ fn rewrite_exprs<TF>(
 
 fn rewrite_stmts<TF>(
     env: &Env<TF>,
+    temps: &mut Temporaries,
     stmts: Vec<Stmt>,
     visitor_name: &str,
 ) -> Result<(Vec<Stmt>, Vec<Expr>), (Pos, String)> {
     let mut virtual_results = Vec::with_capacity(stmts.len());
     let mut desugar_results = Vec::with_capacity(stmts.len());
     for stmt in stmts {
-        let (virtual_stmt, desugared_expr) = rewrite_stmt(env, stmt, visitor_name)?;
+        let (virtual_stmt, desugared_expr) = rewrite_stmt(env, temps, stmt, visitor_name)?;
         virtual_results.push(virtual_stmt);
         if let Some(desugared_expr) = desugared_expr {
             desugar_results.push(desugared_expr);
@@ -1188,6 +1108,7 @@ fn rewrite_stmts<TF>(
 
 fn rewrite_stmt<TF>(
     env: &Env<TF>,
+    temps: &mut Temporaries,
     s: Stmt,
     visitor_name: &str,
 ) -> Result<(Stmt, Option<Expr>), (Pos, String)> {
@@ -1198,7 +1119,7 @@ fn rewrite_stmt<TF>(
 
     let virtual_desugar = match stmt_ {
         Expr(e) => {
-            let (virtual_expr, desugar_expr) = rewrite_expr(env, *e, visitor_name)?;
+            let (virtual_expr, desugar_expr) = rewrite_expr(env, temps, *e, visitor_name)?;
             (Stmt(pos, Expr(Box::new(virtual_expr))), Some(desugar_expr))
         }
         Return(e) => match *e {
@@ -1206,7 +1127,7 @@ fn rewrite_stmt<TF>(
             // Virtualized: return ...;
             // Desugared: $0v->visitReturn(new ExprPos(...), $0v->...)
             Some(e) => {
-                let (virtual_expr, desugar_expr) = rewrite_expr(env, e, visitor_name)?;
+                let (virtual_expr, desugar_expr) = rewrite_expr(env, temps, e, visitor_name)?;
                 let desugar_expr =
                     v_meth_call(et::VISIT_RETURN, vec![pos_expr, desugar_expr], &pos);
                 let virtual_stmt = Stmt(pos, Return(Box::new(Some(virtual_expr))));
@@ -1232,9 +1153,11 @@ fn rewrite_stmt<TF>(
         // Desugared: $0v->visitIf(new ExprPos(...), $0v->..., vec[...], vec[...])
         If(if_stmt) => {
             let (cond_expr, then_block, else_block) = *if_stmt;
-            let (virtual_cond, desugar_cond) = rewrite_expr(env, cond_expr, visitor_name)?;
-            let (virtual_then_stmts, desugar_then) = rewrite_stmts(env, then_block, visitor_name)?;
-            let (virtual_else_stmts, desugar_else) = rewrite_stmts(env, else_block, visitor_name)?;
+            let (virtual_cond, desugar_cond) = rewrite_expr(env, temps, cond_expr, visitor_name)?;
+            let (virtual_then_stmts, desugar_then) =
+                rewrite_stmts(env, temps, then_block, visitor_name)?;
+            let (virtual_else_stmts, desugar_else) =
+                rewrite_stmts(env, temps, else_block, visitor_name)?;
 
             let desugar_expr = v_meth_call(
                 et::VISIT_IF,
@@ -1261,8 +1184,8 @@ fn rewrite_stmt<TF>(
         // Desugared: $0v->visitWhile(new ExprPos(...), $0v->..., vec[...])
         While(w) => {
             let (cond, body) = *w;
-            let (virtual_cond, desugar_cond) = rewrite_expr(env, cond, visitor_name)?;
-            let (virtual_body_stmts, desugar_body) = rewrite_stmts(env, body, visitor_name)?;
+            let (virtual_cond, desugar_cond) = rewrite_expr(env, temps, cond, visitor_name)?;
+            let (virtual_body_stmts, desugar_body) = rewrite_stmts(env, temps, body, visitor_name)?;
 
             let desugar_expr = v_meth_call(
                 et::VISIT_WHILE,
@@ -1280,16 +1203,19 @@ fn rewrite_stmt<TF>(
         // Desugared: $0v->visitFor(new ExprPos(...), vec[...], ..., vec[...], vec[...])
         For(w) => {
             let (init, cond, incr, body) = *w;
-            let (virtual_init_exprs, desugar_init_exprs) = rewrite_exprs(env, init, visitor_name)?;
+            let (virtual_init_exprs, desugar_init_exprs) =
+                rewrite_exprs(env, temps, init, visitor_name)?;
             let (virtual_cond_option, desugar_cond_expr) = match cond {
                 Some(cond) => {
-                    let (virtual_cond, desugar_cond) = rewrite_expr(env, cond, visitor_name)?;
+                    let (virtual_cond, desugar_cond) =
+                        rewrite_expr(env, temps, cond, visitor_name)?;
                     (Some(boolify(virtual_cond)), desugar_cond)
                 }
                 None => (None, null_literal(pos.clone())),
             };
-            let (virtual_incr_exprs, desugar_incr_exprs) = rewrite_exprs(env, incr, visitor_name)?;
-            let (virtual_body_stmts, desugar_body) = rewrite_stmts(env, body, visitor_name)?;
+            let (virtual_incr_exprs, desugar_incr_exprs) =
+                rewrite_exprs(env, temps, incr, visitor_name)?;
+            let (virtual_body_stmts, desugar_body) = rewrite_stmts(env, temps, body, visitor_name)?;
 
             let desugar_expr = v_meth_call(
                 et::VISIT_FOR,

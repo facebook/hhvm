@@ -441,6 +441,7 @@ private:
   void uninitStack();
   void trackInlineCall(const IRInstruction* inst);
   void trackInlineReturn();
+  void trackCall();
 
   /*
    * Per-block state helpers.

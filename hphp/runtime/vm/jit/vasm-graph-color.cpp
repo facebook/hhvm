@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-info.h"
@@ -251,11 +250,6 @@ struct State {
                 std::pair<Optional<int64_t>, bool>>
   physRecoverableCache;
 
-  // Cached information about the memory locations written to in a
-  // particular block. This vector is resized on first use and the
-  // per-block information is calculated on demand.
-  jit::vector<Optional<AliasClass>> memWrites;
-
   // Loop information. A loop is represented by its header block.
   jit::fast_map<Vlabel, LoopInfo> loopInfo;
   // Map of block to the inner-most loop it belongs to. Blocks not contained
@@ -420,7 +414,6 @@ std::string show(const State& state) {
     "RPO:                  {}\n"
     "Spill Colors:         {}\n"
     "Phys Changed:         {}\n"
-    "Mem-Writes:\n{}"
     "Reg Info:\n{}"
     "Live In:\n{}"
     "Live Out:\n{}"
@@ -453,18 +446,6 @@ std::string show(const State& state) {
       );
     }(),
     show(state.physChanged),
-    [&] () -> std::string {
-      if (state.memWrites.empty()) return "";
-      std::string str;
-      for (auto const b : state.rpo) {
-        if (b >= state.memWrites.size() || !state.memWrites[b]) continue;
-        str += folly::sformat(
-          "  {:5} -> {}\n",
-          b, show(*state.memWrites[b])
-        );
-      }
-      return str;
-     }(),
     [&]{
       std::string str;
       for (size_t i = 0; i < state.regInfo.size(); ++i) {
@@ -2793,22 +2774,6 @@ bool compare_remat_insts(const Vunit& unit,
   return true;
 }
 
-// Emit an instruction for a reload or rematerialization, setting the
-// appropriate origin. For normal reload instruction, we use the
-// current origin in the Vout. For rematerialization instructions we
-// want to preserve the origin of the remat instruction (this is
-// important to keep memory effects correct).
-void emit_reload(Vout& v, const Vinstr& inst) {
-  if (inst.op == Vinstr::reload) {
-    v << inst;
-    return;
-  }
-  auto const old = v.getOrigin();
-  v.setOrigin(inst.origin);
-  v << inst;
-  v.setOrigin(old);
-}
-
 // The result of a defining instruction for rematerialization lookup:
 struct RematLookup {
   // The defining instruction. Might be reload if no single one can be
@@ -3082,17 +3047,6 @@ RematLookup find_defining_inst_for_remat(State& state,
   }
 }
 
-// Is this instruction a (simple) memory read?
-bool is_mem_read(const Vinstr& inst) {
-  // We're looking for instructions which read from memory and nothing
-  // else.
-  return
-    !isPure(inst) &&
-    !isCall(inst) &&
-    touchesMemory(inst.op) &&
-    !writesMemory(inst.op);
-}
-
 // Similar to find_defining_inst_for_remat, but first checks if a
 // cached entry for the Vreg exists. If not, it will call
 // find_defining_inst_for_remat to obtain one, then cache it and
@@ -3141,25 +3095,10 @@ RematLookup find_defining_inst_for_remat_cached(State& state,
   // Entirely mutually recursive:
   if (result.inst.op == Vinstr::nop) return cache(nop{}, true, b);
 
-  // Is this instruction at least possibly rematerializable?
+  // Can't rematerialize instructions which aren't pure, define more
+  // than one Vreg, or define any physical registers.
   auto const acceptable = [&] {
-    if (!isPure(result.inst)) {
-      // Most non-pure instructions cannot be rematerialized. The
-      // exception are "simple" mem reads which have the appropriate
-      // associated memory effects.
-      if (!is_mem_read(result.inst)) return false;
-      // If there's no origin, we can't calculate memory effects and
-      // must be conservative.
-      if (!result.inst.origin) return false;
-      // We can only (possibly) rematerialize loads which are pure and
-      // read from a single (abstract) location. Anything more
-      // complicated is beyond our abilities to track safely.
-      auto const effects = memory_effects(*result.inst.origin);
-      auto const load = boost::get<PureLoad>(&effects);
-      if (!load || !load->src.isSingleLocation()) return false;
-    }
-    // Can't rematerialization instructions which define any physical
-    // registers or define more than one Vreg.
+    if (!isPure(result.inst)) return false;
     if (!phys_defs_set_cached(state, result.inst).empty()) return false;
     if (defs_set_cached(state, result.inst).size() != 1) return false;
     return true;
@@ -3216,9 +3155,9 @@ bool is_simple_vptr(const Vptr& ptr) {
 // inverse of that change. Return std::nullopt if the register is
 // changed in an unpredictable way.
 Optional<int64_t> tracked_physical_register_change(const State& state,
-                                                   PhysReg r,
-                                                   const Vinstr& inst,
-                                                   Vlabel b) {
+                                                          PhysReg r,
+                                                          const Vinstr& inst,
+                                                          Vlabel b) {
   auto const& unit = state.unit;
 
   // Right now we only support "simple" leas and copyish instructions
@@ -3565,9 +3504,9 @@ PhysRecoverableResult physical_register_is_recoverable(
 // return that. Note that this will return an offset of zero if the
 // instruction uses no physical registers.
 Optional<int64_t> used_physical_registers_recoverable(State& state,
-                                                      RematInfo& remat,
-                                                      Vlabel b,
-                                                      size_t instIdx) {
+                                                             RematInfo& remat,
+                                                             Vlabel b,
+                                                             size_t instIdx) {
   // Remove any physical registers which are not modified anywhere in
   // the unit.  There's no need to check those.
   auto const physUses =
@@ -3645,56 +3584,6 @@ bool can_merge_disps(int64_t disp1, int64_t disp2) {
   }
 }
 
-namespace detail {
-
-// Attempt to add an offset to an instruction's Vptr
-struct VptrVisitor {
-  explicit VptrVisitor(int64_t offset) : offset{offset} {}
-
-  template<typename T> void imm(const T&) {}
-  template<typename T> void across(const T&) {}
-  template<typename T> void def(const T&) {}
-  template<typename T, typename H> void defHint(const T&, const H&) {}
-
-  template<typename T, typename H>
-  void useHint(const T& t, const H&) { use(t); }
-
-  template<typename T>
-  typename std::enable_if<
-    std::is_same<Vreg,T>::value ||
-    std::is_same<Vreg8,T>::value ||
-    std::is_same<Vreg16,T>::value ||
-    std::is_same<Vreg32,T>::value ||
-    std::is_same<Vreg64,T>::value ||
-    std::is_same<Vreg128,T>::value ||
-    std::is_same<VregSF,T>::value ||
-    std::is_same<VregDbl,T>::value
-  >::type use(T) {}
-  void use(RegSet) {}
-  void use(VcallArgsId) {}
-  void use(Vtuple) {}
-
-  void use(Vptr& ptr) {
-    // We only want to modify one Vptr. If an instruction has more
-    // than one, it's something odd and we don't want to touch it.
-    if (count > 0) {
-      success = false;
-      return;
-    }
-    ++count;
-    if (!is_simple_vptr(ptr)) return;
-    if (!can_merge_disps(ptr.disp, offset)) return;
-    ptr.disp += offset;
-    success = true;
-  }
-
-  int64_t offset;
-  size_t count = 0;
-  bool success = false;
-};
-
-}
-
 // Attempt to fold the given offset into the given instruction,
 // returning true if successful (with the instruction modified). If
 // false, the instruction is not modified.
@@ -3702,7 +3591,15 @@ bool fold_offset_into_instr(Vinstr& instr, int64_t offset) {
   // A zero offset requires no changes, so always succeeds
   if (offset == 0) return true;
 
-  if (instr.op == Vinstr::copy) {
+  if (instr.op == Vinstr::lea) {
+    // leas can just have their displacement adjusted (if the lea is
+    // simple).
+    auto& i = instr.lea_;
+    if (!is_simple_vptr(i.s)) return false;
+    if (!can_merge_disps(i.s.disp, offset)) return false;
+    i.s.disp += offset;
+    return true;
+  } else if (instr.op == Vinstr::copy) {
     // copys can be turned into leas with the offset as the
     // displacement
     if (!can_merge_disps(0, offset)) return false;
@@ -3715,299 +3612,8 @@ bool fold_offset_into_instr(Vinstr& instr, int64_t offset) {
     instr.lea_.d = dst;
     return true;
   } else {
-    detail::VptrVisitor visitor{offset};
-    visitOperands(instr, visitor);
-    return visitor.success;
+    return false;
   }
-}
-
-// Calculate the abstract memory locations that the given instruction
-// may write to. We don't have memory effects on the vasm level, so we
-// use the HHIR ones. We get the origin HHIR instruction corresponding
-// to the vasm instruction, and get the memory effects of that. This
-// is necessarily an overly conservative estimate, but it's better
-// than nothing.
-//
-// Note: this means that we need to keep the origin field properly up
-// to date!
-AliasClass mem_writes_for_inst(const Vinstr& inst) {
-  if (!inst.origin) {
-    // The instruction has no origin, so we have no way to get any
-    // memory effects for it. If the vasm instruction writes to
-    // memory, we act conservatively and assume it can write to
-    // anything (this covers most cases). The exception are the
-    // inlinestart and inlineend instructions, which don't actually do
-    // anything, but mark the transition of stack slots to locals. We
-    // treat these pessimistically as well.
-    if (inst.op == Vinstr::inlinestart ||
-        inst.op == Vinstr::inlineend ||
-        writesMemory(inst.op)) {
-      return AUnknown;
-    }
-    return AEmpty;
-  }
-  // Get the memory effects and use to calculate an aggregated set of
-  // locations that may be written to (for our purposes, killed is
-  // treated as a write).
-  auto const effects = memory_effects(*inst.origin);
-  return match<AliasClass>(
-    effects,
-    [] (const GeneralEffects& e)  { return e.stores | e.kills; },
-    [] (const PureLoad&)          { return AEmpty; },
-    [] (const PureStore& a)       { return a.dst; },
-    [] (const PureInlineCall& a)  { return a.base; },
-    [] (const PureInlineReturn&)  { return AEmpty; },
-    [] (const CallEffects& e)     {
-      return e.kills | e.actrec | e.outputs | AHeapAny | ARdsAny;
-    },
-    [] (const ReturnEffects& e)   { return e.kills; },
-    [] (const ExitEffects& e)     { return e.kills; },
-    [] (const IrrelevantEffects&) { return AEmpty; },
-    [] (const UnknownEffects&)    { return AUnknown; }
-  );
-}
-
-// Aggregate all of the abstract locations that may be written to
-// within a block.
-AliasClass mem_writes_for_block(State& state, Vlabel b) {
-  // If we've already calculated for this block, just return it.
-  if (b < state.memWrites.size()) {
-    if (state.memWrites[b]) return *state.memWrites[b];
-  }
-
-  // Otherwise calculate it by unioning together everything in the
-  // block
-  auto writes = AEmpty;
-  for (auto const& inst : state.unit.blocks[b].code) {
-    writes |= mem_writes_for_inst(inst);
-  }
-
-  // And save it in the cache
-  if (b >= state.memWrites.size()) {
-    state.memWrites.resize(state.unit.blocks.size());
-  }
-  state.memWrites[b] = writes;
-  return writes;
-}
-
-// Implementation of mem_read_available. This walks backwards through
-// the unit from the starting point (following copy/spill/reload
-// chains) until it either (1) finds the original memory load, or (2)
-// finds a write which conflicts with the load's abstract location. If
-// we find no such write on any path before finding the load, this
-// means the original value is still present in the original location,
-// and the load can be safely re-performed. We keep a set of already
-// processed labels to avoid infinite recursion.
-bool mem_read_available_recurse(State& state,
-                                Vlabel b,
-                                size_t instIdx,
-                                const AliasClass& load,
-                                Vreg r,
-                                jit::fast_set<Vlabel>& processing) {
-  assertx(!r.isPhys());
-  assertx(instIdx <= state.unit.blocks[b].code.size());
-
-  // We only modify the processing set for blocks which have multiple
-  // successors, since we'll have to pass through one in any loop.
-  if (instIdx == state.unit.blocks[b].code.size() &&
-      succs(state.unit.blocks[b]).size() > 1) {
-    if (!processing.emplace(b).second) return true;
-  }
-
-  while (true) {
-    assertx(!r.isPhys());
-
-    while (state.liveIn[b][r]) {
-      // The current Vreg is live-in to this block, which means it is
-      // not def'ed here. We only need to check this block for
-      // conflicting writes.
-      auto& block = state.unit.blocks[b];
-
-      // Check if any the aggregated writes in this block interfer
-      // with the load. If they do, do a per-instruction check. This
-      // is for two reasons. The first is that unioning together the
-      // locations can sometimes create larger than desired
-      // unions. The second is that we might only be processing *some*
-      // of this block (if instIdx is not at the end), so the
-      // per-block writes is an over-estimate.
-      if (mem_writes_for_block(state, b).maybe(load)) {
-        for (size_t i = 0; i < instIdx; ++i) {
-          auto const& inst = block.code[i];
-          if (mem_writes_for_inst(inst).maybe(load)) return false;
-        }
-      }
-
-      // No conflicts. This block is clean. Recurse into any
-      // predecessors. If there's only one predecessor, we can just
-      // loop.
-      auto const& preds = state.preds[b];
-      assertx(!preds.empty());
-
-      if (preds.size() > 1) {
-        for (auto const pred : preds) {
-          auto const available = mem_read_available_recurse(
-            state,
-            pred,
-            state.unit.blocks[pred].code.size(),
-            load,
-            r,
-            processing
-          );
-          if (!available) return false;
-        }
-        return true;
-      }
-
-      b = preds[0];
-      instIdx = state.unit.blocks[b].code.size();
-
-      if (succs(state.unit.blocks[b]).size() > 1) {
-        if (!processing.emplace(b).second) return true;
-      }
-    }
-
-    // The current Vreg has a def in this block. This could either be
-    // the original load, or a copy/spill/reload.
-
-    // We're going to check for per-instruction memory location
-    // conflicts below, but we can skip it if there's no conflicts for
-    // the entire block.
-    auto const checkWrites = mem_writes_for_block(state, b).maybe(load);
-
-    auto& block = state.unit.blocks[b];
-    while (true) {
-      // We shouldn't reach the beginning of the block since we should
-      // hit the def first.
-      always_assert_flog(
-        instIdx > 0,
-        "Cannot find a def for {} in {}",
-        show(r), b
-      );
-      --instIdx;
-      auto& inst = block.code[instIdx];
-
-      // Do a quick check against the cached defs set. If there's no
-      // match, we can move onto the next instruction. Before we do
-      // that, check for write conflicts if we're checking.
-      if (!defs_set_cached(state, inst)[r]) {
-        if (checkWrites && mem_writes_for_inst(inst).maybe(load)) {
-          return false;
-        }
-        continue;
-      }
-
-      // We found our def. These are all copyish, or the original
-      // memory load. For the copyish ones, switch to the new Vreg to
-      // track and repeat the process. We don't need to check for
-      // write conflicts for any of these because none of them write
-      // to memory.
-      switch (inst.op) {
-        case Vinstr::copy:
-          assertx(inst.copy_.d == r);
-          r = inst.copy_.s;
-          break;
-        case Vinstr::reload:
-          assertx(inst.reload_.d == r);
-          r = inst.reload_.s;
-          break;
-        case Vinstr::spill:
-          assertx(inst.spill_.d == r);
-          r = inst.spill_.s;
-          break;
-        case Vinstr::ssaalias:
-          assertx(inst.ssaalias_.d == r);
-          r = inst.ssaalias_.s;
-          break;
-        case Vinstr::copyargs: {
-          auto const& dsts = state.unit.tuples[inst.copyargs_.d];
-          auto const& srcs = state.unit.tuples[inst.copyargs_.s];
-          assertx(srcs.size() == dsts.size());
-          auto DEBUG_ONLY found = false;
-          for (size_t i = 0; i < dsts.size(); ++i) {
-            if (dsts[i] != r) continue;
-            r = srcs[i];
-            if (debug) found = true;
-            break;
-          }
-          assertx(found);
-          break;
-        }
-        case Vinstr::phidef: {
-          assertx(instIdx == 0);
-          auto const& dsts = state.unit.tuples[inst.phidef_.defs];
-          auto const& preds = state.preds[b];
-
-          // Recurse into every predecessor corresponding to the phi
-          // srcs. Once we return, we have our answer.
-          for (size_t i = 0; i < dsts.size(); ++i) {
-            if (dsts[i] != r) continue;
-
-            for (auto const p : preds) {
-              auto const& pred = state.unit.blocks[p];
-              auto const& phijmp = pred.code.back();
-              assertx(phijmp.op == Vinstr::phijmp);
-              auto const s = state.unit.tuples[phijmp.phijmp_.uses][i];
-              auto const available = mem_read_available_recurse(
-                state,
-                p,
-                pred.code.size(),
-                load,
-                s,
-                processing
-              );
-              if (!available) return false;
-            }
-            return true;
-          }
-          always_assert(false);
-        }
-        default:
-          // This should be the original memory load. Do some sanity
-          // checking.
-          assertx(is_mem_read(inst));
-          assertx(inst.origin);
-          if (debug) {
-            auto const DEBUG_ONLY effects = memory_effects(*inst.origin);
-            auto const DEBUG_ONLY otherLoad = boost::get<PureLoad>(&effects);
-            always_assert(otherLoad && otherLoad->src.isSingleLocation());
-            always_assert(load.maybe(otherLoad->src));
-          }
-          return true;
-      }
-
-      // If we reach here, we hit a copyish instruction and updated
-      // our current Vreg. Break out of this loop and into the outer
-      // loop, which will restart the logic.
-      break;
-    }
-  }
-
-  not_reached();
-}
-
-// Return true if the memory read given by the "instr" instruction can
-// be safely rematerialized at the program point given by "b" and
-// "instIdx". The value that was loaded is currently in "r".
-bool mem_read_available(State& state,
-                        Vlabel b,
-                        size_t instIdx,
-                        const Vinstr& instr,
-                        Vreg r) {
-  assertx(is_mem_read(instr));
-  assertx(instr.origin);
-  auto const effects = memory_effects(*instr.origin);
-  auto const pureLoad = boost::get<PureLoad>(&effects);
-  assertx(pureLoad && pureLoad->src.isSingleLocation());
-
-  jit::fast_set<Vlabel> processing;
-  return mem_read_available_recurse(
-    state,
-    b,
-    instIdx,
-    pureLoad->src,
-    r,
-    processing
-  );
 }
 
 // Return an instruction to reload a spilled Vreg src into Vreg dst,
@@ -4017,16 +3623,13 @@ bool mem_read_available(State& state,
 // block and instruction offset. The "inReg" VregSet determines which
 // Vregs are known to be in registers (and thus available) at the
 // current program point. An instruction can only be rematerialized if
-// all of its sources are available in physical registers. The
-// rematerialization logic will consider sufficiently simple memory
-// reads, unless if "allowMemReads" is false.
+// all of its sources are available in physical registers.
 Vinstr reload_with_remat(State& state,
                          Vlabel b,
                          size_t instIdx,
                          const VregSet& inReg,
                          Vreg src,
-                         Vreg dst,
-                         bool allowMemReads = true) {
+                         Vreg dst) {
   assertx(!src.isPhys());
 
   auto remat =
@@ -4044,11 +3647,6 @@ Vinstr reload_with_remat(State& state,
     return reload{src, dst};
   }
 
-  // If we don't want to consider memory reads here, bail out right
-  // away.
-  auto const memRead = is_mem_read(remat.instr);
-  if (memRead && !allowMemReads) return reload{src, dst};
-
   // Check if the physical registers this rematerialization
   // instruction uses (if any) are recoverable. If not, we cannot use
   // it.
@@ -4060,11 +3658,6 @@ Vinstr reload_with_remat(State& state,
   // zero, this will always succeed). If we can't, the instruction
   // cannot be used.
   if (!fold_offset_into_instr(remat.instr, *offset)) return reload{src, dst};
-
-  // If this is a memory read, check if we can safely rematerialize it
-  if (memRead && !mem_read_available(state, b, instIdx, remat.instr, src)) {
-    return reload{src, dst};
-  }
 
   // Change the output of the rematerialized instruction (there should
   // be only one) to the requested Vreg and return it.
@@ -4088,9 +3681,9 @@ Vinstr reload_with_remat(State& state,
 // only. If the rematerialization is trivial, it is returned,
 // std::nullopt otherwise.
 Optional<Vinstr> is_trivial_remat(State& state,
-                                  Vreg r,
-                                  Vlabel b,
-                                  size_t instIdx) {
+                                         Vreg r,
+                                         Vlabel b,
+                                         size_t instIdx) {
   auto remat = find_defining_inst_for_remat_enter(state, r, b, instIdx);
   switch (remat.instr.op) {
     case Vinstr::ldimmq:
@@ -4104,8 +3697,7 @@ Optional<Vinstr> is_trivial_remat(State& state,
       // If we ever have to reload it, it's obviously not trivial.
       return std::nullopt;
     default: {
-      // Memory rematerialization is never trivial
-      if (!isPure(remat.instr)) return std::nullopt;
+      assertx(isPure(remat.instr));
       // If the instruction uses any non-ignored registers, we cannot
       // treat it as trivial, as we do not know if they'll be
       // available or not.
@@ -4308,7 +3900,7 @@ SpillWithRematResult try_immed_spill(I i,
     return {1, true};
   }
   if (useDst) {
-    emit_reload(v, remat);
+    v << remat;
     v << spill{dst, dst};
     return {2, true};
   }
@@ -4358,8 +3950,7 @@ SpillWithRematResult spill_with_remat(State& state,
                                       bool useSrc) {
   // Determine if this Vreg can be rematerialized at this current
   // program point.
-  auto const remat =
-    reload_with_remat(state, b, instIdx, inReg, src, dst, false);
+  auto const remat = reload_with_remat(state, b, instIdx, inReg, src, dst);
 
   // We can't use the spill immediate instructions on non-X86 because
   // they'd have to be lowered (and that has to be done before
@@ -4370,7 +3961,7 @@ SpillWithRematResult spill_with_remat(State& state,
       v << spill{src, dst};
       return {1, false};
     }
-    emit_reload(v, remat);
+    v << remat;
     v << spill{dst, dst};
     return {2, true};
   }
@@ -4413,7 +4004,7 @@ SpillWithRematResult spill_with_remat(State& state,
       // just as a spill destination).
       assertx(isPure(remat));
       if (useDst) {
-        emit_reload(v, remat);
+        v << remat;
         v << spill{dst, dst};
         return {2, true};
       }
@@ -5898,7 +5489,7 @@ size_t process_phijmp_spills(State& state,
             p.second
           );
           if (inst.op != Vinstr::reload) results.rematerialized.add(p.first);
-          emit_reload(v, inst);
+          v << inst;
           ++added;
           // The destination is now available for rematerialization.
           rematAvail.add(p.second);
@@ -6459,7 +6050,7 @@ ProcessCopyResults process_copy_spills(State& state,
             p.second
           );
           if (inst.op != Vinstr::reload) results.rematerialized.add(p.first);
-          emit_reload(v, inst);
+          v << inst;
           ++addedAfter;
           // Anything reloaded is now available for rematerialization.
           rematAvail.add(p.second);
@@ -6524,7 +6115,7 @@ size_t process_unrecordbasenativesp_spills(State& state,
           r
         );
         if (inst.op != Vinstr::reload) results.rematerialized.add(r);
-        emit_reload(v, inst);
+        v << inst;
         ++added;
         rematAvail.add(r);
       }
@@ -6801,7 +6392,7 @@ size_t process_inst_spills(State& state,
           d
         );
         if (inst.op != Vinstr::reload) results.rematerialized.add(d);
-        emit_reload(v, inst);
+        v << inst;
         ++added;
         if (r == d) rematAvail.add(r);
       }
@@ -8137,7 +7728,7 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
               r2
             );
             if (inst.op != Vinstr::reload) results.rematerialized.add(r);
-            emit_reload(v, inst);
+            v << inst;
             availForRemat.add(r2);
           }
 

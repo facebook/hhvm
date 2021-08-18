@@ -96,9 +96,9 @@ ETCH_NAME(_memcpy8):
  * void* memcpy(void* dst, void* src, size_t length);
  */
               ETCH_ALIGN16
-              .globl ETCH_NAME(memcpy)
-              ETCH_TYPE(ETCH_NAME(memcpy), @function)
-ETCH_NAME(memcpy):
+              .globl ETCH_NAME(_hhvm_memcpy)
+              ETCH_TYPE(ETCH_NAME(_hhvm_memcpy), @function)
+ETCH_NAME(_hhvm_memcpy):
               CFI(startproc)
 
               mov   %rdx, %rcx
@@ -246,7 +246,15 @@ ETCH_LABEL(END16):
               ret
 
               CFI(endproc)
-              ETCH_SIZE(memcpy)
+              ETCH_SIZE(_hhvm_memcpy)
+
+// When AVX2 is enabled, we use folly's memcpy instead of _hhvm_memcpy.
+              .globl    memcpy
+#ifdef __AVX2__
+              memcpy = _folly_memcpy
+#else
+              memcpy = _hhvm_memcpy
+#endif
 
               .ident "GCC: (GNU) 4.8.2"
 #ifdef __linux__

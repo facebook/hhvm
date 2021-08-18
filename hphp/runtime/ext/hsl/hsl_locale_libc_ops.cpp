@@ -326,4 +326,9 @@ String HSLLocaleLibcOps::replace_every_ci(const String& haystack,
   return replace_every_impl(HHVM_FN(str_ireplace), haystack, replacements);
 }
 
+String HSLLocaleLibcOps::replace_every_nonrecursive(const String& haystack,
+                                                    const Array& replacements) const {
+  return HHVM_FN(strtr)(haystack, replacements).asCStrRef();
+}
+
 } // namespace HPHP

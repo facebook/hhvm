@@ -68,6 +68,7 @@ namespace HPHP {
 
     virtual String replace_every(const String& haystack, const Array& replacements) const override;
     virtual String replace_every_ci(const String& haystack, const Array& replacements) const override;
+    virtual String replace_every_nonrecursive(const String& haystack, const Array& replacements) const override;
     private:
       icu::Locale m_collate;
       icu::Locale m_ctype;

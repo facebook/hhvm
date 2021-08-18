@@ -49,5 +49,6 @@ function replace_l(string $haystack, string $needle, string $replacement, ?Local
 function replace_ci_l(string $haystack, string $needle, string $replacement, ?Locale $loc = null): string;
 function replace_every_l(string $haystack, dict<string, string> $replacements, ?Locale $loc = null): string;
 function replace_every_ci_l(string $haystack, dict<string, string> $replacements, ?Locale $loc = null): string;
+function replace_every_nonrecursive_l(string $haystack, dict<string, string> $replacements, ?Locale $loc = null): string;
 
 } // namespace HH\Lib\_Private\_Str

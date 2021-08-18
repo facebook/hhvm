@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/locale.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/hsl/ext_hsl_locale.h"
@@ -347,6 +348,23 @@ String HHVM_FUNCTION(replace_ci_l,
   return get_locale(maybe_loc)->ops()->replace_ci(haystack, needle, replacement); 
 }
 
+namespace {
+void check_replace_pairs(const Array& replacements) {
+  IterateKV(replacements.get(), [](TypedValue needle, TypedValue replacement) {
+    if(!isStringType(needle.type()) || !isStringType(replacement.type())) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Keys and values passed to str_replace*() must be strings"
+      );
+    }
+    if (needle.val().pstr->empty()) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Keys passed to str_replace*() must be non-empty strings"
+      );
+    }
+  });
+}
+} // namespace
+
 String HHVM_FUNCTION(replace_every_l,
                      const String& haystack,
                      const Array& replacements,
@@ -354,6 +372,7 @@ String HHVM_FUNCTION(replace_every_l,
   if (haystack.empty() || replacements.empty()) {
     return haystack;
   }
+  check_replace_pairs(replacements);
   return get_locale(maybe_loc)->ops()->replace_every(haystack, replacements);
 }
 
@@ -364,7 +383,19 @@ String HHVM_FUNCTION(replace_every_ci_l,
   if (haystack.empty() || replacements.empty()) {
     return haystack;
   }
+  check_replace_pairs(replacements);
   return get_locale(maybe_loc)->ops()->replace_every_ci(haystack, replacements);
+}
+
+String HHVM_FUNCTION(replace_every_nonrecursive_l,
+                     const String& haystack,
+                     const Array& replacements,
+                     const Variant& maybe_loc) {
+  if (haystack.empty() || replacements.empty()) {
+    return haystack;
+  }
+  check_replace_pairs(replacements);
+  return get_locale(maybe_loc)->ops()->replace_every_nonrecursive(haystack, replacements);
 }
 
 struct HSLStrExtension final : Extension {
@@ -419,6 +450,7 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_ci_l, replace_ci_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_l, replace_every_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_ci_l, replace_every_ci_l);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_nonrecursive_l, replace_every_nonrecursive_l);
 
     loadSystemlib();
   }

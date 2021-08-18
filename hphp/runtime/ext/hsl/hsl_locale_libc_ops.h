@@ -63,6 +63,7 @@ namespace HPHP {
 
     virtual String replace_every(const String& haystack, const Array& replacements) const override;
     virtual String replace_every_ci(const String& haystack, const Array& replacements) const override;
+    virtual String replace_every_nonrecursive(const String& haystack, const Array& replacements) const override;
     private:
       locale_t m_loc;
   };

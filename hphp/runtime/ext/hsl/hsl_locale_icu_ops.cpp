@@ -716,4 +716,62 @@ String HSLLocaleICUOps::replace_every_ci(const String& haystack,
   return ret;
 }
 
+String HSLLocaleICUOps::replace_every_nonrecursive(const String& haystack,
+                                                   const Array& replacements) const {
+  
+  auto uhaystack = ustr_from_utf8(haystack);
+  icu::ErrorCode err;
+  // singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  uhaystack = normalizer->normalize(uhaystack, err);
+
+  std::vector<std::tuple<icu::UnicodeString, icu::UnicodeString>> ureplacements;
+
+  IterateKV(replacements.get(), [&](TypedValue needle, TypedValue replacement) {
+    auto uneedle = ustr_from_utf8(needle);
+    const auto ureplacement = ustr_from_utf8(replacement);
+    normalizer->normalize(uneedle, err);
+    ureplacements.push_back(std::make_tuple(uneedle, ureplacement));
+  });
+
+  // Longest matching needle wins
+  std::sort(ureplacements.begin(), ureplacements.end(), [](
+    decltype(ureplacements[0])& a,
+    decltype(ureplacements[0])& b) {
+      return std::get<0>(a).length() > std::get<0>(b).length();
+  });
+
+  int32_t i = 0;
+  while (i < uhaystack.length()) {
+    int32_t matchedOffset = -1;
+    icu::UnicodeString matchedNeedle, matchedReplacement;
+
+    for (const auto& [uneedle, ureplacement]: ureplacements) {
+#ifndef NDEBUG
+      if (matchedOffset >= 0) {
+        assertx(matchedNeedle.length() >= uneedle.length());
+      }
+#endif
+      if (matchedOffset >= 0 && uneedle.length() < matchedNeedle.length()) {
+        break;
+      }
+      auto j = uhaystack.indexOf(uneedle, i);
+      if (j < 0 || (matchedOffset >= 0 && j >= matchedOffset)) {
+        continue;
+      }
+      matchedOffset = j;
+      matchedNeedle = uneedle;
+      matchedReplacement = ureplacement;
+    }
+    if (matchedOffset == -1) {
+      break;
+    }
+    uhaystack.replace(matchedOffset, matchedNeedle.length(), matchedReplacement);
+    i += matchedReplacement.length();
+  }
+  std::string ret;
+  uhaystack.toUTF8String(ret);
+  return ret;
+}
+
 } // namespace HPHP

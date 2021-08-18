@@ -275,7 +275,7 @@ let test_local_changes () =
         FileInfo.
           {
             FileInfo.empty_t with
-            consts = [(a_pos, a_name, None)];
+            consts = [(a_pos, a_name)];
             hash = Some (Int64.of_int 1234567);
           }
       in
@@ -689,8 +689,7 @@ let test_naming_table_query_by_dep_hash () =
             [
               ( FileInfo.File
                   (FileInfo.Class, Relative_path.from_root ~suffix:"bar.php"),
-                "\\Baz",
-                None );
+                "\\Baz" );
             ];
         }
       in

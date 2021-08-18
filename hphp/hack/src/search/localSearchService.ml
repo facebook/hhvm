@@ -80,7 +80,7 @@ let convert_fileinfo_to_contents
       (kind : SearchUtils.si_kind)
       (acc : SearchUtils.si_capture)
       (list : FileInfo.id list) : SearchUtils.si_capture =
-    List.fold list ~init:acc ~f:(fun inside_acc (_, name, _) ->
+    List.fold list ~init:acc ~f:(fun inside_acc (_, name) ->
         append_item kind inside_acc name)
   in
   let acc = fold_full SI_Function [] info.FileInfo.funs in

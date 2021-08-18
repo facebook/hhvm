@@ -56,7 +56,7 @@ let find_symbol_in_context
              ~entry
          in
          let symbols = get_entry_symbols file_info in
-         List.find_map symbols ~f:(fun ((pos, name, _), kind) ->
+         List.find_map symbols ~f:(fun ((pos, name), kind) ->
              if is_symbol name then
                Some (pos, kind)
              else
@@ -723,7 +723,7 @@ let update
     ~(old_file_info : FileInfo.t option)
     ~(new_file_info : FileInfo.t option) : unit =
   let open FileInfo in
-  let strip_positions symbols = List.map symbols ~f:(fun (_, x, _) -> x) in
+  let strip_positions symbols = List.map symbols ~f:snd in
   match backend with
   | Provider_backend.Decl_service _ -> not_implemented backend
   | Provider_backend.Analysis -> failwith "invalid"
@@ -740,15 +740,15 @@ let update
        because it attempts to look up the symbol by doing a file parse, but
        we have to use the file_info we're given to avoid races. *)
     Option.iter new_file_info ~f:(fun new_file_info ->
-        List.iter new_file_info.funs ~f:(fun (pos, name, _) ->
+        List.iter new_file_info.funs ~f:(fun (pos, name) ->
             add_fun backend name pos);
-        List.iter new_file_info.classes ~f:(fun (pos, name, _) ->
+        List.iter new_file_info.classes ~f:(fun (pos, name) ->
             add_class backend name pos);
-        List.iter new_file_info.record_defs ~f:(fun (pos, name, _) ->
+        List.iter new_file_info.record_defs ~f:(fun (pos, name) ->
             add_record_def backend name pos);
-        List.iter new_file_info.typedefs ~f:(fun (pos, name, _) ->
+        List.iter new_file_info.typedefs ~f:(fun (pos, name) ->
             add_typedef backend name pos);
-        List.iter new_file_info.consts ~f:(fun (pos, name, _) ->
+        List.iter new_file_info.consts ~f:(fun (pos, name) ->
             add_const backend name pos));
     ()
   | Provider_backend.Local_memory

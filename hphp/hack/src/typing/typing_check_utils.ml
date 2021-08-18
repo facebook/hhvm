@@ -11,7 +11,6 @@ open Hh_prelude
 
 let type_file_with_global_tvenvs
     tcopt fn { FileInfo.funs; classes; record_defs; typedefs; consts; _ } =
-  let snd (_, x, _) = x in
   let (errors, (tast, global_tvenvs)) =
     Errors.do_with_context fn Errors.Typing (fun () ->
         let (fs, f_global_tvenvs) =

@@ -38,8 +38,7 @@ let test () =
   let get_classes path =
     match Naming_table.get_file_info env.ServerEnv.naming_table path with
     | None -> SSet.empty
-    | Some info ->
-      SSet.of_list @@ List.map info.FileInfo.classes ~f:(fun (_, x, _) -> x)
+    | Some info -> SSet.of_list @@ List.map info.FileInfo.classes ~f:snd
   in
   let dependent_classes =
     Decl_redecl_service.get_dependent_classes

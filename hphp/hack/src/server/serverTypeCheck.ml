@@ -146,7 +146,6 @@ let remove_decls env fast_parsed =
             hash = _;
           } ->
         (* we use [snd] to strip away positions *)
-        let snd (_, x, _) = x in
         Naming_global.remove_decls
           ~backend:(Provider_backend.get ())
           ~funs:(List.map funs ~f:snd)
@@ -768,10 +767,8 @@ functor
       match Naming_table.get_file_info naming_table path with
       | None -> SSet.empty
       | Some info ->
-        List.fold
-          info.FileInfo.classes
-          ~init:SSet.empty
-          ~f:(fun acc (_, cid, _) -> SSet.add acc cid)
+        List.fold info.FileInfo.classes ~init:SSet.empty ~f:(fun acc (_, cid) ->
+            SSet.add acc cid)
 
     let clear_failed_parsing env errors failed_parsing =
       (* In most cases, set of files processed in a phase is a superset

@@ -22,7 +22,7 @@ let class_naming_and_decl ctx c =
 let direct_decl_parse_and_cache ctx filename name =
   match Direct_decl_utils.direct_decl_parse_and_cache ctx filename with
   | None -> err_not_found filename name
-  | Some (decls, _mode, _hash, _symbol_decl_hashes) -> decls
+  | Some (decls, _mode, _hash) -> decls
 
 let shallow_decl_enabled ctx =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)

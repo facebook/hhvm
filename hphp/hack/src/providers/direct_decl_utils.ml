@@ -83,20 +83,14 @@ let get_file_contents ctx filename =
     Some (Full_fidelity_source_text.text source_text)
   | None -> File_provider.get_contents filename
 
-let direct_decl_parse_and_cache ?(file_decl_hash = false) ctx file =
+let direct_decl_parse_and_cache ?(decl_hash = false) ctx file =
   match get_file_contents ctx file with
   | None -> None
   | Some contents ->
     let popt = Provider_context.get_popt ctx in
     let opts = DeclParserOptions.from_parser_options popt in
-    let symbol_decl_hashes = true in
-    let (decls, mode, file_decl_hash, symbol_decl_hashes) =
-      Direct_decl_parser.parse_decls_and_mode_ffi
-        opts
-        file
-        contents
-        file_decl_hash
-        symbol_decl_hashes
+    let (decls, mode, hash) =
+      Direct_decl_parser.parse_decls_and_mode_ffi opts file contents decl_hash
     in
     let deregister_php_stdlib =
       Relative_path.is_hhi (Relative_path.prefix file)
@@ -109,35 +103,29 @@ let direct_decl_parse_and_cache ?(file_decl_hash = false) ctx file =
             Naming_special_names.UserAttributes.uaPHPStdLib
             (snd a.Typing_defs_core.ua_name))
     in
-    let (decls, symbol_decl_hashes) =
+    let decls =
       if not deregister_php_stdlib then
-        (decls, symbol_decl_hashes)
+        decls
       else
         let open Shallow_decl_defs in
-        let (decls, symbol_decl_hashes) =
-          List.filter_map
-            (List.zip_exn decls (Option.value_exn symbol_decl_hashes))
-            ~f:(function
-              | ((_, Fun f), _) when is_stdlib_fun f -> None
-              | ((_, Class c), _) when is_stdlib_class c -> None
-              | ((name, Class c), hash) ->
-                let keep_prop sp = not (sp_php_std_lib sp) in
-                let keep_meth sm = not (sm_php_std_lib sm) in
-                let c =
-                  {
-                    c with
-                    sc_props = List.filter c.sc_props ~f:keep_prop;
-                    sc_sprops = List.filter c.sc_sprops ~f:keep_prop;
-                    sc_methods = List.filter c.sc_methods ~f:keep_meth;
-                    sc_static_methods =
-                      List.filter c.sc_static_methods ~f:keep_meth;
-                  }
-                in
-                Some ((name, Class c), hash)
-              | (name_and_decl, hash) -> Some (name_and_decl, hash))
-          |> List.unzip
-        in
-        (decls, Some symbol_decl_hashes)
+        List.filter_map decls ~f:(function
+            | (_, Fun f) when is_stdlib_fun f -> None
+            | (_, Class c) when is_stdlib_class c -> None
+            | (name, Class c) ->
+              let keep_prop sp = not (sp_php_std_lib sp) in
+              let keep_meth sm = not (sm_php_std_lib sm) in
+              let c =
+                {
+                  c with
+                  sc_props = List.filter c.sc_props ~f:keep_prop;
+                  sc_sprops = List.filter c.sc_sprops ~f:keep_prop;
+                  sc_methods = List.filter c.sc_methods ~f:keep_meth;
+                  sc_static_methods =
+                    List.filter c.sc_static_methods ~f:keep_meth;
+                }
+              in
+              Some (name, Class c)
+            | name_and_decl -> Some name_and_decl)
     in
     cache_decls ctx decls;
-    Some (decls, mode, file_decl_hash, symbol_decl_hashes)
+    Some (decls, mode, hash)

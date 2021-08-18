@@ -52,9 +52,9 @@ type pos =
   | File of name_type * Relative_path.t
 [@@deriving eq, show]
 
-type id = pos * string * Int64.t option [@@deriving eq, show]
+type id = pos * string [@@deriving eq, show]
 
-val pos_full : Pos.t * string * Int64.t option -> id
+val pos_full : Pos.t * string -> id
 
 val get_pos_filename : pos -> Relative_path.t
 

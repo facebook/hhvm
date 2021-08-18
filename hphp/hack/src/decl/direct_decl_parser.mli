@@ -17,5 +17,4 @@ val parse_decls_and_mode_ffi :
   Relative_path.t ->
   string ->
   bool ->
-  bool ->
-  decls * FileInfo.mode option * Int64.t option * Int64.t list option
+  decls * FileInfo.mode option * Int64.t option

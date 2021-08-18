@@ -22,7 +22,7 @@ let go
     Naming_table.fold naming_table ~init:[] ~f:(fun path info acc ->
         match Relative_path.prefix path with
         | Relative_path.Root ->
-          List.fold info.FileInfo.classes ~init:acc ~f:(fun acc (_, x, _) ->
+          List.fold info.FileInfo.classes ~init:acc ~f:(fun acc (_, x) ->
               x :: acc)
         | _ -> acc)
   in

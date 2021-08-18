@@ -78,7 +78,7 @@ let make_env
   if use_direct_decl_parser ctx then (
     match Direct_decl_utils.direct_decl_parse_and_cache ctx fn with
     | None -> ()
-    | Some (decls, _mode, _hash, _symbol_decl_hashes) ->
+    | Some (decls, _mode, _hash) ->
       if not (shallow_decl_enabled ctx) then
         List.iter decls ~f:(function
             | (name, Shallow_decl_defs.Class _) ->

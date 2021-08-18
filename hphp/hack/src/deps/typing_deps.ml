@@ -692,7 +692,7 @@ module Files = struct
         consts
         ~f:
           begin
-            fun acc (_, const_id, _) ->
+            fun acc (_, const_id) ->
             Dep.make hash_mode (Dep.GConst const_id) :: acc
           end
         ~init:[]
@@ -702,7 +702,7 @@ module Files = struct
         funs
         ~f:
           begin
-            fun acc (_, fun_id, _) ->
+            fun acc (_, fun_id) ->
             Dep.make hash_mode (Dep.Fun fun_id) :: acc
           end
         ~init:defs
@@ -712,7 +712,7 @@ module Files = struct
         classes
         ~f:
           begin
-            fun acc (_, class_id, _) ->
+            fun acc (_, class_id) ->
             Dep.make hash_mode (Dep.Type class_id) :: acc
           end
         ~init:defs
@@ -722,7 +722,7 @@ module Files = struct
         record_defs
         ~f:
           begin
-            fun acc (_, type_id, _) ->
+            fun acc (_, type_id) ->
             Dep.make hash_mode (Dep.Type type_id) :: acc
           end
         ~init:defs
@@ -732,7 +732,7 @@ module Files = struct
         typedefs
         ~f:
           begin
-            fun acc (_, type_id, _) ->
+            fun acc (_, type_id) ->
             Dep.make hash_mode (Dep.Type type_id) :: acc
           end
         ~init:defs

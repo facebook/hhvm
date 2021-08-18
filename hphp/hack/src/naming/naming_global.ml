@@ -132,8 +132,8 @@ let should_report_duplicate
     ~(id : FileInfo.id)
     ~(canonical_id : FileInfo.id) : bool =
   let open FileInfo in
-  let (p, name, _) = id in
-  let (pc, canonical, _) = canonical_id in
+  let (p, name) = id in
+  let (pc, canonical) = canonical_id in
   (* helper, for the various paths below which want to log a bug *)
   let bug ~(desc : string) : unit =
     let desc = "naming_duplicate_" ^ desc in
@@ -197,7 +197,7 @@ let should_report_duplicate
 
 (* The primitives to manipulate the naming environment *)
 module Env = struct
-  let check_type_not_typehint ctx (p, name, _) =
+  let check_type_not_typehint ctx (p, name) =
     let x = String.lowercase (Utils.strip_all_ns name) in
     if
       SN.Typehints.is_reserved_hh_name x
@@ -209,14 +209,14 @@ module Env = struct
     ) else
       true
 
-  let new_fun_skip_if_already_bound ctx fn (_p, name, _) =
+  let new_fun_skip_if_already_bound ctx fn (_p, name) =
     match Naming_provider.get_fun_canon_name ctx name with
     | Some _ -> ()
     | None ->
       let backend = Provider_context.get_backend ctx in
       Naming_provider.add_fun backend name (FileInfo.File (FileInfo.Fun, fn))
 
-  let new_type_skip_if_already_bound ctx fn ~kind (_p, name, _) =
+  let new_type_skip_if_already_bound ctx fn ~kind (_p, name) =
     let name_type =
       match kind with
       | Naming_types.TClass -> FileInfo.Class
@@ -231,7 +231,7 @@ module Env = struct
       (* Full position, we don't store the kind, so this is necessary *)
       Naming_provider.add_type backend name (FileInfo.File (name_type, fn)) kind
 
-  let new_global_const_skip_if_already_bound ctx fn (_p, name, _) =
+  let new_global_const_skip_if_already_bound ctx fn (_p, name) =
     let backend = Provider_context.get_backend ctx in
     Naming_provider.add_const backend name (FileInfo.File (FileInfo.Const, fn))
 
@@ -240,7 +240,7 @@ module Env = struct
       (fi : FileInfo.t)
       (current_file_symbols_acc : FileInfo.pos list)
       (id : FileInfo.id) : FileInfo.pos list =
-    let (p, name, _) = id in
+    let (p, name) = id in
     match Naming_provider.get_fun_canon_name ctx name with
     | Some canonical ->
       let pc = Option.value_exn (Naming_provider.get_fun_pos ctx canonical) in
@@ -251,7 +251,7 @@ module Env = struct
           fi
           current_file_symbols_acc
           ~id
-          ~canonical_id:(pc, canonical, None)
+          ~canonical_id:(pc, canonical)
        then
           let (p, name) = GEnv.get_fun_full_pos ctx (p, name) in
           let (pc, canonical) = GEnv.get_fun_full_pos ctx (pc, canonical) in
@@ -272,7 +272,7 @@ module Env = struct
     if not (check_type_not_typehint ctx id) then
       current_file_symbols_acc
     else
-      let (p, name, _) = id in
+      let (p, name) = id in
       match Naming_provider.get_type_canon_name ctx name with
       | Some canonical ->
         let pc =
@@ -285,7 +285,7 @@ module Env = struct
             fi
             current_file_symbols_acc
             ~id
-            ~canonical_id:(pc, canonical, None)
+            ~canonical_id:(pc, canonical)
          then
             let (p, name) = GEnv.get_type_full_pos ctx (p, name) in
             let (pc, canonical) = GEnv.get_type_full_pos ctx (pc, canonical) in
@@ -302,7 +302,7 @@ module Env = struct
       (fi : FileInfo.t)
       (current_file_symbols_acc : FileInfo.pos list)
       (id : FileInfo.id) : FileInfo.pos list =
-    let (p, name, _) = id in
+    let (p, name) = id in
     match Naming_provider.get_const_pos ctx name with
     | Some pc ->
       begin
@@ -312,7 +312,7 @@ module Env = struct
           fi
           current_file_symbols_acc
           ~id
-          ~canonical_id:(pc, name, None)
+          ~canonical_id:(pc, name)
        then
           let (p, name) = GEnv.get_const_full_pos ctx (p, name) in
           let (pc, name) = GEnv.get_const_full_pos ctx (pc, name) in
@@ -409,7 +409,7 @@ let add_files_to_rename failed defl defs_in_env =
   List.fold_left
     ~f:
       begin
-        fun failed (_, def, _) ->
+        fun failed (_, def) ->
         match defs_in_env def with
         | None -> failed
         | Some previous_definition_position ->

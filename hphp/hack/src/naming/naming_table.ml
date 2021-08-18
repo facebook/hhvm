@@ -519,19 +519,19 @@ let update_reverse_entries_helper
       | Some fi ->
         Naming_provider.remove_type_batch
           backend
-          (fi.FileInfo.classes |> List.map ~f:(fun (_, x, _) -> x));
+          (fi.FileInfo.classes |> List.map ~f:snd);
         Naming_provider.remove_type_batch
           backend
-          (fi.FileInfo.typedefs |> List.map ~f:(fun (_, x, _) -> x));
+          (fi.FileInfo.typedefs |> List.map ~f:snd);
         Naming_provider.remove_type_batch
           backend
-          (fi.FileInfo.record_defs |> List.map ~f:(fun (_, x, _) -> x));
+          (fi.FileInfo.record_defs |> List.map ~f:snd);
         Naming_provider.remove_fun_batch
           backend
-          (fi.FileInfo.funs |> List.map ~f:(fun (_, x, _) -> x));
+          (fi.FileInfo.funs |> List.map ~f:snd);
         Naming_provider.remove_const_batch
           backend
-          (fi.FileInfo.consts |> List.map ~f:(fun (_, x, _) -> x))
+          (fi.FileInfo.consts |> List.map ~f:snd)
       | None -> ())
     changed_file_infos;
 
@@ -541,21 +541,20 @@ let update_reverse_entries_helper
       match new_file_info with
       | Some fi ->
         List.iter
-          ~f:(fun (pos, name, _) -> Naming_provider.add_class backend name pos)
+          ~f:(fun (pos, name) -> Naming_provider.add_class backend name pos)
           fi.FileInfo.classes;
         List.iter
-          ~f:(fun (pos, name, _) ->
+          ~f:(fun (pos, name) ->
             Naming_provider.add_record_def backend name pos)
           fi.FileInfo.record_defs;
         List.iter
-          ~f:(fun (pos, name, _) ->
-            Naming_provider.add_typedef backend name pos)
+          ~f:(fun (pos, name) -> Naming_provider.add_typedef backend name pos)
           fi.FileInfo.typedefs;
         List.iter
-          ~f:(fun (pos, name, _) -> Naming_provider.add_fun backend name pos)
+          ~f:(fun (pos, name) -> Naming_provider.add_fun backend name pos)
           fi.FileInfo.funs;
         List.iter
-          ~f:(fun (pos, name, _) -> Naming_provider.add_const backend name pos)
+          ~f:(fun (pos, name) -> Naming_provider.add_const backend name pos)
           fi.FileInfo.consts
       | None -> ())
     changed_file_infos

@@ -76,19 +76,21 @@ module Collections = struct
   (* concrete classes *)
   let cVector = "\\HH\\Vector"
 
-  let cMutableVector = "\\HH\\MutableVector"
+  let cMutableVector = "\\MutableVector"
 
   let cImmVector = "\\HH\\ImmVector"
 
   let cSet = "\\HH\\Set"
 
-  let cMutableSet = "\\HH\\MutableSet"
+  let cConstSet = "\\ConstSet"
+
+  let cMutableSet = "\\MutableSet"
 
   let cImmSet = "\\HH\\ImmSet"
 
   let cMap = "\\HH\\Map"
 
-  let cMutableMap = "\\HH\\MutableMap"
+  let cMutableMap = "\\MutableMap"
 
   let cImmMap = "\\HH\\ImmMap"
 

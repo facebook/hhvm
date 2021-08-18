@@ -307,20 +307,36 @@ let get_varray_inst ty =
   | Tvarray vty -> Some vty
   | _ -> get_value_collection_inst ty
 
+let vc_kind_to_supers kind =
+  match kind with
+  | Vector -> [SN.Collections.cVector; SN.Collections.cMutableVector]
+  | ImmVector -> [SN.Collections.cImmVector; SN.Collections.cConstVector]
+  | Vec -> [SN.Collections.cVec]
+  | Set -> [SN.Collections.cSet; SN.Collections.cMutableSet]
+  | ImmSet -> [SN.Collections.cImmSet; SN.Collections.cConstSet]
+  | Keyset -> [SN.Collections.cKeyset]
+
+let kvc_kind_to_supers kind =
+  match kind with
+  | Map -> [SN.Collections.cMap; SN.Collections.cMutableMap]
+  | ImmMap -> [SN.Collections.cImmMap; SN.Collections.cConstMap]
+  | Dict -> [SN.Collections.cDict]
+
 (* Is this type one of the value collection types with element type vty? *)
 let get_vc_inst vc_kind ty =
+  let classnames = vc_kind_to_supers vc_kind in
   match get_node ty with
-  | Tclass ((_, c), _, [vty]) when String.equal c (Nast.vc_kind_to_name vc_kind)
-    ->
+  | Tclass ((_, c), _, [vty]) when List.exists classnames ~f:(String.equal c) ->
     Some vty
   | _ -> get_value_collection_inst ty
 
 (* Is this type one of the three key-value collection types
  * e.g. dict<kty,vty> or a supertype for some kty and vty? *)
 let get_kvc_inst p kvc_kind ty =
+  let classnames = kvc_kind_to_supers kvc_kind in
   match get_node ty with
   | Tclass ((_, c), _, [kty; vty])
-    when String.equal c (Nast.kvc_kind_to_name kvc_kind) ->
+    when List.exists classnames ~f:(String.equal c) ->
     Some (kty, vty)
   | _ -> get_key_value_collection_inst p ty
 

@@ -62,14 +62,14 @@
                                                        (Return
                                                           (Some ((), [4:8-26], (Call (((), [4:8-26], (Class_const (((), [4:8-26], (CI ([4:8-26], "\\Code"))), ([4:8-26], "voidType")))), [], [], None))))))
                                                       ];
-                                                    fb_annotation = Named };
+                                                    fb_annotation = () };
                                                   f_fun_kind = FSync; 
                                                   f_user_attributes = []; 
                                                   f_external = false; 
                                                   f_doc_comment = None },
                                                 []))))))
                                    ];
-                                 fb_annotation = Named };
+                                 fb_annotation = () };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
                              []))),
@@ -175,7 +175,7 @@
                                                     ],
                                                   None))))))
                                      ];
-                                   fb_annotation = Named };
+                                   fb_annotation = () };
                                  f_fun_kind = FSync; f_user_attributes = []; 
                                  f_external = false; f_doc_comment = None },
                                [])))
@@ -183,7 +183,7 @@
                          None)))
                      }))))
             ];
-          fb_annotation = Named };
+          fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

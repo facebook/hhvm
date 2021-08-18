@@ -9,7 +9,6 @@ decl_defs::XhpAttr
 ident::Ident
 lazy::Lazy
 method_flags::MethodFlags
-nast::FuncBodyAnn
 prop_flags::PropFlags
 shallow_decl_defs::Visibility
 tany_sentinel::TanySentinel

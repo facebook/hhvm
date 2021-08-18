@@ -254,13 +254,9 @@ module Nast_helper : sig
     Provider_context.t ->
     string ->
     string ->
-    (unit, Nast.func_body_ann, unit) Aast.class_typeconst_def option
+    (unit, unit, unit) Aast.class_typeconst_def option
 
-  val get_prop :
-    Provider_context.t ->
-    string ->
-    string ->
-    (unit, Nast.func_body_ann, unit) Aast.class_var option
+  val get_prop : Provider_context.t -> string -> string -> Nast.class_var option
 
   val is_tydef : Provider_context.t -> string -> bool
 
@@ -2174,8 +2170,7 @@ end = struct
 
     val mk_const : Provider_context.t -> Nast.class_const -> t
 
-    val mk_tyconst :
-      (unit, Nast.func_body_ann, unit) Aast.class_typeconst_def -> t
+    val mk_tyconst : (unit, unit, unit) Aast.class_typeconst_def -> t
 
     val mk_method : bool -> Nast.method_ -> t
 
@@ -2187,8 +2182,7 @@ end = struct
 
     val mk_target_method : Provider_context.t -> Cmd.target -> t
 
-    val mk_prop :
-      Provider_context.t -> (unit, Nast.func_body_ann, unit) Aast.class_var -> t
+    val mk_prop : Provider_context.t -> Nast.class_var -> t
 
     val compare : t -> t -> int
 

@@ -78,14 +78,14 @@
                                                        (Return
                                                           (Some ((), [4:8-41], (Call (((), [4:8-41], (Class_const (((), [4:8-41], (CI ([4:8-41], "\\Code"))), ([4:8-41], "voidType")))), [], [], None))))))
                                                       ];
-                                                    fb_annotation = Named };
+                                                    fb_annotation = () };
                                                   f_fun_kind = FSync; 
                                                   f_user_attributes = []; 
                                                   f_external = false; 
                                                   f_doc_comment = None },
                                                 [([4:31-34], $0fp0)]))))))
                                    ];
-                                 fb_annotation = Named };
+                                 fb_annotation = () };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
                              [([4:8-41], $0fp0)]))),
@@ -225,7 +225,7 @@
                                                                     (), [Pos.none], (ValCollection (Vec, None, [])))], None)))])))], None)))])))],
                                                                   None))))))
                                                             ];
-                                                          fb_annotation = Named };
+                                                          fb_annotation = () };
                                                         f_fun_kind = FSync; 
                                                         f_user_attributes = []; 
                                                         f_external = false; 
@@ -234,14 +234,14 @@
                                                   ],
                                                 None))))))
                                    ];
-                                 fb_annotation = Named };
+                                 fb_annotation = () };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
                              [([4:31-34], $0fp0); ([4:31-34], $0fp0)]))),
                          [], [], None)))
                      }))))
             ];
-          fb_annotation = Named };
+          fb_annotation = () };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

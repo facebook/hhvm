@@ -38,7 +38,7 @@ impl syn::visit_mut::VisitMut for TypeArgRewriter {
                     if segment.ident == "Ex" {
                         *ty = syn::parse_quote!(&'a crate::pos::Pos<'a>)
                     } else if segment.ident == "Fb" {
-                        *ty = syn::parse_quote!(crate::nast::FuncBodyAnn)
+                        *ty = syn::parse_quote!(())
                     } else if segment.ident == "En" {
                         *ty = syn::parse_quote!(())
                     }

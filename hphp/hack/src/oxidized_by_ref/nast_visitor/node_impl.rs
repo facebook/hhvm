@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bf4309d0ae474b7bea9686cffd21cc6f>>
+// @generated SignedSource<<b8c1c3c46e06feee0e7f8dca73a78848>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -17,7 +17,6 @@ impl<'a> Node<'a> for bstr::BStr {}
 impl<'a> Node<'a> for crate::file_info::Mode {}
 impl<'a> Node<'a> for crate::local_id::LocalId<'a> {}
 impl<'a> Node<'a> for crate::method_flags::MethodFlags {}
-impl<'a> Node<'a> for crate::nast::FuncBodyAnn {}
 impl<'a> Node<'a> for crate::pos::Pos<'a> {}
 impl<'a> Node<'a> for crate::prop_flags::PropFlags {}
 impl<'a> Node<'a> for crate::tany_sentinel::TanySentinel {}

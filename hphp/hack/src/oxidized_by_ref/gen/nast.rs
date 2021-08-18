@@ -3,14 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bd18150f575b815b57f09f932225c438>>
+// @generated SignedSource<<413de9fd577eb7d648468f443e9000bf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
@@ -28,86 +27,63 @@ pub use aast::TraitHint;
 pub use aast::XhpAttrHint;
 pub use ast_defs::ShapeFieldName;
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum FuncBodyAnn {
-    Named,
-    NamedWithUnsafeBlocks,
-}
-impl TrivialDrop for FuncBodyAnn {}
-arena_deserializer::impl_deserialize_in_arena!(FuncBodyAnn);
+pub type Program<'a> = aast::Program<'a, (), (), ()>;
 
-pub type Program<'a> = aast::Program<'a, (), FuncBodyAnn, ()>;
+pub type Def<'a> = aast::Def<'a, (), (), ()>;
 
-pub type Def<'a> = aast::Def<'a, (), FuncBodyAnn, ()>;
+pub type Expr<'a> = aast::Expr<'a, (), (), ()>;
 
-pub type Expr<'a> = aast::Expr<'a, (), FuncBodyAnn, ()>;
+pub type Expr_<'a> = aast::Expr_<'a, (), (), ()>;
 
-pub type Expr_<'a> = aast::Expr_<'a, (), FuncBodyAnn, ()>;
+pub type Stmt<'a> = aast::Stmt<'a, (), (), ()>;
 
-pub type Stmt<'a> = aast::Stmt<'a, (), FuncBodyAnn, ()>;
+pub type Block<'a> = aast::Block<'a, (), (), ()>;
 
-pub type Block<'a> = aast::Block<'a, (), FuncBodyAnn, ()>;
+pub type UserAttribute<'a> = aast::UserAttribute<'a, (), (), ()>;
 
-pub type UserAttribute<'a> = aast::UserAttribute<'a, (), FuncBodyAnn, ()>;
+pub type ClassId_<'a> = aast::ClassId_<'a, (), (), ()>;
 
-pub type ClassId_<'a> = aast::ClassId_<'a, (), FuncBodyAnn, ()>;
+pub type Class_<'a> = aast::Class_<'a, (), (), ()>;
 
-pub type Class_<'a> = aast::Class_<'a, (), FuncBodyAnn, ()>;
+pub type ClassVar<'a> = aast::ClassVar<'a, (), (), ()>;
 
-pub type ClassVar<'a> = aast::ClassVar<'a, (), FuncBodyAnn, ()>;
+pub type Method_<'a> = aast::Method_<'a, (), (), ()>;
 
-pub type Method_<'a> = aast::Method_<'a, (), FuncBodyAnn, ()>;
+pub type FileAttribute<'a> = aast::FileAttribute<'a, (), (), ()>;
 
-pub type FileAttribute<'a> = aast::FileAttribute<'a, (), FuncBodyAnn, ()>;
+pub type Fun_<'a> = aast::Fun_<'a, (), (), ()>;
 
-pub type Fun_<'a> = aast::Fun_<'a, (), FuncBodyAnn, ()>;
+pub type FunDef<'a> = aast::FunDef<'a, (), (), ()>;
 
-pub type FunDef<'a> = aast::FunDef<'a, (), FuncBodyAnn, ()>;
+pub type FuncBody<'a> = aast::FuncBody<'a, (), (), ()>;
 
-pub type FuncBody<'a> = aast::FuncBody<'a, (), FuncBodyAnn, ()>;
+pub type FunParam<'a> = aast::FunParam<'a, (), (), ()>;
 
-pub type FunParam<'a> = aast::FunParam<'a, (), FuncBodyAnn, ()>;
+pub type FunVariadicity<'a> = aast::FunVariadicity<'a, (), (), ()>;
 
-pub type FunVariadicity<'a> = aast::FunVariadicity<'a, (), FuncBodyAnn, ()>;
+pub type Typedef<'a> = aast::Typedef<'a, (), (), ()>;
 
-pub type Typedef<'a> = aast::Typedef<'a, (), FuncBodyAnn, ()>;
+pub type RecordDef<'a> = aast::RecordDef<'a, (), (), ()>;
 
-pub type RecordDef<'a> = aast::RecordDef<'a, (), FuncBodyAnn, ()>;
+pub type Tparam<'a> = aast::Tparam<'a, (), (), ()>;
 
-pub type Tparam<'a> = aast::Tparam<'a, (), FuncBodyAnn, ()>;
+pub type Gconst<'a> = aast::Gconst<'a, (), (), ()>;
 
-pub type Gconst<'a> = aast::Gconst<'a, (), FuncBodyAnn, ()>;
+pub type ClassConst<'a> = aast::ClassConst<'a, (), (), ()>;
 
-pub type ClassConst<'a> = aast::ClassConst<'a, (), FuncBodyAnn, ()>;
+pub type ClassId<'a> = aast::ClassId<'a, (), (), ()>;
 
-pub type ClassId<'a> = aast::ClassId<'a, (), FuncBodyAnn, ()>;
+pub type Catch<'a> = aast::Catch<'a, (), (), ()>;
 
-pub type Catch<'a> = aast::Catch<'a, (), FuncBodyAnn, ()>;
+pub type Case<'a> = aast::Case<'a, (), (), ()>;
 
-pub type Case<'a> = aast::Case<'a, (), FuncBodyAnn, ()>;
+pub type Field<'a> = aast::Field<'a, (), (), ()>;
 
-pub type Field<'a> = aast::Field<'a, (), FuncBodyAnn, ()>;
+pub type Afield<'a> = aast::Afield<'a, (), (), ()>;
 
-pub type Afield<'a> = aast::Afield<'a, (), FuncBodyAnn, ()>;
+pub type XhpAttribute<'a> = aast::XhpAttribute<'a, (), (), ()>;
 
-pub type XhpAttribute<'a> = aast::XhpAttribute<'a, (), FuncBodyAnn, ()>;
-
-pub type ExpressionTree<'a> = aast::ExpressionTree<'a, (), FuncBodyAnn, ()>;
+pub type ExpressionTree<'a> = aast::ExpressionTree<'a, (), (), ()>;
 
 pub type Targ<'a> = aast::Targ<'a, ()>;
 

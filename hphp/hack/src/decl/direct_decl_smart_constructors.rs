@@ -245,11 +245,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         self.const_refs = Some(arena_collections::set::Set::empty());
     }
 
-    fn accumulate_const_ref(
-        &mut self,
-        class_id: &'a aast::ClassId<(), nast::FuncBodyAnn, ()>,
-        value_id: &Id<'a>,
-    ) {
+    fn accumulate_const_ref(&mut self, class_id: &'a aast::ClassId<(), (), ()>, value_id: &Id<'a>) {
         // The decl for a class constant stores a list of all the scope-resolution expressions
         // it contains. For example "const C=A::X" stores A::X, and "const D=self::Y" stores self::Y.
         // (This is so we can detect cross-type circularity in constant initializers).

@@ -31,7 +31,6 @@ pub fn node_impl() -> TokenStream {
         impl<'a> Node<'a> for crate::file_info::Mode {}
         impl<'a> Node<'a> for crate::local_id::LocalId<'a> {}
         impl<'a> Node<'a> for crate::method_flags::MethodFlags {}
-        impl<'a> Node<'a> for crate::nast::FuncBodyAnn {}
         impl<'a> Node<'a> for crate::pos::Pos<'a> {}
         impl<'a> Node<'a> for crate::prop_flags::PropFlags {}
         impl<'a> Node<'a> for crate::tany_sentinel::TanySentinel {}

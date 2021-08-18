@@ -155,7 +155,7 @@ let nast_converter =
 
     method on_'ex _ _ = ()
 
-    method on_'fb _ _fb = Nast.Named
+    method on_'fb _ _fb = ()
 
     method on_'en _ _ = ()
 

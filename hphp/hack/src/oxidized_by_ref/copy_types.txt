@@ -43,7 +43,6 @@ i_set::ISet
 ident::Ident
 local_id::map::Map
 method_flags::MethodFlags
-nast::FuncBodyAnn
 nast::shape_map::ShapeMap
 nast::Sid
 oxidized::aast_defs::FuncReactive

@@ -739,6 +739,7 @@ let rec is_minimal env ty =
   | Tnewtype (name, [ty], _)
     when String.equal name Naming_special_names.Classes.cClassname ->
     is_minimal env ty
+  | Tdependent _ -> true
   | _ -> false
 
 (** Construct union of a list of types by applying binary union pairwise.

@@ -174,7 +174,7 @@ struct
         begin
           fun _ ->
           Hh_logger.log "Got an exit signal. Killing server and exiting.";
-          SC.kill_server process;
+          SC.kill_server ~violently:false process;
           Exit.exit Exit_status.Interrupted
         end
         [Sys.sigint; Sys.sigquit; Sys.sigterm; Sys.sighup]
@@ -216,7 +216,7 @@ struct
     | Alive server ->
       if not monitor_kill_again_fix then begin
         let kill_signal_time = Unix.gettimeofday () in
-        SC.kill_server server;
+        SC.kill_server ~violently:false server;
         let (_ : bool) =
           SC.wait_for_server_exit ~timeout_t:None server kill_signal_time
         in
@@ -224,7 +224,9 @@ struct
       end else
         let start_t = Unix.gettimeofday () in
         let rec kill_server_with_check_and_wait_impl () =
-          SC.kill_server server;
+          SC.kill_server
+            ~violently:Float.(Unix.gettimeofday () -. start_t >= 4.0)
+            server;
           let success =
             SC.wait_for_server_exit
               ~timeout_t:(Some (Unix.gettimeofday () +. 2.0))

@@ -148,19 +148,24 @@ module HhServerConfig = struct
       start_hh_server ~informant_managed (ServerArgs.set_no_load options true)
     | _ -> start_hh_server ~informant_managed options
 
-  let kill_server process =
-    Hh_logger.log "kill_server: sending SIGUSR2 to %d" process.ServerProcess.pid;
-    try Unix.kill process.ServerProcess.pid Sys.sigusr2 with
-    | _ ->
+  let kill_server ~violently process =
+    if not violently then begin
+      Hh_logger.log
+        "kill_server: sending SIGUSR2 to %d"
+        process.ServerProcess.pid;
+      try Unix.kill process.ServerProcess.pid Sys.sigusr2 with
+      | _ -> ()
+    end else begin
       Hh_logger.log
         "Failed to send sigusr2 signal to server process. Trying violently";
-      (try Unix.kill process.ServerProcess.pid Sys.sigkill with
+      try Unix.kill process.ServerProcess.pid Sys.sigkill with
       | e ->
         let stack = Printexc.get_backtrace () in
         Hh_logger.exc
           ~prefix:"Failed to violently kill server process: "
           ~stack
-          e)
+          e
+    end
 
   let wait_for_server_exit ~(timeout_t : float option) process start_t =
     (* There's a bug: before entering this function, we might have tried

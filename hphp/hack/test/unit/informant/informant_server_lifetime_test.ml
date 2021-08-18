@@ -71,7 +71,8 @@ let make_test test =
 
       let kill_server_count = ref 0
 
-      let kill_server _ = kill_server_count := !kill_server_count + 1
+      let kill_server ~violently:_ _ =
+        kill_server_count := !kill_server_count + 1
 
       let get_kill_server_count () = !kill_server_count
 

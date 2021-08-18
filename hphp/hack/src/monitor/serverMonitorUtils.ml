@@ -53,7 +53,7 @@ module type Server_config = sig
     server_start_options ->
     ServerProcess.process_data
 
-  val kill_server : ServerProcess.process_data -> unit
+  val kill_server : violently:bool -> ServerProcess.process_data -> unit
 
   val wait_for_server_exit :
     timeout_t:float option ->

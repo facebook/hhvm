@@ -2,8 +2,9 @@
 
 # Utility to generate or verify `php.bzl` from `php.txt`
 
-import sys
 import os.path
+import sys
+
 
 def _read_file_and_gen_bzl(path: str) -> str:
     r = ""
@@ -15,9 +16,10 @@ def _read_file_and_gen_bzl(path: str) -> str:
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
-            r += f"    \"{line}\",\n"
+            r += f'    "{line}",\n'
     r += "]\n"
     return r
+
 
 def _generate():
     php_txt = os.path.dirname(__file__) + "/php.txt"
@@ -26,6 +28,7 @@ def _generate():
     with open(php_bzl, mode="w") as f:
         f.write(contents)
 
+
 def _verify(php_txt: str, php_bzl: str):
     with open(php_bzl, mode="rb") as f:
         expected = f.read()
@@ -33,6 +36,7 @@ def _verify(php_txt: str, php_bzl: str):
     actual = _read_file_and_gen_bzl(php_txt)
     actual = bytes(actual, "utf-8")
     assert expected == actual, "file need to be regenerated"
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:

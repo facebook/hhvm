@@ -3,18 +3,18 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from bcc import BPF, USDT, PerfType, PerfHWConfig
-import ctypes as ct
 import argparse
+import ctypes as ct
 import os
 
+from bcc import BPF, USDT, PerfType, PerfHWConfig
+
 parser = argparse.ArgumentParser(
-    description="Log stack snapshots triggered by HW events")
-parser.add_argument("pids",
-                    metavar='pid',
-                    type=int,
-                    nargs='+',
-                    help="pid to signal and attach to.")
+    description="Log stack snapshots triggered by HW events"
+)
+parser.add_argument(
+    "pids", metavar="pid", type=int, nargs="+", help="pid to signal and attach to."
+)
 args = parser.parse_args()
 
 # see tracing_types.h
@@ -44,9 +44,7 @@ for pid in args.pids:
     print("Enabled tracing on {}\n".format(pid))
     usdts.append(usdt)
 
-b = BPF(text=bpf_text,
-        usdt_contexts=usdts,
-        cflags=cflags)
+b = BPF(text=bpf_text, usdt_contexts=usdts, cflags=cflags)
 
 # Track pids to fire signals on
 hhvm_pids = b.get_table("hhvm_pids")
@@ -58,27 +56,29 @@ b.attach_perf_event(
     ev_type=PerfType.HARDWARE,
     ev_config=PerfHWConfig.CPU_CYCLES,
     fn_name="on_event",
-    sample_period=10000000)
+    sample_period=10000000,
+)
 
 
-class HackSymbol():
-    '''Struct from strobelight_hhvm_structs.h'''
+class HackSymbol:
+    """Struct from strobelight_hhvm_structs.h"""
+
     def __init__(self, bcc_obj):
         self.line = bcc_obj.line
-        encoding = 'utf-8'
+        encoding = "utf-8"
         self.file_name = bcc_obj.file_name.decode(encoding)
         self.class_name = bcc_obj.class_name.decode(encoding)
         self.function = bcc_obj.function.decode(encoding)
 
     def __str__(self):
-        return "{}:{} {}::{}".format(self.file_name,
-                                     self.line,
-                                     self.class_name,
-                                     self.function)
+        return "{}:{} {}::{}".format(
+            self.file_name, self.line, self.class_name, self.function
+        )
 
 
 class HackSymbol(ct.Structure):
-    '''Struct from strobelight_hhvm_structs.h'''
+    """Struct from strobelight_hhvm_structs.h"""
+
     _fields_ = [
         ("line", ct.c_int),
         ("file_name", ct.c_char_p),
@@ -87,20 +87,25 @@ class HackSymbol(ct.Structure):
     ]
 
     def __str__(self):
-        encoding = 'utf-8'
-        if (self.class_name):
-            return '{}:{} {}::{}'.format(self.file_name.decode(encoding),
-                                         self.line,
-                                         self.class_name.decode(encoding),
-                                         self.function.decode(encoding))
+        encoding = "utf-8"
+        if self.class_name:
+            return "{}:{} {}::{}".format(
+                self.file_name.decode(encoding),
+                self.line,
+                self.class_name.decode(encoding),
+                self.function.decode(encoding),
+            )
         else:
-            return '{}:{} {}'.format(self.file_name.decode(encoding),
-                                     self.line,
-                                     self.function.decode(encoding))
+            return "{}:{} {}".format(
+                self.file_name.decode(encoding),
+                self.line,
+                self.function.decode(encoding),
+            )
 
 
 class HackSample(ct.Structure):
-    '''Struct from strobelight_hhvm_structs.h'''
+    """Struct from strobelight_hhvm_structs.h"""
+
     _fields_ = [
         ("pid", ct.c_int),
         ("tid", ct.c_int),

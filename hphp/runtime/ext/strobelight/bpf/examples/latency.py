@@ -3,19 +3,17 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from bcc import BPF, USDT, PerfType, PerfHWConfig
-from ctypes import c_int
 import argparse
 import os
 import time
+from ctypes import c_int
 
-parser = argparse.ArgumentParser(
-    description="Log latency of signal handling in hhvm")
-parser.add_argument("pids",
-                    metavar='pid',
-                    type=int,
-                    nargs='+',
-                    help="pid to signal and attach to.")
+from bcc import BPF, USDT, PerfType, PerfHWConfig
+
+parser = argparse.ArgumentParser(description="Log latency of signal handling in hhvm")
+parser.add_argument(
+    "pids", metavar="pid", type=int, nargs="+", help="pid to signal and attach to."
+)
 args = parser.parse_args()
 
 # see tracing_types.h
@@ -42,9 +40,7 @@ for pid in args.pids:
     print("Enabled tracing on {}\n".format(pid))
     usdts.append(usdt)
 
-bpf = BPF(text=bpf_text,
-          usdt_contexts=usdts,
-          cflags=cflags)
+bpf = BPF(text=bpf_text, usdt_contexts=usdts, cflags=cflags)
 
 hhvm_pids = bpf.get_table("hhvm_pids")
 for pid in args.pids:
@@ -55,7 +51,8 @@ bpf.attach_perf_event(
     ev_type=PerfType.HARDWARE,
     ev_config=PerfHWConfig.CPU_CYCLES,
     fn_name="on_event",
-    sample_period=10000000)
+    sample_period=10000000,
+)
 
 try:
     print("Go run `sudo cat /sys/kernel/debug/tracing/trace_pipe`\n")

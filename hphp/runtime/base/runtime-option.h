@@ -903,9 +903,6 @@ struct RuntimeOption {
   F(bool, AssemblerFoldDefaultValues,  true)                            \
   F(uint64_t, AssemblerMaxScalarSize,  2147483648) /* 2GB */            \
   F(uint32_t, HHIRLoadElimMaxIters,    10)                              \
-  /* Temporarily only enable in debug builds so the optimizations get
-   * tested */                                                          \
-  F(bool, HHIRLoadEnableTeardownOpts, false)                            \
   F(uint32_t, HHIRLoadStackTeardownMaxDecrefs, 8)                       \
   F(uint32_t, HHIRLoadThrowMaxDecrefs, 64)                              \
   F(bool, HHIRStorePRE,                true)                            \

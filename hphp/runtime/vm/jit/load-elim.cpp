@@ -279,18 +279,8 @@ struct FRemovable {};
 struct FJmpNext {};
 struct FJmpTaken {};
 
-/*
- * The instruction can be turned into specialized frame teardown instructions
- * followed by an EndCatch or an EnterTCUnwind that will omit the teardown
- */
-constexpr uint32_t kMaxTrackedFrameElems = 64;
-struct FFrameTeardown {
-  int32_t numStackElems;
-  CompactVector<std::pair<uint32_t, Type>> elems;
-};
-
 using Flags = boost::variant<FNone,FRedundant,FReducible,FRefinableLoad,
-                             FRemovable,FJmpNext,FJmpTaken,FFrameTeardown>;
+                             FRemovable,FJmpNext,FJmpTaken>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -662,104 +652,6 @@ void check_decref_eligible(
     }
   };
 
-Flags handle_end_catch(Local& env, const IRInstruction& inst) {
-  if (!RuntimeOption::EvalHHIRLoadEnableTeardownOpts) return FNone{};
-  assertx(inst.op() == EndCatch);
-  auto const data = inst.extra<EndCatchData>();
-  if (data->teardown != EndCatchData::Teardown::Full ||
-      inst.func()->isCPPBuiltin() ||
-      findCatchHandler(inst.func(), inst.marker().bcOff()) != kInvalidOffset) {
-    FTRACE(4, "      non-reducible EndCatch\n");
-    return FNone{};
-  }
-  auto pc = inst.marker().fixupSk().func()->entry() + inst.marker().bcOff();
-  auto const op = decode_op(pc);
-  if (op == OpFCallCtor &&
-      decodeFCallArgs(op, pc, nullptr /*StringDecoder*/).lockWhileUnwinding()) {
-    FTRACE(4, "      non-reducible EndCatch -- lock while unwinding\n");
-    return FNone{};
-  }
-  assertx(data->stublogue != EndCatchData::FrameMode::Stublogue);
-  auto const numLocals = inst.func()->numLocals();
-  auto const numStackElems = inst.marker().bcSPOff() - SBInvOffset{0};
-
-  if (numStackElems + numLocals > kMaxTrackedFrameElems) {
-    FTRACE(4, "      non-reducible EndCatch - too many values\n");
-    return FNone{};
-  }
-
-  FTRACE(4, "      reducible EndCatch\n");
-  FTRACE(4, "Optimize EndCatch {}, num locals {}, num stack {}\n{}\n",
-    inst.func()->fullName()->data(), numLocals, numStackElems,
-    inst.marker().show());
-
-  CompactVector<std::pair<uint32_t, Type>> elems;
-
-  // If locals are decreffed, we shouldn't decref them again. This also implies
-  // that there are no stack elements.
-  if (data->mode != EndCatchData::CatchMode::LocalsDecRefd) {
-    for (uint32_t i = 0; i < numLocals; ++i) {
-      check_decref_eligible(
-        env,
-        elems,
-        i,
-        AliasClass { ALocal { inst.marker().fp(), i }});
-    }
-
-    // Iterate from higher addresses to lower so that tracing prints them in
-    // the memory layout order
-    for (int32_t i = numStackElems - 1; i >= 0; --i) {
-      auto const astk_ = AStack::at(data->offset + i);
-      check_decref_eligible(
-        env,
-        elems,
-        numLocals + numStackElems - 1 - i,
-        AliasClass { astk_ });
-    }
-  }
-
-  if (elems.size() > RuntimeOption::EvalHHIRLoadStackTeardownMaxDecrefs) {
-    FTRACE(2, "      handle_end_catch: refusing -- too many decrefs {}\n",
-           elems.size());
-    return FNone{};
-  }
-
-  return FFrameTeardown { numStackElems, std::move(elems) };
-}
-
-Flags handle_enter_tc_unwind(Local& env, const IRInstruction& inst) {
-  if (!RuntimeOption::EvalHHIRLoadEnableTeardownOpts) return FNone{};
-  assertx(inst.op() == EnterTCUnwind);
-  auto const data = inst.extra<EnterTCUnwind>();
-  if (!data->teardown || inst.func()->isCPPBuiltin()) {
-    FTRACE(4, "      non-reducible EnterTCUnwind\n");
-    return FNone{};
-  }
-  auto const numLocals = inst.func()->numLocals();
-  if (numLocals > kMaxTrackedFrameElems) {
-    FTRACE(4, "      non-reducible EnterTCUnwind - too many locals\n");
-    return FNone{};
-  }
-
-  FTRACE(4, "      reducible EnterTCUnwind\n");
-  CompactVector<std::pair<uint32_t, Type>> locals;
-  for (uint32_t i = 0; i < numLocals; ++i) {
-    check_decref_eligible(
-      env,
-      locals,
-      i,
-      AliasClass { ALocal { inst.src(1), i }});
-  }
-
-  if (locals.size() > RuntimeOption::EvalHHIRLoadThrowMaxDecrefs) {
-    FTRACE(2, "      handle_enter_tc_unwind: refusing -- too many decrefs {}\n",
-           locals.size());
-    return FNone{};
-  }
-
-  return FFrameTeardown { 0, std::move(locals) };
-}
-
 void refine_value(Local& env, SSATmp* newVal, SSATmp* oldVal) {
   bitset_for_each_set(
     env.state.avail,
@@ -788,8 +680,6 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { clear_everything(env); },
     [&] (ExitEffects)       {
-      if (inst.op() == EndCatch) flags = handle_end_catch(env, inst);
-      if (inst.op() == EnterTCUnwind) flags = handle_enter_tc_unwind(env, inst);
       clear_everything(env);
     },
     [&] (ReturnEffects)     {},
@@ -1188,19 +1078,6 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
       FTRACE(2, "      unnecessary\n");
       env.unit.replace(&inst, Jmp, inst.taken());
       ++env.jumpsRemoved;
-    },
-
-    [&] (FFrameTeardown f) {
-      FTRACE(2, "      frame teardown\n");
-      if (inst.op() == EndCatch) {
-        DEBUG_ONLY auto const data = inst.extra<EndCatchData>();
-        assertx(data->teardown == EndCatchData::Teardown::Full);
-        assertx(data->stublogue == EndCatchData::FrameMode::Phplogue);
-        optimize_end_catch(env, inst, f.numStackElems, f.elems);
-        return;
-      }
-      assertx(inst.op() == EnterTCUnwind && f.numStackElems == 0);
-      optimize_enter_tc_unwind(env, inst, f.elems);
     }
   );
 

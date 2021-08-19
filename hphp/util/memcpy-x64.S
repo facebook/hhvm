@@ -249,11 +249,11 @@ ETCH_LABEL(END16):
               ETCH_SIZE(_hhvm_memcpy)
 
 // When AVX2 is enabled, we use folly's memcpy instead of _hhvm_memcpy.
-              .globl    memcpy
+              .globl    ETCH_NAME(memcpy)
 #ifdef __AVX2__
-              memcpy = _folly_memcpy
+              ETCH_NAME(memcpy) = ETCH_NAME(_folly_memcpy)
 #else
-              memcpy = _hhvm_memcpy
+              ETCH_NAME(memcpy) = ETCH_NAME(_hhvm_memcpy)
 #endif
 
               .ident "GCC: (GNU) 4.8.2"

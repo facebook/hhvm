@@ -59,7 +59,8 @@ struct State {
   // was known to be Rx mutable
   bool mbrMustContainMutableLocalOrThis;
   bool afterDim; // has there been a Dim in the current minstr seqence
-  bool afterCheckROCOW; // has there been an instruction with CheckROCOW
+  // has there been an instruction with CheckROCOW or CheckMutROCOW
+  bool afterCheckCOW;
 };
 
 /**
@@ -1561,7 +1562,7 @@ bool FuncChecker::checkReadOnlyOp(State* cur, PC pc, Op op) {
       decode_oa<MOpMode>(new_pc);
       auto const rop = decode_oa<ReadOnlyOp>(new_pc);
       if (rop == ReadOnlyOp::ReadOnly) return readOnlyImmNotSupported(rop, op);
-      cur->afterCheckROCOW = rop == ReadOnlyOp::CheckROCOW || rop == ReadOnlyOp::CheckMutROCOW;
+      cur->afterCheckCOW = rop == ReadOnlyOp::CheckROCOW || rop == ReadOnlyOp::CheckMutROCOW;
       return true;
     } else if (op == Op::BaseL) {
       decode_op(new_pc);
@@ -1572,10 +1573,10 @@ bool FuncChecker::checkReadOnlyOp(State* cur, PC pc, Op op) {
       if (rop != ReadOnlyOp::CheckROCOW && rop != ReadOnlyOp::Any) {
         return readOnlyImmNotSupported(rop, op);
       }
-      cur->afterCheckROCOW = rop == ReadOnlyOp::CheckROCOW;
+      cur->afterCheckCOW = rop == ReadOnlyOp::CheckROCOW;
       return true;
     } else {
-      cur->afterCheckROCOW = false;
+      cur->afterCheckCOW = false;
       return true;
     }
   } else if (isMemberDimOp(op)) {
@@ -1603,7 +1604,7 @@ bool FuncChecker::checkReadOnlyOp(State* cur, PC pc, Op op) {
         break;
     }
     auto const is_prop_flavor = isPropFlavor(mcode);
-    if (is_prop_flavor && cur->afterCheckROCOW) {
+    if (is_prop_flavor && cur->afterCheckCOW) {
       ferror("Check(Mut)ROCOW must only appear on the last prop access.\n");
       return false;
     }
@@ -1613,7 +1614,7 @@ bool FuncChecker::checkReadOnlyOp(State* cur, PC pc, Op op) {
         ferror("Only property-flavored member keys may be marked Check(Mut)ROCOW.\n");
         return false;
       } else {
-        cur->afterCheckROCOW = true;
+        cur->afterCheckCOW = true;
       }
     }
   }
@@ -2069,7 +2070,7 @@ void FuncChecker::initState(State* s) {
   s->guaranteedThis = m_func->pce() && !(m_func->attrs & AttrStatic);
   s->mbrMustContainMutableLocalOrThis = false;
   s->afterDim = false;
-  s->afterCheckROCOW = false;
+  s->afterCheckCOW = false;
 }
 
 void FuncChecker::copyState(State* to, const State* from) {
@@ -2084,7 +2085,7 @@ void FuncChecker::copyState(State* to, const State* from) {
   to->guaranteedThis = from->guaranteedThis;
   to->mbrMustContainMutableLocalOrThis = from->mbrMustContainMutableLocalOrThis;
   to->afterDim = from->afterDim;
-  to->afterCheckROCOW = from->afterCheckROCOW;
+  to->afterCheckCOW = from->afterCheckCOW;
 }
 
 bool FuncChecker::checkExnEdge(State cur, Op op, Block* b) {

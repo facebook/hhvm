@@ -240,6 +240,8 @@ bool is_constructor_name(const char* func);
                                                        const char* propName);
 [[noreturn]] void throw_must_be_mutable(const char* className, const char* propName);
 [[noreturn]] void throw_local_must_be_value_type(const char* locName);
+[[noreturn]] void throw_prop_must_be_value_type(const char* className,
+                                                const char* propName);
 [[noreturn]] void throw_late_init_prop(const Class* cls,
                                        const StringData* propName,
                                        bool isSProp);
@@ -248,8 +250,8 @@ bool is_constructor_name(const char* func);
                                              unsigned int arg_num,
                                              const StringData* type);
 
-bool checkReadonly(const TypedValue* tv, const Class* cls, const StringData* name,
-                   bool readonly, ReadOnlyOp op);
+void checkReadonly(const TypedValue* tv, const Class* cls, const StringData* name,
+                   bool readonly, ReadOnlyOp op, bool* roProp);
 bool readonlyLocalShouldThrow(TypedValue tv, ReadOnlyOp op, bool& roProp);
 
 void check_collection_cast_to_array();

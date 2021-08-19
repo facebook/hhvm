@@ -902,9 +902,16 @@ void throw_must_be_mutable(const char* className, const char* propName)
 
 void throw_local_must_be_value_type(const char* locName)
 {
+  auto msg = folly::sformat("Local {} must be a value type.", locName);
+  SystemLib::throwInvalidOperationExceptionObject(msg);
+}
+
+void throw_prop_must_be_value_type(const char* className, const char* propName)
+{
   auto msg = folly::sformat(
-    "Local {} must be a value type (e.g. Hack arrays).",
-    locName
+    "Property {} of class {} is readonly, and therefore must be a value "
+    "type to be modified.",
+    propName, className
   );
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
@@ -919,22 +926,28 @@ bool readonlyLocalShouldThrow(TypedValue tv, ReadOnlyOp op, bool& roProp) {
   return false;
 }
 
-bool checkReadonly(const TypedValue* tv,
+void checkReadonly(const TypedValue* tv,
                    const Class* cls,
                    const StringData* name,
                    bool readonly,
-                   ReadOnlyOp op) {
-  if (!RO::EvalEnableReadonlyPropertyEnforcement) return false;
+                   ReadOnlyOp op,
+                   bool* roProp) {
+  if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
   auto cow = !isRefcountedType(type(tv)) || hasPersistentFlavor(type(tv));
   if (readonly) {
-    if (op == ReadOnlyOp::CheckMutROCOW || op == ReadOnlyOp::Mutable) {
-      if (op == ReadOnlyOp::CheckMutROCOW && cow) return true;
+    if (op == ReadOnlyOp::CheckMutROCOW || op == ReadOnlyOp::CheckROCOW) {
+      if (cow) {
+        assertx(roProp);
+        *roProp = true;
+      } else {
+        throw_prop_must_be_value_type(cls->name()->data(), name->data());
+      }
+    } else if (op == ReadOnlyOp::Mutable) {
       throw_must_be_mutable(cls->name()->data(), name->data());
     }
-  } else if (op == ReadOnlyOp::ReadOnly) {
-      throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
+  } else if (op == ReadOnlyOp::ReadOnly || op == ReadOnlyOp::CheckROCOW) {
+    throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
   }
-  return false;
 }
 
 NEVER_INLINE

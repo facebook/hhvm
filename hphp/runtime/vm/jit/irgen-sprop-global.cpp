@@ -148,7 +148,9 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, SSATmp* 
        opts.readOnlyCheck == ReadOnlyOp::CheckMutROCOW)) {
       return false;
     }
-    if (!lookup.readonly && opts.readOnlyCheck == ReadOnlyOp::ReadOnly) {
+    if (!lookup.readonly &&
+      (opts.readOnlyCheck == ReadOnlyOp::ReadOnly ||
+       opts.readOnlyCheck == ReadOnlyOp::CheckROCOW)) {
       return false;
     }
     return true;

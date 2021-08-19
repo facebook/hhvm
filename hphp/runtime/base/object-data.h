@@ -492,6 +492,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   [[noreturn]] NEVER_INLINE
   void throwMustBeReadOnly(Slot prop) const;
 
+  [[noreturn]] NEVER_INLINE
+  void throwMustBeValueType(Slot prop) const;
+
  public:
   // never box the lval returned from getPropLval; use propB instead
   tv_lval getPropLval(const Class*, const StringData*);
@@ -512,6 +515,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     bool isConst;
     bool readonly;
   };
+
+  void checkReadonly(const PropLookup&, ReadOnlyOp, bool*) const;
 
   template <bool forWrite, bool forRead, bool ignoreLateInit>
   ALWAYS_INLINE

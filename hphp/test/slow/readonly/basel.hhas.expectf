@@ -1,2 +1,2 @@
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Local y must be a value type (e.g. Hack arrays).' in %s/basel.hhas:8
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Local y must be a value type.' in %s/basel.hhas:8
 %A

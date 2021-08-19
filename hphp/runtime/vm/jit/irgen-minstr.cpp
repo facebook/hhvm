@@ -961,13 +961,18 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadOnlyOp
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
   if (!propInfo || propInfo->isConst || mode == MOpMode::Unset ||
-    (propInfo->readOnly && op == ReadOnlyOp::CheckMutROCOW)) {
+    (propInfo->readOnly &&
+    (op == ReadOnlyOp::CheckMutROCOW || op == ReadOnlyOp::CheckROCOW))) {
     return propGenericImpl(env, mode, base, key, nullsafe, op);
   }
-  if (RO::EvalEnableReadonlyPropertyEnforcement && propInfo->readOnly &&
-    op == ReadOnlyOp::Mutable) {
-    gen(env, ThrowMustBeMutableException, cns(env, propInfo->propClass), key);
-    return cns(env, TBottom);
+  if (RO::EvalEnableReadonlyPropertyEnforcement) {
+    if (propInfo->readOnly && op == ReadOnlyOp::Mutable) {
+      gen(env, ThrowMustBeMutableException, cns(env, propInfo->propClass), key);
+      return cns(env, TBottom);
+    } else if (!propInfo->readOnly && op == ReadOnlyOp::CheckROCOW) {
+      gen(env, ThrowMustBeReadOnlyException, cns(env, propInfo->propClass), key);
+      return cns(env, TBottom);
+    }
   }
 
   SSATmp* propPtr;

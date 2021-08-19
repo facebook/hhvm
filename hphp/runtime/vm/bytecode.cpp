@@ -2485,7 +2485,7 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
       name->data());
   }
 
-  if (checkReadonly(lookup.val, class_, name, lookup.readonly, op)) mstate.roProp = true;
+  checkReadonly(lookup.val, class_, name, lookup.readonly, op, &mstate.roProp);
   mstate.base = tv_lval(lookup.val);
 }
 

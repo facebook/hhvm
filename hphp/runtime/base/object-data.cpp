@@ -1119,6 +1119,35 @@ void ObjectData::throwMustBeReadOnly(Slot prop) const {
   );
 }
 
+NEVER_INLINE
+void ObjectData::throwMustBeValueType(Slot prop) const {
+  throw_prop_must_be_value_type(
+    getClassName().data(),
+    m_cls->declProperties()[prop].name->data()
+  );
+}
+
+void ObjectData::checkReadonly(const PropLookup& lookup, ReadOnlyOp op,
+                               bool* roProp) const {
+  if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
+  auto cow = !isRefcountedType(type(lookup.val)) ||
+             hasPersistentFlavor(type(lookup.val));
+  if (lookup.readonly) {
+    if (op == ReadOnlyOp::CheckMutROCOW || op == ReadOnlyOp::CheckROCOW) {
+      if (cow) {
+        assertx(roProp);
+        *roProp = true;
+      } else {
+        throwMustBeValueType(lookup.slot);
+      }
+    } else if (op == ReadOnlyOp::Mutable) {
+      throwMustBeMutable(lookup.slot);
+    }
+  } else if (op == ReadOnlyOp::ReadOnly || op == ReadOnlyOp::CheckROCOW) {
+    throwMustBeReadOnly(lookup.slot);
+  }
+}
+
 template <bool forWrite, bool forRead, bool ignoreLateInit>
 ALWAYS_INLINE
 ObjectData::PropLookup ObjectData::getPropImpl(
@@ -1229,15 +1258,7 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
             throwMutateConstProp(lookup.slot);
           }
         }
-        if (RO::EvalEnableReadonlyPropertyEnforcement && lookup.readonly) {
-          if (op == ReadOnlyOp::CheckMutROCOW &&
-            (!isRefcountedType(lookup.val.type()) || hasPersistentFlavor(lookup.val.type()))) {
-            assertx(roProp);
-            *roProp = true;
-          } else if (op == ReadOnlyOp::Mutable || op == ReadOnlyOp::CheckMutROCOW) {
-            throwMustBeMutable(lookup.slot);
-          }
-        }
+        checkReadonly(lookup, op, roProp);
         return prop;
       };
 

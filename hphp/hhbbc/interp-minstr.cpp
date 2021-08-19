@@ -2029,10 +2029,22 @@ void in(ISS& env, const bc::BaseSC& op) {
     lookup.readOnly == TriBool::Yes) {
     return unreachable(env);
   }
-  auto const mightReadOnlyThrow =
-    checkReadOnlyOp() &&
-    ((op.subop4 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Maybe) ||
-    (op.subop4 == ReadOnlyOp::CheckMutROCOW && lookup.readOnly != TriBool::No));
+  if (checkReadOnlyOp(ReadOnlyOp::CheckROCOW, op.subop4) &&
+    lookup.readOnly == TriBool::No) {
+    return unreachable(env);
+  }
+
+  auto mightNotBeCOW =
+    lookup.ty.couldBe(BCounted) && !lookup.ty.subtypeOf(BArrLike);
+
+  auto const mightMutableThrow =
+    op.subop4 == ReadOnlyOp::Mutable && lookup.readOnly == TriBool::Maybe;
+  auto const mightROCOWThrow = op.subop4 == ReadOnlyOp::CheckROCOW && mightNotBeCOW;
+  auto const mightMutROCOWThrow = op.subop4 == ReadOnlyOp::CheckMutROCOW &&
+    lookup.readOnly == TriBool::Maybe && mightNotBeCOW;
+
+  auto const mightReadOnlyThrow = checkReadOnlyOp() &&
+    (mightMutableThrow || mightROCOWThrow || mightMutROCOWThrow);
 
   // Loading the base from a static property can be considered
   // effect_free if there's no possibility of throwing. This requires

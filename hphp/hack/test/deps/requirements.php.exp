@@ -1,5 +1,5 @@
-Cstr Bar -> Type Foo
-Cstr FooParent -> Type Bar, Type Foo, Type IFoo
+Constructor Bar -> Type Foo
+Constructor FooParent -> Type Bar, Type Foo, Type IFoo
 Extends Bar -> Type Foo
 Extends FooParent -> Type Bar, Type Foo, Type IFoo
 Extends IFoo -> Type Foo

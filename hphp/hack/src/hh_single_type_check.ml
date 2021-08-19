@@ -1523,7 +1523,7 @@ let dump_dep_hashes (nast : Nast.program) : unit =
 
       method! on_class_ _cls x =
         process_variant @@ Type (snd x.c_name);
-        process_variant @@ Cstr (snd x.c_name);
+        process_variant @@ Constructor (snd x.c_name);
         process_variant @@ Extends (snd x.c_name);
         process_variant @@ AllMembers (snd x.c_name);
         super#on_class_ (Some (snd x.c_name)) x

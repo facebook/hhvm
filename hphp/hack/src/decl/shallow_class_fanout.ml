@@ -122,7 +122,7 @@ let add_minor_change_fanout
   in
   let acc =
     Option.value_map constructor ~default:acc ~f:(fun change ->
-        add_member_fanout acc change (fun cid -> Dep.Cstr cid))
+        add_member_fanout acc change (fun cid -> Dep.Constructor cid))
   in
   acc
 

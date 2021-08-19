@@ -1,4 +1,4 @@
-Cstr B -> Type C
+Constructor B -> Type C
 Extends B -> Type C
 Fun f1 -> Fun f2
 Method B::foo -> Type C

@@ -1,4 +1,4 @@
-Cstr C -> Fun bar, Fun obj_only, Type C
+Constructor C -> Fun bar, Fun obj_only, Type C
 Extends I -> Type C
 Fun bar -> Type C
 Fun foo -> Fun bar, Type C

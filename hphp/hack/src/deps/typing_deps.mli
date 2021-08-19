@@ -42,7 +42,7 @@ module Dep : sig
         extends`, `require implements`, etc.) *)
     | Const : string * string -> dependency variant
         (** Represents something depending on a class constant. *)
-    | Cstr : string -> dependency variant
+    | Constructor : string -> dependency variant
         (** Represents something depending on a class constructor. *)
     | Prop : string * string -> dependency variant
         (** Represents something depending on a class's instance property. *)

@@ -86,12 +86,12 @@ module ClassDiff = struct
       add_inverted_deps mode acc (fun x -> Dep.SMethod (cid, x)) smethods_diff
     in
     (* compare class constructors *)
-    let cstr_diff = Poly.( <> ) class1.dc_construct class2.dc_construct in
-    let is_unchanged = is_unchanged && not cstr_diff in
-    let cstr_ideps = Typing_deps.get_ideps mode (Dep.Cstr cid) in
+    let ctor_diff = Poly.( <> ) class1.dc_construct class2.dc_construct in
+    let is_unchanged = is_unchanged && not ctor_diff in
+    let ctor_ideps = Typing_deps.get_ideps mode (Dep.Constructor cid) in
     let acc =
-      if cstr_diff then
-        DepSet.union acc cstr_ideps
+      if ctor_diff then
+        DepSet.union acc ctor_ideps
       else
         acc
     in
@@ -233,14 +233,14 @@ module ClassEltDiff = struct
       match (Constructors.get_old cid, Constructors.get cid) with
       | (None, _)
       | (_, None) ->
-        (Typing_deps.get_ideps mode (Dep.Cstr cid), `Changed)
+        (Typing_deps.get_ideps mode (Dep.Constructor cid), `Changed)
       | (Some fe1, Some fe2) ->
         let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
         let fe2 = Decl_pos_utils.NormalizeSig.fun_elt fe2 in
         if Poly.( = ) fe1 fe2 then
           (DepSet.make mode, `Unchanged)
         else
-          (Typing_deps.get_ideps mode (Dep.Cstr cid), `Changed)
+          (Typing_deps.get_ideps mode (Dep.Constructor cid), `Changed)
     else
       (DepSet.make mode, `Unchanged)
 

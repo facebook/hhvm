@@ -408,7 +408,7 @@ end = struct
       | Prop (cls, _) -> Some cls
       | SProp (cls, _) -> Some cls
       | Type cls -> Some cls
-      | Cstr cls -> Some cls
+      | Constructor cls -> Some cls
       | AllMembers cls -> Some cls
       | Extends cls -> Some cls
       | Fun _
@@ -426,7 +426,7 @@ end = struct
     | SMethod (name, _)
     | Prop (name, _)
     | SProp (name, _)
-    | Cstr name
+    | Constructor name
     | AllMembers name
     | Extends name ->
       Decl.get_class_or_typedef_pos ctx name
@@ -466,7 +466,7 @@ end = struct
     | SMethod (name, _)
     | Prop (name, _)
     | SProp (name, _)
-    | Cstr name
+    | Constructor name
     | AllMembers name
     | Extends name ->
       get_class_or_typedef_mode ctx name
@@ -506,7 +506,7 @@ end = struct
         value_or_not_found description @@ Class.get_const cls name
       in
       cc_origin
-    | Cstr cls -> cls
+    | Constructor cls -> cls
     | _ -> raise UnexpectedDependency
 
   let is_builtin ctx dep =
@@ -781,7 +781,7 @@ end = struct
             Option.iter ~f:(add_classvar_attr_deps ctx env)
             @@ Nast_helper.get_prop ctx cls_name name;
             (* We need to initialize properties in the constructor, add a dependency on it *)
-            do_add_dep ctx env (Cstr cls_name)
+            do_add_dep ctx env (Constructor cls_name)
           | SProp (_, name) ->
             let Typing_defs.{ ce_type; _ } =
               value_or_not_found description @@ Class.get_sprop cls name
@@ -847,7 +847,7 @@ end = struct
                 value_or_not_found description @@ Class.get_const cls name
               in
               add_dep cc_type)
-          | Cstr _ ->
+          | Constructor _ ->
             (match Class.construct cls with
             | (Some Typing_defs.{ ce_type; _ }, _) ->
               add_dep @@ Lazy.force ce_type;
@@ -897,7 +897,7 @@ end = struct
       ~f:(fun Aast.{ ua_name = (_, cls); ua_params = exprs } ->
         if not @@ String.is_prefix ~prefix:"__" cls then (
           do_add_dep ctx env @@ Typing_deps.Dep.Type cls;
-          do_add_dep ctx env @@ Typing_deps.Dep.Cstr cls
+          do_add_dep ctx env @@ Typing_deps.Dep.Constructor cls
         );
         List.iter exprs ~f:(function
             | (_, _, Aast.(Class_get ((_, _, CI (_, cls)), _, _)))
@@ -2755,7 +2755,8 @@ end = struct
       | SMethod (cls_nm, nm)
         when String.(cls_nm = Dep.get_origin ctx cls_nm dep) ->
         of_method ctx cls_nm nm
-      | Cstr cls_nm when String.(cls_nm = Dep.get_origin ctx cls_nm dep) ->
+      | Constructor cls_nm when String.(cls_nm = Dep.get_origin ctx cls_nm dep)
+        ->
         let nm = "__construct" in
         of_method ctx cls_nm nm
       | Prop (cls_nm, nm) when String.(cls_nm = Dep.get_origin ctx cls_nm dep)
@@ -2789,7 +2790,7 @@ end = struct
       | Const _
       | Method _
       | SMethod _
-      | Cstr _
+      | Constructor _
       | Prop _
       | SProp _
       | AllMembers _

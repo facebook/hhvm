@@ -1,5 +1,5 @@
-Cstr A -> Type B
-Cstr T -> Type A
+Constructor A -> Type B
+Constructor T -> Type A
 Extends A -> Type B
 Extends I -> Type B
 Extends T -> Type A

@@ -33,7 +33,7 @@ module Dep = struct
     | Type : string -> 'a variant
     | Extends : string -> dependency variant
     | Const : string * string -> dependency variant
-    | Cstr : string -> dependency variant
+    | Constructor : string -> dependency variant
     | Prop : string * string -> dependency variant
     | SProp : string * string -> dependency variant
     | Method : string * string -> dependency variant
@@ -71,7 +71,7 @@ module Dep = struct
     | (GConst _, _) -> false
     | (Type _, _) -> false
     | (Fun _, _) -> false
-    | (Cstr _, _) -> false
+    | (Constructor _, _) -> false
     | (Const _, _) -> false
     | (Prop _, _) -> false
     | (SProp _, _) -> false
@@ -115,7 +115,7 @@ module Dep = struct
     | Type name1 -> hash1 mode 2 name1
     | Extends name1 -> hash1 mode 3 name1
     | Const (name1, name2) -> hash2 mode 5 name1 name2
-    | Cstr name1 -> hash1 mode 6 name1
+    | Constructor name1 -> hash1 mode 6 name1
     | Prop (name1, name2) -> hash2 mode 7 name1 name2
     | SProp (name1, name2) -> hash2 mode 8 name1 name2
     | Method (name1, name2) -> hash2 mode 9 name1 name2
@@ -139,7 +139,7 @@ module Dep = struct
     | SProp (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
     | Method (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
     | SMethod (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
-    | Cstr s -> Utils.strip_ns s
+    | Constructor s -> Utils.strip_ns s
     | AllMembers s -> Utils.strip_ns s
     | Extends s -> Utils.strip_ns s
 
@@ -148,7 +148,7 @@ module Dep = struct
     | Const (s, _) -> Decl_reference.Type s
     | Extends s -> Decl_reference.Type s
     | AllMembers s -> Decl_reference.Type s
-    | Cstr s -> Decl_reference.Type s
+    | Constructor s -> Decl_reference.Type s
     | Prop (s, _) -> Decl_reference.Type s
     | SProp (s, _) -> Decl_reference.Type s
     | Method (s, _) -> Decl_reference.Type s
@@ -179,7 +179,7 @@ module Dep = struct
       | SProp _ -> "SProp"
       | Method _ -> "Method"
       | SMethod _ -> "SMethod"
-      | Cstr _ -> "Cstr"
+      | Constructor _ -> "Constructor"
       | AllMembers _ -> "AllMembers"
       | Extends _ -> "Extends"
     in

@@ -609,7 +609,7 @@ let check_members
           | `FromSMethod -> Dep.SMethod (parent_class_elt.ce_origin, member_name)
           | `FromSProp -> Dep.SProp (parent_class_elt.ce_origin, member_name)
           | `FromProp -> Dep.Prop (parent_class_elt.ce_origin, member_name)
-          | `FromConstructor -> Dep.Cstr parent_class_elt.ce_origin
+          | `FromConstructor -> Dep.Constructor parent_class_elt.ce_origin
         in
         if not (Pos_or_decl.is_hhi (Cls.pos parent_class)) then
           Typing_deps.add_idep
@@ -773,7 +773,7 @@ let check_constructors env parent_class class_ psubst subst on_error =
           Typing_deps.add_idep
             (Env.get_deps_mode env)
             (Dep.Type (Cls.name class_))
-            (Dep.Cstr parent_cstr.ce_origin);
+            (Dep.Constructor parent_cstr.ce_origin);
         check_override
           env
           ~check_member_unique:false

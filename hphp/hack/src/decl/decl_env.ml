@@ -63,7 +63,7 @@ let get_class_add_dep env ?(cache : class_cache option) x =
 let get_construct env class_ =
   if not (is_hhi class_) then begin
     add_wclass env class_.dc_name;
-    let dep = Dep.Cstr class_.dc_name in
+    let dep = Dep.Constructor class_.dc_name in
     Option.iter env.droot ~f:(fun root ->
         Typing_deps.add_idep (deps_mode env) root dep)
   end;
@@ -72,6 +72,6 @@ let get_construct env class_ =
 
 let add_constructor_dependency env class_name =
   add_wclass env class_name;
-  let dep = Dep.Cstr class_name in
+  let dep = Dep.Constructor class_name in
   Option.iter env.droot ~f:(fun root ->
       Typing_deps.add_idep (deps_mode env) root dep)

@@ -682,7 +682,7 @@ let make_depend_on_class env class_name =
 
 let make_depend_on_constructor env class_name =
   make_depend_on_class env class_name;
-  let dep = Dep.Cstr class_name in
+  let dep = Dep.Constructor class_name in
   Option.iter env.decl_env.droot ~f:(fun root ->
       Typing_deps.add_idep (get_deps_mode env) root dep);
   ()

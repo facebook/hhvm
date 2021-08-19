@@ -1,6 +1,6 @@
-Cstr Bar -> Type Baz
-Cstr Foo -> Type Bar
-Cstr N\Foo -> Type N\Bar, Type Qux
+Constructor Bar -> Type Baz
+Constructor Foo -> Type Bar
+Constructor N\Foo -> Type N\Bar, Type Qux
 Extends Bar -> Type Baz
 Extends Foo -> Type Bar
 Extends N\Foo -> Type N\Bar, Type Qux

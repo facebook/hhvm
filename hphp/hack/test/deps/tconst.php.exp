@@ -1,5 +1,5 @@
-Cstr Foo -> Type Bar
-Cstr M -> Type N
+Constructor Foo -> Type Bar
+Constructor M -> Type N
 Extends Foo -> Type Bar
 Extends M -> Type N
 Type Foo -> Type Bar

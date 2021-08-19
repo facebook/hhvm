@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<51001f783ee2539e9c07ca6394c94ce8>>
+// @generated SignedSource<<e44f2c5134ac1980cbebeaff08b041f2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -46,6 +46,7 @@ pub use oxidized::aast_defs::Visibility;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Lid<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Pos<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a LocalId<'a>,
@@ -75,6 +76,7 @@ pub use oxidized::aast_defs::ImportFlavor;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum XhpChild<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ChildName(&'a Sid<'a>),
@@ -105,6 +107,7 @@ pub use oxidized::aast_defs::XhpChildOp;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Hint<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Pos<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Hint_<'a>,
@@ -129,6 +132,7 @@ pub type VariadicHint<'a> = Option<&'a Hint<'a>>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Contexts<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Pos<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a [&'a Hint<'a>],
@@ -151,6 +155,7 @@ arena_deserializer::impl_deserialize_in_arena!(Contexts<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct HfParamInfo {
     pub kind: Option<oxidized::ast_defs::ParamKind>,
     pub readonlyness: Option<oxidized::ast_defs::ReadonlyKind>,
@@ -173,6 +178,7 @@ arena_deserializer::impl_deserialize_in_arena!(HfParamInfo);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct HintFun<'a> {
     pub is_readonly: Option<oxidized::ast_defs::ReadonlyKind>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -206,6 +212,7 @@ arena_deserializer::impl_deserialize_in_arena!(HintFun<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Hint_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hoption(&'a Hint<'a>),
@@ -292,6 +299,7 @@ arena_deserializer::impl_deserialize_in_arena!(Hint_<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Tprim {
     Tnull,
     Tvoid,
@@ -322,6 +330,7 @@ arena_deserializer::impl_deserialize_in_arena!(Tprim);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ShapeFieldInfo<'a> {
     pub optional: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -347,6 +356,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShapeFieldInfo<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct NastShapeInfo<'a> {
     pub allows_unknown_fields: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -378,6 +388,7 @@ pub use oxidized::aast_defs::TypedefVisibility;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Enum_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub base: &'a Hint<'a>,
@@ -404,6 +415,7 @@ arena_deserializer::impl_deserialize_in_arena!(Enum_<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct WhereConstraintHint<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Hint<'a>,
     pub oxidized::ast_defs::ConstraintKind,

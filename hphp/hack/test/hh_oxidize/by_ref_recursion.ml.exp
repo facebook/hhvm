@@ -31,6 +31,7 @@ use crate::*;
     Serialize,
     ToOcamlRep,
 )]
+#[repr(C)]
 pub enum IntList<'a> {
     Nil,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -56,6 +57,7 @@ arena_deserializer::impl_deserialize_in_arena!(IntList<'arena>);
     ToOcamlRep,
 )]
 #[serde(bound(deserialize = "A: 'de + arena_deserializer::DeserializeInArena<'de>"))]
+#[repr(C)]
 pub enum NAryTree<'a, A> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Leaf(&'a A),

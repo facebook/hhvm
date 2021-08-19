@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<353f8bf9718805c1cc652a71d1b33042>>
+// @generated SignedSource<<593c47cac1dadc38f0ab98db89361daa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -38,6 +38,7 @@ pub type ExpressionId = ident::Ident;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Local<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Ty<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a pos::Pos<'a>,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1bc744e5508b23642b05e60b27f3991c>>
+// @generated SignedSource<<d9d182cbcae040b90a4598c9ee077ee6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -45,6 +45,7 @@ pub use shape_map::ShapeMap;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Lid(pub Pos, pub LocalId);
 
 pub type Sid = ast_defs::Id;
@@ -68,6 +69,7 @@ pub type IsReified = bool;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ImportFlavor {
     Include,
     Require,
@@ -92,6 +94,7 @@ arena_deserializer::impl_deserialize_in_arena!(ImportFlavor);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum XhpChild {
     ChildName(Sid),
     ChildList(Vec<XhpChild>),
@@ -116,6 +119,7 @@ pub enum XhpChild {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum XhpChildOp {
     ChildStar,
     ChildPlus,
@@ -139,6 +143,7 @@ arena_deserializer::impl_deserialize_in_arena!(XhpChildOp);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Hint(pub Pos, pub Box<Hint_>);
 
 pub type VariadicHint = Option<Hint>;
@@ -158,6 +163,7 @@ pub type VariadicHint = Option<Hint>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Contexts(pub Pos, pub Vec<Hint>);
 
 #[derive(
@@ -175,6 +181,7 @@ pub struct Contexts(pub Pos, pub Vec<Hint>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct HfParamInfo {
     pub kind: Option<ast_defs::ParamKind>,
     pub readonlyness: Option<ast_defs::ReadonlyKind>,
@@ -195,6 +202,7 @@ pub struct HfParamInfo {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct HintFun {
     pub is_readonly: Option<ast_defs::ReadonlyKind>,
     pub param_tys: Vec<Hint>,
@@ -220,6 +228,7 @@ pub struct HintFun {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Hint_ {
     Hoption(Hint),
     Hlike(Hint),
@@ -286,6 +295,7 @@ pub enum Hint_ {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Tprim {
     Tnull,
     Tvoid,
@@ -316,6 +326,7 @@ arena_deserializer::impl_deserialize_in_arena!(Tprim);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ShapeFieldInfo {
     pub optional: bool,
     pub hint: Hint,
@@ -337,6 +348,7 @@ pub struct ShapeFieldInfo {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct NastShapeInfo {
     pub allows_unknown_fields: bool,
     pub field_map: Vec<ShapeFieldInfo>,
@@ -359,6 +371,7 @@ pub struct NastShapeInfo {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum KvcKind {
     Map,
     ImmMap,
@@ -384,6 +397,7 @@ arena_deserializer::impl_deserialize_in_arena!(KvcKind);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum VcKind {
     Vector,
     ImmVector,
@@ -412,6 +426,7 @@ arena_deserializer::impl_deserialize_in_arena!(VcKind);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum UseAsVisibility {
     UseAsPublic,
     UseAsPrivate,
@@ -438,6 +453,7 @@ arena_deserializer::impl_deserialize_in_arena!(UseAsVisibility);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum TypedefVisibility {
     Transparent,
     Opaque,
@@ -461,6 +477,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypedefVisibility);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Enum_ {
     pub base: Hint,
     pub constraint: Option<Hint>,
@@ -482,6 +499,7 @@ pub struct Enum_ {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct WhereConstraintHint(pub Hint, pub ast_defs::ConstraintKind, pub Hint);
 
 #[derive(
@@ -501,6 +519,7 @@ pub struct WhereConstraintHint(pub Hint, pub ast_defs::ConstraintKind, pub Hint)
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ReifyKind {
     Erased,
     SoftReified,

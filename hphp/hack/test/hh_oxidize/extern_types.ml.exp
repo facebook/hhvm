@@ -31,6 +31,7 @@ pub use qux::*;
     Serialize,
     ToOcamlRep,
 )]
+#[repr(C)]
 pub struct X {
     pub bar: foo::bar::Bar,
     pub baz: foo::baz::BazList,

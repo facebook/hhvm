@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0742542820f55b1df2af6a0116d419ce>>
+// @generated SignedSource<<db98a0db8c8d3b4660f017843731d7ff>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -35,6 +35,7 @@ pub use c::map as c_map;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct PerContEntry<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub local_types: &'a typing_local_types::TypingLocalTypes<'a>,

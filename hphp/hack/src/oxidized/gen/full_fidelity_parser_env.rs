@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b500991b080e929a6b19f8311288f643>>
+// @generated SignedSource<<e26a9e2d8f0f1659ece82364953ca1ac>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -31,6 +31,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct FullFidelityParserEnv {
     pub hhvm_compat_mode: bool,
     pub php5_compat_mode: bool,

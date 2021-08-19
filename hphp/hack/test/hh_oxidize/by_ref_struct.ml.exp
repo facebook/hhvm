@@ -30,6 +30,7 @@ use crate::*;
     Serialize,
     ToOcamlRep,
 )]
+#[repr(C)]
 pub struct X<'a> {
     pub a: Option<isize>,
     pub b: bool,

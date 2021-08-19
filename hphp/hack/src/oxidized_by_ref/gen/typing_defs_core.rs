@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8a88fae513b2274c7bff98c3f0989ff4>>
+// @generated SignedSource<<67dc0bfc6134407829a6c273f3957153>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -41,6 +41,7 @@ pub use reason::PosId;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum CeVisibility<'a> {
     Vpublic,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -69,6 +70,7 @@ arena_deserializer::impl_deserialize_in_arena!(CeVisibility<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum IfcFunDecl<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     FDPolicied(Option<&'a str>),
@@ -94,6 +96,7 @@ arena_deserializer::impl_deserialize_in_arena!(IfcFunDecl<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Exact {
     Exact,
     Nonexact,
@@ -118,6 +121,7 @@ arena_deserializer::impl_deserialize_in_arena!(Exact);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ValKind {
     Lval,
     LvalSubexpr,
@@ -143,6 +147,7 @@ arena_deserializer::impl_deserialize_in_arena!(ValKind);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum FunTparamsKind {
     /// If ft_tparams is empty, the containing fun_type is a concrete function type.
     /// Otherwise, it is a generic function and ft_tparams specifies its type parameters.
@@ -175,6 +180,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunTparamsKind);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ShapeKind {
     ClosedShape,
     OpenShape,
@@ -198,6 +204,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShapeKind);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct PosString<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub  &'a pos_or_decl::PosOrDecl<'a>,
@@ -224,6 +231,7 @@ pub type TByteString<'a> = str;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct PosByteString<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub  &'a pos_or_decl::PosOrDecl<'a>,
@@ -248,6 +256,7 @@ arena_deserializer::impl_deserialize_in_arena!(PosByteString<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum TshapeFieldName<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TSFlitInt(&'a PosString<'a>),
@@ -276,6 +285,7 @@ arena_deserializer::impl_deserialize_in_arena!(TshapeFieldName<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ParamMode {
     FPnormal,
     FPinout,
@@ -300,6 +310,7 @@ arena_deserializer::impl_deserialize_in_arena!(ParamMode);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum XhpAttrTag {
     Required,
     Lateinit,
@@ -323,6 +334,7 @@ arena_deserializer::impl_deserialize_in_arena!(XhpAttrTag);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct XhpAttr {
     pub tag: Option<XhpAttrTag>,
     pub has_default: bool,
@@ -354,6 +366,7 @@ arena_deserializer::impl_deserialize_in_arena!(XhpAttr);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ConsistentKind {
     Inconsistent,
     ConsistentConstruct,
@@ -378,6 +391,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConsistentKind);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum DependentType {
     DTexpr(ident::Ident),
 }
@@ -399,6 +413,7 @@ arena_deserializer::impl_deserialize_in_arena!(DependentType);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct UserAttribute<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: PosId<'a>,
@@ -423,6 +438,7 @@ arena_deserializer::impl_deserialize_in_arena!(UserAttribute<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Tparam<'a> {
     pub variance: oxidized::ast_defs::Variance,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -453,6 +469,7 @@ arena_deserializer::impl_deserialize_in_arena!(Tparam<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct WhereConstraint<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Ty<'a>,
     pub oxidized::ast_defs::ConstraintKind,
@@ -478,6 +495,7 @@ arena_deserializer::impl_deserialize_in_arena!(WhereConstraint<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum CollectionStyle {
     VecStyle,
     DictStyle,
@@ -503,6 +521,7 @@ arena_deserializer::impl_deserialize_in_arena!(CollectionStyle);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Enforcement<'a> {
     Unenforced,
     Enforced,
@@ -523,6 +542,7 @@ arena_deserializer::impl_deserialize_in_arena!(Enforcement<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Ty<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a reason::T_<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Ty_<'a>,
@@ -546,6 +566,7 @@ arena_deserializer::impl_deserialize_in_arena!(Ty<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum NegType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     NegPrim(&'a aast::Tprim),
@@ -579,6 +600,7 @@ arena_deserializer::impl_deserialize_in_arena!(NegType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ShapeFieldType<'a> {
     pub optional: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -602,6 +624,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShapeFieldType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Ty_<'a> {
     /// The late static bound type of a class
     Tthis,
@@ -769,6 +792,7 @@ arena_deserializer::impl_deserialize_in_arena!(Ty_<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct TaccessType<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Ty<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub PosId<'a>,
@@ -792,6 +816,7 @@ arena_deserializer::impl_deserialize_in_arena!(TaccessType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Capability<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     CapDefaults(&'a pos_or_decl::PosOrDecl<'a>),
@@ -818,6 +843,7 @@ arena_deserializer::impl_deserialize_in_arena!(Capability<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct FunImplicitParams<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub capability: Capability<'a>,
@@ -842,6 +868,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunImplicitParams<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct FunType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub arity: FunArity<'a>,
@@ -882,6 +909,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum FunArity<'a> {
     Fstandard,
     /// PHP5.6-style ...$args finishes the func declaration.
@@ -907,6 +935,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunArity<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct PossiblyEnforcedTy<'a> {
     /// True if consumer of this type enforces it at runtime
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -932,6 +961,7 @@ arena_deserializer::impl_deserialize_in_arena!(PossiblyEnforcedTy<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct FunParam<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
@@ -962,6 +992,7 @@ pub type FunParams<'a> = [&'a FunParam<'a>];
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum DestructureKind {
     ListDestructure,
     SplatUnpack,
@@ -983,6 +1014,7 @@ arena_deserializer::impl_deserialize_in_arena!(DestructureKind);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Destructure<'a> {
     /// This represents the standard parameters of a function or the fields in a list
     /// destructuring assignment. Example:
@@ -1024,6 +1056,7 @@ arena_deserializer::impl_deserialize_in_arena!(Destructure<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct HasMember<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: nast::Sid<'a>,
@@ -1055,6 +1088,7 @@ arena_deserializer::impl_deserialize_in_arena!(HasMember<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ConstraintType_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ThasMember(&'a HasMember<'a>),
@@ -1080,6 +1114,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConstraintType_<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ConstraintType<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a reason::Reason<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a ConstraintType_<'a>,
@@ -1102,6 +1137,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConstraintType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum InternalType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     LoclType(&'a Ty<'a>),

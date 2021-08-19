@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<853acc32a63031aa1cc3e355e5b8be32>>
+// @generated SignedSource<<50846321c661321a1998b7b643b6d72d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -43,6 +43,7 @@ pub use oxidized::file_info::NameType;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Pos<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Full(&'a pos::Pos<'a>),
@@ -76,6 +77,7 @@ pub type HashType<'a> = Option<isize>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct FileInfo<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub hash: &'a HashType<'a>,
@@ -114,6 +116,7 @@ pub use oxidized::file_info::Names;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct SavedNames<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub funs: s_set::SSet<'a>,
@@ -145,6 +148,7 @@ pub use oxidized::file_info::Saved;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Diff<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub removed_funs: s_set::SSet<'a>,

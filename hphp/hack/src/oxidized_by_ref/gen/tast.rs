@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ebf76a15a71628e604b14748e733a59b>>
+// @generated SignedSource<<d89c067094bed4d791e007e708b59c16>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,6 +39,7 @@ pub type DeclTy<'a> = typing_defs::Ty<'a>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct FunTastInfo {
     /// True if there are leaves of the function's imaginary CFG without a return statement
     pub has_implicit_return: bool,
@@ -60,6 +61,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunTastInfo);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct SavedEnv<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tcopt: &'a typechecker_options::TypecheckerOptions<'a>,

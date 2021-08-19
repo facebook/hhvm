@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a348a6b84e8a400892adb6fffc39ac1e>>
+// @generated SignedSource<<0fb061a7a63832239ff37eb2b18ba20c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -41,6 +41,7 @@ pub type Id_ = String;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Id(pub Pos, pub Id_);
 
 pub type Pstring = (Pos, String);
@@ -64,6 +65,7 @@ pub type PositionedByteString = (Pos, bstr::BString);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ShapeFieldName {
     SFlitInt(Pstring),
     SFlitStr(PositionedByteString),
@@ -87,6 +89,7 @@ pub enum ShapeFieldName {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Variance {
     Covariant,
     Contravariant,
@@ -112,6 +115,7 @@ arena_deserializer::impl_deserialize_in_arena!(Variance);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ConstraintKind {
     ConstraintAs,
     ConstraintEq,
@@ -139,6 +143,7 @@ pub type Reified = bool;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Abstraction {
     Concrete,
     Abstract,
@@ -161,6 +166,7 @@ arena_deserializer::impl_deserialize_in_arena!(Abstraction);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ClassishKind {
     /// Kind for `class` and `abstract class`
     Cclass(Abstraction),
@@ -192,6 +198,7 @@ pub enum ClassishKind {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ParamKind {
     Pinout,
 }
@@ -215,6 +222,7 @@ arena_deserializer::impl_deserialize_in_arena!(ParamKind);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ReadonlyKind {
     Readonly,
 }
@@ -238,6 +246,7 @@ arena_deserializer::impl_deserialize_in_arena!(ReadonlyKind);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum OgNullFlavor {
     OGNullthrows,
     OGNullsafe,
@@ -262,6 +271,7 @@ arena_deserializer::impl_deserialize_in_arena!(OgNullFlavor);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum FunKind {
     FSync,
     FAsync,
@@ -286,6 +296,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunKind);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Bop {
     Plus,
     Minus,
@@ -331,6 +342,7 @@ pub enum Bop {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Uop {
     Utild,
     Unot,
@@ -362,6 +374,7 @@ arena_deserializer::impl_deserialize_in_arena!(Uop);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Visibility {
     Private,
     Public,
@@ -391,6 +404,7 @@ arena_deserializer::impl_deserialize_in_arena!(Visibility);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum XhpEnumValue {
     XEVInt(isize),
     XEVString(String),

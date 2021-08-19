@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<671b6ebac5e77f9b4fed947f28ae37a6>>
+// @generated SignedSource<<47f8b38fca3a1aa91a10f554dbf10f57>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -38,6 +38,7 @@ pub type LocalIdSetT<'a> = local_id::set::Set<'a>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct LocalEnv<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub per_cont_env: &'a typing_per_cont_env::TypingPerContEnv<'a>,
@@ -58,6 +59,7 @@ arena_deserializer::impl_deserialize_in_arena!(LocalEnv<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Env<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub fresh_typarams: s_set::SSet<'a>,
@@ -102,6 +104,7 @@ arena_deserializer::impl_deserialize_in_arena!(Env<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Genv<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tcopt: &'a typechecker_options::TypecheckerOptions<'a>,

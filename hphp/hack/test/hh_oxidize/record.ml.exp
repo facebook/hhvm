@@ -29,6 +29,7 @@ use crate::*;
     Serialize,
     ToOcamlRep,
 )]
+#[repr(C)]
 pub struct A {
     pub x: isize,
     pub y: isize,

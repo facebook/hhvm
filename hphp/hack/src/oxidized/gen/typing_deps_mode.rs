@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<752de5326e8e27b4fc1134fecaeb0834>>
+// @generated SignedSource<<cba7aa770a12c5431dfc65b00d524e1f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -35,6 +35,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum TypingDepsMode {
     /// Legacy mode, with SQLite saved-state dependency graph
     SQLiteMode,
@@ -70,6 +71,7 @@ pub enum TypingDepsMode {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum HashMode {
     Hash32Bit,
     Hash64Bit,

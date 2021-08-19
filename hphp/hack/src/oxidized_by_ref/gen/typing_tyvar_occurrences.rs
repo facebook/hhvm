@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<05997ef6f6510bfb9a7e9435f574e8d0>>
+// @generated SignedSource<<37b4fb50d01a52724a316acf7aa954c9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -32,6 +32,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct TypingTyvarOccurrences<'a> {
     /// A map to track where each type variable occurs,
     /// more precisely in the type of which other type variables.

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<28a5c3f6e1749a0ec75e3413301bbdc9>>
+// @generated SignedSource<<e817669fad8f663a480e47f7845aa993>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -38,6 +38,7 @@ pub use crate::typing_tyvar_occurrences as occ;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct TyvarConstraints<'a> {
     /// Does this type variable appear covariantly in the type of the expression?
     pub appears_covariantly: bool,
@@ -74,6 +75,7 @@ arena_deserializer::impl_deserialize_in_arena!(TyvarConstraints<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum SolvingInfo<'a> {
     /// when the type variable is bound to a type
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -99,6 +101,7 @@ arena_deserializer::impl_deserialize_in_arena!(SolvingInfo<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct TyvarInfo<'a> {
     /// Where was the type variable introduced? (e.g. generic method invocation,
     /// new object construction)
@@ -129,6 +132,7 @@ pub type Tvenv<'a> = i_map::IMap<'a, &'a TyvarInfo<'a>>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct TypingInferenceEnv<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tvenv: Tvenv<'a>,
@@ -157,6 +161,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypingInferenceEnv<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct GlobalTyvarInfo<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tyvar_reason: &'a reason::Reason<'a>,
@@ -184,6 +189,7 @@ pub type TGlobal<'a> = GlobalTvenv<'a>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct TGlobalWithPos<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a pos::Pos<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a TGlobal<'a>,

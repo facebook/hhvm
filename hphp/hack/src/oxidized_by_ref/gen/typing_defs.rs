@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ee55cd22148395178a7d3fdd2c4bf37a>>
+// @generated SignedSource<<85e28e7bd767059ee579fdaa722ddb9a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -54,6 +54,7 @@ pub use typing_defs_core::*;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ClassConstFrom<'a> {
     Self_,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -90,6 +91,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConstFrom<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ClassConstRef<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub ClassConstFrom<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a str,
@@ -112,6 +114,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConstRef<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ConstDecl<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
@@ -136,6 +139,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConstDecl<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ClassElt<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub visibility: CeVisibility<'a>,
@@ -169,6 +173,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassElt<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct FunElt<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub deprecated: Option<&'a str>,
@@ -202,6 +207,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunElt<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ClassConstKind {
     CCAbstract(bool),
     CCConcrete,
@@ -224,6 +230,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConstKind);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ClassConst<'a> {
     pub synthesized: bool,
     pub abstract_: ClassConstKind,
@@ -258,6 +265,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum RecordFieldReq {
     ValueRequired,
     HasDefaultValue,
@@ -280,6 +288,7 @@ arena_deserializer::impl_deserialize_in_arena!(RecordFieldReq);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct RecordDefType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub module: Option<&'a str>,
@@ -324,6 +333,7 @@ arena_deserializer::impl_deserialize_in_arena!(RecordDefType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Requirement<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub  &'a pos_or_decl::PosOrDecl<'a>,
@@ -347,6 +357,7 @@ arena_deserializer::impl_deserialize_in_arena!(Requirement<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct AbstractTypeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub as_constraint: Option<&'a Ty<'a>>,
@@ -373,6 +384,7 @@ arena_deserializer::impl_deserialize_in_arena!(AbstractTypeconst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ConcreteTypeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tc_type: &'a Ty<'a>,
@@ -395,6 +407,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConcreteTypeconst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct PartiallyAbstractTypeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub constraint: &'a Ty<'a>,
@@ -420,6 +433,7 @@ arena_deserializer::impl_deserialize_in_arena!(PartiallyAbstractTypeconst<'arena
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Typeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TCAbstract(&'a AbstractTypeconst<'a>),
@@ -446,6 +460,7 @@ arena_deserializer::impl_deserialize_in_arena!(Typeconst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct TypeconstType<'a> {
     pub synthesized: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -497,6 +512,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypeconstType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct EnumType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub base: &'a Ty<'a>,
@@ -523,6 +539,7 @@ arena_deserializer::impl_deserialize_in_arena!(EnumType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct TypedefType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub module: Option<&'a str>,
@@ -556,6 +573,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypedefType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum DeserializationError<'a> {
     /// The type was valid, but some component thereof was a decl_ty when we
     /// expected a locl_phase ty, or vice versa.

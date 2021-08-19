@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f048ca58c43a3626dcc95a799bd9c7b3>>
+// @generated SignedSource<<696a2e200492e86bf312d39a9e797019>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -32,6 +32,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Env<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub ns_uses: s_map::SMap<'a, &'a str>,

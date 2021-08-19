@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<887d62603e0f26f55e9380c1e0651823>>
+// @generated SignedSource<<e861e512deb1ea8bdab11e21a17c1f0b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -52,6 +52,7 @@ pub use oxidized::errors::Format;
     ToOcamlRep
 )]
 #[serde(bound(deserialize = "Pos: 'de + arena_deserializer::DeserializeInArena<'de>"))]
+#[repr(C)]
 pub struct Quickfix<'a, Pos> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub title: &'a str,
@@ -87,6 +88,7 @@ pub type FilesT<'a, A> = relative_path::map::Map<'a, FileT<'a, A>>;
 #[serde(bound(
     deserialize = "PrimPos: 'de + arena_deserializer::DeserializeInArena<'de>, Pos: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
+#[repr(C)]
 pub struct Error_<'a, PrimPos, Pos> {
     pub code: oxidized::errors::ErrorCode,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -117,6 +119,7 @@ pub type Error<'a> = Error_<'a, &'a pos::Pos<'a>, &'a pos_or_decl::PosOrDecl<'a>
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct AppliedFixme<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a pos::Pos<'a>,
     pub isize,
@@ -140,6 +143,7 @@ pub type PerFileErrors<'a> = FileT<'a, &'a Error<'a>>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Errors<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub FilesT<'a, &'a Error<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

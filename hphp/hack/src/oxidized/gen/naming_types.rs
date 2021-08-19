@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<99557c73e87f54ab473364550b9313df>>
+// @generated SignedSource<<7b2ef46b7959ff61e34f9df7cb5ba1b5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -37,6 +37,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum KindOfType {
     TClass = 0,
     TTypedef = 1,

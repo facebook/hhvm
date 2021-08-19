@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ebd136fb9378c4c6d773b9ee2f87a180>>
+// @generated SignedSource<<3cabc2f2d1e2c8252e84c94c5c173c99>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -36,6 +36,7 @@ pub type PosOrDecl = pos::Pos;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Ctx {
     pub decl: Option<decl_reference::DeclReference>,
     pub file: relative_path::RelativePath,

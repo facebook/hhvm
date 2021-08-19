@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f70b38f817329e890ff6a38352861ca4>>
+// @generated SignedSource<<ed2bf8baefcbb774ffd98420bf34d01d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,6 +39,7 @@ pub use prim_defs::*;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Mode {
     /// just declare signatures, don't check anything
     Mhhi,
@@ -66,6 +67,7 @@ arena_deserializer::impl_deserialize_in_arena!(Mode);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum NameType {
     Fun = 0,
     Class = 1,
@@ -94,6 +96,7 @@ arena_deserializer::impl_deserialize_in_arena!(NameType);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Pos {
     Full(pos::Pos),
     File(NameType, ocamlrep::rc::RcOc<relative_path::RelativePath>),
@@ -118,6 +121,7 @@ pub type HashType = Option<isize>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct FileInfo {
     pub hash: HashType,
     pub file_mode: Option<Mode>,
@@ -145,6 +149,7 @@ pub struct FileInfo {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Names {
     pub funs: s_set::SSet,
     pub classes: s_set::SSet,
@@ -168,6 +173,7 @@ pub struct Names {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct SavedNames {
     pub funs: s_set::SSet,
     pub classes: s_set::SSet,
@@ -191,6 +197,7 @@ pub struct SavedNames {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Saved {
     pub names: SavedNames,
     pub hash: Option<isize>,
@@ -211,6 +218,7 @@ pub struct Saved {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Diff {
     pub removed_funs: s_set::SSet,
     pub added_funs: s_set::SSet,

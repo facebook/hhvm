@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1959f1909a8e3ae708aff29716c9ee72>>
+// @generated SignedSource<<3b34b4fa86574779547c56d8a70072ad>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -38,6 +38,7 @@ pub type TparamBounds<'a> = ty_set::TySet<'a>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Kind<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub lower_bounds: &'a TparamBounds<'a>,
@@ -67,6 +68,7 @@ arena_deserializer::impl_deserialize_in_arena!(Kind<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct NamedKind<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub PosId<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Kind<'a>,

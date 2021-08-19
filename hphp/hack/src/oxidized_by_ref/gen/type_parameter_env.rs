@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<49d8a0ef793ff8929d24f97746757c10>>
+// @generated SignedSource<<d81e28b6fd5513eb3ee10128cf3e8c59>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -43,6 +43,7 @@ pub type TparamInfo<'a> = typing_kinding_defs::Kind<'a>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct TypeParameterEnv<'a> {
     /// The position indicates where the type parameter was defined.
     /// It may be Pos.none if the type parameter denotes a fresh type variable

@@ -73,6 +73,7 @@ pub type D = isize;
     Serialize,
     ToOcamlRep,
 )]
+#[repr(C)]
 pub struct Record {
     /// The comments need to trail the field declaration in OCaml (unfortunately).
     pub foo: isize,
@@ -98,6 +99,7 @@ pub struct Record {
     Serialize,
     ToOcamlRep,
 )]
+#[repr(C)]
 pub enum Variant {
     /// Again, the comments need to trail the variant declaration.
     /// Multiline comments are understood.

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<748fe098a47eb4d9f7baa8a7c2c061c9>>
+// @generated SignedSource<<270917069df330b9d685e59ed0e50c14>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -33,6 +33,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum DeclReference {
     GlobalConstant(String),
     Function(String),

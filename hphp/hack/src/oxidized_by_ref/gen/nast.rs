@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<413de9fd577eb7d648468f443e9000bf>>
+// @generated SignedSource<<0c4c031e0b993cb3a75df2e30b16367a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -103,6 +103,7 @@ pub type TypeHint<'a> = aast::TypeHint<'a, ()>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct IgnoreAttributeEnv<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub ignored_attributes: &'a [&'a str],

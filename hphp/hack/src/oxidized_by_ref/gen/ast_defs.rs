@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<da26223cb20c2380746aa6fed326c1da>>
+// @generated SignedSource<<8ce1d56f2f6b0cfd515cb29c6377510f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,6 +40,7 @@ pub type Id_<'a> = str;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Id<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Pos<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Id_<'a>,
@@ -69,6 +70,7 @@ pub type PositionedByteString<'a> = (&'a Pos<'a>, &'a bstr::BStr);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ShapeFieldName<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     SFlitInt(&'a Pstring<'a>),
@@ -104,6 +106,7 @@ pub use oxidized::ast_defs::Abstraction;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ClassishKind<'a> {
     /// Kind for `class` and `abstract class`
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -146,6 +149,7 @@ pub use oxidized::ast_defs::FunKind;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Bop<'a> {
     Plus,
     Minus,
@@ -202,6 +206,7 @@ pub use oxidized::ast_defs::Visibility;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum XhpEnumValue<'a> {
     XEVInt(isize),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

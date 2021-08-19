@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<486dd8eafc24708163346089623f69ec>>
+// @generated SignedSource<<adefbb79d58b9e97ae04ad86ebe55631>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -67,6 +67,7 @@ pub use typing_defs::*;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct SubstContext<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub subst: s_map::SMap<'a, &'a Ty<'a>>,
@@ -94,6 +95,7 @@ arena_deserializer::impl_deserialize_in_arena!(SubstContext<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum SourceType {
     Child,
     Parent,
@@ -124,6 +126,7 @@ arena_deserializer::impl_deserialize_in_arena!(SourceType);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum LinearizationKind {
     MemberResolution,
     AncestorTypes,
@@ -146,6 +149,7 @@ arena_deserializer::impl_deserialize_in_arena!(LinearizationKind);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct DeclClassType<'a> {
     pub need_init: bool,
     pub members_fully_known: bool,
@@ -229,6 +233,7 @@ arena_deserializer::impl_deserialize_in_arena!(DeclClassType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Element<'a> {
     pub flags: isize,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

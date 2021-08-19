@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5f1ce200c42d03d46d04727d15ec0740>>
+// @generated SignedSource<<6a7e0620602cc1706463d81da1278a8e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -42,6 +42,7 @@ pub type Program<Ex, Fb, En> = Vec<Def<Ex, Fb, En>>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Stmt<Ex, Fb, En>(pub Pos, pub Stmt_<Ex, Fb, En>);
 
 #[derive(
@@ -58,6 +59,7 @@ pub struct Stmt<Ex, Fb, En>(pub Pos, pub Stmt_<Ex, Fb, En>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Stmt_<Ex, Fb, En> {
     /// Marker for a switch statement that falls through.
     ///
@@ -203,6 +205,7 @@ pub enum Stmt_<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum EnvAnnot {
     Join,
     Refinement,
@@ -224,6 +227,7 @@ arena_deserializer::impl_deserialize_in_arena!(EnvAnnot);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct UsingStmt<Ex, Fb, En> {
     pub is_block_scoped: bool,
     pub has_await: bool,
@@ -245,6 +249,7 @@ pub struct UsingStmt<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum AsExpr<Ex, Fb, En> {
     AsV(Expr<Ex, Fb, En>),
     AsKv(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>),
@@ -268,6 +273,7 @@ pub type Block<Ex, Fb, En> = Vec<Stmt<Ex, Fb, En>>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ClassId<Ex, Fb, En>(pub Ex, pub Pos, pub ClassId_<Ex, Fb, En>);
 
 /// Class ID, used in things like instantiation and static property access.
@@ -285,6 +291,7 @@ pub struct ClassId<Ex, Fb, En>(pub Ex, pub Pos, pub ClassId_<Ex, Fb, En>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ClassId_<Ex, Fb, En> {
     /// The class ID of the parent of the lexically scoped class.
     ///
@@ -344,6 +351,7 @@ pub enum ClassId_<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Expr<Ex, Fb, En>(pub Ex, pub Pos, pub Expr_<Ex, Fb, En>);
 
 #[derive(
@@ -360,6 +368,7 @@ pub struct Expr<Ex, Fb, En>(pub Ex, pub Pos, pub Expr_<Ex, Fb, En>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum CollectionTarg<Ex> {
     CollectionTV(Targ<Ex>),
     CollectionTKV(Targ<Ex>, Targ<Ex>),
@@ -379,6 +388,7 @@ pub enum CollectionTarg<Ex> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum FunctionPtrId<Ex, Fb, En> {
     FPId(Sid),
     FPClassConst(ClassId<Ex, Fb, En>, Pstring),
@@ -402,6 +412,7 @@ pub enum FunctionPtrId<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ExpressionTree<Ex, Fb, En> {
     /// The hint before the backtick, so Foo in this example.
     pub hint: Hint,
@@ -434,6 +445,7 @@ pub struct ExpressionTree<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Expr_<Ex, Fb, En> {
     /// darray literal.
     ///
@@ -831,6 +843,7 @@ pub enum Expr_<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum HoleSource {
     Typing,
     UnsafeCast(Vec<Hint>),
@@ -851,6 +864,7 @@ pub enum HoleSource {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ClassGetExpr<Ex, Fb, En> {
     CGstring(Pstring),
     CGexpr(Expr<Ex, Fb, En>),
@@ -870,6 +884,7 @@ pub enum ClassGetExpr<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Case<Ex, Fb, En> {
     Default(Pos, Block<Ex, Fb, En>),
     Case(Expr<Ex, Fb, En>, Block<Ex, Fb, En>),
@@ -889,6 +904,7 @@ pub enum Case<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Catch<Ex, Fb, En>(pub Sid, pub Lid, pub Block<Ex, Fb, En>);
 
 #[derive(
@@ -905,6 +921,7 @@ pub struct Catch<Ex, Fb, En>(pub Sid, pub Lid, pub Block<Ex, Fb, En>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Field<Ex, Fb, En>(pub Expr<Ex, Fb, En>, pub Expr<Ex, Fb, En>);
 
 #[derive(
@@ -921,6 +938,7 @@ pub struct Field<Ex, Fb, En>(pub Expr<Ex, Fb, En>, pub Expr<Ex, Fb, En>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Afield<Ex, Fb, En> {
     AFvalue(Expr<Ex, Fb, En>),
     AFkvalue(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>),
@@ -940,6 +958,7 @@ pub enum Afield<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct XhpSimple<Ex, Fb, En> {
     pub name: Pstring,
     pub type_: Ex,
@@ -960,6 +979,7 @@ pub struct XhpSimple<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum XhpAttribute<Ex, Fb, En> {
     XhpSimple(XhpSimple<Ex, Fb, En>),
     XhpSpread(Expr<Ex, Fb, En>),
@@ -981,6 +1001,7 @@ pub type IsVariadic = bool;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct FunParam<Ex, Fb, En> {
     pub annotation: Ex,
     pub type_hint: TypeHint<Ex>,
@@ -1009,6 +1030,7 @@ pub struct FunParam<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum FunVariadicity<Ex, Fb, En> {
     /// Named variadic argument.
     ///
@@ -1036,6 +1058,7 @@ pub enum FunVariadicity<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Fun_<Ex, Fb, En> {
     pub span: Pos,
     pub readonly_this: Option<ast_defs::ReadonlyKind>,
@@ -1078,6 +1101,7 @@ pub struct Fun_<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct FuncBody<Ex, Fb, En> {
     pub ast: Block<Ex, Fb, En>,
     pub annotation: Fb,
@@ -1100,6 +1124,7 @@ pub struct FuncBody<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct TypeHint<Ex>(pub Ex, pub TypeHint_);
 
 /// Explicit type argument to function, constructor, or collection literal.
@@ -1120,6 +1145,7 @@ pub struct TypeHint<Ex>(pub Ex, pub TypeHint_);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Targ<Ex>(pub Ex, pub Hint);
 
 pub type TypeHint_ = Option<Hint>;
@@ -1138,6 +1164,7 @@ pub type TypeHint_ = Option<Hint>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct UserAttribute<Ex, Fb, En> {
     pub name: Sid,
     /// user attributes are restricted to scalar values
@@ -1158,6 +1185,7 @@ pub struct UserAttribute<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct FileAttribute<Ex, Fb, En> {
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En>>,
     pub namespace: Nsenv,
@@ -1177,6 +1205,7 @@ pub struct FileAttribute<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Tparam<Ex, Fb, En> {
     pub variance: ast_defs::Variance,
     pub name: Sid,
@@ -1200,6 +1229,7 @@ pub struct Tparam<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct UseAsAlias(
     pub Option<Sid>,
     pub Pstring,
@@ -1221,6 +1251,7 @@ pub struct UseAsAlias(
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct InsteadofAlias(pub Sid, pub Pstring, pub Vec<Sid>);
 
 pub type IsExtends = bool;
@@ -1241,6 +1272,7 @@ pub type IsExtends = bool;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum EmitId {
     EmitId(isize),
     Anonymous,
@@ -1261,6 +1293,7 @@ arena_deserializer::impl_deserialize_in_arena!(EmitId);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Class_<Ex, Fb, En> {
     pub span: Pos,
     pub annotation: En,
@@ -1323,6 +1356,7 @@ pub type XhpAttrHint = Hint;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum XhpAttrTag {
     Required,
     LateInit,
@@ -1344,6 +1378,7 @@ arena_deserializer::impl_deserialize_in_arena!(XhpAttrTag);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct XhpAttr<Ex, Fb, En>(
     pub TypeHint<Ex>,
     pub ClassVar<Ex, Fb, En>,
@@ -1365,6 +1400,7 @@ pub struct XhpAttr<Ex, Fb, En>(
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ClassAttr<Ex, Fb, En> {
     CAName(Sid),
     CAField(CaField<Ex, Fb, En>),
@@ -1384,6 +1420,7 @@ pub enum ClassAttr<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct CaField<Ex, Fb, En> {
     pub type_: CaType,
     pub id: Sid,
@@ -1405,6 +1442,7 @@ pub struct CaField<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum CaType {
     CAHint(Hint),
     CAEnum(Vec<String>),
@@ -1424,6 +1462,7 @@ pub enum CaType {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ClassConstKind<Ex, Fb, En> {
     /// CCAbstract represents the states
     ///    abstract const int X;
@@ -1450,6 +1489,7 @@ pub enum ClassConstKind<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ClassConst<Ex, Fb, En> {
     pub type_: Option<Hint>,
     pub id: Sid,
@@ -1471,6 +1511,7 @@ pub struct ClassConst<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ClassAbstractTypeconst {
     pub as_constraint: Option<Hint>,
     pub super_constraint: Option<Hint>,
@@ -1491,6 +1532,7 @@ pub struct ClassAbstractTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ClassConcreteTypeconst {
     pub c_tc_type: Hint,
 }
@@ -1509,6 +1551,7 @@ pub struct ClassConcreteTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ClassPartiallyAbstractTypeconst {
     pub constraint: Hint,
     pub type_: Hint,
@@ -1528,6 +1571,7 @@ pub struct ClassPartiallyAbstractTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ClassTypeconst {
     TCAbstract(ClassAbstractTypeconst),
     TCConcrete(ClassConcreteTypeconst),
@@ -1548,6 +1592,7 @@ pub enum ClassTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ClassTypeconstDef<Ex, Fb, En> {
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En>>,
     pub name: Sid,
@@ -1571,6 +1616,7 @@ pub struct ClassTypeconstDef<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct XhpAttrInfo {
     pub tag: Option<XhpAttrTag>,
     pub enum_values: Vec<ast_defs::XhpEnumValue>,
@@ -1590,6 +1636,7 @@ pub struct XhpAttrInfo {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct ClassVar<Ex, Fb, En> {
     pub final_: bool,
     pub xhp_attr: Option<XhpAttrInfo>,
@@ -1620,6 +1667,7 @@ pub struct ClassVar<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Method_<Ex, Fb, En> {
     pub span: Pos,
     pub annotation: En,
@@ -1662,6 +1710,7 @@ pub type Nsenv = ocamlrep::rc::RcOc<namespace_env::Env>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Typedef<Ex, Fb, En> {
     pub annotation: En,
     pub name: Sid,
@@ -1691,6 +1740,7 @@ pub struct Typedef<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct Gconst<Ex, Fb, En> {
     pub annotation: En,
     pub mode: file_info::Mode,
@@ -1716,6 +1766,7 @@ pub struct Gconst<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct RecordDef<Ex, Fb, En> {
     pub annotation: En,
     pub name: Sid,
@@ -1745,6 +1796,7 @@ pub type RecordHint = Hint;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub struct FunDef<Ex, Fb, En> {
     pub namespace: Nsenv,
     pub file_attributes: Vec<FileAttribute<Ex, Fb, En>>,
@@ -1766,6 +1818,7 @@ pub struct FunDef<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Def<Ex, Fb, En> {
     Fun(Box<FunDef<Ex, Fb, En>>),
     Class(Box<Class_<Ex, Fb, En>>),
@@ -1795,6 +1848,7 @@ pub enum Def<Ex, Fb, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum NsKind {
     NSNamespace,
     NSClass,
@@ -1819,6 +1873,7 @@ arena_deserializer::impl_deserialize_in_arena!(NsKind);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum BreakContinueLevel {
     LevelOk(Option<isize>),
     LevelNonLiteral,

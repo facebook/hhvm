@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c6e4ba72aa614978e4e68d03f00163c9>>
+// @generated SignedSource<<ab763ea3e62e612602ec810aae336baa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -37,6 +37,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Parsing {
     FixmeFormat = 1001,
     ParsingError = 1002,
@@ -62,6 +63,7 @@ arena_deserializer::impl_deserialize_in_arena!(Parsing);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Naming {
     AddATypehint = 2001,
     AssertArity = 2003,
@@ -157,6 +159,7 @@ arena_deserializer::impl_deserialize_in_arena!(Naming);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum NastCheck {
     AbstractBody = 3001,
     AbstractWithBody = 3002,
@@ -230,6 +233,7 @@ arena_deserializer::impl_deserialize_in_arena!(NastCheck);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Typing {
     UninstantiableClass = 4002,
     ArrayAccessRead = 4005,
@@ -574,6 +578,7 @@ arena_deserializer::impl_deserialize_in_arena!(Typing);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Init {
     ForwardCompatibilityNotCurrent = 8001,
     ForwardCompatibilityBelowMinimum = 8002,

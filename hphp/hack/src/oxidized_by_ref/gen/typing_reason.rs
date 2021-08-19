@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e3cbab9e93ac233bd663329042b5f23b>>
+// @generated SignedSource<<1302e20831216e10a309a3a8833597f1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,6 +39,7 @@ pub type PosId<'a> = (&'a pos_or_decl::PosOrDecl<'a>, &'a ast_defs::Id_<'a>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ArgPosition {
     Aonly,
     Afirst,
@@ -63,6 +64,7 @@ arena_deserializer::impl_deserialize_in_arena!(ArgPosition);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum ExprDepTypeReason<'a> {
     ERexpr(isize),
     ERstatic,
@@ -95,6 +97,7 @@ arena_deserializer::impl_deserialize_in_arena!(ExprDepTypeReason<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum BlameSource {
     BScall,
     BSlambda,
@@ -120,6 +123,7 @@ arena_deserializer::impl_deserialize_in_arena!(BlameSource);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Blame<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Blame(&'a (&'a pos::Pos<'a>, BlameSource)),
@@ -144,6 +148,7 @@ arena_deserializer::impl_deserialize_in_arena!(Blame<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum T_<'a> {
     Rnone,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -365,6 +370,7 @@ pub type DeclT<'a> = T_<'a>;
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
 pub enum Ureason<'a> {
     URnone,
     URassign,

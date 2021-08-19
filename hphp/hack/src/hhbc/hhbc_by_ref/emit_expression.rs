@@ -3937,6 +3937,7 @@ fn emit_obj_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         null_coalesce_assignment,
         prop_stack_size,
         0,
+        readonly_op,
     )?;
     let (mk, prop_instrs, _) = emit_prop_expr(
         e,
@@ -4159,6 +4160,7 @@ fn emit_array_get_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 elem_stack_size,
                 0,
                 inout_param_info,
+                ReadOnlyOp::Any, // array get on reading has no restrictions
             )?;
             let cls_stack_size = match &base_result {
                 ArrayGetBase::Regular(base) => base.cls_stack_size,
@@ -4241,6 +4243,7 @@ fn emit_array_get_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                 base_expr,
                                 local,
                                 false,
+                                ReadOnlyOp::Any,
                             )?,
                             instr::popc(alloc),
                         ],
@@ -4489,6 +4492,7 @@ fn emit_store_for_simple_base<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     base: &ast::Expr,
     local: Local<'arena>,
     is_base: bool,
+    readonly_op: ReadOnlyOp,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let (base_expr_instrs_begin, base_expr_instrs_end, base_setup_instrs, _, _) = emit_base(
@@ -4501,6 +4505,7 @@ fn emit_store_for_simple_base<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         false,
         elem_stack_size,
         0,
+        readonly_op,
     )?;
     let memberkey = MemberKey::EL(local, ReadOnlyOp::Any);
     Ok(InstrSeq::gather(
@@ -5365,9 +5370,10 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         MemberOpMode::Define,
         false, /* is_object */
         BareThisOp::Notice,
-        false, /*null_coalesce_assignment*/
-        3,     /* base_offset */
-        3,     /* rhs_stack_size */
+        false,           /*null_coalesce_assignment*/
+        3,               /* base_offset */
+        3,               /* rhs_stack_size */
+        ReadOnlyOp::Any, /* readonly_op */
     )?;
     Ok(InstrSeq::gather(
         alloc,
@@ -5463,6 +5469,7 @@ fn emit_base<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     null_coalesce_assignment: bool,
     base_offset: StackIndex,
     rhs_stack_size: StackIndex,
+    readonly_enforcement: ReadOnlyOp, // this value depends on where we are emitting the base
 ) -> Result<(
     InstrSeq<'arena>,
     InstrSeq<'arena>,
@@ -5481,6 +5488,7 @@ fn emit_base<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         base_offset,
         rhs_stack_size,
         None,
+        readonly_enforcement,
     )?;
     match result {
         ArrayGetBase::Regular(i) => Ok((
@@ -5545,6 +5553,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     base_offset: StackIndex,
     rhs_stack_size: StackIndex,
     inout_param_info: Option<(usize, &inout_locals::AliasInfoMap)>,
+    readonly_op: ReadOnlyOp,
 ) -> Result<ArrayGetBase<'arena>> {
     let alloc = env.arena;
     let pos = &expr.1;
@@ -5694,6 +5703,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     base_offset + elem_stack_size,
                     rhs_stack_size,
                     inout_param_info,
+                    readonly_op, // continue passing readonly enforcement up
                 )?;
                 let cls_stack_size = match &base_result {
                     ArrayGetBase::Regular(base) => base.cls_stack_size,
@@ -5744,6 +5754,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                 base_expr,
                                 local,
                                 true,
+                                readonly_op,
                             )?,
                         }
                     }
@@ -5844,7 +5855,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             0,
                             prop_expr,
                             null_coalesce_assignment,
-                            ReadOnlyOp::Any,
+                            ReadOnlyOp::Any, // just getting stack size here
                         )?
                         .2;
                         let (
@@ -5863,6 +5874,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             null_coalesce_assignment,
                             base_offset + prop_stack_size,
                             rhs_stack_size,
+                            ReadOnlyOp::Mutable, // the rest of the base must be completely mutable
                         )?;
                         let (mk, prop_instrs, _) = emit_prop_expr(
                             e,
@@ -5871,7 +5883,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             base_offset + cls_stack_size,
                             prop_expr,
                             null_coalesce_assignment,
-                            ReadOnlyOp::Any, // TODO: readonly properties (non assignment)
+                            readonly_op, // use the current enforcement
                         )?;
                         let total_stack_size = prop_stack_size + base_stack_size;
                         let final_instr = instr::dim(alloc, mode, mk);
@@ -5903,7 +5915,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         base_offset + 1,
                         rhs_stack_size,
                         base_mode,
-                        ReadOnlyOp::Any,
+                        readonly_op,
                     ),
                     1,
                     1,
@@ -6385,6 +6397,11 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     let (elem_instrs, elem_stack_size) =
                         emit_elem(e, env, opt_elem_expr, None, null_coalesce_assignment)?;
                     let base_offset = elem_stack_size + rhs_stack_size;
+                    let readonly_op = if rhs_readonly {
+                        ReadOnlyOp::CheckROCOW // writing a readonly value requires a readony copy on write array
+                    } else {
+                        ReadOnlyOp::CheckMutROCOW // writing a mut value requires left side to be mutable or a ROCOW
+                    };
                     let (
                         base_expr_instrs_begin,
                         base_expr_instrs_end,
@@ -6401,6 +6418,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         null_coalesce_assignment,
                         base_offset,
                         rhs_stack_size,
+                        readonly_op,
                     )?;
                     let (mk, warninstr) = get_elem_member_key(
                         e,
@@ -6484,6 +6502,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     null_coalesce_assignment,
                     base_offset,
                     rhs_stack_size,
+                    ReadOnlyOp::Mutable, // writing to a property requires everything in the base to be mutable
                 )?;
                 let (mk, prop_instrs, _) = emit_prop_expr(
                     e,

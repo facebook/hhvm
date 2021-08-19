@@ -36,7 +36,7 @@ bitflags! {
         const IS_CLOSURE_BODY = 1 << 7;
         const IS_INTERCEPTABLE = 1 << 8;
         const IS_MEMOIZE_IMPL = 1 << 9;
-        const RX_DISABLED = 1 << 10;
+        const IS_READONLY_RETURN = 1 << 10;
         const NO_INJECTION = 1 << 11;
     }
 }

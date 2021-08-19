@@ -145,8 +145,10 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             },
         )?
     };
+    let is_readonly_return = f.readonly_ret.is_some();
     flags.set(HhasFunctionFlags::GENERATOR, is_gen);
     flags.set(HhasFunctionFlags::PAIR_GENERATOR, is_pair_gen);
+    flags.set(HhasFunctionFlags::READONLY_RETURN, is_readonly_return);
     let memoize_wrapper = if memoized {
         Some(emit_memoize_function::emit_wrapper_function(
             alloc,

@@ -32,7 +32,7 @@ bitflags! {
         const NO_INJECTION =   1 << 4;
         const INTERCEPTABLE =  1 << 5;
         const MEMOIZE_IMPL =   1 << 6;
-        const RX_DISABLED =    1 << 7;
+        const READONLY_RETURN = 1 << 7;
     }
 }
 
@@ -61,8 +61,8 @@ impl<'arena> HhasFunction<'arena> {
         self.flags.contains(HhasFunctionFlags::MEMOIZE_IMPL)
     }
 
-    pub fn rx_disabled(&self) -> bool {
-        self.flags.contains(HhasFunctionFlags::RX_DISABLED)
+    pub fn is_readonly_return(&self) -> bool {
+        self.flags.contains(HhasFunctionFlags::READONLY_RETURN)
     }
 
     pub fn with_body<F, T>(&mut self, body: HhasBody<'arena>, f: F) -> T

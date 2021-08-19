@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
@@ -44,6 +45,13 @@ static void logGuardFailure(TypedValue tv, uint16_t layout, uint64_t sk) {
   assertx(tvIsArrayLike(tv));
   auto const al = ArrayLayout::FromUint16(layout);
   bespoke::logGuardFailure(val(tv).parr, al, SrcKey(sk));
+}
+
+bool maybeLogging(Type t) {
+  auto const loggingLayout =
+    ArrayLayout(bespoke::LoggingArray::GetLayoutIndex());
+  auto const loggingArray = TArrLike.narrowToLayout(loggingLayout);
+  return t.maybe(loggingArray);
 }
 }
 
@@ -139,6 +147,8 @@ void cgProfileArrLikeProps(IRLS& env, const IRInstruction* inst) {
     return Generic;                                                          \
   }()
 
+void cgBespokeGetWithSync(IRLS& env, const IRInstruction* inst, bool maySync) {
+}
 
 CallSpec destructorForArrayLike(Type arr) {
   assertx(arr <= TArrLike);
@@ -161,9 +171,14 @@ void cgBespokeGet(IRLS& env, const IRInstruction* inst) {
     ? CALL_TARGET(arr, NvGetInt, getInt)
     : CALL_TARGET(arr, NvGetStr, getStr);
 
+  auto const syncMode = maybeLogging(inst->src(0)->type())
+    ? SyncOptions::Sync
+    : SyncOptions::None;
+
   auto& v = vmain(env);
   auto const args = argGroup(env, inst).ssa(0).ssa(1);
-  cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDestTV(env, inst), syncMode, args);
+
 }
 
 void cgBespokeGetThrow(IRLS& env, const IRInstruction* inst) {
@@ -301,10 +316,14 @@ void cgBespokeEscalateToVanilla(IRLS& env, const IRInstruction* inst) {
     }
   }();
 
+  auto const syncMode = maybeLogging(inst->src(0)->type())
+    ? SyncOptions::Sync
+    : SyncOptions::None;
+
   auto& v = vmain(env);
   auto const reason = inst->src(1)->strVal()->data();
   auto const args = argGroup(env, inst).ssa(0).imm(reason);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDest(env, inst), syncMode, args);
 }
 
 #undef CALL_TARGET

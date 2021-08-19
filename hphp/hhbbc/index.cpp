@@ -4217,7 +4217,7 @@ PropLookupResult<> lookup_static_impl(IndexData& data,
       propName,
       TriBool::Yes,
       yesOrNo(prop.attrs & AttrIsConst),
-      yesOrNo(prop.attrs & AttrIsReadOnly),
+      yesOrNo(prop.attrs & AttrIsReadonly),
       yesOrNo(prop.attrs & AttrLateInit),
       initMightRaise
     };
@@ -4409,7 +4409,7 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
             ITRACE(6, "skipping const {}::${}\n", ci->cls->name, prop.name);
             continue;
           }
-          if (mustBeReadOnly && !(prop.attrs & AttrIsReadOnly)) {
+          if (mustBeReadOnly && !(prop.attrs & AttrIsReadonly)) {
             ITRACE(6, "skipping mutable property that must be readonly {}::${}\n",
               ci->cls->name, prop.name);
             continue;
@@ -4450,7 +4450,7 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
           );
           return notFound();
         }
-        if (mustBeReadOnly && !(prop.attrs & AttrIsReadOnly)) {
+        if (mustBeReadOnly && !(prop.attrs & AttrIsReadonly)) {
           ITRACE(
             6, "{}:${} found but is mutable and must be readonly, stopping\n",
             ci->cls->name, propName

@@ -1218,7 +1218,7 @@ Class::PropSlotLookup Class::getDeclPropSlot(
 
   if (propSlot != kInvalidSlot) {
     auto const attrs = m_declProperties[propSlot].attrs;
-    readonly = bool(attrs & AttrIsReadOnly);
+    readonly = bool(attrs & AttrIsReadonly);
     if ((attrs & (AttrProtected|AttrPrivate)) &&
         (g_context.isNull() || !g_context->debuggerSettings.bypassCheck)) {
       // Fetch the class in the inheritance tree which first declared the
@@ -1319,7 +1319,7 @@ Class::PropSlotLookup Class::findSProp(
   auto const& sProp = m_staticProperties[sPropInd];
   auto const sPropAttrs = sProp.attrs;
   auto const sPropConst = bool(sPropAttrs & AttrIsConst);
-  auto const sPropReadOnly = bool(sPropAttrs & AttrIsReadOnly);
+  auto const sPropReadOnly = bool(sPropAttrs & AttrIsReadonly);
   const Class* baseCls = this;
   if (sPropAttrs & AttrLSB) {
     // For an LSB static, accessibility attributes are relative to the class

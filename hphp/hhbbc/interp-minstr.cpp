@@ -962,7 +962,7 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadOnlyOp op) {
     auto const thisTy    = optThisTy ? *optThisTy : TObj;
     if (name) {
       if (checkReadOnlyOp(ReadOnlyOp::Mutable, op) &&
-        isDefinitelyThisPropAttr(env, name, AttrIsReadOnly)) {
+        isDefinitelyThisPropAttr(env, name, AttrIsReadonly)) {
         return Effects::AlwaysThrows;
       }
 
@@ -976,7 +976,7 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadOnlyOp op) {
             return { TBottom, Effects::AlwaysThrows };
           }
           if (checkReadOnlyOp(ReadOnlyOp::Mutable, op) &&
-            isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
+            isMaybeThisPropAttr(env, name, AttrIsReadonly)) {
             return { *propTy, Effects::Throws };
           }
           if (isMaybeThisPropAttr(env, name, AttrLateInit)) {
@@ -1390,7 +1390,7 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
         }
         push(env, std::move(*t));
         if (mustBeMutable &&
-          isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
+          isMaybeThisPropAttr(env, name, AttrIsReadonly)) {
           return Effects::Throws;
         }
         if (isMaybeThisPropAttr(env, name, AttrLateInit)) {
@@ -1441,7 +1441,7 @@ Effects miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key, ReadOnlyOp o
   };
 
   if (checkReadOnlyOp(ReadOnlyOp::ReadOnly, op) &&
-    !isMaybeThisPropAttr(env, name, AttrIsReadOnly)) {
+    !isMaybeThisPropAttr(env, name, AttrIsReadonly)) {
     return alwaysThrows();
   }
 
@@ -2024,7 +2024,7 @@ void in(ISS& env, const bc::BaseSC& op) {
       break;
   }
 
-  // Whether we might potentially throw because of AttrIsReadOnly
+  // Whether we might potentially throw because of AttrIsReadonly
   if (checkReadOnlyOp(ReadOnlyOp::Mutable, op.subop4) &&
     lookup.readOnly == TriBool::Yes) {
     return unreachable(env);

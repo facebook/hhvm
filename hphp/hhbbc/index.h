@@ -181,7 +181,7 @@ struct PropLookupResult {
   SString name; // The statically known name of the string, if any
   TriBool found; // If the property was found
   TriBool isConst; // If the property is AttrConst
-  TriBool readOnly; // If the property is AttrIsReadOnly
+  TriBool readOnly; // If the property is AttrIsReadonly
   TriBool lateInit; // If the property is AttrLateInit
   bool classInitMightRaise; // If class initialization during the
                             // property access can raise (unlike the

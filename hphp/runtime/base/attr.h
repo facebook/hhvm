@@ -147,7 +147,7 @@ enum Attr {
   // Set on functions with coeffect rules
   AttrHasCoeffectRules     = (1u << 25), //       |          |    X    //
   // Indicates that this property was declared as readonly             //
-  AttrIsReadOnly           = (1u << 26), //       |    X     |         //
+  AttrIsReadonly           = (1u << 26), //       |    X     |         //
                                          //       |          |         //
   // Indicates that this function can be constant-folded if it is called with
   // all constant arguments.             //       |          |         //

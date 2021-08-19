@@ -285,7 +285,7 @@ void PropertiesInfo::mergeInPrivateStatic(const Index& index,
   auto it = m_cls->privateStatics.find(name);
   if (it == m_cls->privateStatics.end()) return;
   if (!ignoreConst && (it->second.attrs & AttrIsConst)) return;
-  if (mustBeReadOnly && !(it->second.attrs & AttrIsReadOnly)) return;
+  if (mustBeReadOnly && !(it->second.attrs & AttrIsReadonly)) return;
   if (m_cls->work) {
     m_cls->work->worklist.addPropMutateDep(name, *m_func);
     m_cls->work->propMutators[m_func].emplace(name);
@@ -355,7 +355,7 @@ void PropertiesInfo::mergeInAllPrivateStatics(const Index& index,
   if (!m_cls || t.is(BBottom)) return;
   for (auto& kv : m_cls->privateStatics) {
     if (!ignoreConst && (kv.second.attrs & AttrIsConst)) return;
-    if (mustBeReadOnly && !(kv.second.attrs & AttrIsReadOnly)) return;
+    if (mustBeReadOnly && !(kv.second.attrs & AttrIsReadonly)) return;
     if (m_cls->work) {
       m_cls->work->worklist.addPropMutateDep(kv.first, *m_func);
       m_cls->work->propMutators[m_func].emplace(kv.first);

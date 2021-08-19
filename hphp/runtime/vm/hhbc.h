@@ -102,35 +102,39 @@ struct IterArgs {
 //   asyncEagerOffset = flags & HasAEO ? decode_ba() : kInvalidOffset
 struct FCallArgsBase {
   enum Flags : uint16_t {
-    None                     = 0,
+    None                         = 0,
     // Unpack remaining arguments from a varray passed by ...$args.
-    HasUnpack                = (1 << 0),
+    HasUnpack                    = (1 << 0),
     // Pass generics to the callee.
-    HasGenerics              = (1 << 1),
+    HasGenerics                  = (1 << 1),
     // Lock newly constructed object if unwinding the constructor call.
-    LockWhileUnwinding       = (1 << 2),
+    LockWhileUnwinding           = (1 << 2),
     // Arguments are known to be compatible with prologue of the callee and
     // do not need to be repacked.
-    SkipRepack               = (1 << 3),
+    SkipRepack                   = (1 << 3),
+    // Indicates that the caller requires the return value to be mutable
+    // (not readonly)
+    EnforceMutableReturn         = (1 << 4),
     // HHBC-only: Op should be resolved using an explicit context class
-    ExplicitContext          = (1 << 4),
+    ExplicitContext              = (1 << 5),
     // HHBC-only: is the number of returns provided? false => 1
-    HasInOut                 = (1 << 5),
+    HasInOut                     = (1 << 6),
     // HHBC-only: should this FCall enforce argument inout-ness?
-    EnforceInOut             = (1 << 6),
+    EnforceInOut                 = (1 << 7),
     // HHBC-only: should this FCall enforce argument readonly-ness?
-    EnforceReadonly          = (1 << 7),
+    EnforceReadonly              = (1 << 8),
     // HHBC-only: is the async eager offset provided? false => kInvalidOffset
-    HasAsyncEagerOffset      = (1 << 8),
+    HasAsyncEagerOffset          = (1 << 9),
     // HHBC-only: the remaining space is used for number of arguments
-    NumArgsStart             = (1 << 9),
+    NumArgsStart                 = (1 << 10),
   };
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
   static constexpr uint8_t kInternalFlags =
-    HasUnpack | HasGenerics | LockWhileUnwinding | SkipRepack;
+    HasUnpack | HasGenerics | LockWhileUnwinding | SkipRepack |
+    EnforceMutableReturn;
   // The first (lowest) bit of numArgs.
-  static constexpr uint8_t kFirstNumArgsBit = 9;
+  static constexpr uint8_t kFirstNumArgsBit = 10;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
     : numArgs(numArgs)
@@ -143,6 +147,9 @@ struct FCallArgsBase {
   bool hasGenerics() const { return flags & Flags::HasGenerics; }
   bool lockWhileUnwinding() const { return flags & Flags::LockWhileUnwinding; }
   bool skipRepack() const { return flags & Flags::SkipRepack; }
+  bool enforceMutableReturn() const {
+    return flags & Flags::EnforceMutableReturn;
+  }
   uint32_t numInputs() const {
     return numArgs + (hasUnpack() ? 1 : 0) + (hasGenerics() ? 1 : 0);
   }

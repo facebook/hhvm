@@ -1346,6 +1346,10 @@ FCallArgs::Flags read_fcall_flags(AsmState& as, Op thisOpcode) {
     if (flag == "Unpack") { flags |= FCallArgs::HasUnpack; continue; }
     if (flag == "Generics") { flags |= FCallArgs::HasGenerics; continue; }
     if (flag == "SkipRepack") { flags |= FCallArgs::SkipRepack; continue; }
+    if (flag == "EnforceMutableReturn") {
+      flags |= FCallArgs::EnforceMutableReturn;
+      continue;
+    }
 
     as.error("unrecognized FCall flag `" + flag + "'");
   }

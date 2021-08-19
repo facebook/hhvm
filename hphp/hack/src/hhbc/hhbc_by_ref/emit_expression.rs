@@ -448,7 +448,7 @@ pub fn emit_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             false,
         )?
         .0),
-        Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, c),
+        Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, false, c),
         Expr_::New(e) => emit_new(emitter, env, pos, e, false),
         Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, pos, &fp.0, &fp.1),
         Expr_::Record(e) => emit_record(emitter, env, pos, e),
@@ -897,7 +897,7 @@ pub fn emit_await<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             let after_await = emitter.label_gen_mut().next_regular();
             let instrs = match e {
                 ast::Expr_::Call(c) => {
-                    emit_call_expr(emitter, env, pos, Some(after_await.clone()), &*c)?
+                    emit_call_expr(emitter, env, pos, Some(after_await.clone()), false, &*c)?
                 }
                 _ => emit_expr(emitter, env, expr)?,
             };
@@ -1874,6 +1874,7 @@ fn emit_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     args: &[ast::Expr],
     uarg: Option<&ast::Expr>,
     async_eager_label: Option<Label>,
+    readonly_return: bool,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     if let Some(ast_defs::Id(_, s)) = expr.as_id() {
@@ -1888,6 +1889,7 @@ fn emit_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         async_eager_label,
         env.call_context.clone(),
         false,
+        readonly_return,
     );
     match expr.2.as_id() {
         None => emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args),
@@ -2702,12 +2704,14 @@ fn get_fcall_args<'arena, 'decl, D: DeclProvider<'decl>>(
     async_eager_label: Option<Label>,
     context: Option<String>,
     lock_while_unwinding: bool,
+    readonly_return: bool,
 ) -> FcallArgs<'arena> {
     let num_args = args.len();
     let num_rets = 1 + args.iter().filter(|x| is_inout_arg(*x)).count();
     let mut flags = FcallFlags::default();
     flags.set(FcallFlags::HAS_UNPACK, uarg.is_some());
     flags.set(FcallFlags::LOCK_WHILE_UNWINDING, lock_while_unwinding);
+    flags.set(FcallFlags::ENFORCE_MUTABLE_RETURN, !readonly_return);
     let is_readonly_arg = if e
         .options()
         .hhvm
@@ -3481,6 +3485,7 @@ fn emit_call_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     async_eager_label: Option<Label>,
+    readonly_return: bool,
     (expr, targs, args, uarg): &(ast::Expr, Vec<ast::Targ>, Vec<ast::Expr>, Option<ast::Expr>),
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
@@ -3564,6 +3569,7 @@ fn emit_call_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 args,
                 uarg.as_ref(),
                 async_eager_label,
+                readonly_return,
             )?;
             Ok(emit_pos_then(alloc, pos, instrs))
         }
@@ -3855,6 +3861,7 @@ fn emit_new<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                 None,
                                 env.call_context.clone(),
                                 true,
+                                false, // readonly return
                             ),
                         ),
                         instr::popc(alloc),
@@ -4072,7 +4079,7 @@ fn emit_xhp_obj_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         pos.clone(),
         E_::mk_string(string_utils::clean(s).into()),
     )];
-    emit_call(e, env, pos, &f, &[], &args[..], None, None)
+    emit_call(e, env, pos, &f, &[], &args[..], None, None, false)
 }
 
 fn emit_array_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
@@ -4970,6 +4977,7 @@ fn emit_readonly_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         aast::Expr_::ObjGet(x) => {
             Ok(emit_obj_get(e, env, pos, QueryOp::CGet, &x.0, &x.1, &x.2, false, true)?.0)
         }
+        aast::Expr_::Call(c) => emit_call_expr(e, env, pos, None, true, c),
         _ => emit_expr(e, env, expr),
     }
 }

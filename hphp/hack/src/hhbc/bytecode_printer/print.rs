@@ -1153,6 +1153,9 @@ fn print_fcall_args<W: Write>(
     if_then(fls.contains(F::LOCK_WHILE_UNWINDING), || {
         flags.push("LockWhileUnwinding")
     });
+    if_then(fls.contains(F::ENFORCE_MUTABLE_RETURN), || {
+        flags.push("EnforceMutableReturn")
+    });
     angle(w, |w| concat_str_by(w, " ", flags))?;
     w.write(" ")?;
     print_int(w, num_args)?;

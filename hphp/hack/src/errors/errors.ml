@@ -2374,7 +2374,14 @@ let visibility_extends
 let visibility_override_internal
     pos parent_pos m parent_m (on_error : error_from_reasons_callback) =
   let msg1 =
-    (pos, Printf.sprintf "Cannot override this member in module `%s`" m)
+    ( pos,
+      match m with
+      | None ->
+        Printf.sprintf
+          "Cannot override this member outside module `%s`"
+          parent_m
+      | Some m -> Printf.sprintf "Cannot override this member in module `%s`" m
+    )
   in
   let msg2 =
     ( parent_pos,

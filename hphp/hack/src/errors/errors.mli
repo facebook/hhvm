@@ -1078,7 +1078,7 @@ val visibility_extends :
 val visibility_override_internal :
   Pos_or_decl.t ->
   Pos_or_decl.t ->
-  string ->
+  string option ->
   string ->
   error_from_reasons_callback ->
   unit

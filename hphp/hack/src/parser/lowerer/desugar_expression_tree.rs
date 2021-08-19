@@ -66,7 +66,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<TF>) -> Result<Expr, (P
         global_function_pointers: vec![],
         static_method_pointers: vec![],
     };
-    let (virtual_expr, desugar_expr) = rewrite_expr(env, &mut temps, e, &visitor_name)?;
+    let (virtual_expr, desugar_expr) = rewrite_expr(&mut temps, e, &visitor_name)?;
 
     let splice_count = temps.splices.len();
     let function_count = temps.global_function_pointers.len();
@@ -560,8 +560,7 @@ struct Temporaries {
 /// Also extracts the expressions that need to be assigned to temporaries
 /// Replaces the extracted splices, function pointers, and static method pointers
 /// with temporary variables
-fn rewrite_expr<TF>(
-    env: &Env<TF>,
+fn rewrite_expr(
     temps: &mut Temporaries,
     e: Expr,
     visitor_name: &str,
@@ -641,8 +640,8 @@ fn rewrite_expr<TF>(
         }
         Binop(bop) => {
             let (op, lhs, rhs) = *bop;
-            let (virtual_lhs, desugar_lhs) = rewrite_expr(env, temps, lhs, visitor_name)?;
-            let (virtual_rhs, desugar_rhs) = rewrite_expr(env, temps, rhs, visitor_name)?;
+            let (virtual_lhs, desugar_lhs) = rewrite_expr(temps, lhs, visitor_name)?;
+            let (virtual_rhs, desugar_rhs) = rewrite_expr(temps, rhs, visitor_name)?;
             if op == Bop::Eq(None) {
                 // Source: MyDsl`$x = ...`
                 // Virtualized: $x = ...
@@ -734,8 +733,7 @@ fn rewrite_expr<TF>(
         // Desugared: $0v->visitUnop(new ExprPos(...), ..., '__exclamationMark')
         Unop(unop) => {
             let (op, operand) = *unop;
-            let (virtual_operand, desugar_operand) =
-                rewrite_expr(env, temps, operand, visitor_name)?;
+            let (virtual_operand, desugar_operand) = rewrite_expr(temps, operand, visitor_name)?;
             let op_str = match op {
                 // Allow boolean not operator !$x
                 Uop::Unot => "__exclamationMark",
@@ -787,16 +785,16 @@ fn rewrite_expr<TF>(
         // Desugared: $0v->visitTernary(new ExprPos(...), ..., ..., ...)
         Eif(eif) => {
             let (e1, e2o, e3) = *eif;
-            let (virtual_e1, desugar_e1) = rewrite_expr(env, temps, e1, visitor_name)?;
+            let (virtual_e1, desugar_e1) = rewrite_expr(temps, e1, visitor_name)?;
             let (virtual_e2, desugar_e2) = if let Some(e2) = e2o {
-                rewrite_expr(env, temps, e2, visitor_name)?
+                rewrite_expr(temps, e2, visitor_name)?
             } else {
                 return Err((
                     pos,
                     "Unsupport expression tree syntax: Elvis operator".into(),
                 ));
             };
-            let (virtual_e3, desugar_e3) = rewrite_expr(env, temps, e3, visitor_name)?;
+            let (virtual_e3, desugar_e3) = rewrite_expr(temps, e3, visitor_name)?;
 
             let desugar_expr = v_meth_call(
                 et::VISIT_TERNARY,
@@ -844,7 +842,7 @@ fn rewrite_expr<TF>(
                 _ => {}
             }
 
-            let (virtual_args, desugar_args) = rewrite_exprs(env, temps, args, visitor_name)?;
+            let (virtual_args, desugar_args) = rewrite_exprs(temps, args, visitor_name)?;
 
             match recv.2 {
                 // Source: MyDsl`foo()`
@@ -950,7 +948,7 @@ fn rewrite_expr<TF>(
                 }
                 _ => {
                     let (virtual_recv, desugar_recv) =
-                        rewrite_expr(env, temps, Expr((), recv.1, recv.2), visitor_name)?;
+                        rewrite_expr(temps, Expr((), recv.1, recv.2), visitor_name)?;
                     let desugar_expr = v_meth_call(
                         et::VISIT_CALL,
                         vec![pos_expr, desugar_recv, vec_literal(desugar_args)],
@@ -987,8 +985,7 @@ fn rewrite_expr<TF>(
 
             let should_append_return = only_void_return(&body);
 
-            let (mut virtual_body_stmts, desugar_body) =
-                rewrite_stmts(env, temps, body, visitor_name)?;
+            let (mut virtual_body_stmts, desugar_body) = rewrite_stmts(temps, body, visitor_name)?;
 
             if should_append_return {
                 virtual_body_stmts.push(Stmt(
@@ -1041,7 +1038,7 @@ fn rewrite_expr<TF>(
                     "Expression Trees do not support nullsafe property access".into(),
                 ));
             }
-            let (virtual_e1, desugar_e1) = rewrite_expr(env, temps, e1, visitor_name)?;
+            let (virtual_e1, desugar_e1) = rewrite_expr(temps, e1, visitor_name)?;
             let id = if let Id(id) = &e2.2 {
                 string_literal(id.0.clone(), &id.1)
             } else {
@@ -1072,8 +1069,7 @@ fn rewrite_expr<TF>(
     Ok((virtual_expr, desugar_expr))
 }
 
-fn rewrite_exprs<TF>(
-    env: &Env<TF>,
+fn rewrite_exprs(
     temps: &mut Temporaries,
     exprs: Vec<Expr>,
     visitor_name: &str,
@@ -1081,15 +1077,14 @@ fn rewrite_exprs<TF>(
     let mut virtual_results = Vec::with_capacity(exprs.len());
     let mut desugar_results = Vec::with_capacity(exprs.len());
     for expr in exprs {
-        let (virtual_expr, desugar_expr) = rewrite_expr(env, temps, expr, visitor_name)?;
+        let (virtual_expr, desugar_expr) = rewrite_expr(temps, expr, visitor_name)?;
         virtual_results.push(virtual_expr);
         desugar_results.push(desugar_expr);
     }
     Ok((virtual_results, desugar_results))
 }
 
-fn rewrite_stmts<TF>(
-    env: &Env<TF>,
+fn rewrite_stmts(
     temps: &mut Temporaries,
     stmts: Vec<Stmt>,
     visitor_name: &str,
@@ -1097,7 +1092,7 @@ fn rewrite_stmts<TF>(
     let mut virtual_results = Vec::with_capacity(stmts.len());
     let mut desugar_results = Vec::with_capacity(stmts.len());
     for stmt in stmts {
-        let (virtual_stmt, desugared_expr) = rewrite_stmt(env, temps, stmt, visitor_name)?;
+        let (virtual_stmt, desugared_expr) = rewrite_stmt(temps, stmt, visitor_name)?;
         virtual_results.push(virtual_stmt);
         if let Some(desugared_expr) = desugared_expr {
             desugar_results.push(desugared_expr);
@@ -1106,8 +1101,7 @@ fn rewrite_stmts<TF>(
     Ok((virtual_results, desugar_results))
 }
 
-fn rewrite_stmt<TF>(
-    env: &Env<TF>,
+fn rewrite_stmt(
     temps: &mut Temporaries,
     s: Stmt,
     visitor_name: &str,
@@ -1119,7 +1113,7 @@ fn rewrite_stmt<TF>(
 
     let virtual_desugar = match stmt_ {
         Expr(e) => {
-            let (virtual_expr, desugar_expr) = rewrite_expr(env, temps, *e, visitor_name)?;
+            let (virtual_expr, desugar_expr) = rewrite_expr(temps, *e, visitor_name)?;
             (Stmt(pos, Expr(Box::new(virtual_expr))), Some(desugar_expr))
         }
         Return(e) => match *e {
@@ -1127,7 +1121,7 @@ fn rewrite_stmt<TF>(
             // Virtualized: return ...;
             // Desugared: $0v->visitReturn(new ExprPos(...), $0v->...)
             Some(e) => {
-                let (virtual_expr, desugar_expr) = rewrite_expr(env, temps, e, visitor_name)?;
+                let (virtual_expr, desugar_expr) = rewrite_expr(temps, e, visitor_name)?;
                 let desugar_expr =
                     v_meth_call(et::VISIT_RETURN, vec![pos_expr, desugar_expr], &pos);
                 let virtual_stmt = Stmt(pos, Return(Box::new(Some(virtual_expr))));
@@ -1153,11 +1147,11 @@ fn rewrite_stmt<TF>(
         // Desugared: $0v->visitIf(new ExprPos(...), $0v->..., vec[...], vec[...])
         If(if_stmt) => {
             let (cond_expr, then_block, else_block) = *if_stmt;
-            let (virtual_cond, desugar_cond) = rewrite_expr(env, temps, cond_expr, visitor_name)?;
+            let (virtual_cond, desugar_cond) = rewrite_expr(temps, cond_expr, visitor_name)?;
             let (virtual_then_stmts, desugar_then) =
-                rewrite_stmts(env, temps, then_block, visitor_name)?;
+                rewrite_stmts(temps, then_block, visitor_name)?;
             let (virtual_else_stmts, desugar_else) =
-                rewrite_stmts(env, temps, else_block, visitor_name)?;
+                rewrite_stmts(temps, else_block, visitor_name)?;
 
             let desugar_expr = v_meth_call(
                 et::VISIT_IF,
@@ -1184,8 +1178,8 @@ fn rewrite_stmt<TF>(
         // Desugared: $0v->visitWhile(new ExprPos(...), $0v->..., vec[...])
         While(w) => {
             let (cond, body) = *w;
-            let (virtual_cond, desugar_cond) = rewrite_expr(env, temps, cond, visitor_name)?;
-            let (virtual_body_stmts, desugar_body) = rewrite_stmts(env, temps, body, visitor_name)?;
+            let (virtual_cond, desugar_cond) = rewrite_expr(temps, cond, visitor_name)?;
+            let (virtual_body_stmts, desugar_body) = rewrite_stmts(temps, body, visitor_name)?;
 
             let desugar_expr = v_meth_call(
                 et::VISIT_WHILE,
@@ -1204,18 +1198,17 @@ fn rewrite_stmt<TF>(
         For(w) => {
             let (init, cond, incr, body) = *w;
             let (virtual_init_exprs, desugar_init_exprs) =
-                rewrite_exprs(env, temps, init, visitor_name)?;
+                rewrite_exprs(temps, init, visitor_name)?;
             let (virtual_cond_option, desugar_cond_expr) = match cond {
                 Some(cond) => {
-                    let (virtual_cond, desugar_cond) =
-                        rewrite_expr(env, temps, cond, visitor_name)?;
+                    let (virtual_cond, desugar_cond) = rewrite_expr(temps, cond, visitor_name)?;
                     (Some(boolify(virtual_cond)), desugar_cond)
                 }
                 None => (None, null_literal(pos.clone())),
             };
             let (virtual_incr_exprs, desugar_incr_exprs) =
-                rewrite_exprs(env, temps, incr, visitor_name)?;
-            let (virtual_body_stmts, desugar_body) = rewrite_stmts(env, temps, body, visitor_name)?;
+                rewrite_exprs(temps, incr, visitor_name)?;
+            let (virtual_body_stmts, desugar_body) = rewrite_stmts(temps, body, visitor_name)?;
 
             let desugar_expr = v_meth_call(
                 et::VISIT_FOR,

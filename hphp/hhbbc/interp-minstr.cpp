@@ -2076,7 +2076,7 @@ void in(ISS& env, const bc::BaseL& op) {
   auto ty = peekLocRaw(env, op.nloc1.id);
   auto throws = false;
 
-  if (op.subop3 == ReadOnlyOp::CheckROCOW) {
+  if (checkReadOnlyOp(ReadOnlyOp::CheckROCOW,  op.subop3)) {
     if (ty.couldBe(BCounted) && !ty.subtypeOf(BArrLike)) throws = true;
   }
 

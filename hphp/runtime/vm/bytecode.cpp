@@ -2496,13 +2496,11 @@ OPTBLD_INLINE void baseLImpl(named_local_var loc, MOpMode mode, ReadOnlyOp op) {
     raise_undefined_local(vmfp(), loc.name);
   }
 
-  if (op == ReadOnlyOp::CheckROCOW) {
-    if (!isRefcountedType(local.type()) || hasPersistentFlavor(local.type())) {
-      mstate.roProp = true;
-    } else {
-      auto const name = vmfp()->func()->localVarName(loc.name)->data();
-      throw_local_must_be_value_type(name);
-    }
+  if (readonlyLocalShouldThrow(*local, op, mstate.roProp)) {
+    assertx(loc.name < vmfp()->func()->numNamedLocals());
+    assertx(vmfp()->func()->localVarName(loc.name));
+    auto const name = vmfp()->func()->localVarName(loc.name);
+    throw_local_must_be_value_type(name->data());
   }
   mstate.base = local;
 }

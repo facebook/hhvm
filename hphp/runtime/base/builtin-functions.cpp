@@ -909,6 +909,16 @@ void throw_local_must_be_value_type(const char* locName)
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
+bool readonlyLocalShouldThrow(TypedValue tv, ReadOnlyOp op, bool& roProp) {
+  if (!RO::EvalEnableReadonlyPropertyEnforcement) return false;
+  if (op == ReadOnlyOp::CheckROCOW) {
+    auto cow = !isRefcountedType(type(tv)) || hasPersistentFlavor(type(tv));
+    if (!cow) return true;
+    roProp = true;
+  }
+  return false;
+}
+
 bool checkReadonly(const TypedValue* tv,
                    const Class* cls,
                    const StringData* name,

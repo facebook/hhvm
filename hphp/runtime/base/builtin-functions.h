@@ -250,6 +250,7 @@ bool is_constructor_name(const char* func);
 
 bool checkReadonly(const TypedValue* tv, const Class* cls, const StringData* name,
                    bool readonly, ReadOnlyOp op);
+bool readonlyLocalShouldThrow(TypedValue tv, ReadOnlyOp op, bool& roProp);
 
 void check_collection_cast_to_array();
 

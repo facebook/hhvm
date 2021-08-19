@@ -47,8 +47,8 @@
               (Return
                  (Some ((int), [10:10-46],
                         (Hole (((Sub), [10:43-45], (Lvar ([10:43-45], $b))), (Super), (int), (UnsafeCast [([10:32-37], (Happly (([10:32-37], "\\Super"), []))); ([10:38-41], (Hprim Tint))])))))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

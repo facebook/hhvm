@@ -17,7 +17,7 @@
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
            ];
-         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([4:41-45], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }
@@ -48,7 +48,7 @@
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
            ];
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -107,8 +107,8 @@
                      (((function(Pair<int, int> $b): void)), [23:3-10],
                       (Obj_get (((TestPair), [23:3-7], (Lvar ([23:3-7], $foo))), (((function(Pair<int, int> $b): void)), [23:9-10], (Id ([23:9-10], "b"))), OG_nullthrows, false))),
                      [], [((Pair<int, bool>), [23:11-14], (Hole (((Pair<int, bool>), [23:11-14], (Lvar ([23:11-14], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing)))], None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -199,8 +199,8 @@
                           )))
                        ],
                      None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

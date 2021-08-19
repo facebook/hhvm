@@ -24,8 +24,8 @@
                          (((function(): ?arraykey)), [5:10-17],
                           (Obj_get (((A<arraykey>), [5:10-12], (Lvar ([5:10-12], $x))), (((function(): ?arraykey)), [5:14-17], (Id ([5:14-17], "get"))), OG_nullthrows, false))),
                          [], [], None))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })[(Class
@@ -43,7 +43,7 @@
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([4:19-22], "get"); m_tparams = []; m_where_constraints = [(([4:35-36], (Habstr ("T", []))), Constraint_super, ([4:43-51], (Hprim Tarraykey)))]; 
          m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
-         m_body = { fb_ast = [([5:5-17], (Return (Some ((null), [5:12-16], Null))))]; fb_annotation = () }; 
+         m_body = { fb_ast = [([5:5-17], (Return (Some ((null), [5:12-16], Null))))] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((?T), (Some ([4:26-28], (Hoption ([4:27-28], (Habstr ("T", []))))))); 
          m_external = false; m_doc_comment = None }

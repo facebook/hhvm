@@ -15,7 +15,7 @@
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
           ];
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some ((string), [4:10-12], (Lvar ([4:10-12], $x))))))]; fb_annotation = () }; 
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some ((string), [4:10-12], (Lvar ([4:10-12], $x))))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })[(Fun
@@ -39,8 +39,8 @@
         f_body =
         { fb_ast =
           [([4:3-17], (Return (Some ((string), [4:10-16], (Call ((((function(string $x): string)), [4:10-12], (Id ([4:10-12], "\\f1"))), [], [((string), [4:13-15], (Lvar ([4:13-15], $x)))], None))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })[(Fun
@@ -69,8 +69,8 @@
                       (Call ((((function(string $x): string)), [4:10-12], (Id ([4:10-12], "\\f2"))), 
                          [], [((string), [4:13-19], (Call ((((function(string $x): string)), [4:13-15], (Id ([4:13-15], "\\f1"))), [], [((string), [4:16-18], (Lvar ([4:16-18], $x)))], None)))], None
                          ))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })[(Fun
@@ -96,8 +96,8 @@
                               [], [((string), [4:16-22], (Call ((((function(string $x): string)), [4:16-18], (Id ([4:16-18], "\\f1"))), [], [((string), [4:19-21], (String ""))], None)))], None)))
                            ],
                          None))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

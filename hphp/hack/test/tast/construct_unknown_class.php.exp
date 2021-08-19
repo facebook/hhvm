@@ -27,8 +27,8 @@ Errors:
                       (New (((_), [4:14-21], (CI ([4:14-21], "\\Unknown"))), 
                          [], [((int), [4:22-23], (Int "3")); ((string), [4:25-28], (String "s")); ((vec<int>), [4:30-36], (ValCollection (Vec, None, [((int), [4:34-35], (Int "3"))])))],
                          (Some ((vec<string>), [4:41-43], (Lvar ([4:41-43], $x)))), (_)))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

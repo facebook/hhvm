@@ -27,8 +27,8 @@
                 ((nothing), [6:3-12],
                  (Array_get (((dict<nothing, nothing>), [6:3-6], (Lvar ([6:3-6], $xs))), (Some (
                     (mixed), [6:7-11], (Hole (((mixed), [6:7-11], (Lvar ([6:7-11], $idx))), (mixed), (arraykey), Typing)))))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

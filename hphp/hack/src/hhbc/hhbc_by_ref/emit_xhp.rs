@@ -444,7 +444,7 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl, D: DeclProvider<'dec
     abstract_: bool,
     static_: bool,
     visibility: Visibility,
-    ast: Block,
+    fb_ast: Block,
 ) -> Result<HhasMethod<'arena>> {
     let meth = Method_ {
         span: pos.unwrap_or_else(Pos::make_none),
@@ -461,10 +461,7 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl, D: DeclProvider<'dec
         params: vec![],
         ctxs: None,        // TODO(T70095684)
         unsafe_ctxs: None, // TODO(T70095684)
-        body: FuncBody {
-            ast,
-            annotation: (),
-        },
+        body: FuncBody { fb_ast },
         fun_kind: ast_defs::FunKind::FSync,
         user_attributes: vec![],
         readonly_ret: None, // TODO readonly emitter

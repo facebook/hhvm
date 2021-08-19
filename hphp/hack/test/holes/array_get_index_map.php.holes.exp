@@ -26,8 +26,8 @@
              (Expr
                 ((nothing), [7:3-12],
                  (Array_get (((Map<nothing, nothing>), [7:3-6], (Lvar ([7:3-6], $xs))), (Some ((mixed), [7:7-11], (Hole (((mixed), [7:7-11], (Lvar ([7:7-11], $idx))), (mixed), (nothing), Typing)))))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -61,8 +61,8 @@
              (Expr
                 ((int), [13:3-12],
                  (Array_get (((Map<string, int>), [13:3-6], (Lvar ([13:3-6], $xs))), (Some ((mixed), [13:7-11], (Hole (((mixed), [13:7-11], (Lvar ([13:7-11], $idx))), (mixed), (string), Typing)))))))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

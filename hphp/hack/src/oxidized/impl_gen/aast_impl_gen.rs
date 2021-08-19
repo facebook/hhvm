@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3917999bf1fdaf01b136577579717d1f>>
+// @generated SignedSource<<5691f022bf2ea545a9230e30b72d9c8d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,11 +11,11 @@
 use crate::aast::*;
 use crate::ast_defs;
 use crate::LocalIdMap;
-impl<Ex, Fb, En> Stmt_<Ex, Fb, En> {
+impl<Ex, En> Stmt_<Ex, En> {
     pub fn mk_fallthrough() -> Self {
         Stmt_::Fallthrough
     }
-    pub fn mk_expr(p0: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_expr(p0: Expr<Ex, En>) -> Self {
         Stmt_::Expr(Box::new(p0))
     }
     pub fn mk_break() -> Self {
@@ -24,55 +24,51 @@ impl<Ex, Fb, En> Stmt_<Ex, Fb, En> {
     pub fn mk_continue() -> Self {
         Stmt_::Continue
     }
-    pub fn mk_throw(p0: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_throw(p0: Expr<Ex, En>) -> Self {
         Stmt_::Throw(Box::new(p0))
     }
-    pub fn mk_return(p0: Option<Expr<Ex, Fb, En>>) -> Self {
+    pub fn mk_return(p0: Option<Expr<Ex, En>>) -> Self {
         Stmt_::Return(Box::new(p0))
     }
     pub fn mk_yield_break() -> Self {
         Stmt_::YieldBreak
     }
-    pub fn mk_awaitall(p0: Vec<(Option<Lid>, Expr<Ex, Fb, En>)>, p1: Block<Ex, Fb, En>) -> Self {
+    pub fn mk_awaitall(p0: Vec<(Option<Lid>, Expr<Ex, En>)>, p1: Block<Ex, En>) -> Self {
         Stmt_::Awaitall(Box::new((p0, p1)))
     }
-    pub fn mk_if(p0: Expr<Ex, Fb, En>, p1: Block<Ex, Fb, En>, p2: Block<Ex, Fb, En>) -> Self {
+    pub fn mk_if(p0: Expr<Ex, En>, p1: Block<Ex, En>, p2: Block<Ex, En>) -> Self {
         Stmt_::If(Box::new((p0, p1, p2)))
     }
-    pub fn mk_do(p0: Block<Ex, Fb, En>, p1: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_do(p0: Block<Ex, En>, p1: Expr<Ex, En>) -> Self {
         Stmt_::Do(Box::new((p0, p1)))
     }
-    pub fn mk_while(p0: Expr<Ex, Fb, En>, p1: Block<Ex, Fb, En>) -> Self {
+    pub fn mk_while(p0: Expr<Ex, En>, p1: Block<Ex, En>) -> Self {
         Stmt_::While(Box::new((p0, p1)))
     }
-    pub fn mk_using(p0: UsingStmt<Ex, Fb, En>) -> Self {
+    pub fn mk_using(p0: UsingStmt<Ex, En>) -> Self {
         Stmt_::Using(Box::new(p0))
     }
     pub fn mk_for(
-        p0: Vec<Expr<Ex, Fb, En>>,
-        p1: Option<Expr<Ex, Fb, En>>,
-        p2: Vec<Expr<Ex, Fb, En>>,
-        p3: Block<Ex, Fb, En>,
+        p0: Vec<Expr<Ex, En>>,
+        p1: Option<Expr<Ex, En>>,
+        p2: Vec<Expr<Ex, En>>,
+        p3: Block<Ex, En>,
     ) -> Self {
         Stmt_::For(Box::new((p0, p1, p2, p3)))
     }
-    pub fn mk_switch(p0: Expr<Ex, Fb, En>, p1: Vec<Case<Ex, Fb, En>>) -> Self {
+    pub fn mk_switch(p0: Expr<Ex, En>, p1: Vec<Case<Ex, En>>) -> Self {
         Stmt_::Switch(Box::new((p0, p1)))
     }
-    pub fn mk_foreach(p0: Expr<Ex, Fb, En>, p1: AsExpr<Ex, Fb, En>, p2: Block<Ex, Fb, En>) -> Self {
+    pub fn mk_foreach(p0: Expr<Ex, En>, p1: AsExpr<Ex, En>, p2: Block<Ex, En>) -> Self {
         Stmt_::Foreach(Box::new((p0, p1, p2)))
     }
-    pub fn mk_try(
-        p0: Block<Ex, Fb, En>,
-        p1: Vec<Catch<Ex, Fb, En>>,
-        p2: Block<Ex, Fb, En>,
-    ) -> Self {
+    pub fn mk_try(p0: Block<Ex, En>, p1: Vec<Catch<Ex, En>>, p2: Block<Ex, En>) -> Self {
         Stmt_::Try(Box::new((p0, p1, p2)))
     }
     pub fn mk_noop() -> Self {
         Stmt_::Noop
     }
-    pub fn mk_block(p0: Block<Ex, Fb, En>) -> Self {
+    pub fn mk_block(p0: Block<Ex, En>) -> Self {
         Stmt_::Block(p0)
     }
     pub fn mk_markup(p0: Pstring) -> Self {
@@ -201,51 +197,49 @@ impl<Ex, Fb, En> Stmt_<Ex, Fb, En> {
             _ => false,
         }
     }
-    pub fn as_expr(&self) -> Option<&Expr<Ex, Fb, En>> {
+    pub fn as_expr(&self) -> Option<&Expr<Ex, En>> {
         match self {
             Stmt_::Expr(p0) => Some(&p0),
             _ => None,
         }
     }
-    pub fn as_throw(&self) -> Option<&Expr<Ex, Fb, En>> {
+    pub fn as_throw(&self) -> Option<&Expr<Ex, En>> {
         match self {
             Stmt_::Throw(p0) => Some(&p0),
             _ => None,
         }
     }
-    pub fn as_return(&self) -> Option<&Option<Expr<Ex, Fb, En>>> {
+    pub fn as_return(&self) -> Option<&Option<Expr<Ex, En>>> {
         match self {
             Stmt_::Return(p0) => Some(&p0),
             _ => None,
         }
     }
-    pub fn as_awaitall(
-        &self,
-    ) -> Option<(&Vec<(Option<Lid>, Expr<Ex, Fb, En>)>, &Block<Ex, Fb, En>)> {
+    pub fn as_awaitall(&self) -> Option<(&Vec<(Option<Lid>, Expr<Ex, En>)>, &Block<Ex, En>)> {
         match self {
             Stmt_::Awaitall(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_if(&self) -> Option<(&Expr<Ex, Fb, En>, &Block<Ex, Fb, En>, &Block<Ex, Fb, En>)> {
+    pub fn as_if(&self) -> Option<(&Expr<Ex, En>, &Block<Ex, En>, &Block<Ex, En>)> {
         match self {
             Stmt_::If(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
-    pub fn as_do(&self) -> Option<(&Block<Ex, Fb, En>, &Expr<Ex, Fb, En>)> {
+    pub fn as_do(&self) -> Option<(&Block<Ex, En>, &Expr<Ex, En>)> {
         match self {
             Stmt_::Do(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_while(&self) -> Option<(&Expr<Ex, Fb, En>, &Block<Ex, Fb, En>)> {
+    pub fn as_while(&self) -> Option<(&Expr<Ex, En>, &Block<Ex, En>)> {
         match self {
             Stmt_::While(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_using(&self) -> Option<&UsingStmt<Ex, Fb, En>> {
+    pub fn as_using(&self) -> Option<&UsingStmt<Ex, En>> {
         match self {
             Stmt_::Using(p0) => Some(&p0),
             _ => None,
@@ -254,43 +248,35 @@ impl<Ex, Fb, En> Stmt_<Ex, Fb, En> {
     pub fn as_for(
         &self,
     ) -> Option<(
-        &Vec<Expr<Ex, Fb, En>>,
-        &Option<Expr<Ex, Fb, En>>,
-        &Vec<Expr<Ex, Fb, En>>,
-        &Block<Ex, Fb, En>,
+        &Vec<Expr<Ex, En>>,
+        &Option<Expr<Ex, En>>,
+        &Vec<Expr<Ex, En>>,
+        &Block<Ex, En>,
     )> {
         match self {
             Stmt_::For(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3)),
             _ => None,
         }
     }
-    pub fn as_switch(&self) -> Option<(&Expr<Ex, Fb, En>, &Vec<Case<Ex, Fb, En>>)> {
+    pub fn as_switch(&self) -> Option<(&Expr<Ex, En>, &Vec<Case<Ex, En>>)> {
         match self {
             Stmt_::Switch(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_foreach(
-        &self,
-    ) -> Option<(&Expr<Ex, Fb, En>, &AsExpr<Ex, Fb, En>, &Block<Ex, Fb, En>)> {
+    pub fn as_foreach(&self) -> Option<(&Expr<Ex, En>, &AsExpr<Ex, En>, &Block<Ex, En>)> {
         match self {
             Stmt_::Foreach(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
-    pub fn as_try(
-        &self,
-    ) -> Option<(
-        &Block<Ex, Fb, En>,
-        &Vec<Catch<Ex, Fb, En>>,
-        &Block<Ex, Fb, En>,
-    )> {
+    pub fn as_try(&self) -> Option<(&Block<Ex, En>, &Vec<Catch<Ex, En>>, &Block<Ex, En>)> {
         match self {
             Stmt_::Try(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
-    pub fn as_block(&self) -> Option<&Block<Ex, Fb, En>> {
+    pub fn as_block(&self) -> Option<&Block<Ex, En>> {
         match self {
             Stmt_::Block(p0) => Some(p0),
             _ => None,
@@ -308,19 +294,19 @@ impl<Ex, Fb, En> Stmt_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_expr_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En>> {
+    pub fn as_expr_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
         match self {
             Stmt_::Expr(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
-    pub fn as_throw_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En>> {
+    pub fn as_throw_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
         match self {
             Stmt_::Throw(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
-    pub fn as_return_mut(&mut self) -> Option<&mut Option<Expr<Ex, Fb, En>>> {
+    pub fn as_return_mut(&mut self) -> Option<&mut Option<Expr<Ex, En>>> {
         match self {
             Stmt_::Return(p0) => Some(p0.as_mut()),
             _ => None,
@@ -328,10 +314,7 @@ impl<Ex, Fb, En> Stmt_<Ex, Fb, En> {
     }
     pub fn as_awaitall_mut(
         &mut self,
-    ) -> Option<(
-        &mut Vec<(Option<Lid>, Expr<Ex, Fb, En>)>,
-        &mut Block<Ex, Fb, En>,
-    )> {
+    ) -> Option<(&mut Vec<(Option<Lid>, Expr<Ex, En>)>, &mut Block<Ex, En>)> {
         match self {
             Stmt_::Awaitall(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -339,29 +322,25 @@ impl<Ex, Fb, En> Stmt_<Ex, Fb, En> {
     }
     pub fn as_if_mut(
         &mut self,
-    ) -> Option<(
-        &mut Expr<Ex, Fb, En>,
-        &mut Block<Ex, Fb, En>,
-        &mut Block<Ex, Fb, En>,
-    )> {
+    ) -> Option<(&mut Expr<Ex, En>, &mut Block<Ex, En>, &mut Block<Ex, En>)> {
         match self {
             Stmt_::If(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
         }
     }
-    pub fn as_do_mut(&mut self) -> Option<(&mut Block<Ex, Fb, En>, &mut Expr<Ex, Fb, En>)> {
+    pub fn as_do_mut(&mut self) -> Option<(&mut Block<Ex, En>, &mut Expr<Ex, En>)> {
         match self {
             Stmt_::Do(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
-    pub fn as_while_mut(&mut self) -> Option<(&mut Expr<Ex, Fb, En>, &mut Block<Ex, Fb, En>)> {
+    pub fn as_while_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Block<Ex, En>)> {
         match self {
             Stmt_::While(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
-    pub fn as_using_mut(&mut self) -> Option<&mut UsingStmt<Ex, Fb, En>> {
+    pub fn as_using_mut(&mut self) -> Option<&mut UsingStmt<Ex, En>> {
         match self {
             Stmt_::Using(p0) => Some(p0.as_mut()),
             _ => None,
@@ -370,17 +349,17 @@ impl<Ex, Fb, En> Stmt_<Ex, Fb, En> {
     pub fn as_for_mut(
         &mut self,
     ) -> Option<(
-        &mut Vec<Expr<Ex, Fb, En>>,
-        &mut Option<Expr<Ex, Fb, En>>,
-        &mut Vec<Expr<Ex, Fb, En>>,
-        &mut Block<Ex, Fb, En>,
+        &mut Vec<Expr<Ex, En>>,
+        &mut Option<Expr<Ex, En>>,
+        &mut Vec<Expr<Ex, En>>,
+        &mut Block<Ex, En>,
     )> {
         match self {
             Stmt_::For(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2, &mut p0.3)),
             _ => None,
         }
     }
-    pub fn as_switch_mut(&mut self) -> Option<(&mut Expr<Ex, Fb, En>, &mut Vec<Case<Ex, Fb, En>>)> {
+    pub fn as_switch_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Vec<Case<Ex, En>>)> {
         match self {
             Stmt_::Switch(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -388,11 +367,7 @@ impl<Ex, Fb, En> Stmt_<Ex, Fb, En> {
     }
     pub fn as_foreach_mut(
         &mut self,
-    ) -> Option<(
-        &mut Expr<Ex, Fb, En>,
-        &mut AsExpr<Ex, Fb, En>,
-        &mut Block<Ex, Fb, En>,
-    )> {
+    ) -> Option<(&mut Expr<Ex, En>, &mut AsExpr<Ex, En>, &mut Block<Ex, En>)> {
         match self {
             Stmt_::Foreach(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
@@ -401,16 +376,16 @@ impl<Ex, Fb, En> Stmt_<Ex, Fb, En> {
     pub fn as_try_mut(
         &mut self,
     ) -> Option<(
-        &mut Block<Ex, Fb, En>,
-        &mut Vec<Catch<Ex, Fb, En>>,
-        &mut Block<Ex, Fb, En>,
+        &mut Block<Ex, En>,
+        &mut Vec<Catch<Ex, En>>,
+        &mut Block<Ex, En>,
     )> {
         match self {
             Stmt_::Try(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
         }
     }
-    pub fn as_block_mut(&mut self) -> Option<&mut Block<Ex, Fb, En>> {
+    pub fn as_block_mut(&mut self) -> Option<&mut Block<Ex, En>> {
         match self {
             Stmt_::Block(p0) => Some(p0),
             _ => None,
@@ -428,51 +403,49 @@ impl<Ex, Fb, En> Stmt_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_expr_into(self) -> Option<Expr<Ex, Fb, En>> {
+    pub fn as_expr_into(self) -> Option<Expr<Ex, En>> {
         match self {
             Stmt_::Expr(p0) => Some(*p0),
             _ => None,
         }
     }
-    pub fn as_throw_into(self) -> Option<Expr<Ex, Fb, En>> {
+    pub fn as_throw_into(self) -> Option<Expr<Ex, En>> {
         match self {
             Stmt_::Throw(p0) => Some(*p0),
             _ => None,
         }
     }
-    pub fn as_return_into(self) -> Option<Option<Expr<Ex, Fb, En>>> {
+    pub fn as_return_into(self) -> Option<Option<Expr<Ex, En>>> {
         match self {
             Stmt_::Return(p0) => Some(*p0),
             _ => None,
         }
     }
-    pub fn as_awaitall_into(
-        self,
-    ) -> Option<(Vec<(Option<Lid>, Expr<Ex, Fb, En>)>, Block<Ex, Fb, En>)> {
+    pub fn as_awaitall_into(self) -> Option<(Vec<(Option<Lid>, Expr<Ex, En>)>, Block<Ex, En>)> {
         match self {
             Stmt_::Awaitall(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_if_into(self) -> Option<(Expr<Ex, Fb, En>, Block<Ex, Fb, En>, Block<Ex, Fb, En>)> {
+    pub fn as_if_into(self) -> Option<(Expr<Ex, En>, Block<Ex, En>, Block<Ex, En>)> {
         match self {
             Stmt_::If(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }
-    pub fn as_do_into(self) -> Option<(Block<Ex, Fb, En>, Expr<Ex, Fb, En>)> {
+    pub fn as_do_into(self) -> Option<(Block<Ex, En>, Expr<Ex, En>)> {
         match self {
             Stmt_::Do(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_while_into(self) -> Option<(Expr<Ex, Fb, En>, Block<Ex, Fb, En>)> {
+    pub fn as_while_into(self) -> Option<(Expr<Ex, En>, Block<Ex, En>)> {
         match self {
             Stmt_::While(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_using_into(self) -> Option<UsingStmt<Ex, Fb, En>> {
+    pub fn as_using_into(self) -> Option<UsingStmt<Ex, En>> {
         match self {
             Stmt_::Using(p0) => Some(*p0),
             _ => None,
@@ -481,39 +454,35 @@ impl<Ex, Fb, En> Stmt_<Ex, Fb, En> {
     pub fn as_for_into(
         self,
     ) -> Option<(
-        Vec<Expr<Ex, Fb, En>>,
-        Option<Expr<Ex, Fb, En>>,
-        Vec<Expr<Ex, Fb, En>>,
-        Block<Ex, Fb, En>,
+        Vec<Expr<Ex, En>>,
+        Option<Expr<Ex, En>>,
+        Vec<Expr<Ex, En>>,
+        Block<Ex, En>,
     )> {
         match self {
             Stmt_::For(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3)),
             _ => None,
         }
     }
-    pub fn as_switch_into(self) -> Option<(Expr<Ex, Fb, En>, Vec<Case<Ex, Fb, En>>)> {
+    pub fn as_switch_into(self) -> Option<(Expr<Ex, En>, Vec<Case<Ex, En>>)> {
         match self {
             Stmt_::Switch(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_foreach_into(
-        self,
-    ) -> Option<(Expr<Ex, Fb, En>, AsExpr<Ex, Fb, En>, Block<Ex, Fb, En>)> {
+    pub fn as_foreach_into(self) -> Option<(Expr<Ex, En>, AsExpr<Ex, En>, Block<Ex, En>)> {
         match self {
             Stmt_::Foreach(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }
-    pub fn as_try_into(
-        self,
-    ) -> Option<(Block<Ex, Fb, En>, Vec<Catch<Ex, Fb, En>>, Block<Ex, Fb, En>)> {
+    pub fn as_try_into(self) -> Option<(Block<Ex, En>, Vec<Catch<Ex, En>>, Block<Ex, En>)> {
         match self {
             Stmt_::Try(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }
-    pub fn as_block_into(self) -> Option<Block<Ex, Fb, En>> {
+    pub fn as_block_into(self) -> Option<Block<Ex, En>> {
         match self {
             Stmt_::Block(p0) => Some(p0),
             _ => None,
@@ -552,17 +521,17 @@ impl EnvAnnot {
         }
     }
 }
-impl<Ex, Fb, En> AsExpr<Ex, Fb, En> {
-    pub fn mk_as_v(p0: Expr<Ex, Fb, En>) -> Self {
+impl<Ex, En> AsExpr<Ex, En> {
+    pub fn mk_as_v(p0: Expr<Ex, En>) -> Self {
         AsExpr::AsV(p0)
     }
-    pub fn mk_as_kv(p0: Expr<Ex, Fb, En>, p1: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_as_kv(p0: Expr<Ex, En>, p1: Expr<Ex, En>) -> Self {
         AsExpr::AsKv(p0, p1)
     }
-    pub fn mk_await_as_v(p0: Pos, p1: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_await_as_v(p0: Pos, p1: Expr<Ex, En>) -> Self {
         AsExpr::AwaitAsV(p0, p1)
     }
-    pub fn mk_await_as_kv(p0: Pos, p1: Expr<Ex, Fb, En>, p2: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_await_as_kv(p0: Pos, p1: Expr<Ex, En>, p2: Expr<Ex, En>) -> Self {
         AsExpr::AwaitAsKv(p0, p1, p2)
     }
     pub fn is_as_v(&self) -> bool {
@@ -589,43 +558,43 @@ impl<Ex, Fb, En> AsExpr<Ex, Fb, En> {
             _ => false,
         }
     }
-    pub fn as_as_v(&self) -> Option<&Expr<Ex, Fb, En>> {
+    pub fn as_as_v(&self) -> Option<&Expr<Ex, En>> {
         match self {
             AsExpr::AsV(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_as_kv(&self) -> Option<(&Expr<Ex, Fb, En>, &Expr<Ex, Fb, En>)> {
+    pub fn as_as_kv(&self) -> Option<(&Expr<Ex, En>, &Expr<Ex, En>)> {
         match self {
             AsExpr::AsKv(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
-    pub fn as_await_as_v(&self) -> Option<(&Pos, &Expr<Ex, Fb, En>)> {
+    pub fn as_await_as_v(&self) -> Option<(&Pos, &Expr<Ex, En>)> {
         match self {
             AsExpr::AwaitAsV(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
-    pub fn as_await_as_kv(&self) -> Option<(&Pos, &Expr<Ex, Fb, En>, &Expr<Ex, Fb, En>)> {
+    pub fn as_await_as_kv(&self) -> Option<(&Pos, &Expr<Ex, En>, &Expr<Ex, En>)> {
         match self {
             AsExpr::AwaitAsKv(p0, p1, p2) => Some((p0, p1, p2)),
             _ => None,
         }
     }
-    pub fn as_as_v_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En>> {
+    pub fn as_as_v_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
         match self {
             AsExpr::AsV(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_as_kv_mut(&mut self) -> Option<(&mut Expr<Ex, Fb, En>, &mut Expr<Ex, Fb, En>)> {
+    pub fn as_as_kv_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Expr<Ex, En>)> {
         match self {
             AsExpr::AsKv(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
-    pub fn as_await_as_v_mut(&mut self) -> Option<(&mut Pos, &mut Expr<Ex, Fb, En>)> {
+    pub fn as_await_as_v_mut(&mut self) -> Option<(&mut Pos, &mut Expr<Ex, En>)> {
         match self {
             AsExpr::AwaitAsV(p0, p1) => Some((p0, p1)),
             _ => None,
@@ -633,38 +602,38 @@ impl<Ex, Fb, En> AsExpr<Ex, Fb, En> {
     }
     pub fn as_await_as_kv_mut(
         &mut self,
-    ) -> Option<(&mut Pos, &mut Expr<Ex, Fb, En>, &mut Expr<Ex, Fb, En>)> {
+    ) -> Option<(&mut Pos, &mut Expr<Ex, En>, &mut Expr<Ex, En>)> {
         match self {
             AsExpr::AwaitAsKv(p0, p1, p2) => Some((p0, p1, p2)),
             _ => None,
         }
     }
-    pub fn as_as_v_into(self) -> Option<Expr<Ex, Fb, En>> {
+    pub fn as_as_v_into(self) -> Option<Expr<Ex, En>> {
         match self {
             AsExpr::AsV(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_as_kv_into(self) -> Option<(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)> {
+    pub fn as_as_kv_into(self) -> Option<(Expr<Ex, En>, Expr<Ex, En>)> {
         match self {
             AsExpr::AsKv(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
-    pub fn as_await_as_v_into(self) -> Option<(Pos, Expr<Ex, Fb, En>)> {
+    pub fn as_await_as_v_into(self) -> Option<(Pos, Expr<Ex, En>)> {
         match self {
             AsExpr::AwaitAsV(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
-    pub fn as_await_as_kv_into(self) -> Option<(Pos, Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)> {
+    pub fn as_await_as_kv_into(self) -> Option<(Pos, Expr<Ex, En>, Expr<Ex, En>)> {
         match self {
             AsExpr::AwaitAsKv(p0, p1, p2) => Some((p0, p1, p2)),
             _ => None,
         }
     }
 }
-impl<Ex, Fb, En> ClassId_<Ex, Fb, En> {
+impl<Ex, En> ClassId_<Ex, En> {
     pub fn mk_ciparent() -> Self {
         ClassId_::CIparent
     }
@@ -674,7 +643,7 @@ impl<Ex, Fb, En> ClassId_<Ex, Fb, En> {
     pub fn mk_cistatic() -> Self {
         ClassId_::CIstatic
     }
-    pub fn mk_ciexpr(p0: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_ciexpr(p0: Expr<Ex, En>) -> Self {
         ClassId_::CIexpr(p0)
     }
     pub fn mk_ci(p0: Sid) -> Self {
@@ -710,7 +679,7 @@ impl<Ex, Fb, En> ClassId_<Ex, Fb, En> {
             _ => false,
         }
     }
-    pub fn as_ciexpr(&self) -> Option<&Expr<Ex, Fb, En>> {
+    pub fn as_ciexpr(&self) -> Option<&Expr<Ex, En>> {
         match self {
             ClassId_::CIexpr(p0) => Some(p0),
             _ => None,
@@ -722,7 +691,7 @@ impl<Ex, Fb, En> ClassId_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_ciexpr_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En>> {
+    pub fn as_ciexpr_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
         match self {
             ClassId_::CIexpr(p0) => Some(p0),
             _ => None,
@@ -734,7 +703,7 @@ impl<Ex, Fb, En> ClassId_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_ciexpr_into(self) -> Option<Expr<Ex, Fb, En>> {
+    pub fn as_ciexpr_into(self) -> Option<Expr<Ex, En>> {
         match self {
             ClassId_::CIexpr(p0) => Some(p0),
             _ => None,
@@ -803,11 +772,11 @@ impl<Ex> CollectionTarg<Ex> {
         }
     }
 }
-impl<Ex, Fb, En> FunctionPtrId<Ex, Fb, En> {
+impl<Ex, En> FunctionPtrId<Ex, En> {
     pub fn mk_fpid(p0: Sid) -> Self {
         FunctionPtrId::FPId(p0)
     }
-    pub fn mk_fpclass_const(p0: ClassId<Ex, Fb, En>, p1: Pstring) -> Self {
+    pub fn mk_fpclass_const(p0: ClassId<Ex, En>, p1: Pstring) -> Self {
         FunctionPtrId::FPClassConst(p0, p1)
     }
     pub fn is_fpid(&self) -> bool {
@@ -828,7 +797,7 @@ impl<Ex, Fb, En> FunctionPtrId<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_fpclass_const(&self) -> Option<(&ClassId<Ex, Fb, En>, &Pstring)> {
+    pub fn as_fpclass_const(&self) -> Option<(&ClassId<Ex, En>, &Pstring)> {
         match self {
             FunctionPtrId::FPClassConst(p0, p1) => Some((p0, p1)),
             _ => None,
@@ -840,7 +809,7 @@ impl<Ex, Fb, En> FunctionPtrId<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_fpclass_const_mut(&mut self) -> Option<(&mut ClassId<Ex, Fb, En>, &mut Pstring)> {
+    pub fn as_fpclass_const_mut(&mut self) -> Option<(&mut ClassId<Ex, En>, &mut Pstring)> {
         match self {
             FunctionPtrId::FPClassConst(p0, p1) => Some((p0, p1)),
             _ => None,
@@ -852,33 +821,33 @@ impl<Ex, Fb, En> FunctionPtrId<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_fpclass_const_into(self) -> Option<(ClassId<Ex, Fb, En>, Pstring)> {
+    pub fn as_fpclass_const_into(self) -> Option<(ClassId<Ex, En>, Pstring)> {
         match self {
             FunctionPtrId::FPClassConst(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
 }
-impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
+impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_darray(
         p0: Option<(Targ<Ex>, Targ<Ex>)>,
-        p1: Vec<(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)>,
+        p1: Vec<(Expr<Ex, En>, Expr<Ex, En>)>,
     ) -> Self {
         Expr_::Darray(Box::new((p0, p1)))
     }
-    pub fn mk_varray(p0: Option<Targ<Ex>>, p1: Vec<Expr<Ex, Fb, En>>) -> Self {
+    pub fn mk_varray(p0: Option<Targ<Ex>>, p1: Vec<Expr<Ex, En>>) -> Self {
         Expr_::Varray(Box::new((p0, p1)))
     }
-    pub fn mk_shape(p0: Vec<(ast_defs::ShapeFieldName, Expr<Ex, Fb, En>)>) -> Self {
+    pub fn mk_shape(p0: Vec<(ast_defs::ShapeFieldName, Expr<Ex, En>)>) -> Self {
         Expr_::Shape(p0)
     }
-    pub fn mk_val_collection(p0: VcKind, p1: Option<Targ<Ex>>, p2: Vec<Expr<Ex, Fb, En>>) -> Self {
+    pub fn mk_val_collection(p0: VcKind, p1: Option<Targ<Ex>>, p2: Vec<Expr<Ex, En>>) -> Self {
         Expr_::ValCollection(Box::new((p0, p1, p2)))
     }
     pub fn mk_key_val_collection(
         p0: KvcKind,
         p1: Option<(Targ<Ex>, Targ<Ex>)>,
-        p2: Vec<Field<Ex, Fb, En>>,
+        p2: Vec<Field<Ex, En>>,
     ) -> Self {
         Expr_::KeyValCollection(Box::new((p0, p1, p2)))
     }
@@ -906,35 +875,30 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     pub fn mk_dollardollar(p0: Lid) -> Self {
         Expr_::Dollardollar(Box::new(p0))
     }
-    pub fn mk_clone(p0: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_clone(p0: Expr<Ex, En>) -> Self {
         Expr_::Clone(Box::new(p0))
     }
-    pub fn mk_array_get(p0: Expr<Ex, Fb, En>, p1: Option<Expr<Ex, Fb, En>>) -> Self {
+    pub fn mk_array_get(p0: Expr<Ex, En>, p1: Option<Expr<Ex, En>>) -> Self {
         Expr_::ArrayGet(Box::new((p0, p1)))
     }
-    pub fn mk_obj_get(
-        p0: Expr<Ex, Fb, En>,
-        p1: Expr<Ex, Fb, En>,
-        p2: OgNullFlavor,
-        p3: bool,
-    ) -> Self {
+    pub fn mk_obj_get(p0: Expr<Ex, En>, p1: Expr<Ex, En>, p2: OgNullFlavor, p3: bool) -> Self {
         Expr_::ObjGet(Box::new((p0, p1, p2, p3)))
     }
-    pub fn mk_class_get(p0: ClassId<Ex, Fb, En>, p1: ClassGetExpr<Ex, Fb, En>, p2: bool) -> Self {
+    pub fn mk_class_get(p0: ClassId<Ex, En>, p1: ClassGetExpr<Ex, En>, p2: bool) -> Self {
         Expr_::ClassGet(Box::new((p0, p1, p2)))
     }
-    pub fn mk_class_const(p0: ClassId<Ex, Fb, En>, p1: Pstring) -> Self {
+    pub fn mk_class_const(p0: ClassId<Ex, En>, p1: Pstring) -> Self {
         Expr_::ClassConst(Box::new((p0, p1)))
     }
     pub fn mk_call(
-        p0: Expr<Ex, Fb, En>,
+        p0: Expr<Ex, En>,
         p1: Vec<Targ<Ex>>,
-        p2: Vec<Expr<Ex, Fb, En>>,
-        p3: Option<Expr<Ex, Fb, En>>,
+        p2: Vec<Expr<Ex, En>>,
+        p3: Option<Expr<Ex, En>>,
     ) -> Self {
         Expr_::Call(Box::new((p0, p1, p2, p3)))
     }
-    pub fn mk_function_pointer(p0: FunctionPtrId<Ex, Fb, En>, p1: Vec<Targ<Ex>>) -> Self {
+    pub fn mk_function_pointer(p0: FunctionPtrId<Ex, En>, p1: Vec<Targ<Ex>>) -> Self {
         Expr_::FunctionPointer(Box::new((p0, p1)))
     }
     pub fn mk_int(p0: String) -> Self {
@@ -946,87 +910,79 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     pub fn mk_string(p0: bstr::BString) -> Self {
         Expr_::String(p0)
     }
-    pub fn mk_string2(p0: Vec<Expr<Ex, Fb, En>>) -> Self {
+    pub fn mk_string2(p0: Vec<Expr<Ex, En>>) -> Self {
         Expr_::String2(p0)
     }
-    pub fn mk_prefixed_string(p0: String, p1: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_prefixed_string(p0: String, p1: Expr<Ex, En>) -> Self {
         Expr_::PrefixedString(Box::new((p0, p1)))
     }
-    pub fn mk_yield(p0: Afield<Ex, Fb, En>) -> Self {
+    pub fn mk_yield(p0: Afield<Ex, En>) -> Self {
         Expr_::Yield(Box::new(p0))
     }
-    pub fn mk_await(p0: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_await(p0: Expr<Ex, En>) -> Self {
         Expr_::Await(Box::new(p0))
     }
-    pub fn mk_readonly_expr(p0: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_readonly_expr(p0: Expr<Ex, En>) -> Self {
         Expr_::ReadonlyExpr(Box::new(p0))
     }
-    pub fn mk_tuple(p0: Vec<Expr<Ex, Fb, En>>) -> Self {
+    pub fn mk_tuple(p0: Vec<Expr<Ex, En>>) -> Self {
         Expr_::Tuple(p0)
     }
-    pub fn mk_list(p0: Vec<Expr<Ex, Fb, En>>) -> Self {
+    pub fn mk_list(p0: Vec<Expr<Ex, En>>) -> Self {
         Expr_::List(p0)
     }
-    pub fn mk_cast(p0: Hint, p1: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_cast(p0: Hint, p1: Expr<Ex, En>) -> Self {
         Expr_::Cast(Box::new((p0, p1)))
     }
-    pub fn mk_unop(p0: ast_defs::Uop, p1: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_unop(p0: ast_defs::Uop, p1: Expr<Ex, En>) -> Self {
         Expr_::Unop(Box::new((p0, p1)))
     }
-    pub fn mk_binop(p0: ast_defs::Bop, p1: Expr<Ex, Fb, En>, p2: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_binop(p0: ast_defs::Bop, p1: Expr<Ex, En>, p2: Expr<Ex, En>) -> Self {
         Expr_::Binop(Box::new((p0, p1, p2)))
     }
-    pub fn mk_pipe(p0: Lid, p1: Expr<Ex, Fb, En>, p2: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_pipe(p0: Lid, p1: Expr<Ex, En>, p2: Expr<Ex, En>) -> Self {
         Expr_::Pipe(Box::new((p0, p1, p2)))
     }
-    pub fn mk_eif(
-        p0: Expr<Ex, Fb, En>,
-        p1: Option<Expr<Ex, Fb, En>>,
-        p2: Expr<Ex, Fb, En>,
-    ) -> Self {
+    pub fn mk_eif(p0: Expr<Ex, En>, p1: Option<Expr<Ex, En>>, p2: Expr<Ex, En>) -> Self {
         Expr_::Eif(Box::new((p0, p1, p2)))
     }
-    pub fn mk_is(p0: Expr<Ex, Fb, En>, p1: Hint) -> Self {
+    pub fn mk_is(p0: Expr<Ex, En>, p1: Hint) -> Self {
         Expr_::Is(Box::new((p0, p1)))
     }
-    pub fn mk_as(p0: Expr<Ex, Fb, En>, p1: Hint, p2: bool) -> Self {
+    pub fn mk_as(p0: Expr<Ex, En>, p1: Hint, p2: bool) -> Self {
         Expr_::As(Box::new((p0, p1, p2)))
     }
     pub fn mk_new(
-        p0: ClassId<Ex, Fb, En>,
+        p0: ClassId<Ex, En>,
         p1: Vec<Targ<Ex>>,
-        p2: Vec<Expr<Ex, Fb, En>>,
-        p3: Option<Expr<Ex, Fb, En>>,
+        p2: Vec<Expr<Ex, En>>,
+        p3: Option<Expr<Ex, En>>,
         p4: Ex,
     ) -> Self {
         Expr_::New(Box::new((p0, p1, p2, p3, p4)))
     }
-    pub fn mk_record(p0: Sid, p1: Vec<(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)>) -> Self {
+    pub fn mk_record(p0: Sid, p1: Vec<(Expr<Ex, En>, Expr<Ex, En>)>) -> Self {
         Expr_::Record(Box::new((p0, p1)))
     }
-    pub fn mk_efun(p0: Fun_<Ex, Fb, En>, p1: Vec<Lid>) -> Self {
+    pub fn mk_efun(p0: Fun_<Ex, En>, p1: Vec<Lid>) -> Self {
         Expr_::Efun(Box::new((p0, p1)))
     }
-    pub fn mk_lfun(p0: Fun_<Ex, Fb, En>, p1: Vec<Lid>) -> Self {
+    pub fn mk_lfun(p0: Fun_<Ex, En>, p1: Vec<Lid>) -> Self {
         Expr_::Lfun(Box::new((p0, p1)))
     }
-    pub fn mk_xml(p0: Sid, p1: Vec<XhpAttribute<Ex, Fb, En>>, p2: Vec<Expr<Ex, Fb, En>>) -> Self {
+    pub fn mk_xml(p0: Sid, p1: Vec<XhpAttribute<Ex, En>>, p2: Vec<Expr<Ex, En>>) -> Self {
         Expr_::Xml(Box::new((p0, p1, p2)))
     }
-    pub fn mk_callconv(p0: ast_defs::ParamKind, p1: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_callconv(p0: ast_defs::ParamKind, p1: Expr<Ex, En>) -> Self {
         Expr_::Callconv(Box::new((p0, p1)))
     }
-    pub fn mk_import(p0: ImportFlavor, p1: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_import(p0: ImportFlavor, p1: Expr<Ex, En>) -> Self {
         Expr_::Import(Box::new((p0, p1)))
     }
-    pub fn mk_collection(
-        p0: Sid,
-        p1: Option<CollectionTarg<Ex>>,
-        p2: Vec<Afield<Ex, Fb, En>>,
-    ) -> Self {
+    pub fn mk_collection(p0: Sid, p1: Option<CollectionTarg<Ex>>, p2: Vec<Afield<Ex, En>>) -> Self {
         Expr_::Collection(Box::new((p0, p1, p2)))
     }
-    pub fn mk_expression_tree(p0: ExpressionTree<Ex, Fb, En>) -> Self {
+    pub fn mk_expression_tree(p0: ExpressionTree<Ex, En>) -> Self {
         Expr_::ExpressionTree(Box::new(p0))
     }
     pub fn mk_lplaceholder(p0: Pos) -> Self {
@@ -1035,29 +991,25 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     pub fn mk_fun_id(p0: Sid) -> Self {
         Expr_::FunId(Box::new(p0))
     }
-    pub fn mk_method_id(p0: Expr<Ex, Fb, En>, p1: Pstring) -> Self {
+    pub fn mk_method_id(p0: Expr<Ex, En>, p1: Pstring) -> Self {
         Expr_::MethodId(Box::new((p0, p1)))
     }
     pub fn mk_method_caller(p0: Sid, p1: Pstring) -> Self {
         Expr_::MethodCaller(Box::new((p0, p1)))
     }
-    pub fn mk_smethod_id(p0: ClassId<Ex, Fb, En>, p1: Pstring) -> Self {
+    pub fn mk_smethod_id(p0: ClassId<Ex, En>, p1: Pstring) -> Self {
         Expr_::SmethodId(Box::new((p0, p1)))
     }
-    pub fn mk_pair(
-        p0: Option<(Targ<Ex>, Targ<Ex>)>,
-        p1: Expr<Ex, Fb, En>,
-        p2: Expr<Ex, Fb, En>,
-    ) -> Self {
+    pub fn mk_pair(p0: Option<(Targ<Ex>, Targ<Ex>)>, p1: Expr<Ex, En>, p2: Expr<Ex, En>) -> Self {
         Expr_::Pair(Box::new((p0, p1, p2)))
     }
-    pub fn mk_etsplice(p0: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_etsplice(p0: Expr<Ex, En>) -> Self {
         Expr_::ETSplice(Box::new(p0))
     }
     pub fn mk_enum_class_label(p0: Option<Sid>, p1: String) -> Self {
         Expr_::EnumClassLabel(Box::new((p0, p1)))
     }
-    pub fn mk_hole(p0: Expr<Ex, Fb, En>, p1: Ex, p2: Ex, p3: HoleSource) -> Self {
+    pub fn mk_hole(p0: Expr<Ex, En>, p1: Ex, p2: Ex, p3: HoleSource) -> Self {
         Expr_::Hole(Box::new((p0, p1, p2, p3)))
     }
     pub fn is_darray(&self) -> bool {
@@ -1394,28 +1346,26 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
         &self,
     ) -> Option<(
         &Option<(Targ<Ex>, Targ<Ex>)>,
-        &Vec<(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)>,
+        &Vec<(Expr<Ex, En>, Expr<Ex, En>)>,
     )> {
         match self {
             Expr_::Darray(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_varray(&self) -> Option<(&Option<Targ<Ex>>, &Vec<Expr<Ex, Fb, En>>)> {
+    pub fn as_varray(&self) -> Option<(&Option<Targ<Ex>>, &Vec<Expr<Ex, En>>)> {
         match self {
             Expr_::Varray(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_shape(&self) -> Option<&Vec<(ast_defs::ShapeFieldName, Expr<Ex, Fb, En>)>> {
+    pub fn as_shape(&self) -> Option<&Vec<(ast_defs::ShapeFieldName, Expr<Ex, En>)>> {
         match self {
             Expr_::Shape(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_val_collection(
-        &self,
-    ) -> Option<(&VcKind, &Option<Targ<Ex>>, &Vec<Expr<Ex, Fb, En>>)> {
+    pub fn as_val_collection(&self) -> Option<(&VcKind, &Option<Targ<Ex>>, &Vec<Expr<Ex, En>>)> {
         match self {
             Expr_::ValCollection(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
@@ -1423,11 +1373,7 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     }
     pub fn as_key_val_collection(
         &self,
-    ) -> Option<(
-        &KvcKind,
-        &Option<(Targ<Ex>, Targ<Ex>)>,
-        &Vec<Field<Ex, Fb, En>>,
-    )> {
+    ) -> Option<(&KvcKind, &Option<(Targ<Ex>, Targ<Ex>)>, &Vec<Field<Ex, En>>)> {
         match self {
             Expr_::KeyValCollection(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
@@ -1451,33 +1397,31 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_clone(&self) -> Option<&Expr<Ex, Fb, En>> {
+    pub fn as_clone(&self) -> Option<&Expr<Ex, En>> {
         match self {
             Expr_::Clone(p0) => Some(&p0),
             _ => None,
         }
     }
-    pub fn as_array_get(&self) -> Option<(&Expr<Ex, Fb, En>, &Option<Expr<Ex, Fb, En>>)> {
+    pub fn as_array_get(&self) -> Option<(&Expr<Ex, En>, &Option<Expr<Ex, En>>)> {
         match self {
             Expr_::ArrayGet(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_obj_get(
-        &self,
-    ) -> Option<(&Expr<Ex, Fb, En>, &Expr<Ex, Fb, En>, &OgNullFlavor, &bool)> {
+    pub fn as_obj_get(&self) -> Option<(&Expr<Ex, En>, &Expr<Ex, En>, &OgNullFlavor, &bool)> {
         match self {
             Expr_::ObjGet(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3)),
             _ => None,
         }
     }
-    pub fn as_class_get(&self) -> Option<(&ClassId<Ex, Fb, En>, &ClassGetExpr<Ex, Fb, En>, &bool)> {
+    pub fn as_class_get(&self) -> Option<(&ClassId<Ex, En>, &ClassGetExpr<Ex, En>, &bool)> {
         match self {
             Expr_::ClassGet(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
-    pub fn as_class_const(&self) -> Option<(&ClassId<Ex, Fb, En>, &Pstring)> {
+    pub fn as_class_const(&self) -> Option<(&ClassId<Ex, En>, &Pstring)> {
         match self {
             Expr_::ClassConst(p0) => Some((&p0.0, &p0.1)),
             _ => None,
@@ -1486,17 +1430,17 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     pub fn as_call(
         &self,
     ) -> Option<(
-        &Expr<Ex, Fb, En>,
+        &Expr<Ex, En>,
         &Vec<Targ<Ex>>,
-        &Vec<Expr<Ex, Fb, En>>,
-        &Option<Expr<Ex, Fb, En>>,
+        &Vec<Expr<Ex, En>>,
+        &Option<Expr<Ex, En>>,
     )> {
         match self {
             Expr_::Call(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3)),
             _ => None,
         }
     }
-    pub fn as_function_pointer(&self) -> Option<(&FunctionPtrId<Ex, Fb, En>, &Vec<Targ<Ex>>)> {
+    pub fn as_function_pointer(&self) -> Option<(&FunctionPtrId<Ex, En>, &Vec<Targ<Ex>>)> {
         match self {
             Expr_::FunctionPointer(p0) => Some((&p0.0, &p0.1)),
             _ => None,
@@ -1520,91 +1464,85 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_string2(&self) -> Option<&Vec<Expr<Ex, Fb, En>>> {
+    pub fn as_string2(&self) -> Option<&Vec<Expr<Ex, En>>> {
         match self {
             Expr_::String2(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_prefixed_string(&self) -> Option<(&String, &Expr<Ex, Fb, En>)> {
+    pub fn as_prefixed_string(&self) -> Option<(&String, &Expr<Ex, En>)> {
         match self {
             Expr_::PrefixedString(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_yield(&self) -> Option<&Afield<Ex, Fb, En>> {
+    pub fn as_yield(&self) -> Option<&Afield<Ex, En>> {
         match self {
             Expr_::Yield(p0) => Some(&p0),
             _ => None,
         }
     }
-    pub fn as_await(&self) -> Option<&Expr<Ex, Fb, En>> {
+    pub fn as_await(&self) -> Option<&Expr<Ex, En>> {
         match self {
             Expr_::Await(p0) => Some(&p0),
             _ => None,
         }
     }
-    pub fn as_readonly_expr(&self) -> Option<&Expr<Ex, Fb, En>> {
+    pub fn as_readonly_expr(&self) -> Option<&Expr<Ex, En>> {
         match self {
             Expr_::ReadonlyExpr(p0) => Some(&p0),
             _ => None,
         }
     }
-    pub fn as_tuple(&self) -> Option<&Vec<Expr<Ex, Fb, En>>> {
+    pub fn as_tuple(&self) -> Option<&Vec<Expr<Ex, En>>> {
         match self {
             Expr_::Tuple(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_list(&self) -> Option<&Vec<Expr<Ex, Fb, En>>> {
+    pub fn as_list(&self) -> Option<&Vec<Expr<Ex, En>>> {
         match self {
             Expr_::List(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_cast(&self) -> Option<(&Hint, &Expr<Ex, Fb, En>)> {
+    pub fn as_cast(&self) -> Option<(&Hint, &Expr<Ex, En>)> {
         match self {
             Expr_::Cast(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_unop(&self) -> Option<(&ast_defs::Uop, &Expr<Ex, Fb, En>)> {
+    pub fn as_unop(&self) -> Option<(&ast_defs::Uop, &Expr<Ex, En>)> {
         match self {
             Expr_::Unop(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_binop(&self) -> Option<(&ast_defs::Bop, &Expr<Ex, Fb, En>, &Expr<Ex, Fb, En>)> {
+    pub fn as_binop(&self) -> Option<(&ast_defs::Bop, &Expr<Ex, En>, &Expr<Ex, En>)> {
         match self {
             Expr_::Binop(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
-    pub fn as_pipe(&self) -> Option<(&Lid, &Expr<Ex, Fb, En>, &Expr<Ex, Fb, En>)> {
+    pub fn as_pipe(&self) -> Option<(&Lid, &Expr<Ex, En>, &Expr<Ex, En>)> {
         match self {
             Expr_::Pipe(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
-    pub fn as_eif(
-        &self,
-    ) -> Option<(
-        &Expr<Ex, Fb, En>,
-        &Option<Expr<Ex, Fb, En>>,
-        &Expr<Ex, Fb, En>,
-    )> {
+    pub fn as_eif(&self) -> Option<(&Expr<Ex, En>, &Option<Expr<Ex, En>>, &Expr<Ex, En>)> {
         match self {
             Expr_::Eif(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
-    pub fn as_is(&self) -> Option<(&Expr<Ex, Fb, En>, &Hint)> {
+    pub fn as_is(&self) -> Option<(&Expr<Ex, En>, &Hint)> {
         match self {
             Expr_::Is(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_as(&self) -> Option<(&Expr<Ex, Fb, En>, &Hint, &bool)> {
+    pub fn as_as(&self) -> Option<(&Expr<Ex, En>, &Hint, &bool)> {
         match self {
             Expr_::As(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
@@ -1613,10 +1551,10 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     pub fn as_new(
         &self,
     ) -> Option<(
-        &ClassId<Ex, Fb, En>,
+        &ClassId<Ex, En>,
         &Vec<Targ<Ex>>,
-        &Vec<Expr<Ex, Fb, En>>,
-        &Option<Expr<Ex, Fb, En>>,
+        &Vec<Expr<Ex, En>>,
+        &Option<Expr<Ex, En>>,
         &Ex,
     )> {
         match self {
@@ -1624,37 +1562,37 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_record(&self) -> Option<(&Sid, &Vec<(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)>)> {
+    pub fn as_record(&self) -> Option<(&Sid, &Vec<(Expr<Ex, En>, Expr<Ex, En>)>)> {
         match self {
             Expr_::Record(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_efun(&self) -> Option<(&Fun_<Ex, Fb, En>, &Vec<Lid>)> {
+    pub fn as_efun(&self) -> Option<(&Fun_<Ex, En>, &Vec<Lid>)> {
         match self {
             Expr_::Efun(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_lfun(&self) -> Option<(&Fun_<Ex, Fb, En>, &Vec<Lid>)> {
+    pub fn as_lfun(&self) -> Option<(&Fun_<Ex, En>, &Vec<Lid>)> {
         match self {
             Expr_::Lfun(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_xml(&self) -> Option<(&Sid, &Vec<XhpAttribute<Ex, Fb, En>>, &Vec<Expr<Ex, Fb, En>>)> {
+    pub fn as_xml(&self) -> Option<(&Sid, &Vec<XhpAttribute<Ex, En>>, &Vec<Expr<Ex, En>>)> {
         match self {
             Expr_::Xml(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
-    pub fn as_callconv(&self) -> Option<(&ast_defs::ParamKind, &Expr<Ex, Fb, En>)> {
+    pub fn as_callconv(&self) -> Option<(&ast_defs::ParamKind, &Expr<Ex, En>)> {
         match self {
             Expr_::Callconv(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_import(&self) -> Option<(&ImportFlavor, &Expr<Ex, Fb, En>)> {
+    pub fn as_import(&self) -> Option<(&ImportFlavor, &Expr<Ex, En>)> {
         match self {
             Expr_::Import(p0) => Some((&p0.0, &p0.1)),
             _ => None,
@@ -1662,13 +1600,13 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     }
     pub fn as_collection(
         &self,
-    ) -> Option<(&Sid, &Option<CollectionTarg<Ex>>, &Vec<Afield<Ex, Fb, En>>)> {
+    ) -> Option<(&Sid, &Option<CollectionTarg<Ex>>, &Vec<Afield<Ex, En>>)> {
         match self {
             Expr_::Collection(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
-    pub fn as_expression_tree(&self) -> Option<&ExpressionTree<Ex, Fb, En>> {
+    pub fn as_expression_tree(&self) -> Option<&ExpressionTree<Ex, En>> {
         match self {
             Expr_::ExpressionTree(p0) => Some(&p0),
             _ => None,
@@ -1686,7 +1624,7 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_method_id(&self) -> Option<(&Expr<Ex, Fb, En>, &Pstring)> {
+    pub fn as_method_id(&self) -> Option<(&Expr<Ex, En>, &Pstring)> {
         match self {
             Expr_::MethodId(p0) => Some((&p0.0, &p0.1)),
             _ => None,
@@ -1698,25 +1636,19 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_smethod_id(&self) -> Option<(&ClassId<Ex, Fb, En>, &Pstring)> {
+    pub fn as_smethod_id(&self) -> Option<(&ClassId<Ex, En>, &Pstring)> {
         match self {
             Expr_::SmethodId(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
-    pub fn as_pair(
-        &self,
-    ) -> Option<(
-        &Option<(Targ<Ex>, Targ<Ex>)>,
-        &Expr<Ex, Fb, En>,
-        &Expr<Ex, Fb, En>,
-    )> {
+    pub fn as_pair(&self) -> Option<(&Option<(Targ<Ex>, Targ<Ex>)>, &Expr<Ex, En>, &Expr<Ex, En>)> {
         match self {
             Expr_::Pair(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
-    pub fn as_etsplice(&self) -> Option<&Expr<Ex, Fb, En>> {
+    pub fn as_etsplice(&self) -> Option<&Expr<Ex, En>> {
         match self {
             Expr_::ETSplice(p0) => Some(&p0),
             _ => None,
@@ -1728,7 +1660,7 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_hole(&self) -> Option<(&Expr<Ex, Fb, En>, &Ex, &Ex, &HoleSource)> {
+    pub fn as_hole(&self) -> Option<(&Expr<Ex, En>, &Ex, &Ex, &HoleSource)> {
         match self {
             Expr_::Hole(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3)),
             _ => None,
@@ -1738,22 +1670,20 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
         &mut self,
     ) -> Option<(
         &mut Option<(Targ<Ex>, Targ<Ex>)>,
-        &mut Vec<(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)>,
+        &mut Vec<(Expr<Ex, En>, Expr<Ex, En>)>,
     )> {
         match self {
             Expr_::Darray(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
-    pub fn as_varray_mut(&mut self) -> Option<(&mut Option<Targ<Ex>>, &mut Vec<Expr<Ex, Fb, En>>)> {
+    pub fn as_varray_mut(&mut self) -> Option<(&mut Option<Targ<Ex>>, &mut Vec<Expr<Ex, En>>)> {
         match self {
             Expr_::Varray(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
-    pub fn as_shape_mut(
-        &mut self,
-    ) -> Option<&mut Vec<(ast_defs::ShapeFieldName, Expr<Ex, Fb, En>)>> {
+    pub fn as_shape_mut(&mut self) -> Option<&mut Vec<(ast_defs::ShapeFieldName, Expr<Ex, En>)>> {
         match self {
             Expr_::Shape(p0) => Some(p0),
             _ => None,
@@ -1761,11 +1691,7 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     }
     pub fn as_val_collection_mut(
         &mut self,
-    ) -> Option<(
-        &mut VcKind,
-        &mut Option<Targ<Ex>>,
-        &mut Vec<Expr<Ex, Fb, En>>,
-    )> {
+    ) -> Option<(&mut VcKind, &mut Option<Targ<Ex>>, &mut Vec<Expr<Ex, En>>)> {
         match self {
             Expr_::ValCollection(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
@@ -1776,7 +1702,7 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     ) -> Option<(
         &mut KvcKind,
         &mut Option<(Targ<Ex>, Targ<Ex>)>,
-        &mut Vec<Field<Ex, Fb, En>>,
+        &mut Vec<Field<Ex, En>>,
     )> {
         match self {
             Expr_::KeyValCollection(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
@@ -1801,15 +1727,13 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_clone_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En>> {
+    pub fn as_clone_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
         match self {
             Expr_::Clone(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
-    pub fn as_array_get_mut(
-        &mut self,
-    ) -> Option<(&mut Expr<Ex, Fb, En>, &mut Option<Expr<Ex, Fb, En>>)> {
+    pub fn as_array_get_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Option<Expr<Ex, En>>)> {
         match self {
             Expr_::ArrayGet(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -1818,8 +1742,8 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     pub fn as_obj_get_mut(
         &mut self,
     ) -> Option<(
-        &mut Expr<Ex, Fb, En>,
-        &mut Expr<Ex, Fb, En>,
+        &mut Expr<Ex, En>,
+        &mut Expr<Ex, En>,
         &mut OgNullFlavor,
         &mut bool,
     )> {
@@ -1830,17 +1754,13 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     }
     pub fn as_class_get_mut(
         &mut self,
-    ) -> Option<(
-        &mut ClassId<Ex, Fb, En>,
-        &mut ClassGetExpr<Ex, Fb, En>,
-        &mut bool,
-    )> {
+    ) -> Option<(&mut ClassId<Ex, En>, &mut ClassGetExpr<Ex, En>, &mut bool)> {
         match self {
             Expr_::ClassGet(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
         }
     }
-    pub fn as_class_const_mut(&mut self) -> Option<(&mut ClassId<Ex, Fb, En>, &mut Pstring)> {
+    pub fn as_class_const_mut(&mut self) -> Option<(&mut ClassId<Ex, En>, &mut Pstring)> {
         match self {
             Expr_::ClassConst(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -1849,10 +1769,10 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     pub fn as_call_mut(
         &mut self,
     ) -> Option<(
-        &mut Expr<Ex, Fb, En>,
+        &mut Expr<Ex, En>,
         &mut Vec<Targ<Ex>>,
-        &mut Vec<Expr<Ex, Fb, En>>,
-        &mut Option<Expr<Ex, Fb, En>>,
+        &mut Vec<Expr<Ex, En>>,
+        &mut Option<Expr<Ex, En>>,
     )> {
         match self {
             Expr_::Call(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2, &mut p0.3)),
@@ -1861,7 +1781,7 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     }
     pub fn as_function_pointer_mut(
         &mut self,
-    ) -> Option<(&mut FunctionPtrId<Ex, Fb, En>, &mut Vec<Targ<Ex>>)> {
+    ) -> Option<(&mut FunctionPtrId<Ex, En>, &mut Vec<Targ<Ex>>)> {
         match self {
             Expr_::FunctionPointer(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -1885,55 +1805,55 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_string2_mut(&mut self) -> Option<&mut Vec<Expr<Ex, Fb, En>>> {
+    pub fn as_string2_mut(&mut self) -> Option<&mut Vec<Expr<Ex, En>>> {
         match self {
             Expr_::String2(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_prefixed_string_mut(&mut self) -> Option<(&mut String, &mut Expr<Ex, Fb, En>)> {
+    pub fn as_prefixed_string_mut(&mut self) -> Option<(&mut String, &mut Expr<Ex, En>)> {
         match self {
             Expr_::PrefixedString(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
-    pub fn as_yield_mut(&mut self) -> Option<&mut Afield<Ex, Fb, En>> {
+    pub fn as_yield_mut(&mut self) -> Option<&mut Afield<Ex, En>> {
         match self {
             Expr_::Yield(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
-    pub fn as_await_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En>> {
+    pub fn as_await_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
         match self {
             Expr_::Await(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
-    pub fn as_readonly_expr_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En>> {
+    pub fn as_readonly_expr_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
         match self {
             Expr_::ReadonlyExpr(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
-    pub fn as_tuple_mut(&mut self) -> Option<&mut Vec<Expr<Ex, Fb, En>>> {
+    pub fn as_tuple_mut(&mut self) -> Option<&mut Vec<Expr<Ex, En>>> {
         match self {
             Expr_::Tuple(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_list_mut(&mut self) -> Option<&mut Vec<Expr<Ex, Fb, En>>> {
+    pub fn as_list_mut(&mut self) -> Option<&mut Vec<Expr<Ex, En>>> {
         match self {
             Expr_::List(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_cast_mut(&mut self) -> Option<(&mut Hint, &mut Expr<Ex, Fb, En>)> {
+    pub fn as_cast_mut(&mut self) -> Option<(&mut Hint, &mut Expr<Ex, En>)> {
         match self {
             Expr_::Cast(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
-    pub fn as_unop_mut(&mut self) -> Option<(&mut ast_defs::Uop, &mut Expr<Ex, Fb, En>)> {
+    pub fn as_unop_mut(&mut self) -> Option<(&mut ast_defs::Uop, &mut Expr<Ex, En>)> {
         match self {
             Expr_::Unop(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -1941,19 +1861,13 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     }
     pub fn as_binop_mut(
         &mut self,
-    ) -> Option<(
-        &mut ast_defs::Bop,
-        &mut Expr<Ex, Fb, En>,
-        &mut Expr<Ex, Fb, En>,
-    )> {
+    ) -> Option<(&mut ast_defs::Bop, &mut Expr<Ex, En>, &mut Expr<Ex, En>)> {
         match self {
             Expr_::Binop(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
         }
     }
-    pub fn as_pipe_mut(
-        &mut self,
-    ) -> Option<(&mut Lid, &mut Expr<Ex, Fb, En>, &mut Expr<Ex, Fb, En>)> {
+    pub fn as_pipe_mut(&mut self) -> Option<(&mut Lid, &mut Expr<Ex, En>, &mut Expr<Ex, En>)> {
         match self {
             Expr_::Pipe(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
@@ -1962,22 +1876,22 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     pub fn as_eif_mut(
         &mut self,
     ) -> Option<(
-        &mut Expr<Ex, Fb, En>,
-        &mut Option<Expr<Ex, Fb, En>>,
-        &mut Expr<Ex, Fb, En>,
+        &mut Expr<Ex, En>,
+        &mut Option<Expr<Ex, En>>,
+        &mut Expr<Ex, En>,
     )> {
         match self {
             Expr_::Eif(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
         }
     }
-    pub fn as_is_mut(&mut self) -> Option<(&mut Expr<Ex, Fb, En>, &mut Hint)> {
+    pub fn as_is_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Hint)> {
         match self {
             Expr_::Is(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
-    pub fn as_as_mut(&mut self) -> Option<(&mut Expr<Ex, Fb, En>, &mut Hint, &mut bool)> {
+    pub fn as_as_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Hint, &mut bool)> {
         match self {
             Expr_::As(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
@@ -1986,10 +1900,10 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     pub fn as_new_mut(
         &mut self,
     ) -> Option<(
-        &mut ClassId<Ex, Fb, En>,
+        &mut ClassId<Ex, En>,
         &mut Vec<Targ<Ex>>,
-        &mut Vec<Expr<Ex, Fb, En>>,
-        &mut Option<Expr<Ex, Fb, En>>,
+        &mut Vec<Expr<Ex, En>>,
+        &mut Option<Expr<Ex, En>>,
         &mut Ex,
     )> {
         match self {
@@ -1997,21 +1911,19 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_record_mut(
-        &mut self,
-    ) -> Option<(&mut Sid, &mut Vec<(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)>)> {
+    pub fn as_record_mut(&mut self) -> Option<(&mut Sid, &mut Vec<(Expr<Ex, En>, Expr<Ex, En>)>)> {
         match self {
             Expr_::Record(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
-    pub fn as_efun_mut(&mut self) -> Option<(&mut Fun_<Ex, Fb, En>, &mut Vec<Lid>)> {
+    pub fn as_efun_mut(&mut self) -> Option<(&mut Fun_<Ex, En>, &mut Vec<Lid>)> {
         match self {
             Expr_::Efun(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
-    pub fn as_lfun_mut(&mut self) -> Option<(&mut Fun_<Ex, Fb, En>, &mut Vec<Lid>)> {
+    pub fn as_lfun_mut(&mut self) -> Option<(&mut Fun_<Ex, En>, &mut Vec<Lid>)> {
         match self {
             Expr_::Lfun(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -2021,21 +1933,21 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
         &mut self,
     ) -> Option<(
         &mut Sid,
-        &mut Vec<XhpAttribute<Ex, Fb, En>>,
-        &mut Vec<Expr<Ex, Fb, En>>,
+        &mut Vec<XhpAttribute<Ex, En>>,
+        &mut Vec<Expr<Ex, En>>,
     )> {
         match self {
             Expr_::Xml(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
         }
     }
-    pub fn as_callconv_mut(&mut self) -> Option<(&mut ast_defs::ParamKind, &mut Expr<Ex, Fb, En>)> {
+    pub fn as_callconv_mut(&mut self) -> Option<(&mut ast_defs::ParamKind, &mut Expr<Ex, En>)> {
         match self {
             Expr_::Callconv(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
-    pub fn as_import_mut(&mut self) -> Option<(&mut ImportFlavor, &mut Expr<Ex, Fb, En>)> {
+    pub fn as_import_mut(&mut self) -> Option<(&mut ImportFlavor, &mut Expr<Ex, En>)> {
         match self {
             Expr_::Import(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -2046,14 +1958,14 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     ) -> Option<(
         &mut Sid,
         &mut Option<CollectionTarg<Ex>>,
-        &mut Vec<Afield<Ex, Fb, En>>,
+        &mut Vec<Afield<Ex, En>>,
     )> {
         match self {
             Expr_::Collection(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
         }
     }
-    pub fn as_expression_tree_mut(&mut self) -> Option<&mut ExpressionTree<Ex, Fb, En>> {
+    pub fn as_expression_tree_mut(&mut self) -> Option<&mut ExpressionTree<Ex, En>> {
         match self {
             Expr_::ExpressionTree(p0) => Some(p0.as_mut()),
             _ => None,
@@ -2071,7 +1983,7 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_method_id_mut(&mut self) -> Option<(&mut Expr<Ex, Fb, En>, &mut Pstring)> {
+    pub fn as_method_id_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Pstring)> {
         match self {
             Expr_::MethodId(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -2083,7 +1995,7 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_smethod_id_mut(&mut self) -> Option<(&mut ClassId<Ex, Fb, En>, &mut Pstring)> {
+    pub fn as_smethod_id_mut(&mut self) -> Option<(&mut ClassId<Ex, En>, &mut Pstring)> {
         match self {
             Expr_::SmethodId(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -2093,15 +2005,15 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
         &mut self,
     ) -> Option<(
         &mut Option<(Targ<Ex>, Targ<Ex>)>,
-        &mut Expr<Ex, Fb, En>,
-        &mut Expr<Ex, Fb, En>,
+        &mut Expr<Ex, En>,
+        &mut Expr<Ex, En>,
     )> {
         match self {
             Expr_::Pair(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
         }
     }
-    pub fn as_etsplice_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En>> {
+    pub fn as_etsplice_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
         match self {
             Expr_::ETSplice(p0) => Some(p0.as_mut()),
             _ => None,
@@ -2115,7 +2027,7 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     }
     pub fn as_hole_mut(
         &mut self,
-    ) -> Option<(&mut Expr<Ex, Fb, En>, &mut Ex, &mut Ex, &mut HoleSource)> {
+    ) -> Option<(&mut Expr<Ex, En>, &mut Ex, &mut Ex, &mut HoleSource)> {
         match self {
             Expr_::Hole(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2, &mut p0.3)),
             _ => None,
@@ -2125,28 +2037,26 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
         self,
     ) -> Option<(
         Option<(Targ<Ex>, Targ<Ex>)>,
-        Vec<(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)>,
+        Vec<(Expr<Ex, En>, Expr<Ex, En>)>,
     )> {
         match self {
             Expr_::Darray(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_varray_into(self) -> Option<(Option<Targ<Ex>>, Vec<Expr<Ex, Fb, En>>)> {
+    pub fn as_varray_into(self) -> Option<(Option<Targ<Ex>>, Vec<Expr<Ex, En>>)> {
         match self {
             Expr_::Varray(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_shape_into(self) -> Option<Vec<(ast_defs::ShapeFieldName, Expr<Ex, Fb, En>)>> {
+    pub fn as_shape_into(self) -> Option<Vec<(ast_defs::ShapeFieldName, Expr<Ex, En>)>> {
         match self {
             Expr_::Shape(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_val_collection_into(
-        self,
-    ) -> Option<(VcKind, Option<Targ<Ex>>, Vec<Expr<Ex, Fb, En>>)> {
+    pub fn as_val_collection_into(self) -> Option<(VcKind, Option<Targ<Ex>>, Vec<Expr<Ex, En>>)> {
         match self {
             Expr_::ValCollection(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
@@ -2154,11 +2064,7 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     }
     pub fn as_key_val_collection_into(
         self,
-    ) -> Option<(
-        KvcKind,
-        Option<(Targ<Ex>, Targ<Ex>)>,
-        Vec<Field<Ex, Fb, En>>,
-    )> {
+    ) -> Option<(KvcKind, Option<(Targ<Ex>, Targ<Ex>)>, Vec<Field<Ex, En>>)> {
         match self {
             Expr_::KeyValCollection(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
@@ -2182,35 +2088,31 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_clone_into(self) -> Option<Expr<Ex, Fb, En>> {
+    pub fn as_clone_into(self) -> Option<Expr<Ex, En>> {
         match self {
             Expr_::Clone(p0) => Some(*p0),
             _ => None,
         }
     }
-    pub fn as_array_get_into(self) -> Option<(Expr<Ex, Fb, En>, Option<Expr<Ex, Fb, En>>)> {
+    pub fn as_array_get_into(self) -> Option<(Expr<Ex, En>, Option<Expr<Ex, En>>)> {
         match self {
             Expr_::ArrayGet(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_obj_get_into(
-        self,
-    ) -> Option<(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>, OgNullFlavor, bool)> {
+    pub fn as_obj_get_into(self) -> Option<(Expr<Ex, En>, Expr<Ex, En>, OgNullFlavor, bool)> {
         match self {
             Expr_::ObjGet(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3)),
             _ => None,
         }
     }
-    pub fn as_class_get_into(
-        self,
-    ) -> Option<(ClassId<Ex, Fb, En>, ClassGetExpr<Ex, Fb, En>, bool)> {
+    pub fn as_class_get_into(self) -> Option<(ClassId<Ex, En>, ClassGetExpr<Ex, En>, bool)> {
         match self {
             Expr_::ClassGet(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }
-    pub fn as_class_const_into(self) -> Option<(ClassId<Ex, Fb, En>, Pstring)> {
+    pub fn as_class_const_into(self) -> Option<(ClassId<Ex, En>, Pstring)> {
         match self {
             Expr_::ClassConst(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
@@ -2219,17 +2121,17 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     pub fn as_call_into(
         self,
     ) -> Option<(
-        Expr<Ex, Fb, En>,
+        Expr<Ex, En>,
         Vec<Targ<Ex>>,
-        Vec<Expr<Ex, Fb, En>>,
-        Option<Expr<Ex, Fb, En>>,
+        Vec<Expr<Ex, En>>,
+        Option<Expr<Ex, En>>,
     )> {
         match self {
             Expr_::Call(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3)),
             _ => None,
         }
     }
-    pub fn as_function_pointer_into(self) -> Option<(FunctionPtrId<Ex, Fb, En>, Vec<Targ<Ex>>)> {
+    pub fn as_function_pointer_into(self) -> Option<(FunctionPtrId<Ex, En>, Vec<Targ<Ex>>)> {
         match self {
             Expr_::FunctionPointer(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
@@ -2253,87 +2155,85 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_string2_into(self) -> Option<Vec<Expr<Ex, Fb, En>>> {
+    pub fn as_string2_into(self) -> Option<Vec<Expr<Ex, En>>> {
         match self {
             Expr_::String2(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_prefixed_string_into(self) -> Option<(String, Expr<Ex, Fb, En>)> {
+    pub fn as_prefixed_string_into(self) -> Option<(String, Expr<Ex, En>)> {
         match self {
             Expr_::PrefixedString(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_yield_into(self) -> Option<Afield<Ex, Fb, En>> {
+    pub fn as_yield_into(self) -> Option<Afield<Ex, En>> {
         match self {
             Expr_::Yield(p0) => Some(*p0),
             _ => None,
         }
     }
-    pub fn as_await_into(self) -> Option<Expr<Ex, Fb, En>> {
+    pub fn as_await_into(self) -> Option<Expr<Ex, En>> {
         match self {
             Expr_::Await(p0) => Some(*p0),
             _ => None,
         }
     }
-    pub fn as_readonly_expr_into(self) -> Option<Expr<Ex, Fb, En>> {
+    pub fn as_readonly_expr_into(self) -> Option<Expr<Ex, En>> {
         match self {
             Expr_::ReadonlyExpr(p0) => Some(*p0),
             _ => None,
         }
     }
-    pub fn as_tuple_into(self) -> Option<Vec<Expr<Ex, Fb, En>>> {
+    pub fn as_tuple_into(self) -> Option<Vec<Expr<Ex, En>>> {
         match self {
             Expr_::Tuple(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_list_into(self) -> Option<Vec<Expr<Ex, Fb, En>>> {
+    pub fn as_list_into(self) -> Option<Vec<Expr<Ex, En>>> {
         match self {
             Expr_::List(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_cast_into(self) -> Option<(Hint, Expr<Ex, Fb, En>)> {
+    pub fn as_cast_into(self) -> Option<(Hint, Expr<Ex, En>)> {
         match self {
             Expr_::Cast(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_unop_into(self) -> Option<(ast_defs::Uop, Expr<Ex, Fb, En>)> {
+    pub fn as_unop_into(self) -> Option<(ast_defs::Uop, Expr<Ex, En>)> {
         match self {
             Expr_::Unop(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_binop_into(self) -> Option<(ast_defs::Bop, Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)> {
+    pub fn as_binop_into(self) -> Option<(ast_defs::Bop, Expr<Ex, En>, Expr<Ex, En>)> {
         match self {
             Expr_::Binop(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }
-    pub fn as_pipe_into(self) -> Option<(Lid, Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)> {
+    pub fn as_pipe_into(self) -> Option<(Lid, Expr<Ex, En>, Expr<Ex, En>)> {
         match self {
             Expr_::Pipe(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }
-    pub fn as_eif_into(
-        self,
-    ) -> Option<(Expr<Ex, Fb, En>, Option<Expr<Ex, Fb, En>>, Expr<Ex, Fb, En>)> {
+    pub fn as_eif_into(self) -> Option<(Expr<Ex, En>, Option<Expr<Ex, En>>, Expr<Ex, En>)> {
         match self {
             Expr_::Eif(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }
-    pub fn as_is_into(self) -> Option<(Expr<Ex, Fb, En>, Hint)> {
+    pub fn as_is_into(self) -> Option<(Expr<Ex, En>, Hint)> {
         match self {
             Expr_::Is(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_as_into(self) -> Option<(Expr<Ex, Fb, En>, Hint, bool)> {
+    pub fn as_as_into(self) -> Option<(Expr<Ex, En>, Hint, bool)> {
         match self {
             Expr_::As(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
@@ -2342,10 +2242,10 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     pub fn as_new_into(
         self,
     ) -> Option<(
-        ClassId<Ex, Fb, En>,
+        ClassId<Ex, En>,
         Vec<Targ<Ex>>,
-        Vec<Expr<Ex, Fb, En>>,
-        Option<Expr<Ex, Fb, En>>,
+        Vec<Expr<Ex, En>>,
+        Option<Expr<Ex, En>>,
         Ex,
     )> {
         match self {
@@ -2353,39 +2253,37 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_record_into(self) -> Option<(Sid, Vec<(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)>)> {
+    pub fn as_record_into(self) -> Option<(Sid, Vec<(Expr<Ex, En>, Expr<Ex, En>)>)> {
         match self {
             Expr_::Record(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_efun_into(self) -> Option<(Fun_<Ex, Fb, En>, Vec<Lid>)> {
+    pub fn as_efun_into(self) -> Option<(Fun_<Ex, En>, Vec<Lid>)> {
         match self {
             Expr_::Efun(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_lfun_into(self) -> Option<(Fun_<Ex, Fb, En>, Vec<Lid>)> {
+    pub fn as_lfun_into(self) -> Option<(Fun_<Ex, En>, Vec<Lid>)> {
         match self {
             Expr_::Lfun(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_xml_into(
-        self,
-    ) -> Option<(Sid, Vec<XhpAttribute<Ex, Fb, En>>, Vec<Expr<Ex, Fb, En>>)> {
+    pub fn as_xml_into(self) -> Option<(Sid, Vec<XhpAttribute<Ex, En>>, Vec<Expr<Ex, En>>)> {
         match self {
             Expr_::Xml(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }
-    pub fn as_callconv_into(self) -> Option<(ast_defs::ParamKind, Expr<Ex, Fb, En>)> {
+    pub fn as_callconv_into(self) -> Option<(ast_defs::ParamKind, Expr<Ex, En>)> {
         match self {
             Expr_::Callconv(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
-    pub fn as_import_into(self) -> Option<(ImportFlavor, Expr<Ex, Fb, En>)> {
+    pub fn as_import_into(self) -> Option<(ImportFlavor, Expr<Ex, En>)> {
         match self {
             Expr_::Import(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
@@ -2393,13 +2291,13 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     }
     pub fn as_collection_into(
         self,
-    ) -> Option<(Sid, Option<CollectionTarg<Ex>>, Vec<Afield<Ex, Fb, En>>)> {
+    ) -> Option<(Sid, Option<CollectionTarg<Ex>>, Vec<Afield<Ex, En>>)> {
         match self {
             Expr_::Collection(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }
-    pub fn as_expression_tree_into(self) -> Option<ExpressionTree<Ex, Fb, En>> {
+    pub fn as_expression_tree_into(self) -> Option<ExpressionTree<Ex, En>> {
         match self {
             Expr_::ExpressionTree(p0) => Some(*p0),
             _ => None,
@@ -2417,7 +2315,7 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_method_id_into(self) -> Option<(Expr<Ex, Fb, En>, Pstring)> {
+    pub fn as_method_id_into(self) -> Option<(Expr<Ex, En>, Pstring)> {
         match self {
             Expr_::MethodId(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
@@ -2429,7 +2327,7 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_smethod_id_into(self) -> Option<(ClassId<Ex, Fb, En>, Pstring)> {
+    pub fn as_smethod_id_into(self) -> Option<(ClassId<Ex, En>, Pstring)> {
         match self {
             Expr_::SmethodId(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
@@ -2437,17 +2335,13 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
     }
     pub fn as_pair_into(
         self,
-    ) -> Option<(
-        Option<(Targ<Ex>, Targ<Ex>)>,
-        Expr<Ex, Fb, En>,
-        Expr<Ex, Fb, En>,
-    )> {
+    ) -> Option<(Option<(Targ<Ex>, Targ<Ex>)>, Expr<Ex, En>, Expr<Ex, En>)> {
         match self {
             Expr_::Pair(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }
-    pub fn as_etsplice_into(self) -> Option<Expr<Ex, Fb, En>> {
+    pub fn as_etsplice_into(self) -> Option<Expr<Ex, En>> {
         match self {
             Expr_::ETSplice(p0) => Some(*p0),
             _ => None,
@@ -2459,7 +2353,7 @@ impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_hole_into(self) -> Option<(Expr<Ex, Fb, En>, Ex, Ex, HoleSource)> {
+    pub fn as_hole_into(self) -> Option<(Expr<Ex, En>, Ex, Ex, HoleSource)> {
         match self {
             Expr_::Hole(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3)),
             _ => None,
@@ -2531,11 +2425,11 @@ impl HoleSource {
         }
     }
 }
-impl<Ex, Fb, En> ClassGetExpr<Ex, Fb, En> {
+impl<Ex, En> ClassGetExpr<Ex, En> {
     pub fn mk_cgstring(p0: Pstring) -> Self {
         ClassGetExpr::CGstring(p0)
     }
-    pub fn mk_cgexpr(p0: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_cgexpr(p0: Expr<Ex, En>) -> Self {
         ClassGetExpr::CGexpr(p0)
     }
     pub fn is_cgstring(&self) -> bool {
@@ -2556,7 +2450,7 @@ impl<Ex, Fb, En> ClassGetExpr<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_cgexpr(&self) -> Option<&Expr<Ex, Fb, En>> {
+    pub fn as_cgexpr(&self) -> Option<&Expr<Ex, En>> {
         match self {
             ClassGetExpr::CGexpr(p0) => Some(p0),
             _ => None,
@@ -2568,7 +2462,7 @@ impl<Ex, Fb, En> ClassGetExpr<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_cgexpr_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En>> {
+    pub fn as_cgexpr_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
         match self {
             ClassGetExpr::CGexpr(p0) => Some(p0),
             _ => None,
@@ -2580,18 +2474,18 @@ impl<Ex, Fb, En> ClassGetExpr<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_cgexpr_into(self) -> Option<Expr<Ex, Fb, En>> {
+    pub fn as_cgexpr_into(self) -> Option<Expr<Ex, En>> {
         match self {
             ClassGetExpr::CGexpr(p0) => Some(p0),
             _ => None,
         }
     }
 }
-impl<Ex, Fb, En> Case<Ex, Fb, En> {
-    pub fn mk_default(p0: Pos, p1: Block<Ex, Fb, En>) -> Self {
+impl<Ex, En> Case<Ex, En> {
+    pub fn mk_default(p0: Pos, p1: Block<Ex, En>) -> Self {
         Case::Default(p0, p1)
     }
-    pub fn mk_case(p0: Expr<Ex, Fb, En>, p1: Block<Ex, Fb, En>) -> Self {
+    pub fn mk_case(p0: Expr<Ex, En>, p1: Block<Ex, En>) -> Self {
         Case::Case(p0, p1)
     }
     pub fn is_default(&self) -> bool {
@@ -2606,48 +2500,48 @@ impl<Ex, Fb, En> Case<Ex, Fb, En> {
             _ => false,
         }
     }
-    pub fn as_default(&self) -> Option<(&Pos, &Block<Ex, Fb, En>)> {
+    pub fn as_default(&self) -> Option<(&Pos, &Block<Ex, En>)> {
         match self {
             Case::Default(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
-    pub fn as_case(&self) -> Option<(&Expr<Ex, Fb, En>, &Block<Ex, Fb, En>)> {
+    pub fn as_case(&self) -> Option<(&Expr<Ex, En>, &Block<Ex, En>)> {
         match self {
             Case::Case(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
-    pub fn as_default_mut(&mut self) -> Option<(&mut Pos, &mut Block<Ex, Fb, En>)> {
+    pub fn as_default_mut(&mut self) -> Option<(&mut Pos, &mut Block<Ex, En>)> {
         match self {
             Case::Default(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
-    pub fn as_case_mut(&mut self) -> Option<(&mut Expr<Ex, Fb, En>, &mut Block<Ex, Fb, En>)> {
+    pub fn as_case_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Block<Ex, En>)> {
         match self {
             Case::Case(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
-    pub fn as_default_into(self) -> Option<(Pos, Block<Ex, Fb, En>)> {
+    pub fn as_default_into(self) -> Option<(Pos, Block<Ex, En>)> {
         match self {
             Case::Default(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
-    pub fn as_case_into(self) -> Option<(Expr<Ex, Fb, En>, Block<Ex, Fb, En>)> {
+    pub fn as_case_into(self) -> Option<(Expr<Ex, En>, Block<Ex, En>)> {
         match self {
             Case::Case(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
 }
-impl<Ex, Fb, En> Afield<Ex, Fb, En> {
-    pub fn mk_afvalue(p0: Expr<Ex, Fb, En>) -> Self {
+impl<Ex, En> Afield<Ex, En> {
+    pub fn mk_afvalue(p0: Expr<Ex, En>) -> Self {
         Afield::AFvalue(p0)
     }
-    pub fn mk_afkvalue(p0: Expr<Ex, Fb, En>, p1: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_afkvalue(p0: Expr<Ex, En>, p1: Expr<Ex, En>) -> Self {
         Afield::AFkvalue(p0, p1)
     }
     pub fn is_afvalue(&self) -> bool {
@@ -2662,48 +2556,48 @@ impl<Ex, Fb, En> Afield<Ex, Fb, En> {
             _ => false,
         }
     }
-    pub fn as_afvalue(&self) -> Option<&Expr<Ex, Fb, En>> {
+    pub fn as_afvalue(&self) -> Option<&Expr<Ex, En>> {
         match self {
             Afield::AFvalue(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_afkvalue(&self) -> Option<(&Expr<Ex, Fb, En>, &Expr<Ex, Fb, En>)> {
+    pub fn as_afkvalue(&self) -> Option<(&Expr<Ex, En>, &Expr<Ex, En>)> {
         match self {
             Afield::AFkvalue(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
-    pub fn as_afvalue_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En>> {
+    pub fn as_afvalue_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
         match self {
             Afield::AFvalue(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_afkvalue_mut(&mut self) -> Option<(&mut Expr<Ex, Fb, En>, &mut Expr<Ex, Fb, En>)> {
+    pub fn as_afkvalue_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Expr<Ex, En>)> {
         match self {
             Afield::AFkvalue(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
-    pub fn as_afvalue_into(self) -> Option<Expr<Ex, Fb, En>> {
+    pub fn as_afvalue_into(self) -> Option<Expr<Ex, En>> {
         match self {
             Afield::AFvalue(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_afkvalue_into(self) -> Option<(Expr<Ex, Fb, En>, Expr<Ex, Fb, En>)> {
+    pub fn as_afkvalue_into(self) -> Option<(Expr<Ex, En>, Expr<Ex, En>)> {
         match self {
             Afield::AFkvalue(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
 }
-impl<Ex, Fb, En> XhpAttribute<Ex, Fb, En> {
-    pub fn mk_xhp_simple(p0: XhpSimple<Ex, Fb, En>) -> Self {
+impl<Ex, En> XhpAttribute<Ex, En> {
+    pub fn mk_xhp_simple(p0: XhpSimple<Ex, En>) -> Self {
         XhpAttribute::XhpSimple(p0)
     }
-    pub fn mk_xhp_spread(p0: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_xhp_spread(p0: Expr<Ex, En>) -> Self {
         XhpAttribute::XhpSpread(p0)
     }
     pub fn is_xhp_simple(&self) -> bool {
@@ -2718,45 +2612,45 @@ impl<Ex, Fb, En> XhpAttribute<Ex, Fb, En> {
             _ => false,
         }
     }
-    pub fn as_xhp_simple(&self) -> Option<&XhpSimple<Ex, Fb, En>> {
+    pub fn as_xhp_simple(&self) -> Option<&XhpSimple<Ex, En>> {
         match self {
             XhpAttribute::XhpSimple(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_xhp_spread(&self) -> Option<&Expr<Ex, Fb, En>> {
+    pub fn as_xhp_spread(&self) -> Option<&Expr<Ex, En>> {
         match self {
             XhpAttribute::XhpSpread(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_xhp_simple_mut(&mut self) -> Option<&mut XhpSimple<Ex, Fb, En>> {
+    pub fn as_xhp_simple_mut(&mut self) -> Option<&mut XhpSimple<Ex, En>> {
         match self {
             XhpAttribute::XhpSimple(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_xhp_spread_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En>> {
+    pub fn as_xhp_spread_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
         match self {
             XhpAttribute::XhpSpread(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_xhp_simple_into(self) -> Option<XhpSimple<Ex, Fb, En>> {
+    pub fn as_xhp_simple_into(self) -> Option<XhpSimple<Ex, En>> {
         match self {
             XhpAttribute::XhpSimple(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_xhp_spread_into(self) -> Option<Expr<Ex, Fb, En>> {
+    pub fn as_xhp_spread_into(self) -> Option<Expr<Ex, En>> {
         match self {
             XhpAttribute::XhpSpread(p0) => Some(p0),
             _ => None,
         }
     }
 }
-impl<Ex, Fb, En> FunVariadicity<Ex, Fb, En> {
-    pub fn mk_fvvariadic_arg(p0: FunParam<Ex, Fb, En>) -> Self {
+impl<Ex, En> FunVariadicity<Ex, En> {
+    pub fn mk_fvvariadic_arg(p0: FunParam<Ex, En>) -> Self {
         FunVariadicity::FVvariadicArg(p0)
     }
     pub fn mk_fvellipsis(p0: Pos) -> Self {
@@ -2783,7 +2677,7 @@ impl<Ex, Fb, En> FunVariadicity<Ex, Fb, En> {
             _ => false,
         }
     }
-    pub fn as_fvvariadic_arg(&self) -> Option<&FunParam<Ex, Fb, En>> {
+    pub fn as_fvvariadic_arg(&self) -> Option<&FunParam<Ex, En>> {
         match self {
             FunVariadicity::FVvariadicArg(p0) => Some(p0),
             _ => None,
@@ -2795,7 +2689,7 @@ impl<Ex, Fb, En> FunVariadicity<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_fvvariadic_arg_mut(&mut self) -> Option<&mut FunParam<Ex, Fb, En>> {
+    pub fn as_fvvariadic_arg_mut(&mut self) -> Option<&mut FunParam<Ex, En>> {
         match self {
             FunVariadicity::FVvariadicArg(p0) => Some(p0),
             _ => None,
@@ -2807,7 +2701,7 @@ impl<Ex, Fb, En> FunVariadicity<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_fvvariadic_arg_into(self) -> Option<FunParam<Ex, Fb, En>> {
+    pub fn as_fvvariadic_arg_into(self) -> Option<FunParam<Ex, En>> {
         match self {
             FunVariadicity::FVvariadicArg(p0) => Some(p0),
             _ => None,
@@ -2878,11 +2772,11 @@ impl XhpAttrTag {
         }
     }
 }
-impl<Ex, Fb, En> ClassAttr<Ex, Fb, En> {
+impl<Ex, En> ClassAttr<Ex, En> {
     pub fn mk_caname(p0: Sid) -> Self {
         ClassAttr::CAName(p0)
     }
-    pub fn mk_cafield(p0: CaField<Ex, Fb, En>) -> Self {
+    pub fn mk_cafield(p0: CaField<Ex, En>) -> Self {
         ClassAttr::CAField(p0)
     }
     pub fn is_caname(&self) -> bool {
@@ -2903,7 +2797,7 @@ impl<Ex, Fb, En> ClassAttr<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_cafield(&self) -> Option<&CaField<Ex, Fb, En>> {
+    pub fn as_cafield(&self) -> Option<&CaField<Ex, En>> {
         match self {
             ClassAttr::CAField(p0) => Some(p0),
             _ => None,
@@ -2915,7 +2809,7 @@ impl<Ex, Fb, En> ClassAttr<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_cafield_mut(&mut self) -> Option<&mut CaField<Ex, Fb, En>> {
+    pub fn as_cafield_mut(&mut self) -> Option<&mut CaField<Ex, En>> {
         match self {
             ClassAttr::CAField(p0) => Some(p0),
             _ => None,
@@ -2927,7 +2821,7 @@ impl<Ex, Fb, En> ClassAttr<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_cafield_into(self) -> Option<CaField<Ex, Fb, En>> {
+    pub fn as_cafield_into(self) -> Option<CaField<Ex, En>> {
         match self {
             ClassAttr::CAField(p0) => Some(p0),
             _ => None,
@@ -2990,11 +2884,11 @@ impl CaType {
         }
     }
 }
-impl<Ex, Fb, En> ClassConstKind<Ex, Fb, En> {
-    pub fn mk_ccabstract(p0: Option<Expr<Ex, Fb, En>>) -> Self {
+impl<Ex, En> ClassConstKind<Ex, En> {
+    pub fn mk_ccabstract(p0: Option<Expr<Ex, En>>) -> Self {
         ClassConstKind::CCAbstract(p0)
     }
-    pub fn mk_ccconcrete(p0: Expr<Ex, Fb, En>) -> Self {
+    pub fn mk_ccconcrete(p0: Expr<Ex, En>) -> Self {
         ClassConstKind::CCConcrete(p0)
     }
     pub fn is_ccabstract(&self) -> bool {
@@ -3009,37 +2903,37 @@ impl<Ex, Fb, En> ClassConstKind<Ex, Fb, En> {
             _ => false,
         }
     }
-    pub fn as_ccabstract(&self) -> Option<&Option<Expr<Ex, Fb, En>>> {
+    pub fn as_ccabstract(&self) -> Option<&Option<Expr<Ex, En>>> {
         match self {
             ClassConstKind::CCAbstract(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_ccconcrete(&self) -> Option<&Expr<Ex, Fb, En>> {
+    pub fn as_ccconcrete(&self) -> Option<&Expr<Ex, En>> {
         match self {
             ClassConstKind::CCConcrete(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_ccabstract_mut(&mut self) -> Option<&mut Option<Expr<Ex, Fb, En>>> {
+    pub fn as_ccabstract_mut(&mut self) -> Option<&mut Option<Expr<Ex, En>>> {
         match self {
             ClassConstKind::CCAbstract(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_ccconcrete_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En>> {
+    pub fn as_ccconcrete_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
         match self {
             ClassConstKind::CCConcrete(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_ccabstract_into(self) -> Option<Option<Expr<Ex, Fb, En>>> {
+    pub fn as_ccabstract_into(self) -> Option<Option<Expr<Ex, En>>> {
         match self {
             ClassConstKind::CCAbstract(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_ccconcrete_into(self) -> Option<Expr<Ex, Fb, En>> {
+    pub fn as_ccconcrete_into(self) -> Option<Expr<Ex, En>> {
         match self {
             ClassConstKind::CCConcrete(p0) => Some(p0),
             _ => None,
@@ -3129,26 +3023,26 @@ impl ClassTypeconst {
         }
     }
 }
-impl<Ex, Fb, En> Def<Ex, Fb, En> {
-    pub fn mk_fun(p0: FunDef<Ex, Fb, En>) -> Self {
+impl<Ex, En> Def<Ex, En> {
+    pub fn mk_fun(p0: FunDef<Ex, En>) -> Self {
         Def::Fun(Box::new(p0))
     }
-    pub fn mk_class(p0: Class_<Ex, Fb, En>) -> Self {
+    pub fn mk_class(p0: Class_<Ex, En>) -> Self {
         Def::Class(Box::new(p0))
     }
-    pub fn mk_record_def(p0: RecordDef<Ex, Fb, En>) -> Self {
+    pub fn mk_record_def(p0: RecordDef<Ex, En>) -> Self {
         Def::RecordDef(Box::new(p0))
     }
-    pub fn mk_stmt(p0: Stmt<Ex, Fb, En>) -> Self {
+    pub fn mk_stmt(p0: Stmt<Ex, En>) -> Self {
         Def::Stmt(Box::new(p0))
     }
-    pub fn mk_typedef(p0: Typedef<Ex, Fb, En>) -> Self {
+    pub fn mk_typedef(p0: Typedef<Ex, En>) -> Self {
         Def::Typedef(Box::new(p0))
     }
-    pub fn mk_constant(p0: Gconst<Ex, Fb, En>) -> Self {
+    pub fn mk_constant(p0: Gconst<Ex, En>) -> Self {
         Def::Constant(Box::new(p0))
     }
-    pub fn mk_namespace(p0: Sid, p1: Program<Ex, Fb, En>) -> Self {
+    pub fn mk_namespace(p0: Sid, p1: Program<Ex, En>) -> Self {
         Def::Namespace(Box::new((p0, p1)))
     }
     pub fn mk_namespace_use(p0: Vec<(NsKind, Sid, Sid)>) -> Self {
@@ -3157,7 +3051,7 @@ impl<Ex, Fb, En> Def<Ex, Fb, En> {
     pub fn mk_set_namespace_env(p0: Nsenv) -> Self {
         Def::SetNamespaceEnv(Box::new(p0))
     }
-    pub fn mk_file_attributes(p0: FileAttribute<Ex, Fb, En>) -> Self {
+    pub fn mk_file_attributes(p0: FileAttribute<Ex, En>) -> Self {
         Def::FileAttributes(Box::new(p0))
     }
     pub fn is_fun(&self) -> bool {
@@ -3220,43 +3114,43 @@ impl<Ex, Fb, En> Def<Ex, Fb, En> {
             _ => false,
         }
     }
-    pub fn as_fun(&self) -> Option<&FunDef<Ex, Fb, En>> {
+    pub fn as_fun(&self) -> Option<&FunDef<Ex, En>> {
         match self {
             Def::Fun(p0) => Some(&p0),
             _ => None,
         }
     }
-    pub fn as_class(&self) -> Option<&Class_<Ex, Fb, En>> {
+    pub fn as_class(&self) -> Option<&Class_<Ex, En>> {
         match self {
             Def::Class(p0) => Some(&p0),
             _ => None,
         }
     }
-    pub fn as_record_def(&self) -> Option<&RecordDef<Ex, Fb, En>> {
+    pub fn as_record_def(&self) -> Option<&RecordDef<Ex, En>> {
         match self {
             Def::RecordDef(p0) => Some(&p0),
             _ => None,
         }
     }
-    pub fn as_stmt(&self) -> Option<&Stmt<Ex, Fb, En>> {
+    pub fn as_stmt(&self) -> Option<&Stmt<Ex, En>> {
         match self {
             Def::Stmt(p0) => Some(&p0),
             _ => None,
         }
     }
-    pub fn as_typedef(&self) -> Option<&Typedef<Ex, Fb, En>> {
+    pub fn as_typedef(&self) -> Option<&Typedef<Ex, En>> {
         match self {
             Def::Typedef(p0) => Some(&p0),
             _ => None,
         }
     }
-    pub fn as_constant(&self) -> Option<&Gconst<Ex, Fb, En>> {
+    pub fn as_constant(&self) -> Option<&Gconst<Ex, En>> {
         match self {
             Def::Constant(p0) => Some(&p0),
             _ => None,
         }
     }
-    pub fn as_namespace(&self) -> Option<(&Sid, &Program<Ex, Fb, En>)> {
+    pub fn as_namespace(&self) -> Option<(&Sid, &Program<Ex, En>)> {
         match self {
             Def::Namespace(p0) => Some((&p0.0, &p0.1)),
             _ => None,
@@ -3274,49 +3168,49 @@ impl<Ex, Fb, En> Def<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_file_attributes(&self) -> Option<&FileAttribute<Ex, Fb, En>> {
+    pub fn as_file_attributes(&self) -> Option<&FileAttribute<Ex, En>> {
         match self {
             Def::FileAttributes(p0) => Some(&p0),
             _ => None,
         }
     }
-    pub fn as_fun_mut(&mut self) -> Option<&mut FunDef<Ex, Fb, En>> {
+    pub fn as_fun_mut(&mut self) -> Option<&mut FunDef<Ex, En>> {
         match self {
             Def::Fun(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
-    pub fn as_class_mut(&mut self) -> Option<&mut Class_<Ex, Fb, En>> {
+    pub fn as_class_mut(&mut self) -> Option<&mut Class_<Ex, En>> {
         match self {
             Def::Class(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
-    pub fn as_record_def_mut(&mut self) -> Option<&mut RecordDef<Ex, Fb, En>> {
+    pub fn as_record_def_mut(&mut self) -> Option<&mut RecordDef<Ex, En>> {
         match self {
             Def::RecordDef(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
-    pub fn as_stmt_mut(&mut self) -> Option<&mut Stmt<Ex, Fb, En>> {
+    pub fn as_stmt_mut(&mut self) -> Option<&mut Stmt<Ex, En>> {
         match self {
             Def::Stmt(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
-    pub fn as_typedef_mut(&mut self) -> Option<&mut Typedef<Ex, Fb, En>> {
+    pub fn as_typedef_mut(&mut self) -> Option<&mut Typedef<Ex, En>> {
         match self {
             Def::Typedef(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
-    pub fn as_constant_mut(&mut self) -> Option<&mut Gconst<Ex, Fb, En>> {
+    pub fn as_constant_mut(&mut self) -> Option<&mut Gconst<Ex, En>> {
         match self {
             Def::Constant(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
-    pub fn as_namespace_mut(&mut self) -> Option<(&mut Sid, &mut Program<Ex, Fb, En>)> {
+    pub fn as_namespace_mut(&mut self) -> Option<(&mut Sid, &mut Program<Ex, En>)> {
         match self {
             Def::Namespace(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -3334,49 +3228,49 @@ impl<Ex, Fb, En> Def<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_file_attributes_mut(&mut self) -> Option<&mut FileAttribute<Ex, Fb, En>> {
+    pub fn as_file_attributes_mut(&mut self) -> Option<&mut FileAttribute<Ex, En>> {
         match self {
             Def::FileAttributes(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
-    pub fn as_fun_into(self) -> Option<FunDef<Ex, Fb, En>> {
+    pub fn as_fun_into(self) -> Option<FunDef<Ex, En>> {
         match self {
             Def::Fun(p0) => Some(*p0),
             _ => None,
         }
     }
-    pub fn as_class_into(self) -> Option<Class_<Ex, Fb, En>> {
+    pub fn as_class_into(self) -> Option<Class_<Ex, En>> {
         match self {
             Def::Class(p0) => Some(*p0),
             _ => None,
         }
     }
-    pub fn as_record_def_into(self) -> Option<RecordDef<Ex, Fb, En>> {
+    pub fn as_record_def_into(self) -> Option<RecordDef<Ex, En>> {
         match self {
             Def::RecordDef(p0) => Some(*p0),
             _ => None,
         }
     }
-    pub fn as_stmt_into(self) -> Option<Stmt<Ex, Fb, En>> {
+    pub fn as_stmt_into(self) -> Option<Stmt<Ex, En>> {
         match self {
             Def::Stmt(p0) => Some(*p0),
             _ => None,
         }
     }
-    pub fn as_typedef_into(self) -> Option<Typedef<Ex, Fb, En>> {
+    pub fn as_typedef_into(self) -> Option<Typedef<Ex, En>> {
         match self {
             Def::Typedef(p0) => Some(*p0),
             _ => None,
         }
     }
-    pub fn as_constant_into(self) -> Option<Gconst<Ex, Fb, En>> {
+    pub fn as_constant_into(self) -> Option<Gconst<Ex, En>> {
         match self {
             Def::Constant(p0) => Some(*p0),
             _ => None,
         }
     }
-    pub fn as_namespace_into(self) -> Option<(Sid, Program<Ex, Fb, En>)> {
+    pub fn as_namespace_into(self) -> Option<(Sid, Program<Ex, En>)> {
         match self {
             Def::Namespace(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
@@ -3394,7 +3288,7 @@ impl<Ex, Fb, En> Def<Ex, Fb, En> {
             _ => None,
         }
     }
-    pub fn as_file_attributes_into(self) -> Option<FileAttribute<Ex, Fb, En>> {
+    pub fn as_file_attributes_into(self) -> Option<FileAttribute<Ex, En>> {
         match self {
             Def::FileAttributes(p0) => Some(*p0),
             _ => None,

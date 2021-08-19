@@ -15,8 +15,8 @@
             (Return
                (Some ((Pair<int, string>), [5:10-29],
                       (Pair (None, ((string), [5:15-20], (Hole (((string), [5:15-20], (String "bad")), (string), (int), Typing))), ((string), [5:22-28], (String "good"))))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

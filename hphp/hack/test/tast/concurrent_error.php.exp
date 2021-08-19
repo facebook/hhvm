@@ -15,7 +15,7 @@ Errors:
         f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([3:27-41], (Happly (([3:27-36], "\\HH\\Awaitable"), [([3:37-40], (Hprim Tint))]))))); 
         f_name = ([3:16-23], "\\gen_int"); f_tparams = []; f_where_constraints = []; 
         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
-        f_body = { fb_ast = [([4:3-12], (Return (Some ((int), [4:10-11], (Int "1")))))]; fb_annotation = () }; 
+        f_body = { fb_ast = [([4:3-12], (Return (Some ((int), [4:10-11], (Int "1")))))] }; 
         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -47,8 +47,8 @@ Errors:
                  (Some ((int), [12:10-19],
                         (Binop (Plus, ((int), [12:10-13], (Lvar ([12:10-13], $v1))),
                            ((Awaitable<int>), [12:16-19], (Hole (((Awaitable<int>), [12:16-19], (Lvar ([12:16-19], $v2))), (Awaitable<int>), (num), Typing)))))))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

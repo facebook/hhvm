@@ -2881,7 +2881,7 @@ pub fn print_expr<W: Write>(
                         })
                     })?;
                     w.write(" ==> ")?;
-                    print_block_(ctx, w, env, &fun_.body.ast, None)
+                    print_block_(ctx, w, env, &fun_.body.fb_ast, None)
                 })
             } else {
                 Err(Error::fail(
@@ -2980,7 +2980,7 @@ fn print_efun<W: Write>(
         })?;
         w.write(" ")?;
     }
-    print_block_(ctx, w, env, &f.body.ast, None)
+    print_block_(ctx, w, env, &f.body.fb_ast, None)
 }
 
 fn print_block<W: Write>(

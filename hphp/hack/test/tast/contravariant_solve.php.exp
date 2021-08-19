@@ -57,8 +57,8 @@
            [([9:3-25],
              (Throw
                 ((Exception), [9:9-24], (New (((Exception), [9:13-22], (CI ([9:13-22], "\\Exception"))), [], [], None, ((function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -86,8 +86,8 @@
            [([13:3-25],
              (Throw
                 ((Exception), [13:9-24], (New (((Exception), [13:13-22], (CI ([13:13-22], "\\Exception"))), [], [], None, ((function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -123,8 +123,8 @@
                           ],
                         None)))
                     )))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

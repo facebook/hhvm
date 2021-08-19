@@ -84,7 +84,7 @@ impl<'ast> Visitor<'ast> for Checker {
         self
     }
 
-    fn visit_class_(&mut self, c: &mut Context, p: &aast::Class_<(), (), ()>) -> Result<(), ()> {
+    fn visit_class_(&mut self, c: &mut Context, p: &aast::Class_<(), ()>) -> Result<(), ()> {
         p.recurse(
             &mut Context {
                 in_classish: true,
@@ -94,7 +94,7 @@ impl<'ast> Visitor<'ast> for Checker {
         )
     }
 
-    fn visit_method_(&mut self, c: &mut Context, m: &aast::Method_<(), (), ()>) -> Result<(), ()> {
+    fn visit_method_(&mut self, c: &mut Context, m: &aast::Method_<(), ()>) -> Result<(), ()> {
         if m.fun_kind == ast::FunKind::FAsync {
             self.check_async_ret_hint(&m.ret);
         }
@@ -108,7 +108,7 @@ impl<'ast> Visitor<'ast> for Checker {
         )
     }
 
-    fn visit_fun_(&mut self, c: &mut Context, f: &aast::Fun_<(), (), ()>) -> Result<(), ()> {
+    fn visit_fun_(&mut self, c: &mut Context, f: &aast::Fun_<(), ()>) -> Result<(), ()> {
         if f.fun_kind == ast::FunKind::FAsync {
             self.check_async_ret_hint(&f.ret);
         }
@@ -122,7 +122,7 @@ impl<'ast> Visitor<'ast> for Checker {
         )
     }
 
-    fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), (), ()>) -> Result<(), ()> {
+    fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
         use aast::{ClassId, ClassId_::*, Expr, Expr_::*, Lid};
 
         if let Await(_) = p.2 {
@@ -144,7 +144,7 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 }
 
-pub fn check_program(program: &aast::Program<(), (), ()>) -> Vec<SyntaxError> {
+pub fn check_program(program: &aast::Program<(), ()>) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
     let mut context = Context {
         in_methodish: false,

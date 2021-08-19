@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f69ac3aa10f628f6300e207fa7cec0a6>>
+// @generated SignedSource<<820e429a867b0e377b57a09e74fc37e5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -29,13 +29,6 @@ pub trait Visitor<'node> {
     ) -> Result<(), <Self::P as Params>::Error> {
         Ok(())
     }
-    fn visit_fb(
-        &mut self,
-        c: &mut <Self::P as Params>::Context,
-        p: &'node <Self::P as Params>::Fb,
-    ) -> Result<(), <Self::P as Params>::Error> {
-        Ok(())
-    }
     fn visit_en(
         &mut self,
         c: &mut <Self::P as Params>::Context,
@@ -53,14 +46,14 @@ pub trait Visitor<'node> {
     fn visit_afield(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Afield<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node Afield<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_as_expr(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node AsExpr<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node AsExpr<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -74,11 +67,7 @@ pub trait Visitor<'node> {
     fn visit_ca_field(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node CaField<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node CaField<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -92,14 +81,14 @@ pub trait Visitor<'node> {
     fn visit_case(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Case<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node Case<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_catch(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Catch<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node Catch<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -113,11 +102,7 @@ pub trait Visitor<'node> {
     fn visit_class_attr(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node ClassAttr<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node ClassAttr<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -131,55 +116,35 @@ pub trait Visitor<'node> {
     fn visit_class_const(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node ClassConst<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node ClassConst<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_class_const_kind(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node ClassConstKind<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node ClassConstKind<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_class_get_expr(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node ClassGetExpr<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node ClassGetExpr<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_class_id(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node ClassId<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node ClassId<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_class_id_(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node ClassId_<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node ClassId_<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -200,29 +165,21 @@ pub trait Visitor<'node> {
     fn visit_class_typeconst_def(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node ClassTypeconstDef<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node ClassTypeconstDef<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_class_var(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node ClassVar<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node ClassVar<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_class_(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Class_<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node Class_<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -257,7 +214,7 @@ pub trait Visitor<'node> {
     fn visit_def(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Def<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node Def<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -292,50 +249,42 @@ pub trait Visitor<'node> {
     fn visit_expr(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Expr<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node Expr<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_expr_(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Expr_<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node Expr_<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_expression_tree(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node ExpressionTree<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node ExpressionTree<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_field(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Field<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node Field<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_file_attribute(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node FileAttribute<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node FileAttribute<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_fun_def(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node FunDef<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node FunDef<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -349,58 +298,42 @@ pub trait Visitor<'node> {
     fn visit_fun_param(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node FunParam<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node FunParam<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_fun_variadicity(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node FunVariadicity<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node FunVariadicity<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_fun_(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Fun_<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node Fun_<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_func_body(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node FuncBody<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node FuncBody<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_function_ptr_id(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node FunctionPtrId<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node FunctionPtrId<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_gconst(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Gconst<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node Gconst<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -477,11 +410,7 @@ pub trait Visitor<'node> {
     fn visit_method_(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Method_<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node Method_<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -523,11 +452,7 @@ pub trait Visitor<'node> {
     fn visit_record_def(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node RecordDef<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node RecordDef<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -555,14 +480,14 @@ pub trait Visitor<'node> {
     fn visit_stmt(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Stmt<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node Stmt<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_stmt_(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Stmt_<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node Stmt_<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -576,7 +501,7 @@ pub trait Visitor<'node> {
     fn visit_tparam(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Tparam<<Self::P as Params>::Ex, <Self::P as Params>::Fb, <Self::P as Params>::En>,
+        p: &'node Tparam<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -597,11 +522,7 @@ pub trait Visitor<'node> {
     fn visit_typedef(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node Typedef<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node Typedef<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -636,22 +557,14 @@ pub trait Visitor<'node> {
     fn visit_user_attribute(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node UserAttribute<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node UserAttribute<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
     fn visit_using_stmt(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node UsingStmt<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node UsingStmt<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -686,11 +599,7 @@ pub trait Visitor<'node> {
     fn visit_xhp_attr(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node XhpAttr<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node XhpAttr<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -711,11 +620,7 @@ pub trait Visitor<'node> {
     fn visit_xhp_attribute(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node XhpAttribute<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node XhpAttribute<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
@@ -743,11 +648,7 @@ pub trait Visitor<'node> {
     fn visit_xhp_simple(
         &mut self,
         c: &mut <Self::P as Params>::Context,
-        p: &'node XhpSimple<
-            <Self::P as Params>::Ex,
-            <Self::P as Params>::Fb,
-            <Self::P as Params>::En,
-        >,
+        p: &'node XhpSimple<<Self::P as Params>::Ex, <Self::P as Params>::En>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }

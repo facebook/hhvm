@@ -102,7 +102,7 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     if is_meth_caller {
         coeffects = coeffects.with_caller()
     }
-    let ast_body = &f.body.ast;
+    let ast_body = &f.body.fb_ast;
     let deprecation_info = hhas_attribute::deprecation_info(attrs.iter());
     let (body, is_gen, is_pair_gen) = {
         let deprecation_info = if memoized { None } else { deprecation_info };

@@ -64,7 +64,7 @@ let should_surface_errors env =
 
 type aast_result = {
   fi_mode: FileInfo.mode;
-  ast: (unit, unit, unit) Aast.program;
+  ast: (unit, unit) Aast.program;
   content: string;
   file: Relative_path.t;
   comments: Scoured_comments.t;
@@ -195,8 +195,6 @@ let aast_to_nast aast : Nast.program =
         )
 
       method! on_pos = self#check_pos
-
-      method on_'fb _ _ = ()
 
       method on_'ex = i
 

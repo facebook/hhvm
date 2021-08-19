@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0c4c031e0b993cb3a75df2e30b16367a>>
+// @generated SignedSource<<b11e9d55e1fa9e9c1f6cc8a02041f8b8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -27,63 +27,63 @@ pub use aast::TraitHint;
 pub use aast::XhpAttrHint;
 pub use ast_defs::ShapeFieldName;
 
-pub type Program<'a> = aast::Program<'a, (), (), ()>;
+pub type Program<'a> = aast::Program<'a, (), ()>;
 
-pub type Def<'a> = aast::Def<'a, (), (), ()>;
+pub type Def<'a> = aast::Def<'a, (), ()>;
 
-pub type Expr<'a> = aast::Expr<'a, (), (), ()>;
+pub type Expr<'a> = aast::Expr<'a, (), ()>;
 
-pub type Expr_<'a> = aast::Expr_<'a, (), (), ()>;
+pub type Expr_<'a> = aast::Expr_<'a, (), ()>;
 
-pub type Stmt<'a> = aast::Stmt<'a, (), (), ()>;
+pub type Stmt<'a> = aast::Stmt<'a, (), ()>;
 
-pub type Block<'a> = aast::Block<'a, (), (), ()>;
+pub type Block<'a> = aast::Block<'a, (), ()>;
 
-pub type UserAttribute<'a> = aast::UserAttribute<'a, (), (), ()>;
+pub type UserAttribute<'a> = aast::UserAttribute<'a, (), ()>;
 
-pub type ClassId_<'a> = aast::ClassId_<'a, (), (), ()>;
+pub type ClassId_<'a> = aast::ClassId_<'a, (), ()>;
 
-pub type Class_<'a> = aast::Class_<'a, (), (), ()>;
+pub type Class_<'a> = aast::Class_<'a, (), ()>;
 
-pub type ClassVar<'a> = aast::ClassVar<'a, (), (), ()>;
+pub type ClassVar<'a> = aast::ClassVar<'a, (), ()>;
 
-pub type Method_<'a> = aast::Method_<'a, (), (), ()>;
+pub type Method_<'a> = aast::Method_<'a, (), ()>;
 
-pub type FileAttribute<'a> = aast::FileAttribute<'a, (), (), ()>;
+pub type FileAttribute<'a> = aast::FileAttribute<'a, (), ()>;
 
-pub type Fun_<'a> = aast::Fun_<'a, (), (), ()>;
+pub type Fun_<'a> = aast::Fun_<'a, (), ()>;
 
-pub type FunDef<'a> = aast::FunDef<'a, (), (), ()>;
+pub type FunDef<'a> = aast::FunDef<'a, (), ()>;
 
-pub type FuncBody<'a> = aast::FuncBody<'a, (), (), ()>;
+pub type FuncBody<'a> = aast::FuncBody<'a, (), ()>;
 
-pub type FunParam<'a> = aast::FunParam<'a, (), (), ()>;
+pub type FunParam<'a> = aast::FunParam<'a, (), ()>;
 
-pub type FunVariadicity<'a> = aast::FunVariadicity<'a, (), (), ()>;
+pub type FunVariadicity<'a> = aast::FunVariadicity<'a, (), ()>;
 
-pub type Typedef<'a> = aast::Typedef<'a, (), (), ()>;
+pub type Typedef<'a> = aast::Typedef<'a, (), ()>;
 
-pub type RecordDef<'a> = aast::RecordDef<'a, (), (), ()>;
+pub type RecordDef<'a> = aast::RecordDef<'a, (), ()>;
 
-pub type Tparam<'a> = aast::Tparam<'a, (), (), ()>;
+pub type Tparam<'a> = aast::Tparam<'a, (), ()>;
 
-pub type Gconst<'a> = aast::Gconst<'a, (), (), ()>;
+pub type Gconst<'a> = aast::Gconst<'a, (), ()>;
 
-pub type ClassConst<'a> = aast::ClassConst<'a, (), (), ()>;
+pub type ClassConst<'a> = aast::ClassConst<'a, (), ()>;
 
-pub type ClassId<'a> = aast::ClassId<'a, (), (), ()>;
+pub type ClassId<'a> = aast::ClassId<'a, (), ()>;
 
-pub type Catch<'a> = aast::Catch<'a, (), (), ()>;
+pub type Catch<'a> = aast::Catch<'a, (), ()>;
 
-pub type Case<'a> = aast::Case<'a, (), (), ()>;
+pub type Case<'a> = aast::Case<'a, (), ()>;
 
-pub type Field<'a> = aast::Field<'a, (), (), ()>;
+pub type Field<'a> = aast::Field<'a, (), ()>;
 
-pub type Afield<'a> = aast::Afield<'a, (), (), ()>;
+pub type Afield<'a> = aast::Afield<'a, (), ()>;
 
-pub type XhpAttribute<'a> = aast::XhpAttribute<'a, (), (), ()>;
+pub type XhpAttribute<'a> = aast::XhpAttribute<'a, (), ()>;
 
-pub type ExpressionTree<'a> = aast::ExpressionTree<'a, (), (), ()>;
+pub type ExpressionTree<'a> = aast::ExpressionTree<'a, (), ()>;
 
 pub type Targ<'a> = aast::Targ<'a, ()>;
 

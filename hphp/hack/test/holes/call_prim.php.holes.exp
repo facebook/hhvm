@@ -15,7 +15,7 @@
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
           ];
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -54,8 +54,8 @@
                  ((void), [10:5-13],
                   (Call ((((function(int $i): void)), [10:5-9], (Id ([10:5-9], "\\prim"))), 
                      [], [((?int), [10:10-12], (Hole (((?int), [10:10-12], (Lvar ([10:10-12], $x))), (?int), (int), Typing)))], None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -97,8 +97,8 @@
                      [((int), [18:10-45],
                        (Hole (((?int), [18:42-44], (Lvar ([18:42-44], $x))), (?int), (int), (UnsafeCast [([18:32-36], (Hoption ([18:33-36], (Hprim Tint)))); ([18:37-40], (Hprim Tint))]))))],
                      None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

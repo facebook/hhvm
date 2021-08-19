@@ -24,8 +24,8 @@
                 ((bool), [6:3-13],
                  (Binop ((Eq None), ((bool), [6:3-8], (Array_get (((Set<nothing>), [6:3-6], (Lvar ([6:3-6], $xs))), None))),
                     ((bool), [6:11-13], (Hole (((bool), [6:11-13], (Lvar ([6:11-13], $x))), (bool), (arraykey), Typing))))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

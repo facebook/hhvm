@@ -117,8 +117,8 @@
                 ((dict<arraykey, _>), [18:3-29],
                  (Call ((((function($callback, $arr1, ...): dict<arraykey, _>)), [18:3-12], (Id ([18:3-12], "\\array_map"))), 
                     [], [(((function(num): bool)), [18:13-15], (Lvar ([18:13-15], $i))); (((Container<int> | KeyedContainer<int, num>)), [18:17-28], (Lvar ([18:17-28], $unresolved)))], None)))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

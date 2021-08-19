@@ -29,8 +29,8 @@
                    ((string), [5:3-12],
                     (Array_get (((string), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((mixed), [5:7-11], (Hole (((mixed), [5:7-11], (Lvar ([5:7-11], $idx))), (mixed), (int), Typing))))))),
                    ((string), [5:15-18], (String "a")))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

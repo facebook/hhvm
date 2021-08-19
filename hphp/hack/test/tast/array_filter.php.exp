@@ -103,7 +103,7 @@
                              param_callconv = None; param_user_attributes = []; 
                              param_visibility = None }
                             ];
-                          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([20:31-35], (Return (Some ((bool), [20:31-35], True))))]; fb_annotation = () }; 
+                          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([20:31-35], (Return (Some ((bool), [20:31-35], True))))] }; 
                           f_fun_kind = FSync; f_user_attributes = []; 
                           f_external = false; f_doc_comment = None },
                         [])))
@@ -144,8 +144,8 @@
                  (Call ((((function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): dict<arraykey, ?string>)), [27:3-15], (Id ([27:3-15], "\\array_filter"))),
                     [((?string), ([27:3-15], (Happly (([Pos.none], "_"), []))))],
                     [((Container<?string>), [27:16-27], (Lvar ([27:16-27], $unresolved))); (((function(?string $x): bool)), [27:29-31], (Lvar ([27:29-31], $f)))], None)))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

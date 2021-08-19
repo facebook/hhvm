@@ -55,8 +55,8 @@
                                                         None))),
                                                     ((), [4:8-26], (Id ([4:8-26], "__plus"))), OG_nullthrows, false))),
                                                 [], [((), [4:17-26], (ET_Splice ((), [4:19-25], (Lvar ([4:19-25], $0splice0)))))], None))))))
-                                   ];
-                                 fb_annotation = () };
+                                   ]
+                                 };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
                              [([4:8-26], $0splice0)]))),
@@ -193,8 +193,8 @@
                                                                     (), [4:19-25], (String "$0splice0")); (
                                                                     (), [4:19-25], (Lvar ([4:19-25], $0splice0)))], None)))],
                                                                   None))))))
-                                                            ];
-                                                          fb_annotation = () };
+                                                            ]
+                                                          };
                                                         f_fun_kind = FSync; 
                                                         f_user_attributes = []; 
                                                         f_external = false; 
@@ -202,15 +202,15 @@
                                                       [([4:19-25], $0splice0)])))
                                                   ],
                                                 None))))))
-                                   ];
-                                 fb_annotation = () };
+                                   ]
+                                 };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
                              [([4:19-25], $0splice0); ([4:19-25], $0splice0)]))),
                          [], [], None)))
                      }))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

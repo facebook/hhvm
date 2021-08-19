@@ -19,8 +19,8 @@
         f_body =
         { fb_ast =
           [([5:3-9],
-            (Expr ((_), [5:3-8], (Array_get (((_), [5:3-5], (Hole (((bool), [5:3-5], (Lvar ([5:3-5], $x))), (_), (KeyedContainer<int, nothing>), Typing))), (Some ((int), [5:6-7], (Int "1"))))))))];
-          fb_annotation = () };
+            (Expr ((_), [5:3-8], (Array_get (((_), [5:3-5], (Hole (((bool), [5:3-5], (Lvar ([5:3-5], $x))), (_), (KeyedContainer<int, nothing>), Typing))), (Some ((int), [5:6-7], (Int "1"))))))))]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

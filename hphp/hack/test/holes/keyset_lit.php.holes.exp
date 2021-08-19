@@ -18,8 +18,8 @@
                    ((keyset<(int | bool)>), [5:8-23],
                     (ValCollection (Keyset, None, [((int), [5:15-16], (Int "1")); ((bool), [5:18-22], (Hole (((bool), [5:18-22], True), (bool), (arraykey), Typing)))])))
                    )))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -49,8 +49,8 @@
                 ((keyset<?string>), [10:3-18],
                  (Binop ((Eq None), ((keyset<?string>), [10:3-5], (Lvar ([10:3-5], $y))),
                     ((keyset<?string>), [10:8-18], (ValCollection (Keyset, None, [((?string), [10:15-17], (Hole (((?string), [10:15-17], (Lvar ([10:15-17], $x))), (?string), (string), Typing)))]))))))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

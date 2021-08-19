@@ -61,8 +61,8 @@
                                                         None))),
                                                     ((), [4:8-20], (Id ([4:8-20], "__plus"))), OG_nullthrows, false))),
                                                 [], [((), [4:18-20], (Lvar ([4:18-20], $x)))], None))))))
-                                   ];
-                                 fb_annotation = () };
+                                   ]
+                                 };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
                              []))),
@@ -181,16 +181,16 @@
                                                         None)))
                                                     ],
                                                   None))))))
-                                     ];
-                                   fb_annotation = () };
+                                     ]
+                                   };
                                  f_fun_kind = FSync; f_user_attributes = []; 
                                  f_external = false; f_doc_comment = None },
                                [])))
                            ],
                          None)))
                      }))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

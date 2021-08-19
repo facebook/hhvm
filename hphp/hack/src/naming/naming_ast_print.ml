@@ -12,7 +12,7 @@ let print_nast_internal pp_ex nast =
   let pp_unit fmt () = Format.pp_print_string fmt "()" in
   let formatter = Format.formatter_of_out_channel Stdlib.stdout in
   Format.pp_set_margin formatter 200;
-  Aast.pp_program pp_ex pp_unit pp_unit formatter nast;
+  Aast.pp_program pp_ex pp_unit formatter nast;
   Format.pp_print_newline formatter ()
 
 let print_nast nast = print_nast_internal pp_unit nast
@@ -23,8 +23,6 @@ let print_nast_without_position nast =
       inherit [_] Aast.map
 
       method! on_pos _ _pos = Pos.none
-
-      method on_'fb _ fb = fb
 
       method on_'ex _ _pos = ()
 

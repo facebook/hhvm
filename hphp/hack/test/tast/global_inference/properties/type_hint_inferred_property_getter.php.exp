@@ -30,8 +30,8 @@
                 ((int), [7:5-18],
                  (Binop ((Eq None), ((int), [7:5-13], (Obj_get (((this), [7:5-10], This), ((int), [7:12-13], (Id ([7:12-13], "x"))), OG_nullthrows, false))),
                     ((int), [7:16-18], (Lvar ([7:16-18], $x))))))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([6:19-30], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None };
@@ -46,8 +46,8 @@
                  ((int), [11:5-18],
                   (Binop ((Eq None), ((int), [11:5-7], (Lvar ([11:5-7], $y))),
                      ((int), [11:10-18], (Obj_get (((this), [11:10-15], This), ((int), [11:17-18], (Id ([11:17-18], "x"))), OG_nullthrows, false))))))));
-              ([12:5-15], (Return (Some ((int), [12:12-14], (Lvar ([12:12-14], $y))))))];
-            fb_annotation = () };
+              ([12:5-15], (Return (Some ((int), [12:12-14], (Lvar ([12:12-14], $y))))))]
+            };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((int), None); m_external = false; m_doc_comment = None }
         ];
@@ -87,8 +87,8 @@
                           [], [], None)))
                        ],
                      None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -110,7 +110,7 @@
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
            ];
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

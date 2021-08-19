@@ -27,8 +27,8 @@
                ((dict<string, nothing>), [7:3-10:4],
                 (KeyValCollection (Dict, None,
                    [(((string), [8:5-8], (String "a")), ((nothing), [8:12-14], (Lvar ([8:12-14], $a)))); (((string), [9:5-8], (String "b")), ((nothing), [9:12-14], (Lvar ([9:12-14], $b))))])))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

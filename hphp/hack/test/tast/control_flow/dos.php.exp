@@ -44,8 +44,8 @@
                       ((bool), [23:14-16], (Lvar ([23:14-16], $b))))));
                   ([24:5-13], (Expr ((string), [24:5-12], (Binop ((Eq None), ((string), [24:5-7], (Lvar ([24:5-7], $a))), ((string), [24:10-12], (String "")))))))],
                 ((bool), [25:12-14], (Lvar ([25:12-14], $b))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

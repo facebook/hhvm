@@ -8,8 +8,8 @@ use crate::ast_defs;
 use crate::pos::Pos;
 use std::{borrow::Cow, boxed::Box};
 
-impl<Ex, Fb, En> Stmt<Ex, Fb, En> {
-    pub fn new(pos: Pos, s: Stmt_<Ex, Fb, En>) -> Self {
+impl<Ex, En> Stmt<Ex, En> {
+    pub fn new(pos: Pos, s: Stmt_<Ex, En>) -> Self {
         Self(pos, s)
     }
 
@@ -27,8 +27,8 @@ impl<Ex, Fb, En> Stmt<Ex, Fb, En> {
     }
 }
 
-impl<Ex, Fb, En> Expr<Ex, Fb, En> {
-    pub fn new(ex: Ex, pos: Pos, e: Expr_<Ex, Fb, En>) -> Self {
+impl<Ex, En> Expr<Ex, En> {
+    pub fn new(ex: Ex, pos: Pos, e: Expr_<Ex, En>) -> Self {
         Self(ex, pos, e)
     }
 
@@ -47,7 +47,7 @@ impl<Ex, Fb, En> Expr<Ex, Fb, En> {
     }
 }
 
-impl<Fb, En> Expr<(), Fb, En> {
+impl<En> Expr<(), En> {
     pub fn pos(&self) -> &Pos {
         &self.1
     }
@@ -59,11 +59,11 @@ impl<Fb, En> Expr<(), Fb, En> {
         )
     }
 
-    pub fn as_class_get(&self) -> Option<(&ClassId<(), Fb, En>, &ClassGetExpr<(), Fb, En>, &bool)> {
+    pub fn as_class_get(&self) -> Option<(&ClassId<(), En>, &ClassGetExpr<(), En>, &bool)> {
         self.2.as_class_get()
     }
 
-    pub fn as_class_const(&self) -> Option<(&ClassId<(), Fb, En>, &Pstring)> {
+    pub fn as_class_const(&self) -> Option<(&ClassId<(), En>, &Pstring)> {
         self.2.as_class_const()
     }
 
@@ -72,20 +72,20 @@ impl<Fb, En> Expr<(), Fb, En> {
     }
 }
 
-impl<Ex, Fb, En> Expr_<Ex, Fb, En> {
+impl<Ex, En> Expr_<Ex, En> {
     pub fn make_string(s: Vec<u8>) -> Self {
         Expr_::String(s.into())
     }
 }
 
-impl<Ex, Fb, En> ClassId<Ex, Fb, En> {
+impl<Ex, En> ClassId<Ex, En> {
     pub fn annot(&self) -> &Ex {
         &self.0
     }
-    pub fn get(&self) -> &ClassId_<Ex, Fb, En> {
+    pub fn get(&self) -> &ClassId_<Ex, En> {
         &self.2
     }
-    pub fn as_ciexpr(&self) -> Option<&Expr<Ex, Fb, En>> {
+    pub fn as_ciexpr(&self) -> Option<&Expr<Ex, En>> {
         self.2.as_ciexpr()
     }
 }
@@ -112,8 +112,8 @@ pub fn new_nsenv(env: crate::namespace_env::Env) -> Nsenv {
     ocamlrep::rc::RcOc::new(env)
 }
 
-impl<Ex, Fb, En> Afield<Ex, Fb, En> {
-    pub fn value(&self) -> &Expr<Ex, Fb, En> {
+impl<Ex, En> Afield<Ex, En> {
+    pub fn value(&self) -> &Expr<Ex, En> {
         match self {
             Self::AFvalue(e) => e,
             Self::AFkvalue(_, e) => e,
@@ -122,10 +122,9 @@ impl<Ex, Fb, En> Afield<Ex, Fb, En> {
 }
 
 // TODO(hrust): consider codegen the following
-impl<'a, Ex, Fb, En> Into<Cow<'a, Method_<Ex, Fb, En>>> for Method_<Ex, Fb, En>
+impl<'a, Ex, En> Into<Cow<'a, Method_<Ex, En>>> for Method_<Ex, En>
 where
     Ex: Clone,
-    Fb: Clone,
     En: Clone,
 {
     fn into(self) -> Cow<'a, Self> {
@@ -133,13 +132,12 @@ where
     }
 }
 
-impl<'a, Ex, Fb, En> Into<Cow<'a, Method_<Ex, Fb, En>>> for &'a Method_<Ex, Fb, En>
+impl<'a, Ex, En> Into<Cow<'a, Method_<Ex, En>>> for &'a Method_<Ex, En>
 where
     Ex: Clone,
-    Fb: Clone,
     En: Clone,
 {
-    fn into(self) -> Cow<'a, Method_<Ex, Fb, En>> {
+    fn into(self) -> Cow<'a, Method_<Ex, En>> {
         Cow::Borrowed(self)
     }
 }

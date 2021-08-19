@@ -31,13 +31,13 @@
                            ];
                          f_ctxs = (Some ([4:12-16], [([4:13-15], (Happly (([4:13-15], "\\HH\\Contexts\\rx"), [])))]));
                          f_unsafe_ctxs = (Some ([4:12-16], [([4:13-15], (Happly (([4:13-15], "\\HH\\Contexts\\Unsafe\\rx"), [])))])); 
-                         f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+                         f_body = { fb_ast = [([Pos.none], Noop)] }; 
                          f_fun_kind = FSync; f_user_attributes = []; 
                          f_external = false; f_doc_comment = None },
                        [])))
                    )))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

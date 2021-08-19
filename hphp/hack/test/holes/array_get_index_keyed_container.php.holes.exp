@@ -28,8 +28,8 @@
                ((int), [8:3-12],
                 (Array_get (((KeyedContainer<string, int>), [8:3-6], (Lvar ([8:3-6], $xs))),
                    (Some ((mixed), [8:7-11], (Hole (((mixed), [8:7-11], (Lvar ([8:7-11], $idx))), (mixed), (arraykey), Typing)))))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

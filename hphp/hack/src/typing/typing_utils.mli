@@ -266,7 +266,7 @@ val get_printable_shape_field_name : Typing_defs.tshape_field_name -> string
 
 val shape_field_name_ :
   Ast_defs.id option Lazy.t ->
-  Ast_defs.pos * ('a, 'b, 'c) Aast.expr_ ->
+  Ast_defs.pos * ('a, 'b) Aast.expr_ ->
   ( Ast_defs.shape_field_name,
     [> `Expected_class | `Invalid_shape_field_name ] )
   result

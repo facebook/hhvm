@@ -512,7 +512,7 @@ let fun_def ctx fd :
       Aast.f_unsafe_ctxs = f.f_unsafe_ctxs;
       Aast.f_fun_kind = f.f_fun_kind;
       Aast.f_user_attributes = user_attributes;
-      Aast.f_body = { Aast.fb_ast = tb; fb_annotation = () };
+      Aast.f_body = { Aast.fb_ast = tb };
       Aast.f_external = f.f_external;
       Aast.f_doc_comment = f.f_doc_comment;
     }
@@ -858,7 +858,7 @@ let method_def env cls m =
       Aast.m_user_attributes = user_attributes;
       Aast.m_readonly_ret = m.m_readonly_ret;
       Aast.m_ret = (locl_ty, hint_of_type_hint m.m_ret);
-      Aast.m_body = { Aast.fb_ast = tb; fb_annotation = () };
+      Aast.m_body = { Aast.fb_ast = tb };
       Aast.m_external = m.m_external;
       Aast.m_doc_comment = m.m_doc_comment;
     }

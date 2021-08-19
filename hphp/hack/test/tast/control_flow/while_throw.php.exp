@@ -28,8 +28,8 @@
                          [], [((string), [5:25-38], (String "DoWhileBody"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
                  ]
                )))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

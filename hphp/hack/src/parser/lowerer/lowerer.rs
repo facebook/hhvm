@@ -1613,10 +1613,7 @@ where
                     name: ast::Id(pos, String::from(";anonymous")),
                     tparams: vec![],
                     where_constraints: vec![],
-                    body: ast::FuncBody {
-                        ast: body,
-                        annotation: (),
-                    },
+                    body: ast::FuncBody { fb_ast: body },
                     fun_kind: Self::mk_fun_kind(suspension_kind, yield_),
                     variadic: Self::determine_variadicity(&params),
                     params,
@@ -2191,10 +2188,7 @@ where
                     name: ast::Id(name_pos, String::from(";anonymous")),
                     tparams: vec![],
                     where_constraints: vec![],
-                    body: ast::FuncBody {
-                        ast: body,
-                        annotation: (),
-                    },
+                    body: ast::FuncBody { fb_ast: body },
                     fun_kind: Self::mk_fun_kind(suspension_kind, yield_),
                     variadic: Self::determine_variadicity(&params),
                     params,
@@ -2224,13 +2218,12 @@ where
                     tparams: vec![],
                     where_constraints: vec![],
                     body: ast::FuncBody {
-                        ast: if blk.len() == 0 {
+                        fb_ast: if blk.len() == 0 {
                             let pos = Self::p_pos(&c.compound_statement, env);
                             vec![ast::Stmt::noop(pos)]
                         } else {
                             blk
                         },
-                        annotation: (),
                     },
                     fun_kind: Self::mk_fun_kind(suspension_kind, yld),
                     variadic: Self::determine_variadicity(&[]),
@@ -4558,10 +4551,7 @@ where
                     params: hdr.parameters,
                     ctxs: hdr.contexts,
                     unsafe_ctxs: hdr.unsafe_contexts,
-                    body: ast::FuncBody {
-                        annotation: (),
-                        ast: body,
-                    },
+                    body: ast::FuncBody { fb_ast: body },
                     fun_kind: Self::mk_fun_kind(hdr.suspension_kind, body_has_yield),
                     user_attributes,
                     readonly_ret: hdr.readonly_return,
@@ -4922,7 +4912,7 @@ where
 
     fn check_effect_memoized(
         contexts: &Option<ast::Contexts>,
-        user_attributes: &[aast::UserAttribute<(), (), ()>],
+        user_attributes: &[aast::UserAttribute<(), ()>],
         kind: &str,
         env: &mut Env<'a, TF>,
     ) {
@@ -5048,10 +5038,7 @@ where
                     params: hdr.parameters,
                     ctxs: hdr.contexts,
                     unsafe_ctxs: hdr.unsafe_contexts,
-                    body: ast::FuncBody {
-                        ast: block,
-                        annotation: (),
-                    },
+                    body: ast::FuncBody { fb_ast: block },
                     fun_kind: Self::mk_fun_kind(hdr.suspension_kind, yield_),
                     variadic,
                     user_attributes,

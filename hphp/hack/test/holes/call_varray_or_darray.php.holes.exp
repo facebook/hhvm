@@ -16,7 +16,7 @@
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
            ];
-         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([4:48-52], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }
@@ -46,7 +46,7 @@
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
            ];
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -95,8 +95,8 @@
                      [((vec_or_dict<arraykey, float>), [18:11-13],
                        (Hole (((vec_or_dict<arraykey, float>), [18:11-13], (Lvar ([18:11-13], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), Typing)))],
                      None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -149,8 +149,8 @@
                           (UnsafeCast [([30:33-56], (Hvec_or_dict (None, ([30:50-55], (Hprim Tfloat))))); ([30:57-78], (Hvec_or_dict (None, ([30:74-77], (Hprim Tint)))))]))))
                        ],
                      None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

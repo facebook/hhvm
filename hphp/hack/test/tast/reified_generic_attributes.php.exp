@@ -52,7 +52,7 @@ Errors:
             }
            ];
          f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -72,7 +72,7 @@ Errors:
              tp_constraints = []; tp_reified = Reified; tp_user_attributes = [{ ua_name = ([7:29-38], "__Newable"); ua_params = [] }; { ua_name = ([7:17-28], "\\Enforceable"); ua_params = [] }] }
            ];
          f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -91,7 +91,7 @@ Errors:
             tp_constraints = []; tp_reified = Erased; tp_user_attributes = [{ ua_name = ([8:14-15], "\\B"); ua_params = [] }] }
            ];
          f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -110,7 +110,7 @@ Errors:
             tp_constraints = []; tp_reified = SoftReified; tp_user_attributes = [{ ua_name = ([9:14-20], "__Soft"); ua_params = [] }] }
            ];
          f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -129,7 +129,7 @@ Errors:
             tp_constraints = []; tp_reified = Erased; tp_user_attributes = [{ ua_name = ([11:15-16], "\\A"); ua_params = [((int), [11:17-18], (Int "1"))] }] }
            ];
          f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

@@ -62,8 +62,8 @@
              (Expr
                 ((:hello), [8:3-11:11],
                  (Xml (([8:4-9], "\\:hello"), [], [((:selam), [9:5-14], (Xml (([9:6-11], "\\:selam"), [], []))); ((:salut), [10:5-14], (Xml (([10:6-11], "\\:salut"), [], [])))])))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

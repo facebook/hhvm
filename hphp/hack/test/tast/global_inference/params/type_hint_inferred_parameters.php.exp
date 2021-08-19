@@ -22,8 +22,8 @@
             (If (((bool), [4:7-16], (Is (((mixed), [4:7-9], (Lvar ([4:7-9], $x))), ([4:13-16], (Hprim Tint))))),
                [([4:3-6:4], (AssertEnv (Refinement, {$x}))); ([5:5-15], (Return (Some (((mixed & int)), [5:12-14], (Lvar ([5:12-14], $x))))))],
                [([4:3-6:4], (AssertEnv (Refinement, {$x}))); ([Pos.none], Noop)])));
-            ([7:3-19], (Return (Some ((int), [7:10-18], (Cast (([7:11-14], (Hprim Tint)), (((mixed & not int)), [7:16-18], (Lvar ([7:16-18], $x)))))))))];
-          fb_annotation = () };
+            ([7:3-19], (Return (Some ((int), [7:10-18], (Cast (([7:11-14], (Hprim Tint)), (((mixed & not int)), [7:16-18], (Lvar ([7:16-18], $x)))))))))]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -46,7 +46,7 @@
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([11:3-17], (Return (Some ((int), [11:10-16], (Binop (Plus, ((num), [11:10-12], (Lvar ([11:10-12], $x))), ((int), [11:15-16], (Int "4"))))))))]; fb_annotation = () };
+         f_body = { fb_ast = [([11:3-17], (Return (Some ((int), [11:10-16], (Binop (Plus, ((num), [11:10-12], (Lvar ([11:10-12], $x))), ((int), [11:15-16], (Int "4"))))))))] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

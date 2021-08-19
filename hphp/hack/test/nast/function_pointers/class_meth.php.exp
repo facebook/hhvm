@@ -14,10 +14,9 @@
          m_static = true; m_readonly_this = false; m_visibility = Public; 
          m_name = ([6:26-30], "buzz"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
-         m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
-         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-         m_ret = ((), (Some ([6:34-38], (Hprim Tvoid)))); m_external = false; 
-         m_doc_comment = None }
+         m_body = { fb_ast = [([Pos.none], Noop)] }; m_fun_kind = FSync; 
+         m_user_attributes = []; m_readonly_ret = None; m_ret = ((), (Some ([6:34-38], (Hprim Tvoid)))); 
+         m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
@@ -51,8 +50,8 @@
                  ((), [14:3-27],
                   (Binop ((Eq None), ((), [14:3-5], (Lvar ([14:3-5], $x))),
                      ((), [14:8-27], (FunctionPointer ((FP_class_const (((), [14:8-14], (CI ([14:8-14], "\\HH\\Vector"))), ([14:16-25], "fromItems"))), []))))))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

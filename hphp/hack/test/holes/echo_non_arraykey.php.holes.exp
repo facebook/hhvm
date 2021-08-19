@@ -27,8 +27,8 @@
                ((void), [5:3-12], (Call (((_), [5:3-7], (Id ([5:3-7], "echo"))), [], [((mixed), [5:8-10], (Hole (((mixed), [5:8-10], (Lvar ([5:8-10], $x))), (mixed), (arraykey), Typing)))], None)))));
             ([7:3-12],
              (Expr ((void), [7:3-12], (Call (((_), [7:3-7], (Id ([7:3-7], "echo"))), [], [((bool), [7:8-10], (Hole (((bool), [7:8-10], (Lvar ([7:8-10], $y))), (bool), (arraykey), Typing)))], None)))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

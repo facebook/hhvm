@@ -57,59 +57,59 @@ type saved_env = {
 }
 [@@deriving show]
 
-type program = (ty, unit, saved_env) Aast.program [@@deriving show]
+type program = (ty, saved_env) Aast.program [@@deriving show]
 
-type def = (ty, unit, saved_env) Aast.def
+type def = (ty, saved_env) Aast.def
 
-type expr = (ty, unit, saved_env) Aast.expr
+type expr = (ty, saved_env) Aast.expr
 
-type expr_ = (ty, unit, saved_env) Aast.expr_
+type expr_ = (ty, saved_env) Aast.expr_
 
-type stmt = (ty, unit, saved_env) Aast.stmt
+type stmt = (ty, saved_env) Aast.stmt
 
-type stmt_ = (ty, unit, saved_env) Aast.stmt_
+type stmt_ = (ty, saved_env) Aast.stmt_
 
-type block = (ty, unit, saved_env) Aast.block
+type block = (ty, saved_env) Aast.block
 
-type class_ = (ty, unit, saved_env) Aast.class_
+type class_ = (ty, saved_env) Aast.class_
 
-type class_id = (ty, unit, saved_env) Aast.class_id
+type class_id = (ty, saved_env) Aast.class_id
 
 type type_hint = ty Aast.type_hint
 
 type targ = ty Aast.targ
 
-type class_get_expr = (ty, unit, saved_env) Aast.class_get_expr
+type class_get_expr = (ty, saved_env) Aast.class_get_expr
 
-type class_typeconst_def = (ty, unit, saved_env) Aast.class_typeconst_def
+type class_typeconst_def = (ty, saved_env) Aast.class_typeconst_def
 
-type user_attribute = (ty, unit, saved_env) Aast.user_attribute
+type user_attribute = (ty, saved_env) Aast.user_attribute
 
-type fun_ = (ty, unit, saved_env) Aast.fun_
+type fun_ = (ty, saved_env) Aast.fun_
 
-type file_attribute = (ty, unit, saved_env) Aast.file_attribute
+type file_attribute = (ty, saved_env) Aast.file_attribute
 
-type fun_def = (ty, unit, saved_env) Aast.fun_def
+type fun_def = (ty, saved_env) Aast.fun_def
 
-type fun_param = (ty, unit, saved_env) Aast.fun_param
+type fun_param = (ty, saved_env) Aast.fun_param
 
-type fun_variadicity = (ty, unit, saved_env) Aast.fun_variadicity
+type fun_variadicity = (ty, saved_env) Aast.fun_variadicity
 
-type func_body = (ty, unit, saved_env) Aast.func_body
+type func_body = (ty, saved_env) Aast.func_body
 
-type method_ = (ty, unit, saved_env) Aast.method_
+type method_ = (ty, saved_env) Aast.method_
 
-type class_var = (ty, unit, saved_env) Aast.class_var
+type class_var = (ty, saved_env) Aast.class_var
 
-type class_const = (ty, unit, saved_env) Aast.class_const
+type class_const = (ty, saved_env) Aast.class_const
 
-type tparam = (ty, unit, saved_env) Aast.tparam
+type tparam = (ty, saved_env) Aast.tparam
 
-type typedef = (ty, unit, saved_env) Aast.typedef
+type typedef = (ty, saved_env) Aast.typedef
 
-type record_def = (ty, unit, saved_env) Aast.record_def
+type record_def = (ty, saved_env) Aast.record_def
 
-type gconst = (ty, unit, saved_env) Aast.gconst
+type gconst = (ty, saved_env) Aast.gconst
 
 let empty_saved_env tcopt : saved_env =
   {
@@ -154,8 +154,6 @@ let nast_converter =
     inherit [_] Aast.map as super
 
     method on_'ex _ _ = ()
-
-    method on_'fb _ _fb = ()
 
     method on_'en _ _ = ()
 

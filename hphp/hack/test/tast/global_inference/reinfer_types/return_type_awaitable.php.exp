@@ -15,7 +15,7 @@
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
           ];
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some ((int), [4:10-12], (Lvar ([4:10-12], $x))))))]; fb_annotation = () }; 
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some ((int), [4:10-12], (Lvar ([4:10-12], $x))))))] }; 
         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -37,7 +37,7 @@
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None }
             ];
-          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([9:5-15], (Return (Some ((int), [9:12-14], (Lvar ([9:12-14], $x))))))]; fb_annotation = () }; 
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([9:5-15], (Return (Some ((int), [9:12-14], (Lvar ([9:12-14], $x))))))] }; 
           m_fun_kind = FAsync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((Awaitable<int>), (Some ([8:38-54], (Happly (([8:38-47], "\\HH\\Awaitable"), [([8:48-53], Hmixed)]))))); 
           m_external = false; m_doc_comment = None }

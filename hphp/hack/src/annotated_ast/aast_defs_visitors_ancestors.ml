@@ -30,8 +30,6 @@ class ['self] iter_defs_base =
 
     method private on_xhp_enum_value _ _ : unit = ()
 
-    method on_'fb _ _ = ()
-
     method on_'ex _ _ = ()
 
     method on_'en _ _ = ()
@@ -60,8 +58,6 @@ class virtual ['self] reduce_defs_base =
         LM.fold (fun _ d acc -> self#plus acc (f env d)) x self#zero
 
     method private on_xhp_enum_value _ _ = self#zero
-
-    method on_'fb _env _ = self#zero
 
     method on_'ex _env _ = self#zero
 

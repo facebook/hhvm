@@ -204,11 +204,11 @@ impl HhasCoeffects {
         (static_coeffects, unenforced_static_coeffects)
     }
 
-    pub fn from_ast<Ex, Fb, En>(
+    pub fn from_ast<Ex, En>(
         ctxs_opt: &Option<a::Contexts>,
-        params: impl AsRef<[a::FunParam<Ex, Fb, En>]>,
-        fun_tparams: impl AsRef<[a::Tparam<Ex, Fb, En>]>,
-        cls_tparams: impl AsRef<[a::Tparam<Ex, Fb, En>]>,
+        params: impl AsRef<[a::FunParam<Ex, En>]>,
+        fun_tparams: impl AsRef<[a::Tparam<Ex, En>]>,
+        cls_tparams: impl AsRef<[a::Tparam<Ex, En>]>,
     ) -> Self {
         let mut static_coeffects = vec![];
         let mut unenforced_static_coeffects = vec![];
@@ -386,11 +386,11 @@ impl HhasCoeffects {
     }
 }
 
-pub fn halves_of_is_enabled_body<Ex, Fb, En>(
-    body: &a::FuncBody<Ex, Fb, En>,
-) -> Option<(&a::Block<Ex, Fb, En>, &a::Block<Ex, Fb, En>)> {
+pub fn halves_of_is_enabled_body<Ex, En>(
+    body: &a::FuncBody<Ex, En>,
+) -> Option<(&a::Block<Ex, En>, &a::Block<Ex, En>)> {
     use a::*;
-    if let [Stmt(_, Stmt_::If(if_))] = body.ast.as_slice() {
+    if let [Stmt(_, Stmt_::If(if_))] = body.fb_ast.as_slice() {
         if let (Expr(_, _, Expr_::Id(sid)), enabled, disabled) = &**if_ {
             let Id(_, name) = &**sid;
             return if name != sn::rx::IS_ENABLED {

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1477d683045943bc96efb8c5fc5201d5>>
+// @generated SignedSource<<8cc4cabf9cfb198041999e1394ec83a0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -16,52 +16,49 @@ pub trait Visitor<'a> {
     fn visit_abstraction(&mut self, p: &'a Abstraction) {
         p.recurse(self.object())
     }
-    fn visit_afield(&mut self, p: &'a Afield<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_afield(&mut self, p: &'a Afield<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_as_expr(&mut self, p: &'a AsExpr<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_as_expr(&mut self, p: &'a AsExpr<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_bop(&mut self, p: &'a Bop<'a>) {
         p.recurse(self.object())
     }
-    fn visit_ca_field(&mut self, p: &'a CaField<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_ca_field(&mut self, p: &'a CaField<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_ca_type(&mut self, p: &'a CaType<'a>) {
         p.recurse(self.object())
     }
-    fn visit_case(&mut self, p: &'a Case<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_case(&mut self, p: &'a Case<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_catch(&mut self, p: &'a Catch<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_catch(&mut self, p: &'a Catch<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_class_abstract_typeconst(&mut self, p: &'a ClassAbstractTypeconst<'a>) {
         p.recurse(self.object())
     }
-    fn visit_class_attr(&mut self, p: &'a ClassAttr<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_class_attr(&mut self, p: &'a ClassAttr<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_class_concrete_typeconst(&mut self, p: &'a ClassConcreteTypeconst<'a>) {
         p.recurse(self.object())
     }
-    fn visit_class_const(&mut self, p: &'a ClassConst<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_class_const(&mut self, p: &'a ClassConst<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_class_const_kind(
-        &mut self,
-        p: &'a ClassConstKind<'a, &'a crate::pos::Pos<'a>, (), ()>,
-    ) {
+    fn visit_class_const_kind(&mut self, p: &'a ClassConstKind<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_class_get_expr(&mut self, p: &'a ClassGetExpr<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_class_get_expr(&mut self, p: &'a ClassGetExpr<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_class_id(&mut self, p: &'a ClassId<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_class_id(&mut self, p: &'a ClassId<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_class_id_(&mut self, p: &'a ClassId_<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_class_id_(&mut self, p: &'a ClassId_<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_class_partially_abstract_typeconst(
@@ -75,14 +72,14 @@ pub trait Visitor<'a> {
     }
     fn visit_class_typeconst_def(
         &mut self,
-        p: &'a ClassTypeconstDef<'a, &'a crate::pos::Pos<'a>, (), ()>,
+        p: &'a ClassTypeconstDef<'a, &'a crate::pos::Pos<'a>, ()>,
     ) {
         p.recurse(self.object())
     }
-    fn visit_class_var(&mut self, p: &'a ClassVar<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_class_var(&mut self, p: &'a ClassVar<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_class_(&mut self, p: &'a Class_<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_class_(&mut self, p: &'a Class_<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_classish_kind(&mut self, p: &'a ClassishKind<'a>) {
@@ -97,7 +94,7 @@ pub trait Visitor<'a> {
     fn visit_contexts(&mut self, p: &'a Contexts<'a>) {
         p.recurse(self.object())
     }
-    fn visit_def(&mut self, p: &'a Def<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_def(&mut self, p: &'a Def<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_doc_comment(&mut self, p: &'a DocComment<'a>) {
@@ -115,49 +112,43 @@ pub trait Visitor<'a> {
     fn visit_env_annot(&mut self, p: &'a EnvAnnot) {
         p.recurse(self.object())
     }
-    fn visit_expr(&mut self, p: &'a Expr<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_expr(&mut self, p: &'a Expr<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_expr_(&mut self, p: &'a Expr_<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_expr_(&mut self, p: &'a Expr_<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_expression_tree(
-        &mut self,
-        p: &'a ExpressionTree<'a, &'a crate::pos::Pos<'a>, (), ()>,
-    ) {
+    fn visit_expression_tree(&mut self, p: &'a ExpressionTree<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_field(&mut self, p: &'a Field<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_field(&mut self, p: &'a Field<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_file_attribute(&mut self, p: &'a FileAttribute<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_file_attribute(&mut self, p: &'a FileAttribute<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_fun_def(&mut self, p: &'a FunDef<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_fun_def(&mut self, p: &'a FunDef<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_fun_kind(&mut self, p: &'a FunKind) {
         p.recurse(self.object())
     }
-    fn visit_fun_param(&mut self, p: &'a FunParam<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_fun_param(&mut self, p: &'a FunParam<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_fun_variadicity(
-        &mut self,
-        p: &'a FunVariadicity<'a, &'a crate::pos::Pos<'a>, (), ()>,
-    ) {
+    fn visit_fun_variadicity(&mut self, p: &'a FunVariadicity<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_fun_(&mut self, p: &'a Fun_<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_fun_(&mut self, p: &'a Fun_<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_func_body(&mut self, p: &'a FuncBody<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_func_body(&mut self, p: &'a FuncBody<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_function_ptr_id(&mut self, p: &'a FunctionPtrId<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_function_ptr_id(&mut self, p: &'a FunctionPtrId<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_gconst(&mut self, p: &'a Gconst<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_gconst(&mut self, p: &'a Gconst<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_hf_param_info(&mut self, p: &'a HfParamInfo) {
@@ -190,7 +181,7 @@ pub trait Visitor<'a> {
     fn visit_lid(&mut self, p: &'a Lid<'a>) {
         p.recurse(self.object())
     }
-    fn visit_method_(&mut self, p: &'a Method_<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_method_(&mut self, p: &'a Method_<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_nast_shape_info(&mut self, p: &'a NastShapeInfo<'a>) {
@@ -208,7 +199,7 @@ pub trait Visitor<'a> {
     fn visit_readonly_kind(&mut self, p: &'a ReadonlyKind) {
         p.recurse(self.object())
     }
-    fn visit_record_def(&mut self, p: &'a RecordDef<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_record_def(&mut self, p: &'a RecordDef<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_reify_kind(&mut self, p: &'a ReifyKind) {
@@ -220,16 +211,16 @@ pub trait Visitor<'a> {
     fn visit_shape_field_name(&mut self, p: &'a ShapeFieldName<'a>) {
         p.recurse(self.object())
     }
-    fn visit_stmt(&mut self, p: &'a Stmt<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_stmt(&mut self, p: &'a Stmt<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_stmt_(&mut self, p: &'a Stmt_<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_stmt_(&mut self, p: &'a Stmt_<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_targ(&mut self, p: &'a Targ<'a, &'a crate::pos::Pos<'a>>) {
         p.recurse(self.object())
     }
-    fn visit_tparam(&mut self, p: &'a Tparam<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_tparam(&mut self, p: &'a Tparam<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_tprim(&mut self, p: &'a Tprim) {
@@ -238,7 +229,7 @@ pub trait Visitor<'a> {
     fn visit_type_hint(&mut self, p: &'a TypeHint<'a, &'a crate::pos::Pos<'a>>) {
         p.recurse(self.object())
     }
-    fn visit_typedef(&mut self, p: &'a Typedef<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_typedef(&mut self, p: &'a Typedef<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_typedef_visibility(&mut self, p: &'a TypedefVisibility) {
@@ -253,10 +244,10 @@ pub trait Visitor<'a> {
     fn visit_use_as_visibility(&mut self, p: &'a UseAsVisibility) {
         p.recurse(self.object())
     }
-    fn visit_user_attribute(&mut self, p: &'a UserAttribute<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_user_attribute(&mut self, p: &'a UserAttribute<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
-    fn visit_using_stmt(&mut self, p: &'a UsingStmt<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_using_stmt(&mut self, p: &'a UsingStmt<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_variance(&mut self, p: &'a Variance) {
@@ -271,7 +262,7 @@ pub trait Visitor<'a> {
     fn visit_where_constraint_hint(&mut self, p: &'a WhereConstraintHint<'a>) {
         p.recurse(self.object())
     }
-    fn visit_xhp_attr(&mut self, p: &'a XhpAttr<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_xhp_attr(&mut self, p: &'a XhpAttr<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_xhp_attr_info(&mut self, p: &'a XhpAttrInfo<'a>) {
@@ -280,7 +271,7 @@ pub trait Visitor<'a> {
     fn visit_xhp_attr_tag(&mut self, p: &'a XhpAttrTag) {
         p.recurse(self.object())
     }
-    fn visit_xhp_attribute(&mut self, p: &'a XhpAttribute<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_xhp_attribute(&mut self, p: &'a XhpAttribute<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
     fn visit_xhp_child(&mut self, p: &'a XhpChild<'a>) {
@@ -292,7 +283,7 @@ pub trait Visitor<'a> {
     fn visit_xhp_enum_value(&mut self, p: &'a XhpEnumValue<'a>) {
         p.recurse(self.object())
     }
-    fn visit_xhp_simple(&mut self, p: &'a XhpSimple<'a, &'a crate::pos::Pos<'a>, (), ()>) {
+    fn visit_xhp_simple(&mut self, p: &'a XhpSimple<'a, &'a crate::pos::Pos<'a>, ()>) {
         p.recurse(self.object())
     }
 }

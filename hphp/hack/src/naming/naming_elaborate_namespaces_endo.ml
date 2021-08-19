@@ -121,8 +121,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
 
     method on_'ex _ ex = ex
 
-    method on_'fb _ fb = fb
-
     method on_'en _ en = en
 
     (* Namespaces were already precomputed by ElaborateDefs
@@ -428,7 +426,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
           ChildName (elaborate_type_name env sid)
         | _ -> super#on_xhp_child env child
 
-    method! on_program (env : env) (p : ('a, 'b, 'c) Aast.program) =
+    method! on_program (env : env) (p : ('a, 'b) Aast.program) =
       let aux (env, defs) def =
         match def with
         | SetNamespaceEnv nsenv ->

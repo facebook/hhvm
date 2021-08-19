@@ -254,7 +254,7 @@ module Nast_helper : sig
     Provider_context.t ->
     string ->
     string ->
-    (unit, unit, unit) Aast.class_typeconst_def option
+    (unit, unit) Aast.class_typeconst_def option
 
   val get_prop : Provider_context.t -> string -> string -> Nast.class_var option
 
@@ -2170,7 +2170,7 @@ end = struct
 
     val mk_const : Provider_context.t -> Nast.class_const -> t
 
-    val mk_tyconst : (unit, unit, unit) Aast.class_typeconst_def -> t
+    val mk_tyconst : (unit, unit) Aast.class_typeconst_def -> t
 
     val mk_method : bool -> Nast.method_ -> t
 

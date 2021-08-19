@@ -23,7 +23,7 @@ Errors:
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
           ];
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some ((Tu), [4:10-12], (Lvar ([4:10-12], $f))))))]; fb_annotation = () }; 
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some ((Tu), [4:10-12], (Lvar ([4:10-12], $f))))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -47,8 +47,8 @@ Errors:
                  (Call ((((function<reify T, Tu>(string $f): string)), [8:3-4], (Id ([8:3-4], "\\f"))), 
                     [((int), ([8:5-8], (Hprim Tint))); ((string), ([8:10-16], (Hprim Tstring)))], 
                     [((int), [8:18-20], (Hole (((int), [8:18-20], (Int "42")), (int), (string), Typing)))], None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

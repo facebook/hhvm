@@ -13,7 +13,7 @@ Errors:
         f_ret = ((Awaitable<shape()>), (Some ([4:35-53], (Happly (([4:35-44], "\\HH\\Awaitable"), [([4:45-52], (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [] }))])))));
         f_name = ([4:16-31], "\\gen_empty_shape"); f_tparams = []; f_where_constraints = []; 
         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
-        f_body = { fb_ast = [([5:3-18], (Return (Some ((shape()), [5:10-17], (Shape [])))))]; fb_annotation = () }; 
+        f_body = { fb_ast = [([5:3-18], (Return (Some ((shape()), [5:10-17], (Shape [])))))] }; 
         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -54,8 +54,8 @@ Errors:
                           [], [((shape()), [14:17-19], (Lvar ([14:17-19], $s))); ((string), [14:21-26], (String "foo"))], None)))))
                   ]
                 )))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

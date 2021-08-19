@@ -27,8 +27,7 @@ Errors:
          f_readonly_ret = None; f_ret = ((void), (Some ([6:21-25], (Hprim Tvoid)))); 
          f_name = ([6:10-11], "\\f"); f_tparams = [{ tp_variance = Invariant; tp_name = ([6:12-16], "Tcat"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
          f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
-         f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([7:3-14], (Expr ((Tcat), [7:3-13], (New (((Tcat), [7:7-11], (CI ([7:7-11], "Tcat"))), [], [], None, (_))))))]; fb_annotation = () }; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([7:3-14], (Expr ((Tcat), [7:3-13], (New (((Tcat), [7:7-11], (CI ([7:7-11], "Tcat"))), [], [], None, (_))))))] };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -44,7 +43,7 @@ Errors:
          f_readonly_ret = None; f_ret = ((void), (Some ([10:15-19], (Hprim Tvoid)))); 
          f_name = ([10:10-11], "\\g"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([11:3-14], (Expr ((Tcat), [11:3-13], (New (((Tcat), [11:7-11], (CI ([11:7-11], "\\Tcat"))), [], [], None, (_))))))]; fb_annotation = () }; 
+         f_body = { fb_ast = [([11:3-14], (Expr ((Tcat), [11:3-13], (New (((Tcat), [11:7-11], (CI ([11:7-11], "\\Tcat"))), [], [], None, (_))))))] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

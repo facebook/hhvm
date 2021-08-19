@@ -12,12 +12,11 @@ let print_tast_internal apply_to_ex_ty print_ex ctx tast =
   let print_ex ex =
     apply_to_ex_ty (Typing_print.full_strip_ns env) ex |> print_ex
   in
-  let pp_fb fmt _ = Format.pp_print_string fmt "()" in
   let pp_en fmt _ = Format.pp_print_string fmt "()" in
   let pp_ex fmt ex = Format.pp_print_string fmt (print_ex ex) in
   let formatter = Format.formatter_of_out_channel Stdlib.stdout in
   Format.pp_set_margin formatter 200;
-  Aast.pp_program pp_ex pp_fb pp_en formatter tast
+  Aast.pp_program pp_ex pp_en formatter tast
 
 let print_tast ctx tast =
   let apply_to_ex_ty f ty = f ty in
@@ -30,8 +29,6 @@ let print_tast_without_position ctx tast =
       inherit [_] Aast.map
 
       method! on_pos _ _pos = Pos.none
-
-      method on_'fb _ fb = fb
 
       method on_'ex _ ty = ty
 

@@ -11,31 +11,31 @@
 val fun_env :
   ?origin:Decl_counters.origin ->
   Provider_context.t ->
-  ('a, 'b, 'c) Aast.fun_def ->
+  ('a, 'b) Aast.fun_def ->
   Typing_env_types.env
 
 val class_env :
   ?origin:Decl_counters.origin ->
   Provider_context.t ->
-  ('a, 'b, 'c) Aast.class_ ->
+  ('a, 'b) Aast.class_ ->
   Typing_env_types.env
 
 val record_def_env :
   ?origin:Decl_counters.origin ->
   Provider_context.t ->
-  ('a, 'b, 'c) Aast.record_def ->
+  ('a, 'b) Aast.record_def ->
   Typing_env_types.env
 
 val typedef_env :
   ?origin:Decl_counters.origin ->
   Provider_context.t ->
-  ('a, 'b, 'c) Aast.typedef ->
+  ('a, 'b) Aast.typedef ->
   Typing_env_types.env
 
 val gconst_env :
   ?origin:Decl_counters.origin ->
   Provider_context.t ->
-  ('a, 'b, 'c) Aast.gconst ->
+  ('a, 'b) Aast.gconst ->
   Typing_env_types.env
 
-val get_self_from_c : ('a, 'b, 'c) Aast.class_ -> Typing_defs.decl_ty
+val get_self_from_c : ('a, 'b) Aast.class_ -> Typing_defs.decl_ty

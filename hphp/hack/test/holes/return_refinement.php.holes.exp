@@ -16,8 +16,8 @@
             ([5:3-10:4],
              (If (((bool), [5:6-10], True), [([7:5-15], (Return (Some ((int), [7:12-14], (Hole (((int), [7:12-14], (Lvar ([7:12-14], $x))), (int), (bool), Typing))))))],
                 [([9:5-15], (Return (Some ((nothing), [9:12-14], (Lvar ([9:12-14], $x))))))])))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

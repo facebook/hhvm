@@ -33,7 +33,7 @@ val set_tyvars_variance_in_callable :
   Tast.fun_variadicity ->
   Typing_env_types.env
 
-val has_accept_disposable_attribute : ('a, 'b, 'c) Aast.fun_param -> bool
+val has_accept_disposable_attribute : ('a, 'b) Aast.fun_param -> bool
 
 val all_record_fields :
   Typing_env_types.env ->

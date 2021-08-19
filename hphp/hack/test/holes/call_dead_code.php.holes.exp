@@ -15,7 +15,7 @@
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
           ];
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -46,8 +46,8 @@
                  [([12:5-19], (Expr ((string), [12:5-18], (Binop ((Eq None), ((string), [12:5-7], (Lvar ([12:5-7], $x))), ((string), [12:10-18], (String "string")))))));
                    ([13:5-13], (Expr ((void), [13:5-12], (Call ((((function(int $x): void)), [13:5-8], (Id ([13:5-8], "\\foo"))), [], [((nothing), [13:9-11], (Lvar ([13:9-11], $x)))], None)))))]
                  )))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -81,8 +81,8 @@
                  [([24:5-19], (Expr ((string), [24:5-18], (Binop ((Eq None), ((string), [24:5-7], (Lvar ([24:5-7], $x))), ((string), [24:10-18], (String "string")))))));
                    ([25:5-13], (Expr ((void), [25:5-12], (Call ((((function(int $x): void)), [25:5-8], (Id ([25:5-8], "\\foo"))), [], [((nothing), [25:9-11], (Lvar ([25:9-11], $x)))], None)))))]
                  )))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

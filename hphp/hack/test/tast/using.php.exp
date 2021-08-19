@@ -11,10 +11,9 @@
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([4:19-28], "__dispose"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
-         m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
-         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-         m_ret = ((void), (Some ([4:32-36], (Hprim Tvoid)))); m_external = false; 
-         m_doc_comment = None }
+         m_body = { fb_ast = [([Pos.none], Noop)] }; m_fun_kind = FSync; 
+         m_user_attributes = []; m_readonly_ret = None; m_ret = ((void), (Some ([4:32-36], (Hprim Tvoid)))); 
+         m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
@@ -58,8 +57,8 @@
                          us_block = [([Pos.none], Noop)] }))
                     ]
                   }))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

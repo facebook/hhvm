@@ -32,8 +32,8 @@ Errors:
                      (Array_get (((Map<nothing, int>), [6:3-6], (Lvar ([6:3-6], $xs))), (Some (
                         (mixed), [6:7-11], (Hole (((mixed), [6:7-11], (Lvar ([6:7-11], $idx))), (mixed), (arraykey), Typing))))))),
                     ((int), [6:15-16], (Int "1")))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

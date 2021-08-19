@@ -58,8 +58,8 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                      ))
                   ]
                 )));
-            ([37:3-15], (Expr ((void), [37:3-14], (Call (((_), [37:3-10], (Id ([37:3-10], "\\hh_show"))), [], [(((bool | num)), [37:11-13], (Lvar ([37:11-13], $x)))], None)))))];
-          fb_annotation = () };
+            ([37:3-15], (Expr ((void), [37:3-14], (Call (((_), [37:3-10], (Id ([37:3-10], "\\hh_show"))), [], [(((bool | num)), [37:11-13], (Lvar ([37:11-13], $x)))], None)))))]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

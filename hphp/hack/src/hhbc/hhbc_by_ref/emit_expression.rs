@@ -4976,7 +4976,7 @@ fn emit_readonly_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     e: &mut Emitter<'arena, 'decl, D>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    expr: &aast::Expr<(), (), ()>,
+    expr: &aast::Expr<(), ()>,
 ) -> Result<InstrSeq<'arena>> {
     match &expr.2 {
         aast::Expr_::ObjGet(x) => {

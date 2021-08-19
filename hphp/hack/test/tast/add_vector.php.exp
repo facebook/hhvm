@@ -26,8 +26,8 @@
                 ((Vector<T>), [16:5-25],
                  (Binop ((Eq None), ((Vector<T>), [16:5-13], (Obj_get (((this), [16:5-10], This), ((Vector<T>), [16:12-13], (Id ([16:12-13], "x"))), OG_nullthrows, false))),
                     ((Vector<T>), [16:16-25], (ValCollection (Vector, None, []))))))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([15:19-30], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None };
@@ -50,8 +50,8 @@
                   (Binop ((Eq None),
                      ((T), [20:5-15], (Array_get (((Vector<T>), [20:5-13], (Obj_get (((this), [20:5-10], This), ((Vector<T>), [20:12-13], (Id ([20:12-13], "x"))), OG_nullthrows, false))), None))),
                      ((T), [20:18-20], (Lvar ([20:18-20], $x))))))))
-              ];
-            fb_annotation = () };
+              ]
+            };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((void), (Some ([19:30-34], (Hprim Tvoid)))); m_external = false; 
           m_doc_comment = None };
@@ -73,8 +73,8 @@
                  (Some ((T), [24:12-23],
                         (Array_get (((Vector<T>), [24:12-20], (Obj_get (((this), [24:12-17], This), ((Vector<T>), [24:19-20], (Id ([24:19-20], "x"))), OG_nullthrows, false))),
                            (Some ((int), [24:21-22], (Int "0")))))))))
-              ];
-            fb_annotation = () };
+              ]
+            };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((T), (Some ([23:32-33], (Habstr ("T", []))))); m_external = false; 
           m_doc_comment = None }
@@ -179,8 +179,8 @@
                      [], [((A), [35:11-18], (New (((A), [35:15-16], (CI ([35:15-16], "\\A"))), [], [], None, (_))))], None)))));
              ([36:3-12],
               (Expr ((void), [36:3-11], (Call ((((function(MyPhonyVector<X> $v): void)), [36:3-7], (Id ([36:3-7], "\\test"))), [], [((MyPhonyVector<X>), [36:8-10], (Lvar ([36:8-10], $x)))], None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

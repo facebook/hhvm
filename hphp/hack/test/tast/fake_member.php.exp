@@ -24,8 +24,8 @@
                 [([7:5-9:6], (AssertEnv (Refinement, {$this->foo})));
                   ([8:7-18], (Expr ((int), [8:7-17], (Obj_get (((this), [8:7-12], This), ((int), [8:14-17], (Id ([8:14-17], "foo"))), OG_nullthrows, false)))))],
                 [([7:5-9:6], (AssertEnv (Refinement, {$this->foo}))); ([Pos.none], Noop)])))
-             ];
-           fb_annotation = () };
+             ]
+           };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([6:26-30], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }

@@ -21,7 +21,7 @@ impl<'ast> Visitor<'ast> for Checker {
         self
     }
 
-    fn visit_expr(&mut self, c: &mut (), e: &Expr<(), (), ()>) -> Result<(), ()> {
+    fn visit_expr(&mut self, c: &mut (), e: &Expr<(), ()>) -> Result<(), ()> {
         match &e.2 {
             Expr_::ExpressionTree(_) => {}
             Expr_::ETSplice(_) => {
@@ -43,7 +43,7 @@ impl<'ast> Visitor<'ast> for Checker {
 
 /// Check for splice syntax ${...} outside of an expression tree literal.
 #[allow(clippy::ptr_arg)] // we can't use a slice because Visitor requires a &Program.
-pub fn check_splices(program: &Program<(), (), ()>) -> Vec<SyntaxError> {
+pub fn check_splices(program: &Program<(), ()>) -> Vec<SyntaxError> {
     let mut checker = Checker { errors: vec![] };
     visit(&mut checker, &mut (), program).expect("Unexpected error when checking nested splices");
     checker.errors

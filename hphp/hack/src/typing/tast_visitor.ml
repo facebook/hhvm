@@ -226,8 +226,6 @@ class virtual map =
 
     method on_'ex _ ex = ex
 
-    method on_'fb _ fb = fb
-
     method on_'en _ en = en
 
     (* Entry point *)
@@ -300,8 +298,6 @@ class virtual endo =
     inherit [_] Aast.endo as super
 
     method on_'ex _ ex = ex
-
-    method on_'fb _ fb = fb
 
     method on_'en _ en = en
 

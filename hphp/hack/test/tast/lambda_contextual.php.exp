@@ -23,7 +23,7 @@
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
           ];
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -60,14 +60,14 @@
                               param_callconv = None; param_user_attributes = []; 
                               param_visibility = None }
                              ];
-                           f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:20-22], (Return (Some ((int), [6:20-22], (Lvar ([6:20-22], $x))))))]; fb_annotation = () };
+                           f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:20-22], (Return (Some ((int), [6:20-22], (Lvar ([6:20-22], $x))))))] }; 
                            f_fun_kind = FSync; f_user_attributes = []; 
                            f_external = false; f_doc_comment = None },
                          [])))
                       ],
                     None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

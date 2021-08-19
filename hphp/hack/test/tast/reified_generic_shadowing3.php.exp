@@ -17,8 +17,8 @@ Errors:
         f_body =
         { fb_ast =
           [([5:3-11], (Expr ((T), [5:3-10], (New (((T), [5:7-8], (CI ([5:7-8], "T"))), [], [], None, (_))))));
-            ([6:3-11], (Expr ((_), [6:3-10], (New (((_), [6:7-8], (CI ([6:7-8], "\\U"))), [], [], None, (_))))))];
-          fb_annotation = () };
+            ([6:3-11], (Expr ((_), [6:3-10], (New (((_), [6:7-8], (CI ([6:7-8], "\\U"))), [], [], None, (_))))))]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

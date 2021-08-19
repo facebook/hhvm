@@ -20,7 +20,7 @@
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
           ];
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -81,8 +81,8 @@
                        (int), [16:16-18], (Hole (((int), [16:16-18], (Lvar ([16:16-18], $x))), (int), (float), Typing)));
                        ((int), [16:20-22], (Hole (((int), [16:20-22], (Lvar ([16:20-22], $x))), (int), (float), Typing)))],
                      None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

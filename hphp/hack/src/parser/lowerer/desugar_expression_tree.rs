@@ -82,8 +82,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<TF>) -> Result<Expr, (P
     // Make anonymous function of smart constructor calls
     let visitor_expr = wrap_return(desugar_expr, &et_literal_pos);
     let visitor_body = ast::FuncBody {
-        ast: vec![visitor_expr],
-        annotation: (),
+        fb_ast: vec![visitor_expr],
     };
     let param = ast::FunParam {
         annotation: (),
@@ -108,8 +107,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<TF>) -> Result<Expr, (P
     // This enables us to report unbound variables correctly.
     let virtualized_expr = {
         let typing_fun_body = ast::FuncBody {
-            ast: vec![wrap_return(virtual_expr, &et_literal_pos)],
-            annotation: (),
+            fb_ast: vec![wrap_return(virtual_expr, &et_literal_pos)],
         };
         let typing_fun_ = wrap_fun_(typing_fun_body, vec![], et_literal_pos.clone());
         let mut spliced_vars: Vec<ast::Lid> = (0..splice_count)
@@ -238,7 +236,7 @@ impl<'ast> Visitor<'ast> for VoidReturnCheck {
         self
     }
 
-    fn visit_expr(&mut self, env: &mut (), e: &aast::Expr<(), (), ()>) -> Result<(), ()> {
+    fn visit_expr(&mut self, env: &mut (), e: &aast::Expr<(), ()>) -> Result<(), ()> {
         use aast::Expr_::*;
 
         match &e.2 {
@@ -249,7 +247,7 @@ impl<'ast> Visitor<'ast> for VoidReturnCheck {
         }
     }
 
-    fn visit_stmt(&mut self, env: &mut (), s: &'ast aast::Stmt<(), (), ()>) -> Result<(), ()> {
+    fn visit_stmt(&mut self, env: &mut (), s: &'ast aast::Stmt<(), ()>) -> Result<(), ()> {
         use aast::Stmt_::*;
 
         match &s.1 {
@@ -283,7 +281,7 @@ impl<'ast> Visitor<'ast> for NestedSpliceCheck {
         self
     }
 
-    fn visit_expr(&mut self, env: &mut (), e: &aast::Expr<(), (), ()>) -> Result<(), ()> {
+    fn visit_expr(&mut self, env: &mut (), e: &aast::Expr<(), ()>) -> Result<(), ()> {
         use aast::Expr_::*;
 
         match &e.2 {
@@ -981,7 +979,7 @@ fn rewrite_expr(
                 param_names.push(string_literal(param.pos.clone(), &param.name));
             }
 
-            let body = std::mem::take(&mut fun_.body.ast);
+            let body = std::mem::take(&mut fun_.body.fb_ast);
 
             let should_append_return = only_void_return(&body);
 
@@ -1008,7 +1006,7 @@ fn rewrite_expr(
                 ],
                 &pos,
             );
-            fun_.body.ast = virtual_body_stmts;
+            fun_.body.fb_ast = virtual_body_stmts;
             let virtual_expr = Expr((), pos, Lfun(Box::new((fun_, vec![]))));
             (virtual_expr, desugar_expr)
         }
@@ -1271,10 +1269,7 @@ fn hint_name(hint: &aast::Hint) -> Result<String, (Pos, String)> {
 }
 
 fn immediately_invoked_lambda(pos: &Pos, stmts: Vec<Stmt>) -> Expr {
-    let func_body = ast::FuncBody {
-        ast: stmts,
-        annotation: (),
-    };
+    let func_body = ast::FuncBody { fb_ast: stmts };
     let fun_ = wrap_fun_(func_body, vec![], pos.clone());
     let lambda_expr = Expr::new((), pos.clone(), Expr_::mk_lfun(fun_, vec![]));
 

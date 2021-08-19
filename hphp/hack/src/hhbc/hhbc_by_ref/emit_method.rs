@@ -89,7 +89,7 @@ pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             }
         }
     };
-    if class.kind.is_cinterface() && !method.body.ast.is_empty() {
+    if class.kind.is_cinterface() && !method.body.fb_ast.is_empty() {
         return Err(raise_fatal_parse(
             &method.name.0,
             format!(
@@ -192,7 +192,7 @@ pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             _ => {}
         }
     }
-    let ast_body_block = &method.body.ast;
+    let ast_body_block = &method.body.fb_ast;
     let (body, is_generator, is_pair_generator) = if is_native_opcode_impl {
         (
             emit_native_opcode::emit_body(

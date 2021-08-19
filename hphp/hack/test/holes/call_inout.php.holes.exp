@@ -15,7 +15,7 @@
            param_expr = None; param_readonly = None; param_callconv = (Some Pinout); 
            param_user_attributes = []; param_visibility = None }
           ];
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -45,8 +45,8 @@
                 ((void), [7:3-23],
                  (Call ((((function(inout int $i): void)), [7:3-13], (Id ([7:3-13], "\\with_inout"))), 
                     [], [((float), [7:14-22], (Callconv (Pinout, ((float), [7:14-22], (Hole (((float), [7:20-22], (Lvar ([7:20-22], $f))), (float), (int), Typing))))))], None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

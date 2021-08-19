@@ -10,7 +10,7 @@
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([4:19-22], "foo"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
-         m_body = { fb_ast = [([5:5-14], (Return (Some ((int), [5:12-13], (Int "1")))))]; fb_annotation = () }; 
+         m_body = { fb_ast = [([5:5-14], (Return (Some ((int), [5:12-13], (Int "1")))))] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((int), None); m_external = false; m_doc_comment = None }
         ];
@@ -32,7 +32,7 @@
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([4:19-22], "foo"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
-         m_body = { fb_ast = [([5:5-14], (Return (Some ((int), [5:12-13], (Int "3")))))]; fb_annotation = () }; 
+         m_body = { fb_ast = [([5:5-14], (Return (Some ((int), [5:12-13], (Int "3")))))] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((int), None); m_external = false; m_doc_comment = None }
         ];
@@ -54,7 +54,7 @@
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([4:19-22], "foo"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
-         m_body = { fb_ast = [([5:5-14], (Return (Some ((int), [5:12-13], (Int "2")))))]; fb_annotation = () }; 
+         m_body = { fb_ast = [([5:5-14], (Return (Some ((int), [5:12-13], (Int "2")))))] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((int), None); m_external = false; m_doc_comment = None }
         ];

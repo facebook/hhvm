@@ -16,7 +16,7 @@
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
            ];
-         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([5:5-15], (Return (Some ((string), [5:12-14], (Lvar ([5:12-14], $x))))))]; fb_annotation = () }; 
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([5:5-15], (Return (Some ((string), [5:12-14], (Lvar ([5:12-14], $x))))))] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((string), None); m_external = false; m_doc_comment = None }
         ];
@@ -51,8 +51,8 @@
              (Return
                 (Some ((string), [5:12-25],
                        (Call ((((function(string $x): string)), [5:12-21], (Class_const (((A), [5:12-18], CIparent), ([5:20-21], "f")))), [], [((string), [5:22-24], (Lvar ([5:22-24], $x)))], None))))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((string), None); m_external = false; m_doc_comment = None }
         ];
@@ -99,8 +99,8 @@
                               [], [((string), [4:22-24], (String ""))], None)))
                            ],
                          None))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

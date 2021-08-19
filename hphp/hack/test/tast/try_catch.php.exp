@@ -9,8 +9,8 @@
         f_readonly_ret = None; f_ret = ((void), (Some ([11:25-29], (Hprim Tvoid)))); 
         f_name = ([11:10-21], "\\might_throw"); f_tparams = []; f_where_constraints = []; 
         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
-        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+        f_body = { fb_ast = [([Pos.none], Noop)] }; f_fun_kind = FSync; 
+        f_user_attributes = []; f_external = false;
         f_doc_comment =
         (Some ([2:1-10:4],
                "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
@@ -42,8 +42,8 @@
                       ([23:5-18], (Return (Some ((int), [23:12-17], (Int "23904")))))]);
                    (([24:12-21], "\\Exception"), ([24:22-24], $e), [([25:5-15], (Return (Some ((int), [25:12-14], (Lvar ([25:12-14], $a))))))])],
                  [([27:5-12], (Expr ((int), [27:5-11], (Binop ((Eq None), ((int), [27:5-7], (Lvar ([27:5-7], $a))), ((int), [27:10-11], (Int "4")))))))])));
-             ([30:3-13], (Return (Some ((int), [30:10-12], (Lvar ([30:10-12], $a))))))];
-           fb_annotation = () };
+             ([30:3-13], (Return (Some ((int), [30:10-12], (Lvar ([30:10-12], $a))))))]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });

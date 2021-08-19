@@ -65,8 +65,8 @@
                  ((dict<string, int>), [10:3-22],
                   (Call ((((function(shape(...) $shape): dict<string, int>)), [10:3-18], (Class_const (((Shapes), [10:3-9], (CI ([10:3-9], "\\HH\\Shapes"))), ([10:11-18], "toArray")))), 
                      [], [((shape('x' => int)), [10:19-21], (Lvar ([10:19-21], $p)))], None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

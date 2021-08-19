@@ -17,7 +17,7 @@
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
            ];
-         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([6:19-30], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }
@@ -363,7 +363,7 @@
               ];
             param_visibility = None }
            ];
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync;
          f_user_attributes =
          [{ ua_name = ([19:3-4], "\\F");
@@ -412,7 +412,7 @@
           m_abstract = false; m_static = false; m_readonly_this = false; 
           m_visibility = Private; m_name = ([29:20-23], "met"); m_tparams = []; 
           m_where_constraints = []; m_variadic = FVnonVariadic; m_params = []; 
-          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
           m_fun_kind = FSync;
           m_user_attributes =
           [{ ua_name = ([28:5-8], "\\Met");

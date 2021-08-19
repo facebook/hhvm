@@ -33,8 +33,7 @@ Errors:
                             ];
                           f_ctxs = None; f_unsafe_ctxs = None;
                           f_body =
-                          { fb_ast = [([15:15-22], (Return (Some ((int), [15:15-22], (Binop (Plus, ((int), [15:15-17], (Lvar ([15:15-17], $y))), ((num), [15:20-22], (Lvar ([15:20-22], $z)))))))))];
-                            fb_annotation = () };
+                          { fb_ast = [([15:15-22], (Return (Some ((int), [15:15-22], (Binop (Plus, ((int), [15:15-17], (Lvar ([15:15-17], $y))), ((num), [15:20-22], (Lvar ([15:20-22], $z)))))))))] };
                           f_fun_kind = FSync; f_user_attributes = []; 
                           f_external = false; f_doc_comment = None },
                         [([15:15-17], $y)])))
@@ -63,8 +62,7 @@ Errors:
                             ];
                           f_ctxs = None; f_unsafe_ctxs = None;
                           f_body =
-                          { fb_ast = [([19:5-20], (Return (Some ((int), [19:12-19], (Binop (Plus, ((int), [19:12-14], (Lvar ([19:12-14], $y))), ((num), [19:17-19], (Lvar ([19:17-19], $z)))))))))];
-                            fb_annotation = () };
+                          { fb_ast = [([19:5-20], (Return (Some ((int), [19:12-19], (Binop (Plus, ((int), [19:12-14], (Lvar ([19:12-14], $y))), ((num), [19:17-19], (Lvar ([19:17-19], $z)))))))))] };
                           f_fun_kind = FSync; f_user_attributes = []; 
                           f_external = false; f_doc_comment = None },
                         [([18:26-28], $y)])))
@@ -98,8 +96,7 @@ Errors:
                             ];
                           f_ctxs = None; f_unsafe_ctxs = None;
                           f_body =
-                          { fb_ast = [([23:21-28], (Return (Some ((int), [23:21-28], (Binop (Plus, ((int), [23:21-23], (Lvar ([23:21-23], $a))), ((int), [23:26-28], (Lvar ([23:26-28], $b)))))))))];
-                            fb_annotation = () };
+                          { fb_ast = [([23:21-28], (Return (Some ((int), [23:21-28], (Binop (Plus, ((int), [23:21-23], (Lvar ([23:21-23], $a))), ((int), [23:26-28], (Lvar ([23:26-28], $b)))))))))] };
                           f_fun_kind = FSync; f_user_attributes = []; 
                           f_external = false; f_doc_comment = None },
                         [])))
@@ -111,8 +108,8 @@ Errors:
                     ((int), [24:8-17],
                      (Call ((((function(int $a, int $b): int)), [24:8-10], (Lvar ([24:8-10], $x))), [], [((int), [24:11-12], (Int "2")); ((int), [24:14-16], (Lvar ([24:14-16], $y)))], None)))
                     )))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false;
         f_doc_comment =
         (Some ([2:1-10:4],

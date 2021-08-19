@@ -827,7 +827,7 @@ let invalid_expr_ (p : Pos.t) : Nast.expr_ =
               f_params = [];
               f_ctxs = None;
               f_unsafe_ctxs = None;
-              f_body = { Aast.fb_ast = [throw]; fb_annotation = () };
+              f_body = { Aast.fb_ast = [throw] };
               f_fun_kind = Ast_defs.FSync;
               f_user_attributes = [];
               f_external = false;
@@ -1438,7 +1438,7 @@ and method_ genv m =
   in
   let body =
     match genv.in_mode with
-    | FileInfo.Mhhi -> { N.fb_ast = []; fb_annotation = () }
+    | FileInfo.Mhhi -> { N.fb_ast = [] }
     | FileInfo.Mstrict
     | FileInfo.Mpartial ->
       let env = List.fold_left ~f:Env.add_param m.N.m_params ~init:env in
@@ -1450,7 +1450,7 @@ and method_ genv m =
         | N.FVvariadicArg param -> Env.add_param env param
       in
       let fub_ast = block env m.N.m_body.N.fb_ast in
-      { N.fb_ast = fub_ast; fb_annotation = () }
+      { N.fb_ast = fub_ast }
   in
   let attrs = user_attributes env m.Aast.m_user_attributes in
   let m_ctxs = Option.map ~f:(contexts env) m.Aast.m_ctxs in
@@ -1565,7 +1565,7 @@ and fun_ genv f =
   let f_kind = f.Aast.f_fun_kind in
   let body =
     match genv.in_mode with
-    | FileInfo.Mhhi -> { N.fb_ast = []; fb_annotation = () }
+    | FileInfo.Mhhi -> { N.fb_ast = [] }
     | FileInfo.Mstrict
     | FileInfo.Mpartial ->
       let env = List.fold_left ~f:Env.add_param paraml ~init:env in
@@ -1577,8 +1577,7 @@ and fun_ genv f =
         | N.FVvariadicArg param -> Env.add_param env param
       in
       let fb_ast = block env f.Aast.f_body.Aast.fb_ast in
-      let annotation = () in
-      { N.fb_ast; fb_annotation = annotation }
+      { N.fb_ast }
   in
   let f_ctxs = Option.map ~f:(contexts env) f.Aast.f_ctxs in
   let f_unsafe_ctxs = Option.map ~f:(contexts env) f.Aast.f_unsafe_ctxs in
@@ -2329,7 +2328,7 @@ and expr_lambda env f =
   let f_ctxs = Option.map ~f:(contexts env) f.Aast.f_ctxs in
   let f_unsafe_ctxs = Option.map ~f:(contexts env) f.Aast.f_unsafe_ctxs in
   (* These could all be probably be replaced with a {... where ...} *)
-  let body = { N.fb_ast = body_nast; fb_annotation = () } in
+  let body = { N.fb_ast = body_nast } in
   {
     N.f_annotation = ();
     f_readonly_this = f.Aast.f_readonly_this;

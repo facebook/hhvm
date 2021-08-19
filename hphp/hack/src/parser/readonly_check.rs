@@ -374,7 +374,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
     fn visit_method_(
         &mut self,
         _context: &mut Context,
-        m: &mut aast::Method_<(), (), ()>,
+        m: &mut aast::Method_<(), ()>,
     ) -> Result<(), ()> {
         let readonly_return = ro_kind_to_rty(m.readonly_ret);
         let readonly_this = if m.readonly_this {
@@ -394,11 +394,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
         m.recurse(&mut context, self.object())
     }
 
-    fn visit_fun_(
-        &mut self,
-        _context: &mut Context,
-        f: &mut aast::Fun_<(), (), ()>,
-    ) -> Result<(), ()> {
+    fn visit_fun_(&mut self, _context: &mut Context, f: &mut aast::Fun_<(), ()>) -> Result<(), ()> {
         let readonly_return = ro_kind_to_rty(f.readonly_ret);
         let readonly_this = ro_kind_to_rty(f.readonly_this);
         let mut context = Context::new(readonly_return, readonly_this);
@@ -413,11 +409,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
         f.recurse(&mut context, self.object())
     }
 
-    fn visit_expr(
-        &mut self,
-        context: &mut Context,
-        p: &mut aast::Expr<(), (), ()>,
-    ) -> Result<(), ()> {
+    fn visit_expr(&mut self, context: &mut Context, p: &mut aast::Expr<(), ()>) -> Result<(), ()> {
         match &mut p.2 {
             aast::Expr_::Binop(x) => {
                 let (bop, e_lhs, e_rhs) = x.as_mut();
@@ -444,7 +436,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
     fn visit_stmt(
         &mut self,
         context: &mut Context,
-        s: &mut aast::Stmt<(), (), ()>,
+        s: &mut aast::Stmt<(), ()>,
     ) -> std::result::Result<(), ()> {
         if let aast::Stmt_::Return(r) = &mut s.1 {
             if let Some(expr) = r.as_mut() {
@@ -455,7 +447,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
     }
 }
 
-pub fn check_program(program: &mut aast::Program<(), (), ()>) -> Vec<SyntaxError> {
+pub fn check_program(program: &mut aast::Program<(), ()>) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
     let mut context = Context::new(Rty::Mutable, Rty::Mutable);
     visit_mut(&mut checker, &mut context, program).unwrap();

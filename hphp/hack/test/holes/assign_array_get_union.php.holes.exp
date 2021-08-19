@@ -28,8 +28,8 @@
                (((int | string)), [5:3-14],
                 (Binop ((Eq None), (((int | string)), [5:3-9], (Array_get (((Vector<(int | bool)>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((int), [5:7-8], (Int "0")))))),
                    (((int | string)), [5:12-14], (Hole ((((int | string)), [5:12-14], (Lvar ([5:12-14], $x))), ((int | string)), ((int | bool)), Typing))))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

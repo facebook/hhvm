@@ -41,8 +41,8 @@
                                             (Binop (Dot, (((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>))), [4:24-26], (Lvar ([4:24-26], $n))),
                                                ((string), [4:29-31], (Lvar ([4:29-31], $s)))))),
                                            ((string), [4:34-38], (String "\\n"))))))))
-                              ];
-                            fb_annotation = () };
+                              ]
+                            };
                           f_fun_kind = FSync; f_user_attributes = []; 
                           f_external = false; f_doc_comment = None },
                         [([4:29-31], $s)])))
@@ -63,8 +63,8 @@
                      (Call ((((function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [6:8-10], (Lvar ([6:8-10], $f))), 
                         [], [((string), [6:11-16], (String "bar"))], None)))
                     )))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

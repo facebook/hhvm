@@ -20,7 +20,7 @@
            param_expr = None; param_readonly = None; param_callconv = (Some Pinout); 
            param_user_attributes = []; param_visibility = None }
           ];
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:3-16], (Return (Some ((bool), [3:10-15], False))))]; fb_annotation = () }; 
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:3-16], (Return (Some ((bool), [3:10-15], False))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -36,7 +36,7 @@
          f_readonly_ret = None; f_ret = ((dynamic), (Some ([5:17-24], Hdynamic))); 
          f_name = ([5:10-13], "\\bar"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([6:3-19], (Return (Some ((vec<nothing>), [6:10-18], (ValCollection (Vec, None, []))))))]; fb_annotation = () }; 
+         f_body = { fb_ast = [([6:3-19], (Return (Some ((vec<nothing>), [6:10-18], (ValCollection (Vec, None, []))))))] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -69,8 +69,8 @@
            [([9:3-26],
              (Throw
                 ((Exception), [9:9-25], (New (((Exception), [9:13-23], (CI ([9:13-23], "\\Exception"))), [], [], None, ((function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -109,8 +109,8 @@
                          [((nothing), ([18:15-18], (Happly (([Pos.none], "_"), [])))); ((nothing), ([18:15-18], (Happly (([Pos.none], "_"), []))))],
                          [((nothing), [18:19-23], (Lvar ([18:19-23], $arr)))], None)))
                      )))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

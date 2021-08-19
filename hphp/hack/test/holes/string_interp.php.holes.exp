@@ -19,8 +19,8 @@
         f_body =
         { fb_ast =
           [([5:3-10], (Expr ((string), [5:3-9], (String2 [((mixed), [5:4-8], (Hole (((mixed), [5:4-8], (Lvar ([5:4-8], $x))), (mixed), ((dynamic | arraykey | HH\FormatString<nothing>)), Typing)))]))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

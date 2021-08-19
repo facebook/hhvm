@@ -16,8 +16,8 @@
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([6:28-31], "gen"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
-         m_body = { fb_ast = []; fb_annotation = () }; m_fun_kind = FSync; 
-         m_user_attributes = []; m_readonly_ret = None; m_ret = ((this::TX), (Some ([6:35-43], (Haccess (([6:35-39], Hthis), [([6:41-43], "TX")]))))); 
+         m_body = { fb_ast = [] }; m_fun_kind = FSync; m_user_attributes = []; 
+         m_readonly_ret = None; m_ret = ((this::TX), (Some ([6:35-43], (Haccess (([6:35-39], Hthis), [([6:41-43], "TX")]))))); 
          m_external = false; m_doc_comment = None };
         { m_span = [7:3-51]; m_annotation = (); m_final = false; m_abstract = true; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
@@ -29,7 +29,7 @@
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None }
             ];
-          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = []; fb_annotation = () }; 
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((void), (Some ([7:46-50], (Hprim Tvoid)))); m_external = false; 
           m_doc_comment = None }
@@ -75,8 +75,8 @@
                           (((function(): T::TX)), [11:10-20],
                            (Obj_get (((T), [11:10-15], (Lvar ([11:10-15], $left))), (((function(): T::TX)), [11:17-20], (Id ([11:17-20], "gen"))), OG_nullthrows, false))),
                           [], [], None))))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -141,13 +141,13 @@
                                              (((function(T::TX $x): void)), [17:23-33],
                                               (Obj_get (((T), [17:23-28], (Lvar ([17:23-28], $left))), (((function(T::TX $x): void)), [17:30-33], (Id ([17:30-33], "log"))), OG_nullthrows, false))),
                                              [], [((TR), [17:34-36], (Lvar ([17:34-36], $x)))], None))))))
-                                ];
-                              fb_annotation = () };
+                                ]
+                              };
                             f_fun_kind = FSync; f_user_attributes = []; 
                             f_external = false; f_doc_comment = None },
                           [([17:23-28], $left)]))))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -199,8 +199,8 @@
                  ((void), [26:3-13],
                   (Call ((((function(<expr#2>::TX): void)), [26:3-7], (Lvar ([26:3-7], $log))), 
                      [], [((<expr#1>::TX), [26:8-12], (Hole (((<expr#1>::TX), [26:8-12], (Lvar ([26:8-12], $gen))), (<expr#1>::TX), (<expr#2>::TX), Typing)))], None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

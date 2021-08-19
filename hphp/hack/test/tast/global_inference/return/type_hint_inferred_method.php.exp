@@ -16,7 +16,7 @@
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
            ];
-         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([5:5-14], (Return (Some ((int), [5:12-13], (Int "1")))))]; fb_annotation = () }; 
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([5:5-14], (Return (Some ((int), [5:12-13], (Int "1")))))] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((int), None); m_external = false; m_doc_comment = None }
         ];

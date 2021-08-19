@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<757eb5c405f704ea3816071b886ecb61>>
+// @generated SignedSource<<5b4ffb15060a2fdccb0bfe93f05c93ce>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -32,7 +32,7 @@ impl<P: Params> Node<P> for Abstraction {
         }
     }
 }
-impl<P: Params> Node<P> for Afield<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Afield<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -58,7 +58,7 @@ impl<P: Params> Node<P> for Afield<P::Ex, P::Fb, P::En> {
         }
     }
 }
-impl<P: Params> Node<P> for AsExpr<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for AsExpr<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -140,7 +140,7 @@ impl<P: Params> Node<P> for Bop {
         }
     }
 }
-impl<P: Params> Node<P> for CaField<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for CaField<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -185,7 +185,7 @@ impl<P: Params> Node<P> for CaType {
         }
     }
 }
-impl<P: Params> Node<P> for Case<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Case<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -212,7 +212,7 @@ impl<P: Params> Node<P> for Case<P::Ex, P::Fb, P::En> {
         }
     }
 }
-impl<P: Params> Node<P> for Catch<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Catch<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -250,7 +250,7 @@ impl<P: Params> Node<P> for ClassAbstractTypeconst {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for ClassAttr<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for ClassAttr<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -292,7 +292,7 @@ impl<P: Params> Node<P> for ClassConcreteTypeconst {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for ClassConst<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for ClassConst<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -312,7 +312,7 @@ impl<P: Params> Node<P> for ClassConst<P::Ex, P::Fb, P::En> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for ClassConstKind<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for ClassConstKind<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -337,7 +337,7 @@ impl<P: Params> Node<P> for ClassConstKind<P::Ex, P::Fb, P::En> {
         }
     }
 }
-impl<P: Params> Node<P> for ClassGetExpr<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for ClassGetExpr<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -362,7 +362,7 @@ impl<P: Params> Node<P> for ClassGetExpr<P::Ex, P::Fb, P::En> {
         }
     }
 }
-impl<P: Params> Node<P> for ClassId<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for ClassId<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -381,7 +381,7 @@ impl<P: Params> Node<P> for ClassId<P::Ex, P::Fb, P::En> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for ClassId_<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for ClassId_<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -456,7 +456,7 @@ impl<P: Params> Node<P> for ClassTypeconst {
         }
     }
 }
-impl<P: Params> Node<P> for ClassTypeconstDef<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for ClassTypeconstDef<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -478,7 +478,7 @@ impl<P: Params> Node<P> for ClassTypeconstDef<P::Ex, P::Fb, P::En> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for ClassVar<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for ClassVar<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -507,7 +507,7 @@ impl<P: Params> Node<P> for ClassVar<P::Ex, P::Fb, P::En> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for Class_<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Class_<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -647,7 +647,7 @@ impl<P: Params> Node<P> for Contexts {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for Def<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Def<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -782,7 +782,7 @@ impl<P: Params> Node<P> for EnvAnnot {
         }
     }
 }
-impl<P: Params> Node<P> for Expr<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Expr<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -801,7 +801,7 @@ impl<P: Params> Node<P> for Expr<P::Ex, P::Fb, P::En> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for Expr_<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1074,7 +1074,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::Fb, P::En> {
         }
     }
 }
-impl<P: Params> Node<P> for ExpressionTree<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for ExpressionTree<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1094,7 +1094,7 @@ impl<P: Params> Node<P> for ExpressionTree<P::Ex, P::Fb, P::En> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for Field<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Field<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1112,7 +1112,7 @@ impl<P: Params> Node<P> for Field<P::Ex, P::Fb, P::En> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for FileAttribute<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for FileAttribute<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1130,7 +1130,7 @@ impl<P: Params> Node<P> for FileAttribute<P::Ex, P::Fb, P::En> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for FunDef<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for FunDef<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1171,7 +1171,7 @@ impl<P: Params> Node<P> for FunKind {
         }
     }
 }
-impl<P: Params> Node<P> for FunParam<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for FunParam<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1197,7 +1197,7 @@ impl<P: Params> Node<P> for FunParam<P::Ex, P::Fb, P::En> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for FunVariadicity<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for FunVariadicity<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1223,7 +1223,7 @@ impl<P: Params> Node<P> for FunVariadicity<P::Ex, P::Fb, P::En> {
         }
     }
 }
-impl<P: Params> Node<P> for Fun_<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Fun_<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1256,7 +1256,7 @@ impl<P: Params> Node<P> for Fun_<P::Ex, P::Fb, P::En> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for FuncBody<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for FuncBody<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1269,12 +1269,11 @@ impl<P: Params> Node<P> for FuncBody<P::Ex, P::Fb, P::En> {
         c: &mut P::Context,
         v: &mut dyn Visitor<'node, P = P>,
     ) -> Result<(), P::Error> {
-        self.ast.accept(c, v)?;
-        v.visit_fb(c, &self.annotation)?;
+        self.fb_ast.accept(c, v)?;
         Ok(())
     }
 }
-impl<P: Params> Node<P> for FunctionPtrId<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for FunctionPtrId<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1300,7 +1299,7 @@ impl<P: Params> Node<P> for FunctionPtrId<P::Ex, P::Fb, P::En> {
         }
     }
 }
-impl<P: Params> Node<P> for Gconst<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Gconst<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1607,7 +1606,7 @@ impl<P: Params> Node<P> for Lid {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for Method_<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Method_<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1739,7 +1738,7 @@ impl<P: Params> Node<P> for ReadonlyKind {
         }
     }
 }
-impl<P: Params> Node<P> for RecordDef<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for RecordDef<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1834,7 +1833,7 @@ impl<P: Params> Node<P> for ShapeFieldName {
         }
     }
 }
-impl<P: Params> Node<P> for Stmt<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Stmt<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1852,7 +1851,7 @@ impl<P: Params> Node<P> for Stmt<P::Ex, P::Fb, P::En> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for Stmt_<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Stmt_<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -1966,7 +1965,7 @@ impl<P: Params> Node<P> for Targ<P::Ex> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for Tparam<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Tparam<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -2033,7 +2032,7 @@ impl<P: Params> Node<P> for TypeHint<P::Ex> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for Typedef<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for Typedef<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -2148,7 +2147,7 @@ impl<P: Params> Node<P> for UseAsVisibility {
         }
     }
 }
-impl<P: Params> Node<P> for UserAttribute<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for UserAttribute<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -2166,7 +2165,7 @@ impl<P: Params> Node<P> for UserAttribute<P::Ex, P::Fb, P::En> {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for UsingStmt<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for UsingStmt<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -2269,7 +2268,7 @@ impl<P: Params> Node<P> for WhereConstraintHint {
         Ok(())
     }
 }
-impl<P: Params> Node<P> for XhpAttr<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for XhpAttr<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -2326,7 +2325,7 @@ impl<P: Params> Node<P> for XhpAttrTag {
         }
     }
 }
-impl<P: Params> Node<P> for XhpAttribute<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for XhpAttribute<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,
@@ -2431,7 +2430,7 @@ impl<P: Params> Node<P> for XhpEnumValue {
         }
     }
 }
-impl<P: Params> Node<P> for XhpSimple<P::Ex, P::Fb, P::En> {
+impl<P: Params> Node<P> for XhpSimple<P::Ex, P::En> {
     fn accept<'node>(
         &'node self,
         c: &mut P::Context,

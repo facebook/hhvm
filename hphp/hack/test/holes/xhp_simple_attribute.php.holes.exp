@@ -80,8 +80,8 @@
                  ((int), [10:18-23],
                   (Binop ((Eq None), ((int), [10:18-23], (Obj_get (((this), [10:18-23], This), ((int), [10:18-23], (Id ([10:18-23], "line"))), OG_nullthrows, false))),
                      ((int), [10:18-23], (Lvar ([10:18-23], $line))))))));
-             ([Pos.none], Noop)];
-           fb_annotation = () };
+             ([Pos.none], Noop)]
+           };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([6:21-32], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }
@@ -126,8 +126,8 @@
                           ],
                         [])))
                     )))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

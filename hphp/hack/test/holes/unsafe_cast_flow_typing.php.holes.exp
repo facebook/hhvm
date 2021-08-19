@@ -17,7 +17,7 @@ Errors:
            param_expr = None; param_readonly = None; param_callconv = None; 
            param_user_attributes = []; param_visibility = None }
           ];
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-15], (Return (Some ((bool), [4:10-14], True))))]; fb_annotation = () }; 
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-15], (Return (Some ((bool), [4:10-14], True))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -45,8 +45,8 @@ Errors:
                         [], [((int), [8:33-71], (Hole (((bool), [8:65-70], False), (bool), (int), (UnsafeCast [([8:54-58], (Hprim Tbool)); ([8:60-63], (Hprim Tint))]))))], None)))
                     ))),
                 [], [([Pos.none], Noop)])))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

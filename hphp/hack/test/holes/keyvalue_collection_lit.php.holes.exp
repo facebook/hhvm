@@ -19,8 +19,8 @@
                          [(((string), [5:18-23], (Hole (((string), [5:18-23], (String "bad")), (string), (int), Typing))), ((int), [5:27-28], (Int "1")));
                            (((int), [5:30-31], (Int "1")), ((int), [5:35-36], (Int "2")))]
                          ))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

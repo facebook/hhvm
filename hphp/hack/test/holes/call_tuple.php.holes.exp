@@ -16,7 +16,7 @@
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
            ];
-         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([4:37-41], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }
@@ -46,7 +46,7 @@
             param_expr = None; param_readonly = None; param_callconv = None; 
             param_user_attributes = []; param_visibility = None }
            ];
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -104,8 +104,8 @@
                      (((function((int, int) $a): void)), [23:3-10],
                       (Obj_get (((TestTuple), [23:3-7], (Lvar ([23:3-7], $foo))), (((function((int, int) $a): void)), [23:9-10], (Id ([23:9-10], "a"))), OG_nullthrows, false))),
                      [], [(((bool, int)), [23:11-14], (Hole ((((bool, int)), [23:11-14], (Lvar ([23:11-14], $a2))), ((bool, int)), ((int, int)), Typing)))], None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -191,8 +191,8 @@
                           )))
                        ],
                      None)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

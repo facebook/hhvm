@@ -135,7 +135,7 @@ impl<'a> Env<'a> {
             is_closure_body,
             &fd.params,
             fd.span.clone(),
-            &fd.body.ast.as_slice(),
+            &fd.body.fb_ast.as_slice(),
         )
     }
 
@@ -153,7 +153,7 @@ impl<'a> Env<'a> {
             false,
             &md.params,
             md.span.clone(),
-            &md.body.ast,
+            &md.body.fb_ast,
         )
     }
 
@@ -938,11 +938,10 @@ fn convert_meth_caller_to_func_ptr(
         ctxs: Some(Contexts(pos(), vec![])),
         unsafe_ctxs: None,
         body: FuncBody {
-            ast: vec![
+            fb_ast: vec![
                 Stmt(pos(), Stmt_::Expr(Box::new(assert_invariant))),
                 Stmt(pos(), Stmt_::Return(Box::new(Some(meth_caller_handle)))),
             ],
-            annotation: (),
         },
         fun_kind: FunKind::FSync,
         user_attributes: vec![UserAttribute {
@@ -1019,8 +1018,7 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
         ctxs: Some(Contexts(pos(), vec![])),
         unsafe_ctxs: None,
         body: FuncBody {
-            ast: vec![Stmt(pos(), Stmt_::Return(Box::new(Some(invoke_method))))],
-            annotation: (),
+            fb_ast: vec![Stmt(pos(), Stmt_::Return(Box::new(Some(invoke_method))))],
         },
         fun_kind: FunKind::FSync,
         user_attributes: attrs,
@@ -1658,10 +1656,7 @@ fn extract_debugger_main(
         params,
         ctxs: None,        // TODO(T70095684)
         unsafe_ctxs: None, // TODO(T70095684)
-        body: FuncBody {
-            ast: body,
-            annotation: (),
-        },
+        body: FuncBody { fb_ast: body },
         fun_kind: FunKind::FSync,
         user_attributes: vec![UserAttribute {
             name: Id(Pos::make_none(), "__DebuggerMain".into()),

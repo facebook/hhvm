@@ -234,8 +234,6 @@ let with_type ty env (e : Nast.expr) : Tast.expr =
 
       method on_'ex _ () = ty
 
-      method on_'fb _ _ = ()
-
       method on_'en _ _ = env
     end
   in
@@ -1566,9 +1564,7 @@ let rec rewrite_expr_tree_maketree env expr f =
       in
 
       let (env, body_ast) = List.map_env env fun_.f_body.fb_ast ~f:map_stmt in
-      let fun_ =
-        { fun_ with f_body = { fun_.f_body with fb_ast = body_ast } }
-      in
+      let fun_ = { fun_ with f_body = { fb_ast = body_ast } } in
 
       (env, Call ((fun_pos, p, Lfun (fun_, idl)), targs, args, variadic))
     | Call _ ->
@@ -4838,7 +4834,7 @@ and closure_make
       Aast.f_where_constraints = f.f_where_constraints;
       Aast.f_fun_kind = f.f_fun_kind;
       Aast.f_user_attributes = user_attributes;
-      Aast.f_body = { Aast.fb_ast = tb; fb_annotation = () };
+      Aast.f_body = { Aast.fb_ast = tb };
       Aast.f_ctxs = f.f_ctxs;
       Aast.f_unsafe_ctxs = f.f_unsafe_ctxs;
       Aast.f_params = t_params;

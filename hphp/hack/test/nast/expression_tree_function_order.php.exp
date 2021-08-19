@@ -75,8 +75,8 @@
                                                       [], [], None)))
                                                   ],
                                                 None))))))
-                                   ];
-                                 fb_annotation = () };
+                                   ]
+                                 };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
                              [([5:5-11:4], $0fp0); ([5:5-11:4], $0fp1); ([5:5-11:4], $0fp2); ([5:5-11:4], $0fp3); ([5:5-11:4], $0fp4)]))),
@@ -293,8 +293,8 @@
                                                                     (), [10:7-11], (Lvar ([10:7-11], $0fp3)))], None))); (
                                                                     (), [Pos.none], (ValCollection (Vec, None, [])))], None)))])))],
                                                                   None))))))
-                                                            ];
-                                                          fb_annotation = () };
+                                                            ]
+                                                          };
                                                         f_fun_kind = FSync; 
                                                         f_user_attributes = []; 
                                                         f_external = false; 
@@ -302,8 +302,8 @@
                                                       [([10:7-11], $0fp3); ([8:9-12], $0fp1); ([7:9-12], $0fp0); ([6:7-10], $0fp2); ([5:5-8], $0fp4)])))
                                                   ],
                                                 None))))))
-                                   ];
-                                 fb_annotation = () };
+                                   ]
+                                 };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
                              [([10:7-11], $0fp3); ([8:9-12], $0fp1); (
@@ -314,8 +314,8 @@
                              ))),
                          [], [], None)))
                      }))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

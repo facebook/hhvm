@@ -9,7 +9,7 @@
         f_readonly_ret = None; f_ret = ((string), (Some ([3:33-39], (Hprim Tstring)))); 
         f_name = ([3:10-29], "\\returnsTheStringFoo"); f_tparams = []; 
         f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:42-55], (Return (Some ((string), [3:49-54], (String "foo")))))]; fb_annotation = () }; 
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:42-55], (Return (Some ((string), [3:49-54], (String "foo")))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -42,8 +42,8 @@
                  ((dynamic), [9:3-30],
                   (Obj_get (((dynamic), [9:3-5], (Lvar ([9:3-5], $c))), (
                      (dynamic), [9:8-29], (Call ((((function(): string)), [9:8-27], (Id ([9:8-27], "\\returnsTheStringFoo"))), [], [], None))), OG_nullthrows, false)))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

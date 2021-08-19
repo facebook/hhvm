@@ -46,8 +46,8 @@ Errors:
                 ((string), [15:3-21],
                  (Binop ((Eq None), ((string), [15:3-5], (Lvar ([15:3-5], $z))),
                     ((string), [15:8-21], (Binop (Dot, ((HH\Lib\Regex\Pattern<shape(0 => string)>), [15:8-10], (Lvar ([15:8-10], $x))), ((string), [15:11-21], (String ", world!"))))))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -81,8 +81,8 @@ Errors:
            [([19:3-25],
              (Throw
                 ((Exception), [19:9-24], (New (((Exception), [19:13-22], (CI ([19:13-22], "\\Exception"))), [], [], None, ((function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -189,8 +189,8 @@ Errors:
                      ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 10 => string, 11 => string, 12 => string, 13 => string, 2 => string, 3 => string, 5 => string, 6 => string, 7 => string, 9 => string, 'd' => string, 'h' => string, 'n' => string)>),
                       [41:13-73], (PrefixedString ("re", ((string), [41:15-73], (String "/(a)(b)(c)(?<d>d)(e)(f)(g)(?<h>h)(i)(j)(k)(l)(m)(?<n>n)/")))))
                      )))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -240,8 +240,8 @@ Errors:
                   (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [56:3-9], (Lvar ([56:3-9], $good9))),
                      ((HH\Lib\Regex\Pattern<shape(0 => string)>), [56:12-23], (PrefixedString ("re", ((string), [56:14-23], (String "[Hello]"))))))))));
              ([57:3-26], (Expr ((_), [57:3-25], (Binop ((Eq None), ((_), [57:3-9], (Lvar ([57:3-9], $bad10))), ((_), [57:14-25], (String "\\Hello\\")))))));
-             ([58:3-23], (Expr ((_), [58:3-22], (Binop ((Eq None), ((_), [58:3-9], (Lvar ([58:3-9], $bad11))), ((_), [58:14-22], (String "HelloH")))))))];
-           fb_annotation = () };
+             ([58:3-23], (Expr ((_), [58:3-22], (Binop ((Eq None), ((_), [58:3-9], (Lvar ([58:3-9], $bad11))), ((_), [58:14-22], (String "HelloH")))))))]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -267,8 +267,8 @@ Errors:
                     ((HH\Lib\Regex\Pattern<shape(0 => string)>), [64:12-76],
                      (PrefixedString ("re", ((string), [64:14-76], (String "(He\\(?'one'\\D\\)\\(\\D\\)\\(?'three'\\D\\)\\(\\D\\)\\(\\D\\)\\(?'six'\\D\\))")))))
                     )))))
-             ];
-           fb_annotation = () };
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

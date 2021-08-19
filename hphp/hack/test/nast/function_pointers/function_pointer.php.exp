@@ -14,9 +14,8 @@
         f_readonly_ret = None; f_ret = ((), (Some ([5:17-21], (Hprim Tvoid)))); 
         f_name = ([5:10-13], "\\Foo\\Bar\\qux"); f_tparams = []; f_where_constraints = []; 
         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
-        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None }
+        f_body = { fb_ast = [([Pos.none], Noop)] }; f_fun_kind = FSync; 
+        f_user_attributes = []; f_external = false; f_doc_comment = None }
       });
   (Fun
      { fd_namespace =
@@ -34,8 +33,8 @@
          { fb_ast =
            [([9:3-9], (Expr ((), [9:3-8], (FunctionPointer ((FP_id ([9:3-6], "\\Foo\\Bar\\qux")), [])))));
              ([11:3-17], (Expr ((), [11:3-16], (Binop ((Eq None), ((), [11:3-5], (Lvar ([11:3-5], $x))), ((), [11:8-16], (FunctionPointer ((FP_id ([11:8-14], "\\HH\\is_vec")), []))))))));
-             ([13:3-14], (Expr ((), [13:3-13], (Binop ((Eq None), ((), [13:3-5], (Lvar ([13:3-5], $x))), ((), [13:8-13], (FunctionPointer ((FP_id ([13:8-11], "\\HH\\vec")), []))))))))];
-           fb_annotation = () };
+             ([13:3-14], (Expr ((), [13:3-13], (Binop ((Eq None), ((), [13:3-5], (Lvar ([13:3-5], $x))), ((), [13:8-13], (FunctionPointer ((FP_id ([13:8-11], "\\HH\\vec")), []))))))))]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

@@ -31,8 +31,8 @@
                           (((function(string $x): ?int)), [6:10-17],
                            (Obj_get (((MyMap<string, int>), [6:10-12], (Lvar ([6:10-12], $m))), (((function(string $x): ?int)), [6:14-17], (Id ([6:14-17], "get"))), OG_nullthrows, false))),
                           [], [((string), [6:18-22], (String "ho"))], None))))))
-            ];
-          fb_annotation = () };
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })[(Class
@@ -61,7 +61,7 @@
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None }
            ];
-         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () }; 
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([4:38-42], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None };
@@ -75,7 +75,7 @@
              param_expr = None; param_readonly = None; param_callconv = None; 
              param_user_attributes = []; param_visibility = None }
             ];
-          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([6:5-17], (Return (Some ((null), [6:12-16], Null))))]; fb_annotation = () }; 
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([6:5-17], (Return (Some ((null), [6:12-16], Null))))] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((?Tv), (Some ([5:31-34], (Hoption ([5:32-34], (Habstr ("Tv", []))))))); 
           m_external = false; m_doc_comment = None }

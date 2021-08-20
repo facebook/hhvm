@@ -1327,7 +1327,8 @@ let safely_refine_class_type
     match get_node ty with
     | Tclass ((_, name), _, _)
       when String.equal name (Cls.name class_info)
-           || Cls.has_ancestor class_info name ->
+           || Cls.has_ancestor class_info name
+           || Cls.requires_ancestor class_info name ->
       true
     | Tdynamic -> true
     | Toption ty -> might_be_supertype ty

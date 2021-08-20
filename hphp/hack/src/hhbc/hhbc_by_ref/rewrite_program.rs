@@ -59,8 +59,7 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl, D: DeclProvider<'decl>>(
         }
     }
 
-    let local_alloc = bumpalo::Bump::new();
-    closure_convert::convert_toplevel_prog(&local_alloc, emitter, prog, namespace_env)?;
+    closure_convert::convert_toplevel_prog(alloc, emitter, prog, namespace_env)?;
 
     emitter.for_debugger_eval = for_debugger_eval;
 

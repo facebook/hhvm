@@ -10,27 +10,27 @@ use itertools::Either;
 use std::rc::Rc;
 
 #[derive(Clone, Debug)]
-pub struct LongLambda {
+pub struct LongLambda<'arena> {
     pub is_async: bool,
-    pub coeffects: HhasCoeffects,
+    pub coeffects: HhasCoeffects<'arena>,
 }
 
 #[derive(Clone, Debug)]
-pub struct Lambda {
+pub struct Lambda<'arena> {
     pub is_async: bool,
-    pub coeffects: HhasCoeffects,
+    pub coeffects: HhasCoeffects<'arena>,
 }
 
 #[derive(Clone, Debug)]
-pub enum ScopeItem<'a> {
+pub enum ScopeItem<'a, 'arena> {
     Class(Class<'a>),
     Function(Fun<'a>),
     Method(Method<'a>),
-    LongLambda(LongLambda),
-    Lambda(Lambda),
+    LongLambda(LongLambda<'arena>),
+    Lambda(Lambda<'arena>),
 }
 
-impl<'a> ScopeItem<'a> {
+impl<'a, 'arena> ScopeItem<'a, 'arena> {
     pub fn is_in_lambda(&self) -> bool {
         matches!(self, ScopeItem::Lambda(_) | ScopeItem::LongLambda(_))
     }

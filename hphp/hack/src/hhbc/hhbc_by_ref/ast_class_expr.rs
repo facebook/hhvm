@@ -84,7 +84,7 @@ impl<'arena> ClassExpr<'arena> {
         emitter: &Emitter<'arena, 'decl, D>,
         check_traits: bool,
         resolve_self: bool,
-        scope: &Scope<'a>,
+        scope: &Scope<'a, 'arena>,
         expr: ast::Expr,
     ) -> Self {
         if let Some(cd) = scope.get_class() {
@@ -150,7 +150,7 @@ impl<'arena> ClassExpr<'arena> {
         emitter: &Emitter<'arena, 'decl, D>,
         check_traits: bool,
         resolve_self: bool,
-        scope: &Scope<'a>,
+        scope: &Scope<'a, 'arena>,
         cid: &ast::ClassId,
     ) -> Self {
         let ClassId(_, annot, cid_) = cid;

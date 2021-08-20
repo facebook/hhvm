@@ -53,7 +53,7 @@ pub struct HhasClass<'arena> {
     pub properties: Slice<'arena, HhasProperty<'arena>>,
     pub constants: Slice<'arena, HhasConstant<'arena>>,
     pub type_constants: Slice<'arena, HhasTypeConstant<'arena>>,
-    pub ctx_constants: Slice<'arena, HhasCtxConstant>, // TODO(SF, 2021-0811): HhasCtxConstant is part of Steve's HhasCoeffect work
+    pub ctx_constants: Slice<'arena, HhasCtxConstant<'arena>>, // TODO(SF, 2021-0811): HhasCtxConstant is part of Steve's HhasCoeffect work
     pub requirements: Slice<'arena, Pair<ClassType<'arena>, TraitReqKind>>,
     pub upper_bounds: Slice<'arena, Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>>,
     pub doc_comment: Maybe<Str<'arena>>,

@@ -18,8 +18,9 @@ pub struct HhasFunction<'arena> {
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub name: FunctionType<'arena>,
     pub body: HhasBody<'arena>,
+
     pub span: HhasSpan,
-    pub coeffects: HhasCoeffects,
+    pub coeffects: HhasCoeffects<'arena>,
     pub flags: HhasFunctionFlags,
 }
 

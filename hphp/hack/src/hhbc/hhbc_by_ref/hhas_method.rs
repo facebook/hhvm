@@ -20,7 +20,7 @@ pub struct HhasMethod<'arena> {
     pub name: MethodType<'arena>,
     pub body: HhasBody<'arena>,
     pub span: HhasSpan,
-    pub coeffects: HhasCoeffects, //TODO(SF, 2021-08-10): Fix when Steve's `HhasCoeffect`'s (`repr(C)`)work lands
+    pub coeffects: HhasCoeffects<'arena>,
     pub flags: HhasMethodFlags,
 }
 

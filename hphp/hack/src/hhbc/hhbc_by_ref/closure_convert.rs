@@ -37,8 +37,8 @@ use oxidized::{
     s_map::SMap,
 };
 
-type Scope<'a> = AstScope<'a>;
-type ScopeItem<'a> = AstScopeItem<'a>;
+type Scope<'a, 'arena> = AstScope<'a, 'arena>;
+type ScopeItem<'a, 'arena> = AstScopeItem<'a, 'arena>;
 
 #[derive(Debug, Clone)] // TODO(hrust): Clone is used when bactracking now, can we somehow avoid it?
 struct Variables {
@@ -49,7 +49,7 @@ struct Variables {
 }
 
 #[derive(Debug, Clone)] // TODO(hrust): do we need clone
-struct Env<'a> {
+struct Env<'a, 'arena> {
     /// What is the current context?
     // TODO(hrust) VisitorMut doesn't provide an interface
     // where a reference to visited NodeMut outlives the Context type (in this case Env<'a>),
@@ -58,7 +58,7 @@ struct Env<'a> {
     /// Span of function/method body
     pos: Pos, // TODO(hrust) change to &'a Pos after dependent Visitor/Node lifetime is fixed.
     /// What is the current context?
-    scope: Scope<'a>,
+    scope: Scope<'a, 'arena>,
     variable_scopes: Vec<Variables>,
     /// How many existing classes are there?
     defined_class_count: usize,
@@ -79,7 +79,7 @@ struct PerFunctionState {
     pub has_finally: bool,
 }
 
-impl<'a> Env<'a> {
+impl<'a, 'arena> Env<'a, 'arena> {
     pub fn toplevel(
         class_count: usize,
         record_count: usize,
@@ -109,7 +109,7 @@ impl<'a> Env<'a> {
 
     fn with_function_like_(
         &mut self,
-        e: ScopeItem<'a>,
+        e: ScopeItem<'a, 'arena>,
         _is_closure_body: bool,
         params: &[FunParam],
         pos: Pos,
@@ -126,7 +126,7 @@ impl<'a> Env<'a> {
 
     fn with_function_like(
         &mut self,
-        e: ScopeItem<'a>,
+        e: ScopeItem<'a, 'arena>,
         is_closure_body: bool,
         fd: &Fun_,
     ) -> Result<()> {
@@ -157,9 +157,9 @@ impl<'a> Env<'a> {
         )
     }
 
-    fn with_lambda(&mut self, fd: &Fun_) -> Result<()> {
+    fn with_lambda(&mut self, alloc: &'arena bumpalo::Bump, fd: &Fun_) -> Result<()> {
         let is_async = fd.fun_kind.is_async();
-        let coeffects = HhasCoeffects::from_ast(&fd.ctxs, &fd.params, vec![], vec![]);
+        let coeffects = HhasCoeffects::from_ast(alloc, &fd.ctxs, &fd.params, vec![], vec![]);
 
         let lambda = Lambda {
             is_async,
@@ -168,9 +168,9 @@ impl<'a> Env<'a> {
         self.with_function_like(ScopeItem::Lambda(lambda), true, fd)
     }
 
-    fn with_longlambda(&mut self, fd: &Fun_) -> Result<()> {
+    fn with_longlambda(&mut self, alloc: &'arena bumpalo::Bump, fd: &Fun_) -> Result<()> {
         let is_async = fd.fun_kind.is_async();
-        let coeffects = HhasCoeffects::from_ast(&fd.ctxs, &fd.params, vec![], vec![]);
+        let coeffects = HhasCoeffects::from_ast(alloc, &fd.ctxs, &fd.params, vec![], vec![]);
 
         let long_lambda = LongLambda {
             is_async,
@@ -236,7 +236,7 @@ impl<'a> Env<'a> {
     }
 }
 
-struct State {
+struct State<'arena> {
     // Number of closures created in the current function
     closure_cnt_per_fun: u32,
     // Free variables computed so far
@@ -254,10 +254,10 @@ struct State {
     // information about current function
     current_function_state: PerFunctionState,
     // accumulated information about program
-    global_state: GlobalState,
+    global_state: GlobalState<'arena>,
 }
 
-impl State {
+impl<'arena> State<'arena> {
     pub fn initial_state(empty_namespace: RcOc<namespace_env::Env>) -> Self {
         Self {
             namespace: RcOc::clone(&empty_namespace),
@@ -281,7 +281,7 @@ impl State {
         &mut self,
         key: String,
         fun: PerFunctionState,
-        coeffects_of_scope: HhasCoeffects,
+        coeffects_of_scope: HhasCoeffects<'arena>,
         num_closures: u32,
     ) {
         if fun.has_finally {
@@ -600,9 +600,9 @@ fn convert_id(env: &Env, Id(p, s): Id) -> Expr_ {
     }
 }
 
-fn visit_class_id<'a>(
-    env: &mut Env<'a>,
-    self_: &mut ClosureConvertVisitor<'a>,
+fn visit_class_id<'a, 'arena>(
+    env: &mut Env<'a, 'arena>,
+    self_: &mut ClosureConvertVisitor<'a, 'arena>,
     cid: &mut ClassId,
 ) -> Result<()> {
     Ok(if let ClassId(_, _, ClassId_::CIexpr(e)) = cid {
@@ -622,9 +622,10 @@ fn make_info(c: &ast_scope::Class) -> ClosureEnclosingClassInfo {
 }
 // Closure-convert a lambda expression, with use_vars_opt = Some vars
 // if there is an explicit `use` clause.
-fn convert_lambda<'a>(
-    env: &mut Env<'a>,
-    self_: &mut ClosureConvertVisitor<'a>,
+fn convert_lambda<'a, 'arena>(
+    alloc: &'arena bumpalo::Bump,
+    env: &mut Env<'a, 'arena>,
+    self_: &mut ClosureConvertVisitor<'a, 'arena>,
     mut fd: Fun_,
     use_vars_opt: Option<Vec<aast_defs::Lid>>,
 ) -> Result<Expr_> {
@@ -636,7 +637,7 @@ fn convert_lambda<'a>(
     let captured_vars = st.captured_vars.clone();
     let captured_generics = st.captured_generics.clone();
     let old_function_state = st.current_function_state.clone();
-    let coeffects_of_scope = env.scope.coeffects_of_scope();
+    let coeffects_of_scope = env.scope.coeffects_of_scope(alloc);
     st.enter_lambda();
     if let Some(user_vars) = &use_vars_opt {
         for aast_defs::Lid(p, id) in user_vars.iter() {
@@ -651,9 +652,9 @@ fn convert_lambda<'a>(
     let lambda_env = &mut env.clone();
 
     if use_vars_opt.is_some() {
-        lambda_env.with_longlambda(&fd)?
+        lambda_env.with_longlambda(alloc, &fd)?
     } else {
-        lambda_env.with_lambda(&fd)?
+        lambda_env.with_lambda(alloc, &fd)?
     };
     let function_state = convert_function_like_body(self_, lambda_env, &mut fd.body)?;
     for param in &mut fd.params {
@@ -1041,9 +1042,9 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
     fun_handle
 }
 
-fn convert_function_like_body<'a>(
-    self_: &mut ClosureConvertVisitor<'a>,
-    env: &mut Env<'a>,
+fn convert_function_like_body<'a, 'arena>(
+    self_: &mut ClosureConvertVisitor<'a, 'arena>,
+    env: &mut Env<'a, 'arena>,
     body: &mut FuncBody,
 ) -> Result<PerFunctionState> {
     // reset has_finally values on the state
@@ -1092,19 +1093,20 @@ fn count_records(defs: &[Def]) -> usize {
     defs.iter().filter(|x| x.is_record_def()).count()
 }
 
-struct ClosureConvertVisitor<'a> {
-    state: State,
+struct ClosureConvertVisitor<'a, 'arena> {
+    alloc: &'arena bumpalo::Bump,
+    state: State<'arena>,
     phantom_lifetime_a: std::marker::PhantomData<&'a ()>,
 }
 
-impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
-    type P = AstParams<Env<'a>, Error>;
+impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
+    type P = AstParams<Env<'a, 'arena>, Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
         self
     }
 
-    fn visit_method_(&mut self, env: &mut Env<'a>, md: &mut Method_) -> Result<()> {
+    fn visit_method_(&mut self, env: &mut Env<'a, 'arena>, md: &mut Method_) -> Result<()> {
         let cls = env.scope.get_class().ok_or_else(|| {
             unrecoverable("unexpected scope shape - method is not inside the class")
         })?;
@@ -1122,7 +1124,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
         visit_mut(self, &mut env, &mut md.params)
     }
 
-    fn visit_class_<'b>(&mut self, env: &mut Env<'a>, cd: &'b mut Class_) -> Result<()> {
+    fn visit_class_<'b>(&mut self, env: &mut Env<'a, 'arena>, cd: &'b mut Class_) -> Result<()> {
         let mut env = env.clone();
         env.with_class(cd);
         self.state.reset_function_counts();
@@ -1134,7 +1136,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
         Ok(add_reified_property(&cd.tparams, &mut cd.vars))
     }
 
-    fn visit_def(&mut self, env: &mut Env<'a>, def: &mut Def) -> Result<()> {
+    fn visit_def(&mut self, env: &mut Env<'a, 'arena>, def: &mut Def) -> Result<()> {
         match def {
             // need to handle it ourselvses, because visit_fun_ is
             // called both for toplevel functions and lambdas
@@ -1156,14 +1158,14 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
         }
     }
 
-    fn visit_hint_(&mut self, env: &mut Env<'a>, hint: &mut Hint_) -> Result<()> {
+    fn visit_hint_(&mut self, env: &mut Env<'a, 'arena>, hint: &mut Hint_) -> Result<()> {
         if let Hint_::Happly(id, _) = hint {
             add_generic(env, &mut self.state, id.name())
         };
         hint.recurse(env, self.object())
     }
 
-    fn visit_stmt_(&mut self, env: &mut Env<'a>, stmt: &mut Stmt_) -> Result<()> {
+    fn visit_stmt_(&mut self, env: &mut Env<'a, 'arena>, stmt: &mut Stmt_) -> Result<()> {
         match stmt {
             Stmt_::Awaitall(x) => {
                 env.check_if_in_async_context()?;
@@ -1227,12 +1229,12 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
     }
 
     //TODO(hrust): do we need special handling for Awaitall?
-    fn visit_expr(&mut self, env: &mut Env<'a>, Expr(_, pos, e): &mut Expr) -> Result<()> {
+    fn visit_expr(&mut self, env: &mut Env<'a, 'arena>, Expr(_, pos, e): &mut Expr) -> Result<()> {
         let null = Expr_::mk_null();
         let e_owned = std::mem::replace(e, null);
         *e = match e_owned {
-            Expr_::Efun(x) => convert_lambda(env, self, x.0, Some(x.1))?,
-            Expr_::Lfun(x) => convert_lambda(env, self, x.0, None)?,
+            Expr_::Efun(x) => convert_lambda(self.alloc, env, self, x.0, Some(x.1))?,
+            Expr_::Lfun(x) => convert_lambda(self.alloc, env, self, x.0, None)?,
             Expr_::Lvar(id_orig) => {
                 let id = if env.for_debugger_eval
                     && local_id::get_name(&id_orig.1) == special_idents::THIS
@@ -1677,12 +1679,15 @@ fn extract_debugger_main(
     Ok(())
 }
 
-pub fn convert_toplevel_prog<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn convert_toplevel_prog<'arena, 'local_arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'local_arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl, D>,
     defs: &mut Program,
     namespace_env: RcOc<namespace_env::Env>,
-) -> Result<()> {
+) -> Result<()>
+where
+    'local_arena: 'arena,
+{
     if e.options()
         .hack_compiler_flags
         .contains(CompilerFlags::CONSTANT_FOLDING)
@@ -1705,6 +1710,7 @@ pub fn convert_toplevel_prog<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>
     }
 
     let mut visitor = ClosureConvertVisitor {
+        alloc,
         state: State::initial_state(namespace_env),
         phantom_lifetime_a: std::marker::PhantomData,
     };

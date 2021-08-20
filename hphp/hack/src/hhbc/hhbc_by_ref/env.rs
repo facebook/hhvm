@@ -32,7 +32,7 @@ pub struct Env<'a, 'arena> {
     pub arena: &'arena bumpalo::Bump,
     pub flags: Flags,
     pub jump_targets_gen: jump_targets::Gen,
-    pub scope: Scope<'a>,
+    pub scope: Scope<'a, 'arena>,
     pub namespace: RcOc<NamespaceEnv>,
     pub call_context: Option<String>,
     pub pipe_var: Option<Local<'arena>>,
@@ -72,7 +72,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
         self.pipe_var = Some(local);
     }
 
-    pub fn with_scope(mut self, scope: Scope<'a>) -> Env<'a, 'arena> {
+    pub fn with_scope(mut self, scope: Scope<'a, 'arena>) -> Env<'a, 'arena> {
         self.scope = scope;
         self
     }

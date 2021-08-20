@@ -18,7 +18,7 @@ use oxidized::{aast, ast, pos::Pos};
 pub fn emit_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,
-    scope: &Scope<'a>,
+    scope: &Scope<'a, 'arena>,
     class_attrs: &[ast::UserAttribute],
     name: &ast::Sid,
     params: &[ast::FunParam],

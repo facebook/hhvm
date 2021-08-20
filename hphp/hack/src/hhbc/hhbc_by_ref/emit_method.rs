@@ -36,7 +36,7 @@ pub fn from_asts<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     methods
         .iter()
         .map(|m| from_ast(alloc, emitter, class, m))
-        .collect::<Result<Vec<_>>>()
+        .collect()
 }
 
 pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
@@ -162,9 +162,12 @@ pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         let parent_coeffects = emitter
             .emit_global_state()
             .get_lambda_coeffects_of_scope(&class.name.1, &method.name.1);
-        parent_coeffects.inherit_to_child_closure()
+        parent_coeffects.map_or(HhasCoeffects::default(), |pc| {
+            pc.inherit_to_child_closure(alloc)
+        })
     } else {
         HhasCoeffects::from_ast(
+            alloc,
             &method.ctxs,
             &method.params,
             &method.tparams,
@@ -187,7 +190,7 @@ pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         match (class.name.1.as_str(), method.name.1.as_str()) {
             ("\\__SystemLib\\MethCallerHelper", "__invoke")
             | ("\\__SystemLib\\DynMethCallerHelper", "__invoke") => {
-                coeffects = coeffects.with_caller()
+                coeffects = coeffects.with_caller(alloc)
             }
             _ => {}
         }

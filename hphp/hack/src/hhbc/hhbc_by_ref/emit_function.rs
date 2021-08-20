@@ -98,9 +98,9 @@ pub fn emit_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(&fd)));
     }
 
-    let mut coeffects = HhasCoeffects::from_ast(&f.ctxs, &f.params, &f.tparams, vec![]);
+    let mut coeffects = HhasCoeffects::from_ast(alloc, &f.ctxs, &f.params, &f.tparams, vec![]);
     if is_meth_caller {
-        coeffects = coeffects.with_caller()
+        coeffects = coeffects.with_caller(alloc)
     }
     let ast_body = &f.body.fb_ast;
     let deprecation_info = hhas_attribute::deprecation_info(attrs.iter());

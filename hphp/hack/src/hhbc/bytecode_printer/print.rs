@@ -380,15 +380,19 @@ fn print_ctx_constant<W: Write>(
     c: &HhasCtxConstant,
 ) -> Result<(), W::Error> {
     ctx.newline(w)?;
-    concat_str_by(w, " ", [".ctx", &c.name])?;
+    concat_str_by(w, " ", [".ctx", &c.name.as_str()])?;
     if c.is_abstract {
         w.write(" isAbstract")?;
     }
-    if let Some(coeffects) = HhasCoeffects::vec_to_string(&c.coeffects.0, |c| c.to_string()) {
+    if let Some(coeffects) =
+        HhasCoeffects::vec_to_string(&c.coeffects.0.as_ref(), |c| c.to_string())
+    {
         w.write(" ")?;
         w.write(coeffects)?;
     }
-    if let Some(coeffects) = HhasCoeffects::vec_to_string(&c.coeffects.1, |c| c.to_string()) {
+    if let Some(coeffects) =
+        HhasCoeffects::vec_to_string(&c.coeffects.1.as_ref(), |c| c.as_str().to_string())
+    {
         w.write(" ")?;
         w.write(coeffects)?;
     }

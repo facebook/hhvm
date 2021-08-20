@@ -8,6 +8,8 @@ edition = "2018"
 path = "../../hhas_coeffects.rs"
 
 [dependencies]
+bumpalo = { version = "3.2.1", features = ["collections"] }
+ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_hhbc_string_utils = { path = "../hhbc_by_ref_hhbc_string_utils" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }

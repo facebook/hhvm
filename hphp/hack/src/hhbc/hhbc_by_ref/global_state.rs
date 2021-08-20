@@ -5,7 +5,6 @@
 
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_unique_id_builder::{get_unique_id_for_method, SMap, SSet};
-use lazy_static::lazy_static;
 use ocamlrep::rc::RcOc;
 use oxidized::{
     ast_defs::{Abstraction, ClassishKind},
@@ -30,16 +29,16 @@ impl Default for ClosureEnclosingClassInfo {
 }
 
 #[derive(Default, Debug)]
-pub struct GlobalState {
+pub struct GlobalState<'arena> {
     pub explicit_use_set: SSet,
     pub closure_namespaces: SMap<RcOc<NamespaceEnv>>,
     pub closure_enclosing_classes: SMap<ClosureEnclosingClassInfo>,
     pub functions_with_finally: SSet,
-    pub lambda_coeffects_of_scope: SMap<HhasCoeffects>,
+    pub lambda_coeffects_of_scope: SMap<HhasCoeffects<'arena>>,
     pub num_closures: SMap<u32>,
 }
 
-impl GlobalState {
+impl<'arena> GlobalState<'arena> {
     pub fn init() -> Self {
         GlobalState::default()
     }
@@ -48,14 +47,9 @@ impl GlobalState {
         &self,
         class_name: &str,
         meth_name: &str,
-    ) -> &HhasCoeffects {
-        lazy_static! {
-            static ref DEFAULT_HHAS_COEFFECTS: HhasCoeffects = HhasCoeffects::default();
-        }
+    ) -> Option<&HhasCoeffects<'arena>> {
         let key = get_unique_id_for_method(class_name, meth_name);
-        self.lambda_coeffects_of_scope
-            .get(&key)
-            .unwrap_or(&DEFAULT_HHAS_COEFFECTS)
+        self.lambda_coeffects_of_scope.get(&key)
     }
 
     pub fn get_closure_enclosing_class(

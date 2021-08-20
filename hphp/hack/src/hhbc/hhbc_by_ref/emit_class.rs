@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::DeclProvider;
-use ffi::{Maybe, Maybe::*, Slice, Str};
+use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_body as emit_body;
 use hhbc_by_ref_emit_expression as emit_expression;
@@ -212,18 +212,28 @@ fn from_type_constant<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     })
 }
 
-fn from_ctx_constant(tc: &ast::ClassTypeconstDef) -> Result<HhasCtxConstant> {
+fn from_ctx_constant<'a, 'arena>(
+    alloc: &'arena bumpalo::Bump,
+    tc: &'a ast::ClassTypeconstDef,
+) -> Result<HhasCtxConstant<'arena>> {
     use ast::ClassTypeconst::*;
+    use hhbc_by_ref_hhas_coeffects::Ctx;
     let name = tc.name.1.to_string();
     let coeffects = match &tc.kind {
-        TCAbstract(ast::ClassAbstractTypeconst { default: None, .. }) => (vec![], vec![]),
-        TCPartiallyAbstract(_) => (vec![], vec![]), // does not parse
+        TCAbstract(ast::ClassAbstractTypeconst { default: None, .. }) => {
+            (Slice::empty(), Slice::empty())
+        }
+        TCPartiallyAbstract(_) => (Slice::empty(), Slice::empty()), // does not parse
         TCAbstract(ast::ClassAbstractTypeconst {
             default: Some(hint),
             ..
         })
         | TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: hint }) => {
-            HhasCoeffects::from_ctx_constant(hint)
+            let x = HhasCoeffects::from_ctx_constant(hint);
+            let p1: Slice<'arena, Ctx> = Slice::from_vec(alloc, x.0);
+            let p2: Slice<'arena, Str> =
+                Slice::from_vec(alloc, x.1.iter().map(|s| Str::new_str(alloc, s)).collect());
+            (p1, p2)
         }
     };
     let is_abstract = match &tc.kind {
@@ -231,8 +241,8 @@ fn from_ctx_constant(tc: &ast::ClassTypeconstDef) -> Result<HhasCtxConstant> {
         _ => true,
     };
     Ok(HhasCtxConstant {
-        name,
-        coeffects,
+        name: Str::new_str(alloc, name),
+        coeffects: Pair::from(coeffects),
         is_abstract,
     })
 }
@@ -889,7 +899,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .collect::<Result<Vec<HhasTypeConstant>>>()?;
     let ctx_constants = ctxconsts
         .iter()
-        .map(|x| from_ctx_constant(x))
+        .map(|x| from_ctx_constant(alloc, x))
         .collect::<Result<Vec<HhasCtxConstant>>>()?;
     let upper_bounds = emit_body::emit_generics_upper_bounds(alloc, &ast_class.tparams, &[], false);
 

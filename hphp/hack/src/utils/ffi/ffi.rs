@@ -123,7 +123,6 @@ impl<U, V, W, X> std::convert::From<(U, V, W, X)> for Quadruple<U, V, W, X> {
         Quadruple(u, v, w, x)
     }
 }
-
 // [Note: `BumpSliceMut<'a, T>` and `Slice<'a, T>` safety]
 // -------------------------------------------------------
 // If we assume construction via the factory functions
@@ -155,6 +154,7 @@ impl<'a, T> AsRef<[T]> for Slice<'a, T> {
         unsafe { std::slice::from_raw_parts(self.data, self.len) }
     }
 }
+
 impl<'a, T: 'a> Slice<'a, T> {
     pub fn new(t: &'a [T]) -> Self {
         Slice {
@@ -186,6 +186,12 @@ impl<'a, T: 'a> Slice<'a, T> {
 
     pub fn len(&self) -> usize {
         self.len
+    }
+}
+
+impl<'a, T: 'a> Slice<'a, T> {
+    pub fn from_vec(alloc: &'a bumpalo::Bump, xs: Vec<T>) -> Self {
+        alloc.alloc_slice_fill_iter(xs.into_iter()).into()
     }
 }
 

@@ -88,7 +88,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         is_reified,
         should_emit_implicit_context,
     )?;
-    let coeffects = HhasCoeffects::from_ast(&f.ctxs, &f.params, &f.tparams, vec![]);
+    let coeffects = HhasCoeffects::from_ast(alloc, &f.ctxs, &f.params, &f.tparams, vec![]);
     let body = make_wrapper_body(
         alloc,
         emitter,

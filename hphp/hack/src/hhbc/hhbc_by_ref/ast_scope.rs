@@ -14,28 +14,28 @@ use oxidized::{
 };
 
 #[derive(Clone, Default, Debug)]
-pub struct Scope<'a> {
-    pub items: Vec<ScopeItem<'a>>,
+pub struct Scope<'a, 'arena> {
+    pub items: Vec<ScopeItem<'a, 'arena>>,
 }
 
-impl<'a> Scope<'a> {
+impl<'a, 'arena> Scope<'a, 'arena> {
     pub fn toplevel() -> Self {
         Scope { items: vec![] }
     }
 
-    pub fn push_item(&mut self, s: ScopeItem<'a>) {
+    pub fn push_item(&mut self, s: ScopeItem<'a, 'arena>) {
         self.items.push(s)
     }
 
-    pub fn iter(&self) -> impl ExactSizeIterator<Item = &ScopeItem<'a>> {
+    pub fn iter(&self) -> impl ExactSizeIterator<Item = &ScopeItem<'a, 'arena>> {
         self.items.iter().rev()
     }
 
-    pub fn iter_subscopes(&self) -> impl Iterator<Item = &[ScopeItem<'a>]> {
+    pub fn iter_subscopes(&self) -> impl Iterator<Item = &[ScopeItem<'a, 'arena>]> {
         (0..self.items.len()).rev().map(move |i| &self.items[..i])
     }
 
-    pub fn get_subscope_class<'b>(sub_scope: &'b [ScopeItem<'b>]) -> Option<&'b Class> {
+    pub fn get_subscope_class<'b>(sub_scope: &'b [ScopeItem<'b, 'b>]) -> Option<&'b Class> {
         for scope_item in sub_scope.iter().rev() {
             if let ScopeItem::Class(cd) = scope_item {
                 return Some(cd);
@@ -178,7 +178,7 @@ impl<'a> Scope<'a> {
         self.items.last().map_or(false, &ScopeItem::is_in_lambda)
     }
 
-    pub fn coeffects_of_scope(&self) -> HhasCoeffects {
+    pub fn coeffects_of_scope(&self, alloc: &'arena bumpalo::Bump) -> HhasCoeffects<'arena> {
         for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Class(_) => {
@@ -186,6 +186,7 @@ impl<'a> Scope<'a> {
                 }
                 ScopeItem::Method(m) => {
                     return HhasCoeffects::from_ast(
+                        alloc,
                         m.get_ctxs(),
                         m.get_params(),
                         m.get_tparams(),
@@ -194,6 +195,7 @@ impl<'a> Scope<'a> {
                 }
                 ScopeItem::Function(f) => {
                     return HhasCoeffects::from_ast(
+                        alloc,
                         f.get_ctxs(),
                         f.get_params(),
                         f.get_tparams(),

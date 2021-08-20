@@ -216,17 +216,15 @@ Array HHVM_FUNCTION(split_l,
   if (str.empty()) {
     return make_vec_array(empty_string());
   }
-  if (delimiter.empty()) {
-    return HHVM_FN(chunk_l)(str, 1, maybe_loc);
-  }
 
   int64_t int_limit = limit.isNull() ? k_PHP_INT_MAX : limit.asInt64Val();
   if (int_limit == 0) {
     return empty_vec_array();
   }
   if (int_limit < 0) {
-    int_limit = k_PHP_INT_MAX;
+    SystemLib::throwInvalidArgumentExceptionObject("Limit must be >= 0");
   }
+
   return get_locale(maybe_loc)->ops()->split(str, delimiter, int_limit);
 }
 

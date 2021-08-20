@@ -74,6 +74,20 @@ Array HSLLocaleLibcOps::chunk(const String& str, int64_t chunk_size) const {
 Array HSLLocaleLibcOps::split(const String& str, const String& delimiter, int64_t limit) const {
   assertx(limit > 0);
 
+  // StringUtil::Explode does not respect limit if delimiter is empty string;
+  // this is fine in other cases as the empty string is banned for `explode()`
+  if (delimiter.empty()) {
+    VecInit ret { (size_t) MIN(str.length(), limit) };
+    for (int i = 0; i < str.length(); ++i) {
+      if (i == limit - 1) {
+        ret.append(str.substr(i));
+        break;
+      }
+      ret.append(str.substr(i, 1));
+    }
+    return ret.toArray();
+  }
+
   auto ret = StringUtil::Explode(str, delimiter, limit);
   assertx(ret.isVec());
   return ret.asCArrRef();

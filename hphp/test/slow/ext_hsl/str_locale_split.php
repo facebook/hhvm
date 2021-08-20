@@ -24,8 +24,11 @@ function main(): void {
     tuple('a💩b','', null),
     tuple('','', null),
     tuple('','a', null),
+    tuple('hello', '', null),
+    tuple('hello', '', 3),
     tuple('ababababa', 'b', 3),
     tuple('ababababa', 'b', 30),
+    tuple('💩💩💩', '', 2),
     // These unicode sequences are all é:
     // - `\u{00e9}` is 'é' as a single codepoint
     // - `\u{0065}\u{0301}` is two codepoints - 'e' and a combining accent

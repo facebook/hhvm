@@ -480,13 +480,39 @@ Array HSLLocaleICUOps::split(const String& str, const String& delimiter, int64_t
   assertx(limit > 0);
 
   auto ustr = ustr_from_utf8(str);
+
+  if (delimiter.empty()) {
+    VecInit ret { (size_t) MIN(ustr.countChar32(), limit) };
+    int32_t offset = 0;
+    int count = 0;
+    while (offset < ustr.length()) {
+      std::string slice;
+      if (count == limit - 1) {
+        ustr.tempSubString(offset).toUTF8String(slice);
+        ret.append(slice);
+        break;
+      }
+      auto next = ustr.moveIndex32(offset, 1);
+      if (next == offset) {
+        break;
+      }
+      ustr.tempSubStringBetween(offset, next).toUTF8String(slice);
+      ret.append(slice);
+      offset = next;
+      count++;
+    }
+    return ret.toArray();
+  }
+
   auto udelim = ustr_from_utf8(delimiter);
 
   icu::ErrorCode err;
   // Singleton, do not free
   auto normalizer = icu::Normalizer2::getNFCInstance(err);
   ustr = normalizer->normalize(ustr, err);
+
   udelim = normalizer->normalize(udelim, err);
+
 
   VecInit ret {(size_t) (ustr.length() / udelim.length()) + 1};
 

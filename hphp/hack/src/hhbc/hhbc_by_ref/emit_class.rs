@@ -30,7 +30,7 @@ use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
 use hhbc_by_ref_hhas_xhp_attribute::HhasXhpAttribute;
 use hhbc_by_ref_hhbc_ast::{
-    FatalOp, FcallArgs, FcallFlags, ReadOnlyOp, SpecialClsRef, UseAsVisibility, Visibility,
+    FatalOp, FcallArgs, FcallFlags, ReadonlyOp, SpecialClsRef, UseAsVisibility, Visibility,
 };
 use hhbc_by_ref_hhbc_id::class::ClassType;
 use hhbc_by_ref_hhbc_id::r#const;
@@ -440,7 +440,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     alloc,
                     0,
                     prop::from_raw_string(alloc, PROP_NAME),
-                    ReadOnlyOp::Any,
+                    ReadonlyOp::Any,
                 ),
                 instr::popc(alloc),
             ],

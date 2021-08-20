@@ -650,7 +650,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(CGetL2,          ONE(NLA),         ONE(CV),         TWO(CV,CV), NF) \
   O(PushL,           ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CGetG,           NA,               ONE(CV),         ONE(CV),    NF) \
-  O(CGetS,           ONE(OA(ReadOnlyOp)),                               \
+  O(CGetS,           ONE(OA(ReadonlyOp)),                               \
                      TWO(CV,CV),      ONE(CV),    NF) \
   O(ClassGetC,       NA,               ONE(CV),         ONE(CV),    NF) \
   O(ClassGetTS,      NA,               ONE(CV),         TWO(CV,CV), NF) \
@@ -667,7 +667,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(AssertRATStk,    TWO(IVA,RATA),    NOV,             NOV,        NF) \
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(SetS,            ONE(OA(ReadOnlyOp)),                               \
+  O(SetS,            ONE(OA(ReadonlyOp)),                               \
                                        THREE(CV,CV,CV), ONE(CV),    NF) \
   O(SetOpL,          TWO(LA,                                            \
                        OA(SetOpOp)),   ONE(CV),         ONE(CV),    NF) \
@@ -781,9 +781,9 @@ constexpr uint32_t kMaxConcatN = 4;
                                        NOV,             NOV,        NF) \
   O(BaseGL,          TWO(LA, OA(MOpMode)),                              \
                                        NOV,             NOV,        NF) \
-  O(BaseSC,          FOUR(IVA, IVA, OA(MOpMode), OA(ReadOnlyOp)),       \
+  O(BaseSC,          FOUR(IVA, IVA, OA(MOpMode), OA(ReadonlyOp)),       \
                                        NOV,             NOV,        NF) \
-  O(BaseL,           THREE(NLA, OA(MOpMode), OA(ReadOnlyOp)),           \
+  O(BaseL,           THREE(NLA, OA(MOpMode), OA(ReadonlyOp)),           \
                                        NOV,             NOV,        NF) \
   O(BaseC,           TWO(IVA, OA(MOpMode)),                             \
                                        NOV,             NOV,        NF) \
@@ -959,7 +959,7 @@ const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
 const char* subopToName(SpecialClsRef);
 const char* subopToName(IsLogAsDynamicCallOp);
-const char* subopToName(ReadOnlyOp);
+const char* subopToName(ReadonlyOp);
 
 /*
  * Returns true iff the given SubOp is in the valid range for its type.

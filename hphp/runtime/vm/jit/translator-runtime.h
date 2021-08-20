@@ -118,14 +118,14 @@ TypedValue arrFirstLast(ArrayData* a);
 
 tv_lval ldGblAddrDefHelper(StringData* name);
 
-TypedValue* getSPropOrNull(ReadOnlyOp op,
+TypedValue* getSPropOrNull(ReadonlyOp op,
                            const Class* cls,
                            const StringData* name,
                            Class* ctx,
                            bool* roProp,
                            bool ignoreLateInit,
                            bool writeMode);
-TypedValue* getSPropOrRaise(ReadOnlyOp op,
+TypedValue* getSPropOrRaise(ReadonlyOp op,
                             const Class* cls,
                             const StringData* name,
                             Class* ctx,

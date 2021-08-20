@@ -983,7 +983,7 @@ static const char* SpecialClsRef_names[] = {
 #undef REF
 };
 
-static const char* ReadOnlyOp_names[] = {
+static const char* ReadonlyOp_names[] = {
 #define OP(x) #x,
   READONLY_OPS
 #undef OP
@@ -1062,7 +1062,7 @@ X(CudOp,          static_cast<int>(CudOp::IgnoreIter))
 X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
 X(IsLogAsDynamicCallOp,
                   static_cast<int>(IsLogAsDynamicCallOp::LogAsDynamicCall))
-X(ReadOnlyOp,     static_cast<int>(ReadOnlyOp::Any))
+X(ReadonlyOp,     static_cast<int>(ReadonlyOp::Any))
 #undef X
 
 //////////////////////////////////////////////////////////////////////

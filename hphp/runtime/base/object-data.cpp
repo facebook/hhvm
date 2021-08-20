@@ -1127,23 +1127,23 @@ void ObjectData::throwMustBeValueType(Slot prop) const {
   );
 }
 
-void ObjectData::checkReadonly(const PropLookup& lookup, ReadOnlyOp op,
+void ObjectData::checkReadonly(const PropLookup& lookup, ReadonlyOp op,
                                bool* roProp) const {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
   auto cow = !isRefcountedType(type(lookup.val)) ||
              hasPersistentFlavor(type(lookup.val));
   if (lookup.readonly) {
-    if (op == ReadOnlyOp::CheckMutROCOW || op == ReadOnlyOp::CheckROCOW) {
+    if (op == ReadonlyOp::CheckMutROCOW || op == ReadonlyOp::CheckROCOW) {
       if (cow) {
         assertx(roProp);
         *roProp = true;
       } else {
         throwMustBeValueType(lookup.slot);
       }
-    } else if (op == ReadOnlyOp::Mutable) {
+    } else if (op == ReadonlyOp::Mutable) {
       throwMustBeMutable(lookup.slot);
     }
-  } else if (op == ReadOnlyOp::ReadOnly || op == ReadOnlyOp::CheckROCOW) {
+  } else if (op == ReadonlyOp::ReadOnly || op == ReadonlyOp::CheckROCOW) {
     throwMustBeReadOnly(lookup.slot);
   }
 }
@@ -1243,7 +1243,7 @@ tv_lval ObjectData::getPropIgnoreAccessibility(const StringData* key) {
 template<ObjectData::PropMode mode>
 ALWAYS_INLINE
 tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
-                             const StringData* key, const ReadOnlyOp op,
+                             const StringData* key, const ReadonlyOp op,
                              bool* roProp) {
   auto constexpr write = (mode == PropMode::DimForWrite);
   auto constexpr read = (mode == PropMode::ReadNoWarn) ||
@@ -1306,7 +1306,7 @@ tv_lval ObjectData::prop(
   TypedValue* tvRef,
   const Class* ctx,
   const StringData* key,
-  const ReadOnlyOp op,
+  const ReadonlyOp op,
   bool* roProp
 ) {
   return propImpl<PropMode::ReadNoWarn>(tvRef, ctx, key, op, roProp);
@@ -1316,7 +1316,7 @@ tv_lval ObjectData::propW(
   TypedValue* tvRef,
   const Class* ctx,
   const StringData* key,
-  const ReadOnlyOp op
+  const ReadonlyOp op
 ) {
   return propImpl<PropMode::ReadWarn>(tvRef, ctx, key, op);
 }
@@ -1325,7 +1325,7 @@ tv_lval ObjectData::propU(
   TypedValue* tvRef,
   const Class* ctx,
   const StringData* key,
-  const ReadOnlyOp op,
+  const ReadonlyOp op,
   bool* roProp
 ) {
   return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, op, roProp);
@@ -1335,7 +1335,7 @@ tv_lval ObjectData::propD(
   TypedValue* tvRef,
   const Class* ctx,
   const StringData* key,
-  const ReadOnlyOp op,
+  const ReadonlyOp op,
   bool* roProp
 ) {
   return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, op, roProp);
@@ -1360,7 +1360,7 @@ bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
   return false;
 }
 
-void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val, ReadOnlyOp op) {
+void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val, ReadonlyOp op) {
   assertx(tvIsPlausible(val));
   assertx(val.m_type != KindOfUninit);
 
@@ -1372,7 +1372,7 @@ void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val, Read
       throwMutateConstProp(lookup.slot);
     }
     if (RO::EvalEnableReadonlyPropertyEnforcement && !lookup.readonly &&
-      op == ReadOnlyOp::ReadOnly) {
+      op == ReadonlyOp::ReadOnly) {
       throwMustBeReadOnly(lookup.slot);
     }
     // TODO(T61738946): We can remove the temporary here once we no longer

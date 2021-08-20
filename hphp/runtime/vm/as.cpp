@@ -1266,22 +1266,22 @@ MemberKey read_member_key(AsmState& as) {
         as.error("couldn't read name for local variable in member key");
       }
       int32_t lid = as.getLocalId(name);
-      ReadOnlyOp op = static_cast<ReadOnlyOp>(read_subop<ReadOnlyOp>(as));
+      ReadonlyOp op = static_cast<ReadonlyOp>(read_subop<ReadonlyOp>(as));
       return MemberKey{mcode, NamedLocal{lid, lid}, op};
     }
     case MEC: case MPC: {
       auto const i = read_opcode_arg<int32_t>(as);
-      ReadOnlyOp op = static_cast<ReadOnlyOp>(read_subop<ReadOnlyOp>(as));
+      ReadonlyOp op = static_cast<ReadonlyOp>(read_subop<ReadonlyOp>(as));
       return MemberKey{mcode, i, op};
     }
     case MEI: {
       auto const i = read_opcode_arg<int64_t>(as);
-      ReadOnlyOp op = static_cast<ReadOnlyOp>(read_subop<ReadOnlyOp>(as));
+      ReadonlyOp op = static_cast<ReadonlyOp>(read_subop<ReadonlyOp>(as));
       return MemberKey{mcode, i, op};
     }
     case MET: case MPT: case MQT: {
       auto const litstr = read_litstr(as);
-      ReadOnlyOp op = static_cast<ReadOnlyOp>(read_subop<ReadOnlyOp>(as));
+      ReadonlyOp op = static_cast<ReadonlyOp>(read_subop<ReadonlyOp>(as));
       return MemberKey{mcode, litstr, op};
     }
   }

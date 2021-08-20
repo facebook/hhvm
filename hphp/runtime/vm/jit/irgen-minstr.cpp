@@ -934,7 +934,7 @@ const StaticString
   s_NULLSAFE_PROP_WRITE_ERROR(Strings::NULLSAFE_PROP_WRITE_ERROR);
 
 SSATmp* propGenericImpl(IRGS& env, MOpMode mode, SSATmp* base, SSATmp* key,
-                        bool nullsafe, ReadOnlyOp rop) {
+                        bool nullsafe, ReadonlyOp rop) {
   auto const define = mode == MOpMode::Define;
   if (define && nullsafe) {
     gen(env, RaiseError, cns(env, s_NULLSAFE_PROP_WRITE_ERROR.get()));
@@ -948,7 +948,7 @@ SSATmp* propGenericImpl(IRGS& env, MOpMode mode, SSATmp* base, SSATmp* key,
   return gen(env, op, PropData { mode, rop }, base, key, roProp, tvRef);
 }
 
-SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadOnlyOp op) {
+SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadonlyOp op) {
   auto const baseType = env.irb->fs().mbase().type;
 
   if (mode == MOpMode::Unset && !baseType.maybe(TObj)) {
@@ -962,14 +962,14 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadOnlyOp
     getCurrentPropertyOffset(env, base, key->type(), false);
   if (!propInfo || propInfo->isConst || mode == MOpMode::Unset ||
     (propInfo->readOnly &&
-    (op == ReadOnlyOp::CheckMutROCOW || op == ReadOnlyOp::CheckROCOW))) {
+    (op == ReadonlyOp::CheckMutROCOW || op == ReadonlyOp::CheckROCOW))) {
     return propGenericImpl(env, mode, base, key, nullsafe, op);
   }
   if (RO::EvalEnableReadonlyPropertyEnforcement) {
-    if (propInfo->readOnly && op == ReadOnlyOp::Mutable) {
+    if (propInfo->readOnly && op == ReadonlyOp::Mutable) {
       gen(env, ThrowMustBeMutableException, cns(env, propInfo->propClass), key);
       return cns(env, TBottom);
-    } else if (!propInfo->readOnly && op == ReadOnlyOp::CheckROCOW) {
+    } else if (!propInfo->readOnly && op == ReadonlyOp::CheckROCOW) {
       gen(env, ThrowMustBeReadOnlyException, cns(env, propInfo->propClass), key);
       return cns(env, TBottom);
     }
@@ -1175,12 +1175,12 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
 
 template<class Finish>
 SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
-                     MOpMode mode, bool nullsafe, Finish finish, ReadOnlyOp op) {
+                     MOpMode mode, bool nullsafe, Finish finish, ReadonlyOp op) {
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
   if (propInfo) {
     if (RO::EvalEnableReadonlyPropertyEnforcement && propInfo->readOnly &&
-      op == ReadOnlyOp::Mutable) {
+      op == ReadonlyOp::Mutable) {
       gen(env, ThrowMustBeMutableException, cns(env, propInfo->propClass), key);
       return cns(env, TBottom);
     }
@@ -1247,7 +1247,7 @@ Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
   return block;
 }
 
-SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadOnlyOp op) {
+SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
   auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
 
   auto const base = extractBaseIfObj(env);
@@ -1258,7 +1258,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadOnlyOp op) {
 
   if (propInfo && !propInfo->isConst) {
     if (RO::EvalEnableReadonlyPropertyEnforcement && !propInfo->readOnly &&
-      op == ReadOnlyOp::ReadOnly) {
+      op == ReadonlyOp::ReadOnly) {
       gen(env, ThrowMustBeReadOnlyException, cns(env, propInfo->propClass), key);
       return cns(env, TBottom);
     }
@@ -1592,7 +1592,7 @@ void emitBaseSC(IRGS& env,
                 uint32_t propIdx,
                 uint32_t clsIdx,
                 MOpMode mode,
-                ReadOnlyOp op) {
+                ReadonlyOp op) {
   auto const cls = topC(env, BCSPRelOffset{safe_cast<int32_t>(clsIdx)});
   if (!cls->isA(TCls)) PUNT(BaseSC-NotClass);
 
@@ -1608,7 +1608,7 @@ void emitBaseSC(IRGS& env,
   stMBase(env, spropPtr);
 }
 
-void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode, ReadOnlyOp op) {
+void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode, ReadonlyOp op) {
   stMBase(env, ldLocAddr(env, loc.id));
 
   auto base = ldLoc(env, loc.id, DataTypeGeneric);
@@ -1622,7 +1622,7 @@ void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode, ReadOnlyOp op) {
     gen(env, ThrowUninitLoc, cns(env, baseName));
   }
 
-  if (RO::EvalEnableReadonlyPropertyEnforcement && op == ReadOnlyOp::CheckROCOW) {
+  if (RO::EvalEnableReadonlyPropertyEnforcement && op == ReadonlyOp::CheckROCOW) {
     if (!base->type().maybe(TCounted) || base->type().subtypeOfAny(TArrLike)) {
       gen(env, StMROProp, cns(env, true));
     } else {

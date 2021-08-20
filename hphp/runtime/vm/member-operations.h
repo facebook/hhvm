@@ -2453,7 +2453,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
                             Class* ctx,
                             tv_rval base,
                             StringData* key,
-                            ReadOnlyOp op,
+                            ReadonlyOp op,
                             bool* roProp = nullptr) {
   switch (base.type()) {
     case KindOfUninit:
@@ -2496,7 +2496,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
 template<MOpMode mode, KeyType keyType = KeyType::Any>
 inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
                        ObjectData* instance, key_type<keyType> key,
-                       ReadOnlyOp op, bool* roProp = nullptr) {
+                       ReadonlyOp op, bool* roProp = nullptr) {
   auto keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
 
@@ -2516,7 +2516,7 @@ inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
 
 template<MOpMode mode, KeyType keyType = KeyType::Any>
 inline tv_lval Prop(TypedValue& tvRef, const Class* ctx,
-                    tv_lval base, key_type<keyType> key, ReadOnlyOp op,
+                    tv_lval base, key_type<keyType> key, ReadonlyOp op,
                     bool* roProp = nullptr) {
   auto const result = propPre<mode>(tvRef, base);
   if (result.type() == KindOfNull) return result;
@@ -2552,7 +2552,7 @@ inline void SetPropNull(TypedValue* val) {
 
 template <KeyType keyType>
 inline void SetPropObj(Class* ctx, ObjectData* instance, key_type<keyType> key,
-                       TypedValue* val, ReadOnlyOp op) {
+                       TypedValue* val, ReadonlyOp op) {
   StringData* keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
 
@@ -2563,7 +2563,7 @@ inline void SetPropObj(Class* ctx, ObjectData* instance, key_type<keyType> key,
 // $base->$key = $val
 template <bool setResult, KeyType keyType = KeyType::Any>
 inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
-                    TypedValue* val, ReadOnlyOp op) {
+                    TypedValue* val, ReadonlyOp op) {
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:

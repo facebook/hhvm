@@ -195,7 +195,7 @@ inline const char* prettytype(SetRangeOp) { return "SetRangeOp"; }
 inline const char* prettytype(TypeStructResolveOp) {
   return "TypeStructResolveOp";
 }
-inline const char* prettytype(ReadOnlyOp) { return "ReadOnlyOp"; }
+inline const char* prettytype(ReadonlyOp) { return "ReadonlyOp"; }
 inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
 inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
@@ -2410,7 +2410,7 @@ SpropState::~SpropState() {
   tvDecRefGen(oldNameCell);
 }
 
-OPTBLD_INLINE void iopCGetS(ReadOnlyOp op) {
+OPTBLD_INLINE void iopCGetS(ReadonlyOp op) {
   SpropState ss(vmStack(), false);
   if (!(ss.visible && ss.accessible)) {
     raise_error("Invalid static property access: %s::%s",
@@ -2418,7 +2418,7 @@ OPTBLD_INLINE void iopCGetS(ReadOnlyOp op) {
                 ss.name->data());
   }
   if (RO::EvalEnableReadonlyPropertyEnforcement &&
-    ss.readonly && op == ReadOnlyOp::Mutable){
+    ss.readonly && op == ReadonlyOp::Mutable){
     throw_must_be_mutable(ss.cls->name()->data(), ss.name->data());
   }
   tvDup(*ss.val, *ss.output);
@@ -2459,7 +2459,7 @@ OPTBLD_INLINE void iopBaseGL(tv_lval loc, MOpMode mode) {
 OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
                              uint32_t clsIdx,
                              MOpMode mode,
-                             ReadOnlyOp op) {
+                             ReadonlyOp op) {
   auto& mstate = vmMInstrState();
   auto const clsCell = vmStack().indC(clsIdx);
   auto const key = vmStack().indTV(keyIdx);
@@ -2489,7 +2489,7 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
   mstate.base = tv_lval(lookup.val);
 }
 
-OPTBLD_INLINE void baseLImpl(named_local_var loc, MOpMode mode, ReadOnlyOp op) {
+OPTBLD_INLINE void baseLImpl(named_local_var loc, MOpMode mode, ReadonlyOp op) {
   auto& mstate = vmMInstrState();
   auto const local = loc.lval;
   if (mode == MOpMode::Warn && type(local) == KindOfUninit) {
@@ -2505,7 +2505,7 @@ OPTBLD_INLINE void baseLImpl(named_local_var loc, MOpMode mode, ReadOnlyOp op) {
   mstate.base = local;
 }
 
-OPTBLD_INLINE void iopBaseL(named_local_var loc, MOpMode mode, ReadOnlyOp op) {
+OPTBLD_INLINE void iopBaseL(named_local_var loc, MOpMode mode, ReadonlyOp op) {
   baseLImpl(loc, mode, op);
 }
 
@@ -2520,7 +2520,7 @@ OPTBLD_INLINE void iopBaseH() {
   mstate.base = &mstate.tvTempBase;
 }
 
-static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key, ReadOnlyOp op) {
+static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key, ReadonlyOp op) {
   auto& mstate = vmMInstrState();
   auto ctx = arGetContextClass(vmfp());
 
@@ -2545,7 +2545,7 @@ static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key, ReadOnlyOp 
   }();
 }
 
-static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key, ReadOnlyOp op) {
+static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key, ReadonlyOp op) {
   auto& mstate = vmMInstrState();
   auto ctx = arGetContextClass(vmfp());
 
@@ -3258,7 +3258,7 @@ OPTBLD_INLINE void iopSetG() {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopSetS(ReadOnlyOp op) {
+OPTBLD_INLINE void iopSetS(ReadonlyOp op) {
   TypedValue* tv1 = vmStack().topTV();
   TypedValue* clsCell = vmStack().indC(1);
   TypedValue* propn = vmStack().indTV(2);
@@ -3278,7 +3278,7 @@ OPTBLD_INLINE void iopSetS(ReadOnlyOp op) {
 
   SCOPE_EXIT { decRefStr(name); };
   if (RO::EvalEnableReadonlyPropertyEnforcement &&
-    !readonly && op == ReadOnlyOp::ReadOnly) {
+    !readonly && op == ReadonlyOp::ReadOnly) {
     throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
   }
   if (!(visible && accessible)) {

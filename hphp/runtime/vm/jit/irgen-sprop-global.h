@@ -44,7 +44,7 @@ struct ClsPropLookup {
 };
 
 struct LdClsPropOptions {
-  const ReadOnlyOp readOnlyCheck;
+  const ReadonlyOp readOnlyCheck;
   bool raise;
   bool ignoreLateInit;
   bool writeMode;

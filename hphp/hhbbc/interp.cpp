@@ -2408,11 +2408,11 @@ void in(ISS& env, const bc::CGetS& op) {
     return throws();
   }
 
-  if (checkReadOnlyOp(ReadOnlyOp::Mutable, op.subop1) &&
+  if (checkReadonlyOp(ReadonlyOp::Mutable, op.subop1) &&
     lookup.readOnly == TriBool::Yes) {
     return throws();
   }
-  auto const mightReadOnlyThrow = checkReadOnlyOp(ReadOnlyOp::Mutable, op.subop1) &&
+  auto const mightReadOnlyThrow = checkReadonlyOp(ReadonlyOp::Mutable, op.subop1) &&
     lookup.readOnly == TriBool::Maybe;
 
   if (lookup.found == TriBool::Yes &&
@@ -3380,7 +3380,7 @@ void in(ISS& env, const bc::SetS& op) {
     val,
     true,
     false,
-    checkReadOnlyOp(ReadOnlyOp::ReadOnly, op.subop1)
+    checkReadonlyOp(ReadonlyOp::ReadOnly, op.subop1)
   );
 
   if (merge.throws == TriBool::Yes || merge.adjusted.subtypeOf(BBottom)) {

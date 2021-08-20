@@ -2007,7 +2007,7 @@ struct MOpModeData : IRExtraData {
 };
 
 struct PropData : IRExtraData {
-  explicit PropData(MOpMode mode, ReadOnlyOp op) : mode{mode}, op(op) {}
+  explicit PropData(MOpMode mode, ReadonlyOp op) : mode{mode}, op(op) {}
 
   std::string show() const {
     return fmt::format("{} {}", subopToName(mode), subopToName(op));
@@ -2016,7 +2016,7 @@ struct PropData : IRExtraData {
   size_t stableHash() const {
     return folly::hash::hash_combine(
       std::hash<MOpMode>()(mode),
-      std::hash<ReadOnlyOp>()(op)
+      std::hash<ReadonlyOp>()(op)
     );
   }
 
@@ -2025,26 +2025,26 @@ struct PropData : IRExtraData {
   }
 
   MOpMode mode;
-  ReadOnlyOp op;
+  ReadonlyOp op;
 };
 
 struct ReadOnlyData : IRExtraData {
-  explicit ReadOnlyData(ReadOnlyOp op) : op(op) {}
+  explicit ReadOnlyData(ReadonlyOp op) : op(op) {}
   std::string show() const { return subopToName(op); }
 
   size_t hash() const {
-    return std::hash<ReadOnlyOp>()(op);
+    return std::hash<ReadonlyOp>()(op);
   }
 
   size_t stableHash() const {
-    return std::hash<ReadOnlyOp>()(op);
+    return std::hash<ReadonlyOp>()(op);
   }
 
   bool equals(const ReadOnlyData& o) const {
     return op == o.op;
   }
 
-  ReadOnlyOp op;
+  ReadonlyOp op;
 };
 
 struct SetOpData : IRExtraData {

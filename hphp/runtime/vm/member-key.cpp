@@ -48,9 +48,9 @@ const char* const readOnlyNames[] = {
   "Any", "ReadOnly", "Mutable", "CheckROCOW", "CheckMutROCOW"
 };
 
-const char* readOnlyString(ReadOnlyOp op) {
+const char* readOnlyString(ReadonlyOp op) {
   static_assert(
-    std::is_same<typename std::underlying_type<ReadOnlyOp>::type,uint8_t>::value,
+    std::is_same<typename std::underlying_type<ReadonlyOp>::type,uint8_t>::value,
     "Subops are all expected to be single-bytes"
   );
   return readOnlyNames[static_cast<uint8_t>(op)];

@@ -48,19 +48,19 @@ MemberKey decode_member_key(PC& pc, Either<const Unit*, const UnitEmitter*> u) {
   switch (mcode) {
     case MEC: case MPC: {
       auto const iva = static_cast<int32_t>(decode_iva(pc));
-      return MemberKey{mcode, iva, decode_oa<ReadOnlyOp>(pc)};
+      return MemberKey{mcode, iva, decode_oa<ReadonlyOp>(pc)};
     }
     case MEL: case MPL: {
       auto const local = decode_named_local(pc);
-      return MemberKey{mcode, local, decode_oa<ReadOnlyOp>(pc)};
+      return MemberKey{mcode, local, decode_oa<ReadonlyOp>(pc)};
     }
     case MEI: {
       auto const i64 = decode_raw<int64_t>(pc);
-      return MemberKey{mcode, i64, decode_oa<ReadOnlyOp>(pc)};
+      return MemberKey{mcode, i64, decode_oa<ReadonlyOp>(pc)};
     }
     case MET: case MPT: case MQT: {
       auto const str = decode_string(pc, u);
-      return MemberKey{mcode, str, decode_oa<ReadOnlyOp>(pc)};
+      return MemberKey{mcode, str, decode_oa<ReadonlyOp>(pc)};
     }
 
     case MW:

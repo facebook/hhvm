@@ -970,7 +970,7 @@ fn inline_gena_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                 instr::cgetl(alloc, val_local),
                                 instr::whresult(alloc),
                                 instr::basel(alloc, arr_local, MemberOpMode::Define),
-                                instr::setm(alloc, 0, MemberKey::EL(key_local, ReadOnlyOp::Any)),
+                                instr::setm(alloc, 0, MemberKey::EL(key_local, ReadonlyOp::Any)),
                                 instr::popc(alloc),
                             ],
                         )
@@ -1992,7 +1992,7 @@ pub fn emit_reified_targs<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     QueryOp::CGet,
                     MemberKey::PT(
                         prop::from_raw_string(alloc, string_utils::reified::PROP_NAME),
-                        ReadOnlyOp::Any,
+                        ReadonlyOp::Any,
                     ),
                 ),
             ],
@@ -2550,7 +2550,7 @@ fn get_reified_var_cexpr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     alloc,
                     1,
                     QueryOp::CGet,
-                    MemberKey::ET(Str::from("classname"), ReadOnlyOp::Any),
+                    MemberKey::ET(Str::from("classname"), ReadonlyOp::Any),
                 ),
             ],
         ))
@@ -3600,7 +3600,7 @@ pub fn emit_reified_generic_instrs<'arena>(
                 instr::dim_warn_pt(
                     alloc,
                     prop::from_raw_string(alloc, string_utils::reified::PROP_NAME),
-                    ReadOnlyOp::Any,
+                    ReadonlyOp::Any,
                 ),
             ],
         )
@@ -3616,7 +3616,7 @@ pub fn emit_reified_generic_instrs<'arena>(
                     alloc,
                     0,
                     QueryOp::CGet,
-                    MemberKey::EI(index.try_into().unwrap(), ReadOnlyOp::Any),
+                    MemberKey::EI(index.try_into().unwrap(), ReadonlyOp::Any),
                 ),
             ],
         ),
@@ -3886,9 +3886,9 @@ fn emit_obj_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     readonly_get: bool, // obj_get enclosed in readonly expression
 ) -> Result<(InstrSeq<'arena>, Option<NumParams>)> {
     let readonly_op = if readonly_get {
-        ReadOnlyOp::Any
+        ReadonlyOp::Any
     } else {
-        ReadOnlyOp::Mutable
+        ReadonlyOp::Mutable
     };
     let alloc = env.arena;
     if let Some(ast::Lid(pos, id)) = expr.2.as_lvar() {
@@ -3918,7 +3918,7 @@ fn emit_obj_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         0,
         prop,
         null_coalesce_assignment,
-        ReadOnlyOp::Any,
+        ReadonlyOp::Any,
     )?
     .2;
     let (
@@ -3986,7 +3986,7 @@ fn emit_prop_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     stack_index: StackIndex,
     prop: &ast::Expr,
     null_coalesce_assignment: bool,
-    readonly_op: ReadOnlyOp,
+    readonly_op: ReadonlyOp,
 ) -> Result<(MemberKey<'arena>, InstrSeq<'arena>, StackIndex)> {
     let alloc = env.arena;
 
@@ -4160,7 +4160,7 @@ fn emit_array_get_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 elem_stack_size,
                 0,
                 inout_param_info,
-                ReadOnlyOp::Any, // array get on reading has no restrictions
+                ReadonlyOp::Any, // array get on reading has no restrictions
             )?;
             let cls_stack_size = match &base_result {
                 ArrayGetBase::Regular(base) => base.cls_stack_size,
@@ -4243,7 +4243,7 @@ fn emit_array_get_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                 base_expr,
                                 local,
                                 false,
-                                ReadOnlyOp::Any,
+                                ReadonlyOp::Any,
                             )?,
                             instr::popc(alloc),
                         ],
@@ -4330,7 +4330,7 @@ fn emit_array_get_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         alloc,
                         vec![
                             store,
-                            instr::setm(alloc, 0, MemberKey::EL(local, ReadOnlyOp::Any)),
+                            instr::setm(alloc, 0, MemberKey::EL(local, ReadonlyOp::Any)),
                             instr::popc(alloc),
                         ],
                     );
@@ -4416,11 +4416,11 @@ fn get_elem_member_key<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             E_::Lvar(x) if !is_local_this(env, &x.1) => Ok((
                 {
                     if null_coalesce_assignment {
-                        MemberKey::EC(stack_index, ReadOnlyOp::Any)
+                        MemberKey::EC(stack_index, ReadonlyOp::Any)
                     } else {
                         MemberKey::EL(
                             get_local(e, env, &x.0, local_id::get_name(&x.1))?,
-                            ReadOnlyOp::Any,
+                            ReadonlyOp::Any,
                         )
                     }
                 },
@@ -4429,7 +4429,7 @@ fn get_elem_member_key<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             // Special case for literal integer
             E_::Int(s) => match ast_constant_folder::expr_to_typed_value(alloc, e, elem_expr) {
                 Ok(TypedValue::Int(i)) => {
-                    Ok((MemberKey::EI(i, ReadOnlyOp::Any), instr::empty(alloc)))
+                    Ok((MemberKey::EI(i, ReadonlyOp::Any), instr::empty(alloc)))
                 }
                 _ => Err(Unrecoverable(format!("{} is not a valid integer index", s))),
             },
@@ -4440,7 +4440,7 @@ fn get_elem_member_key<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 let s = unsafe { std::str::from_utf8_unchecked(s.as_slice()) };
                 let s = bumpalo::collections::String::from_str_in(s, alloc).into_bump_str();
                 Ok((
-                    MemberKey::ET(Str::from(s), ReadOnlyOp::Any),
+                    MemberKey::ET(Str::from(s), ReadonlyOp::Any),
                     instr::empty(alloc),
                 ))
             }
@@ -4463,12 +4463,12 @@ fn get_elem_member_key<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     class::ClassType::<'arena>::from_ast_name(alloc, &cname).to_raw_string();
                 if e.options().emit_class_pointers() > 0 {
                     Ok((
-                        MemberKey::ET(Str::from(fq_id), ReadOnlyOp::Any),
+                        MemberKey::ET(Str::from(fq_id), ReadonlyOp::Any),
                         instr::raise_class_string_conversion_warning(alloc),
                     ))
                 } else {
                     Ok((
-                        MemberKey::ET(Str::from(fq_id), ReadOnlyOp::Any),
+                        MemberKey::ET(Str::from(fq_id), ReadonlyOp::Any),
                         instr::empty(alloc),
                     ))
                 }
@@ -4476,7 +4476,7 @@ fn get_elem_member_key<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             _ => {
                 // General case
                 Ok((
-                    MemberKey::EC(stack_index, ReadOnlyOp::Any),
+                    MemberKey::EC(stack_index, ReadonlyOp::Any),
                     instr::empty(alloc),
                 ))
             }
@@ -4492,7 +4492,7 @@ fn emit_store_for_simple_base<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     base: &ast::Expr,
     local: Local<'arena>,
     is_base: bool,
-    readonly_op: ReadOnlyOp,
+    readonly_op: ReadonlyOp,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let (base_expr_instrs_begin, base_expr_instrs_end, base_setup_instrs, _, _) = emit_base(
@@ -4507,7 +4507,7 @@ fn emit_store_for_simple_base<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         0,
         readonly_op,
     )?;
-    let memberkey = MemberKey::EL(local, ReadOnlyOp::Any);
+    let memberkey = MemberKey::EL(local, ReadonlyOp::Any);
     Ok(InstrSeq::gather(
         alloc,
         vec![
@@ -4546,7 +4546,7 @@ fn emit_class_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         vec![
             InstrSeq::from((alloc, emit_class_expr(e, env, cexpr, prop)?)),
             match query_op {
-                QueryOp::CGet => instr::cgets(alloc, ReadOnlyOp::Any),
+                QueryOp::CGet => instr::cgets(alloc, ReadonlyOp::Any),
                 QueryOp::Isset => instr::issets(alloc),
                 QueryOp::CGetQuiet => {
                     return Err(Unrecoverable("emit_class_get: CGetQuiet".into()));
@@ -5373,7 +5373,7 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         false,           /*null_coalesce_assignment*/
         3,               /* base_offset */
         3,               /* rhs_stack_size */
-        ReadOnlyOp::Any, /* readonly_op */
+        ReadonlyOp::Any, /* readonly_op */
     )?;
     Ok(InstrSeq::gather(
         alloc,
@@ -5469,7 +5469,7 @@ fn emit_base<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     null_coalesce_assignment: bool,
     base_offset: StackIndex,
     rhs_stack_size: StackIndex,
-    readonly_enforcement: ReadOnlyOp, // this value depends on where we are emitting the base
+    readonly_enforcement: ReadonlyOp, // this value depends on where we are emitting the base
 ) -> Result<(
     InstrSeq<'arena>,
     InstrSeq<'arena>,
@@ -5553,7 +5553,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     base_offset: StackIndex,
     rhs_stack_size: StackIndex,
     inout_param_info: Option<(usize, &inout_locals::AliasInfoMap)>,
-    readonly_op: ReadOnlyOp,
+    readonly_op: ReadonlyOp,
 ) -> Result<ArrayGetBase<'arena>> {
     let alloc = env.arena;
     let pos = &expr.1;
@@ -5820,7 +5820,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                     instr::dim(
                                         alloc,
                                         MemberOpMode::Define,
-                                        MemberKey::EL(local, ReadOnlyOp::Any),
+                                        MemberKey::EL(local, ReadonlyOp::Any),
                                     ),
                                 ],
                             ),
@@ -5855,7 +5855,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             0,
                             prop_expr,
                             null_coalesce_assignment,
-                            ReadOnlyOp::Any, // just getting stack size here
+                            ReadonlyOp::Any, // just getting stack size here
                         )?
                         .2;
                         let (
@@ -5874,7 +5874,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             null_coalesce_assignment,
                             base_offset + prop_stack_size,
                             rhs_stack_size,
-                            ReadOnlyOp::Mutable, // the rest of the base must be completely mutable
+                            ReadonlyOp::Mutable, // the rest of the base must be completely mutable
                         )?;
                         let (mk, prop_instrs, _) = emit_prop_expr(
                             e,
@@ -6106,7 +6106,7 @@ fn emit_array_get_fixed<'arena, 'decl, D: DeclProvider<'decl>>(
             .enumerate()
             .rev()
             .map(|(i, ix)| {
-                let mk = MemberKey::EI(*ix as i64, ReadOnlyOp::Any);
+                let mk = MemberKey::EI(*ix as i64, ReadonlyOp::Any);
                 if i == 0 {
                     instr::querym(alloc, stack_count, QueryOp::CGet, mk)
                 } else {
@@ -6320,7 +6320,7 @@ fn emit_final_static_op<'arena, 'decl, D: DeclProvider<'decl>>(
 ) -> Result<InstrSeq<'arena>> {
     use LValOp as L;
     Ok(match op {
-        L::Set => instr::sets(alloc, ReadOnlyOp::Any),
+        L::Set => instr::sets(alloc, ReadonlyOp::Any),
         L::SetOp(op) => instr::setops(alloc, op),
         L::IncDec(op) => instr::incdecs(alloc, op),
         L::Unset => {
@@ -6398,9 +6398,9 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         emit_elem(e, env, opt_elem_expr, None, null_coalesce_assignment)?;
                     let base_offset = elem_stack_size + rhs_stack_size;
                     let readonly_op = if rhs_readonly {
-                        ReadOnlyOp::CheckROCOW // writing a readonly value requires a readony copy on write array
+                        ReadonlyOp::CheckROCOW // writing a readonly value requires a readony copy on write array
                     } else {
-                        ReadOnlyOp::CheckMutROCOW // writing a mut value requires left side to be mutable or a ROCOW
+                        ReadonlyOp::CheckMutROCOW // writing a mut value requires left side to be mutable or a ROCOW
                     };
                     let (
                         base_expr_instrs_begin,
@@ -6471,9 +6471,9 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     _ => MemberOpMode::Define,
                 };
                 let readonly_op = if rhs_readonly {
-                    ReadOnlyOp::ReadOnly
+                    ReadonlyOp::ReadOnly
                 } else {
-                    ReadOnlyOp::Any
+                    ReadonlyOp::Any
                 };
                 let prop_stack_size = emit_prop_expr(
                     e,
@@ -6502,7 +6502,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     null_coalesce_assignment,
                     base_offset,
                     rhs_stack_size,
-                    ReadOnlyOp::Mutable, // writing to a property requires everything in the base to be mutable
+                    ReadonlyOp::Mutable, // writing to a property requires everything in the base to be mutable
                 )?;
                 let (mk, prop_instrs, _) = emit_prop_expr(
                     e,

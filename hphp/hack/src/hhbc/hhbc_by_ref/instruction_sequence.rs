@@ -615,7 +615,7 @@ pub mod instr {
         instr(alloc, Instruct::IOp(InstructOperator::BitXor))
     }
 
-    pub fn sets<'a>(alloc: &'a bumpalo::Bump, readonly_op: ReadOnlyOp) -> InstrSeq<'a> {
+    pub fn sets<'a>(alloc: &'a bumpalo::Bump, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
         instr(
             alloc,
             Instruct::IMutator(InstructMutator::SetS(readonly_op)),
@@ -684,7 +684,7 @@ pub mod instr {
         instr(alloc, Instruct::IIsset(InstructIsset::IsUnsetL(local)))
     }
 
-    pub fn cgets<'a>(alloc: &'a bumpalo::Bump, readonly_op: ReadOnlyOp) -> InstrSeq<'a> {
+    pub fn cgets<'a>(alloc: &'a bumpalo::Bump, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
         instr(alloc, Instruct::IGet(InstructGet::CGetS(readonly_op)))
     }
 
@@ -893,7 +893,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IBase(InstructBase::BaseL(local, mode, ReadOnlyOp::Any)),
+            Instruct::IBase(InstructBase::BaseL(local, mode, ReadonlyOp::Any)),
         )
     }
 
@@ -932,7 +932,7 @@ pub mod instr {
         y: StackIndex,
         z: StackIndex,
         mode: MemberOpMode,
-        readonly_op: ReadOnlyOp,
+        readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
@@ -1052,7 +1052,7 @@ pub mod instr {
     pub fn dim_warn_pt<'a>(
         alloc: &'a bumpalo::Bump,
         key: PropId<'a>,
-        readonly_op: ReadOnlyOp,
+        readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
         dim(alloc, MemberOpMode::Warn, MemberKey::PT(key, readonly_op))
     }
@@ -1060,7 +1060,7 @@ pub mod instr {
     pub fn dim_define_pt<'a>(
         alloc: &'a bumpalo::Bump,
         key: PropId<'a>,
-        readonly_op: ReadOnlyOp,
+        readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
         dim(alloc, MemberOpMode::Define, MemberKey::PT(key, readonly_op))
     }
@@ -1188,7 +1188,7 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         num_params: NumParams,
         key: PropId<'a>,
-        readonly_op: ReadOnlyOp,
+        readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
         querym(
             alloc,
@@ -1248,7 +1248,7 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         num_params: NumParams,
         key: PropId<'a>,
-        readonly_op: ReadOnlyOp,
+        readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
         setm(alloc, num_params, MemberKey::PT(key, readonly_op))
     }

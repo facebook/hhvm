@@ -64,7 +64,7 @@ constexpr size_t NumMemberCodes = MW + 1;
   OP(CheckROCOW)        \
   OP(CheckMutROCOW)
 
-enum class ReadOnlyOp : uint8_t {
+enum class ReadonlyOp : uint8_t {
 #define OP(name) name,
   READONLY_OPS
 #undef OP
@@ -96,36 +96,36 @@ constexpr bool mcodeIsElem(MemberCode mcode) {
 struct MemberKey {
   MemberKey()
     : mcode{MW}
-    , rop{ReadOnlyOp::Any}
+    , rop{ReadonlyOp::Any}
     , int64{0}
   {}
 
-  MemberKey(MemberCode mcode, NamedLocal loc, ReadOnlyOp rop)
+  MemberKey(MemberCode mcode, NamedLocal loc, ReadonlyOp rop)
     : mcode{mcode}
     , rop{rop}
     , local{loc}
   {}
 
-  MemberKey(MemberCode mcode, int32_t iva, ReadOnlyOp rop)
+  MemberKey(MemberCode mcode, int32_t iva, ReadonlyOp rop)
     : mcode{mcode}
     , rop{rop}
     , iva{iva}
   {}
 
-  MemberKey(MemberCode mcode, int64_t int64, ReadOnlyOp rop)
+  MemberKey(MemberCode mcode, int64_t int64, ReadonlyOp rop)
     : mcode{mcode}
     , rop{rop}
     , int64{int64}
   {}
 
-  MemberKey(MemberCode mcode, const StringData* litstr, ReadOnlyOp rop)
+  MemberKey(MemberCode mcode, const StringData* litstr, ReadonlyOp rop)
     : mcode{mcode}
     , rop{rop}
     , litstr{litstr}
   {}
 
   MemberCode mcode;
-  ReadOnlyOp rop;
+  ReadonlyOp rop;
   union {
     NamedLocal local;
     int32_t iva;

@@ -82,7 +82,7 @@ BASE_G_HELPER_TABLE(X)
 
 #define X(nm, mode, kt)                                             \
 inline tv_lval nm(Class* ctx, tv_lval base, key_type<kt> key,       \
-                  TypedValue& tvRef, ReadOnlyOp op, bool* roProp) { \
+                  TypedValue& tvRef, ReadonlyOp op, bool* roProp) { \
   return Prop<mode,kt>(tvRef, ctx, base, key, op, roProp);          \
 }
 PROP_HELPER_TABLE(X)
@@ -95,7 +95,7 @@ PROP_HELPER_TABLE(X)
 
 #define X(nm, kt)                                                     \
 inline tv_lval nm(Class* ctx, tv_lval base, key_type<kt> key,         \
-                  TypedValue& tvRef, ReadOnlyOp op, bool* roProp) {   \
+                  TypedValue& tvRef, ReadonlyOp op, bool* roProp) {   \
   return Prop<MOpMode::Define,kt>(tvRef, ctx, base, key, op, roProp); \
 }
 PROPD_HELPER_TABLE(X)
@@ -112,7 +112,7 @@ PROPD_HELPER_TABLE(X)
 
 #define X(nm, mode, kt)                                             \
 inline tv_lval nm(Class* ctx, ObjectData* base, key_type<kt> key,   \
-                  TypedValue& tvRef, ReadOnlyOp op, bool* roProp) { \
+                  TypedValue& tvRef, ReadonlyOp op, bool* roProp) { \
   return PropObj<mode,kt>(tvRef, ctx, base, key, op, roProp);       \
 }
 PROP_OBJ_HELPER_TABLE(X)
@@ -125,7 +125,7 @@ PROP_OBJ_HELPER_TABLE(X)
 
 #define X(nm, kt)                                                       \
 inline tv_lval nm(Class* ctx, ObjectData* base, key_type<kt> key,       \
-                  TypedValue& tvRef, ReadOnlyOp op, bool* roProp) {     \
+                  TypedValue& tvRef, ReadonlyOp op, bool* roProp) {     \
   return PropObj<MOpMode::Define,kt>(tvRef, ctx, base, key, op, roProp);\
 }
 PROPD_OBJ_HELPER_TABLE(X)
@@ -133,13 +133,13 @@ PROPD_OBJ_HELPER_TABLE(X)
 
 // NullSafe prop.
 inline tv_lval propCQ(Class* ctx, tv_rval base, StringData* key,
-                      TypedValue& tvRef, ReadOnlyOp op, bool* roProp) {
+                      TypedValue& tvRef, ReadonlyOp op, bool* roProp) {
   return nullSafeProp(tvRef, ctx, base, key, op, roProp);
 }
 
 // NullSafe prop with object base.
 inline tv_lval propCOQ(Class* ctx, ObjectData* base, StringData* key,
-                       TypedValue& tvRef, ReadOnlyOp op, bool* roProp) {
+                       TypedValue& tvRef, ReadonlyOp op, bool* roProp) {
   return base->prop(&tvRef, ctx, key, op, roProp);
 }
 
@@ -163,7 +163,7 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
 
 #define X(nm, kt, mode)                                               \
 inline TypedValue nm(Class* ctx, tv_lval base, key_type<kt> key,      \
-                     ReadOnlyOp op) {                                 \
+                     ReadonlyOp op) {                                 \
   TypedValue localTvRef;                                              \
   auto result = Prop<mode,kt>(localTvRef, ctx, base, key, op);        \
   return cGetRefShuffle(localTvRef, result);                          \
@@ -180,7 +180,7 @@ CGET_PROP_HELPER_TABLE(X)
 
 #define X(nm, kt, mode)                                               \
 inline TypedValue nm(Class* ctx, ObjectData* base, key_type<kt> key,  \
-                     ReadOnlyOp op) {                                 \
+                     ReadonlyOp op) {                                 \
   TypedValue localTvRef;                                              \
   auto result = PropObj<mode,kt>(localTvRef, ctx, base, key, op);     \
   return cGetRefShuffle(localTvRef, result);                          \
@@ -192,7 +192,7 @@ CGET_OBJ_PROP_HELPER_TABLE(X)
 
 // NullSafe prop.
 inline TypedValue cGetPropSQ(Class* ctx, tv_lval base, StringData* key,
-                             ReadOnlyOp op) {
+                             ReadonlyOp op) {
   TypedValue localTvRef;
   auto result = nullSafeProp(localTvRef, ctx, base, key, op);
   return cGetRefShuffle(localTvRef, result);
@@ -200,7 +200,7 @@ inline TypedValue cGetPropSQ(Class* ctx, tv_lval base, StringData* key,
 
 // NullSafe prop with object base.
 inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key,
-                              ReadOnlyOp op) {
+                              ReadonlyOp op) {
   TypedValue localTvRef;
   auto result = base->prop(&localTvRef, ctx, key, op);
   return cGetRefShuffle(localTvRef, result);
@@ -215,7 +215,7 @@ inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key,
 
 #define X(nm, kt)                                                            \
 inline void nm(Class* ctx, tv_lval base, key_type<kt> key, TypedValue val,   \
-               ReadOnlyOp op) {                                              \
+               ReadonlyOp op) {                                              \
   HPHP::SetProp<false, kt>(ctx, base, key, &val, op);                        \
 }
 SETPROP_HELPER_TABLE(X)
@@ -228,7 +228,7 @@ SETPROP_HELPER_TABLE(X)
 
 #define X(nm, kt)                                                              \
 inline void nm(Class* ctx, ObjectData* base, key_type<kt> key, TypedValue val, \
-               ReadOnlyOp op) {                                                \
+               ReadonlyOp op) {                                                \
   HPHP::SetPropObj<kt>(ctx, base, key, &val, op);                              \
 }
 SETPROP_OBJ_HELPER_TABLE(X)

@@ -516,7 +516,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     bool readonly;
   };
 
-  void checkReadonly(const PropLookup&, ReadOnlyOp, bool*) const;
+  void checkReadonly(const PropLookup&, ReadonlyOp, bool*) const;
 
   template <bool forWrite, bool forRead, bool ignoreLateInit>
   ALWAYS_INLINE
@@ -529,19 +529,19 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   };
 
   template<PropMode mode>
-  tv_lval propImpl(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op = ReadOnlyOp::Any, bool* roProp = nullptr);
+  tv_lval propImpl(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op = ReadonlyOp::Any, bool* roProp = nullptr);
 
   void setDynProp(const StringData* key, TypedValue val);
 
  public:
-  tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op, bool* roProp = nullptr);
-  tv_lval propW(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op);
-  tv_lval propU(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op, bool* roProp);
-  tv_lval propD(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadOnlyOp op, bool* roProp);
+  tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op, bool* roProp = nullptr);
+  tv_lval propW(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
+  tv_lval propU(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op, bool* roProp);
+  tv_lval propD(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op, bool* roProp);
 
   bool propIsset(const Class* ctx, const StringData* key);
 
-  void setProp(Class* ctx, const StringData* key, TypedValue val, ReadOnlyOp op = ReadOnlyOp::Any);
+  void setProp(Class* ctx, const StringData* key, TypedValue val, ReadonlyOp op = ReadonlyOp::Any);
   tv_lval setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
                     const StringData* key, TypedValue* val);
 

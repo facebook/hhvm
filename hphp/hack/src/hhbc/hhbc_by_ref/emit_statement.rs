@@ -1377,7 +1377,7 @@ fn emit_load_list_element<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     alloc,
                     0,
                     QueryOp::CGet,
-                    MemberKey::EI(i as i64, ReadOnlyOp::Any),
+                    MemberKey::EI(i as i64, ReadonlyOp::Any),
                 ),
             ],
         )
@@ -1401,7 +1401,7 @@ fn emit_load_list_element<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             let instr_dim = instr::dim(
                 alloc,
                 MemberOpMode::Warn,
-                MemberKey::EI(i as i64, ReadOnlyOp::Any),
+                MemberKey::EI(i as i64, ReadonlyOp::Any),
             );
             path.push(instr_dim);
             emit_load_list_elements(e, env, path, es)?

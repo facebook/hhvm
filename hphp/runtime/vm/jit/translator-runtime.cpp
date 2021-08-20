@@ -429,7 +429,7 @@ template TypedValue arrFirstLast<false, false>(ArrayData*);
 template TypedValue arrFirstLast<true, true>(ArrayData*);
 template TypedValue arrFirstLast<false, true>(ArrayData*);
 
-TypedValue* getSPropOrNull(ReadOnlyOp op,
+TypedValue* getSPropOrNull(ReadonlyOp op,
                            const Class* cls,
                            const StringData* name,
                            Class* ctx,
@@ -448,7 +448,7 @@ TypedValue* getSPropOrNull(ReadOnlyOp op,
   return lookup.val;
 }
 
-TypedValue* getSPropOrRaise(ReadOnlyOp op,
+TypedValue* getSPropOrRaise(ReadonlyOp op,
                             const Class* cls,
                             const StringData* name,
                             Class* ctx,

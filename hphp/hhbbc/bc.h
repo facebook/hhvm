@@ -79,36 +79,36 @@ inline bool operator!=(NamedLocal a, NamedLocal b) {
 struct MKey {
   MKey()
     : mcode{MW}
-    , rop{ReadOnlyOp::Any}
+    , rop{ReadonlyOp::Any}
     , int64{0}
   {}
 
-  MKey(MemberCode mcode, NamedLocal local, ReadOnlyOp rop)
+  MKey(MemberCode mcode, NamedLocal local, ReadonlyOp rop)
     : mcode{mcode}
     , rop{rop}
     , local{local}
   {}
 
-  MKey(MemberCode mcode, int32_t idx, ReadOnlyOp rop)
+  MKey(MemberCode mcode, int32_t idx, ReadonlyOp rop)
     : mcode{mcode}
     , rop{rop}
     , idx{idx}
   {}
 
-  MKey(MemberCode mcode, int64_t int64, ReadOnlyOp rop)
+  MKey(MemberCode mcode, int64_t int64, ReadonlyOp rop)
     : mcode{mcode}
     , rop{rop}
     , int64{int64}
   {}
 
-  MKey(MemberCode mcode, SString litstr, ReadOnlyOp rop)
+  MKey(MemberCode mcode, SString litstr, ReadonlyOp rop)
     : mcode{mcode}
     , rop{rop}
     , litstr{litstr}
   {}
 
   MemberCode mcode;
-  ReadOnlyOp rop;
+  ReadonlyOp rop;
   union {
     SString litstr;
     int64_t int64;

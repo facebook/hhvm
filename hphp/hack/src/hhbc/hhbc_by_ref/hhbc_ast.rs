@@ -171,14 +171,14 @@ pub enum FatalOp {
 #[derive(Clone, Copy, Debug)]
 #[repr(C)]
 pub enum MemberKey<'arena> {
-    EC(StackIndex, ReadOnlyOp),
-    EL(Local<'arena>, ReadOnlyOp),
-    ET(Str<'arena>, ReadOnlyOp),
-    EI(i64, ReadOnlyOp),
-    PC(StackIndex, ReadOnlyOp),
-    PL(Local<'arena>, ReadOnlyOp),
-    PT(PropId<'arena>, ReadOnlyOp),
-    QT(PropId<'arena>, ReadOnlyOp),
+    EC(StackIndex, ReadonlyOp),
+    EL(Local<'arena>, ReadonlyOp),
+    ET(Str<'arena>, ReadonlyOp),
+    EI(i64, ReadonlyOp),
+    PC(StackIndex, ReadonlyOp),
+    PL(Local<'arena>, ReadonlyOp),
+    PT(PropId<'arena>, ReadonlyOp),
+    QT(PropId<'arena>, ReadonlyOp),
     W,
 }
 
@@ -201,7 +201,7 @@ pub enum TypestructResolveOp {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
-pub enum ReadOnlyOp {
+pub enum ReadonlyOp {
     ReadOnly,
     Mutable,
     Any,
@@ -362,7 +362,7 @@ pub enum InstructGet<'arena> {
     CUGetL(Local<'arena>),
     PushL(Local<'arena>),
     CGetG,
-    CGetS(ReadOnlyOp),
+    CGetS(ReadonlyOp),
     ClassGetC,
     ClassGetTS,
 }
@@ -456,7 +456,7 @@ pub enum InstructMutator<'arena> {
     /// PopL is put in mutators since it behaves as SetL + PopC
     PopL(Local<'arena>),
     SetG,
-    SetS(ReadOnlyOp),
+    SetS(ReadonlyOp),
     SetOpL(Local<'arena>, EqOp),
     SetOpG(EqOp),
     SetOpS(EqOp),
@@ -501,8 +501,8 @@ pub enum InstructCall<'arena> {
 pub enum InstructBase<'arena> {
     BaseGC(StackIndex, MemberOpMode),
     BaseGL(Local<'arena>, MemberOpMode),
-    BaseSC(StackIndex, StackIndex, MemberOpMode, ReadOnlyOp),
-    BaseL(Local<'arena>, MemberOpMode, ReadOnlyOp),
+    BaseSC(StackIndex, StackIndex, MemberOpMode, ReadonlyOp),
+    BaseL(Local<'arena>, MemberOpMode, ReadonlyOp),
     BaseC(StackIndex, MemberOpMode),
     BaseH,
     Dim(MemberOpMode, MemberKey<'arena>),

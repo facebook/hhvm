@@ -916,9 +916,9 @@ void throw_prop_must_be_value_type(const char* className, const char* propName)
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
-bool readonlyLocalShouldThrow(TypedValue tv, ReadOnlyOp op, bool& roProp) {
+bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op, bool& roProp) {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return false;
-  if (op == ReadOnlyOp::CheckROCOW) {
+  if (op == ReadonlyOp::CheckROCOW) {
     auto cow = !isRefcountedType(type(tv)) || hasPersistentFlavor(type(tv));
     if (!cow) return true;
     roProp = true;
@@ -930,22 +930,22 @@ void checkReadonly(const TypedValue* tv,
                    const Class* cls,
                    const StringData* name,
                    bool readonly,
-                   ReadOnlyOp op,
+                   ReadonlyOp op,
                    bool* roProp) {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
   auto cow = !isRefcountedType(type(tv)) || hasPersistentFlavor(type(tv));
   if (readonly) {
-    if (op == ReadOnlyOp::CheckMutROCOW || op == ReadOnlyOp::CheckROCOW) {
+    if (op == ReadonlyOp::CheckMutROCOW || op == ReadonlyOp::CheckROCOW) {
       if (cow) {
         assertx(roProp);
         *roProp = true;
       } else {
         throw_prop_must_be_value_type(cls->name()->data(), name->data());
       }
-    } else if (op == ReadOnlyOp::Mutable) {
+    } else if (op == ReadonlyOp::Mutable) {
       throw_must_be_mutable(cls->name()->data(), name->data());
     }
-  } else if (op == ReadOnlyOp::ReadOnly || op == ReadOnlyOp::CheckROCOW) {
+  } else if (op == ReadonlyOp::ReadOnly || op == ReadonlyOp::CheckROCOW) {
     throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
   }
 }

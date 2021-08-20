@@ -107,7 +107,7 @@ struct FuncChecker {
   bool checkInputs(State* cur, PC, Block* b);
   bool checkOutputs(State* cur, PC, Block* b);
   bool checkRxOp(State* cur, PC, Op, bool);
-  bool checkReadOnlyOp(State* cur, PC, Op);
+  bool checkReadonlyOp(State* cur, PC, Op);
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
   bool checkTerminal(State* cur, Op op, Block* b);
   bool checkIter(State* cur, PC pc);
@@ -116,7 +116,7 @@ struct FuncChecker {
   bool checkString(PC pc, Id id);
   bool checkExnEdge(State cur, Op op, Block* b);
   bool checkItersDead(const State& cur, Op op, Block* b, const char* info);
-  bool readOnlyImmNotSupported(ReadOnlyOp rop, Op op);
+  bool readOnlyImmNotSupported(ReadonlyOp rop, Op op);
   void reportStkUnderflow(Block*, const State& cur, PC);
   void reportStkOverflow(Block*, const State& cur, PC);
   void reportStkMismatch(Block* b, Block* target, const State& cur);
@@ -632,7 +632,7 @@ bool FuncChecker::checkImmKA(PC& pc, PC const instr) {
     return false;
   }
 
-  ReadOnlyOp rop = ReadOnlyOp::Any;
+  ReadonlyOp rop = ReadonlyOp::Any;
   auto ok = true;
   switch (mcode) {
     case MW:
@@ -641,36 +641,36 @@ bool FuncChecker::checkImmKA(PC& pc, PC const instr) {
       decode_iva(pc);
       auto const loc = decode_iva(pc);
       ok &= checkLocal(pc, loc);
-      rop = decode_oa<ReadOnlyOp>(pc);
+      rop = decode_oa<ReadonlyOp>(pc);
       break;
     }
     case MEC: case MPC:
       decode_iva(pc);
-      rop = decode_oa<ReadOnlyOp>(pc);
+      rop = decode_oa<ReadonlyOp>(pc);
       break;
     case MEI:
       pc += sizeof(int64_t);
-      rop = decode_oa<ReadOnlyOp>(pc);
+      rop = decode_oa<ReadonlyOp>(pc);
       break;
     case MET: case MPT: case MQT:
       auto const id = decode_raw<Id>(pc);
       ok &= checkString(pc, id);
-      rop = decode_oa<ReadOnlyOp>(pc);
+      rop = decode_oa<ReadonlyOp>(pc);
       break;
   }
 
   auto const op = peek_op(instr);
   switch (op) {
     case Op::Dim:
-      if (rop == ReadOnlyOp::ReadOnly) return readOnlyImmNotSupported(rop, op);
+      if (rop == ReadonlyOp::ReadOnly) return readOnlyImmNotSupported(rop, op);
       break;
     case Op::QueryM:
-      if (rop != ReadOnlyOp::Mutable && rop != ReadOnlyOp::Any) {
+      if (rop != ReadonlyOp::Mutable && rop != ReadonlyOp::Any) {
         return readOnlyImmNotSupported(rop, op);
       }
       break;
     case Op::SetM:
-      if (rop != ReadOnlyOp::ReadOnly && rop != ReadOnlyOp::Any) {
+      if (rop != ReadonlyOp::ReadOnly && rop != ReadonlyOp::Any) {
         return readOnlyImmNotSupported(rop, op);
       }
       break;
@@ -678,7 +678,7 @@ bool FuncChecker::checkImmKA(PC& pc, PC const instr) {
     case Op::IncDecM:
     case Op::SetOpM:
     case Op::UnsetM:
-      if (rop != ReadOnlyOp::Any) return readOnlyImmNotSupported(rop, op);
+      if (rop != ReadonlyOp::Any) return readOnlyImmNotSupported(rop, op);
       break;
     default:
       always_assert(false);
@@ -915,7 +915,7 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
   }
 
   uint32_t iva = 0;
-  ReadOnlyOp rop = ReadOnlyOp::Any;
+  ReadonlyOp rop = ReadonlyOp::Any;
 
   switch (mcode) {
     case MET: case MPT: case MQT: {
@@ -925,22 +925,22 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
               opcodeToName(op));
         return false;
       }
-      rop = decode_oa<ReadOnlyOp>(pc);
+      rop = decode_oa<ReadonlyOp>(pc);
       break;
     }
 
     case MEC: case MPC:
       iva = decode_iva(pc);
-      rop = decode_oa<ReadOnlyOp>(pc);
+      rop = decode_oa<ReadonlyOp>(pc);
       break;
     case MEL: case MPL:
       decode_iva(pc);
       decode_iva(pc);
-      rop = decode_oa<ReadOnlyOp>(pc);
+      rop = decode_oa<ReadonlyOp>(pc);
       break;
     case MEI:
       decode_raw<int64_t>(pc);
-      rop = decode_oa<ReadOnlyOp>(pc);
+      rop = decode_oa<ReadonlyOp>(pc);
       break;
     case MW:
       break;
@@ -1444,8 +1444,8 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
     case Op::SetS: {
       auto new_pc = pc;
       decode_op(new_pc);
-      auto const rop = decode_oa<ReadOnlyOp>(new_pc);
-      if (rop != ReadOnlyOp::ReadOnly && rop != ReadOnlyOp::Any) {
+      auto const rop = decode_oa<ReadonlyOp>(new_pc);
+      if (rop != ReadonlyOp::ReadOnly && rop != ReadonlyOp::Any) {
         return readOnlyImmNotSupported(rop, op);
       }
       break;
@@ -1453,8 +1453,8 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
     case Op::CGetS: {
       auto new_pc = pc;
       decode_op(new_pc);
-      auto const rop = decode_oa<ReadOnlyOp>(new_pc);
-      if (rop != ReadOnlyOp::Mutable && rop != ReadOnlyOp::Any) {
+      auto const rop = decode_oa<ReadonlyOp>(new_pc);
+      if (rop != ReadonlyOp::Mutable && rop != ReadonlyOp::Any) {
         return readOnlyImmNotSupported(rop, op);
       }
       break;
@@ -1526,7 +1526,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
       if (op == Op::BaseL) decode_iva(new_pc);
       decode_iva(new_pc);
       cur->mbr_mode = decode_oa<MOpMode>(new_pc);
-      if (op == Op::BaseL) decode_oa<ReadOnlyOp>(new_pc);
+      if (op == Op::BaseL) decode_oa<ReadonlyOp>(new_pc);
     }
   } else if (isMemberFinalOp(op)) {
     cur->mbr_live = false;
@@ -1536,13 +1536,13 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   return ok;
 }
 
-bool FuncChecker::readOnlyImmNotSupported(ReadOnlyOp rop, Op op) {
+bool FuncChecker::readOnlyImmNotSupported(ReadonlyOp rop, Op op) {
   ferror("{} immediate not supported on {}.\n",
     subopToName(rop), opcodeToName(op));
   return false;
 }
 
-bool FuncChecker::checkReadOnlyOp(State* cur, PC pc, Op op) {
+bool FuncChecker::checkReadonlyOp(State* cur, PC pc, Op op) {
   auto const isPropFlavor = [&](MemberCode mcode) {
     switch (mcode) {
       case MEL: case MEC: case MET: case MEI: case MW:
@@ -1560,20 +1560,20 @@ bool FuncChecker::checkReadOnlyOp(State* cur, PC pc, Op op) {
       decode_iva(new_pc);
       decode_iva(new_pc);
       decode_oa<MOpMode>(new_pc);
-      auto const rop = decode_oa<ReadOnlyOp>(new_pc);
-      if (rop == ReadOnlyOp::ReadOnly) return readOnlyImmNotSupported(rop, op);
-      cur->afterCheckCOW = rop == ReadOnlyOp::CheckROCOW || rop == ReadOnlyOp::CheckMutROCOW;
+      auto const rop = decode_oa<ReadonlyOp>(new_pc);
+      if (rop == ReadonlyOp::ReadOnly) return readOnlyImmNotSupported(rop, op);
+      cur->afterCheckCOW = rop == ReadonlyOp::CheckROCOW || rop == ReadonlyOp::CheckMutROCOW;
       return true;
     } else if (op == Op::BaseL) {
       decode_op(new_pc);
       decode_iva(new_pc);
       decode_iva(new_pc);
       decode_oa<MOpMode>(new_pc);
-      auto const rop = decode_oa<ReadOnlyOp>(new_pc);
-      if (rop != ReadOnlyOp::CheckROCOW && rop != ReadOnlyOp::Any) {
+      auto const rop = decode_oa<ReadonlyOp>(new_pc);
+      if (rop != ReadonlyOp::CheckROCOW && rop != ReadonlyOp::Any) {
         return readOnlyImmNotSupported(rop, op);
       }
-      cur->afterCheckCOW = rop == ReadOnlyOp::CheckROCOW;
+      cur->afterCheckCOW = rop == ReadonlyOp::CheckROCOW;
       return true;
     } else {
       cur->afterCheckCOW = false;
@@ -1608,8 +1608,8 @@ bool FuncChecker::checkReadOnlyOp(State* cur, PC pc, Op op) {
       ferror("Check(Mut)ROCOW must only appear on the last prop access.\n");
       return false;
     }
-    auto const rop = decode_oa<ReadOnlyOp>(new_pc);
-    if (rop == ReadOnlyOp::CheckMutROCOW || rop == ReadOnlyOp::CheckROCOW) {
+    auto const rop = decode_oa<ReadonlyOp>(new_pc);
+    if (rop == ReadonlyOp::CheckMutROCOW || rop == ReadonlyOp::CheckROCOW) {
       if (!is_prop_flavor) {
         ferror("Only property-flavored member keys may be marked Check(Mut)ROCOW.\n");
         return false;
@@ -2130,7 +2130,7 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     if (flags & TF) ok &= checkTerminal(&cur, op, b);
     if (isIter(pc)) ok &= checkIter(&cur, pc);
     ok &= checkOutputs(&cur, pc, b);
-    ok &= checkReadOnlyOp(&cur, pc, op);
+    ok &= checkReadonlyOp(&cur, pc, op);
     if (m_verify_rx) ok &= checkRxOp(&cur, pc, op, false);
     if (m_verify_pure) ok &= checkRxOp(&cur, pc, op, true);
     prev_pc = pc;

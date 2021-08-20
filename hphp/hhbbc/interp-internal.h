@@ -990,8 +990,8 @@ void badPropInitialValue(ISS& env) {
   env.collect.props.setBadPropInitialValues();
 }
 
-bool checkReadOnlyOp(ReadOnlyOp expected = ReadOnlyOp::Any,
-                     ReadOnlyOp actual = ReadOnlyOp::Any) {
+bool checkReadonlyOp(ReadonlyOp expected = ReadonlyOp::Any,
+                     ReadonlyOp actual = ReadonlyOp::Any) {
   return RO::EvalEnableReadonlyPropertyEnforcement && expected == actual;
 }
 #ifdef __clang__

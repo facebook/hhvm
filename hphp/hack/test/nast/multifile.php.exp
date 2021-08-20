@@ -1,7 +1,3 @@
-
-
-(Relative_path.Dummy, "multifile.php--file2.php"):
-
 [(Class
     { c_span = [2:1-10]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -17,10 +13,6 @@
       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
       c_doc_comment = None; c_emit_id = None })
   ]
-
-
-(Relative_path.Dummy, "multifile.php--file1.php"):
-
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

@@ -1428,7 +1428,6 @@ let print_nasts ~should_print_position nasts filenames =
         Relative_path.Map.iter nasts ~f:(fun path _ ->
             Printf.eprintf "  %s\n" (Relative_path.show path))
       | Some nast ->
-        Printf.printf "\n\n%s:\n\n" (Relative_path.show filename);
         if should_print_position then
           Naming_ast_print.print_nast nast
         else

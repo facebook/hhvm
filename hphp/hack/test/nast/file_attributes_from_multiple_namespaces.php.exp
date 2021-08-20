@@ -1,7 +1,3 @@
-
-
-(Relative_path.Dummy, "file_attributes_from_multiple_namespaces.php"):
-
 [(Class
     { c_span = [7:1-45]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 

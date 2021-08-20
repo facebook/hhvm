@@ -1,7 +1,3 @@
-
-
-(Relative_path.Dummy, "poly_ctx.php"):
-
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

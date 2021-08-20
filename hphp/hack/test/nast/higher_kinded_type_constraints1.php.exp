@@ -1,7 +1,3 @@
-
-
-(Relative_path.Dummy, "higher_kinded_type_constraints1.php"):
-
 [(Typedef
     { t_annotation = (); t_name = ([10:6-8], "\\T2"); t_tparams = []; 
       t_constraint = None; t_kind = ([10:11-16], Hmixed); t_user_attributes = []; 

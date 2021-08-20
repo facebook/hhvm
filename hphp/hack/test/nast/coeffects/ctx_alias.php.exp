@@ -1,7 +1,3 @@
-
-
-(Relative_path.Dummy, "ctx_alias.php"):
-
 [(Typedef
     { t_annotation = (); t_name = ([4:9-10], "\\X"); t_tparams = []; 
       t_constraint = (Some ([4:14-16], (Hintersection []))); t_kind = ([4:19-41], (Hintersection [([4:20-40], (Happly (([4:20-40], "\\HH\\Contexts\\HH\\Contexts\\defaults"), [])))]));

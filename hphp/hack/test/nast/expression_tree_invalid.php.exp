@@ -1,7 +1,3 @@
-
-
-(Relative_path.Dummy, "expression_tree_invalid.php"):
-
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

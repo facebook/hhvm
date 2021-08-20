@@ -1286,6 +1286,8 @@ bool RuntimeOption::TrackPerUnitMemory = false;
 
 bool RuntimeOption::SetProfileNullThisObject = true;
 
+bool RuntimeOption::ApplySecondaryQueuePenalty = false;
+
 std::map<std::string, std::string> RuntimeOption::CustomSettings;
 
 #ifdef NDEBUG
@@ -2788,6 +2790,10 @@ void RuntimeOption::Load(
     // Profiling
     Config::Bind(SetProfileNullThisObject, ini, config,
                  "SetProfile.NullThisObject", true);
+  }
+  {
+    // Loadhint queue penalty
+    Config::Bind(ApplySecondaryQueuePenalty, ini, config, "Server.ApplySecondaryQueuePenalty", false);
   }
 
   Config::Bind(TzdataSearchPaths, ini, config, "TzdataSearchPaths");

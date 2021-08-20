@@ -1479,6 +1479,8 @@ public:
   static bool StrobelightEnabled;
 
   static bool SetProfileNullThisObject;
+
+  static bool ApplySecondaryQueuePenalty;
 };
 static_assert(sizeof(RuntimeOption) == 1, "no instance variables");
 

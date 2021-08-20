@@ -2744,9 +2744,9 @@ X(RaiseTooManyArg,              FuncData);
 X(RaiseCoeffectsCallViolation,  FuncData);
 X(RaiseCoeffectsFunParamTypeViolation, ParamData);
 X(CheckInOutMismatch,           BoolVecArgsData);
-X(ThrowInOutMismatch,           BoolVecArgsData);
+X(ThrowInOutMismatch,           ParamData);
 X(CheckReadonlyMismatch,        BoolVecArgsData);
-X(ThrowReadonlyMismatch,        BoolVecArgsData);
+X(ThrowReadonlyMismatch,        ParamData);
 X(ThrowParameterWrongType,      FuncArgTypeData);
 X(CheckClsReifiedGenericMismatch,
                                 ClassData);

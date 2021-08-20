@@ -63,8 +63,8 @@ bool emitCallerInOutChecksKnown(IRGS& env, const Func* callee,
 
   for (auto i = 0; i < fca.numArgs; ++i) {
     if (callee->isInOut(i) != fca.isInOut(i)) {
-      auto const ioaData = BoolVecArgsData { fca.numArgs, fca.inoutArgs };
-      gen(env, ThrowInOutMismatch, ioaData, cns(env, callee));
+      auto const data = ParamData { i };
+      gen(env, ThrowInOutMismatch, data, cns(env, callee));
       return false;
     }
   }
@@ -123,9 +123,9 @@ bool emitCallerReadonlyChecksKnown(IRGS& env, const Func* callee,
 
   for (auto i = 0; i < fca.numArgs; ++i) {
     if (fca.isReadonly(i) && !callee->isReadonly(i)) {
-      auto const data = BoolVecArgsData { fca.numArgs, fca.readonlyArgs };
+      auto const data = ParamData { i };
       gen(env, ThrowReadonlyMismatch, data, cns(env, callee));
-      return RO::EvalEnableReadonlyCallEnforcement <= 1;
+      if (RO::EvalEnableReadonlyCallEnforcement > 1) return false;
     }
   }
   return true;

@@ -255,7 +255,7 @@ String HSLLocaleLibcOps::slice(const String& str, int64_t offset, int64_t length
   if (offset < 0 || offset >= str.length()) {
     return empty_string();
   }
-  return str.substr(offset, length);
+  return str.substr(offset, MIN(length, StringData::MaxSize));
 }
 
 String HSLLocaleLibcOps::reverse(const String& str) const {

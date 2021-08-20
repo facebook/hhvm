@@ -423,7 +423,7 @@ String HSLLocaleICUOps::slice(const String& str, int64_t offset, int64_t length)
   }
 
   const auto char16_start = ustr.moveIndex32(0, offset);
-  const auto char16_end = ustr.moveIndex32(char16_start, length);
+  const auto char16_end = ustr.moveIndex32(char16_start, MIN(length, std::numeric_limits<int32_t>::max()));
   auto uslice = ustr.tempSubStringBetween(char16_start, char16_end);
   std::string ret;
   uslice.toUTF8String(ret);

@@ -17,6 +17,7 @@ function main(): void {
     tuple(1, -1),
     tuple(1, 1),
     tuple(1, 2),
+    tuple(1, PHP_INT_MAX),
     tuple(-1, -1),
     tuple(-1, 0),
     tuple(-1, 1),
@@ -27,6 +28,7 @@ function main(): void {
     tuple(-3, -2),
     tuple(-3, -3),
     tuple(0, 9999),
+    tuple(2, 9999),
   ];
   printf("input\toffset\tlength\tC\tbytes\tUTF-8\tbytes\n");
   foreach($strings as $str) {

@@ -935,7 +935,7 @@ fn convert_meth_caller_to_func_ptr(
             make_fn_param(pos(), &obj_var.1, false, false),
             variadic_param,
         ],
-        ctxs: Some(Contexts(pos(), vec![])),
+        ctxs: None,
         unsafe_ctxs: None,
         body: FuncBody {
             fb_ast: vec![
@@ -1015,7 +1015,7 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
             make_fn_param(pos(), &meth_var.1, false, false),
             variadic_param,
         ],
-        ctxs: Some(Contexts(pos(), vec![])),
+        ctxs: None,
         unsafe_ctxs: None,
         body: FuncBody {
             fb_ast: vec![Stmt(pos(), Stmt_::Return(Box::new(Some(invoke_method))))],

@@ -330,6 +330,7 @@ impl HhasCoeffects {
 
     pub fn with_caller(&self) -> Self {
         Self {
+            static_coeffects: vec![Ctx::Pure],
             caller: true,
             ..self.clone()
         }

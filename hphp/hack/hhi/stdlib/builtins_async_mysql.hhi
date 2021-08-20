@@ -309,6 +309,8 @@ namespace HH {
   }
 }
 
+// Please update hphp/runtime/ext/async_mysql/ext_async_mysql.php
+// when changes are made to these interfaces.
 namespace HH\Lib\SQL {
   interface ScalarFormat {
     public function format_f(?float $s): string;

@@ -2000,7 +2000,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ArrayMarkLegacyShallow:
   case ArrayMarkLegacyRecursive:
   case ThrowMustBeMutableException:
-  case ThrowMustBeReadOnlyException:
+  case ThrowMustBeReadonlyException:
   case ThrowMustBeValueTypeException:
   case ArrayUnmarkLegacyShallow:
   case ArrayUnmarkLegacyRecursive:

@@ -1112,7 +1112,7 @@ void ObjectData::throwMustBeMutable(Slot prop) const {
 }
 
 NEVER_INLINE
-void ObjectData::throwMustBeReadOnly(Slot prop) const {
+void ObjectData::throwMustBeReadonly(Slot prop) const {
   throw_cannot_write_non_readonly_prop(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
@@ -1144,7 +1144,7 @@ void ObjectData::checkReadonly(const PropLookup& lookup, ReadonlyOp op,
       throwMustBeMutable(lookup.slot);
     }
   } else if (op == ReadonlyOp::Readonly || op == ReadonlyOp::CheckROCOW) {
-    throwMustBeReadOnly(lookup.slot);
+    throwMustBeReadonly(lookup.slot);
   }
 }
 
@@ -1373,7 +1373,7 @@ void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val, Read
     }
     if (RO::EvalEnableReadonlyPropertyEnforcement && !lookup.readonly &&
       op == ReadonlyOp::Readonly) {
-      throwMustBeReadOnly(lookup.slot);
+      throwMustBeReadonly(lookup.slot);
     }
     // TODO(T61738946): We can remove the temporary here once we no longer
     // coerce class_meth types.

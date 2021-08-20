@@ -970,7 +970,7 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadonlyOp
       gen(env, ThrowMustBeMutableException, cns(env, propInfo->propClass), key);
       return cns(env, TBottom);
     } else if (!propInfo->readOnly && op == ReadonlyOp::CheckROCOW) {
-      gen(env, ThrowMustBeReadOnlyException, cns(env, propInfo->propClass), key);
+      gen(env, ThrowMustBeReadonlyException, cns(env, propInfo->propClass), key);
       return cns(env, TBottom);
     }
   }
@@ -1259,7 +1259,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
   if (propInfo && !propInfo->isConst) {
     if (RO::EvalEnableReadonlyPropertyEnforcement && !propInfo->readOnly &&
       op == ReadonlyOp::Readonly) {
-      gen(env, ThrowMustBeReadOnlyException, cns(env, propInfo->propClass), key);
+      gen(env, ThrowMustBeReadonlyException, cns(env, propInfo->propClass), key);
       return cns(env, TBottom);
     }
     SSATmp* propPtr;

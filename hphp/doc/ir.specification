@@ -1720,8 +1720,8 @@ To string conversions:
 
   Store S1 into the location pointed to by S0.
 
-| StTVInRDS<RDSHandle,includeAux>, ND, S(InitCell), NF 
-  
+| StTVInRDS<RDSHandle,includeAux>, ND, S(InitCell), NF
+
   Store the TypedValue in S0 into the specified RDS handle. Must store the aux
   bits if `includeAux` is true.
 
@@ -2785,17 +2785,17 @@ fields of that struct for holding intermediate values.
 | PropX, D(LvalToMembCell), S(Obj,LvalToCell) S(Cell) S(PtrToMISBool) S(PtrToMISCell), NF
 
   Lookup intermediate property in S0, with key S1. An exception is thrown if
-  the property is ReadOnly when it was required to be Mutable.
+  the property is Readonly when it was required to be Mutable.
 
 | PropQ, D(LvalToMembCell), S(Obj,LvalToCell) S(StaticStr) S(PtrToMISBool) S(PtrToMISCell), NF
 
   A nullsafe version of PropX, returns null if the base S0 is null. An exception
-  is thrown if the property is ReadOnly when it was required to be Mutable.
+  is thrown if the property is Readonly when it was required to be Mutable.
 
 | PropDX, D(LvalToMembCell), S(Obj,LvalToCell) S(Cell) S(PtrToMISBool) S(PtrToMISCell), MProp
 
   Like PropX, but used for intermediate element lookups that may modify the
-  base. An exception is thrown if the property is ReadOnly when it was
+  base. An exception is thrown if the property is Readonly when it was
   required to be Mutable.
 
 | CGetProp, D(InitCell), S(Obj,LvalToCell) S(Cell), PRc
@@ -3269,7 +3269,7 @@ fields of that struct for holding intermediate values.
   where the property was required to be mutable. S0 is the class the property
   was declared on. S1 is the property name.
 
-| ThrowMustBeReadOnlyException, ND, S(Cls) S(Str), T
+| ThrowMustBeReadonlyException, ND, S(Cls) S(Str), T
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the property was required to be readonly. S0 is the class the property

@@ -444,7 +444,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowOutOfBounds:
   case ThrowParameterWrongType:
   case ThrowMustBeMutableException:
-  case ThrowMustBeReadOnlyException:
+  case ThrowMustBeReadonlyException:
   case ThrowMustBeValueTypeException:
   case UnsetElem:
   case UnsetProp:

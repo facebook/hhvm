@@ -62,7 +62,7 @@ void throwParamReadonlyMismatch(const Func* func, uint32_t index);
 [[noreturn]] void throwInvalidUnpackArgs();
 [[noreturn]] void throwMissingArgument(const Func* func, int got);
 [[noreturn]] void throwMustBeMutableException(const Class* cls, const StringData* propName);
-[[noreturn]] void throwMustBeReadOnlyException(const Class* cls, const StringData* propName);
+[[noreturn]] void throwMustBeReadonlyException(const Class* cls, const StringData* propName);
 [[noreturn]] void throwMustBeValueTypeException(const StringData* locName);
 void raiseTooManyArguments(const Func* func, int got);
 void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs);

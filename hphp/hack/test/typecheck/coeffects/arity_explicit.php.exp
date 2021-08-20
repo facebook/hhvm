@@ -2,6 +2,10 @@ File "arity_explicit.php", line 11, characters 3-3:
 Expected exactly one type parameter (Typing[4029])
   File "arity_explicit.php", line 5, characters 10-10:
   Definition is here
+File "arity_explicit.php", line 13, characters 3-3:
+Expected exactly one type parameter (Typing[4029])
+  File "arity_explicit.php", line 5, characters 10-10:
+  Definition is here
 File "arity_explicit.php", line 20, characters 3-3:
 Expected exactly one type parameter (Typing[4029])
   File "arity_explicit.php", line 5, characters 10-10:

@@ -860,13 +860,31 @@ let localize_targs_with_kinds
     | n -> n
   in
   let explicit_tparam_count = tparam_count - generated_tparam_count in
+
+  let checking_rewritten_call () =
+    (* Typing_phase expands the case of targl=[] to a list of wildcards matching the
+     * length of tparaml, but some `if` condition checks retype already typed
+     * expressions, so we get the generated list instead of what the user wrote
+     * TODO(coeffects) attempt to remove Tast.to_nast_expr calls *)
+    generated_tparam_count > 0
+    && targ_count = tparam_count
+    && List.for_all
+         ~f:(function
+           | a ->
+             (match a with
+             | (_, Aast.Happly ((_, n), _)) ->
+               String.equal n SN.Typehints.wildcard
+             | _ -> false))
+         targl
+  in
   (* If there are explicit type arguments but too few or too many then
    * report an error *)
+  let open Int in
   if
-    Int.(
-      targ_count <> 0
-      && tparam_count <> targ_count
-      && targ_count <> explicit_tparam_count)
+    not
+      (targ_count = 0
+      || targ_count = explicit_tparam_count
+      || checking_rewritten_call ())
   then
     if is_method then
       Errors.expected_tparam
@@ -883,7 +901,7 @@ let localize_targs_with_kinds
 
   (* Declare and localize the explicit type arguments *)
   let targl =
-    if Int.( > ) targ_count tparam_count then
+    if targ_count > tparam_count then
       List.take targl tparam_count
     else
       targl
@@ -904,7 +922,7 @@ let localize_targs_with_kinds
       if
         check_well_kinded
         && KindDefs.Simple.get_arity kind > 0
-        && Int.( = ) targ_count 0
+        && targ_count = 0
       then (
         (* We only throw an error if the user didn't provide any type arguments at all.
            Otherwise, if they provided some, but not all of them, n arity mismatch

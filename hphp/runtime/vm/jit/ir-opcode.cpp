@@ -295,6 +295,7 @@ bool opcodeMayRaise(Opcode opc) {
   case Clone:
   case CmpArrLike:
   case CmpObj:
+  case CmpRes:
   case ConcatIntStr:
   case ConcatStr3:
   case ConcatStr4:
@@ -334,7 +335,9 @@ bool opcodeMayRaise(Opcode opc) {
   case GtArrLike:
   case GteArrLike:
   case GteObj:
+  case GteRes:
   case GtObj:
+  case GtRes:
   case HandleRequestSurprise:
   case IncDecElem:
   case IncDecProp:
@@ -374,7 +377,9 @@ bool opcodeMayRaise(Opcode opc) {
   case LtArrLike:
   case LteArrLike:
   case LteObj:
+  case LteRes:
   case LtObj:
+  case LtRes:
   case MapGet:
   case MapSet:
   case NativeImpl:
@@ -535,7 +540,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CmpBool:
   case CmpDbl:
   case CmpInt:
-  case CmpRes:
   case CmpStr:
   case ColIsEmpty:
   case ColIsNEmpty:
@@ -643,10 +647,8 @@ bool opcodeMayRaise(Opcode opc) {
   case GteBool:
   case GteDbl:
   case GteInt:
-  case GteRes:
   case GteStr:
   case GtInt:
-  case GtRes:
   case GtStr:
   case HasReifiedGenerics:
   case HasToString:
@@ -803,10 +805,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LteBool:
   case LteDbl:
   case LteInt:
-  case LteRes:
   case LteStr:
   case LtInt:
-  case LtRes:
   case LtStr:
   case MapIsset:
   case MarkRDSAccess:

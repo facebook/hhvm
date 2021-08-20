@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/opaque-resource.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
@@ -210,7 +211,13 @@ struct CompareBase {
   template<class T1, class T2>
   enable_if_same_ptr_ty<T1, T2, RetType> operator()(T1 t1, T2 t2) const {
     using U = remove_ptr_const<T1>;
-    if constexpr (std::is_same_v<U, ResourceHdr*>)  return operator()(t1->data()->o_toInt64(), t2->data()->o_toInt64());
+    if constexpr (std::is_same_v<U, ResourceHdr*>) {
+      if (t1->data()->template instanceof<OpaqueResource>() ||
+          t2->data()->template instanceof<OpaqueResource>()) {
+        throw_opaque_resource_compare_exception();
+      }
+      return operator()(t1->data()->o_toInt64(), t2->data()->o_toInt64());
+    }
     if constexpr (std::is_same_v<U, StringData*>)   return operator()(t1->compare(t2), 0);
     if constexpr (std::is_same_v<U, ObjectData*>)   return (t1->*objCmp)(*t2);
     if constexpr (std::is_same_v<U, Func*>)         throw_func_compare_exception();

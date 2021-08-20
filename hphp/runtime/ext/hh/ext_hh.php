@@ -634,5 +634,26 @@ function reflection_class_is_interface(
     mixed $class,
 )[]: bool;
 
+<<__Native, __NoInjection>>
+function create_opaque_value_internal(int $id, mixed $val)[]: resource;
+
+/**
+ * Create an OpaqueValue resource wrapping $val with $id.
+ *
+ * The value must be memoizable to ensure that equivalent values are only
+ * allocated once and will always compare as equal.
+ */
+<<__Memoize, __NoInjection>>
+function create_opaque_value(int $id, mixed $val): mixed {
+  return create_opaque_value_internal($id, $val);
+}
+
+/**
+ * Returns the value used to construct $res in a call to create_opaque_value,
+ * if $res is not an opaque value resource or $id does not match the id used
+ * to construct it throw an exception.
+ */
+<<__Native, __NoInjection>>
+function unwrap_opaque_value(int $id, resource $res): mixed;
 
 }

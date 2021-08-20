@@ -112,13 +112,8 @@ bool canDCE(IRInstruction* inst) {
   case CmpBool:
   case SameObj:
   case NSameObj:
-  case GtRes:
-  case GteRes:
-  case LtRes:
-  case LteRes:
   case EqRes:
   case NeqRes:
-  case CmpRes:
   case EqRecDesc:
   case EqCls:
   case EqLazyCls:
@@ -358,6 +353,11 @@ bool canDCE(IRInstruction* inst) {
   case EqObj:
   case NeqObj:
   case CmpObj:
+  case CmpRes:
+  case GtRes:
+  case GteRes:
+  case LtRes:
+  case LteRes:
   case GtArrLike:
   case GteArrLike:
   case LtArrLike:

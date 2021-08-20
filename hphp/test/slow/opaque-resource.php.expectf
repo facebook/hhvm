@@ -1,0 +1,72 @@
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+string(81) "Cannot use relational comparison operators (<, <=, >, >=, <=>) with opaque values"
+string(81) "Cannot use relational comparison operators (<, <=, >, >=, <=>) with opaque values"
+string(81) "Cannot use relational comparison operators (<, <=, >, >=, <=>) with opaque values"
+string(81) "Cannot use relational comparison operators (<, <=, >, >=, <=>) with opaque values"
+string(67) "Cannot compare stdClass and OpaqueValue using a relational operator"
+string(81) "Cannot use relational comparison operators (<, <=, >, >=, <=>) with opaque values"
+string(65) "Cannot compare OpaqueValue and HH\vec using a relational operator"
+string(65) "Cannot compare OpaqueValue and string using a relational operator"
+string(47) "Could not unwrap OpaqueValue: id does not match"
+string(47) "Could not unwrap OpaqueValue: id does not match"
+string(47) "Could not unwrap OpaqueValue: id does not match"
+string(47) "Could not unwrap OpaqueValue: id does not match"
+string(19) "Invalid OpaqueValue"
+string(82) "__SystemLib\unwrap_opaque_value() expects parameter 2 to be resource, object given"
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(2) {
+  int(1)
+  int(3)
+}
+vec(2) {
+  int(2)
+  int(3)
+}

@@ -33,6 +33,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/implicit-context.h"
+#include "hphp/runtime/base/opaque-resource.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -1324,6 +1325,25 @@ Array HHVM_FUNCTION(collect_function_coverage) {
   return Func::GetCoverage();
 }
 
+Resource HHVM_FUNCTION(create_opaque_value_internal, int64_t id,
+                                                     const Variant& val) {
+  return Resource(req::make<OpaqueResource>(id, val));
+}
+
+Variant HHVM_FUNCTION(unwrap_opaque_value, int64_t id,
+                                           const Resource& res) {
+  if (!res->instanceof<OpaqueResource>()) {
+    SystemLib::throwInvalidArgumentExceptionObject("Invalid OpaqueValue");
+  }
+  auto const ov = cast<OpaqueResource>(res);
+  if (ov->opaqueId() != id) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Could not unwrap OpaqueValue: id does not match"
+    );
+  }
+  return ov->opaqueValue();
+}
+
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
@@ -1391,16 +1411,15 @@ static struct HHExtension final : Extension {
     HHVM_NAMED_FE(HH\\Coeffects\\_Private\\enter_policied_of,
                   HHVM_FN(enter_policied_of));
 
-    HHVM_NAMED_FE(__SystemLib\\is_dynamically_callable_inst_method,
-                  HHVM_FN(is_dynamically_callable_inst_method));
-    HHVM_NAMED_FE(__SystemLib\\reflection_class_get_name,
-                  HHVM_FN(reflection_class_get_name));
-    HHVM_NAMED_FE(__SystemLib\\reflection_class_is_abstract,
-                  HHVM_FN(reflection_class_is_abstract));
-    HHVM_NAMED_FE(__SystemLib\\reflection_class_is_final,
-                  HHVM_FN(reflection_class_is_final));
-    HHVM_NAMED_FE(__SystemLib\\reflection_class_is_interface,
-                  HHVM_FN(reflection_class_is_interface));
+#define X(nm) HHVM_NAMED_FE(__SystemLib\\nm, HHVM_FN(nm))
+    X(is_dynamically_callable_inst_method);
+    X(reflection_class_get_name);
+    X(reflection_class_is_abstract);
+    X(reflection_class_is_final);
+    X(reflection_class_is_interface);
+    X(create_opaque_value_internal);
+    X(unwrap_opaque_value);
+#undef X
 
     loadSystemlib();
   }

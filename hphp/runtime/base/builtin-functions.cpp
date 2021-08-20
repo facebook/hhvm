@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/opaque-resource.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -100,6 +101,10 @@ const StaticString s_cmpWithRClsMeth(
 const StaticString s_cmpWithRFunc(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) with "
   "reified functions"
+);
+const StaticString s_cmpWithOpaqueResource(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) with "
+  "opaque values"
 );
 const StaticString s_cmpWithNonRecord(
   "Cannot compare records with non-records"
@@ -803,6 +808,10 @@ void throw_record_compare_exception() {
 
 void throw_rfunc_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithRFunc);
+}
+
+void throw_opaque_resource_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithOpaqueResource);
 }
 
 void throw_rec_non_rec_compare_exception() {

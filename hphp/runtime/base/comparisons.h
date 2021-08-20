@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/opaque-resource.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/type-variant.h"
 
@@ -294,6 +295,10 @@ inline bool nequal(const ResourceHdr* v1, const ResourceHdr* v2) {
 inline bool less(const ResourceHdr* v1, const ResourceHdr* v2) {
   assertx(v1);
   assertx(v2);
+  if (v1->data()->template instanceof<OpaqueResource>() ||
+      v2->data()->template instanceof<OpaqueResource>()) {
+    throw_opaque_resource_compare_exception();
+  }
   return v1->data()->o_toInt64() < v2->data()->o_toInt64();
 }
 
@@ -304,6 +309,10 @@ inline bool lessEqual(const ResourceHdr* v1, const ResourceHdr* v2) {
 inline bool more(const ResourceHdr* v1, const ResourceHdr* v2) {
   assertx(v1);
   assertx(v2);
+  if (v1->data()->template instanceof<OpaqueResource>() ||
+      v2->data()->template instanceof<OpaqueResource>()) {
+    throw_opaque_resource_compare_exception();
+  }
   return v1->data()->o_toInt64() > v2->data()->o_toInt64();
 }
 
@@ -314,6 +323,10 @@ inline bool moreEqual(const ResourceHdr* v1, const ResourceHdr* v2) {
 inline int64_t compare(const ResourceHdr* v1, const ResourceHdr* v2) {
   assertx(v1);
   assertx(v1);
+  if (v1->data()->template instanceof<OpaqueResource>() ||
+      v2->data()->template instanceof<OpaqueResource>()) {
+    throw_opaque_resource_compare_exception();
+  }
   auto id1 = v1->data()->o_toInt64();
   auto id2 = v2->data()->o_toInt64();
   return (id1 < id2) ? -1 : ((id1 > id2) ? 1 : 0);

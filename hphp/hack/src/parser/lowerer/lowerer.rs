@@ -136,7 +136,10 @@ impl FunHdr {
 
 #[derive(Debug)]
 pub struct State {
-    pub cls_reified_generics: HashSet<String>,
+    // bool represents reification
+    pub cls_generics: HashMap<String, bool>,
+    // fn_generics also used for methods; maps are separate due to shadowing
+    pub fn_generics: HashMap<String, bool>,
     pub in_static_method: bool,
     pub parent_maybe_reified: bool,
     /// This provides a generic mechanism to delay raising parsing errors;
@@ -229,7 +232,8 @@ impl<'a, TF: Clone> Env<'a, TF> {
             arena,
 
             state: Rc::new(RefCell::new(State {
-                cls_reified_generics: HashSet::default(),
+                cls_generics: HashMap::default(),
+                fn_generics: HashMap::default(),
                 in_static_method: false,
                 parent_maybe_reified: false,
                 lowpri_errors: vec![],
@@ -266,8 +270,30 @@ impl<'a, TF: Clone> Env<'a, TF> {
         self.fail_open
     }
 
-    fn cls_reified_generics(&mut self) -> RefMut<HashSet<String>> {
-        RefMut::map(self.state.borrow_mut(), |s| &mut s.cls_reified_generics)
+    fn cls_generics_mut(&mut self) -> RefMut<HashMap<String, bool>> {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.cls_generics)
+    }
+
+    fn fn_generics_mut(&mut self) -> RefMut<HashMap<String, bool>> {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.fn_generics)
+    }
+
+    pub fn clear_generics(&mut self) {
+        let mut s = self.state.borrow_mut();
+        s.cls_generics = HashMap::default();
+        s.fn_generics = HashMap::default();
+    }
+
+    // avoids returning a reference to the env
+    pub fn get_reification(&self, id: &String) -> Option<bool> {
+        let s = self.state.borrow();
+        if let Some(reif) = s.fn_generics.get(id) {
+            Some(*reif)
+        } else if let Some(reif) = s.cls_generics.get(id) {
+            Some(*reif)
+        } else {
+            None
+        }
     }
 
     fn in_static_method(&mut self) -> RefMut<bool> {
@@ -923,7 +949,7 @@ where
                         variadic_hints.len().to_string()
                     ));
                 }
-                let (ctxs, _) = Self::p_contexts(&c.contexts, env)?;
+                let ctxs = Self::p_contexts(&c.contexts, env)?;
                 Ok(Hfun(ast::HintFun {
                     is_readonly: Self::mp_optional(Self::p_readonly, &c.readonly_keyword, env)?,
                     param_tys: type_hints,
@@ -1100,7 +1126,7 @@ where
         let id = id.as_ref();
         let is_in_static_method = *env.in_static_method();
         if is_in_static_method
-            && ((id == special_classes::SELF && !env.cls_reified_generics().is_empty())
+            && ((id == special_classes::SELF && env.cls_generics_mut().values().any(|reif| *reif))
                 || (id == special_classes::PARENT && *env.parent_maybe_reified()))
         {
             Self::raise_parsing_error(node, env, &syntax_error::static_method_reified_obj_creation);
@@ -1113,7 +1139,12 @@ where
         id: impl AsRef<str>,
     ) {
         let is_in_static_method = *env.in_static_method();
-        if is_in_static_method && env.cls_reified_generics().contains(id.as_ref()) {
+        if is_in_static_method
+            && *env
+                .cls_generics_mut()
+                .get(id.as_ref())
+                .unwrap_or_else(|| &false)
+        {
             Self::raise_parsing_error(
                 node,
                 env,
@@ -1563,8 +1594,9 @@ where
                         let params = Self::could_map(Self::p_fun_param, &c.parameters, env)?;
                         let readonly_ret =
                             Self::mp_optional(Self::p_readonly, &c.readonly_return, env)?;
-                        let (ctxs, unsafe_ctxs) = Self::p_contexts(&c.contexts, env)?;
-                        if Self::has_polymorphic_context(&ctxs) {
+                        let ctxs = Self::p_contexts(&c.contexts, env)?;
+                        let unsafe_ctxs = ctxs.clone();
+                        if Self::has_polymorphic_context(env, &ctxs) {
                             Self::raise_parsing_error(
                                 &c.contexts,
                                 env,
@@ -2163,7 +2195,8 @@ where
                     Token(_) => mk_name_lid(n, e),
                     _ => Self::missing_syntax("use variable", n, e),
                 };
-                let (ctxs, unsafe_ctxs) = Self::p_contexts(&c.ctx_list, env)?;
+                let ctxs = Self::p_contexts(&c.ctx_list, env)?;
+                let unsafe_ctxs = ctxs.clone();
                 let p_use = |n: S<'a, T, V>, e: &mut Env<'a, TF>| match &n.children {
                     AnonymousFunctionUseClause(c) => Self::could_map(p_arg, &c.variables, e),
                     _ => Ok(vec![]),
@@ -3226,16 +3259,19 @@ where
         }
     }
 
-    fn has_polymorphic_context_single(hint: &ast::Hint) -> bool {
+    fn has_polymorphic_context_single(env: &mut Env<'a, TF>, hint: &ast::Hint) -> bool {
         use ast::Hint_::{Haccess, Happly, HfunContext, Hvar};
         match *hint.1 {
             HfunContext(_) => true,
             Haccess(ref root, _) => match &*root.1 {
-                Happly(oxidized::ast::Id(_, id), _)
-                    if Self::strip_ns(id.as_str())
-                        == naming_special_names_rust::typehints::THIS =>
-                {
-                    true
+                Happly(oxidized::ast::Id(_, id), _) => {
+                    let s = id.as_str();
+                    /* TODO(coeffects) There is an opportunity to represent this structurally
+                     * in the AST if we refactor so generic hints lower as Habstr instead of
+                     * Happly, like we do in the direct decl parser. */
+                    Self::strip_ns(s) == naming_special_names_rust::typehints::THIS
+                        || env.fn_generics_mut().contains_key(s)
+                        || env.cls_generics_mut().contains_key(s)
                 }
                 Hvar(_) => true,
                 _ => false,
@@ -3244,11 +3280,11 @@ where
         }
     }
 
-    fn has_polymorphic_context(contexts: &Option<ast::Contexts>) -> bool {
+    fn has_polymorphic_context(env: &mut Env<'a, TF>, contexts: &Option<ast::Contexts>) -> bool {
         if let Some(ast::Contexts(_, ref context_hints)) = contexts {
             return context_hints
                 .iter()
-                .any(|c| Self::has_polymorphic_context_single(c));
+                .any(|c| Self::has_polymorphic_context_single(env, c));
         } else {
             false
         }
@@ -3277,7 +3313,7 @@ where
         use ast::{Hint, Hint_, ReifyKind, Variance};
         use Hint_::{Haccess, Happly, HfunContext, Hvar};
 
-        if !Self::has_polymorphic_context(contexts) {
+        if !Self::has_polymorphic_context(env, contexts) {
             return;
         }
         let ast::Contexts(ref _p, ref context_hints) = contexts.as_ref().unwrap();
@@ -3459,6 +3495,37 @@ where
                                 &syntax_error::ctx_var_invalid_parameter(name),
                             ),
                         }
+                    } else if let Happly(ast::Id(_, ref id), _) = *root.1 {
+                        // For polymorphic context with form `T::*::C` where `T` is a reified generic
+                        // add a type parameter "T/[T::*::C]"
+                        // add a where constraint T/[T::*::C] = T :: C
+                        let haccess_string = |id, csts: &Vec<aast::Sid>| {
+                            format!("{}::{}", id, csts.iter().map(|c| c.1.clone()).join("::"))
+                        };
+
+                        match env.get_reification(id) {
+                            None => {} // not a generic
+                            Some(false) => Self::raise_parsing_error_pos(
+                                &root.0,
+                                env,
+                                &syntax_error::ctx_generic_invalid(id, haccess_string(id, &csts)),
+                            ),
+                            Some(true) if env.codegen() => {}
+                            Some(true) => {
+                                let left_id = ast::Id(
+                                    context_hint.0.clone(),
+                                    format!("T/[{}]", haccess_string(id, &csts)),
+                                );
+                                tparams.push(tp(left_id.clone(), vec![]));
+                                let left =
+                                    ast::Hint::new(context_hint.0.clone(), Happly(left_id, vec![]));
+                                where_constraints.push(ast::WhereConstraintHint(
+                                    left,
+                                    ast::ConstraintKind::ConstraintEq,
+                                    context_hint.clone(),
+                                ));
+                            }
+                        }
                     }
                 }
                 _ => {}
@@ -3622,10 +3689,15 @@ where
             }) => {
                 let user_attributes = Self::p_user_attributes(attribute_spec, env)?;
                 let is_reified = !reified.is_missing();
-                if is_class && is_reified {
-                    let type_name = Self::text(name, env);
-                    env.cls_reified_generics().insert(type_name);
+
+                let type_name = Self::text(name, env);
+                if is_class {
+                    env.cls_generics_mut().insert(type_name, is_reified);
+                } else {
+                    // this is incorrect for type aliases, but it doesn't affect any check
+                    env.fn_generics_mut().insert(type_name, is_reified);
                 }
+
                 let variance = match Self::token_kind(variance) {
                     Some(TK::Plus) => ast::Variance::Covariant,
                     Some(TK::Minus) => ast::Variance::Contravariant,
@@ -3715,15 +3787,14 @@ where
     fn p_contexts(
         node: S<'a, T, V>,
         env: &mut Env<'a, TF>,
-    ) -> Result<(Option<ast::Contexts>, Option<ast::Contexts>), Error> {
+    ) -> Result<Option<ast::Contexts>, Error> {
         match &node.children {
-            Missing => Ok((None, None)),
+            Missing => Ok(None),
             Contexts(c) => {
                 let hints = Self::could_map(&Self::p_hint, &c.types, env)?;
                 let pos = Self::p_pos(node, env);
                 let ctxs = ast::Contexts(pos, hints);
-                let unsafe_ctxs = ctxs.clone();
-                Ok((Some(ctxs), Some(unsafe_ctxs)))
+                Ok(Some(ctxs))
             }
             _ => Self::missing_syntax("contexts", node, env),
         }
@@ -3733,8 +3804,7 @@ where
         ctx_list: S<'a, T, V>,
         env: &mut Env<'a, TF>,
     ) -> Result<Option<ast::Hint>, Error> {
-        Ok(Self::mp_optional(Self::p_contexts, &ctx_list, env)?
-            .and_then(|t| t.0)
+        Ok(Self::p_contexts(&ctx_list, env)?
             .map(|t| ast::Hint::new(t.0, ast::Hint_::Hintersection(t.1))))
     }
 
@@ -3764,7 +3834,7 @@ where
                 let readonly_ret = Self::mp_optional(Self::p_readonly, readonly_return, env)?;
                 let mut type_parameters = Self::p_tparam_l(false, type_parameter_list, env)?;
                 let mut parameters = Self::could_map(Self::p_fun_param, parameter_list, env)?;
-                let (contexts, unsafe_contexts) = Self::p_contexts(contexts, env)?;
+                let contexts = Self::p_contexts(contexts, env)?;
                 let mut constrs = Self::p_where_constraint(false, node, where_clause, env)?;
                 Self::rewrite_effect_polymorphism(
                     env,
@@ -3793,6 +3863,7 @@ where
                         }
                     }
                 }
+                let unsafe_contexts = contexts.clone();
                 Ok(FunHdr {
                     suspension_kind,
                     readonly_this,
@@ -3816,7 +3887,8 @@ where
                 let readonly_ret = Self::mp_optional(Self::p_readonly, readonly_return, env)?;
                 let mut header = FunHdr::make_empty(env);
                 header.parameters = Self::could_map(Self::p_fun_param, parameters, env)?;
-                let (contexts, unsafe_contexts) = Self::p_contexts(contexts, env)?;
+                let contexts = Self::p_contexts(contexts, env)?;
+                let unsafe_contexts = contexts.clone();
                 header.contexts = contexts;
                 header.unsafe_contexts = unsafe_contexts;
                 header.return_type = Self::mp_optional(Self::p_hint, type_, env)?;
@@ -4346,7 +4418,7 @@ where
                     let ast::Hint(_, ref h) = hint;
                     if let Hintersection(hl) = &**h {
                         for h in hl {
-                            if Self::has_polymorphic_context_single(h) {
+                            if Self::has_polymorphic_context_single(env, h) {
                                 Self::raise_parsing_error(
                                     &c.constraint,
                                     env,
@@ -4459,6 +4531,8 @@ where
                 Ok(())
             }
             MethodishDeclaration(c) if has_fun_header(c) => {
+                // keep cls_generics
+                *env.fn_generics_mut() = HashMap::default();
                 let classvar_init = |param: &ast::FunParam| -> (ast::Stmt, ast::ClassVar) {
                     let cvname = Self::drop_prefix(&param.name, '$');
                     let p = &param.pos;
@@ -4916,7 +4990,7 @@ where
         kind: &str,
         env: &mut Env<'a, TF>,
     ) {
-        if Self::has_polymorphic_context(contexts) {
+        if Self::has_polymorphic_context(env, contexts) {
             if let Some(u) = user_attributes
                 .iter()
                 .find(|u| naming_special_names_rust::user_attributes::is_memoized(&u.name.1))
@@ -5013,6 +5087,7 @@ where
             }) => {
                 let mut env = Env::clone_and_unset_toplevel_if_toplevel(env);
                 let env = env.as_mut();
+                env.clear_generics();
                 let hdr = Self::p_fun_hdr(declaration_header, env)?;
                 let is_external = body.is_external();
                 let (block, yield_) = if is_external {
@@ -5066,7 +5141,7 @@ where
                 );
                 let has_xhp_keyword = matches!(Self::token_kind(&c.xhp), Some(TK::XHP));
                 let name = Self::pos_name(&c.name, env)?;
-                *env.cls_reified_generics() = HashSet::default();
+                env.clear_generics();
                 let tparams = Self::p_tparam_l(true, &c.type_parameters, env)?;
                 let class_kind = match Self::token_kind(&c.keyword) {
                     Some(TK::Class) if kinds.has(modifier::ABSTRACT) => {

@@ -27,8 +27,14 @@ and context_hint env (p, h) =
   match h with
   | Hfun_context n ->
     make_decl_ty env p (Tgeneric (Format.sprintf "T/[ctx %s]" n, []))
-  | Haccess ((_, Hvar n), [(_, id)]) ->
-    make_decl_ty env p (Tgeneric (Format.sprintf "T/[%s::%s]" n id, []))
+  | Haccess ((_, (Habstr (n, []) | Hvar n)), ids) ->
+    let name =
+      Format.sprintf
+        "T/[%s::%s]"
+        n
+        (String.concat ~sep:"::" (List.map ~f:snd ids))
+    in
+    make_decl_ty env p (Tgeneric (name, []))
   | _ -> hint env (p, h)
 
 and shape_field_info_to_shape_field_type

@@ -341,6 +341,7 @@ let rec hint
     ?(allow_wildcard = false)
     ?(allow_like = false)
     ?(in_where_clause = false)
+    ?(in_context = false)
     ?(ignore_hack_arr = false)
     ?(tp_depth = 0)
     env
@@ -353,6 +354,7 @@ let rec hint
       ~allow_wildcard
       ~allow_like
       ~in_where_clause
+      ~in_context
       ~ignore_hack_arr
       ~tp_depth
       env
@@ -370,7 +372,7 @@ and contexts env ctxs =
            * wildcard hints to be transformed into Hfun_context *)
           Errors.invalid_wildcard_context p;
           (p, N.Herr)
-        | _ -> hint env h)
+        | _ -> hint ~in_context:true env h)
       hl
   in
   (pos, hl)
@@ -397,6 +399,7 @@ and hint_
     ~allow_wildcard
     ~allow_like
     ~in_where_clause
+    ~in_context
     ~ignore_hack_arr
     ?(tp_depth = 0)
     env
@@ -489,7 +492,7 @@ and hint_
           | N.Hthis
           | N.Happly _ ->
             h
-          | N.Habstr _ when in_where_clause -> h
+          | N.Habstr _ when in_where_clause || in_context -> h
           | _ ->
             Errors.invalid_type_access_root root;
             N.Herr

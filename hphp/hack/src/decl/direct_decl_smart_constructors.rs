@@ -1934,6 +1934,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         contexts.iter().any(|&ty| match ty.1 {
             Ty_::Tapply((root, &[])) // Hfun_context in the AST
             | Ty_::Taccess(TaccessType(Ty(_, Ty_::Tapply((root, &[]))), _)) => root.1.contains('$'),
+            | Ty_::Taccess(TaccessType(t, _)) => Self::taccess_root_is_generic(t),
             _ => false,
         })
     }
@@ -1944,6 +1945,31 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
 
     fn ctx_generic_for_dependent(&self, name: &str, cst: &str) -> &'a str {
         bumpalo::format!(in self.arena, "T/[{}::{}]", name, cst).into_bump_str()
+    }
+
+    // Note: the reason for the divergence between this and the lowerer is that
+    // hint Haccess is a flat list, whereas decl ty Taccess is a tree.
+    fn taccess_root_is_generic(ty: &Ty<'_>) -> bool {
+        match ty {
+            Ty(_, Ty_::Tgeneric((_, &[]))) => true,
+            Ty(_, Ty_::Taccess(&TaccessType(t, _))) => Self::taccess_root_is_generic(t),
+            _ => false,
+        }
+    }
+
+    fn ctx_generic_for_generic_taccess_inner(&self, ty: &Ty<'_>, cst: &str) -> std::string::String {
+        let left = match ty {
+            Ty(_, Ty_::Tgeneric((name, &[]))) => name.to_string(),
+            Ty(_, Ty_::Taccess(&TaccessType(ty, cst))) => {
+                self.ctx_generic_for_generic_taccess_inner(ty, cst.1)
+            }
+            _ => panic!("Unexpected element in Taccess"),
+        };
+        format!("{}::{}", left, cst)
+    }
+    fn ctx_generic_for_generic_taccess(&self, ty: &Ty<'_>, cst: &str) -> &'a str {
+        bumpalo::format!(in self.arena, "T/[{}]", self.ctx_generic_for_generic_taccess_inner(ty, cst))
+            .into_bump_str()
     }
 
     fn rewrite_effect_polymorphism(
@@ -2127,6 +2153,22 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         }
                     }
                 }
+                Ty_::Taccess(&TaccessType(t, cst)) if Self::taccess_root_is_generic(t) => {
+                    let left_id = (
+                        context_ty.0.pos().unwrap_or(Pos::none()),
+                        self.ctx_generic_for_generic_taccess(t, &cst.1),
+                    );
+                    tparams.push(tp(left_id, &[]));
+                    let left = self.alloc(Ty(
+                        context_ty.0,
+                        Ty_::Tgeneric(self.alloc((left_id.1, &[]))),
+                    ));
+                    where_constraints.push(self.alloc(WhereConstraint(
+                        left,
+                        ConstraintKind::ConstraintEq,
+                        context_ty,
+                    )));
+                }
                 _ => {}
             }
         }
@@ -2156,6 +2198,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     if name.starts_with('$') =>
                 {
                     let name = self.ctx_generic_for_dependent(name, &cst.1);
+                    Ty_::Tgeneric(self.alloc((name, &[])))
+                }
+                Ty_::Taccess(&TaccessType(t, cst)) if Self::taccess_root_is_generic(t) => {
+                    let name = self.ctx_generic_for_generic_taccess(t, &cst.1);
                     Ty_::Tgeneric(self.alloc((name, &[])))
                 }
                 _ => return ty,

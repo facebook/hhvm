@@ -981,6 +981,14 @@ pub fn ctx_fun_invalid_type_hint(param_name: &str) -> Error {
     ))
 }
 
+pub fn ctx_generic_invalid(tparam_name: &str, ctx: String) -> Error {
+    Cow::Owned(format!(
+        "Type parameter {} used for dependent context {} must be reified",
+        tparam_name.to_string(),
+        ctx
+    ))
+}
+
 pub fn effect_polymorphic_memoized(kind: &str) -> Error {
     Cow::Owned(format!(
         "This {} cannot be memoized because it has a polymorphic context",

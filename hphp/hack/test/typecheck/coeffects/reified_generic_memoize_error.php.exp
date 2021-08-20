@@ -1,0 +1,6 @@
+File "reified_generic_memoize_error.php", line 9, characters 5-13:
+This method cannot be memoized because it has a polymorphic context (Parsing[1002])
+File "reified_generic_memoize_error.php", line 11, characters 5-13:
+This method cannot be memoized because it has a polymorphic context (Parsing[1002])
+File "reified_generic_memoize_error.php", line 16, characters 3-11:
+This function cannot be memoized because it has a polymorphic context (Parsing[1002])

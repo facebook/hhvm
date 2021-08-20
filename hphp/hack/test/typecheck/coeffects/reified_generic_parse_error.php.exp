@@ -1,0 +1,6 @@
+File "reified_generic_parse_error.php", line 8, characters 22-22:
+Type parameter T used for dependent context T::Tself::C must be reified (Parsing[1002])
+File "reified_generic_parse_error.php", line 12, characters 5-5:
+Type parameter T used for dependent context T::C must be reified (Parsing[1002])
+File "reified_generic_parse_error.php", line 13, characters 5-6:
+Type parameter Tm used for dependent context Tm::C must be reified (Parsing[1002])

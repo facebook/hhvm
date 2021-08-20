@@ -320,12 +320,10 @@ int XboxServer::TaskResult(XboxTransport *job, int timeout_ms, Variant *ret) {
 }
 
 int XboxServer::GetActiveWorkers() {
-  Lock l(s_dispatchMutex);
   return s_dispatcher ? s_dispatcher->getActiveWorker() : 0;
 }
 
 int XboxServer::GetQueuedJobs() {
-  Lock l(s_dispatchMutex);
   return s_dispatcher ? s_dispatcher->getQueuedJobs() : 0;
 }
 

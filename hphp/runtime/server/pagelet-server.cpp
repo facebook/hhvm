@@ -496,12 +496,10 @@ void PageletServer::AddToPipeline(const std::string &s) {
 }
 
 int PageletServer::GetActiveWorker() {
-  Lock l(s_dispatchMutex);
   return s_dispatcher ? s_dispatcher->getActiveWorker() : 0;
 }
 
 int PageletServer::GetQueuedJobs() {
-  Lock l(s_dispatchMutex);
   return s_dispatcher ? s_dispatcher->getQueuedJobs() : 0;
 }
 

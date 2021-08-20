@@ -329,6 +329,9 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
   } else if (class_or_object.isString()) {
     cls = Class::load(class_or_object.toString().get());
     if (!cls) return false;
+  } else if (class_or_object.isLazyClass()) {
+    cls = Class::load(class_or_object.toLazyClassVal().name());
+    if (!cls) return false;
   } else {
     raise_warning(
       "First parameter must either be an object"

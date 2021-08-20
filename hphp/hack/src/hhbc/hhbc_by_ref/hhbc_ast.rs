@@ -202,7 +202,7 @@ pub enum TypestructResolveOp {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
 pub enum ReadonlyOp {
-    ReadOnly,
+    Readonly,
     Mutable,
     Any,
     CheckROCOW,

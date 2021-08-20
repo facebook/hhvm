@@ -6471,7 +6471,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     _ => MemberOpMode::Define,
                 };
                 let readonly_op = if rhs_readonly {
-                    ReadonlyOp::ReadOnly
+                    ReadonlyOp::Readonly
                 } else {
                     ReadonlyOp::Any
                 };

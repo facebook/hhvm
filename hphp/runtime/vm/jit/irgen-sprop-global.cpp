@@ -149,7 +149,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, SSATmp* 
       return false;
     }
     if (!lookup.readonly &&
-      (opts.readOnlyCheck == ReadonlyOp::ReadOnly ||
+      (opts.readOnlyCheck == ReadonlyOp::Readonly ||
        opts.readOnlyCheck == ReadonlyOp::CheckROCOW)) {
       return false;
     }

@@ -59,7 +59,7 @@ constexpr size_t NumMemberCodes = MW + 1;
 
 #define READONLY_OPS    \
   OP(Any)               \
-  OP(ReadOnly)          \
+  OP(Readonly)          \
   OP(Mutable)           \
   OP(CheckROCOW)        \
   OP(CheckMutROCOW)

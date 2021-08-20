@@ -1740,7 +1740,7 @@ fn print_eq_op<W: Write>(w: &mut W, op: &EqOp) -> Result<(), W::Error> {
 
 fn print_readonly_op<W: Write>(w: &mut W, op: &ReadonlyOp) -> Result<(), W::Error> {
     w.write(match op {
-        ReadonlyOp::ReadOnly => "ReadOnly",
+        ReadonlyOp::Readonly => "Readonly",
         ReadonlyOp::Mutable => "Mutable",
         ReadonlyOp::Any => "Any",
         ReadonlyOp::CheckROCOW => "CheckROCOW",

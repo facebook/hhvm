@@ -3380,7 +3380,7 @@ void in(ISS& env, const bc::SetS& op) {
     val,
     true,
     false,
-    checkReadonlyOp(ReadonlyOp::ReadOnly, op.subop1)
+    checkReadonlyOp(ReadonlyOp::Readonly, op.subop1)
   );
 
   if (merge.throws == TriBool::Yes || merge.adjusted.subtypeOf(BBottom)) {

@@ -1143,7 +1143,7 @@ void ObjectData::checkReadonly(const PropLookup& lookup, ReadonlyOp op,
     } else if (op == ReadonlyOp::Mutable) {
       throwMustBeMutable(lookup.slot);
     }
-  } else if (op == ReadonlyOp::ReadOnly || op == ReadonlyOp::CheckROCOW) {
+  } else if (op == ReadonlyOp::Readonly || op == ReadonlyOp::CheckROCOW) {
     throwMustBeReadOnly(lookup.slot);
   }
 }
@@ -1372,7 +1372,7 @@ void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val, Read
       throwMutateConstProp(lookup.slot);
     }
     if (RO::EvalEnableReadonlyPropertyEnforcement && !lookup.readonly &&
-      op == ReadonlyOp::ReadOnly) {
+      op == ReadonlyOp::Readonly) {
       throwMustBeReadOnly(lookup.slot);
     }
     // TODO(T61738946): We can remove the temporary here once we no longer

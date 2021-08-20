@@ -3278,7 +3278,7 @@ OPTBLD_INLINE void iopSetS(ReadonlyOp op) {
 
   SCOPE_EXIT { decRefStr(name); };
   if (RO::EvalEnableReadonlyPropertyEnforcement &&
-    !readonly && op == ReadonlyOp::ReadOnly) {
+    !readonly && op == ReadonlyOp::Readonly) {
     throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
   }
   if (!(visible && accessible)) {

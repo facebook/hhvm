@@ -1258,7 +1258,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
 
   if (propInfo && !propInfo->isConst) {
     if (RO::EvalEnableReadonlyPropertyEnforcement && !propInfo->readOnly &&
-      op == ReadonlyOp::ReadOnly) {
+      op == ReadonlyOp::Readonly) {
       gen(env, ThrowMustBeReadOnlyException, cns(env, propInfo->propClass), key);
       return cns(env, TBottom);
     }

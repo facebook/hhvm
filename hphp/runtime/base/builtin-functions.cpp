@@ -945,7 +945,7 @@ void checkReadonly(const TypedValue* tv,
     } else if (op == ReadonlyOp::Mutable) {
       throw_must_be_mutable(cls->name()->data(), name->data());
     }
-  } else if (op == ReadonlyOp::ReadOnly || op == ReadonlyOp::CheckROCOW) {
+  } else if (op == ReadonlyOp::Readonly || op == ReadonlyOp::CheckROCOW) {
     throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
   }
 }

@@ -662,7 +662,7 @@ bool FuncChecker::checkImmKA(PC& pc, PC const instr) {
   auto const op = peek_op(instr);
   switch (op) {
     case Op::Dim:
-      if (rop == ReadonlyOp::ReadOnly) return readOnlyImmNotSupported(rop, op);
+      if (rop == ReadonlyOp::Readonly) return readOnlyImmNotSupported(rop, op);
       break;
     case Op::QueryM:
       if (rop != ReadonlyOp::Mutable && rop != ReadonlyOp::Any) {
@@ -670,7 +670,7 @@ bool FuncChecker::checkImmKA(PC& pc, PC const instr) {
       }
       break;
     case Op::SetM:
-      if (rop != ReadonlyOp::ReadOnly && rop != ReadonlyOp::Any) {
+      if (rop != ReadonlyOp::Readonly && rop != ReadonlyOp::Any) {
         return readOnlyImmNotSupported(rop, op);
       }
       break;
@@ -1445,7 +1445,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       auto new_pc = pc;
       decode_op(new_pc);
       auto const rop = decode_oa<ReadonlyOp>(new_pc);
-      if (rop != ReadonlyOp::ReadOnly && rop != ReadonlyOp::Any) {
+      if (rop != ReadonlyOp::Readonly && rop != ReadonlyOp::Any) {
         return readOnlyImmNotSupported(rop, op);
       }
       break;
@@ -1561,7 +1561,7 @@ bool FuncChecker::checkReadonlyOp(State* cur, PC pc, Op op) {
       decode_iva(new_pc);
       decode_oa<MOpMode>(new_pc);
       auto const rop = decode_oa<ReadonlyOp>(new_pc);
-      if (rop == ReadonlyOp::ReadOnly) return readOnlyImmNotSupported(rop, op);
+      if (rop == ReadonlyOp::Readonly) return readOnlyImmNotSupported(rop, op);
       cur->afterCheckCOW = rop == ReadonlyOp::CheckROCOW || rop == ReadonlyOp::CheckMutROCOW;
       return true;
     } else if (op == Op::BaseL) {

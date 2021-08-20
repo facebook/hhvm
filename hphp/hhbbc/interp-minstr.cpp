@@ -1440,7 +1440,7 @@ Effects miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key, ReadonlyOp o
     return Effects::AlwaysThrows;
   };
 
-  if (checkReadonlyOp(ReadonlyOp::ReadOnly, op) &&
+  if (checkReadonlyOp(ReadonlyOp::Readonly, op) &&
     !isMaybeThisPropAttr(env, name, AttrIsReadonly)) {
     return alwaysThrows();
   }

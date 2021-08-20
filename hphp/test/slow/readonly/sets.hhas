@@ -32,7 +32,7 @@
   BaseL $a Warn Any
   QueryM 0 CGet PT:"b" Any
   .srcloc 16:3,16:7;
-  SetS ReadOnly
+  SetS Readonly
   .srcloc 16:3,16:16;
   PopC
   .srcloc 17:6,17:8;
@@ -43,7 +43,7 @@
   BaseL $a Warn Any
   QueryM 0 CGet PT:"b" Any
   .srcloc 17:3,17:8;
-  SetS ReadOnly
+  SetS Readonly
   .srcloc 17:3,17:17;
   PopC
   .srcloc 18:2,18:2;

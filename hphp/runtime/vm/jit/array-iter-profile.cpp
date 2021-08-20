@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/set-array.h"
 
 #include <folly/Format.h>
 

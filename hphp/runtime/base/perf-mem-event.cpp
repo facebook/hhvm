@@ -315,7 +315,7 @@ bool record_request_heap_mem_event(const void* addr,
       break;
 
     case HeaderKind::Keyset:
-      try_member(static_cast<const SetArray*>(hdr), addr, record);
+      try_member(static_cast<const VanillaKeyset*>(hdr), addr, record);
       break;
 
     case HeaderKind::BespokeVec:

@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -37,6 +36,7 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/vm/class-meth-data-ref.h"

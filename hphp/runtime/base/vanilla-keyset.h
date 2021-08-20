@@ -37,7 +37,7 @@ struct ArrayAccessProfile;
 struct APCArray;
 struct APCHandle;
 
-struct SetArrayElm {
+struct VanillaKeysetElm {
   using hash_t = strhash_t;
   /*
    * We store elements of the set here, but also some information
@@ -134,24 +134,24 @@ struct SetArrayElm {
   }
 
   static constexpr ptrdiff_t keyOff() {
-    return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_data.pstr);
+    return offsetof(VanillaKeysetElm, tv) + offsetof(TypedValue, m_data.pstr);
   }
   static constexpr ptrdiff_t dataOff() {
-    return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_data);
+    return offsetof(VanillaKeysetElm, tv) + offsetof(TypedValue, m_data);
   }
   static constexpr ptrdiff_t typeOff() {
-    return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_type);
+    return offsetof(VanillaKeysetElm, tv) + offsetof(TypedValue, m_type);
   }
   static constexpr ptrdiff_t hashOff() {
-    return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_aux);
+    return offsetof(VanillaKeysetElm, tv) + offsetof(TypedValue, m_aux);
   }
 };
 
 //////////////////////////////////////////////////////////////////////
 
-struct SetArray final : ArrayData,
-                        array::HashTable<SetArray, SetArrayElm>,
-                        type_scan::MarkCollectable<SetArray> {
+struct VanillaKeyset final : ArrayData,
+                             array::HashTable<VanillaKeyset, VanillaKeysetElm>,
+                             type_scan::MarkCollectable<VanillaKeyset> {
 
 //////////////////////////////////////////////////////////////////////
 // Set Layout
@@ -178,7 +178,7 @@ public:
   static ArrayData* MakeSet(uint32_t size, const TypedValue* values);
 
   /*
-   * Allocate an uncounted SetArray and copy the values from the
+   * Allocate an uncounted keyset and copy the values from the
    * input 'array' into the uncounted one.
    *
    * If withApcTypedValue is true, space for an APCTypedValue will be
@@ -193,8 +193,8 @@ public:
   /*
    * Safe downcast helpers.
    */
-  static SetArray* asSet(ArrayData* ad);
-  static const SetArray* asSet(const ArrayData* ad);
+  static VanillaKeyset* asSet(ArrayData* ad);
+  static const VanillaKeyset* asSet(const ArrayData* ad);
 
   static ArrayData* MakeSetFromAPC(const APCArray*);
 
@@ -211,16 +211,16 @@ private:
 
   enum class AllocMode : bool { Request, Static };
 
-  static SetArray* CopySet(const SetArray& other, AllocMode);
-  SetArray* copySet() const { return CopySet(*this, AllocMode::Request); }
+  static VanillaKeyset* CopySet(const VanillaKeyset& other, AllocMode);
+  VanillaKeyset* copySet() const { return CopySet(*this, AllocMode::Request); }
 
   void eraseNoCompact(RemovePos pos);
 
 private:
-  SetArray() = delete;
-  SetArray(const SetArray&) = delete;
-  SetArray& operator=(const SetArray&) = delete;
-  ~SetArray() = delete;
+  VanillaKeyset() = delete;
+  VanillaKeyset(const VanillaKeyset&) = delete;
+  VanillaKeyset& operator=(const VanillaKeyset&) = delete;
+  ~VanillaKeyset() = delete;
 
 //////////////////////////////////////////////////////////////////////
 // Iteration
@@ -232,7 +232,7 @@ public:
   const TypedValue* tvOfPos(uint32_t) const;
 
   template <class F>
-  static void Iterate(const SetArray* a, F fn) {
+  static void Iterate(const VanillaKeyset* a, F fn) {
     auto const* elm = a->data();
     for (auto i = a->m_used; i--; elm++) {
       if (LIKELY(!elm->isTombstone())) {
@@ -282,13 +282,13 @@ private:
    * rebuilds the hash table, but it does not compact the elements. If copy is
    * true, it will copy elements instead of taking ownership of them.
    */
-  SetArray* grow(bool copy);
+  VanillaKeyset* grow(bool copy);
 
   /*
    * prepareForInsert ensures that the set has room to insert an element and
    * has a refcount of 1, copying if requested and growing if needed.
    */
-  SetArray* prepareForInsert(bool copy);
+  VanillaKeyset* prepareForInsert(bool copy);
 
   /*
    * compact() removes all tombstones from the hash table by going
@@ -348,7 +348,7 @@ private:
 // Friends
 
 private:
-  friend struct array::HashTable<SetArray, SetArrayElm>;
+  friend struct array::HashTable<VanillaKeyset, VanillaKeysetElm>;
   friend struct MemoryProfile;
   friend struct jit::ArrayAccessProfile;
   friend struct MixedArray;
@@ -393,7 +393,7 @@ public:
 
 private:
   template<class K>
-  static ArrayData* RemoveImpl(ArrayData*, K key, bool, SetArrayElm::hash_t);
+  static ArrayData* RemoveImpl(ArrayData*, K key, bool, VanillaKeysetElm::hash_t);
   static ArrayData* AppendImpl(ArrayData*, TypedValue, bool);
 
 private:
@@ -403,7 +403,7 @@ private:
   uint64_t m_padding;
 };
 
-HASH_TABLE_CHECK_OFFSETS(SetArray, SetArrayElm)
+HASH_TABLE_CHECK_OFFSETS(VanillaKeyset, VanillaKeysetElm)
 //////////////////////////////////////////////////////////////////////
 
 }

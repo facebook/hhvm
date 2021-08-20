@@ -19,9 +19,9 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/vm/member-operations.h"
 
 #include "hphp/util/safe-cast.h"
@@ -180,7 +180,7 @@ void ArrayAccessProfile::update(const ArrayData* ad, int64_t i, bool cowCheck) {
   auto const pos =
     cowCheck && ad->cowCheck() ? -1 :
     ad->isVanillaDict() ? MixedArray::asMixed(ad)->find(i, h) :
-    ad->isVanillaKeyset() ? SetArray::asSet(ad)->find(i, h) :
+    ad->isVanillaKeyset() ? VanillaKeyset::asSet(ad)->find(i, h) :
     -1;
   if (!update(pos, 1)) m_untracked++;
   if (isSmallStaticArray(ad)) m_small++;
@@ -195,7 +195,7 @@ void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
   auto const pos =
     cowCheck && ad->cowCheck() ? -1 :
     ad->isVanillaDict() ? findStringKey(MixedArray::asMixed(ad), sd) :
-    ad->isVanillaKeyset() ? findStringKey(SetArray::asSet(ad), sd) :
+    ad->isVanillaKeyset() ? findStringKey(VanillaKeyset::asSet(ad), sd) :
     -1;
   if (!update(pos, 1)) m_untracked++;
   if (isSmallStaticArray(ad)) m_small++;

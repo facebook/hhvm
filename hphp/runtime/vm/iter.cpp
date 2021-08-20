@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/base/mixed-array-defs.h"

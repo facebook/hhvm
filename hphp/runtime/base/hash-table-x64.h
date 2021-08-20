@@ -24,11 +24,11 @@
 #define MixedArrayElm_TYPE      8
 #define MixedArrayElm_QUADWORDS 3
 
-#define SetArray_SCALE        16
-#define SetArray_DATA         32
-#define SetArrayElm_HASH      12
-#define SetArrayElm_KEY       0
-#define SetArrayElm_DATA      0
-#define SetArrayElm_TYPE      8
-#define SetArrayElm_QUADWORDS 2
+#define VanillaKeyset_SCALE        16
+#define VanillaKeyset_DATA         32
+#define VanillaKeysetElm_HASH      12
+#define VanillaKeysetElm_KEY       0
+#define VanillaKeysetElm_DATA      0
+#define VanillaKeysetElm_TYPE      8
+#define VanillaKeysetElm_QUADWORDS 2
 

@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
 
 #include "hphp/runtime/vm/class-meth-data.h"
@@ -353,7 +353,7 @@ inline size_t allocSize(const HeapObject* h) {
       break;
     case HeaderKind::Keyset:
       // size = fn of h->m_scale
-      size = static_cast<const SetArray*>(h)->heapSize();
+      size = static_cast<const VanillaKeyset*>(h)->heapSize();
       break;
     case HeaderKind::BespokeVec:
     case HeaderKind::BespokeDict:

@@ -535,11 +535,11 @@ DICTSET_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, int64_t i) {
-  return SetArray::AddToSet(a, i);
+  return VanillaKeyset::AddToSet(a, i);
 }
 
 inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, StringData* s) {
-  return SetArray::AddToSet(a, s);
+  return VanillaKeyset::AddToSet(a, s);
 }
 
 template<KeyType keyType>

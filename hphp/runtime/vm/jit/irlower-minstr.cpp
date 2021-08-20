@@ -471,12 +471,12 @@ void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
   auto const branch = label(env, inst->taken());
   auto const pos = inst->extra<CheckKeysetOffset>()->index;
   auto& v = vmain(env);
-  auto const tvOff =
-    pos * (int) sizeof(SetArray::Elm) + SetArray::dataOff() + SetArray::tvOff();
+  auto const tvOff = pos * (int) sizeof(VanillaKeyset::Elm) +
+                     VanillaKeyset::dataOff() + VanillaKeyset::tvOff();
 
   { // Fail if our predicted position exceeds bounds.
     auto const sf = v.makeReg();
-    v << cmplim{safe_cast<int32_t>(pos), keyset[SetArray::usedOff()], sf};
+    v << cmplim{safe_cast<int32_t>(pos), keyset[VanillaKeyset::usedOff()], sf};
     ifThen(v, CC_LE, sf, branch);
   }
   { // Fail if the Elm key value doesn't match.
@@ -494,7 +494,7 @@ void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
     auto const is_str_key = key_type == KeyType::Str;
     ifThen(v, is_str_key ? CC_L : CC_GE, sf, branch);
   }
-  { // Fail if the Elm is a tombstone.  See SetArray::isTombstone().
+  { // Fail if the Elm is a tombstone.  See VanillaKeyset::isTombstone().
     auto const sf = v.makeReg();
     v << cmpbim{static_cast<data_type_t>(kInvalidDataType),
                 keyset[tvOff + TVOFF(m_type)], sf};
@@ -614,15 +614,15 @@ VscaledDisp getDictLayoutOffset(IRLS& env, const IRInstruction* inst) {
   return pos3 * 8 + MixedArray::dataOff() + MixedArray::Elm::dataOff();
 }
 
-VscaledDisp getSetArrayLayoutOffset(IRLS& env, const IRInstruction* inst) {
+VscaledDisp getKeysetLayoutOffset(IRLS& env, const IRInstruction* inst) {
   auto const pos = srcLoc(env, inst, 2).reg();
   auto& v = vmain(env);
   // We want to index by MixedArray::Elm but VScaled doesn't let us scale by 16
-  // So let's use (2 * pos) * 8 to get sizeof(SetArray::Elm) * pos
+  // So let's use (2 * pos) * 8 to get sizeof(VanillaKeyset::Elm) * pos
   auto pos2 = v.makeReg();
   v << lea{pos[pos], pos2};
-  static_assert(sizeof(SetArray::Elm) == 16);
-  return pos2 * 8 + SetArray::dataOff() + SetArray::tvOff();
+  static_assert(sizeof(VanillaKeyset::Elm) == 16);
+  return pos2 * 8 + VanillaKeyset::dataOff() + VanillaKeyset::tvOff();
 }
 
 } // namespace
@@ -1011,7 +1011,7 @@ void cgElemKeysetK(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0);
 
   auto& v = vmain(env);
-  auto const off = getSetArrayLayoutOffset(env, inst);
+  auto const off = getKeysetLayoutOffset(env, inst);
   v << lea{keyset[off], dst.reg(tv_lval::val_idx)};
   static_assert(TVOFF(m_data) == 0, "");
   v << lea{keyset[off + TVOFF(m_type)], dst.reg(tv_lval::type_idx)};
@@ -1026,7 +1026,7 @@ void cgKeysetGetQuiet(IRLS& env, const IRInstruction* inst) {
 
 void cgKeysetGetK(IRLS& env, const IRInstruction* inst) {
   auto const keyset = srcLoc(env, inst, 0).reg();
-  auto const off = getSetArrayLayoutOffset(env, inst);
+  auto const off = getKeysetLayoutOffset(env, inst);
   loadTV(vmain(env), inst->dst(0), dstLoc(env, inst, 0), keyset[off]);
 }
 

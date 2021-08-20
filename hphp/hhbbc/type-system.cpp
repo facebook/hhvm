@@ -30,7 +30,6 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"

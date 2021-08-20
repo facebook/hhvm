@@ -26,13 +26,13 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/req-root.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -252,11 +252,11 @@ inline TypedValue ElemDict(ArrayData* base, key_type<keyType> key) {
  * Elem when base is a Keyset
  */
 inline TypedValue ElemKeysetPre(ArrayData* base, int64_t key) {
-  return SetArray::NvGetInt(base, key);
+  return VanillaKeyset::NvGetInt(base, key);
 }
 
 inline TypedValue ElemKeysetPre(ArrayData* base, StringData* key) {
-  return SetArray::NvGetStr(base, key);
+  return VanillaKeyset::NvGetStr(base, key);
 }
 
 inline TypedValue ElemKeysetPre(ArrayData* base, TypedValue key) {
@@ -1576,7 +1576,7 @@ inline void SetNewElemKeyset(tv_lval base, TypedValue* value) {
   assertx(tvIsKeyset(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto a2 = SetArray::AppendMove(a, *value);
+  auto a2 = VanillaKeyset::AppendMove(a, *value);
   if (a2 != a) {
     type(base) = KindOfKeyset;
     val(base).parr = a2;
@@ -2074,11 +2074,11 @@ inline void UnsetElemDict(tv_lval base, key_type<keyType> key) {
  */
 
 inline ArrayData* UnsetElemKeysetPre(ArrayData* a, int64_t key) {
-  return SetArray::RemoveIntMove(a, key);
+  return VanillaKeyset::RemoveIntMove(a, key);
 }
 
 inline ArrayData* UnsetElemKeysetPre(ArrayData* a, StringData* key) {
-  return SetArray::RemoveStrMove(a, key);
+  return VanillaKeyset::RemoveStrMove(a, key);
 }
 
 inline ArrayData* UnsetElemKeysetPre(ArrayData* a, TypedValue key) {

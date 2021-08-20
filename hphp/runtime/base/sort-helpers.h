@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 
 #include "hphp/util/safesort.h"
 
@@ -66,8 +66,8 @@ struct AssocKeyAccessor<MixedArray::Elm> :
 };
 
 template<>
-struct AssocKeyAccessor<SetArray::Elm> :
-  AssocKeyAccessorImpl<AssocKeyAccessor<SetArray::Elm>, SetArray::Elm> {
+struct AssocKeyAccessor<VanillaKeyset::Elm> :
+  AssocKeyAccessorImpl<AssocKeyAccessor<VanillaKeyset::Elm>, VanillaKeyset::Elm> {
   static int64_t getInt(ElmT elm) { return elm.intKey(); }
   static StringData* getStr(ElmT elm) { return elm.strKey(); }
 };

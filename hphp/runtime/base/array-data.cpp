@@ -30,7 +30,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/server/memory-stats.h"
@@ -286,7 +286,7 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     BespokeArray::entry,     /* bespoke vec */    \
     MixedArray::entry,       /* vanilla dict */   \
     BespokeArray::entry,     /* bespoke dict */   \
-    SetArray::entry,         /* vanilla keyset */ \
+    VanillaKeyset::entry,    /* vanilla keyset */ \
     BespokeArray::entry,     /* bespoke keyset */ \
   },
 
@@ -729,7 +729,7 @@ bool ArrayData::same(const ArrayData* v2) const {
   if (!bothVanilla(this, v2)) return Same(this, v2);
   if (isVanillaVec())  return VanillaVec::VecSame(this, v2);
   if (isVanillaDict()) return MixedArray::DictSame(this, v2);
-  return SetArray::Same(this, v2);
+  return VanillaKeyset::Same(this, v2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

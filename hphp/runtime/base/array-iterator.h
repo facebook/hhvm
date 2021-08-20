@@ -24,8 +24,8 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/tv-val.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
@@ -265,7 +265,7 @@ void IterateV(const ArrayData* adata, ArrFn arrFn) {
   } else if (bespoke::IsStructDict(adata)) {
     bespoke::StructDictIterateV(adata, arrFn);
   } else if (adata->isVanillaKeyset()) {
-    SetArray::Iterate(SetArray::asSet(adata), arrFn);
+    VanillaKeyset::Iterate(VanillaKeyset::asSet(adata), arrFn);
   } else {
     for (ArrayIter iter(adata); iter; ++iter) {
       if (ArrayData::call_helper(arrFn, iter.secondVal())) {
@@ -341,7 +341,7 @@ void IterateKV(const ArrayData* adata, ArrFn arrFn) {
     VanillaVec::IterateKV(adata, arrFn);
   } else if (adata->isVanillaKeyset()) {
     auto fun = [&](TypedValue v) { return arrFn(v, v); };
-    SetArray::Iterate(SetArray::asSet(adata), fun);
+    VanillaKeyset::Iterate(VanillaKeyset::asSet(adata), fun);
   } else {
     for (ArrayIter iter(adata); iter; ++iter) {
       if (ArrayData::call_helper(arrFn, iter.nvFirst(), iter.secondVal())) {

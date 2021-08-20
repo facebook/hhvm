@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/opaque-resource.h"
-#include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
@@ -163,7 +163,7 @@ struct Eq {
       switch (t1->toDataType()) {
         case KindOfVec:    return arrImpl<VanillaVec::VecEqual>(t1, t2);
         case KindOfDict:   return arrImpl<MixedArray::DictEqual>(t1, t2);
-        case KindOfKeyset: return arrImpl<SetArray::Equal>(t1, t2);
+        case KindOfKeyset: return arrImpl<VanillaKeyset::Equal>(t1, t2);
         default: always_assert(false);
       }
     }
@@ -316,7 +316,7 @@ bool tvSame(TypedValue c1, TypedValue c2) {
       auto const ad1 = c1.m_data.parr;
       auto const ad2 = c2.m_data.parr;
       return ArrayData::bothVanilla(ad1, ad2)
-        ? SetArray::Same(ad1, ad2)
+        ? VanillaKeyset::Same(ad1, ad2)
         : ArrayData::Same(ad1, ad2);
     }
     case KindOfObject:

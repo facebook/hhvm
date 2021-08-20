@@ -1312,13 +1312,13 @@ cmpKeysetImpl(State& env, Opcode opc, SSATmp* left, SSATmp* right) {
     auto const rightVal = right->keysetVal();
     switch (opc) {
       case EqArrLike:
-        return cns(env, SetArray::Equal(leftVal, rightVal));
+        return cns(env, VanillaKeyset::Equal(leftVal, rightVal));
       case SameArrLike:
-        return cns(env, SetArray::Same(leftVal, rightVal));
+        return cns(env, VanillaKeyset::Same(leftVal, rightVal));
       case NeqArrLike:
-        return cns(env, SetArray::NotEqual(leftVal, rightVal));
+        return cns(env, VanillaKeyset::NotEqual(leftVal, rightVal));
       case NSameArrLike:
-        return cns(env, SetArray::NotSame(leftVal, rightVal));
+        return cns(env, VanillaKeyset::NotSame(leftVal, rightVal));
       default:
         break;
     }
@@ -2791,10 +2791,10 @@ SSATmp* simplify##Name(State& env, const IRInstruction* inst) {       \
   return hackArr##Action##Impl(                                       \
     env, inst,                                                        \
     [](SSATmp* a, int64_t k) {                                        \
-      return SetArray::NvGetInt(a->keysetVal(), k);                   \
+      return VanillaKeyset::NvGetInt(a->keysetVal(), k);              \
     },                                                                \
     [](SSATmp* a, const StringData* k) {                              \
-      return SetArray::NvGetStr(a->keysetVal(), k);                   \
+      return VanillaKeyset::NvGetStr(a->keysetVal(), k);              \
     }                                                                 \
   );                                                                  \
 }
@@ -2819,7 +2819,7 @@ SSATmp* simplifyKeysetGetK(State& env, const IRInstruction* inst) {
   assertx(validPos(ssize_t(pos)));
   if (!arr->hasConstVal()) return nullptr;
 
-  auto const set = SetArray::asSet(arr->keysetVal());
+  auto const set = VanillaKeyset::asSet(arr->keysetVal());
   auto const tv = set->tvOfPos(pos);
 
   // The array doesn't contain a valid element at that offset. Since this
@@ -2913,7 +2913,7 @@ SSATmp* simplifyCheckKeysetOffset(State& env, const IRInstruction* inst) {
   assertx(validPos(ssize_t(extra->index)));
   if (!arr->hasConstVal()) return mergeBranchDests(env, inst);
 
-  auto const set = SetArray::asSet(arr->keysetVal());
+  auto const set = VanillaKeyset::asSet(arr->keysetVal());
   auto const tv = set->tvOfPos(extra->index);
   if (!tv) return gen(env, Jmp, inst->taken());
   assertx(tvIsPlausible(*tv));

@@ -4,6 +4,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"

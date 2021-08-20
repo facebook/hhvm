@@ -66,7 +66,7 @@ ArrayData* GetEmptyArray(bool legacy) {
   if constexpr (std::is_same<Array, MixedArray>::value) {
     return ArrayData::CreateDict(legacy);
   }
-  if constexpr (std::is_same<Array, SetArray>::value) {
+  if constexpr (std::is_same<Array, VanillaKeyset>::value) {
     return ArrayData::CreateKeyset();
   }
 }
@@ -79,8 +79,8 @@ tv_lval LvalAtIterPos(ArrayData* ad, ssize_t pos) {
   if constexpr (std::is_same<Array, MixedArray>::value) {
     return &MixedArray::asMixed(ad)->data()[pos].data;
   }
-  if constexpr (std::is_same<Array, SetArray>::value) {
-    return &SetArray::asSet(ad)->data()[pos].tv;
+  if constexpr (std::is_same<Array, VanillaKeyset>::value) {
+    return &VanillaKeyset::asSet(ad)->data()[pos].tv;
   }
 }
 
@@ -271,7 +271,8 @@ ArrayData* makeAPCBespoke(APCBespokeEnv& env, ArrayData* ain, bool hasApcTv) {
     return implAPCBespoke<MixedArray, kDictHashSeed>(env, ain, vin, hasApcTv);
   } else if (vin->isKeysetType()) {
     if (!arrayTypeCouldBeBespoke(KindOfKeyset)) return nullptr;
-    return implAPCBespoke<SetArray, kKeysetHashSeed>(env, ain, vin, hasApcTv);
+    return implAPCBespoke<VanillaKeyset, kKeysetHashSeed>(
+        env, ain, vin, hasApcTv);
   }
   always_assert(false);
 }

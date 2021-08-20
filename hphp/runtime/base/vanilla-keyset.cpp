@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/array-init.h"
@@ -37,41 +37,39 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
-static_assert(SetArray::computeAllocBytes(SetArray::SmallScale) ==
-              kEmptySetArraySize, "");
+std::aligned_storage<kEmptyKeysetSize, 16>::type s_theEmptyKeyset;
 
-std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
-
-struct SetArray::Initializer {
+struct VanillaKeyset::Initializer {
   Initializer() {
-    auto const ad = reinterpret_cast<SetArray*>(&s_theEmptySetArray);
-    ad->initHash(SetArray::SmallScale);
+    static_assert(computeAllocBytes(SmallScale) == kEmptyKeysetSize);
+    auto const ad = reinterpret_cast<VanillaKeyset*>(&s_theEmptyKeyset);
+    ad->initHash(VanillaKeyset::SmallScale);
     ad->m_size = 0;
     ad->m_layout_index = kVanillaLayoutIndex;
-    ad->m_scale_used = SetArray::SmallScale;
+    ad->m_scale_used = VanillaKeyset::SmallScale;
     ad->initHeader(HeaderKind::Keyset, StaticValue);
     assertx(ad->checkInvariants());
   }
 };
-SetArray::Initializer SetArray::s_initializer;
+VanillaKeyset::Initializer VanillaKeyset::s_initializer;
 
 //////////////////////////////////////////////////////////////////////
 
-SetArray* SetArray::asSet(ArrayData* ad) {
+VanillaKeyset* VanillaKeyset::asSet(ArrayData* ad) {
   assertx(ad->isVanillaKeyset());
-  auto a = static_cast<SetArray*>(ad);
+  auto a = static_cast<VanillaKeyset*>(ad);
   assertx(a->checkInvariants());
   return a;
 }
 
-const SetArray* SetArray::asSet(const ArrayData* ad) {
+const VanillaKeyset* VanillaKeyset::asSet(const ArrayData* ad) {
   assertx(ad->isVanillaKeyset());
-  auto a = static_cast<const SetArray*>(ad);
+  auto a = static_cast<const VanillaKeyset*>(ad);
   assertx(a->checkInvariants());
   return a;
 }
 
-bool SetArray::ClearElms(Elm* elms, uint32_t count) {
+bool VanillaKeyset::ClearElms(Elm* elms, uint32_t count) {
   static_assert(static_cast<uint32_t>(Elm::kEmpty) == 0,
                 "ClearElms zeroes elements.");
   memset(elms, 0, count * sizeof(Elm));
@@ -80,7 +78,7 @@ bool SetArray::ClearElms(Elm* elms, uint32_t count) {
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayData* SetArray::MakeReserveSet(uint32_t size) {
+ArrayData* VanillaKeyset::MakeReserveSet(uint32_t size) {
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
 
@@ -102,7 +100,7 @@ ArrayData* SetArray::MakeReserveSet(uint32_t size) {
   return ad;
 }
 
-ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
+ArrayData* VanillaKeyset::MakeSet(uint32_t size, const TypedValue* values) {
   for (uint32_t i = 0; i < size; ++i) {
     auto& tv = values[i];
     if (!isIntType(tv.m_type) &&
@@ -138,7 +136,7 @@ ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
   return ad;
 }
 
-ArrayData* SetArray::MakeUncounted(
+ArrayData* VanillaKeyset::MakeUncounted(
     ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv) {
   auto src = asSet(array);
   assertx(!src->empty());
@@ -151,7 +149,7 @@ ArrayData* SetArray::MakeUncounted(
 
   assertx(reinterpret_cast<uintptr_t>(dest) % 16 == 0);
   assertx(reinterpret_cast<uintptr_t>(src) % 16 == 0);
-  memcpy16_inline(dest, src, sizeof(SetArray) + sizeof(Elm) * used);
+  memcpy16_inline(dest, src, sizeof(VanillaKeyset) + sizeof(Elm) * used);
   assertx(ClearElms(Data(dest) + used, Capacity(scale) - used));
   CopyHash(HashTab(dest, scale), src->hashTab(), scale);
   dest->initHeader_16(HeaderKind::Keyset, UncountedValue,
@@ -174,7 +172,7 @@ ArrayData* SetArray::MakeUncounted(
   return dest;
 }
 
-SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
+VanillaKeyset* VanillaKeyset::CopySet(const VanillaKeyset& other, AllocMode mode) {
   auto const scale = other.m_scale;
   auto const used = other.m_used;
   auto const ad = mode == AllocMode::Request
@@ -183,7 +181,7 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
 
   assertx(reinterpret_cast<uintptr_t>(ad) % 16 == 0);
   assertx(reinterpret_cast<uintptr_t>(&other) % 16 == 0);
-  memcpy16_inline(ad, &other, sizeof(SetArray) + sizeof(Elm) * used);
+  memcpy16_inline(ad, &other, sizeof(VanillaKeyset) + sizeof(Elm) * used);
   assertx(ClearElms(Data(ad) + used, Capacity(scale) - used));
   CopyHash(HashTab(ad, scale), other.hashTab(), scale);
   auto const count = mode == AllocMode::Request ? OneReference : StaticValue;
@@ -208,7 +206,7 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
   return ad;
 }
 
-ArrayData* SetArray::MakeSetFromAPC(const APCArray* apc) {
+ArrayData* VanillaKeyset::MakeSetFromAPC(const APCArray* apc) {
   assertx(apc->isKeyset());
   auto const apcSize = apc->size();
   KeysetInit init{apcSize};
@@ -216,25 +214,25 @@ ArrayData* SetArray::MakeSetFromAPC(const APCArray* apc) {
   return init.create();
 }
 
-ArrayData* SetArray::AddToSet(ArrayData* ad, int64_t i) {
+ArrayData* VanillaKeyset::AddToSet(ArrayData* ad, int64_t i) {
   auto a = asSet(ad)->prepareForInsert(ad->cowCheck());
   a->insert(i);
   return a;
 }
 
-ArrayData* SetArray::AddToSetInPlace(ArrayData* ad, int64_t i) {
+ArrayData* VanillaKeyset::AddToSetInPlace(ArrayData* ad, int64_t i) {
   auto a = asSet(ad)->prepareForInsert(false);
   a->insert(i);
   return a;
 }
 
-ArrayData* SetArray::AddToSet(ArrayData* ad, StringData* s) {
+ArrayData* VanillaKeyset::AddToSet(ArrayData* ad, StringData* s) {
   auto a = asSet(ad)->prepareForInsert(ad->cowCheck());
   a->insert<false>(s);
   return a;
 }
 
-ArrayData* SetArray::AddToSetInPlace(ArrayData* ad, StringData* s) {
+ArrayData* VanillaKeyset::AddToSetInPlace(ArrayData* ad, StringData* s) {
   auto a = asSet(ad)->prepareForInsert(false);
   a->insert<false>(s);
   return a;
@@ -242,7 +240,7 @@ ArrayData* SetArray::AddToSetInPlace(ArrayData* ad, StringData* s) {
 
 //////////////////////////////////////////////////////////////////////
 
-void SetArray::Release(ArrayData* in) {
+void VanillaKeyset::Release(ArrayData* in) {
   in->fixCountForRelease();
   assertx(in->isRefCounted());
   assertx(in->hasExactlyOneRef());
@@ -263,7 +261,7 @@ void SetArray::Release(ArrayData* in) {
   AARCH64_WALKABLE_FRAME();
 }
 
-void SetArray::ReleaseUncounted(ArrayData* in) {
+void VanillaKeyset::ReleaseUncounted(ArrayData* in) {
   assertx(!in->uncountedCowCheck());
   auto const ad = asSet(in);
 
@@ -285,7 +283,7 @@ void SetArray::ReleaseUncounted(ArrayData* in) {
 
 //////////////////////////////////////////////////////////////////////
 
-void SetArray::insert(int64_t k, inthash_t h) {
+void VanillaKeyset::insert(int64_t k, inthash_t h) {
   assertx(!isFull());
   auto const loc = findForInsert(k, h);
   if (isValidIns(loc)) {
@@ -293,10 +291,10 @@ void SetArray::insert(int64_t k, inthash_t h) {
     elm->setIntKey(k, h);
   }
 }
-void SetArray::insert(int64_t k) { return insert(k, hash_int64(k)); }
+void VanillaKeyset::insert(int64_t k) { return insert(k, hash_int64(k)); }
 
 template <bool Move>
-void SetArray::insert(StringData* k, strhash_t h) {
+void VanillaKeyset::insert(StringData* k, strhash_t h) {
   assertx(!isFull());
   auto const loc = findForInsert(k, h);
   if (isValidIns(loc)) {
@@ -305,11 +303,11 @@ void SetArray::insert(StringData* k, strhash_t h) {
   }
 }
 template <bool Move>
-void SetArray::insert(StringData* k) { return insert<Move>(k, k->hash()); }
+void VanillaKeyset::insert(StringData* k) { return insert<Move>(k, k->hash()); }
 
 //////////////////////////////////////////////////////////////////////
 
-TypedValue SetArray::getElm(ssize_t ei) const {
+TypedValue VanillaKeyset::getElm(ssize_t ei) const {
   assertx(0 <= ei && ei < m_used);
   return data()[ei].getKey();
 }
@@ -317,7 +315,7 @@ TypedValue SetArray::getElm(ssize_t ei) const {
 //////////////////////////////////////////////////////////////////////
 
 NEVER_INLINE
-SetArray* SetArray::grow(bool copy) {
+VanillaKeyset* VanillaKeyset::grow(bool copy) {
   assertx(m_size > 0);
   auto const oldUsed = m_used;
   auto const newScale = m_scale * 2;
@@ -368,14 +366,14 @@ SetArray* SetArray::grow(bool copy) {
 }
 
 ALWAYS_INLINE
-SetArray* SetArray::prepareForInsert(bool copy) {
+VanillaKeyset* VanillaKeyset::prepareForInsert(bool copy) {
   assertx(checkInvariants());
   if (isFull()) return grow(copy);
   if (copy) return copySet();
   return this;
 }
 
-void SetArray::compact() {
+void VanillaKeyset::compact() {
   auto const elms = data();
   auto const table = initHash(m_scale);
   auto const mask = this->mask();
@@ -420,8 +418,8 @@ void SetArray::compact() {
  *   m_size <= m_used
  *   m_used <= capacity()
  */
-bool SetArray::checkInvariants() const {
-  static_assert(sizeof(SetArray) % 16 == 0, "Some memcpy16 can fail.");
+bool VanillaKeyset::checkInvariants() const {
+  static_assert(sizeof(VanillaKeyset) % 16 == 0, "Some memcpy16 can fail.");
   static_assert(sizeof(Elm) <= 16, "Don't loose the precious memory gainz!");
 
   // All arrays:
@@ -475,20 +473,20 @@ bool SetArray::checkInvariants() const {
 
 //////////////////////////////////////////////////////////////////////
 
-const TypedValue* SetArray::tvOfPos(uint32_t pos) const {
+const TypedValue* VanillaKeyset::tvOfPos(uint32_t pos) const {
   assertx(validPos(ssize_t(pos)));
   if (size_t(pos) >= m_used) return nullptr;
   auto& elm = data()[pos];
   return !elm.isTombstone() ? &elm.tv : nullptr;
 }
 
-TypedValue SetArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
+TypedValue VanillaKeyset::GetPosVal(const ArrayData* ad, ssize_t pos) {
   auto a = asSet(ad);
   assertx(0 <= pos && pos < a->m_used);
   return *a->tvOfPos(pos);
 }
 
-bool SetArray::IsVectorData(const ArrayData* ad) {
+bool VanillaKeyset::IsVectorData(const ArrayData* ad) {
   auto a = asSet(ad);
   if (a->m_size == 0) {
     // any 0-length array is "vector-like" for the sake of this function.
@@ -509,36 +507,36 @@ bool SetArray::IsVectorData(const ArrayData* ad) {
   return true;
 }
 
-bool SetArray::ExistsInt(const ArrayData* ad, int64_t k) {
+bool VanillaKeyset::ExistsInt(const ArrayData* ad, int64_t k) {
   return asSet(ad)->findForExists(k, hash_int64(k));
 }
 
-bool SetArray::ExistsStr(const ArrayData* ad, const StringData* k) {
+bool VanillaKeyset::ExistsStr(const ArrayData* ad, const StringData* k) {
   return NvGetStr(ad, k).is_init();
 }
 
-arr_lval SetArray::LvalInt(ArrayData*, int64_t) {
+arr_lval VanillaKeyset::LvalInt(ArrayData*, int64_t) {
   throwInvalidKeysetOperation();
 }
 
-arr_lval SetArray::LvalStr(ArrayData*, StringData*) {
+arr_lval VanillaKeyset::LvalStr(ArrayData*, StringData*) {
   throwInvalidKeysetOperation();
 }
 
-ArrayData* SetArray::SetIntMove(ArrayData*, int64_t, TypedValue) {
+ArrayData* VanillaKeyset::SetIntMove(ArrayData*, int64_t, TypedValue) {
   throwInvalidKeysetOperation();
 }
 
-ArrayData* SetArray::SetStrMove(ArrayData*, StringData*, TypedValue) {
+ArrayData* VanillaKeyset::SetStrMove(ArrayData*, StringData*, TypedValue) {
   throwInvalidKeysetOperation();
 }
 
-void SetArray::eraseNoCompact(RemovePos pos) {
+void VanillaKeyset::eraseNoCompact(RemovePos pos) {
   HashTable::eraseNoCompact(pos);
 }
 
 template<class K> ArrayData*
-SetArray::RemoveImpl(ArrayData* ad, K k, bool copy, SetArrayElm::hash_t h) {
+VanillaKeyset::RemoveImpl(ArrayData* ad, K k, bool copy, VanillaKeysetElm::hash_t h) {
     auto a = asSet(ad);
     auto const pos = a->findForRemove(k, h);
     if (!pos.valid()) return a;
@@ -554,37 +552,37 @@ SetArray::RemoveImpl(ArrayData* ad, K k, bool copy, SetArrayElm::hash_t h) {
     return sas;
 }
 
-ArrayData* SetArray::RemoveIntMove(ArrayData* ad, int64_t k) {
+ArrayData* VanillaKeyset::RemoveIntMove(ArrayData* ad, int64_t k) {
   return RemoveImpl(ad, k, ad->cowCheck(), hash_int64(k));
 }
 
-ArrayData* SetArray::RemoveStrMove(ArrayData* ad, const StringData* k) {
+ArrayData* VanillaKeyset::RemoveStrMove(ArrayData* ad, const StringData* k) {
   return RemoveImpl(ad, k, ad->cowCheck(), k->hash());
 }
 
-void SetArray::Sort(ArrayData*, int, bool) {
+void VanillaKeyset::Sort(ArrayData*, int, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (sort)"
   );
 }
 
-bool SetArray::Usort(ArrayData*, const Variant&) {
+bool VanillaKeyset::Usort(ArrayData*, const Variant&) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (usort)"
   );
 }
 
-ArrayData* SetArray::Copy(const ArrayData* ad) {
+ArrayData* VanillaKeyset::Copy(const ArrayData* ad) {
   auto a = asSet(ad);
   return a->copySet();
 }
 
-ArrayData* SetArray::CopyStatic(const ArrayData* ad) {
+ArrayData* VanillaKeyset::CopyStatic(const ArrayData* ad) {
   auto a = asSet(ad);
   return CopySet(*a, AllocMode::Static);
 }
 
-ArrayData* SetArray::AppendImpl(ArrayData* ad, TypedValue v, bool copy) {
+ArrayData* VanillaKeyset::AppendImpl(ArrayData* ad, TypedValue v, bool copy) {
   auto const res = [&] {
     if (isIntType(v.m_type)) {
       auto a = asSet(ad)->prepareForInsert(copy);
@@ -598,15 +596,15 @@ ArrayData* SetArray::AppendImpl(ArrayData* ad, TypedValue v, bool copy) {
       throwInvalidArrayKeyException(&v, ad);
     }
   }();
-  if (res != ad && ad->decReleaseCheck()) SetArray::Release(ad);
+  if (res != ad && ad->decReleaseCheck()) VanillaKeyset::Release(ad);
   return res;
 }
 
-ArrayData* SetArray::AppendMove(ArrayData* ad, TypedValue v) {
+ArrayData* VanillaKeyset::AppendMove(ArrayData* ad, TypedValue v) {
   return AppendImpl(ad, tvClassToString(v), ad->cowCheck());
 }
 
-ArrayData* SetArray::PopMove(ArrayData* ad, Variant& value) {
+ArrayData* VanillaKeyset::PopMove(ArrayData* ad, Variant& value) {
   if (ad->empty()) {
     value = uninit_null();
     return ad;
@@ -632,7 +630,7 @@ ArrayData* SetArray::PopMove(ArrayData* ad, Variant& value) {
   return a;
 }
 
-void SetArray::OnSetEvalScalar(ArrayData* ad) {
+void VanillaKeyset::OnSetEvalScalar(ArrayData* ad) {
   auto a = asSet(ad);
   auto const used = a->m_used;
   auto const elms = a->data();
@@ -645,7 +643,7 @@ void SetArray::OnSetEvalScalar(ArrayData* ad) {
 }
 
 ALWAYS_INLINE
-bool SetArray::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
+bool VanillaKeyset::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
                            bool strict) {
   assertx(asSet(ad1)->checkInvariants());
   assertx(asSet(ad2)->checkInvariants());
@@ -717,19 +715,19 @@ bool SetArray::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
   return true;
 }
 
-bool SetArray::Equal(const ArrayData* ad1, const ArrayData* ad2) {
+bool VanillaKeyset::Equal(const ArrayData* ad1, const ArrayData* ad2) {
   return EqualHelper(ad1, ad2, false);
 }
 
-bool SetArray::NotEqual(const ArrayData* ad1, const ArrayData* ad2) {
+bool VanillaKeyset::NotEqual(const ArrayData* ad1, const ArrayData* ad2) {
   return !EqualHelper(ad1, ad2, false);
 }
 
-bool SetArray::Same(const ArrayData* ad1, const ArrayData* ad2) {
+bool VanillaKeyset::Same(const ArrayData* ad1, const ArrayData* ad2) {
   return EqualHelper(ad1, ad2, true);
 }
 
-bool SetArray::NotSame(const ArrayData* ad1, const ArrayData* ad2) {
+bool VanillaKeyset::NotSame(const ArrayData* ad1, const ArrayData* ad2) {
   return !EqualHelper(ad1, ad2, true);
 }
 

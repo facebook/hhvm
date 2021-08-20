@@ -25,9 +25,7 @@
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
-#include "hphp/runtime/base/vanilla-vec.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 

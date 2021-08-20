@@ -21,9 +21,9 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/func.h"
 

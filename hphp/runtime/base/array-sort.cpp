@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -97,7 +97,7 @@ SortFlavor MixedArray::preSort(const AccessorT& acc, bool checkTypes) {
 }
 
 template <typename AccessorT>
-SortFlavor SetArray::preSort(const AccessorT& acc, bool checkTypes) {
+SortFlavor VanillaKeyset::preSort(const AccessorT& acc, bool checkTypes) {
   auto const oldUsed UNUSED = m_used;
   auto flav = genericPreSort(*this, acc, checkTypes);
   assertx(ClearElms(data() + m_used, oldUsed - m_used));
@@ -136,10 +136,10 @@ void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
 }
 
 /**
- * postSort() runs after the sort has been performed. For SetArray, postSort()
- * handles rebuilding the hash.
+ * postSort() runs after the sort has been performed. For VanillaKeyset,
+ * postSort() handles rebuilding the hash.
  */
-void SetArray::postSort(bool) {   // nothrow guarantee
+void VanillaKeyset::postSort(bool) {   // nothrow guarantee
   assertx(m_size > 0);
   auto const ht = initHash(m_scale);
   auto const mask = this->mask();
@@ -157,7 +157,7 @@ ArrayData* MixedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   return a->cowCheck() ? a->copyMixed() : a;
 }
 
-ArrayData* SetArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
+ArrayData* VanillaKeyset::EscalateForSort(ArrayData* ad, SortFunction sf) {
   auto const a = asSet(ad);
   return a->cowCheck() ? a->copySet() : a;
 }
@@ -239,11 +239,11 @@ void MixedArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
   SORT_BODY(AssocValAccessor<MixedArray::Elm>, false);
 }
 
-void SetArray::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
+void VanillaKeyset::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
   auto a = asSet(ad);
   auto data_begin = a->data();
   auto data_end = data_begin + a->m_size;
-  SORT_BODY(AssocKeyAccessor<SetArray::Elm>, false);
+  SORT_BODY(AssocKeyAccessor<VanillaKeyset::Elm>, false);
 }
 
 #undef SORT_BODY
@@ -306,9 +306,9 @@ bool MixedArray::Uasort(ArrayData* ad, const Variant& cmp_function) {
   USER_SORT_BODY(AssocValAccessor<MixedArray::Elm>, false);
 }
 
-bool SetArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
+bool VanillaKeyset::Uksort(ArrayData* ad, const Variant& cmp_function) {
   auto a = asSet(ad);
-  USER_SORT_BODY(AssocKeyAccessor<SetArray::Elm>, false);
+  USER_SORT_BODY(AssocKeyAccessor<VanillaKeyset::Elm>, false);
 }
 
 #undef USER_SORT_BODY

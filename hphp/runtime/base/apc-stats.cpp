@@ -207,15 +207,15 @@ size_t getMemSize(const ArrayData* arr, bool recurse) {
     return size;
   }
   case ArrayData::ArrayKind::kKeysetKind: {
-    auto const set = SetArray::asSet(arr);
-    auto size = sizeof(SetArray) +
-                sizeof(SetArray::Elm) + (set->capacity() - set->m_used);
+    auto const set = VanillaKeyset::asSet(arr);
+    auto size = sizeof(VanillaKeyset) +
+                sizeof(VanillaKeyset::Elm) + (set->capacity() - set->m_used);
     auto const elms = set->data();
     auto const used = set->m_used;
     for (uint32_t i = 0; i < used; ++i) {
       auto const& elm = elms[i];
       if (elm.isTombstone()) {
-        size += sizeof(SetArray::Elm);
+        size += sizeof(VanillaKeyset::Elm);
       } else {
         size += elm.hasStrKey() ? getMemSize(elm.strKey()) : sizeof(int64_t);
       }

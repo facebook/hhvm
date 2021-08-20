@@ -31,7 +31,7 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
@@ -134,7 +134,7 @@ void dictReleaseWrapper(ArrayData* ad) noexcept {
 }
 
 void keysetReleaseWrapper(ArrayData* ad) noexcept {
-  ad->isVanilla() ? SetArray::Release(ad) : BespokeArray::Release(ad);
+  ad->isVanilla() ? VanillaKeyset::Release(ad) : BespokeArray::Release(ad);
 }
 
 void objReleaseWrapper(ObjectData* obj) noexcept {
@@ -177,7 +177,7 @@ void specializeVanillaDestructors() {
   };
   specialize(KindOfVec,    &VanillaVec::Release);
   specialize(KindOfDict,   &MixedArray::Release);
-  specialize(KindOfKeyset, &SetArray::Release);
+  specialize(KindOfKeyset, &VanillaKeyset::Release);
 }
 
 #define IMPLEMENT_SET(argType, setOp)                     \

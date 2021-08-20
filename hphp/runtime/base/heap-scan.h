@@ -111,7 +111,7 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
     case HeaderKind::Dict:
       return static_cast<const MixedArray*>(h)->scan(scanner);
     case HeaderKind::Keyset:
-      return static_cast<const SetArray*>(h)->scan(scanner);
+      return static_cast<const VanillaKeyset*>(h)->scan(scanner);
     case HeaderKind::BespokeVec:
     case HeaderKind::BespokeDict:
     case HeaderKind::BespokeKeyset:

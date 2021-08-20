@@ -55,7 +55,6 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
@@ -74,6 +73,7 @@
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
@@ -1239,7 +1239,7 @@ OPTBLD_INLINE void iopNewVec(uint32_t n) {
 
 OPTBLD_INLINE void iopNewKeysetArray(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
-  auto const ad = SetArray::MakeSet(n, vmStack().topC());
+  auto const ad = VanillaKeyset::MakeSet(n, vmStack().topC());
   vmStack().ndiscard(n);
   vmStack().pushKeysetNoRc(bespoke::maybeMakeLoggingArray(ad));
 }

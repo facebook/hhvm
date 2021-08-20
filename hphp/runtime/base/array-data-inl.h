@@ -44,7 +44,7 @@ ALWAYS_INLINE ArrayData* staticEmptyMarkedDictArray() {
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
-  void* vp = &s_theEmptySetArray;
+  void* vp = &s_theEmptyKeyset;
   return static_cast<ArrayData*>(vp);
 }
 

@@ -22,10 +22,10 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/vm/vm-regs.h"
@@ -310,8 +310,8 @@ struct VecInit final : ArrayInitBase<detail::Vec, KindOfVec> {
 /*
  * Initializer for a Hack keyset.
  */
-struct KeysetInit : ArrayInitBase<SetArray, KindOfKeyset> {
-  using ArrayInitBase<SetArray, KindOfKeyset>::ArrayInitBase;
+struct KeysetInit : ArrayInitBase<VanillaKeyset, KindOfKeyset> {
+  using ArrayInitBase<VanillaKeyset, KindOfKeyset>::ArrayInitBase;
 
   /*
    * Before allocating, check if the allocation would cause the request to OOM.
@@ -321,15 +321,15 @@ struct KeysetInit : ArrayInitBase<SetArray, KindOfKeyset> {
   KeysetInit(size_t n, CheckAllocation);
 
   KeysetInit& add(int64_t v) {
-    performOp([&]{ return SetArray::AddToSetInPlace(m_arr, v); });
+    performOp([&]{ return VanillaKeyset::AddToSetInPlace(m_arr, v); });
     return *this;
   }
   KeysetInit& add(StringData* v) {
-    performOp([&]{ return SetArray::AddToSetInPlace(m_arr, v); });
+    performOp([&]{ return VanillaKeyset::AddToSetInPlace(m_arr, v); });
     return *this;
   }
   KeysetInit& add(TypedValue tv) {
-    performOp([&]{ return SetArray::AppendMove(m_arr, tvToInit(tv)); });
+    performOp([&]{ return VanillaKeyset::AppendMove(m_arr, tvToInit(tv)); });
     tvIncRefGen(tv);
     return *this;
   }

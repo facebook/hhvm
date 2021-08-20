@@ -20,7 +20,6 @@
 
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/timestamp.h"

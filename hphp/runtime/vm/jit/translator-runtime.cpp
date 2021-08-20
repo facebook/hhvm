@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
@@ -35,6 +34,7 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/zend-functions.h"
 
@@ -103,7 +103,7 @@ ArrayData* addNewElemVec(ArrayData* vec, TypedValue v) {
 ArrayData* addNewElemKeyset(ArrayData* keyset, TypedValue v) {
   assertx(keyset->isVanillaKeyset());
   tvIncRefGen(v);
-  return SetArray::AppendMove(keyset, v);
+  return VanillaKeyset::AppendMove(keyset, v);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -396,12 +396,12 @@ TypedValue dictIdxScan(ArrayData* a, StringData* key, TypedValue def) {
 
 TypedValue keysetIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isVanillaKeyset());
-  return getDefaultIfMissing(SetArray::NvGetInt(a, key), def);
+  return getDefaultIfMissing(VanillaKeyset::NvGetInt(a, key), def);
 }
 
 TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isVanillaKeyset());
-  return getDefaultIfMissing(SetArray::NvGetStr(a, key), def);
+  return getDefaultIfMissing(VanillaKeyset::NvGetStr(a, key), def);
 }
 
 template <bool isFirst>

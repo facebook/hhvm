@@ -661,32 +661,24 @@ constexpr size_t kEmptyMixedArrayStrKeyTableSize =
   ((sizeof(StrKeyTable) - 1) / 16 + 1) * 16;
 
 constexpr size_t kEmptyMixedArraySize = 120 + kEmptyMixedArrayStrKeyTableSize;
-constexpr size_t kEmptySetArraySize = 96;
+constexpr size_t kEmptyKeysetSize  = 96;
 
 /*
  * Storage for the static empty arrays.
  */
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVec;
-extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVArray;
-extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
-
-extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVArray;
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVec;
+extern std::aligned_storage<kEmptyKeysetSize, 16>::type s_theEmptyKeyset;
 
 /*
- * Pointers to canonical empty Dicts/DArrays.
+ * Pointers to canonical empty dicts.
  */
 extern ArrayData* s_theEmptyDictArrayPtr;
-extern ArrayData* s_theEmptyDArrayPtr;
-extern ArrayData* s_theEmptyMarkedDArrayPtr;
 extern ArrayData* s_theEmptyMarkedDictArrayPtr;
 
 /*
- * Return the static empty array, for PHP and Hack arrays.
- *
- * These are singleton static arrays that can be used whenever an empty array
- * is needed. We should avoid using these methods, as these arrays don't have
- * provenance information; use ArrayData::CreateDArray and friends instead.
+ * Return the static empty array, for PHP and Hack arrays. Prefer using
+ * ArrayData::CreateVec(), ArrayData::CreateDict(), ArrayData::CreateKeyset().
  */
 ArrayData* staticEmptyVec();
 ArrayData* staticEmptyDictArray();

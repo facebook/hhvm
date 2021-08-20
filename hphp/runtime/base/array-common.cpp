@@ -22,8 +22,8 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
 namespace HPHP {

@@ -24,11 +24,11 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/record-data.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
 
@@ -215,8 +215,8 @@ void cgAKExistsKeyset(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const target = (keyTy <= TInt)
-    ? CallSpec::direct(SetArray::ExistsInt)
-    : CallSpec::direct(SetArray::ExistsStr);
+    ? CallSpec::direct(VanillaKeyset::ExistsInt)
+    : CallSpec::direct(VanillaKeyset::ExistsStr);
 
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None,
                argGroup(env, inst).ssa(0).ssa(1));
@@ -276,7 +276,7 @@ void cgNewKeysetArray(IRLS& env, const IRInstruction* inst) {
     .imm(extra->size)
     .addr(sp, cellsToBytes(extra->offset.offset));
 
-  cgCallHelper(v, env, CallSpec::direct(SetArray::MakeSet),
+  cgCallHelper(v, env, CallSpec::direct(VanillaKeyset::MakeSet),
                callDest(env, inst), SyncOptions::Sync, args);
 }
 

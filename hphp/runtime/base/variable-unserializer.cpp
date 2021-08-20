@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
-#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/dummy-resource.h"
@@ -34,6 +33,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/struct-log-util.h"
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
@@ -1480,7 +1480,7 @@ Array VariableUnserializer::unserializeKeyset() {
   }
 
   // For large arrays, do a naive pre-check for OOM.
-  auto const allocsz = SetArray::computeAllocBytesFromMaxElms(size);
+  auto const allocsz = VanillaKeyset::computeAllocBytesFromMaxElms(size);
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }

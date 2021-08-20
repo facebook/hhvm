@@ -96,7 +96,7 @@ ArrayData* makeSampledArray(ArrayData* vad) {
     vad->decRefCount();
     if (vad->isVanillaVec())  return VanillaVec::Copy(vad);
     if (vad->isVanillaDict()) return MixedArray::Copy(vad);
-    return SetArray::Copy(vad);
+    return VanillaKeyset::Copy(vad);
   }();
   assertx(result->hasExactlyOneRef());
   result->setSampledArrayInPlace();

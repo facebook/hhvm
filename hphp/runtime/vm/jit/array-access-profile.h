@@ -32,7 +32,7 @@ namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Target profile used to optimize MixedArray and SetArray hash table lookups.
+ * Target profile used to optimize vanilla dict and keyset hash table lookups.
  * This profile can be used for two types of optimizations:
  *
  *  - Offset profiling: If the array used at a certain source location always

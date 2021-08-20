@@ -20,14 +20,8 @@
 
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/set-array.h"
-#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/tv-val.h"
-#include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/word-mem.h"

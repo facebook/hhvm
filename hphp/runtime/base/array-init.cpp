@@ -46,13 +46,13 @@ KeysetInit::KeysetInit(size_t n, CheckAllocation)
     tl_heap->forceOOM();
     check_non_safepoint_surprise();
   }
-  auto const allocsz = SetArray::computeAllocBytes(
-                         SetArray::computeScaleFromSize(n)
+  auto const allocsz = VanillaKeyset::computeAllocBytes(
+                         VanillaKeyset::computeScaleFromSize(n)
                        );
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
-  m_arr = SetArray::MakeReserveSet(n);
+  m_arr = VanillaKeyset::MakeReserveSet(n);
   assertx(m_arr->hasExactlyOneRef());
   check_non_safepoint_surprise();
 }

@@ -198,6 +198,10 @@ void XboxServer::Stop() {
   s_dispatcher = nullptr;
 }
 
+bool XboxServer::Enabled() {
+  return s_dispatcher;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
@@ -313,6 +317,16 @@ int XboxServer::TaskResult(XboxTransport *job, int timeout_ms, Variant *ret) {
     }
   }
   return code;
+}
+
+int XboxServer::GetActiveWorkers() {
+  Lock l(s_dispatchMutex);
+  return s_dispatcher ? s_dispatcher->getActiveWorker() : 0;
+}
+
+int XboxServer::GetQueuedJobs() {
+  Lock l(s_dispatchMutex);
+  return s_dispatcher ? s_dispatcher->getQueuedJobs() : 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

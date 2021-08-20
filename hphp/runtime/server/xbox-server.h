@@ -38,6 +38,8 @@ struct XboxServer {
   static void Restart();
   static void Stop();
 
+  static bool Enabled();
+
 public:
   /**
    * Local tasklet for parallel processing.
@@ -47,6 +49,9 @@ public:
   static bool TaskStatus(const Resource& task);
   static int TaskResult(const Resource& task, int timeout_ms, Variant *ret);
   static int TaskResult(XboxTransport* const job, int timeout_ms, Variant *ret);
+
+  static int GetActiveWorkers();
+  static int GetQueuedJobs();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

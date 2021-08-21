@@ -461,6 +461,8 @@ pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_ffi<'arena>(
     _: Str<'arena>,
     _: Maybe<i32>,
     _: Pair<i32, i32>,
+    _: Triple<i32, i32, i32>,
+    _: Quadruple<i32, i32, i32, i32>,
     _: BumpSliceMut<'arena, i32>,
 ) {
     unimplemented!()

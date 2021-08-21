@@ -64,6 +64,7 @@ impl fmt::Display for Ctx {
 }
 
 #[derive(Debug)]
+#[repr(C)]
 pub struct HhasCtxConstant<'arena> {
     pub name: Str<'arena>,
     pub coeffects: Pair<Slice<'arena, Ctx>, Slice<'arena, Str<'arena>>>,
@@ -71,6 +72,7 @@ pub struct HhasCtxConstant<'arena> {
 }
 
 #[derive(Clone, Debug, Default)]
+#[repr(C)]
 pub struct HhasCoeffects<'arena> {
     static_coeffects: Slice<'arena, Ctx>,
     unenforced_static_coeffects: Slice<'arena, Str<'arena>>,
@@ -428,4 +430,20 @@ pub fn halves_of_is_enabled_body<Ex, En>(
         }
     }
     None
+}
+
+#[allow(clippy::needless_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_ctx_constant<'arena>(
+    _: HhasCtxConstant<'arena>,
+) {
+    unimplemented!()
+}
+
+#[allow(clippy::needless_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_coeffects<'arena>(
+    _: HhasCoeffects<'arena>,
+) {
+    unimplemented!()
 }

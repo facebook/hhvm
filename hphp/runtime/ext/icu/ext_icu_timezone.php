@@ -7,8 +7,9 @@ class IntlTimeZone {
    * Objects are only created wit the static create functions
    */
   public final function __construct() {
-    throw new Exception("An object of this type cannot be created ".
-                        "with the new operator");
+    throw new Exception(
+      "An object of this type cannot be created with the new operator",
+    );
   }
 
   /**
@@ -23,10 +24,11 @@ class IntlTimeZone {
   public static function countEquivalentIDs(string $zoneId): mixed;
 
   <<__Native>>
-  public static
-  function createTimeZoneIDEnumeration(int $zonetype,
-                                       string $region = "",
-                                       ?int $offset = null): mixed;
+  public static function createTimeZoneIDEnumeration(
+    int $zonetype,
+    string $region = "",
+    ?int $offset = null,
+  ): mixed;
 
   /**
    * Create a new copy of the default timezone for this host
@@ -45,8 +47,9 @@ class IntlTimeZone {
    * @return IntlIterator -
    */
   <<__Native>>
-  public static
-  function createEnumeration(mixed $countryOrRawOffset = null): mixed;
+  public static function createEnumeration(
+    mixed $countryOrRawOffset = null,
+  ): mixed;
 
   /**
    * Create a timezone object for the given ID
@@ -56,8 +59,7 @@ class IntlTimeZone {
    * @return IntlTimeZone -
    */
   <<__Native>>
-  public static
-  function createTimeZone(string $zoneId): IntlTimeZone;
+  public static function createTimeZone(string $zoneId): IntlTimeZone;
 
   /**
    * Create a timezone object from
@@ -66,8 +68,7 @@ class IntlTimeZone {
    *
    * @return IntlTimeZone -
    */
-  public static
-  function fromDateTimeZone(DateTimeZone $zoneId): IntlTimeZone {
+  public static function fromDateTimeZone(DateTimeZone $zoneId): IntlTimeZone {
     return self::createTimeZone($zoneId->getname());
   }
 
@@ -81,10 +82,10 @@ class IntlTimeZone {
    * @return string -
    */
   <<__Native>>
-  public static
-  function getCanonicalID(string $zoneId,
-                          <<__OutOnly("KindOfBoolean")>>
-                          inout mixed $isSystemID): mixed;
+  public static function getCanonicalID(
+    string $zoneId,
+    <<__OutOnly("KindOfBoolean")>> inout mixed $isSystemID,
+  ): mixed;
 
 
   <<__Native>>
@@ -100,9 +101,11 @@ class IntlTimeZone {
    * @return string -
    */
   <<__Native>>
-  public function getDisplayName(bool $isDaylight = false,
-                                 int $style = IntlTimeZone::DISPLAY_LONG,
-                                 string $locale = ""): mixed;
+  public function getDisplayName(
+    bool $isDaylight = false,
+    int $style = IntlTimeZone::DISPLAY_LONG,
+    string $locale = "",
+  ): mixed;
 
   /**
    * Get the amount of time to be added to local standard time to get local
@@ -122,8 +125,7 @@ class IntlTimeZone {
    * @return string -
    */
   <<__Native>>
-  public static function getEquivalentID(string $zoneId,
-                                         int $index): mixed;
+  public static function getEquivalentID(string $zoneId, int $index): mixed;
 
   /**
    * Get last error code on the object
@@ -213,8 +215,10 @@ class IntlTimeZone {
   public function toDateTimeZone(): DateTimeZone {
     $id = $this->getID();
     if (!strncmp($id, "GMT", 3)) {
-      throw new Exception("Converting IntlTimeZone to DateTimeZone ".
-                          "is not currently supported for GMT offsets");
+      throw new Exception(
+        "Converting IntlTimeZone to DateTimeZone ".
+        "is not currently supported for GMT offsets",
+      );
     }
     return new DateTimeZone($id);
   }
@@ -241,11 +245,11 @@ function intltz_count_equivalent_ids(string $zoneId): mixed {
 }
 
 function intltz_create_time_zone_id_enumeration(
-                                         int $zonetype,
-                                         string $region = "",
-                                         ?int $offset = null): mixed {
-  return IntlTimeZone::createTimeZoneIDEnumeration($zonetype,
-                                                   $region, $offset);
+  int $zonetype,
+  string $region = "",
+  ?int $offset = null,
+): mixed {
+  return IntlTimeZone::createTimeZoneIDEnumeration($zonetype, $region, $offset);
 }
 
 /**
@@ -300,8 +304,10 @@ function intltz_from_date_time_zone(DateTimeZone $zoneId): IntlTimeZone {
  *
  * @return string -
  */
-function intltz_get_canonical_id(string $zoneId,
-                                 inout mixed $isSystemID): mixed {
+function intltz_get_canonical_id(
+  string $zoneId,
+  inout mixed $isSystemID,
+): mixed {
   return IntlTimeZone::getCanonicalID($zoneId, inout $isSystemID);
 }
 
@@ -318,10 +324,12 @@ function intltz_get_region(string $str): mixed {
  *
  * @return string -
  */
-function intltz_get_display_name(IntlTimeZone $obj,
-                                 bool $isDaylight = false,
-                                 int $style = IntlTimeZone::DISPLAY_LONG,
-                                 string $locale = ""): mixed {
+function intltz_get_display_name(
+  IntlTimeZone $obj,
+  bool $isDaylight = false,
+  int $style = IntlTimeZone::DISPLAY_LONG,
+  string $locale = "",
+): mixed {
   return $obj->getDisplayName($isDaylight, $style, $locale);
 }
 
@@ -343,8 +351,7 @@ function intltz_get_dst_savings(IntlTimeZone $obj): int {
  *
  * @return string -
  */
-function intltz_get_equivalent_id(string $zoneId,
-                                  int $index): mixed {
+function intltz_get_equivalent_id(string $zoneId, int $index): mixed {
   return IntlTimeZone::getEquivalentID($zoneId, $index);
 }
 
@@ -398,11 +405,13 @@ function intltz_get_id(IntlTimeZone $obj): string {
  *
  * @return integer -
  */
-function intltz_get_offset(IntlTimeZone $obj,
-                           float $date,
-                           bool $local,
-                           inout int $rawOffset,
-                           inout int $dstOffset): bool {
+function intltz_get_offset(
+  IntlTimeZone $obj,
+  float $date,
+  bool $local,
+  inout int $rawOffset,
+  inout int $dstOffset,
+): bool {
   return $obj->getOffset($date, $local, inout $rawOffset, inout $dstOffset);
 }
 
@@ -432,8 +441,10 @@ function intltz_get_tz_data_version(): mixed {
  *
  * @return bool -
  */
-function intltz_has_same_rules(IntlTimeZone $obj,
-                               IntlTimeZone $otherTimeZone): bool {
+function intltz_has_same_rules(
+  IntlTimeZone $obj,
+  IntlTimeZone $otherTimeZone,
+): bool {
   return $obj->hasSameRules($otherTimeZone);
 }
 

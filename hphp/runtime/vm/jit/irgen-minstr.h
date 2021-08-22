@@ -93,7 +93,7 @@ void updateCanonicalBase(IRGS& env, SSATmp* baseLoc, SSATmp* newArr);
  * falls back to `generic'. In optimized translations:
  *
  *  - If the key is likely to be at a particular offset in the array-like, we
- *    generate a Check(MixedArray|Dict|Keyset)Offset. If it passes, we use
+ *    generate a Check(VanillaDict|Dict|Keyset)Offset. If it passes, we use
  *    `direct`, else we fall back to `generic`.
  *
  *  - If the key is likely to be missing in some way that we can quickly check,

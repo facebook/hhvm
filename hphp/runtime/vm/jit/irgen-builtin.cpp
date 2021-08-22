@@ -1014,7 +1014,7 @@ SSATmp* opt_enum_is_valid(IRGS& env, const ParamPrep& params) {
   auto const value = convertClassKey(env, origVal);
   auto const enum_values = getEnumValues(env, params);
   if (!enum_values) return nullptr;
-  auto const ad = MixedArray::asMixed(enum_values->names.get());
+  auto const ad = VanillaDict::as(enum_values->names.get());
   if (value->isA(TInt)) {
     if (ad->keyTypes().mustBeStrs()) return cns(env, false);
     return gen(env, AKExistsDict, cns(env, ad->asArrayData()), value);

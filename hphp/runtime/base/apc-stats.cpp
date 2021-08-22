@@ -16,17 +16,17 @@
 
 #include "hphp/runtime/base/apc-stats.h"
 
-#include "hphp/runtime/base/tv-val.h"
-#include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-array.h"
+#include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-rclass-meth.h"
 #include "hphp/runtime/base/apc-rfunc.h"
-#include "hphp/runtime/base/vanilla-vec.h"
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/tv-val.h"
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 #include "hphp/util/trace.h"
@@ -186,18 +186,18 @@ size_t getMemSize(const ArrayData* arr, bool recurse) {
     return size;
   }
   case ArrayData::ArrayKind::kDictKind: {
-    auto const mixed = MixedArray::asMixed(arr);
-    auto size = sizeof(MixedArray) +
-                sizeof(MixedArray::Elm) * (mixed->capacity() - mixed->m_used);
+    auto const mixed = VanillaDict::as(arr);
+    auto size = sizeof(VanillaDict) +
+                sizeof(VanillaDict::Elm) * (mixed->capacity() - mixed->m_used);
     auto elms = mixed->data();
     auto last = elms + mixed->m_used;
     for (auto ptr = elms; ptr != last; ++ptr) {
-      if (MixedArray::isTombstone(ptr->data.m_type)) {
-        size += sizeof(MixedArray::Elm);
+      if (VanillaDict::isTombstone(ptr->data.m_type)) {
+        size += sizeof(VanillaDict::Elm);
         continue;
       }
       // TODO(kshaunak): I think our key-size accounting is wrong. We count the
-      // direct size within the MixedArray for int64 keys but only the indirect
+      // direct size within the VanillaDict for int64 keys but only the indirect
       // size for string keys. We should use the object's heap size to get all
       // the direct memory sizes, like we do for arrays, above.
       size += ptr->hasStrKey() ? getMemSize(ptr->skey) : sizeof(int64_t);

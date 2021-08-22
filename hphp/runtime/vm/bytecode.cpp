@@ -53,7 +53,6 @@
 #include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
@@ -63,16 +62,17 @@
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/type-structure.h"
-#include "hphp/runtime/base/type-structure-helpers.h"
-#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/type-structure.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
+#include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 
 #include "hphp/runtime/ext/array/ext_array.h"
@@ -1198,7 +1198,7 @@ OPTBLD_INLINE void iopKeyset(const ArrayData* a) {
 }
 
 OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
-  auto const ad = capacity ? MixedArray::MakeReserveDict(capacity)
+  auto const ad = capacity ? VanillaDict::MakeReserveDict(capacity)
                            : ArrayData::CreateDict();
   vmStack().pushDictNoRc(bespoke::maybeMakeLoggingArray(ad));
 }
@@ -1226,7 +1226,7 @@ ArrayData* newStructArrayImpl(imm_array<int32_t> ids, F f) {
 }
 
 OPTBLD_INLINE void iopNewStructDict(imm_array<int32_t> ids) {
-  auto const ad = newStructArrayImpl(ids, MixedArray::MakeStructDict);
+  auto const ad = newStructArrayImpl(ids, VanillaDict::MakeStructDict);
   vmStack().pushDictNoRc(bespoke::maybeMakeLoggingArray(ad));
 }
 

@@ -13,11 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/heap-scan.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/heap-graph.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/weakref-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/alloc.h"

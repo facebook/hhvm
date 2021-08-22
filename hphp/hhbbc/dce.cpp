@@ -47,8 +47,8 @@
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
 
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 
 namespace HPHP { namespace HHBBC {
 

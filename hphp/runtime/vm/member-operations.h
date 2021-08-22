@@ -18,13 +18,12 @@
 
 #include <type_traits>
 
-#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/tv-conversions.h"
@@ -32,6 +31,7 @@
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -221,11 +221,11 @@ inline TypedValue ElemVec(ArrayData* base, key_type<keyType> key) {
  * Elem when base is a Dict
  */
 inline TypedValue ElemDictPre(ArrayData* base, int64_t key) {
-  return MixedArray::NvGetInt(base, key);
+  return VanillaDict::NvGetInt(base, key);
 }
 
 inline TypedValue ElemDictPre(ArrayData* base, StringData* key) {
-  return MixedArray::NvGetStr(base, key);
+  return VanillaDict::NvGetStr(base, key);
 }
 
 inline TypedValue ElemDictPre(ArrayData* base, TypedValue key) {
@@ -235,7 +235,7 @@ inline TypedValue ElemDictPre(ArrayData* base, TypedValue key) {
   throwInvalidArrayKeyException(&key, base);
 }
 
-// This helper may also be used when we know we have a MixedArray in the JIT.
+// This helper may also be used when we know we have a VanillaDict in the JIT.
 template<MOpMode mode, KeyType keyType>
 inline TypedValue ElemDict(ArrayData* base, key_type<keyType> key) {
   assertx(base->isVanillaDict());
@@ -604,7 +604,7 @@ inline tv_lval ElemDVec(tv_lval base, key_type<keyType> key) {
  */
 inline tv_lval ElemDDictPre(tv_lval base, int64_t key) {
   auto const oldArr = base.val().parr;
-  auto const lval = MixedArray::LvalSilentInt(oldArr, key);
+  auto const lval = VanillaDict::LvalSilentInt(oldArr, key);
 
   if (UNLIKELY(!lval)) {
     assertx(oldArr == lval.arr);
@@ -623,7 +623,7 @@ inline tv_lval ElemDDictPre(tv_lval base, int64_t key) {
 
 inline tv_lval ElemDDictPre(tv_lval base, StringData* key) {
   auto const oldArr = base.val().parr;
-  auto const lval = MixedArray::LvalSilentStr(oldArr, key);
+  auto const lval = VanillaDict::LvalSilentStr(oldArr, key);
 
   if (UNLIKELY(!lval)) {
     assertx(oldArr == lval.arr);
@@ -903,7 +903,7 @@ inline tv_lval ElemUVec(tv_lval base, key_type<keyType> key) {
  */
 inline tv_lval ElemUDictPre(tv_lval base, int64_t key) {
   ArrayData* oldArr = val(base).parr;
-  auto const lval = MixedArray::LvalSilentInt(oldArr, key);
+  auto const lval = VanillaDict::LvalSilentInt(oldArr, key);
 
   if (UNLIKELY(!lval)) {
     return ElemUEmptyish();
@@ -919,7 +919,7 @@ inline tv_lval ElemUDictPre(tv_lval base, int64_t key) {
 
 inline tv_lval ElemUDictPre(tv_lval base, StringData* key) {
   ArrayData* oldArr = val(base).parr;
-  auto const lval = MixedArray::LvalSilentStr(oldArr, key);
+  auto const lval = VanillaDict::LvalSilentStr(oldArr, key);
 
   if (UNLIKELY(!lval)) {
     return ElemUEmptyish();
@@ -1351,13 +1351,13 @@ inline void SetElemVec(tv_lval base, key_type<keyType> key, TypedValue* value) {
  */
 inline ArrayData* SetElemDictPre(ArrayData* a, int64_t key, TypedValue* value) {
   tvIncRefGen(*value);
-  return MixedArray::SetIntMove(a, key, *value);
+  return VanillaDict::SetIntMove(a, key, *value);
 }
 
 inline ArrayData*
 SetElemDictPre(ArrayData* a, StringData* key, TypedValue* value) {
   tvIncRefGen(*value);
-  return MixedArray::SetStrMove(a, key, *value);
+  return VanillaDict::SetStrMove(a, key, *value);
 }
 
 inline ArrayData*
@@ -1565,7 +1565,7 @@ inline void SetNewElemDict(tv_lval base, TypedValue* value) {
   assertx(tvIsDict(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto a2 = MixedArray::AppendMove(a, *value);
+  auto a2 = VanillaDict::AppendMove(a, *value);
   arraySetUpdateBase(a2, base);
 }
 
@@ -2043,11 +2043,11 @@ inline void UnsetElemVec(tv_lval base, key_type<keyType> key) {
  */
 
 inline ArrayData* UnsetElemDictPre(ArrayData* a, int64_t key) {
-  return MixedArray::RemoveIntMove(a, key);
+  return VanillaDict::RemoveIntMove(a, key);
 }
 
 inline ArrayData* UnsetElemDictPre(ArrayData* a, StringData* key) {
-  return MixedArray::RemoveStrMove(a, key);
+  return VanillaDict::RemoveStrMove(a, key);
 }
 
 inline ArrayData* UnsetElemDictPre(ArrayData* a, TypedValue key) {

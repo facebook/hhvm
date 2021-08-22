@@ -17,10 +17,10 @@
 #include "hphp/runtime/vm/jit/array-access-profile.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/vm/member-operations.h"
 
@@ -45,8 +45,8 @@ int32_t findStringKey(const Arr* ad, const StringData* sd) {
 
 bool isSmallStaticArray(const ArrayData* ad) {
   if (!ad->isVanillaDict()) return false;
-  auto const arr = MixedArray::asMixed(ad);
-  return arr->iterLimit() <= MixedArray::SmallSize &&
+  auto const arr = VanillaDict::as(ad);
+  return arr->iterLimit() <= VanillaDict::SmallSize &&
          arr->keyTypes().mustBeStaticStrs();
 }
 
@@ -179,7 +179,7 @@ void ArrayAccessProfile::update(const ArrayData* ad, int64_t i, bool cowCheck) {
   auto const h = hash_int64(i);
   auto const pos =
     cowCheck && ad->cowCheck() ? -1 :
-    ad->isVanillaDict() ? MixedArray::asMixed(ad)->find(i, h) :
+    ad->isVanillaDict() ? VanillaDict::as(ad)->find(i, h) :
     ad->isVanillaKeyset() ? VanillaKeyset::asSet(ad)->find(i, h) :
     -1;
   if (!update(pos, 1)) m_untracked++;
@@ -194,7 +194,7 @@ void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
   // pointers (checked within findStringKey).
   auto const pos =
     cowCheck && ad->cowCheck() ? -1 :
-    ad->isVanillaDict() ? findStringKey(MixedArray::asMixed(ad), sd) :
+    ad->isVanillaDict() ? findStringKey(VanillaDict::as(ad), sd) :
     ad->isVanillaKeyset() ? findStringKey(VanillaKeyset::asSet(ad), sd) :
     -1;
   if (!update(pos, 1)) m_untracked++;

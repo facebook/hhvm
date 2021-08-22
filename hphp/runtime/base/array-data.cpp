@@ -25,11 +25,11 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
-#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -284,7 +284,7 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
 #define DISPATCH(entry)                           \
   { VanillaVec::entry,       /* vanilla vec */    \
     BespokeArray::entry,     /* bespoke vec */    \
-    MixedArray::entry,       /* vanilla dict */   \
+    VanillaDict::entry,       /* vanilla dict */   \
     BespokeArray::entry,     /* bespoke dict */   \
     VanillaKeyset::entry,    /* vanilla keyset */ \
     BespokeArray::entry,     /* bespoke keyset */ \
@@ -728,7 +728,7 @@ bool ArrayData::same(const ArrayData* v2) const {
 
   if (!bothVanilla(this, v2)) return Same(this, v2);
   if (isVanillaVec())  return VanillaVec::VecSame(this, v2);
-  if (isVanillaDict()) return MixedArray::DictSame(this, v2);
+  if (isVanillaDict()) return VanillaDict::DictSame(this, v2);
   return VanillaKeyset::Same(this, v2);
 }
 
@@ -891,7 +891,7 @@ ArrayData* ArrayData::toDictIntishCast(bool copy) {
   // When keysets are intish-casted, we cast the values, too. Do so in place.
   // This case is rare, so we keep the extra checks out of the loop above.
   assertx(ad->hasExactlyOneRef());
-  auto elm = MixedArray::asMixed(ad)->data();
+  auto elm = VanillaDict::as(ad)->data();
   for (auto const end = elm + ad->size(); elm != end; elm++) {
     if (tvIsString(elm->data) && elm->hasIntKey()) {
       decRefStr(val(elm->data).pstr);
@@ -915,7 +915,7 @@ ArrayData* ArrayData::setLegacyArray(bool copy, bool legacy) {
 
   auto const ad = [&]{
     if (!copy) return this;
-    return isVanillaVec() ? VanillaVec::Copy(this) : MixedArray::Copy(this);
+    return isVanillaVec() ? VanillaVec::Copy(this) : VanillaDict::Copy(this);
   }();
   ad->setLegacyArrayInPlace(legacy);
   return ad;

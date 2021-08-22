@@ -17,18 +17,18 @@
 
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 
-#include "hphp/runtime/ext/asio/ext_asio.h"
-#include "hphp/runtime/ext/collections/ext_collections-map.h"
-#include "hphp/runtime/ext/collections/ext_collections-vector.h"
+#include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/vanilla-dict.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
-#include "hphp/runtime/ext/asio/ext_wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
-#include "hphp/system/systemlib.h"
-#include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/vanilla-vec.h"
+#include "hphp/runtime/ext/asio/ext_wait-handle.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -189,7 +189,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
   if (!ad->isVanilla()) return c_AwaitAllWaitHandle::fromArrLike(ad);
   assertx(ad->isVanillaDict());
   return c_AwaitAllWaitHandle::Create([=](auto fn) {
-    MixedArray::IterateV(MixedArray::asMixed(ad), fn);
+    VanillaDict::IterateV(VanillaDict::as(ad), fn);
   });
 }
 
@@ -201,7 +201,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
       assertx(collections::isType(obj->getVMClass(), CollectionType::Map,
                                                      CollectionType::ImmMap));
       return c_AwaitAllWaitHandle::Create([=](auto fn) {
-        MixedArray::IterateV(static_cast<BaseMap*>(obj)->arrayData(), fn);
+        VanillaDict::IterateV(static_cast<BaseMap*>(obj)->arrayData(), fn);
       });
     }
   }

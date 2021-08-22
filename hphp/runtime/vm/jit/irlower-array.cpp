@@ -21,16 +21,16 @@
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/record-data.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
-#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
@@ -203,8 +203,8 @@ void cgAKExistsDict(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const target = (keyTy <= TInt)
-    ? CallSpec::direct(MixedArray::ExistsInt)
-    : CallSpec::direct(MixedArray::ExistsStr);
+    ? CallSpec::direct(VanillaDict::ExistsInt)
+    : CallSpec::direct(VanillaDict::ExistsStr);
 
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None,
                argGroup(env, inst).ssa(0).ssa(1));
@@ -238,7 +238,7 @@ void cgAKExistsObj(IRLS& env, const IRInstruction* inst) {
 // Array creation.
 
 void cgNewDictArray(IRLS& env, const IRInstruction* inst) {
-  auto const target = CallSpec::direct(MixedArray::MakeReserveDict);
+  auto const target = CallSpec::direct(VanillaDict::MakeReserveDict);
   cgCallHelper(vmain(env), env, target, callDest(env, inst),
                SyncOptions::None, argGroup(env, inst).ssa(0));
 }
@@ -258,7 +258,7 @@ void cgNewStructDict(IRLS& env, const IRInstruction* inst) {
   auto table = v.allocData<const StringData*>(extra->numKeys);
   memcpy(table, extra->keys, extra->numKeys * sizeof(*extra->keys));
 
-  auto const target = CallSpec::direct(MixedArray::MakeStructDict);
+  auto const target = CallSpec::direct(VanillaDict::MakeStructDict);
   auto const args = argGroup(env, inst)
     .imm(extra->numKeys)
     .dataPtr(table)
@@ -287,10 +287,10 @@ void cgAllocStructDict(IRLS& env, const IRInstruction* inst) {
     init.set(extra->keys[i], make_tv<KindOfNull>());
   }
   auto const array = init.toArray();
-  auto const ad = MixedArray::asMixed(array.get());
+  auto const ad = VanillaDict::as(array.get());
 
-  auto const scale = MixedArray::computeScaleFromSize(extra->numKeys);
-  always_assert(MixedArray::HashSize(scale) == ad->hashSize());
+  auto const scale = VanillaDict::computeScaleFromSize(extra->numKeys);
+  always_assert(VanillaDict::HashSize(scale) == ad->hashSize());
 
   using HashTableEntry = std::remove_pointer_t<decltype(ad->hashTab())>;
 
@@ -298,7 +298,7 @@ void cgAllocStructDict(IRLS& env, const IRInstruction* inst) {
   auto table = v.allocData<HashTableEntry>(ad->hashSize());
   memcpy(table, ad->hashTab(), ad->hashSize() * sizeof(HashTableEntry));
 
-  auto const target = CallSpec::direct(MixedArray::AllocStructDict);
+  auto const target = CallSpec::direct(VanillaDict::AllocStructDict);
   auto const args = argGroup(env, inst).imm(extra->numKeys).dataPtr(table);
 
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
@@ -309,10 +309,10 @@ void cgInitDictElem(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->extra<InitDictElem>()->key;
   auto const idx = inst->extra<InitDictElem>()->index;
 
-  auto const elm_off  = MixedArray::elmOff(idx);
-  auto const key_ptr  = arr[elm_off + MixedArrayElm::keyOff()];
-  auto const data_ptr = arr[elm_off + MixedArrayElm::dataOff()];
-  auto const hash_ptr = arr[elm_off + MixedArrayElm::hashOff()];
+  auto const elm_off  = VanillaDict::elmOff(idx);
+  auto const key_ptr  = arr[elm_off + VanillaDictElm::keyOff()];
+  auto const data_ptr = arr[elm_off + VanillaDictElm::dataOff()];
+  auto const hash_ptr = arr[elm_off + VanillaDictElm::hashOff()];
 
   auto& v = vmain(env);
   storeTV(v, data_ptr, srcLoc(env, inst, 1), inst->src(1));

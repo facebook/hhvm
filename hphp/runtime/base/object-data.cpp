@@ -16,21 +16,21 @@
 
 #include "hphp/runtime/base/object-data.h"
 
-#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/object-iterator.h"
-#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/generator/ext_generator.h"
@@ -346,13 +346,13 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
     return dynPropArray();
   }
 
-  auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(numDynamic);
+  auto const allocsz = VanillaDict::computeAllocBytesFromMaxElms(numDynamic);
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
 
   return setDynPropArray(Array::attach(
-      MixedArray::MakeReserveDict(numDynamic)));
+      VanillaDict::MakeReserveDict(numDynamic)));
 }
 
 Array& ObjectData::setDynPropArray(const Array& newArr) {
@@ -630,7 +630,7 @@ Array ObjectData::o_toIterArray(const String& context) {
   if (getAttribute(HasDynPropArr)) {
     size += dynPropArray().size();
   }
-  Array retArray { Array::attach(MixedArray::MakeReserveDict(size)) };
+  Array retArray { Array::attach(VanillaDict::MakeReserveDict(size)) };
 
   Class* ctx = nullptr;
   if (!context.empty()) {

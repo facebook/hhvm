@@ -253,7 +253,7 @@ class OptionalPrinter(object):
 
 
 class ArrayDataPrinter(object):
-    RECOGNIZE = '^HPHP::(ArrayData|MixedArray)$'
+    RECOGNIZE = '^HPHP::(ArrayData|VanillaDict)$'
 
     class _packed_iterator(_BaseIterator):
         def __init__(self, base, size):
@@ -336,7 +336,7 @@ class ArrayDataPrinter(object):
         self.kind = val['m_kind'].cast(kind_ty)
 
         if self.kind == self._kind('Mixed') or self.kind == self._kind('Dict'):
-            self.val = val.cast(T('HPHP::MixedArray'))
+            self.val = val.cast(T('HPHP::VanillaDict'))
         elif self.kind == self._kind('Keyset'):
             self.val = val.cast(T('HPHP::SetArray'))
         else:
@@ -364,7 +364,7 @@ class ArrayDataPrinter(object):
             pelm = data.cast(T('HPHP::TypedValue').pointer())
             return self._packed_iterator(pelm, self.val['m_size'])
         if self.kind == self._kind('Mixed') or self.kind == self._kind('Dict'):
-            pelm = data.cast(T('HPHP::MixedArrayElm').pointer())
+            pelm = data.cast(T('HPHP::VanillaDictElm').pointer())
             return self._mixed_iterator(pelm, pelm + self.val['m_used'])
         if self.kind == self._kind('Keyset'):
             pelm = data.cast(T('HPHP::SetArrayElm').pointer())

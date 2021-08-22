@@ -218,8 +218,8 @@ KeyCountMap arraysContainingKeys(
     auto const ad = profile->data->staticSampledArray;
     if (!ad) continue;
     assertx(ad->isVanillaDict());
-    MixedArray::IterateKV(
-      MixedArray::asMixed(ad),
+    VanillaDict::IterateKV(
+      VanillaDict::as(ad),
       [&](auto k, auto) {
         if (!tvIsString(k)) return;
         auto& count = arrayCounts[val(k).pstr];

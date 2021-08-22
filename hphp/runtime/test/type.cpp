@@ -1329,8 +1329,8 @@ TEST(Type, ConstantPtrTypes) {
     DictInit dinit{1};
     dinit.set(StringData::Make(key), make_tv<KindOfBoolean>(true));
     auto const dict = dinit.toArray();
-    MixedArray::asMixed(dict.get())->onSetEvalScalar();
-    auto const static_dict = MixedArray::CopyStatic(dict.get());
+    VanillaDict::as(dict.get())->onSetEvalScalar();
+    auto const static_dict = VanillaDict::CopyStatic(dict.get());
     dicts.push_back(make_persistent_array_like_tv(static_dict));
   }
 

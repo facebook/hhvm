@@ -1,13 +1,13 @@
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 
+#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
-#include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
@@ -135,8 +135,8 @@ void BaseSet::addFront(int64_t k) {
   mutate();
   auto h = hash_int64(k);
   auto p = findForInsert(k, h);
-  assertx(MixedArray::isValidIns(p));
-  if (MixedArray::isValidPos(*p)) {
+  assertx(VanillaDict::isValidIns(p));
+  if (VanillaDict::isValidPos(*p)) {
     // When there is a conflict, the addFront() API is supposed to replace
     // the existing element with the new element in place. However since
     // Sets currently only support integer and string elements, there is
@@ -157,16 +157,16 @@ void BaseSet::addFront(int64_t k) {
 }
 
 void BaseSet::SetIntMoveSkipConflict(int64_t k, TypedValue v) {
-  auto ad = MixedArray::SetIntMoveSkipConflict(arrayData(), k, v);
-  setArrayData(MixedArray::asMixed(ad));
+  auto ad = VanillaDict::SetIntMoveSkipConflict(arrayData(), k, v);
+  setArrayData(VanillaDict::as(ad));
   m_size = arrayData()->m_size;
 }
 
 void BaseSet::SetStrMoveSkipConflict(StringData* k, TypedValue v) {
   // This increments the string's refcount twice, once for
   // the key and once for the value
-  auto ad = MixedArray::SetStrMoveSkipConflict(arrayData(), k, v);
-  setArrayData(MixedArray::asMixed(ad));
+  auto ad = VanillaDict::SetStrMoveSkipConflict(arrayData(), k, v);
+  setArrayData(VanillaDict::as(ad));
   if (m_size != arrayData()->m_size) {
     k->incRefCount();
     m_size = arrayData()->m_size;
@@ -177,8 +177,8 @@ void BaseSet::addFront(StringData *key) {
   mutate();
   strhash_t h = key->hash();
   auto p = findForInsert(key, h);
-  assertx(MixedArray::isValidIns(p));
-  if (MixedArray::isValidPos(*p)) {
+  assertx(VanillaDict::isValidIns(p));
+  if (VanillaDict::isValidPos(*p)) {
     return;
   }
   if (UNLIKELY(isFull())) {
@@ -262,13 +262,13 @@ Object c_Set::getImmutableCopy() {
 bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto st1 = static_cast<const BaseSet*>(obj1);
   auto st2 = static_cast<const BaseSet*>(obj2);
-  return MixedArray::DictEqual(st1->arrayData(), st2->arrayData());
+  return VanillaDict::DictEqual(st1->arrayData(), st2->arrayData());
 }
 
 BaseSet::~BaseSet() {
-  auto const mixed = MixedArray::asMixed(arrayData());
-  // Avoid indirect call, as we know it is a MixedArray
-  if (mixed->decReleaseCheck()) MixedArray::Release(mixed);
+  auto const mixed = VanillaDict::as(arrayData());
+  // Avoid indirect call, as we know it is a VanillaDict
+  if (mixed->decReleaseCheck()) VanillaDict::Release(mixed);
 }
 
 void BaseSet::throwBadValueType() {

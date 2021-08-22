@@ -37,7 +37,7 @@ of array is created and tagged using one of the [several current array `HeaderKi
 We use a custom vtable to dispatch to the appropriate implementation for all
 `ArrayData` member functions; the current implementation classes are
 [`PackedArray`](../../runtime/base/packed-array.h),
-[`MixedArray`](../../runtime/base/mixed-array.h), and
+[`VanillaDict`](../../runtime/base/vanilla-dict.h), and
 [`SetArray`](../../runtime/base/set-array.h). Note that many of these types
 don't directly inherit from `ArrayData`, so they're only subtypes of `ArrayData`
 by convention.

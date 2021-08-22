@@ -127,7 +127,7 @@ Variant ArrayUtil::PadLeft(const Array& input, const Variant& pad_value,
   if (input->isVecType()) {
     data = VanillaVec::MakeReserveVec(pad_size);
   } else {
-    data = MixedArray::MakeReserveDict(pad_size);
+    data = VanillaDict::MakeReserveDict(pad_size);
   }
   auto ret = Array::attach(data);
   for (int i = input_size; i < pad_size; i++) {
@@ -187,7 +187,7 @@ void rangeCheckAlloc(double estNumSteps) {
   }
 
   int32_t numElms = static_cast<int32_t>(estNumSteps);
-  if (tl_heap->preAllocOOM(MixedArray::computeAllocBytesFromMaxElms(numElms))) {
+  if (tl_heap->preAllocOOM(VanillaDict::computeAllocBytesFromMaxElms(numElms))) {
     check_non_safepoint_surprise();
   }
 }

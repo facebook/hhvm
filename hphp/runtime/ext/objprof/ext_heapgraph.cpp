@@ -212,11 +212,11 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       // Known generalized cases that don't really need pointer kind
       case HeaderKind::Dict:
       case HeaderKind::Keyset: {
-        if (edge.offset >= sizeof(MixedArray)) {
-          using Elm = MixedArray::Elm;
-          auto elm_offset = edge.offset - sizeof(MixedArray);
+        if (edge.offset >= sizeof(VanillaDict)) {
+          using Elm = VanillaDict::Elm;
+          auto elm_offset = edge.offset - sizeof(VanillaDict);
           uint32_t index = elm_offset / sizeof(Elm);
-          if (index < static_cast<const MixedArray*>(from_hdr)->iterLimit()) {
+          if (index < static_cast<const VanillaDict*>(from_hdr)->iterLimit()) {
             auto field = elm_offset - index * sizeof(Elm);
             if (field == Elm::keyOff()) {
               return {CapturedPtr::Key, index};

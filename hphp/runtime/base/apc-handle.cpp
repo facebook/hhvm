@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/apc-rfunc.h"
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/apc-typed-value.h"
-#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 

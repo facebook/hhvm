@@ -36,7 +36,7 @@ namespace HPHP {
 struct Variant;
 struct ArrayData;
 struct StringData;
-struct MixedArray;
+struct VanillaDict;
 struct APCArray;
 struct APCHandle;
 
@@ -178,11 +178,11 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
   template <class F>
   static void IterateKV(const ArrayData* arr, F fn);
 
-  // Return a MixedArray with the same elements as this VanillaVec..
+  // Return a VanillaDict with the same elements as this VanillaVec..
   // The target type is based on the source: varray -> darray, vec -> dict.
-  static MixedArray* ToMixed(ArrayData*);
-  static MixedArray* ToMixedCopy(const ArrayData*);
-  static MixedArray* ToMixedCopyReserve(const ArrayData*, size_t);
+  static VanillaDict* ToMixed(ArrayData*);
+  static VanillaDict* ToMixedCopy(const ArrayData*);
+  static VanillaDict* ToMixedCopyReserve(const ArrayData*, size_t);
 
   // Converts a pointer into the given array to an index at that array.
   // May fail, in which case the result will be negative. May be slow.
@@ -195,7 +195,7 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
 private:
   static uint8_t sizeClass(const ArrayData*);
 
-  static MixedArray* ToMixedHeader(const ArrayData*, size_t);
+  static VanillaDict* ToMixedHeader(const ArrayData*, size_t);
 
   static ArrayData* Grow(ArrayData*, bool);
   static ArrayData* PrepareForInsert(ArrayData*, bool);

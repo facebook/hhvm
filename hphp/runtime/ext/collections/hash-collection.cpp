@@ -1,8 +1,8 @@
 #include "hphp/runtime/ext/collections/hash-collection.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/text-util.h"
 
@@ -15,7 +15,7 @@ HashCollection::HashCollection(Class* cls, HeaderKind kind, uint32_t cap)
   , m_unusedAndSize(0)
 {
   setArrayData(cap > 0
-    ? MixedArray::asMixed(MixedArray::MakeReserveDict(cap))
+    ? VanillaDict::as(VanillaDict::MakeReserveDict(cap))
     : CreateDictAsMixed());
 }
 
@@ -142,7 +142,7 @@ void HashCollection::remove(StringData* key) {
   }
 }
 
-void HashCollection::eraseNoCompact(MixedArray::RemovePos pos) {
+void HashCollection::eraseNoCompact(VanillaDict::RemovePos pos) {
   assertx(canMutateBuffer());
   assertx(pos.valid() && !isTombstone(pos.elmIdx));
   assertx(m_size > 0);
@@ -171,7 +171,7 @@ void HashCollection::reserve(int64_t sz) {
     }
     // Fast path: The requested capacity is greater than the current capacity.
     // Grow to the smallest allowed capacity that is sufficient.
-    grow(MixedArray::computeScaleFromSize(sz));
+    grow(VanillaDict::computeScaleFromSize(sz));
     assertx(canMutateBuffer());
     return;
   }
@@ -200,7 +200,7 @@ void HashCollection::reserve(int64_t sz) {
   assertx(sz + int64_t(posLimit() - m_size) > cap);
   assertx(cap < MaxSize && tableMask() != 0);
   auto newScale = scale() * 2;
-  assertx(sz > 0 && MixedArray::Capacity(newScale) >= sz);
+  assertx(sz > 0 && VanillaDict::Capacity(newScale) >= sz);
   grow(newScale);
   assertx(canMutateBuffer());
 }
@@ -212,22 +212,22 @@ void HashCollection::resizeHelper(uint32_t newCap) {
   // Allocate a new ArrayData with the specified capacity and dup
   // all the elements (without copying over tombstones).
   auto ad = arrayData()->isStatic() && arrayData()->empty() ?
-    MixedArray::asMixed(MixedArray::MakeReserveDict(newCap)) :
-    MixedArray::CopyReserve(arrayData(), newCap);
+    VanillaDict::as(VanillaDict::MakeReserveDict(newCap)) :
+    VanillaDict::CopyReserve(arrayData(), newCap);
   decRefArr(arrayData());
   setArrayData(ad);
   assertx(canMutateBuffer());
 }
 
 void HashCollection::grow(uint32_t newScale) {
-  auto newCap = MixedArray::Capacity(newScale);
+  auto newCap = VanillaDict::Capacity(newScale);
   assertx(m_size <= posLimit() && posLimit() <= cap() && cap() <= newCap);
   assertx(SmallSize <= newCap && newCap <= MaxSize);
   assertx(m_size <= newCap);
   auto oldAd = arrayData();
   dropImmCopy();
   if (m_size > 0 && !oldAd->cowCheck()) {
-    setArrayData(MixedArray::Grow(oldAd, newScale, false));
+    setArrayData(VanillaDict::Grow(oldAd, newScale, false));
     decRefArr(oldAd);
   } else {
     // For cases where m_size is zero or the buffer's refcount is
@@ -241,7 +241,7 @@ void HashCollection::compact() {
   assertx(isDensityTooLow());
   dropImmCopy();
   if (!arrayData()->cowCheck()) {
-    // MixedArray::compact can only handle cases where the buffer's
+    // VanillaDict::compact can only handle cases where the buffer's
     // refcount is 1.
     arrayData()->compact(false);
   } else {
@@ -287,7 +287,7 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     auto oldBuf = data();
     auto oldUsed = posLimit();
     auto oldNextKI = nextKI();
-    auto const arr = MixedArray::asMixed(MixedArray::MakeReserveDict(newCap));
+    auto const arr = VanillaDict::as(VanillaDict::MakeReserveDict(newCap));
     setArrayData(arr);
     arr->m_size = m_size;
     arr->mutableKeyTypes()->copyFrom(oldAd->keyTypes(), /*compact=*/true);
@@ -312,8 +312,8 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
   assertx(!isCapacityTooHigh() || newCap == oldCap);
 }
 
-HashCollection::Elm& HashCollection::allocElmFront(MixedArray::Inserter ei) {
-  assertx(MixedArray::isValidIns(ei) && !MixedArray::isValidPos(*ei));
+HashCollection::Elm& HashCollection::allocElmFront(VanillaDict::Inserter ei) {
+  assertx(VanillaDict::isValidIns(ei) && !VanillaDict::isValidPos(*ei));
   assertx(m_size <= posLimit() && posLimit() < cap());
   // Move the existing elements to make element slot 0 available.
   memmove(data() + 1, data(), posLimit() * sizeof(Elm));
@@ -342,7 +342,7 @@ void HashCollection::mutateImpl() {
     return;
   }
   auto* oldAd = arrayData();
-  setArrayData(MixedArray::asMixed(MixedArray::Copy(oldAd)));
+  setArrayData(VanillaDict::as(VanillaDict::Copy(oldAd)));
   assertx(oldAd->hasMultipleRefs());
   oldAd->decRefCount();
 }

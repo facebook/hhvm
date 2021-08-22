@@ -132,7 +132,7 @@ DATATYPES
  * keep switches cleaner.
  *
  * These should only be used where MaybeDataType cannot be (e.g., in
- * TypedValues, such as for MixedArray tombstones).
+ * TypedValues, such as for VanillaDict tombstones).
  */
 constexpr DataType kInvalidDataType = static_cast<DataType>(-128);
 constexpr DataType kExtraInvalidDataType = static_cast<DataType>(0);

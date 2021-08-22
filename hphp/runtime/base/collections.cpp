@@ -160,7 +160,7 @@ void replaceArray(ObjectData* obj, ArrayData* ad) {
   case CollectionType::Set: {
     auto const collection = static_cast<HashCollection*>(obj);
     decRefArr(collection->arrayData()->asArrayData());
-    return collection->setArrayData(MixedArray::asMixed(ad));
+    return collection->setArrayData(VanillaDict::as(ad));
   }
   case CollectionType::Pair:
     always_assert(false);

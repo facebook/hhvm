@@ -27,9 +27,9 @@ void BaseMap::throwBadKeyType() {
 }
 
 BaseMap::~BaseMap() {
-  auto const mixed = MixedArray::asMixed(arrayData());
-  // Avoid indirect call, as we know it is a MixedArray
-  if (mixed->decReleaseCheck()) MixedArray::Release(mixed);
+  auto const mixed = VanillaDict::as(arrayData());
+  // Avoid indirect call, as we know it is a VanillaDict
+  if (mixed->decReleaseCheck()) VanillaDict::Release(mixed);
 }
 
 template<typename TMap>
@@ -219,15 +219,15 @@ Variant BaseMap::popFront() {
 
 void BaseMap::setImpl(int64_t k, TypedValue tv) {
   assertx(canMutateBuffer());
-  auto ad = MixedArray::SetIntMove(arrayData(), k, tv);
-  setArrayData(MixedArray::asMixed(ad));
+  auto ad = VanillaDict::SetIntMove(arrayData(), k, tv);
+  setArrayData(VanillaDict::as(ad));
   m_size = arrayData()->m_size;
 }
 
 void BaseMap::setImpl(StringData* key, TypedValue tv) {
   assertx(canMutateBuffer());
-  auto ad = MixedArray::SetStrMove(arrayData(), key, tv);
-  setArrayData(MixedArray::asMixed(ad));
+  auto ad = VanillaDict::SetStrMove(arrayData(), key, tv);
+  setArrayData(VanillaDict::as(ad));
   m_size = arrayData()->m_size;
 }
 
@@ -313,7 +313,7 @@ void BaseMap::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 bool BaseMap::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto map1 = static_cast<const BaseMap*>(obj1);
   auto map2 = static_cast<const BaseMap*>(obj2);
-  return MixedArray::DictEqual(map1->arrayData(), map2->arrayData());
+  return VanillaDict::DictEqual(map1->arrayData(), map2->arrayData());
 }
 
 /////////////////////////////////////////////////////////////////////////////

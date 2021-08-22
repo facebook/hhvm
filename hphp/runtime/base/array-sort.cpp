@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/sort-helpers.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
@@ -92,7 +92,7 @@ done:
 }
 
 template <typename AccessorT>
-SortFlavor MixedArray::preSort(const AccessorT& acc, bool checkTypes) {
+SortFlavor VanillaDict::preSort(const AccessorT& acc, bool checkTypes) {
   return genericPreSort(*this, acc, checkTypes);
 }
 
@@ -105,11 +105,11 @@ SortFlavor VanillaKeyset::preSort(const AccessorT& acc, bool checkTypes) {
 }
 
 /**
- * postSort() runs after the sort has been performed. For MixedArray, postSort()
+ * postSort() runs after the sort has been performed. For VanillaDict, postSort()
  * handles rebuilding the hash. Also, if resetKeys is true, postSort() will
  * renumber the keys 0 thru n-1.
  */
-void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
+void VanillaDict::postSort(bool resetKeys) {   // nothrow guarantee
   assertx(m_size > 0);
   assertx(m_size == m_used);
   auto const ht = initHash(m_scale);
@@ -152,8 +152,8 @@ void VanillaKeyset::postSort(bool) {   // nothrow guarantee
   }
 }
 
-ArrayData* MixedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
-  auto const a = asMixed(ad);
+ArrayData* VanillaDict::EscalateForSort(ArrayData* ad, SortFunction sf) {
+  auto const a = as(ad);
   return a->cowCheck() ? a->copyMixed() : a;
 }
 
@@ -217,26 +217,26 @@ ArrayData* VanillaVec::EscalateForSort(ArrayData* ad, SortFunction sf) {
     a->postSort(resetKeys);                                     \
   } while (0)
 
-void MixedArray::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
-  auto a = asMixed(ad);
+void VanillaDict::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
+  auto a = as(ad);
   auto data_begin = a->data();
   auto data_end = data_begin + a->m_size;
-  SORT_BODY(AssocKeyAccessor<MixedArray::Elm>, false);
+  SORT_BODY(AssocKeyAccessor<VanillaDict::Elm>, false);
 }
 
-void MixedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
-  auto a = asMixed(ad);
+void VanillaDict::Sort(ArrayData* ad, int sort_flags, bool ascending) {
+  auto a = as(ad);
   auto data_begin = a->data();
   auto data_end = data_begin + a->m_size;
   a->m_nextKI = 0;
-  SORT_BODY(AssocValAccessor<MixedArray::Elm>, true);
+  SORT_BODY(AssocValAccessor<VanillaDict::Elm>, true);
 }
 
-void MixedArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
-  auto a = asMixed(ad);
+void VanillaDict::Asort(ArrayData* ad, int sort_flags, bool ascending) {
+  auto a = as(ad);
   auto data_begin = a->data();
   auto data_end = data_begin + a->m_size;
-  SORT_BODY(AssocValAccessor<MixedArray::Elm>, false);
+  SORT_BODY(AssocValAccessor<VanillaDict::Elm>, false);
 }
 
 void VanillaKeyset::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
@@ -290,20 +290,20 @@ void VanillaVec::Sort(ArrayData* ad, int sort_flags, bool ascending) {
     return true;                                                \
   } while (0)
 
-bool MixedArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
-  auto a = asMixed(ad);
-  USER_SORT_BODY(AssocKeyAccessor<MixedArray::Elm>, false);
+bool VanillaDict::Uksort(ArrayData* ad, const Variant& cmp_function) {
+  auto a = as(ad);
+  USER_SORT_BODY(AssocKeyAccessor<VanillaDict::Elm>, false);
 }
 
-bool MixedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
-  auto a = asMixed(ad);
+bool VanillaDict::Usort(ArrayData* ad, const Variant& cmp_function) {
+  auto a = as(ad);
   a->m_nextKI = 0;
-  USER_SORT_BODY(AssocValAccessor<MixedArray::Elm>, true);
+  USER_SORT_BODY(AssocValAccessor<VanillaDict::Elm>, true);
 }
 
-bool MixedArray::Uasort(ArrayData* ad, const Variant& cmp_function) {
-  auto a = asMixed(ad);
-  USER_SORT_BODY(AssocValAccessor<MixedArray::Elm>, false);
+bool VanillaDict::Uasort(ArrayData* ad, const Variant& cmp_function) {
+  auto a = as(ad);
+  USER_SORT_BODY(AssocValAccessor<VanillaDict::Elm>, false);
 }
 
 bool VanillaKeyset::Uksort(ArrayData* ad, const Variant& cmp_function) {

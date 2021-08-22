@@ -16,11 +16,11 @@
 
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 
-#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 
 #include "hphp/runtime/vm/jit/array-layout.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -334,7 +334,7 @@ StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
   auto const types = result->rawTypes();
   auto const vals = result->rawValues();
   auto pos = result->rawPositions();
-  MixedArray::IterateKV(MixedArray::asMixed(ad), [&](auto k, auto v) -> bool {
+  VanillaDict::IterateKV(VanillaDict::as(ad), [&](auto k, auto v) -> bool {
     if (!tvIsString(k)) {
       fail = true;
       return true;
@@ -450,7 +450,7 @@ ArrayData* StructDict::escalateWithCapacity(size_t capacity,
   assertx(capacity >= size());
   logEscalateToVanilla(this, reason);
 
-  auto ad = MixedArray::MakeReserveDict(capacity);
+  auto ad = VanillaDict::MakeReserveDict(capacity);
   ad->setLegacyArrayInPlace(isLegacyArray());
 
   auto const layout = this->layout();
@@ -459,7 +459,7 @@ ArrayData* StructDict::escalateWithCapacity(size_t capacity,
     auto const k = layout->field(slot).key;
     auto const tv = typedValueUnchecked(slot);
     auto const res =
-      MixedArray::SetStrMove(ad, const_cast<StringData*>(k.get()), tv);
+      VanillaDict::SetStrMove(ad, const_cast<StringData*>(k.get()), tv);
     assertx(ad == res);
     tvIncRefGen(tv);
     ad = res;
@@ -617,7 +617,7 @@ tv_lval StructDict::ElemStr(tv_lval lvalIn, StringData* k, bool throwOnMissing) 
 
 ArrayData* StructDict::SetIntMove(StructDict* sad, int64_t k, TypedValue v) {
   auto const vad = sad->escalateWithCapacity(sad->size() + 1, __func__);
-  auto const res = MixedArray::SetIntMove(vad, k, v);
+  auto const res = VanillaDict::SetIntMove(vad, k, v);
   assertx(vad == res);
   if (sad->decReleaseCheck()) Release(sad);
   return res;
@@ -629,7 +629,7 @@ ArrayData* StructDict::SetStrMove(StructDict* sadIn,
   auto const slot = StructLayout::keySlot(sadIn->layoutIndex(), k);
   if (slot == kInvalidSlot) {
     auto const vad = sadIn->escalateWithCapacity(sadIn->size() + 1, __func__);
-    auto const res = MixedArray::SetStrMove(vad, k, v);
+    auto const res = VanillaDict::SetStrMove(vad, k, v);
     assertx(vad == res);
     if (sadIn->decReleaseCheck()) Release(sadIn);
     return res;
@@ -719,7 +719,7 @@ ArrayData* StructDict::RemoveStrInSlot(StructDict* sadIn, Slot slot) {
 
 ArrayData* StructDict::AppendMove(StructDict* sad, TypedValue v) {
   auto const vad = sad->escalateWithCapacity(sad->size() + 1, __func__);
-  auto const res = MixedArray::AppendMove(vad, v);
+  auto const res = VanillaDict::AppendMove(vad, v);
   assertx(vad == res);
   if (sad->decReleaseCheck()) Release(sad);
   return res;
@@ -754,7 +754,7 @@ ArrayData* StructDict::PreSort(StructDict* sad, SortFunction sf) {
 ArrayData* StructDict::PostSort(StructDict* sad, ArrayData* vad) {
   auto const result = MakeFromVanilla(vad, sad->layout());
   if (!result) return vad;
-  MixedArray::Release(vad);
+  VanillaDict::Release(vad);
   return result;
 }
 

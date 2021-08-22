@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/preclass.h"
 
@@ -60,8 +60,8 @@ void IteratePropMemOrder(const ObjectData* obj, DeclFn declFn, DynFn dynFn) {
   }
 
   if (UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr))) {
-    auto const mad = MixedArray::asMixed(obj->dynPropArray().get());
-    MixedArray::IterateKV(mad, dynFn);
+    auto const mad = VanillaDict::as(obj->dynPropArray().get());
+    VanillaDict::IterateKV(mad, dynFn);
   }
 }
 
@@ -89,8 +89,8 @@ void IteratePropToArrayOrder(const ObjectData* obj, DeclFn declFn, DynFn dynFn) 
   }
 
   if (UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr))) {
-    auto const mad = MixedArray::asMixed(obj->dynPropArray().get());
-    MixedArray::IterateKV(mad, dynFn);
+    auto const mad = VanillaDict::as(obj->dynPropArray().get());
+    VanillaDict::IterateKV(mad, dynFn);
   }
 }
 

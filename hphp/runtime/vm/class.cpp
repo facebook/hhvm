@@ -14,27 +14,27 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/enum-cache.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/type-structure.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/frame-restore.h"
+#include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/memo-cache.h"
-#include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
+#include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
 #include "hphp/runtime/vm/property-profile.h"
@@ -1600,7 +1600,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
     // ArrayData.
     clsCnsData.detach();
     clsCnsData = Array::attach(
-      MixedArray::MakeReserveDict(m_constants.size())
+      VanillaDict::MakeReserveDict(m_constants.size())
     );
     m_nonScalarConstantCache.markInit();
   }

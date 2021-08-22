@@ -21,10 +21,10 @@
 #include "hphp/runtime/vm/verifier/pretty.h"
 
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"

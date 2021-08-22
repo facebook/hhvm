@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 
 #include <folly/container/F14Map.h>
 #include <folly/SharedMutex.h>

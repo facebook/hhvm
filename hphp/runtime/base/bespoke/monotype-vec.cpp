@@ -17,14 +17,14 @@
 
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/bespoke/entry-types.h"
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
-#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
 
 #include "hphp/runtime/vm/jit/type.h"
 

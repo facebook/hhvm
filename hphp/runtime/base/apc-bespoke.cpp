@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 #include <vector>
@@ -63,7 +63,7 @@ ArrayData* GetEmptyArray(bool legacy) {
   if constexpr (std::is_same<Array, VanillaVec>::value) {
     return ArrayData::CreateVec(legacy);
   }
-  if constexpr (std::is_same<Array, MixedArray>::value) {
+  if constexpr (std::is_same<Array, VanillaDict>::value) {
     return ArrayData::CreateDict(legacy);
   }
   if constexpr (std::is_same<Array, VanillaKeyset>::value) {
@@ -76,8 +76,8 @@ tv_lval LvalAtIterPos(ArrayData* ad, ssize_t pos) {
   if constexpr (std::is_same<Array, VanillaVec>::value) {
     return VanillaVec::LvalUncheckedInt(ad, pos);
   }
-  if constexpr (std::is_same<Array, MixedArray>::value) {
-    return &MixedArray::asMixed(ad)->data()[pos].data;
+  if constexpr (std::is_same<Array, VanillaDict>::value) {
+    return &VanillaDict::as(ad)->data()[pos].data;
   }
   if constexpr (std::is_same<Array, VanillaKeyset>::value) {
     return &VanillaKeyset::asSet(ad)->data()[pos].tv;
@@ -268,7 +268,7 @@ ArrayData* makeAPCBespoke(APCBespokeEnv& env, ArrayData* ain, bool hasApcTv) {
   if (vin->isVecType()) {
     return implAPCBespoke<VanillaVec, kVecHashSeed>(env, ain, vin, hasApcTv);
   } else if (vin->isDictType()) {
-    return implAPCBespoke<MixedArray, kDictHashSeed>(env, ain, vin, hasApcTv);
+    return implAPCBespoke<VanillaDict, kDictHashSeed>(env, ain, vin, hasApcTv);
   } else if (vin->isKeysetType()) {
     if (!arrayTypeCouldBeBespoke(KindOfKeyset)) return nullptr;
     return implAPCBespoke<VanillaKeyset, kKeysetHashSeed>(

@@ -129,7 +129,7 @@ union AuxUnion {
   // flag is false, it doesn't mean that the TV is a non-finished Awaitable,
   // or an Awaitable at all.
   uint32_t u_asyncEagerReturnFlag;
-  // Key type and hash for MixedArray.
+  // Key type and hash for VanillaDict.
   int32_t u_hash;
   // Used by Class::Const.
   ConstModifiers u_constModifiers;

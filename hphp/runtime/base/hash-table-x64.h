@@ -16,13 +16,13 @@
 
 #pragma once
 
-#define MixedArray_SCALE        16
-#define MixedArray_DATA         32
-#define MixedArrayElm_HASH      12
-#define MixedArrayElm_KEY       16
-#define MixedArrayElm_DATA      0
-#define MixedArrayElm_TYPE      8
-#define MixedArrayElm_QUADWORDS 3
+#define VanillaDict_SCALE        16
+#define VanillaDict_DATA         32
+#define VanillaDictElm_HASH      12
+#define VanillaDictElm_KEY       16
+#define VanillaDictElm_DATA      0
+#define VanillaDictElm_TYPE      8
+#define VanillaDictElm_QUADWORDS 3
 
 #define VanillaKeyset_SCALE        16
 #define VanillaKeyset_DATA         32

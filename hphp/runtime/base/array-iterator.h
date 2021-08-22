@@ -22,9 +22,9 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-iter.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
@@ -62,7 +62,7 @@ struct ArrayIter {
   ArrayIter(const ArrayData* data, NoInc) {
     setArrayData(data);
   }
-  explicit ArrayIter(const MixedArray*) = delete;
+  explicit ArrayIter(const VanillaDict*) = delete;
   explicit ArrayIter(const Array& array);
   explicit ArrayIter(ObjectData* obj);
   ArrayIter(ObjectData* obj, NoInc);
@@ -261,7 +261,7 @@ void IterateV(const ArrayData* adata, ArrFn arrFn) {
   if (adata->isVanillaVec()) {
     VanillaVec::IterateV(adata, arrFn);
   } else if (adata->isVanillaDict()) {
-    MixedArray::IterateV(MixedArray::asMixed(adata), arrFn);
+    VanillaDict::IterateV(VanillaDict::as(adata), arrFn);
   } else if (bespoke::IsStructDict(adata)) {
     bespoke::StructDictIterateV(adata, arrFn);
   } else if (adata->isVanillaKeyset()) {
@@ -334,7 +334,7 @@ template <typename ArrFn>
 void IterateKV(const ArrayData* adata, ArrFn arrFn) {
   if (adata->empty()) return;
   if (adata->isVanillaDict()) {
-    MixedArray::IterateKV(MixedArray::asMixed(adata), arrFn);
+    VanillaDict::IterateKV(VanillaDict::as(adata), arrFn);
   } else if (bespoke::IsStructDict(adata)) {
     bespoke::StructDictIterateKV(adata, arrFn);
   } else if (adata->isVanillaVec()) {

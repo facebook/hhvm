@@ -18,12 +18,12 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/str-key-table.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/vanilla-vec.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -426,8 +426,8 @@ void cgCheckDictOffset(IRLS& env, const IRInstruction* inst) {
   auto const pos = inst->extra<IndexData>()->index;
   auto& v = vmain(env);
 
-  auto const elmOff = MixedArray::elmOff(pos);
-  using Elm = MixedArray::Elm;
+  auto const elmOff = VanillaDict::elmOff(pos);
+  using Elm = VanillaDict::Elm;
 
   auto const key_type = getKeyType(inst->src(1));
   auto const is_str_key = key_type == KeyType::Str;
@@ -438,7 +438,7 @@ void cgCheckDictOffset(IRLS& env, const IRInstruction* inst) {
     // array-likes, m_extra is always 0, and for bespoke array-likes, the full
     // quadword is always a negative int64_t.
     auto const sf = v.makeReg();
-    v << cmplim{safe_cast<int32_t>(pos), arr[MixedArray::usedOff()], sf};
+    v << cmplim{safe_cast<int32_t>(pos), arr[VanillaDict::usedOff()], sf};
     ifThen(v, CC_LE, sf, branch);
   }
   { // Fail if the Elm key value doesn't match.
@@ -452,7 +452,7 @@ void cgCheckDictOffset(IRLS& env, const IRInstruction* inst) {
 
     ifThen(v, is_str_key ? CC_L : CC_GE, sf, branch);
   }
-  { // Fail if the Elm is a tombstone.  See MixedArray::isTombstone().
+  { // Fail if the Elm is a tombstone.  See VanillaDict::isTombstone().
     // We set the key type to look like an int when setting it be a tombstone.
     // This is originally to simplify the type scan, however we can use this
     // to elide this check when looking for string keys.
@@ -512,13 +512,13 @@ void cgCheckArrayCOW(IRLS& env, const IRInstruction* inst) {
 
 void cgCheckDictKeys(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0).reg();
-  auto const mask = MixedArrayKeys::getMask(inst->typeParam());
-  always_assert_flog(mask, "Invalid MixedArray key check: {}",
+  auto const mask = VanillaDictKeys::getMask(inst->typeParam());
+  always_assert_flog(mask, "Invalid VanillaDict key check: {}",
                      inst->typeParam().toString());
 
   auto& v = vmain(env);
   auto const sf = v.makeReg();
-  v << testbim{int8_t(*mask), src[MixedArray::kKeyTypesOffset], sf};
+  v << testbim{int8_t(*mask), src[VanillaDict::kKeyTypesOffset], sf};
   v << jcc{CC_NZ, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
@@ -606,18 +606,18 @@ namespace {
 VscaledDisp getDictLayoutOffset(IRLS& env, const IRInstruction* inst) {
   auto const pos = srcLoc(env, inst, 2).reg();
   auto& v = vmain(env);
-  // We want to index by MixedArray::Elm but VScaled doesn't let us scale by 24
-  // So let's use (3 * pos) * 8 to get sizeof(MixedArray::Elm) * pos
+  // We want to index by VanillaDict::Elm but VScaled doesn't let us scale by 24
+  // So let's use (3 * pos) * 8 to get sizeof(VanillaDict::Elm) * pos
   auto pos3 = v.makeReg();
   v << lea{pos[pos * 2], pos3};
-  static_assert(sizeof(MixedArray::Elm) == 24);
-  return pos3 * 8 + MixedArray::dataOff() + MixedArray::Elm::dataOff();
+  static_assert(sizeof(VanillaDict::Elm) == 24);
+  return pos3 * 8 + VanillaDict::dataOff() + VanillaDict::Elm::dataOff();
 }
 
 VscaledDisp getKeysetLayoutOffset(IRLS& env, const IRInstruction* inst) {
   auto const pos = srcLoc(env, inst, 2).reg();
   auto& v = vmain(env);
-  // We want to index by MixedArray::Elm but VScaled doesn't let us scale by 16
+  // We want to index by VanillaDict::Elm but VScaled doesn't let us scale by 16
   // So let's use (2 * pos) * 8 to get sizeof(VanillaKeyset::Elm) * pos
   auto pos2 = v.makeReg();
   v << lea{pos[pos], pos2};
@@ -635,7 +635,7 @@ void cgGetDictPtrIter(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   if (pos_tmp->hasConstVal(TInt)) {
-    auto const offset = MixedArray::elmOff(pos_tmp->intVal());
+    auto const offset = VanillaDict::elmOff(pos_tmp->intVal());
     if (deltaFits(offset, sz::dword)) {
       v << addqi{safe_cast<int32_t>(offset), arr, dst, v.makeReg()};
       return;
@@ -644,7 +644,7 @@ void cgGetDictPtrIter(IRLS& env, const IRInstruction* inst) {
 
   auto const px3 = v.makeReg();
   v << lea{pos[pos * 2], px3};
-  v << lea{arr[px3 * 8 + MixedArray::dataOff()], dst};
+  v << lea{arr[px3 * 8 + VanillaDict::dataOff()], dst};
 }
 
 void cgAdvanceDictPtrIter(IRLS& env, const IRInstruction* inst) {
@@ -653,12 +653,12 @@ void cgAdvanceDictPtrIter(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   auto const extra = inst->extra<AdvanceDictPtrIter>();
-  auto const delta = extra->offset * int32_t(sizeof(MixedArrayElm));
+  auto const delta = extra->offset * int32_t(sizeof(VanillaDictElm));
   v << addqi{delta, src, dst, v.makeReg()};
 }
 
 void cgLdPtrIterKey(IRLS& env, const IRInstruction* inst) {
-  static_assert(sizeof(MixedArrayElm::hash_t) == 4, "");
+  static_assert(sizeof(VanillaDictElm::hash_t) == 4, "");
   auto const elm = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0);
 
@@ -666,14 +666,14 @@ void cgLdPtrIterKey(IRLS& env, const IRInstruction* inst) {
   if (inst->dst(0)->type().needsReg()) {
     assertx(dst.hasReg(1));
     auto const sf = v.makeReg();
-    v << cmplim{0, elm[MixedArrayElm::hashOff()], sf};
+    v << cmplim{0, elm[VanillaDictElm::hashOff()], sf};
     v << cmovb{CC_L, sf, v.cns(KindOfString), v.cns(KindOfInt64), dst.reg(1)};
   }
-  v << load{elm[MixedArrayElm::keyOff()], dst.reg(0)};
+  v << load{elm[VanillaDictElm::keyOff()], dst.reg(0)};
 }
 
 void cgLdPtrIterVal(IRLS& env, const IRInstruction* inst) {
-  static_assert(MixedArrayElm::dataOff() == 0, "");
+  static_assert(VanillaDictElm::dataOff() == 0, "");
   auto const elm = srcLoc(env, inst, 0).reg();
   loadTV(vmain(env), inst->dst(0), dstLoc(env, inst, 0), elm[0]);
 }

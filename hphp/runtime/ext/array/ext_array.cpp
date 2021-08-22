@@ -27,11 +27,11 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/double-to-int64.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
@@ -40,8 +40,8 @@
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/rds-local.h"
 
@@ -68,7 +68,7 @@ Array makeReserveLike(DataType type, size_t size) {
   auto const ad = [&]{
     switch (dt_with_rc(type)) {
       case KindOfVec:    return VanillaVec::MakeReserveVec(size);
-      case KindOfDict:   return MixedArray::MakeReserveDict(size);
+      case KindOfDict:   return VanillaDict::MakeReserveDict(size);
       case KindOfKeyset: return VanillaKeyset::MakeReserveSet(size);
       default:           always_assert(false);
     }
@@ -260,7 +260,7 @@ TypedValue HHVM_FUNCTION(array_combine,
                   "number of elements");
     return make_tv<KindOfBoolean>(false);
   }
-  Array ret = Array::attach(MixedArray::MakeReserveDict(keys_size));
+  Array ret = Array::attach(VanillaDict::MakeReserveDict(keys_size));
   for (ArrayIter iter1(cell_keys), iter2(cell_values);
        iter1; ++iter1, ++iter2) {
     auto const key = iter1.secondValPlus();
@@ -467,8 +467,8 @@ namespace {
 
 void php_array_merge(Array& arr1, const Array& arr2) {
   assertx(arr1->isVanillaDict());
-  arr1.reset(!arr2.empty() ? MixedArray::Merge(arr1.get(), arr2.get())
-                           : MixedArray::Renumber(arr1.get()));
+  arr1.reset(!arr2.empty() ? VanillaDict::Merge(arr1.get(), arr2.get())
+                           : VanillaDict::Renumber(arr1.get()));
 }
 
 void php_array_merge_recursive(Array& arr1, const Array& arr2) {
@@ -1000,7 +1000,7 @@ TypedValue HHVM_FUNCTION(array_slice,
 
   // Otherwise VecInit can't be used because non-numeric keys are
   // preserved even when preserve_keys is false
-  Array ret = Array::attach(MixedArray::MakeReserveDict(len));
+  Array ret = Array::attach(VanillaDict::MakeReserveDict(len));
   auto nextKI = 0; // for appends
   for (; pos < (offset + len) && iter; ++pos, ++iter) {
     auto const key = iter.first();

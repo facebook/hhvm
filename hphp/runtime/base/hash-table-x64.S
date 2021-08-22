@@ -27,7 +27,7 @@ ETCH_SECTION(\MANGLED_NAME)
         .globl   \MANGLED_NAME
 
 /*
- * HPHP::MixedArray::NvGetStr(const ArrayData* ad, const StringData* k);
+ * HPHP::VanillaDict::NvGetStr(const ArrayData* ad, const StringData* k);
  */
 
         ETCH_ALIGN16
@@ -196,7 +196,7 @@ ETCH_LABEL(hend\MANGLED_NAME):
 #define IMPLEMENT_NV_GET_STR(MangledName, ArrayType, ElmType) \
   implement_nvgetstr MangledName ArrayType ## _SCALE ArrayType ## _DATA ElmType ## _HASH ElmType ## _KEY  ElmType ## _DATA ElmType ## _TYPE ElmType ## _QUADWORDS
 
-IMPLEMENT_NV_GET_STR(_ZN4HPHP5array9HashTableINS_10MixedArrayENS_13MixedArrayElmEE8NvGetStrEPKNS_9ArrayDataEPKNS_10StringDataE, MixedArray, MixedArrayElm)
+IMPLEMENT_NV_GET_STR(_ZN4HPHP5array9HashTableINS_11VanillaDictENS_14VanillaDictElmEE8NvGetStrEPKNS_9ArrayDataEPKNS_10StringDataE, VanillaDict, VanillaDictElm)
 
 IMPLEMENT_NV_GET_STR(_ZN4HPHP5array9HashTableINS_13VanillaKeysetENS_16VanillaKeysetElmEE8NvGetStrEPKNS_9ArrayDataEPKNS_10StringDataE, VanillaKeyset, VanillaKeysetElm)
 

@@ -16,13 +16,13 @@
 
 #pragma once
 
+#include "hphp/runtime/base/apc-handle.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/req-list.h"
 #include "hphp/runtime/base/req-tiny-vector.h"
 #include "hphp/runtime/base/req-vector.h"
-#include "hphp/runtime/base/apc-handle.h"
-#include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/virtual-host.h"

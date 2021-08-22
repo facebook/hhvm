@@ -16,6 +16,10 @@
 
 #include "hphp/runtime/base/stats.h"
 
+#include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
+#include "hphp/runtime/base/vanilla-dict.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
@@ -23,9 +27,6 @@
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/unit-util.h"
-#include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 

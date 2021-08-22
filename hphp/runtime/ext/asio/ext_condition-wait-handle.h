@@ -18,9 +18,9 @@
 #ifndef incl_HPHP_EXT_ASIO_CONDITION_WAIT_HANDLE_H_
 #define incl_HPHP_EXT_ASIO_CONDITION_WAIT_HANDLE_H_
 
-#include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
+#include "hphp/runtime/ext/extension.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

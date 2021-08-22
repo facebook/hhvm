@@ -17,7 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
 
@@ -349,7 +349,7 @@ inline size_t allocSize(const HeapObject* h) {
       return size;
     case HeaderKind::Dict:
       // size = fn of h->m_scale
-      size = static_cast<const MixedArray*>(h)->heapSize();
+      size = static_cast<const VanillaDict*>(h)->heapSize();
       break;
     case HeaderKind::Keyset:
       // size = fn of h->m_scale

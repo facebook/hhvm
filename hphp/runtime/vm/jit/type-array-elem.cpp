@@ -16,14 +16,14 @@
 
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 
-#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-data-defs.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
-#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -42,7 +42,7 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
 
   if (idx.hasConstVal()) {
     auto const idxVal = idx.intVal();
-    if (idxVal < 0 || idxVal > MixedArray::MaxSize) return {TBottom, false};
+    if (idxVal < 0 || idxVal > VanillaDict::MaxSize) return {TBottom, false};
   }
 
   if (arr.hasConstVal()) {
@@ -337,7 +337,7 @@ Type arrLikePosType(Type arr, Type pos, bool isKey, const Class* ctx) {
 
 VecBounds vecBoundsStaticCheck(Type arrayType, Optional<int64_t> idx) {
   assertx(arrayType <= TVec);
-  if (idx && (*idx < 0 || *idx > MixedArray::MaxSize)) return VecBounds::Out;
+  if (idx && (*idx < 0 || *idx > VanillaDict::MaxSize)) return VecBounds::Out;
 
   if (arrayType.hasConstVal()) {
     auto const val = arrayType.arrLikeVal();

@@ -25,18 +25,18 @@
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/tv-val.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 
-#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/packed-block.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
 
@@ -90,7 +90,7 @@ inline ArrayData* alloc_packed_static(const ArrayData* ad) {
 bool VanillaVec::checkInvariants(const ArrayData* arr) {
   assertx(arr->checkCountZ());
   assertx(arr->isVanillaVec());
-  assertx(arr->m_size <= MixedArray::MaxSize);
+  assertx(arr->m_size <= VanillaDict::MaxSize);
   assertx(arr->m_size <= capacity(arr));
   assertx(arr->m_layout_index == kVanillaLayoutIndex);
 
@@ -109,15 +109,15 @@ bool VanillaVec::checkInvariants(const ArrayData* arr) {
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE
-MixedArray* VanillaVec::ToMixedHeader(const ArrayData* old,
+VanillaDict* VanillaVec::ToMixedHeader(const ArrayData* old,
                                        size_t neededSize) {
   assertx(checkInvariants(old));
 
   auto const oldSize = old->m_size;
-  auto const scale   = MixedArray::computeScaleFromSize(neededSize);
-  auto const ad      = MixedArray::reqAlloc(scale);
+  auto const scale   = VanillaDict::computeScaleFromSize(neededSize);
+  auto const ad      = VanillaDict::reqAlloc(scale);
   auto const kind    = HeaderKind::Dict;
-  ad->initHeader_16(kind, OneReference, MixedArrayKeys::packIntsForAux());
+  ad->initHeader_16(kind, OneReference, VanillaDictKeys::packIntsForAux());
   ad->m_size          = oldSize;
   ad->m_layout_index  = old->m_layout_index;
   ad->m_scale_used    = scale | uint64_t{oldSize} << 32; // used=oldSize
@@ -141,7 +141,7 @@ MixedArray* VanillaVec::ToMixedHeader(const ArrayData* old,
  * The returned array is mixed, and is guaranteed not to be isFull().
  * (Note: only unset can call ToMixed when we aren't about to insert.)
  */
-MixedArray* VanillaVec::ToMixed(ArrayData* old) {
+VanillaDict* VanillaVec::ToMixed(ArrayData* old) {
   auto const oldSize = old->m_size;
   auto const ad      = ToMixedHeader(old, oldSize + 1);
   auto const mask    = ad->mask();
@@ -169,7 +169,7 @@ MixedArray* VanillaVec::ToMixed(ArrayData* old) {
  * time as converting to mixed.  The returned mixed array is
  * guaranteed not to be full.
  */
-MixedArray* VanillaVec::ToMixedCopy(const ArrayData* old) {
+VanillaDict* VanillaVec::ToMixedCopy(const ArrayData* old) {
   assertx(checkInvariants(old));
   auto ad = VanillaVec::ToMixedCopyReserve(old, old->m_size + 1);
   assertx(!ad->isFull());
@@ -180,7 +180,7 @@ MixedArray* VanillaVec::ToMixedCopy(const ArrayData* old) {
  * Convert to mixed, reserving space for at least `neededSize' elems.
  * `neededSize' must be at least old->size(), and may be equal to it.
  */
-MixedArray* VanillaVec::ToMixedCopyReserve(const ArrayData* old,
+VanillaDict* VanillaVec::ToMixedCopyReserve(const ArrayData* old,
                                             size_t neededSize) {
   assertx(neededSize >= old->m_size);
   auto const ad      = ToMixedHeader(old, neededSize);

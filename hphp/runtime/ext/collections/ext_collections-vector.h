@@ -250,7 +250,7 @@ public:
   [[noreturn]] static void throwBadKeyType();
 
   static constexpr uint64_t MaxCapacity() {
-    return MixedArray::MaxSize;
+    return VanillaDict::MaxSize;
   }
 
   void scan(type_scan::Scanner& scanner) const {

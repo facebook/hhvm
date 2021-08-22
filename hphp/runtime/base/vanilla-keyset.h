@@ -351,7 +351,7 @@ private:
   friend struct array::HashTable<VanillaKeyset, VanillaKeysetElm>;
   friend struct MemoryProfile;
   friend struct jit::ArrayAccessProfile;
-  friend struct MixedArray;
+  friend struct VanillaDict;
   friend struct HashCollection;
   friend struct BaseMap;
   friend struct c_Map;

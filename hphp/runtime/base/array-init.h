@@ -20,11 +20,11 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/tv-val.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
@@ -40,20 +40,20 @@ namespace HPHP {
 // These helpers work for both mixed PHP arrays and dicts.
 namespace arr_init {
 inline ArrayData* SetInPlace(ArrayData* ad, int64_t k, TypedValue v) {
-  return MixedArray::SetIntInPlace(ad, k, tvToInit(v));
+  return VanillaDict::SetIntInPlace(ad, k, tvToInit(v));
 }
 inline ArrayData* SetInPlace(ArrayData* ad, StringData* k, TypedValue v) {
-  return MixedArray::SetStrInPlace(ad, k, tvToInit(v));
+  return VanillaDict::SetStrInPlace(ad, k, tvToInit(v));
 }
 inline ArrayData* SetInPlace(ArrayData* ad, const String& k, TypedValue v) {
-  return MixedArray::SetStrInPlace(ad, k.get(), tvToInit(v));
+  return VanillaDict::SetStrInPlace(ad, k.get(), tvToInit(v));
 }
 inline ArrayData* SetInPlace(ArrayData* ad, TypedValue k, TypedValue v) {
   if (isIntType(k.m_type)) {
-    return MixedArray::SetIntInPlace(ad, k.m_data.num, tvToInit(v));
+    return VanillaDict::SetIntInPlace(ad, k.m_data.num, tvToInit(v));
   } else {
     assertx(isStringType(k.m_type));
-    return MixedArray::SetStrInPlace(ad, k.m_data.pstr, tvToInit(v));
+    return VanillaDict::SetStrInPlace(ad, k.m_data.pstr, tvToInit(v));
   }
 }
 }
@@ -69,7 +69,7 @@ enum class CheckAllocation {};
  * Base class for ArrayInits specialized on array kind.
  *
  * Takes two template parameters:
- *  - TArray is a bag of static class functions, such as MixedArray.  See the
+ *  - TArray is a bag of static class functions, such as VanillaDict.  See the
  *    `detail' namespace below for the requirements.
  *  - DT is the DataType for the arrays created by the ArrayInit. If DT is
  *    the sentinel KindOfUninit, we won't make assumptions about the type.
@@ -172,7 +172,7 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Dummy MixedArray-like bags of statics for Hack arrays.
+ * Dummy VanillaDict-like bags of statics for Hack arrays.
  */
 namespace detail {
 
@@ -182,8 +182,8 @@ struct Vec {
 };
 
 struct Dict {
-  static constexpr auto MakeReserve = &MixedArray::MakeReserveDict;
-  static constexpr auto Release = MixedArray::Release;
+  static constexpr auto MakeReserve = &VanillaDict::MakeReserveDict;
+  static constexpr auto Release = VanillaDict::Release;
 };
 
 }
@@ -203,7 +203,7 @@ struct DictInit : ArrayInitBase<detail::Dict, KindOfDict> {
   /////////////////////////////////////////////////////////////////////////////
 
   DictInit& append(TypedValue tv) {
-    performOp([&]{ return MixedArray::AppendMove(m_arr, tvToInit(tv)); });
+    performOp([&]{ return VanillaDict::AppendMove(m_arr, tvToInit(tv)); });
     tvIncRefGen(tv);
     return *this;
   }

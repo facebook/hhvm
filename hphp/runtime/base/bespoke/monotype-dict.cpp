@@ -21,13 +21,13 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/monotype-dict-x64.h"
-#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data-macros.h"
 #include "hphp/runtime/base/tv-uncounted.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
 
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -513,7 +513,7 @@ MonotypeDict<Key>* MonotypeDict<Key>::MakeFromVanilla(
     ? MakeReserve<true>(ad->isLegacyArray(), ad->size(), dt)
     : MakeReserve<false>(ad->isLegacyArray(), ad->size(), dt);
 
-  MixedArray::IterateKV(MixedArray::asMixed(ad), [&](auto k, auto v) {
+  VanillaDict::IterateKV(VanillaDict::as(ad), [&](auto k, auto v) {
     auto const next = tvIsString(k) ? SetStrMove(result, val(k).pstr, v)
                                     : SetIntMove(result, val(k).num, v);
     tvIncRefGen(v);
@@ -986,7 +986,7 @@ ArrayData* MonotypeDict<Key>::escalateWithCapacity(
   logEscalateToVanilla(this, reason);
 
   auto const space = capacity + tombstones();
-  auto ad = MixedArray::MakeReserveDict(space);
+  auto ad = VanillaDict::MakeReserveDict(space);
   ad->setLegacyArrayInPlace(isLegacyArray());
 
   auto const dt = type();
@@ -994,20 +994,20 @@ ArrayData* MonotypeDict<Key>::escalateWithCapacity(
     // To support local iteration (where the base is not const), iterator
     // indices must match between this array and its vanilla counterpart.
     if (elm->key == getTombstone<Key>()) {
-      MixedArray::AppendTombstoneInPlace(ad);
+      VanillaDict::AppendTombstoneInPlace(ad);
       continue;
     }
 
     auto const tv = make_tv_of_type(elm->val, dt);
     auto const result = [&]{
       if constexpr (std::is_same<Key, int64_t>::value) {
-        return MixedArray::SetIntMove(ad, elm->key, tv);
+        return VanillaDict::SetIntMove(ad, elm->key, tv);
       } else if constexpr (std::is_same<Key, StringData*>::value) {
-        return MixedArray::SetStrMove(ad, elm->key, tv);
+        return VanillaDict::SetStrMove(ad, elm->key, tv);
       } else {
         static_assert(std::is_same<Key, StaticStrPtr>::value);
         auto const key = const_cast<StringData*>(elm->key.value);
-        return MixedArray::SetStrMove(ad, key, tv);
+        return VanillaDict::SetStrMove(ad, key, tv);
       }
     }();
     tvIncRefGen(tv);
@@ -1380,7 +1380,7 @@ ArrayData* MonotypeDict<Key>::PreSort(Self* mad, SortFunction sf) {
 
 // Some sort types can change the keys of a dict or darray.
 namespace {
-ArrayData* MonotypeDictPostSort(MixedArray* mad, DataType dt) {
+ArrayData* MonotypeDictPostSort(VanillaDict* mad, DataType dt) {
   auto const keys = mad->keyTypes();
   auto const result = [&]() -> ArrayData* {
     if (keys.mustBeStaticStrs()) {
@@ -1393,14 +1393,14 @@ ArrayData* MonotypeDictPostSort(MixedArray* mad, DataType dt) {
     return nullptr;
   }();
   if (!result) return mad;
-  MixedArray::Release(mad);
+  VanillaDict::Release(mad);
   return result;
 }
 }
 
 template <typename Key>
 ArrayData* MonotypeDict<Key>::PostSort(Self* mad, ArrayData* vad) {
-  return MonotypeDictPostSort(MixedArray::asMixed(vad), mad->type());
+  return MonotypeDictPostSort(VanillaDict::as(vad), mad->type());
 }
 
 template <typename Key>

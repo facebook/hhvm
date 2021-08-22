@@ -2484,8 +2484,8 @@ void RuntimeOption::Load(
     Config::Bind(LockCodeMemory, ini, config, "Server.LockCodeMemory", false);
     Config::Bind(MaxArrayChain, ini, config, "Server.MaxArrayChain", INT_MAX);
     if (MaxArrayChain != INT_MAX) {
-      // MixedArray needs a higher threshold to avoid false-positives.
-      // (and we always use MixedArray)
+      // VanillaDict needs a higher threshold to avoid false-positives.
+      // (and we always use VanillaDict)
       MaxArrayChain *= 2;
     }
 

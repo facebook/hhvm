@@ -23,14 +23,14 @@ namespace HPHP {
 
 // Forward declarations needed for getMask and checkInvariants.
 namespace jit { struct Type; }
-struct MixedArray;
+struct VanillaDict;
 
 /*
- * We use four bits in the MixedArray header to track a bit-set that tells us
- * if the MixedArray contains certain types of keys. In particular, we track
+ * We use four bits in the VanillaDict header to track a bit-set that tells us
+ * if the VanillaDict contains certain types of keys. In particular, we track
  * int keys, static str keys, non-static str keys, and tombstones.
  *
- * Whenever we add a key to a MixedArray, we set a bit in this bit-set. Doing
+ * Whenever we add a key to a VanillaDict, we set a bit in this bit-set. Doing
  * so means that the bit-set is conservative: if a key is in the array, then
  * the corresponding bit will be set. However, we may have bits in the bitset
  * that correspond to keys that aren't present - for example, if we add an int
@@ -40,11 +40,11 @@ struct MixedArray;
  * optimizations, because we don't often remove keys from arrays. For example,
  * if the bit for non-static str keys is unset, we can skip releasing keys.
  */
-struct MixedArrayKeys {
+struct VanillaDictKeys {
   /*
    * Equality operator (used in assertions).
    */
-  bool operator==(MixedArrayKeys other) const {
+  bool operator==(VanillaDictKeys other) const {
     return m_bits == other.m_bits;
   }
 
@@ -71,7 +71,7 @@ struct MixedArrayKeys {
 
   /*
    * Call this helper to get a 1-byte mask to test against when JITing code
-   * to optimistically check the keys of a MixedArray. If you and this mask
+   * to optimistically check the keys of a VanillaDict. If you and this mask
    * with the key bitset and the result is zero, then all keys match `type`.
    *
    * Some types can't be tested against this bitset; for these types, this
@@ -102,7 +102,7 @@ struct MixedArrayKeys {
   /*
    * Call these methods when performing the appropriate bulk operation.
    */
-  void copyFrom(MixedArrayKeys other, bool compact) {
+  void copyFrom(VanillaDictKeys other, bool compact) {
     m_bits |= other.m_bits & (compact ? ~kTombstoneKey : 0xff);
   }
   void makeCompact() {
@@ -134,10 +134,10 @@ struct MixedArrayKeys {
   }
 
   /*
-   * Check that m_bits is a valid key types bitset for the given MixedArray.
+   * Check that m_bits is a valid key types bitset for the given VanillaDict.
    * This check is very slow - it requires a full traversal of the array.
    */
-  bool checkInvariants(const MixedArray* ad) const;
+  bool checkInvariants(const VanillaDict* ad) const;
 
 private:
   static constexpr uint8_t kNonStaticStrKey = 0b0001;

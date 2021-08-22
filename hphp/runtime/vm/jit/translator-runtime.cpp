@@ -16,24 +16,24 @@
 
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
-#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/type-structure-helpers.h"
-#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
+#include "hphp/runtime/base/type-structure-helpers.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -358,7 +358,7 @@ TypedValue getDefaultIfMissing(TypedValue tv, TypedValue def) {
 }
 
 ALWAYS_INLINE
-TypedValue doScan(const MixedArray* arr, StringData* key, TypedValue def) {
+TypedValue doScan(const VanillaDict* arr, StringData* key, TypedValue def) {
   assertx(key->isStatic());
   assertx(arr->keyTypes().mustBeStaticStrs());
   auto used = arr->iterLimit();
@@ -372,24 +372,24 @@ TypedValue doScan(const MixedArray* arr, StringData* key, TypedValue def) {
 
 }
 
-// This helper may also be used when we know we have a MixedArray in the JIT.
+// This helper may also be used when we know we have a VanillaDict in the JIT.
 TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isVanillaDict());
-  return getDefaultIfMissing(MixedArray::NvGetInt(a, key), def);
+  return getDefaultIfMissing(VanillaDict::NvGetInt(a, key), def);
 }
 
-// This helper is also used for MixedArrays.
+// This helper is also used for VanillaDicts.
 NEVER_INLINE
 TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isVanillaDict());
-  return getDefaultIfMissing(MixedArray::NvGetStr(a, key), def);
+  return getDefaultIfMissing(VanillaDict::NvGetStr(a, key), def);
 }
 
-// This helper is also used for MixedArrays.
+// This helper is also used for VanillaDicts.
 NEVER_INLINE
 TypedValue dictIdxScan(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isVanillaDict());
-  auto const ad = MixedArray::asMixed(a);
+  auto const ad = VanillaDict::as(a);
   if (!ad->keyTypes().mustBeStaticStrs()) return dictIdxS(a, key, def);
   return doScan(ad, key, def);
 }

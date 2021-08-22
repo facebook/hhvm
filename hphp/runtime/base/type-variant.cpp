@@ -27,12 +27,12 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/vanilla-dict.h"
+#include "hphp/runtime/base/vanilla-keyset.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/vanilla-keyset.h"
-#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
@@ -130,7 +130,7 @@ void vecReleaseWrapper(ArrayData* ad) noexcept {
 }
 
 void dictReleaseWrapper(ArrayData* ad) noexcept {
-  ad->isVanilla() ? MixedArray::Release(ad) : BespokeArray::Release(ad);
+  ad->isVanilla() ? VanillaDict::Release(ad) : BespokeArray::Release(ad);
 }
 
 void keysetReleaseWrapper(ArrayData* ad) noexcept {
@@ -176,7 +176,7 @@ void specializeVanillaDestructors() {
     g_destructors[typeToDestrIdx(type)] = (RawDestructor)destructor;
   };
   specialize(KindOfVec,    &VanillaVec::Release);
-  specialize(KindOfDict,   &MixedArray::Release);
+  specialize(KindOfDict,   &VanillaDict::Release);
   specialize(KindOfKeyset, &VanillaKeyset::Release);
 }
 

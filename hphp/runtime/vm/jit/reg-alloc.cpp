@@ -105,7 +105,7 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   // may give it an XMM register, and the instruction will store the whole 16
   // bytes into memory.  Therefore it's important *not* to return true if the
   // TypedValue.m_aux field in memory has important data.  This is the case for
-  // MixedArray elements, and Map elements.
+  // VanillaDict elements, and Map elements.
   switch (inst.op()) {
   case StLoc:
     return srcIdx == 1;

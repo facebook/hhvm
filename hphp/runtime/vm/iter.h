@@ -20,9 +20,9 @@
 #include <cstdint>
 
 #include "hphp/runtime/base/array-data-defs.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/util/type-scan.h"
 
@@ -45,7 +45,7 @@ enum class IterNextIndex : uint8_t {
   //
   // We only use this mode if all the following conditions are met:
   //  - The array is guaranteed to be unchanged during iteration
-  //  - The array is a MixedArray (a dict or a darray)
+  //  - The array is a VanillaDict (a dict or a darray)
   //  - The array is free of tombstones
   ArrayMixedPointer,
 
@@ -365,12 +365,12 @@ private:
   union {
     size_t m_pos;
     TypedValue* m_packed_elm;
-    MixedArrayElm* m_mixed_elm;
+    VanillaDictElm* m_mixed_elm;
   };
   union {
     size_t m_end;
     TypedValue* m_packed_end;
-    MixedArrayElm* m_mixed_end;
+    VanillaDictElm* m_mixed_end;
   };
 
   // These elements are always referenced elsewhere, either in the m_data field

@@ -16,22 +16,22 @@
 
 #include "hphp/runtime/vm/jit/simplify.h"
 
-#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/double-to-int64.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
-#include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
-#include "hphp/runtime/base/vanilla-vec.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
@@ -2679,7 +2679,7 @@ SSATmp* arrGetKImpl(State& env, const IRInstruction* inst) {
   assertx(validPos(ssize_t(pos)));
   if (!arr->hasConstVal()) return nullptr;
 
-  auto const mixed = MixedArray::asMixed(arr->arrLikeVal());
+  auto const mixed = VanillaDict::as(arr->arrLikeVal());
   auto const tv = mixed->getArrayElmPtr(pos);
 
   // The array doesn't contain a valid element at that offset. Since this
@@ -2770,10 +2770,10 @@ SSATmp* simplify##Name(State& env, const IRInstruction* inst) {       \
   return hackArr##Action##Impl(                                       \
     env, inst,                                                        \
     [](SSATmp* a, int64_t k) {                                        \
-      return MixedArray::NvGetInt(a->arrLikeVal(), k);                \
+      return VanillaDict::NvGetInt(a->arrLikeVal(), k);                \
     },                                                                \
     [](SSATmp* a, const StringData* k) {                              \
-      return MixedArray::NvGetStr(a->arrLikeVal(), k);                \
+      return VanillaDict::NvGetStr(a->arrLikeVal(), k);                \
     }                                                                 \
   );                                                                  \
 }
@@ -2838,7 +2838,7 @@ SSATmp* simplifyGetDictPtrIter(State& env, const IRInstruction* inst) {
   auto const idx = inst->src(1);
   if (!arr->hasConstVal(TArrLike)) return nullptr;
   if (!idx->hasConstVal(TInt)) return nullptr;
-  auto const ad  = MixedArray::asMixed(arr->arrLikeVal());
+  auto const ad  = VanillaDict::as(arr->arrLikeVal());
   auto const elm = ad->data() + idx->intVal();
   return cns(env, Type::cns(elm, outputType(inst)));
 }
@@ -2879,7 +2879,7 @@ SSATmp* simplifyCheckDictOffset(State& env, const IRInstruction* inst) {
   assertx(validPos(ssize_t(extra->index)));
   if (!arr->hasConstVal()) return mergeBranchDests(env, inst);
 
-  auto const mixed = MixedArray::asMixed(arr->arrLikeVal());
+  auto const mixed = VanillaDict::as(arr->arrLikeVal());
 
   auto const dataTV = mixed->getArrayElmPtr(extra->index);
   if (!dataTV) return gen(env, Jmp, inst->taken());

@@ -428,7 +428,7 @@ std::vector<const StringData*> LoggingProfile::knownStructKeys() const {
   }
   auto const ad = data->staticSampledArray;
   if (ad && ad->isVanillaDict()) {
-    MixedArray::IterateKV(MixedArray::asMixed(ad), [&](auto k, auto) {
+    VanillaDict::IterateKV(VanillaDict::as(ad), [&](auto k, auto) {
       if (tvIsString(k)) ret.push_back(val(k).pstr);
     });
     return ret;

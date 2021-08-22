@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
-#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
@@ -103,48 +103,48 @@ void cgProfileArrLikeProps(IRLS& env, const IRInstruction* inst) {
 //    - the ones on the vanilla arrays (Packed, Mixed, Set);
 //    - failing all those options, the CallSpec Generic
 //
-#define CALL_TARGET(Type, Fn, Generic)                                \
-  [&]{                                                                \
-    auto const layout = Type.arrSpec().layout();                      \
-    if (layout.bespoke()) {                                           \
-      auto const vtable = layout.bespokeLayout()->vtable();           \
-      if (vtable->fn##Fn) {                                           \
-        return CallSpec::direct(vtable->fn##Fn);                      \
-      } else {                                                        \
-        return CallSpec::direct(BespokeArray::Fn);                    \
-      }                                                               \
-    }                                                                 \
-    if (layout.vanilla()) {                                           \
-      if (arr <= TVec)    return CallSpec::direct(VanillaVec::Fn);    \
-      if (arr <= TDict)   return CallSpec::direct(MixedArray::Fn);    \
-      if (arr <= TKeyset) return CallSpec::direct(VanillaKeyset::Fn); \
-    }                                                                 \
-    return Generic;                                                   \
+#define CALL_TARGET(Type, Fn, Generic)                              \
+  [&]{                                                              \
+    auto const layout = Type.arrSpec().layout();                    \
+    if (layout.bespoke()) {                                         \
+      auto const vtable = layout.bespokeLayout()->vtable();         \
+      if (vtable->fn##Fn) {                                         \
+        return CallSpec::direct(vtable->fn##Fn);                    \
+      } else {                                                      \
+        return CallSpec::direct(BespokeArray::Fn);                  \
+      }                                                             \
+    }                                                               \
+    if (layout.vanilla()) {                                         \
+      if (arr <= TVec)    return CallSpec::direct(VanillaVec::Fn);  \
+      if (arr <= TDict)   return CallSpec::direct(VanillaDict::Fn); \
+      if (arr <= TKeyset) return CallSpec::direct(VanillaKeyset::Fn);\
+    }                                                               \
+    return Generic;                                                 \
   }()
 
-#define CALL_TARGET_SYNTH(Type, Fn, Generic)                                   \
-  [&]{                                                                         \
-    auto const layout = Type.arrSpec().layout();                               \
-    if (layout.bespoke()) {                                                    \
-      auto const vtable = layout.bespokeLayout()->vtable();                    \
-      if (vtable->fn##Fn) {                                                    \
-        return CallSpec::direct(vtable->fn##Fn);                               \
-      } else {                                                                 \
-        return CallSpec::direct(BespokeArray::Fn);                             \
-      }                                                                        \
-    }                                                                          \
-    if (layout.vanilla()) {                                                    \
-      if (arr <= TVec) {                                                       \
-        return CallSpec::direct(SynthesizedArrayFunctions<VanillaVec>::Fn);    \
-      }                                                                        \
-      if (arr <= TDict) {                                                      \
-        return CallSpec::direct(SynthesizedArrayFunctions<MixedArray>::Fn);    \
-      }                                                                        \
-      if (arr <= TKeyset) {                                                    \
-        return CallSpec::direct(SynthesizedArrayFunctions<VanillaKeyset>::Fn); \
-      }                                                                        \
-    }                                                                          \
-    return Generic;                                                            \
+#define CALL_TARGET_SYNTH(Type, Fn, Generic)                                 \
+  [&]{                                                                       \
+    auto const layout = Type.arrSpec().layout();                             \
+    if (layout.bespoke()) {                                                  \
+      auto const vtable = layout.bespokeLayout()->vtable();                  \
+      if (vtable->fn##Fn) {                                                  \
+        return CallSpec::direct(vtable->fn##Fn);                             \
+      } else {                                                               \
+        return CallSpec::direct(BespokeArray::Fn);                           \
+      }                                                                      \
+    }                                                                        \
+    if (layout.vanilla()) {                                                  \
+      if (arr <= TVec) {                                                     \
+        return CallSpec::direct(SynthesizedArrayFunctions<VanillaVec>::Fn);  \
+      }                                                                      \
+      if (arr <= TDict) {                                                    \
+        return CallSpec::direct(SynthesizedArrayFunctions<VanillaDict>::Fn); \
+      }                                                                      \
+      if (arr <= TKeyset) {                                                  \
+        return CallSpec::direct(SynthesizedArrayFunctions<VanillaKeyset>::Fn);\
+      }                                                                      \
+    }                                                                        \
+    return Generic;                                                          \
   }()
 
 void cgBespokeGetWithSync(IRLS& env, const IRInstruction* inst, bool maySync) {

@@ -44,7 +44,7 @@
  *
  * The layout of MonotypeDict<Key> is the same for all Key types. The smallest
  * monodict has a capacity of 5 elements in 128 bytes (compare to the smallest
- * MixedArray: 3 elements in 120 rounding up to 128 bytes):
+ * VanillaDict: 3 elements in 120 rounding up to 128 bytes):
  *
  *  16-byte ArrayData header:
  *      8-byte HeapObject header:
@@ -57,10 +57,10 @@
  *      2-byte m_tombstones field
  *      2-byte bespoke::LayoutIndex
  *          (low byte stores the DataType!)
- *  5x16-byte MixedArray<Key>::Elm
+ *  5x16-byte VanillaDict<Key>::Elm
  *      8-byte Key
  *      8-byte Value
- *  8x4-byte MixedArray<Key>::Index
+ *  8x4-byte VanillaDict<Key>::Index
  *      (hash table indices into the Elm array)
  *
  * When we double the array size, we always have space for one extra element

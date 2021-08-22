@@ -606,7 +606,7 @@ private:
 protected:
   friend struct BespokeArray;
   friend struct VanillaVec;
-  friend struct MixedArray;
+  friend struct VanillaDict;
   friend struct BaseVector;
   friend struct c_Vector;
   friend struct c_ImmVector;
@@ -657,10 +657,10 @@ static_assert(ArrayData::kBespokeKeysetKind == uint8_t(HeaderKind::BespokeKeyset
 // The size of the StrKeyTable, which is stored in front of the array, needs to
 // rounded up to a multiple of 16, so that we can enforce the base array pointer
 // is 16-byte aligned.
-constexpr size_t kEmptyMixedArrayStrKeyTableSize =
+constexpr size_t kEmptyVanillaDictStrKeyTableSize =
   ((sizeof(StrKeyTable) - 1) / 16 + 1) * 16;
 
-constexpr size_t kEmptyMixedArraySize = 120 + kEmptyMixedArrayStrKeyTableSize;
+constexpr size_t kEmptyVanillaDictSize = 120 + kEmptyVanillaDictStrKeyTableSize;
 constexpr size_t kEmptyKeysetSize  = 96;
 
 /*

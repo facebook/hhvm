@@ -20,14 +20,14 @@
 #include <folly/Likely.h>
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
-#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -138,7 +138,7 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
     assertx(arr->isVanillaDict());
   } else if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
     assertx(arr->isVanillaDict());
-    assertx(arr->size() == MixedArray::asMixed(arr)->iterLimit());
+    assertx(arr->size() == VanillaDict::as(arr)->iterLimit());
   } else if (m_nextHelperIdx == IterNextIndex::StructDict) {
     assertx(!arr->isVanilla());
     assertx(isStructDict(BespokeArray::asBespoke(arr)));
@@ -158,7 +158,7 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   // Check the consistency of the pos and end fields.
   if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
     assertx(m_mixed_elm < m_mixed_end);
-    assertx(m_mixed_end == MixedArray::asMixed(arr)->data() + arr->size());
+    assertx(m_mixed_end == VanillaDict::as(arr)->data() + arr->size());
   } else {
     assertx(m_pos < m_end);
     assertx(m_end == arr->iter_end());
@@ -421,7 +421,7 @@ NEVER_INLINE int64_t iter_next_free_packed(Iter* iter, ArrayData* arr) {
 }
 
 NEVER_INLINE int64_t iter_next_free_mixed(Iter* iter, ArrayData* arr) {
-  MixedArray::Release(arr);
+  VanillaDict::Release(arr);
   iter->kill();
   return 0;
 }
@@ -513,7 +513,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   }
 
   if (LIKELY(ad->isVanillaDict())) {
-    auto const mixed = MixedArray::asMixed(ad);
+    auto const mixed = VanillaDict::as(ad);
     if (BaseConst && LIKELY(mixed->iterLimit() == size)) {
       aiter.m_mixed_elm = mixed->data();
       aiter.m_mixed_end = aiter.m_mixed_elm + size;
@@ -594,7 +594,7 @@ int64_t new_iter_array_key(Iter*       dest,
   }
 
   if (ad->isVanillaDict()) {
-    auto const mixed = MixedArray::asMixed(ad);
+    auto const mixed = VanillaDict::as(ad);
     if (BaseConst && LIKELY(mixed->iterLimit() == size)) {
       aiter.m_mixed_elm = mixed->data();
       aiter.m_mixed_end = aiter.m_mixed_elm + size;
@@ -865,7 +865,7 @@ int64_t iter_next_packed_impl(Iter* it, TypedValue* valOut,
 
 // "virtual" method implementation of *IterNext* for ArrayMixed iterators.
 // Since we know the array is mixed, we can do "while (elm[pos].isTombstone())"
-// inline here, and we can use MixedArray helpers to extract the key and value.
+// inline here, and we can use VanillaDict helpers to extract the key and value.
 //
 // HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
 // See iter.h for the meaning of a "local" iterator. At this point,
@@ -877,7 +877,7 @@ int64_t iter_next_mixed_impl(Iter* it, TypedValue* valOut,
                              TypedValue* keyOut, ArrayData* arrData) {
   auto& iter     = *unwrap(it);
   ssize_t pos    = iter.getPos();
-  auto const arr = MixedArray::asMixed(arrData);
+  auto const arr = VanillaDict::as(arrData);
 
   do {
     if ((++pos) == iter.getEnd()) {

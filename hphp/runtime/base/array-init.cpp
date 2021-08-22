@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
 
 namespace HPHP {
 
@@ -28,13 +28,13 @@ DictInit::DictInit(size_t n, CheckAllocation)
     tl_heap->forceOOM();
     check_non_safepoint_surprise();
   }
-  auto const allocsz = MixedArray::computeAllocBytes(
-                         MixedArray::computeScaleFromSize(n)
+  auto const allocsz = VanillaDict::computeAllocBytes(
+                         VanillaDict::computeScaleFromSize(n)
                        );
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
-  m_arr = MixedArray::MakeReserveDict(n);
+  m_arr = VanillaDict::MakeReserveDict(n);
   assertx(m_arr->hasExactlyOneRef());
   check_non_safepoint_surprise();
 }

@@ -251,7 +251,7 @@ StructDictInit::StructDictInit(RuntimeStruct* structHandle, size_t n) {
     }
   }
 
-  m_arr = MixedArray::MakeReserveDict(n);
+  m_arr = VanillaDict::MakeReserveDict(n);
   m_vanilla = true;
 }
 
@@ -267,10 +267,10 @@ void StructDictInit::set(size_t idx, StringData* key, TypedValue value) {
 
   if (m_vanilla) {
     assertx(m_arr->isVanilla());
-    // We have a vanilla MixedArray that must be properly sized. Set the
+    // We have a vanilla VanillaDict that must be properly sized. Set the
     // field in place.
     auto const DEBUG_ONLY res =
-      MixedArray::SetStrInPlace(m_arr, key, value);
+      VanillaDict::SetStrInPlace(m_arr, key, value);
     assertx(res == m_arr);
     return;
   }
@@ -291,7 +291,7 @@ void StructDictInit::set(size_t idx, StringData* key, TypedValue value) {
     m_vanilla = true;
 
     auto const DEBUG_ONLY res =
-      MixedArray::SetStrInPlace(m_arr, key, value);
+      VanillaDict::SetStrInPlace(m_arr, key, value);
     assertx(res == m_arr);
   } else {
     // We are adding a key with a known slot. This can be done in place.
@@ -320,10 +320,10 @@ void StructDictInit::set(int64_t key, TypedValue value) {
 
   if (m_vanilla) {
     assertx(m_arr->isVanilla());
-    // We have a vanilla MixedArray that must be properly sized. Set the
+    // We have a vanilla VanillaDict that must be properly sized. Set the
     // field in place.
     auto const DEBUG_ONLY res =
-      MixedArray::SetIntInPlace(m_arr, key, value);
+      VanillaDict::SetIntInPlace(m_arr, key, value);
     assertx(res == m_arr);
     return;
   }
@@ -336,7 +336,7 @@ void StructDictInit::set(int64_t key, TypedValue value) {
   m_struct = nullptr;
   m_vanilla = true;
 
-  auto const DEBUG_ONLY res = MixedArray::SetIntInPlace(m_arr, key, value);
+  auto const DEBUG_ONLY res = VanillaDict::SetIntInPlace(m_arr, key, value);
   assertx(res == m_arr);
 }
 

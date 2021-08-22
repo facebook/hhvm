@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 
 #include <folly/Format.h>
 
@@ -46,7 +46,7 @@ IterSpecialization getIterSpecialization(const ArrayData* arr) {
     }
 
     case ArrayData::kDictKind: {
-      auto const keys = MixedArray::asMixed(arr)->keyTypes();
+      auto const keys = VanillaDict::as(arr)->keyTypes();
       if (keys.mayIncludeTombstone()) return result;
       result.specialized = true;
       result.base_type = S::Dict;

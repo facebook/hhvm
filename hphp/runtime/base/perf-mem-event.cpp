@@ -19,11 +19,11 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/member-reflection.h"
-#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
-#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
@@ -170,13 +170,13 @@ void fill_record(const ArrayData* arr, const void* addr,
   }
 }
 
-void fill_record(const MixedArray* arr, const void* addr,
+void fill_record(const VanillaDict* arr, const void* addr,
                  StructuredLogEntry& record) {
   if (try_member(arr, addr, record)) return;
 
-  auto const data = reinterpret_cast<const MixedArray::Elm*>(arr + 1);
+  auto const data = reinterpret_cast<const VanillaDict::Elm*>(arr + 1);
   auto const idx = (uintptr_t(addr) - uintptr_t(data))
-                   / sizeof(MixedArray::Elm);
+                   / sizeof(VanillaDict::Elm);
 
   if (idx < arr->iterLimit()) {
     auto const elm = &data[idx];
@@ -311,7 +311,7 @@ bool record_request_heap_mem_event(const void* addr,
       break;
 
     case HeaderKind::Dict:
-      fill_record(static_cast<const MixedArray*>(hdr), addr, record);
+      fill_record(static_cast<const VanillaDict*>(hdr), addr, record);
       break;
 
     case HeaderKind::Keyset:

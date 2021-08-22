@@ -19,16 +19,16 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/req-root.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/vanilla-vec.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
@@ -109,7 +109,7 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
     case HeaderKind::Vec:
       return VanillaVec::scan(static_cast<const ArrayData*>(h), scanner);
     case HeaderKind::Dict:
-      return static_cast<const MixedArray*>(h)->scan(scanner);
+      return static_cast<const VanillaDict*>(h)->scan(scanner);
     case HeaderKind::Keyset:
       return static_cast<const VanillaKeyset*>(h)->scan(scanner);
     case HeaderKind::BespokeVec:

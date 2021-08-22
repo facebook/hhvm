@@ -507,10 +507,10 @@ CGETELEM_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 inline ArrayData* dictSetImplPre(ArrayData* a, int64_t i, TypedValue val) {
-  return MixedArray::SetIntMove(a, i, val);
+  return VanillaDict::SetIntMove(a, i, val);
 }
 inline ArrayData* dictSetImplPre(ArrayData* a, StringData* s, TypedValue val) {
-  return MixedArray::SetStrMove(a, s, val);
+  return VanillaDict::SetStrMove(a, s, val);
 }
 
 template<KeyType keyType>

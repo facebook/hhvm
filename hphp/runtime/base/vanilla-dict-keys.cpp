@@ -15,14 +15,14 @@
 */
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/mixed-array-keys.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/vanilla-dict.h"
+#include "hphp/runtime/base/vanilla-dict-keys.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 namespace HPHP {
 
-Optional<uint8_t> MixedArrayKeys::getMask(const jit::Type& type) {
+Optional<uint8_t> VanillaDictKeys::getMask(const jit::Type& type) {
   using namespace jit;
   auto const str = kNonStaticStrKey | kStaticStrKey;
   if (type == TInt)          return ~kIntKey;
@@ -32,9 +32,9 @@ Optional<uint8_t> MixedArrayKeys::getMask(const jit::Type& type) {
   return std::nullopt;
 }
 
-bool MixedArrayKeys::checkInvariants(const MixedArray* ad) const {
+bool VanillaDictKeys::checkInvariants(const VanillaDict* ad) const {
   uint8_t true_bits = 0;
-  MixedArrayElm* elm = ad->data();
+  VanillaDictElm* elm = ad->data();
   for (auto const end = elm + ad->iterLimit(); elm < end; elm++) {
     true_bits |= [&]{
       if (elm->isTombstone())        return kTombstoneKey;

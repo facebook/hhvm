@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/vanilla-dict.h"
 
 namespace HPHP {
 
@@ -29,7 +29,7 @@ namespace HPHP {
   X(Class)\
   /* arrays */\
   X(ArrayData)\
-  X(MixedArray)\
+  X(VanillaDict)\
   /* other php types */\
   X(StringData)\
   X(ObjectData)\
@@ -42,7 +42,7 @@ namespace HPHP {
 
 #define HPHP_REFLECTABLES \
   HPHP_REFLECTABLES_UNQ\
-  X(MixedArray::Elm)\
+  X(VanillaDict::Elm)\
   /* */
 
 #define X(name) struct name;

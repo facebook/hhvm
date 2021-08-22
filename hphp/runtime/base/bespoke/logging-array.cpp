@@ -19,17 +19,17 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/bespoke-runtime.h"
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
-#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/bespoke-runtime.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-uncounted.h"
-#include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/punt.h"
+#include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include <algorithm>
@@ -95,7 +95,7 @@ ArrayData* makeSampledArray(ArrayData* vad) {
     if (!vad->cowCheck()) return vad;
     vad->decRefCount();
     if (vad->isVanillaVec())  return VanillaVec::Copy(vad);
-    if (vad->isVanillaDict()) return MixedArray::Copy(vad);
+    if (vad->isVanillaDict()) return VanillaDict::Copy(vad);
     return VanillaKeyset::Copy(vad);
   }();
   assertx(result->hasExactlyOneRef());

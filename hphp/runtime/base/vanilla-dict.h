@@ -20,11 +20,11 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/hash-table.h"
-#include "hphp/runtime/base/mixed-array-keys.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-layout.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-dict-keys.h"
 
 #include <folly/portability/Constexpr.h>
 
@@ -38,7 +38,7 @@ struct MemoryProfile;
 
 //////////////////////////////////////////////////////////////////////
 
-struct MixedArrayElm {
+struct VanillaDictElm {
   using hash_t = strhash_t;
 
   // We store values here, but also some information local to this array:
@@ -50,7 +50,7 @@ struct MixedArrayElm {
   // write the m_aux field!
   TypedValueAux data;
 
-  // Putting the key second lets us cast MixedArrayElm* to TypedValue*, which
+  // Putting the key second lets us cast VanillaDictElm* to TypedValue*, which
   // we can use to simplify the Lval sublattice in the JIT type system.
   union {
     int64_t ikey;
@@ -82,7 +82,7 @@ struct MixedArrayElm {
   }
 
   void setTombstone() {
-    // We don't explicitly check for tombstones in MixedArray::release(),
+    // We don't explicitly check for tombstones in VanillaDict::release(),
     // instead make the deleted element appear to contain uncounted values.
     data.m_type = kInvalidDataType;
     static_assert(!isRefcountedType(kInvalidDataType), "");
@@ -156,22 +156,22 @@ struct MixedArrayElm {
   }
 
   static constexpr ptrdiff_t keyOff() {
-    return offsetof(MixedArrayElm, ikey);
+    return offsetof(VanillaDictElm, ikey);
   }
   static constexpr ptrdiff_t dataOff() {
-    return offsetof(MixedArrayElm, data) + offsetof(TypedValue, m_data);
+    return offsetof(VanillaDictElm, data) + offsetof(TypedValue, m_data);
   }
   static constexpr ptrdiff_t typeOff() {
-    return offsetof(MixedArrayElm, data) + offsetof(TypedValue, m_type);
+    return offsetof(VanillaDictElm, data) + offsetof(TypedValue, m_type);
   }
   static constexpr ptrdiff_t hashOff() {
-    return offsetof(MixedArrayElm, data) + offsetof(TypedValue, m_aux);
+    return offsetof(VanillaDictElm, data) + offsetof(TypedValue, m_aux);
   }
 };
 
-struct MixedArray final : ArrayData,
-                          array::HashTable<MixedArray, MixedArrayElm>,
-                          type_scan::MarkCollectable<MixedArray> {
+struct VanillaDict final : ArrayData,
+                          array::HashTable<VanillaDict, VanillaDictElm>,
+                          type_scan::MarkCollectable<VanillaDict> {
   struct ElmKey {
     ElmKey() {}
     ElmKey(strhash_t hash, StringData* key)
@@ -202,36 +202,36 @@ struct MixedArray final : ArrayData,
    * natural order. Returns nullptr if there are duplicate keys. Does not check
    * for integer-like keys. Takes ownership of keys and values iff successful.
    */
-  static MixedArray* MakeDict(uint32_t size, const TypedValue* kvs);
+  static VanillaDict* MakeDict(uint32_t size, const TypedValue* kvs);
 
 private:
   template<HeaderKind hdr>
-  static MixedArray* MakeMixedImpl(uint32_t size, const TypedValue* kvs);
+  static VanillaDict* MakeMixedImpl(uint32_t size, const TypedValue* kvs);
 
 public:
   static constexpr size_t kKeyTypesOffset = 7;
 
-  const MixedArrayKeys& keyTypes() const {
+  const VanillaDictKeys& keyTypes() const {
     auto const pointer = uintptr_t(this) + kKeyTypesOffset;
-    return *reinterpret_cast<MixedArrayKeys*>(pointer);
+    return *reinterpret_cast<VanillaDictKeys*>(pointer);
   }
 
-  MixedArrayKeys* mutableKeyTypes() {
+  VanillaDictKeys* mutableKeyTypes() {
     auto const pointer = uintptr_t(this) + kKeyTypesOffset;
-    return reinterpret_cast<MixedArrayKeys*>(pointer);
+    return reinterpret_cast<VanillaDictKeys*>(pointer);
   }
 
 public:
   /*
    * Same semantics as VanillaVec::MakeNatural().
    */
-  static MixedArray* MakeDictNatural(uint32_t size, const TypedValue* vals);
+  static VanillaDict* MakeDictNatural(uint32_t size, const TypedValue* vals);
 
   /*
    * Like MakePacked, but given static strings, make a struct-like array.
    * Also requires size > 0.
    */
-  static MixedArray* MakeStructDict(uint32_t size,
+  static VanillaDict* MakeStructDict(uint32_t size,
                                     const StringData* const* keys,
                                     const TypedValue* values);
 
@@ -239,10 +239,10 @@ public:
    * Allocate a struct-like array (with string literal keys), but only init
    * the hash table and the header, leaving elms uninit. Requires size > 0.
    */
-  static MixedArray* AllocStructDict(uint32_t size, const int32_t* hash);
+  static VanillaDict* AllocStructDict(uint32_t size, const int32_t* hash);
 
   /*
-   * Allocate an uncounted MixedArray and copy the values from the
+   * Allocate an uncounted VanillaDict and copy the values from the
    * input 'array' into the uncounted one. All values copied are made
    * uncounted as well.  An uncounted array can only contain uncounted
    * values (primitive values, uncounted or static strings and
@@ -268,13 +268,13 @@ public:
   using ArrayData::incRefCount;
 
   /*
-   * MixedArray is convertible to ArrayData*, but not implicitly.
+   * VanillaDict is convertible to ArrayData*, but not implicitly.
    * This is to avoid accidentally using virtual dispatch when you
    * already know something is Mixed.
    *
    * I.e., instead of doing things like mixed->nvGet(...) you want to
-   * do MixedArray::NvGetInt(adYouKnowIsMixed, ...).  This means using
-   * MixedArray*'s directly shouldn't really happen very often.
+   * do VanillaDict::NvGetInt(adYouKnowIsMixed, ...).  This means using
+   * VanillaDict*'s directly shouldn't really happen very often.
    */
   ArrayData* asArrayData() { return this; }
   const ArrayData* asArrayData() const { return this; }
@@ -323,7 +323,7 @@ public:
 
   //////////////////////////////////////////////////////////////////////
 
-  // Helpers used by ArrayInit to update MixedArrays without refcount ops.
+  // Helpers used by ArrayInit to update VanillaDicts without refcount ops.
   // These helpers work for both mixed PHP arrays and dicts.
   static ArrayData* SetIntInPlace(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStrInPlace(ArrayData*, StringData* k, TypedValue v);
@@ -339,14 +339,14 @@ public:
   static arr_lval LvalSilentInt(ArrayData* ad, int64_t k);
   static arr_lval LvalSilentStr(ArrayData* ad, StringData* k);
 
-  // When we escalate a MonotypeDict to a vanilla MixedArray, we must ensure
+  // When we escalate a MonotypeDict to a vanilla VanillaDict, we must ensure
   // that iterator positions match (local iterators rely on this invariant).
   static void AppendTombstoneInPlace(ArrayData* ad);
 
   //////////////////////////////////////////////////////////////////////
 
 private:
-  MixedArray* copyMixed() const;
+  VanillaDict* copyMixed() const;
 
   static bool DictEqualHelper(const ArrayData*, const ArrayData*, bool);
 
@@ -369,7 +369,7 @@ public:
   }
 
 private:
-  friend struct array::HashTable<MixedArray, MixedArrayElm>;
+  friend struct array::HashTable<VanillaDict, VanillaDictElm>;
   friend struct MemoryProfile;
   friend struct VanillaVec;
   friend struct HashCollection;
@@ -387,22 +387,22 @@ private:
 
 public:
   // Safe downcast helpers
-  static MixedArray* asMixed(ArrayData* ad) {
+  static VanillaDict* as(ArrayData* ad) {
     assertx(ad->isVanillaDict());
-    auto a = static_cast<MixedArray*>(ad);
+    auto a = static_cast<VanillaDict*>(ad);
     assertx(a->checkInvariants());
     return a;
   }
-  static const MixedArray* asMixed(const ArrayData* ad) {
+  static const VanillaDict* as(const ArrayData* ad) {
     assertx(ad->isVanillaDict());
-    auto a = static_cast<const MixedArray*>(ad);
+    auto a = static_cast<const VanillaDict*>(ad);
     assertx(a->checkInvariants());
     return a;
   }
 
   // Fast iteration
   template <class F>
-  static void IterateV(const MixedArray* arr, F fn) {
+  static void IterateV(const VanillaDict* arr, F fn) {
     assertx(arr->isVanillaDict());
     auto elm = arr->data();
     for (auto i = arr->m_used; i--; elm++) {
@@ -412,7 +412,7 @@ public:
     }
   }
   template <class F>
-  static void IterateKV(const MixedArray* arr, F fn) {
+  static void IterateKV(const VanillaDict* arr, F fn) {
     assertx(arr->isVanillaDict());
     auto elm = arr->data();
     for (auto i = arr->m_used; i--; elm++) {
@@ -431,37 +431,37 @@ private:
 private:
   enum class AllocMode : bool { Request, Static };
 
-  static MixedArray* CopyMixed(const MixedArray& other, AllocMode);
-  static MixedArray* CopyReserve(const MixedArray* src, size_t expectedSize);
+  static VanillaDict* CopyMixed(const VanillaDict& other, AllocMode);
+  static VanillaDict* CopyReserve(const VanillaDict* src, size_t expectedSize);
 
-  // Slow paths used for MixedArrays with references or counted string keys.
+  // Slow paths used for VanillaDicts with references or counted string keys.
   // We fall back to SlowCopy and SlowGrow in the middle of iteration when we
   // encounter a reference, so we take an (elm, end) pair as arguments.
-  static MixedArray* SlowCopy(MixedArray*, const ArrayData& old,
-                              MixedArrayElm* elm, MixedArrayElm* end);
-  static MixedArray* SlowGrow(MixedArray*, const ArrayData& old,
-                              MixedArrayElm* elm, MixedArrayElm* end);
-  static void SlowRelease(MixedArray*);
+  static VanillaDict* SlowCopy(VanillaDict*, const ArrayData& old,
+                              VanillaDictElm* elm, VanillaDictElm* end);
+  static VanillaDict* SlowGrow(VanillaDict*, const ArrayData& old,
+                              VanillaDictElm* elm, VanillaDictElm* end);
+  static void SlowRelease(VanillaDict*);
 
-  MixedArray() = delete;
-  MixedArray(const MixedArray&) = delete;
-  MixedArray& operator=(const MixedArray&) = delete;
-  ~MixedArray() = delete;
+  VanillaDict() = delete;
+  VanillaDict(const VanillaDict&) = delete;
+  VanillaDict& operator=(const VanillaDict&) = delete;
+  ~VanillaDict() = delete;
 
 private:
-  // Copy elements as well as `m_nextKI' from one MixedArray to another.
+  // Copy elements as well as `m_nextKI' from one VanillaDict to another.
   // Warning: it could copy up to 24 bytes beyond the array and thus overwrite
   // the hashtable, but it never reads/writes beyond the end of the hash
   // table.  If you use this function, make sure you copy/write the correct
   // data on the hash table afterwards.
-  static void copyElmsNextUnsafe(MixedArray* to, const MixedArray* from,
+  static void copyElmsNextUnsafe(VanillaDict* to, const VanillaDict* from,
                                  uint32_t nElems);
 
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
 
-  static ArrayData* ArrayMergeGeneric(MixedArray*, const ArrayData*);
+  static ArrayData* ArrayMergeGeneric(VanillaDict*, const ArrayData*);
 
   // Assert a bunch of invariants about this array then return true.
   // usage:  assertx(checkInvariants());
@@ -478,7 +478,7 @@ private:
   InsertPos insert(int64_t k);
   InsertPos insert(StringData* k);
 
-  using HashTable<MixedArray, MixedArrayElm>::findForRemove;
+  using HashTable<VanillaDict, VanillaDictElm>::findForRemove;
 
   template <bool Move>
   void nextInsert(TypedValue);
@@ -490,14 +490,14 @@ private:
   void updateNextKI(int64_t removedKey, bool updateNext);
   void eraseNoCompact(RemovePos pos);
 
-  MixedArray* moveVal(TypedValue& tv, TypedValue v);
+  VanillaDict* moveVal(TypedValue& tv, TypedValue v);
 
   /*
    * Helper routine for inserting elements into a new array
    * when Grow()ing the array, that also checks for potentially
    * unbalanced entries because of hash collision.
    */
-  static MixedArray* InsertCheckUnbalanced(MixedArray* ad, int32_t* table,
+  static VanillaDict* InsertCheckUnbalanced(VanillaDict* ad, int32_t* table,
                                            uint32_t mask,
                                            Elm* iter, Elm* stop);
   /*
@@ -505,13 +505,13 @@ private:
    * hash table, but it does not compact the elements. If copy is true, it
    * will copy elements instead of taking ownership of them.
    */
-  static MixedArray* Grow(MixedArray* old, uint32_t newScale, bool copy);
+  static VanillaDict* Grow(VanillaDict* old, uint32_t newScale, bool copy);
 
   /*
    * prepareForInsert ensures that the array has room to insert an element and
    * has a refcount of 1, copying if requested and growing if needed.
    */
-  MixedArray* prepareForInsert(bool copy);
+  VanillaDict* prepareForInsert(bool copy);
 
   /**
    * compact() does not change the hash table size or the number of slots
@@ -524,7 +524,7 @@ private:
   void setZombie() { m_used = -uint32_t{1}; }
 
 public:
-  void scan(type_scan::Scanner&) const; // in mixed-array-defs.h
+  void scan(type_scan::Scanner&) const; // in vanilla-dict-defs.h
 
 private:
   struct DictInitializer;
@@ -536,7 +536,7 @@ private:
   int64_t  m_nextKI;        // Next integer key to use for append.
 };
 
-HASH_TABLE_CHECK_OFFSETS(MixedArray, MixedArrayElm)
+HASH_TABLE_CHECK_OFFSETS(VanillaDict, VanillaDictElm)
 //////////////////////////////////////////////////////////////////////
 
 }

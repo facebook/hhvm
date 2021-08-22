@@ -1230,7 +1230,7 @@ Array VariableUnserializer::unserializeArray() {
     return Array::CreateDict();
   }
   // For large arrays, do a naive pre-check for OOM.
-  auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(size);
+  auto const allocsz = VanillaDict::computeAllocBytesFromMaxElms(size);
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
@@ -1246,7 +1246,7 @@ Array VariableUnserializer::unserializeArray() {
     Variant key;
     unserializeVariant(key.asTypedValue(), UnserializeMode::Key);
     if (!key.isString() && !key.isInteger()) throwInvalidKey();
-    unserializeVariant(MixedArray::LvalInPlace(arr.get(), key));
+    unserializeVariant(VanillaDict::LvalInPlace(arr.get(), key));
     if (i < size - 1) checkElemTermination();
   }
 
@@ -1320,7 +1320,7 @@ Array VariableUnserializer::unserializeDict() {
   }
 
   // For large arrays, do a naive pre-check for OOM.
-  auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(size);
+  auto const allocsz = VanillaDict::computeAllocBytesFromMaxElms(size);
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
@@ -1330,7 +1330,7 @@ Array VariableUnserializer::unserializeDict() {
     Variant key;
     unserializeVariant(key.asTypedValue(), UnserializeMode::Key);
     if (!key.isString() && !key.isInteger()) throwInvalidKey();
-    unserializeVariant(MixedArray::LvalInPlace(arr.get(), key));
+    unserializeVariant(VanillaDict::LvalInPlace(arr.get(), key));
     if (i < size - 1) checkElemTermination();
   }
 
@@ -1400,18 +1400,18 @@ Array VariableUnserializer::unserializeVArray() {
 
   auto arr = Array{};
   if (m_forceDArrays && m_type == Type::Serialize) {
-    // Deserialize to vector-ish darray. Use direct calls to MixedArray.
-    oomCheck(MixedArray::computeAllocBytesFromMaxElms(size));
+    // Deserialize to vector-ish darray. Use direct calls to VanillaDict.
+    oomCheck(VanillaDict::computeAllocBytesFromMaxElms(size));
 
     arr = DictInit(size).toArray();
     reserveForAdd(size);
 
     for (int64_t i = 0; i < size; i++) {
-      unserializeVariant(MixedArray::LvalInPlace(arr.get(), i));
+      unserializeVariant(VanillaDict::LvalInPlace(arr.get(), i));
       if (i < size - 1) checkElemTermination();
     }
   } else {
-    // Deserialize to varray. Use direct calls to MixedArray.
+    // Deserialize to varray. Use direct calls to VanillaDict.
     auto const index = VanillaVec::capacityToSizeIndex(size);
     oomCheck(MemoryManager::sizeIndex2Size(index));
 
@@ -1446,7 +1446,7 @@ Array VariableUnserializer::unserializeDArray() {
   }
 
   // For large arrays, do a naive pre-check for OOM.
-  auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(size);
+  auto const allocsz = VanillaDict::computeAllocBytesFromMaxElms(size);
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
@@ -1458,7 +1458,7 @@ Array VariableUnserializer::unserializeDArray() {
     Variant key;
     unserializeVariant(key.asTypedValue(), UnserializeMode::Key);
     if (!key.isString() && !key.isInteger()) throwInvalidKey();
-    unserializeVariant(MixedArray::LvalInPlace(arr.get(), key));
+    unserializeVariant(VanillaDict::LvalInPlace(arr.get(), key));
     if (i < size - 1) checkElemTermination();
   }
 
@@ -1637,7 +1637,7 @@ void VariableUnserializer::unserializeMap(ObjectData* obj, int64_t sz,
   if (type != 'K') throwBadFormat(obj, type);
 
   // For large maps, do a naive pre-check for OOM.
-  auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(sz);
+  auto const allocsz = VanillaDict::computeAllocBytesFromMaxElms(sz);
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
@@ -1684,7 +1684,7 @@ void VariableUnserializer::unserializeSet(ObjectData* obj, int64_t sz,
   if (type != 'V') throwBadFormat(obj, type);
 
   // For large maps, do a naive pre-check for OOM.
-  auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(sz);
+  auto const allocsz = VanillaDict::computeAllocBytesFromMaxElms(sz);
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }

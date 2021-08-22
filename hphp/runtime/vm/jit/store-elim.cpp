@@ -1516,11 +1516,13 @@ void insert_eager_sync(Global& genv, IRInstruction& endCatch) {
   );
   auto syncPC = genv.unit.gen(
     StVMPC,
-    endCatch.bcctx()
+    endCatch.bcctx(),
+    genv.unit.cns(uintptr_t(endCatch.bcctx().marker.sk().pc()))
   );
   auto syncReturnAddr = genv.unit.gen(
     StVMReturnAddr,
-    endCatch.bcctx()
+    endCatch.bcctx(),
+    genv.unit.cns(getNextFakeReturnAddress())
   );
   block->insert(--block->end(), syncFP);
   block->insert(--block->end(), bcSP);

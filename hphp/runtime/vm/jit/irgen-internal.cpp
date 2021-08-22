@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
+#include "hphp/runtime/vm/jit/fixup.h"
+
 namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
@@ -111,6 +113,13 @@ void handleConvNoticeLevel(
   if (notice_data.level == ConvNoticeLevel::Log) {
     gen(env, RaiseNotice, cns(env, str));
   }
+}
+
+void genStVMReturnAddr(IRGS& env) {
+  auto const addr = isInlining(env)
+    ? cns(env, getNextFakeReturnAddress())
+    : cns(env, 0);
+  gen(env, StVMReturnAddr, addr);
 }
 
 }}}

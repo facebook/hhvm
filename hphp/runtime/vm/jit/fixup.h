@@ -240,6 +240,11 @@ inline void syncVMRegs(bool soft = false) {
   detail::syncVMRegsWork(soft);
 }
 
+/*
+ * Gets the next fake JIT return address for eager syncs.
+ */
+int32_t getNextFakeReturnAddress();
+
 //////////////////////////////////////////////////////////////////////
 
 }}

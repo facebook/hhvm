@@ -1408,8 +1408,8 @@ private:
     auto const bcSP = gen(env, LoadBCSP, spOff, sp(env));
     gen(env, StVMFP, fp(env));
     gen(env, StVMSP, bcSP);
-    gen(env, StVMPC);
-    gen(env, StVMReturnAddr);
+    gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
+    genStVMReturnAddr(env);
     gen(env, StVMRegState, cns(env, eagerlyCleanState()));
     updateMarker(env);  // Mark the EndCatch safe, since we're eager syncing.
   }

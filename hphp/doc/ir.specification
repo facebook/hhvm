@@ -1797,9 +1797,9 @@ To string conversions:
 
 | StVMSP, ND, S(StkPtr), NF
 
-| StVMPC, ND, NA, NF
+| StVMPC, ND, C(Int), NF
 
-| StVMReturnAddr, ND, NA, NF
+| StVMReturnAddr, ND, C(Int), NF
 
 | StVMRegState, ND, C(Int), NF
 

@@ -1728,7 +1728,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureStore { AVMPC, nullptr };
 
   case StVMReturnAddr:
-    return PureStore { AVMRetAddr, nullptr };
+    return PureStore { AVMRetAddr, inst.src(0) };
 
   case StVMRegState:
     return PureStore { AVMRegState, inst.src(0) };

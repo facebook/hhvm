@@ -116,16 +116,18 @@ void cgStVMSP(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgStVMPC(IRLS& env, const IRInstruction* inst) {
-  auto const pc = inst->marker().fixupSk().pc();
+  auto const pc = inst->src(0)->intVal();
   auto& v = vmain(env);
   emitImmStoreq(v, intptr_t(pc), rvmtl()[rds::kVmpcOff]);
 }
 
 void cgStVMReturnAddr(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  auto const addr = getNextFakeReturnAddress();
-  v << storeqi{addr, rvmtl()[rds::kVmJitReturnAddrOff]};
-  v << recordstack{(TCA)static_cast<int64_t>(addr)};
+  auto const addr = inst->src(0)->intVal();
+  emitImmStoreq(v, addr, rvmtl()[rds::kVmJitReturnAddrOff]);
+  if (addr != 0) {
+    v << recordstack{(TCA)static_cast<int64_t>(addr)};
+  }
 }
 
 void cgLoadBCSP(IRLS& env, const IRInstruction* inst) {

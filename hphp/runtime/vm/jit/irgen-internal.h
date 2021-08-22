@@ -934,6 +934,8 @@ inline void profileRDSAccess(IRGS& env, rds::Handle handle) {
   gen(env, MarkRDSAccess, RDSHandleData { handle });
 }
 
+void genStVMReturnAddr(IRGS& env);
+
 //////////////////////////////////////////////////////////////////////
 
 /*

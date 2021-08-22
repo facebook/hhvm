@@ -535,15 +535,9 @@ Vreg emitIsCollection(Vout& v, Vreg obj) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static std::atomic<int32_t> s_nextFakeAddress{-1};
-
 void emitSetVMRegState(Vout& v, VMRegState state) {
   auto const regstate = rvmtl()[rds::kVmRegStateOff];
   v << storeqi{static_cast<int32_t>(state), regstate};
-}
-
-int32_t getNextFakeReturnAddress() {
-  return s_nextFakeAddress.fetch_sub(1, std::memory_order_relaxed);
 }
 
 void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp) {

@@ -1028,8 +1028,7 @@ void optimize_enter_tc_unwind(
     block->insert(block->iteratorTo(&inst), decref);
   }
   auto const etcData = EnterTCUnwindData { extra->offset, false };
-  env.unit.replace(&inst, EnterTCUnwind, etcData, inst.src(0), inst.src(1),
-                   inst.src(2));
+  env.unit.replace(&inst, EnterTCUnwind, etcData, inst.src(0));
   env.stackTeardownsOptimized++;
 }
 

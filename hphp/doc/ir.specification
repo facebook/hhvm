@@ -3417,11 +3417,11 @@ fields of that struct for holding intermediate values.
 
   Loads the value contained by the current unwinder exception.
 
-| EnterTCUnwind<spOff,teardown>, ND, S(StkPtr) S(FramePtr) S(Obj), CRc|T
+| EnterTCUnwind<spOff,teardown>, ND, S(Obj), CRc|T
 
-  Enters tc_unwind_resume by doing a side enter, i.e. skipping itanium ABI.
-  Syncs VM registers using spOff, S0 and S1 and stores the exception given by S2
-  to UnwindRDS's exn field as well as true to sideEnter field.
+  Enters tc_unwind_resume by doing a side enter, i.e. skipping
+  itanium ABI. Stores the exception given by S0 to UnwindRDS's exn
+  field as well as true to sideEnter field.
 
   If teardown is set, it notifies tc_unwind_resume to also teardown the locals.
 

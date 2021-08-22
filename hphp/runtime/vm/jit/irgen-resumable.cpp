@@ -480,8 +480,15 @@ void implAwaitFailed(IRGS& env, SSATmp* child, Block* exit) {
     // There are no more catch blocks in this function, we are at the top
     // level throw
     hint(env, Block::Hint::Unlikely);
-    auto const etcData = EnterTCUnwindData { spOffBCFromIRSP(env), true };
-    gen(env, EnterTCUnwind, etcData, sp(env), fp(env), exception);
+    auto const spOff = spOffBCFromIRSP(env);
+    auto const bcSP = gen(env, LoadBCSP, IRSPRelOffsetData { spOff }, sp(env));
+    gen(env, StVMFP, fp(env));
+    gen(env, StVMSP, bcSP);
+    gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
+    genStVMReturnAddr(env);
+    gen(env, StVMRegState, cns(env, eagerlyCleanState()));
+    auto const etcData = EnterTCUnwindData { spOff, true };
+    gen(env, EnterTCUnwind, etcData, exception);
   }
 }
 

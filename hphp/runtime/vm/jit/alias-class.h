@@ -437,6 +437,8 @@ struct AliasClass {
   Optional<AliasClass> vm_reg_state() const;
   Optional<AliasClass> is_vm_reg_state() const;
 
+  Optional<AliasClass> exclude_vm_reg() const;
+
 private:
   enum class STag {
 #define O(name, ...) name,

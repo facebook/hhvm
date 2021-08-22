@@ -333,6 +333,31 @@ Optional<AliasClass> AliasClass::is_vm_reg() const {
   return std::nullopt;
 }
 
+Optional<AliasClass> AliasClass::exclude_vm_reg() const {
+  auto const bits = static_cast<rep>(m_bits & ~BVMReg);
+
+  if (bits != BEmpty) {
+    auto ret = AliasClass{bits};
+    ret.m_stagBits = m_stagBits;
+
+    switch (stagFor(m_stagBits)) {
+    case STag::None:
+      break;
+    case STag::Iter:     new (&ret.m_iter) AIter(m_iter); break;
+    case STag::FrameAll: new (&ret.m_frameAll) UFrameBase(m_frameAll);break;
+    case STag::Local:    new (&ret.m_local) ALocal(m_local); break;
+    case STag::Prop:     new (&ret.m_prop) AProp(m_prop); break;
+    case STag::ElemI:    new (&ret.m_elemI) AElemI(m_elemI); break;
+    case STag::ElemS:    new (&ret.m_elemS) AElemS(m_elemS); break;
+    case STag::Stack:    new (&ret.m_stack) AStack(m_stack); break;
+    case STag::Rds:      new (&ret.m_rds) ARds(m_rds); break;
+    }
+
+    return ret;
+  }
+  return std::nullopt;
+}
+
 AliasClass::STag AliasClass::stagFor(rep bits) {
   if (bits == BEmpty) return STag::None;
   STag ret{STag::None};

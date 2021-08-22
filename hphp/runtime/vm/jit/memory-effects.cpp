@@ -497,33 +497,33 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // locals).
   case ReqBindJmp:
     return ExitEffects {
-      AUnknown,
+      *AUnknown.exclude_vm_reg(),
       stack_below(inst.extra<ReqBindJmp>()->irSPOff)
     };
   case ReqInterpBBNoTranslate:
     return ExitEffects {
-      AUnknown,
+      *AUnknown.exclude_vm_reg(),
       stack_below(inst.extra<ReqInterpBBNoTranslate>()->irSPOff)
     };
   case ReqRetranslate:
     return ExitEffects {
-      AUnknown,
+      *AUnknown.exclude_vm_reg(),
       stack_below(inst.extra<ReqRetranslate>()->offset)
     };
   case ReqRetranslateOpt:
     return ExitEffects {
-      AUnknown,
+      *AUnknown.exclude_vm_reg(),
       stack_below(inst.extra<ReqRetranslateOpt>()->offset)
     };
   case JmpSwitchDest:
     return ExitEffects {
-      AUnknown,
+      *AUnknown.exclude_vm_reg(),
       *stack_below(inst.extra<JmpSwitchDest>()->spOffBCFromIRSP).
         precise_union(AMIStateAny)
     };
   case JmpSSwitchDest:
     return ExitEffects {
-      AUnknown,
+      *AUnknown.exclude_vm_reg(),
       *stack_below(inst.extra<JmpSSwitchDest>()->offset).
         precise_union(AMIStateAny)
     };
@@ -674,7 +674,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InterpOneCF: {
     auto const extra = inst.extra<InterpOneData>();
     return ExitEffects {
-      AUnknown,
+      *AUnknown.exclude_vm_reg(),
       stack_below(extra->spOffset) | AMIStateAny
     };
   }

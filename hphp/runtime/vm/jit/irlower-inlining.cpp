@@ -80,26 +80,7 @@ void cgInlineCall(IRLS& env, const IRInstruction* inst) {
   auto const retAddr = v.makeReg();
   v << ldbindretaddr{extra->returnSk, extra->returnSPOff, retAddr};
   v << store{retAddr, calleeFP[AROFF(m_savedRip)]};
-
-  if (extra->syncVmpc) {
-    // If we are in a catch block, update the vmfp() to point to the inlined
-    // frame if it was pointing to the parent frame, letting the unwinder see
-    // the inlined frame.
-    auto const sf = v.makeReg();
-    v << cmpqm{callerFP, rvmtl()[rds::kVmfpOff], sf};
-
-    // Do this store now to hopefully allow vasm-copy to replace the store of
-    // calleeFP below with rvmfp.
-    v << pushvmfp{calleeFP, cellsToBytes(off)};
-
-    ifThen(v, CC_E, sf, [&](Vout& v) {
-      v << store{calleeFP, rvmtl()[rds::kVmfpOff]};
-      emitImmStoreq(v, intptr_t(extra->syncVmpc), rvmtl()[rds::kVmpcOff]);
-    });
-  } else {
-    v << pushvmfp{calleeFP, cellsToBytes(off)};
-  }
-
+  v << pushvmfp{calleeFP, cellsToBytes(off)};
   v << pushframe{};
 }
 

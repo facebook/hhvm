@@ -1018,17 +1018,14 @@ struct InlineCallData : IRExtraData {
   }
 
   size_t stableHash() const {
-    // For now we are ignoring `syncVmpc`, but this could be fixed by storing
-    // an SK rather than a raw PC.
     return std::hash<int32_t>()(spOffset.offset);
   }
 
   bool equals(const InlineCallData& o) const {
-    return spOffset == o.spOffset && syncVmpc == o.syncVmpc;
+    return spOffset == o.spOffset;
   }
 
   IRSPRelOffset spOffset; // offset from caller SP to bottom of callee's ActRec
-  PC syncVmpc{nullptr};
   SrcKey returnSk;
   SBInvOffset returnSPOff;
 };

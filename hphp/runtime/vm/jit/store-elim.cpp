@@ -693,7 +693,6 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (PureInlineCall l) {
       doPureStore(PureStore { l.base, l.fp });
       load(env, l.actrec);
-      mayStore(env, AVMSP);
     },
 
     [&] (PureInlineReturn l) {
@@ -1681,7 +1680,8 @@ void fix_inline_frames(Global& genv) {
     populate_ancestor_frames(fp, published_frames);
     assertx(published_frames.size() == state.exitDepth);
 
-    for (auto& inst : *blk) {
+    for (auto iter = blk->begin(); iter != blk->end(); iter++) {
+      auto& inst = *iter;
       adjust_inline_marker(inst, scratch_frames, published_frames);
 
       if (inst.is(InlineReturn)) {
@@ -1707,7 +1707,6 @@ void fix_inline_frames(Global& genv) {
         assertx(parent->is(BeginInlining));
 
         InlineCallData data;
-        data.syncVmpc = state.catchSk.valid() ? state.catchSk.pc() : nullptr;
         data.spOffset = parent->extra<BeginInlining>()->spOffset;
         data.returnSk = parent->marker().sk().advanced();
         data.returnSPOff = parent->marker().bcSPOff() - kNumActRecCells + 1;
@@ -1718,8 +1717,22 @@ void fix_inline_frames(Global& genv) {
       if (inst.is(InlineCall)) {
         fp = inst.src(0);
         published_frames.push_back(fp);
-        inst.extra<InlineCall>()->syncVmpc = state.catchSk.valid()
-          ? state.catchSk.pc() : nullptr;
+        auto const syncFP = genv.unit.gen(
+          StVMFP,
+          inst.bcctx(),
+          fp
+        );
+        auto next = iter;
+        next++;
+        if (state.catchSk.valid()) {
+          auto const syncPC = genv.unit.gen(
+            StVMPC,
+            inst.bcctx(),
+            genv.unit.cns(uintptr_t(state.catchSk.pc()))
+          );
+          blk->insert(next, syncPC);
+        }
+        blk->insert(next, syncFP);
       }
 
       if (inst.is(DefFP, DefFuncEntryFP)) {
@@ -1733,6 +1746,13 @@ void fix_inline_frames(Global& genv) {
 
       if (inst.is(StVMFP)) {
         inst.setSrc(0, fp);
+      }
+
+      if (inst.is(StVMPC)) {
+        auto const pc = state.catchSk.valid()
+          ? state.catchSk.pc()
+          : inst.marker().fixupSk().pc();
+        inst.setSrc(0, genv.unit.cns(uintptr_t(pc)));
       }
 
       if (inst.is(BeginCatch)) {

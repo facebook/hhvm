@@ -325,7 +325,6 @@ void beginInlining(IRGS& env,
 
   InlineCallData data;
   data.spOffset = calleeAROff;
-  data.syncVmpc = nullptr;
   data.returnSk = nextSrcKey(env);
   data.returnSPOff = spOffBCFromStackBase(env) - kNumActRecCells + 1;
 

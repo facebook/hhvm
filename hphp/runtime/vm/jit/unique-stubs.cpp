@@ -175,7 +175,6 @@ Result withVMRegsForCall(CallFlags callFlags, const Func* func,
   // The stub already synced the vmfp() and vmsp() registers, but the vmsp() is
   // pointing to the space reserved for the ActRec. Adjust it to point to the
   // top of the stack containing call inputs and set vmpc()/vmJitReturnAddr().
-  assertx(regState() == VMRegState::DIRTY);
   auto& unsafeRegs = vmRegsUnsafe();
   auto const calleeFP = unsafeRegs.stack.top();
   auto const callerFP = unsafeRegs.fp;

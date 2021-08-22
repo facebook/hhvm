@@ -386,7 +386,7 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
 
   return GeneralEffects {
     x.loads | AHeapAny | ARdsAny | AVMRegAny | AVMRegState | backtrace_locals(inst),
-    x.stores | AHeapAny | ARdsAny,
+    x.stores | AHeapAny | ARdsAny | AVMRegAny,
     x.moves,
     new_kills
   };
@@ -738,7 +738,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const extra = inst.extra<ContEnter>();
       return CallEffects {
         // Kills. Everything on the stack.
-        stack_below(extra->spOffset) | AMIStateAny,
+        stack_below(extra->spOffset) | AMIStateAny | AVMRegAny,
         // No inputs. The value being sent is passed explicitly.
         AEmpty,
         // ActRec. It is on the heap and we already implicitly assume that
@@ -1753,7 +1753,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case OrdStr:
   case ChrInt:
   case CreateSSWH:
-  case BeginCatch:
   case CheckSurpriseFlags:
   case CheckType:
   case ZeroErrorLevel:
@@ -1857,6 +1856,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileCall:
   case ProfileMethod:
     return may_load_store(AEmpty, AEmpty);
+
+  case BeginCatch:
+    return may_load_store(AEmpty, AVMRegAny | AVMRegState);
 
   case LogArrayReach:
   case LogGuardFailure:
@@ -2137,7 +2139,45 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
 MemEffects memory_effects(const IRInstruction& inst) {
   auto const inner = memory_effects_impl(inst);
   auto const ret = [&] () -> MemEffects {
-    if (!inst.mayRaiseErrorWithSources()) return inner;
+    if (!inst.mayRaiseErrorWithSources()) {
+      if (inst.maySyncVMRegsWithSources()) {
+        auto fail = [&] {
+          always_assert_flog(
+            false,
+            "Instruction {} has effects {} but has been marked as MaySyncVMRegs "
+            "without MayRaiseError.",
+            inst,
+            show(inner)
+          );
+          return may_load_store(AUnknown, AUnknown);
+        };
+        return match<MemEffects>(
+          inner,
+          [&] (GeneralEffects x)   {
+            return GeneralEffects {
+              x.loads | AVMRegAny | AVMRegState,
+              x.stores | AVMRegAny,
+              x.moves, x.kills
+            };
+          },
+          [&] (CallEffects x)      { return fail(); },
+          [&] (UnknownEffects x)   { return fail(); },
+          [&] (PureLoad x)         {
+            return may_load_store(
+              x.src | AVMRegAny | AVMRegState,
+              AVMRegAny
+            );
+          },
+          [&] (PureStore)          { return fail(); },
+          [&] (ExitEffects)        { return fail(); },
+          [&] (PureInlineCall)     { return fail(); },
+          [&] (PureInlineReturn)   { return fail(); },
+          [&] (IrrelevantEffects)  { return fail(); },
+          [&] (ReturnEffects)      { return fail(); }
+        );
+      }
+      return inner;
+    }
 
     auto fail = [&] {
       always_assert_flog(

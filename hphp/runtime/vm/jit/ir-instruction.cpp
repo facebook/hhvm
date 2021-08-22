@@ -21,6 +21,8 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/func.h"
 
+#include "hphp/runtime/base/bespoke/logging-array.h"
+
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/edge.h"
@@ -712,5 +714,45 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DPtrIterVal
 #undef DBespokeElemLval
 }
+
+bool IRInstruction::maySyncVMRegsWithSources() const {
+  if (mayRaiseError()) return true;
+  switch (op()) {
+    // Profiling
+    case DebugBacktrace:
+    case LogArrayReach:
+    case NewLoggingArray:
+    case ProfileArrLikeProps:
+    case ProfileDictAccess:
+    case ProfileKeysetAccess:
+      return true;
+
+    // CPGO profiling
+    case BespokeEscalateToVanilla:
+    case BespokeGet: {
+      auto const loggingLayout =
+        ArrayLayout(bespoke::LoggingArray::GetLayoutIndex());
+      auto const loggingArray = TArrLike.narrowToLayout(loggingLayout);
+      return src(0)->type().maybe(loggingArray);
+    }
+
+    // Intended Access
+    case InitThrowableFileAndLine:
+      return true;
+
+    // Likely fixable
+    case EqStr:
+    case NeqStr:
+    case IsTypeStruct:
+    case StructDictSet:
+    case StructDictUnset:
+      return true;
+
+    default:
+      return false;
+  }
+
+}
+
 
 }}

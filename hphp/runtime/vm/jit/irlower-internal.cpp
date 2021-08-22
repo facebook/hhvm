@@ -168,6 +168,10 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
     prepareArg(args.stkArg(i), v, vStkArgs, &vStkSpills);
   }
 
+  // If it is valid to sync the VMRegs within this call, we must track the load
+  // in memory-effects.
+  assertx(IMPLIES(sync != SyncOptions::None, inst->maySyncVMRegsWithSources()));
+
   auto const syncFixup = [&] {
     if (RuntimeOption::HHProfEnabled ||
         RuntimeOption::EvalJitForceVMRegSync ||

@@ -125,7 +125,6 @@ inline void assert_native_stack_aligned() {
 }
 
 inline void interp_set_regs(ActRec* ar, TypedValue* sp, Offset pcOff) {
-  assertx(regState() == VMRegState::DIRTY);
   regState() = VMRegState::CLEAN;
   vmfp() = ar;
   vmsp() = sp;

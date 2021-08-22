@@ -148,6 +148,14 @@ struct IRInstruction {
   bool mayRaiseErrorWithSources() const;
 
   /*
+   * Returns true if the instruction may perform a sync of the VMRegs. This
+   * implies that the instruction can load AVMRegState. Further, it can store
+   * to AVMRegAny if the VMRegState is DIRTY, and load from AVMRegAny if the
+   * VMRegState is CLEAN. mayRaise implies maySync.
+   */
+  bool maySyncVMRegsWithSources() const;
+
+  /*
    * consumesReference covers two similar conditions. Either it decRefs
    * the input, or it transfers ownership of the input to a new location.
    */

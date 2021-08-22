@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/alias-analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/mutation.h"
@@ -267,6 +268,12 @@ struct StoreKey {
   uint32_t alocId;
 };
 
+enum class KnownRegState {
+  Dead,
+  MaybeLive,
+  Live
+};
+
 struct StoreKeyHashCmp {
   size_t operator()(const StoreKey& k) const {
     return (k.blkId * 2 + (int)k.where) * kMaxTrackedALocs + k.alocId;
@@ -303,6 +310,7 @@ struct Global {
     , ainfo(collect_aliases(unit, poBlockList))
     , blockStates(unit, BlockState{})
     , seenStores(unit, 0)
+    , vmRegsLiveness(unit, KnownRegState::Dead)
   {}
 
   IRUnit& unit;
@@ -325,6 +333,7 @@ struct Global {
   jit::vector<IRInstruction*> reStores;
   // Used to prevent cycles in find_candidate_store
   StateVector<Block,uint32_t> seenStores;
+  StateVector<IRInstruction,KnownRegState> vmRegsLiveness;
   uint32_t seenStoreId{0};
   bool needsReflow{false};
   bool adjustedInlineCalls{false};
@@ -440,6 +449,15 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
   if (dbgInst) {
     block->insert(pos, dbgInst);
     return false;
+  }
+  if (inst.is(InlineCall)) {
+    auto const syncFP = env.global.unit.gen(
+      StVMFP,
+      inst.bcctx(),
+      inst.src(1)
+    );
+    block->insert(pos, syncFP);
+    FTRACE(4, "      insert: {}\n", syncFP->toString());
   }
   return true;
 }
@@ -577,6 +595,23 @@ void visit(Local& env, IRInstruction& inst) {
     mayStore(env, l.dst);
   };
 
+  if (inst.is(BeginCatch)) {
+    // The unwinder fixes up the VMRegs before entering a catch trace, so we
+    // must account for these effects. Otherwise, store-elim may sink sync
+    // operations across the catch trace boundary.
+    auto const doMustStore = [&](AliasClass acls) {
+      if (auto const bit = pure_store_bit(env, acls)) {
+        mustStore(env, *bit);
+      }
+    };
+    doMustStore(AVMRegState);
+    doMustStore(AVMFP);
+    doMustStore(AVMSP);
+    doMustStore(AVMPC);
+    doMustStore(AVMRetAddr);
+    return;
+  }
+
   match<void>(
     effects,
     [&] (IrrelevantEffects) {
@@ -591,7 +626,15 @@ void visit(Local& env, IRInstruction& inst) {
         return;
       }
     },
-    [&] (UnknownEffects)    { addAllLoad(env); env.mayStore.set(); },
+    [&] (UnknownEffects) {
+      addAllLoad(env);
+      env.mayStore.set();
+      if (env.global.vmRegsLiveness[inst] == KnownRegState::Dead) {
+        // If the VMRegs are dead, we know they can't be accessed. Kill them
+        // before pessimizing loads.
+        kill(env, AVMRegAny);
+      }
+    },
     [&] (PureLoad l) {
       if (auto bit = pure_store_bit(env, l.src)) {
         if (env.reStores[*bit]) {
@@ -608,8 +651,18 @@ void visit(Local& env, IRInstruction& inst) {
       load(env, l.src);
     },
     [&] (GeneralEffects l)  {
-      load(env, l.loads);
-      mayStore(env, l.stores);
+      if (env.global.vmRegsLiveness[inst] != KnownRegState::Dead) {
+        load(env, l.loads);
+      } else if (auto const loads = l.loads.exclude_vm_reg()) {
+        load(env, *loads);
+      }
+
+      if (env.global.vmRegsLiveness[inst] != KnownRegState::Live) {
+        mayStore(env, l.stores);
+      } else if (auto const stores = l.stores.exclude_vm_reg()) {
+        mayStore(env, *stores);
+      }
+
       kill(env, l.kills);
     },
 
@@ -621,16 +674,26 @@ void visit(Local& env, IRInstruction& inst) {
       addAllLoad(env);
       killSet(env, env.global.ainfo.all_local);
       kill(env, l.kills);
+      if (env.global.vmRegsLiveness[inst] == KnownRegState::Dead) {
+        // If the VMRegs are dead, we know they can't be accessed. Kill them
+        // before pessimizing loads.
+        kill(env, AVMRegAny);
+      }
     },
 
     [&] (ExitEffects l) {
-      load(env, l.live);
+      if (env.global.vmRegsLiveness[inst] != KnownRegState::Dead) {
+        load(env, l.live);
+      } else if (auto const live = l.live.exclude_vm_reg()) {
+        load(env, *live);
+      }
       kill(env, l.kills);
     },
 
     [&] (PureInlineCall l) {
       doPureStore(PureStore { l.base, l.fp });
       load(env, l.actrec);
+      mayStore(env, AVMSP);
     },
 
     [&] (PureInlineReturn l) {
@@ -644,14 +707,16 @@ void visit(Local& env, IRInstruction& inst) {
     },
 
     /*
-     * Call instructions can potentially read any heap location, but we can be
-     * more precise about everything else.
+     * Call instructions can potentially read any heap location or the VM
+     * register state (which must be dirty), but we can be more precise about
+     * everything else.
      */
     [&] (CallEffects l) {
       env.containsCall = true;
 
       store(env, l.outputs);
       load(env, AHeapAny);
+      load(env, AVMRegState);
       load(env, l.locals);
       load(env, l.inputs);
       store(env, l.actrec);
@@ -991,8 +1056,17 @@ void optimize_block_pre(Global& genv, Block* block,
         auto const cinst = resolve_ts(genv, block, StoreKey::In, i);
         FTRACE(1, " Inserting store {}: {}\n", i, cinst->toString());
         auto const inst = genv.unit.clone(cinst);
+        if (inst->is(InlineCall)) {
+          auto const syncFP = genv.unit.gen(
+            StVMFP,
+            inst->bcctx(),
+            inst->src(0)
+          );
+          block->prepend(syncFP);
+          FTRACE(4, " insert: {}\n", syncFP->toString());
+          genv.adjustedInlineCalls = true;
+        }
         block->prepend(inst);
-        if (inst->is(InlineCall)) genv.adjustedInlineCalls = true;
       }
     );
   }
@@ -1156,6 +1230,21 @@ TrackedStore find_candidate_store(Global& genv, TrackedStore ts, uint32_t id) {
   return find_candidate_store_helper(genv, ts, id);
 }
 
+bool pureStoreSupportsPhi(Opcode op) {
+  switch (op) {
+    /* Instructions that require constant arguments cannot have different
+     * sources be Phi-ed together. */
+    case StVMReturnAddr:
+    case StVMPC:
+      return false;
+    /* The Phi-ing of frame pointers is catastrophic. */
+    case StVMFP:
+      return false;
+    default:
+      return true;
+  }
+}
+
 TrackedStore combine_ts(Global& genv, uint32_t id,
                         TrackedStore s1,
                         TrackedStore s2, Block* succ) {
@@ -1182,7 +1271,10 @@ TrackedStore combine_ts(Global& genv, uint32_t id,
       }
     }
     for (auto i = i1->numSrcs(); i--; ) {
-      if (i1->src(i) != i2->src(i)) return Compat::Compat;
+      if (i1->src(i) != i2->src(i)) {
+        if (!pureStoreSupportsPhi(i1->op())) return Compat::Bad;
+        return Compat::Compat;
+      }
     }
     return Compat::Same;
   };
@@ -1504,22 +1596,22 @@ void insert_eager_sync(Global& genv, IRInstruction& endCatch) {
     IRSPRelOffsetData { endCatch.extra<EndCatch>()->offset },
     endCatch.src(1)
   );
-  auto syncFP = genv.unit.gen(
+  auto const syncFP = genv.unit.gen(
     StVMFP,
     endCatch.bcctx(),
     endCatch.src(0)
   );
-  auto syncSP = genv.unit.gen(
+  auto const syncSP = genv.unit.gen(
     StVMSP,
     endCatch.bcctx(),
     bcSP->dst()
   );
-  auto syncPC = genv.unit.gen(
+  auto const syncPC = genv.unit.gen(
     StVMPC,
     endCatch.bcctx(),
     genv.unit.cns(uintptr_t(endCatch.bcctx().marker.sk().pc()))
   );
-  auto syncReturnAddr = genv.unit.gen(
+  auto const syncReturnAddr = genv.unit.gen(
     StVMReturnAddr,
     endCatch.bcctx(),
     genv.unit.cns(getNextFakeReturnAddress())
@@ -1673,6 +1765,94 @@ void fix_inline_frames(Global& genv) {
   }
 }
 
+KnownRegState livenessUnion(KnownRegState a, KnownRegState b) {
+  return (a == KnownRegState::MaybeLive || a != b)
+    ? KnownRegState::MaybeLive
+    : a;
+}
+
+std::string livenessToStr(KnownRegState r) {
+  switch (r) {
+    case KnownRegState::Dead:
+      return "Dead";
+    case KnownRegState::MaybeLive:
+      return "MaybeLive";
+    case KnownRegState::Live:
+      return "Live";
+    default:
+      always_assert(false);
+  }
+}
+
+void analyzeVMRegLiveness(Global& genv) {
+  const BlockList rpoBlocks{genv.poBlockList.rbegin(), genv.poBlockList.rend()};
+  auto const rpoIDs = numberBlocks(genv.unit, rpoBlocks);
+
+  using Sorter = std::less<PostOrderId>;
+  auto incompleteQ =
+    dataflow_worklist<PostOrderId, Sorter>(genv.unit.numBlocks());
+
+  for (auto rpoId = uint32_t{0}; rpoId < rpoBlocks.size(); ++rpoId) {
+    incompleteQ.push(rpoId);
+  }
+
+  StateVector<Block,KnownRegState> liveIn{genv.unit, KnownRegState::Dead};
+  StateVector<Block,KnownRegState> liveOut{genv.unit, KnownRegState::Dead};
+
+  while (!incompleteQ.empty()) {
+    auto const rpoId = incompleteQ.pop();
+    auto const blk = rpoBlocks[rpoId];
+
+    FTRACE(2, "  scanning B{}\n", blk->id());
+    auto live = liveIn[blk];
+
+    FTRACE(2, "    in: {}\n", livenessToStr(live));
+
+    for (auto const& inst : *blk) {
+      if (inst.is(StVMRegState)) {
+        assertx(inst.src(0)->hasConstVal(TInt));
+        auto const regState =
+          static_cast<VMRegState>(inst.src(0)->intVal());
+        assertx(
+          regState == eagerlyCleanState() ||
+          regState == VMRegState::DIRTY);
+        live = (regState == eagerlyCleanState())
+          ? KnownRegState::Live
+          : KnownRegState::Dead;
+      } else if (inst.is(BeginCatch)) {
+        // VMRegs are live within catch traces.
+        live = KnownRegState::Live;
+      } else if (inst.is(InterpOne)) {
+        // InterpOne marks the regState dirty before returning.
+        live = KnownRegState::Dead;
+      }
+      genv.vmRegsLiveness[inst] = live;
+    }
+    FTRACE(2, "    out: {}\n", livenessToStr(live));
+
+    if (live == liveOut[blk]) continue;
+    liveOut[blk] = live;
+
+    blk->forEachSucc([&](Block* succ) {
+      auto newLive = KnownRegState::Dead;
+      bool first = true;
+      succ->forEachPred([&](Block* pred) {
+        if (first) {
+          newLive = liveOut[pred];
+          first = false;
+        } else {
+          newLive = livenessUnion(newLive, liveOut[pred]);
+        }
+      });
+
+      if (newLive != liveIn[succ]) {
+        liveIn[succ] = newLive;
+        incompleteQ.push(rpoIDs[succ]);
+      }
+    });
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -1695,6 +1875,11 @@ void optimizeStores(IRUnit& unit) {
     return;
   }
   FTRACE(1, "\nLocations:\n{}\n", show(genv.ainfo));
+
+  /*
+   * Analyze true liveness of VMRegs.
+   */
+  analyzeVMRegLiveness(genv);
 
   /*
    * Initialize the block state structures.

@@ -990,17 +990,32 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
     add(env.unit.gen(LdStk, inst.bcctx(), type, offset, inst.src(1)));
   }
 
+  auto const newOffset = original->offset + numStackElems;
+  auto const bcSP = env.unit.gen(
+    LoadBCSP,
+    inst.bcctx(),
+    IRSPRelOffsetData { newOffset },
+    inst.src(1)
+  );
+  auto const syncSP = env.unit.gen(
+    StVMSP,
+    inst.bcctx(),
+    bcSP->dst()
+  );
   auto const teardownMode =
     original->mode != EndCatchData::CatchMode::LocalsDecRefd &&
     inst.func()->hasThisInBody()
       ? EndCatchData::Teardown::OnlyThis
       : EndCatchData::Teardown::None;
   auto const data = EndCatchData {
-    original->offset + numStackElems,
+    newOffset,
     original->mode,
     original->stublogue,
     teardownMode
   };
+  auto iter = block->iteratorTo(&inst)--;
+  block->insert(iter++, bcSP);
+  block->insert(iter++, syncSP);
   env.unit.replace(&inst, EndCatch, data, inst.src(0), inst.src(1));
   env.stackTeardownsOptimized++;
 }

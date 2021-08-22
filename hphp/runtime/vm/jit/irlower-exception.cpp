@@ -77,15 +77,6 @@ void cgEndCatch(IRLS& env, const IRInstruction* inst) {
     return;
   }
 
-  if (data->teardown == EndCatchData::Teardown::None ||
-      data->teardown == EndCatchData::Teardown::OnlyThis) {
-    auto const vmsp = v.makeReg();
-    auto const spReg = srcLoc(env, inst, 1).reg();
-    auto const offset = data->offset.offset;
-    v << lea{spReg[offset * static_cast<int32_t>(sizeof(TypedValue))], vmsp};
-    v << store{vmsp, rvmtl()[rds::kVmspOff]};
-  }
-
   auto const helper = [&]() -> TCA {
     switch (data->teardown) {
       case EndCatchData::Teardown::None:

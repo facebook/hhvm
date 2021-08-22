@@ -261,11 +261,6 @@ Vreg emitIsCollection(Vout& v, Vreg obj);
 // VM intrinsics.
 
 /*
- * Eagerly sync the vm regs to RDS.
- */
-void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp);
-
-/*
  * Set the VM register state.
  */
 void emitSetVMRegState(Vout& v, VMRegState state);

@@ -1800,6 +1800,16 @@ SSATmp* builtinCall(IRGS& env,
 
   // Make the actual call.
   SSATmp** const decayedPtr = &realized[0];
+  auto const eagerFixup = FixupMap::eagerRecord(callee);
+  if (eagerFixup) {
+    auto const spOff = IRSPRelOffsetData { spOffBCFromIRSP(env) };
+    auto const bcSP = gen(env, LoadBCSP, spOff, sp(env));
+    gen(env, StVMFP, fp(env));
+    gen(env, StVMSP, bcSP);
+    gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
+    genStVMReturnAddr(env);
+    gen(env, StVMRegState, cns(env, eagerlyCleanState()));
+  }
   auto const ret = gen(
     env,
     CallBuiltin,
@@ -1811,6 +1821,10 @@ SSATmp* builtinCall(IRGS& env,
     catchMaker.makeUnusualCatch(),
     std::make_pair(realized.size(), decayedPtr)
   );
+
+  if (eagerFixup) {
+    gen(env, StVMRegState, cns(env, VMRegState::DIRTY));
+  }
 
   if (!params.forNativeImpl) {
     if (params.ctx && params.ctx->type() <= TObj) {
@@ -1936,7 +1950,18 @@ void emitNativeImpl(IRGS& env) {
   auto const callee = curFunc(env);
 
   auto genericNativeImpl = [&]() {
+    auto const eagerFixup = FixupMap::eagerRecord(callee);
+    if (eagerFixup) {
+      gen(env, StVMFP, fp(env));
+      gen(env, StVMSP, sp(env));
+      gen(env, StVMPC, cns(env, uintptr_t(callee->entry())));
+      genStVMReturnAddr(env);
+      gen(env, StVMRegState, cns(env, eagerlyCleanState()));
+    }
     gen(env, NativeImpl, fp(env), sp(env));
+    if (eagerFixup) {
+      gen(env, StVMRegState, cns(env, VMRegState::DIRTY));
+    }
     auto const retVal = gen(env, LdRetVal, callReturnType(callee), fp(env));
     auto const spAdjust = offsetToReturnSlot(env);
     auto const data = RetCtrlData { spAdjust, false, AuxUnion{0} };

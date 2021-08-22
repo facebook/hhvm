@@ -218,19 +218,6 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
            t == KindOfObject || t == KindOfResource;
   };
 
-  auto const eagerFixup = FixupMap::eagerRecord(callee);
-  if (eagerFixup) {
-    auto const sp = srcLoc(env, inst, 1).reg();
-    auto const spOffset = cellsToBytes(extra->spOffset.offset);
-    auto const& marker = inst->marker();
-    auto const pc = marker.fixupSk().func()->entry() + marker.fixupBcOff();
-
-    auto const synced_sp = v.makeReg();
-    v << lea{sp[spOffset], synced_sp};
-    emitEagerSyncPoint(v, pc, rvmtl(), srcLoc(env, inst, 0).reg(), synced_sp);
-    emitSetVMRegState(v, eagerlyCleanState());
-  }
-
   int returnOffset = rds::kVmMInstrStateOff +
                      offsetof(MInstrState, tvBuiltinReturn);
   auto args = argGroup(env, inst);
@@ -336,9 +323,6 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     v << copy{tmpData, dstData};
     if (dstType.isValid()) v << copy{tmpType, dstType};
     if (isInlined) v << inlineend{};
-    if (eagerFixup) {
-      emitSetVMRegState(v, VMRegState::DIRTY);
-    }
   };
 
   cgCallHelper(v, env, CallSpec::direct(callee->nativeFuncPtr(), nullptr),
@@ -391,16 +375,10 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
 
 void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
   auto fp = srcLoc(env, inst, 0).reg();
-  auto sp = srcLoc(env, inst, 1).reg();
   auto& v = vmain(env);
 
   auto const func = inst->marker().func();
 
-  auto const eagerFixup = FixupMap::eagerRecord(func);
-  if (eagerFixup) {
-    emitEagerSyncPoint(v, func->entry(), rvmtl(), fp, sp);
-    emitSetVMRegState(v, eagerlyCleanState());
-  }
   v << vinvoke{
     CallSpec::direct(func->arFuncPtr(), nullptr),
     v.makeVcallArgs({{fp}}),
@@ -409,9 +387,6 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
      label(env, inst->taken())},
     makeFixup(inst->marker(), SyncOptions::Sync)
   };
-  if (eagerFixup) {
-    emitSetVMRegState(v, VMRegState::DIRTY);
-  }
 }
 
 static void traceCallback(ActRec* fp, TypedValue* sp, Offset bcOff) {

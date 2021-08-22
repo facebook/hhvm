@@ -540,16 +540,6 @@ void emitSetVMRegState(Vout& v, VMRegState state) {
   v << storeqi{static_cast<int32_t>(state), regstate};
 }
 
-void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
-  v << store{vmfp, rds[rds::kVmfpOff]};
-  v << store{vmsp, rds[rds::kVmspOff]};
-  emitImmStoreq(v, intptr_t(pc), rds[rds::kVmpcOff]);
-
-  auto const addr = getNextFakeReturnAddress();
-  v << storeqi{addr, rds[rds::kVmJitReturnAddrOff]};
-  v << recordstack{(TCA)static_cast<int64_t>(addr)};
-}
-
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
   if (!Trace::moduleEnabled(Trace::ringbuffer, 1)) return;
   v << vcall{CallSpec::direct(Trace::ringbufferMsg),

@@ -886,6 +886,7 @@ pub mod expression_trees {
     pub const VISIT_BREAK: &str = "visitBreak";
     pub const VISIT_CONTINUE: &str = "visitContinue";
     pub const VISIT_PROPERTY_ACCESS: &str = "visitPropertyAccess";
+    pub const VISIT_XHP: &str = "visitXhp";
 
     pub const SPLICE: &str = "splice";
 }

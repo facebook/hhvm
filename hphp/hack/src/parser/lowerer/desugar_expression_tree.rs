@@ -6,6 +6,7 @@ use oxidized::{
     aast_visitor::{visit, AstParams, Node, Visitor},
     ast,
     ast::{ClassId, ClassId_, Expr, Expr_, Hint_, Sid, Stmt, Stmt_},
+    ast_defs,
     ast_defs::*,
     pos::Pos,
 };
@@ -1054,6 +1055,83 @@ fn rewrite_expr(
                 (),
                 pos,
                 ObjGet(Box::new((virtual_e1, e2, null_flavor, is_prop_call))),
+            );
+            (virtual_expr, desugar_expr)
+        }
+        // Source: MyDsl`<foo my-attr="stuff">text <foo-child/> </foo>`
+        // Virtualized: <foo my-attr={MyDsl::stringType()}>{MyDsl::stringType()} <foo-child/> </foo>
+        // Desugared:
+        //   $0v->visitXhp(
+        //     newExprPos(...),
+        //     :foo::class,
+        //     dict["my-attr" => $0v->visitString(...)],
+        //     vec[
+        //       $0v->visitString(..., "text ")],
+        //       $0v->visitXhp(..., :foo-child::class, ...),
+        //     ],
+        //   )
+        Xml(xml) => {
+            let (hint, attrs, children) = *xml;
+
+            let mut virtual_attrs = vec![];
+            let mut desugar_attrs = vec![];
+            for attr in attrs.clone() {
+                match attr {
+                    aast::XhpAttribute::XhpSimple(xs) => {
+                        let (attr_name_pos, attr_name) = xs.name.clone();
+                        let dict_key =
+                            Expr::new((), attr_name_pos, Expr_::String(BString::from(attr_name)));
+
+                        let (virtual_attr_expr, desugar_attr_expr) =
+                            rewrite_expr(temps, xs.expr, visitor_name)?;
+
+                        desugar_attrs.push((dict_key, desugar_attr_expr));
+                        virtual_attrs.push(aast::XhpAttribute::XhpSimple(aast::XhpSimple {
+                            expr: virtual_attr_expr,
+                            ..xs
+                        }))
+                    }
+                    aast::XhpAttribute::XhpSpread(e) => {
+                        return Err((
+                            e.1,
+                            "Expression trees do not support attribute spread syntax.".into(),
+                        ));
+                    }
+                }
+            }
+
+            let (virtual_children, desugar_children) =
+                rewrite_exprs(temps, children.clone(), visitor_name)?;
+
+            // Construct :foo::class.
+            let hint_pos = hint.0.clone();
+            let hint_class = Expr_::ClassConst(Box::new((
+                ClassId(
+                    (),
+                    hint_pos.clone(),
+                    ClassId_::CIexpr(Expr::new(
+                        (),
+                        hint_pos.clone(),
+                        Expr_::Id(Box::new(ast_defs::Id(hint_pos.clone(), hint.1.clone()))),
+                    )),
+                ),
+                (hint_pos.clone(), "class".to_string()),
+            )));
+
+            let virtual_expr = Expr(
+                (),
+                pos.clone(),
+                Xml(Box::new((hint, virtual_attrs, virtual_children))),
+            );
+            let desugar_expr = v_meth_call(
+                et::VISIT_XHP,
+                vec![
+                    pos_expr,
+                    Expr((), pos.clone(), hint_class),
+                    dict_literal(&pos, desugar_attrs),
+                    vec_literal(desugar_children),
+                ],
+                &pos,
             );
             (virtual_expr, desugar_expr)
         }

@@ -311,7 +311,7 @@ and stmt env acc st =
   let catch = catch env in
   let case = case env in
   match snd st with
-  | Expr
+  | Expr (* only in top level!*)
       (_, _, Call ((_, _, Class_const ((_, _, CIparent), (_, m))), _, el, _uel))
     when String.equal m SN.Members.__construct ->
     let acc = List.fold_left ~f:expr ~init:acc el in

@@ -166,7 +166,15 @@ class Code {
   ): Code::TAst {
     throw new Exception();
   }
-  // Splice
+  public function visitXhp(
+    ?ExprPos $_,
+    string $_,
+    dict<string, Code::TAst> $_,
+    vec<Code::TAst> $_,
+  ): Code::TAst {
+    throw new Exception();
+  }
+
   public function splice<T>(
     ?ExprPos $_,
     string $_key,
@@ -232,7 +240,7 @@ abstract class ExampleBool extends ExampleMixed {
   public abstract function __exclamationMark(): ExampleBool;
 }
 
-abstract class ExampleString extends ExampleMixed {
+abstract class ExampleString extends ExampleMixed implements XHPChild {
   public abstract function __dot(ExampleString $_): ExampleString;
 }
 

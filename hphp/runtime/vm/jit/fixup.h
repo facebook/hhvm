@@ -207,11 +207,6 @@ bool processFixupForVMFrame(VMFrame frame);
  * if `soft` is not set).
  */
 bool fixupWork(ActRec* rbp, bool soft = false);
-
-/*
- * Returns true if calls to func should use an EagerVMRegAnchor.
- */
-bool eagerRecord(const Func* func);
 }
 
 namespace detail {

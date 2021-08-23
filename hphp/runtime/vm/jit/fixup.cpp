@@ -200,27 +200,6 @@ bool fixupWork(ActRec* nextRbp, bool soft) {
   return false;
 }
 
-/* This is somewhat hacky. It decides which helpers/builtins should
- * use eager vmreganchor based on profile information. Using eager
- * vmreganchor for all helper calls is a perf regression. */
-bool eagerRecord(const Func* func) {
-  const char* list[] = {
-    "array_filter",
-    "array_map",
-    "thrift_protocol_read_binary",
-    "thrift_protocol_read_binary_struct",
-    "thrift_protocol_read_compact",
-    "thrift_protocol_read_compact_struct",
-    "HH\\Asio\\join",
-  };
-
-  for (auto str : list) {
-    if (!strcmp(func->name()->data(), str)) return true;
-  }
-
-  return false;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 }
 

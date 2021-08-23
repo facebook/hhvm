@@ -440,15 +440,16 @@ final class Set implements \MutableSet {
    * @return object
    */
   public static function fromArrays(...$argv)[] {
-    if (!$argv) return \HH\Set {};
-    $ret = \HH\Set {};
+    $ret = keyset[];
     foreach ($argv as $arr) {
       if (!\HH\is_any_array($arr)) {
         throw new \InvalidArgumentException("Parameters must be array-likes");
       }
-      $ret->addAll($arr);
+      foreach ($arr as $value) {
+        $ret[] = $value;
+      }
     }
-    return $ret;
+    return new Set($ret);
   }
 }
 
@@ -763,15 +764,16 @@ final class ImmSet implements \ConstSet {
    * @return object
    */
   public static function fromArrays(...$argv)[] {
-    if (!$argv) return \HH\ImmSet {};
-    $ret = \HH\Set {};
+    $ret = keyset[];
     foreach ($argv as $arr) {
       if (!\HH\is_any_array($arr)) {
         throw new \InvalidArgumentException("Parameters must be array-likes");
       }
-      $ret->addAll($arr);
+      foreach ($arr as $value) {
+        $ret[] = $value;
+      }
     }
-    return $ret->toImmSet();
+    return new ImmSet($ret);
   }
 }
 

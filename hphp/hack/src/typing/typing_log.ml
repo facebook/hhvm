@@ -75,7 +75,7 @@ let lastenv =
        (Provider_context.empty_for_debugging
           ~popt:ParserOptions.default
           ~tcopt:TypecheckerOptions.default
-          ~deps_mode:Typing_deps_mode.SQLiteMode)
+          ~deps_mode:(Typing_deps_mode.CustomMode None))
        Relative_path.default
        ~droot:None)
 

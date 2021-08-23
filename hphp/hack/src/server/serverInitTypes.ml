@@ -57,7 +57,6 @@ let load_state_error_to_verbose_string (err : load_state_error) :
     load_state_verbose_error =
   match err with
   | Load_state_saved_state_loader_failure err ->
-    (* TODO(hverr): Construct verbose errors with all fields properly set *)
     {
       message =
         Printf.sprintf

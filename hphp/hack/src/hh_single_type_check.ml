@@ -1892,12 +1892,11 @@ let handle_mode
     Naming_table.iter naming_table ~f:(Typing_deps.Files.update_file deps_mode);
     let genv = ServerEnvBuild.default_genv in
     let init_id = Random_id.short_string () in
-    (* TODO(hverr): Figure out 64-bit *)
     let env =
       {
         (ServerEnvBuild.make_env
            ~init_id
-           ~deps_mode:Typing_deps_mode.SQLiteMode
+           ~deps_mode:(Typing_deps_mode.CustomMode None)
            genv.ServerEnv.config)
         with
         ServerEnv.naming_table;
@@ -1934,12 +1933,11 @@ let handle_mode
     Naming_table.iter naming_table ~f:(Typing_deps.Files.update_file deps_mode);
     let genv = ServerEnvBuild.default_genv in
     let init_id = Random_id.short_string () in
-    (* TODO(hverr): Figure out 64-bit mode *)
     let env =
       {
         (ServerEnvBuild.make_env
            ~init_id
-           ~deps_mode:Typing_deps_mode.SQLiteMode
+           ~deps_mode:(Typing_deps_mode.CustomMode None)
            genv.ServerEnv.config)
         with
         ServerEnv.naming_table;
@@ -2429,12 +2427,11 @@ let decl_and_run_mode
     in
     Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace
   | _ -> ());
-  (* TODO(hverr): Should we switch this to 64-bit *)
   let ctx =
     Provider_context.empty_for_test
       ~popt
       ~tcopt
-      ~deps_mode:Typing_deps_mode.SQLiteMode
+      ~deps_mode:(Typing_deps_mode.CustomMode None)
   in
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
      so it will look in the sqlite database for names it doesn't know.

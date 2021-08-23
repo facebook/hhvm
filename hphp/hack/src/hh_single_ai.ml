@@ -340,12 +340,11 @@ let decl_and_run_mode
       File_provider.(provide_file filename (Disk contents)));
   (* Don't declare all the filenames in batch_errors mode *)
   let to_decl = files_contents_with_builtins in
-  (* TODO(hverr): Should we switch this to 64-bit *)
   let ctx =
     Provider_context.empty_for_test
       ~popt
       ~tcopt
-      ~deps_mode:Typing_deps_mode.SQLiteMode
+      ~deps_mode:(Typing_deps_mode.CustomMode None)
   in
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
      so it will look in the sqlite database for names it doesn't know.

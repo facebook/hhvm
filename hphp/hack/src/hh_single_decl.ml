@@ -50,13 +50,12 @@ let init root popt : Provider_context.t =
       tco_higher_kinded_types = true;
     }
   in
-  (* TODO(hverr): Figure out 64-bit *)
   let ctx =
     Provider_context.empty_for_tool
       ~popt
       ~tcopt
       ~backend:Provider_backend.Shared_memory
-      ~deps_mode:Typing_deps_mode.SQLiteMode
+      ~deps_mode:(Typing_deps_mode.CustomMode None)
   in
 
   (* Push local stacks here so we don't include shared memory in our timing. *)

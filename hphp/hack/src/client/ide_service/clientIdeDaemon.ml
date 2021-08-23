@@ -407,10 +407,9 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   let genv = ServerEnvBuild.make_genv server_args config local_config [] in
   let init_id = Random_id.short_string () in
   let { ServerEnv.tcopt; popt; gleanopt; _ } =
-    (* TODO(hverr): Figure out 64-bit mode *)
     ServerEnvBuild.make_env
       ~init_id
-      ~deps_mode:Typing_deps_mode.SQLiteMode
+      ~deps_mode:(Typing_deps_mode.CustomMode None)
       genv.ServerEnv.config
   in
 
@@ -524,12 +523,11 @@ let initialize2
 
 (** An empty ctx with no entries *)
 let make_empty_ctx (istate : istate) : Provider_context.t =
-  (* TODO(hverr): Support 64-bit *)
   Provider_context.empty_for_tool
     ~popt:istate.icommon.popt
     ~tcopt:istate.icommon.tcopt
     ~backend:(Provider_backend.Local_memory istate.icommon.local_memory)
-    ~deps_mode:Typing_deps_mode.SQLiteMode
+    ~deps_mode:(Typing_deps_mode.CustomMode None)
 
 (** Constructs a temporary ctx with just one entry. *)
 let make_singleton_ctx (istate : istate) (entry : Provider_context.entry) :
@@ -696,7 +694,6 @@ let handle_request :
            Once it's done, it will appear as a LoadedState message on the queue. *)
         Lwt.async (fun () ->
             (* following method never throws *)
-            (* TODO(hverr): Figure out how to support 64-bit *)
             let%lwt result =
               load_saved_state
                 (Provider_context.empty_for_tool
@@ -704,7 +701,7 @@ let handle_request :
                    ~tcopt:dstate.dcommon.tcopt
                    ~backend:
                      (Provider_backend.Local_memory dstate.dcommon.local_memory)
-                   ~deps_mode:Typing_deps_mode.SQLiteMode)
+                   ~deps_mode:(Typing_deps_mode.CustomMode None))
                 ~root:param.root
                 ~naming_table_load_info:param.naming_table_load_info
             in

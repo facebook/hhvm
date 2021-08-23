@@ -7,13 +7,14 @@
  *
  *)
 
-(** Checks that a class implements an interface, extends a base class, or
-    uses a trait. *)
-val check_implements :
+(** Checks that a class implements its interfaces, extends its base class, and
+    uses its traits. *)
+val check_implements_extends_uses :
   Typing_env_types.env ->
-  Typing_defs.decl_ty list ->
-  (* The parent (interface, base type, or trait) *)
-  Typing_defs.decl_ty ->
-  (* The type to be checked, instantiated at its generic parameters *)
-  Pos.t * Typing_defs.decl_ty ->
+  (* All directly implemented interfaces *)
+  implements:Typing_defs.decl_ty list ->
+  (* All direct parents (interfaces, base type, traits) *)
+  parents:Typing_defs.decl_ty list ->
+  (* The type to be checked *)
+  Pos.t * Decl_provider.Class.t ->
   Typing_env_types.env

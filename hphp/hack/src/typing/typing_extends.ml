@@ -452,12 +452,14 @@ let check_const_override
     const_name
     parent_class
     class_
+    psubst
     parent_class_const
     class_const
     on_error =
   if String.equal parent_class_const.cc_origin class_const.cc_origin then
     env
   else
+    let parent_class_const = Inst.instantiate_cc psubst parent_class_const in
     let parent_kind = Cls.kind parent_class in
     let class_kind = Cls.kind class_ in
     let check_params = should_check_params parent_class class_ in
@@ -562,7 +564,7 @@ let check_members
     check_private
     env
     (parent_class, psubst)
-    (class_pos, class_, subst)
+    (class_pos, class_)
     on_error
     (mem_source, parent_members, get_member) =
   let parent_members =
@@ -602,7 +604,6 @@ let check_members
       | Some class_elt
         when String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin ->
         let parent_class_elt = Inst.instantiate_ce psubst parent_class_elt in
-        let class_elt = Inst.instantiate_ce subst class_elt in
         let check_member_unique =
           should_check_member_unique class_elt parent_class_elt
         in
@@ -680,16 +681,6 @@ let check_members
             ());
         env)
 
-(*****************************************************************************)
-(* Before checking that a class implements an interface, we have to
- * substitute the type parameters with their real type.
- *)
-(*****************************************************************************)
-
-(* Instantiation basically applies the substitution *)
-let instantiate_consts subst consts =
-  List.map consts ~f:(fun (id, cc) -> (id, Inst.instantiate_cc subst cc))
-
 let make_all_members ~child_class ~parent_class =
   let wrap_constructor = function
     | None -> []
@@ -748,7 +739,7 @@ let default_constructor_ce class_ =
   }
 
 (* When an interface defines a constructor, we check that they are compatible *)
-let check_constructors env parent_class class_ psubst subst on_error =
+let check_constructors env parent_class class_ psubst on_error =
   let consistent =
     not (equal_consistent_kind (snd (Cls.construct parent_class)) Inconsistent)
   in
@@ -771,7 +762,6 @@ let check_constructors env parent_class class_ psubst subst on_error =
       in
       if String.( <> ) parent_cstr.ce_origin cstr.ce_origin then begin
         let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
-        let cstr = Inst.instantiate_ce subst cstr in
         if not (Pos_or_decl.is_hhi (Cls.pos parent_class)) then
           Typing_deps.add_idep
             (Env.get_deps_mode env)
@@ -1123,7 +1113,7 @@ let check_typeconst_override
     with other inherited type constants *)
 let check_typeconsts env implements parent_class class_ on_error =
   let (parent_pos, parent_class, _) = parent_class in
-  let (pos, class_, _) = class_ in
+  let (pos, class_) = class_ in
   let ptypeconsts = Cls.typeconsts parent_class in
   List.fold ptypeconsts ~init:env ~f:(fun env (tconst_name, parent_tconst) ->
       match Cls.get_typeconst class_ tconst_name with
@@ -1145,15 +1135,12 @@ let check_typeconsts env implements parent_class class_ on_error =
           [];
         env)
 
-let check_consts
-    env implements parent_class (name_pos, class_) psubst subst on_error =
-  let (pconsts, consts) = (Cls.consts parent_class, Cls.consts class_) in
-  let pconsts = instantiate_consts psubst pconsts in
-  let consts = instantiate_consts subst consts in
-  let consts = SMap.of_list consts in
+let check_consts env implements parent_class (name_pos, class_) psubst on_error
+    =
+  let pconsts = Cls.consts parent_class in
   List.fold pconsts ~init:env ~f:(fun env (const_name, parent_const) ->
       if String.( <> ) const_name SN.Members.mClass then (
-        match SMap.find_opt const_name consts with
+        match Cls.get_const class_ const_name with
         | Some const ->
           (* skip checks for typeconst derived class constants *)
           (match Cls.get_typeconst class_ const_name with
@@ -1164,6 +1151,7 @@ let check_consts
               const_name
               parent_class
               class_
+              psubst
               parent_const
               const
               on_error
@@ -1185,6 +1173,34 @@ let check_consts
  *)
 let check_class_implements
     env implements parent_class (name_pos, class_) on_error =
+  let env =
+    check_typeconsts env implements parent_class (name_pos, class_) on_error
+  in
+  let (parent_pos, parent_class, parent_tparaml) = parent_class in
+  let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
+  let env =
+    check_consts env implements parent_class (name_pos, class_) psubst on_error
+  in
+  let memberl = make_all_members ~parent_class ~child_class:class_ in
+  let env = check_constructors env parent_class class_ psubst on_error in
+  let check_privates : bool = Ast_defs.is_c_trait (Cls.kind parent_class) in
+  if Cls.members_fully_known class_ then
+    List.iter
+      memberl
+      ~f:(check_members_implemented check_privates parent_pos name_pos);
+  List.fold ~init:env memberl ~f:(fun env ->
+      check_members
+        check_privates
+        env
+        (parent_class, psubst)
+        (name_pos, class_)
+        on_error)
+
+(*****************************************************************************)
+(* The externally visible function *)
+(*****************************************************************************)
+
+let check_implements_extends_uses env ~implements ~parents (name_pos, class_) =
   let get_interfaces acc x =
     let (_, (_, name), _) = TUtils.unwrap_class_type x in
     match Env.get_class env name with
@@ -1192,67 +1208,31 @@ let check_class_implements
     | None -> acc
   in
   let implements = List.fold ~f:get_interfaces ~init:[] implements in
-  let env = check_typeconsts env implements parent_class class_ on_error in
-  let (parent_pos, parent_class, parent_tparaml) = parent_class in
-  let (pos, class_, tparaml) = class_ in
-  let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
-  let subst = Inst.make_subst (Cls.tparams class_) tparaml in
-  let env =
-    check_consts
-      env
-      implements
-      parent_class
-      (name_pos, class_)
-      psubst
-      subst
-      on_error
-  in
-  let memberl = make_all_members ~parent_class ~child_class:class_ in
-  let env = check_constructors env parent_class class_ psubst subst on_error in
-  let check_privates : bool = Ast_defs.is_c_trait (Cls.kind parent_class) in
-  if Cls.members_fully_known class_ then
-    List.iter
-      memberl
-      ~f:(check_members_implemented check_privates parent_pos pos);
-  List.fold ~init:env memberl ~f:(fun env ->
-      check_members
-        check_privates
-        env
-        (parent_class, psubst)
-        (name_pos, class_, subst)
-        on_error)
-
-(*****************************************************************************)
-(* The externally visible function *)
-(*****************************************************************************)
-
-let check_implements env implements parent_type (name_pos, type_to_be_checked) =
-  let (_, parent_name, parent_tparaml) = TUtils.unwrap_class_type parent_type in
-  let (_, (_, name), tparaml) = TUtils.unwrap_class_type type_to_be_checked in
-  let (parent_name_pos, parent_name_str) = parent_name in
-  let parent_class = Env.get_class env (snd parent_name) in
-  let class_ = Env.get_class env name in
-  match (parent_class, class_) with
-  | (None, _)
-  | (_, None) ->
-    env
-  | (Some parent_class, Some class_) ->
-    let parent_class = (parent_name_pos, parent_class, parent_tparaml) in
-    let class_ = (name_pos, class_, tparaml) in
-    check_class_implements
-      env
-      implements
-      parent_class
-      (name_pos, class_)
-      (fun ?code:_ ?quickfixes:_ reasons ->
-        (* sadly, enum error reporting requires this to keep the error in the file
-           with the enum *)
-        if String.equal parent_name_str SN.Classes.cHH_BuiltinEnum then
-          Errors.bad_enum_decl name_pos reasons
-        else
-          Errors.bad_decl_override
-            parent_name_pos
-            parent_name_str
-            name_pos
-            name
-            reasons)
+  let name = Cls.name class_ in
+  List.fold ~init:env parents ~f:(fun env parent_type ->
+      let (_, parent_name, parent_tparaml) =
+        TUtils.unwrap_class_type parent_type
+      in
+      let (parent_name_pos, parent_name_str) = parent_name in
+      let parent_class = Env.get_class env (snd parent_name) in
+      match parent_class with
+      | None -> env
+      | Some parent_class ->
+        let parent_class = (parent_name_pos, parent_class, parent_tparaml) in
+        check_class_implements
+          env
+          implements
+          parent_class
+          (name_pos, class_)
+          (fun ?code:_ ?quickfixes:_ reasons ->
+            (* sadly, enum error reporting requires this to keep the error in the file
+               with the enum *)
+            if String.equal parent_name_str SN.Classes.cHH_BuiltinEnum then
+              Errors.bad_enum_decl name_pos reasons
+            else
+              Errors.bad_decl_override
+                parent_name_pos
+                parent_name_str
+                name_pos
+                name
+                reasons))

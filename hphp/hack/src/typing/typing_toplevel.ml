@@ -1542,22 +1542,6 @@ let class_constr_def env cls constructor =
   let env = { env with inside_constructor = true } in
   Option.bind constructor ~f:(method_def env cls)
 
-(** Checks that a class implements an interface, extends a base class, or
-    uses a trait. *)
-let class_implements_type env implements c1 (_hint2, ctype2) =
-  let c1_name_pos = fst c1.c_name in
-  let ctype1 =
-    let r = Reason.Rwitness_from_decl (Pos_or_decl.of_raw_pos c1_name_pos) in
-    let params =
-      List.map c1.c_tparams ~f:(fun { tp_name = (p, s); _ } ->
-          mk
-            ( Reason.Rwitness_from_decl (Pos_or_decl.of_raw_pos p),
-              Tgeneric (s, []) ))
-    in
-    mk (r, Tapply (Positioned.of_raw_positioned c1.c_name, params))
-  in
-  Typing_extends.check_implements env implements ctype2 (c1_name_pos, ctype1)
-
 (** Type-check a property declaration, with optional initializer *)
 let class_var_def ~is_static cls env cv =
   (* First pick up and localize the hint if it exists *)
@@ -1959,8 +1943,11 @@ let class_def_ env c tc =
     if skip_hierarchy_checks ctx then
       env
     else
-      List.fold ~init:env impl ~f:(fun env ->
-          class_implements_type env (List.map implements ~f:snd) c)
+      Typing_extends.check_implements_extends_uses
+        env
+        ~implements:(List.map implements ~f:snd)
+        ~parents:(List.map impl ~f:snd)
+        (fst c.c_name, tc)
   in
   if Cls.is_disposable tc then
     List.iter

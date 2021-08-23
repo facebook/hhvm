@@ -425,17 +425,27 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
             if occ.is_declaration then
               (xrefs, prog)
             else
+              let pos = occ.pos in
               match occ.type_ with
               | Attribute info ->
                 process_attribute_xref ctx occ info (xrefs, prog)
               | _ ->
                 let symbol_def_res = ServerSymbolDefinition.go ctx None occ in
                 (match symbol_def_res with
-                | None -> (xrefs, prog)
+                | None ->
+                  (* no symbol info - likely dynamic *)
+                  (match occ.type_ with
+                  | Method (receiver_class, name) ->
+                    let (target_id, prog) =
+                      add_method_occ_fact receiver_class name prog
+                    in
+                    let xref_json = build_method_occ_json_ref target_id in
+                    let _target_json = build_occ_target_json xref_json in
+                    (xrefs, prog)
+                  | _ -> (xrefs, prog))
                 | Some sym_def ->
                   let proc_mem = process_member_xref ctx sym_def occ.pos in
                   let name = sym_def.name in
-                  let pos = occ.pos in
                   (match sym_def.kind with
                   | Class ->
                     let con_kind = parent_decl_predicate ClassContainer in
@@ -512,6 +522,7 @@ let progress_to_json progress =
       ( "hack.GlobalConstDeclaration.5",
         progress.resultJson.globalConstDeclaration );
       ("hack.NamespaceDeclaration.5", progress.resultJson.namespaceDeclaration);
+      ("hack.MethodOccurrence.5", progress.resultJson.methodOccurrence);
     ]
   in
   let json_array =

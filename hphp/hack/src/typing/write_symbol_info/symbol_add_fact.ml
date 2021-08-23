@@ -479,3 +479,17 @@ let add_file_decls_fact filepath decls progress =
       ]
   in
   add_fact FileDeclarations json_fact progress
+
+let add_method_occ_fact receiver_class name progress =
+  let module SO = SymbolOccurrence in
+  let json_fact =
+    List.concat
+    @@ [
+         [("name", build_name_json_nested name)];
+         (match receiver_class with
+         | SO.ClassName className ->
+           [("className", build_name_json_nested className)]
+         | SO.UnknownClass -> []);
+       ]
+  in
+  add_fact MethodOccurrence (JSON_Object json_fact) progress

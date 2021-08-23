@@ -138,6 +138,8 @@ let build_constraint_json ctx (kind, hint) =
 
 let build_decl_target_json json = JSON_Object [("declaration", json)]
 
+let build_occ_target_json json = JSON_Object [("occurrence", json)]
+
 let build_file_lines_json filepath lineLengths endsInNewline hasUnicodeOrTabs =
   let lengths =
     List.map lineLengths ~f:(fun len -> JSON_Number (string_of_int len))
@@ -336,3 +338,6 @@ let build_type_const_decl_json_ref fact_id =
 
 let build_typedef_decl_json_ref fact_id =
   JSON_Object [("typedef_", build_id_json fact_id)]
+
+let build_method_occ_json_ref fact_id =
+  JSON_Object [("method", build_id_json fact_id)]

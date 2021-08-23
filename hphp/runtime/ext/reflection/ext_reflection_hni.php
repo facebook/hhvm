@@ -1129,7 +1129,7 @@ class ReflectionClass implements Reflector {
       $ret .= implode(', ', $ifaces);
     }
     $ret .= " ] {\n";
-    if ($this->getStartLine() > 0) {
+    if ((int)$this->getStartLine() > 0) {
       $file = (string)$this->getFileName();
       $start = (string)$this->getStartLine();
       $end = (string)$this->getEndLine();

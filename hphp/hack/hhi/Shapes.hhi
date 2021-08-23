@@ -24,7 +24,7 @@ abstract final class Shapes {
  * * `Shapes::idx(shape('x' => 123), 'y') // null`
  * * `Shapes::idx(shape('x' => 123), 'y', 456) // 456`
  *
- * * `Shapes::idx(null, 'y', 456) // 45`
+ * * `Shapes::idx(null, 'y', 456) // 456`
  *
  * Use `Shapes::idx` when the key in your shape is optional (e.g., `?x`, in `shape(?'x' => int`).
  * If the key in your shape is always present, access the value directly: `$my_shape['x']`.

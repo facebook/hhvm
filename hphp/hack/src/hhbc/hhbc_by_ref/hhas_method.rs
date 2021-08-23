@@ -14,6 +14,7 @@ use hhbc_by_ref_hhbc_id::method::MethodType;
 use bitflags::bitflags;
 
 #[derive(Debug)]
+#[repr(C)]
 pub struct HhasMethod<'arena> {
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub visibility: Visibility,
@@ -57,4 +58,12 @@ impl<'a, 'arena> HhasMethod<'arena> {
     pub fn is_interceptable(&self) -> bool {
         self.flags.contains(HhasMethodFlags::IS_INTERCEPTABLE)
     }
+}
+
+#[allow(clippy::needless_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_method<'arena>(
+    _: HhasMethod<'arena>,
+) {
+    unimplemented!()
 }

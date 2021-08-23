@@ -14,6 +14,7 @@ use hhbc_by_ref_hhbc_id::function::FunctionType;
 use bitflags::bitflags;
 
 #[derive(Debug)]
+#[repr(C)]
 pub struct HhasFunction<'arena> {
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub name: FunctionType<'arena>,
@@ -79,4 +80,12 @@ impl<'arena> HhasFunction<'arena> {
     pub fn params(&self) -> &[HhasParam<'arena>] {
         self.body.params.as_ref()
     }
+}
+
+#[allow(clippy::needless_lifetimes)]
+#[no_mangle]
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_function<'arena>(
+    _: HhasFunction<'arena>,
+) {
+    unimplemented!()
 }

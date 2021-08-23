@@ -1338,8 +1338,8 @@ namespace {
   }
 }
 
-// helper for getMethods: returns a Set
-static Object HHVM_STATIC_METHOD(
+// helper for getMethods: returns a keyset
+static Array HHVM_STATIC_METHOD(
   ReflectionClass,
   getMethodOrder,
   const String& clsname,
@@ -1351,14 +1351,13 @@ static Object HHVM_STATIC_METHOD(
   // order in which getMethods returns matters
   req::StringIFastSet visitedMethods;
   req::StringIFastSet visitedInterfaces;
-  auto st = req::make<c_Set>();
-  st->reserve(cls->numMethods());
+  auto st = Array::CreateKeyset();
 
   auto add = [&] (const Func* m) {
     if (m->isGenerated()) return;
     if (!visitedMethods.insert(m->nameStr()).second) return;
     if (m->attrs() & mask) {
-      st->add(m->nameStr().get());
+      st.append(m->nameStr().asString());
     }
   };
 
@@ -1429,7 +1428,7 @@ static Object HHVM_STATIC_METHOD(
       }
     }
   }
-  return Object(std::move(st));
+  return st;
 }
 
 static bool HHVM_METHOD(ReflectionClass, hasConstant, const String& name) {

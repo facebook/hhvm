@@ -1359,21 +1359,20 @@ class ReflectionClass implements Reflector {
 
   /* Helper for getMethods: correctly ordered Set of the methods
    * declared on this class and its parents */
-  <<__Native, __Pure>>
-  private static function getMethodOrder(string $clsname, int $filter): object;
+  <<__Native>>
+  private static function getMethodOrder(string $clsname, int $filter)[]: keyset;
 
-  <<__Pure, __MaybeMutable>>
-  private function getMethodOrderWithCaching(?int $filter): Set<string> {
+  private function getMethodOrderWithCaching(?int $filter)[]: keyset<string> {
     if (null === $filter) {
       return self::getMethodOrderCache($this->getName());
     }
     return self::getMethodOrder($this->getName(), $filter);
   }
 
-  <<__Memoize, __Pure>>
+  <<__Memoize>>
   private static function getMethodOrderCache(
     string $clsname,
-  ): Set<string> {
+  )[]: keyset<string> {
     return self::getMethodOrder($clsname, 0xFFFF);
   }
 

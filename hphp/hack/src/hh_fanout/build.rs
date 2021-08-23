@@ -281,6 +281,7 @@ fn extend_edges_from_dep_graph(all_edges: &Edges, graph: &DepGraph<'_>) {
 }
 
 fn main(
+    allow_empty: bool,
     incremental: Option<OsString>,
     new_edges_dir: Option<OsString>,
     delta_file: Option<OsString>,
@@ -356,6 +357,10 @@ fn main(
         all_edges.count_edges()
     );
 
+    if !allow_empty && all_edges.count_edges() == 0 {
+        panic!("No input edges. Refusing to build as --allow-empty not set.");
+    }
+
     info!("Converting to structured edges");
     let structured_edges = all_edges.structured_edges();
     info!("Getting sorted unique hashes");
@@ -407,11 +412,12 @@ fn main(
 
 ocaml_ffi! {
   fn hh_fanout_build_main(
+    allow_empty: bool,
     incremental: Option<OsString>,
     new_edges_dir: Option<OsString>,
     delta_file: Option<OsString>,
     output: OsString,
   ) {
-    main(incremental, new_edges_dir, delta_file, output).unwrap();
+    main(allow_empty, incremental, new_edges_dir, delta_file, output).unwrap();
   }
 }

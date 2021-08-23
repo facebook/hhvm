@@ -256,9 +256,6 @@ impl<'bytes> Indexer<'bytes> {
 
         // Read in length
         let length = byteutils::read_u64_ne(data);
-        if length == 0 {
-            return Err("indexer: length must be >0".to_string());
-        }
         if length > (1 << 32) - 1 {
             return Err("indexer: length is too big".to_string());
         }

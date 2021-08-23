@@ -7,9 +7,9 @@
  *)
 
 external hh_fanout_build_main :
-  string option -> string option -> string option -> string -> unit
+  bool -> string option -> string option -> string option -> string -> unit
   = "hh_fanout_build_main"
 
-let go ~incremental ~edges_dir ~delta_file ~output =
-  hh_fanout_build_main incremental edges_dir delta_file output;
+let go ~allow_empty ~incremental ~edges_dir ~delta_file ~output =
+  hh_fanout_build_main allow_empty incremental edges_dir delta_file output;
   Lwt.return_unit

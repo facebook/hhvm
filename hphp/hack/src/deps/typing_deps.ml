@@ -607,7 +607,8 @@ module SaveCustomGraph = struct
       destination_file_handle_ref := Some handle;
       handle
 
-  let filter_discovered_deps_batch mode =
+  let filter_discovered_deps_batch ~flush mode =
+    let handle = destination_file_handle mode in
     Hashtbl.iter
       begin
         fun CustomGraph.{ idependent; idependency } () ->
@@ -618,7 +619,6 @@ module SaveCustomGraph = struct
                idependent
                idependency)
         then begin
-          let handle = destination_file_handle mode in
           (* output_binary_int outputs the lower 4-bytes only, regardless
            * of architecture. It outputs in big-endian format.*)
           Out_channel.output_binary_int handle (idependent lsr 32);
@@ -628,6 +628,7 @@ module SaveCustomGraph = struct
         end
       end
       discovered_deps_batch;
+    if flush then Out_channel.flush handle;
     Hashtbl.clear discovered_deps_batch
 
   let add_idep mode dependent dependency =
@@ -643,7 +644,7 @@ module SaveCustomGraph = struct
           CustomGraph.{ idependent; idependency }
           ();
         if Hashtbl.length discovered_deps_batch >= 1000 then
-          filter_discovered_deps_batch mode
+          filter_discovered_deps_batch ~flush:false mode
       end
     )
 end
@@ -814,7 +815,7 @@ let flush_ideps_batch mode : dep_edges =
     CustomGraph.filtered_deps_batch := CustomGraph.DepEdgeSet.empty;
     Some old_batch
   | SaveCustomMode _ ->
-    SaveCustomGraph.filter_discovered_deps_batch mode;
+    SaveCustomGraph.filter_discovered_deps_batch ~flush:true mode;
     None
 
 let merge_dep_edges (x : dep_edges) (y : dep_edges) : dep_edges =

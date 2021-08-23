@@ -13,6 +13,7 @@ open Integration_test_base_types
 val setup_server :
   ?custom_config:ServerConfig.t ->
   ?hhi_files:(string * string) list ->
+  ?edges_dir:string ->
   unit ->
   ServerEnv.env
 
@@ -33,7 +34,8 @@ val save_state :
 val save_state_incremental :
   ServerEnv.env ->
   ?store_decls_in_saved_state:bool ->
-  string ->
+  old_state_dir:string ->
+  new_state_dir:string ->
   SaveStateServiceTypes.save_state_result option
 
 val save_state_with_errors : disk_changes_type -> string -> string -> unit

@@ -289,7 +289,7 @@ let saved_state_build_revision_write ~(base_file_name : string) : unit =
 
 let saved_state_build_revision_read ~(base_file_name : string) : string =
   let info_file = saved_state_info_file_name ~base_file_name in
-  let contents = Sys_utils.cat info_file in
+  let contents = RealDisk.cat info_file in
   let json = Some (Hh_json.json_of_string contents) in
   let build_revision = Hh_json_helpers.Jget.string_exn json "build_revision" in
   build_revision

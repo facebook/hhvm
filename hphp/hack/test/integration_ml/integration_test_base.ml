@@ -77,11 +77,17 @@ to the test disk and add them to disk_needs_parsing. After one server run loop, 
 This isn't exactly the same as how initialization does it, but the purpose is not to test the hhi
 files, but to test incremental mode behavior with Hhi files present.
 *)
-let setup_server ?custom_config ?(hhi_files = []) () =
+let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () =
   test_init_common () ~hhi_files;
 
   let init_id = Random_id.short_string () in
-  let deps_mode = Typing_deps_mode.SQLiteMode in
+  let deps_mode =
+    match edges_dir with
+    | Some edges_dir ->
+      Typing_deps_mode.SaveCustomMode
+        { graph = None; new_edges_dir = edges_dir }
+    | None -> Typing_deps_mode.CustomMode None
+  in
   let result =
     match custom_config with
     | Some config -> ServerEnvBuild.make_env ~init_id ~deps_mode config
@@ -521,6 +527,31 @@ let in_daemon f =
   | (_, Unix.WEXITED 0) -> ()
   | _ -> assert false
 
+let build_dep_graph ~output ~edges_dir =
+  let hh_fanout = Sys.getenv "HH_FANOUT_BIN" in
+  let cmd =
+    Printf.sprintf
+      "%s build --allow-empty --output %s --edges-dir %s"
+      (Filename.quote hh_fanout)
+      (Filename.quote output)
+      (Filename.quote edges_dir)
+  in
+  let () = assert (Sys.command cmd = 0) in
+  ()
+
+let build_dep_graph_incr ~output ~old_graph ~delta =
+  let hh_fanout = Sys.getenv "HH_FANOUT_BIN" in
+  let cmd =
+    Printf.sprintf
+      "%s build --allow-empty --output %s --incremental %s --delta %s"
+      (Filename.quote hh_fanout)
+      (Filename.quote output)
+      (Filename.quote old_graph)
+      (Filename.quote delta)
+  in
+  let () = assert (Sys.command cmd = 0) in
+  ()
+
 let save_state
     ?(load_hhi_files = false)
     ?(store_decls_in_saved_state =
@@ -536,7 +567,11 @@ let save_state
     else
       []
   in
-  let env = setup_server () ?custom_config ~hhi_files in
+  let edges_dir = temp_dir ^ "/edges/" in
+  RealDisk.mkdir_p edges_dir;
+  (* We don't support multiple workers! And don't use any *)
+  Typing_deps.worker_id := Some 0;
+  let env = setup_server () ~edges_dir ?custom_config ~hhi_files in
   let env = setup_disk env disk_changes in
   assert_no_errors env;
   genv :=
@@ -554,6 +589,8 @@ let save_state
   let _edges_added =
     ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename)
   in
+  let output = temp_dir ^ "/" ^ saved_state_filename ^ ".hhdg" in
+  build_dep_graph ~output ~edges_dir;
   if enable_naming_table_fallback then (
     let _rows_added =
       SaveStateService.go_naming
@@ -569,7 +606,8 @@ let save_state_incremental
     env
     ?(store_decls_in_saved_state =
       ServerLocalConfig.(default.store_decls_in_saved_state))
-    temp_dir =
+    ~old_state_dir
+    ~new_state_dir =
   assert_no_errors env;
   genv :=
     {
@@ -580,11 +618,24 @@ let save_state_incremental
           ServerLocalConfig.store_decls_in_saved_state;
         };
     };
-  ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename)
+  let result =
+    ServerInit.save_state !genv env (new_state_dir ^ "/" ^ saved_state_filename)
+  in
+  let old_graph = old_state_dir ^ "/" ^ saved_state_filename ^ ".hhdg" in
+  let output = new_state_dir ^ "/" ^ saved_state_filename ^ ".hhdg" in
+  let delta =
+    new_state_dir ^ "/" ^ saved_state_filename ^ "_64bit_dep_graph.delta"
+  in
+  build_dep_graph_incr ~output ~old_graph ~delta;
+  result
 
 let save_state_with_errors disk_changes temp_dir expected_error : unit =
   in_daemon @@ fun () ->
-  let env = setup_server () in
+  let edges_dir = temp_dir ^ "/edges/" in
+  RealDisk.mkdir_p edges_dir;
+  (* We don't support multiple workers! And don't use any *)
+  Typing_deps.worker_id := Some 0;
+  let env = setup_server ~edges_dir () in
   let env = setup_disk env disk_changes in
   assert_env_errors env expected_error;
 
@@ -598,6 +649,8 @@ let save_state_with_errors disk_changes temp_dir expected_error : unit =
   let _edges_added =
     ServerInit.save_state genv env (temp_dir ^ "/" ^ saved_state_filename)
   in
+  let output = temp_dir ^ "/" ^ saved_state_filename ^ ".hhdg" in
+  build_dep_graph ~output ~edges_dir;
   ()
 
 let load_state
@@ -655,9 +708,8 @@ let load_state
         Relative_path.create_detect_prefix (root ^ x))
   in
   let naming_table_path = saved_state_dir ^ "/" ^ saved_state_filename in
-  let deptable_fn = saved_state_dir ^ "/" ^ saved_state_filename ^ ".sql" in
-  (* TODO(hverr): Figure out 64-bit *)
-  let deptable_is_64bit = false in
+  let deptable_fn = saved_state_dir ^ "/" ^ saved_state_filename ^ ".hhdg" in
+  let deptable_is_64bit = true in
   let load_state_approach =
     ServerInit.Precomputed
       {
@@ -673,11 +725,10 @@ let load_state
       }
   in
   let init_id = Random_id.short_string () in
-  (* TODO(hverr): Figure out 64-bit *)
   let env =
     ServerEnvBuild.make_env
       ~init_id
-      ~deps_mode:Typing_deps_mode.SQLiteMode
+      ~deps_mode:(Typing_deps_mode.CustomMode (Some deptable_fn))
       !genv.ServerEnv.config
   in
   match
@@ -690,8 +741,8 @@ let load_state
   | (_env, ServerInit.Load_state_declined s) ->
     Printf.eprintf "> DECLINED %s\n" s;
     assert false
-  | (_env, ServerInit.Load_state_failed (s, _stack)) ->
-    Printf.eprintf "> FAILED %s\n" s;
+  | (_env, ServerInit.Load_state_failed (s, Utils.Callstack stack)) ->
+    Printf.eprintf "> FAILED %s: %s\n" s stack;
     assert false
 
 let diagnostics_to_string x =

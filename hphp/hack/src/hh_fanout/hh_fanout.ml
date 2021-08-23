@@ -884,6 +884,15 @@ to be produced by hh_server
   in
   let exits = Term.default_exits in
 
+  let allow_empty =
+    let doc =
+      "Do not fail when produced dependency graph is empty. By default, the tool"
+      ^ " exits with a non-zero exit code when trying to produce an empty graph,"
+      ^ " as most likely, this only happens when something has gone wrong (a bug)."
+      ^ " However, producing empty graphs can still be useful! (E.g. in tests)"
+    in
+    value & flag & info ["allow-empty"] ~doc
+  in
   let incremental =
     let doc =
       "Use the provided dependency graph as a base. Build a new dependency graph"
@@ -914,11 +923,12 @@ to be produced by hh_server
     let doc = "Where to put the 64-bit dependency graph." in
     required & opt (some string) None & info ["output"] ~doc ~docv:"OUTPUT"
   in
-  let run incremental edges_dir delta_file output =
-    Lwt_main.run (mode_build ~incremental ~edges_dir ~delta_file ~output)
+  let run allow_empty incremental edges_dir delta_file output =
+    Lwt_main.run
+      (mode_build ~allow_empty ~incremental ~edges_dir ~delta_file ~output)
   in
   Term.
-    ( const run $ incremental $ edges_dir $ delta_file $ output,
+    ( const run $ allow_empty $ incremental $ edges_dir $ delta_file $ output,
       info "build" ~doc ~sdocs:Manpage.s_common_options ~man ~exits )
 
 let mode_dep_graph_stats = Dep_graph_stats.go

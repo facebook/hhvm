@@ -239,12 +239,12 @@ impl DepGraphWriter<Phase1AllocateHashSets> {
 
         // Check sorted
         let mut hashes_iter = sorted_hashes.iter();
-        let mut prev_hash = hashes_iter.next().expect("exected at least one hash");
+        let mut prev_hash = hashes_iter.next();
         for h in hashes_iter {
-            if h <= prev_hash {
-                panic!("hashes not sorted: {} <= {}", h, prev_hash);
+            if h <= prev_hash.unwrap() {
+                panic!("hashes not sorted: {} <= {}", h, prev_hash.unwrap());
             }
-            prev_hash = h;
+            prev_hash = Some(h);
         }
 
         // Indexer!

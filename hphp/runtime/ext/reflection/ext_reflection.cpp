@@ -631,7 +631,10 @@ Array HHVM_FUNCTION(type_structure_no_throw,
 String HHVM_FUNCTION(type_structure_classname,
                      const Variant& cls_or_obj, const Variant& cns_name) {
   auto const ts = implTypeStructure(cls_or_obj, cns_name, false);
-  return ts[s_classname].asCStrRef();
+  auto const classname = ts->get(s_classname.get(), true);
+  assertx(isStringType(type(classname)));
+  assertx(val(classname).pstr->isStatic());
+  return String::attach(val(classname).pstr);
 }
 
 [[noreturn]]

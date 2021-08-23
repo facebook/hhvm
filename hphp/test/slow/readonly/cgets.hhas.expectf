@@ -1,2 +1,2 @@
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Property ro_prop of class Foo must be mutable.' in %s/cgets.hhas:%d
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Property ro_prop of class Foo is readonly, but isn't enclosed in a readonly expression' in %s/cgets.hhas:%d
 %A

@@ -3280,6 +3280,12 @@ fields of that struct for holding intermediate values.
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the local was required to be a value type. S0 is the local name.
 
+| ThrowMustBeEnclosedInReadonly<cls>, ND, S(Str), T
+
+  Throws an InvalidOperationException indicating a readonly semantics violation
+  where the property was required to be enclosed in a readonly expression. cls
+  is the class the property was declared on. S0 is the property name.
+
 | ProfileType, ND, S(Cell), NF
 
   Profile the type of S0.

@@ -191,6 +191,10 @@ void throwArrayKeyException(const ArrayData* ad, const StringData* key) {
   throwOOBArrayKeyException(key, ad);
 }
 
+void throwMustBeEnclosedinReadonly(const Class* cls, const StringData* propName) {
+  throw_must_be_enclosed_in_readonly(cls->name()->data(), propName->data());
+}
+
 void throwMustBeReadonlyException(const Class* cls, const StringData* propName) {
   throw_cannot_write_non_readonly_prop(cls->name()->data(), propName->data());
 }

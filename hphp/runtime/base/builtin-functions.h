@@ -240,6 +240,8 @@ bool is_constructor_name(const char* func);
 [[noreturn]] void throw_cannot_write_non_readonly_prop(const char* className,
                                                        const char* propName);
 [[noreturn]] void throw_must_be_mutable(const char* className, const char* propName);
+[[noreturn]] void throw_must_be_enclosed_in_readonly(const char* className,
+                                                     const char* propName);
 [[noreturn]] void throw_local_must_be_value_type(const char* locName);
 [[noreturn]] void throw_prop_must_be_value_type(const char* className,
                                                 const char* propName);
@@ -252,7 +254,7 @@ bool is_constructor_name(const char* func);
                                              const StringData* type);
 
 void checkReadonly(const TypedValue* tv, const Class* cls, const StringData* name,
-                   bool readonly, ReadonlyOp op, bool* roProp);
+                   bool readonly, ReadonlyOp op, bool* roProp, bool writeMode);
 bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op, bool& roProp);
 
 void check_collection_cast_to_array();

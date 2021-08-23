@@ -61,6 +61,7 @@ void checkReadonlyMismatch(const Func* func, uint32_t numArgs,
 void throwParamReadonlyMismatch(const Func* func, uint32_t index);
 [[noreturn]] void throwInvalidUnpackArgs();
 [[noreturn]] void throwMissingArgument(const Func* func, int got);
+[[noreturn]] void throwMustBeEnclosedinReadonly(const Class* cls, const StringData* propName);
 [[noreturn]] void throwMustBeMutableException(const Class* cls, const StringData* propName);
 [[noreturn]] void throwMustBeReadonlyException(const Class* cls, const StringData* propName);
 [[noreturn]] void throwMustBeValueTypeException(const StringData* locName);

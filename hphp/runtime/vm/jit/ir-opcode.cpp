@@ -448,6 +448,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowMissingThis:
   case ThrowOutOfBounds:
   case ThrowParameterWrongType:
+  case ThrowMustBeEnclosedInReadonly:
   case ThrowMustBeMutableException:
   case ThrowMustBeReadonlyException:
   case ThrowMustBeValueTypeException:

@@ -2001,6 +2001,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowParameterWrongType:
   case ArrayMarkLegacyShallow:
   case ArrayMarkLegacyRecursive:
+  case ThrowMustBeEnclosedInReadonly:
   case ThrowMustBeMutableException:
   case ThrowMustBeReadonlyException:
   case ThrowMustBeValueTypeException:

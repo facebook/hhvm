@@ -490,6 +490,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   void throwMustBeMutable(Slot prop) const;
 
   [[noreturn]] NEVER_INLINE
+  void throwMustBeEnclosedInReadonly(Slot prop) const;
+
+  [[noreturn]] NEVER_INLINE
   void throwMustBeReadonly(Slot prop) const;
 
   [[noreturn]] NEVER_INLINE
@@ -516,7 +519,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     bool readonly;
   };
 
-  void checkReadonly(const PropLookup&, ReadonlyOp, bool*) const;
+  void checkReadonly(const PropLookup&, ReadonlyOp, bool*, bool) const;
 
   template <bool forWrite, bool forRead, bool ignoreLateInit>
   ALWAYS_INLINE

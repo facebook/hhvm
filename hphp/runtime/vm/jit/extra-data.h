@@ -2866,6 +2866,7 @@ X(CheckFuncNeedsCoverage,       FuncData);
 X(RecordFuncCall,               FuncData);
 X(LdClsPropAddrOrNull,          ReadOnlyData);
 X(LdClsPropAddrOrRaise,         ReadOnlyData);
+X(ThrowMustBeEnclosedInReadonly,ClassData);
 
 #undef X
 

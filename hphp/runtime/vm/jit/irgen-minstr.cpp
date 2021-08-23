@@ -967,7 +967,12 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadonlyOp
   }
   if (RO::EvalEnableReadonlyPropertyEnforcement) {
     if (propInfo->readOnly && op == ReadonlyOp::Mutable) {
-      gen(env, ThrowMustBeMutableException, cns(env, propInfo->propClass), key);
+      if (mode == MOpMode::Unset || mode == MOpMode::Define) {
+        gen(env, ThrowMustBeMutableException, cns(env, propInfo->propClass), key);
+      } else {
+        auto data = ClassData { propInfo->propClass };
+        gen(env, ThrowMustBeEnclosedInReadonly, data, key);
+      }
       return cns(env, TBottom);
     } else if (!propInfo->readOnly && op == ReadonlyOp::CheckROCOW) {
       gen(env, ThrowMustBeReadonlyException, cns(env, propInfo->propClass), key);
@@ -1181,7 +1186,8 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
   if (propInfo) {
     if (RO::EvalEnableReadonlyPropertyEnforcement && propInfo->readOnly &&
       op == ReadonlyOp::Mutable) {
-      gen(env, ThrowMustBeMutableException, cns(env, propInfo->propClass), key);
+      auto data = ClassData { propInfo->propClass };
+      gen(env, ThrowMustBeEnclosedInReadonly, data, key);
       return cns(env, TBottom);
     }
     auto propAddr =

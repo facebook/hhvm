@@ -442,7 +442,7 @@ TypedValue* getSPropOrNull(ReadonlyOp op,
   if (writeMode && UNLIKELY(lookup.constant)) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
-  checkReadonly(lookup.val, cls, name, lookup.readonly, op, roProp);
+  checkReadonly(lookup.val, cls, name, lookup.readonly, op, roProp, writeMode);
   if (UNLIKELY(!lookup.val || !lookup.accessible)) return nullptr;
 
   return lookup.val;

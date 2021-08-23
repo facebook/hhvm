@@ -909,6 +909,15 @@ void throw_must_be_mutable(const char* className, const char* propName)
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
+void throw_must_be_enclosed_in_readonly(const char* className, const char* propName)
+{
+  auto msg = folly::sformat(
+   "Property {} of class {} is readonly, but isn't enclosed in a "
+   "readonly expression", propName, className
+  );
+  SystemLib::throwInvalidOperationExceptionObject(msg);
+}
+
 void throw_local_must_be_value_type(const char* locName)
 {
   auto msg = folly::sformat("Local {} must be a value type.", locName);
@@ -934,13 +943,13 @@ bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op, bool& roProp) {
   }
   return false;
 }
-
 void checkReadonly(const TypedValue* tv,
                    const Class* cls,
                    const StringData* name,
                    bool readonly,
                    ReadonlyOp op,
-                   bool* roProp) {
+                   bool* roProp,
+                   bool writeMode) {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
   auto cow = !isRefcountedType(type(tv)) || hasPersistentFlavor(type(tv));
   if (readonly) {
@@ -952,7 +961,11 @@ void checkReadonly(const TypedValue* tv,
         throw_prop_must_be_value_type(cls->name()->data(), name->data());
       }
     } else if (op == ReadonlyOp::Mutable) {
-      throw_must_be_mutable(cls->name()->data(), name->data());
+      if (writeMode) {
+        throw_must_be_mutable(cls->name()->data(), name->data());
+      } else {
+        throw_must_be_enclosed_in_readonly(cls->name()->data(), name->data());
+      }
     }
   } else if (op == ReadonlyOp::Readonly || op == ReadonlyOp::CheckROCOW) {
     throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());

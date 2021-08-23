@@ -2386,7 +2386,9 @@ OPTBLD_INLINE void iopCGetS(ReadonlyOp op) {
   }
   if (RO::EvalEnableReadonlyPropertyEnforcement &&
     ss.readonly && op == ReadonlyOp::Mutable){
-    throw_must_be_mutable(ss.cls->name()->data(), ss.name->data());
+    throw_must_be_enclosed_in_readonly(
+      ss.cls->name()->data(), ss.name->data()
+    );
   }
   tvDup(*ss.val, *ss.output);
 }
@@ -2452,7 +2454,8 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
       name->data());
   }
 
-  checkReadonly(lookup.val, class_, name, lookup.readonly, op, &mstate.roProp);
+  checkReadonly(lookup.val, class_, name, lookup.readonly, op,
+                &mstate.roProp, writeMode);
   mstate.base = tv_lval(lookup.val);
 }
 

@@ -22,10 +22,14 @@ if (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
   set (LibDwarf_FIND_QUIETLY TRUE)
 endif (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
 
+find_package(PkgConfig)
+pkg_check_modules(PkgConfig_LibDwarf QUIET libdwarf)
+
 find_path (DWARF_INCLUDE_DIR
   NAMES
     libdwarf.h dwarf.h
   PATHS
+    ${PkgConfig_LibDwarf_INCLUDE_DIRS}
     /usr/include
     /usr/include/libdwarf
     /usr/local/include
@@ -46,6 +50,7 @@ find_library (LIBDWARF_LIBRARIES
     /usr/local/lib
     /opt/local/lib
     /sw/lib
+    ${PkgConfig_LibDwarf_LIBRARY_DIRS}
     ENV LIBRARY_PATH   # PATH and LIB will also work
     ENV LD_LIBRARY_PATH)
 include (FindPackageHandleStandardArgs)

@@ -77,9 +77,9 @@ TEST_F(TaintTest, TestRetCSource) {
   auto func = createFunc("__source");
   vmfp()->setFunc(func);
 
-  EXPECT_EQ(State::get()->returned_source, kNoSource);
+  State::get()->stack.push(kNoSource);
   iopRetC();
-  EXPECT_EQ(State::get()->returned_source, kTestSource);
+  EXPECT_EQ(State::get()->stack.top(), kTestSource);
 }
 
 TEST_F(TaintTest, TestRetCNoSource) {
@@ -89,9 +89,9 @@ TEST_F(TaintTest, TestRetCNoSource) {
   auto func = createFunc("__unrelated");
   vmfp()->setFunc(func);
 
-  EXPECT_EQ(State::get()->returned_source, kNoSource);
+  State::get()->stack.push(kNoSource);
   iopRetC();
-  EXPECT_EQ(State::get()->returned_source, kNoSource);
+  EXPECT_EQ(State::get()->stack.top(), kNoSource);
 }
 
 TEST_F(TaintTest, TestFCallFuncDIssue) {
@@ -101,7 +101,7 @@ TEST_F(TaintTest, TestFCallFuncDIssue) {
   auto func = createFunc("__sink");
   vmfp()->setFunc(func);
 
-  State::get()->stack.push_back(kTestSource);
+  State::get()->stack.push(kTestSource);
   EXPECT_TRUE(State::get()->issues.empty());
   iopFCallFuncD();
   EXPECT_EQ(State::get()->issues.size(), 1);
@@ -115,7 +115,7 @@ TEST_F(TaintTest, TestFCallFuncDNoIssue) {
   auto func = createFunc("__sink");
   vmfp()->setFunc(func);
 
-  State::get()->stack.push_back(kNoSource);
+  State::get()->stack.push(kNoSource);
   EXPECT_TRUE(State::get()->issues.empty());
   iopFCallFuncD();
   EXPECT_TRUE(State::get()->issues.empty());

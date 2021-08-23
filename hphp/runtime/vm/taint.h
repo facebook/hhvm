@@ -48,21 +48,29 @@ struct Issue {
   }
 };
 
+struct Stack {
+  Stack(const std::vector<Source>& stack = {}) : m_stack(stack) {}
+
+  void push(Source source);
+  Source top() const;
+  void pop(int n = 1);
+  void replaceTop(Source source);
+
+  size_t size() const;
+  void clear();
+ private:
+  std::vector<Source> m_stack;
+};
+
 struct State {
   static std::shared_ptr<State> get();
 
   void reset() {
-    returned_source = kNoSource;
     stack.clear();
     issues.clear();
   }
 
-  // Keep track of encountered source.
-  Source returned_source = kNoSource;
-
-  // Dummy shadow-stack, this is not yet maintained by the runtime.
-  std::vector<Source> stack;
-
+  Stack stack;
   std::vector<Issue> issues;
 };
 

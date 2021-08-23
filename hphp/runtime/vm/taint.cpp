@@ -70,6 +70,35 @@ folly::Singleton<Configuration, ConfigurationSingletonTag> kConfigurationSinglet
   return kConfigurationSingleton.try_get();
 }
 
+void Stack::push(Source source) {
+  m_stack.push_back(source);
+}
+
+Source Stack::top() const {
+  assertx(!m_stack.empty());
+  return m_stack.back();
+}
+
+void Stack::pop(int n) {
+  assertx(m_stack.size() >= n);
+  for (int i = 0; i < n; i++) {
+    m_stack.pop_back();
+  }
+}
+
+void Stack::replaceTop(Source source) {
+  assertx(!m_stack.empty());
+  m_stack.back() = source;
+}
+
+size_t Stack::size() const {
+  return m_stack.size();
+}
+
+void Stack::clear() {
+  m_stack.clear();
+}
+
 folly::Singleton<State, StateSingletonTag> kStateSingleton{};
 /* static */ std::shared_ptr<State> State::get() {
   return kStateSingleton.try_get();
@@ -78,14 +107,20 @@ folly::Singleton<State, StateSingletonTag> kStateSingleton{};
 namespace {
 
 void iopPreamble() {
-  // TOOD(T93549800): actually check whether we have consistency
-  // between shadow and real stack.
+  auto vm_stack_size = vmStack().count();
   FTRACE(
       3,
       "taint: stack -> size: {}, pushes: {}, pops: {}\n",
-      vmStack().count(),
+      vm_stack_size,
       instrNumPushes(vmpc()),
       instrNumPops(vmpc()));
+  auto shadow_stack_size = State::get()->stack.size();
+  if (vm_stack_size != shadow_stack_size) {
+    FTRACE(
+        3,
+        "taint: stacks out of sync (shadow stack size: {})\n",
+        shadow_stack_size);
+  }
 }
 
 void iopUnhandled(const std::string& name) {
@@ -471,7 +506,7 @@ void iopRetC() {
   auto& sources = Configuration::get()->sources;
   if (sources.find(name) != sources.end()) {
     FTRACE(1, "taint: {}: function returns `TestSource`\n", pcOff());
-    State::get()->returned_source = kTestSource;
+    State::get()->stack.replaceTop(kTestSource);
   }
 }
 
@@ -706,7 +741,7 @@ void iopFCallFuncD() {
   std::string name = vmfp()->func()->fullName()->data();
   auto& sinks = Configuration::get()->sinks;
   if (sinks.find(name) != sinks.end() &&
-      State::get()->stack.back() == kTestSource) {
+      State::get()->stack.top() == kTestSource) {
     FTRACE(1, "taint: {}: tainted value flows into sink\n", pcOff());
     State::get()->issues.push_back({kTestSource, name});
   }

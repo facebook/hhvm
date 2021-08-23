@@ -77,8 +77,20 @@ folly::Singleton<State, StateSingletonTag> kStateSingleton{};
 
 namespace {
 
-inline void iopUnhandled(const std::string& name) {
-  FTRACE(1, "taint: iopUnhandled opcode `{}`\n", name);
+void iopPreamble() {
+  // TOOD(T93549800): actually check whether we have consistency
+  // between shadow and real stack.
+  FTRACE(
+      3,
+      "taint: stack -> size: {}, pushes: {}, pops: {}\n",
+      vmStack().count(),
+      instrNumPushes(vmpc()),
+      instrNumPops(vmpc()));
+}
+
+void iopUnhandled(const std::string& name) {
+  FTRACE(1, "taint: unhandled opcode `{}`\n", name);
+  iopPreamble();
 }
 
 } // namespace
@@ -452,6 +464,9 @@ void iopSSwitch() {
 }
 
 void iopRetC() {
+  FTRACE(1, "taint: RetC\n");
+  iopPreamble();
+
   std::string name = vmfp()->func()->fullName()->data();
   auto& sources = Configuration::get()->sources;
   if (sources.find(name) != sources.end()) {
@@ -685,6 +700,9 @@ void iopFCallFunc() {
 }
 
 void iopFCallFuncD() {
+  FTRACE(1, "taint: FCallFuncD\n");
+  iopPreamble();
+
   std::string name = vmfp()->func()->fullName()->data();
   auto& sinks = Configuration::get()->sinks;
   if (sinks.find(name) != sinks.end() &&

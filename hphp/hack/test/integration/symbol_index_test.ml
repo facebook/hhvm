@@ -198,7 +198,7 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
   let env =
     ServerEnvBuild.make_env
       ~init_id
-      ~deps_mode:Typing_deps_mode.SQLiteMode
+      ~deps_mode:(Typing_deps_mode.CustomMode None)
       ServerConfig.default_config
   in
   let ctx = Provider_utils.ctx_from_server_env env in
@@ -369,7 +369,7 @@ let test_docblock_finder (harness : Test_harness.t) : bool =
   let env =
     ServerEnvBuild.make_env
       ~init_id
-      ~deps_mode:Typing_deps_mode.SQLiteMode
+      ~deps_mode:(Typing_deps_mode.CustomMode None)
       ServerConfig.default_config
   in
   let handle = SharedMem.init ~num_workers:0 SharedMem.default_config in

@@ -41,7 +41,7 @@ end = struct
       Provider_context.empty_for_test
         ~popt:ParserOptions.default
         ~tcopt:TypecheckerOptions.default
-        ~deps_mode:Typing_deps_mode.SQLiteMode
+        ~deps_mode:(Typing_deps_mode.CustomMode None)
     in
     let env = Env.empty ctx Relative_path.default ~droot:None in
     let env = Env.set_log_level env "show" 2 in

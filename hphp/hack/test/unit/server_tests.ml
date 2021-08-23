@@ -207,7 +207,7 @@ let test_compute_tast_counting () =
           ~popt:ParserOptions.default
           ~tcopt:TypecheckerOptions.default
           ~backend:(Provider_backend.get ())
-          ~deps_mode:Typing_deps_mode.SQLiteMode
+          ~deps_mode:(Typing_deps_mode.CustomMode None)
       in
       let (ctx, entry) =
         Provider_context.add_entry_if_missing ~ctx ~path:foo_path

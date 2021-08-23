@@ -63,7 +63,7 @@ let setup ~(sqlite : bool) (tcopt : GlobalOptions.t) : setup =
   (* Parsing produces the file infos that the naming table module can use
      to construct the forward naming table (files-to-symbols) *)
   let popt = ParserOptions.default in
-  let deps_mode = Typing_deps_mode.SQLiteMode in
+  let deps_mode = Typing_deps_mode.CustomMode None in
   let ctx =
     Provider_context.empty_for_tool
       ~popt

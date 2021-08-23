@@ -222,39 +222,6 @@ inline const ArrayData* decode_litarr(PC& pc) {
   return liveUnit()->lookupArrayId(decode<Id>(pc));
 }
 
-namespace {
-
-// wrapper for local variable ILA operand
-struct local_var {
-  tv_lval lval;
-  int32_t index;
-};
-
-// wrapper for named local variable NLA operand
-struct named_local_var {
-  LocalName name;
-  tv_lval lval;
-};
-
-// wrapper to handle unaligned access to variadic immediates
-template<class T> struct imm_array {
-  uint32_t const size;
-  PC const ptr;
-
-  explicit imm_array(uint32_t size, PC pc)
-    : size{size}
-    , ptr{pc}
-  {}
-
-  T operator[](uint32_t i) const {
-    T e;
-    memcpy(&e, ptr + i * sizeof(T), sizeof(T));
-    return e;
-  }
-};
-
-}
-
 ALWAYS_INLINE TypedValue* decode_local(PC& pc) {
   auto la = decode_iva(pc);
   assertx(la < vmfp()->func()->numLocals());
@@ -5409,7 +5376,8 @@ struct litstr_id {
 
 #ifdef HHVM_TAINT
 #define TAINT(name, imm, in, out, flags)                             \
-  HPHP::taint::iop##name();
+  iopWrapReturn(                                                     \
+    taint::iop##name, breakOnCtlFlow, origpc FLAG_##flags PASS_##imm);
 #else
 #define TAINT(name, imm, in, out, flags) ;
 #endif

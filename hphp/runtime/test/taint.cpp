@@ -78,7 +78,10 @@ TEST_F(TaintTest, TestRetCSource) {
   vmfp()->setFunc(func);
 
   State::get()->stack.push(kNoSource);
-  iopRetC();
+
+  PC pc = 0;
+  iopRetC(pc);
+
   EXPECT_EQ(State::get()->stack.top(), kTestSource);
 }
 
@@ -90,7 +93,10 @@ TEST_F(TaintTest, TestRetCNoSource) {
   vmfp()->setFunc(func);
 
   State::get()->stack.push(kNoSource);
-  iopRetC();
+
+  PC pc = 0;
+  iopRetC(pc);
+
   EXPECT_EQ(State::get()->stack.top(), kNoSource);
 }
 
@@ -103,7 +109,23 @@ TEST_F(TaintTest, TestFCallFuncDIssue) {
 
   State::get()->stack.push(kTestSource);
   EXPECT_TRUE(State::get()->issues.empty());
-  iopFCallFuncD();
+
+  PC pc = 0;
+  FCallArgs fca(
+      FCallArgsBase::Flags::None,
+      /* numArgs */ 0,
+      /* numRets */ 0,
+      /* inoutArgs */ nullptr,
+      /* readonlyArgs */ nullptr,
+      /* offset */ 0,
+      /* context */ nullptr);
+  iopFCallFuncD(
+       /* retToJit */ false,
+       pc,
+       /* origpc */ pc,
+       fca,
+       /* id */ 0);
+
   EXPECT_EQ(State::get()->issues.size(), 1);
   EXPECT_EQ(State::get()->issues[0], (Issue{kTestSource, "__sink"}));
 }
@@ -117,7 +139,23 @@ TEST_F(TaintTest, TestFCallFuncDNoIssue) {
 
   State::get()->stack.push(kNoSource);
   EXPECT_TRUE(State::get()->issues.empty());
-  iopFCallFuncD();
+
+  PC pc = 0;
+  FCallArgs fca(
+      FCallArgsBase::Flags::None,
+      /* numArgs */ 0,
+      /* numRets */ 0,
+      /* inoutArgs */ nullptr,
+      /* readonlyArgs */ nullptr,
+      /* offset */ 0,
+      /* context */ nullptr);
+  iopFCallFuncD(
+       /* retToJit */ false,
+       pc,
+       /* origpc */ pc,
+       fca,
+       /* id */ 0);
+
   EXPECT_TRUE(State::get()->issues.empty());
 }
 

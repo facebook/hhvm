@@ -114,6 +114,12 @@ void State::initialize() {
   }
 }
 
+void State::reset() {
+  stack.clear();
+  issues.clear();
+  initialize();
+}
+
 namespace {
 
 void iopPreamble(const std::string& name) {
@@ -166,7 +172,7 @@ void iopPopU2() {
   iopUnhandled("PopU2");
 }
 
-void iopPopL() {
+void iopPopL(tv_lval /* to */) {
   iopUnhandled("PopL");
 }
 
@@ -204,48 +210,48 @@ void iopFuncCred() {
   iopUnhandled("FuncCred");
 }
 
-void iopInt() {
+void iopInt(int64_t /* imm */) {
   iopPreamble("Int");
   State::get()->stack.push(kNoSource);
 }
 
-void iopDouble() {
+void iopDouble(double /* imm */) {
   iopUnhandled("Double");
 }
 
-void iopString() {
+void iopString(const StringData* /* s */) {
   iopUnhandled("String");
 }
 
-void iopDict() {
+void iopDict(const ArrayData* /* a */) {
   iopUnhandled("Dict");
 }
 
-void iopKeyset() {
+void iopKeyset(const ArrayData* /* a */) {
   iopUnhandled("Keyset");
 }
 
-void iopVec() {
+void iopVec(const ArrayData* /* a */) {
   iopUnhandled("Vec");
 }
 
-void iopNewDictArray() {
+void iopNewDictArray(uint32_t /* capacity */) {
   iopUnhandled("NewDictArray");
 }
 
-void iopNewStructDict() {
+void iopNewStructDict(imm_array<int32_t> /* ids */) {
   iopUnhandled("NewStructDict");
 }
 
-void iopNewVec() {
+void iopNewVec(uint32_t /* n */) {
   iopUnhandled("NewVec");
 }
 
-void iopNewKeysetArray() {
+void iopNewKeysetArray(uint32_t /* n */) {
   iopUnhandled("NewKeysetArray");
 }
 
-void iopNewRecord() {
+void iopNewRecord(const StringData* /* s */, imm_array<int32_t> /* ids */) {
   iopUnhandled("NewRecord");
 }
 
@@ -257,7 +263,7 @@ void iopAddNewElemC() {
   iopUnhandled("AddNewElemC");
 }
 
-void iopNewCol() {
+void iopNewCol(CollectionType /* cType */) {
   iopUnhandled("NewCol");
 }
 
@@ -265,23 +271,23 @@ void iopNewPair() {
   iopUnhandled("NewPair");
 }
 
-void iopColFromArray() {
+void iopColFromArray(CollectionType /* cType */) {
   iopUnhandled("ColFromArray");
 }
 
-void iopCnsE() {
+void iopCnsE(const StringData* /* s */) {
   iopUnhandled("CnsE");
 }
 
-void iopClsCns() {
+void iopClsCns(const StringData* /* clsCnsName */) {
   iopUnhandled("ClsCns");
 }
 
-void iopClsCnsD() {
+void iopClsCnsD(const StringData* /* clsCnsName */, Id /* classId */) {
   iopUnhandled("ClsCnsD");
 }
 
-void iopClsCnsL() {
+void iopClsCnsL(tv_lval /* local */) {
   iopUnhandled("ClsCnsL");
 }
 
@@ -309,7 +315,7 @@ void iopConcat() {
   iopUnhandled("Concat");
 }
 
-void iopConcatN() {
+void iopConcatN(uint32_t /* n */) {
   iopUnhandled("ConcatN");
 }
 
@@ -449,7 +455,7 @@ void iopInstanceOf() {
   iopUnhandled("InstanceOf");
 }
 
-void iopInstanceOfD() {
+void iopInstanceOfD(Id /* id */) {
   iopUnhandled("InstanceOfD");
 }
 
@@ -457,7 +463,7 @@ void iopIsLateBoundCls() {
   iopUnhandled("IsLateBoundCls");
 }
 
-void iopIsTypeStructC() {
+void iopIsTypeStructC(TypeStructResolveOp /* op */) {
   iopUnhandled("IsTypeStructC");
 }
 
@@ -465,7 +471,7 @@ void iopThrowAsTypeStructException() {
   iopUnhandled("ThrowAsTypeStructException");
 }
 
-void iopCombineAndResolveTypeStruct() {
+void iopCombineAndResolveTypeStruct(uint32_t /* n */) {
   iopUnhandled("CombineAndResolveTypeStruct");
 }
 
@@ -485,35 +491,36 @@ void iopExit() {
   iopUnhandled("Exit");
 }
 
-void iopFatal() {
+void iopFatal(FatalOp /* kind_char */) {
   iopUnhandled("Fatal");
 }
 
-void iopJmp() {
+void iopJmp(PC& /* pc */, PC /* targetpc */) {
   iopUnhandled("Jmp");
 }
 
-void iopJmpNS() {
+void iopJmpNS(PC& /* pc */, PC /* targetpc */) {
   iopUnhandled("JmpNS");
 }
 
-void iopJmpZ() {
+void iopJmpZ(PC& /* pc */, PC /* targetpc */) {
   iopUnhandled("JmpZ");
 }
 
-void iopJmpNZ() {
+void iopJmpNZ(PC& /* pc */, PC /* targetpc */) {
   iopUnhandled("JmpNZ");
 }
 
-void iopSwitch() {
+void iopSwitch(PC /* origpc */, PC& /* pc */, SwitchKind /* kind */, int64_t /* base */,
+               imm_array<Offset> /* jmptab */) {
   iopUnhandled("Switch");
 }
 
-void iopSSwitch() {
+void iopSSwitch(PC /* origpc */, PC& /* pc */, imm_array<StrVecItem> /* jmptab */) {
   iopUnhandled("SSwitch");
 }
 
-void iopRetC() {
+void iopRetC(PC& /* pc */) {
   iopPreamble("RetC");
 
   auto func = vmfp()->func();
@@ -527,37 +534,37 @@ void iopRetC() {
   }
 }
 
-void iopRetM() {
+void iopRetM(PC& /* pc */, uint32_t /* numRet */) {
   iopUnhandled("RetM");
 }
 
-void iopRetCSuspended() {
+void iopRetCSuspended(PC& /* pc */) {
   iopUnhandled("RetCSuspended");
 }
 
-void iopThrow() {
+void iopThrow(PC& /* pc */) {
   iopUnhandled("Throw");
 }
 
-void iopCGetL() {
+void iopCGetL(named_local_var /* fr */) {
   iopPreamble("CGetL");
   // TODO(T93549800): implement shadow heap.
   State::get()->stack.push(kNoSource);
 }
 
-void iopCGetQuietL() {
+void iopCGetQuietL(tv_lval /* fr */) {
   iopUnhandled("CGetQuietL");
 }
 
-void iopCUGetL() {
+void iopCUGetL(tv_lval /* fr */) {
   iopUnhandled("CUGetL");
 }
 
-void iopCGetL2() {
+void iopCGetL2(named_local_var /* fr */) {
   iopUnhandled("CGetL2");
 }
 
-void iopPushL() {
+void iopPushL(tv_lval /* locVal */) {
   iopUnhandled("PushL");
 }
 
@@ -565,7 +572,7 @@ void iopCGetG() {
   iopUnhandled("CGetG");
 }
 
-void iopCGetS() {
+void iopCGetS(ReadonlyOp /* op */) {
   iopUnhandled("CGetS");
 }
 
@@ -577,7 +584,7 @@ void iopClassGetTS() {
   iopUnhandled("ClassGetTS");
 }
 
-void iopGetMemoKeyL() {
+void iopGetMemoKeyL(named_local_var /* loc */) {
   iopUnhandled("GetMemoKeyL");
 }
 
@@ -585,7 +592,7 @@ void iopAKExists() {
   iopUnhandled("AKExists");
 }
 
-void iopIssetL() {
+void iopIssetL(tv_lval /* val */) {
   iopUnhandled("IssetL");
 }
 
@@ -597,27 +604,27 @@ void iopIssetS() {
   iopUnhandled("IssetS");
 }
 
-void iopIsUnsetL() {
+void iopIsUnsetL(tv_lval /* val */) {
   iopUnhandled("IsUnsetL");
 }
 
-void iopIsTypeC() {
+void iopIsTypeC(IsTypeOp /* op */) {
   iopUnhandled("IsTypeC");
 }
 
-void iopIsTypeL() {
+void iopIsTypeL(named_local_var /* loc */, IsTypeOp /* op */) {
   iopUnhandled("IsTypeL");
 }
 
-void iopAssertRATL() {
+void iopAssertRATL(local_var /* loc */, RepoAuthType /* rat */) {
   iopUnhandled("AssertRATL");
 }
 
-void iopAssertRATStk() {
+void iopAssertRATStk(uint32_t /* stkSlot */, RepoAuthType /* rat */) {
   iopUnhandled("AssertRATStk");
 }
 
-void iopSetL() {
+void iopSetL(tv_lval /* to */) {
   iopPreamble("SetL");
   // TODO(T93549800): implement shadow heap.
 }
@@ -626,35 +633,35 @@ void iopSetG() {
   iopUnhandled("SetG");
 }
 
-void iopSetS() {
+void iopSetS(ReadonlyOp /* op */) {
   iopUnhandled("SetS");
 }
 
-void iopSetOpL() {
+void iopSetOpL(tv_lval /* to */, SetOpOp /* op */) {
   iopUnhandled("SetOpL");
 }
 
-void iopSetOpG() {
+void iopSetOpG(SetOpOp /* op */) {
   iopUnhandled("SetOpG");
 }
 
-void iopSetOpS() {
+void iopSetOpS(SetOpOp /* op */) {
   iopUnhandled("SetOpS");
 }
 
-void iopIncDecL() {
+void iopIncDecL(named_local_var /* fr */, IncDecOp /* op */) {
   iopUnhandled("IncDecL");
 }
 
-void iopIncDecG() {
+void iopIncDecG(IncDecOp /* op */) {
   iopUnhandled("IncDecG");
 }
 
-void iopIncDecS() {
+void iopIncDecS(IncDecOp /* op */) {
   iopUnhandled("IncDecS");
 }
 
-void iopUnsetL() {
+void iopUnsetL(tv_lval /* loc */) {
   iopUnhandled("UnsetL");
 }
 
@@ -662,47 +669,51 @@ void iopUnsetG() {
   iopUnhandled("UnsetG");
 }
 
-void iopResolveFunc() {
+void iopResolveFunc(Id /* id */) {
   iopUnhandled("ResolveFunc");
 }
 
-void iopResolveMethCaller() {
+void iopResolveMethCaller(Id /* id */) {
   iopUnhandled("ResolveMethCaller");
 }
 
-void iopResolveRFunc() {
+void iopResolveRFunc(Id /* id */) {
   iopUnhandled("ResolveRFunc");
 }
 
-void iopResolveClsMethod() {
+void iopResolveClsMethod(const StringData* /* methName */) {
   iopUnhandled("ResolveClsMethod");
 }
 
-void iopResolveClsMethodD() {
+void iopResolveClsMethodD(Id /* classId */,
+                          const StringData* /* methName */) {
   iopUnhandled("ResolveClsMethodD");
 }
 
-void iopResolveClsMethodS() {
+void iopResolveClsMethodS(SpecialClsRef /* ref */,
+                          const StringData* /* methName */) {
   iopUnhandled("ResolveClsMethodS");
 }
 
-void iopResolveRClsMethod() {
+void iopResolveRClsMethod(const StringData* /* methName */) {
   iopUnhandled("ResolveRClsMethod");
 }
 
-void iopResolveRClsMethodD() {
+void iopResolveRClsMethodD(Id /* classId */,
+                           const StringData* /* methName */) {
   iopUnhandled("ResolveRClsMethodD");
 }
 
-void iopResolveRClsMethodS() {
+void iopResolveRClsMethodS(SpecialClsRef /* ref */,
+                           const StringData* /* methName */) {
   iopUnhandled("ResolveRClsMethodS");
 }
 
-void iopResolveClass() {
+void iopResolveClass(Id /* id */) {
   iopUnhandled("ResolveClass");
 }
 
-void iopLazyClass() {
+void iopLazyClass(Id /* id */) {
   iopUnhandled("LazyClass");
 }
 
@@ -714,15 +725,15 @@ void iopNewObjR() {
   iopUnhandled("NewObjR");
 }
 
-void iopNewObjD() {
+void iopNewObjD(Id /* id */) {
   iopUnhandled("NewObjD");
 }
 
-void iopNewObjRD() {
+void iopNewObjRD(Id /* id */) {
   iopUnhandled("NewObjRD");
 }
 
-void iopNewObjS() {
+void iopNewObjS(SpecialClsRef /* ref */) {
   iopUnhandled("NewObjS");
 }
 
@@ -730,31 +741,70 @@ void iopLockObj() {
   iopUnhandled("LockObj");
 }
 
-void iopFCallClsMethod() {
+TCA iopFCallClsMethod(bool /* retToJit */,
+                      PC /* origpc */,
+                      PC& /* pc */,
+                      const FCallArgs& /* fca */,
+                      const StringData*,
+                      IsLogAsDynamicCallOp /* op */) {
   iopUnhandled("FCallClsMethod");
+  return nullptr;
 }
 
-void iopFCallClsMethodD() {
+TCA iopFCallClsMethodD(bool /* retToJit */,
+                       PC /* origpc */,
+                       PC& /* pc */,
+                       const FCallArgs& /* fca */,
+                       const StringData*,
+                       Id /* classId */,
+                       const StringData* /* methName */) {
   iopUnhandled("FCallClsMethodD");
+  return nullptr;
 }
 
-void iopFCallClsMethodS() {
+TCA iopFCallClsMethodS(bool /* retToJit */,
+                       PC /* origpc */,
+                       PC& /* pc */,
+                       const FCallArgs& /* fca */,
+                       const StringData*,
+                       SpecialClsRef /* ref */) {
   iopUnhandled("FCallClsMethodS");
+  return nullptr;
 }
 
-void iopFCallClsMethodSD() {
+TCA iopFCallClsMethodSD(bool /* retToJit */,
+                        PC /* origpc */,
+                        PC& /* pc */,
+                        const FCallArgs& /* fca */,
+                        const StringData*,
+                        SpecialClsRef /* ref */,
+                        const StringData* /* methName */) {
   iopUnhandled("FCallClsMethodSD");
+  return nullptr;
 }
 
-void iopFCallCtor() {
+TCA iopFCallCtor(bool /* retToJit */,
+                 PC /* origpc */,
+                 PC& /* pc */,
+                 const FCallArgs& /* fca */,
+                 const StringData*) {
   iopUnhandled("FCallCtor");
+  return nullptr;
 }
 
-void iopFCallFunc() {
+TCA iopFCallFunc(bool /* retToJit */,
+                 PC /* origpc */,
+                 PC& /* pc */,
+                 const FCallArgs& /* fca */) {
   iopUnhandled("FCallFunc");
+  return nullptr;
 }
 
-void iopFCallFuncD() {
+TCA iopFCallFuncD(bool /* retToJit */,
+                  PC /* origpc */,
+                  PC& /* pc */,
+                  const FCallArgs& /* fca */,
+                  Id /* id */) {
   iopPreamble("FCallFuncD");
 
   std::string name = vmfp()->func()->fullName()->data();
@@ -764,37 +814,58 @@ void iopFCallFuncD() {
     FTRACE(1, "taint: {}: tainted value flows into sink\n", pcOff());
     State::get()->issues.push_back({kTestSource, name});
   }
+
+  return nullptr;
 }
 
-void iopFCallObjMethod() {
+TCA iopFCallObjMethod(bool /* retToJit */,
+                      PC /* origpc */,
+                      PC& /* pc */,
+                      const FCallArgs& /* fca */,
+                      const StringData*,
+                      ObjMethodOp /* op */) {
   iopUnhandled("FCallObjMethod");
+  return nullptr;
 }
 
-void iopFCallObjMethodD() {
+TCA iopFCallObjMethodD(bool /* retToJit */,
+                       PC /* origpc */,
+                       PC& /* pc */,
+                       const FCallArgs& /* fca */,
+                       const StringData*,
+                       ObjMethodOp /* op */,
+                       const StringData* /* methName */) {
   iopUnhandled("FCallObjMethodD");
+  return nullptr;
 }
 
-void iopIterInit() {
+void iopIterInit(PC& /* pc */, const IterArgs& /* ita */, PC /* targetpc */) {
   iopUnhandled("IterInit");
 }
 
-void iopLIterInit() {
+void iopLIterInit(PC& /* pc */,
+                  const IterArgs& /* ita */,
+                  TypedValue* /* base */,
+                  PC /* targetpc */) {
   iopUnhandled("LIterInit");
 }
 
-void iopIterNext() {
+void iopIterNext(PC& /* pc */, const IterArgs& /* ita */, PC /* targetpc */) {
   iopUnhandled("IterNext");
 }
 
-void iopLIterNext() {
+void iopLIterNext(PC& /* pc */,
+                  const IterArgs& /* ita */,
+                  TypedValue* /* base */,
+                  PC /* targetpc */) {
   iopUnhandled("LIterNext");
 }
 
-void iopIterFree() {
+void iopIterFree(Iter* /* it */) {
   iopUnhandled("IterFree");
 }
 
-void iopLIterFree() {
+void iopLIterFree(Iter* /* it */, tv_lval) {
   iopUnhandled("LIterFree");
 }
 
@@ -826,7 +897,7 @@ void iopThis() {
   iopUnhandled("This");
 }
 
-void iopBareThis() {
+void iopBareThis(BareThisOp /* bto */) {
   iopUnhandled("BareThis");
 }
 
@@ -838,19 +909,19 @@ void iopChainFaults() {
   iopUnhandled("ChainFaults");
 }
 
-void iopOODeclExists() {
+void iopOODeclExists(OODeclExistsOp /* subop */) {
   iopUnhandled("OODeclExists");
 }
 
-void iopVerifyOutType() {
+void iopVerifyOutType(uint32_t /* paramId */) {
   iopUnhandled("VerifyOutType");
 }
 
-void iopVerifyParamType() {
+void iopVerifyParamType(local_var /* param */) {
   iopUnhandled("VerifyParamType");
 }
 
-void iopVerifyParamTypeTS() {
+void iopVerifyParamTypeTS(local_var /* param */) {
   iopUnhandled("VerifyParamTypeTS");
 }
 
@@ -886,35 +957,35 @@ void iopCheckReifiedGenericMismatch() {
   iopUnhandled("CheckReifiedGenericMismatch");
 }
 
-void iopNativeImpl() {
+void iopNativeImpl(PC& /* pc */) {
   iopUnhandled("NativeImpl");
 }
 
-void iopCreateCl() {
+void iopCreateCl(uint32_t /* numArgs */, uint32_t /* clsIx */) {
   iopUnhandled("CreateCl");
 }
 
-void iopCreateCont() {
+void iopCreateCont(PC /* origpc */, PC& /* pc */) {
   iopUnhandled("CreateCont");
 }
 
-void iopContEnter() {
+void iopContEnter(PC /* origpc */, PC& /* pc */) {
   iopUnhandled("ContEnter");
 }
 
-void iopContRaise() {
+void iopContRaise(PC /* origpc */, PC& /* pc */) {
   iopUnhandled("ContRaise");
 }
 
-void iopYield() {
+void iopYield(PC /* origpc */, PC& /* pc */) {
   iopUnhandled("Yield");
 }
 
-void iopYieldK() {
+void iopYieldK(PC /* origpc */, PC& /* pc */) {
   iopUnhandled("YieldK");
 }
 
-void iopContCheck() {
+void iopContCheck(ContCheckOp /* subop */) {
   iopUnhandled("ContCheck");
 }
 
@@ -938,11 +1009,11 @@ void iopWHResult() {
   iopUnhandled("WHResult");
 }
 
-void iopAwait() {
+void iopAwait(PC /* origpc */, PC& /* pc */) {
   iopUnhandled("Await");
 }
 
-void iopAwaitAll() {
+void iopAwaitAll(PC /* origpc */, PC& /* pc */, LocalRange /* locals */) {
   iopUnhandled("AwaitAll");
 }
 
@@ -962,15 +1033,15 @@ void iopArrayUnmarkLegacy() {
   iopUnhandled("ArrayUnmarkLegacy");
 }
 
-void iopCheckProp() {
+void iopCheckProp(const StringData* /* propName */) {
   iopUnhandled("CheckProp");
 }
 
-void iopInitProp() {
+void iopInitProp(const StringData* /* propName */, InitPropOp /* propOp */) {
   iopUnhandled("InitProp");
 }
 
-void iopSilence() {
+void iopSilence(tv_lval /* loc */, SilenceOp /* subop */) {
   iopUnhandled("Silence");
 }
 
@@ -982,23 +1053,28 @@ void iopRaiseClassStringConversionWarning() {
   iopUnhandled("RaiseClassStringConversionWarning");
 }
 
-void iopBaseGC() {
+void iopBaseGC(uint32_t /* idx */, MOpMode /* mode */) {
   iopUnhandled("BaseGC");
 }
 
-void iopBaseGL() {
+void iopBaseGL(tv_lval /* loc */, MOpMode /* mode */) {
   iopUnhandled("BaseGL");
 }
 
-void iopBaseSC() {
+void iopBaseSC(uint32_t /* keyIdx */,
+               uint32_t /* clsIdx */,
+               MOpMode /* mode */,
+               ReadonlyOp /* op */) {
   iopUnhandled("BaseSC");
 }
 
-void iopBaseL() {
+void iopBaseL(named_local_var /* loc */,
+              MOpMode /* mode */,
+              ReadonlyOp /* op */) {
   iopUnhandled("BaseL");
 }
 
-void iopBaseC() {
+void iopBaseC(uint32_t /* idx */, MOpMode) {
   iopUnhandled("BaseC");
 }
 
@@ -1006,47 +1082,58 @@ void iopBaseH() {
   iopUnhandled("BaseH");
 }
 
-void iopDim() {
+void iopDim(MOpMode /* mode */, MemberKey /* mk */) {
   iopUnhandled("Dim");
 }
 
-void iopQueryM() {
+void iopQueryM(uint32_t /* nDiscard */,
+               QueryMOp /* subop */,
+               MemberKey /* mk */) {
   iopUnhandled("QueryM");
 }
 
-void iopSetM() {
+void iopSetM(uint32_t /* nDiscard */, MemberKey /* mk */) {
   iopUnhandled("SetM");
 }
 
-void iopSetRangeM() {
+void iopSetRangeM(uint32_t /* nDiscard */,
+                  uint32_t /* size */,
+                  SetRangeOp /* op */) {
   iopUnhandled("SetRangeM");
 }
 
-void iopIncDecM() {
+void iopIncDecM(uint32_t /* nDiscard */,
+                IncDecOp /* subop */,
+                MemberKey /* mk */) {
   iopUnhandled("IncDecM");
 }
 
-void iopSetOpM() {
+void iopSetOpM(uint32_t /* nDiscard */,
+               SetOpOp /* subop */,
+               MemberKey /* mk */) {
   iopUnhandled("SetOpM");
 }
 
-void iopUnsetM() {
+void iopUnsetM(uint32_t /* nDiscard */, MemberKey /* mk */) {
   iopUnhandled("UnsetM");
 }
 
-void iopMemoGet() {
+void iopMemoGet(PC& /* pc */, PC /* notfound */, LocalRange /* keys */) {
   iopUnhandled("MemoGet");
 }
 
-void iopMemoGetEager() {
+void iopMemoGetEager(PC& /* pc */,
+                     PC /* notfound */,
+                     PC /* suspended */,
+                     LocalRange /* keys */) {
   iopUnhandled("MemoGetEager");
 }
 
-void iopMemoSet() {
+void iopMemoSet(LocalRange /* keys */) {
   iopUnhandled("MemoSet");
 }
 
-void iopMemoSetEager() {
+void iopMemoSetEager(LocalRange /* keys */) {
   iopUnhandled("MemoSetEager");
 }
 

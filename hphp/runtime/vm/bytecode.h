@@ -685,3 +685,6 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
 
 }
 
+#define incl_HPHP_VM_BYTECODE_INL_H_
+#include "hphp/runtime/vm/bytecode-inl.h"
+#undef incl_HPHP_VM_BYTECODE_INL_H_

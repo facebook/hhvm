@@ -2867,6 +2867,8 @@ X(RecordFuncCall,               FuncData);
 X(LdClsPropAddrOrNull,          ReadOnlyData);
 X(LdClsPropAddrOrRaise,         ReadOnlyData);
 X(ThrowMustBeEnclosedInReadonly,ClassData);
+X(ThrowMustBeMutableException,  ClassData);
+X(ThrowMustBeReadonlyException, ClassData);
 
 #undef X
 

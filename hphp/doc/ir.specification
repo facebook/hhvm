@@ -3263,17 +3263,17 @@ fields of that struct for holding intermediate values.
   Throws a RuntimeException if calling a function with an argument that has the
   wrong type
 
-| ThrowMustBeMutableException, ND, S(Cls) S(Str), T
+| ThrowMustBeMutableException<cls>, ND, S(Str), T
 
   Throws an InvalidOperationException indicating a readonly semantics violation
-  where the property was required to be mutable. S0 is the class the property
-  was declared on. S1 is the property name.
+  where the property was required to be mutable. cls is the class the property
+  was declared on. S0 is the property name.
 
-| ThrowMustBeReadonlyException, ND, S(Cls) S(Str), T
+| ThrowMustBeReadonlyException<cls>, ND, S(Str), T
 
   Throws an InvalidOperationException indicating a readonly semantics violation
-  where the property was required to be readonly. S0 is the class the property
-  was declared on. S1 is the property name.
+  where the property was required to be readonly. cls is the class the property
+  was declared on. S0 is the property name.
 
 | ThrowMustBeValueTypeException, ND, S(Str), T
 

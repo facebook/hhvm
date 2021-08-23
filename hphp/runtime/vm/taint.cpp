@@ -116,8 +116,9 @@ void State::initialize() {
 
 namespace {
 
-void iopPreamble() {
+void iopPreamble(const std::string& name) {
   auto vm_stack_size = vmStack().count();
+  FTRACE(1, "taint: iop{}\n", name);
   FTRACE(
       3,
       "taint: stack -> size: {}, pushes: {}, pops: {}\n",
@@ -134,8 +135,8 @@ void iopPreamble() {
 }
 
 void iopUnhandled(const std::string& name) {
-  FTRACE(1, "taint: unhandled opcode `{}`\n", name);
-  iopPreamble();
+  iopPreamble(name);
+  FTRACE(1, "taint: unhandled opcode\n");
 }
 
 } // namespace
@@ -153,7 +154,8 @@ void iopBreakTraceHint() {
 }
 
 void iopPopC() {
-  iopUnhandled("PopC");
+  iopPreamble("PopC");
+  State::get()->stack.pop();
 }
 
 void iopPopU() {
@@ -181,11 +183,13 @@ void iopUGetCUNop() {
 }
 
 void iopNull() {
-  iopUnhandled("Null");
+  iopPreamble("Null");
+  State::get()->stack.push(kNoSource);
 }
 
 void iopNullUninit() {
-  iopUnhandled("NullUninit");
+  iopPreamble("NullUninit");
+  State::get()->stack.push(kNoSource);
 }
 
 void iopTrue() {
@@ -201,7 +205,8 @@ void iopFuncCred() {
 }
 
 void iopInt() {
-  iopUnhandled("Int");
+  iopPreamble("Int");
+  State::get()->stack.push(kNoSource);
 }
 
 void iopDouble() {
@@ -509,10 +514,12 @@ void iopSSwitch() {
 }
 
 void iopRetC() {
-  FTRACE(1, "taint: RetC\n");
-  iopPreamble();
+  iopPreamble("RetC");
 
-  std::string name = vmfp()->func()->fullName()->data();
+  auto func = vmfp()->func();
+  State::get()->stack.pop(2 + func->params().size());
+
+  std::string name = func->fullName()->data();
   auto& sources = Configuration::get()->sources;
   if (sources.find(name) != sources.end()) {
     FTRACE(1, "taint: {}: function returns `TestSource`\n", pcOff());
@@ -533,7 +540,9 @@ void iopThrow() {
 }
 
 void iopCGetL() {
-  iopUnhandled("CGetL");
+  iopPreamble("CGetL");
+  // TODO(T93549800): implement shadow heap.
+  State::get()->stack.push(kNoSource);
 }
 
 void iopCGetQuietL() {
@@ -609,7 +618,8 @@ void iopAssertRATStk() {
 }
 
 void iopSetL() {
-  iopUnhandled("SetL");
+  iopPreamble("SetL");
+  // TODO(T93549800): implement shadow heap.
 }
 
 void iopSetG() {
@@ -745,8 +755,7 @@ void iopFCallFunc() {
 }
 
 void iopFCallFuncD() {
-  FTRACE(1, "taint: FCallFuncD\n");
-  iopPreamble();
+  iopPreamble("FCallFuncD");
 
   std::string name = vmfp()->func()->fullName()->data();
   auto& sinks = Configuration::get()->sinks;
@@ -846,7 +855,7 @@ void iopVerifyParamTypeTS() {
 }
 
 void iopVerifyRetTypeC() {
-  iopUnhandled("VerifyRetTypeC");
+  iopPreamble("VerifyRetTypeC");
 }
 
 void iopVerifyRetTypeTS() {

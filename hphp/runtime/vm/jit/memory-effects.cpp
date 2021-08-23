@@ -2313,4 +2313,17 @@ std::string show(MemEffects effects) {
 
 //////////////////////////////////////////////////////////////////////
 
+GeneralEffects general_effects_for_vmreg_liveness(
+    GeneralEffects l, KnownRegState liveness) {
+  auto ret = GeneralEffects { l.loads, l.stores, l.moves, l.kills };
+
+  if (liveness == KnownRegState::Dead) {
+    ret.loads = l.loads.exclude_vm_reg().value_or(AEmpty);
+  } else if (liveness == KnownRegState::Live) {
+    ret.stores = l.stores.exclude_vm_reg().value_or(AEmpty);
+  }
+
+  return ret;
+}
+
 }}

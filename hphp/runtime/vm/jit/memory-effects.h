@@ -20,6 +20,7 @@
 #include <boost/variant.hpp>
 
 #include "hphp/runtime/vm/jit/alias-class.h"
+#include "hphp/runtime/vm/jit/vm-reg-liveness.h"
 
 namespace HPHP { namespace jit {
 
@@ -213,6 +214,15 @@ AliasClass pointee(const SSATmp*);
  * Produces a string about some MemEffects for debug-printing.
  */
 std::string show(MemEffects);
+
+/*
+ * Given a known VMReg liveness, computes a more precise GeneralEffects.
+ *
+ * For Dead VMRegState, the VMRegs may not be loaded.
+ * For Live VMRegState, the VMRegs may not be stored.
+ */
+GeneralEffects general_effects_for_vmreg_liveness(
+    GeneralEffects l, KnownRegState liveness);
 
 //////////////////////////////////////////////////////////////////////
 

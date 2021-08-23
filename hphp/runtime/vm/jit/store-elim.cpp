@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/jit/state-multi-map.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/vm-reg-liveness.h"
 
 /*
   This implements partial-redundancy elimination for stores.
@@ -268,12 +269,6 @@ struct StoreKey {
   uint32_t alocId;
 };
 
-enum class KnownRegState {
-  Dead,
-  MaybeLive,
-  Live
-};
-
 struct StoreKeyHashCmp {
   size_t operator()(const StoreKey& k) const {
     return (k.blkId * 2 + (int)k.where) * kMaxTrackedALocs + k.alocId;
@@ -310,7 +305,7 @@ struct Global {
     , ainfo(collect_aliases(unit, poBlockList))
     , blockStates(unit, BlockState{})
     , seenStores(unit, 0)
-    , vmRegsLiveness(unit, KnownRegState::Dead)
+    , vmRegsLiveness(analyzeVMRegLiveness(unit, poBlockList))
   {}
 
   IRUnit& unit;
@@ -650,19 +645,11 @@ void visit(Local& env, IRInstruction& inst) {
       }
       load(env, l.src);
     },
-    [&] (GeneralEffects l)  {
-      if (env.global.vmRegsLiveness[inst] != KnownRegState::Dead) {
-        load(env, l.loads);
-      } else if (auto const loads = l.loads.exclude_vm_reg()) {
-        load(env, *loads);
-      }
-
-      if (env.global.vmRegsLiveness[inst] != KnownRegState::Live) {
-        mayStore(env, l.stores);
-      } else if (auto const stores = l.stores.exclude_vm_reg()) {
-        mayStore(env, *stores);
-      }
-
+    [&] (GeneralEffects preL)  {
+      auto const liveness = env.global.vmRegsLiveness[inst];
+      auto const l = general_effects_for_vmreg_liveness(preL, liveness);
+      load(env, l.loads);
+      mayStore(env, l.stores);
       kill(env, l.kills);
     },
 
@@ -682,11 +669,7 @@ void visit(Local& env, IRInstruction& inst) {
     },
 
     [&] (ExitEffects l) {
-      if (env.global.vmRegsLiveness[inst] != KnownRegState::Dead) {
-        load(env, l.live);
-      } else if (auto const live = l.live.exclude_vm_reg()) {
-        load(env, *live);
-      }
+      load(env, l.live);
       kill(env, l.kills);
     },
 
@@ -1785,94 +1768,6 @@ void fix_inline_frames(Global& genv) {
   }
 }
 
-KnownRegState livenessUnion(KnownRegState a, KnownRegState b) {
-  return (a == KnownRegState::MaybeLive || a != b)
-    ? KnownRegState::MaybeLive
-    : a;
-}
-
-std::string livenessToStr(KnownRegState r) {
-  switch (r) {
-    case KnownRegState::Dead:
-      return "Dead";
-    case KnownRegState::MaybeLive:
-      return "MaybeLive";
-    case KnownRegState::Live:
-      return "Live";
-    default:
-      always_assert(false);
-  }
-}
-
-void analyzeVMRegLiveness(Global& genv) {
-  const BlockList rpoBlocks{genv.poBlockList.rbegin(), genv.poBlockList.rend()};
-  auto const rpoIDs = numberBlocks(genv.unit, rpoBlocks);
-
-  using Sorter = std::less<PostOrderId>;
-  auto incompleteQ =
-    dataflow_worklist<PostOrderId, Sorter>(genv.unit.numBlocks());
-
-  for (auto rpoId = uint32_t{0}; rpoId < rpoBlocks.size(); ++rpoId) {
-    incompleteQ.push(rpoId);
-  }
-
-  StateVector<Block,KnownRegState> liveIn{genv.unit, KnownRegState::Dead};
-  StateVector<Block,KnownRegState> liveOut{genv.unit, KnownRegState::Dead};
-
-  while (!incompleteQ.empty()) {
-    auto const rpoId = incompleteQ.pop();
-    auto const blk = rpoBlocks[rpoId];
-
-    FTRACE(2, "  scanning B{}\n", blk->id());
-    auto live = liveIn[blk];
-
-    FTRACE(2, "    in: {}\n", livenessToStr(live));
-
-    for (auto const& inst : *blk) {
-      if (inst.is(StVMRegState)) {
-        assertx(inst.src(0)->hasConstVal(TInt));
-        auto const regState =
-          static_cast<VMRegState>(inst.src(0)->intVal());
-        assertx(
-          regState == eagerlyCleanState() ||
-          regState == VMRegState::DIRTY);
-        live = (regState == eagerlyCleanState())
-          ? KnownRegState::Live
-          : KnownRegState::Dead;
-      } else if (inst.is(BeginCatch)) {
-        // VMRegs are live within catch traces.
-        live = KnownRegState::Live;
-      } else if (inst.is(InterpOne)) {
-        // InterpOne marks the regState dirty before returning.
-        live = KnownRegState::Dead;
-      }
-      genv.vmRegsLiveness[inst] = live;
-    }
-    FTRACE(2, "    out: {}\n", livenessToStr(live));
-
-    if (live == liveOut[blk]) continue;
-    liveOut[blk] = live;
-
-    blk->forEachSucc([&](Block* succ) {
-      auto newLive = KnownRegState::Dead;
-      bool first = true;
-      succ->forEachPred([&](Block* pred) {
-        if (first) {
-          newLive = liveOut[pred];
-          first = false;
-        } else {
-          newLive = livenessUnion(newLive, liveOut[pred]);
-        }
-      });
-
-      if (newLive != liveIn[succ]) {
-        liveIn[succ] = newLive;
-        incompleteQ.push(rpoIDs[succ]);
-      }
-    });
-  }
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -1895,11 +1790,6 @@ void optimizeStores(IRUnit& unit) {
     return;
   }
   FTRACE(1, "\nLocations:\n{}\n", show(genv.ainfo));
-
-  /*
-   * Analyze true liveness of VMRegs.
-   */
-  analyzeVMRegLiveness(genv);
 
   /*
    * Initialize the block state structures.

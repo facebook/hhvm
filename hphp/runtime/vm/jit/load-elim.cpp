@@ -62,6 +62,10 @@ using RpoID = uint32_t;
 
 //////////////////////////////////////////////////////////////////////
 
+BlockList reverse(const BlockList& list) {
+  return BlockList(list.rbegin(), list.rend());
+}
+
 /*
  * Information about a value in memory.
  *
@@ -160,6 +164,7 @@ struct Global {
     , rpoBlocks(rpoSortCfg(unit))
     , ainfo(collect_aliases(unit, rpoBlocks))
     , blockInfo(unit, BlockInfo{})
+    , vmRegsLiveness(analyzeVMRegLiveness(unit, reverse(rpoBlocks)))
   {}
 
   IRUnit& unit;
@@ -171,6 +176,7 @@ struct Global {
    * analysis the states in the info structures are not necessarily meaningful.
    */
   StateVector<Block,BlockInfo> blockInfo;
+  StateVector<IRInstruction,KnownRegState> vmRegsLiveness;
 
   /*
    * During the optimize pass, we may add phis for the values known to be in
@@ -446,7 +452,10 @@ bool handle_minstr(Local& env, const IRInstruction& inst, GeneralEffects m) {
 
 Flags handle_general_effects(Local& env,
                              const IRInstruction& inst,
-                             GeneralEffects m) {
+                             GeneralEffects preM) {
+  auto const liveness = env.global.vmRegsLiveness[inst];
+  auto const m = general_effects_for_vmreg_liveness(preM, liveness);
+
   if (inst.is(DecRef, DecRefNZ)) {
     // DecRef can only free things, which means from load-elim's point
     // of view it only has a kill set, which load-elim
@@ -1223,6 +1232,7 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
 
   // CheckInitMem's pointee is TUninit on the taken branch, so update outState.
   if (inst.is(CheckInitMem)) {
+    assertx(!inst.maySyncVMRegsWithSources());
     auto const effects = memory_effects(inst);
     auto const ge = boost::get<GeneralEffects>(effects);
     auto const meta = genv.ainfo.find(canonicalize(ge.loads));

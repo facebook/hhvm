@@ -129,14 +129,14 @@ void iopPreamble(const std::string& name) {
   if (vm_stack_size != shadow_stack_size) {
     FTRACE(
         3,
-        "taint: stacks out of sync (shadow stack size: {})\n",
+        "taint: (WARNING) stacks out of sync (shadow stack size: {})\n",
         shadow_stack_size);
   }
 }
 
 void iopUnhandled(const std::string& name) {
   iopPreamble(name);
-  FTRACE(1, "taint: unhandled opcode\n");
+  FTRACE(1, "taint: (WARNING) unhandled opcode\n");
 }
 
 } // namespace

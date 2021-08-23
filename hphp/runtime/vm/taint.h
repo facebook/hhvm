@@ -65,6 +65,8 @@ struct Stack {
 struct State {
   static std::shared_ptr<State> get();
 
+  void initialize();
+
   void reset() {
     stack.clear();
     issues.clear();

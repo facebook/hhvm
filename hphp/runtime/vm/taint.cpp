@@ -42,6 +42,7 @@ struct StateSingletonTag {};
 
 InitFiniNode s_configurationInitialization([]() {
   Configuration::get()->read(RO::EvalTaintConfigurationPath);
+  State::get()->initialize();
 }, InitFiniNode::When::ProcessInit);
 
 void Configuration::read(const std::string& path) {
@@ -102,6 +103,15 @@ void Stack::clear() {
 folly::Singleton<State, StateSingletonTag> kStateSingleton{};
 /* static */ std::shared_ptr<State> State::get() {
   return kStateSingleton.try_get();
+}
+
+void State::initialize() {
+  // Stack is initialized with 4 values before any operation happens.
+  // We don't care about these values but mirroring simplifies
+  // consistency checks.
+  for (int i = 0; i < 4; i++) {
+    stack.push(kNoSource);
+  }
 }
 
 namespace {

@@ -307,7 +307,8 @@ where
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
         NoDeclProvider,
     );
-    let prog = emit_program::emit_fatal_program(FatalOp::Parse, &Pos::make_none(), err_msg);
+    let alloc = &bumpalo::Bump::new();
+    let prog = emit_program::emit_fatal_program(alloc, FatalOp::Parse, &Pos::make_none(), err_msg);
     let prog = prog.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
     print_program(
         &mut Context::new(
@@ -391,7 +392,7 @@ where
             time(move || rewrite_and_emit(alloc, e, &env, namespace_env, ast))
         }
         Either::Left((pos, msg, is_runtime_error)) => {
-            time(|| emit_fatal(*is_runtime_error, pos, msg))
+            time(|| emit_fatal(alloc, *is_runtime_error, pos, msg))
         }
     };
     let program = program.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
@@ -436,7 +437,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
             emit(alloc, emitter, &env, namespace_env, ast)
         }
         Err(Error::IncludeTimeFatalException(op, pos, msg)) => {
-            emit_program::emit_fatal_program(op, &pos, msg)
+            emit_program::emit_fatal_program(alloc, op, &pos, msg)
         }
         Err(e) => Err(e),
     }
@@ -487,16 +488,17 @@ fn emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
 }
 
 fn emit_fatal<'arena>(
+    alloc: &'arena bumpalo::Bump,
     is_runtime_error: bool,
     pos: &Pos,
-    msg: impl AsRef<str>,
+    msg: impl AsRef<str> + 'arena,
 ) -> Result<HhasProgram<'arena>, Error> {
     let op = if is_runtime_error {
         FatalOp::Runtime
     } else {
         FatalOp::Parse
     };
-    emit_program::emit_fatal_program(op, pos, msg)
+    emit_program::emit_fatal_program(alloc, op, pos, msg)
 }
 
 fn create_parser_options(opts: &Options) -> ParserOptions {

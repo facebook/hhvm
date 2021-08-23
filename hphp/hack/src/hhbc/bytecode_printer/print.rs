@@ -127,7 +127,7 @@ fn print_program_<W: Write>(
                 " ",
                 get_fatal_op(fop),
                 " \"",
-                escape(msg).as_ref(),
+                escape(msg.as_str()).as_ref(),
                 "\";",
             ],
         )?;

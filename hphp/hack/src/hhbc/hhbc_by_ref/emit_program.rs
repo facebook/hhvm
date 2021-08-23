@@ -5,7 +5,7 @@
 
 use bitflags::bitflags;
 use decl_provider::DeclProvider;
-use ffi::{Maybe::*, Slice};
+use ffi::{Maybe::*, Slice, Str};
 use hhbc_by_ref_emit_adata as emit_adata;
 use hhbc_by_ref_emit_class::emit_classes_from_program;
 use hhbc_by_ref_emit_constant::emit_constants_from_program;
@@ -26,12 +26,13 @@ use oxidized::{ast, namespace_env, pos::Pos};
 
 /// This is the entry point from hh_single_compile & fuzzer
 pub fn emit_fatal_program<'arena>(
+    alloc: &'arena bumpalo::Bump,
     op: FatalOp,
     pos: &Pos,
-    msg: impl AsRef<str>,
+    msg: impl AsRef<str> + 'arena,
 ) -> Result<HhasProgram<'arena>> {
     Ok(HhasProgram {
-        fatal: Just((op, pos.clone().into(), msg.as_ref().into()).into()),
+        fatal: Just((op, pos.clone().into(), Str::new_str(alloc, msg.as_ref())).into()),
         ..HhasProgram::default()
     })
 }
@@ -46,7 +47,9 @@ pub fn emit_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 ) -> Result<HhasProgram<'arena>> {
     let result = emit_program_(alloc, emitter, flags, namespace, tast);
     match result {
-        Err(Error::IncludeTimeFatalException(op, pos, msg)) => emit_fatal_program(op, &pos, msg),
+        Err(Error::IncludeTimeFatalException(op, pos, msg)) => {
+            emit_fatal_program(alloc, op, &pos, msg)
+        }
         _ => result,
     }
 }

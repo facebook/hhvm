@@ -48,7 +48,6 @@ class TestCase(unittest.TestCase, Generic[T]):
     @classmethod
     def setUpClass(cls) -> None:
         cls._test_driver = cls.get_test_driver()
-        # pyre-fixme[16]: `Optional` has no attribute `setUpClass`.
         cls._test_driver.setUpClass(cls.get_template_repo())
 
     @classmethod

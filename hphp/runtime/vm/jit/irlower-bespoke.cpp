@@ -147,9 +147,6 @@ void cgProfileArrLikeProps(IRLS& env, const IRInstruction* inst) {
     return Generic;                                                          \
   }()
 
-void cgBespokeGetWithSync(IRLS& env, const IRInstruction* inst, bool maySync) {
-}
-
 CallSpec destructorForArrayLike(Type arr) {
   assertx(arr <= TArrLike);
   assertx(allowBespokeArrayLikes());

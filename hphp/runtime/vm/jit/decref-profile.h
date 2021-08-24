@@ -16,11 +16,10 @@
 
 #pragma once
 
-#include <folly/dynamic.h>
-#include <folly/Format.h>
-
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+
+#include <folly/dynamic.h>
 
 namespace HPHP { namespace jit {
 
@@ -65,51 +64,16 @@ struct DecRefProfile {
     return total ? 100.0 * value / total : 0.0;
   }
 
-  std::string toString() const {
-    return folly::sformat(
-      "total: {:4}\n uncounted: {:4} ({:.1f}%),\n persistent: {:4} ({:.1f}%),\n"
-      " destroyed: {:4} ({:.1f}%),\n survived: {:4} ({:.1f}%)",
-      total,
-      uncounted(),  percent(uncounted()),
-      persistent(), percent(persistent()),
-      destroyed(),  percent(destroyed()),
-      survived(),   percent(survived())
-    );
-  }
+  /*
+   * Update the profile for a dec-ref on tv, then optionally do the dec-ref.
+   */
+  void update(TypedValue tv);
+  void updateAndDecRef(TypedValue tv);
 
-  folly::dynamic toDynamic() const {
-    return folly::dynamic::object("total", total)
-                                 ("uncounted", uncounted())
-                                 ("percentUncounted", percent(uncounted()))
-                                 ("persistent", persistent())
-                                 ("percentPersistent", percent(persistent()))
-                                 ("destroyed", destroyed())
-                                 ("percentDestroyed", percent(destroyed()))
-                                 ("survived", survived())
-                                 ("percentSurvived", percent(survived()))
-                                 ("profileType", "DecRefProfile");
-  }
+  static void reduce(DecRefProfile& a, const DecRefProfile& b);
 
-  // overflow handling isn't statistically correct; but its better
-  // than overflowing.
-  static void reduce(DecRefProfile& a, const DecRefProfile& b) {
-    auto const total = static_cast<uint64_t>(a.total + b.total);
-    auto constexpr limit = std::numeric_limits<decltype(a.total)>::max();
-    if (total > limit) {
-      auto scale = [&] (uint32_t& x, uint64_t y) {
-        x = ((x + y) * limit + total - 1) / total;
-      };
-      a.total = limit;
-      scale(a.refcounted, b.refcounted);
-      scale(a.released, b.released);
-      scale(a.decremented, b.decremented);
-    } else {
-      a.total       = total;
-      a.refcounted  += b.refcounted;
-      a.released    += b.released;
-      a.decremented += b.decremented;
-    }
-  }
+  folly::dynamic toDynamic() const;
+  std::string toString() const;
 
   /*
    * The total number of times this DecRef was executed.
@@ -131,18 +95,11 @@ struct DecRefProfile {
   uint32_t decremented;
 };
 
-inline const StringData* decRefProfileKey(const IRInstruction* inst) {
-  return makeStaticString(folly::to<std::string>(
-                            "DecRefProfile-",
-                            inst->extra<DecRefData>()->locId));
-}
+const StringData* decRefProfileKey(const IRInstruction* inst);
 
-inline TargetProfile<DecRefProfile> decRefProfile(const TransContext& context,
-                                                  const IRInstruction* inst) {
-  auto const profileKey = decRefProfileKey(inst);
-  return TargetProfile<DecRefProfile>(context, inst->marker(), profileKey);
-}
+TargetProfile<DecRefProfile> decRefProfile(
+    const TransContext& context, const IRInstruction* inst);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-} }
+}}

@@ -808,9 +808,6 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
       if (UNLIKELY(checkInOutAnnot && func->isInOut(i))) {
         throwParamInOutMismatch(func, i);
       }
-      if (UNLIKELY(func->isReadonly(i))) {
-        throwParamReadonlyMismatch(func, i);
-      }
       auto const from = iter.secondValPlus();
       tvDup(from, *stack.allocTV());
     }

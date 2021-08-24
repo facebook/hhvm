@@ -167,17 +167,36 @@ struct FCallArgs : FCallArgsBase {
     , inoutArgs(inoutArgs)
     , readonlyArgs(readonlyArgs)
     , context(context) {
-    assertx(IMPLIES(inoutArgs != nullptr, numArgs != 0));
+    assertx(IMPLIES(inoutArgs != nullptr || readonlyArgs != nullptr,
+                    numArgs != 0));
+    if (readonlyArgs && !anyReadonly(readonlyArgs, numArgs)) {
+      readonlyArgs = nullptr;
+    }
+  }
+  static bool isReadonlyArg(const uint8_t* readonlyArgs, uint32_t i) {
+    assertx(readonlyArgs != nullptr);
+    return readonlyArgs[i / 8] & (1 << (i % 8));
+  }
+  static bool anyReadonly(const uint8_t* readonlyArgs, uint32_t numArgs) {
+    assertx(readonlyArgs != nullptr);
+    for (size_t i = 0; i < numArgs; ++i) {
+      if (isReadonlyArg(readonlyArgs, i)) return true;
+    }
+    return false;
   }
   bool enforceInOut() const { return inoutArgs != nullptr; }
   bool isInOut(uint32_t i) const {
     assertx(enforceInOut());
     return inoutArgs[i / 8] & (1 << (i % 8));
   }
-  bool enforceReadonly() const { return readonlyArgs != nullptr; }
+  bool enforceReadonly() const {
+    assertx(IMPLIES(readonlyArgs != nullptr,
+                    anyReadonly(readonlyArgs, numArgs)));
+    return readonlyArgs != nullptr;
+  }
   bool isReadonly(uint32_t i) const {
     assertx(enforceReadonly());
-    return readonlyArgs[i / 8] & (1 << (i % 8));
+    return isReadonlyArg(readonlyArgs, i);
   }
   FCallArgs withGenerics() const {
     assertx(!hasGenerics());

@@ -47,7 +47,7 @@ struct c_WaitableWaitHandle;
 
 struct CompactFrame final {
   CompactFrame(const Func* f = nullptr, int32_t ppc = 0, bool ht = false)
-    : func(LowPtr<const Func>::Unchecked{}, f)
+    : func(f)
     , prevPc(ppc)
     , hasThis(ht) {}
 

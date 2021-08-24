@@ -65,12 +65,6 @@ inline bool is_low(T* px) {
 
 template<class T>
 inline low_storage_t to_low(T* px) {
-  always_assert(is_low(px));
-  return (low_storage_t)(reinterpret_cast<uintptr_t>(px));
-}
-
-template<class T>
-inline low_storage_t to_low_unchecked(T* px) {
   assertx(is_low(px));
   return (low_storage_t)(reinterpret_cast<uintptr_t>(px));
 }
@@ -92,8 +86,6 @@ struct LowPtrImpl {
   LowPtrImpl() {}
 
   /* implicit */ LowPtrImpl(T* px) : m_s{to_low(px)} {}
-  /* implicit */ LowPtrImpl(Unchecked, T* px) : m_s{to_low_unchecked(px)} {}
-
   /* implicit */ LowPtrImpl(std::nullptr_t /*px*/) : m_s{ 0 } {}
 
   LowPtrImpl(const LowPtrImpl<T, S>& r) : m_s{S::get(r.m_s)} {}
@@ -206,7 +198,6 @@ struct LowPtr {
   LowPtr() = default;
 
   /* implicit */ LowPtr(T* px) : m_s{detail::to_low(px)} {}
-  /* implicit */ LowPtr(Unchecked, T* px) : m_s{detail::to_low_unchecked(px)} {}
   /* implicit */ LowPtr(std::nullptr_t /*px*/) : m_s{0} {}
 
   LowPtr(const LowPtr<T>&) = default;

@@ -27,7 +27,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline ObjectData::ObjectData(Class* cls, uint8_t flags, HeaderKind kind)
-  : m_cls(LowPtr<Class>::Unchecked{}, cls)
+  : m_cls(cls)
 {
   initHeader_16(kind, OneReference, flags);
   if (debug && cls->releaseFunc() == ObjectData::release) {
@@ -44,7 +44,7 @@ inline ObjectData::ObjectData(Class* cls, uint8_t flags, HeaderKind kind)
 
 inline ObjectData::ObjectData(Class* cls, InitRaw, uint8_t flags,
                               HeaderKind kind) noexcept
-  : m_cls(LowPtr<Class>::Unchecked{}, cls)
+  : m_cls(cls)
 {
   initHeader_16(kind, OneReference, flags);
   if (debug && cls->releaseFunc() == ObjectData::release) {

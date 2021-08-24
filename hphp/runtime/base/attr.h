@@ -40,6 +40,9 @@ enum Attr {
   // simply memcpy-ing from the initializer vector.          |         //
   AttrDeepInit             = (1u <<  0), //       |    X     |         //
                                          //       |          |         //
+  // Indicates that the function returns readonly value
+  AttrReadonlyReturn       = (1u <<  0), //       |          |    X    //
+                                         //       |          |         //
   // Method visibility.  The relative ordering of these is important.  //
   // N.B. the values are overlayed with some of the no-override bits for magic
   // class methods (next), since they don't apply to classes.

@@ -1,0 +1,3 @@
+Warning: f() returns readonly, but the caller expects a mutable value in %s on line 10
+
+Warning: f() returns readonly, but the caller expects a mutable value in %s on line 13

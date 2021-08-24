@@ -244,12 +244,24 @@ std::string formatParamReadonlyMismatch(const char* fname, uint32_t index) {
   );
 }
 
-void throwParamReadonlyMismatch(const Func* func, uint32_t index) {
+std::string formatReturnReadonlyMismatch(const char* fname) {
+  return folly::sformat(
+    "{}() returns readonly, but the caller expects a mutable value",
+    fname
+  );
+}
+
+void throwParamReadonlyMismatch(const Func* func, int32_t index) {
+  auto const msg = [&] {
+    if (index == kInvalidId) {
+      return formatReturnReadonlyMismatch(func->fullName()->data());
+    }
+    return formatParamReadonlyMismatch(func->fullName()->data(), index);
+  };
   if (RO::EvalEnableReadonlyCallEnforcement == 1) {
-    raise_warning(formatParamReadonlyMismatch(func->fullName()->data(), index));
+    raise_warning(msg());
   } else if (RO::EvalEnableReadonlyCallEnforcement > 1) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      formatParamReadonlyMismatch(func->fullName()->data(), index));
+    SystemLib::throwInvalidArgumentExceptionObject(msg());
   }
 }
 

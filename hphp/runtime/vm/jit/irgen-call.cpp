@@ -119,14 +119,19 @@ void emitCallerInOutChecksUnknown(IRGS& env, SSATmp* callee,
 bool emitCallerReadonlyChecksKnown(IRGS& env, const Func* callee,
                                    const FCallArgs& fca) {
   if (RO::EvalEnableReadonlyCallEnforcement == 0) return true;
-  if (!fca.enforceReadonly()) return true;
-
-  for (auto i = 0; i < fca.numArgs; ++i) {
-    if (fca.isReadonly(i) && !callee->isReadonly(i)) {
-      auto const data = ParamData { i };
-      gen(env, ThrowReadonlyMismatch, data, cns(env, callee));
-      if (RO::EvalEnableReadonlyCallEnforcement > 1) return false;
+  if (fca.enforceReadonly()) {
+    for (auto i = 0; i < fca.numArgs; ++i) {
+      if (fca.isReadonly(i) && !callee->isReadonly(i)) {
+        auto const data = ParamData { i };
+        gen(env, ThrowReadonlyMismatch, data, cns(env, callee));
+        if (RO::EvalEnableReadonlyCallEnforcement > 1) return false;
+      }
     }
+  }
+  if (fca.enforceMutableReturn() && (callee->attrs() & AttrReadonlyReturn)) {
+    auto const data = ParamData { kInvalidId };
+    gen(env, ThrowReadonlyMismatch, data, cns(env, callee));
+    if (RO::EvalEnableReadonlyCallEnforcement > 1) return false;
   }
   return true;
 }
@@ -134,10 +139,25 @@ bool emitCallerReadonlyChecksKnown(IRGS& env, const Func* callee,
 void emitCallerReadonlyChecksUnknown(IRGS& env, SSATmp* callee,
                                       const FCallArgs& fca) {
   if (RO::EvalEnableReadonlyCallEnforcement == 0) return;
-  if (!fca.enforceReadonly()) return;
-
-  auto const data = BoolVecArgsData { fca.numArgs, fca.readonlyArgs };
-  gen(env, CheckReadonlyMismatch, data, callee);
+  if (fca.enforceReadonly()) {
+    auto const data = BoolVecArgsData { fca.numArgs, fca.readonlyArgs };
+    gen(env, CheckReadonlyMismatch, data, callee);
+  }
+  if (fca.enforceMutableReturn()) {
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        auto const data = AttrData { AttrReadonlyReturn };
+        auto const success = gen(env, FuncHasAttr, data, callee);
+        gen(env, JmpNZero, taken, success);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        auto const data = ParamData { kInvalidId };
+        gen(env, ThrowReadonlyMismatch, data, callee);
+      }
+    );
+  }
 }
 
 void emitCallerDynamicCallChecksKnown(IRGS& env, const Func* callee) {

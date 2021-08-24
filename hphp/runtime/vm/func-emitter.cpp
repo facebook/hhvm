@@ -246,6 +246,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     // Async functions can return results directly.
     attrs |= AttrSupportsAsyncEagerReturn;
   }
+  if (isReadonlyReturn) attrs |= AttrReadonlyReturn;
 
   if (!coeffectRules.empty()) attrs |= AttrHasCoeffectRules;
 

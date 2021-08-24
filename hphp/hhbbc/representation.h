@@ -390,6 +390,8 @@ struct Func : FuncBase {
 
   bool hasCreateCl : 1; // Function has CreateCl opcode
 
+  bool isReadonlyReturn : 1;
+
   /*
    * Type parameter upper bounds. May be enforced and used for optimizations.
    */

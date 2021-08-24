@@ -599,6 +599,7 @@ std::string func_flag_list(const FuncInfo& finfo) {
   if (func->isAsync()) flags.push_back("isAsync");
   if (func->isClosureBody()) flags.push_back("isClosureBody");
   if (func->isPairGenerator()) flags.push_back("isPairGenerator");
+  if (func->attrs() & AttrReadonlyReturn) flags.push_back("isReadonlyReturn");
 
   std::string strflags = folly::join(" ", flags);
   if (!strflags.empty()) return " " + strflags + " ";

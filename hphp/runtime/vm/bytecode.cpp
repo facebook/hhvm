@@ -3510,6 +3510,9 @@ TCA fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
   if (fca.enforceReadonly()) {
     checkReadonlyMismatch(func, fca.numArgs, fca.readonlyArgs);
   }
+  if (fca.enforceMutableReturn() && (func->attrs() & AttrReadonlyReturn)) {
+    throwParamReadonlyMismatch(func, kInvalidId);
+  }
   if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
   checkStack(vmStack(), func, 0);
 

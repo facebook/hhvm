@@ -58,7 +58,7 @@ void checkInOutMismatch(const Func* func, uint32_t numArgs,
 void checkReadonlyMismatch(const Func* func, uint32_t numArgs,
                            const uint8_t* readonlyArgs);
 [[noreturn]] void throwParamInOutMismatch(const Func* func, uint32_t index);
-void throwParamReadonlyMismatch(const Func* func, uint32_t index);
+void throwParamReadonlyMismatch(const Func* func, int32_t index);
 [[noreturn]] void throwInvalidUnpackArgs();
 [[noreturn]] void throwMissingArgument(const Func* func, int got);
 [[noreturn]] void throwMustBeEnclosedinReadonly(const Class* cls, const StringData* propName);

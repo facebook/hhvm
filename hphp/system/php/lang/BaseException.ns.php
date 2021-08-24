@@ -30,7 +30,6 @@ trait BaseException {
    *
    * @return     mixed   Returns the Exception message as a string.
    */
-  <<__Pure, __OnlyRxIfImpl(\HH\Rx\Exception::class), __MaybeMutable>>
   public function getMessage() {
     return $this->message;
   }
@@ -45,13 +44,11 @@ trait BaseException {
    * @return     mixed   Returns the previous Exception if available or NULL
    *                     otherwise.
    */
-  <<__Pure, __MaybeMutable>>
-  final public function getPrevious() {
+  final public function getPrevious()[] {
     return $this->previous;
   }
 
-  <<__Pure, __Mutable>>
-  final public function setPrevious(\Throwable $previous) {
+  final public function setPrevious(\Throwable $previous)[write_props] {
     $this->previous = $previous;
   }
 
@@ -65,8 +62,7 @@ trait BaseException {
    *                     but possibly as other type in Exception descendants
    *                     (for example as string in PDOException).
    */
-  <<__Pure, __MaybeMutable>>
-  public function getCode() {
+  public function getCode()[] {
     return $this->code;
   }
 
@@ -79,8 +75,7 @@ trait BaseException {
    * @return     mixed   Returns the filename in which the exception was
    *                     created.
    */
-  <<__Pure, __MaybeMutable>>
-  final public function getFile(): string {
+  final public function getFile()[]: string {
     return $this->file;
   }
 
@@ -93,8 +88,7 @@ trait BaseException {
    * @return     mixed   Returns the line number where the exception was
    *                     created.
    */
-  <<__Pure, __MaybeMutable>>
-  final public function getLine(): int {
+  final public function getLine()[]: int {
     return $this->line;
   }
 
@@ -106,8 +100,7 @@ trait BaseException {
    *
    * @return     mixed   Returns the Exception stack trace as an array.
    */
-  <<__Pure, __MaybeMutable>>
-  final public function getTrace() {
+  final public function getTrace()[] {
     return $this->trace;
   }
 
@@ -115,7 +108,9 @@ trait BaseException {
    * Modifies the exception's trace by prepending the provided trace.
    * Does not modify file, line, etc.
    */
-  final protected function __prependTrace(\HH\Container $trace): void {
+  final protected function __prependTrace(
+    \HH\Container $trace,
+  )[write_props]: void {
     $this->trace = vec(\array_merge(\array_values($trace), $this->trace));
   }
 
@@ -127,8 +122,7 @@ trait BaseException {
    *
    * @return     mixed   Returns the Exception stack trace as a string.
    */
-  <<__Pure, __MaybeMutable>>
-  final public function getTraceAsString() {
+  final public function getTraceAsString()[] {
     $i = 0;
     $s = "";
     foreach ($this->trace as $frame) {

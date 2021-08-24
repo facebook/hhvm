@@ -7,11 +7,11 @@ class Exception implements Throwable {
 
   private static $traceOpts = 0;
 
-  final public static function getTraceOptions() {
+  final public static function getTraceOptions()[read_globals] {
     return self::$traceOpts;
   }
 
-  final public static function setTraceOptions($opts) {
+  final public static function setTraceOptions($opts)[globals] {
     self::$traceOpts = (int)$opts;
   }
 

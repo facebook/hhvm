@@ -77,19 +77,19 @@ class Exception implements Throwable {
   // TODO(coeffects) How do we fix this?
   public function getMessage(): string;
   final public function getPrevious()[]: ?Exception;
-  public final function setPrevious(Exception $previous)[]: void;
+  public final function setPrevious(Exception $previous)[write_props]: void;
   public function getCode()[]: int;
   final public function getFile()[]: string;
   final public function getLine()[]: int;
   final public function getTrace()[]: varray<mixed>;
-  final protected function __prependTrace(Container<mixed> $trace): void;
+  final protected function __prependTrace(Container<mixed> $trace)[write_props]: void;
   final public function getTraceAsString()[]: string;
   public function __toString(): string;
   public function toString(): string;
   final private function __clone(): void;
 
-  final public static function getTraceOptions();
-  final public static function setTraceOptions($opts);
+  final public static function getTraceOptions()[read_globals];
+  final public static function setTraceOptions($opts)[globals];
 }
 
 class ErrorException extends Exception {

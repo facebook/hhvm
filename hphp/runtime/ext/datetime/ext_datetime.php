@@ -696,7 +696,7 @@ function localtime(?int $timestamp = null,
  *
  */
 <<__Native>>
-function microtime(bool $get_as_float = false): mixed;
+function microtime(bool $get_as_float = false)[controlled]: mixed;
 
 /**
  * Returns the Unix timestamp corresponding to the arguments given. This
@@ -728,7 +728,7 @@ function mktime(int $hour = PHP_INT_MAX,
                 int $second = PHP_INT_MAX,
                 int $month = PHP_INT_MAX,
                 int $day = PHP_INT_MAX,
-                int $year = PHP_INT_MAX): mixed;
+                int $year = PHP_INT_MAX)[controlled]: mixed;
 
 /**
  * Format the time and/or date according to locale settings. Month and weekday
@@ -749,7 +749,7 @@ function mktime(int $hour = PHP_INT_MAX,
  *
  */
 <<__Native>>
-function strftime(string $format, ?int $timestamp = null): mixed;
+function strftime(string $format, ?int $timestamp = null)[controlled]: mixed;
 
 /**
  * strptime() returns an array with the date parsed, or FALSE on error.  Month
@@ -785,7 +785,7 @@ function strptime(string $date, string $format): mixed;
  *
  */
 <<__Native>>
-function strtotime(string $input, ?int $timestamp = null): mixed;
+function strtotime(string $input, ?int $timestamp = null)[controlled]: mixed;
 
 /**
  * Returns the current time measured in the number of seconds since the Unix
@@ -793,7 +793,7 @@ function strtotime(string $input, ?int $timestamp = null): mixed;
  *
  */
 <<__Native>>
-function time(): int;
+function time()[controlled]: int;
 
 function timezone_abbreviations_list(): darray {
   return DateTimeZone::listAbbreviations();

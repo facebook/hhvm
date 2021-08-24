@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -488,7 +489,10 @@ bool verifyReifiedLocalType(
   if (isObj && get_ts_kind(type_) == TypeStructure::Kind::T_unresolved) {
     try {
       bool persistent = true;
-      type = TypeStructure::resolve(type, nullptr, nullptr,
+      auto const declaringCls = vmfp()->func()->cls();
+      auto const thiz = declaringCls && vmfp()->hasThis()
+        ? vmfp()->getThis()->getVMClass() : nullptr;
+      type = TypeStructure::resolve(type, thiz, declaringCls,
                                     req::vector<Array>(), persistent);
     } catch (Exception& e) {
       if (is_ts_soft(type_)) warn = true;

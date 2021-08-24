@@ -1,0 +1,1 @@
+Catchable fatal error: Value returned from function D::foo_static() must be of type C<A, HH\this::T>, C<A,int> given in %s on line 25

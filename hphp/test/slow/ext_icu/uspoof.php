@@ -12,7 +12,7 @@ function VERIFY($x) { VS($x, true); }
 // Php doesn't support \u escapes.
 function u($x) { return json_decode("\"" . $x . "\""); }
 
-function test_SpoofChecker_issuspicious() {
+function test_SpoofChecker_issuspicious(): void {
   $issues = null;
   $checker = new SpoofChecker();
   VS($checker->isSuspicious("facebook", inout $issues), false);
@@ -43,7 +43,7 @@ function test_SpoofChecker_issuspicious() {
   // }
 }
 
-function test_SpoofChecker_areconfusable() {
+function test_SpoofChecker_areconfusable(): void {
   $issues = null;
   $checker = new SpoofChecker();
   VS($checker->areConfusable("hello, world", "goodbye, world", inout $issues), false);
@@ -84,12 +84,12 @@ function test_SpoofChecker_areconfusable() {
   // }
 }
 
-function test_SpoofChecker_issuesfound() {
+function test_SpoofChecker_issuesfound(): void {
   $ret = null;
   $checker = new SpoofChecker();
 
   VS($checker->isSuspicious("NAPKIN PEZ", inout $ret), true);
-  VS($ret, Spoofchecker::WHOLE_SCRIPT_CONFUSABLE);
+  VS($ret, SpoofChecker::WHOLE_SCRIPT_CONFUSABLE);
 
   VS($checker->isSuspicious(u('f\u0430\u0441\u0435b\u043e\u043ek'), inout $ret),
      true);
@@ -97,11 +97,9 @@ function test_SpoofChecker_issuesfound() {
 
   VS($checker->areConfusable("hello, world", "he11o, wor1d", inout $ret), true);
   VS($ret, SpoofChecker::SINGLE_SCRIPT_CONFUSABLE);
-
-  return Count(true);
 }
 
-function test_SpoofChecker_setchecks() {
+function test_SpoofChecker_setchecks(): void {
   $issues = null;
   $checker = new SpoofChecker();
 
@@ -130,7 +128,7 @@ function test_SpoofChecker_setchecks() {
   // }
 }
 
-function test_SpoofChecker_setAllowedLocales() {
+function test_SpoofChecker_setAllowedLocales(): void {
   $issues = null;
   $checker = new SpoofChecker();
 
@@ -183,7 +181,6 @@ function test_SpoofChecker_setAllowedLocales() {
   VS($checker->isSuspicious($korean, inout $issues), true);
   VS($checker->isSuspicious($snowman, inout $issues), false);
 }
-
 
 <<__EntryPoint>>
 function main_uspoof() {

@@ -1,2 +1,2 @@
 extension intl
-class Spoofchecker
+class SpoofChecker

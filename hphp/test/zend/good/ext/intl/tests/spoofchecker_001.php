@@ -3,7 +3,7 @@
 $url = "http://www.payp\xD0\xB0l.com";
 
 $issues = 0;
-$x = new Spoofchecker();
+$x = new SpoofChecker();
 echo "paypal with Cyrillic spoof characters\n";
 var_dump($x->isSuspicious($url, inout $issues));
 

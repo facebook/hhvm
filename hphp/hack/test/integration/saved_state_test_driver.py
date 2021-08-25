@@ -10,7 +10,7 @@ import tempfile
 from typing import Iterable, List, Mapping, NamedTuple, Optional, TextIO, TypeVar, Union
 
 import common_tests
-from hh_paths import hh_client, hh_server
+from hh_paths import hh_client, hh_server, hh_fanout
 
 
 T = TypeVar("T")
@@ -66,20 +66,6 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
             return base_path + "_naming.sql"
 
     @classmethod
-    def exec_save_command(
-        cls,
-        hh_command: List[str],
-        ignore_errors: bool = False,
-    ) -> SaveStateCommandResult:
-        stdout, stderr, retcode = cls.proc_call(hh_command)
-        if retcode != 0 and not ignore_errors:
-            raise Exception(
-                'Failed to save! stdout: "%s" stderr: "%s"' % (stdout, stderr)
-            )
-
-        return SaveStateCommandResult(retcode)
-
-    @classmethod
     def save_command(
         cls,
         init_dir: str,
@@ -90,10 +76,15 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         actual_saved_state_path: str = (
             saved_state_path if saved_state_path is not None else cls.saved_state_path()
         )
+        edges_dir = tempfile.mkdtemp()
+        hhdg_path = actual_saved_state_path + ".hhdg"
 
+        # call hh
         hh_command: List[str] = [
             hh_client,
             "--json",
+            "--save-64bit",
+            edges_dir,
             "--save-state",
             actual_saved_state_path,
             init_dir,
@@ -104,10 +95,28 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         if ignore_errors:
             hh_command.append("--gen-saved-ignore-type-errors")
 
-        result = cls.exec_save_command(hh_command, ignore_errors)
+        stdout, stderr, retcode = cls.proc_call(hh_command)
+        if not (retcode == 0 or (ignore_errors and retcode == 2)):
+            raise Exception(
+                'Failed to save! stdout: "%s" stderr: "%s"' % (stdout, stderr)
+            )
+        result = SaveStateCommandResult(retcode)
 
         if cls.enable_naming_table_fallback:
             cls.dump_naming_saved_state(init_dir, saved_state_path)
+
+        # construct dep graph using hh_fanout
+        _, _, retcode = cls.proc_call(
+            [
+                hh_fanout,
+                "build",
+                "--output",
+                hhdg_path,
+                "--edges",
+                edges_dir,
+            ]
+        )
+        assert retcode == 0
 
         return result
 
@@ -122,6 +131,78 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         result: SaveStateCommandResult = cls.save_command(
             cls.repo_dir,
             saved_state_path,
+            ignore_errors,
+        )
+
+        return SaveStateResult(saved_state_path, result)
+
+    @classmethod
+    def save_command_incr(
+        cls,
+        init_dir: str,
+        saved_state_path: str,
+        original_saved_state_path: str,
+        ignore_errors: bool = False,
+    ) -> SaveStateCommandResult:
+        delta_file = saved_state_path + "_64bit_dep_graph.delta"
+        hhdg_path = saved_state_path + ".hhdg"
+        original_hhdg_path = original_saved_state_path + ".hhdg"
+
+        # call hh
+        hh_command: List[str] = [
+            hh_client,
+            "--json",
+            "--save-state",
+            saved_state_path,
+            init_dir,
+            "--config",
+            "max_workers=2",
+        ]
+
+        if ignore_errors:
+            hh_command.append("--gen-saved-ignore-type-errors")
+
+        stdout, stderr, retcode = cls.proc_call(hh_command)
+        if not (retcode == 0 or (ignore_errors and retcode == 2)):
+            raise Exception(
+                'Failed to save! stdout: "%s" stderr: "%s"' % (stdout, stderr)
+            )
+        result = SaveStateCommandResult(retcode)
+
+        if cls.enable_naming_table_fallback:
+            cls.dump_naming_saved_state(init_dir, saved_state_path)
+
+        # construct dep graph using hh_fanout
+        _, _, retcode = cls.proc_call(
+            [
+                hh_fanout,
+                "build",
+                "--output",
+                hhdg_path,
+                "--incremental",
+                original_hhdg_path,
+                "--delta",
+                delta_file,
+            ]
+        )
+        assert retcode == 0
+
+        return result
+
+    @classmethod
+    def dump_saved_state_incr(
+        cls,
+        original_saved_state_result: SaveStateResult,
+        ignore_errors: bool = False,
+    ) -> SaveStateResult:
+        # Dump a saved state to a temporary directory.
+        # Return the path to the saved state.
+        saved_state_path = os.path.join(tempfile.mkdtemp(), "new_saved_state")
+        original_saved_state_path = original_saved_state_result.path
+        result: SaveStateCommandResult = cls.save_command_incr(
+            cls.repo_dir,
+            saved_state_path,
+            original_saved_state_path,
             ignore_errors,
         )
 
@@ -210,7 +291,8 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
             "state": saved_state_path,
             "corresponding_base_revision": "1",
             "is_cached": True,
-            "deptable": saved_state_path + ".sql",
+            "deptable": saved_state_path + ".hhdg",
+            "deptable_is_64bit": True,
             "changes": changed_files,
             "naming_changes": changed_naming_files,
         }

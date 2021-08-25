@@ -127,10 +127,19 @@ watchman_init_timeout = 1
 
     def test_incrementally_generated_saved_state(self) -> None:
         old_saved_state: SaveStateResult = self.test_driver.dump_saved_state()
+        self.test_driver.proc_call([hh_client, "stop", self.test_driver.repo_dir])
+        self.test_driver.start_hh_server(
+            changed_files=[],
+            saved_state_path=old_saved_state.path,
+        )
+
         new_file = os.path.join(self.test_driver.repo_dir, "class_3b.php")
         self.add_file_that_depends_on_class_a(new_file)
         self.test_driver.check_cmd(["No errors!"], assert_loaded_saved_state=False)
-        new_saved_state: SaveStateResult = self.test_driver.dump_saved_state()
+
+        new_saved_state: SaveStateResult = self.test_driver.dump_saved_state_incr(
+            old_saved_state
+        )
 
         self.change_return_type_on_base_class(
             os.path.join(self.test_driver.repo_dir, "class_1.php")
@@ -181,12 +190,19 @@ watchman_init_timeout = 1
         self.test_driver.start_hh_server()
         # Hack server is now started with a saved state
         self.test_driver.check_cmd(["No errors!"], assert_loaded_saved_state=True)
+        self.test_driver.proc_call([hh_client, "stop", self.test_driver.repo_dir])
+
         old_saved_state = self.test_driver.dump_saved_state()
+        self.test_driver.proc_call([hh_client, "stop", self.test_driver.repo_dir])
+        self.test_driver.start_hh_server(
+            changed_files=[],
+            saved_state_path=old_saved_state.path,
+        )
 
         new_file = os.path.join(self.test_driver.repo_dir, "class_3b.php")
         self.add_file_that_depends_on_class_a(new_file)
         self.test_driver.check_cmd(["No errors!"], assert_loaded_saved_state=True)
-        new_saved_state = self.test_driver.dump_saved_state()
+        new_saved_state = self.test_driver.dump_saved_state_incr(old_saved_state)
 
         self.change_return_type_on_base_class(
             os.path.join(self.test_driver.repo_dir, "class_1.php")
@@ -282,8 +298,8 @@ watchman_init_timeout = 1
             assert_loaded_saved_state=False,
         )
 
-        saved_state_with_2_errors = self.test_driver.dump_saved_state(
-            ignore_errors=True
+        saved_state_with_2_errors = self.test_driver.dump_saved_state_incr(
+            saved_state_with_1_error, ignore_errors=True
         )
 
         self.test_driver.proc_call([hh_client, "stop", self.test_driver.repo_dir])

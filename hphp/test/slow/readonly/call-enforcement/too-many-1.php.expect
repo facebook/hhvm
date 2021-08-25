@@ -1,0 +1,2 @@
+f() does not allow for parameter 1 to be passed readonly, but the argument was annotated with 'readonly'
+f() does not allow for parameter 1 to be passed readonly, but the argument was annotated with 'readonly'

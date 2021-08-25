@@ -208,6 +208,12 @@ struct FCallArgsLong : FCallArgsBase {
     return fca;
   }
 
+  FCallArgsLong withoutReadonly() const {
+    auto fca = *this;
+    fca.readonlyArgs = nullptr;
+    return fca;
+  }
+
   FCallArgsLong withoutAsyncEagerTarget() const {
     auto fca = *this;
     fca.asyncEagerTarget = NoBlockId;
@@ -340,6 +346,9 @@ struct FCallArgs {
 
   FCallArgs withoutInOut() const {
     return l->withoutInOut();
+  }
+  FCallArgs withoutReadonly() const {
+    return l->withoutReadonly();
   }
   FCallArgs withoutLockWhileUnwinding() const {
     return l->withoutLockWhileUnwinding();

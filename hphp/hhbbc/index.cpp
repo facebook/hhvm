@@ -1164,6 +1164,7 @@ struct Index::IndexData {
   ISStringToOneT<const php::Class*>      classes;
   SStringToMany<const php::Func>         methods;
   SStringToOneFastT<uint64_t>            method_inout_params_by_name;
+  SStringToOneFastT<uint64_t>            method_readonly_params_by_name;
   ISStringToOneT<const php::Func*>       funcs;
   ISStringToOneT<const php::TypeAlias*>  typeAliases;
   ISStringToOneT<const php::Class*>      enums;
@@ -2406,12 +2407,16 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
       attribute_setter(m->attrs, false, AttrNoOverride);
       index.methods.insert({m->name, m.get()});
 
-      uint64_t refs = 0, cur = 1;
-      bool anyInOut = false;
+      uint64_t inOutBits = 0, readonlyBits = 0, cur = 1;
+      bool anyInOut = false, anyReadonly = false;
       for (auto& p : m->params) {
         if (p.inout) {
-          refs |= cur;
+          inOutBits |= cur;
           anyInOut = true;
+        }
+        if (p.readonly) {
+          readonlyBits |= cur;
+          anyReadonly = true;
         }
         // It doesn't matter that we lose parameters beyond the 64th,
         // for those, we'll conservatively check everything anyway.
@@ -2422,7 +2427,10 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
         // cell, thus we use |=. This only makes sense in WholeProgram mode
         // since we use this field to check that no functions has its n-th
         // parameter as inout, which requires global knowledge.
-        index.method_inout_params_by_name[m->name] |= refs;
+        index.method_inout_params_by_name[m->name] |= inOutBits;
+      }
+      if (anyReadonly) {
+        index.method_readonly_params_by_name[m->name] |= readonlyBits;
       }
     }
 
@@ -3960,29 +3968,25 @@ Type context_sensitive_return_type(IndexData& data,
 
 //////////////////////////////////////////////////////////////////////
 
-PrepKind func_param_prep_default() {
-  return PrepKind::Val;
+PrepKind func_param_prep_func_doesnt_exist() {
+  // since function doesnt exist, we will fail anyway, it is fine to remove
+  // readonly checks
+  return PrepKind{TriBool::No, TriBool::Yes};
 }
 
-PrepKind func_param_prep(const php::Func* func,
-                         uint32_t paramId) {
-  if (paramId >= func->params.size()) {
-    return PrepKind::Val;
-  }
-  return func->params[paramId].inout ? PrepKind::InOut : PrepKind::Val;
+PrepKind func_param_prep(const php::Func* f, uint32_t paramId) {
+  auto const sz = f->params.size();
+  if (paramId >= sz) return PrepKind{TriBool::No, TriBool::No};
+  PrepKind kind;
+  kind.inOut = yesOrNo(f->params[paramId].inout);
+  kind.readonly = yesOrNo(f->params[paramId].readonly);
+  return kind;
 }
 
 template<class PossibleFuncRange>
 PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
 
-  /*
-   * In single-unit mode, the range is not complete. Without konwing all
-   * possible resolutions, HHBBC cannot deduce anything about by-val vs inout.
-   * So the caller should make sure not calling this in single-unit mode.
-   */
-  if (begin(range) == end(range)) {
-    return func_param_prep_default();
-  }
+  if (begin(range) == end(range)) return func_param_prep_func_doesnt_exist();
 
   struct FuncFind {
     using F = const php::Func*;
@@ -3992,19 +3996,15 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
 
   Optional<PrepKind> prep;
   for (auto& item : range) {
-    switch (func_param_prep(FuncFind::get(item), paramId)) {
-    case PrepKind::Unknown:
-      return PrepKind::Unknown;
-    case PrepKind::InOut:
-      if (prep && *prep != PrepKind::InOut) return PrepKind::Unknown;
-      prep = PrepKind::InOut;
-      break;
-    case PrepKind::Val:
-      if (prep && *prep != PrepKind::Val) return PrepKind::Unknown;
-      prep = PrepKind::Val;
-      break;
+    auto const kind = func_param_prep(FuncFind::get(item), paramId);
+    if (!prep) {
+      prep = kind;
+      continue;
     }
+    prep->inOut |= kind.inOut;
+    prep->readonly |= kind.readonly;
   }
+  assertx(prep);
   return *prep;
 }
 
@@ -6174,24 +6174,29 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
   return match<PrepKind>(
     rfunc.val,
     [&] (res::Func::FuncName s) {
-      if (s.renamable) return PrepKind::Unknown;
+      if (s.renamable) return PrepKind{TriBool::Maybe, TriBool::Maybe};
       auto const it = m_data->funcs.find(s.name);
       return it != end(m_data->funcs)
         ? func_param_prep(it->second, paramId)
-        : func_param_prep_default();
+        : func_param_prep_func_doesnt_exist();
     },
     [&] (res::Func::MethodName s) {
-      auto const it = m_data->method_inout_params_by_name.find(s.name);
-      if (it == end(m_data->method_inout_params_by_name)) {
-        // There was no entry, so no method by this name takes a parameter
-        // by inout.
-        return PrepKind::Val;
+
+      auto const couldHaveBit = [&] (auto map, auto index) {
+        auto const it = map.find(s.name);
+        if (it == end(map)) return false;
+        if (index < sizeof(it->second) * CHAR_BIT &&
+            !((it->second >> index) & 1)) {
+          return false;
+        }
+        return true;
+      };
+
+      if (!couldHaveBit(m_data->method_inout_params_by_name, paramId) &&
+          !couldHaveBit(m_data->method_readonly_params_by_name, paramId)) {
+        return PrepKind{TriBool::No, TriBool::No};
       }
-      if (paramId < sizeof(it->second) * CHAR_BIT &&
-          !((it->second >> paramId) & 1)) {
-        // No method of this name takes parameter paramId by inout.
-        return PrepKind::Val;
-      }
+
       auto const pair = m_data->methods.equal_range(s.name);
       return prep_kind_from_set(folly::range(pair.first, pair.second), paramId);
     },
@@ -7174,6 +7179,7 @@ void Index::cleanup_post_emit(php::ProgramPtr program) {
   CLEAR_PARALLEL(m_data->classes);
   CLEAR_PARALLEL(m_data->methods);
   CLEAR_PARALLEL(m_data->method_inout_params_by_name);
+  CLEAR_PARALLEL(m_data->method_readonly_params_by_name);
   CLEAR_PARALLEL(m_data->funcs);
   CLEAR_PARALLEL(m_data->typeAliases);
   CLEAR_PARALLEL(m_data->enums);

@@ -3582,12 +3582,12 @@ bool fcallOptimizeChecks(
       bool match = true;
       for (auto i = 0; i < fca.numArgs(); ++i) {
         auto const kind = env.index.lookup_param_prep(env.ctx, func, i);
-        if (kind == PrepKind::Unknown) {
+        if (kind.inOut == TriBool::Maybe) {
           match = false;
           break;
         }
 
-        if (kind != (fca.isInOut(i) ? PrepKind::InOut : PrepKind::Val)) {
+        if (yesOrNo(fca.isInOut(i)) != kind.inOut) {
           // The function/method may not exist, in which case we should raise a
           // different error. Just defer the checks to the runtime.
           if (!func.exactFunc()) return false;
@@ -3617,6 +3617,32 @@ bool fcallOptimizeChecks(
         reduce(env, fcallWithFCA(fca.withoutInOut()));
         return true;
       }
+    }
+  }
+
+  if (fca.enforceReadonly()) {
+    bool match = true;
+    for (auto i = 0; i < fca.numArgs(); ++i) {
+      if (!fca.isReadonly(i)) continue;
+      auto const kind = env.index.lookup_param_prep(env.ctx, func, i);
+      if (kind.readonly == TriBool::Maybe) {
+        match = false;
+        break;
+      }
+
+      if (kind.readonly != TriBool::Yes) {
+        // The function/method may not exist, in which case we should raise a
+        // different error. Just defer the checks to the runtime.
+        if (!func.exactFunc()) return false;
+        match = false;
+        break;
+      }
+    }
+
+    if (match) {
+      // Optimize away the runtime readonly-ness check.
+      reduce(env, fcallWithFCA(fca.withoutReadonly()));
+      return true;
     }
   }
 

@@ -25,6 +25,7 @@
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
+#include "hphp/util/tribool.h"
 
 namespace HPHP {
 struct StringData;
@@ -54,7 +55,10 @@ enum class Flavor { C, U, CU };
 /*
  * Types of parameter preparation (or unknown).
  */
-enum class PrepKind { InOut, Val, Unknown };
+struct PrepKind {
+  TriBool inOut;
+  TriBool readonly;
+};
 
 using LocalId = uint32_t;
 constexpr const LocalId NoLocalId = -1;

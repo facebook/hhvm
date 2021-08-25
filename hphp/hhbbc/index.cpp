@@ -418,6 +418,7 @@ struct res::Func::FuncFamily {
   PFuncVec  m_v;
   LockFreeLazy<Type> m_returnTy;
   Optional<uint32_t> m_numInOut;
+  TriBool m_isReadonlyReturn;
 };
 
 namespace {
@@ -1164,6 +1165,7 @@ struct Index::IndexData {
   ISStringToOneT<const php::Class*>      classes;
   SStringToMany<const php::Func>         methods;
   SStringToOneFastT<uint64_t>            method_inout_params_by_name;
+  // 0th index is the return value
   SStringToOneFastT<uint64_t>            method_readonly_params_by_name;
   ISStringToOneT<const php::Func*>       funcs;
   ISStringToOneT<const php::TypeAlias*>  typeAliases;
@@ -2316,6 +2318,28 @@ Optional<uint32_t> num_inout_from_set(PossibleFuncRange range) {
   return num;
 }
 
+template<typename PossibleFuncRange>
+TriBool is_readonly_return_from_set(PossibleFuncRange range) {
+  if (begin(range) == end(range)) return TriBool::No;
+
+  struct FuncFind {
+    using F = const php::Func*;
+    static F get(std::pair<SString,F> p) { return p.second; }
+    static F get(const MethTabEntryPair* mte) { return mte->second.func; }
+  };
+
+  Optional<bool> result = false;
+  for (auto const& item : range) {
+    auto const b = FuncFind::get(item)->isReadonlyReturn;
+    if (!result) {
+      result = b;
+      continue;
+    }
+    if (*result != b) return TriBool::Maybe;
+  }
+  return yesOrNo(*result);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 template<class T>
@@ -2429,8 +2453,9 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
         // parameter as inout, which requires global knowledge.
         index.method_inout_params_by_name[m->name] |= inOutBits;
       }
-      if (anyReadonly) {
-        index.method_readonly_params_by_name[m->name] |= readonlyBits;
+      if (anyReadonly || m->isReadonlyReturn) {
+        index.method_readonly_params_by_name[m->name] |=
+          ((readonlyBits << 1) | (m->isReadonlyReturn ? 1 : 0));
       }
     }
 
@@ -3367,6 +3392,7 @@ void define_func_families(IndexData& index) {
     work,
     [&] (FuncFamily* ff) {
       ff->m_numInOut = num_inout_from_set(ff->possibleFuncs());
+      ff->m_isReadonlyReturn = is_readonly_return_from_set(ff->possibleFuncs());
       for (auto const pf : ff->possibleFuncs()) {
         auto finfo = create_func_info(index, pf->second.func);
         auto& lock = locks[pointer_hash<FuncInfo>{}(finfo) % locks.size()];
@@ -6193,7 +6219,7 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
       };
 
       if (!couldHaveBit(m_data->method_inout_params_by_name, paramId) &&
-          !couldHaveBit(m_data->method_readonly_params_by_name, paramId)) {
+          !couldHaveBit(m_data->method_readonly_params_by_name, paramId + 1)) {
         return PrepKind{TriBool::No, TriBool::No};
       }
 
@@ -6208,6 +6234,44 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
     },
     [&] (FuncFamily* fam) {
       return prep_kind_from_set(fam->possibleFuncs(), paramId);
+    }
+  );
+}
+
+TriBool Index::lookup_return_readonly(
+  Context,
+  res::Func rfunc
+) const {
+  return match<TriBool>(
+    rfunc.val,
+    [&] (res::Func::FuncName s) {
+      if (s.renamable) return TriBool::Maybe;
+      auto const it = m_data->funcs.find(s.name);
+      return it != end(m_data->funcs)
+       ? yesOrNo(it->second->isReadonlyReturn)
+       : TriBool::No; // if the function doesnt exist, we will error anyway
+    },
+    [&] (res::Func::MethodName s) {
+      auto const it = m_data->method_readonly_params_by_name.find(s.name);
+      if (it == end(m_data->method_readonly_params_by_name)) {
+        // There was no entry, so no method by this name returns readonly.
+        return TriBool::No;
+      }
+      if (!(it->second & 1)) {
+        // No method of this name returns readonly.
+        return TriBool::No;
+      }
+      auto const pair = m_data->methods.equal_range(s.name);
+      return is_readonly_return_from_set(folly::range(pair.first, pair.second));
+    },
+    [&] (FuncInfo* finfo) {
+      return yesOrNo(finfo->func->isReadonlyReturn);
+    },
+    [&] (const MethTabEntryPair* mte) {
+      return yesOrNo(mte->second.func->isReadonlyReturn);
+    },
+    [&] (FuncFamily* fam) {
+      return fam->m_isReadonlyReturn;
     }
   );
 }

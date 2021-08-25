@@ -195,6 +195,11 @@ struct FCallArgsLong : FCallArgsBase {
     fca.flags = static_cast<Flags>(fca.flags & ~Flags::LockWhileUnwinding);
     return fca;
   }
+  FCallArgsLong withoutEnforceMutableReturn() const {
+    auto fca = *this;
+    fca.flags = static_cast<Flags>(fca.flags & ~Flags::EnforceMutableReturn);
+    return fca;
+  }
 
   FCallArgsLong withoutRepack() const {
     auto fca = *this;
@@ -343,6 +348,9 @@ struct FCallArgs {
   FCallArgs withoutGenerics() const {
     return l->withoutGenerics();
   }
+  FCallArgs withoutEnforceMutableReturn() const {
+    return l->withoutEnforceMutableReturn();
+  }
 
   FCallArgs withoutInOut() const {
     return l->withoutInOut();
@@ -410,6 +418,9 @@ struct FCallArgs {
   }
   bool hasGenerics() const {
     return l->hasGenerics();
+  }
+  bool enforceMutableReturn() const {
+    return l->enforceMutableReturn();
   }
   bool lockWhileUnwinding() const {
     return l->lockWhileUnwinding();

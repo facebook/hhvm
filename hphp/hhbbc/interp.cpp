@@ -3646,6 +3646,13 @@ bool fcallOptimizeChecks(
     }
   }
 
+  if (fca.enforceMutableReturn()) {
+    if (env.index.lookup_return_readonly(env.ctx, func) == TriBool::No) {
+      reduce(env, fcallWithFCA(fca.withoutEnforceMutableReturn()));
+      return true;
+    }
+  }
+
   // Infer whether the callee supports async eager return.
   if (fca.asyncEagerTarget() != NoBlockId) {
     auto const status = env.index.supports_async_eager_return(func);

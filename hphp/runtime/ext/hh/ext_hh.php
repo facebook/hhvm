@@ -608,7 +608,7 @@ namespace HH\Coeffects {
 
 namespace __SystemLib {
 
-<<__Native, __IsFoldable>>
+<<__Native>>
 function is_dynamically_callable_inst_method(
     string $class,
     string $method

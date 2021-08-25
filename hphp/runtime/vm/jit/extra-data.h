@@ -2025,8 +2025,8 @@ struct PropData : IRExtraData {
   ReadonlyOp op;
 };
 
-struct ReadOnlyData : IRExtraData {
-  explicit ReadOnlyData(ReadonlyOp op) : op(op) {}
+struct ReadonlyData : IRExtraData {
+  explicit ReadonlyData(ReadonlyOp op) : op(op) {}
   std::string show() const { return subopToName(op); }
 
   size_t hash() const {
@@ -2037,7 +2037,7 @@ struct ReadOnlyData : IRExtraData {
     return std::hash<ReadonlyOp>()(op);
   }
 
-  bool equals(const ReadOnlyData& o) const {
+  bool equals(const ReadonlyData& o) const {
     return op == o.op;
   }
 
@@ -2786,13 +2786,13 @@ X(LdTVFromRDS,                  TVInRDSHandleData);
 X(StTVInRDS,                    TVInRDSHandleData);
 X(BaseG,                        MOpModeData);
 X(PropX,                        PropData);
-X(PropQ,                        ReadOnlyData);
+X(PropQ,                        ReadonlyData);
 X(PropDX,                       PropData);
 X(ElemX,                        MOpModeData);
 X(ElemDX,                       MOpModeData);
 X(ElemUX,                       MOpModeData);
 X(CGetProp,                     PropData);
-X(CGetPropQ,                    ReadOnlyData);
+X(CGetPropQ,                    ReadonlyData);
 X(CGetElem,                     MOpModeData);
 X(MemoGetStaticValue,           MemoValueStaticData);
 X(MemoSetStaticValue,           MemoValueStaticData);
@@ -2808,7 +2808,7 @@ X(MemoGetInstanceCache,         MemoCacheInstanceData);
 X(MemoSetInstanceCache,         MemoCacheInstanceData);
 X(SetOpProp,                    SetOpData);
 X(SetOpTV,                      SetOpData);
-X(SetProp,                      ReadOnlyData);
+X(SetProp,                      ReadonlyData);
 X(OutlineSetOp,                 SetOpData);
 X(IncDecProp,                   IncDecData);
 X(SetOpElem,                    SetOpData);
@@ -2864,8 +2864,8 @@ X(LdClsTypeCns,                 LdClsTypeCnsData);
 X(ConvTVToStr,                  ConvNoticeData);
 X(CheckFuncNeedsCoverage,       FuncData);
 X(RecordFuncCall,               FuncData);
-X(LdClsPropAddrOrNull,          ReadOnlyData);
-X(LdClsPropAddrOrRaise,         ReadOnlyData);
+X(LdClsPropAddrOrNull,          ReadonlyData);
+X(LdClsPropAddrOrRaise,         ReadonlyData);
 X(ThrowMustBeEnclosedInReadonly,ClassData);
 X(ThrowMustBeMutableException,  ClassData);
 X(ThrowMustBeReadonlyException, ClassData);

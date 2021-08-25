@@ -124,7 +124,7 @@ void cgPropQ(IRLS& env, const IRInstruction* inst) {
   auto const args = propArgs(env, inst)
     .ssa(1)
     .ssa(3)
-    .imm(static_cast<int32_t>(inst->extra<ReadOnlyData>()->op))
+    .imm(static_cast<int32_t>(inst->extra<ReadonlyData>()->op))
     .ssa(2);
 
   auto helper = inst->src(0)->isA(TObj)
@@ -159,7 +159,7 @@ void cgCGetPropQ(IRLS& env, const IRInstruction* inst) {
 
   auto args = propArgs(env, inst)
     .ssa(1)
-    .imm(static_cast<int32_t>(inst->extra<ReadOnlyData>()->op));
+    .imm(static_cast<int32_t>(inst->extra<ReadonlyData>()->op));
 
   auto& v = vmain(env);
 
@@ -179,7 +179,7 @@ void cgSetProp(IRLS& env, const IRInstruction* inst) {
   auto args = propArgs(env, inst)
     .memberKeyS(1)
     .typedValue(2)
-    .imm(static_cast<int32_t>(inst->extra<ReadOnlyData>()->op));
+    .imm(static_cast<int32_t>(inst->extra<ReadonlyData>()->op));
 
   auto const target = [&] {
     if (base->isA(TObj)) {

@@ -943,7 +943,7 @@ SSATmp* propGenericImpl(IRGS& env, MOpMode mode, SSATmp* base, SSATmp* key,
 
   auto const tvRef = propTvRefPtr(env, base, key);
   auto const roProp = gen(env, LdMROPropAddr);
-  if (nullsafe) return gen(env, PropQ, ReadOnlyData { rop }, base, key, roProp, tvRef);
+  if (nullsafe) return gen(env, PropQ, ReadonlyData { rop }, base, key, roProp, tvRef);
   auto const op = define ? PropDX : PropX;
   return gen(env, op, PropData { mode, rop }, base, key, roProp, tvRef);
 }
@@ -1206,7 +1206,7 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
   if (!nullsafe || mode != MOpMode::Warn) {
     return gen(env, CGetProp, PropData{mode, op}, base, key);
   }
-  return gen(env, CGetPropQ, ReadOnlyData{op}, base, key);
+  return gen(env, CGetPropQ, ReadonlyData{op}, base, key);
 }
 
 Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
@@ -1300,7 +1300,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
     gen(env, StMem, propPtr, newVal);
     decRef(env, oldVal);
   } else {
-    gen(env, SetProp, makeCatchSet(env, nDiscard), ReadOnlyData{op}, base, key, value);
+    gen(env, SetProp, makeCatchSet(env, nDiscard), ReadonlyData{op}, base, key, value);
   }
 
   return value;

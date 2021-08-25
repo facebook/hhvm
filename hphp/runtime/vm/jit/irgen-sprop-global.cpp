@@ -168,7 +168,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, SSATmp* 
 
   auto const ctxClass = curClass(env);
   auto const ctxTmp = ctxClass ? cns(env, ctxClass) : cns(env, nullptr);
-  auto const data = ReadOnlyData{ opts.readOnlyCheck };
+  auto const data = ReadonlyData{ opts.readOnlyCheck };
   auto const propAddr = gen(
     env,
     opts.raise ? LdClsPropAddrOrRaise : LdClsPropAddrOrNull,

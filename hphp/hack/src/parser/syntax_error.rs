@@ -1062,13 +1062,6 @@ pub fn invalid_readonly(r1: &str, r2: &str, reason: &str) -> Error {
     ))
 }
 
-pub fn redefined_assignment_different_mutability(var_name: &str) -> Error {
-    Cow::Owned(format!(
-        "Cannot change variable mutability of `{}` after it has been initially defined",
-        var_name.to_string(),
-    ))
-}
-
 pub const enum_class_constant_missing_initializer: Error =
     Cow::Borrowed("Concrete enum class constants must have an initial value");
 

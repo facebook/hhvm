@@ -11,5 +11,5 @@ function main() {
   $ro = readonly new P(1);
   $mut = new P(1);
   $p = shape("a" => $ro, "b" => $mut);
-  $mut = $p; // error, assigning readonly value to mutable
+  $p["a"]->i = 4; // error, $p is mutable
 }

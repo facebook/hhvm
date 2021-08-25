@@ -18,6 +18,8 @@ use parser_core_types::{
 };
 use std::collections::HashMap;
 
+type Lenv = HashMap<String, Rty>;
+
 #[derive(PartialEq, Copy, Clone)]
 pub enum Rty {
     Readonly,
@@ -25,7 +27,7 @@ pub enum Rty {
 }
 
 struct Context {
-    locals: HashMap<String, Rty>,
+    locals: Lenv,
     readonly_return: Rty,
     this_ty: Rty,
 }
@@ -40,20 +42,7 @@ impl Context {
     }
 
     pub fn add_local(&mut self, var_name: &String, rty: Rty) {
-        match self.locals.get(var_name) {
-            Some(_) => {
-                // per @jjwu, "...once a variable is assigned a value, it
-                // can only be assigned a value of the same Rty
-                // for the rest of the function." See D29320968 for more context.
-            }
-            None => {
-                self.locals.insert(var_name.clone(), rty);
-            }
-        }
-    }
-
-    pub fn is_new_local(&self, var_name: &String) -> bool {
-        !self.locals.contains_key(var_name)
+        self.locals.insert(var_name.clone(), rty);
     }
 
     pub fn get_rty<S: ?Sized>(&self, var_name: &S) -> Rty
@@ -235,27 +224,6 @@ fn explicit_readonly(expr: &mut Expr) {
     }
 }
 
-// For assignments to local variables, i.e.
-// $x = new Foo();
-fn check_assignment_local(
-    context: &mut Context,
-    checker: &mut Checker,
-    pos: &Pos,
-    id_orig: &Box<Lid>,
-    rhs: &mut Expr,
-) {
-    let var_name = local_id::get_name(&id_orig.1).to_string();
-    let rhs_rty = rty_expr(context, &rhs);
-    if context.is_new_local(&var_name) {
-        context.add_local(&var_name, rhs_rty);
-    } else if context.get_rty(&var_name) != rhs_rty {
-        checker.add_error(
-            &pos,
-            syntax_error::redefined_assignment_different_mutability(&var_name),
-        );
-    }
-}
-
 // For assignments to nonlocals, i.e.
 // $x->prop[0] = new Foo();
 fn check_assignment_nonlocal(
@@ -312,6 +280,19 @@ fn check_assignment_nonlocal(
     }
 }
 
+fn merge_lenvs(lenv1: &Lenv, lenv2: &Lenv) -> Lenv {
+    let mut new_lenv = lenv1.clone();
+    for (key, value) in lenv2.into_iter() {
+        match (value, new_lenv.get(key)) {
+            (_, Some(Rty::Readonly)) => {}
+            (rty, _) => {
+                new_lenv.insert(key.to_string(), *rty);
+            }
+        }
+    }
+    new_lenv
+}
+
 // Toplevel assignment check
 fn check_assignment_validity(
     context: &mut Context,
@@ -322,7 +303,9 @@ fn check_assignment_validity(
 ) {
     match &mut lhs.2 {
         aast::Expr_::Lvar(id_orig) => {
-            check_assignment_local(context, checker, pos, id_orig, rhs);
+            let var_name = local_id::get_name(&id_orig.1).to_string();
+            let rhs_rty = rty_expr(context, &rhs);
+            context.add_local(&var_name, rhs_rty);
         }
         // list assignment
         aast::Expr_::List(l) => {
@@ -361,6 +344,17 @@ impl Checker {
             ),
             _ => {}
         }
+    }
+
+    fn handle_single_block(
+        &mut self,
+        context: &mut Context,
+        lenv: Lenv,
+        b: &mut aast::Block<(), ()>,
+    ) -> Lenv {
+        context.locals = lenv;
+        let _ = b.recurse(context, self.object());
+        context.locals.clone()
     }
 }
 
@@ -438,12 +432,25 @@ impl<'ast> VisitorMut<'ast> for Checker {
         context: &mut Context,
         s: &mut aast::Stmt<(), ()>,
     ) -> std::result::Result<(), ()> {
-        if let aast::Stmt_::Return(r) = &mut s.1 {
-            if let Some(expr) = r.as_mut() {
-                self.subtype(&expr.1, &rty_expr(context, &expr), &context.readonly_return, "this function does not return readonly. Please mark it to return readonly if needed.")
+        match &mut s.1 {
+            aast::Stmt_::Return(r) => {
+                if let Some(expr) = r.as_mut() {
+                    self.subtype(&expr.1, &rty_expr(context, &expr), &context.readonly_return, "this function does not return readonly. Please mark it to return readonly if needed.")
+                }
+                s.recurse(context, self.object())
             }
+            aast::Stmt_::If(i) => {
+                let (condition, if_, else_) = &mut **i;
+                let old_lenv = context.locals.clone();
+                condition.recurse(context, self.object())?;
+                let if_lenv = self.handle_single_block(context, old_lenv.clone(), if_);
+                let else_lenv = self.handle_single_block(context, old_lenv.clone(), else_);
+                let new_lenv = merge_lenvs(&if_lenv, &else_lenv);
+                context.locals = new_lenv;
+                Ok(())
+            }
+            _ => s.recurse(context, self.object()),
         }
-        s.recurse(context, self.object())
     }
 }
 

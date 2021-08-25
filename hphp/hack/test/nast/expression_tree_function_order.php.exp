@@ -15,8 +15,9 @@
             (Expr
                ((), [4:3-11:5],
                 (ExpressionTree
-                   { et_hint = ([4:3-7], (Happly (([4:3-7], "\\Code"), [])));
-                     et_splices =
+                   { et_hint = ([4:3-7], (Happly (([4:3-7], "\\Code"), []))); 
+                     et_splices = [];
+                     et_function_pointers =
                      [([7:9-12], (Expr ((), [7:9-12], (Binop ((Eq None), ((), [7:9-12], (Lvar ([7:9-12], $0fp0))), ((), [7:9-12], (FunctionPointer ((FP_id ([7:9-12], "\\baz")), []))))))));
                        ([8:9-12], (Expr ((), [8:9-12], (Binop ((Eq None), ((), [8:9-12], (Lvar ([8:9-12], $0fp1))), ((), [8:9-12], (FunctionPointer ((FP_id ([8:9-12], "\\qux")), []))))))));
                        ([6:7-10], (Expr ((), [6:7-10], (Binop ((Eq None), ((), [6:7-10], (Lvar ([6:7-10], $0fp2))), ((), [6:7-10], (FunctionPointer ((FP_id ([6:7-10], "\\bar")), []))))))));

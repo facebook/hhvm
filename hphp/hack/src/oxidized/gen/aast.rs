@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ebd97fd7e892558448092d982c52f19b>>
+// @generated SignedSource<<60412c3c0953388616f0d4a5d9578ef8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -420,6 +420,11 @@ pub struct ExpressionTree<Ex, En> {
     ///
     /// $0tmp1 = $x; $0tmp2 = bar();
     pub splices: Vec<Stmt<Ex, En>>,
+    /// The list of global functions and static methods assigned to
+    /// temporaries.
+    ///
+    /// $0fp1 = foo<>;
+    pub function_pointers: Vec<Stmt<Ex, En>>,
     /// The expression that gets type checked.
     ///
     /// 1 + $0tmp1 + $0tmp2

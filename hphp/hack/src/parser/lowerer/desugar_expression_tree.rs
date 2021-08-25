@@ -161,10 +161,9 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<TF>) -> Result<Expr, (P
     let static_method_assignments: Vec<Stmt> =
         create_temp_statements(temps.static_method_pointers, temp_static_method_lvar);
 
-    let mut temp_assignments = vec![];
-    temp_assignments.extend(splice_assignments);
-    temp_assignments.extend(function_pointer_assignments);
-    temp_assignments.extend(static_method_assignments);
+    let mut function_pointers = vec![];
+    function_pointers.extend(function_pointer_assignments);
+    function_pointers.extend(static_method_assignments);
 
     let make_tree = static_meth_call(
         &visitor_name,
@@ -173,11 +172,12 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<TF>) -> Result<Expr, (P
         &et_literal_pos.clone(),
     );
 
-    let runtime_expr = if temp_assignments.is_empty() {
+    let runtime_expr = if splice_assignments.is_empty() && function_pointers.is_empty() {
         make_tree
     } else {
         let body = if env.codegen {
-            let mut b = temp_assignments.clone();
+            let mut b = splice_assignments.clone();
+            b.extend(function_pointers.clone());
             b.push(wrap_return(make_tree, &et_literal_pos));
             b
         } else {
@@ -191,7 +191,8 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<TF>) -> Result<Expr, (P
         et_literal_pos,
         Expr_::mk_expression_tree(ast::ExpressionTree {
             hint: hint.clone(),
-            splices: temp_assignments,
+            splices: splice_assignments,
+            function_pointers,
             virtualized_expr,
             runtime_expr,
         }),

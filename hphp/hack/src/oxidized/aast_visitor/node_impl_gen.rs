@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5b4ffb15060a2fdccb0bfe93f05c93ce>>
+// @generated SignedSource<<f00a4acb7fbe7d4a51f70c91c8b10128>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1089,6 +1089,7 @@ impl<P: Params> Node<P> for ExpressionTree<P::Ex, P::En> {
     ) -> Result<(), P::Error> {
         self.hint.accept(c, v)?;
         self.splices.accept(c, v)?;
+        self.function_pointers.accept(c, v)?;
         self.virtualized_expr.accept(c, v)?;
         self.runtime_expr.accept(c, v)?;
         Ok(())

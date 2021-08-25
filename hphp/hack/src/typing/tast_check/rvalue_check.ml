@@ -67,9 +67,16 @@ let visitor =
         this#on_expr env e2
       | List el -> List.iter el ~f:(this#on_expr env)
       | ExpressionTree
-          { et_hint; et_splices; et_virtualized_expr; et_runtime_expr } ->
+          {
+            et_hint;
+            et_splices;
+            et_function_pointers;
+            et_virtualized_expr;
+            et_runtime_expr;
+          } ->
         this#on_hint env et_hint;
         this#on_block env et_splices;
+        this#on_block env et_function_pointers;
         (* Allow calls to void functions at the top level:
 
              Code`void_func()`

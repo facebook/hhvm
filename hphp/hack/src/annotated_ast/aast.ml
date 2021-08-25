@@ -269,6 +269,11 @@ and ('ex, 'en) expression_tree = {
           to temporaries.
 
           $0tmp1 = $x; $0tmp2 = bar(); *)
+  et_function_pointers: ('ex, 'en) stmt list;
+      (** The list of global functions and static methods assigned to
+          temporaries.
+
+          $0fp1 = foo<>; *)
   et_virtualized_expr: ('ex, 'en) expr;
       (** The expression that gets type checked.
 

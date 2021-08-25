@@ -2185,6 +2185,7 @@ and expr_ env p (e : Nast.expr_) =
         {
           et_hint = hint env et.et_hint;
           et_splices = block env et.et_splices;
+          et_function_pointers = block env et.et_function_pointers;
           et_virtualized_expr = expr env et.et_virtualized_expr;
           et_runtime_expr = expr env et.et_runtime_expr;
         }

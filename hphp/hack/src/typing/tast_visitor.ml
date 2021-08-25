@@ -62,10 +62,19 @@ class virtual iter =
       super#on_As env e h
 
     method! on_expression_tree
-        env Aast.{ et_hint; et_splices; et_virtualized_expr; et_runtime_expr } =
+        env
+        Aast.
+          {
+            et_hint;
+            et_splices;
+            et_function_pointers;
+            et_virtualized_expr;
+            et_runtime_expr;
+          } =
       self#on_hint env et_hint;
       self#on_block env et_splices;
       let env = Env.set_in_expr_tree env true in
+      self#on_block env et_function_pointers;
       self#on_expr env et_virtualized_expr;
       let env = Env.set_in_expr_tree env false in
       self#on_expr env et_runtime_expr
@@ -137,10 +146,18 @@ class virtual ['state] iter_with_state =
 
     method! on_expression_tree
         (env, state)
-        Aast.{ et_hint; et_splices; et_virtualized_expr; et_runtime_expr } =
+        Aast.
+          {
+            et_hint;
+            et_splices;
+            et_function_pointers;
+            et_virtualized_expr;
+            et_runtime_expr;
+          } =
       self#on_hint (env, state) et_hint;
       self#on_block (env, state) et_splices;
       let env = Env.set_in_expr_tree env true in
+      self#on_block (env, state) et_function_pointers;
       self#on_expr (env, state) et_virtualized_expr;
       let env = Env.set_in_expr_tree env false in
       self#on_expr (env, state) et_runtime_expr
@@ -204,16 +221,29 @@ class virtual ['a] reduce =
       super#on_As env e h
 
     method! on_expression_tree
-        env Aast.{ et_hint; et_splices; et_virtualized_expr; et_runtime_expr } =
+        env
+        Aast.
+          {
+            et_hint;
+            et_splices;
+            et_function_pointers;
+            et_virtualized_expr;
+            et_runtime_expr;
+          } =
       let et_hint = self#on_hint env et_hint in
       let et_splices = self#on_block env et_splices in
       let env = Env.set_in_expr_tree env true in
+      let et_function_pointers = self#on_block env et_function_pointers in
       let et_virtualized_expr = self#on_expr env et_virtualized_expr in
       let env = Env.set_in_expr_tree env false in
       let et_runtime_expr = self#on_expr env et_runtime_expr in
       self#plus
         et_hint
-        (self#plus et_splices (self#plus et_virtualized_expr et_runtime_expr))
+        (self#plus
+           et_splices
+           (self#plus
+              et_function_pointers
+              (self#plus et_virtualized_expr et_runtime_expr)))
 
     method! on_ET_Splice env e =
       let env = Env.set_in_expr_tree env false in
@@ -278,15 +308,34 @@ class virtual map =
       super#on_As env e h
 
     method! on_expression_tree
-        env Aast.{ et_hint; et_splices; et_virtualized_expr; et_runtime_expr } =
+        env
+        Aast.
+          {
+            et_hint;
+            et_splices;
+            et_function_pointers;
+            et_virtualized_expr;
+            et_runtime_expr;
+          } =
       let et_hint = self#on_hint env et_hint in
       let et_splices = self#on_block env et_splices in
+      let et_function_pointers =
+        let env = Env.set_in_expr_tree env true in
+        self#on_block env et_function_pointers
+      in
       let et_virtualized_expr =
         let env = Env.set_in_expr_tree env true in
         self#on_expr env et_virtualized_expr
       in
       let et_runtime_expr = self#on_expr env et_runtime_expr in
-      Aast.{ et_hint; et_splices; et_virtualized_expr; et_runtime_expr }
+      Aast.
+        {
+          et_hint;
+          et_splices;
+          et_function_pointers;
+          et_virtualized_expr;
+          et_runtime_expr;
+        }
 
     method! on_ET_Splice env e =
       let env = Env.set_in_expr_tree env false in
@@ -354,15 +403,34 @@ class virtual endo =
       super#on_As env e h
 
     method! on_expression_tree
-        env Aast.{ et_hint; et_splices; et_virtualized_expr; et_runtime_expr } =
+        env
+        Aast.
+          {
+            et_hint;
+            et_splices;
+            et_function_pointers;
+            et_virtualized_expr;
+            et_runtime_expr;
+          } =
       let et_hint = self#on_hint env et_hint in
       let et_splices = self#on_block env et_splices in
+      let et_function_pointers =
+        let env = Env.set_in_expr_tree env true in
+        self#on_block env et_function_pointers
+      in
       let et_virtualized_expr =
         let env = Env.set_in_expr_tree env true in
         self#on_expr env et_virtualized_expr
       in
       let et_runtime_expr = self#on_expr env et_runtime_expr in
-      Aast.{ et_hint; et_splices; et_virtualized_expr; et_runtime_expr }
+      Aast.
+        {
+          et_hint;
+          et_splices;
+          et_function_pointers;
+          et_virtualized_expr;
+          et_runtime_expr;
+        }
 
     method! on_ET_Splice env e =
       let env = Env.set_in_expr_tree env false in

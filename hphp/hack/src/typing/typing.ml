@@ -4870,7 +4870,15 @@ and closure_make
 (* Expression trees *)
 (*****************************************************************************)
 and expression_tree env p et =
-  let { et_hint; et_splices; et_virtualized_expr; et_runtime_expr } = et in
+  let {
+    et_hint;
+    et_splices;
+    et_function_pointers;
+    et_virtualized_expr;
+    et_runtime_expr;
+  } =
+    et
+  in
 
   (* Given the expression tree literal:
 
@@ -4879,6 +4887,13 @@ and expression_tree env p et =
      First, type check the expressions that are spliced in, so foo() in
      this example. *)
   let (env, t_splices) = block env et_splices in
+
+  (* Next, typecheck the function pointer assignments *)
+  let (env, _, t_function_pointers) =
+    Typing_env.with_in_expr_tree env true (fun env ->
+        let (env, t_function_pointers) = block env et_function_pointers in
+        (env, (), t_function_pointers))
+  in
 
   (* Type check the virtualized expression, which will look
      roughly like this:
@@ -4916,6 +4931,7 @@ and expression_tree env p et =
        {
          et_hint;
          et_splices = t_splices;
+         et_function_pointers = t_function_pointers;
          et_virtualized_expr = t_virtualized_expr;
          et_runtime_expr = t_runtime_expr;
        })

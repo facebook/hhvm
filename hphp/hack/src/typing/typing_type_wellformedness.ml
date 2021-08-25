@@ -505,6 +505,7 @@ let expr : Typing_env_types.env -> Nast.expr -> unit =
       {
         et_hint = h;
         et_splices = _;
+        et_function_pointers = _;
         et_virtualized_expr = _;
         et_runtime_expr = _;
       }

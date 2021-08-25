@@ -16,7 +16,7 @@
                ((), [4:3-21],
                 (ExpressionTree
                    { et_hint = ([4:3-7], (Happly (([4:3-7], "\\Code"), []))); 
-                     et_splices = [];
+                     et_splices = []; et_function_pointers = [];
                      et_virtualized_expr =
                      ((), [4:8-20],
                       (Call (

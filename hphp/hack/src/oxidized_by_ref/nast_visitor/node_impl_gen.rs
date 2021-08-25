@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<55b108303cb11290e0eac1c9b099730a>>
+// @generated SignedSource<<ca4d5561db552eb0fea011f6236b5f78>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -799,8 +799,9 @@ impl<'a> Node<'a> for ExpressionTree<'a, &'a crate::pos::Pos<'a>, ()> {
             ExpressionTree {
                 hint: ref __binding_0,
                 splices: ref __binding_1,
-                virtualized_expr: ref __binding_2,
-                runtime_expr: ref __binding_3,
+                function_pointers: ref __binding_2,
+                virtualized_expr: ref __binding_3,
+                runtime_expr: ref __binding_4,
             } => {
                 {
                     __binding_0.accept(v)
@@ -811,7 +812,10 @@ impl<'a> Node<'a> for ExpressionTree<'a, &'a crate::pos::Pos<'a>, ()> {
                 {
                     __binding_2.accept(v)
                 }
-                { __binding_3.accept(v) }
+                {
+                    __binding_3.accept(v)
+                }
+                { __binding_4.accept(v) }
             }
         }
     }

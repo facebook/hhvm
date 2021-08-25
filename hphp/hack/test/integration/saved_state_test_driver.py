@@ -23,11 +23,6 @@ def write_echo_json(f: TextIO, obj: T) -> None:
 
 class SaveStateCommandResult(NamedTuple):
     retcode: int
-    edges_added: Optional[int]
-
-    def get_edges_added(self) -> int:
-        assert self.edges_added is not None
-        return self.edges_added
 
 
 class SaveStateResult(NamedTuple):
@@ -74,7 +69,6 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
     def exec_save_command(
         cls,
         hh_command: List[str],
-        assert_edges_added: bool = False,
         ignore_errors: bool = False,
     ) -> SaveStateCommandResult:
         stdout, stderr, retcode = cls.proc_call(hh_command)
@@ -83,36 +77,13 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
                 'Failed to save! stdout: "%s" stderr: "%s"' % (stdout, stderr)
             )
 
-        edges_added = None
-        if assert_edges_added is not None:
-            print(stdout)
-            obj = json.loads(stdout)
-            saved_state_result = obj.get("save_state_result", None)
-            result = obj.get("result", None)
-            obj = saved_state_result if saved_state_result is not None else result
-
-            if obj is None:
-                raise Exception(
-                    'Failed. Missing result field: "%s" stderr: "%s"' % (stdout, stderr)
-                )
-
-            if obj is not None:
-                edges_added = obj.get("dep_table_edges_added", None)
-
-            if edges_added is None:
-                raise Exception(
-                    'Failed. Missing dep_table_edges_added field: "%s" stderr: "%s"'
-                    % (stdout, stderr)
-                )
-
-        return SaveStateCommandResult(retcode, edges_added)
+        return SaveStateCommandResult(retcode)
 
     @classmethod
     def save_command(
         cls,
         init_dir: str,
         saved_state_path: Optional[str] = None,
-        assert_edges_added: bool = False,
         ignore_errors: bool = False,
     ) -> SaveStateCommandResult:
 
@@ -133,7 +104,7 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         if ignore_errors:
             hh_command.append("--gen-saved-ignore-type-errors")
 
-        result = cls.exec_save_command(hh_command, assert_edges_added, ignore_errors)
+        result = cls.exec_save_command(hh_command, ignore_errors)
 
         if cls.enable_naming_table_fallback:
             cls.dump_naming_saved_state(init_dir, saved_state_path)
@@ -143,7 +114,6 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
     @classmethod
     def dump_saved_state(
         cls,
-        assert_edges_added: bool = False,
         ignore_errors: bool = False,
     ) -> SaveStateResult:
         # Dump a saved state to a temporary directory.
@@ -152,7 +122,6 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         result: SaveStateCommandResult = cls.save_command(
             cls.repo_dir,
             saved_state_path,
-            assert_edges_added,
             ignore_errors,
         )
 

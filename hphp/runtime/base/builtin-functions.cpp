@@ -890,8 +890,7 @@ void throw_cannot_modify_static_const_prop(const char* className,
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
-void throw_cannot_write_non_readonly_prop(const char* className,
-                                          const char* propName)
+void throw_must_be_readonly(const char* className, const char* propName)
 {
   auto msg = folly::sformat(
    "Cannot store readonly value in a non-readonly property {} of class {}.",
@@ -924,7 +923,7 @@ void throw_local_must_be_value_type(const char* locName)
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
-void throw_prop_must_be_value_type(const char* className, const char* propName)
+void throw_must_be_value_type(const char* className, const char* propName)
 {
   auto msg = folly::sformat(
     "Property {} of class {} is readonly, and therefore must be a value "
@@ -958,7 +957,7 @@ void checkReadonly(const TypedValue* tv,
         assertx(roProp);
         *roProp = true;
       } else {
-        throw_prop_must_be_value_type(cls->name()->data(), name->data());
+        throw_must_be_value_type(cls->name()->data(), name->data());
       }
     } else if (op == ReadonlyOp::Mutable) {
       if (writeMode) {
@@ -968,7 +967,7 @@ void checkReadonly(const TypedValue* tv,
       }
     }
   } else if (op == ReadonlyOp::Readonly || op == ReadonlyOp::CheckROCOW) {
-    throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
+    throw_must_be_readonly(cls->name()->data(), name->data());
   }
 }
 

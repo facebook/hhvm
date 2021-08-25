@@ -196,7 +196,7 @@ void throwMustBeEnclosedinReadonly(const Class* cls, const StringData* propName)
 }
 
 void throwMustBeReadonlyException(const Class* cls, const StringData* propName) {
-  throw_cannot_write_non_readonly_prop(cls->name()->data(), propName->data());
+  throw_must_be_readonly(cls->name()->data(), propName->data());
 }
 
 void throwMustBeMutableException(const Class* cls, const StringData* propName) {

@@ -1121,7 +1121,7 @@ void ObjectData::throwMustBeEnclosedInReadonly(Slot prop) const {
 
 NEVER_INLINE
 void ObjectData::throwMustBeReadonly(Slot prop) const {
-  throw_cannot_write_non_readonly_prop(
+  throw_must_be_readonly(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );
@@ -1129,7 +1129,7 @@ void ObjectData::throwMustBeReadonly(Slot prop) const {
 
 NEVER_INLINE
 void ObjectData::throwMustBeValueType(Slot prop) const {
-  throw_prop_must_be_value_type(
+  throw_must_be_value_type(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );

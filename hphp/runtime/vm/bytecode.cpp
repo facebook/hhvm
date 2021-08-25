@@ -3246,7 +3246,7 @@ OPTBLD_INLINE void iopSetS(ReadonlyOp op) {
   SCOPE_EXIT { decRefStr(name); };
   if (RO::EvalEnableReadonlyPropertyEnforcement &&
     !readonly && op == ReadonlyOp::Readonly) {
-    throw_cannot_write_non_readonly_prop(cls->name()->data(), name->data());
+    throw_must_be_readonly(cls->name()->data(), name->data());
   }
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",

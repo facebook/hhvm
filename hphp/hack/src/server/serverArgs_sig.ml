@@ -76,8 +76,6 @@ module type S = sig
 
   val save_filename : options -> string option
 
-  val save_with_spec : options -> save_state_spec_info option
-
   val save_64bit : options -> string option
 
   val save_naming_filename : options -> string option

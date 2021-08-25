@@ -147,48 +147,6 @@ let naming
     ~start_t:t;
   (env, Hh_logger.log_duration ("Naming " ^ profile_label) t)
 
-let is_path_in_range (path : string) (range : ServerArgs.files_to_check_range) :
-    bool =
-  (* TODO: not sure how to include the prefix - should we just have these as strings? *)
-  let is_from_prefix_incl =
-    match range.ServerArgs.from_prefix_incl with
-    | None -> true
-    | Some (from_prefix_incl : Relative_path.t) ->
-      String.(path >= Relative_path.suffix from_prefix_incl)
-  in
-  let is_to_prefix_excl =
-    match range.ServerArgs.to_prefix_excl with
-    | None -> true
-    | Some (to_prefix_excl : Relative_path.t) ->
-      String.(path < Relative_path.suffix to_prefix_excl)
-  in
-  is_from_prefix_incl && is_to_prefix_excl
-
-let does_path_match_spec path (spec : ServerArgs.files_to_check_spec) : bool =
-  match spec with
-  | ServerArgs.Range range -> is_path_in_range path range
-  | ServerArgs.Prefix prefix ->
-    String_utils.string_starts_with path (Relative_path.suffix prefix)
-
-let does_path_match_specs path (specs : ServerArgs.files_to_check_spec list) :
-    bool =
-  match List.find specs ~f:(fun spec -> does_path_match_spec path spec) with
-  | None -> false
-  | Some _ -> true
-
-let filter_filenames_by_spec
-    (fnl : Relative_path.t list) (spec : ServerArgs.save_state_spec_info) :
-    Relative_path.t list =
-  let filtered_filenames =
-    List.filter fnl ~f:(fun (fn : Relative_path.t) ->
-        (* TODO: not sure how to include the prefix *)
-        does_path_match_specs
-          (Relative_path.suffix fn)
-          spec.ServerArgs.files_to_check)
-  in
-  Hh_logger.log "Filtered filenames to %d" (List.length filtered_filenames);
-  filtered_filenames
-
 let log_type_check_end
     env genv ~start_t ~count ~desc ~init_telemetry ~typecheck_telemetry =
   let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
@@ -225,7 +183,6 @@ let type_check
   else if
     ServerArgs.check_mode genv.options
     || Option.is_some (ServerArgs.save_filename genv.options)
-    || Option.is_some (ServerArgs.save_with_spec genv.options)
   then (
     (* Prechecked files are not supported in check/saving-state modes, we
      * should always recheck everything necessary up-front. *)
@@ -238,12 +195,6 @@ let type_check
     let logstring = Printf.sprintf "Filter %d files [%s]" count profile_label in
     Hh_logger.log "Begin %s" logstring;
 
-    let (files_to_check : Relative_path.t list) =
-      match ServerArgs.save_with_spec genv.options with
-      | None -> files_to_check
-      | Some (spec : ServerArgs.save_state_spec_info) ->
-        filter_filenames_by_spec files_to_check spec
-    in
     let (_new_t : float) = Hh_logger.log_duration logstring t in
     let count = List.length files_to_check in
     let logstring = Printf.sprintf "type-check %d files" count in

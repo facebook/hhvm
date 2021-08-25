@@ -132,51 +132,6 @@ watchman_init_timeout = 1
         self.test_driver.proc_call([hh_client, "stop", self.test_driver.repo_dir])
         self.assertIn("Watchman_sig.Types.Timeout", self.test_driver.get_server_logs())
 
-    def test_save_partial_state(self) -> None:
-        self.test_driver.start_hh_server()
-
-        result1 = self.test_driver.save_partial(
-            files_to_check=["class_1.php"], assert_edges_added=True, filename="partial1"
-        )
-
-        self.assertEqual(
-            result1.returned_values.get_edges_added(),
-            0,
-            "class_1 has no dependencies except pure coeffect (mixed)",
-        )
-
-        result2 = self.test_driver.save_partial(
-            files_to_check=["class_2.php"], assert_edges_added=True, filename="partial2"
-        )
-        assert result2.returned_values.get_edges_added() > 0
-
-        result3 = self.test_driver.save_partial(
-            files_to_check=["class_3.php"], assert_edges_added=True, filename="partial3"
-        )
-        assert result3.returned_values.get_edges_added() > 0
-
-        result4 = self.test_driver.save_partial(
-            files_to_check=["class_1.php", "class_2.php", "class_3.php"],
-            assert_edges_added=True,
-            filename="partial4",
-        )
-        self.assertEqual(
-            result4.returned_values.get_edges_added(),
-            result3.returned_values.get_edges_added(),
-        )
-
-        result5 = self.test_driver.save_partial(
-            files_to_check=[
-                {"from_prefix_incl": "class_1.php", "to_prefix_excl": "class_3.php"}
-            ],
-            assert_edges_added=True,
-            filename="partial5",
-        )
-        self.assertEqual(
-            result5.returned_values.get_edges_added(),
-            result2.returned_values.get_edges_added(),
-        )
-
     def test_incrementally_generated_saved_state(self) -> None:
         old_saved_state: SaveStateResult = self.test_driver.dump_saved_state()
         new_file = os.path.join(self.test_driver.repo_dir, "class_3b.php")

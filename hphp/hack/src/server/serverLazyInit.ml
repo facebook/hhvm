@@ -475,7 +475,6 @@ let use_prechecked_files (genv : ServerEnv.genv) : bool =
   && Option.is_none (ServerArgs.ai_mode genv.options)
   && (not (ServerArgs.check_mode genv.options))
   && Option.is_none (ServerArgs.save_filename genv.options)
-  && Option.is_none (ServerArgs.save_with_spec genv.options)
 
 let get_dirty_fast
     (old_naming_table : Naming_table.t)

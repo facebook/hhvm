@@ -1452,16 +1452,9 @@ let run_once options config local_config =
   let env = program_init genv env in
   (* All of saving state happens here *)
   let (env, save_state_results) =
-    match
-      ( ServerArgs.save_filename genv.options,
-        ServerArgs.save_with_spec genv.options )
-    with
-    | (None, None) -> (env, None)
-    | (Some filename, None) -> (env, ServerInit.save_state genv env filename)
-    | (None, Some (spec : ServerArgs.save_state_spec_info)) ->
-      (env, ServerInit.save_state genv env spec.ServerArgs.filename)
-    | (Some _, Some _) ->
-      failwith "Saved state file name is specified in two different ways!"
+    match ServerArgs.save_filename genv.options with
+    | None -> (env, None)
+    | Some filename -> (env, ServerInit.save_state genv env filename)
   in
   let _naming_table_rows_changed =
     match ServerArgs.save_naming_filename genv.options with

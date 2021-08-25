@@ -41,7 +41,6 @@ type options = {
   save_filename: string option;
   save_64bit: string option;
   save_naming_filename: string option;
-  save_with_spec: save_state_spec_info option;
   should_detach: bool;
   (* AKA, daemon mode *)
   waiting_client: Unix.file_descr option;
@@ -119,9 +118,6 @@ module Messages = struct
 
   let save_naming = " save naming table to file"
 
-  let save_with_spec =
-    " save server state given a JSON spec:\n" ^ save_state_spec_json_descr
-
   let save_64bit = " save discovered 64-bit to the given directory"
 
   let waiting_client =
@@ -172,7 +168,6 @@ let parse_options () : options =
   let root = ref "" in
   let replace_state_after_saving = ref false in
   let save = ref None in
-  let save_with_spec = ref None in
   let save_64bit = ref None in
   let save_naming = ref None in
   let should_detach = ref false in
@@ -185,7 +180,6 @@ let parse_options () : options =
   let set_ai s = ai_mode := Some (Ai_options.prepare ~server:true s) in
   let set_max_procs n = max_procs := Some n in
   let set_save_state s = save := Some s in
-  let set_save_with_spec s = save_with_spec := Some s in
   let set_save_naming s = save_naming := Some s in
   let set_wait fd = waiting_client := Some (Handle.wrap_handle fd) in
   let set_with_saved_state s = with_saved_state := Some s in
@@ -242,9 +236,6 @@ let parse_options () : options =
       ("--save-mini", Arg.String set_save_state, Messages.save_state);
       ("--save-naming", Arg.String set_save_naming, Messages.save_naming);
       ("--save-state", Arg.String set_save_state, Messages.save_state);
-      ( "--save-state-with-spec",
-        Arg.String set_save_with_spec,
-        Messages.save_with_spec );
       ( "--save-64bit",
         Arg.String (fun s -> save_64bit := Some s),
         Messages.save_64bit );
@@ -288,11 +279,6 @@ let parse_options () : options =
     Printf.eprintf "--check is incompatible with wait modes!\n";
     Exit.exit Exit_status.Input_error
   );
-  let save_with_spec =
-    match get_save_state_spec !save_with_spec with
-    | Ok spec -> spec
-    | Error message -> raise (Arg.Bad message)
-  in
   let with_saved_state =
     match get_saved_state_spec !with_saved_state with
     | Ok (Some spec) -> Some (Saved_state_target_info spec)
@@ -306,11 +292,6 @@ let parse_options () : options =
   | _ -> ());
   let root_path = Path.make !root in
   Wwwroot.assert_www_directory root_path;
-  if Option.is_some !save && Option.is_some save_with_spec then (
-    Printf.eprintf
-      "--save-state and --save-state-with-spec cannot be combined\n%!";
-    exit 1
-  );
   if !gen_saved_ignore_type_errors && not (Option.is_some !save) then (
     Printf.eprintf
       "--gen-saved-ignore-type-errors is only valid when combined with --save-state\n%!";
@@ -340,7 +321,6 @@ let parse_options () : options =
     root = root_path;
     save_filename = !save;
     save_64bit = !save_64bit;
-    save_with_spec;
     save_naming_filename = !save_naming;
     should_detach = !should_detach;
     waiting_client = !waiting_client;
@@ -375,7 +355,6 @@ let default_options ~root =
     replace_state_after_saving = false;
     root = Path.make root;
     save_filename = None;
-    save_with_spec = None;
     save_64bit = None;
     save_naming_filename = None;
     should_detach = false;
@@ -438,8 +417,6 @@ let replace_state_after_saving options = options.replace_state_after_saving
 let root options = options.root
 
 let save_filename options = options.save_filename
-
-let save_with_spec options = options.save_with_spec
 
 let save_64bit options = options.save_64bit
 
@@ -506,7 +483,6 @@ let to_string
       replace_state_after_saving;
       root;
       save_filename;
-      save_with_spec;
       save_64bit;
       save_naming_filename;
       should_detach;
@@ -540,11 +516,6 @@ let to_string
     match save_filename with
     | None -> "<>"
     | Some path -> path
-  in
-  let save_with_spec_str =
-    match save_with_spec with
-    | None -> "<>"
-    | Some _ -> "SaveStateSpec(...)"
   in
   let save_64bit_str =
     match save_64bit with
@@ -652,9 +623,6 @@ let to_string
     ", ";
     "save_filename: ";
     save_filename_str;
-    ", ";
-    "save_with_spec: ";
-    save_with_spec_str;
     ", ";
     "save_64bit: ";
     save_64bit_str;

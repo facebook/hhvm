@@ -31,14 +31,7 @@ let save_state
     (genv : ServerEnv.genv) (env : ServerEnv.env) (output_filename : string) :
     SaveStateServiceTypes.save_state_result option =
   let ignore_errors =
-    match ServerArgs.save_with_spec genv.ServerEnv.options with
-    | None -> false
-    | Some (spec : ServerArgs.save_state_spec_info) ->
-      spec.ServerArgs.gen_with_errors
-  in
-  let ignore_errors =
-    ignore_errors
-    || ServerArgs.gen_saved_ignore_type_errors genv.ServerEnv.options
+    ServerArgs.gen_saved_ignore_type_errors genv.ServerEnv.options
   in
   let has_errors = not (Errors.is_empty env.errorl) in
   let do_save_state =

@@ -96,7 +96,6 @@ type client_check_env = {
   mini_state: string option;
   profile_log: bool;
   remote: bool;
-  replace_state_after_saving: bool;
   root: Path.t;
   sort_results: bool;
   stdin_name: string option;

@@ -398,7 +398,7 @@ type _ t =
       string
       -> (SaveStateServiceTypes.save_naming_result, string) Stdlib.result t
   | SAVE_STATE :
-      (string * bool * bool)
+      (string * bool)
       -> (SaveStateServiceTypes.save_state_result, string) Stdlib.result t
   | SEARCH : string * string -> SearchUtils.result t
   | COVERAGE_COUNTS : string -> ServerCoverageMetricTypes.result t

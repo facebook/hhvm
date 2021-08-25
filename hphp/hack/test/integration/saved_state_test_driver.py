@@ -114,7 +114,6 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         saved_state_path: Optional[str] = None,
         assert_edges_added: bool = False,
         ignore_errors: bool = False,
-        replace_state_after_saving: bool = False,
     ) -> SaveStateCommandResult:
 
         actual_saved_state_path: str = (
@@ -134,9 +133,6 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         if ignore_errors:
             hh_command.append("--gen-saved-ignore-type-errors")
 
-        if replace_state_after_saving:
-            hh_command.append("--replace-state-after-saving")
-
         result = cls.exec_save_command(hh_command, assert_edges_added, ignore_errors)
 
         if cls.enable_naming_table_fallback:
@@ -149,7 +145,6 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         cls,
         assert_edges_added: bool = False,
         ignore_errors: bool = False,
-        replace_state_after_saving: bool = False,
     ) -> SaveStateResult:
         # Dump a saved state to a temporary directory.
         # Return the path to the saved state.
@@ -159,7 +154,6 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
             saved_state_path,
             assert_edges_added,
             ignore_errors,
-            replace_state_after_saving,
         )
 
         return SaveStateResult(saved_state_path, result)

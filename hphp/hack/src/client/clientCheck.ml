@@ -132,7 +132,6 @@ let connect ?(use_priority_pipe = false) args =
     max_errors = _;
     mode = _;
     output_json = _;
-    replace_state_after_saving = _;
     sort_results = _;
     stdin_name = _;
     desc = _;
@@ -647,9 +646,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       let%lwt (result, telemetry) =
         rpc args
         @@ Rpc.SAVE_STATE
-             ( Path.to_string path,
-               args.gen_saved_ignore_type_errors,
-               args.replace_state_after_saving )
+             (Path.to_string path, args.gen_saved_ignore_type_errors)
       in
       SaveStateResultPrinter.go result args.output_json;
       Lwt.return (Exit_status.No_error, telemetry)

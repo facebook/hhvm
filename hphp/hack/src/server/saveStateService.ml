@@ -244,15 +244,12 @@ let dump_errors_json (output_filename : string) (errors : Errors.t) : unit =
   Hh_json.json_to_output chan errors_json;
   Stdlib.close_out chan
 
-let dump_dep_graph_32bit ~db_name ~replace_state_after_saving =
+let dump_dep_graph_32bit ~db_name =
   let t = Unix.gettimeofday () in
   match SharedMem.loaded_dep_table_filename () with
   | None ->
     let dep_table_edges_added =
-      SharedMem.save_dep_table_sqlite
-        db_name
-        Build_id.build_revision
-        ~replace_state_after_saving
+      SharedMem.save_dep_table_sqlite db_name Build_id.build_revision
     in
     let (_ : float) = Hh_logger.log_duration "Saving saved state took" t in
     { dep_table_edges_added }
@@ -270,10 +267,7 @@ let dump_dep_graph_32bit ~db_name ~replace_state_after_saving =
       failwith
         "Existing save state SQL file missing; disk copy must have failed";
     let dep_table_edges_added =
-      SharedMem.update_dep_table_sqlite
-        db_name
-        Build_id.build_revision
-        replace_state_after_saving
+      SharedMem.update_dep_table_sqlite db_name Build_id.build_revision
     in
     let (_ : float) = Hh_logger.log_duration "Updating saved state took" t in
     { dep_table_edges_added }
@@ -294,8 +288,7 @@ let saved_state_build_revision_read ~(base_file_name : string) : string =
   let build_revision = Hh_json_helpers.Jget.string_exn json "build_revision" in
   build_revision
 
-let dump_dep_graph_64bit
-    ~mode ~db_name ~incremental_info_file ~replace_state_after_saving =
+let dump_dep_graph_64bit ~mode ~db_name ~incremental_info_file =
   let t = Unix.gettimeofday () in
   let base_dep_graph =
     match mode with
@@ -314,7 +307,7 @@ let dump_dep_graph_64bit
       mode
       ~dest:db_name
       ~build_revision:Build_id.build_revision
-      ~reset_state_after_saving:replace_state_after_saving
+      ~reset_state_after_saving:false
   in
   let (_ : float) = Hh_logger.log_duration "Writing discovered edges took" t in
   { dep_table_edges_added }
@@ -325,8 +318,7 @@ let save_state
     ~(save_decls : bool)
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (output_filename : string)
-    ~(replace_state_after_saving : bool) : save_state_result =
+    (output_filename : string) : save_state_result =
   let () = Sys_utils.mkdir_p (Filename.dirname output_filename) in
   let db_name =
     match env.ServerEnv.deps_mode with
@@ -362,8 +354,7 @@ let save_state
     Hh_logger.log_duration "Saving saved-state naming/errors/decls took" t
   in
   match env.ServerEnv.deps_mode with
-  | Typing_deps_mode.SQLiteMode ->
-    dump_dep_graph_32bit ~db_name ~replace_state_after_saving
+  | Typing_deps_mode.SQLiteMode -> dump_dep_graph_32bit ~db_name
   | Typing_deps_mode.CustomMode _ ->
     let incremental_info_file = output_filename ^ "_incremental_info.json" in
     dump_errors_json output_filename env.ServerEnv.errorl;
@@ -372,7 +363,6 @@ let save_state
       ~mode:env.ServerEnv.deps_mode
       ~db_name
       ~incremental_info_file
-      ~replace_state_after_saving
   | Typing_deps_mode.SaveCustomMode { graph = _; new_edges_dir } ->
     dump_errors_json output_filename env.ServerEnv.errorl;
     saved_state_build_revision_write ~base_file_name:output_filename;
@@ -410,13 +400,7 @@ let go
     ~(save_decls : bool)
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (output_filename : string)
-    ~(replace_state_after_saving : bool) : (save_state_result, string) result =
+    (output_filename : string) : (save_state_result, string) result =
   Utils.try_with_stack (fun () ->
-      save_state
-        ~save_decls
-        genv
-        env
-        output_filename
-        ~replace_state_after_saving)
+      save_state ~save_decls genv env output_filename)
   |> Result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)

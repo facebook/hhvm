@@ -2830,7 +2830,6 @@ static void hh_swap_in_db(sqlite3 *db_out) {
 static size_t hh_save_dep_table_helper(
     sqlite3* const db_out,
     const char* const build_info,
-    const size_t replace_state_after_saving,
     int is_update) {
   struct timeval start_t = { 0 };
   gettimeofday(&start_t, NULL);
@@ -2956,13 +2955,10 @@ static size_t hh_save_dep_table_helper(
   fprintf(stderr, "Wrote %lu new rows\n", new_rows_count);
   fprintf(stderr, "Updated %lu existing rows\n", existing_rows_updated_count);
 
-  if (replace_state_after_saving) {
-    hh_swap_in_db(db_out);
-  } else {
-    destroy_prepared_stmt(&select_dep_stmt);
-    assert_sql(NULL, sqlite3_close(db_out), SQLITE_OK);
-    log_duration("Finished closing SQL connection", start_t);
-  }
+  destroy_prepared_stmt(&select_dep_stmt);
+  assert_sql(NULL, sqlite3_close(db_out), SQLITE_OK);
+  log_duration("Finished closing SQL connection", start_t);
+
 
   return edges_added;
 }
@@ -2981,8 +2977,7 @@ static void set_db_filename(const char* const out_filename) {
 
 static size_t hh_save_dep_table_helper_sqlite(
     const char* const out_filename,
-    const char* const build_info,
-    const size_t replace_state_after_saving) {
+    const char* const build_info) {
   // This can only happen in the master
   assert_master();
 
@@ -2994,12 +2989,7 @@ static size_t hh_save_dep_table_helper_sqlite(
   size_t edges_added = hh_save_dep_table_helper(
     db_out,
     build_info,
-    replace_state_after_saving,
     0); // is_update == false
-
-  if (replace_state_after_saving) {
-    set_db_filename(out_filename);
-  }
 
   tv2 = log_duration("Writing dependency file with sqlite", tv);
   UNUSED(tv2);
@@ -3014,28 +3004,23 @@ static size_t hh_save_dep_table_helper_sqlite(
  */
 CAMLprim value hh_save_dep_table_sqlite(
     value out_filename,
-    value build_revision,
-    value replace_state_after_saving) {
-  CAMLparam3(out_filename, build_revision, replace_state_after_saving);
+    value build_revision) {
+  CAMLparam2(out_filename, build_revision);
   const char *out_filename_raw = String_val(out_filename);
   const char *build_revision_raw = String_val(build_revision);
-  size_t replace_state_after_saving_raw = Bool_val(replace_state_after_saving);
   size_t edges_added = hh_save_dep_table_helper_sqlite(
     out_filename_raw,
-    build_revision_raw,
-    replace_state_after_saving_raw);
+    build_revision_raw);
 
   CAMLreturn(Val_long(edges_added));
 }
 
 CAMLprim value hh_update_dep_table_sqlite(
     value out_filename,
-    value build_revision,
-    value replace_state_after_saving) {
-  CAMLparam3(out_filename, build_revision, replace_state_after_saving);
+    value build_revision) {
+  CAMLparam2(out_filename, build_revision);
   const char *out_filename_raw = String_val(out_filename);
   const char *build_revision_raw = String_val(build_revision);
-  size_t replace_state_after_saving_raw = Bool_val(replace_state_after_saving);
   sqlite3 *db_out = NULL;
 
   // This can only happen in the master
@@ -3050,12 +3035,7 @@ CAMLprim value hh_update_dep_table_sqlite(
   size_t edges_added = hh_save_dep_table_helper(
     db_out,
     build_revision_raw,
-    replace_state_after_saving_raw,
     1); // is_update == true
-
-  if (replace_state_after_saving_raw) {
-    set_db_filename(out_filename_raw);
-  }
 
   UNUSED(log_duration("Updated dependency file with sqlite", tv));
   CAMLreturn(Val_long(edges_added));
@@ -3248,8 +3228,7 @@ CAMLprim value hh_get_loaded_dep_table_filename() {
 
 CAMLprim value hh_save_dep_table_sqlite(
     value out_filename,
-    value build_revision,
-    value replace_state_after_saving
+    value build_revision
 ) {
   CAMLparam0();
   CAMLreturn(Val_long(0));
@@ -3257,8 +3236,7 @@ CAMLprim value hh_save_dep_table_sqlite(
 
 CAMLprim value hh_update_dep_table_sqlite(
     value out_filename,
-    value build_revision,
-    value replace_state_after_saving
+    value build_revision
 ) {
   CAMLparam0();
   CAMLreturn(Val_long(0));

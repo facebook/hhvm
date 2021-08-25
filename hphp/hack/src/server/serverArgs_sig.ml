@@ -70,8 +70,6 @@ module type S = sig
 
   val remote : options -> bool
 
-  val replace_state_after_saving : options -> bool
-
   val root : options -> Path.t
 
   val save_filename : options -> string option

@@ -127,7 +127,6 @@ let parse_check_args cmd =
   let refactor_before = ref "" in
   let refactor_mode = ref "" in
   let remote = ref false in
-  let replace_state_after_saving = ref false in
   let sort_results = ref false in
   let stdin_name = ref None in
   let timeout = ref None in
@@ -565,11 +564,6 @@ let parse_check_args cmd =
         Arg.Unit (fun () -> set_mode (MODE_REMOVE_DEAD_FIXMES [])),
         " (mode) remove dead HH_FIXME for any error code < 5000 "
         ^ "(first do hh_client restart --no-load)" );
-      ( "--replace-state-after-saving",
-        Arg.Set replace_state_after_saving,
-        " if combined with --save-mini, causes the saved state"
-        ^ " to replace the program state; otherwise, the state files are not"
-        ^ " used after being written to disk (default: false)" );
       ( "--resume",
         Arg.Unit (fun () -> set_mode (MODE_PAUSE false)),
         " (mode) resume recheck-on-file-change [EXPERIMENTAL]" );
@@ -832,7 +826,6 @@ let parse_check_args cmd =
       mini_state = !mini_state;
       profile_log = !profile_log;
       remote = !remote;
-      replace_state_after_saving = !replace_state_after_saving;
       root;
       sort_results = !sort_results;
       stdin_name = !stdin_name;

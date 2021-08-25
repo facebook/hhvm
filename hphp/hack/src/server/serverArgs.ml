@@ -36,7 +36,6 @@ type options = {
   prechecked: bool option;
   profile_log: bool;
   remote: bool;
-  replace_state_after_saving: bool;
   root: Path.t;
   save_filename: string option;
   save_64bit: string option;
@@ -109,11 +108,6 @@ module Messages = struct
 
   let remote = " force remote type checking"
 
-  let replace_state_after_saving =
-    " if combined with --save-mini, causes the saved state"
-    ^ " to replace the program state; otherwise, the state files are not"
-    ^ " used after being written to disk (default: false)"
-
   let save_state = " save server state to file"
 
   let save_naming = " save naming table to file"
@@ -166,7 +160,6 @@ let parse_options () : options =
   let profile_log = ref false in
   let remote = ref false in
   let root = ref "" in
-  let replace_state_after_saving = ref false in
   let save = ref None in
   let save_64bit = ref None in
   let save_naming = ref None in
@@ -230,9 +223,6 @@ let parse_options () : options =
         Messages.prechecked );
       ("--profile-log", Arg.Set profile_log, Messages.profile_log);
       ("--remote", Arg.Set remote, Messages.remote);
-      ( "--replace-state-after-saving",
-        Arg.Set replace_state_after_saving,
-        Messages.replace_state_after_saving );
       ("--save-mini", Arg.String set_save_state, Messages.save_state);
       ("--save-naming", Arg.String set_save_naming, Messages.save_naming);
       ("--save-state", Arg.String set_save_state, Messages.save_state);
@@ -317,7 +307,6 @@ let parse_options () : options =
     prechecked = !prechecked;
     profile_log = !profile_log;
     remote = !remote;
-    replace_state_after_saving = !replace_state_after_saving;
     root = root_path;
     save_filename = !save;
     save_64bit = !save_64bit;
@@ -352,7 +341,6 @@ let default_options ~root =
     prechecked = None;
     profile_log = false;
     remote = false;
-    replace_state_after_saving = false;
     root = Path.make root;
     save_filename = None;
     save_64bit = None;
@@ -411,8 +399,6 @@ let prechecked options = options.prechecked
 let profile_log options = options.profile_log
 
 let remote options = options.remote
-
-let replace_state_after_saving options = options.replace_state_after_saving
 
 let root options = options.root
 
@@ -480,7 +466,6 @@ let to_string
       prechecked;
       profile_log;
       remote;
-      replace_state_after_saving;
       root;
       save_filename;
       save_64bit;
@@ -614,9 +599,6 @@ let to_string
     ", ";
     "remote: ";
     string_of_bool remote;
-    ", ";
-    "replace_state_after_saving: ";
-    string_of_bool replace_state_after_saving;
     ", ";
     "root: ";
     Path.to_string root;

@@ -57,16 +57,8 @@ let save_state
     let save_decls =
       genv.local_config.ServerLocalConfig.store_decls_in_saved_state
     in
-    let replace_state_after_saving =
-      ServerArgs.replace_state_after_saving genv.ServerEnv.options
-    in
     let result =
-      SaveStateService.save_state
-        ~save_decls
-        genv
-        env
-        output_filename
-        ~replace_state_after_saving
+      SaveStateService.save_state ~save_decls genv env output_filename
     in
     Some result
 

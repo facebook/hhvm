@@ -2,7 +2,7 @@
 <?hh
 <<file:__EnableUnstableFeatures('context_alias_declaration')>>
 
-newtype Foo as [] = [defaults];
+newctx Foo as [] = [defaults];
 
 function enter_foo(
   (function ()[Foo]: void) $f

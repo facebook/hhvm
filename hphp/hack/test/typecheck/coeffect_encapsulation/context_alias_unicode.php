@@ -1,15 +1,15 @@
 <?hh
 <<file:__EnableUnstableFeatures('context_alias_declaration')>>
 
-newtype İ as [] = [defaults];
+newctx İ as [] = [defaults];
 
-newtype i̇ as [] = [defaults];
+newctx i̇ as [] = [defaults];
 
-newtype X as [] = [İ];
+newctx X as [] = [İ];
 
-newtype Y as [İ] = [X];
+newctx Y as [İ] = [X];
 
-newtype Z as [] = [i̇];
+newctx Z as [] = [i̇];
 
 function test1()[X]: void {}
 

@@ -2483,6 +2483,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             | TokenKind::Implements
             | TokenKind::Inout
             | TokenKind::Interface
+            | TokenKind::Newctx
             | TokenKind::Newtype
             | TokenKind::Type
             | TokenKind::Yield

@@ -1,12 +1,12 @@
 [(Typedef
-    { t_annotation = (); t_name = ([4:9-10], "\\X"); t_tparams = []; 
-      t_constraint = (Some ([4:14-16], (Hintersection []))); t_kind = ([4:19-41], (Hintersection [([4:20-40], (Happly (([4:20-40], "\\HH\\Contexts\\HH\\Contexts\\defaults"), [])))]));
+    { t_annotation = (); t_name = ([4:8-9], "\\X"); t_tparams = []; t_constraint = (Some ([4:13-15], (Hintersection [])));
+      t_kind = ([4:18-28], (Hintersection [([4:19-27], (Happly (([4:19-27], "\\HH\\Contexts\\defaults"), [])))])); 
       t_user_attributes = []; t_mode = Mstrict; t_vis = Opaque;
       t_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      t_span = [4:1-42]; t_emit_id = None; t_is_ctx = true });
+      t_span = [4:1-29]; t_emit_id = None; t_is_ctx = true });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

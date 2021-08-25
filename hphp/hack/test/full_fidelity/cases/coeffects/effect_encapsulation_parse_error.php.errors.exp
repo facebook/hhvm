@@ -1,1 +1,6 @@
-(4,1)-(4,5) A type alias declaration cannot both use `type` and have a constraint. Did you mean `newtype`?
+(6,14)-(6,15) A type specifier is expected here.
+(6,15)-(6,15) An equals sign `=` is expected here.
+(6,16)-(6,16) A semicolon `;` is expected here.
+(6,18)-(6,18) An expression is expected here.
+(6,21)-(6,21) An expression is expected here.
+(6,22)-(6,23) Encountered unexpected token `]`.

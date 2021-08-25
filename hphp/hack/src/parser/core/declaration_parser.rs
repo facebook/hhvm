@@ -2233,8 +2233,9 @@ where
         match self.peek_token_kind() {
             TokenKind::Enum => self.parse_enum_or_enum_class_declaration(attribute_specification),
             TokenKind::Type | TokenKind::Newtype => {
-                self.parse_ctx_or_type_alias_declaration(attribute_specification)
+                self.parse_type_alias_declaration(attribute_specification)
             }
+            TokenKind::Newctx => self.parse_ctx_alias_declaration(attribute_specification),
             TokenKind::Async | TokenKind::Function => {
                 if attribute_specification.is_missing() {
                     // if attribute section is missing - it might be either
@@ -2374,7 +2375,7 @@ where
         self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_type_constraint_opt())
     }
 
-    fn parse_ctx_or_type_alias_declaration(&mut self, attr: S::R) -> S::R {
+    fn parse_type_alias_declaration(&mut self, attr: S::R) -> S::R {
         // SPEC
         // alias-declaration:
         //   attribute-spec-opt type  name
@@ -2390,55 +2391,55 @@ where
         let generic = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
             p.parse_generic_type_parameter_list_opt()
         });
-        let is_coeffect = self.peek_token_kind_with_lookahead(1) == TokenKind::LeftBracket;
-        let (constr, equal, ty) = if is_coeffect {
-            let constr = self.with_type_parser(|p| {
-                p.parse_list_until_none(|p| p.parse_context_constraint_opt())
-            });
-            if self.peek_token_kind() == TokenKind::Equal {
-                let equal = self.require_equal();
-                let ty = self.with_type_parser(|p| p.parse_contexts());
-                (constr, equal, ty)
-            } else {
-                let equal = S!(make_missing, self, self.pos());
-                let ty = S!(make_missing, self, self.pos());
-                (constr, equal, ty)
-            }
-        } else {
-            let constr = self.parse_type_constraint_opt();
+        let constr = self.parse_type_constraint_opt();
+        let equal = self.require_equal();
+        let ty = self.parse_type_specifier(false /* allow_var */, true /* allow_attr */);
+        let semi = self.require_semicolon();
+        S!(
+            make_alias_declaration,
+            self,
+            attr,
+            token,
+            name,
+            generic,
+            constr,
+            equal,
+            ty,
+            semi
+        )
+    }
+
+    fn parse_ctx_alias_declaration(&mut self, attr: S::R) -> S::R {
+        // SPEC
+        // ctx-alias-declaration:
+        //   newctx name type-constraint-opt = type-specifier  ;
+        let token = self.fetch_token();
+        let name = self.require_name();
+        let generic = S!(make_missing, self, self.pos());
+        let constr = self
+            .with_type_parser(|p| p.parse_list_until_none(|p| p.parse_context_constraint_opt()));
+        let (equal, ty) = if self.peek_token_kind() == TokenKind::Equal {
             let equal = self.require_equal();
-            let ty =
-                self.parse_type_specifier(false /* allow_var */, true /* allow_attr */);
-            (constr, equal, ty)
+            let ty = self.with_type_parser(|p| p.parse_contexts());
+            (equal, ty)
+        } else {
+            let equal = S!(make_missing, self, self.pos());
+            let ty = S!(make_missing, self, self.pos());
+            (equal, ty)
         };
         let semi = self.require_semicolon();
-        if is_coeffect {
-            S!(
-                make_context_alias_declaration,
-                self,
-                attr,
-                token,
-                name,
-                generic,
-                constr,
-                equal,
-                ty,
-                semi
-            )
-        } else {
-            S!(
-                make_alias_declaration,
-                self,
-                attr,
-                token,
-                name,
-                generic,
-                constr,
-                equal,
-                ty,
-                semi
-            )
-        }
+        S!(
+            make_context_alias_declaration,
+            self,
+            attr,
+            token,
+            name,
+            generic,
+            constr,
+            equal,
+            ty,
+            semi
+        )
     }
 
     fn parse_enumerator(&mut self) -> S::R {
@@ -2531,7 +2532,11 @@ where
                 } =>
             {
                 let missing = S!(make_missing, self, self.pos());
-                self.parse_ctx_or_type_alias_declaration(missing)
+                self.parse_type_alias_declaration(missing)
+            }
+            TokenKind::Newctx => {
+                let missing = S!(make_missing, self, self.pos());
+                self.parse_ctx_alias_declaration(missing)
             }
             TokenKind::Enum => {
                 let missing = S!(make_missing, self, self.pos());

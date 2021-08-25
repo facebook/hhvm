@@ -100,6 +100,7 @@ enum UnstableFeatures {
     ContextAliasDeclaration,
     ClassConstDefault,
     AbstractEnumClass,
+    ContextAliasDeclarationShort,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -117,6 +118,7 @@ impl UnstableFeatures {
             UnstableFeatures::ContextAliasDeclaration => Unstable,
             UnstableFeatures::ClassConstDefault => Migration,
             UnstableFeatures::AbstractEnumClass => Unstable,
+            UnstableFeatures::ContextAliasDeclarationShort => Preview,
         }
     }
 }
@@ -4034,7 +4036,12 @@ where
                 self.check_type_name(&ad.name, name, location)
             }
         } else if let ContextAliasDeclaration(cad) = &node.children {
-            self.check_can_use_feature(node, &UnstableFeatures::ContextAliasDeclaration);
+            if cad.equal.is_missing() {
+                // short newctx X as []; syntax
+                self.check_can_use_feature(node, &UnstableFeatures::ContextAliasDeclarationShort);
+            } else {
+                self.check_can_use_feature(node, &UnstableFeatures::ContextAliasDeclaration);
+            }
             let attrs = &cad.attribute_spec;
             self.check_attr_enabled(&attrs);
             if Self::token_kind(&cad.keyword) == Some(TokenKind::Type)

@@ -89,6 +89,7 @@ type t =
   | Mixed
   | Namespace
   | New
+  | Newctx
   | Newtype
   | Noreturn
   | Num
@@ -302,6 +303,7 @@ let from_string keyword ~only_reserved =
   | "mixed" when not only_reserved -> Some Mixed
   | "namespace" -> Some Namespace
   | "new" -> Some New
+  | "newctx" when not only_reserved -> Some Newctx
   | "newtype" when not only_reserved -> Some Newtype
   | "noreturn" when not only_reserved -> Some Noreturn
   | "num" when not only_reserved -> Some Num
@@ -490,6 +492,7 @@ let to_string kind =
   | Mixed -> "mixed"
   | Namespace -> "namespace"
   | New -> "new"
+  | Newctx -> "newctx"
   | Newtype -> "newtype"
   | Noreturn -> "noreturn"
   | Num -> "num"

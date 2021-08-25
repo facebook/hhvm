@@ -1,9 +1,9 @@
 //// f.php
 <?hh
-<<file:__EnableUnstableFeatures('context_alias_declaration')>>
+<<file:__EnableUnstableFeatures('context_alias_declaration_short')>>
 
 // Codegen framework
-newtype Codegen as [];
+newctx Codegen as [];
 
 function enter_codegen(
   (function ()[\Codegen]: void) $f
@@ -14,7 +14,6 @@ function enter_codegen(
 
 //// g.php
 <?hh
-<<file:__EnableUnstableFeatures('context_alias_declaration')>>
 
 // client code
 <<__EntryPoint>>

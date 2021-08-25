@@ -3,7 +3,7 @@
 <<file:__EnableUnstableFeatures('context_alias_declaration')>>
 
 // Codegen framework
-newtype Codegen as [] = [defaults];
+newctx Codegen as [] = [defaults];
 
 function enter_codegen(
   (function ()[Codegen]: void) $f

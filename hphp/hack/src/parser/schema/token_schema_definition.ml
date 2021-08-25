@@ -144,6 +144,7 @@ let given_text_tokens =
     make_token_node "Mixed" "mixed" ~allowed_as_identifier:true ();
     make_token_node "Namespace" "namespace" ();
     make_token_node "New" "new" ();
+    make_token_node "Newctx" "newctx" ~allowed_as_identifier:true ();
     make_token_node "Newtype" "newtype" ~allowed_as_identifier:true ();
     make_token_node "Noreturn" "noreturn" ~allowed_as_identifier:true ();
     make_token_node "Num" "num" ~allowed_as_identifier:true ();

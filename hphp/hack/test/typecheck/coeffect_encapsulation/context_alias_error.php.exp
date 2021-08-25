@@ -1,4 +1,4 @@
-File "context_alias_error.php", line 4, characters 9-9:
+File "context_alias_error.php", line 4, characters 8-8:
 Context x should begin with an uppercase letter (Parsing[1002])
 File "context_alias_error.php", line 6, characters 17-17:
 Unbound name: `HH\Contexts\Unsafe\x` (Naming[2049])

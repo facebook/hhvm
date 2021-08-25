@@ -7213,6 +7213,17 @@ and class_expr
     end
   | CIexpr ((_, p, _) as e) ->
     let (env, te, ty) = expr env e ~allow_awaitable:(*?*) false in
+    let fold_errs errs =
+      let rec aux = function
+        | (Ok xs, Ok x :: rest) -> aux (Ok (x :: xs), rest)
+        | (Ok xs, Error (x, y) :: rest) -> aux (Error (x :: xs, y :: xs), rest)
+        | (Error (xs, ys), Ok x :: rest) -> aux (Error (x :: xs, x :: ys), rest)
+        | (Error (xs, ys), Error (x, y) :: rest) ->
+          aux (Error (x :: xs, y :: ys), rest)
+        | (acc, []) -> acc
+      in
+      aux (Ok [], errs)
+    in
     let rec resolve_ety env ty =
       let (env, ty) =
         Typing_solver.expand_type_and_solve
@@ -7223,25 +7234,60 @@ and class_expr
       in
       let base_ty = TUtils.get_base_type env ty in
       match deref base_ty with
-      | (_, Tnewtype (classname, [the_cls], _))
+      | (_, Tnewtype (classname, [the_cls], as_ty))
         when String.equal classname SN.Classes.cClassname ->
-        resolve_ety env the_cls
+        let (env, ty, err_res) = resolve_ety env the_cls in
+        let wrap ty = mk (Reason.none, Tnewtype (classname, [ty], as_ty)) in
+        let err_res =
+          match err_res with
+          | Ok ty -> Ok (wrap ty)
+          | Error (ty_act, ty_exp) -> Error (wrap ty_act, wrap ty_exp)
+        in
+        (env, ty, err_res)
       | (_, Tgeneric _)
       | (_, Tclass _) ->
-        (env, ty)
+        (env, ty, Ok ty)
       | (r, Tunion tyl) ->
-        let (env, tyl) = List.map_env env tyl ~f:resolve_ety in
-        (env, MakeType.union r tyl)
+        let (env, tyl, errs) = List.map_env_err_res env tyl ~f:resolve_ety in
+        let ty = MakeType.union r tyl in
+        let err =
+          match fold_errs errs with
+          | Ok _ -> Ok ty
+          | Error (ty_actuals, ty_expects) ->
+            let ty_actual = MakeType.union Reason.none ty_actuals
+            and ty_expect = MakeType.union Reason.none ty_expects in
+            Error (ty_actual, ty_expect)
+        in
+        (env, ty, err)
       | (r, Tintersection tyl) ->
-        let (env, tyl) = TUtils.run_on_intersection env tyl ~f:resolve_ety in
-        Inter.intersect_list env r tyl
-      | (_, Tdynamic) -> (env, base_ty)
+        let (env, tyl, errs) =
+          TUtils.run_on_intersection_res env tyl ~f:resolve_ety
+        in
+        let (env, ty) = Inter.intersect_list env r tyl in
+        let (env, err) =
+          match fold_errs errs with
+          | Ok _ -> (env, Ok ty)
+          | Error (ty_actuals, ty_expects) ->
+            let (env, ty_actual) =
+              Inter.intersect_list env Reason.none ty_actuals
+            in
+            let (env, ty_expect) =
+              Inter.intersect_list env Reason.none ty_expects
+            in
+            (env, Error (ty_actual, ty_expect))
+        in
+        (env, ty, err)
+      | (_, Tdynamic) -> (env, base_ty, Ok base_ty)
       | (_, (Tany _ | Tprim Tstring)) when not (Env.is_strict env) ->
-        (env, Typing_utils.mk_tany env p)
-      | (_, Terr) -> (env, err_witness env p)
+        let ty = Typing_utils.mk_tany env p in
+        (env, ty, Ok ty)
+      | (_, Terr) ->
+        let ty = err_witness env p in
+        (env, ty, Ok ty)
       | (r, Tvar _) ->
         Errors.unknown_type "an object" p (Reason.to_string "It is unknown" r);
-        (env, err_witness env p)
+        let ty = err_witness env p in
+        (env, ty, Ok ty)
       | (_, Tunapplied_alias _) ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | ( _,
@@ -7251,10 +7297,20 @@ and class_expr
         Errors.expected_class
           ~suffix:(", but got " ^ Typing_print.error env base_ty)
           p;
-        (env, err_witness env p)
+        let ty_nothing = MakeType.nothing Reason.none in
+        let ty_expect = MakeType.classname Reason.none [ty_nothing] in
+        (env, err_witness env p, Error (base_ty, ty_expect))
     in
-    let (env, result_ty) = resolve_ety env ty in
-    make_result env [] (Aast.CIexpr te) result_ty
+    let (env, result_ty, err_res) = resolve_ety env ty in
+    let err_opt =
+      Result.fold
+        err_res
+        ~ok:(fun _ -> None)
+        ~error:(fun (ty_act, ty_expect) -> Some (ty_act, ty_expect))
+    in
+    let te = hole_on_err ~err_opt te in
+    let x = make_result env [] (Aast.CIexpr te) result_ty in
+    x
 
 and call_construct p env class_ params el unpacked_element cid cid_ty =
   let cid_ty =

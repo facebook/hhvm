@@ -1,0 +1,57 @@
+Errors:
+  [6:11-22] Can't use `new` on `classname<C>`; `__construct` arguments are not guaranteed to be consistent in child classes
+  [4:58-59] This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
+[(Class
+    { c_span = [2:1-11]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+      c_name = ([2:7-8], "\\C"); c_tparams = []; c_extends = []; c_uses = []; 
+      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false; 
+      c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
+      c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_doc_comment = None; c_emit_id = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [4:1-7:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([4:77-81], (Hprim Tvoid)))); 
+         f_name = ([4:10-40], "\\expected_class_union_classname"); f_tparams = []; 
+         f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_params =
+         [{ param_annotation = ((int | classname<C>));
+            param_type_hint =
+            (((int | classname<C>)), (Some ([4:41-61], (Hunion [([4:42-45], (Hprim Tint)); ([4:48-60], (Happly (([4:48-57], "\\HH\\classname"), [([4:58-59], (Happly (([4:58-59], "\\C"), [])))])))]))));
+            param_is_variadic = false; param_pos = [4:62-73]; param_name = "$class_name"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([6:2-25],
+             (Expr
+                ((<expr#1> as C), [6:2-24],
+                 (Binop ((Eq None), ((<expr#1> as C), [6:2-4], (Lvar ([6:2-4], $x))),
+                    ((<expr#1> as C), [6:7-24],
+                     (New (
+                        (((_ | C)), [6:11-22],
+                         (CIexpr
+                            (((int | classname<C>)), [6:11-22],
+                             (Hole ((((int | classname<C>)), [6:11-22], (Lvar ([6:11-22], $class_name))), ((int | classname<C>)), ((classname<C> | classname<nothing>)), Typing))))),
+                        [], [], None, (_))))
+                    )))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

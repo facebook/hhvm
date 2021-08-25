@@ -15,6 +15,8 @@ module Nast = Aast
 let class_type r name tyl =
   mk (r, Tclass ((Reason.to_pos r, name), Nonexact, tyl))
 
+let classname r tyl = class_type r SN.Classes.cClassname tyl
+
 let prim_type r t = mk (r, Tprim t)
 
 (* Make a negation type *)

@@ -1,0 +1,32 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:70-74], (Hprim Tvoid)))); 
+        f_name = ([3:10-37], "\\expected_class_intersection"); f_tparams = []; 
+        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:38-54], (Hintersection [([3:39-42], (Hprim Tint)); ([3:45-53], (Hprim Tarraykey))])))); 
+           param_is_variadic = false; param_pos = [3:55-66]; param_name = "$class_name"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:2-25],
+            (Expr
+               ((_), [5:2-24],
+                (Binop ((Eq None), ((_), [5:2-4], (Lvar ([5:2-4], $x))),
+                   ((_), [5:7-24],
+                    (New (((_), [5:11-22], (CIexpr ((int), [5:11-22], (Hole (((int), [5:11-22], (Lvar ([5:11-22], $class_name))), (int), (classname<nothing>), Typing))))), [], [], None, (_))))
+                   )))))
+            ]
+          };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

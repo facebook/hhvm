@@ -6410,8 +6410,8 @@ and dispatch_call
       | OG_nullsafe -> Some p
     in
     let (_, p1, _) = e1 in
-    let (env, (tfty, tal)) =
-      TOG.obj_get
+    let (env, (tfty, tal), err_opt) =
+      TOG.obj_get_with_err
         ~obj_pos:p1
         ~is_method:true
         ~inst_meth:false
@@ -6436,7 +6436,7 @@ and dispatch_call
            fpos
            tfty
            (Aast.Obj_get
-              ( te1,
+              ( hole_on_err ~err_opt te1,
                 Tast.make_typed_expr pos_id tfty (Aast.Id m),
                 nullflavor,
                 false )))
@@ -6490,8 +6490,8 @@ and dispatch_call
         Union.union_i env r has_method_ty null_ty
     in
     let (_, receiver_pos, _) = receiver in
-    let env =
-      Type.sub_type_i
+    let env_res =
+      Type.sub_type_i_res
         receiver_pos
         Reason.URnone
         env
@@ -6499,6 +6499,14 @@ and dispatch_call
         has_method_super_ty
         Errors.unify_error
     in
+    let ty_nothing = MakeType.nothing Reason.none in
+    let (env, err_opt) =
+      Result.fold
+        env_res
+        ~ok:(fun env -> (env, None))
+        ~error:(fun env -> (env, Some (receiver_ty, ty_nothing)))
+    in
+
     (* Perhaps solve for `method_ty`. Opening and closing a scope is too coarse
        here - type parameters are localised to fresh type variables over the
        course of subtyping above, and we do not want to solve these until later.
@@ -6541,7 +6549,7 @@ and dispatch_call
            fpos
            method_ty
            (Aast.Obj_get
-              ( typed_receiver,
+              ( hole_on_err ~err_opt typed_receiver,
                 Tast.make_typed_expr pos_id method_ty (Aast.Id meth),
                 nullflavor,
                 false )))

@@ -705,44 +705,49 @@ and nullable_obj_get
     in
     (env, (ty, tal), err_res)
   | None ->
-    (match deref ety1 with
-    | (r, Toption opt_ty) ->
-      begin
-        match get_node opt_ty with
-        | Tnonnull ->
-          let err =
-            if read_context then
-              Errors.top_member_read
-            else
-              Errors.top_member_write
-          in
-          err
-            ~is_method
-            ~is_nullable:true
-            id_str
-            id_pos
-            (Typing_print.error env ety1)
-            (Reason.to_pos r)
-        | _ ->
-          let err =
-            if read_context then
-              Errors.null_member_read
-            else
-              Errors.null_member_write
-          in
-          err ~is_method id_str id_pos (Reason.to_string "This can be null" r)
-      end
-    | (r, _) ->
-      let err =
-        if read_context then
-          Errors.null_member_read
-        else
-          Errors.null_member_write
-      in
-      err ~is_method id_str id_pos (Reason.to_string "This can be null" r));
+    let ty_expect =
+      match deref ety1 with
+      | (r, Toption opt_ty) ->
+        begin
+          match get_node opt_ty with
+          | Tnonnull ->
+            let err =
+              if read_context then
+                Errors.top_member_read
+              else
+                Errors.top_member_write
+            in
+            err
+              ~is_method
+              ~is_nullable:true
+              id_str
+              id_pos
+              (Typing_print.error env ety1)
+              (Reason.to_pos r);
+            MakeType.nothing Reason.none
+          | _ ->
+            let err =
+              if read_context then
+                Errors.null_member_read
+              else
+                Errors.null_member_write
+            in
+            err ~is_method id_str id_pos (Reason.to_string "This can be null" r);
+            MakeType.nothing Reason.none
+        end
+      | (r, _) ->
+        let err =
+          if read_context then
+            Errors.null_member_read
+          else
+            Errors.null_member_write
+        in
+        err ~is_method id_str id_pos (Reason.to_string "This can be null" r);
+        MakeType.nothing Reason.none
+    in
     ( env,
       (TUtils.terr env (get_reason ety1), []),
-      Option.map ~f:(fun (_, _, ty) -> Ok ty) coerce_from_ty )
+      Some (Error (ety1, ty_expect)) )
 
 (* Helper method for obj_get that decomposes the type ty1.
  * The additional parameter this_ty represents the type that will be substitued

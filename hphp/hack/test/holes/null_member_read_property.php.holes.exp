@@ -1,0 +1,69 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:53-57], (Hprim Tvoid)))); 
+        f_name = ([3:10-40], "\\null_member_read_property_null"); f_tparams = []; 
+        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = (null); param_type_hint = ((null), (Some ([3:41-45], (Hprim Tnull)))); 
+           param_is_variadic = false; param_pos = [3:46-49]; param_name = "$xs"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body = { fb_ast = [([5:3-10], (Expr ((nothing), [5:3-9], (Obj_get (((null), [5:3-6], (Lvar ([5:3-6], $xs))), ((nothing), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, false)))))] };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [8:1-11:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([8:60-64], (Hprim Tvoid)))); 
+         f_name = ([8:10-44], "\\null_member_read_property_nullable"); 
+         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_params =
+         [{ param_annotation = (?string); param_type_hint = ((?string), (Some ([8:45-52], (Hoption ([8:46-52], (Hprim Tstring)))))); 
+            param_is_variadic = false; param_pos = [8:53-56]; param_name = "$xs"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast = [([10:3-10], (Expr ((nothing), [10:3-9], (Obj_get (((?string), [10:3-6], (Lvar ([10:3-6], $xs))), ((nothing), [10:8-9], (Id ([10:8-9], "c"))), OG_nullthrows, false)))))] };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [13:1-16:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([13:55-59], (Hprim Tvoid)))); 
+         f_name = ([13:10-41], "\\null_member_read_property_mixed"); 
+         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_params =
+         [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([13:42-47], Hmixed))); 
+            param_is_variadic = false; param_pos = [13:48-51]; param_name = "$xs"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body = { fb_ast = [([15:3-10], (Expr ((nothing), [15:3-9], (Obj_get (((mixed), [15:3-6], (Lvar ([15:3-6], $xs))), ((nothing), [15:8-9], (Id ([15:8-9], "c"))), OG_nullthrows, false)))))] };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

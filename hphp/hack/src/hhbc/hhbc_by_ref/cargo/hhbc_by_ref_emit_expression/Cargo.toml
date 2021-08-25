@@ -31,7 +31,7 @@ hhbc_by_ref_options = { path = "../hhbc_by_ref_options" }
 hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
 hhbc_by_ref_scope = { path = "../hhbc_by_ref_scope" }
 hhbc_by_ref_symbol_refs_state = { path = "../hhbc_by_ref_symbol_refs_state" }
-indexmap = { version = "1.6", features = ["rayon", "serde-1"] }
+indexmap = { version = "1.7.0", features = ["rayon", "serde-1"] }
 itertools = "0.10.1"
 lazy_static = "1.0"
 naming_special_names_rust = { path = "../../../../naming" }

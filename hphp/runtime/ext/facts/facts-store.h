@@ -37,7 +37,8 @@ std::shared_ptr<FactsStore> make_watchman_facts(
     DBData dbData,
     folly::dynamic queryExpr,
     Watchman& watchmanClient,
-    bool shouldSubscribe);
+    bool shouldSubscribe,
+    std::vector<std::string> indexedMethodAttributes);
 
 /**
  * Create a FactsStore that trusts the DB at `dbData.m_path` and never modifies

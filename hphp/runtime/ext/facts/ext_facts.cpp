@@ -45,8 +45,8 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/watchman.h"
 #include "hphp/runtime/base/watchman-connection.h"
+#include "hphp/runtime/base/watchman.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/ext_facts.h"
@@ -214,19 +214,32 @@ struct WatchmanAutoloadMapKey {
     return WatchmanAutoloadMapKey{
         .m_root = std::move(root),
         .m_queryExpr = std::move(queryExpr),
+        .m_indexedMethodAttrs = repoOptions.indexedMethodAttributes(),
         .m_dbData = std::move(dbData)};
   }
 
   bool operator==(const WatchmanAutoloadMapKey& rhs) const noexcept {
     return m_root == rhs.m_root && m_queryExpr == rhs.m_queryExpr &&
+           m_indexedMethodAttrs == rhs.m_indexedMethodAttrs &&
            m_dbData == rhs.m_dbData;
   }
 
   std::string toString() const {
+
+    std::string indexedMethodAttrString = "{";
+    for (auto const& v : m_indexedMethodAttrs) {
+      if (indexedMethodAttrString.size() > 1) {
+        indexedMethodAttrString += ',';
+      }
+      indexedMethodAttrString += v;
+    }
+    indexedMethodAttrString += '}';
+
     return folly::sformat(
-        "WatchmanAutoloadMapKey({}, {}, {})",
+        "WatchmanAutoloadMapKey({}, {}, {}, {})",
         m_root.native(),
         folly::toJson(m_queryExpr),
+        indexedMethodAttrString,
         m_dbData.toString());
   }
 
@@ -234,6 +247,8 @@ struct WatchmanAutoloadMapKey {
     return folly::hash::hash_combine(
         hash_string_view_cs(m_root.native()),
         m_queryExpr.hash(),
+        folly::hash::hash_range(
+            m_indexedMethodAttrs.begin(), m_indexedMethodAttrs.end()),
         m_dbData.hash());
   }
 
@@ -250,6 +265,7 @@ struct WatchmanAutoloadMapKey {
 
   folly::fs::path m_root;
   folly::dynamic m_queryExpr;
+  std::vector<std::string> m_indexedMethodAttrs;
   DBData m_dbData;
 };
 
@@ -627,7 +643,8 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
                mapKey->m_dbData,
                mapKey->m_queryExpr,
                get_watchman_client(mapKey->m_root),
-               RuntimeOption::ServerExecutionMode())})
+               RuntimeOption::ServerExecutionMode(),
+               mapKey->m_indexedMethodAttrs)})
       .first->second.get();
 }
 

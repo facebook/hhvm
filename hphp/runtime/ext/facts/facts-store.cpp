@@ -40,6 +40,7 @@
 #include "hphp/runtime/ext/facts/symbol-map.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"
 #include "hphp/runtime/ext/facts/thread-factory.h"
+#include "hphp/util/hash-set.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/sha1.h"
 #include "hphp/util/trace.h"
@@ -551,10 +552,11 @@ struct FactsStoreImpl final
       folly::fs::path root,
       DBData dbData,
       folly::dynamic queryExpr,
-      Watchman& watchmanClient)
+      Watchman& watchmanClient,
+      hphp_hash_set<std::string> indexedMethodAttributes)
       : m_updateExec{1, make_thread_factory("Autoload update")}
       , m_root{std::move(root)}
-      , m_map{m_root, std::move(dbData)}
+      , m_map{m_root, std::move(dbData), std::move(indexedMethodAttributes)}
       , m_watchmanData{
             {.m_queryExpr = addFieldsToQuery(std::move(queryExpr)),
              .m_watchmanClient = watchmanClient}} {
@@ -777,8 +779,7 @@ struct FactsStoreImpl final
         *type.get(), *method.get(), *attribute.get()));
   }
 
-  Array getFileAttrArgs(
-      const String& file, const String& attribute) override {
+  Array getFileAttrArgs(const String& file, const String& attribute) override {
     return makeVecOfDynamic(
         m_map.getFileAttributeArgs(Path{*file.get()}, *attribute.get()));
   }
@@ -1351,9 +1352,19 @@ std::shared_ptr<FactsStore> make_watchman_facts(
     DBData dbData,
     folly::dynamic queryExpr,
     Watchman& watchmanClient,
-    bool shouldSubscribe) {
+    bool shouldSubscribe,
+    std::vector<std::string> indexedMethodAttrsVec) {
+  hphp_hash_set<std::string> indexedMethodAttrs;
+  indexedMethodAttrs.reserve(indexedMethodAttrsVec.size());
+  for (auto& v : indexedMethodAttrsVec) {
+    indexedMethodAttrs.insert(std::move(v));
+  }
   auto map = std::make_shared<FactsStoreImpl>(
-      std::move(root), std::move(dbData), std::move(queryExpr), watchmanClient);
+      std::move(root),
+      std::move(dbData),
+      std::move(queryExpr),
+      watchmanClient,
+      std::move(indexedMethodAttrs));
   if (shouldSubscribe) {
     map->subscribe();
   }

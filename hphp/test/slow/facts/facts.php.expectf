@@ -123,6 +123,9 @@ ClassWithTwoAttrs => attribute-classes.inc
 DerivedClass => derived-class.inc
   Abstract? false
   Final? true
+DontIndexThisMethodAttr => attribute-classes.inc
+  Abstract? false
+  Final? false
 E1 => types-with-kinds.inc
   Abstract? false
   Final? false
@@ -254,7 +257,7 @@ Facts in attribute-classes.inc:
       requireExtends: []
       requireImplements: []
       attributes: []
-      methods: [{"name":"methodWithNoArgAttr","attributes":[{"name":"NoArgMethodAttr","args":[]}]},{"name":"methodWithTwoArgAttr","attributes":[{"name":"TwoArgMethodAttr","args":["42","banana"]}]}]
+      methods: [{"name":"dontIndexThisFunction","attributes":[{"name":"DontIndexThisMethodAttr","args":[]}]},{"name":"methodWithNoArgAttr","attributes":[{"name":"NoArgMethodAttr","args":[]}]},{"name":"methodWithTwoArgAttr","attributes":[{"name":"TwoArgMethodAttr","args":["42","banana"]}]}]
     name: ClassWithTwoAttrs
       kind: class
       flags: 0
@@ -262,6 +265,14 @@ Facts in attribute-classes.inc:
       requireExtends: []
       requireImplements: []
       attributes: [{"name":"NoArgAttr","args":[]},{"name":"TwoArgAttr","args":["abc","def"]}]
+      methods: []
+    name: DontIndexThisMethodAttr
+      kind: class
+      flags: 0
+      baseTypes: ["HH\\MethodAttribute"]
+      requireExtends: []
+      requireImplements: []
+      attributes: []
       methods: []
     name: IBaseForAttributeFiltering
       kind: interface
@@ -322,7 +333,7 @@ Facts in attribute-classes.inc:
   functions: []
   constants: []
   attributes: [{"name":"NoArgFileAttr","args":[]},{"name":"TwoArgFileAttr","args":["Hello","There"]}]
-  sha1sum: a466dc59a54ae863ceb9b9baae105ac23f442743
+  sha1sum: 3204e667c4853260d1c7780f04a7863812833f8c
 Facts in attribute-namespace.inc:
   types:
     name: AnnoyingNS\TerribleClass
@@ -653,6 +664,9 @@ ClassWithTwoAttrs => attribute-classes.inc
 DerivedClass => derived-class.inc
   Abstract? false
   Final? true
+DontIndexThisMethodAttr => attribute-classes.inc
+  Abstract? false
+  Final? false
 E1 => types-with-kinds.inc
   Abstract? false
   Final? false
@@ -784,7 +798,7 @@ Facts in attribute-classes.inc:
       requireExtends: []
       requireImplements: []
       attributes: []
-      methods: [{"name":"methodWithNoArgAttr","attributes":[{"name":"NoArgMethodAttr","args":[]}]},{"name":"methodWithTwoArgAttr","attributes":[{"name":"TwoArgMethodAttr","args":["42","banana"]}]}]
+      methods: [{"name":"dontIndexThisFunction","attributes":[{"name":"DontIndexThisMethodAttr","args":[]}]},{"name":"methodWithNoArgAttr","attributes":[{"name":"NoArgMethodAttr","args":[]}]},{"name":"methodWithTwoArgAttr","attributes":[{"name":"TwoArgMethodAttr","args":["42","banana"]}]}]
     name: ClassWithTwoAttrs
       kind: class
       flags: 0
@@ -792,6 +806,14 @@ Facts in attribute-classes.inc:
       requireExtends: []
       requireImplements: []
       attributes: [{"name":"NoArgAttr","args":[]},{"name":"TwoArgAttr","args":["abc","def"]}]
+      methods: []
+    name: DontIndexThisMethodAttr
+      kind: class
+      flags: 0
+      baseTypes: ["HH\\MethodAttribute"]
+      requireExtends: []
+      requireImplements: []
+      attributes: []
       methods: []
     name: IBaseForAttributeFiltering
       kind: interface
@@ -852,7 +874,7 @@ Facts in attribute-classes.inc:
   functions: []
   constants: []
   attributes: [{"name":"NoArgFileAttr","args":[]},{"name":"TwoArgFileAttr","args":["Hello","There"]}]
-  sha1sum: a466dc59a54ae863ceb9b9baae105ac23f442743
+  sha1sum: 3204e667c4853260d1c7780f04a7863812833f8c
 Facts in attribute-namespace.inc:
   types:
     name: AnnoyingNS\TerribleClass

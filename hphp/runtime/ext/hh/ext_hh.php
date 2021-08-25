@@ -462,6 +462,12 @@ function enable_function_coverage(): void;
 <<__Native>>
 function collect_function_coverage(): dict<string, string>;
 
+/**
+ * Return the options for the given root, stored in .hhvmconfig.hdf.
+ */
+<<__Native>>
+function root_options(string $repo): dict<string, mixed>;
+
 } // HH
 
 namespace HH\Rx {

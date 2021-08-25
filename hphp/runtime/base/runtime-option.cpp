@@ -131,6 +131,14 @@ void mangleForKey(const RepoOptions::StringMap& map, std::string& s) {
     s += '\0';
   }
 }
+void mangleForKey(const RepoOptions::StringVector& vec, std::string& s) {
+  s += folly::to<std::string>(vec.size());
+  s += '\0';
+  for (auto const& val : vec) {
+    s += val;
+    s += '\0';
+  }
+}
 void mangleForKey(const std::string& s1, std::string& s2) { s2 += s1; }
 void hdfExtract(const Hdf& hdf, const char* name, bool& val, bool dv) {
   val = hdf[name].configGetBool(dv);
@@ -151,6 +159,16 @@ void hdfExtract(
 void hdfExtract(
   const Hdf& hdf,
   const char* name,
+  RepoOptions::StringVector& vec,
+  const RepoOptions::StringVector& dv
+) {
+  Hdf config = hdf[name];
+  if (config.exists() && !config.isEmpty()) config.configGet(vec);
+  else vec = dv;
+}
+void hdfExtract(
+  const Hdf& hdf,
+  const char* name,
   std::string& val,
   std::string dv
 ) {
@@ -164,6 +182,14 @@ folly::dynamic toIniValue(const RepoOptions::StringMap& map) {
   folly::dynamic obj = folly::dynamic::object();
   for (auto& kv : map) {
     obj[kv.first] = kv.second;
+  }
+  return obj;
+}
+
+folly::dynamic toIniValue(const RepoOptions::StringVector& vec) {
+  folly::dynamic obj = folly::dynamic::array();
+  for (auto& val : vec) {
+    obj.push_back(val);
   }
   return obj;
 }

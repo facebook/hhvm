@@ -83,6 +83,7 @@ struct RepoOptions {
   RepoOptions(RepoOptions&&) = default;
 
   using StringMap = std::map<std::string, std::string>;
+  using StringVector = std::vector<std::string>;
 // (Type, HDFName, DV)
 // (N=no-prefix, P=PHP7, E=Eval, H=Hack.Lang)
 #define PARSERFLAGS() \
@@ -115,6 +116,7 @@ struct RepoOptions {
 #define AUTOLOADFLAGS() \
   N(std::string,    Query,                                        "") \
   N(std::string,    TrustedDBPath,                                "") \
+  N(StringVector,   IndexedMethodAttributes,                      {}) \
   /**/
 
   std::string path() const { return m_path; }
@@ -129,6 +131,14 @@ struct RepoOptions {
   struct stat stat() const { return m_stat; }
   std::string autoloadQuery() const noexcept { return Query; }
   std::string trustedDBPath() const noexcept { return TrustedDBPath; }
+
+  /**
+   * Allowlist consisting of the attributes, marking methods, which Facts
+   * should index
+   */
+  const StringVector& indexedMethodAttributes() const noexcept {
+    return IndexedMethodAttributes;
+  }
 
   bool operator==(const RepoOptions& o) const {
     // If we have hash collisions of unequal RepoOptions, we have

@@ -16,6 +16,11 @@ class TwoArgMethodAttr implements HH\MethodAttribute {
   public function __construct(dynamic $arg0, dynamic $arg1) {}
 }
 
+// Not included in the `IndexedMethodAttributes` list in `.hhvmconfig.hdf`
+class DontIndexThisMethodAttr implements HH\MethodAttribute {
+  public function __construct() {}
+}
+
 class NoArgFileAttr implements HH\FileAttribute {}
 
 class TwoArgFileAttr implements HH\FileAttribute {
@@ -43,4 +48,7 @@ class ClassWithMethodAttrs {
 
   <<TwoArgMethodAttr(42, "banana")>>
   public function methodWithTwoArgAttr(): void {}
+
+  <<DontIndexThisMethodAttr>>
+  public function dontIndexThisFunction(): void {}
 }

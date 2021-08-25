@@ -267,35 +267,3 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         root = self.repo_dir + os.path.sep
         second = second.format(root=root)
         self.assertEqual(first, second, msg)
-
-
-# Like SavedStateTestDriver except saves the state by invoking hh_server
-# directly instead of over RPC via hh_client
-class SavedStateClassicTestDriver(SavedStateTestDriver):
-    @classmethod
-    # pyre-fixme[14]: `save_command` overrides method defined in
-    #  `SavedStateTestDriver` inconsistently.
-    # pyre-fixme[14]: `save_command` overrides method defined in
-    #  `SavedStateTestDriver` inconsistently.
-    # pyre-fixme[14]: `save_command` overrides method defined in
-    #  `SavedStateTestDriver` inconsistently.
-    # pyre-fixme[14]: `save_command` overrides method defined in
-    #  `SavedStateTestDriver` inconsistently.
-    # pyre-fixme[15]: `save_command` overrides method defined in
-    #  `SavedStateTestDriver` inconsistently.
-    def save_command(cls, init_dir: str) -> None:
-        stdout, stderr, retcode = cls.proc_call(
-            [
-                hh_server,
-                "--check",
-                init_dir,
-                "--save-state",
-                cls.saved_state_path(),
-                "--max-procs",
-                "2",
-            ]
-        )
-        if retcode != 0:
-            raise Exception(
-                'Failed to save! stdout: "%s" stderr: "%s"' % (stdout, stderr)
-            )

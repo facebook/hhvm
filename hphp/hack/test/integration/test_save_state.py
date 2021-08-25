@@ -17,7 +17,6 @@ import common_tests
 import hierarchy_tests
 from hh_paths import hh_client
 from saved_state_test_driver import (
-    SavedStateClassicTestDriver,
     SavedStateTestDriver,
     SaveStateResult,
 )
@@ -63,12 +62,6 @@ class SavedStateCommonTests(common_tests.CommonTests):
     @classmethod
     def get_test_driver(cls) -> SavedStateTestDriver:
         return SavedStateTestDriver()
-
-
-class SavedStateBarebonesTestsClassic(common_tests.BarebonesTests):
-    @classmethod
-    def get_test_driver(cls) -> SavedStateClassicTestDriver:
-        return SavedStateClassicTestDriver()
 
 
 class SavedStateHierarchyTests(hierarchy_tests.HierarchyTests):

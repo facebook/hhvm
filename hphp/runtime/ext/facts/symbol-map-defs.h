@@ -84,11 +84,15 @@ getPathSymMap(typename SymbolMap<S>::Data& data) {
 
 template <typename S>
 SymbolMap<S>::SymbolMap(
-    folly::fs::path root, DBData dbData, SQLite::OpenMode dbMode)
+    folly::fs::path root,
+    DBData dbData,
+    hphp_hash_set<std::string> indexedMethodAttrs,
+    SQLite::OpenMode dbMode)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
           1, std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))}
     , m_root{std::move(root)}
     , m_dbData{std::move(dbData)}
+    , m_indexedMethodAttrs{std::move(indexedMethodAttrs)}
     , m_dbMode{dbMode} {
   assertx(m_root.is_absolute());
 }
@@ -956,7 +960,8 @@ void SymbolMap<S>::update(
   // Write information about base and derived types
   for (auto i = 0; i < alteredPaths.size(); i++) {
     wlock->removePath(db, txn, Path<S>{alteredPaths[i]});
-    wlock->updatePath(Path<S>{alteredPaths[i]}, alteredPathFacts[i]);
+    wlock->updatePath(
+        Path<S>{alteredPaths[i]}, alteredPathFacts[i], m_indexedMethodAttrs);
   }
 
   for (auto const& path : deletedPaths) {
@@ -1221,6 +1226,12 @@ void SymbolMap<S>::updateDBPath(
     }
     for (auto const& methodDetails : type.m_methods) {
       for (auto const& attribute : methodDetails.m_attributes) {
+        // If we have an allowlist of method attributes to index, then skip any
+        // method attribute which isn't in that allowlist.
+        if (!m_indexedMethodAttrs.empty() &&
+            !m_indexedMethodAttrs.count(attribute.m_name)) {
+          continue;
+        }
         if (attribute.m_args.empty()) {
           db.insertMethodAttribute(
               txn,
@@ -1399,7 +1410,10 @@ SymbolMap<S>::getPathSymbols(Path<S> path) {
 }
 
 template <typename S>
-void SymbolMap<S>::Data::updatePath(Path<S> path, FileFacts facts) {
+void SymbolMap<S>::Data::updatePath(
+    Path<S> path,
+    FileFacts facts,
+    const hphp_hash_set<std::string>& indexedMethodAttrs) {
   typename PathToSymbolsMap<S, SymKind::Type>::SymbolSet types;
   typename PathToMethodsMap<S>::MethodSet methods;
   for (auto& type : facts.m_types) {
@@ -1426,9 +1440,22 @@ void SymbolMap<S>::Data::updatePath(Path<S> path, FileFacts facts) {
         std::move(type.m_requireImplements));
 
     for (auto& [method, attributes] : type.m_methods) {
+      // Remove method attributes not in the allowlist if the allowlist exists
+      if (!indexedMethodAttrs.empty()) {
+        attributes.erase(
+            std::remove_if(
+                attributes.begin(),
+                attributes.end(),
+                [&](const Attribute& attr) {
+                  return !indexedMethodAttrs.count(attr.m_name);
+                }),
+            attributes.end());
+      }
+
       MethodDecl<S> methodDecl{
           .m_type = {.m_name = typeName, .m_path = path},
           .m_method = Symbol<S, SymKind::Function>{method}};
+
       m_methodAttrs.setAttributes(methodDecl, std::move(attributes));
       methods.insert(methodDecl);
     }

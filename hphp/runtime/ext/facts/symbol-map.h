@@ -71,6 +71,7 @@ template <typename S> struct SymbolMap {
   explicit SymbolMap(
       folly::fs::path root,
       DBData dbData,
+      hphp_hash_set<std::string> indexedMethodAttributes = {},
       SQLite::OpenMode dbMode = SQLite::OpenMode::ReadWrite);
   SymbolMap() = delete;
   SymbolMap(const SymbolMap&) = delete;
@@ -470,7 +471,10 @@ template <typename S> struct SymbolMap {
     /**
      * Parse the given path and store all its data in the map.
      */
-    void updatePath(Path<S> path, FileFacts facts);
+    void updatePath(
+        Path<S> path,
+        FileFacts facts,
+        const hphp_hash_set<std::string>& indexedMethodAttrs);
 
     /**
      * Remove the given path from the map, along with all data associated with
@@ -563,6 +567,7 @@ private:
   const folly::fs::path m_root;
   const std::string m_schemaHash;
   const DBData m_dbData;
+  const hphp_hash_set<std::string> m_indexedMethodAttrs;
   const SQLite::OpenMode m_dbMode{SQLite::OpenMode::ReadWrite};
 };
 

@@ -24,12 +24,13 @@
 #include <folly/executors/GlobalExecutor.h>
 #include <folly/executors/ManualExecutor.h>
 #include <folly/experimental/TestUtil.h>
-#include <folly/portability/GTest.h>
 #include <folly/portability/GMock.h>
+#include <folly/portability/GTest.h>
 
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/runtime/ext/facts/symbol-map.h"
+#include "hphp/util/hash-set.h"
 
 using ::testing::AllOf;
 using ::testing::Contains;
@@ -42,23 +43,26 @@ using ::testing::UnorderedElementsAre;
 namespace HPHP {
 namespace Facts {
 
-template<typename S, SymKind k>
+template <typename S, SymKind k>
 void PrintTo(const Symbol<S, k>& symbol, ::std::ostream* os) {
   *os << symbol.slice();
 }
 
-template<typename S, SymKind k>
+template <typename S, SymKind k>
 bool operator==(const Symbol<S, k>& symbol, const char* str) {
   return symbol.slice() == str;
 }
 
-template<typename S, SymKind k, typename T, typename U>
-void PrintTo(const std::tuple<Symbol<S, k>, Path<S>, T, U>& typeInfo, ::std::ostream* os) {
+template <typename S, SymKind k, typename T, typename U>
+void PrintTo(
+    const std::tuple<Symbol<S, k>, Path<S>, T, U>& typeInfo,
+    ::std::ostream* os) {
   *os << std::get<0>(typeInfo).slice();
 }
 
-template<typename S, SymKind k, typename T, typename U>
-bool operator==(const std::tuple<Symbol<S, k>, Path<S>, T, U>& typeInfo, const char* str) {
+template <typename S, SymKind k, typename T, typename U>
+bool operator==(
+    const std::tuple<Symbol<S, k>, Path<S>, T, U>& typeInfo, const char* str) {
   return std::get<0>(typeInfo) == str;
 }
 
@@ -147,7 +151,9 @@ protected:
   }
 
   SymbolMap<std::string>& make(
-      std::string root, std::shared_ptr<folly::ManualExecutor> exec = nullptr) {
+      std::string root,
+      std::shared_ptr<folly::ManualExecutor> exec = nullptr,
+      hphp_hash_set<std::string> indexedMethodAttributes = {}) {
     auto dbPath = m_tmpdir->path() /
                   folly::to<std::string>(
                       "autoload_", std::hash<std::string>{}(root), "_db.sql3");
@@ -155,7 +161,8 @@ protected:
         std::make_unique<SymbolMap<std::string>>(
             std::move(root),
             DBData::readWrite(
-                std::move(dbPath), static_cast<::gid_t>(-1), 0644)),
+                std::move(dbPath), static_cast<::gid_t>(-1), 0644),
+            std::move(indexedMethodAttributes)),
         std::move(exec)});
     return *m_wrappers.back().m_map;
   }
@@ -197,7 +204,7 @@ TEST_F(SymbolMapTest, addPaths) {
 
   // file -> symbols
   EXPECT_THAT(
-    m.getFileTypes(path1), UnorderedElementsAre("BaseClass", "SomeClass"));
+      m.getFileTypes(path1), UnorderedElementsAre("BaseClass", "SomeClass"));
   EXPECT_EQ(m.getFileFunctions(path1).at(0), "some_fn");
   EXPECT_EQ(m.getFileConstants(path1).at(0), "SOME_CONSTANT");
   EXPECT_EQ(m.getFileTypeAliases(path1).at(0), "SomeTypeAlias");
@@ -248,15 +255,15 @@ TEST_F(SymbolMapTest, addPaths) {
   EXPECT_EQ(m.getTypeAliasFile("SomeTypeAlias"), path2.native());
 
   EXPECT_THAT(
-    m.getBaseTypes("SomeClass", DeriveKind::Extends),
-    ElementsAre("BaseClass"));
+      m.getBaseTypes("SomeClass", DeriveKind::Extends),
+      ElementsAre("BaseClass"));
 
   EXPECT_TRUE(m.getDerivedTypes("SomeClass", DeriveKind::Extends).empty());
   EXPECT_TRUE(m.getBaseTypes("BaseClass", DeriveKind::Extends).empty());
 
   EXPECT_THAT(
-    m.getDerivedTypes("BaseClass", DeriveKind::Extends),
-    ElementsAre("SomeClass"));
+      m.getDerivedTypes("BaseClass", DeriveKind::Extends),
+      ElementsAre("SomeClass"));
 }
 
 TEST_F(SymbolMapTest, duplicateSymbols) {
@@ -309,8 +316,7 @@ TEST_F(SymbolMapTest, DBFill) {
 
   // file -> symbol
   EXPECT_THAT(
-      m1.getFileTypes(path),
-      UnorderedElementsAre("BaseClass", "SomeClass"));
+      m1.getFileTypes(path), UnorderedElementsAre("BaseClass", "SomeClass"));
   EXPECT_EQ(m1.getFileFunctions(path).at(0), "some_fn");
   EXPECT_EQ(m1.getFileConstants(path).at(0), "SOME_CONSTANT");
   EXPECT_EQ(m1.getFileTypeAliases(path).at(0), "SomeTypeAlias");
@@ -331,8 +337,7 @@ TEST_F(SymbolMapTest, DBFill) {
 
   // file -> symbol
   EXPECT_THAT(
-    m1.getFileTypes(path),
-    UnorderedElementsAre("BaseClass", "SomeClass"));
+      m1.getFileTypes(path), UnorderedElementsAre("BaseClass", "SomeClass"));
   EXPECT_EQ(m2.getFileFunctions(path).at(0).slice(), "some_fn");
   EXPECT_EQ(m2.getFileConstants(path).at(0).slice(), "SOME_CONSTANT");
   EXPECT_EQ(m2.getFileTypeAliases(path).at(0).slice(), "SomeTypeAlias");
@@ -600,13 +605,13 @@ TEST_F(SymbolMapTest, ConcurrentCallsToGetTypeFile) {
       }));
       futures.push_back(folly::via(folly::getCPUExecutor().get(), [&]() {
         EXPECT_THAT(
-          m2.getFileTypes(path1),
-          UnorderedElementsAre("SomeClass", "OtherClass"));
+            m2.getFileTypes(path1),
+            UnorderedElementsAre("SomeClass", "OtherClass"));
       }));
       futures.push_back(folly::via(folly::getCPUExecutor().get(), [&]() {
         EXPECT_THAT(
-          m2.getFileTypes(path2),
-          UnorderedElementsAre("SomeClass", "OtherClass"));
+            m2.getFileTypes(path2),
+            UnorderedElementsAre("SomeClass", "OtherClass"));
       }));
     }
   }
@@ -837,17 +842,17 @@ TEST_F(SymbolMapTest, DeriveKinds) {
   EXPECT_EQ(m1.getClock().m_clock, "1:2:3");
   EXPECT_TRUE(m1.getBaseTypes("SomeTrait", DeriveKind::Extends).empty());
   EXPECT_THAT(
-    m1.getBaseTypes("SomeTrait", DeriveKind::RequireExtends),
-    ElementsAre("BaseClass"));
+      m1.getBaseTypes("SomeTrait", DeriveKind::RequireExtends),
+      ElementsAre("BaseClass"));
   EXPECT_THAT(
-    m1.getBaseTypes("SomeTrait", DeriveKind::RequireImplements),
-    ElementsAre("BaseInterface"));
+      m1.getBaseTypes("SomeTrait", DeriveKind::RequireImplements),
+      ElementsAre("BaseInterface"));
   EXPECT_THAT(
-    m1.getDerivedTypes("BaseClass", DeriveKind::RequireExtends),
-    ElementsAre("SomeTrait"));
+      m1.getDerivedTypes("BaseClass", DeriveKind::RequireExtends),
+      ElementsAre("SomeTrait"));
   EXPECT_THAT(
-    m1.getDerivedTypes("BaseInterface", DeriveKind::RequireImplements),
-    ElementsAre("SomeTrait"));
+      m1.getDerivedTypes("BaseInterface", DeriveKind::RequireImplements),
+      ElementsAre("SomeTrait"));
 
   auto& someTraitFacts = ff.m_types[2];
   ASSERT_EQ(someTraitFacts.m_name, "SomeTrait");
@@ -973,12 +978,12 @@ TEST_F(SymbolMapTest, DuplicateDefineDerivedType) {
   EXPECT_EQ(m.getTypeFile("SomeClass"), path1.native());
 
   EXPECT_THAT(
-    m.getBaseTypes("SomeClass", DeriveKind::Extends),
-    ElementsAre("BaseClass"));
+      m.getBaseTypes("SomeClass", DeriveKind::Extends),
+      ElementsAre("BaseClass"));
 
   EXPECT_THAT(
-    m.getDerivedTypes("BaseClass", DeriveKind::Extends),
-    ElementsAre("SomeClass"));
+      m.getDerivedTypes("BaseClass", DeriveKind::Extends),
+      ElementsAre("SomeClass"));
 }
 
 TEST_F(SymbolMapTest, DBUpdatesOutOfOrder) {
@@ -1351,9 +1356,11 @@ TEST_F(SymbolMapTest, DerivedTypesWithDifferentCases) {
 
   update(m, "", "1", {p1}, {}, {ff1});
   EXPECT_EQ(m.getTypeFile("SomeClass").slice(), p1.native());
-  EXPECT_THAT(m.getBaseTypes("SomeClass", DeriveKind::Extends),
+  EXPECT_THAT(
+      m.getBaseTypes("SomeClass", DeriveKind::Extends),
       ElementsAre("BaseClass"));
-  EXPECT_THAT(m.getDerivedTypes("BaseClass", DeriveKind::Extends),
+  EXPECT_THAT(
+      m.getDerivedTypes("BaseClass", DeriveKind::Extends),
       ElementsAre("SomeClass"));
 
   // Replace "SomeClass" with "SOMECLASS"
@@ -1390,8 +1397,8 @@ TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
 
   EXPECT_EQ(m1.getTypeFile("SomeClass"), path.native());
   EXPECT_THAT(
-    m1.getFileTypes(path.native()),
-    UnorderedElementsAre("SomeClass", "OtherClass"));
+      m1.getFileTypes(path.native()),
+      UnorderedElementsAre("SomeClass", "OtherClass"));
   EXPECT_EQ(m1.getTypeFile("OtherClass"), path.native());
 
   waitForDB(m1, m_exec);
@@ -1404,8 +1411,8 @@ TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
   // really only know some of them.
   EXPECT_EQ(m2.getTypeFile("SomeClass"), path.native());
   EXPECT_THAT(
-    m2.getFileTypes(path.native()),
-    UnorderedElementsAre("SomeClass", "OtherClass"));
+      m2.getFileTypes(path.native()),
+      UnorderedElementsAre("SomeClass", "OtherClass"));
   EXPECT_EQ(m2.getTypeFile("OtherClass"), path.native());
 }
 
@@ -1468,32 +1475,30 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
   EXPECT_THAT(
       m1.getTypeAttributeArgs("SomeClass", "Bar"), ElementsAre(nullptr));
   EXPECT_THAT(m1.getTypeAttributeArgs("SomeClass", "Baz"), IsEmpty());
-  EXPECT_THAT(
-      m1.getAttributesOfType("SomeTypeAlias"), ElementsAre("Foo"));
+  EXPECT_THAT(m1.getAttributesOfType("SomeTypeAlias"), ElementsAre("Foo"));
 
   waitForDB(m1, m_exec);
 
   auto& m2 = make("/var/www", m_exec);
   update(m2, "1:2:3", "1:2:3", {}, {}, {});
   EXPECT_THAT(
-    m2.getAttributesOfType("SomeClass"),
-    UnorderedElementsAre("Bar", "Baz", "Foo"));
+      m2.getAttributesOfType("SomeClass"),
+      UnorderedElementsAre("Bar", "Baz", "Foo"));
   EXPECT_EQ(m2.getTypeFile("SomeClass"), p.native());
   EXPECT_THAT(
-    m2.getTypesAndTypeAliasesWithAttribute("Foo"),
-    UnorderedElementsAre("SomeClass", "SomeTypeAlias"));
+      m2.getTypesAndTypeAliasesWithAttribute("Foo"),
+      UnorderedElementsAre("SomeClass", "SomeTypeAlias"));
   EXPECT_THAT(
-    m2.getTypeAttributeArgs("SomeTypeAlias", "Foo"), ElementsAre(42, "a"));
+      m2.getTypeAttributeArgs("SomeTypeAlias", "Foo"), ElementsAre(42, "a"));
   EXPECT_THAT(
-    m2.getTypesAndTypeAliasesWithAttribute("Bar"),
-    UnorderedElementsAre("SomeClass", "OtherClass"));
+      m2.getTypesAndTypeAliasesWithAttribute("Bar"),
+      UnorderedElementsAre("SomeClass", "OtherClass"));
   EXPECT_THAT(
-    m1.getTypeAttributeArgs("SomeClass", "Foo"), ElementsAre("apple", 38));
+      m1.getTypeAttributeArgs("SomeClass", "Foo"), ElementsAre("apple", 38));
   EXPECT_THAT(
-    m1.getTypeAttributeArgs("SomeClass", "Bar"), ElementsAre(nullptr));
+      m1.getTypeAttributeArgs("SomeClass", "Bar"), ElementsAre(nullptr));
   EXPECT_THAT(m1.getTypeAttributeArgs("SomeClass", "Baz"), IsEmpty());
-  EXPECT_THAT(
-    m1.getAttributesOfType("SomeTypeAlias"), ElementsAre("Foo"));
+  EXPECT_THAT(m1.getAttributesOfType("SomeTypeAlias"), ElementsAre("Foo"));
 }
 
 TEST_F(SymbolMapTest, getTypesWithAttributeFiltersDuplicateDefs) {
@@ -1550,16 +1555,17 @@ TEST_F(SymbolMapTest, GetMethodsWithAttribute) {
 
   auto testMap = [&p1](auto& m) {
     auto methods = m.getMethodsWithAttribute("A1");
-    EXPECT_THAT(methods, AllOf(
-          SizeIs(2),
-          Contains(
-            MethodDecl<std::string>{
+    EXPECT_THAT(
+        methods,
+        AllOf(
+            SizeIs(2),
+            Contains(MethodDecl<std::string>{
                 .m_type =
                     {.m_name =
                          Symbol<std::string, SymKind::Type>{std::string{"C1"}},
                      .m_path = Path<std::string>{p1}},
-                .m_method =
-                    Symbol<std::string, SymKind::Function>{std::string{"m1"}}})));
+                .m_method = Symbol<std::string, SymKind::Function>{
+                    std::string{"m1"}}})));
 
     EXPECT_THAT(m.getAttributesOfMethod("C1", "m1"), ElementsAre("A1"));
     EXPECT_THAT(m.getMethodAttributeArgs("C1", "m1", "A1"), ElementsAre(1));
@@ -1624,6 +1630,46 @@ TEST_F(SymbolMapTest, GetAttributesOfRenamedMethod) {
     EXPECT_EQ(methods[0].m_type.m_name.slice(), "C1");
     EXPECT_EQ(methods[0].m_method.m_name.slice(), "m2");
   }
+}
+
+TEST_F(SymbolMapTest, OnlyIndexCertainMethodAttrs) {
+  // Index A2 but not A1
+  auto& m1 = make("/var/www", nullptr, {"A2"});
+
+  // Create method `C1::m1`
+  FileFacts ff1{
+      .m_types = {TypeDetails{
+          .m_name = "C1",
+          .m_methods =
+              {
+                  MethodDetails{
+                      .m_name = "m1",
+                      .m_attributes = {{.m_name = "A1"}, {.m_name = "A2"}}},
+              }}},
+      .m_sha1hex = kSHA};
+  folly::fs::path p1{"some/path1.php"};
+
+  auto check = [&](SymbolMap<std::string>& m) {
+    auto attrs = m.getAttributesOfMethod("C1", "m1");
+    ASSERT_EQ(attrs.size(), 1);
+    EXPECT_EQ(attrs[0].m_name, "A2");
+
+    auto a1Methods = m.getMethodsWithAttribute("A1");
+    EXPECT_TRUE(a1Methods.empty());
+
+    auto a2Methods = m.getMethodsWithAttribute("A2");
+    ASSERT_EQ(a2Methods.size(), 1);
+    EXPECT_EQ(a2Methods[0].m_type.m_name, "C1");
+    EXPECT_EQ(a2Methods[0].m_method, "m1");
+  };
+
+  update(m1, "", "1", {p1}, {}, {ff1});
+  check(m1);
+  m1.waitForDBUpdate();
+
+  auto& m2 = make("/var/www", nullptr, {"A2"});
+  update(m2, "1", "1", {}, {}, {});
+  check(m2);
 }
 
 TEST_F(SymbolMapTest, GetFilesWithAttribute) {
@@ -1698,22 +1744,22 @@ TEST_F(SymbolMapTest, TransitiveSubtypes) {
   update(m1, "", "1:2:3", {p}, {}, {ff});
 
   EXPECT_THAT(
-    m1.getTransitiveDerivedTypes("C0"),
-    UnorderedElementsAre("C1", "C2", "C3", "I1", "T0", "T1"));
+      m1.getTransitiveDerivedTypes("C0"),
+      UnorderedElementsAre("C1", "C2", "C3", "I1", "T0", "T1"));
 
   EXPECT_THAT(
-    m1.getTransitiveDerivedTypes("C0", static_cast<int>(TypeKind::Class)),
-    UnorderedElementsAre("C1", "C2"));
+      m1.getTransitiveDerivedTypes("C0", static_cast<int>(TypeKind::Class)),
+      UnorderedElementsAre("C1", "C2"));
 
   EXPECT_THAT(
-    m1.getTransitiveDerivedTypes(
-      "C0", kTypeKindAll, static_cast<int>(DeriveKind::Extends)),
-    UnorderedElementsAre("C1", "C2", "C3", "I1"));
+      m1.getTransitiveDerivedTypes(
+          "C0", kTypeKindAll, static_cast<int>(DeriveKind::Extends)),
+      UnorderedElementsAre("C1", "C2", "C3", "I1"));
 
   EXPECT_THAT(
-    m1.getTransitiveDerivedTypes(
-        "C0", kTypeKindAll, static_cast<int>(DeriveKind::RequireExtends)),
-    ElementsAre("T0"));
+      m1.getTransitiveDerivedTypes(
+          "C0", kTypeKindAll, static_cast<int>(DeriveKind::RequireExtends)),
+      ElementsAre("T0"));
 }
 
 TEST_F(SymbolMapTest, ConcurrentFillsFromDB) {

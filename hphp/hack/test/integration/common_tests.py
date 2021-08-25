@@ -13,7 +13,7 @@ import tempfile
 import time
 from typing import ClassVar, List, Mapping, Optional, Tuple
 
-from hh_paths import hackfmt, hh_client, hh_merge_deps, hh_server
+from hh_paths import hackfmt, hh_client, hh_server
 from test_case import TestCase, TestDriver
 
 
@@ -43,9 +43,7 @@ class CommonTestDriver(TestDriver):
         cls.bin_dir = tempfile.mkdtemp()
         hh_server_dir = os.path.dirname(hh_server)
 
-        hh_merge_deps_dir = os.path.dirname(hh_merge_deps)
         print("hh_server_dir " + hh_server_dir)
-        print("hh_merge_deps_dir " + hh_merge_deps_dir)
 
         cls.test_env = dict(
             os.environ,
@@ -54,8 +52,7 @@ class CommonTestDriver(TestDriver):
                 "HH_TMPDIR": cls.hh_tmp_dir,
                 "HACKFMT_TEST_PATH": hackfmt,
                 "PATH": (
-                    "%s:%s:%s:/bin:/usr/bin:/usr/local/bin"
-                    % (hh_server_dir, hh_merge_deps_dir, cls.bin_dir)
+                    "%s:%s:/bin:/usr/bin:/usr/local/bin" % (hh_server_dir, cls.bin_dir)
                 ),
                 "HH_HOME": os.path.dirname(hh_client),
                 "OCAMLRUNPARAM": "b",

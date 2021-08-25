@@ -10,7 +10,7 @@ import tempfile
 from typing import Iterable, List, Mapping, NamedTuple, Optional, TextIO, TypeVar, Union
 
 import common_tests
-from hh_paths import hh_client, hh_merge_deps, hh_server
+from hh_paths import hh_client, hh_server
 
 
 T = TypeVar("T")
@@ -217,23 +217,6 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         self.write_local_conf()
         self.write_hhconfig()
         self.write_watchman_config()
-
-    def merge_partial(self, files_to_merge: List[str], filename: str) -> int:
-
-        hh_command: List[str] = [
-            hh_merge_deps,
-            "--ignore-hh-version",
-            "true",
-            "--output_filename",
-            filename,
-        ] + files_to_merge
-
-        stdout, stderr, retcode = self.proc_call(hh_command)
-        if retcode != 0:
-            raise RuntimeError(
-                'Failed to save! stdout: "%s" stderr: "%s"' % (stdout, stderr)
-            )
-        return retcode
 
     def save_partial(
         self,

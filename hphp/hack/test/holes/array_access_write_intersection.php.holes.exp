@@ -1,0 +1,62 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:68-72], (Hprim Tvoid)))); 
+        f_name = ([3:10-41], "\\array_access_write_intersection"); f_tparams = []; 
+        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:42-61], (Hintersection [([3:43-51], (Hprim Tarraykey)); ([3:54-60], (Hprim Tstring))])))); 
+           param_is_variadic = false; param_pos = [3:62-65]; param_name = "$xs"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:3-14],
+            (Expr
+               ((int), [5:3-13],
+                (Binop ((Eq None), ((int), [5:3-9], (Array_get (((string), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((int), [5:7-8], (Int "0")))))),
+                   ((int), [5:12-13], (Hole (((int), [5:12-13], (Int "1")), (int), (string), Typing))))))))
+            ]
+          };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [8:1-12:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([8:71-75], (Hprim Tvoid)))); 
+         f_name = ([8:10-47], "\\array_access_write_intersection_empty"); 
+         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_params =
+         [{ param_annotation = (int); param_type_hint = ((int), (Some ([8:48-64], (Hintersection [([8:49-57], (Hprim Tarraykey)); ([8:60-63], (Hprim Tint))])))); 
+            param_is_variadic = false; param_pos = [8:65-68]; param_name = "$xs"; 
+            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([11:3-14],
+             (Expr
+                ((int), [11:3-13],
+                 (Binop ((Eq None),
+                    ((int), [11:3-9], (Array_get (((int), [11:3-6], (Hole (((int), [11:3-6], (Lvar ([11:3-6], $xs))), (int), (nothing), Typing))), (Some ((int), [11:7-8], (Int "0")))))),
+                    ((int), [11:12-13], (Hole (((int), [11:12-13], (Int "1")), (int), (nothing), Typing))))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

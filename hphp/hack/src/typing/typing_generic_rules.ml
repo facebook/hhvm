@@ -63,40 +63,46 @@ let is_arraykey t =
   | _ -> false
 
 let fold_errs errs =
-  Result.map ~f:List.rev
-  @@ Result.map_error ~f:(fun (acts, exps) -> List.(rev acts, rev exps))
-  @@ List.fold_left errs ~init:(Ok []) ~f:(fun acc res ->
-         match (acc, res) with
-         | (Ok xs, Ok x) -> Ok (x :: xs)
-         | (Ok xs, Error (ty_actual, ty_expect)) ->
-           Error (ty_actual :: xs, ty_expect :: xs)
-         | (Error (xs, ys), Ok x) -> Error (x :: xs, x :: ys)
-         | (Error (xs, ys), Error (ty_actual, ty_expect)) ->
-           Error (ty_actual :: xs, ty_expect :: ys))
+  List.fold_left (List.rev errs) ~init:(Ok []) ~f:(fun acc res ->
+      match (acc, res) with
+      | (Ok xs, Ok x) -> Ok (x :: xs)
+      | (Ok xs, Error (ty_actual, ty_expect)) ->
+        Error (ty_actual :: xs, ty_expect :: xs)
+      | (Error (xs, ys), Ok x) -> Error (x :: xs, x :: ys)
+      | (Error (xs, ys), Error (ty_actual, ty_expect)) ->
+        Error (ty_actual :: xs, ty_expect :: ys))
 
-let intersect_errs errs =
+let intersect_errs env errs =
   Result.fold
-    ~ok:(fun tys -> Ok (Typing_make_type.intersection Reason.none tys))
+    ~ok:(fun tys ->
+      let (env, ty) = Typing_intersection.intersect_list env Reason.none tys in
+      (env, Ok ty))
     ~error:(fun (actuals, expects) ->
-      Error
-        ( Typing_make_type.intersection Reason.none actuals,
-          Typing_make_type.intersection Reason.none expects ))
+      let (env, ty_actual) =
+        Typing_intersection.intersect_list env Reason.none actuals
+      in
+      let (env, ty_expect) =
+        Typing_intersection.intersect_list env Reason.none expects
+      in
+      (env, Error (ty_actual, ty_expect)))
   @@ fold_errs errs
 
-let union_errs errs =
+let union_errs env errs =
   Result.fold
-    ~ok:(fun tys -> Ok (Typing_make_type.union Reason.none tys))
+    ~ok:(fun tys ->
+      let (env, ty) = Typing_union.union_list env Reason.none tys in
+      (env, Ok ty))
     ~error:(fun (actuals, expects) ->
-      Error
-        ( Typing_make_type.union Reason.none actuals,
-          Typing_make_type.union Reason.none expects ))
+      let (env, ty_actual) = Typing_union.union_list env Reason.none actuals in
+      let (env, ty_expect) = Typing_union.union_list env Reason.none expects in
+      (env, Error (ty_actual, ty_expect)))
   @@ fold_errs errs
 
 (*  Here we have a function returns the updated environment, a local type
     and results indicating type errors for both and index expression and
     the rhs expression of an assignment *)
-let apply_rules_with_index_value_errs ?(ignore_type_structure = false) env ty f
-    =
+let apply_rules_with_array_index_value_errs
+    ?(ignore_type_structure = false) env ty f =
   let rec iter ~is_nonnull env ty =
     let (env, ety) = Env.expand_type env ty in
     (* This is the base case: not a union or intersection or bounded abstract type *)
@@ -109,29 +115,38 @@ let apply_rules_with_index_value_errs ?(ignore_type_structure = false) env ty f
       let is_nonnull =
         Typing_solver.is_sub_type env ty (Typing_make_type.nonnull Reason.none)
       in
-      let (env, tys, key_errs, errs) =
-        Typing_utils.run_on_intersection_key_value_res
+      let (env, tys, arr_errs, key_errs, val_errs) =
+        Typing_utils.run_on_intersection_array_key_value_res
           env
           ~f:(iter ~is_nonnull)
           tyl
       in
-      let err_res = intersect_errs errs
-      and key_err_res = intersect_errs key_errs in
+      let (env, arr_err_res) = intersect_errs env arr_errs in
+      let (env, key_err_res) = intersect_errs env key_errs in
+      let (env, val_err_res) = intersect_errs env val_errs in
       let (env, ty) = Typing_intersection.intersect_list env r tys in
-      (env, ty, key_err_res, err_res)
+      (env, ty, arr_err_res, key_err_res, val_err_res)
     (* For unions, just apply rule of components and compute union of result *)
     | (r, Tunion tyl) ->
-      let (env, tys, key_errs, errs) =
+      let (env, tys, arr_errs, key_errs, val_errs) =
         List.fold_left
           tyl
-          ~init:(env, [], [], [])
-          ~f:(fun (env, tys, key_errs, errs) ty ->
-            let (env, ty, key_err, err) = iter ~is_nonnull env ty in
-            (env, ty :: tys, key_err :: key_errs, err :: errs))
+          ~init:(env, [], [], [], [])
+          ~f:(fun (env, tys, arr_errs, key_errs, val_errs) ty ->
+            let (env, ty, arr_err, key_err, val_err) =
+              iter ~is_nonnull env ty
+            in
+            ( env,
+              ty :: tys,
+              arr_err :: arr_errs,
+              key_err :: key_errs,
+              val_err :: val_errs ))
       in
-      let err_res = union_errs errs and key_err_res = union_errs key_errs in
+      let (env, arr_err_res) = union_errs env arr_errs in
+      let (env, key_err_res) = union_errs env key_errs in
+      let (env, val_err_res) = union_errs env val_errs in
       let (env, ty) = Typing_union.union_list env r tys in
-      (env, ty, key_err_res, err_res)
+      (env, ty, arr_err_res, key_err_res, val_err_res)
     (* Special case for `TypeStructure<_> as shape { ... }`, because some clients care about the
      * fact that we have the special type TypeStructure *)
     | (_, Tnewtype (cid, _, bound))
@@ -161,13 +176,26 @@ let apply_rules_with_index_value_errs ?(ignore_type_structure = false) env ty f
         iter ~is_nonnull env ty
     | _ -> default ()
   in
-  let (env, ty, key_err_res, err_res) = iter ~is_nonnull:false env ty in
-  let err_opt =
-    Result.fold err_res ~ok:(fun _ -> None) ~error:(fun tys -> Some tys)
-  and key_err_opt =
-    Result.fold key_err_res ~ok:(fun _ -> None) ~error:(fun tys -> Some tys)
+  let (env, ty, arr_err_res, key_err_res, val_err_res) =
+    iter ~is_nonnull:false env ty
   in
-  (env, ty, key_err_opt, err_opt)
+  let opt_of_res =
+    Result.fold ~ok:(fun _ -> None) ~error:(fun tys -> Some tys)
+  in
+  let arr_err_opt = opt_of_res arr_err_res
+  and key_err_opt = opt_of_res key_err_res
+  and val_err_opt = opt_of_res val_err_res in
+  (env, ty, arr_err_opt, key_err_opt, val_err_opt)
+
+let apply_rules_with_index_value_errs ?ignore_type_structure env ty f =
+  let g env ty =
+    let (env, ty, idx_err_res, val_err_res) = f env ty in
+    (env, ty, Ok ty, idx_err_res, val_err_res)
+  in
+  let (env, ty, _, idx_err_res, val_err_res) =
+    apply_rules_with_array_index_value_errs ?ignore_type_structure env ty g
+  in
+  (env, ty, idx_err_res, val_err_res)
 
 (*  Here we have a function returns the updated environment, a local type
     and a result indicating type errors for the rhs of an assignment *)

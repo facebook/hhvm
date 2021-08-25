@@ -147,6 +147,8 @@ let mutating_this_in_ctor env (_, _, e) : bool =
 let rec is_valid_mutable_subscript_expression_target env v =
   let open Aast in
   match v with
+  | (_, _, Hole (e, _, _, _)) ->
+    is_valid_mutable_subscript_expression_target env e
   | (ty, _, Lvar _) -> is_byval_collection_or_string_or_any_type env ty
   | (ty, _, Array_get (e, _)) ->
     is_byval_collection_or_string_or_any_type env ty
@@ -172,7 +174,7 @@ let is_valid_append_target _env ty =
   | Tclass ((_, n), _, [_; _]) -> String.( <> ) n SN.Collections.cMap
   | _ -> true
 
-let check_assignment_or_unset_target
+let rec check_assignment_or_unset_target
     ~is_assignment
     ?append_pos_opt
     env
@@ -189,6 +191,14 @@ let check_assignment_or_unset_target
   let (_, p, expr_) = te1 in
   let open Aast in
   match expr_ with
+  | Hole (e, _, _, _) ->
+    check_assignment_or_unset_target
+      ~is_assignment
+      ?append_pos_opt
+      env
+      e
+      capability_available
+      capability_required
   | Obj_get (e1, _, _, _) when mutating_this_in_ctor env e1 -> ()
   | Array_get ((ty1, _, _), i)
     when is_assignment && not (is_valid_append_target env ty1) ->
@@ -218,9 +228,10 @@ let check_assignment_or_unset_target
 
 (* END logic from Typed AST check in basic_reactivity_check *)
 
-let check_assignment env (_, append_pos_opt, te_) =
+let rec check_assignment env (x, append_pos_opt, te_) =
   let open Ast_defs in
   match te_ with
+  | Aast.Hole ((_, _, e), _, _, _) -> check_assignment env (x, append_pos_opt, e)
   | Aast.Unop ((Uincr | Udecr | Upincr | Updecr), te1)
   | Aast.Binop (Eq _, te1, _) ->
     let env =

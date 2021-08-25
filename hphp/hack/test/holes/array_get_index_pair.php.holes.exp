@@ -26,7 +26,7 @@
           [([5:3-13],
             (Expr
                ((_), [5:3-12],
-                (Array_get (((Pair<string, int>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((int), [5:7-11], (Hole (((mixed), [5:7-11], (Lvar ([5:7-11], $idx))), (int), (int), Typing)))))))))
+                (Array_get (((Pair<string, int>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((mixed), [5:7-11], (Hole (((mixed), [5:7-11], (Lvar ([5:7-11], $idx))), (mixed), (int), Typing)))))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

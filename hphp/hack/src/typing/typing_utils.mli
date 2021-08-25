@@ -251,6 +251,12 @@ val run_on_intersection_key_value_res :
   Typing_defs.locl_ty list ->
   'a * 'b list * 'c list * 'd list
 
+val run_on_intersection_array_key_value_res :
+  'a ->
+  f:('a -> Typing_defs.locl_ty -> 'a * 'b * 'c * 'd * 'e) ->
+  Typing_defs.locl_ty list ->
+  'a * 'b list * 'c list * 'd list * 'e list
+
 val is_dynamic : Typing_env_types.env -> Typing_defs.locl_ty -> bool
 
 val is_any : Typing_env_types.env -> Typing_defs.locl_ty -> bool

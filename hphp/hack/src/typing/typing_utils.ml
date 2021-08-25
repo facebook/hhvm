@@ -467,6 +467,15 @@ let run_on_intersection_key_value_res env ~f tyl =
   let (res, key_errs, errs) = List.unzip3 triples in
   (env, res, key_errs, errs)
 
+let run_on_intersection_array_key_value_res env ~f tyl =
+  let g env ty =
+    let (env, a, b, c, d) = f env ty in
+    (env, (a, b, c, d))
+  in
+  let (env, quads) = run_on_intersection env ~f:g tyl in
+  let (res, arr_errs, key_errs, val_errs) = List.unzip4 quads in
+  (env, res, arr_errs, key_errs, val_errs)
+
 (* Gets the base type of an abstract type *)
 let rec get_base_type env ty =
   let (env, ty) = Env.expand_type env ty in

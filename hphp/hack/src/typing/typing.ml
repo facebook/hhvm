@@ -76,25 +76,29 @@ let debug_print_last_pos _ =
 (*****************************************************************************)
 
 let mk_hole ?(source = Aast.Typing) expr ~ty_have ~ty_expect =
-  (* if the hole is generated from typing, we leave the type unchanged,
-     if it is a call to `[unsafe|enforced]_cast`, we give it the expected type
-  *)
-  let ty_hole =
-    match source with
-    | Aast.Typing -> ty_have
-    | UnsafeCast _
-    | EnforcedCast _ ->
-      ty_expect
-  in
-  match expr with
-  | (ty, pos, Aast.Callconv (param_kind, expr)) ->
-    (* push the hole inside the `Callconv` constructor *)
-    let expr' =
-      make_typed_expr pos ty_hole @@ Aast.Hole (expr, ty_have, ty_expect, source)
+  if equal_locl_ty ty_have ty_expect then
+    expr
+  else
+    (* if the hole is generated from typing, we leave the type unchanged,
+       if it is a call to `[unsafe|enforced]_cast`, we give it the expected type
+    *)
+    let ty_hole =
+      match source with
+      | Aast.Typing -> ty_have
+      | UnsafeCast _
+      | EnforcedCast _ ->
+        ty_expect
     in
-    make_typed_expr pos ty @@ Aast.Callconv (param_kind, expr')
-  | (_, pos, _) ->
-    make_typed_expr pos ty_hole @@ Aast.Hole (expr, ty_have, ty_expect, source)
+    match expr with
+    | (ty, pos, Aast.Callconv (param_kind, expr)) ->
+      (* push the hole inside the `Callconv` constructor *)
+      let expr' =
+        make_typed_expr pos ty_hole
+        @@ Aast.Hole (expr, ty_have, ty_expect, source)
+      in
+      make_typed_expr pos ty @@ Aast.Callconv (param_kind, expr')
+    | (_, pos, _) ->
+      make_typed_expr pos ty_hole @@ Aast.Hole (expr, ty_have, ty_expect, source)
 
 let hole_on_err (te : Tast.expr) ~err_opt =
   Option.value_map err_opt ~default:te ~f:(fun (ty_have, ty_expect) ->
@@ -3386,7 +3390,7 @@ and expr_
     let env = might_throw env in
     let is_lvalue = is_lvalue valkind in
     let (_, p1, _) = e1 in
-    let (env, ty, key_err_opt, arr_err_opt) =
+    let (env, ty, arr_err_opt, key_err_opt) =
       Typing_array_access.array_get
         ~array_pos:p1
         ~expr_pos:p
@@ -5464,7 +5468,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
     | (_, pos, Array_get (e1, None)) ->
       let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
       let (_, p1, _) = e1 in
-      let (env, ty1', err_opt) =
+      let (env, ty1', arr_err_opt, val_err_opt) =
         Typing_array_access.assign_array_append_with_err
           ~array_pos:p1
           ~expr_pos:p
@@ -5475,21 +5479,27 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       in
       let (env, te1) =
         if is_hack_collection env ty1 then
-          (env, te1)
+          (env, hole_on_err ~err_opt:arr_err_opt te1)
         else
-          let (env, te1, _, _) = assign_with_subtype_err_ p ur env e1 p1 ty1' in
-          (env, te1)
+          let (env, te1, ty, _) =
+            assign_with_subtype_err_ p ur env e1 p1 ty1'
+          in
+          (* Update the actual type to that after assignment *)
+          let arr_err_opt =
+            Option.map arr_err_opt ~f:(fun (_, ty_expect) -> (ty, ty_expect))
+          in
+          (env, hole_on_err ~err_opt:arr_err_opt te1)
       in
       let (env, te, ty) =
         make_result env pos (Aast.Array_get (te1, None)) ty2
       in
-      (env, te, ty, err_opt)
+      (env, te, ty, val_err_opt)
     | (_, pos, Array_get (e1, Some e)) ->
       let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
       let (env, te, ty) = expr env e ~allow_awaitable in
       let env = might_throw env in
       let (_, p1, _) = e1 in
-      let (env, ty1', key_err_opt, err_opt) =
+      let (env, ty1', arr_err_opt, key_err_opt, val_err_opt) =
         Typing_array_access.assign_array_get_with_err
           ~array_pos:p1
           ~expr_pos:p
@@ -5502,17 +5512,23 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       in
       let (env, te1) =
         if is_hack_collection env ty1 then
-          (env, te1)
+          (env, hole_on_err ~err_opt:arr_err_opt te1)
         else
-          let (env, te1, _, _) = assign_with_subtype_err_ p ur env e1 p1 ty1' in
-          (env, te1)
+          let (env, te1, ty, _) =
+            assign_with_subtype_err_ p ur env e1 p1 ty1'
+          in
+          (* Update the actual type to that after assignment *)
+          let arr_err_opt =
+            Option.map arr_err_opt ~f:(fun (_, ty_expect) -> (ty, ty_expect))
+          in
+          (env, hole_on_err ~err_opt:arr_err_opt te1)
       in
       ( env,
         ( ty2,
           pos,
           Aast.Array_get (te1, Some (hole_on_err ~err_opt:key_err_opt te)) ),
         ty2,
-        err_opt )
+        val_err_opt )
     | _ -> assign_simple p ur env e1 ty2)
 
 and assign_simple pos ur env e1 ty2 =

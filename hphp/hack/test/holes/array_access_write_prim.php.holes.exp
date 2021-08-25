@@ -1,0 +1,31 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:45-49], (Hprim Tvoid)))); 
+        f_name = ([3:10-33], "\\array_access_write_prim"); f_tparams = []; 
+        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:34-38], (Hprim Tbool)))); 
+           param_is_variadic = false; param_pos = [3:39-42]; param_name = "$xs"; 
+           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:3-17],
+            (Expr
+               ((bool), [5:3-16],
+                (Binop ((Eq None),
+                   ((bool), [5:3-9], (Array_get (((bool), [5:3-6], (Hole (((bool), [5:3-6], (Lvar ([5:3-6], $xs))), (bool), (nothing), Typing))), (Some ((int), [5:7-8], (Int "0")))))),
+                   ((bool), [5:12-16], (Hole (((bool), [5:12-16], True), (bool), (nothing), Typing))))))))
+            ]
+          };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      })

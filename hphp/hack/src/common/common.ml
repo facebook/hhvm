@@ -1,6 +1,13 @@
 module List = struct
   include Core_kernel.List
 
+  let unzip4 xyzws =
+    let rec aux ((xs, ys, zs, ws) as acc) = function
+      | (x, y, z, w) :: rest -> aux (x :: xs, y :: ys, z :: zs, w :: ws) rest
+      | _ -> acc
+    in
+    aux ([], [], [], []) (List.rev xyzws)
+
   let rec fold_left_env env l ~init ~f =
     match l with
     | [] -> (env, init)

@@ -332,6 +332,10 @@ let parse_check_args cmd =
         " generate a JSON file listing all classes with more dependents than the"
         ^ " given threshold. Usage: --gen-hot-classes-file 500 ~/hh_hot_classes.json"
       );
+      ( "--gen-prefetch-dir",
+        Arg.String (fun x -> set_mode (MODE_GEN_PREFETCH_DIR x)),
+        " generate a directory of decls and typecheck dependencies to use for prefetching"
+        ^ " Usage: --gen-prefetch-dir ~/prefetched-dir" );
       ( "--gen-saved-ignore-type-errors",
         Arg.Set gen_saved_ignore_type_errors,
         " generate a saved state even if there are type errors (default: false)."

@@ -149,6 +149,15 @@ module Hg_actual = struct
     in
     FutureProcess.make process Sys_utils.split_lines
 
+  (** Returns the files changed in rev
+   *
+   * hg status --change <rev> --cwd <repo> *)
+  let files_changed_in_rev rev repo =
+    let process =
+      exec_hg ["status"; "-n"; "--change"; rev_string rev; "--cwd"; repo]
+    in
+    FutureProcess.make process Sys_utils.split_lines
+
   (** Similar to above, except instead of listing files to get us to
    * the repo's current state, it gets us to the given "finish" revision.
    *
@@ -203,6 +212,9 @@ module Hg_actual = struct
     let files_changed_since_rev_returns ~rev:_ _ =
       raise Cannot_set_when_mocks_disabled
 
+    let files_changed_in_rev_returns ~rev:_ _ =
+      raise Cannot_set_when_mocks_disabled
+
     let files_changed_since_rev_to_rev_returns ~start:_ ~finish:_ _ =
       raise Cannot_set_when_mocks_disabled
 
@@ -210,6 +222,9 @@ module Hg_actual = struct
       raise Cannot_set_when_mocks_disabled
 
     let reset_files_changed_since_rev_returns _ =
+      raise Cannot_set_when_mocks_disabled
+
+    let reset_files_changed_in_rev_returns _ =
       raise Cannot_set_when_mocks_disabled
   end
 end
@@ -228,6 +243,8 @@ module Hg_mock = struct
 
     let files_changed_since_rev = Hashtbl.create 10
 
+    let files_changed_in_rev = Hashtbl.create 10
+
     let files_changed_since_rev_to_rev = Hashtbl.create 10
 
     let current_working_copy_hg_rev_returns v = current_working_copy_hg_rev := v
@@ -244,8 +261,14 @@ module Hg_mock = struct
     let files_changed_since_rev_returns ~rev v =
       Hashtbl.replace files_changed_since_rev rev v
 
+    let files_changed_in_rev_returns ~rev v =
+      Hashtbl.replace files_changed_in_rev rev v
+
     let reset_files_changed_since_rev_returns () =
       Hashtbl.reset files_changed_since_rev
+
+    let reset_files_changed_in_rev_returns () =
+      Hashtbl.reset files_changed_in_rev
 
     let files_changed_since_rev_to_rev_returns ~start ~finish v =
       Hashtbl.replace files_changed_since_rev_to_rev (start, finish) v
@@ -265,6 +288,8 @@ module Hg_mock = struct
 
   let files_changed_since_rev rev _ =
     Hashtbl.find Mocking.files_changed_since_rev rev
+
+  let files_changed_in_rev rev _ = Hashtbl.find Mocking.files_changed_in_rev rev
 
   let files_changed_since_rev_to_rev ~start ~finish _ =
     Hashtbl.find Mocking.files_changed_since_rev_to_rev (start, finish)

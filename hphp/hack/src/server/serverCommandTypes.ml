@@ -430,6 +430,7 @@ type _ t =
   | CST_SEARCH : cst_search_input -> (Hh_json.json, string) result t
   | NO_PRECHECKED_FILES : unit t
   | GEN_HOT_CLASSES : int -> string t
+  | GEN_PREFETCH_DIR : string -> unit t
   | FUN_DEPS_BATCH : (string * int * int) list * bool -> string list t
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENTS : string list -> string list t

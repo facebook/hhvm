@@ -285,6 +285,9 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       Out_channel.output_string oc content;
       Stdlib.close_out oc;
       Lwt.return (Exit_status.No_error, telemetry)
+    | MODE_GEN_PREFETCH_DIR dirname ->
+      let%lwt (_, telemetry) = rpc args @@ Rpc.GEN_PREFETCH_DIR dirname in
+      Lwt.return (Exit_status.No_error, telemetry)
     | MODE_GO_TO_IMPL_CLASS class_name ->
       let%lwt results =
         rpc_with_retry args

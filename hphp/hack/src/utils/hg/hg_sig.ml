@@ -51,6 +51,10 @@ module type S = sig
     rev -> (* repository path. *)
            string -> string list Future.t
 
+  val files_changed_in_rev :
+    rev -> (* repository path. *)
+           string -> string list Future.t
+
   val files_changed_since_rev_to_rev :
     start:rev ->
     finish:rev ->
@@ -74,11 +78,15 @@ module type S = sig
     val files_changed_since_rev_returns :
       rev:rev -> string list Future.t -> unit
 
+    val files_changed_in_rev_returns : rev:rev -> string list Future.t -> unit
+
     val files_changed_since_rev_to_rev_returns :
       start:rev -> finish:rev -> string list Future.t -> unit
 
     val reset_files_changed_since_rev_to_rev_returns : unit -> unit
 
     val reset_files_changed_since_rev_returns : unit -> unit
+
+    val reset_files_changed_in_rev_returns : unit -> unit
   end
 end

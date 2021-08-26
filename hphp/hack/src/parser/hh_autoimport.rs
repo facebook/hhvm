@@ -30,6 +30,7 @@ pub static TYPES: &[&str] = &[
     "dict",
     "ExternalThreadEventWaitHandle",
     "IMemoizeParam",
+    "UNSAFESingletonMemoizeParam",
     "ImmMap",
     "ImmSet",
     "ImmVector",

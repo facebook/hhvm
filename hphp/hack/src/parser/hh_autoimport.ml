@@ -27,6 +27,7 @@ let types =
     "dict";
     "ExternalThreadEventWaitHandle";
     "IMemoizeParam";
+    "UNSAFESingletonMemoizeParam";
     "ImmMap";
     "ImmSet";
     "ImmVector";

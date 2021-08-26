@@ -56,6 +56,8 @@ module Classes = struct
 
   let cIMemoizeParam = "\\HH\\IMemoizeParam"
 
+  let cUNSAFESingletonMemoizeParam = "\\HH\\UNSAFESingletonMemoizeParam"
+
   let cClassname = "\\HH\\classname"
 
   let cTypename = "\\HH\\typename"

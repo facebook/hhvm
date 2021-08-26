@@ -16,6 +16,18 @@ interface IMemoizeParam {
   public function getInstanceKey(): string;
 }
 
+/*
+ * Unsafe marker interface for an IMemoizeParam used to override
+ * typechecker check that IMemoizeParam objects are only used as parameters
+ * on functions that have access to globals.
+ * Singleton classes are allowed to be passed into pure memoized functions because there can't
+ * be a data leak associated with them.
+ * TODO: enforce SingletonMemoizeParam in some way in runtime/typechecker
+*/
+interface UNSAFESingletonMemoizeParam extends IMemoizeParam {
+  public function getInstanceKey(): string;
+}
+
 /**
  * Return true if we're using a native autoloader.
  *

@@ -94,7 +94,17 @@ let check_param : env -> Nast.fun_param -> unit =
         let is_hackarray = Typing_utils.is_sub_type env ty hackarray in
         let env =
           if not is_hackarray then
-            Typing_local_ops.enforce_memoize_object pos env
+            (* Check if it's a UNSAFEsingleton memoize param *)
+            let singleton =
+              MakeType.class_type
+                Reason.none
+                Naming_special_names.Classes.cUNSAFESingletonMemoizeParam
+                []
+            in
+            if Typing_utils.is_sub_type env ty singleton then
+              env
+            else
+              Typing_local_ops.enforce_memoize_object pos env
           else
             env
         in

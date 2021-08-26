@@ -6,12 +6,27 @@ class Foo implements IMemoizeParam {
   }
 }
 
+class Bar implements UNSAFESingletonMemoizeParam {
+  public function getInstanceKey()[] : string {
+    return "";
+  }
+}
+
 <<__Memoize>>
 function foo(vec<int> $x)[] : void {}
 
 
 <<__Memoize>>
 function not_ok(vec<Foo> $x)[] : void {}
+
+<<__Memoize>>
+function ok_singleton(Bar $x)[] : void {}
+
+<<__Memoize>>
+function ok_vec_singleton(vec<Bar> $x)[] : void {}
+
+<<__Memoize>>
+function not_ok_vector_singleton(Vector<Bar> $x)[] : void {}
 
 <<__Memoize>>
 function not_ok_mixed(mixed $x)[] : void {}

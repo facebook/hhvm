@@ -1,7 +1,7 @@
 *** Testing get_declared_interfaces() : basic functionality ***
 
 -- Testing get_declared_interfaces() function with Zero arguments --
-vec(123) {
+vec(124) {
   string(23) "HH\Rx\IteratorAggregate"
   string(19) "HH\Rx\KeyedIterator"
   string(26) "HH\Lib\IO\SeekableFDHandle"
@@ -104,6 +104,7 @@ vec(123) {
   string(21) "HH\ParameterAttribute"
   string(29) "HH\Lib\Str\SprintfFormatQuote"
   string(32) "HH\Lib\File\CloseableWriteHandle"
+  string(30) "HH\UNSAFESingletonMemoizeParam"
   string(17) "HH\Rx\Traversable"
   string(39) "HH\Lib\IO\CloseableSeekableReadFDHandle"
   string(17) "RecursiveIterator"

@@ -3861,7 +3861,7 @@ fn emit_new<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                 None,
                                 env.call_context.clone(),
                                 true,
-                                false, // readonly return
+                                true, // we do not need to enforce readonly return for constructors
                             ),
                         ),
                         instr::popc(alloc),

@@ -106,7 +106,7 @@
     .srcloc 12:20,12:25;
     String "zuck"
     .srcloc 12:12,12:26;
-    FCallCtor <LockWhileUnwinding EnforceMutableReturn> 1 1 "0" "" - "" ""
+    FCallCtor <LockWhileUnwinding> 1 1 "0" "" - "" ""
     PopC
     LockObj
     .srcloc 12:5,12:27;
@@ -132,7 +132,7 @@
     .srcloc 17:25,17:26;
     Int 42
     .srcloc 17:17,17:27;
-    FCallCtor <LockWhileUnwinding EnforceMutableReturn> 1 1 "0" "" - "" ""
+    FCallCtor <LockWhileUnwinding> 1 1 "0" "" - "" ""
     PopC
     LockObj
     .srcloc 16:1,19:84;
@@ -196,7 +196,7 @@
     .srcloc 26:27,26:30;
     Double 3.1400000000000001
     .srcloc 26:18,26:31;
-    FCallCtor <LockWhileUnwinding EnforceMutableReturn> 1 1 "0" "" - "" ""
+    FCallCtor <LockWhileUnwinding> 1 1 "0" "" - "" ""
     PopC
     LockObj
     .srcloc 25:1,27:63;

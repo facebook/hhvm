@@ -12,7 +12,7 @@ add_custom_command(
 add_custom_command(
   OUTPUT parse_iso_intervals.c
   MAIN_DEPENDENCY parse_iso_intervals.re
-  COMMAND ${RE2C} ${CMAKE_CURRENT_SOURCE_DIR}/parse_date.re -o ${CMAKE_CURRENT_BINARY_DIR}/parse_iso_intervals.c
+  COMMAND ${RE2C} ${CMAKE_CURRENT_SOURCE_DIR}/parse_iso_intervals.re -o ${CMAKE_CURRENT_BINARY_DIR}/parse_iso_intervals.c
 )
 
 file(GLOB files *.c)

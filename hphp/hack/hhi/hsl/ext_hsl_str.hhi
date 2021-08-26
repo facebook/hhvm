@@ -1,11 +1,19 @@
 <?hh // decl
-/**
- * Copyright (c) 2014, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the "hack" directory of this source tree.
- *
+
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
  */
 
 namespace HH\Lib\_Private\_Str {
@@ -16,8 +24,8 @@ function strlen_l(string $str, ?Locale $loc = null): int;
 function uppercase_l(string $str, ?Locale $loc = null): string;
 function lowercase_l(string $str, ?Locale $loc = null): string;
 function titlecase_l(string $str, ?Locale $loc = null): string;
+
 function foldcase_l(string $str, ?Locale $loc = null): string;
-function chunk_l(string $str, int $chunk_size, ?Locale $loc = null): vec<string>;
 
 function strcoll_l(string $a, string $b, ?Locale $loc = null): int;
 function strcasecmp_l(string $a, string $b, ?Locale $loc = null): int;
@@ -34,8 +42,13 @@ function strrpos_l(string $haystack, string $needle, int $offset, ?Locale $loc =
 function stripos_l(string $haystack, string $needle, int $offset, ?Locale $loc = null): int;
 function strripos_l(string $haystack, string $needle, int $offset, ?Locale $loc = null): int;
 
+function chunk_l(string $str, int $size, ?Locale $loc = null): vec<string>;
 function slice_l(string $str, int $offset, int $length, ?Locale $loc = null): string;
+function splice_l(string $str, string $replacement, int $offset, ?int $length = null, ?Locale $loc = null): string;
+function split_l(string $string, string $delimiter, ?int $limit = null, ?Locale $loc = null): vec<string>;
+
 function reverse_l(string $str, ?Locale $loc = null): string;
+
 function vsprintf_l(?Locale $loc, string $fmt, vec<mixed> $args): string;
 
 function pad_left_l(string $str, int $length, string $pad_str = ' ', ?Locale $loc = null): string;

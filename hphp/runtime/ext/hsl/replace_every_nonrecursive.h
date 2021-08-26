@@ -69,12 +69,12 @@ template<class T> String replace_every_nonrecursive(
         assertx(matchedNeedle.length() >= needle.length());
       }
 #endif
-      if (matchedOffset >= 0 && needle.length() < matchedNeedle.length()) {
-        break;
-      }
       auto j = find(search, needle, i);
       if (j < 0 || (matchedOffset >= 0 && j >= matchedOffset)) {
         continue;
+      }
+      if (matchedOffset == j && needle.length() < matchedNeedle.length()) {
+        break;
       }
       matchedOffset = j;
       matchedNeedle = needle;
@@ -86,7 +86,7 @@ template<class T> String replace_every_nonrecursive(
 
     replace(&search, matchedOffset, matchedNeedle.length(), matchedReplacement);
     replace(&haystack, matchedOffset, matchedNeedle.length(), matchedReplacement);
-    i += matchedReplacement.length();
+    i = matchedOffset + matchedReplacement.length();
   }
   return from_t(haystack);
 }

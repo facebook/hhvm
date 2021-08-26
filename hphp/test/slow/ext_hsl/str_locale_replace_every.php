@@ -20,6 +20,8 @@ function main(): void {
     // `non_recursive` longest-wins:
     tuple('ababa', dict['a' => '1', 'ab' => '2']),
     tuple('ababa', dict['ab' => '1', 'a' => '2']),
+    // `non-recursive` with multiple matches at differing offset
+    tuple('HI HELLO world', dict['hi' => 'hello', 'hello' => 'hi']),
   ];
 
   $c = _Locale\get_c_locale();

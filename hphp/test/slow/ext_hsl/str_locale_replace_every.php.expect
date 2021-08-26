@@ -275,29 +275,29 @@ dict(5) {
     ["replace_every_ci_l()"]=>
     string(6) "r2bbr2"
     ["replace_every_nonrecursive_ci_l()"]=>
-    string(6) "r1bbr2"
+    string(6) "r1bbr1"
   }
   ["en_US.UTF-8"]=>
   dict(4) {
     ["replace_every_l()"]=>
     string(6) "r2bbr2"
     ["replace_every_nonrecursive_l()"]=>
-    string(6) "r1bbr2"
+    string(6) "r1bbr1"
     ["replace_every_ci_l()"]=>
     string(6) "r2bbr2"
     ["replace_every_nonrecursive_ci_l()"]=>
-    string(6) "r1bbr2"
+    string(6) "r1bbr1"
   }
   ["tr_TR.UTF-8"]=>
   dict(4) {
     ["replace_every_l()"]=>
     string(6) "r2bbr2"
     ["replace_every_nonrecursive_l()"]=>
-    string(6) "r1bbr2"
+    string(6) "r1bbr1"
     ["replace_every_ci_l()"]=>
     string(6) "r2bbr2"
     ["replace_every_nonrecursive_ci_l()"]=>
-    string(6) "r1bbr2"
+    string(6) "r1bbr1"
   }
 }
 dict(5) {
@@ -602,6 +602,50 @@ dict(5) {
     string(3) "112"
     ["replace_every_nonrecursive_ci_l()"]=>
     string(3) "112"
+  }
+}
+dict(5) {
+  ["haystack"]=>
+  string(14) "HI HELLO world"
+  ["replacements"]=>
+  dict(2) {
+    ["hi"]=>
+    string(5) "hello"
+    ["hello"]=>
+    string(2) "hi"
+  }
+  ["C"]=>
+  dict(4) {
+    ["replace_every_l()"]=>
+    string(14) "HI HELLO world"
+    ["replace_every_nonrecursive_l()"]=>
+    string(14) "HI HELLO world"
+    ["replace_every_ci_l()"]=>
+    string(11) "hi hi world"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(14) "hello hi world"
+  }
+  ["en_US.UTF-8"]=>
+  dict(4) {
+    ["replace_every_l()"]=>
+    string(14) "HI HELLO world"
+    ["replace_every_nonrecursive_l()"]=>
+    string(14) "HI HELLO world"
+    ["replace_every_ci_l()"]=>
+    string(11) "hi hi world"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(14) "hello hi world"
+  }
+  ["tr_TR.UTF-8"]=>
+  dict(4) {
+    ["replace_every_l()"]=>
+    string(14) "HI HELLO world"
+    ["replace_every_nonrecursive_l()"]=>
+    string(14) "HI HELLO world"
+    ["replace_every_ci_l()"]=>
+    string(11) "HI hi world"
+    ["replace_every_nonrecursive_ci_l()"]=>
+    string(11) "HI hi world"
   }
 }
 --- C: abc => 123

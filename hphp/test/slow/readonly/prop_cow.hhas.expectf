@@ -1,2 +1,0 @@
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Read-Only collections cannot be mutated.' in %s/prop_cow.hhas:19
-%A

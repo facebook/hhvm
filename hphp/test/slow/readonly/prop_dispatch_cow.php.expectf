@@ -1,0 +1,4 @@
+string(45) "Property ro_foo of class Bar must be mutable."
+
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Property bad_c of class Foo is readonly, and therefore must be a value type to be modified.' in %s/prop_dispatch_cow.php:25
+%A

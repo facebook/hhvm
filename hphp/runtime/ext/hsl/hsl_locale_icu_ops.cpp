@@ -329,17 +329,12 @@ int64_t strpos_impl(const String& haystack,
   auto uhs = ustr_from_utf8(haystack);
   auto un = ustr_from_utf8(needle);
   auto char32_len = uhs.countChar32();
-  if (offset >= char32_len) {
-    return -1;
-  }
   if (offset >= 0) {
+    offset = HSLLocale::Ops::normalize_offset(offset, char32_len);
     char32_len -= offset;
   } else {
     if (dir == Direction::LEFT_TO_RIGHT) {
-      offset += char32_len;
-      if (offset < 0) {
-        return -1;
-      }
+      offset = HSLLocale::Ops::normalize_offset(offset, char32_len);
     } else {
       // Match PHP strrpos() behavior for now; RFC for new behavior at
       // https://github.com/facebook/hhvm/pull/8847
@@ -415,12 +410,7 @@ String HSLLocaleICUOps::slice(const String& str, int64_t offset, int64_t length)
     }
   }
 
-  if (offset < 0) {
-    offset += char32_full_len;
-  }
-  if (offset < 0 || offset >= char32_full_len) {
-    return empty_string();
-  }
+  offset = normalize_offset(offset, char32_full_len);
 
   const auto char16_start = ustr.moveIndex32(0, offset);
   const auto char16_end = ustr.moveIndex32(char16_start, MIN(length, std::numeric_limits<int32_t>::max()));
@@ -559,16 +549,9 @@ String HSLLocaleICUOps::splice(const String& str,
   mut = normalizer->normalize(mut, err);
 
   const auto char32_len = mut.countChar32();
-  if (offset < 0) {
-    offset += char32_len;
-  }
-  if (offset < 0 || offset > char32_len) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Offset {} was out-of-bounds for length {}", offset, length)
-    );
-  }
   const auto ureplacement = ustr_from_utf8(replacement);
 
+  offset = normalize_offset(offset, char32_len);
   offset = mut.moveIndex32(0, offset);
   length = mut.moveIndex32(offset, length) - offset;
   mut.replace(offset, length, ureplacement);

@@ -171,12 +171,7 @@ int64_t HSLLocaleLibcOps::strpos(const String& haystack, const String& needle, i
   if (needle.empty() || haystack.empty()) {
     return -1;
   }
-  if (offset < 0) {
-    offset += haystack.length();
-    if (offset < 0) {
-      return -1;
-    }
-  }
+  offset = normalize_offset(offset, haystack.length());
   auto pos = HHVM_FN(strpos)(haystack, needle, offset);
   if (pos.m_type == KindOfBoolean) {
     return -1;
@@ -188,6 +183,10 @@ int64_t HSLLocaleLibcOps::strrpos(const String& haystack, const String& needle, 
   if (needle.empty() || haystack.empty()) {
     return -1;
   }
+  // Don't store the normalized version, just validate the bounds: strrpos
+  // has special behavior:
+  // https://github.com/facebook/hhvm/pull/8847
+  normalize_offset(offset, haystack.length());
   auto pos = HHVM_FN(strrpos)(haystack, needle, offset);
   if (pos.m_type == KindOfBoolean) {
     return -1;
@@ -199,12 +198,7 @@ int64_t HSLLocaleLibcOps::stripos(const String& haystack, const String& needle, 
   if (needle.empty() || haystack.empty()) {
     return -1;
   }
-  if (offset < 0) {
-    offset += haystack.length();
-    if (offset < 0) {
-      return -1;
-    }
-  }
+  offset = normalize_offset(offset, haystack.length());
   auto pos = HHVM_FN(stripos)(haystack, needle, offset);
   if (pos.m_type == KindOfBoolean) {
     return -1;
@@ -216,6 +210,8 @@ int64_t HSLLocaleLibcOps::strripos(const String& haystack, const String& needle,
   if (needle.empty() || haystack.empty()) {
     return -1;
   }
+  // As for strrpos, just validate bounds, don't store/use normalized value
+  normalize_offset(offset, haystack.length());
   auto pos = HHVM_FN(strripos)(haystack, needle, offset);
   if (pos.m_type == KindOfBoolean) {
     return -1;
@@ -228,14 +224,7 @@ String HSLLocaleLibcOps::splice(const String& str,
                                 int64_t offset,
                                 int64_t length) const {
   assertx(length >= 0);
-  if (offset < 0) {
-    offset += str.length();
-  }
-  if (offset < 0 || offset > str.length()) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Offset {} was out-of-bounds for length {}", offset, length)
-    );
-  }
+  offset = normalize_offset(offset, str.length());
 
   const auto prefix = slice(str, 0, offset);
   const auto suffix = str.substr(offset + length, StringData::MaxSize);
@@ -243,18 +232,7 @@ String HSLLocaleLibcOps::splice(const String& str,
 }
 
 String HSLLocaleLibcOps::slice(const String& str, int64_t offset, int64_t length) const {
-  if (length < 0) {
-    length += str.length();
-    if (length <= 0) {
-      return empty_string();
-    }
-  }
-  if (offset < 0) {
-    offset += str.length();
-  }
-  if (offset < 0 || offset >= str.length()) {
-    return empty_string();
-  }
+  offset = normalize_offset(offset, str.length());
   return str.substr(offset, MIN(length, StringData::MaxSize));
 }
 

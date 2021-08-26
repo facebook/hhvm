@@ -9,24 +9,14 @@ function main(): void {
   $strings = vec['abc', '💩a👀'];
 
   $offsets = vec[
-    tuple(0, -1),
-    tuple(0, -2),
-    tuple(0, -3),
     tuple(0, 0),
     tuple(0, 1),
-    tuple(1, -1),
     tuple(1, 1),
     tuple(1, 2),
     tuple(1, PHP_INT_MAX),
-    tuple(-1, -1),
     tuple(-1, 0),
     tuple(-1, 1),
-    tuple(-2, -1),
-    tuple(-2, -2),
     tuple(-2, 1),
-    tuple(-3, -1),
-    tuple(-3, -2),
-    tuple(-3, -3),
     tuple(0, 9999),
     tuple(2, 9999),
   ];
@@ -45,6 +35,15 @@ function main(): void {
         $utf8_slice,
         \strlen($utf8_slice),
       );
+    }
+  }
+
+  foreach(vec[$c, $utf8] as $l) {
+    try {
+      _Str\slice_l('foo', 1, -1, $l);
+      print "Expected exception not thrown!\n";
+    } catch (InvalidArgumentException $e) {
+      printf("Ex: %s\n", $e->getMessage());
     }
   }
 }

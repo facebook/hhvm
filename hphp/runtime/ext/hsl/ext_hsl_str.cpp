@@ -185,11 +185,21 @@ int64_t HHVM_FUNCTION(strripos_l,
   return get_locale(maybe_loc)->ops()->strripos(haystack, needle, offset);
 }
 
+namespace {
+ALWAYS_INLINE int64_t normalize_length(int64_t length) {
+  if (length < 0) {
+    SystemLib::throwInvalidArgumentExceptionObject("Expected non-negative length.");
+  }
+  return MIN(length, StringData::MaxSize);
+}
+} // namespace
+
 String HHVM_FUNCTION(slice_l,
                      const String& str,
                      int64_t offset,
                      int64_t length,
                      const Variant& maybe_loc) {
+  length = normalize_length(length);
   return get_locale(maybe_loc)->ops()->slice(str, offset, length);
 }
 
@@ -199,12 +209,9 @@ String HHVM_FUNCTION(splice_l,
                      int64_t offset,
                      const Variant& length,
                      const Variant& maybe_loc) {
-  const int64_t int_length = length.isNull() ? StringData::MaxSize : length.asInt64Val();
-  if (int_length < 0) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Length must be null, or >= 0"
-    );
-  }
+  const int64_t int_length = normalize_length(
+    length.isNull() ? StringData::MaxSize : length.asInt64Val()
+  );
   return get_locale(maybe_loc)->ops()->splice(str, replacement, offset, int_length);
 }
 
@@ -247,6 +254,7 @@ String HHVM_FUNCTION(pad_left_l,
       "padding string can not be empty"
     );
   }
+  len = normalize_length(len);
   return get_locale(maybe_loc)->ops()->pad_left(str, len, pad);
 }
 
@@ -260,6 +268,7 @@ String HHVM_FUNCTION(pad_right_l,
       "padding string can not be empty"
     );
   }
+  len = normalize_length(len);
   return get_locale(maybe_loc)->ops()->pad_right(str, len, pad);
 }
 

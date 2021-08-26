@@ -73,5 +73,7 @@ namespace HPHP {
     virtual String replace_every_ci(const String& haystack, const Array& replacements) const = 0;
     virtual String replace_every_nonrecursive(const String& haystack, const Array& replacements) const = 0;
     virtual String replace_every_nonrecursive_ci(const String& haystack, const Array& replacements) const = 0;
+
+    static int64_t normalize_offset(int64_t offset, int64_t length);
   };
 } // namespace HPHP

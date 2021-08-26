@@ -322,6 +322,7 @@ final class StrIntrospectTest extends HackTest {
     int $offset,
     ?int $expected,
   ): void {
+    \var_dump(vec[$haystack ,$needle, $offset, $expected, Str\search_last($haystack, $needle, $offset)]);
     expect(Str\search_last($haystack, $needle, $offset))->toEqual($expected);
   }
 

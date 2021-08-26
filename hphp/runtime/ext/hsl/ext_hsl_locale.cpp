@@ -150,6 +150,31 @@ Object HHVM_FUNCTION(newlocale_category,
   return HSLLocale::newInstance(loc);
 }
 
+Object HHVM_FUNCTION(newlocale_all,
+                     const String& locale) {
+  // As this function is pure:
+  // - we need to ban all the magic behavior
+  // - implemented in C++ instead of Hack so that we can enforce purity in
+  //   Hack code in the future.
+  if (locale.isNull()) {
+    throw_object(
+      s_InvalidLocaleException,
+      make_vec_array("Locale must not be null")
+    );
+  }
+  if (locale.empty() || (locale.length() == 1 && locale[0] == '0')) {
+    throw_object(
+      s_InvalidLocaleException,
+      make_vec_array("Magic locales are not supported.")
+    );
+  }
+  return HHVM_FN(newlocale_mask)(
+    LC_ALL_MASK,
+    locale,
+    HHVM_FN(get_c_locale)()
+  );
+}
+
 struct LocaleExtension final : Extension {
 
   LocaleExtension() : Extension("hsl_locale", "0.1") {}
@@ -166,6 +191,7 @@ struct LocaleExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Locale\\set_request_locale, set_request_locale);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Locale\\newlocale_mask, newlocale_mask);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Locale\\newlocale_category, newlocale_category);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_Locale\\newlocale_all, newlocale_all);
 
 #define LC_(x) \
     HHVM_RC_INT(HH\\Lib\\_Private\\_Locale\\LC_##x, LC_##x); \

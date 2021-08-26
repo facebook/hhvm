@@ -27,6 +27,12 @@ function set_request_locale(Locale $loc): void;
 function newlocale_mask(int $mask, string $locale, Locale $base): Locale;
 /** Take a single category, e.g. `LC_TYPE` */
 function newlocale_category(int $category, string $locale, Locale $base): Locale;
+/** Create a new locale object using the specified locale for all categories.
+ *
+ * This function will throw if a 'magic' locale is passed, e.g.
+ * `"0"` (fetch current locale) or `""` (environment locale).
+ */
+function newlocale_all(string $locale)[]: Locale;
 
 // --- platform-specific constants ---
 // more are defined for every platform, but the HHI is only including ones that

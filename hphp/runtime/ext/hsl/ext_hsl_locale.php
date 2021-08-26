@@ -40,10 +40,17 @@ function newlocale_mask(int $mask, string $locale, Locale $base): Locale;
 /** Take a single category, e.g. `LC_TYPE` */
 <<__Native>>
 function newlocale_category(int $category, string $locale, Locale $base): Locale;
+/** Create a new locale object using the specified locale for all categories.
+ *
+ * This function will throw if a 'magic' locale is passed, e.g.
+ * `"0"` (fetch current locale) or `""` (environment locale).
+ */
+<<__Native>>
+function newlocale_all(string $locale)[]: Locale;
 
 } // namespace _Locale
 
 namespace HH\Lib\Locale {
-  final class InvalidLocaleException extends \Exception {
+  final class InvalidLocaleException extends \InvalidArgumentException {
   }
 }

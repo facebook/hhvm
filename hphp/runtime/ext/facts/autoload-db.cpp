@@ -187,14 +187,13 @@ void createSchema(SQLiteTxn& txn) {
            " UNIQUE (typeid, method, attribute_name, attribute_position)"
            ")");
 
-  txn.exec(
-      "CREATE TABLE IF NOT EXISTS file_attributes ("
-      " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
-      " attribute_name TEXT NOT NULL,"
-      " attribute_position INTEGER NULL,"
-      " attribute_value TEXT NULL,"
-      " UNIQUE (pathid, attribute_name, attribute_position)"
-      ")");
+  txn.exec("CREATE TABLE IF NOT EXISTS file_attributes ("
+           " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
+           " attribute_name TEXT NOT NULL,"
+           " attribute_position INTEGER NULL,"
+           " attribute_value TEXT NULL,"
+           " UNIQUE (pathid, attribute_name, attribute_position)"
+           ")");
 }
 
 void rebuildIndices(SQLiteTxn& txn) {

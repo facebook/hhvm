@@ -3722,11 +3722,11 @@ and expr_
         ~explicit_targs:None
     in
     let lty1 = LoclType ty1 in
-    let (env, result_ty) =
+    let (env, result_ty, err_opt) =
       match nullsafe with
       | None ->
-        let env =
-          Type.sub_type_i
+        let env_res =
+          Type.sub_type_i_res
             p1
             Reason.URnone
             env
@@ -3734,7 +3734,13 @@ and expr_
             has_member_ty
             Errors.unify_error
         in
-        (env, mem_ty)
+        let (env, err_opt) =
+          Result.fold
+            env_res
+            ~ok:(fun env -> (env, None))
+            ~error:(fun env -> (env, Some (ty1, MakeType.nothing Reason.none)))
+        in
+        (env, mem_ty, err_opt)
       | Some _ ->
         (* In that case ty1 is a subtype of ?Thas_member(m, #1)
            and the result is ?#1 if ty1 is nullable. *)
@@ -3743,8 +3749,8 @@ and expr_
         let (env, null_has_mem_ty) =
           Union.union_i env r has_member_ty null_ty
         in
-        let env =
-          Type.sub_type_i
+        let env_res =
+          Type.sub_type_i_res
             p1
             Reason.URnone
             env
@@ -3752,9 +3758,15 @@ and expr_
             null_has_mem_ty
             Errors.unify_error
         in
+        let (env, err_opt) =
+          Result.fold
+            env_res
+            ~ok:(fun env -> (env, None))
+            ~error:(fun env -> (env, Some (ty1, MakeType.nothing Reason.none)))
+        in
         let (env, null_or_nothing_ty) = Inter.intersect env ~r null_ty ty1 in
         let (env, result_ty) = Union.union env null_or_nothing_ty mem_ty in
-        (env, result_ty)
+        (env, result_ty, err_opt)
     in
     let (env, result_ty) =
       Env.FakeMembers.check_instance_invalid env e1 (snd m) result_ty
@@ -3763,7 +3775,7 @@ and expr_
       env
       p
       (Aast.Obj_get
-         ( te1,
+         ( hole_on_err ~err_opt te1,
            Tast.make_typed_expr pm result_ty (Aast.Id m),
            nullflavor,
            in_parens ))
@@ -6655,7 +6667,7 @@ and class_get_err
     cty
     (p, mid)
     cid =
-  let (env, tys, err_res_opt) =
+  let (env, tys, rval_res_opt) =
     class_get_res
       ~is_method
       ~is_const
@@ -6668,14 +6680,8 @@ and class_get_err
       (p, mid)
       cid
   in
-  let err_opt =
-    match err_res_opt with
-    | None
-    | Some (Ok _) ->
-      None
-    | Some (Error (ty_actual, ty_expect)) -> Some (ty_actual, ty_expect)
-  in
-  (env, tys, err_opt)
+  let rval_err_opt = Option.bind ~f:Result.error rval_res_opt in
+  (env, tys, rval_err_opt)
 
 and class_get
     ~is_method
@@ -6715,16 +6721,19 @@ and class_get_inner
     ((_, cid_pos, cid_) as cid)
     cty
     (p, mid) =
-  let dflt_err = Option.map ~f:(fun (_, _, ty) -> Ok ty) coerce_from_ty in
   let (env, cty) = Env.expand_type env cty in
+  let dflt_rval_err = Option.map ~f:(fun (_, _, ty) -> Ok ty) coerce_from_ty in
   match deref cty with
-  | (r, Tany _) -> (env, (mk (r, Typing_utils.tany env), []), dflt_err)
-  | (_, Terr) -> (env, (err_witness env cid_pos, []), dflt_err)
-  | (_, Tdynamic) -> (env, (cty, []), dflt_err)
+  | (r, Tany _) -> (env, (mk (r, Typing_utils.tany env), []), dflt_rval_err)
+  | (_, Terr) -> (env, (err_witness env cid_pos, []), dflt_rval_err)
+  | (_, Tdynamic) -> (env, (cty, []), dflt_rval_err)
   | (_, Tunion tyl) ->
-    let (env, pairs, err_res_opts) =
-      List.fold_left tyl ~init:(env, [], []) ~f:(fun (env, pairs, errs) ty ->
-          let (env, pair, err) =
+    let (env, pairs, rval_err_opts) =
+      List.fold_left
+        tyl
+        ~init:(env, [], [])
+        ~f:(fun (env, pairs, rval_err_opts) ty ->
+          let (env, pair, rval_err_opt) =
             class_get_res
               ~is_method
               ~is_const
@@ -6737,15 +6746,16 @@ and class_get_inner
               (p, mid)
               cid
           in
-          (env, pair :: pairs, err :: errs))
+          (env, pair :: pairs, rval_err_opt :: rval_err_opts))
     in
-    let err_res_opt = Option.(map ~f:union_coercion_errs @@ all err_res_opts) in
+
+    let rval_err = Option.(map ~f:union_coercion_errs @@ all rval_err_opts) in
     let (env, ty) =
       Union.union_list env (get_reason cty) (List.map ~f:fst pairs)
     in
-    (env, (ty, []), err_res_opt)
+    (env, (ty, []), rval_err)
   | (_, Tintersection tyl) ->
-    let (env, pairs, err_res_opts) =
+    let (env, pairs, rval_err_opts) =
       TUtils.run_on_intersection_res env tyl ~f:(fun env ty ->
           class_get_inner
             ~is_method
@@ -6760,13 +6770,13 @@ and class_get_inner
             ty
             (p, mid))
     in
-    let err_res_opt =
-      Option.(map ~f:intersect_coercion_errs @@ all err_res_opts)
+    let rval_err =
+      Option.(map ~f:intersect_coercion_errs @@ all rval_err_opts)
     in
     let (env, ty) =
       Inter.intersect_list env (get_reason cty) (List.map ~f:fst pairs)
     in
-    (env, (ty, []), err_res_opt)
+    (env, (ty, []), rval_err)
   | (_, Tnewtype (_, _, ty))
   | (_, Tdependent (_, ty)) ->
     class_get_inner
@@ -6792,7 +6802,7 @@ and class_get_inner
         p
         (Typing_print.error env cty)
         (get_pos cty);
-      (env, (err_witness env p, []), dflt_err)
+      (env, (err_witness env p, []), dflt_rval_err)
     end else
       let (env, ty) = Typing_intersection.intersect_list env r tyl in
       class_get_inner
@@ -6810,7 +6820,7 @@ and class_get_inner
   | (_, Tclass ((_, c), _, paraml)) ->
     let class_ = Env.get_class env c in
     (match class_ with
-    | None -> (env, (Typing_utils.mk_tany env p, []), dflt_err)
+    | None -> (env, (Typing_utils.mk_tany env p, []), dflt_rval_err)
     | Some class_ ->
       (* TODO akenn: Should we move this to the class_get original call? *)
       let (env, this_ty) = ExprDepTy.make env ~cid:cid_ this_ty in
@@ -6858,7 +6868,7 @@ and class_get_inner
               class_info
               mid
               Errors.unify_error;
-            (env, (TUtils.terr env Reason.Rnone, []), dflt_err))
+            (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err))
       in
       if is_const then (
         let const =
@@ -6883,7 +6893,7 @@ and class_get_inner
             class_
             mid
             Errors.unify_error;
-          (env, (TUtils.terr env Reason.Rnone, []), dflt_err)
+          (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err)
         | Some { cc_type; cc_abstract; cc_pos; _ } ->
           let (env, cc_locl_type) = Phase.localize ~ety_env env cc_type in
           (match cc_abstract with
@@ -6896,7 +6906,7 @@ and class_get_inner
               let cc_name = Cls.name class_ ^ "::" ^ mid in
               Errors.abstract_const_usage p cc_pos cc_name)
           | CCConcrete -> ());
-          (env, (cc_locl_type, []), dflt_err)
+          (env, (cc_locl_type, []), dflt_rval_err)
       ) else
         let static_member_opt =
           Env.get_static_member is_method env class_ mid
@@ -6913,7 +6923,7 @@ and class_get_inner
             class_
             mid
             Errors.unify_error;
-          (env, (TUtils.terr env Reason.Rnone, []), dflt_err)
+          (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err)
         | Some
             ({
                ce_visibility = vis;
@@ -6989,7 +6999,8 @@ and class_get_inner
                   (fun () -> (get_smember_from_constraints env class_, true))
                   (fun _ ->
                     (* No eligible functions found in constraints *)
-                    ((env, (MakeType.mixed Reason.Rnone, []), dflt_err), false))
+                    ( (env, (MakeType.mixed Reason.Rnone, []), dflt_rval_err),
+                      false ))
               in
               if succeed then
                 Inter.intersect env ~r:(Reason.Rwitness p) member_ty member_ty'
@@ -6998,7 +7009,7 @@ and class_get_inner
             else
               (env, member_ty)
           in
-          let (env, err_res_opt) =
+          let (env, rval_err) =
             match coerce_from_ty with
             | None -> (env, None)
             | Some (p, ur, ty) ->
@@ -7013,7 +7024,7 @@ and class_get_inner
                    { et_type = member_ty; et_enforced }
                    Errors.unify_error
           in
-          (env, (member_ty, tal), err_res_opt)))
+          (env, (member_ty, tal), rval_err)))
   | (_, Tunapplied_alias _) ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   | ( _,
@@ -7026,7 +7037,7 @@ and class_get_inner
       p
       (Typing_print.error env cty)
       (get_pos cty);
-    (env, (err_witness env p, []), dflt_err)
+    (env, (err_witness env p, []), dflt_rval_err)
 
 and class_id_for_new
     ~exact p env (cid : Nast.class_id_) (explicit_targs : Nast.targ list) :

@@ -365,18 +365,25 @@ let rec obj_get_concrete_ty
                   id_str
                   r
                   on_error;
-                default ())
+                let ty_nothing = MakeType.nothing Reason.none in
+                default ~lval_err:(Error (concrete_ty, ty_nothing)) ())
           | None when not is_method ->
-            if not (SN.Members.is_special_xhp_attribute id_str) then
-              member_not_found
-                env
-                id_pos
-                ~is_method
-                class_info
-                id_str
-                r
-                on_error;
-            default ()
+            let lval_err =
+              if not (SN.Members.is_special_xhp_attribute id_str) then (
+                member_not_found
+                  env
+                  id_pos
+                  ~is_method
+                  class_info
+                  id_str
+                  r
+                  on_error;
+                let ty_nothing = MakeType.nothing Reason.none in
+                Error (concrete_ty, ty_nothing)
+              ) else
+                dflt_lval_err
+            in
+            default ~lval_err ()
           | None when String.equal id_str SN.Members.__clone ->
             (* Create a `public function __clone()[]: void {}` for classes that don't declare __clone *)
             let ft =
@@ -403,7 +410,8 @@ let rec obj_get_concrete_ty
             default ()
           | None ->
             member_not_found env id_pos ~is_method class_info id_str r on_error;
-            default ()
+            let ty_nothing = MakeType.nothing Reason.none in
+            default ~lval_err:(Error (concrete_ty, ty_nothing)) ()
           | Some
               ({
                  ce_visibility = vis;

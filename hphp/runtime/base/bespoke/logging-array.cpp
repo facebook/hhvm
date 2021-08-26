@@ -154,6 +154,7 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
   auto const shouldEmitBespoke = [&]{
     if (shouldTestBespokeArrayLikes()) return true;
     if (RO::EvalEmitLoggingArraySampleRate == 0) return false;
+    if (RO::EvalEmitLoggingArraySampleRate == 1) return true;
 
     // We want the first sample to be vanilla and the second to be logged.
     auto const skCount = profile->data->sampleCount++;

@@ -74,15 +74,6 @@ let set_bit bit value flags =
 
 (* MRO element flags *)
 
-(** True if this element referred to a class whose definition could not be
-    found. This is always indicative of an "Unbound name" error (emitted by
-    Naming), so one could imagine omitting elements with this flag set from the
-    linearization (since correct programs will not have them), but keeping
-    track of them helps reduce cascading errors in the event of a typo.
-    Additionally, it's helpful to do this (for now) to keep the behavior of
-    shallow_class_decl equivalent to legacy decl. *)
-let mro_class_not_found = 1 lsl 0
-
 (** True if this element is included in the linearization (directly or
     indirectly) because of a require extends relationship. *)
 let mro_via_req_extends = 1 lsl 1
@@ -166,7 +157,6 @@ type linearization_kind =
 
 type decl_class_type = {
   dc_need_init: bool;
-  dc_members_fully_known: bool;
   dc_abstract: bool;
   dc_final: bool;
   dc_is_disposable: bool;

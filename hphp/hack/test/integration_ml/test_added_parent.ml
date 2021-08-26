@@ -41,12 +41,13 @@ let bar_contents =
 function take_int(int $x) : void {}
 
 function test(FooChild $foo_child) : void {
+  /* HH_FIXME[4053] */
   take_int($foo_child->f());
 }
 "
 
 let bar_errors =
-  "File \"/bar.php\", line 6, characters 12-26:
+  "File \"/bar.php\", line 7, characters 12-26:
 Invalid argument (Typing[4110])
   File \"/bar.php\", line 3, characters 19-21:
   Expected `int`
@@ -60,7 +61,7 @@ let hhconfig_filename = Filename.concat root ".hhconfig"
 
 let hhconfig_contents =
   "
-allowed_fixme_codes_strict = 2049,4110,4123,4336
+allowed_fixme_codes_strict = 2049,4053,4110,4123,4336
 allowed_decl_fixme_codes = 2049,4123,4336
 "
 

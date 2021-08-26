@@ -273,7 +273,6 @@ let class_big_diff class1 class2 =
        class1.dc_deferred_init_members
        class2.dc_deferred_init_members
      <> 0
-  || class1.dc_members_fully_known <> class2.dc_members_fully_known
   || class1.dc_kind <> class2.dc_kind
   || class1.dc_is_xhp <> class2.dc_is_xhp
   || class1.dc_has_xhp_keyword <> class2.dc_has_xhp_keyword

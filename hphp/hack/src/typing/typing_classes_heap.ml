@@ -20,7 +20,6 @@ type lazy_class_type = {
   lin_ancestors: Decl_defs.linearization;
   ih: inherited_members;
   ancestors: decl_ty LSTable.t;  (** Types of parents, interfaces, and traits *)
-  members_fully_known: bool Lazy.t;
   req_ancestor_names: unit LSTable.t;
   all_requirements: (Pos_or_decl.t * decl_ty) Sequence.t;
   is_disposable: bool Lazy.t;
@@ -76,8 +75,6 @@ let make_lazy_class_type ctx class_name =
              Decl_inheritance.make ctx class_name lin_members (fun x ->
                  LSTable.get ancestors x);
            ancestors;
-           members_fully_known =
-             Decl_ancestors.members_fully_known ~lin_ancestors_drop_one;
            req_ancestor_names =
              LSTable.make
                (Decl_ancestors.req_ancestor_names ~lin_members)
@@ -501,13 +498,6 @@ module ApiEager = struct
     | (Lazy (_sc, lc), Decl_defs.Ancestor_types) ->
       (Lazy.force lc).lin_ancestors |> Sequence.to_list
     | (Eager _, _) -> failwith "shallow_class_decl is disabled"
-
-  let members_fully_known (decl, t) =
-    Decl_counters.count_subdecl decl Decl_counters.Members_fully_known
-    @@ fun () ->
-    match t with
-    | Lazy (_sc, lc) -> Lazy.force (Lazy.force lc).members_fully_known
-    | Eager (c, _) -> c.Decl_defs.dc_members_fully_known
 
   let all_ancestor_req_names (decl, t) =
     Decl_counters.count_subdecl decl Decl_counters.All_ancestor_req_names

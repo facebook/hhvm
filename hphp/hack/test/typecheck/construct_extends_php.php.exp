@@ -1,6 +1,8 @@
 File "construct_extends_php.php", line 12, characters 23-26:
 Unbound name: `Base` (an object type) (Naming[2049])
+File "construct_extends_php.php", line 16, characters 7-13:
+This constructor expects no argument (Typing[4012])
 File "construct_extends_php.php", line 16, characters 19-22:
 You are trying to access the method `test` but this is an int (Typing[4062])
-File "construct_extends_php.php", line 15, characters 14-16:
-Definition is here
+  File "construct_extends_php.php", line 15, characters 14-16:
+  Definition is here

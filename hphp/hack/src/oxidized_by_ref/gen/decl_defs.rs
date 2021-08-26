@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<adefbb79d58b9e97ae04ad86ebe55631>>
+// @generated SignedSource<<a27c19e83ea00b2833742722a269aa5d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -152,7 +152,6 @@ arena_deserializer::impl_deserialize_in_arena!(LinearizationKind);
 #[repr(C)]
 pub struct DeclClassType<'a> {
     pub need_init: bool,
-    pub members_fully_known: bool,
     pub abstract_: bool,
     pub final_: bool,
     pub is_disposable: bool,

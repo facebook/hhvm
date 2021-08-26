@@ -262,7 +262,6 @@ struct
       dc_need_init = dc.dc_need_init;
       dc_deferred_init_members = dc.dc_deferred_init_members;
       dc_abstract = dc.dc_abstract;
-      dc_members_fully_known = dc.dc_members_fully_known;
       dc_kind = dc.dc_kind;
       dc_is_xhp = dc.dc_is_xhp;
       dc_has_xhp_keyword = dc.dc_has_xhp_keyword;

@@ -557,22 +557,7 @@ and get_linearization (env : env) (class_name : string) : mro_element list =
         in
         Linearization_provider.add (get_ctx env) (snd c.sc_name) lin;
         result lin
-      | None ->
-        (* There is no known definition for the class with the given name. This
-           is always an "Unbound name" error, and we will emit one wherever this
-           class was specified as an ancestor. In order to suppress downstream
-           errors (and, historically, to support the now-removed assume_php
-           feature), we include this fake mro_element with the
-           mro_class_not_found flag set. This logic is largely here to ensure
-           that the behavior of shallow_class_decl is equivalent to legacy decl,
-           and we should look into removing it (along with
-           Typing_classes_heap.members_fully_known) after we have removed legacy
-           decl. *)
-        let mro_flags =
-          set_bit mro_class_not_found true empty_mro_element.mro_flags
-        in
-        (* This class is not known to exist! *)
-        [{ empty_mro_element with mro_name = class_name; mro_flags }])
+      | None -> [])
 
 type linearizations = {
   lin_members: Decl_defs.linearization;

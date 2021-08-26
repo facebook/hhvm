@@ -5711,12 +5711,8 @@ and call_parent_construct pos env el unpacked_element =
           default
         | Some (_, parent_ty) ->
           check_parent_construct pos env el unpacked_element parent_ty)
-      | Some self_tc ->
-        if not (Cls.members_fully_known self_tc) then
-          ()
-        (* Don't know the hierarchy, assume it's correct *)
-        else
-          Errors.undefined_parent pos;
+      | Some _self_tc ->
+        Errors.undefined_parent pos;
         default
       | None -> assert false)
     | None ->
@@ -7367,7 +7363,6 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
     if
       ((not (List.is_empty el)) || Option.is_some unpacked_element)
       && (FileInfo.is_strict mode || FileInfo.(equal_mode mode Mpartial))
-      && Cls.members_fully_known class_
     then
       Errors.constructor_no_args p;
     let (env, tel, _tyl) = exprs env el ~allow_awaitable:(*?*) false in

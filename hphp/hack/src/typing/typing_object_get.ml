@@ -56,9 +56,6 @@ let smember_not_found
   | (Some (def_pos, v), _) -> error (Some (`static, def_pos, v))
   (* Fallback to closest normal method *)
   | (None, Some (def_pos, v)) -> error (Some (`instance, def_pos, v))
-  (* no error in this case ... the member might be present
-   * in one of the parents of class_ that the typing cannot see *)
-  | (None, None) when not (Cls.members_fully_known class_) -> ()
   | (None, None) -> error None
 
 let member_not_found
@@ -93,10 +90,6 @@ let member_not_found
       error (Some (`static, def_pos, v))
     | (Some (def_pos, v), _) -> error (Some (`instance, def_pos, v))
     | (None, Some (def_pos, v)) -> error (Some (`static, def_pos, v))
-    | (None, None) when not (Cls.members_fully_known class_) ->
-      (* no error in this case ... the member might be present
-       * in one of the parents of class_ that the typing cannot see *)
-      ()
     | (None, None) -> error None
 
 let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =

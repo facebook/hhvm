@@ -1219,7 +1219,7 @@ let check_extend_abstract (pc, tc) =
       false
   in
   let is_final = Cls.final tc in
-  if (is_concrete || is_final) && Cls.members_fully_known tc then (
+  if is_concrete || is_final then (
     let constructor_as_list cstr =
       fst cstr
       >>| (fun cstr -> (SN.Members.__construct, cstr))

@@ -1,3 +1,9 @@
+File "trait_reuse_cyclic.php", line 10, characters 7-16:
+This type doesn't implement the method `foo` (Typing[4054])
+  File "trait_reuse_cyclic.php", line 11, characters 7-17:
+  Which is required by this interface
+  File "trait_reuse_cyclic.php", line 6, characters 25-27:
+  As defined here
 File "trait_reuse_cyclic.php", line 11, characters 7-17:
 Cyclic class definition : `ReusedTrait` `OtherTrait`  (Typing[4013])
 File "trait_reuse_cyclic.php", line 19, characters 7-17:

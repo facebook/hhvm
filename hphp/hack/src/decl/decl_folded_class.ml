@@ -125,9 +125,9 @@ let add_grand_parents_or_traits
     (no_trait_reuse : bool)
     (parent_pos : Pos_or_decl.t)
     (shallow_class : Shallow_decl_defs.shallow_class)
-    (acc : SSet.t * bool * [> `Extends_pass | `Xhp_pass ])
-    (parent_type : Decl_defs.decl_class_type) : SSet.t * bool * 'a =
-  let (extends, is_complete, pass) = acc in
+    (acc : SSet.t * [> `Extends_pass | `Xhp_pass ])
+    (parent_type : Decl_defs.decl_class_type) : SSet.t * 'a =
+  let (extends, pass) = acc in
   let class_pos = fst shallow_class.sc_name in
   let classish_kind = shallow_class.sc_kind in
   let class_name = snd shallow_class.sc_name in
@@ -152,15 +152,14 @@ let add_grand_parents_or_traits
   (* Verify that merging the parent's extends did not introduce trait reuse *)
   if no_trait_reuse then
     check_no_duplicate_traits parent_type shallow_class extends extends';
-  (extends', parent_type.dc_members_fully_known && is_complete, pass)
+  (extends', pass)
 
 let get_class_parent_or_trait
     (env : Decl_env.env)
     (shallow_class : Shallow_decl_defs.shallow_class)
     (parent_cache : Decl_store.class_entries SMap.t)
-    ((parents, is_complete, pass) :
-      SSet.t * bool * [> `Extends_pass | `Xhp_pass ])
-    (ty : Typing_defs.decl_phase Typing_defs.ty) : SSet.t * bool * 'a =
+    ((parents, pass) : SSet.t * [> `Extends_pass | `Xhp_pass ])
+    (ty : Typing_defs.decl_phase Typing_defs.ty) : SSet.t * 'a =
   (* See comment on check_no_duplicate_traits for reasoning here *)
   let no_trait_reuse =
     disallow_trait_reuse env
@@ -173,13 +172,11 @@ let get_class_parent_or_trait
   let parents = SSet.add parent parents in
   let parent_type = Decl_env.get_class_add_dep env parent ~cache:parent_cache in
   match parent_type with
-  | None ->
-    (* The class lives in PHP *)
-    (parents, false, pass)
+  | None -> (parents, pass)
   | Some parent_type ->
     (* The parent class lives in Hack, so we can report reused traits *)
     if reused_trait then report_reused_trait parent_type shallow_class parent;
-    let acc = (parents, is_complete, pass) in
+    let acc = (parents, pass) in
     add_grand_parents_or_traits
       no_trait_reuse
       parent_pos
@@ -190,34 +187,33 @@ let get_class_parent_or_trait
 let get_class_parents_and_traits
     (env : Decl_env.env)
     (shallow_class : Shallow_decl_defs.shallow_class)
-    parent_cache : SSet.t * SSet.t * bool =
+    parent_cache : SSet.t * SSet.t =
   let parents = SSet.empty in
-  let is_complete = true in
   (* extends parents *)
-  let acc = (parents, is_complete, `Extends_pass) in
-  let (parents, is_complete, _) =
+  let acc = (parents, `Extends_pass) in
+  let (parents, _) =
     List.fold_left
       shallow_class.sc_extends
       ~f:(get_class_parent_or_trait env shallow_class parent_cache)
       ~init:acc
   in
   (* traits *)
-  let acc = (parents, is_complete, `Traits_pass) in
-  let (parents, is_complete, _) =
+  let acc = (parents, `Traits_pass) in
+  let (parents, _) =
     List.fold_left
       shallow_class.sc_uses
       ~f:(get_class_parent_or_trait env shallow_class parent_cache)
       ~init:acc
   in
   (* XHP classes whose attributes were imported via "attribute :foo;" syntax *)
-  let acc = (SSet.empty, is_complete, `Xhp_pass) in
-  let (xhp_parents, is_complete, _) =
+  let acc = (SSet.empty, `Xhp_pass) in
+  let (xhp_parents, _) =
     List.fold_left
       shallow_class.sc_xhp_attr_uses
       ~f:(get_class_parent_or_trait env shallow_class parent_cache)
       ~init:acc
   in
-  (parents, xhp_parents, is_complete)
+  (parents, xhp_parents)
 
 type class_env = {
   ctx: Provider_context.t;
@@ -433,9 +429,7 @@ and class_decl
   in
   let impl = List.map impl ~f:(get_implements env parents) in
   let impl = List.fold_right impl ~f:(SMap.fold SMap.add) ~init:SMap.empty in
-  let (extends, xhp_attr_deps, ext_strict) =
-    get_class_parents_and_traits env c parents
-  in
+  let (extends, xhp_attr_deps) = get_class_parents_and_traits env c parents in
   let (req_ancestors, req_ancestors_extends) =
     Decl_requirements.get_class_requirements env parents c
   in
@@ -459,9 +453,6 @@ and class_decl
    * trait that is used, is also disposable, in order that escape analysis
    * has been applied on the $this parameter.
    *)
-  let ext_strict =
-    List.fold_left c.sc_uses ~f:(trait_exists env parents) ~init:ext_strict
-  in
   let enum = c.sc_enum_type in
   let enum_inner_ty = SMap.find_opt SN.FB.tInner typeconsts in
   let is_enum_class = Ast_defs.is_c_enum_class c.sc_kind in
@@ -494,7 +485,6 @@ and class_decl
       dc_abstract = is_abstract;
       dc_need_init = has_concrete_cstr;
       dc_deferred_init_members = deferred_members;
-      dc_members_fully_known = ext_strict;
       dc_kind = c.sc_kind;
       dc_is_xhp = c.sc_is_xhp;
       dc_has_xhp_keyword = c.sc_has_xhp_keyword;
@@ -564,17 +554,6 @@ and get_implements (env : Decl_env.env) parent_cache (ht : Typing_defs.decl_ty)
       SMap.map (fun ty -> Inst.instantiate subst ty) class_.dc_ancestors
     in
     SMap.add c ht sub_implements
-
-and trait_exists
-    (env : Decl_env.env) cache (acc : bool) (trait : Typing_defs.decl_ty) : bool
-    =
-  match get_node trait with
-  | Tapply ((_, trait), _) ->
-    let class_ = Decl_env.get_class_add_dep env trait ~cache in
-    (match class_ with
-    | None -> false
-    | Some _class -> acc)
-  | _ -> false
 
 and constructor_decl
     ~(sh : SharedMem.uses)

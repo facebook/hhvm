@@ -1611,20 +1611,12 @@ module PrintClass = struct
     (* Format is as follows:
      *    ParentKnownToHack
      *  ! ParentCompletelyUnknown
-     *  ~ ParentPartiallyKnown  (interface|abstract|trait)
-     *
-     * ParentPartiallyKnown must inherit one of the ! Unknown parents, so that
-     * sigil could be omitted *)
+     *)
     List.fold m ~init:"" ~f:(fun acc (field, v) ->
         let (sigil, kind) =
           match Decl_provider.get_class ctx field with
           | None -> ("!", "")
-          | Some cls ->
-            ( (if Cls.members_fully_known cls then
-                " "
-              else
-                "~"),
-              " (" ^ classish_kind (Cls.kind cls) ^ ")" )
+          | Some cls -> (" ", " (" ^ classish_kind (Cls.kind cls) ^ ")")
         in
         let ty_str = Full.to_string_decl v in
         "\n" ^ indent ^ sigil ^ " " ^ ty_str ^ kind ^ acc)
@@ -1645,7 +1637,6 @@ module PrintClass = struct
   let class_type ctx c =
     let tenv = Typing_env.empty ctx Relative_path.default ~droot:None in
     let tc_need_init = bool (Cls.need_init c) in
-    let tc_members_fully_known = bool (Cls.members_fully_known c) in
     let tc_abstract = bool (Cls.abstract c) in
     let tc_deferred_init_members =
       sset
@@ -1674,9 +1665,6 @@ module PrintClass = struct
     in
     "tc_need_init: "
     ^ tc_need_init
-    ^ "\n"
-    ^ "tc_members_fully_known: "
-    ^ tc_members_fully_known
     ^ "\n"
     ^ "tc_abstract: "
     ^ tc_abstract

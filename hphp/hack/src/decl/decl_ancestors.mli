@@ -12,9 +12,6 @@ val all_ancestors :
   lin_ancestors_drop_one:Decl_defs.linearization ->
   (string * Typing_defs.decl_ty) Sequence.t
 
-val members_fully_known :
-  lin_ancestors_drop_one:Decl_defs.linearization -> bool Lazy.t
-
 val req_ancestor_names :
   lin_members:Decl_defs.linearization -> (string * unit) Sequence.t
 

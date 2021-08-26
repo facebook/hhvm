@@ -5397,7 +5397,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       in
       let env = might_throw env in
       let (_, p1, _) = obj in
-      let (env, (declared_ty, _tal), err_opt) =
+      let (env, (declared_ty, _tal), lval_err_opt, rval_err_opt) =
         TOG.obj_get_with_err
           ~obj_pos:p1
           ~is_method:false
@@ -5417,7 +5417,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
           pobj
           declared_ty
           (Aast.Obj_get
-             ( tobj,
+             ( hole_on_err ~err_opt:lval_err_opt tobj,
                Tast.make_typed_expr pm declared_ty (Aast.Id m),
                nullflavor,
                in_parens ))
@@ -5432,8 +5432,8 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
             Inter.intersect env ~r:(Reason.Rwitness p) declared_ty ty2
           in
           let env = set_valid_rvalue p env local refined_ty in
-          (env, te1, ty2, err_opt)
-        | _ -> (env, te1, ty2, err_opt)
+          (env, te1, ty2, rval_err_opt)
+        | _ -> (env, te1, ty2, rval_err_opt)
       end
     | (_, _, Obj_get _) ->
       let lenv = env.lenv in
@@ -5465,7 +5465,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       (* This defers the coercion check to class_get, which looks up the appropriate target type *)
       let (env, _tal, _, cty) = class_expr env [] cid in
       let env = might_throw env in
-      let (env, (declared_ty, _), err_opt) =
+      let (env, (declared_ty, _), rval_err_opt) =
         class_get_err
           ~is_method:false
           ~is_const:false
@@ -5480,7 +5480,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
         Inter.intersect env ~r:(Reason.Rwitness p) declared_ty ty2
       in
       let env = set_valid_rvalue p env local refined_ty in
-      (env, te1, ty2, err_opt)
+      (env, te1, ty2, rval_err_opt)
     | (_, pos, Array_get (e1, None)) ->
       let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
       let (_, p1, _) = e1 in
@@ -6422,7 +6422,7 @@ and dispatch_call
       | OG_nullsafe -> Some p
     in
     let (_, p1, _) = e1 in
-    let (env, (tfty, tal), err_opt) =
+    let (env, (tfty, tal), lval_err_opt, _rval_err_opt) =
       TOG.obj_get_with_err
         ~obj_pos:p1
         ~is_method:true
@@ -6448,7 +6448,7 @@ and dispatch_call
            fpos
            tfty
            (Aast.Obj_get
-              ( hole_on_err ~err_opt te1,
+              ( hole_on_err ~err_opt:lval_err_opt te1,
                 Tast.make_typed_expr pos_id tfty (Aast.Id m),
                 nullflavor,
                 false )))

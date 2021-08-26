@@ -34,8 +34,9 @@ val obj_get :
   Typing_defs.locl_ty ->
   Typing_env_types.env * (Typing_defs.locl_ty * Tast.targ list)
 
-(** As above but also return the types at which coercion of `coerce_from_ty`
-    to the object type failed, if at all *)
+(** As above but also return the types at which
+    - we encountered an error based on the receiver's type, if at all
+    - coercion of `coerce_from_ty` to the object type failed, if at all *)
 val obj_get_with_err :
   obj_pos:Ast_defs.pos ->
   is_method:bool ->
@@ -53,6 +54,7 @@ val obj_get_with_err :
   Typing_defs.locl_ty ->
   Typing_env_types.env
   * (Typing_defs.locl_ty * Tast.targ list)
+  * (Typing_defs.locl_ty * Typing_defs.locl_ty) option
   * (Typing_defs.locl_ty * Typing_defs.locl_ty) option
 
 val smember_not_found :

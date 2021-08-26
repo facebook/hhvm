@@ -269,11 +269,11 @@ let rec obj_get_concrete_ty
                   Log_type ("this_ty", this_ty);
                 ] );
           ]));
-  let default_err_res =
-    Option.map ~f:(fun (_, _, ty) -> Ok ty) coerce_from_ty
-  in
-  let default () =
-    (env, (Typing_utils.mk_tany env id_pos, []), default_err_res)
+  let dflt_rval_err = Option.map ~f:(fun (_, _, ty) -> Ok ty) coerce_from_ty
+  and dflt_lval_err = Ok concrete_ty in
+
+  let default ?(lval_err = dflt_lval_err) ?(rval_err = dflt_rval_err) () =
+    (env, (Typing_utils.mk_tany env id_pos, []), lval_err, rval_err)
   in
   let mk_ety_env class_info paraml =
     {
@@ -396,7 +396,7 @@ let rec obj_get_concrete_ty
                 ft_ifc_decl = default_ifc_fun_decl;
               }
             in
-            (env, (mk (Reason.Rnone, Tfun ft), []), None)
+            (env, (mk (Reason.Rnone, Tfun ft), []), dflt_lval_err, dflt_rval_err)
           | None when String.equal id_str SN.Members.__construct ->
             (* __construct is not an instance method and shouldn't be invoked directly *)
             let () = Errors.magic (id_pos, id_str) in
@@ -537,13 +537,16 @@ let rec obj_get_concrete_ty
               TVis.check_meth_caller_access ~use_pos:id_pos ~def_pos:mem_pos vis;
             let (env, (member_ty, tal)) =
               if Cls.has_upper_bounds_on_this_from_constraints class_info then
-                let ((env, (ty, tal), _), succeed) =
+                let ((env, (ty, tal), _, _), succeed) =
                   Errors.try_
                     (fun () ->
                       (get_member_from_constraints env class_info, true))
                     (fun _ ->
                       (* No eligible functions found in constraints *)
-                      ( (env, (MakeType.mixed Reason.Rnone, []), default_err_res),
+                      ( ( env,
+                          (MakeType.mixed Reason.Rnone, []),
+                          dflt_lval_err,
+                          dflt_rval_err ),
                         false ))
                 in
                 if succeed then
@@ -556,10 +559,10 @@ let rec obj_get_concrete_ty
               else
                 (env, (member_ty, tal))
             in
-            let (env, err_res) =
+            let (env, rval_err) =
               Option.value_map
                 coerce_from_ty
-                ~default:(env, None)
+                ~default:(env, dflt_rval_err)
                 ~f:(fun (p, ur, ty) ->
                   Result.fold
                     ~ok:(fun env -> (env, Some (Ok ty)))
@@ -572,7 +575,7 @@ let rec obj_get_concrete_ty
                        { et_type = member_ty; et_enforced }
                        Errors.unify_error)
             in
-            (env, (member_ty, tal), err_res)
+            (env, (member_ty, tal), dflt_lval_err, rval_err)
         end
         (* match member_info *)
     end
@@ -611,7 +614,7 @@ let rec obj_get_concrete_ty
         | _ -> ())
       | _ -> ());
     let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in
-    (env, (ty, []), None)
+    (env, (ty, []), dflt_lval_err, dflt_rval_err)
   | (_, Tany _)
   | (_, Terr) ->
     default ()
@@ -629,7 +632,9 @@ let rec obj_get_concrete_ty
       id_pos
       (Typing_print.error env concrete_ty)
       (get_pos concrete_ty);
-    default ()
+    let ty_nothing = MakeType.nothing Reason.none in
+    let lval_err = Error (concrete_ty, ty_nothing) in
+    default ~lval_err ()
   | _ ->
     let err =
       if read_context then
@@ -648,7 +653,9 @@ let rec obj_get_concrete_ty
       (Typing_print.error env concrete_ty)
       (get_pos concrete_ty)
       on_error;
-    default ()
+    let ty_nothing = MakeType.nothing Reason.none in
+    let lval_err = Error (concrete_ty, ty_nothing) in
+    default ~lval_err ()
 
 and nullable_obj_get
     ~inst_meth
@@ -669,9 +676,10 @@ and nullable_obj_get
     on_error
     ~read_context
     ty =
+  let dflt_rval_err = Option.map ~f:(fun (_, _, ty) -> Ok ty) coerce_from_ty in
   match nullsafe with
   | Some r_null ->
-    let (env, (method_, tal), err_res) =
+    let (env, (method_, tal), lval_err, rval_err) =
       obj_get_inner
         ~inst_meth
         ~meth_caller
@@ -696,7 +704,7 @@ and nullable_obj_get
         make_nullable_member_type ~is_method env id_pos p1 method_
       | _ -> (env, method_)
     in
-    (env, (ty, tal), err_res)
+    (env, (ty, tal), lval_err, rval_err)
   | None ->
     let ty_expect =
       match deref ety1 with
@@ -740,7 +748,8 @@ and nullable_obj_get
     in
     ( env,
       (TUtils.terr env (get_reason ety1), []),
-      Some (Error (ety1, ty_expect)) )
+      Error (ety1, ty_expect),
+      dflt_rval_err )
 
 (* Helper method for obj_get that decomposes the type ty1.
  * The additional parameter this_ty represents the type that will be substitued
@@ -796,7 +805,8 @@ and obj_get_inner
         | (Error (xs, ys), Error (x, y)) -> Error (x :: xs, y :: ys))
   in
   let fold_opt_errs opt_errs = Option.(map ~f:fold_errs @@ all opt_errs) in
-
+  let dflt_lval_err = Ok receiver_ty
+  and dflt_rval_err = Option.map ~f:(fun (_, _, ty) -> Ok ty) coerce_from_ty in
   let (env, ety1) =
     if is_method then
       if TypecheckerOptions.method_call_inference (Env.get_tcopt env) then
@@ -847,9 +857,12 @@ and obj_get_inner
   let read_context = Option.is_none coerce_from_ty in
   match deref ety1 with
   | (r, Tunion tyl) ->
-    let (env, resultl, err_res_opts) =
-      List.fold_left tyl ~init:(env, [], []) ~f:(fun (env, tys, errs) ty ->
-          let (env, ty, err_res) =
+    let (env, resultl, lval_errs, rval_err_opts) =
+      List.fold_left
+        tyl
+        ~init:(env, [], [], [])
+        ~f:(fun (env, tys, lval_errs, rval_err_opts) ty ->
+          let (env, ty, lval_err, rval_err_opt) =
             obj_get_inner
               ~inst_meth
               ~meth_caller
@@ -868,18 +881,28 @@ and obj_get_inner
               id
               on_error
           in
-          (env, ty :: tys, err_res :: errs))
+          (env, ty :: tys, lval_err :: lval_errs, rval_err_opt :: rval_err_opts))
     in
-    let err_res =
-      Option.map
-        ~f:
-          (Result.fold
-             ~ok:(fun tys -> Ok (Typing_make_type.union Reason.none tys))
-             ~error:(fun (actuals, expecteds) ->
-               Error
-                 ( Typing_make_type.union Reason.none actuals,
-                   Typing_make_type.union Reason.none expecteds )))
-      @@ fold_opt_errs err_res_opts
+    let mk_err env =
+      Result.fold
+        ~ok:(fun tys ->
+          let (env, ty) = Typing_union.union_list env Reason.none tys in
+          (env, Ok ty))
+        ~error:(fun (actuals, expecteds) ->
+          let (env, ty_acutal) =
+            Typing_union.union_list env Reason.none actuals
+          in
+          let (env, ty_expect) =
+            Typing_union.union_list env Reason.none expecteds
+          in
+          (env, Error (ty_acutal, ty_expect)))
+    in
+    let (env, lval_err) = mk_err env @@ fold_errs lval_errs in
+    let (env, rval_err) =
+      Option.value_map ~default:(env, None) ~f:(fun res ->
+          let (env, r) = mk_err env res in
+          (env, Some r))
+      @@ fold_opt_errs rval_err_opts
     in
 
     (* TODO: decide what to do about methods with differing generic arity.
@@ -891,7 +914,7 @@ and obj_get_inner
     in
     let tyl = List.map ~f:fst resultl in
     let (env, ty) = Union.union_list env r tyl in
-    (env, (ty, tal), err_res)
+    (env, (ty, tal), lval_err, rval_err)
   | (r, Tintersection tyl) ->
     let is_nonnull =
       is_nonnull
@@ -900,8 +923,8 @@ and obj_get_inner
            receiver_ty
            (Typing_make_type.nonnull Reason.none)
     in
-    let (env, resultl, err_res_opts) =
-      TUtils.run_on_intersection_res env tyl ~f:(fun env ty ->
+    let (env, resultl, lval_errs, rval_err_opts) =
+      TUtils.run_on_intersection_key_value_res env tyl ~f:(fun env ty ->
           obj_get_inner
             ~inst_meth
             ~meth_caller
@@ -920,16 +943,28 @@ and obj_get_inner
             id
             on_error)
     in
-    let err_res =
-      Option.map
-        ~f:
-          (Result.fold
-             ~ok:(fun tys -> Ok (Typing_make_type.intersection Reason.none tys))
-             ~error:(fun (actuals, expecteds) ->
-               Error
-                 ( Typing_make_type.intersection Reason.none actuals,
-                   Typing_make_type.intersection Reason.none expecteds )))
-      @@ fold_opt_errs err_res_opts
+    let mk_ty env =
+      Result.fold
+        ~ok:(fun tys ->
+          let (env, ty) =
+            Typing_intersection.intersect_list env Reason.none tys
+          in
+          (env, Ok ty))
+        ~error:(fun (actuals, expecteds) ->
+          let (env, ty_actual) =
+            Typing_intersection.intersect_list env Reason.none actuals
+          in
+          let (env, ty_expect) =
+            Typing_intersection.intersect_list env Reason.none expecteds
+          in
+          (env, Error (ty_actual, ty_expect)))
+    in
+    let (env, lval_err) = mk_ty env @@ fold_errs lval_errs in
+    let (env, rval_err) =
+      Option.value_map ~default:(env, None) ~f:(fun res ->
+          let (env, err) = mk_ty env res in
+          (env, Some err))
+      @@ fold_opt_errs rval_err_opts
     in
     (* TODO: decide what to do about methods with differing generic arity.
      * See T55414751 *)
@@ -940,7 +975,7 @@ and obj_get_inner
     in
     let tyl = List.map ~f:fst resultl in
     let (env, ty) = Inter.intersect_list env r tyl in
-    (env, (ty, tal), err_res)
+    (env, (ty, tal), lval_err, rval_err)
   | (_, Tdependent (_, ty))
   | (_, Tnewtype (_, _, ty)) ->
     obj_get_inner
@@ -982,9 +1017,7 @@ and obj_get_inner
         (Typing_print.error env ety1)
         (Reason.to_pos r)
         on_error;
-      ( env,
-        (err_witness env id_pos, []),
-        Option.map coerce_from_ty ~f:(fun (_, _, ty) -> Ok ty) )
+      (env, (err_witness env id_pos, []), dflt_lval_err, dflt_rval_err)
     ) else
       let (env, ty) = Typing_intersection.intersect_list env r tyl in
       let (env, ty) =
@@ -1021,7 +1054,11 @@ and obj_get_inner
       id_str
       id_pos
       (Reason.to_string "It is unknown" r);
-    (env, (TUtils.terr env r, []), None)
+    let ty_nothing = MakeType.nothing Reason.none in
+    ( env,
+      (TUtils.terr env r, []),
+      Error (receiver_ty, ty_nothing),
+      dflt_rval_err )
   | (_, _) ->
     obj_get_concrete_ty
       ~inst_meth
@@ -1109,7 +1146,7 @@ let obj_get_with_err
     | None -> receiver_ty
   in
   let is_parent_call = Nast.equal_class_id_ class_id Aast.CIparent in
-  let (env, ty, err_res_opt) =
+  let (env, ty, lval_err, rval_err_opt) =
     obj_get_inner
       ~inst_meth
       ~meth_caller
@@ -1128,15 +1165,10 @@ let obj_get_with_err
       member_id
       on_error
   in
-  let err_opt =
-    match err_res_opt with
-    | None
-    | Some (Ok _) ->
-      None
-    | Some (Error (actual_ty, expected_ty)) -> Some (actual_ty, expected_ty)
-  in
-
-  (env, ty, err_opt)
+  let from_res = Result.fold ~ok:(fun _ -> None) ~error:(fun tys -> Some tys) in
+  let lval_err_opt = from_res lval_err
+  and rval_err_opt = Option.bind ~f:from_res rval_err_opt in
+  (env, ty, lval_err_opt, rval_err_opt)
 
 (* Look up the type of the property or method id in the type receiver_ty of the
  * receiver and use the function k to postprocess the result.
@@ -1164,7 +1196,7 @@ let obj_get
     ?parent_ty
     env
     receiver_ty =
-  let (env, ty, _err_opt) =
+  let (env, ty, _lval_err_opt, _rval_err_opt) =
     obj_get_with_err
       ~obj_pos
       ~is_method

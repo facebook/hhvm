@@ -449,6 +449,24 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 context.locals = new_lenv;
                 Ok(())
             }
+            aast::Stmt_::Try(t) => {
+                let (try_, catches, finally_) = &mut **t;
+                let old_lenv = context.locals.clone();
+                try_.recurse(context, self.object())?;
+                // Each catch should run with no assumptions about how much of the try ran, i.e. with
+                // old_lenv. Start with the lenv right after the try block and merge
+                let result_lenv =
+                    catches
+                        .iter_mut()
+                        .fold(context.locals.clone(), |result_lenv, catch| {
+                            let catch_lenv =
+                                self.handle_single_block(context, old_lenv.clone(), &mut catch.2);
+                            merge_lenvs(&result_lenv, &catch_lenv)
+                        });
+                // Update the lenv from the old lenv with the result of
+                context.locals = result_lenv.clone();
+                finally_.recurse(context, self.object())
+            }
             _ => s.recurse(context, self.object()),
         }
     }

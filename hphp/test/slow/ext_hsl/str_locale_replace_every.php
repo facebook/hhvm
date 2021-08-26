@@ -52,6 +52,7 @@ function main(): void {
     ]);
   }
 
+  print("--- Invalid inputs\n");
   $inputs = dict[
     'abc' => 123,
     123 => 'abc',
@@ -72,6 +73,33 @@ function main(): void {
         try {
           $fun('abc', dict[$needle => $replacement], $encoding);
           printf("Expected exception not thrown!\n");
+        } catch (InvalidArgumentException $ex) {
+          printf("%s\n", $ex->getMessage());
+        }
+      }
+    }
+  }
+
+  print("--- Similar pairs, e.g. due to normalization or capitalization\n");
+  $inputs = vec[
+    tuple('abc', 'ABC'),
+    // [é] vs [e + `]
+    tuple("\u{00e9}", "\u{0065}\u{0301}"),
+    // [É], [e + `]
+    tuple("\u{00c9}", "\u{0065}\u{0301}"),
+    // [e], [E + `]
+    tuple("\u{00e9}", "\u{0045}\u{0301}"),
+    // [É], [é]
+    tuple("\u{00c9}", "\u{00e9}"),
+  ];
+  foreach ($inputs as list($a, $b)) {
+    foreach($encodings as $name => $encoding) {
+      printf("--- %s: (%s, %s)\n", $name, $a, $b);
+      foreach ($funcs as $fun) {
+        printf("- %s\n", \HH\fun_get_function($fun));
+        try {
+          $fun('abc', dict[$a => 'RA', $b => 'RB'], $encoding);
+          print("No exception.\n");
         } catch (InvalidArgumentException $ex) {
           printf("%s\n", $ex->getMessage());
         }

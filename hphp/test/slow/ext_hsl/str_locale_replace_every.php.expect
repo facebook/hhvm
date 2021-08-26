@@ -648,6 +648,7 @@ dict(5) {
     string(11) "HI hi world"
   }
 }
+--- Invalid inputs
 --- C: abc => 123
 - HH\Lib\_Private\_Str\replace_every_l
 Keys and values passed to str_replace*() must be strings
@@ -702,3 +703,94 @@ Keys passed to str_replace*() must be non-empty strings
 Keys passed to str_replace*() must be non-empty strings
 - HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
 Keys passed to str_replace*() must be non-empty strings
+--- Similar pairs, e.g. due to normalization or capitalization
+--- C: (abc, ABC)
+- HH\Lib\_Private\_Str\replace_every_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_ci_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
+Duplicate replacement found after normalization
+--- UTF8: (abc, ABC)
+- HH\Lib\_Private\_Str\replace_every_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_ci_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
+Duplicate replacement found after normalization
+--- C: (é, é)
+- HH\Lib\_Private\_Str\replace_every_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_ci_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
+No exception.
+--- UTF8: (é, é)
+- HH\Lib\_Private\_Str\replace_every_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_ci_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_l
+Duplicate replacement found after normalization
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
+Duplicate replacement found after normalization
+--- C: (É, é)
+- HH\Lib\_Private\_Str\replace_every_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_ci_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
+No exception.
+--- UTF8: (É, é)
+- HH\Lib\_Private\_Str\replace_every_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_ci_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
+Duplicate replacement found after normalization
+--- C: (é, É)
+- HH\Lib\_Private\_Str\replace_every_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_ci_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
+No exception.
+--- UTF8: (é, É)
+- HH\Lib\_Private\_Str\replace_every_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_ci_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
+Duplicate replacement found after normalization
+--- C: (É, é)
+- HH\Lib\_Private\_Str\replace_every_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_ci_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
+No exception.
+--- UTF8: (É, é)
+- HH\Lib\_Private\_Str\replace_every_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_ci_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_l
+No exception.
+- HH\Lib\_Private\_Str\replace_every_nonrecursive_ci_l
+Duplicate replacement found after normalization

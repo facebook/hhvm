@@ -40,6 +40,7 @@ template<class T> String replace_every_nonrecursive(
   fold_case(&search);
 
   std::vector<std::tuple<T, T>> replacements;
+  std::set<T> seen;
 
   IterateKV(raw_replacements.get(), [&](TypedValue rawNeedle, TypedValue rawReplacement) {
     assertx(isStringType(rawNeedle.type()));
@@ -49,6 +50,12 @@ template<class T> String replace_every_nonrecursive(
     fold_case(&needle);
     auto replacement = to_t(String(rawReplacement.val().pstr));
     replacements.push_back(std::make_tuple(needle, replacement));
+    auto [it, is_unique] = seen.emplace(needle);
+    if (!is_unique) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Duplicate replacement found after normalization"
+      );
+    }
   });
 
   // Longest matching needle wins

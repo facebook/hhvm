@@ -8,7 +8,7 @@
 # internal usage by the build system, and for direct usage by people working on
 # Hack itself from CMake builds:
 #
-#  source $BUILD_DIR/hphp/hack/dev_env.sh
+#  . $BUILD_DIR/hphp/hack/dev_env_rust_only.sh
 
 . "@CMAKE_CURRENT_BINARY_DIR@/dev_env_common.sh"
-eval $(opam env)
+# Nothing else to do for rust :)

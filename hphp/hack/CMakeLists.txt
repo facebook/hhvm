@@ -124,7 +124,7 @@ set(CARGO_BUILD "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/build_rust_to_ocaml.sh")
 add_custom_target(
   hack_ffi
   COMMAND
-   . "${CMAKE_CURRENT_BINARY_DIR}/dev_env.sh" &&
+   . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
     ${CARGO_BUILD} hack_parser_ffi rust_parser_ffi &&
     ${CARGO_BUILD} rust_facts_ffi rust_facts_ffi &&
     ${CARGO_BUILD} compile_ffi compile_ffi &&
@@ -185,6 +185,8 @@ add_dependencies(libdecl_cpp_ffi_stubs hack_ffi)
 set_target_properties(libdecl_cpp_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBRUST_DECL_PATH})
 
 configure_file(dev_env.sh.in dev_env.sh ESCAPE_QUOTES @ONLY)
+configure_file(dev_env_common.sh.in dev_env_common.sh ESCAPE_QUOTES @ONLY)
+configure_file(dev_env_rust_only.sh.in dev_env_rust_only.sh ESCAPE_QUOTES @ONLY)
 
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/hh_client
   DESTINATION bin

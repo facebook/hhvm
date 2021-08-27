@@ -142,9 +142,6 @@ inline bool operator!=(const LocalRange& a, const LocalRange& b) {
 }
 
 struct FCallArgsLong : FCallArgsBase {
-  explicit FCallArgsLong(uint32_t numArgs)
-    : FCallArgsLong(Flags::None, numArgs, 1, nullptr, nullptr, NoBlockId, nullptr) {
-  }
   explicit FCallArgsLong(Flags flags, uint32_t numArgs, uint32_t numRets,
                          std::unique_ptr<uint8_t[]> inoutArgs,
                          std::unique_ptr<uint8_t[]> readonlyArgs,
@@ -169,10 +166,6 @@ struct FCallArgsLong : FCallArgsBase {
       memcpy(readonlyArgs.get(), o.readonlyArgs.get(), numBytes);
     }
   }
-  FCallArgsLong(FCallArgsLong&& o)
-    : FCallArgsLong(o.flags, o.numArgs, o.numRets, std::move(o.inoutArgs),
-                    std::move(o.readonlyArgs),
-                    o.asyncEagerTarget, o.context) {}
 
   bool enforceInOut() const { return inoutArgs.get() != nullptr; }
   bool isInOut(uint32_t i) const {
@@ -309,22 +302,6 @@ struct FCallArgs {
   FCallArgs(const FCallArgsLong& o) : l{o} {}
   FCallArgs(const FCallArgs& o) : l{} {
     l = o.l;
-  }
-  FCallArgs(FCallArgs&& o) : l{} {
-    l = std::move(o.l);
-  }
-  FCallArgs& operator=(const FCallArgs& o) {
-    if (raw != o.raw) {
-      this->~FCallArgs();
-      new (this) FCallArgs{o};
-    }
-    return *this;
-  }
-  FCallArgs& operator=(FCallArgs&& o) {
-    assertx(raw != o.raw);
-    this->~FCallArgs();
-    new (this) FCallArgs{std::move(o)};
-    return *this;
   }
   ~FCallArgs() {
     l.~copy_ptr();

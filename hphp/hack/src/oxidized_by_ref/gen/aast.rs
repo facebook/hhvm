@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<279a598bdf959c9bd80b7704b11ae01c>>
+// @generated SignedSource<<4705508e0eba80968f5d675eff73828b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1657,7 +1657,6 @@ pub struct Class_<'a, Ex, En> {
     pub reqs: &'a [(&'a ClassHint<'a>, &'a oxidized::aast::IsExtends)],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub implements: &'a [&'a ClassHint<'a>],
-    pub support_dynamic_type: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub where_constraints: &'a [&'a WhereConstraintHint<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

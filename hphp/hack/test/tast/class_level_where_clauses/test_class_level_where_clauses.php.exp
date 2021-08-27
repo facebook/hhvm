@@ -5,7 +5,7 @@
       c_tparams = [{ tp_variance = Invariant; tp_name = ([12:21-22], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-      c_support_dynamic_type = false; c_where_constraints = [(([12:30-31], (Habstr ("T", []))), Constraint_eq, ([12:34-37], (Hprim Tint)))]; 
+      c_where_constraints = [(([12:30-31], (Habstr ("T", []))), Constraint_eq, ([12:34-37], (Hprim Tint)))]; 
       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
@@ -23,8 +23,7 @@
        c_name = ([14:7-18], "\\ListConstrs");
        c_tparams = [{ tp_variance = Invariant; tp_name = ([14:20-21], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
        c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
-       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-       c_support_dynamic_type = false;
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = [];
        c_where_constraints = [(([14:29-30], (Habstr ("T", []))), Constraint_eq, ([14:33-36], (Hprim Tint))); (([14:37-38], (Habstr ("T", []))), Constraint_eq, ([14:41-47], (Hprim Tstring)))];
        c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
@@ -43,8 +42,7 @@
        [{ tp_variance = Invariant; tp_name = ([16:21-22], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
          { tp_variance = Invariant; tp_name = ([16:24-26], "Tu"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
        c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
-       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-       c_support_dynamic_type = false;
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = [];
        c_where_constraints =
        [(([16:34-35], (Habstr ("T", []))), Constraint_eq, ([16:38-41], (Hprim Tint))); (
          ([16:43-45], (Habstr ("Tu", []))), Constraint_eq, ([16:48-54], (Hprim Tstring))); (
@@ -65,7 +63,7 @@
        c_tparams = [{ tp_variance = Invariant; tp_name = ([18:17-18], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
        c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-       c_support_dynamic_type = false; c_where_constraints = [(([18:26-27], (Habstr ("T", []))), Constraint_as, ([18:31-34], (Hprim Tint)))]; 
+       c_where_constraints = [(([18:26-27], (Habstr ("T", []))), Constraint_as, ([18:31-34], (Hprim Tint)))]; 
        c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
@@ -82,7 +80,7 @@
        c_tparams = [{ tp_variance = Invariant; tp_name = ([20:20-21], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
        c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-       c_support_dynamic_type = false; c_where_constraints = [(([20:29-30], (Habstr ("T", []))), Constraint_super, ([20:37-40], (Hprim Tint)))]; 
+       c_where_constraints = [(([20:29-30], (Habstr ("T", []))), Constraint_super, ([20:37-40], (Hprim Tint)))]; 
        c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =

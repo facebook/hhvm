@@ -36,8 +36,7 @@
       [{ tp_variance = Invariant; tp_name = ([3:9-10], "T"); tp_parameters = []; tp_constraints = [(Constraint_super, ([3:17-23], (Hprim Tstring)))]; tp_reified = Erased; tp_user_attributes = [] }];
       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-      c_support_dynamic_type = false; c_where_constraints = []; c_consts = []; 
-      c_typeconsts = []; c_vars = [];
+      c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = [];
       c_methods =
       [{ m_span = [4:3-6:4]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 

@@ -353,6 +353,9 @@ let class_ ctx c =
     let where_constraints =
       List.map c.c_where_constraints ~f:(FunUtils.where_constraint env)
     in
+    let support_dynamic_type =
+      Attrs.mem SN.UserAttributes.uaSupportDynamicType c.c_user_attributes
+    in
     let enum_type hint e =
       {
         te_base = hint e.e_base;
@@ -377,7 +380,7 @@ let class_ ctx c =
       sc_req_extends;
       sc_req_implements;
       sc_implements;
-      sc_support_dynamic_type = c.c_support_dynamic_type;
+      sc_support_dynamic_type = support_dynamic_type;
       sc_consts = List.filter_map c.c_consts ~f:(class_const env);
       sc_typeconsts = List.filter_map c.c_typeconsts ~f:(typeconst env c);
       sc_props = List.map ~f:(prop env) vars;

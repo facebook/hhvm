@@ -1697,7 +1697,16 @@ let check_class_parents_where_constraints env pc impl =
 
 let check_generic_class_with_SupportDynamicType env c parents =
   let (pc, c_name) = c.c_name in
-  if c.c_support_dynamic_type then
+  let check_support_dynamic_type =
+    Naming_attributes.mem
+      SN.UserAttributes.uaSupportDynamicType
+      c.c_user_attributes
+  in
+  if
+    TypecheckerOptions.enable_sound_dynamic
+      (Provider_context.get_tcopt (Env.get_ctx env))
+    && check_support_dynamic_type
+  then
     (* Any class that extends a class or implements an interface
      * that declares <<__SupportDynamicType>> must itself declare
      * <<__SupportDynamicType>>. This is checked elsewhere. But if any generic
@@ -1763,6 +1772,11 @@ let check_SupportDynamicType env c =
     TypecheckerOptions.enable_sound_dynamic
       (Provider_context.get_tcopt (Env.get_ctx env))
   then
+    let support_dynamic_type =
+      Naming_attributes.mem
+        SN.UserAttributes.uaSupportDynamicType
+        c.c_user_attributes
+    in
     let parent_names =
       List.filter_map
         (c.c_extends @ c.c_uses @ c.c_implements)
@@ -1788,11 +1802,11 @@ let check_SupportDynamicType env c =
                * that implements dynamic.  Upward well-formedness checks are performed in Typing_extends *)
               if
                 Cls.get_support_dynamic_type parent_type
-                && not c.c_support_dynamic_type
+                && not support_dynamic_type
               then
                 error_parent_support_dynamic_type
                   parent_type
-                  c.c_support_dynamic_type
+                  support_dynamic_type
             | Ast_defs.(Cenum | Cenum_class _ | Ctrait) -> ()
           end
         | None -> ())
@@ -2016,7 +2030,6 @@ let class_def_ env c tc =
       Aast.c_xhp_category = c.c_xhp_category;
       Aast.c_reqs = c.c_reqs;
       Aast.c_implements = c.c_implements;
-      Aast.c_support_dynamic_type = c.c_support_dynamic_type;
       Aast.c_where_constraints = c.c_where_constraints;
       Aast.c_consts = typed_consts;
       Aast.c_typeconsts = typed_typeconsts;

@@ -347,7 +347,6 @@ let class_ tenv c =
     (* TODO: c_reqs should be checked too. Problem: that causes errors in un-fixmeable places. *)
     c_reqs = _;
     c_implements;
-    c_support_dynamic_type = _;
     c_where_constraints;
     c_consts;
     c_typeconsts;

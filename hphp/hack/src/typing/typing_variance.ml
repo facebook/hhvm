@@ -949,7 +949,6 @@ let class_def : Typing_env_types.env -> Nast.class_ -> unit =
     c_xhp_attr_uses = _;
     c_xhp_category = _;
     c_reqs = _;
-    c_support_dynamic_type = _;
     c_consts = _;
     c_attributes = _;
     c_xhp_children = _;

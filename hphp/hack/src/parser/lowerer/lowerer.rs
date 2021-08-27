@@ -3238,12 +3238,6 @@ where
         attrs.iter().any(|attr| attr.name.1 == special_attrs::SOFT)
     }
 
-    fn has_support_dynamic_type(attrs: &[ast::UserAttribute]) -> bool {
-        attrs
-            .iter()
-            .any(|attr| attr.name.1 == special_attrs::SUPPORT_DYNAMIC_TYPE)
-    }
-
     fn soften_hint(attrs: &[ast::UserAttribute], hint: ast::Hint) -> ast::Hint {
         if Self::has_soft(attrs) {
             ast::Hint::new(hint.0.clone(), ast::Hint_::Hsoft(hint))
@@ -5180,8 +5174,6 @@ where
                     xhp_category: None,
                     reqs: vec![],
                     implements,
-                    support_dynamic_type: env.parser_options.tco_enable_sound_dynamic
-                        && Self::has_support_dynamic_type(&user_attributes),
                     where_constraints,
                     consts: vec![],
                     typeconsts: vec![],
@@ -5347,7 +5339,6 @@ where
                     tparams: vec![],
                     extends: vec![],
                     implements: vec![],
-                    support_dynamic_type: false,
                     where_constraints: vec![],
                     consts: Self::could_map(p_enumerator, &c.enumerators, env)?,
                     namespace: Self::mk_empty_ns_env(env),
@@ -5422,7 +5413,6 @@ where
                     tparams: vec![],
                     extends: extends.clone(),
                     implements: vec![],
-                    support_dynamic_type: false,
                     where_constraints: vec![],
                     consts: vec![],
                     namespace: Self::mk_empty_ns_env(env),

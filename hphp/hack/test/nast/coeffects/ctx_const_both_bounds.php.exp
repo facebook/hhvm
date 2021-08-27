@@ -4,7 +4,7 @@
       c_name = ([3:11-34], "\\WithLowerThenUpperBound"); c_tparams = []; 
       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-      c_support_dynamic_type = false; c_where_constraints = []; c_consts = [];
+      c_where_constraints = []; c_consts = [];
       c_typeconsts =
       [{ c_tconst_user_attributes = []; c_tconst_name = ([4:22-23], "C");
          c_tconst_kind =
@@ -28,7 +28,7 @@
        c_name = ([7:11-34], "\\WithUpperThenLowerBound"); c_tparams = []; 
        c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-       c_support_dynamic_type = false; c_where_constraints = []; c_consts = [];
+       c_where_constraints = []; c_consts = [];
        c_typeconsts =
        [{ c_tconst_user_attributes = []; c_tconst_name = ([8:22-23], "C");
           c_tconst_kind =

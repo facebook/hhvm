@@ -815,7 +815,6 @@ and ('ex, 'en) class_ = {
   c_xhp_category: (pos * pstring list) option;
   c_reqs: (class_hint * is_extends) list;
   c_implements: class_hint list;
-  c_support_dynamic_type: bool;
   c_where_constraints: where_constraint_hint list;
   c_consts: ('ex, 'en) class_const list;
   c_typeconsts: ('ex, 'en) class_typeconst_def list;

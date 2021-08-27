@@ -7,8 +7,7 @@ Errors:
       c_name = ([4:9-30], "\\A\\MyStringFileAttribute"); c_tparams = []; 
       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = [([4:42-59], (Happly (([4:42-59], "\\HH\\FileAttribute"), [])))]; 
-      c_support_dynamic_type = false; c_where_constraints = []; c_consts = []; 
-      c_typeconsts = [];
+      c_where_constraints = []; c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
          cv_visibility = Public; cv_type = ((string), (Some ([5:40-46], (Hprim Tstring)))); 
@@ -66,8 +65,7 @@ Errors:
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([8:9-16], "\\A\\MyClass"); c_tparams = []; c_extends = []; 
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false; 
-       c_where_constraints = [];
+       c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = [];
        c_consts =
        [{ cc_type = (Some ([9:11-17], (Hprim Tstring))); cc_id = ([9:18-32], "MY_CLASS_CONST"); cc_kind = (CCConcrete ((string), [9:35-57], (String "my class const value"))); cc_doc_comment = None }];
        c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = []; 
@@ -96,9 +94,9 @@ Errors:
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([16:9-21], "\\B\\MyOtherClass"); c_tparams = []; c_extends = []; 
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = []; c_support_dynamic_type = false; 
-       c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
+       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
+       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 

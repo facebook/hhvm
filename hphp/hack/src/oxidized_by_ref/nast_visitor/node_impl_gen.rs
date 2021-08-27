@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ca4d5561db552eb0fea011f6236b5f78>>
+// @generated SignedSource<<2609073e66976143137559ab30a79eea>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -423,21 +423,20 @@ impl<'a> Node<'a> for Class_<'a, &'a crate::pos::Pos<'a>, ()> {
                 xhp_category: ref __binding_14,
                 reqs: ref __binding_15,
                 implements: ref __binding_16,
-                support_dynamic_type: ref __binding_17,
-                where_constraints: ref __binding_18,
-                consts: ref __binding_19,
-                typeconsts: ref __binding_20,
-                vars: ref __binding_21,
-                methods: ref __binding_22,
-                attributes: ref __binding_23,
-                xhp_children: ref __binding_24,
-                xhp_attrs: ref __binding_25,
-                namespace: ref __binding_26,
-                user_attributes: ref __binding_27,
-                file_attributes: ref __binding_28,
-                enum_: ref __binding_29,
-                doc_comment: ref __binding_30,
-                emit_id: ref __binding_31,
+                where_constraints: ref __binding_17,
+                consts: ref __binding_18,
+                typeconsts: ref __binding_19,
+                vars: ref __binding_20,
+                methods: ref __binding_21,
+                attributes: ref __binding_22,
+                xhp_children: ref __binding_23,
+                xhp_attrs: ref __binding_24,
+                namespace: ref __binding_25,
+                user_attributes: ref __binding_26,
+                file_attributes: ref __binding_27,
+                enum_: ref __binding_28,
+                doc_comment: ref __binding_29,
+                emit_id: ref __binding_30,
             } => {
                 {
                     __binding_0.accept(v)
@@ -529,10 +528,7 @@ impl<'a> Node<'a> for Class_<'a, &'a crate::pos::Pos<'a>, ()> {
                 {
                     __binding_29.accept(v)
                 }
-                {
-                    __binding_30.accept(v)
-                }
-                { __binding_31.accept(v) }
+                { __binding_30.accept(v) }
             }
         }
     }

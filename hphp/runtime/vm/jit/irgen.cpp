@@ -134,7 +134,39 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
     assertx(inst->taken() && inst->taken()->isCatch());
   }
 
-  return env.irb->optimizeInst(inst, IRBuilder::CloneFlag::Yes, nullptr);
+  auto const outputInst = [&] {
+    return env.irb->optimizeInst(inst, IRBuilder::CloneFlag::Yes, nullptr);
+  };
+
+  /*
+   * In debug mode, emit eager syncs with high frequency to ensure that
+   * store and load elimination optimizations are correct. The correctness of
+   * the VMRegs is verified in VMRegAnchor.
+   */
+  auto const shouldStressEagerSync =
+    debug &&
+    inst->maySyncVMRegsWithSources() && !inst->marker().prologue() &&
+    !inst->is(CallBuiltin, Call, ContEnter) &&
+    (env.unit.numInsts() % 3 == 0);
+
+  if (shouldStressEagerSync) {
+    auto const bcSP = gen(
+      env,
+      LoadBCSP,
+      IRSPRelOffsetData { offsetFromIRSP(env, inst->marker().bcSPOff()) },
+      sp(env)
+    );
+    gen(env, StVMFP, fp(env));
+    gen(env, StVMSP, bcSP);
+    gen(env, StVMPC, cns(env, uintptr_t(inst->marker().sk().pc())));
+    genStVMReturnAddr(env);
+    gen(env, StVMRegState, cns(env, eagerlyCleanState()));
+    auto const res = outputInst();
+    gen(env, StVMRegState, cns(env, VMRegState::DIRTY));
+    return res;
+  }
+
+  return outputInst();
 }
 }
 

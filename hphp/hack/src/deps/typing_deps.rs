@@ -13,7 +13,7 @@ use ocamlrep_ocamlpool::ocaml_ffi;
 use once_cell::sync::OnceCell;
 use oxidized::typing_deps_mode::{HashMode, TypingDepsMode};
 use std::cell::RefCell;
-use std::collections::{BTreeMap, BTreeSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::convert::TryInto;
 use std::ffi::OsString;
 use std::io;
@@ -210,21 +210,21 @@ impl UnsafeDepGraph {
 ///
 /// The second field is used to keep track of the number of edges.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DepGraphDelta(BTreeMap<Dep, BTreeSet<Dep>>, usize);
+pub struct DepGraphDelta(HashMap<Dep, HashSet<Dep>>, usize);
 
 impl DepGraphDelta {
     pub fn new() -> Self {
-        DepGraphDelta(BTreeMap::new(), 0)
+        DepGraphDelta(HashMap::new(), 0)
     }
 
     pub fn insert(&mut self, dependent: Dep, dependency: Dep) {
-        let depts = self.0.entry(dependency).or_insert_with(|| BTreeSet::new());
+        let depts = self.0.entry(dependency).or_insert_with(|| HashSet::new());
         if depts.insert(dependent) {
             self.1 += 1;
         }
     }
 
-    pub fn get(&self, dependency: Dep) -> Option<&BTreeSet<Dep>> {
+    pub fn get(&self, dependency: Dep) -> Option<&HashSet<Dep>> {
         self.0.get(&dependency)
     }
 
@@ -498,18 +498,18 @@ impl CamlSerialize for DepSet {
 
 /// Rust set of visited hashes
 #[derive(Debug)]
-pub struct VisitedSet(RefCell<BTreeSet<Dep>>);
+pub struct VisitedSet(RefCell<HashSet<Dep>>);
 
 impl std::ops::Deref for VisitedSet {
-    type Target = RefCell<BTreeSet<Dep>>;
+    type Target = RefCell<HashSet<Dep>>;
 
-    fn deref(&self) -> &RefCell<BTreeSet<Dep>> {
+    fn deref(&self) -> &RefCell<HashSet<Dep>> {
         &self.0
     }
 }
 
-impl From<RefCell<BTreeSet<Dep>>> for VisitedSet {
-    fn from(x: RefCell<BTreeSet<Dep>>) -> Self {
+impl From<RefCell<HashSet<Dep>>> for VisitedSet {
+    fn from(x: RefCell<HashSet<Dep>>) -> Self {
         Self(x)
     }
 }
@@ -579,7 +579,7 @@ ocaml_ffi! {
     }
 
     fn hh_custom_dep_graph_add_extend_deps(mode: RawTypingDepsMode, query: Custom<DepSet>) -> Custom<DepSet> {
-        let mut visited = BTreeSet::new();
+        let mut visited = HashSet::new();
         let mut queue = VecDeque::new();
         let mut acc = query.clone();
         for source_class in query.iter() {
@@ -690,7 +690,7 @@ ocaml_ffi! {
 /// still valid.
 unsafe fn get_extend_deps_visit(
     mode: RawTypingDepsMode,
-    visited: &mut BTreeSet<Dep>,
+    visited: &mut HashSet<Dep>,
     queue: &mut VecDeque<Dep>,
     source_class: Dep,
     acc: &mut OrdSet<Dep>,
@@ -725,7 +725,7 @@ unsafe fn get_extend_deps_visit(
 // Auxiliary functions for Typing_deps.DepSet/Typing_deps.VisitedSet
 ocaml_ffi! {
     fn hh_visited_set_make() -> Custom<VisitedSet> {
-        Custom::from(RefCell::new(BTreeSet::new()).into())
+        Custom::from(RefCell::new(HashSet::new()).into())
     }
 
     fn hh_dep_set_make() -> Custom<DepSet> {
@@ -942,7 +942,8 @@ mod tests {
         for (dependency, dependent) in edges.iter() {
             x.insert(*dependency, *dependent)
         }
-        let v: Vec<_> = x.iter().collect();
+        let mut v: Vec<_> = x.iter().collect();
+        v.sort();
         assert_eq!(v, edges);
     }
 }

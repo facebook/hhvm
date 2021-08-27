@@ -467,6 +467,32 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 context.locals = result_lenv.clone();
                 finally_.recurse(context, self.object())
             }
+            aast::Stmt_::Switch(s) => {
+                let (condition, cases) = &mut **s;
+                condition.recurse(context, self.object())?;
+                let old_lenv = context.locals.clone();
+                let result_lenv =
+                    cases
+                        .iter_mut()
+                        .fold(
+                            context.locals.clone(),
+                            |result_lenv, mut case| match &mut case {
+                                aast::Case::Case(exp, b) => {
+                                    let _ = exp.recurse(context, self.object());
+                                    let case_lenv =
+                                        self.handle_single_block(context, old_lenv.clone(), b);
+                                    merge_lenvs(&result_lenv, &case_lenv)
+                                }
+                                aast::Case::Default(_, b) => {
+                                    let case_lenv =
+                                        self.handle_single_block(context, old_lenv.clone(), b);
+                                    merge_lenvs(&result_lenv, &case_lenv)
+                                }
+                            },
+                        );
+                context.locals = result_lenv.clone();
+                Ok(())
+            }
             _ => s.recurse(context, self.object()),
         }
     }

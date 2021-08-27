@@ -454,7 +454,7 @@ bool ConcurrentTableSharedStore::eraseImpl(const StringData* key,
     var->unreferenceRoot(storeVal.dataSize);
   }
 
-  APCStats::getAPCStats().removeKey(acc->first->size());
+  APCStats::getAPCStats().removeKey(acc->first->heapSize());
   auto const existing_key = acc->first;
 
   /*
@@ -885,7 +885,7 @@ bool ConcurrentTableSharedStore::storeImpl(const StringData* key,
       FTRACE(2, "Update {} {}\n", acc->first, show(acc->second));
     } else {
       FTRACE(2, "Add {} {}\n", acc->first, show(acc->second));
-      APCStats::getAPCStats().addKey(key->size());
+      APCStats::getAPCStats().addKey(kcp->heapSize());
     }
 
     int64_t adjustedMaxTTL = apply_ttl_limit(max_ttl);

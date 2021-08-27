@@ -240,7 +240,7 @@ let connect_persistent_client env =
   in
   fail_on_none
     "Expected persistent client to be connected"
-    env.ServerEnv.persistent_client;
+    (Ide_info_store.get_client ());
   env
 
 let assert_errors_in_phase

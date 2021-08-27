@@ -7,9 +7,8 @@
  *
  *)
 
-let send (env : ServerEnv.env) (status : ServerCommandTypes.busy_status) :
-    ServerEnv.seconds option =
-  match env.ServerEnv.persistent_client with
+let send (status : ServerCommandTypes.busy_status) : ServerEnv.seconds option =
+  match Ide_info_store.get_client () with
   | None -> None
   | Some client ->
     let message = ServerCommandTypes.BUSY_STATUS status in

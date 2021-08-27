@@ -14,7 +14,7 @@ module Test = Integration_test_base
 let test () =
   let env = Test.setup_server () in
   let env = Test.connect_persistent_client env in
-  let (env, _) =
+  let (_env, _) =
     Test.(
       run_loop_once
         env
@@ -27,6 +27,6 @@ let test () =
                     { ignore_ide = false; remote = false; max_errors = None }));
         })
   in
-  match env.ServerEnv.persistent_client with
+  match Ide_info_store.get () with
   | None -> ()
   | Some _ -> failwith "expected persistent client to be disconnected"

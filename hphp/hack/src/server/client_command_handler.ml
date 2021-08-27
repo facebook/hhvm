@@ -196,7 +196,7 @@ end = struct
       Hh_logger.log "Handling persistent client connection.";
       let handle_persistent_client_connection env =
         let env =
-          match env.ServerEnv.persistent_client with
+          match Ide_info_store.get_client () with
           | Some old_client ->
             ClientProvider.send_push_message_to_client
               old_client
@@ -208,19 +208,12 @@ end = struct
         ClientProvider.send_response_to_client
           client
           ServerCommandTypes.Connected;
-        let env =
-          {
-            env with
-            ServerEnv.persistent_client =
-              Some (Ide_info_store.make_persistent_and_track_new_ide client);
-          }
-        in
+        Ide_info_store.new_ client;
         (* If the client connected in the middle of recheck, let them know it's
          * happening. *)
         (if ServerEnv.is_full_check_started env.ServerEnv.full_check_status then
           let (_ : ServerEnv.seconds option) =
             ServerBusyStatus.send
-              env
               (ServerCommandTypes.Doing_global_typecheck
                  (ServerCheckUtils.global_typecheck_kind genv env))
           in
@@ -228,7 +221,7 @@ end = struct
         env
       in
       if
-        Option.is_some env.ServerEnv.persistent_client
+        Option.is_some @@ Ide_info_store.get_client ()
         (* Cleaning up after existing client (in shutdown_persistent_client)
          * will attempt to write to shared memory *)
       then (

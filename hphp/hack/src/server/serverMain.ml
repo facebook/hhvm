@@ -571,7 +571,7 @@ let push_diagnostics genv env : env * string * seconds_since_epoch option =
     match env.diag_subscribe with
     | None -> (env, "no diag subscriptions", None)
     | Some sub ->
-      let client = Option.value_exn env.persistent_client in
+      let client = Option.value_exn (Ide_info_store.get_client ()) in
       (* Should we hold off sending diagnostics to the client? *)
       if ClientProvider.client_has_message client then
         (env, "client has message", None)
@@ -655,7 +655,7 @@ let serve_one_iteration genv env client_provider =
     | Some client_kind ->
       ClientProvider.sleep_and_check
         client_provider
-        env.persistent_client
+        (Ide_info_store.get_client ())
         ~ide_idle:env.ide_idle
         ~idle_gc_slice:genv.local_config.ServerLocalConfig.idle_gc_slice
         client_kind
@@ -776,50 +776,44 @@ let serve_one_iteration genv env client_provider =
           env
       end
   in
-  let has_persistent_connection_request =
-    (* has_persistent_connection_request means that at the beginning of this
-     * iteration of main loop there was a request to read and handle.
-     * We'll now try to do it, but it's possible that we have ran a recheck
-     * in-between  those two events, and if this recheck was non-blocking, we
-     * might have already handled this command there. Proceeding to
-     * handle_connection would then block reading a request that is not there
-     * anymore, so we need to check and update has_persistent_connection_request
-     * again. *)
-    Option.value_map
-      env.persistent_client
-      ~f:ClientProvider.has_persistent_connection_request
-      ~default:false
-  in
   let env =
-    if has_persistent_connection_request then (
-      let client = Utils.unsafe_opt env.persistent_client in
-      (* client here is the existing persistent client *)
-      (* whose request we're going to handle.          *)
-      HackEventLogger.got_persistent_client_channels t_start_recheck;
-      try
-        let env =
-          Client_command_handler.handle_client_command_or_persistent_connection
-            genv
-            env
-            client
-            `Persistent
-          |> main_loop_command_handler `Persistent client
-        in
-        HackEventLogger.handled_persistent_connection t_start_recheck;
+    match Ide_info_store.get_client () with
+    | None -> env
+    | Some client ->
+      (* Test whether at the beginning of this iteration of main loop
+       * there was a request to read and handle.
+       * If yes, we'll try to do it, but it's possible that we have ran a recheck
+       * in-between those two events, and if this recheck was non-blocking, we
+       * might have already handled this command there. Proceeding to
+       * handle_connection would then block reading a request that is not there
+       * anymore, so we need to call has_persistent_connection_request again. *)
+      if ClientProvider.has_persistent_connection_request client then (
+        HackEventLogger.got_persistent_client_channels t_start_recheck;
+        try
+          let env =
+            Client_command_handler
+            .handle_client_command_or_persistent_connection
+              genv
+              env
+              client
+              `Persistent
+            |> main_loop_command_handler `Persistent client
+          in
+          HackEventLogger.handled_persistent_connection t_start_recheck;
+          env
+        with
+        | exn ->
+          let e = Exception.wrap exn in
+          HackEventLogger.handle_persistent_connection_exception
+            "outer"
+            e
+            ~is_fatal:true;
+          Hh_logger.log
+            "HANDLE_PERSISTENT_CONNECTION_EXCEPTION(outer) [ignoring request] %s"
+            (Exception.to_string e);
+          env
+      ) else
         env
-      with
-      | exn ->
-        let e = Exception.wrap exn in
-        HackEventLogger.handle_persistent_connection_exception
-          "outer"
-          e
-          ~is_fatal:true;
-        Hh_logger.log
-          "HANDLE_PERSISTENT_CONNECTION_EXCEPTION(outer) [ignoring request] %s"
-          (Exception.to_string e);
-        env
-    ) else
-      env
   in
   let env =
     match env.pending_command_needs_writes with
@@ -897,7 +891,7 @@ let priority_client_interrupt_handler genv client_provider :
       ) else
         ClientProvider.sleep_and_check
           client_provider
-          env.persistent_client
+          (Ide_info_store.get_client ())
           ~ide_idle:env.ide_idle
           ~idle_gc_slice
           `Priority
@@ -965,7 +959,7 @@ let persistent_client_interrupt_handler genv :
     env MultiThreadedCall.interrupt_handler =
  fun env ->
   Hh_logger.info "Handling message on persistent client socket.";
-  match env.persistent_client with
+  match Ide_info_store.get_client () with
   (* Several handlers can become ready simultaneously and one of them can remove
    * the persistent client before we get to it. *)
   | None -> (env, MultiThreadedCall.Continue)
@@ -1037,7 +1031,9 @@ let setup_interrupts env client_provider =
           | _ -> handlers
         in
         let handlers =
-          match env.persistent_client >>= ClientProvider.get_client_fd with
+          match
+            Ide_info_store.get_client () >>= ClientProvider.get_client_fd
+          with
           | Some fd when interrupt_on_client ->
             (fd, persistent_client_interrupt_handler genv) :: handlers
           | _ -> handlers

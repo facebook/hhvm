@@ -31,14 +31,20 @@ type t = {
   open_files: Relative_path.Set.t;
 }
 
+(* We track the IDE using a global reference instead of using the server env (ServerEnv.env)
+   because:
+   - the code that agglomerates job results needs access to the IDE to stream errors
+   - but that code does not have access to the server environment, as it can be called without a server
+   - besides, interrupts passed to MultiWorker can edit IDE info. We want the code agglomerating job results
+     to see those changes. *)
 let ide_info : t option ref = ref None
 
-let make_persistent_and_track_new_ide client =
+let new_ client =
   let client = ClientProvider.make_persistent client in
   let id = ClientId.make () in
   Hh_logger.info "[Ide_info_store] New tracked IDE with ID %d." id;
   ide_info := Some { id; client; open_files = Relative_path.Set.empty };
-  client
+  ()
 
 let ide_disconnect () =
   Option.iter !ide_info ~f:(fun ide_info ->
@@ -56,3 +62,5 @@ let with_close_file file ide =
 let close_file file = ide_info := !ide_info >>| with_close_file file
 
 let get () = !ide_info
+
+let get_client () = get () >>| fun { client; _ } -> client

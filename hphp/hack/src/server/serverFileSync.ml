@@ -145,7 +145,7 @@ let edit_file ~predeclare env path (edits : File_content.text_edit list) =
       let ctx = Provider_utils.ctx_from_server_env env in
       Decl.make_env ~sh:SharedMem.Uses ctx path);
     let (_ : ServerEnv.seconds option) =
-      ServerBusyStatus.send env ServerCommandTypes.Needs_local_typecheck
+      ServerBusyStatus.send ServerCommandTypes.Needs_local_typecheck
     in
     let file_content =
       match File_provider.get path with
@@ -190,7 +190,7 @@ let clear_sync_data env =
         close_relative_path env x)
   in
   Ide_info_store.ide_disconnect ();
-  { env with persistent_client = None; diag_subscribe = None }
+  { env with diag_subscribe = None }
 
 (** Determine which files are different in the IDE and on disk.
     This is achieved using File_provider for the IDE content and reading file from disk.

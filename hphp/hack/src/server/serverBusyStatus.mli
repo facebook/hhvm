@@ -10,5 +10,4 @@
     Returns the timestamp of the send or None if nothing
     was sent, e.g. because of there is no persistent client
     or sending failed. *)
-val send :
-  ServerEnv.env -> ServerCommandTypes.busy_status -> ServerEnv.seconds option
+val send : ServerCommandTypes.busy_status -> ServerEnv.seconds option

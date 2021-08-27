@@ -45,7 +45,7 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
 
   (* include current state of diagnostics on client, as we know it *)
   let subscription_data =
-    match (env.diag_subscribe, env.persistent_client) with
+    match (env.diag_subscribe, Ide_info_store.get_client ()) with
     | (None, None) -> "no diag subscription, no client"
     | (Some _, None) -> "?? diagnostics subscription but no client ??"
     | (None, Some _) -> "?? client but no diagnostics subscription ??"

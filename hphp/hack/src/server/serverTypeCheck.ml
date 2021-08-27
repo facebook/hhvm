@@ -1935,7 +1935,7 @@ let type_check_unsafe genv env kind start_time profiling =
       "Check kind: will check only those files already open in IDE or with reported errors ('%s')"
       check_kind;
     let (_ : seconds option) =
-      ServerBusyStatus.send env ServerCommandTypes.Doing_local_typecheck
+      ServerBusyStatus.send ServerCommandTypes.Doing_local_typecheck
     in
     let telemetry =
       Telemetry.duration telemetry ~key:"core_start" ~start_time
@@ -1949,7 +1949,7 @@ let type_check_unsafe genv env kind start_time profiling =
       |> Telemetry.object_ ~key:"core" ~value:core_telemetry
     in
     let t_sent_done =
-      ServerBusyStatus.send env ServerCommandTypes.Done_local_typecheck
+      ServerBusyStatus.send ServerCommandTypes.Done_local_typecheck
     in
     let stats = CheckStats.record_result_sent_ts stats t_sent_done in
     let telemetry = Telemetry.duration telemetry ~key:"sent_done" ~start_time in
@@ -1960,7 +1960,6 @@ let type_check_unsafe genv env kind start_time profiling =
       check_kind;
     let (_ : seconds option) =
       ServerBusyStatus.send
-        env
         (ServerCommandTypes.Doing_global_typecheck
            (global_typecheck_kind genv env))
     in
@@ -1986,7 +1985,7 @@ let type_check_unsafe genv env kind start_time profiling =
         in
         let total = Option.value is_truncated ~default:shown in
         let msg = ServerCommandTypes.Done_global_typecheck { shown; total } in
-        ServerBusyStatus.send env msg
+        ServerBusyStatus.send msg
       else
         None
     in

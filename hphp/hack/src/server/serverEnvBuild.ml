@@ -285,7 +285,6 @@ let make_env ~init_id ~deps_mode config : ServerEnv.env =
       };
     errorl = Errors.empty;
     failed_naming = Relative_path.Set.empty;
-    persistent_client = None;
     ide_idle = false;
     last_command_time = 0.0;
     last_notifier_check_time = 0.0;

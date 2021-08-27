@@ -19,8 +19,7 @@ type t = {
 }
 
 (** Make this client persistent and track a new IDE client. *)
-val make_persistent_and_track_new_ide :
-  ClientProvider.client -> ClientProvider.client
+val new_ : ClientProvider.client -> unit
 
 (** Notify that the IDE has disconnected and stop tracking it. *)
 val ide_disconnect : unit -> unit
@@ -33,3 +32,5 @@ val close_file : Relative_path.t -> unit
 
 (** Get current IDE tracked information. *)
 val get : unit -> t option
+
+val get_client : unit -> ClientProvider.client option

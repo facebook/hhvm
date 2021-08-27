@@ -231,9 +231,7 @@ let connect_persistent () =
     | ClientProvider.Select_nothing ->
       assert false
   in
-  let (_ : ClientProvider.client) =
-    Ide_info_store.make_persistent_and_track_new_ide client
-  in
+  Ide_info_store.new_ client;
   ()
 
 let test_push _ =

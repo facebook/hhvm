@@ -741,6 +741,14 @@ let merge
   diagnostic_pusher := diag_pusher;
   time_first_error := Option.first_some !time_first_error time_errors_pushed;
 
+  Typing_deps.register_discovered_dep_edges produced_by_job.dep_edges;
+  Typing_deps.register_discovered_dep_edges acc.dep_edges;
+
+  let produced_by_job =
+    { produced_by_job with dep_edges = Typing_deps.dep_edges_make () }
+  in
+  let acc = { acc with dep_edges = Typing_deps.dep_edges_make () } in
+
   accumulate_job_output produced_by_job acc
 
 let next

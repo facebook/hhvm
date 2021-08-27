@@ -407,6 +407,8 @@ type t = {
   load_state_natively: bool;
   (* make hh_server query and download saved state. *)
   load_state_natively_64bit: bool;
+  no_load_64bit: bool;
+  (* if doing a full init, do it in 64-bit mode *)
   load_state_natively_download_timeout: int;
   (* in seconds *)
   load_state_natively_dirty_files_timeout: int;
@@ -564,6 +566,7 @@ let default =
     require_saved_state = false;
     load_state_natively = false;
     load_state_natively_64bit = false;
+    no_load_64bit = false;
     load_state_natively_download_timeout = 60;
     load_state_natively_dirty_files_timeout = 200;
     type_decl_bucket_size = 1000;
@@ -808,6 +811,13 @@ let load_ fn ~silent ~current_version overrides =
     bool_if_min_version
       "load_state_natively_64bit"
       ~default:default.load_state_natively_64bit
+      ~current_version
+      config
+  in
+  let no_load_64bit =
+    bool_if_min_version
+      "no_load_64bit"
+      ~default:default.no_load_64bit
       ~current_version
       config
   in
@@ -1208,6 +1218,7 @@ let load_ fn ~silent ~current_version overrides =
     require_saved_state;
     load_state_natively;
     load_state_natively_64bit;
+    no_load_64bit;
     load_state_natively_download_timeout;
     load_state_natively_dirty_files_timeout;
     max_purgatory_clients;

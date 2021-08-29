@@ -371,7 +371,6 @@ public:
       bool isNative            : 1;
       bool isGenerator         : 1;
       bool isPairGenerator     : 1;
-      bool isReadonlyReturn    : 1;
       bool hasParamsWithMultiUBs : 1;
       bool hasReturnWithMultiUBs : 1;
     };

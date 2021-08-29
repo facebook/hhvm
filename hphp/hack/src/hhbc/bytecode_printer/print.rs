@@ -328,9 +328,6 @@ fn print_fun_def<W: Write>(
     if fun_def.is_pair_generator() {
         w.write(" isPairGenerator")?;
     }
-    if fun_def.is_readonly_return() {
-        w.write(" isReadonlyReturn")?;
-    }
     w.write(" ")?;
     braces(w, |w| {
         ctx.block(w, |c, w| print_body(c, w, body, &fun_def.coeffects))?;
@@ -783,12 +780,6 @@ fn print_method_def<W: Write>(
     if method_def.flags.contains(HhasMethodFlags::IS_CLOSURE_BODY) {
         w.write(" isClosureBody")?;
     }
-    if method_def
-        .flags
-        .contains(HhasMethodFlags::IS_READONLY_RETURN)
-    {
-        w.write(" isReadonlyReturn")?;
-    }
     w.write(" ")?;
     braces(w, |w| {
         ctx.block(w, |c, w| print_body(c, w, body, &method_def.coeffects))?;
@@ -821,6 +812,9 @@ fn print_method_attrs<W: Write>(
     }
     if m.flags.contains(HhasMethodFlags::IS_ABSTRACT) {
         special_attrs.push("abstract");
+    }
+    if m.flags.contains(HhasMethodFlags::IS_READONLY_RETURN) {
+        special_attrs.push("readonly_return");
     }
     if m.flags.contains(HhasMethodFlags::IS_READONLY_THIS) {
         special_attrs.push("readonly_this");
@@ -3207,6 +3201,9 @@ fn print_fun_attrs<W: Write>(
     }
     if f.is_no_injection() {
         special_attrs.push("no_injection");
+    }
+    if f.is_readonly_return() {
+        special_attrs.push("readonly_return");
     }
     if ctx.is_system_lib() || (has_dynamically_callable(user_attrs) && !f.is_memoize_impl()) {
         special_attrs.push("dyn_callable")

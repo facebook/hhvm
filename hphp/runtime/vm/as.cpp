@@ -2661,8 +2661,6 @@ void parse_function_flags(AsmState& as) {
       as.fe->isClosureBody = true;
     } else if (flag == "isPairGenerator") {
       as.fe->isPairGenerator = true;
-    } else if (flag == "isReadonlyReturn") {
-      as.fe->isReadonlyReturn = true;
     } else {
       as.error("Unexpected function flag \"" + flag + "\"");
     }

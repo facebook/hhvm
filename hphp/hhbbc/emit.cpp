@@ -1113,7 +1113,6 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   fe.setNumClosures(func.numClosures);
   fe.hasParamsWithMultiUBs = func.hasParamsWithMultiUBs;
   fe.hasReturnWithMultiUBs = func.hasReturnWithMultiUBs;
-  fe.isReadonlyReturn = func.isReadonlyReturn;
 
   for (auto& name : func.staticCoeffects) fe.staticCoeffects.push_back(name);
   for (auto& rule : func.coeffectRules)   fe.coeffectRules.push_back(rule);

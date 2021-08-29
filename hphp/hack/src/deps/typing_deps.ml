@@ -824,13 +824,8 @@ let merge_dep_edges (x : dep_edges) (y : dep_edges) : dep_edges =
   | _ -> None
 
 let register_discovered_dep_edges : dep_edges -> unit = function
-  | None ->
-    Hh_logger.log "No discovered dependency edges to register in 32-bit mode"
-  | Some batch ->
-    Hh_logger.log
-      "Registering %d discovered 64-bit dependency edges"
-      (CustomGraph.DepEdgeSet.cardinal batch);
-    CustomGraph.register_discovered_dep_edges batch
+  | None -> ()
+  | Some batch -> CustomGraph.register_discovered_dep_edges batch
 
 let save_discovered_edges mode ~dest ~build_revision ~reset_state_after_saving =
   match mode with

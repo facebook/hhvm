@@ -462,7 +462,7 @@ fn make_closure(
         final_: false,
         abstract_: false,
         static_: is_static,
-        readonly_this: false, // readonly on closure_convert
+        readonly_this: fd.readonly_this.is_some(),
         visibility: Visibility::Public,
         name: Id(fd.name.0.clone(), "__invoke".into()),
         tparams: fun_tparams,

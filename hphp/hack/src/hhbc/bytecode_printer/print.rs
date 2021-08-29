@@ -822,6 +822,9 @@ fn print_method_attrs<W: Write>(
     if m.flags.contains(HhasMethodFlags::IS_ABSTRACT) {
         special_attrs.push("abstract");
     }
+    if m.flags.contains(HhasMethodFlags::IS_READONLY_THIS) {
+        special_attrs.push("readonly_this");
+    }
     if has_foldable(user_attrs) {
         special_attrs.push("foldable");
     }

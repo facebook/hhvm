@@ -279,6 +279,7 @@ pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     flags.set(HhasMethodFlags::IS_INTERCEPTABLE, is_interceptable);
     flags.set(HhasMethodFlags::IS_MEMOIZE_IMPL, is_memoize);
     flags.set(HhasMethodFlags::IS_READONLY_RETURN, is_readonly_return);
+    flags.set(HhasMethodFlags::IS_READONLY_THIS, method.readonly_this);
     flags.set(HhasMethodFlags::NO_INJECTION, is_no_injection);
     Ok(HhasMethod {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),

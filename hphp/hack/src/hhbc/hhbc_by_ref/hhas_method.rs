@@ -38,7 +38,8 @@ bitflags! {
         const IS_INTERCEPTABLE = 1 << 8;
         const IS_MEMOIZE_IMPL = 1 << 9;
         const IS_READONLY_RETURN = 1 << 10;
-        const NO_INJECTION = 1 << 11;
+        const IS_READONLY_THIS = 1 << 11;
+        const NO_INJECTION = 1 << 12;
     }
 }
 

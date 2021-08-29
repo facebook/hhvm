@@ -40,9 +40,6 @@ enum Attr {
   // simply memcpy-ing from the initializer vector.          |         //
   AttrDeepInit             = (1u <<  0), //       |    X     |         //
                                          //       |          |         //
-  // Indicates that the function returns readonly value
-  AttrReadonlyReturn       = (1u <<  0), //       |          |    X    //
-                                         //       |          |         //
   // Method visibility.  The relative ordering of these is important.  //
   // N.B. the values are overlayed with some of the no-override bits for magic
   // class methods (next), since they don't apply to classes.
@@ -118,6 +115,15 @@ enum Attr {
   // not extended, or on a method that no extending class defines the method.
   AttrNoOverride           = (1u << 13), //    X  |          |    X    //
                                          //       |          |         //
+  // Indicates that this property was declared as readonly             //
+  AttrIsReadonly           = (1u << 14), //       |    X     |         //
+                                         //       |          |         //
+  // Indicates that the function does not modify its instance
+  AttrReadonlyThis         = (1u << 14), //       |          |    X    //
+                                         //       |          |         //
+  // Indicates that the function returns readonly value
+  AttrReadonlyReturn       = (1u << 15), //       |          |    X    //
+                                         //       |          |         //
   // Indicates that the function, class or static property can be loaded
   // once and then persisted across all requests. |          |         //
   AttrPersistent           = (1u << 18), //    X  |    X     |    X    //
@@ -149,8 +155,6 @@ enum Attr {
                            = (1u << 25), //    X  |          |         //
   // Set on functions with coeffect rules
   AttrHasCoeffectRules     = (1u << 25), //       |          |    X    //
-  // Indicates that this property was declared as readonly             //
-  AttrIsReadonly           = (1u << 26), //       |    X     |         //
                                          //       |          |         //
   // Indicates that this function can be constant-folded if it is called with
   // all constant arguments.             //       |          |         //

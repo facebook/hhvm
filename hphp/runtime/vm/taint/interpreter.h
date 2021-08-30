@@ -40,15 +40,6 @@ namespace taint {
 
 using jit::TCA;
 
-struct Configuration {
-  static std::shared_ptr<Configuration> get();
-
-  void read(const std::string& path);
-
-  std::set<std::string> sources;
-  std::set<std::string> sinks;
-};
-
 struct Path {
   // Print trace in JSON-line format to stderr.
   void dump() const;

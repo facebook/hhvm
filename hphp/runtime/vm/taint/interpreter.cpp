@@ -19,15 +19,13 @@
 #include <sstream>
 
 #include <folly/Singleton.h>
-#include <folly/json.h>
-
-#include <boost/filesystem/string_file.hpp>
 
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/method-lookup.h"
-#include "hphp/runtime/vm/taint.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/runtime/vm/taint/configuration.h"
+#include "hphp/runtime/vm/taint/interpreter.h"
 
 #include "hphp/util/trace.h"
 
@@ -68,47 +66,6 @@ namespace HPHP {
 namespace taint {
 
 TRACE_SET_MOD(taint);
-
-namespace {
-
-struct ConfigurationSingletonTag {};
-struct StateSingletonTag {};
-
-} // namespace
-
-InitFiniNode s_configurationInitialization(
-    []() {
-      Configuration::get()->read(RO::EvalTaintConfigurationPath);
-      State::get()->initialize();
-    },
-    InitFiniNode::When::ProcessInit);
-
-void Configuration::read(const std::string& path) {
-  sources.clear();
-  sinks.clear();
-
-  try {
-    std::string contents;
-    boost::filesystem::load_string_file(path, contents);
-    auto parsed = folly::parseJson(contents);
-    for (const auto source : parsed["sources"]) {
-      sources.insert(source.asString());
-    }
-    for (const auto sink : parsed["sinks"]) {
-      sinks.insert(sink.asString());
-    }
-  } catch (std::exception& exception) {
-    // Swallow because we don't use it in tests.
-    std::cerr << "taint: warning, unable to read configuration ("
-              << exception.what() << ")" << std::endl;
-  }
-}
-
-folly::Singleton<Configuration, ConfigurationSingletonTag>
-    kConfigurationSingleton{};
-/* static */ std::shared_ptr<Configuration> Configuration::get() {
-  return kConfigurationSingleton.try_get();
-}
 
 void Path::dump() const {
   std::stringstream stream;
@@ -210,9 +167,21 @@ void Heap::clear() {
   m_heap.clear();
 }
 
-folly::Singleton<State, StateSingletonTag> kStateSingleton{};
+namespace {
+
+struct SingletonTag {};
+
+} // namespace
+
+InitFiniNode s_stateInitialization(
+    []() {
+      State::get()->initialize();
+    },
+    InitFiniNode::When::ProcessInit);
+
+folly::Singleton<State, SingletonTag> kSingleton{};
 /* static */ std::shared_ptr<State> State::get() {
-  return kStateSingleton.try_get();
+  return kSingleton.try_get();
 }
 
 void State::initialize() {

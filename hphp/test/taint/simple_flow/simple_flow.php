@@ -6,8 +6,7 @@ function __source(): int {
 
 function __sink($input): void {}
 
-<<__EntryPoint>>
-function main(): void {
+<<__EntryPoint>> function main(): void {
   $data = __source();
   $derp = $data;
   __sink($derp);

@@ -56,7 +56,6 @@ struct Path {
 };
 
 using Value = Optional<Path>;
-std::ostream& operator<<(std::ostream& out, const HPHP::taint::Value& value);
 
 struct Stack {
   Stack(const std::vector<Value>& stack = {}) : m_stack(stack) {}

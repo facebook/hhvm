@@ -1,1 +1,1 @@
--vEval.TaintConfigurationPath=configuration.json
+-vEval.TaintConfigurationPath=hphp/test/taint/simple_flow/configuration.json

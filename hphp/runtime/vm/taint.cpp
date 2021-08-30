@@ -25,10 +25,44 @@
 
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/taint.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/trace.h"
+
+namespace folly {
+
+template<> class FormatValue<HPHP::taint::Value> {
+ public:
+  explicit FormatValue(const HPHP::taint::Value& value): m_value(value) {}
+  template<class FormatCallback>
+  void format(FormatArg& arg, FormatCallback& cb) const {
+    auto value = m_value ? "S" : "_";
+    FormatValue<std::string>(value).format(arg, cb);
+  }
+ private:
+  const HPHP::taint::Value& m_value;
+};
+
+template<> class FormatValue<HPHP::tv_lval> {
+ public:
+  explicit FormatValue(const HPHP::tv_lval& value): m_value(value) {}
+  template<class FormatCallback>
+  void format(FormatArg& arg, FormatCallback& cb) const {
+    if (!m_value.is_set()) {
+      FormatValue<std::string>("<nullptr>").format(arg, cb);
+      return;
+    }
+    auto string = folly::sformat("<{}>", uintptr_t(&m_value.val()));
+    format_value::formatString(string, arg, cb);
+  }
+ private:
+  const HPHP::tv_lval& m_value;
+};
+
+} // folly
+
 
 namespace HPHP {
 namespace taint {
@@ -89,7 +123,7 @@ void Path::dump() const {
   std::cerr << stream.str() << std::endl;
 }
 
-std::ostream& operator<<(std::ostream& out, const Value& value) {
+std::ostream& operator<<(std::ostream& out, const HPHP::taint::Value& value) {
   if (!value) {
     return out << "_";
   } else {
@@ -160,13 +194,10 @@ void Stack::clear() {
 }
 
 void Heap::set(tv_lval to, const Value& value) {
-  FTRACE(2, "taint: setting lval to `value`\n" /*, value */); // TODO
   m_heap[to] = value;
 }
 
 Value Heap::get(tv_lval from) const {
-  FTRACE(2, "taint: getting from lval\n");
-
   auto value = m_heap.find(from);
   if (value != m_heap.end()) {
     return value->second;
@@ -202,16 +233,26 @@ void State::reset() {
 namespace {
 
 void iopPreamble(const std::string& name) {
-  auto stack_size = vmStack().count();
+  auto vm_stack_size = vmStack().count();
+
   FTRACE(1, "taint: iop{}\n", name);
   FTRACE(4, "taint: stack: {}\n", State::get()->stack.show());
-  auto shadow_stack_size = State::get()->stack.size();
-  if (stack_size != shadow_stack_size) {
+
+  auto& stack = State::get()->stack;
+  auto shadow_stack_size = stack.size();
+  if (vm_stack_size != shadow_stack_size) {
     FTRACE(
         3,
-        "taint: (WARNING) stacks out of sync (stack size: {}, shadow stack size: {})\n",
-        stack_size,
+        "taint: (WARNING) stacks out of sync "
+        "(stack size: {}, shadow stack size: {}). Adjusting...\n",
+        vm_stack_size,
         shadow_stack_size);
+    for (int i = shadow_stack_size; i <= vm_stack_size; i++) {
+      stack.push(std::nullopt);
+    }
+    for (int i = vm_stack_size; i > shadow_stack_size; i--) {
+      stack.pop();
+    }
   }
 }
 
@@ -257,7 +298,8 @@ void iopPopL(tv_lval /* to */) {
 }
 
 void iopDup() {
-  iopUnhandled("Dup");
+  iopPreamble("Dup");
+  State::get()->stack.push(std::nullopt);
 }
 
 void iopCGetCUNop() {
@@ -650,6 +692,9 @@ void iopCGetL(named_local_var fr) {
 
   auto state = State::get();
   auto value = state->heap.get(fr.lval);
+
+  FTRACE(2, "taint: getting {} (name: {}, value: {})\n", fr.lval, fr.name, value);
+
   state->stack.push(value);
 }
 
@@ -729,6 +774,10 @@ void iopSetL(tv_lval to) {
   iopPreamble("SetL");
 
   auto state = State::get();
+  auto value = state->stack.top();
+
+  FTRACE(2, "taint: setting {} to `{}`\n", to, value);
+
   state->heap.set(to, state->stack.top());
 }
 
@@ -829,7 +878,8 @@ void iopNewObjR() {
 }
 
 void iopNewObjD(Id /* id */) {
-  iopUnhandled("NewObjD");
+  iopPreamble("NewObjD");
+  State::get()->stack.push(std::nullopt);
 }
 
 void iopNewObjRD(Id /* id */) {
@@ -841,7 +891,7 @@ void iopNewObjS(SpecialClsRef /* ref */) {
 }
 
 void iopLockObj() {
-  iopUnhandled("LockObj");
+  iopPreamble("LockObj");
 }
 
 TCA iopFCallClsMethod(
@@ -894,9 +944,26 @@ TCA iopFCallCtor(
     bool /* retToJit */,
     PC /* origpc */,
     PC& /* pc */,
-    const FCallArgs& /* fca */,
+    const FCallArgs& fca,
     const StringData*) {
-  iopUnhandled("FCallCtor");
+  iopPreamble("FCallCtor");
+
+  auto const obj = vmStack()
+      .indC(fca.numInputs() + (kNumActRecCells - 1))
+      ->m_data.pobj;
+
+  const Func* func;
+  auto ar = vmfp();
+  auto ctx = ar == nullptr ? nullptr : ar->func()->cls();
+  lookupCtorMethod(
+      func,
+      obj->getVMClass(),
+      ctx,
+      MethodLookupErrorOptions::RaiseOnNotFound);
+  auto name = func->fullName()->data();
+
+  FTRACE(1, "taint: -> calling `{}`\n", name);
+
   return nullptr;
 }
 
@@ -1045,7 +1112,12 @@ void iopVerifyParamType(local_var param) {
 
   auto value = state->stack.peek(func->numParams() - (param.index + 1));
   if (value) {
-    FTRACE(2, "taint: parameter is tainted\n");
+    FTRACE(
+        2,
+        "taint: setting parameter {} (index: {}) to `{}`\n",
+        param.lval,
+        param.index,
+        value);
     value->hops.push_back(func);
     state->heap.set(param.lval, value);
   }

@@ -1,0 +1,4 @@
+{"hops": ["__source", "__sink"]}
+{"hops": ["__source", "MyClass::identity", "__sink"]}
+{"hops": ["__source", "MySubClass::identity", "__sink"]}
+{"hops": ["__source", "MyClass::static_identity", "__sink"]}

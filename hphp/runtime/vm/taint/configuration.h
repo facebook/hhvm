@@ -20,6 +20,33 @@
 
 #include <set>
 #include <string>
+#include <unordered_set>
+
+#include <boost/functional/hash.hpp>
+
+namespace HPHP {
+namespace taint {
+
+struct Sink {
+  bool operator==(const Sink& other) const;
+  std::string name;
+  int64_t index;
+};
+
+using SinkSet = std::unordered_set<Sink>;
+
+} // namespace taint
+} // namespace HPHP
+
+template <>
+struct std::hash<HPHP::taint::Sink> {
+  std::size_t operator()(const HPHP::taint::Sink& sink) const {
+    std::size_t seed = 0;
+    boost::hash_combine(seed, sink.name);
+    boost::hash_combine(seed, sink.index);
+    return seed;
+  }
+};
 
 namespace HPHP {
 namespace taint {
@@ -30,7 +57,11 @@ struct Configuration {
   void read(const std::string& path);
 
   std::set<std::string> sources;
-  std::set<std::string> sinks;
+
+  void addSink(const Sink& sink);
+  const SinkSet& sinks(const std::string& name) const;
+ private:
+  std::unordered_map<std::string, SinkSet> m_sinks;
 };
 
 } // namespace taint

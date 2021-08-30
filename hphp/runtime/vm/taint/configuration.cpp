@@ -29,6 +29,10 @@
 namespace HPHP {
 namespace taint {
 
+bool Sink::operator==(const Sink& other) const {
+  return name == other.name && index == other.index;
+}
+
 namespace {
 
 struct SingletonTag {};
@@ -43,7 +47,7 @@ InitFiniNode s_configurationInitialization(
 
 void Configuration::read(const std::string& path) {
   sources.clear();
-  sinks.clear();
+  m_sinks.clear();
 
   try {
     std::string contents;
@@ -53,7 +57,7 @@ void Configuration::read(const std::string& path) {
       sources.insert(source.asString());
     }
     for (const auto sink : parsed["sinks"]) {
-      sinks.insert(sink.asString());
+      addSink(Sink{sink["name"].asString(), sink["index"].asInt()});
     }
   } catch (std::exception& exception) {
     // Swallow because we don't use it in tests.
@@ -65,6 +69,24 @@ void Configuration::read(const std::string& path) {
 folly::Singleton<Configuration, SingletonTag> kSingleton{};
 /* static */ std::shared_ptr<Configuration> Configuration::get() {
   return kSingleton.try_get();
+}
+
+void Configuration::addSink(const Sink& sink) {
+  auto sinks = m_sinks.find(sink.name);
+  if (sinks != m_sinks.end()) {
+      sinks->second.insert(sink);
+  }
+  m_sinks.insert({sink.name, SinkSet{sink}});
+}
+
+static SinkSet kEmptySet = {};
+
+const SinkSet& Configuration::sinks(const std::string& name) const {
+  auto sinks = m_sinks.find(name);
+  if (sinks != m_sinks.end()) {
+    return sinks->second;
+  }
+  return kEmptySet;
 }
 
 } // namespace taint

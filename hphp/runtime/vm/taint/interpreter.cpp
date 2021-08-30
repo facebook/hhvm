@@ -959,9 +959,11 @@ TCA iopFCallFuncD(
 
   FTRACE(1, "taint: -> calling `{}`\n", name);
 
-  auto& sinks = Configuration::get()->sinks;
-  auto value = State::get()->stack.top();
-  if (sinks.find(name) != sinks.end() && value) {
+  const auto& sinks = Configuration::get()->sinks(name);
+  for (const auto& sink : sinks) {
+    auto value = State::get()->stack.peek(fca.numArgs - 1 - sink.index);
+    if (!value) { continue; }
+
     FTRACE(1, "taint: tainted value flows into sink\n");
     value->hops.push_back(func);
     value->dump();

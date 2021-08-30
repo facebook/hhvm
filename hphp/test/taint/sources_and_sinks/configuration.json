@@ -1,7 +1,10 @@
 {
-    "sources": [
-        "__source_returned_from_function",
-        "MyClass::__source_returned_from_method"
-    ],
-    "sinks": ["__sink"]
+  "sources": [
+      "__source_returned_from_function",
+      "MyClass::__source_returned_from_method"
+  ],
+  "sinks": [
+    {"name": "__sink", "index": 0 },
+    {"name": "__sink_in_second_parameter", "index": 1 }
+  ]
 }

@@ -1,4 +1,6 @@
 {
   "sources": ["__source"],
-  "sinks": ["__sink"]
+  "sinks": [
+    {"name": "__sink", "index": 0 }
+  ]
 }

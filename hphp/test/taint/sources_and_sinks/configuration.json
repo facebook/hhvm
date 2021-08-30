@@ -1,0 +1,7 @@
+{
+    "sources": [
+        "__source_returned_from_function",
+        "MyClass::__source_returned_from_method"
+    ],
+    "sinks": ["__sink"]
+}

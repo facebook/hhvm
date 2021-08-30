@@ -1,0 +1,2 @@
+{"hops": ["__source_returned_from_function", "__sink"]}
+{"hops": ["MyClass::__source_returned_from_method", "__sink"]}

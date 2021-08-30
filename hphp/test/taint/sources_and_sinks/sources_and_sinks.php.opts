@@ -1,0 +1,1 @@
+-vEval.TaintConfigurationPath=hphp/test/taint/sources_and_sinks/configuration.json

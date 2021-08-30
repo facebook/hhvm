@@ -73,15 +73,36 @@ folly::Singleton<Configuration, ConfigurationSingletonTag> kConfigurationSinglet
   return kConfigurationSingleton.try_get();
 }
 
-void Stack::push(Source source) {
-  m_stack.push_back(source);
+void Path::dump() const {
+  std::stringstream stream;
+  stream << "{\"hops\": [";
+  for (int i = 0; i < hops.size(); i++) {
+    stream << "\"" << hops[i]->fullName()->data() << "\"";
+    if (i != hops.size() - 1) {
+      stream << ", ";
+    }
+  }
+  stream << "]}";
+  std::cerr << stream.str() << std::endl;
 }
 
-Source Stack::top() const {
+std::ostream& operator<<(std::ostream& out, const Value& value) {
+  if (!value) {
+    return out << "_";
+  } else {
+    return out << "S";
+  }
+}
+
+void Stack::push(const Value& value) {
+  m_stack.push_back(value);
+}
+
+Value Stack::top() const {
   // TODO(T93491972): replace with assertions once we can run the integration tests.
   if (m_stack.empty()) {
     FTRACE(3, "taint: (WARNING) called `Stack::top()` on empty stack\n");
-    return kNoSource;
+    return std::nullopt;
   }
   return m_stack.back();
 }
@@ -101,12 +122,12 @@ void Stack::pop(int n) {
   }
 }
 
-void Stack::replaceTop(Source source) {
+void Stack::replaceTop(const Value& value) {
   if (m_stack.empty()) {
     FTRACE(3, "taint: (WARNING) called `Stack::replaceTop()` on empty stack\n");
     return;
   }
-  m_stack.back() = source;
+  m_stack.back() = value;
 }
 
 size_t Stack::size() const {
@@ -114,13 +135,11 @@ size_t Stack::size() const {
 }
 
 std::string Stack::show() const {
-  std::stringstream stream("(-> top) ");
-  for (int i = 0; i < m_stack.size(); i++) {
-    stream << m_stack[i];
-    if (i != m_stack.size() - 1) {
-      stream << ", ";
-    }
+  std::stringstream stream;
+  for (const auto value : m_stack) {
+    stream << value << " ";
   }
+  stream << "(t)";
   return stream.str();
 }
 
@@ -128,17 +147,17 @@ void Stack::clear() {
   m_stack.clear();
 }
 
-void Heap::set(tv_lval to, Source source) {
-  FTRACE(2, "taint: setting lval to `{}`\n", source);
-  m_heap[to] = source;
+void Heap::set(tv_lval to, const Value& value) {
+  FTRACE(2, "taint: setting lval to `value`\n" /*, value */);  // TODO
+  m_heap[to] = value;
 }
 
-Optional<Source> Heap::get(tv_lval from) {
+Value Heap::get(tv_lval from) const {
   FTRACE(2, "taint: getting from lval\n");
 
-  auto source = m_heap.find(from);
-  if (source != m_heap.end()) {
-    return source->second;
+  auto value = m_heap.find(from);
+  if (value != m_heap.end()) {
+    return value->second;
   } else {
     return std::nullopt;
   }
@@ -157,15 +176,14 @@ void State::initialize() {
   // Stack is initialized with 4 values before any operation happens.
   // We don't care about these values but mirroring simplifies
   // consistency checks.
-  for (int i = 0; i < 1000; i++) {
-    stack.push(kNoSource);
+  for (int i = 0; i < 4; i++) {
+    stack.push(std::nullopt);
   }
 }
 
 void State::reset() {
   stack.clear();
   heap.clear();
-  issues.clear();
   initialize();
 }
 
@@ -240,12 +258,12 @@ void iopUGetCUNop() {
 
 void iopNull() {
   iopPreamble("Null");
-  State::get()->stack.push(kNoSource);
+  State::get()->stack.push(std::nullopt);
 }
 
 void iopNullUninit() {
   iopPreamble("NullUninit");
-  State::get()->stack.push(kNoSource);
+  State::get()->stack.push(std::nullopt);
 }
 
 void iopTrue() {
@@ -262,7 +280,7 @@ void iopFuncCred() {
 
 void iopInt(int64_t /* imm */) {
   iopPreamble("Int");
-  State::get()->stack.push(kNoSource);
+  State::get()->stack.push(std::nullopt);
 }
 
 void iopDouble(double /* imm */) {
@@ -579,8 +597,10 @@ void iopRetC(PC& /* pc */) {
   std::string name = func->fullName()->data();
   auto& sources = Configuration::get()->sources;
   if (sources.find(name) != sources.end()) {
-    FTRACE(1, "taint: {}: function returns `TestSource`\n", pcOff());
-    State::get()->stack.replaceTop(kTestSource);
+    FTRACE(1, "taint: {}: function returns source\n", pcOff());
+    Path path;
+    path.hops.push_back(func);
+    State::get()->stack.replaceTop(path);
   }
 }
 
@@ -601,10 +621,7 @@ void iopCGetL(named_local_var fr) {
 
   auto state = State::get();
   auto value = state->heap.get(fr.lval);
-  if (!value) {
-    value = kNoSource;
-  }
-  state->stack.push(*value);
+  state->stack.push(value);
 }
 
 void iopCGetQuietL(tv_lval /* fr */) {
@@ -869,11 +886,11 @@ TCA iopFCallFuncD(bool /* retToJit */,
   auto name = func->fullName()->data();
 
   auto& sinks = Configuration::get()->sinks;
-  if (sinks.find(name) != sinks.end() &&
-      State::get()->stack.top() == kTestSource) {
-    FTRACE(1, "taint: {}: tainted value flows into sink\n", pcOff());
-    std::cerr << "tainted value flows into sink" << std::endl;
-    State::get()->issues.push_back({kTestSource, name});
+  auto value = State::get()->stack.top();
+  if (sinks.find(name) != sinks.end() && value) {
+    FTRACE(1, "taint: tainted value flows into sink\n");
+    value->hops.push_back(func);
+    value->dump();
   }
 
   return nullptr;

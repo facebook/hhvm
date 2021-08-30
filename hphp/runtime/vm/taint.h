@@ -40,10 +40,6 @@ namespace taint {
 
 using jit::TCA;
 
-using Source = int;
-constexpr Source kNoSource = 0;
-constexpr Source kTestSource = 1;
-
 struct Configuration {
   static std::shared_ptr<Configuration> get();
 
@@ -53,29 +49,29 @@ struct Configuration {
   std::set<std::string> sinks;
 };
 
-struct Issue {
-  Source source;
-  std::string sink_function;
-
-  bool operator==(const Issue& other) const {
-    return source == other.source && sink_function == other.sink_function;
-  }
+struct Path {
+  // Print trace in JSON-line format to stderr.
+  void dump() const;
+  std::vector<const Func*> hops;
 };
 
-struct Stack {
-  Stack(const std::vector<Source>& stack = {}) : m_stack(stack) {}
+using Value = Optional<Path>;
+std::ostream& operator<<(std::ostream& out, const HPHP::taint::Value& value);
 
-  void push(Source source);
-  Source top() const;
+struct Stack {
+  Stack(const std::vector<Value>& stack = {}) : m_stack(stack) {}
+
+  void push(const Value& value);
+  Value top() const;
   void pop(int n = 1);
-  void replaceTop(Source source);
+  void replaceTop(const Value& value);
 
   size_t size() const;
   std::string show() const;
 
   void clear();
  private:
-  std::vector<Source> m_stack;
+  std::vector<Value> m_stack;
 };
 
 /*
@@ -83,12 +79,12 @@ struct Stack {
  * of tainted values (cells) on the heap.
  */
 struct Heap {
-  void set(tv_lval to, Source source);
-  Optional<Source> get(tv_lval from);
+  void set(tv_lval to, const Value& value);
+  Value get(tv_lval from) const;
 
   void clear();
  private:
-  hphp_fast_map<tv_lval, Source> m_heap;
+  hphp_fast_map<tv_lval, Value> m_heap;
 };
 
 struct State {
@@ -99,7 +95,6 @@ struct State {
 
   Stack stack;
   Heap heap;
-  std::vector<Issue> issues;
 };
 
 void iopNop();

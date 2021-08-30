@@ -1,1 +1,1 @@
-tainted value flows into sink
+{"hops": ["__source", "__sink"]}

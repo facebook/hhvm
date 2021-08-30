@@ -21,6 +21,7 @@
 
 #include "hphp/util/compact-tagged-ptrs.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/functional.h"
 
 #include <cstddef>
 #include <type_traits>
@@ -94,6 +95,8 @@ public:
 
   INLINE_FLATTEN bool operator==(tv_val other) const;
   INLINE_FLATTEN bool operator!=(tv_val other) const;
+
+  INLINE_FLATTEN size_t hash() const;
 
   /*
    * Whether this tv_val is set.
@@ -171,6 +174,10 @@ private:
 
     INLINE_FLATTEN bool operator!=(const wide_storage& o) const {
       return !operator==(o);
+    }
+
+    INLINE_FLATTEN size_t hash() const {
+      return pointer_hash<Value>()(m_val);
     }
 
     INLINE_FLATTEN type_t* type() const {

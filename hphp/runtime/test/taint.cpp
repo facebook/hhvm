@@ -100,65 +100,6 @@ TEST_F(TaintTest, TestRetCNoSource) {
   EXPECT_EQ(State::get()->stack.top(), kNoSource);
 }
 
-TEST_F(TaintTest, TestFCallFuncDIssue) {
-  ActRec act_rec;
-  vmfp() = &act_rec;
-
-  auto func = createFunc("__sink");
-  vmfp()->setFunc(func);
-
-  State::get()->stack.push(kTestSource);
-  EXPECT_TRUE(State::get()->issues.empty());
-
-  PC pc = 0;
-  FCallArgs fca(
-      FCallArgsBase::Flags::None,
-      /* numArgs */ 0,
-      /* numRets */ 0,
-      /* inoutArgs */ nullptr,
-      /* readonlyArgs */ nullptr,
-      /* offset */ 0,
-      /* context */ nullptr);
-  iopFCallFuncD(
-       /* retToJit */ false,
-       pc,
-       /* origpc */ pc,
-       fca,
-       /* id */ 0);
-
-  EXPECT_EQ(State::get()->issues.size(), 1);
-  EXPECT_EQ(State::get()->issues[0], (Issue{kTestSource, "__sink"}));
-}
-
-TEST_F(TaintTest, TestFCallFuncDNoIssue) {
-  ActRec act_rec;
-  vmfp() = &act_rec;
-
-  auto func = createFunc("__sink");
-  vmfp()->setFunc(func);
-
-  State::get()->stack.push(kNoSource);
-  EXPECT_TRUE(State::get()->issues.empty());
-
-  PC pc = 0;
-  FCallArgs fca(
-      FCallArgsBase::Flags::None,
-      /* numArgs */ 0,
-      /* numRets */ 0,
-      /* inoutArgs */ nullptr,
-      /* readonlyArgs */ nullptr,
-      /* offset */ 0,
-      /* context */ nullptr);
-  iopFCallFuncD(
-       /* retToJit */ false,
-       pc,
-       /* origpc */ pc,
-       fca,
-       /* id */ 0);
-
-  EXPECT_TRUE(State::get()->issues.empty());
-}
-
 } // namespace taint
 } // namespace HPHP
 

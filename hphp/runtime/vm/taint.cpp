@@ -16,6 +16,8 @@
 
 #ifdef HHVM_TAINT
 
+#include <sstream>
+
 #include <folly/Singleton.h>
 #include <folly/json.h>
 
@@ -96,8 +98,39 @@ size_t Stack::size() const {
   return m_stack.size();
 }
 
+std::string Stack::show() const {
+  std::stringstream stream("(-> top) ");
+  for (int i = 0; i < m_stack.size(); i++) {
+    stream << m_stack[i];
+    if (i != m_stack.size() - 1) {
+      stream << ", ";
+    }
+  }
+  return stream.str();
+}
+
 void Stack::clear() {
   m_stack.clear();
+}
+
+void Heap::set(tv_lval to, Source source) {
+  FTRACE(2, "taint: setting lval to `{}`\n", source);
+  m_heap[to] = source;
+}
+
+Optional<Source> Heap::get(tv_lval from) {
+  FTRACE(2, "taint: getting from lval\n");
+
+  auto source = m_heap.find(from);
+  if (source != m_heap.end()) {
+    return source->second;
+  } else {
+    return std::nullopt;
+  }
+}
+
+void Heap::clear() {
+  m_heap.clear();
 }
 
 folly::Singleton<State, StateSingletonTag> kStateSingleton{};
@@ -109,13 +142,14 @@ void State::initialize() {
   // Stack is initialized with 4 values before any operation happens.
   // We don't care about these values but mirroring simplifies
   // consistency checks.
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 1000; i++) {
     stack.push(kNoSource);
   }
 }
 
 void State::reset() {
   stack.clear();
+  heap.clear();
   issues.clear();
   initialize();
 }
@@ -138,6 +172,7 @@ void iopPreamble(const std::string& name) {
         "taint: (WARNING) stacks out of sync (shadow stack size: {})\n",
         shadow_stack_size);
   }
+  FTRACE(4, "taint: stack: {}\n", State::get()->stack.show());
 }
 
 void iopUnhandled(const std::string& name) {
@@ -546,10 +581,15 @@ void iopThrow(PC& /* pc */) {
   iopUnhandled("Throw");
 }
 
-void iopCGetL(named_local_var /* fr */) {
+void iopCGetL(named_local_var fr) {
   iopPreamble("CGetL");
-  // TODO(T93549800): implement shadow heap.
-  State::get()->stack.push(kNoSource);
+
+  auto state = State::get();
+  auto value = state->heap.get(fr.lval);
+  if (!value) {
+    value = kNoSource;
+  }
+  state->stack.push(*value);
 }
 
 void iopCGetQuietL(tv_lval /* fr */) {
@@ -624,9 +664,11 @@ void iopAssertRATStk(uint32_t /* stkSlot */, RepoAuthType /* rat */) {
   iopUnhandled("AssertRATStk");
 }
 
-void iopSetL(tv_lval /* to */) {
+void iopSetL(tv_lval to) {
   iopPreamble("SetL");
-  // TODO(T93549800): implement shadow heap.
+
+  auto state = State::get();
+  state->heap.set(to, state->stack.top());
 }
 
 void iopSetG() {
@@ -804,10 +846,13 @@ TCA iopFCallFuncD(bool /* retToJit */,
                   PC /* origpc */,
                   PC& /* pc */,
                   const FCallArgs& /* fca */,
-                  Id /* id */) {
+                  Id id) {
   iopPreamble("FCallFuncD");
 
-  std::string name = vmfp()->func()->fullName()->data();
+  auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
+  auto const func = Func::load(nep.second, nep.first);
+  auto name = func->fullName()->data();
+
   auto& sinks = Configuration::get()->sinks;
   if (sinks.find(name) != sinks.end() &&
       State::get()->stack.top() == kTestSource) {

@@ -18,12 +18,22 @@
 
 #ifdef HHVM_TAINT
 
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/types.h"
 
+#include <map>
 #include <memory>
+#include <optional>
 #include <set>
+
+template <>
+struct std::hash<HPHP::tv_lval> {
+  std::size_t operator()(const HPHP::tv_lval& val) const {
+    return val.hash();
+  }
+};
 
 namespace HPHP {
 namespace taint {
@@ -61,9 +71,24 @@ struct Stack {
   void replaceTop(Source source);
 
   size_t size() const;
+  std::string show() const;
+
   void clear();
  private:
   std::vector<Source> m_stack;
+};
+
+/*
+ * Our shadow heap is not replicating the full VM heap but keeps track
+ * of tainted values (cells) on the heap.
+ */
+struct Heap {
+  void set(tv_lval to, Source source);
+  Optional<Source> get(tv_lval from);
+
+  void clear();
+ private:
+  hphp_fast_map<tv_lval, Source> m_heap;
 };
 
 struct State {
@@ -73,6 +98,7 @@ struct State {
   void reset();
 
   Stack stack;
+  Heap heap;
   std::vector<Issue> issues;
 };
 

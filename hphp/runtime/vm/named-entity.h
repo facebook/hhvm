@@ -253,4 +253,3 @@ using NamedEntityPair = std::pair<LowStringPtr,LowPtr<const NamedEntity>>;
 #define incl_HPHP_VM_NAMED_ENTITY_INL_H_
 #include "hphp/runtime/vm/named-entity-inl.h"
 #undef incl_HPHP_VM_NAMED_ENTITY_INL_H_
-

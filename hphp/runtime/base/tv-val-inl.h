@@ -58,6 +58,11 @@ bool tv_val<is_const, tag_t>::operator!=(tv_val other) const {
 }
 
 template<bool is_const, typename tag_t>
+size_t tv_val<is_const, tag_t>::hash() const {
+  return m_s.hash();
+}
+
+template<bool is_const, typename tag_t>
 bool tv_val<is_const, tag_t>::is_set() const {
   return m_s.is_set();
 }

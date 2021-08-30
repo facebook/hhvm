@@ -99,12 +99,20 @@ void Stack::push(const Value& value) {
 }
 
 Value Stack::top() const {
+  return peek(0);
+}
+
+Value Stack::peek(int offset) const {
   // TODO(T93491972): replace with assertions once we can run the integration tests.
-  if (m_stack.empty()) {
-    FTRACE(3, "taint: (WARNING) called `Stack::top()` on empty stack\n");
+  if (m_stack.size() <= offset) {
+    FTRACE(
+        3,
+        "taint: (WARNING) called `Stack::peek({})` on stack of size {}\n",
+        offset,
+        m_stack.size());
     return std::nullopt;
   }
-  return m_stack.back();
+  return m_stack[m_stack.size() - 1 - offset];
 }
 
 void Stack::pop(int n) {
@@ -190,22 +198,17 @@ void State::reset() {
 namespace {
 
 void iopPreamble(const std::string& name) {
-  auto vm_stack_size = vmStack().count();
+  auto stack_size = vmStack().count();
   FTRACE(1, "taint: iop{}\n", name);
-  FTRACE(
-      3,
-      "taint: stack -> size: {}, pushes: {}, pops: {}\n",
-      vm_stack_size,
-      instrNumPushes(vmpc()),
-      instrNumPops(vmpc()));
+  FTRACE(4, "taint: stack: {}\n", State::get()->stack.show());
   auto shadow_stack_size = State::get()->stack.size();
-  if (vm_stack_size != shadow_stack_size) {
+  if (stack_size != shadow_stack_size) {
     FTRACE(
         3,
-        "taint: (WARNING) stacks out of sync (shadow stack size: {})\n",
+        "taint: (WARNING) stacks out of sync (stack size: {}, shadow stack size: {})\n",
+        stack_size,
         shadow_stack_size);
   }
-  FTRACE(4, "taint: stack: {}\n", State::get()->stack.show());
 }
 
 void iopUnhandled(const std::string& name) {
@@ -591,16 +594,29 @@ void iopSSwitch(PC /* origpc */, PC& /* pc */, imm_array<StrVecItem> /* jmptab *
 void iopRetC(PC& /* pc */) {
   iopPreamble("RetC");
 
+  auto& stack = State::get()->stack;
+  auto saved = stack.top();
+
   auto func = vmfp()->func();
-  State::get()->stack.pop(2 + func->params().size());
+  stack.pop(2 + func->params().size());
 
   std::string name = func->fullName()->data();
+  FTRACE(1, "taint: -> returning from `{}`\n", name);
+
+  // Check if this function is the origin of a source.
   auto& sources = Configuration::get()->sources;
   if (sources.find(name) != sources.end()) {
-    FTRACE(1, "taint: {}: function returns source\n", pcOff());
+    FTRACE(1, "taint: function returns source\n");
     Path path;
     path.hops.push_back(func);
-    State::get()->stack.replaceTop(path);
+    stack.replaceTop(path);
+  }
+
+  // Return value overrides top of stack.
+  // TODO(T93549800): we may want to keep a set of traces.
+  if (saved) {
+    FTRACE(1, "taint: function returns source\n");
+    stack.replaceTop(saved);
   }
 }
 
@@ -877,13 +893,15 @@ TCA iopFCallFunc(bool /* retToJit */,
 TCA iopFCallFuncD(bool /* retToJit */,
                   PC /* origpc */,
                   PC& /* pc */,
-                  const FCallArgs& /* fca */,
+                  const FCallArgs& fca,
                   Id id) {
   iopPreamble("FCallFuncD");
 
   auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
   auto const func = Func::load(nep.second, nep.first);
   auto name = func->fullName()->data();
+
+  FTRACE(1, "taint: -> calling `{}`\n", name);
 
   auto& sinks = Configuration::get()->sinks;
   auto value = State::get()->stack.top();
@@ -995,8 +1013,18 @@ void iopVerifyOutType(uint32_t /* paramId */) {
   iopUnhandled("VerifyOutType");
 }
 
-void iopVerifyParamType(local_var /* param */) {
-  iopUnhandled("VerifyParamType");
+void iopVerifyParamType(local_var param) {
+  iopPreamble("VerifyParamType");
+
+  auto state = State::get();
+  auto func = vmfp()->func();
+
+  auto value = state->stack.peek(func->numParams() - (param.index + 1));
+  if (value) {
+    FTRACE(2, "taint: parameter is tainted\n");
+    value->hops.push_back(func);
+    state->heap.set(param.lval, value);
+  }
 }
 
 void iopVerifyParamTypeTS(local_var /* param */) {

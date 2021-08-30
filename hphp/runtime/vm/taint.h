@@ -62,7 +62,10 @@ struct Stack {
   Stack(const std::vector<Value>& stack = {}) : m_stack(stack) {}
 
   void push(const Value& value);
+
   Value top() const;
+  Value peek(int offset) const;
+
   void pop(int n = 1);
   void replaceTop(const Value& value);
 

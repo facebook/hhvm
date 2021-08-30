@@ -36,6 +36,7 @@ type env = {
   do_post_handoff_handshake: bool;
   ignore_hh_version: bool;
   save_64bit: string option;
+  save_human_readable_64bit_dep_map: string option;
   saved_state_ignore_hhconfig: bool;
   mini_state: string option;
   use_priority_pipe: bool;
@@ -450,6 +451,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
           do_post_handoff_handshake = _;
           ignore_hh_version;
           save_64bit;
+          save_human_readable_64bit_dep_map;
           saved_state_ignore_hhconfig;
           use_priority_pipe = _;
           prechecked;
@@ -475,6 +477,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
               ai_mode;
               ignore_hh_version;
               save_64bit;
+              save_human_readable_64bit_dep_map;
               saved_state_ignore_hhconfig;
               dynamic_view = false;
               prechecked;

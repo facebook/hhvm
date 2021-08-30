@@ -85,7 +85,11 @@ let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () =
     match edges_dir with
     | Some edges_dir ->
       Typing_deps_mode.SaveCustomMode
-        { graph = None; new_edges_dir = edges_dir }
+        {
+          graph = None;
+          new_edges_dir = edges_dir;
+          human_readable_dep_map_dir = None;
+        }
     | None -> Typing_deps_mode.CustomMode None
   in
   let result =

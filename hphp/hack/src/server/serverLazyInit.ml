@@ -1186,8 +1186,15 @@ let post_saved_state_initialization
         (if deptable_is_64bit then
           match ServerArgs.save_64bit genv.options with
           | Some new_edges_dir ->
+            let human_readable_dep_map_dir =
+              ServerArgs.save_human_readable_64bit_dep_map genv.options
+            in
             Typing_deps_mode.SaveCustomMode
-              { graph = Some deptable_fn; new_edges_dir }
+              {
+                graph = Some deptable_fn;
+                new_edges_dir;
+                human_readable_dep_map_dir;
+              }
           | None -> Typing_deps_mode.CustomMode (Some deptable_fn)
         else
           Typing_deps_mode.SQLiteMode);

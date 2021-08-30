@@ -137,6 +137,7 @@ impl UnsafeDepGraph {
                 | TypingDepsMode::SaveCustomMode {
                     graph: None,
                     new_edges_dir: _,
+                    human_readable_dep_map_dir: _,
                 } => {
                     // Enabled, but we don't have a saved-state, so we can't open it
                     Ok(None)
@@ -145,6 +146,7 @@ impl UnsafeDepGraph {
                 | TypingDepsMode::SaveCustomMode {
                     graph: Some(depgraph_fn),
                     new_edges_dir: _,
+                    human_readable_dep_map_dir: _,
                 } => {
                     let opener = DepGraphOpener::from_path(&depgraph_fn)
                         .map_err(|err| format!("could not open dep graph file: {:?}", err))?;

@@ -1318,7 +1318,11 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   let deps_mode =
     match ServerArgs.save_64bit options with
     | Some new_edges_dir ->
-      Typing_deps_mode.SaveCustomMode { graph = None; new_edges_dir }
+      let human_readable_dep_map_dir =
+        ServerArgs.save_human_readable_64bit_dep_map options
+      in
+      Typing_deps_mode.SaveCustomMode
+        { graph = None; new_edges_dir; human_readable_dep_map_dir }
     | None ->
       if local_config.ServerLocalConfig.no_load_64bit then
         Typing_deps_mode.CustomMode None

@@ -1176,6 +1176,7 @@ let start_server ~(env : env) (root : Path.t) : unit =
       saved_state_ignore_hhconfig = false;
       mini_state = None;
       save_64bit = None;
+      save_human_readable_64bit_dep_map = None;
       dynamic_view = !cached_toggle_state;
       prechecked = None;
       config = env.args.config;
@@ -1223,6 +1224,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
       saved_state_ignore_hhconfig = false;
       mini_state = None;
       save_64bit = None;
+      save_human_readable_64bit_dep_map = None;
       (* priority_pipe delivers good experience for hh_server, but has a bug,
          and doesn't provide benefits in serverless-ide. *)
       use_priority_pipe = not env.use_serverless_ide;

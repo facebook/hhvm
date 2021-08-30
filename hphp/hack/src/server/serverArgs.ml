@@ -39,6 +39,7 @@ type options = {
   root: Path.t;
   save_filename: string option;
   save_64bit: string option;
+  save_human_readable_64bit_dep_map: string option;
   save_naming_filename: string option;
   should_detach: bool;
   (* AKA, daemon mode *)
@@ -114,6 +115,9 @@ module Messages = struct
 
   let save_64bit = " save discovered 64-bit to the given directory"
 
+  let save_human_readable_64bit_dep_map =
+    " save human readable map of 64bit hashes to names to files in the given directory"
+
   let waiting_client =
     " send message to fd/handle when server has begun"
     ^ " starting and again when it's done starting"
@@ -162,6 +166,7 @@ let parse_options () : options =
   let root = ref "" in
   let save = ref None in
   let save_64bit = ref None in
+  let save_human_readable_64bit_dep_map = ref None in
   let save_naming = ref None in
   let should_detach = ref false in
   let version = ref false in
@@ -229,6 +234,9 @@ let parse_options () : options =
       ( "--save-64bit",
         Arg.String (fun s -> save_64bit := Some s),
         Messages.save_64bit );
+      ( "--save-human-readable-64bit-dep-map",
+        Arg.String (fun s -> save_human_readable_64bit_dep_map := Some s),
+        Messages.save_human_readable_64bit_dep_map );
       ( "--saved-state-ignore-hhconfig",
         Arg.Set saved_state_ignore_hhconfig,
         Messages.saved_state_ignore_hhconfig );
@@ -310,6 +318,7 @@ let parse_options () : options =
     root = root_path;
     save_filename = !save;
     save_64bit = !save_64bit;
+    save_human_readable_64bit_dep_map = !save_human_readable_64bit_dep_map;
     save_naming_filename = !save_naming;
     should_detach = !should_detach;
     waiting_client = !waiting_client;
@@ -344,6 +353,7 @@ let default_options ~root =
     root = Path.make root;
     save_filename = None;
     save_64bit = None;
+    save_human_readable_64bit_dep_map = None;
     save_naming_filename = None;
     should_detach = false;
     waiting_client = None;
@@ -405,6 +415,9 @@ let root options = options.root
 let save_filename options = options.save_filename
 
 let save_64bit options = options.save_64bit
+
+let save_human_readable_64bit_dep_map options =
+  options.save_human_readable_64bit_dep_map
 
 let save_naming_filename options = options.save_naming_filename
 
@@ -469,6 +482,7 @@ let to_string
       root;
       save_filename;
       save_64bit;
+      save_human_readable_64bit_dep_map;
       save_naming_filename;
       should_detach;
       waiting_client;
@@ -504,6 +518,11 @@ let to_string
   in
   let save_64bit_str =
     match save_64bit with
+    | None -> "<>"
+    | Some path -> path
+  in
+  let save_human_readable_64bit_dep_map_str =
+    match save_human_readable_64bit_dep_map with
     | None -> "<>"
     | Some path -> path
   in
@@ -608,6 +627,9 @@ let to_string
     ", ";
     "save_64bit: ";
     save_64bit_str;
+    ", ";
+    "save_human_readable_64bit_dep_map: ";
+    save_human_readable_64bit_dep_map_str;
     ", ";
     "save_naming_filename: ";
     save_naming_filename_str;

@@ -17,6 +17,7 @@ type t =
   | SaveCustomMode of {
       graph: string option;
       new_edges_dir: string;
+      human_readable_dep_map_dir: string option;
     }
       (** Mode to produce both the legacy SQLite saved-state dependency graph,
         * and, along side it, the new custom 64-bit dependency graph.

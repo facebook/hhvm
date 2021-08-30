@@ -119,6 +119,7 @@ let connect ?(use_priority_pipe = false) args =
     show_spinner;
     ignore_hh_version;
     save_64bit;
+    save_human_readable_64bit_dep_map;
     saved_state_ignore_hhconfig;
     prechecked;
     mini_state;
@@ -158,6 +159,7 @@ let connect ?(use_priority_pipe = false) args =
         do_post_handoff_handshake = true;
         ignore_hh_version;
         save_64bit;
+        save_human_readable_64bit_dep_map;
         saved_state_ignore_hhconfig;
         use_priority_pipe;
         prechecked;

@@ -76,6 +76,8 @@ module type S = sig
 
   val save_64bit : options -> string option
 
+  val save_human_readable_64bit_dep_map : options -> string option
+
   val save_naming_filename : options -> string option
 
   val should_detach : options -> bool

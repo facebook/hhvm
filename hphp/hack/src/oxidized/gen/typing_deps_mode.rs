@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cba7aa770a12c5431dfc65b00d524e1f>>
+// @generated SignedSource<<31ce3b45a535da3dab9e651a6922c890>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -51,6 +51,7 @@ pub enum TypingDepsMode {
     SaveCustomMode {
         graph: Option<String>,
         new_edges_dir: String,
+        human_readable_dep_map_dir: Option<String>,
     },
 }
 

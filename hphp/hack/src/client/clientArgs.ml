@@ -109,6 +109,7 @@ let parse_check_args cmd =
   let gen_saved_ignore_type_errors = ref false in
   let ignore_hh_version = ref false in
   let save_64bit = ref None in
+  let save_human_readable_64bit_dep_map = ref None in
   let saved_state_ignore_hhconfig = ref false in
   let log_inference_constraints = ref false in
   let max_errors = ref None in
@@ -621,6 +622,9 @@ let parse_check_args cmd =
       ( "--save-64bit",
         Arg.String (fun x -> save_64bit := Some x),
         " save discovered 64-bit to the given directory" );
+      ( "--save-human-readable-64bit-dep-map",
+        Arg.String (fun x -> save_human_readable_64bit_dep_map := Some x),
+        " save map of 64bit hashes to names to files in the given directory" );
       ( "--saved-state-ignore-hhconfig",
         Arg.Set saved_state_ignore_hhconfig,
         " ignore hhconfig hash when loading saved states (default: false)" );
@@ -825,6 +829,7 @@ let parse_check_args cmd =
         | MODE_REMOVE_DEAD_FIXMES _ -> true
         | _ -> false);
       save_64bit = !save_64bit;
+      save_human_readable_64bit_dep_map = !save_human_readable_64bit_dep_map;
       output_json = !output_json;
       prechecked = !prechecked;
       mini_state = !mini_state;
@@ -915,6 +920,7 @@ let parse_start_env command =
     ignore_hh_version = !ignore_hh_version;
     saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
     save_64bit = None;
+    save_human_readable_64bit_dep_map = None;
     log_inference_constraints = !log_inference_constraints;
     no_load = !no_load;
     prechecked = !prechecked;

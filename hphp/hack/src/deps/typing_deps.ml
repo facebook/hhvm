@@ -582,6 +582,86 @@ module CustomGraph = struct
     hh_custom_dep_graph_has_edge mode idependent idependency
 end
 
+module SaveHumanReadableDepMap = struct
+  let should_save mode =
+    match mode with
+    | SaveCustomMode { human_readable_dep_map_dir = Some _; _ } -> true
+    | _ -> false
+
+  let human_readable_dep_map_channel_ref : Out_channel.t option ref = ref None
+
+  let human_readable_dep_map_channel mode =
+    match !human_readable_dep_map_channel_ref with
+    | None ->
+      let directory =
+        match mode with
+        | SaveCustomMode { human_readable_dep_map_dir = Some d; _ } -> d
+        | _ -> failwith "programming error: no human_readable_dep_map_dir"
+      in
+      let () =
+        if (not (Sys.file_exists directory)) || not (Sys.is_directory directory)
+        then
+          Sys_utils.mkdir_p directory
+      in
+      let worker_id = Option.value_exn !worker_id in
+      (* To avoid multiple processes interleaving writes to the same file, rely on
+       * unique process id's to have each process write to separate files.
+       * Use ~append:true to have each new process write to the previously created logs
+       * if they happened to share the same process id.
+       *)
+      let filepath =
+        Filename.concat
+          directory
+          (Printf.sprintf "human-readable-dep-map-%d.txt" worker_id)
+      in
+      let handle = Out_channel.create ~append:true ~perm:0o600 filepath in
+      let () = human_readable_dep_map_channel_ref := Some handle in
+      handle
+    | Some h -> h
+
+  (* For each process, keep a set of the seen (hashcode, dependency name)s to reduce logging duplicates.
+   * Use the name as well as the hashcode in case of hashcode conflicts.
+   *)
+  let set_max_size = 20000
+
+  let seen_set_ref : (int * string, unit) Hashtbl.t option ref = ref None
+
+  let seen_set () =
+    match !seen_set_ref with
+    | None ->
+      let tbl = Hashtbl.create set_max_size in
+      let () = seen_set_ref := Some tbl in
+      tbl
+    | Some tbl -> tbl
+
+  (* Takes the current set of human readable deps and writes them to disk
+   * Resets the set of human readable deps to be empty
+   * ~flush flushes the channel after the write *)
+  let export_to_disk ?(flush = false) mode =
+    if should_save mode then
+      let ss = seen_set () in
+      let out_channel = human_readable_dep_map_channel mode in
+      let () =
+        Hashtbl.iter
+          (fun (hash, name) () ->
+            Printf.fprintf out_channel "%u %s\n" hash name)
+          ss
+      in
+      let () = Hashtbl.reset ss in
+      if flush then Out_channel.flush out_channel
+
+  (* Adds a dep to the current set of human readable deps *)
+  let add mode (dep, hash) =
+    if should_save mode then
+      let ss = seen_set () in
+      let name = Dep.variant_to_string dep in
+      if Hashtbl.mem ss (hash, name) then
+        ()
+      else
+        let () = Hashtbl.add ss (hash, name) () in
+        if Hashtbl.length ss >= set_max_size then export_to_disk mode
+end
+
 module SaveCustomGraph = struct
   let discovered_deps_batch : (CustomGraph.dep_edge, unit) Hashtbl.t =
     Hashtbl.create 1000
@@ -645,7 +725,9 @@ module SaveCustomGraph = struct
           ();
         if Hashtbl.length discovered_deps_batch >= 1000 then
           filter_discovered_deps_batch ~flush:false mode
-      end
+      end;
+      let () = SaveHumanReadableDepMap.add mode (dependent, idependent) in
+      SaveHumanReadableDepMap.add mode (dependency, idependency)
     )
 end
 
@@ -816,6 +898,7 @@ let flush_ideps_batch mode : dep_edges =
     Some old_batch
   | SaveCustomMode _ ->
     SaveCustomGraph.filter_discovered_deps_batch ~flush:true mode;
+    SaveHumanReadableDepMap.export_to_disk ~flush:true mode;
     None
 
 let merge_dep_edges (x : dep_edges) (y : dep_edges) : dep_edges =

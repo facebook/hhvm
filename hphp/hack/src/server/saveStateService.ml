@@ -363,12 +363,17 @@ let save_state
       ~mode:env.ServerEnv.deps_mode
       ~db_name
       ~incremental_info_file
-  | Typing_deps_mode.SaveCustomMode { graph = _; new_edges_dir } ->
+  | Typing_deps_mode.SaveCustomMode
+      { graph = _; new_edges_dir; human_readable_dep_map_dir } ->
     dump_errors_json output_filename env.ServerEnv.errorl;
     saved_state_build_revision_write ~base_file_name:output_filename;
     Hh_logger.warn
       "saveStateService: not saving 64-bit dep graph edges to disk, because they are already in %s"
       new_edges_dir;
+    (match human_readable_dep_map_dir with
+    | None -> ()
+    | Some dir ->
+      Hh_logger.warn "saveStateService: human readable dep map dir: %s" dir);
     { dep_table_edges_added = 0 }
 
 let get_in_memory_dep_table_entry_count () : (int, string) result =

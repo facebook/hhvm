@@ -211,6 +211,11 @@ void iopPreamble(const std::string& name) {
   }
 }
 
+void iopConstant(const std::string& name) {
+  iopPreamble(name);
+  State::get()->stack.push(std::nullopt);
+}
+
 void iopUnhandled(const std::string& name) {
   iopPreamble(name);
   FTRACE(1, "taint: (WARNING) unhandled opcode\n");
@@ -260,21 +265,19 @@ void iopUGetCUNop() {
 }
 
 void iopNull() {
-  iopPreamble("Null");
-  State::get()->stack.push(std::nullopt);
+  iopConstant("Null");
 }
 
 void iopNullUninit() {
-  iopPreamble("NullUninit");
-  State::get()->stack.push(std::nullopt);
+  iopConstant("NullUninit");
 }
 
 void iopTrue() {
-  iopUnhandled("True");
+  iopConstant("True");
 }
 
 void iopFalse() {
-  iopUnhandled("False");
+  iopConstant("False");
 }
 
 void iopFuncCred() {
@@ -282,16 +285,15 @@ void iopFuncCred() {
 }
 
 void iopInt(int64_t /* imm */) {
-  iopPreamble("Int");
-  State::get()->stack.push(std::nullopt);
+  iopConstant("Int");
 }
 
 void iopDouble(double /* imm */) {
-  iopUnhandled("Double");
+  iopConstant("Int");
 }
 
 void iopString(const StringData* /* s */) {
-  iopUnhandled("String");
+  iopConstant("String");
 }
 
 void iopDict(const ArrayData* /* a */) {

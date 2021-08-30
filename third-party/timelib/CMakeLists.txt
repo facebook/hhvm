@@ -2,6 +2,8 @@ message(STATUS "Building timelib")
 include(ExternalProject)
 include(HPHPFunctions)
 
+find_program(RE2C_EXECUTABLE NAMES re2c REQUIRED)
+
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   TIMELIB_DOWNLOAD_ARGS
   SOURCE_URL "https://github.com/derickr/timelib/archive/refs/tags/2021.07.tar.gz"
@@ -18,6 +20,7 @@ ExternalProject_Add(
     "${CMAKE_CURRENT_SOURCE_DIR}/timelib-CMakeLists.txt"
     "<SOURCE_DIR>/CMakeLists.txt"
   CMAKE_ARGS
+    "-DRE2C_EXECUTABLE=${RE2C_EXECUTABLE}"
     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
     -DCMAKE_INSTALL_INCLUDEDIR=include
     -DCMAKE_INSTALL_LIBDIR=lib

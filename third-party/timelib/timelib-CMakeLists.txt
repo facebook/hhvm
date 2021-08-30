@@ -2,17 +2,17 @@ cmake_minimum_required(VERSION 2.6)
 project(timelib C)
 
 
-find_program(RE2C NAMES re2c REQUIRED)
+find_program(RE2C_EXECUTABLE NAMES re2c REQUIRED)
 
 add_custom_command(
   OUTPUT parse_date.c
   MAIN_DEPENDENCY parse_date.re
-  COMMAND ${RE2C} ${CMAKE_CURRENT_SOURCE_DIR}/parse_date.re -o ${CMAKE_CURRENT_BINARY_DIR}/parse_date.c
+  COMMAND ${RE2C_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/parse_date.re -o ${CMAKE_CURRENT_BINARY_DIR}/parse_date.c
 )
 add_custom_command(
   OUTPUT parse_iso_intervals.c
   MAIN_DEPENDENCY parse_iso_intervals.re
-  COMMAND ${RE2C} ${CMAKE_CURRENT_SOURCE_DIR}/parse_iso_intervals.re -o ${CMAKE_CURRENT_BINARY_DIR}/parse_iso_intervals.c
+  COMMAND ${RE2C_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/parse_iso_intervals.re -o ${CMAKE_CURRENT_BINARY_DIR}/parse_iso_intervals.c
 )
 
 file(GLOB files *.c)

@@ -97,13 +97,11 @@ bool type_converts_to_number(Type ty) {
 //////////////////////////////////////////////////////////////////////
 
 Block* make_opt_catch(IRGS& env, const ParamPrep& params) {
-  // The params have been popped and if we're inlining the ActRec is gone
-  env.irb->setCurMarker(makeMarker(env, nextSrcKey(env)));
   env.irb->exceptionStackBoundary();
 
   assertx(!env.irb->fs().stublogue());
   auto const exit = defBlock(env, Block::Hint::Unlikely);
-  BlockPusher bp(*env.irb, makeMarker(env, nextSrcKey(env)), exit);
+  BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
   gen(env, BeginCatch);
   params.decRefParams(env);
   auto const data = EndCatchData {

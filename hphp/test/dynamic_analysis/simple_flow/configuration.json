@@ -1,0 +1,4 @@
+{
+  "sources": ["__source"],
+  "sinks": ["__sink"]
+}

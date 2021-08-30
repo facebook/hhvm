@@ -615,13 +615,14 @@ function canonical_path($test) {
  */
 function find_test_files($file) {
   $mappage = dict[
-    'quick'      => 'hphp/test/quick',
-    'slow'       => 'hphp/test/slow',
-    'debugger'   => 'hphp/test/server/debugger/tests',
-    'http'       => 'hphp/test/server/http/tests',
-    'fastcgi'    => 'hphp/test/server/fastcgi/tests',
-    'zend'       => 'hphp/test/zend/good',
-    'facebook'   => 'hphp/facebook/test',
+    'quick'              => 'hphp/test/quick',
+    'slow'               => 'hphp/test/slow',
+    'debugger'           => 'hphp/test/server/debugger/tests',
+    'http'               => 'hphp/test/server/http/tests',
+    'fastcgi'            => 'hphp/test/server/fastcgi/tests',
+    'zend'               => 'hphp/test/zend/good',
+    'facebook'           => 'hphp/facebook/test',
+    'dynamic_analysis'   => 'hphp/test/dynamic_analysis',
 
     // subset of slow we run with CLI server too
     'slow_ext_hsl' => 'hphp/test/slow/ext_hsl',

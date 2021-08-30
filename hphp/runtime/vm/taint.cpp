@@ -78,19 +78,34 @@ void Stack::push(Source source) {
 }
 
 Source Stack::top() const {
-  assertx(!m_stack.empty());
+  // TODO(T93491972): replace with assertions once we can run the integration tests.
+  if (m_stack.empty()) {
+    FTRACE(3, "taint: (WARNING) called `Stack::top()` on empty stack\n");
+    return kNoSource;
+  }
   return m_stack.back();
 }
 
 void Stack::pop(int n) {
-  assertx(m_stack.size() >= n);
+  if (m_stack.size() < n) {
+    FTRACE(
+        3,
+        "taint: (WARNING) called `Stack::pop({})` on stack of size {}\n",
+        n,
+        m_stack.size());
+    n = m_stack.size();
+  }
+
   for (int i = 0; i < n; i++) {
     m_stack.pop_back();
   }
 }
 
 void Stack::replaceTop(Source source) {
-  assertx(!m_stack.empty());
+  if (m_stack.empty()) {
+    FTRACE(3, "taint: (WARNING) called `Stack::replaceTop()` on empty stack\n");
+    return;
+  }
   m_stack.back() = source;
 }
 
@@ -857,6 +872,7 @@ TCA iopFCallFuncD(bool /* retToJit */,
   if (sinks.find(name) != sinks.end() &&
       State::get()->stack.top() == kTestSource) {
     FTRACE(1, "taint: {}: tainted value flows into sink\n", pcOff());
+    std::cerr << "tainted value flows into sink" << std::endl;
     State::get()->issues.push_back({kTestSource, name});
   }
 

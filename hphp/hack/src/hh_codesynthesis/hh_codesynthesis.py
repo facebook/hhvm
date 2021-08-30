@@ -24,8 +24,9 @@ from typing import List, Optional, Union
 
 import clingo
 from clingo import Number, Symbol
-from codeGenerator import CodeGenerator
-from hackGenerator import HackCodeGenerator
+from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
+from hphp.hack.src.hh_codesynthesis.hackGenerator import HackCodeGenerator
+from libfb.py import parutil
 
 
 class ClingoContext:
@@ -224,10 +225,9 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
 # Take in a dependency graph and a code generator to emit code.
 def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> None:
     # Logic programs for code synthesis.
-    # asp_files = os.path.join(
-    #     parutil.get_dir_path("hphp/hack/src/hh_codesynthesis/"), "asp_code"
-    # )
-    asp_files = "."
+    asp_files = os.path.join(
+        parutil.get_dir_path("hphp/hack/src/hh_codesynthesis/"), "asp_code"
+    )
 
     # Clingo interfaces.
     ctl = clingo.Control()

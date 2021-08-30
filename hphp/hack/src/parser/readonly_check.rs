@@ -18,7 +18,43 @@ use parser_core_types::{
 };
 use std::collections::HashMap;
 
-type Lenv = HashMap<String, Rty>;
+// Local environment which keeps track of how many readonly values it has
+#[derive(PartialEq, Clone)]
+struct Lenv {
+    pub lenv: HashMap<String, Rty>,
+    pub num_readonly: u32,
+}
+
+impl Lenv {
+    pub fn new() -> Lenv {
+        Lenv {
+            lenv: HashMap::new(),
+            num_readonly: 0,
+        }
+    }
+    pub fn insert(&mut self, var_name: String, rty: Rty) {
+        let result = self.lenv.insert(var_name, rty);
+        match (rty, result) {
+            (Rty::Readonly, Some(Rty::Mutable)) => {
+                self.num_readonly += 1;
+            }
+            (Rty::Readonly, None) => {
+                self.num_readonly += 1;
+            }
+            (Rty::Mutable, Some(Rty::Readonly)) => {
+                self.num_readonly -= 1;
+            }
+            _ => {} // otherwise number of readonly values does not change
+        }
+    }
+    pub fn get<S: Sized>(&self, var_name: &S) -> Option<&Rty>
+    where
+        String: std::borrow::Borrow<S>,
+        S: std::hash::Hash + Eq,
+    {
+        self.lenv.get(&var_name)
+    }
+}
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum Rty {
@@ -35,7 +71,7 @@ struct Context {
 impl Context {
     fn new(readonly_ret: Rty, this_ty: Rty) -> Self {
         Self {
-            locals: HashMap::new(),
+            locals: Lenv::new(),
             readonly_return: readonly_ret,
             this_ty,
         }
@@ -45,11 +81,7 @@ impl Context {
         self.locals.insert(var_name.clone(), rty);
     }
 
-    pub fn get_rty<S: ?Sized>(&self, var_name: &S) -> Rty
-    where
-        String: std::borrow::Borrow<S>,
-        S: std::hash::Hash + Eq,
-    {
+    pub fn get_rty(&self, var_name: &String) -> Rty {
         match self.locals.get(var_name) {
             Some(&x) => x,
             None => Rty::Mutable,
@@ -280,9 +312,12 @@ fn check_assignment_nonlocal(
     }
 }
 
+// Merges two local environments together. Note that
+// because of conservativeness, the resulting Lenv's num_readonly is at
+// least the max of lenv1.num_readonly, lenv2.num_readonly
 fn merge_lenvs(lenv1: &Lenv, lenv2: &Lenv) -> Lenv {
     let mut new_lenv = lenv1.clone();
-    for (key, value) in lenv2.into_iter() {
+    for (key, value) in lenv2.lenv.iter() {
         match (value, new_lenv.get(key)) {
             (_, Some(Rty::Readonly)) => {}
             (rty, _) => {
@@ -355,6 +390,28 @@ impl Checker {
         context.locals = lenv;
         let _ = b.recurse(context, self.object());
         context.locals.clone()
+    }
+
+
+    // Handles analysis for a given loop
+    // Will run b.recurse() up to X times, where X is the number
+    // of readonly values in the local environment
+    // on each loop, we check if the number of readonly values has changed
+    // since each loop iteration will monotonically increase the number
+    // of readonly values, the loop must end within that fixed number of iterations.
+    fn handle_loop(
+        &mut self,
+        context: &mut Context,
+        lenv: Lenv,
+        b: &mut aast::Block<(), ()>,
+    ) -> Lenv {
+        // run the block once and merge the environment
+        let new_lenv = merge_lenvs(&lenv, &self.handle_single_block(context, lenv.clone(), b));
+        if new_lenv.num_readonly > lenv.num_readonly {
+            self.handle_loop(context, new_lenv, b)
+        } else {
+            new_lenv
+        }
     }
 }
 
@@ -491,6 +548,50 @@ impl<'ast> VisitorMut<'ast> for Checker {
                             },
                         );
                 context.locals = result_lenv.clone();
+                Ok(())
+            }
+            aast::Stmt_::Foreach(f) => {
+                let (e, as_expr, b) = &mut **f;
+                e.recurse(context, self.object())?;
+                as_expr.recurse(context, self.object())?;
+                let old_lenv = context.locals.clone();
+                let new_lenv = self.handle_loop(context, old_lenv, b);
+                context.locals = new_lenv;
+                Ok(())
+            }
+            aast::Stmt_::Do(d) => {
+                let (b, cond) = &mut **d;
+                // loop runs at least once
+                let new_lenv = self.handle_single_block(context, context.locals.clone(), b);
+                let block_lenv = self.handle_loop(context, new_lenv, b);
+                context.locals = block_lenv;
+                cond.recurse(context, self.object())
+            }
+            aast::Stmt_::While(w) => {
+                let (cond, b) = &mut **w;
+                cond.recurse(context, self.object())?;
+                let old_lenv = context.locals.clone();
+                let new_lenv = self.handle_loop(context, old_lenv, b);
+                context.locals = new_lenv;
+                Ok(())
+            }
+            aast::Stmt_::For(f) => {
+                let (initializers, term, increment, b) = &mut **f;
+                for i in initializers {
+                    i.recurse(context, self.object())?;
+                }
+                match term {
+                    Some(t) => {
+                        t.recurse(context, self.object())?;
+                    }
+                    None => {}
+                }
+                for inc in increment {
+                    inc.recurse(context, self.object())?;
+                }
+                let old_lenv = context.locals.clone();
+                let new_lenv = self.handle_loop(context, old_lenv, b);
+                context.locals = new_lenv;
                 Ok(())
             }
             _ => s.recurse(context, self.object()),

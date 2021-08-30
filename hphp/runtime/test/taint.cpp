@@ -24,13 +24,11 @@
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/act-rec.h"
-#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/trace.h"
-
-
 
 namespace HPHP {
 namespace taint {
@@ -39,10 +37,10 @@ struct TaintTest : public ::testing::Test {
   TaintTest() {
     SHA1 sha1, bcSha1;
     m_unitEmitter = std::make_unique<UnitEmitter>(
-      sha1,
-      bcSha1,
-      m_funcTable,
-      /* useGlobalIDs */ false);
+        sha1,
+        bcSha1,
+        m_funcTable,
+        /* useGlobalIDs */ false);
 
     auto name = StringData::Make("func_emitter");
     m_funcEmitter = std::make_unique<FuncEmitter>(*m_unitEmitter, 0, 0, name);

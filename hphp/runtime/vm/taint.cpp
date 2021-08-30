@@ -42,10 +42,12 @@ struct StateSingletonTag {};
 
 } // namespace
 
-InitFiniNode s_configurationInitialization([]() {
-  Configuration::get()->read(RO::EvalTaintConfigurationPath);
-  State::get()->initialize();
-}, InitFiniNode::When::ProcessInit);
+InitFiniNode s_configurationInitialization(
+    []() {
+      Configuration::get()->read(RO::EvalTaintConfigurationPath);
+      State::get()->initialize();
+    },
+    InitFiniNode::When::ProcessInit);
 
 void Configuration::read(const std::string& path) {
   sources.clear();
@@ -64,11 +66,12 @@ void Configuration::read(const std::string& path) {
   } catch (std::exception& exception) {
     // Swallow because we don't use it in tests.
     std::cerr << "taint: warning, unable to read configuration ("
-      << exception.what() << ")" << std::endl;
+              << exception.what() << ")" << std::endl;
   }
 }
 
-folly::Singleton<Configuration, ConfigurationSingletonTag> kConfigurationSingleton{};
+folly::Singleton<Configuration, ConfigurationSingletonTag>
+    kConfigurationSingleton{};
 /* static */ std::shared_ptr<Configuration> Configuration::get() {
   return kConfigurationSingleton.try_get();
 }
@@ -103,7 +106,8 @@ Value Stack::top() const {
 }
 
 Value Stack::peek(int offset) const {
-  // TODO(T93491972): replace with assertions once we can run the integration tests.
+  // TODO(T93491972): replace with assertions once we can run the integration
+  // tests.
   if (m_stack.size() <= offset) {
     FTRACE(
         3,
@@ -156,7 +160,7 @@ void Stack::clear() {
 }
 
 void Heap::set(tv_lval to, const Value& value) {
-  FTRACE(2, "taint: setting lval to `value`\n" /*, value */);  // TODO
+  FTRACE(2, "taint: setting lval to `value`\n" /*, value */); // TODO
   m_heap[to] = value;
 }
 
@@ -584,12 +588,19 @@ void iopJmpNZ(PC& /* pc */, PC /* targetpc */) {
   iopUnhandled("JmpNZ");
 }
 
-void iopSwitch(PC /* origpc */, PC& /* pc */, SwitchKind /* kind */, int64_t /* base */,
-               imm_array<Offset> /* jmptab */) {
+void iopSwitch(
+    PC /* origpc */,
+    PC& /* pc */,
+    SwitchKind /* kind */,
+    int64_t /* base */,
+    imm_array<Offset> /* jmptab */) {
   iopUnhandled("Switch");
 }
 
-void iopSSwitch(PC /* origpc */, PC& /* pc */, imm_array<StrVecItem> /* jmptab */) {
+void iopSSwitch(
+    PC /* origpc */,
+    PC& /* pc */,
+    imm_array<StrVecItem> /* jmptab */) {
   iopUnhandled("SSwitch");
 }
 
@@ -777,13 +788,13 @@ void iopResolveClsMethod(const StringData* /* methName */) {
   iopUnhandled("ResolveClsMethod");
 }
 
-void iopResolveClsMethodD(Id /* classId */,
-                          const StringData* /* methName */) {
+void iopResolveClsMethodD(Id /* classId */, const StringData* /* methName */) {
   iopUnhandled("ResolveClsMethodD");
 }
 
-void iopResolveClsMethodS(SpecialClsRef /* ref */,
-                          const StringData* /* methName */) {
+void iopResolveClsMethodS(
+    SpecialClsRef /* ref */,
+    const StringData* /* methName */) {
   iopUnhandled("ResolveClsMethodS");
 }
 
@@ -791,13 +802,13 @@ void iopResolveRClsMethod(const StringData* /* methName */) {
   iopUnhandled("ResolveRClsMethod");
 }
 
-void iopResolveRClsMethodD(Id /* classId */,
-                           const StringData* /* methName */) {
+void iopResolveRClsMethodD(Id /* classId */, const StringData* /* methName */) {
   iopUnhandled("ResolveRClsMethodD");
 }
 
-void iopResolveRClsMethodS(SpecialClsRef /* ref */,
-                           const StringData* /* methName */) {
+void iopResolveRClsMethodS(
+    SpecialClsRef /* ref */,
+    const StringData* /* methName */) {
   iopUnhandled("ResolveRClsMethodS");
 }
 
@@ -833,70 +844,77 @@ void iopLockObj() {
   iopUnhandled("LockObj");
 }
 
-TCA iopFCallClsMethod(bool /* retToJit */,
-                      PC /* origpc */,
-                      PC& /* pc */,
-                      const FCallArgs& /* fca */,
-                      const StringData*,
-                      IsLogAsDynamicCallOp /* op */) {
+TCA iopFCallClsMethod(
+    bool /* retToJit */,
+    PC /* origpc */,
+    PC& /* pc */,
+    const FCallArgs& /* fca */,
+    const StringData*,
+    IsLogAsDynamicCallOp /* op */) {
   iopUnhandled("FCallClsMethod");
   return nullptr;
 }
 
-TCA iopFCallClsMethodD(bool /* retToJit */,
-                       PC /* origpc */,
-                       PC& /* pc */,
-                       const FCallArgs& /* fca */,
-                       const StringData*,
-                       Id /* classId */,
-                       const StringData* /* methName */) {
+TCA iopFCallClsMethodD(
+    bool /* retToJit */,
+    PC /* origpc */,
+    PC& /* pc */,
+    const FCallArgs& /* fca */,
+    const StringData*,
+    Id /* classId */,
+    const StringData* /* methName */) {
   iopUnhandled("FCallClsMethodD");
   return nullptr;
 }
 
-TCA iopFCallClsMethodS(bool /* retToJit */,
-                       PC /* origpc */,
-                       PC& /* pc */,
-                       const FCallArgs& /* fca */,
-                       const StringData*,
-                       SpecialClsRef /* ref */) {
+TCA iopFCallClsMethodS(
+    bool /* retToJit */,
+    PC /* origpc */,
+    PC& /* pc */,
+    const FCallArgs& /* fca */,
+    const StringData*,
+    SpecialClsRef /* ref */) {
   iopUnhandled("FCallClsMethodS");
   return nullptr;
 }
 
-TCA iopFCallClsMethodSD(bool /* retToJit */,
-                        PC /* origpc */,
-                        PC& /* pc */,
-                        const FCallArgs& /* fca */,
-                        const StringData*,
-                        SpecialClsRef /* ref */,
-                        const StringData* /* methName */) {
+TCA iopFCallClsMethodSD(
+    bool /* retToJit */,
+    PC /* origpc */,
+    PC& /* pc */,
+    const FCallArgs& /* fca */,
+    const StringData*,
+    SpecialClsRef /* ref */,
+    const StringData* /* methName */) {
   iopUnhandled("FCallClsMethodSD");
   return nullptr;
 }
 
-TCA iopFCallCtor(bool /* retToJit */,
-                 PC /* origpc */,
-                 PC& /* pc */,
-                 const FCallArgs& /* fca */,
-                 const StringData*) {
+TCA iopFCallCtor(
+    bool /* retToJit */,
+    PC /* origpc */,
+    PC& /* pc */,
+    const FCallArgs& /* fca */,
+    const StringData*) {
   iopUnhandled("FCallCtor");
   return nullptr;
 }
 
-TCA iopFCallFunc(bool /* retToJit */,
-                 PC /* origpc */,
-                 PC& /* pc */,
-                 const FCallArgs& /* fca */) {
+TCA iopFCallFunc(
+    bool /* retToJit */,
+    PC /* origpc */,
+    PC& /* pc */,
+    const FCallArgs& /* fca */) {
   iopUnhandled("FCallFunc");
   return nullptr;
 }
 
-TCA iopFCallFuncD(bool /* retToJit */,
-                  PC /* origpc */,
-                  PC& /* pc */,
-                  const FCallArgs& fca,
-                  Id id) {
+TCA iopFCallFuncD(
+    bool /* retToJit */,
+    PC /* origpc */,
+    PC& /* pc */,
+    const FCallArgs& fca,
+    Id id) {
   iopPreamble("FCallFuncD");
 
   auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
@@ -916,23 +934,25 @@ TCA iopFCallFuncD(bool /* retToJit */,
   return nullptr;
 }
 
-TCA iopFCallObjMethod(bool /* retToJit */,
-                      PC /* origpc */,
-                      PC& /* pc */,
-                      const FCallArgs& /* fca */,
-                      const StringData*,
-                      ObjMethodOp /* op */) {
+TCA iopFCallObjMethod(
+    bool /* retToJit */,
+    PC /* origpc */,
+    PC& /* pc */,
+    const FCallArgs& /* fca */,
+    const StringData*,
+    ObjMethodOp /* op */) {
   iopUnhandled("FCallObjMethod");
   return nullptr;
 }
 
-TCA iopFCallObjMethodD(bool /* retToJit */,
-                       PC /* origpc */,
-                       PC& /* pc */,
-                       const FCallArgs& /* fca */,
-                       const StringData*,
-                       ObjMethodOp /* op */,
-                       const StringData* /* methName */) {
+TCA iopFCallObjMethodD(
+    bool /* retToJit */,
+    PC /* origpc */,
+    PC& /* pc */,
+    const FCallArgs& /* fca */,
+    const StringData*,
+    ObjMethodOp /* op */,
+    const StringData* /* methName */) {
   iopUnhandled("FCallObjMethodD");
   return nullptr;
 }
@@ -941,10 +961,11 @@ void iopIterInit(PC& /* pc */, const IterArgs& /* ita */, PC /* targetpc */) {
   iopUnhandled("IterInit");
 }
 
-void iopLIterInit(PC& /* pc */,
-                  const IterArgs& /* ita */,
-                  TypedValue* /* base */,
-                  PC /* targetpc */) {
+void iopLIterInit(
+    PC& /* pc */,
+    const IterArgs& /* ita */,
+    TypedValue* /* base */,
+    PC /* targetpc */) {
   iopUnhandled("LIterInit");
 }
 
@@ -952,10 +973,11 @@ void iopIterNext(PC& /* pc */, const IterArgs& /* ita */, PC /* targetpc */) {
   iopUnhandled("IterNext");
 }
 
-void iopLIterNext(PC& /* pc */,
-                  const IterArgs& /* ita */,
-                  TypedValue* /* base */,
-                  PC /* targetpc */) {
+void iopLIterNext(
+    PC& /* pc */,
+    const IterArgs& /* ita */,
+    TypedValue* /* base */,
+    PC /* targetpc */) {
   iopUnhandled("LIterNext");
 }
 
@@ -1169,16 +1191,18 @@ void iopBaseGL(tv_lval /* loc */, MOpMode /* mode */) {
   iopUnhandled("BaseGL");
 }
 
-void iopBaseSC(uint32_t /* keyIdx */,
-               uint32_t /* clsIdx */,
-               MOpMode /* mode */,
-               ReadonlyOp /* op */) {
+void iopBaseSC(
+    uint32_t /* keyIdx */,
+    uint32_t /* clsIdx */,
+    MOpMode /* mode */,
+    ReadonlyOp /* op */) {
   iopUnhandled("BaseSC");
 }
 
-void iopBaseL(named_local_var /* loc */,
-              MOpMode /* mode */,
-              ReadonlyOp /* op */) {
+void iopBaseL(
+    named_local_var /* loc */,
+    MOpMode /* mode */,
+    ReadonlyOp /* op */) {
   iopUnhandled("BaseL");
 }
 
@@ -1194,9 +1218,10 @@ void iopDim(MOpMode /* mode */, MemberKey /* mk */) {
   iopUnhandled("Dim");
 }
 
-void iopQueryM(uint32_t /* nDiscard */,
-               QueryMOp /* subop */,
-               MemberKey /* mk */) {
+void iopQueryM(
+    uint32_t /* nDiscard */,
+    QueryMOp /* subop */,
+    MemberKey /* mk */) {
   iopUnhandled("QueryM");
 }
 
@@ -1204,21 +1229,24 @@ void iopSetM(uint32_t /* nDiscard */, MemberKey /* mk */) {
   iopUnhandled("SetM");
 }
 
-void iopSetRangeM(uint32_t /* nDiscard */,
-                  uint32_t /* size */,
-                  SetRangeOp /* op */) {
+void iopSetRangeM(
+    uint32_t /* nDiscard */,
+    uint32_t /* size */,
+    SetRangeOp /* op */) {
   iopUnhandled("SetRangeM");
 }
 
-void iopIncDecM(uint32_t /* nDiscard */,
-                IncDecOp /* subop */,
-                MemberKey /* mk */) {
+void iopIncDecM(
+    uint32_t /* nDiscard */,
+    IncDecOp /* subop */,
+    MemberKey /* mk */) {
   iopUnhandled("IncDecM");
 }
 
-void iopSetOpM(uint32_t /* nDiscard */,
-               SetOpOp /* subop */,
-               MemberKey /* mk */) {
+void iopSetOpM(
+    uint32_t /* nDiscard */,
+    SetOpOp /* subop */,
+    MemberKey /* mk */) {
   iopUnhandled("SetOpM");
 }
 
@@ -1230,10 +1258,11 @@ void iopMemoGet(PC& /* pc */, PC /* notfound */, LocalRange /* keys */) {
   iopUnhandled("MemoGet");
 }
 
-void iopMemoGetEager(PC& /* pc */,
-                     PC /* notfound */,
-                     PC /* suspended */,
-                     LocalRange /* keys */) {
+void iopMemoGetEager(
+    PC& /* pc */,
+    PC /* notfound */,
+    PC /* suspended */,
+    LocalRange /* keys */) {
   iopUnhandled("MemoGetEager");
 }
 

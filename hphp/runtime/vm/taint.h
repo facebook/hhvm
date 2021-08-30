@@ -73,6 +73,7 @@ struct Stack {
   std::string show() const;
 
   void clear();
+
  private:
   std::vector<Value> m_stack;
 };
@@ -86,6 +87,7 @@ struct Heap {
   Value get(tv_lval from) const;
 
   void clear();
+
  private:
   hphp_fast_map<tv_lval, Value> m_heap;
 };
@@ -190,8 +192,12 @@ void iopJmp(PC& pc, PC targetpc);
 void iopJmpNS(PC& pc, PC targetpc);
 void iopJmpZ(PC& pc, PC targetpc);
 void iopJmpNZ(PC& pc, PC targetpc);
-void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
-               imm_array<Offset> jmptab);
+void iopSwitch(
+    PC origpc,
+    PC& pc,
+    SwitchKind kind,
+    int64_t base,
+    imm_array<Offset> jmptab);
 void iopSSwitch(PC origpc, PC& pc, imm_array<StrVecItem> jmptab);
 void iopRetC(PC& pc);
 void iopRetM(PC& pc, uint32_t numRet);
@@ -231,15 +237,11 @@ void iopResolveFunc(Id id);
 void iopResolveMethCaller(Id id);
 void iopResolveRFunc(Id id);
 void iopResolveClsMethod(const StringData* methName);
-void iopResolveClsMethodD(Id classId,
-                          const StringData* methName);
-void iopResolveClsMethodS(SpecialClsRef ref,
-                          const StringData* methName);
+void iopResolveClsMethodD(Id classId, const StringData* methName);
+void iopResolveClsMethodS(SpecialClsRef ref, const StringData* methName);
 void iopResolveRClsMethod(const StringData* methName);
-void iopResolveRClsMethodD(Id classId,
-                           const StringData* methName);
-void iopResolveRClsMethodS(SpecialClsRef ref,
-                           const StringData* methName);
+void iopResolveRClsMethodD(Id classId, const StringData* methName);
+void iopResolveRClsMethodS(SpecialClsRef ref, const StringData* methName);
 void iopResolveClass(Id id);
 void iopLazyClass(Id id);
 void iopNewObj();
@@ -248,69 +250,68 @@ void iopNewObjD(Id id);
 void iopNewObjRD(Id id);
 void iopNewObjS(SpecialClsRef ref);
 void iopLockObj();
-TCA iopFCallClsMethod(bool retToJit,
-                      PC origpc,
-                      PC& pc,
-                      const FCallArgs& fca,
-                      const StringData*,
-                      IsLogAsDynamicCallOp op);
-TCA iopFCallClsMethodD(bool retToJit,
-                       PC origpc,
-                       PC& pc,
-                       const FCallArgs& fca,
-                       const StringData*,
-                       Id classId,
-                       const StringData* methName);
-TCA iopFCallClsMethodS(bool retToJit,
-                       PC origpc,
-                       PC& pc,
-                       const FCallArgs& fca,
-                       const StringData*,
-                       SpecialClsRef ref);
-TCA iopFCallClsMethodSD(bool retToJit,
-                        PC origpc,
-                        PC& pc,
-                        const FCallArgs& fca,
-                        const StringData*,
-                        SpecialClsRef ref,
-                        const StringData* methName);
-TCA iopFCallCtor(bool retToJit,
-                 PC origpc,
-                 PC& pc,
-                 const FCallArgs& fca,
-                 const StringData*);
-TCA iopFCallFunc(bool retToJit,
-                 PC origpc,
-                 PC& pc,
-                 const FCallArgs& fca);
-TCA iopFCallFuncD(bool retToJit,
-                  PC origpc,
-                  PC& pc,
-                  const FCallArgs& fca,
-                  Id id);
-TCA iopFCallObjMethod(bool retToJit,
-                      PC origpc,
-                      PC& pc,
-                      const FCallArgs& fca,
-                      const StringData*,
-                      ObjMethodOp op);
-TCA iopFCallObjMethodD(bool retToJit,
-                       PC origpc,
-                       PC& pc,
-                       const FCallArgs& fca,
-                       const StringData*,
-                       ObjMethodOp op,
-                       const StringData* methName);
+TCA iopFCallClsMethod(
+    bool retToJit,
+    PC origpc,
+    PC& pc,
+    const FCallArgs& fca,
+    const StringData*,
+    IsLogAsDynamicCallOp op);
+TCA iopFCallClsMethodD(
+    bool retToJit,
+    PC origpc,
+    PC& pc,
+    const FCallArgs& fca,
+    const StringData*,
+    Id classId,
+    const StringData* methName);
+TCA iopFCallClsMethodS(
+    bool retToJit,
+    PC origpc,
+    PC& pc,
+    const FCallArgs& fca,
+    const StringData*,
+    SpecialClsRef ref);
+TCA iopFCallClsMethodSD(
+    bool retToJit,
+    PC origpc,
+    PC& pc,
+    const FCallArgs& fca,
+    const StringData*,
+    SpecialClsRef ref,
+    const StringData* methName);
+TCA iopFCallCtor(
+    bool retToJit,
+    PC origpc,
+    PC& pc,
+    const FCallArgs& fca,
+    const StringData*);
+TCA iopFCallFunc(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca);
+TCA iopFCallFuncD(
+    bool retToJit,
+    PC origpc,
+    PC& pc,
+    const FCallArgs& fca,
+    Id id);
+TCA iopFCallObjMethod(
+    bool retToJit,
+    PC origpc,
+    PC& pc,
+    const FCallArgs& fca,
+    const StringData*,
+    ObjMethodOp op);
+TCA iopFCallObjMethodD(
+    bool retToJit,
+    PC origpc,
+    PC& pc,
+    const FCallArgs& fca,
+    const StringData*,
+    ObjMethodOp op,
+    const StringData* methName);
 void iopIterInit(PC& pc, const IterArgs& ita, PC targetpc);
-void iopLIterInit(PC& pc,
-                  const IterArgs& ita,
-                  TypedValue* base,
-                  PC targetpc);
+void iopLIterInit(PC& pc, const IterArgs& ita, TypedValue* base, PC targetpc);
 void iopIterNext(PC& pc, const IterArgs& ita, PC targetpc);
-void iopLIterNext(PC& pc,
-                  const IterArgs& ita,
-                  TypedValue* base,
-                  PC targetpc);
+void iopLIterNext(PC& pc, const IterArgs& ita, TypedValue* base, PC targetpc);
 void iopIterFree(Iter* it);
 void iopLIterFree(Iter* it, tv_lval);
 void iopIncl();
@@ -361,10 +362,7 @@ void iopThrowNonExhaustiveSwitch();
 void iopRaiseClassStringConversionWarning();
 void iopBaseGC(uint32_t idx, MOpMode mode);
 void iopBaseGL(tv_lval loc, MOpMode mode);
-void iopBaseSC(uint32_t keyIdx,
-               uint32_t clsIdx,
-               MOpMode mode,
-               ReadonlyOp op);
+void iopBaseSC(uint32_t keyIdx, uint32_t clsIdx, MOpMode mode, ReadonlyOp op);
 void iopBaseL(named_local_var loc, MOpMode mode, ReadonlyOp op);
 void iopBaseC(uint32_t idx, MOpMode);
 void iopBaseH();
@@ -376,10 +374,7 @@ void iopIncDecM(uint32_t nDiscard, IncDecOp subop, MemberKey mk);
 void iopSetOpM(uint32_t nDiscard, SetOpOp subop, MemberKey mk);
 void iopUnsetM(uint32_t nDiscard, MemberKey mk);
 void iopMemoGet(PC& pc, PC notfound, LocalRange keys);
-void iopMemoGetEager(PC& pc,
-                     PC notfound,
-                     PC suspended,
-                     LocalRange keys);
+void iopMemoGetEager(PC& pc, PC notfound, PC suspended, LocalRange keys);
 void iopMemoSet(LocalRange keys);
 void iopMemoSetEager(LocalRange keys);
 

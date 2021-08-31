@@ -17,7 +17,7 @@
     --error-format raw
     )))
 
-; (alias
-;    (name runtest)
-;    (deps
-;        (alias tast_holes)))
+(alias
+    (name runtest)
+    (deps
+        (alias tast_holes)))

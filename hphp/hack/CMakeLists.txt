@@ -151,6 +151,7 @@ add_custom_command(
     COMMAND cp ${FFI_BRIDGE_BIN}/cxxbridge/rust_facts_ffi_bridge/rust_facts_ffi_bridge.rs.cc ${RUST_PART_CXX}
     COMMAND cp ${FFI_BRIDGE_BIN}/cxxbridge/rust_facts_ffi_bridge/rust_facts_ffi_bridge.rs.h ${FFI_BRIDGE_BIN}/rust_facts_ffi_bridge.rs
     WORKING_DIRECTORY ${FFI_BRIDGE_SRC}
+    DEPENDS rustc cargo
 )
 
 add_custom_target(

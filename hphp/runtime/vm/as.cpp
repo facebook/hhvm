@@ -93,7 +93,6 @@
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/bc-pattern.h"
 #include "hphp/runtime/vm/coeffects.h"
-#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/native.h"
@@ -102,6 +101,7 @@
 #include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-emitter.h"
+#include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/zend/zend-string.h"
 

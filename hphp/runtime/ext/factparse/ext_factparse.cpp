@@ -24,8 +24,8 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/util/file.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/job-queue.h"
@@ -56,7 +56,7 @@ struct HackCFactsExtractor {
     folly::StringPiece code,
     result_type& res
   ) {
-    auto result = extract_facts(path, code.data(), code.size(),
+    auto result = extract_facts(path, code.data(),
                                 RepoOptions::forFile(path.data()));
     match<void>(
       result,

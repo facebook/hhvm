@@ -43,10 +43,10 @@
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
-#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/file.h"
 #include "hphp/util/match.h"
@@ -607,8 +607,8 @@ String HHVM_FUNCTION(ffp_parse_string_native, const String& str) {
     [] (const ActRec* fp, Offset) { return fp->unit()->filepath()->data(); }
   );
 
-  auto result = ffp_parse_file("", program.c_str(), program.size(),
-                               RepoOptions::forFile(file));
+  auto result =
+    ffp_parse_file("", program.c_str(), RepoOptions::forFile(file));
 
   FfpJSONString res;
   match<void>(

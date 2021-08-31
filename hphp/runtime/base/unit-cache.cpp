@@ -36,11 +36,11 @@
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/debugger-hook.h"
-#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unit-emitter.h"
+#include "hphp/runtime/vm/unit-parser.h"
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/build-info.h"

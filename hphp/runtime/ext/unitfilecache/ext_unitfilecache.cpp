@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/blob-helper.h"
-#include "hphp/runtime/vm/extern-compiler.h"
+#include "hphp/runtime/vm/unit-parser.h"
 
 #include "hphp/util/build-info.h"
 #include "hphp/util/logger.h"

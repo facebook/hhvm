@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/extern-compiler.h"
+#include "hphp/runtime/vm/unit-parser.h"
 
 #include <cinttypes>
 #include <condition_variable>
@@ -60,8 +60,6 @@
 #include "hphp/util/timer.h"
 #include "hphp/zend/zend-strtod.h"
 
-#include <iostream>
-
 namespace HPHP {
 
 TRACE_SET_MOD(extern_compiler);
@@ -72,7 +70,6 @@ static std::string s_misc_config;
 namespace {
 
 struct CompileException : Exception {
-  explicit CompileException(const std::string& what) : Exception(what) {}
   template<class... A>
   explicit CompileException(A&&... args)
     : Exception(folly::sformat(std::forward<A>(args)...))
@@ -159,7 +156,6 @@ struct ConfigBuilder {
 
 CompilerResult hackc_compile(
   const char* code,
-  int len,
   const char* filename,
   const SHA1& sha1,
   const Native::FuncTable& nativeFuncs,
@@ -171,19 +167,12 @@ CompilerResult hackc_compile(
   using namespace ::HPHP::hackc::compile;
 
   std::uint8_t flags = 0;
-  if(forDebuggerEval) {
-    flags |= FOR_DEBUGGER_EVAL;
-  }
-  if(!SystemLib::s_inited) {
-    flags |= IS_SYSTEMLIB;
-  }
-  if (RuntimeOption::EvalEnableDecl) {
-    flags |= ENABLE_DECL;
-  }
+  if (forDebuggerEval) flags |= FOR_DEBUGGER_EVAL;
+  if (!SystemLib::s_inited) flags |= IS_SYSTEMLIB;
+  if (RuntimeOption::EvalEnableDecl) flags |= ENABLE_DECL;
   flags |= DUMP_SYMBOL_REFS;
 
   HhvmDeclProvider decl_provider;
-
   std::string aliased_namespaces = options.getAliasedNamespacesConfig();
 
   native_environment const native_env{
@@ -237,7 +226,6 @@ void compilers_start() {
 ParseFactsResult extract_facts(
   const std::string& filename,
   const char* code,
-  int len,
   const RepoOptions& options
 ) {
   auto const get_facts = [&](const char* source_text) -> ParseFactsResult {
@@ -269,7 +257,6 @@ ParseFactsResult extract_facts(
 FfpResult ffp_parse_file(
   std::string file,
   const char *contents,
-  int size,
   const RepoOptions& options
 ) {
   auto const env = options.getParserEnvironment();
@@ -292,8 +279,8 @@ UnitCompiler::create(const char* code,
                      const Native::FuncTable& nativeFuncs,
                      bool forDebuggerEval,
                      const RepoOptions& options) {
-  auto const make = [code, codeLen, filename, sha1, forDebuggerEval,
-                     &nativeFuncs, &options] {
+  auto make = [code, codeLen, filename, sha1, forDebuggerEval,
+               &nativeFuncs, &options] {
     return std::make_unique<HackcUnitCompiler>(
       code,
       codeLen,
@@ -327,7 +314,6 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
   auto ice = false;
   cacheHit = false;
   auto res = hackc_compile(m_code,
-                           m_codeLen,
                            m_filename,
                            m_sha1,
                            m_nativeFuncs,

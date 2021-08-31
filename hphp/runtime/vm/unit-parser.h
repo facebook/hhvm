@@ -51,11 +51,9 @@ using FfpResult = boost::variant<FfpJSONString, std::string>;
 
 ParseFactsResult extract_facts(const std::string& filename,
                                const char* code,
-                               int len,
                                const RepoOptions& options);
 FfpResult ffp_parse_file(std::string file,
                          const char* contents,
-                         int size,
                          const RepoOptions& options);
 
 /*

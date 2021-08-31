@@ -1665,8 +1665,6 @@ void fix_inline_frames(Global& genv) {
 
     for (auto iter = blk->begin(); iter != blk->end(); iter++) {
       auto& inst = *iter;
-      adjust_inline_marker(inst, scratch_frames, published_frames);
-
       if (inst.is(InlineReturn)) {
         if (fp == inst.src(0)) {
           // If we didn't elide the InlineCall paired with this return we can't
@@ -1707,21 +1705,30 @@ void fix_inline_frames(Global& genv) {
         );
         auto next = iter;
         next++;
-        if (state.catchSk.valid()) {
-          auto const syncPC = genv.unit.gen(
-            StVMPC,
-            inst.bcctx(),
-            genv.unit.cns(uintptr_t(state.catchSk.pc()))
-          );
-          blk->insert(next, syncPC);
-        }
+        auto const syncPC = genv.unit.gen(
+          StVMPC,
+          inst.bcctx(),
+          genv.unit.cns(uintptr_t(-1))
+        );
         blk->insert(next, syncFP);
+        blk->insert(next, syncPC);
       }
 
       if (inst.is(DefFP, DefFuncEntryFP)) {
         fp = inst.dst();
         published_frames.push_back(fp);
       }
+
+      adjust_inline_marker(inst, scratch_frames, published_frames);
+      FTRACE(1,
+        "adjust_inline_marker:\n"
+        "  inst: {}\n"
+        "  sk: {}\n"
+        "  fixupSk: {}\n",
+        inst.toString(),
+        show(inst.marker().sk()),
+        show(inst.marker().fixupSk())
+      );
 
       if (debug && inst.is(BeginInlining)) parentFPs[inst.dst()] = inst.src(1);
       if (inst.is(Call)) fix_inlined_call(genv, &inst, fp);

@@ -29,6 +29,7 @@ let () = Random.self_init ()
 let () =
   (* no-op, needed at entry-point for Daemon hookup *)
   Daemon.check_entry_point ();
+  Folly.ensure_folly_init ();
 
   (* Ignore SIGPIPE since we might get a server hangup and don't care (can
    * detect and handle better than a signal). Ignore SIGUSR1 since we sometimes

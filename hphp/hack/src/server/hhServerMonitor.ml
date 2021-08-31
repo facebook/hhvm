@@ -34,6 +34,8 @@ let make_tmp_dir () =
     requests to the typechecker process. *)
 let monitor_daemon_main
     (options : ServerArgs.options) ~(proc_stack : string list) =
+  Folly.ensure_folly_init ();
+
   let www_root = ServerArgs.root options in
 
   (* Check mode: --check means we'll start up the server and it will do a typecheck

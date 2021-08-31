@@ -1005,6 +1005,7 @@ let default_subcommand =
 let () =
   EventLogger.init EventLogger.Event_logger_fake 0.0;
   Daemon.check_entry_point ();
+  Folly.ensure_folly_init ();
   let cmds =
     [
       build_subcommand;

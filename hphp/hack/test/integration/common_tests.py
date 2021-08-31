@@ -896,10 +896,26 @@ class CommonTests(BarebonesTests):
         pid = m.group(1)
         self.assertIsNotNone(pid)
         os.kill(int(pid), signal.SIGTERM)
-        # For some reason, waitpid in the monitor after the kill signal
-        # sent above doesn't preserve ordering - maybe because they're
-        # in separate processes? Give it some time.
-        time.sleep(1)
+        # We've sent a kill signal to the server, but it may take some time for
+        # the server to actually die. For instance, it may be attempting to
+        # print a backtrace in the signal handler, which takes less than a
+        # second in @mode/opt-clang, but can take minutes in @mode/dev. If we
+        # attempt to connect before the server process actually dies, the
+        # monitor will happily hand us off to the dying server, which will
+        # abruptly close our connection when its process exits. What we want
+        # instead is to connect to the monitor after its waitpid on the server
+        # completes, so that it can report to us the signal which killed the
+        # server. We can't waitpid here because the server isn't a child of this
+        # process, so we poll the monitor logs until the monitor records the
+        # TYPECHECKER_EXIT event.
+        attempts = 0
+        while attempts < 5 * 60:
+            monitor_logs = self.test_driver.get_monitor_logs()
+            m = re.search("TYPECHECKER_EXIT", monitor_logs)
+            if m is not None:
+                break
+            attempts += 1
+            time.sleep(1)
         client_error = self.test_driver.check_cmd(
             expected_output=None, assert_loaded_saved_state=False
         )

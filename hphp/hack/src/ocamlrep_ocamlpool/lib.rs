@@ -269,9 +269,9 @@ macro_rules! ocaml_ffi_with_arena_fn {
         #[no_mangle]
         pub unsafe extern "C" fn $name ($($param: usize,)*) -> usize {
             $crate::catch_unwind(|| {
-                use $crate::FromOcamlRep;
+                use $crate::FromOcamlRepIn;
                 let arena = &$crate::Bump::new();
-                fn inner<$lifetime>($arena: &$lifetime $crate::Bump, $($param: usize,)*) -> $ret {
+                fn inner<$lifetime>($arena: $arena_ty, $($param: usize,)*) -> $ret {
                     $(let $param = unsafe { <$ty>::from_ocamlrep_in($crate::Value::from_bits($param), $arena).unwrap() };)*
                     $code
                 }
@@ -285,7 +285,7 @@ macro_rules! ocaml_ffi_with_arena_fn {
         #[no_mangle]
         pub unsafe extern "C" fn $name (_unit: usize) -> usize {
             $crate::catch_unwind(|| {
-                fn inner<$lifetime>($arena: &$lifetime $crate::Bump) -> $ret { $code }
+                fn inner<$lifetime>($arena: $arena_ty) -> $ret { $code }
                 let arena = &$crate::Bump::new();
                 let result = inner(arena);
                 $crate::to_ocaml(&result)

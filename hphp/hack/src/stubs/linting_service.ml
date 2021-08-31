@@ -7,6 +7,10 @@
  *
  *)
 
-let lint _ _ _ = ()
+let untyped_linters = []
+
+let typed_linters = []
+
+let lint_tast _ _ = ()
 
 let lint_xcontroller _ _ = ()

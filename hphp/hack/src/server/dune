@@ -532,6 +532,8 @@
     hhi
     ide_rpc_api_types
     linting
+    linting_main
+    lints_core
     lsp
     parsing_service
     remote

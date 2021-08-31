@@ -1698,7 +1698,7 @@ let handle_mode
         ~init:[]
         ~f:(fun fn content lint_errors ->
           lint_errors
-          @ fst (Lint.do_ (fun () -> Linting_service.lint ctx fn content)))
+          @ fst (Lints_core.do_ (fun () -> Linting_main.lint ctx fn content)))
     in
     if not (List.is_empty lint_errors) then (
       let lint_errors =
@@ -1706,11 +1706,11 @@ let handle_mode
           ~compare:
             begin
               fun x y ->
-              Pos.compare (Lint.get_pos x) (Lint.get_pos y)
+              Pos.compare (Lints_core.get_pos x) (Lints_core.get_pos y)
             end
           lint_errors
       in
-      let lint_errors = List.map ~f:Lint.to_absolute lint_errors in
+      let lint_errors = List.map ~f:Lints_core.to_absolute lint_errors in
       ServerLintTypes.output_text stdout lint_errors error_format;
       exit 2
     ) else

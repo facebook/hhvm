@@ -1,6 +1,5 @@
 (*
- * Copyright (c) 2015, Facebook, Inc.
- * All rights reserved.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
@@ -57,6 +56,15 @@ let add
     lint_list := Some (lint :: lst)
   (* by default, we ignore lint errors *)
   | None -> ()
+
+let add_lint lint =
+  add
+    ~bypass_changed_lines:lint.bypass_changed_lines
+    ~autofix:lint.autofix
+    lint.code
+    lint.severity
+    lint.pos
+    lint.message
 
 let to_absolute ({ pos; _ } as lint) = { lint with pos = Pos.to_absolute pos }
 

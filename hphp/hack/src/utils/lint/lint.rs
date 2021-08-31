@@ -22,7 +22,7 @@ pub enum Severity {
     Advice,
 }
 
-// port from lint_core.t
+// port from lints_core.t
 #[derive(Clone, Debug, FromOcamlRep, ToOcamlRep)]
 pub struct LintError {
     code: usize,

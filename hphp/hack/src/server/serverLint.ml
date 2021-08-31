@@ -30,14 +30,14 @@ let lint tcopt _acc (files_with_contents : lint_target list) =
       begin
         fun acc { filename; contents } ->
         let (errs, ()) =
-          Lint.do_ (fun () ->
+          Lints_core.do_ (fun () ->
               Errors.ignore_ (fun () ->
                   let contents =
                     match contents with
                     | Some contents -> contents
                     | None -> Sys_utils.cat (Relative_path.to_absolute filename)
                   in
-                  Linting_service.lint tcopt filename contents))
+                  Linting_main.lint tcopt filename contents))
         in
         errs @ acc
       end
@@ -45,7 +45,7 @@ let lint tcopt _acc (files_with_contents : lint_target list) =
 
 let lint_and_filter tcopt code acc fnl =
   let lint_errs = lint tcopt acc fnl in
-  List.filter lint_errs ~f:(fun err -> Lint.get_code err = code)
+  List.filter lint_errs ~f:(fun err -> Lints_core.get_code err = code)
 
 let lint_all genv ctx code =
   let next =
@@ -65,15 +65,15 @@ let lint_all genv ctx code =
       ~neutral:[]
       ~next
   in
-  List.map errs ~f:Lint.to_absolute
+  List.map errs ~f:Lints_core.to_absolute
 
 let create_rp : string -> RP.t = Relative_path.create Relative_path.Root
 
 let prepare_errors_for_output errs =
   errs
   |> List.sort ~compare:(fun x y ->
-         Pos.compare (Lint.get_pos x) (Lint.get_pos y))
-  |> List.map ~f:Lint.to_absolute
+         Pos.compare (Lints_core.get_pos x) (Lints_core.get_pos y))
+  |> List.map ~f:Lints_core.to_absolute
 
 let go genv ctx fnl =
   let files_with_contents =
@@ -113,7 +113,7 @@ let lint_single_xcontroller ctx name =
 let lint_xcontroller tcopt acc classes =
   List.fold_left classes ~init:acc ~f:(fun acc class_ ->
       let (errs, ()) =
-        Lint.do_ (fun () ->
+        Lints_core.do_ (fun () ->
             Errors.ignore_ (fun () -> lint_single_xcontroller tcopt class_))
       in
       errs @ acc)

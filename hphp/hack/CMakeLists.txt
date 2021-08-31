@@ -132,6 +132,38 @@ add_custom_target(
   COMMENT "Compiling Rust FFI"
 )
 
+# Compiling facts cxx entrypoint for hhvm
+if(DEFINED ENV{HACKDEBUG})
+  set(PROFILE "debug")
+else()
+  set(PROFILE "release")
+endif()
+
+set(FFI_BRIDGE "hphp/hack/src/facts/ffi_bridge")
+set(FFI_BRIDGE_SRC "${CMAKE_SOURCE_DIR}/${FFI_BRIDGE}")
+set(FFI_BRIDGE_BIN "${CMAKE_BINARY_DIR}/${FFI_BRIDGE}")
+set(RUST_PART_LIB "${FFI_BRIDGE_BIN}/${PROFILE}/librust_facts_ffi_bridge.a")
+set(RUST_PART_CXX "${FFI_BRIDGE_BIN}/rust_facts_ffi_bridge.cpp")
+
+add_custom_command(
+    OUTPUT ${RUST_PART_CXX}
+    COMMAND . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
+      ${CARGO_BUILD} rust_facts_ffi_bridge rust_facts_ffi_bridge --cxx ${FFI_BRIDGE_BIN}
+    COMMAND cp ${FFI_BRIDGE_BIN}/cxxbridge/rust_facts_ffi_bridge/rust_facts_ffi_bridge.rs.cc ${RUST_PART_CXX}
+    COMMAND cp ${FFI_BRIDGE_BIN}/cxxbridge/rust_facts_ffi_bridge/rust_facts_ffi_bridge.rs.h ${FFI_BRIDGE_BIN}/rust_facts_ffi_bridge.rs
+    WORKING_DIRECTORY ${FFI_BRIDGE_SRC}
+)
+
+add_custom_target(
+  rust_facts_cxx
+  DEPENDS ${RUST_PART_CXX}
+)
+
+include_directories(${FFI_BRIDGE_BIN})
+add_library(rust_facts_ffi_bridge STATIC ${RUST_PART_CXX})
+add_dependencies(rust_facts_ffi_bridge rustc cargo rust_facts_cxx)
+target_link_libraries(rust_facts_ffi_bridge ${RUST_PART_LIB})
+
 add_dependencies(hack_ffi rustc cargo)
 # Not a true dependency, but we need to make sure we don't have two cargo/rustc
 # processes building the FFI files at the same time; this leads to intermittent

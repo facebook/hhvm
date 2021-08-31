@@ -35,7 +35,7 @@
 #include <folly/FileUtil.h>
 #include <folly/system/ThreadName.h>
 
-#include "hphp/hack/src/facts/rust_facts_ffi.h"
+#include "hphp/hack/src/facts/ffi_bridge/rust_facts_ffi_bridge.rs"
 #include "hphp/hack/src/hhbc/compile_ffi.h"
 #include "hphp/hack/src/hhbc/compile_ffi_types.h"
 #include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi.h"
@@ -242,14 +242,11 @@ ParseFactsResult extract_facts(
 ) {
   auto const get_facts = [&](const char* source_text) -> ParseFactsResult {
     try {
-      hackc_extract_as_json_ptr facts{
-        hackc_extract_as_json(options.getFactsFlags(), filename.data(), source_text, true)
-      };
-      if (facts) {
-        std::string facts_str{facts.get()};
-        return FactsJSONString { facts_str };
-      }
-      return FactsJSONString { "" }; // Swallow errors from HackC
+      auto facts = hackc_extract_as_json_cpp_ffi(options.getFactsFlags(),
+                                                 filename,
+                                                 source_text,
+                                                 true);
+      return FactsJSONString { std::string(facts) };
     } catch (const std::exception& e) {
       return FactsJSONString { "" }; // Swallow errors from HackC
     }

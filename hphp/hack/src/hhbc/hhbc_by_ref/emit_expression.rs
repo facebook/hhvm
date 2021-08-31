@@ -1919,7 +1919,7 @@ fn emit_call_default<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     scope::with_unnamed_locals(alloc, e, |alloc, em| {
         let FcallArgs(_, _, num_ret, _, _, _, _) = &fcall_args;
         let num_uninit = num_ret - 1;
-        let (lhs, fcall) = emit_call_lhs_and_fcall(em, env, expr, fcall_args, targs)?;
+        let (lhs, fcall) = emit_call_lhs_and_fcall(em, env, expr, fcall_args, targs, None)?;
         let (args, inout_setters) = emit_args_inout_setters(em, env, args)?;
         let uargs = match uarg {
             Some(uarg) => emit_expr(em, env, uarg)?,
@@ -2069,6 +2069,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     expr: &ast::Expr,
     mut fcall_args: FcallArgs<'arena>,
     targs: &[ast::Targ],
+    caller_readonly_opt: Option<&Pos>,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     let ast::Expr(_, pos, expr_) = expr;
     use ast::{Expr as E, Expr_ as E_};
@@ -2098,15 +2099,22 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         env,
         expr: &ast::Expr,
         fcall_args: FcallArgs<'arena>,
+        caller_readonly_opt: Option<&Pos>,
     | -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
         let tmp = e.local_gen_mut().get_unnamed();
+        // if the original expression was wrapped in readonly, emit a readonly expression here
+        let res = if let Some(p) = caller_readonly_opt {
+            emit_readonly_expr(e, env, p, expr)?
+        } else {
+            emit_expr(e, env, expr)?
+        };
         Ok((
             InstrSeq::gather(
                 alloc,
                 vec![
                     instr::nulluninit(alloc),
                     instr::nulluninit(alloc),
-                    emit_expr(e, env, expr)?,
+                    res,
                     instr::popl(alloc, tmp),
                 ],
             ),
@@ -2121,6 +2129,13 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     };
 
     match expr_ {
+        E_::ReadonlyExpr(r) => {
+            // If calling a Readonly expression, first recurse inside to
+            // handle ObjGet and ClassGet prop call cases. Keep track of the position of the
+            // outer readonly expression for use later.
+            // TODO: use the fact that this is a readonly call in HHVM enforcement
+            emit_call_lhs_and_fcall(e, env, r, fcall_args, targs, Some(pos))
+        }
         E_::ObjGet(o) => {
             if o.as_ref().3 {
                 // Case ($x->foo)(...).
@@ -2129,9 +2144,10 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     pos.clone(),
                     E_::ObjGet(Box::new((o.0.clone(), o.1.clone(), o.2.clone(), false))),
                 );
-                emit_fcall_func(e, env, &expr, fcall_args)
+                emit_fcall_func(e, env, &expr, fcall_args, caller_readonly_opt)
             } else {
                 // Case $x->foo(...).
+                // TODO: utilze caller_readonly_opt here for method calls
                 let emit_id = |
                     e: &mut Emitter<'arena, 'decl, D>,
                     obj,
@@ -2363,7 +2379,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     pos.clone(),
                     E_::ClassGet(Box::new((c.0.clone(), c.1.clone(), false))),
                 );
-                emit_fcall_func(e, env, &expr, fcall_args)
+                emit_fcall_func(e, env, &expr, fcall_args, caller_readonly_opt)
             } else {
                 // Case Foo::bar(...).
                 let (cid, cls_get_expr, _) = &**c;
@@ -2530,7 +2546,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 ),
             ))
         }
-        _ => emit_fcall_func(e, env, expr, fcall_args),
+        _ => emit_fcall_func(e, env, expr, fcall_args, caller_readonly_opt),
     }
 }
 

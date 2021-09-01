@@ -132,38 +132,42 @@ add_custom_target(
   COMMENT "Compiling Rust FFI"
 )
 
-# Compiling facts cxx entrypoint for hhvm
+# Compiling cxx entrypoints for hhvm
 if(DEFINED ENV{HACKDEBUG})
   set(PROFILE "debug")
 else()
   set(PROFILE "release")
 endif()
 
-set(FFI_BRIDGE "hphp/hack/src/facts/ffi_bridge")
-set(FFI_BRIDGE_SRC "${CMAKE_SOURCE_DIR}/${FFI_BRIDGE}")
-set(FFI_BRIDGE_BIN "${CMAKE_BINARY_DIR}/${FFI_BRIDGE}")
-set(RUST_PART_LIB "${FFI_BRIDGE_BIN}/${PROFILE}/librust_facts_ffi_bridge.a")
-set(RUST_PART_CXX "${FFI_BRIDGE_BIN}/rust_facts_ffi_bridge.cpp")
+function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
+  set(FFI_BRIDGE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/${FFI_BRIDGE_DIR}")
+  set(FFI_BRIDGE_BIN "${CMAKE_CURRENT_BINARY_DIR}/${FFI_BRIDGE_DIR}")
 
-add_custom_command(
-    OUTPUT ${RUST_PART_CXX}
-    COMMAND . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-      ${CARGO_BUILD} rust_facts_ffi_bridge rust_facts_ffi_bridge --cxx ${FFI_BRIDGE_BIN}
-    COMMAND cp ${FFI_BRIDGE_BIN}/cxxbridge/rust_facts_ffi_bridge/rust_facts_ffi_bridge.rs.cc ${RUST_PART_CXX}
-    COMMAND cp ${FFI_BRIDGE_BIN}/cxxbridge/rust_facts_ffi_bridge/rust_facts_ffi_bridge.rs.h ${FFI_BRIDGE_BIN}/rust_facts_ffi_bridge.rs
-    WORKING_DIRECTORY ${FFI_BRIDGE_SRC}
-    DEPENDS rustc cargo
-)
+  set(RUST_PART_LIB "${FFI_BRIDGE_BIN}/${PROFILE}/lib${NAME}_ffi_bridge${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(RUST_PART_CXX "${FFI_BRIDGE_BIN}/${NAME}_ffi_bridge.cpp")
+  set(GENERATED "${FFI_BRIDGE_BIN}/cxxbridge/${NAME}_ffi_bridge/${NAME}_ffi_bridge")
 
-add_custom_target(
-  rust_facts_cxx
-  DEPENDS ${RUST_PART_CXX}
-)
+  add_custom_command(
+      OUTPUT ${RUST_PART_CXX}
+      COMMAND . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
+        ${CARGO_BUILD} "${NAME}_ffi_bridge" "${NAME}_ffi_bridge" --cxx ${FFI_BRIDGE_BIN}
+      COMMAND cp "${GENERATED}.rs.cc" ${RUST_PART_CXX}
+      COMMAND cp "${GENERATED}.rs.h" "${FFI_BRIDGE_BIN}/${NAME}_ffi_bridge.rs"
+      WORKING_DIRECTORY ${FFI_BRIDGE_SRC}
+      DEPENDS rustc cargo
+  )
+  add_custom_target(
+    "${NAME}_cxx"
+    DEPENDS ${RUST_PART_CXX}
+  )
 
-include_directories(${FFI_BRIDGE_BIN})
-add_library(rust_facts_ffi_bridge STATIC ${RUST_PART_CXX})
-add_dependencies(rust_facts_ffi_bridge rustc cargo rust_facts_cxx)
-target_link_libraries(rust_facts_ffi_bridge ${RUST_PART_LIB})
+  include_directories(${FFI_BRIDGE_BIN})
+  add_library("${NAME}_ffi_bridge" STATIC ${RUST_PART_CXX})
+  add_dependencies("${NAME}_ffi_bridge" rustc cargo "${NAME}_cxx")
+  target_link_libraries("${NAME}_ffi_bridge" ${RUST_PART_LIB})
+endfunction()
+
+build_cxx_bridge(rust_facts "src/facts/ffi_bridge")
 
 add_dependencies(hack_ffi rustc cargo)
 # Not a true dependency, but we need to make sure we don't have two cargo/rustc

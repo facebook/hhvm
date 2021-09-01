@@ -37,7 +37,7 @@ ACCUMULATE: we start with all fields empty, and then merge in the output of each
 type typing_result = {
   errors: Errors.t;
   dep_edges: Typing_deps.dep_edges;
-  adhoc_profiling: Adhoc_profiler.t;
+  adhoc_profiling: Adhoc_profiler.CallTree.t;
   telemetry: Telemetry.t;
   jobs_finished_to_end: Measure.record;
       (** accumulates information about jobs where process_files finished every file in the bucket *)
@@ -50,7 +50,7 @@ let make_typing_result () =
     errors = Errors.empty;
     dep_edges = Typing_deps.dep_edges_make ();
     telemetry = Telemetry.create ();
-    adhoc_profiling = Adhoc_profiler.init ();
+    adhoc_profiling = Adhoc_profiler.CallTree.make ();
     jobs_finished_to_end = Measure.create ();
     jobs_finished_early = Measure.create ();
   }
@@ -94,7 +94,7 @@ let accumulate_job_output
         produced_by_job.dep_edges
         accumulated_so_far.dep_edges;
     adhoc_profiling =
-      Adhoc_profiler.merge
+      Adhoc_profiler.CallTree.merge
         produced_by_job.adhoc_profiling
         accumulated_so_far.adhoc_profiling;
     telemetry =

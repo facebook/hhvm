@@ -80,7 +80,7 @@ module Node = struct
       (string, t) Hashtbl.t;
   }
 
-  let init : unit -> t =
+  let make : unit -> t =
    (fun () -> { data = Counter.init; children = Hashtbl.create () })
 
   let to_string : name:string -> t -> string =
@@ -108,8 +108,45 @@ module Node = struct
     to_string 0 name node
 end
 
-(** The profiler structure. A set of named roots. *)
-type t = (string, Node.t) Hashtbl.t
+module CallTree = struct
+  (** The profiling data. A set of named roots. *)
+  type t = (string, Node.t) Hashtbl.t
+
+  let make () = Hashtbl.create ()
+
+  let rec merge : t -> t -> t =
+   fun p1 p2 ->
+    Hashtbl.merge p1 p2 ~f:(fun ~key:_ -> function
+      | `Left n
+      | `Right n ->
+        Some n
+      | `Both
+          ( { Node.data = data1; children = children1 },
+            { Node.data = data2; children = children2 } ) ->
+        Some
+          {
+            Node.data = Counter.add data1 data2;
+            children = merge children1 children2;
+          })
+
+  let to_string : t -> string =
+   fun nodes ->
+    nodes
+    |> Hashtbl.to_list
+    |> List.sort ~compare:(fun (name1, _) (name2, _) ->
+           String.compare name1 name2)
+    |> List.map ~f:(fun (name, node) -> Node.to_string ~name node)
+    |> String.concat
+end
+
+(** The profiler structure. *)
+type prof = {
+  nodes: CallTree.t;
+  depth: int;
+      (** Used to limit depth of stacks. Useful especially with recursive functions. *)
+}
+
+type t = prof option
 
 let get_time_ref : (unit -> seconds) ref = ref Sys.time
 
@@ -119,64 +156,45 @@ module Test = struct
   let set_time_getter get_time = get_time_ref := get_time
 end
 
-let count_with_node : Node.t -> (t -> 'result) -> 'result =
- fun node f ->
+let max_depth = 10
+
+let count_with_node : Node.t * int -> (t -> 'result) -> 'result =
+ fun (node, depth) f ->
   let { Node.data; children } = node in
   let start = get_time () in
-  let result = f children in
+  let result = f (Some { nodes = children; depth = depth + 1 }) in
   let end_ = get_time () in
   let data = Counter.count data ~start ~end_ in
   node.Node.data <- data;
   result
 
 let count : t -> name:string -> (t -> 'result) -> 'result =
- fun nodes ~name f ->
-  let node = Hashtbl.find_or_add nodes name ~default:Node.init in
-  count_with_node node f
+ fun prof ~name f ->
+  match prof with
+  | None -> f None
+  | Some { nodes; depth } ->
+    if depth > max_depth then
+      f None
+    else
+      let node = Hashtbl.find_or_add nodes name ~default:Node.make in
+      count_with_node (node, depth) f
 
 let count_leaf : t -> name:string -> (unit -> 'result) -> 'result =
  fun nodes ~name f ->
   let f _nodes = f () in
   count nodes ~name f
 
-let init () : t = Hashtbl.create ()
-
-let profilers : (string, Node.t) Hashtbl.t = Hashtbl.create ()
+let profilers : CallTree.t = CallTree.make ()
 
 let create : name:string -> (t -> 'result) -> 'result =
  fun ~name f ->
-  let node = Hashtbl.find_or_add profilers name ~default:Node.init in
-  count_with_node node f
+  let node = Hashtbl.find_or_add profilers name ~default:Node.make in
+  count_with_node (node, 0) f
 
-let without_profiling : (prof:t -> 'result) -> 'result =
- (fun f -> f ~prof:(init ()))
+let without_profiling : (prof:t -> 'result) -> 'result = (fun f -> f ~prof:None)
 
-let rec merge : t -> t -> t =
- fun p1 p2 ->
-  Hashtbl.merge p1 p2 ~f:(fun ~key:_ -> function
-    | `Left n
-    | `Right n ->
-      Some n
-    | `Both
-        ( { Node.data = data1; children = children1 },
-          { Node.data = data2; children = children2 } ) ->
-      Some
-        {
-          Node.data = Counter.add data1 data2;
-          children = merge children1 children2;
-        })
-
-let get_and_reset : unit -> t =
+let get_and_reset : unit -> CallTree.t =
  fun () ->
   let prof = Hashtbl.copy profilers in
   Hashtbl.clear profilers;
   prof
-
-let to_string : t -> string =
- fun nodes ->
-  nodes
-  |> Hashtbl.to_list
-  |> List.sort ~compare:(fun (name1, _) (name2, _) ->
-         String.compare name1 name2)
-  |> List.map ~f:(fun (name, node) -> Node.to_string ~name node)
-  |> String.concat

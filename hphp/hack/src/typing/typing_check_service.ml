@@ -580,7 +580,9 @@ let process_files
   Ast_provider.local_changes_pop_sharedmem_stack ();
   File_provider.local_changes_pop_sharedmem_stack ();
   let adhoc_profiling =
-    Adhoc_profiler.merge adhoc_profiling (Adhoc_profiler.get_and_reset ())
+    Adhoc_profiler.CallTree.merge
+      adhoc_profiling
+      (Adhoc_profiler.get_and_reset ())
   in
   ( {
       errors;
@@ -1085,7 +1087,7 @@ type result = {
   errors: Errors.t;
   delegate_state: Delegate.state;
   telemetry: Telemetry.t;
-  adhoc_profiling: Adhoc_profiler.t;
+  adhoc_profiling: Adhoc_profiler.CallTree.t;
   diagnostic_pusher: Diagnostic_pusher.t option * seconds_since_epoch option;
 }
 

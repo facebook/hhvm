@@ -50,6 +50,19 @@ type seconds = float
 
 type t
 
+module CallTree : sig
+  (** The data that a profiler produces. *)
+  type t
+
+  val make : unit -> t
+
+  (** Merge two profiles, e.g. if obtained from multiple workers. *)
+  val merge : t -> t -> t
+
+  (** Print profiling data. *)
+  val to_string : t -> string
+end
+
 (** Create a profiler to be threaded through code to profile. *)
 val create : name:string -> (t -> 'result) -> 'result
 
@@ -62,16 +75,8 @@ val count_leaf : t -> name:string -> (unit -> 'result) -> 'result
 (** Use this to wrap a function taking a profiler as parameter which you don't want to profile. *)
 val without_profiling : (prof:t -> 'result) -> 'result
 
-val init : unit -> t
-
 (** Get the accumulated profiling data and reset it. *)
-val get_and_reset : unit -> t
-
-(** Merge two profiles, e.g. if obtained from multiple workers. *)
-val merge : t -> t -> t
-
-(** Print profiling data. *)
-val to_string : t -> string
+val get_and_reset : unit -> CallTree.t
 
 module Test : sig
   val set_time_getter : (unit -> seconds) -> unit

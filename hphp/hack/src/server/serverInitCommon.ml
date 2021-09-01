@@ -169,7 +169,7 @@ let log_type_check_end
   in
   HackEventLogger.type_check_end
     (Some telemetry)
-    ~adhoc_profiling:(Adhoc_profiler.to_string adhoc_profiling)
+    ~adhoc_profiling:(Adhoc_profiler.CallTree.to_string adhoc_profiling)
     ~heap_size:(SharedMem.heap_size ())
     ~started_count:count
     ~count

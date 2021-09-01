@@ -1045,7 +1045,7 @@ functor
       diag_subscribe: Diagnostic_subscription.t option;
       errors: Errors.t;
       telemetry: Telemetry.t;
-      adhoc_profiling: Adhoc_profiler.t;
+      adhoc_profiling: Adhoc_profiler.CallTree.t;
       files_checked: Relative_path.Set.t;
       full_check_done: bool;
       needs_recheck: Relative_path.Set.t;
@@ -1950,7 +1950,7 @@ functor
         ~experiments:genv.local_config.ServerLocalConfig.experiments
         ~desc:"serverTypeCheck"
         ~start_t:type_check_start_t
-        ~adhoc_profiling:(Adhoc_profiler.to_string adhoc_profiling);
+        ~adhoc_profiling:(Adhoc_profiler.CallTree.to_string adhoc_profiling);
 
       ( env,
         {

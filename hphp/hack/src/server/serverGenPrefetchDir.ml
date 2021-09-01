@@ -10,14 +10,18 @@
 (*
  * This module is used in saved state jobs to create two primary artifacts for
  * each changed file in a mergebase commit
- *  1) a marshalled ocaml blob representing the shallow decls in said file
+ *  1) a marshalled ocaml blob representing the decls in said file
  *  2) a json blob representing the "fan in" or in other words the decls
  *     needed to typecheck said file
  *)
 
 open Hh_prelude
 
-let get_shallow_decls_filename (filename : string) : string = filename ^ ".bin"
+let get_shallow_decls_filename (filename : string) : string =
+  filename ^ ".shallow.bin"
+
+let get_folded_decls_filename (filename : string) : string =
+  filename ^ ".folded.bin"
 
 let save_contents (output_filename : string) (contents : 'a) : unit =
   let chan = Stdlib.open_out_bin output_filename in
@@ -38,6 +42,19 @@ let get_classes_from_file (file : Relative_path.t) (ctx : Provider_context.t) :
         | _ -> None)
       decls)
   |> SSet.of_list
+
+let dump_folded_decls
+    (ctx : Provider_context.t) (dir : string) (path : Relative_path.t) : unit =
+  let file_name = Relative_path.suffix path in
+  let classes_in_file = get_classes_from_file path ctx in
+  let folded_decls_in_file =
+    Decl_export.collect_legacy_decls ctx classes_in_file
+  in
+  let folded_decls_dir = Filename.concat dir "folded_decls" in
+  let file = file_name |> Filename.concat folded_decls_dir in
+  Sys_utils.mkdir_p (Filename.dirname file);
+  save_contents (get_folded_decls_filename file) folded_decls_in_file;
+  ()
 
 let dump_shallow_decls
     (ctx : Provider_context.t)
@@ -135,6 +152,7 @@ let go (env : ServerEnv.env) (genv : ServerEnv.genv) (dir : string) : unit =
   List.iter
     ~f:(fun path ->
       dump_fan_in_deps ctx dir path;
-      dump_shallow_decls ctx genv dir path)
+      dump_shallow_decls ctx genv dir path;
+      dump_folded_decls ctx dir path)
     changed_files;
   ()

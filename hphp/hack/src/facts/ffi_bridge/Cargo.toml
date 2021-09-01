@@ -16,7 +16,7 @@ oxidized = { path = "../../oxidized" }
 rust_facts_ffi = { path = "../ffi" }
 
 [build-dependencies]
-cxx-build = "1.0.54"
+cxx-build = {}
 
 [profile.release]
 incremental = false

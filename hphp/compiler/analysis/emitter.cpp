@@ -485,44 +485,39 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
   RID().setJitFolding(true);
   SCOPE_EXIT { RID().setJitFolding(prevFolding); };
 
-  try {
-    if (!filename) filename = "";
+  if (!filename) filename = "";
 
-    std::unique_ptr<UnitEmitter> ue;
-    // Check if this file contains raw hip hop bytecode instead of
-    // php.  This is dictated by a special file extension.
-    if (RuntimeOption::EvalAllowHhas) {
-      if (const char* dot = strrchr(filename, '.')) {
-        const char hhbc_ext[] = "hhas";
-        if (!strcmp(dot + 1, hhbc_ext)) {
-          ue = assemble_string(code, codeLen, filename, sha1, nativeFuncs);
-        }
+  std::unique_ptr<UnitEmitter> ue;
+  // Check if this file contains raw hip hop bytecode instead of
+  // php.  This is dictated by a special file extension.
+  if (RuntimeOption::EvalAllowHhas) {
+    if (const char* dot = strrchr(filename, '.')) {
+      const char hhbc_ext[] = "hhas";
+      if (!strcmp(dot + 1, hhbc_ext)) {
+        ue = assemble_string(code, codeLen, filename, sha1, nativeFuncs);
       }
     }
-
-    // If ue != nullptr then we assembled it above, so don't feed it into
-    // the extern compiler
-    if (!ue) {
-      auto uc = UnitCompiler::create(code, codeLen, filename, sha1,
-                                     nativeFuncs, forDebuggerEval, options);
-      assertx(uc);
-      tracing::BlockNoTrace _{"unit-compiler-run"};
-      bool ignore;
-      ue = uc->compile(ignore);
-    }
-
-    unit = ue->create();
-    if (BuiltinSymbols::s_systemAr) {
-      assertx(ue->m_filepath->data()[0] == '/' &&
-              ue->m_filepath->data()[1] == ':');
-      BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
-    }
-
-    return unit.release();
-  } catch (const std::exception&) {
-    // extern "C" function should not be throwing exceptions...
-    return nullptr;
   }
+
+  // If ue != nullptr then we assembled it above, so don't feed it into
+  // the extern compiler
+  if (!ue) {
+    auto uc = UnitCompiler::create(code, codeLen, filename, sha1,
+                                   nativeFuncs, forDebuggerEval, options);
+    assertx(uc);
+    tracing::BlockNoTrace _{"unit-compiler-run"};
+    bool ignore;
+    ue = uc->compile(ignore);
+  }
+
+  unit = ue->create();
+  if (BuiltinSymbols::s_systemAr) {
+    assertx(ue->m_filepath->data()[0] == '/' &&
+            ue->m_filepath->data()[1] == ':');
+    BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
+  }
+
+  return unit.release();
 }
 
 } // extern "C"

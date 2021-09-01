@@ -864,7 +864,7 @@ void print_cls(Output& out, const PreClass* cls) {
   out.indent();
   auto name = cls->name()->toCppString();
   if (PreClassEmitter::IsAnonymousClassName(name)) {
-    auto p = name.find(';');
+    auto const p = name.find(';');
     if (p != std::string::npos) {
       name = name.substr(0, p);
     }

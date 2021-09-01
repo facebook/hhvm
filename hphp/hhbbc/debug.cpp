@@ -76,7 +76,7 @@ std::vector<NameTy> sorted_prop_state(const PropState& ps) {
 void dump_class_state(std::ostream& out,
                       const Index& index,
                       const php::Class* c) {
-  auto const clsName = normalized_class_name(*c);
+  auto const clsName = c->name->toCppString();
 
   if (is_closure(*c)) {
     auto const invoke = find_method(c, s_invoke.get());
@@ -130,9 +130,9 @@ void dump_func_state(std::ostream& out,
   auto const name = f->cls
     ? folly::sformat(
         "{}::{}()",
-        normalized_class_name(*f->cls), f->name->data()
+        f->cls->name, f->name
       )
-    : folly::sformat("{}()", f->name->toCppString());
+    : folly::sformat("{}()", f->name);
 
   auto const retTy = index.lookup_return_type_raw(f).first;
   out << name << " :: " << show(retTy) <<
@@ -171,7 +171,7 @@ std::string debug_dump_to() {
 void dump_representation(const std::string& dir, const php::Unit* unit) {
   auto const rep_dir = fs::path{dir} / "representation";
   with_file(rep_dir, unit, [&] (std::ostream& out) {
-      out << show(*unit, true);
+      out << show(*unit);
     }
   );
 }

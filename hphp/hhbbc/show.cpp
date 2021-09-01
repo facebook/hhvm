@@ -337,11 +337,11 @@ std::string show(const Func& f) {
   return ret;
 }
 
-std::string show(const Class& cls, bool normalizeClosures) {
+std::string show(const Class& cls) {
   std::string ret;
   folly::toAppend(
     "class ",
-    normalizeClosures ? normalized_class_name(cls) : cls.name->data(),
+    cls.name->data(),
     &ret
   );
   if (cls.parentName) {
@@ -362,7 +362,7 @@ std::string show(const Class& cls, bool normalizeClosures) {
   return ret;
 }
 
-std::string show(const Unit& unit, bool normalizeClosures) {
+std::string show(const Unit& unit) {
   std::string ret;
   folly::toAppend(
     "Unit ", unit.filename->data(), "\n",
@@ -371,7 +371,7 @@ std::string show(const Unit& unit, bool normalizeClosures) {
 
   for (auto& c : unit.classes) {
     folly::toAppend(
-      indent(2, show(*c, normalizeClosures)),
+      indent(2, show(*c)),
       &ret
     );
   }

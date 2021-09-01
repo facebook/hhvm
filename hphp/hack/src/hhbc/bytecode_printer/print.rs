@@ -664,9 +664,6 @@ fn print_class_special_attributes<W: Write>(
     if hhas_attribute::has_dynamically_constructible(user_attrs) {
         special_attributes.push("dyn_constructible");
     }
-    if c.is_closure() && !is_system_lib {
-        special_attributes.push("unique");
-    }
     if c.is_closure() {
         special_attributes.push("no_override");
     }

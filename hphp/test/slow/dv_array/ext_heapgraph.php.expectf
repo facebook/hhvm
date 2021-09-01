@@ -45,7 +45,7 @@ Property:children
 
 Doing DFS from root class on nodes:
 ChildWithClosureMember
-Closure$ParentWithClosureTarget::createClosure;%d
+Closure$ParentWithClosureTarget::createClosure
 ParentWithClosureTarget
 RootClass
 

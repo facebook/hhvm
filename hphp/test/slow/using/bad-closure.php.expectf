@@ -1,1 +1,1 @@
-Fatal error: Call to undefined method Closure$%S;%d::__dispose() in %s/test/slow/using/bad-closure.php on line 3
+Fatal error: Call to undefined method Closure$%S::__dispose() in %s/test/slow/using/bad-closure.php on line 3

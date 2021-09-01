@@ -610,8 +610,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       serdeMethods(pce);
     },
     [&] (auto& sd, PreClassEmitter* pce) {
-      auto const nm = StripIdFromAnonymousClassName(pce->name()->slice());
-      sd(nm.toString());
+      sd(pce->name()->toCppString());
       pce->serdeMetaData(sd);
       serdeMethods(pce);
     }
@@ -628,8 +627,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       assertx(re->id() == i);
     },
     [&] (auto& sd, RecordEmitter* re) {
-      auto const nm = StripIdFromAnonymousClassName(re->name()->slice());
-      sd(nm.toString());
+      sd(re->name()->toCppString());
       re->serdeMetaData(sd);
     }
   );

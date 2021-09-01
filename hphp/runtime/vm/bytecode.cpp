@@ -4674,7 +4674,7 @@ OPTBLD_INLINE void iopParent() {
 OPTBLD_INLINE void iopCreateCl(uint32_t numArgs, uint32_t clsIx) {
   auto const func = vmfp()->func();
   auto const preCls = func->unit()->lookupPreClassId(clsIx);
-  auto const c = Class::defClosure(preCls);
+  auto const c = Class::defClosure(preCls, true);
 
   auto const cls = c->rescope(const_cast<Class*>(func->cls()));
   assertx(!cls->needInitialization());

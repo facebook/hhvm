@@ -10,7 +10,7 @@ object(__SystemLib\DynMethCallerHelper) (3) {
   ["method":"__SystemLib\DynMethCallerHelper":private]=>
   string(8) "inst_dyn"
   ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
-  object(Closure$main;%d) (1) {
+  object(Closure$main) (1) {
     ["parameter"]=>
     dict(3) {
       ["$o"]=>
@@ -28,7 +28,7 @@ object(__SystemLib\DynMethCallerHelper) (3) {
   ["method":"__SystemLib\DynMethCallerHelper":private]=>
   string(9) "inst_meth"
   ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
-  object(Closure$main#2;%d) (1) {
+  object(Closure$main#2) (1) {
     ["parameter"]=>
     dict(3) {
       ["$o"]=>
@@ -46,7 +46,7 @@ object(__SystemLib\DynMethCallerHelper) (3) {
   ["method":"__SystemLib\DynMethCallerHelper":private]=>
   string(11) "static_meth"
   ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
-  object(Closure$main#3;%d) (1) {
+  object(Closure$main#3) (1) {
     ["parameter"]=>
     dict(3) {
       ["$o"]=>
@@ -64,7 +64,7 @@ object(__SystemLib\DynMethCallerHelper) (3) {
   ["method":"__SystemLib\DynMethCallerHelper":private]=>
   string(10) "not_a_meth"
   ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
-  object(Closure$main#4;%d) (1) {
+  object(Closure$main#4) (1) {
     ["parameter"]=>
     dict(3) {
       ["$o"]=>

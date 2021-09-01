@@ -1386,10 +1386,9 @@ public:
   static Class* def(const PreClass* preClass, bool failIsFatal = true);
 
   /*
-   * Define a closure from preClass. Closures have unique names, so unlike
-   * defClass, this is a one time operation.
+   * Define a closure from preClass.
    */
-  static Class* defClosure(const PreClass* preClass);
+  static Class* defClosure(const PreClass* preClass, bool cache);
 
   /*
    * Look up the Class in this request with name `name', or with the name

@@ -3345,14 +3345,17 @@ void parse_class(AsmState& as) {
   if (!as.in.readname(name)) {
     as.error(".class must have a name");
   }
+
   if (PreClassEmitter::IsAnonymousClassName(name)) {
     // assign unique numbers to anonymous classes
     // they must not be pre-numbered in the hhas
     auto p = name.find(';');
     if (p != std::string::npos) {
-      as.error("anonymous class and closure names may not contain ids in hhas");
+      as.error(
+        "anonymous class and closure names may not contain " \
+        "a semicolon in hhas"
+      );
     }
-    name = HPHP::NewAnonymousClassName(name);
   }
 
   int line0;

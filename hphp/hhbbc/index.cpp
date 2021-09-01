@@ -69,6 +69,8 @@
 #include "hphp/util/lock-free-lazy.h"
 #include "hphp/util/match.h"
 
+#include "hphp/zend/zend-string.h"
+
 namespace HPHP { namespace HHBBC {
 
 TRACE_SET_MOD(hhbbc_index);
@@ -2761,14 +2763,20 @@ bool merge_cinits(std::vector<std::unique_ptr<php::Func>>& clones,
 
 void rename_closure(const IndexData& index,
                     php::Class* cls,
-                    ClsPreResolveUpdates& updates) {
+                    ClsPreResolveUpdates& updates,
+                    size_t idx) {
   auto n = cls->name->slice();
   auto const p = n.find(';');
   if (p != std::string::npos) {
     n = n.subpiece(0, p);
   }
-  auto const newName = makeStaticString(NewAnonymousClassName(n));
-  assertx(!index.classes.count(newName));
+  auto const newName = makeStaticString(
+    folly::sformat(
+      "{};{}-{}",
+      n, idx+1, string_sha1(cls->unit->filename->slice())
+    )
+  );
+  always_assert(!index.classes.count(newName));
   cls->name = newName;
   updates.newClosures.emplace_back(cls);
 }
@@ -2917,7 +2925,7 @@ void flatten_traits(const php::Program* program,
     if (!clonedClosures.empty()) {
       auto& closures = updates.closures[cls];
       for (auto& [orig, clo, idx] : clonedClosures) {
-        rename_closure(index, clo.get(), updates);
+        rename_closure(index, clo.get(), updates, idx);
         ITRACE(5, "  - closure {} as {}\n", orig->name, clo->name);
         assertx(clo->closureContextCls == cls);
         assertx(clo->unit == cls->unit);

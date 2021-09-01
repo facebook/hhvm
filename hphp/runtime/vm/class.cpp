@@ -4790,13 +4790,26 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
   }
 }
 
-Class* Class::defClosure(const PreClass* preClass) {
+Class* Class::defClosure(const PreClass* preClass, bool cache) {
   auto const nameList = preClass->namedEntity();
 
-  if (nameList->clsList()) return nameList->clsList();
+  auto const find = [&] () -> Class* {
+    if (auto const cls = nameList->getCachedClass()) {
+      if (cls->preClass() == preClass) return cls;
+    }
+    for (auto class_ = nameList->clsList(); class_; class_ = class_->m_next) {
+      if (class_->preClass() == preClass) {
+        if (cache && !classHasPersistentRDS(class_)) {
+          nameList->setCachedClass(class_);
+        }
+        return class_;
+      }
+    }
+    return nullptr;
+  };
+  if (auto const cls = find()) return cls;
 
   auto const parent = c_Closure::classof();
-
   assertx(preClass->parent() == parent->name());
   // Create a new class.
 
@@ -4806,11 +4819,11 @@ Class* Class::defClosure(const PreClass* preClass) {
 
   Lock l(g_classesMutex);
 
-  if (UNLIKELY(nameList->clsList() != nullptr)) return nameList->clsList();
-
+  if (auto const cls = find()) return cls;
   setupClass(newClass.get(), nameList);
-
-  if (classHasPersistentRDS(newClass.get())) newClass.get()->setCached();
+  if (cache || classHasPersistentRDS(newClass.get())) {
+    newClass.get()->setCached();
+  }
   return newClass.get();
 }
 

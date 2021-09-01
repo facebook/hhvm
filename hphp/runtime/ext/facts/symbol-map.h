@@ -65,12 +65,16 @@ struct UpdateDBWorkItem {
  * Queries the SQLite AutoloadDB when the DB has information
  * we don't, and updates the AutoloadDB when we have
  * information the DB doesn't have.
+ *
+ * Iff `enforceOneDefinition` is true, we treat multiple definitions of the
+ * same symbol as though the symbol were completely undefined.
  */
 template <typename S> struct SymbolMap {
 
   explicit SymbolMap(
       folly::fs::path root,
       DBData dbData,
+      bool enforceOneDefinition,
       hphp_hash_set<std::string> indexedMethodAttributes = {},
       SQLite::OpenMode dbMode = SQLite::OpenMode::ReadWrite);
   SymbolMap() = delete;
@@ -339,15 +343,19 @@ template <typename S> struct SymbolMap {
   /**
    * Return the one and only path where `symbol` is defined.
    *
-   * If `symbol` is not defined, or if `symbol` is defined in more
-   * than one path, return nullptr.
+   * If `symbol` is not defined, return nullptr.
+   *
+   * If `symbol` is defined in more than one path, return either one of the
+   * paths that defines `symbol`, or return `nullptr`. In Hack, it's a bug to
+   * define the same symbol in multiple paths, so we leave this behavior
+   * flexible.
    *
    * Query the DB if there is no data about `symbol` in the given
    * symbolMap, and add any information found to the corresponding symbolMap if
    * so.
    */
   template <SymKind k>
-  Path<S> getOnlyPath(Symbol<S, k> symbol); // throws(SQLiteExc)
+  Path<S> getSymbolPath(Symbol<S, k> symbol); // throws(SQLiteExc)
 
   /**
    * Return all the symbols of the kind corresponding to symbolMap
@@ -567,6 +575,7 @@ private:
   const folly::fs::path m_root;
   const std::string m_schemaHash;
   const DBData m_dbData;
+  const bool m_enforceOneDefinition;
   const hphp_hash_set<std::string> m_indexedMethodAttrs;
   const SQLite::OpenMode m_dbMode{SQLite::OpenMode::ReadWrite};
 };

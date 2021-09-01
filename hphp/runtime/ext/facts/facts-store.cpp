@@ -556,7 +556,7 @@ struct FactsStoreImpl final
       hphp_hash_set<std::string> indexedMethodAttributes)
       : m_updateExec{1, make_thread_factory("Autoload update")}
       , m_root{std::move(root)}
-      , m_map{m_root, std::move(dbData), std::move(indexedMethodAttributes)}
+      , m_map{m_root, std::move(dbData), RuntimeOption::AutoloadEnforceOneDefinitionRule, std::move(indexedMethodAttributes)}
       , m_watchmanData{
             {.m_queryExpr = addFieldsToQuery(std::move(queryExpr)),
              .m_watchmanClient = watchmanClient}} {
@@ -565,7 +565,10 @@ struct FactsStoreImpl final
   FactsStoreImpl(folly::fs::path root, DBData dbData)
       : m_updateExec{1, make_thread_factory("Autoload update")}
       , m_root{std::move(root)}
-      , m_map{m_root, std::move(dbData)} {
+      , m_map{
+            m_root,
+            std::move(dbData),
+            RuntimeOption::AutoloadEnforceOneDefinitionRule} {
   }
 
   ~FactsStoreImpl() override {

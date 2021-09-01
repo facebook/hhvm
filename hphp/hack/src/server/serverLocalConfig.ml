@@ -428,6 +428,7 @@ type t = {
   cpu_priority: int;
   can_skip_deptable: bool;
   shm_dirs: string list;
+  shm_use_sharded_hashtbl: bool;
   max_workers: int option;
   (* max_bucket_size is the default bucket size for ALL users of MultiWorker unless they provide a specific override max_size *)
   max_bucket_size: int;
@@ -582,6 +583,7 @@ let default =
     cpu_priority = 10;
     can_skip_deptable = true;
     shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir];
+    shm_use_sharded_hashtbl = false;
     max_workers = None;
     max_bucket_size = Bucket.max_size ();
     small_buckets_for_dirty_names = false;
@@ -868,6 +870,13 @@ let load_ fn ~silent ~current_version overrides =
   let shm_dirs =
     string_list "shm_dirs" ~default:default.shm_dirs config
     |> List.map ~f:(fun dir -> Path.(to_string @@ make dir))
+  in
+  let shm_use_sharded_hashtbl =
+    bool_if_min_version
+      "shm_use_sharded_hashtbl"
+      ~default:default.shm_use_sharded_hashtbl
+      ~current_version
+      config
   in
   let max_workers = int_opt "max_workers" config in
   let max_bucket_size =
@@ -1234,6 +1243,7 @@ let load_ fn ~silent ~current_version overrides =
     cpu_priority;
     can_skip_deptable;
     shm_dirs;
+    shm_use_sharded_hashtbl;
     max_workers;
     max_bucket_size;
     small_buckets_for_dirty_names;

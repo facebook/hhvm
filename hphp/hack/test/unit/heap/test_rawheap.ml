@@ -95,6 +95,7 @@ let tests () =
               dep_table_pow = 2;
               hash_table_pow = 12;
               shm_dirs = [];
+              shm_use_sharded_hashtbl = false;
               shm_min_avail = 0;
               log_level = 0;
               sample_rate = 0.0;

@@ -60,7 +60,13 @@ let make_gc_control config =
   { GlobalConfig.gc_control with Gc.Control.minor_heap_size; space_overhead }
 
 let make_sharedmem_config config options local_config =
-  let { SharedMem.global_size; heap_size; shm_min_avail; _ } =
+  let {
+    SharedMem.global_size;
+    heap_size;
+    shm_min_avail;
+    shm_use_sharded_hashtbl;
+    _;
+  } =
     SharedMem.default_config
   in
   let shm_dirs = local_config.ServerLocalConfig.shm_dirs in
@@ -72,6 +78,9 @@ let make_sharedmem_config config options local_config =
   let sample_rate = float_ "sharedmem_sample_rate" ~default:0.0 config in
   let compression = int_ "sharedmem_compression" ~default:0 config in
   let shm_dirs = string_list "sharedmem_dirs" ~default:shm_dirs config in
+  let shm_use_sharded_hashtbl =
+    bool_ "shm_use_sharded_hashtbl" ~default:shm_use_sharded_hashtbl config
+  in
   let shm_min_avail =
     int_ "sharedmem_minimum_available" ~default:shm_min_avail config
   in
@@ -95,6 +104,7 @@ let make_sharedmem_config config options local_config =
     log_level;
     sample_rate;
     shm_dirs;
+    shm_use_sharded_hashtbl;
     shm_min_avail;
     compression;
   }

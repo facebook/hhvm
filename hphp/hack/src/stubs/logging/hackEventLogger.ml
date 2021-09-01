@@ -20,6 +20,7 @@ type rollout_flags = {
   require_saved_state: bool;
   stream_errors: bool;
   monitor_kill_again_fix: bool;
+  use_direct_decl_in_tc_loop: bool;
 }
 
 let flush () = ()

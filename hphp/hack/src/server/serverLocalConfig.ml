@@ -531,6 +531,8 @@ type t = {
   tico_invalidate_smart: bool;
   (* Enable use of the direct decl parser for parsing type signatures. *)
   use_direct_decl_parser: bool;
+  (* Direct decl parsing in type check loop fix *)
+  use_direct_decl_in_tc_loop: bool;
   (* If --profile-log, we'll record telemetry on typechecks that took longer than the threshold (in seconds). In case of profile_type_check_twice we judge by the second type check. *)
   profile_type_check_duration_threshold: float;
   (* If --profile-log, we'll record telemetry on any file which allocated more than this many mb on the ocaml heap. In case of profile_type_check_twice we judge by the second type check. *)
@@ -637,6 +639,7 @@ let default =
     tico_invalidate_files = false;
     tico_invalidate_smart = false;
     use_direct_decl_parser = false;
+    use_direct_decl_in_tc_loop = false;
     profile_type_check_duration_threshold = 0.05;
     (* seconds *)
     profile_type_check_memory_threshold_mb = 100;
@@ -1145,6 +1148,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let use_direct_decl_in_tc_loop =
+    bool_if_min_version
+      "use_direct_decl_in_tc_loop"
+      ~default:default.use_direct_decl_in_tc_loop
+      ~current_version
+      config
+  in
   let profile_type_check_duration_threshold =
     float_
       "profile_type_check_duration_threshold"
@@ -1287,6 +1297,7 @@ let load_ fn ~silent ~current_version overrides =
     tico_invalidate_files;
     tico_invalidate_smart;
     use_direct_decl_parser;
+    use_direct_decl_in_tc_loop;
     profile_type_check_duration_threshold;
     profile_type_check_memory_threshold_mb;
     profile_type_check_twice;
@@ -1316,4 +1327,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       require_saved_state = options.require_saved_state;
       stream_errors = options.stream_errors;
       monitor_kill_again_fix = options.monitor_kill_again_fix;
+      use_direct_decl_in_tc_loop = options.use_direct_decl_in_tc_loop;
     }

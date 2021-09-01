@@ -454,6 +454,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?po_disallow_inst_meth:(bool_opt "disallow_inst_meth" config)
       ~tco_use_direct_decl_parser:
         local_config.ServerLocalConfig.use_direct_decl_parser
+      ~tco_use_direct_decl_in_tc_loop:
+        local_config.ServerLocalConfig.use_direct_decl_in_tc_loop
       ~tco_ifc_enabled:(ServerArgs.enable_ifc options)
       ?po_enable_enum_classes:(bool_opt "enable_enum_classes" config)
       ?po_enable_enum_supertyping:(bool_opt "enable_enum_supertyping" config)

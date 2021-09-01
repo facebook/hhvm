@@ -527,6 +527,7 @@
     coverage_level
     decl_redecl_service
     dfind
+    direct_decl_service
     fileutils
     hg
     hhi

@@ -1320,6 +1320,41 @@ functor
       let t = Hh_logger.log_duration logstring t in
       Hh_logger.log "Heap size: %d" hs;
 
+      (* DIRECT DECL PARSER *****************)
+      (* We should use the direct decl parser results for the naming phase.
+         The direct decl parser behaviour is different from the legacy parser:
+         parser errors in the body might be ignored! As such, if we use the
+         legacy parser result to update the naming table, we might erroneously
+         remove entries! When typechecking files using that entry, erroneous
+         "Name unbound" errors will be reported. Those are unrecoverable,
+         because decl diffing won't catch any changes (the direct decl parser
+         returns the same result with or without parsing errors), and no fanout
+         will be computed.
+
+         TODO(hverr, jakebailey): It would be great if we could only do a
+         direct-decl-parse (rather than doing a direct-decl-parse pass after the
+         AST-parse pass). If we removed the AST-parse pass, it would probably be
+         best to remove the failed_parsing tracking too (since the direct decl
+         parser won't emit the complete set of parse errors). Then we'd attempt
+         to typecheck those files, and we could make sure that we emit parsing
+         errors during the typechecking step.*)
+      let ctx = Provider_utils.ctx_from_server_env env in
+      let fast_parsed =
+        if
+          TypecheckerOptions.use_direct_decl_in_tc_loop
+            (Provider_context.get_tcopt ctx)
+          && use_direct_decl_parser ctx
+        then
+          let get_next =
+            MultiWorker.next
+              genv.workers
+              (Relative_path.Set.elements files_to_parse)
+          in
+          Direct_decl_service.go ctx genv.workers get_next
+        else
+          fast_parsed
+      in
+
       (* UPDATE NAMING TABLES **************************************************)
       let logstring = "Updating deps" in
       Hh_logger.log "Begin %s" logstring;
@@ -1355,7 +1390,6 @@ functor
       let deptable_unlocked =
         Typing_deps.allow_dependency_table_reads env.deps_mode true
       in
-      let ctx = Provider_utils.ctx_from_server_env env in
       (* Run Naming_global, updating the reverse naming table (which maps the names
          of toplevel symbols to the files in which they were declared) in shared
          memory. Does not run Naming itself (which converts an AST to a NAST by

@@ -511,8 +511,10 @@ pub fn emit_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             pos,
             emit_lambda(emitter, env, &e.0, &e.1)?,
         )),
-
-        Expr_::ClassGet(e) => emit_class_get(emitter, env, QueryOp::CGet, &e.0, &e.1),
+        Expr_::ClassGet(e) => {
+            // class gets without a readonly expression must be mutable
+            emit_class_get(emitter, env, QueryOp::CGet, &e.0, &e.1, ReadonlyOp::Mutable)
+        }
 
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
         Expr_::Id(e) => Ok(emit_pos_then(alloc, pos, emit_id(emitter, env, e)?)),
@@ -1689,7 +1691,7 @@ fn emit_call_isset_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .0);
     }
     if let Some((cid, id, _)) = expr.2.as_class_get() {
-        return emit_class_get(e, env, QueryOp::Isset, cid, id);
+        return emit_class_get(e, env, QueryOp::Isset, cid, id, ReadonlyOp::Any);
     }
     if let Some((expr_, prop, nullflavor, _)) = expr.2.as_obj_get() {
         return Ok(emit_obj_get(
@@ -4554,6 +4556,7 @@ fn emit_class_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     query_op: QueryOp,
     cid: &ast::ClassId,
     prop: &ast::ClassGetExpr,
+    readonly_op: ReadonlyOp,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
@@ -4562,7 +4565,7 @@ fn emit_class_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         vec![
             InstrSeq::from((alloc, emit_class_expr(e, env, cexpr, prop)?)),
             match query_op {
-                QueryOp::CGet => instr::cgets(alloc, ReadonlyOp::Any),
+                QueryOp::CGet => instr::cgets(alloc, readonly_op),
                 QueryOp::Isset => instr::issets(alloc),
                 QueryOp::CGetQuiet => {
                     return Err(Unrecoverable("emit_class_get: CGetQuiet".into()));
@@ -4999,6 +5002,9 @@ fn emit_readonly_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             Ok(emit_obj_get(e, env, pos, QueryOp::CGet, &x.0, &x.1, &x.2, false, true)?.0)
         }
         aast::Expr_::Call(c) => emit_call_expr(e, env, pos, None, true, c),
+        aast::Expr_::ClassGet(x) => {
+            emit_class_get(e, env, QueryOp::CGet, &x.0, &x.1, ReadonlyOp::Any)
+        }
         _ => emit_expr(e, env, expr),
     }
 }

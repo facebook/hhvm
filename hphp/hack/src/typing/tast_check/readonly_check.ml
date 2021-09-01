@@ -190,6 +190,20 @@ let check_readonly_property env obj get obj_ro =
       (Lazy.force elt.Typing_defs.ce_pos)
   | _ -> ()
 
+let check_static_readonly_property env (class_ : Tast.class_id) get obj_ro =
+  let prop_elts = get_static_prop_elts env class_ get in
+  let (_, pos, _) = class_ in
+  (* If there's any property in the list of possible properties that could be readonly,
+      it must be explicitly cast to readonly *)
+  let readonly_prop = List.find ~f:Typing_defs.get_ce_readonly_prop prop_elts in
+  match (readonly_prop, obj_ro) with
+  | (Some elt, Mut) when Typing_defs.get_ce_readonly_prop elt ->
+    Errors.explicit_readonly_cast
+      "static property"
+      pos
+      (Lazy.force elt.Typing_defs.ce_pos)
+  | _ -> ()
+
 let check =
   object (self)
     inherit Tast_visitor.iter as super
@@ -704,6 +718,18 @@ let check =
         (* During a property assignment, skip the self#expr call to avoid erroring *)
         self#on_Obj_get env obj get nullable is_prop_call;
         self#on_expr env rval
+      (* Static property assignment *)
+      | ( _,
+          _,
+          Binop
+            ( (Ast_defs.Eq _ as bop),
+              ((_, _, Class_get (class_id, get, is_prop_call)) as lval),
+              rval ) ) ->
+        self#assign env lval rval;
+        self#on_bop env bop;
+        (* During a static property assignment, skip the self#expr call to avoid erroring *)
+        self#on_Class_get env class_id get is_prop_call;
+        self#on_expr env rval
       (* All other assignment *)
       | (_, _, Binop (Ast_defs.Eq _, lval, rval)) ->
         self#assign env lval rval;
@@ -739,8 +765,14 @@ let check =
         ->
         (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
         self#on_Obj_get env obj get nullable is_prop_call
+      | (_, _, ReadonlyExpr (_, _, Class_get (class_, get, x))) ->
+        (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
+        self#on_Class_get env class_ get x
       | (_, _, Obj_get (obj, get, _nullable, _is_prop_call)) ->
-        check_readonly_property env obj get (self#ty_expr env obj);
+        check_readonly_property env obj get Mut;
+        super#on_expr env e
+      | (_, _, Class_get (class_, get, _is_prop_call)) ->
+        check_static_readonly_property env class_ get Mut;
         super#on_expr env e
       | (_, pos, New (_, _, args, unpacked_arg, constructor_fty)) ->
         (* Constructors never return readonly, so that specific check is irrelevant *)
@@ -758,7 +790,6 @@ let check =
       | (_, _, Lvar _)
       | (_, _, Clone _)
       | (_, _, Array_get (_, _))
-      | (_, _, Class_get (_, _, _))
       | (_, _, Yield _)
       | (_, _, Await _)
       | (_, _, Tuple _)
@@ -919,6 +950,8 @@ let handler =
             without readonly keyword/analysis *)
         | (_, _, Obj_get (obj, get, _, _)) ->
           check_readonly_property env obj get Mut
+        | (_, _, Class_get (class_id, get, _)) ->
+          check_static_readonly_property env class_id get Mut
         | _ -> ()
       in
       check e

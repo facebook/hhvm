@@ -24,8 +24,6 @@ function test(Foo $x): void {
   $y = $x->ro; // needs to be wrapped in a readonly
   $ro_prop = readonly $x->ro; // good
   $z = readonly new Foo();
-  $a = $z->ro; // since $z is known to be readonly,
-  // $z->ro is therefore always readonly, and doesn't need to be cast.
   $x->ro = readonly new Bar();
   // Error, readonly value assigned to mutable
   $x->not_ro = readonly new Bar();

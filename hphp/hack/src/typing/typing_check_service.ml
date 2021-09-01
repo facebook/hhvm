@@ -122,15 +122,7 @@ type seconds_since_epoch = float
 
 type progress = job_progress
 
-let neutral : unit -> typing_result =
- fun () ->
-  {
-    errors = Errors.empty;
-    dep_edges = Typing_deps.dep_edges_make ();
-    telemetry = Telemetry.create ();
-    jobs_finished_to_end = Measure.create ();
-    jobs_finished_early = Measure.create ();
-  }
+let neutral : unit -> typing_result = Typing_service_types.make_typing_result
 
 let should_enable_deferring
     (opts : GlobalOptions.t) (file : check_file_computation) =
@@ -381,7 +373,14 @@ let clear_caches_and_force_gc () =
 let process_files
     (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
-    ({ errors; dep_edges; telemetry; jobs_finished_early; jobs_finished_to_end } :
+    ({
+       errors;
+       dep_edges;
+       telemetry;
+       adhoc_profiling;
+       jobs_finished_early;
+       jobs_finished_to_end;
+     } :
       typing_result)
     (progress : computation_progress)
     ~(memory_cap : int option)
@@ -580,7 +579,17 @@ let process_files
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_sharedmem_stack ();
   File_provider.local_changes_pop_sharedmem_stack ();
-  ( { errors; dep_edges; telemetry; jobs_finished_early; jobs_finished_to_end },
+  let adhoc_profiling =
+    Adhoc_profiler.merge adhoc_profiling (Adhoc_profiler.get_and_reset ())
+  in
+  ( {
+      errors;
+      dep_edges;
+      telemetry;
+      adhoc_profiling;
+      jobs_finished_early;
+      jobs_finished_to_end;
+    },
     progress )
 
 let load_and_process_files
@@ -1076,6 +1085,7 @@ type result = {
   errors: Errors.t;
   delegate_state: Delegate.state;
   telemetry: Telemetry.t;
+  adhoc_profiling: Adhoc_profiler.t;
   diagnostic_pusher: Diagnostic_pusher.t option * seconds_since_epoch option;
 }
 
@@ -1178,8 +1188,9 @@ let go_with_interrupt
     errors;
     dep_edges;
     telemetry = typing_telemetry;
-    jobs_finished_to_end;
+    adhoc_profiling;
     jobs_finished_early;
+    jobs_finished_to_end;
   } =
     typing_result
   in
@@ -1213,7 +1224,9 @@ let go_with_interrupt
     |> Telemetry.object_ ~key:"profiling_info" ~value:typing_telemetry
     |> Telemetry.object_ ~key:"job_sizes" ~value:job_size_telemetry
   in
-  ( (env, { errors; delegate_state; telemetry; diagnostic_pusher }),
+  ( ( env,
+      { errors; delegate_state; telemetry; adhoc_profiling; diagnostic_pusher }
+    ),
     cancelled_fnl )
 
 let go

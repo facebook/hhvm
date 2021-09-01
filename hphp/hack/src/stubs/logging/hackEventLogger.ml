@@ -307,7 +307,14 @@ let invariant_violation_bug
   ()
 
 let type_check_end
-    _ ~heap_size:_ ~started_count:_ ~count:_ ~desc:_ ~experiments:_ ~start_t:_ =
+    _
+    ~heap_size:_
+    ~started_count:_
+    ~count:_
+    ~adhoc_profiling:_
+    ~desc:_
+    ~experiments:_
+    ~start_t:_ =
   ()
 
 let notifier_returned _ _ = ()

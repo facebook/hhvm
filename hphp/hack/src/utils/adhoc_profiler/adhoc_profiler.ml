@@ -24,6 +24,31 @@ module Hashtbl = struct
       let v = default () in
       add t k v;
       v
+
+  let merge :
+      (string, 'a) t ->
+      (string, 'b) t ->
+      f:
+        (key:string ->
+        [< `Both of 'a * 'b | `Left of 'a | `Right of 'b ] ->
+        'c option) ->
+      (string, 'c) t =
+   fun t1 t2 ~f ->
+    let module SMap = Caml.Map.Make (String) in
+    let t1 = to_seq t1 |> SMap.of_seq in
+    let t2 = to_seq t2 |> SMap.of_seq in
+    let t = create () in
+    SMap.merge
+      (fun key left right ->
+        match (left, right) with
+        | (None, None) -> None
+        | (Some left, None) -> f ~key (`Left left)
+        | (None, Some right) -> f ~key (`Right right)
+        | (Some left, Some right) -> f ~key (`Both (left, right)))
+      t1
+      t2
+    |> SMap.iter (fun key data -> add t key data);
+    t
 end
 
 (** Counter for the number of times a function is called and the total duration it has run. *)
@@ -41,6 +66,9 @@ module Counter = struct
   let to_string ~total_time { count; time } =
     let percentage = 100. *. time /. total_time in
     Printf.sprintf "%-12d%.3f sec   %.2f%%" count time percentage
+
+  let add { count = count1; time = time1 } { count = count2; time = time2 } =
+    { count = count1 + count2; time = time1 +. time2 }
 end
 
 (** A node in the tree of counters which constitutes the profile. *)
@@ -122,6 +150,21 @@ let create : name:string -> (t -> 'result) -> 'result =
 
 let without_profiling : (prof:t -> 'result) -> 'result =
  (fun f -> f ~prof:(init ()))
+
+let rec merge : t -> t -> t =
+ fun p1 p2 ->
+  Hashtbl.merge p1 p2 ~f:(fun ~key:_ -> function
+    | `Left n
+    | `Right n ->
+      Some n
+    | `Both
+        ( { Node.data = data1; children = children1 },
+          { Node.data = data2; children = children2 } ) ->
+      Some
+        {
+          Node.data = Counter.add data1 data2;
+          children = merge children1 children2;
+        })
 
 let get_and_reset : unit -> t =
  fun () ->

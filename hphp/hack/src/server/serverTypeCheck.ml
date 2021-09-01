@@ -1045,6 +1045,7 @@ functor
       diag_subscribe: Diagnostic_subscription.t option;
       errors: Errors.t;
       telemetry: Telemetry.t;
+      adhoc_profiling: Adhoc_profiler.t;
       files_checked: Relative_path.Set.t;
       full_check_done: bool;
       needs_recheck: Relative_path.Set.t;
@@ -1080,7 +1081,12 @@ functor
       in
       let diag_subscribe_before = env.diag_subscribe in
 
-      let (errorl', telemetry, env, cancelled, time_first_typing_error) =
+      let ( errorl',
+            telemetry,
+            adhoc_profiling,
+            env,
+            cancelled,
+            time_first_typing_error ) =
         let ctx = Provider_utils.ctx_from_server_env env in
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"type check"
         @@ fun () ->
@@ -1089,6 +1095,7 @@ functor
                   Typing_check_service.errors = errorl;
                   delegate_state;
                   telemetry;
+                  adhoc_profiling;
                   diagnostic_pusher =
                     (diagnostic_pusher, time_first_typing_error);
                 } ),
@@ -1116,7 +1123,12 @@ functor
             typing_service = { env.typing_service with delegate_state };
           }
         in
-        (errorl, telemetry, env, cancelled, time_first_typing_error)
+        ( errorl,
+          telemetry,
+          adhoc_profiling,
+          env,
+          cancelled,
+          time_first_typing_error )
       in
 
       log_if_diag_subscribe_changed
@@ -1195,6 +1207,7 @@ functor
         diag_subscribe;
         errors;
         telemetry;
+        adhoc_profiling;
         files_checked = files_to_check;
         full_check_done;
         needs_recheck;
@@ -1746,6 +1759,7 @@ functor
         diag_subscribe;
         errors;
         telemetry = typecheck_telemetry;
+        adhoc_profiling;
         files_checked;
         full_check_done = _;
         needs_recheck;
@@ -1935,7 +1949,8 @@ functor
         ~count:total_rechecked_count
         ~experiments:genv.local_config.ServerLocalConfig.experiments
         ~desc:"serverTypeCheck"
-        ~start_t:type_check_start_t;
+        ~start_t:type_check_start_t
+        ~adhoc_profiling:(Adhoc_profiler.to_string adhoc_profiling);
 
       ( env,
         {

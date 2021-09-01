@@ -62,8 +62,13 @@ val count_leaf : t -> name:string -> (unit -> 'result) -> 'result
 (** Use this to wrap a function taking a profiler as parameter which you don't want to profile. *)
 val without_profiling : (prof:t -> 'result) -> 'result
 
+val init : unit -> t
+
 (** Get the accumulated profiling data and reset it. *)
 val get_and_reset : unit -> t
+
+(** Merge two profiles, e.g. if obtained from multiple workers. *)
+val merge : t -> t -> t
 
 (** Print profiling data. *)
 val to_string : t -> string

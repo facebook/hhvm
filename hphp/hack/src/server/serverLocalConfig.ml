@@ -435,7 +435,6 @@ type t = {
   small_buckets_for_dirty_names: bool;
   (* See HhMonitorInformant. *)
   use_dummy_informant: bool;
-  monitor_kill_again_fix: bool;
   informant_min_distance_restart: int;
   use_full_fidelity_parser: bool;
   interrupt_on_watchman: bool;
@@ -587,7 +586,6 @@ let default =
     max_bucket_size = Bucket.max_size ();
     small_buckets_for_dirty_names = false;
     use_dummy_informant = true;
-    monitor_kill_again_fix = false;
     informant_min_distance_restart = 100;
     use_full_fidelity_parser = true;
     interrupt_on_watchman = false;
@@ -840,13 +838,6 @@ let load_ fn ~silent ~current_version overrides =
     bool_if_min_version
       "use_dummy_informant"
       ~default:default.use_dummy_informant
-      ~current_version
-      config
-  in
-  let monitor_kill_again_fix =
-    bool_if_min_version
-      "monitor_kill_again_fix"
-      ~default:default.monitor_kill_again_fix
       ~current_version
       config
   in
@@ -1247,7 +1238,6 @@ let load_ fn ~silent ~current_version overrides =
     max_bucket_size;
     small_buckets_for_dirty_names;
     use_dummy_informant;
-    monitor_kill_again_fix;
     informant_min_distance_restart;
     use_full_fidelity_parser;
     interrupt_on_watchman;
@@ -1326,6 +1316,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       symbolindex_search_provider = options.symbolindex_search_provider;
       require_saved_state = options.require_saved_state;
       stream_errors = options.stream_errors;
-      monitor_kill_again_fix = options.monitor_kill_again_fix;
       use_direct_decl_in_tc_loop = options.use_direct_decl_in_tc_loop;
     }

@@ -113,8 +113,6 @@ let monitor_daemon_main
           (match ServerArgs.with_saved_state options with
           | Some (ServerArgs.Saved_state_target_info _) -> true
           | _ -> false);
-        monitor_kill_again_fix =
-          local_config.ServerLocalConfig.monitor_kill_again_fix;
       }
     in
     SM.start_monitoring

@@ -52,6 +52,4 @@ module type S = sig
   val should_start_first_server : t -> bool
 
   val should_ignore_hh_version : init_env -> bool
-
-  val monitor_kill_again_fix : init_env -> bool
 end

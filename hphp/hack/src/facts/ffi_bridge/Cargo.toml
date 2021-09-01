@@ -11,12 +11,12 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-cxx = "1.0.52"
+cxx = "1.0.54"
 oxidized = { path = "../../oxidized" }
 rust_facts_ffi = { path = "../ffi" }
 
 [build-dependencies]
-cxx-build = "1.0"
+cxx-build = "1.0.54"
 
 [profile.release]
 incremental = false

@@ -476,7 +476,7 @@ let check =
         when String.equal (Utils.strip_ns x) (Utils.strip_ns SN.Readonly.as_mut)
         ->
         let arg_ty = Tast.get_type arg in
-        if not (self#is_safe_mut_ty env arg_ty) then
+        if not (self#is_safe_mut_ty env SSet.empty arg_ty) then
           Errors.readonly_invalid_as_mut pos
         else
           ()
@@ -558,24 +558,53 @@ let check =
 
     (* Check if type is safe to convert from readonly to mut
        TODO(readonly): Update to include more complex types. *)
-    method is_safe_mut_ty env ty =
-      let env = Tast_env.tast_env_as_typing_env env in
-      let primitive_types =
-        [
-          MakeType.bool Reason.none;
-          MakeType.int Reason.none;
-          MakeType.arraykey Reason.none;
-          MakeType.string Reason.none;
-          MakeType.float Reason.none;
-          MakeType.null Reason.none;
-          MakeType.num Reason.none;
-          (* Keysets only contain arraykeys so if they're readonly its safe to remove *)
-          MakeType.keyset Reason.none (MakeType.arraykey Reason.none);
-        ]
-      in
-      (* Make a union type to subtype with the ty *)
-      let union = MakeType.union Reason.none primitive_types in
-      Typing_utils.is_sub_type env ty union
+    method is_safe_mut_ty env (seen : SSet.t) ty =
+      let open Typing_defs_core in
+      match get_node ty with
+      | Tshape (Open_shape, _) -> false
+      | Tshape (Closed_shape, fields) ->
+        TShapeMap.for_all
+          (fun _k v -> self#is_safe_mut_ty env seen v.sft_ty)
+          fields
+      (* If it's a Tclass it's an array type by is_value_collection *)
+      | Tintersection tyl ->
+        List.exists tyl ~f:(fun l -> self#is_safe_mut_ty env seen l)
+      | Tunion tyl ->
+        List.exists tyl ~f:(fun l -> self#is_safe_mut_ty env seen l)
+      | Tdependent (_, upper) ->
+        (* check upper bounds *)
+        self#is_safe_mut_ty env seen upper
+      | Tclass (_, _, tyl) when self#is_value_collection_ty env ty ->
+        List.for_all tyl ~f:(fun l -> self#is_safe_mut_ty env seen l)
+      | Tgeneric (name, tyargs) ->
+        (* Avoid circular generics with a set *)
+        if SSet.mem name seen then
+          false
+        else
+          let new_seen = SSet.add name seen in
+          let upper_bounds = Tast_env.get_upper_bounds env name tyargs in
+          Typing_set.exists
+            (fun l -> self#is_safe_mut_ty env new_seen l)
+            upper_bounds
+      | _ ->
+        (* Otherwise, check if it's primitive *)
+        let env = Tast_env.tast_env_as_typing_env env in
+        let primitive_types =
+          [
+            MakeType.bool Reason.none;
+            MakeType.int Reason.none;
+            MakeType.arraykey Reason.none;
+            MakeType.string Reason.none;
+            MakeType.float Reason.none;
+            MakeType.null Reason.none;
+            MakeType.num Reason.none;
+            (* Keysets only contain arraykeys so if they're readonly its safe to remove *)
+            MakeType.keyset Reason.none (MakeType.arraykey Reason.none);
+          ]
+        in
+        (* Make a union type to subtype with the ty *)
+        let union = MakeType.union Reason.none primitive_types in
+        Typing_utils.is_sub_type env ty union
 
     method is_value_collection_ty env ty =
       let mixed = MakeType.mixed Reason.none in

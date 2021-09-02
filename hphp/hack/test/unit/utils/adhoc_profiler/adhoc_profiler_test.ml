@@ -13,7 +13,9 @@ module Time = struct
 
   let advance duration = time := !time +. duration
 
-  let get () = !time
+  let get () =
+    advance 0.01;
+    !time
 end
 
 let () = Adhoc_profiler.Test.set_time_getter Time.get
@@ -52,11 +54,11 @@ let test1 _ =
     Adhoc_profiler.CallTree.to_string @@ Adhoc_profiler.get_and_reset ()
   in
   let expected_profile =
-    {|test1                                                                           2           10.600 sec   100.00%
-  step1                                                                           2           0.600 sec   5.66%
-  step2                                                                           2           7.400 sec   69.81%
-    step2.1                                                                         2           2.000 sec   18.87%
-    step2.2                                                                         2           4.000 sec   37.74%
+    {|test1                                                                           2           10.780 sec   100.00%
+  step1                                                                           2           0.620 sec   5.75%
+  step2                                                                           2           7.500 sec   69.57%
+    step2.1                                                                         2           2.020 sec   18.74%
+    step2.2                                                                         2           4.020 sec   37.29%
 |}
   in
   assert_strings_equal expected_profile profile;
@@ -100,11 +102,11 @@ let test_branch _ =
     Adhoc_profiler.CallTree.to_string @@ Adhoc_profiler.get_and_reset ()
   in
   let expected_profile =
-    {|test_branch                                                                     3           11.400 sec   100.00%
-  step1                                                                           1           0.300 sec   2.63%
-  step2                                                                           2           7.400 sec   64.91%
-    step2.1                                                                         2           2.000 sec   17.54%
-    step2.2                                                                         2           4.000 sec   35.09%
+    {|test_branch                                                                     3           11.570 sec   100.00%
+  step1                                                                           1           0.310 sec   2.68%
+  step2                                                                           2           7.500 sec   64.82%
+    step2.1                                                                         2           2.020 sec   17.46%
+    step2.2                                                                         2           4.020 sec   34.75%
 |}
   in
   assert_strings_equal expected_profile profile;
@@ -129,26 +131,26 @@ let test_rec _ =
     Adhoc_profiler.CallTree.to_string @@ Adhoc_profiler.get_and_reset ()
   in
   let expected_profile =
-    {|test_rec                                                                        1           7.200 sec   100.00%
-  f                                                                               1           7.200 sec   100.00%
-    f                                                                               1           7.000 sec   97.22%
-      f                                                                               1           6.800 sec   94.44%
-        f                                                                               1           6.600 sec   91.67%
-          f                                                                               1           6.400 sec   88.89%
-            f                                                                               1           6.200 sec   86.11%
-              f                                                                               1           6.000 sec   83.33%
-                f                                                                               1           5.800 sec   80.56%
-                  f                                                                               1           5.600 sec   77.78%
-                    f                                                                               1           5.400 sec   75.00%
-                    lt_zero                                                                         1           0.100 sec   1.39%
-                  lt_zero                                                                         1           0.100 sec   1.39%
-                lt_zero                                                                         1           0.100 sec   1.39%
-              lt_zero                                                                         1           0.100 sec   1.39%
-            lt_zero                                                                         1           0.100 sec   1.39%
-          lt_zero                                                                         1           0.100 sec   1.39%
-        lt_zero                                                                         1           0.100 sec   1.39%
-      lt_zero                                                                         1           0.100 sec   1.39%
-    lt_zero                                                                         1           0.100 sec   1.39%
+    {|test_rec                                                                        1           7.630 sec   100.00%
+  f                                                                               1           7.610 sec   99.74%
+    f                                                                               1           7.370 sec   96.59%
+      f                                                                               1           7.130 sec   93.45%
+        f                                                                               1           6.890 sec   90.30%
+          f                                                                               1           6.650 sec   87.16%
+            f                                                                               1           6.410 sec   84.01%
+              f                                                                               1           6.170 sec   80.87%
+                f                                                                               1           5.930 sec   77.72%
+                  f                                                                               1           5.690 sec   74.57%
+                    f                                                                               1           5.450 sec   71.43%
+                    lt_zero                                                                         1           0.110 sec   1.44%
+                  lt_zero                                                                         1           0.110 sec   1.44%
+                lt_zero                                                                         1           0.110 sec   1.44%
+              lt_zero                                                                         1           0.110 sec   1.44%
+            lt_zero                                                                         1           0.110 sec   1.44%
+          lt_zero                                                                         1           0.110 sec   1.44%
+        lt_zero                                                                         1           0.110 sec   1.44%
+      lt_zero                                                                         1           0.110 sec   1.44%
+    lt_zero                                                                         1           0.110 sec   1.44%
 |}
   in
   assert_strings_equal expected_profile profile;

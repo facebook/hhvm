@@ -60,8 +60,8 @@ module Counter = struct
 
   let init : t = { count = 0; time = 0. }
 
-  let count ~start ~end_ { count; time } =
-    { count = count + 1; time = time +. end_ -. start }
+  let count ~duration { count; time } =
+    { count = count + 1; time = time +. duration }
 
   let to_string ~total_time { count; time } =
     let percentage = 100. *. time /. total_time in
@@ -108,6 +108,10 @@ module Node = struct
     to_string 0 name node
 end
 
+(** Each node will have a child with this name, which keeps track of the time
+    spent profiling. These will be subtracted before printing the tree. *)
+let prof_node_name = "__prof"
+
 module CallTree = struct
   (** The profiling data. A set of named roots. *)
   type t = (string, Node.t) Hashtbl.t
@@ -129,8 +133,41 @@ module CallTree = struct
             children = merge children1 children2;
           })
 
+  (** Each node has a child named "__prof" which keeps track of the time spent
+      profiling. This function subtract the __prof node's time from its parent node
+      recursively, starting from the leaves of the tree (post-order depth-first traversal). *)
+  let subtract_profiling_time : t -> unit =
+   fun nodes ->
+    let rec subtract_nodes : t -> seconds =
+     fun nodes ->
+      let profiling_time =
+        match Hashtbl.find_opt nodes prof_node_name with
+        | None -> 0.
+        | Some { Node.data = { Counter.time; count = _ }; children = _ } -> time
+      in
+      Hashtbl.remove nodes prof_node_name;
+      let profiling_time =
+        Hashtbl.fold
+          (fun _name node profiling_time ->
+            profiling_time +. subtract_node node)
+          nodes
+          profiling_time
+      in
+      profiling_time
+    and subtract_node : Node.t -> seconds =
+     fun node ->
+      let { Node.data = { Counter.time; count }; children } = node in
+      let profiling_time = subtract_nodes children in
+      let time = time -. profiling_time in
+      node.Node.data <- { Counter.time; count };
+      profiling_time
+    in
+    let _profiling_time = subtract_nodes nodes in
+    ()
+
   let to_string : t -> string =
    fun nodes ->
+    subtract_profiling_time nodes;
     nodes
     |> Hashtbl.to_list
     |> List.sort ~compare:(fun (name1, _) (name2, _) ->
@@ -158,26 +195,50 @@ end
 
 let max_depth = 10
 
-let count_with_node : Node.t * int -> (t -> 'result) -> 'result =
+(** Run the provided function and return its result along with the duration
+    it has taken. *)
+let time_call : (unit -> 'result) -> 'result * seconds =
+ fun f ->
+  let start = get_time () in
+  let result = f () in
+  let end_ = get_time () in
+  let duration = end_ -. start in
+  (result, duration)
+
+let count_with_node : Node.t * int -> (t -> 'result) -> 'result * seconds =
  fun (node, depth) f ->
   let { Node.data; children } = node in
-  let start = get_time () in
-  let result = f (Some { nodes = children; depth = depth + 1 }) in
-  let end_ = get_time () in
-  let data = Counter.count data ~start ~end_ in
+  let (result, duration) =
+    time_call @@ fun () -> f (Some { nodes = children; depth = depth + 1 })
+  in
+  let data = Counter.count data ~duration in
   node.Node.data <- data;
-  result
+  (result, duration)
+
+(** Record the time it took to profile a node in a child named __prof. *)
+let record_prof_duration nodes ~start_prof ~duration =
+  let prof_node = Hashtbl.find_or_add nodes prof_node_name ~default:Node.make in
+  let end_prof = get_time () in
+  let total_duration = end_prof -. start_prof in
+  let duration_prof = total_duration -. duration in
+  prof_node.Node.data <-
+    Counter.count prof_node.Node.data ~duration:duration_prof
 
 let count : t -> name:string -> (t -> 'result) -> 'result =
  fun prof ~name f ->
   match prof with
   | None -> f None
   | Some { nodes; depth } ->
-    if depth > max_depth then
-      f None
-    else
-      let node = Hashtbl.find_or_add nodes name ~default:Node.make in
-      count_with_node (node, depth) f
+    let start_prof = get_time () in
+    let (result, duration) =
+      if depth > max_depth then
+        time_call @@ fun () -> f None
+      else
+        let node = Hashtbl.find_or_add nodes name ~default:Node.make in
+        count_with_node (node, depth) f
+    in
+    record_prof_duration nodes ~start_prof ~duration;
+    result
 
 let count_leaf : t -> name:string -> (unit -> 'result) -> 'result =
  fun nodes ~name f ->
@@ -187,9 +248,7 @@ let count_leaf : t -> name:string -> (unit -> 'result) -> 'result =
 let profilers : CallTree.t = CallTree.make ()
 
 let create : name:string -> (t -> 'result) -> 'result =
- fun ~name f ->
-  let node = Hashtbl.find_or_add profilers name ~default:Node.make in
-  count_with_node (node, 0) f
+ (fun ~name f -> count (Some { nodes = profilers; depth = 0 }) ~name f)
 
 let without_profiling : (prof:t -> 'result) -> 'result = (fun f -> f ~prof:None)
 

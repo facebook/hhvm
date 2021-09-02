@@ -13,13 +13,13 @@ include(HPHPFunctions)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   OPAM_DOWNLOAD_ARGS
   Linux_URL
-  "https://github.com/ocaml/opam/releases/download/2.0.7/opam-2.0.7-x86_64-linux"
+  "https://github.com/ocaml/opam/releases/download/2.1.0/opam-2.1.0-x86_64-linux"
   Darwin_URL
-  "https://github.com/ocaml/opam/releases/download/2.0.7/opam-2.0.7-x86_64-macos"
+  "https://github.com/ocaml/opam/releases/download/2.1.0/opam-2.1.0-x86_64-macos"
   Linux_HASH
-  "SHA512=da75b0cb5ad50f95d31857a7d72f1836132a1fa1cdbfdedf684342b798e7107b4add4c74c05d5ce44881309fa1e57707538dbcda874e7f74b269b1bb204f3ae3"
+  "SHA512=03c6a85f13a452749fdb2271731f3624a3993498ff2b304123231a8f2b26ccf1182d12119466e9a85f4de370fca51bd61d0eefe6280d3ca087cf4620fdc59a22"
   Darwin_HASH
-  "SHA512=de1194c8e97e53956e5e47502c28881bbf26d1beaac4f33a43a922b8ca7ce97725533cfaf65a33fc0e183eab5a95e9ecd2e20f72faeaec333dc3850b79b5fe8a"
+  "SHA512=1c9acee545c851dd3701229e3a6aa7b5650620e37e01400d797a4b1fbeeb614adc459411283684e223a72fda8b14ba6c6e5482661485f888819f6a2a02e4d279"
 )
 
 include(ExternalProject)

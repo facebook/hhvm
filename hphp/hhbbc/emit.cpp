@@ -44,7 +44,6 @@
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
-#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
@@ -1001,7 +1000,6 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptFunc:
   case T::OptCls:
   case T::OptClsMeth:
-  case T::OptRecord:
   case T::OptLazyCls:
   case T::OptUncArrKey:
   case T::OptArrKey:
@@ -1032,7 +1030,6 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::Func:
   case T::Cls:
   case T::ClsMeth:
-  case T::Record:
   case T::LazyCls:
   case T::Num:
   case T::OptNum:
@@ -1077,13 +1074,6 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::SubCls:
   case T::ExactCls:
     ue.mergeLitstr(rat.clsName());
-    return;
-
-  case T::OptSubRecord:
-  case T::OptExactRecord:
-  case T::SubRecord:
-  case T::ExactRecord:
-    ue.mergeLitstr(rat.recordName());
     return;
   }
 }
@@ -1198,33 +1188,6 @@ void emit_func(EmitUnitState& state, UnitEmitter& ue,
   auto func = php::WideFunc::mut(&f);
   auto const info = emit_bytecode(state, ue, fe, func);
   emit_finish_func(state, fe, func, info);
-}
-
-void emit_record(UnitEmitter& ue, const php::Record& rec) {
-  assertx(rec.attrs & AttrUnique);
-  assertx(rec.attrs & AttrPersistent);
-  auto const re = ue.newRecordEmitter(rec.name->toCppString());
-  re->init(
-      std::get<0>(rec.srcInfo.loc),
-      std::get<1>(rec.srcInfo.loc),
-      rec.attrs,
-      rec.parentName ? rec.parentName : staticEmptyString(),
-      rec.srcInfo.docComment
-  );
-  re->setUserAttributes(rec.userAttributes);
-  for (auto&& f : rec.fields) {
-    re->addField(
-        f.name,
-        f.attrs,
-        f.userType,
-        f.typeConstraint,
-        RecordEmitter::UpperBoundVec{},
-        f.docComment,
-        &f.val,
-        RepoAuthType{},
-        f.userAttributes
-    );
-  }
 }
 
 void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
@@ -1486,10 +1449,6 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index, php::Unit& unit) {
 
   for (size_t id = 0; id < unit.constants.size(); ++id) {
     emit_constant(*ue, *unit.constants[id]);
-  }
-
-  for (size_t id = 0; id < unit.records.size(); ++id) {
-    emit_record(*ue, *unit.records[id]);
   }
 
   ue->finish();

@@ -1854,10 +1854,6 @@ void VariableSerializer::serializeVariant(tv_rval tv,
       assertx(!isArrayKey);
       serializeLazyClass(val(tv).plazyclass);
       return;
-
-    case KindOfRecord:
-      // TODO(T41025646): implement serialization of record
-      always_assert(false);
   }
   not_reached();
 }

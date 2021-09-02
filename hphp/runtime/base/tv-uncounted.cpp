@@ -112,9 +112,6 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
     case KindOfDouble:
       break;
 
-    case KindOfRecord:
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
-
     // DataWalker excludes these cases when it analyzes a value.
     case KindOfObject:
     case KindOfResource:

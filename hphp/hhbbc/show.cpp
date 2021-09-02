@@ -603,18 +603,6 @@ std::string show(const Type& t) {
       if (t.m_data.dcls.isCtx) folly::toAppend(" this", &ret);
       return impl(BCls, ret);
     }
-    case DataTag::Record: {
-      std::string ret;
-      switch (t.m_data.drec.type) {
-      case DRecord::Exact:
-        folly::toAppend("=", show(t.m_data.drec.rec), &ret);
-        break;
-      case DRecord::Sub:
-        folly::toAppend("<=", show(t.m_data.drec.rec), &ret);
-        break;
-      }
-      return impl(BRecord, ret);
-    }
     case DataTag::ArrLikePacked:
       return impl(
         BArrLikeN,

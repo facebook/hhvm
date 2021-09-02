@@ -40,7 +40,6 @@
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
-#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
@@ -871,38 +870,6 @@ void add_stringish(php::Class* cls) {
   }
 }
 
-std::unique_ptr<php::Record> parse_record(php::Unit* unit,
-                                          const RecordEmitter& re) {
-  FTRACE(2, "  record: {}\n", re.name()->data());
-
-  auto ret                = std::make_unique<php::Record>();
-  ret->unit               = unit;
-  ret->srcInfo            = php::SrcInfo {re.getLocation(), re.docComment()};
-  ret->name               = re.name();
-  ret->attrs              = static_cast<Attr>((re.attrs() & ~AttrNoOverride) |
-                                              AttrUnique | AttrPersistent);
-  ret->parentName         = re.parentName()->empty()? nullptr: re.parentName();
-  ret->id                 = re.id();
-  ret->userAttributes     = re.userAttributes();
-
-  auto& fieldMap = re.fieldMap();
-  for (size_t idx = 0; idx < fieldMap.size(); ++idx) {
-    auto& field = fieldMap[idx];
-    ret->fields.push_back(
-      php::RecordField {
-        field.name(),
-        field.attrs(),
-        field.userType(),
-        field.docComment(),
-        field.val(),
-        field.typeConstraint(),
-        field.userAttributes()
-      }
-    );
-  }
-  return ret;
-}
-
 const StaticString s_DynamicallyConstructible("__DynamicallyConstructible");
 
 std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
@@ -1146,11 +1113,6 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
   for (size_t i = 0; i < ue.numPreClasses(); ++i) {
     auto cls = parse_class(puState, ret.get(), *ue.pce(i));
     ret->classes.push_back(std::move(cls));
-  }
-
-  for (size_t i = 0; i < ue.numRecords(); ++i) {
-    auto rec = parse_record(ret.get(), *ue.re(i));
-    ret->records.push_back(std::move(rec));
   }
 
   for (auto& fe : ue.fevec()) {

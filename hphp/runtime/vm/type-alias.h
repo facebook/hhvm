@@ -31,7 +31,6 @@ namespace HPHP {
 
 struct ArrayData;
 struct Class;
-struct RecordDesc;
 struct StringData;
 struct Unit;
 
@@ -104,8 +103,6 @@ struct TypeAlias {
   bool nullable{false};
   // Aliased Class; nullptr if type != Object.
   LowPtr<Class> klass{nullptr};
-  // Aliased RecordDesc; nullptr if type != Record.
-  LowPtr<RecordDesc> rec{nullptr};
 
   explicit TypeAlias(const PreTypeAlias* preTypeAlias)
     : m_preTypeAlias(preTypeAlias)

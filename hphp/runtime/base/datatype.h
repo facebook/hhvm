@@ -86,22 +86,21 @@ constexpr int8_t udt(size_t index, bool counted) {
   DT(Vec,              udt(1,  true))  \
   DT(PersistentKeyset, udt(2,  false)) \
   DT(Keyset,           udt(2,  true))  \
-  DT(Record,           udt(3,  true))  \
-  DT(PersistentString, udt(4,  false)) \
-  DT(String,           udt(4,  true))  \
-  DT(Object,           udt(5,  true))  \
-  DT(Resource,         udt(6,  true))  \
-  DT(RFunc,            udt(7,  true))  \
-  DT(RClsMeth,         udt(8,  true))  \
-  DT(ClsMeth,          udt(9,  false)) \
-  DT(Boolean,          udt(10, false)) \
-  DT(Int64,            udt(11, false)) \
-  DT(Double,           udt(12, false)) \
-  DT(Func,             udt(13, false)) \
-  DT(Class,            udt(14, false)) \
-  DT(LazyClass,        udt(15, false)) \
-  DT(Uninit,           udt(16, false)) \
-  DT(Null,             udt(17, false))
+  DT(PersistentString, udt(3,  false)) \
+  DT(String,           udt(3,  true))  \
+  DT(Object,           udt(4,  true))  \
+  DT(Resource,         udt(5,  true))  \
+  DT(RFunc,            udt(6,  true))  \
+  DT(RClsMeth,         udt(7,  true))  \
+  DT(ClsMeth,          udt(8,  false)) \
+  DT(Boolean,          udt(9, false))  \
+  DT(Int64,            udt(10, false)) \
+  DT(Double,           udt(11, false)) \
+  DT(Func,             udt(12, false)) \
+  DT(Class,            udt(13, false)) \
+  DT(LazyClass,        udt(14, false)) \
+  DT(Uninit,           udt(15, false)) \
+  DT(Null,             udt(16, false))
 
 enum class DataType : int8_t {
 #define DT(name, value) name = value,
@@ -344,7 +343,6 @@ constexpr bool isIntType(DataType t) { return t == KindOfInt64; }
 constexpr bool isBoolType(DataType t) { return t == KindOfBoolean; }
 constexpr bool isDoubleType(DataType t) { return t == KindOfDouble; }
 constexpr bool isObjectType(DataType t) { return t == KindOfObject; }
-constexpr bool isRecordType(DataType t) { return t == KindOfRecord; }
 constexpr bool isResourceType(DataType t) { return t == KindOfResource; }
 constexpr bool isRFuncType(DataType t) { return t == KindOfRFunc; }
 constexpr bool isFuncType(DataType t) { return t == KindOfFunc; }

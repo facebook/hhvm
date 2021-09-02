@@ -117,7 +117,6 @@ void iopNewDictArray(uint32_t capacity);
 void iopNewStructDict(imm_array<int32_t> ids);
 void iopNewVec(uint32_t n);
 void iopNewKeysetArray(uint32_t n);
-void iopNewRecord(const StringData* s, imm_array<int32_t> ids);
 void iopAddElemC();
 void iopAddNewElemC();
 void iopNewCol(CollectionType cType);

@@ -339,10 +339,6 @@ void iopNewKeysetArray(uint32_t /* n */) {
   iopUnhandled("NewKeysetArray");
 }
 
-void iopNewRecord(const StringData* /* s */, imm_array<int32_t> /* ids */) {
-  iopUnhandled("NewRecord");
-}
-
 void iopAddElemC() {
   iopUnhandled("AddElemC");
 }

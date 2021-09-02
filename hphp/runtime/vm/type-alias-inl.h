@@ -60,7 +60,7 @@ inline bool TypeAlias::same(const TypeAlias& req) const {
   return (invalid && req.invalid) ||
          (type == AnnotType::Mixed && req.type == AnnotType::Mixed) ||
          (type == req.type && nullable == req.nullable &&
-          klass == req.klass && rec == req.rec);
+          klass == req.klass);
 }
 
 inline bool operator==(const TypeAlias& l,

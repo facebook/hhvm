@@ -42,7 +42,6 @@ struct MemoCacheBase;
 struct Func;
 struct RFuncData;
 struct Class;
-struct RecordData;
 struct RClsMethData;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,7 +66,6 @@ union Value {
   Class*        pclass; // KindOfClass
   ClsMethDataRef pclsmeth; // KindOfClsMeth
   RClsMethData* prclsmeth; // KindOfRClsMeth
-  RecordData*   prec;   // KindOfRecord
   LazyClassData plazyclass;   // KindOfLazyClass
 };
 
@@ -312,7 +310,6 @@ X(KindOfRFunc,        RFuncData*);
 X(KindOfClass,        Class*);
 X(KindOfClsMeth,      ClsMethDataRef);
 X(KindOfRClsMeth,     RClsMethData*);
-X(KindOfRecord,       RecordData*);
 X(KindOfLazyClass,    LazyClassData);
 
 #undef X

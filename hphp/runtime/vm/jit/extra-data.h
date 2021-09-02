@@ -1220,28 +1220,6 @@ struct RetCtrlData : IRExtraData {
 };
 
 /*
- * Name of a record
- */
-struct RecNameData : IRExtraData {
-  explicit RecNameData(const StringData* name)
-    : recName(name)
-  {}
-
-  std::string show() const {
-    return folly::to<std::string>(recName->data());
-  }
-
-  size_t hash() const { return recName->hash(); }
-
-  size_t stableHash() const { return recName->hash(); }
-  bool equals(const RecNameData& o) const {
-    return recName == o.recName;
-  }
-
-  const StringData* recName;
-};
-
-/*
  * Name of a class constant in a known class
  */
 struct ClsCnsName : IRExtraData {
@@ -2781,7 +2759,6 @@ X(RBTraceEntry,                 RBEntryData);
 X(RBTraceMsg,                   RBMsgData);
 X(OODeclExists,                 ClassKindData);
 X(NewStructDict,                NewStructData);
-X(NewRecord,                    NewStructData);
 X(AllocStructDict,              NewStructData);
 X(AllocBespokeStructDict,       ArrayLayoutData);
 X(InitStructPositions,          InitStructPositionsData);
@@ -2865,14 +2842,12 @@ X(Unreachable,                  AssertReason);
 X(EndBlock,                     AssertReason);
 X(VerifyRetCallable,            ParamData);
 X(VerifyRetCls,                 ParamData);
-X(VerifyRetRecDesc,             ParamData);
 X(VerifyParamFail,              ParamWithTCData);
 X(VerifyParamFailHard,          ParamWithTCData);
 X(VerifyRetFail,                ParamWithTCData);
 X(VerifyRetFailHard,            ParamWithTCData);
 X(VerifyReifiedLocalType,       ParamData);
 X(VerifyPropCls,                TypeConstraintData);
-X(VerifyPropRecDesc,            TypeConstraintData);
 X(VerifyPropFail,               TypeConstraintData);
 X(VerifyPropFailHard,           TypeConstraintData);
 X(VerifyProp,                   TypeConstraintData);
@@ -2882,8 +2857,6 @@ X(EnterTCUnwind,                EnterTCUnwindData);
 X(FuncHasAttr,                  AttrData);
 X(ClassHasAttr,                 AttrData);
 X(LdMethCallerName,             MethCallerData);
-X(LdRecDescCached,              RecNameData);
-X(LdRecDescCachedSafe,          RecNameData);
 X(LdUnitPerRequestFilepath,     RDSHandleData);
 X(LdClsTypeCns,                 LdClsTypeCnsData);
 X(ConvTVToStr,                  ConvNoticeData);

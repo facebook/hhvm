@@ -242,16 +242,11 @@ inline const RepoAuthType::Array* Unit::lookupArrayTypeId(Id id) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// PreClasses and RecordDescs.
+// PreClasses
 
 inline PreClass* Unit::lookupPreClassId(Id id) const {
   assertx(id < Id(m_preClasses.size()));
   return m_preClasses[id].get();
-}
-
-inline PreRecordDesc* Unit::lookupPreRecordId(Id id) const {
-  assertx(id < Id(m_preRecords.size()));
-  return m_preRecords[id].get();
 }
 
 inline const Constant* Unit::lookupConstantId(Id id) const {
@@ -270,14 +265,6 @@ inline folly::Range<PreClassPtr*> Unit::preclasses() {
 
 inline folly::Range<const PreClassPtr*> Unit::preclasses() const {
   return { m_preClasses.data(), m_preClasses.size() };
-}
-
-inline folly::Range<PreRecordDescPtr*> Unit::prerecords() {
-  return { m_preRecords.data(), m_preRecords.size() };
-}
-
-inline folly::Range<const PreRecordDescPtr*> Unit::prerecords() const {
-  return { m_preRecords.data(), m_preRecords.size() };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

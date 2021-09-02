@@ -120,7 +120,6 @@ size_t hashArrayPortion(const ArrayData* arr) {
         case KindOfResource:
         case KindOfRFunc:
         case KindOfRClsMeth:
-        case KindOfRecord:
           always_assert(false);
       }
     }
@@ -785,7 +784,6 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfLazyClass:
   case KindOfClsMeth:
   case KindOfRClsMeth:
-  case KindOfRecord:
     return "<invalid key type>";
   }
   not_reached();

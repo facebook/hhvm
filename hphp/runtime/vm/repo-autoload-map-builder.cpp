@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
-#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/type-alias-emitter.h"
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -36,10 +35,6 @@ void RepoAutoloadMapBuilder::addUnit(const UnitEmitter& ue) {
     if (!boost::starts_with(pce->name()->slice(), "Closure$")) {
       m_types.emplace(pce->name(), unitSn);
     }
-  }
-  for (size_t n = 0; n < ue.numRecords(); ++n) {
-    auto re = ue.re(n);
-    m_types.emplace(re->name(), unitSn);
   }
   for (auto& fe : ue.fevec()) {
     if (!fe->isMethod()

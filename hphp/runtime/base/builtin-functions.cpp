@@ -86,10 +86,6 @@ const StaticString s_cmpWithKeyset(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
   "keysets"
 );
-const StaticString s_cmpWithRecord(
-  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
-  "records"
-);
 const StaticString s_cmpWithClsMeth(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
   "a clsmeth"
@@ -105,9 +101,6 @@ const StaticString s_cmpWithRFunc(
 const StaticString s_cmpWithOpaqueResource(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) with "
   "opaque values"
-);
-const StaticString s_cmpWithNonRecord(
-  "Cannot compare records with non-records"
 );
 const StaticString s_cmpWithNonArr(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
@@ -802,20 +795,12 @@ void throw_dict_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithDict);
 }
 
-void throw_record_compare_exception() {
-  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithRecord);
-}
-
 void throw_rfunc_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithRFunc);
 }
 
 void throw_opaque_resource_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithOpaqueResource);
-}
-
-void throw_rec_non_rec_compare_exception() {
-  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithNonRecord);
 }
 
 void throw_keyset_compare_exception() {

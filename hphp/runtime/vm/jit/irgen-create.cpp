@@ -494,31 +494,6 @@ void emitNewPair(IRGS& env) {
   push(env, gen(env, NewPair, c2, c1));
 }
 
-void emitNewRecordImpl(IRGS& env, const StringData* name,
-                       const ImmVector& immVec,
-                       Opcode newRecordOp) {
-  auto const recDesc = RecordDesc::lookupUnique(name);
-  auto const isPersistent = recordHasPersistentRDS(recDesc);
-  auto const cachedRec = isPersistent ?
-    cns(env, recDesc) : gen(env, LdRecDescCached, RecNameData{name});
-  auto const numArgs = immVec.size();
-  auto const ids = immVec.vec32();
-  NewStructData extra;
-  extra.offset = spOffBCFromIRSP(env);
-  extra.numKeys = numArgs;
-  extra.keys = new (env.unit.arena()) StringData*[numArgs];
-  for (auto i = size_t{0}; i < numArgs; ++i) {
-    extra.keys[i] = curUnit(env)->lookupLitstrId(ids[i]);
-  }
-  auto const recData = gen(env, newRecordOp, extra, cachedRec, sp(env));
-  discard(env, numArgs);
-  push(env, recData);
-}
-
-void emitNewRecord(IRGS& env, const StringData* name, const ImmVector& immVec) {
-  emitNewRecordImpl(env, name, immVec, NewRecord);
-}
-
 void emitColFromArray(IRGS& env, CollectionType type) {
   assertx(type != CollectionType::Pair);
   auto const arr = popC(env);

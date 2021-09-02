@@ -615,10 +615,6 @@ To string conversions:
 
   Checks if two Lazy class values are equal.
 
-| EqRecDesc,                   D(Bool), S(RecDesc) S(RecDesc),            NF
-
-  Checks if two record types are equal.
-
 | EqFunc,                      D(Bool), S(Func) S(Func),                  NF
 
   Checks if two Func values are equal.
@@ -671,10 +667,6 @@ To string conversions:
   A fast-path for instanceof checks. Sets D based on whether S0 is a descendant
   of the class named by S1, where S1 must have a bit allocated for it in the
   fast instance check bitvector (see class.h).
-
-| InstanceOfRecDesc, D(Bool), S(RecDesc) S(RecDesc), NF
-
-  Sets D to true if S0 is a descendant of the record in S1, false otherwise.
 
 | InterfaceSupportsArrLike,    D(Bool), S(Str), NF
 
@@ -969,20 +961,6 @@ To string conversions:
 | LdSmashableFunc, D(Func), S(Smashable), NF
 
   Loads into D the func pointer stored in the higher 32 bits of S0.
-
-| LdRecDesc, D(RecDesc), S(Record), NF
-
-  Load the record type out of the record in S0 and put it in D.
-
-| LdRecDescCached<recName>, D(RecDesc), NA, NF
-
-  Loads the record whose name is recName via the RDS. Invokes autoload and may raise an error
-  if the record is not defined.
-
-| LdRecDescCachedSafe<recName>, D(RecDesc), NA, B
-
-  Loads the record whose name is recName out of the RDS. If the record is not
-  defined, branch to B.
 
 | DefConst<T>, DParam(Top), NA, NF
 
@@ -1501,13 +1479,6 @@ To string conversions:
   N fields with the given `slots` with N stack elements starting at `offset`.
   This op moves stack values with no refcounting.
 
-| NewRecord<offset,keys...>, D(Record), S(RecDesc) S(StkPtr), PRc|CRc
-
-  Allocate a new record, given the type S0 and N immediate keys
-  and taking N elements off the stack given by S1, at `offset'.
-  This instruction assumes it can take the values from the stack
-  without increfing them.
-
 | NewCol<type>, DCol, NA, PRc
 
   Create an empty new collection of `type'. `type' cannot be Pair.
@@ -1969,13 +1940,6 @@ To string conversions:
   a class) or implement (if S1 is an interface) S1, this instruction will raise
   a recoverable fatal error describing the type mismatch.
 
-| VerifyParamRecDesc, ND, S(RecDesc) S(RecDesc|Nullptr) C(Int) C(Int), NF
-
-  Verify parameter type for records. If S0 does not extend S1 (if S1 is a record
-  type) or does not satisfy the type hint S2 (if S1 is null pointer),
-  this instruction will raise a recoverable fatal error describing the type
-  mismatch for parameter S3.
-
 | VerifyParamCallable, ND, S(Cell) C(Int), NF
 
   If S0 is not callable, as defined by the php function is_callable, this
@@ -2003,10 +1967,6 @@ To string conversions:
 
   Verify a return type hint for a class.
 
-| VerifyRetRecDesc, ND, S(RecDesc) S(RecDesc|Nullptr) C(Int) S(Cell), NF
-
-  Verify a return type hint for a record.
-
 | VerifyRetFail, ND, S(PtrToCell), NF
 
   Failure to verify a return type hint.
@@ -2025,16 +1985,6 @@ To string conversions:
   S3 will be checked to see if its an instance of S2. Otherwise, the type-hint
   refers to a type-alias, and the alias will be resolved and checked against
   S3. S4 is true if this is a static property, false otherwise.
-
-| VerifyPropRecDesc, ND, S(Cls) S(Int) S(RecDesc|Nullptr) S(Record) C(Bool), NF
-
-  Verify a property type hint with AnnotType::Record against a record value. S0
-  is the class of the object containing the property. S1 is the slot of the
-  property. S3 is the record being set in the property. If S2 is not nullptr,
-  it is the type hint and S3 will be checked to see if it's an instance of S2.
-  Otherwise, the type hint refers to a type-alias and the type-alias will be
-  resolved and checked against S3. S4 is true if this is a static property,
-  otherwise false.
 
 | VerifyPropFail, ND, S(Cls) S(Int) S(Cell) C(Bool), NF
 

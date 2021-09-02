@@ -607,33 +607,6 @@ struct TypeAlias {
 };
 
 //////////////////////////////////////////////////////////////////////
-/*
- * A record field
- */
-struct RecordField {
-  LSString name;
-  Attr attrs;
-  LSString userType;
-  LSString docComment;
-  TypedValue val;
-  TypeConstraint typeConstraint;
-  UserAttributeMap userAttributes;
-};
-/*
- * Representation of a Hack record
- */
-struct Record {
-  Unit* unit;
-  SrcInfo srcInfo;
-  LSString name;
-  LSString parentName;
-  Attr attrs;
-  int32_t id;
-  UserAttributeMap userAttributes;
-  CompactVector<RecordField> fields;
-};
-
-//////////////////////////////////////////////////////////////////////
 
 /*
  * Information regarding a runtime/parse error in a unit
@@ -654,7 +627,6 @@ struct Unit {
   std::unique_ptr<FatalInfo> fatalInfo{nullptr};
   CompactVector<std::unique_ptr<Func>> funcs;
   CompactVector<std::unique_ptr<Class>> classes;
-  CompactVector<std::unique_ptr<Record>> records;
   CompactVector<std::unique_ptr<TypeAlias>> typeAliases;
   CompactVector<std::unique_ptr<Constant>> constants;
   CompactVector<SrcLoc> srcLocs;

@@ -3139,7 +3139,6 @@ bool Class::compatibleTraitPropInit(const TypedValue& tv1,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
       return false;
   }
   not_reached();

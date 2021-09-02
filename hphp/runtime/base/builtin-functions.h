@@ -36,7 +36,6 @@ extern const StaticString s_cmpWithKeyset;
 extern const StaticString s_cmpWithClsMeth;
 extern const StaticString s_cmpWithRClsMeth;
 extern const StaticString s_cmpWithRFunc;
-extern const StaticString s_cmpWithRecord;
 extern const StaticString s_cmpWithNonArr;
 extern const StaticString s_cmpWithFunc;
 
@@ -223,7 +222,6 @@ bool is_constructor_name(const char* func);
 [[noreturn]] void throw_keyset_compare_exception();
 [[noreturn]] void throw_clsmeth_compare_exception();
 [[noreturn]] void throw_rclsmeth_compare_exception();
-[[noreturn]] void throw_record_compare_exception();
 [[noreturn]] void throw_rfunc_compare_exception();
 [[noreturn]] void throw_opaque_resource_compare_exception();
 [[noreturn]] void throw_rec_non_rec_compare_exception();

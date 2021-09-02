@@ -541,14 +541,6 @@ static std::string toStringElm(TypedValue tv) {
          << tv.m_data.pobj->getClassName().get()->data()
          << ")";
       continue;
-    case KindOfRecord:
-      assertx(tv.m_data.prec->checkCount());
-      os << tv.m_data.prec;
-      print_count();
-      os << ":Record("
-         << tv.m_data.prec->record()->name()->data()
-         << ")";
-      continue;
     case KindOfResource:
       assertx(tv.m_data.pres->checkCount());
       os << tv.m_data.pres;
@@ -1206,36 +1198,6 @@ OPTBLD_INLINE void iopNewKeysetArray(uint32_t n) {
   auto const ad = VanillaKeyset::MakeSet(n, vmStack().topC());
   vmStack().ndiscard(n);
   vmStack().pushKeysetNoRc(bespoke::maybeMakeLoggingArray(ad));
-}
-
-namespace {
-template<typename CreatorFn, typename PushFn>
-void newRecordImpl(const StringData* s,
-                   const imm_array<int32_t>& ids,
-                   CreatorFn creatorFn, PushFn pushFn) {
-  auto rec = RecordDesc::get(s, true);
-  if (!rec) {
-    raise_error(Strings::UNKNOWN_RECORD, s->data());
-  }
-  auto const n = ids.size;
-  assertx(n > 0 && n <= ArrayData::MaxElemsOnStack);
-  req::vector<const StringData*> names;
-  names.reserve(n);
-  auto const unit = vmfp()->func()->unit();
-  for (size_t i = 0; i < n; ++i) {
-    auto name = unit->lookupLitstrId(ids[i]);
-    names.push_back(name);
-  }
-  auto recdata = creatorFn(rec, names.size(), names.data(), vmStack().topC());
-  vmStack().ndiscard(n);
-  pushFn(vmStack(), recdata);
-}
-}
-
-// TODO (T29595301): Use id instead of StringData
-OPTBLD_INLINE void iopNewRecord(const StringData* s, imm_array<int32_t> ids) {
-  newRecordImpl(s, ids, RecordData::newRecord,
-                [] (Stack& st, RecordData* r) { st.pushRecordNoRc(r); });
 }
 
 OPTBLD_INLINE void iopAddElemC() {

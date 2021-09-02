@@ -52,20 +52,6 @@ std::unordered_set<Type> allTypes() {
   return r;
 }
 
-std::unique_ptr<RecordDesc> testRecordDesc(const char* name,
-                                           const char* parentName = nullptr) {
-  auto const parentStr = parentName ? makeStaticString(name) : nullptr;
-  auto const preRec = new PreRecordDesc(nullptr, -1, -1, makeStaticString(name),
-                                        Attr{}, parentStr, nullptr, 1);
-  auto const parentPreRec = parentStr ?
-    new PreRecordDesc(nullptr, -1, -1, parentStr, Attr{}, nullptr, nullptr, 1) :
-    nullptr;
-  return std::make_unique<RecordDesc>(
-    preRec,
-    parentPreRec ? RecordDesc::newRecordDesc(parentPreRec, nullptr) : nullptr
-  );
-}
-
 }
 
 TEST(Type, Equality) {
@@ -97,7 +83,6 @@ TEST(Type, KnownDataType) {
     TCountedStr,
     TStr,
     TObj,
-    TRecord,
     TDbl,
     TVec,
     TPersistentVec,
@@ -263,12 +248,6 @@ TEST(Type, ToString) {
   EXPECT_EQ("PtrToStr", TPtrToStr.toString());
   EXPECT_EQ("LvalToStr", TLvalToStr.toString());
 
-  auto const recA = testRecordDesc("A");
-  auto const subRec = Type::SubRecord(recA.get());
-  auto const exactRec = Type::ExactRecord(recA.get());
-  EXPECT_EQ("Record<=A", subRec.toString());
-  EXPECT_EQ("Record=A", exactRec.toString());
-
   EXPECT_EQ("PtrTo{Prop|MIS|MMisc|Other|Field}Cell",
             (TPtrToMembCell - TPtrToElemCell).toString());
   EXPECT_EQ("LvalTo{Prop|MIS|MMisc|Other|Field}Cell",
@@ -284,7 +263,6 @@ TEST(Type, ToString) {
   EXPECT_EQ("LvalTo{Int|StaticStr}|{Int|StaticStr}",
             (TInt | TLvalToStaticStr).toString());
   EXPECT_EQ("{Obj<=HH\\Iterator|Int}", (TInt | sub).toString());
-  EXPECT_EQ("{Record<=A|Int}", (TInt | subRec).toString());
 
   EXPECT_EQ("Cls<=HH\\Iterator",
             Type::SubCls(SystemLib::s_HH_IteratorClass).toString());
@@ -387,21 +365,6 @@ TEST(Type, Ptr) {
   EXPECT_TRUE(ptrToSubObj.isSpecialized());
   EXPECT_EQ(TPtrToObj, ptrToSubObj.unspecialize());
   EXPECT_EQ(subClassSpec, ptrToSubObj.clsSpec());
-
-  auto const recA = testRecordDesc("A");
-  auto const ptrToExactRec = Type::ExactRecord(recA.get()).ptr(Ptr::Ptr);
-  auto const exactRecSpec = RecordSpec(recA.get(), RecordSpec::ExactTag{});
-  EXPECT_FALSE(ptrToExactRec.hasConstVal());
-  EXPECT_TRUE(ptrToExactRec.isSpecialized());
-  EXPECT_EQ(TPtrToRecord, ptrToExactRec.unspecialize());
-  EXPECT_EQ(exactRecSpec, ptrToExactRec.recSpec());
-
-  auto const ptrToSubRec = Type::SubRecord(recA.get()).ptr(Ptr::Ptr);
-  auto const subRecSpec = RecordSpec(recA.get(), RecordSpec::SubTag{});
-  EXPECT_FALSE(ptrToSubRec.hasConstVal());
-  EXPECT_TRUE(ptrToSubRec.isSpecialized());
-  EXPECT_EQ(TPtrToRecord, ptrToSubRec.unspecialize());
-  EXPECT_EQ(subRecSpec, ptrToSubRec.recSpec());
 }
 
 TEST(Type, Lval) {
@@ -525,14 +488,6 @@ TEST(Type, RelaxType) {
   auto subIter = Type::SubObj(SystemLib::s_HH_IteratorClass);
   EXPECT_EQ("Obj<=HH\\Iterator", subIter.toString());
   EXPECT_EQ(subIter, relaxType(subIter, gc.category));
-
-  auto const rec = testRecordDesc("A");
-  gc = GuardConstraint{DataTypeSpecialized};
-  gc.setDesiredRecord(rec.get());
-  gc.category = DataTypeSpecialized;
-  auto subRec = Type::SubRecord(rec.get());
-  EXPECT_EQ("Record<=A", subRec.toString());
-  EXPECT_EQ(subRec, relaxType(subRec, gc.category));
 }
 
 TEST(Type, RelaxConstraint) {
@@ -545,7 +500,6 @@ TEST(Type, Specialized) {
   EXPECT_LT(TVanillaArrLike, TArrLike);
   EXPECT_FALSE(TArrLike <= TVanillaArrLike);
   EXPECT_LT(TVanillaArrLike, TArrLike | TObj);
-  EXPECT_LT(TVanillaArrLike, TArrLike | TRecord);
   EXPECT_EQ(TVanillaArrLike, TVanillaArrLike & (TArrLike | TCounted));
   EXPECT_GE(TVanillaArrLike, TBottom);
   EXPECT_GT(TVanillaArrLike, TBottom);
@@ -586,13 +540,10 @@ TEST(Type, Specialized) {
   EXPECT_EQ(TBottom, constDict - TDict);
 
   // Checking specialization dropping.  We cannot specialize on two dimensions
-  // (e.g. array-like and object, or array-like and record) at the same time.
+  // (e.g. array-like and object) at the same time.
   EXPECT_EQ(TStaticVec | TObj, constVec | TObj);
   auto const subIter = Type::SubObj(SystemLib::s_HH_IteratorClass);
   EXPECT_EQ(TVec | TObj, TVec | subIter);
-  auto const recA = testRecordDesc("A");
-  auto const subRec = Type::SubRecord(recA.get());
-  EXPECT_EQ(TVec | TRecord, TVec | subRec);
 
   auto const vecOrInt = TVec | TInt;
   EXPECT_EQ(TInt, vecOrInt - TArrLike);
@@ -605,14 +556,6 @@ TEST(Type, Specialized) {
   EXPECT_EQ(TStr, iterOrStr - subIter);
   EXPECT_EQ(subIter, iterOrStr - TStr);
   EXPECT_EQ(TPtrToObj, TPtrToObj - subIter.ptr(Ptr::Ptr));
-
-  auto const recOrStr = subRec | TStr;
-  EXPECT_EQ(TStr, recOrStr - TRecord);
-  EXPECT_EQ(TStr, recOrStr - subRec);
-  EXPECT_EQ(subRec, recOrStr - TStr);
-  EXPECT_EQ(TPtrToRecord, TPtrToRecord - subRec.ptr(Ptr::Ptr));
-
-  EXPECT_EQ(TObj | TRecord, subRec | subIter);
 
   auto const subCls = Type::SubCls(SystemLib::s_HH_IteratorClass);
   EXPECT_EQ(TCls, TCls - subCls);
@@ -739,49 +682,6 @@ TEST(Type, SpecializedObjects) {
   EXPECT_EQ(subA, subA - exactA);  // conservative
 }
 
-TEST(Type, SpecializedRecords) {
-  auto const rA = testRecordDesc("A", "B");
-  auto const A = rA.get();
-  auto const B = A->parent();
-  EXPECT_TRUE(A->recordDescOf(B));
-
-  auto const exactA = Type::ExactRecord(A);
-  auto const exactB = Type::ExactRecord(B);
-  auto const subA = Type::SubRecord(A);
-  auto const subB = Type::SubRecord(B);
-
-  EXPECT_EQ(exactA.recSpec().rec(), A);
-  EXPECT_EQ(subA.recSpec().rec(), A);
-
-  EXPECT_EQ(exactA.recSpec().exactRec(), A);
-  EXPECT_EQ(subA.recSpec().exactRec(), nullptr);
-
-  EXPECT_LE(exactA, exactA);
-  EXPECT_LE(subA, subA);
-
-  EXPECT_LT(exactA, TRecord);
-  EXPECT_LT(subA, TRecord);
-
-  EXPECT_LE(TBottom, subA);
-  EXPECT_LE(TBottom, exactA);
-
-  EXPECT_LT(exactA, subA);
-
-  EXPECT_LT(exactA, subB);
-  EXPECT_LT(subA, subB);
-
-  EXPECT_FALSE(exactA <= exactB);
-  EXPECT_FALSE(subA <= exactB);
-
-  EXPECT_EQ(exactA & subA, exactA);
-  EXPECT_EQ(subA & exactA, exactA);
-  EXPECT_EQ(exactB & subB, exactB);
-  EXPECT_EQ(subB & exactB, exactB);
-
-  EXPECT_EQ(TRecord, TRecord - subA);  // conservative
-  EXPECT_EQ(subA, subA - exactA);  // conservative
-}
-
 TEST(Type, SpecializedClass) {
   auto const A = SystemLib::s_HH_IteratorClass;
   auto const B = SystemLib::s_HH_TraversableClass;
@@ -895,7 +795,6 @@ TEST(Type, Const) {
   EXPECT_TRUE(ratArray1 < TDict);
   EXPECT_TRUE(ratArray1 <= ratArray1);
   EXPECT_TRUE(ratArray1 < (TDict|TObj));
-  EXPECT_TRUE(ratArray1 < (TDict|TRecord));
   EXPECT_FALSE(ratArray1 < ratArray2);
   EXPECT_NE(ratArray1, ratArray2);
 
@@ -1277,14 +1176,12 @@ TEST(Type, PtrKinds) {
   auto const unknownBool = TBool.ptr(Ptr::Ptr);
   auto const unknownCell  = TCell.ptr(Ptr::Ptr);
   auto const stackObj    = TObj.ptr(Ptr::Stk);
-  auto const stackRec    = TRecord.ptr(Ptr::Stk);
   auto const stackBool    = TBool.ptr(Ptr::Stk);
 
   EXPECT_EQ("PtrToFrameCell", frameCell.toString());
   EXPECT_EQ("PtrToFrameBool", frameBool.toString());
   EXPECT_EQ("PtrToBool", unknownBool.toString());
   EXPECT_EQ("PtrToStkObj", stackObj.toString());
-  EXPECT_EQ("PtrToStkRecord", stackRec.toString());
   EXPECT_EQ("Nullptr|PtrToPropCell",
     (TPtrToPropCell|TNullptr).toString());
   EXPECT_EQ("Nullptr|PtrToFieldCell",

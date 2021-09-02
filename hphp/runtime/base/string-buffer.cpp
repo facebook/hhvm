@@ -197,7 +197,6 @@ void StringBuffer::append(const Variant& v) {
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
       append(v.toString());
   }
 }

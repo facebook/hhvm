@@ -170,45 +170,34 @@ void cgLdFunc(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class T>
-constexpr const char* errorString();
-template<>
-constexpr const char* errorString<Class>() {
-  return Strings::UNKNOWN_CLASS;
-}
-template<>
-constexpr const char* errorString<RecordDesc>() {
-  return Strings::UNKNOWN_RECORD;
-}
-
-template<class T>
-const T* autoloadKnownPersistentType(rds::Handle h, const StringData* name) {
+const Class* autoloadKnownPersistentType(rds::Handle h,
+                                         const StringData* name) {
   assertx(rds::isPersistentHandle(h));
-  AutoloadHandler::s_instance->autoloadType<T>(
+  AutoloadHandler::s_instance->autoloadClass(
     StrNR(const_cast<StringData*>(name))
   );
-  auto const ptr = rds::handleToRef<LowPtr<T>, rds::Mode::Persistent>(h).get();
+  auto const ptr =
+    rds::handleToRef<LowPtr<Class>, rds::Mode::Persistent>(h).get();
   // Autoloader should have inited it as a side-effect.
-  if (UNLIKELY(!ptr)) raise_error(errorString<T>(), name->data());
+  if (UNLIKELY(!ptr)) raise_error(Strings::UNKNOWN_CLASS, name->data());
   return ptr;
 }
 
-template<class T>
-const T* lookupKnownType(rds::Handle cache_handle,
-                         const StringData* name) {
+const Class* lookupKnownType(rds::Handle cache_handle,
+                             const StringData* name) {
   assertx(rds::isNormalHandle(cache_handle));
   // The caller should already have checked.
   assertx(!rds::isHandleInit(cache_handle));
 
-  AutoloadHandler::s_instance->autoloadType<T>(
+  AutoloadHandler::s_instance->autoloadClass(
     StrNR(const_cast<StringData*>(name))
   );
 
   // Autoloader should have inited it as a side-effect.
   if (UNLIKELY(!rds::isHandleInit(cache_handle, rds::NormalTag{}))) {
-    raise_error(errorString<T>(), name->data());
+    raise_error(Strings::UNKNOWN_CLASS, name->data());
   }
-  return rds::handleToRef<LowPtr<T>, rds::Mode::Normal>(cache_handle).get();
+  return rds::handleToRef<LowPtr<Class>, rds::Mode::Normal>(cache_handle).get();
 }
 
 const Func* loadUnknownFunc(const StringData* name) {
@@ -237,11 +226,6 @@ template<>
 rds::Handle handleFrom<Class>(const NamedEntity* ne,
                               const StringData* name) {
   return ne->getClassHandle(name);
-}
-template<>
-rds::Handle handleFrom<RecordDesc>(const NamedEntity* ne,
-                                   const StringData* name) {
-  return ne->getRecordDescHandle(name);
 }
 
 template<class T, class SlowPath>
@@ -277,26 +261,6 @@ void implLdCached(IRLS& env, const IRInstruction* inst,
   }
 }
 
-template<class T>
-void implLdCachedSafe(IRLS& env, const IRInstruction* inst,
-                      const StringData* name) {
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const ch = handleFrom<T>(NamedEntity::get(name), name);
-  auto& v = vmain(env);
-
-  if (rds::isNormalHandle(ch)) {
-    auto const sf = checkRDSHandleInitialized(v, ch);
-    fwdJcc(v, env, CC_NE, sf, inst->taken());
-    markRDSAccess(v, ch);
-    emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<T>));
-  } else {
-    assertx(rds::isPersistentHandle(ch));
-    auto const pptr = rds::handleToPtr<LowPtr<T>, rds::Mode::Persistent>(ch);
-    markRDSAccess(v, ch);
-    emitLdLowPtr(v, *v.cns(pptr), dst, sizeof(LowPtr<T>));
-  }
-}
-
 template<Opcode opc>
 void ldFuncCachedHelper(IRLS& env, const IRInstruction* inst,
                         const CallSpec& call) {
@@ -320,25 +284,9 @@ void cgLdClsCached(IRLS& env, const IRInstruction* inst) {
   implLdCached<Class>(env, inst, name, [&] (Vout& v, rds::Handle ch) {
     auto const ptr = v.makeReg();
     auto const target = rds::isPersistentHandle(ch)
-                        ? autoloadKnownPersistentType<Class>
-                        : lookupKnownType<Class>;
+                        ? autoloadKnownPersistentType
+                        : lookupKnownType;
     auto const args = argGroup(env, inst).imm(ch).ssa(0);
-    cgCallHelper(v, env, CallSpec::direct(target),
-                 callDest(ptr), SyncOptions::Sync, args);
-    return ptr;
-  });
-}
-
-void cgLdRecDescCached(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<LdRecDescCached>();
-
-  implLdCached<RecordDesc>(env, inst, extra->recName,
-                           [&] (Vout& v, rds::Handle ch) {
-    auto const ptr = v.makeReg();
-    auto const target = rds::isPersistentHandle(ch)
-                        ? autoloadKnownPersistentType<RecordDesc>
-                        : lookupKnownType<RecordDesc>;
-    auto const args = argGroup(env, inst).imm(ch).immPtr(extra->recName);
     cgCallHelper(v, env, CallSpec::direct(target),
                  callDest(ptr), SyncOptions::Sync, args);
     return ptr;
@@ -359,12 +307,22 @@ void cgLookupFuncCached(IRLS& env, const IRInstruction* inst) {
 
 void cgLdClsCachedSafe(IRLS& env, const IRInstruction* inst) {
   auto const name = inst->src(0)->strVal();
-  implLdCachedSafe<Class>(env, inst, name);
-}
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const ch = handleFrom<Class>(NamedEntity::get(name), name);
+  auto& v = vmain(env);
 
-void cgLdRecDescCachedSafe(IRLS& env, const IRInstruction* inst) {
-  auto const name = inst->extra<LdRecDescCachedSafe>()->recName;
-  implLdCachedSafe<RecordDesc>(env, inst, name);
+  if (rds::isNormalHandle(ch)) {
+    auto const sf = checkRDSHandleInitialized(v, ch);
+    fwdJcc(v, env, CC_NE, sf, inst->taken());
+    markRDSAccess(v, ch);
+    emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<Class>));
+  } else {
+    assertx(rds::isPersistentHandle(ch));
+    auto const pptr =
+      rds::handleToPtr<LowPtr<Class>, rds::Mode::Persistent>(ch);
+    markRDSAccess(v, ch);
+    emitLdLowPtr(v, *v.cns(pptr), dst, sizeof(LowPtr<Class>));
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

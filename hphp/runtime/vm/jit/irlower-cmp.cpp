@@ -296,23 +296,6 @@ CMP_DATA_OPS
 #undef CMP_DATA_OPS
 
 ///////////////////////////////////////////////////////////////////////////////
-void cgEqRecDesc(IRLS& env, const IRInstruction* inst) {
-  auto const dst  = dstLoc(env, inst, 0).reg();
-  auto const src1 = srcLoc(env, inst, 0).reg();
-  auto const src2 = srcLoc(env, inst, 1).reg();
-  auto& v = vmain(env);
-
-  auto const sf = v.makeReg();
-  emitCmpLowPtr<RecordDesc>(v, sf, src2, src1);
-  v << setcc{CC_E, sf, dst};
-}
-
-void cgInstanceOfRecDesc(IRLS& env, const IRInstruction* inst) {
-  // TODO: Optimize this. See T45403957.
-  cgCallHelper(vmain(env), env, CallSpec::method(&RecordDesc::recordDescOf),
-               callDest(env, inst), SyncOptions::None,
-               argGroup(env, inst).ssa(0).ssa(1));
-}
 
 void cgEqFunc(IRLS& env, const IRInstruction* inst) {
   auto const s0 = srcLoc(env, inst, 0).reg();

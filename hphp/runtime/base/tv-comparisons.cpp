@@ -119,7 +119,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
     case KindOfFunc:         return op(c1.m_data.pfunc, c2.m_data.pfunc);
     case KindOfClsMeth:      return op(c1.m_data.pclsmeth, c2.m_data.pclsmeth);
     case KindOfRClsMeth:     return op(c1.m_data.prclsmeth, c2.m_data.prclsmeth);
-    case KindOfRecord:       return op(c1.m_data.prec, c2.m_data.prec);
   }
   not_reached();
 }
@@ -155,7 +154,6 @@ struct Eq {
     if constexpr (std::is_same_v<U, ResourceHdr*>)  return t1 == t2;
     if constexpr (std::is_same_v<U, StringData*>)   return t1->equal(t2);
     if constexpr (std::is_same_v<U, ObjectData*>)   return t1->equal(*t2);
-    if constexpr (std::is_same_v<U, RecordData*>)   return RecordData::equal(t1, t2);
     if constexpr (std::is_same_v<U, RFuncData*>)    return RFuncData::Same(t1, t2);
     if constexpr (std::is_same_v<U, RClsMethData*>) return RClsMethData::Same(t1, t2);
     if constexpr (std::is_same_v<U, ArrayData*>) {
@@ -222,7 +220,6 @@ struct CompareBase {
     if constexpr (std::is_same_v<U, ObjectData*>)   return (t1->*objCmp)(*t2);
     if constexpr (std::is_same_v<U, Func*>)         throw_func_compare_exception();
     if constexpr (std::is_same_v<U, RFuncData*>)    throw_rfunc_compare_exception();
-    if constexpr (std::is_same_v<U, RecordData*>)   throw_record_compare_exception();
     if constexpr (std::is_same_v<U, RClsMethData*>) throw_rclsmeth_compare_exception();
     if constexpr (std::is_same_v<U, ArrayData*>) {
       assertx(t1->toDataType() == t2->toDataType());
@@ -327,8 +324,6 @@ bool tvSame(TypedValue c1, TypedValue c2) {
       return c1.m_data.pclsmeth == c2.m_data.pclsmeth;
     case KindOfRClsMeth:
       return RClsMethData::Same(c1.m_data.prclsmeth, c2.m_data.prclsmeth);
-    case KindOfRecord:
-      return RecordData::same(c1.m_data.prec, c2.m_data.prec);
     case KindOfUninit:
     case KindOfNull:
       break;

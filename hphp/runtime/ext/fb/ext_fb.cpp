@@ -602,11 +602,10 @@ static int fb_compact_serialize_variant(
         break;
       }
     case KindOfResource:
-    case KindOfRecord: // TODO(T41025646)
       fb_compact_serialize_code(sb, FB_CS_NULL);
       raise_warning(
         "fb_compact_serialize(): unable to serialize "
-        "object/resource/ref/func/class/record"
+        "object/resource/ref/func/class"
       );
       break;
     case KindOfRFunc:

@@ -36,10 +36,8 @@ private:
                      m_persistent_keyset, m_keyset,
                      m_object, m_resource,
                      m_func, m_rfunc,
-                     m_class, m_clsmeth, m_rclsmeth,
-                     m_record, m_lclass;
+                     m_class, m_clsmeth, m_rclsmeth, m_lclass;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
-

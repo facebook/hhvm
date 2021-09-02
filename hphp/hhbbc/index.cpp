@@ -441,20 +441,6 @@ struct PFuncVecHasher {
 
 //////////////////////////////////////////////////////////////////////
 
-/* Known information about a particular possible instantiation of a
- * PHP record. The php::Record will be marked AttrUnique if there is a unique
- * RecordInfo with a given name.
- */
-struct RecordInfo {
-  const php::Record* rec = nullptr;
-  const RecordInfo* parent = nullptr;
-  /*
-   * A vector of RecordInfo that encodes the inheritance hierarchy.
-   */
-  CompactVector<RecordInfo*> baseList;
-  const php::Record* phpType() const { return rec; }
-};
-
 /*
  * Known information about a particular possible instantiation of a
  * PHP class.  The php::Class will be marked AttrUnique if there is a
@@ -664,96 +650,6 @@ const MagicMapInfo magicMethods[] {
 //////////////////////////////////////////////////////////////////////
 
 namespace res {
-Record::Record(Either<SString, RecordInfo*> val) : val(val) {}
-
-bool Record::same(const Record& o) const {
-  return val == o.val;
-}
-
-bool Record::couldBe(const Record& o) const {
-  // If either types are not unique return true
-  if (val.left() || o.val.left()) return true;
-
-  auto r1 = val.right();
-  auto r2 = o.val.right();
-  assertx(r1 && r2);
-  // Both types are unique records so they "could be" if they are in an
-  // inheritance relationship
-  if (r1->baseList.size() >= r2->baseList.size()) {
-    return r1->baseList[r2->baseList.size() - 1] == r2;
-  } else {
-    return r2->baseList[r1->baseList.size() - 1] == r1;
-  }
-}
-
-SString Record::name() const {
-  return val.match(
-    [] (SString s) { return s; },
-    [] (RecordInfo* ri) { return ri->rec->name.get(); }
-  );
-}
-
-template <bool returnTrueOnMaybe>
-bool Record::subtypeOfImpl(const Record& o) const {
-  auto s1 = val.left();
-  auto s2 = o.val.left();
-  if (s1 || s2) return returnTrueOnMaybe || s1 == s2;
-  auto r1 = val.right();
-  auto r2 = o.val.right();
-  assertx(r1 && r2);
-  if (r1->baseList.size() >= r2->baseList.size()) {
-    return r1->baseList[r2->baseList.size() - 1] == r2;
-  }
-  return false;
-}
-
-bool Record::mustBeSubtypeOf(const Record& o) const {
-  return subtypeOfImpl<false>(o);
-}
-
-bool Record::maybeSubtypeOf(const Record& o) const {
-  return subtypeOfImpl<true>(o);
-}
-
-bool Record::couldBeOverriden() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (RecordInfo* rinfo) {
-      return !(rinfo->rec->attrs & AttrFinal);
-    }
-  );
-}
-
-std::string show(const Record& r) {
-  return r.val.match(
-    [] (SString s) -> std::string {
-      return s->data();
-    },
-    [] (RecordInfo* rinfo) {
-      return folly::sformat("{}*", rinfo->rec->name);
-    }
-  );
-}
-
-Optional<Record> Record::commonAncestor(const Record& r) const {
-  if (val.left() || r.val.left()) return std::nullopt;
-  auto const c1 = val.right();
-  auto const c2 = r.val.right();
-  // Walk the arrays of base classes until they match. For common ancestors
-  // to exist they must be on both sides of the baseList at the same positions
-  RecordInfo* ancestor = nullptr;
-  auto it1 = c1->baseList.begin();
-  auto it2 = c2->baseList.begin();
-  while (it1 != c1->baseList.end() && it2 != c2->baseList.end()) {
-    if (*it1 != *it2) break;
-    ancestor = *it1;
-    ++it1; ++it2;
-  }
-  if (ancestor == nullptr) {
-    return std::nullopt;
-  }
-  return res::Record { ancestor };
-}
 
 Class::Class(Either<SString,ClassInfo*> val) : val(val) {}
 
@@ -1129,25 +1025,6 @@ using IfaceSlotMap = hphp_hash_map<const php::Class*, Slot>;
 using ConstInfoConcurrentMap =
   tbb::concurrent_hash_map<SString, ConstInfo, StringDataHashCompare>;
 
-template <typename T>
-struct ResTypeHelper;
-
-template <>
-struct ResTypeHelper<res::Class> {
-  using InfoT = ClassInfo;
-  using InfoMapT = ISStringToOneT<InfoT*>;
-  using OtherT = res::Record;
-  static std::string name() { return "class"; }
-};
-
-template <>
-struct ResTypeHelper<res::Record> {
-  using InfoT = RecordInfo;
-  using InfoMapT = ISStringToOneT<InfoT*>;
-  using OtherT = res::Class;
-  static std::string name() { return "record"; }
-};
-
 struct Index::IndexData {
   explicit IndexData(Index* index) : m_index{index} {}
   IndexData(const IndexData&) = delete;
@@ -1175,7 +1052,6 @@ struct Index::IndexData {
   ISStringToOneT<const php::TypeAlias*>  typeAliases;
   ISStringToOneT<const php::Class*>      enums;
   SStringToOneT<const php::Constant*>    constants;
-  ISStringToOneT<const php::Record*>     records;
 
   // Map from each class to all the closures that are allocated in
   // functions of that class.
@@ -1206,23 +1082,6 @@ struct Index::IndexData {
    * all the ClassInfos that were created for X's dependencies.
    */
   std::vector<std::unique_ptr<ClassInfo>> allClassInfos;
-
-  /*
-   * Map from each record name to RecordInfo objects if one exists.
-   *
-   * It may not exists if we would fatal when defining the record.
-   */
-  ISStringToOneT<RecordInfo*> recordInfo;
-
-  /*
-   * All the RecordInfos, sorted topologically (ie all the parents of
-   * RecordInfo at index K will have indices less than K).
-   * This mostly drops out of the way RecordInfos are created;
-   * it would be hard to create the RecordInfos for the
-   * php::Record X (or even know how many to create) without knowing
-   * all the RecordInfos that were created for X's dependencies.
-   */
-  std::vector<std::unique_ptr<RecordInfo>> allRecordInfos;
 
   std::vector<FuncInfo> funcInfo;
 
@@ -1326,21 +1185,7 @@ struct Index::IndexData {
   ContextRetTyMap contextualReturnTypes{};
 
   std::thread compute_iface_vtables;
-
-  template<typename T>
-  const typename ResTypeHelper<T>::InfoMapT& infoMap() const;
 };
-
-template<>
-const typename ResTypeHelper<res::Class>::InfoMapT&
-Index::IndexData::infoMap<res::Class>() const {
-  return classInfo;
-}
-template<>
-const typename ResTypeHelper<res::Record>::InfoMapT&
-Index::IndexData::infoMap<res::Record>() const {
-  return recordInfo;
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1581,10 +1426,9 @@ struct TMIOps {
 using TMIData = TraitMethodImportData<TraitMethod,
                                       TMIOps>;
 
-template<typename T>
-struct PreResolveUpdates {
-  TinyVector<std::unique_ptr<T>> newInfos;
-  TinyVector<T*> updateDeps;
+struct ClsPreResolveUpdates {
+  TinyVector<std::unique_ptr<ClassInfo>> newInfos;
+  TinyVector<ClassInfo*> updateDeps;
 
   struct CnsHash {
     size_t operator()(const ClassInfo::ConstIndex& cns) const {
@@ -1617,9 +1461,6 @@ struct PreResolveUpdates {
 
   uint32_t nextClassId = 0;
 };
-
-using RecPreResolveUpdates = PreResolveUpdates<RecordInfo>;
-using ClsPreResolveUpdates = PreResolveUpdates<ClassInfo>;
 
 // Keep track of order of closure creation to make the logic more
 // deterministic.
@@ -2358,66 +2199,22 @@ TriBool is_readonly_this_from_set(PossibleFuncRange range) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class T>
-struct PhpTypeHelper;
-
-template<>
-struct PhpTypeHelper<php::Class> {
-  template<class Fn>
-  static void process_bases(const php::Class* cls, Fn&& fn) {
-    if (cls->parentName) fn(cls->parentName);
-    for (auto& i : cls->interfaceNames) fn(i);
-    for (auto& t : cls->usedTraitNames) fn(t);
-    for (auto& t : cls->includedEnumNames) fn(t);
-  }
-
-  static std::string name() { return "class"; }
-
-  static void assert_bases(const IndexData&, const php::Class* cls);
-  static void try_flatten_traits(const php::Program*, const IndexData&,
-                                 const php::Class*, ClassInfo*,
-                                 ClsPreResolveUpdates&);
-
-  using Info = ClassInfo;
-};
-
-template<>
-struct PhpTypeHelper<php::Record> {
-  template<class Fn>
-  static void process_bases(const php::Record* rec, Fn&& fn) {
-    if (rec->parentName) fn(rec->parentName);
-  }
-
-  static std::string name() { return "record"; }
-
-  static void assert_bases(const IndexData&, const php::Record* rec);
-  static void try_flatten_traits(const php::Program*, const IndexData&,
-                                 const php::Record*, RecordInfo*,
-                                 RecPreResolveUpdates&);
-
-  using Info = RecordInfo;
-};
-
-template<typename T>
-struct TypeInfoData {
+struct ClassInfoData {
   // Map from name to types that directly use that name (as parent,
   // interface or trait).
   hphp_hash_map<SString,
-                CompactVector<const T*>,
+                CompactVector<const php::Class*>,
                 string_data_hash,
                 string_data_isame>     users;
   // Map from types to number of dependencies, used in
   // conjunction with users field above.
-  hphp_hash_map<const T*, uint32_t> depCounts;
+  hphp_hash_map<const php::Class*, uint32_t> depCounts;
 
   uint32_t cqFront{};
   uint32_t cqBack{};
-  std::vector<const T*> queue;
+  std::vector<const php::Class*> queue;
   bool hasPseudoCycles{};
 };
-
-using ClassInfoData = TypeInfoData<php::Class>;
-using RecordInfoData = TypeInfoData<php::Record>;
 
 // We want const qualifiers on various index data structures for php
 // object pointers, but during index creation time we need to
@@ -2441,7 +2238,7 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
       add_symbol(index.enums, c.get(), "enum");
     }
 
-    add_symbol(index.classes, c.get(), "class", index.records, index.typeAliases);
+    add_symbol(index.classes, c.get(), "class", index.typeAliases);
 
     for (auto& m : c->methods) {
       attribute_setter(m->attrs, false, AttrNoOverride);
@@ -2503,41 +2300,11 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
   }
 
   for (auto& ta : unit.typeAliases) {
-    add_symbol(index.typeAliases, ta.get(), "type alias", index.classes, index.records);
+    add_symbol(index.typeAliases, ta.get(), "type alias", index.classes);
   }
 
   for (auto& c : unit.constants) {
     add_symbol(index.constants, c.get(), "constant");
-  }
-
-  for (auto& rec : unit.records) {
-    assertx(!(rec->attrs & AttrNoOverride));
-    add_symbol(index.records, rec.get(), "record", index.classes, index.typeAliases);
-  }
-}
-
-template<class T>
-using TypeInfo = typename std::conditional<std::is_same<T, php::Class>::value,
-                                           ClassInfo, RecordInfo>::type;
-
-
-void PhpTypeHelper<php::Class>::assert_bases(const IndexData& index,
-                                             const php::Class* cls) {
-  if (cls->parentName) {
-    assertx(index.classInfo.count(cls->parentName));
-  }
-  for (DEBUG_ONLY auto& i : cls->interfaceNames) {
-    assertx(index.classInfo.count(i));
-  }
-  for (DEBUG_ONLY auto& t : cls->usedTraitNames) {
-    assertx(index.classInfo.count(t));
-  }
-}
-
-void PhpTypeHelper<php::Record>::assert_bases(const IndexData& index,
-                                              const php::Record* rec) {
-  if (rec->parentName) {
-    assertx(index.recordInfo.count(rec->parentName));
   }
 }
 
@@ -2797,11 +2564,10 @@ void rename_closure(const IndexData& index,
   updates.newClosures.emplace_back(cls);
 }
 
-template <typename T>
 void preresolve(const php::Program*,
                 const IndexData&,
-                const T*,
-                PreResolveUpdates<typename PhpTypeHelper<T>::Info>&);
+                const php::Class*,
+                ClsPreResolveUpdates&);
 
 void flatten_traits(const php::Program* program,
                     const IndexData& index,
@@ -2983,35 +2749,6 @@ void flatten_traits(const php::Program* program,
 }
 
 /*
- * Given a static representation of a Hack record, find a possible resolution
- * of the record along with all records in its hierarchy.
- */
-RecordInfo* resolve_combinations(const php::Program* program,
-                                 const IndexData& index,
-                                 const php::Record* rec,
-                                 RecPreResolveUpdates& updates) {
-  auto rinfo = std::make_unique<RecordInfo>();
-  rinfo->rec = rec;
-  if (rec->parentName) {
-    auto const parent = index.recordInfo.at(rec->parentName);
-    if (parent->rec->attrs & AttrFinal) {
-      ITRACE(2,
-             "Resolve combinations failed for `{}' because "
-             "its parent record `{}' is not abstract\n",
-             rec->name, parent->rec->name);
-      return nullptr;
-    }
-    rinfo->parent = parent;
-    rinfo->baseList = rinfo->parent->baseList;
-  }
-  rinfo->baseList.push_back(rinfo.get());
-  rinfo->baseList.shrink_to_fit();
-  ITRACE(2, "  resolved: {}\n", rec->name);
-  updates.newInfos.emplace_back(std::move(rinfo));
-  return updates.newInfos.back().get();
-}
-
-/*
  * Given a static representation of a Hack class, find a possible resolution
  * of the class along with all classes, interfaces and traits in its hierarchy.
  *
@@ -3093,39 +2830,24 @@ ClassInfo* resolve_combinations(const php::Program* program,
   return updates.newInfos.back().get();
 }
 
-void PhpTypeHelper<php::Record>::try_flatten_traits(const php::Program*,
-                                                    const IndexData&,
-                                                    const php::Record*,
-                                                    RecordInfo*,
-                                                    RecPreResolveUpdates&) {}
-
-void PhpTypeHelper<php::Class>::try_flatten_traits(
-    const php::Program* program,
-    const IndexData& index,
-    const php::Class* cls,
-    ClassInfo* cinfo,
-    ClsPreResolveUpdates& updates) {
-  if (options.FlattenTraits &&
-      !(cls->attrs & AttrNoExpandTrait) &&
-      !cls->usedTraitNames.empty() &&
-      index.classes.count(cls->name) == 1) {
-    Trace::Indent indent;
-    flatten_traits(program, index, cinfo, updates);
-  }
-}
-
-template <typename T>
 void preresolve(const php::Program* program,
                 const IndexData& index,
-                const T* type,
-                PreResolveUpdates<typename PhpTypeHelper<T>::Info>& updates) {
-  ITRACE(2, "preresolve {}: {}:{}\n",
-         PhpTypeHelper<T>::name(), type->name, (void*)type);
+                const php::Class* type,
+                ClsPreResolveUpdates& updates) {
+  ITRACE(2, "preresolve class: {}:{}\n", type->name, (void*)type);
 
   auto const resolved = [&] {
     Trace::Indent indent;
     if (debug) {
-      PhpTypeHelper<T>::assert_bases(index, type);
+      if (type->parentName) {
+        assertx(index.classInfo.count(type->parentName));
+      }
+      for (DEBUG_ONLY auto& i : type->interfaceNames) {
+        assertx(index.classInfo.count(i));
+      }
+      for (DEBUG_ONLY auto& t : type->usedTraitNames) {
+        assertx(index.classInfo.count(t));
+      }
     }
     return resolve_combinations(program, index, type, updates);
   }();
@@ -3135,9 +2857,14 @@ void preresolve(const php::Program* program,
 
   if (resolved) {
     updates.updateDeps.emplace_back(resolved);
-    PhpTypeHelper<T>::try_flatten_traits(
-      program, index, type, resolved, updates
-    );
+
+    if (options.FlattenTraits &&
+        !(type->attrs & AttrNoExpandTrait) &&
+        !type->usedTraitNames.empty() &&
+        index.classes.count(type->name) == 1) {
+      Trace::Indent indent;
+      flatten_traits(program, index, resolved, updates);
+    }
   }
 }
 
@@ -4532,63 +4259,56 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
 
 //////////////////////////////////////////////////////////////////////
 
-}
-
-//////////////////////////////////////////////////////////////////////
-namespace {
-template<typename T>
-void buildTypeInfoData(TypeInfoData<T>& tid,
-                       const ISStringToOneT<const T*>& tmap) {
-  for (auto const& elm : tmap) {
-    auto const t = elm.second;
+void buildTypeInfoData(IndexData& data, ClassInfoData& cid) {
+  for (auto const& elm : data.classes) {
+    auto const cls = elm.second;
     auto const addUser = [&] (SString rName) {
-      tid.users[rName].push_back(t);
-      ++tid.depCounts[t];
+      cid.users[rName].push_back(cls);
+      ++cid.depCounts[cls];
     };
-    PhpTypeHelper<T>::process_bases(t, addUser);
 
-    if (!tid.depCounts.count(t)) {
-      FTRACE(5, "Adding no-dep {} {}:{} to queue\n",
-             PhpTypeHelper<T>::name(), t->name, (void*)t);
+    if (cls->parentName) addUser(cls->parentName);
+    for (auto& i : cls->interfaceNames) addUser(i);
+    for (auto& t : cls->usedTraitNames) addUser(t);
+    for (auto& t : cls->includedEnumNames) addUser(t);
+
+    if (!cid.depCounts.count(cls)) {
+      FTRACE(5, "Adding no-dep class {}:{} to queue\n",
+             cls->name, (void*)cls);
       // make sure that closure is first, because we end up calling
       // preresolve directly on closures created by trait
       // flattening, which assumes all dependencies are satisfied.
-      if (tid.queue.size() && t->name == s_Closure.get()) {
-        tid.queue.push_back(tid.queue[0]);
-        tid.queue[0] = t;
+      if (cid.queue.size() && cls->name == s_Closure.get()) {
+        cid.queue.push_back(cid.queue[0]);
+        cid.queue[0] = cls;
       } else {
-        tid.queue.push_back(t);
+        cid.queue.push_back(cls);
       }
     } else {
-      FTRACE(6, "{} {}:{} has {} deps\n",
-             PhpTypeHelper<T>::name(), t->name, (void*)t, tid.depCounts[t]);
+      FTRACE(6, "class {}:{} has {} deps\n",
+             cls->name, (void*)cls, cid.depCounts[cls]);
     }
   }
-  tid.cqBack = tid.queue.size();
-  tid.queue.resize(tmap.size());
+  cid.cqBack = cid.queue.size();
+  cid.queue.resize(data.classes.size());
 }
 
-SString nameFromInfo(const RecordInfo* r) { return r->rec->name; }
-SString nameFromInfo(const ClassInfo* c)  { return c->cls->name; }
-
-template <typename T>
-void updatePreResolveDeps(
-    TypeInfoData<T>& tid,
-    const PreResolveUpdates<typename PhpTypeHelper<T>::Info>& updates) {
+void updatePreResolveDeps(ClassInfoData& cid,
+                          const ClsPreResolveUpdates& updates) {
   for (auto const info : updates.updateDeps) {
-    auto const& users = tid.users[nameFromInfo(info)];
+    auto const& users = cid.users[info->cls->name];
     for (auto const tu : users) {
-      auto const it = tid.depCounts.find(tu);
-      if (it == tid.depCounts.end()) {
-        assertx(tid.hasPseudoCycles);
+      auto const it = cid.depCounts.find(tu);
+      if (it == cid.depCounts.end()) {
+        assertx(cid.hasPseudoCycles);
         continue;
       }
       auto& depCount = it->second;
       assertx(depCount);
       if (!--depCount) {
-        tid.depCounts.erase(it);
+        cid.depCounts.erase(it);
         ITRACE(5, "  enqueue: {}:{}\n", tu->name, (void*)tu);
-        tid.queue[tid.cqBack++] = tu;
+        cid.queue[cid.cqBack++] = tu;
       } else {
         ITRACE(6, "  depcount: {}:{} = {}\n", tu->name, (void*)tu, depCount);
       }
@@ -4597,28 +4317,7 @@ void updatePreResolveDeps(
 }
 
 void commitPreResolveUpdates(IndexData& index,
-                             TypeInfoData<php::Record>& tid,
-                             std::vector<RecPreResolveUpdates>& updates) {
-  parallel::parallel(
-    [&] {
-      for (auto const& u : updates) updatePreResolveDeps(tid, u);
-    },
-    [&] {
-      for (auto& u : updates) {
-        for (size_t i = 0; i < u.newInfos.size(); ++i) {
-          auto& rinfo = u.newInfos[i];
-          auto const UNUSED it =
-            index.recordInfo.emplace(rinfo->rec->name, rinfo.get());
-          assertx(it.second);
-          index.allRecordInfos.emplace_back(std::move(rinfo));
-        }
-      }
-    }
-  );
-}
-
-void commitPreResolveUpdates(IndexData& index,
-                             TypeInfoData<php::Class>& tid,
+                             ClassInfoData& tid,
                              std::vector<ClsPreResolveUpdates>& updates) {
   parallel::parallel(
     [&] {
@@ -4678,14 +4377,12 @@ void commitPreResolveUpdates(IndexData& index,
   );
 }
 
-template<typename T>
 void preresolveTypes(php::Program* program,
                      IndexData& index,
-                     TypeInfoData<T>& tid,
-                     const ISStringToOneT<TypeInfo<T>*>& tmap) {
+                     ClassInfoData& cid) {
   auto round = uint32_t{0};
   while (true) {
-    if (tid.cqFront == tid.cqBack) {
+    if (cid.cqFront == cid.cqBack) {
       // we've consumed everything where all dependencies are
       // satisfied. There may still be some pseudo-cycles that can
       // be broken though.
@@ -4694,27 +4391,33 @@ void preresolveTypes(php::Program* program,
       // A', and then end up here, since both A and B' still have
       // one dependency. But both A and B' can be resolved at this
       // point
-      for (auto it = tid.depCounts.begin();
-           it != tid.depCounts.end();) {
+      for (auto it = cid.depCounts.begin();
+           it != cid.depCounts.end();) {
         auto canResolve = true;
         auto const checkCanResolve = [&] (SString name) {
-          if (canResolve) canResolve = tmap.count(name);
+          if (canResolve) canResolve = index.classInfo.count(name);
         };
-        PhpTypeHelper<T>::process_bases(it->first, checkCanResolve);
+
+        auto const cls = it->first;
+        if (cls->parentName) checkCanResolve(cls->parentName);
+        for (auto& i : cls->interfaceNames) checkCanResolve(i);
+        for (auto& t : cls->usedTraitNames) checkCanResolve(t);
+        for (auto& t : cls->includedEnumNames) checkCanResolve(t);
+
         if (canResolve) {
-          FTRACE(2, "Breaking pseudo-cycle for {} {}:{}\n",
-                 PhpTypeHelper<T>::name(), it->first->name, (void*)it->first);
-          tid.queue[tid.cqBack++] = it->first;
-          it = tid.depCounts.erase(it);
-          tid.hasPseudoCycles = true;
+          FTRACE(2, "Breaking pseudo-cycle for class {}:{}\n",
+                 it->first->name, (void*)it->first);
+          cid.queue[cid.cqBack++] = it->first;
+          it = cid.depCounts.erase(it);
+          cid.hasPseudoCycles = true;
         } else {
           ++it;
         }
       }
-      if (tid.cqFront == tid.cqBack) break;
+      if (cid.cqFront == cid.cqBack) break;
     }
 
-    auto const workitems = tid.cqBack - tid.cqFront;
+    auto const workitems = cid.cqBack - cid.cqFront;
     auto updates = [&] {
       trace_time trace(
         "preresolve",
@@ -4725,16 +4428,15 @@ void preresolveTypes(php::Program* program,
       // one thread will be processing a particular Unit at a
       // time. This lets us avoid locking access to the Unit, and also
       // keeps the flattening logic deterministic.
-      using UnitGroup = std::pair<const php::Unit*, CompactVector<const T*>>;
+      using UnitGroup =
+        std::pair<const php::Unit*, CompactVector<const php::Class*>>;
 
-      hphp_fast_map<const php::Unit*, CompactVector<const T*>> group;
-      for (auto idx = tid.cqFront; idx < tid.cqBack; ++idx) {
-        auto const t = tid.queue[idx];
+      hphp_fast_map<const php::Unit*, CompactVector<const php::Class*>> group;
+      for (auto idx = cid.cqFront; idx < cid.cqBack; ++idx) {
+        auto const t = cid.queue[idx];
         group[t->unit].emplace_back(t);
       }
       std::vector<UnitGroup> worklist{group.begin(), group.end()};
-
-      using U = PreResolveUpdates<typename PhpTypeHelper<T>::Info>;
 
       return parallel::map(
         worklist,
@@ -4746,7 +4448,7 @@ void preresolveTypes(php::Program* program,
 
           std::sort(
             group.second.begin(), group.second.end(),
-            [&] (const T* a, const T* b) {
+            [&] (const php::Class* a, const php::Class* b) {
               return strcmp(a->name->data(), b->name->data()) < 0;
             }
           );
@@ -4754,7 +4456,7 @@ void preresolveTypes(php::Program* program,
           // NB: Even though we can freely access the Unit, we cannot
           // modify it in preresolve because other threads might also
           // be accessing it.
-          U updates;
+          ClsPreResolveUpdates updates;
           updates.nextClassId = group.first->classes.size();
           for (auto const t : group.second) {
             preresolve(program, index, t, updates);
@@ -4765,10 +4467,10 @@ void preresolveTypes(php::Program* program,
     }();
 
     ++round;
-    tid.cqFront += workitems;
+    cid.cqFront += workitems;
 
     trace_time trace("update");
-    commitPreResolveUpdates(index, tid, updates);
+    commitPreResolveUpdates(index, cid, updates);
   }
 
   trace_time trace("preresolve clear state");
@@ -4798,26 +4500,15 @@ Index::Index(php::Program* program)
     }
   }
 
-  RecordInfoData rid;
-  {
-    trace_time build_record_info_data("build recordinfo data");
-    buildTypeInfoData(rid, m_data->records);
-  }
-
-  {
-    trace_time preresolve_records("preresolve records");
-    preresolveTypes(program, *m_data, rid, m_data->recordInfo);
-  }
-
   ClassInfoData cid;
   {
     trace_time build_class_info_data("build classinfo data");
-    buildTypeInfoData(cid, m_data->classes);
+    buildTypeInfoData(*m_data, cid);
   }
 
   {
     trace_time preresolve_classes("preresolve classes");
-    preresolveTypes(program, *m_data, cid, m_data->classInfo);
+    preresolveTypes(program, *m_data, cid);
   }
 
   m_data->funcInfo.resize(program->nextFuncId);
@@ -5206,59 +4897,6 @@ Index::lookup_extra_methods(const php::Class* cls) const {
 
 //////////////////////////////////////////////////////////////////////
 
-template<typename T>
-Optional<T> Index::resolve_type_impl(SString name) const {
-  auto const& infomap = m_data->infoMap<T>();
-  auto const& omap = m_data->infoMap<typename ResTypeHelper<T>::OtherT>();
-  auto const it = infomap.find(name);
-  if (it != end(infomap)) {
-    auto const tinfo = it->second;
-    /*
-     * If the preresolved [Class|Record]Info is Unique we can give it out.
-     */
-    assertx(tinfo->phpType()->attrs & AttrUnique);
-    if (debug &&
-        (omap.count(name) ||
-          m_data->typeAliases.count(name))) {
-      std::fprintf(stderr, "non unique \"unique\" %s: %s\n",
-                    ResTypeHelper<T>::name().c_str(),
-                    tinfo->phpType()->name->data());
-
-      auto const ta = m_data->typeAliases.find(name);
-      if (ta != end(m_data->typeAliases)) {
-        std::fprintf(stderr, "   and type-alias %s\n",
-                      ta->second->name->data());
-      }
-
-      auto const to = omap.find(name);
-      if (to != end(omap)) {
-        std::fprintf(stderr, "   and %s %s\n",
-                      ResTypeHelper<typename ResTypeHelper<T>::OtherT>::
-                      name().c_str(),
-                      to->second->phpType()->name->data());
-      }
-      always_assert(0);
-    }
-    return T { tinfo };
-  }
-  // We refuse to have name-only resolutions of enums and typeAliases,
-  // so that all name only resolutions can be treated as records or classes.
-  if (!m_data->enums.count(name) &&
-      !m_data->typeAliases.count(name) &&
-      !omap.count(name)) {
-    return T { name };
-  }
-
-  return std::nullopt;
-}
-
-Optional<res::Record> Index::resolve_record(SString recName) const {
-  recName = normalizeNS(recName);
-  return resolve_type_impl<res::Record>(recName);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 res::Class Index::resolve_class(const php::Class* cls) const {
 
   auto const it = m_data->classInfo.find(cls->name);
@@ -5275,7 +4913,7 @@ res::Class Index::resolve_class(const php::Class* cls) const {
 }
 
 Optional<res::Class> Index::resolve_class(Context ctx,
-                                                 SString clsName) const {
+                                          SString clsName) const {
   clsName = normalizeNS(clsName);
 
   if (ctx.cls) {
@@ -5287,7 +4925,34 @@ Optional<res::Class> Index::resolve_class(Context ctx,
     }
   }
 
-  return resolve_type_impl<res::Class>(clsName);
+  auto const it = m_data->classInfo.find(clsName);
+  if (it != end(m_data->classInfo)) {
+    auto const tinfo = it->second;
+    /*
+     * If the preresolved ClassInfo is Unique we can give it out.
+     */
+    assertx(tinfo->phpType()->attrs & AttrUnique);
+    if (debug && m_data->typeAliases.count(clsName)) {
+      std::fprintf(stderr, "non unique \"unique\" class: %s\n",
+                   tinfo->phpType()->name->data());
+
+      auto const ta = m_data->typeAliases.find(clsName);
+      if (ta != end(m_data->typeAliases)) {
+        std::fprintf(stderr, "   and type-alias %s\n",
+                      ta->second->name->data());
+      }
+      always_assert(false);
+    }
+    return res::Class { tinfo };
+  }
+  // We refuse to have name-only resolutions of enums and typeAliases,
+  // so that all name only resolutions can be treated as classes.
+  if (!m_data->enums.count(clsName) &&
+      !m_data->typeAliases.count(clsName)) {
+    return res::Class { clsName };
+  }
+
+  return std::nullopt;
 }
 
 Optional<res::Class> Index::selfCls(const Context& ctx) const {
@@ -5301,24 +4966,20 @@ Optional<res::Class> Index::parentCls(const Context& ctx) const {
   return resolve_class(ctx, ctx.cls->parentName);
 }
 
-Index::ResolvedInfo<boost::variant<boost::blank,res::Class,res::Record>>
+Index::ResolvedInfo<Optional<res::Class>>
 Index::resolve_type_name(SString inName) const {
   auto const res = resolve_type_name_internal(inName);
-  using Ret = boost::variant<boost::blank,res::Class,res::Record>;
+  using Ret = Optional<res::Class>;
   auto const val = match<Ret>(
     res.value,
     [&] (boost::blank) { return Ret{}; },
-    [&] (SString s) {
-      return (res.type == AnnotType::Record) ?
-             Ret{res::Record{s}} : Ret{res::Class{s}};
-    },
-    [&] (ClassInfo* c) { return res::Class{c}; },
-    [&] (RecordInfo* r) { return res::Record{r}; }
+    [&] (SString s)    { return res::Class{s}; },
+    [&] (ClassInfo* c) { return res::Class{c}; }
   );
   return { res.type, res.nullable, val };
 }
 
-Index::ResolvedInfo<boost::variant<boost::blank,SString,ClassInfo*,RecordInfo*>>
+Index::ResolvedInfo<boost::variant<boost::blank,SString,ClassInfo*>>
 Index::resolve_type_name_internal(SString inName) const {
   Optional<hphp_fast_set<const void*>> seen;
 
@@ -5327,12 +4988,6 @@ Index::resolve_type_name_internal(SString inName) const {
 
   for (unsigned i = 0; ; ++i) {
     name = normalizeNS(name);
-    auto const rec_it = m_data->recordInfo.find(name);
-    if (rec_it != end(m_data->recordInfo)) {
-      auto const rinfo = rec_it->second;
-      assertx(rinfo->rec->attrs & AttrUnique);
-      return { AnnotType::Record, nullable, rinfo };
-    }
     auto const cls_it = m_data->classInfo.find(name);
     if (cls_it != end(m_data->classInfo)) {
       auto const cinfo = cls_it->second;
@@ -5422,23 +5077,12 @@ Index::ConstraintResolution Index::resolve_named_type(
       res.value,
       [&] (boost::blank) { return nullptr; },
       [&] (SString s) { return s; },
-      [&] (ClassInfo* c) { return c; },
-      [&] (RecordInfo*) { always_assert(false); return nullptr; }
+      [&] (ClassInfo* c) { return c; }
     );
     if (val.isNull()) return ConstraintResolution{ std::nullopt, true };
     auto ty = resolve(res::Class { val });
     if (ty && res.nullable) *ty = opt(std::move(*ty));
     return ConstraintResolution{ std::move(ty), false };
-  } else if (res.type == AnnotType::Record) {
-    auto const val = match<Either<SString, RecordInfo*>>(
-      res.value,
-      [&] (boost::blank) { return nullptr; },
-      [&] (SString s) { return s; },
-      [&] (ClassInfo* c) { always_assert(false); return nullptr; },
-      [&] (RecordInfo* r) { return r; }
-    );
-    if (val.isNull()) return ConstraintResolution{ std::nullopt, true };
-    return subRecord(res::Record { val });
   }
 
   return get_type_for_annotated_type(ctx, res.type, res.nullable,
@@ -5732,7 +5376,6 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       case KindOfKeyset:       return TKeyset;
       case KindOfResource:     return TRes;
       case KindOfClsMeth:      return TClsMeth;
-      case KindOfRecord:       // fallthrough
       case KindOfObject:
         return resolve_named_type(ctx, name, candidate);
       case KindOfUninit:
@@ -5839,8 +5482,7 @@ bool Index::could_have_reified_type(Context ctx,
     resolved.value,
     [&] (boost::blank) { return nullptr; },
     [&] (SString s) { return s; },
-    [&] (ClassInfo* c) { return c; },
-    [&] (RecordInfo*) { always_assert(false); return nullptr; }
+    [&] (ClassInfo* c) { return c; }
   );
   res::Class rcls{val};
   return rcls.couldHaveReifiedGenerics();
@@ -7311,7 +6953,6 @@ void Index::cleanup_post_emit(php::ProgramPtr program) {
   CLEAR_PARALLEL(m_data->typeAliases);
   CLEAR_PARALLEL(m_data->enums);
   CLEAR_PARALLEL(m_data->constants);
-  CLEAR_PARALLEL(m_data->records);
 
   CLEAR_PARALLEL(m_data->classClosureMap);
   CLEAR_PARALLEL(m_data->classExtraMethodMap);

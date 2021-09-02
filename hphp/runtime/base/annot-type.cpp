@@ -185,7 +185,6 @@ TypedValue annotDefaultValue(AnnotType at) {
     case AnnotType::Resource:
     case AnnotType::Object:
     case AnnotType::Nothing:
-    case AnnotType::Record:
     case AnnotType::NoReturn:
     case AnnotType::Classname:
     case AnnotType::Null:     return make_tv<KindOfNull>();
@@ -280,10 +279,6 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
   }
 
-  if (at == AnnotType::Record) {
-    return dt == KindOfRecord ? AnnotAction::RecordCheck : AnnotAction::Fail;
-  }
-
   if (at != AnnotType::Object) {
     // If `at' is "bool", "int", "float", "string", "array", or "resource",
     // then equivDataTypes() can definitively tell us whether or not `dt'
@@ -335,7 +330,6 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfNull:
       case KindOfBoolean:
       case KindOfResource:
-      case KindOfRecord:
         return AnnotAction::Fail;
       case KindOfObject:
         not_reached();

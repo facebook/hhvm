@@ -5,10 +5,6 @@ class A {
   public static function meth() {}
 }
 
-record B {
-  int x;
-}
-
 function foo() {}
 
 function varrayCast($x) {
@@ -39,10 +35,6 @@ function getMeth() {
   return __hhvm_intrinsics\launder_value(HH\class_meth(A::class, 'meth'));
 }
 
-function getRec() {
-  return __hhvm_intrinsics\launder_value(B['x' => 123]);
-}
-
 <<__EntryPoint>>
 function main(): void {
   $tests = vec[
@@ -57,12 +49,6 @@ function main(): void {
     () ==> var_dump(dictCast(getMeth())),
     () ==> var_dump(vecCast(getMeth())),
     () ==> var_dump(keysetCast(getMeth())),
-
-    () ==> var_dump(darrayCast(getRec())),
-    () ==> var_dump(varrayCast(getRec())),
-    () ==> var_dump(dictCast(getRec())),
-    () ==> var_dump(vecCast(getRec())),
-    () ==> var_dump(keysetCast(getRec())),
   ];
 
   $success = false;

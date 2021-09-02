@@ -114,7 +114,6 @@ bool canDCE(IRInstruction* inst) {
   case NSameObj:
   case EqRes:
   case NeqRes:
-  case EqRecDesc:
   case EqCls:
   case EqLazyCls:
   case EqFunc:
@@ -127,7 +126,6 @@ bool canDCE(IRInstruction* inst) {
   case ExtendsClass:
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
-  case InstanceOfRecDesc:
   case InterfaceSupportsArrLike:
   case InterfaceSupportsStr:
   case InterfaceSupportsInt:
@@ -163,7 +161,6 @@ bool canDCE(IRInstruction* inst) {
   case LdGenericsFromRClsMeth:
   case LdFuncFromRFunc:
   case LdGenericsFromRFunc:
-  case LdRecDesc:
   case LdTVFromRDS:
   case DefConst:
   case Conjure:
@@ -388,8 +385,6 @@ bool canDCE(IRInstruction* inst) {
   case LdClsCachedSafe:
   case LdClsTypeCns:
   case LdClsTypeCnsClsName:
-  case LdRecDescCached:
-  case LdRecDescCachedSafe:
   case LdCns:
   case IsTypeStructCached:
   case LookupCnsE:
@@ -436,7 +431,6 @@ bool canDCE(IRInstruction* inst) {
   case InitVecElem:
   case InitVecElemLoop:
   case NewKeysetArray:
-  case NewRecord:
   case NewStructDict:
   case NewBespokeStructDict:
   case Clone:
@@ -497,9 +491,6 @@ bool canDCE(IRInstruction* inst) {
   case VerifyPropCoerceAll:
   case VerifyPropFail:
   case VerifyPropFailHard:
-  case VerifyParamRecDesc:
-  case VerifyRetRecDesc:
-  case VerifyPropRecDesc:
   case ThrowUninitLoc:
   case ThrowUndefPropException:
   case RaiseTooManyArg:

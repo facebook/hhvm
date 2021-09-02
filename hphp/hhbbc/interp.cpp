@@ -887,12 +887,6 @@ void in(ISS& env, const bc::NewDictArray& op) {
   push(env, op.arg1 == 0 ? dict_empty() : some_dict_empty());
 }
 
-void in(ISS& env, const bc::NewRecord& op) {
-  discard(env, op.keys.size());
-  auto const rrec = env.index.resolve_record(op.str1);
-  push(env, rrec ? exactRecord(*rrec) : TRecord);
-}
-
 void in(ISS& env, const bc::NewStructDict& op) {
   auto map = MapElems{};
   for (auto it = op.keys.end(); it != op.keys.begin(); ) {

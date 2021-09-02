@@ -657,18 +657,12 @@ void fixTypeConstraint(const Index& index, TypeConstraint& tc) {
   auto const resolved = index.resolve_type_name(tc.typeName());
 
   if (resolved.type == AnnotType::Object) {
-    auto const resolvedValue = match<Optional<res::Class>>(
-      resolved.value,
-      [&] (boost::blank) { return std::nullopt; },
-      [&] (const res::Class& c) { return make_optional(c); },
-      [&] (const res::Record&) { always_assert(false); return std::nullopt; }
-    );
-    if (!resolvedValue || !resolvedValue->resolved()) return;
+    if (!resolved.value || !resolved.value->resolved()) return;
     // Can't resolve if it resolves to a magic interface. If we mark it as
     // resolved, we'll think its an object and not do the special magic
     // interface checks at runtime.
-    if (interface_supports_non_objects(resolvedValue->name())) return;
-    if (!resolvedValue->couldHaveMockedDerivedClass()) tc.setNoMockObjects();
+    if (interface_supports_non_objects(resolved.value->name())) return;
+    if (!resolved.value->couldHaveMockedDerivedClass()) tc.setNoMockObjects();
   }
 
   tc.resolveType(resolved.type, tc.isNullable() || resolved.nullable);
@@ -812,7 +806,6 @@ Bytecode gen_constant(const TypedValue& cell) {
     case KindOfClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
       always_assert(0 && "invalid constant in gen_constant");
   }
   not_reached();

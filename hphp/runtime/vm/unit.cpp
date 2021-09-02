@@ -78,7 +78,6 @@
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
-#include "hphp/runtime/vm/record.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-alias.h"
@@ -138,17 +137,6 @@ Unit::~Unit() {
       Class* cur = cls;
       cls = cls->m_next;
       if (cur->preClass() == pcls.get()) {
-        cur->destroy();
-      }
-    }
-  }
-
-  for (auto const& rec : m_preRecords) {
-    RecordDesc* recList = rec->namedEntity()->recordList();
-    while (recList) {
-      RecordDesc* cur = recList;
-      recList = recList->m_next;
-      if (cur->preRecordDesc() == rec.get()) {
         cur->destroy();
       }
     }
@@ -399,9 +387,9 @@ void Unit::mergeImpl(MergeTypes mergeTypes) {
   assertx(m_mergeState.load(std::memory_order_relaxed) >= MergeState::InitialMerged);
   autoTypecheck(this);
 
-  FTRACE(1, "Merging unit {} ({} funcs, {} constants, {} typealiases, {} classes, {} records)\n",
+  FTRACE(1, "Merging unit {} ({} funcs, {} constants, {} typealiases, {} classes)\n",
          this->m_origFilepath->data(), m_funcs.size(), m_constants.size(), m_typeAliases.size(),
-         m_preClasses.size(), m_preRecords.size());
+         m_preClasses.size());
 
   if (mergeTypes & MergeTypes::Function) {
     for (auto func : funcs()) {
@@ -420,8 +408,6 @@ void Unit::mergeImpl(MergeTypes mergeTypes) {
 
     boost::dynamic_bitset<> preClasses(m_preClasses.size());
     preClasses.set();
-    boost::dynamic_bitset<> preRecords(m_preRecords.size());
-    preRecords.set();
     boost::dynamic_bitset<> typeAliases(m_typeAliases.size());
     typeAliases.set();
 
@@ -439,14 +425,7 @@ void Unit::mergeImpl(MergeTypes mergeTypes) {
                                      return Class::def(preClass.get(), failIsFatal) != nullptr;
                                    }) || madeProgress;
 
-      madeProgress = defineSymbols(m_preRecords, preRecords, failIsFatal,
-                                   Stats::UnitMerge_mergeable_record,
-                                   [&](const PreRecordDescPtr& preRecord) {
-                                     assertx(preRecord->isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
-                                     return RecordDesc::def(preRecord.get(), failIsFatal) != nullptr;
-                                   }) || madeProgress;
-
-      // We do type alias last because they may depend on classes or records that needs to be define first
+      // We do type alias last because they may depend on classes that needs to be define first
       madeProgress = defineSymbols(m_typeAliases, typeAliases, failIsFatal,
                                    Stats::UnitMerge_mergeable_typealias,
                                    [&](const PreTypeAlias& typeAlias) {
@@ -454,7 +433,7 @@ void Unit::mergeImpl(MergeTypes mergeTypes) {
                                      return TypeAlias::def(&typeAlias, failIsFatal);
                                    }) || madeProgress;
       if (!madeProgress) failIsFatal = true;
-    } while (typeAliases.any() || preClasses.any() || preRecords.any());
+    } while (typeAliases.any() || preClasses.any());
   }
 }
 

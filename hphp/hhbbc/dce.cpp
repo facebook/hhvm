@@ -1642,7 +1642,6 @@ void dce(Env& env, const bc::NewObjD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObjRD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObjS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::LockObj& op) { no_dce(env, op); }
-void dce(Env& env, const bc::NewRecord& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Nop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::OODeclExists& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Print& op) { no_dce(env, op); }

@@ -54,7 +54,6 @@ inline bool tvToBool(TypedValue cell) {
     case KindOfKeyset:        return !cell.m_data.parr->empty();
     case KindOfObject:        return cell.m_data.pobj->toBoolean();
     case KindOfResource:      return cell.m_data.pres->data()->o_toBoolean();
-    case KindOfRecord:        raise_convert_record_to_type("bool"); break;
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
@@ -91,7 +90,6 @@ inline int64_t tvToInt(TypedValue cell) {
       return cell.m_data.pobj->toInt64();
     case KindOfResource:
       return cell.m_data.pres->data()->o_toInt64();
-    case KindOfRecord:        raise_convert_record_to_type("int"); break;
     case KindOfRFunc:         raise_convert_rfunc_to_type("int"); break;
     case KindOfFunc:
       invalidFuncConversion("int");

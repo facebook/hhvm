@@ -34,7 +34,6 @@ namespace HPHP {
 
 struct Func;
 struct String;
-struct RecordDesc;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -121,23 +120,6 @@ struct NamedEntity {
   void setCachedClass(Class* c);
   Class* getCachedClass() const;
 
-
-  /////////////////////////////////////////////////////////////////////////////
-  // RecordDesc cache.
-
-  /*
-   * Get the rds::Handle that caches this RecordDesc*,
-   * creating a (non-persistent) one if it doesn't exist yet.
-   */
-  rds::Handle getRecordDescHandle(const StringData* name) const;
-
-  /*
-   * Set and get the cached RecordDesc*.
-   */
-  void setCachedRecordDesc(RecordDesc* c);
-  RecordDesc* getCachedRecordDesc() const;
-
-
   /////////////////////////////////////////////////////////////////////////////
   // Type alias cache.
 
@@ -180,11 +162,6 @@ struct NamedEntity {
   void pushClass(Class* cls);
   void removeClass(Class* goner);
 
-  /////////////////////////////////////////////////////////////////////////////
-  // RecordDesc.
-  RecordDesc* recordList() const;
-  void pushRecordDesc(RecordDesc*);
-  void removeRecordDesc(RecordDesc*);
   /////////////////////////////////////////////////////////////////////////////
   // Global table.                                                     [static]
 
@@ -233,14 +210,12 @@ public:
     mutable rds::Link<TypeAlias, rds::Mode::NonLocal> m_cachedTypeAlias{};
     mutable rds::Link<ArrayData*, rds::Mode::NonLocal> m_cachedReifiedGenerics;
   };
-  mutable rds::Link<LowPtr<RecordDesc>, rds::Mode::NonLocal> m_cachedRecordDesc;
 
   template<class T>
   using ListType = AtomicLowPtr<T, std::memory_order_acquire,
                                    std::memory_order_release>;
 private:
   ListType<Class> m_clsList{nullptr};
-  ListType<RecordDesc> m_recordList{nullptr};
 };
 
 /*

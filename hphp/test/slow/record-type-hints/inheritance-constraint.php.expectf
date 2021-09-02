@@ -1,3 +1,0 @@
-int(10)
-
-Catchable fatal error: Record field 'A::f' declared as type Base, C assigned in %s/inheritance-constraint.php on line 22

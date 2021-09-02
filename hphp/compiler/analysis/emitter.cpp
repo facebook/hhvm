@@ -28,7 +28,6 @@
 #include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
-#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -226,7 +225,6 @@ struct SymbolSets {
   IMap classes;
   IMap funcs;
   IMap typeAliases;
-  IMap records;
   Map constants;
 
   static std::unique_ptr<Data> make(const UnitEmitter* ue,
@@ -278,7 +276,7 @@ void writeUnit(UnitEmitter& ue,
       HHBBC::add_symbol(sets.enums, make(pce->name(), pce->attrs()), "enum");
     }
     HHBBC::add_symbol(sets.classes, make(pce->name(), pce->attrs()), "class",
-                      sets.records, sets.typeAliases);
+                      sets.typeAliases);
   }
   for (auto& fe : ue.fevec()) {
     // Dedup meth_caller wrappers
@@ -289,17 +287,11 @@ void writeUnit(UnitEmitter& ue,
   for (auto& te : ue.typeAliases()) {
     te->setAttrs(te->attrs() | AttrUnique | AttrPersistent);
     HHBBC::add_symbol(sets.typeAliases, make(te->name(), te->attrs()),
-                      "type alias", sets.classes, sets.records);
+                      "type alias", sets.classes);
   }
   for (auto& c : ue.constants()) {
     c.attrs |= AttrUnique | AttrPersistent;
     HHBBC::add_symbol(sets.constants, make(c.name, c.attrs), "constant");
-  }
-  for (size_t n = 0; n < ue.numRecords(); ++n) {
-    auto const re = ue.re(n);
-    re->setAttrs(re->attrs() | AttrUnique | AttrPersistent);
-    HHBBC::add_symbol(sets.records, make(re->name(), re->attrs()), "record",
-                      sets.classes, sets.typeAliases);
   }
 
   autoloadMapBuilder.addUnit(ue);

@@ -97,7 +97,6 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
-#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-emitter.h"
@@ -648,7 +647,7 @@ struct AsmState {
   }
 
   void finishClass() {
-    assertx(!fe && !re);
+    assertx(!fe);
     pce = 0;
     enumTySet = false;
   }
@@ -767,9 +766,6 @@ struct AsmState {
 
   // When inside a class, this state is active.
   PreClassEmitter* pce{nullptr};
-
-  // When inside a record, this state is active.
-  RecordEmitter* re{nullptr};
 
   // When we're doing a function or method body, this state is active.
   FuncEmitter* fe{nullptr};
@@ -994,10 +990,6 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   Y("?Cls=",    T::OptExactCls);
   Y("?Cls<=",   T::OptSubCls);
   Y("Cls<=",    T::SubCls);
-  Y("Record=",  T::ExactRecord);
-  Y("?Record=", T::OptExactRecord);
-  Y("?Record<=",T::OptSubRecord);
-  Y("Record<=", T::SubRecord);
   X("Vec",      T::Vec);
   X("?Vec",     T::OptVec);
   X("Dict",     T::Dict);
@@ -1024,10 +1016,8 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("?Cls",     T::OptCls);
   X("ClsMeth",  T::ClsMeth);
   X("?ClsMeth", T::OptClsMeth);
-  X("Record",   T::Record);
-  X("?Record",  T::OptRecord);
-  X("LazyCls",     T::LazyCls);
-  X("?LazyCls",    T::OptLazyCls);
+  X("LazyCls",  T::LazyCls);
+  X("?LazyCls", T::OptLazyCls);
   X("?Res",     T::OptRes);
   X("Res",      T::Res);
   X("?SVec",    T::OptSVec);
@@ -1118,8 +1108,6 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::OptCls:
   case T::ClsMeth:
   case T::OptClsMeth:
-  case T::Record:
-  case T::OptRecord:
   case T::LazyCls:
   case T::OptLazyCls:
   case T::InitUnc:
@@ -1156,10 +1144,6 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::SubCls:
   case T::OptExactCls:
   case T::OptSubCls:
-  case T::ExactRecord:
-  case T::SubRecord:
-  case T::OptExactRecord:
-  case T::OptSubRecord:
     break;
   }
 
@@ -2999,17 +2983,6 @@ void parse_property(AsmState& as, bool class_is_const,
   );
 }
 
-void parse_record_field(AsmState& as) {
-  parse_prop_or_field_impl(
-    as,
-    [](Attr attrs) {},
-    [&](auto&&... args) {
-      as.re->addField(std::forward<decltype(args)>(args)...);
-    },
-    {}
-  );
-}
-
 /*
  * const-flags     : isType
  *                 : isAbstract
@@ -3294,24 +3267,6 @@ void parse_class_body(AsmState& as, bool class_is_const,
 }
 
 /*
- * record-body : record-body-line* '}'
- *             ;
- *
- * record-body-line : ".property"  directive-property
- *                  ;
- */
-void parse_record_body(AsmState& as) {
-  std::string directive;
-  while (as.in.readword(directive)) {
-    if (directive == ".property") { parse_record_field(as); continue; }
-
-    as.error(folly::to<std::string>("unrecognized directive `",
-                                    directive, "` in record"));
-  }
-  as.in.expect('}');
-}
-
-/*
  * directive-class : upper-bound-list ?"top" attribute-list identifier
  *                   ?line-range extension-clause implements-clause '{'
  *                   class-body
@@ -3411,62 +3366,6 @@ void parse_class(AsmState& as) {
   parse_class_body(as, attrs & AttrIsConst, ubs);
 
   as.finishClass();
-}
-
-/*
- * directive-record : attribute identifier ?line-range
- *                      extension-clause '{' record-body
- *                  ;
- *
- * extension-clause : empty
- *                  | "extends" identifier
- *                  ;
- */
-void parse_record(AsmState& as) {
-  if (!RuntimeOption::EvalHackRecords) {
-    as.error("Records not supported");
-  }
-
-  as.in.skipWhitespace();
-
-  Attr attrs = parse_attribute_list(as, AttrContext::Class);
-  if (!(attrs & AttrFinal)) {
-    // parser only sets the final flag. If the final flag is not set,
-    // the record is abstract.
-    attrs |= AttrAbstract;
-  } else if (attrs & AttrAbstract) {
-    as.error("A record cannot be both final and abstract");
-  }
-
-
-  std::string name;
-  if (!as.in.readname(name)) {
-    as.error(".record must have a name");
-  }
-
-  int line0;
-  int line1;
-  parse_line_range(as, line0, line1);
-
-  std::string parentName;
-  if (as.in.tryConsume("extends")) {
-    if (!as.in.readname(parentName)) {
-      as.error("expected parent record name after `extends'");
-    }
-  }
-
-  as.re = as.ue->newRecordEmitter(name);
-  as.re->init(line0,
-              line1,
-              attrs,
-              makeStaticString(parentName),
-              staticEmptyString());
-
-  as.in.expectWs('{');
-  parse_record_body(as);
-
-  assertx(!as.fe && !as.pce);
-  as.re = nullptr;
 }
 
 /*
@@ -3715,7 +3614,6 @@ void parse(AsmState& as) {
     if (directive == ".function")      { parse_function(as)      ; continue; }
     if (directive == ".adata")         { parse_adata(as)         ; continue; }
     if (directive == ".class")         { parse_class(as)         ; continue; }
-    if (directive == ".record")        { parse_record(as)        ; continue; }
     if (directive == ".alias")         { parse_alias(as)         ; continue; }
     if (directive == ".includes")      { parse_includes(as)      ; continue; }
     if (directive == ".const")         { parse_constant(as)      ; continue; }

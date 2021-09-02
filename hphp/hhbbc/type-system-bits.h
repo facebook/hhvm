@@ -45,7 +45,6 @@
 #define HHBBC_TYPE_DECL_SINGLE_COUNTED(X)       \
   X(Obj)                                        \
   X(Res)                                        \
-  X(Record)                                     \
   X(RFunc)                                      \
   X(RClsMeth)                                   \
 

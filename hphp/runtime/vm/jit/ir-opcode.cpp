@@ -364,7 +364,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdFuncCached:
   case LdGblAddr:
   case LdGblAddrDef:
-  case LdRecDescCached:
   case LdObjMethodD:
   case LdObjMethodS:
   case LookupClsCns:
@@ -386,7 +385,6 @@ bool opcodeMayRaise(Opcode opc) {
   case NeqArrLike:
   case NeqObj:
   case NewKeysetArray:
-  case NewRecord:
   case NSameArrLike:
   case OODeclExists:
   case OrdStrIdx:
@@ -474,9 +472,6 @@ bool opcodeMayRaise(Opcode opc) {
   case VerifyRetCls:
   case VerifyRetFail:
   case VerifyRetFailHard:
-  case VerifyParamRecDesc:
-  case VerifyRetRecDesc:
-  case VerifyPropRecDesc:
     return true;
 
   case AbsDbl:
@@ -629,7 +624,6 @@ bool opcodeMayRaise(Opcode opc) {
   case EqFunc:
   case EqInt:
   case EqPtrIter:
-  case EqRecDesc:
   case EqRes:
   case EqStr:
   case EqStrPtr:
@@ -672,7 +666,6 @@ bool opcodeMayRaise(Opcode opc) {
   case InstanceOfBitmask:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
-  case InstanceOfRecDesc:
   case InterfaceSupportsArrLike:
   case InterfaceSupportsDbl:
   case InterfaceSupportsInt:
@@ -763,8 +756,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdPtrIterKey:
   case LdPtrIterVal:
   case LdRDSAddr:
-  case LdRecDesc:
-  case LdRecDescCachedSafe:
   case LdRetVal:
   case LdSmashable:
   case LdSmashableFunc:

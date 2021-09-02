@@ -717,7 +717,6 @@ bool StringData::isNumeric() const {
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
       break;
   }
   not_reached();
@@ -751,7 +750,6 @@ bool StringData::isInteger() const {
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
       break;
   }
   not_reached();

@@ -42,28 +42,14 @@ TRACE_SET_MOD(irlower);
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-template<typename T>
-constexpr Type getType();
-template<>
-constexpr Type getType<Class>() { return TCls; }
-template<>
-constexpr Type getType<RecordDesc>() { return TRecDesc; }
 
-template<typename T>
-const T* constVal(SSATmp*);
-template<>
-const Class* constVal<Class>(SSATmp* cls) { return cls->clsVal(); }
-template<>
-const RecordDesc* constVal<RecordDesc>(SSATmp* rec) { return rec->recVal(); }
-
-template<typename T>
 void implVerifyType(IRLS& env, const IRInstruction* inst) {
   auto const type = inst->src(0);
   auto const constraint = inst->src(1);
   auto& v = vmain(env);
 
-  if (type->hasConstVal() && constraint->hasConstVal(getType<T>())) {
-    if (constVal<T>(type) != constVal<T>(constraint)) {
+  if (type->hasConstVal() && constraint->hasConstVal(TCls)) {
+    if (type->clsVal() != constraint->clsVal()) {
       cgCallNative(v, env, inst);
     }
     return;
@@ -89,17 +75,10 @@ IMPL_OPCODE_CALL(VerifyReifiedLocalType)
 IMPL_OPCODE_CALL(VerifyReifiedReturnType)
 
 void cgVerifyParamCls(IRLS& env, const IRInstruction* inst) {
-  implVerifyType<Class>(env, inst);
+  implVerifyType(env, inst);
 }
 void cgVerifyRetCls(IRLS& env, const IRInstruction* inst) {
-  implVerifyType<Class>(env, inst);
-}
-
-void cgVerifyParamRecDesc(IRLS& env, const IRInstruction* inst) {
-  implVerifyType<RecordDesc>(env, inst);
-}
-void cgVerifyRetRecDesc(IRLS& env, const IRInstruction* inst) {
-  implVerifyType<RecordDesc>(env, inst);
+  implVerifyType(env, inst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -135,41 +114,6 @@ static void verifyStaticPropFailImpl(const Class* objCls, TypedValue val,
     true
   );
 }
-
-static void verifyPropRecDescImpl(const Class* objCls,
-                                  const RecordDesc* constraint,
-                                  RecordData* val,
-                                  Slot slot,
-                                  const TypeConstraint* tc) {
-  assertx(slot < objCls->numDeclProperties());
-  assertx(tc && tc->isRecord());
-  auto const success = [&]{
-    auto const valRec = val->record();
-    if (LIKELY(constraint != nullptr)) return valRec->recordDescOf(constraint);
-    return tc->checkTypeAliasRecord(valRec);
-  }();
-  if (!success) {
-    verifyPropFailImpl(objCls, make_tv<KindOfRecord>(val), slot, tc);
-  }
-}
-
-static void verifyStaticPropRecDescImpl(const Class* objCls,
-                                        const RecordDesc* constraint,
-                                        RecordData* val,
-                                        Slot slot,
-                                        const TypeConstraint* tc) {
-  assertx(slot < objCls->numStaticProperties());
-  assertx(tc && tc->isRecord());
-  auto const success = [&]{
-    auto const valRec = val->record();
-    if (LIKELY(constraint != nullptr)) return valRec->recordDescOf(constraint);
-    return tc->checkTypeAliasRecord(valRec);
-  }();
-  if (!success) {
-    verifyStaticPropFailImpl(objCls, make_tv<KindOfRecord>(val), slot, tc);
-  }
-}
-
 
 static void verifyPropClsImpl(const Class* objCls,
                               const Class* constraint,
@@ -300,25 +244,6 @@ void cgVerifyPropCls(IRLS& env, const IRInstruction* inst) {
     inst->src(4)->boolVal()
       ? CallSpec::direct(verifyStaticPropClsImpl)
       : CallSpec::direct(verifyPropClsImpl),
-    kVoidDest,
-    SyncOptions::Sync,
-    argGroup(env, inst)
-      .ssa(0)
-      .ssa(2)
-      .ssa(3)
-      .ssa(1)
-      .immPtr(extra->tc)
-  );
-}
-
-void cgVerifyPropRecDesc(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<TypeConstraintData>();
-  cgCallHelper(
-    vmain(env),
-    env,
-    inst->src(4)->boolVal()
-      ? CallSpec::direct(verifyStaticPropRecDescImpl)
-      : CallSpec::direct(verifyPropRecDescImpl),
     kVoidDest,
     SyncOptions::Sync,
     argGroup(env, inst)

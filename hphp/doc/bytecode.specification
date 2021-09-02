@@ -870,15 +870,6 @@ NewKeysetArray <num elems>    [C..C]  ->  [C:Keyset]
   those cells, then pushes the new keyset onto the stack.  Elements are pushed
   on the stack in keyset insertion order.
 
-NewRecord <record-name><litstr id vector>    [C..C]  ->  [C:Rec]
-
-  New record. Creates a new record of the record type corresponding to the name
-  in %1. The vector of litstr ids in %2 gives the field names to initialize.
-  One initial value for each name is popped from the stack. This instruction
-  throws errors if the initial values do not match their corresponding
-  type-hints or if a field in %2 is not declared in the record type or if any
-  field declared in the record type is left uninitialized.
-
 AddElemC    [C C C]  ->  [C:Arr|Dict]
 
   Add element. If $3 is an array or dict, this instruction executes $3[$2] = $1

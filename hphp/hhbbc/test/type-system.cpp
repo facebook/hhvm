@@ -52,7 +52,6 @@ void PrintTo(Emptiness e, ::std::ostream* os) {
 
 Type make_obj_for_testing(trep, res::Class, DObj::Tag, bool);
 Type make_cls_for_testing(trep, res::Class, DCls::Tag, bool);
-Type make_record_for_testing(trep, res::Record, DRecord::Tag);
 Type make_arrval_for_testing(trep, SArray);
 Type make_arrpacked_for_testing(trep, std::vector<Type>);
 Type make_arrpackedn_for_testing(trep, Type);
@@ -78,13 +77,10 @@ const StaticString s_IBase("IBase");
 const StaticString s_IA("IA");
 const StaticString s_IAA("IAA");
 const StaticString s_IB("IB");
-const StaticString s_UniqueRecBase("UniqueRecBase");
-const StaticString s_UniqueRec("UniqueRec");
-const StaticString s_UniqueRecA("UniqueRecA");
 const StaticString s_Awaitable("HH\\Awaitable");
 
 // A test program so we can actually test things involving object or
-// class or record types.
+// class types.
 void add_test_unit(php::Program& program) {
   assertx(SystemLib::s_inited);
   std::string const hhas = R"(
@@ -156,10 +152,6 @@ void add_test_unit(php::Program& program) {
       .default_ctor;
     }
 
-    .record [abstract persistent unique] UniqueRecBase {}
-    .record [final unique] UniqueRec extends UniqueRecBase {}
-    .record [final unique] UniqueRecA extends UniqueRecBase {}
-
     .function test() {
       Int 1
       RetC
@@ -175,7 +167,6 @@ void add_test_unit(php::Program& program) {
 }
 
 php::ProgramPtr make_test_program() {
-  RuntimeOption::EvalHackRecords = true;
   auto program = make_program();
   add_test_unit(*program);
   return program;
@@ -221,14 +212,6 @@ Type make_specialized_exact_class(trep bits, res::Class cls,
 Type make_specialized_sub_class(trep bits, res::Class cls,
                                 bool isCtx = false) {
   return make_cls_for_testing(bits, cls, DCls::Sub, isCtx);
-}
-
-Type make_specialized_exact_record(trep bits, res::Record rec) {
-  return make_record_for_testing(bits, rec, DRecord::Exact);
-}
-
-Type make_specialized_sub_record(trep bits, res::Record rec) {
-  return make_record_for_testing(bits, rec, DRecord::Sub);
 }
 
 Type make_specialized_arrval(trep bits, SArray ar) {
@@ -377,13 +360,6 @@ std::vector<Type> withData(const Index& index) {
   auto const clsIB = index.resolve_class(Context{}, s_IB.get());
   if (!clsIB || !clsIB->resolved()) ADD_FAILURE();
 
-  auto const recA = index.resolve_record(s_UniqueRecBase.get());
-  if (!recA || !recA->resolved()) ADD_FAILURE();
-  auto const recB = index.resolve_record(s_UniqueRec.get());
-  if (!recB || !recB->resolved()) ADD_FAILURE();
-  auto const recC = index.resolve_record(s_UniqueRecA.get());
-  if (!recC || !recC->resolved()) ADD_FAILURE();
-
   auto const svec1 = static_vec(s_A.get(), s_B.get());
   auto const svec2 = static_vec(123, 456);
   auto const sdict1 = static_dict(s_A.get(), s_B.get(), s_C.get(), 123);
@@ -392,7 +368,7 @@ std::vector<Type> withData(const Index& index) {
   auto const skeyset2 = static_keyset(123, 456);
 
   auto const support = BStr | BDbl | BInt | BCls | BObj |
-                       BRecord | BArrLikeN | BLazyCls;
+                       BArrLikeN | BLazyCls;
   auto const nonSupport = BCell & ~support;
 
   auto const add = [&] (trep b) {
@@ -480,15 +456,6 @@ std::vector<Type> withData(const Index& index) {
       types.emplace_back(make_specialized_sub_class(b, *clsA, true));
       types.emplace_back(make_specialized_sub_class(b, *clsAA, true));
       types.emplace_back(make_specialized_sub_class(b, *clsAB, true));
-    }
-    if (couldBe(b, BRecord) && subtypeOf(b, BRecord | nonSupport)) {
-      types.emplace_back(make_specialized_exact_record(b, *recA));
-      types.emplace_back(make_specialized_exact_record(b, *recB));
-      types.emplace_back(make_specialized_exact_record(b, *recC));
-
-      types.emplace_back(make_specialized_sub_record(b, *recA));
-      types.emplace_back(make_specialized_sub_record(b, *recB));
-      types.emplace_back(make_specialized_sub_record(b, *recC));
     }
 
     if (couldBe(b, BArrLikeN) && subtypeOf(b, BArrLikeN | nonSupport)) {
@@ -1099,9 +1066,6 @@ void test_basic_operators(const std::vector<Type>& types) {
     }
     if (is_specialized_double(t1)) {
       return is_specialized_double(t2) || !t2.hasData();
-    }
-    if (is_specialized_record(t1)) {
-      return is_specialized_record(t2) || !t2.hasData();
     }
     if (is_specialized_cls(t1)) {
       return is_specialized_cls(t2) || !t2.hasData();
@@ -1849,7 +1813,6 @@ TEST(Type, Prim) {
     { TInitPrim, TFalse },
     { TPrim, TCell },
     { TPrim, TOptObj },
-    { TPrim, TOptRecord },
     { TPrim, TOptFalse },
   };
 
@@ -1861,7 +1824,6 @@ TEST(Type, Prim) {
     { TPrim, sval(s_test) },
     { TInitPrim, TUninit },
     { TPrim, TObj },
-    { TPrim, TRecord },
     { TPrim, TRes },
     { TPrim, TRFunc },
     { TPrim, TFunc },
@@ -2065,10 +2027,6 @@ TEST(Type, Option) {
   EXPECT_TRUE(TObj.subtypeOf(BOptObj));
   EXPECT_TRUE(TInitNull.subtypeOf(BOptObj));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptObj));
-
-  EXPECT_TRUE(TRecord.subtypeOf(BOptRecord));
-  EXPECT_TRUE(TInitNull.subtypeOf(BOptRecord));
-  EXPECT_TRUE(!TUninit.subtypeOf(BOptRecord));
 
   EXPECT_TRUE(TRes.subtypeOf(BOptRes));
   EXPECT_TRUE(TInitNull.subtypeOf(BOptRes));
@@ -3567,10 +3525,6 @@ TEST(Type, IndexBased) {
   auto const clsBase = idx.resolve_class(ctx, s_Base.get());
   if (!clsBase) ADD_FAILURE();
 
-  // Need to use base because final records are always exact.
-  auto const rec = idx.resolve_record(s_UniqueRecBase.get());
-  if (!rec) ADD_FAILURE();
-
   auto const objExactTy = objExact(*cls);
   auto const subObjTy   = subObj(*cls);
   auto const clsExactTy = clsExact(*cls);
@@ -3578,27 +3532,20 @@ TEST(Type, IndexBased) {
   auto const objExactBaseTy = objExact(*clsBase);
   auto const subObjBaseTy   = subObj(*clsBase);
 
-  auto const exactRecTy = exactRecord(*rec);
-  auto const subRecTy   = subRecord(*rec);
-
   // Basic relationship between the class types and object types.
   EXPECT_EQ(objcls(objExactTy), clsExactTy);
   EXPECT_EQ(objcls(subObjTy), subClsTy);
 
-  // =TestClass <: <=TestClass, and not vice versa. Same for records.
+  // =TestClass <: <=TestClass, and not vice versa.
   EXPECT_TRUE(objExactTy.subtypeOf(subObjTy));
   EXPECT_TRUE(!subObjTy.subtypeOf(objExactTy));
-  EXPECT_TRUE(exactRecTy.subtypeOf(subRecTy));
-  EXPECT_TRUE(!subRecTy.subtypeOf(exactRecTy));
   // =TestClass <: <=TestClass, and not vice versa.
   EXPECT_TRUE(clsExactTy.subtypeOf(subClsTy));
   EXPECT_TRUE(!subClsTy.subtypeOf(clsExactTy));
 
-  // =TestClass couldBe <= TestClass, and vice versa. Same for records.
+  // =TestClass couldBe <= TestClass, and vice versa.
   EXPECT_TRUE(objExactTy.couldBe(subObjTy));
   EXPECT_TRUE(subObjTy.couldBe(objExactTy));
-  EXPECT_TRUE(exactRecTy.couldBe(subRecTy));
-  EXPECT_TRUE(subRecTy.couldBe(exactRecTy));
   EXPECT_TRUE(clsExactTy.couldBe(subClsTy));
   EXPECT_TRUE(subClsTy.couldBe(clsExactTy));
 
@@ -3615,12 +3562,6 @@ TEST(Type, IndexBased) {
   EXPECT_TRUE(subClsTy.couldBe(BCls));
   EXPECT_TRUE(TCls.couldBe(clsExactTy));
   EXPECT_TRUE(TCls.couldBe(subClsTy));
-  EXPECT_TRUE(exactRecTy.subtypeOf(BRecord));
-  EXPECT_TRUE(subRecTy.subtypeOf(BRecord));
-  EXPECT_TRUE(exactRecTy.couldBe(BRecord));
-  EXPECT_TRUE(subRecTy.couldBe(BRecord));
-  EXPECT_TRUE(TRecord.couldBe(exactRecTy));
-  EXPECT_TRUE(TRecord.couldBe(subRecTy));
 
   // These checks are relevant for class to key conversions
   EXPECT_TRUE(clsExactTy.subtypeOf(BOptCls | BOptLazyCls));
@@ -3642,50 +3583,32 @@ TEST(Type, IndexBased) {
   EXPECT_TRUE(subObjTy.couldBe(BOptObj));
   EXPECT_TRUE(TOptObj.couldBe(objExactTy));
   EXPECT_TRUE(TOptObj.couldBe(subObjTy));
-  EXPECT_TRUE(exactRecTy.couldBe(BOptRecord));
-  EXPECT_TRUE(subRecTy.couldBe(BOptRecord));
-  EXPECT_TRUE(TOptRecord.couldBe(exactRecTy));
-  EXPECT_TRUE(TOptRecord.couldBe(subRecTy));
 
   // Obj= and Obj<= are subtypes of ?Obj.
   EXPECT_TRUE(objExactTy.subtypeOf(BOptObj));
   EXPECT_TRUE(subObjTy.subtypeOf(BOptObj));
-  EXPECT_TRUE(exactRecTy.subtypeOf(BOptRecord));
-  EXPECT_TRUE(subRecTy.subtypeOf(BOptRecord));
 
   // Obj= is a subtype of ?Obj=, and also ?Obj<=.
   EXPECT_TRUE(objExactTy.subtypeOf(opt(objExactTy)));
   EXPECT_TRUE(objExactTy.subtypeOf(opt(subObjTy)));
   EXPECT_TRUE(!opt(objExactTy).subtypeOf(objExactTy));
   EXPECT_TRUE(!opt(subObjTy).subtypeOf(objExactTy));
-  EXPECT_TRUE(exactRecTy.subtypeOf(opt(exactRecTy)));
-  EXPECT_TRUE(exactRecTy.subtypeOf(opt(subRecTy)));
-  EXPECT_TRUE(!opt(exactRecTy).subtypeOf(exactRecTy));
-  EXPECT_TRUE(!opt(subRecTy).subtypeOf(exactRecTy));
 
   // Obj= couldBe ?Obj= and ?Obj<=, and vice versa.
   EXPECT_TRUE(objExactTy.couldBe(opt(objExactTy)));
   EXPECT_TRUE(opt(objExactTy).couldBe(objExactTy));
   EXPECT_TRUE(objExactTy.couldBe(opt(subObjTy)));
   EXPECT_TRUE(opt(subObjTy).couldBe(objExactTy));
-  EXPECT_TRUE(exactRecTy.couldBe(opt(exactRecTy)));
-  EXPECT_TRUE(opt(exactRecTy).couldBe(exactRecTy));
-  EXPECT_TRUE(exactRecTy.couldBe(opt(subRecTy)));
-  EXPECT_TRUE(opt(subRecTy).couldBe(exactRecTy));
 
   // Obj<= is not a subtype of ?Obj=, it is overlapping but
   // potentially contains other types.  (We might eventually check
   // whether objects are final as part of this, but not right now.)
   EXPECT_TRUE(!subObjTy.subtypeOf(opt(objExactTy)));
   EXPECT_TRUE(!opt(objExactTy).subtypeOf(subObjTy));
-  EXPECT_TRUE(!subRecTy.subtypeOf(opt(exactRecTy)));
-  EXPECT_TRUE(!opt(exactRecTy).subtypeOf(subRecTy));
 
   // Obj<= couldBe ?Obj= and vice versa.
   EXPECT_TRUE(subObjTy.couldBe(opt(objExactTy)));
   EXPECT_TRUE(opt(objExactTy).couldBe(subObjTy));
-  EXPECT_TRUE(subRecTy.couldBe(opt(exactRecTy)));
-  EXPECT_TRUE(opt(exactRecTy).couldBe(subRecTy));
 
   // ?Obj<=, ?Obj=, ?Foo<= and ?Foo= couldBe each other
   EXPECT_TRUE(opt(subObjTy).couldBe(opt(objExactBaseTy)));
@@ -3732,13 +3655,6 @@ TEST(Type, Hierarchies) {
   auto const clsTestClass = idx.resolve_class(ctx, s_TestClass.get());
   if (!clsTestClass) ADD_FAILURE();
 
-  auto const recBaseUnique = idx.resolve_record(s_UniqueRecBase.get());
-  if (!recBaseUnique) ADD_FAILURE();
-  auto const recUnique = idx.resolve_record(s_UniqueRec.get());
-  if (!recUnique) ADD_FAILURE();
-  auto const recUniqueA = idx.resolve_record(s_UniqueRecA.get());
-  if (!recUniqueA) ADD_FAILURE();
-
   // make *exact type* and *sub type* types and objects for all loaded classes
   auto const objExactBaseTy = objExact(*clsBase);
   auto const subObjBaseTy   = subObj(*clsBase);
@@ -3784,13 +3700,6 @@ TEST(Type, Hierarchies) {
   auto const subObjTestClassTy   = subObj(*clsTestClass);
   auto const clsExactTestClassTy = clsExact(*clsTestClass);
   auto const subClsTestClassTy   = subCls(*clsTestClass);
-
-  auto const exactRecUniqueBaseTy = exactRecord(*recBaseUnique);
-  auto const subRecUniqueBaseTy = subRecord(*recBaseUnique);
-  auto const exactRecUniqueTy = exactRecord(*recUnique);
-  auto const subRecUniqueTy   = subRecord(*recUnique);
-  auto const exactRecUniqueATy = exactRecord(*recUniqueA);
-  auto const subRecUniqueATy   = subRecord(*recUniqueA);
 
   // check that type from object and type are the same (obnoxious test)
   EXPECT_EQ(objcls(objExactBaseTy), clsExactBaseTy);
@@ -4017,7 +3926,6 @@ TEST(Type, Hierarchies) {
   EXPECT_EQ(union_of(subObjBAATy, subObjBBTy), subObjBTy);
   EXPECT_EQ(union_of(subObjAATy, subObjBaseTy), subObjBaseTy);
   EXPECT_EQ(union_of(subObjAATy, subObjTestClassTy), TObj);
-  EXPECT_EQ(union_of(subRecUniqueTy, subRecUniqueATy), subRecUniqueBaseTy);
   // union of subObj and objExact mixed
   EXPECT_EQ(union_of(objExactATy, subObjBTy), subObjBaseTy);
   EXPECT_EQ(union_of(subObjAATy, objExactABTy), subObjATy);
@@ -4026,7 +3934,6 @@ TEST(Type, Hierarchies) {
   EXPECT_EQ(union_of(objExactBAATy, subObjBBTy), subObjBTy);
   EXPECT_EQ(union_of(subObjAATy, objExactBaseTy), subObjBaseTy);
   EXPECT_EQ(union_of(objExactAATy, subObjTestClassTy), TObj);
-  EXPECT_EQ(union_of(subRecUniqueATy, exactRecUniqueTy), subRecUniqueBaseTy);
   // union of objExact
   EXPECT_EQ(union_of(objExactATy, objExactBTy), subObjBaseTy);
   EXPECT_EQ(union_of(objExactAATy, objExactABTy), subObjATy);
@@ -4035,7 +3942,6 @@ TEST(Type, Hierarchies) {
   EXPECT_EQ(union_of(objExactBAATy, objExactBBTy), subObjBTy);
   EXPECT_EQ(union_of(objExactAATy, objExactBaseTy), subObjBaseTy);
   EXPECT_EQ(union_of(objExactAATy, objExactTestClassTy), TObj);
-  EXPECT_EQ(union_of(subRecUniqueATy, exactRecUniqueTy), subRecUniqueBaseTy);
   // optional sub obj
   EXPECT_EQ(union_of(opt(subObjATy), opt(subObjBTy)), opt(subObjBaseTy));
   EXPECT_EQ(union_of(subObjAATy, opt(subObjABTy)), opt(subObjATy));
@@ -4044,10 +3950,6 @@ TEST(Type, Hierarchies) {
   EXPECT_EQ(union_of(opt(subObjBAATy), subObjBBTy), opt(subObjBTy));
   EXPECT_EQ(union_of(opt(subObjAATy), opt(subObjBaseTy)), opt(subObjBaseTy));
   EXPECT_EQ(union_of(subObjAATy, opt(subObjTestClassTy)), opt(TObj));
-  EXPECT_EQ(union_of(opt(subRecUniqueATy), exactRecUniqueTy),
-            opt(subRecUniqueBaseTy));
-  EXPECT_EQ(union_of(opt(subRecUniqueATy), opt(exactRecUniqueTy)),
-            opt(subRecUniqueBaseTy));
   // optional sub and exact obj mixed
   EXPECT_EQ(union_of(opt(objExactATy), subObjBTy), opt(subObjBaseTy));
   EXPECT_EQ(union_of(subObjAATy, opt(objExactABTy)), opt(subObjATy));
@@ -5431,15 +5333,11 @@ TEST(Type, LoosenValues) {
 
   auto const cls = index.resolve_class(ctx, s_TestClass.get());
   EXPECT_TRUE(!!cls);
-  auto const rec = index.resolve_record(s_UniqueRec.get());
-  EXPECT_TRUE(rec);
 
   EXPECT_TRUE(loosen_values(objExact(*cls)) == objExact(*cls));
   EXPECT_TRUE(loosen_values(subObj(*cls)) == subObj(*cls));
   EXPECT_TRUE(loosen_values(clsExact(*cls)) == clsExact(*cls));
   EXPECT_TRUE(loosen_values(subCls(*cls)) == subCls(*cls));
-  EXPECT_TRUE(loosen_values(exactRecord(*rec)) == exactRecord(*rec));
-  EXPECT_TRUE(loosen_values(subRecord(*rec)) == subRecord(*rec));
 
   EXPECT_TRUE(loosen_values(opt(objExact(*cls))) == opt(objExact(*cls)));
   EXPECT_TRUE(loosen_values(opt(subObj(*cls))) == opt(subObj(*cls)));

@@ -68,12 +68,6 @@ void throw_cannot_use_newelem_for_lval_read_clsmeth() {
   );
 }
 
-void throw_cannot_use_newelem_for_lval_read_record() {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Cannot use [] with record for reading in an lvalue context"
-  );
-}
-
 TypedValue incDecBodySlow(IncDecOp op, tv_lval fr) {
   assertx(tvIsPlausible(*fr));
   assertx(type(fr) != KindOfUninit);

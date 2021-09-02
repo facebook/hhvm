@@ -56,7 +56,6 @@ extern const Type TCell;
 namespace php {
 struct Class;
 struct Prop;
-struct Record;
 struct Const;
 struct Func;
 struct Unit;
@@ -230,7 +229,6 @@ std::string show(const PropMergeResult<Type>&);
 
 // private types
 struct ClassInfo;
-struct RecordInfo;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -380,90 +378,6 @@ private:
   friend struct ::HPHP::HHBBC::Index;
   friend struct ::HPHP::HHBBC::PublicSPropMutations;
   Either<SString,ClassInfo*> val;
-};
-
-/*
- * A resolved runtime Record, for a particular php::Record.
- *
- * Provides various lookup tables that allow querying the Record's
- * information.
- */
-struct Record {
-  /*
-   * Returns whether two records are definitely same at runtime.  If
-   * this function returns false, they still *may* be the same at
-   * runtime.
-   */
-  bool same(const Record&) const;
-
-  /*
-   * Returns true if this record is definitely going to be a subtype
-   * of `o' at runtime.  If this function returns false, this may
-   * still be a subtype of `o' at runtime, it just may not be known.
-   * A typical example is with "non unique" records.
-   */
-  bool mustBeSubtypeOf(const Record& o) const;
-
-  /*
-   * Returns false if this record is definitely not going to be a subtype
-   * of `o' at runtime.  If this function returns true, this may
-   * still not be a subtype of `o' at runtime, it just may not be known.
-   */
-  bool maybeSubtypeOf(const Record& o) const;
-
-  /*
-   * If this function return false, it is known that this record
-   * is in no subtype relationship with the argument record 'o'.
-   * Returns true if this record could be a subtype of `o' at runtime.
-   * When true is returned the two records may still be unrelated but it is
-   * not possible to tell. A typical example is with "non unique" records.
-   */
-  bool couldBe(const Record& o) const;
-
-  /*
-   * Returns false if this is a final record.
-   */
-  bool couldBeOverriden() const;
-
-  /*
-   * Returns the name of this record.  Non-null guarantee.
-   */
-  SString name() const;
-
-  /*
-   * Returns the res::Record for this Record's parent if there is one,
-   * or nullptr.
-   */
-  Optional<Record> parent() const;
-
-  /*
-   * Returns the Record that is the first common ancestor between
-   * 'this' and 'o'.
-   * If there is no common ancestor std::nullopt is returned
-   */
-  Optional<Record> commonAncestor(const Record&) const;
-
-  /*
-   * Returns true if we have a RecordInfo for this Record.
-   */
-  bool resolved() const {
-    return val.right() != nullptr;
-  }
-
-  /*
-   * Returns the php::Record for this Record if there is one, or
-   * nullptr.
-   */
-  const php::Record* rec() const;
-
-private:
-  explicit Record(Either<SString,RecordInfo*>);
-  template <bool> bool subtypeOfImpl(const Record&) const;
-
-private:
-  friend std::string show(const Record&);
-  friend struct ::HPHP::HHBBC::Index;
-  Either<SString,RecordInfo*> val;
 };
 
 /*
@@ -632,19 +546,6 @@ struct Index {
   std::unique_ptr<ArrayTypeTable::Builder>& array_table_builder() const;
 
   /*
-   * Try to resolve which record will be the record named `name`,
-   * if we can resolve it to a single record.
-   *
-   * Note, the returned record may or may not be *defined* at the
-   * program point you care about (it could be non-hoistable, even
-   * though it's unique, for example).
-   *
-   * Returns std::nullopt if we can't prove the supplied name must be a
-   * record type.  (E.g. if there are type aliases.)
-   */
-  Optional<res::Record> resolve_record(SString name) const;
-
-  /*
    * Find all the closures created inside the context of a given
    * php::Class.
    */
@@ -699,8 +600,7 @@ struct Index {
   /*
    * Try to resolve name, looking through TypeAliases and enums.
    */
-  ResolvedInfo<boost::variant<boost::blank,res::Class,res::Record>>
-  resolve_type_name(SString name) const;
+  ResolvedInfo<Optional<res::Class>> resolve_type_name(SString name) const;
 
   /*
    * Resolve a closure class.
@@ -1224,11 +1124,8 @@ private:
 
   void init_return_type(const php::Func* func);
 
-  ResolvedInfo<boost::variant<boost::blank,SString,ClassInfo*,RecordInfo*>>
+  ResolvedInfo<boost::variant<boost::blank,SString,ClassInfo*>>
   resolve_type_name_internal(SString name) const;
-
-  template<typename T>
-  Optional<T> resolve_type_impl(SString name) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;

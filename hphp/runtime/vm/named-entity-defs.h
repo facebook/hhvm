@@ -70,8 +70,6 @@ template<class T>
 const char* NamedEntity::checkSameName() {
   if (!std::is_same<T, PreTypeAlias>::value && getCachedTypeAlias()) {
     return "type";
-  } else if (!std::is_same<T, RecordDesc>::value && getCachedRecordDesc()) {
-    return "record";
   } else if (!std::is_same<T, PreClass>::value && getCachedClass()) {
     return "class";
   }

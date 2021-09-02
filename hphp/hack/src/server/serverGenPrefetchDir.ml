@@ -76,51 +76,6 @@ let dump_shallow_decls
   save_contents (get_shallow_decls_filename file) shallow_decls_in_file;
   ()
 
-let dump_fan_in_deps
-    (ctx : Provider_context.t) (dir : string) (path : Relative_path.t) : unit =
-  let file_name = Relative_path.suffix path in
-  let recorded_decls = Caml.Hashtbl.create 10 in
-  Typing_deps.add_dependency_callback
-    "hh_single collect decls"
-    (fun _ dependency ->
-      Caml.Hashtbl.replace
-        recorded_decls
-        (Typing_deps.Dep.extract_name dependency)
-        true);
-  let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-  Hh_logger.log "typechecking %s" file_name;
-  let _ = Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry in
-  let symbol_to_file name =
-    let name = "\\" ^ name in
-    match Naming_provider.get_class_path ctx name with
-    | Some path ->
-      (match Relative_path.prefix path with
-      | Relative_path.Root -> Some (Relative_path.suffix path)
-      | _ -> None)
-    | _ ->
-      Hh_logger.log "Couldn't find filename for symbol %s" name;
-      None
-  in
-  let typecheck_decl_deps =
-    Caml.Hashtbl.to_seq recorded_decls
-    |> Sequence.of_seq
-    |> Sequence.to_list
-    |> List.filter_map ~f:(fun (classname, _) -> symbol_to_file classname)
-    |> List.map ~f:(fun path -> Hh_json.string_ path)
-    |> HashSet.of_list
-    |> HashSet.to_list
-  in
-  let typecheck_decl_deps =
-    Hh_json.(
-      json_to_string ~pretty:true
-      @@ JSON_Object [("decl_deps", JSON_Array typecheck_decl_deps)])
-  in
-  let typecheck_deps_dir = Filename.concat dir "typecheck_deps" in
-  let file = file_name |> Filename.concat typecheck_deps_dir in
-  Sys_utils.mkdir_p (Filename.dirname file);
-  Disk.write_file ~file ~contents:typecheck_decl_deps;
-  ()
-
 let go (env : ServerEnv.env) (genv : ServerEnv.genv) (dir : string) : unit =
   let ctx = Provider_utils.ctx_from_server_env env in
   (* TODO: Make this more robust. I should be able to get the root from somewhere... *)
@@ -155,7 +110,6 @@ let go (env : ServerEnv.env) (genv : ServerEnv.genv) (dir : string) : unit =
   in
   List.iter
     ~f:(fun path ->
-      dump_fan_in_deps ctx dir path;
       dump_shallow_decls ctx genv dir path;
       dump_folded_decls ctx dir path)
     changed_files;

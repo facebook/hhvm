@@ -50,7 +50,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | NO_PRECHECKED_FILES -> true
   (* Dump codebase-wide dependency graph information *)
   | GEN_HOT_CLASSES _ -> true
-  | GEN_PREFETCH_DIR _ -> true
+  | GEN_PREFETCH_DIR _ -> false
   | STATS -> false
   | DISCONNECT -> false
   | STATUS_SINGLE _ -> false

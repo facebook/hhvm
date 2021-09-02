@@ -37,6 +37,46 @@ let insert_safe ~name ~kind_of_type ~hash ~canon_hash f :
     let origin_exception = Exception.wrap e in
     Error { canon_hash; hash; kind_of_type; name; origin_exception }
 
+let symbols_table_name = "NAMING_SYMBOLS"
+
+let create_symbols_table_sqlite =
+  (* Two things to take note of:
+     *  1) FLAGS is set to 0 for non-type things
+     *  2) CANON_HASH is simply the hash of lowercase name for consts
+  *)
+  (* Flags is set to 0 for non-type things *)
+  Printf.sprintf
+    "
+      CREATE TABLE IF NOT EXISTS %s(
+        HASH INTEGER PRIMARY KEY NOT NULL,
+        CANON_HASH INTEGER NOT NULL,
+        DECL_HASH INTEGER NOT NULL,
+        FLAGS INTEGER NOT NULL,
+        FILE_INFO_ID INTEGER NOT NULL
+      );
+    "
+    symbols_table_name
+
+let create_symbols_index_sqlite =
+  Printf.sprintf
+    "
+    CREATE INDEX IF NOT EXISTS TYPES_CANON ON %s (CANON_HASH);
+    "
+    symbols_table_name
+
+let insert_symbols_sqlite =
+  Printf.sprintf
+    "
+      INSERT INTO %s(
+        HASH,
+        CANON_HASH,
+        DECL_HASH,
+        FLAGS,
+        FILE_INFO_ID)
+      VALUES (?, ?, ?, ?, ?);
+    "
+    symbols_table_name
+
 type 'a forward_naming_table_delta =
   | Modified of 'a
   | Deleted
@@ -410,8 +450,6 @@ module FileInfoTable = struct
 end
 
 module TypesTable = struct
-  let table_name = "NAMING_TYPES"
-
   let class_flag =
     Int64.of_int (Naming_types.kind_of_type_to_enum Naming_types.TClass)
 
@@ -421,44 +459,17 @@ module TypesTable = struct
   let record_def_flag =
     Int64.of_int (Naming_types.kind_of_type_to_enum Naming_types.TRecordDef)
 
-  let create_table_sqlite =
-    Printf.sprintf
-      "
-        CREATE TABLE IF NOT EXISTS %s(
-          HASH INTEGER PRIMARY KEY NOT NULL,
-          CANON_HASH INTEGER NOT NULL,
-          DECL_HASH INTEGER NOT NULL,
-          FLAGS INTEGER NOT NULL,
-          FILE_INFO_ID INTEGER NOT NULL
-        );
-      "
-      table_name
+  let create_table_sqlite = create_symbols_table_sqlite
 
-  let create_index_sqlite =
-    Printf.sprintf
-      "
-      CREATE INDEX IF NOT EXISTS TYPES_CANON ON %s (CANON_HASH);
-      "
-      table_name
+  let create_index_sqlite = create_symbols_index_sqlite
 
-  let insert_sqlite =
-    Printf.sprintf
-      "
-        INSERT INTO %s(
-          HASH,
-          CANON_HASH,
-          DECL_HASH,
-          FLAGS,
-          FILE_INFO_ID)
-        VALUES (?, ?, ?, ?, ?);
-      "
-      table_name
+  let insert_sqlite = insert_symbols_sqlite
 
   let (get_sqlite, get_sqlite_case_insensitive) =
     let base =
       Str.global_replace
         (Str.regexp "{table_name}")
-        table_name
+        symbols_table_name
         "
         SELECT
           NAMING_FILE_INFO.PATH_PREFIX_TYPE,
@@ -529,39 +540,17 @@ module TypesTable = struct
 end
 
 module FunsTable = struct
-  let table_name = "NAMING_FUNS"
+  let create_table_sqlite = create_symbols_table_sqlite
 
-  let create_table_sqlite =
-    Printf.sprintf
-      "
-        CREATE TABLE IF NOT EXISTS %s(
-          HASH INTEGER PRIMARY KEY NOT NULL,
-          CANON_HASH INTEGER NOT NULL,
-          DECL_HASH INTEGER NOT NULL,
-          FILE_INFO_ID INTEGER NOT NULL
-        );
-      "
-      table_name
+  let create_index_sqlite = create_symbols_index_sqlite
 
-  let create_index_sqlite =
-    Printf.sprintf
-      "
-      CREATE INDEX IF NOT EXISTS FUNS_CANON ON %s (CANON_HASH);
-      "
-      table_name
-
-  let insert_sqlite =
-    Printf.sprintf
-      "
-        INSERT INTO %s (HASH, CANON_HASH, DECL_HASH, FILE_INFO_ID) VALUES (?, ?, ?, ?);
-      "
-      table_name
+  let insert_sqlite = insert_symbols_sqlite
 
   let (get_sqlite, get_sqlite_case_insensitive) =
     let base =
       Str.global_replace
         (Str.regexp "{table_name}")
-        table_name
+        symbols_table_name
         "
         SELECT
           NAMING_FILE_INFO.PATH_PREFIX_TYPE,
@@ -587,10 +576,13 @@ module FunsTable = struct
       |> Typing_deps.Dep.to_int64
     in
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
+    let not_applicable_flag = Int64.zero in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
     Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT decl_hash) |> check_rc db;
-    Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+    Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT not_applicable_flag)
+    |> check_rc db;
+    Sqlite3.bind insert_stmt 5 (Sqlite3.Data.INT file_info_id) |> check_rc db;
     insert_safe ~name ~kind_of_type:None ~hash ~canon_hash:(Some canon_hash)
     @@ fun () -> Sqlite3.step insert_stmt |> check_rc db
 
@@ -610,31 +602,16 @@ module FunsTable = struct
 end
 
 module ConstsTable = struct
-  let table_name = "NAMING_CONSTS"
+  let create_table_sqlite = create_symbols_table_sqlite
 
-  let create_table_sqlite =
-    Printf.sprintf
-      "
-        CREATE TABLE IF NOT EXISTS %s(
-          HASH INTEGER PRIMARY KEY NOT NULL,
-          DECL_HASH INTEGER KEY,
-          CANON_HASH INTEGER KEY NOT NULL,
-          FILE_INFO_ID INTEGER NOT NULL
-        );
-      "
-      table_name
+  let create_index_sqlite = create_symbols_index_sqlite
 
-  let insert_sqlite =
-    Printf.sprintf
-      "
-        INSERT INTO %s (HASH, CANON_HASH, DECL_HASH, FILE_INFO_ID) VALUES (?, ?, ?, ?);
-      "
-      table_name
+  let insert_sqlite = insert_symbols_sqlite
 
   let get_sqlite =
     Str.global_replace
       (Str.regexp "{table_name}")
-      table_name
+      symbols_table_name
       "
         SELECT
           NAMING_FILE_INFO.PATH_PREFIX_TYPE,
@@ -661,7 +638,8 @@ module ConstsTable = struct
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
     Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT decl_hash) |> check_rc db;
-    Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+    Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT Int64.zero) |> check_rc db;
+    Sqlite3.bind insert_stmt 5 (Sqlite3.Data.INT file_info_id) |> check_rc db;
     insert_safe ~name ~kind_of_type:None ~hash ~canon_hash:None @@ fun () ->
     Sqlite3.step insert_stmt |> check_rc db
 
@@ -804,6 +782,7 @@ let save_file_infos db_name file_info_map ~base_content_version =
     Sqlite3.exec db FileInfoTable.create_index_sqlite |> check_rc db;
     Sqlite3.exec db TypesTable.create_index_sqlite |> check_rc db;
     Sqlite3.exec db FunsTable.create_index_sqlite |> check_rc db;
+    Sqlite3.exec db ConstsTable.create_index_sqlite |> check_rc db;
     Sqlite3.exec db "END TRANSACTION;" |> check_rc db;
     StatementCache.close stmt_cache;
     if not @@ Sqlite3.db_close db then

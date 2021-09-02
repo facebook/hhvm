@@ -1,0 +1,211 @@
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
+use std::ops::{Deref, DerefMut};
+
+use hashbrown::{hash_map::DefaultHashBuilder, HashMap};
+
+use crate::mapalloc::MapAlloc;
+
+/// A hash map that lives in shared memory.
+///
+/// This is a wrapper around hashbrown's `HashMap`. The hash map lives
+/// and allocates in shared memory.
+pub struct Map<'shm, K, V, S = DefaultHashBuilder> {
+    inner: Option<MapInner<'shm, K, V, S>>,
+}
+
+struct MapInner<'shm, K, V, S> {
+    map: HashMap<K, V, S, MapAlloc<'shm>>,
+    alloc: MapAlloc<'shm>,
+}
+
+impl<'shm, K, V, S> Deref for Map<'shm, K, V, S> {
+    type Target = HashMap<K, V, S, MapAlloc<'shm>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner.as_ref().unwrap().map
+    }
+}
+
+impl<'shm, K, V, S> DerefMut for Map<'shm, K, V, S> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner.as_mut().unwrap().map
+    }
+}
+
+impl<'shm, K, V> Map<'shm, K, V, DefaultHashBuilder> {
+    /// Re-allocate the hash map.
+    ///
+    /// See `reset_with_hasher`
+    pub fn reset(&mut self, alloc: MapAlloc<'shm>) {
+        let map = HashMap::new_in(alloc.clone());
+        self.inner = Some(MapInner { map, alloc });
+    }
+}
+
+impl<'shm, K, V, S> Map<'shm, K, V, S> {
+    /// Return a map layout with an uninitialized map and allocator.
+    ///
+    /// Call `reset` to actually allocate the map.
+    pub fn new() -> Self {
+        Self { inner: None }
+    }
+
+    /// Re-allocate the hash map.
+    ///
+    /// Uses the given map allocator as underlying allocator.
+    ///
+    /// Each hash map must have a unique `MapAlloc`. Otherwise, your
+    /// program will panic (even though this function takes an immutable ref,
+    /// under the hood mutability is protected by a `RefCell`).
+    pub fn reset_with_hasher(&mut self, alloc: MapAlloc<'shm>, hash_builder: S) {
+        let map = HashMap::with_hasher_in(hash_builder, alloc.clone());
+        self.inner = Some(MapInner { map, alloc })
+    }
+
+    /// Return a clone to the underlying allocator
+    ///
+    /// Safety:
+    ///  - You must ensure you are the ONLY one using this allocator.
+    ///    While this map should be protected by shared-memory locks, and
+    ///    as a result you should be the only one being able to call this
+    ///    method, the result of this method IS ALLOWED TO ESCAPE THE
+    ///    CRITICAL SECTION! However, you must not use it outside the
+    ///    critical section!
+    ///
+    /// TODO: Make `MapAlloc` thread/process-safe!
+    ///
+    pub unsafe fn allocator(&self) -> MapAlloc<'shm> {
+        self.inner.as_ref().unwrap().alloc.clone()
+    }
+}
+
+#[cfg(test)]
+mod integration_tests {
+    use super::*;
+
+    use std::collections::{HashMap, HashSet};
+    use std::mem::MaybeUninit;
+    use std::time::Duration;
+
+    use nix::sys::wait::WaitStatus;
+    use nix::unistd::ForkResult;
+    use rand::prelude::*;
+
+    use crate::filealloc::FileAlloc;
+    use crate::mapalloc::{MapAlloc, MapAllocControlData};
+    use crate::sync::RwLock;
+
+    struct InsertMany {
+        file_alloc: FileAlloc,
+        map_alloc: MapAllocControlData,
+        map: RwLock<Map<'static, u64, u64>>,
+    }
+
+    #[test]
+    fn test_insert_many() {
+        const NUM_PROCS: usize = 20;
+        const NUM_INSERTS_PER_PROC: usize = 1000;
+        const OP_SLEEP: Duration = Duration::from_micros(10);
+
+        const MEM_HEAP_SIZE: usize = 10 * 1024 * 1024;
+
+        let mut rng = StdRng::from_seed([0; 32]);
+        let scenarios: Vec<Vec<(u64, u64)>> = std::iter::repeat_with(|| {
+            std::iter::repeat_with(|| (rng.next_u64() % 1000, rng.next_u64() % 1000))
+                .take(NUM_INSERTS_PER_PROC)
+                .collect()
+        })
+        .take(NUM_PROCS)
+        .collect();
+
+        let mmap_ptr = unsafe {
+            libc::mmap(
+                std::ptr::null_mut(),
+                MEM_HEAP_SIZE,
+                libc::PROT_READ | libc::PROT_WRITE,
+                libc::MAP_SHARED | libc::MAP_ANONYMOUS,
+                -1,
+                0,
+            )
+        };
+        assert_ne!(mmap_ptr, libc::MAP_FAILED);
+        let inserter_ptr: *mut MaybeUninit<InsertMany> = mmap_ptr as *mut _;
+        let inserter: &'static mut MaybeUninit<InsertMany> =
+            // Safety:
+            //  - Pointer is not null
+            //  - Pointer is aligned on a page
+            //  - This is the only reference to the data, and the lifteim is
+            //    static as we don't unmap the memory
+            unsafe { &mut *inserter_ptr };
+        // Safety: Initialize the memory properly
+        let inserter = unsafe {
+            inserter.as_mut_ptr().write(InsertMany {
+                file_alloc: FileAlloc::new(
+                    mmap_ptr,
+                    MEM_HEAP_SIZE,
+                    std::mem::size_of::<InsertMany>(),
+                ),
+                map_alloc: MapAllocControlData::new(),
+                map: RwLock::new(Map::new()),
+            });
+            inserter.assume_init_mut()
+        };
+        // Safety: We are the only ones to attach to this lock.
+        let map = unsafe { inserter.map.initialize() }.unwrap();
+
+        let map_alloc = unsafe {
+            // Safety: we'll only use this for one map.
+            MapAlloc::new(&inserter.map_alloc, &inserter.file_alloc)
+        };
+        map.write().unwrap().reset(map_alloc);
+
+        let mut child_procs = vec![];
+        for scenario in &scenarios {
+            match unsafe { nix::unistd::fork() }.unwrap() {
+                ForkResult::Parent { child } => {
+                    child_procs.push(child);
+                }
+                ForkResult::Child => {
+                    for &(key, value) in scenario.iter() {
+                        let mut guard = map.write().unwrap();
+                        guard.insert(key, value);
+                        std::thread::sleep(OP_SLEEP);
+                        // Make sure we sleep while holding the lock.
+                        drop(guard);
+                    }
+
+                    std::process::exit(0)
+                }
+            }
+        }
+
+        for pid in child_procs {
+            match nix::sys::wait::waitpid(pid, None).unwrap() {
+                WaitStatus::Exited(_, status) => assert_eq!(status, 0),
+                status => panic!("unexpected status for pid {:?}: {:?}", pid, status),
+            }
+        }
+
+        let guard = map.read().unwrap();
+
+        let mut expected: HashMap<u64, HashSet<u64>> = HashMap::new();
+        for scenario in scenarios {
+            for (key, value) in scenario {
+                expected.entry(key).or_default().insert(value);
+            }
+        }
+
+        for (key, values) in expected {
+            let value = guard[&key];
+            assert!(values.contains(&value));
+        }
+
+        // Must drop! Otherwise, munmap will already have unmapped the lock!
+        drop(guard);
+        assert_eq!(unsafe { libc::munmap(mmap_ptr, MEM_HEAP_SIZE) }, 0);
+    }
+}

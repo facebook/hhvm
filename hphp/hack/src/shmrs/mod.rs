@@ -8,4 +8,6 @@
 /// A Rust library for interacting with shared memory.
 pub mod error;
 pub mod filealloc;
+pub mod hashmap;
+pub mod mapalloc;
 pub mod sync;

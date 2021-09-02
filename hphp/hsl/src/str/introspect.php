@@ -139,6 +139,8 @@ function is_empty(
 
 /**
  * Returns the length of the given string, i.e. the number of bytes.
+ *
+ * @see `Str\length_l()` for the length in characters.
  */
 function length(
   string $string,

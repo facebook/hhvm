@@ -3,9 +3,7 @@
 
 class Foo {
   public function __construct(public (function(): void) $prop) {}
-  <<__NEVER_INLINE>>
   public readonly function foo() : void {}
-  <<__NEVER_INLINE>>
   public function bar(): void {}
 }
 

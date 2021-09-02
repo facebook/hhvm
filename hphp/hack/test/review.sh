@@ -66,7 +66,7 @@ for f in "$@"; do
   # --no-index makes us ignore the git repo, if any - otherwise this only
   # works in hg checkouts (i.e. fbcode)
   git --no-pager diff --no-index --diff-algorithm=histogram --color=always \
-    --word-diff=color --word-diff-regex='[a-zA-Z0-9_:;()\\-]+' \
+    --word-diff=color --word-diff-regex='[^[:space:]]+' \
     $EXP "$OUT" | tail -n +5
   echo
   if [ "$NO_COPY" = true ]; then

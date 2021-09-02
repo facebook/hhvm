@@ -27,8 +27,8 @@ rayon = "1.2"
 serde_json = { version = "1.0", features = ["float_roundtrip"] }
 stack_limit = { path = "../utils/stack_limit" }
 structopt = "0.3.21"
-strum = "0.19"
-strum_macros = "0.19"
+strum = "0.21"
+strum_macros = "0.21"
 
 [profile.release]
 incremental = false

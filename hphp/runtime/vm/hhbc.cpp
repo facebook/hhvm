@@ -989,6 +989,12 @@ static const char* ReadonlyOp_names[] = {
 #undef OP
 };
 
+static const char* ReadonlyViolation_names[] = {
+#define OP(x) #x,
+  READONLY_VIOLATION_OPS
+#undef OP
+};
+
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode, int off) {
   static_assert(
@@ -1063,6 +1069,8 @@ X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
 X(IsLogAsDynamicCallOp,
                   static_cast<int>(IsLogAsDynamicCallOp::LogAsDynamicCall))
 X(ReadonlyOp,     static_cast<int>(ReadonlyOp::Any))
+X(ReadonlyViolation,
+                  static_cast<int>(ReadonlyViolation::Readonly))
 #undef X
 
 //////////////////////////////////////////////////////////////////////

@@ -1012,7 +1012,8 @@ void badPropInitialValue(ISS& env) {
 
 bool checkReadonlyOp(ReadonlyOp expected = ReadonlyOp::Any,
                      ReadonlyOp actual = ReadonlyOp::Any) {
-  return RO::EvalEnableReadonlyPropertyEnforcement && expected == actual;
+  return RO::EvalEnableReadonlyPropertyEnforcement == 2 &&
+    expected == actual;
 }
 #ifdef __clang__
 #pragma clang diagnostic pop

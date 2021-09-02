@@ -2044,6 +2044,31 @@ struct ReadonlyData : IRExtraData {
   ReadonlyOp op;
 };
 
+struct ReadonlyPropData : IRExtraData {
+  explicit ReadonlyPropData(ReadonlyViolation rv, const Class* cls)
+    : rv(rv), cls(cls) {
+}
+  std::string show() const {
+    return folly::sformat("{},{}",
+      subopToName(rv),
+      cls ? cls->name()->data() : "nullptr"
+    );
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      std::hash<ReadonlyViolation>()(rv), cls ? cls->stableHash() : 0
+    );
+  }
+
+  bool equals(const ReadonlyPropData& o) const {
+    return cls == o.cls && rv == o.rv ;
+  }
+
+  ReadonlyViolation rv;
+  const Class* cls;
+};
+
 struct SetOpData : IRExtraData {
   explicit SetOpData(SetOpOp op) : op(op) {}
   std::string show() const { return subopToName(op); }
@@ -2869,6 +2894,7 @@ X(LdClsPropAddrOrRaise,         ReadonlyData);
 X(ThrowMustBeEnclosedInReadonly,ClassData);
 X(ThrowMustBeMutableException,  ClassData);
 X(ThrowMustBeReadonlyException, ClassData);
+X(RaiseReadonlyPropViolation,   ReadonlyPropData);
 
 #undef X
 

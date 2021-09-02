@@ -4390,7 +4390,7 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
   );
   Trace::Indent _;
 
-  assertx(!mustBeReadOnly || RO::EvalEnableReadonlyPropertyEnforcement);
+  assertx(!mustBeReadOnly || RO::EvalEnableReadonlyPropertyEnforcement == 2);
   assertx(!val.subtypeOf(BBottom));
 
   // Perform the actual merge for a given property, returning the
@@ -6598,7 +6598,7 @@ PropMergeResult<> Index::merge_static_type(
   );
   Trace::Indent _;
 
-  assertx(!mustBeReadOnly || RO::EvalEnableReadonlyPropertyEnforcement);
+  assertx(!mustBeReadOnly || RO::EvalEnableReadonlyPropertyEnforcement == 2);
   assertx(val.subtypeOf(BInitCell));
 
   using R = PropMergeResult<>;

@@ -2382,7 +2382,7 @@ OPTBLD_INLINE void iopCGetS(ReadonlyOp op) {
                 ss.name->data());
   }
   if (RO::EvalEnableReadonlyPropertyEnforcement &&
-    ss.readonly && op == ReadonlyOp::Mutable){
+    ss.readonly && op == ReadonlyOp::Mutable) {
     throw_must_be_enclosed_in_readonly(
       ss.cls->name()->data(), ss.name->data()
     );
@@ -3244,10 +3244,12 @@ OPTBLD_INLINE void iopSetS(ReadonlyOp op) {
                accessible, constant, readonly, true);
 
   SCOPE_EXIT { decRefStr(name); };
-  if (RO::EvalEnableReadonlyPropertyEnforcement &&
-    !readonly && op == ReadonlyOp::Readonly) {
+
+  if (RO::EvalEnableReadonlyPropertyEnforcement && !readonly &&
+    op == ReadonlyOp::Readonly) {
     throw_must_be_readonly(cls->name()->data(), name->data());
   }
+
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(),

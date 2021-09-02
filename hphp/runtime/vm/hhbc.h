@@ -333,6 +333,19 @@ enum class IncDecOp : uint8_t {
 #undef INCDEC_OP
 };
 
+
+#define READONLY_VIOLATION_OPS   \
+  OP(Readonly)                   \
+  OP(Mutable)                    \
+  OP(EnclosedInRO)
+
+enum class ReadonlyViolation : uint8_t {
+#define OP(op) op,
+  READONLY_VIOLATION_OPS
+#undef OP
+};
+
+
 inline bool isPre(IncDecOp op) {
   return
     op == IncDecOp::PreInc || op == IncDecOp::PreIncO ||
@@ -984,6 +997,7 @@ const char* subopToName(CudOp);
 const char* subopToName(SpecialClsRef);
 const char* subopToName(IsLogAsDynamicCallOp);
 const char* subopToName(ReadonlyOp);
+const char* subopToName(ReadonlyViolation);
 
 /*
  * Returns true iff the given SubOp is in the valid range for its type.

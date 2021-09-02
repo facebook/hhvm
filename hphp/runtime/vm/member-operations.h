@@ -774,7 +774,11 @@ tv_lval ElemD(tv_lval base, key_type<keyType> key, bool roProp) {
 
   if (RO::EvalEnableReadonlyPropertyEnforcement && roProp &&
     !hasPersistentFlavor(base.type()) && isRefcountedType(base.type())) {
-    throwReadOnlyCollectionMutation();
+      if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
+        raiseReadOnlyCollectionMutation();
+      } else {
+        throwReadOnlyCollectionMutation();
+      }
   }
 
   switch (base.type()) {
@@ -1008,7 +1012,11 @@ tv_lval ElemU(tv_lval base, key_type<keyType> key, bool roProp) {
 
   if (RO::EvalEnableReadonlyPropertyEnforcement && roProp &&
     (!hasPersistentFlavor(type(base)) && isRefcountedType(type(base)))) {
-    throwReadOnlyCollectionMutation();
+    if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
+      raiseReadOnlyCollectionMutation();
+    } else {
+      throwReadOnlyCollectionMutation();
+    }
   }
 
   switch (type(base)) {

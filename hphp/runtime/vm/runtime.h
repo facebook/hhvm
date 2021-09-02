@@ -64,10 +64,12 @@ void checkReadonlyMismatch(const Func* func, uint32_t numArgs,
 void throwReadonlyMismatch(const Func* func, int32_t index);
 [[noreturn]] void throwInvalidUnpackArgs();
 [[noreturn]] void throwMissingArgument(const Func* func, int got);
-[[noreturn]] void throwMustBeEnclosedinReadonly(const Class* cls, const StringData* propName);
-[[noreturn]] void throwMustBeMutableException(const Class* cls, const StringData* propName);
-[[noreturn]] void throwMustBeReadonlyException(const Class* cls, const StringData* propName);
-[[noreturn]] void throwMustBeValueTypeException(const StringData* locName);
+void throwMustBeEnclosedInReadonly(const Class* cls, const StringData* propName);
+void throwMustBeMutableException(const Class* cls, const StringData* propName);
+void throwMustBeReadonlyException(const Class* cls, const StringData* propName);
+void throwMustBeValueTypeException(const StringData* locName);
+void raiseReadonlyViolationWarning(ReadonlyViolation rv, const Class* cls,
+                                   const StringData* propName);
 void raiseTooManyArguments(const Func* func, int got);
 void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs);
 

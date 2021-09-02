@@ -191,7 +191,7 @@ void throwArrayKeyException(const ArrayData* ad, const StringData* key) {
   throwOOBArrayKeyException(key, ad);
 }
 
-void throwMustBeEnclosedinReadonly(const Class* cls, const StringData* propName) {
+void throwMustBeEnclosedInReadonly(const Class* cls, const StringData* propName) {
   throw_must_be_enclosed_in_readonly(cls->name()->data(), propName->data());
 }
 
@@ -205,6 +205,21 @@ void throwMustBeMutableException(const Class* cls, const StringData* propName) {
 
 void throwMustBeValueTypeException(const StringData* locName) {
   throw_local_must_be_value_type(locName->data());
+}
+
+void raiseReadonlyViolationWarning(ReadonlyViolation rv, const Class* cls, const StringData* propName) {
+  switch (rv) {
+    case ReadonlyViolation::Readonly:
+      throw_must_be_readonly(cls->name()->data(), propName->data());
+      return;
+    case ReadonlyViolation::Mutable:
+      throw_must_be_mutable(cls->name()->data(), propName->data());
+      return;
+    case ReadonlyViolation::EnclosedInRO:
+       throw_must_be_enclosed_in_readonly(cls->name()->data(), propName->data());
+      return;
+  }
+  not_reached();
 }
 
 std::string formatParamInOutMismatch(const char* fname, uint32_t index,

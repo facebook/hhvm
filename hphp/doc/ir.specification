@@ -2109,6 +2109,12 @@ To string conversions:
 
   Raises a notice with the text in S0 as its message.
 
+| RaiseReadonlyPropViolation<cls, flag>, ND, S(Str), NF
+
+  Raises a warning indicating a readonly semantics violation. Cls is the class
+  the property was declared on. Flag is the readonly rule we are enforcing.
+  S0 is the property name.
+
 | ThrowHasThisNeedStatic, ND, S(Func), T
 
   Throws a BadMethodCallException to indicate that func was called on an object

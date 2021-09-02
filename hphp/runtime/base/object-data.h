@@ -485,17 +485,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   [[noreturn]] NEVER_INLINE
   void throwMutateConstProp(Slot prop) const;
-
-  [[noreturn]] NEVER_INLINE
   void throwMustBeMutable(Slot prop) const;
-
-  [[noreturn]] NEVER_INLINE
   void throwMustBeEnclosedInReadonly(Slot prop) const;
-
-  [[noreturn]] NEVER_INLINE
   void throwMustBeReadonly(Slot prop) const;
-
-  [[noreturn]] NEVER_INLINE
   void throwMustBeValueType(Slot prop) const;
 
  public:

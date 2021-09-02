@@ -1375,7 +1375,7 @@ struct RuntimeOption {
   F(bool, TypeconstAbstractDefaultReflectionIsAbstract, false)          \
   F(bool, AbstractContextConstantUninitAccess, false)                   \
   F(bool, TraitConstantInterfaceBehavior, false)                        \
-  /* 0 nothing, 1 notice, 2 error */                                    \
+  /* 0 nothing, 1 warning, 2 error */                                   \
   F(uint32_t, EnableReadonlyPropertyEnforcement, 0)                     \
   /* 0 nothing, 1 warning, 2 error */                                   \
   F(uint32_t, EnableReadonlyCallEnforcement, 0)                         \

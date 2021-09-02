@@ -165,6 +165,18 @@ add_definitions(-DDEFAULT_CONFIG_DIR="${DEFAULT_CONFIG_DIR}")
 
 add_definitions(-DHAVE_INTTYPES_H)
 
+# Load system tzdata if present
+# Works on Linux and Mac; given that we don't want to (and basically don't)
+# update the bundled tzdata, if this doesn't work on some platform, please
+# blacklist the platform rather than whitelisting others.
+option(USE_BUNDLED_TZDATA "Use bundled system tzdata instead of /usr/share/zoneinfo" OFF)
+if (NOT ${USE_BUNDLED_TZDATA})
+  if (NOT EXISTS /usr/share/zoneinfo)
+    message(FATAL_ERROR "/usr/share/zoneinfo does not exist, and USE_BUNDLED_TZDATA not set")
+  endif()
+  add_definitions(-DHAVE_SYSTEM_TZDATA)
+endif()
+
 include_directories(${TP_DIR})
 if (THIRD_PARTY_INCLUDE_PATHS)
   include_directories(${THIRD_PARTY_INCLUDE_PATHS})

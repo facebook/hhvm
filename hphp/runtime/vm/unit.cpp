@@ -90,6 +90,7 @@
 #include "hphp/runtime/server/source-root-info.h"
 
 #include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
@@ -277,6 +278,9 @@ void Unit::initialMerge() {
       StructuredLogEntry ent;
       ent.setStr("path", m_origFilepath->data());
       ent.setInt("index", index);
+      if (RuntimeOption::ServerExecutionMode()) {
+        ent.setInt("uptime", f_server_uptime());
+      }
       StructuredLog::log("hhvm_first_units", ent);
     }
   }

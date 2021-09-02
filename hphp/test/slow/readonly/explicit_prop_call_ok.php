@@ -7,7 +7,7 @@ class Foo {
 
 <<__EntryPoint>>
 function test() : void {
-  $f = new Foo(() ==> {echo "hi\n";});
+  $f = new Foo(readonly () ==> {echo "hi\n";});
   (readonly $f->prop)(); // This is allowed, since $prop is marked readonly at declaration time
   echo "Done\n";
 }

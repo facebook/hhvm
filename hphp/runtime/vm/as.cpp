@@ -1350,6 +1350,10 @@ FCallArgs::Flags read_fcall_flags(AsmState& as, Op thisOpcode) {
       flags |= FCallArgs::EnforceMutableReturn;
       continue;
     }
+    if (flag == "EnforceReadonlyThis") {
+      flags |= FCallArgs::EnforceReadonlyThis;
+      continue;
+    }
 
     as.error("unrecognized FCall flag `" + flag + "'");
   }

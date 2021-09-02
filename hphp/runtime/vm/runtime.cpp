@@ -251,18 +251,29 @@ std::string formatReturnReadonlyMismatch(const char* fname) {
   );
 }
 
-void throwParamReadonlyMismatch(const Func* func, int32_t index) {
+std::string formatReadonlyThisMismatch(const char* fname) {
+  return folly::sformat(
+    "{}() modifies the instance, but the caller has a readonly instance",
+    fname
+  );
+}
+
+void throwReadonlyMismatch(const Func* func, int32_t index) {
+  if (RO::EvalEnableReadonlyCallEnforcement == 0) return;
   auto const msg = [&] {
-    if (index == kInvalidId) {
+    if (index == kReadonlyReturnId) {
       return formatReturnReadonlyMismatch(func->fullName()->data());
     }
+    if (index == kReadonlyThisId) {
+      return formatReadonlyThisMismatch(func->fullName()->data());
+    }
     return formatParamReadonlyMismatch(func->fullName()->data(), index);
-  };
+  }();
   if (RO::EvalEnableReadonlyCallEnforcement == 1) {
-    raise_warning(msg());
-  } else if (RO::EvalEnableReadonlyCallEnforcement > 1) {
-    SystemLib::throwInvalidArgumentExceptionObject(msg());
+    raise_warning(msg);
+    return;
   }
+  SystemLib::throwInvalidArgumentExceptionObject(msg);
 }
 
 void checkReadonlyMismatch(const Func* func, uint32_t numArgs,
@@ -271,7 +282,7 @@ void checkReadonlyMismatch(const Func* func, uint32_t numArgs,
   uint8_t tmp = 0;
   for (auto i = 0; i < numArgs; ++i) {
     tmp = (i % 8) == 0 ? *(readonlyArgs++) : tmp >> 1;
-    if ((tmp & 1) && !func->isReadonly(i)) throwParamReadonlyMismatch(func, i);
+    if ((tmp & 1) && !func->isReadonly(i)) throwReadonlyMismatch(func, i);
   }
 }
 

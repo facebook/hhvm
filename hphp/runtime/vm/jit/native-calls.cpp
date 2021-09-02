@@ -291,7 +291,7 @@ static CallMap s_callMap {
                           {{SSA, 0},
                            extra(&BoolVecArgsData::numArgs),
                            extra(&BoolVecArgsData::args)}},
-    {ThrowReadonlyMismatch, throwParamReadonlyMismatch, DNone, SSync,
+    {ThrowReadonlyMismatch, throwReadonlyMismatch, DNone, SSync,
                           {{SSA, 0},
                            extra(&ParamData::paramId)}},
     {HasToString,        &ObjectData::hasToString, DSSA, SNone,

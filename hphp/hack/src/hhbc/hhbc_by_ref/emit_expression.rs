@@ -1883,6 +1883,10 @@ fn emit_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         let fid = function::FunctionType::<'arena>::from_ast_name(alloc, s);
         emit_symbol_refs::add_function(alloc, e, fid);
     }
+    let readonly_this = match &expr.2 {
+        ast::Expr_::ReadonlyExpr(_) => true,
+        _ => false,
+    };
     let fcall_args = get_fcall_args(
         e,
         alloc,
@@ -1892,6 +1896,7 @@ fn emit_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         env.call_context.clone(),
         false,
         readonly_return,
+        readonly_this,
     );
     match expr.2.as_id() {
         None => emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args),
@@ -2723,6 +2728,7 @@ fn get_fcall_args<'arena, 'decl, D: DeclProvider<'decl>>(
     context: Option<String>,
     lock_while_unwinding: bool,
     readonly_return: bool,
+    readonly_this: bool,
 ) -> FcallArgs<'arena> {
     let num_args = args.len();
     let num_rets = 1 + args.iter().filter(|x| is_inout_arg(*x)).count();
@@ -2730,6 +2736,7 @@ fn get_fcall_args<'arena, 'decl, D: DeclProvider<'decl>>(
     flags.set(FcallFlags::HAS_UNPACK, uarg.is_some());
     flags.set(FcallFlags::LOCK_WHILE_UNWINDING, lock_while_unwinding);
     flags.set(FcallFlags::ENFORCE_MUTABLE_RETURN, !readonly_return);
+    flags.set(FcallFlags::ENFORCE_READONLY_THIS, readonly_this);
     let is_readonly_arg = if e
         .options()
         .hhvm
@@ -3880,6 +3887,7 @@ fn emit_new<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                 env.call_context.clone(),
                                 true,
                                 true, // we do not need to enforce readonly return for constructors
+                                false, // we do not need to enforce readonly this for constructors
                             ),
                         ),
                         instr::popc(alloc),

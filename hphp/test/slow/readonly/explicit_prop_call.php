@@ -8,6 +8,8 @@ class Foo {
 <<__EntryPoint>>
 function test() : void {
   $f = new Foo(() ==> {echo "hi\n";});
-  (readonly $f->prop)(); // TODO: this should fail, $f is not marked readonly
+  try {
+    (readonly $f->prop)(); // fail, $f is not marked readonly
+  } catch (Exception $e) { echo $e->getMessage() . "\n"; }
   echo "Done\n";
 }

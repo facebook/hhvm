@@ -129,7 +129,12 @@ bool emitCallerReadonlyChecksKnown(IRGS& env, const Func* callee,
     }
   }
   if (fca.enforceMutableReturn() && (callee->attrs() & AttrReadonlyReturn)) {
-    auto const data = ParamData { kInvalidId };
+    auto const data = ParamData { kReadonlyReturnId };
+    gen(env, ThrowReadonlyMismatch, data, cns(env, callee));
+    if (RO::EvalEnableReadonlyCallEnforcement > 1) return false;
+  }
+  if (fca.enforceReadonlyThis() && !(callee->attrs() & AttrReadonlyThis)) {
+    auto const data = ParamData { kReadonlyThisId };
     gen(env, ThrowReadonlyMismatch, data, cns(env, callee));
     if (RO::EvalEnableReadonlyCallEnforcement > 1) return false;
   }
@@ -153,7 +158,22 @@ void emitCallerReadonlyChecksUnknown(IRGS& env, SSATmp* callee,
       },
       [&] {
         hint(env, Block::Hint::Unlikely);
-        auto const data = ParamData { kInvalidId };
+        auto const data = ParamData { kReadonlyReturnId };
+        gen(env, ThrowReadonlyMismatch, data, callee);
+      }
+    );
+  }
+  if (fca.enforceReadonlyThis()) {
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        auto const data = AttrData { AttrReadonlyThis };
+        auto const success = gen(env, FuncHasAttr, data, callee);
+        gen(env, JmpZero, taken, success);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        auto const data = ParamData { kReadonlyThisId };
         gen(env, ThrowReadonlyMismatch, data, callee);
       }
     );

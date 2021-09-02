@@ -1176,6 +1176,7 @@ std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgs,
   if (fca.lockWhileUnwinding()) flags.push_back("LockWhileUnwinding");
   if (fca.skipRepack()) flags.push_back("SkipRepack");
   if (fca.enforceMutableReturn()) flags.push_back("EnforceMutableReturn");
+  if (fca.enforceReadonlyThis()) flags.push_back("EnforceReadonlyThis");
   return folly::sformat(
     "<{}> {} {} \"{}\" \"{}\" {} \"{}\"",
     folly::join(' ', flags), fca.numArgs, fca.numRets,

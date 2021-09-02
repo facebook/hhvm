@@ -3,7 +3,9 @@
 
 class Foo {
   public function __construct(public (function(): void) $prop) {}
+  <<__NEVER_INLINE>>
   public readonly function foo() : void {}
+  <<__NEVER_INLINE>>
   public function bar(): void {}
 }
 
@@ -11,6 +13,8 @@ class Foo {
 function test() : void {
   $f = readonly new Foo(() ==> {echo "hi\n";});
   $f->foo(); // ok
-  $f->bar(); // TODO: error, $f is readonly\
+  try {
+    $f->bar(); // TODO: error, $f is readonly\
+  } catch (Exception $e) { echo $e->getMessage() . "\n"; }
   echo "Done\n";
 }

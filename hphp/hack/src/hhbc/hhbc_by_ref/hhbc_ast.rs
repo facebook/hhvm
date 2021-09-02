@@ -50,10 +50,11 @@ pub type ByRefs<'arena> = Slice<'arena, bool>;
 bitflags::bitflags! {
     #[repr(C)]
     pub struct FcallFlags: u8 {
-        const HAS_UNPACK                      =        0b0001;
-        const HAS_GENERICS                    =        0b0010;
-        const LOCK_WHILE_UNWINDING            =        0b0100;
-        const ENFORCE_MUTABLE_RETURN          =        0b1000;
+        const HAS_UNPACK                      = 1 << 0;
+        const HAS_GENERICS                    = 1 << 1;
+        const LOCK_WHILE_UNWINDING            = 1 << 2;
+        const ENFORCE_MUTABLE_RETURN          = 1 << 3;
+        const ENFORCE_READONLY_THIS           = 1 << 4;
     }
 }
 impl Default for FcallFlags {

@@ -8,5 +8,9 @@ class Foo {
 <<__EntryPoint>>
 function test() : void {
   $f = readonly new Foo(() ==> {echo "hi\n";});
-  ($f->prop)(); // TODO: error, $f is readonly so the function needs to be readonly
+  try {
+    ($f->prop)(); // fail, $f is readonly so the function needs to be readonly
+  } catch (Exception $e) {
+    echo $e->getMessage() . "\n";
+  }
 }

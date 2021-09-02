@@ -7,8 +7,8 @@
  *)
 
 val direct_decl_parse_and_cache :
-  ?file_decl_hash:bool ->
-  ?symbol_decl_hashes:bool ->
+  file_decl_hash:bool ->
+  symbol_decl_hashes:bool ->
   Provider_context.t ->
   Relative_path.t ->
   ((string * Shallow_decl_defs.decl) list

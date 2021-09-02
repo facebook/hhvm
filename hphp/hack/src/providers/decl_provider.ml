@@ -31,8 +31,15 @@ let err_not_found (file : Relative_path.t) (name : string) : 'a =
   in
   raise (Decl_defs.Decl_not_found err_str)
 
-let direct_decl_parse_and_cache ctx filename name =
-  match Direct_decl_utils.direct_decl_parse_and_cache ctx filename with
+let direct_decl_parse_and_cache
+    ~file_decl_hash ~symbol_decl_hashes ctx filename name =
+  match
+    Direct_decl_utils.direct_decl_parse_and_cache
+      ~file_decl_hash
+      ~symbol_decl_hashes
+      ctx
+      filename
+  with
   | None -> err_not_found filename name
   | Some (decls, _mode, _hash, _symbol_decl_hashes) -> decls
 
@@ -164,7 +171,12 @@ let get_fun
       (match Naming_provider.get_fun_path ctx fun_name with
       | Some filename ->
         if use_direct_decl_parser ctx then
-          direct_decl_parse_and_cache ctx filename fun_name
+          direct_decl_parse_and_cache
+            ~file_decl_hash:false
+            ~symbol_decl_hashes:false
+            ctx
+            filename
+            fun_name
           |> List.find_map ~f:(function
                  | (name, Shallow_decl_defs.Fun decl)
                    when String.equal fun_name name ->
@@ -186,7 +198,12 @@ let get_fun
         match Naming_provider.get_fun_path ctx fun_name with
         | Some filename ->
           if use_direct_decl_parser ctx then
-            direct_decl_parse_and_cache ctx filename fun_name
+            direct_decl_parse_and_cache
+              ~file_decl_hash:false
+              ~symbol_decl_hashes:false
+              ctx
+              filename
+              fun_name
             |> List.find_map ~f:(function
                    | (name, Shallow_decl_defs.Fun decl)
                      when String.equal fun_name name ->
@@ -226,7 +243,12 @@ let get_typedef
       (match Naming_provider.get_typedef_path ctx typedef_name with
       | Some filename ->
         if use_direct_decl_parser ctx then
-          direct_decl_parse_and_cache ctx filename typedef_name
+          direct_decl_parse_and_cache
+            ~file_decl_hash:false
+            ~symbol_decl_hashes:false
+            ctx
+            filename
+            typedef_name
           |> List.find_map ~f:(function
                  | (name, Shallow_decl_defs.Typedef decl)
                    when String.equal typedef_name name ->
@@ -248,7 +270,12 @@ let get_typedef
         match Naming_provider.get_typedef_path ctx typedef_name with
         | Some filename ->
           if use_direct_decl_parser ctx then
-            direct_decl_parse_and_cache ctx filename typedef_name
+            direct_decl_parse_and_cache
+              ~file_decl_hash:false
+              ~symbol_decl_hashes:false
+              ctx
+              filename
+              typedef_name
             |> List.find_map ~f:(function
                    | (name, Shallow_decl_defs.Typedef decl)
                      when String.equal typedef_name name ->
@@ -288,7 +315,12 @@ let get_record_def
       (match Naming_provider.get_record_def_path ctx record_name with
       | Some filename ->
         if use_direct_decl_parser ctx then
-          direct_decl_parse_and_cache ctx filename record_name
+          direct_decl_parse_and_cache
+            ~file_decl_hash:false
+            ~symbol_decl_hashes:false
+            ctx
+            filename
+            record_name
           |> List.find_map ~f:(function
                  | (name, Shallow_decl_defs.Record decl)
                    when String.equal record_name name ->
@@ -310,7 +342,12 @@ let get_record_def
         match Naming_provider.get_record_def_path ctx record_name with
         | Some filename ->
           if use_direct_decl_parser ctx then
-            direct_decl_parse_and_cache ctx filename record_name
+            direct_decl_parse_and_cache
+              ~file_decl_hash:false
+              ~symbol_decl_hashes:false
+              ctx
+              filename
+              record_name
             |> List.find_map ~f:(function
                    | (name, Shallow_decl_defs.Record decl)
                      when String.equal record_name name ->
@@ -350,7 +387,12 @@ let get_gconst
       (match Naming_provider.get_const_path ctx gconst_name with
       | Some filename ->
         if use_direct_decl_parser ctx then
-          direct_decl_parse_and_cache ctx filename gconst_name
+          direct_decl_parse_and_cache
+            ~file_decl_hash:false
+            ~symbol_decl_hashes:false
+            ctx
+            filename
+            gconst_name
           |> List.find_map ~f:(function
                  | (name, Shallow_decl_defs.Const decl)
                    when String.equal gconst_name name ->
@@ -372,7 +414,12 @@ let get_gconst
         match Naming_provider.get_const_path ctx gconst_name with
         | Some filename ->
           if use_direct_decl_parser ctx then
-            direct_decl_parse_and_cache ctx filename gconst_name
+            direct_decl_parse_and_cache
+              ~file_decl_hash:false
+              ~symbol_decl_hashes:false
+              ctx
+              filename
+              gconst_name
             |> List.find_map ~f:(function
                    | (name, Shallow_decl_defs.Const decl)
                      when String.equal gconst_name name ->

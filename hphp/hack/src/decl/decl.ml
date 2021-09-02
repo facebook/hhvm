@@ -76,7 +76,13 @@ let make_env
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (fn : Relative_path.t) :
     unit =
   if use_direct_decl_parser ctx then (
-    match Direct_decl_utils.direct_decl_parse_and_cache ctx fn with
+    match
+      Direct_decl_utils.direct_decl_parse_and_cache
+        ~file_decl_hash:false
+        ~symbol_decl_hashes:false
+        ctx
+        fn
+    with
     | None -> ()
     | Some (decls, _mode, _hash, _symbol_decl_hashes) ->
       if not (shallow_decl_enabled ctx) then

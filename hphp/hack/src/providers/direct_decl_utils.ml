@@ -83,8 +83,7 @@ let get_file_contents ctx filename =
     Some (Full_fidelity_source_text.text source_text)
   | None -> File_provider.get_contents filename
 
-let direct_decl_parse_and_cache
-    ?(file_decl_hash = false) ?(symbol_decl_hashes = false) ctx file =
+let direct_decl_parse_and_cache ~file_decl_hash ~symbol_decl_hashes ctx file =
   match get_file_contents ctx file with
   | None -> None
   | Some contents ->

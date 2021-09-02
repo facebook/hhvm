@@ -5775,6 +5775,7 @@ let readonly_invalid_as_mut pos =
     (Typing.err_code Typing.ReadonlyInvalidAsMut)
     pos
     "Only value types and arrays can be converted to mutable."
+
 let readonly_exception pos =
   add
     (Typing.err_code Typing.ReadonlyException)

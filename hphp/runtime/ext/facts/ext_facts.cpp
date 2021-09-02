@@ -858,7 +858,7 @@ Array HHVM_FUNCTION(
     facts_type_alias_attribute_parameters,
     const String& type,
     const String& attr) {
-  return Facts::getFactsOrThrow().getTypeAttrArgs(type, attr);
+  return Facts::getFactsOrThrow().getTypeAliasAttrArgs(type, attr);
 }
 
 Array HHVM_FUNCTION(

@@ -190,12 +190,27 @@ template <typename S> struct SymbolMap {
   std::vector<Symbol<S, SymKind::Type>> getAttributesOfType(const S& type);
 
   /**
-   * Return the types and type aliases with a given attribute
+   * Return the attributes decorating a type alias
    */
   std::vector<Symbol<S, SymKind::Type>>
-  getTypesAndTypeAliasesWithAttribute(Symbol<S, SymKind::Type> attr);
+  getAttributesOfTypeAlias(Symbol<S, SymKind::Type> typeAlias);
   std::vector<Symbol<S, SymKind::Type>>
-  getTypesAndTypeAliasesWithAttribute(const S& attr);
+  getAttributesOfTypeAlias(const S& typeAlias);
+
+  /**
+   * Return the types decorated with a given attribute
+   */
+  std::vector<Symbol<S, SymKind::Type>>
+  getTypesWithAttribute(Symbol<S, SymKind::Type> attr);
+  std::vector<Symbol<S, SymKind::Type>> getTypesWithAttribute(const S& attr);
+
+  /**
+   * Return the type aliases decorated with a given attribute
+   */
+  std::vector<Symbol<S, SymKind::Type>>
+  getTypeAliasesWithAttribute(Symbol<S, SymKind::Type> attr);
+  std::vector<Symbol<S, SymKind::Type>>
+  getTypeAliasesWithAttribute(const S& attr);
 
   /**
    * Return the attributes of a method
@@ -251,6 +266,11 @@ template <typename S> struct SymbolMap {
       Symbol<S, SymKind::Type> type, Symbol<S, SymKind::Type> attribute);
   std::vector<folly::dynamic>
   getTypeAttributeArgs(const S& type, const S& attribute);
+
+  std::vector<folly::dynamic> getTypeAliasAttributeArgs(
+      Symbol<S, SymKind::Type> type, Symbol<S, SymKind::Type> attribute);
+  std::vector<folly::dynamic>
+  getTypeAliasAttributeArgs(const S& type, const S& attribute);
 
   std::vector<folly::dynamic> getMethodAttributeArgs(
       Symbol<S, SymKind::Type> type,
@@ -459,6 +479,11 @@ template <typename S> struct SymbolMap {
      * Maps between types and the attributes that decorate them.
      */
     AttributeMap<S, TypeDecl<S>> m_typeAttrs;
+
+    /**
+     * Maps between type aliases and the attributes that decorate them.
+     */
+    AttributeMap<S, TypeDecl<S>> m_typeAliasAttrs;
 
     /**
      * Maps between methods and the attributes that decorate them.

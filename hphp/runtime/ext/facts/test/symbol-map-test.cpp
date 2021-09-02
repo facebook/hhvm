@@ -162,14 +162,14 @@ protected:
             std::move(root),
             DBData::readWrite(
                 std::move(dbPath), static_cast<::gid_t>(-1), 0644),
-                GetParam(),
+            GetParam(),
             std::move(indexedMethodAttributes)),
         std::move(exec)});
     return *m_wrappers.back().m_map;
   }
 
   bool OneDefinitionEnforced() {
-      return GetParam();
+    return GetParam();
   }
 
   std::unique_ptr<folly::test::TemporaryDirectory> m_tmpdir;
@@ -178,9 +178,10 @@ protected:
   std::vector<SymbolMapWrapper> m_wrappers;
 };
 
-INSTANTIATE_TEST_SUITE_P(OneDefinitionRuleEnforcement,
-                         SymbolMapTest,
-                         ::testing::Values(true, false));
+INSTANTIATE_TEST_SUITE_P(
+    OneDefinitionRuleEnforcement,
+    SymbolMapTest,
+    ::testing::Values(true, false));
 
 TEST_P(SymbolMapTest, addPaths) {
   auto& m = make("/var/www");
@@ -1061,7 +1062,7 @@ TEST_P(SymbolMapTest, ChangeAndMoveClassAttrs) {
 
   update(m, "", "1", {p1}, {}, {ffWithAttr});
   EXPECT_THAT(m.getAttributesOfType("C1"), ElementsAre("A1"));
-  EXPECT_THAT(m.getTypesAndTypeAliasesWithAttribute("A1"), ElementsAre("C1"));
+  EXPECT_THAT(m.getTypesWithAttribute("A1"), ElementsAre("C1"));
 
   FileFacts ffEmpty{.m_sha1hex = kSHA};
   FileFacts ffNoAttr{
@@ -1071,7 +1072,7 @@ TEST_P(SymbolMapTest, ChangeAndMoveClassAttrs) {
 
   update(m, "1", "2", {p1, p2}, {}, {ffEmpty, ffNoAttr});
   EXPECT_THAT(m.getAttributesOfType("C1"), IsEmpty());
-  EXPECT_THAT(m.getTypesAndTypeAliasesWithAttribute("A1"), IsEmpty());
+  EXPECT_THAT(m.getTypesWithAttribute("A1"), IsEmpty());
 }
 
 TEST_P(SymbolMapTest, RemovePathFromExistingFile) {
@@ -1321,16 +1322,16 @@ TEST_P(SymbolMapTest, BaseTypesWithDifferentCases) {
 
     // Remove references to "baseclass", keep references to "BaseClass"
     auto check = [&](auto& map) {
-        EXPECT_EQ(map.getTypeFile("SomeClass"), p1.native());
-        EXPECT_THAT(
-            map.getBaseTypes("SomeClass", DeriveKind::Extends),
-            ElementsAre("BaseClass"));
-        EXPECT_THAT(
-            map.getDerivedTypes("BaseClass", DeriveKind::Extends),
-            ElementsAre("SomeClass"));
-        EXPECT_THAT(
-            map.getDerivedTypes("baseclass", DeriveKind::Extends),
-            ElementsAre("SomeClass"));
+      EXPECT_EQ(map.getTypeFile("SomeClass"), p1.native());
+      EXPECT_THAT(
+          map.getBaseTypes("SomeClass", DeriveKind::Extends),
+          ElementsAre("BaseClass"));
+      EXPECT_THAT(
+          map.getDerivedTypes("BaseClass", DeriveKind::Extends),
+          ElementsAre("SomeClass"));
+      EXPECT_THAT(
+          map.getDerivedTypes("baseclass", DeriveKind::Extends),
+          ElementsAre("SomeClass"));
     };
     update(m1, "1", "2", {}, {p2, p4}, {});
     check(m1);
@@ -1356,7 +1357,7 @@ TEST_P(SymbolMapTest, BaseTypesWithDifferentCases) {
     EXPECT_THAT(
         m1.getDerivedTypes("baseclass", DeriveKind::Extends),
         ElementsAre("SomeClass"));
-    }
+  }
 }
 
 TEST_P(SymbolMapTest, DerivedTypesWithDifferentCases) {
@@ -1480,20 +1481,24 @@ TEST_P(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
   update(m1, "", "1:2:3", {p}, {}, {ff});
   EXPECT_EQ(m1.getTypeFile("SomeClass"), p.native());
   EXPECT_THAT(
-      m1.getTypesAndTypeAliasesWithAttribute("Foo"),
-      UnorderedElementsAre("SomeClass", "SomeTypeAlias"));
+      m1.getTypesWithAttribute("Foo"), UnorderedElementsAre("SomeClass"));
   EXPECT_THAT(
-      m1.getTypesAndTypeAliasesWithAttribute("Bar"),
+      m1.getTypeAliasesWithAttribute("Foo"),
+      UnorderedElementsAre("SomeTypeAlias"));
+  EXPECT_THAT(
+      m1.getTypesWithAttribute("Bar"),
       UnorderedElementsAre("SomeClass", "OtherClass"));
   EXPECT_THAT(
       m1.getAttributesOfType("SomeClass"),
       UnorderedElementsAre("Bar", "Baz", "Foo"));
   EXPECT_THAT(
+      m1.getTypeAliasAttributeArgs("SomeTypeAlias", "Foo"), ElementsAre(42, "a"));
+  EXPECT_THAT(
       m1.getTypeAttributeArgs("SomeClass", "Foo"), ElementsAre("apple", 38));
   EXPECT_THAT(
       m1.getTypeAttributeArgs("SomeClass", "Bar"), ElementsAre(nullptr));
   EXPECT_THAT(m1.getTypeAttributeArgs("SomeClass", "Baz"), IsEmpty());
-  EXPECT_THAT(m1.getAttributesOfType("SomeTypeAlias"), ElementsAre("Foo"));
+  EXPECT_THAT(m1.getAttributesOfTypeAlias("SomeTypeAlias"), ElementsAre("Foo"));
 
   waitForDB(m1, m_exec);
 
@@ -1504,12 +1509,14 @@ TEST_P(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
       UnorderedElementsAre("Bar", "Baz", "Foo"));
   EXPECT_EQ(m2.getTypeFile("SomeClass"), p.native());
   EXPECT_THAT(
-      m2.getTypesAndTypeAliasesWithAttribute("Foo"),
-      UnorderedElementsAre("SomeClass", "SomeTypeAlias"));
+      m2.getTypesWithAttribute("Foo"), UnorderedElementsAre("SomeClass"));
   EXPECT_THAT(
-      m2.getTypeAttributeArgs("SomeTypeAlias", "Foo"), ElementsAre(42, "a"));
+      m2.getTypeAliasesWithAttribute("Foo"),
+      UnorderedElementsAre("SomeTypeAlias"));
   EXPECT_THAT(
-      m2.getTypesAndTypeAliasesWithAttribute("Bar"),
+      m2.getTypeAliasAttributeArgs("SomeTypeAlias", "Foo"), ElementsAre(42, "a"));
+  EXPECT_THAT(
+      m2.getTypesWithAttribute("Bar"),
       UnorderedElementsAre("SomeClass", "OtherClass"));
   EXPECT_THAT(
       m1.getTypeAttributeArgs("SomeClass", "Foo"), ElementsAre("apple", 38));
@@ -1521,7 +1528,7 @@ TEST_P(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
 
 TEST_P(SymbolMapTest, getTypesWithAttributeFiltersDuplicateDefs) {
   if (!OneDefinitionEnforced()) {
-      return;
+    return;
   }
   auto& m1 = make("/var/www", m_exec);
 
@@ -1538,17 +1545,17 @@ TEST_P(SymbolMapTest, getTypesWithAttributeFiltersDuplicateDefs) {
 
   update(m1, "", "1:2:3", {p1, p2}, {}, {ff, ff});
   EXPECT_EQ(m1.getTypeFile("SomeClass"), nullptr);
-  EXPECT_TRUE(m1.getTypesAndTypeAliasesWithAttribute("Foo").empty());
+  EXPECT_TRUE(m1.getTypesWithAttribute("Foo").empty());
 
   waitForDB(m1, m_exec);
 
   auto& m2 = make("/var/www", m_exec);
   update(m2, "1:2:3", "1:2:3", {}, {}, {});
   EXPECT_EQ(m2.getTypeFile("SomeClass"), nullptr);
-  EXPECT_TRUE(m2.getTypesAndTypeAliasesWithAttribute("Foo").empty());
+  EXPECT_TRUE(m2.getTypesWithAttribute("Foo").empty());
 
   update(m2, "1:2:3", "1:2:4", {}, {p2}, {});
-  auto fooTypes = m2.getTypesAndTypeAliasesWithAttribute("Foo");
+  auto fooTypes = m2.getTypesWithAttribute("Foo");
   EXPECT_THAT(fooTypes, ElementsAre("SomeClass"));
   EXPECT_EQ(m2.getTypeFile("SomeClass"), p1.native());
 }

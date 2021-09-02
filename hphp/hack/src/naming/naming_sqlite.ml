@@ -307,7 +307,9 @@ module FileInfoTable = struct
     in
     let names_to_data_type names =
       let open Core_kernel in
-      let names = String.concat ~sep:"|" (List.map names ~f:snd) in
+      let names =
+        String.concat ~sep:"|" (List.map names ~f:(fun (_, x, _) -> x))
+      in
       match String.length names with
       | 0 -> Sqlite3.Data.NULL
       | _ -> Sqlite3.Data.TEXT names
@@ -338,7 +340,7 @@ module FileInfoTable = struct
       | Sqlite3.Data.TEXT s ->
         Core_kernel.(
           List.map (String.split s ~on:'|') ~f:(fun name ->
-              (FileInfo.File (name_type, path), name)))
+              (FileInfo.File (name_type, path), name, None)))
       | Sqlite3.Data.NULL -> []
       | _ -> failwith "Unexpected column type when retrieving names"
     in
@@ -425,6 +427,7 @@ module TypesTable = struct
         CREATE TABLE IF NOT EXISTS %s(
           HASH INTEGER PRIMARY KEY NOT NULL,
           CANON_HASH INTEGER NOT NULL,
+          DECL_HASH INTEGER NOT NULL,
           FLAGS INTEGER NOT NULL,
           FILE_INFO_ID INTEGER NOT NULL
         );
@@ -444,9 +447,10 @@ module TypesTable = struct
         INSERT INTO %s(
           HASH,
           CANON_HASH,
+          DECL_HASH,
           FLAGS,
           FILE_INFO_ID)
-        VALUES (?, ?, ?, ?);
+        VALUES (?, ?, ?, ?, ?);
       "
       table_name
 
@@ -468,7 +472,7 @@ module TypesTable = struct
     ( Str.global_replace (Str.regexp "{hash}") "HASH" base,
       Str.global_replace (Str.regexp "{hash}") "CANON_HASH" base )
 
-  let insert db stmt_cache ~name ~flags ~file_info_id :
+  let insert db stmt_cache ~name ~flags ~file_info_id ~decl_hash :
       (unit, insertion_error) result =
     let hash =
       Typing_deps.Dep.Type name
@@ -483,25 +487,26 @@ module TypesTable = struct
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
-    Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT flags) |> check_rc db;
-    Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+    Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT decl_hash) |> check_rc db;
+    Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT flags) |> check_rc db;
+    Sqlite3.bind insert_stmt 5 (Sqlite3.Data.INT file_info_id) |> check_rc db;
     let kind_of_type =
       Naming_types.kind_of_type_of_enum (Option.value_exn (Int64.to_int flags))
     in
     insert_safe ~name ~kind_of_type ~hash ~canon_hash:(Some canon_hash)
     @@ fun () -> Sqlite3.step insert_stmt |> check_rc db
 
-  let insert_class db stmt_cache ~name ~file_info_id :
+  let insert_class db stmt_cache ~name ~file_info_id ~decl_hash :
       (unit, insertion_error) result =
-    insert db stmt_cache ~name ~flags:class_flag ~file_info_id
+    insert db stmt_cache ~name ~flags:class_flag ~file_info_id ~decl_hash
 
-  let insert_typedef db stmt_cache ~name ~file_info_id :
+  let insert_typedef db stmt_cache ~name ~file_info_id ~decl_hash :
       (unit, insertion_error) result =
-    insert db stmt_cache ~name ~flags:typedef_flag ~file_info_id
+    insert db stmt_cache ~name ~flags:typedef_flag ~file_info_id ~decl_hash
 
-  let insert_record_def db stmt_cache ~name ~file_info_id :
+  let insert_record_def db stmt_cache ~name ~file_info_id ~decl_hash :
       (unit, insertion_error) result =
-    insert db stmt_cache ~name ~flags:record_def_flag ~file_info_id
+    insert db stmt_cache ~name ~flags:record_def_flag ~file_info_id ~decl_hash
 
   let get db stmt_cache dep stmt =
     let hash = dep |> Typing_deps.Dep.to_int64 in
@@ -532,6 +537,7 @@ module FunsTable = struct
         CREATE TABLE IF NOT EXISTS %s(
           HASH INTEGER PRIMARY KEY NOT NULL,
           CANON_HASH INTEGER NOT NULL,
+          DECL_HASH INTEGER NOT NULL,
           FILE_INFO_ID INTEGER NOT NULL
         );
       "
@@ -547,7 +553,7 @@ module FunsTable = struct
   let insert_sqlite =
     Printf.sprintf
       "
-        INSERT INTO %s (HASH, CANON_HASH, FILE_INFO_ID) VALUES (?, ?, ?);
+        INSERT INTO %s (HASH, CANON_HASH, DECL_HASH, FILE_INFO_ID) VALUES (?, ?, ?, ?);
       "
       table_name
 
@@ -568,8 +574,8 @@ module FunsTable = struct
     ( Str.global_replace (Str.regexp "{hash}") "HASH" base,
       Str.global_replace (Str.regexp "{hash}") "CANON_HASH" base )
 
-  let insert db stmt_cache ~name ~file_info_id : (unit, insertion_error) result
-      =
+  let insert db stmt_cache ~name ~file_info_id ~decl_hash :
+      (unit, insertion_error) result =
     let hash =
       Typing_deps.Dep.Fun name
       |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
@@ -583,7 +589,8 @@ module FunsTable = struct
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
-    Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+    Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT decl_hash) |> check_rc db;
+    Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT file_info_id) |> check_rc db;
     insert_safe ~name ~kind_of_type:None ~hash ~canon_hash:(Some canon_hash)
     @@ fun () -> Sqlite3.step insert_stmt |> check_rc db
 
@@ -610,6 +617,7 @@ module ConstsTable = struct
       "
         CREATE TABLE IF NOT EXISTS %s(
           HASH INTEGER PRIMARY KEY NOT NULL,
+          DECL_HASH INTEGER KEY,
           FILE_INFO_ID INTEGER NOT NULL
         );
       "
@@ -618,7 +626,7 @@ module ConstsTable = struct
   let insert_sqlite =
     Printf.sprintf
       "
-        INSERT INTO %s (HASH, FILE_INFO_ID) VALUES (?, ?);
+        INSERT INTO %s (HASH, DECL_HASH, FILE_INFO_ID) VALUES (?, ?, ?);
       "
       table_name
 
@@ -636,8 +644,8 @@ module ConstsTable = struct
         WHERE {table_name}.HASH = ?
       "
 
-  let insert db stmt_cache ~name ~file_info_id : (unit, insertion_error) result
-      =
+  let insert db stmt_cache ~name ~file_info_id ~decl_hash :
+      (unit, insertion_error) result =
     let hash =
       Typing_deps.Dep.GConst name
       |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
@@ -645,7 +653,8 @@ module ConstsTable = struct
     in
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
-    Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+    Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT decl_hash) |> check_rc db;
+    Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT file_info_id) |> check_rc db;
     insert_safe ~name ~kind_of_type:None ~hash ~canon_hash:None @@ fun () ->
     Sqlite3.step insert_stmt |> check_rc db
 
@@ -723,8 +732,9 @@ let save_file_info db stmt_cache relative_path file_info :
     | Some id -> id
     | None -> failwith "Could not get last inserted row ID"
   in
-  let insert insert_fun (symbols_inserted, errors) (_, name) =
-    match insert_fun db stmt_cache ~name ~file_info_id with
+  let insert insert_fun (symbols_inserted, errors) (_, name, decl_hash) =
+    let decl_hash = Option.value decl_hash ~default:Int64.zero in
+    match insert_fun db stmt_cache ~name ~file_info_id ~decl_hash with
     | Ok () -> (symbols_inserted + 1, errors)
     | Error error -> (symbols_inserted, error :: errors)
   in

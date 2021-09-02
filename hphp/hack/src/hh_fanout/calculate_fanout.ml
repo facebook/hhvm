@@ -84,7 +84,7 @@ let explanation_to_json (explanation : explanation) : Hh_json.json =
 
 let get_symbol_edges_for_file_info (file_info : FileInfo.t) : symbol_edge list =
   let make_edges ~symbol_type ~ids ~f =
-    List.map ids ~f:(fun (_, symbol_name) ->
+    List.map ids ~f:(fun (_, symbol_name, _) ->
         { symbol_type; symbol_name; symbol_dep = f symbol_name })
   in
   List.concat

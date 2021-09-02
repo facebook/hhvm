@@ -78,7 +78,10 @@ type pos =
   | File of name_type * Relative_path.t
 [@@deriving eq, show]
 
-type id = pos * string [@@deriving eq, show]
+(** An id contains a pos, name and a optional decl hash. The decl hash is None
+ * only in the case when we didn't compute it for performance reasons
+ *)
+type id = pos * string * Int64.t option [@@deriving eq, show]
 
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)
@@ -117,7 +120,7 @@ let empty_t =
     comments = Some [];
   }
 
-let pos_full (p, name) = (Full p, name)
+let pos_full (p, name, hash) = (Full p, name, hash)
 
 let get_pos_filename = function
   | Full p -> Pos.filename p
@@ -166,7 +169,7 @@ let empty_names =
 (*****************************************************************************)
 
 let name_set_of_idl idl =
-  List.fold_left idl ~f:(fun acc (_, x) -> SSet.add x acc) ~init:SSet.empty
+  List.fold_left idl ~f:(fun acc (_, x, _) -> SSet.add x acc) ~init:SSet.empty
 
 let simplify info =
   let {
@@ -213,20 +216,22 @@ let from_saved fn saved =
   let { s_names; s_mode; s_hash } = saved in
   let { sn_funs; sn_classes; sn_record_defs; sn_types; sn_consts } = s_names in
   let funs =
-    List.map (SSet.elements sn_funs) ~f:(fun x -> (File (Fun, fn), x))
+    List.map (SSet.elements sn_funs) ~f:(fun x -> (File (Fun, fn), x, None))
   in
   let classes =
-    List.map (SSet.elements sn_classes) ~f:(fun x -> (File (Class, fn), x))
+    List.map (SSet.elements sn_classes) ~f:(fun x ->
+        (File (Class, fn), x, None))
   in
   let record_defs =
     List.map (SSet.elements sn_record_defs) ~f:(fun x ->
-        (File (RecordDef, fn), x))
+        (File (RecordDef, fn), x, None))
   in
   let typedefs =
-    List.map (SSet.elements sn_types) ~f:(fun x -> (File (Typedef, fn), x))
+    List.map (SSet.elements sn_types) ~f:(fun x ->
+        (File (Typedef, fn), x, None))
   in
   let consts =
-    List.map (SSet.elements sn_consts) ~f:(fun x -> (File (Const, fn), x))
+    List.map (SSet.elements sn_consts) ~f:(fun x -> (File (Const, fn), x, None))
   in
   {
     file_mode = s_mode;
@@ -259,18 +264,25 @@ let merge_names t_names1 t_names2 =
   }
 
 let to_string fast =
+  let funs = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.funs in
+  let classes = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.classes in
+  let typedefs = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.typedefs in
+  let consts = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.consts in
   [
-    ("funs", fast.funs);
-    ("classes", fast.classes);
-    ("typedefs", fast.typedefs);
-    ("consts", fast.consts);
+    ("funs", funs);
+    ("classes", classes);
+    ("typedefs", typedefs);
+    ("consts", consts);
   ]
   |> List.filter ~f:(fun (_, l) -> not @@ List.is_empty l)
   |> List.map ~f:(fun (kind, l) ->
          Printf.sprintf
-           "%s: %s"
+           "%s: %s %s"
            kind
-           (List.map l ~f:snd |> String.concat ~sep:","))
+           (List.map l ~f:(fun (_, x, _) -> x) |> String.concat ~sep:",")
+           (List.map l ~f:(fun (_, _, hash) ->
+                Int64.to_string (Option.value hash ~default:Int64.zero))
+           |> String.concat ~sep:","))
   |> String.concat ~sep:";"
 
 type diff = {

@@ -34,7 +34,7 @@ let err_not_found (file : Relative_path.t) (name : string) : 'a =
 let direct_decl_parse_and_cache ctx filename name =
   match Direct_decl_utils.direct_decl_parse_and_cache ctx filename with
   | None -> err_not_found filename name
-  | Some (decls, _mode, _hash) -> decls
+  | Some (decls, _mode, _hash, _symbol_decl_hashes) -> decls
 
 let use_direct_decl_parser ctx =
   TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)

@@ -31,10 +31,14 @@ let save_contents (output_filename : string) (contents : 'a) : unit =
 let get_classes_from_file (file : Relative_path.t) (ctx : Provider_context.t) :
     SSet.t =
   (match
-     Direct_decl_utils.direct_decl_parse_and_cache ~decl_hash:true ctx file
+     Direct_decl_utils.direct_decl_parse_and_cache
+       ~file_decl_hash:true
+       ~symbol_decl_hashes:false
+       ctx
+       file
    with
   | None -> []
-  | Some (decls, _, _) ->
+  | Some (decls, _, _, _) ->
     List.filter_map
       ~f:(fun (name, decl) ->
         match decl with

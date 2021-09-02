@@ -618,6 +618,7 @@ module ConstsTable = struct
         CREATE TABLE IF NOT EXISTS %s(
           HASH INTEGER PRIMARY KEY NOT NULL,
           DECL_HASH INTEGER KEY,
+          CANON_HASH INTEGER KEY NOT NULL,
           FILE_INFO_ID INTEGER NOT NULL
         );
       "
@@ -626,7 +627,7 @@ module ConstsTable = struct
   let insert_sqlite =
     Printf.sprintf
       "
-        INSERT INTO %s (HASH, DECL_HASH, FILE_INFO_ID) VALUES (?, ?, ?);
+        INSERT INTO %s (HASH, CANON_HASH, DECL_HASH, FILE_INFO_ID) VALUES (?, ?, ?, ?);
       "
       table_name
 
@@ -651,10 +652,16 @@ module ConstsTable = struct
       |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
       |> Typing_deps.Dep.to_int64
     in
+    let canon_hash =
+      Typing_deps.Dep.GConst (to_canon_name_key name)
+      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+      |> Typing_deps.Dep.to_int64
+    in
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
-    Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT decl_hash) |> check_rc db;
-    Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+    Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
+    Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT decl_hash) |> check_rc db;
+    Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT file_info_id) |> check_rc db;
     insert_safe ~name ~kind_of_type:None ~hash ~canon_hash:None @@ fun () ->
     Sqlite3.step insert_stmt |> check_rc db
 

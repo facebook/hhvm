@@ -57,6 +57,21 @@ include(HPHPFindLibs)
 include(HHVMGenerateConfig)
 HHVM_GENERATE_CONFIG("${CMAKE_CURRENT_BINARY_DIR}/util/hphp-config.h")
 
+# Link against this target if you `#include "hphp/runtime/base/foo.h"`; it
+# brings in all the transitive dependencies (e.g. rust FFI, folly, boost)
+#
+# It's currently really the wrong way around: we should declare all the
+# dependencies directly against this target without using `hphp_link()`, then
+# `hphp_link()` should be changed to link against this target. Done like this
+# for now to minimize risk while unblocking adding new dependencies.
+#
+# Even that's wrong: given improvements in CMake over the years, we don't need
+# and should remove many of the HPHP/hphp/HHVM CMake macros, including
+# hphp_link, and just use target_link_libraries throughout.
+add_library(hhvm_base_headers INTERFACE)
+hphp_link(hhvm_base_headers INTERFACE)
+target_include_directories(hhvm_base_headers INTERFACE ${CMAKE_SOURCE_DIR})
+
 if (ENABLE_COTIRE)
   include(cotire)
   FIND_PATH(LIBC_INCLUDE_PATH stdlib.h)

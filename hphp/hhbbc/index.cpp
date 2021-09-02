@@ -421,6 +421,7 @@ struct res::Func::FuncFamily {
   LockFreeLazy<Type> m_returnTy;
   Optional<uint32_t> m_numInOut;
   TriBool m_isReadonlyReturn;
+  TriBool m_isReadonlyThis;
 };
 
 namespace {
@@ -1168,7 +1169,8 @@ struct Index::IndexData {
   SStringToMany<const php::Func>         methods;
   SStringToOneFastT<uint64_t>            method_inout_params_by_name;
   // 0th index is the return value
-  SStringToOneFastT<uint64_t>            method_readonly_params_by_name;
+  // 1st index is whether function is marked readonly
+  SStringToOneFastT<uint64_t>            method_readonly_by_name;
   ISStringToOneT<const php::Func*>       funcs;
   ISStringToOneT<const php::TypeAlias*>  typeAliases;
   ISStringToOneT<const php::Class*>      enums;
@@ -2320,8 +2322,8 @@ Optional<uint32_t> num_inout_from_set(PossibleFuncRange range) {
   return num;
 }
 
-template<typename PossibleFuncRange>
-TriBool is_readonly_return_from_set(PossibleFuncRange range) {
+template<typename PossibleFuncRange, typename Fn>
+TriBool is_readonly_helper_from_set(PossibleFuncRange range, Fn fn) {
   if (begin(range) == end(range)) return TriBool::No;
 
   struct FuncFind {
@@ -2332,7 +2334,7 @@ TriBool is_readonly_return_from_set(PossibleFuncRange range) {
 
   Optional<bool> result = false;
   for (auto const& item : range) {
-    auto const b = FuncFind::get(item)->isReadonlyReturn;
+    auto const b = fn(FuncFind::get(item));
     if (!result) {
       result = b;
       continue;
@@ -2340,6 +2342,18 @@ TriBool is_readonly_return_from_set(PossibleFuncRange range) {
     if (*result != b) return TriBool::Maybe;
   }
   return yesOrNo(*result);
+}
+
+template<typename PossibleFuncRange>
+TriBool is_readonly_return_from_set(PossibleFuncRange range) {
+  return is_readonly_helper_from_set(
+    range, [](const php::Func* f) { return f->isReadonlyReturn; });
+}
+
+template<typename PossibleFuncRange>
+TriBool is_readonly_this_from_set(PossibleFuncRange range) {
+  return is_readonly_helper_from_set(
+    range, [](const php::Func* f) { return f->isReadonlyThis; });
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2455,9 +2469,11 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
         // parameter as inout, which requires global knowledge.
         index.method_inout_params_by_name[m->name] |= inOutBits;
       }
-      if (anyReadonly || m->isReadonlyReturn) {
-        index.method_readonly_params_by_name[m->name] |=
-          ((readonlyBits << 1) | (m->isReadonlyReturn ? 1 : 0));
+      if (anyReadonly || m->isReadonlyReturn || m->isReadonlyThis) {
+        index.method_readonly_by_name[m->name] |=
+          ((readonlyBits << 2) |
+           ((m->isReadonlyThis ? 1 : 0) << 1) |
+           (m->isReadonlyReturn ? 1 : 0));
       }
     }
 
@@ -3401,6 +3417,7 @@ void define_func_families(IndexData& index) {
     [&] (FuncFamily* ff) {
       ff->m_numInOut = num_inout_from_set(ff->possibleFuncs());
       ff->m_isReadonlyReturn = is_readonly_return_from_set(ff->possibleFuncs());
+      ff->m_isReadonlyThis = is_readonly_this_from_set(ff->possibleFuncs());
       for (auto const pf : ff->possibleFuncs()) {
         auto finfo = create_func_info(index, pf->second.func);
         auto& lock = locks[pointer_hash<FuncInfo>{}(finfo) % locks.size()];
@@ -6227,7 +6244,7 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
       };
 
       if (!couldHaveBit(m_data->method_inout_params_by_name, paramId) &&
-          !couldHaveBit(m_data->method_readonly_params_by_name, paramId + 1)) {
+          !couldHaveBit(m_data->method_readonly_by_name, paramId + 2)) {
         return PrepKind{TriBool::No, TriBool::No};
       }
 
@@ -6260,8 +6277,8 @@ TriBool Index::lookup_return_readonly(
        : TriBool::No; // if the function doesnt exist, we will error anyway
     },
     [&] (res::Func::MethodName s) {
-      auto const it = m_data->method_readonly_params_by_name.find(s.name);
-      if (it == end(m_data->method_readonly_params_by_name)) {
+      auto const it = m_data->method_readonly_by_name.find(s.name);
+      if (it == end(m_data->method_readonly_by_name)) {
         // There was no entry, so no method by this name returns readonly.
         return TriBool::No;
       }
@@ -6280,6 +6297,44 @@ TriBool Index::lookup_return_readonly(
     },
     [&] (FuncFamily* fam) {
       return fam->m_isReadonlyReturn;
+    }
+  );
+}
+
+TriBool Index::lookup_readonly_this(
+  Context,
+  res::Func rfunc
+) const {
+  return match<TriBool>(
+    rfunc.val,
+    [&] (res::Func::FuncName s) {
+      if (s.renamable) return TriBool::Maybe;
+      auto const it = m_data->funcs.find(s.name);
+      return it != end(m_data->funcs)
+       ? yesOrNo(it->second->isReadonlyThis)
+       : TriBool::Yes; // if the function doesnt exist, we will error anyway
+    },
+    [&] (res::Func::MethodName s) {
+      auto const it = m_data->method_readonly_by_name.find(s.name);
+      if (it == end(m_data->method_readonly_by_name)) {
+        // There was no entry, so no method by this name returns readonly.
+        return TriBool::No;
+      }
+      if (!((it->second >> 1) & 1)) {
+        // No method of this name is marked readonly
+        return TriBool::No;
+      }
+      auto const pair = m_data->methods.equal_range(s.name);
+      return is_readonly_this_from_set(folly::range(pair.first, pair.second));
+    },
+    [&] (FuncInfo* finfo) {
+      return yesOrNo(finfo->func->isReadonlyThis);
+    },
+    [&] (const MethTabEntryPair* mte) {
+      return yesOrNo(mte->second.func->isReadonlyThis);
+    },
+    [&] (FuncFamily* fam) {
+      return fam->m_isReadonlyThis;
     }
   );
 }
@@ -7251,7 +7306,7 @@ void Index::cleanup_post_emit(php::ProgramPtr program) {
   CLEAR_PARALLEL(m_data->classes);
   CLEAR_PARALLEL(m_data->methods);
   CLEAR_PARALLEL(m_data->method_inout_params_by_name);
-  CLEAR_PARALLEL(m_data->method_readonly_params_by_name);
+  CLEAR_PARALLEL(m_data->method_readonly_by_name);
   CLEAR_PARALLEL(m_data->funcs);
   CLEAR_PARALLEL(m_data->typeAliases);
   CLEAR_PARALLEL(m_data->enums);

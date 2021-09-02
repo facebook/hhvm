@@ -709,6 +709,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isReified           = fe.userAttributes.find(s___Reified.get()) !=
                              fe.userAttributes.end();
   ret->isReadonlyReturn    = fe.attrs & AttrReadonlyReturn;
+  ret->isReadonlyThis      = fe.attrs & AttrReadonlyThis;
   ret->noContextSensitiveAnalysis = fe.userAttributes.find(
     s___NoContextSensitiveAnalysis.get()) != fe.userAttributes.end();
   ret->hasInOutArgs        = [&] {

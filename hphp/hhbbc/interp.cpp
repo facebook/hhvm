@@ -3653,6 +3653,13 @@ bool fcallOptimizeChecks(
     }
   }
 
+  if (fca.enforceReadonlyThis()) {
+    if (env.index.lookup_readonly_this(env.ctx, func) == TriBool::Yes) {
+      reduce(env, fcallWithFCA(fca.withoutEnforceReadonlyThis()));
+      return true;
+    }
+  }
+
   // Infer whether the callee supports async eager return.
   if (fca.asyncEagerTarget() != NoBlockId) {
     auto const status = env.index.supports_async_eager_return(func);

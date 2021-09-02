@@ -890,6 +890,11 @@ struct Index {
   TriBool lookup_return_readonly(Context, res::Func) const;
 
   /*
+   * Returns whether the function is marked as readonly
+   */
+  TriBool lookup_readonly_this(Context, res::Func) const;
+
+  /*
    * Returns the control-flow insensitive inferred private instance
    * property types for a Class.  The Class doesn't need to be
    * resolved, because private properties don't depend on the

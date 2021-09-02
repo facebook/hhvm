@@ -392,6 +392,8 @@ struct Func : FuncBase {
 
   bool isReadonlyReturn : 1;
 
+  bool isReadonlyThis : 1;
+
   /*
    * Type parameter upper bounds. May be enforced and used for optimizations.
    */

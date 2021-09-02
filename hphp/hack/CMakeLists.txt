@@ -36,8 +36,12 @@ endif()
 if ("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
   set(DUNE_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/_build")
   set(OPAM_STAMP_FILE "_build/opam.stamp")
+  set(RUST_FFI_BUILD_ROOT "${DUNE_BUILD_DIR}/rust_ffi")
+  set(CARGO_HOME "${DUNE_BUILD_DIR}/cargo_home")
 else()
   set(DUNE_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+  set(RUST_FFI_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}")
+  set(CARGO_HOME "${CMAKE_CURRENT_BINARY_DIR}/cargo_home")
   set(OPAM_STAMP_FILE "opam.stamp")
 endif()
 set(HACK_BUILD_ROOT "${DUNE_BUILD_DIR}/default")
@@ -141,18 +145,21 @@ endif()
 
 function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
   set(FFI_BRIDGE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/${FFI_BRIDGE_DIR}")
-  set(FFI_BRIDGE_BIN "${CMAKE_CURRENT_BINARY_DIR}/${FFI_BRIDGE_DIR}")
+  set(FFI_BRIDGE_BIN "${RUST_FFI_BUILD_ROOT}/hphp/hack/${FFI_BRIDGE_DIR}")
 
-  set(RUST_PART_LIB "${FFI_BRIDGE_BIN}/${PROFILE}/lib${NAME}_ffi_bridge${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(RUST_PART_LIB "${FFI_BRIDGE_BIN}/${PROFILE}/${CMAKE_STATIC_LIBRARY_PREFIX}${NAME}_ffi_bridge${CMAKE_STATIC_LIBRARY_SUFFIX}")
   set(RUST_PART_CXX "${FFI_BRIDGE_BIN}/${NAME}_ffi_bridge.cpp")
+  set(RUST_PART_HEADER "${FFI_BRIDGE_BIN}/${NAME}_ffi_bridge.rs")
   set(GENERATED "${FFI_BRIDGE_BIN}/cxxbridge/${NAME}_ffi_bridge/${NAME}_ffi_bridge")
 
   add_custom_command(
       OUTPUT ${RUST_PART_CXX}
-      COMMAND . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-        ${CARGO_BUILD} "${NAME}_ffi_bridge" "${NAME}_ffi_bridge" --cxx ${FFI_BRIDGE_BIN}
-      COMMAND cp "${GENERATED}.rs.cc" ${RUST_PART_CXX}
-      COMMAND cp "${GENERATED}.rs.h" "${FFI_BRIDGE_BIN}/${NAME}_ffi_bridge.rs"
+      COMMAND
+        ${CMAKE_COMMAND} -E make_directory "${FFI_BRIDGE_BIN}" &&
+        . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
+        ${CARGO_BUILD} "${NAME}_ffi_bridge" "${NAME}_ffi_bridge" --cxx "${FFI_BRIDGE_BIN}" &&
+        ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.cc" "${RUST_PART_CXX}" &&
+        ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.h" "${RUST_PART_HEADER}"
       WORKING_DIRECTORY ${FFI_BRIDGE_SRC}
       DEPENDS rustc cargo
   )
@@ -161,10 +168,13 @@ function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
     DEPENDS ${RUST_PART_CXX}
   )
 
-  include_directories(${FFI_BRIDGE_BIN})
   add_library("${NAME}_ffi_bridge" STATIC ${RUST_PART_CXX})
   add_dependencies("${NAME}_ffi_bridge" rustc cargo "${NAME}_cxx")
-  target_link_libraries("${NAME}_ffi_bridge" ${RUST_PART_LIB})
+  target_link_libraries("${NAME}_ffi_bridge" PUBLIC ${RUST_PART_LIB})
+  # `-iquote` is like `-I` (or target_include_directories()`), except:
+  # - it takes precedence over `-I`
+  # - it only applies to `#include "foo"`, not `#include <foo>`
+  target_compile_options("${NAME}_ffi_bridge" INTERFACE "-iquote" "${RUST_FFI_BUILD_ROOT}")
 endfunction()
 
 build_cxx_bridge(rust_facts "src/facts/ffi_bridge")

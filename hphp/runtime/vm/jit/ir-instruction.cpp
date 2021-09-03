@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/vm/func.h"
 
 #include "hphp/runtime/base/bespoke/logging-array.h"
@@ -580,6 +581,44 @@ Type arrLikeAppendReturn(const IRInstruction* inst) {
   return base.narrowToLayout(layout);
 }
 
+Type typeCnsClsName(const IRInstruction* inst) {
+  assertx(inst->is(LdResolvedTypeCnsClsName));
+  auto const clsTmp = inst->src(0);
+  auto const clsSpec = clsTmp->type().clsSpec();
+  if (!clsSpec) return TStaticStr | TNullptr;
+  auto const cls = clsSpec.cls();
+  auto const extra = inst->extra<LdResolvedTypeCnsClsName>();
+
+  assertx(cls->hasTypeConstant(extra->cnsName, true));
+  assertx(extra->slot < cls->numConstants());
+  auto const& typeCns = cls->constants()[extra->slot];
+  auto const& resolved = typeCns.preConst->resolvedTypeStructure();
+
+  auto const classname = [&] {
+    auto const name = resolved->get(s_classname);
+    if (tvIsString(name)) return Type::cns(name);
+    return TNullptr;
+  };
+
+  if (clsSpec.exact()) {
+    if (typeCns.isAbstractAndUninit()) return TNullptr;
+    if (resolved.isNull()) return TStaticStr | TNullptr;
+    return classname();
+  }
+  if (resolved.isNull()) return TStaticStr | TNullptr;
+
+  switch (typeCns.preConst->invariance()) {
+    case PreClass::Const::Invariance::None:
+    case PreClass::Const::Invariance::Present:
+      return TStaticStr | TNullptr;
+    case PreClass::Const::Invariance::ClassnamePresent:
+      return TStaticStr;
+    case PreClass::Const::Invariance::Same:
+      return classname();
+  }
+  always_assert(false);
+}
+
 // Is this instruction an array cast that always modifies the type of the
 // input array? Such casts are guaranteed to return vanilla arrays.
 bool isNontrivialArrayCast(const IRInstruction* inst) {
@@ -668,6 +707,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DPtrIter        return ptrIterReturn(inst);
 #define DPtrIterVal     return ptrIterValReturn(inst);
 #define DBespokeElemLval return bespokeElemLvalReturn(inst);
+#define DTypeCnsClsName return typeCnsClsName(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -713,6 +753,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DPtrIter
 #undef DPtrIterVal
 #undef DBespokeElemLval
+#undef DTypeCnsClsName
 }
 
 bool IRInstruction::maySyncVMRegsWithSources() const {

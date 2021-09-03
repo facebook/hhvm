@@ -1641,8 +1641,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdMROPropAddr:
   case LdClsCns:
   case LdSubClsCns:
-  case LdSubClsCnsClsName:
-  case LdTypeCns:
+  case LdResolvedTypeCns:
+  case LdResolvedTypeCnsClsName:
+  case LdResolvedTypeCnsNoCheck:
   case CheckSubClsCns:
   case LdClsCnsVecLen:
   case FuncHasAttr:
@@ -1816,8 +1817,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsMethodCacheCls:
   case LdClsMethodCacheFunc:
   case LdClsMethodFCacheFunc:
-  case LdClsTypeCns:
-  case LdClsTypeCnsClsName:
+  case LdTypeCns:
+  case LdTypeCnsNoThrow:
+  case LdTypeCnsClsName:
   case ProfileSwitchDest:
   case LdFuncCls:
   case LdFuncInOutBits:

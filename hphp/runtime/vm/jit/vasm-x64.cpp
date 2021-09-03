@@ -155,6 +155,7 @@ struct Vgen {
   void emit(const addqrm& i);
   void emit(const addqim& i);
   void emit(addsd i) { commute(i); a.addsd(i.s0, i.d); }
+  void emit(const btrq& i) { binary(i); a.btrq(i.s0, i.d); }
   void emit(const cloadq& i);
   template<class cmov> void emit_cmov(const cmov& i);
   void emit(const cmovb& i) { emit_cmov(i); }

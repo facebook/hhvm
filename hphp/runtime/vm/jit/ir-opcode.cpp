@@ -84,6 +84,7 @@ TRACE_SET_MOD(hhir);
 #define DPtrIter       HasDest
 #define DPtrIterVal    HasDest
 #define DEscalateToVanilla HasDest
+#define DTypeCnsClsName HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -358,14 +359,15 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsCtor:
   case LdClsPropAddrOrNull:
   case LdClsPropAddrOrRaise:
-  case LdClsTypeCns:
-  case LdClsTypeCnsClsName:
   case LdFunc:
   case LdFuncCached:
   case LdGblAddr:
   case LdGblAddrDef:
   case LdObjMethodD:
   case LdObjMethodS:
+  case LdTypeCns:
+  case LdTypeCnsClsName:
+  case LdTypeCnsNoThrow:
   case LookupClsCns:
   case LookupClsCtxCns:
   case LookupClsMethod:
@@ -756,6 +758,9 @@ bool opcodeMayRaise(Opcode opc) {
   case LdPtrIterKey:
   case LdPtrIterVal:
   case LdRDSAddr:
+  case LdResolvedTypeCns:
+  case LdResolvedTypeCnsClsName:
+  case LdResolvedTypeCnsNoCheck:
   case LdRetVal:
   case LdSmashable:
   case LdSmashableFunc:
@@ -764,10 +769,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LdStkAddr:
   case LdStrLen:
   case LdSubClsCns:
-  case LdSubClsCnsClsName:
   case LdTVAux:
   case LdTVFromRDS:
-  case LdTypeCns:
   case LdUnitPerRequestFilepath:
   case LdUnwinderValue:
   case LdMonotypeDictTombstones:

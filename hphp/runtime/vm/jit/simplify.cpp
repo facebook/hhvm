@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
@@ -366,6 +367,94 @@ SSATmp* simplifyLookupClsCtxCns(State& env, const IRInstruction* inst) {
   auto const result = clsTmp->clsVal()->clsCtxCnsGet(nameTmp->strVal(), false);
   if (!result) return nullptr; // we will raise warning/error
   return cns(env, result->value());
+}
+
+SSATmp* simplifyLdResolvedTypeCns(State& env, const IRInstruction* inst) {
+  auto const clsTmp = inst->src(0);
+  auto const clsSpec = clsTmp->type().clsSpec();
+  if (!clsSpec) return nullptr;
+  auto const cls = clsSpec.cls();
+  auto const extra = inst->extra<LdResolvedTypeCns>();
+
+  assertx(cls->hasTypeConstant(extra->cnsName, true));
+  assertx(extra->slot < cls->numConstants());
+  auto const& typeCns = cls->constants()[extra->slot];
+  auto const& resolved = typeCns.preConst->resolvedTypeStructure();
+
+  if (clsSpec.exact()) {
+    if (typeCns.isAbstractAndUninit()) {
+      gen(env, Jmp, inst->taken());
+      return cns(env, TBottom);
+    }
+    if (resolved.isNull()) return nullptr;
+    return cns(env, resolved.get());
+  }
+  if (resolved.isNull()) return nullptr;
+
+  switch (typeCns.preConst->invariance()) {
+    case PreClass::Const::Invariance::None:
+      return nullptr;
+    case PreClass::Const::Invariance::Present:
+    case PreClass::Const::Invariance::ClassnamePresent:
+      return gen(env, LdResolvedTypeCnsNoCheck, *extra, clsTmp);
+    case PreClass::Const::Invariance::Same:
+      return cns(env, resolved.get());
+  }
+  always_assert(false);
+}
+
+SSATmp* simplifyLdResolvedTypeCnsNoCheck(State& env,
+                                         const IRInstruction* inst) {
+  auto const clsTmp = inst->src(0);
+  auto const clsSpec = clsTmp->type().clsSpec();
+  if (!clsSpec) return nullptr;
+  auto const cls = clsSpec.cls();
+  auto const extra = inst->extra<LdResolvedTypeCnsNoCheck>();
+
+  assertx(cls->hasTypeConstant(extra->cnsName, true));
+  assertx(extra->slot < cls->numConstants());
+  auto const& typeCns = cls->constants()[extra->slot];
+
+  auto const& resolved = typeCns.preConst->resolvedTypeStructure();
+  if (resolved.isNull()) return nullptr;
+
+  if (clsSpec.exact()) return cns(env, resolved.get());
+  if (typeCns.preConst->invariance() == PreClass::Const::Invariance::Same) {
+    return cns(env, resolved.get());
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyLdResolvedTypeCnsClsName(State& env,
+                                         const IRInstruction* inst) {
+  auto const clsTmp = inst->src(0);
+  auto const clsSpec = clsTmp->type().clsSpec();
+  if (!clsSpec) return nullptr;
+  auto const cls = clsSpec.cls();
+  auto const extra = inst->extra<LdResolvedTypeCnsClsName>();
+
+  assertx(cls->hasTypeConstant(extra->cnsName, true));
+  assertx(extra->slot < cls->numConstants());
+  auto const& typeCns = cls->constants()[extra->slot];
+  auto const& resolved = typeCns.preConst->resolvedTypeStructure();
+
+  auto const classname = [&] {
+    auto const name = resolved->get(s_classname);
+    if (tvIsString(name)) return cns(env, name);
+    return cns(env, nullptr);
+  };
+
+  if (clsSpec.exact()) {
+    if (typeCns.isAbstractAndUninit()) return cns(env, nullptr);
+    if (resolved.isNull()) return nullptr;
+    return classname();
+  }
+  if (resolved.isNull()) return nullptr;
+
+  if (typeCns.preConst->invariance() == PreClass::Const::Invariance::Same) {
+    return classname();
+  }
+  return nullptr;
 }
 
 SSATmp* simplifyLdCls(State& env, const IRInstruction* inst) {
@@ -3856,6 +3945,9 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdClsFromClsMeth)
       X(LdFuncFromClsMeth)
       X(StructDictGetWithColor)
+      X(LdResolvedTypeCns)
+      X(LdResolvedTypeCnsNoCheck)
+      X(LdResolvedTypeCnsClsName)
 #undef X
       default: break;
     }

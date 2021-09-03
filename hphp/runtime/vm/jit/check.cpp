@@ -555,6 +555,7 @@ using TypeNames::TCA;
 #define DLvalOfPtr
 #define DPtrIter
 #define DPtrIterVal
+#define DTypeCnsClsName
 
 #define O(opcode, dstinfo, srcinfo, flags) \
   case opcode: dstinfo srcinfo countCheck(); return true;

@@ -38,7 +38,7 @@ SSATmp* resolveTypeConstantChain(IRGS& env, const Func* f, SSATmp* cls,
   auto const ctx = f->isMethod() ? cns(env, f->implCls()) : cns(env, nullptr);
   for (auto const type : types) {
     auto const name =
-      gen(env, LdClsTypeCnsClsName, result, cns(env, type.get()));
+      gen(env, LdTypeCnsClsName, result, cns(env, type.get()));
     result = gen(env, LdCls, name, ctx);
   }
   return result;

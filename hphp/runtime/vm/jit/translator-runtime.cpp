@@ -626,15 +626,11 @@ ArrayData* loadClsTypeCnsHelper(
 StringData* loadClsTypeCnsClsNameHelper(const Class* cls,
                                         const StringData* name) {
   auto const ts = loadClsTypeCnsHelper(cls, name, false);
-  auto const classname_field = ts->get(s_classname.get());
-  if (classname_field.is_init()) {
-    assertx(isStringType(classname_field.type()));
-    return classname_field.val().pstr;
-  }
-  raise_error("Type constant %s::%s does not have a 'classname' field",
-              cls->name()->data(), name->data());
+  auto const classname = ts->get(s_classname.get(), true);
+  assertx(isStringType(type(classname)));
+  assertx(val(classname).pstr->isStatic());
+  return val(classname).pstr;
 }
-
 
 void raiseCoeffectsCallViolationHelper(const Func* callee,
                                        uint64_t providedCoeffects,

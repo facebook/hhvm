@@ -281,6 +281,8 @@ bool canDCE(IRInstruction* inst) {
   case BespokeIterGetVal:
   case StructDictGetWithColor:
   case LoadBCSP:
+  case LdResolvedTypeCnsNoCheck:
+  case LdResolvedTypeCnsClsName:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -383,16 +385,16 @@ bool canDCE(IRInstruction* inst) {
   case LdCls:
   case LdClsCached:
   case LdClsCachedSafe:
-  case LdClsTypeCns:
-  case LdClsTypeCnsClsName:
   case LdCns:
+  case LdTypeCns:
+  case LdTypeCnsNoThrow:
+  case LdTypeCnsClsName:
   case IsTypeStructCached:
   case LookupCnsE:
   case LdClsCns:
   case InitClsCns:
   case InitSubClsCns:
-  case LdSubClsCnsClsName:
-  case LdTypeCns:
+  case LdResolvedTypeCns:
   case CheckSubClsCns:
   case LdClsCnsVecLen:
   case LookupClsMethodFCache:

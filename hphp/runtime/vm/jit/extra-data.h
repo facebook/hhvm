@@ -431,18 +431,6 @@ struct FuncArgTypeData : IRExtraData {
   const StringData* type;
 };
 
-struct LdClsTypeCnsData : IRExtraData {
-  explicit LdClsTypeCnsData(bool no_throw) : noThrow(no_throw) {}
-
-  std::string show() const { return folly::to<std::string>(noThrow); }
-
-  bool equals(LdClsTypeCnsData o) const { return noThrow == o.noThrow; }
-  size_t hash() const { return noThrow ? 1 : 0; }
-  size_t stableHash() const { return noThrow ? 1 : 0; }
-
-  bool noThrow;
-};
-
 /*
  * Local variable ID.
  */
@@ -1248,16 +1236,16 @@ struct ClsCnsName : IRExtraData {
 };
 
 /*
- * Name of a class constant in an unknown class.
+ * Name and slot of a class constant.
  */
-struct LdSubClsCnsData : IRExtraData {
-  explicit LdSubClsCnsData(const StringData* cns, Slot s)
+struct ClsCnsSlotData : IRExtraData {
+  explicit ClsCnsSlotData(const StringData* cns, Slot s)
     : cnsName(cns)
     , slot(s)
   {}
 
   std::string show() const {
-    return folly::sformat("<cls>::{}({})", cnsName, slot);
+    return folly::sformat("{},{}", cnsName, slot);
   }
   size_t stableHash() const {
     return folly::hash::hash_combine(
@@ -1265,7 +1253,7 @@ struct LdSubClsCnsData : IRExtraData {
       std::hash<Slot>()(slot)
     );
   }
-  bool equals(const LdSubClsCnsData& o) const {
+  bool equals(const ClsCnsSlotData& o) const {
     return cnsName == o.cnsName && slot == o.slot;
   }
 
@@ -2730,10 +2718,12 @@ X(LookupClsMethodFCache,        ClsMethodData);
 X(LdIfaceMethod,                IfaceMethodData);
 X(LdClsCns,                     ClsCnsName);
 X(InitClsCns,                   ClsCnsName);
-X(InitSubClsCns,                LdSubClsCnsData);
-X(LdSubClsCns,                  LdSubClsCnsData);
-X(LdSubClsCnsClsName,           LdSubClsCnsData);
-X(CheckSubClsCns,               LdSubClsCnsData);
+X(InitSubClsCns,                ClsCnsSlotData);
+X(LdSubClsCns,                  ClsCnsSlotData);
+X(CheckSubClsCns,               ClsCnsSlotData);
+X(LdResolvedTypeCns,            ClsCnsSlotData);
+X(LdResolvedTypeCnsClsName,     ClsCnsSlotData);
+X(LdResolvedTypeCnsNoCheck,     ClsCnsSlotData);
 X(ProfileSubClsCns,             ProfileSubClsCnsData);
 X(LdFuncCached,                 FuncNameData);
 X(LookupFuncCached,             FuncNameData);
@@ -2858,7 +2848,6 @@ X(FuncHasAttr,                  AttrData);
 X(ClassHasAttr,                 AttrData);
 X(LdMethCallerName,             MethCallerData);
 X(LdUnitPerRequestFilepath,     RDSHandleData);
-X(LdClsTypeCns,                 LdClsTypeCnsData);
 X(ConvTVToStr,                  ConvNoticeData);
 X(CheckFuncNeedsCoverage,       FuncData);
 X(RecordFuncCall,               FuncData);

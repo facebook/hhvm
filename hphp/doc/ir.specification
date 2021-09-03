@@ -1042,42 +1042,55 @@ To string conversions:
   Slow path for LdSubClsCns. Used when LdSubClsCns indicates the slot is
   uninitialized.
 
-| LdSubClsCnsClsName<constantName,slot>, D(StaticStr|Nullptr), S(Cls), NF
-
-  Loads the name of the class pointed by the constant 'constantName' for the
-  class S0. The constant is known to be in the given slot. Returns nullptr if
-  constant is abstract, not type constant or does not point to a class.
-
 | CheckSubClsCns<constantName,slot>, ND, S(Cls), B
 
   Check that the constant 'constantName' lives in the given slot for the class
   S0, and branch if not. S0 must have at least slot+1 constants.
-
-| LdClsCnsVecLen, D(Int), S(Cls), NF
-
-  Load the size of S0's constant table.
-
-| LdTypeCns, D(StaticDict), S(InitCell), B
-
-  Loads the resolved type constant S0 or branches to B if S0 is not resolved or
-  not a type constant.
-
-| LdClsTypeCns, D(StaticDict), S(Cls) S(Str), NF
-
-  Loads type constant S1 of class S0 or raises an error if no such constant
-  could be found, or if S0::S1 is not a type constant.
-
-| LdClsTypeCnsClsName, D(StaticStr), S(Cls) S(Str), NF
-
-  Loads the name of the class pointed by the type constant S1 of class S0 or
-  raises an error if no such constant could be found, or if S0::S1 is not a
-  type constant.
 
 | ProfileSubClsCns<constantName,handle>, D(Cell), S(Cls), NF
 
   Load the constant 'constantName' for the class S0, profiling the observed
   slots. If the returned value is Uninit, the constant does not exist or is
   abstract or is a type-constant.
+
+| LdClsCnsVecLen, D(Int), S(Cls), NF
+
+  Load the size of S0's constant table.
+
+| LdResolvedTypeCns<slot>, D(StaticDict), S(Cls), B
+
+  Loads the resolved type constant in the slot `slot' on S0 or branches to B if
+  the type constant is not resolved.
+
+| LdResolvedTypeCnsNoCheck<slot>, D(StaticDict), S(Cls), NF
+
+  Loads the resolved type constant in the slot `slot' on S0. The type constant
+  is assumed to be present and resolved.
+
+| LdTypeCns, D(StaticDict), S(Cls) S(Str), NF
+
+  Loads type constant with name S1 from class S0, performing any necessary
+  resolution. Raises an error if no such constant could be found, if S0::S1 is
+  not a type constant, if resolution fails, or if S0::S1 is abstract.
+
+| LdTypeCnsNoThrow, D(StaticDict), S(Cls) S(Str), NF
+
+  Loads type constant with name S1 from class S0, performing any necessary
+  resolution. If no such constant can be found, if S0::S1 is not a type
+  constant, if resolution fails, or if S0::S1 is abstract, then a "fake"
+  invalid type-structure is returned.
+
+| LdResolvedTypeCnsClsName<slot>, DTypeCnsClsName, S(Cls), NF
+
+  Loads the cached 'classname' field from the resolved type constant in the
+  slot `slot' on S0. If there is no cached field, returns nullptr.
+
+| LdTypeCnsClsName, D(StaticStr), S(Cls) S(Str), NF
+
+  Loads and resolved type constant with name S1 from class S0, as if by
+  LdTypeCns. Returns the 'classname' field from that type constant. Raises an
+  error if the type constant loading fails, or if there is no 'classname' field
+  present.
 
 | LdClsMethodFCacheFunc<clsName,methodName>, D(Func), NA, B
 

@@ -289,6 +289,8 @@ public:
   void shrq (Reg64 r) { xedInstrRR_CL(XED_ICLASS_SHR, r); }
   void sarq (Reg64 r) { xedInstrRR_CL(XED_ICLASS_SAR, r); }
 
+  void btrq (Immed i, Reg64 r) { xedInstrIR(XED_ICLASS_BTR, i, r, sz::byte); }
+
   void roundsd (RoundDirection d, RegXMM src, RegXMM dst) {
     Immed i((int)d);
     xedInstrIRR(XED_ICLASS_ROUNDSD, dst, src, i, sz::byte);
@@ -1033,4 +1035,3 @@ private:
 };
 
 }}
-

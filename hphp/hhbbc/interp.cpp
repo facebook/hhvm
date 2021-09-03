@@ -3885,7 +3885,9 @@ void fcallKnownImpl(
                      fca, nullsafe, std::move(inOuts));
 }
 
-void fcallUnknownImpl(ISS& env, const FCallArgs& fca) {
+void fcallUnknownImpl(ISS& env,
+                      const FCallArgs& fca,
+                      const Type& retTy = TInitCell) {
   if (fca.hasGenerics()) popC(env);
   if (fca.hasUnpack()) popC(env);
   auto const numArgs = fca.numArgs();
@@ -3895,12 +3897,13 @@ void fcallUnknownImpl(ISS& env, const FCallArgs& fca) {
   popCU(env);
   if (fca.asyncEagerTarget() != NoBlockId) {
     assertx(numRets == 1);
-    push(env, TInitCell);
+    assertx(!retTy.is(BBottom));
+    push(env, retTy);
     env.propagate(fca.asyncEagerTarget(), &env.state);
     popC(env);
   }
   for (auto i = uint32_t{0}; i < numRets - 1; ++i) popU(env);
-  for (auto i = uint32_t{0}; i < numRets; ++i) push(env, TInitCell);
+  for (auto i = uint32_t{0}; i < numRets; ++i) push(env, retTy);
 }
 
 void in(ISS& env, const bc::FCallFuncD& op) {
@@ -4206,17 +4209,19 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     }
   };
 
-  auto const unknown = [&] {
+  auto const throws = [&] {
+    if (op.fca.asyncEagerTarget() != NoBlockId) {
+      // Kill the async eager target if the function never returns.
+      return reduce(env, updateBC(op.fca.withoutAsyncEagerTarget()));
+    }
     if (extraInput) popC(env);
-    fcallUnknownImpl(env, op.fca);
-    refineLoc();
+    fcallUnknownImpl(env, op.fca, TBottom);
+    unreachable(env);
   };
 
   if (!mayCallMethod && !mayUseNullsafe) {
-    // This FCallObjMethodD may only throw, make sure it's not optimized away.
-    unknown();
-    unreachable(env);
-    return;
+    // This FCallObjMethodD may only throw
+    return throws();
   }
 
   if (!mayCallMethod && !mayThrowNonObj) {
@@ -4233,11 +4238,7 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     return fcallObjMethodNullsafeNoFold(env, op.fca, extraInput);
   }
 
-  if (isBadContext(op.fca)) {
-    unknown();
-    unreachable(env);
-    return;
-  }
+  if (isBadContext(op.fca)) return throws();
 
   auto const ctx = getCallContext(env, op.fca);
   auto const ctxTy = input.couldBe(BObj)

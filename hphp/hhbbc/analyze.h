@@ -113,10 +113,10 @@ struct FuncAnalysisResult {
   std::bitset<64> usedParams;
 
   /*
-   * For an 86cinit, any constants that we resolved.
+   * For an 86cinit, any constants that we inferred a type for.
    * The size_t is the index into ctx.cls->constants
    */
-  CompactVector<std::pair<size_t,TypedValue>> resolvedConstants;
+  CompactVector<std::pair<size_t,Type>> resolvedConstants;
 
   /*
    * Public static property mutations in this function.

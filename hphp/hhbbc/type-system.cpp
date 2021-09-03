@@ -3782,8 +3782,8 @@ Optional<IsTypeOp> type_to_istypeop(const Type& t) {
 }
 
 Optional<Type> type_of_type_structure(const Index& index,
-                                             Context ctx,
-                                             SArray ts) {
+                                      Context ctx,
+                                      SArray ts) {
   auto base = [&] () -> Optional<Type> {
     switch (get_ts_kind(ts)) {
       case TypeStructure::Kind::T_int:      return TInt;
@@ -3831,13 +3831,18 @@ Optional<Type> type_of_type_structure(const Index& index,
             always_assert(matched);
 
             auto const rcls = index.resolve_class(ctx, makeStaticString(cls));
-            if (!rcls || index.lookup_class_init_might_raise(ctx, *rcls)) {
+            if (!rcls) return std::nullopt;
+
+            auto const lookup = index.lookup_class_constant(
+              ctx,
+              clsExact(*rcls),
+              sval(makeStaticString(cns))
+            );
+            if (lookup.found != TriBool::Yes || lookup.mightThrow) {
               return std::nullopt;
             }
-            auto const tcns = index.lookup_class_constant(
-              ctx, *rcls, makeStaticString(cns), false);
 
-            auto const vcns = tv(tcns);
+            auto const vcns = tv(lookup.ty);
             if (!vcns || !isStringType(type(*vcns))) return std::nullopt;
             key = val(*vcns).pstr;
           }

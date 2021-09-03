@@ -1109,38 +1109,68 @@ void in(ISS& env, const bc::CnsE& op) {
   push(env, std::move(t));
 }
 
-void in(ISS& env, const bc::ClsCns& op) {
-  auto const& t1 = topC(env);
-  if (t1.subtypeOf(BCls) && is_specialized_cls(t1)) {
-    auto const dcls = dcls_of(t1);
-    auto const finish = [&] {
-      reduce(env, bc::PopC { },
-                  bc::ClsCnsD { op.str1, dcls.cls.name() });
-    };
-    if (dcls.type == DCls::Exact) return finish();
-    auto const cnst = env.index.lookup_class_const_ptr(env.ctx, dcls.cls,
-                                                       op.str1, false);
-    if (cnst && cnst->isNoOverride) return finish();
-  }
-  popC(env);
-  push(env, TInitCell);
-}
+namespace {
 
-void in(ISS& env, const bc::ClsCnsD& op) {
-  if (auto const rcls = env.index.resolve_class(env.ctx, op.str2)) {
-    auto t = env.index.lookup_class_constant(env.ctx, *rcls, op.str1, false);
-    constprop(env);
-    push(env, std::move(t));
+void clsCnsImpl(ISS& env, const Type& cls, const Type& name) {
+  if (!cls.couldBe(BCls) || !name.couldBe(BStr)) {
+    push(env, TBottom);
+    unreachable(env);
     return;
   }
-  push(env, TInitCell);
+
+  auto lookup = env.index.lookup_class_constant(env.ctx, cls, name);
+  if (lookup.found == TriBool::No) {
+    push(env, TBottom);
+    unreachable(env);
+    return;
+  }
+
+  if (cls.subtypeOf(BCls) &&
+      name.subtypeOf(BStr) &&
+      lookup.found == TriBool::Yes &&
+      !lookup.mightThrow) {
+    constprop(env);
+    effect_free(env);
+  }
+
+  push(env, std::move(lookup.ty));
+}
+
+}
+
+void in(ISS& env, const bc::ClsCns& op) {
+  auto const cls = topC(env);
+
+  if (cls.subtypeOf(BCls) && is_specialized_cls(cls)) {
+    auto const dcls = dcls_of(cls);
+    if (dcls.type == DCls::Exact) {
+      return reduce(env, bc::PopC {}, bc::ClsCnsD { op.str1, dcls.cls.name() });
+    }
+  }
+
+  popC(env);
+  clsCnsImpl(env, cls, sval(op.str1));
 }
 
 void in(ISS& env, const bc::ClsCnsL& op) {
-  //For now, just pop a stack value and push a TCell.
-  mayReadLocal(env, op.loc1);
+  auto const cls = topC(env);
+  auto const name = locRaw(env, op.loc1);
+
+  if (name.subtypeOf(BStr) && is_specialized_string(name)) {
+    return reduce(env, bc::ClsCns { sval_of(name) });
+  }
+
   popC(env);
-  push(env, TInitCell);
+  clsCnsImpl(env, cls, name);
+}
+
+void in(ISS& env, const bc::ClsCnsD& op) {
+  auto const rcls = env.index.resolve_class(env.ctx, op.str2);
+  if (!rcls || !rcls->resolved()) {
+    push(env, TInitCell);
+    return;
+  }
+  clsCnsImpl(env, clsExact(*rcls), sval(op.str1));
 }
 
 void in(ISS& env, const bc::File&)   { effect_free(env); push(env, TSStr); }

@@ -478,7 +478,7 @@ struct ClassInfo {
   CompactVector<const ClassInfo*> includedEnums;
 
   struct ConstIndex {
-    php::Const operator*() const {
+    const php::Const& operator*() const {
       return cls->constants[idx];
     }
     const php::Const* operator->() const {
@@ -1022,8 +1022,12 @@ std::string show(const Func& f) {
 //////////////////////////////////////////////////////////////////////
 
 using IfaceSlotMap = hphp_hash_map<const php::Class*, Slot>;
-using ConstInfoConcurrentMap =
-  tbb::concurrent_hash_map<SString, ConstInfo, StringDataHashCompare>;
+
+// Inferred class constant type from a 86cinit.
+struct ClsConstInfo {
+  Type type;
+  size_t refinements = 0;
+};
 
 struct Index::IndexData {
   explicit IndexData(Index* index) : m_index{index} {}
@@ -1155,6 +1159,32 @@ struct Index::IndexData {
     const php::Class*,
     CompactVector<Type>
   > closureUseVars;
+
+  struct ClsConstTypesHasher {
+    bool operator()(const std::pair<const php::Class*, SString>& k) const {
+      return hash_int64_pair(uintptr_t(k.first), k.second->hash());
+    }
+  };
+  struct ClsConstTypesEquals {
+    bool operator()(const std::pair<const php::Class*, SString>& a,
+                    const std::pair<const php::Class*, SString>& b) const {
+      return a.first == b.first && a.second->same(b.second);
+    }
+  };
+  folly_concurrent_hash_map_simd<
+    std::pair<const php::Class*, SString>,
+    ClsConstInfo,
+    ClsConstTypesHasher,
+    ClsConstTypesEquals
+  > clsConstTypes;
+
+  // Cache for lookup_class_constant
+  folly_concurrent_hash_map_simd<
+    std::pair<const php::Class*, SString>,
+    ClsConstLookupResult<>,
+    ClsConstTypesHasher,
+    ClsConstTypesEquals
+  > clsConstLookupCache;
 
   bool useClassDependencies{};
   DepMap dependencyMap;
@@ -5568,13 +5598,134 @@ const php::Const* Index::lookup_class_const_ptr(Context ctx,
   return nullptr;
 }
 
-Type Index::lookup_class_constant(Context ctx,
-                                  res::Class rcls,
-                                  SString cnsName,
-                                  bool allow_tconst) const {
-  auto const cnst = lookup_class_const_ptr(ctx, rcls, cnsName, allow_tconst);
-  if (!cnst) return TInitCell;
-  return from_cell(cnst->val.value());
+ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
+                                                    const Type& cls,
+                                                    const Type& name) const {
+  ITRACE(4, "lookup_class_constant: ({}) {}::{}\n",
+         show(ctx), show(cls), show(name));
+  Trace::Indent _;
+
+  using R = ClsConstLookupResult<>;
+
+  auto const conservative = [] {
+    ITRACE(4, "conservative\n");
+    return R{ TInitCell, TriBool::Maybe, true };
+  };
+
+  auto const notFound = [] {
+    ITRACE(4, "not found\n");
+    return R{ TBottom, TriBool::No, false };
+  };
+
+  if (!is_specialized_cls(cls)) return conservative();
+
+  auto const dcls = dcls_of(cls);
+  if (dcls.cls.val.left()) return conservative();
+  auto const cinfo = dcls.cls.val.right();
+
+  // We could easy support the case where we don't know the constant
+  // name, but know the class (like we do for properties), by unioning
+  // together all possible constants. However it very rarely happens,
+  // but when it does, the set of constants to union together can be
+  // huge and it becomes very expensive.
+  if (!is_specialized_string(name)) return conservative();
+  auto const sname = sval_of(name);
+
+  // If this lookup is safe to cache. Some classes can have a huge
+  // number of subclasses and unioning together all possible constants
+  // can become very expensive. We can aleviate some of this expense
+  // by caching results. We cannot cache a result we use 86cinit
+  // analysis since that can change.
+  auto cachable = true;
+
+  auto const process = [&] (const ClassInfo* ci) {
+    ITRACE(4, "{}:\n", ci->cls->name);
+    Trace::Indent _;
+
+    // Does the constant exist on this class?
+    auto const it = ci->clsConstants.find(sname);
+    if (it == ci->clsConstants.end()) return notFound();
+
+    // Is it a value and is it non-abstract (we only deal with
+    // concrete constants).
+    auto const& cns = *it->second.get();
+    if (cns.kind != ConstModifiers::Kind::Value) return notFound();
+    if (!cns.val.has_value()) return notFound();
+
+    // Determine the constant's value and return it
+    auto const r = [&] {
+      if (cns.val->m_type == KindOfUninit) {
+        // Constant is defined by a 86cinit. Use the result from
+        // analysis and add a dependency. We cannot cache in this
+        // case.
+        cachable = false;
+        if (ctx.func) {
+          auto const cinit = cns.cls->methods.back().get();
+          assertx(cinit->name == s_86cinit.get());
+          add_dependency(*m_data, cinit, ctx, Dep::ClsConst);
+        }
+
+        ITRACE(4, "(dynamic)\n");
+        auto const it =
+          m_data->clsConstTypes.find(std::make_pair(cns.cls, cns.name));
+        auto const type =
+          (it == m_data->clsConstTypes.end()) ? TInitCell : it->second.type;
+        return R{ type, TriBool::Yes, true };
+      }
+
+      // Fully resolved constant with a known value
+      return R{ from_cell(*cns.val), TriBool::Yes, false };
+    }();
+    ITRACE(4, "-> {}\n", show(r));
+    return r;
+  };
+
+  // If we know the exact class, just look up the constant and we're
+  // done. Otherwise, loop over all possible subclasses and do the
+  // lookup for each.
+  switch (dcls.type) {
+    case DCls::Sub: {
+      // Before anything, look up this entry in the cache. We don't
+      // bother with the cache for the DCls::Exact case because it's
+      // quick and there's little point.
+      if (auto const it =
+          m_data->clsConstLookupCache.find(std::make_pair(cinfo->cls, sname));
+          it != m_data->clsConstLookupCache.end()) {
+        ITRACE(4, "cache hit: {}\n", show(it->second));
+        return it->second;
+      }
+
+      Optional<R> result;
+      for (auto const sub : cinfo->subclassList) {
+        if (result) {
+          ITRACE(5, "-> {}\n", show(*result));
+        }
+        auto r = process(sub);
+        if (!result) {
+          result.emplace(std::move(r));
+        } else {
+          *result |= r;
+        }
+      }
+      // This can happen if cls is an interface with no
+      // implementations.
+      if (!result) return notFound();
+
+      // Save this for future lookups if we can
+      if (cachable) {
+        m_data->clsConstLookupCache.emplace(
+          std::make_pair(cinfo->cls, sname),
+          *result
+        );
+      }
+
+      ITRACE(4, "-> {}\n", show(*result));
+      return *result;
+    }
+    case DCls::Exact:
+      return process(cinfo);
+  }
+  always_assert(false);
 }
 
 Type Index::lookup_constant(Context ctx, SString cnsName) const {
@@ -6065,10 +6216,8 @@ PropLookupResult<> Index::lookup_static(Context ctx,
   auto const sname = [&] () -> SString {
     // Treat non-string names conservatively, but the caller should be
     // checking this.
-    if (!name.subtypeOf(BStr)) return nullptr;
-    auto const vname = tv(name);
-    if (!vname || vname->m_type != KindOfPersistentString) return nullptr;
-    return vname->m_data.pstr;
+    if (!is_specialized_string(name)) return nullptr;
+    return sval_of(name);
   }();
 
   // Conservative result when we can't do any better. The type can be
@@ -6156,9 +6305,8 @@ PropLookupResult<> Index::lookup_static(Context ctx,
 Type Index::lookup_public_prop(const Type& cls, const Type& name) const {
   if (!is_specialized_cls(cls)) return TCell;
 
-  auto const vname = tv(name);
-  if (!vname || vname->m_type != KindOfPersistentString) return TCell;
-  auto const sname = vname->m_data.pstr;
+  if (!is_specialized_string(name)) return TCell;
+  auto const sname = sval_of(name);
 
   auto const dcls = dcls_of(cls);
   if (dcls.cls.val.left()) return TCell;
@@ -6254,10 +6402,8 @@ PropMergeResult<> Index::merge_static_type(
   auto const sname = [&] () -> SString {
     // Non-string names are treated conservatively here. The caller
     // should be checking for these and doing the right thing.
-    if (!name.subtypeOf(BStr)) return nullptr;
-    auto const vname = tv(name);
-    if (!vname || vname->m_type != KindOfPersistentString) return nullptr;
-    return vname->m_data.pstr;
+    if (!is_specialized_string(name)) return nullptr;
+    return sval_of(name);
   }();
 
   // The case where we don't know `cls':
@@ -6439,17 +6585,65 @@ void Index::init_public_static_prop_types() {
 
 void Index::refine_class_constants(
     const Context& ctx,
-    const CompactVector<std::pair<size_t, TypedValue>>& resolved,
+    const CompactVector<std::pair<size_t, Type>>& resolved,
     DependencyContextSet& deps) {
   if (!resolved.size()) return;
+
+  auto changed = false;
   auto& constants = ctx.func->cls->constants;
+
   for (auto const& c : resolved) {
     assertx(c.first < constants.size());
     auto& cnst = constants[c.first];
-    assertx(cnst.val && cnst.val->m_type == KindOfUninit);
-    cnst.val = c.second;
+    assertx(cnst.kind == ConstModifiers::Kind::Value);
+
+    auto const key = std::make_pair(ctx.func->cls, cnst.name);
+
+    auto& types = m_data->clsConstTypes;
+
+    always_assert(cnst.val && type(*cnst.val) == KindOfUninit);
+    if (auto const val = tv(c.second)) {
+      assertx(val->m_type != KindOfUninit);
+      cnst.val = *val;
+      // Deleting from the types map is too expensive, so just leave
+      // any entry. We won't look at it if val is set.
+      changed = true;
+    } else {
+      auto const old = [&] {
+        auto const it = types.find(key);
+        return (it == types.end()) ? ClsConstInfo{ TInitCell, 0 } : it->second;
+      }();
+
+      if (c.second.strictlyMoreRefined(old.type)) {
+        if (old.refinements < options.returnTypeRefineLimit) {
+          types.insert_or_assign(
+            key,
+            ClsConstInfo{ c.second, old.refinements+1 }
+          );
+          changed = true;
+        } else {
+          FTRACE(
+            1, "maxed out refinements for class constant {}::{}\n",
+            ctx.func->cls->name, cnst.name
+          );
+        }
+      } else {
+        always_assert_flog(
+          more_refined_for_index(c.second, old.type),
+          "Class constant type invariant violated for {}::{}\n"
+          "    {} is not at least as refined as {}\n",
+          ctx.func->cls->name,
+          cnst.name,
+          show(c.second),
+          show(old.type)
+        );
+      }
+    }
   }
-  find_deps(*m_data, ctx.func, Dep::ClsConst, deps);
+
+  if (changed) {
+    find_deps(*m_data, ctx.func, Dep::ClsConst, deps);
+  }
 }
 
 void Index::refine_constants(const FuncAnalysisResult& fa,
@@ -6967,6 +7161,9 @@ void Index::cleanup_post_emit(php::ProgramPtr program) {
   CLEAR_PARALLEL(m_data->funcFamilies);
   CLEAR_PARALLEL(m_data->ifaceSlotMap);
   CLEAR_PARALLEL(m_data->closureUseVars);
+
+  CLEAR_PARALLEL(m_data->clsConstTypes);
+  CLEAR_PARALLEL(m_data->clsConstLookupCache);
 
   CLEAR_PARALLEL(m_data->foldableReturnTypeMap);
   CLEAR_PARALLEL(m_data->contextualReturnTypes);

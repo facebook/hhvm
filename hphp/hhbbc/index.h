@@ -225,6 +225,29 @@ inline PropMergeResult<T>& operator|=(PropMergeResult<T>& a,
 
 std::string show(const PropMergeResult<Type>&);
 
+/*
+ * The result of Index::lookup_class_constant
+ */
+template <typename T = Type> // NB: The template parameter is here to
+                             // break a cyclic dependency on Type
+struct ClsConstLookupResult {
+  T ty;            // The best known type of the constant (might not be a
+                   // scalar).
+  TriBool found;   // If the constant was found
+  bool mightThrow; // If accessing the constant can throw
+};
+
+template <typename T>
+inline ClsConstLookupResult<T>& operator|=(ClsConstLookupResult<T>& a,
+                                           const ClsConstLookupResult<T>& b) {
+  a.ty |= b.ty;
+  a.found |= b.found;
+  a.mightThrow |= b.mightThrow;
+  return a;
+}
+
+std::string show(const ClsConstLookupResult<Type>&);
+
 //////////////////////////////////////////////////////////////////////
 
 // private types
@@ -687,6 +710,21 @@ struct Index {
   bool could_have_reified_type(Context ctx, const TypeConstraint& tc) const;
 
   /*
+   * Lookup metadata about the constant access `cls'::`name', in the
+   * current context `ctx'. The returned metadata not only includes
+   * the best known type of the constant, but whether it is definitely
+   * found, and whether accessing the constant might throw.  This
+   * function is responsible for walking the class hierarchy to find
+   * all possible constants and combining the results.  This is
+   * intended to be the source of truth about constants during
+   * analysis.
+   *
+   * This function only looks up non-type, non-context constants.
+   */
+  ClsConstLookupResult<>
+  lookup_class_constant(Context ctx, const Type& cls, const Type& name) const;
+
+  /*
    * Lookup what the best known Type for a class constant would be,
    * using a given Index and Context, if a class of that name were
    * loaded.
@@ -694,8 +732,6 @@ struct Index {
    * lookup_class_const_ptr version returns the statically known version
    * of the const if it can find it, otherwise returns nullptr.
    */
-  Type lookup_class_constant(Context, res::Class, SString cns,
-                             bool allow_tconst) const;
   const php::Const* lookup_class_const_ptr(Context, res::Class, SString cns,
                                            bool allow_tconst) const;
 
@@ -937,7 +973,7 @@ struct Index {
    */
   void refine_class_constants(
     const Context& ctx,
-    const CompactVector<std::pair<size_t, TypedValue>>& resolved,
+    const CompactVector<std::pair<size_t, Type>>& resolved,
     DependencyContextSet& deps);
 
   /*

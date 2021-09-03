@@ -696,6 +696,7 @@ std::string show(const Type& t) {
 
 std::string show(Context ctx) {
   if (!ctx.func) {
+    if (!ctx.cls) return "-";
     return ctx.cls->name->toCppString();
   }
   auto ret = std::string{};
@@ -729,6 +730,15 @@ std::string show(const PropMergeResult<Type>& r) {
     "{{adjusted:{},throws:{}}}",
     show(r.adjusted),
     show(r.throws)
+  );
+}
+
+std::string show(const ClsConstLookupResult<Type>& r) {
+  return folly::sformat(
+    "{{ty:{},found:{},throw:{}}}",
+    show(r.ty),
+    show(r.found),
+    r.mightThrow
   );
 }
 
